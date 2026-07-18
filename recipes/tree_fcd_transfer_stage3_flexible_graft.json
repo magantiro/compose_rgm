@@ -21,7 +21,7 @@
     "hidden_dim": 256,
     "message_passing_steps": 6,
     "training_backend": "factorized_marks",
-    "data_workers": 16,
+    "data_workers": 24,
     "data_prefetch_factor": 2,
     "path_workers": 16,
     "path_checkpoint_interval": 8,

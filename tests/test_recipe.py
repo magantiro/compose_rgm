@@ -40,5 +40,5 @@ def test_stage3_recipe_has_early_selection_and_throughput_gates() -> None:
     assert arguments["early_stopping_patience"] == 6
     assert arguments["early_stopping_min_relative_delta"] == 0.001
     assert arguments["recovery_every"] == 500
-    assert arguments["data_workers"] == 16
+    assert arguments["data_workers"] == 24
     assert arguments["data_prefetch_factor"] == 2

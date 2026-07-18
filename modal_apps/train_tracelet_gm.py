@@ -153,7 +153,7 @@ def _materialize_remote_recipe(
                 "rollout_samples": 16,
                 "rollout_workers": 8,
                 "fiber_workers": 12,
-                "data_workers": 16,
+                "data_workers": 24,
                 "data_prefetch_factor": 2,
                 "path_workers": 16,
                 "corpus_workers": 0,
@@ -620,7 +620,7 @@ def smoke_stage(
 @app.function(
     image=image,
     gpu="A100",
-    cpu=24.0,
+    cpu=32.0,
     memory=65536,
     timeout=60 * 60,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
@@ -640,7 +640,7 @@ def preflight_stage(
 @app.function(
     image=image,
     gpu="H100",
-    cpu=24.0,
+    cpu=32.0,
     memory=65536,
     timeout=60 * 60,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
@@ -760,7 +760,7 @@ def audit_teacher_stage(
 @app.function(
     image=image,
     gpu="A100",
-    cpu=24.0,
+    cpu=32.0,
     memory=65536,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
