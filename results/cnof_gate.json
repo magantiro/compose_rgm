@@ -1,0 +1,307 @@
+{
+  "final_test": {
+    "conditional_gm_loss": 4.996842791792005,
+    "conditional_top_successor_accuracy": 0.3247863247863248,
+    "mean_teacher_successor_mass": 0.21067021359516383,
+    "mean_terminal_hazard": 1.1554378542033108
+  },
+  "final_validation": {
+    "conditional_gm_loss": 6.575950858183205,
+    "conditional_top_successor_accuracy": 0.2903225806451613,
+    "mean_teacher_successor_mass": 0.21444228552064235,
+    "mean_terminal_hazard": 1.0679368078708649,
+    "selected_step": 600.0
+  },
+  "initial_validation": {
+    "conditional_gm_loss": 28.159657855518162,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.03592520753633708,
+    "mean_terminal_hazard": 0.6842171251773834
+  },
+  "rollout": {
+    "atom_count_total_variation": 0.1609375,
+    "connected_or_null_fraction": 1.0,
+    "event_budget_exhaustion_fraction": 0.0,
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 10.39,
+    "mean_events": 12.98,
+    "non_null_fraction": 1.0,
+    "novel_to_train_fraction": 1.0,
+    "reference_mean_atoms": 10.5,
+    "samples": 100,
+    "top_final_states": [
+      [
+        "OC1C=CCCC1",
+        1
+      ],
+      [
+        "C=CCC(C)=C=O",
+        1
+      ],
+      [
+        "CC1CC2CCOC2=C1C#N",
+        1
+      ],
+      [
+        "O=C1CC2=C3CC4C1C(O)(N3)C24",
+        1
+      ],
+      [
+        "CC1N2C3C4=CC35C(=C4N=O)C125",
+        1
+      ],
+      [
+        "O=C1C2=C=C3C4=C2C2=C3C1C2O4",
+        1
+      ],
+      [
+        "O=C1C2=NC3=NC45OC67C13C46C257",
+        1
+      ],
+      [
+        "O=C1C2=C=C=C3C4=C=NC34OC12",
+        1
+      ],
+      [
+        "N=CO",
+        1
+      ],
+      [
+        "CCC1C=CC1NCN",
+        1
+      ],
+      [
+        "C1COC2=C3C(=N1)C1C4=C2OC341",
+        1
+      ],
+      [
+        "C1=CC2CC2NC1",
+        1
+      ],
+      [
+        "N#CC1OC2=C3C(OC2)C31",
+        1
+      ],
+      [
+        "CN=C(NN=NC=O)OC",
+        1
+      ],
+      [
+        "NC1=C2CC2=C1",
+        1
+      ],
+      [
+        "CC(=O)NCCC=CC=N",
+        1
+      ],
+      [
+        "CC1=C=CC(=CCN)C1C",
+        1
+      ],
+      [
+        "CC1CCC2OCCC(C)C2C1",
+        1
+      ],
+      [
+        "O=C1C2=C3C4=C5C26C(=O)C3C1C456",
+        1
+      ],
+      [
+        "C1#CC23OC4=C2C2(C=N1)N=C3C42",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.0,
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "sampler": {
+    "max_events": 32,
+    "operational_horizon": 7.0,
+    "target_available": false,
+    "time_step": 0.1
+  },
+  "seed": 20260714,
+  "split": {
+    "max_atoms": 12,
+    "scanned_lines": 21410,
+    "test": 16,
+    "train": 96,
+    "validation": 16
+  },
+  "training": {
+    "batch_size": 8,
+    "history": [
+      {
+        "conditional_gm_loss": 26.41822791285813,
+        "conditional_top_successor_accuracy": 0.016129032258064516,
+        "mean_teacher_successor_mass": 0.040036156073436364,
+        "mean_terminal_hazard": 0.7558577656745911,
+        "step": 1.0,
+        "train_batch_loss": 27.152698516845703
+      },
+      {
+        "conditional_gm_loss": 6.933206218294799,
+        "conditional_top_successor_accuracy": 0.27419354838709675,
+        "mean_teacher_successor_mass": 0.1788873552570303,
+        "mean_terminal_hazard": 1.0595843493938446,
+        "step": 40.0,
+        "train_batch_loss": 6.728020668029785
+      },
+      {
+        "conditional_gm_loss": 7.152270331978798,
+        "conditional_top_successor_accuracy": 0.3225806451612903,
+        "mean_teacher_successor_mass": 0.19185004434234626,
+        "mean_terminal_hazard": 0.738418459892273,
+        "step": 80.0,
+        "train_batch_loss": 13.79147720336914
+      },
+      {
+        "conditional_gm_loss": 6.845087598077953,
+        "conditional_top_successor_accuracy": 0.3064516129032258,
+        "mean_teacher_successor_mass": 0.16536066682072822,
+        "mean_terminal_hazard": 0.926488608121872,
+        "step": 120.0,
+        "train_batch_loss": 7.039534091949463
+      },
+      {
+        "conditional_gm_loss": 7.630138726904988,
+        "conditional_top_successor_accuracy": 0.3064516129032258,
+        "mean_teacher_successor_mass": 0.2344866418712234,
+        "mean_terminal_hazard": 1.0511851906776428,
+        "step": 160.0,
+        "train_batch_loss": 3.9292759895324707
+      },
+      {
+        "conditional_gm_loss": 6.767739664763212,
+        "conditional_top_successor_accuracy": 0.3225806451612903,
+        "mean_teacher_successor_mass": 0.20546263784541088,
+        "mean_terminal_hazard": 0.746045708656311,
+        "step": 200.0,
+        "train_batch_loss": 3.695307731628418
+      },
+      {
+        "conditional_gm_loss": 7.178770205006003,
+        "conditional_top_successor_accuracy": 0.3064516129032258,
+        "mean_teacher_successor_mass": 0.23017718889397976,
+        "mean_terminal_hazard": 0.8639063239097595,
+        "step": 240.0,
+        "train_batch_loss": 3.3408713340759277
+      },
+      {
+        "conditional_gm_loss": 6.867522366344929,
+        "conditional_top_successor_accuracy": 0.3225806451612903,
+        "mean_teacher_successor_mass": 0.20875036356090437,
+        "mean_terminal_hazard": 0.9230690002441406,
+        "step": 280.0,
+        "train_batch_loss": 4.5780029296875
+      },
+      {
+        "conditional_gm_loss": 6.670783635228872,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.18434045367997365,
+        "mean_terminal_hazard": 0.9840725660324097,
+        "step": 320.0,
+        "train_batch_loss": 6.121563911437988
+      },
+      {
+        "conditional_gm_loss": 6.93325873138383,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.18076169134620196,
+        "mean_terminal_hazard": 0.5837196260690689,
+        "step": 360.0,
+        "train_batch_loss": 6.469002723693848
+      },
+      {
+        "conditional_gm_loss": 7.210792301222682,
+        "conditional_top_successor_accuracy": 0.22580645161290322,
+        "mean_teacher_successor_mass": 0.1780489598477518,
+        "mean_terminal_hazard": 1.0878146290779114,
+        "step": 400.0,
+        "train_batch_loss": 3.6319026947021484
+      },
+      {
+        "conditional_gm_loss": 7.597398015204817,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.2370494650776888,
+        "mean_terminal_hazard": 0.8030830174684525,
+        "step": 440.0,
+        "train_batch_loss": 9.103484153747559
+      },
+      {
+        "conditional_gm_loss": 7.2221124386414886,
+        "conditional_top_successor_accuracy": 0.3064516129032258,
+        "mean_teacher_successor_mass": 0.22962696440332467,
+        "mean_terminal_hazard": 0.8118948638439178,
+        "step": 480.0,
+        "train_batch_loss": 3.7031755447387695
+      },
+      {
+        "conditional_gm_loss": 6.65175537019968,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.19334502473729417,
+        "mean_terminal_hazard": 1.718091368675232,
+        "step": 520.0,
+        "train_batch_loss": 10.132444381713867
+      },
+      {
+        "conditional_gm_loss": 6.917240286245942,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.22477126663602603,
+        "mean_terminal_hazard": 1.4062955975532532,
+        "step": 560.0,
+        "train_batch_loss": 7.005288124084473
+      },
+      {
+        "conditional_gm_loss": 6.575950858183205,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.21444228552064235,
+        "mean_terminal_hazard": 1.0679368078708649,
+        "step": 600.0,
+        "train_batch_loss": 8.676226615905762
+      },
+      {
+        "conditional_gm_loss": 6.907923208549619,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.2271084996578448,
+        "mean_terminal_hazard": 0.7451270222663879,
+        "step": 640.0,
+        "train_batch_loss": 5.386783599853516
+      },
+      {
+        "conditional_gm_loss": 6.620818378403783,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.20382056352237757,
+        "mean_terminal_hazard": 1.2714374661445618,
+        "step": 680.0,
+        "train_batch_loss": 12.00738525390625
+      },
+      {
+        "conditional_gm_loss": 6.921432245057076,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.2038580201789831,
+        "mean_terminal_hazard": 0.8850837796926498,
+        "step": 720.0,
+        "train_batch_loss": 5.725838661193848
+      },
+      {
+        "conditional_gm_loss": 7.06903757667169,
+        "conditional_top_successor_accuracy": 0.2903225806451613,
+        "mean_teacher_successor_mass": 0.21877908854358416,
+        "mean_terminal_hazard": 1.0094827860593796,
+        "step": 760.0,
+        "train_batch_loss": 13.312660217285156
+      },
+      {
+        "conditional_gm_loss": 8.172532500699162,
+        "conditional_top_successor_accuracy": 0.3064516129032258,
+        "mean_teacher_successor_mass": 0.2517029030984706,
+        "mean_terminal_hazard": 0.9931363463401794,
+        "step": 800.0,
+        "train_batch_loss": 4.385977745056152
+      }
+    ],
+    "steps": 800,
+    "train_traces": 192
+  }
+}

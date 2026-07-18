@@ -1,0 +1,239 @@
+{
+  "final_test": {
+    "conditional_gm_loss": 22.553050756454468,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.03128539582154431,
+    "mean_terminal_hazard": 0.0
+  },
+  "frequency_prior_role": "none",
+  "generated_nonnull_smiles": 3,
+  "generated_ring_taxonomy": {
+    "means": {
+      "cycle_rank": 0.3333333333333333,
+      "ring_systems": 0.3333333333333333,
+      "sssr_rings_per_molecule": 0.3333333333333333
+    },
+    "molecule_count": 3,
+    "molecule_prevalence": {
+      "acyclic": {
+        "count": 2,
+        "fraction": 0.6666666666666666
+      },
+      "aromatic": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "bridged": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "charged_ring": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "cyclic": {
+        "count": 1,
+        "fraction": 0.3333333333333333
+      },
+      "fused": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "heterocycle": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "macrocycle_ge_12": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "monocyclic": {
+        "count": 1,
+        "fraction": 0.3333333333333333
+      },
+      "polybridged_or_cage_candidate": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "polycyclic": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "saturated_ring": {
+        "count": 1,
+        "fraction": 0.3333333333333333
+      },
+      "small_ring_3_or_4": {
+        "count": 1,
+        "fraction": 0.3333333333333333
+      },
+      "spiro": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "unsaturated_nonaromatic_ring": {
+        "count": 0,
+        "fraction": 0.0
+      }
+    },
+    "ring_class_counts": {
+      "aromatic": {
+        "count": 0,
+        "fraction_of_rings": 0.0
+      },
+      "carbocycle": {
+        "count": 1,
+        "fraction_of_rings": 1.0
+      },
+      "charged": {
+        "count": 0,
+        "fraction_of_rings": 0.0
+      },
+      "heterocycle": {
+        "count": 0,
+        "fraction_of_rings": 0.0
+      },
+      "saturated": {
+        "count": 1,
+        "fraction_of_rings": 1.0
+      },
+      "unsaturated_nonaromatic": {
+        "count": 0,
+        "fraction_of_rings": 0.0
+      }
+    },
+    "ring_count": 1,
+    "ring_size_counts": {
+      "3": 1
+    }
+  },
+  "generated_smiles": [
+    "",
+    "",
+    "C1CC1"
+  ],
+  "initial_validation": {
+    "conditional_gm_loss": 43.10197734832764,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.008173035707639123,
+    "mean_terminal_hazard": 0.0
+  },
+  "model": "from_scratch",
+  "rollout": {
+    "atom_count_total_variation": 1.0,
+    "bond_order_distribution_total_variation": 0.2941176470588235,
+    "connected_or_null_fraction": 1.0,
+    "cycle_rank_above_reference_max_fraction": 0.0,
+    "cycle_rank_total_variation": 0.16666666666666666,
+    "element_distribution_total_variation": 0.33333333333333337,
+    "event_budget_exhaustion_fraction": 0.0,
+    "event_rule_fractions": {
+      "atom_delete": 0.0,
+      "atom_insert": 0.0,
+      "atom_restate": 0.0,
+      "bond_delete": 0.0,
+      "bond_insert": 0.0,
+      "bond_reorder": 0.0
+    },
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 1.0,
+    "mean_bonds": 1.0,
+    "mean_cycle_rank": 0.3333333333333333,
+    "mean_events": 0.3333333333333333,
+    "non_null_fraction": 0.3333333333333333,
+    "novel_to_train_fraction": 0.3333333333333333,
+    "reference_mean_atoms": 9.0,
+    "reference_mean_bonds": 8.5,
+    "reference_mean_cycle_rank": 0.5,
+    "samples": 3,
+    "top_final_states": [
+      [
+        "<NULL>",
+        2
+      ],
+      [
+        "C1CC1",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.0,
+    "unique_fraction": 0.6666666666666666,
+    "valid_fraction": 1.0
+  },
+  "rollout_event_counts": {
+    "cycle_insert": 1
+  },
+  "sampler": {
+    "ancestral_ctmc": true,
+    "beam_search": false,
+    "max_events": 4,
+    "operational_horizon": 0.5,
+    "target_available": false,
+    "time_step": 0.25
+  },
+  "seed": 20260714,
+  "selected_validation": {
+    "conditional_gm_loss": 40.41746234893799,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.010714950421933815,
+    "mean_terminal_hazard": 0.0,
+    "selected_step": 5.0
+  },
+  "split": {
+    "eligible": 302,
+    "max_atoms": 12,
+    "test": 4,
+    "train": 16,
+    "validation": 4
+  },
+  "training": {
+    "action_kl_weight": 0.0,
+    "batch_size": 2,
+    "hazard_tilt_weight": 0.0,
+    "hidden_dim": 16,
+    "history": [
+      {
+        "conditional_gm_loss": 42.57268810272217,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.008613609774858758,
+        "mean_terminal_hazard": 0.0,
+        "step": 1.0,
+        "train_batch_loss": 44.12370300292969
+      },
+      {
+        "conditional_gm_loss": 41.97343444824219,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.009170750138913792,
+        "mean_terminal_hazard": 0.0,
+        "step": 2.0,
+        "train_batch_loss": 18.383541107177734
+      },
+      {
+        "conditional_gm_loss": 41.37843990325928,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.009754905031580021,
+        "mean_terminal_hazard": 0.0,
+        "step": 3.0,
+        "train_batch_loss": 27.392139434814453
+      },
+      {
+        "conditional_gm_loss": 40.96336650848389,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.010140256156898573,
+        "mean_terminal_hazard": 0.0,
+        "step": 4.0,
+        "train_batch_loss": 25.418684005737305
+      },
+      {
+        "conditional_gm_loss": 40.41746234893799,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.010714950421933815,
+        "mean_terminal_hazard": 0.0,
+        "step": 5.0,
+        "train_batch_loss": 38.91555404663086
+      }
+    ],
+    "message_passing_steps": 1,
+    "steps": 5
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "data": {
+    "fcd_reference": {
+      "bytes": 240722,
+      "path": "/guacamol/guacamol_heldout_val_5000_seed0.smiles",
+      "sha256": "1f8e92f70018dfb94965977f87b7844dea791e4727ea8f7d251946925d1aa99f"
+    },
+    "train": {
+      "bytes": 24271090,
+      "path": "/guacamol/guacamol_subset_500000_seed0.smiles",
+      "sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+    }
+  },
+  "preflight": false,
+  "recipe": {
+    "arguments": {
+      "batch_size": 32,
+      "bond_representation": "aromatic",
+      "checkpoint": "/artifacts/tree_fcd_transfer_stage1_factorized_v1/checkpoint.pt",
+      "corpus_workers": 16,
+      "data_workers": 16,
+      "device": "auto",
+      "fcd_device": "cpu",
+      "fcd_generated_limit": 0,
+      "fiber_workers": 12,
+      "hidden_dim": 128,
+      "include_fcd": true,
+      "late_time_fraction": 0.5,
+      "learning_rate": 0.0005,
+      "max_atoms": 24,
+      "max_attach_templates": 256,
+      "max_cycle_templates": 256,
+      "max_ear_templates": 256,
+      "max_events": 64,
+      "message_passing_steps": 4,
+      "model": "from_scratch",
+      "operational_horizon": 12.0,
+      "output": "/artifacts/tree_fcd_transfer_stage1_factorized_v1/metrics.json",
+      "path_cache": "/artifacts/tree_fcd_transfer_stage1_factorized_v1/compiled_paths.pt",
+      "path_workers": 16,
+      "progress_stratification_fraction": 0.5,
+      "quality_metrics": true,
+      "quality_reference_limit": 5000,
+      "rate_factorization": "hierarchical",
+      "recovery_every": 2000,
+      "resume_checkpoint": "/artifacts/tree_fcd_transfer_stage1_factorized_v1/checkpoint.recovery.pt",
+      "ring_proposals": "typed_catalog",
+      "rollout_cache": "/artifacts/tree_fcd_transfer_stage1_factorized_v1/rollouts.pt",
+      "rollout_samples": 2000,
+      "rollout_workers": 8,
+      "seed": 20260717,
+      "source_prior": "carbon_tree",
+      "steps": 8000,
+      "teacher_ordering": "sequential",
+      "test_examples": 2048,
+      "test_size": 1000,
+      "time_step": 0.1,
+      "torch_threads": 1,
+      "train_size": 8000,
+      "training_backend": "factorized_marks",
+      "tree_couplings_per_target": 4,
+      "tree_size_prior": "empirical",
+      "use_bf16": true,
+      "validation_examples": 1024,
+      "validation_size": 1000,
+      "weight_decay": 1e-05
+    },
+    "name": "tree_fcd_transfer_stage1",
+    "purpose": "First quality-bearing carbon-tree Generator Matching screen using the transferable lessons from rank_d500k without copying its mask-DFM objective.",
+    "reference_run": {
+      "generated_molecules": 1500,
+      "recipe": "rank_d500k",
+      "reference_molecules": 5000,
+      "reported_fcd": 9.96,
+      "repository": "compose"
+    }
+  },
+  "run_label": "tree_fcd_transfer_stage1_factorized_v1",
+  "runtime": {
+    "python": "3.11.12",
+    "rdkit": "2024.03.5",
+    "torch": "2.4.0+cu121"
+  },
+  "smoke": false,
+  "source_sha256": "ba69e68d6a89b1b06171bd66a53184d41b3d098a22e11adcd2bd34d7eb962eab"
+}

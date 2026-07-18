@@ -1,0 +1,78 @@
+{
+  "checkpoint": "results/tiny_rate_quotient_pilot.pt",
+  "operational_horizon": 5.0,
+  "rollout": {
+    "connected_or_null_fraction": 1.0,
+    "distinct_final_states": 14,
+    "event_budget_exhaustion_fraction": 0.0,
+    "mean_events": 1.982,
+    "non_null_fraction": 0.997,
+    "reference_mode_coverage_fraction": 1.0,
+    "reference_support_fraction": 0.993,
+    "reference_total_variation": 0.059000000000000004,
+    "samples": 1000,
+    "top_final_states": [
+      [
+        "CC",
+        108
+      ],
+      [
+        "CO",
+        93
+      ],
+      [
+        "CCO",
+        92
+      ],
+      [
+        "O",
+        88
+      ],
+      [
+        "C",
+        87
+      ],
+      [
+        "F",
+        84
+      ],
+      [
+        "C1CC1",
+        83
+      ],
+      [
+        "N",
+        77
+      ],
+      [
+        "C#N",
+        75
+      ],
+      [
+        "CN",
+        73
+      ],
+      [
+        "C=C",
+        71
+      ],
+      [
+        "CCN",
+        62
+      ],
+      [
+        "CCC",
+        4
+      ],
+      [
+        "<NULL>",
+        3
+      ]
+    ],
+    "unique_fraction": 0.014,
+    "valid_fraction": 1.0
+  },
+  "seed": 20260715,
+  "target_available": false,
+  "time_step": 0.05
+}

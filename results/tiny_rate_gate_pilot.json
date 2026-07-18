@@ -1,0 +1,107 @@
+{
+  "corpus_size": 12,
+  "coverage_examples": 36,
+  "epochs": 200,
+  "final": {
+    "conditional_top_successor_accuracy": 0.6666666666666666,
+    "mean_loss": 1.1022667830104105,
+    "mean_teacher_rate_absolute_error": 0.6376964350541433,
+    "mean_teacher_successor_mass": 0.6195043197331459,
+    "mean_terminal_hazard": 0.00027490007315197906
+  },
+  "initial": {
+    "conditional_top_successor_accuracy": 0.041666666666666664,
+    "mean_loss": 3.5068652861648135,
+    "mean_teacher_rate_absolute_error": 1.4287459800640743,
+    "mean_teacher_successor_mass": 0.16707184018713414,
+    "mean_terminal_hazard": 2.255128930012385
+  },
+  "loss_history": [
+    3.5068652629852295,
+    2.28467059135437,
+    1.8048654794692993,
+    1.5810670852661133,
+    1.4927045106887817,
+    1.428393840789795,
+    1.3819578886032104,
+    1.3222426176071167,
+    1.2941149473190308,
+    1.242866039276123,
+    1.2202563285827637,
+    1.1919125318527222,
+    1.1568881273269653,
+    1.1372941732406616,
+    1.125856876373291,
+    1.123115062713623,
+    1.1182633638381958,
+    1.114578366279602,
+    1.1079211235046387,
+    1.1034893989562988,
+    1.1057093143463135
+  ],
+  "rollout": {
+    "connected_or_null_fraction": 1.0,
+    "event_budget_exhaustion_fraction": 0.0,
+    "mean_events": 2.36,
+    "non_null_fraction": 0.92,
+    "reference_support_fraction": 0.86,
+    "samples": 50,
+    "top_final_states": [
+      [
+        "C1CC1",
+        16
+      ],
+      [
+        "C",
+        8
+      ],
+      [
+        "F",
+        7
+      ],
+      [
+        "<NULL>",
+        4
+      ],
+      [
+        "CCO",
+        4
+      ],
+      [
+        "N",
+        3
+      ],
+      [
+        "CCN",
+        3
+      ],
+      [
+        "C1=CO1",
+        2
+      ],
+      [
+        "CO",
+        1
+      ],
+      [
+        "C1#CC1",
+        1
+      ],
+      [
+        "O",
+        1
+      ]
+    ],
+    "unique_fraction": 0.22,
+    "valid_fraction": 1.0
+  },
+  "sampler": {
+    "clock": "cumulative_hazard_operational_time",
+    "max_events": 24,
+    "operational_horizon": 5.0,
+    "scheme": "piecewise_constant_ancestral_ctmc",
+    "target_available": false,
+    "time_step": 0.1
+  },
+  "seed": 20260714
+}

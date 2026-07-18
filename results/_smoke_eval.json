@@ -1,0 +1,347 @@
+{
+  "final_test": {
+    "conditional_gm_loss": 8.828448828076944,
+    "conditional_top_successor_accuracy": 0.25,
+    "mean_teacher_successor_mass": 0.11294519646672734,
+    "mean_terminal_hazard": 0.26105093164369464
+  },
+  "frequency_prior_role": "none",
+  "generated_nonnull_smiles": 10,
+  "generated_ring_taxonomy": {
+    "means": {
+      "cycle_rank": 1.7,
+      "ring_systems": 1.1,
+      "sssr_rings_per_molecule": 1.7
+    },
+    "molecule_count": 10,
+    "molecule_prevalence": {
+      "acyclic": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "aromatic": {
+        "count": 1,
+        "fraction": 0.1
+      },
+      "bridged": {
+        "count": 1,
+        "fraction": 0.1
+      },
+      "charged_ring": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "cyclic": {
+        "count": 10,
+        "fraction": 1.0
+      },
+      "fused": {
+        "count": 4,
+        "fraction": 0.4
+      },
+      "heterocycle": {
+        "count": 5,
+        "fraction": 0.5
+      },
+      "macrocycle_ge_12": {
+        "count": 1,
+        "fraction": 0.1
+      },
+      "monocyclic": {
+        "count": 5,
+        "fraction": 0.5
+      },
+      "polybridged_or_cage_candidate": {
+        "count": 1,
+        "fraction": 0.1
+      },
+      "polycyclic": {
+        "count": 5,
+        "fraction": 0.5
+      },
+      "saturated_ring": {
+        "count": 2,
+        "fraction": 0.2
+      },
+      "small_ring_3_or_4": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "spiro": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "unsaturated_nonaromatic_ring": {
+        "count": 7,
+        "fraction": 0.7
+      }
+    },
+    "ring_class_counts": {
+      "aromatic": {
+        "count": 1,
+        "fraction_of_rings": 0.058823529411764705
+      },
+      "carbocycle": {
+        "count": 7,
+        "fraction_of_rings": 0.4117647058823529
+      },
+      "charged": {
+        "count": 0,
+        "fraction_of_rings": 0.0
+      },
+      "heterocycle": {
+        "count": 10,
+        "fraction_of_rings": 0.5882352941176471
+      },
+      "saturated": {
+        "count": 2,
+        "fraction_of_rings": 0.11764705882352941
+      },
+      "unsaturated_nonaromatic": {
+        "count": 14,
+        "fraction_of_rings": 0.8235294117647058
+      }
+    },
+    "ring_count": 17,
+    "ring_size_counts": {
+      "12": 1,
+      "5": 3,
+      "6": 11,
+      "8": 1,
+      "9": 1
+    }
+  },
+  "generated_smiles": [
+    "CNC1(C(=N)O)CCCCC1",
+    "CN1C=CC2=C(CCCCCNC1)NON2",
+    "COCC(CN)(OC)c1ccc(N)c(N)c1",
+    "NC1=C2C=CC3=CC2CC(N1)N(O)CCC3",
+    "OC1=C=C=C(OOC2=C=C=CC=C2)C=C1",
+    "ON1C=C=CC2=C1C=CN1C2=NOC1CF",
+    "NC1C=CCCC1=C(O)O",
+    "NC=C1CC(=O)CC(CCF)CC(CO)N1",
+    "COC1C=CN2C=NC(OCCF)=NC2=C1",
+    "C=C=C(COC1=C=CC=C1OC)OC(C)=O"
+  ],
+  "initial_validation": {
+    "conditional_gm_loss": 4.075487147085369,
+    "conditional_top_successor_accuracy": 0.6,
+    "mean_teacher_successor_mass": 0.2081479692585689,
+    "mean_terminal_hazard": 0.21773086736599603
+  },
+  "model": "from_scratch",
+  "molecular_quality": {
+    "descriptor_distributions": {
+      "aromatic_atom_fraction": {
+        "generated_mean": 0.0375,
+        "reference_mean": 0.4264712313584494,
+        "standardized_wasserstein": 1.328383141880624,
+        "wasserstein_distance": 0.38897123135844947
+      },
+      "fraction_csp3": {
+        "generated_mean": 0.44717532467532467,
+        "reference_mean": 0.4065798654144519,
+        "standardized_wasserstein": 0.238032132153134,
+        "wasserstein_distance": 0.07009526188097617
+      },
+      "h_bond_acceptors": {
+        "generated_mean": 4.0,
+        "reference_mean": 2.969924812030075,
+        "standardized_wasserstein": 0.879007018090058,
+        "wasserstein_distance": 1.1353383458646615
+      },
+      "h_bond_donors": {
+        "generated_mean": 2.0,
+        "reference_mean": 1.1954887218045114,
+        "standardized_wasserstein": 0.8400204783291765,
+        "wasserstein_distance": 0.8646616541353384
+      },
+      "logp": {
+        "generated_mean": 1.1381070000000002,
+        "reference_mean": 1.3190984210526315,
+        "standardized_wasserstein": 0.4418810533454025,
+        "wasserstein_distance": 0.49459728571428585
+      },
+      "molecular_weight": {
+        "generated_mean": 206.13849999999996,
+        "reference_mean": 192.4023458646616,
+        "standardized_wasserstein": 0.5151052776946496,
+        "wasserstein_distance": 15.98820977443609
+      },
+      "qed": {
+        "generated_mean": 0.5414983233150197,
+        "reference_mean": 0.6377514789640244,
+        "standardized_wasserstein": 0.7506706983382825,
+        "wasserstein_distance": 0.09919513081884253
+      },
+      "rotatable_bonds": {
+        "generated_mean": 2.2,
+        "reference_mean": 2.2857142857142856,
+        "standardized_wasserstein": 0.3013241134103561,
+        "wasserstein_distance": 0.5233082706766918
+      },
+      "sa_score": {
+        "generated_mean": 4.704822792539854,
+        "reference_mean": 2.643932588448187,
+        "standardized_wasserstein": 2.512913282562669,
+        "wasserstein_distance": 2.0608902040916677
+      },
+      "tpsa": {
+        "generated_mean": 58.270999999999994,
+        "reference_mean": 51.5781954887218,
+        "standardized_wasserstein": 0.35974244270648786,
+        "wasserstein_distance": 9.16554135338346
+      }
+    },
+    "frechet_chemnet_distance": 36.615531525013,
+    "novel_to_train_fraction": 1.0,
+    "requested_samples": 10,
+    "ring_systems": {
+      "generated_aromatic_ring_fraction": 0.058823529411764705,
+      "generated_bridged_fraction": 0.1,
+      "generated_fused_fraction": 0.4,
+      "generated_mean_aromatic_rings": 0.1,
+      "generated_mean_rings": 1.7,
+      "generated_spiro_fraction": 0.0,
+      "reference_aromatic_ring_fraction": 0.6419213973799127,
+      "reference_bridged_fraction": 0.06015037593984962,
+      "reference_fused_fraction": 0.3383458646616541,
+      "reference_mean_aromatic_rings": 1.105263157894737,
+      "reference_mean_rings": 1.7218045112781954,
+      "reference_spiro_fraction": 0.03007518796992481,
+      "ring_size_total_variation": 0.17647058823529407
+    },
+    "scaffolds": {
+      "acyclic_fraction": 0.0,
+      "novel_scaffold_fraction": 0.8,
+      "unique_scaffold_fraction": 1.0
+    },
+    "similarity": {
+      "internal_diversity": 0.924333676646954,
+      "mean_nearest_train_tanimoto": 0.21457284923720105
+    },
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "rollout": {
+    "atom_count_total_variation": 0.5390977443609023,
+    "bond_order_distribution_total_variation": 0.028500132205182445,
+    "connected_or_null_fraction": 1.0,
+    "cycle_rank_above_reference_max_fraction": 0.0,
+    "cycle_rank_total_variation": 0.25639097744360906,
+    "element_distribution_total_variation": 0.028925319291304236,
+    "event_budget_exhaustion_fraction": 0.0,
+    "event_rule_fractions": {
+      "atom_delete": 0.0,
+      "atom_insert": 0.43902439024390244,
+      "atom_restate": 0.13821138211382114,
+      "bond_delete": 0.0,
+      "bond_insert": 0.0,
+      "bond_reorder": 0.24390243902439024
+    },
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 14.8,
+    "mean_bonds": 15.5,
+    "mean_cycle_rank": 1.7,
+    "mean_events": 12.3,
+    "non_null_fraction": 1.0,
+    "novel_to_train_fraction": 1.0,
+    "reference_mean_atoms": 13.969924812030076,
+    "reference_mean_bonds": 14.676691729323307,
+    "reference_mean_cycle_rank": 1.7067669172932332,
+    "samples": 10,
+    "top_final_states": [
+      [
+        "CNC1(C(=N)O)CCCCC1",
+        1
+      ],
+      [
+        "CN1C=CC2=C(CCCCCNC1)NON2",
+        1
+      ],
+      [
+        "COCC(CN)(OC)c1ccc(N)c(N)c1",
+        1
+      ],
+      [
+        "NC1=C2C=CC3=CC2CC(N1)N(O)CCC3",
+        1
+      ],
+      [
+        "OC1=C=C=C(OOC2=C=C=CC=C2)C=C1",
+        1
+      ],
+      [
+        "ON1C=C=CC2=C1C=CN1C2=NOC1CF",
+        1
+      ],
+      [
+        "NC1C=CCCC1=C(O)O",
+        1
+      ],
+      [
+        "NC=C1CC(=O)CC(CCF)CC(CO)N1",
+        1
+      ],
+      [
+        "COC1C=CN2C=NC(OCCF)=NC2=C1",
+        1
+      ],
+      [
+        "C=C=C(COC1=C=CC=C1OC)OC(C)=O",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.0,
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "rollout_event_counts": {
+    "atom_insert": 54,
+    "atom_restate": 17,
+    "bond_reorder": 30,
+    "cycle_insert": 10,
+    "ring_ear_insert": 7,
+    "ring_system_restate": 5
+  },
+  "sampler": {
+    "ancestral_ctmc": true,
+    "beam_search": false,
+    "max_events": 32,
+    "operational_horizon": 7.0,
+    "seed_scheme": "seed_sequence_per_trajectory_v1",
+    "target_available": false,
+    "time_step": 0.1,
+    "workers": 2
+  },
+  "seed": 20260714,
+  "selected_validation": {
+    "conditional_gm_loss": 7.595599086314905,
+    "conditional_top_successor_accuracy": 0.375,
+    "mean_teacher_successor_mass": 0.2008780345481247,
+    "mean_terminal_hazard": 0.39981342968530953,
+    "selected_step": 720.0
+  },
+  "split": {
+    "eligible": 1333,
+    "max_atoms": 16,
+    "test": 133,
+    "train": 1067,
+    "validation": 133
+  },
+  "training": {
+    "action_kl_weight": 0.0,
+    "batch_size": 8,
+    "bond_representation": "kekule",
+    "device": "cpu",
+    "evaluation_only": true,
+    "hazard_tilt_weight": 0.0,
+    "hidden_dim": 64,
+    "history": [],
+    "loaded_checkpoint": "results/tracelet_quotient_kekule_800_seed20260714.pt",
+    "message_passing_steps": 3,
+    "progress_stratification_fraction": 0.0,
+    "rate_factorization": "quotient_energy",
+    "steps": null
+  }
+}

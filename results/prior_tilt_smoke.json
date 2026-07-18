@@ -1,0 +1,220 @@
+{
+  "corpus_marginal_baseline": {
+    "generated_smiles": [
+      "CC12C=C=C3CC1OC2C3",
+      "C1#CC2CC3C1=CC21NCCC31",
+      "O=C1C2CC13OCCON3C=N2",
+      "O=C=C1N(N=O)ON1NO",
+      "CC(CC1NOCCC1C)OO"
+    ],
+    "mean_path_length": 12.0,
+    "rollout": {
+      "atom_count_total_variation": 0.5,
+      "bond_order_distribution_total_variation": 0.20545746388443015,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.6,
+      "cycle_rank_total_variation": 0.6,
+      "element_distribution_total_variation": 0.10447454844006568,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.0,
+        "atom_insert": 0.8235294117647058,
+        "atom_restate": 0.0,
+        "bond_delete": 0.0,
+        "bond_insert": 0.17647058823529413,
+        "bond_reorder": 0.0
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 11.2,
+      "mean_bonds": 12.6,
+      "mean_cycle_rank": 2.4,
+      "mean_events": 13.6,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "reference_mean_atoms": 10.875,
+      "reference_mean_bonds": 11.125,
+      "reference_mean_cycle_rank": 1.25,
+      "samples": 5,
+      "top_final_states": [
+        [
+          "CC12C=C=C3CC1OC2C3",
+          1
+        ],
+        [
+          "C1#CC2CC3C1=CC21NCCC31",
+          1
+        ],
+        [
+          "O=C1C2CC13OCCON3C=N2",
+          1
+        ],
+        [
+          "O=C=C1N(N=O)ON1NO",
+          1
+        ],
+        [
+          "CC(CC1NOCCC1C)OO",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "time_bins": 64
+  },
+  "evaluation_reference": "test",
+  "final_test": {
+    "conditional_gm_loss": 5.357360899448395,
+    "conditional_top_successor_accuracy": 0.2,
+    "mean_teacher_successor_mass": 0.12455384742220625,
+    "mean_terminal_hazard": 0.4736949602762858
+  },
+  "final_validation": {
+    "conditional_gm_loss": 8.727897003293037,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.10863959913424022,
+    "mean_terminal_hazard": 0.4204789400100708,
+    "selected_step": 0.0
+  },
+  "generated_smiles": [
+    "CCC=C(C)CC",
+    "O=O",
+    "C=C(C)C(=O)C(O)N(C)CC",
+    "CN1C(=O)C2CC3=C1CN2CC3",
+    "CC1N=NC(N)(C=O)C1=O"
+  ],
+  "initial_validation": {
+    "conditional_gm_loss": 8.727897003293037,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.10863959913424022,
+    "mean_terminal_hazard": 0.4204789400100708
+  },
+  "rollout": {
+    "atom_count_total_variation": 0.6000000000000001,
+    "bond_order_distribution_total_variation": 0.1288024116196218,
+    "connected_or_null_fraction": 1.0,
+    "cycle_rank_above_reference_max_fraction": 0.2,
+    "cycle_rank_total_variation": 0.7999999999999999,
+    "element_distribution_total_variation": 0.07471264367816091,
+    "event_budget_exhaustion_fraction": 0.0,
+    "event_rule_fractions": {
+      "atom_delete": 0.0,
+      "atom_insert": 0.9130434782608695,
+      "atom_restate": 0.0,
+      "bond_delete": 0.0,
+      "bond_insert": 0.08695652173913043,
+      "bond_reorder": 0.0
+    },
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 8.4,
+    "mean_bonds": 8.2,
+    "mean_cycle_rank": 0.8,
+    "mean_events": 9.2,
+    "non_null_fraction": 1.0,
+    "novel_to_train_fraction": 1.0,
+    "reference_mean_atoms": 10.875,
+    "reference_mean_bonds": 11.125,
+    "reference_mean_cycle_rank": 1.25,
+    "samples": 5,
+    "top_final_states": [
+      [
+        "CCC=C(C)CC",
+        1
+      ],
+      [
+        "O=O",
+        1
+      ],
+      [
+        "C=C(C)C(=O)C(O)N(C)CC",
+        1
+      ],
+      [
+        "CN1C(=O)C2CC3=C1CN2CC3",
+        1
+      ],
+      [
+        "CC1N=NC(N)(C=O)C1=O",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.0,
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "sampler": {
+    "max_events": 32,
+    "operational_horizon": 7.0,
+    "target_available": false,
+    "time_step": 0.1
+  },
+  "seed": 20260714,
+  "split": {
+    "eligible_molecules": 40,
+    "max_atoms": 12,
+    "requested_test": 8,
+    "requested_train": 24,
+    "requested_validation": 8,
+    "scaffold_overlap_count": 2,
+    "scanned_lines": 6902,
+    "strategy": "random",
+    "test": 8,
+    "train": 24,
+    "validation": 8
+  },
+  "training": {
+    "batch_size": 4,
+    "evaluation_points": 4,
+    "history": [
+      {
+        "conditional_gm_loss": 8.735705476254225,
+        "conditional_top_successor_accuracy": 0.14285714285714285,
+        "mean_teacher_successor_mass": 0.10862880705980837,
+        "mean_terminal_hazard": 0.4244755208492279,
+        "step": 1.0,
+        "train_batch_loss": 5.668290138244629
+      },
+      {
+        "conditional_gm_loss": 8.782671220600605,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.10886959032539786,
+        "mean_terminal_hazard": 0.4348450303077698,
+        "step": 5.0,
+        "train_batch_loss": 5.338459014892578
+      },
+      {
+        "conditional_gm_loss": 8.757539246231318,
+        "conditional_top_successor_accuracy": 0.14285714285714285,
+        "mean_teacher_successor_mass": 0.10890797618038708,
+        "mean_terminal_hazard": 0.42489030957221985,
+        "step": 10.0,
+        "train_batch_loss": 1.9853618144989014
+      },
+      {
+        "conditional_gm_loss": 8.737406898289919,
+        "conditional_top_successor_accuracy": 0.14285714285714285,
+        "mean_teacher_successor_mass": 0.10891790528504579,
+        "mean_terminal_hazard": 0.4141186773777008,
+        "step": 15.0,
+        "train_batch_loss": 1.9776396751403809
+      },
+      {
+        "conditional_gm_loss": 8.729155614972115,
+        "conditional_top_successor_accuracy": 0.14285714285714285,
+        "mean_teacher_successor_mass": 0.10902970938447329,
+        "mean_terminal_hazard": 0.40440070629119873,
+        "step": 20.0,
+        "train_batch_loss": 5.656796455383301
+      }
+    ],
+    "late_time_fraction": 0.5,
+    "model_type": "prior_tilted_rewrite_generator",
+    "operational_horizon": 7.0,
+    "rewrite_context": false,
+    "steps": 20,
+    "test_examples": 8,
+    "train_traces": 48,
+    "validation_examples": 8
+  }
+}

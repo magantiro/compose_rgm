@@ -1,0 +1,103 @@
+{
+  "action_counts": {
+    "graft": {
+      "atom_restate": 612,
+      "bond_reorder": 685,
+      "bond_reroute": 1792,
+      "ring_ear_insert": 355
+    },
+    "primitive": {
+      "atom_delete": 2608,
+      "atom_insert": 882,
+      "atom_restate": 270,
+      "bond_reorder": 262,
+      "cycle_attach": 157,
+      "ring_ear_insert": 198,
+      "ring_system_restate": 171
+    }
+  },
+  "aligned_source_edge_fraction_retained": {
+    "max": 0.8333333333333334,
+    "mean": 0.47063688606359266,
+    "median": 0.46291208791208793,
+    "p90": 0.6820574162679426,
+    "p95": 0.724294670846395
+  },
+  "aligned_source_edges_retained": {
+    "max": 21.0,
+    "mean": 11.2,
+    "median": 11.0,
+    "p90": 15.0,
+    "p95": 17.049999999999997
+  },
+  "attempted": 100,
+  "catalog": {
+    "attach_templates": 56,
+    "cycle_templates": 27,
+    "ear_templates": 40,
+    "zero_span_ring_buckets": 5
+  },
+  "cohorts": {
+    "monocyclic": {
+      "count": 6,
+      "graft_path_steps": {
+        "max": 36.0,
+        "mean": 23.0,
+        "median": 26.5,
+        "p90": 34.5,
+        "p95": 35.25
+      }
+    },
+    "polycyclic": {
+      "count": 94,
+      "graft_path_steps": {
+        "max": 97.0,
+        "mean": 35.170212765957444,
+        "median": 33.0,
+        "p90": 52.7,
+        "p95": 54.349999999999994
+      }
+    }
+  },
+  "compile_molecules_per_second": {
+    "graft": 0.3828930987518807,
+    "primitive": 4.860014303614182
+  },
+  "compile_seconds": {
+    "graft": 261.1695022082422,
+    "primitive": 20.57607112918049
+  },
+  "failed": 0,
+  "failures": [],
+  "graft_path_steps": {
+    "max": 97.0,
+    "mean": 34.44,
+    "median": 33.0,
+    "p90": 52.10000000000001,
+    "p95": 54.05
+  },
+  "input": {
+    "eligible_molecules": 2271,
+    "max_atoms": 40,
+    "requested": 100,
+    "scanned_lines": 5000,
+    "seed": 20260717,
+    "smiles_file": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles"
+  },
+  "primitive_path_steps": {
+    "max": 69.0,
+    "mean": 45.48,
+    "median": 45.0,
+    "p90": 61.10000000000001,
+    "p95": 64.05
+  },
+  "steps_saved": {
+    "max": 27.0,
+    "mean": 11.04,
+    "median": 13.5,
+    "p90": 19.0,
+    "p95": 23.0
+  },
+  "succeeded": 100,
+  "success_fraction": 1.0
+}

@@ -1,0 +1,415 @@
+{
+  "checkpoint": "results/cnof_gate.pt",
+  "evaluations": {
+    "dt_0.05": {
+      "atom_count_total_variation": 0.109375,
+      "bond_order_distribution_total_variation": 0.013318356867779182,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.1,
+      "cycle_rank_total_variation": 0.46875,
+      "element_distribution_total_variation": 0.038148086337338696,
+      "event_budget_exhaustion_fraction": 0.0,
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 10.7,
+      "mean_bonds": 12.3,
+      "mean_cycle_rank": 2.6,
+      "mean_events": 13.6,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 20,
+      "time_step": 0.05,
+      "top_final_states": [
+        [
+          "O=CC1=C2C3=C(N3)C2N=NO1",
+          1
+        ],
+        [
+          "O=C=C=C1N2C3=C(O3)C12O",
+          1
+        ],
+        [
+          "O=C1C2CC1C2",
+          1
+        ],
+        [
+          "C=NC1CC=C=C1CC",
+          1
+        ],
+        [
+          "C1=C2COC3=C4C2C4C2C=1ON32",
+          1
+        ],
+        [
+          "C=C1C(=O)N2N=C=C12",
+          1
+        ],
+        [
+          "CC1=C(C)C(N2CC2=O)=C1",
+          1
+        ],
+        [
+          "C1=C2C3=C4NCC(C3)OC4=C2C1",
+          1
+        ],
+        [
+          "CCC(=CO)CC(C)=CN1CO1",
+          1
+        ],
+        [
+          "C1#CC2CC(C3OO3)=C(N2)OC1",
+          1
+        ],
+        [
+          "O=Nc1c2c3n4c1CC(=C2C3)N4",
+          1
+        ],
+        [
+          "CCC(=CN)N=C1C=CN1",
+          1
+        ],
+        [
+          "CC1C(=O)C=CCC(C)(C)C1=O",
+          1
+        ],
+        [
+          "O=c1c2c(c3c4n1C1=NOC134)C2",
+          1
+        ],
+        [
+          "N#CC1=C(C2(O)CC2)CCO1",
+          1
+        ],
+        [
+          "CC=C=C(C)C(CC)C1CCC1",
+          1
+        ],
+        [
+          "CN=C=C1C(=O)C12C1=C=C=C=C12",
+          1
+        ],
+        [
+          "O=C1CCC2=C=C1CC1OC21",
+          1
+        ],
+        [
+          "c1[nH]c2c3c4nc4c-3c12",
+          1
+        ],
+        [
+          "OOC1=C2C=C1CCCCO2",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "dt_0.10": {
+      "atom_count_total_variation": 0.2953125,
+      "bond_order_distribution_total_variation": 0.02121038762915195,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.3,
+      "cycle_rank_total_variation": 0.46875,
+      "element_distribution_total_variation": 0.02390473369442567,
+      "event_budget_exhaustion_fraction": 0.0,
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 10.55,
+      "mean_bonds": 12.65,
+      "mean_cycle_rank": 3.1,
+      "mean_events": 13.95,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 20,
+      "time_step": 0.1,
+      "top_final_states": [
+        [
+          "CC1=C=CN=C=C2CNC2(C)C1",
+          1
+        ],
+        [
+          "O=C1CONC2=CC3C=C3OC12",
+          1
+        ],
+        [
+          "O=C=NOC1=NCCC1=O",
+          1
+        ],
+        [
+          "CC=C=C(CC)C(C)(CC)CC",
+          1
+        ],
+        [
+          "O=C=C1C#CC2=C=NN(OC2)O1",
+          1
+        ],
+        [
+          "CC(O)C1=NC#C1",
+          1
+        ],
+        [
+          "CC1=C=CC=CC(C)CC1",
+          1
+        ],
+        [
+          "CC12C3=C=C4ON1C21C(=CC41)O3",
+          1
+        ],
+        [
+          "C1=C2c3c4nc5c(c32)N2C(C=14)C52",
+          1
+        ],
+        [
+          "CCC1C(=O)C(C)=C=C2C=C21",
+          1
+        ],
+        [
+          "COC12ON1C1=NN12",
+          1
+        ],
+        [
+          "O=NN1N=NC2=C3C4=C1C2=NC34",
+          1
+        ],
+        [
+          "CC1CC1O",
+          1
+        ],
+        [
+          "C1#CC23N=C4C5=C6C(N62)N1C43O5",
+          1
+        ],
+        [
+          "C1=C2OC34CC35N3C=1C35N1C2=C14",
+          1
+        ],
+        [
+          "N1=C2OC2N2C3C4C5=C1C52ON43",
+          1
+        ],
+        [
+          "CC1C2=CCNC21C",
+          1
+        ],
+        [
+          "N=CCC(C=O)=CO",
+          1
+        ],
+        [
+          "C1=CC2CC3CC4NC(CC=12)C34",
+          1
+        ],
+        [
+          "N#Cn1c2n3c1=C1C45OC=2C4C135",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "dt_0.20": {
+      "atom_count_total_variation": 0.31718749999999996,
+      "bond_order_distribution_total_variation": 0.008470143248028295,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.05,
+      "cycle_rank_total_variation": 0.5625,
+      "element_distribution_total_variation": 0.02937705254515596,
+      "event_budget_exhaustion_fraction": 0.0,
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 10.15,
+      "mean_bonds": 10.9,
+      "mean_cycle_rank": 1.75,
+      "mean_events": 12.0,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 20,
+      "time_step": 0.2,
+      "top_final_states": [
+        [
+          "CC=C(C=O)C=C=CN",
+          1
+        ],
+        [
+          "C=C=C=COC(O)CO",
+          1
+        ],
+        [
+          "CN=CCC#N",
+          1
+        ],
+        [
+          "C1=C2N=NCNC3C(=COC13)O2",
+          1
+        ],
+        [
+          "O=C1C2=NCC3CC4C=C4C2N13",
+          1
+        ],
+        [
+          "CCN=CC(N=C=C=CO)NC",
+          1
+        ],
+        [
+          "C1NC2=C3CN(C3)C(=NO2)O1",
+          1
+        ],
+        [
+          "CC1CC2CC(C1NN)N2C",
+          1
+        ],
+        [
+          "CC=C1C=C=NN(C)C1",
+          1
+        ],
+        [
+          "CC1=NN2NN1CC(=O)C1=CC12",
+          1
+        ],
+        [
+          "C1=CC2OC3C=1OC2C1=CCN13",
+          1
+        ],
+        [
+          "CC=C=C(C)CC=CC=CO",
+          1
+        ],
+        [
+          "OC12OC1=C1N=C12",
+          1
+        ],
+        [
+          "C1=C2N=C2C2CC2OC1",
+          1
+        ],
+        [
+          "CNC1C2=COCC(=N2)C1C=N",
+          1
+        ],
+        [
+          "O=C1C2=C3C4=C(O4)C4NC3C2C14",
+          1
+        ],
+        [
+          "CCCC1=C=C(C)C(C=O)=C1C",
+          1
+        ],
+        [
+          "CN=CC(=O)CO",
+          1
+        ],
+        [
+          "CC1CCC(N=O)=C1N",
+          1
+        ],
+        [
+          "CN(C)C(=O)C(=O)NO",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "untrained_dt_0.10": {
+      "atom_count_total_variation": 1.0,
+      "bond_order_distribution_total_variation": 0.17582559339525283,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.0,
+      "cycle_rank_total_variation": 0.84375,
+      "element_distribution_total_variation": 0.3062412464985994,
+      "event_budget_exhaustion_fraction": 0.0,
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 1.7,
+      "mean_bonds": 0.85,
+      "mean_cycle_rank": 0.0,
+      "mean_events": 4.9,
+      "non_null_fraction": 0.85,
+      "novel_to_train_fraction": 0.85,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 20,
+      "time_step": 0.1,
+      "top_final_states": [
+        [
+          "<NULL>",
+          3
+        ],
+        [
+          "CC",
+          2
+        ],
+        [
+          "C",
+          2
+        ],
+        [
+          "C#N",
+          2
+        ],
+        [
+          "CF",
+          1
+        ],
+        [
+          "C=N",
+          1
+        ],
+        [
+          "CO",
+          1
+        ],
+        [
+          "OCF",
+          1
+        ],
+        [
+          "NO",
+          1
+        ],
+        [
+          "COOF",
+          1
+        ],
+        [
+          "OF",
+          1
+        ],
+        [
+          "CN",
+          1
+        ],
+        [
+          "NOO",
+          1
+        ],
+        [
+          "O",
+          1
+        ],
+        [
+          "F",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 0.75,
+      "valid_fraction": 1.0
+    }
+  },
+  "samples_per_configuration": 20,
+  "target_available": false
+}

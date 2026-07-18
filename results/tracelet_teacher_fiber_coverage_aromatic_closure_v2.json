@@ -1,0 +1,17 @@
+{
+  "checked_teacher_steps": 903,
+  "compiled_steps_seen": 14941,
+  "coverage_fraction": 1.0,
+  "covered_teacher_steps": 903,
+  "missing": [],
+  "molecules": 1333,
+  "teacher_family_counts": {
+    "atom_insert": 7746,
+    "atom_restate": 1824,
+    "bond_insert": 1,
+    "bond_reorder": 2263,
+    "cycle_insert": 1222,
+    "ring_ear_insert": 982,
+    "ring_system_restate": 903
+  }
+}

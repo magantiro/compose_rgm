@@ -1,0 +1,111 @@
+{
+  "corpus_size": 12,
+  "exact_marginal_examples": 120,
+  "final": {
+    "mean_loss": 0.8459467402913475,
+    "mean_rate_vector_l1_error": 0.40951794338780684,
+    "mean_teacher_support_mass": 0.8488808844161563,
+    "mean_total_hazard_absolute_error": 0.32950093657380514,
+    "mean_zero_target_hazard": 0.18928071097896587,
+    "top_successor_accuracy": 0.85
+  },
+  "initial": {
+    "mean_loss": 3.231003005305926,
+    "mean_rate_vector_l1_error": 2.5886166406795383,
+    "mean_teacher_support_mass": 0.19330200795472788,
+    "mean_total_hazard_absolute_error": 1.6908879115515256,
+    "mean_zero_target_hazard": 2.119113693634669,
+    "top_successor_accuracy": 0.0
+  },
+  "loss_history": [
+    3.223933219909668,
+    1.0435242652893066,
+    0.7566463351249695,
+    0.890244722366333,
+    0.9878740310668945,
+    0.8726999163627625,
+    0.9547255635261536,
+    0.7973623871803284,
+    0.7499851584434509,
+    0.9152466654777527,
+    1.1283506155014038,
+    0.8473805785179138,
+    0.8744966387748718,
+    0.7109701633453369,
+    0.9059131741523743,
+    1.1694310903549194,
+    1.0131076574325562,
+    0.9019531607627869,
+    0.6389512419700623,
+    0.7725979685783386,
+    0.7560105323791504
+  ],
+  "minibatch_size": 24,
+  "rollout": {
+    "connected_or_null_fraction": 1.0,
+    "event_budget_exhaustion_fraction": 0.0,
+    "mean_events": 2.3,
+    "non_null_fraction": 1.0,
+    "reference_support_fraction": 1.0,
+    "samples": 50,
+    "top_final_states": [
+      [
+        "C1CC1",
+        10
+      ],
+      [
+        "C=C",
+        8
+      ],
+      [
+        "CCO",
+        6
+      ],
+      [
+        "N",
+        5
+      ],
+      [
+        "F",
+        5
+      ],
+      [
+        "CO",
+        5
+      ],
+      [
+        "CN",
+        4
+      ],
+      [
+        "C#N",
+        4
+      ],
+      [
+        "O",
+        1
+      ],
+      [
+        "C",
+        1
+      ],
+      [
+        "CCN",
+        1
+      ]
+    ],
+    "unique_fraction": 0.22,
+    "valid_fraction": 1.0
+  },
+  "sampler": {
+    "clock": "cumulative_hazard_operational_time",
+    "max_events": 24,
+    "operational_horizon": 5.0,
+    "scheme": "piecewise_constant_ancestral_ctmc",
+    "target_available": false,
+    "time_step": 0.1
+  },
+  "seed": 20260714,
+  "training_steps": 400,
+  "training_weighting": "uniform_over_exact_state_time_groups"
+}

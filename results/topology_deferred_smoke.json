@@ -1,0 +1,736 @@
+{
+  "corpus_marginal_baseline": {
+    "generated_smiles": [
+      "CC1(C)CC2=C=C1C=N2",
+      "CC1=CC=C2C=CC(C)(N)C1O2",
+      "C=c1n(C)on2c(n1C)=CCO2",
+      "CC1CN(C=N)C2=CN(C)N1C2",
+      "CCC1(C=N)OOCC1O",
+      "C=C1CC(C)(OO)C(=N)C(C)=N1",
+      "C=C(C)C(N)N",
+      "C1=C2CC1C1CCCC2C1",
+      "CC12OC=C=CC1C1=C=CC2=C1",
+      "C=NC1(CC)ON=C=C(C)C1N",
+      "C=NC(C)=CC1(O)C=CCC1",
+      "O=C=C1C2CN12",
+      "C=C=CC1(C)C=COC=C1",
+      "CC12C=C=C1C2",
+      "CC1=C=C2C=C=C=C=C12",
+      "NNC(N)(O)CNO",
+      "CC12OC3=NOC4(OC5C1C354)O2",
+      "COC12CC(=N)C(C)C1(N)CO2",
+      "C=CC12C=NN=C1OON(C)C2",
+      "C=C1OC(=N)C(C)=CC1(N)N",
+      "C=NC(C=CO)CC",
+      "CC1=C2C=CC3(NC4(C)C3N14)O2",
+      "C#CC(N)(C1=CC1C)N(O)OC",
+      "C=CC(=C)C(C)(C)N(C)C=C",
+      "CCC=C1C=C(C)NCC1(C)C",
+      "CC1=C=C=CC(C)C1",
+      "CC12C=C3ON1OOC32",
+      "C=C1NC2OCC(=C)N(N)N2O1",
+      "C=C1CN2C3=CC(C2=NN3)N1C",
+      "C=C1N2OC=C3CC1(N)ONN32",
+      "CC1(N)C(=O)C2=C3C4=C1C23OO4",
+      "C=C1COC2N=C12",
+      "CC=C=C(O)C(O)C(=N)OC",
+      "c1oc2c3c1N(CN3)O2",
+      "CC12C=NC3C=C1C=CC3(C)O2",
+      "C=C=C1CNCO1",
+      "CN=C=C=CN(C)C(C)(C)N=O",
+      "C=C=CN(NCC)OC",
+      "NC12C=C3C(=CC14CC34)CC2=O",
+      "CC1CC2CCC13C=NCC3C2",
+      "CC1Cc2ccn1c2",
+      "CCC(N)=NC(C)N",
+      "OC=CON1C=NC=C=N1",
+      "CC1(C)OOC2CC21",
+      "COC1(O)N(F)ON=CC1(C)C",
+      "C=CN(C)NCCN",
+      "C=C1C(=O)C=CON1C",
+      "CC1CCC23CC(CC12)C(C)O3",
+      "CC12CCC=C(N)C1O2",
+      "CC12C=C1C=CN2O",
+      "CC1=C=C=NC1=N",
+      "C=CC1(C)OCOC1=C",
+      "C=C1C(=O)C1=O",
+      "C=C(CCC)CC(C=O)=CC",
+      "CC12C=C=CC(C)(C1)ON(O)N2",
+      "CNC1(O)CO1",
+      "O=CC1(O)CCCOC1",
+      "CC=C=C1OOC(O)(C=N)N1F",
+      "OC1C2=C1N2",
+      "CC1C2=C3CC2(C)CN31",
+      "C=CN=C(C)C=C",
+      "C=C(OCC)C(C)(C)N",
+      "C=CN(C)N(C)C",
+      "C=NC(=CC)ON(N)CC",
+      "C=C(C)C(C)=C(C)OCCO",
+      "C=C(N)C=C=O",
+      "CC=C=CN(CN)CN",
+      "C=CN1OCNC(C(=C)C)O1",
+      "C=C1N=CC(C)N1C",
+      "C=CC=C=CNC(=C=N)N=CC",
+      "C=CC(O)C1(C)C=CC(C)(C)C1",
+      "CC12C#CC(C1)C1CC2(C)C=N1",
+      "CCC1CC(C)C(O)(CC=N)O1",
+      "CN1C23C=C(O)C1(C)C(=N2)CO3",
+      "CCCN(C)C(=O)O",
+      "C1=C2CC3=CC45OC3(C=C24)C5O1",
+      "C=COC(CC)CNC",
+      "CN1C2C3=NC21O3",
+      "CC12OC=C3C=C=C1C=CC32O",
+      "CCC(OO)OCO"
+    ],
+    "mean_path_length": 14.291666666666666,
+    "molecular_quality": {
+      "descriptor_distributions": {
+        "aromatic_atom_fraction": {
+          "generated_mean": 0.021006944444444446,
+          "reference_mean": 0.42269570707070714,
+          "standardized_wasserstein": 1.589459533225293,
+          "wasserstein_distance": 0.40168876262626263
+        },
+        "fraction_csp3": {
+          "generated_mean": 0.525973124098124,
+          "reference_mean": 0.40245761183261186,
+          "standardized_wasserstein": 0.49299556293127056,
+          "wasserstein_distance": 0.14775523088023088
+        },
+        "h_bond_acceptors": {
+          "generated_mean": 2.6,
+          "reference_mean": 2.25,
+          "standardized_wasserstein": 0.38490017945975047,
+          "wasserstein_distance": 0.49999999999999994
+        },
+        "h_bond_donors": {
+          "generated_mean": 0.9375,
+          "reference_mean": 1.375,
+          "standardized_wasserstein": 0.3796119902715071,
+          "wasserstein_distance": 0.4625000000000001
+        },
+        "logp": {
+          "generated_mean": 0.7764300000000001,
+          "reference_mean": 0.907310625,
+          "standardized_wasserstein": 0.34470614562718394,
+          "wasserstein_distance": 0.4565456250000002
+        },
+        "molecular_weight": {
+          "generated_mean": 136.59393749999998,
+          "reference_mean": 150.50406249999997,
+          "standardized_wasserstein": 0.6948062023069675,
+          "wasserstein_distance": 13.913725000000003
+        },
+        "qed": {
+          "generated_mean": 0.4568118492782194,
+          "reference_mean": 0.5690770835130106,
+          "standardized_wasserstein": 1.183020146002726,
+          "wasserstein_distance": 0.1122652342347912
+        },
+        "rotatable_bonds": {
+          "generated_mean": 1.175,
+          "reference_mean": 1.875,
+          "standardized_wasserstein": 0.49691964527302374,
+          "wasserstein_distance": 0.7
+        },
+        "sa_score": {
+          "generated_mean": 5.1720021924343484,
+          "reference_mean": 2.523575132397438,
+          "standardized_wasserstein": 2.8301347968351256,
+          "wasserstein_distance": 2.6484270600369104
+        },
+        "tpsa": {
+          "generated_mean": 35.317750000000004,
+          "reference_mean": 42.779375,
+          "standardized_wasserstein": 0.2989314559716646,
+          "wasserstein_distance": 8.047625000000004
+        }
+      },
+      "novel_to_train_fraction": 1.0,
+      "requested_samples": 80,
+      "ring_systems": {
+        "generated_aromatic_ring_fraction": 0.022222222222222223,
+        "generated_bridged_fraction": 0.3,
+        "generated_fused_fraction": 0.45,
+        "generated_mean_aromatic_rings": 0.0375,
+        "generated_mean_rings": 1.6875,
+        "generated_spiro_fraction": 0.1125,
+        "reference_aromatic_ring_fraction": 0.5714285714285714,
+        "reference_bridged_fraction": 0.0625,
+        "reference_fused_fraction": 0.1875,
+        "reference_mean_aromatic_rings": 0.75,
+        "reference_mean_rings": 1.3125,
+        "reference_spiro_fraction": 0.0,
+        "ring_size_total_variation": 0.42857142857142855
+      },
+      "scaffolds": {
+        "acyclic_fraction": 0.2625,
+        "novel_scaffold_fraction": 0.725,
+        "unique_scaffold_fraction": 0.7375
+      },
+      "similarity": {
+        "internal_diversity": 0.9257013370143027,
+        "mean_nearest_train_tanimoto": 0.16632359739222308
+      },
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "rollout": {
+      "atom_count_total_variation": 0.275,
+      "bond_order_distribution_total_variation": 0.04925377162442983,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.025,
+      "cycle_rank_total_variation": 0.48750000000000004,
+      "element_distribution_total_variation": 0.04398620439281175,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.0,
+        "atom_insert": 0.6697872340425531,
+        "atom_restate": 0.0,
+        "bond_delete": 0.0,
+        "bond_insert": 0.10297872340425532,
+        "bond_reorder": 0.2272340425531915
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 9.8375,
+      "mean_bonds": 10.35,
+      "mean_cycle_rank": 1.5125,
+      "mean_events": 14.6875,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "reference_mean_atoms": 10.9375,
+      "reference_mean_bonds": 11.1875,
+      "reference_mean_cycle_rank": 1.25,
+      "samples": 80,
+      "top_final_states": [
+        [
+          "CC1(C)CC2=C=C1C=N2",
+          1
+        ],
+        [
+          "CC1=CC=C2C=CC(C)(N)C1O2",
+          1
+        ],
+        [
+          "C=c1n(C)on2c(n1C)=CCO2",
+          1
+        ],
+        [
+          "CC1CN(C=N)C2=CN(C)N1C2",
+          1
+        ],
+        [
+          "CCC1(C=N)OOCC1O",
+          1
+        ],
+        [
+          "C=C1CC(C)(OO)C(=N)C(C)=N1",
+          1
+        ],
+        [
+          "C=C(C)C(N)N",
+          1
+        ],
+        [
+          "C1=C2CC1C1CCCC2C1",
+          1
+        ],
+        [
+          "CC12OC=C=CC1C1=C=CC2=C1",
+          1
+        ],
+        [
+          "C=NC1(CC)ON=C=C(C)C1N",
+          1
+        ],
+        [
+          "C=NC(C)=CC1(O)C=CCC1",
+          1
+        ],
+        [
+          "O=C=C1C2CN12",
+          1
+        ],
+        [
+          "C=C=CC1(C)C=COC=C1",
+          1
+        ],
+        [
+          "CC12C=C=C1C2",
+          1
+        ],
+        [
+          "CC1=C=C2C=C=C=C=C12",
+          1
+        ],
+        [
+          "NNC(N)(O)CNO",
+          1
+        ],
+        [
+          "CC12OC3=NOC4(OC5C1C354)O2",
+          1
+        ],
+        [
+          "COC12CC(=N)C(C)C1(N)CO2",
+          1
+        ],
+        [
+          "C=CC12C=NN=C1OON(C)C2",
+          1
+        ],
+        [
+          "C=C1OC(=N)C(C)=CC1(N)N",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "time_bins": 64
+  },
+  "evaluation_reference": "test",
+  "final_test": {
+    "conditional_gm_loss": 1.909247150979354,
+    "conditional_top_successor_accuracy": 0.4473684210526316,
+    "mean_action_kl_to_prior": 0.12264749676069187,
+    "mean_squared_log_hazard_tilt": 4.75628228353564e-05,
+    "mean_teacher_successor_mass": 0.24394985977896413,
+    "mean_terminal_hazard": 0.3779622828946091
+  },
+  "final_validation": {
+    "conditional_gm_loss": 2.7782753489445895,
+    "conditional_top_successor_accuracy": 0.4074074074074074,
+    "mean_action_kl_to_prior": 0.15491519605348003,
+    "mean_squared_log_hazard_tilt": 4.271505107311668e-05,
+    "mean_teacher_successor_mass": 0.224773496206427,
+    "mean_terminal_hazard": 0.5128037974238395,
+    "selected_step": 100.0
+  },
+  "generated_smiles": [
+    "C=C1C=C(C)CN(O)C1",
+    "CNCONN1NCCC1C",
+    "C=CC(O)C1C(=O)C(O)CN1O",
+    "CCCC(CN=N)C1C=CC1F",
+    "CC12C=C3OC=CN1C3C=C=N2",
+    "C=C=CC1=C2COC(=N1)C(O)C2",
+    "COC1NC(N)C2=CC1C(C)N2",
+    "CC12C3=NC4=CC31C(=O)N4N2O",
+    "CC1(O)C(O)=CCCC1N",
+    "O=C1CC12OO2",
+    "C=CN(CCC=O)CCCCN",
+    "CN(CN)OC1CC=C=CC1=O",
+    "CC=C(CC)C(=O)C(O)CC",
+    "CC(N)(CO)COCCC(=O)O",
+    "CCCOC1C=C=C=C1",
+    "CCCC(=N)C1C=NOCN1C",
+    "C=C(C=C=CC)C(C)(O)N(C)N",
+    "CC=CC1NOC(CO)=C=C1O",
+    "C1=C2N=C3ON4C=CC=1C3=C4O2",
+    "C=CN1C=NC(C2CN2)C(C)=N1",
+    "C12C3C4C1C234",
+    "C1=CC2C3=CC(O1)C2=C3",
+    "CN=NC(O)(O)OC(O)C(C)C",
+    "OCC12Cn3cc(c1c3)C=CO2",
+    "C=C1NC2OC13C=C23",
+    "CC#CC=C(C)CC=CO",
+    "CC1(O)CC2(CN)C=C=C1OC2",
+    "C=Nc1cc(OC)co1",
+    "Cc1c#cc(O)c(C)c1",
+    "CC1C2COOC1ONN2",
+    "C=Cc1cc(C)ccc1C(N)=O",
+    "CCC=C1COOC1=CC=C=N",
+    "C=CC(=CO)CO",
+    "NNn1[nH]on(C2CO2)[nH]1",
+    "C=C1ONCCC1(O)CC=C=O",
+    "CC1CC(=O)C2=CN(C)C1(O)C2",
+    "COC(C)(C)C=C=C(CN)CN",
+    "CCC1OC(=CN)C=CC1ON",
+    "C1=C2OON3OC123",
+    "OCN1C2=CN(O)C(=C1O)N=N2",
+    "C1=C2NON1ON2",
+    "NC12C=C1C=CC2O",
+    "NNN1CC(N(O)O)CCN1",
+    "CC1OC1OO",
+    "C1=c2c3c4c5c1c2=C(O4)N(C5)C3",
+    "CC=CNC1(CCN)CO1",
+    "N=C1C=C2CCC13CC2ONO3",
+    "C=CC(C)CN",
+    "O=C=CN1C=C(N=O)C=CC1",
+    "C=CC(=N)C=C1C=CC(O)N=C1",
+    "CCC1CCCC2CCC(=N1)C2",
+    "C=C(C)CC1=C2OC(=O)C2C1=O",
+    "FOON1C=C1",
+    "CNC12CCOC1=C=CC(N)C2",
+    "CN1OOCC1=NC=O",
+    "C=NN1OC2=C3C(=C31)N(N)C=C2",
+    "C=CC(C)=C(C)C(O)C=CCN",
+    "FN1CC23CC45OOC2C14C5N3",
+    "CN=C=CCC(N)CC(O)F",
+    "CCCNC(CCC)OC(C)C",
+    "C=C(NO)C1(CN)N=CC=N1",
+    "OC1C=NC2(O)CN12",
+    "CC1=C2C=C=C3C(C1)NNC32O",
+    "C=C(N)CC1COC2=NNN1N2",
+    "N=C1CCC=C1O",
+    "Cc1c#cc(OC(=O)O)nc1C",
+    "CC1=C2NC(N)=C(C=C1)C2CO",
+    "CN1ON2N=CC(O)=NC2(O)O1",
+    "NCC(=COCO)NOCON",
+    "C1=C2OOC34NN(CC13)C1=C2N14",
+    "C#CN(N=N)C1=C=C=CN=C1N",
+    "CC1(C)C(C=N)=C2C=NC1NC2",
+    "CCCCCN1N=C2CC1NN2",
+    "FOC12C=CC3=C(C1)C3C2",
+    "C1CC2CCOC(C1)C2",
+    "NC1(N)C(=O)CCCC1O",
+    "N=C1N2CC3=CC14C=C3C=C2O4",
+    "CCC(C)C1ON1N",
+    "CC(O)OC(N)OO",
+    "CN1C=C=C=C2OC21"
+  ],
+  "initial_validation": {
+    "conditional_gm_loss": 3.819865162251517,
+    "conditional_top_successor_accuracy": 0.4074074074074074,
+    "mean_action_kl_to_prior": -4.733422010946842e-08,
+    "mean_squared_log_hazard_tilt": 0.0,
+    "mean_teacher_successor_mass": 0.19102842368924033,
+    "mean_terminal_hazard": 0.5170943424105644
+  },
+  "molecular_quality": {
+    "descriptor_distributions": {
+      "aromatic_atom_fraction": {
+        "generated_mean": 0.0454861111111111,
+        "reference_mean": 0.42269570707070714,
+        "standardized_wasserstein": 1.4925968662954108,
+        "wasserstein_distance": 0.37720959595959597
+      },
+      "fraction_csp3": {
+        "generated_mean": 0.5275789141414141,
+        "reference_mean": 0.40245761183261186,
+        "standardized_wasserstein": 0.48517623099606355,
+        "wasserstein_distance": 0.14541170634920636
+      },
+      "h_bond_acceptors": {
+        "generated_mean": 3.2875,
+        "reference_mean": 2.25,
+        "standardized_wasserstein": 0.7986678723789824,
+        "wasserstein_distance": 1.0375
+      },
+      "h_bond_donors": {
+        "generated_mean": 1.525,
+        "reference_mean": 1.375,
+        "standardized_wasserstein": 0.28727393858384326,
+        "wasserstein_distance": 0.3500000000000001
+      },
+      "logp": {
+        "generated_mean": 0.35189237500000015,
+        "reference_mean": 0.907310625,
+        "standardized_wasserstein": 0.6068581345253568,
+        "wasserstein_distance": 0.8037525000000001
+      },
+      "molecular_weight": {
+        "generated_mean": 147.54378749999998,
+        "reference_mean": 150.50406249999997,
+        "standardized_wasserstein": 0.3190321610376501,
+        "wasserstein_distance": 6.388724999999997
+      },
+      "qed": {
+        "generated_mean": 0.465580545896196,
+        "reference_mean": 0.5690770835130106,
+        "standardized_wasserstein": 1.0944031362294124,
+        "wasserstein_distance": 0.10385573301623383
+      },
+      "rotatable_bonds": {
+        "generated_mean": 1.7125,
+        "reference_mean": 1.875,
+        "standardized_wasserstein": 0.3105747782956398,
+        "wasserstein_distance": 0.4374999999999999
+      },
+      "sa_score": {
+        "generated_mean": 5.141472104040185,
+        "reference_mean": 2.523575132397438,
+        "standardized_wasserstein": 2.797510048803148,
+        "wasserstein_distance": 2.6178969716427467
+      },
+      "tpsa": {
+        "generated_mean": 48.44575,
+        "reference_mean": 42.779375,
+        "standardized_wasserstein": 0.32176652999146294,
+        "wasserstein_distance": 8.662375
+      }
+    },
+    "novel_to_train_fraction": 1.0,
+    "requested_samples": 80,
+    "ring_systems": {
+      "generated_aromatic_ring_fraction": 0.04794520547945205,
+      "generated_bridged_fraction": 0.325,
+      "generated_fused_fraction": 0.4375,
+      "generated_mean_aromatic_rings": 0.0875,
+      "generated_mean_rings": 1.825,
+      "generated_spiro_fraction": 0.1125,
+      "reference_aromatic_ring_fraction": 0.5714285714285714,
+      "reference_bridged_fraction": 0.0625,
+      "reference_fused_fraction": 0.1875,
+      "reference_mean_aromatic_rings": 0.75,
+      "reference_mean_rings": 1.3125,
+      "reference_spiro_fraction": 0.0,
+      "ring_size_total_variation": 0.2893020221787345
+    },
+    "scaffolds": {
+      "acyclic_fraction": 0.175,
+      "novel_scaffold_fraction": 0.7875,
+      "unique_scaffold_fraction": 0.825
+    },
+    "similarity": {
+      "internal_diversity": 0.9334699751720525,
+      "mean_nearest_train_tanimoto": 0.1674199694966374
+    },
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "rollout": {
+    "atom_count_total_variation": 0.1875,
+    "bond_order_distribution_total_variation": 0.06235236774024215,
+    "connected_or_null_fraction": 1.0,
+    "cycle_rank_above_reference_max_fraction": 0.0375,
+    "cycle_rank_total_variation": 0.4125,
+    "element_distribution_total_variation": 0.09983750846310084,
+    "event_budget_exhaustion_fraction": 0.0,
+    "event_rule_fractions": {
+      "atom_delete": 0.0,
+      "atom_insert": 0.7092436974789916,
+      "atom_restate": 0.0,
+      "bond_delete": 0.0,
+      "bond_insert": 0.1092436974789916,
+      "bond_reorder": 0.1815126050420168
+    },
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 10.55,
+    "mean_bonds": 11.175,
+    "mean_cycle_rank": 1.625,
+    "mean_events": 14.875,
+    "non_null_fraction": 1.0,
+    "novel_to_train_fraction": 1.0,
+    "reference_mean_atoms": 10.9375,
+    "reference_mean_bonds": 11.1875,
+    "reference_mean_cycle_rank": 1.25,
+    "samples": 80,
+    "top_final_states": [
+      [
+        "C=C1C=C(C)CN(O)C1",
+        1
+      ],
+      [
+        "CNCONN1NCCC1C",
+        1
+      ],
+      [
+        "C=CC(O)C1C(=O)C(O)CN1O",
+        1
+      ],
+      [
+        "CCCC(CN=N)C1C=CC1F",
+        1
+      ],
+      [
+        "CC12C=C3OC=CN1C3C=C=N2",
+        1
+      ],
+      [
+        "C=C=CC1=C2COC(=N1)C(O)C2",
+        1
+      ],
+      [
+        "COC1NC(N)C2=CC1C(C)N2",
+        1
+      ],
+      [
+        "CC12C3=NC4=CC31C(=O)N4N2O",
+        1
+      ],
+      [
+        "CC1(O)C(O)=CCCC1N",
+        1
+      ],
+      [
+        "O=C1CC12OO2",
+        1
+      ],
+      [
+        "C=CN(CCC=O)CCCCN",
+        1
+      ],
+      [
+        "CN(CN)OC1CC=C=CC1=O",
+        1
+      ],
+      [
+        "CC=C(CC)C(=O)C(O)CC",
+        1
+      ],
+      [
+        "CC(N)(CO)COCCC(=O)O",
+        1
+      ],
+      [
+        "CCCOC1C=C=C=C1",
+        1
+      ],
+      [
+        "CCCC(=N)C1C=NOCN1C",
+        1
+      ],
+      [
+        "C=C(C=C=CC)C(C)(O)N(C)N",
+        1
+      ],
+      [
+        "CC=CC1NOC(CO)=C=C1O",
+        1
+      ],
+      [
+        "C1=C2N=C3ON4C=CC=1C3=C4O2",
+        1
+      ],
+      [
+        "C=CN1C=NC(C2CN2)C(C)=N1",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.0,
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "sampler": {
+    "max_events": 32,
+    "operational_horizon": 7.0,
+    "target_available": false,
+    "time_step": 0.1
+  },
+  "seed": 20260714,
+  "split": {
+    "eligible_molecules": 128,
+    "max_atoms": 12,
+    "requested_test": 16,
+    "requested_train": 96,
+    "requested_validation": 16,
+    "scaffold_overlap_count": 6,
+    "scanned_lines": 21410,
+    "strategy": "random",
+    "test": 16,
+    "train": 96,
+    "validation": 16
+  },
+  "training": {
+    "action_kl_weight": 0.05,
+    "batch_size": 8,
+    "defer_bond_orders": true,
+    "evaluation_points": 8,
+    "hazard_tilt_weight": 0.01,
+    "history": [
+      {
+        "conditional_gm_loss": 3.820366717176512,
+        "conditional_top_successor_accuracy": 0.37037037037037035,
+        "mean_action_kl_to_prior": 1.762689194606537e-08,
+        "mean_squared_log_hazard_tilt": 1.2215359774359058e-05,
+        "mean_teacher_successor_mass": 0.1910024370770229,
+        "mean_terminal_hazard": 0.5190505459904671,
+        "step": 1.0,
+        "train_batch_loss": 3.8953797817230225
+      },
+      {
+        "conditional_gm_loss": 3.8164084311574697,
+        "conditional_top_successor_accuracy": 0.4444444444444444,
+        "mean_action_kl_to_prior": 6.721877963400402e-05,
+        "mean_squared_log_hazard_tilt": 1.242206346319108e-05,
+        "mean_teacher_successor_mass": 0.19045610744969074,
+        "mean_terminal_hazard": 0.515464437007904,
+        "step": 20.0,
+        "train_batch_loss": 7.224831581115723
+      },
+      {
+        "conditional_gm_loss": 3.641077682375908,
+        "conditional_top_successor_accuracy": 0.4074074074074074,
+        "mean_action_kl_to_prior": 0.0027217165434194612,
+        "mean_squared_log_hazard_tilt": 3.180840185510597e-05,
+        "mean_teacher_successor_mass": 0.1932019033133847,
+        "mean_terminal_hazard": 0.513563871383667,
+        "step": 40.0,
+        "train_batch_loss": 0.06723193824291229
+      },
+      {
+        "conditional_gm_loss": 3.2418127027340233,
+        "conditional_top_successor_accuracy": 0.4444444444444444,
+        "mean_action_kl_to_prior": 0.053933015566144604,
+        "mean_squared_log_hazard_tilt": 0.0013458206232925818,
+        "mean_teacher_successor_mass": 0.20809596895362847,
+        "mean_terminal_hazard": 0.4943286210298538,
+        "step": 60.0,
+        "train_batch_loss": 5.899458408355713
+      },
+      {
+        "conditional_gm_loss": 3.1457120730774477,
+        "conditional_top_successor_accuracy": 0.48148148148148145,
+        "mean_action_kl_to_prior": 0.18097932822456642,
+        "mean_squared_log_hazard_tilt": 0.00019240529930186767,
+        "mean_teacher_successor_mass": 0.21969648521651639,
+        "mean_terminal_hazard": 0.5075322337448597,
+        "step": 80.0,
+        "train_batch_loss": 0.1337306797504425
+      },
+      {
+        "conditional_gm_loss": 2.7782753489445895,
+        "conditional_top_successor_accuracy": 0.4074074074074074,
+        "mean_action_kl_to_prior": 0.15491519605348003,
+        "mean_squared_log_hazard_tilt": 4.271505107311668e-05,
+        "mean_teacher_successor_mass": 0.224773496206427,
+        "mean_terminal_hazard": 0.5128037974238395,
+        "step": 100.0,
+        "train_batch_loss": 1.212665319442749
+      },
+      {
+        "conditional_gm_loss": 2.7821505749598145,
+        "conditional_top_successor_accuracy": 0.4444444444444444,
+        "mean_action_kl_to_prior": 0.24877402585389063,
+        "mean_squared_log_hazard_tilt": 0.0010797774757520529,
+        "mean_teacher_successor_mass": 0.24844805936400005,
+        "mean_terminal_hazard": 0.4949787199497223,
+        "step": 120.0,
+        "train_batch_loss": 9.199615478515625
+      },
+      {
+        "conditional_gm_loss": 2.8713181861676276,
+        "conditional_top_successor_accuracy": 0.48148148148148145,
+        "mean_action_kl_to_prior": 0.1976448177556449,
+        "mean_squared_log_hazard_tilt": 0.0006098154809563994,
+        "mean_teacher_successor_mass": 0.23013402016030937,
+        "mean_terminal_hazard": 0.4982509285211563,
+        "step": 140.0,
+        "train_batch_loss": 2.738173007965088
+      },
+      {
+        "conditional_gm_loss": 2.785183197353035,
+        "conditional_top_successor_accuracy": 0.4444444444444444,
+        "mean_action_kl_to_prior": 0.28855962906345667,
+        "mean_squared_log_hazard_tilt": 0.0002781783497951551,
+        "mean_teacher_successor_mass": 0.23700389842542582,
+        "mean_terminal_hazard": 0.5036832720041275,
+        "step": 160.0,
+        "train_batch_loss": 5.325019359588623
+      }
+    ],
+    "late_time_fraction": 0.5,
+    "learning_rate": 0.0005,
+    "model_type": "prior_tilted_rewrite_generator",
+    "operational_horizon": 7.0,
+    "rewrite_context": false,
+    "steps": 160,
+    "test_examples": 64,
+    "topology_context": true,
+    "train_traces": 192,
+    "validation_examples": 32,
+    "weight_decay": 1e-05
+  }
+}

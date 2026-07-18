@@ -1,0 +1,39 @@
+{
+  "best": {
+    "conditional_gm_loss": 1.600115145246188,
+    "conditional_top_successor_accuracy": 0.3333333333333333,
+    "mean_teacher_successor_mass": 0.22371292170578652,
+    "mean_terminal_hazard": 0.17567075043916702,
+    "selected_step": 54.0
+  },
+  "connected": 20,
+  "event_rules": {
+    "atom_delete": 1,
+    "atom_insert": 1,
+    "cycle_insert": 19,
+    "ring_ear_insert": 8,
+    "ring_system_restate": 4
+  },
+  "initial": {
+    "conditional_gm_loss": 2.507681942648358,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.05434957239571637,
+    "mean_terminal_hazard": 0.6828174442052841
+  },
+  "last_history": {
+    "conditional_gm_loss": 1.7075306607617273,
+    "conditional_top_successor_accuracy": 0.3333333333333333,
+    "mean_teacher_successor_mass": 0.2458471874771633,
+    "mean_terminal_hazard": 0.36402102808157605,
+    "step": 60.0,
+    "train_batch_loss": 3.459029197692871
+  },
+  "mean_events": 1.65,
+  "model": "from_scratch_tracelet_generator_matching",
+  "nonnull": 20,
+  "rollouts": 20,
+  "seed": 20260714,
+  "unique": 12,
+  "uses_corpus_frequency_prior": false,
+  "valid": 20
+}

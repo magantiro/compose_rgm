@@ -1,0 +1,416 @@
+{
+  "corpus_marginal_baseline": {
+    "generated_smiles": [
+      "CC12C=C=C3CC1OC2C3",
+      "C1#CC2CC3C1=CC21NCCC31",
+      "O=C1C2CC13OCCON3C=N2",
+      "O=C=C1N(N=O)ON1NO",
+      "CC(CC1NOCCC1C)OO"
+    ],
+    "mean_path_length": 12.0,
+    "molecular_quality": {
+      "descriptor_distributions": {
+        "fraction_csp3": {
+          "generated_mean": 0.6034632034632035,
+          "reference_mean": 0.2186147186147186,
+          "standardized_wasserstein": 2.8922534304341654,
+          "wasserstein_distance": 0.4015151515151515
+        },
+        "h_bond_acceptors": {
+          "generated_mean": 3.6,
+          "reference_mean": 2.0,
+          "standardized_wasserstein": 2.68700576850888,
+          "wasserstein_distance": 1.9
+        },
+        "h_bond_donors": {
+          "generated_mean": 1.0,
+          "reference_mean": 1.125,
+          "standardized_wasserstein": 0.7089490077940543,
+          "wasserstein_distance": 0.42500000000000004
+        },
+        "logp": {
+          "generated_mean": 0.3579199999999999,
+          "reference_mean": 1.099025,
+          "standardized_wasserstein": 0.9252295907119807,
+          "wasserstein_distance": 0.7411050000000001
+        },
+        "molecular_weight": {
+          "generated_mean": 156.16719999999998,
+          "reference_mean": 147.049125,
+          "standardized_wasserstein": 0.5129353197860339,
+          "wasserstein_distance": 9.577024999999999
+        },
+        "qed": {
+          "generated_mean": 0.447472114140806,
+          "reference_mean": 0.6102846878890839,
+          "standardized_wasserstein": 1.8753500074515752,
+          "wasserstein_distance": 0.16281257374827784
+        },
+        "rotatable_bonds": {
+          "generated_mean": 1.0,
+          "reference_mean": 1.5,
+          "standardized_wasserstein": 0.6499999999999999,
+          "wasserstein_distance": 0.6499999999999999
+        },
+        "sa_score": {
+          "generated_mean": 6.262031004336554,
+          "reference_mean": 2.227577168800246,
+          "standardized_wasserstein": 10.277594216171082,
+          "wasserstein_distance": 4.034453835536308
+        },
+        "tpsa": {
+          "generated_mean": 43.516000000000005,
+          "reference_mean": 45.9625,
+          "standardized_wasserstein": 1.421000635301087,
+          "wasserstein_distance": 18.0875
+        }
+      },
+      "novel_to_train_fraction": 1.0,
+      "requested_samples": 5,
+      "ring_systems": {
+        "generated_bridged_fraction": 0.6,
+        "generated_fused_fraction": 0.6,
+        "generated_mean_rings": 3.2,
+        "generated_spiro_fraction": 0.4,
+        "reference_bridged_fraction": 0.0,
+        "reference_fused_fraction": 0.25,
+        "reference_mean_rings": 1.25,
+        "reference_spiro_fraction": 0.0,
+        "ring_size_total_variation": 0.18750000000000003
+      },
+      "scaffolds": {
+        "acyclic_fraction": 0.0,
+        "novel_scaffold_fraction": 1.0,
+        "unique_scaffold_fraction": 1.0
+      },
+      "similarity": {
+        "internal_diversity": 0.9221567322665789,
+        "mean_nearest_train_tanimoto": 0.13878772021629165
+      },
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "rollout": {
+      "atom_count_total_variation": 0.5,
+      "bond_order_distribution_total_variation": 0.20545746388443015,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.6,
+      "cycle_rank_total_variation": 0.6,
+      "element_distribution_total_variation": 0.10447454844006568,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.0,
+        "atom_insert": 0.8235294117647058,
+        "atom_restate": 0.0,
+        "bond_delete": 0.0,
+        "bond_insert": 0.17647058823529413,
+        "bond_reorder": 0.0
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 11.2,
+      "mean_bonds": 12.6,
+      "mean_cycle_rank": 2.4,
+      "mean_events": 13.6,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "reference_mean_atoms": 10.875,
+      "reference_mean_bonds": 11.125,
+      "reference_mean_cycle_rank": 1.25,
+      "samples": 5,
+      "top_final_states": [
+        [
+          "CC12C=C=C3CC1OC2C3",
+          1
+        ],
+        [
+          "C1#CC2CC3C1=CC21NCCC31",
+          1
+        ],
+        [
+          "O=C1C2CC13OCCON3C=N2",
+          1
+        ],
+        [
+          "O=C=C1N(N=O)ON1NO",
+          1
+        ],
+        [
+          "CC(CC1NOCCC1C)OO",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "time_bins": 64
+  },
+  "evaluation_reference": "test",
+  "final_test": {
+    "conditional_gm_loss": 14.42471116501838,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.030453617006477182,
+    "mean_terminal_hazard": 0.8717520788863853
+  },
+  "final_validation": {
+    "conditional_gm_loss": 17.45027476735413,
+    "conditional_top_successor_accuracy": 0.0,
+    "mean_teacher_successor_mass": 0.02696585046777289,
+    "mean_terminal_hazard": 0.8684409737586976,
+    "selected_step": 10.0
+  },
+  "generated_smiles": [
+    "ONOF",
+    "OF",
+    "N",
+    "OF",
+    "CO"
+  ],
+  "initial_validation": {
+    "conditional_gm_loss": 20.22361142747104,
+    "conditional_top_successor_accuracy": 0.037037037037037035,
+    "mean_teacher_successor_mass": 0.022336542523900264,
+    "mean_terminal_hazard": 0.657044780254364
+  },
+  "molecular_quality": {
+    "descriptor_distributions": {
+      "fraction_csp3": {
+        "generated_mean": 0.2,
+        "reference_mean": 0.2186147186147186,
+        "standardized_wasserstein": 1.7908583774645186,
+        "wasserstein_distance": 0.2486147186147186
+      },
+      "h_bond_acceptors": {
+        "generated_mean": 1.4,
+        "reference_mean": 2.0,
+        "standardized_wasserstein": 0.8485281374238571,
+        "wasserstein_distance": 0.6000000000000001
+      },
+      "h_bond_donors": {
+        "generated_mean": 1.2,
+        "reference_mean": 1.125,
+        "standardized_wasserstein": 0.29192017967990475,
+        "wasserstein_distance": 0.17500000000000004
+      },
+      "logp": {
+        "generated_mean": -0.14436,
+        "reference_mean": 1.099025,
+        "standardized_wasserstein": 1.5522990597113981,
+        "wasserstein_distance": 1.2433849999999997
+      },
+      "molecular_weight": {
+        "generated_mean": 37.620400000000004,
+        "reference_mean": 147.049125,
+        "standardized_wasserstein": 5.860886658607758,
+        "wasserstein_distance": 109.428725
+      },
+      "qed": {
+        "generated_mean": 0.3983262348408541,
+        "reference_mean": 0.6102846878890839,
+        "standardized_wasserstein": 2.4414348188978647,
+        "wasserstein_distance": 0.21195845304822974
+      },
+      "rotatable_bonds": {
+        "generated_mean": 0.2,
+        "reference_mean": 1.5,
+        "standardized_wasserstein": 1.3,
+        "wasserstein_distance": 1.3
+      },
+      "sa_score": {
+        "generated_mean": 4.171900745278616,
+        "reference_mean": 2.227577168800246,
+        "standardized_wasserstein": 4.953079043305696,
+        "wasserstein_distance": 1.9443235764783702
+      },
+      "tpsa": {
+        "generated_mean": 27.436,
+        "reference_mean": 45.9625,
+        "standardized_wasserstein": 1.4554896071820647,
+        "wasserstein_distance": 18.526500000000006
+      }
+    },
+    "novel_to_train_fraction": 1.0,
+    "requested_samples": 5,
+    "ring_systems": {
+      "generated_bridged_fraction": 0.0,
+      "generated_fused_fraction": 0.0,
+      "generated_mean_rings": 0.0,
+      "generated_spiro_fraction": 0.0,
+      "reference_bridged_fraction": 0.0,
+      "reference_fused_fraction": 0.25,
+      "reference_mean_rings": 1.25,
+      "reference_spiro_fraction": 0.0,
+      "ring_size_total_variation": 1.0
+    },
+    "scaffolds": {
+      "acyclic_fraction": 1.0,
+      "novel_scaffold_fraction": 0.0,
+      "unique_scaffold_fraction": 0.2
+    },
+    "similarity": {
+      "internal_diversity": 0.8109090909090909,
+      "mean_nearest_train_tanimoto": 0.0731359649122807
+    },
+    "unique_fraction": 0.8,
+    "valid_fraction": 1.0
+  },
+  "rollout": {
+    "atom_count_total_variation": 1.0,
+    "bond_order_distribution_total_variation": 0.348314606741573,
+    "connected_or_null_fraction": 1.0,
+    "cycle_rank_above_reference_max_fraction": 0.0,
+    "cycle_rank_total_variation": 1.0,
+    "element_distribution_total_variation": 0.6677115987460814,
+    "event_budget_exhaustion_fraction": 0.0,
+    "event_rule_fractions": {
+      "atom_delete": 0.14285714285714285,
+      "atom_insert": 0.6666666666666666,
+      "atom_restate": 0.19047619047619047,
+      "bond_delete": 0.0,
+      "bond_insert": 0.0,
+      "bond_reorder": 0.0
+    },
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 2.2,
+    "mean_bonds": 1.2,
+    "mean_cycle_rank": 0.0,
+    "mean_events": 4.2,
+    "non_null_fraction": 1.0,
+    "novel_to_train_fraction": 1.0,
+    "reference_mean_atoms": 10.875,
+    "reference_mean_bonds": 11.125,
+    "reference_mean_cycle_rank": 1.25,
+    "samples": 5,
+    "top_final_states": [
+      [
+        "OF",
+        2
+      ],
+      [
+        "ONOF",
+        1
+      ],
+      [
+        "N",
+        1
+      ],
+      [
+        "CO",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.0,
+    "unique_fraction": 0.8,
+    "valid_fraction": 1.0
+  },
+  "sampler": {
+    "max_events": 32,
+    "operational_horizon": 7.0,
+    "target_available": false,
+    "time_step": 0.1
+  },
+  "seed": 20260714,
+  "split": {
+    "eligible_molecules": 40,
+    "max_atoms": 12,
+    "requested_test": 8,
+    "requested_train": 24,
+    "requested_validation": 8,
+    "scaffold_overlap_count": 2,
+    "scanned_lines": 6902,
+    "strategy": "random",
+    "test": 8,
+    "train": 24,
+    "validation": 8
+  },
+  "training": {
+    "batch_size": 4,
+    "history": [
+      {
+        "conditional_gm_loss": 19.968529410660267,
+        "conditional_top_successor_accuracy": 0.037037037037037035,
+        "mean_teacher_successor_mass": 0.022869847331677427,
+        "mean_terminal_hazard": 0.6678168773651123,
+        "step": 1.0,
+        "train_batch_loss": 13.991250991821289
+      },
+      {
+        "conditional_gm_loss": 19.722417952492833,
+        "conditional_top_successor_accuracy": 0.037037037037037035,
+        "mean_teacher_successor_mass": 0.023257942837082934,
+        "mean_terminal_hazard": 0.6791881203651429,
+        "step": 2.0,
+        "train_batch_loss": 13.932281494140625
+      },
+      {
+        "conditional_gm_loss": 19.479960277676582,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.023625973699753677,
+        "mean_terminal_hazard": 0.6947633266448975,
+        "step": 3.0,
+        "train_batch_loss": 18.539813995361328
+      },
+      {
+        "conditional_gm_loss": 19.227002443745732,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.023966937093541023,
+        "mean_terminal_hazard": 0.7132607102394104,
+        "step": 4.0,
+        "train_batch_loss": 15.391205787658691
+      },
+      {
+        "conditional_gm_loss": 18.95251041650772,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.024369866868936163,
+        "mean_terminal_hazard": 0.7340287208557129,
+        "step": 5.0,
+        "train_batch_loss": 14.583677291870117
+      },
+      {
+        "conditional_gm_loss": 18.667947778478265,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.02480549003720724,
+        "mean_terminal_hazard": 0.7576312184333801,
+        "step": 6.0,
+        "train_batch_loss": 23.68497085571289
+      },
+      {
+        "conditional_gm_loss": 18.37081632576883,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.025243539175639797,
+        "mean_terminal_hazard": 0.7847591757774353,
+        "step": 7.0,
+        "train_batch_loss": 20.337324142456055
+      },
+      {
+        "conditional_gm_loss": 18.068956896662712,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.025745151225763152,
+        "mean_terminal_hazard": 0.811544132232666,
+        "step": 8.0,
+        "train_batch_loss": 7.405049800872803
+      },
+      {
+        "conditional_gm_loss": 17.763078255578876,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.026319094923864764,
+        "mean_terminal_hazard": 0.8396389365196228,
+        "step": 9.0,
+        "train_batch_loss": 7.636955261230469
+      },
+      {
+        "conditional_gm_loss": 17.45027476735413,
+        "conditional_top_successor_accuracy": 0.0,
+        "mean_teacher_successor_mass": 0.02696585046777289,
+        "mean_terminal_hazard": 0.8684409737586976,
+        "step": 10.0,
+        "train_batch_loss": 5.551695823669434
+      }
+    ],
+    "late_time_fraction": 0.5,
+    "operational_horizon": 7.0,
+    "rewrite_context": false,
+    "steps": 10,
+    "train_traces": 48
+  }
+}

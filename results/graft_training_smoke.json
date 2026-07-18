@@ -1,0 +1,129 @@
+{
+  "final_test": {
+    "factorized_gm_loss": 20.986032485961914,
+    "family_accuracy": 0.4399999976158142,
+    "mean_teacher_mark_probability": 0.0144394775852561,
+    "mean_terminal_hazard": 4.294990062713623
+  },
+  "generated_nonnull_smiles": 0,
+  "initial_validation": {
+    "factorized_gm_loss": 43.700035095214844,
+    "family_accuracy": 0.0,
+    "mean_teacher_mark_probability": 0.005782674998044968,
+    "mean_terminal_hazard": 0.7236846089363098
+  },
+  "model": "from_scratch",
+  "rollout": {
+    "skipped": true
+  },
+  "seed": 20260714,
+  "selected_validation": {
+    "factorized_gm_loss": 24.076274871826172,
+    "family_accuracy": 0.695652186870575,
+    "mean_teacher_mark_probability": 0.016432367265224457,
+    "mean_terminal_hazard": 3.775989532470703,
+    "selected_step": 27.0
+  },
+  "training": {
+    "batch_size": 8,
+    "corpus_workers": 0,
+    "data_workers": 0,
+    "device": "cpu",
+    "hidden_dim": 32,
+    "history": [
+      {
+        "factorized_gm_loss": 43.19066619873047,
+        "family_accuracy": 0.30434781312942505,
+        "mean_teacher_mark_probability": 0.006325097288936377,
+        "mean_terminal_hazard": 0.7390485405921936,
+        "step": 1.0,
+        "train_batch_loss": 23.390579223632812
+      },
+      {
+        "factorized_gm_loss": 42.30322265625,
+        "family_accuracy": 0.21739129722118378,
+        "mean_teacher_mark_probability": 0.006902568507939577,
+        "mean_terminal_hazard": 0.7714695334434509,
+        "step": 3.0,
+        "train_batch_loss": 8.048526763916016
+      },
+      {
+        "factorized_gm_loss": 41.04615783691406,
+        "family_accuracy": 0.5652173757553101,
+        "mean_teacher_mark_probability": 0.006985050160437822,
+        "mean_terminal_hazard": 0.8332027792930603,
+        "step": 6.0,
+        "train_batch_loss": 20.3858642578125
+      },
+      {
+        "factorized_gm_loss": 39.087059020996094,
+        "family_accuracy": 0.6086956262588501,
+        "mean_teacher_mark_probability": 0.007190335541963577,
+        "mean_terminal_hazard": 0.9462815523147583,
+        "step": 9.0,
+        "train_batch_loss": 35.6356315612793
+      },
+      {
+        "factorized_gm_loss": 36.13977813720703,
+        "family_accuracy": 0.6086956262588501,
+        "mean_teacher_mark_probability": 0.007731313351541758,
+        "mean_terminal_hazard": 1.1573967933654785,
+        "step": 12.0,
+        "train_batch_loss": 10.02453899383545
+      },
+      {
+        "factorized_gm_loss": 33.050716400146484,
+        "family_accuracy": 0.5652173757553101,
+        "mean_teacher_mark_probability": 0.00888036098331213,
+        "mean_terminal_hazard": 1.4706413745880127,
+        "step": 15.0,
+        "train_batch_loss": 39.843868255615234
+      },
+      {
+        "factorized_gm_loss": 30.022024154663086,
+        "family_accuracy": 0.695652186870575,
+        "mean_teacher_mark_probability": 0.010280434042215347,
+        "mean_terminal_hazard": 1.9397879838943481,
+        "step": 18.0,
+        "train_batch_loss": 43.58769226074219
+      },
+      {
+        "factorized_gm_loss": 26.914844512939453,
+        "family_accuracy": 0.695652186870575,
+        "mean_teacher_mark_probability": 0.011828399263322353,
+        "mean_terminal_hazard": 2.743459939956665,
+        "step": 21.0,
+        "train_batch_loss": 19.559192657470703
+      },
+      {
+        "factorized_gm_loss": 24.887834548950195,
+        "family_accuracy": 0.695652186870575,
+        "mean_teacher_mark_probability": 0.014062614180147648,
+        "mean_terminal_hazard": 3.552199125289917,
+        "step": 24.0,
+        "train_batch_loss": 17.474750518798828
+      },
+      {
+        "factorized_gm_loss": 24.076274871826172,
+        "family_accuracy": 0.695652186870575,
+        "mean_teacher_mark_probability": 0.016432367265224457,
+        "mean_terminal_hazard": 3.775989532470703,
+        "step": 27.0,
+        "train_batch_loss": 16.2210693359375
+      },
+      {
+        "factorized_gm_loss": 24.260046005249023,
+        "family_accuracy": 0.695652186870575,
+        "mean_teacher_mark_probability": 0.018303751945495605,
+        "mean_terminal_hazard": 2.9719924926757812,
+        "step": 30.0,
+        "train_batch_loss": 13.261213302612305
+      }
+    ],
+    "message_passing_steps": 2,
+    "path_workers": 0,
+    "steps": 30,
+    "use_bf16": false
+  },
+  "training_backend": "factorized_marks"
+}

@@ -1,0 +1,573 @@
+{
+  "final_test": {
+    "conditional_gm_loss": 7.1172934731403075,
+    "conditional_top_successor_accuracy": 0.30177514792899407,
+    "mean_teacher_successor_mass": 0.1884446358682812,
+    "mean_terminal_hazard": 0.19544229642541586
+  },
+  "frequency_prior_role": "none",
+  "generated_nonnull_smiles": 100,
+  "generated_ring_taxonomy": {
+    "means": {
+      "cycle_rank": 1.06,
+      "ring_systems": 0.96,
+      "sssr_rings_per_molecule": 1.06
+    },
+    "molecule_count": 100,
+    "molecule_prevalence": {
+      "acyclic": {
+        "count": 5,
+        "fraction": 0.05
+      },
+      "aromatic": {
+        "count": 39,
+        "fraction": 0.39
+      },
+      "bridged": {
+        "count": 1,
+        "fraction": 0.01
+      },
+      "charged_ring": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "cyclic": {
+        "count": 95,
+        "fraction": 0.95
+      },
+      "fused": {
+        "count": 10,
+        "fraction": 0.1
+      },
+      "heterocycle": {
+        "count": 30,
+        "fraction": 0.3
+      },
+      "macrocycle_ge_12": {
+        "count": 3,
+        "fraction": 0.03
+      },
+      "monocyclic": {
+        "count": 84,
+        "fraction": 0.84
+      },
+      "polybridged_or_cage_candidate": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "polycyclic": {
+        "count": 11,
+        "fraction": 0.11
+      },
+      "saturated_ring": {
+        "count": 10,
+        "fraction": 0.1
+      },
+      "small_ring_3_or_4": {
+        "count": 8,
+        "fraction": 0.08
+      },
+      "spiro": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "unsaturated_nonaromatic_ring": {
+        "count": 54,
+        "fraction": 0.54
+      }
+    },
+    "ring_class_counts": {
+      "aromatic": {
+        "count": 40,
+        "fraction_of_rings": 0.37735849056603776
+      },
+      "carbocycle": {
+        "count": 74,
+        "fraction_of_rings": 0.6981132075471698
+      },
+      "charged": {
+        "count": 0,
+        "fraction_of_rings": 0.0
+      },
+      "heterocycle": {
+        "count": 32,
+        "fraction_of_rings": 0.3018867924528302
+      },
+      "saturated": {
+        "count": 10,
+        "fraction_of_rings": 0.09433962264150944
+      },
+      "unsaturated_nonaromatic": {
+        "count": 56,
+        "fraction_of_rings": 0.5283018867924528
+      }
+    },
+    "ring_count": 106,
+    "ring_size_counts": {
+      "11": 1,
+      "12": 1,
+      "14": 1,
+      "15": 1,
+      "3": 2,
+      "4": 6,
+      "5": 31,
+      "6": 54,
+      "7": 6,
+      "8": 2,
+      "9": 1
+    }
+  },
+  "generated_smiles": [
+    "O=C(O)c1ccccc1",
+    "Cc1c(OO)[nH]c(O)c1CC(C)CO",
+    "C=CC(O)(C1CC#CCC1)N(C)CC",
+    "C=C1C(=O)C=C(CO)CCC1CCO",
+    "C=C1C#CC(O)(N=O)C(C)=C1",
+    "O=NC1=C(O)C#CC(OCO)C1",
+    "COCc1ccc(C(=O)O)cn1",
+    "NC1=CN=CC=CC=C(O)C=CC=C=C=C1",
+    "CC(C)=Cc1c(C(=O)O)cccc1C(C)O",
+    "O=COC(O)(OO)C(=O)C1=NC(=O)C1",
+    "Cc1cccc(CO)c1C",
+    "C=NC(F)c1cc(O)[nH]c1C",
+    "NC1CCC#CCC=CCCCCNNC1",
+    "CCC(C)(C)c1ccc[nH]1",
+    "COC(N)(O)C12C=CCC=C=CC1CC=C2",
+    "C=Cc1ccc(C)c(O)c1CF",
+    "CCc1cc(N)cc(O)c1OO",
+    "O=C(O)C(O)=NC1=C=C=C=C=C1",
+    "O=CC(CO)(C(=O)O)c1c#cccc1",
+    "C=NCc1cc(CC)ccc1C(=O)CO",
+    "C=C(C)C1=C(OO)N=C=C1",
+    "CCC(O)(O)C1=C=C=C(O)N1",
+    "O=C1C=C(C(=O)O)CC1",
+    "CC(C)C1=CC#CC(=O)C1=C(O)CO",
+    "CC(C)c1ccc(O)cc1",
+    "C=NC(C(=C)C)=C(CCO)OC",
+    "CC(O)(O)C(=NO)c1c#cc(OO)cc1O",
+    "CC(O)(COc1ccccc1)C(=O)O",
+    "CC1=C=C=CC=C1O",
+    "Cc1c(C(CN)COC=N)[nH]c(CO)c1O",
+    "C#COC(C)(O)C1=CC#CC1=O",
+    "C=C(N)C(=O)c1cccc(CO)c1OO",
+    "C=C1CCC=C(C=O)C=CC1C(C=O)CO",
+    "CCC1NC2CC=CCCCCC(C)=NC12",
+    "CC(=NO)C(C)(N=O)c1ccoc1O",
+    "NC1CCC=C2CCC=C2C1C(=O)CO",
+    "O=CC1(C(=O)C#CO)CC#CCC1",
+    "C=C1C=C(C(C)=O)C=NN=C1c1ccc[nH]1",
+    "CN(O)C1=C(C=O)C=CCC1=N",
+    "CCC1C=CN=C(C)C#CC=CC=C(C)C1",
+    "NOC(=C=O)C(=O)O",
+    "NNCOCc1ccc(O)[nH]1",
+    "O=C=NC1=C(OO)C=C=C1",
+    "CC1=CCC2CC(C)CCC(CN)C2CC1",
+    "CC(=O)OCC1=CC2CCC2C1",
+    "CCc1cccc(O)c1NC",
+    "CCNc1n[nH]c(O)n1",
+    "CC(C)=C1CC1OCCN",
+    "NC(=O)OC(C(=O)CO)C1C=CCC1",
+    "CCC(OC)C1(C(C)CC=O)C=CC=CC1",
+    "CC(ON)C1(O)CCCCC1",
+    "NCCC(O)=C1CC=C(O)C1",
+    "CC1=C(F)C(=CO)C(F)(F)C(C)C1",
+    "CCc1ccccc1OCCCN",
+    "COC(=C=O)C1=C(O)C(=CO)C1",
+    "CC(O)C(=O)C1CCC1C",
+    "CC1=C=C(O)C(F)C=C1O",
+    "CC(C)C=Cc1ccccc1",
+    "COC1=C=CCC=C1O",
+    "C=C(OC)N(F)OC",
+    "O=CN=C(O)c1ccncc1",
+    "C=C1CC(O)(C(CN)OO)CCC1=O",
+    "CC(F)C1(C)CCC(CO)=CC1=O",
+    "O=Cc1[nH]ccc1O",
+    "CC(O)=C(CO)CC1(O)C=CC(O)CC1=O",
+    "O=C(O)C1=CC(=O)C(=O)N1",
+    "O=C(O)c1ccccc1",
+    "CCc1cccc2c1C=CCC(C)=CC=C2",
+    "C=C1NC(C)=C(O)N1",
+    "Cc1ccccc1C(O)=C(C=O)CO",
+    "COCC(=O)c1ccc(N(C)C=O)c(C)c1",
+    "OCc1ccccc1O",
+    "CC(O)=C1CCC(O)(C(=O)CN=N)CC1",
+    "COC1=C=NC(O)=C1",
+    "COC(=O)c1ccc[nH]1",
+    "CC(O)=C1CCC(CC(=O)C=O)C1=N",
+    "CC1(CON)C=CC(=O)C(O)=C1",
+    "C#CC(O)(CC)OOC1C=C(C)C=CN1",
+    "C=C(OC)OC(OC)(OO)c1ccccc1",
+    "C=Cc1ccc(C=O)cc1",
+    "C=CC=C=CCC(C=CC=CC)OCON",
+    "C=CC(C)=C1C=CC(C=O)=C1O",
+    "NNc1nc2c([nH]1)C2",
+    "CCC1=NC(C)=C(CO)c2cccc1c2",
+    "C=C(N=O)C1=C=CC=C=C1",
+    "C=C(C)C(O)(O)C1N=CC(=C)C1(O)C(C)O",
+    "C=COCC1C=C(O)C=CC1F",
+    "CC1(C(=O)O)C=CC(C(N)=O)C(O)C1",
+    "NC1=C(OO)C(=O)c2cc(O)c(C=O)cc21",
+    "CCc1cc(OOO)ccc1C",
+    "CC(C)c1cc(=O)cc[nH]1",
+    "C=C1C=CC(C(CO)(CO)CC(=O)C=O)C1",
+    "Cc1ccc(O)c2ccccc12",
+    "CCC1=NNC(O)C1(N)C=O",
+    "CN(C)NC(O)=C(O)C1=C=CC1",
+    "OCC(OO)C1CCC(F)=C(NO)N1",
+    "CC(=O)C1(C)CCCC1",
+    "C=CC(C)(N)C(C)=NO",
+    "CC1C=C(C=O)N=C(C=O)N1C",
+    "C=C(OO)C1=C=C=C(O)C=C1"
+  ],
+  "initial_validation": {
+    "conditional_gm_loss": 21.77635487727821,
+    "conditional_top_successor_accuracy": 0.0625,
+    "mean_teacher_successor_mass": 0.021682332049228228,
+    "mean_terminal_hazard": 0.7500937730073929
+  },
+  "model": "from_scratch",
+  "molecular_quality": {
+    "descriptor_distributions": {
+      "aromatic_atom_fraction": {
+        "generated_mean": 0.1917643745143745,
+        "reference_mean": 0.4264712313584494,
+        "standardized_wasserstein": 0.8015519061052159,
+        "wasserstein_distance": 0.2347068568440749
+      },
+      "fraction_csp3": {
+        "generated_mean": 0.3599952547452548,
+        "reference_mean": 0.4065798654144519,
+        "standardized_wasserstein": 0.2330804806722028,
+        "wasserstein_distance": 0.06863710871417639
+      },
+      "h_bond_acceptors": {
+        "generated_mean": 2.93,
+        "reference_mean": 2.969924812030075,
+        "standardized_wasserstein": 0.14046648573849732,
+        "wasserstein_distance": 0.18142857142857138
+      },
+      "h_bond_donors": {
+        "generated_mean": 1.72,
+        "reference_mean": 1.1954887218045114,
+        "standardized_wasserstein": 0.5241727784774061,
+        "wasserstein_distance": 0.5395488721804511
+      },
+      "logp": {
+        "generated_mean": 1.1976844000000002,
+        "reference_mean": 1.3190984210526315,
+        "standardized_wasserstein": 0.19041161843906695,
+        "wasserstein_distance": 0.21312764812030074
+      },
+      "molecular_weight": {
+        "generated_mean": 172.44681999999997,
+        "reference_mean": 192.4023458646616,
+        "standardized_wasserstein": 0.6731940548233564,
+        "wasserstein_distance": 20.895083458646624
+      },
+      "qed": {
+        "generated_mean": 0.49422119031110046,
+        "reference_mean": 0.6377514789640244,
+        "standardized_wasserstein": 1.0861821656604866,
+        "wasserstein_distance": 0.14353028865292392
+      },
+      "rotatable_bonds": {
+        "generated_mean": 2.4,
+        "reference_mean": 2.2857142857142856,
+        "standardized_wasserstein": 0.1396654583134783,
+        "wasserstein_distance": 0.2425563909774437
+      },
+      "sa_score": {
+        "generated_mean": 3.9604052350016827,
+        "reference_mean": 2.643932588448187,
+        "standardized_wasserstein": 1.6287139101472552,
+        "wasserstein_distance": 1.3357406982493458
+      },
+      "tpsa": {
+        "generated_mean": 54.33829999999999,
+        "reference_mean": 51.5781954887218,
+        "standardized_wasserstein": 0.1505677011969186,
+        "wasserstein_distance": 3.836173684210526
+      }
+    },
+    "novel_to_train_fraction": 0.99,
+    "requested_samples": 100,
+    "ring_systems": {
+      "generated_aromatic_ring_fraction": 0.37735849056603776,
+      "generated_bridged_fraction": 0.01,
+      "generated_fused_fraction": 0.1,
+      "generated_mean_aromatic_rings": 0.4,
+      "generated_mean_rings": 1.06,
+      "generated_spiro_fraction": 0.0,
+      "reference_aromatic_ring_fraction": 0.6419213973799127,
+      "reference_bridged_fraction": 0.06015037593984962,
+      "reference_fused_fraction": 0.3383458646616541,
+      "reference_mean_aromatic_rings": 1.105263157894737,
+      "reference_mean_rings": 1.7218045112781954,
+      "reference_spiro_fraction": 0.03007518796992481,
+      "ring_size_total_variation": 0.15444508527642742
+    },
+    "scaffolds": {
+      "acyclic_fraction": 0.05,
+      "novel_scaffold_fraction": 0.51,
+      "unique_scaffold_fraction": 0.65
+    },
+    "similarity": {
+      "internal_diversity": 0.9019919104322704,
+      "mean_nearest_train_tanimoto": 0.25585226049924226
+    },
+    "unique_fraction": 0.99,
+    "valid_fraction": 1.0
+  },
+  "rollout": {
+    "atom_count_total_variation": 0.3945864661654135,
+    "bond_order_distribution_total_variation": 0.01693040680998869,
+    "connected_or_null_fraction": 1.0,
+    "cycle_rank_above_reference_max_fraction": 0.0,
+    "cycle_rank_total_variation": 0.5317293233082707,
+    "element_distribution_total_variation": 0.0703158095767214,
+    "event_budget_exhaustion_fraction": 0.0,
+    "event_rule_fractions": {
+      "atom_delete": 0.00375234521575985,
+      "atom_insert": 0.5769230769230769,
+      "atom_restate": 0.04127579737335835,
+      "bond_delete": 0.0028142589118198874,
+      "bond_insert": 0.0,
+      "bond_reorder": 0.22889305816135083
+    },
+    "full_reference_support_fraction": 0.0,
+    "mean_atoms": 12.4,
+    "mean_bonds": 12.46,
+    "mean_cycle_rank": 1.06,
+    "mean_events": 10.66,
+    "non_null_fraction": 1.0,
+    "novel_to_train_fraction": 0.99,
+    "reference_mean_atoms": 13.969924812030076,
+    "reference_mean_bonds": 14.676691729323307,
+    "reference_mean_cycle_rank": 1.7067669172932332,
+    "samples": 100,
+    "top_final_states": [
+      [
+        "O=C(O)c1ccccc1",
+        2
+      ],
+      [
+        "Cc1c(OO)[nH]c(O)c1CC(C)CO",
+        1
+      ],
+      [
+        "C=CC(O)(C1CC#CCC1)N(C)CC",
+        1
+      ],
+      [
+        "C=C1C(=O)C=C(CO)CCC1CCO",
+        1
+      ],
+      [
+        "C=C1C#CC(O)(N=O)C(C)=C1",
+        1
+      ],
+      [
+        "O=NC1=C(O)C#CC(OCO)C1",
+        1
+      ],
+      [
+        "COCc1ccc(C(=O)O)cn1",
+        1
+      ],
+      [
+        "NC1=CN=CC=CC=C(O)C=CC=C=C=C1",
+        1
+      ],
+      [
+        "CC(C)=Cc1c(C(=O)O)cccc1C(C)O",
+        1
+      ],
+      [
+        "O=COC(O)(OO)C(=O)C1=NC(=O)C1",
+        1
+      ],
+      [
+        "Cc1cccc(CO)c1C",
+        1
+      ],
+      [
+        "C=NC(F)c1cc(O)[nH]c1C",
+        1
+      ],
+      [
+        "NC1CCC#CCC=CCCCCNNC1",
+        1
+      ],
+      [
+        "CCC(C)(C)c1ccc[nH]1",
+        1
+      ],
+      [
+        "COC(N)(O)C12C=CCC=C=CC1CC=C2",
+        1
+      ],
+      [
+        "C=Cc1ccc(C)c(O)c1CF",
+        1
+      ],
+      [
+        "CCc1cc(N)cc(O)c1OO",
+        1
+      ],
+      [
+        "O=C(O)C(O)=NC1=C=C=C=C=C1",
+        1
+      ],
+      [
+        "O=CC(CO)(C(=O)O)c1c#cccc1",
+        1
+      ],
+      [
+        "C=NCc1cc(CC)ccc1C(=O)CO",
+        1
+      ]
+    ],
+    "train_support_fraction": 0.01,
+    "unique_fraction": 0.99,
+    "valid_fraction": 1.0
+  },
+  "rollout_event_counts": {
+    "atom_delete": 4,
+    "atom_insert": 615,
+    "atom_restate": 44,
+    "bond_delete": 3,
+    "bond_reorder": 244,
+    "cycle_insert": 98,
+    "ring_ear_insert": 11,
+    "ring_system_restate": 47
+  },
+  "sampler": {
+    "ancestral_ctmc": true,
+    "beam_search": false,
+    "max_events": 32,
+    "operational_horizon": 7.0,
+    "seed_scheme": "seed_sequence_per_trajectory_v1",
+    "target_available": false,
+    "time_step": 0.1,
+    "workers": 8
+  },
+  "seed": 20260714,
+  "selected_validation": {
+    "conditional_gm_loss": 8.603013667991036,
+    "conditional_top_successor_accuracy": 0.3333333333333333,
+    "mean_teacher_successor_mass": 0.19266461652838315,
+    "mean_terminal_hazard": 0.3228378585190512,
+    "selected_step": 192.0
+  },
+  "split": {
+    "eligible": 1333,
+    "max_atoms": 16,
+    "test": 133,
+    "train": 1067,
+    "validation": 133
+  },
+  "training": {
+    "action_kl_weight": 0.0,
+    "batch_size": 8,
+    "bond_representation": "kekule",
+    "device": "cpu",
+    "evaluation_only": false,
+    "hazard_tilt_weight": 0.0,
+    "hidden_dim": 64,
+    "history": [
+      {
+        "conditional_gm_loss": 21.635427459608763,
+        "conditional_top_successor_accuracy": 0.07291666666666667,
+        "mean_teacher_successor_mass": 0.02076147793073539,
+        "mean_terminal_hazard": 0.7293317448347807,
+        "step": 1.0,
+        "train_batch_loss": 4.73424768447876
+      },
+      {
+        "conditional_gm_loss": 11.635359545296524,
+        "conditional_top_successor_accuracy": 0.20833333333333334,
+        "mean_teacher_successor_mass": 0.063156121770205,
+        "mean_terminal_hazard": 0.3183030525688082,
+        "step": 24.0,
+        "train_batch_loss": 7.474611759185791
+      },
+      {
+        "conditional_gm_loss": 10.193021665210836,
+        "conditional_top_successor_accuracy": 0.2708333333333333,
+        "mean_teacher_successor_mass": 0.11661256099619588,
+        "mean_terminal_hazard": 0.38019178388640285,
+        "step": 48.0,
+        "train_batch_loss": 13.49228572845459
+      },
+      {
+        "conditional_gm_loss": 10.524717724649236,
+        "conditional_top_successor_accuracy": 0.3020833333333333,
+        "mean_teacher_successor_mass": 0.1178363274719351,
+        "mean_terminal_hazard": 0.6795924035832286,
+        "step": 72.0,
+        "train_batch_loss": 9.820795059204102
+      },
+      {
+        "conditional_gm_loss": 9.253033779044927,
+        "conditional_top_successor_accuracy": 0.2916666666666667,
+        "mean_teacher_successor_mass": 0.14687215833138464,
+        "mean_terminal_hazard": 0.15243667902541347,
+        "step": 96.0,
+        "train_batch_loss": 11.770461082458496
+      },
+      {
+        "conditional_gm_loss": 9.66954915507813,
+        "conditional_top_successor_accuracy": 0.3020833333333333,
+        "mean_teacher_successor_mass": 0.1941401203601132,
+        "mean_terminal_hazard": 0.38934217777568847,
+        "step": 120.0,
+        "train_batch_loss": 4.4256086349487305
+      },
+      {
+        "conditional_gm_loss": 11.970113862567814,
+        "conditional_top_successor_accuracy": 0.28125,
+        "mean_teacher_successor_mass": 0.1725232940337238,
+        "mean_terminal_hazard": 0.5660225759493187,
+        "step": 144.0,
+        "train_batch_loss": 6.5394744873046875
+      },
+      {
+        "conditional_gm_loss": 9.412540372213698,
+        "conditional_top_successor_accuracy": 0.2916666666666667,
+        "mean_teacher_successor_mass": 0.1785489917850883,
+        "mean_terminal_hazard": 0.4906213869689964,
+        "step": 168.0,
+        "train_batch_loss": 16.372970581054688
+      },
+      {
+        "conditional_gm_loss": 8.603013667991036,
+        "conditional_top_successor_accuracy": 0.3333333333333333,
+        "mean_teacher_successor_mass": 0.19266461652838315,
+        "mean_terminal_hazard": 0.3228378585190512,
+        "step": 192.0,
+        "train_batch_loss": 7.964355945587158
+      },
+      {
+        "conditional_gm_loss": 9.096221181418514,
+        "conditional_top_successor_accuracy": 0.3229166666666667,
+        "mean_teacher_successor_mass": 0.19246568366126135,
+        "mean_terminal_hazard": 0.13502289296593517,
+        "step": 216.0,
+        "train_batch_loss": 8.044682502746582
+      },
+      {
+        "conditional_gm_loss": 9.535389713244513,
+        "conditional_top_successor_accuracy": 0.25,
+        "mean_teacher_successor_mass": 0.19195633638393186,
+        "mean_terminal_hazard": 0.4860570589080453,
+        "step": 240.0,
+        "train_batch_loss": 3.6646714210510254
+      }
+    ],
+    "loaded_checkpoint": null,
+    "message_passing_steps": 3,
+    "progress_stratification_fraction": 0.0,
+    "rate_factorization": "quotient_energy",
+    "steps": 240
+  }
+}

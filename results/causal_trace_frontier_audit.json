@@ -1,0 +1,60 @@
+{
+  "test": {
+    "alternate_order_endpoint_checks": 64,
+    "branching_ideal_fraction": 0.47724839400428265,
+    "endpoint_failures": 0,
+    "frontier_size_counts": {
+      "1": 1953,
+      "2": 1164,
+      "3": 502,
+      "4": 104,
+      "5": 13
+    },
+    "maximum_sampled_frontier": 5,
+    "mean_frontier_size": 1.677730192719486,
+    "molecules": 133,
+    "molecules_with_branching_fraction": 0.9172932330827067,
+    "orders_per_molecule": 4,
+    "sampled_nonterminal_ideals": 3736
+  },
+  "train": {
+    "alternate_order_endpoint_checks": 64,
+    "branching_ideal_fraction": 0.497245268343272,
+    "endpoint_failures": 0,
+    "frontier_size_counts": {
+      "1": 15513,
+      "2": 9363,
+      "3": 4208,
+      "4": 1363,
+      "5": 355,
+      "6": 51,
+      "7": 2,
+      "8": 1
+    },
+    "maximum_sampled_frontier": 8,
+    "mean_frontier_size": 1.763611615245009,
+    "molecules": 1067,
+    "molecules_with_branching_fraction": 0.9203373945641987,
+    "orders_per_molecule": 4,
+    "sampled_nonterminal_ideals": 30856
+  },
+  "validation": {
+    "alternate_order_endpoint_checks": 64,
+    "branching_ideal_fraction": 0.489344262295082,
+    "endpoint_failures": 0,
+    "frontier_size_counts": {
+      "1": 1869,
+      "2": 1094,
+      "3": 517,
+      "4": 135,
+      "5": 43,
+      "6": 2
+    },
+    "maximum_sampled_frontier": 6,
+    "mean_frontier_size": 1.7418032786885247,
+    "molecules": 133,
+    "molecules_with_branching_fraction": 0.8947368421052632,
+    "orders_per_molecule": 4,
+    "sampled_nonterminal_ideals": 3660
+  }
+}

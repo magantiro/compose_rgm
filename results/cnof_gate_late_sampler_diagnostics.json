@@ -1,0 +1,467 @@
+{
+  "checkpoint": "results/cnof_gate_late.pt",
+  "evaluations": {
+    "dt_0.05": {
+      "atom_count_total_variation": 0.21218749999999997,
+      "bond_order_distribution_total_variation": 0.04958386038240847,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.02,
+      "cycle_rank_total_variation": 0.2803125,
+      "element_distribution_total_variation": 0.06186826145552565,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.000942507068803016,
+        "atom_insert": 0.9000942507068803,
+        "atom_restate": 0.0,
+        "bond_delete": 0.000942507068803016,
+        "bond_insert": 0.09802073515551367,
+        "bond_reorder": 0.0
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 9.54,
+      "mean_bonds": 9.57,
+      "mean_cycle_rank": 1.03,
+      "mean_events": 10.61,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 100,
+      "time_step": 0.05,
+      "top_final_states": [
+        [
+          "CCC1(C#N)N=NCC1C",
+          1
+        ],
+        [
+          "CC=C(C)CC(C)=CCN",
+          1
+        ],
+        [
+          "C=C(O)C(=C)OCC",
+          1
+        ],
+        [
+          "CCC1CC(C#N)OC1N",
+          1
+        ],
+        [
+          "CNN1CCOOCN(C)C1=O",
+          1
+        ],
+        [
+          "CC1=C2CCCC2=C1",
+          1
+        ],
+        [
+          "CC=CCC(C)=CC(C)C=N",
+          1
+        ],
+        [
+          "C=CC(=C(C)O)C(CC)C(C)C",
+          1
+        ],
+        [
+          "CCOCCC(C)=C=O",
+          1
+        ],
+        [
+          "COCN1C2=CC1=C2C",
+          1
+        ],
+        [
+          "CN=C1CCCC(C)CC=C1C",
+          1
+        ],
+        [
+          "O=C1CN=C2OCCCC2CN1",
+          1
+        ],
+        [
+          "C1=C2C=C12",
+          1
+        ],
+        [
+          "C=NC(=CON=NC)C(C)NN",
+          1
+        ],
+        [
+          "CNCC1C#CC1=CO",
+          1
+        ],
+        [
+          "CC1C2C3CCCC(N)OC3C12",
+          1
+        ],
+        [
+          "COCC=CN(C)N(C)OO",
+          1
+        ],
+        [
+          "CC1C=NCC(=O)C1C",
+          1
+        ],
+        [
+          "CCC1=CC(C)C=CC1=O",
+          1
+        ],
+        [
+          "CC1CC(C)C1",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "dt_0.10": {
+      "atom_count_total_variation": 0.14718749999999997,
+      "bond_order_distribution_total_variation": 0.028175348367704862,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.03,
+      "cycle_rank_total_variation": 0.3225,
+      "element_distribution_total_variation": 0.06984265319673687,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.0017482517482517483,
+        "atom_insert": 0.8793706293706294,
+        "atom_restate": 0.0,
+        "bond_delete": 0.0,
+        "bond_insert": 0.11888111888111888,
+        "bond_reorder": 0.0
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 10.04,
+      "mean_bonds": 10.37,
+      "mean_cycle_rank": 1.33,
+      "mean_events": 11.44,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 100,
+      "time_step": 0.1,
+      "top_final_states": [
+        [
+          "CN1OC2CC3(C=C1CCC3)O2",
+          1
+        ],
+        [
+          "CC1=C2NC(C#N)C3=CN=C1C32",
+          1
+        ],
+        [
+          "C=CC(=C=O)CCC",
+          1
+        ],
+        [
+          "CCC=C(C)C(C)CC=O",
+          1
+        ],
+        [
+          "CC(=N)C(=CCN)c1nc1=O",
+          1
+        ],
+        [
+          "CNC1CC=NNC1",
+          1
+        ],
+        [
+          "C=C(C)CC(CC)NC=C=N",
+          1
+        ],
+        [
+          "C=CC1N=C=C=C1C=CC",
+          1
+        ],
+        [
+          "CC1=C2NCC34OCC3C=C4C12",
+          1
+        ],
+        [
+          "C=NCN(C#N)C1C=CC1",
+          1
+        ],
+        [
+          "CC1CC1O",
+          1
+        ],
+        [
+          "CCCC(=O)N(C)CC(=O)CC",
+          1
+        ],
+        [
+          "N=NCCC1C#C1",
+          1
+        ],
+        [
+          "CC(=C=O)N=CCCC=CN",
+          1
+        ],
+        [
+          "C=CCC(O)C(=C)CN",
+          1
+        ],
+        [
+          "CC(=O)C1CC2N=C3C24C(=O)C314",
+          1
+        ],
+        [
+          "NC=C1CCCC=CC2CC2C1",
+          1
+        ],
+        [
+          "NC1=C=NC(=O)N=C=CC1",
+          1
+        ],
+        [
+          "CCC=CN(C)OCCC",
+          1
+        ],
+        [
+          "CCC1C(=O)C(=O)C(CO)N1C",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "dt_0.20": {
+      "atom_count_total_variation": 0.13093749999999998,
+      "bond_order_distribution_total_variation": 0.020331837345301276,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.04,
+      "cycle_rank_total_variation": 0.3325,
+      "element_distribution_total_variation": 0.06296530629100004,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.0008787346221441124,
+        "atom_insert": 0.8875219683655536,
+        "atom_restate": 0.0017574692442882249,
+        "bond_delete": 0.0008787346221441124,
+        "bond_insert": 0.10896309314586995,
+        "bond_reorder": 0.0
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 10.09,
+      "mean_bonds": 10.32,
+      "mean_cycle_rank": 1.23,
+      "mean_events": 11.38,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 100,
+      "time_step": 0.2,
+      "top_final_states": [
+        [
+          "CCC(C)=CCOC",
+          1
+        ],
+        [
+          "CCC(C=C(C)N)C(C)=O",
+          1
+        ],
+        [
+          "C=C=C1CCCCC1",
+          1
+        ],
+        [
+          "CCC(C)C(=C=O)NCC(C)C",
+          1
+        ],
+        [
+          "CC1C=C2C1C(C)C21C=C1C=O",
+          1
+        ],
+        [
+          "CCC1=C(C)CC(CC)C1",
+          1
+        ],
+        [
+          "CC(=O)N(O)C1=C(C)NC1",
+          1
+        ],
+        [
+          "CC(C)=C(N)C1C(=N)C1=C1CC1",
+          1
+        ],
+        [
+          "CC(=N)N(C)OO",
+          1
+        ],
+        [
+          "C=C(F)N(C)C(=O)C(=N)CCC",
+          1
+        ],
+        [
+          "O=C1C2=NC34C5=C2C5N3C2=C1C24",
+          1
+        ],
+        [
+          "CC1=C2C=CC1=C=C2C(C)C=O",
+          1
+        ],
+        [
+          "CC=C(F)C(C)=CN(C)C",
+          1
+        ],
+        [
+          "C=CC(=N)CC",
+          1
+        ],
+        [
+          "O=CCC1=NC1",
+          1
+        ],
+        [
+          "CCC(C)CC(=COC)CO",
+          1
+        ],
+        [
+          "CCN=C(N)C1=CC(=O)CC1C",
+          1
+        ],
+        [
+          "CCN=CCN1CCCC1",
+          1
+        ],
+        [
+          "CN=NC(=O)O",
+          1
+        ],
+        [
+          "CC(N)=NC=CC=N",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "untrained_dt_0.10": {
+      "atom_count_total_variation": 1.0,
+      "bond_order_distribution_total_variation": 0.08090643274853798,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.0,
+      "cycle_rank_total_variation": 0.81375,
+      "element_distribution_total_variation": 0.3696188556067588,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.21052631578947367,
+        "atom_insert": 0.5504385964912281,
+        "atom_restate": 0.16666666666666666,
+        "bond_delete": 0.0,
+        "bond_insert": 0.006578947368421052,
+        "bond_reorder": 0.06578947368421052
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 1.55,
+      "mean_bonds": 0.75,
+      "mean_cycle_rank": 0.03,
+      "mean_events": 4.56,
+      "non_null_fraction": 0.83,
+      "novel_to_train_fraction": 0.83,
+      "operational_horizon": 7.0,
+      "reference_mean_atoms": 10.5,
+      "reference_mean_bonds": 10.6875,
+      "reference_mean_cycle_rank": 1.1875,
+      "samples": 100,
+      "time_step": 0.1,
+      "top_final_states": [
+        [
+          "<NULL>",
+          17
+        ],
+        [
+          "C",
+          12
+        ],
+        [
+          "F",
+          12
+        ],
+        [
+          "N",
+          7
+        ],
+        [
+          "CO",
+          5
+        ],
+        [
+          "O",
+          5
+        ],
+        [
+          "NO",
+          4
+        ],
+        [
+          "CC",
+          3
+        ],
+        [
+          "CF",
+          3
+        ],
+        [
+          "C#N",
+          3
+        ],
+        [
+          "OCF",
+          2
+        ],
+        [
+          "OF",
+          2
+        ],
+        [
+          "C=O",
+          2
+        ],
+        [
+          "C=N",
+          1
+        ],
+        [
+          "COOF",
+          1
+        ],
+        [
+          "CN",
+          1
+        ],
+        [
+          "NOO",
+          1
+        ],
+        [
+          "O=NF",
+          1
+        ],
+        [
+          "CCC#CO",
+          1
+        ],
+        [
+          "FF",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "unique_fraction": 0.36,
+      "valid_fraction": 1.0
+    }
+  },
+  "samples_per_configuration": 100,
+  "target_available": false
+}

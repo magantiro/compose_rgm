@@ -1,0 +1,138 @@
+{
+  "coverage_by_limit": {
+    "128": {
+      "test": {
+        "cycle_event_fraction": 0.9836065573770492,
+        "ear_event_fraction": 0.9428571428571428,
+        "fully_supported_fraction": 0.9398496240601504,
+        "fully_supported_molecules": 125
+      },
+      "train": {
+        "cycle_event_fraction": 1.0,
+        "ear_event_fraction": 0.9803149606299213,
+        "fully_supported_fraction": 0.985941893158388,
+        "fully_supported_molecules": 1052
+      },
+      "validation": {
+        "cycle_event_fraction": 0.967479674796748,
+        "ear_event_fraction": 0.8956521739130435,
+        "fully_supported_fraction": 0.8796992481203008,
+        "fully_supported_molecules": 117
+      }
+    },
+    "16": {
+      "test": {
+        "cycle_event_fraction": 0.5983606557377049,
+        "ear_event_fraction": 0.6190476190476191,
+        "fully_supported_fraction": 0.47368421052631576,
+        "fully_supported_molecules": 63
+      },
+      "train": {
+        "cycle_event_fraction": 0.6693961105424769,
+        "ear_event_fraction": 0.6561679790026247,
+        "fully_supported_fraction": 0.5529522024367385,
+        "fully_supported_molecules": 590
+      },
+      "validation": {
+        "cycle_event_fraction": 0.6504065040650406,
+        "ear_event_fraction": 0.5652173913043478,
+        "fully_supported_fraction": 0.44360902255639095,
+        "fully_supported_molecules": 59
+      }
+    },
+    "32": {
+      "test": {
+        "cycle_event_fraction": 0.7868852459016393,
+        "ear_event_fraction": 0.7523809523809524,
+        "fully_supported_fraction": 0.6766917293233082,
+        "fully_supported_molecules": 90
+      },
+      "train": {
+        "cycle_event_fraction": 0.827021494370522,
+        "ear_event_fraction": 0.7716535433070866,
+        "fully_supported_fraction": 0.7169634489222118,
+        "fully_supported_molecules": 765
+      },
+      "validation": {
+        "cycle_event_fraction": 0.7642276422764228,
+        "ear_event_fraction": 0.7043478260869566,
+        "fully_supported_fraction": 0.5789473684210527,
+        "fully_supported_molecules": 77
+      }
+    },
+    "64": {
+      "test": {
+        "cycle_event_fraction": 0.8770491803278688,
+        "ear_event_fraction": 0.8476190476190476,
+        "fully_supported_fraction": 0.7969924812030075,
+        "fully_supported_molecules": 106
+      },
+      "train": {
+        "cycle_event_fraction": 0.946775844421699,
+        "ear_event_fraction": 0.8805774278215223,
+        "fully_supported_fraction": 0.8687910028116214,
+        "fully_supported_molecules": 927
+      },
+      "validation": {
+        "cycle_event_fraction": 0.8861788617886179,
+        "ear_event_fraction": 0.808695652173913,
+        "fully_supported_fraction": 0.7443609022556391,
+        "fully_supported_molecules": 99
+      }
+    },
+    "8": {
+      "test": {
+        "cycle_event_fraction": 0.48360655737704916,
+        "ear_event_fraction": 0.5047619047619047,
+        "fully_supported_fraction": 0.3458646616541353,
+        "fully_supported_molecules": 46
+      },
+      "train": {
+        "cycle_event_fraction": 0.503582395087001,
+        "ear_event_fraction": 0.5183727034120735,
+        "fully_supported_fraction": 0.3992502343017807,
+        "fully_supported_molecules": 426
+      },
+      "validation": {
+        "cycle_event_fraction": 0.4146341463414634,
+        "ear_event_fraction": 0.40869565217391307,
+        "fully_supported_fraction": 0.3082706766917293,
+        "fully_supported_molecules": 41
+      }
+    }
+  },
+  "partition_events": {
+    "test": {
+      "family_counts": {
+        "atom_insert": 749,
+        "cycle_insert": 122,
+        "ring_ear_insert": 105
+      },
+      "mean_steps": 7.338345864661654,
+      "molecules": 133
+    },
+    "train": {
+      "family_counts": {
+        "atom_insert": 6277,
+        "bond_insert": 1,
+        "cycle_insert": 977,
+        "ring_ear_insert": 762
+      },
+      "mean_steps": 7.513589503280225,
+      "molecules": 1067
+    },
+    "validation": {
+      "family_counts": {
+        "atom_insert": 720,
+        "cycle_insert": 123,
+        "ring_ear_insert": 115
+      },
+      "mean_steps": 7.203007518796992,
+      "molecules": 133
+    }
+  },
+  "unique_train_templates": {
+    "cycle": 102,
+    "ear": 143
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "checkpoint": "results/tracelet_gate_from_scratch_seed20260714.pt",
+  "max_events": 32,
+  "operational_horizon": 7.0,
+  "recommended_workers": 2,
+  "results": {
+    "1": {
+      "exactly_matches_first_configuration": true,
+      "seconds": 23.032311209011823,
+      "seconds_per_trajectory": 2.879038901126478
+    },
+    "2": {
+      "exactly_matches_first_configuration": true,
+      "seconds": 22.489716125070117,
+      "seconds_per_trajectory": 2.8112145156337647
+    },
+    "4": {
+      "exactly_matches_first_configuration": true,
+      "seconds": 24.182176999980584,
+      "seconds_per_trajectory": 3.022772124997573
+    },
+    "8": {
+      "exactly_matches_first_configuration": true,
+      "seconds": 30.688040625071153,
+      "seconds_per_trajectory": 3.836005078133894
+    }
+  },
+  "samples": 8
+}

@@ -1,0 +1,58 @@
+{
+  "final_test": {
+    "factorized_gm_loss": 18.72604751586914,
+    "family_accuracy": 0.20000000298023224,
+    "mean_teacher_mark_probability": 0.007205083034932613,
+    "mean_terminal_hazard": 0.6318454742431641
+  },
+  "generated_nonnull_smiles": 0,
+  "initial_validation": {
+    "factorized_gm_loss": 36.81517028808594,
+    "family_accuracy": 0.1428571492433548,
+    "mean_teacher_mark_probability": 0.010166252963244915,
+    "mean_terminal_hazard": 0.6240430474281311
+  },
+  "model": "from_scratch",
+  "rollout": {
+    "skipped": true
+  },
+  "seed": 18,
+  "selected_validation": {
+    "factorized_gm_loss": 36.6483039855957,
+    "family_accuracy": 0.1428571492433548,
+    "mean_teacher_mark_probability": 0.010229170322418213,
+    "mean_terminal_hazard": 0.6364765167236328,
+    "selected_step": 2.0
+  },
+  "training": {
+    "batch_size": 2,
+    "corpus_workers": 0,
+    "data_workers": 0,
+    "device": "cpu",
+    "hidden_dim": 16,
+    "history": [
+      {
+        "factorized_gm_loss": 36.75839614868164,
+        "family_accuracy": 0.1428571492433548,
+        "mean_teacher_mark_probability": 0.010196822695434093,
+        "mean_terminal_hazard": 0.629199743270874,
+        "step": 1.0,
+        "train_batch_loss": 5.376441478729248
+      },
+      {
+        "factorized_gm_loss": 36.6483039855957,
+        "family_accuracy": 0.1428571492433548,
+        "mean_teacher_mark_probability": 0.010229170322418213,
+        "mean_terminal_hazard": 0.6364765167236328,
+        "step": 2.0,
+        "train_batch_loss": 45.9326057434082
+      }
+    ],
+    "message_passing_steps": 1,
+    "path_checkpoint_interval": 4,
+    "path_workers": 0,
+    "steps": 2,
+    "use_bf16": false
+  },
+  "training_backend": "factorized_marks"
+}
