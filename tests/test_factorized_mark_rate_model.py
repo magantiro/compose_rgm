@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import replace
 
 import numpy as np
@@ -15,6 +16,7 @@ from compose_v4.experiments.factorized_mark_conditional import (
     cosine_warmup_learning_rate,
     factorized_adamw_parameter_groups,
 )
+from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.tracelet_conditional import build_tracelet_path_records
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
@@ -187,6 +189,165 @@ def test_legacy_ring_catalog_retains_complete_semantic_fallback(
     assert model.ring_system_electronic_witness_aliases is None
     assert support[template_index]
     assert semantic_calls > 0
+
+
+def test_ring_enablement_certificate_matches_complete_support() -> None:
+    catalog, state, _ = _ring_support_case()
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+
+    certificate = model._ring_grow_enablement_certificate(state)
+    complete = model._ring_grow_support(state)
+
+    assert sum(certificate) <= 1
+    assert any(certificate) == any(complete)
+    assert all(not selected or complete[index] for index, selected in enumerate(certificate))
+
+
+def test_objective_aware_ring_certificate_preserves_nonring_loss_and_gradients() -> None:
+    paths = []
+    for seed, smiles in enumerate(
+        ("c1ccccc1", "C1CCCCC1", "c1ncnnc1", "C1CCC2CCCCC2C1"),
+        start=100,
+    ):
+        target = pad_molecular_graph(smiles_to_molecular_graph(smiles), 16)
+        source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+            np.random.default_rng(seed),
+            n_slots=16,
+        )
+        paths.append(
+            TraceProgressCTMC(
+                compile_carbon_tree_to_target(
+                    source,
+                    target,
+                    use_bond_reroute=True,
+                    align_source=True,
+                )
+            )
+        )
+    catalog = build_typed_ring_catalog_from_paths(tuple(paths))
+    oracle = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+    selected = None
+    for path in paths:
+        for progress, step in enumerate(path.trace.steps):
+            if step.rule_name == "ring_system_grow":
+                continue
+            state = path.state_at(progress)
+            complete = oracle._ring_grow_support(state)
+            if sum(complete) > 1:
+                selected = (path, progress, step, state, complete)
+                break
+        if selected is not None:
+            break
+    assert selected is not None
+    path, progress, step, state, complete = selected
+    certificate = oracle._ring_grow_enablement_certificate(state)
+    assert sum(certificate) == 1 < sum(complete)
+
+    base = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+    )
+    complete_batch = replace(
+        base,
+        ring_grow_support_mask=torch.tensor((complete,), dtype=torch.bool),
+        ring_grow_support_is_exact=torch.tensor((True,)),
+        ring_grow_enablement_is_exact=torch.tensor((True,)),
+    )
+    certificate_batch = replace(
+        base,
+        ring_grow_support_mask=torch.tensor((certificate,), dtype=torch.bool),
+        ring_grow_support_is_exact=torch.tensor((False,)),
+        ring_grow_enablement_is_exact=torch.tensor((True,)),
+    )
+    complete_model = copy.deepcopy(oracle)
+    certificate_model = copy.deepcopy(oracle)
+
+    complete_prediction = complete_model.forward_mark_batch(complete_batch)
+    certificate_prediction = certificate_model.forward_mark_batch(certificate_batch)
+    complete_loss = factorized_mark_bregman_loss(complete_prediction, complete_batch)
+    certificate_loss = factorized_mark_bregman_loss(
+        certificate_prediction,
+        certificate_batch,
+    )
+    complete_loss.backward()
+    certificate_loss.backward()
+
+    assert torch.equal(
+        complete_prediction.enabled_families,
+        certificate_prediction.enabled_families,
+    )
+    assert torch.allclose(
+        complete_prediction.family_log_probabilities,
+        certificate_prediction.family_log_probabilities,
+    )
+    assert torch.allclose(
+        complete_prediction.selected_mark_log_probability,
+        certificate_prediction.selected_mark_log_probability,
+    )
+    assert torch.allclose(complete_loss, certificate_loss)
+    for (complete_name, complete_parameter), (certificate_name, certificate_parameter) in zip(
+        complete_model.named_parameters(),
+        certificate_model.named_parameters(),
+    ):
+        assert complete_name == certificate_name
+        if complete_parameter.grad is None or certificate_parameter.grad is None:
+            assert complete_parameter.grad is certificate_parameter.grad
+        else:
+            assert torch.allclose(complete_parameter.grad, certificate_parameter.grad)
+
+
+def test_factorized_dataset_uses_full_support_only_for_ring_teacher_rows() -> None:
+    target = pad_molecular_graph(smiles_to_molecular_graph("c1ncnnc1"), 12)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(977),
+        n_slots=12,
+    )
+    path = TraceProgressCTMC(
+        compile_carbon_tree_to_target(
+            source,
+            target,
+            use_bond_reroute=True,
+            align_source=True,
+        )
+    )
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    dataset = FactorizedMarkDataset(
+        (PathRecord("ring-target", path),),
+        start_index=0,
+        length=128,
+        seed=29,
+        late_time_fraction=0.5,
+        operational_horizon=2.0,
+        progress_stratification_fraction=0.5,
+        ring_catalog=catalog,
+    )
+    observed_ring = False
+    observed_other = False
+    for index in range(len(dataset)):
+        example = dataset[index]
+        assert example.ring_grow_enablement_is_exact
+        if example.teacher_rule_name == "ring_system_grow":
+            observed_ring = True
+            assert example.ring_grow_support_is_exact
+        else:
+            observed_other = True
+            assert not example.ring_grow_support_is_exact
+            assert example.ring_grow_support_mask is not None
+            assert sum(example.ring_grow_support_mask) <= 1
+        if observed_ring and observed_other:
+            break
+    assert observed_ring and observed_other
 
 
 def test_factorized_mark_forward_and_backward_without_successor_fiber() -> None:

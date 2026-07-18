@@ -58,6 +58,31 @@ def test_rollout_checkpoint_is_self_contained(tmp_path: Path) -> None:
         assert torch.equal(loaded.state_dict()[key], value)
 
 
+def test_interim_best_checkpoint_is_rollout_ready(tmp_path: Path) -> None:
+    selected_path = tmp_path / "selected.pt"
+    expected = _checkpoint(selected_path)
+    payload = torch.load(selected_path, map_location="cpu", weights_only=False)
+    payload.update(
+        {
+            "checkpoint_kind": "interim_best_evaluation_model",
+            "selected_validation": {
+                "factorized_gm_loss": 2.5,
+                "selected_step": 500.0,
+            },
+            "completed_steps": 500,
+        }
+    )
+    interim_path = tmp_path / "checkpoint.best_so_far.pt"
+    torch.save(payload, interim_path)
+
+    loaded, loaded_payload = load_factorized_rollout_checkpoint(interim_path)
+
+    assert loaded_payload["checkpoint_kind"] == "interim_best_evaluation_model"
+    assert loaded_payload["selected_validation"]["selected_step"] == 500.0
+    for key, value in expected.state_dict().items():
+        assert torch.equal(loaded.state_dict()[key], value)
+
+
 def test_rollout_checkpoint_rejects_missing_inference_metadata(tmp_path: Path) -> None:
     path = tmp_path / "checkpoint.pt"
     torch.save({"state_dict": {}}, path)

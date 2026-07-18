@@ -29,6 +29,9 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert "guacamol_heldout_val_5000_seed0.smiles" in source
     assert "train_stage.spawn" in source
     assert "evaluate_stage.spawn" in source
+    assert "rollout_evaluate_stage.spawn" in source
+    assert "checkpoint.snapshot.pt" in source
+    assert "shutil.copyfile" in source
     assert "pipeline_stage.spawn" in source
     assert "compile_paths_only=True" in source
     assert "require_path_cache=True" in source

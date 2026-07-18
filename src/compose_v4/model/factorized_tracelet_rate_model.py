@@ -128,7 +128,8 @@ class FactorizedMarkBatch:
     ring_restate_actions: tuple[tuple[RingSystemRestate, ...], ...]
     ring_grow_support_mask: Tensor | None = None
     ring_delete_actions: tuple[tuple[RingSystemDelete, ...], ...] | None = None
-    ring_grow_support_is_exact: bool = False
+    ring_grow_support_is_exact: Tensor | bool = False
+    ring_grow_enablement_is_exact: Tensor | bool = False
 
     @property
     def batch_size(self) -> int:
@@ -168,7 +169,11 @@ class FactorizedMarkBatch:
                 None if self.ring_grow_support_mask is None else move(self.ring_grow_support_mask)
             ),
             ring_delete_actions=self.ring_delete_actions,
+            # Exactness flags are control-flow metadata, not model inputs.
+            # Keeping them on CPU avoids a CUDA-to-Python synchronization in
+            # the per-row objective-aware support routing below.
             ring_grow_support_is_exact=self.ring_grow_support_is_exact,
+            ring_grow_enablement_is_exact=self.ring_grow_enablement_is_exact,
         )
 
     def pin_memory(self) -> "FactorizedMarkBatch":
@@ -201,7 +206,16 @@ class FactorizedMarkBatch:
                 None if self.ring_grow_support_mask is None else pin(self.ring_grow_support_mask)
             ),
             ring_delete_actions=self.ring_delete_actions,
-            ring_grow_support_is_exact=self.ring_grow_support_is_exact,
+            ring_grow_support_is_exact=(
+                pin(self.ring_grow_support_is_exact)
+                if isinstance(self.ring_grow_support_is_exact, Tensor)
+                else self.ring_grow_support_is_exact
+            ),
+            ring_grow_enablement_is_exact=(
+                pin(self.ring_grow_enablement_is_exact)
+                if isinstance(self.ring_grow_enablement_is_exact, Tensor)
+                else self.ring_grow_enablement_is_exact
+            ),
         )
 
 
@@ -595,6 +609,10 @@ class FactorizedTraceletRateModel(nn.Module):
             tuple[bytes, bytes, bytes, bytes],
             tuple[bool, ...],
         ] = OrderedDict()
+        self._ring_grow_enablement_certificate_cache: OrderedDict[
+            tuple[bytes, bytes, bytes, bytes],
+            tuple[bool, ...],
+        ] = OrderedDict()
         self._ring_template_placement_group_cache: OrderedDict[
             tuple[tuple[bytes, bytes, bytes, bytes], int],
             tuple[tuple[RingSystemPlacement, ...], ...],
@@ -862,8 +880,114 @@ class FactorizedTraceletRateModel(nn.Module):
             self._ring_grow_support_cache[key] = cached
             if len(self._ring_grow_support_cache) > self._ring_candidate_cache_limit:
                 self._ring_grow_support_cache.popitem(last=False)
+            certificate = [False] * len(cached)
+            first_supported = next(
+                (index for index, supported in enumerate(cached) if supported),
+                None,
+            )
+            if first_supported is not None:
+                certificate[first_supported] = True
+            self._ring_grow_enablement_certificate_cache[key] = tuple(certificate)
+            if (
+                len(self._ring_grow_enablement_certificate_cache)
+                > self._ring_candidate_cache_limit
+            ):
+                self._ring_grow_enablement_certificate_cache.popitem(last=False)
         else:
             self._ring_grow_support_cache.move_to_end(key)
+        return cached
+
+    def _ring_grow_enablement_certificate(
+        self,
+        state: MolecularGraph,
+    ) -> tuple[bool, ...]:
+        """Return one verified template iff the ring-grow family is enabled.
+
+        Generator Matching needs the complete within-family partition only on
+        rows whose teacher is ``ring_system_grow``.  Every other row needs the
+        exact Boolean application condition for the family softmax, so this
+        method stops at the first executor-supported template.  An all-false
+        result is exhaustive and therefore also an exact disabled certificate.
+        """
+
+        key = self._state_cache_key(state)
+        cached = self._ring_grow_enablement_certificate_cache.get(key)
+        if cached is not None:
+            self._ring_grow_enablement_certificate_cache.move_to_end(key)
+            return cached
+        full_support = self._ring_grow_support_cache.get(key)
+        if full_support is not None:
+            self._ring_grow_support_cache.move_to_end(key)
+            certificate = [False] * len(full_support)
+            first_supported = next(
+                (index for index, supported in enumerate(full_support) if supported),
+                None,
+            )
+            if first_supported is not None:
+                certificate[first_supported] = True
+            cached = tuple(certificate)
+        elif self.ring_system_electronic_aliases is not None:
+            support = ring_system_electronic_template_support_mask(
+                state,
+                self.ring_system_templates,
+                self.ring_system_electronic_aliases,
+            )
+            certificate = np.zeros_like(support)
+            supported = np.flatnonzero(support)
+            if len(supported):
+                certificate[int(supported[0])] = True
+            cached = tuple(bool(item) for item in certificate)
+        else:
+            coarse_support = ring_system_template_local_support_mask(
+                state,
+                self.ring_system_templates,
+                self.ring_system_template_aliases,
+            )
+            witness_support = (
+                ring_system_electronic_template_support_mask(
+                    state,
+                    self.ring_system_templates,
+                    self.ring_system_electronic_witness_aliases,
+                )
+                if self.ring_system_electronic_witness_aliases is not None
+                else np.zeros_like(coarse_support)
+            )
+            certificate = np.zeros_like(coarse_support)
+            witness_indices = np.flatnonzero(coarse_support & witness_support)
+            for raw_index in witness_indices:
+                template_index = int(raw_index)
+                if self._ring_witness_candidates(state, template_index):
+                    certificate[template_index] = True
+                    break
+            if not bool(certificate.any()):
+                for raw_index in np.flatnonzero(coarse_support):
+                    template_index = int(raw_index)
+                    placement_groups = self._ring_template_placement_groups(
+                        state,
+                        template_index,
+                    )
+                    if any(
+                        semantic_ring_prefix_is_completable(
+                            self._ring_semantic_decoder(state, group[0]),
+                            (),
+                        )
+                        for group in placement_groups
+                    ):
+                        certificate[template_index] = True
+                        break
+            cached = tuple(bool(item) for item in certificate)
+            if not any(cached):
+                # The certificate exhausted every coarse-supported template,
+                # so the complete support is known to be empty as well.
+                self._ring_grow_support_cache[key] = cached
+                if len(self._ring_grow_support_cache) > self._ring_candidate_cache_limit:
+                    self._ring_grow_support_cache.popitem(last=False)
+        self._ring_grow_enablement_certificate_cache[key] = cached
+        if (
+            len(self._ring_grow_enablement_certificate_cache)
+            > self._ring_candidate_cache_limit
+        ):
+            self._ring_grow_enablement_certificate_cache.popitem(last=False)
         return cached
 
     def _ring_template_placement_groups(
@@ -1015,12 +1139,7 @@ class FactorizedTraceletRateModel(nn.Module):
                     "precomputed ring support has the wrong shape: "
                     f"{tuple(batch.ring_grow_support_mask.shape)} != {expected_shape}"
                 )
-        if (
-            batch.ring_grow_support_mask is not None
-            and (batch.ring_grow_support_is_exact or not require_exact_support)
-        ):
-            mask = batch.ring_grow_support_mask
-        else:
+        if batch.ring_grow_support_mask is None:
             # Training likelihoods require the exact executor-aware support.
             # Inference may defer this expensive refinement until the ring
             # family is actually selected; family probabilities use only the
@@ -1030,6 +1149,52 @@ class FactorizedTraceletRateModel(nn.Module):
                 dtype=torch.bool,
                 device=self.device,
             )
+        elif not require_exact_support:
+            mask = batch.ring_grow_support_mask
+        else:
+            def row_flags(value: Tensor | bool, name: str) -> Tensor:
+                if isinstance(value, Tensor):
+                    if tuple(value.shape) != (batch.batch_size,):
+                        raise ValueError(
+                            f"{name} has the wrong shape: {tuple(value.shape)} "
+                            f"!= {(batch.batch_size,)}"
+                        )
+                    return value.detach().to(device="cpu", dtype=torch.bool)
+                return torch.full(
+                    (batch.batch_size,),
+                    bool(value),
+                    dtype=torch.bool,
+                )
+
+            full_rows = row_flags(
+                batch.ring_grow_support_is_exact,
+                "ring_grow_support_is_exact",
+            )
+            enablement_rows = full_rows | row_flags(
+                batch.ring_grow_enablement_is_exact,
+                "ring_grow_enablement_is_exact",
+            )
+            needs_full = torch.tensor(
+                tuple(name == "ring_system_grow" for name in batch.teacher_rule_names),
+                dtype=torch.bool,
+            )
+            usable_rows = torch.where(needs_full, full_rows, enablement_rows)
+            if bool(usable_rows.all()):
+                mask = batch.ring_grow_support_mask
+            else:
+                rows = []
+                for index, state in enumerate(batch.states):
+                    if bool(usable_rows[index]):
+                        rows.append(batch.ring_grow_support_mask[index])
+                    else:
+                        rows.append(
+                            torch.tensor(
+                                self._ring_grow_support(state),
+                                dtype=torch.bool,
+                                device=self.device,
+                            )
+                        )
+                mask = torch.stack(rows)
         return logits, mask
 
     def _ring_placement_logits(

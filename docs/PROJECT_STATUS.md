@@ -24,26 +24,30 @@ not.
 
 ## Active code gate
 
-The remaining blocker before a fresh quality run is exact ring-support
-throughput—not a chemistry or reachability failure.
+The first exact-support H100 preflight reached step 50 and confirmed that the
+model learns normally: validation loss fell from 56.1582 to 25.1875 and family
+accuracy rose from 0.0769 to 0.5897. It also exposed a decisive systems failure:
+the first update waited 119.31 seconds for CPU support construction while GPU
+forward/backward/optimization used approximately 1.11 seconds. The run was
+stopped after preserving its recovery checkpoint; it is diagnostic only.
 
-The current working implementation adds an exact witness-first path:
+The working tree now performs exact objective-aware support evaluation. A
+ring-grow teacher receives the complete executor-aware template mask. Every
+other row receives an exact one-witness family-enablement certificate (or an
+exhaustive all-false certificate), because the hierarchical family softmax
+depends only on whether that unselected family is enabled. Sampling and ring
+teacher likelihoods retain complete semantic support.
 
-1. A catalog electronic assignment may short-circuit a template to “supported”
-   only after the normal rewrite executor verifies a valid candidate.
-2. Catalog absence or witness failure never marks a template unsupported; the
-   complete semantic decoder remains the fallback.
-3. Catalog-exact scoring still enumerates the complete candidate table; the
-   first-witness shortcut is used only for the Boolean semantic-support query.
-4. Legacy topology-only catalogs continue to use the semantic fallback.
+On the frozen deterministic 128-example benchmark, the new path is 3.38x faster
+end to end and approximately 8.34x faster after worker startup. Two repetitions
+produced identical mask/flag hashes. The refreshed 128-example teacher audit
+reports zero failures and completed in 23.9 seconds on one process. The full
+local suite passes with 242 tests and the Modal-entrypoint suite passes with 8.
+The complete measurements and equivalence contract are recorded in
+`docs/audits/2026-07-18_objective_aware_ring_support.md`.
 
-Focused witness/fallback/legacy tests pass. The complete local suite passes with
-236 non-Modal tests and 8 Modal-entrypoint tests, and the refreshed 128-example
-teacher audit again reports zero failures. On the frozen v3 validation cache,
-the single-process 128-state support scan completed in 105.24 seconds versus a
-144.2-second pre-fix profile. This is a CPU preprocessing path designed to run
-in parallel DataLoader workers; it is not the measured GPU update time. A fresh
-H100 preflight is still required before declaring the gate complete.
+A fresh 200-update H100 preflight with cumulative loader telemetry is still
+required before declaring the gate complete.
 
 ## Not currently running
 
@@ -55,13 +59,15 @@ H100 preflight is still required before declaring the gate complete.
 
 ## Immediate sequence
 
-1. Run the exact-support H100 preflight and verify validation/test batch build,
-   training-update throughput, teacher finiteness, and ancestral sampling.
+1. Rerun the exact-support H100 preflight with 8 data workers and prefetch 2;
+   verify cumulative throughput, teacher finiteness, and ancestral sampling.
 2. Launch fresh flexible-size training from the carbon-tree source with the
    successor quotient, exact semantic ring support, early stopping, and best
    checkpoint restoration.
-3. Evaluate the first credible checkpoint on 100 ancestral samples; inspect
-   molecules and trajectories before spending on a full evaluation.
+3. Validate every 250 updates; after the 500-step warmup, persist
+   `checkpoint.best_so_far.pt` every 500 updates and launch a separate
+   100-sample ancestral evaluation from the first materially improved snapshot.
+   Training continues while those molecules and trajectories are inspected.
 4. Freeze the selected checkpoint and run 2,000 samples for validity,
    connectivity, uniqueness, novelty, size/ring/operator diagnostics, FCD, and
    the ChemNet mean/covariance decomposition.

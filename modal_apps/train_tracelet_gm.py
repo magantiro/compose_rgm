@@ -20,6 +20,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 import time
@@ -116,6 +117,7 @@ def _materialize_remote_recipe(
                 "rollout_workers": 1,
                 "fiber_workers": 1,
                 "data_workers": 0,
+                "data_prefetch_factor": 2,
                 "path_workers": 0,
                 "corpus_workers": 0,
                 "quality_metrics": False,
@@ -142,7 +144,8 @@ def _materialize_remote_recipe(
                 "rollout_samples": 16,
                 "rollout_workers": 8,
                 "fiber_workers": 12,
-                "data_workers": 16,
+                "data_workers": 8,
+                "data_prefetch_factor": 2,
                 "path_workers": 16,
                 "corpus_workers": 0,
                 "quality_metrics": False,
@@ -435,15 +438,24 @@ def compile_stage(
 )
 def audit_teacher_stage(
     run_label: str,
+    recipe_name: str = RECIPE_NAME,
     batch_size: int = 2048,
     workers: int = 12,
 ) -> dict[str, object]:
     """Reject a finalized cache with any zero-probability validation teacher."""
 
+    from compose_v4.experiments.recipe import load_tracelet_recipe
+
     if Path(run_label).name != run_label:
         raise ValueError("run label must be a basename")
     if batch_size <= 0 or workers < 0:
         raise ValueError("audit batch size must be positive and workers non-negative")
+    recipe = load_tracelet_recipe(REMOTE_ROOT / "recipes" / recipe_name)
+    ring_electronic_mode = str(
+        recipe["arguments"].get("ring_electronic_mode", "factorized_local")
+    )
+    if ring_electronic_mode not in {"factorized_local", "catalog_exact"}:
+        raise ValueError(f"unsupported ring electronic mode: {ring_electronic_mode}")
     artifact_volume.reload()
     cache_root = Path("/artifacts") / run_label / "compiled_paths.pt.shards"
     manifest = cache_root / "manifest.pt"
@@ -462,7 +474,7 @@ def audit_teacher_stage(
         "--workers",
         str(workers),
         "--ring-electronic-mode",
-        "factorized_local",
+        ring_electronic_mode,
         "--output",
         str(output),
     )
@@ -527,7 +539,7 @@ def evaluate_stage(
     run_label: str,
     source_run_label: str,
     recipe_name: str = RECIPE_NAME,
-    checkpoint_name: str = "checkpoint.best_step3000.pt",
+    checkpoint_name: str = "checkpoint.pt",
 ) -> dict[str, object]:
     """Evaluate a selected checkpoint without resuming its training state."""
 
@@ -552,7 +564,7 @@ def evaluate_stage(
 def rollout_evaluate_stage(
     run_label: str,
     source_run_label: str,
-    checkpoint_name: str = "checkpoint.best_step3000.pt",
+    checkpoint_name: str = "checkpoint.best_so_far.pt",
     rollout_samples: int = 2000,
     disable_ring_ear: bool = False,
 ) -> dict[str, object]:
@@ -579,12 +591,17 @@ def rollout_evaluate_stage(
 
     run_dir = Path("/artifacts") / run_label
     run_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_snapshot = run_dir / "checkpoint.snapshot.pt"
+    temporary_snapshot = checkpoint_snapshot.with_suffix(".pt.tmp")
+    shutil.copyfile(source_checkpoint, temporary_snapshot)
+    os.replace(temporary_snapshot, checkpoint_snapshot)
     manifest = {
         "evaluation_kind": "checkpoint_rollout_only",
         "run_label": run_label,
         "source_run_label": source_run_label,
-        "checkpoint": str(source_checkpoint),
-        "checkpoint_sha256": _file_sha256(source_checkpoint),
+        "source_checkpoint": str(source_checkpoint),
+        "checkpoint": str(checkpoint_snapshot),
+        "checkpoint_sha256": _file_sha256(checkpoint_snapshot),
         "rollout_samples": rollout_samples,
         "disabled_rule_names": ["ring_ear_insert"] if disable_ring_ear else [],
         "teacher_path_cache_loaded": False,
@@ -602,7 +619,7 @@ def rollout_evaluate_stage(
         str(REMOTE_ROOT / "scripts" / "evaluate_tracelet_rollouts.py"),
         str(train_file),
         "--checkpoint",
-        str(source_checkpoint),
+        str(checkpoint_snapshot),
         "--quality-reference-file",
         str(reference_file),
         "--output",
@@ -677,7 +694,7 @@ def pipeline_stage(
     """Run CPU preprocessing to completion before allocating the H100."""
 
     compile_result = compile_stage.remote(run_label, recipe_name)
-    audit_result = audit_teacher_stage.remote(run_label)
+    audit_result = audit_teacher_stage.remote(run_label, recipe_name)
     train_result = train_stage.remote(run_label, recipe_name)
     return {"compile": compile_result, "audit": audit_result, "train": train_result}
 
@@ -689,15 +706,27 @@ def main(
     compile_only: bool = False,
     train_only: bool = False,
     evaluate_only: bool = False,
+    rollout_evaluate_only: bool = False,
     run_label: str = "tree_fcd_transfer_stage1",
     recipe_name: str = RECIPE_NAME,
     source_run_label: str = "",
-    checkpoint_name: str = "checkpoint.best_step3000.pt",
+    checkpoint_name: str = "checkpoint.best_so_far.pt",
+    rollout_samples: int = 100,
 ) -> None:
-    modes = sum((smoke, preflight, compile_only, train_only, evaluate_only))
+    modes = sum(
+        (
+            smoke,
+            preflight,
+            compile_only,
+            train_only,
+            evaluate_only,
+            rollout_evaluate_only,
+        )
+    )
     if modes > 1:
         raise ValueError(
-            "smoke, preflight, compile-only, train-only, and evaluate-only are exclusive"
+            "smoke, preflight, compile-only, train-only, evaluate-only, and "
+            "rollout-evaluate-only are exclusive"
         )
     if smoke:
         if run_label == "tree_fcd_transfer_stage1":
@@ -711,7 +740,17 @@ def main(
         result = preflight_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return
-    if evaluate_only:
+    if rollout_evaluate_only:
+        if not source_run_label:
+            raise ValueError("rollout-evaluate-only requires --source-run-label")
+        call = rollout_evaluate_stage.spawn(
+            run_label,
+            source_run_label,
+            checkpoint_name,
+            rollout_samples,
+        )
+        phase = "rollout_evaluation_spawned"
+    elif evaluate_only:
         if not source_run_label:
             raise ValueError("evaluate-only requires --source-run-label")
         call = evaluate_stage.spawn(

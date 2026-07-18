@@ -158,6 +158,8 @@ def main() -> None:
         late_time_fraction=args.late_time_fraction,
         operational_horizon=args.operational_horizon,
         progress_stratification_fraction=0.0,
+        ring_catalog=manifest["ring_catalog"],
+        ring_electronic_mode=args.ring_electronic_mode,
     )
     collator = FactorizedMarkCollator(
         use_aromatic_bond_view=True,
@@ -166,7 +168,7 @@ def main() -> None:
     warm_ring_system_candidate_indices(manifest["ring_catalog"])
     loader_options: dict[str, object] = {}
     if args.workers > 0:
-        loader_options.update(persistent_workers=True, prefetch_factor=4)
+        loader_options.update(persistent_workers=True, prefetch_factor=2)
     loader = DataLoader(
         dataset,
         batch_size=args.chunk_size,

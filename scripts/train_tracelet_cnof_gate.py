@@ -78,6 +78,10 @@ def _recovery_path(checkpoint: Path) -> Path:
     return checkpoint.with_name(f"{checkpoint.stem}.recovery{checkpoint.suffix}")
 
 
+def _best_so_far_path(checkpoint: Path) -> Path:
+    return checkpoint.with_name(f"{checkpoint.stem}.best_so_far{checkpoint.suffix}")
+
+
 def _path_cache_fingerprint(signature: dict[str, object]) -> str:
     """Return a stable identifier without copying the full split into every shard."""
 
@@ -486,6 +490,12 @@ def main() -> None:
         help="persistent deterministic workers for factorized batch preparation",
     )
     parser.add_argument(
+        "--data-prefetch-factor",
+        type=int,
+        default=2,
+        help="whole batches queued per persistent factorized-data worker",
+    )
+    parser.add_argument(
         "--use-bf16",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -716,6 +726,8 @@ def main() -> None:
         raise ValueError("--evaluation-every and --early-stopping-patience must be non-negative")
     if min(args.data_workers, args.path_workers, args.corpus_workers) < 0:
         raise ValueError("data, path, and corpus worker counts must be non-negative")
+    if args.data_prefetch_factor <= 0:
+        raise ValueError("data-prefetch-factor must be positive")
     if args.path_checkpoint_interval <= 0:
         raise ValueError("path-checkpoint-interval must be positive")
     if args.path_shard_size <= 0:
@@ -1495,6 +1507,7 @@ def main() -> None:
             use_aromatic_bond_view=args.bond_representation == "aromatic",
             workers=args.data_workers,
             ring_catalog=ring_catalog,
+            ring_electronic_mode=args.ring_electronic_mode,
         )
         print(
             json.dumps({"phase": "validation_factorized_batch_built"}),
@@ -1509,6 +1522,7 @@ def main() -> None:
             use_aromatic_bond_view=args.bond_representation == "aromatic",
             workers=args.data_workers,
             ring_catalog=ring_catalog,
+            ring_electronic_mode=args.ring_electronic_mode,
         )
         print(
             json.dumps({"phase": "test_factorized_batch_built"}),
@@ -1592,6 +1606,7 @@ def main() -> None:
         "training_backend": args.training_backend,
         "use_bf16": args.use_bf16,
         "data_workers": args.data_workers,
+        "data_prefetch_factor": args.data_prefetch_factor,
         "path_workers": args.path_workers,
         "path_checkpoint_interval": args.path_checkpoint_interval,
         "corpus_workers": args.corpus_workers,
@@ -1746,6 +1761,9 @@ def main() -> None:
     recovery_path = (
         _recovery_path(args.checkpoint) if args.checkpoint is not None else args.resume_checkpoint
     )
+    best_so_far_path = (
+        _best_so_far_path(args.checkpoint) if args.checkpoint is not None else None
+    )
 
     def save_recovery(training_state: dict[str, object]) -> None:
         if recovery_path is None:
@@ -1756,6 +1774,31 @@ def main() -> None:
             "checkpoint_kind": "exact_training_recovery",
         }
         _atomic_torch_save(payload, recovery_path)
+        if best_so_far_path is not None:
+            _atomic_torch_save(
+                {
+                    **checkpoint_metadata,
+                    "checkpoint_kind": "interim_best_evaluation_model",
+                    "state_dict": training_state["best_state_dict"],
+                    "selected_validation": training_state["best_metrics"],
+                    "completed_steps": training_state["completed_steps"],
+                },
+                best_so_far_path,
+            )
+            print(
+                json.dumps(
+                    {
+                        "phase": "interim_best_checkpoint_saved",
+                        "path": str(best_so_far_path),
+                        "completed_steps": training_state["completed_steps"],
+                        "selected_step": training_state["best_metrics"].get(
+                            "selected_step"
+                        ),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
         print(
             json.dumps(
                 {
@@ -1779,6 +1822,8 @@ def main() -> None:
             weight_decay=args.weight_decay,
             seed=args.seed + 3,
             workers=args.data_workers,
+            data_prefetch_factor=args.data_prefetch_factor,
+            ring_electronic_mode=args.ring_electronic_mode,
             late_time_fraction=args.late_time_fraction,
             operational_horizon=args.operational_horizon,
             progress_stratification_fraction=(args.progress_stratification_fraction),
@@ -1873,6 +1918,7 @@ def main() -> None:
                 "hidden_dim": args.hidden_dim,
                 "message_passing_steps": args.message_passing_steps,
                 "data_workers": args.data_workers,
+                "data_prefetch_factor": args.data_prefetch_factor,
                 "path_workers": args.path_workers,
                 "path_checkpoint_interval": args.path_checkpoint_interval,
                 "corpus_workers": args.corpus_workers,
@@ -2050,6 +2096,7 @@ def main() -> None:
             ),
             "training_backend": args.training_backend,
             "data_workers": args.data_workers,
+            "data_prefetch_factor": args.data_prefetch_factor,
             "path_workers": args.path_workers,
             "path_checkpoint_interval": args.path_checkpoint_interval,
             "corpus_workers": args.corpus_workers,

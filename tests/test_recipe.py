@@ -26,3 +26,18 @@ def test_frozen_tree_fcd_recipe_materializes_expected_command() -> None:
     assert "--quality-metrics" in argv
     assert "--include-fcd" in argv
     assert argv[-2:] == ("--quality-reference-file", "heldout.smi")
+
+
+def test_stage3_recipe_has_early_selection_and_throughput_gates() -> None:
+    root = Path(__file__).resolve().parents[1]
+    recipe = load_tracelet_recipe(
+        root / "recipes" / "tree_fcd_transfer_stage3_flexible_graft.json"
+    )
+    arguments = recipe["arguments"]
+
+    assert arguments["warmup_steps"] == 500
+    assert arguments["evaluation_every"] == 250
+    assert arguments["early_stopping_patience"] == 6
+    assert arguments["recovery_every"] == 500
+    assert arguments["data_workers"] == 8
+    assert arguments["data_prefetch_factor"] == 2

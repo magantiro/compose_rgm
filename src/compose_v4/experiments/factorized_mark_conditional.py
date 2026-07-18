@@ -37,6 +37,8 @@ class FactorizedMarkExample:
     teacher_rate: float
     importance_weight: float
     ring_grow_support_mask: tuple[bool, ...] | None = None
+    ring_grow_support_is_exact: bool = False
+    ring_grow_enablement_is_exact: bool = False
 
 
 class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
@@ -58,6 +60,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         operational_horizon: float,
         progress_stratification_fraction: float,
         ring_catalog: TypedRingCatalog | None = None,
+        ring_electronic_mode: str = "factorized_local",
     ) -> None:
         if not records:
             raise ValueError("factorized mark training records must be non-empty")
@@ -77,6 +80,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self.operational_horizon = float(operational_horizon)
         self.progress_stratification_fraction = float(progress_stratification_fraction)
         self.ring_catalog = ring_catalog
+        self.ring_electronic_mode = str(ring_electronic_mode)
         self._ring_support_model: FactorizedTraceletRateModel | None = None
 
     def __len__(self) -> int:
@@ -114,6 +118,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rate = 0.0
         state = record.path.state_at(progress)
         ring_grow_support_mask = None
+        ring_grow_support_is_exact = False
+        ring_grow_enablement_is_exact = False
         if self.ring_catalog is not None:
             if self._ring_support_model is None:
                 # Exact semantic support is chemistry-only. A tiny parameter
@@ -124,8 +130,16 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                     hidden_dim=1,
                     message_passing_steps=1,
                     mark_dim=1,
+                    ring_electronic_mode=self.ring_electronic_mode,
                 )
-            ring_grow_support_mask = self._ring_support_model._ring_grow_support(state)
+            if teacher_rule_name == "ring_system_grow":
+                ring_grow_support_mask = self._ring_support_model._ring_grow_support(state)
+                ring_grow_support_is_exact = True
+            else:
+                ring_grow_support_mask = (
+                    self._ring_support_model._ring_grow_enablement_certificate(state)
+                )
+            ring_grow_enablement_is_exact = True
         return FactorizedMarkExample(
             state=state,
             time=time,
@@ -134,6 +148,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rate=teacher_rate,
             importance_weight=importance_weight,
             ring_grow_support_mask=ring_grow_support_mask,
+            ring_grow_support_is_exact=ring_grow_support_is_exact,
+            ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
         )
 
 
@@ -161,7 +177,16 @@ class FactorizedMarkCollator:
                     tuple(mask for mask in exact_masks if mask is not None),
                     dtype=torch.bool,
                 ),
-                ring_grow_support_is_exact=True,
+                ring_grow_support_is_exact=torch.tensor(
+                    tuple(example.ring_grow_support_is_exact for example in examples),
+                    dtype=torch.bool,
+                ),
+                ring_grow_enablement_is_exact=torch.tensor(
+                    tuple(
+                        example.ring_grow_enablement_is_exact for example in examples
+                    ),
+                    dtype=torch.bool,
+                ),
             )
         return batch
 
@@ -180,9 +205,13 @@ def factorized_mark_loader(
     use_aromatic_bond_view: bool,
     pin_memory: bool,
     ring_catalog: TypedRingCatalog | None = None,
+    prefetch_factor: int = 2,
+    ring_electronic_mode: str = "factorized_local",
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
         raise ValueError("start step lies outside the training horizon")
+    if prefetch_factor <= 0:
+        raise ValueError("prefetch factor must be positive")
     remaining_steps = steps - start_step
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
@@ -195,12 +224,13 @@ def factorized_mark_loader(
         operational_horizon=operational_horizon,
         progress_stratification_fraction=progress_stratification_fraction,
         ring_catalog=ring_catalog,
+        ring_electronic_mode=ring_electronic_mode,
     )
     options: dict[str, Any] = {}
     if workers > 0:
         options.update(
             persistent_workers=True,
-            prefetch_factor=4,
+            prefetch_factor=prefetch_factor,
         )
     return DataLoader(
         dataset,
@@ -225,6 +255,7 @@ def sample_factorized_mark_batch(
     use_aromatic_bond_view: bool = True,
     workers: int = 0,
     ring_catalog: TypedRingCatalog | None = None,
+    ring_electronic_mode: str = "factorized_local",
 ) -> FactorizedMarkBatch:
     if workers < 0:
         raise ValueError("evaluation workers must be non-negative")
@@ -239,6 +270,7 @@ def sample_factorized_mark_batch(
         operational_horizon=operational_horizon,
         progress_stratification_fraction=progress_stratification_fraction,
         ring_catalog=ring_catalog,
+        ring_electronic_mode=ring_electronic_mode,
     )
     collator = FactorizedMarkCollator(use_aromatic_bond_view, ring_catalog)
     if workers == 0:
@@ -310,8 +342,31 @@ def _concatenate_factorized_mark_batches(
         ),
         ring_grow_support_mask=ring_grow_support_mask,
         ring_delete_actions=ring_delete_actions,
-        ring_grow_support_is_exact=all(
-            batch.ring_grow_support_is_exact for batch in batches
+        ring_grow_support_is_exact=torch.cat(
+            [
+                batch.ring_grow_support_is_exact
+                if isinstance(batch.ring_grow_support_is_exact, Tensor)
+                else torch.full(
+                    (batch.batch_size,),
+                    bool(batch.ring_grow_support_is_exact),
+                    dtype=torch.bool,
+                )
+                for batch in batches
+            ],
+            dim=0,
+        ),
+        ring_grow_enablement_is_exact=torch.cat(
+            [
+                batch.ring_grow_enablement_is_exact
+                if isinstance(batch.ring_grow_enablement_is_exact, Tensor)
+                else torch.full(
+                    (batch.batch_size,),
+                    bool(batch.ring_grow_enablement_is_exact),
+                    dtype=torch.bool,
+                )
+                for batch in batches
+            ],
+            dim=0,
         ),
     )
 
@@ -375,6 +430,8 @@ def train_factorized_mark_model(
     use_aromatic_bond_view: bool,
     use_bf16: bool,
     ring_catalog: TypedRingCatalog | None = None,
+    data_prefetch_factor: int = 2,
+    ring_electronic_mode: str = "factorized_local",
     evaluation_points: int = 10,
     evaluation_interval: int | None = None,
     warmup_steps: int = 0,
@@ -390,6 +447,8 @@ def train_factorized_mark_model(
         raise ValueError("steps, batch size, and learning rate must be positive")
     if workers < 0:
         raise ValueError("data workers must be non-negative")
+    if data_prefetch_factor <= 0:
+        raise ValueError("data prefetch factor must be positive")
     if evaluation_interval is not None and evaluation_interval <= 0:
         raise ValueError("evaluation interval must be positive")
     if not 0 <= warmup_steps <= steps:
@@ -468,8 +527,15 @@ def train_factorized_mark_model(
         use_aromatic_bond_view=use_aromatic_bond_view,
         pin_memory=model.device.type == "cuda",
         ring_catalog=ring_catalog,
+        prefetch_factor=data_prefetch_factor,
+        ring_electronic_mode=ring_electronic_mode,
     )
+    timing_loop_started = perf_counter()
     iterator: Iterator[FactorizedMarkBatch] = iter(loader)
+    cumulative_data_wait = 0.0
+    cumulative_update_time = 0.0
+    maximum_data_wait = 0.0
+    data_wait_history: list[float] = []
     resolved_evaluation_interval = (
         evaluation_interval
         if evaluation_interval is not None
@@ -513,6 +579,12 @@ def train_factorized_mark_model(
         if profile_timing:
             _synchronize(model.device)
         optimized_at = perf_counter()
+        data_wait = loaded_at - started
+        update_time = optimized_at - started
+        cumulative_data_wait += data_wait
+        cumulative_update_time += update_time
+        maximum_data_wait = max(maximum_data_wait, data_wait)
+        data_wait_history.append(data_wait)
         evaluated = (
             step == start_step
             or completed_steps % resolved_evaluation_interval == 0
@@ -549,15 +621,42 @@ def train_factorized_mark_model(
             metrics["early_stopped"] = float(should_early_stop)
             history.append(metrics)
             if progress_callback is not None:
+                observed_updates = completed_steps - start_step
+                timing_metrics = {
+                    "timing/profile_synchronized": float(profile_timing),
+                    "timing/data_wait_seconds": data_wait,
+                    "timing/cumulative_data_wait_seconds": cumulative_data_wait,
+                    "timing/mean_data_wait_seconds": (
+                        cumulative_data_wait / observed_updates
+                    ),
+                    "timing/p95_data_wait_seconds": float(
+                        np.percentile(data_wait_history, 95)
+                    ),
+                    "timing/max_data_wait_seconds": maximum_data_wait,
+                }
+                if profile_timing:
+                    elapsed = max(optimized_at - timing_loop_started, 1e-12)
+                    timing_metrics.update(
+                        {
+                            "timing/transfer_seconds": transferred_at - loaded_at,
+                            "timing/forward_seconds": forwarded_at - transferred_at,
+                            "timing/backward_seconds": backward_at - forwarded_at,
+                            "timing/optimizer_seconds": optimized_at - backward_at,
+                            "timing/update_seconds": update_time,
+                            "timing/data_wait_fraction": (
+                                cumulative_data_wait
+                                / max(cumulative_update_time, 1e-12)
+                            ),
+                            "timing/updates_per_second": observed_updates / elapsed,
+                            "timing/examples_per_second": (
+                                observed_updates * batch_size / elapsed
+                            ),
+                        }
+                    )
                 progress_callback(
                     {
                         **metrics,
-                        "timing/data_wait_seconds": loaded_at - started,
-                        "timing/transfer_seconds": transferred_at - loaded_at,
-                        "timing/forward_seconds": forwarded_at - transferred_at,
-                        "timing/backward_seconds": backward_at - forwarded_at,
-                        "timing/optimizer_seconds": optimized_at - backward_at,
-                        "timing/update_seconds": optimized_at - started,
+                        **timing_metrics,
                     }
                 )
             model.train()
