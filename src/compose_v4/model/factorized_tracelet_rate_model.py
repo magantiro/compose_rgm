@@ -589,10 +589,13 @@ class FactorizedTraceletRateModel(nn.Module):
         message_passing_steps: int = 4,
         mark_dim: int = 32,
         ring_electronic_mode: str = "factorized_local",
+        ring_candidate_cache_limit: int = 32768,
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
             raise ValueError("model dimensions and message-passing steps must be positive")
+        if ring_candidate_cache_limit <= 0:
+            raise ValueError("ring candidate cache limit must be positive")
         self.ring_catalog = ring_catalog
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
@@ -629,7 +632,7 @@ class FactorizedTraceletRateModel(nn.Module):
             tuple[tuple[bytes, bytes, bytes, bytes], int],
             tuple[ExecutableRingGrowCandidate, ...],
         ] = OrderedDict()
-        self._ring_candidate_cache_limit = 32768
+        self._ring_candidate_cache_limit = int(ring_candidate_cache_limit)
 
         self.cycle_templates = tuple(ring_catalog.cycle_templates)
         self.attach_templates = tuple(ring_catalog.attach_templates)
@@ -814,6 +817,16 @@ class FactorizedTraceletRateModel(nn.Module):
     @property
     def device(self) -> torch.device:
         return next(self.parameters()).device
+
+    def clear_ring_candidate_caches(self) -> None:
+        """Release state-dependent chemistry caches without changing rates."""
+
+        self._ring_grow_support_cache.clear()
+        self._ring_grow_enablement_certificate_cache.clear()
+        self._ring_template_placement_group_cache.clear()
+        self._ring_semantic_decoder_cache.clear()
+        self._ring_delete_candidate_cache.clear()
+        self._ring_paired_candidate_cache.clear()
 
     @staticmethod
     def _state_cache_key(
@@ -1758,7 +1771,6 @@ class FactorizedTraceletRateModel(nn.Module):
                 state,
                 template_index,
             )
-            placements = tuple(group[0] for group in placement_groups)
             placement_logits, semantic_tables, placement_mask = (
                 self._ring_supported_placement_tables(
                     state,

@@ -15,6 +15,8 @@ from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkDataset,
     cosine_warmup_learning_rate,
     factorized_adamw_parameter_groups,
+    sample_factorized_mark_batch,
+    train_factorized_mark_model,
 )
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.tracelet_conditional import build_tracelet_path_records
@@ -482,6 +484,120 @@ def test_factorized_dataset_is_index_deterministic_and_resume_stable() -> None:
         assert expected.teacher_action == actual.teacher_action
         assert expected.teacher_rate == actual.teacher_rate
         assert expected.state == actual.state
+
+
+def test_factorized_training_resume_preserves_validation_and_patience_trajectory() -> None:
+    catalog, records = _catalog_and_records(("CCO", "CCN"))
+    validation = sample_factorized_mark_batch(
+        records,
+        batch_size=2,
+        seed=71,
+        late_time_fraction=0.5,
+        operational_horizon=2.0,
+        ring_catalog=catalog,
+    )
+    torch.manual_seed(99)
+    template = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    initial_state = copy.deepcopy(template.state_dict())
+    common = {
+        "train_records": records,
+        "validation_batch": validation,
+        "steps": 4,
+        "batch_size": 1,
+        "learning_rate": 1e-3,
+        "weight_decay": 0.0,
+        "seed": 17,
+        "workers": 0,
+        "late_time_fraction": 0.5,
+        "operational_horizon": 2.0,
+        "progress_stratification_fraction": 0.5,
+        "use_aromatic_bond_view": True,
+        "use_bf16": False,
+        "ring_catalog": catalog,
+        "evaluation_interval": 2,
+        "warmup_steps": 2,
+        "minimum_learning_rate_fraction": 0.5,
+        "early_stopping_patience": 3,
+        "early_stopping_min_relative_delta": 0.001,
+    }
+
+    uninterrupted = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    uninterrupted.load_state_dict(initial_state)
+    torch.manual_seed(1234)
+    full_history, full_best = train_factorized_mark_model(
+        uninterrupted,
+        **common,
+    )
+    full_rng_state = torch.get_rng_state().clone()
+
+    captured: dict[str, object] = {}
+
+    class ExpectedInterruption(RuntimeError):
+        pass
+
+    def interrupt_after_two_steps(state: dict[str, object]) -> None:
+        captured.update(state)
+        raise ExpectedInterruption
+
+    interrupted = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    interrupted.load_state_dict(initial_state)
+    torch.manual_seed(1234)
+    with pytest.raises(ExpectedInterruption):
+        train_factorized_mark_model(
+            interrupted,
+            checkpoint_interval=2,
+            checkpoint_callback=interrupt_after_two_steps,
+            **common,
+        )
+
+    resumed = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    resumed_history, resumed_best = train_factorized_mark_model(
+        resumed,
+        resume_state=captured,
+        **common,
+    )
+
+    assert resumed_history == full_history
+    assert resumed_best == full_best
+    assert torch.equal(torch.get_rng_state(), full_rng_state)
+    for name, value in uninterrupted.state_dict().items():
+        assert torch.equal(resumed.state_dict()[name], value)
+
+
+def test_support_worker_cache_cap_and_clear_preserve_exact_support() -> None:
+    catalog, _ = _catalog_and_records(("CCO", "c1ccccc1", "C1CCCCC1"))
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=1,
+        message_passing_steps=1,
+        mark_dim=1,
+        ring_candidate_cache_limit=1,
+    )
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCCCC"), 12)
+
+    expected = model._ring_grow_support(state)
+    assert len(model._ring_grow_support_cache) <= 1
+    model.clear_ring_candidate_caches()
+
+    assert not model._ring_grow_support_cache
+    assert not model._ring_grow_enablement_certificate_cache
+    assert model._ring_grow_support(state) == expected
 
 
 def test_complete_ring_fiber_cannot_overgrow_an_existing_ring_system() -> None:

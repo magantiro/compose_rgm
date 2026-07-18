@@ -574,6 +574,20 @@ def semantic_ring_next_category_mask(
     )
 
 
+def clear_semantic_ring_state_caches() -> None:
+    """Release decoder/state-specific semantic DP entries in data workers.
+
+    These memo tables are exact accelerators rather than stochastic state.
+    Clearing them periodically bounds long-run worker memory without changing
+    any support decision. Generic topology and matching caches are retained.
+    """
+
+    semantic_ring_prefix_is_completable.cache_clear()
+    _semantic_ring_symbol_prefix_is_completable.cache_clear()
+    semantic_ring_next_category_mask.cache_clear()
+    _semantic_action_for_categories.cache_clear()
+
+
 @lru_cache(maxsize=131072)
 def _canonical_component_matching(
     adjacency_masks: tuple[int, ...],

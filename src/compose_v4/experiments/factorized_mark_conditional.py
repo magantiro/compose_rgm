@@ -24,7 +24,10 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     factorized_mark_bregman_loss,
     prepare_factorized_mark_batch,
 )
-from compose_v4.rewrite.ring_system_fiber import warm_ring_system_candidate_indices
+from compose_v4.rewrite.ring_system_fiber import (
+    clear_semantic_ring_state_caches,
+    warm_ring_system_candidate_indices,
+)
 from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
 
@@ -61,6 +64,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         progress_stratification_fraction: float,
         ring_catalog: TypedRingCatalog | None = None,
         ring_electronic_mode: str = "factorized_local",
+        support_cache_limit: int = 2048,
+        support_cache_reset_interval: int = 2048,
     ) -> None:
         if not records:
             raise ValueError("factorized mark training records must be non-empty")
@@ -72,6 +77,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             raise ValueError("operational horizon must be positive")
         if not 0.0 <= progress_stratification_fraction <= 1.0:
             raise ValueError("progress stratification must lie in [0, 1]")
+        if support_cache_limit <= 0 or support_cache_reset_interval <= 0:
+            raise ValueError("support cache limits and reset intervals must be positive")
         self.records = records
         self.start_index = int(start_index)
         self.length = int(length)
@@ -81,7 +88,10 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self.progress_stratification_fraction = float(progress_stratification_fraction)
         self.ring_catalog = ring_catalog
         self.ring_electronic_mode = str(ring_electronic_mode)
+        self.support_cache_limit = int(support_cache_limit)
+        self.support_cache_reset_interval = int(support_cache_reset_interval)
         self._ring_support_model: FactorizedTraceletRateModel | None = None
+        self._ring_support_examples_since_reset = 0
 
     def __len__(self) -> int:
         return self.length
@@ -121,17 +131,30 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         ring_grow_support_is_exact = False
         ring_grow_enablement_is_exact = False
         if self.ring_catalog is not None:
+            if (
+                self._ring_support_model is not None
+                and self._ring_support_examples_since_reset
+                >= self.support_cache_reset_interval
+            ):
+                self._ring_support_model.clear_ring_candidate_caches()
+                clear_semantic_ring_state_caches()
+                self._ring_support_examples_since_reset = 0
             if self._ring_support_model is None:
                 # Exact semantic support is chemistry-only. A tiny parameter
                 # shell lets persistent DataLoader workers reuse the same
                 # placement/decoder caches without duplicating the compiler.
-                self._ring_support_model = FactorizedTraceletRateModel(
-                    self.ring_catalog,
-                    hidden_dim=1,
-                    message_passing_steps=1,
-                    mark_dim=1,
-                    ring_electronic_mode=self.ring_electronic_mode,
-                )
+                # Its unused neural parameters must not perturb the training
+                # RNG stream when a loader is recreated after recovery.
+                with torch.random.fork_rng(devices=[]):
+                    torch.manual_seed(0)
+                    self._ring_support_model = FactorizedTraceletRateModel(
+                        self.ring_catalog,
+                        hidden_dim=1,
+                        message_passing_steps=1,
+                        mark_dim=1,
+                        ring_electronic_mode=self.ring_electronic_mode,
+                        ring_candidate_cache_limit=self.support_cache_limit,
+                    )
             if teacher_rule_name == "ring_system_grow":
                 ring_grow_support_mask = self._ring_support_model._ring_grow_support(state)
                 ring_grow_support_is_exact = True
@@ -140,6 +163,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                     self._ring_support_model._ring_grow_enablement_certificate(state)
                 )
             ring_grow_enablement_is_exact = True
+            self._ring_support_examples_since_reset += 1
         return FactorizedMarkExample(
             state=state,
             time=time,
@@ -232,6 +256,8 @@ def factorized_mark_loader(
             persistent_workers=True,
             prefetch_factor=prefetch_factor,
         )
+    loader_generator = torch.Generator(device="cpu")
+    loader_generator.manual_seed(int(seed))
     return DataLoader(
         dataset,
         batch_size=batch_size,
@@ -240,6 +266,7 @@ def factorized_mark_loader(
         collate_fn=FactorizedMarkCollator(use_aromatic_bond_view, ring_catalog),
         pin_memory=pin_memory,
         drop_last=True,
+        generator=loader_generator,
         **options,
     )
 
@@ -437,6 +464,7 @@ def train_factorized_mark_model(
     warmup_steps: int = 0,
     minimum_learning_rate_fraction: float = 1.0,
     early_stopping_patience: int = 0,
+    early_stopping_min_relative_delta: float = 0.0,
     progress_callback: Callable[[dict[str, float]], None] | None = None,
     checkpoint_interval: int = 0,
     checkpoint_callback: Callable[[dict[str, object]], None] | None = None,
@@ -457,6 +485,8 @@ def train_factorized_mark_model(
         raise ValueError("minimum learning-rate fraction must lie in (0, 1]")
     if early_stopping_patience < 0:
         raise ValueError("early-stopping patience must be non-negative")
+    if not 0.0 <= early_stopping_min_relative_delta < 1.0:
+        raise ValueError("early-stopping minimum relative delta must lie in [0, 1)")
     optimizer = torch.optim.AdamW(
         factorized_adamw_parameter_groups(model, weight_decay=weight_decay),
         lr=learning_rate,
@@ -473,6 +503,7 @@ def train_factorized_mark_model(
         best_state = _clone_model_state(model)
         history: list[dict[str, float]] = []
         evaluations_without_improvement = 0
+        early_stopping_reference_loss = float(best_metrics["factorized_gm_loss"])
     else:
         required = {
             "completed_steps",
@@ -513,6 +544,12 @@ def train_factorized_mark_model(
             for row in resume_state["history"]  # type: ignore[union-attr]
         ]
         evaluations_without_improvement = int(resume_state["evaluations_without_improvement"])
+        early_stopping_reference_loss = float(
+            resume_state.get(
+                "early_stopping_reference_loss",
+                best_metrics["factorized_gm_loss"],
+            )
+        )
 
     loader = factorized_mark_loader(
         train_records,
@@ -586,7 +623,7 @@ def train_factorized_mark_model(
         maximum_data_wait = max(maximum_data_wait, data_wait)
         data_wait_history.append(data_wait)
         evaluated = (
-            step == start_step
+            step == 0
             or completed_steps % resolved_evaluation_interval == 0
             or completed_steps == steps
         )
@@ -601,7 +638,8 @@ def train_factorized_mark_model(
             metrics["step"] = float(completed_steps)
             metrics["train_batch_loss"] = float(loss.detach())
             metrics["learning_rate"] = float(current_learning_rate)
-            improved = metrics["factorized_gm_loss"] < best_metrics["factorized_gm_loss"]
+            current_validation_loss = float(metrics["factorized_gm_loss"])
+            improved = current_validation_loss < best_metrics["factorized_gm_loss"]
             if improved:
                 best_metrics = {
                     key: value
@@ -610,9 +648,19 @@ def train_factorized_mark_model(
                 }
                 best_metrics["selected_step"] = float(completed_steps)
                 best_state = _clone_model_state(model)
+            material_threshold = early_stopping_reference_loss * (
+                1.0 - early_stopping_min_relative_delta
+            )
+            materially_improved = current_validation_loss < material_threshold
+            if materially_improved:
+                early_stopping_reference_loss = current_validation_loss
                 evaluations_without_improvement = 0
             elif completed_steps >= max(warmup_steps, 1):
                 evaluations_without_improvement += 1
+            metrics["materially_improved"] = float(materially_improved)
+            metrics["early_stopping_reference_loss"] = float(
+                early_stopping_reference_loss
+            )
             metrics["evaluations_without_improvement"] = float(evaluations_without_improvement)
             should_early_stop = (
                 early_stopping_patience > 0
@@ -675,6 +723,7 @@ def train_factorized_mark_model(
                     best_metrics=best_metrics,
                     history=history,
                     evaluations_without_improvement=(evaluations_without_improvement),
+                    early_stopping_reference_loss=early_stopping_reference_loss,
                 )
             )
         if should_early_stop:
@@ -766,6 +815,7 @@ def _factorized_recovery_state(
     best_metrics: dict[str, float],
     history: list[dict[str, float]],
     evaluations_without_improvement: int,
+    early_stopping_reference_loss: float,
 ) -> dict[str, object]:
     return {
         "optimizer_kind": "adamw_decoupled_v1",
@@ -782,6 +832,7 @@ def _factorized_recovery_state(
         "best_metrics": copy.deepcopy(best_metrics),
         "history": copy.deepcopy(history),
         "evaluations_without_improvement": int(evaluations_without_improvement),
+        "early_stopping_reference_loss": float(early_stopping_reference_loss),
     }
 
 

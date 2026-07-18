@@ -586,6 +586,15 @@ def main() -> None:
         default=0,
         help="non-improving evaluations before stopping; 0 disables stopping",
     )
+    parser.add_argument(
+        "--early-stopping-min-relative-delta",
+        type=float,
+        default=0.0,
+        help=(
+            "relative validation-loss decrease required to reset patience; "
+            "the absolute best checkpoint is still retained"
+        ),
+    )
     parser.add_argument("--action-kl-weight", type=float, default=0.0)
     parser.add_argument("--hazard-tilt-weight", type=float, default=0.0)
     parser.add_argument("--validation-examples", type=int, default=256)
@@ -724,6 +733,8 @@ def main() -> None:
         raise ValueError("--minimum-learning-rate-fraction must lie in (0, 1]")
     if args.evaluation_every < 0 or args.early_stopping_patience < 0:
         raise ValueError("--evaluation-every and --early-stopping-patience must be non-negative")
+    if not 0.0 <= args.early_stopping_min_relative_delta < 1.0:
+        raise ValueError("--early-stopping-min-relative-delta must lie in [0, 1)")
     if min(args.data_workers, args.path_workers, args.corpus_workers) < 0:
         raise ValueError("data, path, and corpus worker counts must be non-negative")
     if args.data_prefetch_factor <= 0:
@@ -1644,6 +1655,9 @@ def main() -> None:
         "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
         "evaluation_every": args.evaluation_every,
         "early_stopping_patience": args.early_stopping_patience,
+        "early_stopping_min_relative_delta": (
+            args.early_stopping_min_relative_delta
+        ),
         "late_time_fraction": args.late_time_fraction,
         "operational_horizon": args.operational_horizon,
     }
@@ -1707,6 +1721,7 @@ def main() -> None:
                     "minimum_learning_rate_fraction",
                     "evaluation_every",
                     "early_stopping_patience",
+                    "early_stopping_min_relative_delta",
                     "late_time_fraction",
                     "operational_horizon",
                     "progress_stratification_fraction",
@@ -1781,6 +1796,7 @@ def main() -> None:
                     "checkpoint_kind": "interim_best_evaluation_model",
                     "state_dict": training_state["best_state_dict"],
                     "selected_validation": training_state["best_metrics"],
+                    "initial_validation": initial_validation,
                     "completed_steps": training_state["completed_steps"],
                 },
                 best_so_far_path,
@@ -1834,6 +1850,9 @@ def main() -> None:
             warmup_steps=args.warmup_steps,
             minimum_learning_rate_fraction=(args.minimum_learning_rate_fraction),
             early_stopping_patience=args.early_stopping_patience,
+            early_stopping_min_relative_delta=(
+                args.early_stopping_min_relative_delta
+            ),
             progress_callback=lambda metrics: print(
                 json.dumps({"phase": "training", **metrics}, sort_keys=True),
                 flush=True,
@@ -1930,6 +1949,9 @@ def main() -> None:
                 "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
                 "evaluation_every": args.evaluation_every,
                 "early_stopping_patience": args.early_stopping_patience,
+                "early_stopping_min_relative_delta": (
+                    args.early_stopping_min_relative_delta
+                ),
                 "history": history,
                 "device": str(device),
             },
@@ -2108,6 +2130,9 @@ def main() -> None:
             "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
             "evaluation_every": args.evaluation_every,
             "early_stopping_patience": args.early_stopping_patience,
+            "early_stopping_min_relative_delta": (
+                args.early_stopping_min_relative_delta
+            ),
             "bond_representation": (
                 args.bond_representation if isinstance(model, torch.nn.Module) else None
             ),

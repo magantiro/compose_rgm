@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -30,7 +31,7 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose_v4")
-RECIPE_NAME = "tree_fcd_transfer_stage1.json"
+RECIPE_NAME = "tree_fcd_transfer_stage3_flexible_graft.json"
 
 # Modal executes the entrypoint module from /root while the snapshotted package
 # lives under REMOTE_ROOT/src.  Install that path before any remote helper
@@ -48,7 +49,15 @@ image = (
         "rdkit==2024.3.5",
         "fcd-torch==1.0.7",
     )
-    .env({"PYTHONPATH": str(REMOTE_ROOT / "src"), "PYTHONUNBUFFERED": "1"})
+    .env(
+        {
+            "PYTHONPATH": str(REMOTE_ROOT / "src"),
+            "PYTHONUNBUFFERED": "1",
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+        }
+    )
     .add_local_dir(ROOT / "src", str(REMOTE_ROOT / "src"), copy=True)
     .add_local_dir(ROOT / "scripts", str(REMOTE_ROOT / "scripts"), copy=True)
     .add_local_dir(ROOT / "recipes", str(REMOTE_ROOT / "recipes"), copy=True)
@@ -144,7 +153,7 @@ def _materialize_remote_recipe(
                 "rollout_samples": 16,
                 "rollout_workers": 8,
                 "fiber_workers": 12,
-                "data_workers": 8,
+                "data_workers": 16,
                 "data_prefetch_factor": 2,
                 "path_workers": 16,
                 "corpus_workers": 0,
@@ -174,6 +183,210 @@ def _file_sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _early_rollout_decision(
+    checkpoint_payload: dict[str, object],
+    *,
+    completed_steps: int,
+    warmup_steps: int,
+    minimum_relative_improvement: float = 0.05,
+) -> dict[str, float] | None:
+    """Return auditable launch metadata for a sufficiently trained checkpoint."""
+
+    if completed_steps < warmup_steps:
+        return None
+    initial = checkpoint_payload.get("initial_validation")
+    selected = checkpoint_payload.get("selected_validation")
+    if not isinstance(initial, dict) or not isinstance(selected, dict):
+        return None
+    try:
+        initial_loss = float(initial["factorized_gm_loss"])
+        selected_loss = float(selected["factorized_gm_loss"])
+        selected_step = float(selected["selected_step"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not (
+        math.isfinite(initial_loss)
+        and math.isfinite(selected_loss)
+        and initial_loss > 0.0
+        and 0.0 <= minimum_relative_improvement < 1.0
+    ):
+        return None
+    relative_improvement = (initial_loss - selected_loss) / initial_loss
+    if relative_improvement < minimum_relative_improvement:
+        return None
+    return {
+        "completed_steps": float(completed_steps),
+        "selected_step": selected_step,
+        "initial_validation_loss": initial_loss,
+        "selected_validation_loss": selected_loss,
+        "relative_improvement": relative_improvement,
+    }
+
+
+def _atomic_json_write(payload: dict[str, object], path: Path) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    os.replace(temporary, path)
+
+
+def _early_launch_marker_blocks_retry(marker_path: Path) -> bool:
+    """Return whether a prior launch is active, complete, or not yet stale."""
+
+    if not marker_path.is_file():
+        return False
+    try:
+        marker = json.loads(marker_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return False
+    if not isinstance(marker, dict):
+        return False
+    status = str(marker.get("status", ""))
+    if status == "failed":
+        return False
+    if status == "completed":
+        return True
+    evaluation_run_label = marker.get("evaluation_run_label")
+    if isinstance(evaluation_run_label, str):
+        evaluation_dir = Path("/artifacts") / evaluation_run_label
+        if (evaluation_dir / "metrics.json").is_file():
+            return True
+    updated_at = float(marker.get("updated_at_unix", 0.0))
+    return time.time() - updated_at < 15.0 * 60.0
+
+
+def _update_source_early_eval_marker(
+    *,
+    source_run_label: str,
+    evaluation_run_label: str,
+    status: str,
+    details: dict[str, object] | None = None,
+) -> None:
+    """Publish evaluator liveness back to the training run's marker."""
+
+    marker_path = Path("/artifacts") / source_run_label / "early_eval_launch.json"
+    if not marker_path.is_file():
+        return
+    try:
+        marker = json.loads(marker_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return
+    if (
+        not isinstance(marker, dict)
+        or marker.get("evaluation_run_label") != evaluation_run_label
+    ):
+        return
+    marker.update(
+        {
+            "status": status,
+            "updated_at_unix": time.time(),
+            **({} if details is None else details),
+        }
+    )
+    _atomic_json_write(marker, marker_path)
+    artifact_volume.commit()
+
+
+def _maybe_launch_early_rollout(
+    *,
+    run_label: str,
+    run_dir: Path,
+    recipe: dict[str, object],
+    completed_steps: int,
+) -> None:
+    """Spawn one immutable 100-sample CPU preview while training continues."""
+
+    marker_path = run_dir / "early_eval_launch.json"
+    if _early_launch_marker_blocks_retry(marker_path):
+        return
+    marker_path.unlink(missing_ok=True)
+    arguments = recipe.get("arguments")
+    if not isinstance(arguments, dict):
+        return
+    warmup_steps = int(arguments.get("warmup_steps", 0))
+    checkpoint_path = run_dir / "checkpoint.best_so_far.pt"
+    if not checkpoint_path.is_file() or checkpoint_path.stat().st_size == 0:
+        return
+
+    import torch
+
+    checkpoint_payload = torch.load(
+        checkpoint_path,
+        map_location="cpu",
+        weights_only=False,
+    )
+    if not isinstance(checkpoint_payload, dict):
+        return
+    decision = _early_rollout_decision(
+        checkpoint_payload,
+        completed_steps=completed_steps,
+        warmup_steps=warmup_steps,
+    )
+    if decision is None:
+        print(
+            json.dumps(
+                {
+                    "phase": "early_rollout_pending",
+                    "completed_steps": completed_steps,
+                    "warmup_steps": warmup_steps,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
+
+    selected_step = int(decision["selected_step"])
+    evaluation_run_label = f"{run_label}-early-step{selected_step}-eval100"
+    immutable_checkpoint = run_dir / f"checkpoint.early_step{selected_step}.pt"
+    temporary_checkpoint = immutable_checkpoint.with_suffix(".pt.tmp")
+    shutil.copyfile(checkpoint_path, temporary_checkpoint)
+    os.replace(temporary_checkpoint, immutable_checkpoint)
+    marker: dict[str, object] = {
+        "status": "reserved",
+        "source_run_label": run_label,
+        "source_checkpoint": immutable_checkpoint.name,
+        "source_checkpoint_sha256": _file_sha256(immutable_checkpoint),
+        "evaluation_run_label": evaluation_run_label,
+        "rollout_samples": 100,
+        "updated_at_unix": time.time(),
+        **decision,
+    }
+    _atomic_json_write(marker, marker_path)
+    artifact_volume.commit()
+    try:
+        call = rollout_evaluate_stage.spawn(
+            evaluation_run_label,
+            run_label,
+            immutable_checkpoint.name,
+            100,
+        )
+    except Exception as error:
+        marker_path.unlink(missing_ok=True)
+        artifact_volume.commit()
+        print(
+            json.dumps(
+                {
+                    "phase": "early_rollout_launch_failed",
+                    "completed_steps": completed_steps,
+                    "error": repr(error),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
+    marker.update(
+        {
+            "status": "spawned",
+            "function_call_id": call.object_id,
+            "updated_at_unix": time.time(),
+        }
+    )
+    _atomic_json_write(marker, marker_path)
+    artifact_volume.commit()
+    print(json.dumps({"phase": "early_rollout_spawned", **marker}, sort_keys=True), flush=True)
 
 
 def _run_remote(
@@ -305,6 +518,13 @@ def _run_remote(
     environment["PYTHONPATH"] = os.pathsep.join((str(REMOTE_ROOT), str(REMOTE_ROOT / "src")))
     environment["PYTHONUNBUFFERED"] = "1"
     print(json.dumps({"phase": "remote_command", "argv": command}), flush=True)
+    auto_early_rollout = (
+        not smoke
+        and not preflight
+        and not compile_paths_only
+        and evaluation_source_run is None
+        and int(recipe["arguments"].get("early_stopping_patience", 0)) > 0
+    )
     process = subprocess.Popen(
         command,
         cwd=REMOTE_ROOT,
@@ -330,9 +550,16 @@ def _run_remote(
             "recovery_checkpoint_saved",
         }:
             # Recovery frequency is deliberately coarse: committing a Modal
-            # volume is much slower than an H100 update and synchronously
+            # volume is much slower than a GPU update and synchronously
             # committing every few hundred steps throttles the child process.
             artifact_volume.commit()
+            if event.get("phase") == "recovery_checkpoint_saved" and auto_early_rollout:
+                _maybe_launch_early_rollout(
+                    run_label=run_label,
+                    run_dir=run_dir,
+                    recipe=recipe,
+                    completed_steps=int(event.get("completed_steps", 0)),
+                )
     return_code = process.wait()
     artifact_volume.commit()
     if return_code != 0:
@@ -389,14 +616,14 @@ def smoke_stage(
 
 @app.function(
     image=image,
-    gpu="H100",
-    cpu=16.0,
+    gpu="A100",
+    cpu=24.0,
     memory=65536,
     timeout=60 * 60,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
 )
 def preflight_stage(
-    run_label: str = "tree_fcd_transfer_h100_preflight",
+    run_label: str = "tree_fcd_transfer_a100_preflight",
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     return _run_remote(
@@ -507,8 +734,8 @@ def audit_teacher_stage(
 
 @app.function(
     image=image,
-    gpu="H100",
-    cpu=16.0,
+    gpu="A100",
+    cpu=24.0,
     memory=65536,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
@@ -613,6 +840,12 @@ def rollout_evaluate_stage(
     }
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     artifact_volume.commit()
+    _update_source_early_eval_marker(
+        source_run_label=source_run_label,
+        evaluation_run_label=run_label,
+        status="running",
+        details={"checkpoint_snapshot_sha256": manifest["checkpoint_sha256"]},
+    )
 
     command = (
         sys.executable,
@@ -660,10 +893,22 @@ def rollout_evaluate_stage(
     return_code = process.wait()
     artifact_volume.commit()
     if return_code != 0:
+        _update_source_early_eval_marker(
+            source_run_label=source_run_label,
+            evaluation_run_label=run_label,
+            status="failed",
+            details={"return_code": return_code},
+        )
         raise subprocess.CalledProcessError(return_code, command)
 
     metrics_path = run_dir / "metrics.json"
     if not metrics_path.is_file():
+        _update_source_early_eval_marker(
+            source_run_label=source_run_label,
+            evaluation_run_label=run_label,
+            status="failed",
+            details={"error": "missing metrics.json"},
+        )
         raise RuntimeError("rollout evaluation completed without metrics.json")
     report = json.loads(metrics_path.read_text())
     summary = {
@@ -674,6 +919,12 @@ def rollout_evaluate_stage(
         "selected_validation": report.get("selected_validation"),
         "fcd": report.get("molecular_quality", {}).get("frechet_chemnet_distance"),
     }
+    _update_source_early_eval_marker(
+        source_run_label=source_run_label,
+        evaluation_run_label=run_label,
+        status="completed",
+        details={"metrics_sha256": _file_sha256(metrics_path)},
+    )
     print(
         json.dumps({"phase": "remote_rollout_complete", **summary}, sort_keys=True),
         flush=True,
@@ -691,7 +942,7 @@ def pipeline_stage(
     run_label: str = "tree_fcd_transfer_stage1",
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
-    """Run CPU preprocessing to completion before allocating the H100."""
+    """Run CPU preprocessing to completion before allocating the training GPU."""
 
     compile_result = compile_stage.remote(run_label, recipe_name)
     audit_result = audit_teacher_stage.remote(run_label, recipe_name)
@@ -736,7 +987,7 @@ def main(
         return
     if preflight:
         if run_label == "tree_fcd_transfer_stage1":
-            run_label = "tree_fcd_transfer_h100_preflight"
+            run_label = "tree_fcd_transfer_a100_preflight"
         result = preflight_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return

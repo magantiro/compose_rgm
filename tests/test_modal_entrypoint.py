@@ -24,13 +24,15 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
         "pipeline_stage",
         "main",
     } <= function_names
-    assert "tree_fcd_transfer_stage1.json" in source
+    assert "tree_fcd_transfer_stage3_flexible_graft.json" in source
     assert "compose-v4-artifacts" in source
     assert "guacamol_heldout_val_5000_seed0.smiles" in source
     assert "train_stage.spawn" in source
     assert "evaluate_stage.spawn" in source
     assert "rollout_evaluate_stage.spawn" in source
     assert "checkpoint.snapshot.pt" in source
+    assert "early_eval_launch.json" in source
+    assert "early_rollout_spawned" in source
     assert "shutil.copyfile" in source
     assert "pipeline_stage.spawn" in source
     assert "compile_paths_only=True" in source
