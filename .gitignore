@@ -1,0 +1,37 @@
+# Operating-system and editor files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Python environments and caches
+.venv*/
+.uv-cache*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local scratch space and generated training artifacts
+tmp/
+*.pt
+*.pth
+*.ckpt
+*.rollouts.*
+results/**/rollouts.pt
+
+# Modal/local credentials must never enter source control
+.modal.toml
+.env
+.env.*
+!.env.example
+
+# LaTeX build intermediates (source, bibliography, PDFs, and release ZIPs remain tracked)
+paper_iclr_stochastic_rewriting/*.aux
+paper_iclr_stochastic_rewriting/*.blg
+paper_iclr_stochastic_rewriting/*.log
+paper_iclr_stochastic_rewriting/*.out
+paper_iclr_stochastic_rewriting/tmp/

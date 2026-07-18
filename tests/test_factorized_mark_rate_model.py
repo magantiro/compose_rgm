@@ -1,0 +1,908 @@
+from __future__ import annotations
+
+import numpy as np
+import pytest
+import torch
+
+from compose_v4.chem.molecular_graph import is_element, smiles_to_molecular_graph
+from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
+from compose_v4.experiments.factorized_mark_conditional import (
+    _concatenate_factorized_mark_batches,
+    FactorizedMarkDataset,
+    cosine_warmup_learning_rate,
+    factorized_adamw_parameter_groups,
+)
+from compose_v4.experiments.tracelet_conditional import build_tracelet_path_records
+from compose_v4.model.factorized_tracelet_rate_model import (
+    FactorizedTraceletRateModel,
+    MARK_RULE_TO_INDEX,
+    factorized_mark_bregman_loss,
+    prepare_factorized_mark_batch,
+)
+from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
+from compose_v4.rewrite.operators import BondReroute
+from compose_v4.rewrite.typed_ring_catalog import (
+    build_typed_ring_catalog,
+    build_typed_ring_catalog_from_paths,
+)
+from compose_v4.rewrite.progress import TraceProgressCTMC
+from compose_v4.rewrite.ring_system_fiber import (
+    matching_ring_system_template_indices,
+    ring_system_grow_electronic_key,
+    ring_system_placement,
+    ring_system_placement_key,
+    semantic_ring_categories_for_action,
+    semantic_ring_next_category_mask,
+    semantic_ring_prefix_is_completable,
+    structured_ring_trace_supported,
+)
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
+from compose_v4.rewrite.tracelets import is_valid_ring_system_grow
+
+
+def _catalog_and_records(smiles: tuple[str, ...]):
+    records = build_tracelet_path_records(
+        smiles,
+        n_slots=12,
+        typed_ring_payloads=True,
+    )
+    catalog = build_typed_ring_catalog(
+        (record.path.trace for record in records),
+        max_cycle_templates=32,
+        max_attach_templates=32,
+        max_ear_templates=32,
+    )
+    return catalog, records
+
+
+def test_factorized_mark_forward_and_backward_without_successor_fiber() -> None:
+    catalog, records = _catalog_and_records(("CCO", "c1ccccc1"))
+    examples = []
+    for record in records:
+        progress = 0
+        step = record.path.trace.steps[progress]
+        examples.append(
+            (
+                record.path.states[progress],
+                0.4,
+                step.action,
+                step.rule_name,
+                record.path.operational_jump_rate(progress),
+            )
+        )
+    batch = prepare_factorized_mark_batch(
+        tuple(row[0] for row in examples),
+        tuple(row[1] for row in examples),
+        tuple(row[2] for row in examples),
+        tuple(row[3] for row in examples),
+        tuple(row[4] for row in examples),
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=32,
+        message_passing_steps=1,
+    )
+    prediction = model.forward_mark_batch(batch)
+    loss = factorized_mark_bregman_loss(prediction, batch)
+    loss.backward()
+
+    assert prediction.total_hazard.shape == (2,)
+    assert torch.isfinite(loss)
+    assert all(
+        parameter.grad is None or torch.isfinite(parameter.grad).all()
+        for parameter in model.parameters()
+    )
+
+
+def test_factorized_batch_concatenation_retains_graft_successor_groups() -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCC"), 12)
+    source = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (None,),
+        (None,),
+        (0.0,),
+    )
+    merged = _concatenate_factorized_mark_batches((source, source))
+    assert merged.batch_size == 2
+    assert torch.equal(merged.graft_successor_groups[0], source.graft_successor_groups[0])
+    assert torch.equal(merged.graft_successor_groups[1], source.graft_successor_groups[0])
+
+
+def test_factorized_adamw_excludes_lookup_and_scale_parameters_from_decay() -> None:
+    catalog, _ = _catalog_and_records(("CCO", "c1ccccc1"))
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+    groups = factorized_adamw_parameter_groups(model, weight_decay=0.1)
+    decayed_ids = {id(parameter) for parameter in groups[0]["params"]}
+    no_decay_ids = {id(parameter) for parameter in groups[1]["params"]}
+
+    assert id(model.atom_embedding.weight) in no_decay_ids
+    assert id(model.cycle_key.weight) in no_decay_ids
+    assert id(model.update_norms[0].weight) in no_decay_ids
+    assert id(model.total_hazard_head[-1].bias) in no_decay_ids
+    assert id(model.total_hazard_head[-1].weight) in decayed_ids
+    assert decayed_ids.isdisjoint(no_decay_ids)
+    assert decayed_ids | no_decay_ids == {
+        id(parameter) for parameter in model.parameters() if parameter.requires_grad
+    }
+
+    lookup_before = model.cycle_key.weight.detach().clone()
+    dense_before = model.total_hazard_head[-1].weight.detach().clone()
+    optimizer = torch.optim.AdamW(groups, lr=0.01)
+    for parameter in model.parameters():
+        parameter.grad = torch.zeros_like(parameter)
+    optimizer.step()
+
+    assert torch.equal(model.cycle_key.weight, lookup_before)
+    assert not torch.equal(model.total_hazard_head[-1].weight, dense_before)
+
+
+def test_cosine_warmup_learning_rate_has_exact_boundaries() -> None:
+    common = {
+        "base_learning_rate": 1e-3,
+        "total_steps": 100,
+        "warmup_steps": 10,
+        "minimum_fraction": 0.05,
+    }
+    first = cosine_warmup_learning_rate(completed_step=1, **common)
+    peak = cosine_warmup_learning_rate(completed_step=10, **common)
+    middle = cosine_warmup_learning_rate(completed_step=55, **common)
+    final = cosine_warmup_learning_rate(completed_step=100, **common)
+
+    assert first == 1e-4
+    assert peak == 1e-3
+    assert final == 5e-5
+    assert peak > middle > final
+
+
+def test_factorized_dataset_is_index_deterministic_and_resume_stable() -> None:
+    _, records = _catalog_and_records(("CCO", "CCN", "c1ccccc1"))
+    common = {
+        "records": records,
+        "seed": 19,
+        "late_time_fraction": 0.5,
+        "operational_horizon": 2.0,
+        "progress_stratification_fraction": 0.5,
+    }
+    complete = FactorizedMarkDataset(
+        start_index=0,
+        length=16,
+        **common,
+    )
+    resumed = FactorizedMarkDataset(
+        start_index=8,
+        length=8,
+        **common,
+    )
+
+    for local_index in range(8):
+        expected = complete[8 + local_index]
+        actual = resumed[local_index]
+        assert expected.time == actual.time
+        assert expected.teacher_rule_name == actual.teacher_rule_name
+        assert expected.teacher_action == actual.teacher_action
+        assert expected.teacher_rate == actual.teacher_rate
+        assert expected.state == actual.state
+
+
+def test_complete_ring_fiber_cannot_overgrow_an_existing_ring_system() -> None:
+    target = pad_molecular_graph(smiles_to_molecular_graph("C1CCCCC1"), 12)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(37),
+        n_slots=12,
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    catalog = build_typed_ring_catalog((trace,))
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    ).eval()
+    batch = prepare_factorized_mark_batch(
+        (target,),
+        (0.5,),
+        (None,),
+        (None,),
+        (0.0,),
+    )
+    with torch.no_grad():
+        node, global_state, pair = model._encode_batch(batch)
+        masks, _, _ = model._action_tables(batch, node, global_state, pair)
+    assert not bool(masks["ring_system_grow"][0].any())
+    assert bool(masks["ring_system_delete"][0].any())
+
+
+def test_production_factorization_has_no_ring_ear_family() -> None:
+    assert "ring_ear_insert" not in MARK_RULE_TO_INDEX
+    assert "ring_system_grow" in MARK_RULE_TO_INDEX
+    assert "ring_system_delete" in MARK_RULE_TO_INDEX
+
+
+def test_sampling_rule_ablation_removes_full_ring_grow_family() -> None:
+    target = pad_molecular_graph(smiles_to_molecular_graph("C1CCCCC1"), 8)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(41),
+        n_slots=8,
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    catalog = build_typed_ring_catalog((trace,))
+    path = TraceProgressCTMC(trace)
+    progress = next(
+        index for index, step in enumerate(trace.steps) if step.rule_name == "ring_system_grow"
+    )
+    state = path.states[progress]
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    ).eval()
+    with torch.no_grad():
+        model.family_head[-1].weight.zero_()
+        model.family_head[-1].bias.fill_(-100.0)
+        model.family_head[-1].bias[MARK_RULE_TO_INDEX["ring_system_grow"]] = 100.0
+
+    baseline = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(7))
+    model.disabled_sampling_rule_names = frozenset({"ring_system_grow"})
+    ablated = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(7))
+
+    assert baseline.rule_name == "ring_system_grow"
+    assert ablated.rule_name != "ring_system_grow"
+
+
+def test_factorized_graft_and_full_ring_teachers_are_legal_and_trainable() -> None:
+    target = pad_molecular_graph(
+        smiles_to_molecular_graph("C1CCC2CCCCC2C1"),
+        16,
+    )
+    source = DegreeBoundedCarbonTreePrior(
+        sizes=(target.n_real_atoms,),
+    ).sample(np.random.default_rng(323), n_slots=16)
+    proposal = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    catalog = build_typed_ring_catalog((proposal,))
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+        ring_catalog=catalog,
+    )
+    path = TraceProgressCTMC(trace)
+    progress = [
+        index
+        for index, step in enumerate(trace.steps)
+        if step.rule_name in {"bond_reroute", "ring_system_grow"}
+    ]
+    assert {trace.steps[index].rule_name for index in progress} == {
+        "bond_reroute",
+        "ring_system_grow",
+    }
+    batch = prepare_factorized_mark_batch(
+        tuple(path.states[index] for index in progress),
+        tuple(0.5 for _ in progress),
+        tuple(trace.steps[index].action for index in progress),
+        tuple(trace.steps[index].rule_name for index in progress),
+        tuple(path.operational_jump_rate(index) for index in progress),
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=32,
+        message_passing_steps=1,
+    )
+    prediction = model.forward_mark_batch(batch)
+    loss = factorized_mark_bregman_loss(prediction, batch)
+    loss.backward()
+
+    assert torch.isfinite(prediction.selected_mark_log_probability).all()
+    assert torch.isfinite(loss)
+    assert model.graft_head[-1].weight.grad is not None
+    assert torch.isfinite(model.graft_head[-1].weight.grad).all()
+    assert model.ring_system_grow_head[-1].weight.grad is not None
+    assert torch.isfinite(model.ring_system_grow_head[-1].weight.grad).all()
+    assert model.ring_system_template_key.weight.grad is not None
+    assert torch.isfinite(model.ring_system_template_key.weight.grad).all()
+
+
+def test_dense_graft_support_excludes_canonical_self_successors() -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCC"), 12)
+    batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (None,),
+        (None,),
+        (0.0,),
+    )
+    runtime = de_novo_rewrite_system()
+    current_key = canonical_state_key(state)
+    enabled = torch.nonzero(batch.graft_mask[0], as_tuple=False)
+
+    # A labeled eight-carbon chain has 42 root-free coordinates before
+    # quotienting; 12 are molecular self-successors and must disappear.
+    real = tuple(int(value) for value in np.flatnonzero(is_element(state.atom_types)))
+    raw_coordinates = sum(
+        int(moved != target and int(state.bonds[moved, target]) == 0)
+        for moved in real
+        for target in real
+    )
+    assert raw_coordinates == 42
+    assert len(enabled) == 30
+    assert int((batch.graft_successor_groups[0] >= 0).sum()) == len(enabled)
+
+    successor_keys_by_group: dict[int, set[str]] = {}
+    for moved_tensor, target_tensor in enabled:
+        moved, target = int(moved_tensor), int(target_tensor)
+        removed = int(batch.graft_remove_neighbors[0, moved, target])
+        successor = runtime.apply(
+            state,
+            "bond_reroute",
+            BondReroute(a=moved, b=removed, u=moved, v=target),
+        )
+        successor_key = canonical_state_key(successor)
+        assert successor_key != current_key
+        group = int(batch.graft_successor_groups[0, moved, target])
+        successor_keys_by_group.setdefault(group, set()).add(successor_key)
+    assert all(len(keys) == 1 for keys in successor_keys_by_group.values())
+    grouped_keys = [next(iter(keys)) for keys in successor_keys_by_group.values()]
+    assert len(grouped_keys) == len(set(grouped_keys))
+
+
+def test_graft_teacher_score_aggregates_mark_aliases_by_successor() -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCC"), 12)
+    support = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (None,),
+        (None,),
+        (0.0,),
+    )
+    groups = support.graft_successor_groups[0]
+    group_values, counts = torch.unique(groups[groups >= 0], return_counts=True)
+    group = int(group_values[int(torch.argmax(counts))])
+    aliases = torch.nonzero(
+        support.graft_mask[0] & (groups == group),
+        as_tuple=False,
+    )
+    assert len(aliases) > 1
+    moved, target = (int(value) for value in aliases[0])
+    removed = int(support.graft_remove_neighbors[0, moved, target])
+    teacher = BondReroute(a=moved, b=removed, u=moved, v=target)
+    batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (teacher,),
+        ("bond_reroute",),
+        (1.0,),
+    )
+    catalog, _ = _catalog_and_records(("CCCCCCCC",))
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+    node, global_state, pair = model._encode_batch(batch)
+    masks, logits, _ = model._action_tables(batch, node, global_state, pair)
+    score, legal = model._teacher_action_score(
+        0,
+        teacher,
+        "bond_reroute",
+        batch,
+        node,
+        global_state,
+        pair,
+        masks,
+        logits,
+    )
+    group_mask = masks["bond_reroute"][0] & (
+        batch.graft_successor_groups[0] == group
+    )
+    expected = torch.logsumexp(
+        logits["bond_reroute"][0][group_mask],
+        dim=0,
+    )
+    assert bool(legal)
+    assert int(group_mask.sum()) == len(aliases)
+    assert torch.allclose(score, expected)
+    assert not torch.allclose(score, logits["bond_reroute"][0, moved, target])
+
+
+def test_forced_graft_sampling_never_emits_a_molecular_self_transition() -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCC"), 12)
+    catalog, _ = _catalog_and_records(("CCCCCCCC",))
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    ).eval()
+    with torch.no_grad():
+        model.family_head[-1].weight.zero_()
+        model.family_head[-1].bias.fill_(-100.0)
+        model.family_head[-1].bias[MARK_RULE_TO_INDEX["bond_reroute"]] = 100.0
+    runtime = de_novo_rewrite_system()
+    current_key = canonical_state_key(state)
+    for seed in range(32):
+        sampled = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(seed))
+        assert sampled.rule_name == "bond_reroute"
+        successor = runtime.apply(state, sampled.rule_name, sampled.action)
+        assert canonical_state_key(successor) != current_key
+
+
+def test_structured_ring_decoder_generalizes_atom_labels_beyond_catalog() -> None:
+    training_target = pad_molecular_graph(
+        smiles_to_molecular_graph("c1ccccc1"),
+        12,
+    )
+    heldout_target = pad_molecular_graph(
+        smiles_to_molecular_graph("c1ccncc1"),
+        12,
+    )
+    source = DegreeBoundedCarbonTreePrior(sizes=(6,)).sample(
+        np.random.default_rng(509),
+        n_slots=12,
+    )
+    training_trace = compile_carbon_tree_to_target(
+        source,
+        training_target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    heldout_trace = compile_carbon_tree_to_target(
+        source,
+        heldout_target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    catalog = build_typed_ring_catalog((training_trace,))
+    path = TraceProgressCTMC(heldout_trace)
+    progress = next(
+        index
+        for index, step in enumerate(heldout_trace.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    step = heldout_trace.steps[progress]
+    batch = prepare_factorized_mark_batch(
+        (path.states[progress],),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=24,
+        message_passing_steps=1,
+    )
+    prediction = model.forward_mark_batch(batch)
+    loss = factorized_mark_bregman_loss(prediction, batch)
+    loss.backward()
+
+    assert not catalog.supports_trace(heldout_trace)
+    assert structured_ring_trace_supported(heldout_trace, catalog)
+    assert torch.isfinite(prediction.selected_mark_log_probability).all()
+    assert torch.isfinite(loss)
+    assert model.ring_system_atom_head[-1].weight.grad is not None
+
+
+def test_structured_ring_decoder_resolves_unseen_kekule_alias() -> None:
+    training_target = pad_molecular_graph(
+        smiles_to_molecular_graph("c1ccccc1"),
+        12,
+    )
+    heldout_target = pad_molecular_graph(
+        smiles_to_molecular_graph("O=c1cccco1"),
+        12,
+    )
+    training_source = DegreeBoundedCarbonTreePrior(sizes=(6,)).sample(
+        np.random.default_rng(811),
+        n_slots=12,
+    )
+    heldout_source = DegreeBoundedCarbonTreePrior(sizes=(7,)).sample(
+        np.random.default_rng(821),
+        n_slots=12,
+    )
+    training_path = TraceProgressCTMC(
+        compile_carbon_tree_to_target(
+            training_source,
+            training_target,
+            use_bond_reroute=True,
+            align_source=True,
+        )
+    )
+    heldout_trace = compile_carbon_tree_to_target(
+        heldout_source,
+        heldout_target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    heldout_path = TraceProgressCTMC(heldout_trace)
+    catalog = build_typed_ring_catalog_from_paths((training_path,))
+    progress = next(
+        index
+        for index, step in enumerate(heldout_trace.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    step = heldout_trace.steps[progress]
+    batch = prepare_factorized_mark_batch(
+        (heldout_path.state_at(progress),),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (heldout_path.operational_jump_rate(progress),),
+        ring_catalog=catalog,
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+    prediction = model.forward_mark_batch(batch)
+    placement_groups = model._ring_template_placement_groups(
+        heldout_path.state_at(progress),
+        0,
+    )
+
+    assert bool(batch.ring_grow_support_mask[0, 0])
+    assert len(placement_groups) == 1
+    assert len(placement_groups[0]) == 1
+    assert torch.isfinite(prediction.selected_mark_log_probability).all()
+
+
+def test_semantic_ring_teacher_and_sampler_share_one_normalized_support() -> None:
+    target = pad_molecular_graph(
+        smiles_to_molecular_graph("c1cc[nH]c1"),
+        12,
+    )
+    source = DegreeBoundedCarbonTreePrior(
+        sizes=(target.n_real_atoms,),
+    ).sample(np.random.default_rng(1701), n_slots=12)
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    path = TraceProgressCTMC(trace)
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    progress = next(
+        index
+        for index, step in enumerate(trace.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    step = trace.steps[progress]
+    state = path.state_at(progress)
+    batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+        ring_catalog=catalog,
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=24,
+        message_passing_steps=1,
+    )
+    prediction = model.forward_mark_batch(batch)
+    loss = factorized_mark_bregman_loss(prediction, batch)
+    loss.backward()
+
+    template_index = matching_ring_system_template_indices(
+        step.action,
+        model.ring_system_templates,
+    )[0]
+    placement_groups = model._ring_template_placement_groups(
+        state,
+        template_index,
+    )
+    assert placement_groups
+    assert all(len(group) == 1 for group in placement_groups)
+    with torch.no_grad():
+        device_batch = batch.to(model.device)
+        node, global_state, pair = model._encode_batch(device_batch)
+        _, semantic_tables, placement_mask = model._ring_supported_placement_tables(
+            state,
+            placement_groups,
+            node[0],
+            global_state[0],
+            pair[0],
+        )
+        matching_index = next(
+            index
+            for index, (decoder, _) in enumerate(semantic_tables)
+            if ring_system_placement_key(decoder.placement)
+            == ring_system_placement_key(ring_system_placement(step.action))
+        )
+        assert bool(placement_mask[matching_index])
+        decoder, category_logits = semantic_tables[matching_index]
+        teacher_categories = semantic_ring_categories_for_action(
+            decoder,
+            step.action,
+        )
+        teacher_score, teacher_legal = (
+            model._ring_semantic_sequence_log_probability(
+                decoder,
+                category_logits,
+                teacher_categories,
+            )
+        )
+
+        sequence_scores = []
+
+        def visit(prefix: tuple[int, ...]) -> None:
+            if len(prefix) == decoder.span:
+                score, legal = model._ring_semantic_sequence_log_probability(
+                    decoder,
+                    category_logits,
+                    prefix,
+                )
+                assert bool(legal)
+                sequence_scores.append(score)
+                return
+            mask = semantic_ring_next_category_mask(decoder, prefix)
+            for category, enabled in enumerate(mask):
+                if enabled:
+                    visit((*prefix, category))
+
+        visit(())
+        model.family_head[-1].weight.zero_()
+        model.family_head[-1].bias.fill_(-100.0)
+        model.family_head[-1].bias[MARK_RULE_TO_INDEX["ring_system_grow"]] = 100.0
+        sampled = model.sample_rewrite_mark(
+            state,
+            0.5,
+            np.random.default_rng(1702),
+        )
+
+    assert bool(teacher_legal)
+    assert torch.isfinite(teacher_score)
+    assert sequence_scores
+    assert torch.exp(torch.stack(sequence_scores)).sum().item() == pytest.approx(1.0)
+    assert sampled.rule_name == "ring_system_grow"
+    assert is_valid_ring_system_grow(state, sampled.action)
+    sampled_decoder = next(
+        decoder
+        for decoder, _ in semantic_tables
+        if ring_system_placement_key(decoder.placement)
+        == ring_system_placement_key(ring_system_placement(sampled.action))
+    )
+    sampled_categories = semantic_ring_categories_for_action(
+        sampled_decoder,
+        sampled.action,
+    )
+    assert semantic_ring_prefix_is_completable(
+        sampled_decoder,
+        sampled_categories,
+    )
+    assert model.ring_system_role_head[-1].weight.grad is not None
+    assert torch.isfinite(model.ring_system_role_head[-1].weight.grad).all()
+
+
+def test_fused_heteroaromatic_teacher_keeps_executable_resonance_alias() -> None:
+    target = pad_molecular_graph(
+        smiles_to_molecular_graph("c1ccc2ncccc2c1"),
+        20,
+    )
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(701),
+        n_slots=20,
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    path = TraceProgressCTMC(trace)
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    progress = next(
+        index for index, step in enumerate(trace.steps) if step.rule_name == "ring_system_grow"
+    )
+    step = trace.steps[progress]
+    batch = prepare_factorized_mark_batch(
+        (path.state_at(progress),),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+
+    prediction = model.forward_mark_batch(batch)
+    loss = factorized_mark_bregman_loss(prediction, batch)
+
+    assert torch.isfinite(prediction.selected_mark_log_probability).all()
+    assert torch.isfinite(loss)
+
+
+def test_exact_ring_electronic_decoder_shares_normalized_teacher_sampler_table() -> None:
+    target = pad_molecular_graph(
+        smiles_to_molecular_graph("c1ccc2ncccc2c1"),
+        20,
+    )
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(761),
+        n_slots=20,
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    path = TraceProgressCTMC(trace)
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    progress = next(
+        index for index, step in enumerate(trace.steps) if step.rule_name == "ring_system_grow"
+    )
+    state = path.state_at(progress)
+    step = trace.steps[progress]
+    batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+        ring_catalog=catalog,
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=24,
+        message_passing_steps=1,
+        ring_electronic_mode="catalog_exact",
+    )
+    prediction = model.forward_mark_batch(batch)
+    loss = factorized_mark_bregman_loss(prediction, batch)
+    loss.backward()
+
+    template_index = matching_ring_system_template_indices(
+        step.action,
+        model.ring_system_templates,
+    )[0]
+    with torch.no_grad():
+        node, global_state, pair = model._encode_batch(batch.to(model.device))
+        candidates, log_probabilities = model._ring_exact_candidate_log_probabilities(
+            state,
+            template_index,
+            node[0],
+            global_state[0],
+            pair[0],
+        )
+        first_cache_result = model._ring_paired_candidates(state, template_index)
+        second_cache_result = model._ring_paired_candidates(state, template_index)
+        model.family_head[-1].weight.zero_()
+        model.family_head[-1].bias.fill_(-100.0)
+        model.family_head[-1].bias[MARK_RULE_TO_INDEX["ring_system_grow"]] = 100.0
+        sampled = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(762))
+
+    assert torch.isfinite(prediction.selected_mark_log_probability).all()
+    assert torch.isfinite(loss)
+    assert candidates
+    assert torch.exp(log_probabilities).sum().item() == pytest.approx(1.0)
+    assert first_cache_result is second_cache_result
+    assert ring_system_grow_electronic_key(step.action) in {
+        ring_system_grow_electronic_key(candidate.action) for candidate in candidates
+    }
+    assert sampled.rule_name == "ring_system_grow"
+    assert ring_system_grow_electronic_key(sampled.action) in {
+        ring_system_grow_electronic_key(candidate.action) for candidate in candidates
+    }
+    assert model.ring_system_grow_head[-1].weight.grad is not None
+    assert model.ring_system_atom_head[-1].weight.grad is not None
+
+
+def test_aromatic_nitrogen_masks_cover_ring_nitrogen_teachers() -> None:
+    for seed, smiles in enumerate(
+        (
+            "c1ncnnc1",
+            "c1ccc2[nH]ccc2c1",
+            "O=c1cc[nH]c(=O)[nH]1",
+            "O=c1ccc2ccccc2o1",
+        ),
+        start=811,
+    ):
+        target = pad_molecular_graph(smiles_to_molecular_graph(smiles), 20)
+        source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+            np.random.default_rng(seed),
+            n_slots=20,
+        )
+        trace = compile_carbon_tree_to_target(
+            source,
+            target,
+            use_bond_reroute=True,
+            align_source=True,
+        )
+        path = TraceProgressCTMC(trace)
+        catalog = build_typed_ring_catalog_from_paths((path,))
+        progress = next(
+            index for index, step in enumerate(trace.steps) if step.rule_name == "ring_system_grow"
+        )
+        step = trace.steps[progress]
+        batch = prepare_factorized_mark_batch(
+            (path.state_at(progress),),
+            (0.5,),
+            (step.action,),
+            (step.rule_name,),
+            (path.operational_jump_rate(progress),),
+        )
+        model = FactorizedTraceletRateModel(
+            catalog,
+            hidden_dim=16,
+            message_passing_steps=1,
+        )
+
+        prediction = model.forward_mark_batch(batch)
+        loss = factorized_mark_bregman_loss(prediction, batch)
+
+        assert torch.isfinite(prediction.selected_mark_log_probability).all()
+        assert torch.isfinite(loss)
+
+
+def test_precomputed_ring_application_conditions_match_dynamic_forward() -> None:
+    target = pad_molecular_graph(smiles_to_molecular_graph("c1ncnnc1"), 12)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(907),
+        n_slots=12,
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    path = TraceProgressCTMC(trace)
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    progress = next(
+        index for index, step in enumerate(trace.steps) if step.rule_name == "ring_system_grow"
+    )
+    step = trace.steps[progress]
+    arguments = (
+        (path.state_at(progress),),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+    )
+    dynamic_batch = prepare_factorized_mark_batch(*arguments)
+    precomputed_batch = prepare_factorized_mark_batch(
+        *arguments,
+        ring_catalog=catalog,
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+
+    dynamic = model.forward_mark_batch(dynamic_batch)
+    precomputed = model.forward_mark_batch(precomputed_batch)
+
+    assert precomputed_batch.ring_grow_support_mask is not None
+    assert precomputed_batch.ring_delete_actions is not None
+    assert torch.equal(dynamic.enabled_families, precomputed.enabled_families)
+    assert torch.allclose(
+        dynamic.selected_mark_log_probability,
+        precomputed.selected_mark_log_probability,
+    )
