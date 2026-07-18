@@ -5,6 +5,9 @@ Matching for validity-closed molecular generation. It contains the executable
 model, tests, experiment recipes, paper draft, research plans, and the exact
 diagnostic artifacts used to make current design decisions.
 
+Read [`PROJECT_STATUS.md`](PROJECT_STATUS.md) for the dated distinction between
+completed work, the active compiler gate, queued training, and legacy evidence.
+
 ## Scientific contract
 
 COMPOSE learns a continuous-time Markov generator over executable molecular
@@ -88,29 +91,34 @@ edits. The successor quotient addresses exactly that measured failure mode.
 python -m pip install -e ".[dev,eval]"
 pytest -q
 python scripts/audit_factorized_teacher_support.py --help
+cp -R docs/trajectory_diagnostics/legacy_prequotient/full_trajectories_step6250 \
+  /tmp/compose-rgm-trajectory-rerender
 python scripts/diagnostics/rerender_saved_compose_trajectories.py \
-  docs/trajectory_diagnostics/legacy_prequotient/full_trajectories_step6250
+  /tmp/compose-rgm-trajectory-rerender
 ```
+
+The rerender utility intentionally rewrites PNGs and JSON in its target
+directory. Run it on a scratch copy, as above, because RDKit depiction can vary
+across versions even when the molecular trajectory is identical.
 
 Cloud entry points and production recipes live in [`modal_apps/`](../modal_apps/)
 and [`recipes/`](../recipes/). Generated checkpoints, serialized path caches,
-rollout tensors, datasets, and credentials are intentionally excluded from Git;
-their small JSON/PNG evidence records are retained when they are necessary to
-interpret a scientific decision.
+rollout tensors, full training datasets, and credentials are intentionally
+excluded from Git. One frozen 5,000-SMILES held-out reference subset and small
+JSON/CSV/PNG evidence records are intentionally retained because they are
+needed to interpret and reproduce the archived stage-1 evaluation.
 
 ## Next gated sequence
 
-1. Finish the exact ring-support performance gate without weakening semantic
-   support or introducing rejection sampling.
-2. Run the full local suite and a fresh H100 preflight.
-3. Launch the fresh flexible-size, quotient-correct unconditional run with
+1. Run the fresh H100 preflight for the locally verified exact-support compiler.
+2. Launch the fresh flexible-size, quotient-correct unconditional run with
    early stopping and checkpointed validation.
-4. At the first credible checkpoint, render 100 ancestral samples and audit
+3. At the first credible checkpoint, render 100 ancestral samples and audit
    event rates, atom-count trajectories, ring phenotypes, Graft self-transitions,
    validity, connectivity, uniqueness, and novelty.
-5. Freeze one checkpoint and evaluate 2,000 samples for FCD and its mean versus
+4. Freeze one checkpoint and evaluate 2,000 samples for FCD and its mean versus
    covariance decomposition.
-6. Add the valid-rewrite recovery objective, then run the matched QED and
+5. Add the valid-rewrite recovery objective, then run the matched QED and
    multi-objective guidance comparisons required by Paper 1.
 
 Validity makes conditional generation unusually actionable because the oracle,

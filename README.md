@@ -16,8 +16,9 @@ labels, beam/candidate-bank ring decoder, or MIS-centric reverse sampler.
 
 For a collaborator taking over the project, read
 [`docs/HANDOFF.md`](docs/HANDOFF.md) first. The complete artifact map is in
-[`docs/ARTIFACT_INDEX.md`](docs/ARTIFACT_INDEX.md). The three canonical HTML
-research plans are versioned in [`docs/research_plans/`](docs/research_plans/),
+[`docs/ARTIFACT_INDEX.md`](docs/ARTIFACT_INDEX.md), and the dated live workstream
+is in [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md). The three canonical
+HTML research plans are versioned in [`docs/research_plans/`](docs/research_plans/),
 and the full historical “pancaking” trajectory that motivated the Graft
 successor quotient is preserved under
 [`docs/trajectory_diagnostics/legacy_prequotient/`](docs/trajectory_diagnostics/legacy_prequotient/).
@@ -144,7 +145,8 @@ pytest
   21,909 verified micro lowerings (1.83x path compression). A ring-frequency
   audit records both molecule-level topology prevalence and operator-mark
   frequencies; it is saved in `results/ring_tracelet_frequency_audit.json`.
-- Tracelet teacher successors are verified to lie in the finite inference
-  fiber. Integration of that fiber into the learned rate model and the matched
-  macro-aware baseline is the next experimental gate; the earlier FCD result
-  remains a 200-sample directional result, not a final benchmark estimate.
+- Tracelet teacher successors are verified to lie in the production marked
+  fiber, and the factorized semantic ring decoder is integrated into both
+  teacher scoring and ancestral sampling. The current gate is exact-support
+  throughput followed by a fresh quotient-correct run; the archived step-6,250
+  FCD and trajectories predate that correction and remain diagnostic only.
