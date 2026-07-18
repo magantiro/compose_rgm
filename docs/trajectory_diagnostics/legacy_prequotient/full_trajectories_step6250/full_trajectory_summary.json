@@ -1,0 +1,49 @@
+[
+  {
+    "trajectory_index": 32,
+    "trajectory_seed": 9200789697982655181,
+    "selected_checkpoint_step": 6250.0,
+    "events": 118,
+    "event_counts": {
+      "atom_delete": 9,
+      "atom_restate": 3,
+      "bond_reroute": 103,
+      "ring_system_grow": 3
+    },
+    "unique_states": 30,
+    "state_revisits": 89,
+    "immediate_reversals": 0,
+    "exhausted_event_budget": false,
+    "png": "full_trajectory_step6250_index32.png",
+    "png_pages": [
+      "full_trajectory_step6250_index32_page01.png",
+      "full_trajectory_step6250_index32_page02.png",
+      "full_trajectory_step6250_index32_page03.png",
+      "full_trajectory_step6250_index32_page04.png"
+    ],
+    "canonical_self_transitions": 89
+  },
+  {
+    "trajectory_index": 75,
+    "trajectory_seed": 16960640654357234745,
+    "selected_checkpoint_step": 6250.0,
+    "events": 37,
+    "event_counts": {
+      "atom_insert": 8,
+      "atom_restate": 3,
+      "bond_reorder": 1,
+      "bond_reroute": 22,
+      "ring_system_grow": 3
+    },
+    "unique_states": 38,
+    "state_revisits": 0,
+    "immediate_reversals": 0,
+    "exhausted_event_budget": false,
+    "png": "full_trajectory_step6250_index75.png",
+    "png_pages": [
+      "full_trajectory_step6250_index75_page01.png",
+      "full_trajectory_step6250_index75_page02.png"
+    ],
+    "canonical_self_transitions": 0
+  }
+]
