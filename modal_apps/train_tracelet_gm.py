@@ -487,6 +487,9 @@ def _run_remote(
             "python": platform.python_version(),
             "torch": torch.__version__,
             "rdkit": rdkit.__version__,
+            "cuda_device_name": (
+                torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
+            ),
         },
         "source_sha256": _source_fingerprint(),
         "data": {
@@ -626,6 +629,28 @@ def preflight_stage(
     run_label: str = "tree_fcd_transfer_a100_preflight",
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
+    return _run_remote(
+        run_label=run_label,
+        smoke=False,
+        preflight=True,
+        recipe_name=recipe_name,
+    )
+
+
+@app.function(
+    image=image,
+    gpu="H100",
+    cpu=24.0,
+    memory=65536,
+    timeout=60 * 60,
+    volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
+)
+def h100_preflight_stage(
+    run_label: str = "tree_fcd_transfer_h100_preflight",
+    recipe_name: str = RECIPE_NAME,
+) -> dict[str, object]:
+    """Resource-matched H100 control for cost-per-update selection."""
+
     return _run_remote(
         run_label=run_label,
         smoke=False,
@@ -954,6 +979,7 @@ def pipeline_stage(
 def main(
     smoke: bool = False,
     preflight: bool = False,
+    h100_preflight: bool = False,
     compile_only: bool = False,
     train_only: bool = False,
     evaluate_only: bool = False,
@@ -968,6 +994,7 @@ def main(
         (
             smoke,
             preflight,
+            h100_preflight,
             compile_only,
             train_only,
             evaluate_only,
@@ -976,7 +1003,8 @@ def main(
     )
     if modes > 1:
         raise ValueError(
-            "smoke, preflight, compile-only, train-only, evaluate-only, and "
+            "smoke, preflight, h100-preflight, compile-only, train-only, "
+            "evaluate-only, and "
             "rollout-evaluate-only are exclusive"
         )
     if smoke:
@@ -989,6 +1017,12 @@ def main(
         if run_label == "tree_fcd_transfer_stage1":
             run_label = "tree_fcd_transfer_a100_preflight"
         result = preflight_stage.remote(run_label, recipe_name)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+    if h100_preflight:
+        if run_label == "tree_fcd_transfer_stage1":
+            run_label = "tree_fcd_transfer_h100_preflight"
+        result = h100_preflight_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return
     if rollout_evaluate_only:

@@ -18,6 +18,7 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
         "_run_remote",
         "smoke_stage",
         "preflight_stage",
+        "h100_preflight_stage",
         "compile_stage",
         "train_stage",
         "evaluate_stage",
