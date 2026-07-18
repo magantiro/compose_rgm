@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COMPOSE Two-Paper Execution Plan</title>
+  <style>
+    :root{--paper:#fbfcfd;--surface:#f2f6f8;--raise:#fff;--ink:#172230;--muted:#596b79;--faint:#8695a3;
+      --line:#dce4e9;--soft:#e9eef2;--accent:#315f83;--accent2:#254a66;--as:#e8f0f6;--good:#176d49;
+      --gs:#e5f1ea;--warn:#925817;--ws:#f6ecdd;--bad:#96394c;--bs:#f6e7ea;
+      --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+      --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--paper);color:var(--ink);
+      font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:1120px;margin:0 auto;padding:24px 24px 90px}.nav{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:30px;
+      padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--raise);position:sticky;top:10px;z-index:10;
+      box-shadow:0 8px 24px rgba(29,48,61,.06);font-family:var(--mono);font-size:11.5px}.nav a{padding:5px 9px;
+      border-radius:7px;text-decoration:none;color:var(--muted)}.nav a.current{background:var(--as);color:var(--accent2);font-weight:700}
+    .mast{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:38px;align-items:end;border-bottom:1px solid var(--line);
+      padding:28px 0 34px;margin-bottom:46px}.kicker{font:700 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;
+      color:var(--accent);margin:0 0 14px}h1{font-family:var(--serif);font-size:clamp(36px,5.6vw,59px);font-weight:600;
+      letter-spacing:-.025em;line-height:1.01;margin:0 0 15px;max-width:17ch}.dek{font-family:var(--serif);font-size:clamp(18px,2.4vw,22px);
+      line-height:1.43;font-style:italic;color:var(--muted);max-width:64ch;margin:0}.meta{display:grid;gap:9px;padding:18px;
+      border:1px solid var(--line);border-radius:11px;background:var(--raise);font:12px var(--mono);color:var(--muted)}
+    .meta div{display:grid;grid-template-columns:86px 1fr;gap:8px}.meta b{color:var(--ink)}main{max-width:980px}
+    section{margin-top:58px;scroll-margin-top:80px}.head{display:flex;align-items:baseline;gap:13px;border-bottom:1px solid var(--soft);
+      padding-bottom:10px;margin-bottom:20px}.num{font:700 12px var(--mono);color:var(--accent)}h2{font-family:var(--serif);
+      font-size:clamp(23px,3vw,31px);font-weight:600;line-height:1.12;letter-spacing:-.012em;margin:0}h3{font-size:16px;
+      margin:29px 0 8px}p{margin:0 0 15px}.lede{font-size:18px;line-height:1.55}strong{font-weight:680}
+    a{color:var(--accent2);text-underline-offset:3px}.mono,code{font-family:var(--mono);font-size:.9em}code{background:var(--surface);
+      border-radius:5px;padding:1px 5px}.thesis,.callout{padding:20px 22px;border:1px solid var(--line);border-radius:10px;
+      background:var(--surface);margin:18px 0}.thesis{border-left:4px solid var(--accent);background:var(--as)}.label{font:700 11px var(--mono);
+      letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}.thesis .statement{font:21px/1.43 var(--serif);margin:0}
+    .callout.good{background:var(--gs);border-color:#c9dfd2}.callout.good .label{color:var(--good)}.callout.warn{background:var(--ws);
+      border-color:#e8d5b8}.callout.warn .label{color:var(--warn)}.callout.bad{background:var(--bs);border-color:#e7cbd1}
+    .callout.bad .label{color:var(--bad)}.callout p:last-child{margin-bottom:0}.grid{display:grid;gap:14px;margin:17px 0}
+    .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{padding:18px 19px;border:1px solid var(--line);border-radius:10px;background:var(--raise)}.card .tag{font:700 11px var(--mono);
+      letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin:0 0 7px}.card h3{margin:0 0 7px;font-size:16px}
+    .card p{font-size:14px;line-height:1.52;color:var(--muted);margin:0}.table{overflow-x:auto;margin:17px 0;border:1px solid var(--line);
+      border-radius:10px;background:var(--raise)}table{width:100%;border-collapse:collapse;min-width:720px;font-size:13.5px}th,td{text-align:left;
+      vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--soft)}thead th{background:var(--surface);color:var(--muted);
+      font:700 10.5px var(--mono);letter-spacing:.055em;text-transform:uppercase}tbody tr:last-child td{border-bottom:0}
+    tr.shared td{background:color-mix(in srgb,var(--accent) 6%,transparent)}caption{caption-side:bottom;padding:10px 12px;
+      text-align:left;color:var(--faint);font-size:12px;font-style:italic}ul,ol{margin:0 0 16px;padding-left:1.28em}li{margin:0 0 7px}
+    li::marker{color:var(--faint)}.steps{list-style:none;padding:0;margin:16px 0}.steps li{display:grid;grid-template-columns:88px 1fr;
+      gap:16px;padding:16px 0;margin:0;border-top:1px solid var(--soft)}.steps li:first-child{border-top:0}.key{width:fit-content;height:fit-content;
+      padding:5px 8px;border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));border-radius:7px;background:var(--as);
+      color:var(--accent2);font:700 11px var(--mono)}.body b{display:block;margin-bottom:3px}.body span{display:block;color:var(--muted);font-size:14px}
+    .body .gate{margin-top:6px;color:var(--good);font:12px var(--mono)}.status{display:inline-block;padding:2px 7px;border-radius:20px;
+      white-space:nowrap;font:700 10.5px var(--mono)}.done{background:var(--gs);color:var(--good)}.active{background:var(--as);color:var(--accent2)}
+    .pending{background:var(--ws);color:var(--warn)}footer{max-width:980px;margin-top:66px;padding-top:20px;border-top:1px solid var(--line);
+      color:var(--faint);font:11.5px var(--mono)}
+    @media(max-width:820px){.mast{grid-template-columns:1fr;gap:22px}.grid.three{grid-template-columns:1fr}}
+    @media(max-width:620px){.wrap{padding:16px 12px 70px}.nav{position:static}.grid.two{grid-template-columns:1fr}.steps li{grid-template-columns:1fr;gap:7px}h1{max-width:none}}
+    @media print{body{background:#fff;color:#000;font-size:10.5pt}.wrap{max-width:none;padding:0}.nav{display:none}.mast{margin-bottom:18px}section{margin-top:24px}.card,.callout,.thesis{break-inside:avoid}.table{overflow:visible;break-inside:auto}table{min-width:0;font-size:9.4pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:#000}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="COMPOSE paper program">
+    <a href="paper1_compose_methods.html">Paper 1 · COMPOSE methods</a>
+    <a href="paper2_compose_lipid.html">Paper 2 · COMPOSE-Lipid</a>
+    <a class="current" href="compose_two_paper_execution_plan.html">Shared execution plan</a>
+  </nav>
+
+  <header class="mast">
+    <div>
+      <p class="kicker">Canonical Program Roadmap · Two Papers, One Frozen Core</p>
+      <h1>COMPOSE execution plan</h1>
+      <p class="dek">A gated program for introducing and validating the structured molecular RGM construction, moving quickly to conditional design, and translating the same frozen substrate into prospective ionizable-lipid discovery.</p>
+    </div>
+    <div class="meta">
+      <div><b>Paper 1</b><span>ICLR methods</span></div>
+      <div><b>Paper 2</b><span>Nature Biotechnology translation</span></div>
+      <div><b>Shared core</b><span>versioned RGM executor, model, and sampler</span></div>
+      <div><b>Strategy</b><span>sufficient unconditional → headline conditional</span></div>
+      <div><b>Execution gate</b><span>credible base + recovery + matched QED proof</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="decision">
+      <div class="head"><span class="num">00</span><h2>The operating decision</h2></div>
+      <div class="thesis"><p class="label">Locked program</p><p class="statement">Paper 1 makes stochastic chemical rewriting plus Generator Matching the methodological contribution, uses unconditional generation as a strict sufficiency gate, and puts its empirical weight behind conditional generation and optimization. Paper 2 keeps the original six-figure translational story. It does not require Paper 1 publication, but our chosen execution policy starts lipid model training only after COMPOSE clears a credible unconditional-generator gate and one decisive conditional/optimization proof.</p></div>
+      <div class="grid three">
+        <div class="card"><p class="tag">Do prove</p><h3>A real generator</h3><p>Target-free ancestral sampling, credible distribution learning, diversity, coverage, no topology pathology, and 100% committed-state validity/connectivity.</p></div>
+        <div class="card"><p class="tag">Do headline</p><h3>Conditional design</h3><p>Property targeting, valid-successor guidance, recovery-trained editing, and similarity-constrained optimization under matched oracle budgets.</p></div>
+        <div class="card"><p class="tag">Do not do</p><h3>Die on FCD</h3><p>Use FCD as one frozen diagnostic. Reopen the base for diagnosed coverage, covariance, size, ring, or collapse failures—not for endless incremental metric shaving.</p></div>
+      </div>
+    </section>
+
+    <section id="scope">
+      <div class="head"><span class="num">01</span><h2>Paper boundary and claim ownership</h2></div>
+      <div class="table"><table>
+        <thead><tr><th>Dimension</th><th>Paper 1 · COMPOSE</th><th>Paper 2 · COMPOSE-Lipid</th><th>Shared artifact</th></tr></thead>
+        <tbody>
+          <tr><td>Central claim</td><td>RGM specializes Generator Matching to admissible matches of a bidirectional, validity-closed molecular rewrite system—including coordinated Graft and whole-ring-system events—and learns their contextual rates over complete connected molecules. <strong>To our knowledge, COMPOSE is the first validity-closed, non-monotone flexible-size molecular generator trained through Generator Matching, with learned transitions between complete connected molecules.</strong></td><td>To our knowledge, the first learned de-novo ionizable-lipid generator whose model-sampled candidates are prospectively synthesized, formulated, and validated in vivo; lipid-adapted RGM is the engine.</td><td>Claim ledger with required evidence and prohibited overclaims.</td></tr>
+          <tr><td>Method</td><td>Declared molecular state space, guarded rules, match fibers, successor quotient, chemically admissible bridge, teacher process, loss, prior/coupling, sampler, and guarantees.</td><td>Lipid-specific chemistry scope, guards, data, source choice, recovery curriculum, synthesis eligibility, and guidance configuration.</td><td>Semantic version of executor/model interface.</td></tr>
+          <tr><td>Unconditional</td><td>Public drug-like benchmark; sufficient and credible, not necessarily SOTA.</td><td>Strong lipid-specific fidelity, diversity, novelty, and usable candidate yield.</td><td>Frozen evaluator and result registry.</td></tr>
+          <tr><td>Headline</td><td>Conditional targeting and similarity-constrained molecular optimization.</td><td>Prospective hit-rate enrichment, biodistribution, target-cell delivery, and functional round 2.</td><td>Guidance/reward APIs and audit logs.</td></tr>
+          <tr><td>Validity</td><td>Pathwise closure within the declared 2D molecular state space under guarded rewrites.</td><td>Same graph guarantee plus separate synthesis and biology evidence.</td><td>Independent executor/sanitization audit.</td></tr>
+          <tr><td>What is not claimed</td><td>Not first rewriting, CTMC, GM, flexible size, or molecular validity method; molecular grammars and CoCoGraph already establish validity-by-construction in other formalisms. The owned intersection is guarded learned-rate GM, non-monotone flexible editing, coordinated rewrite marks, and complete connected molecular states. Not synthesis or 3D validity.</td><td>Not first AI lipid design, first lipid generator, or first AI-plus-in-vivo study separately. The claimed novelty is their missing conjunction: a learned de-novo lipid generator prospectively validated in vivo.</td><td>Dated prior-art matrix that distinguishes learned sampling from enumeration, prediction, and ranking.</td></tr>
+          <tr><td>Direct lineage</td><td>Paper 1 supplies the new structured molecular RGM construction; generic conditional-to-marginal and latent-program projection identities are inherited from GM/LPGM.</td><td>Our GEM 2026 synthesis-constrained discrete-diffusion study is the fixed-size, fixed-topology Ugi-scaffold computational precursor; COMPOSE-Lipid must self-cite it, reproduce it on a matched subset, and separate every reused artifact from the new RGM and prospective evidence.</td><td>Precursor overlap ledger and matched internal baseline.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="dependencies">
+      <div class="head"><span class="num">02</span><h2>Dependency contract</h2></div>
+      <div class="table"><table>
+        <thead><tr><th>Item</th><th>Paper 1</th><th>Paper 2 work before candidate lock</th><th>Prospective candidate lock</th></tr></thead>
+        <tbody>
+          <tr class="shared"><td>Rewrite semantics + executor</td><td>hard dependency</td><td>lipid adapter builds against it</td><td>must be frozen and requalified after any change</td></tr>
+          <tr class="shared"><td>Marked-rate model + ancestral sampler</td><td>hard dependency</td><td>needed for retrospective lipid modeling</td><td>must be frozen</td></tr>
+          <tr><td>Paper 1 authorization package</td><td>best unconditional checkpoint + recovery qualification + matched QED result</td><td>hard dependency under the chosen execution policy</td><td>frozen executor/model/sampler API must remain qualified</td></tr>
+          <tr><td>Paper 1 benchmark checkpoint</td><td>required for Paper 1</td><td>must be credible before lipid execution begins; weights need not transfer directly</td><td>general validation evidence required</td></tr>
+          <tr><td>Paper 1 conditional success</td><td>headline</td><td>one matched proof is required to authorize Paper 2; the full matrix may finish later</td><td>full reward/guidance qualification required for Arm B</td></tr>
+          <tr><td>Paper 1 submission or acceptance</td><td>milestone</td><td>not required</td><td>not required</td></tr>
+          <tr><td>Lipid corpus + kernel extension</td><td>not required</td><td>queued until the Paper 1 authorization gate</td><td>must be frozen</td></tr>
+          <tr><td>Lipid oracle + prospective protocol</td><td>not required</td><td>queued until the Paper 1 authorization gate</td><td>hard dependency</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout good"><p class="label">Dependency versus chosen order</p><p>Scientifically, Paper 2 does not depend on Paper 1 submission or acceptance. Operationally, we choose a staged sequence: <strong>Paper 1 unconditional sufficiency → recovery/guidance machinery → QED optimization proof → lipid kernel and base training → lipid oracle and Arms A/B → prospective lock.</strong> Paper 2 planning and dataset placeholders may be prepared now, but no lipid generator or oracle campaign is launched before the QED go-signal. This is risk control, not a shortcut: both papers retain their complete experiment programs.</p></div>
+    </section>
+
+    <section id="artifacts">
+      <div class="head"><span class="num">03</span><h2>Canonical shared artifacts</h2></div>
+      <div class="table"><table>
+        <thead><tr><th>ID</th><th>Artifact</th><th>Required contents</th><th>Owner</th><th>Freeze rule</th></tr></thead>
+        <tbody>
+          <tr><td>S1</td><td>Claim ledger</td><td>exact claim, evidence, status, paper ownership, inherited GM/LPGM theory, prior validity-by-construction work, forbidden stronger wording, dated literature check</td><td>[Paper leads]</td><td>review at every result freeze</td></tr>
+          <tr><td>S2</td><td>Rewrite specification</td><td>state grammar, rules, matches, application conditions, payloads, executors, inverses, alias quotient</td><td>[Methods + chemistry]</td><td>semantic version; downstream requalification on change</td></tr>
+          <tr><td>S3</td><td>Ring-system specification</td><td>topology catalog/hash, train-only frequencies, Kekulé aliases, support projection, full-system lowerings</td><td>[Cheminformatics]</td><td>no validation/test mining</td></tr>
+          <tr><td>S4</td><td>Prior/coupling card</td><td>tree sampler, size law, source-target coupling, program randomization, recovery mixture, seeds</td><td>[Methods]</td><td>training and sampling source marginals must match</td></tr>
+          <tr><td>S5</td><td>RGM objective card</td><td>conditional CTMC, time convention, rate loss, bridge correctness or unbiasedness, inherited GM/LPGM projection identity, stratification weights, rate factorization</td><td>[Theory + ML]</td><td>unit-tested equations and code hash</td></tr>
+          <tr><td>S6</td><td>Ancestral sampler card</td><td>hazard/event draw, legal masks, stopping rule, event budget, stall behavior, no endpoint access</td><td>[ML]</td><td>deterministic seed replay</td></tr>
+          <tr><td>S7</td><td>Evaluation manifests</td><td>splits, reference hashes, quick/final sample counts, seeds, metrics, baseline provenance, hardware</td><td>[Evaluation]</td><td>freeze before confirmatory selection</td></tr>
+          <tr><td>S8</td><td>Result registry</td><td>checkpoint/config hashes, metrics, CIs, trajectories, PNGs, failure atlases, compute</td><td>[Evaluation]</td><td>append-only</td></tr>
+          <tr><td>S9</td><td>Lipid data card</td><td>source/license, molecule/formulation separation, deduplication, study/scaffold/linker splits, exclusions</td><td>[Lipid data]</td><td>freeze before final lipid training</td></tr>
+          <tr><td>S10</td><td>Oracle card</td><td>endpoint, covariates, splits, calibration, AD, abstention, checkpoint, preprocessing</td><td>[Oracle + biology]</td><td>freeze before generation</td></tr>
+          <tr><td>S11</td><td>Candidate-lock package</td><td>generator/oracle/selection hashes, arms, budgets, routes, formulation, QC, power, preregistration</td><td>[PI + stats + wet lab]</td><td>immutable before prospective results</td></tr>
+          <tr><td>S12</td><td>Precursor overlap ledger</td><td>GEM-paper citation; reused data, preprocessing, code, checkpoints, text, and figures; common Ugi subset; matched precursor baseline; claim-by-claim delta</td><td>[Paper leads]</td><td>freeze before Paper 2 result integration and review at submission</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="streams">
+      <div class="head"><span class="num">04</span><h2>Workstreams and activation order</h2></div>
+      <div class="grid two">
+        <div class="card"><p class="tag">A · Shared core</p><h3>RGM semantics and infrastructure</h3><p>Freeze executor, exact teacher replay, alias quotient, dense marked-rate model, source/coupling contract, ancestral sampler, operator/time diagnostics, throughput, and reproducibility.</p></div>
+        <div class="card"><p class="tag">B · Paper 1 base</p><h3>Unconditional sufficiency</h3><p>Finish current run with early stopping, restore best checkpoint, audit ring/size/Graft behavior, iterate only on diagnosed failures, and run matched public baselines.</p></div>
+        <div class="card"><p class="tag">C · Paper 1 headline</p><h3>Conditional and optimization</h3><p>Implement valid recovery supervision, property conditioning, local valid-successor guidance, KL-anchored reward fine-tuning, and matched targeting/optimization protocols.</p></div>
+        <div class="card"><p class="tag">D · Paper 1 analysis</p><h3>Formal contract and ablations</h3><p>Prove closure, bounded-domain reachability, finite total hazard/non-explosion, quotient and presentation invariance, and bridge correctness; then measure effective program multiplicity and test source, matched macro-versus-micro, teacher, factorization, and hard-support mechanisms.</p></div>
+        <div class="card"><p class="tag">E · queued after P1-G7</p><h3>Lipid chemistry and provenance</h3><p>After authorization: define chemistry scope; audit licenses; canonicalize/deduplicate; create study/scaffold/linker splits; separate molecule identity from formulation/cargo/route/dose/assay. Exact sources will be inserted when supplied.</p></div>
+        <div class="card"><p class="tag">F · queued after P1-G7</p><h3>Oracle and prospective design</h3><p>After authorization: lock target profile; train/calibrate the hard-split oracle; define AD/abstention; power the arms; confirm routes; freeze formulation/QC, randomization, blinding, and endpoints.</p></div>
+      </div>
+    </section>
+
+    <section id="p1gates">
+      <div class="head"><span class="num">05</span><h2>Paper 1 quantitative gates</h2></div>
+      <ol class="steps">
+        <li><span class="key">P1-G0</span><span class="body"><b>Formal and semantic contract</b><span>Formal closure; reachability/communicating-class statement for the declared bounded domain; finite-match and rate assumptions implying finite total hazard/non-explosion; permutation, automorphism, and presentation invariance of the successor generator. Verify with zero invalid or disconnected commits across ≥100,000 randomized executor events, exact reversible round trips, exhaustive small-state mask/executor and alias-rate agreement, and zero production ring-ear or scalar-closure teacher events.</span><span class="gate">Exit: the mathematical object is well posed and the implementation reproduces it.</span></span></li>
+        <li><span class="key">P1-G1</span><span class="body"><b>Bridge, compiler, and teacher support</b><span>Prove each certified program is a valid endpoint-conditioned bridge and the implemented conditional target is exact or unbiased; freeze chemistry scope and splits; ≥99% exact compiler coverage on declared eligible train/validation/test endpoints; 100% exact reconstruction for retained programs; 100% teacher successor presence in the production fiber; training and inference source-size marginal TV &lt;0.01.</span><span class="gate">Exit: bridge correctness is established with no silent truncation or target/test leakage.</span></span></li>
+        <li><span class="key">P1-G2</span><span class="body"><b>Training integrity</b><span>Validation-driven early stopping restores the true best checkpoint; exact and batched teachers agree on a fixed audit set; hazard/family calibration is finite; no operator starvation; fixed-seed sampling reproduces.</span><span class="gate">Exit: scaled learning is trustworthy before chemistry tuning.</span></span></li>
+        <li><span class="key">P1-G3</span><span class="body"><b>Unconditional sufficiency</b><span>Development: fixed 2,000-sample quick manifest, with FCD ≤7 as a stretch goal. Final: ≥10,000 ancestral samples/seed, ≥3 seeds, 100% all-step validity/connectivity, ≥99% uniqueness, ≥90% novelty, ≤0.5% stall/budget failure, faithful size/charge/ring/property marginals, competitive precision/recall, and no cage/macrocycle/fusion pathology.</span><span class="gate">Decision: proceed once the base is credible and covering. Missing the FCD stretch target alone does not hold conditional work hostage; a gross mean/covariance or coverage failure does.</span></span></li>
+        <li><span class="key">P1-G4</span><span class="body"><b>Conditional targeting</b><span>Reproduce exact GrIDDD/FreeGress protocols; ≥3 seeds and bootstrap CIs; 100% all-step validity/connectivity; ≥95% within-target uniqueness; match or beat the strongest comparable target MAE on predeclared tasks under all-attempt denominators.</span><span class="gate">Exit: at least two targeting tasks show competitive accuracy without validity or diversity tradeoff.</span></span></li>
+        <li><span class="key">P1-G5</span><span class="body"><b>Optimization headline</b><span>Exact similarity thresholds and starting sets; fixed oracle calls and proposal budgets; provisional bars: ZINC QED success &gt;45.1%, penalized-logP improvement &gt;2.70 at δ=0.4, DRD2 success &gt;5%; diversity and pathwise validity reported.</span><span class="gate">Language: use SOTA only if matched lower confidence bounds clear the comparator; parity plus path validity remains useful but is described precisely.</span></span></li>
+        <li><span class="key">P1-G6</span><span class="body"><b>Mechanism and transport qualification</b><span>Measure effective successor multiplicity, teacher mass, NLL, calibration, and recovery success; synthetic λ/M check under stated symmetry assumptions; real-data association across datasets. Run matched Graft-versus-micro and whole-ring-versus-micro decompositions with the same endpoints and supervision budget, reporting program length, successor entropy, recovery accuracy, convergence, compute-normalized quality, and optimization. Compare hard support with a matched proposal-plus-rejection control.</span><span class="gate">Fallback: if interventions or assumptions fail, retain transport and validity-efficiency as diagnostics, not headline causal laws.</span></span></li>
+        <li><span class="key">P1-G7</span><span class="body"><b>Paper 2 authorization package</b><span>P1-G0–G3 passed; restored best unconditional checkpoint and 10,000-sample report frozen; recovery suite passed across required operator families; valid-successor guidance/reward loop runs without support violations; matched ZINC-QED optimization completed for ≥3 seeds using the comparator's starts, fingerprint, similarity threshold, oracle, proposal/oracle-call budgets, and all-attempt denominator; no severe diversity collapse or oracle exploitation.</span><span class="gate">Decision: a competitive, credible controllability result is sufficient to authorize lipid work even if it is not a clean SOTA win. This gate authorizes Paper 2 execution; it does not truncate the remaining Paper 1 benchmark program.</span></span></li>
+      </ol>
+    </section>
+
+    <section id="p2gates">
+      <div class="head"><span class="num">06</span><h2>Paper 2 readiness gates</h2></div>
+      <ol class="steps">
+        <li><span class="key">P2-G0</span><span class="body"><b>Prior art, precursor, and target profile</b><span>Dated matrix for our GEM 2026 synthesis-constrained diffusion paper, LUMI-lab, MOLEA, Wang et al., LiGen, other synthesis-aware generators, COMET, AGILE/LiON, and LNPDB. Classify every system as learned molecular generation, latent optimization, combinatorial/enumerated proposal, prediction, or ranking; record whether its own proposals were prospectively synthesized, formulated, and tested in vivo. Freeze the GEM-to-COMPOSE-Lipid overlap ledger plus target cell/tissue, route, cargo, dose, formulation policy, primary endpoint, hit threshold, and minimum functional claim.</span><span class="gate">Queued for activation after P1-G7; retain “to our knowledge” and rerun immediately before submission.</span></span></li>
+        <li><span class="key">P2-G1</span><span class="body"><b>Data readiness</b><span>Separate virtual structural corpus, measured lipids, formulation-response records, and internal prospective data; complete provenance/licensing, deduplication, study/reaction IDs, leakage-resistant splits, and target-specific counts. Replace all provisional source/count language when the dataset package is supplied.</span><span class="gate">Queued after P1-G7; do not describe 1.5M measured lipids without a manifest.</span></span></li>
+        <li><span class="key">P2-G2</span><span class="body"><b>Lipid kernel readiness</b><span>Audit elements, charges, protonation, stereochemistry policy, and sizes; ≥99% exact program support on declared eligible splits; zero committed validity/connectivity failures; practical lipid-size throughput.</span><span class="gate">The C/N/O/F small-molecule kernel is not assumed lipid-ready.</span></span></li>
+        <li><span class="key">P2-G3</span><span class="body"><b>Frozen base lipid generator</b><span>10,000 independent ancestral samples; 100% committed-state validity/connectivity; ≥99% uniqueness; ≥90% exact novelty plus scaffold/linker novelty; faithful architecture distributions; no deletion or topology pathology; adequate synthesis-filter yield.</span><span class="gate">Required before prospective generation is locked.</span></span></li>
+        <li><span class="key">P2-G4</span><span class="body"><b>Frozen oracle</b><span>Leave-study-out and chemistry-held-out performance, calibration, uncertainty coverage, AD abstention, simple/published baselines, and explicit formulation/route/cargo/dose/assay handling. Suggested minimum: AUROC ≥0.75 and PR-AUC ≥2× prevalence with ECE ≤0.10, or Spearman ≥0.40 with calibrated uncertainty.</span><span class="gate">If it fails, switch to an active-learning pilot; do not lock a large oracle-led panel.</span></span></li>
+        <li><span class="key">P2-G5</span><span class="body"><b>Arm B readiness</b><span>Reward improvement across seeds/oracle members; unchanged hard support; matched compute; no diversity collapse, extreme chemistry, uncertainty inflation, or AD escape.</span><span class="gate">If it fails, Arm A proceeds; Paper 2 does not wait.</span></span></li>
+        <li><span class="key">P2-G6</span><span class="body"><b>Candidate lock</b><span>Power analysis, route/reagent confirmation, diverse matched panel, formulation/QC SOPs, randomization, blinding, exclusions, statistics, independent replication, and immutable S11 package.</span><span class="gate">No prospective assay result before this lock.</span></span></li>
+        <li><span class="key">P2-G7</span><span class="body"><b>Prospective and functional proof</b><span>Round 1 hit-rate enrichment, biodistribution, target-cell localization, tolerability, and independent confirmation; Round 2 linker-frozen optimization, functional cargo, durability, mechanism, and SAR.</span><span class="gate">Luciferase-only delivery is not the intended final venue bar.</span></span></li>
+      </ol>
+    </section>
+
+    <section id="matrix">
+      <div class="head"><span class="num">07</span><h2>Experiment matrices</h2></div>
+      <h3>Paper 1</h3>
+      <div class="table"><table>
+        <thead><tr><th>Block</th><th>Question</th><th>Required comparison</th><th>Principal output</th></tr></thead>
+        <tbody>
+          <tr><td>P1-E1</td><td>Is unconditional RGM sufficient?</td><td>matched partner flow model, DiGress/DeFoG, CoCoGraph, and a valid-by-construction grammar/autoregressive baseline</td><td>FCD components, validity, uniqueness, exact/scaffold novelty, precision/recall, 36-property and topology marginals</td></tr>
+          <tr><td>P1-E2</td><td>Did the model learn revision rather than nominal edit heads?</td><td>construction-only vs construction+recovery; perturbation depth and teacher variants</td><td>legal-successor recall, inverse-family accuracy, distance reduction, exact/plausible recovery, steps, per-family starvation</td></tr>
+          <tr><td>P1-E3</td><td>Does RGM target properties?</td><td>DiGress, FreeGress, GrIDDD; Morph only where representation and protocol truly match</td><td>MAE/tolerance success, achieved-vs-requested calibration, diversity, validity, oracle calls</td></tr>
+          <tr><td>P1-E4</td><td>Does it optimize molecules?</td><td>exact GrIDDD/GCPN and other released matched optimizers</td><td>success/improvement, similarity, no-solution rate, diversity, oracle efficiency, paired CIs</td></tr>
+          <tr><td>P1-E5</td><td>What does stochastic rewriting buy?</td><td>hard legal fiber vs matched proposal/rejection with the same model/data/optimizer</td><td>all-step validity, usable oracle efficiency, wall time, invalid/rejected compute</td></tr>
+          <tr><td>P1-E6</td><td>Do coordinated rewrite marks improve learnability?</td><td>Matched Graft vs primitive rewire and whole-ring vs primitive ring decomposition, with identical endpoints and supervision/compute accounting; plus resize, recovery, and bond-revision ablations</td><td>compiler support, certified program length, successor/teacher entropy, recovery accuracy, convergence, compute-normalized quality, ring fidelity, editing, and optimization</td></tr>
+          <tr><td>P1-E7</td><td>Which source/coupling/teacher matters?</td><td>one atom vs carbon tree; size-matched vs flexible-size; canonical vs randomized programs</td><td>reachability, teacher entropy, rate calibration, convergence, source-memory artifacts</td></tr>
+          <tr><td>P1-E8</td><td>Does the implemented quotient reproduce the canonical molecular successor generator?</td><td>factorized marked lift vs exhaustive small-state canonical-successor generator, including permutations, automorphisms, and alternative rewrite presentations</td><td>successor-set/rate equality to 1e-6 and calibration</td></tr>
+          <tr><td>P1-E9</td><td>Does transport analysis predict behavior?</td><td>controlled multiplicity plus real-data bins/interventions on ≥2 datasets</td><td>teacher mass, effective multiplicity, NLL, partial correlations, recovery success</td></tr>
+          <tr><td>P1-E10</td><td>Is it practical?</td><td>model, event-budget, CTMC-step, and batching sweeps</td><td>samples/s, events/s, memory, GPU-hours, quality/runtime Pareto</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Paper 2</h3>
+      <div class="table"><table>
+        <thead><tr><th>Block</th><th>Question</th><th>Required comparison</th><th>Principal output</th></tr></thead>
+        <tbody>
+          <tr><td>P2-E1</td><td>Is the corpus defensible?</td><td>source/split/provenance audits</td><td>coverage, duplication, leakage, exclusions</td></tr>
+          <tr><td>P2-E2</td><td>Is COMPOSE-Lipid a real generator, and what improves over our precursor?</td><td>our GEM fixed-size/fixed-topology diffusion model on the common Ugi subset; LiGen; synthesis-DAG/MCTS generation; and matched enumeration/generative controls where data and code permit</td><td>validity, exact/scaffold/linker novelty, diversity, coverage, nearest-neighbor memorization, architecture marginals, size/topology flexibility, and matched precursor deltas</td></tr>
+          <tr><td>P2-E3</td><td>Is generated chemistry usable?</td><td>rational and reaction-accessible design spaces</td><td>architecture coverage, route feasibility, expert audit</td></tr>
+          <tr><td>P2-E4</td><td>Is the oracle trustworthy?</td><td>descriptor linear/tree, message-passing, and released lipid predictors; random shown only as a sanity check, study/scaffold/linker/temporal holdouts primary</td><td>external performance, calibration, uncertainty coverage, applicability-domain behavior</td></tr>
+          <tr><td>P2-E5</td><td>Does AI enrich prospective hits?</td><td>Arm A/B vs matched expert/DoE/random controls</td><td>hit rate, effect size, biodistribution, target cells, safety</td></tr>
+          <tr><td>P2-E6</td><td>Does guided RGM add value?</td><td>Arm A vs B at fixed budget, only if gated</td><td>enrichment, novelty, oracle exploitation</td></tr>
+          <tr><td>P2-E7</td><td>Can a generated hit be improved?</td><td>lead vs linker-frozen derivatives</td><td>functional delivery, SAR, durability/specificity</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="benchmark-contracts">
+      <div class="head"><span class="num">08</span><h2>Benchmark protocol registry</h2></div>
+      <div class="callout"><p class="label">No benchmark by name only</p><p>Every result row receives a versioned protocol record before training. A published number is never copied as a comparator when the dataset, preprocessing, target grid, starting set, fingerprint, oracle, search budget, or denominator differs. When exact reproduction is impossible, the result is labeled contextual rather than head-to-head.</p></div>
+
+      <h3>Fields frozen for every experiment</h3>
+      <div class="table"><table>
+        <thead><tr><th>Registry block</th><th>Required locked fields</th><th>Non-negotiable rule</th></tr></thead>
+        <tbody>
+          <tr><td>Data</td><td>release URL/DOI, raw and processed hashes, canonicalization, salts/tautomers/stereochemistry/charges, element and size policy, exact split indices, reference-set hash</td><td>Baselines train and evaluate on the same eligible support or are reported in a separate table.</td></tr>
+          <tr><td>Selection</td><td>validation cadence, model-selection metric, checkpoint restoration rule, early-stopping rule, hyperparameter search budget</td><td>The test set never selects a checkpoint, guidance scale, threshold, or operator setting.</td></tr>
+          <tr><td>Generation</td><td>source prior and size law, CTMC horizon/step or event rule, sample count, event/proposal/oracle-call/time budget, stall handling, seeds</td><td>Every attempted trajectory stays in the denominator, including stalls and budget exhaustion.</td></tr>
+          <tr><td>Comparator</td><td>paper, repository, commit, checkpoint, configuration, preprocessing patch, model capacity, and search procedure</td><td>“Matched” means the same data, oracle, starts, budget, and evaluation code—not merely the same task name.</td></tr>
+          <tr><td>Statistics</td><td>training and sampling seeds, resampling unit, confidence-interval method, multiplicity policy, primary/secondary endpoints</td><td>Use ≥3 independent seeds; use paired molecule/start-level bootstrap when the design is paired.</td></tr>
+          <tr><td>Compute</td><td>hardware, precision, batch size, workers, training GPU-hours, sampling wall time, peak memory, software/RDKit/metric versions</td><td>Report quality and efficiency together; do not hide invalid/rejected baseline compute.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Paper 1 · exact benchmark contracts</h3>
+      <div class="table"><table>
+        <thead><tr><th>ID</th><th>Dataset and task</th><th>Frozen comparisons and budgets</th><th>Required report</th></tr></thead>
+        <tbody>
+          <tr><td>U1 · primary</td><td><b>GuacaMol distribution learning.</b> Freeze the exact GuacaMol release and declared grammar-eligible processed split; retain a separate manifest for the current C/N/O/F ≤40-heavy-atom development subset.</td><td>Partner <span class="mono">rank_d500k</span> flow model on the identical evaluator; retrained DiGress/DeFoG; CoCoGraph BASE/FPS where support matches; at least one valid-by-construction grammar/autoregressive model. Development: 2,000 samples. Confirmation: 10,000 independent ancestral samples/seed, ≥3 seeds.</td><td>Committed-state and terminal validity/connectivity; stalls; uniqueness; exact/scaffold novelty; FCD with mean/covariance terms; precision/recall or density/coverage; 36-property JS panel; atom/bond/charge/size/ring-system marginals; macrocycle/cage rates; operator counts, minimum size, Graft/resize balance; samples/s and GPU-hours.</td></tr>
+          <tr><td>R1 · editor proof</td><td><b>Held-out valid recovery.</b> Apply <span class="mono">k∈{1,2,4,8}</span> legal perturbations to held-out clean molecules, stratified by atom restate, grow/shrink, Graft/inverse, bond reorder, whole-ring-system change, mixed change, and scaffold-preserving change.</td><td>Construction-only; construction+recovery; recovery depth/mixture sweeps; canonical inverse teacher versus randomized valid inverse programs. The clean endpoint constructs and scores the benchmark but is never exposed to target-free inference.</td><td>Teacher-successor probability; legal successor recall@K; inverse-family accuracy; certified-distance reduction; exact recovery when identifiable; Tanimoto/property restoration otherwise; steps; pathwise validity; per-family use/starvation and confidence intervals.</td></tr>
+          <tr><td>T1 · QM9</td><td><b>Property targeting.</b> Dipole moment μ, HOMO, and joint μ+HOMO only if the exact 2D property computation and FreeGress/GrIDDD split are reproduced.</td><td>DiGress, FreeGress, GrIDDD on their released target grid. Freeze targets, number of targets, samples/target, condition-dropout policy, and validation-only guidance-scale selection. OOD targets form a separate table.</td><td>MAE, success within predeclared tolerance, achieved-versus-requested calibration, validity/connectivity, per-target uniqueness/novelty, scaffold diversity, quality–guidance Pareto, oracle calls and all-attempt denominator.</td></tr>
+          <tr><td>T2 · ZINC-250k</td><td><b>Property targeting.</b> logP, QED, joint logP+QED, and molecular weight under exact released preprocessing.</td><td>DiGress, FreeGress, and GrIDDD using identical split, target grid, atom/charge policy, samples/target, node/size handling, and metric code. Morph is a conceptual flexible-size neighbor unless a genuinely matched 3D protocol exists.</td><td>Same targeting pack as T1, plus achieved size distribution and error stratified by target quantile and graph-size change.</td></tr>
+          <tr><td>O1 · authorization</td><td><b>ZINC QED constrained optimization.</b> This is the Paper 2 go/no-go proof.</td><td>Use the exact GrIDDD setup: 800 starting molecules with QED 0.7–0.8; 20 candidates per start; success requires at least one candidate with QED in [0.9, 1.0] and fingerprint Tanimoto ≥0.4 to its start. Freeze the comparator commit, starts/hashes, preprocessing, QED implementation, fingerprint type/radius/length, proposal and oracle-call budget, event/time budget, selection rule, seeds, and no-solution policy.</td><td>All-attempt success; mean/median/best improvement; similarity; fraction with no valid improvement; output diversity; all-step validity; oracle calls and wall time/success; paired bootstrap CI. Compare the lower confidence bound against the reproduced 45.1% bar.</td></tr>
+          <tr><td>O2 · full optimization</td><td><b>Penalized logP and DRD2.</b> Exact released starting sets and similarity-constrained protocols; add a multiobjective QED–SA–diversity study as secondary, not a replacement.</td><td>GrIDDD, GCPN, and other released baselines only under identical starts, oracle, fingerprint, thresholds, and budgets. Pre-register thresholds and report every attempted start.</td><td>Success and improvement at each similarity threshold; no-solution rate; diversity; Pareto fronts; oracle calls/success; paired CIs; compute; validity of every committed state.</td></tr>
+          <tr><td>M1 · mechanism</td><td><b>Support, operators, teacher, transport, and efficiency.</b></td><td>Carbon tree vs one atom vs size-matched tree; fixed vs flexible-size coupling; matched Graft/whole-ring macro vs primitive micro decompositions; recovery and bond-revision on/off; empirical vs flattened ring base measure; canonical vs randomized teacher; hard fiber vs matched propose-and-reject; factorization/time/event-budget sweeps.</td><td>Compiler coverage and reachability for support-changing ablations; program length; successor entropy; rate calibration; effective multiplicity; recovery accuracy; convergence; quality/runtime Pareto; reward per oracle call; invalid/rejected compute. Broader causal or generalization language only after dedicated intervention evidence.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Paper 2 · benchmark and prospective contracts</h3>
+      <div class="table"><table>
+        <thead><tr><th>ID</th><th>Contract</th><th>Required design</th><th>Required report</th></tr></thead>
+        <tbody>
+          <tr><td>L0 · dataset registry</td><td>Insert the user-supplied lipid sources after P1-G7. Separate virtual structures, experimentally measured ionizable lipids, formulation-response rows, and internal prospective data.</td><td>Version/license/hash/count for every source; salt/tautomer/stereo/protonation policy; structure and study deduplication; reaction/formulation/route/cargo/dose/assay IDs; leave-study, scaffold, linker, reaction-family, and temporal splits.</td><td>Flow diagram from raw rows to each split; overlap/leakage report; counts by endpoint and study; exclusions with reasons. No aggregate “millions measured” language without this manifest.</td></tr>
+          <tr><td>L1 · generator</td><td>Unconditional COMPOSE-Lipid qualification and novel-linker stress test.</td><td>10,000 samples/seed, ≥3 seeds; reproduce our GEM synthesis-constrained diffusion precursor on the identical Ugi-supported subset, then compare with LiGen, synthesis-DAG/MCTS generators, and matched combinatorial/enumeration controls only where structural scope and code/data permit.</td><td>Validity/connectivity; uniqueness; exact/scaffold/linker novelty; nearest-neighbor memorization curves; head/linker/tail architecture, tail count/length/branching, degradable motifs, charge/protonation and size marginals; flexible-size/topology gain over the precursor; synthesis-filter yield; blinded route review; throughput.</td></tr>
+          <tr><td>L2 · oracle</td><td>Lung endpoint prediction and uncertainty.</td><td>Descriptor linear/tree baselines, message-passing model, and relevant released lipid predictors. Random split is diagnostic only; leave-study-out is primary, with chemistry/linker/temporal holdouts. Formulation, route, cargo, dose, and assay are modeled or stratified explicitly.</td><td>AUROC/AUPRC or regression metrics as appropriate; calibration; uncertainty coverage; AD/abstention; subgroup performance; external CIs. Lock the numeric gate after endpoint prevalence and attainable baselines are known.</td></tr>
+          <tr><td>L3 · computational selection</td><td>Arm A frozen-generator ranking versus gated Arm B guided RGM.</td><td>Same base checkpoint, oracle ensemble, AD and feasibility rules, proposal/oracle-call/compute budget, diversity selector, and candidate count. Arm B additionally freezes reward, KL coefficient, update steps, seeds, and uncertainty penalty.</td><td>Predicted enrichment, novelty/diversity, chemistry/AD drift, uncertainty inflation, oracle-member agreement, and exact budget accounting. Arm B is dropped if it exploits the oracle.</td></tr>
+          <tr><td>L4 · prospective round 1</td><td>AI-selected candidates versus expert/rational and random/DoE controls.</td><td>Power-derived synthesized panel; budgets matched by compounds actually synthesized/tested; locked formulation, cargo, route, dose, batch, QC, randomization, blinding, exclusions, multiplicity correction, endpoint, and hit threshold.</td><td>All attempted syntheses; QC yield; hit-rate risk difference/ratio with CIs; effect sizes; biodistribution; target-cell localization; tolerability; independent confirmation. The assay, not oracle score, adjudicates success.</td></tr>
+          <tr><td>L5 · functional round 2</td><td>Linker-frozen RGM optimization of a reproducible round-1 hit.</td><td>Prespecified lead and trigger; frozen linker condition; matched parent/control; functional cargo; durability and safety plan; candidate and analysis lock before results.</td><td>Functional delivery or disease-relevant benefit, cellular specificity, durability, tolerability, SAR, mechanism, and independent confirmation. Reporter-only data do not satisfy the intended final venue bar.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="timeline">
+      <div class="head"><span class="num">09</span><h2>Relative timeline and synchronization points</h2></div>
+      <div class="table"><table>
+        <thead><tr><th>Phase</th><th>Relative time</th><th>Active technical work</th><th>Work permitted to overlap</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr><td>P0</td><td>Weeks 0–2</td><td>freeze RGM semantics and evaluator; finish early-stopped training; restore and evaluate the best checkpoint</td><td>claim ledger and manuscript scaffolding only</td><td>P1-G0–G2 integrity decision</td></tr>
+          <tr><td>P1</td><td>Weeks 2–5</td><td>unconditional engineering loop; trajectory/ring/size diagnostics; matched U1 baselines</td><td>freeze exact R1/T1/T2/O1/O2 protocols</td><td>P1-G3 unconditional sufficiency</td></tr>
+          <tr><td>P2</td><td>Weeks 5–7</td><td>recovery curriculum and R1 editor qualification; valid-successor guidance and KL-anchored reward loop</td><td>Paper 1 theory and support tests that do not consume the critical path</td><td>recovery/guidance machinery ready</td></tr>
+          <tr><td>P3</td><td>Weeks 7–9</td><td>matched three-seed ZINC-QED authorization experiment</td><td>no substantive lipid model/oracle work</td><td>P1-G7 Paper 2 go/no-go</td></tr>
+          <tr><td>P4</td><td>Weeks 9–14</td><td>full Paper 1 targeting/optimization/ablation matrix</td><td>if P1-G7 passes: ingest supplied lipid datasets, extend kernel, build splits/oracle, begin lipid base</td><td>Paper 1 result hierarchy + lipid data/kernel readiness</td></tr>
+          <tr><td>P5</td><td>Weeks 14–18</td><td>Paper 1 multi-seed freeze, figures, manuscript, code archive</td><td>lipid generator and oracle qualification; Arm A/B dry run</td><td>P2-G3/G4/G5 readiness</td></tr>
+          <tr><td>P6</td><td>thereafter</td><td>Paper 1 submission/reviewer reserve</td><td>freeze S11; preregister; synthesis, blinded round 1, independent confirmation, gated round 2</td><td>candidate-lock and functional-story decisions</td></tr>
+        </tbody>
+        <caption>Wet-lab dates must be set from actual formulation, animal, cargo, synthesis, and assay lead times rather than forced into the ML schedule.</caption>
+      </table></div>
+    </section>
+
+    <section id="decisions">
+      <div class="head"><span class="num">10</span><h2>Stop/go rules and risks</h2></div>
+      <div class="table"><table>
+        <thead><tr><th>Observed condition</th><th>Decision</th><th>Claim consequence</th></tr></thead>
+        <tbody>
+          <tr><td>FCD misses the quick ≤7 stretch target, but coverage/marginals are credible and conditional tasks work</td><td>proceed; diagnose, but do not hold the program hostage</td><td>scope unconditional claim as sufficient/competitive</td></tr>
+          <tr><td>FCD reflects severe covariance collapse, size/ring mismatch, or missing reward-region coverage</td><td>reopen base training before final freeze</td><td>conditional results are not trusted until coverage is restored</td></tr>
+          <tr><td>Conditional/optimization does not beat matched comparators</td><td>iterate recovery/guidance; submit only if structural/method ablations independently carry the paper</td><td>remove SOTA language</td></tr>
+          <tr><td>Validity-efficiency ablation fails</td><td>retain support as a guarantee</td><td>remove causal sample-efficiency claim</td></tr>
+          <tr><td>Transport multiplicity assumptions fail</td><td>retain the scoped diagnostic figure if useful</td><td>remove broader causal or generalization language; keep the result explicitly conditional on stated symmetry assumptions</td></tr>
+          <tr><td>Lipid oracle fails external/calibration gate</td><td>do not lock a large oracle-selected panel; use active-learning pilot</td><td>Paper 2 remains generator development</td></tr>
+          <tr><td>Arm B exploits oracle or collapses diversity</td><td>drop it from required wet lab; preserve Arm A</td><td>report as negative computational result or round-2-only</td></tr>
+          <tr><td>A prior learned lipid generator with prospective in-vivo validation is verified</td><td>retain the study; narrow by validity-closed RGM, matched selection-versus-guidance, lung target, or linker-constrained transfer</td><td>remove the broad “first learned generator plus in vivo” sentence, but do not collapse the translational story</td></tr>
+          <tr><td>Blinded route feasibility is poor</td><td>revise lipid support/training/synthesis constraints</td><td>do not call generated set synthesis-ready</td></tr>
+          <tr><td>Shared core changes after dry run</td><td>requalify generator, oracle-selection outputs, and S11</td><td>candidate lock is invalid until repeated</td></tr>
+        </tbody>
+      </table></div>
+      <div class="grid two">
+        <div class="card"><p class="tag">Technical risks</p><h3>Process and model</h3><p>Compiler bias, teacher multiplicity, ring long-tail support, unsupervised inverse mass, source-memory artifacts, stalls, event-budget truncation, chemistry exclusions, and throughput at lipid sizes.</p></div>
+        <div class="card"><p class="tag">Translational risks</p><h3>Data and experiments</h3><p>Prior-art drift, study leakage, assay/formulation confounding, oracle exploitation, underpowered arms, synthesis failure, strong luminescence without functional depth, and manuscript overlap.</p></div>
+      </div>
+    </section>
+
+    <section id="actions">
+      <div class="head"><span class="num">11</span><h2>Immediate action queue</h2></div>
+      <ol class="steps">
+        <li><span class="key">01</span><span class="body"><b>Adopt these three HTML files as the canonical strategy set</b><span>Paper 1, Paper 2, and this roadmap cross-reference one another. Record future strategic changes here before implementing them.</span><span class="gate">Owner: [Paper leads] · now</span></span></li>
+        <li><span class="key">02</span><span class="body"><b>Freeze RGM semantic candidate v1</b><span>State grammar, operator payloads, whole-ring system, source prior, compiler, rate objective, and sampler. The ring payload decoder must use one shared, exactly normalized executable support for teacher scoring and ancestral sampling, with resonance aliases quotiented at the molecular-successor level.</span><span class="gate">Owner: [Methods + chemistry] · current blocker</span></span></li>
+        <li><span class="key">03</span><span class="body"><b>Launch the fresh quotient-correct unconditional run</b><span>The developmental 2,000-sample evaluation and failure audit are complete. After Action 02 passes, compile the final paths, train from scratch with early stopping, restore the selected checkpoint, and repeat the fixed 2,000-sample diagnostic with operator rates, minimum size, Graft/resize balance, ring taxonomy, cages, macrocycles, and representative trajectories.</span><span class="gate">Owner: [ML + evaluation]</span></span></li>
+        <li><span class="key">04</span><span class="body"><b>Freeze final public benchmark protocol</b><span>Splits, reference hashes, 10,000-sample final counts, baselines, seeds, metric versions, and result schema.</span><span class="gate">Owner: [Evaluation]</span></span></li>
+        <li><span class="key">05</span><span class="body"><b>Implement the principled recovery objective</b><span>Short valid perturbation/inverse trajectories; explicit supervision for shrink, ring delete, Graft reversal, restatement, and scaffold-preserving correction.</span><span class="gate">Owner: [Methods]</span></span></li>
+        <li><span class="key">06</span><span class="body"><b>Run the first conditional headline gate</b><span>ZINC QED optimization at fixed oracle budget and 100% committed-state validity, with Arm A-style filtering/guidance and a matched comparator.</span><span class="gate">Owner: [Conditional generation]</span></span></li>
+        <li><span class="key">07</span><span class="body"><b>Freeze the exact QED authorization protocol</b><span>Comparator commit, starts, oracle, fingerprint, Tanimoto rule, proposals and oracle calls, event/time budget, failure denominator, seeds, and paired-CI analysis.</span><span class="gate">Owner: [Evaluation + conditional generation]</span></span></li>
+        <li><span class="key">08</span><span class="body"><b>Build and qualify construct-plus-recovery supervision</b><span>Run the R1 perturbation suite across grow/shrink, restate, bond revision, Graft/inverse, whole-ring-system, mixed, and scaffold-preserving strata.</span><span class="gate">Owner: [Methods]</span></span></li>
+        <li><span class="key">09</span><span class="body"><b>Run the three-seed QED authorization experiment</b><span>Use the frozen protocol and restored qualified base; report all-attempt success, improvement, similarity, diversity, validity, oracle efficiency, compute, and paired confidence intervals.</span><span class="gate">Owner: [Conditional generation + evaluation]</span></span></li>
+        <li><span class="key">10</span><span class="body"><b>Hold the Paper 2 go/no-go meeting</b><span>Review the frozen P1-G7 package. If it passes, activate the user-supplied lipid dataset registry, kernel extension, base generator, and oracle work without waiting for Paper 1 submission.</span><span class="gate">Owner: [PI + paper leads]</span></span></li>
+      </ol>
+      <h3>First queue after P1-G7 authorization</h3>
+      <ol class="steps">
+        <li><span class="key">11</span><span class="body"><b>Ingest the lipid dataset package</b><span>Replace placeholders with exact source versions, licenses, counts, hashes, endpoint/study metadata, deduplication, and hard splits.</span><span class="gate">Owner: [Lipid data]</span></span></li>
+        <li><span class="key">12</span><span class="body"><b>Lock the Paper 2 target product profile</b><span>Cell/tissue, route, cargo, dose, formulation policy, primary endpoint, hit threshold, functional endpoint, and synthesis/animal budget.</span><span class="gate">Owner: [PI + biology + wet lab]</span></span></li>
+        <li><span class="key">13</span><span class="body"><b>Qualify the lipid kernel and base generator</b><span>Extend supported chemistry, compile the eligible corpus, train COMPOSE-Lipid, and pass P2-G2/G3 before any prospective candidate lock.</span><span class="gate">Owner: [Methods + lipid chemistry]</span></span></li>
+        <li><span class="key">14</span><span class="body"><b>Build the hard-split lung oracle</b><span>Descriptor, tree, graph, and released-predictor baselines; study/scaffold/linker/temporal holdouts; calibration, uncertainty, AD, and abstention.</span><span class="gate">Owner: [Oracle + statistics]</span></span></li>
+      </ol>
+    </section>
+
+    <section id="sources">
+      <div class="head"><span class="num">12</span><h2>Primary literature checkpoints</h2></div>
+      <ul>
+        <li><a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/819aaee144cb40e887a4aa9e781b1547-Abstract-Conference.html">Generator Matching</a>; <a href="https://arxiv.org/abs/2605.20547">Latent Process Generator Matching</a>; <a href="https://arxiv.org/abs/2106.02573">restricted stochastic rewriting CTMC semantics</a>; <a href="https://arxiv.org/abs/1503.06022">thermodynamic graph rewriting</a>. Generic endpoint/program marginalization is inherited from GM/LPGM.</li>
+        <li><a href="https://arxiv.org/abs/2606.07239">Morph</a>; <a href="https://arxiv.org/abs/2506.09018">Edit Flows</a>; <a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/2438d634f0ed1640934d31376c110a92-Abstract-Conference.html">DDSBM</a>; <a href="https://arxiv.org/abs/2506.15725">GrIDDD</a>; <a href="https://www.nature.com/articles/s42256-026-01229-5">CoCoGraph</a>; <a href="https://proceedings.mlr.press/v97/kajino19a.html">Molecular Hypergraph Grammar</a>; <a href="https://arxiv.org/abs/2203.08031">data-efficient molecular graph grammars</a>.</li>
+        <li><a href="https://openreview.net/forum?id=6RFQqfjD06">Our GEM 2026 synthesis-constrained discrete-diffusion paper</a> is the Ugi-scaffold-conditioned, fixed-size/fixed-topology computational precursor: 99% validity, 100% scaffold retention, 62% novelty, and in-silico activity evidence, without prospective synthesis or in-vivo validation.</li>
+        <li><a href="https://doi.org/10.1016/j.cell.2026.01.012">LUMI-lab</a> and <a href="https://www.nature.com/articles/s41587-026-03109-0">MOLEA</a> are AI-plus-in-vivo but not reported learned molecular generators; <a href="https://aclanthology.org/2026.acl-long.392/">LiGen</a> and the <a href="https://arxiv.org/abs/2412.00928">synthesis-aware lipid generator</a> are generative but lack prospective in-vivo validation.</li>
+        <li><a href="https://www.nature.com/articles/s41467-024-55072-6">Wang et al.</a> combine SHAP-informed head/tail enumeration with predictive screening and in-vivo validation; the distinction from a learned sampler must remain explicit.</li>
+        <li><a href="https://www.nature.com/articles/s41467-026-68818-1">LNPDB</a>; <a href="https://www.nature.com/articles/s41565-025-01975-4">COMET/LANCE</a>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>COMPOSE two-paper execution plan · canonical program index · all numeric thresholds are prespecified working gates and must be reconciled with exact comparator protocols before final claims</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COMPOSE — Rewrite Generator Matching research plan</title>
+<style>
+  :root {
+    --paper:#fbfcfd; --surface:#f2f6f8; --raise:#ffffff;
+    --ink:#172230; --muted:#586a7a; --faint:#8695a3;
+    --line:#dce4e9; --line-soft:#e9eef2;
+    --accent:#0d6e78; --accent-ink:#0a555d; --accent-soft:#e4f1f2;
+    --win:#16794c; --win-soft:#e4f2ea;
+    --caveat:#9c5a12; --caveat-soft:#f6ecdd;
+    --have:#0d6e78;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace;
+    --maxw:74ch;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0d1420; --surface:#131c29; --raise:#16202e;
+      --ink:#e7edf4; --muted:#9aa9b9; --faint:#6b7b8c;
+      --line:#26333f; --line-soft:#1e2a36;
+      --accent:#43b6c0; --accent-ink:#66c9d1; --accent-soft:#13323540;
+      --win:#4bc98a; --win-soft:#12301f;
+      --caveat:#dc9b45; --caveat-soft:#2a2214;
+      --have:#43b6c0;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#fbfcfd; --surface:#f2f6f8; --raise:#ffffff;
+    --ink:#172230; --muted:#586a7a; --faint:#8695a3;
+    --line:#dce4e9; --line-soft:#e9eef2;
+    --accent:#0d6e78; --accent-ink:#0a555d; --accent-soft:#e4f1f2;
+    --win:#16794c; --win-soft:#e4f2ea; --caveat:#9c5a12; --caveat-soft:#f6ecdd; --have:#0d6e78;
+  }
+  :root[data-theme="dark"]{
+    --paper:#0d1420; --surface:#131c29; --raise:#16202e;
+    --ink:#e7edf4; --muted:#9aa9b9; --faint:#6b7b8c;
+    --line:#26333f; --line-soft:#1e2a36;
+    --accent:#43b6c0; --accent-ink:#66c9d1; --accent-soft:#13323540;
+    --win:#4bc98a; --win-soft:#12301f; --caveat:#dc9b45; --caveat-soft:#2a2214; --have:#43b6c0;
+  }
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:clamp(28px,5vw,64px) clamp(20px,5vw,28px) 96px;}
+
+  /* masthead */
+  .mast{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:44px;}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 16px;}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5.4vw,44px);line-height:1.08;
+    letter-spacing:-.01em;margin:0 0 14px;text-wrap:balance;}
+  .dek{font-family:var(--serif);font-size:clamp(18px,2.6vw,21px);font-style:italic;color:var(--muted);
+    margin:0;max-width:60ch;line-height:1.4;}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:22px;font-family:var(--mono);
+    font-size:12.5px;color:var(--faint);letter-spacing:.02em;}
+  .meta b{color:var(--muted);font-weight:600;}
+
+  /* sections */
+  section{margin-top:56px;scroll-margin-top:24px;}
+  .eyebrow{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;
+    border-bottom:1px solid var(--line-soft);padding-bottom:10px;}
+  .num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;
+    letter-spacing:.04em;flex:none;}
+  h2{font-family:var(--serif);font-weight:600;font-size:clamp(21px,3.2vw,27px);letter-spacing:-.01em;
+    margin:0;line-height:1.15;text-wrap:balance;}
+  h3{font-family:var(--sans);font-weight:650;font-size:15.5px;letter-spacing:.005em;margin:30px 0 8px;
+    color:var(--ink);}
+  h3 .tag{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--accent);margin-right:9px;}
+  p{margin:0 0 15px;}
+  .lede{font-size:18.5px;line-height:1.55;color:var(--ink);}
+  a{color:var(--accent-ink);text-underline-offset:3px;text-decoration-thickness:1px;}
+  strong{font-weight:650;}
+  em{font-style:italic;}
+  .mono{font-family:var(--mono);font-size:.9em;}
+  .accent{color:var(--accent-ink);font-weight:600;}
+  .win-t{color:var(--win);font-weight:650;}
+  ul,ol{margin:0 0 16px;padding-left:1.25em;}
+  li{margin:0 0 7px;}
+  li::marker{color:var(--faint);}
+
+  /* thesis callout */
+  .thesis{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:22px 24px;margin:8px 0 4px;}
+  .thesis .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 9px;}
+  .thesis p{font-family:var(--serif);font-size:20px;line-height:1.42;margin:0;color:var(--ink);}
+
+  .callout{border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:20px 0;
+    background:var(--surface);}
+  .callout.win{border-color:color-mix(in srgb,var(--win) 34%,var(--line));background:var(--win-soft);}
+  .callout.caveat{border-color:color-mix(in srgb,var(--caveat) 34%,var(--line));background:var(--caveat-soft);}
+  .callout .ttl{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
+    margin:0 0 8px;color:var(--accent);}
+  .callout.win .ttl{color:var(--win);}
+  .callout.caveat .ttl{color:var(--caveat);}
+  .callout p:last-child{margin-bottom:0;}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;margin:18px 0 8px;border:1px solid var(--line);border-radius:10px;
+    background:var(--raise);}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px;}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;background:var(--surface);border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num-c,th.num-c{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;}
+  .beat{color:var(--win);font-weight:650;}
+  .ours td{background:color-mix(in srgb,var(--accent) 7%,transparent);}
+  .ours td:first-child{font-weight:650;color:var(--accent-ink);}
+  caption{caption-side:bottom;text-align:left;font-size:12.5px;color:var(--faint);padding:10px 14px;
+    font-style:italic;}
+
+  /* chips */
+  .chip{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;
+    padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);
+    background:var(--surface);white-space:nowrap;}
+  .chip.have{color:var(--have);border-color:color-mix(in srgb,var(--have) 40%,var(--line));
+    background:var(--accent-soft);}
+  .chip.build{color:var(--caveat);border-color:color-mix(in srgb,var(--caveat) 40%,var(--line));
+    background:var(--caveat-soft);}
+
+  /* contribution grid */
+  .grid{display:grid;gap:14px;margin:18px 0 4px;}
+  @media(min-width:620px){.grid.two{grid-template-columns:1fr 1fr;}}
+  .card{border:1px solid var(--line);border-radius:10px;padding:17px 19px;background:var(--raise);}
+  .card .ci{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600;margin:0 0 7px;
+    letter-spacing:.03em;}
+  .card h4{font-family:var(--serif);font-size:18px;font-weight:600;margin:0 0 7px;line-height:1.25;}
+  .card p{font-size:14.5px;margin:0;color:var(--muted);line-height:1.5;}
+  .card p + p{margin-top:8px;}
+
+  /* milestones */
+  .miles{list-style:none;padding:0;margin:16px 0 4px;counter-reset:m;}
+  .miles li{display:grid;grid-template-columns:auto 1fr;gap:16px;padding:15px 0;
+    border-top:1px solid var(--line-soft);align-items:start;}
+  .miles li:first-child{border-top:none;}
+  .miles .mk{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));border-radius:7px;
+    padding:5px 9px;height:fit-content;white-space:nowrap;background:var(--accent-soft);}
+  .miles .mb b{display:block;font-family:var(--sans);font-weight:650;font-size:15.5px;margin-bottom:3px;}
+  .miles .mb span{font-size:14px;color:var(--muted);}
+  .miles .mb .mgate{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:12px;
+    color:var(--win);}
+
+  footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.02em;}
+  .program-nav{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 28px;padding:8px;border:1px solid var(--line);
+    border-radius:10px;background:var(--raise);font-family:var(--mono);font-size:11.5px;}
+  .program-nav a{padding:5px 9px;border-radius:7px;text-decoration:none;color:var(--muted);}
+  .program-nav a.current{background:var(--accent-soft);color:var(--accent-ink);font-weight:700;}
+  ::selection{background:color-mix(in srgb,var(--accent) 25%,transparent);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="program-nav" aria-label="COMPOSE paper program">
+    <a class="current" href="paper1_compose_methods.html">Paper 1 · COMPOSE methods</a>
+    <a href="paper2_compose_lipid.html">Paper 2 · COMPOSE-Lipid</a>
+    <a href="compose_two_paper_execution_plan.html">Shared execution plan</a>
+  </nav>
+  <header class="mast">
+    <p class="kicker">Research Plan · Methods Paper · Rewrite Generator Matching</p>
+    <h1>COMPOSE: generator-matched stochastic rewriting for molecular generation and optimization</h1>
+    <p class="dek">One learned rewrite process that generates de novo <em>and</em> optimizes toward an oracle: sufficiently competitive unconditionally, strongest in conditional design, and valid and connected at every committed state.</p>
+    <div class="meta">
+      <span><b>Paper 1 of 2</b> methods → ICLR</span>
+      <span><b>Intellectual core</b> stochastic rewriting + Generator Matching</span>
+      <span><b>Companion</b> COMPOSE-Lipid → Nature Biotech</span>
+      <span><b>Empirical strategy</b> sufficient unconditional → headline conditional</span>
+    </div>
+  </header>
+
+  <section id="thesis">
+    <div class="eyebrow"><span class="num">00</span><h2>The thesis</h2></div>
+    <div class="thesis">
+      <p class="lbl">One sentence</p>
+      <p>COMPOSE instantiates Rewrite Generator Matching: stochastic chemical graph rewriting defines the legal molecular state graph and executable events, while Generator Matching learns their contextual firing rates—yielding a target-free, flexible-size generator that is sufficiently competitive de novo and designed to excel at valid conditional generation and optimization.</p>
+    </div>
+    <p style="margin-top:20px" class="lede">The field has quietly told us where the value is. Morph's flexible-size 3D model is most compelling in steering and out-of-distribution design; GrIDDD leads with property targeting and optimization. We do not turn this paper into an FCD arms race. The unconditional model must be valid, diverse, faithful, and covering enough to support downstream design. The headline is the regime where executable editing matters most: <strong>conditional generation and optimization over complete valid molecules.</strong></p>
+    <div class="callout"><p class="ttl">The added intellectual contribution</p><p>This is not merely an operator library. RGM specializes Generator Matching to state-dependent admissible matches of a molecular rewrite system. Certified endpoint-conditioned rewrite programs supply conditional generators; the generic conditional-to-marginal and latent-program projection identities are inherited from Generator Matching and <a href="https://arxiv.org/abs/2605.20547">Latent Process Generator Matching</a>. COMPOSE contributes the chemically admissible bridge and support, contextual rates over complete connected molecules, and coordinated executable marks; inference ancestrally samples those learned rates with no target, compiler, beam search, or terminal repair.</p></div>
+  </section>
+
+  <section id="gap">
+    <div class="eyebrow"><span class="num">01</span><h2>The gap we own</h2></div>
+    <p>The claim is the synthesis, not any ingredient in isolation. Graph rewriting, stochastic CTMC semantics, molecular edit operators, flexible size, Generator Matching, and validity-constrained graph generation all have precedent. COMPOSE makes <em>legal matches of executable chemical rewrite rules</em> the learned infinitesimal events and trains their contextual rates through Generator Matching.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Init</th><th>Validity</th><th>Uncond. reported?</th><th>Conditional / opt.</th><th>Representation / scope</th></tr></thead>
+        <tbody>
+          <tr><td>DiGress</td><td>marginal noise</td><td>~85%</td><td>yes</td><td>guidance</td><td>2D molecular graphs</td></tr>
+          <tr><td>FreeGress</td><td>marginal noise</td><td>partial</td><td>partial</td><td>property targeting</td><td>2D graphs · QM9 / ZINC</td></tr>
+          <tr><td>Morph</td><td>random graph + UOT</td><td>99% (not guaranteed)</td><td>parity only</td><td>property steer + scaffold</td><td>3D geometric graphs · QM9 / GEOM-Drugs</td></tr>
+          <tr><td>GrIDDD</td><td>random graph</td><td>79–94%</td><td>not its headline</td><td>targeting + optimization</td><td>2D graphs · QM9 / ZINC</td></tr>
+          <tr><td>CoCoGraph</td><td>constrained graph moves</td><td>chemical validity reported</td><td>yes</td><td>not its main scope</td><td>2D constrained molecular graphs</td></tr>
+          <tr><td>Molecular graph grammars</td><td>grammar start symbol</td><td>valid outputs by construction</td><td>yes</td><td>grammar-dependent</td><td>variable-size grammar derivations</td></tr>
+          <tr class="ours"><td>COMPOSE</td><td>valid tree prior + learned rewrite CTMC</td><td class="beat">pathwise valid + connected</td><td>yes (sufficiency gate)</td><td>targeting + guidance + reward-FT</td><td>2D complete-molecule rewrite states</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:8px;font-size:14px;color:var(--muted)">This is a mechanism-positioning table, not a scale comparison. Morph addresses 3D geometric generation; COMPOSE addresses 2D constitutional molecular graphs. No advantage is inferred from dataset or atom-count differences.</p>
+    <p style="margin-top:16px">CoCoGraph establishes constrained-valid generation, while molecular graph grammars establish variable-size, motif- and ring-aware valid generation in other formalisms. The claim is therefore not validity or flexible size alone. The gap we own is narrower and stronger: <strong>to our knowledge, COMPOSE is the first validity-closed, non-monotone flexible-size molecular generator trained through Generator Matching, with learned transitions between complete connected molecules.</strong> Its time-inhomogeneous CTMC is defined over guarded chemical rewrite matches and can change size and topology without leaving the declared molecular state space. The transport analysis then tests when the same rewrite vocabulary is most valuable near a desired region.</p>
+  </section>
+
+  <section id="contrib">
+    <div class="eyebrow"><span class="num">02</span><h2>Four contributions</h2></div>
+    <div class="grid two">
+      <div class="card"><p class="ci">C1 · Structured specialization</p><h4>Rewrite Generator Matching</h4><p>We specialize Generator Matching to admissible matches of a stochastic molecular rewrite system: qualitative rules and application conditions define which jumps exist; a neural marked-rate model learns when and where they fire; executable aliases are summed at the canonical chemical successor.</p></div>
+      <div class="card"><p class="ci">C2 · Event construction</p><h4>A validity-closed, coordinated molecular process</h4><p>The production vocabulary is <span class="mono">grow/shrink · atom restate · bond reorder · subtree Graft · whole ring-system grow/delete</span>. Every committed successor passes the same valence, sanitization, and connectivity boundary in training and inference. Graft and whole-ring marks are atomic derived rewrites with verified primitive lowerings—not unstructured multi-edit bundles.</p></div>
+      <div class="card"><p class="ci">C3 · Bridge design</p><h4>Transport-aware construction and editing</h4><p>A directly samplable carbon-tree source, flexible-size coupling, Graft path compression, and whole-ring events are designed to shorten certified programs and reduce delete-to-one-and-regrow supervision. A matched macro-versus-micro ablation must establish that this inductive bias improves learnability; the scoped path-ambiguity analysis predicts that correction is easiest in the small-transport conditional regime.</p></div>
+      <div class="card"><p class="ci">C4 · Result</p><h4>Sufficient de novo; headline conditional</h4><p>First establish a faithful unconditional base with pathwise validity. Then test the paper's strongest empirical claim: property targeting and molecular optimization at 100% committed-state validity, with matched-sample efficiency and coverage rather than unsupported promises of SOTA before the runs exist.</p></div>
+    </div>
+  </section>
+
+  <section id="theory">
+    <div class="eyebrow"><span class="num">03</span><h2>The companion theory: transport and program ambiguity</h2></div>
+    <p class="lede">Rewrite Generator Matching is the primary intellectual contribution. The transport analysis explains which source–target couplings make its rate-learning problem easy or hard and why conditional editing is the natural high-value regime.</p>
+    <p style="margin-top:14px"><strong>The scoped result to prove and test.</strong> Under a single-successor or sparsely sampled program teacher, let <span class="mono">M<sub>eff</sub></span> be the number of exchangeable legal edits that make comparable progress from the same state. When the compiler selects one of those edits, positive teacher mass per exchangeable successor scales like <span class="mono">1/M<sub>eff</sub></span> under the stated symmetry assumptions. Larger transport generally increases path multiplicity and target ambiguity; small-transport correction reduces both. This is a prediction about the coupling and teacher—not an architecture-independent impossibility theorem.</p>
+    <div class="tbl-wrap">
+      <table>
+        <caption>The confirmatory analysis replaces unsupported pilot ratios with reproducible state-level measurements.</caption>
+        <thead><tr><th>Quantity</th><th>Definition</th><th>Prediction</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Remaining transport</td><td>certified steps and graph-edit proxies to endpoint</td><td>larger transport tends to increase program multiplicity</td><td>measure, do not assume</td></tr>
+          <tr><td>Effective multiplicity</td><td><span class="mono">exp H[P(next successor|G,t)]</span> and inverse participation ratio</td><td>teacher mass is spread across more equivalent successors</td><td>primary explanatory variable</td></tr>
+          <tr><td>Per-successor teacher mass</td><td>conditional marginal rate assigned to each canonical successor</td><td><span class="mono">λ/M<sub>eff</sub></span> under explicit symmetry assumptions</td><td>synthetic proof check + real-data fit</td></tr>
+          <tr><td>Learnability</td><td>NLL, calibration, teacher rank, recovery success</td><td>coordinated operators and short recovery paths improve estimation</td><td>required empirical link</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><p class="ttl">How it changes the design</p><p>We do not conclude that large-transport editing is impossible or that per-coordinate models cannot approximate coordinated changes. We hypothesize a learnability advantage from shorter certified programs: source trees are valid and directly samplable; Graft can preserve useful subtrees; whole-ring-system events can replace delayed ring coordination; randomized causal teachers expose more than one valid next correction; and a separate recovery curriculum supplies small-transport editing examples. The confirmatory experiment bins states by path length, effective branching, and teacher successor entropy and includes matched macro-versus-micro interventions.</p></div>
+  </section>
+
+  <section id="method">
+    <div class="eyebrow"><span class="num">04</span><h2>The method</h2></div>
+    <h3><span class="tag">Process</span>Stochastic rewriting supplies the generator support</h3>
+    <p>Let <span class="mono">M<sub>c</sub></span> be the complete, connected molecular graphs admitted by chemistry and hard condition <span class="mono">c</span>, and let <span class="mono">A<sub>c</sub>(G)</span> be the legal marked rewrite matches at state <span class="mono">G</span>. COMPOSE learns the jump generator</p>
+    <div class="callout"><p class="mono" style="margin:0">(L<sub>θ,t,c</sub>f)(G) = Σ<sub>a∈A<sub>c</sub>(G)</sub> q<sub>θ,t</sub>(a|G,c) [ f(T<sub>a</sub>G) − f(G) ].</p></div>
+    <p>The rewrite layer determines rules, matches, application conditions, executors, exact inverses, and the legal state graph. The network learns only non-negative context- and time-dependent rates. If symmetric marks or different executable aliases reach the same canonical molecule, their rates are summed at that successor.</p>
+
+    <h3><span class="tag">Vocabulary</span>Expressive micro rules + verified derived rules</h3>
+    <p>The semantic micro basis contains atom insertion/deletion, atom restatement, and bond insertion/deletion/reordering. The production marked model promotes two preidentified coordination bottlenecks into atomic derived events:</p>
+    <ul>
+      <li><strong>Subtree Graft</strong> atomically cuts one bridge and reconnects the detached component across the cut, preserving connectivity and useful source topology.</li>
+      <li><strong>Whole ring-system grow/delete</strong> jointly commits or removes a complete single, fused, bridged, spiro, or mixed cyclic component, including its bond orders, aromatic semantics, atom labels, charges, and hydrogens.</li>
+    </ul>
+    <p>The production generator contains no learned ring ear and no independent scalar ring closure. A whole-ring mark is one chemically coordinated rewrite, not an arbitrary bundle of simultaneous edits. The implementation may use a versioned, training-derived support catalog for topology and electronic payloads, but each entry is a parameterized executable rewrite with a validity-checked micro lowering and exact inverse semantics—not a terminal fragment token. Catalog scope, split-wise coverage, and misses are reported explicitly.</p>
+
+    <h3><span class="tag">Training</span>Certified programs become Generator Matching teachers</h3>
+    <p>Training samples a target-independent, degree-bounded carbon tree from a declared source distribution and a molecule from the data distribution. A flexible-size compiler grows, shrinks, Grafts, restates, reorders, and commits complete ring systems until the exact endpoint is reached through legal states. A progress CTMC on each certified program provides conditional firing rates. The neural model receives only the current molecule and time. Marginalizing the privileged endpoint and latent program follows the general identities of Generator Matching and Latent Process Generator Matching; the COMPOSE obligation is to construct a chemically admissible bridge and an exact or unbiased conditional target on that bridge.</p>
+    <p>The rate model factorizes total hazard, rewrite family, topology or operand, legal match, and payload. Hard masks come from the rewrite executor; learned scores determine probability only within the legal fiber. This is why a corpus-frequency base measure for common ring topologies does not eliminate learning: it initializes support frequencies, while the network learns the contextual residual.</p>
+
+    <h3><span class="tag">Inference</span>Target-free ancestral CTMC sampling</h3>
+    <p>At inference, sample a fresh source tree from the same source marginal, evaluate the learned hazard and marked rewrite distribution, draw one legal event, commit it, and repeat. There is <strong>no target molecule, compiler, beam search, candidate bank, or terminal repair</strong>. The visible trajectory always consists of complete connected molecular graphs admitted by the declared molecular state space.</p>
+
+    <h3><span class="tag">De novo</span>A sufficiency gate, not the paper's final battleground</h3>
+    <p>The random carbon tree is structured noise, not a scaffold that must survive and not fragment assembly. Flexible-size and recovery supervision expose grow and shrink; Graft is intended to reduce delete-to-one compiler paths; atom restatement and bond/ring events make non-monotone revision available. Whether the learned process actually uses these affordances instead of behaving like any-order construction is an empirical operator-use and trajectory question. We advance once the unconditional process is faithful, diverse, non-memorizing, covering, and computationally tractable. An earlier grow-model FCD near 10 is historical motivation, <strong>not</strong> a result of the final RGM system.</p>
+
+    <h3><span class="tag">Transfer</span>One generator, plus a principled recovery curriculum</h3>
+    <p>A construction-only teacher does not by itself prove local molecular editing. The final training program therefore combines two explicitly logged trajectory distributions:</p>
+    <ul>
+      <li><strong>Base transport</strong> — independently sampled valid tree → corpus molecule; trains target-free de-novo generation, variable size, Graft, retyping, bond revision, and whole-ring construction.</li>
+      <li><strong>Recovery / revision</strong> — apply <span class="mono">k≈1–4</span> valid perturbations to a data molecule and learn the inverse causal rewrite distribution; supplies direct supervision for shrink, ring-system delete, Graft reversal, and small-transport correction.</li>
+    </ul>
+    <p>The base and recovery mixtures share the same state space, executor, rate parameterization, and ancestral sampler. Their mixture weight is an ablation, and operator-use audits must show that editing capability is actually learned rather than inferred from reachability alone.</p>
+
+    <h3><span class="tag">Conditional</span>One model, three levers on a spectrum</h3>
+    <p>The same valid rewrite generator is steered three ways as the target gets rarer:</p>
+    <ol>
+      <li><strong>Property conditioning (classifier-free guidance).</strong> Feed target <span class="mono">y</span> as an input and drop it on ~15% of batches so one model supports conditional and unconditional sampling. Benchmark against FreeGress-style targeting under the matched protocol.</li>
+      <li><strong>Modular inference-time guidance.</strong> Tilt only rates of legal successor rewrites using a frozen oracle or learned value function. The first baseline enumerates or samples valid successors locally; a Doob/value approximation is promoted only if it improves compute–quality tradeoffs.</li>
+      <li><strong>Reward fine-tuning.</strong> Fine-tune the marked CTMC toward a frozen reward with a KL or trajectory anchor to the base. Hard chemistry support is unchanged, but oracle exploitation, diversity collapse, and applicability-domain escape remain empirical risks.</li>
+    </ol>
+  </section>
+
+  <section id="exp">
+    <div class="eyebrow"><span class="num">05</span><h2>Experiments &amp; the numbers to beat</h2></div>
+    <p>Seven result blocks. E3 is the empirical headline; E0 establishes that the structured molecular construction is mathematically and computationally well posed, and E1 establishes a credible generator. E1 remains a sufficiency gate, not an endless battleground.</p>
+
+    <h3>E0 · Rewrite Generator Matching contract <span style="font-weight:400;color:var(--muted)">— prove the method is what we claim</span></h3>
+    <ul>
+      <li><strong>Closure and well-posedness:</strong> prove that every legal rewrite preserves the declared state space; state the finite atom bound, finite-match conditions, and rate assumptions that imply finite total hazard and non-explosion. Empirically audit every committed training and sampling state with the frozen valence grammar, independent RDKit sanitization, and connectivity checks.</li>
+      <li><strong>Bounded reachability:</strong> characterize the communicating class induced by the micro rules and show reachability between the declared bounded source and target domains. State explicitly which chemistry falls outside that domain.</li>
+      <li><strong>Bridge correctness:</strong> prove that each certified program defines a valid endpoint-conditioned generator and that the implemented teacher is exact or unbiased for its conditional Generator Matching target. Report source–target coupling coverage by split and failure class, including single, fused, bridged, spiro, and mixed ring systems.</li>
+      <li><strong>Quotient and invariance:</strong> prove that rates over canonical molecular successors are invariant to atom permutation, automorphisms, and alternative presentations of the same executable rewrite. On enumerable small states, verify that the factorized marked lift and exhaustive alias-aggregated chemical generator produce the same successor set and total successor rates.</li>
+      <li><strong>Executor audit:</strong> report attempted, masked, rejected, and committed events by family; verify exact reversible round trips and teacher-successor support under the production inference fiber.</li>
+      <li><strong>Target-free inference audit:</strong> log that the sampler receives no endpoint, program, oracle, or repair stage and uses the same source marginal and executor as training.</li>
+    </ul>
+
+    <h3>E1 · Unconditional baseline <span style="font-weight:400;color:var(--muted)">— prove the generator, don't win here</span></h3>
+    <p>GuacaMol distribution learning, with MOSES or ZINC as a secondary transfer check. Developmental checkpoint decisions may use 2,000 samples; final FCD and coverage use at least 10,000 independent ancestral samples per seed, at least three seeds, a frozen ChemNet pipeline, and bootstrap confidence intervals. The gate for advancing to conditional is <strong>not best-in-class FCD</strong>—it is pathwise validity, diversity, faithful marginals, coverage, and absence of obvious topology pathology.</p>
+    <div class="tbl-wrap">
+      <table>
+        <caption>Advance to conditional only when every "must clear" row is met. FCD non-SOTA is acceptable by design.</caption>
+        <thead><tr><th>Metric</th><th>Bar to clear</th><th>What it gates</th></tr></thead>
+        <tbody>
+          <tr><td>Validity</td><td class="beat">100% (by construction)</td><td>the structural contract and enabler — non-negotiable, but not standalone novelty</td></tr>
+          <tr><td>Uniqueness</td><td>&gt; 99%</td><td>not mode-collapsed</td></tr>
+          <tr><td>Novelty</td><td>&gt; 90% vs train</td><td>not memorizing</td></tr>
+          <tr><td>FCD</td><td>prespecified competitive band; no severe mean or covariance failure</td><td>credible base, not headline</td></tr>
+          <tr><td>Marginal match (MW, logP, TPSA, rings, rot-bonds, atom &amp; charge)</td><td>KL / W1 ≈ baselines; no visibly-wrong marginal</td><td><strong>faithful, not just valid</strong></td></tr>
+          <tr><td>Coverage / precision (fixed embedding)</td><td>non-inferior to locked baselines</td><td>spans the region guidance will explore</td></tr>
+          <tr><td>Ring taxonomy</td><td>no cage/macrocycle pathology; faithful single/fused/bridged/spiro frequencies</td><td>whole-system ring mechanism works</td></tr>
+          <tr><td>Process use</td><td>nonzero, time-coherent grow/shrink/retype/Graft/ring events</td><td>not collapsed to monotone construction</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><p class="ttl">The real gate is downstream</p><p>Those rows are necessary but not sufficient. The test FCD cannot provide is whether the base covers regions from which legal guidance can reach useful molecules without collapse. Clear the table, freeze the base checkpoint, and let E2/E3 be the true verdict. Reopen unconditional training only for a diagnosed coverage or pathology failure—not merely to shave an incremental FCD point.</p></div>
+
+    <h3>E2 · Conditional property targeting <span style="font-weight:400;color:var(--muted)">— benchmark against GrIDDD / FreeGress under matched protocols</span></h3>
+    <div class="tbl-wrap">
+      <table>
+        <caption>MAE, lower is better. Comparator values remain provisional until starts, preprocessing, budgets, property evaluation, and denominators are reproduced exactly.</caption>
+        <thead><tr><th>Task</th><th class="num-c">GrIDDD</th><th class="num-c">FreeGress</th><th class="num-c">COMPOSE (target)</th><th class="num-c">Validity</th></tr></thead>
+        <tbody>
+          <tr><td>ZINC · MolWeight</td><td class="num-c">4.89</td><td class="num-c">8.96</td><td class="num-c beat">≤ 4.9</td><td class="num-c">GrIDDD 84–88%</td></tr>
+          <tr><td>ZINC · logP</td><td class="num-c">0.19</td><td class="num-c">0.17</td><td class="num-c beat">≤ 0.19</td><td class="num-c">→</td></tr>
+          <tr><td>ZINC · QED</td><td class="num-c">0.04</td><td class="num-c">0.04</td><td class="num-c beat">≤ 0.04</td><td class="num-c">→</td></tr>
+          <tr><td>QM9 · dipole μ</td><td class="num-c">0.66</td><td class="num-c">0.74</td><td class="num-c beat">≤ 0.66</td><td class="num-c">GrIDDD 79–94%</td></tr>
+          <tr class="ours"><td>COMPOSE validity</td><td class="num-c">—</td><td class="num-c">—</td><td class="num-c">—</td><td class="num-c beat">100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:6px;font-size:14px;color:var(--muted)">At matched targeting accuracy, pathwise validity is a meaningful structural advantage only if chemistry fidelity, diversity, sampling budget, and abstentions are also reported; it is not by itself a blanket SOTA claim.</p>
+
+    <h3>E3 · Molecular optimization <span style="font-weight:400;color:var(--accent)">— the headline</span></h3>
+    <div class="tbl-wrap">
+      <table>
+        <caption>Success rate / improvement, higher is better. Values remain provisional until every comparator protocol and denominator is reproduced.</caption>
+        <thead><tr><th>Task</th><th class="num-c">GCPN</th><th class="num-c">GrIDDD</th><th class="num-c">COMPOSE (target)</th></tr></thead>
+        <tbody>
+          <tr><td>ZINC · QED (success)</td><td class="num-c">9.4%</td><td class="num-c">45.1%</td><td class="num-c beat">&gt; 45.1%</td></tr>
+          <tr><td>ZINC · pen. logP δ=0.4 (Δ)</td><td class="num-c">2.49</td><td class="num-c">2.70</td><td class="num-c beat">&gt; 2.70</td></tr>
+          <tr><td>ZINC · DRD2 (success)</td><td class="num-c">4.4%</td><td class="num-c">5.0%</td><td class="num-c beat">&gt; 5%</td></tr>
+          <tr class="ours"><td>Pathwise validity guarantee</td><td class="num-c">not reported</td><td class="num-c">not reported</td><td class="num-c beat">100% committed states</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><p class="ttl">Locked GrIDDD QED reproduction</p><p>Use the same 800 starting molecules, 20 candidates per start, starting-QED band 0.7–0.8, and success definition: at least one candidate with QED in [0.9, 1.0] and fingerprint Tanimoto similarity ≥0.4 to its start. Match preprocessing, QED implementation, fingerprint type and parameters, proposal/oracle budget, selection rule, random seeds, and the all-attempt denominator. Report paired bootstrap confidence intervals and every invalid, duplicate, failed, or abstained attempt rather than silently removing it.</p></div>
+
+    <h3>E4 · The valid-and-connected mechanism <span style="font-weight:400;color:var(--muted)">— test why it helps</span></h3>
+    <p>Do not assert the causal result in advance. Measure reward improvement per oracle call, per proposed event, per committed molecule, and per wall-clock second under matched compute. Compare the hard legal fiber with a carefully matched proposal-plus-rejection variant, logging invalid, disconnected, duplicate, and abstained states. The mechanistic hypothesis is that valid-state guidance spends a larger fraction of its budget on meaningful oracle evaluations; the ablation determines whether that actually produces the sample-efficiency gain.</p>
+
+    <h3>E5 · Transport and teacher-ambiguity analysis <span style="font-weight:400;color:var(--muted)">— validate the scoped prediction</span></h3>
+    <p>Bin training states by remaining program length, effective legal branching, number of progress-equivalent successors, and teacher successor entropy. Measure teacher mass, learned successor rank, family accuracy, calibration, and downstream recovery success. Compare a single canonical program, randomized programs, and causal multi-successor supervision. Test where the <span class="mono">1/M<sub>eff</sub></span> approximation holds and report where it fails.</p>
+
+    <h3>E6 · Ablations</h3>
+    <p><strong>Source/coupling:</strong> null or single atom vs independent carbon tree; primitive delete/regrow vs Graft; size-matched vs flexible-size source. <strong>Coordinated-event mechanism:</strong> match each Graft or whole-ring macro to a primitive micro decomposition under the same endpoint pairs and supervision budget; report certified program length, successor/teacher entropy, recovery accuracy, convergence, wall-clock and oracle cost, compute-normalized sampling quality, and optimization performance. This tests an inductive-bias hypothesis—not an incapability claim about per-coordinate models. <strong>Rings:</strong> scalar micro construction vs atomic whole-ring systems; empirical topology base measure vs uniform. <strong>Learning:</strong> single-program vs randomized/causal teachers; exact successor objective on small states vs factorized marked lift; with/without recovery curriculum. <strong>Control:</strong> filtering vs inference-time rate guidance vs reward fine-tuning across target rarity.</p>
+
+    <h3>E7 · Editing capability <span style="font-weight:400;color:var(--muted)">— prove the promised transfer</span></h3>
+    <p>Similarity-constrained property optimization, scaffold-preserving decoration, and a formula/size-changing edit task. Report success, similarity, property improvement, validity at every state, event counts, scaffold violations, and operator use. This block can be secondary in the main paper, but at least one convincing editing result is required before COMPOSE is described as a unified generator/editor.</p>
+  </section>
+
+  <section id="program">
+    <div class="eyebrow"><span class="num">06</span><h2>Two-paper program — lipids are their own story</h2></div>
+    <p>The same engine carries two papers at two venues. This one introduces and validates the structured molecular RGM construction; the companion applies it to a real translational problem with prospective in-vivo validation. Keeping them separate lets each make its strongest claim without diluting the other.</p>
+    <div class="grid two">
+      <div class="card"><p class="ci">Paper 1 · this doc</p><h4>COMPOSE — methods (ICLR)</h4><p>Rewrite Generator Matching, the validity-closed molecular CTMC, transport-aware teachers, sufficient unconditional distribution learning, and headline conditional generation/optimization on public benchmarks. Establishes <em>methodological credibility</em>.</p></div>
+      <div class="card"><p class="ci">Paper 2 · companion</p><h4>COMPOSE-Lipid — application (Nature Biotechnology)</h4><p>A lipid-adapted rewrite generator with prospective synthesis and in-vivo validation for lung delivery, comparing frozen-oracle selection with validity-preserving guided generation. It explicitly extends our GEM 2026 Ugi-scaffold-conditioned, fixed-size/fixed-topology diffusion precursor and benchmarks against it on the common supported subset. Establishes <em>translational impact</em>.</p></div>
+    </div>
+    <div class="callout"><p class="ttl">Why the split is the right call</p><p>The methods paper owns the structured molecular stochastic-rewrite/Generator-Matching construction, its bridge and support guarantees, and public-benchmark evidence. The lipid paper owns lipid chemistry support, heterogeneous data, oracle validation, synthesis, formulation, in-vivo enrichment, and functional cargo. Lipids are not assumed easy: their size, repeated tails, ionization states, symmetry, and formulation confounding create a different set of problems. The two papers share a frozen core, not a duplicated claim set.</p></div>
+  </section>
+
+  <section id="build">
+    <div class="eyebrow"><span class="num">07</span><h2>What we have vs. what's left</h2></div>
+    <div class="grid two">
+      <div class="card"><p class="ci">Built &amp; validated</p><h4>The engine exists</h4>
+        <p><span class="chip have">done</span> Guarded micro-rewrite executor + exact inverse tests<br>
+        <span class="chip have">done</span> Random carbon-tree prior + flexible-size compiler<br>
+        <span class="chip have">done</span> Subtree Graft + atomic whole-ring grow/delete<br>
+        <span class="chip have">done</span> Conditional CTMC teacher + Generator Matching loss<br>
+        <span class="chip have">done</span> Dense factorized H100 rate model + ancestral sampler<br>
+        <span class="chip have">done</span> Developmental all-step validity and throughput evidence</p></div>
+      <div class="card"><p class="ci">To build</p><h4>The paper's results</h4>
+        <p><span class="chip build">run</span> Frozen multi-seed full-system flexible-size benchmark<br>
+        <span class="chip build">build</span> Recovery / short-valid-edit objective<br>
+        <span class="chip build">build</span> Reward-FT loop (KL-anchored rate/policy update)<br>
+        <span class="chip build">build</span> Property conditioning (classifier-free)<br>
+        <span class="chip build">build</span> Valid-successor oracle guidance<br>
+        <span class="chip build">build</span> Matched QM9 / ZINC targeting + optimization harness<br>
+        <span class="chip build">test</span> Qualify transport, multiplicity, and support-mechanism analyses</p></div>
+    </div>
+
+    <div class="callout caveat"><p class="ttl">Evidence boundary</p><p>The sibling <span class="mono">rank_d500k</span> model's reported FCD 9.96 is not a COMPOSE/RGM result. The latest developmental flexible-size COMPOSE checkpoint produced 2,000/2,000 valid, unique, and novel samples under restricted neutral C/N/O/F chemistry with at most 40 heavy atoms. Against 5,000 held-out references, its full-support FCD was 16.08 (finite-sample bootstrap interval 15.61–16.54); on the matched neutral C/N/O/F≤40 support it was 11.29 (10.82–11.76). The gap is concentrated in covariance, aromatic/fused-ring coverage, and flexible-chain overrepresentation. That checkpoint is retired: it used an obsolete Graft teacher admitting molecularly self-equivalent reroutes and predated the exact semantic ring-payload support gate. These are engineering diagnostics, not the frozen GuacaMol table. Every final claim is populated only from a fresh quotient-trained confirmatory manifest.</p></div>
+
+    <h3 style="margin-top:34px">Milestones</h3>
+    <ol class="miles">
+      <li><span class="mk">M0</span><span class="mb"><b>Freeze the RGM contract</b><span>Version the state grammar, operators, ring catalog, source prior, compiler, objective, sampler, split hashes, and evaluation protocol.</span><span class="mgate">Gate: exact teacher/fiber support; zero illegal commits; no endpoint information at inference.</span></span></li>
+      <li><span class="mk">M1</span><span class="mb"><b>Clear unconditional sufficiency</b><span>Train and evaluate a fresh quotient-correct checkpoint; iterate only on diagnosed coverage, ring, size, or collapse failures; then freeze the base.</span><span class="mgate">Gate: 100% all-step validity/connectivity, ≥99% uniqueness, ≥90% novelty, credible FCD/marginals/coverage.</span></span></li>
+      <li><span class="mk">M2</span><span class="mb"><b>Prove one conditional headline</b><span>Implement the recovery objective and valid-successor guidance or reward-FT; reproduce the exact 800-start, 20-candidate ZINC QED protocol and beat or match 45.1% at the same oracle budget and all-attempt denominator.</span><span class="mgate">Gate: one predeclared task showing the substrate translates into useful design.</span></span></li>
+      <li><span class="mk">M3</span><span class="mb"><b>Fill the conditional matrix</b><span>Property targeting, similarity-constrained optimization, guidance/filtering/reward-FT comparison, and the causal support ablation.</span></span></li>
+      <li><span class="mk">M4</span><span class="mb"><b>Qualify the analysis</b><span>Transport/multiplicity figure, prior/Graft/ring/teacher ablations, operator-use audits, compute–quality Pareto.</span></span></li>
+      <li><span class="mk">M5</span><span class="mb"><b>Freeze and write</b><span>Lead with RGM, demonstrate the base, headline conditional design, and archive a one-command reproducibility package. Paper 2 inherits the frozen core—not a provisional checkpoint.</span></span></li>
+    </ol>
+  </section>
+
+  <section id="risk">
+    <div class="eyebrow"><span class="num">08</span><h2>Risks &amp; how we absorb them</h2></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+        <tbody>
+          <tr><td>Reward-FT doesn't clear GrIDDD's optimization numbers</td><td>Parity with stronger pathwise validity is still informative, but not automatically SOTA. Diagnose coverage, oracle exploitation, and recovery supervision; reserve the strongest language for matched confidence intervals.</td></tr>
+          <tr><td>Weak unconditional FCD invites reviewer pushback</td><td>Framed as baseline, not headline; validity story + the honest fidelity↔validity trade; the paper's claims never rest on FCD.</td></tr>
+          <tr><td>Base under-covers the reward region (guidance stuck)</td><td>Coverage—not FCD alone—is the real gate. Measure it directly and reopen the base only for a diagnosed missing region; no application is assumed to sidestep this problem.</td></tr>
+          <tr><td>"Graph rewriting and GM already exist"</td><td>Agree with the premises. Generic conditional-to-marginal and latent-program identities are inherited from GM/LPGM; molecular grammars and CoCoGraph already establish validity-by-construction in other formalisms. Claim the new intersection precisely: a validity-closed, non-monotone flexible-size molecular GM construction with a chemically admissible bridge, coordinated executable marks, and learned transitions between complete connected molecules.</td></tr>
+          <tr><td>Program multiplicity makes teacher labels unstable</td><td>Measure effective successor entropy; randomize certified programs; use causal multi-successor teachers; promote derived rules only when they shorten or coordinate a measured bottleneck.</td></tr>
+          <tr><td>Ring support leaks validation/test topology</td><td>Mine catalogs and frequency base measures from training only; project every source–target coupling through the frozen support and report split-wise misses.</td></tr>
+          <tr><td>Inverse operators exist but are not learned</td><td>Add the recovery curriculum, report teacher and sampled counts by family, and do not claim editor capability from reachability alone.</td></tr>
+          <tr><td>Validity does not improve optimization</td><td>Remove the causal claim if the matched support/rejection ablation fails; retain pathwise closure as a structural guarantee.</td></tr>
+          <tr><td>2D graph validity is mistaken for chemistry success</td><td>State the boundary everywhere: no guarantee of synthesizability, strain, stereochemistry, conformers, or biological performance.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="abstract">
+    <div class="eyebrow"><span class="num">09</span><h2>Draft abstract</h2></div>
+    <div class="callout"><p class="ttl">For iteration · results intentionally placeholdered</p><p>We introduce COMPOSE, a structured molecular instantiation of Generator Matching in which executable graph rewrites are the infinitesimal events of a learned continuous-time Markov chain. To our knowledge, COMPOSE is the first validity-closed, non-monotone flexible-size molecular generator trained through Generator Matching, with learned transitions between complete connected molecules. Guarded rule matches restrict every committed state to the declared complete, connected, valence-admissible state space. Certified carbon-tree-to-data programs define conditional jump generators; the general Generator Matching and Latent Process Generator Matching identities project away the endpoint and latent program, yielding target-free ancestral inference without beam search or terminal repair. The new burden—and contribution—is the chemically admissible bridge and support: subtree Grafts and coordinated whole-ring-system rewrites provide parameterized, invertible topology-changing events with verified molecular semantics and flexible size. COMPOSE achieves endpoint validity <strong>XXX</strong>, all-step validity/connectivity <strong>XXX/XXX</strong>, unconditional FCD <strong>XXX</strong>, and conditional/optimization performance <strong>XXX</strong>. A controlled transport and matched macro-versus-micro analysis tests when structured couplings and coordinated rewrites improve learnability.</p></div>
+  </section>
+
+  <section id="refs">
+    <div class="eyebrow"><span class="num">10</span><h2>Primary positioning anchors</h2></div>
+    <ul>
+      <li><a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/819aaee144cb40e887a4aa9e781b1547-Abstract-Conference.html">Generator Matching</a> — the general conditional-to-marginal framework over arbitrary Markov generators.</li>
+      <li><a href="https://arxiv.org/abs/2605.20547">Latent Process Generator Matching</a> — precedent for projecting latent process variables and shared-successor structure; COMPOSE inherits these generic identities rather than claiming them anew.</li>
+      <li><a href="https://arxiv.org/abs/2106.02573">Restricted stochastic rewriting with CTMC semantics</a> — precedent for rules, matches, application conditions, and CTMC interpretation.</li>
+      <li><a href="https://arxiv.org/abs/1503.06022">Thermodynamic graph rewriting</a> — precedent for separating qualitative rules from contextual quantitative propensities.</li>
+      <li><a href="https://arxiv.org/abs/2506.09018">Edit Flows</a> — insertion, deletion, and substitution flows for variable-length sequences.</li>
+      <li><a href="https://arxiv.org/abs/2606.07239">Morph</a> — flexible-size 3D molecular generation with unbalanced optimal transport and Generator Matching.</li>
+      <li><a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/2438d634f0ed1640934d31376c110a92-Abstract-Conference.html">DDSBM</a> — CTMC Schrödinger bridges for graph transformation.</li>
+      <li><a href="https://arxiv.org/abs/2506.15725">GrIDDD</a> — graph diffusion with insertion and deletion for targeting and optimization.</li>
+      <li><a href="https://www.nature.com/articles/s42256-026-01229-5">CoCoGraph</a> — constrained molecular graph generation and an essential boundary on validity claims.</li>
+      <li><a href="https://proceedings.mlr.press/v97/kajino19a.html">Molecular Hypergraph Grammar</a> and <a href="https://arxiv.org/abs/2203.08031">data-efficient molecular graph grammars</a> — structural-validity and ring-aware generation precedents.</li>
+      <li><a href="https://openreview.net/forum?id=6RFQqfjD06">Synthesis-constrained discrete diffusion for ionizable lipid generation</a> — our GEM 2026 fixed-size, fixed-topology Ugi-scaffold precursor to the separate COMPOSE-Lipid translational program.</li>
+    </ul>
+  </section>
+
+  <footer>COMPOSE research plan · canonical strategy · linked to the shared execution plan · primary positioning: Generator Matching, Latent Process Generator Matching, restricted stochastic rewriting, GrIDDD, Morph, DDSBM, CoCoGraph, Edit Flows, and molecular graph grammars</footer>
+</div>
+</body>
+</html>

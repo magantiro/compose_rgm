@@ -1,0 +1,16 @@
+{
+  "examples": 128,
+  "failures": [],
+  "family_counts": {
+    "atom_delete": 8,
+    "atom_insert": 7,
+    "atom_restate": 10,
+    "bond_reorder": 3,
+    "bond_reroute": 34,
+    "ring_system_grow": 16,
+    "terminal": 50
+  },
+  "family_failures": {},
+  "phase": "audit_complete",
+  "ring_electronic_mode": "factorized_local"
+}
