@@ -619,16 +619,25 @@ class FactorizedTraceletRateModel(nn.Module):
         self.ring_system_template_aliases = structured_ring_system_template_aliases(ring_catalog)
         if len(self.ring_system_template_aliases) != len(self.ring_system_templates):
             raise RuntimeError("ring-system alias groups do not align with templates")
-        self.ring_system_electronic_aliases = (
+        self.ring_system_electronic_witness_aliases = (
             structured_ring_system_electronic_aliases(ring_catalog)
+            if (
+                self.ring_electronic_mode == "catalog_exact"
+                or int(getattr(ring_catalog, "ring_system_electronic_alias_version", 0)) >= 1
+            )
+            else None
+        )
+        self.ring_system_electronic_aliases = (
+            self.ring_system_electronic_witness_aliases
             if self.ring_electronic_mode == "catalog_exact"
             else None
         )
         if (
-            self.ring_system_electronic_aliases is not None
-            and len(self.ring_system_electronic_aliases) != len(self.ring_system_templates)
+            self.ring_system_electronic_witness_aliases is not None
+            and len(self.ring_system_electronic_witness_aliases)
+            != len(self.ring_system_templates)
         ):
-            raise RuntimeError("ring electronic aliases do not align with templates")
+            raise RuntimeError("ring electronic witness aliases do not align with templates")
         raw_ring_counts = tuple(
             int(count) for count in getattr(ring_catalog, "ring_system_template_counts", ())
         )
@@ -810,12 +819,33 @@ class FactorizedTraceletRateModel(nn.Module):
                     self.ring_system_template_aliases,
                 )
                 support = np.zeros_like(coarse_support)
+                witness_support = (
+                    ring_system_electronic_template_support_mask(
+                        state,
+                        self.ring_system_templates,
+                        self.ring_system_electronic_witness_aliases,
+                    )
+                    if self.ring_system_electronic_witness_aliases is not None
+                    else np.zeros_like(coarse_support)
+                )
                 for template_index in np.flatnonzero(coarse_support):
+                    template_index = int(template_index)
+                    # Catalog assignments are positive witnesses only.  A
+                    # verified candidate proves semantic support immediately;
+                    # absence never removes the template because the catalog
+                    # is not the generative vocabulary.  The exhaustive
+                    # semantic decoder below remains the completeness fallback.
+                    if witness_support[template_index] and self._ring_witness_candidates(
+                        state,
+                        template_index,
+                    ):
+                        support[template_index] = True
+                        continue
                     placement_groups = self._ring_template_placement_groups(
                         state,
-                        int(template_index),
+                        template_index,
                     )
-                    support[int(template_index)] = any(
+                    support[template_index] = any(
                         semantic_ring_prefix_is_completable(
                             self._ring_semantic_decoder(state, group[0]),
                             (),
@@ -911,22 +941,24 @@ class FactorizedTraceletRateModel(nn.Module):
             for group in self._ring_template_placement_groups(state, template_index)
         )
 
-    def _ring_paired_candidates(
+    def _ring_witness_candidates(
         self,
         state: MolecularGraph,
         template_index: int,
     ) -> tuple[ExecutableRingGrowCandidate, ...]:
-        """Return cached executor-verified joint electronic candidates."""
+        """Return cached executor-verified catalog witnesses when available."""
 
-        if self.ring_system_electronic_aliases is None:
-            raise RuntimeError("paired ring candidates require catalog_exact mode")
+        aliases = self.ring_system_electronic_witness_aliases
+        if aliases is None:
+            return ()
         state_key = self._state_cache_key(state)
         key = (state_key, int(template_index))
         cached = self._ring_paired_candidate_cache.get(key)
         if cached is None:
             cached = enumerate_executable_ring_grow_candidates(
                 state,
-                self.ring_system_electronic_aliases[int(template_index)],
+                aliases[int(template_index)],
+                stop_after_first=self.ring_electronic_mode != "catalog_exact",
             )
             self._ring_paired_candidate_cache[key] = cached
             if len(self._ring_paired_candidate_cache) > self._ring_candidate_cache_limit:
@@ -934,6 +966,17 @@ class FactorizedTraceletRateModel(nn.Module):
         else:
             self._ring_paired_candidate_cache.move_to_end(key)
         return cached
+
+    def _ring_paired_candidates(
+        self,
+        state: MolecularGraph,
+        template_index: int,
+    ) -> tuple[ExecutableRingGrowCandidate, ...]:
+        """Return the exact catalog candidate table for catalog-exact scoring."""
+
+        if self.ring_system_electronic_aliases is None:
+            raise RuntimeError("paired ring candidates require catalog_exact mode")
+        return self._ring_witness_candidates(state, template_index)
 
     def _ring_delete_candidates(
         self,

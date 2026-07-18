@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 import torch
@@ -54,6 +56,137 @@ def _catalog_and_records(smiles: tuple[str, ...]):
         max_ear_templates=32,
     )
     return catalog, records
+
+
+def _ring_support_case():
+    target = pad_molecular_graph(smiles_to_molecular_graph("c1ccccc1"), 12)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(409),
+        n_slots=12,
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    path = TraceProgressCTMC(trace)
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    progress = next(
+        index
+        for index, step in enumerate(trace.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    return catalog, path.state_at(progress), trace.steps[progress].action
+
+
+def test_ring_template_support_short_circuits_on_verified_witness(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    catalog, state, action = _ring_support_case()
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    template_index = matching_ring_system_template_indices(
+        action,
+        model.ring_system_templates,
+    )[0]
+    assert model.ring_system_electronic_witness_aliases is not None
+
+    monkeypatch.setattr(
+        model,
+        "_ring_witness_candidates",
+        lambda current_state, current_index: (object(),),
+    )
+
+    def reject_semantic_search(*_args, **_kwargs):
+        raise AssertionError("a verified positive witness must short-circuit semantic search")
+
+    monkeypatch.setattr(
+        "compose_v4.model.factorized_tracelet_rate_model."
+        "semantic_ring_prefix_is_completable",
+        reject_semantic_search,
+    )
+
+    support = model._ring_grow_support(state)
+    assert support[template_index]
+
+
+def test_ring_template_support_falls_back_when_catalog_has_no_witness(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    catalog, state, action = _ring_support_case()
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    template_index = matching_ring_system_template_indices(
+        action,
+        model.ring_system_templates,
+    )[0]
+    semantic_calls = 0
+
+    monkeypatch.setattr(
+        model,
+        "_ring_witness_candidates",
+        lambda current_state, current_index: (),
+    )
+
+    def accept_semantic_fallback(*_args, **_kwargs):
+        nonlocal semantic_calls
+        semantic_calls += 1
+        return True
+
+    monkeypatch.setattr(
+        "compose_v4.model.factorized_tracelet_rate_model."
+        "semantic_ring_prefix_is_completable",
+        accept_semantic_fallback,
+    )
+
+    support = model._ring_grow_support(state)
+    assert support[template_index]
+    assert semantic_calls > 0
+
+
+def test_legacy_ring_catalog_retains_complete_semantic_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    catalog, state, action = _ring_support_case()
+    legacy_catalog = replace(
+        catalog,
+        ring_system_electronic_alias_version=0,
+        ring_system_electronic_aliases=(),
+        ring_system_electronic_alias_counts=(),
+    )
+    model = FactorizedTraceletRateModel(
+        legacy_catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    template_index = matching_ring_system_template_indices(
+        action,
+        model.ring_system_templates,
+    )[0]
+    semantic_calls = 0
+
+    def accept_semantic_fallback(*_args, **_kwargs):
+        nonlocal semantic_calls
+        semantic_calls += 1
+        return True
+
+    monkeypatch.setattr(
+        "compose_v4.model.factorized_tracelet_rate_model."
+        "semantic_ring_prefix_is_completable",
+        accept_semantic_fallback,
+    )
+
+    support = model._ring_grow_support(state)
+    assert model.ring_system_electronic_witness_aliases is None
+    assert support[template_index]
+    assert semantic_calls > 0
 
 
 def test_factorized_mark_forward_and_backward_without_successor_fiber() -> None:

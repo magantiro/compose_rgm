@@ -2301,8 +2301,15 @@ def _enumerate_mapped_ring_system_template_placements(
 def enumerate_executable_ring_grow_candidates(
     state: MolecularGraph,
     electronic_aliases: tuple[tuple[RingSystemElectronicAlias, int], ...],
+    *,
+    stop_after_first: bool = False,
 ) -> tuple[ExecutableRingGrowCandidate, ...]:
-    """Enumerate the exact observed joint labels that execute in ``state``."""
+    """Enumerate observed joint labels that execute in ``state``.
+
+    ``stop_after_first`` is a positive-witness optimization for semantic
+    template support.  It never proves absence; callers that need the complete
+    catalog-exact distribution retain the exhaustive default.
+    """
 
     candidates: dict[
         tuple,
@@ -2368,6 +2375,15 @@ def enumerate_executable_ring_grow_candidates(
             key = ring_system_grow_electronic_key(action)
             if key in seen_keys:
                 continue
+            if stop_after_first:
+                return (
+                    ExecutableRingGrowCandidate(
+                        placement=placement,
+                        atom_types=atom_types,
+                        action=action,
+                        support_count=int(count),
+                    ),
+                )
             seen_keys.add(key)
             incumbent = candidates.get(key)
             if incumbent is None:
