@@ -32,7 +32,7 @@ from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
 
 MINIMUM_SUPPORT_REORDER_WINDOW = 16000
-WORKER_SUPPORT_CACHE_LIMIT = 512
+WORKER_SUPPORT_CACHE_LIMIT = 16
 
 
 @dataclass(frozen=True)
