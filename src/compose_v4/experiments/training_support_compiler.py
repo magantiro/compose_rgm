@@ -26,6 +26,9 @@ from compose_v4.rewrite.ring_system_fiber import warm_ring_system_candidate_indi
 from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
 
+MINIMUM_SUPPORT_REORDER_WINDOW = 65536
+
+
 @dataclass(frozen=True)
 class IndexedTrainingSupportRow:
     absolute_index: int
@@ -143,7 +146,7 @@ def iter_training_support_rows(
     # existing microbatch option now controls queue depth, not task grouping;
     # each task remains one row so no fast row is trapped behind a slow peer.
     reorder_window = max(
-        4096,
+        MINIMUM_SUPPORT_REORDER_WINDOW,
         int(workers) * int(microbatch_size) * int(prefetch_factor),
     )
     global _SUPPORT_COMPILATION_DATASET
