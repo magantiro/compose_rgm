@@ -1,5 +1,15 @@
 # Project status — 2026-07-19
 
+> **18:14 EDT live override:** the long 3,000-step run and its support-build
+> sequence described below are complete historical context.  The active
+> experiment is the bounded 750-update fresh-optimizer continuation from its
+> selected step-2,500 weights, app `ap-Vl2HEZcpNLhyGlTi2Ftv2M`.  All 50,000
+> retained paths, the fixed 2,048/4,096 evaluation cache, and exact training
+> support are being reused.  Initial validation reproduced loss **11.6977** and
+> family accuracy **58.08%**; training has started.  The current decision
+> schedule and 48-hour work boundary are in
+> [`48_HOUR_RESULTS_TRACKER.md`](48_HOUR_RESULTS_TRACKER.md).
+
 This is the operational status for the current working tree. It separates
 verified implementation, completed cloud gates, the next launch, and legacy
 evidence so a collaborator can tell what is actually running.
