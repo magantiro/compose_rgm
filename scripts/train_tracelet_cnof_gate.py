@@ -123,6 +123,48 @@ def _validation_baseline_for_run(
         raise ValueError("recovery initial_validation must contain numeric metrics") from error
 
 
+def _compatible_checkpoint_initialization(
+    target_state: dict[str, torch.Tensor],
+    checkpoint_payload: dict[str, object],
+) -> tuple[dict[str, torch.Tensor], tuple[str, ...], tuple[str, ...]]:
+    """Transfer exactly shape-compatible tensors and retain new-head initialization.
+
+    This is intentionally narrower than ``strict=False`` checkpoint loading.  A
+    source tensor is accepted only when both its fully qualified parameter name
+    and shape match the current model.  Changed template tables and newly added
+    heads therefore keep the current model's deterministic initialization.
+    """
+
+    source_state = checkpoint_payload.get("state_dict")
+    if source_state is None:
+        source_state = checkpoint_payload.get("best_state_dict")
+    if not isinstance(source_state, dict) or not source_state:
+        raise ValueError(
+            "compatible initialization checkpoint lacks state_dict or best_state_dict"
+        )
+    if not all(
+        isinstance(name, str) and isinstance(value, torch.Tensor)
+        for name, value in source_state.items()
+    ):
+        raise ValueError("compatible initialization state must map names to tensors")
+
+    initialized = {name: value.detach().clone() for name, value in target_state.items()}
+    transferred: list[str] = []
+    retained: list[str] = []
+    for name, target in target_state.items():
+        source = source_state.get(name)
+        if isinstance(source, torch.Tensor) and source.shape == target.shape:
+            initialized[name] = (
+                source.detach().to(device=target.device, dtype=target.dtype).clone()
+            )
+            transferred.append(name)
+        else:
+            retained.append(name)
+    if not transferred:
+        raise ValueError("compatible initialization found no shape-compatible tensors")
+    return initialized, tuple(transferred), tuple(retained)
+
+
 def _path_cache_fingerprint(signature: dict[str, object]) -> str:
     """Return a stable identifier without copying the full split into every shard."""
 
@@ -949,6 +991,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--initialize-compatible-checkpoint",
+        type=Path,
+        help=(
+            "initialize only tensors whose full parameter name and shape match; "
+            "new or resized heads retain their current initialization"
+        ),
+    )
+    parser.add_argument(
         "--resume-checkpoint",
         type=Path,
         help="resume interrupted training from a periodic recovery checkpoint",
@@ -984,13 +1034,15 @@ def main() -> None:
         for item in (
             args.load_checkpoint,
             args.initialize_checkpoint,
+            args.initialize_compatible_checkpoint,
             args.resume_checkpoint,
         )
     )
     if checkpoint_modes > 1:
         raise ValueError(
             "--load-checkpoint, --initialize-checkpoint, and "
-            "--resume-checkpoint are mutually exclusive"
+            "--initialize-compatible-checkpoint, and --resume-checkpoint are "
+            "mutually exclusive"
         )
     if args.allow_resume_provenance_mismatch and args.resume_checkpoint is None:
         raise ValueError("--allow-resume-provenance-mismatch requires --resume-checkpoint")
@@ -2270,7 +2322,9 @@ def main() -> None:
 
     loaded_checkpoint = None
     resume_state = None
-    initialized_checkpoint_path = args.initialize_checkpoint
+    initialized_checkpoint_path = (
+        args.initialize_checkpoint or args.initialize_compatible_checkpoint
+    )
     selected_checkpoint_path = (
         args.load_checkpoint
         or initialized_checkpoint_path
@@ -2328,16 +2382,35 @@ def main() -> None:
             loaded_checkpoint = checkpoint_payload
             model.load_state_dict(loaded_checkpoint["state_dict"])
             phase = "checkpoint_loaded"
-        elif initialized_checkpoint_path is not None:
+        elif args.initialize_checkpoint is not None:
             model.load_state_dict(checkpoint_payload["state_dict"])
             phase = "checkpoint_initialized_fresh_optimizer"
+        elif args.initialize_compatible_checkpoint is not None:
+            initialized_state, transferred, retained = _compatible_checkpoint_initialization(
+                model.state_dict(),
+                checkpoint_payload,
+            )
+            model.load_state_dict(initialized_state, strict=True)
+            phase = "checkpoint_compatibly_initialized_fresh_optimizer"
         else:
             resume_state = checkpoint_payload
             model.load_state_dict(resume_state["current_state_dict"])
             phase = "recovery_checkpoint_loaded"
         print(
             json.dumps(
-                {"phase": phase, "path": str(selected_checkpoint_path)},
+                {
+                    "phase": phase,
+                    "path": str(selected_checkpoint_path),
+                    **(
+                        {
+                            "transferred_tensors": len(transferred),
+                            "retained_initialized_tensors": len(retained),
+                            "retained_initialized_names": retained,
+                        }
+                        if args.initialize_compatible_checkpoint is not None
+                        else {}
+                    ),
+                },
                 sort_keys=True,
             ),
             flush=True,

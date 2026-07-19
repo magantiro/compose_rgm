@@ -1,12 +1,15 @@
 # Project status — 2026-07-19
 
-> **18:14 EDT live override:** the long 3,000-step run and its support-build
-> sequence described below are complete historical context.  The active
-> experiment is the bounded 750-update fresh-optimizer continuation from its
-> selected step-2,500 weights, app `ap-Vl2HEZcpNLhyGlTi2Ftv2M`.  All 50,000
-> retained paths, the fixed 2,048/4,096 evaluation cache, and exact training
-> support are being reused.  Initial validation reproduced loss **11.6977** and
-> family accuracy **58.08%**; training has started.  The current decision
+> **18:35 EDT live override:** the bounded 750-update fresh-optimizer
+> continuation from step 2,500 has completed and early-stopped after three
+> non-improving evaluations.  Its validation losses were 12.0112, 12.0760, and
+> 12.0837 at steps 250/500/750 versus the selected baseline 11.6914; the
+> original step-2,500 weights remain selected at 58.08% validation family
+> accuracy.  The `1e-4` continuation is retired.  The next bounded arm transfers
+> the 109 name-and-shape-compatible tensors from the stronger legacy checkpoint
+> into the corrected quotient executor, leaves the resized ring-template table
+> and four new ring-role tensors freshly initialized, and reuses all existing
+> path, evaluation, and exact sparse-support caches.  The current decision
 > schedule and 48-hour work boundary are in
 > [`48_HOUR_RESULTS_TRACKER.md`](48_HOUR_RESULTS_TRACKER.md).
 

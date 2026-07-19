@@ -55,6 +55,7 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert "initialize_from_source_checkpoint" in source
     assert "initialization_source_run_label" in source
     assert 'recipe["arguments"]["initialize_checkpoint"]' in source
+    assert 'recipe["arguments"]["initialize_compatible_checkpoint"]' in source
     assert "checkpoint_initialized_fresh_optimizer" in (
         root / "scripts" / "train_tracelet_cnof_gate.py"
     ).read_text()

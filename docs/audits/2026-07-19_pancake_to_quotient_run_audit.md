@@ -96,6 +96,23 @@ The shortest controlled run is therefore:
    from the legacy pancake checkpoint, reinitialize changed ring-specific
    layers, and run the identical corrected objective and schedule.
 
+### Continuation result and authorized fallback
+
+The first arm failed cleanly.  The fresh-optimizer continuation selected none
+of its 250/500/750-update checkpoints: validation loss rose from 11.6914 to
+12.0112, 12.0760, and 12.0837, and early stopping fired.  The original
+step-2,500 checkpoint remains intact.  This rejects another `1e-4` continuation
+from the same weights; it does not reject the quotient semantics.
+
+The authorized fallback is a 500-update maximum legacy-transfer gate at
+`5e-5`, evaluated every 100 updates with patience two.  Exactly 109 tensors
+match by full name and shape and are transferred.  The resized
+`ring_system_template_key.weight` and four new `ring_system_role_head` tensors
+retain fresh initialization.  The gate reuses the current path, validation,
+test, and training-support caches and therefore requires no chemistry
+recompilation.  If it does not improve the corrected validation objective, it
+is stopped rather than extended.
+
 This isolates the schedule/initialization question before changing capacity,
 teacher paths, or the loss.  The sparse unique-state/path-witness compiler
 remains required before the next large from-scratch stream and lipid-scale

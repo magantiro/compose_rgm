@@ -687,6 +687,7 @@ def _run_remote(
     resume_source_run: str | None = None,
     initialization_source_run: str | None = None,
     initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
+    compatible_initialization: bool = False,
     training_steps: int | None = None,
     training_support_workers: int = 12,
     training_support_microbatch_size: int = 4,
@@ -796,7 +797,16 @@ def _run_remote(
             raise FileNotFoundError(
                 f"initialization checkpoint is missing: {source_checkpoint}"
             )
-        recipe["arguments"]["initialize_checkpoint"] = str(source_checkpoint)
+        if compatible_initialization:
+            recipe["arguments"]["initialize_compatible_checkpoint"] = str(
+                source_checkpoint
+            )
+        else:
+            recipe["arguments"]["initialize_checkpoint"] = str(source_checkpoint)
+    elif compatible_initialization:
+        raise ValueError(
+            "compatible initialization requires an initialization source run"
+        )
     if skip_rollouts and (
         smoke
         or preflight
@@ -934,6 +944,7 @@ def _run_remote(
             if initialization_source_run is not None
             else None
         ),
+        "compatible_initialization": compatible_initialization,
     }
     run_identity_sha256 = _stable_json_sha256(run_identity)
     stage_manifest_path = run_dir / f"manifest.{stage_kind}.json"
@@ -1397,6 +1408,7 @@ def train_stage(
     resume_source_run: str | None = None,
     initialization_source_run: str | None = None,
     initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
+    compatible_initialization: bool = False,
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
@@ -1410,6 +1422,7 @@ def train_stage(
         resume_source_run=resume_source_run,
         initialization_source_run=initialization_source_run,
         initialization_checkpoint_name=initialization_checkpoint_name,
+        compatible_initialization=compatible_initialization,
     )
 
 
@@ -1815,6 +1828,7 @@ def main(
     support_workers: int = 12,
     training_steps: int = 0,
     initialize_from_source_checkpoint: bool = False,
+    initialize_compatible_from_source_checkpoint: bool = False,
 ) -> None:
     modes = sum(
         (
@@ -1861,6 +1875,21 @@ def main(
         raise ValueError(
             "--initialize-from-source-checkpoint requires either "
             "--initialization-source-run-label or --source-run-label"
+        )
+    if initialize_compatible_from_source_checkpoint and not train_only:
+        raise ValueError(
+            "--initialize-compatible-from-source-checkpoint requires --train-only"
+        )
+    if initialize_compatible_from_source_checkpoint and not (
+        initialization_source_run_label or source_run_label
+    ):
+        raise ValueError(
+            "--initialize-compatible-from-source-checkpoint requires either "
+            "--initialization-source-run-label or --source-run-label"
+        )
+    if initialize_from_source_checkpoint and initialize_compatible_from_source_checkpoint:
+        raise ValueError(
+            "strict and compatible source-checkpoint initialization are exclusive"
         )
     if integration_smoke:
         call = integration_smoke_pipeline_stage.spawn(run_label)
@@ -1960,10 +1989,14 @@ def main(
             None,
             (
                 initialization_source_run_label or source_run_label
-                if initialize_from_source_checkpoint
+                if (
+                    initialize_from_source_checkpoint
+                    or initialize_compatible_from_source_checkpoint
+                )
                 else None
             ),
             checkpoint_name,
+            initialize_compatible_from_source_checkpoint,
         )
         phase = "train_spawned"
     else:
