@@ -83,3 +83,23 @@ every 250 updates, uses early-stopping patience 6 after a 500-step warmup, and
 exports `checkpoint.best_so_far.pt` every 500 updates. The first improved
 post-warmup snapshot receives a concurrent 100-sample rollout evaluation before
 the full training run is allowed to consume its complete budget.
+
+## Gate completion addendum — 2026-07-19
+
+The historical H100/8-worker action above has been superseded by completed
+cost-and-throughput gates. The 200-update A100/32-CPU/24-worker run reached
+54.52 examples/s in its final interval, validation loss 19.0701, and family
+accuracy 0.7436. Its 16 ancestral rollouts were all valid, connected, non-null,
+unique, and novel, with zero event-budget exhaustion. The measured
+H100/24-CPU/16-worker control reached 51.80 examples/s, validation loss 19.0842,
+and the same family accuracy at higher total container cost.
+
+Production therefore uses A100/32 CPU/24 data workers. The 16-sample ring mix
+is not a chemistry pass: 7/16 molecules contained a three- or four-membered
+ring. A 100-sample evaluation now launches automatically only after at least
+50% validation-loss improvement and family accuracy of at least 0.60, and the
+warning is rechecked at step 1,000 if necessary.
+
+Training and final inference are cost-separated: the validation-selected
+checkpoint releases the A100 before a retry-safe CPU evaluator draws 2,000
+samples and computes FCD. The current regression suite passes 266 tests.

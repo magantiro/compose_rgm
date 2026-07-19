@@ -1,5 +1,9 @@
 # Result file ledger
 
+Files described below as “current” are current only within their historical
+development gate. None is the quotient-correct Stage-3 production checkpoint;
+that run has not yet launched. See `docs/PROJECT_STATUS.md` for live status.
+
 - `tree_source_reachability_primitive_tracelet_uniform_size_seed20260717.json`
   is the current structured-source reachability gate: 512 independently
   size-sampled tree/target attempts over 128 GuacaMol molecules. All 496

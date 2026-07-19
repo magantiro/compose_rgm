@@ -50,7 +50,7 @@ but is written as a biotechnology paper, not a second ML-theory paper.
 
 ## Current evidence boundary
 
-As of 2026-07-18:
+As of 2026-07-19:
 
 - Validity-closed execution, flexible-size tree transport, Graft, complete-ring
   actions, factorized marked-rate training, and ancestral sampling are
@@ -65,8 +65,15 @@ As of 2026-07-18:
 - The old step-6,250 checkpoint predates the Graft successor quotient and the
   final exact ring-support compiler. Its 2,000-sample metrics and trajectories
   are diagnostics, not evidence for the corrected model.
-- A fresh quotient-correct training run, early checkpoint evaluation, 100-sample
-  visual inspection, and frozen 2,000-sample FCD evaluation remain required.
+- Objective-aware exact-support and resource preflights are complete. The
+  production choice is A100 + 32 CPU cores + 24 data workers; its final
+  preflight interval reached 54.52 examples/s and all 16 rollouts were valid,
+  connected, non-null, unique, and novel. The 7/16 small-ring warning remains
+  a required early-checkpoint diagnostic, not a final result.
+- The 30,000-update quotient-correct run, 100-sample visual inspection, and
+  frozen 2,000-sample FCD evaluation remain required. Validation early stopping
+  and the credible-checkpoint preview are automatic; final sampling/FCD runs on
+  CPU only after the selected checkpoint releases the A100.
 - Full invariance of learned rates to arbitrary atom-slot permutations remains
   a formal audit obligation. Canonical successor aggregation fixes the measured
   Graft gauge churn; it is not by itself a proof of every presentation-level
@@ -88,7 +95,7 @@ edits. The successor quotient addresses exactly that measured failure mode.
 ## Reproducing local checks
 
 ```bash
-python -m pip install -e ".[dev,eval]"
+python -m pip install -e ".[dev,cloud,eval]"
 pytest -q
 python scripts/audit_factorized_teacher_support.py --help
 cp -R docs/trajectory_diagnostics/legacy_prequotient/full_trajectories_step6250 \
@@ -110,13 +117,17 @@ needed to interpret and reproduce the archived stage-1 evaluation.
 
 ## Next gated sequence
 
-1. Run the fresh H100 preflight for the locally verified exact-support compiler.
-2. Launch the fresh flexible-size, quotient-correct unconditional run with
-   early stopping and checkpointed validation.
-3. At the first credible checkpoint, render 100 ancestral samples and audit
+1. Commit and deploy from a commit-bearing immutable run label; confirm that
+   its Modal artifact directory does not already exist.
+2. Launch the fresh A100/32-CPU/24-worker flexible-size, quotient-correct
+   unconditional run. Validation runs every 250 updates after a 500-update
+   warmup, with six evaluations of early-stopping patience.
+3. At the first checkpoint with at least 50% validation-loss improvement and
+   family accuracy at least 0.60, render 100 ancestral samples and audit
    event rates, atom-count trajectories, ring phenotypes, Graft self-transitions,
    validity, connectivity, uniqueness, and novelty.
-4. Freeze one checkpoint and evaluate 2,000 samples for FCD and its mean versus
+4. Let early stopping freeze the validation-selected `checkpoint.pt`; after the
+   A100 exits, evaluate 2,000 samples on CPU for FCD and its mean-versus-
    covariance decomposition.
 5. Add the valid-rewrite recovery objective, then run the matched QED and
    multi-objective guidance comparisons required by Paper 1.

@@ -73,7 +73,7 @@ diagnostic, is documented in
 ## Development setup
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,cloud,eval]"
 pytest
 ```
 
@@ -107,17 +107,20 @@ pytest
 - Permutation-equivariant whole-graph neural marked-rate model implemented.
 - Dense marked-rewrite backend implemented: batched graph/message encoding,
   tensorized family/template/site masks, deterministic persistent data workers,
-  pinned prefetch, BF16 H100 training, direct ancestral mark sampling, and an
-  exact index-stable recovery stream. The measured steady-state batch-32 H100
-  update is 0.023-0.032 seconds instead of 9-15 seconds for exhaustive fibers.
+  pinned prefetch, BF16 GPU training, direct ancestral mark sampling, and an
+  exact index-stable recovery stream. The selected production configuration is
+  A100 + 32 CPU cores + 24 data workers: its final preflight interval reached
+  54.52 examples/s versus 51.80 for the measured H100 configuration, with
+  effectively identical validation metrics and lower total container cost.
 - Deterministic 16-process path compilation now stores exact byte-packed graph
   checkpoints instead of every dense intermediate, writes atomic proposal and
   transport shards, and resumes from a signature-validated manifest. On 54
   representative 40-slot Graft paths, interval-8 checkpoints reduced serialized
   storage from 14.62 MB to 1.38 MB (10.6x); the previous full 99,738-path cache
-  was measured at 29.0 GiB. Modal runs compile on CPU before an H100 stage that
-  refuses to start without a complete cache. The compile/load/resume workflow
-  passes both local and real-volume Modal smoke tests.
+  was measured at 29.0 GiB. Modal runs compile and audit on CPU before an A100
+  stage that refuses to start without a complete cache. Training releases the
+  GPU before the retry-safe CPU 2,000-sample/FCD evaluation. Immutable stage
+  manifests bind resumes to code, recipe, and data provenance.
 - First end-to-end learned gate passed: 1,000 target-free rollouts were 100%
   valid/connected, 99.8% non-null, 99.5% on tiny reference support, recovered
   all reference modes, and reached total variation 0.0523.
@@ -147,6 +150,8 @@ pytest
   frequencies; it is saved in `results/ring_tracelet_frequency_audit.json`.
 - Tracelet teacher successors are verified to lie in the production marked
   fiber, and the factorized semantic ring decoder is integrated into both
-  teacher scoring and ancestral sampling. The current gate is exact-support
-  throughput followed by a fresh quotient-correct run; the archived step-6,250
-  FCD and trajectories predate that correction and remain diagnostic only.
+  teacher scoring and ancestral sampling. Exact-support throughput and the
+  A100/H100 resource gate are complete. The next experiment is the fresh
+  quotient-correct 30,000-update run with validation early stopping, an
+  automatic credible-checkpoint 100-sample preview, and CPU final evaluation;
+  the archived step-6,250 FCD and trajectories remain diagnostic only.

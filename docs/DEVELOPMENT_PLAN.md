@@ -168,12 +168,12 @@ fivefold but remain 0.130 versus 1.105 in the test set; aromatic ring-system
 rewriting is the next measured operator bottleneck.
 
 The production backend now implements the intended hierarchical marked CTMC
-directly. On H100, its sustained 32-graph update time is 0.020-0.032 seconds
-versus 9-15 seconds for exhaustive successor construction, a roughly 300-500x
-speedup. Direct ancestral sampling instantiates only the fired action and keeps
-the same executor boundary. The end-to-end preflight produced 16/16 valid,
-connected molecules; benchmark-scale quality and FCD are being measured in the
-current tree-source run.
+directly. The selected A100/32-CPU/24-worker preflight reached 54.52 examples/s
+in its final interval versus 51.80 for the measured H100 configuration, while
+retaining the same validation metrics and validity contract. Direct ancestral
+sampling instantiates only the fired action and keeps the executor boundary.
+The 30,000-update tree-source quality run is the next launch; benchmark-scale
+quality and FCD are not currently being measured.
 
 ## Phase 4 — de novo base model
 
@@ -264,14 +264,13 @@ quality result.
    teacher support.
 6. **Done as a diagnostic:** integrate typed tracelets, superposed family
    hazards, topology commitment, and target-free ancestral sampling.
-7. Replace the finite typed catalog with a factorized mark decoder over event
-   family, topology/anchors, span, and joint atom/bond payload. The catalog's
-   top-128 coverage is 100%/88.0%/92.5% on train/validation/test and is evidence
-   for the operator design, not an acceptable final support boundary.
-8. Run the topology-committed model versus the earlier generic-carbon and
-   scalar-closure models under matched training/sample budgets; include FCD
-   only after the structural/ring gates pass.
-9. **Reachability done; quality comparison next:** run the checkpoint-distinct
+7. **Done:** replace the finite fully typed ring vocabulary with a factorized
+   semantic mark decoder over topology, anchors, and atom/electronic payload,
+   with exact executor-aware teacher and sampler support.
+8. **Resource gate done; quality run next:** launch the quotient-correct Stage-3
+   A100 run, inspect the automatic 100-sample credible-checkpoint preview, and
+   compute the final 2,000-sample FCD on CPU after early stopping.
+9. **Reachability done; source comparison queued:** run the checkpoint-distinct
    null-versus-tree source ablation. Primitive tree transport now uses a
    retained-carbon root tracelet, has zero scalar closures, and reaches every
    chemistry-supported target in the 512-attempt audit.

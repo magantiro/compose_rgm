@@ -15,6 +15,7 @@ This index separates current model artifacts from historical diagnostics.
 | Artifact | Status |
 |---|---|
 | [`audits/semantic_ring_teacher_audit_v4.json`](audits/semantic_ring_teacher_audit_v4.json) | 128 examples; zero teacher-support failures |
+| [`audits/2026-07-18_objective_aware_ring_support.md`](audits/2026-07-18_objective_aware_ring_support.md) | Exact-support optimization plus completed A100/H100 resource-gate addendum |
 | [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | Dated completed/in-flight/queued workstream and claim boundary |
 | [`CURRENT_MODEL.md`](CURRENT_MODEL.md) | Source, teacher, operator, generator, sampler, and evidence contract |
 | [`NOVELTY_POSITIONING.md`](NOVELTY_POSITIONING.md) | Scoped distinctions from Morph, Edit Flows, DDSBM, grammars, and fragment methods |

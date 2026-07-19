@@ -94,13 +94,18 @@ the local valid-successor baseline.
   2,000-sample FCD 24.35. Graft dominated its actions and it did not prune to one
   atom, but the old ring-ear family produced severe cage/over-fusion pathology.
 - Full-system ring replacement: local full suite, structured held-out-label
-  generalization tests, serialized flexible-size path compilation, and a short
-  end-to-end train/checkpoint smoke passed. On the 512-path remote preflight
-  split, structural support covered 512/512 train, 92/128 validation, and
-  86/128 test paths. Scaled quality training remains pending.
-- The clean 200-step H100 preflight reached validation GM loss 27.36 at
-  0.96 seconds/update. A patched checkpoint rollout produced 16/16 non-null,
-  valid, connected molecules with zero cage candidates and zero macrocycles;
-  its 16-sample FCD is not treated as a quality estimate.
+  generalization tests, serialized flexible-size path compilation, and remote
+  teacher-support audits pass. The current Stage-3 recipe uses a flexible-size
+  empirical carbon-tree source, Graft transport, semantic whole-ring actions,
+  validation every 250 updates, a 500-update warmup, and six evaluations of
+  early-stopping patience.
+- The resource gate selected A100 + 32 CPU cores + 24 data workers. Its
+  200-step run reached validation GM loss 19.0701, family accuracy 0.7436, and
+  54.52 examples/s in the final interval. All 16 samples were non-null, valid,
+  connected, unique, and novel; the 7/16 small-ring warning is explicitly
+  rechecked in the automatic 100-sample checkpoint preview.
+- Production training releases the A100 after writing the validation-selected
+  checkpoint. A separate retry-safe CPU evaluator owns the final 2,000
+  ancestral samples and FCD, so inference never keeps the training GPU alive.
 - Null-versus-tree matched-budget FCD comparison: pending.
 - Recovery/revision objective and guided Pareto evaluation: pending.
