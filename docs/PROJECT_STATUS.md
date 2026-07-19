@@ -117,7 +117,7 @@ FCD is not a model-quality result.
   before the first 16,000-row shard completed. That CPU-only gate was stopped;
   no GPU was allocated.
 - Support compilation now accepts shard-aligned absolute step ranges. The
-  launch surface partitions them across isolated 16-core/12-worker Modal
+  launch surface partitions them across isolated 14-core/12-worker Modal
   containers with unique immutable run directories and non-overlapping atomic
   shard files. This changes only execution placement: exact masks, deterministic
   row indices, and the training objective are bit-for-bit unchanged.
@@ -129,9 +129,10 @@ FCD is not a model-quality result.
 2. **Done:** reuse the immutable `2be9258` path cache, build the signed fixed
    evaluation cache on a 64-CPU stage, and pass the streamed-evaluation
    integration gate.
-3. **Active:** pass one memory-safe isolated support-range gate, then compile
-   the early-training prefix across four containers (64 allocated CPUs total).
-   Verify every sparse shard before allocating an A100.
+3. **Active:** the first isolated 16,000-row gate completed at 5.15 rows/s and
+   atomically validated its shard. Compile the seven remaining early-training
+   shards in parallel across seven 14-core containers (98 allocated CPUs), then
+   verify every sparse shard before allocating an A100.
 4. Relaunch A100/32-CPU/24-worker training from the commit containing the exact
    successor optimizations and required support-cache consumer. At the first
    credible checkpoint, inspect 100

@@ -1215,8 +1215,8 @@ def compile_stage(
 
 @app.function(
     image=image,
-    cpu=16.0,
-    memory=131072,
+    cpu=14.0,
+    memory=114688,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
 )
@@ -1783,8 +1783,8 @@ def main(
         raise ValueError("--support-start-step must be non-negative")
     if support_containers <= 0:
         raise ValueError("--support-containers must be positive")
-    if not 0 < support_workers < 16:
-        raise ValueError("--support-workers must lie in [1, 15]")
+    if not 0 < support_workers < 14:
+        raise ValueError("--support-workers must lie in [1, 13]")
     if training_steps < 0:
         raise ValueError("--training-steps must be non-negative")
     if integration_smoke:

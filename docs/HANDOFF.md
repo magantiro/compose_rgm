@@ -88,7 +88,7 @@ As of 2026-07-19:
   4,096-template chemistry state in one address space (>372 GB), so it was
   stopped without launching a GPU. The current launch surface assigns
   deterministic non-overlapping cache-shard ranges to isolated
-  16-core/12-worker Modal containers; this preserves exact support and row
+  14-core/12-worker Modal containers; this preserves exact support and row
   identity while bounding memory per container.
 - Full invariance of learned rates to arbitrary atom-slot permutations remains
   a formal audit obligation. Canonical successor aggregation fixes the measured
@@ -133,9 +133,10 @@ needed to interpret and reproduce the archived stage-1 evaluation.
 
 ## Next gated sequence
 
-1. Pass a one-shard, 16-core/12-worker support compilation gate. Then compile
-   the desired prefix across four non-overlapping containers and validate the
-   first and last row of every atomic sparse shard.
+1. **Gate passed:** one 16,000-row shard compiled exactly at 5.15 rows/s and was
+   atomically validated. Compile the seven remaining shards across seven
+   non-overlapping 14-core/12-worker containers (98 CPUs total), then validate
+   the first and last row of every atomic sparse shard.
 2. Commit and deploy from a commit-bearing immutable run label; confirm that
    its Modal artifact directory does not already exist.
 3. Launch the fresh A100/32-CPU/24-worker flexible-size, quotient-correct
