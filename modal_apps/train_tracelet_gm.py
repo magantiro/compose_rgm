@@ -1144,7 +1144,7 @@ def h100_preflight_stage(
 @app.function(
     image=image,
     cpu=64.0,
-    memory=393216,
+    memory=344064,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
     retries=modal.Retries(max_retries=2, backoff_coefficient=2.0),
