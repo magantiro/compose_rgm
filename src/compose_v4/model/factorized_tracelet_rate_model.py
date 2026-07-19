@@ -1437,19 +1437,9 @@ class FactorizedTraceletRateModel(nn.Module):
                     if self.ring_system_electronic_witness_aliases is not None
                     else np.zeros_like(coarse_support)
                 )
+                unresolved: list[int] = []
                 for template_index in np.flatnonzero(coarse_support):
                     template_index = int(template_index)
-                    # Catalog assignments are positive witnesses only.  A
-                    # verified candidate proves semantic support immediately;
-                    # absence never removes the template because the catalog
-                    # is not the generative vocabulary.  The exhaustive
-                    # semantic decoder below remains the completeness fallback.
-                    if witness_support[template_index] and self._ring_witness_candidates(
-                        state,
-                        template_index,
-                    ):
-                        support[template_index] = True
-                        continue
                     placement_groups = self._ring_template_placement_groups(
                         state,
                         template_index,
@@ -1461,6 +1451,23 @@ class FactorizedTraceletRateModel(nn.Module):
                         )
                         for group in placement_groups
                     )
+                    if not support[template_index]:
+                        unresolved.append(template_index)
+                # The semantic decoder is the complete factorized path for
+                # almost every template.  Fixed catalog assignments remain
+                # positive executor-verified witnesses for rare resonance
+                # lowerings that its canonical matching does not yet expose.
+                # Checking that exact fallback only after semantic failure is
+                # the same logical union as the former witness-first order,
+                # but avoids enumerating hundreds of redundant RDKit-validated
+                # aliases on ordinary rows.
+                if unresolved and self.ring_system_electronic_witness_aliases is not None:
+                    for template_index in unresolved:
+                        if witness_support[template_index] and self._ring_witness_candidates(
+                            state,
+                            template_index,
+                        ):
+                            support[template_index] = True
             else:
                 support = ring_system_electronic_template_support_mask(
                     state,
@@ -1544,25 +1551,32 @@ class FactorizedTraceletRateModel(nn.Module):
                 else np.zeros_like(coarse_support)
             )
             certificate = np.zeros_like(coarse_support)
-            witness_indices = np.flatnonzero(coarse_support & witness_support)
-            for raw_index in witness_indices:
+            unresolved: list[int] = []
+            for raw_index in np.flatnonzero(coarse_support):
                 template_index = int(raw_index)
-                if self._ring_witness_candidates(state, template_index):
+                placement_groups = self._ring_template_placement_groups(
+                    state,
+                    template_index,
+                )
+                if any(
+                    semantic_ring_prefix_is_completable(
+                        self._ring_semantic_decoder(state, group[0]),
+                        (),
+                    )
+                    for group in placement_groups
+                ):
                     certificate[template_index] = True
                     break
+                unresolved.append(template_index)
             if not bool(certificate.any()):
-                for raw_index in np.flatnonzero(coarse_support):
-                    template_index = int(raw_index)
-                    placement_groups = self._ring_template_placement_groups(
+                for template_index in (
+                    unresolved
+                    if self.ring_system_electronic_witness_aliases is not None
+                    else ()
+                ):
+                    if witness_support[template_index] and self._ring_witness_candidates(
                         state,
                         template_index,
-                    )
-                    if any(
-                        semantic_ring_prefix_is_completable(
-                            self._ring_semantic_decoder(state, group[0]),
-                            (),
-                        )
-                        for group in placement_groups
                     ):
                         certificate[template_index] = True
                         break

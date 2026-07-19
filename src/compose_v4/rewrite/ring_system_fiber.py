@@ -1702,6 +1702,28 @@ def _source_local_support_groups(
     return groups
 
 
+def _local_rooted_support_index(
+    templates: tuple[RingSystemTemplate, ...],
+    aliases: tuple[tuple[RingSystemTemplate, ...], ...],
+) -> _RootedTreeSupportIndex:
+    cache_key = (id(templates), id(aliases))
+    cached = _LOCAL_ROOTED_SUPPORT_INDEX_CACHE.get(cache_key)
+    if cached is not None and cached[0] is templates and cached[1] is aliases:
+        return cached[2]
+    index = _build_rooted_tree_support_index(
+        _source_local_support_groups(templates, aliases),
+        constraint_for_node=lambda pattern, node: (
+            int(pattern.nodes[int(node)]["valence_increment"]),
+        ),
+    )
+    if len(_LOCAL_ROOTED_SUPPORT_INDEX_CACHE) >= 16:
+        _LOCAL_ROOTED_SUPPORT_INDEX_CACHE.pop(
+            next(iter(_LOCAL_ROOTED_SUPPORT_INDEX_CACHE))
+        )
+    _LOCAL_ROOTED_SUPPORT_INDEX_CACHE[cache_key] = (templates, aliases, index)
+    return index
+
+
 def _electronic_support_pattern(alias: RingSystemElectronicAlias) -> nx.Graph:
     """Decorate a source tree with one fixed observed electronic assignment."""
 
@@ -1818,6 +1840,48 @@ def _source_electronic_support_groups(
     return groups
 
 
+def _electronic_rooted_support_index(
+    templates: tuple[RingSystemTemplate, ...],
+    electronic_aliases: tuple[
+        tuple[tuple[RingSystemElectronicAlias, int], ...], ...
+    ],
+) -> _RootedTreeSupportIndex:
+    cache_key = (id(templates), id(electronic_aliases))
+    cached = _ELECTRONIC_ROOTED_SUPPORT_INDEX_CACHE.get(cache_key)
+    if (
+        cached is not None
+        and cached[0] is templates
+        and cached[1] is electronic_aliases
+    ):
+        return cached[2]
+
+    def constraint(pattern: nx.Graph, node: int) -> tuple[int, ...]:
+        attributes = pattern.nodes[int(node)]
+        return (
+            int(attributes["atom_type"]),
+            int(attributes["charge"]),
+            int(attributes["source_valence"]),
+            int(attributes["target_valence"]),
+            int(attributes["aromatic"]),
+            int(attributes["target_hydrogens"]),
+        )
+
+    index = _build_rooted_tree_support_index(
+        _source_electronic_support_groups(templates, electronic_aliases),
+        constraint_for_node=constraint,
+    )
+    if len(_ELECTRONIC_ROOTED_SUPPORT_INDEX_CACHE) >= 16:
+        _ELECTRONIC_ROOTED_SUPPORT_INDEX_CACHE.pop(
+            next(iter(_ELECTRONIC_ROOTED_SUPPORT_INDEX_CACHE))
+        )
+    _ELECTRONIC_ROOTED_SUPPORT_INDEX_CACHE[cache_key] = (
+        templates,
+        electronic_aliases,
+        index,
+    )
+    return index
+
+
 _SOURCE_TOPOLOGY_GROUP_CACHE: dict[
     int,
     tuple[
@@ -1866,6 +1930,156 @@ _SOURCE_ELECTRONIC_SUPPORT_GROUP_CACHE: dict[
         tuple[tuple[nx.Graph, tuple[int, ...], tuple[int, int, int, int, int]], ...],
     ],
 ] = {}
+
+
+@dataclass(frozen=True)
+class _RootedTreeSupportState:
+    """One deduplicated rooted colored-pattern subproblem."""
+
+    constraint: tuple[int, ...]
+    children: tuple[int, ...]
+    size: int
+
+
+@dataclass(frozen=True)
+class _RootedTreeSupportIndex:
+    """Shared exact tree-pattern automaton for a complete template vocabulary."""
+
+    states: tuple[_RootedTreeSupportState, ...]
+    root_outputs: tuple[tuple[int, tuple[int, ...]], ...]
+
+
+_LOCAL_ROOTED_SUPPORT_INDEX_CACHE: dict[
+    tuple[int, int],
+    tuple[
+        tuple[RingSystemTemplate, ...],
+        tuple[tuple[RingSystemTemplate, ...], ...],
+        _RootedTreeSupportIndex,
+    ],
+] = {}
+
+_ELECTRONIC_ROOTED_SUPPORT_INDEX_CACHE: dict[
+    tuple[int, int],
+    tuple[
+        tuple[RingSystemTemplate, ...],
+        tuple[tuple[tuple[RingSystemElectronicAlias, int], ...], ...],
+        _RootedTreeSupportIndex,
+    ],
+] = {}
+
+
+def _build_rooted_tree_support_index(
+    groups: tuple[
+        tuple[nx.Graph, tuple[int, ...], tuple[int, int, int, int, int]],
+        ...,
+    ],
+    *,
+    constraint_for_node: Callable[[nx.Graph, int], tuple[int, ...]],
+) -> _RootedTreeSupportIndex:
+    """Hash-cons every rooted pattern branch across all support groups."""
+
+    state_ids: dict[tuple[tuple[int, ...], tuple[int, ...]], int] = {}
+    states: list[_RootedTreeSupportState] = []
+
+    def encode(pattern: nx.Graph, node: int, parent: int) -> int:
+        children = tuple(
+            sorted(
+                encode(pattern, int(child), int(node))
+                for child in pattern.neighbors(node)
+                if int(child) != parent
+            )
+        )
+        constraint = tuple(int(value) for value in constraint_for_node(pattern, node))
+        key = (constraint, children)
+        identifier = state_ids.get(key)
+        if identifier is None:
+            identifier = len(states)
+            state_ids[key] = identifier
+            states.append(
+                _RootedTreeSupportState(
+                    constraint=constraint,
+                    children=children,
+                    size=1 + sum(states[child].size for child in children),
+                )
+            )
+        return identifier
+
+    outputs: dict[int, set[int]] = {}
+    for pattern, indices, _ in groups:
+        root = min(
+            (int(node) for node in pattern.nodes()),
+            key=lambda node: (-int(pattern.degree[node]), node),
+        )
+        root_id = encode(pattern, root, -1)
+        outputs.setdefault(root_id, set()).update(int(index) for index in indices)
+    return _RootedTreeSupportIndex(
+        states=tuple(states),
+        root_outputs=tuple(
+            (root_id, tuple(sorted(indices)))
+            for root_id, indices in sorted(outputs.items())
+        ),
+    )
+
+
+def _rooted_tree_support_mask(
+    host: nx.Graph,
+    *,
+    width: int,
+    index: _RootedTreeSupportIndex,
+    compatible: Callable[[tuple[int, ...], int], bool],
+) -> np.ndarray:
+    """Evaluate all deduplicated tree patterns together by exact rooted DP."""
+
+    mask = np.zeros(int(width), dtype=np.bool_)
+    if not len(index.root_outputs) or host.number_of_nodes() == 0:
+        return mask
+    host_neighbors = {
+        int(node): tuple(sorted(int(neighbor) for neighbor in host.neighbors(node)))
+        for node in host.nodes()
+    }
+
+    @lru_cache(maxsize=None)
+    def matches(pattern_id: int, host_node: int, host_parent: int) -> bool:
+        pattern = index.states[int(pattern_id)]
+        if not compatible(pattern.constraint, int(host_node)):
+            return False
+        host_children = tuple(
+            child for child in host_neighbors[int(host_node)] if child != int(host_parent)
+        )
+        if len(pattern.children) > len(host_children):
+            return False
+        candidate_masks = []
+        for pattern_child in pattern.children:
+            candidates = 0
+            for offset, host_child in enumerate(host_children):
+                if matches(pattern_child, host_child, int(host_node)):
+                    candidates |= 1 << offset
+            if candidates == 0:
+                return False
+            candidate_masks.append(candidates)
+        candidate_masks.sort(key=int.bit_count)
+
+        @lru_cache(maxsize=None)
+        def assign(position: int, used: int) -> bool:
+            if position == len(candidate_masks):
+                return True
+            available = candidate_masks[position] & ~used
+            while available:
+                selected = available & -available
+                available ^= selected
+                if assign(position + 1, used | selected):
+                    return True
+            return False
+
+        return assign(0, 0)
+
+    host_nodes = tuple(sorted(int(node) for node in host.nodes()))
+    for root_id, outputs in index.root_outputs:
+        if index.states[root_id].size > host.number_of_nodes():
+            continue
+        if any(matches(root_id, host_node, -1) for host_node in host_nodes):
+            mask[np.asarray(outputs, dtype=np.int64)] = True
+    return mask
 
 
 def _canonical_tree_code(tree: nx.Graph) -> str:
@@ -1936,6 +2150,9 @@ def warm_ring_system_candidate_indices(catalog: TypedRingCatalog) -> None:
     templates, aliases = _structured_catalog_views(catalog)
     _source_topology_groups(templates)
     _source_local_support_groups(templates, aliases)
+    _local_rooted_support_index(templates, aliases)
+    if int(getattr(catalog, "ring_system_electronic_alias_version", 0)) >= 1:
+        structured_ring_system_electronic_aliases(catalog)
     _structured_delete_index_by_identity(catalog.ring_system_templates)
 
 
@@ -2106,46 +2323,17 @@ def ring_system_template_local_support_mask(
         )
         for node in host.nodes()
     }
-    components = []
-    for nodes in nx.connected_components(host):
-        component = host.subgraph(nodes)
-        degrees = tuple(int(degree) for _, degree in component.degree())
-        components.append(
-            (
-                component,
-                (
-                    component.number_of_nodes(),
-                    sum(int(degree >= 2) for degree in degrees),
-                    sum(int(degree >= 3) for degree in degrees),
-                    sum(int(degree >= 4) for degree in degrees),
-                    nx.diameter(component),
-                ),
-            )
-        )
     maximum_valence = max(int(value) for value in CNOF_VALENCE.values())
-    mask = np.zeros(len(templates), dtype=np.bool_)
-    for pattern, indices, requirements in _source_local_support_groups(
-        templates,
-        aliases,
-    ):
-
-        def compatible(pattern_node: int, host_node: int) -> bool:
-            installed_valence = (
-                current_valence[int(host_node)]
-                + int(pattern.nodes[int(pattern_node)]["valence_increment"])
-            )
-            return 0 <= installed_valence <= maximum_valence
-
-        if any(
-            all(required <= available for required, available in zip(requirements, capacity))
-            and _forest_contains_tree(
-                component,
-                pattern,
-                node_compatible=compatible,
-            )
-            for component, capacity in components
-        ):
-            mask[np.asarray(indices, dtype=np.int64)] = True
+    mask = _rooted_tree_support_mask(
+        host,
+        width=len(templates),
+        index=_local_rooted_support_index(templates, aliases),
+        compatible=lambda constraint, host_node: (
+            0
+            <= current_valence[int(host_node)] + int(constraint[0])
+            <= maximum_valence
+        ),
+    )
     if len(_RING_LOCAL_SUPPORT_MASK_CACHE) >= 8192:
         _RING_LOCAL_SUPPORT_MASK_CACHE.pop(next(iter(_RING_LOCAL_SUPPORT_MASK_CACHE)))
     mask.setflags(write=False)
@@ -2179,75 +2367,53 @@ def ring_system_electronic_template_support_mask(
         )
         for node in host.nodes()
     }
-    components = []
-    for nodes in nx.connected_components(host):
-        component = host.subgraph(nodes)
-        degrees = tuple(int(degree) for _, degree in component.degree())
-        components.append(
-            (
-                component,
-                (
-                    component.number_of_nodes(),
-                    sum(int(degree >= 2) for degree in degrees),
-                    sum(int(degree >= 3) for degree in degrees),
-                    sum(int(degree >= 4) for degree in degrees),
-                    nx.diameter(component),
-                ),
-            )
-        )
-    mask = np.zeros(len(templates), dtype=np.bool_)
-    for pattern, indices, requirements in _source_electronic_support_groups(
-        templates,
-        electronic_aliases,
-    ):
 
-        def compatible(pattern_node: int, host_node: int) -> bool:
-            attributes = pattern.nodes[int(pattern_node)]
-            atom_type = int(attributes["atom_type"])
-            if int(attributes["charge"]) != 0 or atom_type not in CNOF_ATOM_TYPES:
-                return False
-            external_valence = (
-                current_valence[int(host_node)]
-                - int(attributes["source_valence"])
-            )
-            internal_valence = int(attributes["target_valence"])
-            bond_valence = external_valence + internal_valence
-            hydrogens = int(CNOF_VALENCE[atom_type]) - bond_valence
-            allowed = 0 <= hydrogens <= MAX_H_COUNT
-            if bool(attributes["aromatic"]) and allowed:
-                if atom_type == int(CNOF_ATOM_TYPES[0]):
-                    allowed = True
-                elif atom_type == int(CNOF_ATOM_TYPES[1]):
-                    pyridine_like = bond_valence == 3 and hydrogens == 0
-                    pyrrole_like = (
-                        internal_valence == 2
-                        and external_valence == 0
-                        and hydrogens == 1
-                    )
-                    allowed = (pyridine_like or pyrrole_like) and hydrogens == int(
-                        attributes["target_hydrogens"]
-                    )
-                elif atom_type == int(CNOF_ATOM_TYPES[2]):
-                    allowed = (
-                        internal_valence == 2
-                        and external_valence == 0
-                        and hydrogens == 0
-                        and int(attributes["target_hydrogens"]) == 0
-                    )
-                else:
-                    allowed = False
-            return bool(allowed)
+    def compatible(constraint: tuple[int, ...], host_node: int) -> bool:
+        (
+            atom_type,
+            charge,
+            source_valence,
+            target_valence,
+            aromatic,
+            target_hydrogens,
+        ) = constraint
+        if int(charge) != 0 or int(atom_type) not in CNOF_ATOM_TYPES:
+            return False
+        external_valence = current_valence[int(host_node)] - int(source_valence)
+        internal_valence = int(target_valence)
+        bond_valence = external_valence + internal_valence
+        hydrogens = int(CNOF_VALENCE[int(atom_type)]) - bond_valence
+        allowed = 0 <= hydrogens <= MAX_H_COUNT
+        if bool(aromatic) and allowed:
+            if int(atom_type) == int(CNOF_ATOM_TYPES[0]):
+                allowed = True
+            elif int(atom_type) == int(CNOF_ATOM_TYPES[1]):
+                pyridine_like = bond_valence == 3 and hydrogens == 0
+                pyrrole_like = (
+                    internal_valence == 2
+                    and external_valence == 0
+                    and hydrogens == 1
+                )
+                allowed = (pyridine_like or pyrrole_like) and hydrogens == int(
+                    target_hydrogens
+                )
+            elif int(atom_type) == int(CNOF_ATOM_TYPES[2]):
+                allowed = (
+                    internal_valence == 2
+                    and external_valence == 0
+                    and hydrogens == 0
+                    and int(target_hydrogens) == 0
+                )
+            else:
+                allowed = False
+        return bool(allowed)
 
-        if any(
-            all(required <= available for required, available in zip(requirements, capacity))
-            and _forest_contains_tree(
-                component,
-                pattern,
-                node_compatible=compatible,
-            )
-            for component, capacity in components
-        ):
-            mask[np.asarray(indices, dtype=np.int64)] = True
+    mask = _rooted_tree_support_mask(
+        host,
+        width=len(templates),
+        index=_electronic_rooted_support_index(templates, electronic_aliases),
+        compatible=compatible,
+    )
     if len(_RING_ELECTRONIC_SUPPORT_MASK_CACHE) >= 8192:
         _RING_ELECTRONIC_SUPPORT_MASK_CACHE.pop(
             next(iter(_RING_ELECTRONIC_SUPPORT_MASK_CACHE))

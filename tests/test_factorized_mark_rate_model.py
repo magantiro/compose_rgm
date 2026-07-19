@@ -91,7 +91,7 @@ def _ring_support_case():
     return catalog, path.state_at(progress), trace.steps[progress].action
 
 
-def test_ring_template_support_short_circuits_on_verified_witness(
+def test_ring_template_support_avoids_witness_search_after_semantic_proof(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     catalog, state, action = _ring_support_case()
@@ -109,16 +109,14 @@ def test_ring_template_support_short_circuits_on_verified_witness(
     monkeypatch.setattr(
         model,
         "_ring_witness_candidates",
-        lambda current_state, current_index: (object(),),
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("semantic proof should avoid executor witness search")
+        ),
     )
-
-    def reject_semantic_search(*_args, **_kwargs):
-        raise AssertionError("a verified positive witness must short-circuit semantic search")
-
     monkeypatch.setattr(
         "compose_v4.model.factorized_tracelet_rate_model."
         "semantic_ring_prefix_is_completable",
-        reject_semantic_search,
+        lambda *_args, **_kwargs: True,
     )
 
     support = model._ring_grow_support(state)
