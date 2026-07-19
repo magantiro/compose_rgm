@@ -25,6 +25,7 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     ChemistryStateFeatures,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
+    MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
     SparseBinaryRows,
     factorized_mark_bregman_loss,
@@ -518,6 +519,14 @@ def factorized_mark_metrics(
     nonterminal_count = 0
     terminal_hazard_sum = 0.0
     terminal_count = 0
+    predicted_hazard_sum = 0.0
+    teacher_hazard_sum = 0.0
+    hazard_absolute_error_sum = 0.0
+    weighted_hazard_absolute_error_sum = 0.0
+    importance_weight_sum = 0.0
+    family_counts = [0 for _ in MARK_RULE_NAMES]
+    family_hits = [0 for _ in MARK_RULE_NAMES]
+    family_teacher_probability_sums = [0.0 for _ in MARK_RULE_NAMES]
     for start in range(0, batch.batch_size, resolved_microbatch_size):
         cpu_batch = batch.subbatch(
             start,
@@ -545,6 +554,16 @@ def factorized_mark_metrics(
         )
         nonterminal = teacher_family >= 0
         terminal = ~nonterminal
+        teacher_rates = device_batch.teacher_rates.to(device)
+        importance_weights = device_batch.importance_weights.to(device)
+        hazard_absolute_error = (prediction.total_hazard - teacher_rates).abs()
+        predicted_hazard_sum += float(prediction.total_hazard.sum())
+        teacher_hazard_sum += float(teacher_rates.sum())
+        hazard_absolute_error_sum += float(hazard_absolute_error.sum())
+        weighted_hazard_absolute_error_sum += float(
+            (hazard_absolute_error * importance_weights).sum()
+        )
+        importance_weight_sum += float(importance_weights.sum())
         current_nonterminal_count = int(nonterminal.sum())
         current_terminal_count = int(terminal.sum())
         loss_sum += float(loss) * device_batch.batch_size
@@ -558,11 +577,25 @@ def factorized_mark_metrics(
                     == teacher_family[nonterminal]
                 ).sum()
             )
+            predicted_family = prediction.family_log_probabilities.argmax(dim=-1)
+            teacher_mark_probability = prediction.selected_mark_log_probability.exp()
+            for family_index in range(len(MARK_RULE_NAMES)):
+                selected_family = nonterminal & (teacher_family == family_index)
+                family_count = int(selected_family.sum())
+                if not family_count:
+                    continue
+                family_counts[family_index] += family_count
+                family_hits[family_index] += int(
+                    (predicted_family[selected_family] == family_index).sum()
+                )
+                family_teacher_probability_sums[family_index] += float(
+                    teacher_mark_probability[selected_family].sum()
+                )
             nonterminal_count += current_nonterminal_count
         if current_terminal_count:
             terminal_hazard_sum += float(prediction.total_hazard[terminal].sum())
             terminal_count += current_terminal_count
-    return {
+    metrics = {
         "factorized_gm_loss": loss_sum / batch.batch_size,
         "mean_teacher_mark_probability": (
             teacher_probability_sum / nonterminal_count
@@ -575,7 +608,27 @@ def factorized_mark_metrics(
         "mean_terminal_hazard": (
             terminal_hazard_sum / terminal_count if terminal_count else 0.0
         ),
+        "mean_predicted_hazard": predicted_hazard_sum / batch.batch_size,
+        "mean_teacher_hazard": teacher_hazard_sum / batch.batch_size,
+        "mean_absolute_hazard_error": hazard_absolute_error_sum / batch.batch_size,
+        "importance_weighted_mean_absolute_hazard_error": (
+            weighted_hazard_absolute_error_sum / importance_weight_sum
+            if importance_weight_sum
+            else 0.0
+        ),
     }
+    for family_index, family_name in enumerate(MARK_RULE_NAMES):
+        count = family_counts[family_index]
+        metrics[f"teacher_examples_{family_name}"] = float(count)
+        metrics[f"family_accuracy_{family_name}"] = (
+            family_hits[family_index] / count if count else 0.0
+        )
+        metrics[f"mean_teacher_mark_probability_{family_name}"] = (
+            family_teacher_probability_sums[family_index] / count
+            if count
+            else 0.0
+        )
+    return metrics
 
 
 def train_factorized_mark_model(
