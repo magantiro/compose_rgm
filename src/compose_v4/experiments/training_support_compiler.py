@@ -12,6 +12,7 @@ from time import perf_counter
 import torch
 from torch.utils.data import Dataset
 
+from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_mark_conditional import FactorizedMarkDataset
 from compose_v4.experiments.training_support_cache import (
@@ -22,17 +23,31 @@ from compose_v4.experiments.training_support_cache import (
     save_training_support_shard,
     training_support_shard_path,
 )
-from compose_v4.rewrite.ring_system_fiber import warm_ring_system_candidate_indices
+from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
+from compose_v4.rewrite.ring_system_fiber import (
+    clear_semantic_ring_state_caches,
+    warm_ring_system_candidate_indices,
+)
 from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
 
-MINIMUM_SUPPORT_REORDER_WINDOW = 65536
+MINIMUM_SUPPORT_REORDER_WINDOW = 16000
+WORKER_SUPPORT_CACHE_LIMIT = 512
 
 
 @dataclass(frozen=True)
 class IndexedTrainingSupportRow:
     absolute_index: int
     support: TrainingSupportRow
+
+
+@dataclass(frozen=True)
+class IndexedTrainingSupportRequest:
+    """Compact chemistry request sampled by the sole path-owning process."""
+
+    absolute_index: int
+    state: MolecularGraph
+    full_support: bool
 
 
 class TrainingSupportCompilationDataset(Dataset[IndexedTrainingSupportRow]):
@@ -80,20 +95,98 @@ class TrainingSupportCompilationDataset(Dataset[IndexedTrainingSupportRow]):
         )
 
 
-_SUPPORT_COMPILATION_DATASET: TrainingSupportCompilationDataset | None = None
+class TrainingSupportRequestDataset(Dataset[IndexedTrainingSupportRequest]):
+    """Sample states without letting support workers touch the path corpus."""
+
+    def __init__(
+        self,
+        records: tuple[PathRecord, ...],
+        *,
+        start_index: int,
+        length: int,
+        seed: int,
+        late_time_fraction: float,
+        operational_horizon: float,
+        progress_stratification_fraction: float,
+    ) -> None:
+        self.start_index = int(start_index)
+        self.dataset = FactorizedMarkDataset(
+            records,
+            start_index=start_index,
+            length=length,
+            seed=seed,
+            late_time_fraction=late_time_fraction,
+            operational_horizon=operational_horizon,
+            progress_stratification_fraction=progress_stratification_fraction,
+            ring_catalog=None,
+        )
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    def __getitem__(self, index: int) -> IndexedTrainingSupportRequest:
+        example = self.dataset[index]
+        return IndexedTrainingSupportRequest(
+            absolute_index=self.start_index + int(index),
+            state=example.state,
+            full_support=example.teacher_rule_name == "ring_system_grow",
+        )
+
+
+_SUPPORT_RING_CATALOG: TypedRingCatalog | None = None
+_SUPPORT_RING_ELECTRONIC_MODE = "factorized_local"
+_SUPPORT_RING_MODEL: FactorizedTraceletRateModel | None = None
+_SUPPORT_REQUESTS_SINCE_RESET = 0
 
 
 def _initialize_support_worker() -> None:
     # Chemistry workers are process-parallel; nested BLAS/Torch thread pools
     # only oversubscribe the container and amplify long-tail latency.
     torch.set_num_threads(1)
+    catalog = _SUPPORT_RING_CATALOG
+    if catalog is None:
+        raise RuntimeError("support worker was started without its ring catalog")
+    global _SUPPORT_REQUESTS_SINCE_RESET, _SUPPORT_RING_MODEL
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(0)
+        _SUPPORT_RING_MODEL = FactorizedTraceletRateModel(
+            catalog,
+            hidden_dim=1,
+            message_passing_steps=1,
+            mark_dim=1,
+            ring_electronic_mode=_SUPPORT_RING_ELECTRONIC_MODE,
+            ring_candidate_cache_limit=WORKER_SUPPORT_CACHE_LIMIT,
+        )
+    _SUPPORT_REQUESTS_SINCE_RESET = 0
 
 
-def _compile_support_row(index: int) -> IndexedTrainingSupportRow:
-    dataset = _SUPPORT_COMPILATION_DATASET
-    if dataset is None:
-        raise RuntimeError("support worker was started without its forked dataset")
-    return dataset[int(index)]
+def _compile_support_request(
+    request: IndexedTrainingSupportRequest,
+) -> IndexedTrainingSupportRow:
+    global _SUPPORT_REQUESTS_SINCE_RESET
+    model = _SUPPORT_RING_MODEL
+    if model is None:
+        raise RuntimeError("support worker lacks its chemistry oracle")
+    if _SUPPORT_REQUESTS_SINCE_RESET >= WORKER_SUPPORT_CACHE_LIMIT:
+        model.clear_ring_candidate_caches()
+        clear_semantic_ring_state_caches()
+        _SUPPORT_REQUESTS_SINCE_RESET = 0
+    if request.full_support:
+        mask = model._ring_grow_support(request.state)
+    else:
+        mask = model._ring_grow_enablement_certificate(request.state)
+    _SUPPORT_REQUESTS_SINCE_RESET += 1
+    return IndexedTrainingSupportRow(
+        absolute_index=int(request.absolute_index),
+        support=TrainingSupportRow(
+            indices=tuple(
+                int(index) for index, supported in enumerate(mask) if supported
+            ),
+            width=len(mask),
+            support_is_exact=bool(request.full_support),
+            enablement_is_exact=True,
+        ),
+    )
 
 
 def iter_training_support_rows(
@@ -125,7 +218,23 @@ def iter_training_support_rows(
     if workers < 0 or microbatch_size <= 0 or prefetch_factor <= 0:
         raise ValueError("training support worker settings are invalid")
     warm_ring_system_candidate_indices(ring_catalog)
-    dataset = TrainingSupportCompilationDataset(
+    if workers == 0:
+        dataset = TrainingSupportCompilationDataset(
+            records,
+            start_index=start_index,
+            length=stop_index - start_index,
+            seed=seed,
+            late_time_fraction=late_time_fraction,
+            operational_horizon=operational_horizon,
+            progress_stratification_fraction=progress_stratification_fraction,
+            ring_catalog=ring_catalog,
+            ring_electronic_mode=ring_electronic_mode,
+        )
+        for index in range(len(dataset)):
+            yield dataset[index]
+        return
+
+    request_dataset = TrainingSupportRequestDataset(
         records,
         start_index=start_index,
         length=stop_index - start_index,
@@ -133,13 +242,7 @@ def iter_training_support_rows(
         late_time_fraction=late_time_fraction,
         operational_horizon=operational_horizon,
         progress_stratification_fraction=progress_stratification_fraction,
-        ring_catalog=ring_catalog,
-        ring_electronic_mode=ring_electronic_mode,
     )
-    if workers == 0:
-        for index in range(len(dataset)):
-            yield dataset[index]
-        return
 
     # Keep enough independent rows in flight to absorb rare multi-second ring
     # certificates without allowing an unbounded reordering buffer.  The
@@ -149,8 +252,9 @@ def iter_training_support_rows(
         MINIMUM_SUPPORT_REORDER_WINDOW,
         int(workers) * int(microbatch_size) * int(prefetch_factor),
     )
-    global _SUPPORT_COMPILATION_DATASET
-    _SUPPORT_COMPILATION_DATASET = dataset
+    global _SUPPORT_RING_CATALOG, _SUPPORT_RING_ELECTRONIC_MODE
+    _SUPPORT_RING_CATALOG = ring_catalog
+    _SUPPORT_RING_ELECTRONIC_MODE = str(ring_electronic_mode)
     context = mp.get_context("fork")
     pool = context.Pool(
         processes=workers,
@@ -165,12 +269,13 @@ def iter_training_support_rows(
     def fill_window() -> None:
         nonlocal in_flight, next_submit
         while (
-            next_submit < len(dataset)
+            next_submit < len(request_dataset)
             and next_submit - next_yield < reorder_window
         ):
+            request = request_dataset[next_submit]
             pool.apply_async(
-                _compile_support_row,
-                (next_submit,),
+                _compile_support_request,
+                (request,),
                 callback=lambda row: completions.put((True, row)),
                 error_callback=lambda error: completions.put((False, error)),
             )
@@ -191,7 +296,7 @@ def iter_training_support_rows(
                 raise TypeError("support worker returned an invalid row payload")
             row = payload
             local_index = int(row.absolute_index) - int(start_index)
-            if not 0 <= local_index < len(dataset):
+            if not 0 <= local_index < len(request_dataset):
                 raise RuntimeError(
                     "support worker returned the wrong deterministic index"
                 )
@@ -204,7 +309,7 @@ def iter_training_support_rows(
                 fill_window()
                 yield row
             fill_window()
-        if pending or next_yield != len(dataset):
+        if pending or next_yield != len(request_dataset):
             raise RuntimeError("support compiler lost a reordered worker result")
         completed_normally = True
     finally:
@@ -213,7 +318,8 @@ def iter_training_support_rows(
         else:
             pool.terminate()
         pool.join()
-        _SUPPORT_COMPILATION_DATASET = None
+        _SUPPORT_RING_CATALOG = None
+        _SUPPORT_RING_ELECTRONIC_MODE = "factorized_local"
 
 
 def _validated_cached_prefix(
@@ -344,7 +450,9 @@ def compile_training_support_shards(
 
 __all__ = [
     "IndexedTrainingSupportRow",
+    "IndexedTrainingSupportRequest",
     "TrainingSupportCompilationDataset",
+    "TrainingSupportRequestDataset",
     "compile_training_support_shards",
     "iter_training_support_rows",
 ]
