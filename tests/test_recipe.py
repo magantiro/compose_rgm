@@ -42,3 +42,33 @@ def test_stage3_recipe_has_early_selection_and_throughput_gates() -> None:
     assert arguments["recovery_every"] == 500
     assert arguments["data_workers"] == 24
     assert arguments["data_prefetch_factor"] == 2
+
+
+def test_stage3_integration_smoke_recipe_is_tiny_but_semantically_matched() -> None:
+    root = Path(__file__).resolve().parents[1]
+    production = load_tracelet_recipe(
+        root / "recipes" / "tree_fcd_transfer_stage3_flexible_graft.json"
+    )["arguments"]
+    smoke = load_tracelet_recipe(
+        root / "recipes" / "tree_fcd_transfer_stage3_integration_smoke.json"
+    )["arguments"]
+
+    assert smoke["train_size"] == 32
+    assert smoke["validation_size"] == 4
+    assert smoke["test_size"] == 4
+    assert smoke["steps"] == 2
+    assert smoke["fast_split"] is True
+    assert smoke["early_stopping_patience"] == 0
+    assert "skip_rollouts" not in smoke
+    for key in (
+        "training_backend",
+        "rate_factorization",
+        "ring_proposals",
+        "ring_electronic_mode",
+        "source_prior",
+        "tree_size_prior",
+        "tree_transport",
+        "bond_representation",
+        "teacher_ordering",
+    ):
+        assert smoke[key] == production[key]

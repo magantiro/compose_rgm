@@ -22,10 +22,12 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
         "compile_stage",
         "train_stage",
         "evaluate_stage",
+        "integration_smoke_pipeline_stage",
         "pipeline_stage",
         "main",
     } <= function_names
     assert "tree_fcd_transfer_stage3_flexible_graft.json" in source
+    assert "tree_fcd_transfer_stage3_integration_smoke.json" in source
     assert "compose-v4-artifacts" in source
     assert "guacamol_heldout_val_5000_seed0.smiles" in source
     assert "train_stage.spawn" in source
@@ -38,6 +40,9 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert "pipeline_stage.spawn" in source
     assert "skip_rollouts=True" in source
     assert "FINAL_ROLLOUT_SAMPLES = 2000" in source
+    assert "INTEGRATION_SMOKE_ROLLOUT_SAMPLES = 16" in source
+    assert "integration_smoke_pipeline_stage.spawn" in source
+    assert "integration_smoke_v1" in source
     assert "rollout_evaluate_stage.remote" in source
     assert '"checkpoint.pt"' in source
     assert source.index("compile_stage.remote") < source.index("audit_teacher_stage.remote")
@@ -54,6 +59,7 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert "run_identity_sha256" in source
     assert 'recipe["arguments"]["provenance_sha256"]' in source
     assert "--run-label is required" in source
+    assert source.count("ignore=SOURCE_TREE_IGNORE") == 3
     rollout_stage = source[source.index("def rollout_evaluate_stage(") :]
     assert rollout_stage.index("_atomic_json_write(manifest, manifest_path)") < (
         rollout_stage.index("shutil.copyfile(source_checkpoint")

@@ -23,6 +23,7 @@ import math
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -34,12 +35,19 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose_v4")
 RECIPE_NAME = "tree_fcd_transfer_stage3_flexible_graft.json"
+INTEGRATION_SMOKE_RECIPE_NAME = (
+    "tree_fcd_transfer_stage3_integration_smoke.json"
+)
 FINAL_ROLLOUT_SAMPLES = 2000
+INTEGRATION_SMOKE_ROLLOUT_SAMPLES = 16
 ROLLOUT_BASE_SEED = 20260717
 ROLLOUT_MAX_ATOMS = 40
 ROLLOUT_OPERATIONAL_HORIZON = 16.0
 ROLLOUT_TIME_STEP = 0.1
 ROLLOUT_MAX_EVENTS = 128
+SOURCE_TREE_IGNORE = ("**/__pycache__/**", "**/*.pyc")
+SOURCE_FINGERPRINT_SUFFIXES = frozenset({".py", ".json"})
+RUN_LABEL_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 
 # Modal executes the entrypoint module from /root while the snapshotted package
 # lives under REMOTE_ROOT/src.  Install that path before any remote helper
@@ -66,9 +74,24 @@ image = (
             "OPENBLAS_NUM_THREADS": "1",
         }
     )
-    .add_local_dir(ROOT / "src", str(REMOTE_ROOT / "src"), copy=True)
-    .add_local_dir(ROOT / "scripts", str(REMOTE_ROOT / "scripts"), copy=True)
-    .add_local_dir(ROOT / "recipes", str(REMOTE_ROOT / "recipes"), copy=True)
+    .add_local_dir(
+        ROOT / "src",
+        str(REMOTE_ROOT / "src"),
+        copy=True,
+        ignore=SOURCE_TREE_IGNORE,
+    )
+    .add_local_dir(
+        ROOT / "scripts",
+        str(REMOTE_ROOT / "scripts"),
+        copy=True,
+        ignore=SOURCE_TREE_IGNORE,
+    )
+    .add_local_dir(
+        ROOT / "recipes",
+        str(REMOTE_ROOT / "recipes"),
+        copy=True,
+        ignore=SOURCE_TREE_IGNORE,
+    )
 )
 
 app = modal.App("compose-v4-tracelet-gm")
@@ -179,10 +202,24 @@ def _source_fingerprint() -> str:
     digest.update(entrypoint.read_bytes())
     for directory_name in ("src", "scripts", "recipes"):
         directory = REMOTE_ROOT / directory_name
-        for path in sorted(item for item in directory.rglob("*") if item.is_file()):
+        for path in sorted(
+            item
+            for item in directory.rglob("*")
+            if item.is_file() and item.suffix in SOURCE_FINGERPRINT_SUFFIXES
+        ):
             digest.update(str(path.relative_to(REMOTE_ROOT)).encode())
             digest.update(path.read_bytes())
     return digest.hexdigest()
+
+
+def _validate_run_label(value: str, *, field: str = "run label") -> None:
+    """Reject traversal, nested paths, and ambiguous artifact labels."""
+
+    if Path(value).name != value or RUN_LABEL_PATTERN.fullmatch(value) is None:
+        raise ValueError(
+            f"{field} must be a 1-128 character ASCII basename containing only "
+            "letters, digits, '.', '_', or '-', and must begin with a letter or digit"
+        )
 
 
 def _file_sha256(path: Path) -> str:
@@ -410,11 +447,12 @@ def _maybe_launch_early_rollout(
 def _final_rollout_spec(
     source_run_label: str,
     train_result: dict[str, object],
+    *,
+    rollout_samples: int = FINAL_ROLLOUT_SAMPLES,
 ) -> tuple[str, str, int]:
     """Name the immutable post-training CPU evaluation from selected state."""
 
-    if Path(source_run_label).name != source_run_label:
-        raise ValueError("source run label must be a basename")
+    _validate_run_label(source_run_label, field="source run label")
     selected = train_result.get("selected_validation")
     if not isinstance(selected, dict):
         raise ValueError("training result lacks selected_validation")
@@ -428,12 +466,56 @@ def _final_rollout_spec(
         or not selected_step_value.is_integer()
     ):
         raise ValueError("selected_step must be a finite non-negative integer")
+    if rollout_samples <= 0:
+        raise ValueError("rollout_samples must be positive")
     selected_step = int(selected_step_value)
     return (
-        f"{source_run_label}-final-step{selected_step}-eval{FINAL_ROLLOUT_SAMPLES}",
+        f"{source_run_label}-final-step{selected_step}-eval{rollout_samples}",
         "checkpoint.pt",
-        FINAL_ROLLOUT_SAMPLES,
+        rollout_samples,
     )
+
+
+def _rollout_evaluation_profile(name: str) -> dict[str, object]:
+    """Return one frozen CPU-evaluation profile for artifact identity."""
+
+    if name == "production_v1":
+        return {
+            "name": name,
+            "seed": ROLLOUT_BASE_SEED,
+            "max_atoms": ROLLOUT_MAX_ATOMS,
+            "train_size": 50000,
+            "validation_size": 2000,
+            "test_size": 2000,
+            "fast_split": False,
+            "corpus_workers": 16,
+            "rollout_workers": 16,
+            "torch_threads": 1,
+            "operational_horizon": ROLLOUT_OPERATIONAL_HORIZON,
+            "time_step": ROLLOUT_TIME_STEP,
+            "max_events": ROLLOUT_MAX_EVENTS,
+            "quality_reference_limit": 5000,
+            "fcd_generated_limit": 2000,
+        }
+    if name == "integration_smoke_v1":
+        return {
+            "name": name,
+            "seed": ROLLOUT_BASE_SEED,
+            "max_atoms": 12,
+            "train_size": 32,
+            "validation_size": 4,
+            "test_size": 4,
+            "fast_split": True,
+            "corpus_workers": 1,
+            "rollout_workers": 4,
+            "torch_threads": 1,
+            "operational_horizon": 0.2,
+            "time_step": 0.1,
+            "max_events": 2,
+            "quality_reference_limit": 128,
+            "fcd_generated_limit": INTEGRATION_SMOKE_ROLLOUT_SAMPLES,
+        }
+    raise ValueError(f"unknown rollout evaluation profile: {name}")
 
 
 def _rollout_manifest_signature(
@@ -446,20 +528,27 @@ def _rollout_manifest_signature(
     train_sha256: str,
     reference_sha256: str,
     source_sha256: str,
+    evaluation_profile: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Return the fields that must match before rollout artifacts are reused."""
 
+    profile = dict(
+        _rollout_evaluation_profile("production_v1")
+        if evaluation_profile is None
+        else evaluation_profile
+    )
     return {
         "version": 1,
         "source_run_label": source_run_label,
         "checkpoint_name": checkpoint_name,
         "checkpoint_sha256": checkpoint_sha256,
         "rollout_samples": rollout_samples,
-        "sampling_seed": ROLLOUT_BASE_SEED + 4,
-        "max_atoms": ROLLOUT_MAX_ATOMS,
-        "operational_horizon": ROLLOUT_OPERATIONAL_HORIZON,
-        "time_step": ROLLOUT_TIME_STEP,
-        "max_events": ROLLOUT_MAX_EVENTS,
+        "sampling_seed": int(profile["seed"]) + 4,
+        "max_atoms": profile["max_atoms"],
+        "operational_horizon": profile["operational_horizon"],
+        "time_step": profile["time_step"],
+        "max_events": profile["max_events"],
+        "evaluation_profile": profile,
         "disabled_rule_names": list(disabled_rule_names),
         "source_prior": "carbon_tree",
         "train_sha256": train_sha256,
@@ -485,6 +574,9 @@ def _rollout_remote_summary(
         "artifact_dir": str(run_dir),
         "generated_nonnull_smiles": report.get("generated_nonnull_smiles"),
         "valid_fraction": rollout.get("valid_fraction"),
+        "trajectory_diagnostics_available": report.get(
+            "trajectory_diagnostics_available"
+        ),
         "selected_validation": report.get("selected_validation"),
         "fcd": molecular_quality.get("frechet_chemnet_distance"),
     }
@@ -531,6 +623,7 @@ def _run_remote(
 ) -> dict[str, object]:
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
 
+    _validate_run_label(run_label)
     guacamol_volume.reload()
     artifact_volume.reload()
     started = time.perf_counter()
@@ -549,8 +642,7 @@ def _run_remote(
     if skip_rollouts:
         recipe["arguments"]["skip_rollouts"] = True
     if evaluation_source_run is not None:
-        if Path(evaluation_source_run).name != evaluation_source_run:
-            raise ValueError("evaluation source run must be a volume-directory name")
+        _validate_run_label(evaluation_source_run, field="evaluation source run")
         if Path(evaluation_checkpoint_name).name != evaluation_checkpoint_name:
             raise ValueError("evaluation checkpoint must be a file basename")
         source_dir = Path("/artifacts") / evaluation_source_run
@@ -805,6 +897,9 @@ def _run_remote(
     if not metrics_path.is_file():
         raise RuntimeError(f"training completed without metrics artifact: {metrics_path}")
     report = json.loads(metrics_path.read_text())
+    rollout_report = report.get("rollout")
+    if not isinstance(rollout_report, dict):
+        rollout_report = {}
     summary = {
         "run_label": run_label,
         "smoke": smoke,
@@ -814,7 +909,8 @@ def _run_remote(
         "artifact_dir": str(run_dir),
         "model": report.get("model"),
         "generated_nonnull_smiles": report.get("generated_nonnull_smiles"),
-        "valid_fraction": report.get("rollout", {}).get("valid_fraction"),
+        "valid_fraction": rollout_report.get("valid_fraction"),
+        "rollouts_skipped": rollout_report.get("skipped") is True,
         "selected_validation": report.get("selected_validation"),
         "fcd": report.get("molecular_quality", {}).get("frechet_chemnet_distance"),
     }
@@ -917,8 +1013,7 @@ def audit_teacher_stage(
 
     from compose_v4.experiments.recipe import load_tracelet_recipe
 
-    if Path(run_label).name != run_label:
-        raise ValueError("run label must be a basename")
+    _validate_run_label(run_label)
     if batch_size <= 0 or workers < 0:
         raise ValueError("audit batch size must be positive and workers non-negative")
     recipe = load_tracelet_recipe(REMOTE_ROOT / "recipes" / recipe_name)
@@ -1039,18 +1134,17 @@ def rollout_evaluate_stage(
     checkpoint_name: str = "checkpoint.best_so_far.pt",
     rollout_samples: int = 2000,
     disable_ring_ear: bool = False,
+    evaluation_profile_name: str = "production_v1",
 ) -> dict[str, object]:
     """Evaluate ancestral samples without loading endpoint-conditioned teachers."""
 
-    for value, label in (
-        (run_label, "run label"),
-        (source_run_label, "source run label"),
-        (checkpoint_name, "checkpoint name"),
-    ):
-        if Path(value).name != value:
-            raise ValueError(f"{label} must be a basename")
+    _validate_run_label(run_label)
+    _validate_run_label(source_run_label, field="source run label")
+    if Path(checkpoint_name).name != checkpoint_name:
+        raise ValueError("checkpoint name must be a basename")
     if rollout_samples <= 0:
         raise ValueError("rollout_samples must be positive")
+    evaluation_profile = _rollout_evaluation_profile(evaluation_profile_name)
 
     guacamol_volume.reload()
     artifact_volume.reload()
@@ -1076,6 +1170,7 @@ def rollout_evaluate_stage(
         train_sha256=_file_sha256(train_file),
         reference_sha256=_file_sha256(reference_file),
         source_sha256=_source_fingerprint(),
+        evaluation_profile=evaluation_profile,
     )
     checkpoint_snapshot = run_dir / "checkpoint.snapshot.pt"
     rollout_cache_path = run_dir / "rollouts.pt"
@@ -1179,20 +1274,34 @@ def rollout_evaluate_stage(
         "--rollout-samples",
         str(rollout_samples),
         "--rollout-workers",
-        "16",
+        str(evaluation_profile["rollout_workers"]),
         "--corpus-workers",
-        "16",
+        str(evaluation_profile["corpus_workers"]),
         "--seed",
-        str(ROLLOUT_BASE_SEED),
+        str(evaluation_profile["seed"]),
         "--max-atoms",
-        str(ROLLOUT_MAX_ATOMS),
+        str(evaluation_profile["max_atoms"]),
+        "--train-size",
+        str(evaluation_profile["train_size"]),
+        "--validation-size",
+        str(evaluation_profile["validation_size"]),
+        "--test-size",
+        str(evaluation_profile["test_size"]),
+        "--torch-threads",
+        str(evaluation_profile["torch_threads"]),
         "--operational-horizon",
-        str(ROLLOUT_OPERATIONAL_HORIZON),
+        str(evaluation_profile["operational_horizon"]),
         "--time-step",
-        str(ROLLOUT_TIME_STEP),
+        str(evaluation_profile["time_step"]),
         "--max-events",
-        str(ROLLOUT_MAX_EVENTS),
+        str(evaluation_profile["max_events"]),
+        "--quality-reference-limit",
+        str(evaluation_profile["quality_reference_limit"]),
+        "--fcd-generated-limit",
+        str(evaluation_profile["fcd_generated_limit"]),
     )
+    if bool(evaluation_profile["fast_split"]):
+        command += ("--fast-split",)
     if disable_ring_ear:
         command += ("--disable-rule", "ring_ear_insert")
     environment = dict(os.environ)
@@ -1255,6 +1364,69 @@ def rollout_evaluate_stage(
     return summary
 
 
+def _run_pipeline(
+    run_label: str,
+    recipe_name: str,
+    *,
+    final_rollout_samples: int,
+    audit_batch_size: int,
+    audit_workers: int,
+    evaluation_profile_name: str,
+    require_fcd: bool = False,
+) -> dict[str, object]:
+    """Run the same CPU -> GPU -> CPU boundary for production and its smoke."""
+
+    compile_result = compile_stage.remote(run_label, recipe_name)
+    audit_result = audit_teacher_stage.remote(
+        run_label,
+        recipe_name,
+        audit_batch_size,
+        audit_workers,
+    )
+    train_result = train_stage.remote(run_label, recipe_name)
+    if train_result.get("rollouts_skipped") is not True:
+        raise RuntimeError("GPU training unexpectedly performed in-container rollouts")
+    evaluation_run_label, checkpoint_name, rollout_samples = _final_rollout_spec(
+        run_label,
+        train_result,
+        rollout_samples=final_rollout_samples,
+    )
+    final_rollout_result = rollout_evaluate_stage.remote(
+        evaluation_run_label,
+        run_label,
+        checkpoint_name,
+        rollout_samples,
+        False,
+        evaluation_profile_name,
+    )
+    if require_fcd:
+        generated = final_rollout_result.get("generated_nonnull_smiles")
+        valid_fraction = final_rollout_result.get("valid_fraction")
+        fcd = final_rollout_result.get("fcd")
+        if not isinstance(generated, int) or generated < 2:
+            raise RuntimeError("integration smoke produced fewer than two molecules")
+        if (
+            isinstance(valid_fraction, bool)
+            or not isinstance(valid_fraction, (int, float))
+            or not math.isfinite(float(valid_fraction))
+        ):
+            raise RuntimeError(
+                "integration smoke did not report a numeric valid fraction"
+            )
+        if final_rollout_result.get("trajectory_diagnostics_available") is not True:
+            raise RuntimeError(
+                "integration smoke did not produce trajectory diagnostics"
+            )
+        if not isinstance(fcd, (int, float)) or not math.isfinite(float(fcd)):
+            raise RuntimeError("integration smoke did not complete finite CPU FCD")
+    return {
+        "compile": compile_result,
+        "audit": audit_result,
+        "train": train_result,
+        "final_rollout": final_rollout_result,
+    }
+
+
 @app.function(
     image=image,
     cpu=0.25,
@@ -1265,32 +1437,42 @@ def pipeline_stage(
     run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
-    """Run CPU preprocessing to completion before allocating the training GPU."""
+    """Run CPU preprocessing, A100 training, then CPU final evaluation."""
 
-    compile_result = compile_stage.remote(run_label, recipe_name)
-    audit_result = audit_teacher_stage.remote(run_label, recipe_name)
-    train_result = train_stage.remote(run_label, recipe_name)
-    evaluation_run_label, checkpoint_name, rollout_samples = _final_rollout_spec(
+    return _run_pipeline(
         run_label,
-        train_result,
+        recipe_name,
+        final_rollout_samples=FINAL_ROLLOUT_SAMPLES,
+        audit_batch_size=2048,
+        audit_workers=12,
+        evaluation_profile_name="production_v1",
     )
-    final_rollout_result = rollout_evaluate_stage.remote(
-        evaluation_run_label,
+
+
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=512,
+    timeout=2 * 3600,
+)
+def integration_smoke_pipeline_stage(run_label: str) -> dict[str, object]:
+    """Exercise compile -> audit -> A100 train -> CPU rollout/FCD cheaply."""
+
+    return _run_pipeline(
         run_label,
-        checkpoint_name,
-        rollout_samples,
+        INTEGRATION_SMOKE_RECIPE_NAME,
+        final_rollout_samples=INTEGRATION_SMOKE_ROLLOUT_SAMPLES,
+        audit_batch_size=16,
+        audit_workers=1,
+        evaluation_profile_name="integration_smoke_v1",
+        require_fcd=True,
     )
-    return {
-        "compile": compile_result,
-        "audit": audit_result,
-        "train": train_result,
-        "final_rollout": final_rollout_result,
-    }
 
 
 @app.local_entrypoint()
 def main(
     smoke: bool = False,
+    integration_smoke: bool = False,
     preflight: bool = False,
     h100_preflight: bool = False,
     compile_only: bool = False,
@@ -1306,6 +1488,7 @@ def main(
     modes = sum(
         (
             smoke,
+            integration_smoke,
             preflight,
             h100_preflight,
             compile_only,
@@ -1316,7 +1499,7 @@ def main(
     )
     if modes > 1:
         raise ValueError(
-            "smoke, preflight, h100-preflight, compile-only, train-only, "
+            "smoke, integration-smoke, preflight, h100-preflight, compile-only, train-only, "
             "evaluate-only, and "
             "rollout-evaluate-only are exclusive"
         )
@@ -1324,6 +1507,20 @@ def main(
         raise ValueError(
             "--run-label is required; use a fresh commit-bearing immutable label"
         )
+    _validate_run_label(run_label)
+    if integration_smoke:
+        call = integration_smoke_pipeline_stage.spawn(run_label)
+        print(
+            json.dumps(
+                {
+                    "phase": "integration_smoke_pipeline_spawned",
+                    "function_call_id": call.object_id,
+                    "recipe_name": INTEGRATION_SMOKE_RECIPE_NAME,
+                }
+            )
+        )
+        print("Artifacts: Modal volume compose-v4-artifacts / " + run_label)
+        return
     if smoke:
         result = smoke_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))

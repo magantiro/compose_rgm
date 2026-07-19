@@ -13,8 +13,13 @@ modal_entrypoint = importlib.import_module("modal_apps.train_tracelet_gm")
 _early_rollout_decision = modal_entrypoint._early_rollout_decision
 _final_rollout_spec = modal_entrypoint._final_rollout_spec
 _rollout_manifest_signature = modal_entrypoint._rollout_manifest_signature
+_rollout_evaluation_profile = modal_entrypoint._rollout_evaluation_profile
+_rollout_remote_summary = modal_entrypoint._rollout_remote_summary
+_run_pipeline = modal_entrypoint._run_pipeline
 _stable_json_sha256 = modal_entrypoint._stable_json_sha256
 _remote_stage_kind = modal_entrypoint._remote_stage_kind
+_source_fingerprint = modal_entrypoint._source_fingerprint
+_validate_run_label = modal_entrypoint._validate_run_label
 
 
 def test_early_rollout_waits_for_warmup_and_material_improvement() -> None:
@@ -183,6 +188,16 @@ def test_final_rollout_spec_uses_selected_checkpoint_and_step() -> None:
         2000,
     )
 
+    assert _final_rollout_spec(
+        "smoke-v1",
+        {"selected_validation": {"selected_step": 2.0}},
+        rollout_samples=16,
+    ) == (
+        "smoke-v1-final-step2-eval16",
+        "checkpoint.pt",
+        16,
+    )
+
 
 @pytest.mark.parametrize(
     "train_result",
@@ -225,6 +240,214 @@ def test_rollout_manifest_signature_is_sensitive_to_checkpoint_and_rules() -> No
     assert first["sampling_seed"] == 20260721
 
 
+def test_integration_profile_is_small_and_part_of_rollout_identity() -> None:
+    production = _rollout_evaluation_profile("production_v1")
+    smoke = _rollout_evaluation_profile("integration_smoke_v1")
+    common = {
+        "source_run_label": "source",
+        "checkpoint_name": "checkpoint.pt",
+        "checkpoint_sha256": "checkpoint",
+        "rollout_samples": 16,
+        "disabled_rule_names": (),
+        "train_sha256": "train",
+        "reference_sha256": "reference",
+        "source_sha256": "source-code",
+    }
+
+    assert smoke["fast_split"] is True
+    assert smoke["train_size"] == 32
+    assert smoke["quality_reference_limit"] == 128
+    assert _rollout_manifest_signature(
+        **common,
+        evaluation_profile=production,
+    ) != _rollout_manifest_signature(
+        **common,
+        evaluation_profile=smoke,
+    )
+
+
+def test_rollout_remote_summary_exposes_trajectory_diagnostic_availability(
+    tmp_path: Path,
+) -> None:
+    summary = _rollout_remote_summary(
+        run_label="evaluation",
+        run_dir=tmp_path,
+        report={
+            "generated_nonnull_smiles": 16,
+            "rollout": {"valid_fraction": 0.75},
+            "trajectory_diagnostics_available": True,
+            "molecular_quality": {"frechet_chemnet_distance": 42.0},
+        },
+    )
+
+    assert summary["valid_fraction"] == 0.75
+    assert summary["trajectory_diagnostics_available"] is True
+
+
+def test_pipeline_smoke_uses_real_stage_order_and_separate_cpu_eval(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, tuple[object, ...]]] = []
+
+    class FakeStage:
+        def __init__(self, name: str, result: dict[str, object]) -> None:
+            self.name = name
+            self.result = result
+
+        def remote(self, *args: object) -> dict[str, object]:
+            calls.append((self.name, args))
+            return self.result
+
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "compile_stage",
+        FakeStage("compile", {"path_cache": "compiled"}),
+    )
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "audit_teacher_stage",
+        FakeStage("audit", {"family_failures": {}}),
+    )
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "train_stage",
+        FakeStage(
+            "train",
+            {
+                "rollouts_skipped": True,
+                "selected_validation": {"selected_step": 2.0},
+            },
+        ),
+    )
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "rollout_evaluate_stage",
+        FakeStage(
+            "rollout",
+            {
+                "generated_nonnull_smiles": 16,
+                "valid_fraction": 1.0,
+                "trajectory_diagnostics_available": True,
+                "fcd": 42.0,
+            },
+        ),
+    )
+
+    result = _run_pipeline(
+        "integration-v1",
+        "tree_fcd_transfer_stage3_integration_smoke.json",
+        final_rollout_samples=16,
+        audit_batch_size=16,
+        audit_workers=1,
+        evaluation_profile_name="integration_smoke_v1",
+        require_fcd=True,
+    )
+
+    assert [name for name, _ in calls] == ["compile", "audit", "train", "rollout"]
+    assert calls[-1][1] == (
+        "integration-v1-final-step2-eval16",
+        "integration-v1",
+        "checkpoint.pt",
+        16,
+        False,
+        "integration_smoke_v1",
+    )
+    assert result["final_rollout"]["fcd"] == 42.0
+
+
+def test_pipeline_refuses_gpu_training_that_did_not_skip_rollouts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeStage:
+        def __init__(self, result: dict[str, object]) -> None:
+            self.result = result
+
+        def remote(self, *args: object) -> dict[str, object]:
+            return self.result
+
+    monkeypatch.setattr(modal_entrypoint, "compile_stage", FakeStage({}))
+    monkeypatch.setattr(modal_entrypoint, "audit_teacher_stage", FakeStage({}))
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "train_stage",
+        FakeStage({"rollouts_skipped": False}),
+    )
+
+    with pytest.raises(RuntimeError, match="in-container rollouts"):
+        _run_pipeline(
+            "integration-v1",
+            "tree_fcd_transfer_stage3_integration_smoke.json",
+            final_rollout_samples=16,
+            audit_batch_size=16,
+            audit_workers=1,
+            evaluation_profile_name="integration_smoke_v1",
+        )
+
+
+@pytest.mark.parametrize(
+    ("rollout_result", "message"),
+    (
+        (
+            {
+                "generated_nonnull_smiles": 16,
+                "trajectory_diagnostics_available": True,
+                "fcd": 42.0,
+            },
+            "numeric valid fraction",
+        ),
+        (
+            {
+                "generated_nonnull_smiles": 16,
+                "valid_fraction": 1.0,
+                "trajectory_diagnostics_available": False,
+                "fcd": 42.0,
+            },
+            "trajectory diagnostics",
+        ),
+    ),
+)
+def test_pipeline_smoke_requires_complete_cpu_evaluation_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+    rollout_result: dict[str, object],
+    message: str,
+) -> None:
+    class FakeStage:
+        def __init__(self, result: dict[str, object]) -> None:
+            self.result = result
+
+        def remote(self, *args: object) -> dict[str, object]:
+            return self.result
+
+    monkeypatch.setattr(modal_entrypoint, "compile_stage", FakeStage({}))
+    monkeypatch.setattr(modal_entrypoint, "audit_teacher_stage", FakeStage({}))
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "train_stage",
+        FakeStage(
+            {
+                "rollouts_skipped": True,
+                "selected_validation": {"selected_step": 2.0},
+            }
+        ),
+    )
+    monkeypatch.setattr(
+        modal_entrypoint,
+        "rollout_evaluate_stage",
+        FakeStage(rollout_result),
+    )
+
+    with pytest.raises(RuntimeError, match=message):
+        _run_pipeline(
+            "integration-v1",
+            "tree_fcd_transfer_stage3_integration_smoke.json",
+            final_rollout_samples=16,
+            audit_batch_size=16,
+            audit_workers=1,
+            evaluation_profile_name="integration_smoke_v1",
+            require_fcd=True,
+        )
+
+
 def test_stage_identity_hash_is_order_independent_and_stage_specific() -> None:
     assert _stable_json_sha256({"b": 2, "a": 1}) == _stable_json_sha256(
         {"a": 1, "b": 2}
@@ -241,3 +464,57 @@ def test_stage_identity_hash_is_order_independent_and_stage_specific() -> None:
         compile_paths_only=False,
         evaluation_source_run=None,
     ) == "training"
+
+
+@pytest.mark.parametrize(
+    "label",
+    (
+        "compose-v4-stage3-production-736dae4-v1",
+        "A100_preflight.01",
+        "run-1",
+    ),
+)
+def test_run_label_validation_accepts_safe_ascii_basenames(label: str) -> None:
+    _validate_run_label(label)
+
+
+@pytest.mark.parametrize(
+    "label",
+    (
+        "",
+        ".",
+        "..",
+        "../escape",
+        "nested/run",
+        "/tmp/run",
+        "bad label",
+        "-leading-dash",
+        "nonascii-μ",
+        "a" * 129,
+    ),
+)
+def test_run_label_validation_rejects_unsafe_or_ambiguous_labels(label: str) -> None:
+    with pytest.raises(ValueError, match="ASCII basename"):
+        _validate_run_label(label)
+
+
+def test_source_fingerprint_ignores_bytecode_and_tracks_source(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("src", "scripts", "recipes"):
+        (tmp_path / name).mkdir()
+    source = tmp_path / "src" / "model.py"
+    source.write_text("VALUE = 1\n")
+    (tmp_path / "recipes" / "run.json").write_text('{"name": "run"}\n')
+    monkeypatch.setattr(modal_entrypoint, "REMOTE_ROOT", tmp_path)
+
+    original = _source_fingerprint()
+    cache = tmp_path / "src" / "__pycache__"
+    cache.mkdir()
+    (cache / "model.cpython-311.pyc").write_bytes(b"untracked bytecode")
+    (tmp_path / "scripts" / "worker.pyc").write_bytes(b"more bytecode")
+
+    assert _source_fingerprint() == original
+    source.write_text("VALUE = 2\n")
+    assert _source_fingerprint() != original
