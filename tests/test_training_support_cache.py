@@ -192,3 +192,32 @@ def test_training_support_cache_waits_for_atomic_concurrent_publication(tmp_path
         assert cache.require(1) == _rows()[1]
     finally:
         publisher.join()
+
+
+def test_training_support_cache_waits_for_certificate_complete_replacement(tmp_path) -> None:
+    signature = _signature()
+    cache = ShardedTrainingSupportCache(
+        tmp_path,
+        signature,
+        total_rows=3,
+        shard_size=3,
+        wait_timeout_seconds=1.0,
+        poll_interval_seconds=0.01,
+    )
+    path = training_support_shard_path(cache.root, start=0, stop=3)
+    complete = TrainingSupportShard.from_rows(_rows(), start=0)
+    save_training_support_shard(complete, path, signature=signature)
+    legacy_payload = torch.load(path, map_location="cpu", weights_only=False)
+    legacy_payload.pop("teacher_semantic_certificates")
+    torch.save(legacy_payload, path)
+
+    def replace() -> None:
+        sleep(0.05)
+        save_training_support_shard(complete, path, signature=signature)
+
+    publisher = Thread(target=replace)
+    publisher.start()
+    try:
+        assert cache.require(0) == _rows()[0]
+    finally:
+        publisher.join()

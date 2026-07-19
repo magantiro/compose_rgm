@@ -316,18 +316,26 @@ class ShardedTrainingSupportCache:
         return shard.row(absolute_index)
 
     def require(self, absolute_index: int) -> TrainingSupportRow:
-        row = self.get(absolute_index)
         deadline = monotonic() + float(self.wait_timeout_seconds)
-        while row is None and monotonic() < deadline:
+        shard_start, _ = self.bounds(absolute_index)
+        row = self.get(absolute_index)
+        shard = self._loaded.get(shard_start)
+        while (
+            row is None or shard is None or not shard.teacher_certificates_complete
+        ) and monotonic() < deadline:
+            # A compiler may atomically replace a legacy support-only shard
+            # with its certificate-complete version.  Evict the mmap-backed
+            # object before polling so workers observe that replacement rather
+            # than retaining the stale inode indefinitely.
+            self._loaded.pop(shard_start, None)
             sleep(min(float(self.poll_interval_seconds), max(deadline - monotonic(), 0.0)))
             row = self.get(absolute_index)
+            shard = self._loaded.get(shard_start)
         if row is None:
             raise FileNotFoundError(
                 f"missing compiled training support for row {absolute_index}: "
                 f"{self.path_for_index(absolute_index)}"
             )
-        shard_start, _ = self.bounds(absolute_index)
-        shard = self._loaded.get(shard_start)
         if shard is None or not shard.teacher_certificates_complete:
             raise FileNotFoundError(
                 "compiled training support lacks exact semantic teacher "
