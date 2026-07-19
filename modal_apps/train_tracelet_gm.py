@@ -1806,6 +1806,7 @@ def main(
     run_label: str = "",
     recipe_name: str = RECIPE_NAME,
     source_run_label: str = "",
+    initialization_source_run_label: str = "",
     checkpoint_name: str = "checkpoint.best_so_far.pt",
     rollout_samples: int = 100,
     support_start_step: int = 0,
@@ -1854,9 +1855,12 @@ def main(
         raise ValueError(
             "--initialize-from-source-checkpoint requires --train-only"
         )
-    if initialize_from_source_checkpoint and not source_run_label:
+    if initialize_from_source_checkpoint and not (
+        initialization_source_run_label or source_run_label
+    ):
         raise ValueError(
-            "--initialize-from-source-checkpoint requires --source-run-label"
+            "--initialize-from-source-checkpoint requires either "
+            "--initialization-source-run-label or --source-run-label"
         )
     if integration_smoke:
         call = integration_smoke_pipeline_stage.spawn(run_label)
@@ -1954,7 +1958,11 @@ def main(
             True,
             training_steps or None,
             None,
-            source_run_label if initialize_from_source_checkpoint else None,
+            (
+                initialization_source_run_label or source_run_label
+                if initialize_from_source_checkpoint
+                else None
+            ),
             checkpoint_name,
         )
         phase = "train_spawned"
