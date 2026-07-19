@@ -685,6 +685,8 @@ def _run_remote(
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
     path_cache_source_run: str | None = None,
     resume_source_run: str | None = None,
+    initialization_source_run: str | None = None,
+    initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
     training_steps: int | None = None,
     training_support_workers: int = 12,
     training_support_microbatch_size: int = 4,
@@ -768,6 +770,33 @@ def _run_remote(
                 "allow_resume_provenance_mismatch": True,
             }
         )
+    if initialization_source_run is not None:
+        if resume_source_run is not None:
+            raise ValueError(
+                "fresh checkpoint initialization and recovery resume are exclusive"
+            )
+        if smoke or preflight or compile_paths_only or compile_training_support_steps:
+            raise ValueError("checkpoint initialization is reserved for training")
+        if evaluation_source_run is not None:
+            raise ValueError(
+                "checkpoint initialization and checkpoint evaluation are exclusive"
+            )
+        _validate_run_label(
+            initialization_source_run,
+            field="initialization source run",
+        )
+        if Path(initialization_checkpoint_name).name != initialization_checkpoint_name:
+            raise ValueError("initialization checkpoint must be a file basename")
+        source_checkpoint = (
+            Path("/artifacts")
+            / initialization_source_run
+            / initialization_checkpoint_name
+        )
+        if not source_checkpoint.is_file() or source_checkpoint.stat().st_size == 0:
+            raise FileNotFoundError(
+                f"initialization checkpoint is missing: {source_checkpoint}"
+            )
+        recipe["arguments"]["initialize_checkpoint"] = str(source_checkpoint)
     if skip_rollouts and (
         smoke
         or preflight
@@ -899,6 +928,12 @@ def _run_remote(
         "source_sha256": source_sha256,
         "data": data_manifest,
         "resume_source_run": resume_source_run,
+        "initialization_source_run": initialization_source_run,
+        "initialization_checkpoint_name": (
+            initialization_checkpoint_name
+            if initialization_source_run is not None
+            else None
+        ),
     }
     run_identity_sha256 = _stable_json_sha256(run_identity)
     stage_manifest_path = run_dir / f"manifest.{stage_kind}.json"
@@ -1360,6 +1395,8 @@ def train_stage(
     require_training_support_cache: bool = True,
     training_steps: int | None = None,
     resume_source_run: str | None = None,
+    initialization_source_run: str | None = None,
+    initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
@@ -1371,6 +1408,8 @@ def train_stage(
         path_cache_source_run=path_cache_source_run,
         training_steps=training_steps,
         resume_source_run=resume_source_run,
+        initialization_source_run=initialization_source_run,
+        initialization_checkpoint_name=initialization_checkpoint_name,
     )
 
 
@@ -1774,6 +1813,7 @@ def main(
     support_containers: int = 1,
     support_workers: int = 12,
     training_steps: int = 0,
+    initialize_from_source_checkpoint: bool = False,
 ) -> None:
     modes = sum(
         (
@@ -1810,6 +1850,14 @@ def main(
         raise ValueError("--support-workers must lie in [1, 13]")
     if training_steps < 0:
         raise ValueError("--training-steps must be non-negative")
+    if initialize_from_source_checkpoint and not train_only:
+        raise ValueError(
+            "--initialize-from-source-checkpoint requires --train-only"
+        )
+    if initialize_from_source_checkpoint and not source_run_label:
+        raise ValueError(
+            "--initialize-from-source-checkpoint requires --source-run-label"
+        )
     if integration_smoke:
         call = integration_smoke_pipeline_stage.spawn(run_label)
         print(
@@ -1905,6 +1953,9 @@ def main(
             source_run_label or None,
             True,
             training_steps or None,
+            None,
+            source_run_label if initialize_from_source_checkpoint else None,
+            checkpoint_name,
         )
         phase = "train_spawned"
     else:

@@ -941,6 +941,14 @@ def main() -> None:
         help="evaluate a trained neural checkpoint without retraining",
     )
     parser.add_argument(
+        "--initialize-checkpoint",
+        type=Path,
+        help=(
+            "initialize neural weights from a compatible selected checkpoint, "
+            "then train with a fresh optimizer and the current schedule"
+        ),
+    )
+    parser.add_argument(
         "--resume-checkpoint",
         type=Path,
         help="resume interrupted training from a periodic recovery checkpoint",
@@ -971,8 +979,19 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.load_checkpoint is not None and args.resume_checkpoint is not None:
-        raise ValueError("--load-checkpoint and --resume-checkpoint are mutually exclusive")
+    checkpoint_modes = sum(
+        item is not None
+        for item in (
+            args.load_checkpoint,
+            args.initialize_checkpoint,
+            args.resume_checkpoint,
+        )
+    )
+    if checkpoint_modes > 1:
+        raise ValueError(
+            "--load-checkpoint, --initialize-checkpoint, and "
+            "--resume-checkpoint are mutually exclusive"
+        )
     if args.allow_resume_provenance_mismatch and args.resume_checkpoint is None:
         raise ValueError("--allow-resume-provenance-mismatch requires --resume-checkpoint")
     if args.recovery_every < 0:
@@ -2251,7 +2270,12 @@ def main() -> None:
 
     loaded_checkpoint = None
     resume_state = None
-    selected_checkpoint_path = args.load_checkpoint or args.resume_checkpoint
+    initialized_checkpoint_path = args.initialize_checkpoint
+    selected_checkpoint_path = (
+        args.load_checkpoint
+        or initialized_checkpoint_path
+        or args.resume_checkpoint
+    )
     if selected_checkpoint_path is not None:
         if not isinstance(model, torch.nn.Module):
             raise ValueError("checkpoint loading requires a neural model")
@@ -2304,6 +2328,9 @@ def main() -> None:
             loaded_checkpoint = checkpoint_payload
             model.load_state_dict(loaded_checkpoint["state_dict"])
             phase = "checkpoint_loaded"
+        elif initialized_checkpoint_path is not None:
+            model.load_state_dict(checkpoint_payload["state_dict"])
+            phase = "checkpoint_initialized_fresh_optimizer"
         else:
             resume_state = checkpoint_payload
             model.load_state_dict(resume_state["current_state_dict"])
@@ -2699,6 +2726,11 @@ def main() -> None:
             "evaluation_only": loaded_checkpoint is not None,
             "loaded_checkpoint": (
                 str(args.load_checkpoint) if args.load_checkpoint is not None else None
+            ),
+            "initialized_from": (
+                str(initialized_checkpoint_path)
+                if initialized_checkpoint_path is not None
+                else None
             ),
             "resumed_from": (
                 str(args.resume_checkpoint) if args.resume_checkpoint is not None else None
