@@ -11,13 +11,18 @@ pytest.importorskip("modal", reason="Modal runtime tests require the cloud extra
 
 modal_entrypoint = importlib.import_module("modal_apps.train_tracelet_gm")
 _early_rollout_decision = modal_entrypoint._early_rollout_decision
+_final_rollout_spec = modal_entrypoint._final_rollout_spec
+_rollout_manifest_signature = modal_entrypoint._rollout_manifest_signature
+_stable_json_sha256 = modal_entrypoint._stable_json_sha256
+_remote_stage_kind = modal_entrypoint._remote_stage_kind
 
 
 def test_early_rollout_waits_for_warmup_and_material_improvement() -> None:
     payload = {
         "initial_validation": {"factorized_gm_loss": 10.0},
         "selected_validation": {
-            "factorized_gm_loss": 9.4,
+            "factorized_gm_loss": 4.0,
+            "family_accuracy": 0.7,
             "selected_step": 500.0,
         },
     }
@@ -38,14 +43,16 @@ def test_early_rollout_waits_for_warmup_and_material_improvement() -> None:
 
     assert decision is not None
     assert decision["selected_step"] == 500.0
-    assert decision["relative_improvement"] == pytest.approx(0.06)
+    assert decision["relative_improvement"] == pytest.approx(0.6)
+    assert decision["selected_family_accuracy"] == pytest.approx(0.7)
 
 
 def test_early_rollout_rejects_marginal_or_malformed_checkpoints() -> None:
     marginal = {
         "initial_validation": {"factorized_gm_loss": 10.0},
         "selected_validation": {
-            "factorized_gm_loss": 9.51,
+            "factorized_gm_loss": 5.1,
+            "family_accuracy": 0.7,
             "selected_step": 500.0,
         },
     }
@@ -78,6 +85,7 @@ def test_early_rollout_launch_is_deduplicated_by_persistent_marker(
             "initial_validation": {"factorized_gm_loss": 10.0},
             "selected_validation": {
                 "factorized_gm_loss": 4.0,
+                "family_accuracy": 0.7,
                 "selected_step": 500.0,
             },
         },
@@ -163,3 +171,73 @@ def test_early_rollout_marker_retries_failed_and_stale_reservations(
         )
     )
     assert not modal_entrypoint._early_launch_marker_blocks_retry(marker_path)
+
+
+def test_final_rollout_spec_uses_selected_checkpoint_and_step() -> None:
+    assert _final_rollout_spec(
+        "production-v1",
+        {"selected_validation": {"selected_step": 2750.0}},
+    ) == (
+        "production-v1-final-step2750-eval2000",
+        "checkpoint.pt",
+        2000,
+    )
+
+
+@pytest.mark.parametrize(
+    "train_result",
+    (
+        {},
+        {"selected_validation": {}},
+        {"selected_validation": {"selected_step": float("nan")}},
+        {"selected_validation": {"selected_step": 1.5}},
+    ),
+)
+def test_final_rollout_spec_rejects_missing_or_ambiguous_step(
+    train_result: dict[str, object],
+) -> None:
+    with pytest.raises(ValueError):
+        _final_rollout_spec("production-v1", train_result)
+
+
+def test_rollout_manifest_signature_is_sensitive_to_checkpoint_and_rules() -> None:
+    common = {
+        "source_run_label": "source",
+        "checkpoint_name": "checkpoint.pt",
+        "rollout_samples": 2000,
+        "train_sha256": "train",
+        "reference_sha256": "reference",
+        "source_sha256": "source-code",
+    }
+    first = _rollout_manifest_signature(
+        **common,
+        checkpoint_sha256="checkpoint-a",
+        disabled_rule_names=(),
+    )
+    second = _rollout_manifest_signature(
+        **common,
+        checkpoint_sha256="checkpoint-b",
+        disabled_rule_names=("ring_ear_insert",),
+    )
+
+    assert first != second
+    assert first["rollout_samples"] == 2000
+    assert first["sampling_seed"] == 20260721
+
+
+def test_stage_identity_hash_is_order_independent_and_stage_specific() -> None:
+    assert _stable_json_sha256({"b": 2, "a": 1}) == _stable_json_sha256(
+        {"a": 1, "b": 2}
+    )
+    assert _remote_stage_kind(
+        smoke=False,
+        preflight=False,
+        compile_paths_only=True,
+        evaluation_source_run=None,
+    ) == "compile"
+    assert _remote_stage_kind(
+        smoke=False,
+        preflight=False,
+        compile_paths_only=False,
+        evaluation_source_run=None,
+    ) == "training"

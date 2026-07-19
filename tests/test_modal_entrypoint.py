@@ -36,6 +36,13 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert "early_rollout_spawned" in source
     assert "shutil.copyfile" in source
     assert "pipeline_stage.spawn" in source
+    assert "skip_rollouts=True" in source
+    assert "FINAL_ROLLOUT_SAMPLES = 2000" in source
+    assert "rollout_evaluate_stage.remote" in source
+    assert '"checkpoint.pt"' in source
+    assert source.index("compile_stage.remote") < source.index("audit_teacher_stage.remote")
+    assert source.index("audit_teacher_stage.remote") < source.index("train_stage.remote")
+    assert source.index("train_stage.remote") < source.index("rollout_evaluate_stage.remote")
     assert "compile_paths_only=True" in source
     assert "require_path_cache=True" in source
     assert "compiled_proposal_shard_saved" in source
@@ -43,3 +50,11 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert "subprocess.Popen" in source
     assert "artifact_volume.commit()" in source
     assert "source_sha256" in source
+    assert "manifest.{stage_kind}.json" in source
+    assert "run_identity_sha256" in source
+    assert 'recipe["arguments"]["provenance_sha256"]' in source
+    assert "--run-label is required" in source
+    rollout_stage = source[source.index("def rollout_evaluate_stage(") :]
+    assert rollout_stage.index("_atomic_json_write(manifest, manifest_path)") < (
+        rollout_stage.index("shutil.copyfile(source_checkpoint")
+    )

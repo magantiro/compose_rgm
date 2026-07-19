@@ -11,7 +11,10 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
 )
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
-from scripts.evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
+from scripts.evaluate_tracelet_rollouts import (
+    load_factorized_rollout_checkpoint,
+    load_reusable_rollouts,
+)
 
 
 def _checkpoint(path: Path) -> FactorizedTraceletRateModel:
@@ -140,3 +143,32 @@ def test_rollout_checkpoint_rejects_incomplete_recovery_state(tmp_path: Path) ->
     )
     with pytest.raises(ValueError, match="lacks selected-best rollout state"):
         load_factorized_rollout_checkpoint(path)
+
+
+def test_rollout_cache_reuses_only_exact_complete_signature(tmp_path: Path) -> None:
+    path = tmp_path / "rollouts.pt"
+    signature = {
+        "format": "compose_v4_rollout_cache_v2",
+        "checkpoint_sha256": "abc",
+        "rollout_samples": 2,
+    }
+
+    assert load_reusable_rollouts(path, signature=signature, samples=2) is None
+    torch.save(
+        {"signature": signature, "rollouts": ("rollout-a", "rollout-b")},
+        path,
+    )
+    assert load_reusable_rollouts(
+        path,
+        signature=signature,
+        samples=2,
+    ) == ("rollout-a", "rollout-b")
+
+    with pytest.raises(ValueError, match="signature"):
+        load_reusable_rollouts(
+            path,
+            signature={**signature, "checkpoint_sha256": "different"},
+            samples=2,
+        )
+    with pytest.raises(ValueError, match="size"):
+        load_reusable_rollouts(path, signature=signature, samples=3)

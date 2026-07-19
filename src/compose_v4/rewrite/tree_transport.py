@@ -131,7 +131,6 @@ def _compile_flexible_graft_tree_transport(
         resize_steps.append(RewriteStep(rule_name, action))
 
     source_real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
-    target_real = tuple(int(v) for v in np.flatnonzero(is_element(target.atom_types)))
     if source_size > target_size:
         # Slot labels are aligned only after resizing, so any deterministic
         # leaf-peeling sequence is a valid quotient representative.  Unlike

@@ -579,6 +579,26 @@ def test_factorized_training_resume_preserves_validation_and_patience_trajectory
     for name, value in uninterrupted.state_dict().items():
         assert torch.equal(resumed.state_dict()[name], value)
 
+    terminal_recovery = copy.deepcopy(captured)
+    terminal_recovery["evaluations_without_improvement"] = common[
+        "early_stopping_patience"
+    ]
+    terminal = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    terminal_history, terminal_best = train_factorized_mark_model(
+        terminal,
+        resume_state=terminal_recovery,
+        **common,
+    )
+
+    assert terminal_history == terminal_recovery["history"]
+    assert terminal_best == terminal_recovery["best_metrics"]
+    for name, value in terminal_recovery["best_state_dict"].items():
+        assert torch.equal(terminal.state_dict()[name], value)
+
 
 def test_support_worker_cache_cap_and_clear_preserve_exact_support() -> None:
     catalog, _ = _catalog_and_records(("CCO", "c1ccccc1", "C1CCCCC1"))

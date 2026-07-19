@@ -551,6 +551,18 @@ def train_factorized_mark_model(
             )
         )
 
+    if (
+        resume_state is not None
+        and early_stopping_patience > 0
+        and evaluations_without_improvement >= early_stopping_patience
+    ):
+        # The recovery callback runs before the terminal early-stop break.  A
+        # retry from that exact checkpoint must therefore be a no-op, not an
+        # extra evaluation interval that can alter the selected model.
+        model.load_state_dict(best_state)
+        model.eval()
+        return history, best_metrics
+
     loader = factorized_mark_loader(
         train_records,
         steps=steps,

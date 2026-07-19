@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import itertools
-
 import numpy as np
 
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph

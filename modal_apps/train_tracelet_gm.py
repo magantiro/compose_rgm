@@ -4,13 +4,15 @@ The recipe remains the single source of truth.  The remote entrypoint changes
 only artifact paths (to the persistent Modal volume) and, for ``--smoke``, a
 small explicit set of resource-saving preflight values.
 
-Run the mandatory remote preflight:
+Run a commit-labelled remote preflight:
 
-    modal run modal_apps/train_tracelet_gm.py --smoke
+    modal run modal_apps/train_tracelet_gm.py \
+      --preflight --run-label compose-v4-stage3-a100-preflight-<commit>-v1
 
 Launch the quality run so it survives local disconnects:
 
-    modal run --detach modal_apps/train_tracelet_gm.py
+    modal run --detach modal_apps/train_tracelet_gm.py \
+      --run-label compose-v4-stage3-production-<commit>-v1
 """
 
 from __future__ import annotations
@@ -32,6 +34,12 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose_v4")
 RECIPE_NAME = "tree_fcd_transfer_stage3_flexible_graft.json"
+FINAL_ROLLOUT_SAMPLES = 2000
+ROLLOUT_BASE_SEED = 20260717
+ROLLOUT_MAX_ATOMS = 40
+ROLLOUT_OPERATIONAL_HORIZON = 16.0
+ROLLOUT_TIME_STEP = 0.1
+ROLLOUT_MAX_EVENTS = 128
 
 # Modal executes the entrypoint module from /root while the snapshotted package
 # lives under REMOTE_ROOT/src.  Install that path before any remote helper
@@ -161,14 +169,14 @@ def _materialize_remote_recipe(
                 "include_fcd": False,
             }
         )
-    recovery_path = run_dir / "checkpoint.recovery.pt"
-    if recovery_path.is_file() and recovery_path.stat().st_size > 0:
-        arguments["resume_checkpoint"] = str(recovery_path)
     return recipe, run_dir
 
 
 def _source_fingerprint() -> str:
     digest = hashlib.sha256()
+    entrypoint = Path(__file__).resolve()
+    digest.update(b"modal_apps/train_tracelet_gm.py")
+    digest.update(entrypoint.read_bytes())
     for directory_name in ("src", "scripts", "recipes"):
         directory = REMOTE_ROOT / directory_name
         for path in sorted(item for item in directory.rglob("*") if item.is_file()):
@@ -190,7 +198,9 @@ def _early_rollout_decision(
     *,
     completed_steps: int,
     warmup_steps: int,
-    minimum_relative_improvement: float = 0.05,
+    minimum_relative_improvement: float = 0.50,
+    minimum_family_accuracy: float = 0.60,
+    minimum_selected_step: int = 250,
 ) -> dict[str, float] | None:
     """Return auditable launch metadata for a sufficiently trained checkpoint."""
 
@@ -204,6 +214,7 @@ def _early_rollout_decision(
         initial_loss = float(initial["factorized_gm_loss"])
         selected_loss = float(selected["factorized_gm_loss"])
         selected_step = float(selected["selected_step"])
+        family_accuracy = float(selected["family_accuracy"])
     except (KeyError, TypeError, ValueError):
         return None
     if not (
@@ -211,16 +222,23 @@ def _early_rollout_decision(
         and math.isfinite(selected_loss)
         and initial_loss > 0.0
         and 0.0 <= minimum_relative_improvement < 1.0
+        and math.isfinite(family_accuracy)
+        and 0.0 <= minimum_family_accuracy <= 1.0
     ):
         return None
     relative_improvement = (initial_loss - selected_loss) / initial_loss
-    if relative_improvement < minimum_relative_improvement:
+    if (
+        relative_improvement < minimum_relative_improvement
+        or family_accuracy < minimum_family_accuracy
+        or selected_step < minimum_selected_step
+    ):
         return None
     return {
         "completed_steps": float(completed_steps),
         "selected_step": selected_step,
         "initial_validation_loss": initial_loss,
         "selected_validation_loss": selected_loss,
+        "selected_family_accuracy": family_accuracy,
         "relative_improvement": relative_improvement,
     }
 
@@ -389,6 +407,116 @@ def _maybe_launch_early_rollout(
     print(json.dumps({"phase": "early_rollout_spawned", **marker}, sort_keys=True), flush=True)
 
 
+def _final_rollout_spec(
+    source_run_label: str,
+    train_result: dict[str, object],
+) -> tuple[str, str, int]:
+    """Name the immutable post-training CPU evaluation from selected state."""
+
+    if Path(source_run_label).name != source_run_label:
+        raise ValueError("source run label must be a basename")
+    selected = train_result.get("selected_validation")
+    if not isinstance(selected, dict):
+        raise ValueError("training result lacks selected_validation")
+    try:
+        selected_step_value = float(selected["selected_step"])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError("training result lacks a valid selected_step") from error
+    if (
+        not math.isfinite(selected_step_value)
+        or selected_step_value < 0.0
+        or not selected_step_value.is_integer()
+    ):
+        raise ValueError("selected_step must be a finite non-negative integer")
+    selected_step = int(selected_step_value)
+    return (
+        f"{source_run_label}-final-step{selected_step}-eval{FINAL_ROLLOUT_SAMPLES}",
+        "checkpoint.pt",
+        FINAL_ROLLOUT_SAMPLES,
+    )
+
+
+def _rollout_manifest_signature(
+    *,
+    source_run_label: str,
+    checkpoint_name: str,
+    checkpoint_sha256: str,
+    rollout_samples: int,
+    disabled_rule_names: tuple[str, ...],
+    train_sha256: str,
+    reference_sha256: str,
+    source_sha256: str,
+) -> dict[str, object]:
+    """Return the fields that must match before rollout artifacts are reused."""
+
+    return {
+        "version": 1,
+        "source_run_label": source_run_label,
+        "checkpoint_name": checkpoint_name,
+        "checkpoint_sha256": checkpoint_sha256,
+        "rollout_samples": rollout_samples,
+        "sampling_seed": ROLLOUT_BASE_SEED + 4,
+        "max_atoms": ROLLOUT_MAX_ATOMS,
+        "operational_horizon": ROLLOUT_OPERATIONAL_HORIZON,
+        "time_step": ROLLOUT_TIME_STEP,
+        "max_events": ROLLOUT_MAX_EVENTS,
+        "disabled_rule_names": list(disabled_rule_names),
+        "source_prior": "carbon_tree",
+        "train_sha256": train_sha256,
+        "reference_sha256": reference_sha256,
+        "source_sha256": source_sha256,
+    }
+
+
+def _rollout_remote_summary(
+    *,
+    run_label: str,
+    run_dir: Path,
+    report: dict[str, object],
+) -> dict[str, object]:
+    rollout = report.get("rollout")
+    if not isinstance(rollout, dict):
+        rollout = {}
+    molecular_quality = report.get("molecular_quality")
+    if not isinstance(molecular_quality, dict):
+        molecular_quality = {}
+    return {
+        "run_label": run_label,
+        "artifact_dir": str(run_dir),
+        "generated_nonnull_smiles": report.get("generated_nonnull_smiles"),
+        "valid_fraction": rollout.get("valid_fraction"),
+        "selected_validation": report.get("selected_validation"),
+        "fcd": molecular_quality.get("frechet_chemnet_distance"),
+    }
+
+
+def _stable_json_sha256(payload: object) -> str:
+    serialized = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(serialized).hexdigest()
+
+
+def _remote_stage_kind(
+    *,
+    smoke: bool,
+    preflight: bool,
+    compile_paths_only: bool,
+    evaluation_source_run: str | None,
+) -> str:
+    if evaluation_source_run is not None:
+        return "checkpoint_evaluation"
+    if compile_paths_only:
+        return "compile"
+    if smoke:
+        return "smoke"
+    if preflight:
+        return "preflight"
+    return "training"
+
+
 def _run_remote(
     *,
     run_label: str,
@@ -396,6 +524,7 @@ def _run_remote(
     preflight: bool = False,
     compile_paths_only: bool = False,
     require_path_cache: bool = False,
+    skip_rollouts: bool = False,
     recipe_name: str = RECIPE_NAME,
     evaluation_source_run: str | None = None,
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
@@ -411,6 +540,14 @@ def _run_remote(
         preflight=preflight,
         recipe_name=recipe_name,
     )
+    if skip_rollouts and (
+        smoke or preflight or compile_paths_only or evaluation_source_run is not None
+    ):
+        raise ValueError(
+            "skip_rollouts is reserved for the production training stage"
+        )
+    if skip_rollouts:
+        recipe["arguments"]["skip_rollouts"] = True
     if evaluation_source_run is not None:
         if Path(evaluation_source_run).name != evaluation_source_run:
             raise ValueError("evaluation source run must be a volume-directory name")
@@ -468,6 +605,95 @@ def _run_remote(
                 f"visible root entries={visible[:30]}"
             )
 
+    source_sha256 = _source_fingerprint()
+    data_manifest = {
+        "train": {
+            "path": str(train_file),
+            "bytes": train_file.stat().st_size,
+            "sha256": _file_sha256(train_file),
+        },
+        "fcd_reference": {
+            "path": str(reference_file),
+            "bytes": reference_file.stat().st_size,
+            "sha256": _file_sha256(reference_file),
+        },
+    }
+    stage_kind = _remote_stage_kind(
+        smoke=smoke,
+        preflight=preflight,
+        compile_paths_only=compile_paths_only,
+        evaluation_source_run=evaluation_source_run,
+    )
+    run_identity = {
+        "version": 1,
+        "run_label": run_label,
+        "stage_kind": stage_kind,
+        "recipe_name": recipe_name,
+        "recipe": recipe,
+        "source_sha256": source_sha256,
+        "data": data_manifest,
+    }
+    run_identity_sha256 = _stable_json_sha256(run_identity)
+    stage_manifest_path = run_dir / f"manifest.{stage_kind}.json"
+    stage_manifest_existed = stage_manifest_path.is_file()
+    if stage_manifest_existed:
+        try:
+            stage_manifest = json.loads(stage_manifest_path.read_text())
+        except (json.JSONDecodeError, OSError) as error:
+            raise ValueError(f"invalid immutable stage manifest: {stage_manifest_path}") from error
+        if (
+            not isinstance(stage_manifest, dict)
+            or stage_manifest.get("run_identity") != run_identity
+            or stage_manifest.get("run_identity_sha256") != run_identity_sha256
+        ):
+            raise ValueError(
+                "run label already exists with a different recipe, source, or dataset identity"
+            )
+    else:
+        existing_entries = tuple(run_dir.iterdir())
+        if stage_kind != "training" and existing_entries:
+            raise ValueError(
+                f"fresh {stage_kind} run requires an empty immutable run label"
+            )
+        training_artifacts = tuple(
+            run_dir / name
+            for name in (
+                "checkpoint.pt",
+                "checkpoint.recovery.pt",
+                "checkpoint.best_so_far.pt",
+                "metrics.json",
+                "early_eval_launch.json",
+            )
+        )
+        if stage_kind == "training" and any(path.exists() for path in training_artifacts):
+            raise ValueError(
+                "training artifacts exist without a matching immutable training manifest"
+            )
+        _atomic_json_write(
+            {
+                "run_identity": run_identity,
+                "run_identity_sha256": run_identity_sha256,
+                "created_at_unix": time.time(),
+            },
+            stage_manifest_path,
+        )
+        artifact_volume.commit()
+
+    recipe["arguments"]["provenance_sha256"] = run_identity_sha256
+    recovery_path = run_dir / "checkpoint.recovery.pt"
+    if stage_kind == "training" and recovery_path.is_file():
+        if recovery_path.stat().st_size == 0:
+            raise ValueError("training recovery checkpoint is empty")
+        recipe["arguments"]["resume_checkpoint"] = str(recovery_path)
+    elif (
+        stage_kind == "training"
+        and stage_manifest_existed
+        and (run_dir / "checkpoint.pt").is_file()
+    ):
+        raise ValueError(
+            "completed checkpoint exists without a recovery state; use a new run label"
+        )
+
     import rdkit
     import torch
 
@@ -477,12 +703,16 @@ def _run_remote(
         "preflight": preflight,
         "compile_paths_only": compile_paths_only,
         "require_path_cache": require_path_cache,
+        "skip_rollouts": skip_rollouts,
         "evaluation_source_run": evaluation_source_run,
         "evaluation_checkpoint_name": (
             evaluation_checkpoint_name if evaluation_source_run is not None else None
         ),
         "recipe_name": recipe_name,
         "recipe": recipe,
+        "stage_kind": stage_kind,
+        "stage_manifest": str(stage_manifest_path),
+        "run_identity_sha256": run_identity_sha256,
         "runtime": {
             "python": platform.python_version(),
             "torch": torch.__version__,
@@ -491,21 +721,10 @@ def _run_remote(
                 torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
             ),
         },
-        "source_sha256": _source_fingerprint(),
-        "data": {
-            "train": {
-                "path": str(train_file),
-                "bytes": train_file.stat().st_size,
-                "sha256": _file_sha256(train_file),
-            },
-            "fcd_reference": {
-                "path": str(reference_file),
-                "bytes": reference_file.stat().st_size,
-                "sha256": _file_sha256(reference_file),
-            },
-        },
+        "source_sha256": source_sha256,
+        "data": data_manifest,
     }
-    (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    _atomic_json_write(manifest, run_dir / "manifest.json")
     artifact_volume.commit()
 
     command = (
@@ -611,7 +830,7 @@ def _run_remote(
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
 )
 def smoke_stage(
-    run_label: str = "tree_fcd_transfer_modal_smoke",
+    run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     return _run_remote(run_label=run_label, smoke=True, recipe_name=recipe_name)
@@ -626,7 +845,7 @@ def smoke_stage(
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
 )
 def preflight_stage(
-    run_label: str = "tree_fcd_transfer_a100_preflight",
+    run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     return _run_remote(
@@ -646,7 +865,7 @@ def preflight_stage(
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
 )
 def h100_preflight_stage(
-    run_label: str = "tree_fcd_transfer_h100_preflight",
+    run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     """Resource-matched H100 control for cost-per-update selection."""
@@ -668,7 +887,7 @@ def h100_preflight_stage(
     retries=modal.Retries(max_retries=2, backoff_coefficient=2.0),
 )
 def compile_stage(
-    run_label: str = "tree_fcd_transfer_stage1",
+    run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     """Compile restart-safe path shards without renting a GPU."""
@@ -767,13 +986,14 @@ def audit_teacher_stage(
     retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
 )
 def train_stage(
-    run_label: str = "tree_fcd_transfer_stage1",
+    run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
         smoke=False,
         require_path_cache=True,
+        skip_rollouts=True,
         recipe_name=recipe_name,
     )
 
@@ -811,7 +1031,7 @@ def evaluate_stage(
     memory=65536,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
-    retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
+    retries=modal.Retries(max_retries=2, backoff_coefficient=2.0),
 )
 def rollout_evaluate_stage(
     run_label: str,
@@ -843,28 +1063,100 @@ def rollout_evaluate_stage(
 
     run_dir = Path("/artifacts") / run_label
     run_dir.mkdir(parents=True, exist_ok=True)
+    metrics_path = run_dir / "metrics.json"
+    manifest_path = run_dir / "manifest.json"
+    source_checkpoint_sha256 = _file_sha256(source_checkpoint)
+    disabled_rule_names = ("ring_ear_insert",) if disable_ring_ear else ()
+    signature = _rollout_manifest_signature(
+        source_run_label=source_run_label,
+        checkpoint_name=checkpoint_name,
+        checkpoint_sha256=source_checkpoint_sha256,
+        rollout_samples=rollout_samples,
+        disabled_rule_names=disabled_rule_names,
+        train_sha256=_file_sha256(train_file),
+        reference_sha256=_file_sha256(reference_file),
+        source_sha256=_source_fingerprint(),
+    )
     checkpoint_snapshot = run_dir / "checkpoint.snapshot.pt"
-    temporary_snapshot = checkpoint_snapshot.with_suffix(".pt.tmp")
-    shutil.copyfile(source_checkpoint, temporary_snapshot)
-    os.replace(temporary_snapshot, checkpoint_snapshot)
+    rollout_cache_path = run_dir / "rollouts.pt"
     manifest = {
         "evaluation_kind": "checkpoint_rollout_only",
         "run_label": run_label,
         "source_run_label": source_run_label,
         "source_checkpoint": str(source_checkpoint),
         "checkpoint": str(checkpoint_snapshot),
-        "checkpoint_sha256": _file_sha256(checkpoint_snapshot),
+        "checkpoint_sha256": source_checkpoint_sha256,
         "rollout_samples": rollout_samples,
-        "disabled_rule_names": ["ring_ear_insert"] if disable_ring_ear else [],
+        "disabled_rule_names": list(disabled_rule_names),
         "teacher_path_cache_loaded": False,
-        "source_sha256": _source_fingerprint(),
+        "source_sha256": signature["source_sha256"],
         "data": {
-            "train_sha256": _file_sha256(train_file),
-            "reference_sha256": _file_sha256(reference_file),
+            "train_sha256": signature["train_sha256"],
+            "reference_sha256": signature["reference_sha256"],
         },
+        "signature": signature,
     }
-    (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
-    artifact_volume.commit()
+    has_manifest = manifest_path.is_file()
+    if not has_manifest and any(
+        path.exists() for path in (metrics_path, checkpoint_snapshot, rollout_cache_path)
+    ):
+        raise ValueError(
+            "rollout evaluation directory contains artifacts without an auditable manifest"
+        )
+    if has_manifest:
+        try:
+            existing_manifest = json.loads(manifest_path.read_text())
+        except (json.JSONDecodeError, OSError) as error:
+            raise ValueError(f"invalid existing rollout manifest: {manifest_path}") from error
+        if (
+            not isinstance(existing_manifest, dict)
+            or existing_manifest.get("signature") != signature
+        ):
+            raise ValueError(
+                "rollout evaluation run label already exists with a different signature"
+            )
+    else:
+        # Commit request identity before copying the checkpoint.  A retry can
+        # reconstruct a missing snapshot from its hash-bound source, whereas a
+        # snapshot without a manifest is deliberately rejected as unaudited.
+        _atomic_json_write(manifest, manifest_path)
+        artifact_volume.commit()
+
+    if (
+        not checkpoint_snapshot.is_file()
+        or checkpoint_snapshot.stat().st_size == 0
+        or _file_sha256(checkpoint_snapshot) != source_checkpoint_sha256
+    ):
+        temporary_snapshot = checkpoint_snapshot.with_suffix(".pt.tmp")
+        shutil.copyfile(source_checkpoint, temporary_snapshot)
+        os.replace(temporary_snapshot, checkpoint_snapshot)
+    if _file_sha256(checkpoint_snapshot) != source_checkpoint_sha256:
+        raise RuntimeError("checkpoint snapshot hash does not match its source")
+
+    if has_manifest:
+        if metrics_path.is_file() and metrics_path.stat().st_size > 0:
+            report = json.loads(metrics_path.read_text())
+            if not isinstance(report, dict):
+                raise ValueError("rollout metrics artifact must contain an object")
+            summary = _rollout_remote_summary(
+                run_label=run_label,
+                run_dir=run_dir,
+                report=report,
+            )
+            _update_source_early_eval_marker(
+                source_run_label=source_run_label,
+                evaluation_run_label=run_label,
+                status="completed",
+                details={"metrics_sha256": _file_sha256(metrics_path)},
+            )
+            print(
+                json.dumps(
+                    {"phase": "remote_rollout_reused", **summary},
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            return summary
     _update_source_early_eval_marker(
         source_run_label=source_run_label,
         evaluation_run_label=run_label,
@@ -890,6 +1182,16 @@ def rollout_evaluate_stage(
         "16",
         "--corpus-workers",
         "16",
+        "--seed",
+        str(ROLLOUT_BASE_SEED),
+        "--max-atoms",
+        str(ROLLOUT_MAX_ATOMS),
+        "--operational-horizon",
+        str(ROLLOUT_OPERATIONAL_HORIZON),
+        "--time-step",
+        str(ROLLOUT_TIME_STEP),
+        "--max-events",
+        str(ROLLOUT_MAX_EVENTS),
     )
     if disable_ring_ear:
         command += ("--disable-rule", "ring_ear_insert")
@@ -926,7 +1228,6 @@ def rollout_evaluate_stage(
         )
         raise subprocess.CalledProcessError(return_code, command)
 
-    metrics_path = run_dir / "metrics.json"
     if not metrics_path.is_file():
         _update_source_early_eval_marker(
             source_run_label=source_run_label,
@@ -936,14 +1237,11 @@ def rollout_evaluate_stage(
         )
         raise RuntimeError("rollout evaluation completed without metrics.json")
     report = json.loads(metrics_path.read_text())
-    summary = {
-        "run_label": run_label,
-        "artifact_dir": str(run_dir),
-        "generated_nonnull_smiles": report.get("generated_nonnull_smiles"),
-        "valid_fraction": report.get("rollout", {}).get("valid_fraction"),
-        "selected_validation": report.get("selected_validation"),
-        "fcd": report.get("molecular_quality", {}).get("frechet_chemnet_distance"),
-    }
+    summary = _rollout_remote_summary(
+        run_label=run_label,
+        run_dir=run_dir,
+        report=report,
+    )
     _update_source_early_eval_marker(
         source_run_label=source_run_label,
         evaluation_run_label=run_label,
@@ -964,7 +1262,7 @@ def rollout_evaluate_stage(
     timeout=24 * 3600,
 )
 def pipeline_stage(
-    run_label: str = "tree_fcd_transfer_stage1",
+    run_label: str,
     recipe_name: str = RECIPE_NAME,
 ) -> dict[str, object]:
     """Run CPU preprocessing to completion before allocating the training GPU."""
@@ -972,7 +1270,22 @@ def pipeline_stage(
     compile_result = compile_stage.remote(run_label, recipe_name)
     audit_result = audit_teacher_stage.remote(run_label, recipe_name)
     train_result = train_stage.remote(run_label, recipe_name)
-    return {"compile": compile_result, "audit": audit_result, "train": train_result}
+    evaluation_run_label, checkpoint_name, rollout_samples = _final_rollout_spec(
+        run_label,
+        train_result,
+    )
+    final_rollout_result = rollout_evaluate_stage.remote(
+        evaluation_run_label,
+        run_label,
+        checkpoint_name,
+        rollout_samples,
+    )
+    return {
+        "compile": compile_result,
+        "audit": audit_result,
+        "train": train_result,
+        "final_rollout": final_rollout_result,
+    }
 
 
 @app.local_entrypoint()
@@ -984,7 +1297,7 @@ def main(
     train_only: bool = False,
     evaluate_only: bool = False,
     rollout_evaluate_only: bool = False,
-    run_label: str = "tree_fcd_transfer_stage1",
+    run_label: str = "",
     recipe_name: str = RECIPE_NAME,
     source_run_label: str = "",
     checkpoint_name: str = "checkpoint.best_so_far.pt",
@@ -1007,21 +1320,19 @@ def main(
             "evaluate-only, and "
             "rollout-evaluate-only are exclusive"
         )
+    if not run_label:
+        raise ValueError(
+            "--run-label is required; use a fresh commit-bearing immutable label"
+        )
     if smoke:
-        if run_label == "tree_fcd_transfer_stage1":
-            run_label = "tree_fcd_transfer_modal_smoke"
         result = smoke_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return
     if preflight:
-        if run_label == "tree_fcd_transfer_stage1":
-            run_label = "tree_fcd_transfer_a100_preflight"
         result = preflight_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return
     if h100_preflight:
-        if run_label == "tree_fcd_transfer_stage1":
-            run_label = "tree_fcd_transfer_h100_preflight"
         result = h100_preflight_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return

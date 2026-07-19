@@ -82,6 +82,23 @@ def _best_so_far_path(checkpoint: Path) -> Path:
     return checkpoint.with_name(f"{checkpoint.stem}.best_so_far{checkpoint.suffix}")
 
 
+def _validation_baseline_for_run(
+    observed_validation: dict[str, float],
+    resume_state: dict[str, object] | None,
+) -> dict[str, float]:
+    """Preserve the original step-zero baseline across exact resumptions."""
+
+    if resume_state is None:
+        return dict(observed_validation)
+    baseline = resume_state.get("initial_validation")
+    if not isinstance(baseline, dict) or not baseline:
+        raise ValueError("recovery checkpoint lacks the original initial_validation")
+    try:
+        return {str(key): float(value) for key, value in baseline.items()}
+    except (TypeError, ValueError) as error:
+        raise ValueError("recovery initial_validation must contain numeric metrics") from error
+
+
 def _path_cache_fingerprint(signature: dict[str, object]) -> str:
     """Return a stable identifier without copying the full split into every shard."""
 
@@ -690,6 +707,12 @@ def main() -> None:
     parser.add_argument("--torch-threads", type=int, default=1)
     parser.add_argument("--output", type=Path, default=Path("results/tracelet_gate.json"))
     parser.add_argument("--checkpoint", type=Path)
+    parser.add_argument(
+        "--provenance-sha256",
+        type=str,
+        default="",
+        help="immutable wrapper identity for exact recovery compatibility",
+    )
     parser.add_argument(
         "--path-cache",
         type=Path,
@@ -1660,6 +1683,7 @@ def main() -> None:
         ),
         "late_time_fraction": args.late_time_fraction,
         "operational_horizon": args.operational_horizon,
+        "provenance_sha256": args.provenance_sha256,
     }
     expected = {
         key: checkpoint_metadata[key]
@@ -1726,6 +1750,7 @@ def main() -> None:
                     "operational_horizon",
                     "progress_stratification_fraction",
                     "use_bf16",
+                    "provenance_sha256",
                 )
             }
             mismatches.update(
@@ -1754,23 +1779,48 @@ def main() -> None:
         )
 
     if isinstance(model, FactorizedTraceletRateModel):
-        initial_validation = factorized_mark_metrics(
+        observed_validation = factorized_mark_metrics(
             model,
             validation_examples,
             use_bf16=args.use_bf16,
         )
     else:
-        initial_validation = tracelet_conditional_metrics(model, validation_examples)
-    print(json.dumps({"phase": "initial_validation", **initial_validation}), flush=True)
+        observed_validation = tracelet_conditional_metrics(model, validation_examples)
+    validation_phase = (
+        "resume_validation" if resume_state is not None else "initial_validation"
+    )
+    print(json.dumps({"phase": validation_phase, **observed_validation}), flush=True)
     nonfinite_validation = {
         key: value
-        for key, value in initial_validation.items()
+        for key, value in observed_validation.items()
         if isinstance(value, (int, float)) and not bool(np.isfinite(value))
     }
     if nonfinite_validation:
         raise RuntimeError(
             "initial validation contains non-finite metrics; refusing to train: "
             f"{nonfinite_validation}"
+        )
+    initial_validation = _validation_baseline_for_run(
+        observed_validation,
+        resume_state,
+    )
+    if resume_state is not None:
+        print(
+            json.dumps(
+                {"phase": "initial_validation_restored", **initial_validation},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    nonfinite_baseline = {
+        key: value
+        for key, value in initial_validation.items()
+        if not bool(np.isfinite(value))
+    }
+    if nonfinite_baseline:
+        raise RuntimeError(
+            "restored initial validation contains non-finite metrics: "
+            f"{nonfinite_baseline}"
         )
     history = []
     recovery_path = (
@@ -1787,6 +1837,7 @@ def main() -> None:
             **checkpoint_metadata,
             **training_state,
             "checkpoint_kind": "exact_training_recovery",
+            "initial_validation": initial_validation,
         }
         _atomic_torch_save(payload, recovery_path)
         if best_so_far_path is not None:

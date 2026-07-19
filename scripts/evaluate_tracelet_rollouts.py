@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -35,6 +36,48 @@ def _atomic_torch_save(payload: object, path: Path) -> None:
     temporary = path.with_name(f".{path.name}.tmp")
     torch.save(payload, temporary)
     os.replace(temporary, path)
+
+
+def _atomic_json_write(payload: dict[str, object], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    os.replace(temporary, path)
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_reusable_rollouts(
+    path: Path,
+    *,
+    signature: dict[str, object],
+    samples: int,
+) -> tuple[object, ...] | None:
+    """Load a complete compatible cache or fail closed on stale artifacts."""
+
+    if not path.is_file():
+        return None
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    if not isinstance(payload, dict):
+        raise ValueError("rollout cache payload must be a dictionary")
+    if payload.get("signature") != signature:
+        raise ValueError("rollout cache signature does not match this evaluation")
+    raw_rollouts = payload.get("rollouts")
+    if not isinstance(raw_rollouts, (tuple, list)):
+        raise ValueError("rollout cache lacks a rollout sequence")
+    rollouts = tuple(raw_rollouts)
+    if len(rollouts) != samples:
+        raise ValueError(
+            "rollout cache size does not match requested samples: "
+            f"{len(rollouts)} != {samples}"
+        )
+    return rollouts
 
 
 def _read_smiles_file(path: Path, *, limit: int) -> tuple[str, ...]:
@@ -189,40 +232,67 @@ def main() -> None:
                 flush=True,
             )
 
-    rollouts = sample_tracelet_ancestral_many(
-        model,
-        seed=args.seed + 4,
-        samples=args.rollout_samples,
-        workers=args.rollout_workers,
-        n_slots=args.max_atoms,
-        operational_horizon=args.operational_horizon,
-        time_step=args.time_step,
-        max_events=args.max_events,
-        torch_threads_per_worker=args.torch_threads,
-        progress_callback=report_progress,
-        source_prior=source_prior,
-    )
-    _atomic_torch_save(
-        {
-            "rollouts": rollouts,
-            "checkpoint": str(args.checkpoint),
-            "seed": args.seed + 4,
-            "n_slots": args.max_atoms,
-            "operational_horizon": args.operational_horizon,
-            "time_step": args.time_step,
-            "max_events": args.max_events,
-            "source_prior": "carbon_tree",
-            "tree_source_prior": source_prior,
-        },
+    rollout_signature: dict[str, object] = {
+        "format": "compose_v4_rollout_cache_v2",
+        "checkpoint_sha256": _file_sha256(args.checkpoint),
+        "rollout_samples": args.rollout_samples,
+        "sampling_seed": args.seed + 4,
+        "max_atoms": args.max_atoms,
+        "operational_horizon": args.operational_horizon,
+        "time_step": args.time_step,
+        "max_events": args.max_events,
+        "disabled_rule_names": sorted(model.disabled_sampling_rule_names),
+        "source_prior": "carbon_tree",
+    }
+    rollouts = load_reusable_rollouts(
         args.rollout_cache,
+        signature=rollout_signature,
+        samples=args.rollout_samples,
     )
-    print(
-        json.dumps(
-            {"phase": "rollouts_saved", "path": str(args.rollout_cache)},
-            sort_keys=True,
-        ),
-        flush=True,
-    )
+    if rollouts is None:
+        rollouts = sample_tracelet_ancestral_many(
+            model,
+            seed=args.seed + 4,
+            samples=args.rollout_samples,
+            workers=args.rollout_workers,
+            n_slots=args.max_atoms,
+            operational_horizon=args.operational_horizon,
+            time_step=args.time_step,
+            max_events=args.max_events,
+            torch_threads_per_worker=args.torch_threads,
+            progress_callback=report_progress,
+            source_prior=source_prior,
+        )
+        _atomic_torch_save(
+            {
+                "rollouts": rollouts,
+                "signature": rollout_signature,
+                "checkpoint": str(args.checkpoint),
+                "seed": args.seed + 4,
+                "n_slots": args.max_atoms,
+                "operational_horizon": args.operational_horizon,
+                "time_step": args.time_step,
+                "max_events": args.max_events,
+                "source_prior": "carbon_tree",
+                "tree_source_prior": source_prior,
+            },
+            args.rollout_cache,
+        )
+        print(
+            json.dumps(
+                {"phase": "rollouts_saved", "path": str(args.rollout_cache)},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    else:
+        print(
+            json.dumps(
+                {"phase": "rollouts_reused", "path": str(args.rollout_cache)},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
 
     generated_smiles = tuple(
         text
@@ -238,6 +308,7 @@ def main() -> None:
         "evaluation_kind": "checkpoint_rollout_only",
         "teacher_path_cache_loaded": False,
         "checkpoint": str(args.checkpoint),
+        "checkpoint_sha256": rollout_signature["checkpoint_sha256"],
         "checkpoint_kind": checkpoint.get("checkpoint_kind"),
         "selected_validation": checkpoint.get("selected_validation"),
         "seed": args.seed,
@@ -294,8 +365,7 @@ def main() -> None:
         "source": "external",
         "count": len(quality_reference),
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    _atomic_json_write(report, args.output)
     print(
         json.dumps(
             {
