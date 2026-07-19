@@ -647,7 +647,7 @@ def _run_remote(
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
     path_cache_source_run: str | None = None,
     training_steps: int | None = None,
-    training_support_workers: int = 96,
+    training_support_workers: int = 60,
     training_support_microbatch_size: int = 4,
     training_support_prefetch_factor: int = 2,
     training_support_wait_seconds: float = 600.0,
@@ -1167,8 +1167,8 @@ def compile_stage(
 
 @app.function(
     image=image,
-    cpu=100.0,
-    memory=262144,
+    cpu=64.0,
+    memory=131072,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
     retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
@@ -1178,7 +1178,7 @@ def compile_training_support_stage(
     path_cache_source_run: str,
     steps: int = 2000,
     recipe_name: str = RECIPE_NAME,
-    workers: int = 96,
+    workers: int = 60,
     microbatch_size: int = 4,
     prefetch_factor: int = 2,
     minimum_rows_per_second: float = TRAINING_SUPPORT_MINIMUM_ROWS_PER_SECOND,
