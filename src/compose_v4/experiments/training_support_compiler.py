@@ -53,6 +53,8 @@ class IndexedTrainingSupportRequest:
     absolute_index: int
     state: MolecularGraph
     full_support: bool
+    teacher_action: RingSystemGrow | None
+    precomputed_support: TrainingSupportRow | None
 
 
 class TrainingSupportCompilationDataset(Dataset[IndexedTrainingSupportRow]):
@@ -96,6 +98,7 @@ class TrainingSupportCompilationDataset(Dataset[IndexedTrainingSupportRow]):
                 width=int(example.ring_grow_support_width),
                 support_is_exact=bool(example.ring_grow_support_is_exact),
                 enablement_is_exact=bool(example.ring_grow_enablement_is_exact),
+                teacher_semantic_certificate=(example.ring_teacher_semantic_certificate),
             ),
         )
 
@@ -113,8 +116,10 @@ class TrainingSupportRequestDataset(Dataset[IndexedTrainingSupportRequest]):
         late_time_fraction: float,
         operational_horizon: float,
         progress_stratification_fraction: float,
+        precomputed_support_cache: ShardedTrainingSupportCache | None = None,
     ) -> None:
         self.start_index = int(start_index)
+        self.precomputed_support_cache = precomputed_support_cache
         self.dataset = FactorizedMarkDataset(
             records,
             start_index=start_index,
@@ -135,6 +140,16 @@ class TrainingSupportRequestDataset(Dataset[IndexedTrainingSupportRequest]):
             absolute_index=self.start_index + int(index),
             state=example.state,
             full_support=example.teacher_rule_name == "ring_system_grow",
+            teacher_action=(
+                example.teacher_action
+                if isinstance(example.teacher_action, RingSystemGrow)
+                else None
+            ),
+            precomputed_support=(
+                None
+                if self.precomputed_support_cache is None
+                else self.precomputed_support_cache.get(self.start_index + int(index))
+            ),
         )
 
 
@@ -169,6 +184,11 @@ def _compile_support_request(
     request: IndexedTrainingSupportRequest,
 ) -> IndexedTrainingSupportRow:
     global _SUPPORT_REQUESTS_SINCE_RESET
+    if request.precomputed_support is not None and not request.full_support:
+        return IndexedTrainingSupportRow(
+            absolute_index=int(request.absolute_index),
+            support=request.precomputed_support,
+        )
     model = _SUPPORT_RING_MODEL
     if model is None:
         raise RuntimeError("support worker lacks its chemistry oracle")
@@ -177,19 +197,39 @@ def _compile_support_request(
         clear_semantic_ring_state_caches()
         _SUPPORT_REQUESTS_SINCE_RESET = 0
     if request.full_support:
-        mask = model._ring_grow_support(request.state)
+        if request.teacher_action is None:
+            raise RuntimeError("ring-system training row lacks its teacher action")
+        if request.precomputed_support is None:
+            mask = model._ring_grow_support(request.state)
+            indices = tuple(int(index) for index, supported in enumerate(mask) if supported)
+            width = len(mask)
+            support_is_exact = True
+            enablement_is_exact = True
+        else:
+            indices = request.precomputed_support.indices
+            width = request.precomputed_support.width
+            support_is_exact = request.precomputed_support.support_is_exact
+            enablement_is_exact = request.precomputed_support.enablement_is_exact
+        teacher_semantic_certificate = model.ring_teacher_semantic_certificate(
+            request.state,
+            request.teacher_action,
+        )
     else:
         mask = model._ring_grow_enablement_certificate(request.state)
+        indices = tuple(int(index) for index, supported in enumerate(mask) if supported)
+        width = len(mask)
+        support_is_exact = False
+        enablement_is_exact = True
+        teacher_semantic_certificate = None
     _SUPPORT_REQUESTS_SINCE_RESET += 1
     return IndexedTrainingSupportRow(
         absolute_index=int(request.absolute_index),
         support=TrainingSupportRow(
-            indices=tuple(
-                int(index) for index, supported in enumerate(mask) if supported
-            ),
-            width=len(mask),
-            support_is_exact=bool(request.full_support),
-            enablement_is_exact=True,
+            indices=indices,
+            width=width,
+            support_is_exact=support_is_exact,
+            enablement_is_exact=enablement_is_exact,
+            teacher_semantic_certificate=teacher_semantic_certificate,
         ),
     )
 
@@ -223,21 +263,21 @@ def attach_ring_teacher_semantic_certificates(
     if workers < 0:
         raise ValueError("teacher-certificate workers must be non-negative")
     existing = getattr(batch, "ring_teacher_semantic_certificates", None)
-    if existing is not None and len(existing) == batch.batch_size and all(
-        name != "ring_system_grow" or certificate is not None
-        for name, certificate in zip(batch.teacher_rule_names, existing)
+    if (
+        existing is not None
+        and len(existing) == batch.batch_size
+        and all(
+            name != "ring_system_grow" or certificate is not None
+            for name, certificate in zip(batch.teacher_rule_names, existing)
+        )
     ):
         return batch
     requests = tuple(
         (index, batch.states[index], action)
-        for index, (name, action) in enumerate(
-            zip(batch.teacher_rule_names, batch.teacher_actions)
-        )
+        for index, (name, action) in enumerate(zip(batch.teacher_rule_names, batch.teacher_actions))
         if name == "ring_system_grow" and isinstance(action, RingSystemGrow)
     )
-    certificates: list[RingTeacherSemanticCertificate | None] = [
-        None
-    ] * batch.batch_size
+    certificates: list[RingTeacherSemanticCertificate | None] = [None] * batch.batch_size
     if not requests:
         return replace(batch, ring_teacher_semantic_certificates=tuple(certificates))
 
@@ -278,9 +318,7 @@ def attach_ring_teacher_semantic_certificates(
             _SUPPORT_RING_CATALOG = None
     if any(
         certificates[index] is None
-        for index, (name, _) in enumerate(
-            zip(batch.teacher_rule_names, batch.teacher_actions)
-        )
+        for index, (name, _) in enumerate(zip(batch.teacher_rule_names, batch.teacher_actions))
         if name == "ring_system_grow"
     ):
         raise RuntimeError("teacher-certificate compiler lost a ring row")
@@ -301,6 +339,7 @@ def iter_training_support_rows(
     workers: int,
     microbatch_size: int,
     prefetch_factor: int = 2,
+    precomputed_support_cache: ShardedTrainingSupportCache | None = None,
 ) -> Iterator[IndexedTrainingSupportRow]:
     """Yield ordered rows from a bounded, dynamically scheduled worker queue.
 
@@ -340,6 +379,7 @@ def iter_training_support_rows(
         late_time_fraction=late_time_fraction,
         operational_horizon=operational_horizon,
         progress_stratification_fraction=progress_stratification_fraction,
+        precomputed_support_cache=precomputed_support_cache,
     )
 
     # Keep enough independent rows in flight to absorb rare multi-second ring
@@ -366,10 +406,7 @@ def iter_training_support_rows(
 
     def fill_window() -> None:
         nonlocal in_flight, next_submit
-        while (
-            next_submit < len(request_dataset)
-            and next_submit - next_yield < reorder_window
-        ):
+        while next_submit < len(request_dataset) and next_submit - next_yield < reorder_window:
             request = request_dataset[next_submit]
             pool.apply_async(
                 _compile_support_request,
@@ -395,9 +432,7 @@ def iter_training_support_rows(
             row = payload
             local_index = int(row.absolute_index) - int(start_index)
             if not 0 <= local_index < len(request_dataset):
-                raise RuntimeError(
-                    "support worker returned the wrong deterministic index"
-                )
+                raise RuntimeError("support worker returned the wrong deterministic index")
             if local_index in pending or local_index < next_yield:
                 raise RuntimeError("support worker returned a duplicate row")
             pending[local_index] = row
@@ -433,12 +468,14 @@ def _validated_cached_prefix(
         path = training_support_shard_path(cache.root, start=cursor, stop=shard_stop)
         if not path.is_file():
             break
-        load_training_support_shard(
+        shard = load_training_support_shard(
             path,
             signature=cache.signature,
             expected_start=cursor,
             expected_stop=shard_stop,
         )
+        if not shard.teacher_certificates_complete:
+            break
         paths.append(path)
         cursor = shard_stop
     return cursor, tuple(paths)
@@ -496,6 +533,7 @@ def compile_training_support_shards(
         workers=workers,
         microbatch_size=microbatch_size,
         prefetch_factor=prefetch_factor,
+        precomputed_support_cache=cache,
     ):
         expected_index = cursor + compiled
         if indexed.absolute_index != expected_index:
@@ -515,6 +553,7 @@ def compile_training_support_shards(
                 stop=shard.stop,
             )
             save_training_support_shard(shard, path, signature=cache.signature)
+            cache._loaded.pop(shard.start, None)
             published.append(path)
             buffer.clear()
             shard_start = shard.stop

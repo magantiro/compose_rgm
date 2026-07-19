@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import torch
 
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
@@ -74,6 +75,7 @@ def test_factorized_dataset_uses_required_sparse_training_support_cache(tmp_path
             width=example.ring_grow_support_width,
             support_is_exact=example.ring_grow_support_is_exact,
             enablement_is_exact=example.ring_grow_enablement_is_exact,
+            teacher_semantic_certificate=(example.ring_teacher_semantic_certificate),
         )
         for example in expected
     )
@@ -92,10 +94,10 @@ def test_factorized_dataset_uses_required_sparse_training_support_cache(tmp_path
     )
     observed = tuple(cached[index] for index in range(len(cached)))
 
-    # Sparse template support is loaded from disk, while the new exact
-    # teacher-only semantic certificate is compiled by CPU workers so neural
-    # forward never runs the recursive chemistry DP.
-    assert cached._ring_support_model is not None
+    # Both sparse template support and the exact teacher-only semantic
+    # certificate are loaded from disk.  No chemistry oracle is constructed in
+    # the online training worker.
+    assert cached._ring_support_model is None
     for left, right in zip(expected, observed):
         assert molecular_state_cache_key(left.state) == molecular_state_cache_key(right.state)
         assert left.time == right.time
@@ -107,10 +109,7 @@ def test_factorized_dataset_uses_required_sparse_training_support_cache(tmp_path
         assert left.ring_grow_support_width == right.ring_grow_support_width
         assert left.ring_grow_support_is_exact == right.ring_grow_support_is_exact
         assert left.ring_grow_enablement_is_exact == right.ring_grow_enablement_is_exact
-        assert (
-            left.ring_teacher_semantic_certificate
-            == right.ring_teacher_semantic_certificate
-        )
+        assert left.ring_teacher_semantic_certificate == right.ring_teacher_semantic_certificate
 
 
 def test_factorized_dataset_refuses_missing_required_training_support(tmp_path) -> None:
@@ -170,6 +169,7 @@ def test_training_support_compiler_publishes_ordered_resumable_shards(tmp_path) 
         assert observed.width == expected.ring_grow_support_width
         assert observed.support_is_exact == expected.ring_grow_support_is_exact
         assert observed.enablement_is_exact == expected.ring_grow_enablement_is_exact
+        assert observed.teacher_semantic_certificate == expected.ring_teacher_semantic_certificate
 
     resumed = compile_training_support_shards(
         records,
@@ -223,6 +223,60 @@ def test_training_support_compiler_preserves_absolute_indices_for_nonzero_range(
         assert observed.width == expected.ring_grow_support_width
         assert observed.support_is_exact == expected.ring_grow_support_is_exact
         assert observed.enablement_is_exact == expected.ring_grow_enablement_is_exact
+        assert observed.teacher_semantic_certificate == expected.ring_teacher_semantic_certificate
+
+
+def test_training_support_compiler_upgrades_existing_sparse_support_in_place(
+    tmp_path,
+) -> None:
+    records, catalog = _records_and_catalog()
+    signature = {"format_version": 1, "stream": "upgrade-unit-test"}
+    cache = ShardedTrainingSupportCache(
+        tmp_path,
+        signature,
+        total_rows=8,
+        shard_size=8,
+    )
+    oracle = _dataset(records, catalog)
+    expected = tuple(oracle[index] for index in range(len(oracle)))
+    legacy_rows = tuple(
+        TrainingSupportRow(
+            indices=example.ring_grow_support_indices or (),
+            width=example.ring_grow_support_width,
+            support_is_exact=example.ring_grow_support_is_exact,
+            enablement_is_exact=example.ring_grow_enablement_is_exact,
+        )
+        for example in expected
+    )
+    path = training_support_shard_path(cache.root, start=0, stop=8)
+    save_training_support_shard(
+        TrainingSupportShard.from_rows(legacy_rows, start=0),
+        path,
+        signature=signature,
+    )
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    payload.pop("teacher_semantic_certificates")
+    torch.save(payload, path)
+
+    compile_training_support_shards(
+        records,
+        cache=cache,
+        start_index=0,
+        stop_index=8,
+        seed=47,
+        late_time_fraction=0.5,
+        operational_horizon=16.0,
+        progress_stratification_fraction=0.5,
+        ring_catalog=catalog,
+        ring_electronic_mode="factorized_local",
+        workers=2,
+        microbatch_size=2,
+    )
+
+    for index, example in enumerate(expected):
+        observed = cache.require(index)
+        assert observed.indices == legacy_rows[index].indices
+        assert observed.teacher_semantic_certificate == example.ring_teacher_semantic_certificate
 
 
 def test_unordered_worker_scheduler_reconstructs_the_sequential_stream() -> None:
@@ -239,11 +293,7 @@ def test_unordered_worker_scheduler_reconstructs_the_sequential_stream() -> None
         "microbatch_size": 2,
         "prefetch_factor": 2,
     }
-    sequential = tuple(
-        iter_training_support_rows(records, workers=0, **arguments)
-    )
-    parallel = tuple(
-        iter_training_support_rows(records, workers=2, **arguments)
-    )
+    sequential = tuple(iter_training_support_rows(records, workers=0, **arguments))
+    parallel = tuple(iter_training_support_rows(records, workers=2, **arguments))
 
     assert parallel == sequential

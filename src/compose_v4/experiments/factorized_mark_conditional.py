@@ -129,8 +129,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
     def _ring_chemistry_model(self) -> FactorizedTraceletRateModel:
         if (
             self._ring_support_model is not None
-            and self._ring_support_examples_since_reset
-            >= self.support_cache_reset_interval
+            and self._ring_support_examples_since_reset >= self.support_cache_reset_interval
         ):
             self._ring_support_model.clear_ring_candidate_caches()
             clear_semantic_ring_state_caches()
@@ -206,19 +205,16 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                 ring_grow_support_indices = cached_support.indices
                 ring_grow_support_width = int(cached_support.width)
                 ring_grow_support_is_exact = bool(cached_support.support_is_exact)
-                ring_grow_enablement_is_exact = bool(
-                    cached_support.enablement_is_exact
-                )
+                ring_grow_enablement_is_exact = bool(cached_support.enablement_is_exact)
+                ring_teacher_semantic_certificate = cached_support.teacher_semantic_certificate
             else:
                 chemistry_model = self._ring_chemistry_model()
                 if teacher_rule_name == "ring_system_grow":
-                    ring_grow_support_mask = chemistry_model._ring_grow_support(
-                        state
-                    )
+                    ring_grow_support_mask = chemistry_model._ring_grow_support(state)
                     ring_grow_support_is_exact = True
                 else:
-                    ring_grow_support_mask = (
-                        chemistry_model._ring_grow_enablement_certificate(state)
+                    ring_grow_support_mask = chemistry_model._ring_grow_enablement_certificate(
+                        state
                     )
                 ring_grow_enablement_is_exact = True
                 ring_grow_support_indices = tuple(
@@ -227,9 +223,16 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                     if supported
                 )
                 ring_grow_support_width = len(ring_grow_support_mask)
-            if teacher_rule_name == "ring_system_grow":
+            if (
+                teacher_rule_name == "ring_system_grow"
+                and ring_teacher_semantic_certificate is None
+            ):
                 if not isinstance(teacher_action, RingSystemGrow):
                     raise TypeError("ring-system teacher has the wrong action type")
+                if cached_support is not None and self.require_cached_support:
+                    raise RuntimeError(
+                        "required training support row lacks its exact semantic teacher certificate"
+                    )
                 if chemistry_model is None:
                     chemistry_model = self._ring_chemistry_model()
                 ring_teacher_semantic_certificate = (
@@ -299,9 +302,7 @@ class FactorizedMarkCollator:
                     dtype=torch.bool,
                 ),
                 ring_grow_enablement_is_exact=torch.tensor(
-                    tuple(
-                        example.ring_grow_enablement_is_exact for example in examples
-                    ),
+                    tuple(example.ring_grow_enablement_is_exact for example in examples),
                     dtype=torch.bool,
                 ),
             )
@@ -524,8 +525,7 @@ def _concatenate_factorized_mark_batches(
             for batch in batches
             for certificate in (
                 batch.ring_teacher_semantic_certificates
-                if getattr(batch, "ring_teacher_semantic_certificates", None)
-                is not None
+                if getattr(batch, "ring_teacher_semantic_certificates", None) is not None
                 else (None,) * batch.batch_size
             )
         ),
@@ -634,16 +634,10 @@ def factorized_mark_metrics(
     metrics = {
         "factorized_gm_loss": loss_sum / batch.batch_size,
         "mean_teacher_mark_probability": (
-            teacher_probability_sum / nonterminal_count
-            if nonterminal_count
-            else 0.0
+            teacher_probability_sum / nonterminal_count if nonterminal_count else 0.0
         ),
-        "family_accuracy": (
-            family_hits_sum / nonterminal_count if nonterminal_count else 0.0
-        ),
-        "mean_terminal_hazard": (
-            terminal_hazard_sum / terminal_count if terminal_count else 0.0
-        ),
+        "family_accuracy": (family_hits_sum / nonterminal_count if nonterminal_count else 0.0),
+        "mean_terminal_hazard": (terminal_hazard_sum / terminal_count if terminal_count else 0.0),
         "mean_predicted_hazard": predicted_hazard_sum / batch.batch_size,
         "mean_teacher_hazard": teacher_hazard_sum / batch.batch_size,
         "mean_absolute_hazard_error": hazard_absolute_error_sum / batch.batch_size,
@@ -660,9 +654,7 @@ def factorized_mark_metrics(
             family_hits[family_index] / count if count else 0.0
         )
         metrics[f"mean_teacher_mark_probability_{family_name}"] = (
-            family_teacher_probability_sums[family_index] / count
-            if count
-            else 0.0
+            family_teacher_probability_sums[family_index] / count if count else 0.0
         )
     return metrics
 
@@ -911,9 +903,7 @@ def train_factorized_mark_model(
             elif completed_steps >= max(warmup_steps, 1):
                 evaluations_without_improvement += 1
             metrics["materially_improved"] = float(materially_improved)
-            metrics["early_stopping_reference_loss"] = float(
-                early_stopping_reference_loss
-            )
+            metrics["early_stopping_reference_loss"] = float(early_stopping_reference_loss)
             metrics["evaluations_without_improvement"] = float(evaluations_without_improvement)
             should_early_stop = (
                 early_stopping_patience > 0
@@ -927,12 +917,8 @@ def train_factorized_mark_model(
                     "timing/profile_synchronized": float(profile_timing),
                     "timing/data_wait_seconds": data_wait,
                     "timing/cumulative_data_wait_seconds": cumulative_data_wait,
-                    "timing/mean_data_wait_seconds": (
-                        cumulative_data_wait / observed_updates
-                    ),
-                    "timing/p95_data_wait_seconds": float(
-                        np.percentile(data_wait_history, 95)
-                    ),
+                    "timing/mean_data_wait_seconds": (cumulative_data_wait / observed_updates),
+                    "timing/p95_data_wait_seconds": float(np.percentile(data_wait_history, 95)),
                     "timing/max_data_wait_seconds": maximum_data_wait,
                 }
                 if profile_timing:
@@ -945,13 +931,10 @@ def train_factorized_mark_model(
                             "timing/optimizer_seconds": optimized_at - backward_at,
                             "timing/update_seconds": update_time,
                             "timing/data_wait_fraction": (
-                                cumulative_data_wait
-                                / max(cumulative_update_time, 1e-12)
+                                cumulative_data_wait / max(cumulative_update_time, 1e-12)
                             ),
                             "timing/updates_per_second": observed_updates / elapsed,
-                            "timing/examples_per_second": (
-                                observed_updates * batch_size / elapsed
-                            ),
+                            "timing/examples_per_second": (observed_updates * batch_size / elapsed),
                         }
                     )
                 progress_callback(

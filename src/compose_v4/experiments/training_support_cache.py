@@ -15,6 +15,10 @@ from typing import Mapping
 import torch
 from torch import Tensor
 
+from compose_v4.model.factorized_tracelet_rate_model import (
+    RingTeacherSemanticCertificate,
+)
+
 
 TRAINING_SUPPORT_CACHE_FORMAT_VERSION = 1
 # Bump this only when the set of executable rewrite actions changes.  Pure
@@ -60,12 +64,13 @@ def training_support_shard_path(
 
 @dataclass(frozen=True)
 class TrainingSupportRow:
-    """Sparse ring support associated with one deterministic training index."""
+    """All expensive chemistry support for one deterministic training index."""
 
     indices: tuple[int, ...]
     width: int
     support_is_exact: bool
     enablement_is_exact: bool
+    teacher_semantic_certificate: RingTeacherSemanticCertificate | None = None
 
     def __post_init__(self) -> None:
         if self.width < 0:
@@ -88,6 +93,8 @@ class TrainingSupportShard:
     indices: Tensor
     support_is_exact: Tensor
     enablement_is_exact: Tensor
+    teacher_semantic_certificates: tuple[RingTeacherSemanticCertificate | None, ...]
+    teacher_certificates_complete: bool
 
     def __post_init__(self) -> None:
         rows = int(self.stop) - int(self.start)
@@ -101,15 +108,15 @@ class TrainingSupportShard:
             raise ValueError("training support exactness flags have the wrong shape")
         if self.enablement_is_exact.shape != (rows,):
             raise ValueError("training enablement flags have the wrong shape")
+        if len(self.teacher_semantic_certificates) != rows:
+            raise ValueError("training semantic-certificate rows have the wrong shape")
         indptr = self.indptr.detach().cpu().to(torch.int64)
         indices = self.indices.detach().cpu().to(torch.int64)
         if int(indptr[0]) != 0 or int(indptr[-1]) != int(indices.numel()):
             raise ValueError("training support CSR boundaries are invalid")
         if bool(torch.any(indptr[1:] < indptr[:-1])):
             raise ValueError("training support CSR boundaries are not monotone")
-        if indices.numel() and (
-            int(indices.min()) < 0 or int(indices.max()) >= int(self.width)
-        ):
+        if indices.numel() and (int(indices.min()) < 0 or int(indices.max()) >= int(self.width)):
             raise ValueError("training support CSR index lies outside the vocabulary")
         for row in range(rows):
             left = int(indptr[row])
@@ -149,6 +156,8 @@ class TrainingSupportShard:
                 tuple(bool(row.enablement_is_exact) for row in rows),
                 dtype=torch.bool,
             ),
+            teacher_semantic_certificates=tuple(row.teacher_semantic_certificate for row in rows),
+            teacher_certificates_complete=True,
         )
 
     def row(self, absolute_index: int) -> TrainingSupportRow:
@@ -158,12 +167,11 @@ class TrainingSupportShard:
         left = int(self.indptr[local])
         right = int(self.indptr[local + 1])
         return TrainingSupportRow(
-            indices=tuple(
-                int(value) for value in self.indices[left:right].detach().cpu().tolist()
-            ),
+            indices=tuple(int(value) for value in self.indices[left:right].detach().cpu().tolist()),
             width=int(self.width),
             support_is_exact=bool(self.support_is_exact[local]),
             enablement_is_exact=bool(self.enablement_is_exact[local]),
+            teacher_semantic_certificate=self.teacher_semantic_certificates[local],
         )
 
 
@@ -204,6 +212,7 @@ def save_training_support_shard(
             "indices": shard.indices.detach().cpu().to(torch.int32),
             "support_is_exact": shard.support_is_exact.detach().cpu().bool(),
             "enablement_is_exact": shard.enablement_is_exact.detach().cpu().bool(),
+            "teacher_semantic_certificates": shard.teacher_semantic_certificates,
         },
         Path(path),
     )
@@ -240,6 +249,10 @@ def load_training_support_shard(
         indices=payload["indices"],
         support_is_exact=payload["support_is_exact"],
         enablement_is_exact=payload["enablement_is_exact"],
+        teacher_semantic_certificates=tuple(
+            payload.get("teacher_semantic_certificates", (None,) * (stop - start))
+        ),
+        teacher_certificates_complete="teacher_semantic_certificates" in payload,
     )
 
 
@@ -311,6 +324,14 @@ class ShardedTrainingSupportCache:
         if row is None:
             raise FileNotFoundError(
                 f"missing compiled training support for row {absolute_index}: "
+                f"{self.path_for_index(absolute_index)}"
+            )
+        shard_start, _ = self.bounds(absolute_index)
+        shard = self._loaded.get(shard_start)
+        if shard is None or not shard.teacher_certificates_complete:
+            raise FileNotFoundError(
+                "compiled training support lacks exact semantic teacher "
+                f"certificates for row {absolute_index}: "
                 f"{self.path_for_index(absolute_index)}"
             )
         return row

@@ -192,7 +192,9 @@ def _evaluation_batch_cache_path(
     signature: dict[str, object],
 ) -> Path:
     fingerprint = _path_cache_fingerprint(signature)
-    return cache_dir / f"evaluation-batches-v{EVALUATION_BATCH_CACHE_FORMAT_VERSION}-{fingerprint}.pt"
+    return (
+        cache_dir / f"evaluation-batches-v{EVALUATION_BATCH_CACHE_FORMAT_VERSION}-{fingerprint}.pt"
+    )
 
 
 def _load_evaluation_batch_cache(
@@ -810,9 +812,7 @@ def main() -> None:
     parser.add_argument(
         "--evaluation-cache-dir",
         type=Path,
-        help=(
-            "shared directory for content-addressed fixed validation/test batches"
-        ),
+        help=("shared directory for content-addressed fixed validation/test batches"),
     )
     parser.add_argument(
         "--compile-evaluation-cache",
@@ -974,9 +974,7 @@ def main() -> None:
     if args.load_checkpoint is not None and args.resume_checkpoint is not None:
         raise ValueError("--load-checkpoint and --resume-checkpoint are mutually exclusive")
     if args.allow_resume_provenance_mismatch and args.resume_checkpoint is None:
-        raise ValueError(
-            "--allow-resume-provenance-mismatch requires --resume-checkpoint"
-        )
+        raise ValueError("--allow-resume-provenance-mismatch requires --resume-checkpoint")
     if args.recovery_every < 0:
         raise ValueError("--recovery-every must be non-negative")
     if not 0 <= args.warmup_steps <= args.steps:
@@ -987,15 +985,16 @@ def main() -> None:
         raise ValueError("--evaluation-every and --early-stopping-patience must be non-negative")
     if not 0.0 <= args.early_stopping_min_relative_delta < 1.0:
         raise ValueError("--early-stopping-min-relative-delta must lie in [0, 1)")
-    if min(
-        args.data_workers,
-        args.path_workers,
-        args.corpus_workers,
-        args.training_support_workers,
-    ) < 0:
-        raise ValueError(
-            "data, path, corpus, and support worker counts must be non-negative"
+    if (
+        min(
+            args.data_workers,
+            args.path_workers,
+            args.corpus_workers,
+            args.training_support_workers,
         )
+        < 0
+    ):
+        raise ValueError("data, path, corpus, and support worker counts must be non-negative")
     if args.evaluation_workers is not None and args.evaluation_workers < 0:
         raise ValueError("evaluation-workers must be non-negative")
     if args.evaluation_batch_size <= 0:
@@ -1014,26 +1013,15 @@ def main() -> None:
         raise ValueError("training-support compiler dimensions must be positive")
     if args.compile_training_support_start_step < 0:
         raise ValueError("compile-training-support-start-step must be non-negative")
-    if (
-        args.compile_training_support_start_step
-        and not args.compile_training_support_steps
-    ):
-        raise ValueError(
-            "compile-training-support-start-step requires a non-empty compile range"
-        )
+    if args.compile_training_support_start_step and not args.compile_training_support_steps:
+        raise ValueError("compile-training-support-start-step requires a non-empty compile range")
     if not 0 <= args.compile_training_support_steps <= args.steps:
         raise ValueError("compile-training-support-steps must lie in [0, steps]")
-    if (
-        args.compile_training_support_start_step
-        + args.compile_training_support_steps
-        > args.steps
-    ):
+    if args.compile_training_support_start_step + args.compile_training_support_steps > args.steps:
         raise ValueError("compiled training-support range exceeds the training stream")
     if args.training_support_wait_seconds < 0.0:
         raise ValueError("training-support-wait-seconds must be non-negative")
-    support_mode = bool(
-        args.compile_training_support_steps or args.require_training_support_cache
-    )
+    support_mode = bool(args.compile_training_support_steps or args.require_training_support_cache)
     if support_mode and args.training_support_cache_dir is None:
         raise ValueError("training-support-cache-dir is required for support caching")
     if support_mode and args.training_backend != "factorized_marks":
@@ -1047,8 +1035,7 @@ def main() -> None:
         )
     support_start_row = args.compile_training_support_start_step * args.batch_size
     support_stop_row = (
-        args.compile_training_support_start_step
-        + args.compile_training_support_steps
+        args.compile_training_support_start_step + args.compile_training_support_steps
     ) * args.batch_size
     if args.compile_training_support_steps and (
         support_start_row % args.training_support_shard_size
@@ -1062,9 +1049,7 @@ def main() -> None:
     if (args.compile_evaluation_cache or args.require_evaluation_cache) and (
         args.evaluation_cache_dir is None
     ):
-        raise ValueError(
-            "evaluation-cache-dir is required when compiling or requiring its cache"
-        )
+        raise ValueError("evaluation-cache-dir is required when compiling or requiring its cache")
     if args.compile_evaluation_cache and args.require_evaluation_cache:
         raise ValueError(
             "compile-evaluation-cache and require-evaluation-cache are mutually exclusive"
@@ -1827,8 +1812,7 @@ def main() -> None:
             raise RuntimeError("training support compiler lacks its cache or ring catalog")
         start_index = args.compile_training_support_start_step * args.batch_size
         stop_index = (
-            args.compile_training_support_start_step
-            + args.compile_training_support_steps
+            args.compile_training_support_start_step + args.compile_training_support_steps
         ) * args.batch_size
         last_reported = 0
 
@@ -1890,8 +1874,7 @@ def main() -> None:
                     "rows": stop_index - start_index,
                     "shards": len(paths),
                     "seconds": elapsed,
-                    "rows_per_second": (stop_index - start_index)
-                    / max(elapsed, 1e-12),
+                    "rows_per_second": (stop_index - start_index) / max(elapsed, 1e-12),
                 },
                 sort_keys=True,
             ),
@@ -1937,9 +1920,7 @@ def main() -> None:
         )
     )
     evaluation_workers = (
-        args.data_workers
-        if args.evaluation_workers is None
-        else args.evaluation_workers
+        args.data_workers if args.evaluation_workers is None else args.evaluation_workers
     )
     validation_examples = None
     test_examples = None
@@ -2018,8 +1999,7 @@ def main() -> None:
                 )
     elif args.require_evaluation_cache:
         raise FileNotFoundError(
-            "required evaluation batch cache is missing: "
-            f"{evaluation_cache_path}"
+            f"required evaluation batch cache is missing: {evaluation_cache_path}"
         )
 
     evaluation_build_started = perf_counter()
@@ -2109,9 +2089,7 @@ def main() -> None:
                 fiber_executor=evaluation_fiber_executor,
             )
             print(
-                json.dumps(
-                    {"phase": "test_examples_built", "cache_size": len(fiber_cache)}
-                ),
+                json.dumps({"phase": "test_examples_built", "cache_size": len(fiber_cache)}),
                 flush=True,
             )
 
@@ -2144,11 +2122,7 @@ def main() -> None:
             json.dumps(
                 {
                     "phase": "compiled_evaluation_batches_ready",
-                    "path": (
-                        None
-                        if evaluation_cache_path is None
-                        else str(evaluation_cache_path)
-                    ),
+                    "path": (None if evaluation_cache_path is None else str(evaluation_cache_path)),
                     "validation_examples": args.validation_examples,
                     "test_examples": args.test_examples,
                 },
@@ -2242,9 +2216,7 @@ def main() -> None:
         "evaluation_every": args.evaluation_every,
         "evaluation_batch_size": args.evaluation_batch_size,
         "early_stopping_patience": args.early_stopping_patience,
-        "early_stopping_min_relative_delta": (
-            args.early_stopping_min_relative_delta
-        ),
+        "early_stopping_min_relative_delta": (args.early_stopping_min_relative_delta),
         "late_time_fraction": args.late_time_fraction,
         "operational_horizon": args.operational_horizon,
         "provenance_sha256": args.provenance_sha256,
@@ -2318,9 +2290,7 @@ def main() -> None:
                 )
             }
             if not args.allow_resume_provenance_mismatch:
-                resume_expected["provenance_sha256"] = checkpoint_metadata[
-                    "provenance_sha256"
-                ]
+                resume_expected["provenance_sha256"] = checkpoint_metadata["provenance_sha256"]
             mismatches.update(
                 {
                     key: (checkpoint_payload.get(key), value)
@@ -2350,9 +2320,7 @@ def main() -> None:
                 json.dumps(
                     {
                         "phase": "implementation_only_resume_accepted",
-                        "checkpoint_provenance_sha256": checkpoint_payload.get(
-                            "provenance_sha256"
-                        ),
+                        "checkpoint_provenance_sha256": checkpoint_payload.get("provenance_sha256"),
                         "current_provenance_sha256": args.provenance_sha256,
                     },
                     sort_keys=True,
@@ -2369,9 +2337,7 @@ def main() -> None:
         )
     else:
         observed_validation = tracelet_conditional_metrics(model, validation_examples)
-    validation_phase = (
-        "resume_validation" if resume_state is not None else "initial_validation"
-    )
+    validation_phase = "resume_validation" if resume_state is not None else "initial_validation"
     print(json.dumps({"phase": validation_phase, **observed_validation}), flush=True)
     nonfinite_validation = {
         key: value
@@ -2396,22 +2362,17 @@ def main() -> None:
             flush=True,
         )
     nonfinite_baseline = {
-        key: value
-        for key, value in initial_validation.items()
-        if not bool(np.isfinite(value))
+        key: value for key, value in initial_validation.items() if not bool(np.isfinite(value))
     }
     if nonfinite_baseline:
         raise RuntimeError(
-            "restored initial validation contains non-finite metrics: "
-            f"{nonfinite_baseline}"
+            f"restored initial validation contains non-finite metrics: {nonfinite_baseline}"
         )
     history = []
     recovery_path = (
         _recovery_path(args.checkpoint) if args.checkpoint is not None else args.resume_checkpoint
     )
-    best_so_far_path = (
-        _best_so_far_path(args.checkpoint) if args.checkpoint is not None else None
-    )
+    best_so_far_path = _best_so_far_path(args.checkpoint) if args.checkpoint is not None else None
 
     def save_recovery(training_state: dict[str, object]) -> None:
         if recovery_path is None:
@@ -2441,9 +2402,7 @@ def main() -> None:
                         "phase": "interim_best_checkpoint_saved",
                         "path": str(best_so_far_path),
                         "completed_steps": training_state["completed_steps"],
-                        "selected_step": training_state["best_metrics"].get(
-                            "selected_step"
-                        ),
+                        "selected_step": training_state["best_metrics"].get("selected_step"),
                     },
                     sort_keys=True,
                 ),
@@ -2484,9 +2443,7 @@ def main() -> None:
             warmup_steps=args.warmup_steps,
             minimum_learning_rate_fraction=(args.minimum_learning_rate_fraction),
             early_stopping_patience=args.early_stopping_patience,
-            early_stopping_min_relative_delta=(
-                args.early_stopping_min_relative_delta
-            ),
+            early_stopping_min_relative_delta=(args.early_stopping_min_relative_delta),
             progress_callback=lambda metrics: print(
                 json.dumps({"phase": "training", **metrics}, sort_keys=True),
                 flush=True,
@@ -2498,9 +2455,7 @@ def main() -> None:
             evaluation_batch_size=args.evaluation_batch_size,
             initial_validation_metrics=observed_validation,
             training_support_cache=(
-                training_support_cache
-                if args.require_training_support_cache
-                else None
+                training_support_cache if args.require_training_support_cache else None
             ),
             require_cached_support=args.require_training_support_cache,
         )
@@ -2593,9 +2548,7 @@ def main() -> None:
                 "evaluation_every": args.evaluation_every,
                 "evaluation_batch_size": args.evaluation_batch_size,
                 "early_stopping_patience": args.early_stopping_patience,
-                "early_stopping_min_relative_delta": (
-                    args.early_stopping_min_relative_delta
-                ),
+                "early_stopping_min_relative_delta": (args.early_stopping_min_relative_delta),
                 "history": history,
                 "device": str(device),
             },
@@ -2775,9 +2728,7 @@ def main() -> None:
             "evaluation_every": args.evaluation_every,
             "evaluation_batch_size": args.evaluation_batch_size,
             "early_stopping_patience": args.early_stopping_patience,
-            "early_stopping_min_relative_delta": (
-                args.early_stopping_min_relative_delta
-            ),
+            "early_stopping_min_relative_delta": (args.early_stopping_min_relative_delta),
             "bond_representation": (
                 args.bond_representation if isinstance(model, torch.nn.Module) else None
             ),
