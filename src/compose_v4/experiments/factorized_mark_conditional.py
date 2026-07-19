@@ -27,6 +27,7 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
+    RingTeacherSemanticCertificate,
     SparseBinaryRows,
     factorized_mark_bregman_loss,
     prepare_factorized_mark_batch,
@@ -35,6 +36,7 @@ from compose_v4.rewrite.ring_system_fiber import (
     clear_semantic_ring_state_caches,
     warm_ring_system_candidate_indices,
 )
+from compose_v4.rewrite.tracelets import RingSystemGrow
 from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
 
@@ -50,6 +52,7 @@ class FactorizedMarkExample:
     ring_grow_support_width: int = 0
     ring_grow_support_is_exact: bool = False
     ring_grow_enablement_is_exact: bool = False
+    ring_teacher_semantic_certificate: RingTeacherSemanticCertificate | None = None
 
     @property
     def ring_grow_support_mask(self) -> tuple[bool, ...] | None:
@@ -123,6 +126,31 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self._ring_support_model: FactorizedTraceletRateModel | None = None
         self._ring_support_examples_since_reset = 0
 
+    def _ring_chemistry_model(self) -> FactorizedTraceletRateModel:
+        if (
+            self._ring_support_model is not None
+            and self._ring_support_examples_since_reset
+            >= self.support_cache_reset_interval
+        ):
+            self._ring_support_model.clear_ring_candidate_caches()
+            clear_semantic_ring_state_caches()
+            self._ring_support_examples_since_reset = 0
+        if self._ring_support_model is None:
+            # This is a chemistry oracle only. Its parameters are never read,
+            # and the forked RNG prevents worker initialization from changing
+            # the deterministic training stream.
+            with torch.random.fork_rng(devices=[]):
+                torch.manual_seed(0)
+                self._ring_support_model = FactorizedTraceletRateModel(
+                    self.ring_catalog,
+                    hidden_dim=1,
+                    message_passing_steps=1,
+                    mark_dim=1,
+                    ring_electronic_mode=self.ring_electronic_mode,
+                    ring_candidate_cache_limit=self.support_cache_limit,
+                )
+        return self._ring_support_model
+
     def __len__(self) -> int:
         return self.length
 
@@ -162,6 +190,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         ring_grow_support_width = 0
         ring_grow_support_is_exact = False
         ring_grow_enablement_is_exact = False
+        ring_teacher_semantic_certificate = None
+        chemistry_model = None
         if self.ring_catalog is not None:
             cached_support = (
                 None
@@ -180,47 +210,36 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                     cached_support.enablement_is_exact
                 )
             else:
-                if (
-                    self._ring_support_model is not None
-                    and self._ring_support_examples_since_reset
-                    >= self.support_cache_reset_interval
-                ):
-                    self._ring_support_model.clear_ring_candidate_caches()
-                    clear_semantic_ring_state_caches()
-                    self._ring_support_examples_since_reset = 0
-                if self._ring_support_model is None:
-                    # Exact semantic support is chemistry-only. A tiny parameter
-                    # shell lets persistent DataLoader workers reuse the same
-                    # placement/decoder caches without duplicating the compiler.
-                    # Its unused neural parameters must not perturb the training
-                    # RNG stream when a loader is recreated after recovery.
-                    with torch.random.fork_rng(devices=[]):
-                        torch.manual_seed(0)
-                        self._ring_support_model = FactorizedTraceletRateModel(
-                            self.ring_catalog,
-                            hidden_dim=1,
-                            message_passing_steps=1,
-                            mark_dim=1,
-                            ring_electronic_mode=self.ring_electronic_mode,
-                            ring_candidate_cache_limit=self.support_cache_limit,
-                        )
+                chemistry_model = self._ring_chemistry_model()
                 if teacher_rule_name == "ring_system_grow":
-                    ring_grow_support_mask = self._ring_support_model._ring_grow_support(
+                    ring_grow_support_mask = chemistry_model._ring_grow_support(
                         state
                     )
                     ring_grow_support_is_exact = True
                 else:
                     ring_grow_support_mask = (
-                        self._ring_support_model._ring_grow_enablement_certificate(state)
+                        chemistry_model._ring_grow_enablement_certificate(state)
                     )
                 ring_grow_enablement_is_exact = True
-                self._ring_support_examples_since_reset += 1
                 ring_grow_support_indices = tuple(
                     int(index)
                     for index, supported in enumerate(ring_grow_support_mask)
                     if supported
                 )
                 ring_grow_support_width = len(ring_grow_support_mask)
+            if teacher_rule_name == "ring_system_grow":
+                if not isinstance(teacher_action, RingSystemGrow):
+                    raise TypeError("ring-system teacher has the wrong action type")
+                if chemistry_model is None:
+                    chemistry_model = self._ring_chemistry_model()
+                ring_teacher_semantic_certificate = (
+                    chemistry_model.ring_teacher_semantic_certificate(
+                        state,
+                        teacher_action,
+                    )
+                )
+            if chemistry_model is not None:
+                self._ring_support_examples_since_reset += 1
         return FactorizedMarkExample(
             state=state,
             time=time,
@@ -232,6 +251,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             ring_grow_support_width=ring_grow_support_width,
             ring_grow_support_is_exact=ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
+            ring_teacher_semantic_certificate=ring_teacher_semantic_certificate,
         )
 
 
@@ -285,6 +305,12 @@ class FactorizedMarkCollator:
                     dtype=torch.bool,
                 ),
             )
+        batch = replace(
+            batch,
+            ring_teacher_semantic_certificates=tuple(
+                example.ring_teacher_semantic_certificate for example in examples
+            ),
+        )
         return batch
 
 
@@ -492,6 +518,16 @@ def _concatenate_factorized_mark_batches(
                 for batch in batches
             ],
             dim=0,
+        ),
+        ring_teacher_semantic_certificates=tuple(
+            certificate
+            for batch in batches
+            for certificate in (
+                batch.ring_teacher_semantic_certificates
+                if getattr(batch, "ring_teacher_semantic_certificates", None)
+                is not None
+                else (None,) * batch.batch_size
+            )
         ),
     )
 

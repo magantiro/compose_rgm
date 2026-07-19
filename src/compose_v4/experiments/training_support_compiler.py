@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import multiprocessing as mp
 from pathlib import Path
 from queue import Queue
@@ -23,7 +23,12 @@ from compose_v4.experiments.training_support_cache import (
     save_training_support_shard,
     training_support_shard_path,
 )
-from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
+from compose_v4.model.factorized_tracelet_rate_model import (
+    FactorizedMarkBatch,
+    FactorizedTraceletRateModel,
+    RingTeacherSemanticCertificate,
+)
+from compose_v4.rewrite.tracelets import RingSystemGrow
 from compose_v4.rewrite.ring_system_fiber import (
     clear_semantic_ring_state_caches,
     warm_ring_system_candidate_indices,
@@ -187,6 +192,99 @@ def _compile_support_request(
             enablement_is_exact=True,
         ),
     )
+
+
+def _compile_teacher_certificate_request(
+    request: tuple[int, MolecularGraph, RingSystemGrow],
+) -> tuple[int, RingTeacherSemanticCertificate]:
+    global _SUPPORT_REQUESTS_SINCE_RESET
+    model = _SUPPORT_RING_MODEL
+    if model is None:
+        raise RuntimeError("teacher-certificate worker lacks its chemistry oracle")
+    if _SUPPORT_REQUESTS_SINCE_RESET >= WORKER_SUPPORT_CACHE_LIMIT:
+        model.clear_ring_candidate_caches()
+        clear_semantic_ring_state_caches()
+        _SUPPORT_REQUESTS_SINCE_RESET = 0
+    index, state, action = request
+    certificate = model.ring_teacher_semantic_certificate(state, action)
+    _SUPPORT_REQUESTS_SINCE_RESET += 1
+    return int(index), certificate
+
+
+def attach_ring_teacher_semantic_certificates(
+    batch: FactorizedMarkBatch,
+    *,
+    ring_catalog: TypedRingCatalog,
+    ring_electronic_mode: str,
+    workers: int,
+) -> FactorizedMarkBatch:
+    """Attach exact CPU certificates to an already-cached evaluation batch."""
+
+    if workers < 0:
+        raise ValueError("teacher-certificate workers must be non-negative")
+    existing = getattr(batch, "ring_teacher_semantic_certificates", None)
+    if existing is not None and len(existing) == batch.batch_size and all(
+        name != "ring_system_grow" or certificate is not None
+        for name, certificate in zip(batch.teacher_rule_names, existing)
+    ):
+        return batch
+    requests = tuple(
+        (index, batch.states[index], action)
+        for index, (name, action) in enumerate(
+            zip(batch.teacher_rule_names, batch.teacher_actions)
+        )
+        if name == "ring_system_grow" and isinstance(action, RingSystemGrow)
+    )
+    certificates: list[RingTeacherSemanticCertificate | None] = [
+        None
+    ] * batch.batch_size
+    if not requests:
+        return replace(batch, ring_teacher_semantic_certificates=tuple(certificates))
+
+    global _SUPPORT_RING_CATALOG, _SUPPORT_RING_ELECTRONIC_MODE
+    _SUPPORT_RING_CATALOG = ring_catalog
+    _SUPPORT_RING_ELECTRONIC_MODE = str(ring_electronic_mode)
+    if workers == 0:
+        _initialize_support_worker()
+        try:
+            for request in requests:
+                index, certificate = _compile_teacher_certificate_request(request)
+                certificates[index] = certificate
+        finally:
+            global _SUPPORT_RING_MODEL
+            _SUPPORT_RING_MODEL = None
+            _SUPPORT_RING_CATALOG = None
+    else:
+        context = mp.get_context("fork")
+        pool = context.Pool(
+            processes=workers,
+            initializer=_initialize_support_worker,
+        )
+        completed_normally = False
+        try:
+            for index, certificate in pool.imap_unordered(
+                _compile_teacher_certificate_request,
+                requests,
+                chunksize=1,
+            ):
+                certificates[index] = certificate
+            completed_normally = True
+        finally:
+            if completed_normally:
+                pool.close()
+            else:
+                pool.terminate()
+            pool.join()
+            _SUPPORT_RING_CATALOG = None
+    if any(
+        certificates[index] is None
+        for index, (name, _) in enumerate(
+            zip(batch.teacher_rule_names, batch.teacher_actions)
+        )
+        if name == "ring_system_grow"
+    ):
+        raise RuntimeError("teacher-certificate compiler lost a ring row")
+    return replace(batch, ring_teacher_semantic_certificates=tuple(certificates))
 
 
 def iter_training_support_rows(
@@ -453,6 +551,7 @@ __all__ = [
     "IndexedTrainingSupportRequest",
     "TrainingSupportCompilationDataset",
     "TrainingSupportRequestDataset",
+    "attach_ring_teacher_semantic_certificates",
     "compile_training_support_shards",
     "iter_training_support_rows",
 ]

@@ -25,6 +25,9 @@ from compose_v4.experiments.factorized_mark_conditional import (
 )
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.tracelet_conditional import build_tracelet_path_records
+from compose_v4.experiments.training_support_compiler import (
+    attach_ring_teacher_semantic_certificates,
+)
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
     MARK_RULE_TO_INDEX,
@@ -1305,6 +1308,59 @@ def test_semantic_ring_teacher_and_sampler_share_one_normalized_support() -> Non
     )
     assert model.ring_system_role_head[-1].weight.grad is not None
     assert torch.isfinite(model.ring_system_role_head[-1].weight.grad).all()
+
+
+def test_precomputed_ring_teacher_certificate_is_score_exact() -> None:
+    target = pad_molecular_graph(smiles_to_molecular_graph("c1cc[nH]c1"), 12)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(1711),
+        n_slots=12,
+    )
+    path = TraceProgressCTMC(
+        compile_carbon_tree_to_target(
+            source,
+            target,
+            use_bond_reroute=True,
+            align_source=True,
+        )
+    )
+    catalog = build_typed_ring_catalog_from_paths((path,))
+    progress = next(
+        index
+        for index, step in enumerate(path.trace.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    step = path.trace.steps[progress]
+    state = path.state_at(progress)
+    batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (step.action,),
+        (step.rule_name,),
+        (path.operational_jump_rate(progress),),
+        ring_catalog=catalog,
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=24,
+        message_passing_steps=1,
+    )
+    reference = model.forward_mark_batch(batch).selected_mark_log_probability
+    certified_batch = attach_ring_teacher_semantic_certificates(
+        batch,
+        ring_catalog=catalog,
+        ring_electronic_mode="factorized_local",
+        workers=0,
+    )
+    certificate = certified_batch.ring_teacher_semantic_certificates[0]
+    certified = model.forward_mark_batch(
+        certified_batch
+    ).selected_mark_log_probability
+
+    assert certificate is not None
+    assert certificate.action_is_valid
+    assert certificate.templates
+    assert torch.equal(reference, certified)
 
 
 def test_fused_heteroaromatic_teacher_keeps_executable_resonance_alias() -> None:

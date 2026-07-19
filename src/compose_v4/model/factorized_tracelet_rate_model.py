@@ -133,6 +133,32 @@ class ChemistryStateFeatures:
 
 
 @dataclass(frozen=True)
+class RingTeacherPlacementCertificate:
+    """Exact chemistry-only support for one placed teacher ring system."""
+
+    placement_key: Any
+    supported: bool
+    categories: tuple[int, ...] | None = None
+    next_category_masks: tuple[tuple[bool, ...], ...] | None = None
+
+
+@dataclass(frozen=True)
+class RingTeacherTemplateCertificate:
+    """Placement support aligned to one catalog template."""
+
+    template_index: int
+    placements: tuple[RingTeacherPlacementCertificate, ...]
+
+
+@dataclass(frozen=True)
+class RingTeacherSemanticCertificate:
+    """Executor-verified teacher certificate computed outside GPU forward."""
+
+    action_is_valid: bool
+    templates: tuple[RingTeacherTemplateCertificate, ...]
+
+
+@dataclass(frozen=True)
 class SparseBinaryRows:
     """CSR storage for a Boolean matrix with exact dense reconstruction."""
 
@@ -273,6 +299,9 @@ class FactorizedMarkBatch:
     ring_delete_actions: tuple[tuple[RingSystemDelete, ...], ...] | None = None
     ring_grow_support_is_exact: Tensor | bool = False
     ring_grow_enablement_is_exact: Tensor | bool = False
+    ring_teacher_semantic_certificates: tuple[
+        RingTeacherSemanticCertificate | None, ...
+    ] | None = None
 
     @property
     def batch_size(self) -> int:
@@ -350,6 +379,11 @@ class FactorizedMarkBatch:
             ring_grow_enablement_is_exact=flag_slice(
                 self.ring_grow_enablement_is_exact
             ),
+            ring_teacher_semantic_certificates=(
+                None
+                if self.ring_teacher_semantic_certificates is None
+                else self.ring_teacher_semantic_certificates[start:stop]
+            ),
         )
 
     def to(self, device: torch.device, *, non_blocking: bool = False) -> "FactorizedMarkBatch":
@@ -390,6 +424,9 @@ class FactorizedMarkBatch:
             # the per-row objective-aware support routing below.
             ring_grow_support_is_exact=self.ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=self.ring_grow_enablement_is_exact,
+            ring_teacher_semantic_certificates=(
+                self.ring_teacher_semantic_certificates
+            ),
         )
 
     def pin_memory(self) -> "FactorizedMarkBatch":
@@ -436,6 +473,9 @@ class FactorizedMarkBatch:
                 pin(self.ring_grow_enablement_is_exact)
                 if isinstance(self.ring_grow_enablement_is_exact, Tensor)
                 else self.ring_grow_enablement_is_exact
+            ),
+            ring_teacher_semantic_certificates=(
+                self.ring_teacher_semantic_certificates
             ),
         )
 
@@ -1902,15 +1942,23 @@ class FactorizedTraceletRateModel(nn.Module):
         decoder: SemanticRingSystemDecoder,
         category_logits: Tensor,
         categories: tuple[int, ...],
+        *,
+        next_category_masks: tuple[tuple[bool, ...], ...] | None = None,
     ) -> tuple[Tensor, Tensor]:
         score = category_logits.sum() * 0.0
         legal = score.new_tensor(True, dtype=torch.bool)
         if len(categories) != decoder.span:
             return score, score.new_tensor(False, dtype=torch.bool)
+        if next_category_masks is not None and len(next_category_masks) != decoder.span:
+            return score, score.new_tensor(False, dtype=torch.bool)
         prefix: tuple[int, ...] = ()
         for position, category in enumerate(categories):
             mask = torch.tensor(
-                semantic_ring_next_category_mask(decoder, prefix),
+                (
+                    semantic_ring_next_category_mask(decoder, prefix)
+                    if next_category_masks is None
+                    else next_category_masks[position]
+                ),
                 dtype=torch.bool,
                 device=self.device,
             )
@@ -1924,6 +1972,71 @@ class FactorizedTraceletRateModel(nn.Module):
             prefix = (*prefix, int(category))
         return score, legal
 
+    def ring_teacher_semantic_certificate(
+        self,
+        state: MolecularGraph,
+        action: RingSystemGrow,
+    ) -> RingTeacherSemanticCertificate:
+        """Compile the exact teacher-only semantic DP outside neural forward.
+
+        The masks depend only on the valid molecular state, the catalog, and
+        the teacher action.  Computing them in DataLoader/CPU compilation
+        workers preserves the identical normalized mark probability while
+        preventing recursive NetworkX executor checks from serializing the
+        A100 training loop.
+        """
+
+        action_is_valid = bool(is_valid_ring_system_grow(state, action))
+        if not action_is_valid:
+            return RingTeacherSemanticCertificate(False, ())
+        teacher_key = ring_system_placement_key(ring_system_placement(action))
+        template_certificates = []
+        for template_index in matching_ring_system_template_indices(
+            action,
+            self.ring_system_templates,
+        ):
+            placement_groups = self._ring_template_placement_groups(
+                state,
+                int(template_index),
+            )
+            placement_certificates = []
+            for group in placement_groups:
+                placement = group[0]
+                decoder = self._ring_semantic_decoder(state, placement)
+                supported = bool(semantic_ring_prefix_is_completable(decoder, ()))
+                categories = None
+                masks = None
+                if supported and ring_system_placement_key(placement) == teacher_key:
+                    try:
+                        categories = semantic_ring_categories_for_action(decoder, action)
+                    except (KeyError, ValueError):
+                        categories = None
+                    if categories is not None:
+                        prefix: tuple[int, ...] = ()
+                        rows = []
+                        for category in categories:
+                            rows.append(semantic_ring_next_category_mask(decoder, prefix))
+                            prefix = (*prefix, int(category))
+                        masks = tuple(rows)
+                placement_certificates.append(
+                    RingTeacherPlacementCertificate(
+                        placement_key=ring_system_placement_key(placement),
+                        supported=supported,
+                        categories=categories,
+                        next_category_masks=masks,
+                    )
+                )
+            template_certificates.append(
+                RingTeacherTemplateCertificate(
+                    template_index=int(template_index),
+                    placements=tuple(placement_certificates),
+                )
+            )
+        return RingTeacherSemanticCertificate(
+            action_is_valid=True,
+            templates=tuple(template_certificates),
+        )
+
     def _ring_supported_placement_tables(
         self,
         state: MolecularGraph,
@@ -1931,6 +2044,8 @@ class FactorizedTraceletRateModel(nn.Module):
         node: Tensor,
         global_state: Tensor,
         pair: Tensor,
+        *,
+        certificate: RingTeacherTemplateCertificate | None = None,
     ) -> tuple[
         Tensor,
         tuple[tuple[SemanticRingSystemDecoder, Tensor], ...],
@@ -1960,11 +2075,22 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             for decoder in decoders
         )
+        if certificate is None:
+            placement_support = tuple(
+                semantic_ring_prefix_is_completable(decoder, ()) for decoder in decoders
+            )
+        else:
+            if len(certificate.placements) != len(placements):
+                raise RuntimeError("ring teacher certificate placement count changed")
+            observed_keys = tuple(ring_system_placement_key(item) for item in placements)
+            expected_keys = tuple(item.placement_key for item in certificate.placements)
+            if observed_keys != expected_keys:
+                raise RuntimeError("ring teacher certificate placement order changed")
+            placement_support = tuple(
+                bool(item.supported) for item in certificate.placements
+            )
         placement_mask = torch.tensor(
-            tuple(
-                semantic_ring_prefix_is_completable(decoder, ())
-                for decoder in decoders
-            ),
+            placement_support,
             dtype=torch.bool,
             device=self.device,
         )
@@ -2828,12 +2954,38 @@ class FactorizedTraceletRateModel(nn.Module):
         if isinstance(action, RingSystemGrow):
             teacher_placement = ring_system_placement(action)
             teacher_placement_key = ring_system_placement_key(teacher_placement)
-            if not is_valid_ring_system_grow(batch.states[batch_index], action):
+            certificates = getattr(
+                batch,
+                "ring_teacher_semantic_certificates",
+                None,
+            )
+            teacher_certificate = (
+                None if certificates is None else certificates[batch_index]
+            )
+            action_is_valid = (
+                bool(is_valid_ring_system_grow(batch.states[batch_index], action))
+                if teacher_certificate is None
+                else bool(teacher_certificate.action_is_valid)
+            )
+            if not action_is_valid:
                 zero = logits["ring_system_grow"][batch_index].sum() * 0.0
                 return zero, zero.new_tensor(False, dtype=torch.bool)
-            template_indices = matching_ring_system_template_indices(
-                action,
-                self.ring_system_templates,
+            template_indices = (
+                matching_ring_system_template_indices(
+                    action,
+                    self.ring_system_templates,
+                )
+                if teacher_certificate is None
+                else tuple(
+                    item.template_index for item in teacher_certificate.templates
+                )
+            )
+            template_certificates = (
+                {}
+                if teacher_certificate is None
+                else {
+                    item.template_index: item for item in teacher_certificate.templates
+                }
             )
 
             if self.ring_electronic_mode == "catalog_exact":
@@ -2884,6 +3036,7 @@ class FactorizedTraceletRateModel(nn.Module):
 
             action_scores = []
             for template_index in template_indices:
+                template_certificate = template_certificates.get(template_index)
                 key = (batch_index, template_index)
                 if not bool(masks["ring_system_grow"][key]):
                     continue
@@ -2906,6 +3059,7 @@ class FactorizedTraceletRateModel(nn.Module):
                         node[batch_index],
                         global_state[batch_index],
                         pair[batch_index],
+                        certificate=template_certificate,
                     )
                 )
                 if not bool(placement_mask.any()):
@@ -2919,18 +3073,33 @@ class FactorizedTraceletRateModel(nn.Module):
                     if not bool(placement_mask[placement_index]):
                         continue
                     decoder, category_logits = semantic_tables[placement_index]
-                    try:
-                        categories = semantic_ring_categories_for_action(
-                            decoder,
-                            action,
+                    placement_certificate = (
+                        None
+                        if template_certificate is None
+                        else template_certificate.placements[placement_index]
+                    )
+                    if placement_certificate is None:
+                        try:
+                            categories = semantic_ring_categories_for_action(
+                                decoder,
+                                action,
+                            )
+                        except (KeyError, ValueError):
+                            continue
+                        next_category_masks = None
+                    else:
+                        categories = placement_certificate.categories
+                        next_category_masks = (
+                            placement_certificate.next_category_masks
                         )
-                    except (KeyError, ValueError):
-                        continue
+                        if categories is None or next_category_masks is None:
+                            continue
                     label_score, labels_legal = (
                         self._ring_semantic_sequence_log_probability(
                             decoder,
                             category_logits,
                             categories,
+                            next_category_masks=next_category_masks,
                         )
                     )
                     if not bool(labels_legal):

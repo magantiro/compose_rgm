@@ -684,6 +684,7 @@ def _run_remote(
     evaluation_source_run: str | None = None,
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
     path_cache_source_run: str | None = None,
+    resume_source_run: str | None = None,
     training_steps: int | None = None,
     training_support_workers: int = 12,
     training_support_microbatch_size: int = 4,
@@ -748,6 +749,25 @@ def _run_remote(
             )
         recipe["arguments"]["path_cache"] = str(source_path_cache)
         require_path_cache = True
+    if resume_source_run is not None:
+        if smoke or preflight or compile_paths_only or compile_training_support_steps:
+            raise ValueError("cross-run recovery is reserved for training")
+        if evaluation_source_run is not None:
+            raise ValueError("cross-run recovery and checkpoint evaluation are exclusive")
+        _validate_run_label(resume_source_run, field="resume source run")
+        source_recovery = (
+            Path("/artifacts") / resume_source_run / "checkpoint.recovery.pt"
+        )
+        if not source_recovery.is_file() or source_recovery.stat().st_size == 0:
+            raise FileNotFoundError(
+                f"resume source recovery checkpoint is missing: {source_recovery}"
+            )
+        recipe["arguments"].update(
+            {
+                "resume_checkpoint": str(source_recovery),
+                "allow_resume_provenance_mismatch": True,
+            }
+        )
     if skip_rollouts and (
         smoke
         or preflight
@@ -878,6 +898,7 @@ def _run_remote(
         "recipe": recipe,
         "source_sha256": source_sha256,
         "data": data_manifest,
+        "resume_source_run": resume_source_run,
     }
     run_identity_sha256 = _stable_json_sha256(run_identity)
     stage_manifest_path = run_dir / f"manifest.{stage_kind}.json"
@@ -1338,6 +1359,7 @@ def train_stage(
     path_cache_source_run: str | None = None,
     require_training_support_cache: bool = True,
     training_steps: int | None = None,
+    resume_source_run: str | None = None,
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
@@ -1348,6 +1370,7 @@ def train_stage(
         recipe_name=recipe_name,
         path_cache_source_run=path_cache_source_run,
         training_steps=training_steps,
+        resume_source_run=resume_source_run,
     )
 
 

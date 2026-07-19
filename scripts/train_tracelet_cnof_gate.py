@@ -43,6 +43,7 @@ from compose_v4.experiments.training_support_cache import (
     ShardedTrainingSupportCache,
 )
 from compose_v4.experiments.training_support_compiler import (
+    attach_ring_teacher_semantic_certificates,
     compile_training_support_shards,
 )
 from compose_v4.experiments.parallel_tracelet_sampling import (
@@ -227,6 +228,8 @@ def _load_evaluation_batch_cache(
             continue
         if not hasattr(batch, "ring_grow_support_sparse"):
             object.__setattr__(batch, "ring_grow_support_sparse", None)
+        if not hasattr(batch, "ring_teacher_semantic_certificates"):
+            object.__setattr__(batch, "ring_teacher_semantic_certificates", None)
         dense_support = getattr(batch, "ring_grow_support_mask", None)
         if dense_support is not None:
             object.__setattr__(
@@ -943,6 +946,14 @@ def main() -> None:
         help="resume interrupted training from a periodic recovery checkpoint",
     )
     parser.add_argument(
+        "--allow-resume-provenance-mismatch",
+        action="store_true",
+        help=(
+            "permit an explicitly audited implementation-only acceleration to "
+            "resume an otherwise configuration-identical recovery checkpoint"
+        ),
+    )
+    parser.add_argument(
         "--recovery-every",
         type=int,
         default=200,
@@ -962,6 +973,10 @@ def main() -> None:
 
     if args.load_checkpoint is not None and args.resume_checkpoint is not None:
         raise ValueError("--load-checkpoint and --resume-checkpoint are mutually exclusive")
+    if args.allow_resume_provenance_mismatch and args.resume_checkpoint is None:
+        raise ValueError(
+            "--allow-resume-provenance-mismatch requires --resume-checkpoint"
+        )
     if args.recovery_every < 0:
         raise ValueError("--recovery-every must be non-negative")
     if not 0 <= args.warmup_steps <= args.steps:
@@ -1949,6 +1964,58 @@ def main() -> None:
             ),
             flush=True,
         )
+        if (
+            args.training_backend == "factorized_marks"
+            and args.ring_electronic_mode == "factorized_local"
+            and isinstance(validation_examples, FactorizedMarkBatch)
+            and isinstance(test_examples, FactorizedMarkBatch)
+        ):
+            needs_teacher_certificates = any(
+                getattr(batch, "ring_teacher_semantic_certificates", None) is None
+                or any(
+                    name == "ring_system_grow" and certificate is None
+                    for name, certificate in zip(
+                        batch.teacher_rule_names,
+                        getattr(batch, "ring_teacher_semantic_certificates", None)
+                        or (None,) * batch.batch_size,
+                    )
+                )
+                for batch in (validation_examples, test_examples)
+            )
+            if needs_teacher_certificates:
+                certificate_started = perf_counter()
+                validation_examples = attach_ring_teacher_semantic_certificates(
+                    validation_examples,
+                    ring_catalog=ring_catalog,
+                    ring_electronic_mode=args.ring_electronic_mode,
+                    workers=evaluation_workers,
+                )
+                test_examples = attach_ring_teacher_semantic_certificates(
+                    test_examples,
+                    ring_catalog=ring_catalog,
+                    ring_electronic_mode=args.ring_electronic_mode,
+                    workers=evaluation_workers,
+                )
+                _atomic_shared_torch_save(
+                    {
+                        "signature": evaluation_signature,
+                        "validation_batch": validation_examples,
+                        "test_batch": test_examples,
+                    },
+                    evaluation_cache_path,
+                )
+                print(
+                    json.dumps(
+                        {
+                            "phase": "evaluation_teacher_certificates_compiled",
+                            "path": str(evaluation_cache_path),
+                            "seconds": perf_counter() - certificate_started,
+                            "workers": evaluation_workers,
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
     elif args.require_evaluation_cache:
         raise FileNotFoundError(
             "required evaluation batch cache is missing: "
@@ -2248,9 +2315,12 @@ def main() -> None:
                     "operational_horizon",
                     "progress_stratification_fraction",
                     "use_bf16",
-                    "provenance_sha256",
                 )
             }
+            if not args.allow_resume_provenance_mismatch:
+                resume_expected["provenance_sha256"] = checkpoint_metadata[
+                    "provenance_sha256"
+                ]
             mismatches.update(
                 {
                     key: (checkpoint_payload.get(key), value)
@@ -2275,6 +2345,20 @@ def main() -> None:
             ),
             flush=True,
         )
+        if args.resume_checkpoint is not None and args.allow_resume_provenance_mismatch:
+            print(
+                json.dumps(
+                    {
+                        "phase": "implementation_only_resume_accepted",
+                        "checkpoint_provenance_sha256": checkpoint_payload.get(
+                            "provenance_sha256"
+                        ),
+                        "current_provenance_sha256": args.provenance_sha256,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
 
     if isinstance(model, FactorizedTraceletRateModel):
         observed_validation = factorized_mark_metrics(

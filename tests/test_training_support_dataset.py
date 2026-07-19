@@ -92,7 +92,10 @@ def test_factorized_dataset_uses_required_sparse_training_support_cache(tmp_path
     )
     observed = tuple(cached[index] for index in range(len(cached)))
 
-    assert cached._ring_support_model is None
+    # Sparse template support is loaded from disk, while the new exact
+    # teacher-only semantic certificate is compiled by CPU workers so neural
+    # forward never runs the recursive chemistry DP.
+    assert cached._ring_support_model is not None
     for left, right in zip(expected, observed):
         assert molecular_state_cache_key(left.state) == molecular_state_cache_key(right.state)
         assert left.time == right.time
@@ -104,6 +107,10 @@ def test_factorized_dataset_uses_required_sparse_training_support_cache(tmp_path
         assert left.ring_grow_support_width == right.ring_grow_support_width
         assert left.ring_grow_support_is_exact == right.ring_grow_support_is_exact
         assert left.ring_grow_enablement_is_exact == right.ring_grow_enablement_is_exact
+        assert (
+            left.ring_teacher_semantic_certificate
+            == right.ring_teacher_semantic_certificate
+        )
 
 
 def test_factorized_dataset_refuses_missing_required_training_support(tmp_path) -> None:
