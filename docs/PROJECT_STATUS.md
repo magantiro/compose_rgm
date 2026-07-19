@@ -19,9 +19,12 @@ evidence so a collaborator can tell what is actually running.
 - Validation-based early stopping is configured every 250 updates after a
   500-update warmup, with six materially non-improving evaluations of patience
   and exact recovery of the selected checkpoint.
-- The first early ancestral preview launches from an immutable checkpoint only
-  after at least 50% validation-loss improvement, family accuracy of at least
-  0.60, and a selected step of at least 250.
+- The canonical early ancestral preview gate now requires at least 65%
+  validation-loss improvement, family accuracy of at least 0.75, and a selected
+  step of at least 1,000. These thresholds are persisted in the launch marker.
+  The active immutable `2be9258` run predates this change; any preview launched
+  under its 50%/0.60/250 rule is preliminary and does not replace the stricter
+  100-sample chemistry review.
 - Production training now saves the selected checkpoint and releases the A100
   before the final 2,000-sample/FCD job begins on CPU. The CPU evaluator is
   retry-safe: request identity, checkpoint hash, rollout signature, cached
@@ -33,7 +36,15 @@ evidence so a collaborator can tell what is actually running.
   exact atom counts, authoritative validity/connectivity flags, self-events,
   immediate reversals, and delete-to-one/regrow behavior. Fresh evaluation
   caches require this evidence and reject corrupt or terminal-only payloads.
-- The full local suite passes: **291 tests**, with two non-failing warnings.
+- Fixed validation/test features are now content-addressed by their complete
+  scientific configuration, built once on a CPU-only stage, and reused across
+  runs. Production GPU stages fail fast if this cache is absent.
+- Model evaluation streams the frozen validation/test sets in 64-example
+  microbatches and reuses the already-computed step-zero metrics. Training
+  batch size remains 64; the streamed reduction is mathematically the same
+  full-set evaluation without full-set GPU residency.
+- The full local suite passes: **294 tests** with `PYTHONPATH=src`, with two
+  non-failing warnings.
 
 ## Completed cloud gates
 
@@ -68,12 +79,18 @@ loaded the selected checkpoint and produced 16/16 valid samples with complete
 trajectory diagnostics and a finite infrastructure-only FCD. Its two-update
 FCD is not a model-quality result.
 
-## Currently running
+## Latest production attempt
 
-- The fresh 30,000-update quotient-correct pipeline launched at 04:42 EDT on
-  2026-07-19 from commit `2be9258`. Its immutable Modal artifact label is
-  `compose-v4-stage3-flexible-graft-prod-2be9258-v1`; CPU path compilation is
-  the active stage, followed by the teacher audit and A100 training.
+- The commit-`2be9258` production attempt under
+  `compose-v4-stage3-flexible-graft-prod-2be9258-v1` was stopped before any
+  optimizer update. It spent 24m49s building 2,048 validation examples and
+  27m33s building 4,096 test examples inside the A100 container. The first
+  full-set validation occupied nearly the entire 40-GB A100; the duplicate
+  step-zero validation then failed while requesting another 15.62 GiB. Modal's
+  deterministic retry was stopped before it repeated the same failure.
+- This was an evaluation-pipeline scaling failure, not evidence of slow or
+  unstable training. The retained compiled path shards and zero-failure
+  teacher audit remain valid and can be reused losslessly by the corrected run.
 - No corrected-checkpoint 100-sample preview or 2,000-sample FCD estimate exists
   yet.
 - The archived step-6,250 samples and FCD dashboard remain retired,
@@ -83,8 +100,9 @@ FCD is not a model-quality result.
 
 1. **Done:** commit and push the trajectory-audited deployment code; pass the
    real CPU-to-A100-to-CPU boundary smoke.
-2. **Active:** finish production path compilation and the exact teacher-support
-   audit, then begin A100/32-CPU/24-worker training.
+2. **Active:** reuse the immutable `2be9258` path cache, build the signed fixed
+   evaluation cache on a 64-CPU stage, pass a streamed-evaluation integration
+   gate, then relaunch A100/32-CPU/24-worker training.
 3. At the first credible checkpoint (no earlier than step 500), inspect 100
    ancestral samples and their compact full-trajectory diagnostics.
    Hard-stop on any validity/connectivity failure, event-budget exhaustion,

@@ -15,6 +15,7 @@ from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkDataset,
     cosine_warmup_learning_rate,
     factorized_adamw_parameter_groups,
+    factorized_mark_metrics,
     sample_factorized_mark_batch,
     train_factorized_mark_model,
 )
@@ -484,6 +485,35 @@ def test_factorized_dataset_is_index_deterministic_and_resume_stable() -> None:
         assert expected.teacher_action == actual.teacher_action
         assert expected.teacher_rate == actual.teacher_rate
         assert expected.state == actual.state
+
+
+def test_streamed_factorized_metrics_match_full_batch() -> None:
+    catalog, records = _catalog_and_records(("CCO", "CCN", "c1ccccc1"))
+    batch = sample_factorized_mark_batch(
+        records,
+        batch_size=6,
+        seed=73,
+        late_time_fraction=0.5,
+        operational_horizon=2.0,
+        progress_stratification_fraction=0.5,
+        ring_catalog=catalog,
+    )
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    model.eval()
+
+    full = factorized_mark_metrics(model, batch, use_bf16=False)
+    streamed = factorized_mark_metrics(
+        model,
+        batch,
+        use_bf16=False,
+        microbatch_size=2,
+    )
+
+    assert streamed == pytest.approx(full, rel=1e-6, abs=1e-7)
 
 
 def test_factorized_training_resume_preserves_validation_and_patience_trajectory() -> None:

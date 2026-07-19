@@ -127,6 +127,7 @@ def _materialize_remote_recipe(
             "checkpoint": str(run_dir / "checkpoint.pt"),
             "path_cache": str(run_dir / "compiled_paths.pt"),
             "rollout_cache": str(run_dir / "rollouts.pt"),
+            "evaluation_cache_dir": "/artifacts/_shared/evaluation_batches",
         }
     )
     if smoke and preflight:
@@ -235,9 +236,9 @@ def _early_rollout_decision(
     *,
     completed_steps: int,
     warmup_steps: int,
-    minimum_relative_improvement: float = 0.50,
-    minimum_family_accuracy: float = 0.60,
-    minimum_selected_step: int = 250,
+    minimum_relative_improvement: float = 0.65,
+    minimum_family_accuracy: float = 0.75,
+    minimum_selected_step: int = 1000,
 ) -> dict[str, float] | None:
     """Return auditable launch metadata for a sufficiently trained checkpoint."""
 
@@ -268,6 +269,7 @@ def _early_rollout_decision(
         relative_improvement < minimum_relative_improvement
         or family_accuracy < minimum_family_accuracy
         or selected_step < minimum_selected_step
+        or selected_step > completed_steps
     ):
         return None
     return {
@@ -277,6 +279,9 @@ def _early_rollout_decision(
         "selected_validation_loss": selected_loss,
         "selected_family_accuracy": family_accuracy,
         "relative_improvement": relative_improvement,
+        "minimum_relative_improvement": float(minimum_relative_improvement),
+        "minimum_family_accuracy": float(minimum_family_accuracy),
+        "minimum_selected_step": float(minimum_selected_step),
     }
 
 
@@ -360,6 +365,9 @@ def _maybe_launch_early_rollout(
     if not isinstance(arguments, dict):
         return
     warmup_steps = int(arguments.get("warmup_steps", 0))
+    preview_gate = recipe.get("early_preview", {})
+    if not isinstance(preview_gate, dict):
+        raise ValueError("recipe early_preview must be an object")
     checkpoint_path = run_dir / "checkpoint.best_so_far.pt"
     if not checkpoint_path.is_file() or checkpoint_path.stat().st_size == 0:
         return
@@ -377,6 +385,13 @@ def _maybe_launch_early_rollout(
         checkpoint_payload,
         completed_steps=completed_steps,
         warmup_steps=warmup_steps,
+        minimum_relative_improvement=float(
+            preview_gate.get("minimum_relative_improvement", 0.65)
+        ),
+        minimum_family_accuracy=float(
+            preview_gate.get("minimum_family_accuracy", 0.75)
+        ),
+        minimum_selected_step=int(preview_gate.get("minimum_selected_step", 1000)),
     )
     if decision is None:
         print(
@@ -620,6 +635,7 @@ def _run_remote(
     recipe_name: str = RECIPE_NAME,
     evaluation_source_run: str | None = None,
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
+    path_cache_source_run: str | None = None,
 ) -> dict[str, object]:
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
 
@@ -633,6 +649,25 @@ def _run_remote(
         preflight=preflight,
         recipe_name=recipe_name,
     )
+    if path_cache_source_run is not None:
+        _validate_run_label(path_cache_source_run, field="path-cache source run")
+        source_path_cache = (
+            Path("/artifacts") / path_cache_source_run / "compiled_paths.pt"
+        )
+        source_manifest = Path(f"{source_path_cache}.shards") / "manifest.pt"
+        has_single_cache = (
+            source_path_cache.is_file() and source_path_cache.stat().st_size > 0
+        )
+        has_sharded_cache = (
+            source_manifest.is_file() and source_manifest.stat().st_size > 0
+        )
+        if not (has_single_cache or has_sharded_cache):
+            raise FileNotFoundError(
+                "path-cache source is missing both cache formats: "
+                f"{path_cache_source_run}"
+            )
+        recipe["arguments"]["path_cache"] = str(source_path_cache)
+        require_path_cache = True
     if skip_rollouts and (
         smoke or preflight or compile_paths_only or evaluation_source_run is not None
     ):
@@ -671,17 +706,19 @@ def _run_remote(
             }
         )
         require_path_cache = True
-    if compile_paths_only and require_path_cache:
-        raise ValueError("compile_paths_only and require_path_cache are mutually exclusive")
     if compile_paths_only:
         recipe["arguments"].update(
             {
                 "compile_paths_only": True,
+                "compile_evaluation_cache": True,
+                "evaluation_workers": 56,
                 "device": "cpu",
             }
         )
     if require_path_cache:
         recipe["arguments"]["require_path_cache"] = True
+        if not compile_paths_only:
+            recipe["arguments"]["require_evaluation_cache"] = True
     run_dir.mkdir(parents=True, exist_ok=True)
     # The shared volume's nominal full-training SMILES file is a zero-byte
     # placeholder.  This populated, seeded 500k subset is the corpus used for
@@ -797,6 +834,7 @@ def _run_remote(
         "require_path_cache": require_path_cache,
         "skip_rollouts": skip_rollouts,
         "evaluation_source_run": evaluation_source_run,
+        "path_cache_source_run": path_cache_source_run,
         "evaluation_checkpoint_name": (
             evaluation_checkpoint_name if evaluation_source_run is not None else None
         ),
@@ -861,6 +899,8 @@ def _run_remote(
             "compiled_proposal_shard_saved",
             "compiled_path_shard_saved",
             "compiled_paths_ready",
+            "evaluation_batch_cache_saved",
+            "compiled_evaluation_batches_ready",
             "recovery_checkpoint_saved",
         }:
             # Recovery frequency is deliberately coarse: committing a Modal
@@ -976,8 +1016,8 @@ def h100_preflight_stage(
 
 @app.function(
     image=image,
-    cpu=16.0,
-    memory=65536,
+    cpu=64.0,
+    memory=131072,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
     retries=modal.Retries(max_retries=2, backoff_coefficient=2.0),
@@ -985,6 +1025,7 @@ def h100_preflight_stage(
 def compile_stage(
     run_label: str,
     recipe_name: str = RECIPE_NAME,
+    path_cache_source_run: str | None = None,
 ) -> dict[str, object]:
     """Compile restart-safe path shards without renting a GPU."""
 
@@ -993,6 +1034,7 @@ def compile_stage(
         smoke=False,
         compile_paths_only=True,
         recipe_name=recipe_name,
+        path_cache_source_run=path_cache_source_run,
     )
 
 
@@ -1083,6 +1125,7 @@ def audit_teacher_stage(
 def train_stage(
     run_label: str,
     recipe_name: str = RECIPE_NAME,
+    path_cache_source_run: str | None = None,
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
@@ -1090,6 +1133,7 @@ def train_stage(
         require_path_cache=True,
         skip_rollouts=True,
         recipe_name=recipe_name,
+        path_cache_source_run=path_cache_source_run,
     )
 
 
@@ -1554,10 +1598,18 @@ def main(
         )
         phase = "evaluation_spawned"
     elif compile_only:
-        call = compile_stage.spawn(run_label, recipe_name)
+        call = compile_stage.spawn(
+            run_label,
+            recipe_name,
+            source_run_label or None,
+        )
         phase = "compile_spawned"
     elif train_only:
-        call = train_stage.spawn(run_label, recipe_name)
+        call = train_stage.spawn(
+            run_label,
+            recipe_name,
+            source_run_label or None,
+        )
         phase = "train_spawned"
     else:
         call = pipeline_stage.spawn(run_label, recipe_name)

@@ -139,6 +139,58 @@ class FactorizedMarkBatch:
     def n_slots(self) -> int:
         return int(self.atom_types.shape[1])
 
+    def subbatch(self, start: int, stop: int) -> "FactorizedMarkBatch":
+        """Return an aligned contiguous view for lossless streamed evaluation."""
+
+        if not 0 <= start < stop <= self.batch_size:
+            raise ValueError(
+                f"invalid factorized subbatch bounds: {(start, stop)} for {self.batch_size}"
+            )
+
+        def tensor_slice(value: Tensor) -> Tensor:
+            return value[start:stop]
+
+        def flag_slice(value: Tensor | bool) -> Tensor | bool:
+            return tensor_slice(value) if isinstance(value, Tensor) else value
+
+        return FactorizedMarkBatch(
+            states=self.states[start:stop],
+            atom_types=tensor_slice(self.atom_types),
+            formal_charges=tensor_slice(self.formal_charges),
+            implicit_h_counts=tensor_slice(self.implicit_h_counts),
+            bonds=tensor_slice(self.bonds),
+            neural_bonds=tensor_slice(self.neural_bonds),
+            times=tensor_slice(self.times),
+            atom_topology=tensor_slice(self.atom_topology),
+            closure_topology=tensor_slice(self.closure_topology),
+            ring_system_topology=tensor_slice(self.ring_system_topology),
+            atom_delete_mask=tensor_slice(self.atom_delete_mask),
+            cycle_edge_mask=tensor_slice(self.cycle_edge_mask),
+            cyclic_pair_mask=tensor_slice(self.cyclic_pair_mask),
+            graft_mask=tensor_slice(self.graft_mask),
+            graft_remove_neighbors=tensor_slice(self.graft_remove_neighbors),
+            graft_successor_groups=tensor_slice(self.graft_successor_groups),
+            teacher_actions=self.teacher_actions[start:stop],
+            teacher_rule_names=self.teacher_rule_names[start:stop],
+            teacher_rates=tensor_slice(self.teacher_rates),
+            importance_weights=tensor_slice(self.importance_weights),
+            ring_restate_actions=self.ring_restate_actions[start:stop],
+            ring_grow_support_mask=(
+                None
+                if self.ring_grow_support_mask is None
+                else tensor_slice(self.ring_grow_support_mask)
+            ),
+            ring_delete_actions=(
+                None
+                if self.ring_delete_actions is None
+                else self.ring_delete_actions[start:stop]
+            ),
+            ring_grow_support_is_exact=flag_slice(self.ring_grow_support_is_exact),
+            ring_grow_enablement_is_exact=flag_slice(
+                self.ring_grow_enablement_is_exact
+            ),
+        )
+
     def to(self, device: torch.device, *, non_blocking: bool = False) -> "FactorizedMarkBatch":
         def move(value: Tensor) -> Tensor:
             return value.to(device=device, non_blocking=non_blocking)

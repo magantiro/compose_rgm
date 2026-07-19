@@ -63,6 +63,7 @@ from compose_v4.rewrite.kernel import canonical_state_key
 
 
 TRANSPORT_SUPPORT_PROJECTION_VERSION = 3
+EVALUATION_BATCH_CACHE_FORMAT_VERSION = 1
 
 
 def _atomic_torch_save(payload: object, path: Path) -> None:
@@ -72,6 +73,18 @@ def _atomic_torch_save(payload: object, path: Path) -> None:
     temporary = path.with_name(f".{path.name}.tmp")
     torch.save(payload, temporary)
     os.replace(temporary, path)
+
+
+def _atomic_shared_torch_save(payload: object, path: Path) -> None:
+    """Atomically publish a content-addressed cache under concurrent runs."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        torch.save(payload, temporary)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _recovery_path(checkpoint: Path) -> Path:
@@ -108,6 +121,71 @@ def _path_cache_fingerprint(signature: dict[str, object]) -> str:
         separators=(",", ":"),
     ).encode("utf-8")
     return hashlib.sha256(serialized).hexdigest()
+
+
+def _evaluation_batch_cache_signature(
+    path_cache_signature: dict[str, object],
+    *,
+    training_backend: str,
+    seed: int,
+    validation_examples: int,
+    test_examples: int,
+    late_time_fraction: float,
+    operational_horizon: float,
+    progress_stratification_fraction: float,
+    bond_representation: str,
+    ring_electronic_mode: str,
+) -> dict[str, object]:
+    """Identify every scientific choice that fixes the evaluation tensors."""
+
+    return {
+        "format_version": EVALUATION_BATCH_CACHE_FORMAT_VERSION,
+        "path_cache_fingerprint": _path_cache_fingerprint(path_cache_signature),
+        "training_backend": str(training_backend),
+        "seed": int(seed),
+        "validation_examples": int(validation_examples),
+        "test_examples": int(test_examples),
+        "late_time_fraction": float(late_time_fraction),
+        "operational_horizon": float(operational_horizon),
+        "progress_stratification_fraction": float(progress_stratification_fraction),
+        "bond_representation": str(bond_representation),
+        "ring_electronic_mode": str(ring_electronic_mode),
+    }
+
+
+def _evaluation_batch_cache_path(
+    cache_dir: Path,
+    signature: dict[str, object],
+) -> Path:
+    fingerprint = _path_cache_fingerprint(signature)
+    return cache_dir / f"evaluation-batches-v{EVALUATION_BATCH_CACHE_FORMAT_VERSION}-{fingerprint}.pt"
+
+
+def _load_evaluation_batch_cache(
+    path: Path,
+    *,
+    signature: dict[str, object],
+    validation_examples: int,
+    test_examples: int,
+) -> tuple[object, object]:
+    """Load a complete cache and reject stale or partially written payloads."""
+
+    payload = torch.load(path, weights_only=False, mmap=True)
+    if not isinstance(payload, dict) or payload.get("signature") != signature:
+        raise ValueError(f"evaluation batch cache/config mismatch: {path}")
+    validation_batch = payload.get("validation_batch")
+    test_batch = payload.get("test_batch")
+    observed_sizes = (
+        getattr(validation_batch, "batch_size", None),
+        getattr(test_batch, "batch_size", None),
+    )
+    expected_sizes = (int(validation_examples), int(test_examples))
+    if observed_sizes != expected_sizes:
+        raise ValueError(
+            "evaluation batch cache has invalid partition sizes: "
+            f"{observed_sizes} != {expected_sizes}"
+        )
+    return validation_batch, test_batch
 
 
 def _legacy_evaluation_signature_matches(
@@ -616,6 +694,12 @@ def main() -> None:
     parser.add_argument("--hazard-tilt-weight", type=float, default=0.0)
     parser.add_argument("--validation-examples", type=int, default=256)
     parser.add_argument("--test-examples", type=int, default=512)
+    parser.add_argument(
+        "--evaluation-batch-size",
+        type=int,
+        default=64,
+        help="streamed model-evaluation microbatch size",
+    )
     parser.add_argument("--late-time-fraction", type=float, default=0.5)
     parser.add_argument("--operational-horizon", type=float, default=7.0)
     parser.add_argument(
@@ -669,6 +753,28 @@ def main() -> None:
         "--require-path-cache",
         action="store_true",
         help="fail instead of compiling paths; used to keep GPUs out of preprocessing",
+    )
+    parser.add_argument(
+        "--evaluation-cache-dir",
+        type=Path,
+        help=(
+            "shared directory for content-addressed fixed validation/test batches"
+        ),
+    )
+    parser.add_argument(
+        "--compile-evaluation-cache",
+        action="store_true",
+        help="build the fixed evaluation batches during a CPU compile-only stage",
+    )
+    parser.add_argument(
+        "--require-evaluation-cache",
+        action="store_true",
+        help="fail rather than build fixed evaluation batches in this process",
+    )
+    parser.add_argument(
+        "--evaluation-workers",
+        type=int,
+        help="CPU workers for fixed evaluation batches; defaults to data-workers",
     )
     parser.add_argument(
         "--allow-legacy-evaluation-cache",
@@ -760,16 +866,30 @@ def main() -> None:
         raise ValueError("--early-stopping-min-relative-delta must lie in [0, 1)")
     if min(args.data_workers, args.path_workers, args.corpus_workers) < 0:
         raise ValueError("data, path, and corpus worker counts must be non-negative")
+    if args.evaluation_workers is not None and args.evaluation_workers < 0:
+        raise ValueError("evaluation-workers must be non-negative")
+    if args.evaluation_batch_size <= 0:
+        raise ValueError("evaluation-batch-size must be positive")
     if args.data_prefetch_factor <= 0:
         raise ValueError("data-prefetch-factor must be positive")
     if args.path_checkpoint_interval <= 0:
         raise ValueError("path-checkpoint-interval must be positive")
     if args.path_shard_size <= 0:
         raise ValueError("path-shard-size must be positive")
-    if args.compile_paths_only and args.require_path_cache:
-        raise ValueError("compile-paths-only and require-path-cache are mutually exclusive")
     if args.compile_paths_only and args.path_cache is None:
         raise ValueError("compile-paths-only requires --path-cache")
+    if args.compile_evaluation_cache and not args.compile_paths_only:
+        raise ValueError("compile-evaluation-cache requires --compile-paths-only")
+    if (args.compile_evaluation_cache or args.require_evaluation_cache) and (
+        args.evaluation_cache_dir is None
+    ):
+        raise ValueError(
+            "evaluation-cache-dir is required when compiling or requiring its cache"
+        )
+    if args.compile_evaluation_cache and args.require_evaluation_cache:
+        raise ValueError(
+            "compile-evaluation-cache and require-evaluation-cache are mutually exclusive"
+        )
     if args.allow_legacy_evaluation_cache and (
         args.load_checkpoint is None or not args.require_path_cache
     ):
@@ -1521,48 +1641,113 @@ def main() -> None:
             ),
             flush=True,
         )
-        return
-    # The empirical marginal model scans every compiled path.  Neural
-    # from-scratch training does not consume it, so fitting it here would keep
-    # an allocated GPU idle for a purely dead CPU preprocessing pass.
-    prior = (
-        None
-        if args.model == "from_scratch"
-        else fit_tracelet_corpus_marginal_rate_model(train_records)
-    )
+        if not args.compile_evaluation_cache:
+            return
 
-    if args.training_backend == "factorized_marks":
+    evaluation_signature = _evaluation_batch_cache_signature(
+        path_cache_signature,
+        training_backend=args.training_backend,
+        seed=args.seed,
+        validation_examples=args.validation_examples,
+        test_examples=args.test_examples,
+        late_time_fraction=args.late_time_fraction,
+        operational_horizon=args.operational_horizon,
+        progress_stratification_fraction=args.progress_stratification_fraction,
+        bond_representation=args.bond_representation,
+        ring_electronic_mode=args.ring_electronic_mode,
+    )
+    evaluation_cache_path = (
+        None
+        if args.evaluation_cache_dir is None
+        else _evaluation_batch_cache_path(
+            args.evaluation_cache_dir,
+            evaluation_signature,
+        )
+    )
+    evaluation_workers = (
+        args.data_workers
+        if args.evaluation_workers is None
+        else args.evaluation_workers
+    )
+    validation_examples = None
+    test_examples = None
+    if evaluation_cache_path is not None and evaluation_cache_path.is_file():
+        cache_load_started = perf_counter()
+        validation_examples, test_examples = _load_evaluation_batch_cache(
+            evaluation_cache_path,
+            signature=evaluation_signature,
+            validation_examples=args.validation_examples,
+            test_examples=args.test_examples,
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "evaluation_batch_cache_loaded",
+                    "path": str(evaluation_cache_path),
+                    "seconds": perf_counter() - cache_load_started,
+                    "validation_examples": args.validation_examples,
+                    "test_examples": args.test_examples,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    elif args.require_evaluation_cache:
+        raise FileNotFoundError(
+            "required evaluation batch cache is missing: "
+            f"{evaluation_cache_path}"
+        )
+
+    evaluation_build_started = perf_counter()
+    if validation_examples is None and args.training_backend == "factorized_marks":
         validation_examples = sample_factorized_mark_batch(
             validation_records,
             batch_size=args.validation_examples,
             seed=args.seed + 1,
             late_time_fraction=args.late_time_fraction,
             operational_horizon=args.operational_horizon,
+            progress_stratification_fraction=args.progress_stratification_fraction,
             use_aromatic_bond_view=args.bond_representation == "aromatic",
-            workers=args.data_workers,
+            workers=evaluation_workers,
             ring_catalog=ring_catalog,
             ring_electronic_mode=args.ring_electronic_mode,
         )
         print(
-            json.dumps({"phase": "validation_factorized_batch_built"}),
+            json.dumps(
+                {
+                    "phase": "validation_factorized_batch_built",
+                    "seconds": perf_counter() - evaluation_build_started,
+                    "workers": evaluation_workers,
+                },
+                sort_keys=True,
+            ),
             flush=True,
         )
+        test_build_started = perf_counter()
         test_examples = sample_factorized_mark_batch(
             test_records,
             batch_size=args.test_examples,
             seed=args.seed + 2,
             late_time_fraction=args.late_time_fraction,
             operational_horizon=args.operational_horizon,
+            progress_stratification_fraction=args.progress_stratification_fraction,
             use_aromatic_bond_view=args.bond_representation == "aromatic",
-            workers=args.data_workers,
+            workers=evaluation_workers,
             ring_catalog=ring_catalog,
             ring_electronic_mode=args.ring_electronic_mode,
         )
         print(
-            json.dumps({"phase": "test_factorized_batch_built"}),
+            json.dumps(
+                {
+                    "phase": "test_factorized_batch_built",
+                    "seconds": perf_counter() - test_build_started,
+                    "workers": evaluation_workers,
+                },
+                sort_keys=True,
+            ),
             flush=True,
         )
-    else:
+    elif validation_examples is None:
         fiber_cache = {}
         with tracelet_fiber_executor(
             args.fiber_workers,
@@ -1600,9 +1785,63 @@ def main() -> None:
                 fiber_executor=evaluation_fiber_executor,
             )
             print(
-                json.dumps({"phase": "test_examples_built", "cache_size": len(fiber_cache)}),
+                json.dumps(
+                    {"phase": "test_examples_built", "cache_size": len(fiber_cache)}
+                ),
                 flush=True,
             )
+
+    if validation_examples is None or test_examples is None:
+        raise RuntimeError("evaluation batch construction produced an empty partition")
+    if evaluation_cache_path is not None and not evaluation_cache_path.is_file():
+        _atomic_shared_torch_save(
+            {
+                "signature": evaluation_signature,
+                "validation_batch": validation_examples,
+                "test_batch": test_examples,
+            },
+            evaluation_cache_path,
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "evaluation_batch_cache_saved",
+                    "path": str(evaluation_cache_path),
+                    "bytes": evaluation_cache_path.stat().st_size,
+                    "validation_examples": args.validation_examples,
+                    "test_examples": args.test_examples,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    if args.compile_paths_only:
+        print(
+            json.dumps(
+                {
+                    "phase": "compiled_evaluation_batches_ready",
+                    "path": (
+                        None
+                        if evaluation_cache_path is None
+                        else str(evaluation_cache_path)
+                    ),
+                    "validation_examples": args.validation_examples,
+                    "test_examples": args.test_examples,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
+
+    # The empirical marginal model scans every compiled path.  Neural
+    # from-scratch training does not consume it, so fitting it here would keep
+    # an allocated GPU idle for a purely dead CPU preprocessing pass.
+    prior = (
+        None
+        if args.model == "from_scratch"
+        else fit_tracelet_corpus_marginal_rate_model(train_records)
+    )
 
     if args.model == "from_scratch" and args.training_backend == "factorized_marks":
         if ring_catalog is None:
@@ -1677,6 +1916,7 @@ def main() -> None:
         "warmup_steps": args.warmup_steps,
         "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
         "evaluation_every": args.evaluation_every,
+        "evaluation_batch_size": args.evaluation_batch_size,
         "early_stopping_patience": args.early_stopping_patience,
         "early_stopping_min_relative_delta": (
             args.early_stopping_min_relative_delta
@@ -1744,6 +1984,7 @@ def main() -> None:
                     "warmup_steps",
                     "minimum_learning_rate_fraction",
                     "evaluation_every",
+                    "evaluation_batch_size",
                     "early_stopping_patience",
                     "early_stopping_min_relative_delta",
                     "late_time_fraction",
@@ -1783,6 +2024,7 @@ def main() -> None:
             model,
             validation_examples,
             use_bf16=args.use_bf16,
+            microbatch_size=args.evaluation_batch_size,
         )
     else:
         observed_validation = tracelet_conditional_metrics(model, validation_examples)
@@ -1912,6 +2154,8 @@ def main() -> None:
             checkpoint_callback=(save_recovery if recovery_path is not None else None),
             resume_state=resume_state,
             profile_timing=args.fast_split,
+            evaluation_batch_size=args.evaluation_batch_size,
+            initial_validation_metrics=observed_validation,
         )
     elif isinstance(model, torch.nn.Module) and loaded_checkpoint is None:
         training_fiber_cache = {}
@@ -1956,6 +2200,7 @@ def main() -> None:
             model,
             test_examples,
             use_bf16=args.use_bf16,
+            microbatch_size=args.evaluation_batch_size,
         )
     else:
         final_test = tracelet_conditional_metrics(model, test_examples)
@@ -1999,6 +2244,7 @@ def main() -> None:
                 "warmup_steps": args.warmup_steps,
                 "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
                 "evaluation_every": args.evaluation_every,
+                "evaluation_batch_size": args.evaluation_batch_size,
                 "early_stopping_patience": args.early_stopping_patience,
                 "early_stopping_min_relative_delta": (
                     args.early_stopping_min_relative_delta
@@ -2180,6 +2426,7 @@ def main() -> None:
             "warmup_steps": args.warmup_steps,
             "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
             "evaluation_every": args.evaluation_every,
+            "evaluation_batch_size": args.evaluation_batch_size,
             "early_stopping_patience": args.early_stopping_patience,
             "early_stopping_min_relative_delta": (
                 args.early_stopping_min_relative_delta

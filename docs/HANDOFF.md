@@ -70,13 +70,18 @@ As of 2026-07-19:
   preflight interval reached 54.52 examples/s and all 16 rollouts were valid,
   connected, non-null, unique, and novel. The 7/16 small-ring warning remains
   a required early-checkpoint diagnostic, not a final result.
-- The 30,000-update quotient-correct run is active from commit `2be9258` under
-  `compose-v4-stage3-flexible-graft-prod-2be9258-v1`; production path
-  compilation precedes the exact teacher audit and A100 training. The
-  100-sample visual inspection and frozen 2,000-sample FCD evaluation remain
-  required. Validation early stopping and the credible-checkpoint preview are
-  automatic; final sampling/FCD runs on CPU only after the selected checkpoint
-  releases the A100.
+- The first 30,000-update quotient-correct attempt from commit `2be9258` under
+  `compose-v4-stage3-flexible-graft-prod-2be9258-v1` reached no optimizer
+  updates. Production-only evaluation scaling built 2,048 validation and 4,096
+  test rows inside the A100 container, then a duplicate full-set validation
+  OOMed the 40-GB GPU. The deterministic retry was stopped. The compiled path
+  cache and zero-failure teacher audit remain reusable.
+- The corrected pipeline content-addresses and persists fixed evaluation
+  features on a 64-CPU stage, requires that cache before GPU allocation,
+  streams model evaluation in 64-example chunks, and reuses step-zero metrics
+  instead of evaluating twice. Training batch size remains 64. A fresh
+  integration gate must pass before relaunch; the 100-sample visual inspection
+  and frozen 2,000-sample FCD evaluation remain required afterward.
 - Full invariance of learned rates to arbitrary atom-slot permutations remains
   a formal audit obligation. Canonical successor aggregation fixes the measured
   Graft gauge churn; it is not by itself a proof of every presentation-level
@@ -125,8 +130,9 @@ needed to interpret and reproduce the archived stage-1 evaluation.
 2. Launch the fresh A100/32-CPU/24-worker flexible-size, quotient-correct
    unconditional run. Validation runs every 250 updates after a 500-update
    warmup, with six evaluations of early-stopping patience.
-3. At the first checkpoint with at least 50% validation-loss improvement and
-   family accuracy at least 0.60, render 100 ancestral samples and audit
+3. At the first checkpoint with at least 65% validation-loss improvement,
+   family accuracy at least 0.75, and selected step at least 1,000, render 100
+   ancestral samples and audit
    event rates, atom-count trajectories, ring phenotypes, Graft self-transitions,
    validity, connectivity, uniqueness, and novelty.
 4. Let early stopping freeze the validation-selected `checkpoint.pt`; after the

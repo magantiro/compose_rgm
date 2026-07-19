@@ -8,6 +8,11 @@
     "reference_molecules": 5000,
     "generated_molecules": 1500
   },
+  "early_preview": {
+    "minimum_relative_improvement": 0.65,
+    "minimum_family_accuracy": 0.75,
+    "minimum_selected_step": 1000
+  },
   "arguments": {
     "model": "from_scratch",
     "seed": 20260717,
@@ -49,6 +54,7 @@
     "early_stopping_min_relative_delta": 0.001,
     "validation_examples": 2048,
     "test_examples": 4096,
+    "evaluation_batch_size": 64,
     "late_time_fraction": 0.5,
     "operational_horizon": 16.0,
     "progress_stratification_fraction": 0.5,

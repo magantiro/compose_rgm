@@ -404,38 +404,79 @@ def factorized_mark_metrics(
     batch: FactorizedMarkBatch,
     *,
     use_bf16: bool,
+    microbatch_size: int | None = None,
 ) -> dict[str, float]:
+    """Evaluate a frozen batch without making GPU memory scale with its size."""
+
+    if microbatch_size is not None and microbatch_size <= 0:
+        raise ValueError("evaluation microbatch size must be positive")
     device = model.device
-    batch = batch.to(device, non_blocking=device.type == "cuda")
-    context = (
-        torch.autocast(device_type="cuda", dtype=torch.bfloat16)
-        if use_bf16 and device.type == "cuda"
-        else nullcontext()
+    resolved_microbatch_size = min(
+        batch.batch_size,
+        batch.batch_size if microbatch_size is None else microbatch_size,
     )
-    with context:
-        prediction = model.forward_mark_batch(batch)
-        loss = factorized_mark_bregman_loss(prediction, batch)
-    teacher_family = torch.tensor(
-        [MARK_RULE_TO_INDEX[name] if name is not None else -1 for name in batch.teacher_rule_names],
-        dtype=torch.long,
-        device=device,
-    )
-    nonterminal = teacher_family >= 0
-    family_hits = (
-        prediction.family_log_probabilities.argmax(dim=-1)[nonterminal]
-        == teacher_family[nonterminal]
-    )
-    terminal = ~nonterminal
+    loss_sum = 0.0
+    teacher_probability_sum = 0.0
+    family_hits_sum = 0
+    nonterminal_count = 0
+    terminal_hazard_sum = 0.0
+    terminal_count = 0
+    for start in range(0, batch.batch_size, resolved_microbatch_size):
+        cpu_batch = batch.subbatch(
+            start,
+            min(start + resolved_microbatch_size, batch.batch_size),
+        )
+        device_batch = cpu_batch.to(
+            device,
+            non_blocking=device.type == "cuda",
+        )
+        context = (
+            torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+            if use_bf16 and device.type == "cuda"
+            else nullcontext()
+        )
+        with context:
+            prediction = model.forward_mark_batch(device_batch)
+            loss = factorized_mark_bregman_loss(prediction, device_batch)
+        teacher_family = torch.tensor(
+            [
+                MARK_RULE_TO_INDEX[name] if name is not None else -1
+                for name in device_batch.teacher_rule_names
+            ],
+            dtype=torch.long,
+            device=device,
+        )
+        nonterminal = teacher_family >= 0
+        terminal = ~nonterminal
+        current_nonterminal_count = int(nonterminal.sum())
+        current_terminal_count = int(terminal.sum())
+        loss_sum += float(loss) * device_batch.batch_size
+        if current_nonterminal_count:
+            teacher_probability_sum += float(
+                prediction.selected_mark_log_probability[nonterminal].exp().sum()
+            )
+            family_hits_sum += int(
+                (
+                    prediction.family_log_probabilities.argmax(dim=-1)[nonterminal]
+                    == teacher_family[nonterminal]
+                ).sum()
+            )
+            nonterminal_count += current_nonterminal_count
+        if current_terminal_count:
+            terminal_hazard_sum += float(prediction.total_hazard[terminal].sum())
+            terminal_count += current_terminal_count
     return {
-        "factorized_gm_loss": float(loss),
+        "factorized_gm_loss": loss_sum / batch.batch_size,
         "mean_teacher_mark_probability": (
-            float(prediction.selected_mark_log_probability[nonterminal].exp().mean())
-            if bool(nonterminal.any())
+            teacher_probability_sum / nonterminal_count
+            if nonterminal_count
             else 0.0
         ),
-        "family_accuracy": (float(family_hits.float().mean()) if family_hits.numel() else 0.0),
+        "family_accuracy": (
+            family_hits_sum / nonterminal_count if nonterminal_count else 0.0
+        ),
         "mean_terminal_hazard": (
-            float(prediction.total_hazard[terminal].mean()) if bool(terminal.any()) else 0.0
+            terminal_hazard_sum / terminal_count if terminal_count else 0.0
         ),
     }
 
@@ -470,6 +511,8 @@ def train_factorized_mark_model(
     checkpoint_callback: Callable[[dict[str, object]], None] | None = None,
     resume_state: dict[str, object] | None = None,
     profile_timing: bool = False,
+    evaluation_batch_size: int | None = None,
+    initial_validation_metrics: dict[str, float] | None = None,
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
         raise ValueError("steps, batch size, and learning rate must be positive")
@@ -485,6 +528,8 @@ def train_factorized_mark_model(
         raise ValueError("minimum learning-rate fraction must lie in (0, 1]")
     if early_stopping_patience < 0:
         raise ValueError("early-stopping patience must be non-negative")
+    if evaluation_batch_size is not None and evaluation_batch_size <= 0:
+        raise ValueError("evaluation batch size must be positive")
     if not 0.0 <= early_stopping_min_relative_delta < 1.0:
         raise ValueError("early-stopping minimum relative delta must lie in [0, 1)")
     optimizer = torch.optim.AdamW(
@@ -494,10 +539,15 @@ def train_factorized_mark_model(
     if resume_state is None:
         start_step = 0
         model.eval()
-        best_metrics = factorized_mark_metrics(
-            model,
-            validation_batch,
-            use_bf16=use_bf16,
+        best_metrics = (
+            factorized_mark_metrics(
+                model,
+                validation_batch,
+                use_bf16=use_bf16,
+                microbatch_size=evaluation_batch_size,
+            )
+            if initial_validation_metrics is None
+            else {str(key): float(value) for key, value in initial_validation_metrics.items()}
         )
         best_metrics["selected_step"] = 0.0
         best_state = _clone_model_state(model)
@@ -646,6 +696,7 @@ def train_factorized_mark_model(
                 model,
                 validation_batch,
                 use_bf16=use_bf16,
+                microbatch_size=evaluation_batch_size,
             )
             metrics["step"] = float(completed_steps)
             metrics["train_batch_loss"] = float(loss.detach())
