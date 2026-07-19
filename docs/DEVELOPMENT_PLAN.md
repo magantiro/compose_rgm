@@ -267,8 +267,9 @@ quality result.
 7. **Done:** replace the finite fully typed ring vocabulary with a factorized
    semantic mark decoder over topology, anchors, and atom/electronic payload,
    with exact executor-aware teacher and sampler support.
-8. **Resource gate done; quality run next:** launch the quotient-correct Stage-3
-   A100 run, inspect the automatic 100-sample credible-checkpoint preview, and
+8. **Quality run active:** the commit-`2be9258` quotient-correct Stage-3
+   pipeline is compiling its production paths before A100 training. Inspect the
+   automatic 100-sample credible-checkpoint preview, and
    compute the final 2,000-sample FCD on CPU after early stopping.
 9. **Reachability done; source comparison queued:** run the checkpoint-distinct
    null-versus-tree source ablation. Primitive tree transport now uses a

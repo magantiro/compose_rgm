@@ -29,7 +29,11 @@ evidence so a collaborator can tell what is actually running.
 - Recovery preserves the original step-zero validation baseline, rejects
   changed source/recipe/data provenance, and treats a checkpoint saved at an
   already-triggered early stop as terminal rather than training extra updates.
-- The full local suite passes: **266 tests**, with two non-failing warnings.
+- Compact per-event trajectory evidence now records canonical molecular states,
+  exact atom counts, authoritative validity/connectivity flags, self-events,
+  immediate reversals, and delete-to-one/regrow behavior. Fresh evaluation
+  caches require this evidence and reject corrupt or terminal-only payloads.
+- The full local suite passes: **291 tests**, with two non-failing warnings.
 
 ## Completed cloud gates
 
@@ -57,9 +61,19 @@ updates: 7/16 contained a three- or four-membered ring and every sample was
 polycyclic. Macrocycle and cage-candidate counts were zero. That is an
 undertraining warning to test at 100 samples, not a production result.
 
-## Not currently running
+The commit-`2be9258` deployment-boundary smoke also passed end to end on
+2026-07-19: CPU compilation completed, the 16-example teacher audit had zero
+failures, A100 training skipped in-container rollouts, and a separate CPU job
+loaded the selected checkpoint and produced 16/16 valid samples with complete
+trajectory diagnostics and a finite infrastructure-only FCD. Its two-update
+FCD is not a model-quality result.
 
-- No 30,000-update quotient-correct production job is active yet.
+## Currently running
+
+- The fresh 30,000-update quotient-correct pipeline launched at 04:42 EDT on
+  2026-07-19 from commit `2be9258`. Its immutable Modal artifact label is
+  `compose-v4-stage3-flexible-graft-prod-2be9258-v1`; CPU path compilation is
+  the active stage, followed by the teacher audit and A100 training.
 - No corrected-checkpoint 100-sample preview or 2,000-sample FCD estimate exists
   yet.
 - The archived step-6,250 samples and FCD dashboard remain retired,
@@ -67,11 +81,12 @@ undertraining warning to test at 100 samples, not a production result.
 
 ## Immediate sequence
 
-1. Commit and push the verified GPU-release, CPU-evaluation, immutable-run, and
-   exact-resume changes.
-2. Verify that a commit-bearing production run label is absent on the Modal
-   volume, then launch the A100/32-CPU/24-worker pipeline.
-3. At the first credible step-500 checkpoint, inspect 100 ancestral samples.
+1. **Done:** commit and push the trajectory-audited deployment code; pass the
+   real CPU-to-A100-to-CPU boundary smoke.
+2. **Active:** finish production path compilation and the exact teacher-support
+   audit, then begin A100/32-CPU/24-worker training.
+3. At the first credible checkpoint (no earlier than step 500), inspect 100
+   ancestral samples and their compact full-trajectory diagnostics.
    Hard-stop on any validity/connectivity failure, event-budget exhaustion,
    canonical self-event, delete-to-one recurrence, severe operator collapse,
    or the preregistered distribution/ring thresholds. Treat n=100 FCD and

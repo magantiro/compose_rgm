@@ -102,4 +102,4 @@ warning is rechecked at step 1,000 if necessary.
 
 Training and final inference are cost-separated: the validation-selected
 checkpoint releases the A100 before a retry-safe CPU evaluator draws 2,000
-samples and computes FCD. The current regression suite passes 266 tests.
+samples and computes FCD. The current regression suite passes 291 tests.

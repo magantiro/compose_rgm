@@ -107,5 +107,8 @@ the local valid-successor baseline.
 - Production training releases the A100 after writing the validation-selected
   checkpoint. A separate retry-safe CPU evaluator owns the final 2,000
   ancestral samples and FCD, so inference never keeps the training GPU alive.
+- The commit-`2be9258` production pipeline is active under
+  `compose-v4-stage3-flexible-graft-prod-2be9258-v1`; its current stage is CPU
+  compilation before the teacher audit and A100 allocation.
 - Null-versus-tree matched-budget FCD comparison: pending.
 - Recovery/revision objective and guided Pareto evaluation: pending.

@@ -151,7 +151,9 @@ pytest
 - Tracelet teacher successors are verified to lie in the production marked
   fiber, and the factorized semantic ring decoder is integrated into both
   teacher scoring and ancestral sampling. Exact-support throughput and the
-  A100/H100 resource gate are complete. The next experiment is the fresh
-  quotient-correct 30,000-update run with validation early stopping, an
-  automatic credible-checkpoint 100-sample preview, and CPU final evaluation;
+  A100/H100 resource gate are complete. The fresh commit-`2be9258`
+  quotient-correct 30,000-update run is active under the immutable artifact
+  label `compose-v4-stage3-flexible-graft-prod-2be9258-v1`, with validation
+  early stopping, an automatic credible-checkpoint 100-sample preview, and CPU
+  final evaluation;
   the archived step-6,250 FCD and trajectories remain diagnostic only.

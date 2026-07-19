@@ -70,10 +70,13 @@ As of 2026-07-19:
   preflight interval reached 54.52 examples/s and all 16 rollouts were valid,
   connected, non-null, unique, and novel. The 7/16 small-ring warning remains
   a required early-checkpoint diagnostic, not a final result.
-- The 30,000-update quotient-correct run, 100-sample visual inspection, and
-  frozen 2,000-sample FCD evaluation remain required. Validation early stopping
-  and the credible-checkpoint preview are automatic; final sampling/FCD runs on
-  CPU only after the selected checkpoint releases the A100.
+- The 30,000-update quotient-correct run is active from commit `2be9258` under
+  `compose-v4-stage3-flexible-graft-prod-2be9258-v1`; production path
+  compilation precedes the exact teacher audit and A100 training. The
+  100-sample visual inspection and frozen 2,000-sample FCD evaluation remain
+  required. Validation early stopping and the credible-checkpoint preview are
+  automatic; final sampling/FCD runs on CPU only after the selected checkpoint
+  releases the A100.
 - Full invariance of learned rates to arbitrary atom-slot permutations remains
   a formal audit obligation. Canonical successor aggregation fixes the measured
   Graft gauge churn; it is not by itself a proof of every presentation-level
