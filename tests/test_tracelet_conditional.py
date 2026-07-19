@@ -24,6 +24,7 @@ from compose_v4.experiments.tracelet_prior_tilted import (
     PriorTiltedTraceletRateModel,
 )
 from compose_v4.model.tracelet_rate_model import TraceletRateModel
+from compose_v4.rewrite.kernel import canonical_state_key
 
 
 SMILES = ("c1ccccc1", "c1ccncc1", "C1CCCCC1", "C1CC2CCC1C2")
@@ -164,6 +165,13 @@ def test_tracelet_loss_and_target_free_ancestral_sampler_are_executable() -> Non
     assert torch.isfinite(loss)
     assert is_valid_state(rollout.final_state)
     assert is_connected_or_null(rollout.final_state)
+    assert rollout.diagnostics is not None
+    assert len(rollout.diagnostics.canonical_state_keys) == len(rollout.event_rules) + 1
+    assert rollout.diagnostics.canonical_state_keys[-1] == canonical_state_key(
+        rollout.final_state
+    )
+    assert all(rollout.diagnostics.state_valid)
+    assert all(rollout.diagnostics.state_connected_or_null)
 
 
 def test_tree_transport_records_train_on_primitive_delete_and_regrow_paths() -> None:

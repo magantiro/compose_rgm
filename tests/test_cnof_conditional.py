@@ -88,6 +88,10 @@ def test_corpus_filter_split_and_short_conditional_training(tmp_path: Path) -> N
         operational_horizon=0.5,
     )
     assert rollout.final_state.n_atoms == 3
+    assert rollout.diagnostics is not None
+    assert len(rollout.diagnostics.canonical_state_keys) == len(rollout.event_rules) + 1
+    assert all(rollout.diagnostics.state_valid)
+    assert all(rollout.diagnostics.state_connected_or_null)
 
 
 def test_scaffold_split_has_no_cross_partition_scaffold_overlap(tmp_path: Path) -> None:

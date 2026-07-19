@@ -5,8 +5,13 @@ from pathlib import Path
 import pytest
 import torch
 
+from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
-from compose_v4.experiments.tracelet_conditional import build_tracelet_path_records
+from compose_v4.experiments.cnof_conditional import CompactTrajectoryDiagnostics
+from compose_v4.experiments.tracelet_conditional import (
+    TraceletRollout,
+    build_tracelet_path_records,
+)
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
 )
@@ -148,21 +153,36 @@ def test_rollout_checkpoint_rejects_incomplete_recovery_state(tmp_path: Path) ->
 def test_rollout_cache_reuses_only_exact_complete_signature(tmp_path: Path) -> None:
     path = tmp_path / "rollouts.pt"
     signature = {
-        "format": "compose_v4_rollout_cache_v2",
+        "format": "compose_v4_rollout_cache_v3_compact_trajectories",
         "checkpoint_sha256": "abc",
         "rollout_samples": 2,
     }
+    rollout = TraceletRollout(
+        final_state=smiles_to_molecular_graph("CC"),
+        event_times=(),
+        event_rules=(),
+        exhausted_event_budget=False,
+        diagnostics=CompactTrajectoryDiagnostics(
+            canonical_state_keys=("CC",),
+            atom_counts=(2,),
+            state_valid=(True,),
+            state_connected_or_null=(True,),
+        ),
+    )
 
     assert load_reusable_rollouts(path, signature=signature, samples=2) is None
     torch.save(
-        {"signature": signature, "rollouts": ("rollout-a", "rollout-b")},
+        {"signature": signature, "rollouts": (rollout, rollout)},
         path,
     )
-    assert load_reusable_rollouts(
+    reused = load_reusable_rollouts(
         path,
         signature=signature,
         samples=2,
-    ) == ("rollout-a", "rollout-b")
+    )
+    assert reused is not None
+    assert len(reused) == 2
+    assert all(item.diagnostics == rollout.diagnostics for item in reused)
 
     with pytest.raises(ValueError, match="signature"):
         load_reusable_rollouts(
@@ -172,3 +192,30 @@ def test_rollout_cache_reuses_only_exact_complete_signature(tmp_path: Path) -> N
         )
     with pytest.raises(ValueError, match="size"):
         load_reusable_rollouts(path, signature=signature, samples=3)
+
+    torch.save(
+        {"signature": signature, "rollouts": ("terminal-only", "terminal-only")},
+        path,
+    )
+    with pytest.raises(ValueError, match="trajectory diagnostics"):
+        load_reusable_rollouts(path, signature=signature, samples=2)
+
+    corrupt_diagnostics = CompactTrajectoryDiagnostics(
+        canonical_state_keys=("CC",),
+        atom_counts=(2,),
+        state_valid=(True,),
+        state_connected_or_null=(True,),
+    )
+    object.__setattr__(corrupt_diagnostics, "atom_counts", (-1,))
+    corrupt_rollout = TraceletRollout.__new__(TraceletRollout)
+    object.__setattr__(corrupt_rollout, "final_state", smiles_to_molecular_graph("CC"))
+    object.__setattr__(corrupt_rollout, "event_times", ())
+    object.__setattr__(corrupt_rollout, "event_rules", ())
+    object.__setattr__(corrupt_rollout, "exhausted_event_budget", False)
+    object.__setattr__(corrupt_rollout, "diagnostics", corrupt_diagnostics)
+    torch.save(
+        {"signature": signature, "rollouts": (corrupt_rollout, corrupt_rollout)},
+        path,
+    )
+    with pytest.raises(ValueError, match="trajectory diagnostics"):
+        load_reusable_rollouts(path, signature=signature, samples=2)

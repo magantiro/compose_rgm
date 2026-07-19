@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+import hashlib
 from math import exp
 
 import numpy as np
@@ -49,11 +50,136 @@ class ConditionalRateExample:
 
 
 @dataclass(frozen=True)
+class CompactTrajectoryDiagnostics:
+    """Small, aligned audit trail for one sampled molecular trajectory.
+
+    Index zero is the sampled source.  Every later index is the molecular state
+    after the correspondingly indexed event has committed.  Canonical SMILES
+    make self-events and immediate reversals invariant to padded-slot choices.
+    """
+
+    canonical_state_keys: tuple[str, ...]
+    atom_counts: tuple[int, ...]
+    state_valid: tuple[bool, ...]
+    state_connected_or_null: tuple[bool, ...]
+
+    def __post_init__(self) -> None:
+        lengths = {
+            len(self.canonical_state_keys),
+            len(self.atom_counts),
+            len(self.state_valid),
+            len(self.state_connected_or_null),
+        }
+        if len(lengths) != 1 or not self.canonical_state_keys:
+            raise ValueError("compact trajectory diagnostics must be non-empty and aligned")
+        if any(not isinstance(key, str) for key in self.canonical_state_keys):
+            raise ValueError("trajectory state keys must be strings")
+        if any(
+            not isinstance(count, int) or isinstance(count, bool) or count < 0
+            for count in self.atom_counts
+        ):
+            raise ValueError("trajectory atom counts must be non-negative")
+        if any(type(value) is not bool for value in self.state_valid):
+            raise ValueError("trajectory validity flags must be booleans")
+        if any(type(value) is not bool for value in self.state_connected_or_null):
+            raise ValueError("trajectory connectivity flags must be booleans")
+
+
+def _invalid_state_key(state: MolecularGraph) -> str:
+    digest = hashlib.sha256()
+    for array in (
+        state.atom_types,
+        state.formal_charges,
+        state.implicit_h_counts,
+        state.bonds,
+    ):
+        contiguous = np.ascontiguousarray(array)
+        digest.update(str(contiguous.dtype).encode("ascii"))
+        digest.update(np.asarray(contiguous.shape, dtype=np.int64).tobytes())
+        digest.update(contiguous.tobytes())
+    return f"<INVALID:{digest.hexdigest()}>"
+
+
+def compact_state_observation(state: MolecularGraph) -> tuple[str, int, bool, bool]:
+    """Return one canonical, validity-aware state observation.
+
+    The validity bit is the exact predicate used by the rewrite executor. An
+    invalid state retains a raw-array digest so two distinct closure failures
+    cannot be miscounted as a canonical self-event or immediate reversal.
+    """
+
+    valid = is_valid_state(state)
+    connected = is_connected_or_null(state)
+    key = canonical_state_key(state) if valid else _invalid_state_key(state)
+    return key, state.n_real_atoms, valid, connected
+
+
+def build_compact_trajectory_diagnostics(
+    observations: list[tuple[str, int, bool, bool]],
+) -> CompactTrajectoryDiagnostics:
+    if not observations:
+        raise ValueError("a trajectory must contain its source observation")
+    keys, atom_counts, valid, connected = zip(*observations)
+    return CompactTrajectoryDiagnostics(
+        canonical_state_keys=tuple(keys),
+        atom_counts=tuple(atom_counts),
+        state_valid=tuple(valid),
+        state_connected_or_null=tuple(connected),
+    )
+
+
+@dataclass(frozen=True)
 class FactorizedRollout:
     final_state: MolecularGraph
     event_times: tuple[float, ...]
     event_rules: tuple[str, ...]
     exhausted_event_budget: bool
+    diagnostics: CompactTrajectoryDiagnostics | None = None
+
+    def __post_init__(self) -> None:
+        if len(self.event_times) != len(self.event_rules):
+            raise ValueError("rollout event times and rules must be aligned")
+        if self.diagnostics is not None:
+            validate_rollout_trajectory_diagnostics(self)
+
+
+def validate_rollout_trajectory_diagnostics(
+    rollout: object,
+) -> CompactTrajectoryDiagnostics:
+    """Validate an in-memory or unpickled compact trajectory audit trail."""
+
+    final_state = getattr(rollout, "final_state", None)
+    event_times = getattr(rollout, "event_times", None)
+    event_rules = getattr(rollout, "event_rules", None)
+    diagnostics = getattr(rollout, "diagnostics", None)
+    if not isinstance(final_state, MolecularGraph):
+        raise ValueError("rollout final_state must be a MolecularGraph")
+    if not isinstance(event_times, tuple) or not isinstance(event_rules, tuple):
+        raise ValueError("rollout event times and rules must be tuples")
+    if len(event_times) != len(event_rules):
+        raise ValueError("rollout event times and rules must be aligned")
+    if not isinstance(diagnostics, CompactTrajectoryDiagnostics):
+        raise ValueError("rollout lacks compact trajectory diagnostics")
+    # Re-run the payload checks because pickle restoration bypasses __post_init__.
+    diagnostics.__post_init__()
+    expected_states = len(event_rules) + 1
+    if len(diagnostics.canonical_state_keys) != expected_states:
+        raise ValueError("trajectory diagnostics must contain source plus every event")
+    if diagnostics.atom_counts[-1] != final_state.n_real_atoms:
+        raise ValueError("trajectory diagnostics have the wrong final atom count")
+    final_valid = is_valid_state(final_state)
+    if diagnostics.state_valid[-1] != final_valid:
+        raise ValueError("trajectory diagnostics have the wrong final validity flag")
+    final_key = (
+        canonical_state_key(final_state)
+        if final_valid
+        else _invalid_state_key(final_state)
+    )
+    if diagnostics.canonical_state_keys[-1] != final_key:
+        raise ValueError("trajectory diagnostics do not end at final_state")
+    if diagnostics.state_connected_or_null[-1] != is_connected_or_null(final_state):
+        raise ValueError("trajectory diagnostics have the wrong final connectivity flag")
+    return diagnostics
 
 
 def build_path_records(
@@ -355,6 +481,7 @@ def sample_factorized_ancestral(
     state = empty_molecular_graph(n_slots)
     event_times = []
     event_rules = []
+    observations = [compact_state_observation(state)]
     operational_time = 0.0
     while operational_time < operational_horizon and len(event_times) < max_events:
         interval_end = min(operational_time + time_step, operational_horizon)
@@ -400,12 +527,156 @@ def sample_factorized_ancestral(
             state = selected.successor
             event_times.append(operational_time)
             event_rules.append(selected.rule_name)
+            observations.append(compact_state_observation(state))
     return FactorizedRollout(
         final_state=state,
         event_times=tuple(event_times),
         event_rules=tuple(event_rules),
         exhausted_event_budget=len(event_times) >= max_events,
+        diagnostics=build_compact_trajectory_diagnostics(observations),
     )
+
+
+def _trajectory_diagnostic_metrics(
+    rollouts: tuple[FactorizedRollout, ...],
+) -> dict[str, object]:
+    instrumented = tuple(
+        (rollout, diagnostics)
+        for rollout in rollouts
+        if (diagnostics := getattr(rollout, "diagnostics", None)) is not None
+    )
+    if not instrumented:
+        return {
+            "available": False,
+            "available_rollouts": 0,
+            "available_fraction": 0.0,
+        }
+
+    self_events = 0
+    backtracks = 0
+    backtrack_opportunities = 0
+    trajectories_with_self = 0
+    trajectories_with_backtrack = 0
+    hit_one_atom = 0
+    collapsed_to_one_atom = 0
+    delete_to_one_then_regrow = 0
+    hit_null_after_source = 0
+    invalid_states = 0
+    disconnected_states = 0
+    invalid_committed_states = 0
+    disconnected_committed_states = 0
+    observed_states = 0
+    committed_states = 0
+    all_valid = 0
+    all_connected = 0
+    minimum_atom_counts: list[int] = []
+    unique_state_fractions: list[float] = []
+    backtrack_rule_pairs: Counter[str] = Counter()
+    instrumented_events = 0
+
+    for rollout, diagnostics in instrumented:
+        keys = diagnostics.canonical_state_keys
+        atom_counts = diagnostics.atom_counts
+        rules = rollout.event_rules
+        if len(keys) != len(rules) + 1:
+            raise ValueError("trajectory diagnostics are not aligned with rollout events")
+        instrumented_events += len(rules)
+        observed_states += len(keys)
+        committed_states += len(rules)
+        invalid_states += sum(not value for value in diagnostics.state_valid)
+        disconnected_states += sum(
+            not value for value in diagnostics.state_connected_or_null
+        )
+        invalid_committed_states += sum(
+            not value for value in diagnostics.state_valid[1:]
+        )
+        disconnected_committed_states += sum(
+            not value for value in diagnostics.state_connected_or_null[1:]
+        )
+        all_valid += int(all(diagnostics.state_valid))
+        all_connected += int(all(diagnostics.state_connected_or_null))
+        minimum_atom_counts.append(min(atom_counts))
+        unique_state_fractions.append(len(set(keys)) / len(keys))
+        hit_one_atom += int(1 in atom_counts)
+        collapsed_to_one_atom += int(
+            atom_counts[0] > 1 and any(count == 1 for count in atom_counts[1:])
+        )
+        hit_null_after_source += int(any(count == 0 for count in atom_counts[1:]))
+        delete_to_one_then_regrow += int(
+            any(
+                atom_counts[index] == 1
+                and any(count > 1 for count in atom_counts[index + 1 :])
+                for index in range(1, len(atom_counts))
+            )
+        )
+
+        rollout_self_events = sum(
+            keys[index] == keys[index - 1] for index in range(1, len(keys))
+        )
+        self_events += rollout_self_events
+        trajectories_with_self += int(rollout_self_events > 0)
+
+        rollout_backtracks = 0
+        backtrack_opportunities += max(len(keys) - 2, 0)
+        for state_index in range(2, len(keys)):
+            if (
+                keys[state_index] == keys[state_index - 2]
+                and keys[state_index] != keys[state_index - 1]
+            ):
+                rollout_backtracks += 1
+                pair = f"{rules[state_index - 2]} -> {rules[state_index - 1]}"
+                backtrack_rule_pairs[pair] += 1
+        backtracks += rollout_backtracks
+        trajectories_with_backtrack += int(rollout_backtracks > 0)
+
+    available_rollouts = len(instrumented)
+    return {
+        "available": available_rollouts == len(rollouts),
+        "available_rollouts": available_rollouts,
+        "available_fraction": available_rollouts / len(rollouts),
+        "all_step_valid_trajectory_fraction": all_valid / available_rollouts,
+        "all_step_connected_or_null_trajectory_fraction": (
+            all_connected / available_rollouts
+        ),
+        "invalid_state_count": invalid_states,
+        "disconnected_state_count": disconnected_states,
+        "observed_state_count": observed_states,
+        "committed_state_count": committed_states,
+        "invalid_committed_state_count": invalid_committed_states,
+        "disconnected_committed_state_count": disconnected_committed_states,
+        "invalid_committed_state_fraction": (
+            invalid_committed_states / max(committed_states, 1)
+        ),
+        "disconnected_committed_state_fraction": (
+            disconnected_committed_states / max(committed_states, 1)
+        ),
+        "minimum_atom_count": min(minimum_atom_counts),
+        "mean_trajectory_min_atoms": float(np.mean(minimum_atom_counts)),
+        "hit_one_atom_trajectory_fraction": hit_one_atom / available_rollouts,
+        "collapsed_from_larger_source_to_one_atom_fraction": (
+            collapsed_to_one_atom / available_rollouts
+        ),
+        "delete_to_one_then_regrow_fraction": (
+            delete_to_one_then_regrow / available_rollouts
+        ),
+        "hit_null_after_source_fraction": hit_null_after_source / available_rollouts,
+        "canonical_self_event_count": self_events,
+        "canonical_self_event_fraction": self_events / max(instrumented_events, 1),
+        "trajectories_with_canonical_self_event_fraction": (
+            trajectories_with_self / available_rollouts
+        ),
+        "immediate_backtrack_count": backtracks,
+        "immediate_backtrack_per_opportunity_fraction": (
+            backtracks / max(backtrack_opportunities, 1)
+        ),
+        "trajectories_with_immediate_backtrack_fraction": (
+            trajectories_with_backtrack / available_rollouts
+        ),
+        "immediate_backtrack_rule_pair_counts": dict(
+            sorted(backtrack_rule_pairs.items())
+        ),
+        "mean_unique_state_fraction": float(np.mean(unique_state_fractions)),
+    }
 
 
 def corpus_rollout_metrics(
@@ -501,18 +772,12 @@ def corpus_rollout_metrics(
         "mean_events": float(np.mean([len(item.event_times) for item in rollouts])),
         "event_rule_fractions": {
             rule: event_rule_counts[rule] / max(total_events, 1)
-            for rule in (
-                "atom_insert",
-                "atom_delete",
-                "atom_restate",
-                "bond_insert",
-                "bond_delete",
-                "bond_reorder",
-            )
+            for rule in sorted(event_rule_counts)
         },
         "event_budget_exhaustion_fraction": float(
             np.mean([item.exhausted_event_budget for item in rollouts])
         ),
+        "trajectory_diagnostics": _trajectory_diagnostic_metrics(rollouts),
         "top_final_states": counts.most_common(20),
     }
 

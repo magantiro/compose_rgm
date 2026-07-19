@@ -23,7 +23,13 @@ from compose_v4.chem.source_prior import (
     MolecularSourcePrior,
     NullSourcePrior,
 )
-from compose_v4.experiments.cnof_conditional import PathRecord
+from compose_v4.experiments.cnof_conditional import (
+    CompactTrajectoryDiagnostics,
+    PathRecord,
+    build_compact_trajectory_diagnostics,
+    compact_state_observation,
+    validate_rollout_trajectory_diagnostics,
+)
 from compose_v4.gm.loss import multi_successor_rate_bregman_loss, rate_bregman_loss
 from compose_v4.model.rate_model import FiberRatePrediction
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
@@ -66,6 +72,13 @@ class TraceletRollout:
     event_times: tuple[float, ...]
     event_rules: tuple[str, ...]
     exhausted_event_budget: bool
+    diagnostics: CompactTrajectoryDiagnostics | None = None
+
+    def __post_init__(self) -> None:
+        if len(self.event_times) != len(self.event_rules):
+            raise ValueError("rollout event times and rules must be aligned")
+        if self.diagnostics is not None:
+            validate_rollout_trajectory_diagnostics(self)
 
 
 @dataclass(frozen=True)
@@ -1117,6 +1130,7 @@ def sample_tracelet_ancestral(
     state = (source_prior or NullSourcePrior()).sample(rng, n_slots=n_slots)
     event_times = []
     event_rules = []
+    observations = [compact_state_observation(state)]
     operational_time = 0.0
     direct_mark_sampler = getattr(model, "sample_rewrite_mark", None)
     direct_runtime = de_novo_rewrite_system() if callable(direct_mark_sampler) else None
@@ -1144,6 +1158,7 @@ def sample_tracelet_ancestral(
                 )
                 event_times.append(operational_time)
                 event_rules.append(sampled.rule_name)
+                observations.append(compact_state_observation(state))
                 continue
             state_key = canonical_state_key(state)
             cached = cached_fibers.get(state_key)
@@ -1202,9 +1217,11 @@ def sample_tracelet_ancestral(
             state = selected.successor
             event_times.append(operational_time)
             event_rules.append(selected.rule_name)
+            observations.append(compact_state_observation(state))
     return TraceletRollout(
-        state,
-        tuple(event_times),
-        tuple(event_rules),
-        len(event_times) >= max_events,
+        final_state=state,
+        event_times=tuple(event_times),
+        event_rules=tuple(event_rules),
+        exhausted_event_budget=len(event_times) >= max_events,
+        diagnostics=build_compact_trajectory_diagnostics(observations),
     )

@@ -22,6 +22,7 @@ def _rollout_signature(rollout) -> tuple:
         rollout.event_times,
         rollout.event_rules,
         rollout.exhausted_event_budget,
+        rollout.diagnostics,
     )
 
 

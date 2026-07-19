@@ -21,7 +21,10 @@ from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
 from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
-from compose_v4.experiments.cnof_conditional import corpus_rollout_metrics
+from compose_v4.experiments.cnof_conditional import (
+    corpus_rollout_metrics,
+    validate_rollout_trajectory_diagnostics,
+)
 from compose_v4.experiments.parallel_tracelet_sampling import (
     sample_tracelet_ancestral_many,
 )
@@ -58,6 +61,7 @@ def load_reusable_rollouts(
     *,
     signature: dict[str, object],
     samples: int,
+    require_trajectory_diagnostics: bool = True,
 ) -> tuple[object, ...] | None:
     """Load a complete compatible cache or fail closed on stale artifacts."""
 
@@ -77,7 +81,19 @@ def load_reusable_rollouts(
             "rollout cache size does not match requested samples: "
             f"{len(rollouts)} != {samples}"
         )
+    if require_trajectory_diagnostics and any(
+        not _has_complete_trajectory_diagnostics(rollout) for rollout in rollouts
+    ):
+        raise ValueError("rollout cache lacks complete compact trajectory diagnostics")
     return rollouts
+
+
+def _has_complete_trajectory_diagnostics(rollout: object) -> bool:
+    try:
+        validate_rollout_trajectory_diagnostics(rollout)
+    except ValueError:
+        return False
+    return True
 
 
 def _read_smiles_file(path: Path, *, limit: int) -> tuple[str, ...]:
@@ -233,7 +249,7 @@ def main() -> None:
             )
 
     rollout_signature: dict[str, object] = {
-        "format": "compose_v4_rollout_cache_v2",
+        "format": "compose_v4_rollout_cache_v3_compact_trajectories",
         "checkpoint_sha256": _file_sha256(args.checkpoint),
         "rollout_samples": args.rollout_samples,
         "sampling_seed": args.seed + 4,
@@ -263,6 +279,8 @@ def main() -> None:
             progress_callback=report_progress,
             source_prior=source_prior,
         )
+        if any(not _has_complete_trajectory_diagnostics(item) for item in rollouts):
+            raise RuntimeError("fresh rollouts lack compact trajectory diagnostics")
         _atomic_torch_save(
             {
                 "rollouts": rollouts,
@@ -304,6 +322,11 @@ def main() -> None:
         args.quality_reference_file,
         limit=args.quality_reference_limit,
     )
+    rollout_metrics = corpus_rollout_metrics(
+        rollouts,
+        train_smiles=split.train,
+        reference_smiles=split.test,
+    )
     report: dict[str, object] = {
         "evaluation_kind": "checkpoint_rollout_only",
         "teacher_path_cache_loaded": False,
@@ -328,15 +351,15 @@ def main() -> None:
         },
         "generated_nonnull_smiles": len(generated_smiles),
         "generated_smiles": generated_smiles,
-        "rollout": corpus_rollout_metrics(
-            rollouts,
-            train_smiles=split.train,
-            reference_smiles=split.test,
+        "rollout": rollout_metrics,
+        "trajectory_diagnostics_available": bool(
+            rollout_metrics.get("trajectory_diagnostics", {}).get("available")
         ),
         "rollout_event_counts": dict(sorted(event_counts.items())),
         "generated_ring_taxonomy": (
             ring_taxonomy_report(generated_smiles) if generated_smiles else None
         ),
+        "reference_ring_taxonomy": ring_taxonomy_report(split.test),
         "sampler": {
             "target_available": False,
             "beam_search": False,
