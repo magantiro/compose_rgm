@@ -45,6 +45,9 @@ ROLLOUT_MAX_ATOMS = 40
 ROLLOUT_OPERATIONAL_HORIZON = 16.0
 ROLLOUT_TIME_STEP = 0.1
 ROLLOUT_MAX_EVENTS = 128
+TRAINING_SUPPORT_CACHE_DIR = "/artifacts/_shared/training_support"
+TRAINING_SUPPORT_SHARD_SIZE = 16000
+TRAINING_SUPPORT_MINIMUM_ROWS_PER_SECOND = 64.0
 SOURCE_TREE_IGNORE = ("**/__pycache__/**", "**/*.pyc")
 SOURCE_FINGERPRINT_SUFFIXES = frozenset({".py", ".json"})
 RUN_LABEL_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
@@ -128,6 +131,8 @@ def _materialize_remote_recipe(
             "path_cache": str(run_dir / "compiled_paths.pt"),
             "rollout_cache": str(run_dir / "rollouts.pt"),
             "evaluation_cache_dir": "/artifacts/_shared/evaluation_batches",
+            "training_support_cache_dir": TRAINING_SUPPORT_CACHE_DIR,
+            "training_support_shard_size": TRAINING_SUPPORT_SHARD_SIZE,
         }
     )
     if smoke and preflight:
@@ -611,12 +616,15 @@ def _remote_stage_kind(
     smoke: bool,
     preflight: bool,
     compile_paths_only: bool,
+    compile_training_support_steps: int = 0,
     evaluation_source_run: str | None,
 ) -> str:
     if evaluation_source_run is not None:
         return "checkpoint_evaluation"
     if compile_paths_only:
         return "compile"
+    if compile_training_support_steps:
+        return "support_compile"
     if smoke:
         return "smoke"
     if preflight:
@@ -630,12 +638,20 @@ def _run_remote(
     smoke: bool,
     preflight: bool = False,
     compile_paths_only: bool = False,
+    compile_training_support_steps: int = 0,
     require_path_cache: bool = False,
+    require_training_support_cache: bool = False,
     skip_rollouts: bool = False,
     recipe_name: str = RECIPE_NAME,
     evaluation_source_run: str | None = None,
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
     path_cache_source_run: str | None = None,
+    training_steps: int | None = None,
+    training_support_workers: int = 96,
+    training_support_microbatch_size: int = 4,
+    training_support_prefetch_factor: int = 2,
+    training_support_wait_seconds: float = 600.0,
+    minimum_training_support_rows_per_second: float = 0.0,
 ) -> dict[str, object]:
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
 
@@ -649,6 +665,28 @@ def _run_remote(
         preflight=preflight,
         recipe_name=recipe_name,
     )
+    if compile_training_support_steps < 0:
+        raise ValueError("compile-training-support steps must be non-negative")
+    if training_steps is not None and training_steps <= 0:
+        raise ValueError("training steps must be positive")
+    if min(
+        training_support_workers,
+        training_support_microbatch_size,
+        training_support_prefetch_factor,
+    ) <= 0:
+        raise ValueError("training-support compiler settings must be positive")
+    if training_support_wait_seconds < 0.0:
+        raise ValueError("training-support wait must be non-negative")
+    if minimum_training_support_rows_per_second < 0.0:
+        raise ValueError("training-support throughput gate must be non-negative")
+    if compile_training_support_steps and require_training_support_cache:
+        raise ValueError("support compilation and support consumption are exclusive")
+    if compile_training_support_steps and (
+        smoke or preflight or compile_paths_only or evaluation_source_run is not None
+    ):
+        raise ValueError("support compilation is a dedicated CPU stage")
+    if training_steps is not None:
+        recipe["arguments"]["steps"] = int(training_steps)
     if path_cache_source_run is not None:
         _validate_run_label(path_cache_source_run, field="path-cache source run")
         source_path_cache = (
@@ -669,7 +707,11 @@ def _run_remote(
         recipe["arguments"]["path_cache"] = str(source_path_cache)
         require_path_cache = True
     if skip_rollouts and (
-        smoke or preflight or compile_paths_only or evaluation_source_run is not None
+        smoke
+        or preflight
+        or compile_paths_only
+        or compile_training_support_steps
+        or evaluation_source_run is not None
     ):
         raise ValueError(
             "skip_rollouts is reserved for the production training stage"
@@ -715,9 +757,38 @@ def _run_remote(
                 "device": "cpu",
             }
         )
+    if compile_training_support_steps:
+        if path_cache_source_run is None:
+            raise ValueError(
+                "support compilation requires an immutable path-cache source run"
+            )
+        recipe["arguments"].update(
+            {
+                "compile_training_support_steps": int(
+                    compile_training_support_steps
+                ),
+                "training_support_workers": int(training_support_workers),
+                "training_support_microbatch_size": int(
+                    training_support_microbatch_size
+                ),
+                "training_support_prefetch_factor": int(
+                    training_support_prefetch_factor
+                ),
+                "device": "cpu",
+            }
+        )
+    if require_training_support_cache:
+        recipe["arguments"].update(
+            {
+                "require_training_support_cache": True,
+                "training_support_wait_seconds": float(
+                    training_support_wait_seconds
+                ),
+            }
+        )
     if require_path_cache:
         recipe["arguments"]["require_path_cache"] = True
-        if not compile_paths_only:
+        if not compile_paths_only and not compile_training_support_steps:
             recipe["arguments"]["require_evaluation_cache"] = True
     run_dir.mkdir(parents=True, exist_ok=True)
     # The shared volume's nominal full-training SMILES file is a zero-byte
@@ -751,6 +822,7 @@ def _run_remote(
         smoke=smoke,
         preflight=preflight,
         compile_paths_only=compile_paths_only,
+        compile_training_support_steps=compile_training_support_steps,
         evaluation_source_run=evaluation_source_run,
     )
     run_identity = {
@@ -831,10 +903,16 @@ def _run_remote(
         "smoke": smoke,
         "preflight": preflight,
         "compile_paths_only": compile_paths_only,
+        "compile_training_support_steps": compile_training_support_steps,
         "require_path_cache": require_path_cache,
+        "require_training_support_cache": require_training_support_cache,
         "skip_rollouts": skip_rollouts,
         "evaluation_source_run": evaluation_source_run,
         "path_cache_source_run": path_cache_source_run,
+        "training_steps": training_steps,
+        "minimum_training_support_rows_per_second": (
+            minimum_training_support_rows_per_second
+        ),
         "evaluation_checkpoint_name": (
             evaluation_checkpoint_name if evaluation_source_run is not None else None
         ),
@@ -874,9 +952,12 @@ def _run_remote(
         not smoke
         and not preflight
         and not compile_paths_only
+        and not compile_training_support_steps
         and evaluation_source_run is None
         and int(recipe["arguments"].get("early_stopping_patience", 0)) > 0
     )
+    support_ready_event: dict[str, object] | None = None
+    support_gate_failure: dict[str, float] | None = None
     process = subprocess.Popen(
         command,
         cwd=REMOTE_ROOT,
@@ -901,6 +982,8 @@ def _run_remote(
             "compiled_paths_ready",
             "evaluation_batch_cache_saved",
             "compiled_evaluation_batches_ready",
+            "training_support_shard_saved",
+            "training_support_cache_ready",
             "recovery_checkpoint_saved",
         }:
             # Recovery frequency is deliberately coarse: committing a Modal
@@ -914,8 +997,31 @@ def _run_remote(
                     recipe=recipe,
                     completed_steps=int(event.get("completed_steps", 0)),
                 )
+        if isinstance(event, dict) and event.get("phase") == "training_support_cache_ready":
+            support_ready_event = dict(event)
+        if (
+            isinstance(event, dict)
+            and event.get("phase") == "training_support_shard_saved"
+            and minimum_training_support_rows_per_second > 0.0
+        ):
+            observed_rate = float(event.get("rows_per_second", 0.0))
+            if observed_rate < minimum_training_support_rows_per_second:
+                support_gate_failure = {
+                    "observed_rows_per_second": observed_rate,
+                    "minimum_rows_per_second": float(
+                        minimum_training_support_rows_per_second
+                    ),
+                    "compiled_rows": float(event.get("compiled_rows", 0.0)),
+                }
+                process.terminate()
+                break
     return_code = process.wait()
     artifact_volume.commit()
+    if support_gate_failure is not None:
+        raise RuntimeError(
+            "training-support compiler missed the CPU throughput gate: "
+            f"{support_gate_failure}"
+        )
     if return_code != 0:
         raise subprocess.CalledProcessError(return_code, command)
 
@@ -929,6 +1035,27 @@ def _run_remote(
         }
         print(
             json.dumps({"phase": "remote_compile_complete", **summary}, sort_keys=True),
+            flush=True,
+        )
+        return summary
+
+    if compile_training_support_steps:
+        if support_ready_event is None:
+            raise RuntimeError(
+                "support compiler exited without a validated cache-ready event"
+            )
+        summary = {
+            "run_label": run_label,
+            "recipe_name": recipe_name,
+            "elapsed_seconds": time.perf_counter() - started,
+            "artifact_dir": str(run_dir),
+            "training_support": support_ready_event,
+        }
+        print(
+            json.dumps(
+                {"phase": "remote_support_compile_complete", **summary},
+                sort_keys=True,
+            ),
             flush=True,
         )
         return summary
@@ -1040,6 +1167,40 @@ def compile_stage(
 
 @app.function(
     image=image,
+    cpu=100.0,
+    memory=262144,
+    timeout=24 * 3600,
+    volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
+    retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
+)
+def compile_training_support_stage(
+    run_label: str,
+    path_cache_source_run: str,
+    steps: int = 2000,
+    recipe_name: str = RECIPE_NAME,
+    workers: int = 96,
+    microbatch_size: int = 4,
+    prefetch_factor: int = 2,
+    minimum_rows_per_second: float = TRAINING_SUPPORT_MINIMUM_ROWS_PER_SECOND,
+) -> dict[str, object]:
+    """Compile exact sparse support on CPUs and reject an unfeedable stream."""
+
+    return _run_remote(
+        run_label=run_label,
+        smoke=False,
+        compile_training_support_steps=steps,
+        require_path_cache=True,
+        recipe_name=recipe_name,
+        path_cache_source_run=path_cache_source_run,
+        training_support_workers=workers,
+        training_support_microbatch_size=microbatch_size,
+        training_support_prefetch_factor=prefetch_factor,
+        minimum_training_support_rows_per_second=minimum_rows_per_second,
+    )
+
+
+@app.function(
+    image=image,
     cpu=16.0,
     memory=65536,
     timeout=2 * 3600,
@@ -1126,14 +1287,18 @@ def train_stage(
     run_label: str,
     recipe_name: str = RECIPE_NAME,
     path_cache_source_run: str | None = None,
+    require_training_support_cache: bool = True,
+    training_steps: int | None = None,
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
         smoke=False,
         require_path_cache=True,
+        require_training_support_cache=require_training_support_cache,
         skip_rollouts=True,
         recipe_name=recipe_name,
         path_cache_source_run=path_cache_source_run,
+        training_steps=training_steps,
     )
 
 
@@ -1427,7 +1592,10 @@ def _run_pipeline(
         audit_batch_size,
         audit_workers,
     )
-    train_result = train_stage.remote(run_label, recipe_name)
+    # The legacy all-in-one smoke pipeline intentionally exercises the online
+    # oracle on a tiny corpus. Production launches use --support-compile-only
+    # followed by --train-only, where cached support is mandatory.
+    train_result = train_stage.remote(run_label, recipe_name, None, False, None)
     if train_result.get("rollouts_skipped") is not True:
         raise RuntimeError("GPU training unexpectedly performed in-container rollouts")
     evaluation_run_label, checkpoint_name, rollout_samples = _final_rollout_spec(
@@ -1520,6 +1688,7 @@ def main(
     preflight: bool = False,
     h100_preflight: bool = False,
     compile_only: bool = False,
+    support_compile_only: bool = False,
     train_only: bool = False,
     evaluate_only: bool = False,
     rollout_evaluate_only: bool = False,
@@ -1528,6 +1697,8 @@ def main(
     source_run_label: str = "",
     checkpoint_name: str = "checkpoint.best_so_far.pt",
     rollout_samples: int = 100,
+    support_steps: int = 2000,
+    training_steps: int = 0,
 ) -> None:
     modes = sum(
         (
@@ -1536,6 +1707,7 @@ def main(
             preflight,
             h100_preflight,
             compile_only,
+            support_compile_only,
             train_only,
             evaluate_only,
             rollout_evaluate_only,
@@ -1543,7 +1715,8 @@ def main(
     )
     if modes > 1:
         raise ValueError(
-            "smoke, integration-smoke, preflight, h100-preflight, compile-only, train-only, "
+            "smoke, integration-smoke, preflight, h100-preflight, compile-only, "
+            "support-compile-only, train-only, "
             "evaluate-only, and "
             "rollout-evaluate-only are exclusive"
         )
@@ -1552,6 +1725,10 @@ def main(
             "--run-label is required; use a fresh commit-bearing immutable label"
         )
     _validate_run_label(run_label)
+    if support_steps <= 0:
+        raise ValueError("--support-steps must be positive")
+    if training_steps < 0:
+        raise ValueError("--training-steps must be non-negative")
     if integration_smoke:
         call = integration_smoke_pipeline_stage.spawn(run_label)
         print(
@@ -1597,6 +1774,18 @@ def main(
             checkpoint_name,
         )
         phase = "evaluation_spawned"
+    elif support_compile_only:
+        if not source_run_label:
+            raise ValueError(
+                "support-compile-only requires --source-run-label for paths"
+            )
+        call = compile_training_support_stage.spawn(
+            run_label,
+            source_run_label,
+            support_steps,
+            recipe_name,
+        )
+        phase = "support_compile_spawned"
     elif compile_only:
         call = compile_stage.spawn(
             run_label,
@@ -1609,6 +1798,8 @@ def main(
             run_label,
             recipe_name,
             source_run_label or None,
+            True,
+            training_steps or None,
         )
         phase = "train_spawned"
     else:

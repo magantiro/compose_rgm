@@ -20,6 +20,7 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
         "preflight_stage",
         "h100_preflight_stage",
         "compile_stage",
+        "compile_training_support_stage",
         "train_stage",
         "evaluate_stage",
         "integration_smoke_pipeline_stage",
@@ -49,6 +50,9 @@ def test_modal_entrypoint_uses_frozen_recipe_and_persistent_artifacts() -> None:
     assert source.index("audit_teacher_stage.remote") < source.index("train_stage.remote")
     assert source.index("train_stage.remote") < source.index("rollout_evaluate_stage.remote")
     assert "compile_paths_only=True" in source
+    assert "compile_training_support_steps=steps" in source
+    assert "require_training_support_cache=require_training_support_cache" in source
+    assert "TRAINING_SUPPORT_MINIMUM_ROWS_PER_SECOND = 64.0" in source
     assert "require_path_cache=True" in source
     assert "compiled_proposal_shard_saved" in source
     assert "compiled_path_shard_saved" in source

@@ -474,6 +474,13 @@ def test_stage_identity_hash_is_order_independent_and_stage_specific() -> None:
         compile_paths_only=False,
         evaluation_source_run=None,
     ) == "training"
+    assert _remote_stage_kind(
+        smoke=False,
+        preflight=False,
+        compile_paths_only=False,
+        compile_training_support_steps=2000,
+        evaluation_source_run=None,
+    ) == "support_compile"
 
 
 @pytest.mark.parametrize(

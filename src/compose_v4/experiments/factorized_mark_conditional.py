@@ -17,6 +17,9 @@ from torch.utils.data import DataLoader, Dataset
 
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.experiments.cnof_conditional import PathRecord
+from compose_v4.experiments.training_support_cache import (
+    ShardedTrainingSupportCache,
+)
 from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.model.factorized_tracelet_rate_model import (
     ChemistryStateFeatures,
@@ -79,6 +82,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         ring_electronic_mode: str = "factorized_local",
         support_cache_limit: int = 2048,
         support_cache_reset_interval: int = 2048,
+        training_support_cache: ShardedTrainingSupportCache | None = None,
+        require_cached_support: bool = False,
     ) -> None:
         if not records:
             raise ValueError("factorized mark training records must be non-empty")
@@ -92,6 +97,15 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             raise ValueError("progress stratification must lie in [0, 1]")
         if support_cache_limit <= 0 or support_cache_reset_interval <= 0:
             raise ValueError("support cache limits and reset intervals must be positive")
+        if training_support_cache is not None and ring_catalog is None:
+            raise ValueError("training support cache requires a ring catalog")
+        if require_cached_support and training_support_cache is None:
+            raise ValueError("required training support cache was not provided")
+        if (
+            training_support_cache is not None
+            and start_index + length > training_support_cache.total_rows
+        ):
+            raise ValueError("training dataset extends beyond its support cache")
         self.records = records
         self.start_index = int(start_index)
         self.length = int(length)
@@ -103,6 +117,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self.ring_electronic_mode = str(ring_electronic_mode)
         self.support_cache_limit = int(support_cache_limit)
         self.support_cache_reset_interval = int(support_cache_reset_interval)
+        self.training_support_cache = training_support_cache
+        self.require_cached_support = bool(require_cached_support)
         self._ring_support_model: FactorizedTraceletRateModel | None = None
         self._ring_support_examples_since_reset = 0
 
@@ -141,42 +157,69 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rate = 0.0
         state = record.path.state_at(progress)
         ring_grow_support_mask = None
+        ring_grow_support_indices = None
+        ring_grow_support_width = 0
         ring_grow_support_is_exact = False
         ring_grow_enablement_is_exact = False
         if self.ring_catalog is not None:
-            if (
-                self._ring_support_model is not None
-                and self._ring_support_examples_since_reset
-                >= self.support_cache_reset_interval
-            ):
-                self._ring_support_model.clear_ring_candidate_caches()
-                clear_semantic_ring_state_caches()
-                self._ring_support_examples_since_reset = 0
-            if self._ring_support_model is None:
-                # Exact semantic support is chemistry-only. A tiny parameter
-                # shell lets persistent DataLoader workers reuse the same
-                # placement/decoder caches without duplicating the compiler.
-                # Its unused neural parameters must not perturb the training
-                # RNG stream when a loader is recreated after recovery.
-                with torch.random.fork_rng(devices=[]):
-                    torch.manual_seed(0)
-                    self._ring_support_model = FactorizedTraceletRateModel(
-                        self.ring_catalog,
-                        hidden_dim=1,
-                        message_passing_steps=1,
-                        mark_dim=1,
-                        ring_electronic_mode=self.ring_electronic_mode,
-                        ring_candidate_cache_limit=self.support_cache_limit,
-                    )
-            if teacher_rule_name == "ring_system_grow":
-                ring_grow_support_mask = self._ring_support_model._ring_grow_support(state)
-                ring_grow_support_is_exact = True
-            else:
-                ring_grow_support_mask = (
-                    self._ring_support_model._ring_grow_enablement_certificate(state)
+            cached_support = (
+                None
+                if self.training_support_cache is None
+                else (
+                    self.training_support_cache.require(absolute_index)
+                    if self.require_cached_support
+                    else self.training_support_cache.get(absolute_index)
                 )
-            ring_grow_enablement_is_exact = True
-            self._ring_support_examples_since_reset += 1
+            )
+            if cached_support is not None:
+                ring_grow_support_indices = cached_support.indices
+                ring_grow_support_width = int(cached_support.width)
+                ring_grow_support_is_exact = bool(cached_support.support_is_exact)
+                ring_grow_enablement_is_exact = bool(
+                    cached_support.enablement_is_exact
+                )
+            else:
+                if (
+                    self._ring_support_model is not None
+                    and self._ring_support_examples_since_reset
+                    >= self.support_cache_reset_interval
+                ):
+                    self._ring_support_model.clear_ring_candidate_caches()
+                    clear_semantic_ring_state_caches()
+                    self._ring_support_examples_since_reset = 0
+                if self._ring_support_model is None:
+                    # Exact semantic support is chemistry-only. A tiny parameter
+                    # shell lets persistent DataLoader workers reuse the same
+                    # placement/decoder caches without duplicating the compiler.
+                    # Its unused neural parameters must not perturb the training
+                    # RNG stream when a loader is recreated after recovery.
+                    with torch.random.fork_rng(devices=[]):
+                        torch.manual_seed(0)
+                        self._ring_support_model = FactorizedTraceletRateModel(
+                            self.ring_catalog,
+                            hidden_dim=1,
+                            message_passing_steps=1,
+                            mark_dim=1,
+                            ring_electronic_mode=self.ring_electronic_mode,
+                            ring_candidate_cache_limit=self.support_cache_limit,
+                        )
+                if teacher_rule_name == "ring_system_grow":
+                    ring_grow_support_mask = self._ring_support_model._ring_grow_support(
+                        state
+                    )
+                    ring_grow_support_is_exact = True
+                else:
+                    ring_grow_support_mask = (
+                        self._ring_support_model._ring_grow_enablement_certificate(state)
+                    )
+                ring_grow_enablement_is_exact = True
+                self._ring_support_examples_since_reset += 1
+                ring_grow_support_indices = tuple(
+                    int(index)
+                    for index, supported in enumerate(ring_grow_support_mask)
+                    if supported
+                )
+                ring_grow_support_width = len(ring_grow_support_mask)
         return FactorizedMarkExample(
             state=state,
             time=time,
@@ -184,18 +227,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rule_name=teacher_rule_name,
             teacher_rate=teacher_rate,
             importance_weight=importance_weight,
-            ring_grow_support_indices=(
-                None
-                if ring_grow_support_mask is None
-                else tuple(
-                    int(index)
-                    for index, supported in enumerate(ring_grow_support_mask)
-                    if supported
-                )
-            ),
-            ring_grow_support_width=(
-                0 if ring_grow_support_mask is None else len(ring_grow_support_mask)
-            ),
+            ring_grow_support_indices=ring_grow_support_indices,
+            ring_grow_support_width=ring_grow_support_width,
             ring_grow_support_is_exact=ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
         )
@@ -270,6 +303,8 @@ def factorized_mark_loader(
     ring_catalog: TypedRingCatalog | None = None,
     prefetch_factor: int = 2,
     ring_electronic_mode: str = "factorized_local",
+    training_support_cache: ShardedTrainingSupportCache | None = None,
+    require_cached_support: bool = False,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
         raise ValueError("start step lies outside the training horizon")
@@ -288,6 +323,8 @@ def factorized_mark_loader(
         progress_stratification_fraction=progress_stratification_fraction,
         ring_catalog=ring_catalog,
         ring_electronic_mode=ring_electronic_mode,
+        training_support_cache=training_support_cache,
+        require_cached_support=require_cached_support,
     )
     options: dict[str, Any] = {}
     if workers > 0:
@@ -573,6 +610,8 @@ def train_factorized_mark_model(
     profile_timing: bool = False,
     evaluation_batch_size: int | None = None,
     initial_validation_metrics: dict[str, float] | None = None,
+    training_support_cache: ShardedTrainingSupportCache | None = None,
+    require_cached_support: bool = False,
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
         raise ValueError("steps, batch size, and learning rate must be positive")
@@ -688,6 +727,8 @@ def train_factorized_mark_model(
         ring_catalog=ring_catalog,
         prefetch_factor=data_prefetch_factor,
         ring_electronic_mode=ring_electronic_mode,
+        training_support_cache=training_support_cache,
+        require_cached_support=require_cached_support,
     )
     timing_loop_started = perf_counter()
     iterator: Iterator[FactorizedMarkBatch] = iter(loader)

@@ -38,6 +38,13 @@ from compose_v4.experiments.factorized_mark_conditional import (
     sample_factorized_mark_batch,
     train_factorized_mark_model,
 )
+from compose_v4.experiments.training_support_cache import (
+    RING_SUPPORT_SEMANTICS_VERSION,
+    ShardedTrainingSupportCache,
+)
+from compose_v4.experiments.training_support_compiler import (
+    compile_training_support_shards,
+)
 from compose_v4.experiments.parallel_tracelet_sampling import (
     sample_tracelet_ancestral_many,
 )
@@ -66,6 +73,7 @@ from compose_v4.rewrite.kernel import canonical_state_key
 
 TRANSPORT_SUPPORT_PROJECTION_VERSION = 3
 EVALUATION_BATCH_CACHE_FORMAT_VERSION = 1
+TRAINING_SUPPORT_STREAM_FORMAT_VERSION = 1
 
 
 def _atomic_torch_save(payload: object, path: Path) -> None:
@@ -151,6 +159,29 @@ def _evaluation_batch_cache_signature(
         "operational_horizon": float(operational_horizon),
         "progress_stratification_fraction": float(progress_stratification_fraction),
         "bond_representation": str(bond_representation),
+        "ring_electronic_mode": str(ring_electronic_mode),
+    }
+
+
+def _training_support_cache_signature(
+    path_cache_signature: dict[str, object],
+    *,
+    seed: int,
+    late_time_fraction: float,
+    operational_horizon: float,
+    progress_stratification_fraction: float,
+    ring_electronic_mode: str,
+) -> dict[str, object]:
+    """Identify the infinite deterministic row stream independent of its horizon."""
+
+    return {
+        "format_version": TRAINING_SUPPORT_STREAM_FORMAT_VERSION,
+        "ring_support_semantics_version": RING_SUPPORT_SEMANTICS_VERSION,
+        "path_cache_fingerprint": _path_cache_fingerprint(path_cache_signature),
+        "seed": int(seed),
+        "late_time_fraction": float(late_time_fraction),
+        "operational_horizon": float(operational_horizon),
+        "progress_stratification_fraction": float(progress_stratification_fraction),
         "ring_electronic_mode": str(ring_electronic_mode),
     }
 
@@ -804,6 +835,52 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--training-support-cache-dir",
+        type=Path,
+        help="shared root for content-addressed sparse training-support shards",
+    )
+    parser.add_argument(
+        "--training-support-shard-size",
+        type=int,
+        default=16000,
+        help="deterministic training rows per atomically published support shard",
+    )
+    parser.add_argument(
+        "--training-support-workers",
+        type=int,
+        default=0,
+        help="CPU processes used only by the sparse support compiler",
+    )
+    parser.add_argument(
+        "--training-support-microbatch-size",
+        type=int,
+        default=8,
+        help="row tasks assigned dynamically to each support worker",
+    )
+    parser.add_argument(
+        "--training-support-prefetch-factor",
+        type=int,
+        default=2,
+        help="support microbatches queued per compiler worker",
+    )
+    parser.add_argument(
+        "--compile-training-support-steps",
+        type=int,
+        default=0,
+        help="compile this many leading training steps and exit; 0 disables compilation",
+    )
+    parser.add_argument(
+        "--require-training-support-cache",
+        action="store_true",
+        help="forbid online support chemistry in the training process",
+    )
+    parser.add_argument(
+        "--training-support-wait-seconds",
+        type=float,
+        default=0.0,
+        help="maximum time a trainer worker waits for a concurrently compiled shard",
+    )
+    parser.add_argument(
         "--corpus-workers",
         type=int,
         default=0,
@@ -883,8 +960,15 @@ def main() -> None:
         raise ValueError("--evaluation-every and --early-stopping-patience must be non-negative")
     if not 0.0 <= args.early_stopping_min_relative_delta < 1.0:
         raise ValueError("--early-stopping-min-relative-delta must lie in [0, 1)")
-    if min(args.data_workers, args.path_workers, args.corpus_workers) < 0:
-        raise ValueError("data, path, and corpus worker counts must be non-negative")
+    if min(
+        args.data_workers,
+        args.path_workers,
+        args.corpus_workers,
+        args.training_support_workers,
+    ) < 0:
+        raise ValueError(
+            "data, path, corpus, and support worker counts must be non-negative"
+        )
     if args.evaluation_workers is not None and args.evaluation_workers < 0:
         raise ValueError("evaluation-workers must be non-negative")
     if args.evaluation_batch_size <= 0:
@@ -895,6 +979,34 @@ def main() -> None:
         raise ValueError("path-checkpoint-interval must be positive")
     if args.path_shard_size <= 0:
         raise ValueError("path-shard-size must be positive")
+    if (
+        args.training_support_shard_size <= 0
+        or args.training_support_microbatch_size <= 0
+        or args.training_support_prefetch_factor <= 0
+    ):
+        raise ValueError("training-support compiler dimensions must be positive")
+    if not 0 <= args.compile_training_support_steps <= args.steps:
+        raise ValueError("compile-training-support-steps must lie in [0, steps]")
+    if args.training_support_wait_seconds < 0.0:
+        raise ValueError("training-support-wait-seconds must be non-negative")
+    support_mode = bool(
+        args.compile_training_support_steps or args.require_training_support_cache
+    )
+    if support_mode and args.training_support_cache_dir is None:
+        raise ValueError("training-support-cache-dir is required for support caching")
+    if support_mode and args.training_backend != "factorized_marks":
+        raise ValueError("training support caching requires factorized marked training")
+    if args.compile_training_support_steps and not args.require_path_cache:
+        raise ValueError("training support compilation requires --require-path-cache")
+    if args.compile_training_support_steps and args.require_training_support_cache:
+        raise ValueError(
+            "compile-training-support-steps and require-training-support-cache "
+            "are mutually exclusive"
+        )
+    if args.compile_training_support_steps and (
+        args.compile_training_support_steps * args.batch_size
+    ) % args.training_support_shard_size:
+        raise ValueError("compiled support prefix must end at a shard boundary")
     if args.compile_paths_only and args.path_cache is None:
         raise ValueError("compile-paths-only requires --path-cache")
     if args.compile_evaluation_cache and not args.compile_paths_only:
@@ -1645,6 +1757,91 @@ def main() -> None:
             f"{empty_partitions}; enlarge the training/catalog split or increase "
             "the typed-template limits"
         )
+    training_support_cache = None
+    if args.training_support_cache_dir is not None:
+        training_support_signature = _training_support_cache_signature(
+            path_cache_signature,
+            seed=args.seed + 3,
+            late_time_fraction=args.late_time_fraction,
+            operational_horizon=args.operational_horizon,
+            progress_stratification_fraction=args.progress_stratification_fraction,
+            ring_electronic_mode=args.ring_electronic_mode,
+        )
+        training_support_cache = ShardedTrainingSupportCache(
+            args.training_support_cache_dir,
+            training_support_signature,
+            total_rows=args.steps * args.batch_size,
+            shard_size=args.training_support_shard_size,
+            wait_timeout_seconds=args.training_support_wait_seconds,
+        )
+    if args.compile_training_support_steps:
+        if training_support_cache is None or ring_catalog is None:
+            raise RuntimeError("training support compiler lacks its cache or ring catalog")
+        stop_index = args.compile_training_support_steps * args.batch_size
+        last_reported = 0
+
+        def report_support_progress(metrics: dict[str, float]) -> None:
+            nonlocal last_reported
+            compiled = int(metrics["compiled_rows"])
+            if compiled - last_reported < 4096 and int(metrics["absolute_stop"]) < stop_index:
+                return
+            last_reported = compiled
+            print(
+                json.dumps(
+                    {"phase": "training_support_compilation", **metrics},
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+
+        def report_support_shard(metrics: dict[str, float]) -> None:
+            print(
+                json.dumps(
+                    {"phase": "training_support_shard_saved", **metrics},
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+
+        started = perf_counter()
+        paths = compile_training_support_shards(
+            train_records,
+            cache=training_support_cache,
+            start_index=0,
+            stop_index=stop_index,
+            seed=args.seed + 3,
+            late_time_fraction=args.late_time_fraction,
+            operational_horizon=args.operational_horizon,
+            progress_stratification_fraction=args.progress_stratification_fraction,
+            ring_catalog=ring_catalog,
+            ring_electronic_mode=args.ring_electronic_mode,
+            workers=args.training_support_workers,
+            microbatch_size=args.training_support_microbatch_size,
+            prefetch_factor=args.training_support_prefetch_factor,
+            progress_callback=report_support_progress,
+            shard_callback=report_support_shard,
+        )
+        elapsed = perf_counter() - started
+        # Touch both ends through the validating mmap reader before declaring
+        # a prefix ready for an expensive GPU consumer.
+        training_support_cache.require(0)
+        training_support_cache.require(stop_index - 1)
+        print(
+            json.dumps(
+                {
+                    "phase": "training_support_cache_ready",
+                    "root": str(training_support_cache.root),
+                    "steps": args.compile_training_support_steps,
+                    "rows": stop_index,
+                    "shards": len(paths),
+                    "seconds": elapsed,
+                    "rows_per_second": stop_index / max(elapsed, 1e-12),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
     print(json.dumps({"phase": "evaluation_paths_compiled"}), flush=True)
     if args.compile_paths_only:
         print(
@@ -2175,6 +2372,12 @@ def main() -> None:
             profile_timing=args.fast_split,
             evaluation_batch_size=args.evaluation_batch_size,
             initial_validation_metrics=observed_validation,
+            training_support_cache=(
+                training_support_cache
+                if args.require_training_support_cache
+                else None
+            ),
+            require_cached_support=args.require_training_support_cache,
         )
     elif isinstance(model, torch.nn.Module) and loaded_checkpoint is None:
         training_fiber_cache = {}
