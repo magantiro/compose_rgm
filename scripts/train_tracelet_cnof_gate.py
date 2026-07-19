@@ -864,10 +864,22 @@ def main() -> None:
         help="support microbatches queued per compiler worker",
     )
     parser.add_argument(
+        "--compile-training-support-start-step",
+        type=int,
+        default=0,
+        help=(
+            "first training step in the deterministic support range; must begin "
+            "at a support-shard boundary"
+        ),
+    )
+    parser.add_argument(
         "--compile-training-support-steps",
         type=int,
         default=0,
-        help="compile this many leading training steps and exit; 0 disables compilation",
+        help=(
+            "number of training steps to compile from the requested start and "
+            "then exit; 0 disables compilation"
+        ),
     )
     parser.add_argument(
         "--require-training-support-cache",
@@ -985,8 +997,23 @@ def main() -> None:
         or args.training_support_prefetch_factor <= 0
     ):
         raise ValueError("training-support compiler dimensions must be positive")
+    if args.compile_training_support_start_step < 0:
+        raise ValueError("compile-training-support-start-step must be non-negative")
+    if (
+        args.compile_training_support_start_step
+        and not args.compile_training_support_steps
+    ):
+        raise ValueError(
+            "compile-training-support-start-step requires a non-empty compile range"
+        )
     if not 0 <= args.compile_training_support_steps <= args.steps:
         raise ValueError("compile-training-support-steps must lie in [0, steps]")
+    if (
+        args.compile_training_support_start_step
+        + args.compile_training_support_steps
+        > args.steps
+    ):
+        raise ValueError("compiled training-support range exceeds the training stream")
     if args.training_support_wait_seconds < 0.0:
         raise ValueError("training-support-wait-seconds must be non-negative")
     support_mode = bool(
@@ -1003,10 +1030,16 @@ def main() -> None:
             "compile-training-support-steps and require-training-support-cache "
             "are mutually exclusive"
         )
+    support_start_row = args.compile_training_support_start_step * args.batch_size
+    support_stop_row = (
+        args.compile_training_support_start_step
+        + args.compile_training_support_steps
+    ) * args.batch_size
     if args.compile_training_support_steps and (
-        args.compile_training_support_steps * args.batch_size
-    ) % args.training_support_shard_size:
-        raise ValueError("compiled support prefix must end at a shard boundary")
+        support_start_row % args.training_support_shard_size
+        or support_stop_row % args.training_support_shard_size
+    ):
+        raise ValueError("compiled support range must align to shard boundaries")
     if args.compile_paths_only and args.path_cache is None:
         raise ValueError("compile-paths-only requires --path-cache")
     if args.compile_evaluation_cache and not args.compile_paths_only:
@@ -1777,7 +1810,11 @@ def main() -> None:
     if args.compile_training_support_steps:
         if training_support_cache is None or ring_catalog is None:
             raise RuntimeError("training support compiler lacks its cache or ring catalog")
-        stop_index = args.compile_training_support_steps * args.batch_size
+        start_index = args.compile_training_support_start_step * args.batch_size
+        stop_index = (
+            args.compile_training_support_start_step
+            + args.compile_training_support_steps
+        ) * args.batch_size
         last_reported = 0
 
         def report_support_progress(metrics: dict[str, float]) -> None:
@@ -1807,7 +1844,7 @@ def main() -> None:
         paths = compile_training_support_shards(
             train_records,
             cache=training_support_cache,
-            start_index=0,
+            start_index=start_index,
             stop_index=stop_index,
             seed=args.seed + 3,
             late_time_fraction=args.late_time_fraction,
@@ -1824,18 +1861,22 @@ def main() -> None:
         elapsed = perf_counter() - started
         # Touch both ends through the validating mmap reader before declaring
         # a prefix ready for an expensive GPU consumer.
-        training_support_cache.require(0)
+        training_support_cache.require(start_index)
         training_support_cache.require(stop_index - 1)
         print(
             json.dumps(
                 {
                     "phase": "training_support_cache_ready",
                     "root": str(training_support_cache.root),
+                    "start_step": args.compile_training_support_start_step,
                     "steps": args.compile_training_support_steps,
-                    "rows": stop_index,
+                    "start_row": start_index,
+                    "stop_row": stop_index,
+                    "rows": stop_index - start_index,
                     "shards": len(paths),
                     "seconds": elapsed,
-                    "rows_per_second": stop_index / max(elapsed, 1e-12),
+                    "rows_per_second": (stop_index - start_index)
+                    / max(elapsed, 1e-12),
                 },
                 sort_keys=True,
             ),

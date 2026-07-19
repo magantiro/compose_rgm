@@ -82,6 +82,14 @@ As of 2026-07-19:
   instead of evaluating twice. Training batch size remains 64. A fresh
   integration gate must pass before relaunch; the 100-sample visual inspection
   and frozen 2,000-sample FCD evaluation remain required afterward.
+- Training support is also fail-closed and content-addressed. Exact sparse ring
+  support is compiled before GPU allocation from the frozen path stream. The
+  first 60-worker implementation saturated CPUs but replicated too much
+  4,096-template chemistry state in one address space (>372 GB), so it was
+  stopped without launching a GPU. The current launch surface assigns
+  deterministic non-overlapping cache-shard ranges to isolated
+  16-core/12-worker Modal containers; this preserves exact support and row
+  identity while bounding memory per container.
 - Full invariance of learned rates to arbitrary atom-slot permutations remains
   a formal audit obligation. Canonical successor aggregation fixes the measured
   Graft gauge churn; it is not by itself a proof of every presentation-level
@@ -125,20 +133,23 @@ needed to interpret and reproduce the archived stage-1 evaluation.
 
 ## Next gated sequence
 
-1. Commit and deploy from a commit-bearing immutable run label; confirm that
+1. Pass a one-shard, 16-core/12-worker support compilation gate. Then compile
+   the desired prefix across four non-overlapping containers and validate the
+   first and last row of every atomic sparse shard.
+2. Commit and deploy from a commit-bearing immutable run label; confirm that
    its Modal artifact directory does not already exist.
-2. Launch the fresh A100/32-CPU/24-worker flexible-size, quotient-correct
+3. Launch the fresh A100/32-CPU/24-worker flexible-size, quotient-correct
    unconditional run. Validation runs every 250 updates after a 500-update
    warmup, with six evaluations of early-stopping patience.
-3. At the first checkpoint with at least 65% validation-loss improvement,
+4. At the first checkpoint with at least 65% validation-loss improvement,
    family accuracy at least 0.75, and selected step at least 1,000, render 100
    ancestral samples and audit
    event rates, atom-count trajectories, ring phenotypes, Graft self-transitions,
    validity, connectivity, uniqueness, and novelty.
-4. Let early stopping freeze the validation-selected `checkpoint.pt`; after the
+5. Let early stopping freeze the validation-selected `checkpoint.pt`; after the
    A100 exits, evaluate 2,000 samples on CPU for FCD and its mean-versus-
    covariance decomposition.
-5. Add the valid-rewrite recovery objective, then run the matched QED and
+6. Add the valid-rewrite recovery objective, then run the matched QED and
    multi-objective guidance comparisons required by Paper 1.
 
 Validity makes conditional generation unusually actionable because the oracle,

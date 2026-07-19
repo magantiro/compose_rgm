@@ -182,6 +182,42 @@ def test_training_support_compiler_publishes_ordered_resumable_shards(tmp_path) 
     assert tuple(path.stat().st_mtime_ns for path in paths) == mtimes
 
 
+def test_training_support_compiler_preserves_absolute_indices_for_nonzero_range(
+    tmp_path,
+) -> None:
+    records, catalog = _records_and_catalog()
+    signature = {"format_version": 1, "stream": "nonzero-range"}
+    cache = ShardedTrainingSupportCache(
+        tmp_path,
+        signature,
+        total_rows=24,
+        shard_size=8,
+    )
+    paths = compile_training_support_shards(
+        records,
+        cache=cache,
+        start_index=8,
+        stop_index=16,
+        seed=47,
+        late_time_fraction=0.5,
+        operational_horizon=16.0,
+        progress_stratification_fraction=0.5,
+        ring_catalog=catalog,
+        ring_electronic_mode="factorized_local",
+        workers=0,
+        microbatch_size=4,
+    )
+    assert len(paths) == 1
+    oracle = _dataset(records, catalog, start_index=8, length=8)
+    for offset in range(8):
+        expected = oracle[offset]
+        observed = cache.require(8 + offset)
+        assert observed.indices == (expected.ring_grow_support_indices or ())
+        assert observed.width == expected.ring_grow_support_width
+        assert observed.support_is_exact == expected.ring_grow_support_is_exact
+        assert observed.enablement_is_exact == expected.ring_grow_enablement_is_exact
+
+
 def test_unordered_worker_scheduler_reconstructs_the_sequential_stream() -> None:
     records, catalog = _records_and_catalog()
     arguments = {

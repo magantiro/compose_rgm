@@ -16,6 +16,9 @@ _rollout_manifest_signature = modal_entrypoint._rollout_manifest_signature
 _rollout_evaluation_profile = modal_entrypoint._rollout_evaluation_profile
 _rollout_remote_summary = modal_entrypoint._rollout_remote_summary
 _run_pipeline = modal_entrypoint._run_pipeline
+_partition_training_support_steps = (
+    modal_entrypoint._partition_training_support_steps
+)
 _stable_json_sha256 = modal_entrypoint._stable_json_sha256
 _remote_stage_kind = modal_entrypoint._remote_stage_kind
 _source_fingerprint = modal_entrypoint._source_fingerprint
@@ -481,6 +484,31 @@ def test_stage_identity_hash_is_order_independent_and_stage_specific() -> None:
         compile_training_support_steps=2000,
         evaluation_source_run=None,
     ) == "support_compile"
+
+
+def test_support_ranges_partition_complete_shards_without_overlap() -> None:
+    assert _partition_training_support_steps(
+        start_step=500,
+        steps=2000,
+        containers=4,
+    ) == (
+        (500, 500),
+        (1000, 500),
+        (1500, 500),
+        (2000, 500),
+    )
+    with pytest.raises(ValueError, match="complete cache shards"):
+        _partition_training_support_steps(
+            start_step=0,
+            steps=251,
+            containers=1,
+        )
+    with pytest.raises(ValueError, match="cannot exceed"):
+        _partition_training_support_steps(
+            start_step=0,
+            steps=500,
+            containers=3,
+        )
 
 
 @pytest.mark.parametrize(

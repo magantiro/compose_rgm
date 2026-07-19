@@ -43,7 +43,12 @@ evidence so a collaborator can tell what is actually running.
   microbatches and reuses the already-computed step-zero metrics. Training
   batch size remains 64; the streamed reduction is mathematically the same
   full-set evaluation without full-set GPU residency.
-- The full local suite passes: **302 tests** with `PYTHONPATH=src`, with two
+- Exact training ring support is now a content-addressed sparse cache compiled
+  entirely before GPU allocation. A trainer must load the requested rows and
+  cannot silently fall back to online chemistry. Cache identity includes the
+  path/sampling signature and ring-support semantics, so neural and optimizer
+  changes reuse it while rewrite-semantic changes invalidate it.
+- The full local suite passes: **313 tests** with `PYTHONPATH=src`, with two
   non-failing warnings.
 
 ## Completed cloud gates
@@ -104,6 +109,18 @@ FCD is not a model-quality result.
   examples. Runs with the same scientific signature reuse it without chemistry
   recompilation, saving about 37 minutes relative to this CPU path and 52
   minutes relative to the retired in-A100 path.
+- The next bottleneck was isolated to exact ring-support construction for the
+  deterministic training stream. Computing it inside the A100 DataLoader took
+  roughly 7.5 minutes per 64-row batch and left the GPU idle. A 60-worker
+  single-container compiler restored parallel CPU use, but each worker retained
+  enough of the 4,096-template chemistry engine that memory exceeded 372 GB
+  before the first 16,000-row shard completed. That CPU-only gate was stopped;
+  no GPU was allocated.
+- Support compilation now accepts shard-aligned absolute step ranges. The
+  launch surface partitions them across isolated 16-core/12-worker Modal
+  containers with unique immutable run directories and non-overlapping atomic
+  shard files. This changes only execution placement: exact masks, deterministic
+  row indices, and the training objective are bit-for-bit unchanged.
 
 ## Immediate sequence
 
@@ -111,18 +128,22 @@ FCD is not a model-quality result.
    real CPU-to-A100-to-CPU boundary smoke.
 2. **Done:** reuse the immutable `2be9258` path cache, build the signed fixed
    evaluation cache on a 64-CPU stage, and pass the streamed-evaluation
-   integration gate. **Next:** relaunch A100/32-CPU/24-worker training from the
-   commit containing the exact successor-computation optimizations.
-3. At the first credible checkpoint (no earlier than step 500), inspect 100
+   integration gate.
+3. **Active:** pass one memory-safe isolated support-range gate, then compile
+   the early-training prefix across four containers (64 allocated CPUs total).
+   Verify every sparse shard before allocating an A100.
+4. Relaunch A100/32-CPU/24-worker training from the commit containing the exact
+   successor optimizations and required support-cache consumer. At the first
+   credible checkpoint, inspect 100
    ancestral samples and their compact full-trajectory diagnostics.
    Hard-stop on any validity/connectivity failure, event-budget exhaustion,
    canonical self-event, delete-to-one recurrence, severe operator collapse,
    or the preregistered distribution/ring thresholds. Treat n=100 FCD and
    missing rare spiro/bridged modes as warnings, then recheck at step 1,000.
-4. Let validation early stopping select the checkpoint. After the GPU is
+5. Let validation early stopping select the checkpoint. After the GPU is
    released, run the automatic CPU 2,000-sample/FCD evaluation with full
    trajectory, operator, size, element, bond-order, and ring diagnostics.
-5. Once unconditional sufficiency is established, implement valid-rewrite
+6. Once unconditional sufficiency is established, implement valid-rewrite
    recovery and run the matched QED/conditional-guidance gate required before
    COMPOSE-Lipid candidate generation.
 

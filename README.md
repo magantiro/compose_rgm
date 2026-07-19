@@ -121,6 +121,12 @@ pytest
   stage that refuses to start without a complete cache. Training releases the
   GPU before the retry-safe CPU 2,000-sample/FCD evaluation. Immutable stage
   manifests bind resumes to code, recipe, and data provenance.
+- Exact per-row ring support is compiled into content-addressed CSR shards
+  before GPU training. Shard-aligned absolute ranges can be built concurrently
+  by isolated Modal CPU containers, and the trainer fails rather than reverting
+  to expensive online chemistry when any requested row is missing. The cache
+  retains deterministic Generator Matching semantics across neural or optimizer
+  changes and is invalidated by rewrite/path-signature changes.
 - First end-to-end learned gate passed: 1,000 target-free rollouts were 100%
   valid/connected, 99.8% non-null, 99.5% on tiny reference support, recovered
   all reference modes, and reached total variation 0.0523.

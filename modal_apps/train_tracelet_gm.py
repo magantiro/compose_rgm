@@ -47,6 +47,10 @@ ROLLOUT_TIME_STEP = 0.1
 ROLLOUT_MAX_EVENTS = 128
 TRAINING_SUPPORT_CACHE_DIR = "/artifacts/_shared/training_support"
 TRAINING_SUPPORT_SHARD_SIZE = 16000
+TRAINING_SUPPORT_BATCH_SIZE = 64
+TRAINING_SUPPORT_SHARD_STEPS = (
+    TRAINING_SUPPORT_SHARD_SIZE // TRAINING_SUPPORT_BATCH_SIZE
+)
 TRAINING_SUPPORT_MINIMUM_ROWS_PER_SECOND = 64.0
 SOURCE_TREE_IGNORE = ("**/__pycache__/**", "**/*.pyc")
 SOURCE_FINGERPRINT_SUFFIXES = frozenset({".py", ".json"})
@@ -611,6 +615,39 @@ def _stable_json_sha256(payload: object) -> str:
     return hashlib.sha256(serialized).hexdigest()
 
 
+def _partition_training_support_steps(
+    *,
+    start_step: int,
+    steps: int,
+    containers: int,
+) -> tuple[tuple[int, int], ...]:
+    """Partition complete cache shards into deterministic contiguous ranges."""
+
+    if start_step < 0 or steps <= 0 or containers <= 0:
+        raise ValueError("support range and container count must be positive")
+    if (
+        start_step % TRAINING_SUPPORT_SHARD_STEPS
+        or steps % TRAINING_SUPPORT_SHARD_STEPS
+    ):
+        raise ValueError(
+            "support start and length must align to complete cache shards"
+        )
+    shard_count = steps // TRAINING_SUPPORT_SHARD_STEPS
+    if containers > shard_count:
+        raise ValueError("support containers cannot exceed complete cache shards")
+    base, remainder = divmod(shard_count, containers)
+    ranges = []
+    cursor = int(start_step)
+    for index in range(containers):
+        range_shards = base + int(index < remainder)
+        range_steps = range_shards * TRAINING_SUPPORT_SHARD_STEPS
+        ranges.append((cursor, range_steps))
+        cursor += range_steps
+    if cursor != start_step + steps:
+        raise RuntimeError("support range partitioning lost deterministic coverage")
+    return tuple(ranges)
+
+
 def _remote_stage_kind(
     *,
     smoke: bool,
@@ -638,6 +675,7 @@ def _run_remote(
     smoke: bool,
     preflight: bool = False,
     compile_paths_only: bool = False,
+    compile_training_support_start_step: int = 0,
     compile_training_support_steps: int = 0,
     require_path_cache: bool = False,
     require_training_support_cache: bool = False,
@@ -647,7 +685,7 @@ def _run_remote(
     evaluation_checkpoint_name: str = "checkpoint.best_step3000.pt",
     path_cache_source_run: str | None = None,
     training_steps: int | None = None,
-    training_support_workers: int = 60,
+    training_support_workers: int = 12,
     training_support_microbatch_size: int = 4,
     training_support_prefetch_factor: int = 2,
     training_support_wait_seconds: float = 600.0,
@@ -665,8 +703,12 @@ def _run_remote(
         preflight=preflight,
         recipe_name=recipe_name,
     )
+    if compile_training_support_start_step < 0:
+        raise ValueError("compile-training-support start step must be non-negative")
     if compile_training_support_steps < 0:
         raise ValueError("compile-training-support steps must be non-negative")
+    if compile_training_support_start_step and not compile_training_support_steps:
+        raise ValueError("support start step requires a non-empty compile range")
     if training_steps is not None and training_steps <= 0:
         raise ValueError("training steps must be positive")
     if min(
@@ -766,6 +808,9 @@ def _run_remote(
             {
                 "compile_training_support_steps": int(
                     compile_training_support_steps
+                ),
+                "compile_training_support_start_step": int(
+                    compile_training_support_start_step
                 ),
                 "training_support_workers": int(training_support_workers),
                 "training_support_microbatch_size": int(
@@ -903,6 +948,9 @@ def _run_remote(
         "smoke": smoke,
         "preflight": preflight,
         "compile_paths_only": compile_paths_only,
+        "compile_training_support_start_step": (
+            compile_training_support_start_step
+        ),
         "compile_training_support_steps": compile_training_support_steps,
         "require_path_cache": require_path_cache,
         "require_training_support_cache": require_training_support_cache,
@@ -1144,7 +1192,7 @@ def h100_preflight_stage(
 @app.function(
     image=image,
     cpu=64.0,
-    memory=344064,
+    memory=131072,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
     retries=modal.Retries(max_retries=2, backoff_coefficient=2.0),
@@ -1167,7 +1215,7 @@ def compile_stage(
 
 @app.function(
     image=image,
-    cpu=64.0,
+    cpu=16.0,
     memory=131072,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
@@ -1177,16 +1225,18 @@ def compile_training_support_stage(
     path_cache_source_run: str,
     steps: int = 2000,
     recipe_name: str = RECIPE_NAME,
-    workers: int = 60,
+    start_step: int = 0,
+    workers: int = 12,
     microbatch_size: int = 4,
     prefetch_factor: int = 2,
-    minimum_rows_per_second: float = TRAINING_SUPPORT_MINIMUM_ROWS_PER_SECOND,
+    minimum_rows_per_second: float = 0.0,
 ) -> dict[str, object]:
-    """Compile exact sparse support on CPUs and reject an unfeedable stream."""
+    """Compile one exact, shard-aligned support range in an isolated container."""
 
     return _run_remote(
         run_label=run_label,
         smoke=False,
+        compile_training_support_start_step=start_step,
         compile_training_support_steps=steps,
         require_path_cache=True,
         recipe_name=recipe_name,
@@ -1696,7 +1746,10 @@ def main(
     source_run_label: str = "",
     checkpoint_name: str = "checkpoint.best_so_far.pt",
     rollout_samples: int = 100,
+    support_start_step: int = 0,
     support_steps: int = 2000,
+    support_containers: int = 1,
+    support_workers: int = 12,
     training_steps: int = 0,
 ) -> None:
     modes = sum(
@@ -1726,6 +1779,12 @@ def main(
     _validate_run_label(run_label)
     if support_steps <= 0:
         raise ValueError("--support-steps must be positive")
+    if support_start_step < 0:
+        raise ValueError("--support-start-step must be non-negative")
+    if support_containers <= 0:
+        raise ValueError("--support-containers must be positive")
+    if not 0 < support_workers < 16:
+        raise ValueError("--support-workers must lie in [1, 15]")
     if training_steps < 0:
         raise ValueError("--training-steps must be non-negative")
     if integration_smoke:
@@ -1778,12 +1837,36 @@ def main(
             raise ValueError(
                 "support-compile-only requires --source-run-label for paths"
             )
-        call = compile_training_support_stage.spawn(
-            run_label,
-            source_run_label,
-            support_steps,
-            recipe_name,
+        ranges = _partition_training_support_steps(
+            start_step=support_start_step,
+            steps=support_steps,
+            containers=support_containers,
         )
+        calls = []
+        for index, (range_start, range_steps) in enumerate(ranges):
+            range_label = (
+                run_label
+                if len(ranges) == 1
+                else f"{run_label}-part{index:02d}"
+            )
+            _validate_run_label(range_label)
+            call = compile_training_support_stage.spawn(
+                run_label=range_label,
+                path_cache_source_run=source_run_label,
+                steps=range_steps,
+                recipe_name=recipe_name,
+                start_step=range_start,
+                workers=support_workers,
+                minimum_rows_per_second=0.0,
+            )
+            calls.append(
+                {
+                    "function_call_id": call.object_id,
+                    "run_label": range_label,
+                    "start_step": range_start,
+                    "steps": range_steps,
+                }
+            )
         phase = "support_compile_spawned"
     elif compile_only:
         call = compile_stage.spawn(
@@ -1804,13 +1887,10 @@ def main(
     else:
         call = pipeline_stage.spawn(run_label, recipe_name)
         phase = "pipeline_spawned"
-    print(
-        json.dumps(
-            {
-                "phase": phase,
-                "function_call_id": call.object_id,
-                "recipe_name": recipe_name,
-            }
-        )
-    )
+    payload = {"phase": phase, "recipe_name": recipe_name}
+    if support_compile_only:
+        payload["calls"] = calls
+    else:
+        payload["function_call_id"] = call.object_id
+    print(json.dumps(payload))
     print("Artifacts: Modal volume compose-v4-artifacts / " + run_label)
