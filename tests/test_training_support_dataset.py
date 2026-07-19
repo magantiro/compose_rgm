@@ -17,6 +17,7 @@ from compose_v4.experiments.training_support_cache import (
 )
 from compose_v4.experiments.training_support_compiler import (
     compile_training_support_shards,
+    iter_training_support_rows,
 )
 from compose_v4.model.factorized_tracelet_rate_model import molecular_state_cache_key
 from compose_v4.rewrite.progress import TraceProgressCTMC
@@ -179,3 +180,27 @@ def test_training_support_compiler_publishes_ordered_resumable_shards(tmp_path) 
     )
     assert resumed == paths
     assert tuple(path.stat().st_mtime_ns for path in paths) == mtimes
+
+
+def test_unordered_worker_scheduler_reconstructs_the_sequential_stream() -> None:
+    records, catalog = _records_and_catalog()
+    arguments = {
+        "start_index": 0,
+        "stop_index": 16,
+        "seed": 47,
+        "late_time_fraction": 0.5,
+        "operational_horizon": 16.0,
+        "progress_stratification_fraction": 0.5,
+        "ring_catalog": catalog,
+        "ring_electronic_mode": "factorized_local",
+        "microbatch_size": 2,
+        "prefetch_factor": 2,
+    }
+    sequential = tuple(
+        iter_training_support_rows(records, workers=0, **arguments)
+    )
+    parallel = tuple(
+        iter_training_support_rows(records, workers=2, **arguments)
+    )
+
+    assert parallel == sequential

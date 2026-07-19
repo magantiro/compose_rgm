@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
+import multiprocessing as mp
 from pathlib import Path
+from queue import Queue
 from time import perf_counter
-from typing import Any
 
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_mark_conditional import FactorizedMarkDataset
@@ -76,16 +77,20 @@ class TrainingSupportCompilationDataset(Dataset[IndexedTrainingSupportRow]):
         )
 
 
-def _collate_support_rows(
-    rows: list[IndexedTrainingSupportRow],
-) -> tuple[IndexedTrainingSupportRow, ...]:
-    return tuple(rows)
+_SUPPORT_COMPILATION_DATASET: TrainingSupportCompilationDataset | None = None
 
 
-def _initialize_support_worker(_: int) -> None:
+def _initialize_support_worker() -> None:
     # Chemistry workers are process-parallel; nested BLAS/Torch thread pools
     # only oversubscribe the container and amplify long-tail latency.
     torch.set_num_threads(1)
+
+
+def _compile_support_row(index: int) -> IndexedTrainingSupportRow:
+    dataset = _SUPPORT_COMPILATION_DATASET
+    if dataset is None:
+        raise RuntimeError("support worker was started without its forked dataset")
+    return dataset[int(index)]
 
 
 def iter_training_support_rows(
@@ -103,7 +108,14 @@ def iter_training_support_rows(
     microbatch_size: int,
     prefetch_factor: int = 2,
 ) -> Iterator[IndexedTrainingSupportRow]:
-    """Yield ordered rows while workers dynamically execute small chunks."""
+    """Yield ordered rows from a bounded, dynamically scheduled worker queue.
+
+    A standard ordered DataLoader stops feeding workers when one early row is
+    unusually expensive.  Exact ring support has precisely that heavy-tailed
+    latency profile.  Workers therefore complete individual indices out of
+    order while the parent buffers a bounded window and releases only the next
+    deterministic absolute index.
+    """
 
     if start_index < 0 or stop_index <= start_index:
         raise ValueError("training support compilation bounds are invalid")
@@ -121,28 +133,84 @@ def iter_training_support_rows(
         ring_catalog=ring_catalog,
         ring_electronic_mode=ring_electronic_mode,
     )
-    options: dict[str, Any] = {}
-    if workers > 0:
-        options.update(
-            persistent_workers=True,
-            prefetch_factor=prefetch_factor,
-            worker_init_fn=_initialize_support_worker,
-            # The production container is Linux. Explicit fork preserves the
-            # parent-loaded path corpus and multi-gigabyte catalog by COW.
-            multiprocessing_context="fork",
-        )
-    loader = DataLoader(
-        dataset,
-        batch_size=microbatch_size,
-        shuffle=False,
-        num_workers=workers,
-        collate_fn=_collate_support_rows,
-        pin_memory=False,
-        drop_last=False,
-        **options,
+    if workers == 0:
+        for index in range(len(dataset)):
+            yield dataset[index]
+        return
+
+    # Keep enough independent rows in flight to absorb rare multi-second ring
+    # certificates without allowing an unbounded reordering buffer.  The
+    # existing microbatch option now controls queue depth, not task grouping;
+    # each task remains one row so no fast row is trapped behind a slow peer.
+    reorder_window = max(
+        4096,
+        int(workers) * int(microbatch_size) * int(prefetch_factor),
     )
-    for microbatch in loader:
-        yield from microbatch
+    global _SUPPORT_COMPILATION_DATASET
+    _SUPPORT_COMPILATION_DATASET = dataset
+    context = mp.get_context("fork")
+    pool = context.Pool(
+        processes=workers,
+        initializer=_initialize_support_worker,
+    )
+    completions: Queue[tuple[bool, object]] = Queue()
+    pending: dict[int, IndexedTrainingSupportRow] = {}
+    next_submit = 0
+    next_yield = 0
+    in_flight = 0
+
+    def fill_window() -> None:
+        nonlocal in_flight, next_submit
+        while (
+            next_submit < len(dataset)
+            and next_submit - next_yield < reorder_window
+        ):
+            pool.apply_async(
+                _compile_support_row,
+                (next_submit,),
+                callback=lambda row: completions.put((True, row)),
+                error_callback=lambda error: completions.put((False, error)),
+            )
+            in_flight += 1
+            next_submit += 1
+
+    completed_normally = False
+    try:
+        fill_window()
+        while in_flight:
+            succeeded, payload = completions.get()
+            in_flight -= 1
+            if not succeeded:
+                if isinstance(payload, BaseException):
+                    raise payload
+                raise RuntimeError(f"support worker failed: {payload!r}")
+            if not isinstance(payload, IndexedTrainingSupportRow):
+                raise TypeError("support worker returned an invalid row payload")
+            row = payload
+            local_index = int(row.absolute_index) - int(start_index)
+            if not 0 <= local_index < len(dataset):
+                raise RuntimeError(
+                    "support worker returned the wrong deterministic index"
+                )
+            if local_index in pending or local_index < next_yield:
+                raise RuntimeError("support worker returned a duplicate row")
+            pending[local_index] = row
+            while next_yield in pending:
+                row = pending.pop(next_yield)
+                next_yield += 1
+                fill_window()
+                yield row
+            fill_window()
+        if pending or next_yield != len(dataset):
+            raise RuntimeError("support compiler lost a reordered worker result")
+        completed_normally = True
+    finally:
+        if completed_normally:
+            pool.close()
+        else:
+            pool.terminate()
+        pool.join()
+        _SUPPORT_COMPILATION_DATASET = None
 
 
 def _validated_cached_prefix(
