@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from dataclasses import dataclass, replace
 from math import sqrt
-from typing import Any
+from typing import Any, MutableMapping
 
 import networkx as nx
 import numpy as np
@@ -101,6 +101,148 @@ _CNOF_TO_INDEX = {int(atom_type): index for index, atom_type in enumerate(CNOF_A
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 
 
+StateCacheKey = tuple[bytes, bytes, bytes, bytes]
+
+
+def molecular_state_cache_key(state: MolecularGraph) -> StateCacheKey:
+    """Return an exact slot-aware key for chemistry-only feature reuse."""
+
+    return (
+        state.atom_types.tobytes(),
+        state.formal_charges.tobytes(),
+        state.implicit_h_counts.tobytes(),
+        state.bonds.tobytes(),
+    )
+
+
+@dataclass(frozen=True)
+class ChemistryStateFeatures:
+    """Reusable application conditions that depend only on one molecular state."""
+
+    atom_topology: np.ndarray
+    closure_topology: np.ndarray
+    ring_system_topology: np.ndarray
+    atom_delete_mask: np.ndarray
+    cycle_edge_mask: np.ndarray
+    cyclic_pair_mask: np.ndarray
+    graft_mask: np.ndarray
+    graft_remove_neighbors: np.ndarray
+    graft_successor_groups: np.ndarray
+    neural_bonds: np.ndarray
+    ring_delete_actions: tuple[RingSystemDelete, ...] | None
+
+
+@dataclass(frozen=True)
+class SparseBinaryRows:
+    """CSR storage for a Boolean matrix with exact dense reconstruction."""
+
+    indptr: Tensor
+    indices: Tensor
+    width: int
+
+    def __post_init__(self) -> None:
+        if self.indptr.ndim != 1 or self.indices.ndim != 1:
+            raise ValueError("sparse Boolean rows require one-dimensional tensors")
+        if self.indptr.dtype != torch.long or self.indices.dtype != torch.long:
+            raise ValueError("sparse Boolean row indices must use torch.long")
+        if self.width < 0 or len(self.indptr) == 0:
+            raise ValueError("sparse Boolean rows have invalid dimensions")
+        if int(self.indptr[0]) != 0 or int(self.indptr[-1]) != len(self.indices):
+            raise ValueError("sparse Boolean row pointers are inconsistent")
+        if bool((self.indptr[1:] < self.indptr[:-1]).any()):
+            raise ValueError("sparse Boolean row pointers must be monotone")
+        if len(self.indices) and (
+            int(self.indices.min()) < 0 or int(self.indices.max()) >= self.width
+        ):
+            raise ValueError("sparse Boolean column index lies outside the matrix")
+
+    @property
+    def n_rows(self) -> int:
+        return len(self.indptr) - 1
+
+    @classmethod
+    def from_index_rows(
+        cls,
+        rows: tuple[tuple[int, ...], ...],
+        *,
+        width: int,
+    ) -> "SparseBinaryRows":
+        if width < 0:
+            raise ValueError("sparse Boolean width must be non-negative")
+        flattened: list[int] = []
+        pointers = [0]
+        for row in rows:
+            normalized = tuple(sorted(set(int(index) for index in row)))
+            if normalized and (normalized[0] < 0 or normalized[-1] >= width):
+                raise ValueError("sparse Boolean row contains an invalid index")
+            flattened.extend(normalized)
+            pointers.append(len(flattened))
+        return cls(
+            indptr=torch.tensor(pointers, dtype=torch.long),
+            indices=torch.tensor(flattened, dtype=torch.long),
+            width=int(width),
+        )
+
+    @classmethod
+    def from_dense(cls, mask: Tensor) -> "SparseBinaryRows":
+        if mask.ndim != 2:
+            raise ValueError("dense Boolean support must be a matrix")
+        cpu_mask = mask.detach().to(device="cpu", dtype=torch.bool)
+        rows = tuple(
+            tuple(int(index) for index in torch.nonzero(row, as_tuple=False).flatten())
+            for row in cpu_mask
+        )
+        return cls.from_index_rows(rows, width=int(cpu_mask.shape[1]))
+
+    def subrows(self, start: int, stop: int) -> "SparseBinaryRows":
+        if not 0 <= start < stop <= self.n_rows:
+            raise ValueError("invalid sparse Boolean row slice")
+        lower = int(self.indptr[start])
+        upper = int(self.indptr[stop])
+        return SparseBinaryRows(
+            indptr=self.indptr[start : stop + 1] - lower,
+            indices=self.indices[lower:upper],
+            width=self.width,
+        )
+
+    def index_rows(self) -> tuple[tuple[int, ...], ...]:
+        return tuple(
+            tuple(
+                int(index)
+                for index in self.indices[
+                    int(self.indptr[row]) : int(self.indptr[row + 1])
+                ]
+            )
+            for row in range(self.n_rows)
+        )
+
+    def to_dense(self, *, device: torch.device | None = None) -> Tensor:
+        resolved_device = self.indices.device if device is None else device
+        dense = torch.zeros(
+            (self.n_rows, self.width),
+            dtype=torch.bool,
+            device=resolved_device,
+        )
+        if len(self.indices):
+            counts = self.indptr[1:] - self.indptr[:-1]
+            row_indices = torch.repeat_interleave(
+                torch.arange(self.n_rows, dtype=torch.long),
+                counts,
+            ).to(device=resolved_device)
+            dense[
+                row_indices,
+                self.indices.to(device=resolved_device),
+            ] = True
+        return dense
+
+    def pin_memory(self) -> "SparseBinaryRows":
+        return SparseBinaryRows(
+            indptr=self.indptr.pin_memory(),
+            indices=self.indices.pin_memory(),
+            width=self.width,
+        )
+
+
 @dataclass(frozen=True)
 class FactorizedMarkBatch:
     """CPU tensors and aligned teacher marks for one dense GM batch."""
@@ -127,6 +269,7 @@ class FactorizedMarkBatch:
     importance_weights: Tensor
     ring_restate_actions: tuple[tuple[RingSystemRestate, ...], ...]
     ring_grow_support_mask: Tensor | None = None
+    ring_grow_support_sparse: SparseBinaryRows | None = None
     ring_delete_actions: tuple[tuple[RingSystemDelete, ...], ...] | None = None
     ring_grow_support_is_exact: Tensor | bool = False
     ring_grow_enablement_is_exact: Tensor | bool = False
@@ -138,6 +281,19 @@ class FactorizedMarkBatch:
     @property
     def n_slots(self) -> int:
         return int(self.atom_types.shape[1])
+
+    def dense_ring_grow_support(self, *, device: torch.device | None = None) -> Tensor | None:
+        if self.ring_grow_support_mask is not None:
+            return (
+                self.ring_grow_support_mask
+                if device is None
+                else self.ring_grow_support_mask.to(device=device)
+            )
+        if self.ring_grow_support_sparse is None:
+            return None
+        if self.ring_grow_support_sparse.n_rows != self.batch_size:
+            raise ValueError("sparse ring support has the wrong row count")
+        return self.ring_grow_support_sparse.to_dense(device=device)
 
     def subbatch(self, start: int, stop: int) -> "FactorizedMarkBatch":
         """Return an aligned contiguous view for lossless streamed evaluation."""
@@ -180,6 +336,11 @@ class FactorizedMarkBatch:
                 if self.ring_grow_support_mask is None
                 else tensor_slice(self.ring_grow_support_mask)
             ),
+            ring_grow_support_sparse=(
+                None
+                if self.ring_grow_support_sparse is None
+                else self.ring_grow_support_sparse.subrows(start, stop)
+            ),
             ring_delete_actions=(
                 None
                 if self.ring_delete_actions is None
@@ -220,6 +381,9 @@ class FactorizedMarkBatch:
             ring_grow_support_mask=(
                 None if self.ring_grow_support_mask is None else move(self.ring_grow_support_mask)
             ),
+            # CSR support stays on CPU and is materialized directly on the
+            # destination device only when the model builds its action table.
+            ring_grow_support_sparse=self.ring_grow_support_sparse,
             ring_delete_actions=self.ring_delete_actions,
             # Exactness flags are control-flow metadata, not model inputs.
             # Keeping them on CPU avoids a CUDA-to-Python synchronization in
@@ -256,6 +420,11 @@ class FactorizedMarkBatch:
             ring_restate_actions=self.ring_restate_actions,
             ring_grow_support_mask=(
                 None if self.ring_grow_support_mask is None else pin(self.ring_grow_support_mask)
+            ),
+            ring_grow_support_sparse=(
+                None
+                if self.ring_grow_support_sparse is None
+                else self.ring_grow_support_sparse.pin_memory()
             ),
             ring_delete_actions=self.ring_delete_actions,
             ring_grow_support_is_exact=(
@@ -300,6 +469,12 @@ def prepare_factorized_mark_batch(
     *,
     use_aromatic_bond_view: bool = True,
     ring_catalog: TypedRingCatalog | None = None,
+    chemistry_feature_cache: MutableMapping[
+        tuple[int, bool, StateCacheKey], ChemistryStateFeatures
+    ]
+    | None = None,
+    chemistry_feature_cache_limit: int = 2048,
+    compute_ring_grow_support: bool = True,
 ) -> FactorizedMarkBatch:
     """Collate valid states and cheap graph-theoretic application conditions."""
 
@@ -320,6 +495,8 @@ def prepare_factorized_mark_batch(
     weights = importance_weights or (1.0,) * count
     if len(weights) != count:
         raise ValueError("importance weights have the wrong length")
+    if chemistry_feature_cache_limit <= 0:
+        raise ValueError("chemistry feature cache limit must be positive")
 
     atom_topology = []
     closure_topology = []
@@ -335,35 +512,76 @@ def prepare_factorized_mark_batch(
     ring_grow_support_masks = []
     ring_delete_actions = []
     ring_system_templates = (
-        None if ring_catalog is None else structured_ring_system_templates(ring_catalog)
+        None
+        if ring_catalog is None or not compute_ring_grow_support
+        else structured_ring_system_templates(ring_catalog)
     )
     ring_system_template_aliases = (
         None
-        if ring_catalog is None
+        if ring_catalog is None or not compute_ring_grow_support
         else structured_ring_system_template_aliases(ring_catalog)
     )
     for state in states:
-        atom_topo, closure_topo, ring_system_topo = compute_topology_features(state)
-        (
-            delete_mask,
-            cycle_edge_mask,
-            cyclic_pair_mask,
-            graft_mask,
-            graft_remove_neighbor,
-            graft_successor_group,
-        ) = _graph_application_masks(state, atom_topo)
-        atom_topology.append(atom_topo)
-        closure_topology.append(closure_topo)
-        ring_system_topology.append(ring_system_topo)
-        delete_masks.append(delete_mask)
-        cycle_edge_masks.append(cycle_edge_mask)
-        cyclic_pair_masks.append(cyclic_pair_mask)
-        graft_masks.append(graft_mask)
-        graft_remove_neighbors.append(graft_remove_neighbor)
-        graft_successor_groups.append(graft_successor_group)
-        neural_bonds.append(
-            resonance_invariant_bond_classes(state) if use_aromatic_bond_view else state.bonds
+        feature_key = (
+            0 if ring_catalog is None else id(ring_catalog),
+            bool(use_aromatic_bond_view),
+            molecular_state_cache_key(state),
         )
+        features = (
+            None
+            if chemistry_feature_cache is None
+            else chemistry_feature_cache.get(feature_key)
+        )
+        if features is None:
+            atom_topo, closure_topo, ring_system_topo = compute_topology_features(state)
+            (
+                delete_mask,
+                cycle_edge_mask,
+                cyclic_pair_mask,
+                graft_mask,
+                graft_remove_neighbor,
+                graft_successor_group,
+            ) = _graph_application_masks(state, atom_topo)
+            features = ChemistryStateFeatures(
+                atom_topology=atom_topo,
+                closure_topology=closure_topo,
+                ring_system_topology=ring_system_topo,
+                atom_delete_mask=delete_mask,
+                cycle_edge_mask=cycle_edge_mask,
+                cyclic_pair_mask=cyclic_pair_mask,
+                graft_mask=graft_mask,
+                graft_remove_neighbors=graft_remove_neighbor,
+                graft_successor_groups=graft_successor_group,
+                neural_bonds=(
+                    resonance_invariant_bond_classes(state)
+                    if use_aromatic_bond_view
+                    else state.bonds
+                ),
+                ring_delete_actions=(
+                    None
+                    if ring_catalog is None
+                    else enumerate_structured_ring_system_deletes(state, ring_catalog)
+                ),
+            )
+            if chemistry_feature_cache is not None:
+                chemistry_feature_cache[feature_key] = features
+                while len(chemistry_feature_cache) > chemistry_feature_cache_limit:
+                    if isinstance(chemistry_feature_cache, OrderedDict):
+                        chemistry_feature_cache.popitem(last=False)
+                    else:
+                        chemistry_feature_cache.pop(next(iter(chemistry_feature_cache)))
+        elif isinstance(chemistry_feature_cache, OrderedDict):
+            chemistry_feature_cache.move_to_end(feature_key)
+        atom_topology.append(features.atom_topology)
+        closure_topology.append(features.closure_topology)
+        ring_system_topology.append(features.ring_system_topology)
+        delete_masks.append(features.atom_delete_mask)
+        cycle_edge_masks.append(features.cycle_edge_mask)
+        cyclic_pair_masks.append(features.cyclic_pair_mask)
+        graft_masks.append(features.graft_mask)
+        graft_remove_neighbors.append(features.graft_remove_neighbors)
+        graft_successor_groups.append(features.graft_successor_groups)
+        neural_bonds.append(features.neural_bonds)
         # Atomic RingSystemGrow already commits the complete typed electronic
         # state in the production carbon-tree teachers.  Those paths contain
         # no independent RingSystemRestate marks, so enumerating an exhaustive
@@ -381,12 +599,10 @@ def prepare_factorized_mark_batch(
                     dtype=np.bool_,
                 )
             )
-            ring_delete_actions.append(
-                enumerate_structured_ring_system_deletes(
-                    state,
-                    ring_catalog,
-                )
-            )
+        if ring_catalog is not None:
+            if features.ring_delete_actions is None:
+                raise RuntimeError("ring-aware state features lack delete actions")
+            ring_delete_actions.append(features.ring_delete_actions)
 
     return FactorizedMarkBatch(
         states=states,
@@ -416,7 +632,7 @@ def prepare_factorized_mark_batch(
         ring_restate_actions=tuple(restate_actions),
         ring_grow_support_mask=(
             None
-            if ring_catalog is None
+            if ring_catalog is None or not compute_ring_grow_support
             else torch.from_numpy(np.stack(ring_grow_support_masks)).bool()
         ),
         ring_delete_actions=(None if ring_catalog is None else tuple(ring_delete_actions)),
@@ -426,6 +642,8 @@ def prepare_factorized_mark_batch(
 def _graph_application_masks(
     state: MolecularGraph,
     atom_topology: np.ndarray,
+    *,
+    optimize_graft_canonicalization: bool = True,
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -496,17 +714,43 @@ def _graph_application_masks(
                         for child in tree_adjacency[vertex]
                         if child != parent
                     )
-        working_hydrogens = state.implicit_h_counts.copy()
         tree_codebook: dict[tuple[Any, ...], int] = {}
-        current_key = _canonical_colored_tree_key_from_adjacency(
-            tree_adjacency,
-            state.atom_types,
-            state.formal_charges,
-            working_hydrogens,
-            codebook=tree_codebook,
-        )
+        canonicalizer: _IncrementalColoredTreeCanonicalizer | None = None
+        use_incremental_keys = False
+        use_orbit_pruning = False
+        if optimize_graft_canonicalization and len(real) >= 32:
+            candidate_canonicalizer = _IncrementalColoredTreeCanonicalizer(
+                tree_adjacency,
+                state.atom_types,
+                state.formal_charges,
+                state.implicit_h_counts,
+                codebook=tree_codebook,
+            )
+            vertex_orbit_count = candidate_canonicalizer.vertex_orbit_count()
+            use_incremental_keys = 4 * vertex_orbit_count <= 3 * len(real)
+            use_orbit_pruning = use_incremental_keys
+            if use_incremental_keys:
+                canonicalizer = candidate_canonicalizer
+                current_key = canonicalizer.current_key()
+            else:
+                current_key = _canonical_colored_tree_key_from_adjacency(
+                    tree_adjacency,
+                    state.atom_types,
+                    state.formal_charges,
+                    state.implicit_h_counts,
+                    codebook=tree_codebook,
+                )
+        else:
+            current_key = _canonical_colored_tree_key_from_adjacency(
+                tree_adjacency,
+                state.atom_types,
+                state.formal_charges,
+                state.implicit_h_counts,
+                codebook=tree_codebook,
+            )
         successor_groups: dict[tuple[int, ...], int] = {}
         single_h_delta = int(BOND_CLASS_TO_H_CHANGE[1])
+        candidates: list[tuple[int, int, int]] = []
         for moved in real:
             for target in real:
                 if moved == target or target in tree_adjacency[moved]:
@@ -518,6 +762,38 @@ def _graph_application_masks(
                     continue
                 if int(state.implicit_h_counts[removed_neighbor]) >= MAX_H_COUNT:
                     continue
+                candidates.append((moved, target, removed_neighbor))
+
+        candidate_groups: list[list[tuple[int, int, int]]]
+        if use_orbit_pruning:
+            if canonicalizer is None:
+                raise RuntimeError("Graft orbit pruning lacks a canonicalizer")
+            orbit_groups: OrderedDict[
+                tuple[Any, ...], list[tuple[int, int, int]]
+            ] = OrderedDict()
+            for candidate in candidates:
+                moved, target, _ = candidate
+                orbit_groups.setdefault(
+                    canonicalizer.ordered_pair_orbit_key(moved, target),
+                    [],
+                ).append(candidate)
+            candidate_groups = list(orbit_groups.values())
+        else:
+            candidate_groups = [[candidate] for candidate in candidates]
+
+        for aliases in candidate_groups:
+            moved, target, removed_neighbor = aliases[0]
+            if use_incremental_keys:
+                if canonicalizer is None:
+                    raise RuntimeError("incremental Graft keys lack a canonicalizer")
+                successor_key = canonicalizer.graft_successor_key(
+                    moved,
+                    removed_neighbor,
+                    target,
+                    hydrogen_delta=single_h_delta,
+                )
+            else:
+                working_hydrogens = state.implicit_h_counts.copy()
                 tree_adjacency[moved].remove(removed_neighbor)
                 tree_adjacency[removed_neighbor].remove(moved)
                 tree_adjacency[moved].add(target)
@@ -531,8 +807,6 @@ def _graph_application_masks(
                     working_hydrogens,
                     codebook=tree_codebook,
                 )
-                working_hydrogens[removed_neighbor] -= single_h_delta
-                working_hydrogens[target] += single_h_delta
                 tree_adjacency[moved].remove(target)
                 tree_adjacency[target].remove(moved)
                 tree_adjacency[moved].add(removed_neighbor)
@@ -541,12 +815,13 @@ def _graph_application_masks(
                 # the molecular CTMC.  Removing this group prevents a learned
                 # high-rate sequence of visible events that leaves the
                 # canonical molecule unchanged.
-                if successor_key == current_key:
-                    continue
-                group = successor_groups.setdefault(
-                    successor_key,
-                    len(successor_groups),
-                )
+            if successor_key == current_key:
+                continue
+            group = successor_groups.setdefault(
+                successor_key,
+                len(successor_groups),
+            )
+            for moved, target, removed_neighbor in aliases:
                 graft_mask[moved, target] = True
                 graft_remove_neighbor[moved, target] = removed_neighbor
                 graft_successor_group[moved, target] = group
@@ -628,6 +903,262 @@ def _canonical_colored_tree_key_from_adjacency(
     left, right = centers
     halves = sorted((rooted_code(left, right), rooted_code(right, left)))
     return 2, halves[0], halves[1]
+
+
+class _IncrementalColoredTreeCanonicalizer:
+    """Exact colored-tree keys with orbit pruning and branch reuse for Grafts.
+
+    A Graft changes two edges and the hydrogen colors of two vertices.  The
+    reference implementation rebuilt every rooted subtree for every labeled
+    ``(moved, target)`` coordinate.  This helper memoizes the original directed
+    branch descriptions and reuses every branch whose cut-side component does
+    not contain a changed vertex.  It also gives an exact ordered-pair orbit
+    key: the oriented moved-to-target path decorated by its off-path branches.
+    """
+
+    def __init__(
+        self,
+        adjacency: dict[int, set[int]],
+        atom_types: np.ndarray,
+        formal_charges: np.ndarray,
+        implicit_h_counts: np.ndarray,
+        *,
+        codebook: dict[tuple[Any, ...], int],
+    ) -> None:
+        self.adjacency = {
+            int(vertex): frozenset(int(neighbor) for neighbor in neighbors)
+            for vertex, neighbors in adjacency.items()
+        }
+        self.colors = {
+            int(vertex): (
+                int(atom_types[vertex]),
+                int(formal_charges[vertex]),
+                int(implicit_h_counts[vertex]),
+            )
+            for vertex in adjacency
+        }
+        self.codebook = codebook
+        self._base_descriptors: dict[tuple[int, int], tuple[Any, ...]] = {}
+        self._base_identifiers: dict[tuple[int, int], int] = {}
+        self._side_vertices: dict[tuple[int, int], frozenset[int]] = {}
+
+    @staticmethod
+    def _centers(adjacency: dict[int, frozenset[int]]) -> tuple[int, ...]:
+        remaining = set(adjacency)
+        degree = {vertex: len(adjacency[vertex]) for vertex in remaining}
+        leaves = [vertex for vertex in remaining if degree[vertex] <= 1]
+        while len(remaining) > 2:
+            if not leaves:
+                raise RuntimeError("tree-center peeling found no leaves")
+            next_leaves: list[int] = []
+            for leaf in leaves:
+                if leaf not in remaining:
+                    continue
+                remaining.remove(leaf)
+                for neighbor in adjacency[leaf]:
+                    if neighbor not in remaining:
+                        continue
+                    degree[neighbor] -= 1
+                    if degree[neighbor] == 1:
+                        next_leaves.append(neighbor)
+            leaves = next_leaves
+        return tuple(sorted(remaining))
+
+    def _base_descriptor(self, vertex: int, parent: int) -> tuple[Any, ...]:
+        key = (int(vertex), int(parent))
+        cached = self._base_descriptors.get(key)
+        if cached is not None:
+            return cached
+        children = tuple(
+            sorted(
+                self._base_descriptor(neighbor, vertex)
+                for neighbor in self.adjacency[vertex]
+                if neighbor != parent
+            )
+        )
+        descriptor = (*self.colors[vertex], children)
+        self._base_descriptors[key] = descriptor
+        return descriptor
+
+    def _intern_descriptor(self, descriptor: tuple[Any, ...]) -> int:
+        atom_type, charge, hydrogens, children = descriptor
+        child_ids = tuple(
+            sorted(self._intern_descriptor(child) for child in children)
+        )
+        compact = (int(atom_type), int(charge), int(hydrogens), child_ids)
+        identifier = self.codebook.get(compact)
+        if identifier is None:
+            identifier = len(self.codebook) + 1
+            self.codebook[compact] = identifier
+        return identifier
+
+    def _base_identifier(self, vertex: int, parent: int) -> int:
+        key = (int(vertex), int(parent))
+        cached = self._base_identifiers.get(key)
+        if cached is None:
+            cached = self._intern_descriptor(self._base_descriptor(vertex, parent))
+            self._base_identifiers[key] = cached
+        return cached
+
+    def _key_from_descriptors(
+        self,
+        descriptors: tuple[tuple[Any, ...], ...],
+    ) -> tuple[int, ...]:
+        identifiers = tuple(sorted(self._intern_descriptor(item) for item in descriptors))
+        if len(identifiers) == 1:
+            return 1, identifiers[0]
+        if len(identifiers) == 2:
+            return 2, identifiers[0], identifiers[1]
+        raise RuntimeError("a tree must have one or two centers")
+
+    def current_key(self) -> tuple[int, ...]:
+        centers = self._centers(self.adjacency)
+        if len(centers) == 1:
+            descriptors = (self._base_descriptor(centers[0], -1),)
+        else:
+            left, right = centers
+            descriptors = (
+                self._base_descriptor(left, right),
+                self._base_descriptor(right, left),
+            )
+        return self._key_from_descriptors(descriptors)
+
+    def vertex_orbit_count(self) -> int:
+        """Return the exact number of color-preserving vertex orbits."""
+
+        rooted_ids = [
+            self._base_identifier(vertex, -1)
+            for vertex in self.adjacency
+        ]
+        return len(set(rooted_ids))
+
+    def _path(self, source: int, target: int) -> tuple[int, ...]:
+        parents = {int(source): -1}
+        stack = [int(source)]
+        while stack:
+            vertex = stack.pop()
+            if vertex == target:
+                break
+            for neighbor in self.adjacency[vertex]:
+                if neighbor in parents:
+                    continue
+                parents[neighbor] = vertex
+                stack.append(neighbor)
+        if target not in parents:
+            raise RuntimeError("colored-tree pair has no connecting path")
+        reverse_path = [int(target)]
+        while reverse_path[-1] != source:
+            reverse_path.append(parents[reverse_path[-1]])
+        return tuple(reversed(reverse_path))
+
+    def ordered_pair_orbit_key(self, moved: int, target: int) -> tuple[Any, ...]:
+        """Return an exact automorphism-orbit key for an ordered vertex pair."""
+
+        path = self._path(int(moved), int(target))
+        decorated_path = []
+        for index, vertex in enumerate(path):
+            excluded = {
+                path[index - 1] if index > 0 else -1,
+                path[index + 1] if index + 1 < len(path) else -1,
+            }
+            off_path = tuple(
+                sorted(
+                    self._base_identifier(neighbor, vertex)
+                    for neighbor in self.adjacency[vertex]
+                    if neighbor not in excluded
+                )
+            )
+            decorated_path.append((*self.colors[vertex], off_path))
+        return tuple(decorated_path)
+
+    def _original_side_vertices(self, vertex: int, parent: int) -> frozenset[int]:
+        key = (int(vertex), int(parent))
+        cached = self._side_vertices.get(key)
+        if cached is not None:
+            return cached
+        seen = {int(parent)}
+        stack = [int(vertex)]
+        side: set[int] = set()
+        while stack:
+            current = stack.pop()
+            if current in seen:
+                continue
+            seen.add(current)
+            side.add(current)
+            stack.extend(self.adjacency[current] - seen)
+        result = frozenset(side)
+        self._side_vertices[key] = result
+        return result
+
+    def graft_successor_key(
+        self,
+        moved: int,
+        removed_neighbor: int,
+        target: int,
+        *,
+        hydrogen_delta: int,
+    ) -> tuple[int, ...]:
+        moved = int(moved)
+        removed_neighbor = int(removed_neighbor)
+        target = int(target)
+        if removed_neighbor not in self.adjacency[moved]:
+            raise ValueError("Graft cut edge is absent from the source tree")
+        if target in self.adjacency[moved] or target == moved:
+            raise ValueError("Graft target must be a non-neighbor")
+
+        successor = dict(self.adjacency)
+        successor[moved] = (self.adjacency[moved] - {removed_neighbor}) | {target}
+        successor[removed_neighbor] = self.adjacency[removed_neighbor] - {moved}
+        successor[target] = self.adjacency[target] | {moved}
+        affected = frozenset((moved, removed_neighbor, target))
+        color_overrides = {
+            removed_neighbor: (
+                self.colors[removed_neighbor][0],
+                self.colors[removed_neighbor][1],
+                self.colors[removed_neighbor][2] + int(hydrogen_delta),
+            ),
+            target: (
+                self.colors[target][0],
+                self.colors[target][1],
+                self.colors[target][2] - int(hydrogen_delta),
+            ),
+        }
+        removed_edge = frozenset((moved, removed_neighbor))
+        memo: dict[tuple[int, int], tuple[Any, ...]] = {}
+
+        def rooted(vertex: int, parent: int) -> tuple[Any, ...]:
+            key = (int(vertex), int(parent))
+            cached = memo.get(key)
+            if cached is not None:
+                return cached
+            original_edge = parent in self.adjacency[vertex]
+            if (
+                parent >= 0
+                and original_edge
+                and frozenset((vertex, parent)) != removed_edge
+                and self._original_side_vertices(vertex, parent).isdisjoint(affected)
+            ):
+                descriptor = self._base_descriptor(vertex, parent)
+                memo[key] = descriptor
+                return descriptor
+            children = tuple(
+                sorted(
+                    rooted(neighbor, vertex)
+                    for neighbor in successor[vertex]
+                    if neighbor != parent
+                )
+            )
+            descriptor = (*color_overrides.get(vertex, self.colors[vertex]), children)
+            memo[key] = descriptor
+            return descriptor
+
+        centers = self._centers(successor)
+        if len(centers) == 1:
+            descriptors = (rooted(centers[0], -1),)
+        else:
+            left, right = centers
+            descriptors = (rooted(left, right), rooted(right, left))
+        return self._key_from_descriptors(descriptors)
 
 
 class FactorizedTraceletRateModel(nn.Module):
@@ -884,12 +1415,7 @@ class FactorizedTraceletRateModel(nn.Module):
     def _state_cache_key(
         state: MolecularGraph,
     ) -> tuple[bytes, bytes, bytes, bytes]:
-        return (
-            state.atom_types.tobytes(),
-            state.formal_charges.tobytes(),
-            state.implicit_h_counts.tobytes(),
-            state.bonds.tobytes(),
-        )
+        return molecular_state_cache_key(state)
 
     def _ring_grow_support(self, state: MolecularGraph) -> tuple[bool, ...]:
         key = self._state_cache_key(state)
@@ -1197,14 +1723,15 @@ class FactorizedTraceletRateModel(nn.Module):
             self.ring_system_template_key.weight[: len(self.ring_system_templates)],
         )
         logits = logits + self.ring_system_template_log_prior.unsqueeze(0)
-        if batch.ring_grow_support_mask is not None:
+        precomputed_support = batch.dense_ring_grow_support(device=self.device)
+        if precomputed_support is not None:
             expected_shape = (batch.batch_size, len(self.ring_system_templates))
-            if tuple(batch.ring_grow_support_mask.shape) != expected_shape:
+            if tuple(precomputed_support.shape) != expected_shape:
                 raise ValueError(
                     "precomputed ring support has the wrong shape: "
-                    f"{tuple(batch.ring_grow_support_mask.shape)} != {expected_shape}"
+                    f"{tuple(precomputed_support.shape)} != {expected_shape}"
                 )
-        if batch.ring_grow_support_mask is None:
+        if precomputed_support is None:
             # Training likelihoods require the exact executor-aware support.
             # Inference may defer this expensive refinement until the ring
             # family is actually selected; family probabilities use only the
@@ -1215,7 +1742,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 device=self.device,
             )
         elif not require_exact_support:
-            mask = batch.ring_grow_support_mask
+            mask = precomputed_support
         else:
             def row_flags(value: Tensor | bool, name: str) -> Tensor:
                 if isinstance(value, Tensor):
@@ -1245,12 +1772,12 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             usable_rows = torch.where(needs_full, full_rows, enablement_rows)
             if bool(usable_rows.all()):
-                mask = batch.ring_grow_support_mask
+                mask = precomputed_support
             else:
                 rows = []
                 for index, state in enumerate(batch.states):
                     if bool(usable_rows[index]):
-                        rows.append(batch.ring_grow_support_mask[index])
+                        rows.append(precomputed_support[index])
                     else:
                         rows.append(
                             torch.tensor(

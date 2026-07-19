@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import copy
+from collections import OrderedDict
 from contextlib import nullcontext
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from math import cos, exp, pi
 from time import perf_counter
 from typing import Any, Callable, Iterator
@@ -18,9 +19,11 @@ from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.model.factorized_tracelet_rate_model import (
+    ChemistryStateFeatures,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     MARK_RULE_TO_INDEX,
+    SparseBinaryRows,
     factorized_mark_bregman_loss,
     prepare_factorized_mark_batch,
 )
@@ -39,9 +42,19 @@ class FactorizedMarkExample:
     teacher_rule_name: str | None
     teacher_rate: float
     importance_weight: float
-    ring_grow_support_mask: tuple[bool, ...] | None = None
+    ring_grow_support_indices: tuple[int, ...] | None = None
+    ring_grow_support_width: int = 0
     ring_grow_support_is_exact: bool = False
     ring_grow_enablement_is_exact: bool = False
+
+    @property
+    def ring_grow_support_mask(self) -> tuple[bool, ...] | None:
+        """Dense compatibility view; transport and caches use sparse indices."""
+
+        if self.ring_grow_support_indices is None:
+            return None
+        selected = set(self.ring_grow_support_indices)
+        return tuple(index in selected for index in range(self.ring_grow_support_width))
 
 
 class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
@@ -171,7 +184,18 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rule_name=teacher_rule_name,
             teacher_rate=teacher_rate,
             importance_weight=importance_weight,
-            ring_grow_support_mask=ring_grow_support_mask,
+            ring_grow_support_indices=(
+                None
+                if ring_grow_support_mask is None
+                else tuple(
+                    int(index)
+                    for index, supported in enumerate(ring_grow_support_mask)
+                    if supported
+                )
+            ),
+            ring_grow_support_width=(
+                0 if ring_grow_support_mask is None else len(ring_grow_support_mask)
+            ),
             ring_grow_support_is_exact=ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
         )
@@ -181,8 +205,17 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
 class FactorizedMarkCollator:
     use_aromatic_bond_view: bool
     ring_catalog: TypedRingCatalog | None = None
+    chemistry_feature_cache_limit: int = 2048
+    _chemistry_feature_cache: OrderedDict[
+        tuple[int, bool, tuple[bytes, bytes, bytes, bytes]],
+        ChemistryStateFeatures,
+    ] = field(default_factory=OrderedDict, init=False, repr=False, compare=False)
 
     def __call__(self, examples: list[FactorizedMarkExample]) -> FactorizedMarkBatch:
+        support_rows = tuple(example.ring_grow_support_indices for example in examples)
+        has_precomputed_ring_support = bool(support_rows) and all(
+            row is not None for row in support_rows
+        )
         batch = prepare_factorized_mark_batch(
             tuple(example.state for example in examples),
             tuple(example.time for example in examples),
@@ -192,14 +225,20 @@ class FactorizedMarkCollator:
             tuple(example.importance_weight for example in examples),
             use_aromatic_bond_view=self.use_aromatic_bond_view,
             ring_catalog=self.ring_catalog,
+            chemistry_feature_cache=self._chemistry_feature_cache,
+            chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
+            compute_ring_grow_support=not has_precomputed_ring_support,
         )
-        exact_masks = tuple(example.ring_grow_support_mask for example in examples)
-        if all(mask is not None for mask in exact_masks):
+        if has_precomputed_ring_support:
+            widths = {example.ring_grow_support_width for example in examples}
+            if len(widths) != 1:
+                raise ValueError("precomputed ring support rows have inconsistent widths")
             batch = replace(
                 batch,
-                ring_grow_support_mask=torch.tensor(
-                    tuple(mask for mask in exact_masks if mask is not None),
-                    dtype=torch.bool,
+                ring_grow_support_mask=None,
+                ring_grow_support_sparse=SparseBinaryRows.from_index_rows(
+                    tuple(row for row in support_rows if row is not None),
+                    width=widths.pop(),
                 ),
                 ring_grow_support_is_exact=torch.tensor(
                     tuple(example.ring_grow_support_is_exact for example in examples),
@@ -324,13 +363,33 @@ def _concatenate_factorized_mark_batches(
         return torch.cat([getattr(batch, name) for batch in batches], dim=0)
 
     support_masks = tuple(batch.ring_grow_support_mask for batch in batches)
-    if any(mask is None for mask in support_masks):
-        ring_grow_support_mask = None
-    else:
+    support_sparse = tuple(batch.ring_grow_support_sparse for batch in batches)
+    if all(mask is not None for mask in support_masks):
         ring_grow_support_mask = torch.cat(
             [mask for mask in support_masks if mask is not None],
             dim=0,
         )
+        ring_grow_support_sparse = None
+    elif all(
+        mask is not None or sparse is not None
+        for mask, sparse in zip(support_masks, support_sparse)
+    ):
+        sparse_batches = tuple(
+            sparse if sparse is not None else SparseBinaryRows.from_dense(mask)
+            for mask, sparse in zip(support_masks, support_sparse)
+            if sparse is not None or mask is not None
+        )
+        widths = {item.width for item in sparse_batches}
+        if len(widths) != 1:
+            raise ValueError("factorized ring support widths do not align")
+        ring_grow_support_mask = None
+        ring_grow_support_sparse = SparseBinaryRows.from_index_rows(
+            tuple(row for item in sparse_batches for row in item.index_rows()),
+            width=widths.pop(),
+        )
+    else:
+        ring_grow_support_mask = None
+        ring_grow_support_sparse = None
     delete_actions = tuple(batch.ring_delete_actions for batch in batches)
     ring_delete_actions = (
         None
@@ -368,6 +427,7 @@ def _concatenate_factorized_mark_batches(
             actions for batch in batches for actions in batch.ring_restate_actions
         ),
         ring_grow_support_mask=ring_grow_support_mask,
+        ring_grow_support_sparse=ring_grow_support_sparse,
         ring_delete_actions=ring_delete_actions,
         ring_grow_support_is_exact=torch.cat(
             [

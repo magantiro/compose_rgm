@@ -3,6 +3,11 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
+import torch
+
+from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.model.factorized_tracelet_rate_model import prepare_factorized_mark_batch
 
 from scripts.train_tracelet_cnof_gate import (
     _atomic_shared_torch_save,
@@ -79,6 +84,48 @@ def test_evaluation_cache_round_trip_validates_signature_and_partition_sizes(
             signature=_evaluation_signature(seed=18),
             validation_examples=8,
             test_examples=16,
+        )
+
+
+def test_dense_v1_ring_support_is_upgraded_to_sparse_without_rebuild(tmp_path) -> None:
+    signature = _evaluation_signature(validation_examples=1, test_examples=1)
+    path = _evaluation_batch_cache_path(tmp_path, signature)
+    state = pad_molecular_graph(smiles_to_molecular_graph("CC"), 4)
+    batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (None,),
+        (None,),
+        (0.0,),
+    )
+    object.__setattr__(
+        batch,
+        "ring_grow_support_mask",
+        torch.tensor(((False, True, False),), dtype=torch.bool),
+    )
+    # Simulate an object serialized before the sparse field was introduced.
+    object.__delattr__(batch, "ring_grow_support_sparse")
+    _atomic_shared_torch_save(
+        {
+            "signature": signature,
+            "validation_batch": batch,
+            "test_batch": batch,
+        },
+        path,
+    )
+
+    validation, test = _load_evaluation_batch_cache(
+        path,
+        signature=signature,
+        validation_examples=1,
+        test_examples=1,
+    )
+    for restored in (validation, test):
+        assert restored.ring_grow_support_mask is None
+        assert restored.ring_grow_support_sparse is not None
+        assert torch.equal(
+            restored.ring_grow_support_sparse.to_dense(),
+            torch.tensor(((False, True, False),), dtype=torch.bool),
         )
 
     with pytest.raises(ValueError, match="invalid partition sizes"):

@@ -49,7 +49,9 @@ from compose_v4.experiments.tracelet_prior_tilted import (
 )
 from compose_v4.model.tracelet_rate_model import TraceletRateModel
 from compose_v4.model.factorized_tracelet_rate_model import (
+    FactorizedMarkBatch,
     FactorizedTraceletRateModel,
+    SparseBinaryRows,
 )
 from compose_v4.model.device import resolve_torch_device
 from compose_v4.rewrite.typed_ring_catalog import (
@@ -185,6 +187,23 @@ def _load_evaluation_batch_cache(
             "evaluation batch cache has invalid partition sizes: "
             f"{observed_sizes} != {expected_sizes}"
         )
+    # Cache v1 originally stored exact ring support densely.  New code keeps
+    # the same scientific signature and upgrades those rows to CSR in memory,
+    # so an already published production cache remains reusable without a
+    # chemistry rebuild.
+    for batch in (validation_batch, test_batch):
+        if not isinstance(batch, FactorizedMarkBatch):
+            continue
+        if not hasattr(batch, "ring_grow_support_sparse"):
+            object.__setattr__(batch, "ring_grow_support_sparse", None)
+        dense_support = getattr(batch, "ring_grow_support_mask", None)
+        if dense_support is not None:
+            object.__setattr__(
+                batch,
+                "ring_grow_support_sparse",
+                SparseBinaryRows.from_dense(dense_support),
+            )
+            object.__setattr__(batch, "ring_grow_support_mask", None)
     return validation_batch, test_batch
 
 

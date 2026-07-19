@@ -43,7 +43,7 @@ evidence so a collaborator can tell what is actually running.
   microbatches and reuses the already-computed step-zero metrics. Training
   batch size remains 64; the streamed reduction is mathematically the same
   full-set evaluation without full-set GPU residency.
-- The full local suite passes: **294 tests** with `PYTHONPATH=src`, with two
+- The full local suite passes: **302 tests** with `PYTHONPATH=src`, with two
   non-failing warnings.
 
 ## Completed cloud gates
@@ -95,14 +95,24 @@ FCD is not a model-quality result.
   yet.
 - The archived step-6,250 samples and FCD dashboard remain retired,
   pre-quotient diagnostics only.
+- The corrected production evaluation cache completed on a 64-CPU stage under
+  `compose-v4-stage3-flexible-graft-prod-7ea89d0-v1`. Validation feature
+  construction took 711.61 s and test construction took 1,215.76 s; the full
+  remote compile stage took 2,225.99 s (37m06s), including startup, loading the
+  retained path shards, and finalizing ring support. The resulting 577-MB
+  content-addressed artifact covers the fixed 2,048 validation and 4,096 test
+  examples. Runs with the same scientific signature reuse it without chemistry
+  recompilation, saving about 37 minutes relative to this CPU path and 52
+  minutes relative to the retired in-A100 path.
 
 ## Immediate sequence
 
 1. **Done:** commit and push the trajectory-audited deployment code; pass the
    real CPU-to-A100-to-CPU boundary smoke.
-2. **Active:** reuse the immutable `2be9258` path cache, build the signed fixed
-   evaluation cache on a 64-CPU stage, pass a streamed-evaluation integration
-   gate, then relaunch A100/32-CPU/24-worker training.
+2. **Done:** reuse the immutable `2be9258` path cache, build the signed fixed
+   evaluation cache on a 64-CPU stage, and pass the streamed-evaluation
+   integration gate. **Next:** relaunch A100/32-CPU/24-worker training from the
+   commit containing the exact successor-computation optimizations.
 3. At the first credible checkpoint (no earlier than step 500), inspect 100
    ancestral samples and their compact full-trajectory diagnostics.
    Hard-stop on any validity/connectivity failure, event-budget exhaustion,
@@ -115,6 +125,38 @@ FCD is not a model-quality result.
 5. Once unconditional sufficiency is established, implement valid-rewrite
    recovery and run the matched QED/conditional-guidance gate required before
    COMPOSE-Lipid candidate generation.
+
+## Lossless successor-computation implementation
+
+The four planned exact optimizations are now implemented locally:
+
+1. An LRU keyed by the complete slot-aware molecular state reuses topology,
+   application conditions, resonance-invariant bonds, Graft quotient groups,
+   and ring-delete actions. The cache is bounded per persistent worker.
+2. Exact colored-tree vertex and ordered-pair automorphism-orbit identifiers
+   eliminate redundant Graft successor work on sufficiently symmetric trees
+   while retaining every labeled Graft logit and its total successor rate.
+3. Local Graft reroutes reuse unaffected directed-branch identifiers and
+   recompute only branches affected by the cut and attachment instead of
+   recanonicalizing the complete colored tree for every candidate.
+4. Exact ring-template support is serialized and transported as CSR indices;
+   the dense 4,096-template mask is materialized only at the neural decoder
+   boundary on the target device. Existing version-1 evaluation caches are
+   migrated losslessly in memory and remain reusable.
+
+The optimized and exhaustive Graft masks, removed-neighbor arrays, and
+canonical-successor groups agree exactly on chains and random colored trees up
+to 40 atoms. Dense and sparse ring support produce identical enabled families,
+selected-mark log probabilities, and Generator Matching loss. A repeated-state
+40-atom collation microbenchmark improved from 3.64 s to 0.11 s (31.8x) in the
+cache-hit-heavy case; this is an upper-bound microbenchmark, not a claimed
+end-to-end training speedup. Representative 64-by-4,096 ring support occupied
+3.7 KB in CSR form versus 262 KB dense (71x smaller). Small or asymmetric trees
+fall back to the exhaustive Graft path when orbit reuse is not beneficial.
+
+These changes do not alter rewrite rules, the canonical-successor quotient,
+teacher rates, reachable states, batch size, or evaluation examples. Persistent
+fixed-evaluation features remain content-addressed and reusable across runs.
 
 ## Claim boundary still open
 

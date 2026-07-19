@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from collections import OrderedDict
 from dataclasses import replace
 
 import numpy as np
@@ -8,11 +9,14 @@ import pytest
 import torch
 
 from compose_v4.chem.molecular_graph import is_element, smiles_to_molecular_graph
+from compose_v4.chem.graph_primitives import compute_topology_features
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.experiments.factorized_mark_conditional import (
     _concatenate_factorized_mark_batches,
+    FactorizedMarkCollator,
     FactorizedMarkDataset,
+    FactorizedMarkExample,
     cosine_warmup_learning_rate,
     factorized_adamw_parameter_groups,
     factorized_mark_metrics,
@@ -24,6 +28,8 @@ from compose_v4.experiments.tracelet_conditional import build_tracelet_path_reco
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
     MARK_RULE_TO_INDEX,
+    SparseBinaryRows,
+    _graph_application_masks,
     factorized_mark_bregman_loss,
     prepare_factorized_mark_batch,
 )
@@ -823,6 +829,153 @@ def test_dense_graft_support_excludes_canonical_self_successors() -> None:
     assert all(len(keys) == 1 for keys in successor_keys_by_group.values())
     grouped_keys = [next(iter(keys)) for keys in successor_keys_by_group.values()]
     assert len(grouped_keys) == len(set(grouped_keys))
+
+
+@pytest.mark.parametrize("n_atoms", (6, 12, 24, 40))
+def test_incremental_graft_keys_match_exhaustive_canonicalization(
+    n_atoms: int,
+) -> None:
+    states = [
+        pad_molecular_graph(smiles_to_molecular_graph("C" * n_atoms), 40),
+        DegreeBoundedCarbonTreePrior(sizes=(n_atoms,)).sample(
+            np.random.default_rng(8100 + n_atoms),
+            n_slots=40,
+        ),
+    ]
+    if n_atoms == 40:
+        # A reflection-symmetric, genuinely colored tree exercises the
+        # incremental/orbit path without relying on an all-carbon alphabet.
+        states.append(
+            pad_molecular_graph(
+                smiles_to_molecular_graph("N" + "C" * 38 + "N"),
+                40,
+            )
+        )
+    for state in states:
+        atom_topology = compute_topology_features(state)[0]
+        exhaustive = _graph_application_masks(
+            state,
+            atom_topology,
+            optimize_graft_canonicalization=False,
+        )
+        optimized = _graph_application_masks(
+            state,
+            atom_topology,
+            optimize_graft_canonicalization=True,
+        )
+        assert all(
+            np.array_equal(reference, candidate)
+            for reference, candidate in zip(exhaustive, optimized)
+        )
+
+
+def test_chemistry_features_are_computed_once_per_exact_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCC"), 12)
+    calls = 0
+    original = compute_topology_features
+
+    def counted(current_state):
+        nonlocal calls
+        calls += 1
+        return original(current_state)
+
+    monkeypatch.setattr(
+        "compose_v4.model.factorized_tracelet_rate_model.compute_topology_features",
+        counted,
+    )
+    cache = OrderedDict()
+    for _ in range(2):
+        batch = prepare_factorized_mark_batch(
+            (state, state, state),
+            (0.2, 0.5, 0.8),
+            (None, None, None),
+            (None, None, None),
+            (0.0, 0.0, 0.0),
+            chemistry_feature_cache=cache,
+        )
+        assert batch.batch_size == 3
+    assert calls == 1
+
+
+def test_collator_does_not_recompute_precomputed_ring_support(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    catalog, state, _ = _ring_support_case()
+    width = len(FactorizedTraceletRateModel(catalog).ring_system_templates)
+    example = FactorizedMarkExample(
+        state=state,
+        time=0.5,
+        teacher_action=None,
+        teacher_rule_name=None,
+        teacher_rate=0.0,
+        importance_weight=1.0,
+        ring_grow_support_indices=(0,),
+        ring_grow_support_width=width,
+        ring_grow_enablement_is_exact=True,
+    )
+
+    def reject_duplicate_support(*_args, **_kwargs):
+        raise AssertionError("collator recomputed a precomputed ring-support row")
+
+    monkeypatch.setattr(
+        "compose_v4.model.factorized_tracelet_rate_model."
+        "ring_system_template_local_support_mask",
+        reject_duplicate_support,
+    )
+    batch = FactorizedMarkCollator(True, catalog)([example])
+    assert batch.ring_grow_support_mask is None
+    assert batch.ring_grow_support_sparse is not None
+    assert torch.equal(
+        batch.ring_grow_support_sparse.to_dense(),
+        torch.tensor([[True] + [False] * (width - 1)]),
+    )
+
+
+def test_sparse_ring_support_is_loss_equivalent_to_dense_support() -> None:
+    catalog, state, action = _ring_support_case()
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+    )
+    support = model._ring_grow_support(state)
+    dense_batch = prepare_factorized_mark_batch(
+        (state,),
+        (0.5,),
+        (action,),
+        ("ring_system_grow",),
+        (1.0,),
+    )
+    dense_batch = replace(
+        dense_batch,
+        ring_grow_support_mask=torch.tensor((support,), dtype=torch.bool),
+        ring_grow_support_is_exact=torch.tensor((True,)),
+        ring_grow_enablement_is_exact=torch.tensor((True,)),
+    )
+    sparse_batch = replace(
+        dense_batch,
+        ring_grow_support_mask=None,
+        ring_grow_support_sparse=SparseBinaryRows.from_dense(
+            dense_batch.ring_grow_support_mask
+        ),
+    )
+
+    dense_prediction = model.forward_mark_batch(dense_batch)
+    sparse_prediction = model.forward_mark_batch(sparse_batch)
+    assert torch.equal(
+        dense_prediction.enabled_families,
+        sparse_prediction.enabled_families,
+    )
+    assert torch.allclose(
+        dense_prediction.selected_mark_log_probability,
+        sparse_prediction.selected_mark_log_probability,
+    )
+    assert torch.allclose(
+        factorized_mark_bregman_loss(dense_prediction, dense_batch),
+        factorized_mark_bregman_loss(sparse_prediction, sparse_batch),
+    )
 
 
 def test_graft_teacher_score_aggregates_mark_aliases_by_successor() -> None:
