@@ -207,6 +207,93 @@
       "validation_level": "mechanism_verified"
     },
     {
+      "architecture": "urea-linked ionizable lipid",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[NX2:2]=[CX2:3]=[OX1:4]>>[N:1][C:3](=[O:4])[N:2]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCN(CC)CC",
+              "O=C=NCCCCCCCC"
+            ],
+            "reason": "tertiary amine has no N-H handle",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNC(=O)NCCCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCCN",
+          "O=C=NCCCCCCCC"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported amine+isocyanate substrate/product pair at submission-time literature audit",
+      "reaction_id": "urea_amine_isocyanate",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "acid-degradable acetal/ketal-linked lipid",
+      "atom_mapped_reaction_smarts": "[CX3H1:1]=[OX1:2].[OX2H1:3][CX4:4][CX4:5][OX2H1:6]>>[CH1:1]1[O:3][C:4][C:5][O:6]1",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCC=O",
+              "CCCCCCCCCCCCO"
+            ],
+            "reason": "a mono-ol is not a 1,2-diol",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCC1OCC(CCCCCCCC)O1",
+        "reactants": [
+          "CCCCCCCCCCCC=O",
+          "OCC(O)CCCCCCCC"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported aldehyde+diol acetal substrate/product pair at submission-time literature audit",
+      "reaction_id": "acetal_aldehyde_diol",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "ionizable phospholipid (iPhos; adds phosphate/P)",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[CH2:2]1[CH2:3][OX2:4][PX4:5](=[OX1:6])[OX2:7]1>>[N:1][CH2:2][CH2:3][O:4][P:5](=[O:6])[O:7]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CN(C)CCN",
+              "CCCCCCCCCCCC"
+            ],
+            "reason": "alkane has no dioxaphospholane handle",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCOP(=O)(O)OCCNCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "CCCCCCCCCCOP1(=O)OCCO1"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported amine+dioxaphospholane substrate/product pair at submission-time literature audit",
+      "reaction_id": "iphos_amine_dioxaphospholane",
+      "validation_level": "mechanism_verified"
+    },
+    {
       "architecture": "clinical-like amide-linked ionizable lipid",
       "atom_mapped_reaction_smarts": "[CX3:1](=[OX1:2])[OX2H1:3].[NX3;H2,H1:4]>>[C:1](=[O:2])[N:4]",
       "negative_rejection": {

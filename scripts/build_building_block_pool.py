@@ -45,6 +45,10 @@ HANDLES = {
     # degradable-linker chemistry (Whitehead & Arral 2026 design principles): adds S
     "thiol": ("[SX2H1]", ["thiol_tail", "thiol_head_or_tail"]),
     "chloroformate": ("[Cl][CX3](=[OX1])[OX2]", ["chloroformate_tail"]),
+    # full linker palette: urea, acetal, phosphate (adds P)
+    "isocyanate": ("[NX2]=[CX2]=[OX1]", ["isocyanate_tail"]),
+    "diol": ("[OX2H1][CX4][CX4][OX2H1]", ["diol_linker"]),
+    "dioxaphospholane": ("[CH2]1[CH2][OX2][PX4](=[OX1])[OX2]1", ["dioxaphospholane_tail"]),
 }
 
 # ---- curated ionizable amine heads (documented lipidoid chemistry) ----
@@ -142,6 +146,12 @@ def make_substrate(form: str, chain: str) -> str | None:
         s = chain + "S"
     elif form == "chloroformate":
         s = "ClC(=O)O" + chain
+    elif form == "isocyanate":
+        s = chain + "N=C=O"
+    elif form == "diol":
+        s = "OCC(O)" + chain          # 3-alkyl-1,2-propanediol (glycerol-like 1,2-diol)
+    elif form == "dioxaphospholane":
+        s = chain + "OP1(=O)OCCO1"    # 2-alkoxy-1,3,2-dioxaphospholane-2-oxide
     else:
         return None
     return canonical(s)
@@ -203,7 +213,8 @@ def build_pool() -> dict:
 
     # programmatic fatty substrates
     lengths = [6, 8, 10, 12, 14, 16, 18, 20, 22]
-    for form in ["carboxylic_acid", "aldehyde", "epoxide", "acrylate", "isocyanide", "thiol", "chloroformate"]:
+    for form in ["carboxylic_acid", "aldehyde", "epoxide", "acrylate", "isocyanide", "thiol",
+                 "chloroformate", "isocyanate", "diol", "dioxaphospholane"]:
         for L in lengths:
             for unsat in [0, 1, 2]:
                 for branched in [False, True]:

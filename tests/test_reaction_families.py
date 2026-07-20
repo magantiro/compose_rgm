@@ -43,6 +43,15 @@ CASES = {
     "carbamate_amine_chloroformate": (
         [("amine_head", "CCCCCCCCCCCCN"), ("chloroformate_tail", "O=C(Cl)OCCCCCC")],
         "CCCCCCCCCCCCNC(=O)OCCCCCC"),
+    "urea_amine_isocyanate": (
+        [("amine_head", "CCCCCCCCCCCCN"), ("isocyanate_tail", "O=C=NCCCCCCCC")],
+        "CCCCCCCCCCCCNC(=O)NCCCCCCCC"),
+    "acetal_aldehyde_diol": (
+        [("aldehyde_tail", "CCCCCCCCCCCC=O"), ("diol_linker", "OCC(O)CCCCCCCC")],
+        "CCCCCCCCCCCC1OCC(CCCCCCCC)O1"),
+    "iphos_amine_dioxaphospholane": (
+        [("amine_head", "CN(C)CCN"), ("dioxaphospholane_tail", "CCCCCCCCCCOP1(=O)OCCO1")],
+        "CCCCCCCCCCOP(=O)(O)OCCNCCN(C)C"),
 }
 
 
@@ -53,8 +62,8 @@ def _canon(s: str) -> str:
 def test_all_families_qualified() -> None:
     families = ReactionRegistry.load(REGISTRY)
     ugi = ReactionRegistry.load(REPO_ROOT / "configs/lipid_reactions/qualified_reactions_v1.json")
-    assert families.preflight()["qualified_count"] == 8
-    assert ugi.preflight()["qualified_count"] == 1  # Ugi-3CR -> 9 complementary families total
+    assert families.preflight()["qualified_count"] == 11
+    assert ugi.preflight()["qualified_count"] == 1  # Ugi-3CR -> 12 complementary families total
 
 
 @pytest.mark.parametrize("reaction_id", list(CASES))
@@ -82,4 +91,4 @@ def test_negatives_rejected_and_audit_hash_bound() -> None:
 def test_architectures_are_distinct() -> None:
     registry = ReactionRegistry.load(REGISTRY)
     architectures = {spec.architecture for spec in registry.reactions}
-    assert len(architectures) == 8  # genuinely complementary, not one scaffold
+    assert len(architectures) == 11  # genuinely complementary, not one scaffold

@@ -21,6 +21,9 @@ HANDLE_SMARTS = {
     "isocyanide": "[C;-1,+0;X1]#[N;+1,+0;X2]",
     "thiol": "[SX2H1]",
     "chloroformate": "[Cl][CX3](=[OX1])[OX2]",
+    "isocyanate": "[NX2]=[CX2]=[OX1]",
+    "diol": "[OX2H1][CX4][CX4][OX2H1]",
+    "dioxaphospholane": "[CH2]1[CH2][OX2][PX4](=[OX1])[OX2]1",
 }
 
 

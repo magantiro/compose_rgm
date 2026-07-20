@@ -11,7 +11,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -91,7 +91,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -171,7 +171,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -268,7 +268,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -346,7 +346,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -426,7 +426,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -504,7 +504,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -574,6 +574,251 @@
       "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
     },
     {
+      "architecture": "urea-linked ionizable lipid",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[NX2:2]=[CX2:3]=[OX1:4]>>[N:1][C:3](=[O:4])[N:2]",
+      "conditions": {
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null,
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null
+      },
+      "implementation": {
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
+        "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
+        "test_manifest": "tests/test_reaction_families.py"
+      },
+      "known_negative_examples": [
+        {
+          "expected": "",
+          "reactants": [
+            "CCN(CC)CC",
+            "O=C=NCCCCCCCC"
+          ],
+          "reason": "tertiary amine has no N-H handle"
+        }
+      ],
+      "known_positive_examples": [
+        {
+          "expected": "CCCCCCCCCCCCNC(=O)NCCCCCCCC",
+          "reactants": [
+            "CCCCCCCCCCCCN",
+            "O=C=NCCCCCCCC"
+          ],
+          "reason": "mechanism-verified atom-mapped reconstruction"
+        }
+      ],
+      "protonation_and_salt_policy": "Register neutral full-molecule products under the frozen compose_lipid canonicalization contract.",
+      "reactant_roles": [
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            1
+          ],
+          "name": "amine_head",
+          "required_handle_smarts": "[NX3;H2,H1]"
+        },
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            2,
+            3,
+            4
+          ],
+          "name": "isocyanate_tail",
+          "required_handle_smarts": "[NX2]=[CX2]=[OX1]"
+        }
+      ],
+      "reaction_id": "urea_amine_isocyanate",
+      "reaction_version": 1,
+      "selectivity_policy": "An N-H amine adds to an isocyanate to give a urea linker (a degradable/H-bonding motif in the Whitehead review linker palette). Requires an N-H amine and an isocyanate.",
+      "sources": [
+        {
+          "identifier": "10.1038/s44222-026-00401-1",
+          "kind": "doi",
+          "locator": "urea among degradable linkers (Whitehead & Arral 2026)",
+          "notes": "Reaction-class primary source; mechanism-verified atom-mapped transform. Exact primary-source product example pending submission-time literature audit."
+        }
+      ],
+      "status": "qualified_for_enumeration",
+      "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
+    },
+    {
+      "architecture": "acid-degradable acetal/ketal-linked lipid",
+      "atom_mapped_reaction_smarts": "[CX3H1:1]=[OX1:2].[OX2H1:3][CX4:4][CX4:5][OX2H1:6]>>[CH1:1]1[O:3][C:4][C:5][O:6]1",
+      "conditions": {
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null,
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null
+      },
+      "implementation": {
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
+        "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
+        "test_manifest": "tests/test_reaction_families.py"
+      },
+      "known_negative_examples": [
+        {
+          "expected": "",
+          "reactants": [
+            "CCCCCCCCCCCC=O",
+            "CCCCCCCCCCCCO"
+          ],
+          "reason": "a mono-ol is not a 1,2-diol"
+        }
+      ],
+      "known_positive_examples": [
+        {
+          "expected": "CCCCCCCCCCCC1OCC(CCCCCCCC)O1",
+          "reactants": [
+            "CCCCCCCCCCCC=O",
+            "OCC(O)CCCCCCCC"
+          ],
+          "reason": "mechanism-verified atom-mapped reconstruction"
+        }
+      ],
+      "protonation_and_salt_policy": "Register neutral full-molecule products under the frozen compose_lipid canonicalization contract.",
+      "reactant_roles": [
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            1,
+            2
+          ],
+          "name": "aldehyde_tail",
+          "required_handle_smarts": "[CX3H1]=[OX1]"
+        },
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "name": "diol_linker",
+          "required_handle_smarts": "[OX2H1][CX4][CX4][OX2H1]"
+        }
+      ],
+      "reaction_id": "acetal_aldehyde_diol",
+      "reaction_version": 1,
+      "selectivity_policy": "An aldehyde condenses with a 1,2-diol to a 1,3-dioxolane (acid-labile acetal linker, a pH-degradable motif). Requires an aldehyde and a 1,2-diol.",
+      "sources": [
+        {
+          "identifier": "10.1038/s44222-026-00401-1",
+          "kind": "doi",
+          "locator": "ketal/acetal among degradable linkers (Whitehead & Arral 2026)",
+          "notes": "Reaction-class primary source; mechanism-verified atom-mapped transform. Exact primary-source product example pending submission-time literature audit."
+        }
+      ],
+      "status": "qualified_for_enumeration",
+      "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
+    },
+    {
+      "architecture": "ionizable phospholipid (iPhos; adds phosphate/P)",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[CH2:2]1[CH2:3][OX2:4][PX4:5](=[OX1:6])[OX2:7]1>>[N:1][CH2:2][CH2:3][O:4][P:5](=[O:6])[O:7]",
+      "conditions": {
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null,
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null
+      },
+      "implementation": {
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
+        "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
+        "test_manifest": "tests/test_reaction_families.py"
+      },
+      "known_negative_examples": [
+        {
+          "expected": "",
+          "reactants": [
+            "CN(C)CCN",
+            "CCCCCCCCCCCC"
+          ],
+          "reason": "alkane has no dioxaphospholane handle"
+        }
+      ],
+      "known_positive_examples": [
+        {
+          "expected": "CCCCCCCCCCOP(=O)(O)OCCNCCN(C)C",
+          "reactants": [
+            "CN(C)CCN",
+            "CCCCCCCCCCOP1(=O)OCCO1"
+          ],
+          "reason": "mechanism-verified atom-mapped reconstruction"
+        }
+      ],
+      "protonation_and_salt_policy": "Register neutral full-molecule products under the frozen compose_lipid canonicalization contract.",
+      "reactant_roles": [
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            1
+          ],
+          "name": "amine_head",
+          "required_handle_smarts": "[NX3;H2,H1]"
+        },
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "name": "dioxaphospholane_tail",
+          "required_handle_smarts": "[CH2]1[CH2][OX2][PX4](=[OX1])[OX2]1"
+        }
+      ],
+      "reaction_id": "iphos_amine_dioxaphospholane",
+      "reaction_version": 1,
+      "selectivity_policy": "An amine opens a 2-alkoxy-1,3,2-dioxaphospholane-2-oxide to an ionizable alkyl-phosphate phospholipid (iPhos chemistry). Introduces the phosphate linker and the P element.",
+      "sources": [
+        {
+          "identifier": "10.1038/s41563-020-00886-0",
+          "kind": "doi",
+          "locator": "iPhos ionizable phospholipids (Liu et al., Nat Mater 2021)",
+          "notes": "Reaction-class primary source; mechanism-verified atom-mapped transform. Exact primary-source product example pending submission-time literature audit."
+        }
+      ],
+      "status": "qualified_for_enumeration",
+      "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
+    },
+    {
       "architecture": "clinical-like amide-linked ionizable lipid",
       "atom_mapped_reaction_smarts": "[CX3:1](=[OX1:2])[OX2H1:3].[NX3;H2,H1:4]>>[C:1](=[O:2])[N:4]",
       "conditions": {
@@ -584,7 +829,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "artifact_hash": "dd792edc957e63ba23940603b845a5132ece61b51a755caca33c4c2711aca87d",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },

@@ -3525,6 +3525,1026 @@
       ]
     },
     {
+      "block_id": "diol:0001",
+      "canonical_smiles": "CCC(C)CCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0003",
+      "canonical_smiles": "CCC(C)CCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0005",
+      "canonical_smiles": "CCC(C)CCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0008",
+      "canonical_smiles": "CCC(C)CCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0011",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0015",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0019",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0023",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0027",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "diol",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "diol",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "diol",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0000",
+      "canonical_smiles": "CCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "diol",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "diol",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0002",
+      "canonical_smiles": "CCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "diol",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0004",
+      "canonical_smiles": "CCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0007",
+      "canonical_smiles": "CCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "diol:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCC(O)CO",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "diol",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "diol_linker"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0001",
+      "canonical_smiles": "CCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0003",
+      "canonical_smiles": "CCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0005",
+      "canonical_smiles": "CCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 28,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0008",
+      "canonical_smiles": "CCCCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 27,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 29,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0011",
+      "canonical_smiles": "CCCCCCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0015",
+      "canonical_smiles": "CCCCCCCCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0019",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0023",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 27,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0027",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(C)CCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 29,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 29,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 27,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0007",
+      "canonical_smiles": "CCCCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0004",
+      "canonical_smiles": "CCCCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0002",
+      "canonical_smiles": "CCCCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
+      "block_id": "dioxaphospholane:0000",
+      "canonical_smiles": "CCCCCCOP1(=O)OCCO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "dioxaphospholane",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "dioxaphospholane_tail"
+      ]
+    },
+    {
       "block_id": "epoxide:0001",
       "canonical_smiles": "CCC(C)CCC1CO1",
       "descriptors": {
@@ -4032,6 +5052,516 @@
       },
       "reaction_roles": [
         "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0001",
+      "canonical_smiles": "CCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0003",
+      "canonical_smiles": "CCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0005",
+      "canonical_smiles": "CCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0008",
+      "canonical_smiles": "CCCCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0011",
+      "canonical_smiles": "CCCCCCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0015",
+      "canonical_smiles": "CCCCCCCCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0019",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0023",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0027",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(C)CCN=C=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0007",
+      "canonical_smiles": "CCCCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0004",
+      "canonical_smiles": "CCCCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0002",
+      "canonical_smiles": "CCCCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanate:0000",
+      "canonical_smiles": "CCCCCCN=C=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "isocyanate",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanate_tail"
       ]
     },
     {
@@ -5091,14 +6621,17 @@
     "amine": 88,
     "carboxylic_acid": 30,
     "chloroformate": 30,
+    "diol": 30,
+    "dioxaphospholane": 30,
     "epoxide": 30,
+    "isocyanate": 30,
     "isocyanide": 30,
     "thiol": 30
   },
   "blocks_by_source": {
     "agile_measured": 25,
     "curated_literature": 75,
-    "programmatic_rational": 210
+    "programmatic_rational": 300
   },
   "format": "compose_lipid_building_block_pool_v1",
   "note": "Reactive substrates (not finished-lipid fragments) for the general linker-agnostic corpus.",
@@ -5110,10 +6643,13 @@
     "amine_head": 88,
     "carboxylic_acid_tail": 30,
     "chloroformate_tail": 30,
+    "diol_linker": 30,
+    "dioxaphospholane_tail": 30,
+    "isocyanate_tail": 30,
     "isocyanide_tail": 30,
     "oxoester_aldehyde_body_tail": 42,
     "thiol_head_or_tail": 30,
     "thiol_tail": 30
   },
-  "total_blocks": 310
+  "total_blocks": 400
 }
