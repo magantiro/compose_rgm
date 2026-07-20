@@ -1,0 +1,53 @@
+{
+  "all_products_valid_single_component": true,
+  "block_manifest_role_counts": {
+    "amine_head": 20,
+    "isocyanide_tail": 5,
+    "oxoester_aldehyde_body_tail": 12
+  },
+  "block_manifest_sha256": "4ba3fec67b904fe507eec25215ce0c31a62fdc5b9536a3b33a5994acafc48f81",
+  "compose_size_eligibility": {
+    "fraction_le_40_heavy_atoms": 0.0356,
+    "fraction_le_64_heavy_atoms": 1.0,
+    "max_heavy_atoms": 60,
+    "median_heavy_atoms": 47,
+    "min_heavy_atoms": 38
+  },
+  "environment": {
+    "rdkit": "2025.09.6"
+  },
+  "format": "compose_lipid_ugi_3cr_smoke_audit_v1",
+  "grid_size": 1200,
+  "products_csv_sha256": "80fce518c7223fbbe3f196c242ff65f4339a3338554f303053b17ed583b6ba56",
+  "reaction_id": "ugi_3cr_agile",
+  "reaction_version": 2,
+  "region_coverage": {
+    "charge_bin": {
+      "neutral": 1320
+    },
+    "head_class": {
+      "cyclic_amine": 840,
+      "diamine": 360,
+      "polyamine": 120
+    },
+    "ring_bin": {
+      "acyclic": 480,
+      "ring": 840
+    },
+    "size_bin": {
+      "41_64": 1273,
+      "le40": 47
+    },
+    "unsaturation_bin": {
+      "none": 528,
+      "present": 792
+    }
+  },
+  "route_replay": {
+    "products_not_in_released_set": 120,
+    "released_products": 1200,
+    "replay_fraction": 1.0,
+    "replayed_exactly": 1200
+  },
+  "unique_products": 1320
+}

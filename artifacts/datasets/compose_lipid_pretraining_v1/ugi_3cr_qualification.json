@@ -1,0 +1,144 @@
+{
+  "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[CX3H1:2]=[OX1].[C;-1,+0;X1:3]#[N;+1,+0;X2:4]>>[N:1][CH1:2][C+0:3](=O)[NH1+0:4]",
+  "environment": {
+    "rdkit": "2025.09.6"
+  },
+  "format": "compose_lipid_ugi_3cr_qualification_v1",
+  "negative_rejection": {
+    "all_rejected": true,
+    "cases": [
+      {
+        "enumerated_product_count": 0,
+        "reactants": [
+          "CCN(CC)CC",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCC[N+]#[C-]"
+        ],
+        "reason": "tertiary-amine-only substrate has no N-H handle",
+        "rejected": true
+      },
+      {
+        "enumerated_product_count": 0,
+        "reactants": [
+          "CN(C)CCN",
+          "CCCCC(=O)CCCC",
+          "CCCCCCCCCCCC[N+]#[C-]"
+        ],
+        "reason": "ketone is not an aldehyde (no C-H on the carbonyl)",
+        "rejected": true
+      },
+      {
+        "enumerated_product_count": 0,
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCCC#N"
+        ],
+        "reason": "nitrile carbon is internal (X2), not a terminal isocyanide carbon",
+        "rejected": true
+      },
+      {
+        "enumerated_product_count": 0,
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCC"
+        ],
+        "reason": "alkane supplies no isocyanide handle",
+        "rejected": true
+      },
+      {
+        "enumerated_product_count": 0,
+        "reactants": [
+          "CN(C)CCN",
+          "CCCCCCCC(=O)O",
+          "CCCCCCCCCCCC[N+]#[C-]"
+        ],
+        "reason": "carboxylic acid is not an aldehyde",
+        "rejected": true
+      }
+    ]
+  },
+  "positive_reconstruction": {
+    "exact_fraction": 1.0,
+    "exact_reconstructions": 1200,
+    "examples": [
+      {
+        "enumerated_product_count": 1,
+        "expected": "CCCCCCCCCCCCNC(=O)C(CCCCCOC(=O)CCCCCCCC)NCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCC[N+]#[C-]"
+        ]
+      },
+      {
+        "enumerated_product_count": 1,
+        "expected": "CCCCCCCCCCCCCCNC(=O)C(CCCCCOC(=O)CCCCCCCC)NCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCCCC[N+]#[C-]"
+        ]
+      },
+      {
+        "enumerated_product_count": 1,
+        "expected": "CCCCCCCCCCCCCCCCNC(=O)C(CCCCCOC(=O)CCCCCCCC)NCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCCCCCC[N+]#[C-]"
+        ]
+      },
+      {
+        "enumerated_product_count": 1,
+        "expected": "CCCCCCCCCCCCCCCCCCNC(=O)C(CCCCCOC(=O)CCCCCCCC)NCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCCCCCCCCCCCC[N+]#[C-]"
+        ]
+      },
+      {
+        "enumerated_product_count": 1,
+        "expected": "CCCCCCCC/C=C\\CCCCCCCCNC(=O)C(CCCCCOC(=O)CCCCCCCC)NCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "O=C(CCCCCCCC)OCCCCCC=O",
+          "CCCCCCCC/C=C\\CCCCCCCC[N+]#[C-]"
+        ]
+      },
+      {
+        "enumerated_product_count": 1,
+        "expected": "CCCCCCCCCCCCNC(=O)C(CCCCCOC(=O)CCC(C)CCCCC)NCCN(C)C",
+        "reactants": [
+          "CN(C)CCN",
+          "CC(CCC(OCCCCCC=O)=O)CCCCC",
+          "CCCCCCCCCCCC[N+]#[C-]"
+        ]
+      }
+    ],
+    "misses": [],
+    "rows_with_multiple_enumerated_products": 120,
+    "total_products": 1200
+  },
+  "reaction_id": "ugi_3cr_agile",
+  "reaction_name": "Ugi three-component (acid-free alpha-amino amide)",
+  "reaction_version": 2,
+  "role_handles": {
+    "amine_head": "[NX3;H2,H1]",
+    "isocyanide_tail": "[C;-1,+0;X1]#[N;+1,+0;X2]",
+    "oxoester_aldehyde_body_tail": "[CX3H1]=[OX1]"
+  },
+  "validation_source": {
+    "component_fields": [
+      "A_smiles",
+      "B_smiles",
+      "C_smiles"
+    ],
+    "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/AGILE/AGILE_smiles_with_value_group.csv",
+    "product_field": "combined_mol_SMILES",
+    "sha256": "1b3dd460125ba7d70d8cce266bd5febaabe09eeddc6a4622405c2706420b9686",
+    "source_id": "agile_measured1200"
+  }
+}

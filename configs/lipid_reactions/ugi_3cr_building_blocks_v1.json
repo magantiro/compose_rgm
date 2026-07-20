@@ -1,0 +1,628 @@
+{
+  "blocks": [
+    {
+      "architecture_tags": {
+        "head_class": "diamine"
+      },
+      "block_id": "amine_head:000",
+      "canonical_smiles": "CC(C)N(CCN)C(C)C",
+      "formal_charge": 0,
+      "heavy_atoms": 10,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "diamine"
+      },
+      "block_id": "amine_head:001",
+      "canonical_smiles": "CCCCN(CCCC)CCCN",
+      "formal_charge": 0,
+      "heavy_atoms": 13,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "diamine"
+      },
+      "block_id": "amine_head:002",
+      "canonical_smiles": "CCN(CC)CCCN",
+      "formal_charge": 0,
+      "heavy_atoms": 9,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "diamine"
+      },
+      "block_id": "amine_head:003",
+      "canonical_smiles": "CCN(CC)CCN",
+      "formal_charge": 0,
+      "heavy_atoms": 8,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:004",
+      "canonical_smiles": "CCN1CCCC1CN",
+      "formal_charge": 0,
+      "heavy_atoms": 9,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "diamine"
+      },
+      "block_id": "amine_head:005",
+      "canonical_smiles": "CN(C)CCCN",
+      "formal_charge": 0,
+      "heavy_atoms": 7,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "diamine"
+      },
+      "block_id": "amine_head:006",
+      "canonical_smiles": "CN(C)CCN",
+      "formal_charge": 0,
+      "heavy_atoms": 6,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "polyamine"
+      },
+      "block_id": "amine_head:007",
+      "canonical_smiles": "CN(CCCN)CCCN",
+      "formal_charge": 0,
+      "heavy_atoms": 10,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:008",
+      "canonical_smiles": "CN1CCC(N)CC1",
+      "formal_charge": 0,
+      "heavy_atoms": 8,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:009",
+      "canonical_smiles": "Cc1cc(N)n(C)n1",
+      "formal_charge": 0,
+      "heavy_atoms": 8,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:010",
+      "canonical_smiles": "NC1CCNCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 7,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:011",
+      "canonical_smiles": "NCCCN1CCCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 9,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:012",
+      "canonical_smiles": "NCCCN1CCOCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 10,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "polyamine"
+      },
+      "block_id": "amine_head:013",
+      "canonical_smiles": "NCCN(CCN)CCN",
+      "formal_charge": 0,
+      "heavy_atoms": 10,
+      "rings": 0,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:014",
+      "canonical_smiles": "NCCN1CCCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 8,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:015",
+      "canonical_smiles": "NCCN1CCCCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 9,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:016",
+      "canonical_smiles": "NCCN1CCNCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 9,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:017",
+      "canonical_smiles": "NN1CCCCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 7,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:018",
+      "canonical_smiles": "NN1CCOCC1",
+      "formal_charge": 0,
+      "heavy_atoms": 7,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "head_class": "cyclic_amine"
+      },
+      "block_id": "amine_head:019",
+      "canonical_smiles": "Nc1cn[nH]c1",
+      "formal_charge": 0,
+      "heavy_atoms": 6,
+      "rings": 1,
+      "role": "amine_head",
+      "source": {
+        "component_field": "A_smiles",
+        "occurrence_count": 60,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "tail_class": "alkyl",
+        "tail_size": "long"
+      },
+      "block_id": "isocyanide_tail:000",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCC/C=C\\CCCCCCCC",
+      "formal_charge": 0,
+      "heavy_atoms": 20,
+      "rings": 0,
+      "role": "isocyanide_tail",
+      "source": {
+        "component_field": "C_smiles",
+        "occurrence_count": 240,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "tail_class": "alkyl",
+        "tail_size": "long"
+      },
+      "block_id": "isocyanide_tail:001",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCC",
+      "formal_charge": 0,
+      "heavy_atoms": 14,
+      "rings": 0,
+      "role": "isocyanide_tail",
+      "source": {
+        "component_field": "C_smiles",
+        "occurrence_count": 240,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "tail_class": "alkyl",
+        "tail_size": "long"
+      },
+      "block_id": "isocyanide_tail:002",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCC",
+      "formal_charge": 0,
+      "heavy_atoms": 16,
+      "rings": 0,
+      "role": "isocyanide_tail",
+      "source": {
+        "component_field": "C_smiles",
+        "occurrence_count": 240,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "tail_class": "alkyl",
+        "tail_size": "long"
+      },
+      "block_id": "isocyanide_tail:003",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCCCC",
+      "formal_charge": 0,
+      "heavy_atoms": 18,
+      "rings": 0,
+      "role": "isocyanide_tail",
+      "source": {
+        "component_field": "C_smiles",
+        "occurrence_count": 240,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "tail_class": "alkyl",
+        "tail_size": "long"
+      },
+      "block_id": "isocyanide_tail:004",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCCCCCC",
+      "formal_charge": 0,
+      "heavy_atoms": 20,
+      "rings": 0,
+      "role": "isocyanide_tail",
+      "source": {
+        "component_field": "C_smiles",
+        "occurrence_count": 240,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:000",
+      "canonical_smiles": "C#CCCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 20,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:001",
+      "canonical_smiles": "C=CCCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 20,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:002",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 27,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:003",
+      "canonical_smiles": "CCCCCC(C)CCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 19,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:004",
+      "canonical_smiles": "CCCCCCC/C=C/C(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 19,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:005",
+      "canonical_smiles": "CCCCCCC/C=C\\C(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 19,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:006",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 27,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:007",
+      "canonical_smiles": "CCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 18,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:008",
+      "canonical_smiles": "CCCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 19,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:009",
+      "canonical_smiles": "CCCCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 20,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:010",
+      "canonical_smiles": "CCCCCCCCCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 25,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    },
+    {
+      "architecture_tags": {
+        "body_size": "long",
+        "linker_class": "ester"
+      },
+      "block_id": "oxoester_aldehyde_body_tail:011",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCC(=O)OCCCCCC=O",
+      "formal_charge": 0,
+      "heavy_atoms": 27,
+      "rings": 0,
+      "role": "oxoester_aldehyde_body_tail",
+      "source": {
+        "component_field": "B_smiles",
+        "occurrence_count": 100,
+        "source_id": "agile_measured1200"
+      }
+    }
+  ],
+  "format": "compose_lipid_building_block_manifest_v1",
+  "manifest_id": "ugi_3cr_building_blocks_v1",
+  "reaction_id": "ugi_3cr_agile",
+  "reaction_version": 2,
+  "role_counts": {
+    "amine_head": 20,
+    "isocyanide_tail": 5,
+    "oxoester_aldehyde_body_tail": 12
+  },
+  "source": {
+    "note": "Blocks decomposed from the AGILE measured library; structural-pretraining provenance only. Exact synthetic component identities beyond A/B/C fields are not claimed.",
+    "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/AGILE/AGILE_smiles_with_value_group.csv",
+    "sha256": "1b3dd460125ba7d70d8cce266bd5febaabe09eeddc6a4622405c2706420b9686",
+    "source_id": "agile_measured1200"
+  }
+}
