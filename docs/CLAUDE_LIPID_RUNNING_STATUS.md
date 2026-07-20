@@ -105,4 +105,4 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 - `9b72cce` M4: component-transfer qualification + head-aware oracle design decision.
 - `b646133` M5: qualify 5 complementary reaction families (6 total).
 - `20496ab` M6: building-block pool (220) + stratified pilot + diversity metrics harness.
-- (pending) M7: lipid-appropriate v2 metrics (core Hill + NN-vs-R0 + faithfulness JS); architecture gap finding.
+- `0c819f1` M7: lipid-appropriate v2 metrics (core Hill + NN-vs-R0 + faithfulness JS); architecture-gap finding.
