@@ -1,0 +1,45 @@
+{
+  "all_validation_correct": true,
+  "format": "compose_head_domain_v1",
+  "head_pka_range": [
+    7.18,
+    10.56
+  ],
+  "known_head_regions": 1183,
+  "known_head_regions_csv": {
+    "path": "artifacts/oracles/head_domain_v1/known_head_regions.csv",
+    "sha256": "8d06faf3b11e244d76c2ee3569f5eed17333c8fa4ab7d335bf24fffb17535b79"
+  },
+  "purpose": "known-head applicability domain: rank within, abstain (->active learning) outside",
+  "similarity_threshold": 0.4,
+  "sources": {
+    "corpus_amine_heads": 88,
+    "r0_real_lipids": 15433
+  },
+  "validation": {
+    "DMAPA-head lipid (known)": {
+      "admitted": true,
+      "correct": true,
+      "expected_admit": true,
+      "max_head_similarity": 0.42857142857142855
+    },
+    "MC3-like DMA head (known)": {
+      "admitted": true,
+      "correct": true,
+      "expected_admit": true,
+      "max_head_similarity": 1.0
+    },
+    "guanidine-head (novel/OOD)": {
+      "admitted": false,
+      "correct": true,
+      "expected_admit": false,
+      "max_head_similarity": 0.35714285714285715
+    },
+    "piperazine-head (known)": {
+      "admitted": true,
+      "correct": true,
+      "expected_admit": true,
+      "max_head_similarity": 1.0
+    }
+  }
+}
