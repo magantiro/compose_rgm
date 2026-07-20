@@ -4,7 +4,9 @@
 **Scope:** ~500k reaction-diverse lipid pretraining corpus + pan-lung representation×model oracle matrix.
 **Last updated:** 2026-07-20
 
-Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src` (macOS OpenMP guard).
+Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src` (macOS OpenMP guard). Scripts importing the `scripts` package need `PYTHONPATH=src:.` and module mode (`-m scripts.<name>`).
+
+**Ownership map (cross-stream coordination interface = pushed commits + this doc):** This lane owns the lipid corpus, pan-lung oracle matrix, and Paper 2 data. The COMPOSE generator (unconditional/conditional) is owned by a **separate Claude session** in worktree `compose_rgm_claude_generators` (branch `claude/generator-cond-uncond`) — do not edit generator-owned code. Lipid model training is gated behind the upstream Paper 1 generator + QED authorization (P1-G7).
 
 ---
 
@@ -15,6 +17,19 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 - Raw sources: 6/6 obtainable hash-verified. LUMI + LuT re-fetched from primary origins (Zenodo `10.5281/zenodo.17771224`, Springer source-data xlsx) — byte-exact to frozen SHA-256. LuT 444-row extraction regenerates to its exact hash.
 - Frozen results reproduce: LuT baselines **bit-exact** (0.00 diff / 240 metrics); LUMI baselines to 4 decimals; corpus counts exact (R0=15,433, union=26,509, AGILE-only=11,076).
 - Test suite green: **42 lipid/oracle/reaction tests pass**.
+
+### Oracle — Milestone 4: component-transfer qualification → oracle design decision
+Answers "does head/tail SAR transfer well enough for a single oracle to rank novel-linker candidates?" Held-component vs held-lipid on two independent in-vitro datasets:
+
+| Axis held out | A549 Spearman | LUMI Spearman |
+|---|--:|--:|
+| held-lipid (baseline) | 0.568 | 0.830 |
+| **head / R1 (amine-like)** | **0.158** | **0.475** |
+| tail / R2–R4 (secondary) | 0.508 | 0.735–0.821 |
+
+**Finding (2-dataset consistent):** the high-diversity **ionizable-head axis transfers poorly**; **tail / secondary axes transfer well**. Mechanistic (head drives pKa/escape potency; tails interpolate) and consistent with the LuT round-transfer collapse (0.31).
+
+**Design decision (locked for the oracle lane):** *not* one global oracle applied blindly. Use a **head-aware applicability-domain gate** — candidates reusing in-distribution ionizable heads + varying linker/tails are rankable; novel-head candidates abstain. For the novel Michael-addition linker, run a **small active-learning calibration** (known heads × new linker) to anchor the linker offset, then rank within-family by transferable tail/secondary SAR. Matches the plan's calibrate-don't-extrapolate rule and the `reward_guard` OOD-abstention already in code.
 
 ### Oracle — Milestone 3: R1×M4 masked multitask MLP cell (+ negative-transfer finding)
 - New matrix cell `R1×M4`: shared molecular trunk (Morgan2048 + RDKit descriptors) with typed per-head outputs, masked loss, held-lipid GroupKFold (global grouping). Trained multitask vs single-task under identical folds/features.
@@ -51,20 +66,21 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 | Pan-lung oracle cells complete | R1/R2 × M1/M2/M3 + M6 ensembles + **R1×M4** (this session) |
 | Canonical pan-lung rows | 4,783 head-rows / 4,339 measurements / 7 typed heads |
 | R1×M4 held-lipid Spearman (A549 / LUMI) | 0.592 / 0.885 |
-| Tests passing | 70 (28 added this session) |
+| Head-axis transfer (A549 / LUMI held-head) | 0.158 / 0.475 (vs baseline 0.568 / 0.830) |
+| Tests passing | 73 (31 added this session) |
 
 ---
 
 ## Current blockers / gates
 - Lipid **model training** gated behind Codex Paper 1 P1-G7 (not on my critical path; data/corpus/oracle prep is authorized now).
-- Oracle R3/R4/R5 cells blocked on the **canonical row-level pan-lung table** (not yet materialized).
+- R3 cell needs a justified **frozen molecular encoder**; leave-study-out needs **>1 source per airway head** (LiON lung slice is the next admission).
 - Corpus pilot (50–100k) blocked until **≥3–4 families qualified** (diversity metrics require multiple families).
 
 ## Exact next actions
-1. **Corpus:** qualify breadth batch — epoxide opening, aza-Michael, Passerini — reusing the enumerator/registry machinery (each needs its own primary-source evidence packet + exact reconstruction).
-2. **Oracle:** R3 frozen molecular embeddings cell (needs a justified frozen encoder) over the canonical table; add leave-study-out once >1 source per head is admitted.
+1. **Oracle (design-driven):** build the **head-aware applicability-domain gate** — extend the AD so novel-head candidates abstain; decompose scoring so tail/secondary SAR is ranked while head/linker gate admission. Directly implements the milestone-4 decision.
+2. **Corpus:** qualify breadth batch — epoxide opening, aza-Michael, Passerini — reusing the enumerator/registry machinery (each needs its own primary-source evidence packet + exact reconstruction).
 3. **Corpus:** stratified 50–100k pilot across the qualified family batch with coverage/leakage gates.
-4. **Oracle:** integrate LiON lung slice (already on disk) to enable leave-study-out on the airway heads.
+4. **Oracle:** integrate LiON lung slice (already on disk) to enable leave-study-out on the airway heads; R3 frozen-embedding cell is lower priority given the transfer finding.
 
 ## Key artifact paths
 - `configs/lipid_reactions/qualified_reactions_v1.json` — qualified Ugi-3CR registry (hash-bound).
@@ -78,4 +94,5 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 ## Commit log
 - `5dd44c4` Milestone 1: qualify Ugi-3CR transform + route-replay smoke.
 - `ee87690` Milestone 2: canonical row-level pan-lung manifest.
-- (pending) Milestone 3: R1xM4 masked multitask MLP cell + negative-transfer finding.
+- `d9c7ebf` Milestone 3: R1xM4 masked multitask MLP cell + negative-transfer finding.
+- (pending) Milestone 4: component-transfer qualification + oracle design decision.

@@ -1,0 +1,94 @@
+{
+  "datasets": {
+    "a549_in_vitro": {
+      "caveat": "held_tail1 groups on the primary tail; minor leakage possible if a held tail1 recurs as tail2 in training.",
+      "rows": 1801,
+      "splits": [
+        {
+          "n_groups": 176,
+          "spearman": 0.5684,
+          "split": "held_lipid_baseline",
+          "top_decile_enrichment": 2.364
+        },
+        {
+          "n_groups": 52,
+          "spearman": 0.1583,
+          "split": "held_head",
+          "top_decile_enrichment": 1.154
+        },
+        {
+          "n_groups": 32,
+          "spearman": 0.5085,
+          "split": "held_tail1",
+          "top_decile_enrichment": 2.584
+        }
+      ],
+      "unique_lipids": 176
+    },
+    "lumi_hbe_in_vitro": {
+      "component_cardinalities": {
+        "R1": 20,
+        "R2": 4,
+        "R3": 4,
+        "R4": 6
+      },
+      "note": "R1 is the highest-cardinality (amine/head-like) position; R2-R4 are lower-cardinality secondary positions.",
+      "rows": 1920,
+      "splits": [
+        {
+          "n_groups": 1920,
+          "spearman": 0.8299,
+          "split": "held_lipid_baseline",
+          "top_decile_enrichment": 6.302
+        },
+        {
+          "n_groups": 20,
+          "spearman": 0.4755,
+          "split": "held_R1",
+          "top_decile_enrichment": 2.812
+        },
+        {
+          "n_groups": 4,
+          "spearman": 0.7351,
+          "split": "held_R2",
+          "top_decile_enrichment": 5.0
+        },
+        {
+          "n_groups": 4,
+          "spearman": 0.821,
+          "split": "held_R3",
+          "top_decile_enrichment": 5.781
+        },
+        {
+          "n_groups": 6,
+          "spearman": 0.751,
+          "split": "held_R4",
+          "top_decile_enrichment": 3.594
+        }
+      ]
+    }
+  },
+  "environment": {
+    "rdkit": "2025.09.6",
+    "seed": 20260720
+  },
+  "format": "compose_pan_lung_component_transfer_v1",
+  "headline": {
+    "a549_head_vs_tail_spearman": {
+      "held_head": 0.1583,
+      "held_lipid_baseline": 0.5684,
+      "held_tail1": 0.5085
+    },
+    "lumi_component_spearman": {
+      "held_R1": 0.4755,
+      "held_R2": 0.7351,
+      "held_R3": 0.821,
+      "held_R4": 0.751,
+      "held_lipid_baseline": 0.8299
+    }
+  },
+  "interpretation": "Consistent across two independent in-vitro datasets: the high-diversity ionizable-head axis transfers poorly (A549 held-head Spearman ~0.16; LUMI held-R1 ~0.48) while tail / secondary-component axes transfer well (A549 held-tail ~0.51; LUMI held-R2/R3/R4 ~0.74-0.82). Mechanistically the head drives pKa/endosomal-escape potency (discontinuous SAR); tails interpolate.",
+  "model": "ExtraTrees on Morgan2048 + RDKit descriptors (R1 representation)",
+  "oracle_design_consequence": "Do NOT use one global oracle to rank novel-linker candidates blindly. Use a HEAD-AWARE applicability-domain gate: candidates that reuse in-distribution ionizable heads and vary linker/tails are rankable; candidates with novel heads abstain. For the novel Michael-addition linker, run a small active-learning calibration (known heads x new linker) to anchor the linker offset, then rank within-family by the transferable tail/secondary SAR. This matches the plan's calibrate-don't-extrapolate rule and the reward_guard OOD-abstention already in code.",
+  "purpose": "Decide which axes of a novel-linker candidate are oracle-rankable vs need active-learning calibration."
+}
