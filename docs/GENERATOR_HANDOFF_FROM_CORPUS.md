@@ -7,27 +7,26 @@
 This is what the corpus lane provides for training + evaluating the general
 (linker-agnostic) COMPOSE-Lipid generator, and how the oracle consumes its output.
 
-## 1. What to train on
+## 1. What to train on — MATERIALIZED, training-ready
 
-**Structural corpus = R0 (real) + R1 (reaction-grounded virtual).**
+**Canonical training corpus = R0 (real anchor) + R1 (reaction-grounded reachable support).**
+Manifest: **`artifacts/datasets/compose_lipid_pretraining_v1/training_corpus_manifest_v1.json`** (`format: compose_lipid_training_corpus_v1`) — the single entry point; it has layer counts, per-layer sha256, realism-weighting spec, kernel profile, and split policy.
 
-- **R0 real anchor:** `artifacts/datasets/compose_lipid_pretraining_v1/r0_observed_real_structures.csv` — 15,433 unique measured/observed canonical ionizable lipids. High-weight anchor. Never inherits biological labels.
-- **R1 virtual:** reaction-grounded, route-certified products from the qualified registry over the building-block pool. Regenerate with:
-  ```
-  KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=src python3 scripts/enumerate_corpus_pilot.py --realism-target <N>
-  ```
-  ~464k unique products enumerable today (500k is a pool-size, not machinery, problem). Products carry `reaction_family` + route provenance.
-- **Layering / sampling:** `artifacts/datasets/compose_lipid_pretraining_v1/layer_aware_training_manifest.json` (R0 77.4% / AGILE-Ugi 22.6%). Virtual layer teaches support/variation; it does not overwrite the empirical molecular distribution or create delivery labels.
+- **R0 real anchor:** `r0_observed_real_structures.csv` — **15,433** unique measured/observed canonical ionizable lipids. High-weight anchor; never inherits biological labels.
+- **R1 reachable support:** **`r1_reaction_grounded_corpus_v1.csv`** — **464,265** unique route-certified products (sha `8a691e47…`), columns: `canonical_smiles, reaction_family, reactant_ids, reactant_roles, size_bin, charge_bin, ring_bin, n_tails_bin, tail_length_bin, linker_type, realism_weight`. This is the RGM rewrite-kernel target set (the reachable support the generator learns to cover). **Total corpus ≈ 479,698** ("~500k"; a larger genuine count needs a broader documented block source, not more combinations — see §4).
+- **Realism sampling:** **sample R1 by the `realism_weight` column** to get an R0-faithful distribution while the whole reachable set stays available for coverage. Weights are IPF-fit to R0 on linker/n_tails/tail_length/size — verified weighted JS-to-R0: linker 0.005, n_tails 0.048, tail_length 0.003, size 0.002 (head_size validated on the pilot audit, JS 0.021). Do **not** treat raw per-family row counts as the training distribution — Ugi/Passerini dominate the raw combinatorial support; the weights correct them to R0's real linker mix.
+- Regenerate deterministically (seed 20260720, ~30 min): `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src:. python3 -m scripts.materialize_training_corpus`.
+- (Legacy `layer_aware_training_manifest.json` = the older 26.5k R0+AGILE union; superseded by the above for training.)
 
 **Distribution is realism-matched to R0 by a two-tier resample** (`enumerate_corpus_pilot.py --realism-target N --marginal-match`): (1) linker/family quotas weighted by R0 linker frequency; (2) **iterative proportional fitting** over the four axes family quotas can't control — `n_tails`, `tail_length`, `head_size`, plus `linker_type` — so every DOF matches R0 jointly; (3) a **per-family coverage floor** (drawn IPF-weighted within family) keeps all 12 reaction families visible for the generator, including linkers R0 barely contains. Verified by `structural_freedom_audit.json`: **all 10 DOF well-matched (JS-to-R0 ≤ 0.07, off-ratio axes: none)** and heteroatom-core Hill 188.0 vs R0 188.3. Honest residuals: the finer tail-*architecture* proxy is more concentrated than R0 (Hill 5.3 vs 11.6) and intra-corpus NN-Tanimoto is 0.956 vs R0 0.884 — expected of realism-matching (R0 itself is homologous-chain redundant); exact uniqueness stays 100%.
 
 ## 2. Chemistry the kernel must support (P2-G2)
 
-From `corpus_pilot_v1/pilot_metrics.json → kernel_readiness_profile`:
-- **Elements:** C, N, O, S, P (S = disulfide/thioether; P = iPhos phosphate).
-- **Charges:** neutral products (protonatable ionizable heads).
-- **Sizes:** median ~55 heavy atoms, up to ~128 (MW ~600–1,000, real range) — **the C/N/O/F small-molecule kernel is not lipid-ready**; extend elements + size before training.
-- **Stereo:** ~50% carry stereocenters (policy must be declared).
+From `training_corpus_manifest_v1.json → kernel_readiness_profile` (full 464k corpus):
+- **Elements:** C, N, O, **S, P** (S = disulfide/thioether; P = iPhos phosphate). NOT optional — degradable-linker families require them. The handoff's "(+P if in scope)" must resolve to **P in scope**; coordinate the shared kernel element set with Codex.
+- **Charges:** all products neutral (protonatable ionizable heads); the kernel state must also represent the **protonated** amine (endosomal).
+- **Sizes:** **median 48** heavy atoms, max **138**; 86.5% ≤64, 96.8% ≤96 — the size cap must go 40 → ~48+ with a tail for the upper range. **The C/N/O/F small-molecule kernel is not lipid-ready.**
+- **Stereo:** **88%** carry stereocenters — a stereo policy MUST be declared (much higher than the drug-like ~50%; lipid tails are stereo-rich).
 
 ## 3. Leakage-resistant splits (use these for train/val/test)
 

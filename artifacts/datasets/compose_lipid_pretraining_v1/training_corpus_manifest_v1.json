@@ -1,0 +1,107 @@
+{
+  "format": "compose_lipid_training_corpus_v1",
+  "gates": [
+    "structural pretraining only; R1 never carries biological/delivery labels",
+    "corpus stays general/linker-agnostic; the Michael/propiolate linker is a downstream fine-tune",
+    "lipid generator training authorized only after Paper 1 P1-G7"
+  ],
+  "kernel_readiness_profile": {
+    "elements_present": [
+      "C",
+      "N",
+      "O",
+      "P",
+      "S"
+    ],
+    "fraction_charged": 0.0,
+    "fraction_with_stereocenter": 0.8812,
+    "heavy_atoms": {
+      "frac_le_64": 0.865,
+      "frac_le_96": 0.968,
+      "max": 138,
+      "median": 48,
+      "min": 15
+    },
+    "note": "the C/N/O/F small-molecule kernel is NOT lipid-ready; extend elements (S,P) + heavy-atom range + declare a stereo policy before training"
+  },
+  "layers": {
+    "r0_observed_real": {
+      "never_inherits_labels": true,
+      "path": "artifacts/datasets/compose_lipid_pretraining_v1/r0_observed_real_structures.csv",
+      "role": "high-weight real anchor",
+      "row_count": 15433,
+      "sha256": "3e2a35416c98f44e2261c06717c1fdee1b5ea393fb8013a38235631aa5ee6c0d",
+      "within_layer": "uniform over unique canonical observed structures"
+    },
+    "r1_reaction_grounded": {
+      "family_counts": {
+        "acetal_aldehyde_diol": 1989,
+        "amide_coupling_acid_amine": 16590,
+        "aza_michael_amine_acrylate": 16590,
+        "carbamate_amine_chloroformate": 16590,
+        "disulfide_coupling": 780,
+        "epoxide_opening_amine": 16590,
+        "iphos_amine_dioxaphospholane": 16590,
+        "passerini_3cr": 77571,
+        "reductive_amination_amine_aldehyde": 21654,
+        "thiol_michael_thioether": 1521,
+        "ugi_3cr_agile": 222768,
+        "urea_amine_isocyanate": 55032
+      },
+      "path": "artifacts/datasets/compose_lipid_pretraining_v1/r1_reaction_grounded_corpus_v1.csv",
+      "provenance_columns": [
+        "reaction_family",
+        "reactant_ids",
+        "reactant_roles"
+      ],
+      "role": "reaction-grounded reachable support (RGM rewrite kernel target set)",
+      "row_count": 464265,
+      "sha256": "8a691e47e24a921233a05627094627e54f1a5a404e998c11ee69a51716d62f3a",
+      "within_layer": "sample by realism_weight to match R0 marginals; full set available for coverage"
+    }
+  },
+  "provenance": {
+    "building_block_pool": "configs/lipid_reactions/building_block_pool_v1.json",
+    "raw_applications_by_family": {
+      "acetal_aldehyde_diol": 1989,
+      "amide_coupling_acid_amine": 17646,
+      "aza_michael_amine_acrylate": 17646,
+      "carbamate_amine_chloroformate": 17646,
+      "disulfide_coupling": 1521,
+      "epoxide_opening_amine": 17646,
+      "iphos_amine_dioxaphospholane": 17646,
+      "passerini_3cr": 77571,
+      "reductive_amination_amine_aldehyde": 21654,
+      "thiol_michael_thioether": 1521,
+      "ugi_3cr_agile": 222768,
+      "urea_amine_isocyanate": 56088
+    },
+    "rdkit": "2025.09.6",
+    "reaction_registries": [
+      "configs/lipid_reactions/qualified_reactions_v1.json",
+      "configs/lipid_reactions/qualified_reaction_families_v1.json"
+    ],
+    "seed": 20260720
+  },
+  "purpose": "training-ready structural pretraining corpus for the COMPOSE-Lipid generator (R0 anchor + R1 reachable support)",
+  "realism_weighting": {
+    "axes_fit_at_scale": [
+      "linker_type",
+      "n_tails",
+      "tail_length",
+      "size"
+    ],
+    "head_size_note": "head_size ratio-match validated on the diagnostic pilot (structural_freedom_audit.json, JS 0.021), not re-fit here to avoid head-region BFS at 464k scale",
+    "method": "iterative proportional fitting to R0 marginals; weight column = realism_weight (mean ~1.0)",
+    "weighted_js_to_r0": {
+      "linker_type": 0.0049,
+      "n_tails": 0.0481,
+      "size": 0.0022,
+      "tail_length": 0.0032
+    }
+  },
+  "splits": {
+    "frozen_diagnostic": "artifacts/datasets/compose_lipid_pretraining_v1/splits_v1/ (R0 + 2,159 R1; leak-free)",
+    "policy": "leakage-resistant group-key hashing: a structure is val/test if its group (reaction_family | heteroatom_core | head_region | study) hashes to that fold. Apply the same hash to R1 at load time; reaction_family split is directly available from the reaction_family column."
+  }
+}
