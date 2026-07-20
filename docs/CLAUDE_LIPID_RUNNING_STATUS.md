@@ -114,6 +114,9 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 - `3480a46` M10: 34k route-certified corpus scale demonstration.
 - `013df74` M11: family-balanced within-architecture selection (arch Hill 6.4→9.3; fixes S-linker starvation).
 - `18eab6d` M12: head-aware applicability-domain gate — 1,183 known head-region scaffolds; rank-within / abstain-outside (milestone-4 decision operationalized).
+- `264cc33`/`3480a46`/`013df74`/`7492958` (pKa feature, 34k scale, balanced selection, status).
+- `aed2bb6` M13: complete linker palette — urea/acetal/iPhos (12 families, +P); elements C/N/O/S/P.
+- `56e8706` M14: freeze leakage-resistant corpus splits (family/scaffold/head/study; all leak-free) — Fig 2 contract + generator handoff.
 
 ## Oracle applicability-domain decision (locked)
 Head axis doesn't transfer → the oracle's honest domain is **known heads (large: 1,183 head-region scaffolds from R0+corpus, ~435 LNPDB head SMILES)**. High-ranked candidates come from this rich known-head space; novel-head candidates **abstain → small active-learning round**. Uses **intrinsic** head-pKa (~9), not apparent (~6.4). Head-pKa feature lifts within-domain head ranking (+42%). Next: wire the gate + pKa into the deployed filtering bundle.
