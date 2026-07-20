@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-07-20T14:26:00-04:00",
+  "repository": "https://github.com/KoshaTx/compose_rgm",
+  "source_branch": "agent/compose-rgm-full-snapshot-20260720",
+  "source_parent_commit": "5088053",
+  "target_branch": "claude/generator-cond-uncond",
+  "target_worktree": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators",
+  "scope": [
+    "unconditional molecular generation",
+    "conditional molecular generation",
+    "molecular optimization and valid-state control",
+    "Paper 1 generator evidence"
+  ],
+  "excluded_scope": [
+    "lipid pretraining corpus",
+    "pan-lung oracle matrix",
+    "Claude lipid worktree"
+  ],
+  "remote_runs_at_cut": {
+    "unconditional_compile": {
+      "app_id": "ap-R32pM7XOzNxeptbjNmWfuM",
+      "function_call_id": "fc-01KY0BAF1GKK50RNV86YQK77M6",
+      "run_label": "compose-v4-unconditional-ring-topology-paths-20260720-v1",
+      "state": "running_cpu_compile"
+    },
+    "conditional_qed_v5": {
+      "app_id": "ap-rPVKcg27IM4dLFfUz5EEhW",
+      "function_call_id": "fc-01KY0BYYJEBXCBYHNMZBQ61EWY",
+      "run_label": "compose-v4-griddd-qed-frozen-residual-pilot-20260720-v5-canonical",
+      "state": "completed",
+      "best_step": 500,
+      "best_validation_loss": 11.144801188012021
+    }
+  },
+  "sha256": {
+    "docs/HANDOFF_CLAUDE_GENERATORS.md": "28f8c44b5b7e17fdef933e181eef8f3eaf59dd2ff5f1906d95a013353846cd6e",
+    "docs/CLAUDE_GENERATOR_START_PROMPT.md": "f6adf115ebc2aa8d20653009c8b43cdab12c6269043b4619b0caf39ca2e989ad",
+    "docs/research_plans/compose_two_paper_execution_plan.html": "204c457a3d70d7b5aa699555aa9186dfcd48aab72065592f35b6aed5527dd394",
+    "docs/research_plans/paper1_compose_methods.html": "0d43e06e8fe02f85b373a2e8574d1eb99e0341292b1c9bf924ec6add627378b8",
+    "docs/research_plans/paper2_compose_lipid.html": "3ccea8fa239f6536c420101bc49334f79aa1fb6d0ab51c8127296adcb1f9634e",
+    "docs/audits/2026-07-20_unconditional_reporting_and_conditional_transition.md": "28b8c5afdaec8b2d6962402e361b77a1c5b47c2284db3ef70e400939da498907",
+    "docs/audits/2026-07-20_unconditional_chemistry_failure_audit.md": "4207b6b26a8871c1e65f04c6e3939d2f92a59c0f76c081afeb11dea2e8c4dc98",
+    "docs/audits/2026-07-20_unconditional_root_fix_execution.md": "4e81980ff44b05e85af0cf6b7c75aafd1ee1bd70981275ee17b52825253d0d53",
+    "docs/audits/2026-07-20_pancake_ring_fusion_loss_decomposition.md": "00af08c3c3ee84ebe0c91941b8eac06d2c1e2c9e6bbadfba765eb778f03b8297",
+    "docs/audits/2026-07-19_pancake_to_quotient_run_audit.md": "4532f60c21e8c9750d25797e0c741450636b0bb6826692226531e4c1e917928a",
+    "docs/audits/2026-07-20_canonical_successor_distillation_design.md": "1109c048ab2969e8ec9c84ec5b61287bf05cfd7a1f9f91f730cabedc415bd6b6",
+    "docs/audits/2026-07-20_conditional_backbone_selection.md": "ae2595d73691b81b076552245388f5be7de314046a33acba81e2b0f2d2dee29b",
+    "docs/audits/2026-07-20_valid_state_conditional_control_design.md": "8162cce45dbc875612a6313395ecc1c896a2c93cf5b73dc6aa542b8c67e30c0b",
+    "docs/audits/2026-07-20_qed_conditional_pilot.md": "b22389caf4ba34b19825276716f320c7d6733ca6600631c8372cbba1a27bd441",
+    "docs/audits/2026-07-20_griddd_qed_benchmark_inputs.md": "09e63f9a6b7bf23e4722e742c737e4c8f30df03490cce5ff3247a29ee332ceb8",
+    "docs/audits/2026-07-20_griddd_conditional_execution_contract.md": "cbd325ea148133a3434ec857481127cd32ed53ec323fab8f34cf37a5dd643750",
+    "docs/audits/2026-07-20_tomorrow_griddd_claim_gate.md": "8d3971a1d371ef5919f34d4e6f826dc0bca2c9aaa2a895385b644e513ff43e77",
+    "docs/audits/2026-07-20_griddd_analytic_zero_sidecar_rewrite_smoke.md": "7dcfbf7f914374dde0847feab1f1fa0dbf3e9f66e5d9a8678ffc913319b8f2a5",
+    "diagnostics/pancake6250_calibration_eval600_metrics.json": "2a829bee193e82d73cd8ffd137e4c47cf694d3ccca8c49d7b929d13da358c744",
+    "diagnostics/pancake_ring_fusion_loss_decomposition.json": "886374191611333ec152f51352733d9ac514c11834dc3c1a421304caf76bef78",
+    "diagnostics/pancake_ring_topology_pilot_status.json": "b1058c702a90f8a4be7d22b51d4554f3c9538eabdce3edfc8d398e81d06451be",
+    "diagnostics/canonical_successor_analytic_backbone_qualification.json": "3abc2cbd27c1c0f60a6c71772bebefd4ae4c9d5fe59790a7679cd633eb49e46f",
+    "diagnostics/griddd_analytic_zero_sidecar_rewrite_smoke.json": "5aa1753f92bb29fffe7113fcb401d2ed358892d5d550203ab198d25e532abb63",
+    "recipes/tree_fcd_transfer_unconditional_ring_topology.json": "e6791128c5100f693ef7f065e675b23aa7110be2eb98a4ae5af58820920e4bea",
+    "configs/experiments/griddd_qed_frozen_residual_pilot_v5_canonical.json": "6a63c154bdab9d97c82c8ce391e3e4e0a8589385993ff2948ce2396fc19fba01",
+    "modal_apps/train_qed_frozen_residual.py": "6406cb51825383bd01e3136fabcfda6b29eb6cd8651005fe5b2ef156536e1a21",
+    "modal_apps/train_tracelet_gm.py": "b21f087edce12b72f4352cc584305b00fa1c6f096c96c5b0209eeaa04812aa55",
+    "scripts/run_griddd_analytic_zero_sidecar_smoke.py": "9deac107dda2c9bf056b2b4871dbbb9903440fce173b296c6aa14f246b7d1526",
+    "scripts/train_tracelet_cnof_gate.py": "7b261153785e00b869e4dc049fe1f7d7ac2d6296ebec0b75737d6fd6952de69b",
+    "src/compose_v4/model/factorized_tracelet_rate_model.py": "c70d4752ed4302e5f33a653e8c8835b42147935e6070a16e2a840e0e13e93e54",
+    "src/compose_v4/experiments/factorized_mark_conditional.py": "c2420519d4b3101d9a6e57431548682446c36f4dc180748abd733c98682de92d",
+    "tests/test_factorized_mark_rate_model.py": "ea6cc67537498b29339fc20d646682f503ec5feca56821a70dffc74381917e24"
+  },
+  "notes": [
+    "Hashes bind the pre-commit working-tree content; the handoff commit ID is reported separately after creation.",
+    "diagnostics/pancake_ring_topology_pilot_status.json reconciles the two failed GPU launches and the replacement CPU compile at the handoff cut.",
+    "Remote artifacts are bound by run labels, app/call IDs, config hashes, and checkpoint paths in the handoff; credentials are never stored here."
+  ]
+}

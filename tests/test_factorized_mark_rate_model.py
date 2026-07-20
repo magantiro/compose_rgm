@@ -466,14 +466,16 @@ def test_hierarchical_ring_templates_separate_group_and_template_mass() -> None:
                 (4.0, 1.0, 7.0, 2.0),
             )
         )
-    )
+    ).requires_grad_()
     support = torch.tensor(
         (
             (True, True, True, True),
             (True, False, False, True),
         )
     )
-    group_logits = torch.log(torch.tensor(((0.7, 0.3), (0.2, 0.8))))
+    group_logits = torch.log(
+        torch.tensor(((0.7, 0.3), (0.2, 0.8)))
+    ).requires_grad_()
     logits = _hierarchical_ring_template_logits(
         template_logits,
         support,
@@ -482,11 +484,22 @@ def test_hierarchical_ring_templates_separate_group_and_template_mass() -> None:
     )
     probabilities = torch.softmax(logits, dim=1)
 
-    assert probabilities[0, :2].sum() == pytest.approx(0.7)
-    assert probabilities[0, 2:].sum() == pytest.approx(0.3)
-    assert probabilities[0, 1] / probabilities[0, 0] == pytest.approx(3.0)
-    assert probabilities[0, 3] / probabilities[0, 2] == pytest.approx(3.0)
-    assert probabilities[1].tolist() == pytest.approx((0.2, 0.0, 0.0, 0.8))
+    assert float(probabilities[0, :2].sum().detach()) == pytest.approx(0.7)
+    assert float(probabilities[0, 2:].sum().detach()) == pytest.approx(0.3)
+    assert float(
+        (probabilities[0, 1] / probabilities[0, 0]).detach()
+    ) == pytest.approx(3.0)
+    assert float(
+        (probabilities[0, 3] / probabilities[0, 2]).detach()
+    ) == pytest.approx(3.0)
+    assert probabilities[1].detach().tolist() == pytest.approx(
+        (0.2, 0.0, 0.0, 0.8)
+    )
+    probabilities[0, 0].backward()
+    assert template_logits.grad is not None
+    assert group_logits.grad is not None
+    assert bool(torch.isfinite(template_logits.grad).all())
+    assert bool(torch.isfinite(group_logits.grad).all())
 
 
 def test_topology_cycle_ring_factorization_adds_shared_group_head() -> None:

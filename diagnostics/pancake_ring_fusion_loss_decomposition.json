@@ -1,0 +1,179 @@
+{
+  "schema": "pancake_ring_fusion_loss_decomposition_v1",
+  "constraints": {
+    "training_launched": false,
+    "model_artifacts_mutated": false,
+    "frozen_checkpoint_only": true
+  },
+  "inputs": {
+    "checkpoint": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt",
+    "checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "validation_paths": "/private/tmp/compose_v4_stage3_validation_paths.pt",
+    "validation_paths_sha256": "dd6f4a7607f0e802cc3490857d38a28d28271815e9d1e93d8aae6d37c868523d",
+    "commutation_gate": "diagnostics/pancake_ring_earliest_commutation_falsification32.json",
+    "commutation_gate_sha256": "80cb543597e6c26ac6b69453670613a976d6aa97149113351f3c73829865af1e",
+    "calibrated_rollout_shards": [
+      {
+        "path": "/private/tmp/pancake-calibrated-shards",
+        "sha256": "49767072be92395c5d3cf0753dfb505ec7eae41ab3338c5d00fedcc6fbd7ecd2",
+        "samples": 200
+      },
+      {
+        "path": "/private/tmp/pancake-shard-2.pt",
+        "sha256": "67f04225ab5f09d4be11b34d33728081b783c2569ff786f052248541cbe7e185",
+        "samples": 200
+      },
+      {
+        "path": "/private/tmp/pancake-shard-4.pt",
+        "sha256": "4a585f176c22f2e72498f6b9d854f671bd945f0be5cada79b74502687fb1ea99",
+        "samples": 200
+      }
+    ]
+  },
+  "atomic_ring_construction": {
+    "path_records": 4000,
+    "unique_endpoints": 2000,
+    "all_paths_atomic_full_ring_systems": true,
+    "overlapping_ring_action_component_count": 0,
+    "teacher_ring_action_count": 9946,
+    "teacher_action_topology_counts": {
+      "single_ring": 7210,
+      "bridged_or_fused": 2606,
+      "spiro": 128,
+      "macrocycle": 2
+    },
+    "teacher_action_topology_fractions": {
+      "single_ring": 0.7249145385079429,
+      "bridged_or_fused": 0.26201488035391113,
+      "spiro": 0.012869495274482204,
+      "macrocycle": 0.00020108586366378444
+    },
+    "unique_endpoint_ring_system_count_distribution": {
+      "0": 27,
+      "1": 308,
+      "2": 691,
+      "3": 657,
+      "4": 273,
+      "5": 44
+    },
+    "unique_endpoints_with_multiple_disjoint_ring_systems": 1665,
+    "endpoint_rdkit_counts": {
+      "fused": 1209,
+      "spiro": 89,
+      "bridged": 87
+    }
+  },
+  "calibrated_committed_ring_actions": {
+    "rollout_count": 600,
+    "rollouts_with_ring": 585,
+    "rollouts_without_ring": 15,
+    "ring_action_count": 1274,
+    "topology_reconstruction_failures": 0,
+    "action_topology_counts": {
+      "single_ring": 1079,
+      "bridged_or_fused": 191,
+      "spiro": 4,
+      "macrocycle": 0
+    },
+    "action_topology_fractions": {
+      "single_ring": 0.8469387755102041,
+      "bridged_or_fused": 0.14992150706436422,
+      "spiro": 0.0031397174254317113,
+      "macrocycle": 0.0
+    },
+    "bridged_or_fused_fraction_delta_from_teacher": -0.11209337328954691,
+    "bridged_or_fused_fraction_ratio_to_teacher": 0.572186995112113
+  },
+  "commutation_gate": {
+    "decision": "FAIL_KILL_SCHEDULING",
+    "rows": 32,
+    "endpoint_and_teacher_executability_exact_rows": 32,
+    "rows_moved_earlier": 29,
+    "median_positions_moved_earlier": 5.5,
+    "maximum_positions_moved_earlier": 14,
+    "original_median_bridged_or_fused_admitted_prior_mass": 0.14351829886436462,
+    "earliest_median_bridged_or_fused_admitted_prior_mass": 0.18674392998218536,
+    "median_rowwise_admitted_prior_mass_ratio": 1.186180089969898,
+    "required_ratio": 2.0,
+    "original_degenerate_support_rows_le_5": 0,
+    "earliest_degenerate_support_rows_le_5": 0,
+    "original_small_ring_only_support_rows": 0,
+    "earliest_small_ring_only_support_rows": 0
+  },
+  "frozen_score_panel_32": {
+    "teacher_topology_counts": {
+      "bridged_or_fused": 30,
+      "spiro": 2
+    },
+    "original_state": {
+      "legal_template_count": {
+        "minimum": 158,
+        "median": 584.0,
+        "mean": 681.625,
+        "maximum": 1274
+      },
+      "median_conditional_empirical_prior_bridged_or_fused_mass": 0.15842843055725098,
+      "median_conditional_model_bridged_or_fused_mass": 0.31592756509780884,
+      "median_model_to_prior_bridged_or_fused_ratio": 1.9736483821938213,
+      "median_ring_family_probability": 0.5350983440876007,
+      "rows_with_exact_teacher_template": 26,
+      "rows_with_supported_exact_teacher_template": 26,
+      "median_conditional_exact_teacher_template_probability": 0.0021341260871849954
+    },
+    "earliest_commuting_state_native_time": {
+      "legal_template_count": {
+        "minimum": 228,
+        "median": 1097.0,
+        "mean": 993.9375,
+        "maximum": 1592
+      },
+      "median_conditional_empirical_prior_bridged_or_fused_mass": 0.19624726474285126,
+      "median_conditional_model_bridged_or_fused_mass": 0.1939966082572937,
+      "median_model_to_prior_bridged_or_fused_ratio": 1.2919891371080117,
+      "median_ring_family_probability": 0.1045910008251667,
+      "rows_with_exact_teacher_template": 26,
+      "rows_with_supported_exact_teacher_template": 26,
+      "median_conditional_exact_teacher_template_probability": 0.002346074499655515
+    },
+    "earliest_commuting_state_controlled_original_time": {
+      "median_conditional_model_bridged_or_fused_mass": 0.35429297387599945,
+      "median_model_to_prior_bridged_or_fused_ratio": 1.9693345361712433,
+      "median_ring_family_probability": 0.2602767050266266,
+      "median_conditional_exact_teacher_template_probability": 0.0034352571237832308
+    }
+  },
+  "placement_and_interface": {
+    "teacher_rows": 32,
+    "empty_interface_rows": 32,
+    "empty_atom_insertion_rows": 32,
+    "exact_template_covered_rows": 26,
+    "exact_placement_present_original_rows": 26,
+    "exact_placement_present_earliest_rows": 26,
+    "original_total_competing_placements": 193,
+    "earliest_total_competing_placements": 643,
+    "original_competing_placements_per_covered_row": {
+      "median": 6.0,
+      "mean": 7.423076923076923,
+      "maximum": 17
+    },
+    "earliest_competing_placements_per_covered_row": {
+      "median": 18.0,
+      "mean": 24.73076923076923,
+      "maximum": 66
+    },
+    "median_exact_placement_probability_original_native": 0.5904252529144287,
+    "median_exact_placement_probability_earliest_native": 0.17502950131893158,
+    "median_exact_placement_probability_earliest_controlled_original_time": 0.19563273340463638
+  },
+  "causal_decision": {
+    "atomic_whole_ring_operator_is_broken": false,
+    "global_catalog_has_no_fused_support": false,
+    "late_commutation_is_a_supported_fix": false,
+    "placement_match_is_missing_when_template_is_covered": false,
+    "flat_template_selector_generalizes_topology_to_rollout_states": false,
+    "primary_loss_boundary": "flat complete-template selection across teacher-to-rollout state shift, compounded by late ring-family timing",
+    "smallest_ground_fix": "learn a shared topology-class-and-cycle-size group distribution before conditional complete-template selection; preserve family, placement, electronics, and executor semantics",
+    "implemented_mode": "topology_cycle_hierarchical",
+    "training_authorized_or_launched": false
+  }
+}

@@ -1,0 +1,972 @@
+{
+  "completed_unix_seconds": 1784570358.489228,
+  "controller_uses_exact_qed_for_selection": true,
+  "direct_conditioning_has_learned_effect": false,
+  "efficacy_claim_authorized": false,
+  "evaluation": {
+    "all_attempt_denominator": 1,
+    "arms": {
+      "combined": {
+        "all_trajectory_states_connected": true,
+        "all_trajectory_states_valid": true,
+        "anytime_success_fraction_by_candidate": [
+          0.0
+        ],
+        "candidate_attempts": 1,
+        "connected_candidates": 1,
+        "exact_oracle_budget_every_start_seed": true,
+        "mean_best_feasible_qed_improvement": 0.0,
+        "mean_wall_time_seconds_per_start_seed": 0.4037397091742605,
+        "padding_oracle_calls": 2,
+        "ring_sensitivity": {
+          "availability_scope": "available at any sampled trajectory state",
+          "reference_boundary": "Interpret conditional ring marginals against a high-QED target subset and the unconditional corpus; global fused frequency alone is not a target.",
+          "strata": {
+            "acyclic": {
+              "candidate_count": 0,
+              "mean_qed": null,
+              "mean_qed_delta_from_lead": null,
+              "mean_similarity_to_lead": null,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 0,
+              "start_seed_success_fraction": null,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": null,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 0,
+              "valid_candidate_fraction": null,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 0
+              }
+            },
+            "fused_or_bridged": {
+              "candidate_count": 0,
+              "mean_qed": null,
+              "mean_qed_delta_from_lead": null,
+              "mean_similarity_to_lead": null,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 0,
+              "start_seed_success_fraction": null,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": null,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 0,
+              "valid_candidate_fraction": null,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 0
+              }
+            },
+            "isolated_ring": {
+              "candidate_count": 1,
+              "mean_qed": 0.39605397258456815,
+              "mean_qed_delta_from_lead": -0.34744752674657603,
+              "mean_similarity_to_lead": 0.42857142857142855,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 1,
+                "ring_system_grow": 1,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 1,
+                "ring_system_grow": 1,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 1,
+              "start_seed_success_fraction": 0.0,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": 0.0,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 1,
+              "valid_candidate_fraction": 1.0,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 1
+              }
+            }
+          },
+          "stratum_definition": {
+            "acyclic": "no RDKit atom rings",
+            "fused_or_bridged": "at least one ring pair sharing >=2 atoms or >=1 RDKit bridgehead",
+            "isolated_ring": "ring-containing without fused ring pairs or RDKit bridgeheads; includes spiro systems"
+          }
+        },
+        "start_seed_attempts": 1,
+        "success_fraction_all_attempts": 0.0,
+        "successful_start_seeds": 0,
+        "total_oracle_calls": 6,
+        "valid_candidates": 1
+      },
+      "controller": {
+        "all_trajectory_states_connected": true,
+        "all_trajectory_states_valid": true,
+        "anytime_success_fraction_by_candidate": [
+          0.0
+        ],
+        "candidate_attempts": 1,
+        "connected_candidates": 1,
+        "exact_oracle_budget_every_start_seed": true,
+        "mean_best_feasible_qed_improvement": 0.0,
+        "mean_wall_time_seconds_per_start_seed": 0.4023802501615137,
+        "padding_oracle_calls": 2,
+        "ring_sensitivity": {
+          "availability_scope": "available at any sampled trajectory state",
+          "reference_boundary": "Interpret conditional ring marginals against a high-QED target subset and the unconditional corpus; global fused frequency alone is not a target.",
+          "strata": {
+            "acyclic": {
+              "candidate_count": 0,
+              "mean_qed": null,
+              "mean_qed_delta_from_lead": null,
+              "mean_similarity_to_lead": null,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 0,
+              "start_seed_success_fraction": null,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": null,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 0,
+              "valid_candidate_fraction": null,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 0
+              }
+            },
+            "fused_or_bridged": {
+              "candidate_count": 0,
+              "mean_qed": null,
+              "mean_qed_delta_from_lead": null,
+              "mean_similarity_to_lead": null,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 0,
+              "start_seed_success_fraction": null,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": null,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 0,
+              "valid_candidate_fraction": null,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 0
+              }
+            },
+            "isolated_ring": {
+              "candidate_count": 1,
+              "mean_qed": 0.39605397258456815,
+              "mean_qed_delta_from_lead": -0.34744752674657603,
+              "mean_similarity_to_lead": 0.42857142857142855,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 1,
+                "ring_system_grow": 1,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 1,
+                "ring_system_grow": 1,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 1,
+              "start_seed_success_fraction": 0.0,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": 0.0,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 1,
+              "valid_candidate_fraction": 1.0,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 1
+              }
+            }
+          },
+          "stratum_definition": {
+            "acyclic": "no RDKit atom rings",
+            "fused_or_bridged": "at least one ring pair sharing >=2 atoms or >=1 RDKit bridgehead",
+            "isolated_ring": "ring-containing without fused ring pairs or RDKit bridgeheads; includes spiro systems"
+          }
+        },
+        "start_seed_attempts": 1,
+        "success_fraction_all_attempts": 0.0,
+        "successful_start_seeds": 0,
+        "total_oracle_calls": 6,
+        "valid_candidates": 1
+      },
+      "direct": {
+        "all_trajectory_states_connected": true,
+        "all_trajectory_states_valid": true,
+        "anytime_success_fraction_by_candidate": [
+          0.0
+        ],
+        "candidate_attempts": 1,
+        "connected_candidates": 1,
+        "exact_oracle_budget_every_start_seed": true,
+        "mean_best_feasible_qed_improvement": 0.0,
+        "mean_wall_time_seconds_per_start_seed": 0.6128453330602497,
+        "padding_oracle_calls": 2,
+        "ring_sensitivity": {
+          "availability_scope": "available at any sampled trajectory state",
+          "reference_boundary": "Interpret conditional ring marginals against a high-QED target subset and the unconditional corpus; global fused frequency alone is not a target.",
+          "strata": {
+            "acyclic": {
+              "candidate_count": 0,
+              "mean_qed": null,
+              "mean_qed_delta_from_lead": null,
+              "mean_similarity_to_lead": null,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 0,
+              "start_seed_success_fraction": null,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": null,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 0,
+              "valid_candidate_fraction": null,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 0
+              }
+            },
+            "fused_or_bridged": {
+              "candidate_count": 0,
+              "mean_qed": null,
+              "mean_qed_delta_from_lead": null,
+              "mean_similarity_to_lead": null,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 0,
+                "ring_system_grow": 0,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 0,
+              "start_seed_success_fraction": null,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": null,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 0,
+              "valid_candidate_fraction": null,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 0
+              }
+            },
+            "isolated_ring": {
+              "candidate_count": 1,
+              "mean_qed": 0.39605397258456815,
+              "mean_qed_delta_from_lead": -0.34744752674657603,
+              "mean_similarity_to_lead": 0.42857142857142855,
+              "ring_family_available_candidate_counts": {
+                "ring_system_delete": 1,
+                "ring_system_grow": 1,
+                "ring_system_restate": 0
+              },
+              "ring_rewrite_use_counts": {
+                "ring_system_delete": 1,
+                "ring_system_grow": 1,
+                "ring_system_restate": 0
+              },
+              "start_seed_attempts": 1,
+              "start_seed_success_fraction": 0.0,
+              "successful_candidate_count": 0,
+              "successful_candidate_fraction": 0.0,
+              "successful_start_seeds": 0,
+              "valid_candidate_count": 1,
+              "valid_candidate_fraction": 1.0,
+              "valid_final_candidate_ring_strata": {
+                "acyclic": 0,
+                "fused_or_bridged": 0,
+                "isolated_ring": 1
+              }
+            }
+          },
+          "stratum_definition": {
+            "acyclic": "no RDKit atom rings",
+            "fused_or_bridged": "at least one ring pair sharing >=2 atoms or >=1 RDKit bridgehead",
+            "isolated_ring": "ring-containing without fused ring pairs or RDKit bridgeheads; includes spiro systems"
+          }
+        },
+        "start_seed_attempts": 1,
+        "success_fraction_all_attempts": 0.0,
+        "successful_start_seeds": 0,
+        "total_oracle_calls": 6,
+        "valid_candidates": 1
+      }
+    },
+    "backbone": {
+      "canonical_successor_execution": true,
+      "checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+      "empirical_mark_prior_mode": "none",
+      "molecular_self_transitions_virtualized": true,
+      "p1_p2_imported": false,
+      "ring_family_mass_mode": "boolean",
+      "unconditional_execution_kind": "analytic_pancake_quotient_adapter_v1",
+      "unconditional_qualification_passed": true,
+      "weight_source": "pancake_derived"
+    },
+    "complete": true,
+    "conditional_ring_reference_requirement": {
+      "compare_to_high_qed_target_subset": true,
+      "compare_to_unconditional_corpus": true,
+      "global_fused_frequency_is_target_marginal": false
+    },
+    "format": "compose_v4_griddd_conditional_evaluation_v1",
+    "large_benchmark_authorized": false,
+    "paired_arm_comparisons": {
+      "combined_minus_controller": {
+        "improvement_delta_bootstrap_95_percent_interval": [
+          0.0,
+          0.0
+        ],
+        "mean_best_feasible_qed_improvement_delta": 0.0,
+        "paired_attempts": 1,
+        "success_fraction_delta": 0.0,
+        "success_fraction_delta_bootstrap_95_percent_interval": [
+          0.0,
+          0.0
+        ]
+      },
+      "combined_minus_direct": {
+        "improvement_delta_bootstrap_95_percent_interval": [
+          0.0,
+          0.0
+        ],
+        "mean_best_feasible_qed_improvement_delta": 0.0,
+        "paired_attempts": 1,
+        "success_fraction_delta": 0.0,
+        "success_fraction_delta_bootstrap_95_percent_interval": [
+          0.0,
+          0.0
+        ]
+      },
+      "controller_minus_direct": {
+        "improvement_delta_bootstrap_95_percent_interval": [
+          0.0,
+          0.0
+        ],
+        "mean_best_feasible_qed_improvement_delta": 0.0,
+        "paired_attempts": 1,
+        "success_fraction_delta": 0.0,
+        "success_fraction_delta_bootstrap_95_percent_interval": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "pre_run_lead_screening": {
+      "excluded_from_matched_per_arm_budget": true,
+      "oracle_calls": 1,
+      "shared_across_arms": true
+    },
+    "protocol": {
+      "bootstrap_replicates": 250,
+      "bootstrap_seed": 20260727,
+      "candidates_per_start": 1,
+      "fairness_role": "protocol_b_compose_internal_matched_control",
+      "final_candidate_oracle_calls_per_candidate": 1,
+      "fingerprint": {
+        "bits": 2048,
+        "radius": 2,
+        "type": "Morgan bit vector"
+      },
+      "guidance_oracle_calls_per_candidate": 4,
+      "lead_eligibility_oracle_calls": 1,
+      "minimum_tanimoto_similarity": 0.4,
+      "oracle_calls_per_start_seed_arm": 6,
+      "proposals_per_controlled_event": 4,
+      "query_matched_griddd_claim_authorized": false,
+      "starting_qed_interval": [
+        0.7,
+        0.8
+      ],
+      "target_qed": 0.9
+    },
+    "records": {
+      "combined": [
+        {
+          "all_trajectory_states_connected": true,
+          "all_trajectory_states_valid": true,
+          "anytime": [
+            {
+              "best_feasible_qed": 0.7435014993311442,
+              "candidates_attempted": 1,
+              "oracle_calls_used": 6,
+              "success_observed": false,
+              "wall_time_seconds": 0.4028356249909848
+            }
+          ],
+          "arm": "combined",
+          "best_feasible_qed": 0.7435014993311442,
+          "best_feasible_qed_improvement": 0.0,
+          "candidate_attempts": 1,
+          "candidates": [
+            {
+              "all_trajectory_states_connected": true,
+              "all_trajectory_states_valid": true,
+              "candidate_index": 0,
+              "connected": true,
+              "error": null,
+              "events": 4,
+              "exhausted_event_budget": true,
+              "final_ring_stratum": "isolated_ring",
+              "guidance_oracle_calls": 4,
+              "metadata": {
+                "control_diagnostics": {
+                  "base_sampler_diagnostics": {
+                    "availability_observations": 15,
+                    "available_at_any_observation": {
+                      "ring_system_delete": true,
+                      "ring_system_grow": true,
+                      "ring_system_restate": false
+                    },
+                    "available_observation_counts": {
+                      "ring_system_delete": 15,
+                      "ring_system_grow": 2,
+                      "ring_system_restate": 0
+                    },
+                    "base_sampler_diagnostics": {
+                      "accepted_events": 14,
+                      "base_sampler_diagnostics": null,
+                      "immediate_backtrack_rejections": 1,
+                      "method": "canonical_history_exact_thinning_v1",
+                      "self_rejections": 0
+                    },
+                    "method": "ring_family_availability_audit_v1"
+                  },
+                  "events": [
+                    {
+                      "beta": 8.0,
+                      "model_time": 0.36237184837822667,
+                      "proposals": [
+                        {
+                          "qed": 0.7620311231175719,
+                          "rule_name": "atom_insert",
+                          "selection_probability": 0.28031363841742857,
+                          "similarity": 0.7446808510638298,
+                          "successor_key": "CCc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7620311231175719,
+                          "rule_name": "atom_insert",
+                          "selection_probability": 0.28031363841742857,
+                          "similarity": 0.7446808510638298,
+                          "successor_key": "CCc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7315675964322402,
+                          "rule_name": "ring_system_delete",
+                          "selection_probability": 0.21968636158257138,
+                          "similarity": 0.48148148148148145,
+                          "successor_key": "CCCC(C)CC(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7315675964322402,
+                          "rule_name": "ring_system_delete",
+                          "selection_probability": 0.21968636158257138,
+                          "similarity": 0.48148148148148145,
+                          "successor_key": "CCCC(C)CC(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        }
+                      ],
+                      "selected_index": 3,
+                      "source_key": "Cc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                    }
+                  ],
+                  "oracle_allowance": 4,
+                  "oracle_calls": 4,
+                  "padding_calls": 2,
+                  "proposal_events": 1,
+                  "raw_proposal_marks": 4
+                },
+                "ring_rewrite_use_counts": {
+                  "ring_system_delete": 1,
+                  "ring_system_grow": 1,
+                  "ring_system_restate": 0
+                }
+              },
+              "qed": 0.39605397258456815,
+              "similarity_to_lead": 0.42857142857142855,
+              "stalled": false,
+              "success": false,
+              "trajectory_states_audited": 5,
+              "valid": true
+            }
+          ],
+          "connected_candidates": 1,
+          "diversity": {
+            "mean_pairwise_distance": null,
+            "mean_pairwise_tanimoto": null,
+            "unique_candidates": 1,
+            "unique_fraction": 1.0,
+            "valid_candidates": 1
+          },
+          "event_budget_exhaustions": 1,
+          "failed_candidates": 0,
+          "first_success_candidate": null,
+          "lead_id": "griddd-qualified-zero-sidecar-smoke-0",
+          "lead_qed": 0.7435014993311442,
+          "lead_ring_stratum": "isolated_ring",
+          "oracle": {
+            "budget": 6,
+            "exact": true,
+            "oracle_wall_time_seconds": 0.006123457802459598,
+            "padding_calls": 2,
+            "selection_calls": 2,
+            "unique_canonical_states": 4,
+            "used": 6
+          },
+          "seed": 20260726,
+          "stalled_candidates": 0,
+          "success": false,
+          "valid_candidates": 1,
+          "wall_time_seconds": 0.4037397091742605
+        }
+      ],
+      "controller": [
+        {
+          "all_trajectory_states_connected": true,
+          "all_trajectory_states_valid": true,
+          "anytime": [
+            {
+              "best_feasible_qed": 0.7435014993311442,
+              "candidates_attempted": 1,
+              "oracle_calls_used": 6,
+              "success_observed": false,
+              "wall_time_seconds": 0.4017017080914229
+            }
+          ],
+          "arm": "controller",
+          "best_feasible_qed": 0.7435014993311442,
+          "best_feasible_qed_improvement": 0.0,
+          "candidate_attempts": 1,
+          "candidates": [
+            {
+              "all_trajectory_states_connected": true,
+              "all_trajectory_states_valid": true,
+              "candidate_index": 0,
+              "connected": true,
+              "error": null,
+              "events": 4,
+              "exhausted_event_budget": true,
+              "final_ring_stratum": "isolated_ring",
+              "guidance_oracle_calls": 4,
+              "metadata": {
+                "control_diagnostics": {
+                  "base_sampler_diagnostics": {
+                    "availability_observations": 15,
+                    "available_at_any_observation": {
+                      "ring_system_delete": true,
+                      "ring_system_grow": true,
+                      "ring_system_restate": false
+                    },
+                    "available_observation_counts": {
+                      "ring_system_delete": 15,
+                      "ring_system_grow": 2,
+                      "ring_system_restate": 0
+                    },
+                    "base_sampler_diagnostics": {
+                      "accepted_events": 14,
+                      "base_sampler_diagnostics": null,
+                      "immediate_backtrack_rejections": 1,
+                      "method": "canonical_history_exact_thinning_v1",
+                      "self_rejections": 0
+                    },
+                    "method": "ring_family_availability_audit_v1"
+                  },
+                  "events": [
+                    {
+                      "beta": 8.0,
+                      "model_time": 0.36237184837822667,
+                      "proposals": [
+                        {
+                          "qed": 0.7620311231175719,
+                          "rule_name": "atom_insert",
+                          "selection_probability": 0.28031363841742857,
+                          "similarity": 0.7446808510638298,
+                          "successor_key": "CCc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7620311231175719,
+                          "rule_name": "atom_insert",
+                          "selection_probability": 0.28031363841742857,
+                          "similarity": 0.7446808510638298,
+                          "successor_key": "CCc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7315675964322402,
+                          "rule_name": "ring_system_delete",
+                          "selection_probability": 0.21968636158257138,
+                          "similarity": 0.48148148148148145,
+                          "successor_key": "CCCC(C)CC(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7315675964322402,
+                          "rule_name": "ring_system_delete",
+                          "selection_probability": 0.21968636158257138,
+                          "similarity": 0.48148148148148145,
+                          "successor_key": "CCCC(C)CC(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        }
+                      ],
+                      "selected_index": 3,
+                      "source_key": "Cc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                    }
+                  ],
+                  "oracle_allowance": 4,
+                  "oracle_calls": 4,
+                  "padding_calls": 2,
+                  "proposal_events": 1,
+                  "raw_proposal_marks": 4
+                },
+                "ring_rewrite_use_counts": {
+                  "ring_system_delete": 1,
+                  "ring_system_grow": 1,
+                  "ring_system_restate": 0
+                }
+              },
+              "qed": 0.39605397258456815,
+              "similarity_to_lead": 0.42857142857142855,
+              "stalled": false,
+              "success": false,
+              "trajectory_states_audited": 5,
+              "valid": true
+            }
+          ],
+          "connected_candidates": 1,
+          "diversity": {
+            "mean_pairwise_distance": null,
+            "mean_pairwise_tanimoto": null,
+            "unique_candidates": 1,
+            "unique_fraction": 1.0,
+            "valid_candidates": 1
+          },
+          "event_budget_exhaustions": 1,
+          "failed_candidates": 0,
+          "first_success_candidate": null,
+          "lead_id": "griddd-qualified-zero-sidecar-smoke-0",
+          "lead_qed": 0.7435014993311442,
+          "lead_ring_stratum": "isolated_ring",
+          "oracle": {
+            "budget": 6,
+            "exact": true,
+            "oracle_wall_time_seconds": 0.006150372792035341,
+            "padding_calls": 2,
+            "selection_calls": 2,
+            "unique_canonical_states": 4,
+            "used": 6
+          },
+          "seed": 20260726,
+          "stalled_candidates": 0,
+          "success": false,
+          "valid_candidates": 1,
+          "wall_time_seconds": 0.4023802501615137
+        }
+      ],
+      "direct": [
+        {
+          "all_trajectory_states_connected": true,
+          "all_trajectory_states_valid": true,
+          "anytime": [
+            {
+              "best_feasible_qed": 0.7435014993311442,
+              "candidates_attempted": 1,
+              "oracle_calls_used": 6,
+              "success_observed": false,
+              "wall_time_seconds": 0.6118721668608487
+            }
+          ],
+          "arm": "direct",
+          "best_feasible_qed": 0.7435014993311442,
+          "best_feasible_qed_improvement": 0.0,
+          "candidate_attempts": 1,
+          "candidates": [
+            {
+              "all_trajectory_states_connected": true,
+              "all_trajectory_states_valid": true,
+              "candidate_index": 0,
+              "connected": true,
+              "error": null,
+              "events": 4,
+              "exhausted_event_budget": true,
+              "final_ring_stratum": "isolated_ring",
+              "guidance_oracle_calls": 4,
+              "metadata": {
+                "control_diagnostics": {
+                  "base_sampler_diagnostics": {
+                    "availability_observations": 15,
+                    "available_at_any_observation": {
+                      "ring_system_delete": true,
+                      "ring_system_grow": true,
+                      "ring_system_restate": false
+                    },
+                    "available_observation_counts": {
+                      "ring_system_delete": 15,
+                      "ring_system_grow": 2,
+                      "ring_system_restate": 0
+                    },
+                    "base_sampler_diagnostics": {
+                      "accepted_events": 14,
+                      "base_sampler_diagnostics": null,
+                      "immediate_backtrack_rejections": 1,
+                      "method": "canonical_history_exact_thinning_v1",
+                      "self_rejections": 0
+                    },
+                    "method": "ring_family_availability_audit_v1"
+                  },
+                  "events": [
+                    {
+                      "beta": 0.0,
+                      "model_time": 0.36237184837822667,
+                      "proposals": [
+                        {
+                          "qed": 0.7620311231175719,
+                          "rule_name": "atom_insert",
+                          "selection_probability": 0.25,
+                          "similarity": 0.7446808510638298,
+                          "successor_key": "CCc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7620311231175719,
+                          "rule_name": "atom_insert",
+                          "selection_probability": 0.25,
+                          "similarity": 0.7446808510638298,
+                          "successor_key": "CCc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7315675964322402,
+                          "rule_name": "ring_system_delete",
+                          "selection_probability": 0.25,
+                          "similarity": 0.48148148148148145,
+                          "successor_key": "CCCC(C)CC(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        },
+                        {
+                          "qed": 0.7315675964322402,
+                          "rule_name": "ring_system_delete",
+                          "selection_probability": 0.25,
+                          "similarity": 0.48148148148148145,
+                          "successor_key": "CCCC(C)CC(=O)NNC(=O)Nc1ccc(F)cc1F"
+                        }
+                      ],
+                      "selected_index": 3,
+                      "source_key": "Cc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+                    }
+                  ],
+                  "oracle_allowance": 4,
+                  "oracle_calls": 4,
+                  "padding_calls": 2,
+                  "proposal_events": 1,
+                  "raw_proposal_marks": 4
+                },
+                "ring_rewrite_use_counts": {
+                  "ring_system_delete": 1,
+                  "ring_system_grow": 1,
+                  "ring_system_restate": 0
+                }
+              },
+              "qed": 0.39605397258456815,
+              "similarity_to_lead": 0.42857142857142855,
+              "stalled": false,
+              "success": false,
+              "trajectory_states_audited": 5,
+              "valid": true
+            }
+          ],
+          "connected_candidates": 1,
+          "diversity": {
+            "mean_pairwise_distance": null,
+            "mean_pairwise_tanimoto": null,
+            "unique_candidates": 1,
+            "unique_fraction": 1.0,
+            "valid_candidates": 1
+          },
+          "event_budget_exhaustions": 1,
+          "failed_candidates": 0,
+          "first_success_candidate": null,
+          "lead_id": "griddd-qualified-zero-sidecar-smoke-0",
+          "lead_qed": 0.7435014993311442,
+          "lead_ring_stratum": "isolated_ring",
+          "oracle": {
+            "budget": 6,
+            "exact": true,
+            "oracle_wall_time_seconds": 0.005943040829151869,
+            "padding_calls": 2,
+            "selection_calls": 0,
+            "unique_canonical_states": 4,
+            "used": 6
+          },
+          "seed": 20260726,
+          "stalled_candidates": 0,
+          "success": false,
+          "valid_candidates": 1,
+          "wall_time_seconds": 0.6128453330602497
+        }
+      ]
+    },
+    "seed_stream_identical_across_arms": true,
+    "smoke_only": false,
+    "training_launched": false
+  },
+  "expected_oracle_calls_per_arm": 6,
+  "format": "compose_v4_griddd_analytic_zero_sidecar_rewrite_smoke_v1",
+  "gate_checks": {
+    "actual_rewrite_event_every_arm": true,
+    "final_similarity_at_least_0_40_every_arm": true,
+    "lead_in_frozen_qed_window": true,
+    "oracle_influence_matches_arm_semantics": true,
+    "qed_target_0_90_is_an_outcome_not_an_execution_gate": true,
+    "qualified_analytic_backbone": true,
+    "three_arm_validity_and_exact_accounting": true,
+    "zero_sidecar_identity_exact": true
+  },
+  "gate_role": "real_rewrite_execution_and_exact_accounting_only",
+  "griddd_comparable_claim_authorized": false,
+  "inputs": {
+    "checkpoint": {
+      "path": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt",
+      "sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf"
+    },
+    "lead": {
+      "eligible_qed_interval": [
+        0.7,
+        0.8
+      ],
+      "id": "griddd-qualified-zero-sidecar-smoke-0",
+      "qed": 0.7435014993311442,
+      "smiles": "Cc1occc1C(=O)NNC(=O)Nc1ccc(F)cc1F"
+    },
+    "max_events": 4,
+    "minimum_tanimoto_similarity": 0.4,
+    "operational_horizon": 2.0,
+    "qualification": {
+      "path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/diagnostics/canonical_successor_analytic_backbone_qualification.json",
+      "sha256": "3abc2cbd27c1c0f60a6c71772bebefd4ae4c9d5fe59790a7679cd633eb49e46f"
+    },
+    "seed": 20260726,
+    "sidecar_config": {
+      "path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/configs/experiments/griddd_qed_frozen_residual_pilot_v1.json",
+      "sha256": "c1c97f403775f6971f8ef139f2fe847d71b98a59651c73babfaf0db2a3c17254"
+    },
+    "target_qed": 0.9
+  },
+  "large_benchmark_authorized": false,
+  "learned_qed_sidecar": false,
+  "passed": true,
+  "phase": "complete",
+  "qualification": {
+    "atom_delete_log_rate_adjustment": -0.5,
+    "canonical_successor_execution": true,
+    "checkpoint_path": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt",
+    "checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "empirical_mark_prior_mode": "none",
+    "execution_adapter_source_path": "src/compose_v4/experiments/canonical_successor_distillation.py",
+    "execution_adapter_source_sha256": "00ede099bcf169270ca821c3c9a6b5d4c29b55f0c456b1a4acb81f126a350a0d",
+    "execution_kind": "analytic_pancake_quotient_adapter_v1",
+    "manifest_path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/diagnostics/canonical_successor_analytic_backbone_qualification.json",
+    "manifest_sha256": "3abc2cbd27c1c0f60a6c71772bebefd4ae4c9d5fe59790a7679cd633eb49e46f",
+    "molecular_self_transitions_virtualized": true,
+    "multi_state_panel_states": 24,
+    "p1_p2_imported": false,
+    "property_condition_dim": 0,
+    "qualification_passed": true,
+    "ring_family_mass_mode": "boolean",
+    "small_ring_log_rate_adjustment": -1.5,
+    "source_checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "weight_source": "pancake_derived"
+  },
+  "real_rewrite_generator": true,
+  "scripted_candidates": false,
+  "sidecar_contract": {
+    "base_parameters_frozen": true,
+    "base_weights_in_sidecar_state_dict": false,
+    "family_hazard_residual": true,
+    "independent_total_hazard_residual": false,
+    "kind": "frozen_valid_state_qed_residual_v1",
+    "missing_condition_identity": true,
+    "property_names": [
+      "qed"
+    ],
+    "qed_mean": 0.6012369990348816,
+    "qed_standard_deviation": 0.191695898771286,
+    "within_family_residual": true
+  },
+  "started_unix_seconds": 1784570349.700755,
+  "training_launched": false,
+  "zero_initialization_identity": {
+    "exact": true,
+    "rows": [
+      {
+        "maximum_absolute_family_log_hazard_residual": 0.0,
+        "missing_vs_base_max_family_rate_absolute_error": 0.0,
+        "model_time": 0.0,
+        "target_vs_base_max_family_rate_absolute_error": 0.0,
+        "target_vs_base_total_hazard_absolute_error": 0.0
+      },
+      {
+        "maximum_absolute_family_log_hazard_residual": 0.0,
+        "missing_vs_base_max_family_rate_absolute_error": 0.0,
+        "model_time": 0.2,
+        "target_vs_base_max_family_rate_absolute_error": 0.0,
+        "target_vs_base_total_hazard_absolute_error": 0.0
+      },
+      {
+        "maximum_absolute_family_log_hazard_residual": 0.0,
+        "missing_vs_base_max_family_rate_absolute_error": 0.0,
+        "model_time": 0.4,
+        "target_vs_base_max_family_rate_absolute_error": 0.0,
+        "target_vs_base_total_hazard_absolute_error": 0.0
+      }
+    ]
+  },
+  "zero_initialized_untrained_sidecar": true
+}
