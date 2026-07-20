@@ -1,0 +1,107 @@
+{
+  "format": "compose_lion_representation_transfer_v1",
+  "interpretation": "Richer RDKit descriptors no meaningful lift (null result) cross-chemistry transfer to the held-out Michael-addition library: leave-out Spearman moves 0.077 -> 0.106 (delta 0.029). This is a RICHER RDKIT DESCRIPTOR representation (MACCS + Avalon + atom-pair + topological-torsion + folded Gobbi 2D-pharmacophore concatenated onto the Morgan+RDKit baseline), NOT a learned/frozen neural embedding -- no pretrained molecular encoder (transformers/molfeat/unimol/torch_geometric/deepchem) is installed. A null result would mean the weak transfer is a genuine data/chemistry-coverage limit, not a representation artifact, and supports the head-aware-AD-gate + active-learning calibration design rather than richer featurization alone.",
+  "michael_addition_library": "RM_Michael_addition_branched",
+  "michael_leaveout_delta": 0.029,
+  "michael_positive_control_delta": 0.0,
+  "n_libraries": 3,
+  "n_lipids": 1801,
+  "representation_lifts_transfer": "no meaningful lift (null result)",
+  "representations": {
+    "baseline_morgan_rdkit": {
+      "description": "molecular_features(...)['combined']: 10 RDKit descriptors + Morgan-2048 (identical to scripts/qualify_lion_leave_library.py)",
+      "feature_dim": 2058,
+      "michael_addition_library": "RM_Michael_addition_branched",
+      "michael_leaveout_spearman": 0.077,
+      "per_library": {
+        "IR_Reductive_amination": {
+          "held_out_lipids": 467,
+          "spearman": 0.254,
+          "top_decile_enrichment": 1.27,
+          "train_lipids": 1334
+        },
+        "RM_Michael_addition_branched": {
+          "held_out_lipids": 1177,
+          "spearman": 0.077,
+          "top_decile_enrichment": 1.69,
+          "train_lipids": 624
+        },
+        "other": {
+          "held_out_lipids": 157,
+          "spearman": -0.092,
+          "top_decile_enrichment": 3.68,
+          "train_lipids": 1644
+        }
+      },
+      "positive_control": {
+        "michael_subset_enrichment": 2.11,
+        "michael_subset_spearman": 0.633,
+        "overall_spearman": 0.64,
+        "protocol": "random 5-fold over all A549 LiON (Michael-addition INCLUDED in training)"
+      }
+    },
+    "richer_rdkit_descriptors": {
+      "added_descriptors": [
+        {
+          "dim": 167,
+          "name": "maccs_keys",
+          "note": "rdkit.Chem.MACCSkeys.GenMACCSKeys (167 structural keys)"
+        },
+        {
+          "dim": 512,
+          "name": "avalon_fp",
+          "note": "rdkit.Avalon.pyAvalonTools.GetAvalonFP (default nBits)"
+        },
+        {
+          "dim": 2048,
+          "name": "atom_pair_hashed",
+          "note": "GetHashedAtomPairFingerprintAsBitVect(nBits=2048)"
+        },
+        {
+          "dim": 2048,
+          "name": "topological_torsion_hashed",
+          "note": "GetHashedTopologicalTorsionFingerprintAsBitVect(nBits=2048)"
+        },
+        {
+          "dim": 3997,
+          "name": "pharm2d_gobbi_folded",
+          "note": "rdkit.Chem.Pharm2D Gobbi factory 2D pharmacophore, folded 39972->3997 (fold factor 10) to stay in scale with the other fingerprint families; raw is very high-dimensional/sparse"
+        }
+      ],
+      "added_dim": 8772,
+      "description": "RICHER RDKit DESCRIPTOR representation (NOT a learned/neural embedding): baseline ++ maccs_keys(167) ++ avalon_fp(512) ++ atom_pair_hashed(2048) ++ topological_torsion_hashed(2048) ++ pharm2d_gobbi_folded(3997)",
+      "feature_dim": 10830,
+      "michael_addition_library": "RM_Michael_addition_branched",
+      "michael_leaveout_spearman": 0.106,
+      "per_library": {
+        "IR_Reductive_amination": {
+          "held_out_lipids": 467,
+          "spearman": 0.259,
+          "top_decile_enrichment": 0.85,
+          "train_lipids": 1334
+        },
+        "RM_Michael_addition_branched": {
+          "held_out_lipids": 1177,
+          "spearman": 0.106,
+          "top_decile_enrichment": 1.52,
+          "train_lipids": 624
+        },
+        "other": {
+          "held_out_lipids": 157,
+          "spearman": -0.073,
+          "top_decile_enrichment": 3.07,
+          "train_lipids": 1644
+        }
+      },
+      "positive_control": {
+        "michael_subset_enrichment": 2.11,
+        "michael_subset_spearman": 0.633,
+        "overall_spearman": 0.643,
+        "protocol": "random 5-fold over all A549 LiON (Michael-addition INCLUDED in training)"
+      }
+    }
+  },
+  "seed": 20260720,
+  "skipped_descriptors": [],
+  "task": "A549 in-vitro delivery, leave-LIBRARY-out (train on other chemistries, test on held library) + Michael-included positive control, run under TWO representations"
+}
