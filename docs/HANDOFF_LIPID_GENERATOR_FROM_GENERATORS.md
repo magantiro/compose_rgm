@@ -11,6 +11,14 @@ goals, gates, and claim boundaries in the governing HTML plans
 `compose_two_paper_execution_plan.html`, `paper1_compose_methods.html`). Read the
 HTML plans as canonical; this doc is the generator-side index into them.
 
+> **New to the generator? Read `docs/GENERATOR_INTERNALS_FROM_ZERO.md` first.**
+> It assumes zero prior knowledge and explains, from first principles: what the
+> model is (a learned CTMC that edits molecules via legal chemical rewrites), the
+> state space, operators, the rate-model heads, the training objective, the
+> sampler, the conditioning trio, the Modal pipeline + recipe format, a glossary,
+> and a suggested reading order that maps each file to what it does and where the
+> lipid changes go. This handoff assumes that mental model.
+
 ---
 
 ## 0. How the code gets there — git, not copy
