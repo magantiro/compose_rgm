@@ -1,0 +1,147 @@
+{
+  "builder": {
+    "path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/scripts/build_griddd_qed_lead_manifest.py",
+    "sha256": "d20595dc884ac57238b4da3e1fe9d510a9a5a71b771f1fa86ac843275ae2640e"
+  },
+  "decision": {
+    "griddd_primary_protocol_launch_authorized": false,
+    "griddd_release_exact_list_available": false,
+    "jin_iclr19_exact_public_list_available": true,
+    "no_substitute_labeled_exact": true
+  },
+  "fairness_contract": {
+    "claim_boundary": {
+      "protocol_b_is_query_matched_to_griddd": false,
+      "query_matched_claim_requires_external_baseline_at_same_budget": true,
+      "tables_must_remain_separate": true
+    },
+    "format": "compose_v4_griddd_two_protocol_fairness_v1",
+    "protocol_a_griddd_comparable": {
+      "arm": "direct_conditioned_native_sampling",
+      "beta_zero_shadow_rescoring": false,
+      "candidate_selection": "native_model_sampling_no_oracle_tilt",
+      "exact_leads_available": false,
+      "lead_set_id": "griddd_release_qed_800_exact_unresolved",
+      "oracle_accounting": "report only benchmark evaluation calls; native sampling cost is reported separately",
+      "padding_calls": false,
+      "results_table": "griddd_comparable_primary_only"
+    },
+    "protocol_b_compose_internal": {
+      "arms": [
+        "direct",
+        "controller",
+        "combined"
+      ],
+      "candidate_rng_streams_matched_across_arms": true,
+      "exact_oracle_calls_per_start_seed_arm": 981,
+      "guidance_oracle_calls_per_candidate": 48,
+      "results_table": "compose_control_mechanism_only",
+      "selection_influencing_and_padding_calls_reported_separately": true
+    },
+    "shared_task": {
+      "all_start_denominator": true,
+      "candidates_per_start": 20,
+      "fingerprint": {
+        "bits": 2048,
+        "radius": 2,
+        "type": "Morgan bit vector",
+        "use_chirality": false
+      },
+      "minimum_tanimoto_similarity": 0.4,
+      "starting_qed_interval": [
+        0.7,
+        0.8
+      ],
+      "target_qed_interval": [
+        0.9,
+        1.0
+      ]
+    }
+  },
+  "format": "compose_v4_griddd_qed_lead_manifest_v1",
+  "griddd_code_reconstruction": {
+    "all_qed_in_closed_interval_0p70_0p80": true,
+    "comparison_to_jin_exact": {
+      "canonical_set_intersection": 1,
+      "ordered_equal": false
+    },
+    "counts": {
+      "canonical_train_duplicates_removed": 280,
+      "processed_test_rows": 22629,
+      "rejected_test_rows": 2036,
+      "source_rows": 249455,
+      "test_rows": 24945,
+      "train_rows": 199564,
+      "validation_rows": 24946
+    },
+    "lead_count": 800,
+    "must_not_be_labeled": "official GrIDDD 800",
+    "ordered_canonical_smiles_sha256": "9a4bf524430693cd5ea2e6f48528988583fc80ea608b3524b99b195407e5003b",
+    "qed_maximum": 0.7998864013309673,
+    "qed_minimum": 0.7001584906016023,
+    "runtime": {
+      "numpy": "2.4.2",
+      "rdkit": "2025.09.6"
+    },
+    "settings": {
+      "charges_policy": "dictionary",
+      "qed_interval": [
+        0.7,
+        0.8
+      ],
+      "random_state": 42,
+      "selection": "first 800 eligible processed test rows",
+      "split": [
+        0.8,
+        0.1,
+        0.1
+      ]
+    },
+    "source_csv_sha256": "35e3f1a52b1badc0697e373d73a18ad773f415936ff992f4c6baa2e067b3e6ae",
+    "source_csv_url": "https://raw.githubusercontent.com/aspuru-guzik-group/chemical_vae/37b9f96470d4471c0593cffefa448e0a8a184ef6/models/zinc_properties/250k_rndm_zinc_drugs_clean_3.csv",
+    "status": "reproducible_reconstruction_not_exact",
+    "table": "configs/benchmarks/griddd_qed_test_reconstruction_dictionary_local_runtime_v1.csv",
+    "table_sha256": "001a1c8d8b469c8d7a20ffb1c74f8a940f704c49af5667fd99114e1a86f9ebda"
+  },
+  "griddd_release": {
+    "blockers": [
+      "generated raw/qed_smiles.smiles is not committed",
+      "processed test_qed checkpoint is not committed",
+      "executed Hydra CLI overrides are not frozen",
+      "README requests charges_policy=dictionary while resolved experiment YAML defaults to partial",
+      "the released output is not hash-bound to the requested RDKit 2023.03.2 environment"
+    ],
+    "commit": "cc3dc31ac341216a0bbcc62f63ae6831581ff40b",
+    "paper": "https://arxiv.org/abs/2506.15725",
+    "repository": "https://github.com/mninniri/GrIDDD",
+    "selection_code_path": "griddd/datasets/zinc250k_dataset.py",
+    "selection_summary": "shuffle source CSV with pandas random_state=42; use final 10% as test after an 80/10/10 split; preprocess; select first 800 processed test rows with inclusive QED 0.70-0.80",
+    "status": "exact_list_blocked"
+  },
+  "jin_iclr19_exact": {
+    "all_qed_in_closed_interval_0p70_0p80": true,
+    "canonicalization": "RDKit canonical isomeric SMILES",
+    "commit": "e02c14ae857be0e122413845162aeac0251b09c6",
+    "lead_count": 800,
+    "ordered_canonical_smiles_sha256": "d199f9385d08e690ce9eb4d7d28c32032e4a480aca59eb81a91bb4820ab99d66",
+    "qed_maximum": 0.7997166704260906,
+    "qed_minimum": 0.7000206777564388,
+    "repository": "https://github.com/wengong-jin/iclr19-graph2graph",
+    "source_path": "data/qed/test.txt",
+    "source_sha256": "704103777e8050eb59f4d15d9997ca6070ba05a6b878b8e18738bfb1e706a090",
+    "source_url": "https://raw.githubusercontent.com/wengong-jin/iclr19-graph2graph/e02c14ae857be0e122413845162aeac0251b09c6/data/qed/test.txt",
+    "status": "exact_public_artifact",
+    "table": "configs/benchmarks/jin_iclr19_qed_test_exact_v1.csv",
+    "table_sha256": "cab403bf2f92a5f7f0db19f9b508c8d0db860c89993db355a550f330f41c0983"
+  },
+  "metric_contract": {
+    "fingerprint": {
+      "compose_implementation": "rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)",
+      "equivalent_on_all_frozen_rows": true,
+      "implementation_in_griddd": "AllChem.GetMorganFingerprintAsBitVect(radius=2, nBits=2048, useChirality=False)"
+    },
+    "qed": "rdkit.Chem.QED.qed",
+    "similarity": "Tanimoto"
+  },
+  "no_model_launch": true
+}

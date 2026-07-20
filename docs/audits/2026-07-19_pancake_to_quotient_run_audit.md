@@ -58,6 +58,108 @@ conclusion must not be drawn from this schedule mismatch.
 | Hierarchical hazard/family/action rate model | Separate clock, family choice, and operands | Hazard error improves; low-frequency non-ring family classification remains weak | **Retain provisionally; use a properly matched schedule before changing the loss** |
 | 3,000-step cosine decay | Obtain a fast quality readout | Learning rate decayed while loss still improved; family accuracy plateaued near 58% | **Reject for the next comparison** |
 
+## Step-6,250 pancake audit: global distribution and local execution
+
+The exact 2,000-sample artifact was re-audited rather than inferred from two
+illustrative trajectories.  The machine-readable event report is
+`diagnostics/pancake_step6250_eval2000_event_audit.json`.
+
+### Global distribution error
+
+The retained checkpoint is a strong rescue base, not a completed generator.
+Its neutral-CNOF matched FCD is 11.288, with 100% validity, uniqueness, and
+novelty.  The largest structural deficits are under-generation rather than
+global over-cyclization: mean heavy atoms are 25.07 versus 26.61, mean bonds
+are 26.47 versus 29.02, and mean cycle rank is 2.40 versus 3.41.  Atom-count,
+bond-order, and cycle-rank total variation are 0.117, 0.075, and 0.3295,
+respectively.  Three/four-member rings are locally overrepresented, but the
+model simultaneously lacks roughly one unit of total cycle rank per molecule.
+
+Deletes exceed inserts by 3,536 across 2,000 trajectories, exactly a mean net
+change of -1.768 atoms per molecule.  Reconstructed source trees average 26.84
+atoms while final molecules average 25.07.  This identifies family-rate/size
+calibration as a separate error from ring topology.
+
+### Learned phase collapse
+
+The sequential compiler order became an almost deterministic generative
+schedule:
+
+- atom insertion mean normalized event position: 0.080;
+- Graft: 0.437;
+- atom deletion: 0.733;
+- bond reorder: 0.853;
+- atom restate: 0.919; and
+- whole-ring grow: 0.987.
+
+The first ring event occurs at mean position 0.978; 99.31% of ring events lie
+in the final event decile, and ring-grow is the last event in 94.3% of
+trajectories.  This confirms that the model learned one compiler linearization
+instead of a time-coherent superposition of valid edit orders.  Atomic ring
+commitment prevents independent decoration of ring atoms in the teacher, but
+late commitment still leaves inference with a decorated scaffold and a
+degenerate residual ring support.  The support-renormalization failure is
+therefore downstream of path ordering, not the whole explanation.
+
+### Local execution waste
+
+Graft accounts for 76.07% of all 143,561 sampled events and a mean 73.08% of
+each trajectory.  It is a majority of events in 93.25% of trajectories and at
+least three quarters in 57.05%.  Compact 2,000-sample artifacts do not retain
+intermediate states, but the full index-32 replay proves that 89 of 118 events
+can be canonical molecular self-transitions.  These no-ops consume CTMC time
+and crowd out the insert, delete, bond, and ring events needed to repair the
+global deficits.
+
+### Re-baselined repair order
+
+1. **Rescue the exact pancake checkpoint at inference.**  Remove canonical
+   self-successors and merge equivalent Graft matches; calibrate family
+   intercepts on frozen validation data; replace Boolean ring-family
+   renormalization with supported-match/topology rate mass.  This requires no
+   path or support rebuild.
+2. **Replace the fixed compiler linearization.**  Build a dependency DAG over
+   existing valid rewrite steps using read/write footprints and exact
+   commutation checks.  Sample validated linear extensions so ring systems
+   commit as soon as their prerequisites exist and independent branch,
+   topology, size, and label operations interleave.  Replay every scheduled
+   path to the exact endpoint; fall back to the sequential trace on any failed
+   certificate.
+3. **Retain the good substrate.**  Keep the carbon-tree prior, flexible size,
+   Graft, whole-ring grow/delete, aromatic lowering, all-step
+   validity/connectivity, and ancestral CTMC sampler.  The measured failure is
+   the scheduler and rate normalization, not evidence that these operators or
+   the RGM thesis should be discarded.
+4. **Keep exhaustive chemistry as an oracle.**  Production uses sparse local
+   rule matching; the expensive catalog traversal is reserved for equality
+   tests and rare fallback cases.
+
+### Symmetry correction must thin, not renormalize
+
+The first direct rescue pilot deliberately tested the simplest possible
+canonical mask on the frozen pancake checkpoint.  Eight completed shards (80
+samples) retained 100% final validity, connectivity, non-null rate, and
+uniqueness, with zero recorded canonical self-events.  However, mean size rose
+to 30.75 atoms, atom deletion nearly disappeared (2 total events), and the
+small-ring prevalence was 33.75%.  Masking self-Grafts and renormalizing their
+conditional family distribution therefore changes the learned process; it is
+not a lossless checkpoint repair.
+
+The corrected legacy inference uses CTMC thinning.  A pre-quotient Graft is
+sampled from the original learned operand distribution.  If its canonical
+successor equals the source, operational time advances but the molecular state
+does not change and the event is recorded separately as a virtual jump.  This
+is equivalent to multiplying the chemical Graft intensity by the learned
+non-self mass.  It preserves the checkpoint's state law (up to the model's
+permutation equivariance), avoids presenting gauge events as chemical edits,
+and does not alter clean quotient-model training.  The 100-sample thinned
+evaluation is the active direct-rescue gate.
+
+The dependency scheduler is a meaningful formulation change, but not an
+open-ended computational project: it transforms existing traces, performs one
+validated replay per sampled linearization, and reuses all molecular endpoints
+and operator implementations.
+
 ## Infrastructure change audit
 
 | Commit group | Scientific effect | Operational result | Decision |
@@ -112,6 +214,108 @@ retain fresh initialization.  The gate reuses the current path, validation,
 test, and training-support caches and therefore requires no chemistry
 recompilation.  If it does not improve the corrected validation objective, it
 is stopped rather than extended.
+
+### Completed step-2,500 ring attribution
+
+The completed 100-sample rollout is 100% valid, connected, unique, and novel,
+with zero canonical self-events, zero delete-to-one collapse, and zero event
+budget exhaustion.  Its full-reference FCD is 24.708 and its neutral-CNOF
+matched FCD is 19.180; both are high-variance 100-sample diagnostics, not final
+benchmark estimates.  The material chemistry failure is now localized: 40% of
+molecules contain a three- or four-member ring, versus 5.26% in the reference.
+
+This is not a Graft artifact.  Replay of every committed state shows that all
+53 newly created small rings arise at `ring_system_grow` events; all 40 final
+small-ring molecules first acquire the small ring from that family, and no
+small ring is subsequently removed.  The 265 ring-grow events therefore create
+a small ring 20.0% of the time.  By contrast, only 3.01% of the empirical
+semantic ring-template mass in the fitted catalog contains a three- or
+four-member cycle.  The error is thus state-conditional template/support
+calibration or a learned residual overwhelming the base measure—not an
+empirical catalog dominated by small rings and not an uncoordinated Graft.
+
+The simplest next ring intervention, if the legacy-transfer gate does not
+resolve this, is a matched one-dimensional/topology-group calibration:
+factor ring selection into corpus-frequency topology signature (cycle-size
+multiset, fused/bridged/spiro class, aromaticity) plus a learned residual, while
+retaining positive support for rare rings.  Do not add another ring operator or
+hard-ban rare rings.  Confirm the fix by replay attribution and matched
+100-sample ring histograms before any longer run.
+
+### Legacy-transfer gate result
+
+The bounded transfer gate completed for 500 cached updates and did not resolve
+the failure.  Its best validation point was update 400 at loss 12.7654 and
+53.81% family accuracy; the selected quotient incumbent remains better at loss
+11.6977 and 58.08%.  The transfer checkpoint was therefore rejected before
+rollout/FCD computation.  This negative result rules out a cheap initialization
+rescue and activates the support-versus-residual ring diagnostic above.
+
+### Exact support-versus-logit diagnostic
+
+A read-only audit reconstructed 12 states immediately before retained
+`ring_system_grow` events and evaluated the exact legal template set.  The
+machine-readable row-level result is retained at
+`diagnostics/ring_calibration/step2500_exact_support_audit_12.json`.  The
+catalog contains 3,092 semantic templates, of which 285 contain a three- or
+four-member minimum-basis cycle; their unconditional empirical prior mass is
+only 3.017%.  In broadly supported states, the production small-ring mass was
+typically 1.7--4.6%, so the learned model does not globally amplify rare rings.
+
+The failure is instead concentrated in late, highly decorated states.  Three
+audited support sets contained 2, 2, and 5 legal templates, respectively, and
+every legal template contained a three- or four-member cycle.  Their
+support-conditioned small-ring mass was therefore exactly 100%, and each
+committed event created a small ring.  Across the 12 audited states, exact
+support conditioning raised mean production small-ring mass to 28.0% despite
+the 3.017% global base measure.  This localizes the MVP failure to hierarchical
+family enablement: the family head sees a Boolean “some ring action exists” but
+does not know that the remaining support is a tiny, rare-topology residue.
+
+The immediate inference-only experiment excludes templates containing cycles
+of size at most four from the exact sampling support.  If no ordinary template
+remains, ring-grow returns no action and ancestral sampling falls back to
+another valid rewrite family.  This changes neither the checkpoint nor the
+training objective, retains ordinary/fused/bridged/spiro and aromatic/saturated
+ring systems, and is an ablation rather than the final claim.  A 100-sample
+matched rollout determines whether this simple support policy is sufficient.
+The final trainable solution, if needed, is to expose support-quality summaries
+to the family decision or train a topology-group gate; it is not another ring
+operator.
+
+### Simplified production ring-rate formulation
+
+The final formulation must not reproduce the failure by merely replacing one
+large mask with another.  A Boolean ``ring-grow enabled`` family followed by a
+softmax over the remaining legal templates renormalizes a rare residual support
+set to probability one.  That is exactly what the late-state audit observed.
+
+Replace that hierarchy with **masked, unnormalized topology-group
+intensities**.  Five/six-member ordinary, fused, spiro, bridged, and rare-small
+topology groups receive separate nonnegative CTMC rates.  Inapplicable groups
+have rate zero; removing common groups therefore lowers the total ring hazard
+rather than transferring all of it to a rare small-ring rule.  Conditional on
+a topology group firing, the model decodes an attachment interface and local
+electronic labels.  The empirical corpus frequency is an offset/base measure,
+while the network learns a context-dependent residual.
+
+The corresponding executor is sparse and local:
+
+1. pre-index ring rules by topology group and attachment/valence signature;
+2. query only signatures present at the current state;
+3. apply structural conditions before neural scoring;
+4. canonicalize and merge only the retrieved executable successors; and
+5. run one exact sanitize/executor check on the selected successor, with the
+   exhaustive catalog retained only as a test oracle and rare fallback.
+
+This preserves rare rings, whole-ring coordination, aromatic lowering,
+fused/bridged/spiro support, canonical successor semantics, and all-state
+validity.  It removes the scientific defect (support-collapse renormalization)
+and the computational defect (flat per-row traversal of thousands of
+templates) together.  Acceptance requires equality with the exhaustive oracle
+on enabled topology groups and canonical successor sets, plus matched rollout
+improvement in small-ring prevalence without losing fused/spiro/bridged
+coverage.
 
 This isolates the schedule/initialization question before changing capacity,
 teacher paths, or the loss.  The sparse unique-state/path-witness compiler

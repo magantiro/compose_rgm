@@ -1,0 +1,834 @@
+{
+  "cells": [
+    "R1xM2",
+    "R2xM2"
+  ],
+  "format": "compose_pan_lung_matrix_cell_metrics_v1",
+  "interpretation_boundary": "R1xM2 uses full molecular fingerprints/descriptors under typed task heads. R2xM2 is the explicit LuT component/SAR branch because full LuT product SMILES are unavailable. Metrics are hard-split diagnostics, not a frozen prospective steering oracle.",
+  "manifest": "configs/pan_lung_corpus_manifest_v1.json",
+  "manifest_sha256": "a1a1035bdf814bb44efcfa1e3563b9e7e5ac30cb7d9c0b13d7ad65f428092cf1",
+  "prediction_decimals": 12,
+  "prediction_rows": 11683,
+  "prediction_table": "diagnostics/pan_lung_matrix_R1M2_R2M2_predictions.csv",
+  "prediction_table_sha256": "db31e631bee8513347be8f6a11e9910c4c672d367dacab8586140819031b10a3",
+  "reports": [
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6300863814341136,
+          "r2": 0.3168864472804608,
+          "rmse": 0.7890570822349797,
+          "rows": 361,
+          "spearman": 0.4790517316479979,
+          "top_decile_enrichment": 1.5821767713659605,
+          "top_decile_recall": 0.16216216216216217
+        },
+        {
+          "fold": 1,
+          "mae": 0.6765875887841611,
+          "r2": 0.365459847939824,
+          "rmse": 0.8093817763880603,
+          "rows": 360,
+          "spearman": 0.5791473238032321,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222
+        },
+        {
+          "fold": 2,
+          "mae": 0.5924015580065028,
+          "r2": 0.3797094612242441,
+          "rmse": 0.7445882300836949,
+          "rows": 360,
+          "spearman": 0.562533604989591,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25
+        },
+        {
+          "fold": 3,
+          "mae": 0.5818716349529528,
+          "r2": 0.4214744588317567,
+          "rmse": 0.7364321607679555,
+          "rows": 360,
+          "spearman": 0.6247914554120757,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778
+        },
+        {
+          "fold": 4,
+          "mae": 0.7097028187293222,
+          "r2": 0.32757910508879173,
+          "rmse": 0.886228614540359,
+          "rows": 360,
+          "spearman": 0.5417591743921282,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25
+        }
+      ],
+      "mae": 0.6381255301876586,
+      "r2": 0.36803418588519543,
+      "rmse": 0.7949627753073284,
+      "rows": 1801,
+      "source_id": "lnpdb_2026",
+      "spearman": 0.5684081456907129,
+      "split_name": "held_lipid",
+      "top_decile_enrichment": 2.363877781508501,
+      "top_decile_recall": 0.23756906077348067,
+      "typed_head": "airway_a549_in_vitro_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.1688583497545,
+          "r2": -0.2464104085010419,
+          "rmse": 1.3166315423049038,
+          "rows": 6,
+          "spearman": -0.5797710356524484,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 1,
+          "mae": 1.1121234264770001,
+          "r2": -0.12716725454232036,
+          "rmse": 1.4130305909803982,
+          "rows": 6,
+          "spearman": -0.14494275891311212,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 2,
+          "mae": 1.0148022728636665,
+          "r2": -0.3587107992809868,
+          "rmse": 1.2161687548594702,
+          "rows": 6,
+          "spearman": -0.4058397249567139,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 3,
+          "mae": 0.42188255283950005,
+          "r2": -0.8911643866924872,
+          "rmse": 0.5635024296236436,
+          "rows": 6,
+          "spearman": -0.4058397249567139,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 4,
+          "mae": 0.5993168647978,
+          "r2": -0.06811719724139054,
+          "rmse": 0.6754592600209122,
+          "rows": 5,
+          "spearman": -0.05129891760425771,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        }
+      ],
+      "mae": 0.872502894330931,
+      "r2": -0.22213376026396325,
+      "rmse": 1.1055015876109673,
+      "rows": 29,
+      "source_id": "lnpdb_2026",
+      "spearman": -0.21318352671599583,
+      "split_name": "held_lipid",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0,
+      "typed_head": "airway_hbec_ali_in_vitro_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.9973123539682,
+          "r2": -0.06645484027652815,
+          "rmse": 1.2990401310175834,
+          "rows": 10,
+          "spearman": -0.3015892444226438,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 1,
+          "mae": 1.1227532391883999,
+          "r2": -1.281390009430305,
+          "rmse": 1.306785994475594,
+          "rows": 10,
+          "spearman": 0.4022244544834535,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 2,
+          "mae": 0.6966109778467999,
+          "r2": -0.10499116102606787,
+          "rmse": 1.141531954881075,
+          "rows": 10,
+          "spearman": 0.08809388259564936,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 3,
+          "mae": 0.5028134220846001,
+          "r2": -0.07565038183718831,
+          "rmse": 0.657205468119901,
+          "rows": 10,
+          "spearman": 0.20503223297937706,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 4,
+          "mae": 0.5294082385551112,
+          "r2": -0.435881056636646,
+          "rmse": 0.6690528762953788,
+          "rows": 9,
+          "spearman": 0.1966458508163212,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        }
+      ],
+      "mae": 0.7746851852627753,
+      "r2": -0.1291995314502945,
+      "rmse": 1.0626380059083478,
+      "rows": 49,
+      "source_id": "lnpdb_2026",
+      "spearman": -0.24235657599746382,
+      "split_name": "held_lipid",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0,
+      "typed_head": "local_intratracheal_functional_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.2200547785472,
+          "r2": -0.9166004483781778,
+          "rmse": 1.3997314355558204,
+          "rows": 30,
+          "spearman": 0.0,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 1,
+          "mae": 0.5464627819779999,
+          "r2": 0.24554435098697291,
+          "rmse": 0.6795854543077721,
+          "rows": 17,
+          "spearman": 0.4306751708196266,
+          "top_decile_enrichment": 4.25,
+          "top_decile_recall": 0.5
+        },
+        {
+          "fold": 2,
+          "mae": 0.653633004191706,
+          "r2": 0.10545830759374919,
+          "rmse": 0.7348746289692852,
+          "rows": 17,
+          "spearman": 0.38503992522256386,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 3,
+          "mae": 0.9135917974821249,
+          "r2": 0.21633506696827676,
+          "rmse": 1.2311056513311807,
+          "rows": 16,
+          "spearman": 0.6784402131053124,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        },
+        {
+          "fold": 4,
+          "mae": 0.6337343799290625,
+          "r2": -0.02849716332669061,
+          "rmse": 0.7532783015224342,
+          "rows": 16,
+          "spearman": 0.21633559940668312,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0
+        }
+      ],
+      "mae": 0.8516717766654166,
+      "r2": -0.13685565429292423,
+      "rmse": 1.0662343336539621,
+      "rows": 96,
+      "source_id": "lnpdb_2026",
+      "spearman": 0.04381681899970607,
+      "split_name": "held_lipid",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0,
+      "typed_head": "systemic_iv_barcoded_lung_uptake"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 2.740356879051086,
+          "r2": 0.13179812563834392,
+          "rmse": 3.3248885377194544,
+          "rows": 384,
+          "spearman": 0.4043638214758831,
+          "top_decile_enrichment": 3.7869822485207103,
+          "top_decile_recall": 0.38461538461538464
+        },
+        {
+          "fold": 1,
+          "mae": 2.7246084027095154,
+          "r2": 0.26700132405612853,
+          "rmse": 3.3017769025975134,
+          "rows": 384,
+          "spearman": 0.5633459114075052,
+          "top_decile_enrichment": 4.544378698224852,
+          "top_decile_recall": 0.46153846153846156
+        },
+        {
+          "fold": 2,
+          "mae": 3.3889162771740597,
+          "r2": -0.4097366434016221,
+          "rmse": 4.171643159086575,
+          "rows": 384,
+          "spearman": 0.6195348821439297,
+          "top_decile_enrichment": 3.282051282051282,
+          "top_decile_recall": 0.3333333333333333
+        },
+        {
+          "fold": 3,
+          "mae": 2.012727230585039,
+          "r2": 0.5624040715347491,
+          "rmse": 2.547498281249605,
+          "rows": 384,
+          "spearman": 0.77113649017745,
+          "top_decile_enrichment": 4.544378698224852,
+          "top_decile_recall": 0.46153846153846156
+        },
+        {
+          "fold": 4,
+          "mae": 3.2329442241991377,
+          "r2": -0.37692323800859895,
+          "rmse": 3.8064700932099576,
+          "rows": 384,
+          "spearman": 0.24023245355807726,
+          "top_decile_enrichment": 1.2623274161735698,
+          "top_decile_recall": 0.1282051282051282
+        }
+      ],
+      "mae": 2.8199106027437675,
+      "r2": 0.22936930308652048,
+      "rmse": 3.473850405904375,
+      "rows": 1920,
+      "source_id": "lumi_lab_4cr1920",
+      "spearman": 0.4755052851178239,
+      "split_name": "held_component_R1",
+      "top_decile_enrichment": 2.8125,
+      "top_decile_recall": 0.28125,
+      "typed_head": "airway_hbe_in_vitro_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 2.311167838879648,
+          "r2": 0.562729140066888,
+          "rmse": 2.893592207494691,
+          "rows": 480,
+          "spearman": 0.8273619846574831,
+          "top_decile_enrichment": 4.375,
+          "top_decile_recall": 0.4375
+        },
+        {
+          "fold": 1,
+          "mae": 2.44186019143435,
+          "r2": 0.017796016373039625,
+          "rmse": 2.9838945997343953,
+          "rows": 480,
+          "spearman": 0.7053015915193215,
+          "top_decile_enrichment": 4.791666666666667,
+          "top_decile_recall": 0.4791666666666667
+        },
+        {
+          "fold": 2,
+          "mae": 1.7392240073901832,
+          "r2": 0.6518991220322923,
+          "rmse": 2.2636253352879447,
+          "rows": 480,
+          "spearman": 0.8230857111566809,
+          "top_decile_enrichment": 6.25,
+          "top_decile_recall": 0.625
+        },
+        {
+          "fold": 3,
+          "mae": 2.0595326505621228,
+          "r2": 0.6118413733497183,
+          "rmse": 2.6087270353152148,
+          "rows": 480,
+          "spearman": 0.7804536540546515,
+          "top_decile_enrichment": 6.458333333333333,
+          "top_decile_recall": 0.6458333333333334
+        }
+      ],
+      "mae": 2.137946172066576,
+      "r2": 0.5337320513409066,
+      "rmse": 2.7021269052794348,
+      "rows": 1920,
+      "source_id": "lumi_lab_4cr1920",
+      "spearman": 0.7350523187812009,
+      "split_name": "held_component_R2",
+      "top_decile_enrichment": 5.0,
+      "top_decile_recall": 0.5,
+      "typed_head": "airway_hbe_in_vitro_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.9651416697759916,
+          "r2": 0.5638580787955474,
+          "rmse": 2.4472382657454235,
+          "rows": 480,
+          "spearman": 0.7945097937578489,
+          "top_decile_enrichment": 3.958333333333333,
+          "top_decile_recall": 0.3958333333333333
+        },
+        {
+          "fold": 1,
+          "mae": 1.3804390576802021,
+          "r2": 0.7846120393910895,
+          "rmse": 1.813373182266427,
+          "rows": 480,
+          "spearman": 0.8839072646645287,
+          "top_decile_enrichment": 6.666666666666666,
+          "top_decile_recall": 0.6666666666666666
+        },
+        {
+          "fold": 2,
+          "mae": 1.7157499914224374,
+          "r2": 0.7488635987160805,
+          "rmse": 2.1456418984749432,
+          "rows": 480,
+          "spearman": 0.8855573768212404,
+          "top_decile_enrichment": 6.666666666666666,
+          "top_decile_recall": 0.6666666666666666
+        },
+        {
+          "fold": 3,
+          "mae": 1.9494820313707062,
+          "r2": 0.555311426112433,
+          "rmse": 2.5613490068178595,
+          "rows": 480,
+          "spearman": 0.7756809154247396,
+          "top_decile_enrichment": 5.833333333333333,
+          "top_decile_recall": 0.5833333333333334
+        }
+      ],
+      "mae": 1.7527031875623345,
+      "r2": 0.6736537234523281,
+      "rmse": 2.2606185723552374,
+      "rows": 1920,
+      "source_id": "lumi_lab_4cr1920",
+      "spearman": 0.8209916847322336,
+      "split_name": "held_component_R3",
+      "top_decile_enrichment": 5.78125,
+      "top_decile_recall": 0.578125,
+      "typed_head": "airway_hbe_in_vitro_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 2.6247105945342843,
+          "r2": 0.4331978970398589,
+          "rmse": 3.3264971726633683,
+          "rows": 640,
+          "spearman": 0.7951069809356301,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 0.5
+        },
+        {
+          "fold": 1,
+          "mae": 1.590864648819203,
+          "r2": 0.6137981583316074,
+          "rmse": 2.039543257607257,
+          "rows": 320,
+          "spearman": 0.8161982463686979,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25
+        },
+        {
+          "fold": 2,
+          "mae": 2.3513017090036783,
+          "r2": 0.3540514365799522,
+          "rmse": 3.0123836491801357,
+          "rows": 320,
+          "spearman": 0.6593363090232285,
+          "top_decile_enrichment": 4.375,
+          "top_decile_recall": 0.4375
+        },
+        {
+          "fold": 3,
+          "mae": 1.74152773550185,
+          "r2": 0.5961211220719982,
+          "rmse": 2.21195229582,
+          "rows": 320,
+          "spearman": 0.820108525122188,
+          "top_decile_enrichment": 5.3125,
+          "top_decile_recall": 0.53125
+        },
+        {
+          "fold": 4,
+          "mae": 1.8953479144066876,
+          "r2": 0.5771083762080048,
+          "rmse": 2.405261739096327,
+          "rows": 320,
+          "spearman": 0.7931851715907823,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 0.5
+        }
+      ],
+      "mae": 2.1380771994666645,
+      "r2": 0.5099504588395951,
+      "rmse": 2.7701797721904224,
+      "rows": 1920,
+      "source_id": "lumi_lab_4cr1920",
+      "spearman": 0.7510018580401313,
+      "split_name": "held_component_R4",
+      "top_decile_enrichment": 3.59375,
+      "top_decile_recall": 0.359375,
+      "typed_head": "airway_hbe_in_vitro_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.4373958249608223,
+          "r2": 0.15775273830216452,
+          "rmse": 0.5438509184719366,
+          "rows": 90,
+          "spearman": 0.5574597686957238,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222
+        },
+        {
+          "fold": 1,
+          "mae": 0.5533292344406111,
+          "r2": 0.21855443421239107,
+          "rmse": 0.7267394365018338,
+          "rows": 90,
+          "spearman": 0.5454418240935095,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111
+        },
+        {
+          "fold": 2,
+          "mae": 0.48008460116922724,
+          "r2": 0.1432815745216387,
+          "rmse": 0.6201138952410903,
+          "rows": 88,
+          "spearman": 0.449208362021726,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222
+        },
+        {
+          "fold": 3,
+          "mae": 0.6707839510528637,
+          "r2": 0.12109929405635933,
+          "rmse": 0.8337940339881063,
+          "rows": 88,
+          "spearman": 0.380361561438802,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111
+        },
+        {
+          "fold": 4,
+          "mae": 0.502903584503909,
+          "r2": 0.2957009199116911,
+          "rmse": 0.6356695044072487,
+          "rows": 88,
+          "spearman": 0.5898171955901519,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222
+        }
+      ],
+      "mae": 0.5285973049054437,
+      "r2": 0.20548380197829252,
+      "rmse": 0.6790463546346472,
+      "rows": 444,
+      "source_id": "lut_444_2026",
+      "spearman": 0.4906435323756913,
+      "split_name": "held_head",
+      "top_decile_enrichment": 1.5348148148148149,
+      "top_decile_recall": 0.15555555555555556,
+      "typed_head": "systemic_iv_lung_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.60836028280025,
+          "r2": 0.09103195407695774,
+          "rmse": 0.7045676888390173,
+          "rows": 88,
+          "spearman": 0.3695537318164208,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666
+        },
+        {
+          "fold": 1,
+          "mae": 0.5369667131079999,
+          "r2": 0.28702452215347174,
+          "rmse": 0.6517287293880055,
+          "rows": 88,
+          "spearman": 0.4053044979042655,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556
+        },
+        {
+          "fold": 2,
+          "mae": 0.5923817826419545,
+          "r2": 0.128641047861903,
+          "rmse": 0.7349664608517312,
+          "rows": 88,
+          "spearman": 0.3924483110844986,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333
+        },
+        {
+          "fold": 3,
+          "mae": 0.47096645767088896,
+          "r2": -0.03004306014687308,
+          "rmse": 0.5805940476447117,
+          "rows": 90,
+          "spearman": 0.3083767888110607,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333
+        },
+        {
+          "fold": 4,
+          "mae": 0.4697459139811444,
+          "r2": 0.3108729870563097,
+          "rmse": 0.5724549584061979,
+          "rows": 90,
+          "spearman": 0.5157097584063876,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333
+        }
+      ],
+      "mae": 0.5350956891015789,
+      "r2": 0.268743188661166,
+      "rmse": 0.6514528770712797,
+      "rows": 444,
+      "source_id": "lut_444_2026",
+      "spearman": 0.46666722877306405,
+      "split_name": "held_tail",
+      "top_decile_enrichment": 5.042962962962962,
+      "top_decile_recall": 0.5111111111111111,
+      "typed_head": "systemic_iv_lung_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6592753563237777,
+          "r2": 0.04537595184935317,
+          "rmse": 0.8033306586334406,
+          "rows": 126,
+          "spearman": 0.2973032945712632,
+          "top_decile_enrichment": 3.7278106508875744,
+          "top_decile_recall": 0.38461538461538464
+        }
+      ],
+      "mae": 0.6592753563237777,
+      "r2": 0.04537595184935317,
+      "rmse": 0.8033306586334406,
+      "rows": 126,
+      "source_id": "lut_444_2026",
+      "spearman": 0.2973032945712632,
+      "split_name": "round1_to_round2",
+      "top_decile_enrichment": 3.7278106508875744,
+      "top_decile_recall": 0.38461538461538464,
+      "typed_head": "systemic_iv_lung_expression"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.19573985857406664,
+          "r2": 0.507209591407908,
+          "rmse": 0.27490197742279365,
+          "rows": 90,
+          "spearman": 0.710482775651315,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111
+        },
+        {
+          "fold": 1,
+          "mae": 0.20419583799824445,
+          "r2": 0.6223231815649536,
+          "rmse": 0.2544675000606418,
+          "rows": 90,
+          "spearman": 0.763839157097584,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111
+        },
+        {
+          "fold": 2,
+          "mae": 0.18596821044970452,
+          "r2": 0.6318600994972238,
+          "rmse": 0.24457602610398785,
+          "rows": 88,
+          "spearman": 0.8001391318538268,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222
+        },
+        {
+          "fold": 3,
+          "mae": 0.21943465552779545,
+          "r2": 0.44813010614051463,
+          "rmse": 0.31953956276865075,
+          "rows": 88,
+          "spearman": 0.7239265964566237,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111
+        },
+        {
+          "fold": 4,
+          "mae": 0.16783391816311366,
+          "r2": 0.6006731987404468,
+          "rmse": 0.2334694224454184,
+          "rows": 88,
+          "spearman": 0.7964848015216092,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444
+        }
+      ],
+      "mae": 0.1946825443600946,
+      "r2": 0.5685900521692256,
+      "rmse": 0.2670963102035507,
+      "rows": 444,
+      "source_id": "lut_444_2026",
+      "spearman": 0.7368127624462579,
+      "split_name": "held_head",
+      "top_decile_enrichment": 1.7540740740740741,
+      "top_decile_recall": 0.17777777777777778,
+      "typed_head": "systemic_iv_lung_selectivity"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.2760554652418068,
+          "r2": 0.00828405942361421,
+          "rmse": 0.32594084101046017,
+          "rows": 88,
+          "spearman": 0.34436969462153505,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444
+        },
+        {
+          "fold": 1,
+          "mae": 0.27594683966912503,
+          "r2": 0.32246314155659483,
+          "rmse": 0.30102922330030196,
+          "rows": 88,
+          "spearman": 0.7360431122538834,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333
+        },
+        {
+          "fold": 2,
+          "mae": 0.25618252153825,
+          "r2": 0.28740981308549873,
+          "rmse": 0.312461396882679,
+          "rows": 88,
+          "spearman": 0.6698953893839598,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444
+        },
+        {
+          "fold": 3,
+          "mae": 0.3036368946698333,
+          "r2": -1.276267408544879,
+          "rmse": 0.3241990691571543,
+          "rows": 90,
+          "spearman": 0.31800633823105734,
+          "top_decile_enrichment": 5.555555555555555,
+          "top_decile_recall": 0.5555555555555556
+        },
+        {
+          "fold": 4,
+          "mae": 0.2316087656325444,
+          "r2": 0.5714152318130319,
+          "rmse": 0.26115646980105456,
+          "rows": 90,
+          "spearman": 0.8062147590237477,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333
+        }
+      ],
+      "mae": 0.26867651836653605,
+      "r2": 0.434605077941737,
+      "rmse": 0.30577273844830355,
+      "rows": 444,
+      "source_id": "lut_444_2026",
+      "spearman": 0.7222985730830149,
+      "split_name": "held_tail",
+      "top_decile_enrichment": 4.385185185185184,
+      "top_decile_recall": 0.4444444444444444,
+      "typed_head": "systemic_iv_lung_selectivity"
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.32841114626966667,
+          "r2": -0.12333966252247386,
+          "rmse": 0.415642617888561,
+          "rows": 126,
+          "spearman": 0.3133413071591441,
+          "top_decile_enrichment": 0.7455621301775148,
+          "top_decile_recall": 0.07692307692307693
+        }
+      ],
+      "mae": 0.32841114626966667,
+      "r2": -0.12333966252247386,
+      "rmse": 0.415642617888561,
+      "rows": 126,
+      "source_id": "lut_444_2026",
+      "spearman": 0.3133413071591441,
+      "split_name": "round1_to_round2",
+      "top_decile_enrichment": 0.7455621301775148,
+      "top_decile_recall": 0.07692307692307693,
+      "typed_head": "systemic_iv_lung_selectivity"
+    }
+  ],
+  "seed": 20260720,
+  "source_artifacts": {
+    "lnpdb": {
+      "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/LNPDB/LNPDB.csv",
+      "sha256": "3493f27306419facd0958589030ed37f272f05c81ad47dd7bc1b8ce0284a57b3"
+    },
+    "lumi": {
+      "path": "tmp/lipid_data/lumi_lab/4CR-1920.csv",
+      "sha256": "41118d98ae84c651fd687e23950fbd56c5ed9a3281998122e75062e5a5a26734"
+    },
+    "lut": {
+      "path": "tmp/lipid_data/lut/lut_444_source_table.csv",
+      "sha256": "231c87652ef80fc5af4aaa5e561799e14ed9949d8bce6ee803b4e877db594491"
+    }
+  },
+  "source_counts": {
+    "lnpdb_2026": 1975,
+    "lumi_lab_4cr1920": 7680,
+    "lut_444_2026": 2028
+  },
+  "trees": 300,
+  "typed_head_count": 7
+}

@@ -1,0 +1,434 @@
+{
+  "all_attempt_denominator": 1,
+  "arms": {
+    "combined": {
+      "all_trajectory_states_connected": true,
+      "all_trajectory_states_valid": true,
+      "anytime_success_fraction_by_candidate": [
+        1.0,
+        1.0
+      ],
+      "candidate_attempts": 2,
+      "connected_candidates": 2,
+      "exact_oracle_budget_every_start_seed": true,
+      "mean_best_feasible_qed_improvement": 0.17935787634896883,
+      "mean_wall_time_seconds_per_start_seed": 0.017796166939660907,
+      "padding_oracle_calls": 3,
+      "start_seed_attempts": 1,
+      "success_fraction_all_attempts": 1.0,
+      "successful_start_seeds": 1,
+      "total_oracle_calls": 11,
+      "valid_candidates": 2
+    },
+    "controller": {
+      "all_trajectory_states_connected": true,
+      "all_trajectory_states_valid": true,
+      "anytime_success_fraction_by_candidate": [
+        1.0,
+        1.0
+      ],
+      "candidate_attempts": 2,
+      "connected_candidates": 2,
+      "exact_oracle_budget_every_start_seed": true,
+      "mean_best_feasible_qed_improvement": 0.17935787634896883,
+      "mean_wall_time_seconds_per_start_seed": 0.018362750066444278,
+      "padding_oracle_calls": 5,
+      "start_seed_attempts": 1,
+      "success_fraction_all_attempts": 1.0,
+      "successful_start_seeds": 1,
+      "total_oracle_calls": 11,
+      "valid_candidates": 2
+    },
+    "direct": {
+      "all_trajectory_states_connected": true,
+      "all_trajectory_states_valid": true,
+      "anytime_success_fraction_by_candidate": [
+        0.0,
+        0.0
+      ],
+      "candidate_attempts": 2,
+      "connected_candidates": 2,
+      "exact_oracle_budget_every_start_seed": true,
+      "mean_best_feasible_qed_improvement": 0.0,
+      "mean_wall_time_seconds_per_start_seed": 0.06134508294053376,
+      "padding_oracle_calls": 7,
+      "start_seed_attempts": 1,
+      "success_fraction_all_attempts": 0.0,
+      "successful_start_seeds": 0,
+      "total_oracle_calls": 11,
+      "valid_candidates": 2
+    }
+  },
+  "backbone": {
+    "canonical_successor_execution": true,
+    "checkpoint_sha256": "0e11e35f6c2ee20decf638a3507e974197105eeca6bd6092687805d0807d3c6c",
+    "empirical_mark_prior_mode": "none",
+    "molecular_self_transitions_virtualized": true,
+    "p1_p2_imported": false,
+    "ring_family_mass_mode": "boolean",
+    "unconditional_qualification_passed": false,
+    "weight_source": "pancake_derived"
+  },
+  "complete": true,
+  "format": "compose_v4_griddd_conditional_evaluation_v1",
+  "large_benchmark_authorized": false,
+  "paired_arm_comparisons": {
+    "combined_minus_controller": {
+      "improvement_delta_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ],
+      "mean_best_feasible_qed_improvement_delta": 0.0,
+      "paired_attempts": 1,
+      "success_fraction_delta": 0.0,
+      "success_fraction_delta_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ]
+    },
+    "combined_minus_direct": {
+      "improvement_delta_bootstrap_95_percent_interval": [
+        0.17935787634896883,
+        0.17935787634896883
+      ],
+      "mean_best_feasible_qed_improvement_delta": 0.17935787634896883,
+      "paired_attempts": 1,
+      "success_fraction_delta": 1.0,
+      "success_fraction_delta_bootstrap_95_percent_interval": [
+        1.0,
+        1.0
+      ]
+    },
+    "controller_minus_direct": {
+      "improvement_delta_bootstrap_95_percent_interval": [
+        0.17935787634896883,
+        0.17935787634896883
+      ],
+      "mean_best_feasible_qed_improvement_delta": 0.17935787634896883,
+      "paired_attempts": 1,
+      "success_fraction_delta": 1.0,
+      "success_fraction_delta_bootstrap_95_percent_interval": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "pre_run_lead_screening": {
+    "excluded_from_matched_per_arm_budget": true,
+    "oracle_calls": 1,
+    "shared_across_arms": true
+  },
+  "protocol": {
+    "bootstrap_replicates": 250,
+    "bootstrap_seed": 20260724,
+    "candidates_per_start": 2,
+    "final_candidate_oracle_calls_per_candidate": 1,
+    "fingerprint": {
+      "bits": 2048,
+      "radius": 2,
+      "type": "Morgan bit vector"
+    },
+    "guidance_oracle_calls_per_candidate": 4,
+    "lead_eligibility_oracle_calls": 1,
+    "minimum_tanimoto_similarity": 0.4,
+    "oracle_calls_per_start_seed_arm": 11,
+    "proposals_per_controlled_event": 4,
+    "starting_qed_interval": [
+      0.7,
+      0.8
+    ],
+    "target_qed": 0.9
+  },
+  "records": {
+    "combined": [
+      {
+        "all_trajectory_states_connected": true,
+        "all_trajectory_states_valid": true,
+        "anytime": [
+          {
+            "best_feasible_qed": 0.922859375680113,
+            "candidates_attempted": 1,
+            "oracle_calls_used": 6,
+            "success_observed": true,
+            "wall_time_seconds": 0.009025333914905787
+          },
+          {
+            "best_feasible_qed": 0.922859375680113,
+            "candidates_attempted": 2,
+            "oracle_calls_used": 11,
+            "success_observed": true,
+            "wall_time_seconds": 0.017060874961316586
+          }
+        ],
+        "arm": "combined",
+        "best_feasible_qed": 0.922859375680113,
+        "best_feasible_qed_improvement": 0.17935787634896883,
+        "candidate_attempts": 2,
+        "candidates": [
+          {
+            "all_trajectory_states_connected": true,
+            "all_trajectory_states_valid": true,
+            "candidate_index": 0,
+            "connected": true,
+            "error": null,
+            "events": 1,
+            "exhausted_event_budget": false,
+            "guidance_oracle_calls": 4,
+            "metadata": {
+              "scripted_smoke": true
+            },
+            "qed": 0.922859375680113,
+            "similarity_to_lead": 0.4074074074074074,
+            "stalled": false,
+            "success": true,
+            "trajectory_states_audited": 2,
+            "valid": true
+          },
+          {
+            "all_trajectory_states_connected": true,
+            "all_trajectory_states_valid": true,
+            "candidate_index": 1,
+            "connected": true,
+            "error": null,
+            "events": 1,
+            "exhausted_event_budget": false,
+            "guidance_oracle_calls": 4,
+            "metadata": {
+              "scripted_smoke": true
+            },
+            "qed": 0.922859375680113,
+            "similarity_to_lead": 0.4074074074074074,
+            "stalled": false,
+            "success": true,
+            "trajectory_states_audited": 2,
+            "valid": true
+          }
+        ],
+        "connected_candidates": 2,
+        "diversity": {
+          "mean_pairwise_distance": 0.0,
+          "mean_pairwise_tanimoto": 1.0,
+          "unique_candidates": 1,
+          "unique_fraction": 0.5,
+          "valid_candidates": 2
+        },
+        "event_budget_exhaustions": 0,
+        "failed_candidates": 0,
+        "first_success_candidate": 1,
+        "lead_id": "cnof-griddd-fixture-0",
+        "lead_qed": 0.7435014993311442,
+        "oracle": {
+          "budget": 11,
+          "exact": true,
+          "oracle_wall_time_seconds": 0.009839833248406649,
+          "padding_calls": 3,
+          "selection_calls": 5,
+          "unique_canonical_states": 2,
+          "used": 11
+        },
+        "seed": 20260723,
+        "stalled_candidates": 0,
+        "success": true,
+        "valid_candidates": 2,
+        "wall_time_seconds": 0.017796166939660907
+      }
+    ],
+    "controller": [
+      {
+        "all_trajectory_states_connected": true,
+        "all_trajectory_states_valid": true,
+        "anytime": [
+          {
+            "best_feasible_qed": 0.922859375680113,
+            "candidates_attempted": 1,
+            "oracle_calls_used": 6,
+            "success_observed": true,
+            "wall_time_seconds": 0.009317083051428199
+          },
+          {
+            "best_feasible_qed": 0.922859375680113,
+            "candidates_attempted": 2,
+            "oracle_calls_used": 11,
+            "success_observed": true,
+            "wall_time_seconds": 0.01759066595695913
+          }
+        ],
+        "arm": "controller",
+        "best_feasible_qed": 0.922859375680113,
+        "best_feasible_qed_improvement": 0.17935787634896883,
+        "candidate_attempts": 2,
+        "candidates": [
+          {
+            "all_trajectory_states_connected": true,
+            "all_trajectory_states_valid": true,
+            "candidate_index": 0,
+            "connected": true,
+            "error": null,
+            "events": 1,
+            "exhausted_event_budget": false,
+            "guidance_oracle_calls": 4,
+            "metadata": {
+              "scripted_smoke": true
+            },
+            "qed": 0.922859375680113,
+            "similarity_to_lead": 0.4074074074074074,
+            "stalled": false,
+            "success": true,
+            "trajectory_states_audited": 2,
+            "valid": true
+          },
+          {
+            "all_trajectory_states_connected": true,
+            "all_trajectory_states_valid": true,
+            "candidate_index": 1,
+            "connected": true,
+            "error": null,
+            "events": 1,
+            "exhausted_event_budget": false,
+            "guidance_oracle_calls": 4,
+            "metadata": {
+              "scripted_smoke": true
+            },
+            "qed": 0.922859375680113,
+            "similarity_to_lead": 0.4074074074074074,
+            "stalled": false,
+            "success": true,
+            "trajectory_states_audited": 2,
+            "valid": true
+          }
+        ],
+        "connected_candidates": 2,
+        "diversity": {
+          "mean_pairwise_distance": 0.0,
+          "mean_pairwise_tanimoto": 1.0,
+          "unique_candidates": 1,
+          "unique_fraction": 0.5,
+          "valid_candidates": 2
+        },
+        "event_budget_exhaustions": 0,
+        "failed_candidates": 0,
+        "first_success_candidate": 1,
+        "lead_id": "cnof-griddd-fixture-0",
+        "lead_qed": 0.7435014993311442,
+        "oracle": {
+          "budget": 11,
+          "exact": true,
+          "oracle_wall_time_seconds": 0.010147082852199674,
+          "padding_calls": 5,
+          "selection_calls": 3,
+          "unique_canonical_states": 2,
+          "used": 11
+        },
+        "seed": 20260723,
+        "stalled_candidates": 0,
+        "success": true,
+        "valid_candidates": 2,
+        "wall_time_seconds": 0.018362750066444278
+      }
+    ],
+    "direct": [
+      {
+        "all_trajectory_states_connected": true,
+        "all_trajectory_states_valid": true,
+        "anytime": [
+          {
+            "best_feasible_qed": 0.7435014993311442,
+            "candidates_attempted": 1,
+            "oracle_calls_used": 6,
+            "success_observed": false,
+            "wall_time_seconds": 0.05220866692252457
+          },
+          {
+            "best_feasible_qed": 0.7435014993311442,
+            "candidates_attempted": 2,
+            "oracle_calls_used": 11,
+            "success_observed": false,
+            "wall_time_seconds": 0.060514124808833
+          }
+        ],
+        "arm": "direct",
+        "best_feasible_qed": 0.7435014993311442,
+        "best_feasible_qed_improvement": 0.0,
+        "candidate_attempts": 2,
+        "candidates": [
+          {
+            "all_trajectory_states_connected": true,
+            "all_trajectory_states_valid": true,
+            "candidate_index": 0,
+            "connected": true,
+            "error": null,
+            "events": 1,
+            "exhausted_event_budget": false,
+            "guidance_oracle_calls": 4,
+            "metadata": {
+              "scripted_smoke": true
+            },
+            "qed": 0.7435014993311442,
+            "similarity_to_lead": 1.0,
+            "stalled": false,
+            "success": false,
+            "trajectory_states_audited": 2,
+            "valid": true
+          },
+          {
+            "all_trajectory_states_connected": true,
+            "all_trajectory_states_valid": true,
+            "candidate_index": 1,
+            "connected": true,
+            "error": null,
+            "events": 1,
+            "exhausted_event_budget": false,
+            "guidance_oracle_calls": 4,
+            "metadata": {
+              "scripted_smoke": true
+            },
+            "qed": 0.7435014993311442,
+            "similarity_to_lead": 1.0,
+            "stalled": false,
+            "success": false,
+            "trajectory_states_audited": 2,
+            "valid": true
+          }
+        ],
+        "connected_candidates": 2,
+        "diversity": {
+          "mean_pairwise_distance": 0.0,
+          "mean_pairwise_tanimoto": 1.0,
+          "unique_candidates": 1,
+          "unique_fraction": 0.5,
+          "valid_candidates": 2
+        },
+        "event_budget_exhaustions": 0,
+        "failed_candidates": 0,
+        "first_success_candidate": null,
+        "lead_id": "cnof-griddd-fixture-0",
+        "lead_qed": 0.7435014993311442,
+        "oracle": {
+          "budget": 11,
+          "exact": true,
+          "oracle_wall_time_seconds": 0.011029873974621296,
+          "padding_calls": 7,
+          "selection_calls": 0,
+          "unique_canonical_states": 1,
+          "used": 11
+        },
+        "seed": 20260723,
+        "stalled_candidates": 0,
+        "success": false,
+        "valid_candidates": 2,
+        "wall_time_seconds": 0.06134508294053376
+      }
+    ]
+  },
+  "seed_stream_identical_across_arms": true,
+  "smoke_gate": {
+    "bounded": true,
+    "expected_oracle_calls_per_arm": 11,
+    "large_training_launched": false,
+    "passed": true,
+    "qualified_backbone_used": false,
+    "scripted_candidates": true
+  },
+  "smoke_only": true,
+  "training_launched": false
+}

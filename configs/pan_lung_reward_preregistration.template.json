@@ -1,0 +1,11 @@
+{
+  "format": "compose_pan_lung_reward_preregistration_v1",
+  "enable_reward_fine_tuning": false,
+  "frozen_before_optimization": false,
+  "bundle_manifest_sha256": "REPLACE_WITH_FROZEN_MANIFEST_SHA256",
+  "registration_id": "REPLACE_WITH_IMMUTABLE_REGISTRATION_ID",
+  "registered_at_utc": "REPLACE_WITH_TIMESTAMP",
+  "candidate_budget": 0,
+  "minimum_pessimistic_scores": {},
+  "note": "This template is deliberately non-authorizing. Do not change it using prospective outcomes."
+}

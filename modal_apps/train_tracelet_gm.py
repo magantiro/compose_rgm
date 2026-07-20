@@ -689,6 +689,7 @@ def _run_remote(
     initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
     compatible_initialization: bool = False,
     training_steps: int | None = None,
+    schedule_steps: int | None = None,
     training_support_workers: int = 12,
     training_support_microbatch_size: int = 4,
     training_support_prefetch_factor: int = 2,
@@ -715,6 +716,8 @@ def _run_remote(
         raise ValueError("support start step requires a non-empty compile range")
     if training_steps is not None and training_steps <= 0:
         raise ValueError("training steps must be positive")
+    if schedule_steps is not None and schedule_steps <= 0:
+        raise ValueError("schedule steps must be positive")
     if min(
         training_support_workers,
         training_support_microbatch_size,
@@ -733,6 +736,8 @@ def _run_remote(
         raise ValueError("support compilation is a dedicated CPU stage")
     if training_steps is not None:
         recipe["arguments"]["steps"] = int(training_steps)
+    if schedule_steps is not None:
+        recipe["arguments"]["schedule_steps"] = int(schedule_steps)
     if path_cache_source_run is not None:
         _validate_run_label(path_cache_source_run, field="path-cache source run")
         source_path_cache = (
@@ -769,6 +774,7 @@ def _run_remote(
             {
                 "resume_checkpoint": str(source_recovery),
                 "allow_resume_provenance_mismatch": True,
+                "allow_resume_step_extension": True,
             }
         )
     if initialization_source_run is not None:
@@ -892,7 +898,16 @@ def _run_remote(
         )
     if require_path_cache:
         recipe["arguments"]["require_path_cache"] = True
-        if not compile_paths_only and not compile_training_support_steps:
+        # A conditioned pilot reuses the immutable path and training-support
+        # caches, but its evaluation tensors have a distinct property
+        # signature.  Requiring an unrelated unconditioned cache here causes
+        # a late failure after all paths are loaded.  Let the trainer compile
+        # and persist the bounded conditioned evaluation batch exactly once.
+        if (
+            not compile_paths_only
+            and not compile_training_support_steps
+            and recipe["arguments"].get("property_condition") in {None, "none"}
+        ):
             recipe["arguments"]["require_evaluation_cache"] = True
     run_dir.mkdir(parents=True, exist_ok=True)
     # The shared volume's nominal full-training SMILES file is a zero-byte
@@ -1025,6 +1040,7 @@ def _run_remote(
         "evaluation_source_run": evaluation_source_run,
         "path_cache_source_run": path_cache_source_run,
         "training_steps": training_steps,
+        "schedule_steps": schedule_steps,
         "minimum_training_support_rows_per_second": (
             minimum_training_support_rows_per_second
         ),
@@ -1405,6 +1421,7 @@ def train_stage(
     path_cache_source_run: str | None = None,
     require_training_support_cache: bool = True,
     training_steps: int | None = None,
+    schedule_steps: int | None = None,
     resume_source_run: str | None = None,
     initialization_source_run: str | None = None,
     initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
@@ -1419,6 +1436,7 @@ def train_stage(
         recipe_name=recipe_name,
         path_cache_source_run=path_cache_source_run,
         training_steps=training_steps,
+        schedule_steps=schedule_steps,
         resume_source_run=resume_source_run,
         initialization_source_run=initialization_source_run,
         initialization_checkpoint_name=initialization_checkpoint_name,
@@ -1697,6 +1715,401 @@ def rollout_evaluate_stage(
     return summary
 
 
+@app.function(
+    image=image,
+    cpu=16.0,
+    memory=65536,
+    timeout=24 * 3600,
+    volumes={"/artifacts": artifact_volume},
+    retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
+)
+def property_rollout_evaluate_stage(
+    run_label: str,
+    source_run_label: str,
+    checkpoint_name: str = "checkpoint.pt",
+    targets: str = "0.3,0.5,0.7,0.9",
+    samples_per_target: int = 25,
+    include_classifier_free_control: bool = True,
+) -> dict[str, object]:
+    """Run matched direct-property rollouts from a conditioned checkpoint."""
+
+    _validate_run_label(run_label)
+    _validate_run_label(source_run_label, field="source run label")
+    if Path(checkpoint_name).name != checkpoint_name:
+        raise ValueError("checkpoint name must be a basename")
+    if samples_per_target <= 0:
+        raise ValueError("samples per target must be positive")
+    try:
+        target_values = tuple(float(value) for value in targets.split(","))
+    except ValueError as error:
+        raise ValueError("property targets must be comma-separated floats") from error
+    if not target_values or not all(math.isfinite(value) for value in target_values):
+        raise ValueError("property targets must be finite and non-empty")
+
+    artifact_volume.reload()
+    source_checkpoint = Path("/artifacts") / source_run_label / checkpoint_name
+    if not source_checkpoint.is_file() or source_checkpoint.stat().st_size == 0:
+        raise FileNotFoundError(f"missing conditioned checkpoint: {source_checkpoint}")
+    run_dir = Path("/artifacts") / run_label
+    run_dir.mkdir(parents=True, exist_ok=True)
+    metrics_path = run_dir / "metrics.json"
+    rollout_cache = run_dir / "rollouts.pt"
+    manifest_path = run_dir / "manifest.json"
+    signature = {
+        "format": "compose_v4_property_rollout_request_v1",
+        "source_run_label": source_run_label,
+        "checkpoint_name": checkpoint_name,
+        "checkpoint_sha256": _file_sha256(source_checkpoint),
+        "targets": target_values,
+        "samples_per_target": samples_per_target,
+        "include_classifier_free_control": include_classifier_free_control,
+        "source_sha256": _source_fingerprint(),
+    }
+    if manifest_path.is_file():
+        existing = json.loads(manifest_path.read_text())
+        if not isinstance(existing, dict) or existing.get("signature") != signature:
+            raise ValueError("property-evaluation run label has a different signature")
+        if metrics_path.is_file() and metrics_path.stat().st_size > 0:
+            report = json.loads(metrics_path.read_text())
+            return {
+                "run_label": run_label,
+                "artifact_dir": str(run_dir),
+                "target_achieved_spearman": report.get("target_achieved_spearman"),
+                "reused": True,
+            }
+    else:
+        _atomic_json_write({"signature": signature}, manifest_path)
+        artifact_volume.commit()
+
+    command: tuple[str, ...] = (
+        sys.executable,
+        str(REMOTE_ROOT / "scripts" / "evaluate_property_conditioned_rollouts.py"),
+        "--checkpoint",
+        str(source_checkpoint),
+        "--output",
+        str(metrics_path),
+        "--rollout-cache",
+        str(rollout_cache),
+        "--samples-per-target",
+        str(samples_per_target),
+        "--workers",
+        "12",
+        "--seed",
+        str(ROLLOUT_BASE_SEED),
+        "--max-atoms",
+        str(ROLLOUT_MAX_ATOMS),
+        "--operational-horizon",
+        str(ROLLOUT_OPERATIONAL_HORIZON),
+        "--time-step",
+        str(ROLLOUT_TIME_STEP),
+        "--max-events",
+        str(ROLLOUT_MAX_EVENTS),
+    )
+    if include_classifier_free_control:
+        command += ("--include-classifier-free-control",)
+    for value in target_values:
+        command += ("--target", str(value))
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = f"{REMOTE_ROOT}:{REMOTE_ROOT / 'src'}"
+    environment["PYTHONUNBUFFERED"] = "1"
+    print(json.dumps({"phase": "remote_property_rollout_command", "argv": command}), flush=True)
+    process = subprocess.run(
+        command,
+        cwd=REMOTE_ROOT,
+        env=environment,
+        check=False,
+    )
+    artifact_volume.commit()
+    if process.returncode != 0:
+        raise subprocess.CalledProcessError(process.returncode, command)
+    if not metrics_path.is_file() or metrics_path.stat().st_size == 0:
+        raise RuntimeError("property rollout evaluation produced no metrics")
+    report = json.loads(metrics_path.read_text())
+    summary = {
+        "run_label": run_label,
+        "artifact_dir": str(run_dir),
+        "target_achieved_spearman": report.get("target_achieved_spearman"),
+        "reused": False,
+    }
+    print(json.dumps({"phase": "remote_property_rollout_complete", **summary}), flush=True)
+    return summary
+
+
+@app.function(
+    image=image,
+    cpu=16.0,
+    memory=65536,
+    timeout=4 * 3600,
+    volumes={"/artifacts": artifact_volume},
+    retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
+)
+def qed_successor_guidance_gate_stage(
+    run_label: str,
+    source_run_label: str,
+    rollout_source_run_label: str,
+    checkpoint_name: str = "checkpoint.pt",
+    rollout_cache_name: str = "rollouts.pt",
+    rollout_condition_label: str = "qed_0.9",
+    target_qed: float = 0.9,
+    states: int = 100,
+    proposals_per_state: int = 4,
+    beta: float = 8.0,
+    classifier_free_base: bool = False,
+) -> dict[str, object]:
+    """Audit QED control on shared valid-successor proposal sets."""
+
+    for value, field in (
+        (run_label, "run label"),
+        (source_run_label, "source run label"),
+        (rollout_source_run_label, "rollout source run label"),
+    ):
+        _validate_run_label(value, field=field)
+    for value, field in (
+        (checkpoint_name, "checkpoint name"),
+        (rollout_cache_name, "rollout cache name"),
+    ):
+        if Path(value).name != value:
+            raise ValueError(f"{field} must be a basename")
+    if not 0.0 <= target_qed <= 1.0 or not math.isfinite(target_qed):
+        raise ValueError("target QED must be finite and lie in [0, 1]")
+    if states <= 0 or proposals_per_state <= 0:
+        raise ValueError("state and proposal counts must be positive")
+    if beta <= 0.0 or not math.isfinite(beta):
+        raise ValueError("guidance beta must be finite and positive")
+
+    artifact_volume.reload()
+    source_checkpoint = Path("/artifacts") / source_run_label / checkpoint_name
+    rollout_cache = (
+        Path("/artifacts") / rollout_source_run_label / rollout_cache_name
+    )
+    for required in (source_checkpoint, rollout_cache):
+        if not required.is_file() or required.stat().st_size == 0:
+            raise FileNotFoundError(f"missing QED guidance-gate input: {required}")
+    run_dir = Path("/artifacts") / run_label
+    run_dir.mkdir(parents=True, exist_ok=True)
+    metrics_path = run_dir / "metrics.json"
+    manifest_path = run_dir / "manifest.json"
+    signature = {
+        "format": "compose_v4_qed_common_successor_gate_request_v1",
+        "source_run_label": source_run_label,
+        "checkpoint_name": checkpoint_name,
+        "checkpoint_sha256": _file_sha256(source_checkpoint),
+        "rollout_source_run_label": rollout_source_run_label,
+        "rollout_cache_name": rollout_cache_name,
+        "rollout_cache_sha256": _file_sha256(rollout_cache),
+        "rollout_condition_label": rollout_condition_label,
+        "target_qed": target_qed,
+        "states": states,
+        "proposals_per_state": proposals_per_state,
+        "beta": beta,
+        "classifier_free_base": classifier_free_base,
+        "seed": 20260722,
+        "source_sha256": _source_fingerprint(),
+    }
+    if manifest_path.is_file():
+        existing = json.loads(manifest_path.read_text())
+        if not isinstance(existing, dict) or existing.get("signature") != signature:
+            raise ValueError("QED guidance-gate run label has a different signature")
+        if metrics_path.is_file() and metrics_path.stat().st_size > 0:
+            report = json.loads(metrics_path.read_text())
+            return {
+                "run_label": run_label,
+                "artifact_dir": str(run_dir),
+                "gate": report.get("gate"),
+                "reused": True,
+            }
+    else:
+        _atomic_json_write({"signature": signature}, manifest_path)
+        artifact_volume.commit()
+
+    command: tuple[str, ...] = (
+        sys.executable,
+        str(REMOTE_ROOT / "scripts" / "evaluate_qed_successor_guidance.py"),
+        "--checkpoint",
+        str(source_checkpoint),
+        "--rollout-cache",
+        str(rollout_cache),
+        "--rollout-condition-label",
+        rollout_condition_label,
+        "--output",
+        str(metrics_path),
+        "--target-qed",
+        str(target_qed),
+        "--states",
+        str(states),
+        "--proposals-per-state",
+        str(proposals_per_state),
+        "--beta",
+        str(beta),
+        "--seed",
+        "20260722",
+        "--max-atoms",
+        str(ROLLOUT_MAX_ATOMS),
+    )
+    if classifier_free_base:
+        command += ("--classifier-free-base",)
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = f"{REMOTE_ROOT}:{REMOTE_ROOT / 'src'}"
+    environment["PYTHONUNBUFFERED"] = "1"
+    print(
+        json.dumps({"phase": "remote_qed_successor_gate_command", "argv": command}),
+        flush=True,
+    )
+    process = subprocess.run(command, cwd=REMOTE_ROOT, env=environment, check=False)
+    artifact_volume.commit()
+    if process.returncode != 0:
+        raise subprocess.CalledProcessError(process.returncode, command)
+    if not metrics_path.is_file() or metrics_path.stat().st_size == 0:
+        raise RuntimeError("QED successor guidance gate produced no metrics")
+    report = json.loads(metrics_path.read_text())
+    summary = {
+        "run_label": run_label,
+        "artifact_dir": str(run_dir),
+        "gate": report.get("gate"),
+        "reused": False,
+    }
+    print(json.dumps({"phase": "remote_qed_successor_gate_complete", **summary}), flush=True)
+    return summary
+
+
+@app.function(
+    image=image,
+    cpu=16.0,
+    memory=65536,
+    timeout=24 * 3600,
+    volumes={"/artifacts": artifact_volume},
+    retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
+)
+def qed_controlled_rollout_evaluate_stage(
+    run_label: str,
+    source_run_label: str,
+    checkpoint_name: str = "checkpoint.pt",
+    target_qed: float = 0.9,
+    samples: int = 10,
+    proposals_per_event: int = 4,
+    guidance_start_event: int = 0,
+    max_guided_events: int = 12,
+    beta: float = 8.0,
+) -> dict[str, object]:
+    """Run a small beta-zero versus target-distance controlled CTMC."""
+
+    _validate_run_label(run_label)
+    _validate_run_label(source_run_label, field="source run label")
+    if Path(checkpoint_name).name != checkpoint_name:
+        raise ValueError("checkpoint name must be a basename")
+    if not 0.0 <= target_qed <= 1.0 or not math.isfinite(target_qed):
+        raise ValueError("target QED must be finite and lie in [0, 1]")
+    if samples <= 0 or proposals_per_event <= 0 or max_guided_events <= 0:
+        raise ValueError("controlled rollout counts must be positive")
+    if guidance_start_event < 0:
+        raise ValueError("guidance start event must be nonnegative")
+    if beta <= 0.0 or not math.isfinite(beta):
+        raise ValueError("guidance beta must be finite and positive")
+
+    artifact_volume.reload()
+    source_checkpoint = Path("/artifacts") / source_run_label / checkpoint_name
+    if not source_checkpoint.is_file() or source_checkpoint.stat().st_size == 0:
+        raise FileNotFoundError(f"missing controlled-rollout checkpoint: {source_checkpoint}")
+    run_dir = Path("/artifacts") / run_label
+    run_dir.mkdir(parents=True, exist_ok=True)
+    metrics_path = run_dir / "metrics.json"
+    rollout_cache = run_dir / "rollouts.pt"
+    manifest_path = run_dir / "manifest.json"
+    signature = {
+        "format": "compose_v4_qed_controlled_rollout_request_v1",
+        "source_run_label": source_run_label,
+        "checkpoint_name": checkpoint_name,
+        "checkpoint_sha256": _file_sha256(source_checkpoint),
+        "target_qed": target_qed,
+        "samples": samples,
+        "proposals_per_event": proposals_per_event,
+        "guidance_start_event": guidance_start_event,
+        "max_guided_events": max_guided_events,
+        "beta": beta,
+        "seed": ROLLOUT_BASE_SEED,
+        "max_atoms": ROLLOUT_MAX_ATOMS,
+        "operational_horizon": ROLLOUT_OPERATIONAL_HORIZON,
+        "time_step": ROLLOUT_TIME_STEP,
+        "max_events": ROLLOUT_MAX_EVENTS,
+        "source_sha256": _source_fingerprint(),
+    }
+    if manifest_path.is_file():
+        existing = json.loads(manifest_path.read_text())
+        if not isinstance(existing, dict) or existing.get("signature") != signature:
+            raise ValueError("controlled-rollout run label has a different signature")
+        if metrics_path.is_file() and metrics_path.stat().st_size > 0:
+            report = json.loads(metrics_path.read_text())
+            return {
+                "run_label": run_label,
+                "artifact_dir": str(run_dir),
+                "paired": report.get("paired"),
+                "reused": True,
+            }
+    else:
+        _atomic_json_write({"signature": signature}, manifest_path)
+        artifact_volume.commit()
+
+    command = (
+        sys.executable,
+        str(REMOTE_ROOT / "scripts" / "evaluate_qed_controlled_rollouts.py"),
+        "--checkpoint",
+        str(source_checkpoint),
+        "--output",
+        str(metrics_path),
+        "--rollout-cache",
+        str(rollout_cache),
+        "--target-qed",
+        str(target_qed),
+        "--samples",
+        str(samples),
+        "--workers",
+        str(min(samples, 10)),
+        "--proposals-per-event",
+        str(proposals_per_event),
+        "--guidance-start-event",
+        str(guidance_start_event),
+        "--max-guided-events",
+        str(max_guided_events),
+        "--beta",
+        str(beta),
+        "--seed",
+        str(ROLLOUT_BASE_SEED),
+        "--max-atoms",
+        str(ROLLOUT_MAX_ATOMS),
+        "--operational-horizon",
+        str(ROLLOUT_OPERATIONAL_HORIZON),
+        "--time-step",
+        str(ROLLOUT_TIME_STEP),
+        "--max-events",
+        str(ROLLOUT_MAX_EVENTS),
+    )
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = f"{REMOTE_ROOT}:{REMOTE_ROOT / 'src'}"
+    environment["PYTHONUNBUFFERED"] = "1"
+    print(
+        json.dumps({"phase": "remote_qed_controlled_rollout_command", "argv": command}),
+        flush=True,
+    )
+    process = subprocess.run(command, cwd=REMOTE_ROOT, env=environment, check=False)
+    artifact_volume.commit()
+    if process.returncode != 0:
+        raise subprocess.CalledProcessError(process.returncode, command)
+    if not metrics_path.is_file() or metrics_path.stat().st_size == 0:
+        raise RuntimeError("controlled QED rollout produced no metrics")
+    report = json.loads(metrics_path.read_text())
+    summary = {
+        "run_label": run_label,
+        "artifact_dir": str(run_dir),
+        "paired": report.get("paired"),
+        "reused": False,
+    }
+    print(
+        json.dumps({"phase": "remote_qed_controlled_rollout_complete", **summary}),
+        flush=True,
+    )
+    return summary
+
+
 def _run_pipeline(
     run_label: str,
     recipe_name: str,
@@ -1816,17 +2229,34 @@ def main(
     train_only: bool = False,
     evaluate_only: bool = False,
     rollout_evaluate_only: bool = False,
+    property_rollout_evaluate_only: bool = False,
+    qed_successor_guidance_gate_only: bool = False,
+    qed_controlled_rollout_evaluate_only: bool = False,
     run_label: str = "",
     recipe_name: str = RECIPE_NAME,
     source_run_label: str = "",
+    rollout_source_run_label: str = "",
+    resume_source_run_label: str = "",
     initialization_source_run_label: str = "",
     checkpoint_name: str = "checkpoint.best_so_far.pt",
     rollout_samples: int = 100,
+    property_targets: str = "0.3,0.5,0.7,0.9",
+    property_include_classifier_free_control: bool = True,
+    rollout_cache_name: str = "rollouts.pt",
+    rollout_condition_label: str = "qed_0.9",
+    guidance_target_qed: float = 0.9,
+    guidance_states: int = 100,
+    guidance_proposals_per_state: int = 4,
+    guidance_beta: float = 8.0,
+    guidance_classifier_free_base: bool = False,
+    guidance_max_controlled_events: int = 12,
+    guidance_start_event: int = 0,
     support_start_step: int = 0,
     support_steps: int = 2000,
     support_containers: int = 1,
     support_workers: int = 12,
     training_steps: int = 0,
+    schedule_steps: int = 0,
     initialize_from_source_checkpoint: bool = False,
     initialize_compatible_from_source_checkpoint: bool = False,
 ) -> None:
@@ -1841,6 +2271,9 @@ def main(
             train_only,
             evaluate_only,
             rollout_evaluate_only,
+            property_rollout_evaluate_only,
+            qed_successor_guidance_gate_only,
+            qed_controlled_rollout_evaluate_only,
         )
     )
     if modes > 1:
@@ -1848,7 +2281,8 @@ def main(
             "smoke, integration-smoke, preflight, h100-preflight, compile-only, "
             "support-compile-only, train-only, "
             "evaluate-only, and "
-            "rollout-evaluate-only are exclusive"
+            "rollout-evaluate-only, property-rollout-evaluate-only, and "
+            "QED guidance modes are exclusive"
         )
     if not run_label:
         raise ValueError(
@@ -1865,6 +2299,17 @@ def main(
         raise ValueError("--support-workers must lie in [1, 13]")
     if training_steps < 0:
         raise ValueError("--training-steps must be non-negative")
+    if schedule_steps < 0:
+        raise ValueError("--schedule-steps must be non-negative")
+    if schedule_steps and not train_only:
+        raise ValueError("--schedule-steps requires --train-only")
+    if resume_source_run_label and not train_only:
+        raise ValueError("--resume-source-run-label requires --train-only")
+    if resume_source_run_label and (
+        initialize_from_source_checkpoint
+        or initialize_compatible_from_source_checkpoint
+    ):
+        raise ValueError("recovery resume and fresh initialization are exclusive")
     if initialize_from_source_checkpoint and not train_only:
         raise ValueError(
             "--initialize-from-source-checkpoint requires --train-only"
@@ -1916,7 +2361,58 @@ def main(
         result = h100_preflight_stage.remote(run_label, recipe_name)
         print(json.dumps(result, indent=2, sort_keys=True))
         return
-    if rollout_evaluate_only:
+    if qed_controlled_rollout_evaluate_only:
+        if not source_run_label:
+            raise ValueError(
+                "qed-controlled-rollout-evaluate-only requires --source-run-label"
+            )
+        call = qed_controlled_rollout_evaluate_stage.spawn(
+            run_label,
+            source_run_label,
+            checkpoint_name,
+            guidance_target_qed,
+            rollout_samples,
+            guidance_proposals_per_state,
+            guidance_start_event,
+            guidance_max_controlled_events,
+            guidance_beta,
+        )
+        phase = "qed_controlled_rollout_evaluation_spawned"
+    elif qed_successor_guidance_gate_only:
+        if not source_run_label or not rollout_source_run_label:
+            raise ValueError(
+                "qed-successor-guidance-gate-only requires --source-run-label and "
+                "--rollout-source-run-label"
+            )
+        call = qed_successor_guidance_gate_stage.spawn(
+            run_label,
+            source_run_label,
+            rollout_source_run_label,
+            checkpoint_name,
+            rollout_cache_name,
+            rollout_condition_label,
+            guidance_target_qed,
+            guidance_states,
+            guidance_proposals_per_state,
+            guidance_beta,
+            guidance_classifier_free_base,
+        )
+        phase = "qed_successor_guidance_gate_spawned"
+    elif property_rollout_evaluate_only:
+        if not source_run_label:
+            raise ValueError(
+                "property-rollout-evaluate-only requires --source-run-label"
+            )
+        call = property_rollout_evaluate_stage.spawn(
+            run_label,
+            source_run_label,
+            checkpoint_name,
+            property_targets,
+            rollout_samples,
+            property_include_classifier_free_control,
+        )
+        phase = "property_rollout_evaluation_spawned"
+    elif rollout_evaluate_only:
         if not source_run_label:
             raise ValueError("rollout-evaluate-only requires --source-run-label")
         call = rollout_evaluate_stage.spawn(
@@ -1986,7 +2482,8 @@ def main(
             source_run_label or None,
             True,
             training_steps or None,
-            None,
+            schedule_steps or None,
+            resume_source_run_label or None,
             (
                 initialization_source_run_label or source_run_label
                 if (
@@ -2003,6 +2500,9 @@ def main(
         call = pipeline_stage.spawn(run_label, recipe_name)
         phase = "pipeline_spawned"
     payload = {"phase": phase, "recipe_name": recipe_name}
+    if train_only:
+        payload["training_steps"] = training_steps or None
+        payload["schedule_steps"] = schedule_steps or None
     if support_compile_only:
         payload["calls"] = calls
     else:

@@ -1,0 +1,24 @@
+{
+  "artifact": "4CR-1920.csv",
+  "canonical_local_path": "tmp/lipid_data/lumi_lab/4CR-1920.csv",
+  "columns": [
+    "RLU (log2)",
+    "mol",
+    "Markush code"
+  ],
+  "data_rows": 1920,
+  "doi": "10.5281/zenodo.17771224",
+  "download_url": "https://zenodo.org/api/records/17771224/files/4CR-1920.csv/content",
+  "license": "CC-BY-4.0",
+  "markush_component_cardinalities": {
+    "R1": 20,
+    "R2": 4,
+    "R3": 4,
+    "R4": 6
+  },
+  "molecular_parse_failures": 0,
+  "sha256": "41118d98ae84c651fd687e23950fbd56c5ed9a3281998122e75062e5a5a26734",
+  "unique_markush_codes": 1920,
+  "unique_molecules": 1920,
+  "use_boundary": "Pulmonary airway-cell in-vitro task head only; never flatten into an in-vivo lung label."
+}

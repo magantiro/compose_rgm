@@ -1,0 +1,143 @@
+{
+  "format": "compose_pan_lung_corpus_manifest_v1",
+  "frozen_on": "2026-07-20",
+  "decision": "Preserve assay, route, cargo, pooling, formulation role, and study identity. Never pool all lung values into one scalar target.",
+  "ready_now": {
+    "raw_measurement_rows": 4339,
+    "explanation": "1,975 LNPDB lung rows + 1,920 LUMI rows + 444 LuT rows. This is a measurement-row count, not a count of mutually unique lipids and not a single exchangeable response table.",
+    "source_count": 3,
+    "typed_head_count": 8
+  },
+  "sources": [
+    {
+      "source_id": "lnpdb_2026",
+      "primary_url": "https://www.nature.com/articles/s41467-026-68818-1",
+      "data_url": "https://github.com/evancollins1/LNPDB/blob/main/data/LNPDB_for_LiON/LNPDB.csv",
+      "access_status": "verified_external_artifact",
+      "local_path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/LNPDB/LNPDB.csv",
+      "sha256": "3493f27306419facd0958589030ed37f272f05c81ad47dd7bc1b8ce0284a57b3",
+      "measured_rows_overall": 19528,
+      "lung_rows": 1975,
+      "lung_unique_canonical_lipids": 291,
+      "tasks": [
+        {"head_id": "airway_a549_in_vitro_expression", "rows": 1801, "unique_lipids": 176, "pooling": "individual"},
+        {"head_id": "airway_hbec_ali_in_vitro_expression", "rows": 29, "unique_lipids": 28, "pooling": "individual"},
+        {"head_id": "local_intratracheal_functional_expression", "rows": 49, "unique_lipids": 26, "pooling": "individual"},
+        {"head_id": "systemic_iv_barcoded_lung_uptake", "rows": 96, "unique_lipids": 62, "pooling": "barcoded"}
+      ],
+      "deduplication_rule": "Canonical source anchor. Rows copied into LiON or recovered from the original RCB/CAD papers join to this record and do not become new observations."
+    },
+    {
+      "source_id": "lumi_lab_4cr1920",
+      "primary_url": "https://doi.org/10.1016/j.cell.2026.01.012",
+      "data_url": "https://zenodo.org/records/17771224",
+      "access_status": "frozen_in_repo_workspace",
+      "local_path": "tmp/lipid_data/lumi_lab/4CR-1920.csv",
+      "sha256": "41118d98ae84c651fd687e23950fbd56c5ed9a3281998122e75062e5a5a26734",
+      "rows": 1920,
+      "unique_full_smiles": 1920,
+      "unique_markush_codes": 1920,
+      "schema": ["RLU (log2)", "mol", "Markush code"],
+      "task": {"head_id": "airway_hbe_in_vitro_expression", "route": "in_vitro", "pooling": "individual"},
+      "in_vivo_boundary": "Only six leading LUMI lipids were advanced to intratracheal in-vivo testing; the 1,920 labels are human-bronchial-epithelial in-vitro measurements.",
+      "deduplication_rule": "Join by canonical full SMILES against LNPDB/LiON. Preserve the LUMI assay as an independent measurement even when chemistry overlaps."
+    },
+    {
+      "source_id": "lut_444_2026",
+      "primary_url": "https://www.nature.com/articles/s41551-026-01615-9",
+      "data_urls": [
+        "https://static-content.springer.com/esm/art%3A10.1038%2Fs41551-026-01615-9/MediaObjects/41551_2026_1615_MOESM3_ESM.xlsx",
+        "https://static-content.springer.com/esm/art%3A10.1038%2Fs41551-026-01615-9/MediaObjects/41551_2026_1615_MOESM4_ESM.xlsx"
+      ],
+      "access_status": "frozen_in_repo_workspace",
+      "local_paths": [
+        "tmp/lipid_data/lut/source_data_fig2.xlsx",
+        "tmp/lipid_data/lut/source_data_fig3.xlsx",
+        "tmp/lipid_data/lut/lut_444_source_table.csv"
+      ],
+      "sha256": {
+        "figure_2": "8e2f196eaab0f7dcce582285ad6cb71960b1c68695603d8d57c9341e452fb26c",
+        "figure_3": "bb02584e7661d5d9448f6b2cd0b6b564a034be6505fcc80409459c56381cad98",
+        "extracted_table": "231c87652ef80fc5af4aaa5e561799e14ed9949d8bce6ee803b4e877db594491"
+      },
+      "rows": 444,
+      "round_counts": {"1": 318, "2": 126},
+      "tasks": [
+        {"head_id": "systemic_iv_lung_expression", "rows": 444, "pooling": "individual"},
+        {"head_id": "systemic_iv_lung_selectivity", "rows": 444, "pooling": "individual"}
+      ],
+      "biological_context": {"route": "intravenous", "cargo": "luciferase mRNA", "dose_mg_per_kg": 0.1, "time_hours": 6, "species": "mouse"},
+      "formulation_role_boundary": "The varied LuT molecule is a quaternary cationic lung-targeting component used together with the fixed ionizable lipid 4A3-SC7. It is not interchangeable with a conventional four-component ionizable-lipid label.",
+      "structure_blocker": "Official Fig. 2/3 workbooks expose compound IDs, head/tail identities, expression, and selectivity but not full product SMILES. Until building-block structures are reconstructed and chemically validated, LuT uses component/SAR features and cannot enter Morgan or graph-representation cells.",
+      "deduplication_rule": "Compound key is round + head + tail. DOTAP controls are excluded. Full-structure cross-source overlap remains unknown until the product structures are reconstructed."
+    },
+    {
+      "source_id": "lion_2024",
+      "primary_url": "https://www.nature.com/articles/s41587-024-02490-y",
+      "data_url": "https://github.com/jswitten/LNP_ML/blob/main/data/all_data.csv",
+      "access_status": "verified_public_not_frozen_here",
+      "rows_overall": 13069,
+      "unique_canonical_lipids": 9194,
+      "canonical_overlap_with_lnpdb": 8518,
+      "overlap_fraction": 0.9265,
+      "deduplication_rule": "Treat LiON as a released preprocessing/modeling view over source studies. The 8,518 canonical overlaps join LNPDB; only non-overlapping chemistry or measurements with distinct provenance can add rows."
+    },
+    {
+      "source_id": "rcb_nra_720_2023",
+      "primary_url": "https://www.nature.com/articles/s41587-023-01679-x",
+      "access_status": "represented_in_lnpdb_and_primary_supplement",
+      "synthesized_structures": 720,
+      "trainable_boundary": "Broad A549 screening plus tiered/pooled pulmonary evaluation; only the released individual intratracheal functional rows are treated as individual in-vivo labels.",
+      "deduplication_rule": "The LNPDB A549 and 49 intratracheal rows are the canonical copies. Do not append the paper tables again."
+    },
+    {
+      "source_id": "cad_barcode_2024",
+      "primary_url": "https://www.nature.com/articles/s41467-024-45422-9",
+      "access_status": "represented_in_lnpdb_and_primary_source_data",
+      "synthesized_lipids": 180,
+      "barcoded_in_vivo_formulations": 96,
+      "lnpdb_unique_canonical_lipids": 62,
+      "trainable_boundary": "The 96 systemic IV labels are barcode uptake/biodistribution, not functional expression. Individual functional validation exists only for a small lead set.",
+      "deduplication_rule": "Use the LNPDB 96-row LX_2024 task as the canonical copy."
+    },
+    {
+      "source_id": "branched_tail_580_2024",
+      "primary_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11368637/",
+      "access_status": "primary_article_accessible_row_table_not_frozen",
+      "synthesized_lipidoids": 580,
+      "individual_in_vivo_candidates": 49,
+      "trainable_boundary": "TNS/physicochemical labels cover the library; only 49 candidates were individually tested for in-vivo expression. Helper-lipid-dependent lung cell specificity must remain formulation context.",
+      "deduplication_rule": "Freeze the supplementary row table and canonicalize before admitting it; headline 580 is not counted as 580 lung-expression labels."
+    },
+    {
+      "source_id": "ppz_find_2022",
+      "primary_url": "https://www.nature.com/articles/s41467-022-32281-5",
+      "access_status": "primary_source_data_accessible_not_frozen",
+      "formulations": 65,
+      "distinct_ionizable_lipids": 8,
+      "pooling": "barcoded_pool",
+      "trainable_boundary": "Functional Cre delivery was assayed across 14 cell types, but the paper reports no detected lung or kidney delivery. Use as formulation/cell-type negative supervision, not as 65 positive lung chemotypes."
+    },
+    {
+      "source_id": "split_ugi_155_2025",
+      "primary_url": "https://www.nature.com/articles/s41467-025-59136-z",
+      "access_status": "primary_source_data_accessible_not_frozen",
+      "synthesized_lipopolymers": 155,
+      "trainable_boundary": "Broad library evidence is primarily in vitro; U155 is the main in-vivo pulmonary lead. Do not relabel 155 rows as in-vivo lung potency."
+    },
+    {
+      "source_id": "staar_extrahepatic_22_2025",
+      "primary_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12030499/",
+      "access_status": "supplement_accessible_not_frozen",
+      "individual_systemic_iv_lipids": 22,
+      "reported_lung_selective_fraction": 0.366,
+      "trainable_boundary": "Individual IV organ expression/selectivity is usable after freezing Table S4; the earlier 1,500-lipid screen was intramuscular and is not a lung dataset."
+    }
+  ],
+  "global_deduplication_keys": {
+    "chemical": "canonical_isomeric_smiles + formal_charge + stereochemistry_policy_version",
+    "formulation": "chemical_id + helper_lipid_ids + component_ratios + N_P_ratio + process_metadata",
+    "measurement": "publication_id + experiment_id + source_row + route + cargo + dose + timepoint + tissue_or_cell + readout_type + replicate_or_pool_id",
+    "split_group": "publication/study + chemical family + linker/head/tail family; duplicated compilations inherit the original study group"
+  }
+}

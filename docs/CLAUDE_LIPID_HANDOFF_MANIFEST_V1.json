@@ -1,0 +1,29 @@
+{
+  "format": "compose_claude_lipid_handoff_manifest_v1",
+  "date": "2026-07-20",
+  "root": ".",
+  "authority": "Read all three HTML plans completely before changing scientific scope.",
+  "files": [
+    {"path": "docs/research_plans/paper1_compose_methods.html", "role": "Paper 1 governing methods and evidence plan", "bytes": 54323, "sha256": "0d43e06e8fe02f85b373a2e8574d1eb99e0341292b1c9bf924ec6add627378b8"},
+    {"path": "docs/research_plans/paper2_compose_lipid.html", "role": "Paper 2 governing Nature Biotechnology plan", "bytes": 36502, "sha256": "3ccea8fa239f6536c420101bc49334f79aa1fb6d0ab51c8127296adcb1f9634e"},
+    {"path": "docs/research_plans/compose_two_paper_execution_plan.html", "role": "Canonical two-paper execution index", "bytes": 62884, "sha256": "204c457a3d70d7b5aa699555aa9186dfcd48aab72065592f35b6aed5527dd394"},
+    {"path": "docs/research_plans/compose_lipid_pretraining_corpus_audit.md", "role": "Possessed structural corpus audit", "bytes": 10412, "sha256": "1582bca042de5db6a314757e863f57d089a1d80803a51afb89a9324f5426ce08"},
+    {"path": "docs/research_plans/defensible_lipid_corpus_spec.md", "role": "Reaction-diverse 500k corpus specification", "bytes": 21570, "sha256": "e83167ea33548a57a70fd0d78115b259f098b62bb24da471625de7b0bbb5f76f"},
+    {"path": "docs/research_plans/lipid_dataset_intake.md", "role": "Source access, licensing, counts, and blockers", "bytes": 16660, "sha256": "74abc8d8ccdd2273e89e374f5d001f2da7b23027add12ab060a95cbf374f44d8"},
+    {"path": "docs/research_plans/pan_lung_oracle_corpus.md", "role": "Pan-lung evidence and oracle design", "bytes": 12243, "sha256": "cc41d7ef9a10e86bdc11d7f0f2ab918fe2e650329e5f7ce6f67c5f72870b4a5c"},
+    {"path": "docs/audits/2026-07-20_lung_oracle_results.md", "role": "First oracle results and interpretation", "bytes": 6345, "sha256": "2ded94235b0edca32bd965193800a5b0446fd678e993e71677eb91fc9866416c"},
+    {"path": "docs/audits/2026-07-20_agile_ugi_corpus_bias.md", "role": "AGILE redundancy and bias audit", "bytes": 6829, "sha256": "f5d14a1b8cf878597ed100f258178ea4377c21952f9c9d3d3f0d128ba9547fd2"},
+    {"path": "artifacts/datasets/compose_lipid_pretraining_v1/canonicalization_audit.json", "role": "Exact canonical counts and overlap", "bytes": 12094, "sha256": "b7333bea9eec6ac3e93458068c83e2fcb0a71907c3540f53d62f90a251d8959f"},
+    {"path": "artifacts/datasets/compose_lipid_pretraining_v1/source_manifest.json", "role": "Structural source ledger", "bytes": 11913, "sha256": "651159152e8faf62790bb5d809bcb6febb3fe9487a955ccf158784af6504ade2"},
+    {"path": "artifacts/datasets/compose_lipid_pretraining_v1/layer_aware_training_manifest.json", "role": "Current R0/R1 sampling contract", "bytes": 1353, "sha256": "5225c5bd6237af40f211b7dd139f7bb7c142e933d7afe7f5bb77ed376bfa2b86"},
+    {"path": "configs/pan_lung_corpus_manifest_v1.json", "role": "Pan-lung source and typed-head manifest", "bytes": 9299, "sha256": "a1a1035bdf814bb44efcfa1e3563b9e7e5ac30cb7d9c0b13d7ad65f428092cf1"},
+    {"path": "configs/pan_lung_oracle_matrix_v1.json", "role": "Representation-by-model matrix status", "bytes": 7062, "sha256": "8d5202e7210ed29e5fa89ef821243e457549cbc3f11d9e4117804e24453e3309"},
+    {"path": "configs/pan_lung_qualified_ensemble_contract_v1.json", "role": "Qualified ensemble and deployment contract", "bytes": 29518, "sha256": "543abcff88f77415637323f428668acb100540cde3c1499454d58bfc23c908c6"},
+    {"path": "diagnostics/pan_lung_qualified_matrix_comparison_metrics.json", "role": "Hard-split matrix metrics", "bytes": 105084, "sha256": "c215de71b7e416824083172da1ea6a5cd266ccbe56daa6399d3f8e01cd0012d1"},
+    {"path": "diagnostics/pan_lung_qualified_ensemble_metrics.json", "role": "Qualified ensemble metrics", "bytes": 10038, "sha256": "6748e7bd4d87833ab476a15a46ee169100b0304323b670a409216887e43af7ed"},
+    {"path": "artifacts/oracles/pan_lung_filtering_v1/manifest.json", "role": "Serialized filtering bundle manifest", "bytes": 6719, "sha256": "06d4673e6ccb8a3d2962256b2217619be509a751e46a8bc62315c2151bfb6871"},
+    {"path": "configs/lipid_reactions/reaction_registry.schema.json", "role": "Fail-closed reaction registry schema", "bytes": 6020, "sha256": "bee3d509fbd3a3454ec6546c8a535418060940cc4e985209265d48db252086ae"},
+    {"path": "configs/lipid_reactions/pilot_literature_specs_v1.json", "role": "Unqualified initial reaction evidence", "bytes": 7027, "sha256": "4d29f0bb232c605f5f56828176da3c79ed2cffdbaf0495e973e60bdcd60d4caa"},
+    {"path": "configs/lipid_reactions/pilot_enumeration_v1.json", "role": "Staged 1k/50k/100k enumeration configuration", "bytes": 2545, "sha256": "d06196155117b064899cdae6e2b53cf795ad12f665efde89e88d119d5979d9f6"}
+  ]
+}

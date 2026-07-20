@@ -1,0 +1,71 @@
+{
+  "checkpoint": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt",
+  "checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+  "decision_use": "cheap_nonpromotional_launch_gate",
+  "format": "compose_v4_canonical_successor_distillation_smoke_v1",
+  "gate": {
+    "cheap_pilot_gate_passed": true,
+    "checks": {
+      "excess_reduction_ge_99pct": true,
+      "family_relative_l1_le_0p5pct": true,
+      "graft_relative_l1_le_0p5pct": true,
+      "mass_balance_error_le_1e-6": true,
+      "p1p2_topology_scalar_absent": true,
+      "projected_500_updates_le_10min": true
+    },
+    "corpus_scale_training_authorized": false,
+    "note": "A corpus launch additionally requires a cached-state benchmark on the real pancake checkpoint and a fixed heldout family/backtrack gate."
+  },
+  "objective": {
+    "atom_delete_log_rate_adjustment": -0.5,
+    "joint_ring_context_included": false,
+    "kind": "productive_family_poisson_kl_plus_canonical_graft_conditional",
+    "ring_family_mass_mode": "boolean",
+    "small_ring_calibration_included": false
+  },
+  "optimization": {
+    "excess_reduction_fraction": 1.0,
+    "final_excess_poisson_kl": 0.0,
+    "final_family_relative_l1": 2.1204450604273006e-05,
+    "final_graft_relative_l1": 4.383677878649905e-05,
+    "final_total_hazard": 2.1649158000946045,
+    "initial_excess_poisson_kl": 4.74160099029541,
+    "initial_family_relative_l1": 2.6745314598083496,
+    "initial_graft_relative_l1": 19.398578643798828,
+    "learning_rate": 0.001,
+    "steps": 200,
+    "target_total_hazard": 2.164870500564575
+  },
+  "state": {
+    "n_slots": 40,
+    "smiles": "CCCCCCCC",
+    "time": 0.5
+  },
+  "teacher": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt:step=6250.0",
+  "teacher_mass": {
+    "canonical_graft_successors": 4,
+    "graft_alias_counts": [
+      6,
+      12,
+      6,
+      6
+    ],
+    "mass_balance_error": 0.0,
+    "productive_delete_family_rate": 0.37170422077178955,
+    "productive_graft_family_rate": 0.2860458195209503,
+    "productive_graft_marks": 30,
+    "productive_total_hazard": 2.164870500564575,
+    "raw_delete_family_rate": 0.6128366589546204,
+    "raw_graft_family_rate": 5.834928035736084,
+    "raw_graft_marks": 42,
+    "raw_total_hazard": 7.954885005950928,
+    "virtual_graft_self_rate": 5.548882007598877,
+    "virtual_total_rate": 5.790014266967773
+  },
+  "throughput": {
+    "projected_500_update_seconds": 12.2635926050134,
+    "seconds_per_update": 0.0245271852100268,
+    "target_build_seconds": 1.2261494579724967,
+    "training_seconds": 4.90543704200536
+  }
+}

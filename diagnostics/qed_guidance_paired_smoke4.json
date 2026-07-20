@@ -1,0 +1,62 @@
+{
+  "checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+  "format": "compose_v4_qed_guidance_paired_smoke_v1",
+  "guidance_strength": 8.0,
+  "paired_source_contract": "same prior and per-trajectory RNG seed; compact rollouts omit source state",
+  "proposals_per_event": 4,
+  "rows": [
+    {
+      "guided": "COc1cccn1C(C)C=CC(C)CC(C)c1[nH]c(F)c2c1C(CO)C(N)=CC2",
+      "guided_events": 37,
+      "guided_oracle_requests": 623,
+      "guided_qed": 0.5744934755565309,
+      "guided_unique_oracle_evaluations": 268,
+      "guided_valid": true,
+      "seed": 20260730,
+      "unguided": "CCCOC(=O)C1(C#Cc2ccc(C)n2C2C(N)=CC(N)C2=CCN=CCOCCCN(C)CCC)CCCC1",
+      "unguided_events": 35,
+      "unguided_qed": 0.11835225309032466,
+      "unguided_valid": true
+    },
+    {
+      "guided": "CCCC(OO)N(C)C(=O)C12C(CC)CC(C)C(=O)C1C(C)C(C)NC2C",
+      "guided_events": 36,
+      "guided_oracle_requests": 302,
+      "guided_qed": 0.4185131681358323,
+      "guided_unique_oracle_evaluations": 157,
+      "guided_valid": true,
+      "seed": 20260731,
+      "unguided": "CCCCn1c(Oc2cc(C)nc(C)c2)non(CCc2ccccc2)n1O",
+      "unguided_events": 25,
+      "unguided_qed": 0.5850217484787709,
+      "unguided_valid": true
+    },
+    {
+      "guided": "CCc1cn2nc(-c3ccc(CC4CC4C#N)nc3)nc(C)c2c1C",
+      "guided_events": 25,
+      "guided_oracle_requests": 642,
+      "guided_qed": 0.731315844037892,
+      "guided_unique_oracle_evaluations": 106,
+      "guided_valid": true,
+      "seed": 20260732,
+      "unguided": "COc1c(-c2c(C(=O)O)cccc2N(C)CCCC(C)C)ccnc1CCO",
+      "unguided_events": 25,
+      "unguided_qed": 0.6450819466928198,
+      "unguided_valid": true
+    },
+    {
+      "guided": "CCc1cnc(CO)c(CC)c1COCC(C)OC",
+      "guided_events": 35,
+      "guided_oracle_requests": 337,
+      "guided_qed": 0.7846253105426466,
+      "guided_unique_oracle_evaluations": 168,
+      "guided_valid": true,
+      "seed": 20260733,
+      "unguided": "CC#CC(C#CCCC(N)OCCC(C)CNC)N(CC1CCCCN1)C(=O)O",
+      "unguided_events": 28,
+      "unguided_qed": 0.3085853473963531,
+      "unguided_valid": true
+    }
+  ],
+  "tempering_power": 1.0
+}

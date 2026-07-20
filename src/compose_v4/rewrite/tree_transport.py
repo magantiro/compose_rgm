@@ -19,6 +19,7 @@ from compose_v4.chem.molecular_graph import (
     is_element,
 )
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
+from compose_v4.rewrite.commuting_schedule import schedule_priority_events_earliest
 from compose_v4.rewrite.kernel import RewriteSystem, de_novo_rewrite_system
 from compose_v4.rewrite.operators import (
     AtomDelete,
@@ -54,6 +55,7 @@ def compile_carbon_tree_to_target(
     flexible_size: bool = False,
     typed_ring_payloads: bool = False,
     ring_catalog: TypedRingCatalog | None = None,
+    event_schedule: str = "sequential",
 ) -> RewriteTrace:
     """Compile a carbon tree into ``target`` through valid connected states.
 
@@ -74,32 +76,38 @@ def compile_carbon_tree_to_target(
         raise ValueError("flexible-size transport requires Graft support")
     if align_source and not use_bond_reroute:
         raise ValueError("source alignment is only defined for Graft transport")
+    if event_schedule not in {"sequential", "exact_early_ring"}:
+        raise ValueError(f"unknown tree event schedule: {event_schedule}")
     if flexible_size:
-        return _compile_flexible_graft_tree_transport(
+        trace = _compile_flexible_graft_tree_transport(
             source,
             target,
             runtime=runtime,
             ring_catalog=ring_catalog,
         )
-    if use_bond_reroute:
-        return _compile_graft_tree_transport(
+    elif use_bond_reroute:
+        trace = _compile_graft_tree_transport(
             source,
             target,
             runtime=runtime,
             ring_catalog=ring_catalog,
         )
-    target_trace = compile_null_to_target_tracelets(
-        target,
-        system=runtime,
-        typed_ring_payloads=typed_ring_payloads,
-        ring_catalog=ring_catalog,
-    )
-    return _compile_primitive_tree_transport(
-        source,
-        target,
-        target_trace=target_trace,
-        runtime=runtime,
-    )
+    else:
+        target_trace = compile_null_to_target_tracelets(
+            target,
+            system=runtime,
+            typed_ring_payloads=typed_ring_payloads,
+            ring_catalog=ring_catalog,
+        )
+        trace = _compile_primitive_tree_transport(
+            source,
+            target,
+            target_trace=target_trace,
+            runtime=runtime,
+        )
+    if event_schedule == "exact_early_ring":
+        trace, _ = schedule_priority_events_earliest(trace, system=runtime)
+    return trace
 
 
 def _compile_flexible_graft_tree_transport(

@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kosha.science/compose/lipid-reaction-registry.schema.json",
+  "title": "COMPOSE-Lipid reaction registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registry_version", "reactions"],
+  "properties": {
+    "registry_version": {"type": "string", "minLength": 1},
+    "reactions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/reaction"}
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "identifier", "locator"],
+      "properties": {
+        "kind": {"enum": ["doi", "pmid", "patent", "ord", "supplement"]},
+        "identifier": {"type": "string", "minLength": 1},
+        "locator": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      }
+    },
+    "reactant_role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "count",
+        "required_handle_smarts",
+        "mapped_reactive_atoms",
+        "forbidden_smarts"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "count": {"type": "integer", "minimum": 1},
+        "required_handle_smarts": {"type": ["string", "null"]},
+        "mapped_reactive_atoms": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 1},
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "forbidden_smarts": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "allowed_site_multiplicity": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "example": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reactants", "expected"],
+      "properties": {
+        "reactants": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "minItems": 1
+        },
+        "expected": {"type": "string", "minLength": 1},
+        "source_locator": {"type": "string"},
+        "reason": {"type": "string"}
+      }
+    },
+    "reaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reaction_id",
+        "reaction_version",
+        "status",
+        "architecture",
+        "sources",
+        "reactant_roles",
+        "selectivity_policy",
+        "conditions",
+        "known_positive_examples",
+        "known_negative_examples",
+        "implementation"
+      ],
+      "properties": {
+        "reaction_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+        "reaction_version": {"type": "integer", "minimum": 1},
+        "status": {
+          "enum": ["literature_spec", "validated_transform", "qualified_for_enumeration"]
+        },
+        "architecture": {"type": "string", "minLength": 1},
+        "sources": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/source"},
+          "minItems": 1
+        },
+        "reactant_roles": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/reactant_role"},
+          "minItems": 2
+        },
+        "atom_mapped_reaction_smarts": {"type": ["string", "null"]},
+        "selectivity_policy": {"type": "string", "minLength": 1},
+        "stereochemistry_policy": {"type": "string"},
+        "protonation_and_salt_policy": {"type": "string"},
+        "conditions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "solvent": {"type": "array", "items": {"type": "string"}},
+            "temperature_c": {"type": ["number", "null"]},
+            "time_h": {"type": ["number", "null"]},
+            "catalyst_or_reagent": {"type": "array", "items": {"type": "string"}},
+            "reported_yield_range": {
+              "type": ["array", "null"],
+              "prefixItems": [
+                {"type": "number", "minimum": 0, "maximum": 1},
+                {"type": "number", "minimum": 0, "maximum": 1}
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "known_positive_examples": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/example"}
+        },
+        "known_negative_examples": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/example"}
+        },
+        "implementation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enumerator", "test_manifest", "artifact_hash"],
+          "properties": {
+            "enumerator": {"type": ["string", "null"]},
+            "test_manifest": {"type": ["string", "null"]},
+            "artifact_hash": {"type": ["string", "null"]}
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": ["validated_transform", "qualified_for_enumeration"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "atom_mapped_reaction_smarts": {"type": "string", "minLength": 5},
+              "known_positive_examples": {"minItems": 1},
+              "known_negative_examples": {"minItems": 1},
+              "reactant_roles": {
+                "items": {
+                  "properties": {
+                    "required_handle_smarts": {"type": "string", "minLength": 1},
+                    "mapped_reactive_atoms": {"minItems": 1}
+                  }
+                }
+              },
+              "implementation": {
+                "properties": {
+                  "enumerator": {"type": "string", "minLength": 1},
+                  "test_manifest": {"type": "string", "minLength": 1},
+                  "artifact_hash": {"type": "string", "minLength": 1}
+                }
+              }
+            },
+            "required": ["atom_mapped_reaction_smarts"]
+          }
+        }
+      ]
+    }
+  }
+}

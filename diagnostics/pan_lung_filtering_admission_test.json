@@ -1,0 +1,329 @@
+{
+  "cases": {
+    "a549_in_domain": {
+      "admission": {
+        "admitted": true,
+        "canonical_smiles": "CCCCCCCCCCC(O)CN(CCN1CCN(CCN(CC(O)CCCCCCCCCC)CC(O)CCCCCCCCCC)CC1)CCN(CC(O)CCCCCCCCCC)CC(O)CCCCCCCCCC",
+        "maximum_training_tanimoto": 1.0,
+        "reasons": [],
+        "robust_descriptor_distance": 1.6341913240907746,
+        "robust_distance_threshold": 3.0845398051701514,
+        "similarity_threshold": 0.8052631616592407
+      },
+      "conservative_pessimistic_score": -0.923711153888125,
+      "domain_id": "a549",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": [
+        {
+          "conformal_radius": 1.3019567958176723,
+          "ensemble_id": "lnpdb_2026__airway_a549_in_vitro_expression__held_lipid",
+          "ensemble_mean": 0.47230791663748856,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 0.5996482719060265,
+              "raw": 0.5679032979041884
+            },
+            "ridge_v1": {
+              "calibrated": 0.37532268647571787,
+              "raw": 0.5713256597518921
+            },
+            "xgboost_v1": {
+              "calibrated": 0.44195279153072126,
+              "raw": 0.5157644748687744
+            }
+          },
+          "model_disagreement": 0.09406227470794123,
+          "pessimistic_score": -0.923711153888125,
+          "total_uncertainty": 1.3960190705256135
+        }
+      ]
+    },
+    "a549_ood": {
+      "admission": {
+        "admitted": false,
+        "canonical_smiles": "C",
+        "maximum_training_tanimoto": 0.0,
+        "reasons": [
+          "nearest-training-structure similarity below threshold",
+          "robust descriptor distance above threshold"
+        ],
+        "robust_descriptor_distance": 4.235557902047617,
+        "robust_distance_threshold": 3.0845398051701514,
+        "similarity_threshold": 0.8052631616592407
+      },
+      "conservative_pessimistic_score": null,
+      "domain_id": "a549",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": []
+    },
+    "lumi_in_domain": {
+      "admission": {
+        "admitted": true,
+        "canonical_smiles": "CCCCCCCCCCCCCCCCCC(=O)N(CCCCCCCCC)C(CCN(C)C)C(=O)NC1CCCCC1",
+        "maximum_training_tanimoto": 1.0,
+        "reasons": [],
+        "robust_descriptor_distance": 1.231958950934678,
+        "robust_distance_threshold": 1.998959871295047,
+        "similarity_threshold": 0.875
+      },
+      "conservative_pessimistic_score": 0.2691325998398799,
+      "domain_id": "lumi",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": [
+        {
+          "conformal_radius": 4.596407611329536,
+          "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R2",
+          "ensemble_mean": 4.885262766124226,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 4.8655402111694155,
+              "raw": 5.018791781866479
+            },
+            "xgboost_v1": {
+              "calibrated": 4.904985321079037,
+              "raw": 5.169919490814209
+            }
+          },
+          "model_disagreement": 0.01972255495481079,
+          "pessimistic_score": 0.2691325998398799,
+          "total_uncertainty": 4.616130166284346
+        },
+        {
+          "conformal_radius": 3.7120296871631266,
+          "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R3",
+          "ensemble_mean": 5.170737286129226,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 5.061195138185533,
+              "raw": 5.018791781866479
+            },
+            "xgboost_v1": {
+              "calibrated": 5.28027943407292,
+              "raw": 5.169919490814209
+            }
+          },
+          "model_disagreement": 0.10954214794369355,
+          "pessimistic_score": 1.3491654510224058,
+          "total_uncertainty": 3.82157183510682
+        },
+        {
+          "conformal_radius": 4.497060132369743,
+          "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R4",
+          "ensemble_mean": 5.25271725991655,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 5.732920620187838,
+              "raw": 5.018791781866479
+            },
+            "xgboost_v1": {
+              "calibrated": 4.772513899645262,
+              "raw": 5.169919490814209
+            }
+          },
+          "model_disagreement": 0.48020336027128785,
+          "pessimistic_score": 0.2754537672755193,
+          "total_uncertainty": 4.977263492641031
+        }
+      ]
+    },
+    "lumi_ood": {
+      "admission": {
+        "admitted": false,
+        "canonical_smiles": "C",
+        "maximum_training_tanimoto": 0.0,
+        "reasons": [
+          "nearest-training-structure similarity below threshold",
+          "robust descriptor distance above threshold"
+        ],
+        "robust_descriptor_distance": 5.534426772540382,
+        "robust_distance_threshold": 1.998959871295047,
+        "similarity_threshold": 0.875
+      },
+      "conservative_pessimistic_score": null,
+      "domain_id": "lumi",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": []
+    },
+    "lut_known_pair": {
+      "admission": {
+        "admitted": true,
+        "head": "1A1",
+        "known_pair": true,
+        "novel_combination_of_known_components": false,
+        "reasons": [],
+        "round": 1,
+        "tail": "B1"
+      },
+      "conservative_pessimistic_score": -0.6826395224010163,
+      "domain_id": "lut_selectivity",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": [
+        {
+          "conformal_radius": 0.4356082907016734,
+          "ensemble_id": "lut_444_2026__systemic_iv_lung_selectivity__held_head",
+          "ensemble_mean": 0.08553707377871105,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 0.026684134055743245,
+              "raw": 0.020487284942333147
+            },
+            "ridge_v1": {
+              "calibrated": 0.15187736879722044,
+              "raw": 0.12865623902638584
+            },
+            "xgboost_v1": {
+              "calibrated": 0.07804971848316941,
+              "raw": 0.01977650634944439
+            }
+          },
+          "model_disagreement": 0.05138340765428667,
+          "pessimistic_score": -0.401454624577249,
+          "total_uncertainty": 0.48699169835596007
+        },
+        {
+          "conformal_radius": 0.44940158232547295,
+          "ensemble_id": "lut_444_2026__systemic_iv_lung_selectivity__held_tail",
+          "ensemble_mean": -0.04690487479291761,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": -0.3014675714582307,
+              "raw": 0.020487284942333147
+            },
+            "ridge_v1": {
+              "calibrated": 0.13935436707868942,
+              "raw": 0.12865623902638584
+            },
+            "xgboost_v1": {
+              "calibrated": 0.02139858000078846,
+              "raw": 0.01977650634944439
+            }
+          },
+          "model_disagreement": 0.1863330652826258,
+          "pessimistic_score": -0.6826395224010163,
+          "total_uncertainty": 0.6357346476080987
+        }
+      ]
+    },
+    "lut_novel_pair_known_components": {
+      "admission": {
+        "admitted": true,
+        "head": "1A1",
+        "known_pair": false,
+        "novel_combination_of_known_components": true,
+        "reasons": [],
+        "round": 2,
+        "tail": "B10"
+      },
+      "conservative_pessimistic_score": 0.30264117407084634,
+      "domain_id": "lut_selectivity",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": [
+        {
+          "conformal_radius": 0.4356082907016734,
+          "ensemble_id": "lut_444_2026__systemic_iv_lung_selectivity__held_head",
+          "ensemble_mean": 0.813298990340038,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 0.7961399160080174,
+              "raw": 0.8100585052468188
+            },
+            "ridge_v1": {
+              "calibrated": 0.814166127618433,
+              "raw": 0.8039205459431388
+            },
+            "xgboost_v1": {
+              "calibrated": 0.8295909273936635,
+              "raw": 0.8619078397750854
+            }
+          },
+          "model_disagreement": 0.013670076468338746,
+          "pessimistic_score": 0.3640206231700259,
+          "total_uncertainty": 0.4492783671700121
+        },
+        {
+          "conformal_radius": 0.44940158232547295,
+          "ensemble_id": "lut_444_2026__systemic_iv_lung_selectivity__held_tail",
+          "ensemble_mean": 0.8168190820649274,
+          "members": {
+            "extra_trees_v1": {
+              "calibrated": 0.907590849902463,
+              "raw": 0.8100585052468188
+            },
+            "ridge_v1": {
+              "calibrated": 0.7821253996699231,
+              "raw": 0.8039205459431388
+            },
+            "xgboost_v1": {
+              "calibrated": 0.7607409966223961,
+              "raw": 0.8619078397750854
+            }
+          },
+          "model_disagreement": 0.06477632566860808,
+          "pessimistic_score": 0.30264117407084634,
+          "total_uncertainty": 0.514177907994081
+        }
+      ]
+    },
+    "lut_unseen_component_ood": {
+      "admission": {
+        "admitted": false,
+        "head": "9A999",
+        "known_pair": false,
+        "novel_combination_of_known_components": false,
+        "reasons": [
+          "unseen LuT head component"
+        ],
+        "round": 2,
+        "tail": "B1"
+      },
+      "conservative_pessimistic_score": null,
+      "domain_id": "lut_selectivity",
+      "filtering_only": true,
+      "format": "compose_pan_lung_filtering_score_v1",
+      "reward_fine_tuning_enabled": false,
+      "scores": []
+    }
+  },
+  "format": "compose_pan_lung_filtering_admission_test_v1",
+  "gate_only_cases": {
+    "a549_leave_one_structure_out": {
+      "admission": {
+        "admitted": true,
+        "canonical_smiles": "CCCC/C=C\\CCCCCCCCC(=O)OC(C/C=C\\CCCCCCCCOC(=O)CCN(CCCN(CC)CC)CCC(=O)OCCCCCCCC/C=C\\CC(CCCCCC)OC(=O)CCCCCCCC/C=C\\CCCC)CCCCCC",
+        "maximum_training_tanimoto": 0.9803921580314636,
+        "reasons": [],
+        "robust_descriptor_distance": 0.7784738655964965,
+        "robust_distance_threshold": 3.0845398051701514,
+        "similarity_threshold": 0.8052631616592407
+      },
+      "removed_structure": "CCCC/C=C\\CCCCCCCCC(=O)OC(C/C=C\\CCCCCCCCOC(=O)CCN(CCCN(CC)CC)CCC(=O)OCCCCCCCC/C=C\\CC(CCCCCC)OC(=O)CCCCCCCC/C=C\\CCCC)CCCCCC",
+      "test_type": "leave_one_structure_out_applicability_control"
+    },
+    "lumi_leave_one_structure_out": {
+      "admission": {
+        "admitted": true,
+        "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)N(CCCCCCC/C=C\\CCCCCCCC)C(C(=O)NC(C)(C)C)C1CCN(C)CC1",
+        "maximum_training_tanimoto": 1.0,
+        "reasons": [],
+        "robust_descriptor_distance": 0.8992917283445028,
+        "robust_distance_threshold": 1.998959871295047,
+        "similarity_threshold": 0.875
+      },
+      "removed_structure": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)N(CCCCCCC/C=C\\CCCCCCCC)C(C(=O)NC(C)(C)C)C1CCN(C)CC1",
+      "test_type": "leave_one_structure_out_applicability_control"
+    }
+  },
+  "manifest": "artifacts/oracles/pan_lung_filtering_v1/manifest.json"
+}

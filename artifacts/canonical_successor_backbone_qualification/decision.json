@@ -1,0 +1,33 @@
+{
+  "artifacts": {
+    "head_delta": "artifacts/canonical_successor_backbone_qualification/distilled_head_delta.pt",
+    "manifest": "artifacts/canonical_successor_backbone_qualification/panel_manifest.json",
+    "qualified_checkpoint": null,
+    "rate_metrics": "artifacts/canonical_successor_backbone_qualification/rate_metrics.json",
+    "rollout_metrics": null
+  },
+  "corpus_scale_training_authorized": false,
+  "decision_use": "bounded_nonpromotional_qualification",
+  "format": "compose_v4_pancake_quotient_qualification_decision_v1",
+  "next_step": "inspect failed rate checks; do not roll out",
+  "no_graft_diagnostic_policy": {
+    "default_model": false,
+    "matched_seed_and_operational_budget": true,
+    "ran": false,
+    "reported_axes": [
+      "topology/cycle rank",
+      "delete-to-one then regrow",
+      "size",
+      "unique-state fraction",
+      "backtracking",
+      "rings",
+      "validity"
+    ],
+    "run_only_if": "the matched 20-rollout quotient arm passes all safety checks but fails at least one behavioral check"
+  },
+  "qualification_passed": false,
+  "rate_gate_passed": false,
+  "ring_calibration_authorized": false,
+  "rollout_gate_passed": null,
+  "rollout_gate_run": false
+}

@@ -8,7 +8,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass, field, replace
 from math import cos, exp, pi
 from time import perf_counter
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Mapping
 
 import numpy as np
 import torch
@@ -48,10 +48,13 @@ class FactorizedMarkExample:
     teacher_rule_name: str | None
     teacher_rate: float
     importance_weight: float
+    property_condition_values: tuple[float, ...] | None = None
+    property_condition_mask: tuple[bool, ...] | None = None
     ring_grow_support_indices: tuple[int, ...] | None = None
     ring_grow_support_width: int = 0
     ring_grow_support_is_exact: bool = False
     ring_grow_enablement_is_exact: bool = False
+    ring_topology_local_support_log_mass: float | None = None
     ring_teacher_semantic_certificate: RingTeacherSemanticCertificate | None = None
 
     @property
@@ -88,6 +91,9 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         support_cache_reset_interval: int = 2048,
         training_support_cache: ShardedTrainingSupportCache | None = None,
         require_cached_support: bool = False,
+        target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+        condition_dropout_probability: float = 0.0,
+        ring_family_mass_mode: str = "boolean",
     ) -> None:
         if not records:
             raise ValueError("factorized mark training records must be non-empty")
@@ -105,6 +111,23 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             raise ValueError("training support cache requires a ring catalog")
         if require_cached_support and training_support_cache is None:
             raise ValueError("required training support cache was not provided")
+        if not 0.0 <= condition_dropout_probability <= 1.0:
+            raise ValueError("condition dropout probability must lie in [0, 1]")
+        if ring_family_mass_mode not in {
+            "boolean",
+            "catalog_topology_local_support",
+        }:
+            raise ValueError("unknown ring family mass mode")
+        condition_widths = (
+            set()
+            if target_property_conditions is None
+            else {len(values) for values in target_property_conditions.values()}
+        )
+        if target_property_conditions is not None and (
+            condition_widths != {next(iter(condition_widths), 0)}
+            or next(iter(condition_widths), 0) <= 0
+        ):
+            raise ValueError("target property conditions must share one positive width")
         if (
             training_support_cache is not None
             and start_index + length > training_support_cache.total_rows
@@ -123,6 +146,9 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self.support_cache_reset_interval = int(support_cache_reset_interval)
         self.training_support_cache = training_support_cache
         self.require_cached_support = bool(require_cached_support)
+        self.target_property_conditions = target_property_conditions
+        self.condition_dropout_probability = float(condition_dropout_probability)
+        self.ring_family_mass_mode = str(ring_family_mass_mode)
         self._ring_support_model: FactorizedTraceletRateModel | None = None
         self._ring_support_examples_since_reset = 0
 
@@ -184,11 +210,28 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rule_name = None
             teacher_rate = 0.0
         state = record.path.state_at(progress)
+        property_condition_values = None
+        property_condition_mask = None
+        if self.target_property_conditions is not None:
+            raw_values = self.target_property_conditions.get(record.target_key)
+            if raw_values is None:
+                raise KeyError(f"missing target property condition: {record.target_key}")
+            property_condition_values = tuple(float(value) for value in raw_values)
+            if not np.isfinite(property_condition_values).all():
+                raise ValueError("target property condition contains a non-finite value")
+            dropout_rng = np.random.default_rng(
+                np.random.SeedSequence((self.seed, absolute_index, 0xC0D17))
+            )
+            observed = bool(
+                dropout_rng.random() >= self.condition_dropout_probability
+            )
+            property_condition_mask = (observed,) * len(property_condition_values)
         ring_grow_support_mask = None
         ring_grow_support_indices = None
         ring_grow_support_width = 0
         ring_grow_support_is_exact = False
         ring_grow_enablement_is_exact = False
+        ring_topology_local_support_log_mass = None
         ring_teacher_semantic_certificate = None
         chemistry_model = None
         if self.ring_catalog is not None:
@@ -243,6 +286,15 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                 )
             if chemistry_model is not None:
                 self._ring_support_examples_since_reset += 1
+        if self.ring_family_mass_mode == "catalog_topology_local_support":
+            if self.ring_catalog is None:
+                raise RuntimeError("ring topology mass requires a ring catalog")
+            if chemistry_model is None:
+                chemistry_model = self._ring_chemistry_model()
+                self._ring_support_examples_since_reset += 1
+            ring_topology_local_support_log_mass = (
+                chemistry_model._ring_topology_local_support_log_mass(state)
+            )
         return FactorizedMarkExample(
             state=state,
             time=time,
@@ -250,10 +302,15 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rule_name=teacher_rule_name,
             teacher_rate=teacher_rate,
             importance_weight=importance_weight,
+            property_condition_values=property_condition_values,
+            property_condition_mask=property_condition_mask,
             ring_grow_support_indices=ring_grow_support_indices,
             ring_grow_support_width=ring_grow_support_width,
             ring_grow_support_is_exact=ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
+            ring_topology_local_support_log_mass=(
+                ring_topology_local_support_log_mass
+            ),
             ring_teacher_semantic_certificate=ring_teacher_semantic_certificate,
         )
 
@@ -270,9 +327,28 @@ class FactorizedMarkCollator:
 
     def __call__(self, examples: list[FactorizedMarkExample]) -> FactorizedMarkBatch:
         support_rows = tuple(example.ring_grow_support_indices for example in examples)
+        topology_masses = tuple(
+            example.ring_topology_local_support_log_mass for example in examples
+        )
+        if any(value is None for value in topology_masses) and not all(
+            value is None for value in topology_masses
+        ):
+            raise ValueError("factorized examples mix topology masses and missing values")
         has_precomputed_ring_support = bool(support_rows) and all(
             row is not None for row in support_rows
         )
+        condition_values = tuple(
+            example.property_condition_values for example in examples
+        )
+        condition_masks = tuple(example.property_condition_mask for example in examples)
+        has_conditions = all(values is not None for values in condition_values) and all(
+            mask is not None for mask in condition_masks
+        )
+        if not has_conditions and any(
+            values is not None or mask is not None
+            for values, mask in zip(condition_values, condition_masks)
+        ):
+            raise ValueError("property-conditioned examples are only partially populated")
         batch = prepare_factorized_mark_batch(
             tuple(example.state for example in examples),
             tuple(example.time for example in examples),
@@ -285,6 +361,16 @@ class FactorizedMarkCollator:
             chemistry_feature_cache=self._chemistry_feature_cache,
             chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
             compute_ring_grow_support=not has_precomputed_ring_support,
+            property_condition_values=(
+                tuple(values for values in condition_values if values is not None)
+                if has_conditions
+                else None
+            ),
+            property_condition_mask=(
+                tuple(mask for mask in condition_masks if mask is not None)
+                if has_conditions
+                else None
+            ),
         )
         if has_precomputed_ring_support:
             widths = {example.ring_grow_support_width for example in examples}
@@ -311,6 +397,16 @@ class FactorizedMarkCollator:
             ring_teacher_semantic_certificates=tuple(
                 example.ring_teacher_semantic_certificate for example in examples
             ),
+            ring_topology_local_support_log_mass=(
+                None
+                if all(value is None for value in topology_masses)
+                else torch.tensor(
+                    tuple(
+                        float(value) for value in topology_masses if value is not None
+                    ),
+                    dtype=batch.times.dtype,
+                )
+            ),
         )
         return batch
 
@@ -333,6 +429,9 @@ def factorized_mark_loader(
     ring_electronic_mode: str = "factorized_local",
     training_support_cache: ShardedTrainingSupportCache | None = None,
     require_cached_support: bool = False,
+    target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+    condition_dropout_probability: float = 0.0,
+    ring_family_mass_mode: str = "boolean",
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
         raise ValueError("start step lies outside the training horizon")
@@ -353,6 +452,9 @@ def factorized_mark_loader(
         ring_electronic_mode=ring_electronic_mode,
         training_support_cache=training_support_cache,
         require_cached_support=require_cached_support,
+        target_property_conditions=target_property_conditions,
+        condition_dropout_probability=condition_dropout_probability,
+        ring_family_mass_mode=ring_family_mass_mode,
     )
     options: dict[str, Any] = {}
     if workers > 0:
@@ -387,6 +489,9 @@ def sample_factorized_mark_batch(
     workers: int = 0,
     ring_catalog: TypedRingCatalog | None = None,
     ring_electronic_mode: str = "factorized_local",
+    target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+    condition_dropout_probability: float = 0.0,
+    ring_family_mass_mode: str = "boolean",
 ) -> FactorizedMarkBatch:
     if workers < 0:
         raise ValueError("evaluation workers must be non-negative")
@@ -402,6 +507,9 @@ def sample_factorized_mark_batch(
         progress_stratification_fraction=progress_stratification_fraction,
         ring_catalog=ring_catalog,
         ring_electronic_mode=ring_electronic_mode,
+        target_property_conditions=target_property_conditions,
+        condition_dropout_probability=condition_dropout_probability,
+        ring_family_mass_mode=ring_family_mass_mode,
     )
     collator = FactorizedMarkCollator(use_aromatic_bond_view, ring_catalog)
     if workers == 0:
@@ -416,6 +524,62 @@ def sample_factorized_mark_batch(
         drop_last=False,
     )
     return _concatenate_factorized_mark_batches(tuple(loader))
+
+
+def attach_property_conditions(
+    batch: FactorizedMarkBatch,
+    records: tuple[PathRecord, ...],
+    *,
+    seed: int,
+    target_property_conditions: Mapping[str, tuple[float, ...]],
+    condition_dropout_probability: float = 0.0,
+    start_index: int = 0,
+) -> FactorizedMarkBatch:
+    """Attach endpoint conditions without rebuilding cached chemistry support."""
+
+    if not records:
+        raise ValueError("property-condition attachment requires records")
+    if start_index < 0:
+        raise ValueError("start_index must be non-negative")
+    if not 0.0 <= condition_dropout_probability <= 1.0:
+        raise ValueError("condition dropout probability must lie in [0, 1]")
+    widths = {len(values) for values in target_property_conditions.values()}
+    if len(widths) != 1 or next(iter(widths), 0) <= 0:
+        raise ValueError("target property conditions must share one positive width")
+
+    values: list[tuple[float, ...]] = []
+    masks: list[tuple[bool, ...]] = []
+    width = next(iter(widths))
+    for offset in range(batch.batch_size):
+        absolute_index = start_index + offset
+        rng = np.random.default_rng(np.random.SeedSequence((seed, absolute_index)))
+        record = records[int(rng.integers(len(records)))]
+        row = target_property_conditions.get(record.target_key)
+        if row is None:
+            raise KeyError(f"missing target property condition: {record.target_key}")
+        numeric_row = tuple(float(value) for value in row)
+        if not np.isfinite(numeric_row).all():
+            raise ValueError("target property condition contains a non-finite value")
+        dropout_rng = np.random.default_rng(
+            np.random.SeedSequence((seed, absolute_index, 0xC0D17))
+        )
+        observed = bool(dropout_rng.random() >= condition_dropout_probability)
+        values.append(numeric_row if observed else (0.0,) * width)
+        masks.append((observed,) * width)
+
+    return replace(
+        batch,
+        property_condition_values=torch.tensor(
+            values,
+            dtype=batch.times.dtype,
+            device=batch.times.device,
+        ),
+        property_condition_mask=torch.tensor(
+            masks,
+            dtype=torch.bool,
+            device=batch.times.device,
+        ),
+    )
 
 
 def _concatenate_factorized_mark_batches(
@@ -466,6 +630,32 @@ def _concatenate_factorized_mark_batches(
             for action_group in actions
         )
     )
+    property_values = tuple(batch.property_condition_values for batch in batches)
+    property_masks = tuple(batch.property_condition_mask for batch in batches)
+    if all(values is None and mask is None for values, mask in zip(property_values, property_masks)):
+        concatenated_property_values = None
+        concatenated_property_masks = None
+    elif all(values is not None and mask is not None for values, mask in zip(property_values, property_masks)):
+        concatenated_property_values = torch.cat(
+            [values for values in property_values if values is not None], dim=0
+        )
+        concatenated_property_masks = torch.cat(
+            [mask for mask in property_masks if mask is not None], dim=0
+        )
+    else:
+        raise ValueError("factorized batches mix conditioned and unconditioned rows")
+    topology_masses = tuple(
+        batch.ring_topology_local_support_log_mass for batch in batches
+    )
+    if all(values is None for values in topology_masses):
+        concatenated_topology_mass = None
+    elif all(values is not None for values in topology_masses):
+        concatenated_topology_mass = torch.cat(
+            [values for values in topology_masses if values is not None],
+            dim=0,
+        )
+    else:
+        raise ValueError("factorized batches mix topology masses and missing values")
 
     return FactorizedMarkBatch(
         states=tuple(state for batch in batches for state in batch.states),
@@ -520,6 +710,7 @@ def _concatenate_factorized_mark_batches(
             ],
             dim=0,
         ),
+        ring_topology_local_support_log_mass=concatenated_topology_mass,
         ring_teacher_semantic_certificates=tuple(
             certificate
             for batch in batches
@@ -529,6 +720,8 @@ def _concatenate_factorized_mark_batches(
                 else (None,) * batch.batch_size
             )
         ),
+        property_condition_values=concatenated_property_values,
+        property_condition_mask=concatenated_property_masks,
     )
 
 
@@ -551,7 +744,9 @@ def factorized_mark_metrics(
     )
     loss_sum = 0.0
     teacher_probability_sum = 0.0
+    teacher_family_probability_sum = 0.0
     family_hits_sum = 0
+    family_top3_hits_sum = 0
     nonterminal_count = 0
     terminal_hazard_sum = 0.0
     terminal_count = 0
@@ -562,7 +757,9 @@ def factorized_mark_metrics(
     importance_weight_sum = 0.0
     family_counts = [0 for _ in MARK_RULE_NAMES]
     family_hits = [0 for _ in MARK_RULE_NAMES]
+    family_top3_hits = [0 for _ in MARK_RULE_NAMES]
     family_teacher_probability_sums = [0.0 for _ in MARK_RULE_NAMES]
+    family_teacher_mark_probability_sums = [0.0 for _ in MARK_RULE_NAMES]
     for start in range(0, batch.batch_size, resolved_microbatch_size):
         cpu_batch = batch.subbatch(
             start,
@@ -607,11 +804,28 @@ def factorized_mark_metrics(
             teacher_probability_sum += float(
                 prediction.selected_mark_log_probability[nonterminal].exp().sum()
             )
+            teacher_family_probability = prediction.family_log_probabilities.gather(
+                1,
+                teacher_family.clamp_min(0).unsqueeze(1),
+            ).squeeze(1).exp()
+            teacher_family_probability_sum += float(
+                teacher_family_probability[nonterminal].sum()
+            )
+            family_top3 = prediction.family_log_probabilities.topk(
+                k=min(3, len(MARK_RULE_NAMES)),
+                dim=-1,
+            ).indices
             family_hits_sum += int(
                 (
                     prediction.family_log_probabilities.argmax(dim=-1)[nonterminal]
                     == teacher_family[nonterminal]
                 ).sum()
+            )
+            family_top3_hits_sum += int(
+                (
+                    family_top3[nonterminal]
+                    == teacher_family[nonterminal].unsqueeze(1)
+                ).any(dim=1).sum()
             )
             predicted_family = prediction.family_log_probabilities.argmax(dim=-1)
             teacher_mark_probability = prediction.selected_mark_log_probability.exp()
@@ -624,7 +838,13 @@ def factorized_mark_metrics(
                 family_hits[family_index] += int(
                     (predicted_family[selected_family] == family_index).sum()
                 )
+                family_top3_hits[family_index] += int(
+                    (family_top3[selected_family] == family_index).any(dim=1).sum()
+                )
                 family_teacher_probability_sums[family_index] += float(
+                    teacher_family_probability[selected_family].sum()
+                )
+                family_teacher_mark_probability_sums[family_index] += float(
                     teacher_mark_probability[selected_family].sum()
                 )
             nonterminal_count += current_nonterminal_count
@@ -636,7 +856,13 @@ def factorized_mark_metrics(
         "mean_teacher_mark_probability": (
             teacher_probability_sum / nonterminal_count if nonterminal_count else 0.0
         ),
+        "mean_teacher_family_probability": (
+            teacher_family_probability_sum / nonterminal_count if nonterminal_count else 0.0
+        ),
         "family_accuracy": (family_hits_sum / nonterminal_count if nonterminal_count else 0.0),
+        "family_top3_accuracy": (
+            family_top3_hits_sum / nonterminal_count if nonterminal_count else 0.0
+        ),
         "mean_terminal_hazard": (terminal_hazard_sum / terminal_count if terminal_count else 0.0),
         "mean_predicted_hazard": predicted_hazard_sum / batch.batch_size,
         "mean_teacher_hazard": teacher_hazard_sum / batch.batch_size,
@@ -647,14 +873,44 @@ def factorized_mark_metrics(
             else 0.0
         ),
     }
+    represented_family_indices = [
+        index for index, count in enumerate(family_counts) if count
+    ]
+    metrics["balanced_family_accuracy"] = (
+        sum(
+            family_hits[index] / family_counts[index]
+            for index in represented_family_indices
+        )
+        / len(represented_family_indices)
+        if represented_family_indices
+        else 0.0
+    )
+    metrics["balanced_family_top3_accuracy"] = (
+        sum(
+            family_top3_hits[index] / family_counts[index]
+            for index in represented_family_indices
+        )
+        / len(represented_family_indices)
+        if represented_family_indices
+        else 0.0
+    )
+    metrics["represented_families"] = float(len(represented_family_indices))
     for family_index, family_name in enumerate(MARK_RULE_NAMES):
         count = family_counts[family_index]
         metrics[f"teacher_examples_{family_name}"] = float(count)
         metrics[f"family_accuracy_{family_name}"] = (
             family_hits[family_index] / count if count else 0.0
         )
-        metrics[f"mean_teacher_mark_probability_{family_name}"] = (
+        metrics[f"family_top3_accuracy_{family_name}"] = (
+            family_top3_hits[family_index] / count if count else 0.0
+        )
+        metrics[f"mean_teacher_family_probability_{family_name}"] = (
             family_teacher_probability_sums[family_index] / count if count else 0.0
+        )
+        metrics[f"mean_teacher_mark_probability_{family_name}"] = (
+            family_teacher_mark_probability_sums[family_index] / count
+            if count
+            else 0.0
         )
     return metrics
 
@@ -681,6 +937,7 @@ def train_factorized_mark_model(
     evaluation_points: int = 10,
     evaluation_interval: int | None = None,
     warmup_steps: int = 0,
+    schedule_steps: int | None = None,
     minimum_learning_rate_fraction: float = 1.0,
     early_stopping_patience: int = 0,
     early_stopping_min_relative_delta: float = 0.0,
@@ -693,6 +950,9 @@ def train_factorized_mark_model(
     initial_validation_metrics: dict[str, float] | None = None,
     training_support_cache: ShardedTrainingSupportCache | None = None,
     require_cached_support: bool = False,
+    target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+    condition_dropout_probability: float = 0.0,
+    trainable_parameter_scope: str = "all",
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
         raise ValueError("steps, batch size, and learning rate must be positive")
@@ -702,6 +962,9 @@ def train_factorized_mark_model(
         raise ValueError("data prefetch factor must be positive")
     if evaluation_interval is not None and evaluation_interval <= 0:
         raise ValueError("evaluation interval must be positive")
+    resolved_schedule_steps = steps if schedule_steps is None else int(schedule_steps)
+    if resolved_schedule_steps <= 0:
+        raise ValueError("learning-rate schedule horizon must be positive")
     if not 0 <= warmup_steps <= steps:
         raise ValueError("warmup steps must lie in [0, steps]")
     if not 0.0 < minimum_learning_rate_fraction <= 1.0:
@@ -712,6 +975,10 @@ def train_factorized_mark_model(
         raise ValueError("evaluation batch size must be positive")
     if not 0.0 <= early_stopping_min_relative_delta < 1.0:
         raise ValueError("early-stopping minimum relative delta must lie in [0, 1)")
+    configure_factorized_trainable_parameters(
+        model,
+        scope=trainable_parameter_scope,
+    )
     optimizer = torch.optim.AdamW(
         factorized_adamw_parameter_groups(model, weight_decay=weight_decay),
         lr=learning_rate,
@@ -810,6 +1077,9 @@ def train_factorized_mark_model(
         ring_electronic_mode=ring_electronic_mode,
         training_support_cache=training_support_cache,
         require_cached_support=require_cached_support,
+        target_property_conditions=target_property_conditions,
+        condition_dropout_probability=condition_dropout_probability,
+        ring_family_mass_mode=model.ring_family_mass_mode,
     )
     timing_loop_started = perf_counter()
     iterator: Iterator[FactorizedMarkBatch] = iter(loader)
@@ -828,7 +1098,7 @@ def train_factorized_mark_model(
         current_learning_rate = cosine_warmup_learning_rate(
             base_learning_rate=learning_rate,
             completed_step=completed_steps,
-            total_steps=steps,
+            total_steps=resolved_schedule_steps,
             warmup_steps=warmup_steps,
             minimum_fraction=minimum_learning_rate_fraction,
         )
@@ -1012,6 +1282,66 @@ def factorized_adamw_parameter_groups(
     ]
 
 
+_CHEMISTRY_MARK_PARAMETER_PREFIXES = (
+    "grow_root_head.",
+    "grow_query.",
+    "grow_option.",
+    "restate_head.",
+    "reorder_head.",
+    "ring_system_atom_head.",
+    "ring_system_role_head.",
+    "ring_system_global_category_pair",
+    "ring_system_adjacent_category_pair",
+)
+
+_RING_TOPOLOGY_PARAMETER_PREFIXES = (
+    "ring_topology_group_head.",
+)
+
+
+def configure_factorized_trainable_parameters(
+    model: FactorizedTraceletRateModel,
+    *,
+    scope: str,
+) -> tuple[str, ...]:
+    """Select a controlled training surface for a factorized rate model.
+
+    ``chemistry_marks_only`` repairs atom/bond marks and coordinated ring
+    electronics while keeping the encoder, total hazard, family law, Graft,
+    ring topology/template choice, and placement rates exactly frozen.  It is
+    intentionally narrower than generic fine-tuning so a chemistry pilot
+    cannot recreate the family-rate and topology drift seen in the coupled
+    P1/P2 experiment.
+
+    ``ring_topology_only`` trains only the shared topology-and-cycle group
+    head introduced above the complete-template selector.  It leaves family
+    timing, exact template residuals, placements, electronics, and the graph
+    encoder frozen, isolating the diagnosed fused-ring probability seam.
+    """
+
+    if scope not in {"all", "chemistry_marks_only", "ring_topology_only"}:
+        raise ValueError(f"unknown trainable parameter scope: {scope}")
+    selected: list[str] = []
+    for name, parameter in model.named_parameters():
+        trainable = (
+            scope == "all"
+            or (
+                scope == "chemistry_marks_only"
+                and name.startswith(_CHEMISTRY_MARK_PARAMETER_PREFIXES)
+            )
+            or (
+                scope == "ring_topology_only"
+                and name.startswith(_RING_TOPOLOGY_PARAMETER_PREFIXES)
+            )
+        )
+        parameter.requires_grad_(trainable)
+        if trainable:
+            selected.append(name)
+    if not selected:
+        raise RuntimeError("trainable parameter scope selected no parameters")
+    return tuple(selected)
+
+
 def cosine_warmup_learning_rate(
     *,
     base_learning_rate: float,
@@ -1024,8 +1354,8 @@ def cosine_warmup_learning_rate(
 
     if base_learning_rate <= 0.0 or total_steps <= 0:
         raise ValueError("learning rate and total steps must be positive")
-    if not 1 <= completed_step <= total_steps:
-        raise ValueError("completed step lies outside the training horizon")
+    if completed_step < 1:
+        raise ValueError("completed step must be positive")
     if not 0 <= warmup_steps <= total_steps:
         raise ValueError("warmup steps must lie in [0, total_steps]")
     if not 0.0 < minimum_fraction <= 1.0:
@@ -1086,6 +1416,7 @@ __all__ = [
     "factorized_mark_loader",
     "factorized_mark_metrics",
     "factorized_adamw_parameter_groups",
+    "configure_factorized_trainable_parameters",
     "cosine_warmup_learning_rate",
     "sample_factorized_mark_batch",
     "train_factorized_mark_model",

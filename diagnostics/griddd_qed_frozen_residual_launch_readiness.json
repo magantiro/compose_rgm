@@ -1,0 +1,29 @@
+{
+  "config": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/configs/experiments/griddd_qed_frozen_residual_launch_v1.json",
+  "config_sha256": "646a0ffec1f830a21378acc581855c67cd940fcc93873657487a458e3d6d2f8d",
+  "format": "compose_v4_griddd_qed_frozen_residual_launch_readiness_v1",
+  "launched": false,
+  "next_action": "Resolve only the named artifacts; do not launch the legacy shared-encoder QED recipe or relabel Jin800/reconstruction as official GrIDDD800.",
+  "protocol_a_blockers": [
+    {
+      "code": "official_griddd_800_unavailable",
+      "detail": "the exact GrIDDD release lead list is still unresolved; Jin800 and the local reconstruction are not substitutes"
+    },
+    {
+      "code": "qed_ring_reference_comparison_missing",
+      "detail": "high-QED target-subset versus unconditional-corpus ring comparison is absent"
+    }
+  ],
+  "protocol_a_ready": false,
+  "protocol_b_blockers": [],
+  "protocol_b_ready": true,
+  "sidecar_training_ready": true,
+  "training_blockers": [],
+  "verified_contract": {
+    "frozen_base_residual_sidecar": true,
+    "global_fused_frequency_not_assumed_target": true,
+    "protocol_a_native_20_candidates": true,
+    "protocol_b_exact_981_call_ledger": true,
+    "ring_sensitivity_evaluator_required": true
+  }
+}

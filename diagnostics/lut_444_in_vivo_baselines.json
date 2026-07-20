@@ -1,0 +1,2866 @@
+{
+  "format": "compose_lipid_lut_444_baseline_v1",
+  "interpretation_boundary": "These are within-LuT combinatorial baselines. Random folds are optimistic. Held-component and round-transfer results test extrapolation but do not yet establish cross-study or novel-linker performance; molecular structures and full formulation context are required for the final pan-lung oracle.",
+  "reports": [
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5379482695748463,
+          "r2": 0.2212308175686073,
+          "rmse": 0.6489425409529653,
+          "spearman": 0.4136125877318178,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.4978518553801628,
+          "r2": 0.34991154237217525,
+          "rmse": 0.6189373553492034,
+          "spearman": 0.6478549540347294,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.4679154495007442,
+          "r2": 0.243929445451879,
+          "rmse": 0.6004557777766171,
+          "spearman": 0.48898100938960276,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.5018051611416259,
+          "r2": 0.3094215913466035,
+          "rmse": 0.6414880534955453,
+          "spearman": 0.5600783112019068,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.5642032076248374,
+          "r2": 0.2846765112142997,
+          "rmse": 0.6987501361610771,
+          "spearman": 0.5617977528089889,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5138315940071,
+      "model": "ridge",
+      "r2": 0.2888297809197773,
+      "representation": "component_ids",
+      "rmse": 0.6424433309626122,
+      "spearman": 0.5286506307313626,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 4.823703703703703,
+      "top_decile_recall": 0.4888888888888889
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.40845032378098,
+          "r2": 0.2940711727720078,
+          "rmse": 0.49789815963064027,
+          "spearman": 0.596283561375959,
+          "test_rows": 90,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.5710297589065074,
+          "r2": 0.15663103300919323,
+          "rmse": 0.7549847345190225,
+          "spearman": 0.5411859441021653,
+          "test_rows": 90,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.48286241210546393,
+          "r2": 0.14228291207697563,
+          "rmse": 0.620475218210742,
+          "spearman": 0.4028095908034909,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.72316298744921,
+          "r2": 0.009077111253743442,
+          "rmse": 0.8853373915038321,
+          "spearman": 0.27182244804601374,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.5142038116542483,
+          "r2": 0.256519187165144,
+          "rmse": 0.6531120536689003,
+          "spearman": 0.5670387485432584,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5394895901537367,
+      "model": "ridge",
+      "r2": 0.1694949897169813,
+      "representation": "component_ids",
+      "rmse": 0.6942552500980184,
+      "spearman": 0.4619645749380324,
+      "split": "held_head",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 1.3155555555555554,
+      "top_decile_recall": 0.13333333333333333
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7255347068302336,
+          "r2": -0.2614584122356054,
+          "rmse": 0.8300129785157051,
+          "spearman": 0.22188541826147956,
+          "test_rows": 88,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.5759688220657019,
+          "r2": 0.15769772172779328,
+          "rmse": 0.7083755406739504,
+          "spearman": 0.3079121870356156,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.6161554229442401,
+          "r2": 0.07710025679228838,
+          "rmse": 0.7563907950035633,
+          "spearman": 0.24001812277714693,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.5425415211330724,
+          "r2": -0.3598374903987218,
+          "rmse": 0.6670960882744594,
+          "spearman": 0.3276978542641563,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.5507470207709347,
+          "r2": 0.10688910983008992,
+          "rmse": 0.6516949818685881,
+          "spearman": 0.28058750861608805,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.6016890912912075,
+      "model": "ridge",
+      "r2": 0.09420086199107225,
+      "representation": "component_ids",
+      "rmse": 0.7250433870108205,
+      "spearman": 0.22343714517253965,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 4.385185185185184,
+      "top_decile_recall": 0.4444444444444444
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6665178326933734,
+          "r2": 0.039183913175351526,
+          "rmse": 0.8059317948423239,
+          "spearman": 0.2716642948559432,
+          "test_rows": 126,
+          "top_decile_enrichment": 1.4911242603550297,
+          "top_decile_recall": 0.15384615384615385,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.6665178326933734,
+      "model": "ridge",
+      "r2": 0.039183913175351526,
+      "representation": "component_ids",
+      "rmse": 0.8059317948423239,
+      "spearman": 0.2716642948559432,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 1.4911242603550297,
+      "top_decile_recall": 0.15384615384615385
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5207804914354289,
+          "r2": 0.2826236663434477,
+          "rmse": 0.6228384122308877,
+          "spearman": 0.479096352985072,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.4996130170958169,
+          "r2": 0.353813648731923,
+          "rmse": 0.6170769973604745,
+          "spearman": 0.5900578821927138,
+          "test_rows": 89,
+          "top_decile_enrichment": 6.592592592592593,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.4804690287043079,
+          "r2": 0.1875685159259669,
+          "rmse": 0.6224339007552071,
+          "spearman": 0.4475353041982376,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.4966715787284765,
+          "r2": 0.3357380531739451,
+          "rmse": 0.6291464667739197,
+          "spearman": 0.5529451821586654,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.5356861721362194,
+          "r2": 0.3485547321509139,
+          "rmse": 0.666821554078895,
+          "spearman": 0.5961220104962841,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5065786474522207,
+      "model": "extra_trees",
+      "r2": 0.31211391802795907,
+      "representation": "component_ids",
+      "rmse": 0.6318388202185024,
+      "spearman": 0.5372211763844779,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 4.604444444444444,
+      "top_decile_recall": 0.4666666666666667
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.40210763807598954,
+          "r2": 0.3091453845367481,
+          "rmse": 0.49255348267600496,
+          "spearman": 0.6108796999414817,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.5749505959576359,
+          "r2": 0.13125259745999118,
+          "rmse": 0.7662599408981802,
+          "spearman": 0.48169594674497473,
+          "test_rows": 90,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.4753594281579442,
+          "r2": 0.16031990869477686,
+          "rmse": 0.6139165444730899,
+          "spearman": 0.45177133475792314,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.7041632387640079,
+          "r2": 0.011186706275626901,
+          "rmse": 0.8843944833915742,
+          "spearman": 0.2678494682610097,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.4963140542523952,
+          "r2": 0.29865693465108245,
+          "rmse": 0.6343341170233168,
+          "spearman": 0.6163886576749871,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5302001633476776,
+      "model": "extra_trees",
+      "r2": 0.1769440194554751,
+      "representation": "component_ids",
+      "rmse": 0.6911347532585584,
+      "spearman": 0.46608569169853875,
+      "split": "held_head",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 1.3155555555555554,
+      "top_decile_recall": 0.13333333333333333
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6841559949660394,
+          "r2": -0.11097356641847766,
+          "rmse": 0.778933312376096,
+          "spearman": 0.33552996207090297,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.596201113567743,
+          "r2": 0.13063983294138448,
+          "rmse": 0.7196634362994987,
+          "spearman": 0.23421777296124557,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.6266538132882684,
+          "r2": 0.0357830256295818,
+          "rmse": 0.77313682371062,
+          "spearman": 0.2564318786391657,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.5702839781217354,
+          "r2": -0.4575369263878908,
+          "rmse": 0.690644681893667,
+          "spearman": 0.28200473838932105,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.5265954645205426,
+          "r2": 0.14052437164461784,
+          "rmse": 0.639305539388834,
+          "spearman": 0.3349085784746294,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.6003065562120394,
+      "model": "extra_trees",
+      "r2": 0.10243471376029101,
+      "representation": "component_ids",
+      "rmse": 0.7217404866421832,
+      "spearman": 0.26410401547585594,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 4.165925925925926,
+      "top_decile_recall": 0.4222222222222222
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6614410424007262,
+          "r2": 0.07666497786467652,
+          "rmse": 0.7900558822785748,
+          "spearman": 0.2716642948559432,
+          "test_rows": 126,
+          "top_decile_enrichment": 1.4911242603550297,
+          "top_decile_recall": 0.15384615384615385,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.6614410424007262,
+      "model": "extra_trees",
+      "r2": 0.07666497786467652,
+      "representation": "component_ids",
+      "rmse": 0.7900558822785748,
+      "spearman": 0.2716642948559432,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 1.4911242603550297,
+      "top_decile_recall": 0.15384615384615385
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.2452931094260573,
+          "r2": 0.5122230362926479,
+          "rmse": 0.2881721444594302,
+          "spearman": 0.7438542730677563,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.22614693832143282,
+          "r2": 0.5354579406075384,
+          "rmse": 0.27014524211696395,
+          "spearman": 0.7946373850868234,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.22457126114403153,
+          "r2": 0.5499146634024811,
+          "rmse": 0.276432178765044,
+          "spearman": 0.755583929179435,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.21544323096842677,
+          "r2": 0.5802707580510438,
+          "rmse": 0.25317223451694776,
+          "spearman": 0.7940245148110318,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.24113018054557508,
+          "r2": 0.5273265859404432,
+          "rmse": 0.27352489907783173,
+          "spearman": 0.787890528688669,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.23049304039537394,
+      "model": "ridge",
+      "r2": 0.5508837379726484,
+      "representation": "component_ids",
+      "rmse": 0.27252239767531566,
+      "spearman": 0.7817084047119724,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 2.6311111111111107,
+      "top_decile_recall": 0.26666666666666666
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.25020474433705486,
+          "r2": 0.47152990788130944,
+          "rmse": 0.28467999381597026,
+          "spearman": 0.7668738715858789,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.26788916135559165,
+          "r2": 0.45501717005236364,
+          "rmse": 0.3056775674651018,
+          "spearman": 0.7093729006194747,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.2389531974758294,
+          "r2": 0.5445815153577704,
+          "rmse": 0.2720274722132373,
+          "spearman": 0.761174268806544,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.2781671226202509,
+          "r2": 0.4046874495665843,
+          "rmse": 0.3318782600376974,
+          "spearman": 0.6451620917456975,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.2053932948890844,
+          "r2": 0.5534061755713914,
+          "rmse": 0.24690059466308942,
+          "spearman": 0.7811647754373087,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.24821993160142494,
+      "model": "ridge",
+      "r2": 0.49235778352141946,
+      "representation": "component_ids",
+      "rmse": 0.2897354773834274,
+      "spearman": 0.7005170826519981,
+      "split": "held_head",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.9733333333333334,
+      "top_decile_recall": 0.2
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.4158256602969484,
+          "r2": -0.8429531685472664,
+          "rmse": 0.4443265704177778,
+          "spearman": 0.0671976696757085,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.37914134802864885,
+          "r2": -0.2495482283450896,
+          "rmse": 0.4088073604716615,
+          "spearman": 0.2451308931315889,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.29814310559158647,
+          "r2": 0.09948798067490205,
+          "rmse": 0.3512539430676152,
+          "spearman": 0.2512485873143177,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.46980750264235976,
+          "r2": -4.295935902130205,
+          "rmse": 0.49450590674481554,
+          "spearman": 0.28066983821575237,
+          "test_rows": 90,
+          "top_decile_enrichment": 5.555555555555555,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.36128205061302254,
+          "r2": 0.07458495975869162,
+          "rmse": 0.38375204252330825,
+          "spearman": 0.32190873468762776,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.38511655364346076,
+      "model": "ridge",
+      "r2": -0.06506862559415683,
+      "representation": "component_ids",
+      "rmse": 0.4196735578292205,
+      "spearman": 0.046819184121660085,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.3155555555555554,
+      "top_decile_recall": 0.13333333333333333
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.3887344814297909,
+          "r2": -0.11596411233329995,
+          "rmse": 0.4142758711928011,
+          "spearman": 0.1278676921972552,
+          "test_rows": 126,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.3887344814297909,
+      "model": "ridge",
+      "r2": -0.11596411233329995,
+      "representation": "component_ids",
+      "rmse": 0.4142758711928011,
+      "spearman": 0.1278676921972552,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.20771316961329617,
+          "r2": 0.6484305936631836,
+          "rmse": 0.24465094249659602,
+          "spearman": 0.7911133810010217,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.20143101558882787,
+          "r2": 0.5892694937549139,
+          "rmse": 0.2540172925609161,
+          "spearman": 0.8020939734422882,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.2020442821393139,
+          "r2": 0.5841515110623493,
+          "rmse": 0.2657105072710601,
+          "spearman": 0.7735784814436502,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.1893588183441288,
+          "r2": 0.6416810080834527,
+          "rmse": 0.2339194720369165,
+          "spearman": 0.8034559073884918,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.21031404616102803,
+          "r2": 0.585589611685487,
+          "rmse": 0.25611298355568046,
+          "spearman": 0.7919763305272799,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.20215392902744572,
+      "model": "extra_trees",
+      "r2": 0.6187063757081239,
+      "representation": "component_ids",
+      "rmse": 0.2511033938632364,
+      "spearman": 0.7962402221361625,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 3.2888888888888883,
+      "top_decile_recall": 0.3333333333333333
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.17917600908725426,
+          "r2": 0.6322734217252413,
+          "rmse": 0.23747027268854035,
+          "spearman": 0.7880761631590482,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.2081813790460895,
+          "r2": 0.582944016566068,
+          "rmse": 0.26740488510259386,
+          "spearman": 0.7224244457460384,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.19076484497811297,
+          "r2": 0.6277261626452153,
+          "rmse": 0.2459453958783681,
+          "spearman": 0.778765208886749,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.23541370538205567,
+          "r2": 0.38736467297465427,
+          "rmse": 0.3366722360823471,
+          "spearman": 0.6790822115744621,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.18172165668645257,
+          "r2": 0.5556838090012701,
+          "rmse": 0.24627019199265054,
+          "spearman": 0.7696433272202837,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.19900311520744057,
+      "model": "extra_trees",
+      "r2": 0.5621830391983144,
+      "representation": "component_ids",
+      "rmse": 0.26907236864515566,
+      "spearman": 0.7208095759958444,
+      "split": "held_head",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.7540740740740741,
+      "top_decile_recall": 0.17777777777777778
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.3837663278225198,
+          "r2": -0.5935913830332042,
+          "rmse": 0.41317460556010166,
+          "spearman": 0.18010174329586784,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.3544729196586944,
+          "r2": -0.10896346169034721,
+          "rmse": 0.38512420391673485,
+          "spearman": 0.4006296328770301,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.2967020198213567,
+          "r2": 0.07359939982020858,
+          "rmse": 0.35626722018712825,
+          "spearman": 0.2963996386168205,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.5123091930899341,
+          "r2": -5.636530129861878,
+          "rmse": 0.5535675942424835,
+          "spearman": 0.28526382987702337,
+          "test_rows": 90,
+          "top_decile_enrichment": 5.555555555555555,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.3722524999673229,
+          "r2": 0.0006880129031345827,
+          "rmse": 0.3987796351854829,
+          "spearman": 0.3127042854451529,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.3844265403103138,
+      "model": "extra_trees",
+      "r2": -0.10505926341579319,
+      "representation": "component_ids",
+      "rmse": 0.42747979814669795,
+      "spearman": 0.057962432169041095,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.3155555555555554,
+      "top_decile_recall": 0.13333333333333333
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.37728788182948003,
+          "r2": -0.07056349688309416,
+          "rmse": 0.4057614095507565,
+          "spearman": 0.07266201621448119,
+          "test_rows": 126,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.37728788182948003,
+      "model": "extra_trees",
+      "r2": -0.07056349688309416,
+      "representation": "component_ids",
+      "rmse": 0.4057614095507565,
+      "spearman": 0.07266201621448119,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5382896453459871,
+          "r2": 0.18986334493072243,
+          "rmse": 0.6618826660925347,
+          "spearman": 0.42580194842890096,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.47076924094169337,
+          "r2": 0.40581327358202623,
+          "rmse": 0.5917277548409714,
+          "spearman": 0.6910112359550562,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.5218348454398,
+          "r2": 0.10553409233833855,
+          "rmse": 0.6531031251270705,
+          "spearman": 0.42164131463320714,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.5422319304059616,
+          "r2": 0.23878734934586832,
+          "rmse": 0.6734960820345149,
+          "spearman": 0.4857337419135173,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.56214794100109,
+          "r2": 0.26302164974163056,
+          "rmse": 0.7092478493100773,
+          "spearman": 0.5254482054172097,
+          "test_rows": 88,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5269756818422799,
+      "model": "ridge",
+      "r2": 0.2519690333991902,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.6588822874986026,
+      "spearman": 0.4949937571917241,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 4.604444444444444,
+      "top_decile_recall": 0.4666666666666667
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.47851922700171146,
+          "r2": -0.02666776957744421,
+          "rmse": 0.6004474802127221,
+          "spearman": 0.5285673128369758,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.5509871640537067,
+          "r2": 0.32008306694321675,
+          "rmse": 0.6778869772540945,
+          "spearman": 0.5565049183026711,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.5124349916914717,
+          "r2": 0.07903804671569337,
+          "rmse": 0.642944156846459,
+          "spearman": 0.36782783276390413,
+          "test_rows": 88,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.6392304191975171,
+          "r2": 0.23483025562206905,
+          "rmse": 0.7779788155726707,
+          "spearman": 0.547528684539953,
+          "test_rows": 88,
+          "top_decile_enrichment": 7.604938271604938,
+          "top_decile_recall": 0.7777777777777778,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.5246760252796429,
+          "r2": 0.20246668062912399,
+          "rmse": 0.6764368127646113,
+          "spearman": 0.47101194040364913,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5409315801302416,
+      "model": "ridge",
+      "r2": 0.2094378759188834,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.6773545398836058,
+      "spearman": 0.4768434107353997,
+      "split": "held_head",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 3.5081481481481482,
+      "top_decile_recall": 0.35555555555555557
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.660515331443441,
+          "r2": -0.08184452818088417,
+          "rmse": 0.7686539106378595,
+          "spearman": 0.08638300869994014,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.5676703428182961,
+          "r2": 0.14942950452733073,
+          "rmse": 0.7118438321070517,
+          "spearman": 0.42610334260857324,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.5314834755048774,
+          "r2": 0.26372794408361655,
+          "rmse": 0.6755976516796822,
+          "spearman": 0.4324081575147054,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.4353124464583657,
+          "r2": 0.07802786059328803,
+          "rmse": 0.5492926497137421,
+          "spearman": 0.3748050162809712,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.49317500045827184,
+          "r2": 0.23293763200642348,
+          "rmse": 0.6039583956768823,
+          "spearman": 0.4458245873976211,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.536970169824233,
+      "model": "ridge",
+      "r2": 0.23651367009030466,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.6656542006587861,
+      "spearman": 0.455937234927443,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 4.823703703703703,
+      "top_decile_recall": 0.4888888888888889
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.7650647569467142,
+          "r2": -5.08261581797318,
+          "rmse": 2.027791741924339,
+          "spearman": 0.10043644544431948,
+          "test_rows": 126,
+          "top_decile_enrichment": 3.7278106508875744,
+          "top_decile_recall": 0.38461538461538464,
+          "train_rows": 318
+        }
+      ],
+      "mae": 1.7650647569467142,
+      "model": "ridge",
+      "r2": -5.08261581797318,
+      "representation": "published_sar_descriptors",
+      "rmse": 2.027791741924339,
+      "spearman": 0.10043644544431948,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 3.7278106508875744,
+      "top_decile_recall": 0.38461538461538464
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.4783162680007299,
+          "r2": 0.3716036833301024,
+          "rmse": 0.5829330539238411,
+          "spearman": 0.5254789133470871,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.4674714835124172,
+          "r2": 0.36832512221958225,
+          "rmse": 0.6101087728223987,
+          "spearman": 0.6229996595165136,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.49352789733549024,
+          "r2": 0.18259507120451313,
+          "rmse": 0.6243361641922816,
+          "spearman": 0.48625711831109864,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.46282261433982047,
+          "r2": 0.4240269711533249,
+          "rmse": 0.5858455677210035,
+          "spearman": 0.6220292815798434,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.48915615805741147,
+          "r2": 0.41312585074206176,
+          "rmse": 0.6329117414183575,
+          "spearman": 0.6270649149378326,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.4782343408396958,
+      "model": "extra_trees",
+      "r2": 0.36409011347142184,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.607499371229082,
+      "spearman": 0.5774481823604928,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.042962962962962,
+      "top_decile_recall": 0.5111111111111111
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.4991536666230135,
+          "r2": -0.15899770946104308,
+          "rmse": 0.6379716077110368,
+          "spearman": 0.5141622422521298,
+          "test_rows": 90,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.5190310780026388,
+          "r2": 0.35447071837023025,
+          "rmse": 0.6605220737052725,
+          "spearman": 0.5913075688356587,
+          "test_rows": 90,
+          "top_decile_enrichment": 7.777777777777778,
+          "top_decile_recall": 0.7777777777777778,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.5144525733715244,
+          "r2": 0.09536992378434483,
+          "rmse": 0.6372178318451943,
+          "spearman": 0.45770592282683387,
+          "test_rows": 88,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.605703185555774,
+          "r2": 0.27496614700499256,
+          "rmse": 0.757300108655793,
+          "spearman": 0.497706119089768,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.5412447766289922,
+          "r2": 0.21518718876190346,
+          "rmse": 0.6710206084054483,
+          "spearman": 0.5370363847698215,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5356753922190592,
+      "model": "extra_trees",
+      "r2": 0.2171625356449386,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.6740371677170741,
+      "spearman": 0.5081310069986413,
+      "split": "held_head",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 3.7274074074074073,
+      "top_decile_recall": 0.37777777777777777
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5488530782153433,
+          "r2": 0.18273283317381628,
+          "rmse": 0.6680830302641095,
+          "spearman": 0.42569828466767645,
+          "test_rows": 88,
+          "top_decile_enrichment": 7.604938271604938,
+          "top_decile_recall": 0.7777777777777778,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.49570221828034844,
+          "r2": 0.35507546556716707,
+          "rmse": 0.6198463081411816,
+          "spearman": 0.5620266986016696,
+          "test_rows": 88,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.5448352491507386,
+          "r2": 0.23536738250183364,
+          "rmse": 0.688486426357157,
+          "spearman": 0.4020288119474482,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.42018466199143284,
+          "r2": 0.1182144729681236,
+          "rmse": 0.5371880858727298,
+          "spearman": 0.2731459568939334,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.4470911148340222,
+          "r2": 0.36137881115918213,
+          "rmse": 0.5510783461353397,
+          "spearman": 0.5827139152981848,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.4908134863314793,
+      "model": "extra_trees",
+      "r2": 0.34762110700767046,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.6153156979846282,
+      "spearman": 0.5453304520583101,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.2622222222222215,
+      "top_decile_recall": 0.5333333333333333
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7585689386447565,
+          "r2": -0.23188949060813568,
+          "rmse": 0.9125654698790608,
+          "spearman": 0.3178144943435191,
+          "test_rows": 126,
+          "top_decile_enrichment": 3.7278106508875744,
+          "top_decile_recall": 0.38461538461538464,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.7585689386447565,
+      "model": "extra_trees",
+      "r2": -0.23188949060813568,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.9125654698790608,
+      "spearman": 0.3178144943435191,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 3.7278106508875744,
+      "top_decile_recall": 0.38461538461538464
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.22645509526366897,
+          "r2": 0.4881134560204031,
+          "rmse": 0.29520806087407286,
+          "spearman": 0.6977017364657816,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.21458732593735882,
+          "r2": 0.4853506150984749,
+          "rmse": 0.2843416842667024,
+          "spearman": 0.7334865509022813,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.2141491026487452,
+          "r2": 0.5034068108719594,
+          "rmse": 0.2903631799981368,
+          "spearman": 0.6799625468164795,
+          "test_rows": 89,
+          "top_decile_enrichment": 2.197530864197531,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.19725466851117865,
+          "r2": 0.5340465219914483,
+          "rmse": 0.2667489632399765,
+          "spearman": 0.6456418113721486,
+          "test_rows": 89,
+          "top_decile_enrichment": 1.0987654320987654,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.2365440315181004,
+          "r2": 0.48362858920454155,
+          "rmse": 0.2858889524041444,
+          "spearman": 0.5825613750836534,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.21775582408494937,
+      "model": "ridge",
+      "r2": 0.5099488115304169,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.2846712014476031,
+      "spearman": 0.6767510355008143,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.9733333333333334,
+      "top_decile_recall": 0.2
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.23142228269824067,
+          "r2": 0.37434147223463476,
+          "rmse": 0.30975293122178016,
+          "spearman": 0.5343128781331028,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.22607124060070743,
+          "r2": 0.5521287150132284,
+          "rmse": 0.2771078113185503,
+          "spearman": 0.7044573404123966,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.22497694988012326,
+          "r2": 0.4797359850126006,
+          "rmse": 0.2907497386609983,
+          "spearman": 0.6714627875030821,
+          "test_rows": 88,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.24002288040154693,
+          "r2": 0.44779604997704137,
+          "rmse": 0.3196362594837465,
+          "spearman": 0.7670916839843613,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.20150785803524132,
+          "r2": 0.4599413011898694,
+          "rmse": 0.271510270332664,
+          "spearman": 0.6826282976999755,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.22483579655133684,
+      "model": "ridge",
+      "r2": 0.47613786971612315,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.2943278196454692,
+      "spearman": 0.6407606065249776,
+      "split": "held_head",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.3155555555555554,
+      "top_decile_recall": 0.13333333333333333
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.2893169987809351,
+          "r2": -0.23298255867964257,
+          "rmse": 0.3634323660023697,
+          "spearman": -0.026469655876862386,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.27435952363482374,
+          "r2": 0.2607972900624804,
+          "rmse": 0.3144299960076955,
+          "spearman": 0.4363354584199219,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.26444152433700024,
+          "r2": 0.15437578539936692,
+          "rmse": 0.3403808798655468,
+          "spearman": 0.4295903631432496,
+          "test_rows": 88,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.13423720931885,
+          "r2": -0.0011679392126706656,
+          "rmse": 0.21500749048399354,
+          "spearman": 0.03895954233032885,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.1999191763881503,
+          "r2": 0.5612120831148678,
+          "rmse": 0.2642468099417946,
+          "spearman": 0.7222702391241717,
+          "test_rows": 90,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.23186590726998382,
+      "model": "ridge",
+      "r2": 0.4420768599883016,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.3037456017366795,
+      "spearman": 0.6092884835158405,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.5348148148148149,
+      "top_decile_recall": 0.15555555555555556
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.0589949379494004,
+          "r2": -8.734609949256294,
+          "rmse": 1.223555862779944,
+          "spearman": 0.02908136482939633,
+          "test_rows": 126,
+          "top_decile_enrichment": 2.9822485207100593,
+          "top_decile_recall": 0.3076923076923077,
+          "train_rows": 318
+        }
+      ],
+      "mae": 1.0589949379494004,
+      "model": "ridge",
+      "r2": -8.734609949256294,
+      "representation": "published_sar_descriptors",
+      "rmse": 1.223555862779944,
+      "spearman": 0.02908136482939633,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 2.9822485207100593,
+      "top_decile_recall": 0.3076923076923077
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.1855941517156452,
+          "r2": 0.621003442243533,
+          "rmse": 0.25401478063265764,
+          "spearman": 0.8100783112019068,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.18255214955452376,
+          "r2": 0.5769778810327331,
+          "rmse": 0.257790162772795,
+          "spearman": 0.7846271705822269,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.17415380971710137,
+          "r2": 0.6036746113007868,
+          "rmse": 0.25939829176490464,
+          "spearman": 0.7664283282260811,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.1609958734347151,
+          "r2": 0.6967333637676933,
+          "rmse": 0.21520074890511962,
+          "spearman": 0.8100953353762343,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.17072927944071992,
+          "r2": 0.6612120024764347,
+          "rmse": 0.23156892873183096,
+          "spearman": 0.790919657637984,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.17481423244220734,
+      "model": "extra_trees",
+      "r2": 0.6392602536180472,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.24424169694890105,
+      "spearman": 0.8009819310604799,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 4.385185185185184,
+      "top_decile_recall": 0.4444444444444444
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.20800297285678956,
+          "r2": 0.40609238973934425,
+          "rmse": 0.30179093167235815,
+          "spearman": 0.647742519652632,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.18324457729290364,
+          "r2": 0.6543335143098661,
+          "rmse": 0.2434449645215061,
+          "spearman": 0.7819154628143392,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.1729220841299629,
+          "r2": 0.6487718263856033,
+          "rmse": 0.23889227793640821,
+          "spearman": 0.7860061287027581,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.18432279219136258,
+          "r2": 0.6001938117799839,
+          "rmse": 0.2719762874270167,
+          "spearman": 0.7994610968264593,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.1747982705032335,
+          "r2": 0.5511392048833675,
+          "rmse": 0.24752645184964878,
+          "spearman": 0.7695044204149203,
+          "test_rows": 88,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.18475692890548104,
+      "model": "extra_trees",
+      "r2": 0.5852196952501669,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.26189781435487364,
+      "spearman": 0.7577101697255819,
+      "split": "held_head",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 2.4118518518518517,
+      "top_decile_recall": 0.24444444444444444
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.24819784587865187,
+          "r2": 0.07056361973353908,
+          "rmse": 0.3155403977707823,
+          "spearman": 0.4403684266140679,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.23734649392151327,
+          "r2": 0.4422536883101926,
+          "rmse": 0.2731244303571829,
+          "spearman": 0.7255292170053892,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.23519379757341508,
+          "r2": 0.3417405661329469,
+          "rmse": 0.30031359802954666,
+          "spearman": 0.6938994751857984,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.1161961341344458,
+          "r2": 0.2840125729022335,
+          "rmse": 0.1818246756321241,
+          "spearman": 0.44788245462402765,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.15194197051433628,
+          "r2": 0.6619448372543619,
+          "rmse": 0.23194029738360114,
+          "spearman": 0.8101987899740709,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.19720131871005733,
+      "model": "extra_trees",
+      "r2": 0.5766963604340649,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.2645750044936814,
+      "spearman": 0.7544919058243087,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 3.9466666666666668,
+      "top_decile_recall": 0.4
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.3343120734111375,
+          "r2": -0.4888749877910856,
+          "rmse": 0.4785128909857981,
+          "spearman": 0.275373767155181,
+          "test_rows": 126,
+          "top_decile_enrichment": 3.7278106508875744,
+          "top_decile_recall": 0.38461538461538464,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.3343120734111375,
+      "model": "extra_trees",
+      "r2": -0.4888749877910856,
+      "representation": "published_sar_descriptors",
+      "rmse": 0.4785128909857981,
+      "spearman": 0.275373767155181,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 3.7278106508875744,
+      "top_decile_recall": 0.38461538461538464
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5055700574719558,
+          "r2": 0.31304023937403336,
+          "rmse": 0.6094913067697098,
+          "spearman": 0.5191033329266156,
+          "test_rows": 89,
+          "top_decile_enrichment": 6.592592592592593,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.45789540910118454,
+          "r2": 0.43112810771016896,
+          "rmse": 0.5789855237706971,
+          "spearman": 0.693190330268982,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.4740448687176679,
+          "r2": 0.24656957796333356,
+          "rmse": 0.5994064913376883,
+          "spearman": 0.5093761438399029,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.5001790987792549,
+          "r2": 0.32729011908832073,
+          "rmse": 0.6331344987633928,
+          "spearman": 0.541096356826694,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.5292878394579185,
+          "r2": 0.3422274390599438,
+          "rmse": 0.6700520480093142,
+          "spearman": 0.5837237152618788,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.49331461600119925,
+      "model": "ridge",
+      "r2": 0.34003510932082004,
+      "representation": "combined",
+      "rmse": 0.618882867575504,
+      "spearman": 0.5705407860961966,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.481481481481482,
+      "top_decile_recall": 0.5555555555555556
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.43056330723655056,
+          "r2": 0.16256457493882526,
+          "rmse": 0.5422951578967297,
+          "spearman": 0.5544305881384534,
+          "test_rows": 90,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.5253934752244017,
+          "r2": 0.32192376552281277,
+          "rmse": 0.6769687538694209,
+          "spearman": 0.6337984113265012,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.49221735465554306,
+          "r2": 0.103500258203155,
+          "rmse": 0.6343478812607857,
+          "spearman": 0.4189355781761827,
+          "test_rows": 88,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.6422042070539324,
+          "r2": 0.20041574037165466,
+          "rmse": 0.7952817102363658,
+          "spearman": 0.5002333506705745,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.5123188184674331,
+          "r2": 0.28672663757429373,
+          "rmse": 0.6397065819576583,
+          "spearman": 0.5800958050086296,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5201559997230939,
+      "model": "ridge",
+      "r2": 0.244045153414992,
+      "representation": "combined",
+      "rmse": 0.6623628591013803,
+      "spearman": 0.5260443079668632,
+      "split": "held_head",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 3.0696296296296297,
+      "top_decile_recall": 0.3111111111111111
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6460822978620242,
+          "r2": -0.015931574667275017,
+          "rmse": 0.7448702753527644,
+          "spearman": 0.20494170687894053,
+          "test_rows": 88,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.5473115548582808,
+          "r2": 0.21570220400957552,
+          "rmse": 0.6835496522969525,
+          "spearman": 0.465534852594132,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.5218633703908447,
+          "r2": 0.32297756972848235,
+          "rmse": 0.6478440898554784,
+          "spearman": 0.5530802014722976,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.42733399937526734,
+          "r2": 0.11296416317164881,
+          "rmse": 0.5387849696600849,
+          "spearman": 0.33685778844500003,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.46916882479747585,
+          "r2": 0.2968364405801125,
+          "rmse": 0.5782556200191216,
+          "spearman": 0.5127793554759846,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.5216844365074956,
+      "model": "ridge",
+      "r2": 0.2894404472233847,
+      "representation": "combined",
+      "rmse": 0.6421674457113231,
+      "spearman": 0.49845475585185467,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.481481481481482,
+      "top_decile_recall": 0.5555555555555556
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.4118723653098226,
+          "r2": -3.0288307136173858,
+          "rmse": 1.650318112752135,
+          "spearman": 0.13486614173228348,
+          "test_rows": 126,
+          "top_decile_enrichment": 5.218934911242604,
+          "top_decile_recall": 0.5384615384615384,
+          "train_rows": 318
+        }
+      ],
+      "mae": 1.4118723653098226,
+      "model": "ridge",
+      "r2": -3.0288307136173858,
+      "representation": "combined",
+      "rmse": 1.650318112752135,
+      "spearman": 0.13486614173228348,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.218934911242604,
+      "top_decile_recall": 0.5384615384615384
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5045740924191165,
+          "r2": 0.33226058910737777,
+          "rmse": 0.6009043821530061,
+          "spearman": 0.5143620801973731,
+          "test_rows": 89,
+          "top_decile_enrichment": 6.592592592592593,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.4770734955335531,
+          "r2": 0.3973064860017267,
+          "rmse": 0.5959484933973114,
+          "spearman": 0.6604528430371128,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.47958124932092777,
+          "r2": 0.19875636402226882,
+          "rmse": 0.6181333310916355,
+          "spearman": 0.46827092503335066,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.4898019304305033,
+          "r2": 0.3610800463298439,
+          "rmse": 0.617028608788649,
+          "spearman": 0.5691181477698332,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.5183638554446166,
+          "r2": 0.38531110530277113,
+          "rmse": 0.6477364638085313,
+          "spearman": 0.621957662639569,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.4938237783891694,
+      "model": "extra_trees",
+      "r2": 0.34586334841503075,
+      "representation": "combined",
+      "rmse": 0.6161440884349233,
+      "spearman": 0.5592090642258846,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.2622222222222215,
+      "top_decile_recall": 0.5333333333333333
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.43973180041704707,
+          "r2": 0.1511559687873255,
+          "rmse": 0.5459765778566719,
+          "spearman": 0.5581676750216076,
+          "test_rows": 90,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.552965971000705,
+          "r2": 0.22124074443290376,
+          "rmse": 0.7254892353866857,
+          "spearman": 0.5463143597975058,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.4799813158353263,
+          "r2": 0.14433610100427896,
+          "rmse": 0.6197321316083485,
+          "spearman": 0.4531533436182942,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.6705084985621631,
+          "r2": 0.12161184088503052,
+          "rmse": 0.8335508775037473,
+          "spearman": 0.38446501062575605,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.5023673197249,
+          "r2": 0.2983192597054173,
+          "rmse": 0.6344868047540242,
+          "spearman": 0.5897115283012223,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.5288158270954233,
+      "model": "extra_trees",
+      "r2": 0.20612193289123193,
+      "representation": "combined",
+      "rmse": 0.6787736053101785,
+      "spearman": 0.492668349512864,
+      "split": "held_head",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 1.5348148148148149,
+      "top_decile_recall": 0.15555555555555556
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6091542291853714,
+          "r2": 0.08746153039213633,
+          "rmse": 0.7059501024962189,
+          "spearman": 0.36393575428833086,
+          "test_rows": 88,
+          "top_decile_enrichment": 6.518518518518518,
+          "top_decile_recall": 0.6666666666666666,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.534282768417603,
+          "r2": 0.2921129611246568,
+          "rmse": 0.6493989016620435,
+          "spearman": 0.4096016343207355,
+          "test_rows": 88,
+          "top_decile_enrichment": 5.432098765432099,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.592318497343472,
+          "r2": 0.13028122799524589,
+          "rmse": 0.7342744124174001,
+          "spearman": 0.3941742101370153,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.46751523300720443,
+          "r2": -0.016341048036388806,
+          "rmse": 0.5767194813635416,
+          "spearman": 0.3095950512231482,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.46843029203829045,
+          "r2": 0.31489703156704707,
+          "rmse": 0.5707811327579919,
+          "spearman": 0.5187554019014693,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.5337422991202293,
+      "model": "extra_trees",
+      "r2": 0.2716942930709687,
+      "representation": "combined",
+      "rmse": 0.650137026745381,
+      "spearman": 0.4693142014257662,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 5.042962962962962,
+      "top_decile_recall": 0.5111111111111111
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6608287248974397,
+          "r2": 0.043066343241693894,
+          "rmse": 0.804301856950263,
+          "spearman": 0.2973032945712632,
+          "test_rows": 126,
+          "top_decile_enrichment": 3.7278106508875744,
+          "top_decile_recall": 0.38461538461538464,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.6608287248974397,
+      "model": "extra_trees",
+      "r2": 0.043066343241693894,
+      "representation": "combined",
+      "rmse": 0.804301856950263,
+      "spearman": 0.2973032945712632,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_expression",
+      "top_decile_enrichment": 3.7278106508875744,
+      "top_decile_recall": 0.38461538461538464
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.18479443512366883,
+          "r2": 0.6629231115133262,
+          "rmse": 0.23955533296915518,
+          "spearman": 0.8309839972761324,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.19615355701681442,
+          "r2": 0.601237570460712,
+          "rmse": 0.2502890899652497,
+          "spearman": 0.8070480081716039,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.19211187332719087,
+          "r2": 0.5954166457799481,
+          "rmse": 0.2620868130944502,
+          "spearman": 0.7715185563500171,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.1858659734413379,
+          "r2": 0.641045288306598,
+          "rmse": 0.2341268868520462,
+          "spearman": 0.799897854954035,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.19753797953763963,
+          "r2": 0.6213933217051859,
+          "rmse": 0.24479943648274802,
+          "spearman": 0.7971188052551865,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.1912786978878702,
+      "model": "ridge",
+      "r2": 0.6329691830461693,
+      "representation": "combined",
+      "rmse": 0.24636220137869735,
+      "spearman": 0.8126860113245904,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 3.0696296296296297,
+      "top_decile_recall": 0.3111111111111111
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.21493517539533316,
+          "r2": 0.487090759471687,
+          "rmse": 0.28045746377056285,
+          "spearman": 0.6932460797629336,
+          "test_rows": 90,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.21554955724097632,
+          "r2": 0.6063932697534179,
+          "rmse": 0.259778626734195,
+          "spearman": 0.7650409515578054,
+          "test_rows": 90,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.2093160762908644,
+          "r2": 0.5826569732640328,
+          "rmse": 0.26040781866723806,
+          "spearman": 0.783153111901659,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.22472954980204482,
+          "r2": 0.48866818115311783,
+          "rmse": 0.30757971810224466,
+          "spearman": 0.7769539642844564,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.1749452812800328,
+          "r2": 0.6022293830643697,
+          "rmse": 0.2330140609304022,
+          "spearman": 0.7865696875770493,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.20796131933803322,
+      "model": "ridge",
+      "r2": 0.5611221105415345,
+      "representation": "combined",
+      "rmse": 0.2693981827227459,
+      "spearman": 0.7447552659672538,
+      "split": "held_head",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.7540740740740741,
+      "top_decile_recall": 0.17777777777777778
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.2958042720524423,
+          "r2": -0.16624306449816362,
+          "rmse": 0.3534595106242994,
+          "spearman": 0.13270050368074393,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.25417895036936994,
+          "r2": 0.3770470898984657,
+          "rmse": 0.28864883200174435,
+          "spearman": 0.668222323975908,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.23761178998437968,
+          "r2": 0.30610699284191856,
+          "rmse": 0.3083349156201866,
+          "spearman": 0.6136980028882393,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.17269528740016424,
+          "r2": -0.06854610063098887,
+          "rmse": 0.2221246494140196,
+          "spearman": 0.18938140511174215,
+          "test_rows": 90,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.2053055741756647,
+          "r2": 0.5995621735477044,
+          "rmse": 0.252435233349232,
+          "spearman": 0.794954109560851,
+          "test_rows": 90,
+          "top_decile_enrichment": 4.444444444444444,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.23272170863416552,
+      "model": "ridge",
+      "r2": 0.49786422964403965,
+      "representation": "combined",
+      "rmse": 0.28815979792892255,
+      "spearman": 0.6966890125606414,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.9733333333333334,
+      "top_decile_recall": 0.2
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.9569741546061686,
+          "r2": -7.027410550042484,
+          "rmse": 1.11109773539078,
+          "spearman": 0.02247619047619048,
+          "test_rows": 126,
+          "top_decile_enrichment": 2.2366863905325447,
+          "top_decile_recall": 0.23076923076923078,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.9569741546061686,
+      "model": "ridge",
+      "r2": -7.027410550042484,
+      "representation": "combined",
+      "rmse": 1.11109773539078,
+      "spearman": 0.02247619047619048,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 2.2366863905325447,
+      "top_decile_recall": 0.23076923076923078
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.19131680281934127,
+          "r2": 0.6650307241015874,
+          "rmse": 0.2388052347715167,
+          "spearman": 0.8434627170582227,
+          "test_rows": 89,
+          "top_decile_enrichment": 5.493827160493828,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 355
+        },
+        {
+          "fold": 1,
+          "mae": 0.18112120403627355,
+          "r2": 0.6192381448883464,
+          "rmse": 0.2445746944342298,
+          "spearman": 0.8114572693224379,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 2,
+          "mae": 0.1866537188195823,
+          "r2": 0.5938633929829604,
+          "rmse": 0.26258942535373964,
+          "spearman": 0.7685563500170243,
+          "test_rows": 89,
+          "top_decile_enrichment": 4.395061728395062,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 355
+        },
+        {
+          "fold": 3,
+          "mae": 0.17339450368737513,
+          "r2": 0.6796691082772391,
+          "rmse": 0.22117237046341345,
+          "spearman": 0.807643854273068,
+          "test_rows": 89,
+          "top_decile_enrichment": 3.2962962962962963,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 355
+        },
+        {
+          "fold": 4,
+          "mae": 0.181287814184644,
+          "r2": 0.6495709678671449,
+          "rmse": 0.2355137774217342,
+          "spearman": 0.8085837061040472,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.18275811275116577,
+      "model": "extra_trees",
+      "r2": 0.6490073866197845,
+      "representation": "combined",
+      "rmse": 0.24091941465598993,
+      "spearman": 0.8153307212073334,
+      "split": "random_diagnostic",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 4.165925925925926,
+      "top_decile_recall": 0.4222222222222222
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.195680028866355,
+          "r2": 0.5072545890353305,
+          "rmse": 0.274889426225636,
+          "spearman": 0.7122278470593076,
+          "test_rows": 90,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 354
+        },
+        {
+          "fold": 1,
+          "mae": 0.20416941856161364,
+          "r2": 0.6215251394934372,
+          "rmse": 0.2547362067933769,
+          "spearman": 0.7629830843313988,
+          "test_rows": 90,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 354
+        },
+        {
+          "fold": 2,
+          "mae": 0.1863151698701264,
+          "r2": 0.6297782398758183,
+          "rmse": 0.24526659934469155,
+          "spearman": 0.8003328594816349,
+          "test_rows": 88,
+          "top_decile_enrichment": 2.1728395061728394,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.21931853631784454,
+          "r2": 0.44888701560032895,
+          "rmse": 0.31932035756444604,
+          "spearman": 0.7235391497305486,
+          "test_rows": 88,
+          "top_decile_enrichment": 1.0864197530864197,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 356
+        },
+        {
+          "fold": 4,
+          "mae": 0.16751447006841697,
+          "r2": 0.6022948450201903,
+          "rmse": 0.23299488633184978,
+          "spearman": 0.8016096650346942,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        }
+      ],
+      "mae": 0.19464749950243088,
+      "model": "extra_trees",
+      "r2": 0.5684585054444797,
+      "representation": "combined",
+      "rmse": 0.2671370289757641,
+      "spearman": 0.7378534132228183,
+      "split": "held_head",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 1.9733333333333334,
+      "top_decile_recall": 0.2
+    },
+    {
+      "evaluated_rows": 444,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.2727711947943368,
+          "r2": 0.021799042179027506,
+          "rmse": 0.3237122815025843,
+          "spearman": 0.34889577683068584,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 1,
+          "mae": 0.2739075899267562,
+          "r2": 0.3278364794948292,
+          "rmse": 0.2998331617548123,
+          "spearman": 0.7327322038674229,
+          "test_rows": 88,
+          "top_decile_enrichment": 3.259259259259259,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 356
+        },
+        {
+          "fold": 2,
+          "mae": 0.2552868468802631,
+          "r2": 0.2915666615957452,
+          "rmse": 0.31154870228122294,
+          "spearman": 0.672783628614702,
+          "test_rows": 88,
+          "top_decile_enrichment": 4.345679012345679,
+          "top_decile_recall": 0.4444444444444444,
+          "train_rows": 356
+        },
+        {
+          "fold": 3,
+          "mae": 0.29924682696142646,
+          "r2": -1.2158442231603832,
+          "rmse": 0.3198672203038361,
+          "spearman": 0.3176276906613985,
+          "test_rows": 90,
+          "top_decile_enrichment": 5.555555555555555,
+          "top_decile_recall": 0.5555555555555556,
+          "train_rows": 354
+        },
+        {
+          "fold": 4,
+          "mae": 0.230774773335088,
+          "r2": 0.5748486316341119,
+          "rmse": 0.26010830191065554,
+          "spearman": 0.8052105198172613,
+          "test_rows": 90,
+          "top_decile_enrichment": 3.333333333333333,
+          "top_decile_recall": 0.3333333333333333,
+          "train_rows": 354
+        }
+      ],
+      "mae": 0.26638495407118384,
+      "model": "extra_trees",
+      "r2": 0.44197395237501114,
+      "representation": "combined",
+      "rmse": 0.30377361302664013,
+      "spearman": 0.7236544830252316,
+      "split": "held_tail",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 4.385185185185184,
+      "top_decile_recall": 0.4444444444444444
+    },
+    {
+      "evaluated_rows": 126,
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.3281038088904338,
+          "r2": -0.1302760191113077,
+          "rmse": 0.4169238904475761,
+          "spearman": 0.3133413071591441,
+          "test_rows": 126,
+          "top_decile_enrichment": 0.7455621301775148,
+          "top_decile_recall": 0.07692307692307693,
+          "train_rows": 318
+        }
+      ],
+      "mae": 0.3281038088904338,
+      "model": "extra_trees",
+      "r2": -0.1302760191113077,
+      "representation": "combined",
+      "rmse": 0.4169238904475761,
+      "spearman": 0.3133413071591441,
+      "split": "round1_to_round2",
+      "target": "systemic_iv_lung_selectivity",
+      "top_decile_enrichment": 0.7455621301775148,
+      "top_decile_recall": 0.07692307692307693
+    }
+  ],
+  "round_counts": {
+    "1": 318,
+    "2": 126
+  },
+  "rows": 444,
+  "source": {
+    "article": "https://www.nature.com/articles/s41551-026-01615-9",
+    "fig2": "tmp/lipid_data/lut/source_data_fig2.xlsx",
+    "fig2_sha256": "8e2f196eaab0f7dcce582285ad6cb71960b1c68695603d8d57c9341e452fb26c",
+    "fig3": "tmp/lipid_data/lut/source_data_fig3.xlsx",
+    "fig3_sha256": "bb02584e7661d5d9448f6b2cd0b6b564a034be6505fcc80409459c56381cad98"
+  },
+  "targets": {
+    "systemic_iv_lung_expression": {
+      "maximum": 8.924279,
+      "mean": 6.853525024774774,
+      "minimum": 4.799455,
+      "standard_deviation": 0.7626717607835044
+    },
+    "systemic_iv_lung_selectivity": {
+      "maximum": 0.99629917,
+      "mean": 0.4610292474211712,
+      "minimum": 0.0001,
+      "standard_deviation": 0.4071106211156235
+    }
+  },
+  "unique_heads": 46,
+  "unique_tails": 25
+}

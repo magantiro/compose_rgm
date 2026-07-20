@@ -1,0 +1,3404 @@
+{
+  "artifact": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/LNPDB/LNPDB.csv",
+  "artifact_sha256": "3493f27306419facd0958589030ed37f272f05c81ad47dd7bc1b8ce0284a57b3",
+  "format": "compose_lipid_lnpdb_lung_baselines_v1",
+  "interpretation_boundary": "Each route/readout is modeled as a separate task. Held-lipid folds prevent the same ionizable lipid from leaking across train and test, but these single-study tasks still require leave-study external validation. Barcode uptake is not interpreted as functional expression.",
+  "lung_rows": 1975,
+  "lung_unique_lipids": 291,
+  "reports": [
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7400740912611968,
+          "r2": 0.1355124266503941,
+          "rmse": 0.9134603580705263,
+          "spearman": 0.34601860596850165,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.5821767713659605,
+          "top_decile_recall": 0.16216216216216217,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.7645699428277788,
+          "r2": 0.16007741450728663,
+          "rmse": 0.9442307304337708,
+          "spearman": 0.3803023975049451,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.7785033548056693,
+          "r2": 0.14161033945831059,
+          "rmse": 0.9359802888640436,
+          "spearman": 0.3294236672801583,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.7831570852030296,
+          "r2": 0.13260185873842378,
+          "rmse": 0.9479802183952988,
+          "spearman": 0.37934688253392074,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.6666666666666665,
+          "top_decile_recall": 0.16666666666666666,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.7685587092272642,
+          "r2": 0.07965738210606388,
+          "rmse": 0.912307820613583,
+          "spearman": 0.25641694568589063,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.7669577013260629,
+      "model": "ridge",
+      "r2": 0.13341534427353252,
+      "representation": "descriptors",
+      "rmse": 0.9309052882756275,
+      "spearman": 0.3374318967340854,
+      "split": "random_diagnostic",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 1.649217056866396,
+      "top_decile_recall": 0.16574585635359115
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7764727874986376,
+          "r2": 0.04961847188046775,
+          "rmse": 0.9307026805012019,
+          "spearman": 0.3334514716652633,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.0547845142439738,
+          "top_decile_recall": 0.10810810810810811,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.8095582614807859,
+          "r2": 0.07547226092884485,
+          "rmse": 0.9769758774704936,
+          "spearman": 0.25927872762318194,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.111111111111111,
+          "top_decile_recall": 0.1111111111111111,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.7260946076306791,
+          "r2": 0.09064533736919034,
+          "rmse": 0.9015404918108523,
+          "spearman": 0.30862375017863525,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.6666666666666665,
+          "top_decile_recall": 0.16666666666666666,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.8046307682082008,
+          "r2": -0.0548130849677142,
+          "rmse": 0.994395687080838,
+          "spearman": 0.21014840799464365,
+          "test_rows": 360,
+          "top_decile_enrichment": 0.5555555555555555,
+          "top_decile_recall": 0.05555555555555555,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.840457853600718,
+          "r2": 0.14008699181909678,
+          "rmse": 1.0021954521180225,
+          "spearman": 0.4129327324168383,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.6666666666666665,
+          "top_decile_recall": 0.16666666666666666,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.7914345435970828,
+      "model": "ridge",
+      "r2": 0.07469620934654575,
+      "representation": "descriptors",
+      "rmse": 0.9619271233661109,
+      "spearman": 0.30387055630400056,
+      "split": "held_lipid",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 1.0445041360153842,
+      "top_decile_recall": 0.10497237569060773
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.579563377205231,
+          "r2": 0.4430778188354111,
+          "rmse": 0.7331748939697185,
+          "spearman": 0.660268795463116,
+          "test_rows": 361,
+          "top_decile_enrichment": 3.691745799853908,
+          "top_decile_recall": 0.3783783783783784,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.6153138465553292,
+          "r2": 0.4502553249681145,
+          "rmse": 0.7639044088207482,
+          "spearman": 0.6358474812476753,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.5633927558235171,
+          "r2": 0.5131530506319018,
+          "rmse": 0.7048889304344007,
+          "spearman": 0.6994837685963703,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.9444444444444444,
+          "top_decile_recall": 0.19444444444444445,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.618384558746597,
+          "r2": 0.4437819229158644,
+          "rmse": 0.7591237535571843,
+          "spearman": 0.6318850226095104,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.5656654251757622,
+          "r2": 0.4378950585819801,
+          "rmse": 0.712976692455039,
+          "spearman": 0.624059791163078,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.5884590506604788,
+      "model": "extra_trees",
+      "r2": 0.45948796564215655,
+      "representation": "descriptors",
+      "rmse": 0.735195235543587,
+      "spearman": 0.6451805222559338,
+      "split": "random_diagnostic",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.748695094777327,
+      "top_decile_recall": 0.27624309392265195
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.642429006168254,
+          "r2": 0.30939118036870983,
+          "rmse": 0.7933741235710261,
+          "spearman": 0.46733053451245876,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.5821767713659605,
+          "top_decile_recall": 0.16216216216216217,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.7526775089854092,
+          "r2": 0.17075128465783262,
+          "rmse": 0.9252652917287083,
+          "spearman": 0.4102239455843687,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.7391173234044908,
+          "r2": 0.04534556174874227,
+          "rmse": 0.9237228491094143,
+          "spearman": 0.30070277754492253,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6802457502109222,
+          "r2": 0.1985989144595447,
+          "rmse": 0.866755170187068,
+          "spearman": 0.4779057624013656,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.746330551416266,
+          "r2": 0.27197319457862856,
+          "rmse": 0.92214423025239,
+          "spearman": 0.4496799668565984,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.7121213100904449,
+      "model": "extra_trees",
+      "r2": 0.21200073341835468,
+      "representation": "descriptors",
+      "rmse": 0.8876932277501741,
+      "spearman": 0.44675382472593045,
+      "split": "held_lipid",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.143982173926315,
+      "top_decile_recall": 0.2154696132596685
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.592752472374296,
+          "r2": 0.4287546249799341,
+          "rmse": 0.7425431153984036,
+          "spearman": 0.6435294650141007,
+          "test_rows": 361,
+          "top_decile_enrichment": 3.164353542731921,
+          "top_decile_recall": 0.32432432432432434,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.6030876182139759,
+          "r2": 0.4546907081300534,
+          "rmse": 0.7608165475838159,
+          "spearman": 0.6332218161583201,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.5612385596504919,
+          "r2": 0.5209190323159608,
+          "rmse": 0.6992442809569909,
+          "spearman": 0.6877642464565716,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6201765274437346,
+          "r2": 0.4376370819610724,
+          "rmse": 0.7633054605620102,
+          "spearman": 0.6451609565310413,
+          "test_rows": 360,
+          "top_decile_enrichment": 3.055555555555556,
+          "top_decile_recall": 0.3055555555555556,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.576406900102657,
+          "r2": 0.424769506784236,
+          "rmse": 0.7212529147883165,
+          "spearman": 0.606963407805042,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.5907335371876903,
+      "model": "ridge",
+      "r2": 0.4555969983053446,
+      "representation": "morgan",
+      "rmse": 0.737836703954785,
+      "spearman": 0.6402146257453324,
+      "split": "random_diagnostic",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.4188516834040477,
+      "top_decile_recall": 0.2430939226519337
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6529183659283916,
+          "r2": 0.21692559141697354,
+          "rmse": 0.8448186389141056,
+          "spearman": 0.44026258303903065,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.3184806428049671,
+          "top_decile_recall": 0.13513513513513514,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.7181710626944791,
+          "r2": 0.2265275264212897,
+          "rmse": 0.8936064584756226,
+          "spearman": 0.5851342511601306,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.6868023920065442,
+          "r2": 0.10911874681165912,
+          "rmse": 0.8923361730124647,
+          "spearman": 0.42810804349280257,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.6666666666666665,
+          "top_decile_recall": 0.16666666666666666,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6177179109174761,
+          "r2": 0.36499875856375774,
+          "rmse": 0.7715405652612516,
+          "spearman": 0.5934324045872404,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.7163440965008476,
+          "r2": 0.28966363803743,
+          "rmse": 0.910871663240554,
+          "spearman": 0.6098773469769364,
+          "test_rows": 360,
+          "top_decile_enrichment": 3.055555555555556,
+          "top_decile_recall": 0.3055555555555556,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.678376622133878,
+      "model": "ridge",
+      "r2": 0.25332292797274625,
+      "representation": "morgan",
+      "rmse": 0.864104780705736,
+      "spearman": 0.5405276903235938,
+      "split": "held_lipid",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 1.9790604682396753,
+      "top_decile_recall": 0.19889502762430938
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.587695398321341,
+          "r2": 0.4331439494089151,
+          "rmse": 0.7396848448428198,
+          "spearman": 0.6548970036038403,
+          "test_rows": 361,
+          "top_decile_enrichment": 2.9006574141709276,
+          "top_decile_recall": 0.2972972972972973,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.6060467833106326,
+          "r2": 0.46214355947394636,
+          "rmse": 0.7555995447099794,
+          "spearman": 0.6455232922439915,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.5576855978567675,
+          "r2": 0.5298494369948854,
+          "rmse": 0.6926964217487613,
+          "spearman": 0.6943402083096724,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.3888888888888888,
+          "top_decile_recall": 0.1388888888888889,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6129879285741778,
+          "r2": 0.45860162187683595,
+          "rmse": 0.7489425526484853,
+          "spearman": 0.6500636514045497,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.5638154117856772,
+          "r2": 0.4409795985869449,
+          "rmse": 0.7110177784706904,
+          "spearman": 0.6173109090027586,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.9444444444444444,
+          "top_decile_recall": 0.19444444444444445,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.5856473617678044,
+      "model": "extra_trees",
+      "r2": 0.4671213000146951,
+      "representation": "morgan",
+      "rmse": 0.7299854108085563,
+      "spearman": 0.6502781261361116,
+      "split": "random_diagnostic",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.583773389090687,
+      "top_decile_recall": 0.2596685082872928
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.638052472934996,
+          "r2": 0.2908160549404155,
+          "rmse": 0.8039729167215464,
+          "spearman": 0.4840690161912612,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.3184806428049671,
+          "top_decile_recall": 0.13513513513513514,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.6662493241493231,
+          "r2": 0.38344819460308344,
+          "rmse": 0.7978268621674935,
+          "spearman": 0.5849614639418006,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.6003869827863875,
+          "r2": 0.3581485899706379,
+          "rmse": 0.7574183773116869,
+          "spearman": 0.567126928461313,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.584930130599536,
+          "r2": 0.4186314442324921,
+          "rmse": 0.7382394461121988,
+          "spearman": 0.6235624012855433,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.7247176318949815,
+          "r2": 0.3124158495353144,
+          "rmse": 0.8961652444258863,
+          "spearman": 0.5250887468721254,
+          "test_rows": 360,
+          "top_decile_enrichment": 3.055555555555556,
+          "top_decile_recall": 0.3055555555555556,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.6428646350496479,
+      "model": "extra_trees",
+      "r2": 0.3590585075665209,
+      "representation": "morgan",
+      "rmse": 0.8005882165277851,
+      "spearman": 0.5620754991239506,
+      "split": "held_lipid",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.583773389090687,
+      "top_decile_recall": 0.2596685082872928
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.593103857879552,
+          "r2": 0.4325956009038471,
+          "rmse": 0.7400425256290711,
+          "spearman": 0.6453285722742887,
+          "test_rows": 361,
+          "top_decile_enrichment": 2.6369612856099343,
+          "top_decile_recall": 0.2702702702702703,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.601815731449158,
+          "r2": 0.4548968696331869,
+          "rmse": 0.7606727155300482,
+          "spearman": 0.636533119174254,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.5599156682617766,
+          "r2": 0.5237870757377439,
+          "rmse": 0.6971481076939989,
+          "spearman": 0.6939492310514408,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6192282311959703,
+          "r2": 0.43857851626473743,
+          "rmse": 0.7626662799537329,
+          "spearman": 0.649516693943355,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.5737733931993217,
+          "r2": 0.42921687180285595,
+          "rmse": 0.7184593397794945,
+          "spearman": 0.6112130194258948,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.5895693400181897,
+      "model": "ridge",
+      "r2": 0.4579678554990997,
+      "representation": "combined",
+      "rmse": 0.7362283236259456,
+      "spearman": 0.6433857138868321,
+      "split": "random_diagnostic",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.528799487195141,
+      "top_decile_recall": 0.2541436464088398
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6437432545634136,
+          "r2": 0.25027754523296963,
+          "rmse": 0.8266320328647591,
+          "spearman": 0.44279054634413323,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.0547845142439738,
+          "top_decile_recall": 0.10810810810810811,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.707867147713967,
+          "r2": 0.25035072405149483,
+          "rmse": 0.8797371471934938,
+          "spearman": 0.5582133805608156,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.6666666666666665,
+          "top_decile_recall": 0.16666666666666666,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.6819119007963657,
+          "r2": 0.1077266205867784,
+          "rmse": 0.8930331007270762,
+          "spearman": 0.4455376274300806,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.6666666666666665,
+          "top_decile_recall": 0.16666666666666666,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6204509995225757,
+          "r2": 0.3563542036318381,
+          "rmse": 0.7767744753905892,
+          "spearman": 0.6008620333704064,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.7141804802843994,
+          "r2": 0.2920562949035884,
+          "rmse": 0.9093363049242688,
+          "spearman": 0.6008296076947962,
+          "test_rows": 360,
+          "top_decile_enrichment": 3.888888888888889,
+          "top_decile_recall": 0.3888888888888889,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.6736141616277752,
+      "model": "ridge",
+      "r2": 0.2630223723213986,
+      "representation": "combined",
+      "rmse": 0.8584740110741323,
+      "spearman": 0.5423302974306452,
+      "split": "held_lipid",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.253929977717408,
+      "top_decile_recall": 0.2265193370165746
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.5839636165040676,
+          "r2": 0.436178998932903,
+          "rmse": 0.7377019841035514,
+          "spearman": 0.6589741503159833,
+          "test_rows": 361,
+          "top_decile_enrichment": 2.9006574141709276,
+          "top_decile_recall": 0.2972972972972973,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.606041838004463,
+          "r2": 0.4630595889986139,
+          "rmse": 0.7549558353540697,
+          "spearman": 0.6453196649763614,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.5528754278581005,
+          "r2": 0.5296830707697453,
+          "rmse": 0.6928189687634638,
+          "spearman": 0.696452936264274,
+          "test_rows": 360,
+          "top_decile_enrichment": 1.9444444444444444,
+          "top_decile_recall": 0.19444444444444445,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.6156341152728663,
+          "r2": 0.45309632502715735,
+          "rmse": 0.7527407929704454,
+          "spearman": 0.6384133239166397,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.5601316045495177,
+          "r2": 0.44533210518484934,
+          "rmse": 0.708244394042006,
+          "spearman": 0.622659209595916,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.5837294505300108,
+      "model": "extra_trees",
+      "r2": 0.46751559355044436,
+      "representation": "combined",
+      "rmse": 0.7297152913688884,
+      "spearman": 0.6492909649211029,
+      "split": "random_diagnostic",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.85864289856842,
+      "top_decile_recall": 0.287292817679558
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6300863814341598,
+          "r2": 0.3168864472803873,
+          "rmse": 0.7890570822350222,
+          "spearman": 0.4790517316479979,
+          "test_rows": 361,
+          "top_decile_enrichment": 1.5821767713659605,
+          "top_decile_recall": 0.16216216216216217,
+          "train_rows": 1440
+        },
+        {
+          "fold": 1,
+          "mae": 0.6765875887842121,
+          "r2": 0.3654598479397503,
+          "rmse": 0.8093817763881072,
+          "spearman": 0.5791473238032321,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.222222222222222,
+          "top_decile_recall": 0.2222222222222222,
+          "train_rows": 1441
+        },
+        {
+          "fold": 2,
+          "mae": 0.5924015580065018,
+          "r2": 0.3797094612242078,
+          "rmse": 0.7445882300837166,
+          "spearman": 0.562533604989591,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        },
+        {
+          "fold": 3,
+          "mae": 0.5818716349529659,
+          "r2": 0.4214744588317141,
+          "rmse": 0.7364321607679826,
+          "spearman": 0.6247914554120757,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.7777777777777777,
+          "top_decile_recall": 0.2777777777777778,
+          "train_rows": 1441
+        },
+        {
+          "fold": 4,
+          "mae": 0.709702818729313,
+          "r2": 0.32757910508882726,
+          "rmse": 0.8862286145403355,
+          "spearman": 0.5417591743921282,
+          "test_rows": 360,
+          "top_decile_enrichment": 2.5,
+          "top_decile_recall": 0.25,
+          "train_rows": 1441
+        }
+      ],
+      "mae": 0.6381255301876786,
+      "model": "extra_trees",
+      "r2": 0.3680341858851607,
+      "representation": "combined",
+      "rmse": 0.7949627753073503,
+      "spearman": 0.5684081456907129,
+      "split": "held_lipid",
+      "task": "airway_a549_in_vitro_expression",
+      "top_decile_enrichment": 2.363877781508501,
+      "top_decile_recall": 0.23756906077348067
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8109097438263464,
+          "r2": 0.21725652185901423,
+          "rmse": 1.1464124171323522,
+          "spearman": 0.6571428571428573,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.2708258013813032,
+          "r2": -0.727412457086819,
+          "rmse": 1.4732509213098113,
+          "spearman": 0.4285714285714286,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.7578815067964605,
+          "r2": -0.0547457905145019,
+          "rmse": 0.8203455962492384,
+          "spearman": 0.33394720739540396,
+          "test_rows": 6,
+          "top_decile_enrichment": 6.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.5020366198282665,
+          "r2": -0.5224368937250501,
+          "rmse": 0.7413444362124041,
+          "spearman": 0.058848988633649964,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.7176713886642823,
+          "r2": -0.025782856771288998,
+          "rmse": 0.9449120063484971,
+          "spearman": 0.8207826816681234,
+          "test_rows": 5,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.8151130680798506,
+      "model": "ridge",
+      "r2": -0.12786284711194407,
+      "representation": "descriptors",
+      "rmse": 1.062008873344514,
+      "spearman": 0.3106785835329011,
+      "split": "random_diagnostic",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.63637937371138,
+          "r2": 0.5347819597659089,
+          "rmse": 0.8043813550153107,
+          "spearman": 0.753702346348183,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 0.8936906508339985,
+          "r2": 0.2489194697630852,
+          "rmse": 1.1534549427476462,
+          "spearman": 0.6667366910003157,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.9280104181228918,
+          "r2": 0.008920572520499381,
+          "rmse": 1.0386866710480953,
+          "spearman": 0.0,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.9871145287898928,
+          "r2": -12.017087942885382,
+          "rmse": 1.4783867853607433,
+          "spearman": -0.6377481392176932,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.6873797461167283,
+          "r2": -0.6743079006821562,
+          "rmse": 0.8456825501715706,
+          "spearman": -0.10259783520851543,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.831312708942504,
+      "model": "ridge",
+      "r2": -0.20785537316498148,
+      "representation": "descriptors",
+      "rmse": 1.0990247372611837,
+      "spearman": 0.24867275176883333,
+      "split": "held_lipid",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8692499511140429,
+          "r2": 0.16493730283864871,
+          "rmse": 1.1841063073189044,
+          "spearman": 0.8285714285714287,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.0348744182754679,
+          "r2": 0.011128458987099576,
+          "rmse": 1.1146759653818474,
+          "spearman": 0.3142857142857143,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.5217921974652396,
+          "r2": 0.37757198857927177,
+          "rmse": 0.6301842071665918,
+          "spearman": 0.5161002296110789,
+          "test_rows": 6,
+          "top_decile_enrichment": 6.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.6407072378566493,
+          "r2": -0.626675899950127,
+          "rmse": 0.7663036582437894,
+          "spearman": 0.11769797726729993,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.7121216000895029,
+          "r2": -0.004414613704993631,
+          "rmse": 0.9350184065420712,
+          "spearman": 0.35909242322980395,
+          "test_rows": 5,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.7572534768522727,
+      "model": "extra_trees",
+      "r2": 0.09844554404816908,
+      "representation": "descriptors",
+      "rmse": 0.9495022148011533,
+      "spearman": 0.3168822293702194,
+      "split": "random_diagnostic",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8640005606315554,
+          "r2": 0.33127612012923124,
+          "rmse": 0.9643998577726496,
+          "spearman": 0.6377481392176932,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 0.9859952629942713,
+          "r2": 0.09112780583078339,
+          "rmse": 1.2688456372693981,
+          "spearman": 0.6667366910003157,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.8994763731702567,
+          "r2": -0.09334810039549124,
+          "rmse": 1.0909618282672555,
+          "spearman": 0.0,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.6572539284343997,
+          "r2": -2.8628014596437543,
+          "rmse": 0.8053457031442357,
+          "spearman": -0.6377481392176932,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.7456683729444618,
+          "r2": -0.7670651878702319,
+          "rmse": 0.8687923571272204,
+          "spearman": -0.35909242322980395,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.833403400555352,
+      "model": "extra_trees",
+      "r2": -0.03609983777664283,
+      "representation": "descriptors",
+      "rmse": 1.0178898946994253,
+      "spearman": 0.15535842575577813,
+      "split": "held_lipid",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.3835752719842453,
+          "r2": -0.8747929464786375,
+          "rmse": 1.7742213784731602,
+          "spearman": -0.8285714285714287,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 0.6730377332258556,
+          "r2": 0.5021364039871961,
+          "rmse": 0.7909224147136733,
+          "spearman": 0.7714285714285715,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.5622407735079333,
+          "r2": 0.09942053849022725,
+          "rmse": 0.7580257692485249,
+          "spearman": 0.33394720739540396,
+          "test_rows": 6,
+          "top_decile_enrichment": 6.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.6721633025550582,
+          "r2": -0.4503312399763597,
+          "rmse": 0.7235757167625703,
+          "spearman": 0.5590653920196746,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.949709753388498,
+          "r2": -0.1826495119728,
+          "rmse": 1.0145925695549434,
+          "spearman": 0.7181848464596079,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.8446431467096913,
+      "model": "ridge",
+      "r2": -0.185396493670827,
+      "representation": "morgan",
+      "rmse": 1.0887591531733931,
+      "spearman": 0.2799085001798023,
+      "split": "random_diagnostic",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.4334505408061347,
+          "r2": -0.9921231030916502,
+          "rmse": 1.6645306930757129,
+          "spearman": -0.3478626213914691,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.1823619906377372,
+          "r2": -0.13186438161150482,
+          "rmse": 1.4159717179380122,
+          "spearman": 0.28988551782622424,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.896727647542043,
+          "r2": -0.24766906194559235,
+          "rmse": 1.1654134635409679,
+          "spearman": 0.02898855178262242,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.6941244317245254,
+          "r2": -3.9471562542958463,
+          "rmse": 0.9113998783455445,
+          "spearman": -0.4638168285219587,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.9950068928078121,
+          "r2": -1.8394235194700022,
+          "rmse": 1.1012978562256472,
+          "spearman": 0.15389675281277312,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 1.0418973147690243,
+      "model": "ridge",
+      "r2": -0.6500394663237257,
+      "representation": "morgan",
+      "rmse": 1.2845386199921616,
+      "spearman": 0.04119728222916799,
+      "split": "held_lipid",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.013189246619906,
+          "r2": -0.13041910692954772,
+          "rmse": 1.3776880688101283,
+          "spearman": -0.08571428571428573,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.1621460862792123,
+          "r2": -0.1874994949695714,
+          "rmse": 1.2215054656696107,
+          "spearman": -0.3714285714285715,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.5667411504506369,
+          "r2": 0.09902574579363188,
+          "rmse": 0.7581919013112968,
+          "spearman": 0.33394720739540396,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.5351450314721989,
+          "r2": -0.12390115378780142,
+          "rmse": 0.6369633453200724,
+          "spearman": 0.17654696590094993,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.8171417536576504,
+          "r2": 0.034028522546640794,
+          "rmse": 0.9169503074779151,
+          "spearman": 0.6668859288553503,
+          "test_rows": 5,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.8189323399041372,
+      "model": "extra_trees",
+      "r2": -0.04924320737382426,
+      "representation": "morgan",
+      "rmse": 1.0243257330204159,
+      "spearman": 0.0503736041990247,
+      "split": "random_diagnostic",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.205599718968747,
+          "r2": -0.31251239363405503,
+          "rmse": 1.3510935732425235,
+          "spearman": -0.5797710356524484,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.1363006277475647,
+          "r2": -0.17685696705019804,
+          "rmse": 1.4438405132217347,
+          "spearman": -0.4638168285219587,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 1.0193755091201686,
+          "r2": -0.4126700526422691,
+          "rmse": 1.2400828381844613,
+          "spearman": -0.4058397249567139,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.43542540428463444,
+          "r2": -0.7416763162725324,
+          "rmse": 0.5407728453392133,
+          "spearman": -0.2608969660436018,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.5937103558025341,
+          "r2": -0.08904613908170256,
+          "rmse": 0.6820447118067847,
+          "spearman": 0.20519567041703085,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.8878882530944605,
+      "model": "extra_trees",
+      "r2": -0.26786706443764396,
+      "representation": "morgan",
+      "rmse": 1.1259960321342366,
+      "spearman": -0.2841619768216708,
+      "split": "held_lipid",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.2457202662232578,
+          "r2": -0.5546492493168242,
+          "rmse": 1.615650291340373,
+          "spearman": -0.4285714285714286,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 0.6803254639991456,
+          "r2": 0.3900150118907846,
+          "rmse": 0.8754639579926258,
+          "spearman": 0.6571428571428573,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.6353738087604249,
+          "r2": 0.001296254565560595,
+          "rmse": 0.7982543428769749,
+          "spearman": 0.33394720739540396,
+          "test_rows": 6,
+          "top_decile_enrichment": 6.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.6295383310361442,
+          "r2": -0.47039392972008764,
+          "rmse": 0.7285632035342229,
+          "spearman": 0.6767633692869747,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.9734323424044586,
+          "r2": -0.22542924150272103,
+          "rmse": 1.0327798798953403,
+          "spearman": 0.7181848464596079,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.8280313424874528,
+      "model": "ridge",
+      "r2": -0.12420122281803181,
+      "representation": "combined",
+      "rmse": 1.0602835577187513,
+      "spearman": 0.32928952104485604,
+      "split": "random_diagnostic",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.3728866921417715,
+          "r2": -0.8097920538846299,
+          "rmse": 1.5865291653778135,
+          "spearman": -0.3478626213914691,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.1712218899797973,
+          "r2": -0.1394871633251309,
+          "rmse": 1.4207317984785217,
+          "spearman": 0.28988551782622424,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.9098598422200318,
+          "r2": -0.2118709346195753,
+          "rmse": 1.1485727613863836,
+          "spearman": -0.02898855178262242,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.7737178467861582,
+          "r2": -5.664201760775297,
+          "rmse": 1.0578040390335264,
+          "spearman": -0.4638168285219587,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 1.038680817164511,
+          "r2": -2.320418297650096,
+          "rmse": 1.1909296433067804,
+          "spearman": 0.15389675281277312,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 1.0537766107789348,
+      "model": "ridge",
+      "r2": -0.6873759149193408,
+      "representation": "combined",
+      "rmse": 1.2989903444003519,
+      "spearman": 0.09232162041717167,
+      "split": "held_lipid",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.9812725087836167,
+          "r2": -0.10686432173572769,
+          "rmse": 1.3632589165076618,
+          "spearman": 0.028571428571428574,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.1224501459697294,
+          "r2": -0.10565852305249868,
+          "rmse": 1.178661795599109,
+          "spearman": 0.14285714285714288,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 0.5707540821468889,
+          "r2": 0.18324954725873044,
+          "rmse": 0.7218843764895347,
+          "spearman": 0.3946648814672956,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.5376447687306452,
+          "r2": -0.09861643185289148,
+          "rmse": 0.6297576152332789,
+          "spearman": 0.29424494316824984,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.7833758815686471,
+          "r2": 0.04369763464445742,
+          "rmse": 0.9123495536971126,
+          "spearman": 0.6668859288553503,
+          "test_rows": 5,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.7996416704009834,
+      "model": "extra_trees",
+      "r2": -0.005327234302565431,
+      "representation": "combined",
+      "rmse": 1.0026600791187805,
+      "spearman": 0.15856518760185606,
+      "split": "random_diagnostic",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.168858349754652,
+          "r2": -0.24641040850149487,
+          "rmse": 1.316631542305143,
+          "spearman": -0.5797710356524484,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 1,
+          "mae": 1.1121234264771613,
+          "r2": -0.12716725454267808,
+          "rmse": 1.4130305909806222,
+          "spearman": -0.14494275891311212,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 2,
+          "mae": 1.014802272863684,
+          "r2": -0.35871079928117666,
+          "rmse": 1.2161687548595552,
+          "spearman": -0.4058397249567139,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 3,
+          "mae": 0.42188255283957066,
+          "r2": -0.8911643866925487,
+          "rmse": 0.5635024296236527,
+          "spearman": -0.4058397249567139,
+          "test_rows": 6,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 23
+        },
+        {
+          "fold": 4,
+          "mae": 0.599316864797851,
+          "r2": -0.06811719724143406,
+          "rmse": 0.6754592600209259,
+          "spearman": -0.05129891760425771,
+          "test_rows": 5,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 24
+        }
+      ],
+      "mae": 0.8725028943310229,
+      "model": "extra_trees",
+      "r2": -0.22213376026427256,
+      "representation": "combined",
+      "rmse": 1.1055015876111074,
+      "spearman": -0.21318352671599583,
+      "split": "held_lipid",
+      "task": "airway_hbec_ali_in_vitro_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8447947238023522,
+          "r2": -0.24504992054608454,
+          "rmse": 0.9324949874292726,
+          "spearman": 0.006060606060606061,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 0.6335624915534431,
+          "r2": 0.2473347798372464,
+          "rmse": 0.7822334698542215,
+          "spearman": 0.22561395032806852,
+          "test_rows": 10,
+          "top_decile_enrichment": 10.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.8288922097204956,
+          "r2": -0.24521458795086715,
+          "rmse": 1.2168534927161903,
+          "spearman": -0.12309149097933272,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.7570015851733254,
+          "r2": 0.007034144078686189,
+          "rmse": 1.21357797126498,
+          "spearman": 0.16463720699615814,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.4685580025125114,
+          "r2": -1.2008699030234906,
+          "rmse": 0.6160515782029724,
+          "spearman": 0.042018290340800894,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.7114190229614032,
+      "model": "ridge",
+      "r2": 0.025202528635731802,
+      "representation": "descriptors",
+      "rmse": 0.9873183232849749,
+      "spearman": 0.07288131460237522,
+      "split": "random_diagnostic",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 5.88,
+      "top_decile_recall": 0.6
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.0063718351741897,
+          "r2": -0.13914422742397958,
+          "rmse": 1.3425815968167343,
+          "spearman": -0.15569978883230462,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 1.2800939252952692,
+          "r2": -2.2654270781575376,
+          "rmse": 1.5634165264661113,
+          "spearman": -0.6227991553292183,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.8055056224040458,
+          "r2": -0.32319628152504754,
+          "rmse": 1.2491678754040505,
+          "spearman": -0.10067872296645641,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.5005228743966568,
+          "r2": -0.07508018946259476,
+          "rmse": 0.6570312557425989,
+          "spearman": -0.09319646953608048,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.6392360931718191,
+          "r2": -1.1745698841532088,
+          "rmse": 0.8233564531627955,
+          "spearman": -0.17329174830334546,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.8505728043111834,
+      "model": "ridge",
+      "r2": -0.39776148866480376,
+      "representation": "descriptors",
+      "rmse": 1.1822696345805346,
+      "spearman": -0.47357235425361394,
+      "split": "held_lipid",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7633034011499904,
+          "r2": 0.06891892220564122,
+          "rmse": 0.8063932314694279,
+          "spearman": 0.006060606060606061,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 0.5939316393346366,
+          "r2": 0.2582404306298465,
+          "rmse": 0.7765457536427243,
+          "spearman": 0.1890279043289223,
+          "test_rows": 10,
+          "top_decile_enrichment": 10.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.9210721909405402,
+          "r2": -0.2498364924079619,
+          "rmse": 1.2191097188456061,
+          "spearman": 0.23387383286073218,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.7701965586504396,
+          "r2": 0.14956896262042918,
+          "rmse": 1.123104268769129,
+          "spearman": 0.4695209236557102,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.86136221651996,
+          "r2": -4.436371199008025,
+          "rmse": 0.9682208713962888,
+          "spearman": 0.1596695032950434,
+          "test_rows": 9,
+          "top_decile_enrichment": 9.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.7803530173354226,
+      "model": "extra_trees",
+      "r2": 0.011307847764868595,
+      "representation": "descriptors",
+      "rmse": 0.99433000174337,
+      "spearman": 0.21006967150096384,
+      "split": "random_diagnostic",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.9975199006664026,
+          "r2": -0.07587188555934454,
+          "rmse": 1.3047629392081765,
+          "spearman": -0.15569978883230462,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 1.2528603383425458,
+          "r2": -1.948646847580183,
+          "rmse": 1.4856485526845482,
+          "spearman": 0.4426891948607403,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.6870954359543859,
+          "r2": -0.168229685942211,
+          "rmse": 1.1737423916411176,
+          "spearman": 0.490808774461475,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.47255365982330577,
+          "r2": -0.05842800188508224,
+          "rmse": 0.6519229363093871,
+          "spearman": 0.34172038829896173,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.6136645603986959,
+          "r2": -0.9175683601043183,
+          "rmse": 0.7731729236567179,
+          "spearman": -0.17329174830334546,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.8086382528868299,
+      "model": "extra_trees",
+      "r2": -0.2755611017349704,
+      "representation": "descriptors",
+      "rmse": 1.1294074118337734,
+      "spearman": -0.25322692183299034,
+      "split": "held_lipid",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.0716460053260568,
+          "r2": -0.8385904790589822,
+          "rmse": 1.1331714575473306,
+          "spearman": -0.35757575757575755,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 0.6332833067301764,
+          "r2": 0.1088869804528656,
+          "rmse": 0.8511416928213618,
+          "spearman": 0.1313141338909517,
+          "test_rows": 10,
+          "top_decile_enrichment": 10.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.9222368661600949,
+          "r2": -0.24794312570780774,
+          "rmse": 1.2181859593783968,
+          "spearman": 0.38895558795273394,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.9750409949895905,
+          "r2": -0.026809647593325936,
+          "rmse": 1.234086203922099,
+          "spearman": 0.26747843921922837,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 1.046837955548555,
+          "r2": -6.779533694684551,
+          "rmse": 1.158234966281177,
+          "spearman": 0.08368274087557231,
+          "test_rows": 9,
+          "top_decile_enrichment": 9.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.92742068024482,
+      "model": "ridge",
+      "r2": -0.26996386456555244,
+      "representation": "morgan",
+      "rmse": 1.1269267344130665,
+      "spearman": 0.08478816429302323,
+      "split": "random_diagnostic",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 1.96,
+      "top_decile_recall": 0.2
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.1043778121459975,
+          "r2": -0.21286354412493647,
+          "rmse": 1.3853429668089337,
+          "spearman": -0.5620526827876544,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 1.40869707780305,
+          "r2": -2.3241576353563254,
+          "rmse": 1.5774133380540698,
+          "spearman": -0.24652466565114894,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.8159671872356494,
+          "r2": -0.27271688048775267,
+          "rmse": 1.2251085571506877,
+          "spearman": -0.11326356333726348,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.821370165325302,
+          "r2": -1.6056727240865665,
+          "rmse": 1.0228819941870817,
+          "spearman": 0.04349168578350423,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.5999418503129323,
+          "r2": -0.7068318417180548,
+          "rmse": 0.7294517612580907,
+          "spearman": 0.05270462766947299,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.9572163077125794,
+      "model": "ridge",
+      "r2": -0.5170360019193654,
+      "representation": "morgan",
+      "rmse": 1.2316801541478442,
+      "spearman": -0.22086476306910913,
+      "split": "held_lipid",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8307838106738842,
+          "r2": -0.11325831803151076,
+          "rmse": 0.8817614297816564,
+          "spearman": -0.33333333333333326,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 0.6042189286306913,
+          "r2": 0.287795490198288,
+          "rmse": 0.7609179513817276,
+          "spearman": 0.38143629368324067,
+          "test_rows": 10,
+          "top_decile_enrichment": 10.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.8389930130604665,
+          "r2": -0.19664841800486355,
+          "rmse": 1.192887474765935,
+          "spearman": 0.27782541996623855,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.7823311469724621,
+          "r2": 0.12630481029023788,
+          "rmse": 1.1383622865810665,
+          "spearman": 0.36474332620803873,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.7428777891270132,
+          "r2": -3.0249901543203466,
+          "rmse": 0.8331099088892524,
+          "spearman": 0.11715583722580122,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.7601871243983297,
+      "model": "extra_trees",
+      "r2": 0.0408135758402326,
+      "representation": "morgan",
+      "rmse": 0.9793806329960134,
+      "spearman": 0.15666157508446013,
+      "split": "random_diagnostic",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 1.96,
+      "top_decile_recall": 0.2
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.0013439026064914,
+          "r2": -0.08176373490788835,
+          "rmse": 1.308330729521014,
+          "spearman": -0.5620526827876544,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 1.1796063110486412,
+          "r2": -1.477613470336725,
+          "rmse": 1.3618255574468516,
+          "spearman": 0.0,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.7092411745875764,
+          "r2": -0.1257460080145365,
+          "rmse": 1.1522026744586664,
+          "spearman": 0.08809388259564936,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.5140185684176514,
+          "r2": -0.059523981165555906,
+          "rmse": 0.6522603750224187,
+          "spearman": 0.14290125328865674,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.5367736870980527,
+          "r2": -0.4587197583450058,
+          "rmse": 0.6743527639445789,
+          "spearman": 0.017568209223157664,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.7933278112344097,
+      "model": "extra_trees",
+      "r2": -0.16909984306741666,
+      "representation": "morgan",
+      "rmse": 1.0812492049584648,
+      "spearman": -0.34466971592632456,
+      "split": "held_lipid",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.0765213136012795,
+          "r2": -0.8466624399624445,
+          "rmse": 1.1356562137672799,
+          "spearman": -0.35757575757575755,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 0.6368436706040158,
+          "r2": 0.09937551356590113,
+          "rmse": 0.8556720486082117,
+          "spearman": 0.07926976633148354,
+          "test_rows": 10,
+          "top_decile_enrichment": 10.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.9443165574509503,
+          "r2": -0.2715771723507425,
+          "rmse": 1.2296671024702883,
+          "spearman": 0.4185110693297313,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.9654060680744218,
+          "r2": -0.04621893172640723,
+          "rmse": 1.245695266740025,
+          "spearman": 0.2553203283456271,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 1.042365473840823,
+          "r2": -6.675702834131914,
+          "rmse": 1.1504797133482885,
+          "spearman": 0.08368274087557231,
+          "test_rows": 9,
+          "top_decile_enrichment": 9.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.930860517589267,
+      "model": "ridge",
+      "r2": -0.28101444571839473,
+      "representation": "combined",
+      "rmse": 1.1318190870846867,
+      "spearman": 0.0884942217286589,
+      "split": "random_diagnostic",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 1.96,
+      "top_decile_recall": 0.2
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.106848865746309,
+          "r2": -0.2212014914502196,
+          "rmse": 1.3900966477623387,
+          "spearman": -0.5620526827876544,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 1.6049682477337464,
+          "r2": -3.3287720295786833,
+          "rmse": 1.800060329920386,
+          "spearman": -0.6746990849399864,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.8636876931999897,
+          "r2": -0.35504437354169416,
+          "rmse": 1.2641116383761106,
+          "spearman": -0.11326356333726348,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.8203098284970702,
+          "r2": -1.592050024816964,
+          "rmse": 1.0202046291378228,
+          "spearman": 0.04349168578350423,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.596274813620631,
+          "r2": -0.6824049925172557,
+          "rmse": 0.7242132784417316,
+          "spearman": 0.09363821838346234,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 1.0066248913134048,
+      "model": "ridge",
+      "r2": -0.6904934664010163,
+      "representation": "combined",
+      "rmse": 1.3001897810036958,
+      "spearman": -0.2916385015478623,
+      "split": "held_lipid",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8190281934491062,
+          "r2": -0.08415132232209843,
+          "rmse": 0.8701579160518939,
+          "spearman": -0.38181818181818183,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 0.5962493088139548,
+          "r2": 0.29592088571294195,
+          "rmse": 0.7565649214585675,
+          "spearman": 0.3231767396591252,
+          "test_rows": 10,
+          "top_decile_enrichment": 10.0,
+          "top_decile_recall": 1.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.8348477874552103,
+          "r2": -0.21673921082217218,
+          "rmse": 1.2028596176238915,
+          "spearman": 0.3077287274483318,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.775171450278064,
+          "r2": 0.11476534070606537,
+          "rmse": 1.1458551782392206,
+          "spearman": 0.3404271044608362,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.7147863703733973,
+          "r2": -2.6924155302726227,
+          "rmse": 0.7979490705979086,
+          "spearman": 0.11715583722580122,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.7486947904759985,
+      "model": "extra_trees",
+      "r2": 0.04847529078023538,
+      "representation": "combined",
+      "rmse": 0.9754612802908414,
+      "spearman": 0.16519942083948608,
+      "split": "random_diagnostic",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 1.96,
+      "top_decile_recall": 0.2
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.9973123539681922,
+          "r2": -0.06645484027636384,
+          "rmse": 1.2990401310174833,
+          "spearman": -0.3015892444226438,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 1,
+          "mae": 1.1227532391883912,
+          "r2": -1.281390009430237,
+          "rmse": 1.3067859944755746,
+          "spearman": 0.4022244544834535,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 2,
+          "mae": 0.6966109778468285,
+          "r2": -0.10499116102608297,
+          "rmse": 1.1415319548810827,
+          "spearman": 0.08809388259564936,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 3,
+          "mae": 0.5028134220845819,
+          "r2": -0.07565038183766704,
+          "rmse": 0.6572054681200473,
+          "spearman": 0.20503223297937706,
+          "test_rows": 10,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 39
+        },
+        {
+          "fold": 4,
+          "mae": 0.5294082385552165,
+          "r2": -0.4358810566370015,
+          "rmse": 0.6690528762954616,
+          "spearman": 0.1966458508163212,
+          "test_rows": 9,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 40
+        }
+      ],
+      "mae": 0.7746851852627936,
+      "model": "extra_trees",
+      "r2": -0.1291995314502945,
+      "representation": "combined",
+      "rmse": 1.0626380059083478,
+      "spearman": -0.24235657599746382,
+      "split": "held_lipid",
+      "task": "local_intratracheal_functional_expression",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6143210520960896,
+          "r2": 0.144813066539084,
+          "rmse": 0.868544736897236,
+          "spearman": 0.4858054535105917,
+          "test_rows": 20,
+          "top_decile_enrichment": 5.0,
+          "top_decile_recall": 0.5,
+          "train_rows": 76
+        },
+        {
+          "fold": 1,
+          "mae": 0.529185488550727,
+          "r2": -0.06224715473572906,
+          "rmse": 0.7400880856650826,
+          "spearman": 0.16829644898238932,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 2,
+          "mae": 0.9496251006014488,
+          "r2": 0.11856843904327874,
+          "rmse": 1.1896210454866376,
+          "spearman": 0.350312462681957,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 3,
+          "mae": 0.6861837333015575,
+          "r2": 0.05455371735418402,
+          "rmse": 0.8913458931155362,
+          "spearman": 0.2757736010298958,
+          "test_rows": 19,
+          "top_decile_enrichment": 4.75,
+          "top_decile_recall": 0.5,
+          "train_rows": 77
+        },
+        {
+          "fold": 4,
+          "mae": 0.7492040215377366,
+          "r2": 0.0813315679236235,
+          "rmse": 0.99920520067241,
+          "spearman": 0.36000846355754956,
+          "test_rows": 19,
+          "top_decile_enrichment": 4.75,
+          "top_decile_recall": 0.5,
+          "train_rows": 77
+        }
+      ],
+      "mae": 0.7047519747683304,
+      "model": "ridge",
+      "r2": 0.09949682422734574,
+      "representation": "descriptors",
+      "rmse": 0.9489484578988271,
+      "spearman": 0.31192655867767394,
+      "split": "random_diagnostic",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.96,
+      "top_decile_recall": 0.1
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.094631278651709,
+          "r2": -0.6437316234786106,
+          "rmse": 1.2962667426027497,
+          "spearman": 0.0,
+          "test_rows": 30,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 66
+        },
+        {
+          "fold": 1,
+          "mae": 0.6216789151988822,
+          "r2": -0.021778479335878398,
+          "rmse": 0.7908708946594384,
+          "spearman": 0.1980333285721602,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 2,
+          "mae": 0.6709734160729595,
+          "r2": 0.020580954620391778,
+          "rmse": 0.7689484626181171,
+          "spearman": 0.246777582385885,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 3,
+          "mae": 0.9776292630789869,
+          "r2": 0.17246161491906298,
+          "rmse": 1.2650980661132338,
+          "spearman": 0.5398253575348799,
+          "test_rows": 16,
+          "top_decile_enrichment": 4.0,
+          "top_decile_recall": 0.5,
+          "train_rows": 80
+        },
+        {
+          "fold": 4,
+          "mae": 0.5871389436584791,
+          "r2": -0.201664807340999,
+          "rmse": 0.8142271500774488,
+          "spearman": 0.24778868870453502,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        }
+      ],
+      "mae": 0.8317741593642919,
+      "model": "ridge",
+      "r2": -0.11780356475222353,
+      "representation": "descriptors",
+      "rmse": 1.0572622970305512,
+      "spearman": 0.03323081400806204,
+      "split": "held_lipid",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.96,
+      "top_decile_recall": 0.1
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.6115565560561309,
+          "r2": 0.18882964260720236,
+          "rmse": 0.8458974204238545,
+          "spearman": 0.5828149668481202,
+          "test_rows": 20,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 76
+        },
+        {
+          "fold": 1,
+          "mae": 0.49644629771379967,
+          "r2": 0.03466636687915492,
+          "rmse": 0.7055200223505351,
+          "spearman": 0.216895423554844,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 2,
+          "mae": 0.9298942846867159,
+          "r2": 0.11590680107859719,
+          "rmse": 1.1914158268115709,
+          "spearman": 0.2950468833275516,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 3,
+          "mae": 0.6904788968704,
+          "r2": -0.1210222632033322,
+          "rmse": 0.9705880889064501,
+          "spearman": 0.23540744819709222,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 4,
+          "mae": 0.7963040748436052,
+          "r2": 0.0208870597945906,
+          "rmse": 1.0315533277492943,
+          "spearman": 0.41287046580144293,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        }
+      ],
+      "mae": 0.7039633192635262,
+      "model": "extra_trees",
+      "r2": 0.0744276161251467,
+      "representation": "descriptors",
+      "rmse": 0.9620667252587475,
+      "spearman": 0.3303446886246306,
+      "split": "random_diagnostic",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.96,
+      "top_decile_recall": 0.1
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.3559911972742549,
+          "r2": -1.266645612766509,
+          "rmse": 1.5221965578208232,
+          "spearman": 0.0,
+          "test_rows": 30,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 66
+        },
+        {
+          "fold": 1,
+          "mae": 0.6106263595298669,
+          "r2": 0.022247772130233434,
+          "rmse": 0.7736448244211602,
+          "spearman": 0.22263374205938505,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 2,
+          "mae": 0.6576645039096278,
+          "r2": 0.014707708795162033,
+          "rmse": 0.7712505788709012,
+          "spearman": 0.45795043895490106,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 3,
+          "mae": 0.9635010709064515,
+          "r2": 0.2308047655391694,
+          "rmse": 1.2196870438789145,
+          "spearman": 0.4867277813839081,
+          "test_rows": 16,
+          "top_decile_enrichment": 4.0,
+          "top_decile_recall": 0.5,
+          "train_rows": 80
+        },
+        {
+          "fold": 4,
+          "mae": 0.46799763230304203,
+          "r2": 0.24971023789625446,
+          "rmse": 0.6433812774818326,
+          "spearman": 0.4926275120673494,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        }
+      ],
+      "mae": 0.8869235400838642,
+      "model": "extra_trees",
+      "r2": -0.2523406266661161,
+      "representation": "descriptors",
+      "rmse": 1.119080259245337,
+      "spearman": 0.04053277562674897,
+      "split": "held_lipid",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8699862784236606,
+          "r2": -0.4032605868223069,
+          "rmse": 1.1125789231723404,
+          "spearman": 0.03865222797042149,
+          "test_rows": 20,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 76
+        },
+        {
+          "fold": 1,
+          "mae": 0.5323450691658703,
+          "r2": 0.05884206805586423,
+          "rmse": 0.6966295263394846,
+          "spearman": 0.18265026067992016,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 2,
+          "mae": 0.9405546308487103,
+          "r2": 0.23682706579957247,
+          "rmse": 1.106944431892444,
+          "spearman": 0.3182227714439151,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 3,
+          "mae": 0.7891559408830353,
+          "r2": -0.3971702449030581,
+          "rmse": 1.0835588473144335,
+          "spearman": -0.08017698943680675,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 4,
+          "mae": 0.8167201155635231,
+          "r2": -0.1432739622664343,
+          "rmse": 1.1146806073992106,
+          "spearman": 0.2998551506593261,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        }
+      ],
+      "mae": 0.7905881764711964,
+      "model": "ridge",
+      "r2": -0.07472949991202382,
+      "representation": "morgan",
+      "rmse": 1.0366916127196506,
+      "spearman": 0.15586340118529088,
+      "split": "random_diagnostic",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.3347007633624024,
+          "r2": -1.2080905229945036,
+          "rmse": 1.5024061767083476,
+          "spearman": 0.0,
+          "test_rows": 30,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 66
+        },
+        {
+          "fold": 1,
+          "mae": 0.5987039481179829,
+          "r2": 0.00398936628683888,
+          "rmse": 0.7808348797925492,
+          "spearman": 0.18282222351032582,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 2,
+          "mae": 0.7910443352359862,
+          "r2": -0.3703911580731858,
+          "rmse": 0.9095681291334834,
+          "spearman": 0.0907418932053176,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 3,
+          "mae": 1.0188789223406531,
+          "r2": 0.14732913195185549,
+          "rmse": 1.2841650051625635,
+          "spearman": 0.09565859837710479,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        },
+        {
+          "fold": 4,
+          "mae": 0.7880839120298405,
+          "r2": -0.905156548099622,
+          "rmse": 1.025225128662605,
+          "spearman": -0.03973511009510507,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        }
+      ],
+      "mae": 0.9643557194564316,
+      "model": "ridge",
+      "r2": -0.4098821327539821,
+      "representation": "morgan",
+      "rmse": 1.1873845765868198,
+      "spearman": -0.17426846468693033,
+      "split": "held_lipid",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7406094512328332,
+          "r2": 0.02716916480573739,
+          "rmse": 0.9263611399756491,
+          "spearman": 0.32361767339941133,
+          "test_rows": 20,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 76
+        },
+        {
+          "fold": 1,
+          "mae": 0.4609450581965864,
+          "r2": 0.2644569335277268,
+          "rmse": 0.615849619616527,
+          "spearman": 0.6926656617083171,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 2,
+          "mae": 0.9070051503067509,
+          "r2": 0.10247927468649631,
+          "rmse": 1.2004292890064554,
+          "spearman": 0.4341022120257329,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 3,
+          "mae": 0.7478864181493028,
+          "r2": -0.08100984211226514,
+          "rmse": 0.9531092019209089,
+          "spearman": 0.16299717632757416,
+          "test_rows": 19,
+          "top_decile_enrichment": 4.75,
+          "top_decile_recall": 0.5,
+          "train_rows": 77
+        },
+        {
+          "fold": 4,
+          "mae": 0.8127458979143065,
+          "r2": -0.054285650815705466,
+          "rmse": 1.0704205474271833,
+          "spearman": 0.12304086729182076,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        }
+      ],
+      "mae": 0.7339089269940485,
+      "model": "extra_trees",
+      "r2": 0.054388007030404584,
+      "representation": "morgan",
+      "rmse": 0.9724258290195177,
+      "spearman": 0.2627862719222507,
+      "split": "random_diagnostic",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.96,
+      "top_decile_recall": 0.1
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.1631008842527784,
+          "r2": -0.7867321998896606,
+          "rmse": 1.3514769891450065,
+          "spearman": 0.0,
+          "test_rows": 30,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 66
+        },
+        {
+          "fold": 1,
+          "mae": 0.566746787835452,
+          "r2": 0.20392089587709505,
+          "rmse": 0.698080215421155,
+          "spearman": 0.41349724377838787,
+          "test_rows": 17,
+          "top_decile_enrichment": 4.25,
+          "top_decile_recall": 0.5,
+          "train_rows": 79
+        },
+        {
+          "fold": 2,
+          "mae": 0.7069382083739609,
+          "r2": -0.012433132872362584,
+          "rmse": 0.7818008445572614,
+          "spearman": 0.32618031881911463,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 3,
+          "mae": 0.9223976410475422,
+          "r2": 0.18325777964272305,
+          "rmse": 1.2568186636209537,
+          "spearman": 0.6431201152429968,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        },
+        {
+          "fold": 4,
+          "mae": 0.6458819278887019,
+          "r2": -0.06274591091193371,
+          "rmse": 0.7657176005944448,
+          "spearman": 0.18690218452142013,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        }
+      ],
+      "mae": 0.8503973392304508,
+      "model": "extra_trees",
+      "r2": -0.1262953378441949,
+      "representation": "morgan",
+      "rmse": 1.0612706242114034,
+      "spearman": 0.027339876530393555,
+      "split": "held_lipid",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.8618774550497468,
+          "r2": -0.3643753177202369,
+          "rmse": 1.097055481481182,
+          "spearman": 0.03865222797042149,
+          "test_rows": 20,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 76
+        },
+        {
+          "fold": 1,
+          "mae": 0.5258264565991231,
+          "r2": 0.09874509490436312,
+          "rmse": 0.6817018070262091,
+          "spearman": 0.07016613196525809,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 2,
+          "mae": 0.9145027617229676,
+          "r2": 0.2542418501229531,
+          "rmse": 1.094241909439832,
+          "spearman": 0.4269711695283903,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 3,
+          "mae": 0.7718783176013682,
+          "r2": -0.3573654919313405,
+          "rmse": 1.0680122659115245,
+          "spearman": 0.02026451381369841,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 4,
+          "mae": 0.8285146544378983,
+          "r2": -0.11848467600113355,
+          "rmse": 1.102529728100288,
+          "spearman": 0.2834497016870834,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        }
+      ],
+      "mae": 0.7813674033110493,
+      "model": "ridge",
+      "r2": -0.046025042825822204,
+      "representation": "combined",
+      "rmse": 1.0227536569466944,
+      "spearman": 0.17751206559880534,
+      "split": "random_diagnostic",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.297671640056128,
+          "r2": -1.1095501135278214,
+          "rmse": 1.468499648425047,
+          "spearman": 0.0,
+          "test_rows": 30,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 66
+        },
+        {
+          "fold": 1,
+          "mae": 0.6167034536325906,
+          "r2": -0.009284424000257419,
+          "rmse": 0.7860207352586028,
+          "spearman": 0.12883445280929,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 2,
+          "mae": 0.7572357567728245,
+          "r2": -0.28524362915534396,
+          "rmse": 0.8808575688926886,
+          "spearman": 0.12017169640704224,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 3,
+          "mae": 0.9867865438658813,
+          "r2": 0.1838688480678764,
+          "rmse": 1.2563484137142786,
+          "spearman": 0.15158208665910447,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        },
+        {
+          "fold": 4,
+          "mae": 0.7855238934680601,
+          "r2": -0.8778961474633997,
+          "rmse": 1.0178638583047006,
+          "spearman": -0.042678451583631365,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        }
+      ],
+      "mae": 0.9442091955824891,
+      "model": "ridge",
+      "r2": -0.35645442038570607,
+      "representation": "combined",
+      "rmse": 1.1646692321639716,
+      "spearman": -0.14504806754862612,
+      "split": "held_lipid",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 0.7009089482879732,
+          "r2": 0.10647969273217972,
+          "rmse": 0.8877974193576066,
+          "spearman": 0.39485903475665873,
+          "test_rows": 20,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 76
+        },
+        {
+          "fold": 1,
+          "mae": 0.477942388404122,
+          "r2": 0.25969144788429854,
+          "rmse": 0.6178414025657868,
+          "spearman": 0.5343420818892731,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 2,
+          "mae": 0.8918067610757189,
+          "r2": 0.1287155841106491,
+          "rmse": 1.1827536942808474,
+          "spearman": 0.4501470576447539,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        },
+        {
+          "fold": 3,
+          "mae": 0.7060484383041692,
+          "r2": -0.02796480837890547,
+          "rmse": 0.9294305898677668,
+          "spearman": 0.274011469393922,
+          "test_rows": 19,
+          "top_decile_enrichment": 4.75,
+          "top_decile_recall": 0.5,
+          "train_rows": 77
+        },
+        {
+          "fold": 4,
+          "mae": 0.8313558630975567,
+          "r2": -0.06168646766398744,
+          "rmse": 1.0741710169594887,
+          "spearman": 0.25975294206051047,
+          "test_rows": 19,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 77
+        }
+      ],
+      "mae": 0.7213968180469713,
+      "model": "extra_trees",
+      "r2": 0.0840443316047974,
+      "representation": "combined",
+      "rmse": 0.9570557289785673,
+      "spearman": 0.2949575340977626,
+      "split": "random_diagnostic",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 1.92,
+      "top_decile_recall": 0.2
+    },
+    {
+      "folds": [
+        {
+          "fold": 0,
+          "mae": 1.2200547785469846,
+          "r2": -0.916600448377668,
+          "rmse": 1.3997314355556343,
+          "spearman": 0.0,
+          "test_rows": 30,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 66
+        },
+        {
+          "fold": 1,
+          "mae": 0.5464627819780872,
+          "r2": 0.24554435098683858,
+          "rmse": 0.6795854543078325,
+          "spearman": 0.4306751708196266,
+          "test_rows": 17,
+          "top_decile_enrichment": 4.25,
+          "top_decile_recall": 0.5,
+          "train_rows": 79
+        },
+        {
+          "fold": 2,
+          "mae": 0.6536330041917789,
+          "r2": 0.10545830759360275,
+          "rmse": 0.7348746289693454,
+          "spearman": 0.38503992522256386,
+          "test_rows": 17,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 79
+        },
+        {
+          "fold": 3,
+          "mae": 0.9135917974820652,
+          "r2": 0.21633506696833193,
+          "rmse": 1.2311056513311374,
+          "spearman": 0.6784402131053124,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        },
+        {
+          "fold": 4,
+          "mae": 0.6337343799291193,
+          "r2": -0.02849716332681096,
+          "rmse": 0.7532783015224783,
+          "spearman": 0.21633559940668312,
+          "test_rows": 16,
+          "top_decile_enrichment": 0.0,
+          "top_decile_recall": 0.0,
+          "train_rows": 80
+        }
+      ],
+      "mae": 0.8516717766653773,
+      "model": "extra_trees",
+      "r2": -0.1368556542927848,
+      "representation": "combined",
+      "rmse": 1.0662343336538966,
+      "spearman": 0.04381681899970607,
+      "split": "held_lipid",
+      "task": "systemic_iv_barcoded_lung_uptake",
+      "top_decile_enrichment": 0.0,
+      "top_decile_recall": 0.0
+    }
+  ],
+  "tasks": {
+    "airway_a549_in_vitro_expression": {
+      "batching": [
+        "individual"
+      ],
+      "experiment_id": "JW_2024",
+      "method": [
+        "luminescence_normalized"
+      ],
+      "model_type": "A549",
+      "publication_pmids": [
+        "37985700.0"
+      ],
+      "route": [
+        "in_vitro"
+      ],
+      "rows": 1801,
+      "target_maximum": 2.23574244,
+      "target_minimum": -3.156676774,
+      "unique_lipids": 176
+    },
+    "airway_hbec_ali_in_vitro_expression": {
+      "batching": [
+        "individual"
+      ],
+      "experiment_id": "JW_2024",
+      "method": [
+        "luminescence_normalized"
+      ],
+      "model_type": "HBEC_ALI",
+      "publication_pmids": [
+        "37985700.0"
+      ],
+      "route": [
+        "in_vitro"
+      ],
+      "rows": 29,
+      "target_maximum": 2.517309506,
+      "target_minimum": -1.608889119,
+      "unique_lipids": 28
+    },
+    "local_intratracheal_functional_expression": {
+      "batching": [
+        "individual"
+      ],
+      "experiment_id": "BL_2023",
+      "method": [
+        "luminescence_normalized"
+      ],
+      "model_type": "Mouse_B6",
+      "publication_pmids": [
+        "36997680.0"
+      ],
+      "route": [
+        "intratracheal"
+      ],
+      "rows": 49,
+      "target_maximum": 3.131377134,
+      "target_minimum": -1.556407195,
+      "unique_lipids": 26
+    },
+    "systemic_iv_barcoded_lung_uptake": {
+      "batching": [
+        "barcoded"
+      ],
+      "experiment_id": "LX_2024",
+      "method": [
+        "uptake"
+      ],
+      "model_type": "Mouse_B6",
+      "publication_pmids": [
+        "38424061.0"
+      ],
+      "route": [
+        "intravenous"
+      ],
+      "rows": 96,
+      "target_maximum": 2.538720314,
+      "target_minimum": -3.335152247,
+      "unique_lipids": 62
+    }
+  }
+}

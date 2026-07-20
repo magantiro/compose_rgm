@@ -1,0 +1,855 @@
+{
+  "clean_runtime_verification": "diagnostics/pan_lung_filtering_clean_runtime_verification.json",
+  "cross_fitted_audit_predictions": "diagnostics/pan_lung_qualified_ensemble_predictions.csv",
+  "cross_fitted_audit_predictions_sha256": "71c1941e338f6a1c551f9f48e8222e4d0aac60107521da575a4b10d4ab146778",
+  "deployment_policies": [
+    {
+      "ensemble_id": "lnpdb_2026__airway_a549_in_vitro_expression__held_lipid",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": 0.013814818079033824,
+          "slope": 1.0315725511525897
+        },
+        "ridge_v1": {
+          "intercept": 0.039479686309883716,
+          "slope": 0.5878311159902737
+        },
+        "xgboost_v1": {
+          "intercept": -0.02020657023691462,
+          "slope": 0.8960666821522029
+        }
+      },
+      "final_oof_conformal_radius": 1.3019567958176723,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 1.3160826984407488,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.014777092377217717,
+              "slope": 1.0509332318941977
+            },
+            "ridge_v1": {
+              "intercept": 0.012973788399694163,
+              "slope": 0.6002749690650416
+            },
+            "xgboost_v1": {
+              "intercept": -0.036637399825154696,
+              "slope": 0.9292086177895104
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 361
+        },
+        {
+          "calibration_rows": 1441,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 1.3080418753410514,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.04033269979576495,
+              "slope": 1.019722006323303
+            },
+            "ridge_v1": {
+              "intercept": 0.08972142921279638,
+              "slope": 0.6049852884910961
+            },
+            "xgboost_v1": {
+              "intercept": 0.009217849554805427,
+              "slope": 0.8863091959945033
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 360
+        },
+        {
+          "calibration_rows": 1441,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 1.3126999760894174,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.017781680279390377,
+              "slope": 1.012673563035198
+            },
+            "ridge_v1": {
+              "intercept": 0.018554027059305065,
+              "slope": 0.5790666335282029
+            },
+            "xgboost_v1": {
+              "intercept": -0.021021491308106197,
+              "slope": 0.893268545487514
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 360
+        },
+        {
+          "calibration_rows": 1441,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 1.309926864691323,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.00010980394772749868,
+              "slope": 1.0260083232817432
+            },
+            "ridge_v1": {
+              "intercept": 0.042590471871294576,
+              "slope": 0.5552442019308662
+            },
+            "xgboost_v1": {
+              "intercept": -0.014707470283203582,
+              "slope": 0.8808574662538935
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 360
+        },
+        {
+          "calibration_rows": 1441,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 1.261469004953755,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.0035419869082418385,
+              "slope": 1.0538309960335905
+            },
+            "ridge_v1": {
+              "intercept": 0.03598786039002875,
+              "slope": 0.6082197724710946
+            },
+            "xgboost_v1": {
+              "intercept": -0.03646769356220521,
+              "slope": 0.8927056253515872
+            }
+          },
+          "test_fold": 4,
+          "test_rows": 360
+        }
+      ],
+      "member_models": [
+        "ridge_v1",
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "uniform_member_weight": 0.3333333333333333
+    },
+    {
+      "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R1",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": 0.24296778874756178,
+          "slope": 0.9403965540597935
+        },
+        "xgboost_v1": {
+          "intercept": 1.87867342374623,
+          "slope": 0.5960916418202241
+        }
+      },
+      "final_oof_conformal_radius": 5.663944289141346,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 1536,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 5.6819842402447955,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.09107178382304994,
+              "slope": 1.066511113775566
+            },
+            "xgboost_v1": {
+              "intercept": 1.8250730705602254,
+              "slope": 0.660205031274876
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 384
+        },
+        {
+          "calibration_rows": 1536,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 5.687765848262708,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.886316758803838,
+              "slope": 0.8456903924665664
+            },
+            "xgboost_v1": {
+              "intercept": 2.634766750131126,
+              "slope": 0.47610187944711285
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 384
+        },
+        {
+          "calibration_rows": 1536,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 5.2018202655694665,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.4650678897367035,
+              "slope": 0.928844204310653
+            },
+            "xgboost_v1": {
+              "intercept": 0.5958377143868258,
+              "slope": 0.7240150774326154
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 384
+        },
+        {
+          "calibration_rows": 1536,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 5.86218180016023,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.6010118562484746,
+              "slope": 0.8323982744232307
+            },
+            "xgboost_v1": {
+              "intercept": 2.1567671617862763,
+              "slope": 0.488160123435993
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 384
+        },
+        {
+          "calibration_rows": 1536,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 5.4714483771608045,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.25389779051695294,
+              "slope": 1.0515241750208253
+            },
+            "xgboost_v1": {
+              "intercept": 2.1547306972334965,
+              "slope": 0.6558843876280461
+            }
+          },
+          "test_fold": 4,
+          "test_rows": 384
+        }
+      ],
+      "member_models": [
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "uniform_member_weight": 0.5
+    },
+    {
+      "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R2",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": 0.09187807612763578,
+          "slope": 0.9511576376389266
+        },
+        "xgboost_v1": {
+          "intercept": 0.4423431402683678,
+          "slope": 0.863193747744
+        }
+      },
+      "final_oof_conformal_radius": 4.596407611329536,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.200098293575495,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.1631240932754966,
+              "slope": 0.8728780074829438
+            },
+            "xgboost_v1": {
+              "intercept": 0.4264299360384714,
+              "slope": 0.8010593031174811
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 480
+        },
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.3883655128023165,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.046345077684998764,
+              "slope": 1.0923225987860354
+            },
+            "xgboost_v1": {
+              "intercept": 0.3221114064151772,
+              "slope": 0.9914115014691448
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 480
+        },
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.718900168586488,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.1967137580209032,
+              "slope": 0.9554146962836547
+            },
+            "xgboost_v1": {
+              "intercept": 0.19210531744501955,
+              "slope": 0.8471242326940569
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 480
+        },
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.563593094680364,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.2643466678950781,
+              "slope": 0.912320371889358
+            },
+            "xgboost_v1": {
+              "intercept": 0.7050982182500574,
+              "slope": 0.8451540964911073
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 480
+        }
+      ],
+      "member_models": [
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "uniform_member_weight": 0.5
+    },
+    {
+      "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R3",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": -0.07204330361458909,
+          "slope": 1.0228036278267516
+        },
+        "xgboost_v1": {
+          "intercept": 0.4605464180146274,
+          "slope": 0.9322646173933425
+        }
+      },
+      "final_oof_conformal_radius": 3.7120296871631266,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 3.466920703843792,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.07118193592842378,
+              "slope": 1.0440429780089262
+            },
+            "xgboost_v1": {
+              "intercept": 0.6228527439411277,
+              "slope": 0.9805950548783327
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 480
+        },
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 3.9208641509779945,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.14793804646778486,
+              "slope": 1.0173868581791814
+            },
+            "xgboost_v1": {
+              "intercept": 0.22685178920079785,
+              "slope": 0.9339487944481842
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 480
+        },
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 3.855522479585263,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.3245564030947653,
+              "slope": 0.9633861387780054
+            },
+            "xgboost_v1": {
+              "intercept": 0.9218657519521445,
+              "slope": 0.8652330845983123
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 480
+        },
+        {
+          "calibration_rows": 1440,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 3.5157575358490147,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.5752360203908211,
+              "slope": 1.0743172712689137
+            },
+            "xgboost_v1": {
+              "intercept": -0.0052419445547719525,
+              "slope": 0.9676842457031446
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 480
+        }
+      ],
+      "member_models": [
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "uniform_member_weight": 0.5
+    },
+    {
+      "ensemble_id": "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R4",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": -0.31841033580645434,
+          "slope": 1.2057346108397058
+        },
+        "xgboost_v1": {
+          "intercept": -0.19786297549855925,
+          "slope": 0.9614031483420717
+        }
+      },
+      "final_oof_conformal_radius": 4.497060132369743,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 1280,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.100800314808637,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.22527038130256524,
+              "slope": 1.0521470259358048
+            },
+            "xgboost_v1": {
+              "intercept": 0.06458482303501764,
+              "slope": 0.8345454614890563
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 640
+        },
+        {
+          "calibration_rows": 1600,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.652850710681308,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.23059595232277152,
+              "slope": 1.2342607392762686
+            },
+            "xgboost_v1": {
+              "intercept": -0.0996441037604594,
+              "slope": 0.9560640236049287
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 320
+        },
+        {
+          "calibration_rows": 1600,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.373682990822717,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.5495307208522932,
+              "slope": 1.226520602088015
+            },
+            "xgboost_v1": {
+              "intercept": -0.8076525169612377,
+              "slope": 1.0450793010588562
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 320
+        },
+        {
+          "calibration_rows": 1600,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.632724258408143,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.3404621333017221,
+              "slope": 1.289871100008952
+            },
+            "xgboost_v1": {
+              "intercept": -0.0679013048372651,
+              "slope": 0.9533601288797805
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 320
+        },
+        {
+          "calibration_rows": 1600,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 4.530088138867596,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.30490214136860444,
+              "slope": 1.2165437782521302
+            },
+            "xgboost_v1": {
+              "intercept": -0.19853396569545895,
+              "slope": 1.0262151573089362
+            }
+          },
+          "test_fold": 4,
+          "test_rows": 320
+        }
+      ],
+      "member_models": [
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "uniform_member_weight": 0.5
+    },
+    {
+      "ensemble_id": "lut_444_2026__systemic_iv_lung_selectivity__held_head",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": 0.006718791538189422,
+          "slope": 0.9745235922549782
+        },
+        "ridge_v1": {
+          "intercept": 0.025693325028570912,
+          "slope": 0.9807844899210111
+        },
+        "xgboost_v1": {
+          "intercept": 0.06040061922756042,
+          "slope": 0.8924275574135896
+        }
+      },
+      "final_oof_conformal_radius": 0.4356082907016734,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 354,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.42120545918266517,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.01231206085047516,
+              "slope": 0.9898031781752591
+            },
+            "ridge_v1": {
+              "intercept": 0.005635786046271627,
+              "slope": 0.998459087013532
+            },
+            "xgboost_v1": {
+              "intercept": 0.041109922166218484,
+              "slope": 0.9215454852042082
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 90
+        },
+        {
+          "calibration_rows": 354,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.45693738723740357,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.004778085793924904,
+              "slope": 0.9395586974525684
+            },
+            "ridge_v1": {
+              "intercept": 0.019570777691039352,
+              "slope": 0.9539081515602172
+            },
+            "xgboost_v1": {
+              "intercept": 0.0640336452378021,
+              "slope": 0.8531993305269107
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 90
+        },
+        {
+          "calibration_rows": 356,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.44825733085055586,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.016660461104080503,
+              "slope": 0.9637700588912916
+            },
+            "ridge_v1": {
+              "intercept": 0.03303849448838544,
+              "slope": 0.9739906912298081
+            },
+            "xgboost_v1": {
+              "intercept": 0.06962745570223157,
+              "slope": 0.8959640088324581
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 88
+        },
+        {
+          "calibration_rows": 356,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.42157081035685784,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.00034949149648614,
+              "slope": 0.9971320046346122
+            },
+            "ridge_v1": {
+              "intercept": 0.022651463044889478,
+              "slope": 0.9959876462690591
+            },
+            "xgboost_v1": {
+              "intercept": 0.05757598363350798,
+              "slope": 0.9066481338684957
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 88
+        },
+        {
+          "calibration_rows": 356,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.454878464119965,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": 0.024319935662499348,
+              "slope": 0.9832687720242687
+            },
+            "ridge_v1": {
+              "intercept": 0.04750720924091576,
+              "slope": 0.9815644593220167
+            },
+            "xgboost_v1": {
+              "intercept": 0.06973606901208251,
+              "slope": 0.8850248056209573
+            }
+          },
+          "test_fold": 4,
+          "test_rows": 88
+        }
+      ],
+      "member_models": [
+        "ridge_v1",
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "lut_component_sar_plus_typed_context_v1",
+      "uniform_member_weight": 0.3333333333333333
+    },
+    {
+      "ensemble_id": "lut_444_2026__systemic_iv_lung_selectivity__held_tail",
+      "final_oof_affine_calibrators": {
+        "extra_trees_v1": {
+          "intercept": -0.3328394398259655,
+          "slope": 1.5312848167065152
+        },
+        "ridge_v1": {
+          "intercept": 0.016888981656667593,
+          "slope": 0.9518806577029325
+        },
+        "xgboost_v1": {
+          "intercept": 0.004035955649486076,
+          "slope": 0.8779419400226965
+        }
+      },
+      "final_oof_conformal_radius": 0.44940158232547295,
+      "fold_calibrators_for_audit": [
+        {
+          "calibration_rows": 356,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.4035644927732682,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.3855616344494755,
+              "slope": 1.6139363711370363
+            },
+            "ridge_v1": {
+              "intercept": -0.003499272092843186,
+              "slope": 0.9526412017471485
+            },
+            "xgboost_v1": {
+              "intercept": -0.007063657979593647,
+              "slope": 0.8614263563689878
+            }
+          },
+          "test_fold": 0,
+          "test_rows": 88
+        },
+        {
+          "calibration_rows": 356,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.4526604642736964,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.3129910289982656,
+              "slope": 1.4363636921426868
+            },
+            "ridge_v1": {
+              "intercept": 0.02810395467260123,
+              "slope": 0.8818439115710724
+            },
+            "xgboost_v1": {
+              "intercept": 0.010074792652780296,
+              "slope": 0.7979339113758016
+            }
+          },
+          "test_fold": 1,
+          "test_rows": 88
+        },
+        {
+          "calibration_rows": 356,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.4424943121693554,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.3312536119937939,
+              "slope": 1.5745452607694688
+            },
+            "ridge_v1": {
+              "intercept": -0.013385621224159774,
+              "slope": 1.0670577063563307
+            },
+            "xgboost_v1": {
+              "intercept": -0.11163094661396271,
+              "slope": 1.054773652046489
+            }
+          },
+          "test_fold": 2,
+          "test_rows": 88
+        },
+        {
+          "calibration_rows": 354,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.45942292013476244,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.24292308545754746,
+              "slope": 1.419997407277129
+            },
+            "ridge_v1": {
+              "intercept": 0.04919195950763579,
+              "slope": 0.9263271984996687
+            },
+            "xgboost_v1": {
+              "intercept": 0.10573686417317123,
+              "slope": 0.8268173118476625
+            }
+          },
+          "test_fold": 3,
+          "test_rows": 90
+        },
+        {
+          "calibration_rows": 354,
+          "conformal_absolute_residual_quantile": 0.9,
+          "conformal_radius": 0.4524345663031747,
+          "models": {
+            "extra_trees_v1": {
+              "intercept": -0.37289931743028315,
+              "slope": 1.5871757297518707
+            },
+            "ridge_v1": {
+              "intercept": 0.03498106068447955,
+              "slope": 0.9162121335334742
+            },
+            "xgboost_v1": {
+              "intercept": 0.028761763112866878,
+              "slope": 0.832665465539777
+            }
+          },
+          "test_fold": 4,
+          "test_rows": 90
+        }
+      ],
+      "member_models": [
+        "ridge_v1",
+        "extra_trees_v1",
+        "xgboost_v1"
+      ],
+      "pessimistic_score_formula": "mean(calibrated_member_predictions) - final_oof_conformal_radius - std(calibrated_member_predictions, ddof=0)",
+      "representation": "lut_component_sar_plus_typed_context_v1",
+      "uniform_member_weight": 0.3333333333333333
+    }
+  ],
+  "diagnostic_only_ensemble_ids": [
+    "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R1"
+  ],
+  "direction": "higher_is_better_within_each_typed_head_only",
+  "excluded_heads": {
+    "airway_hbec_ali_in_vitro_expression": "insufficient held-lipid evidence",
+    "local_intratracheal_functional_expression": "insufficient held-lipid evidence",
+    "systemic_iv_barcoded_lung_uptake": "incompatible uptake readout and weak rank signal",
+    "systemic_iv_lung_expression": "not qualified in this selectivity-focused gate"
+  },
+  "filtering_bundle_manifest": "artifacts/oracles/pan_lung_filtering_v1/manifest.json",
+  "filtering_enabled": true,
+  "format": "compose_pan_lung_qualified_ensemble_contract_v1",
+  "hard_blockers_before_reward_fine_tuning": [
+    "Require the present hash-verified bundle and passed clean-runtime verification artifact.",
+    "Keep the hard reward guard in the optimization path so rejected candidates can never receive a reward.",
+    "Create an explicit frozen preregistration bound to the exact bundle-manifest hash and separately authorize reward fine-tuning in the bundle.",
+    "Pre-register score thresholds and candidate budgets without using prospective outcomes.",
+    "Monitor score hacking and applicability-domain drift during any optimization run."
+  ],
+  "preregistration_template": "configs/pan_lung_reward_preregistration.template.json",
+  "purpose": "Domain-bounded filtering and reward construction for later COMPOSE-Lipid experiments.",
+  "qualification_table": "diagnostics/pan_lung_qualified_ensemble_qualification.csv",
+  "qualification_table_sha256": "fbd70ec081c7403921be358b5d02cb1d3f74e2c9930b7dc7f6a1ee6edeac4573",
+  "qualified_ensemble_ids": [
+    "lnpdb_2026__airway_a549_in_vitro_expression__held_lipid",
+    "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R2",
+    "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R3",
+    "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R4",
+    "lut_444_2026__systemic_iv_lung_selectivity__held_head",
+    "lut_444_2026__systemic_iv_lung_selectivity__held_tail"
+  ],
+  "reward_fine_tuning_enabled": false,
+  "reward_guard": "src/compose_v4/oracles/reward_guard.py",
+  "source_comparison_predictions": "diagnostics/pan_lung_qualified_matrix_comparison_predictions.csv",
+  "source_comparison_predictions_sha256": "ae47dbd82ab0977ac29f3e41fed30ed5640b9e5981997ebf8f35404e6e13583a",
+  "status": "filtering_bundle_verified_reward_fine_tuning_disabled",
+  "uncertainty_contract": {
+    "calibration": "Affine calibration is fitted on held-group OOF predictions. Cross-fitted audit rows never use their fold labels to fit calibration.",
+    "conformal_radius": "Finite-sample 90% absolute-residual quantile estimated from other held folds; final deployment radius uses all OOF residuals after qualification.",
+    "model_disagreement": "Population standard deviation across calibrated member predictions; a disagreement proxy, not a posterior standard deviation.",
+    "pessimistic_score": "calibrated ensemble mean minus conformal radius minus model disagreement"
+  },
+  "use_rules": [
+    "Never compare or add raw scores across typed heads.",
+    "Use only policies whose qualification_status is qualified_for_domain_bounded_filtering.",
+    "For LUMI, select the policy matching the claimed novel component axis; if multiple axes are novel, take the minimum pessimistic score across those axes.",
+    "For LuT, admit only released head and tail components; for new combinations of known components, take the minimum pessimistic score from held_head and held_tail policies.",
+    "Round-transfer is diagnostic only and is prohibited as a reward or qualification source.",
+    "Filtering may rank in-domain candidates by pessimistic score; reward fine-tuning additionally requires an applicability-domain gate and serialized full-data base estimators."
+  ]
+}

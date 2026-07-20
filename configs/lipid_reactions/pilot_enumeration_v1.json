@@ -1,0 +1,91 @@
+{
+  "release_id": "compose_lipid_r1_route_certified_pilot_v1",
+  "registry_path": "configs/lipid_reactions/pilot_literature_specs_v1.json",
+  "seed": "compose-lipid-r1-v1",
+  "target_unique_products": 100000,
+  "stages": [
+    {
+      "name": "chemistry_smoke",
+      "target_unique_products": 1000
+    },
+    {
+      "name": "coverage_pilot",
+      "target_unique_products": 50000
+    },
+    {
+      "name": "r1_pilot",
+      "target_unique_products": 100000
+    }
+  ],
+  "stratification": {
+    "axes": [
+      "reaction_family",
+      "head_class",
+      "linker_class",
+      "tail_class",
+      "degradability_class",
+      "size_bin",
+      "charge_bin",
+      "branching_bin",
+      "unsaturation_bin"
+    ],
+    "quota_per_observed_stratum": 256,
+    "selection": "deterministic_hash_reservoir_then_round_robin",
+    "exact_structure_deduplication": "disk_backed_sha256_of_canonical_isomeric_smiles"
+  },
+  "hard_gates": {
+    "required_reaction_status": "qualified_for_enumeration",
+    "single_connected_product": true,
+    "route_replay_required": true,
+    "reported_positive_reproduction_required": true,
+    "known_negative_rejection_required": true,
+    "max_heavy_atoms": 128,
+    "allowed_elements": [
+      "C",
+      "N",
+      "O",
+      "F",
+      "P",
+      "S",
+      "Si"
+    ],
+    "arbitrary_stereoisomer_enumeration": false,
+    "prospective_structures_allowed": false
+  },
+  "split_contract": {
+    "canonical_structure": "hard_group",
+    "source_study": "hard_group",
+    "head_component": "held_component_group",
+    "linker_or_body_component": "held_component_group",
+    "tail_component": "held_component_group",
+    "reaction_family": "held_family_group",
+    "linker_or_scaffold_class": "held_architecture_group",
+    "prospective_campaign": "hard_lock"
+  },
+  "reactions": [
+    {
+      "reaction_id": "amine_epoxide_opening",
+      "architecture_tags": {
+        "linker_class": "unresolved_until_qualification",
+        "degradability_class": "unresolved_until_qualification"
+      },
+      "role_sources": {}
+    },
+    {
+      "reaction_id": "aza_michael_amine_acrylate",
+      "architecture_tags": {
+        "linker_class": "unresolved_until_qualification",
+        "degradability_class": "unresolved_until_qualification"
+      },
+      "role_sources": {}
+    },
+    {
+      "reaction_id": "ugi_3cr_agile",
+      "architecture_tags": {
+        "linker_class": "unresolved_until_qualification",
+        "degradability_class": "unresolved_until_qualification"
+      },
+      "role_sources": {}
+    }
+  ]
+}

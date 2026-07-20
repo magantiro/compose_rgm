@@ -1,16 +1,30 @@
 # Project status — 2026-07-19
 
-> **18:35 EDT live override:** the bounded 750-update fresh-optimizer
-> continuation from step 2,500 has completed and early-stopped after three
-> non-improving evaluations.  Its validation losses were 12.0112, 12.0760, and
-> 12.0837 at steps 250/500/750 versus the selected baseline 11.6914; the
-> original step-2,500 weights remain selected at 58.08% validation family
-> accuracy.  The `1e-4` continuation is retired.  The next bounded arm transfers
-> the 109 name-and-shape-compatible tensors from the stronger legacy checkpoint
-> into the corrected quotient executor, leaves the resized ring-template table
-> and four new ring-role tensors freshly initialized, and reuses all existing
-> path, evaluation, and exact sparse-support caches.  The current decision
-> schedule and 48-hour work boundary are in
+> **Live override:** both bounded continuations have completed and
+> are retired.  The fresh-optimizer arm failed to improve the selected
+> step-2,500 quotient checkpoint.  The legacy-transfer arm copied 109
+> name-and-shape-compatible tensors and trained for 500 cached updates; its best
+> validation point was step 400 at loss 12.7654 and 53.81% family accuracy,
+> versus the incumbent's loss 11.6977 and 58.08%.  It was therefore rejected
+> before rollout or FCD evaluation.  The original step-2,500 quotient weights
+> remain selected.  Their 100-sample replay localizes the main chemistry error:
+> every new three/four-member ring came from whole-ring grow, even though those
+> topologies comprise only 3.01% of the catalog base measure.  The next bounded
+> support-versus-neural-logit audit is now complete.  It found that late states
+> can retain only 2--5 executable ring templates and that every surviving
+> template is a 3/4-member topology, forcing a small ring after the family head
+> selects ring-grow.  A matched inference-only support ablation is running; no
+> new operator or full cache build is authorized before its result.  Both
+> bounded cached retraining arms are now stopped.  The hierarchical control
+> plateaued at 52.67% family accuracy at step 1,000.  The superposed marked-rate
+> arm briefly reached 56.94% at step 750, then declined to 55.07% and 54.61%
+> at steps 1,000 and 1,250.  Neither approaches the retained pancake
+> checkpoint's 84.44%, so no more GPU updates are authorized on those
+> formulations.  Work has returned to the exact step-6,250 pancake model: a
+> 100-sample inference rescue is running with canonical self-Grafts removed,
+> and a validity-certified early-ring schedule is locally verified before any
+> retraining decision.
+> The current decision schedule and 48-hour work boundary are in
 > [`48_HOUR_RESULTS_TRACKER.md`](48_HOUR_RESULTS_TRACKER.md).
 
 This is the operational status for the current working tree. It separates
@@ -61,8 +75,12 @@ evidence so a collaborator can tell what is actually running.
   cannot silently fall back to online chemistry. Cache identity includes the
   path/sampling signature and ring-support semantics, so neural and optimizer
   changes reuse it while rewrite-semantic changes invalidate it.
-- The full local suite passes: **313 tests** with `PYTHONPATH=src`, with two
-  non-failing warnings.
+- The full local suite passes **339 tests** with `PYTHONPATH=.:src`, with one
+  pre-existing non-failing tensor-conversion warning.  This includes the new
+  ring-calibration helper, checkpoint-evaluator integration, sampling-support
+  fallback, and distributed-rollout cache identity checks.
+- This includes exact adjacent-commutation scheduling and legacy pancake
+  checkpoint compatibility.
 
 ## Completed cloud gates
 

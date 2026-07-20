@@ -1,0 +1,107 @@
+{
+  "format": "compose_v4_qed_step1000_target_response_v1",
+  "checkpoint": {
+    "run_label": "compose-v4-qed-conditioned-step1000-continuation-20260720-v1",
+    "remote_path": "/artifacts/compose-v4-qed-conditioned-step1000-continuation-20260720-v1/checkpoint.pt",
+    "sha256": "76ddbba66838d4e3173a9e9278aea8453d54cb845384ea51241590773452b5c4",
+    "selected_step": 1000
+  },
+  "matched_sampling": {
+    "trajectory_seed": 20260721,
+    "attempts_per_condition": 10,
+    "max_atoms": 40,
+    "operational_horizon": 16.0,
+    "time_step": 0.1,
+    "max_events": 128,
+    "ancestral_ctmc": true,
+    "beam_search": false,
+    "all_attempts_in_denominator": true
+  },
+  "classifier_free": {
+    "attempts": 10,
+    "valid": 10,
+    "unique_valid": 10,
+    "mean_qed": 0.5783989126450764,
+    "qed_standard_deviation": 0.143212988556633,
+    "minimum_qed": 0.33424518093002165,
+    "maximum_qed": 0.8024781380445363,
+    "mean_events": 33.1,
+    "intermediate_states_audited": 341,
+    "all_intermediate_states_valid_and_connected": true,
+    "event_budget_exhaustions": 0,
+    "virtual_events": 0
+  },
+  "conditions": [
+    {
+      "label": "qed_0.7",
+      "target_qed": 0.7,
+      "attempts": 10,
+      "valid": 10,
+      "unique_valid": 10,
+      "mean_qed": 0.6037368617025186,
+      "qed_standard_deviation": 0.12117147503683531,
+      "minimum_qed": 0.3733312846320608,
+      "maximum_qed": 0.7640259267866863,
+      "mean_absolute_error": 0.12156893971692469,
+      "within_0.1": 6,
+      "mean_events": 28.7,
+      "mean_shift_vs_classifier_free": 0.025337949057442244,
+      "paired_improved_attempts": 5,
+      "qed_at_least_0.8": 0,
+      "qed_at_least_0.9": 0,
+      "intermediate_states_audited": 297,
+      "all_intermediate_states_valid_and_connected": true,
+      "event_budget_exhaustions": 0,
+      "virtual_events": 0,
+      "remote_artifact_dir": "/artifacts/compose-v4-qed-conditioned-step1000-target070-eval10-20260720-v1",
+      "step500_to_step1000": {
+        "mean_qed_delta": -0.008678565929630788,
+        "within_0.1_count_delta": 2,
+        "maximum_qed_delta": -0.08373666723069595,
+        "valid_count_delta": 0,
+        "unique_valid_count_delta": 0,
+        "mean_events_delta": 2.0,
+        "target_control_shift_delta": -0.012570372583577988
+      }
+    },
+    {
+      "label": "qed_0.9",
+      "target_qed": 0.9,
+      "attempts": 10,
+      "valid": 10,
+      "unique_valid": 10,
+      "mean_qed": 0.5979681151400097,
+      "qed_standard_deviation": 0.18523358462411943,
+      "minimum_qed": 0.312724285648231,
+      "maximum_qed": 0.8623199645090021,
+      "mean_absolute_error": 0.30203188485999033,
+      "within_0.1": 1,
+      "mean_events": 24.8,
+      "mean_shift_vs_classifier_free": 0.019569202494933324,
+      "paired_improved_attempts": 5,
+      "qed_at_least_0.8": 1,
+      "qed_at_least_0.9": 0,
+      "intermediate_states_audited": 258,
+      "all_intermediate_states_valid_and_connected": true,
+      "event_budget_exhaustions": 0,
+      "virtual_events": 0,
+      "remote_artifact_dir": "/artifacts/compose-v4-qed-conditioned-step1000-target090-eval10-20260720-v1",
+      "step500_to_step1000": {
+        "mean_qed_delta": -0.04386614764566932,
+        "within_0.1_count_delta": 0,
+        "maximum_qed_delta": 0.04649470902460917,
+        "valid_count_delta": 0,
+        "unique_valid_count_delta": 0,
+        "mean_events_delta": 0.8000000000000007,
+        "target_control_shift_delta": -0.04775795429961646
+      }
+    }
+  ],
+  "decision": {
+    "continued_training_improved_generator_matching_loss": true,
+    "continued_training_improved_average_high_qed_steering": false,
+    "qed_at_least_0.9_outputs": 0,
+    "griddd_benchmark_authorized": false,
+    "next_gate": "common valid-successor QED oracle tilt on 100 saved states"
+  }
+}

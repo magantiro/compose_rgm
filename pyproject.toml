@@ -29,6 +29,12 @@ cloud = [
 eval = [
     "fcd-torch==1.0.7",
 ]
+oracle = [
+    "joblib>=1.3",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+    "xgboost>=2.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

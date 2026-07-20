@@ -1,0 +1,258 @@
+{
+  "rows": [
+    {
+      "after": "C=C(C(C)=Cc1c(C(C)C)ccc2c1CC(C(C)C)CN2C)C(C)CC(C)CCC(C)CC(C)CC",
+      "before": "C=C(C(C)=CCC(CCC(CC)C(C)CCC(C)C)C(C)C)C(C)CC(C)CCC(C)CC(C)CC",
+      "legal_small_template_count": 120,
+      "legal_template_count": 808,
+      "new_ring_sizes": [
+        6,
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 0,
+      "small_mass_prior_given_support": 0.02938488870859146,
+      "small_mass_production": 0.025453725829720497,
+      "small_mass_residual_given_support": 0.17380937933921814,
+      "small_mass_uniform_support": 0.1485148514851485,
+      "time": 1.693389621947339
+    },
+    {
+      "after": "C=C(C(C)=Cc1c(C(C)C)ccc2c1CC(C(C)C)CN2C)C1(C)C=C(C)c2cc(C)cc(C)c2C1",
+      "before": "C=C(C(C)=Cc1c(C(C)C)ccc2c1CC(C(C)C)CN2C)C(C)CC(C)CCC(C)CC(C)CC",
+      "legal_small_template_count": 102,
+      "legal_template_count": 653,
+      "new_ring_sizes": [
+        6,
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 1,
+      "small_mass_prior_given_support": 0.030591102316975594,
+      "small_mass_production": 0.017180370166897774,
+      "small_mass_residual_given_support": 0.1468498408794403,
+      "small_mass_uniform_support": 0.1562021439509954,
+      "time": 2.2217260272650683
+    },
+    {
+      "after": "C=C(C(C)=Cc1c(C(C)C)ccc2c1CC(N1CC1)CN2C)C1(C)C=C(C)c2cc(C)cc(C)c2C1",
+      "before": "C=C(C(C)=Cc1c(C(C)C)ccc2c1CC(C(C)C)CN2C)C1(C)C=C(C)c2cc(C)cc(C)c2C1",
+      "legal_small_template_count": 2,
+      "legal_template_count": 2,
+      "new_ring_sizes": [
+        3
+      ],
+      "observed_small_ring": true,
+      "row": 2,
+      "small_mass_prior_given_support": 0.9999999403953552,
+      "small_mass_production": 1.0,
+      "small_mass_residual_given_support": 1.0,
+      "small_mass_uniform_support": 1.0,
+      "time": 2.3465922416746197
+    },
+    {
+      "after": "C=C(C(C)=Cc1c(N2CN2)ccc2c1CC(N1CC1)CN2C)C1(C)C=C(C)c2cc(C)cc(C)c2C1",
+      "before": "C=C(C(C)=Cc1c(C(C)C)ccc2c1CC(N1CC1)CN2C)C1(C)C=C(C)c2cc(C)cc(C)c2C1",
+      "legal_small_template_count": 2,
+      "legal_template_count": 2,
+      "new_ring_sizes": [
+        3
+      ],
+      "observed_small_ring": true,
+      "row": 3,
+      "small_mass_prior_given_support": 0.9999999403953552,
+      "small_mass_production": 1.0,
+      "small_mass_residual_given_support": 1.0,
+      "small_mass_uniform_support": 1.0,
+      "time": 2.5236762939165005
+    },
+    {
+      "after": "CC(N)CCCC(C)CCC1CC(C)(F)C=C1OC(C)C",
+      "before": "CC(N)CCCC(C)CCC(COC(C)C)CC(C)(C)F",
+      "legal_small_template_count": 90,
+      "legal_template_count": 469,
+      "new_ring_sizes": [
+        5
+      ],
+      "observed_small_ring": false,
+      "row": 4,
+      "small_mass_prior_given_support": 0.03250060975551605,
+      "small_mass_production": 0.020123952999711037,
+      "small_mass_residual_given_support": 0.16657301783561707,
+      "small_mass_uniform_support": 0.19189765458422176,
+      "time": 5.119093466980576
+    },
+    {
+      "after": "Cc1cc(C2CC(C)(F)C=C2OC(C)C)c(C(C)N)cn1",
+      "before": "CC(N)CCCC(C)CCC1CC(C)(F)C=C1OC(C)C",
+      "legal_small_template_count": 54,
+      "legal_template_count": 113,
+      "new_ring_sizes": [
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 5,
+      "small_mass_prior_given_support": 0.035310566425323486,
+      "small_mass_production": 0.04637269675731659,
+      "small_mass_residual_given_support": 0.6849706768989563,
+      "small_mass_uniform_support": 0.4778761061946903,
+      "time": 5.7731171358282145
+    },
+    {
+      "after": "CCCCC(=O)OC1CCN(C)N(C(=O)C(CCC(C)C(F)CC)C(C)CCCC)N1",
+      "before": "CCCCC(=O)OC(C)CCC(C)CC(=O)C(CCC(C)C(F)CC)C(C)CCCC",
+      "legal_small_template_count": 127,
+      "legal_template_count": 1098,
+      "new_ring_sizes": [
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 6,
+      "small_mass_prior_given_support": 0.029193099588155746,
+      "small_mass_production": 0.023289456963539124,
+      "small_mass_residual_given_support": 0.12463027238845825,
+      "small_mass_uniform_support": 0.11566484517304189,
+      "time": 1.6946118062478783
+    },
+    {
+      "after": "CCCCC(=O)OC1CCN(C)N(C(=O)c2cc(C(C)C(F)CC)n3ccccc23)N1",
+      "before": "CCCCC(=O)OC1CCN(C)N(C(=O)C(CCC(C)C(F)CC)C(C)CCCC)N1",
+      "legal_small_template_count": 88,
+      "legal_template_count": 561,
+      "new_ring_sizes": [
+        5,
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 7,
+      "small_mass_prior_given_support": 0.030954256653785706,
+      "small_mass_production": 0.020744701847434044,
+      "small_mass_residual_given_support": 0.1726711243391037,
+      "small_mass_uniform_support": 0.1568627450980392,
+      "time": 1.9046800622880327
+    },
+    {
+      "after": "CCCCC(=O)OC1CCN(C)N(C(=O)c2cc(C3CNCC3F)n3ccccc23)N1",
+      "before": "CCCCC(=O)OC1CCN(C)N(C(=O)c2cc(C(C)C(F)CC)n3ccccc23)N1",
+      "legal_small_template_count": 5,
+      "legal_template_count": 12,
+      "new_ring_sizes": [
+        5
+      ],
+      "observed_small_ring": false,
+      "row": 8,
+      "small_mass_prior_given_support": 0.15250928699970245,
+      "small_mass_production": 0.16582190990447998,
+      "small_mass_residual_given_support": 0.5263198614120483,
+      "small_mass_uniform_support": 0.4166666666666667,
+      "time": 1.9762750152008308
+    },
+    {
+      "after": "CN1CCC(OC(=O)C2CCC2)NN1C(=O)c1cc(C2CNCC2F)n2ccccc12",
+      "before": "CCCCC(=O)OC1CCN(C)N(C(=O)c2cc(C3CNCC3F)n3ccccc23)N1",
+      "legal_small_template_count": 5,
+      "legal_template_count": 5,
+      "new_ring_sizes": [
+        4
+      ],
+      "observed_small_ring": true,
+      "row": 9,
+      "small_mass_prior_given_support": 1.0,
+      "small_mass_production": 1.0000001192092896,
+      "small_mass_residual_given_support": 1.0,
+      "small_mass_uniform_support": 1.0,
+      "time": 2.2198274424032958
+    },
+    {
+      "after": "Cc1c(CCC(N)CC(C)C)cnc2c1CC(O)CC2O",
+      "before": "CC(C)CC(N)CCC(C)C(C)CC(C)C(O)CC(C)O",
+      "legal_small_template_count": 114,
+      "legal_template_count": 802,
+      "new_ring_sizes": [
+        6,
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 10,
+      "small_mass_prior_given_support": 0.02986075170338154,
+      "small_mass_production": 0.02174643985927105,
+      "small_mass_residual_given_support": 0.16212198138237,
+      "small_mass_uniform_support": 0.14214463840399003,
+      "time": 1.5468038139439322
+    },
+    {
+      "after": "Cc1cc(-c2cnc3c(c2C)CC(O)CC3O)cc(N)n1",
+      "before": "Cc1c(CCC(N)CC(C)C)cnc2c1CC(O)CC2O",
+      "legal_small_template_count": 23,
+      "legal_template_count": 45,
+      "new_ring_sizes": [
+        6
+      ],
+      "observed_small_ring": false,
+      "row": 11,
+      "small_mass_prior_given_support": 0.034309085458517075,
+      "small_mass_production": 0.023575402796268463,
+      "small_mass_residual_given_support": 0.6786136627197266,
+      "small_mass_uniform_support": 0.5111111111111111,
+      "time": 1.6869099168518626
+    }
+  ],
+  "summary": {
+    "audited_state_count": 12,
+    "checkpoint_selected_validation": {
+      "factorized_gm_loss": 11.697665393352509,
+      "family_accuracy": 0.5807743658210948,
+      "family_accuracy_atom_delete": 0.3717948717948718,
+      "family_accuracy_atom_insert": 0.2945205479452055,
+      "family_accuracy_atom_restate": 0.6020761245674741,
+      "family_accuracy_bond_reorder": 0.22395833333333334,
+      "family_accuracy_bond_reroute": 0.8226950354609929,
+      "family_accuracy_cycle_attach": 0.0,
+      "family_accuracy_cycle_insert": 0.0,
+      "family_accuracy_ring_system_delete": 0.0,
+      "family_accuracy_ring_system_grow": 0.6986301369863014,
+      "family_accuracy_ring_system_restate": 0.0,
+      "importance_weighted_mean_absolute_hazard_error": 1.487548931284141,
+      "learning_rate": 4.221507830157e-05,
+      "mean_absolute_hazard_error": 3.534114956855774,
+      "mean_predicted_hazard": 6.982925206422806,
+      "mean_teacher_hazard": 8.42822265625,
+      "mean_teacher_mark_probability": 0.09242353531642654,
+      "mean_teacher_mark_probability_atom_delete": 0.034735485177057296,
+      "mean_teacher_mark_probability_atom_insert": 0.16841396774354309,
+      "mean_teacher_mark_probability_atom_restate": 0.1553222964997935,
+      "mean_teacher_mark_probability_bond_reorder": 0.04758236565006276,
+      "mean_teacher_mark_probability_bond_reroute": 0.0666394401385711,
+      "mean_teacher_mark_probability_cycle_attach": 0.0,
+      "mean_teacher_mark_probability_cycle_insert": 0.0,
+      "mean_teacher_mark_probability_ring_system_delete": 0.0,
+      "mean_teacher_mark_probability_ring_system_grow": 0.08983163687094331,
+      "mean_teacher_mark_probability_ring_system_restate": 0.0,
+      "mean_terminal_hazard": 0.13856098700653424,
+      "selected_step": 2500.0,
+      "teacher_examples_atom_delete": 156.0,
+      "teacher_examples_atom_insert": 146.0,
+      "teacher_examples_atom_restate": 289.0,
+      "teacher_examples_bond_reorder": 192.0,
+      "teacher_examples_bond_reroute": 423.0,
+      "teacher_examples_cycle_attach": 0.0,
+      "teacher_examples_cycle_insert": 0.0,
+      "teacher_examples_ring_system_delete": 0.0,
+      "teacher_examples_ring_system_grow": 292.0,
+      "teacher_examples_ring_system_restate": 0.0
+    },
+    "mean_masses": {
+      "small_mass_prior_given_support": 0.2837177940333883,
+      "small_mass_production": 0.280359064694494,
+      "small_mass_residual_given_support": 0.4863799847662449,
+      "small_mass_uniform_support": 0.44307839688899203
+    },
+    "observed_small_event_fraction": 0.25,
+    "ring_event_count": 265,
+    "rollout_count": 100,
+    "small_template_count": 285,
+    "template_count": 3092,
+    "unconditional_catalog_small_mass": 0.030172288417816162,
+    "unique_ring_event_state_count": 265
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "registry_version": "pilot_literature_specs_v1",
+  "reactions": [
+    {
+      "reaction_id": "amine_epoxide_opening",
+      "reaction_version": 1,
+      "status": "literature_spec",
+      "architecture": "aminoalcohol lipidoid; source example continues in situ to a four-tail degradable branched lipidoid",
+      "sources": [
+        {
+          "kind": "doi",
+          "identifier": "10.1038/s41467-024-45537-z",
+          "locator": "Figure 1a and Results, Design and construction of DB-lipidoids",
+          "notes": "The source states that a primary amine opens alkyl epoxide twice under neat conditions before acyl-chloride derivatization. This entry covers only the first ring-opening stage; the acylation stage requires a separate registry entry."
+        }
+      ],
+      "reactant_roles": [
+        {
+          "name": "primary_amine_head",
+          "count": 1,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        },
+        {
+          "name": "alkyl_epoxide_body_tail",
+          "count": 2,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        }
+      ],
+      "atom_mapped_reaction_smarts": null,
+      "selectivity_policy": "UNRESOLVED: extract the exact epoxide regioselectivity, primary-amine multiplicity, competing-nucleophile exclusions, and accepted mono- versus bis-substitution products from the source supplement before validation.",
+      "stereochemistry_policy": "UNRESOLVED: preserve source-declared epoxide stereochemistry; do not enumerate unspecified stereoisomers.",
+      "protonation_and_salt_policy": "Register the neutral isolated product and retain any reported salt separately.",
+      "conditions": {
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null,
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null
+      },
+      "known_positive_examples": [],
+      "known_negative_examples": [],
+      "implementation": {
+        "enumerator": null,
+        "test_manifest": null,
+        "artifact_hash": null
+      }
+    },
+    {
+      "reaction_id": "aza_michael_amine_acrylate",
+      "reaction_version": 1,
+      "status": "literature_spec",
+      "architecture": "multi-tail beta-amino ester or beta-amino amide lipidoid",
+      "sources": [
+        {
+          "kind": "doi",
+          "identifier": "10.1038/nbt1402",
+          "locator": "Figure 1 and Supplementary Methods/selected characterized lipidoids",
+          "notes": "The primary paper reports a >1,200-member lipidoid library; the supplement distinguishes acrylate- and acrylamide-based products. Exact substrate/product examples must be transcribed before a transform is encoded."
+        }
+      ],
+      "reactant_roles": [
+        {
+          "name": "amine_head",
+          "count": 1,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        },
+        {
+          "name": "alkyl_acrylate_or_acrylamide_tail",
+          "count": 1,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        }
+      ],
+      "atom_mapped_reaction_smarts": null,
+      "selectivity_policy": "UNRESOLVED: encode amine functionality, substitution count, stoichiometry, incomplete-addition products, and acrylate-versus-acrylamide scope as separately tested cases.",
+      "stereochemistry_policy": "UNRESOLVED: do not create stereocenters with arbitrary configuration.",
+      "protonation_and_salt_policy": "Register the neutral isolated product and retain any reported salt separately.",
+      "conditions": {
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null,
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null
+      },
+      "known_positive_examples": [],
+      "known_negative_examples": [],
+      "implementation": {
+        "enumerator": null,
+        "test_manifest": null,
+        "artifact_hash": null
+      }
+    },
+    {
+      "reaction_id": "ugi_3cr_agile",
+      "reaction_version": 1,
+      "status": "literature_spec",
+      "architecture": "asymmetric two-tail Ugi-derived ionizable lipid",
+      "sources": [
+        {
+          "kind": "doi",
+          "identifier": "10.1038/s41467-024-50619-z",
+          "locator": "Figures 1b and 2a; Methods, Virtual library and Experimental library",
+          "notes": "AGILE reports 20 heads, 12 ester-bearing carbon chains and 5 isocyanide-bearing carbon chains for the 1,200-member experimental library. The released notebook performs fixed-core wildcard stitching and is not itself an atom-mapped reaction transform."
+        },
+        {
+          "kind": "supplement",
+          "identifier": "AGILE repository commit b50fe3df876edb5cb0cd36302cb1c476fef7421a",
+          "locator": "https://github.com/bowang-lab/AGILE/blob/b50fe3df876edb5cb0cd36302cb1c476fef7421a/ugi_3CR_agile_reaction_virtual.ipynb",
+          "notes": "Use only as evidence of the released library's component conventions. Do not promote it to an executable chemistry certificate."
+        }
+      ],
+      "reactant_roles": [
+        {
+          "name": "amine_head",
+          "count": 1,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        },
+        {
+          "name": "aldehyde_ester_tail",
+          "count": 1,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        },
+        {
+          "name": "isocyanide_tail",
+          "count": 1,
+          "required_handle_smarts": null,
+          "mapped_reactive_atoms": [],
+          "forbidden_smarts": [],
+          "allowed_site_multiplicity": []
+        }
+      ],
+      "atom_mapped_reaction_smarts": null,
+      "selectivity_policy": "UNRESOLVED: recover the exact AGILE 3CR mechanism, core contribution, chemoselectivity constraints, and atom mapping from the source supplement and validate against released A/B/C components and full products.",
+      "stereochemistry_policy": "Preserve any substrate stereochemistry; do not assign an unspecified Ugi product stereocenter.",
+      "protonation_and_salt_policy": "Register neutral full-molecule products matching the released AGILE SMILES.",
+      "conditions": {
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null,
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null
+      },
+      "known_positive_examples": [],
+      "known_negative_examples": [],
+      "implementation": {
+        "enumerator": null,
+        "test_manifest": null,
+        "artifact_hash": null
+      }
+    }
+  ]
+}

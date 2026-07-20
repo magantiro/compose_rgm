@@ -1,0 +1,40 @@
+{
+  "format": "compose_lipid_source_manifest_v1",
+  "name": "lut_444_systemic_lung_v1",
+  "article": "https://www.nature.com/articles/s41551-026-01615-9",
+  "doi": "10.1038/s41551-026-01615-9",
+  "license": "CC BY 4.0",
+  "accessed": "2026-07-20",
+  "artifacts": [
+    {
+      "role": "figure_2_source_data",
+      "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41551-026-01615-9/MediaObjects/41551_2026_1615_MOESM3_ESM.xlsx",
+      "path": "tmp/lipid_data/lut/source_data_fig2.xlsx",
+      "sha256": "8e2f196eaab0f7dcce582285ad6cb71960b1c68695603d8d57c9341e452fb26c"
+    },
+    {
+      "role": "figure_3_source_data",
+      "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41551-026-01615-9/MediaObjects/41551_2026_1615_MOESM4_ESM.xlsx",
+      "path": "tmp/lipid_data/lut/source_data_fig3.xlsx",
+      "sha256": "bb02584e7661d5d9448f6b2cd0b6b564a034be6505fcc80409459c56381cad98"
+    }
+  ],
+  "extracted_table": {
+    "path": "tmp/lipid_data/lut/lut_444_source_table.csv",
+    "sha256": "231c87652ef80fc5af4aaa5e561799e14ed9949d8bce6ee803b4e877db594491",
+    "rows": 444,
+    "round_counts": {"1": 318, "2": 126},
+    "dotap_controls_excluded": true,
+    "endpoints": [
+      "systemic_iv_lung_expression_log10_photons_per_second",
+      "systemic_iv_lung_selectivity_fraction"
+    ]
+  },
+  "biological_context": {
+    "route": "intravenous",
+    "cargo": "luciferase mRNA",
+    "dose_mg_per_kg": 0.1,
+    "time_hours": 6,
+    "species_strain": "C57BL/6 mouse"
+  }
+}

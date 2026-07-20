@@ -1,0 +1,40 @@
+{
+  "checkpoint": {
+    "path": null,
+    "property_condition_dim": 0,
+    "sha256": null,
+    "source_checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "weight_source": "step6250_pancake_plus_panel_quotient_distilled_family_hazard_heads"
+  },
+  "decision": {
+    "decision_path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/artifacts/canonical_successor_backbone_qualification/decision.json",
+    "qualification_passed": false
+  },
+  "evidence": {
+    "heldout_rate_gate": {
+      "metrics": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/artifacts/canonical_successor_backbone_qualification/rate_metrics.json",
+      "passed": false
+    },
+    "multi_state_panel": {
+      "manifest": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/artifacts/canonical_successor_backbone_qualification/panel_manifest.json",
+      "passed": true,
+      "state_count": 24
+    },
+    "rollout_gate": {
+      "metrics": null,
+      "passed": false,
+      "run": false
+    }
+  },
+  "execution": {
+    "canonical_successor_execution": true,
+    "molecular_self_transitions_virtualized": true,
+    "required_sampling_wrapper": "CanonicalHistoryThinningSampler"
+  },
+  "format": "compose_v4_canonical_successor_backbone_qualification_v1",
+  "model_modes": {
+    "empirical_mark_prior_mode": "none",
+    "p1_p2_imported": false,
+    "ring_family_mass_mode": "boolean"
+  }
+}

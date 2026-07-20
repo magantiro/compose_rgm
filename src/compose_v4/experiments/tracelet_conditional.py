@@ -73,10 +73,15 @@ class TraceletRollout:
     event_rules: tuple[str, ...]
     exhausted_event_budget: bool
     diagnostics: CompactTrajectoryDiagnostics | None = None
+    virtual_event_times: tuple[float, ...] = ()
+    virtual_event_rules: tuple[str, ...] = ()
+    control_diagnostics: dict[str, object] | None = None
 
     def __post_init__(self) -> None:
         if len(self.event_times) != len(self.event_rules):
             raise ValueError("rollout event times and rules must be aligned")
+        if len(self.virtual_event_times) != len(self.virtual_event_rules):
+            raise ValueError("virtual event times and rules must be aligned")
         if self.diagnostics is not None:
             validate_rollout_trajectory_diagnostics(self)
 
@@ -1128,18 +1133,33 @@ def sample_tracelet_ancestral(
     cached_fibers = fiber_cache if fiber_cache is not None else {}
     cached_rates = rate_cache if rate_cache is not None else {}
     state = (source_prior or NullSourcePrior()).sample(rng, n_slots=n_slots)
+    begin_rollout_audit = getattr(model, "begin_rollout_audit", None)
+    if callable(begin_rollout_audit):
+        begin_rollout_audit()
     event_times = []
     event_rules = []
+    virtual_event_times = []
+    virtual_event_rules = []
     observations = [compact_state_observation(state)]
     operational_time = 0.0
     direct_mark_sampler = getattr(model, "sample_rewrite_mark", None)
+    hazard_probe_sampler = getattr(model, "sample_hazard_probe", None)
+    post_event_mark_sampler = getattr(
+        model,
+        "resample_rewrite_mark_after_event",
+        None,
+    )
     direct_runtime = de_novo_rewrite_system() if callable(direct_mark_sampler) else None
     while operational_time < operational_horizon and len(event_times) < max_events:
         interval_end = min(operational_time + time_step, operational_horizon)
         frozen_time = 1.0 - exp(-(operational_time + interval_end) / 2.0)
         while operational_time < interval_end and len(event_times) < max_events:
             if callable(direct_mark_sampler):
-                sampled = direct_mark_sampler(state, frozen_time, rng)
+                sampled = (
+                    hazard_probe_sampler(state, frozen_time, rng)
+                    if callable(hazard_probe_sampler)
+                    else direct_mark_sampler(state, frozen_time, rng)
+                )
                 total_hazard = float(sampled.total_hazard)
                 if total_hazard <= 1e-12:
                     operational_time = interval_end
@@ -1150,6 +1170,27 @@ def sample_tracelet_ancestral(
                     operational_time = interval_end
                     break
                 operational_time += waiting_time
+                if callable(post_event_mark_sampler):
+                    selected = post_event_mark_sampler(
+                        state,
+                        frozen_time,
+                        rng,
+                        sampled,
+                    )
+                    if not np.isclose(
+                        float(selected.total_hazard),
+                        total_hazard,
+                        rtol=1e-5,
+                        atol=1e-8,
+                    ):
+                        raise RuntimeError(
+                            "post-event mark selection changed the CTMC hazard"
+                        )
+                    sampled = selected
+                if sampled.action is None and sampled.rule_name.startswith("<VIRTUAL_"):
+                    virtual_event_times.append(operational_time)
+                    virtual_event_rules.append(sampled.rule_name)
+                    continue
                 assert direct_runtime is not None
                 state = direct_runtime.apply(
                     state,
@@ -1218,10 +1259,24 @@ def sample_tracelet_ancestral(
             event_times.append(operational_time)
             event_rules.append(selected.rule_name)
             observations.append(compact_state_observation(state))
+    finalize_rollout_audit = getattr(model, "finalize_rollout_audit", None)
+    end_rollout_audit = getattr(model, "end_rollout_audit", None)
+    if callable(finalize_rollout_audit):
+        # Budget-exact controllers may need the terminal molecule to consume
+        # an explicitly declared non-selecting oracle allowance when a path
+        # ends before all productive control opportunities occur.
+        control_diagnostics = finalize_rollout_audit(state)
+    else:
+        control_diagnostics = (
+            end_rollout_audit() if callable(end_rollout_audit) else None
+        )
     return TraceletRollout(
         final_state=state,
         event_times=tuple(event_times),
         event_rules=tuple(event_rules),
         exhausted_event_budget=len(event_times) >= max_events,
         diagnostics=build_compact_trajectory_diagnostics(observations),
+        virtual_event_times=tuple(virtual_event_times),
+        virtual_event_rules=tuple(virtual_event_rules),
+        control_diagnostics=control_diagnostics,
     )

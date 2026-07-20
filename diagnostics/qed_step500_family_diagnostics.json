@@ -1,0 +1,49 @@
+{
+  "format": "compose_v4_factorized_family_diagnostics_v1",
+  "checkpoint": {
+    "remote_path": "/artifacts/compose-v4-qed-conditioned-pilot-20260720-v4/checkpoint.pt",
+    "sha256": "e0624f163c53893fcdcbbb565c4aae5aacad7b3b4247f0d1a45741e8f61bb229",
+    "selected_step": 500
+  },
+  "evaluation": {
+    "precision": "cpu_float32_replay",
+    "microbatch_size": 64,
+    "note": "The immutable training artifact used CUDA BF16 and remains the source of record for its 60.4972% test top-1 result. This float32 replay adds diagnostics that do not change training or sampling semantics. One near-tie changes the replayed top-1 result to 60.2210%."
+  },
+  "validation": {
+    "nonterminal_examples": 191,
+    "represented_families": 6,
+    "top1_family_accuracy": 0.5916230366492147,
+    "top3_family_accuracy": 0.8586387434554974,
+    "balanced_top1_family_accuracy": 0.5182198461119484,
+    "balanced_top3_family_accuracy": 0.8147885978809226,
+    "mean_teacher_family_probability": 0.5522522451989937,
+    "mean_teacher_mark_probability": 0.09022658408000207,
+    "families": {
+      "atom_insert": {"examples": 20, "top1": 0.15, "top3": 0.5, "teacher_family_probability": 0.1783312952145934, "teacher_mark_probability": 0.09360122885555029},
+      "atom_delete": {"examples": 18, "top1": 0.6111111111111112, "top3": 0.6666666666666666, "teacher_family_probability": 0.42810940742492676, "teacher_mark_probability": 0.0433550915784306},
+      "atom_restate": {"examples": 31, "top1": 0.5483870967741935, "top3": 0.8709677419354839, "teacher_family_probability": 0.564351620212678, "teacher_mark_probability": 0.1520217618634624},
+      "bond_reorder": {"examples": 22, "top1": 0.2727272727272727, "top3": 0.9545454545454546, "teacher_family_probability": 0.31710747155276214, "teacher_mark_probability": 0.03971064293926412},
+      "bond_reroute": {"examples": 58, "top1": 0.7413793103448276, "top3": 0.896551724137931, "teacher_family_probability": 0.6445484490230166, "teacher_mark_probability": 0.08814660228531936},
+      "ring_system_grow": {"examples": 42, "top1": 0.7857142857142857, "top3": 1.0, "teacher_family_probability": 0.7702978111448742, "teacher_mark_probability": 0.09242976066612062}
+    }
+  },
+  "test": {
+    "nonterminal_examples": 362,
+    "represented_families": 6,
+    "top1_family_accuracy": 0.6022099447513812,
+    "top3_family_accuracy": 0.8674033149171271,
+    "balanced_top1_family_accuracy": 0.5525486525486526,
+    "balanced_top3_family_accuracy": 0.8330466256936845,
+    "mean_teacher_family_probability": 0.5351334830015404,
+    "mean_teacher_mark_probability": 0.07380122835464899,
+    "families": {
+      "atom_insert": {"examples": 28, "top1": 0.35714285714285715, "top3": 0.5714285714285714, "teacher_family_probability": 0.263868505866932, "teacher_mark_probability": 0.15349171769672207},
+      "atom_delete": {"examples": 44, "top1": 0.4090909090909091, "top3": 0.75, "teacher_family_probability": 0.31520066342570563, "teacher_mark_probability": 0.03661655482243408},
+      "atom_restate": {"examples": 74, "top1": 0.7702702702702703, "top3": 0.918918918918919, "teacher_family_probability": 0.6405963060018178, "teacher_mark_probability": 0.13108201123572685},
+      "bond_reorder": {"examples": 51, "top1": 0.3333333333333333, "top3": 0.9215686274509803, "teacher_family_probability": 0.3145206044701969, "teacher_mark_probability": 0.04396252976913078},
+      "bond_reroute": {"examples": 110, "top1": 0.6636363636363637, "top3": 0.8909090909090909, "teacher_family_probability": 0.6153039325367321, "teacher_mark_probability": 0.04390927248380401},
+      "ring_system_grow": {"examples": 55, "top1": 0.7818181818181819, "top3": 0.9454545454545454, "teacher_family_probability": 0.7515101649544456, "teacher_mark_probability": 0.07336308644576506}
+    }
+  }
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,7 @@ from compose_v4.experiments.tracelet_conditional import (
     build_tracelet_path_records,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    FactorizedMarkEmpiricalPriors,
     FactorizedTraceletRateModel,
 )
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
@@ -63,6 +65,86 @@ def test_rollout_checkpoint_is_self_contained(tmp_path: Path) -> None:
     assert payload["checkpoint_kind"] == "selected_evaluation_model"
     assert not loaded.training
     for key, value in expected.state_dict().items():
+        assert torch.equal(loaded.state_dict()[key], value)
+
+
+def test_rollout_checkpoint_restores_empirical_base_measure_configuration(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "checkpoint.pt"
+    expected = _checkpoint(path)
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    uniform_four = (-1.3862943611198906,) * 4
+    uniform_three = (-1.0986122886681098,) * 3
+    uniform_eight = (-2.0794415416798357,) * 8
+    uniform_twelve = (-2.4849066497880004,) * 12
+    priors = FactorizedMarkEmpiricalPriors(
+        root_atom_log_probabilities=uniform_four,
+        connected_atom_order_log_probabilities=tuple(
+            uniform_twelve[index : index + 4] for index in range(0, 12, 4)
+        ),
+        atom_restate_log_probabilities=uniform_four,
+        bond_reorder_log_probabilities=uniform_three,
+        ring_electronic_log_probabilities=uniform_eight,
+    )
+    configured = FactorizedTraceletRateModel(
+        payload["ring_catalog"],
+        hidden_dim=16,
+        message_passing_steps=1,
+        empirical_mark_prior_mode="corpus_residual_v1",
+        empirical_mark_priors=priors,
+        ring_family_mass_mode="catalog_topology_local_support",
+    )
+    configured.load_state_dict(expected.state_dict(), strict=True)
+    payload.update(
+        {
+            "state_dict": configured.state_dict(),
+            "empirical_mark_prior_mode": "corpus_residual_v1",
+            "empirical_mark_priors": priors.to_dict(),
+            "ring_family_mass_mode": "catalog_topology_local_support",
+        }
+    )
+    torch.save(payload, path)
+
+    loaded, _ = load_factorized_rollout_checkpoint(path)
+
+    assert loaded.empirical_mark_prior_mode == "corpus_residual_v1"
+    assert loaded.ring_family_mass_mode == "catalog_topology_local_support"
+    assert torch.equal(loaded.bond_reorder_log_prior, configured.bond_reorder_log_prior)
+    assert torch.equal(
+        loaded.ring_electronic_log_prior,
+        configured.ring_electronic_log_prior,
+    )
+
+
+def test_rollout_checkpoint_restores_hierarchical_ring_template_factorization(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "checkpoint.pt"
+    _checkpoint(path)
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    configured = FactorizedTraceletRateModel(
+        payload["ring_catalog"],
+        hidden_dim=16,
+        message_passing_steps=1,
+        ring_template_factorization="topology_cycle_hierarchical",
+    )
+    payload.update(
+        {
+            "state_dict": configured.state_dict(),
+            "ring_template_factorization": "topology_cycle_hierarchical",
+        }
+    )
+    torch.save(payload, path)
+
+    loaded, loaded_payload = load_factorized_rollout_checkpoint(path)
+
+    assert loaded_payload["ring_template_factorization"] == (
+        "topology_cycle_hierarchical"
+    )
+    assert loaded.ring_template_factorization == "topology_cycle_hierarchical"
+    assert loaded.ring_topology_group_head is not None
+    for key, value in configured.state_dict().items():
         assert torch.equal(loaded.state_dict()[key], value)
 
 
@@ -135,6 +217,42 @@ def test_rollout_checkpoint_uses_selected_best_state_from_recovery(
     for key, value in expected.state_dict().items():
         assert torch.equal(loaded.state_dict()[key], value)
         assert not torch.equal(loaded.state_dict()[key], current_state[key]) or not torch.any(value)
+
+
+def test_legacy_ring_checkpoint_loads_with_neutral_role_logits(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "checkpoint.pt"
+    model = _checkpoint(path)
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    payload.pop("ring_electronic_mode", None)
+    payload["ring_catalog"] = replace(
+        payload["ring_catalog"],
+        ring_system_electronic_alias_version=0,
+        ring_system_electronic_aliases=(),
+        ring_system_electronic_alias_counts=(),
+    )
+    payload["state_dict"] = {
+        name: value
+        for name, value in model.state_dict().items()
+        if not name.startswith("ring_system_role_head.")
+    }
+    torch.save(payload, path)
+
+    loaded, loaded_payload = load_factorized_rollout_checkpoint(path)
+
+    assert (
+        loaded_payload["checkpoint_compatibility"]
+        == "legacy_v0_neutral_ring_role_logits"
+    )
+    role_parameters = tuple(
+        parameter
+        for name, parameter in loaded.named_parameters()
+        if name.startswith("ring_system_role_head.")
+    )
+    assert role_parameters
+    assert all(torch.count_nonzero(parameter) == 0 for parameter in role_parameters)
+    assert loaded.virtualize_legacy_self_grafts is True
 
 
 def test_rollout_checkpoint_rejects_incomplete_recovery_state(tmp_path: Path) -> None:

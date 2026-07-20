@@ -1,0 +1,97 @@
+{
+  "format": "compose_v4_exact_rdkit_conditional_suite_v1",
+  "launch_authorized": false,
+  "qualified_base_required": true,
+  "shared_adapter": {
+    "class": "compose_v4.experiments.canonical_successor_distillation.FrozenExactRDKitResidualAdapter",
+    "kind": "frozen_valid_state_exact_rdkit_residual_v1",
+    "one_separate_sidecar_per_property": true,
+    "base_parameters_frozen": true,
+    "base_weights_in_sidecar_state_dict": false,
+    "family_hazard_residual": true,
+    "within_family_residual": true,
+    "independent_total_hazard_residual": false,
+    "missing_condition_identity": true,
+    "normalizer": "fit each property on the same frozen training partition then freeze"
+  },
+  "execution_order": [
+    "qed",
+    "molecular_weight",
+    "crippen_logp"
+  ],
+  "targets": {
+    "qed": {
+      "priority": 1,
+      "oracle": "rdkit.Chem.QED.qed",
+      "task": "lead_constrained_optimization",
+      "primary_target_minimum": 0.9,
+      "griddd_zinc_reported_reference": {
+        "mae": 0.04,
+        "validity_fraction": 0.872
+      },
+      "launch_config": "configs/experiments/griddd_qed_frozen_residual_launch_v1.json"
+    },
+    "molecular_weight": {
+      "priority": 2,
+      "oracle": "rdkit.Chem.Descriptors.MolWt",
+      "task": "de_novo_target_response_flexible_size_proof",
+      "target_grid": {
+        "method": "frozen_training_partition_quantiles",
+        "quantiles": [
+          0.1,
+          0.5,
+          0.9
+        ],
+        "resolved_values": null
+      },
+      "required_evidence": [
+        "mean_prediction_monotonic_non_decreasing",
+        "mean_heavy_atom_count_monotonic_non_decreasing",
+        "all_attempt_validity",
+        "mae_on_valid_candidates"
+      ],
+      "griddd_zinc_reported_reference": {
+        "mae": 4.89,
+        "validity_fraction": 0.842
+      }
+    },
+    "crippen_logp": {
+      "priority": 3,
+      "oracle": "rdkit.Chem.Crippen.MolLogP",
+      "task": "de_novo_target_response",
+      "target_grid": {
+        "method": "frozen_training_partition_quantiles",
+        "quantiles": [
+          0.1,
+          0.5,
+          0.9
+        ],
+        "resolved_values": null
+      },
+      "required_evidence": [
+        "mean_prediction_monotonic_non_decreasing",
+        "all_attempt_validity",
+        "mae_on_valid_candidates"
+      ],
+      "griddd_zinc_reported_reference": {
+        "mae": 0.19,
+        "validity_fraction": 0.879
+      }
+    }
+  },
+  "evaluator": {
+    "class": "compose_v4.experiments.exact_rdkit_conditioning.ExactRDKitTargetResponseEvaluator",
+    "format": "compose_v4_exact_rdkit_target_response_v1",
+    "invalid_candidates_remain_in_denominator": true,
+    "mae_denominator": "valid_candidates",
+    "trajectory_validity_reported": true,
+    "ring_strata_reported_by_target": true,
+    "direct_griddd_comparison_claim_authorized": false
+  },
+  "excluded_tonight": {
+    "qm9_quantum_targets": true,
+    "drd2_learned_oracle": true,
+    "additional_model_launch": true
+  },
+  "next_launch_gate": "passed analytic-base qualification plus tested property sidecar; QED completes before MW, and MW before LogP"
+}

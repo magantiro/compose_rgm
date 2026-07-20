@@ -126,6 +126,9 @@ def _expected_shard_metadata(
     shard_count: int,
     samples: int,
     base_seed: int,
+    exclude_ring_template_cycle_size_at_most: int = 0,
+    atom_delete_log_rate_adjustment: float = 0.0,
+    small_ring_log_rate_adjustment: float = 0.0,
 ) -> dict[str, object]:
     return {
         "format": "compose_v4_rollout_shard_v1",
@@ -137,6 +140,15 @@ def _expected_shard_metadata(
         "samples": int(samples),
         "base_seed": int(base_seed),
         "shard_seed": _derive_shard_seed(base_seed, shard_index),
+        "exclude_ring_template_cycle_size_at_most": int(
+            exclude_ring_template_cycle_size_at_most
+        ),
+        "atom_delete_log_rate_adjustment": float(
+            atom_delete_log_rate_adjustment
+        ),
+        "small_ring_log_rate_adjustment": float(
+            small_ring_log_rate_adjustment
+        ),
     }
 
 
@@ -185,8 +197,8 @@ def _merge_shard_payloads(
 
 @app.function(
     image=image,
-    cpu=4.0,
-    memory=24576,
+    cpu=10.0,
+    memory=65536,
     timeout=6 * 3600,
     volumes={"/artifacts": artifact_volume},
     retries=modal.Retries(max_retries=2, backoff_coefficient=2.0),
@@ -200,6 +212,9 @@ def sample_rollout_shard(
     samples: int,
     base_seed: int,
     workers: int,
+    exclude_ring_template_cycle_size_at_most: int,
+    atom_delete_log_rate_adjustment: float,
+    small_ring_log_rate_adjustment: float,
 ) -> dict[str, object]:
     """Sample or reuse one deterministic shard without loading any teacher paths."""
 
@@ -207,6 +222,10 @@ def sample_rollout_shard(
 
     from compose_v4.experiments.parallel_tracelet_sampling import (
         sample_tracelet_ancestral_many,
+    )
+    from compose_v4.eval.ring_calibration import undesirable_small_ring_mask
+    from compose_v4.experiments.calibrated_rewrite_sampling import (
+        ThinnedRateCalibrationSampler,
     )
     from scripts.evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
 
@@ -232,6 +251,11 @@ def sample_rollout_shard(
         shard_count=shard_count,
         samples=samples,
         base_seed=base_seed,
+        exclude_ring_template_cycle_size_at_most=(
+            exclude_ring_template_cycle_size_at_most
+        ),
+        atom_delete_log_rate_adjustment=atom_delete_log_rate_adjustment,
+        small_ring_log_rate_adjustment=small_ring_log_rate_adjustment,
     )
     shard_path = (
         Path("/artifacts")
@@ -249,9 +273,26 @@ def sample_rollout_shard(
         }
 
     model, checkpoint = load_factorized_rollout_checkpoint(checkpoint_path)
+    if exclude_ring_template_cycle_size_at_most:
+        if exclude_ring_template_cycle_size_at_most < 3:
+            raise ValueError("excluded ring-template cycle size must be at least three")
+        excluded_mask = undesirable_small_ring_mask(
+            model.ring_system_templates,
+            maximum_size=exclude_ring_template_cycle_size_at_most,
+        )
+        model.excluded_sampling_ring_template_indices = tuple(
+            int(index) for index in torch.nonzero(excluded_mask).flatten().tolist()
+        )
+    calibrated_sampler = ThinnedRateCalibrationSampler(
+        model,
+        family_log_rate_adjustments=(
+            ("atom_delete", float(atom_delete_log_rate_adjustment)),
+        ),
+        small_ring_log_rate_adjustment=float(small_ring_log_rate_adjustment),
+    )
     source_prior = checkpoint["tree_source_prior"]
     rollouts = sample_tracelet_ancestral_many(
-        model,
+        calibrated_sampler,
         seed=int(expected["shard_seed"]),
         samples=samples,
         workers=min(workers, samples),
@@ -319,6 +360,9 @@ def merge_and_evaluate(
     samples: int,
     shards: int,
     base_seed: int,
+    exclude_ring_template_cycle_size_at_most: int,
+    atom_delete_log_rate_adjustment: float,
+    small_ring_log_rate_adjustment: float,
 ) -> dict[str, object]:
     """Merge every attempt in shard order and run fixed-reference metrics once."""
 
@@ -348,6 +392,11 @@ def merge_and_evaluate(
             shard_count=shards,
             samples=count,
             base_seed=base_seed,
+            exclude_ring_template_cycle_size_at_most=(
+                exclude_ring_template_cycle_size_at_most
+            ),
+            atom_delete_log_rate_adjustment=atom_delete_log_rate_adjustment,
+            small_ring_log_rate_adjustment=small_ring_log_rate_adjustment,
         )
         for index, count in enumerate(sample_counts)
     )
@@ -384,6 +433,15 @@ def merge_and_evaluate(
             "operational_horizon": 16.0,
             "time_step": 0.1,
             "max_events": 128,
+            "exclude_ring_template_cycle_size_at_most": (
+                exclude_ring_template_cycle_size_at_most
+            ),
+            "atom_delete_log_rate_adjustment": float(
+                atom_delete_log_rate_adjustment
+            ),
+            "small_ring_log_rate_adjustment": float(
+                small_ring_log_rate_adjustment
+            ),
             "source_prior": "carbon_tree",
             "tree_source_prior": source_prior,
         },
@@ -483,6 +541,19 @@ def merge_and_evaluate(
             "operational_horizon": 16.0,
             "time_step": 0.1,
             "max_events": 128,
+            "exclude_ring_template_cycle_size_at_most": (
+                exclude_ring_template_cycle_size_at_most
+            ),
+            "rate_calibration": {
+                "method": "exact_ctmc_thinning_v1",
+                "family_log_rate_adjustments": {
+                    "atom_delete": float(atom_delete_log_rate_adjustment),
+                },
+                "small_ring_log_rate_adjustment": float(
+                    small_ring_log_rate_adjustment
+                ),
+                "small_ring_maximum_size": 4,
+            },
         },
     }
     metrics_path = run_dir / "metrics.json"
@@ -499,6 +570,15 @@ def merge_and_evaluate(
         "shard_seeds": tuple(item["shard_seed"] for item in expected),
         "teacher_path_cache_loaded": False,
         "all_attempts_retained": True,
+        "exclude_ring_template_cycle_size_at_most": (
+            exclude_ring_template_cycle_size_at_most
+        ),
+        "atom_delete_log_rate_adjustment": float(
+            atom_delete_log_rate_adjustment
+        ),
+        "small_ring_log_rate_adjustment": float(
+            small_ring_log_rate_adjustment
+        ),
     }
     _atomic_json_save(manifest, run_dir / "manifest.json")
     artifact_volume.commit()
@@ -525,6 +605,9 @@ def main(
     shards: int = 80,
     base_seed: int = 20260724,
     workers_per_shard: int = 4,
+    exclude_ring_template_cycle_size_at_most: int = 0,
+    atom_delete_log_rate_adjustment: float = 0.0,
+    small_ring_log_rate_adjustment: float = 0.0,
     smoke: bool = False,
 ) -> None:
     run_label = _basename(run_label, "run label")
@@ -547,6 +630,9 @@ def main(
             count,
             base_seed,
             workers_per_shard,
+            exclude_ring_template_cycle_size_at_most,
+            atom_delete_log_rate_adjustment,
+            small_ring_log_rate_adjustment,
         )
         for index, count in enumerate(counts)
     ]
@@ -558,6 +644,15 @@ def main(
                 "samples": samples,
                 "shards": shards,
                 "workers_per_shard": workers_per_shard,
+                "exclude_ring_template_cycle_size_at_most": (
+                    exclude_ring_template_cycle_size_at_most
+                ),
+                "atom_delete_log_rate_adjustment": float(
+                    atom_delete_log_rate_adjustment
+                ),
+                "small_ring_log_rate_adjustment": float(
+                    small_ring_log_rate_adjustment
+                ),
             },
             sort_keys=True,
         ),
@@ -587,5 +682,8 @@ def main(
         samples,
         shards,
         base_seed,
+        exclude_ring_template_cycle_size_at_most,
+        atom_delete_log_rate_adjustment,
+        small_ring_log_rate_adjustment,
     )
     print(json.dumps(result, indent=2, sort_keys=True))

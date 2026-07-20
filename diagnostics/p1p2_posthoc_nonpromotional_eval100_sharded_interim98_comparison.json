@@ -1,0 +1,454 @@
+{
+  "candidate": {
+    "chemistry": {
+      "adjacent_aromatic_nh_molecule_fraction": 0.11224489795918367,
+      "aromatic_ring_fraction": 0.5503597122302158,
+      "bond_type_counts": {
+        "AROMATIC": 873,
+        "DOUBLE": 147,
+        "SINGLE": 1668,
+        "TRIPLE": 15
+      },
+      "bond_type_fractions": {
+        "AROMATIC": 0.32297447280799113,
+        "DOUBLE": 0.05438401775804662,
+        "SINGLE": 0.6170921198668147,
+        "TRIPLE": 0.005549389567147614
+      },
+      "heterocyclic_ring_fraction": 0.6510791366906474,
+      "high_heteroatom_fraction_ge_0p4": 0.12244897959183673,
+      "mean_bonds": 27.581632653061224,
+      "mean_element_counts": {
+        "C": 18.755102040816325,
+        "F": 0.25510204081632654,
+        "N": 3.693877551020408,
+        "O": 3.0510204081632653
+      },
+      "mean_heavy_atoms": 25.755102040816325,
+      "mean_heteroatom_fraction": 0.27237227141096365,
+      "mean_heteroatoms": 7.0,
+      "multi_aromatic_nh_ring_molecule_fraction": 0.15306122448979592,
+      "nonaromatic_unsaturated_ring_fraction": 0.039568345323741004,
+      "ring_count": 278,
+      "ring_nn_molecule_fraction": 0.3877551020408163,
+      "ring_oo_molecule_fraction": 0.05102040816326531,
+      "ring_triple_bonds": 0,
+      "rings_with_three_heteroatoms_fraction": 0.14388489208633093,
+      "samples": 98,
+      "triple_bond_fraction_of_bonds": 0.005549389567147614,
+      "triple_bond_types": {
+        "C#C": 4,
+        "C#N": 11
+      },
+      "triple_bonds": 15,
+      "triple_bonds_per_molecule": 0.15306122448979592,
+      "triple_containing_molecule_fraction": 0.14285714285714285
+    },
+    "distribution": {
+      "atom_count_total_variation": 0.19070983743563474,
+      "bond_order_distribution_total_variation": 0.07973721644780819,
+      "cycle_rank_total_variation": 0.24886995749422622,
+      "element_distribution_total_variation": 0.04463120317742284,
+      "mean_atoms": 25.755102040816325,
+      "mean_bonds": 27.581632653061224,
+      "mean_cycle_rank": 2.826530612244898,
+      "mean_events": 26.183673469387756,
+      "reference_mean_atoms": 26.346543372963453,
+      "reference_mean_bonds": 28.699691765741964,
+      "reference_mean_cycle_rank": 3.3531483927785115
+    },
+    "event_rule_counts": {
+      "atom_delete": 393,
+      "atom_insert": 330,
+      "atom_restate": 368,
+      "bond_reorder": 152,
+      "bond_reroute": 1068,
+      "ring_system_grow": 255
+    },
+    "event_rule_fractions": {
+      "atom_delete": 0.15315666406858924,
+      "atom_insert": 0.12860483242400625,
+      "atom_restate": 0.14341387373343725,
+      "bond_reorder": 0.059236165237724084,
+      "bond_reroute": 0.4162120031176929,
+      "ring_system_grow": 0.09937646141855028
+    },
+    "quality": {
+      "qed": null,
+      "sa_score": null
+    },
+    "ring_means": {
+      "cycle_rank": 2.826530612244898,
+      "ring_systems": 2.6020408163265305,
+      "sssr_rings_per_molecule": 2.836734693877551
+    },
+    "ring_molecule_prevalence": {
+      "acyclic": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "aromatic": {
+        "count": 92,
+        "fraction": 0.9387755102040817
+      },
+      "bridged": {
+        "count": 2,
+        "fraction": 0.02040816326530612
+      },
+      "charged_ring": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "cyclic": {
+        "count": 98,
+        "fraction": 1.0
+      },
+      "fused": {
+        "count": 21,
+        "fraction": 0.21428571428571427
+      },
+      "heterocycle": {
+        "count": 91,
+        "fraction": 0.9285714285714286
+      },
+      "macrocycle_ge_12": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "monocyclic": {
+        "count": 6,
+        "fraction": 0.061224489795918366
+      },
+      "polybridged_or_cage_candidate": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "polycyclic": {
+        "count": 92,
+        "fraction": 0.9387755102040817
+      },
+      "saturated_ring": {
+        "count": 69,
+        "fraction": 0.7040816326530612
+      },
+      "small_ring_3_or_4": {
+        "count": 45,
+        "fraction": 0.45918367346938777
+      },
+      "spiro": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "unsaturated_nonaromatic_ring": {
+        "count": 15,
+        "fraction": 0.15306122448979592
+      }
+    },
+    "ring_size_counts": {
+      "3": 39,
+      "4": 14,
+      "5": 62,
+      "6": 162,
+      "7": 1
+    },
+    "safety": {
+      "connected_or_null_fraction": 1.0,
+      "event_budget_exhaustion_fraction": 0.0,
+      "non_null_fraction": 1.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "samples": 98,
+    "trajectory_diagnostics": {
+      "all_step_connected_or_null_trajectory_fraction": 1.0,
+      "all_step_valid_trajectory_fraction": 1.0,
+      "available": true,
+      "available_fraction": 1.0,
+      "available_rollouts": 98,
+      "canonical_self_event_count": 0,
+      "canonical_self_event_fraction": 0.0,
+      "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+      "committed_state_count": 2566,
+      "delete_to_one_then_regrow_fraction": 0.0,
+      "disconnected_committed_state_count": 0,
+      "disconnected_committed_state_fraction": 0.0,
+      "disconnected_state_count": 0,
+      "hit_null_after_source_fraction": 0.0,
+      "hit_one_atom_trajectory_fraction": 0.0,
+      "immediate_backtrack_count": 72,
+      "immediate_backtrack_per_opportunity_fraction": 0.029173419773095625,
+      "immediate_backtrack_rule_pair_counts": {
+        "atom_delete -> atom_insert": 9,
+        "atom_insert -> atom_delete": 12,
+        "bond_reroute -> bond_reroute": 51
+      },
+      "invalid_committed_state_count": 0,
+      "invalid_committed_state_fraction": 0.0,
+      "invalid_state_count": 0,
+      "mean_trajectory_min_atoms": 23.867346938775512,
+      "mean_unique_state_fraction": 0.9691325362843808,
+      "minimum_atom_count": 9,
+      "observed_state_count": 2664,
+      "trajectories_with_canonical_self_event_fraction": 0.0,
+      "trajectories_with_immediate_backtrack_fraction": 0.45918367346938777
+    }
+  },
+  "decision_use": "posthoc_nonpromotional_preview_gate_missed",
+  "format": "compose_v4_unconditional_chemistry_posthoc_comparison_v1",
+  "limitations": {
+    "candidate_completed_shards": 98,
+    "candidate_declared_shards": 100,
+    "candidate_incomplete": true,
+    "candidate_missing_shard_indices": [
+      69,
+      86
+    ],
+    "candidate_samples": 98,
+    "minimum_preregistered_promotion_samples": 200,
+    "note": "The candidate missed the preregistered 0.65 family-accuracy preview gate and this bounded diagnostic is descriptive only. If candidate_incomplete is true, shard completion may bias the interim subset toward faster trajectories.",
+    "pancake_samples": 600,
+    "promotion_authorized": false
+  },
+  "matched_reference": {
+    "adjacent_aromatic_nh_molecule_fraction": 0.0,
+    "aromatic_ring_fraction": 0.691113141067467,
+    "bond_type_counts": {
+      "AROMATIC": 29750,
+      "DOUBLE": 3604,
+      "SINGLE": 31652,
+      "TRIPLE": 171
+    },
+    "bond_type_fractions": {
+      "AROMATIC": 0.4564493609708946,
+      "DOUBLE": 0.05529557972904552,
+      "SINGLE": 0.48563143440170614,
+      "TRIPLE": 0.0026236248983537136
+    },
+    "heterocyclic_ring_fraction": 0.48179564139371006,
+    "high_heteroatom_fraction_ge_0p4": 0.028181417877586965,
+    "mean_bonds": 28.699691765741964,
+    "mean_element_counts": {
+      "C": 20.215763980625276,
+      "F": 0.40686922060766184,
+      "N": 2.9233817701453106,
+      "O": 2.8005284015852046
+    },
+    "mean_heavy_atoms": 26.346543372963453,
+    "mean_heteroatom_fraction": 0.23448340982694676,
+    "mean_heteroatoms": 6.130779392338177,
+    "multi_aromatic_nh_ring_molecule_fraction": 0.002642007926023778,
+    "nonaromatic_unsaturated_ring_fraction": 0.042281090956544434,
+    "ring_count": 7663,
+    "ring_nn_molecule_fraction": 0.1686481726111845,
+    "ring_oo_molecule_fraction": 0.0048436811977102595,
+    "ring_triple_bonds": 0,
+    "rings_with_three_heteroatoms_fraction": 0.029883857497063814,
+    "samples": 2271,
+    "triple_bond_fraction_of_bonds": 0.0026236248983537136,
+    "triple_bond_types": {
+      "C#C": 37,
+      "C#N": 134
+    },
+    "triple_bonds": 171,
+    "triple_bonds_per_molecule": 0.07529722589167767,
+    "triple_containing_molecule_fraction": 0.06913254073095552
+  },
+  "pancake": {
+    "chemistry": {
+      "adjacent_aromatic_nh_molecule_fraction": 0.105,
+      "aromatic_ring_fraction": 0.6342123056118999,
+      "bond_type_counts": {
+        "AROMATIC": 5297,
+        "DOUBLE": 973,
+        "SINGLE": 10382,
+        "TRIPLE": 481
+      },
+      "bond_type_fractions": {
+        "AROMATIC": 0.3091694390941458,
+        "DOUBLE": 0.056790988151520456,
+        "SINGLE": 0.6059650965972101,
+        "TRIPLE": 0.02807447615712368
+      },
+      "heterocyclic_ring_fraction": 0.6599053414469236,
+      "high_heteroatom_fraction_ge_0p4": 0.105,
+      "mean_bonds": 28.555,
+      "mean_element_counts": {
+        "C": 19.441666666666666,
+        "F": 0.31,
+        "N": 4.148333333333333,
+        "O": 3.1966666666666668
+      },
+      "mean_heavy_atoms": 27.096666666666668,
+      "mean_heteroatom_fraction": 0.2841008231584457,
+      "mean_heteroatoms": 7.655,
+      "multi_aromatic_nh_ring_molecule_fraction": 0.15166666666666667,
+      "nonaromatic_unsaturated_ring_fraction": 0.0581473968897904,
+      "ring_count": 1479,
+      "ring_nn_molecule_fraction": 0.39666666666666667,
+      "ring_oo_molecule_fraction": 0.07,
+      "ring_triple_bonds": 0,
+      "rings_with_three_heteroatoms_fraction": 0.2035158891142664,
+      "samples": 600,
+      "triple_bond_fraction_of_bonds": 0.02807447615712368,
+      "triple_bond_types": {
+        "C#C": 261,
+        "C#N": 220
+      },
+      "triple_bonds": 481,
+      "triple_bonds_per_molecule": 0.8016666666666666,
+      "triple_containing_molecule_fraction": 0.54
+    },
+    "distribution": {
+      "atom_count_total_variation": 0.14344341699691765,
+      "bond_order_distribution_total_variation": 0.09327263527367746,
+      "cycle_rank_total_variation": 0.29049537648612944,
+      "element_distribution_total_variation": 0.05381185962469861,
+      "mean_atoms": 27.096666666666668,
+      "mean_bonds": 28.555,
+      "mean_cycle_rank": 2.4583333333333335,
+      "mean_events": 30.076666666666668,
+      "reference_mean_atoms": 26.346543372963453,
+      "reference_mean_bonds": 28.699691765741964,
+      "reference_mean_cycle_rank": 3.3531483927785115
+    },
+    "event_rule_counts": {
+      "atom_delete": 1827,
+      "atom_insert": 1964,
+      "atom_restate": 2694,
+      "bond_reorder": 1360,
+      "bond_reroute": 8926,
+      "ring_system_delete": 1,
+      "ring_system_grow": 1274
+    },
+    "event_rule_fractions": {
+      "atom_delete": 0.10124127230411172,
+      "atom_insert": 0.1088329823783664,
+      "atom_restate": 0.1492851601462928,
+      "bond_reorder": 0.07536296132106839,
+      "bond_reroute": 0.4946248476116591,
+      "ring_system_delete": 5.54139421478444e-05,
+      "ring_system_grow": 0.07059736229635376
+    },
+    "quality": {
+      "qed": 0.4394322647407161,
+      "sa_score": 4.4881868209989015
+    },
+    "ring_means": {
+      "cycle_rank": 2.4583333333333335,
+      "ring_systems": 2.1216666666666666,
+      "sssr_rings_per_molecule": 2.465
+    },
+    "ring_molecule_prevalence": {
+      "acyclic": {
+        "count": 15,
+        "fraction": 0.025
+      },
+      "aromatic": {
+        "count": 497,
+        "fraction": 0.8283333333333334
+      },
+      "bridged": {
+        "count": 10,
+        "fraction": 0.016666666666666666
+      },
+      "charged_ring": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "cyclic": {
+        "count": 585,
+        "fraction": 0.975
+      },
+      "fused": {
+        "count": 171,
+        "fraction": 0.285
+      },
+      "heterocycle": {
+        "count": 507,
+        "fraction": 0.845
+      },
+      "macrocycle_ge_12": {
+        "count": 0,
+        "fraction": 0.0
+      },
+      "monocyclic": {
+        "count": 98,
+        "fraction": 0.16333333333333333
+      },
+      "polybridged_or_cage_candidate": {
+        "count": 1,
+        "fraction": 0.0016666666666666668
+      },
+      "polycyclic": {
+        "count": 487,
+        "fraction": 0.8116666666666666
+      },
+      "saturated_ring": {
+        "count": 300,
+        "fraction": 0.5
+      },
+      "small_ring_3_or_4": {
+        "count": 68,
+        "fraction": 0.11333333333333333
+      },
+      "spiro": {
+        "count": 4,
+        "fraction": 0.006666666666666667
+      },
+      "unsaturated_nonaromatic_ring": {
+        "count": 125,
+        "fraction": 0.20833333333333334
+      }
+    },
+    "ring_size_counts": {
+      "3": 62,
+      "4": 12,
+      "5": 466,
+      "6": 923,
+      "7": 14,
+      "8": 2
+    },
+    "safety": {
+      "connected_or_null_fraction": 1.0,
+      "event_budget_exhaustion_fraction": 0.0,
+      "non_null_fraction": 1.0,
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "samples": 600,
+    "trajectory_diagnostics": {
+      "all_step_connected_or_null_trajectory_fraction": 1.0,
+      "all_step_valid_trajectory_fraction": 1.0,
+      "available": true,
+      "available_fraction": 1.0,
+      "available_rollouts": 600,
+      "canonical_self_event_count": 0,
+      "canonical_self_event_fraction": 0.0,
+      "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+      "committed_state_count": 18046,
+      "delete_to_one_then_regrow_fraction": 0.0,
+      "disconnected_committed_state_count": 0,
+      "disconnected_committed_state_fraction": 0.0,
+      "disconnected_state_count": 0,
+      "hit_null_after_source_fraction": 0.0,
+      "hit_one_atom_trajectory_fraction": 0.0,
+      "immediate_backtrack_count": 25,
+      "immediate_backtrack_per_opportunity_fraction": 0.0014329932362719248,
+      "immediate_backtrack_rule_pair_counts": {
+        "atom_delete -> atom_insert": 3,
+        "atom_insert -> atom_delete": 5,
+        "atom_restate -> atom_restate": 1,
+        "bond_reroute -> bond_reroute": 16
+      },
+      "invalid_committed_state_count": 0,
+      "invalid_committed_state_fraction": 0.0,
+      "invalid_state_count": 0,
+      "mean_trajectory_min_atoms": 25.153333333333332,
+      "mean_unique_state_fraction": 0.9981414236055377,
+      "minimum_atom_count": 7,
+      "observed_state_count": 18646,
+      "trajectories_with_canonical_self_event_fraction": 0.0,
+      "trajectories_with_immediate_backtrack_fraction": 0.03666666666666667
+    }
+  }
+}

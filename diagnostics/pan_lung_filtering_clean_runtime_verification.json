@@ -1,0 +1,79 @@
+{
+  "format": "compose_pan_lung_filtering_clean_runtime_verification_v1",
+  "relocated_hash_checks": {
+    "a549:ad": true,
+    "a549:extra_trees_v1": true,
+    "a549:ridge_v1": true,
+    "a549:xgboost_v1": true,
+    "admission_test": true,
+    "corpus_manifest": true,
+    "ensemble_contract": true,
+    "lumi:ad": true,
+    "lumi:extra_trees_v1": true,
+    "lumi:xgboost_v1": true,
+    "lut_selectivity:ad": true,
+    "lut_selectivity:extra_trees_v1": true,
+    "lut_selectivity:ridge_v1": true,
+    "lut_selectivity:xgboost_v1": true,
+    "qualification_table": true
+  },
+  "reward_fine_tuning_enabled": false,
+  "runtime": {
+    "admitted_filtering": {
+      "admitted": true,
+      "filtering_score_present": true,
+      "reward": null
+    },
+    "admitted_reward_block_message": "reward fine-tuning is disabled: filtering bundle does not authorize reward fine-tuning; no preregistration file was supplied",
+    "admitted_reward_request_blocked": true,
+    "default_authorization": {
+      "blocking_reasons": [
+        "filtering bundle does not authorize reward fine-tuning",
+        "no preregistration file was supplied"
+      ],
+      "reward_fine_tuning_authorized": false
+    },
+    "lut_novel_known_component_pair": {
+      "admitted": true,
+      "filtering_score_present": true,
+      "reward": null
+    },
+    "ood_reward_request": {
+      "admitted": false,
+      "filtering_score": null,
+      "reward": null
+    },
+    "python": "3.14.2 (main, Dec  5 2025, 16:49:16) [Clang 17.0.0 (clang-1700.6.3.2)]",
+    "template_authorization": {
+      "blocking_reasons": [
+        "filtering bundle does not authorize reward fine-tuning",
+        "preregistration field 'enable_reward_fine_tuning' must equal True",
+        "preregistration field 'frozen_before_optimization' must equal True",
+        "preregistration field 'bundle_manifest_sha256' must equal '06d4673e6ccb8a3d2962256b2217619be509a751e46a8bc62315c2151bfb6871'",
+        "preregistration candidate_budget must be a positive integer",
+        "preregistration minimum_pessimistic_scores must be a non-empty object"
+      ],
+      "reward_fine_tuning_authorized": false
+    },
+    "versions": {
+      "joblib": "1.5.3",
+      "numpy": "2.4.2",
+      "pandas": "3.0.1",
+      "rdkit": "2025.09.6",
+      "scikit_learn": "1.8.0",
+      "xgboost": "3.2.0"
+    }
+  },
+  "runtime_isolation": {
+    "artifact_relocated_outside_repository": true,
+    "fresh_virtual_environment": true,
+    "project_import_path": "fresh_venv/site-packages/compose_v4/__init__.py",
+    "project_package_copied_into_isolated_site_packages": true,
+    "reason": "The fresh environment reuses the exact preinstalled binary dependency versions recorded by the bundle while isolating project installation, process state, user site packages, and artifact location.",
+    "system_site_packages": true,
+    "temporary_runtime_removed_after_test": true
+  },
+  "source_manifest": "artifacts/oracles/pan_lung_filtering_v1/manifest.json",
+  "source_manifest_sha256": "06d4673e6ccb8a3d2962256b2217619be509a751e46a8bc62315c2151bfb6871",
+  "status": "passed"
+}

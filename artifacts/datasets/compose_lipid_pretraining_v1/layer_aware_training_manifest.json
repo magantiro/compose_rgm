@@ -1,0 +1,35 @@
+{
+  "layers": {
+    "r0_observed_real": {
+      "layer_probability": 0.774377004036365,
+      "row_count": 15433,
+      "within_layer": "uniform over unique canonical observed structures"
+    },
+    "r1_auxiliary_agile_ugi": {
+      "eligibility": "structural pretraining only until exact component identities and route certification are recovered",
+      "layer_probability": 0.22562299596363497,
+      "reaction_family": "ugi_3cr_fixed_core",
+      "row_count": 11076,
+      "within_layer": "R0-anchored ECFP4 structural-cell calibrated"
+    }
+  },
+  "manifest_version": "compose_lipid_layer_aware_sampler_v1",
+  "raw_agile_union_fraction": 0.41782036289562036,
+  "sampler_rows": {
+    "path": "artifacts/datasets/compose_lipid_pretraining_v1/layer_aware_sampler_rows.csv",
+    "row_count": 26509,
+    "sha256": "5d97efc5485834dc5bc0264deeeee8ac5ca086155241be754bad81eb7e2db73a",
+    "total_probability_tolerance": 1e-10
+  },
+  "selection_contract": {
+    "agile_cannot_enter_observed_layer": true,
+    "layer_then_structure": true,
+    "prospective_rows_allowed": false,
+    "replacement": true,
+    "split_groups_precede_selection": true
+  },
+  "weight_selection_audit": {
+    "path": "artifacts/datasets/compose_lipid_pretraining_v1/agile_ugi_bias_audit.json",
+    "sha256": "0ca2758e9b9d70788b23eec444518ae3753c684aa8cb56c4464e6aca08d3fe3e"
+  }
+}

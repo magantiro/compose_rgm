@@ -1,0 +1,131 @@
+{
+  "format": "compose_v4_griddd_qed_frozen_residual_launch_v1",
+  "name": "griddd_qed_frozen_residual_v1",
+  "launch_authorized": false,
+  "backbone": {
+    "execution_kind": "analytic_pancake_quotient_adapter_v1",
+    "qualification_manifest": "diagnostics/canonical_successor_analytic_backbone_qualification.json",
+    "retained_checkpoint_path": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt",
+    "retained_checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "analytic_rollout_evidence": "diagnostics/canonical_successor_analytic_rollout_smoke20.json",
+    "analytic_adapter_source": "src/compose_v4/experiments/canonical_successor_distillation.py",
+    "atom_delete_log_rate_adjustment": -0.5,
+    "small_ring_log_rate_adjustment": -1.5,
+    "small_ring_maximum_size": 4,
+    "history_safety": "canonical_history_exact_thinning_v1"
+  },
+  "conditional_adapter": {
+    "kind": "frozen_valid_state_qed_residual_v1",
+    "property_names": [
+      "qed"
+    ],
+    "base_parameters_frozen": true,
+    "base_weights_in_sidecar_state_dict": false,
+    "family_hazard_residual": true,
+    "within_family_residual": true,
+    "independent_total_hazard_residual": false,
+    "missing_condition_identity": true,
+    "condition_inputs": [
+      "target_qed",
+      "target_present_mask",
+      "valid_state_graph",
+      "model_time"
+    ],
+    "prohibited_inputs_protocol_a": [
+      "current_state_qed",
+      "successor_qed",
+      "tanimoto_similarity",
+      "oracle_tilt"
+    ],
+    "qed_normalizer": {
+      "method": "fit_training_partition_once_then_freeze",
+      "mean": 0.6012370044427231,
+      "standard_deviation": 0.19169590371119966,
+      "evidence_path": "/private/tmp/qed-step500-target090-metrics.json",
+      "evidence_sha256": "f8e4a248839406f60f24b0a7cda32dc3cb49b6872a757df5fa8f8bd4fdccc202"
+    },
+    "condition_dropout_probability": 0.15,
+    "zero_initialized_residual_outputs": true
+  },
+  "training": {
+    "training_partition_manifest": "/private/tmp/compose_v4_stage3_paths_manifest.pt",
+    "training_partition_manifest_sha256": "c8b4d2836d27b3f751131be7d9cf424b99b80937de2b5e2d2ce572d56e147bc2",
+    "trainable_parameters": "conditional_sidecar_only",
+    "seed": 20260725,
+    "steps": 500,
+    "evaluation_every": 100,
+    "early_stopping_patience": 2,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.00001,
+    "objective": "factorized_mark_poisson_bregman",
+    "large_run_before_bounded_smoke": false
+  },
+  "protocol_a": {
+    "role": "griddd_comparable_primary",
+    "exact_official_lead_manifest": "configs/benchmarks/griddd_qed_lead_manifest_v1.json",
+    "requires_griddd_release_exact_list_available": true,
+    "arm": "direct_conditioned_native_sampling",
+    "candidates_per_start": 20,
+    "oracle_tilt_or_rescoring_during_sampling": false,
+    "padding_calls": false,
+    "report_native_sampling_cost_separately": true,
+    "fingerprint": {
+      "type": "Morgan bit vector",
+      "radius": 2,
+      "bits": 2048,
+      "use_chirality": false
+    },
+    "starting_qed_interval": [
+      0.7,
+      0.8
+    ],
+    "target_qed_minimum": 0.9,
+    "minimum_tanimoto_similarity": 0.4
+  },
+  "protocol_b": {
+    "role": "compose_internal_matched_control",
+    "arms": [
+      "direct",
+      "controller",
+      "combined"
+    ],
+    "candidate_rng_streams_matched_across_arms": true,
+    "candidates_per_start": 20,
+    "guidance_oracle_calls_per_candidate": 48,
+    "final_candidate_oracle_calls_per_candidate": 1,
+    "lead_eligibility_oracle_calls": 1,
+    "exact_oracle_calls_per_start_seed_arm": 981,
+    "selection_and_padding_calls_reported_separately": true,
+    "query_matched_griddd_claim_authorized": false
+  },
+  "ring_sensitivity": {
+    "required": true,
+    "lead_strata": [
+      "acyclic",
+      "isolated_ring",
+      "fused_or_bridged"
+    ],
+    "ring_families": [
+      "ring_system_grow",
+      "ring_system_delete",
+      "ring_system_restate"
+    ],
+    "outcome_fields": [
+      "success",
+      "qed_delta_from_lead",
+      "similarity_to_lead",
+      "validity",
+      "candidate_count"
+    ],
+    "reference_comparison_artifact": null,
+    "reference_comparison_format": "compose_v4_qed_ring_reference_comparison_v1",
+    "compare_high_qed_target_subset_to_unconditional_corpus": true,
+    "global_fused_frequency_is_target_marginal": false
+  },
+  "claim_boundary": {
+    "protocol_a_and_b_tables_separate": true,
+    "protocol_b_is_query_matched_to_griddd": false,
+    "efficacy_claim_before_qualified_bounded_smoke": false,
+    "large_benchmark_before_exact_official_leads": false
+  }
+}

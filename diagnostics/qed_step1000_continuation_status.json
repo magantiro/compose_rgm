@@ -1,0 +1,54 @@
+{
+  "format": "compose_v4_qed_continuation_status_v1",
+  "run_label": "compose-v4-qed-conditioned-step1000-continuation-20260720-v1",
+  "modal_app_id": "ap-4c9el3NMrbYlcudOtq58HS",
+  "source_run_label": "compose-v4-qed-conditioned-pilot-20260720-v4",
+  "source_recovery_sha256": "6e5d14e4ca3d110aec8ae93cd43f3d5d03b5f761bcc66670a6a2592f6c91eebc",
+  "total_step_cap": 1000,
+  "schedule_horizon": 500,
+  "post_horizon_learning_rate": 0.00002,
+  "evaluation_every": 100,
+  "early_stopping_patience": 2,
+  "resume_validation": {
+    "step": 500,
+    "factorized_gm_loss": 11.603085994720459,
+    "family_top1_accuracy": 0.5916230366492147,
+    "family_top3_accuracy": 0.8586387434554974,
+    "balanced_family_top1_accuracy": 0.5182198461119484,
+    "balanced_family_top3_accuracy": 0.8147885978809226,
+    "mean_teacher_family_probability": 0.5522774301898417,
+    "mean_teacher_mark_probability": 0.09026756960684092
+  },
+  "latest_evaluation": {
+    "step": 1000,
+    "factorized_gm_loss": 11.022726058959961,
+    "materially_improved": true,
+    "evaluations_without_improvement": 0,
+    "family_top1_accuracy": 0.6020942408376964,
+    "family_top3_accuracy": 0.8481675392670157,
+    "balanced_family_top1_accuracy": 0.539864118701716,
+    "balanced_family_top3_accuracy": 0.8018364962191437,
+    "mean_teacher_family_probability": 0.551050515699137,
+    "mean_teacher_mark_probability": 0.09017151812608329,
+    "learning_rate": 0.00002
+  },
+  "selected_step": 1000,
+  "selected_checkpoint_path": "/artifacts/compose-v4-qed-conditioned-step1000-continuation-20260720-v1/checkpoint.pt",
+  "selected_checkpoint_sha256": "76ddbba66838d4e3173a9e9278aea8453d54cb845384ea51241590773452b5c4",
+  "final_test": {
+    "factorized_gm_loss": 13.492956459522247,
+    "family_top1_accuracy": 0.585635359116022,
+    "family_top3_accuracy": 0.861878453038674,
+    "balanced_family_top1_accuracy": 0.5332399052987289,
+    "balanced_family_top3_accuracy": 0.8349734570322805,
+    "mean_teacher_family_probability": 0.5267438150901163,
+    "mean_teacher_mark_probability": 0.0767419700464491
+  },
+  "early_safety_rollout_dir": "/artifacts/compose-v4-qed-conditioned-step1000-continuation-20260720-v1-early-step700-eval100",
+  "remote_artifact_dir": "/artifacts/compose-v4-qed-conditioned-step1000-continuation-20260720-v1",
+  "conditional_evaluation_dirs": [
+    "/artifacts/compose-v4-qed-conditioned-step1000-target070-eval10-20260720-v1",
+    "/artifacts/compose-v4-qed-conditioned-step1000-target090-eval10-20260720-v1"
+  ],
+  "status": "training_and_direct_conditional_evaluations_complete_successor_guidance_gate_running"
+}

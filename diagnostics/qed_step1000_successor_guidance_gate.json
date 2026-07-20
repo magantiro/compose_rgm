@@ -1,0 +1,86 @@
+{
+  "format": "compose_v4_qed_successor_guidance_gate_summary_v1",
+  "remote_artifact_dir": "/artifacts/compose-v4-qed-step1000-successor-gate100-k4-beta8-20260720-v2",
+  "failed_predecessor_artifact_dir": "/artifacts/compose-v4-qed-step1000-successor-gate100-k4-beta8-20260720-v1",
+  "checkpoint": {
+    "run_label": "compose-v4-qed-conditioned-step1000-continuation-20260720-v1",
+    "sha256": "76ddbba66838d4e3173a9e9278aea8453d54cb845384ea51241590773452b5c4",
+    "selected_step": 1000
+  },
+  "control": {
+    "equation": "q_beta(m|x,t) proportional_to p_theta(m|x,t) exp(beta * U(QED(F_m(x)))); lambda_beta(x,t)=lambda_theta(x,t)",
+    "target_distance_potential": "U_target(q)=-abs(q-0.9)",
+    "raw_max_potential": "U_raw(q)=q",
+    "beta": 8.0,
+    "proposals_per_state": 4,
+    "beam_search": false,
+    "canonical_successor_oracle_quotient": true,
+    "sampled_mark_multiplicity_preserved": true
+  },
+  "state_accounting": {
+    "saved_state_occurrences_available": 258,
+    "evaluated_states": 100,
+    "unique_source_state_keys": 99,
+    "terminal_states_skipped": 0
+  },
+  "oracle_accounting": {
+    "raw_proposal_marks": 400,
+    "canonical_groups_requested": 343,
+    "unique_oracle_evaluations": 338,
+    "cache_hits": 5,
+    "unique_group_fraction_of_proposals": 0.8575
+  },
+  "proposal_audit": {
+    "all_proposals_valid": true,
+    "all_proposals_connected": true
+  },
+  "beta_zero": {
+    "expected_mean_qed": 0.30657060908620226,
+    "selected_mean_qed": 0.30707019346710124,
+    "selected_maximum_qed": 0.8391816466842693,
+    "selected_within_0.1": 1
+  },
+  "target_distance_soft": {
+    "expected_mean_qed": 0.3161264173813651,
+    "expected_qed_delta": 0.00955580829516284,
+    "selected_mean_qed": 0.31201806270646293,
+    "selected_paired_qed_delta": 0.0049478692393616665,
+    "selected_qed_improved_states": 4,
+    "selected_qed_tied_states": 95,
+    "selected_maximum_qed": 0.8391816466842693,
+    "selected_within_0.1": 1
+  },
+  "target_distance_best_of_4_offline": {
+    "mean_qed": 0.3361311423776195,
+    "paired_qed_delta": 0.02906094891051825,
+    "qed_improved_states": 65,
+    "qed_tied_states": 34,
+    "maximum_qed": 0.8864211556941686,
+    "within_0.1": 3
+  },
+  "interpretation": {
+    "support_contains_exploitable_qed_improvement": true,
+    "soft_stochastic_tilt_has_positive_expected_effect": true,
+    "raw_max_equals_target_distance_on_this_gate": true,
+    "raw_max_target_distance_reason": "all 400 proposed successor QED values were below 0.9",
+    "trajectory_guidance_authorized": true,
+    "griddd_benchmark_authorized": false
+  },
+  "controlled_rollout": {
+    "status": "complete",
+    "remote_artifact_dir": "/artifacts/compose-v4-qed-step1000-controlled090-eval10-k4-b48-beta8-20260720-v1",
+    "modal_app_id": "ap-i0ZWyAqnxF6AwQ5lKnFhX0",
+    "function_call_id": "fc-01KXZX9Y7NM58838CGB0GEE2QC",
+    "attempts_per_arm": 10,
+    "proposals_per_controlled_event": 4,
+    "max_controlled_events": 12,
+    "maximum_raw_proposal_marks_per_attempt": 48,
+    "mean_qed_delta": 0.023700492811351902,
+    "bootstrap_95_percent_interval": [-0.04942849, 0.10471912],
+    "improved_attempts": 3,
+    "worsened_attempts": 2,
+    "tied_attempts": 5,
+    "qed_at_least_0.9": 0,
+    "all_states_and_scored_proposals_valid_and_connected": true
+  }
+}

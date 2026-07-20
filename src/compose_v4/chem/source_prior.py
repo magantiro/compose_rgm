@@ -20,6 +20,7 @@ from compose_v4.chem.molecular_graph import (
     NULL_IDX,
 )
 from compose_v4.chem.state import empty_molecular_graph, is_connected_or_null, is_valid_state
+from compose_v4.chem.state import pad_molecular_graph
 
 
 class MolecularSourcePrior(Protocol):
@@ -36,6 +37,39 @@ class NullSourcePrior:
     def sample(self, rng: np.random.Generator, *, n_slots: int) -> MolecularGraph:
         del rng
         return empty_molecular_graph(n_slots)
+
+
+@dataclass(frozen=True)
+class FixedMolecularStatePrior:
+    """Delta source at one complete molecule for editing experiments.
+
+    The state is validated when the prior is constructed and copied on every
+    draw so a downstream executor can never mutate the retained source.  This
+    prior changes only the initial distribution; it does not expose a target
+    molecule to the rate model or alter any rewrite application condition.
+    """
+
+    state: MolecularGraph
+
+    def __post_init__(self) -> None:
+        if not is_valid_state(self.state) or not is_connected_or_null(self.state):
+            raise ValueError("fixed source must be a valid connected molecule")
+
+    def sample(self, rng: np.random.Generator, *, n_slots: int) -> MolecularGraph:
+        del rng
+        if int(n_slots) < self.state.n_atoms:
+            raise ValueError(
+                f"fixed source uses {self.state.n_atoms} slots but only {n_slots} "
+                "were requested"
+            )
+        if int(n_slots) > self.state.n_atoms:
+            return pad_molecular_graph(self.state, int(n_slots))
+        return MolecularGraph(
+            atom_types=self.state.atom_types.copy(),
+            formal_charges=self.state.formal_charges.copy(),
+            implicit_h_counts=self.state.implicit_h_counts.copy(),
+            bonds=self.state.bonds.copy(),
+        )
 
 
 @dataclass(frozen=True)
@@ -180,6 +214,7 @@ def _sample_capped_prufer_tree(
 
 __all__ = [
     "DegreeBoundedCarbonTreePrior",
+    "FixedMolecularStatePrior",
     "MolecularSourcePrior",
     "NullSourcePrior",
 ]

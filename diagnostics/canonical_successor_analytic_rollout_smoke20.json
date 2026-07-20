@@ -1,0 +1,535 @@
+{
+  "baseline": {
+    "control_diagnostics": [],
+    "elapsed_seconds": 438.52226329082623,
+    "label": "calibrated_pancake_virtual_thinning",
+    "metrics": {
+      "atom_count_total_variation": 0.537,
+      "bond_order_distribution_total_variation": 0.0904901260875888,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.0,
+      "cycle_rank_total_variation": 0.23049999999999998,
+      "element_distribution_total_variation": 0.02934439433683511,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.07633587786259542,
+        "atom_insert": 0.1480916030534351,
+        "atom_restate": 0.15114503816793892,
+        "bond_reorder": 0.07480916030534351,
+        "bond_reroute": 0.4763358778625954,
+        "ring_system_grow": 0.0732824427480916
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 29.25,
+      "mean_bonds": 30.95,
+      "mean_cycle_rank": 2.7,
+      "mean_events": 32.75,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "reference_mean_atoms": 26.7885,
+      "reference_mean_bonds": 29.2425,
+      "reference_mean_cycle_rank": 3.454,
+      "samples": 20,
+      "top_final_states": [
+        [
+          "CCC(COC(=CCCC(C)=O)C(=O)N1C=CCC1OCF)C1CC=CC1C",
+          1
+        ],
+        [
+          "CC(C)OC(CC1(O)CCC(CF)C1=O)NC#CNC(=O)CCC(C)n1[nH]ccc1=O",
+          1
+        ],
+        [
+          "CC(Nc1cn(C#CCCc2ccncc2)c(CN)n1)c1co[nH][nH]o1",
+          1
+        ],
+        [
+          "Cc1ccncc1-c1cc2ccncc2cc1CCC=CC(O)Cc1ccccn1",
+          1
+        ],
+        [
+          "OC(=CCCC#CC1(OC2CC2)CO1)NC1(O)NC=CC1c1ccco1",
+          1
+        ],
+        [
+          "C=C(C)c1cc(OC)ncc1C(=O)NCCC(=O)NN(O)c1ccc(C)n1F",
+          1
+        ],
+        [
+          "C=C(C)NC(Nc1ccc(C(O)C#CC)cc1)C(=O)OCC(O)CNC",
+          1
+        ],
+        [
+          "CCOC(CCc1ncnn1C(N)c1ccccc1N)C(=O)NCC1CCCC1",
+          1
+        ],
+        [
+          "CNC1CCCC(OO)C1CC#CC(=N)N1CC1Cc1cn(NCCO)[nH]o[nH]1",
+          1
+        ],
+        [
+          "CC1CCC(C(=O)C2CCC(F)C2)C(O)C1CCOc1ccc(-c2ccccc2)cc1CO",
+          1
+        ],
+        [
+          "C#CN1C(C)CC(C)c2c(C=C(O)NC(=O)CCCC#CC#CCOC(=O)Nc3ccccc3C)ccn21",
+          1
+        ],
+        [
+          "CCC#Cc1c(-c2conc2C)ccc(C=NOC(=O)OC(O)CCCO)c1C1C=CCC1",
+          1
+        ],
+        [
+          "COC(C#CCOc1c[nH][nH][nH]n1OC)CCCC#CC(C)O",
+          1
+        ],
+        [
+          "COc1cnc2cccc(CCc3[nH][nH]on4cccc(-c5ccc(CF)o5)c34)c2c1",
+          1
+        ],
+        [
+          "C=C(CC(C)(C#N)C(=O)NC(C#N)CC)C(C)C(C)C(=C)C(=O)NC=NC(C)CC",
+          1
+        ],
+        [
+          "CCCN(CCCO)C(=O)C(CCN)CON=Nc1cc(CCN)c(=O)n(N=O)c1",
+          1
+        ],
+        [
+          "CCCC(CO)c1c(N2CCCC(CCN)N2)ccc2cc[nH]c12",
+          1
+        ],
+        [
+          "Cc1cn(C(F)C(C)OC(=O)C2CCCCCO2)o[nH]n1C=C1CC2CCCC2C1",
+          1
+        ],
+        [
+          "CCCCCC1(C)COCC(C2=CC(C)(N3C(C)CCC3CCOCCO)CCC2C)C1",
+          1
+        ],
+        [
+          "CC=C1CCC(CCC(C#N)N(CC)CC2CC2C(=O)NC2CC2C#N)CC1",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "trajectory_diagnostics": {
+        "all_step_connected_or_null_trajectory_fraction": 1.0,
+        "all_step_valid_trajectory_fraction": 1.0,
+        "available": true,
+        "available_fraction": 1.0,
+        "available_rollouts": 20,
+        "canonical_self_event_count": 0,
+        "canonical_self_event_fraction": 0.0,
+        "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+        "committed_state_count": 655,
+        "delete_to_one_then_regrow_fraction": 0.0,
+        "disconnected_committed_state_count": 0,
+        "disconnected_committed_state_fraction": 0.0,
+        "disconnected_state_count": 0,
+        "hit_null_after_source_fraction": 0.0,
+        "hit_one_atom_trajectory_fraction": 0.0,
+        "immediate_backtrack_count": 2,
+        "immediate_backtrack_per_opportunity_fraction": 0.0031496062992125984,
+        "immediate_backtrack_rule_pair_counts": {
+          "atom_insert -> atom_delete": 1,
+          "bond_reroute -> bond_reroute": 1
+        },
+        "invalid_committed_state_count": 0,
+        "invalid_committed_state_fraction": 0.0,
+        "invalid_state_count": 0,
+        "mean_trajectory_min_atoms": 26.4,
+        "mean_unique_state_fraction": 0.9954242654508612,
+        "minimum_atom_count": 18,
+        "observed_state_count": 675,
+        "trajectories_with_canonical_self_event_fraction": 0.0,
+        "trajectories_with_immediate_backtrack_fraction": 0.1
+      },
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "selected_metrics": {
+      "all_step_valid_trajectory_fraction": 1.0,
+      "canonical_self_event_count": 0,
+      "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_total_variation": 0.23049999999999998,
+      "delete_to_one_then_regrow_fraction": 0.0,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.07633587786259542,
+        "atom_insert": 0.1480916030534351,
+        "atom_restate": 0.15114503816793892,
+        "bond_reorder": 0.07480916030534351,
+        "bond_reroute": 0.4763358778625954,
+        "ring_system_grow": 0.0732824427480916
+      },
+      "immediate_backtrack_count": 2,
+      "mean_atoms": 29.25,
+      "mean_cycle_rank": 2.7,
+      "mean_events": 32.75,
+      "mean_unique_state_fraction": 0.9954242654508612,
+      "valid_fraction": 1.0
+    },
+    "virtual_event_rule_counts": {
+      "<VIRTUAL_GRAFT>": 918,
+      "<VIRTUAL_RATE_CALIBRATION:atom_delete>": 30,
+      "<VIRTUAL_RATE_CALIBRATION:small_ring>": 13
+    }
+  },
+  "behavior_passed": true,
+  "behavioral_checks": {
+    "elapsed_time_le_1p5x_baseline": true,
+    "event_family_tv_le_0p20": true,
+    "mean_atoms_within_3_of_baseline": true,
+    "mean_cycle_rank_within_1_of_baseline": true,
+    "mean_events_ratio_0p5_to_1p5": true
+  },
+  "candidate": {
+    "control_diagnostics": [
+      {
+        "accepted_events": 32,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 32,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 41,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 31,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 30,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 36,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 27,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 23,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 28,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 29,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 40,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 38,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 30,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 35,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 55,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 1,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 42,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 32,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 28,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 29,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      },
+      {
+        "accepted_events": 25,
+        "base_sampler_diagnostics": null,
+        "immediate_backtrack_rejections": 0,
+        "method": "canonical_history_exact_thinning_v1",
+        "self_rejections": 0
+      }
+    ],
+    "elapsed_seconds": 624.9896872499958,
+    "label": "analytic_productive_quotient",
+    "metrics": {
+      "atom_count_total_variation": 0.5175,
+      "bond_order_distribution_total_variation": 0.11360775237394818,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_above_reference_max_fraction": 0.0,
+      "cycle_rank_total_variation": 0.394,
+      "element_distribution_total_variation": 0.04601478131089854,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.12066365007541478,
+        "atom_insert": 0.14027149321266968,
+        "atom_restate": 0.15233785822021115,
+        "bond_reorder": 0.07088989441930618,
+        "bond_reroute": 0.444947209653092,
+        "ring_system_grow": 0.07088989441930618
+      },
+      "full_reference_support_fraction": 0.0,
+      "mean_atoms": 27.55,
+      "mean_bonds": 29.05,
+      "mean_cycle_rank": 2.5,
+      "mean_events": 33.15,
+      "non_null_fraction": 1.0,
+      "novel_to_train_fraction": 1.0,
+      "reference_mean_atoms": 26.7885,
+      "reference_mean_bonds": 29.2425,
+      "reference_mean_cycle_rank": 3.454,
+      "samples": 20,
+      "top_final_states": [
+        [
+          "CC#CCN1OCCC(COC)C1CC#CNC=CC(C#N)NC#COC",
+          1
+        ],
+        [
+          "COc1c(C)cncc1OCCCCC(=O)n1cccc1C",
+          1
+        ],
+        [
+          "C=C(C)n1cnc(OCC2NC2CNC(=O)NCc2cn(CC)oo[nH]2)c1",
+          1
+        ],
+        [
+          "COCC(CC#CC(=O)c1ccc(CNCCCC#CNC=O)nc1CCO)c1ccncc1",
+          1
+        ],
+        [
+          "CCOC(=O)OCC(CCN1CCCC1C)OC1CCC(CN(C)C)C1",
+          1
+        ],
+        [
+          "CCCCc1cn(C(OC)C(C)C(=O)NCC2OCC2NC#N)c(NC(C)=O)cc1=O",
+          1
+        ],
+        [
+          "COC(F)C1C=CC(F)(NCN)C1C1C=CC(C)(C#CC2CO2)C1",
+          1
+        ],
+        [
+          "C=CCCc1c(Cn2[nH]o[nH]cc2CC)cccc1C1(F)CCCCC1",
+          1
+        ],
+        [
+          "C(CC1CNCOC1CCCCN1CC2CCC1CC2)=C1CCCN1",
+          1
+        ],
+        [
+          "CC1(c2[nH]ccc2F)CC2(CCC1CC1CCOO1)NCCC2C(=O)N=O",
+          1
+        ],
+        [
+          "O=CNCC(O)CCc1c(O)ccc(OCc2c(NO)cccc2OCCC2CC(C(F)F)NCN2)c1F",
+          1
+        ],
+        [
+          "CC#CC(=O)NC1CCC1C#Cc1cn(C)nc1NC(=O)c1cc[nH]c1COC",
+          1
+        ],
+        [
+          "c1ccc(CCC2CCc3ccccc32)cc1",
+          1
+        ],
+        [
+          "CC(O)CCOCN1CCCC(NC(=O)C(C)O)N1CCNC1CCC1",
+          1
+        ],
+        [
+          "C=C(C)C#CC(CN=O)C(C#N)CNC(=O)C(CN)CCc1[nH][nH][nH]n(C(N)(F)F)c1C(C)C",
+          1
+        ],
+        [
+          "CCOC(C#N)(OC)N1CCCC1C(C=NOC(=O)C1C=CC=CC1)CCCF",
+          1
+        ],
+        [
+          "N#CC(=O)OCCC1(CO)CCNC(Nc2cccc(COF)c2)C1=O",
+          1
+        ],
+        [
+          "C=CCCC=CCCc1c(C2CCCC2NC#Cn2cccc2)c[nH]c1C#N",
+          1
+        ],
+        [
+          "COc1c(NC(N)=O)[nH]n(COC=O)[nH]n1CC#CC#CCn1occoo1",
+          1
+        ],
+        [
+          "COc1cc(N)nc(C(CCF)Cc2cnccc2OCO)c1C1CCC1",
+          1
+        ]
+      ],
+      "train_support_fraction": 0.0,
+      "trajectory_diagnostics": {
+        "all_step_connected_or_null_trajectory_fraction": 1.0,
+        "all_step_valid_trajectory_fraction": 1.0,
+        "available": true,
+        "available_fraction": 1.0,
+        "available_rollouts": 20,
+        "canonical_self_event_count": 0,
+        "canonical_self_event_fraction": 0.0,
+        "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+        "committed_state_count": 663,
+        "delete_to_one_then_regrow_fraction": 0.0,
+        "disconnected_committed_state_count": 0,
+        "disconnected_committed_state_fraction": 0.0,
+        "disconnected_state_count": 0,
+        "hit_null_after_source_fraction": 0.0,
+        "hit_one_atom_trajectory_fraction": 0.0,
+        "immediate_backtrack_count": 0,
+        "immediate_backtrack_per_opportunity_fraction": 0.0,
+        "immediate_backtrack_rule_pair_counts": {},
+        "invalid_committed_state_count": 0,
+        "invalid_committed_state_fraction": 0.0,
+        "invalid_state_count": 0,
+        "mean_trajectory_min_atoms": 25.6,
+        "mean_unique_state_fraction": 1.0,
+        "minimum_atom_count": 17,
+        "observed_state_count": 683,
+        "trajectories_with_canonical_self_event_fraction": 0.0,
+        "trajectories_with_immediate_backtrack_fraction": 0.0
+      },
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "selected_metrics": {
+      "all_step_valid_trajectory_fraction": 1.0,
+      "canonical_self_event_count": 0,
+      "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+      "connected_or_null_fraction": 1.0,
+      "cycle_rank_total_variation": 0.394,
+      "delete_to_one_then_regrow_fraction": 0.0,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.12066365007541478,
+        "atom_insert": 0.14027149321266968,
+        "atom_restate": 0.15233785822021115,
+        "bond_reorder": 0.07088989441930618,
+        "bond_reroute": 0.444947209653092,
+        "ring_system_grow": 0.07088989441930618
+      },
+      "immediate_backtrack_count": 0,
+      "mean_atoms": 27.55,
+      "mean_cycle_rank": 2.5,
+      "mean_events": 33.15,
+      "mean_unique_state_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "virtual_event_rule_counts": {
+      "<VIRTUAL_IMMEDIATE_BACKTRACK>": 1,
+      "<VIRTUAL_RATE_CALIBRATION:small_ring>": 16
+    }
+  },
+  "comparison": {
+    "elapsed_time_ratio": 1.4252176903399432,
+    "event_family_total_variation": 0.04552059226509159,
+    "mean_atoms_delta": -1.6999999999999993,
+    "mean_cycle_rank_delta": -0.20000000000000018,
+    "mean_events_ratio": 1.0122137404580152
+  },
+  "corpus_scale_training_authorized": false,
+  "decision": "analytic quotient rollout gate passed",
+  "format": "compose_v4_analytic_pancake_quotient_rollout_smoke_v1",
+  "no_graft_diagnostic": null,
+  "passed": true,
+  "profile": {
+    "atom_delete_log_rate_adjustment": -0.5,
+    "max_events": 128,
+    "n_slots": 40,
+    "operational_horizon": 16.0,
+    "samples": 20,
+    "seed": 20260721,
+    "small_ring_log_rate_adjustment": -1.5,
+    "time_step": 0.1,
+    "workers": 4
+  },
+  "safety_checks": {
+    "all_step_valid_fraction_eq_1": true,
+    "committed_backtracks_eq_0": true,
+    "committed_self_events_eq_0": true,
+    "connected_fraction_eq_1": true,
+    "event_budget_exhaustion_eq_0": true,
+    "valid_fraction_eq_1": true
+  },
+  "safety_passed": true
+}

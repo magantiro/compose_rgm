@@ -259,3 +259,45 @@ def test_typed_tree_transport_teacher_is_in_topology_committed_fiber() -> None:
             if step.rule_name == "ring_system_grow":
                 assert step.action in enumerate_ring_system_grows(state, catalog)
             state = successor
+
+
+def test_tree_transport_can_commit_independent_ring_transaction_early() -> None:
+    target = pad_molecular_graph(
+        smiles_to_molecular_graph("CCOC(=O)N1CCCCC1"),
+        20,
+    )
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(912),
+        n_slots=target.n_atoms,
+    )
+    sequential = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    early = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+        event_schedule="exact_early_ring",
+    )
+
+    sequential_ring = next(
+        index
+        for index, step in enumerate(sequential.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    early_ring = next(
+        index
+        for index, step in enumerate(early.steps)
+        if step.rule_name == "ring_system_grow"
+    )
+    endpoint, states = execute_trace(early.source, early.steps, return_states=True)
+
+    assert early_ring < sequential_ring
+    assert np.array_equal(endpoint.atom_types, target.atom_types)
+    assert np.array_equal(endpoint.bonds, target.bonds)
+    assert all(is_valid_state(state) for state in states)
+    assert all(is_connected_or_null(state) for state in states)

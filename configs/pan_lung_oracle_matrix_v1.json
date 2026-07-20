@@ -1,0 +1,138 @@
+{
+  "format": "compose_pan_lung_oracle_matrix_v1",
+  "manifest": "configs/pan_lung_corpus_manifest_v1.json",
+  "matrix_axes": {
+    "representations": [
+      "R1_morgan_descriptors_plus_context",
+      "R2_region_component_plus_context",
+      "R3_frozen_molecular_encoder_plus_context",
+      "R4_end_to_end_molecular_graph_plus_context",
+      "R5_full_formulation_set_encoder"
+    ],
+    "model_families": [
+      "M1_ridge_elastic_net",
+      "M2_extra_trees",
+      "M3_gradient_boosted_trees",
+      "M4_shallow_masked_multitask_mlp",
+      "M5_masked_multitask_graph_model",
+      "M6_calibrated_ensemble"
+    ]
+  },
+  "typed_heads": [
+    {"head_id": "airway_a549_in_vitro_expression", "ready_rows": 1801, "sources": ["lnpdb_2026"]},
+    {"head_id": "airway_hbec_ali_in_vitro_expression", "ready_rows": 29, "sources": ["lnpdb_2026"]},
+    {"head_id": "airway_hbe_in_vitro_expression", "ready_rows": 1920, "sources": ["lumi_lab_4cr1920"]},
+    {"head_id": "local_intratracheal_functional_expression", "ready_rows": 49, "sources": ["lnpdb_2026"]},
+    {"head_id": "systemic_iv_lung_expression", "ready_rows": 444, "sources": ["lut_444_2026"]},
+    {"head_id": "systemic_iv_lung_selectivity", "ready_rows": 444, "sources": ["lut_444_2026"]},
+    {"head_id": "systemic_iv_barcoded_lung_uptake", "ready_rows": 96, "sources": ["lnpdb_2026"]},
+    {"head_id": "lung_cell_type_or_editing", "ready_rows": 0, "sources": [], "status": "lead-level source data not yet normalized"}
+  ],
+  "cell_contract": "A matrix cell is representation x model family and is evaluated over every compatible typed head with masked losses. Sources are provenance groups and evaluation splits, not matrix columns.",
+  "cells": [
+    {
+      "cell_id": "R1xM1",
+      "status": "complete_for_qualified_full_smiles_heads",
+      "coverage": "A549 and LUMI qualified full-SMILES heads under frozen held-group folds; weak incompatible heads remain excluded from model selection",
+      "outputs": [
+        "diagnostics/pan_lung_qualified_matrix_comparison_predictions.csv",
+        "diagnostics/pan_lung_qualified_matrix_comparison_metrics.json"
+      ]
+    },
+    {
+      "cell_id": "R1xM2",
+      "status": "complete_for_all_full_smiles_heads",
+      "coverage": "All full-SMILES heads with masked per-head ExtraTrees estimators and one shared feature/context contract; LuT reported in R2xM2 until full structures exist",
+      "command": "python3 -m scripts.export_pan_lung_matrix_cell_predictions",
+      "outputs": [
+        "diagnostics/pan_lung_matrix_R1M2_R2M2_predictions.csv",
+        "diagnostics/pan_lung_matrix_R1M2_R2M2_metrics.json"
+      ],
+      "qualification_splits": ["held_lipid", "held_component", "leave_study_out_when_more_sources_are_admitted"],
+      "selection_metric": "held-group Spearman with top-decile enrichment and MAE; no random-fold model selection"
+    },
+    {
+      "cell_id": "R2xM2",
+      "status": "complete_for_lut",
+      "coverage": "LuT systemic-IV expression and selectivity via head/tail/SAR features",
+      "command": "python3 -m scripts.export_pan_lung_matrix_cell_predictions",
+      "outputs": [
+        "diagnostics/lut_444_in_vivo_baselines.json",
+        "diagnostics/pan_lung_matrix_R1M2_R2M2_predictions.csv",
+        "diagnostics/pan_lung_matrix_R1M2_R2M2_metrics.json"
+      ]
+    },
+    {
+      "cell_id": "R1xM3",
+      "status": "complete_for_qualified_full_smiles_heads",
+      "coverage": "A549 and LUMI qualified full-SMILES heads under the identical R1xM1/R1xM2 held-group folds",
+      "outputs": [
+        "diagnostics/pan_lung_qualified_matrix_comparison_predictions.csv",
+        "diagnostics/pan_lung_qualified_matrix_comparison_metrics.json"
+      ]
+    },
+    {
+      "cell_id": "R2xM1",
+      "status": "complete_for_lut_selectivity",
+      "coverage": "LuT systemic-IV selectivity via component/SAR features under held-head, held-tail, and round-transfer splits",
+      "outputs": [
+        "diagnostics/pan_lung_qualified_matrix_comparison_predictions.csv",
+        "diagnostics/pan_lung_qualified_matrix_comparison_metrics.json"
+      ]
+    },
+    {
+      "cell_id": "R2xM3",
+      "status": "complete_for_lut_selectivity",
+      "coverage": "LuT systemic-IV selectivity via component/SAR features under the identical R2xM1/R2xM2 splits",
+      "outputs": [
+        "diagnostics/pan_lung_qualified_matrix_comparison_predictions.csv",
+        "diagnostics/pan_lung_qualified_matrix_comparison_metrics.json"
+      ]
+    },
+    {"cell_id": "R3xM1", "status": "queued_after_canonical_corpus_table"},
+    {"cell_id": "R3xM4", "status": "queued_after_simple_cells_and_leave_study_splits"},
+    {"cell_id": "R4xM5", "status": "deferred_until_pan_lung_oracle_baseline_gate"},
+    {"cell_id": "R5xM5", "status": "deferred_until_formulation_metadata_coverage_audit"},
+    {
+      "cell_id": "R1xM6",
+      "status": "qualified_with_axis_boundary",
+      "coverage": "A549 and LUMI R2/R3/R4 are qualified for domain-bounded filtering; LUMI R1 remains diagnostic-only",
+      "outputs": [
+        "configs/pan_lung_qualified_ensemble_contract_v1.json",
+        "diagnostics/pan_lung_qualified_ensemble_qualification.csv",
+        "diagnostics/pan_lung_qualified_ensemble_predictions.csv",
+        "diagnostics/pan_lung_qualified_ensemble_metrics.json"
+      ]
+    },
+    {
+      "cell_id": "R2xM6",
+      "status": "qualified_for_lut_selectivity",
+      "coverage": "LuT selectivity held-head and held-tail policies only; round transfer is prohibited as a reward",
+      "outputs": [
+        "configs/pan_lung_qualified_ensemble_contract_v1.json",
+        "diagnostics/pan_lung_qualified_ensemble_qualification.csv",
+        "diagnostics/pan_lung_qualified_ensemble_predictions.csv",
+        "diagnostics/pan_lung_qualified_ensemble_metrics.json"
+      ]
+    },
+    {
+      "cell_id": "qualified_filtering_bundle_v1",
+      "status": "serialized_clean_runtime_verified_filtering_only",
+      "coverage": "Eight full-data members across A549, LUMI, and LuT selectivity; filtering only behind molecular or component applicability gates",
+      "outputs": [
+        "artifacts/oracles/pan_lung_filtering_v1/manifest.json",
+        "diagnostics/pan_lung_filtering_admission_test.json",
+        "diagnostics/pan_lung_filtering_clean_runtime_verification.json",
+        "src/compose_v4/oracles/reward_guard.py",
+        "configs/pan_lung_reward_preregistration.template.json"
+      ],
+      "reward_fine_tuning_enabled": false
+    },
+    {"cell_id": "R3xM6", "status": "deferred_until_frozen_encoder_cell_is_executed"}
+  ],
+  "immediate_next_measurable_deliverable": {
+    "cell_id": "explicit_reward_preregistration_decision",
+    "result": "Filtering may proceed with the verified bundle. Reward fine-tuning remains disabled unless a future explicit frozen preregistration is bound to the exact bundle hash and the bundle authorization flag is separately changed.",
+    "do_not_do": "Do not concatenate assay values, count LiON duplicates, treat barcode uptake as expression, or impute missing LuT molecular graphs."
+  }
+}

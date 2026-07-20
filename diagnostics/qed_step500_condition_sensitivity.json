@@ -1,0 +1,51 @@
+{
+  "format": "compose_v4_property_condition_sensitivity_v1",
+  "checkpoint_sha256": "e0624f163c53893fcdcbbb565c4aae5aacad7b3b4247f0d1a45741e8f61bb229",
+  "evaluation_batch": "test, 512 fixed examples",
+  "precision": "cpu_float32",
+  "normalizer": {"mean": 0.6012370044427231, "standard_deviation": 0.19169590371119966},
+  "conditions": {
+    "classifier_free": {
+      "mean_hazard": 7.03161096572876,
+      "mean_teacher_mark_probability": 0.07361506670713425,
+      "mean_family_probabilities": {"atom_insert": 0.06526260077953339, "atom_delete": 0.07819677889347076, "atom_restate": 0.3733578324317932, "bond_reorder": 0.08123378455638885, "bond_reroute": 0.18808519840240479, "ring_system_grow": 0.20749303698539734}
+    },
+    "qed_0.3": {
+      "standardized_value": -1.5714316196164166,
+      "mean_hazard": 8.24478530883789,
+      "signed_hazard_shift_vs_classifier_free": 1.2131741046905518,
+      "mean_family_total_variation_vs_classifier_free": 0.048054710030555725,
+      "mean_family_kl_vs_classifier_free": 0.025318974629044533,
+      "mean_teacher_mark_probability": 0.07525710761547089,
+      "mean_family_probabilities": {"atom_insert": 0.09038309752941132, "atom_delete": 0.06486908346414566, "atom_restate": 0.36407846212387085, "bond_reorder": 0.08374179154634476, "bond_reroute": 0.1867787390947342, "ring_system_grow": 0.20194491744041443}
+    },
+    "qed_0.5": {
+      "standardized_value": -0.5281125077938138,
+      "mean_hazard": 7.362656593322754,
+      "signed_hazard_shift_vs_classifier_free": 0.3310454189777374,
+      "mean_family_total_variation_vs_classifier_free": 0.018592044711112976,
+      "mean_family_kl_vs_classifier_free": 0.003418908454477787,
+      "mean_teacher_mark_probability": 0.0737224668264389,
+      "mean_family_probabilities": {"atom_insert": 0.07334322482347488, "atom_delete": 0.07440991699695587, "atom_restate": 0.3688560426235199, "bond_reorder": 0.07880266010761261, "bond_reroute": 0.1861400455236435, "ring_system_grow": 0.211210235953331}
+    },
+    "qed_0.7": {
+      "standardized_value": 0.5152066040287887,
+      "mean_hazard": 6.533230304718018,
+      "signed_hazard_shift_vs_classifier_free": -0.498381108045578,
+      "mean_family_total_variation_vs_classifier_free": 0.03404027596116066,
+      "mean_family_kl_vs_classifier_free": 0.00851350650191307,
+      "mean_teacher_mark_probability": 0.07131294906139374,
+      "mean_family_probabilities": {"atom_insert": 0.05684773623943329, "atom_delete": 0.08470195531845093, "atom_restate": 0.3724817633628845, "bond_reorder": 0.07269220799207687, "bond_reroute": 0.1839471161365509, "ring_system_grow": 0.22371093928813934}
+    },
+    "qed_0.9": {
+      "standardized_value": 1.5585257158513919,
+      "mean_hazard": 5.774603843688965,
+      "signed_hazard_shift_vs_classifier_free": -1.2570075988769531,
+      "mean_family_total_variation_vs_classifier_free": 0.07705491781234741,
+      "mean_family_kl_vs_classifier_free": 0.046341508626937866,
+      "mean_teacher_mark_probability": 0.06826595962047577,
+      "mean_family_probabilities": {"atom_insert": 0.0418759286403656, "atom_delete": 0.09227710217237473, "atom_restate": 0.37610888481140137, "bond_reorder": 0.06622740626335144, "bond_reroute": 0.1809784322977066, "ring_system_grow": 0.23863177001476288}
+    }
+  },
+  "interpretation": "The condition is not ignored. Raising the requested QED monotonically lowers the mean hazard, lowers atom-insert mass, and raises atom-delete and ring-system-grow mass on identical states. The family distribution moves modestly (mean total variation 0.077 at QED 0.9), consistent with the rollout table's real but weak target response."
+}

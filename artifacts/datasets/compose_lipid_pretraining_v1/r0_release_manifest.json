@@ -1,0 +1,23 @@
+{
+  "artifact": {
+    "path": "artifacts/datasets/compose_lipid_pretraining_v1/r0_observed_real_structures.csv",
+    "sha256": "3e2a35416c98f44e2261c06717c1fdee1b5ea393fb8013a38235631aa5ee6c0d",
+    "size_bytes": 19633160
+  },
+  "canonicalization_audit": {
+    "path": "artifacts/datasets/compose_lipid_pretraining_v1/canonicalization_audit.json",
+    "sha256": "b7333bea9eec6ac3e93458068c83e2fcb0a71907c3540f53d62f90a251d8959f"
+  },
+  "eligible_row_count": 15433,
+  "enumerated_new_molecule_count": 0,
+  "excluded_virtual_only_structures": 11076,
+  "policy": {
+    "labels": "no formulation or delivery label is inherited by structural pretraining rows",
+    "measured_occurrences": "collapsed within source; occurrence counts retained",
+    "prospective": "all retrospective structures are excluded from prospective novelty claims",
+    "split": "canonical structures never cross splits; study/component/reaction groups frozen",
+    "unit": "canonical isomeric molecular structure"
+  },
+  "release_id": "compose_lipid_r0_observed_v1",
+  "row_count": 15433
+}

@@ -20,15 +20,20 @@ import torch
 from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
 from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.eval.molecular_quality import molecular_quality_report
+from compose_v4.eval.ring_calibration import undesirable_small_ring_mask
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import (
     corpus_rollout_metrics,
     validate_rollout_trajectory_diagnostics,
 )
+from compose_v4.experiments.calibrated_rewrite_sampling import (
+    ThinnedRateCalibrationSampler,
+)
 from compose_v4.experiments.parallel_tracelet_sampling import (
     sample_tracelet_ancestral_many,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    FactorizedMarkEmpiricalPriors,
     FactorizedTraceletRateModel,
     MARK_RULE_NAMES,
 )
@@ -154,6 +159,12 @@ def load_factorized_rollout_checkpoint(
         raise ValueError("rollout-only evaluation currently requires factorized_marks")
     if payload["source_prior"] != "carbon_tree":
         raise ValueError("rollout-only evaluation currently requires carbon_tree")
+    empirical_prior_payload = payload.get("empirical_mark_priors")
+    empirical_mark_priors = (
+        None
+        if empirical_prior_payload is None
+        else FactorizedMarkEmpiricalPriors.from_dict(empirical_prior_payload)
+    )
     model = FactorizedTraceletRateModel(
         payload["ring_catalog"],
         hidden_dim=int(payload["hidden_dim"]),
@@ -161,8 +172,56 @@ def load_factorized_rollout_checkpoint(
         ring_electronic_mode=str(
             payload.get("ring_electronic_mode", "factorized_local")
         ),
+        rate_factorization=str(payload.get("rate_factorization", "hierarchical")),
+        property_condition_dim=int(payload.get("property_condition_dim", 0)),
+        empirical_mark_prior_mode=str(
+            payload.get("empirical_mark_prior_mode", "none")
+        ),
+        empirical_mark_priors=empirical_mark_priors,
+        ring_family_mass_mode=str(payload.get("ring_family_mass_mode", "boolean")),
+        ring_template_factorization=str(
+            payload.get("ring_template_factorization", "flat")
+        ),
     )
-    model.load_state_dict(payload["state_dict"], strict=True)
+    incompatible = model.load_state_dict(payload["state_dict"], strict=False)
+    missing_keys = set(incompatible.missing_keys)
+    unexpected_keys = set(incompatible.unexpected_keys)
+    legacy_role_keys = {
+        name
+        for name in model.state_dict()
+        if name.startswith("ring_system_role_head.")
+    }
+    legacy_v0 = (
+        not unexpected_keys
+        and missing_keys == legacy_role_keys
+        and "ring_electronic_mode" not in payload
+        and int(
+            getattr(
+                payload["ring_catalog"],
+                "ring_system_electronic_alias_version",
+                0,
+            )
+        )
+        == 0
+    )
+    if legacy_v0:
+        # Legacy checkpoints learned only the C/N/O/F factor.  The executable
+        # completion predicate supplied the allowable electronic role.  Zero
+        # logits reproduce that neutral factor and avoid random untrained role
+        # preferences while retaining the current exact validity mask.
+        with torch.no_grad():
+            for name, parameter in model.named_parameters():
+                if name in legacy_role_keys:
+                    parameter.zero_()
+        payload["checkpoint_compatibility"] = (
+            "legacy_v0_neutral_ring_role_logits"
+        )
+        model.virtualize_legacy_self_grafts = True
+    elif missing_keys or unexpected_keys:
+        raise ValueError(
+            "checkpoint/model state mismatch: "
+            f"missing={sorted(missing_keys)}, unexpected={sorted(unexpected_keys)}"
+        )
     model.eval()
     return model, payload
 
@@ -194,6 +253,33 @@ def main() -> None:
         default=[],
         help="Disable one production rewrite family during sampling only.",
     )
+    parser.add_argument(
+        "--exclude-ring-template-cycle-size-at-most",
+        type=int,
+        default=None,
+        help=(
+            "Inference-only calibration ablation: exclude complete ring-system "
+            "templates containing a cycle no larger than this value."
+        ),
+    )
+    parser.add_argument(
+        "--atom-delete-log-rate-adjustment",
+        type=float,
+        default=0.0,
+        help=(
+            "Non-positive inference-only log multiplier for atom-delete rates; "
+            "implemented by exact CTMC thinning without family renormalization."
+        ),
+    )
+    parser.add_argument(
+        "--small-ring-log-rate-adjustment",
+        type=float,
+        default=0.0,
+        help=(
+            "Non-positive inference-only log multiplier for whole-ring actions "
+            "containing a 3/4-member cycle; implemented by exact CTMC thinning."
+        ),
+    )
     parser.add_argument("--fast-split", action="store_true")
     args = parser.parse_args()
 
@@ -209,6 +295,30 @@ def main() -> None:
     if unknown_disabled_rules:
         raise ValueError(f"unknown disabled rewrite rules: {unknown_disabled_rules}")
     model.disabled_sampling_rule_names = frozenset(args.disable_rule)
+    if (
+        args.exclude_ring_template_cycle_size_at_most is not None
+        and args.exclude_ring_template_cycle_size_at_most < 3
+    ):
+        raise ValueError("excluded ring-template cycle size must be at least three")
+    excluded_ring_template_indices: tuple[int, ...] = ()
+    if args.exclude_ring_template_cycle_size_at_most is not None:
+        excluded_mask = undesirable_small_ring_mask(
+            model.ring_system_templates,
+            maximum_size=args.exclude_ring_template_cycle_size_at_most,
+        )
+        excluded_ring_template_indices = tuple(
+            int(index) for index in torch.nonzero(excluded_mask).flatten().tolist()
+        )
+    model.excluded_sampling_ring_template_indices = excluded_ring_template_indices
+    calibrated_sampler = ThinnedRateCalibrationSampler(
+        model,
+        family_log_rate_adjustments=(
+            ("atom_delete", float(args.atom_delete_log_rate_adjustment)),
+        ),
+        small_ring_log_rate_adjustment=float(
+            args.small_ring_log_rate_adjustment
+        ),
+    )
     source_prior = checkpoint["tree_source_prior"]
     if max(source_prior.sizes) > args.max_atoms:
         raise ValueError("checkpoint source prior exceeds --max-atoms")
@@ -258,6 +368,8 @@ def main() -> None:
         "time_step": args.time_step,
         "max_events": args.max_events,
         "disabled_rule_names": sorted(model.disabled_sampling_rule_names),
+        "excluded_ring_template_indices": excluded_ring_template_indices,
+        "rate_calibration": calibrated_sampler.calibration_signature,
         "source_prior": "carbon_tree",
     }
     rollouts = load_reusable_rollouts(
@@ -267,7 +379,7 @@ def main() -> None:
     )
     if rollouts is None:
         rollouts = sample_tracelet_ancestral_many(
-            model,
+            calibrated_sampler,
             seed=args.seed + 4,
             samples=args.rollout_samples,
             workers=args.rollout_workers,
@@ -370,6 +482,11 @@ def main() -> None:
             "workers": args.rollout_workers,
             "seed_scheme": "seed_sequence_per_trajectory_v1",
             "disabled_rule_names": sorted(model.disabled_sampling_rule_names),
+            "excluded_ring_template_cycle_size_at_most": (
+                args.exclude_ring_template_cycle_size_at_most
+            ),
+            "excluded_ring_template_count": len(excluded_ring_template_indices),
+            "rate_calibration": calibrated_sampler.calibration_signature,
         },
     }
     if generated_smiles:

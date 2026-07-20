@@ -1,0 +1,13 @@
+{
+  "guided": "COc1cccn1C(C)C=CC(C)CC(C)c1[nH]c(F)c2c1C(CO)C(N)=CC2",
+  "guided_events": 37,
+  "guided_oracle_requests": 623,
+  "guided_qed": 0.5744934755565309,
+  "guided_unique_oracle_evaluations": 268,
+  "guided_valid": true,
+  "seed": 20260730,
+  "unguided": "CCCOC(=O)C1(C#Cc2ccc(C)n2C2C(N)=CC(N)C2=CCN=CCOCCCN(C)CCC)CCCC1",
+  "unguided_events": 35,
+  "unguided_qed": 0.11835225309032466,
+  "unguided_valid": true
+}

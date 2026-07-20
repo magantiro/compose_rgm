@@ -14,6 +14,7 @@ from scripts.train_tracelet_cnof_gate import (
     _evaluation_batch_cache_path,
     _evaluation_batch_cache_signature,
     _load_evaluation_batch_cache,
+    _training_support_cache_signature,
 )
 
 
@@ -53,6 +54,34 @@ def test_evaluation_cache_is_content_addressed_by_scientific_configuration(
     assert _evaluation_batch_cache_path(tmp_path, baseline) != (
         _evaluation_batch_cache_path(tmp_path, changed)
     )
+
+
+def test_contextual_ring_scores_reuse_identical_semantic_support_caches() -> None:
+    local = _evaluation_signature(ring_electronic_mode="factorized_local")
+    contextual = _evaluation_signature(
+        ring_electronic_mode="factorized_contextual"
+    )
+    exact = _evaluation_signature(ring_electronic_mode="catalog_exact")
+    assert contextual == local
+    assert exact != local
+
+    common = {
+        "seed": 20,
+        "late_time_fraction": 0.5,
+        "operational_horizon": 16.0,
+        "progress_stratification_fraction": 0.5,
+    }
+    local_support = _training_support_cache_signature(
+        _path_signature(),
+        ring_electronic_mode="factorized_local",
+        **common,
+    )
+    contextual_support = _training_support_cache_signature(
+        _path_signature(),
+        ring_electronic_mode="factorized_contextual",
+        **common,
+    )
+    assert contextual_support == local_support
 
 
 def test_evaluation_cache_round_trip_validates_signature_and_partition_sizes(

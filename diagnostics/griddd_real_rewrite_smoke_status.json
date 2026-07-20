@@ -1,0 +1,17 @@
+{
+  "blockers": [
+    {
+      "code": "qualification_manifest_not_passed",
+      "detail": "unconditional canonical-successor multi-state qualification has not passed"
+    }
+  ],
+  "completed": false,
+  "conditional_checkpoint": "artifacts/griddd_qed_canonical_successor_smoke/checkpoint.pt",
+  "format": "compose_v4_griddd_real_rewrite_smoke_status_v1",
+  "large_benchmark_authorized": false,
+  "launched": false,
+  "next_action": "rerun this exact command after the named artifact is present and passes; the 800x20 benchmark remains prohibited",
+  "phase": "waiting",
+  "qualification_manifest": "diagnostics/canonical_successor_backbone_qualification.json",
+  "training_launched": false
+}

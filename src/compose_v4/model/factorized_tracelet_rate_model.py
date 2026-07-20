@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from dataclasses import dataclass, replace
 from math import sqrt
-from typing import Any, MutableMapping
+from typing import Any, Mapping, MutableMapping
 
 import networkx as nx
 import numpy as np
@@ -102,6 +102,140 @@ _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 
 
 StateCacheKey = tuple[bytes, bytes, bytes, bytes]
+
+
+@dataclass(frozen=True)
+class FactorizedMarkEmpiricalPriors:
+    """Fixed corpus base measures underneath learned mark-logit residuals.
+
+    Each table is a normalized log probability over the corresponding global
+    mark categories.  Runtime application masks condition the base measure on
+    chemistry exactly as they condition the learned residual logits.
+    """
+
+    root_atom_log_probabilities: tuple[float, ...]
+    connected_atom_order_log_probabilities: tuple[tuple[float, ...], ...]
+    atom_restate_log_probabilities: tuple[float, ...]
+    bond_reorder_log_probabilities: tuple[float, ...]
+    ring_electronic_log_probabilities: tuple[float, ...]
+    root_atom_observations: int = 0
+    connected_atom_observations: int = 0
+    atom_restate_observations: int = 0
+    bond_reorder_observations: int = 0
+    ring_electronic_observations: int = 0
+
+    def __post_init__(self) -> None:
+        expected_shapes = {
+            "root_atom_log_probabilities": (len(CNOF_ATOM_TYPES),),
+            "connected_atom_order_log_probabilities": (
+                3,
+                len(CNOF_ATOM_TYPES),
+            ),
+            "atom_restate_log_probabilities": (len(CNOF_ATOM_TYPES),),
+            "bond_reorder_log_probabilities": (3,),
+            "ring_electronic_log_probabilities": (2 * len(CNOF_ATOM_TYPES),),
+        }
+        for name, expected_shape in expected_shapes.items():
+            values = np.asarray(getattr(self, name), dtype=np.float64)
+            if values.shape != expected_shape:
+                raise ValueError(
+                    f"{name} has shape {values.shape}, expected {expected_shape}"
+                )
+            if not np.isfinite(values).all():
+                raise ValueError(f"{name} must contain only finite values")
+            if not np.isclose(np.logaddexp.reduce(values.reshape(-1)), 0.0, atol=1e-6):
+                raise ValueError(f"{name} must be a normalized log probability table")
+        for name in (
+            "root_atom_observations",
+            "connected_atom_observations",
+            "atom_restate_observations",
+            "bond_reorder_observations",
+            "ring_electronic_observations",
+        ):
+            if int(getattr(self, name)) < 0:
+                raise ValueError(f"{name} must be non-negative")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "root_atom_log_probabilities": list(self.root_atom_log_probabilities),
+            "connected_atom_order_log_probabilities": [
+                list(row) for row in self.connected_atom_order_log_probabilities
+            ],
+            "atom_restate_log_probabilities": list(
+                self.atom_restate_log_probabilities
+            ),
+            "bond_reorder_log_probabilities": list(
+                self.bond_reorder_log_probabilities
+            ),
+            "ring_electronic_log_probabilities": list(
+                self.ring_electronic_log_probabilities
+            ),
+            "root_atom_observations": int(self.root_atom_observations),
+            "connected_atom_observations": int(self.connected_atom_observations),
+            "atom_restate_observations": int(self.atom_restate_observations),
+            "bond_reorder_observations": int(self.bond_reorder_observations),
+            "ring_electronic_observations": int(self.ring_electronic_observations),
+        }
+
+    @classmethod
+    def from_dict(
+        cls,
+        payload: Mapping[str, object],
+    ) -> "FactorizedMarkEmpiricalPriors":
+        def vector(name: str) -> tuple[float, ...]:
+            raw = payload.get(name)
+            if not isinstance(raw, (list, tuple)):
+                raise ValueError(f"empirical prior lacks {name}")
+            return tuple(float(value) for value in raw)
+
+        raw_connected = payload.get("connected_atom_order_log_probabilities")
+        if not isinstance(raw_connected, (list, tuple)):
+            raise ValueError(
+                "empirical prior lacks connected_atom_order_log_probabilities"
+            )
+        return cls(
+            root_atom_log_probabilities=vector("root_atom_log_probabilities"),
+            connected_atom_order_log_probabilities=tuple(
+                tuple(float(value) for value in row)
+                for row in raw_connected
+            ),
+            atom_restate_log_probabilities=vector(
+                "atom_restate_log_probabilities"
+            ),
+            bond_reorder_log_probabilities=vector(
+                "bond_reorder_log_probabilities"
+            ),
+            ring_electronic_log_probabilities=vector(
+                "ring_electronic_log_probabilities"
+            ),
+            root_atom_observations=int(payload.get("root_atom_observations", 0)),
+            connected_atom_observations=int(
+                payload.get("connected_atom_observations", 0)
+            ),
+            atom_restate_observations=int(
+                payload.get("atom_restate_observations", 0)
+            ),
+            bond_reorder_observations=int(
+                payload.get("bond_reorder_observations", 0)
+            ),
+            ring_electronic_observations=int(
+                payload.get("ring_electronic_observations", 0)
+            ),
+        )
+
+
+def _ring_topology_group_key(template: Any) -> tuple[str, tuple[int, ...]]:
+    """Group a semantic template by target topology, not electronics."""
+
+    graph = nx.Graph()
+    graph.add_nodes_from(range(int(template.span)))
+    graph.add_edges_from(
+        (int(left), int(right)) for left, right, _ in template.target_bonds
+    )
+    cycle_sizes = tuple(
+        sorted(len(cycle) for cycle in nx.minimum_cycle_basis(graph))
+    )
+    return str(template.topology_class), cycle_sizes
 
 
 def molecular_state_cache_key(state: MolecularGraph) -> StateCacheKey:
@@ -299,9 +433,12 @@ class FactorizedMarkBatch:
     ring_delete_actions: tuple[tuple[RingSystemDelete, ...], ...] | None = None
     ring_grow_support_is_exact: Tensor | bool = False
     ring_grow_enablement_is_exact: Tensor | bool = False
+    ring_topology_local_support_log_mass: Tensor | None = None
     ring_teacher_semantic_certificates: tuple[
         RingTeacherSemanticCertificate | None, ...
     ] | None = None
+    property_condition_values: Tensor | None = None
+    property_condition_mask: Tensor | None = None
 
     @property
     def batch_size(self) -> int:
@@ -379,10 +516,25 @@ class FactorizedMarkBatch:
             ring_grow_enablement_is_exact=flag_slice(
                 self.ring_grow_enablement_is_exact
             ),
+            ring_topology_local_support_log_mass=(
+                None
+                if self.ring_topology_local_support_log_mass is None
+                else tensor_slice(self.ring_topology_local_support_log_mass)
+            ),
             ring_teacher_semantic_certificates=(
                 None
                 if self.ring_teacher_semantic_certificates is None
                 else self.ring_teacher_semantic_certificates[start:stop]
+            ),
+            property_condition_values=(
+                None
+                if self.property_condition_values is None
+                else tensor_slice(self.property_condition_values)
+            ),
+            property_condition_mask=(
+                None
+                if self.property_condition_mask is None
+                else tensor_slice(self.property_condition_mask)
             ),
         )
 
@@ -424,8 +576,23 @@ class FactorizedMarkBatch:
             # the per-row objective-aware support routing below.
             ring_grow_support_is_exact=self.ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=self.ring_grow_enablement_is_exact,
+            ring_topology_local_support_log_mass=(
+                None
+                if self.ring_topology_local_support_log_mass is None
+                else move(self.ring_topology_local_support_log_mass)
+            ),
             ring_teacher_semantic_certificates=(
                 self.ring_teacher_semantic_certificates
+            ),
+            property_condition_values=(
+                None
+                if self.property_condition_values is None
+                else move(self.property_condition_values)
+            ),
+            property_condition_mask=(
+                None
+                if self.property_condition_mask is None
+                else move(self.property_condition_mask)
             ),
         )
 
@@ -474,8 +641,23 @@ class FactorizedMarkBatch:
                 if isinstance(self.ring_grow_enablement_is_exact, Tensor)
                 else self.ring_grow_enablement_is_exact
             ),
+            ring_topology_local_support_log_mass=(
+                None
+                if self.ring_topology_local_support_log_mass is None
+                else pin(self.ring_topology_local_support_log_mass)
+            ),
             ring_teacher_semantic_certificates=(
                 self.ring_teacher_semantic_certificates
+            ),
+            property_condition_values=(
+                None
+                if self.property_condition_values is None
+                else pin(self.property_condition_values)
+            ),
+            property_condition_mask=(
+                None
+                if self.property_condition_mask is None
+                else pin(self.property_condition_mask)
             ),
         )
 
@@ -499,6 +681,135 @@ class SampledRewriteMark:
     action: Any
 
 
+def _legacy_prequotient_graft_tables(
+    state: MolecularGraph,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the root-free Graft support used by pre-quotient checkpoints.
+
+    Legacy models normalized their Graft operand logits over every valid
+    colored-tree reroute, including automorphism aliases whose canonical
+    successor equals the source.  This compact reconstruction is used only to
+    thin those virtual jumps during legacy inference; production training uses
+    the canonical-successor support compiled in ``ChemistryStateFeatures``.
+    """
+
+    n_slots = state.n_atoms
+    mask = np.zeros((n_slots, n_slots), dtype=np.bool_)
+    removed_neighbors = np.full((n_slots, n_slots), -1, dtype=np.int64)
+    real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
+    graph = nx.Graph()
+    graph.add_nodes_from(real)
+    graph.add_edges_from(
+        (int(a), int(b))
+        for offset, a in enumerate(real)
+        for b in real[offset + 1 :]
+        if int(state.bonds[a, b]) != 0
+    )
+    if not real or not nx.is_tree(graph) or any(
+        int(state.bonds[a, b]) != 1 for a, b in graph.edges()
+    ):
+        return mask, removed_neighbors
+
+    for moved in real:
+        for target in real:
+            if moved == target or graph.has_edge(moved, target):
+                continue
+            path = nx.shortest_path(graph, moved, target)
+            removed_neighbor = int(path[1])
+            if int(state.implicit_h_counts[target]) < 1:
+                continue
+            if int(state.implicit_h_counts[removed_neighbor]) >= MAX_H_COUNT:
+                continue
+            mask[moved, target] = True
+            removed_neighbors[moved, target] = removed_neighbor
+    return mask, removed_neighbors
+
+
+def _masked_family_logits(
+    raw_family_logits: Tensor,
+    action_log_z: Tensor,
+    enabled: Tensor,
+    *,
+    rate_factorization: str,
+) -> Tensor:
+    """Return finite family scores for a normalized marked rewrite rate.
+
+    ``hierarchical`` learns a categorical family distribution independently of
+    the family's executable matches.  ``superposed`` instead adds the exact
+    within-family log partition, which is equivalent to globally normalizing
+    the scores of all executable canonical rewrite matches.
+    """
+
+    if raw_family_logits.shape != action_log_z.shape or enabled.shape != action_log_z.shape:
+        raise ValueError("family logits, partitions, and support must have equal shapes")
+    if rate_factorization == "superposed":
+        raw_family_logits = raw_family_logits + torch.where(
+            enabled,
+            action_log_z,
+            torch.zeros_like(action_log_z),
+        )
+    elif rate_factorization not in {"hierarchical", "quotient_energy"}:
+        raise ValueError("unknown marked-rate factorization")
+    masked = raw_family_logits.masked_fill(~enabled, float("-inf"))
+    has_legal_mark = enabled.any(dim=-1)
+    return torch.where(
+        has_legal_mark.unsqueeze(-1),
+        masked,
+        torch.zeros_like(masked),
+    )
+
+
+def _hierarchical_ring_template_logits(
+    template_logits: Tensor,
+    support: Tensor,
+    topology_group_logits: Tensor,
+    topology_group_members: tuple[tuple[int, ...], ...],
+) -> Tensor:
+    """Compose topology-group and within-group template distributions.
+
+    The flat ring head has one independently learned key per complete ring
+    template.  This factorization adds a shared decision over
+    ``(topology_class, cycle_sizes)`` groups while retaining the existing
+    template logits as conditional residuals within the selected group.  Each
+    group is normalized only over templates legal in the current state, so a
+    group's probability is not accidentally multiplied by its catalog width.
+    """
+
+    if template_logits.ndim != 2 or support.shape != template_logits.shape:
+        raise ValueError("ring template logits and support must be aligned matrices")
+    if topology_group_logits.ndim != 2:
+        raise ValueError("ring topology-group logits must be a matrix")
+    if topology_group_logits.shape[0] != template_logits.shape[0]:
+        raise ValueError("ring template and topology-group batches must align")
+    if topology_group_logits.shape[1] != len(topology_group_members):
+        raise ValueError("ring topology-group logits have the wrong width")
+
+    result = template_logits.new_full(template_logits.shape, float("-inf"))
+    for group_index, raw_members in enumerate(topology_group_members):
+        if not raw_members:
+            continue
+        members = torch.tensor(
+            raw_members,
+            dtype=torch.long,
+            device=template_logits.device,
+        )
+        member_logits = template_logits.index_select(1, members)
+        member_support = support.index_select(1, members)
+        masked = member_logits.masked_fill(~member_support, float("-inf"))
+        enabled = member_support.any(dim=1)
+        normalizer = torch.logsumexp(masked, dim=1)
+        safe_normalizer = torch.where(
+            enabled,
+            normalizer,
+            torch.zeros_like(normalizer),
+        )
+        conditional = masked - safe_normalizer.unsqueeze(1)
+        combined = conditional + topology_group_logits[:, group_index].unsqueeze(1)
+        combined = combined.masked_fill(~member_support, float("-inf"))
+        result.index_copy_(1, members, combined)
+    return result
+
+
 def prepare_factorized_mark_batch(
     states: tuple[MolecularGraph, ...],
     times: tuple[float, ...],
@@ -515,6 +826,8 @@ def prepare_factorized_mark_batch(
     | None = None,
     chemistry_feature_cache_limit: int = 2048,
     compute_ring_grow_support: bool = True,
+    property_condition_values: tuple[tuple[float, ...], ...] | None = None,
+    property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
 ) -> FactorizedMarkBatch:
     """Collate valid states and cheap graph-theoretic application conditions."""
 
@@ -537,6 +850,23 @@ def prepare_factorized_mark_batch(
         raise ValueError("importance weights have the wrong length")
     if chemistry_feature_cache_limit <= 0:
         raise ValueError("chemistry feature cache limit must be positive")
+    if (property_condition_values is None) != (property_condition_mask is None):
+        raise ValueError("property condition values and mask must be provided together")
+    if property_condition_values is not None:
+        if len(property_condition_values) != count or len(property_condition_mask) != count:
+            raise ValueError("property condition rows do not align with the batch")
+        widths = {len(row) for row in property_condition_values}
+        mask_widths = {len(row) for row in property_condition_mask}
+        if len(widths) != 1 or widths != mask_widths or next(iter(widths)) <= 0:
+            raise ValueError("property condition rows must have one positive shared width")
+        values_array = np.asarray(property_condition_values, dtype=np.float32)
+        mask_array = np.asarray(property_condition_mask, dtype=np.bool_)
+        if not np.isfinite(values_array[mask_array]).all():
+            raise ValueError("observed property conditions must be finite")
+        values_array = np.where(mask_array, values_array, 0.0)
+    else:
+        values_array = None
+        mask_array = None
 
     atom_topology = []
     closure_topology = []
@@ -676,6 +1006,12 @@ def prepare_factorized_mark_batch(
             else torch.from_numpy(np.stack(ring_grow_support_masks)).bool()
         ),
         ring_delete_actions=(None if ring_catalog is None else tuple(ring_delete_actions)),
+        property_condition_values=(
+            None if values_array is None else torch.from_numpy(values_array)
+        ),
+        property_condition_mask=(
+            None if mask_array is None else torch.from_numpy(mask_array)
+        ),
     )
 
 
@@ -1212,20 +1548,60 @@ class FactorizedTraceletRateModel(nn.Module):
         message_passing_steps: int = 4,
         mark_dim: int = 32,
         ring_electronic_mode: str = "factorized_local",
+        rate_factorization: str = "hierarchical",
         ring_candidate_cache_limit: int = 32768,
+        property_condition_dim: int = 0,
+        empirical_mark_prior_mode: str = "none",
+        empirical_mark_priors: FactorizedMarkEmpiricalPriors | None = None,
+        ring_family_mass_mode: str = "boolean",
+        ring_template_factorization: str = "flat",
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
             raise ValueError("model dimensions and message-passing steps must be positive")
         if ring_candidate_cache_limit <= 0:
             raise ValueError("ring candidate cache limit must be positive")
+        if property_condition_dim < 0:
+            raise ValueError("property condition dimension must be non-negative")
         self.ring_catalog = ring_catalog
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)
-        if ring_electronic_mode not in {"factorized_local", "catalog_exact"}:
+        self.property_condition_dim = int(property_condition_dim)
+        if ring_electronic_mode not in {
+            "factorized_local",
+            "factorized_contextual",
+            "catalog_exact",
+        }:
             raise ValueError("unknown ring electronic decoding mode")
         self.ring_electronic_mode = str(ring_electronic_mode)
+        if rate_factorization not in {
+            "hierarchical",
+            "quotient_energy",
+            "superposed",
+        }:
+            raise ValueError("unknown marked-rate factorization")
+        self.rate_factorization = str(rate_factorization)
+        if empirical_mark_prior_mode not in {"none", "corpus_residual_v1"}:
+            raise ValueError("unknown empirical mark prior mode")
+        if empirical_mark_prior_mode == "none" and empirical_mark_priors is not None:
+            raise ValueError("empirical priors require corpus_residual_v1 mode")
+        if empirical_mark_prior_mode != "none" and empirical_mark_priors is None:
+            raise ValueError("corpus_residual_v1 mode requires empirical priors")
+        if ring_family_mass_mode not in {
+            "boolean",
+            "catalog_topology_local_support",
+        }:
+            raise ValueError("unknown ring family mass mode")
+        if ring_template_factorization not in {
+            "flat",
+            "topology_cycle_hierarchical",
+        }:
+            raise ValueError("unknown ring template factorization")
+        self.empirical_mark_prior_mode = str(empirical_mark_prior_mode)
+        self.empirical_mark_priors = empirical_mark_priors
+        self.ring_family_mass_mode = str(ring_family_mass_mode)
+        self.ring_template_factorization = str(ring_template_factorization)
         self._sampling_state_cache: OrderedDict[
             tuple[bytes, bytes, bytes, bytes],
             FactorizedMarkBatch,
@@ -1238,6 +1614,10 @@ class FactorizedTraceletRateModel(nn.Module):
         self._ring_grow_enablement_certificate_cache: OrderedDict[
             tuple[bytes, bytes, bytes, bytes],
             tuple[bool, ...],
+        ] = OrderedDict()
+        self._ring_topology_local_support_log_mass_cache: OrderedDict[
+            tuple[bytes, bytes, bytes, bytes],
+            float,
         ] = OrderedDict()
         self._ring_template_placement_group_cache: OrderedDict[
             tuple[tuple[bytes, bytes, bytes, bytes], int],
@@ -1305,6 +1685,85 @@ class FactorizedTraceletRateModel(nn.Module):
             semantic_ring_log_prior,
             persistent=False,
         )
+        topology_group_indices: dict[tuple[str, tuple[int, ...]], int] = {}
+        topology_group_members: list[list[int]] = []
+        for template_index, template in enumerate(self.ring_system_templates):
+            group_key = _ring_topology_group_key(template)
+            group_index = topology_group_indices.get(group_key)
+            if group_index is None:
+                group_index = len(topology_group_members)
+                topology_group_indices[group_key] = group_index
+                topology_group_members.append([])
+            topology_group_members[group_index].append(template_index)
+        self.ring_topology_group_keys = tuple(topology_group_indices)
+        self.ring_topology_group_members = tuple(
+            tuple(members) for members in topology_group_members
+        )
+        topology_group_counts = (
+            torch.stack(
+                tuple(
+                    semantic_ring_counts[
+                        torch.tensor(members, dtype=torch.long)
+                    ].sum()
+                    for members in self.ring_topology_group_members
+                )
+            )
+            if self.ring_topology_group_members
+            else torch.empty(0, dtype=torch.float32)
+        )
+        topology_group_log_prior = topology_group_counts.log()
+        if len(topology_group_log_prior):
+            topology_group_log_prior -= torch.logsumexp(
+                topology_group_log_prior,
+                dim=0,
+            )
+        self._ring_topology_group_log_prior_cpu = tuple(
+            float(value) for value in topology_group_log_prior
+        )
+        self.register_buffer(
+            "ring_topology_group_log_prior",
+            topology_group_log_prior,
+            persistent=False,
+        )
+
+        if empirical_mark_priors is None:
+            root_atom_log_prior = torch.zeros(len(CNOF_ATOM_TYPES))
+            connected_atom_order_log_prior = torch.zeros(
+                3,
+                len(CNOF_ATOM_TYPES),
+            )
+            atom_restate_log_prior = torch.zeros(len(CNOF_ATOM_TYPES))
+            bond_reorder_log_prior = torch.zeros(3)
+            ring_electronic_log_prior = torch.zeros(2 * len(CNOF_ATOM_TYPES))
+        else:
+            root_atom_log_prior = torch.tensor(
+                empirical_mark_priors.root_atom_log_probabilities,
+                dtype=torch.float32,
+            )
+            connected_atom_order_log_prior = torch.tensor(
+                empirical_mark_priors.connected_atom_order_log_probabilities,
+                dtype=torch.float32,
+            )
+            atom_restate_log_prior = torch.tensor(
+                empirical_mark_priors.atom_restate_log_probabilities,
+                dtype=torch.float32,
+            )
+            bond_reorder_log_prior = torch.tensor(
+                empirical_mark_priors.bond_reorder_log_probabilities,
+                dtype=torch.float32,
+            )
+            ring_electronic_log_prior = torch.tensor(
+                empirical_mark_priors.ring_electronic_log_probabilities,
+                dtype=torch.float32,
+            )
+        for name, values in (
+            ("root_atom_log_prior", root_atom_log_prior),
+            ("connected_atom_order_log_prior", connected_atom_order_log_prior),
+            ("atom_restate_log_prior", atom_restate_log_prior),
+            ("bond_reorder_log_prior", bond_reorder_log_prior),
+            ("ring_electronic_log_prior", ring_electronic_log_prior),
+        ):
+            self.register_buffer(name, values, persistent=False)
         self._cycle_to_index = {
             template: index for index, template in enumerate(self.cycle_templates)
         }
@@ -1325,6 +1784,19 @@ class FactorizedTraceletRateModel(nn.Module):
             nn.SiLU(),
             nn.Linear(hidden_dim, hidden_dim),
         )
+        self.property_condition_encoder: nn.Sequential | None = None
+        if self.property_condition_dim:
+            self.property_condition_encoder = nn.Sequential(
+                nn.Linear(2 * self.property_condition_dim, hidden_dim),
+                nn.SiLU(),
+                nn.Linear(hidden_dim, hidden_dim),
+            )
+            # A conditioned model can be warm-started from an unconditional
+            # checkpoint without changing its initial generator.  Training
+            # then learns a residual conditional context, including the
+            # classifier-free all-missing condition.
+            nn.init.zeros_(self.property_condition_encoder[-1].weight)
+            nn.init.zeros_(self.property_condition_encoder[-1].bias)
         self.message_node = nn.Linear(hidden_dim, hidden_dim, bias=False)
         self.update_networks = nn.ModuleList(
             nn.Sequential(
@@ -1384,6 +1856,15 @@ class FactorizedTraceletRateModel(nn.Module):
             max(len(self.ring_system_templates), 1),
             mark_dim,
         )
+        if self.ring_template_factorization == "topology_cycle_hierarchical":
+            self.ring_topology_group_head = nn.Linear(
+                hidden_dim,
+                max(len(self.ring_topology_group_keys), 1),
+            )
+            nn.init.zeros_(self.ring_topology_group_head.weight)
+            nn.init.zeros_(self.ring_topology_group_head.bias)
+        else:
+            self.ring_topology_group_head = None
         self.ring_system_grow_head = nn.Sequential(
             nn.Linear(4 * hidden_dim, 2 * hidden_dim),
             nn.SiLU(),
@@ -1399,6 +1880,19 @@ class FactorizedTraceletRateModel(nn.Module):
             nn.SiLU(),
             nn.Linear(hidden_dim, 2),
         )
+        if self.ring_electronic_mode == "factorized_contextual":
+            ring_category_count = 2 * len(CNOF_ATOM_TYPES)
+            # A complete ring installation is one atomic rewrite event, but
+            # its electronic mark is decoded as a finite sequence. These
+            # zero-started pair potentials learn joint ring composition and
+            # bonded atom-role correlations (for example N--N or O--O)
+            # instead of treating every installed ring atom independently.
+            self.ring_system_global_category_pair = nn.Parameter(
+                torch.zeros(ring_category_count, ring_category_count)
+            )
+            self.ring_system_adjacent_category_pair = nn.Parameter(
+                torch.zeros(ring_category_count, ring_category_count)
+            )
         self.ring_system_delete_head = nn.Sequential(
             nn.Linear(4 * hidden_dim, 2 * hidden_dim),
             nn.SiLU(),
@@ -1446,6 +1940,7 @@ class FactorizedTraceletRateModel(nn.Module):
 
         self._ring_grow_support_cache.clear()
         self._ring_grow_enablement_certificate_cache.clear()
+        self._ring_topology_local_support_log_mass_cache.clear()
         self._ring_template_placement_group_cache.clear()
         self._ring_semantic_decoder_cache.clear()
         self._ring_delete_candidate_cache.clear()
@@ -1456,6 +1951,86 @@ class FactorizedTraceletRateModel(nn.Module):
         state: MolecularGraph,
     ) -> tuple[bytes, bytes, bytes, bytes]:
         return molecular_state_cache_key(state)
+
+    def _ring_topology_local_support_log_mass(
+        self,
+        state: MolecularGraph,
+    ) -> float:
+        """Return catalog topology mass admitted by the fast local tree DP.
+
+        This is deliberately a topology proposal mass, not an electronic
+        executor-support claim.  The existing exact/certificate mask remains
+        authoritative for whether the ring family is executable.
+        """
+
+        key = self._state_cache_key(state)
+        cached = self._ring_topology_local_support_log_mass_cache.get(key)
+        if cached is not None:
+            self._ring_topology_local_support_log_mass_cache.move_to_end(key)
+            return cached
+        local_support = ring_system_template_local_support_mask(
+            state,
+            self.ring_system_templates,
+            self.ring_system_template_aliases,
+        )
+        enabled_groups = tuple(
+            any(bool(local_support[index]) for index in members)
+            for members in self.ring_topology_group_members
+        )
+        if not any(enabled_groups):
+            value = float("-inf")
+        else:
+            value = float(
+                np.logaddexp.reduce(
+                    np.asarray(
+                        tuple(
+                            log_prior
+                            for log_prior, enabled
+                            in zip(
+                                self._ring_topology_group_log_prior_cpu,
+                                enabled_groups,
+                            )
+                            if enabled
+                        ),
+                        dtype=np.float64,
+                    )
+                )
+            )
+        self._ring_topology_local_support_log_mass_cache[key] = value
+        if (
+            len(self._ring_topology_local_support_log_mass_cache)
+            > self._ring_candidate_cache_limit
+        ):
+            self._ring_topology_local_support_log_mass_cache.popitem(last=False)
+        return value
+
+    def _family_base_logits(
+        self,
+        batch: FactorizedMarkBatch,
+        global_state: Tensor,
+    ) -> Tensor:
+        logits = self.family_head(global_state)
+        if self.ring_family_mass_mode == "boolean":
+            return logits
+        if batch.ring_topology_local_support_log_mass is None:
+            ring_mass = torch.tensor(
+                tuple(
+                    self._ring_topology_local_support_log_mass(state)
+                    for state in batch.states
+                ),
+                dtype=logits.dtype,
+                device=logits.device,
+            )
+        else:
+            ring_mass = batch.ring_topology_local_support_log_mass.to(
+                device=logits.device,
+                dtype=logits.dtype,
+            )
+            if tuple(ring_mass.shape) != (batch.batch_size,):
+                raise ValueError("ring topology support mass has the wrong shape")
+        logits = logits.clone()
+        logits[:, MARK_RULE_TO_INDEX["ring_system_grow"]] += ring_mass
+        return logits
 
     def _ring_grow_support(self, state: MolecularGraph) -> tuple[bool, ...]:
         key = self._state_cache_key(state)
@@ -1841,6 +2416,22 @@ class FactorizedTraceletRateModel(nn.Module):
                             )
                         )
                 mask = torch.stack(rows)
+        if self.ring_template_factorization == "topology_cycle_hierarchical":
+            if self.ring_topology_group_head is None:
+                raise RuntimeError("hierarchical ring topology head is unavailable")
+            topology_group_logits = self.ring_topology_group_head(global_state)[
+                :, : len(self.ring_topology_group_keys)
+            ]
+            topology_group_logits = (
+                topology_group_logits
+                + self.ring_topology_group_log_prior.unsqueeze(0)
+            )
+            logits = _hierarchical_ring_template_logits(
+                logits,
+                mask,
+                topology_group_logits,
+                self.ring_topology_group_members,
+            )
         return logits, mask
 
     def _ring_placement_logits(
@@ -1933,9 +2524,10 @@ class FactorizedTraceletRateModel(nn.Module):
         )
         type_logits = self.ring_system_atom_head(features)
         role_logits = self.ring_system_role_head(features)
-        return (
+        residual_logits = (
             type_logits.unsqueeze(-1) + role_logits.unsqueeze(-2)
         ).reshape(decoder.span, 2 * len(CNOF_ATOM_TYPES))
+        return residual_logits + self.ring_electronic_log_prior.unsqueeze(0)
 
     def _ring_semantic_sequence_log_probability(
         self,
@@ -1953,6 +2545,12 @@ class FactorizedTraceletRateModel(nn.Module):
             return score, score.new_tensor(False, dtype=torch.bool)
         prefix: tuple[int, ...] = ()
         for position, category in enumerate(categories):
+            contextual_logits = self._ring_semantic_contextual_logits(
+                decoder,
+                category_logits,
+                position=position,
+                prefix=prefix,
+            )
             mask = torch.tensor(
                 (
                     semantic_ring_next_category_mask(decoder, prefix)
@@ -1966,11 +2564,72 @@ class FactorizedTraceletRateModel(nn.Module):
                 return score, score.new_tensor(False, dtype=torch.bool)
             legal = legal & mask[int(category)]
             score = score + torch.log_softmax(
-                category_logits[position].masked_fill(~mask, float("-inf")),
+                contextual_logits.masked_fill(~mask, float("-inf")),
                 dim=-1,
             )[int(category)]
             prefix = (*prefix, int(category))
         return score, legal
+
+    def _ring_semantic_contextual_logits(
+        self,
+        decoder: SemanticRingSystemDecoder,
+        category_logits: Tensor,
+        *,
+        position: int,
+        prefix: tuple[int, ...],
+    ) -> Tensor:
+        """Add exact-prefix joint electronic potentials to one ring position.
+
+        The global term learns ring-composition correlations; the adjacent
+        term learns correlations only across bonds in the installed ring
+        system.  Symmetrization prevents an arbitrary atom-slot decoding order
+        from defining different pair energies for the same two categories.
+        """
+
+        if not 0 <= position < decoder.span:
+            raise ValueError("ring semantic position is outside the decoder")
+        if len(prefix) != position:
+            raise ValueError("ring semantic prefix does not match the position")
+        base = category_logits[position]
+        if self.ring_electronic_mode != "factorized_contextual" or not prefix:
+            return base
+        category_count = 2 * len(CNOF_ATOM_TYPES)
+        if base.shape != (category_count,):
+            raise ValueError("ring semantic category table has the wrong shape")
+        if any(not 0 <= int(value) < category_count for value in prefix):
+            raise ValueError("ring semantic prefix contains an invalid category")
+
+        global_pair = 0.5 * (
+            self.ring_system_global_category_pair
+            + self.ring_system_global_category_pair.transpose(0, 1)
+        )
+        adjacent_pair = 0.5 * (
+            self.ring_system_adjacent_category_pair
+            + self.ring_system_adjacent_category_pair.transpose(0, 1)
+        )
+        residual = base.new_zeros((category_count,))
+        target_slot = int(decoder.placement.system_atoms[position])
+        internal_edges = {
+            frozenset((int(item.a), int(item.b)))
+            for items in (
+                decoder.placement.scaffold_bonds,
+                decoder.placement.bond_insertions,
+            )
+            for item in items
+        }
+        internal_edges.update(
+            frozenset((int(item.a), int(item.b)))
+            for item in decoder.placement.bond_reorders
+        )
+        for previous_position, previous_category in enumerate(prefix):
+            previous_category = int(previous_category)
+            residual = residual + global_pair[previous_category]
+            previous_slot = int(
+                decoder.placement.system_atoms[previous_position]
+            )
+            if frozenset((previous_slot, target_slot)) in internal_edges:
+                residual = residual + adjacent_pair[previous_category]
+        return base + residual
 
     def ring_teacher_semantic_certificate(
         self,
@@ -2248,14 +2907,11 @@ class FactorizedTraceletRateModel(nn.Module):
         masks, logits, action_log_z = self._action_tables(batch, node, global_state, pair)
         enabled = torch.isfinite(action_log_z)
         has_legal_mark = enabled.any(dim=-1)
-        masked_family_logits = self.family_head(global_state).masked_fill(
-            ~enabled,
-            float("-inf"),
-        )
-        family_logits = torch.where(
-            has_legal_mark.unsqueeze(-1),
-            masked_family_logits,
-            torch.zeros_like(masked_family_logits),
+        family_logits = _masked_family_logits(
+            self._family_base_logits(batch, global_state),
+            action_log_z,
+            enabled,
+            rate_factorization=self.rate_factorization,
         )
         family_log_prob = torch.log_softmax(family_logits, dim=-1)
         selected = self._selected_mark_log_probability(
@@ -2287,6 +2943,41 @@ class FactorizedTraceletRateModel(nn.Module):
     ) -> SampledRewriteMark:
         """Sample one legal rule match without constructing its successor fiber."""
 
+        return self.sample_rewrite_mark_conditioned(
+            state,
+            time,
+            rng,
+            property_values=None,
+            property_mask=None,
+        )
+
+    @torch.no_grad()
+    def sample_rewrite_mark_conditioned(
+        self,
+        state: MolecularGraph,
+        time: float,
+        rng: np.random.Generator,
+        *,
+        property_values: tuple[float, ...] | None,
+        property_mask: tuple[bool, ...] | None = None,
+    ) -> SampledRewriteMark:
+        """Sample one legal mark under an optional standardized target vector."""
+
+        if (property_values is None) != (property_mask is None):
+            raise ValueError("property values and mask must be provided together")
+        if property_values is not None:
+            if self.property_condition_dim == 0:
+                raise ValueError("unconditional model cannot accept property targets")
+            if len(property_values) != self.property_condition_dim or len(
+                property_mask
+            ) != self.property_condition_dim:
+                raise ValueError("property target has the wrong dimension")
+            values = torch.tensor((property_values,), dtype=torch.float32)
+            mask = torch.tensor((property_mask,), dtype=torch.bool)
+        else:
+            values = None
+            mask = None
+
         cache_key = self._state_cache_key(state)
         cached_batch = self._sampling_state_cache.get(cache_key)
         if cached_batch is None:
@@ -2307,6 +2998,8 @@ class FactorizedTraceletRateModel(nn.Module):
         batch = replace(
             cached_batch,
             times=torch.tensor((float(time),), dtype=torch.float32),
+            property_condition_values=values,
+            property_condition_mask=mask,
         ).to(self.device)
         node, global_state, pair = self._encode_batch(batch)
         masks, logits, action_log_z = self._action_tables(
@@ -2316,6 +3009,29 @@ class FactorizedTraceletRateModel(nn.Module):
             pair,
             require_exact_ring_support=False,
         )
+        nonself_graft_mask = masks["bond_reroute"][0].clone()
+        legacy_virtual_grafts = bool(
+            getattr(self, "virtualize_legacy_self_grafts", False)
+        )
+        if legacy_virtual_grafts:
+            raw_mask_array, raw_removed_array = _legacy_prequotient_graft_tables(
+                state
+            )
+            raw_mask = torch.from_numpy(raw_mask_array).to(self.device)
+            raw_removed = torch.from_numpy(raw_removed_array).to(self.device)
+            masks = dict(masks)
+            masks["bond_reroute"] = raw_mask.unsqueeze(0)
+            batch = replace(
+                batch,
+                graft_remove_neighbors=raw_removed.unsqueeze(0),
+            )
+            action_log_z = action_log_z.clone()
+            action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = (
+                _masked_logsumexp(
+                    logits["bond_reroute"][0].unsqueeze(0),
+                    raw_mask.unsqueeze(0),
+                )[0]
+            )
         enabled = torch.isfinite(action_log_z[0]).clone()
         disabled_rule_names = frozenset(
             str(name) for name in getattr(self, "disabled_sampling_rule_names", ())
@@ -2325,9 +3041,11 @@ class FactorizedTraceletRateModel(nn.Module):
             if family_index is not None:
                 enabled[family_index] = False
         while bool(enabled.any()):
-            family_logits = self.family_head(global_state)[0].masked_fill(
-                ~enabled,
-                float("-inf"),
+            family_logits = _masked_family_logits(
+                self._family_base_logits(batch, global_state)[0],
+                action_log_z[0],
+                enabled,
+                rate_factorization=self.rate_factorization,
             )
             family_probabilities = torch.softmax(family_logits, dim=-1).float().cpu().numpy()
             family_index = int(rng.choice(len(MARK_RULE_NAMES), p=family_probabilities))
@@ -2347,6 +3065,15 @@ class FactorizedTraceletRateModel(nn.Module):
                 enabled[family_index] = False
                 continue
             hazard = float(F.softplus(self.total_hazard_head(global_state)[0, 0]))
+            if legacy_virtual_grafts and rule_name == "bond_reroute":
+                moved = int(action.u)
+                target = int(action.v)
+                if not bool(nonself_graft_mask[moved, target]):
+                    return SampledRewriteMark(
+                        hazard,
+                        "<VIRTUAL_GRAFT>",
+                        None,
+                    )
             return SampledRewriteMark(hazard, rule_name, action)
         return SampledRewriteMark(0.0, "<TERMINAL>", None)
 
@@ -2457,6 +3184,26 @@ class FactorizedTraceletRateModel(nn.Module):
                 dtype=torch.bool,
                 device=self.device,
             )
+            excluded_template_indices = tuple(
+                int(index)
+                for index in getattr(
+                    self,
+                    "excluded_sampling_ring_template_indices",
+                    (),
+                )
+            )
+            if excluded_template_indices:
+                if min(excluded_template_indices) < 0 or max(
+                    excluded_template_indices
+                ) >= len(self.ring_system_templates):
+                    raise ValueError("excluded sampling ring-template index is invalid")
+                exact_template_mask[
+                    torch.tensor(
+                        excluded_template_indices,
+                        dtype=torch.long,
+                        device=self.device,
+                    )
+                ] = False
             if not bool(exact_template_mask.any()):
                 return None
             (template_index,) = _sample_masked_coordinate(
@@ -2509,13 +3256,19 @@ class FactorizedTraceletRateModel(nn.Module):
             decoder, category_logits = semantic_tables[placement_index]
             prefix: tuple[int, ...] = ()
             for position in range(decoder.span):
+                contextual_logits = self._ring_semantic_contextual_logits(
+                    decoder,
+                    category_logits,
+                    position=position,
+                    prefix=prefix,
+                )
                 category_mask = torch.tensor(
                     semantic_ring_next_category_mask(decoder, prefix),
                     dtype=torch.bool,
                     device=self.device,
                 )
                 (category,) = _sample_masked_coordinate(
-                    category_logits[position],
+                    contextual_logits,
                     category_mask,
                     rng,
                 )
@@ -2557,6 +3310,37 @@ class FactorizedTraceletRateModel(nn.Module):
             dim=-1,
         )
         time_state = self.time_encoder(time_features)
+        if self.property_condition_dim:
+            values = batch.property_condition_values
+            mask = batch.property_condition_mask
+            if values is None or mask is None:
+                values = torch.zeros(
+                    (batch.batch_size, self.property_condition_dim),
+                    dtype=time_state.dtype,
+                    device=time_state.device,
+                )
+                mask = torch.zeros_like(values, dtype=torch.bool)
+            if tuple(values.shape) != (batch.batch_size, self.property_condition_dim):
+                raise ValueError("property condition values have the wrong shape")
+            if tuple(mask.shape) != tuple(values.shape):
+                raise ValueError("property condition mask has the wrong shape")
+            values = values.to(device=time_state.device, dtype=time_state.dtype)
+            mask = mask.to(device=time_state.device, dtype=torch.bool)
+            if not bool(torch.isfinite(values[mask]).all()):
+                raise ValueError("observed property conditions must be finite")
+            condition_input = torch.cat(
+                (torch.where(mask, values, torch.zeros_like(values)), mask.to(values.dtype)),
+                dim=-1,
+            )
+            assert self.property_condition_encoder is not None
+            context_state = time_state + self.property_condition_encoder(condition_input)
+        else:
+            if (
+                batch.property_condition_values is not None
+                or batch.property_condition_mask is not None
+            ):
+                raise ValueError("unconditional model received property conditions")
+            context_state = time_state
         node = (
             self.atom_embedding(atom_types)
             + self.charge_embedding(charges)
@@ -2579,7 +3363,7 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             messages = (sender + edge_state) * edge_mask
             aggregated = messages.sum(dim=2)
-            tiled_time = time_state.unsqueeze(1).expand(-1, n_slots, -1)
+            tiled_time = context_state.unsqueeze(1).expand(-1, n_slots, -1)
             delta = update(torch.cat((node, aggregated, tiled_time), dim=-1))
             node = norm(node + delta) * real_float
 
@@ -2601,7 +3385,7 @@ class FactorizedTraceletRateModel(nn.Module):
             dim=-1,
         )
         pooled = pooled + self.structure_encoder(structural)
-        global_state = self.global_project(torch.cat((pooled, time_state), dim=-1))
+        global_state = self.global_project(torch.cat((pooled, context_state), dim=-1))
 
         left = node.unsqueeze(2)
         right = node.unsqueeze(1)
@@ -2639,7 +3423,10 @@ class FactorizedTraceletRateModel(nn.Module):
         masks: dict[str, Tensor] = {}
         logits: dict[str, Tensor] = {}
 
-        root_grow_logits = self.grow_root_head(global_state)
+        root_grow_logits = (
+            self.grow_root_head(global_state)
+            + self.root_atom_log_prior.unsqueeze(0)
+        )
         root_grow_mask = (
             ((n_real == 0) & (n_null > 0)).unsqueeze(-1).expand(-1, len(CNOF_ATOM_TYPES))
         )
@@ -2654,6 +3441,10 @@ class FactorizedTraceletRateModel(nn.Module):
             grow_query,
             grow_option,
         ) / sqrt(self.mark_dim)
+        connected_grow_logits = (
+            connected_grow_logits
+            + self.connected_atom_order_log_prior.unsqueeze(0).unsqueeze(0)
+        )
         type_h = self.cnof_valences.view(1, 1, 1, -1) - order_values.view(1, 1, -1, 1)
         connected_grow_mask = (
             real.unsqueeze(-1).unsqueeze(-1)
@@ -2682,7 +3473,10 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["atom_delete"] = delete_mask
         logits["atom_delete"] = delete_logits
 
-        restate_logits = self.restate_head(node)
+        restate_logits = (
+            self.restate_head(node)
+            + self.atom_restate_log_prior.unsqueeze(0).unsqueeze(0)
+        )
         bond_valence = torch.zeros_like(hydrogens)
         for order, delta in enumerate(BOND_CLASS_TO_H_CHANGE):
             if order == 0:
@@ -2703,7 +3497,10 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["atom_restate"] = restate_mask
         logits["atom_restate"] = restate_logits
 
-        reorder_logits = self.reorder_head(pair)
+        reorder_logits = (
+            self.reorder_head(pair)
+            + self.bond_reorder_log_prior.unsqueeze(0).unsqueeze(0).unsqueeze(0)
+        )
         old_order = batch.bonds.unsqueeze(-1)
         new_order = order_values.view(1, 1, 1, 3)
         delta = new_order - old_order
@@ -3227,6 +4024,7 @@ def factorized_mark_bregman_loss(
 
 __all__ = [
     "FactorizedMarkBatch",
+    "FactorizedMarkEmpiricalPriors",
     "FactorizedMarkPrediction",
     "FactorizedTraceletRateModel",
     "MARK_RULE_NAMES",

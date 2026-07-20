@@ -1,0 +1,63 @@
+{
+  "format": "compose_v4_griddd_qed_frozen_residual_pilot_v1",
+  "run_label": "compose-v4-griddd-qed-frozen-residual-pilot-20260720-v1",
+  "property": {
+    "name": "qed",
+    "normalizer_mean": 0.6012370044427231,
+    "normalizer_standard_deviation": 0.19169590371119966,
+    "condition_dropout_probability": 0.15
+  },
+  "base": {
+    "checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "qualification_manifest": "diagnostics/canonical_successor_analytic_backbone_qualification.json",
+    "qualification_required_passed": true,
+    "execution_kind": "analytic_pancake_quotient_adapter_v1",
+    "atom_delete_log_rate_adjustment": -0.5,
+    "small_ring_log_rate_adjustment": -1.5,
+    "small_ring_maximum_size": 4
+  },
+  "data": {
+    "partition_manifest_sha256": "c8b4d2836d27b3f751131be7d9cf424b99b80937de2b5e2d2ce572d56e147bc2",
+    "train_endpoint_subset": 256,
+    "validation_endpoint_subset": 32,
+    "subset_selection": "numpy_default_rng_without_replacement",
+    "path_couplings_per_target": 1,
+    "tree_transport": "flexible_size_graft",
+    "path_checkpoint_interval": 8,
+    "path_workers": 16
+  },
+  "adapter": {
+    "kind": "frozen_valid_state_qed_residual_v1",
+    "hidden_dim": 128,
+    "base_parameters_frozen": true,
+    "base_weights_in_sidecar_state_dict": false,
+    "family_hazard_residual": true,
+    "within_family_residual": true,
+    "independent_total_hazard_residual": false,
+    "missing_condition_identity": true
+  },
+  "optimization": {
+    "seed": 20260725,
+    "steps": 500,
+    "batch_size": 1,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.00001,
+    "gradient_clip_norm": 10.0,
+    "evaluation_every": 100,
+    "validation_examples": 32,
+    "early_stopping_patience": 2,
+    "early_stopping_min_relative_improvement": 0.001,
+    "operational_horizon": 16.0,
+    "late_time_fraction": 0.5,
+    "progress_stratification_fraction": 0.5
+  },
+  "outputs": {
+    "volume": "compose-v4-artifacts",
+    "checkpoint_every_evaluation": true,
+    "persist_step_evaluations": true,
+    "persist_recovery_checkpoint": true,
+    "persist_best_checkpoint": true
+  },
+  "protocol_a_launch": false,
+  "protocol_b_evaluation_after_training": true
+}

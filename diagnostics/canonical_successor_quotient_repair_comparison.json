@@ -1,0 +1,1772 @@
+{
+  "checks": {
+    "analytic_cached_mark_p95_le_5ms": true,
+    "analytic_context_build_p95_le_0p25s": true,
+    "analytic_family_relative_l1_max_le_1e-5": true,
+    "analytic_graft_relative_l1_max_le_1e-5": true
+  },
+  "decision": {
+    "additional_failed_head_only_steps": "FORBIDDEN",
+    "conditional_backbone_qualified": false,
+    "corpus_scale_training_authorized": false,
+    "remedy_a": "GO to the predeclared smallest matched rollout throughput/safety smoke",
+    "remedy_a_analytic_panel_passed": true,
+    "remedy_b_state_conditioned": "NO-GO while analytic execution is lossless and within latency; retain only as a future residual option"
+  },
+  "format": "compose_v4_pancake_quotient_repair_comparison_v1",
+  "inputs": {
+    "checkpoint": "/private/tmp/pancake_checkpoint/checkpoint.recovery.pt",
+    "failed_head_rate_metrics": "artifacts/canonical_successor_backbone_qualification/rate_metrics.json",
+    "panel_manifest": "artifacts/canonical_successor_backbone_qualification/panel_manifest.json",
+    "selected_step": 6250.0,
+    "state_count": 24,
+    "validation_paths": "/private/tmp/compose_v4_stage3_validation_paths.pt",
+    "warm_repeats_per_state": 20
+  },
+  "latency": {
+    "analytic_cached_sample_mark_seconds": {
+      "max": 7.753675792133436,
+      "mean": 0.017274097105837428,
+      "p50": 8.645805064588785e-05,
+      "p95": 0.0010775084723718463
+    },
+    "analytic_context_build_after_support_warm_seconds": {
+      "max": 0.04535262496210635,
+      "mean": 0.016505723954954494,
+      "p50": 0.011271958355791867,
+      "p95": 0.03756383755244314
+    },
+    "analytic_context_cache_hit_seconds": {
+      "max": 5.1416922360658646e-05,
+      "mean": 9.79079583582158e-06,
+      "p50": 9.437440894544125e-06,
+      "p95": 1.421011984348297e-05
+    },
+    "raw_checkpoint_sample_mark_seconds": {
+      "max": 0.7571755000390112,
+      "mean": 0.014524522637172292,
+      "p50": 0.010657791513949633,
+      "p95": 0.021893603797070678
+    }
+  },
+  "row_results": [
+    {
+      "atom_count": 34,
+      "bond_count": 33,
+      "canonical_graft_successors": 795,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.23154495656490326,
+        "graft_relative_l1": 0.18854042887687683,
+        "student_graft_inflation": 1.1885404008255696
+      },
+      "model_time": 0.2,
+      "path_length": 44,
+      "productive_graft_marks": 1033,
+      "progress": 9,
+      "progress_fraction": 0.20454545454545456,
+      "raw_graft_marks": 1056,
+      "record_index": 2519,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 4.9999915063381195e-05,
+          "mean": 1.2079242151230573e-05,
+          "p50": 1.0020565241575241e-05,
+          "p95": 1.7067289445549273e-05
+        },
+        "context_build_seconds": 0.03790175006724894,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00022954214364290237,
+          "mean": 0.00011500209802761674,
+          "p50": 9.818747639656067e-05,
+          "p95": 0.00022732560755684973
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 4.1571979636501055e-08,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "early-acyclic-large-train",
+      "size_bin": "large",
+      "source_key": "CCCCCCCCCCC(C)C(CC(C)C)CC(CCCCCCC)C(CC)CCC(C)C",
+      "split": "train",
+      "stratum": "early/acyclic/large",
+      "support_attribution": {
+        "canonical_graft_successors": 795,
+        "graft_productive_survival_fraction": 0.9837146760737527,
+        "productive_graft_marks": 1033,
+        "productive_graft_rate": 28.082679748535156,
+        "productive_total_hazard": 45.88063049316406,
+        "raw_graft_marks": 1056,
+        "raw_graft_rate": 28.54758644104004,
+        "raw_total_hazard": 46.34608459472656,
+        "total_productive_survival_fraction": 0.9899569749832153
+      },
+      "target_key": "CCCN(Cc1ccc2nc(N)nc(N)c2c1)c1ccc(OC)c(OCCCCC(=O)OC)c1"
+    },
+    {
+      "atom_count": 37,
+      "bond_count": 36,
+      "canonical_graft_successors": 994,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.23907288908958435,
+        "graft_relative_l1": 0.23108060657978058,
+        "student_graft_inflation": 1.2310809798435605
+      },
+      "model_time": 0.2,
+      "path_length": 43,
+      "productive_graft_marks": 1173,
+      "progress": 9,
+      "progress_fraction": 0.20930232558139536,
+      "raw_graft_marks": 1196,
+      "record_index": 853,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.4208024367690086e-05,
+          "mean": 1.0078982450067997e-05,
+          "p50": 9.93744470179081e-06,
+          "p95": 1.3020460028201343e-05
+        },
+        "context_build_seconds": 0.04535262496210635,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.0001663339789956808,
+          "mean": 0.00010288340272381901,
+          "p50": 9.743752889335155e-05,
+          "p95": 0.00013735798420384527
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 1.6499313915119274e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "early-acyclic-large-heldout",
+      "size_bin": "large",
+      "source_key": "CCCCCCCCCCC(CC(C)C(C)CCCC(C)C(C)(C)C(C)CC)C(C)C(C)(CC)CCC",
+      "split": "heldout",
+      "stratum": "early/acyclic/large",
+      "support_attribution": {
+        "canonical_graft_successors": 994,
+        "graft_productive_survival_fraction": 0.9851667494256875,
+        "productive_graft_marks": 1173,
+        "productive_graft_rate": 33.50524139404297,
+        "productive_total_hazard": 46.24067687988281,
+        "raw_graft_marks": 1196,
+        "raw_graft_rate": 34.00971603393555,
+        "raw_total_hazard": 46.745262145996094,
+        "total_productive_survival_fraction": 0.9892056584358215
+      },
+      "target_key": "CCCCCCCCCCCCCCCC(O)CC(O)CC(O)CC(O)CC(O)CC1CC=CC(=O)O1"
+    },
+    {
+      "atom_count": 29,
+      "bond_count": 28,
+      "canonical_graft_successors": 65,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.2427135854959488,
+        "graft_relative_l1": 0.12731574475765228,
+        "student_graft_inflation": 0.8726845231689472
+      },
+      "model_time": 0.2,
+      "path_length": 71,
+      "productive_graft_marks": 702,
+      "progress": 14,
+      "progress_fraction": 0.19718309859154928,
+      "raw_graft_marks": 756,
+      "record_index": 3035,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.35831069201231e-05,
+          "mean": 1.0029063560068607e-05,
+          "p50": 9.936979040503502e-06,
+          "p95": 1.2079242151230575e-05
+        },
+        "context_build_seconds": 0.019347375025972724,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.000138541916385293,
+          "mean": 9.490830125287175e-05,
+          "p50": 8.881255052983761e-05,
+          "p95": 0.000133792101405561
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 2.0341445861049579e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "early-acyclic-medium-train",
+      "size_bin": "medium",
+      "source_key": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+      "split": "train",
+      "stratum": "early/acyclic/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 65,
+        "graft_productive_survival_fraction": 0.0001505524197940434,
+        "productive_graft_marks": 702,
+        "productive_graft_rate": 0.008489630185067654,
+        "productive_total_hazard": 0.009156896732747555,
+        "raw_graft_marks": 756,
+        "raw_graft_rate": 56.389862060546875,
+        "raw_total_hazard": 56.390750885009766,
+        "total_productive_survival_fraction": 0.00016238295938819647
+      },
+      "target_key": "COc1ccc(OCCCC(=O)NCCc2nc3ccccc3[nH]2)cc1"
+    },
+    {
+      "atom_count": 28,
+      "bond_count": 27,
+      "canonical_graft_successors": 61,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.296003133058548,
+        "graft_relative_l1": 0.19268307089805603,
+        "student_graft_inflation": 0.8073170221864135
+      },
+      "model_time": 0.2,
+      "path_length": 63,
+      "productive_graft_marks": 650,
+      "progress": 13,
+      "progress_fraction": 0.20634920634920634,
+      "raw_graft_marks": 702,
+      "record_index": 425,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.5415949746966362e-05,
+          "mean": 1.0389590170234441e-05,
+          "p50": 1.025001984089613e-05,
+          "p95": 1.4308234676718712e-05
+        },
+        "context_build_seconds": 0.01862116693519056,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.0001364590134471655,
+          "mean": 8.808725979179144e-05,
+          "p50": 8.377048652619123e-05,
+          "p95": 0.00011817043414339425
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 1.032949441537312e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "early-acyclic-medium-heldout",
+      "size_bin": "medium",
+      "source_key": "CCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+      "split": "heldout",
+      "stratum": "early/acyclic/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 61,
+        "graft_productive_survival_fraction": 0.00015110277938569722,
+        "productive_graft_marks": 650,
+        "productive_graft_rate": 0.008197803050279617,
+        "productive_total_hazard": 0.009016148746013641,
+        "raw_graft_marks": 702,
+        "raw_graft_rate": 54.25315856933594,
+        "raw_total_hazard": 54.25426483154297,
+        "total_productive_survival_fraction": 0.00016618322115391493
+      },
+      "target_key": "CC(=O)NC(Cc1ccccc1)C(=O)Oc1ccc2ccccc2c1"
+    },
+    {
+      "atom_count": 13,
+      "bond_count": 12,
+      "canonical_graft_successors": 76,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.14006271958351135,
+        "graft_relative_l1": 0.0875454694032669,
+        "student_graft_inflation": 1.0875450876613795
+      },
+      "model_time": 0.2,
+      "path_length": 16,
+      "productive_graft_marks": 124,
+      "progress": 3,
+      "progress_fraction": 0.1875,
+      "raw_graft_marks": 132,
+      "record_index": 238,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 5.1416922360658646e-05,
+          "mean": 1.1824921239167452e-05,
+          "p50": 9.791459888219833e-06,
+          "p95": 1.4604418538510827e-05
+        },
+        "context_build_seconds": 0.012740875128656626,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00017079105600714684,
+          "mean": 9.350618347525597e-05,
+          "p50": 8.285453077405691e-05,
+          "p95": 0.0001439145882613957
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 2.817542963384767e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "early-acyclic-small-train",
+      "size_bin": "small",
+      "source_key": "CCCCC(CC(C)CC)C(C)C",
+      "split": "train",
+      "stratum": "early/acyclic/small",
+      "support_attribution": {
+        "canonical_graft_successors": 76,
+        "graft_productive_survival_fraction": 0.9215826799620549,
+        "productive_graft_marks": 124,
+        "productive_graft_rate": 13.080123901367188,
+        "productive_total_hazard": 16.923864364624023,
+        "raw_graft_marks": 132,
+        "raw_graft_rate": 14.193109512329102,
+        "raw_total_hazard": 18.037052154541016,
+        "total_productive_survival_fraction": 0.9382832646369934
+      },
+      "target_key": "COc1ccc(C(O)CNN)cc1"
+    },
+    {
+      "atom_count": 19,
+      "bond_count": 18,
+      "canonical_graft_successors": 241,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.15122072398662567,
+        "graft_relative_l1": 0.14133720099925995,
+        "student_graft_inflation": 1.1413377183071551
+      },
+      "model_time": 0.2,
+      "path_length": 24,
+      "productive_graft_marks": 292,
+      "progress": 5,
+      "progress_fraction": 0.20833333333333334,
+      "raw_graft_marks": 306,
+      "record_index": 3582,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 4.924996756017208e-05,
+          "mean": 1.1502171400934457e-05,
+          "p50": 9.499606676399708e-06,
+          "p95": 1.6513757873326564e-05
+        },
+        "context_build_seconds": 0.018459874903783202,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00013808300718665123,
+          "mean": 8.902079425752163e-05,
+          "p50": 8.256256114691496e-05,
+          "p95": 0.00011342285433784129
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 4.195125313799508e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "early-acyclic-small-heldout",
+      "size_bin": "small",
+      "source_key": "CCCCC(C)C(CCCC)CC(C)C(C)CCC",
+      "split": "heldout",
+      "stratum": "early/acyclic/small",
+      "support_attribution": {
+        "canonical_graft_successors": 241,
+        "graft_productive_survival_fraction": 0.9215951207337288,
+        "productive_graft_marks": 292,
+        "productive_graft_rate": 16.670515060424805,
+        "productive_total_hazard": 18.18633270263672,
+        "raw_graft_marks": 306,
+        "raw_graft_rate": 18.088762283325195,
+        "raw_total_hazard": 19.604625701904297,
+        "total_productive_survival_fraction": 0.9276551604270935
+      },
+      "target_key": "N#Cc1cc(O)c(O)cc1Cc1ccc(O)c(O)c1"
+    },
+    {
+      "atom_count": 33,
+      "bond_count": 32,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.10040666162967682,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 46,
+      "productive_graft_marks": 0,
+      "progress": 46,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 848,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 2.1666986867785454e-05,
+          "mean": 1.0291649959981442e-05,
+          "p50": 1.0020448826253414e-05,
+          "p95": 1.4818529598414903e-05
+        },
+        "context_build_seconds": 0.010233957786113024,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00013733305968344212,
+          "mean": 9.536041179671883e-05,
+          "p50": 8.737493772059679e-05,
+          "p95": 0.00013048548717051745
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "late-acyclic-large-train",
+      "size_bin": "large",
+      "source_key": "CC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCN",
+      "split": "train",
+      "stratum": "late/acyclic/large",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 4.248660564422607,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 4.248660564422607,
+        "total_productive_survival_fraction": 1.0
+      },
+      "target_key": "CC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCN"
+    },
+    {
+      "atom_count": 33,
+      "bond_count": 32,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.10040666162967682,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 47,
+      "productive_graft_marks": 0,
+      "progress": 47,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 849,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 2.60830856859684e-05,
+          "mean": 1.2041605077683926e-05,
+          "p50": 1.0916613973677158e-05,
+          "p95": 2.2441649343818428e-05
+        },
+        "context_build_seconds": 9.041046723723412e-06,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.0029581671115010977,
+          "mean": 0.0005362146650440991,
+          "p50": 9.056250564754009e-05,
+          "p95": 0.0029111821204423904
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "late-acyclic-large-heldout",
+      "size_bin": "large",
+      "source_key": "CC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCN",
+      "split": "heldout",
+      "stratum": "late/acyclic/large",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 4.248660564422607,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 4.248660564422607,
+        "total_productive_survival_fraction": 1.0
+      },
+      "target_key": "CC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCCCC(=O)N(O)CCCCCN"
+    },
+    {
+      "atom_count": 21,
+      "bond_count": 20,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.08474189788103104,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 59,
+      "productive_graft_marks": 0,
+      "progress": 59,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 2742,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.391698606312275e-05,
+          "mean": 1.0370800737291574e-05,
+          "p50": 1.0666437447071075e-05,
+          "p95": 1.3203651178628206e-05
+        },
+        "context_build_seconds": 0.009901416022330523,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 7.753675792133436,
+          "mean": 0.39903972506290303,
+          "p50": 0.009926666389219463,
+          "p95": 0.427665687212726
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "late-acyclic-medium-train",
+      "size_bin": "medium",
+      "source_key": "CCCCCCCCCCCCCCCCOC(=O)CN",
+      "split": "train",
+      "stratum": "late/acyclic/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 3.132683515548706,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 3.1360199451446533,
+        "total_productive_survival_fraction": 0.998936116695404
+      },
+      "target_key": "CCCCCCCCCCCCCCCCOC(=O)CN"
+    },
+    {
+      "atom_count": 22,
+      "bond_count": 21,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.0576537549495697,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 92,
+      "productive_graft_marks": 0,
+      "progress": 92,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 3377,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.4834105968475342e-05,
+          "mean": 9.574927389621735e-06,
+          "p50": 9.395414963364601e-06,
+          "p95": 1.3804249465465546e-05
+        },
+        "context_build_seconds": 0.009618667187169194,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.21092066611163318,
+          "mean": 0.010804866487160326,
+          "p50": 8.366594556719065e-05,
+          "p95": 0.013254562101792692
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "late-acyclic-medium-heldout",
+      "size_bin": "medium",
+      "source_key": "CCCCCCOCC=C(C)CCC=C(C)CCCN(C)C",
+      "split": "heldout",
+      "stratum": "late/acyclic/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 4.292726516723633,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 4.292726993560791,
+        "total_productive_survival_fraction": 0.9999998807907104
+      },
+      "target_key": "CCCCCCOCC=C(C)CCC=C(C)CCCN(C)C"
+    },
+    {
+      "atom_count": 13,
+      "bond_count": 12,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.01241725217550993,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 75,
+      "productive_graft_marks": 0,
+      "progress": 75,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 284,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.1375173926353455e-05,
+          "mean": 9.268661960959434e-06,
+          "p50": 9.437440894544125e-06,
+          "p95": 1.1176546104252339e-05
+        },
+        "context_build_seconds": 0.00872966693714261,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.0001290829386562109,
+          "mean": 8.553952211514116e-05,
+          "p50": 8.285394869744778e-05,
+          "p95": 9.975171415135267e-05
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "late-acyclic-small-train",
+      "size_bin": "small",
+      "source_key": "CC=CC=CC(=O)OCCC(C)C",
+      "split": "train",
+      "stratum": "late/acyclic/small",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 4.043073654174805,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 4.043074131011963,
+        "total_productive_survival_fraction": 0.9999998807907104
+      },
+      "target_key": "CC=CC=CC(=O)OCCC(C)C"
+    },
+    {
+      "atom_count": 7,
+      "bond_count": 6,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.13376285135746002,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 60,
+      "productive_graft_marks": 0,
+      "progress": 60,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 394,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.033395528793335e-05,
+          "mean": 8.652044925838709e-06,
+          "p50": 8.791452273726463e-06,
+          "p95": 9.77921299636364e-06
+        },
+        "context_build_seconds": 0.008570584002882242,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00013308413326740265,
+          "mean": 8.466871222481131e-05,
+          "p50": 8.018745575100183e-05,
+          "p95": 0.00012481033336371184
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "late-acyclic-small-heldout",
+      "size_bin": "small",
+      "source_key": "CCC(C)C(C)=O",
+      "split": "heldout",
+      "stratum": "late/acyclic/small",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 3.860036849975586,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 3.860037088394165,
+        "total_productive_survival_fraction": 0.9999999403953552
+      },
+      "target_key": "CCC(C)C(C)=O"
+    },
+    {
+      "atom_count": 35,
+      "bond_count": 38,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 4,
+      "failed_head_only": {
+        "family_relative_l1": 0.00040898320730775595,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 47,
+      "productive_graft_marks": 0,
+      "progress": 47,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 1887,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 7.4999406933784485e-06,
+          "mean": 6.685394328087568e-06,
+          "p50": 6.729504093527794e-06,
+          "p95": 7.3024188168346885e-06
+        },
+        "context_build_seconds": 0.00990275014191866,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.008956457953900099,
+          "mean": 0.001151435251813382,
+          "p50": 0.000732625019736588,
+          "p95": 0.00135819945717231
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "ring",
+      "row_id": "late-ring-large-train",
+      "size_bin": "large",
+      "source_key": "NCCC(NC(=O)c1ccc(-c2cccc(NC(=O)c3cnccn3)c2)o1)C(=O)N1CCNCC1",
+      "split": "train",
+      "stratum": "late/ring/large",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 1.4666835069656372,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 1.4666835069656372,
+        "total_productive_survival_fraction": 1.0
+      },
+      "target_key": "NCCC(NC(=O)c1ccc(-c2cccc(NC(=O)c3cnccn3)c2)o1)C(=O)N1CCNCC1"
+    },
+    {
+      "atom_count": 35,
+      "bond_count": 37,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 3,
+      "failed_head_only": {
+        "family_relative_l1": 0.1010991781949997,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 84,
+      "productive_graft_marks": 0,
+      "progress": 84,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 3490,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.7415964975953102e-05,
+          "mean": 8.33956291899085e-06,
+          "p50": 7.354072295129299e-06,
+          "p95": 1.4527013991028073e-05
+        },
+        "context_build_seconds": 0.009628792060539126,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.009519540937617421,
+          "mean": 0.0013247478404082359,
+          "p50": 0.0009021660080179572,
+          "p95": 0.001541322236880666
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "ring",
+      "row_id": "late-ring-large-heldout",
+      "size_bin": "large",
+      "source_key": "C#CCN(Cc1ccc2[nH]c(N)nc(=O)c2c1)c1ccc(C(=O)NC(CCC(=O)O)C(=O)O)cc1",
+      "split": "heldout",
+      "stratum": "late/ring/large",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 1.9851489067077637,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 1.9851489067077637,
+        "total_productive_survival_fraction": 1.0
+      },
+      "target_key": "C#CCN(Cc1ccc2[nH]c(N)nc(=O)c2c1)c1ccc(C(=O)NC(CCC(=O)O)C(=O)O)cc1"
+    },
+    {
+      "atom_count": 24,
+      "bond_count": 27,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 4,
+      "failed_head_only": {
+        "family_relative_l1": 0.00018936654669232666,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 84,
+      "productive_graft_marks": 0,
+      "progress": 84,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 3129,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.0458985343575478e-05,
+          "mean": 9.004247840493917e-06,
+          "p50": 9.083538316190243e-06,
+          "p95": 1.0339322034269572e-05
+        },
+        "context_build_seconds": 0.009606749983504415,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00012983288615942,
+          "mean": 8.46582930535078e-05,
+          "p50": 8.124986197799444e-05,
+          "p95": 9.9076540209353e-05
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "ring",
+      "row_id": "late-ring-medium-train",
+      "size_bin": "medium",
+      "source_key": "O=C(C1CC(N2CCN(c3ncccn3)CC2)CN1)N1CC(F)C1",
+      "split": "train",
+      "stratum": "late/ring/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 1.308279275894165,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 1.3082795143127441,
+        "total_productive_survival_fraction": 0.9999998211860657
+      },
+      "target_key": "O=C(C1CC(N2CCN(c3ncccn3)CC2)CN1)N1CC(F)C1"
+    },
+    {
+      "atom_count": 29,
+      "bond_count": 30,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 2,
+      "failed_head_only": {
+        "family_relative_l1": 0.12126936763525009,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 40,
+      "productive_graft_marks": 0,
+      "progress": 40,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 2347,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.5416881069540977e-05,
+          "mean": 1.0100018698722124e-05,
+          "p50": 9.583542123436928e-06,
+          "p95": 1.4427059795707464e-05
+        },
+        "context_build_seconds": 0.009767541894689202,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00023020897060632706,
+          "mean": 9.403749136254192e-05,
+          "p50": 8.395849727094173e-05,
+          "p95": 0.00013865171931684025
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "ring",
+      "row_id": "late-ring-medium-heldout",
+      "size_bin": "medium",
+      "source_key": "CCN(CC)CCOC(=O)c1ccc(NC(=O)CNC(=O)c2ccccc2)cc1",
+      "split": "heldout",
+      "stratum": "late/ring/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 1.6435128450393677,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 1.6435139179229736,
+        "total_productive_survival_fraction": 0.9999993443489075
+      },
+      "target_key": "CCN(CC)CCOC(=O)c1ccc(NC(=O)CNC(=O)c2ccccc2)cc1"
+    },
+    {
+      "atom_count": 16,
+      "bond_count": 17,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 2,
+      "failed_head_only": {
+        "family_relative_l1": 0.0007264396408572793,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 90,
+      "productive_graft_marks": 0,
+      "progress": 90,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 1891,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.1167023330926895e-05,
+          "mean": 8.97296704351902e-06,
+          "p50": 9.083887562155724e-06,
+          "p95": 1.0414537973701955e-05
+        },
+        "context_build_seconds": 0.008490041131153703,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.0001235411036759615,
+          "mean": 8.521459531039e-05,
+          "p50": 8.35624523460865e-05,
+          "p95": 9.385442826896908e-05
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "ring",
+      "row_id": "late-ring-small-train",
+      "size_bin": "small",
+      "source_key": "COc1cc(OC)c2[nH]c(=O)cc(C)c2c1",
+      "split": "train",
+      "stratum": "late/ring/small",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 0.9502408504486084,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 0.9506298303604126,
+        "total_productive_survival_fraction": 0.9995908141136169
+      },
+      "target_key": "COc1cc(OC)c2[nH]c(=O)cc(C)c2c1"
+    },
+    {
+      "atom_count": 13,
+      "bond_count": 14,
+      "canonical_graft_successors": 0,
+      "cycle_rank": 2,
+      "failed_head_only": {
+        "family_relative_l1": 0.6331205368041992,
+        "graft_relative_l1": null,
+        "student_graft_inflation": null
+      },
+      "model_time": 0.85,
+      "path_length": 89,
+      "productive_graft_marks": 0,
+      "progress": 89,
+      "progress_fraction": 1.0,
+      "raw_graft_marks": 0,
+      "record_index": 3173,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.0874820873141289e-05,
+          "mean": 9.291688911616802e-06,
+          "p50": 9.562470950186253e-06,
+          "p95": 1.0202405974268913e-05
+        },
+        "context_build_seconds": 0.009226916823536158,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00012916699051856995,
+          "mean": 8.614173857495189e-05,
+          "p50": 8.593755774199963e-05,
+          "p95": 9.805364534258845e-05
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 0.0,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "ring",
+      "row_id": "late-ring-small-heldout",
+      "size_bin": "small",
+      "source_key": "O=c1[nH]nc(Cc2ccccc2)[nH]1",
+      "split": "heldout",
+      "stratum": "late/ring/small",
+      "support_attribution": {
+        "canonical_graft_successors": 0,
+        "graft_productive_survival_fraction": 0.0,
+        "productive_graft_marks": 0,
+        "productive_graft_rate": 0.0,
+        "productive_total_hazard": 0.9344412684440613,
+        "raw_graft_marks": 0,
+        "raw_graft_rate": 0.0,
+        "raw_total_hazard": 1.1204530000686646,
+        "total_productive_survival_fraction": 0.8339852690696716
+      },
+      "target_key": "O=c1[nH]nc(Cc2ccccc2)[nH]1"
+    },
+    {
+      "atom_count": 34,
+      "bond_count": 33,
+      "canonical_graft_successors": 737,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.0030850504990667105,
+        "graft_relative_l1": 0.00021353854390326887,
+        "student_graft_inflation": 0.9997866204577986
+      },
+      "model_time": 0.5,
+      "path_length": 47,
+      "productive_graft_marks": 1012,
+      "progress": 24,
+      "progress_fraction": 0.5106382978723404,
+      "raw_graft_marks": 1027,
+      "record_index": 1502,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.2125121429562569e-05,
+          "mean": 9.3417358584702e-06,
+          "p50": 9.37492586672306e-06,
+          "p95": 1.1491193436086179e-05
+        },
+        "context_build_seconds": 0.03564899996854365,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00015529198572039604,
+          "mean": 9.270632872357965e-05,
+          "p50": 8.858356159180403e-05,
+          "p95": 0.00011214595288038257
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 1.8641168253452634e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "mid-acyclic-large-train",
+      "size_bin": "large",
+      "source_key": "CCCC(CCC(C)C(C)C)C(CC)C(C)(CCCC(C)C)C(CCC(C)C(C)C)CC(C)C",
+      "split": "train",
+      "stratum": "mid/acyclic/large",
+      "support_attribution": {
+        "canonical_graft_successors": 737,
+        "graft_productive_survival_fraction": 0.9799475755164712,
+        "productive_graft_marks": 1012,
+        "productive_graft_rate": 20.407190322875977,
+        "productive_total_hazard": 20.463830947875977,
+        "raw_graft_marks": 1027,
+        "raw_graft_rate": 20.824777603149414,
+        "raw_total_hazard": 20.881418228149414,
+        "total_productive_survival_fraction": 0.9800019860267639
+      },
+      "target_key": "CC(=O)OC1C(OC(C)=O)C(C)(C)C2(O)CCC3C(=O)c4ccoc4CC3C2(C)C1OC(C)=O"
+    },
+    {
+      "atom_count": 35,
+      "bond_count": 34,
+      "canonical_graft_successors": 96,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 39.55400466918945,
+        "graft_relative_l1": 20.18214988708496,
+        "student_graft_inflation": 21.182149146849703
+      },
+      "model_time": 0.5,
+      "path_length": 77,
+      "productive_graft_marks": 1056,
+      "progress": 38,
+      "progress_fraction": 0.4935064935064935,
+      "raw_graft_marks": 1122,
+      "record_index": 1310,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.4750054106116295e-05,
+          "mean": 1.056254841387272e-05,
+          "p50": 1.0396004654467106e-05,
+          "p95": 1.3403897173702718e-05
+        },
+        "context_build_seconds": 0.026919750031083822,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00016937521286308765,
+          "mean": 8.897706866264343e-05,
+          "p50": 8.364592213183641e-05,
+          "p95": 0.00010101384250447159
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 3.6850970275281725e-08,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "mid-acyclic-large-heldout",
+      "size_bin": "large",
+      "source_key": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+      "split": "heldout",
+      "stratum": "mid/acyclic/large",
+      "support_attribution": {
+        "canonical_graft_successors": 96,
+        "graft_productive_survival_fraction": 0.0002615986527592302,
+        "productive_graft_marks": 1056,
+        "productive_graft_rate": 0.011501936241984367,
+        "productive_total_hazard": 0.0505453497171402,
+        "raw_graft_marks": 1122,
+        "raw_graft_rate": 43.967872619628906,
+        "raw_total_hazard": 44.03082275390625,
+        "total_productive_survival_fraction": 0.0011479537934064865
+      },
+      "target_key": "O=C(CNC(=O)c1cccc(C(F)(F)F)c1)NC1CCN(Cc2cn(-c3ccccc3)nn2)CC1"
+    },
+    {
+      "atom_count": 30,
+      "bond_count": 29,
+      "canonical_graft_successors": 663,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.001989677781239152,
+        "graft_relative_l1": 0.0006906840135343373,
+        "student_graft_inflation": 1.000690077537722
+      },
+      "model_time": 0.5,
+      "path_length": 37,
+      "productive_graft_marks": 789,
+      "progress": 18,
+      "progress_fraction": 0.4864864864864865,
+      "raw_graft_marks": 812,
+      "record_index": 2993,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.6750069335103035e-05,
+          "mean": 1.0639696847647429e-05,
+          "p50": 1.0083080269396305e-05,
+          "p95": 1.5602540224790575e-05
+        },
+        "context_build_seconds": 0.03297729115001857,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00015225005336105824,
+          "mean": 9.78394178673625e-05,
+          "p50": 9.449943900108337e-05,
+          "p95": 0.00015197268221527337
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 5.625336712000717e-07,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "mid-acyclic-medium-train",
+      "size_bin": "medium",
+      "source_key": "CCCCCCCCCC(CC)CCC(CC)C(C)CCCCC(C)CCCCC",
+      "split": "train",
+      "stratum": "mid/acyclic/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 663,
+        "graft_productive_survival_fraction": 0.9586108708920855,
+        "productive_graft_marks": 789,
+        "productive_graft_rate": 20.2653751373291,
+        "productive_total_hazard": 20.343833923339844,
+        "raw_graft_marks": 812,
+        "raw_graft_rate": 21.140356063842773,
+        "raw_total_hazard": 21.21881866455078,
+        "total_productive_survival_fraction": 0.9587637186050415
+      },
+      "target_key": "COc1cccc2c(C(=O)N3CC4CCCN4CC3C)cn(CC3CCCCC3)c12"
+    },
+    {
+      "atom_count": 29,
+      "bond_count": 28,
+      "canonical_graft_successors": 65,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 5.783410549163818,
+        "graft_relative_l1": 3.1028032302856445,
+        "student_graft_inflation": 4.102802246136794
+      },
+      "model_time": 0.5,
+      "path_length": 73,
+      "productive_graft_marks": 702,
+      "progress": 36,
+      "progress_fraction": 0.4931506849315068,
+      "raw_graft_marks": 756,
+      "record_index": 2025,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.0709045454859734e-05,
+          "mean": 8.77708662301302e-06,
+          "p50": 8.979463018476963e-06,
+          "p95": 1.0471488349139691e-05
+        },
+        "context_build_seconds": 0.01940820785239339,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00015012500807642937,
+          "mean": 8.560415590181946e-05,
+          "p50": 7.960444781929255e-05,
+          "p95": 0.00010773123940452937
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 4.1968924335833435e-08,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "mid-acyclic-medium-heldout",
+      "size_bin": "medium",
+      "source_key": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+      "split": "heldout",
+      "stratum": "mid/acyclic/medium",
+      "support_attribution": {
+        "canonical_graft_successors": 65,
+        "graft_productive_survival_fraction": 0.0003379740578680122,
+        "productive_graft_marks": 702,
+        "productive_graft_rate": 0.012086056172847748,
+        "productive_total_hazard": 0.11095383018255234,
+        "raw_graft_marks": 756,
+        "raw_graft_rate": 35.76030731201172,
+        "raw_total_hazard": 35.9203987121582,
+        "total_productive_survival_fraction": 0.0030888807959854603
+      },
+      "target_key": "COCc1noc(-c2ccc(N3CCCC3CO)nc2)n1"
+    },
+    {
+      "atom_count": 20,
+      "bond_count": 19,
+      "canonical_graft_successors": 30,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.0070563554763793945,
+        "graft_relative_l1": 0.060103800147771835,
+        "student_graft_inflation": 1.0601035665189893
+      },
+      "model_time": 0.5,
+      "path_length": 53,
+      "productive_graft_marks": 306,
+      "progress": 26,
+      "progress_fraction": 0.49056603773584906,
+      "raw_graft_marks": 342,
+      "record_index": 1957,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 9.499955922365189e-06,
+          "mean": 8.343765512108802e-06,
+          "p50": 8.499948307871819e-06,
+          "p95": 9.262398816645146e-06
+        },
+        "context_build_seconds": 0.012763374950736761,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00015308312140405178,
+          "mean": 7.793961558490991e-05,
+          "p50": 7.37084774300456e-05,
+          "p95": 9.283695835620169e-05
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 4.851932633442857e-09,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "mid-acyclic-small-train",
+      "size_bin": "small",
+      "source_key": "CCCCCCCCCCCCCCCCCCCC",
+      "split": "train",
+      "stratum": "mid/acyclic/small",
+      "support_attribution": {
+        "canonical_graft_successors": 30,
+        "graft_productive_survival_fraction": 0.0006624211539644725,
+        "productive_graft_marks": 306,
+        "productive_graft_rate": 0.015812423080205917,
+        "productive_total_hazard": 0.3838975727558136,
+        "raw_graft_marks": 342,
+        "raw_graft_rate": 23.870649337768555,
+        "raw_total_hazard": 24.46481704711914,
+        "total_productive_survival_fraction": 0.01569182239472866
+      },
+      "target_key": "CCCOc1ccc(Cc2cnc(N)nc2N)cc1"
+    },
+    {
+      "atom_count": 20,
+      "bond_count": 19,
+      "canonical_graft_successors": 30,
+      "cycle_rank": 0,
+      "failed_head_only": {
+        "family_relative_l1": 0.007056263275444508,
+        "graft_relative_l1": 0.06010359525680542,
+        "student_graft_inflation": 1.0601031989701777
+      },
+      "model_time": 0.5,
+      "path_length": 51,
+      "productive_graft_marks": 306,
+      "progress": 26,
+      "progress_fraction": 0.5098039215686274,
+      "raw_graft_marks": 342,
+      "record_index": 3585,
+      "remedy_a_analytic": {
+        "cache_hit_seconds": {
+          "max": 1.6750069335103035e-05,
+          "mean": 8.816726040095092e-06,
+          "p50": 8.729519322514534e-06,
+          "p95": 1.0297540575265889e-05
+        },
+        "context_build_seconds": 0.01230995892547071,
+        "family_relative_l1": 0.0,
+        "graft_relative_l1": 0.0,
+        "hazard_absolute_error": 0.0,
+        "sample_mark_seconds": {
+          "max": 0.00015537510626018047,
+          "mean": 7.924584206193685e-05,
+          "p50": 7.356249261647463e-05,
+          "p95": 9.794003563001756e-05
+        }
+      },
+      "remedy_b_state_conditioned": {
+        "oracle_feature_reconstruction_family_relative_l1": 1.4555797456239361e-08,
+        "pretraining_correctness_guarantee": false,
+        "required_exact_inputs": [
+          "raw family rates",
+          "per-family productive survival fractions",
+          "raw/productive Graft log partitions"
+        ],
+        "requires_new_learned_residual": true
+      },
+      "ring_status": "acyclic",
+      "row_id": "mid-acyclic-small-heldout",
+      "size_bin": "small",
+      "source_key": "CCCCCCCCCCCCCCCCCCCC",
+      "split": "heldout",
+      "stratum": "mid/acyclic/small",
+      "support_attribution": {
+        "canonical_graft_successors": 30,
+        "graft_productive_survival_fraction": 0.0006624213100260126,
+        "productive_graft_marks": 306,
+        "productive_graft_rate": 0.015812426805496216,
+        "productive_total_hazard": 0.3838975727558136,
+        "raw_graft_marks": 342,
+        "raw_graft_rate": 23.870649337768555,
+        "raw_total_hazard": 24.46481704711914,
+        "total_productive_survival_fraction": 0.01569182239472866
+      },
+      "target_key": "NNc1nc(N)nc(N)n1"
+    }
+  ],
+  "stratum_attribution": {
+    "early/acyclic/large": {
+      "failed_head_family_relative_l1": {
+        "max": 0.23907288908958435,
+        "mean": 0.2353089228272438,
+        "p50": 0.2353089228272438,
+        "p95": 0.23869649246335028
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.9851667494256875,
+        "mean": 0.9844407127497201,
+        "p50": 0.9844407127497201,
+        "p95": 0.9850941457580907
+      },
+      "rows": 2
+    },
+    "early/acyclic/medium": {
+      "failed_head_family_relative_l1": {
+        "max": 0.296003133058548,
+        "mean": 0.2693583592772484,
+        "p50": 0.2693583592772484,
+        "p95": 0.293338655680418
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.00015110277938569722,
+        "mean": 0.0001508275995898703,
+        "p50": 0.0001508275995898703,
+        "p95": 0.00015107526140611453
+      },
+      "rows": 2
+    },
+    "early/acyclic/small": {
+      "failed_head_family_relative_l1": {
+        "max": 0.15122072398662567,
+        "mean": 0.1456417217850685,
+        "p50": 0.1456417217850685,
+        "p95": 0.15066282376646994
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.9215951207337288,
+        "mean": 0.9215889003478919,
+        "p50": 0.9215889003478919,
+        "p95": 0.9215944986951451
+      },
+      "rows": 2
+    },
+    "late/acyclic/large": {
+      "failed_head_family_relative_l1": {
+        "max": 0.10040666162967682,
+        "mean": 0.10040666162967682,
+        "p50": 0.10040666162967682,
+        "p95": 0.10040666162967682
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rows": 2
+    },
+    "late/acyclic/medium": {
+      "failed_head_family_relative_l1": {
+        "max": 0.08474189788103104,
+        "mean": 0.07119782641530037,
+        "p50": 0.07119782641530037,
+        "p95": 0.08338749073445798
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rows": 2
+    },
+    "late/acyclic/small": {
+      "failed_head_family_relative_l1": {
+        "max": 0.13376285135746002,
+        "mean": 0.07309005176648498,
+        "p50": 0.07309005176648498,
+        "p95": 0.12769557139836252
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rows": 2
+    },
+    "late/ring/large": {
+      "failed_head_family_relative_l1": {
+        "max": 0.1010991781949997,
+        "mean": 0.050754080701153725,
+        "p50": 0.050754080701153725,
+        "p95": 0.09606466844561509
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rows": 2
+    },
+    "late/ring/medium": {
+      "failed_head_family_relative_l1": {
+        "max": 0.12126936763525009,
+        "mean": 0.06072936709097121,
+        "p50": 0.06072936709097121,
+        "p95": 0.1152153675808222
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rows": 2
+    },
+    "late/ring/small": {
+      "failed_head_family_relative_l1": {
+        "max": 0.6331205368041992,
+        "mean": 0.31692348822252825,
+        "p50": 0.31692348822252825,
+        "p95": 0.6015008319460321
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rows": 2
+    },
+    "mid/acyclic/large": {
+      "failed_head_family_relative_l1": {
+        "max": 39.55400466918945,
+        "mean": 19.77854485984426,
+        "p50": 19.77854485984426,
+        "p95": 37.57645868825493
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.9799475755164712,
+        "mean": 0.4901045870846152,
+        "p50": 0.4901045870846152,
+        "p95": 0.9309632766732855
+      },
+      "rows": 2
+    },
+    "mid/acyclic/medium": {
+      "failed_head_family_relative_l1": {
+        "max": 5.783410549163818,
+        "mean": 2.8927001134725288,
+        "p50": 2.8927001134725288,
+        "p95": 5.494339505594689
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.9586108708920855,
+        "mean": 0.4794744224749768,
+        "p50": 0.4794744224749768,
+        "p95": 0.9106972260503746
+      },
+      "rows": 2
+    },
+    "mid/acyclic/small": {
+      "failed_head_family_relative_l1": {
+        "max": 0.0070563554763793945,
+        "mean": 0.007056309375911951,
+        "p50": 0.007056309375911951,
+        "p95": 0.00705635086633265
+      },
+      "graft_productive_survival_fraction": {
+        "max": 0.0006624213100260126,
+        "mean": 0.0006624212319952425,
+        "p50": 0.0006624212319952425,
+        "p95": 0.0006624213022229356
+      },
+      "rows": 2
+    }
+  }
+}

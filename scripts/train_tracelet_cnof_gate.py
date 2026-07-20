@@ -34,9 +34,17 @@ from compose_v4.experiments.tracelet_conditional import (
     train_tracelet_conditional_model,
 )
 from compose_v4.experiments.factorized_mark_conditional import (
+    attach_property_conditions,
     factorized_mark_metrics,
     sample_factorized_mark_batch,
     train_factorized_mark_model,
+)
+from compose_v4.experiments.factorized_mark_priors import (
+    fit_factorized_mark_empirical_priors,
+)
+from compose_v4.experiments.molecular_property_conditioning import (
+    fit_property_condition_normalizer,
+    standardized_record_conditions,
 )
 from compose_v4.experiments.training_support_cache import (
     RING_SUPPORT_SEMANTICS_VERSION,
@@ -176,6 +184,19 @@ def _path_cache_fingerprint(signature: dict[str, object]) -> str:
     return hashlib.sha256(serialized).hexdigest()
 
 
+def _ring_support_semantics_mode(ring_electronic_mode: str) -> str:
+    """Collapse neural scoring variants that share identical exact support."""
+
+    if ring_electronic_mode in {
+        "factorized_local",
+        "factorized_contextual",
+    }:
+        return "factorized_local"
+    if ring_electronic_mode == "catalog_exact":
+        return "catalog_exact"
+    raise ValueError("unknown ring electronic decoding mode")
+
+
 def _evaluation_batch_cache_signature(
     path_cache_signature: dict[str, object],
     *,
@@ -188,6 +209,7 @@ def _evaluation_batch_cache_signature(
     progress_stratification_fraction: float,
     bond_representation: str,
     ring_electronic_mode: str,
+    property_conditioning: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Identify every scientific choice that fixes the evaluation tensors."""
 
@@ -202,7 +224,10 @@ def _evaluation_batch_cache_signature(
         "operational_horizon": float(operational_horizon),
         "progress_stratification_fraction": float(progress_stratification_fraction),
         "bond_representation": str(bond_representation),
-        "ring_electronic_mode": str(ring_electronic_mode),
+        "ring_electronic_mode": _ring_support_semantics_mode(
+            ring_electronic_mode
+        ),
+        "property_conditioning": property_conditioning,
     }
 
 
@@ -225,7 +250,9 @@ def _training_support_cache_signature(
         "late_time_fraction": float(late_time_fraction),
         "operational_horizon": float(operational_horizon),
         "progress_stratification_fraction": float(progress_stratification_fraction),
-        "ring_electronic_mode": str(ring_electronic_mode),
+        "ring_electronic_mode": _ring_support_semantics_mode(
+            ring_electronic_mode
+        ),
     }
 
 
@@ -704,17 +731,71 @@ def main() -> None:
         default="hierarchical",
     )
     parser.add_argument(
+        "--empirical-mark-prior-mode",
+        choices=("none", "corpus_residual_v1"),
+        default="none",
+        help=(
+            "add fixed corpus mark-category log probabilities underneath the "
+            "learned atom/bond/ring-electronic residual logits"
+        ),
+    )
+    parser.add_argument(
+        "--empirical-mark-prior-smoothing",
+        type=float,
+        default=1.0,
+        help="positive additive count smoothing for corpus_residual_v1",
+    )
+    parser.add_argument(
+        "--ring-family-mass-mode",
+        choices=("boolean", "catalog_topology_local_support"),
+        default="boolean",
+        help=(
+            "Boolean ring-family gating or catalog topology-group prior mass "
+            "conditioned on the fast local structural support DP"
+        ),
+    )
+    parser.add_argument(
+        "--ring-template-factorization",
+        choices=("flat", "topology_cycle_hierarchical"),
+        default="flat",
+        help=(
+            "Flat complete-template softmax or an explicit learned hierarchy "
+            "over topology class and cycle-size group before template detail"
+        ),
+    )
+    parser.add_argument(
+        "--property-condition",
+        action="append",
+        choices=("qed", "logp", "molecular_weight"),
+        default=[],
+        help=(
+            "standardized endpoint property supplied to the marked-rate model; "
+            "repeat for multi-property conditioning"
+        ),
+    )
+    parser.add_argument(
+        "--condition-dropout-probability",
+        type=float,
+        default=0.15,
+        help="classifier-free all-target dropout used during conditioned training",
+    )
+    parser.add_argument(
         "--ring-proposals",
         choices=("generic_carbon", "typed_catalog"),
         default="generic_carbon",
     )
     parser.add_argument(
         "--ring-electronic-mode",
-        choices=("factorized_local", "catalog_exact"),
+        choices=(
+            "factorized_local",
+            "factorized_contextual",
+            "catalog_exact",
+        ),
         default="factorized_local",
         help=(
-            "semantic structured-label decoder (generalizes across electronic "
-            "assignments) or the diagnostic observed-alias decoder"
+            "independent semantic labels, contextual semantic labels with "
+            "learned composition/adjacency potentials, or the diagnostic "
+            "observed-alias decoder"
         ),
     )
     parser.add_argument("--max-cycle-templates", type=int, default=128)
@@ -755,10 +836,28 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=2e-3)
     parser.add_argument("--weight-decay", type=float, default=0.0)
     parser.add_argument(
+        "--trainable-parameter-scope",
+        choices=("all", "chemistry_marks_only", "ring_topology_only"),
+        default="all",
+        help=(
+            "all parameters, only atom/bond and ring-electronic mark heads, "
+            "or only the shared ring topology-and-cycle selector"
+        ),
+    )
+    parser.add_argument(
         "--warmup-steps",
         type=int,
         default=0,
         help="linear AdamW warmup updates; factorized marked training only",
+    )
+    parser.add_argument(
+        "--schedule-steps",
+        type=int,
+        default=0,
+        help=(
+            "learning-rate schedule horizon; 0 uses --steps. Set larger than "
+            "--steps for a bounded pilot of a longer intended optimization run"
+        ),
     )
     parser.add_argument(
         "--minimum-learning-rate-fraction",
@@ -1012,6 +1111,15 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--allow-resume-step-extension",
+        action="store_true",
+        help=(
+            "permit only training_steps to increase when resuming an otherwise "
+            "configuration-identical recovery checkpoint; a shorter explicit "
+            "schedule remains at its minimum learning-rate floor"
+        ),
+    )
+    parser.add_argument(
         "--recovery-every",
         type=int,
         default=200,
@@ -1046,10 +1154,28 @@ def main() -> None:
         )
     if args.allow_resume_provenance_mismatch and args.resume_checkpoint is None:
         raise ValueError("--allow-resume-provenance-mismatch requires --resume-checkpoint")
+    if args.allow_resume_step_extension and args.resume_checkpoint is None:
+        raise ValueError("--allow-resume-step-extension requires --resume-checkpoint")
     if args.recovery_every < 0:
         raise ValueError("--recovery-every must be non-negative")
+    if not 0.0 <= args.condition_dropout_probability <= 1.0:
+        raise ValueError("--condition-dropout-probability must lie in [0, 1]")
+    if (
+        not np.isfinite(args.empirical_mark_prior_smoothing)
+        or args.empirical_mark_prior_smoothing <= 0.0
+    ):
+        raise ValueError("--empirical-mark-prior-smoothing must be positive")
+    if len(set(args.property_condition)) != len(args.property_condition):
+        raise ValueError("--property-condition values must be unique")
+    if args.property_condition and (
+        args.model != "from_scratch" or args.training_backend != "factorized_marks"
+    ):
+        raise ValueError("property conditioning currently requires factorized from-scratch training")
     if not 0 <= args.warmup_steps <= args.steps:
         raise ValueError("--warmup-steps must lie in [0, steps]")
+    if args.schedule_steps < 0:
+        raise ValueError("--schedule-steps must be non-negative")
+    resolved_schedule_steps = args.steps if args.schedule_steps == 0 else args.schedule_steps
     if not 0.0 < args.minimum_learning_rate_fraction <= 1.0:
         raise ValueError("--minimum-learning-rate-fraction must lie in (0, 1]")
     if args.evaluation_every < 0 or args.early_stopping_patience < 0:
@@ -1139,6 +1265,21 @@ def main() -> None:
         raise ValueError(
             "factorized marked training requires from_scratch, typed_catalog, "
             "and the sequential teacher"
+        )
+    if (
+        args.empirical_mark_prior_mode != "none"
+        or args.ring_family_mass_mode != "boolean"
+        or args.ring_template_factorization != "flat"
+    ) and args.training_backend != "factorized_marks":
+        raise ValueError(
+            "empirical mark priors and ring factorizations require factorized_marks"
+        )
+    if (
+        args.trainable_parameter_scope != "all"
+        and args.training_backend != "factorized_marks"
+    ):
+        raise ValueError(
+            "restricted trainable parameter scopes require factorized_marks"
         )
 
     if args.ring_proposals == "typed_catalog" and args.model != "from_scratch":
@@ -1970,6 +2111,38 @@ def main() -> None:
         if not args.compile_evaluation_cache:
             return
 
+    property_condition_names = tuple(str(name) for name in args.property_condition)
+    property_normalizer = (
+        fit_property_condition_normalizer(train_records, property_condition_names)
+        if property_condition_names
+        else None
+    )
+    train_property_conditions = (
+        standardized_record_conditions(train_records, property_normalizer)
+        if property_normalizer is not None
+        else None
+    )
+    validation_property_conditions = (
+        standardized_record_conditions(validation_records, property_normalizer)
+        if property_normalizer is not None
+        else None
+    )
+    test_property_conditions = (
+        standardized_record_conditions(test_records, property_normalizer)
+        if property_normalizer is not None
+        else None
+    )
+    property_conditioning_signature = (
+        None
+        if property_normalizer is None
+        else {
+            **property_normalizer.to_dict(),
+            "condition_dropout_probability": float(
+                args.condition_dropout_probability
+            ),
+        }
+    )
+
     evaluation_signature = _evaluation_batch_cache_signature(
         path_cache_signature,
         training_backend=args.training_backend,
@@ -1981,6 +2154,7 @@ def main() -> None:
         progress_stratification_fraction=args.progress_stratification_fraction,
         bond_representation=args.bond_representation,
         ring_electronic_mode=args.ring_electronic_mode,
+        property_conditioning=property_conditioning_signature,
     )
     evaluation_cache_path = (
         None
@@ -2018,7 +2192,8 @@ def main() -> None:
         )
         if (
             args.training_backend == "factorized_marks"
-            and args.ring_electronic_mode == "factorized_local"
+            and args.ring_electronic_mode
+            in {"factorized_local", "factorized_contextual"}
             and isinstance(validation_examples, FactorizedMarkBatch)
             and isinstance(test_examples, FactorizedMarkBatch)
         ):
@@ -2068,6 +2243,78 @@ def main() -> None:
                     ),
                     flush=True,
                 )
+    elif (
+        args.require_evaluation_cache
+        and evaluation_cache_path is not None
+        and property_conditioning_signature is not None
+    ):
+        base_evaluation_signature = _evaluation_batch_cache_signature(
+            path_cache_signature,
+            training_backend=args.training_backend,
+            seed=args.seed,
+            validation_examples=args.validation_examples,
+            test_examples=args.test_examples,
+            late_time_fraction=args.late_time_fraction,
+            operational_horizon=args.operational_horizon,
+            progress_stratification_fraction=args.progress_stratification_fraction,
+            bond_representation=args.bond_representation,
+            ring_electronic_mode=args.ring_electronic_mode,
+            property_conditioning=None,
+        )
+        base_cache_path = _evaluation_batch_cache_path(
+            args.evaluation_cache_dir,
+            base_evaluation_signature,
+        )
+        if not base_cache_path.is_file():
+            raise FileNotFoundError(
+                "required conditioned and reusable base evaluation caches are "
+                f"missing: {evaluation_cache_path}; {base_cache_path}"
+            )
+        cache_load_started = perf_counter()
+        validation_examples, test_examples = _load_evaluation_batch_cache(
+            base_cache_path,
+            signature=base_evaluation_signature,
+            validation_examples=args.validation_examples,
+            test_examples=args.test_examples,
+        )
+        if not isinstance(validation_examples, FactorizedMarkBatch) or not isinstance(
+            test_examples, FactorizedMarkBatch
+        ):
+            raise TypeError("property conditioning requires factorized evaluation caches")
+        validation_examples = attach_property_conditions(
+            validation_examples,
+            validation_records,
+            seed=args.seed + 1,
+            target_property_conditions=validation_property_conditions,
+        )
+        test_examples = attach_property_conditions(
+            test_examples,
+            test_records,
+            seed=args.seed + 2,
+            target_property_conditions=test_property_conditions,
+        )
+        _atomic_shared_torch_save(
+            {
+                "signature": evaluation_signature,
+                "validation_batch": validation_examples,
+                "test_batch": test_examples,
+            },
+            evaluation_cache_path,
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "conditioned_evaluation_cache_upgraded",
+                    "base_path": str(base_cache_path),
+                    "path": str(evaluation_cache_path),
+                    "seconds": perf_counter() - cache_load_started,
+                    "validation_examples": args.validation_examples,
+                    "test_examples": args.test_examples,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     elif args.require_evaluation_cache:
         raise FileNotFoundError(
             f"required evaluation batch cache is missing: {evaluation_cache_path}"
@@ -2086,6 +2333,8 @@ def main() -> None:
             workers=evaluation_workers,
             ring_catalog=ring_catalog,
             ring_electronic_mode=args.ring_electronic_mode,
+            target_property_conditions=validation_property_conditions,
+            condition_dropout_probability=0.0,
         )
         print(
             json.dumps(
@@ -2110,6 +2359,8 @@ def main() -> None:
             workers=evaluation_workers,
             ring_catalog=ring_catalog,
             ring_electronic_mode=args.ring_electronic_mode,
+            target_property_conditions=test_property_conditions,
+            condition_dropout_probability=0.0,
         )
         print(
             json.dumps(
@@ -2211,6 +2462,39 @@ def main() -> None:
         if args.model == "from_scratch"
         else fit_tracelet_corpus_marginal_rate_model(train_records)
     )
+    empirical_mark_priors = None
+    if args.empirical_mark_prior_mode == "corpus_residual_v1":
+        prior_fit_started = perf_counter()
+        empirical_mark_priors = fit_factorized_mark_empirical_priors(
+            train_records,
+            smoothing=args.empirical_mark_prior_smoothing,
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "factorized_empirical_mark_priors_fitted",
+                    "seconds": perf_counter() - prior_fit_started,
+                    "smoothing": args.empirical_mark_prior_smoothing,
+                    "observations": {
+                        "root_atom": empirical_mark_priors.root_atom_observations,
+                        "connected_atom": (
+                            empirical_mark_priors.connected_atom_observations
+                        ),
+                        "atom_restate": (
+                            empirical_mark_priors.atom_restate_observations
+                        ),
+                        "bond_reorder": (
+                            empirical_mark_priors.bond_reorder_observations
+                        ),
+                        "ring_electronic": (
+                            empirical_mark_priors.ring_electronic_observations
+                        ),
+                    },
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
 
     if args.model == "from_scratch" and args.training_backend == "factorized_marks":
         if ring_catalog is None:
@@ -2220,6 +2504,12 @@ def main() -> None:
             hidden_dim=args.hidden_dim,
             message_passing_steps=args.message_passing_steps,
             ring_electronic_mode=args.ring_electronic_mode,
+            rate_factorization=args.rate_factorization,
+            property_condition_dim=len(property_condition_names),
+            empirical_mark_prior_mode=args.empirical_mark_prior_mode,
+            empirical_mark_priors=empirical_mark_priors,
+            ring_family_mass_mode=args.ring_family_mass_mode,
+            ring_template_factorization=args.ring_template_factorization,
         ).to(device)
     elif args.model == "from_scratch":
         model = TraceletRateModel(
@@ -2255,6 +2545,15 @@ def main() -> None:
         "hidden_dim": args.hidden_dim,
         "message_passing_steps": args.message_passing_steps,
         "rate_factorization": args.rate_factorization,
+        "empirical_mark_prior_mode": args.empirical_mark_prior_mode,
+        "empirical_mark_prior_smoothing": args.empirical_mark_prior_smoothing,
+        "empirical_mark_priors": (
+            None
+            if empirical_mark_priors is None
+            else empirical_mark_priors.to_dict()
+        ),
+        "ring_family_mass_mode": args.ring_family_mass_mode,
+        "ring_template_factorization": args.ring_template_factorization,
         "bond_representation": args.bond_representation,
         "ring_proposals": args.ring_proposals,
         "max_cycle_templates": args.max_cycle_templates,
@@ -2267,6 +2566,8 @@ def main() -> None:
             else "not_applicable"
         ),
         "ring_catalog": ring_catalog,
+        "property_condition_dim": len(property_condition_names),
+        "property_conditioning": property_conditioning_signature,
         "progress_stratification_fraction": args.progress_stratification_fraction,
         "teacher_ordering": args.teacher_ordering,
         "source_prior": args.source_prior,
@@ -2279,10 +2580,12 @@ def main() -> None:
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
         "weight_decay": args.weight_decay,
+        "trainable_parameter_scope": args.trainable_parameter_scope,
         "optimizer_kind": (
             "adamw_decoupled_v1" if args.training_backend == "factorized_marks" else "adam"
         ),
         "warmup_steps": args.warmup_steps,
+        "schedule_steps": resolved_schedule_steps,
         "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
         "evaluation_every": args.evaluation_every,
         "evaluation_batch_size": args.evaluation_batch_size,
@@ -2300,6 +2603,11 @@ def main() -> None:
             "hidden_dim",
             "message_passing_steps",
             "rate_factorization",
+            "empirical_mark_prior_mode",
+            "empirical_mark_prior_smoothing",
+            "empirical_mark_priors",
+            "ring_family_mass_mode",
+            "ring_template_factorization",
             "bond_representation",
             "ring_proposals",
             "ring_electronic_mode",
@@ -2308,6 +2616,9 @@ def main() -> None:
             "tree_size_prior",
             "tree_couplings_per_target",
             "tree_transport",
+            "property_condition_dim",
+            "property_conditioning",
+            "trainable_parameter_scope",
         )
     }
     checkpoint_defaults = {
@@ -2318,6 +2629,14 @@ def main() -> None:
         "tree_couplings_per_target": 1,
         "tree_transport": "primitive",
         "ring_electronic_mode": "factorized_local",
+        "empirical_mark_prior_mode": "none",
+        "empirical_mark_prior_smoothing": 1.0,
+        "empirical_mark_priors": None,
+        "ring_family_mass_mode": "boolean",
+        "ring_template_factorization": "flat",
+        "property_condition_dim": 0,
+        "property_conditioning": None,
+        "trainable_parameter_scope": "all",
     }
 
     loaded_checkpoint = None
@@ -2346,6 +2665,29 @@ def main() -> None:
             for key, value in expected.items()
             if checkpoint_payload.get(key, checkpoint_defaults.get(key)) != value
         }
+        if args.initialize_compatible_checkpoint is not None:
+            # A direct conditional model is deliberately warm-started from
+            # the qualified unconditional checkpoint.  The zero-residual
+            # condition adapter and the fixed, parameter-free empirical base
+            # measures are the only scientific configuration differences
+            # permitted by this shape-exact transfer path.
+            mismatches.pop("property_condition_dim", None)
+            mismatches.pop("property_conditioning", None)
+            mismatches.pop("empirical_mark_prior_mode", None)
+            mismatches.pop("empirical_mark_prior_smoothing", None)
+            mismatches.pop("empirical_mark_priors", None)
+            mismatches.pop("ring_family_mass_mode", None)
+            mismatches.pop("ring_template_factorization", None)
+            mismatches.pop("trainable_parameter_scope", None)
+            source_ring_mode = checkpoint_payload.get(
+                "ring_electronic_mode",
+                checkpoint_defaults["ring_electronic_mode"],
+            )
+            if {
+                str(source_ring_mode),
+                str(args.ring_electronic_mode),
+            }.issubset({"factorized_local", "factorized_contextual"}):
+                mismatches.pop("ring_electronic_mode", None)
         if args.resume_checkpoint is not None:
             resume_expected = {
                 key: checkpoint_metadata[key]
@@ -2356,6 +2698,7 @@ def main() -> None:
                     "weight_decay",
                     "optimizer_kind",
                     "warmup_steps",
+                    "schedule_steps",
                     "minimum_learning_rate_fraction",
                     "evaluation_every",
                     "evaluation_batch_size",
@@ -2365,17 +2708,43 @@ def main() -> None:
                     "operational_horizon",
                     "progress_stratification_fraction",
                     "use_bf16",
+                    "trainable_parameter_scope",
                 )
             }
             if not args.allow_resume_provenance_mismatch:
                 resume_expected["provenance_sha256"] = checkpoint_metadata["provenance_sha256"]
-            mismatches.update(
-                {
-                    key: (checkpoint_payload.get(key), value)
-                    for key, value in resume_expected.items()
-                    if checkpoint_payload.get(key) != value
-                }
-            )
+            resume_mismatches = {
+                key: (
+                    checkpoint_payload.get(
+                        key,
+                        (
+                            checkpoint_payload.get("training_steps")
+                            if key == "schedule_steps"
+                            else None
+                        ),
+                    ),
+                    value,
+                )
+                for key, value in resume_expected.items()
+                if checkpoint_payload.get(
+                    key,
+                    (
+                        checkpoint_payload.get("training_steps")
+                        if key == "schedule_steps"
+                        else None
+                    ),
+                )
+                != value
+            }
+            if args.allow_resume_step_extension:
+                previous_steps = int(checkpoint_payload["training_steps"])
+                if args.steps <= previous_steps:
+                    raise ValueError(
+                        "resume step extension requires --steps to exceed the "
+                        "checkpoint training horizon"
+                    )
+                resume_mismatches.pop("training_steps", None)
+            mismatches.update(resume_mismatches)
         if mismatches:
             raise ValueError(f"checkpoint/config mismatch: {mismatches}")
         if args.load_checkpoint is not None:
@@ -2541,6 +2910,7 @@ def main() -> None:
             ring_catalog=ring_catalog,
             evaluation_interval=(args.evaluation_every if args.evaluation_every > 0 else None),
             warmup_steps=args.warmup_steps,
+            schedule_steps=resolved_schedule_steps,
             minimum_learning_rate_fraction=(args.minimum_learning_rate_fraction),
             early_stopping_patience=args.early_stopping_patience,
             early_stopping_min_relative_delta=(args.early_stopping_min_relative_delta),
@@ -2558,6 +2928,9 @@ def main() -> None:
                 training_support_cache if args.require_training_support_cache else None
             ),
             require_cached_support=args.require_training_support_cache,
+            target_property_conditions=train_property_conditions,
+            condition_dropout_probability=args.condition_dropout_probability,
+            trainable_parameter_scope=args.trainable_parameter_scope,
         )
     elif isinstance(model, torch.nn.Module) and loaded_checkpoint is None:
         training_fiber_cache = {}
@@ -2643,7 +3016,9 @@ def main() -> None:
                 "optimizer_kind": (
                     "adamw_decoupled_v1" if args.training_backend == "factorized_marks" else "adam"
                 ),
+                "trainable_parameter_scope": args.trainable_parameter_scope,
                 "warmup_steps": args.warmup_steps,
+                "schedule_steps": resolved_schedule_steps,
                 "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
                 "evaluation_every": args.evaluation_every,
                 "evaluation_batch_size": args.evaluation_batch_size,
@@ -2828,7 +3203,9 @@ def main() -> None:
             "optimizer_kind": (
                 "adamw_decoupled_v1" if args.training_backend == "factorized_marks" else "adam"
             ),
+            "trainable_parameter_scope": args.trainable_parameter_scope,
             "warmup_steps": args.warmup_steps,
+            "schedule_steps": resolved_schedule_steps,
             "minimum_learning_rate_fraction": (args.minimum_learning_rate_fraction),
             "evaluation_every": args.evaluation_every,
             "evaluation_batch_size": args.evaluation_batch_size,

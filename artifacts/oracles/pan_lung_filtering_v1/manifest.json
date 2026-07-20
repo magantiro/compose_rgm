@@ -1,0 +1,153 @@
+{
+  "admission_test": {
+    "observed": {
+      "a549_in_domain": true,
+      "a549_ood": false,
+      "lumi_in_domain": true,
+      "lumi_ood": false,
+      "lut_known_pair": true,
+      "lut_novel_pair_known_components": true,
+      "lut_unseen_component_ood": false
+    },
+    "path": "diagnostics/pan_lung_filtering_admission_test.json",
+    "sha256": "27e32f4e96affdcba84fe8c9303ab0e6031b091b8296de0c55fdf46618ca914c"
+  },
+  "clean_runtime_verification": "diagnostics/pan_lung_filtering_clean_runtime_verification.json",
+  "corpus_manifest": {
+    "path": "configs/pan_lung_corpus_manifest_v1.json",
+    "sha256": "a1a1035bdf814bb44efcfa1e3563b9e7e5ac30cb7d9c0b13d7ad65f428092cf1"
+  },
+  "domains": {
+    "a549": {
+      "applicability_domain": {
+        "bytes": 19037,
+        "path": "artifacts/oracles/pan_lung_filtering_v1/applicability_domains/a549_molecular_ad.joblib",
+        "sha256": "b92e15abbe468d2e255db35cb5b2b58a1af2f65b92baab03682eb597686abec3"
+      },
+      "members": {
+        "extra_trees_v1": {
+          "bytes": 1755328,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/a549__extra_trees_v1.joblib",
+          "sha256": "6399b521192014c03d0999577e01dd13e147ad055b538ab373d9630755ca5bcf"
+        },
+        "ridge_v1": {
+          "bytes": 7635,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/a549__ridge_v1.joblib",
+          "sha256": "c39b555b0feb6525e2bce2be475cdb4ab7f632fa89c51099c3b62fd1b412c42c"
+        },
+        "xgboost_v1": {
+          "bytes": 96052,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/a549__xgboost_v1.joblib",
+          "sha256": "3da1e271d88bbe606b2e5d1b9cb43736386d899c7a069064e58c29b8eb033630"
+        }
+      },
+      "qualified_ensemble_ids": [
+        "lnpdb_2026__airway_a549_in_vitro_expression__held_lipid"
+      ],
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "training_rows": 1801,
+      "unique_training_structures": 176
+    },
+    "lumi": {
+      "applicability_domain": {
+        "bytes": 202355,
+        "path": "artifacts/oracles/pan_lung_filtering_v1/applicability_domains/lumi_molecular_ad.joblib",
+        "sha256": "8368f30962d26ac54c8da1bdc68b2ba5b263e1814844c679cd87c697e4ba6299"
+      },
+      "members": {
+        "extra_trees_v1": {
+          "bytes": 10624243,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/lumi__extra_trees_v1.joblib",
+          "sha256": "b4d57d04f6c80b2825ef8893a590526a2bd5d844ca51def11d6045ec4c3aa9c6"
+        },
+        "xgboost_v1": {
+          "bytes": 111815,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/lumi__xgboost_v1.joblib",
+          "sha256": "ca8e4fed845293161f20d8f0475cbb641123dad1e321feb6390a5bc720062ad2"
+        }
+      },
+      "policy_boundary": "R1 is diagnostic-only. If the novel component axis is unknown, use the minimum pessimistic score across qualified R2/R3/R4 policies.",
+      "qualified_ensemble_ids": [
+        "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R2",
+        "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R3",
+        "lumi_lab_4cr1920__airway_hbe_in_vitro_expression__held_component_R4"
+      ],
+      "representation": "morgan_descriptors_plus_typed_context_v1",
+      "training_rows": 1920,
+      "unique_training_structures": 1920
+    },
+    "lut_selectivity": {
+      "applicability_domain": {
+        "bytes": 1369,
+        "path": "artifacts/oracles/pan_lung_filtering_v1/applicability_domains/lut_component_ad.joblib",
+        "sha256": "74d53f5884b0518928c26d3b6e8839f569d1bea7f35efff7fcfb100e39d741f4"
+      },
+      "members": {
+        "extra_trees_v1": {
+          "bytes": 1057381,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/lut_selectivity__extra_trees_v1.joblib",
+          "sha256": "72761202b4be9e020726ee7ec8161063baad152cf2aad38544a4d57cf64bd295"
+        },
+        "ridge_v1": {
+          "bytes": 2704,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/lut_selectivity__ridge_v1.joblib",
+          "sha256": "3c68aedb44b5f29322b2ce40009d1d151d5ca73d97501721020c01d745615896"
+        },
+        "xgboost_v1": {
+          "bytes": 75947,
+          "path": "artifacts/oracles/pan_lung_filtering_v1/models/lut_selectivity__xgboost_v1.joblib",
+          "sha256": "bb3baa526bacbfc0b33a3e9f15a6e4759258b4b5ba8fcb6eacc69e0371dc7e5b"
+        }
+      },
+      "policy_boundary": "Filtering admits new combinations of released components only; unseen heads/tails and round-transfer rewards are rejected.",
+      "qualified_ensemble_ids": [
+        "lut_444_2026__systemic_iv_lung_selectivity__held_head",
+        "lut_444_2026__systemic_iv_lung_selectivity__held_tail"
+      ],
+      "representation": "lut_component_sar_plus_typed_context_v1",
+      "training_rows": 444
+    }
+  },
+  "ensemble_contract": {
+    "path": "configs/pan_lung_qualified_ensemble_contract_v1.json",
+    "sha256": "543abcff88f77415637323f428668acb100540cde3c1499454d58bfc23c908c6"
+  },
+  "filtering_contract": {
+    "admission_precedes_scoring": true,
+    "default_selection_score": "conservative_pessimistic_score",
+    "rejected_candidates_receive_no_score": true,
+    "scores_are_not_comparable_across_typed_heads": true
+  },
+  "format": "compose_pan_lung_filtering_bundle_v1",
+  "preregistration_template": "configs/pan_lung_reward_preregistration.template.json",
+  "qualification_table": {
+    "path": "diagnostics/pan_lung_qualified_ensemble_qualification.csv",
+    "sha256": "fbd70ec081c7403921be358b5d02cb1d3f74e2c9930b7dc7f6a1ee6edeac4573"
+  },
+  "repo_root_relative_to_manifest": "../../..",
+  "reward_fine_tuning_blockers": [
+    "A passed clean-runtime verification artifact for this exact manifest hash.",
+    "A valid frozen preregistration bound to this exact manifest hash.",
+    "An explicit future bundle authorization; the released bundle flag is false.",
+    "Pre-registered applicability thresholds and candidate budgets.",
+    "The hard reward guard must remain in the optimization path.",
+    "Prospective monitoring for score hacking and domain drift."
+  ],
+  "reward_fine_tuning_enabled": false,
+  "reward_guard": "src/compose_v4/oracles/reward_guard.py",
+  "seed": 20260720,
+  "software": {
+    "joblib": "1.5.3",
+    "numpy": "2.4.2",
+    "pandas": "3.0.1",
+    "rdkit": "2025.09.6",
+    "scikit_learn": "1.8.0",
+    "xgboost": "3.2.0"
+  },
+  "source_hashes": {
+    "lnpdb": "3493f27306419facd0958589030ed37f272f05c81ad47dd7bc1b8ce0284a57b3",
+    "lumi": "41118d98ae84c651fd687e23950fbd56c5ed9a3281998122e75062e5a5a26734",
+    "lut": "231c87652ef80fc5af4aaa5e561799e14ed9949d8bce6ee803b4e877db594491"
+  },
+  "status": "qualified_for_filtering_only"
+}

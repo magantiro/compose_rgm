@@ -1,0 +1,413 @@
+{
+  "canonicalization_policy": {
+    "canonical": true,
+    "charge_neutralization": false,
+    "eligibility": "parseable and single connected component; originals retained",
+    "explicit_hydrogens_removed": true,
+    "isomeric_smiles": true,
+    "parser": "RDKit 2026.03.4",
+    "salt_or_fragment_stripping": false,
+    "tautomer_normalization": false
+  },
+  "enumerated_new_molecule_count": 0,
+  "inventory_version": "compose_lipid_pretraining_v1",
+  "overlap": {
+    "pairwise": [
+      {
+        "fraction_of_a": 0.825,
+        "fraction_of_b": 0.08064516129032258,
+        "intersection_count": 990,
+        "jaccard": 0.07928880345987506,
+        "source_a": "agile_measured1200",
+        "source_a_count": 1200,
+        "source_b": "agile_virtual12k",
+        "source_b_count": 12276
+      },
+      {
+        "fraction_of_a": 0.8333333333333334,
+        "fraction_of_b": 0.10876658690450294,
+        "intersection_count": 1000,
+        "jaccard": 0.10645092612305727,
+        "source_a": "agile_measured1200",
+        "source_a_count": 1200,
+        "source_b": "lion_repository_all",
+        "source_b_count": 9194
+      },
+      {
+        "fraction_of_a": 0.9833333333333333,
+        "fraction_of_b": 0.09192178857988627,
+        "intersection_count": 1180,
+        "jaccard": 0.09177879754219491,
+        "source_a": "agile_measured1200",
+        "source_a_count": 1200,
+        "source_b": "lnpdb_v1",
+        "source_b_count": 12837
+      },
+      {
+        "fraction_of_a": 0.0,
+        "fraction_of_b": 0.0,
+        "intersection_count": 0,
+        "jaccard": 0.0,
+        "source_a": "agile_measured1200",
+        "source_a_count": 1200,
+        "source_b": "lumi_4cr1920",
+        "source_b_count": 1920
+      },
+      {
+        "fraction_of_a": 0.08064516129032258,
+        "fraction_of_b": 0.10767892103545791,
+        "intersection_count": 990,
+        "jaccard": 0.04833984375,
+        "source_a": "agile_virtual12k",
+        "source_a_count": 12276,
+        "source_b": "lion_repository_all",
+        "source_b_count": 9194
+      },
+      {
+        "fraction_of_a": 0.0913978494623656,
+        "fraction_of_b": 0.08740359897172237,
+        "intersection_count": 1122,
+        "jaccard": 0.04676753782668501,
+        "source_a": "agile_virtual12k",
+        "source_a_count": 12276,
+        "source_b": "lnpdb_v1",
+        "source_b_count": 12837
+      },
+      {
+        "fraction_of_a": 0.0,
+        "fraction_of_b": 0.0,
+        "intersection_count": 0,
+        "jaccard": 0.0,
+        "source_a": "agile_virtual12k",
+        "source_a_count": 12276,
+        "source_b": "lumi_4cr1920",
+        "source_b_count": 1920
+      },
+      {
+        "fraction_of_a": 0.926473787252556,
+        "fraction_of_b": 0.6635506738334502,
+        "intersection_count": 8518,
+        "jaccard": 0.630355953526234,
+        "source_a": "lion_repository_all",
+        "source_a_count": 9194,
+        "source_b": "lnpdb_v1",
+        "source_b_count": 12837
+      },
+      {
+        "fraction_of_a": 0.0,
+        "fraction_of_b": 0.0,
+        "intersection_count": 0,
+        "jaccard": 0.0,
+        "source_a": "lion_repository_all",
+        "source_a_count": 9194,
+        "source_b": "lumi_4cr1920",
+        "source_b_count": 1920
+      },
+      {
+        "fraction_of_a": 0.0,
+        "fraction_of_b": 0.0,
+        "intersection_count": 0,
+        "jaccard": 0.0,
+        "source_a": "lnpdb_v1",
+        "source_a_count": 12837,
+        "source_b": "lumi_4cr1920",
+        "source_b_count": 1920
+      }
+    ],
+    "source_counts": {
+      "agile_measured1200": 1200,
+      "agile_virtual12k": 12276,
+      "lion_repository_all": 9194,
+      "lnpdb_v1": 12837,
+      "lumi_4cr1920": 1920
+    },
+    "source_membership_histogram": {
+      "1": 17591,
+      "2": 7800,
+      "3": 236,
+      "4": 882
+    },
+    "union_count": 26509
+  },
+  "r0_chemistry_profile": {
+    "element_presence_counts": {
+      "C": 15433,
+      "F": 92,
+      "N": 15433,
+      "O": 15326,
+      "P": 577,
+      "S": 2534,
+      "Si": 252
+    },
+    "formal_charge_histogram": {
+      "-1": 169,
+      "-2": 130,
+      "-3": 130,
+      "-4": 65,
+      "-5": 13,
+      "0": 14924,
+      "2": 2
+    },
+    "fraction_aromatic_ring_bearing": 0.1233071988595866,
+    "fraction_formally_charged": 0.03298127389360461,
+    "fraction_ring_bearing": 0.526598846627357,
+    "fraction_with_stereogenic_atom": 0.7437309661115791,
+    "heavy_atoms": {
+      "max": 282,
+      "mean": 60.250696559320936,
+      "median": 53,
+      "min": 14,
+      "p95": 114.0
+    },
+    "max_atom_kernel_eligibility": {
+      "128": 14893,
+      "40": 2968,
+      "64": 10877,
+      "96": 14079
+    },
+    "unique_canonical_structures": 15433
+  },
+  "r0_release": {
+    "eligible_row_count": 15433,
+    "excluded_virtual_only_structures": 11076,
+    "policy": {
+      "labels": "no formulation or delivery label is inherited by structural pretraining rows",
+      "measured_occurrences": "collapsed within source; occurrence counts retained",
+      "prospective": "all retrospective structures are excluded from prospective novelty claims",
+      "split": "canonical structures never cross splits; study/component/reaction groups frozen",
+      "unit": "canonical isomeric molecular structure"
+    },
+    "release_id": "compose_lipid_r0_observed_v1",
+    "row_count": 15433
+  },
+  "source_chemistry_profiles": {
+    "agile_measured1200": {
+      "element_presence_counts": {
+        "C": 1200,
+        "N": 1200,
+        "O": 1200
+      },
+      "formal_charge_histogram": {
+        "0": 1200
+      },
+      "fraction_aromatic_ring_bearing": 0.1,
+      "fraction_formally_charged": 0.0,
+      "fraction_ring_bearing": 0.6,
+      "fraction_with_stereogenic_atom": 1.0,
+      "heavy_atoms": {
+        "max": 60,
+        "mean": 47.766666666666666,
+        "median": 47.0,
+        "min": 38,
+        "p95": 56.0
+      },
+      "max_atom_kernel_eligibility": {
+        "128": 1200,
+        "40": 42,
+        "64": 1200,
+        "96": 1200
+      },
+      "unique_canonical_structures": 1200
+    },
+    "agile_virtual12k": {
+      "element_presence_counts": {
+        "C": 12276,
+        "N": 12276,
+        "O": 12276
+      },
+      "formal_charge_histogram": {
+        "0": 12276
+      },
+      "fraction_aromatic_ring_bearing": 0.045454545454545456,
+      "fraction_formally_charged": 0.0,
+      "fraction_ring_bearing": 0.5909090909090909,
+      "fraction_with_stereogenic_atom": 1.0,
+      "heavy_atoms": {
+        "max": 62,
+        "mean": 45.767188009123494,
+        "median": 45.0,
+        "min": 30,
+        "p95": 55.0
+      },
+      "max_atom_kernel_eligibility": {
+        "128": 12276,
+        "40": 1805,
+        "64": 12276,
+        "96": 12276
+      },
+      "unique_canonical_structures": 12276
+    },
+    "lion_repository_all": {
+      "element_presence_counts": {
+        "C": 9194,
+        "F": 90,
+        "N": 9194,
+        "O": 9170,
+        "P": 572,
+        "S": 2262
+      },
+      "formal_charge_histogram": {
+        "-1": 169,
+        "-2": 130,
+        "-3": 130,
+        "-4": 65,
+        "-5": 13,
+        "0": 8685,
+        "2": 2
+      },
+      "fraction_aromatic_ring_bearing": 0.13139003698063956,
+      "fraction_formally_charged": 0.055362192734391996,
+      "fraction_ring_bearing": 0.5429628018272786,
+      "fraction_with_stereogenic_atom": 0.72101370458995,
+      "heavy_atoms": {
+        "max": 282,
+        "mean": 61.95551446595606,
+        "median": 53.0,
+        "min": 14,
+        "p95": 121.0
+      },
+      "max_atom_kernel_eligibility": {
+        "128": 8814,
+        "40": 1837,
+        "64": 6005,
+        "96": 8212
+      },
+      "unique_canonical_structures": 9194
+    },
+    "lnpdb_v1": {
+      "element_presence_counts": {
+        "C": 12837,
+        "F": 92,
+        "N": 12837,
+        "O": 12754,
+        "P": 577,
+        "S": 2465,
+        "Si": 252
+      },
+      "formal_charge_histogram": {
+        "-1": 169,
+        "-2": 130,
+        "-3": 130,
+        "-4": 65,
+        "-5": 13,
+        "0": 12328,
+        "2": 2
+      },
+      "fraction_aromatic_ring_bearing": 0.12837890472851912,
+      "fraction_formally_charged": 0.03965100880267975,
+      "fraction_ring_bearing": 0.47386461011139674,
+      "fraction_with_stereogenic_atom": 0.704525979590247,
+      "heavy_atoms": {
+        "max": 282,
+        "mean": 60.63893433045104,
+        "median": 52,
+        "min": 14,
+        "p95": 118.0
+      },
+      "max_atom_kernel_eligibility": {
+        "128": 12348,
+        "40": 2961,
+        "64": 8589,
+        "96": 11547
+      },
+      "unique_canonical_structures": 12837
+    },
+    "lumi_4cr1920": {
+      "element_presence_counts": {
+        "C": 1920,
+        "N": 1920,
+        "O": 1920
+      },
+      "formal_charge_histogram": {
+        "0": 1920
+      },
+      "fraction_aromatic_ring_bearing": 0.05,
+      "fraction_formally_charged": 0.0,
+      "fraction_ring_bearing": 0.775,
+      "fraction_with_stereogenic_atom": 1.0,
+      "heavy_atoms": {
+        "max": 69,
+        "mean": 54.733333333333334,
+        "median": 56.0,
+        "min": 38,
+        "p95": 63.0
+      },
+      "max_atom_kernel_eligibility": {
+        "128": 1920,
+        "40": 7,
+        "64": 1875,
+        "96": 1920
+      },
+      "unique_canonical_structures": 1920
+    }
+  },
+  "source_summaries": [
+    {
+      "canonical_collisions": 8,
+      "file_size_bytes": 20118803,
+      "nonempty_structure_rows": 19797,
+      "parse_failure_count": 0,
+      "parse_failures": [],
+      "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/LNPDB/LNPDB.csv",
+      "sha256": "3493f27306419facd0958589030ed37f272f05c81ad47dd7bc1b8ce0284a57b3",
+      "source_id": "lnpdb_v1",
+      "total_rows": 19797,
+      "unique_canonical_structures": 12837,
+      "unique_raw_structure_strings": 12845
+    },
+    {
+      "canonical_collisions": 0,
+      "file_size_bytes": 720719,
+      "nonempty_structure_rows": 12276,
+      "parse_failure_count": 0,
+      "parse_failures": [],
+      "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/data/agile_virtual/agile_virtual.csv",
+      "sha256": "2f083ddcd66ac612c71ca0e7781336b1b32d21602d572827a607c14bc80b4628",
+      "source_id": "agile_virtual12k",
+      "total_rows": 12276,
+      "unique_canonical_structures": 12276,
+      "unique_raw_structure_strings": 12276
+    },
+    {
+      "canonical_collisions": 0,
+      "file_size_bytes": 196871,
+      "nonempty_structure_rows": 1200,
+      "parse_failure_count": 0,
+      "parse_failures": [],
+      "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/AGILE/AGILE_smiles_with_value_group.csv",
+      "sha256": "1b3dd460125ba7d70d8cce266bd5febaabe09eeddc6a4622405c2706420b9686",
+      "source_id": "agile_measured1200",
+      "total_rows": 1200,
+      "unique_canonical_structures": 1200,
+      "unique_raw_structure_strings": 1200
+    },
+    {
+      "canonical_collisions": 183,
+      "file_size_bytes": 8077574,
+      "nonempty_structure_rows": 13069,
+      "parse_failure_count": 0,
+      "parse_failures": [],
+      "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/LNP_ML/data/all_data.csv",
+      "sha256": "a5e46d0fc36ad48b47cc394f2897ecedf191dff4471d3404542ae311e0d8f48c",
+      "source_id": "lion_repository_all",
+      "total_rows": 13069,
+      "unique_canonical_structures": 9194,
+      "unique_raw_structure_strings": 9377
+    },
+    {
+      "canonical_collisions": 0,
+      "file_size_bytes": 262119,
+      "nonempty_structure_rows": 1920,
+      "parse_failure_count": 0,
+      "parse_failures": [],
+      "path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/tmp/lipid_data/lumi_lab/4CR-1920.csv",
+      "sha256": "41118d98ae84c651fd687e23950fbd56c5ed9a3281998122e75062e5a5a26734",
+      "source_id": "lumi_4cr1920",
+      "total_rows": 1920,
+      "unique_canonical_structures": 1920,
+      "unique_raw_structure_strings": 1920
+    }
+  ],
+  "unique_canonical_union": 26509,
+  "unique_single_component_union": 26509
+}

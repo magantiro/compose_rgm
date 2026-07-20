@@ -1,0 +1,246 @@
+{
+  "format": "compose_v4_qed_controlled_rollout_analysis_v1",
+  "analysis_uses_new_oracle_calls": false,
+  "remote_artifact_dir": "/artifacts/compose-v4-qed-step1000-controlled090-eval10-k4-b48-beta8-20260720-v1",
+  "modal_app_id": "ap-i0ZWyAqnxF6AwQ5lKnFhX0",
+  "function_call_id": "fc-01KXZX9Y7NM58838CGB0GEE2QC",
+  "control": {
+    "equation": "q_beta(m|x,t) proportional_to p_theta(m|x,t) exp(beta * U(QED(F_m(x)))); lambda_beta(x,t)=lambda_theta(x,t)",
+    "potential": "U(q)=-abs(q-0.9)",
+    "beta": 8.0,
+    "proposals_per_controlled_event": 4,
+    "max_controlled_events": 12,
+    "maximum_raw_proposal_marks_per_attempt": 48,
+    "beam_search": false
+  },
+  "arms": {
+    "beta_zero": {
+      "attempts": 10,
+      "valid": 10,
+      "unique_valid": 10,
+      "mean_qed": 0.6665813215769874,
+      "qed_standard_deviation": 0.1497965027465189,
+      "minimum_qed": 0.4042692244759146,
+      "maximum_qed": 0.8890841392004717,
+      "within_0.1": 2,
+      "qed_at_least_0.9": 0,
+      "mean_events": 25.6,
+      "trajectory_states_audited": 266,
+      "raw_proposal_marks": 480,
+      "canonical_group_requests": 420,
+      "unique_oracle_evaluations": 402,
+      "cache_hits": 18,
+      "all_trajectory_states_valid_and_connected": true,
+      "all_scored_proposals_valid_and_connected": true,
+      "event_budget_exhaustions": 0,
+      "virtual_events": 0
+    },
+    "target_distance_soft": {
+      "attempts": 10,
+      "valid": 10,
+      "unique_valid": 10,
+      "mean_qed": 0.6902818143883394,
+      "qed_standard_deviation": 0.15670799281303488,
+      "minimum_qed": 0.4042692244759146,
+      "maximum_qed": 0.8912005413090696,
+      "within_0.1": 3,
+      "qed_at_least_0.9": 0,
+      "mean_events": 25.0,
+      "trajectory_states_audited": 260,
+      "raw_proposal_marks": 480,
+      "canonical_group_requests": 424,
+      "unique_oracle_evaluations": 414,
+      "cache_hits": 10,
+      "all_trajectory_states_valid_and_connected": true,
+      "all_scored_proposals_valid_and_connected": true,
+      "event_budget_exhaustions": 0,
+      "virtual_events": 0
+    }
+  },
+  "paired": {
+    "per_seed_qed_deltas": [
+      0.0,
+      0.001604248319891477,
+      -0.2084854069227765,
+      0.28738190546060205,
+      0.0,
+      0.0,
+      0.19596333011166733,
+      0.0,
+      0.0,
+      -0.03945914885586532
+    ],
+    "mean_qed_delta": 0.023700492811351902,
+    "median_qed_delta": 0.0,
+    "qed_delta_sample_standard_deviation": 0.1334993198819414,
+    "bootstrap_95_percent_interval": [-0.04942849, 0.10471912],
+    "improved_attempts": 3,
+    "worsened_attempts": 2,
+    "tied_attempts": 5,
+    "within_0.1_count_delta": 1,
+    "qed_at_least_0.9_count_delta": 0,
+    "maximum_qed_delta": 0.0021164021085979495,
+    "mean_events_delta": -0.6
+  },
+  "matched_prefix_action_changes": {
+    "same_source_and_proposal_set_events": 82,
+    "selected_successor_changes": 5,
+    "seeds_with_a_selected_successor_change": [1, 2, 3, 6, 9],
+    "first_change_zero_based_controlled_event_index": {
+      "1": 2,
+      "2": 3,
+      "3": 2,
+      "6": 3,
+      "9": 7
+    },
+    "seeds_without_a_controller_change": [0, 4, 5, 7, 8]
+  },
+  "proposal_set_diagnostics": {
+    "frozen_100_state_gate": {
+      "sets": 100,
+      "sets_with_multiple_canonical_successors": 99,
+      "sets_with_nonzero_qed_spread": 94,
+      "qed_spread_mean": 0.05315668441177657,
+      "qed_spread_minimum": 0.0,
+      "qed_spread_first_quartile": 0.01728807,
+      "qed_spread_median": 0.03580317,
+      "qed_spread_third_quartile": 0.06892626,
+      "qed_spread_p90": 0.09949983,
+      "qed_spread_maximum": 0.33635162
+    },
+    "beta_zero_controlled_window": {
+      "sets": 120,
+      "sets_with_multiple_canonical_successors": 115,
+      "sets_with_nonzero_qed_spread": 106,
+      "qed_spread_mean": 0.02451514321670678,
+      "qed_spread_minimum": 0.0,
+      "qed_spread_first_quartile": 0.01058792,
+      "qed_spread_median": 0.02442032,
+      "qed_spread_third_quartile": 0.03576144,
+      "qed_spread_p90": 0.04823939,
+      "qed_spread_maximum": 0.06208622
+    },
+    "target_distance_controlled_window": {
+      "sets": 120,
+      "sets_with_multiple_canonical_successors": 116,
+      "sets_with_nonzero_qed_spread": 107,
+      "qed_spread_mean": 0.0262701385158975,
+      "qed_spread_minimum": 0.0,
+      "qed_spread_first_quartile": 0.01185706,
+      "qed_spread_median": 0.02545297,
+      "qed_spread_third_quartile": 0.03848745,
+      "qed_spread_p90": 0.05183312,
+      "qed_spread_maximum": 0.06240491
+    }
+  },
+  "guidance_window": {
+    "beta_zero_controlled_events": 120,
+    "beta_zero_total_events": 256,
+    "beta_zero_coverage_fraction": 0.46875,
+    "target_distance_controlled_events": 120,
+    "target_distance_total_events": 250,
+    "target_distance_coverage_fraction": 0.48,
+    "beta_zero_window_proposed_atom_restate": 0,
+    "beta_zero_window_proposed_ring_system_grow": 0,
+    "beta_zero_full_path_committed_atom_restate": 41,
+    "beta_zero_full_path_committed_ring_system_grow": 26,
+    "target_distance_window_proposed_atom_restate": 1,
+    "target_distance_window_proposed_ring_system_grow": 0,
+    "target_distance_full_path_committed_atom_restate": 40,
+    "target_distance_full_path_committed_ring_system_grow": 22
+  },
+  "offline_beta_sensitivity": {
+    "beta_grid": [0, 2, 4, 8, 12, 16, 24, 32],
+    "beta_zero_trajectory_window": {
+      "expected_mean_qed": [
+        0.2223908400619769,
+        0.22269716906557194,
+        0.22300345874933375,
+        0.22361410455611175,
+        0.2242192092194254,
+        0.22481534515228166,
+        0.2259680583014489,
+        0.22704989973868925
+      ],
+      "mean_effective_sample_size": [
+        4.0,
+        3.9975506772266964,
+        3.990232194407514,
+        3.961493783035958,
+        3.9155387625997222,
+        3.8550863512670026,
+        3.703969485676661,
+        3.533984930119958
+      ]
+    },
+    "frozen_100_state_gate": {
+      "expected_mean_qed": [
+        0.30657060908620226,
+        0.3089833417632666,
+        0.31151095734912454,
+        0.3161264173813651,
+        0.3195496624830057,
+        0.32199578645242644,
+        0.32530892071980444,
+        0.32754492845426525
+      ],
+      "mean_effective_sample_size": [
+        4.0,
+        3.9805503518575938,
+        3.927900416666182,
+        3.791072806770718,
+        3.654061851053236,
+        3.522630499209115,
+        3.2823835413103746,
+        3.0764440608900827
+      ]
+    }
+  },
+  "matched_budget_precision": {
+    "raw_proposal_marks_exactly_matched": true,
+    "raw_proposal_marks_per_arm": 480,
+    "canonical_group_requests_exactly_matched": false,
+    "canonical_group_request_difference_guided_minus_control": 4,
+    "unique_oracle_evaluations_exactly_matched": false,
+    "unique_oracle_evaluation_difference_guided_minus_control": 12,
+    "interpretation": "The proposal budget is exact; canonical quotienting makes realized QED computation counts state-dependent and slightly different."
+  },
+  "recommendation": {
+    "exactly_one_controller_change": "Move the same twelve-event guidance window from controlled events 1-12 to events 13-24.",
+    "hold_fixed": [
+      "checkpoint",
+      "target QED 0.9",
+      "beta 8",
+      "K=4",
+      "48 raw proposal marks per attempt",
+      "target-distance potential",
+      "trajectory seeds and CTMC profile"
+    ],
+    "reason": "The first window covers under half the path, has about half the QED spread of the all-progress frozen gate, and sees virtually none of the later atom-restate or ring-grow choices. Raising beta on the early window gives only a small offline gain while ESS remains near uniform.",
+    "authorized_to_launch": true,
+    "griddd_benchmark_authorized": false
+  },
+  "late_window_launch": {
+    "status": "complete_n10",
+    "run_label": "compose-v4-qed-step1000-controlled090-late13to24-eval10-k4-b48-beta8-20260720-v1",
+    "modal_app_id": "ap-JOHZnG1YUxtUhcRYq4beZW",
+    "function_call_id": "fc-01KXZY64WF0BFPHQFCEQ0Y7TPZ",
+    "zero_based_guidance_start_event": 12,
+    "human_event_window": "13-24",
+    "only_changed_variable": "guidance window position",
+    "beta_zero_mean_qed": 0.7096436078657605,
+    "guided_mean_qed": 0.7732321299308946,
+    "paired_mean_qed_delta": 0.06358852206513402,
+    "paired_bootstrap_95_percent_interval": [
+      -0.07025817862735087,
+      0.171583789803
+    ],
+    "guided_qed_at_least_0.9": 2,
+    "both_arms_valid_and_unique": true,
+    "strict_same_oracle_call_gate_passed": false,
+    "realized_raw_marks_beta_zero": 392,
+    "realized_raw_marks_guided": 384,
+    "full_griddd_benchmark_authorized": false,
+    "detail": "diagnostics/qed_step1000_controlled_rollout_late_window.json"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "format": "compose_v4_qed_guidance_event_triggered_smoke_v1",
+  "guidance_strength": 8.0,
+  "guided": {
+    "cache_hits": 277,
+    "events": 30,
+    "oracle_requests": 376,
+    "qed": 0.17310553102197612,
+    "seconds": 45.886505126953125,
+    "smiles": "C=CCCC=C1NCCC(=O)C1=CC(C#Cc1ccc2[nH]o[nH]oc2c1)OCCC(COC)OCC",
+    "unique_oracle_evaluations": 99,
+    "virtual_events": 64
+  },
+  "proposals_per_event": 4,
+  "seed": 20260730,
+  "unguided": {
+    "events": 35,
+    "qed": 0.11835225309032466,
+    "seconds": 24.066110134124756,
+    "smiles": "CCCOC(=O)C1(C#Cc2ccc(C)n2C2C(N)=CC(N)C2=CCN=CCOCCCN(C)CCC)CCCC1",
+    "virtual_events": 66
+  }
+}
