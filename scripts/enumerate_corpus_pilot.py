@@ -268,6 +268,7 @@ def main() -> None:
                         default=REPO_ROOT / "artifacts/datasets/compose_lipid_pretraining_v1/corpus_pilot_v1")
     parser.add_argument("--seed", type=int, default=20260720)
     args = parser.parse_args()
+    args.out_dir = Path(args.out_dir).resolve()  # so relative_to(REPO_ROOT) works
     rng = np.random.default_rng(args.seed)
 
     products, per_family_raw = enumerate_all()
