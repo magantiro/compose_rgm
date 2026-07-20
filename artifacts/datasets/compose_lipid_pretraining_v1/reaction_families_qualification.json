@@ -1,0 +1,153 @@
+{
+  "all_qualified": true,
+  "families": [
+    {
+      "architecture": "degradable amino-ester lipidoid (aza-Michael)",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[CH2:2]=[CH1:3][CX3:4](=[OX1:5])[#7,#8:6]>>[N:1][CH2:2][CH2:3][CX3:4](=[OX1:5])[*:6]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCCN",
+              "CCCCC=CCCCC"
+            ],
+            "reason": "isolated alkene is not a Michael acceptor",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNCCC(=O)OC",
+        "reactants": [
+          "CCCCCCCCCCCCN",
+          "C=CC(=O)OC"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported amine+acrylate substrate/product pair at submission-time literature audit",
+      "reaction_id": "aza_michael_amine_acrylate",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "amino-alcohol / epoxide-derived lipidoid",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[CH2:2]1[CH1:3][OX2:4]1>>[N:1][CH2:2][CH1:3][OH1:4]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCCN",
+              "CCCCCCCCCCCC"
+            ],
+            "reason": "alkane has no epoxide handle",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNCC(O)CCCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCCN",
+          "CCCCCCCCC1CO1"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported amine+epoxide substrate/product pair at submission-time literature audit",
+      "reaction_id": "epoxide_opening_amine",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "asymmetric degradable alpha-acyloxy amide (Passerini)",
+      "atom_mapped_reaction_smarts": "[CX3:1](=[OX1:2])[OX2H1:3].[CX3H1:4]=[OX1:5].[C;-1,+0;X1:6]#[N;+1,+0;X2:7]>>[C:1](=[O:2])[O:3][CH1:4][C+0:6](=[O:5])[NH1+0:7]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCO",
+              "CCCCCCCC=O",
+              "CCCCCCCCCCCC[N+]#[C-]"
+            ],
+            "reason": "alcohol is not a carboxylic acid",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNC(=O)C(CCCCCCC)OC(C)=O",
+        "reactants": [
+          "CC(=O)O",
+          "CCCCCCCC=O",
+          "CCCCCCCCCCCC[N+]#[C-]"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported acid+aldehyde+isocyanide substrate/product triple at submission-time literature audit",
+      "reaction_id": "passerini_3cr",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "reductive-amination amino lipid",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[CX3H1:2]=[OX1:3]>>[N:1][CH2:2]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCCN",
+              "CCCCC(=O)CCCC"
+            ],
+            "reason": "ketone is not an aldehyde handle here",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNCCCCCCCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCCN",
+          "CCCCCCCCCCCC=O"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported amine+aldehyde substrate/product pair at submission-time literature audit",
+      "reaction_id": "reductive_amination_amine_aldehyde",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "clinical-like amide-linked ionizable lipid",
+      "atom_mapped_reaction_smarts": "[CX3:1](=[OX1:2])[OX2H1:3].[NX3;H2,H1:4]>>[C:1](=[O:2])[N:4]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCC",
+              "CCCCCCCCCCCCN"
+            ],
+            "reason": "no carboxylic acid handle",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNC(=O)CCCCCCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCC(=O)O",
+          "CCCCCCCCCCCCN"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported acid+amine substrate/product pair at submission-time literature audit",
+      "reaction_id": "amide_coupling_acid_amine",
+      "validation_level": "mechanism_verified"
+    }
+  ],
+  "format": "compose_lipid_reaction_families_qualification_v1"
+}
