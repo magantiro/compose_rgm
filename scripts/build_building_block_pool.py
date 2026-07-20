@@ -107,27 +107,26 @@ def canonical(smiles: str) -> str | None:
     return Chem.MolToSmiles(m) if m else None
 
 
-def alkyl_chain(length: int, unsaturation: int, branched: bool) -> str:
-    """Return an alkyl-chain SMILES fragment of `length` carbons (as a tail R)."""
-    carbons = ["C"] * length
-    # cis double bonds near the middle (Δ9-like), spaced by 3 (methylene-interrupted)
-    if unsaturation >= 1 and length >= 10:
-        carbons[8] = "/C=C"  # introduces a double bond at C9-C10
-    if unsaturation >= 2 and length >= 13:
-        carbons[11] = "C\\C=C" if False else "C"  # keep simple: single extra handled below
-    chain = "".join(carbons[:length])
-    # simplified: build linear then optionally add one cis unsaturation and a methyl branch
-    base = "C" * length
-    if branched and length >= 6:
-        base = "C" * (length - 4) + "C(C)C" + "C"  # iso-branch near the tail end
-    if unsaturation >= 1 and length >= 10:
-        # place one cis double bond ~mid chain
-        half = length // 2
-        base = "C" * (half - 1) + "/C=C\\" + "C" * (length - half - 1)
+def alkyl_chain(length: int, unsaturation: int, n_branches: int) -> str:
+    """Return an alkyl-chain SMILES of `length` carbons with a controlled number
+    of methyl branches OR cis double bonds (varied separately to keep valid,
+    interpretable structures across the branchedness and unsaturation axes)."""
+    # branched saturated chain: insert n methyl branches at spread interior sites
+    if n_branches >= 1 and unsaturation == 0 and length >= 6:
+        toks = ["C"] * length
+        step = max(2, length // (n_branches + 1))
+        for i in range(1, n_branches + 1):
+            pos = min(length - 2, i * step)
+            toks[pos] = "C(C)"  # methyl branch
+        return "".join(toks)
+    # unsaturated linear chain (methylene-interrupted cis double bonds mid-chain)
     if unsaturation >= 2 and length >= 14:
         half = length // 2
-        base = "C" * (half - 3) + "/C=C\\C/C=C\\" + "C" * (length - half - 3)
-    return base
+        return "C" * (half - 3) + "/C=C\\C/C=C\\" + "C" * (length - half - 3)
+    if unsaturation >= 1 and length >= 10:
+        half = length // 2
+        return "C" * (half - 1) + "/C=C\\" + "C" * (length - half - 1)
+    return "C" * length
 
 
 def make_substrate(form: str, chain: str) -> str | None:
@@ -217,16 +216,20 @@ def build_pool() -> dict:
                  "chloroformate", "isocyanate", "diol", "dioxaphospholane"]:
         for L in lengths:
             for unsat in [0, 1, 2]:
-                for branched in [False, True]:
+                for n_branches in [0, 1, 2]:
+                    if unsat > 0 and n_branches > 0:
+                        continue  # varied separately (alkyl_chain doesn't combine them)
                     if unsat > 0 and L < 10:
                         continue
                     if unsat == 2 and L < 14:
                         continue
-                    chain = alkyl_chain(L, unsat, branched)
+                    if n_branches > 0 and L < 6:
+                        continue
+                    chain = alkyl_chain(L, unsat, n_branches)
                     sub = make_substrate(form, chain)
                     if sub:
                         add(sub, form, {"source": "programmatic_rational"},
-                            {"chain_length": L, "unsaturation": unsat, "branched": branched})
+                            {"chain_length": L, "unsaturation": unsat, "n_branches": n_branches})
 
     # AGILE real components
     agile = load_agile_components()

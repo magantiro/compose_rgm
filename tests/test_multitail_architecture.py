@@ -52,3 +52,28 @@ def test_substitution_terminates_when_no_nh_remains() -> None:
     enum = ReactionEnumerator(spec)
     # a tertiary amine with no N-H cannot react
     assert _substituted_once(enum, "CCN(CC)CC") == set()
+
+
+def test_asymmetric_two_different_tails() -> None:
+    """A polyamine substituted with two DIFFERENT acrylates yields a genuinely
+    asymmetric (mixed-tail) lipid -- the common real-lipid motif."""
+    spec = ReactionRegistry.load(REGISTRY).by_id("aza_michael_amine_acrylate")
+    enum = ReactionEnumerator(spec)
+    tail_a, tail_b = "C=CC(=O)OCCCCCC", "C=CC(=O)OCCCCCCCCCCCCCCCC"  # C6 vs C16 acrylate
+
+    def react(amine_smiles, tail):
+        blocks = [BuildingBlock("a", "amine_head", amine_smiles, {}),
+                  BuildingBlock("t", "alkyl_acrylate_or_acrylamide_tail", tail, {})]
+        return {p.canonical_smiles for p in enum.react(blocks)}
+
+    mono = react("NCCN", tail_a)          # first tail: C6
+    di = set()
+    for inter in mono:
+        di |= react(inter, tail_b)        # second tail: C16
+    assert di, "asymmetric di-substitution should produce a product"
+    # at least one di-product carries two ester tails, one of them the long C16.
+    def two_esters_with_long(s: str) -> bool:
+        m = Chem.MolFromSmiles(s)
+        n_ester = len(m.GetSubstructMatches(Chem.MolFromSmarts("[CX3](=O)[OX2][CH2]")))
+        return n_ester >= 2 and "CCCCCCCCCCCCCCCC" in s
+    assert any(two_esters_with_long(s) for s in di)

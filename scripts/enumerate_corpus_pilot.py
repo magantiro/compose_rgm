@@ -88,7 +88,28 @@ def _multitail(enumerator, amine_block, tail_block, max_tails: int, frontier_cap
         frontier = sorted(nxt)[:frontier_cap]
 
 
-def enumerate_all(max_tails: int = 4) -> list:
+def _asymmetric_ditail(enumerator, amine_block, tail_a, tail_b, max_frontier: int = 3):
+    """Substitute an amine with tail_a then tail_b (two DIFFERENT tails) -> an
+    asymmetric multi-tail lipid, the common real-lipid motif."""
+    role_order = enumerator.role_order
+    amine_pos = role_order.index("amine_head")
+    tail_pos = 1 - amine_pos
+
+    def sub(inter_smiles, tail):
+        ib = BuildingBlock(amine_block.block_id, "amine_head", inter_smiles, amine_block.architecture_tags)
+        ordered = [None, None]
+        ordered[amine_pos] = ib
+        ordered[tail_pos] = tail
+        return {p.canonical_smiles: p for p in enumerator.react(ordered)}
+
+    out: dict[str, object] = {}
+    mono = sub(amine_block.smiles, tail_a)
+    for inter in sorted(mono)[:max_frontier]:
+        out.update(sub(inter, tail_b))
+    return list(out.values())
+
+
+def enumerate_all(max_tails: int = 4, asymmetric_tail_b: int = 4) -> list:
     pool = load_pool(REPO_ROOT / "configs/lipid_reactions/building_block_pool_v1.json")
     products: dict[str, object] = {}
     per_family_raw: dict[str, int] = {}
@@ -104,11 +125,25 @@ def enumerate_all(max_tails: int = 4) -> list:
             multitail = len(roles) == 2 and "amine_head" in roles
             if multitail:
                 tail_role = next(r for r in roles if r != "amine_head")
+                tails = by_role[tail_role]
                 for amine in by_role["amine_head"]:
-                    for tail in by_role[tail_role]:
+                    for tail in tails:
                         for product in _multitail(enumerator, amine, tail, max_tails):
                             count += 1
                             products.setdefault(product.canonical_smiles, product)
+                # asymmetric di-tail (two different tails) for polyamine heads.
+                # Bounded: diverse subsets of BOTH tails keep it fast but varied.
+                tail_a_subset = tails[:: max(1, len(tails) // 10)][:10]
+                tail_b_subset = tails[:: max(1, len(tails) // asymmetric_tail_b)][:asymmetric_tail_b]
+                polyamines = [a for a in by_role["amine_head"] if _amine_nh_count(a.smiles) >= 2]
+                for amine in polyamines:
+                    for tail_a in tail_a_subset:
+                        for tail_b in tail_b_subset:
+                            if tail_b.block_id == tail_a.block_id:
+                                continue
+                            for product in _asymmetric_ditail(enumerator, amine, tail_a, tail_b):
+                                count += 1
+                                products.setdefault(product.canonical_smiles, product)
             else:
                 for product in enumerator.enumerate(by_role):
                     count += 1
