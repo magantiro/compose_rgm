@@ -16,6 +16,14 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 - Frozen results reproduce: LuT baselines **bit-exact** (0.00 diff / 240 metrics); LUMI baselines to 4 decimals; corpus counts exact (R0=15,433, union=26,509, AGILE-only=11,076).
 - Test suite green: **42 lipid/oracle/reaction tests pass**.
 
+### Oracle — Milestone 2: canonical row-level pan-lung manifest
+- Materialized `artifacts/oracles/pan_lung_canonical_v1/{canonical_rows.csv,manifest.json}` — the stated blocker for R3/R4/R5.
+- **4,783 head-measurement rows** from **4,339 distinct measurements** (reconciles with the frozen corpus manifest). Grain = (measurement × typed head); LuT's 444 compounds → 888 paired expression+selectivity rows.
+- All 7 typed heads at exact expected counts (A549 1801, LUMI-HBE 1920, HBEC-ALI 29, intratracheal 49, IV-barcode 96, LuT-expr 444, LuT-sel 444).
+- Readout types kept **semantically distinct** (in-vitro transfection / functional in-vivo expression / biodistribution / selectivity — never pooled).
+- `has_full_structure` boundary: 3,895 molecular rows (LNPDB+LUMI) vs 888 component-only (LuT); LuT graphs never imputed.
+- **0 exact-structure overlap** LNPDB↔LUMI (no cross-source leakage). Covariates preserved (formulation/helper/ratios/cargo/dose/route/species/assay/timepoint/study/batch); missingness explicit; study constants recorded, not invented.
+
 ### Corpus — Milestone 1: first qualified reaction transform (Ugi-3CR)
 - **Ugi-3CR (acid-free α-amino amide)** qualified end-to-end. Atom-mapped SMARTS:
   `[NX3;H2,H1:1].[CX3H1:2]=[OX1].[C;-1,+0;X1:3]#[N;+1,+0;X2:4]>>[N:1][CH1:2][C+0:3](=O)[NH1+0:4]`
@@ -59,4 +67,5 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 - Tests: `tests/test_ugi_3cr_qualification.py`, `tests/test_ugi_3cr_smoke.py`.
 
 ## Commit log
-- (pending) Milestone 1: qualify Ugi-3CR transform + route-replay smoke.
+- `5dd44c4` Milestone 1: qualify Ugi-3CR transform + route-replay smoke.
+- (pending) Milestone 2: canonical row-level pan-lung manifest.

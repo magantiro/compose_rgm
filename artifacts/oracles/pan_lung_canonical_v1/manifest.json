@@ -1,0 +1,69 @@
+{
+  "canonical_rows_csv": {
+    "path": "artifacts/oracles/pan_lung_canonical_v1/canonical_rows.csv",
+    "rows": 4783,
+    "sha256": "c14a4b94a6b0059b95b941f8a23ab087b7f00cf83c5d9f6ac1eeab3f36dc0f7c"
+  },
+  "component_only_rows": 888,
+  "distinct_source_measurements": 4339,
+  "environment": {
+    "rdkit": "2025.09.6"
+  },
+  "format": "compose_pan_lung_canonical_manifest_v1",
+  "full_structure_rows": 3895,
+  "grain": "one row per (measurement x typed head)",
+  "head_measurement_rows": 4783,
+  "overlap": {
+    "cross_source_exact_structure_overlap": {
+      "lnpdb_2026__lumi_lab_4cr1920": 0
+    },
+    "unique_full_structures_per_source": {
+      "lnpdb_2026": 291,
+      "lumi_lab_4cr1920": 1920
+    }
+  },
+  "readout_typing_boundary": "in_vitro_transfection, functional_in_vivo_expression, biodistribution_barcode_uptake, and selectivity are distinct heads and are never pooled into one scalar target. Only the head matching the locked prospective profile defines reward.",
+  "reconciliation_note": "distinct_source_measurements matches the frozen corpus manifest count (1,975 LNPDB + 1,920 LUMI + 444 LuT = 4,339). LuT contributes 2 paired typed-head rows per compound (expression + selectivity), so head_measurement_rows > 4,339.",
+  "representation_boundary": "has_full_structure rows (LNPDB, LUMI) support molecular representations R1/R3/R4; LuT rows are component-defined and support only component representation R2. Do not impute molecular graphs for LuT.",
+  "rows_by_readout_type": {
+    "biodistribution_barcode_uptake": 96,
+    "functional_in_vivo_expression": 493,
+    "in_vitro_transfection": 3750,
+    "selectivity": 444
+  },
+  "rows_by_source": {
+    "lnpdb_2026": 1975,
+    "lumi_lab_4cr1920": 1920,
+    "lut_444_2026": 888
+  },
+  "rows_by_typed_head": {
+    "airway_a549_in_vitro_expression": 1801,
+    "airway_hbe_in_vitro_expression": 1920,
+    "airway_hbec_ali_in_vitro_expression": 29,
+    "local_intratracheal_functional_expression": 49,
+    "systemic_iv_barcoded_lung_uptake": 96,
+    "systemic_iv_lung_expression": 444,
+    "systemic_iv_lung_selectivity": 444
+  },
+  "sources": {
+    "lnpdb_2026": {
+      "license": "MIT",
+      "path": "/Users/rmaganti/Desktop/thesis_projects_ML/diffusion_project/lipid_diffusion/external/LNPDB/LNPDB.csv",
+      "sha256": "3493f27306419facd0958589030ed37f272f05c81ad47dd7bc1b8ce0284a57b3"
+    },
+    "lumi_lab_4cr1920": {
+      "license": "CC-BY-4.0",
+      "path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_lipid/tmp/lipid_data/lumi_lab/4CR-1920.csv",
+      "sha256": "41118d98ae84c651fd687e23950fbd56c5ed9a3281998122e75062e5a5a26734"
+    },
+    "lut_444_2026": {
+      "license": "springer_source_data",
+      "path": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_lipid/tmp/lipid_data/lut/lut_444_source_table.csv",
+      "sha256": "231c87652ef80fc5af4aaa5e561799e14ed9949d8bce6ee803b4e877db594491"
+    }
+  },
+  "split_groups": {
+    "chemical_group": "held-lipid / exact-structure or component identity",
+    "study_group": "leave-study-out (source_id:experiment_or_round)"
+  }
+}
