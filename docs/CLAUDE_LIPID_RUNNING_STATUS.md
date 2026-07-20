@@ -89,7 +89,7 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 1. **Corpus (top priority — surfaced by metrics):** add **multi-tail architecture** — iterative reaction application so polyamine heads carry 2–4 tails, closing the arch-Hill gap (5.5→~11) and the tail-count/size JS gaps to R0. This is the biggest fidelity lever.
 2. **Corpus:** scale/diversify the building-block pool (more heads, cyclic/heteroatom tails; commercial catalog when available) → 50–100k pilot → 500k; add held-reaction-family + held-component splits.
 3. **Oracle (paused):** finish the intrinsic head-pKa feature (fix MolGpKa batch bug; cross-validate vs xtb) and test held-head transfer lift; then the head-aware AD gate.
-4. **Oracle:** integrate LiON lung slice (on disk) for leave-study-out on airway heads.
+4. ~~**Oracle:** integrate LiON lung slice for leave-study-out on airway heads.~~ **Done (M17)** — became **leave-*library*-out**: the LiON A549 screen carries per-library annotations, so we hold out whole chemistry libraries. See finding below.
 
 ## Key artifact paths
 - `configs/lipid_reactions/qualified_reactions_v1.json` — qualified Ugi-3CR registry (hash-bound).
@@ -119,6 +119,13 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 - `56e8706` M14: freeze leakage-resistant corpus splits (family/scaffold/head/study; all leak-free) — Fig 2 contract + generator handoff.
 - `eac99bf` M15: wire oracle end-to-end — `candidate → admit/rank/abstain` nomination engine (Fig 4).
 - `b74b134` M16: corpus coverage-audit card — all-encompassing evidence (10/11 linkers, C/N/O/S/P, 12 families, 8 head classes).
+
+## LiON leave-library-out — cross-chemistry transfer (M17)
+The LiON A549 lung screen (1,801 lipids on disk) carries `Library_ID` annotations grouping it into distinct chemistry libraries — critically a **`RM_Michael_addition_branched`** library (1,177 lipids), the **exact novel-linker chemistry class**, plus `IR_Reductive_amination` (467) and `other` (157). Holding out an entire library and predicting it from an oracle trained on the others (`scripts/qualify_lion_leave_library.py` → `diagnostics/lion_leave_library_transfer.json`) tests cross-chemistry rank transfer with **real lung data**:
+- Held **Michael-addition** (novel-linker relevant): Spearman **+0.077** (near-zero), top-decile enrichment 1.7×.
+- Held **reductive-amination**: Spearman +0.254 (modest); **other**: −0.092.
+
+**Reading:** an oracle trained on other chemistries essentially cannot *rank* Michael-addition lipids (real-data confirmation of the novel-linker challenge), though it retains mild top-decile enrichment. This is direct external-validity evidence for the head-aware AD gate + **active-learning calibration on the novel linker** rather than blind cross-chemistry extrapolation. Test: `tests/test_lion_leave_library.py`. (The A549 slice overlaps LNPDB's A549 head — same screen; LiON adds the per-library breakdown LNPDB lacks.)
 
 ## Oracle applicability-domain decision (locked)
 Head axis doesn't transfer → the oracle's honest domain is **known heads (large: 1,183 head-region scaffolds from R0+corpus, ~435 LNPDB head SMILES)**. High-ranked candidates come from this rich known-head space; novel-head candidates **abstain → small active-learning round**. Uses **intrinsic** head-pKa (~9), not apparent (~6.4). Head-pKa feature lifts within-domain head ranking (+42%). Next: wire the gate + pKa into the deployed filtering bundle.

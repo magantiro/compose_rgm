@@ -1,0 +1,29 @@
+{
+  "format": "compose_lion_leave_library_transfer_v1",
+  "interpretation": "Leave-library-out tests cross-chemistry transfer with real lung data. The Michael-addition library result is the most novel-linker-relevant: whether an oracle trained on OTHER chemistries can rank Michael-addition lipids. Weak transfer supports the head-aware-AD-gate + active-learning-calibration design.",
+  "michael_addition_library": "RM_Michael_addition_branched",
+  "michael_transfer_spearman": 0.077,
+  "n_libraries": 3,
+  "n_lipids": 1801,
+  "per_library": {
+    "IR_Reductive_amination": {
+      "held_out_lipids": 467,
+      "spearman": 0.254,
+      "top_decile_enrichment": 1.27,
+      "train_lipids": 1334
+    },
+    "RM_Michael_addition_branched": {
+      "held_out_lipids": 1177,
+      "spearman": 0.077,
+      "top_decile_enrichment": 1.69,
+      "train_lipids": 624
+    },
+    "other": {
+      "held_out_lipids": 157,
+      "spearman": -0.092,
+      "top_decile_enrichment": 3.68,
+      "train_lipids": 1644
+    }
+  },
+  "task": "A549 in-vitro delivery, leave-LIBRARY-out (train on other chemistries, test on held library)"
+}
