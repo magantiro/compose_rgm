@@ -2,15 +2,18 @@
   "corpus_scope": "general linker-agnostic reaction-grounded pilot (R1); metrics double as Fig 2/3 generator-qualification yardstick",
   "enumeration": {
     "raw_products_by_family": {
-      "amide_coupling_acid_amine": 2040,
-      "aza_michael_amine_acrylate": 2040,
-      "epoxide_opening_amine": 2040,
+      "amide_coupling_acid_amine": 8700,
+      "aza_michael_amine_acrylate": 8700,
+      "carbamate_amine_chloroformate": 8700,
+      "disulfide_coupling": 900,
+      "epoxide_opening_amine": 8700,
       "passerini_3cr": 37800,
-      "reductive_amination_amine_aldehyde": 2856,
-      "ugi_3cr_agile": 85680
+      "reductive_amination_amine_aldehyde": 12180,
+      "thiol_michael_thioether": 900,
+      "ugi_3cr_agile": 141120
     },
-    "total_raw_applications": 132456,
-    "total_unique_products": 132456
+    "total_raw_applications": 227700,
+    "total_unique_products": 227265
   },
   "environment": {
     "rdkit": "2025.09.6",
@@ -19,41 +22,66 @@
   "faithfulness_js_to_r0": {
     "fig2_role": "faithful architecture/property marginals (lower JS = closer to real lipids)",
     "marginals": {
-      "branching_bin": 0.112,
+      "branching_bin": 0.0312,
       "charge_bin": 0.0169,
-      "long_tail_bin": 0.4472,
-      "ring_bin": 0.011,
-      "size_bin": 0.2394,
-      "unsaturation_bin": 0.0268
+      "long_tail_bin": 0.0442,
+      "ring_bin": 0.0346,
+      "size_bin": 0.0636,
+      "unsaturation_bin": 0.0045
     }
   },
   "format": "compose_lipid_corpus_pilot_metrics_v2",
+  "kernel_readiness_profile": {
+    "charge_states": {
+      "0": 3680
+    },
+    "elements_present": [
+      "C",
+      "N",
+      "O",
+      "S"
+    ],
+    "fraction_charged": 0.0,
+    "fraction_with_stereocenter": 0.534,
+    "heavy_atoms": {
+      "frac_le_40": 0.267,
+      "frac_le_64": 0.562,
+      "frac_le_96": 0.814,
+      "max": 128,
+      "median": 58,
+      "min": 12
+    },
+    "p2g2_note": "Lipid kernel must support these elements, charge states, and heavy-atom range; the C/N/O/F base kernel is not assumed lipid-ready."
+  },
   "lipid_diversity_corpus": {
     "architecture_hill": {
-      "richness_q0": 14.0,
-      "shannon_q1": 6.7,
-      "simpson_q2": 5.5
+      "richness_q0": 16.0,
+      "shannon_q1": 7.7,
+      "simpson_q2": 6.3
     },
     "degradable_signature_distribution": {
-      "ester": 0.413,
-      "none_detected": 0.587
+      "disulfide": 0.01,
+      "ester": 0.49,
+      "ester+disulfide": 0.008,
+      "none_detected": 0.492
     },
     "degradable_signature_hill": {
-      "richness_q0": 2.0,
-      "shannon_q1": 2.0,
-      "simpson_q2": 1.9
+      "richness_q0": 4.0,
+      "shannon_q1": 2.2,
+      "simpson_q2": 2.1
     },
     "heteroatom_core_hill": {
-      "richness_q0": 222.0,
-      "shannon_q1": 181.0,
-      "simpson_q2": 161.3
+      "richness_q0": 1253.0,
+      "shannon_q1": 1032.8,
+      "simpson_q2": 901.5
     },
     "long_tail_distribution": {
-      "1": 0.584,
-      "2": 0.4,
-      "3plus": 0.016
+      "0": 0.007,
+      "1": 0.025,
+      "2": 0.397,
+      "3plus": 0.571
     },
-    "n": 762
+    "n": 3680
   },
   "lipid_diversity_r0_reference": {
     "architecture_hill": {
@@ -90,16 +118,16 @@
   },
   "lnpdb_coverage": {
     "fig2_role": "coverage/density of the real ionizable-lipid manifold",
-    "median_r0_nn_to_corpus": 0.479,
+    "median_r0_nn_to_corpus": 0.541,
     "r0_sampled": 2000,
-    "recall_at_tanimoto_0.4": 0.789
+    "recall_at_tanimoto_0.4": 0.879
   },
   "nn_redundancy": {
     "corpus_intra": {
-      "frac_nn_ge_0.9": 0.576,
-      "frac_nn_ge_0.95": 0.458,
-      "median_nn_tanimoto": 0.933,
-      "sampled": 762
+      "frac_nn_ge_0.9": 0.777,
+      "frac_nn_ge_0.95": 0.609,
+      "median_nn_tanimoto": 0.978,
+      "sampled": 3000
     },
     "interpretation": "ECFP NN is intrinsically high for lipids (homologous chains share bits); compare corpus to R0 intra-NN, not to 0. Exact uniqueness is 100%.",
     "r0_intra_reference": {
@@ -110,25 +138,21 @@
     }
   },
   "selection": {
-    "candidate_before_core_dedup": 1990,
+    "candidate_before_core_dedup": 7066,
     "cap_per_heteroatom_core": 6,
     "family_balance_selected": {
-      "amide_coupling_acid_amine": 115,
-      "aza_michael_amine_acrylate": 138,
-      "epoxide_opening_amine": 120,
+      "amide_coupling_acid_amine": 728,
+      "aza_michael_amine_acrylate": 701,
+      "carbamate_amine_chloroformate": 713,
+      "disulfide_coupling": 6,
+      "epoxide_opening_amine": 674,
       "passerini_3cr": 12,
-      "reductive_amination_amine_aldehyde": 137,
-      "ugi_3cr_agile": 240
+      "reductive_amination_amine_aldehyde": 496,
+      "thiol_michael_thioether": 6,
+      "ugi_3cr_agile": 344
     },
-    "quota_per_size_charge_ring_stratum": 120,
-    "selected_pilot_size": 762
-  },
-  "size_eligibility": {
-    "frac_le_64_heavy": 0.95,
-    "frac_le_96_heavy": 1.0,
-    "max_heavy": 69,
-    "median_heavy": 33,
-    "min_heavy": 9
+    "quota_per_size_charge_ring_stratum": 150,
+    "selected_pilot_size": 3680
   },
   "validity_uniqueness": {
     "all_single_component_sanitized": true,

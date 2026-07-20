@@ -120,6 +120,93 @@
       "validation_level": "mechanism_verified"
     },
     {
+      "architecture": "redox-responsive thioether-linked lipid (thiol-Michael)",
+      "atom_mapped_reaction_smarts": "[SX2H1:1].[CH2:2]=[CH1:3][CX3:4](=[OX1:5])[#7,#8:6]>>[S:1][CH2:2][CH2:3][CX3:4](=[OX1:5])[*:6]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCCS",
+              "CCCCC=CCCCC"
+            ],
+            "reason": "isolated alkene is not a Michael acceptor",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCSCCC(=O)OCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCCS",
+          "C=CC(=O)OCCCCCC"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported thiol+acrylate substrate/product pair at submission-time literature audit",
+      "reaction_id": "thiol_michael_thioether",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "bioreducible disulfide-linked lipid",
+      "atom_mapped_reaction_smarts": "[SX2H1:1].[SX2H1:2]>>[S:1][S:2]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCCCCCCCCCCCS",
+              "CCCCCCCC"
+            ],
+            "reason": "alkane has no thiol handle",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCSSCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCCS",
+          "CCCCCCS"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported thiol/thiol disulfide substrate/product pair at submission-time literature audit",
+      "reaction_id": "disulfide_coupling",
+      "validation_level": "mechanism_verified"
+    },
+    {
+      "architecture": "carbamate-linked ionizable lipid",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[Cl][CX3:2](=[OX1:3])[OX2:4]>>[N:1][C:2](=[O:3])[O:4]",
+      "negative_rejection": {
+        "all_rejected": true,
+        "cases": [
+          {
+            "reactants": [
+              "CCN(CC)CC",
+              "O=C(Cl)OCCCCCC"
+            ],
+            "reason": "tertiary amine has no N-H handle",
+            "rejected": true
+          }
+        ]
+      },
+      "positive_reconstruction": {
+        "enumerated_products": 1,
+        "expected": "CCCCCCCCCCCCNC(=O)OCCCCCC",
+        "reactants": [
+          "CCCCCCCCCCCCN",
+          "O=C(Cl)OCCCCCC"
+        ],
+        "reproduced_exactly": true
+      },
+      "primary_example_todo": "attach an exact reported amine+chloroformate substrate/product pair at submission-time literature audit",
+      "reaction_id": "carbamate_amine_chloroformate",
+      "validation_level": "mechanism_verified"
+    },
+    {
       "architecture": "clinical-like amide-linked ionizable lipid",
       "atom_mapped_reaction_smarts": "[CX3:1](=[OX1:2])[OX2H1:3].[NX3;H2,H1:4]>>[C:1](=[O:2])[N:4]",
       "negative_rejection": {

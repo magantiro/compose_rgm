@@ -62,13 +62,15 @@ Answers "does head/tail SAR transfer well enough for a single oracle to rank nov
 | Ugi-3CR chemoselectivity negatives rejected | 5/5 |
 | Smoke unique route-certified products | 1,320 |
 | Smoke exact route-replay of released library | 1200/1200 = 100.00% |
-| Qualified reaction families | **6** (Ugi-3CR + aza-Michael, epoxide, Passerini, red-amination, amide) |
-| Building-block pool | 220 role-annotated (26 AGILE, 44 curated amines, 150 programmatic) |
-| Pilot enumeration | 132,456 unique products from 220 blocks (500k = pool-size, not machinery) |
-| Corpus core diversity (Hill Simpson) | 161 vs R0 214 effective heteroatom-cores |
-| Corpus NN vs R0 intra-NN | 0.933 vs **0.887** (high NN is intrinsic to lipids, not duplication) |
-| Corpus architecture Hill vs R0 | **5.5 vs 11.4** — GAP: need multi-tail architecture |
-| LNPDB recall@Tanimoto 0.4 | 0.79–0.84 |
+| Qualified reaction families | **9** (Ugi-3CR, aza-Michael, epoxide, Passerini, red-amination, amide, + degradable: thioether/thiol-Michael, disulfide, carbamate) |
+| Building-block pool | 320 role-annotated (25 AGILE, 75 curated, 210 programmatic); elements C/N/O/**S** |
+| Pilot enumeration | 209k+ unique products (multi-tail, ≥2-tail biased); 500k = pool-size, not machinery |
+| Multi-tail architecture | polyamine polysubstitution (C12-200 style), ≥2-tail biased (R0: 97% ≥2 tails) |
+| Corpus faithfulness JS-to-R0 | size 0.062, tail-count **0.055**, unsat 0.007, branch 0.028, charge 0.017 (all low) |
+| Corpus core diversity (Hill Simpson) | 702 vs R0 214 effective heteroatom-cores (exceeds real anchor) |
+| Corpus NN vs R0 intra-NN | 0.977 vs 0.887 (high NN intrinsic to lipids, not duplication; exact uniqueness 100%) |
+| LNPDB recall@Tanimoto 0.4 | 0.88 |
+| Design-principle alignment | Whitehead & Arral 2026 (Nat Rev Bioeng): H/L/T ✓, multi-tail ✓, branch/unsat ✓, intrinsic pKa~9 / apparent~6.4 ✓, degradable linkers (ester/amide/thioether/disulfide/carbamate) ✓; still to add: ketal/ether/urea/phosphate(iPhos, P), MW-600-1000 check |
 | Pan-lung oracle cells complete | R1/R2 × M1/M2/M3 + M6 ensembles + **R1×M4** |
 | Head-axis transfer (A549 / LUMI held-head) | 0.158 / 0.475 (vs baseline 0.568 / 0.830) |
 | Tests passing | 91 |

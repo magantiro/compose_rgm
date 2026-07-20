@@ -50,7 +50,45 @@ def fingerprint(smiles: str):
     return _MFP.GetFingerprint(m) if m else None
 
 
-def enumerate_all() -> list:
+def _amine_nh_count(smiles: str) -> int:
+    """Total N-H hydrogens on reactive (non-amide, neutral) amine nitrogens."""
+    mol = Chem.MolFromSmiles(smiles)
+    patt = Chem.MolFromSmarts("[NX3;H1,H2;!$(NC=O);!$(N=*)]")
+    return sum(mol.GetAtomWithIdx(m[0]).GetTotalNumHs() for m in mol.GetSubstructMatches(patt))
+
+
+def _multitail(enumerator, amine_block, tail_block, max_tails: int, frontier_cap: int = 6):
+    """Iteratively substitute an amine at successive N-H sites (C12-200 style).
+
+    Real ionizable lipids are overwhelmingly multi-tail (R0: ~3% single-tail,
+    47% two-tail, 41% three-plus). So a product is only emitted once it carries
+    >=2 tails whenever the head can support them (a primary amine -> a 2-tail
+    tertiary-amine head is a real motif); heads with a single N-H emit at 1 tail.
+    """
+    role_order = enumerator.role_order
+    amine_pos = role_order.index("amine_head")
+    tail_pos = 1 - amine_pos
+    min_emit = 2 if _amine_nh_count(amine_block.smiles) >= 2 else 1
+    frontier = [amine_block.smiles]
+    for depth in range(1, max_tails + 1):
+        nxt: dict[str, object] = {}
+        for inter in frontier:
+            inter_block = BuildingBlock(amine_block.block_id, "amine_head", inter, amine_block.architecture_tags)
+            ordered = [None, None]
+            ordered[amine_pos] = inter_block
+            ordered[tail_pos] = tail_block
+            for product in enumerator.react(ordered):
+                nxt.setdefault(product.canonical_smiles, product)
+        if not nxt:
+            break
+        if depth >= min_emit:
+            for product in nxt.values():
+                yield product
+        # bounded frontier (deterministic: lowest canonical SMILES) to avoid blow-up
+        frontier = sorted(nxt)[:frontier_cap]
+
+
+def enumerate_all(max_tails: int = 4) -> list:
     pool = load_pool(REPO_ROOT / "configs/lipid_reactions/building_block_pool_v1.json")
     products: dict[str, object] = {}
     per_family_raw: dict[str, int] = {}
@@ -58,14 +96,23 @@ def enumerate_all() -> list:
         registry = ReactionRegistry.load(REPO_ROOT / reg_path)
         for spec in registry.reactions:
             enumerator = ReactionEnumerator(spec)
-            by_role = pool.blocks_for_roles(enumerator.role_order)
-            if any(len(by_role.get(r, [])) == 0 for r in enumerator.role_order):
+            roles = enumerator.role_order
+            by_role = pool.blocks_for_roles(roles)
+            if any(len(by_role.get(r, [])) == 0 for r in roles):
                 continue
             count = 0
-            for product in enumerator.enumerate(by_role):
-                count += 1
-                if product.canonical_smiles not in products:
-                    products[product.canonical_smiles] = product
+            multitail = len(roles) == 2 and "amine_head" in roles
+            if multitail:
+                tail_role = next(r for r in roles if r != "amine_head")
+                for amine in by_role["amine_head"]:
+                    for tail in by_role[tail_role]:
+                        for product in _multitail(enumerator, amine, tail, max_tails):
+                            count += 1
+                            products.setdefault(product.canonical_smiles, product)
+            else:
+                for product in enumerator.enumerate(by_role):
+                    count += 1
+                    products.setdefault(product.canonical_smiles, product)
             per_family_raw[spec.reaction_id] = per_family_raw.get(spec.reaction_id, 0) + count
     return list(products.values()), per_family_raw
 
@@ -165,6 +212,35 @@ def lipid_diversity(feats: list[dict]) -> dict:
     }
 
 
+def _kernel_profile(smis: list[str]) -> dict:
+    """Element / charge / size / stereo profile the inherited RGM lipid kernel must support (P2-G2)."""
+    elements: dict[str, int] = {}
+    charges: dict[int, int] = {}
+    heavy = []
+    n_stereo = 0
+    for s in smis:
+        m = Chem.MolFromSmiles(s)
+        for atom in m.GetAtoms():
+            elements[atom.GetSymbol()] = elements.get(atom.GetSymbol(), 0) + 1
+        c = Chem.GetFormalCharge(m)
+        charges[c] = charges.get(c, 0) + 1
+        heavy.append(m.GetNumHeavyAtoms())
+        if Chem.FindMolChiralCenters(m, includeUnassigned=True, useLegacyImplementation=False):
+            n_stereo += 1
+    h = np.array(heavy)
+    return {
+        "elements_present": sorted(elements),
+        "fraction_charged": round(float(1 - charges.get(0, 0) / len(smis)), 4),
+        "charge_states": {str(k): v for k, v in sorted(charges.items())},
+        "fraction_with_stereocenter": round(n_stereo / len(smis), 4),
+        "heavy_atoms": {"min": int(h.min()), "median": int(np.median(h)), "max": int(h.max()),
+                        "frac_le_40": round(float((h <= 40).mean()), 3),
+                        "frac_le_64": round(float((h <= 64).mean()), 3),
+                        "frac_le_96": round(float((h <= 96).mean()), 3)},
+        "p2g2_note": "Lipid kernel must support these elements, charge states, and heavy-atom range; the C/N/O/F base kernel is not assumed lipid-ready.",
+    }
+
+
 def _r0_sample(rng: np.random.Generator, n: int = 1500) -> list[str]:
     import csv as _csv
     path = REPO_ROOT / "artifacts/datasets/compose_lipid_pretraining_v1/r0_observed_real_structures.csv"
@@ -241,11 +317,7 @@ def main() -> None:
         },
         "lnpdb_coverage": {**_lnpdb_coverage(sel_fps, rng),
                            "fig2_role": "coverage/density of the real ionizable-lipid manifold"},
-        "size_eligibility": {
-            "min_heavy": int(heavy.min()), "median_heavy": int(np.median(heavy)), "max_heavy": int(heavy.max()),
-            "frac_le_64_heavy": round(float((heavy <= 64).mean()), 3),
-            "frac_le_96_heavy": round(float((heavy <= 96).mean()), 3),
-        },
+        "kernel_readiness_profile": _kernel_profile(sel_smiles),
         "environment": {"rdkit": Chem.rdBase.rdkitVersion, "seed": args.seed},
     }
 

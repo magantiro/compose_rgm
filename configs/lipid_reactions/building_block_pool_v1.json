@@ -1371,6 +1371,20 @@
       ]
     },
     {
+      "block_id": "amine:0056",
+      "canonical_smiles": "CC(C)(N)CO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "2-amino-2-methylpropanol",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
       "block_id": "amine:0034",
       "canonical_smiles": "CC(C)N",
       "descriptors": {},
@@ -1385,7 +1399,7 @@
       ]
     },
     {
-      "block_id": "amine:0044",
+      "block_id": "amine:0075",
       "canonical_smiles": "CC(C)N(CCN)C(C)C",
       "descriptors": {},
       "handle": "amine",
@@ -1393,6 +1407,20 @@
       "provenance": {
         "agile_component": "A",
         "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0050",
+      "canonical_smiles": "CC(N)CN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "2-methyl-12-propanediamine",
+        "source": "curated_literature"
       },
       "reaction_roles": [
         "amine_head"
@@ -1413,6 +1441,20 @@
       ]
     },
     {
+      "block_id": "amine:0068",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 23,
+      "provenance": {
+        "name": "n-oleyl-13-propanediamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
       "block_id": "amine:0006",
       "canonical_smiles": "CCCCCCCCCCCCN",
       "descriptors": {},
@@ -1420,6 +1462,20 @@
       "heavy_atoms": 13,
       "provenance": {
         "name": "dodecylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0069",
+      "canonical_smiles": "CCCCCCCCCCCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 17,
+      "provenance": {
+        "name": "n-dodecyl-13-propanediamine",
         "source": "curated_literature"
       },
       "reaction_roles": [
@@ -1469,7 +1525,7 @@
       ]
     },
     {
-      "block_id": "amine:0045",
+      "block_id": "amine:0076",
       "canonical_smiles": "CCCCN(CCCC)CCCN",
       "descriptors": {},
       "handle": "amine",
@@ -1525,7 +1581,7 @@
       ]
     },
     {
-      "block_id": "amine:0046",
+      "block_id": "amine:0077",
       "canonical_smiles": "CCN(CC)CCCN",
       "descriptors": {},
       "handle": "amine",
@@ -1539,7 +1595,7 @@
       ]
     },
     {
-      "block_id": "amine:0047",
+      "block_id": "amine:0078",
       "canonical_smiles": "CCN(CC)CCN",
       "descriptors": {},
       "handle": "amine",
@@ -1553,7 +1609,7 @@
       ]
     },
     {
-      "block_id": "amine:0048",
+      "block_id": "amine:0079",
       "canonical_smiles": "CCN1CCCC1CN",
       "descriptors": {},
       "handle": "amine",
@@ -1595,7 +1651,7 @@
       ]
     },
     {
-      "block_id": "amine:0049",
+      "block_id": "amine:0080",
       "canonical_smiles": "CN(C)CCCN",
       "descriptors": {},
       "handle": "amine",
@@ -1603,6 +1659,20 @@
       "provenance": {
         "agile_component": "A",
         "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0058",
+      "canonical_smiles": "CN(C)CCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 11,
+      "provenance": {
+        "name": "n-n-dimethyldipropylenetriamine",
+        "source": "curated_literature"
       },
       "reaction_roles": [
         "amine_head"
@@ -1623,7 +1693,7 @@
       ]
     },
     {
-      "block_id": "amine:0050",
+      "block_id": "amine:0081",
       "canonical_smiles": "CN(CCCN)CCCN",
       "descriptors": {},
       "handle": "amine",
@@ -1637,7 +1707,7 @@
       ]
     },
     {
-      "block_id": "amine:0051",
+      "block_id": "amine:0082",
       "canonical_smiles": "CN1CCC(N)CC1",
       "descriptors": {},
       "handle": "amine",
@@ -1679,7 +1749,35 @@
       ]
     },
     {
-      "block_id": "amine:0052",
+      "block_id": "amine:0049",
+      "canonical_smiles": "CNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "n-methyl-13-propanediamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0060",
+      "canonical_smiles": "CNCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "n-boc-ethylenediamine-free",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0083",
       "canonical_smiles": "Cc1cc(N)n(C)n1",
       "descriptors": {},
       "handle": "amine",
@@ -1687,6 +1785,20 @@
       "provenance": {
         "agile_component": "A",
         "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0053",
+      "canonical_smiles": "NC1CCC(N)CC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "trans-14-diaminocyclohexane",
+        "source": "curated_literature"
       },
       "reaction_roles": [
         "amine_head"
@@ -1721,6 +1833,20 @@
       ]
     },
     {
+      "block_id": "amine:0062",
+      "canonical_smiles": "NCC(O)CN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "13-diaminopropan-2-ol",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
       "block_id": "amine:0012",
       "canonical_smiles": "NCC(O)CO",
       "descriptors": {},
@@ -1735,6 +1861,62 @@
       ]
     },
     {
+      "block_id": "amine:0064",
+      "canonical_smiles": "NCC1(N)CCCCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "1-aminomethylcyclohexylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0066",
+      "canonical_smiles": "NCCCCCCCCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 14,
+      "provenance": {
+        "name": "dodecane-112-diamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0067",
+      "canonical_smiles": "NCCCCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "name": "octane-18-diamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0046",
+      "canonical_smiles": "NCCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "16-diaminohexane",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
       "block_id": "amine:0022",
       "canonical_smiles": "NCCCCCCNCCCCCCN",
       "descriptors": {},
@@ -1742,6 +1924,48 @@
       "heavy_atoms": 15,
       "provenance": {
         "name": "bis-hexamethylenetriamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0045",
+      "canonical_smiles": "NCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "15-diaminopentane",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0044",
+      "canonical_smiles": "NCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "14-diaminobutane",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0051",
+      "canonical_smiles": "NCCCCN1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 11,
+      "provenance": {
+        "name": "1-4-aminobutylpiperazine",
         "source": "curated_literature"
       },
       "reaction_roles": [
@@ -1777,7 +2001,7 @@
       ]
     },
     {
-      "block_id": "amine:0053",
+      "block_id": "amine:0084",
       "canonical_smiles": "NCCCN1CCCC1",
       "descriptors": {},
       "handle": "amine",
@@ -1785,6 +2009,20 @@
       "provenance": {
         "agile_component": "A",
         "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0052",
+      "canonical_smiles": "NCCCN1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "name": "1-3-aminopropylpiperazine",
+        "source": "curated_literature"
       },
       "reaction_roles": [
         "amine_head"
@@ -1812,6 +2050,76 @@
       "heavy_atoms": 14,
       "provenance": {
         "name": "spermine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0047",
+      "canonical_smiles": "NCCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "3-3-diaminodipropylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0063",
+      "canonical_smiles": "NCCCNCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "n1-2-aminoethyl-13-propanediamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0048",
+      "canonical_smiles": "NCCCNCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 12,
+      "provenance": {
+        "name": "bis-3-aminopropylethylenediamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0055",
+      "canonical_smiles": "NCCCO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "3-amino-1-propanol",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0073",
+      "canonical_smiles": "NCCCS",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "3-aminopropane-1-thiol",
         "source": "curated_literature"
       },
       "reaction_roles": [
@@ -1847,14 +2155,14 @@
       ]
     },
     {
-      "block_id": "amine:0054",
+      "block_id": "amine:0059",
       "canonical_smiles": "NCCN1CCCC1",
       "descriptors": {},
       "handle": "amine",
       "heavy_atoms": 8,
       "provenance": {
-        "agile_component": "A",
-        "source": "agile_measured"
+        "name": "1-2-aminoethylpyrrolidine",
+        "source": "curated_literature"
       },
       "reaction_roles": [
         "amine_head"
@@ -1945,6 +2253,20 @@
       ]
     },
     {
+      "block_id": "amine:0054",
+      "canonical_smiles": "NCCNCCO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "2-2-aminoethylaminoethanol",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
       "block_id": "amine:0010",
       "canonical_smiles": "NCCO",
       "descriptors": {},
@@ -1952,6 +2274,90 @@
       "heavy_atoms": 4,
       "provenance": {
         "name": "ethanolamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0065",
+      "canonical_smiles": "NCCOCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "2-2-aminoethoxyethanamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0057",
+      "canonical_smiles": "NCCOCCO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "diglycolamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0072",
+      "canonical_smiles": "NCCS",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 4,
+      "provenance": {
+        "name": "2-aminoethanethiol",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0074",
+      "canonical_smiles": "NCCSCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "thiodiethylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0070",
+      "canonical_smiles": "NCCSSCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "cystamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0071",
+      "canonical_smiles": "NCCSSCCO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "aminoethyl-disulfide-ethanol",
         "source": "curated_literature"
       },
       "reaction_roles": [
@@ -2015,7 +2421,7 @@
       ]
     },
     {
-      "block_id": "amine:0055",
+      "block_id": "amine:0085",
       "canonical_smiles": "NN1CCCCC1",
       "descriptors": {},
       "handle": "amine",
@@ -2029,7 +2435,7 @@
       ]
     },
     {
-      "block_id": "amine:0056",
+      "block_id": "amine:0086",
       "canonical_smiles": "NN1CCOCC1",
       "descriptors": {},
       "handle": "amine",
@@ -2043,7 +2449,21 @@
       ]
     },
     {
-      "block_id": "amine:0057",
+      "block_id": "amine:0061",
+      "canonical_smiles": "Nc1ccccc1N",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "34-diaminobenzene-free",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0087",
       "canonical_smiles": "Nc1cn[nH]c1",
       "descriptors": {},
       "handle": "amine",
@@ -2592,6 +3012,516 @@
       },
       "reaction_roles": [
         "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0027",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0023",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0019",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0015",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0011",
+      "canonical_smiles": "CCC(C)CCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0008",
+      "canonical_smiles": "CCC(C)CCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0005",
+      "canonical_smiles": "CCC(C)CCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0003",
+      "canonical_smiles": "CCC(C)CCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0001",
+      "canonical_smiles": "CCC(C)CCOC(=O)Cl",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0007",
+      "canonical_smiles": "CCCCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0004",
+      "canonical_smiles": "CCCCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0002",
+      "canonical_smiles": "CCCCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
+      ]
+    },
+    {
+      "block_id": "chloroformate:0000",
+      "canonical_smiles": "CCCCCCOC(=O)Cl",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "chloroformate",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "chloroformate_tail"
       ]
     },
     {
@@ -3613,20 +4543,562 @@
       "reaction_roles": [
         "isocyanide_tail"
       ]
+    },
+    {
+      "block_id": "thiol:0001",
+      "canonical_smiles": "CCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 7,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "thiol",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0003",
+      "canonical_smiles": "CCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "thiol",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "thiol",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0005",
+      "canonical_smiles": "CCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "thiol",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "thiol",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0008",
+      "canonical_smiles": "CCCCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "thiol",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0011",
+      "canonical_smiles": "CCCCCCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0015",
+      "canonical_smiles": "CCCCCCCCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0019",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0023",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0027",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(C)CCS",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0007",
+      "canonical_smiles": "CCCCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0004",
+      "canonical_smiles": "CCCCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0002",
+      "canonical_smiles": "CCCCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
+    },
+    {
+      "block_id": "thiol:0000",
+      "canonical_smiles": "CCCCCCS",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "thiol",
+      "heavy_atoms": 7,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "thiol_head_or_tail",
+        "thiol_tail"
+      ]
     }
   ],
   "blocks_by_handle": {
     "acrylate": 30,
     "aldehyde": 42,
-    "amine": 58,
+    "amine": 88,
     "carboxylic_acid": 30,
+    "chloroformate": 30,
     "epoxide": 30,
-    "isocyanide": 30
+    "isocyanide": 30,
+    "thiol": 30
   },
   "blocks_by_source": {
-    "agile_measured": 26,
-    "curated_literature": 44,
-    "programmatic_rational": 150
+    "agile_measured": 25,
+    "curated_literature": 75,
+    "programmatic_rational": 210
   },
   "format": "compose_lipid_building_block_pool_v1",
   "note": "Reactive substrates (not finished-lipid fragments) for the general linker-agnostic corpus.",
@@ -3635,10 +5107,13 @@
     "aldehyde_tail": 42,
     "alkyl_acrylate_or_acrylamide_tail": 30,
     "alkyl_epoxide_tail": 30,
-    "amine_head": 58,
+    "amine_head": 88,
     "carboxylic_acid_tail": 30,
+    "chloroformate_tail": 30,
     "isocyanide_tail": 30,
-    "oxoester_aldehyde_body_tail": 42
+    "oxoester_aldehyde_body_tail": 42,
+    "thiol_head_or_tail": 30,
+    "thiol_tail": 30
   },
-  "total_blocks": 220
+  "total_blocks": 310
 }

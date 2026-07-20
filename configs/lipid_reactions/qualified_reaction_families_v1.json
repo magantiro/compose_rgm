@@ -11,7 +11,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "bd29582b0d94fd84a52716dfc0741f79d1fe6ad76485e3b4919bbb68c7cc6119",
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -91,7 +91,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "bd29582b0d94fd84a52716dfc0741f79d1fe6ad76485e3b4919bbb68c7cc6119",
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -171,7 +171,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "bd29582b0d94fd84a52716dfc0741f79d1fe6ad76485e3b4919bbb68c7cc6119",
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -268,7 +268,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "bd29582b0d94fd84a52716dfc0741f79d1fe6ad76485e3b4919bbb68c7cc6119",
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },
@@ -336,6 +336,244 @@
       "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
     },
     {
+      "architecture": "redox-responsive thioether-linked lipid (thiol-Michael)",
+      "atom_mapped_reaction_smarts": "[SX2H1:1].[CH2:2]=[CH1:3][CX3:4](=[OX1:5])[#7,#8:6]>>[S:1][CH2:2][CH2:3][CX3:4](=[OX1:5])[*:6]",
+      "conditions": {
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null,
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null
+      },
+      "implementation": {
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
+        "test_manifest": "tests/test_reaction_families.py"
+      },
+      "known_negative_examples": [
+        {
+          "expected": "",
+          "reactants": [
+            "CCCCCCCCCCCCS",
+            "CCCCC=CCCCC"
+          ],
+          "reason": "isolated alkene is not a Michael acceptor"
+        }
+      ],
+      "known_positive_examples": [
+        {
+          "expected": "CCCCCCCCCCCCSCCC(=O)OCCCCCC",
+          "reactants": [
+            "CCCCCCCCCCCCS",
+            "C=CC(=O)OCCCCCC"
+          ],
+          "reason": "mechanism-verified atom-mapped reconstruction"
+        }
+      ],
+      "protonation_and_salt_policy": "Register neutral full-molecule products under the frozen compose_lipid canonicalization contract.",
+      "reactant_roles": [
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            1
+          ],
+          "name": "thiol_tail",
+          "required_handle_smarts": "[SX2H1]"
+        },
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            2,
+            3,
+            4
+          ],
+          "name": "alkyl_acrylate_or_acrylamide_tail",
+          "required_handle_smarts": "[CH2]=[CH1][CX3](=[OX1])[#7,#8]"
+        }
+      ],
+      "reaction_id": "thiol_michael_thioether",
+      "reaction_version": 1,
+      "selectivity_policy": "A thiol conjugate-adds across an acrylate to give a thioether-linked ester (a redox/degradable motif). Only alpha,beta-unsaturated carbonyls are acceptors.",
+      "sources": [
+        {
+          "identifier": "10.1016/j.bbamem.2011.05.014",
+          "kind": "doi",
+          "locator": "thioether/disulfide degradable linkers in cationic lipids (Whitehead review refs 61-63)",
+          "notes": "Reaction-class primary source; mechanism-verified atom-mapped transform. Exact primary-source product example pending submission-time literature audit."
+        }
+      ],
+      "status": "qualified_for_enumeration",
+      "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
+    },
+    {
+      "architecture": "bioreducible disulfide-linked lipid",
+      "atom_mapped_reaction_smarts": "[SX2H1:1].[SX2H1:2]>>[S:1][S:2]",
+      "conditions": {
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null,
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null
+      },
+      "implementation": {
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
+        "test_manifest": "tests/test_reaction_families.py"
+      },
+      "known_negative_examples": [
+        {
+          "expected": "",
+          "reactants": [
+            "CCCCCCCCCCCCS",
+            "CCCCCCCC"
+          ],
+          "reason": "alkane has no thiol handle"
+        }
+      ],
+      "known_positive_examples": [
+        {
+          "expected": "CCCCCCCCCCCCSSCCCCCC",
+          "reactants": [
+            "CCCCCCCCCCCCS",
+            "CCCCCCS"
+          ],
+          "reason": "mechanism-verified atom-mapped reconstruction"
+        }
+      ],
+      "protonation_and_salt_policy": "Register neutral full-molecule products under the frozen compose_lipid canonicalization contract.",
+      "reactant_roles": [
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            1
+          ],
+          "name": "thiol_tail",
+          "required_handle_smarts": "[SX2H1]"
+        },
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            2
+          ],
+          "name": "thiol_head_or_tail",
+          "required_handle_smarts": "[SX2H1]"
+        }
+      ],
+      "reaction_id": "disulfide_coupling",
+      "reaction_version": 1,
+      "selectivity_policy": "Oxidative coupling of two thiols gives a bioreducible disulfide linker (cleaved in the reducing cytosol). Enumerates symmetric and asymmetric disulfides; a redox-labile degradable motif.",
+      "sources": [
+        {
+          "identifier": "10.1016/j.bbamem.2011.05.014",
+          "kind": "doi",
+          "locator": "disulfide-spacer multivalent cationic lipids for gene delivery (Whitehead review refs 61-63)",
+          "notes": "Reaction-class primary source; mechanism-verified atom-mapped transform. Exact primary-source product example pending submission-time literature audit."
+        }
+      ],
+      "status": "qualified_for_enumeration",
+      "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
+    },
+    {
+      "architecture": "carbamate-linked ionizable lipid",
+      "atom_mapped_reaction_smarts": "[NX3;H2,H1:1].[Cl][CX3:2](=[OX1:3])[OX2:4]>>[N:1][C:2](=[O:3])[O:4]",
+      "conditions": {
+        "catalyst_or_reagent": [],
+        "reported_yield_range": null,
+        "solvent": [],
+        "temperature_c": null,
+        "time_h": null
+      },
+      "implementation": {
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
+        "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
+        "test_manifest": "tests/test_reaction_families.py"
+      },
+      "known_negative_examples": [
+        {
+          "expected": "",
+          "reactants": [
+            "CCN(CC)CC",
+            "O=C(Cl)OCCCCCC"
+          ],
+          "reason": "tertiary amine has no N-H handle"
+        }
+      ],
+      "known_positive_examples": [
+        {
+          "expected": "CCCCCCCCCCCCNC(=O)OCCCCCC",
+          "reactants": [
+            "CCCCCCCCCCCCN",
+            "O=C(Cl)OCCCCCC"
+          ],
+          "reason": "mechanism-verified atom-mapped reconstruction"
+        }
+      ],
+      "protonation_and_salt_policy": "Register neutral full-molecule products under the frozen compose_lipid canonicalization contract.",
+      "reactant_roles": [
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            1
+          ],
+          "name": "amine_head",
+          "required_handle_smarts": "[NX3;H2,H1]"
+        },
+        {
+          "allowed_site_multiplicity": [
+            1,
+            2
+          ],
+          "count": 1,
+          "forbidden_smarts": [],
+          "mapped_reactive_atoms": [
+            2,
+            3,
+            4
+          ],
+          "name": "chloroformate_tail",
+          "required_handle_smarts": "[Cl][CX3](=[OX1])[OX2]"
+        }
+      ],
+      "reaction_id": "carbamate_amine_chloroformate",
+      "reaction_version": 1,
+      "selectivity_policy": "An N-H amine reacts with an alkyl chloroformate to give a carbamate linker (hydrolytically degradable). Requires an N-H amine and a chloroformate; tertiary amines and simple esters are inert.",
+      "sources": [
+        {
+          "identifier": "10.1038/s44222-026-00401-1",
+          "kind": "doi",
+          "locator": "carbamate among preferred degradable linkers (Whitehead & Arral 2026 review)",
+          "notes": "Reaction-class primary source; mechanism-verified atom-mapped transform. Exact primary-source product example pending submission-time literature audit."
+        }
+      ],
+      "status": "qualified_for_enumeration",
+      "stereochemistry_policy": "Preserve substrate stereochemistry; new stereocenters left unspecified."
+    },
+    {
       "architecture": "clinical-like amide-linked ionizable lipid",
       "atom_mapped_reaction_smarts": "[CX3:1](=[OX1:2])[OX2H1:3].[NX3;H2,H1:4]>>[C:1](=[O:2])[N:4]",
       "conditions": {
@@ -346,7 +584,7 @@
         "time_h": null
       },
       "implementation": {
-        "artifact_hash": "bd29582b0d94fd84a52716dfc0741f79d1fe6ad76485e3b4919bbb68c7cc6119",
+        "artifact_hash": "f5d55b2baf028798a9ffa8c2f25768e4aaec0b595e33291e9cbb84fdf8e8641f",
         "enumerator": "compose_v4.lipids.reaction_enumeration:ReactionEnumerator",
         "test_manifest": "tests/test_reaction_families.py"
       },

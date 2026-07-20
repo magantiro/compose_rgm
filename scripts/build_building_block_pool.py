@@ -42,6 +42,9 @@ HANDLES = {
     "epoxide": ("[CH2]1[CH1][OX2]1", ["alkyl_epoxide_tail"]),
     "acrylate": ("[CH2]=[CH1][CX3](=[OX1])[#7,#8]", ["alkyl_acrylate_or_acrylamide_tail"]),
     "isocyanide": ("[C;-1,+0;X1]#[N;+1,+0;X2]", ["isocyanide_tail", "isocyanide_tail"]),
+    # degradable-linker chemistry (Whitehead & Arral 2026 design principles): adds S
+    "thiol": ("[SX2H1]", ["thiol_tail", "thiol_head_or_tail"]),
+    "chloroformate": ("[Cl][CX3](=[OX1])[OX2]", ["chloroformate_tail"]),
 }
 
 # ---- curated ionizable amine heads (documented lipidoid chemistry) ----
@@ -71,6 +74,27 @@ CURATED_AMINES = {
     "histamine": "NCCc1cnc[nH]1", "3-morpholinopropylamine": "NCCCN1CCOCC1",
     "n-3-aminopropylmorpholine": "NCCCN1CCOCC1", "furfurylamine": "NCc1ccco1",
     "benzylamine": "NCc1ccccc1", "phenethylamine": "NCCc1ccccc1",
+    # extended polyamine / lipidoid-core set (documented amine cores)
+    "14-diaminobutane": "NCCCCN", "15-diaminopentane": "NCCCCCN",
+    "16-diaminohexane": "NCCCCCCN", "3-3-diaminodipropylamine": "NCCCNCCCN",
+    "bis-3-aminopropylethylenediamine": "NCCCNCCNCCCN", "n-methyl-13-propanediamine": "CNCCCN",
+    "2-methyl-12-propanediamine": "CC(N)CN", "12-diaminopropane": "CC(N)CN",
+    "1-4-aminobutylpiperazine": "NCCCCN1CCNCC1", "1-3-aminopropylpiperazine": "NCCCN1CCNCC1",
+    "4-3-aminopropylmorpholine": "NCCCN1CCOCC1", "trans-14-diaminocyclohexane": "NC1CCC(N)CC1",
+    "2-2-aminoethylaminoethanol": "OCCNCCN", "3-amino-1-propanol": "NCCCO",
+    "2-amino-2-methylpropanol": "CC(C)(N)CO", "diglycolamine": "NCCOCCO",
+    "n-n-dimethyldipropylenetriamine": "CN(C)CCCNCCCN", "bishexamethylenetriamine": "NCCCCCCNCCCCCCN",
+    "1-2-aminoethylpyrrolidine": "NCCN1CCCC1", "2-piperazin-1-ylethanamine": "NCCN1CCNCC1",
+    "n-boc-ethylenediamine-free": "NCCNC", "aminoethylethanolamine": "NCCNCCO",
+    "34-diaminobenzene-free": "Nc1ccccc1N", "13-diaminopropan-2-ol": "NCC(O)CN",
+    "tris-2-aminoethylamine": "NCCN(CCN)CCN", "n1-2-aminoethyl-13-propanediamine": "NCCNCCCN",
+    "1-aminomethylcyclohexylamine": "NCC1(N)CCCCC1", "2-2-aminoethoxyethanamine": "NCCOCCN",
+    "dodecane-112-diamine": "NCCCCCCCCCCCCN", "octane-18-diamine": "NCCCCCCCCN",
+    "n-oleyl-13-propanediamine": "CCCCCCCC/C=C\\CCCCCCCCNCCCN", "n-dodecyl-13-propanediamine": "CCCCCCCCCCCCNCCCN",
+    # disulfide/thioether-bearing amine cores -> bioreducible degradable heads (adds S)
+    "cystamine": "NCCSSCCN", "aminoethyl-disulfide-ethanol": "NCCSSCCO",
+    "2-aminoethanethiol": "NCCS", "3-aminopropane-1-thiol": "NCCCS",
+    "thiodiethylamine": "NCCSCCN", "bis-2-aminoethyl-disulfide": "NCCSSCCN",
 }
 
 
@@ -114,6 +138,10 @@ def make_substrate(form: str, chain: str) -> str | None:
         s = "C=CC(=O)OC" + chain  # alkyl acrylate ester
     elif form == "isocyanide":
         s = chain + "[N+]#[C-]"
+    elif form == "thiol":
+        s = chain + "S"
+    elif form == "chloroformate":
+        s = "ClC(=O)O" + chain
     else:
         return None
     return canonical(s)
@@ -175,7 +203,7 @@ def build_pool() -> dict:
 
     # programmatic fatty substrates
     lengths = [6, 8, 10, 12, 14, 16, 18, 20, 22]
-    for form in ["carboxylic_acid", "aldehyde", "epoxide", "acrylate", "isocyanide"]:
+    for form in ["carboxylic_acid", "aldehyde", "epoxide", "acrylate", "isocyanide", "thiol", "chloroformate"]:
         for L in lengths:
             for unsat in [0, 1, 2]:
                 for branched in [False, True]:

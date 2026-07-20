@@ -19,6 +19,8 @@ HANDLE_SMARTS = {
     "epoxide": "[CH2]1[CH1][OX2]1",
     "acrylate": "[CH2]=[CH1][CX3](=[OX1])[#7,#8]",
     "isocyanide": "[C;-1,+0;X1]#[N;+1,+0;X2]",
+    "thiol": "[SX2H1]",
+    "chloroformate": "[Cl][CX3](=[OX1])[OX2]",
 }
 
 
