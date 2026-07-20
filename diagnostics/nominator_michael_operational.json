@@ -1,0 +1,30 @@
+{
+  "format": "compose_nominator_michael_operational_v1",
+  "interpretation": "98% of real Michael-addition lipids (BEAE's chemistry class) are admitted & ranked by the deployed AD gate; 0% abstain on a novel head -> these define the size of the active-learning calibration round. Operational bridge from the transfer diagnostics to the deployed nomination engine. Ranking shown is in-sample wiring; held-out ranking = leave-library + positive-control.",
+  "per_library": {
+    "michael_addition": {
+      "abstain_novel_head_rate": 0.0,
+      "abstain_off_domain_rate": 0.0,
+      "admission_rate": 0.979,
+      "decision_breakdown": {
+        "rank": 92,
+        "reject_no_ionizable_head": 2
+      },
+      "in_sample_ranking_spearman": 0.967,
+      "library_id": "RM_Michael_addition_branched",
+      "unique_lipids": 94
+    },
+    "reductive_amination": {
+      "abstain_novel_head_rate": 0.0,
+      "abstain_off_domain_rate": 0.0,
+      "admission_rate": 1.0,
+      "decision_breakdown": {
+        "rank": 69
+      },
+      "in_sample_ranking_spearman": 0.939,
+      "library_id": "IR_Reductive_amination",
+      "unique_lipids": 69
+    }
+  },
+  "question": "When the deployed nominator sees real Michael-addition lipids, how many are admitted & ranked vs abstain?"
+}
