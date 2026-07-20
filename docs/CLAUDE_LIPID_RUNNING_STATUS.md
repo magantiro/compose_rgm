@@ -108,3 +108,8 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 - `b646133` M5: qualify 5 complementary reaction families (6 total).
 - `20496ab` M6: building-block pool (220) + stratified pilot + diversity metrics harness.
 - `0c819f1` M7: lipid-appropriate v2 metrics (core Hill + NN-vs-R0 + faithfulness JS); architecture-gap finding.
+- `b646133` (families) + `20496ab`/`0c819f1` metrics; `dd4cc5e` status sync.
+- `01b0812` M8: multi-tail architecture + degradable linkers (9 families, +S) — Whitehead design-principle alignment.
+- `264cc33` M9: intrinsic head-pKa feature — lifts held-head transfer +42% (0.18→0.26).
+- `3480a46` M10: 34k route-certified corpus scale demonstration.
+- `013df74` M11: family-balanced within-architecture selection (arch Hill 6.4→9.3; fixes S-linker starvation).
