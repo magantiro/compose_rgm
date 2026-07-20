@@ -79,8 +79,9 @@ Answers "does head/tail SAR transfer well enough for a single oracle to rank nov
 
 ## Current blockers / gates
 - Lipid **model training** gated behind Codex Paper 1 P1-G7 (not on my critical path; data/corpus/oracle prep is authorized now).
-- R3 cell needs a justified **frozen molecular encoder**; leave-study-out needs **>1 source per airway head** (LiON lung slice is the next admission).
-- Corpus pilot (50–100k) blocked until **≥3–4 families qualified** (diversity metrics require multiple families).
+- R3 cell needs a justified **frozen molecular encoder** — none installed (RDKit only); pending an install decision or a richer-descriptor stand-in.
+- ~~leave-study-out needs >1 source per airway head~~ — **done (M17)**: LiON's per-library annotations give leave-*library*-out on A549 (Michael/reductive-amination/other), plus the positive control.
+- ~~Corpus pilot blocked until ≥3–4 families~~ — **done**: 12 families, all DOF realism-matched (M18). Remaining corpus item is pool-size scaling to 500k.
 
 ## Corpus positioning (Nature Biotech)
 Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a **general linker-agnostic** insane lipid generator (Fig 2/3, Arm A); (2) downstream = fine-tune / linker-freeze on the novel Michael linker (Fig 6, Arm B). The corpus stays broad/general. The corpus diversity/coverage metrics double as the **Fig 2/3 generator-qualification yardstick** (validity, non-memorization via NN curves, fidelity via marginals, coverage via LNPDB recall, architecture, synthesis-eligibility, family generalization).
