@@ -15,11 +15,17 @@ REMOTE_ROOT = Path("/root/compose_v4")
 LOCAL_CHECKPOINT = Path("/private/tmp/pancake_checkpoint/checkpoint.recovery.pt")
 LOCAL_PARTITION = Path("/private/tmp/compose_v4_stage3_paths_manifest.pt")
 LOCAL_QUALIFICATION = ROOT / "diagnostics/canonical_successor_analytic_backbone_qualification.json"
-LOCAL_CONFIG = ROOT / "configs/experiments/griddd_qed_frozen_residual_pilot_v1.json"
+LOCAL_CONFIG = (
+    ROOT
+    / "configs/experiments/griddd_qed_frozen_residual_pilot_v5_canonical.json"
+)
 REMOTE_CHECKPOINT = REMOTE_ROOT / "inputs/checkpoint.recovery.pt"
 REMOTE_PARTITION = REMOTE_ROOT / "inputs/compose_v4_stage3_paths_manifest.pt"
 REMOTE_QUALIFICATION = REMOTE_ROOT / "inputs/canonical_successor_analytic_backbone_qualification.json"
-REMOTE_CONFIG = REMOTE_ROOT / "configs/experiments/griddd_qed_frozen_residual_pilot_v1.json"
+REMOTE_CONFIG = (
+    REMOTE_ROOT
+    / "configs/experiments/griddd_qed_frozen_residual_pilot_v5_canonical.json"
+)
 
 
 image = (
@@ -157,6 +163,9 @@ def train_stage(run_label: str) -> dict[str, object]:
         MARK_RULE_TO_INDEX,
     )
     from compose_v4.rewrite.kernel import canonical_state_key
+    from compose_v4.rewrite.ring_system_fiber import (
+        structured_ring_trace_supported,
+    )
     from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
 
     config = json.loads(REMOTE_CONFIG.read_text())
@@ -239,7 +248,7 @@ def train_stage(run_label: str) -> dict[str, object]:
     source_prior = base_payload.get("tree_source_prior")
     if source_prior is None:
         raise ValueError("retained checkpoint lacks its frozen tree source prior")
-    train_records = build_tree_transport_path_records(
+    train_proposal_records = build_tree_transport_path_records(
         train_smiles,
         n_slots=40,
         source_prior=source_prior,
@@ -247,11 +256,11 @@ def train_stage(run_label: str) -> dict[str, object]:
         couplings_per_target=int(config["data"]["path_couplings_per_target"]),
         transport_mode=str(config["data"]["tree_transport"]),
         typed_ring_payloads=True,
-        ring_catalog=base_model.ring_catalog,
+        ring_catalog=None,
         workers=int(config["data"]["path_workers"]),
         checkpoint_interval=int(config["data"]["path_checkpoint_interval"]),
     )
-    validation_records = build_tree_transport_path_records(
+    validation_proposal_records = build_tree_transport_path_records(
         validation_smiles,
         n_slots=40,
         source_prior=source_prior,
@@ -259,10 +268,60 @@ def train_stage(run_label: str) -> dict[str, object]:
         couplings_per_target=1,
         transport_mode=str(config["data"]["tree_transport"]),
         typed_ring_payloads=True,
-        ring_catalog=base_model.ring_catalog,
+        ring_catalog=None,
         workers=int(config["data"]["path_workers"]),
         checkpoint_interval=int(config["data"]["path_checkpoint_interval"]),
     )
+    train_records = tuple(
+        record
+        for record in train_proposal_records
+        if structured_ring_trace_supported(
+            record.path.trace,
+            base_model.ring_catalog,
+        )
+    )
+    validation_records = tuple(
+        record
+        for record in validation_proposal_records
+        if structured_ring_trace_supported(
+            record.path.trace,
+            base_model.ring_catalog,
+        )
+    )
+    minimum_train = int(config["data"]["minimum_supported_train_records"])
+    minimum_validation = int(
+        config["data"]["minimum_supported_validation_records"]
+    )
+    manifest.update(
+        {
+            "phase": "path_support_filtered",
+            "ring_catalog_support_policy": config["data"][
+                "ring_catalog_support_policy"
+            ],
+            "train_path_proposals": len(train_proposal_records),
+            "train_path_records": len(train_records),
+            "train_paths_rejected_by_frozen_ring_catalog": (
+                len(train_proposal_records) - len(train_records)
+            ),
+            "validation_path_proposals": len(validation_proposal_records),
+            "validation_path_records": len(validation_records),
+            "validation_paths_rejected_by_frozen_ring_catalog": (
+                len(validation_proposal_records) - len(validation_records)
+            ),
+        }
+    )
+    _write_json(run_dir / "run_config.json", manifest)
+    artifact_volume.commit()
+    if len(train_records) < minimum_train:
+        raise RuntimeError(
+            "frozen ring catalog retained too few QED training paths: "
+            f"{len(train_records)} < {minimum_train}"
+        )
+    if len(validation_records) < minimum_validation:
+        raise RuntimeError(
+            "frozen ring catalog retained too few QED validation paths: "
+            f"{len(validation_records)} < {minimum_validation}"
+        )
 
     def target_conditions(smiles_values: tuple[str, ...]) -> dict[str, tuple[float]]:
         result = {}
@@ -317,6 +376,14 @@ def train_stage(run_label: str) -> dict[str, object]:
             ],
             "train_path_records": len(train_records),
             "validation_path_records": len(validation_records),
+            "train_path_proposals": len(train_proposal_records),
+            "validation_path_proposals": len(validation_proposal_records),
+            "train_paths_rejected_by_frozen_ring_catalog": (
+                len(train_proposal_records) - len(train_records)
+            ),
+            "validation_paths_rejected_by_frozen_ring_catalog": (
+                len(validation_proposal_records) - len(validation_records)
+            ),
         }
     )
     _write_json(run_dir / "run_config.json", manifest)
@@ -526,8 +593,17 @@ def train_stage(run_label: str) -> dict[str, object]:
 
 @app.local_entrypoint()
 def main(
-    run_label: str = "compose-v4-griddd-qed-frozen-residual-pilot-20260720-v1",
+    run_label: str = (
+        "compose-v4-griddd-qed-frozen-residual-pilot-20260720-v5-canonical"
+    ),
 ) -> None:
+    config = json.loads(LOCAL_CONFIG.read_text(encoding="utf-8"))
+    frozen_run_label = str(config["run_label"])
+    if run_label != frozen_run_label:
+        raise ValueError(
+            "run label must exactly match the frozen pilot config before spawn: "
+            f"expected {frozen_run_label!r}, received {run_label!r}"
+        )
     call = train_stage.spawn(run_label)
     print(
         json.dumps(

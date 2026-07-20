@@ -837,11 +837,17 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=0.0)
     parser.add_argument(
         "--trainable-parameter-scope",
-        choices=("all", "chemistry_marks_only", "ring_topology_only"),
+        choices=(
+            "all",
+            "chemistry_marks_only",
+            "ring_topology_only",
+            "chemistry_and_topology",
+        ),
         default="all",
         help=(
             "all parameters, only atom/bond and ring-electronic mark heads, "
-            "or only the shared ring topology-and-cycle selector"
+            "only the shared ring topology-and-cycle selector, or the union of "
+            "the chemistry-mark and ring-topology heads"
         ),
     )
     parser.add_argument(

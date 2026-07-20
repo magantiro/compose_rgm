@@ -280,6 +280,16 @@ def main() -> None:
             "containing a 3/4-member cycle; implemented by exact CTMC thinning."
         ),
     )
+    parser.add_argument(
+        "--triple-bond-log-rate-adjustment",
+        type=float,
+        default=0.0,
+        help=(
+            "Non-positive inference-only log multiplier for atom-insert/bond-reorder "
+            "marks that install a triple bond; implemented by exact CTMC thinning "
+            "with positive support preserved (a soft rate reduction, not a ban)."
+        ),
+    )
     parser.add_argument("--fast-split", action="store_true")
     args = parser.parse_args()
 
@@ -317,6 +327,9 @@ def main() -> None:
         ),
         small_ring_log_rate_adjustment=float(
             args.small_ring_log_rate_adjustment
+        ),
+        triple_bond_log_rate_adjustment=float(
+            args.triple_bond_log_rate_adjustment
         ),
     )
     source_prior = checkpoint["tree_source_prior"]

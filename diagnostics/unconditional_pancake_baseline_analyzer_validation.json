@@ -1,0 +1,358 @@
+{
+  "counts": {
+    "generated": 600,
+    "reference_cnof_matched": 2271,
+    "train_cnof_matched": 2255
+  },
+  "format": "compose_v4_unconditional_sufficiency_panel_v1",
+  "label": "pancake-baseline-VALIDATION",
+  "motifs": {
+    "generated": {
+      "adjacent_aromatic_nh_molecule_fraction": 0.105,
+      "ge3_hetero_ring_molecule_fraction": 0.39,
+      "heteroatoms_per_molecule": 7.655,
+      "molecules": 600,
+      "multi_aromatic_nh_ring_molecule_fraction": 0.15166666666666667,
+      "nitrogen_per_molecule": 4.148333333333333,
+      "oxygen_per_molecule": 3.1966666666666668,
+      "ring_nn_molecule_fraction": 0.39666666666666667,
+      "ring_oo_molecule_fraction": 0.07,
+      "small_ring_molecule_fraction": 0.11333333333333333,
+      "triple_bond_share_of_all_bonds": 0.02807447615712368,
+      "triple_bonds_in_rings": 0,
+      "triple_bonds_per_molecule": 0.8016666666666666,
+      "triple_molecule_fraction": 0.54
+    },
+    "reference": {
+      "adjacent_aromatic_nh_molecule_fraction": 0.0,
+      "ge3_hetero_ring_molecule_fraction": 0.09555261999119331,
+      "heteroatoms_per_molecule": 6.130779392338177,
+      "molecules": 2271,
+      "multi_aromatic_nh_ring_molecule_fraction": 0.002642007926023778,
+      "nitrogen_per_molecule": 2.9233817701453106,
+      "oxygen_per_molecule": 2.8005284015852046,
+      "ring_nn_molecule_fraction": 0.1686481726111845,
+      "ring_oo_molecule_fraction": 0.0048436811977102595,
+      "small_ring_molecule_fraction": 0.0603258476442096,
+      "triple_bond_share_of_all_bonds": 0.0026236248983537136,
+      "triple_bonds_in_rings": 0,
+      "triple_bonds_per_molecule": 0.07529722589167767,
+      "triple_molecule_fraction": 0.06913254073095552
+    }
+  },
+  "quality": {
+    "descriptor_distributions": {
+      "aromatic_atom_fraction": {
+        "generated_mean": 0.32010569985777,
+        "reference_mean": 0.48060689205702384,
+        "standardized_wasserstein": 0.7468009962404891,
+        "wasserstein_distance": 0.16050119219925382
+      },
+      "fraction_csp3": {
+        "generated_mean": 0.5118127358568908,
+        "reference_mean": 0.35793777568733953,
+        "standardized_wasserstein": 0.7362217154457253,
+        "wasserstein_distance": 0.1539631221750134
+      },
+      "h_bond_acceptors": {
+        "generated_mean": 5.21,
+        "reference_mean": 4.407749889916336,
+        "standardized_wasserstein": 0.45418882218747464,
+        "wasserstein_distance": 0.8108674592690444
+      },
+      "h_bond_donors": {
+        "generated_mean": 2.533333333333333,
+        "reference_mean": 1.4715984147952443,
+        "standardized_wasserstein": 0.8432089234736033,
+        "wasserstein_distance": 1.0619242624394536
+      },
+      "logp": {
+        "generated_mean": 2.548272716666668,
+        "reference_mean": 3.2176727785116706,
+        "standardized_wasserstein": 0.4039173377613924,
+        "wasserstein_distance": 0.6766598656318809
+      },
+      "molecular_weight": {
+        "generated_mean": 375.7592133333335,
+        "reference_mean": 359.3082637604581,
+        "standardized_wasserstein": 0.19253335484204662,
+        "wasserstein_distance": 17.003364434169995
+      },
+      "qed": {
+        "generated_mean": 0.4394322647407161,
+        "reference_mean": 0.6017737414653689,
+        "standardized_wasserstein": 0.8579247834735271,
+        "wasserstein_distance": 0.16234147672465277
+      },
+      "rotatable_bonds": {
+        "generated_mean": 8.055,
+        "reference_mean": 5.116688683399383,
+        "standardized_wasserstein": 0.9653289080697524,
+        "wasserstein_distance": 2.9591347424042276
+      },
+      "sa_score": {
+        "generated_mean": 4.4881868209989015,
+        "reference_mean": 2.875452586245961,
+        "standardized_wasserstein": 2.0207637385969375,
+        "wasserstein_distance": 1.6127342347529405
+      },
+      "tpsa": {
+        "generated_mean": 94.81988333333335,
+        "reference_mean": 73.69648172611186,
+        "standardized_wasserstein": 0.6671409112562878,
+        "wasserstein_distance": 21.29218280493175
+      }
+    },
+    "novel_to_train_fraction": 1.0,
+    "requested_samples": 600,
+    "ring_systems": {
+      "generated_aromatic_ring_fraction": 0.6315077755240027,
+      "generated_bridged_fraction": 0.016666666666666666,
+      "generated_fused_fraction": 0.285,
+      "generated_mean_aromatic_rings": 1.5566666666666666,
+      "generated_mean_rings": 2.465,
+      "generated_spiro_fraction": 0.006666666666666667,
+      "reference_aromatic_ring_fraction": 0.6886336943755709,
+      "reference_bridged_fraction": 0.04007045354469397,
+      "reference_fused_fraction": 0.5799207397622193,
+      "reference_mean_aromatic_rings": 2.3236459709379127,
+      "reference_mean_rings": 3.374284456186702,
+      "reference_spiro_fraction": 0.03478643769264641,
+      "ring_size_total_variation": 0.11956313527494457
+    },
+    "scaffolds": {
+      "acyclic_fraction": 0.025,
+      "novel_scaffold_fraction": 0.86,
+      "unique_scaffold_fraction": 0.8716666666666667
+    },
+    "similarity": {
+      "internal_diversity": 0.894671943300356,
+      "mean_nearest_train_tanimoto": 0.20931298304623805
+    },
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "ring_taxonomy": {
+    "generated": {
+      "means": {
+        "cycle_rank": 2.4583333333333335,
+        "ring_systems": 2.1216666666666666,
+        "sssr_rings_per_molecule": 2.465
+      },
+      "molecule_count": 600,
+      "molecule_prevalence": {
+        "acyclic": {
+          "count": 15,
+          "fraction": 0.025
+        },
+        "aromatic": {
+          "count": 497,
+          "fraction": 0.8283333333333334
+        },
+        "bridged": {
+          "count": 10,
+          "fraction": 0.016666666666666666
+        },
+        "charged_ring": {
+          "count": 0,
+          "fraction": 0.0
+        },
+        "cyclic": {
+          "count": 585,
+          "fraction": 0.975
+        },
+        "fused": {
+          "count": 171,
+          "fraction": 0.285
+        },
+        "heterocycle": {
+          "count": 507,
+          "fraction": 0.845
+        },
+        "macrocycle_ge_12": {
+          "count": 0,
+          "fraction": 0.0
+        },
+        "monocyclic": {
+          "count": 98,
+          "fraction": 0.16333333333333333
+        },
+        "polybridged_or_cage_candidate": {
+          "count": 1,
+          "fraction": 0.0016666666666666668
+        },
+        "polycyclic": {
+          "count": 487,
+          "fraction": 0.8116666666666666
+        },
+        "saturated_ring": {
+          "count": 300,
+          "fraction": 0.5
+        },
+        "small_ring_3_or_4": {
+          "count": 68,
+          "fraction": 0.11333333333333333
+        },
+        "spiro": {
+          "count": 4,
+          "fraction": 0.006666666666666667
+        },
+        "unsaturated_nonaromatic_ring": {
+          "count": 125,
+          "fraction": 0.20833333333333334
+        }
+      },
+      "ring_class_counts": {
+        "aromatic": {
+          "count": 934,
+          "fraction_of_rings": 0.6315077755240027
+        },
+        "carbocycle": {
+          "count": 503,
+          "fraction_of_rings": 0.3400946585530764
+        },
+        "charged": {
+          "count": 0,
+          "fraction_of_rings": 0.0
+        },
+        "heterocycle": {
+          "count": 976,
+          "fraction_of_rings": 0.6599053414469236
+        },
+        "saturated": {
+          "count": 409,
+          "fraction_of_rings": 0.27653820148749153
+        },
+        "unsaturated_nonaromatic": {
+          "count": 136,
+          "fraction_of_rings": 0.09195402298850575
+        }
+      },
+      "ring_count": 1479,
+      "ring_size_counts": {
+        "3": 62,
+        "4": 12,
+        "5": 466,
+        "6": 923,
+        "7": 14,
+        "8": 2
+      }
+    },
+    "reference": {
+      "means": {
+        "cycle_rank": 3.3531483927785115,
+        "ring_systems": 2.436811977102598,
+        "sssr_rings_per_molecule": 3.374284456186702
+      },
+      "molecule_count": 2271,
+      "molecule_prevalence": {
+        "acyclic": {
+          "count": 33,
+          "fraction": 0.01453104359313078
+        },
+        "aromatic": {
+          "count": 2099,
+          "fraction": 0.924262439453985
+        },
+        "bridged": {
+          "count": 91,
+          "fraction": 0.04007045354469397
+        },
+        "charged_ring": {
+          "count": 0,
+          "fraction": 0.0
+        },
+        "cyclic": {
+          "count": 2238,
+          "fraction": 0.9854689564068693
+        },
+        "fused": {
+          "count": 1317,
+          "fraction": 0.5799207397622193
+        },
+        "heterocycle": {
+          "count": 1893,
+          "fraction": 0.8335535006605019
+        },
+        "macrocycle_ge_12": {
+          "count": 14,
+          "fraction": 0.006164685160722149
+        },
+        "monocyclic": {
+          "count": 126,
+          "fraction": 0.05548216644649934
+        },
+        "polybridged_or_cage_candidate": {
+          "count": 33,
+          "fraction": 0.01453104359313078
+        },
+        "polycyclic": {
+          "count": 2112,
+          "fraction": 0.9299867899603699
+        },
+        "saturated_ring": {
+          "count": 1006,
+          "fraction": 0.4429766622633201
+        },
+        "small_ring_3_or_4": {
+          "count": 137,
+          "fraction": 0.0603258476442096
+        },
+        "spiro": {
+          "count": 79,
+          "fraction": 0.03478643769264641
+        },
+        "unsaturated_nonaromatic_ring": {
+          "count": 676,
+          "fraction": 0.29766622633201234
+        }
+      },
+      "ring_class_counts": {
+        "aromatic": {
+          "count": 5277,
+          "fraction_of_rings": 0.6886336943755709
+        },
+        "carbocycle": {
+          "count": 3971,
+          "fraction_of_rings": 0.51820435860629
+        },
+        "charged": {
+          "count": 0,
+          "fraction_of_rings": 0.0
+        },
+        "heterocycle": {
+          "count": 3692,
+          "fraction_of_rings": 0.48179564139371006
+        },
+        "saturated": {
+          "count": 1559,
+          "fraction_of_rings": 0.2034451259297925
+        },
+        "unsaturated_nonaromatic": {
+          "count": 827,
+          "fraction_of_rings": 0.10792117969463656
+        }
+      },
+      "ring_count": 7663,
+      "ring_size_counts": {
+        "10": 1,
+        "11": 1,
+        "12": 4,
+        "13": 4,
+        "15": 1,
+        "16": 2,
+        "18": 1,
+        "19": 1,
+        "20": 1,
+        "27": 3,
+        "3": 108,
+        "4": 47,
+        "5": 1729,
+        "6": 5636,
+        "7": 113,
+        "8": 8,
+        "9": 3
+      }
+    }
+  }
+}

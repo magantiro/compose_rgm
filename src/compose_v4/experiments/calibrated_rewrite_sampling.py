@@ -80,6 +80,33 @@ def ring_system_grow_contains_small_ring(
     return bool(cycle_sizes) and min(cycle_sizes) <= int(maximum_size)
 
 
+TRIPLE_BOND_INSTALLING_RULES = frozenset({"atom_insert", "bond_reorder"})
+
+
+def mark_installs_triple_bond(
+    state: MolecularGraph,
+    rule_name: str,
+    action: object,
+) -> bool:
+    """Return whether a sampled mark increases the count of order-3 (triple) bonds.
+
+    Only connected atom insertion and bond reorder can introduce a new triple
+    bond, and every triple is created exactly once by such a mark, so a positive
+    count delta after applying the action attributes the installation
+    unambiguously.  Graft/reroute relocates existing bonds and preserves the
+    total triple count, so it is intentionally excluded.  Triples never occur
+    inside committed ring systems in the matched corpus, so whole-ring actions
+    are excluded as well.
+    """
+
+    if rule_name not in TRIPLE_BOND_INSTALLING_RULES:
+        return False
+    before = int((np.triu(np.asarray(state.bonds)) == 3).sum())
+    successor = de_novo_rewrite_system().apply(state, str(rule_name), action)
+    after = int((np.triu(np.asarray(successor.bonds)) == 3).sum())
+    return after > before
+
+
 @dataclass(frozen=True)
 class ThinnedRateCalibrationSampler:
     """Multiply selected base-model rates without renormalizing other marks.
@@ -95,6 +122,7 @@ class ThinnedRateCalibrationSampler:
     family_log_rate_adjustments: tuple[tuple[str, float], ...] = ()
     small_ring_log_rate_adjustment: float = 0.0
     small_ring_maximum_size: int = 4
+    triple_bond_log_rate_adjustment: float = 0.0
     _family_adjustments: dict[str, float] = field(
         init=False,
         repr=False,
@@ -120,6 +148,11 @@ class ThinnedRateCalibrationSampler:
             )
         if int(self.small_ring_maximum_size) < 3:
             raise ValueError("maximum small-ring size must be at least three")
+        triple_bond_adjustment = float(self.triple_bond_log_rate_adjustment)
+        if not isfinite(triple_bond_adjustment) or triple_bond_adjustment > 0.0:
+            raise ValueError(
+                "triple-bond log-rate adjustment must be finite and non-positive"
+            )
         object.__setattr__(self, "_family_adjustments", adjustments)
 
     @property
@@ -131,6 +164,9 @@ class ThinnedRateCalibrationSampler:
                 self.small_ring_log_rate_adjustment
             ),
             "small_ring_maximum_size": int(self.small_ring_maximum_size),
+            "triple_bond_log_rate_adjustment": float(
+                self.triple_bond_log_rate_adjustment
+            ),
         }
 
     def sample_rewrite_mark(
@@ -163,6 +199,14 @@ class ThinnedRateCalibrationSampler:
                 if ring_adjustment < 0.0:
                     labels.append("small_ring")
 
+        if self.triple_bond_log_rate_adjustment < 0.0 and mark_installs_triple_bond(
+            state,
+            sampled.rule_name,
+            sampled.action,
+        ):
+            adjustment += float(self.triple_bond_log_rate_adjustment)
+            labels.append("triple_bond")
+
         if adjustment >= 0.0:
             return sampled
         uniform = max(float(rng.random()), float(np.nextafter(0.0, 1.0)))
@@ -179,6 +223,7 @@ class ThinnedRateCalibrationSampler:
 __all__ = [
     "RewriteMarkSampler",
     "ThinnedRateCalibrationSampler",
+    "mark_installs_triple_bond",
     "ring_system_grow_contains_small_ring",
     "ring_system_grow_cycle_sizes",
 ]

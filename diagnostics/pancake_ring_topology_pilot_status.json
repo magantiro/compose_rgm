@@ -1,0 +1,60 @@
+{
+  "schema": "compose_v4_pancake_ring_topology_pilot_status_v1",
+  "recorded_at": "2026-07-20T14:27:12-04:00",
+  "run": {
+    "label": "compose-v4-unconditional-ring-topology-pilot-20260720-v2",
+    "modal_app_id": "ap-2ABsijfQ5AfHB0KUSBCwrv",
+    "modal_function_call_id": "fc-01KY0B5EE4SM5JRJVKRHNFHZN9",
+    "artifact_path": "/artifacts/compose-v4-unconditional-ring-topology-pilot-20260720-v2",
+    "provenance_sha256": "a64c58e4251322669dccc3af045a9b44e843d53d93b4bea9d6288f98c865ea5a",
+    "confirmed_phase": "failed_pre_optimizer",
+    "confirmed_completed_steps": 0,
+    "training_started": false,
+    "outcome": "failed_closed_on_path_manifest_configuration_mismatch",
+    "status_note": "The detached task reached CUDA and wrote immutable manifests, but the old compiled-path configuration did not match the requested topology run. It failed before optimizer step 1. No topology-trained checkpoint or rollout claim exists."
+  },
+  "superseded_launch": {
+    "label": "compose-v4-unconditional-ring-topology-pilot-20260720-v1",
+    "modal_app_id": "ap-1loTb1TBgzd1XjJjkRV9p6",
+    "modal_function_call_id": "fc-01KY0B13FTH2VJ355GFWTWRSXR",
+    "outcome": "non_detached_local_entrypoint_stopped_with_zero_tasks_and_no_artifact"
+  },
+  "recipe": "recipes/tree_fcd_transfer_unconditional_ring_topology.json",
+  "requested_training": {
+    "steps": 500,
+    "schedule_steps": 500,
+    "trainable_parameter_scope": "ring_topology_only",
+    "ring_template_factorization": "topology_cycle_hierarchical"
+  },
+  "initialization": {
+    "source_run_label": "compose-v4-stage3-full-ring-hierarchical-v1",
+    "source_checkpoint": "/artifacts/compose-v4-stage3-full-ring-hierarchical-v1/checkpoint.recovery.pt",
+    "source_checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+    "mode": "compatible_name_and_shape",
+    "new_topology_group_head": "retain_deterministic_zero_initialization"
+  },
+  "cache": {
+    "path_source_run_label": "compose-v4-stage3-full-ring-hierarchical-v1",
+    "path_cache": "/artifacts/compose-v4-stage3-full-ring-hierarchical-v1/compiled_paths.pt",
+    "training_support_cache": "/artifacts/_shared/training_support",
+    "reuse_decision": "rejected_as_not_lossless",
+    "reuse_reason": "The v5 cache omits source targets and couplings and predates the v7 Graft-quotient and electronic-alias certificate semantics."
+  },
+  "replacement_compile": {
+    "label": "compose-v4-unconditional-ring-topology-paths-20260720-v1",
+    "modal_app_id": "ap-R32pM7XOzNxeptbjNmWfuM",
+    "modal_function_call_id": "fc-01KY0BAF1GKK50RNV86YQK77M6",
+    "artifact_path": "/artifacts/compose-v4-unconditional-ring-topology-paths-20260720-v1",
+    "mode": "cpu_compile_paths_and_evaluation_cache_only",
+    "state_at_recorded_at": "running",
+    "train_shards_completed": 8,
+    "train_shards_total": 25,
+    "train_targets_completed": 16384,
+    "train_targets_total": 50000,
+    "transport_records_completed": 32768,
+    "transport_records_total_all_splits": 108000,
+    "approximate_records_per_second": 28.0,
+    "gpu_training_launched": false,
+    "next_gate": "Finish v7 compilation and verify exact multiplicity, replay, fingerprints, evaluation cache, raw catalog order, and 2074 selector order before any GPU launch."
+  }
+}
