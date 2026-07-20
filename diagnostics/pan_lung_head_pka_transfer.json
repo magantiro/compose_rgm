@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "rdkit": "2025.09.6",
+    "seed": 20260720
+  },
+  "finding": "Intrinsic head-N micro-pKa lifts held-head transfer ~40% (0.1816 -> 0.2576); the 5 pKa/ionization features alone (0.1693) nearly match all 2058 fingerprint bits on the head-transfer task -- pKa IS the transferable head signal. Supports the head-aware AD gate + pKa-conditioned ranking for novel-head/novel-linker candidates.",
+  "format": "compose_pan_lung_head_pka_transfer_v1",
+  "held_head_transfer": {
+    "R1_only": {
+      "spearman": 0.1816,
+      "top_decile_enrichment": 1.333
+    },
+    "R1_plus_head_pka": {
+      "spearman": 0.2576,
+      "top_decile_enrichment": 1.166
+    },
+    "head_pka_ionization_only": {
+      "spearman": 0.1693,
+      "top_decile_enrichment": 1.333
+    },
+    "improvement_spearman": 0.076
+  },
+  "intrinsic_head_pka": {
+    "max": 10.56,
+    "median": 9.44,
+    "min": 7.18,
+    "note": "matches Whitehead & Arral 2026 'individual amine ~9' intrinsic value"
+  },
+  "n_head_groups": 50,
+  "n_rows": 1799,
+  "pka_source": {
+    "cache": "artifacts/oracles/head_pka_v1/a549_head_pka.csv",
+    "cross_check": "MolGpKa MAE ~0.4 vs 15 experimental amine pKa; xtb ALPB physics anchor ~1.6 LOO MAE",
+    "engine": "MolGpKa (GNN micro-pKa)",
+    "sanity_guard": "base-site pKa < 3 discarded (MolGpKa symmetric-trialkylamine glitch)",
+    "weight_base_sha256_prefix": "212021f43168208b",
+    "weights": "weight_base.pth"
+  },
+  "task": "A549 in-vitro, held-HEAD split (unseen ionizable head)"
+}

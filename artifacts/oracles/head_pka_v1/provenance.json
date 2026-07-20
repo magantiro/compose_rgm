@@ -1,0 +1,12 @@
+{
+  "format": "compose_head_pka_provenance_v1",
+  "quantity": "intrinsic aqueous head-N micro-pKa (NOT apparent LNP pKa)",
+  "engine": "MolGpKa (Xundrug/MolGpKa) GNN micro-pKa predictor",
+  "weight_base_sha256": "212021f43168208b...",
+  "weight_acid_sha256": "e0cb05874937f17a...",
+  "runtime_env": "conda 'lantern' (py3.10, torch 2.2.2, torch_geometric 2.7); patched torch_scatter->torch_geometric.utils.scatter; OMP guard KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1",
+  "method": "predict_base(mol) -> max base-site pKa as head pKa; base-site pKa<3 discarded (symmetric-trialkylamine glitch guard)",
+  "validation": "MolGpKa MAE ~0.4 vs 15 experimental amine pKa (pyridine 5.13/exp5.23, morpholine 8.9/8.36, aniline 4.77/4.6); xtb ALPB-water physics anchor ~1.6 LOO MAE",
+  "cross_project_note": "MolGpKa cloned to scratch; not vendored into repo. Cache is the committed artifact.",
+  "boundary": "intrinsic molecular pKa ~9 differs from apparent LNP pKa ~6.4 (Whitehead & Arral 2026); this is the molecular value used as a transferable head feature."
+}
