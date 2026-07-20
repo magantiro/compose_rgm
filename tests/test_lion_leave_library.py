@@ -47,3 +47,12 @@ def test_cross_chemistry_transfer_is_limited() -> None:
     # no held-out chemistry library is well-ranked from the others (all Spearman < 0.4):
     # supports domain-bounded nomination over blind extrapolation across chemistries.
     assert all(r["spearman"] < 0.4 for r in d["per_library"].values())
+
+
+def test_positive_control_michael_is_rankable_when_seen() -> None:
+    d = _load()
+    # deploy config: with Michael-addition data represented in training, the oracle
+    # ranks Michael-addition lipids well -- and far better than the blind leave-out.
+    pc = d["positive_control_michael_included"]
+    assert pc["michael_subset_spearman"] > 0.4
+    assert pc["michael_subset_spearman"] > d["michael_transfer_spearman"] + 0.3

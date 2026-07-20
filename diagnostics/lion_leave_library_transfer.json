@@ -25,5 +25,12 @@
       "train_lipids": 1644
     }
   },
+  "positive_control_michael_included": {
+    "michael_subset_enrichment": 2.11,
+    "michael_subset_spearman": 0.633,
+    "note": "Contrast with leave-library-out: with the chemistry represented in training, the oracle ranks Michael-addition lipids well. This is the deploy configuration (LiON Michael data + lab in-vivo BEAE calibration).",
+    "overall_spearman": 0.64,
+    "protocol": "random 5-fold over all A549 LiON (Michael-addition INCLUDED in training)"
+  },
   "task": "A549 in-vitro delivery, leave-LIBRARY-out (train on other chemistries, test on held library)"
 }

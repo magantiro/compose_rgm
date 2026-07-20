@@ -24,6 +24,8 @@ from rdkit import Chem, RDLogger
 from scipy.stats import spearmanr
 from sklearn.ensemble import ExtraTreesRegressor
 
+from sklearn.model_selection import KFold
+
 from scripts.train_lumi_oracle_baselines import molecular_features
 
 RDLogger.DisableLog("rdApp.*")
@@ -81,6 +83,32 @@ def main() -> None:
         }
 
     michael = next((k for k in per_library if "michael" in k.lower()), None)
+
+    # POSITIVE CONTROL (the deploy config): include Michael-addition data in
+    # training via a random 5-fold, and report ranking ON the Michael subset.
+    # Leave-library-out blinds the model to the chemistry (worst case); the real
+    # pipeline includes measured Michael lipids + calibrates, so this is the
+    # honest "can we rank BEAE-like lipids once the oracle has seen the chemistry".
+    mich_mask = np.array([michael is not None and lib == michael for lib in libs])
+    pooled_pred = np.zeros(len(y))
+    for tr, te in KFold(n_splits=5, shuffle=True, random_state=SEED).split(features):
+        m = ExtraTreesRegressor(n_estimators=400, min_samples_leaf=2, max_features="sqrt",
+                                n_jobs=-1, random_state=SEED)
+        m.fit(features[tr], y[tr])
+        pooled_pred[te] = m.predict(features[te])
+    pos_michael = (spearmanr(y[mich_mask], pooled_pred[mich_mask]).statistic
+                   if mich_mask.sum() >= 10 else None)
+    positive_control = {
+        "protocol": "random 5-fold over all A549 LiON (Michael-addition INCLUDED in training)",
+        "michael_subset_spearman": round(float(pos_michael), 3) if pos_michael is not None else None,
+        "michael_subset_enrichment": (round(_enrich(y[mich_mask], pooled_pred[mich_mask]), 2)
+                                      if mich_mask.sum() >= 10 else None),
+        "overall_spearman": round(float(spearmanr(y, pooled_pred).statistic), 3),
+        "note": ("Contrast with leave-library-out: with the chemistry represented in "
+                 "training, the oracle ranks Michael-addition lipids well. This is the "
+                 "deploy configuration (LiON Michael data + lab in-vivo BEAE calibration)."),
+    }
+
     out = {
         "format": "compose_lion_leave_library_transfer_v1",
         "task": "A549 in-vitro delivery, leave-LIBRARY-out (train on other chemistries, test on held library)",
@@ -88,6 +116,7 @@ def main() -> None:
         "per_library": per_library,
         "michael_addition_library": michael,
         "michael_transfer_spearman": per_library.get(michael, {}).get("spearman") if michael else None,
+        "positive_control_michael_included": positive_control,
         "interpretation": (
             "Leave-library-out tests cross-chemistry transfer with real lung data. The "
             "Michael-addition library result is the most novel-linker-relevant: whether an "
@@ -102,6 +131,10 @@ def main() -> None:
     for lib, r in sorted(per_library.items(), key=lambda x: -x[1]["held_out_lipids"]):
         star = "  <- MICHAEL (novel-linker relevant)" if lib == michael else ""
         print(f"  held={lib:34s} n={r['held_out_lipids']:4d}  Spearman={r['spearman']:+.3f}  enrich={r['top_decile_enrichment']}x{star}")
+    print(f"\nPOSITIVE CONTROL (Michael INCLUDED in training, random 5-fold):")
+    print(f"  Michael-subset Spearman={positive_control['michael_subset_spearman']}  "
+          f"enrich={positive_control['michael_subset_enrichment']}x  "
+          f"(vs leave-out {out['michael_transfer_spearman']})")
     print(f"\nwritten: {args.output.relative_to(REPO_ROOT)}")
 
 
