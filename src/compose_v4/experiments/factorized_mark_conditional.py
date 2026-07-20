@@ -1317,9 +1317,23 @@ def configure_factorized_trainable_parameters(
     head introduced above the complete-template selector.  It leaves family
     timing, exact template residuals, placements, electronics, and the graph
     encoder frozen, isolating the diagnosed fused-ring probability seam.
+
+    ``chemistry_and_topology`` is the union of the two above: it repairs the
+    atom/bond/ring-electronic marks and the shared topology-cycle group head
+    together, while keeping the encoder, total hazard, family law, Graft,
+    exact template residuals, and placement frozen.  This composes the two
+    independently rollout-validated fixes (chemistry marks and ring-topology
+    mix) without unfreezing the family/Graft rates that caused the coupled
+    P1/P2 drift.
     """
 
-    if scope not in {"all", "chemistry_marks_only", "ring_topology_only"}:
+    valid_scopes = {
+        "all",
+        "chemistry_marks_only",
+        "ring_topology_only",
+        "chemistry_and_topology",
+    }
+    if scope not in valid_scopes:
         raise ValueError(f"unknown trainable parameter scope: {scope}")
     selected: list[str] = []
     for name, parameter in model.named_parameters():
@@ -1332,6 +1346,13 @@ def configure_factorized_trainable_parameters(
             or (
                 scope == "ring_topology_only"
                 and name.startswith(_RING_TOPOLOGY_PARAMETER_PREFIXES)
+            )
+            or (
+                scope == "chemistry_and_topology"
+                and name.startswith(
+                    _CHEMISTRY_MARK_PARAMETER_PREFIXES
+                    + _RING_TOPOLOGY_PARAMETER_PREFIXES
+                )
             )
         )
         parameter.requires_grad_(trainable)
