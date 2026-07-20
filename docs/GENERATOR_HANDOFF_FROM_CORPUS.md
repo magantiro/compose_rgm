@@ -19,7 +19,7 @@ This is what the corpus lane provides for training + evaluating the general
   ~464k unique products enumerable today (500k is a pool-size, not machinery, problem). Products carry `reaction_family` + route provenance.
 - **Layering / sampling:** `artifacts/datasets/compose_lipid_pretraining_v1/layer_aware_training_manifest.json` (R0 77.4% / AGILE-Ugi 22.6%). Virtual layer teaches support/variation; it does not overwrite the empirical molecular distribution or create delivery labels.
 
-**Distribution is realism-weighted to match R0 marginals** (linker type, tail count/length, head size, branchedness) with a coverage floor for rare/novel linkers — verified by `structural_freedom_audit.json` (per-DOF JS-to-R0).
+**Distribution is realism-matched to R0 by a two-tier resample** (`enumerate_corpus_pilot.py --realism-target N --marginal-match`): (1) linker/family quotas weighted by R0 linker frequency; (2) **iterative proportional fitting** over the four axes family quotas can't control — `n_tails`, `tail_length`, `head_size`, plus `linker_type` — so every DOF matches R0 jointly; (3) a **per-family coverage floor** (drawn IPF-weighted within family) keeps all 12 reaction families visible for the generator, including linkers R0 barely contains. Verified by `structural_freedom_audit.json`: **all 10 DOF well-matched (JS-to-R0 ≤ 0.07, off-ratio axes: none)** and heteroatom-core Hill 188.0 vs R0 188.3. Honest residuals: the finer tail-*architecture* proxy is more concentrated than R0 (Hill 5.3 vs 11.6) and intra-corpus NN-Tanimoto is 0.956 vs R0 0.884 — expected of realism-matching (R0 itself is homologous-chain redundant); exact uniqueness stays 100%.
 
 ## 2. Chemistry the kernel must support (P2-G2)
 

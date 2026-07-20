@@ -1,5 +1,5 @@
 {
-  "corpus_n": 2211,
+  "corpus_n": 3000,
   "degrees_of_freedom": {
     "charge": {
       "corpus": {
@@ -16,12 +16,12 @@
     },
     "head_size": {
       "corpus": {
-        "5-8": 0.066,
-        "9-14": 0.261,
-        "<=4": 0.286,
-        ">14": 0.387
+        "5-8": 0.075,
+        "9-14": 0.363,
+        "<=4": 0.07,
+        ">14": 0.492
       },
-      "jensen_shannon_to_r0": 0.1325,
+      "jensen_shannon_to_r0": 0.0212,
       "n_categories_covered": 4,
       "r0": {
         "5-8": 0.118,
@@ -29,21 +29,21 @@
         "<=4": 0.011,
         ">14": 0.504
       },
-      "ratio_match": "off"
+      "ratio_match": "good"
     },
     "linker_type": {
       "corpus": {
         "acetal": 0.018,
-        "amide": 0.161,
-        "carbamate": 0.09,
-        "disulfide": 0.054,
-        "ester": 0.147,
-        "none": 0.216,
-        "phosphate": 0.181,
-        "thioether": 0.038,
-        "urea": 0.095
+        "amide": 0.348,
+        "carbamate": 0.013,
+        "disulfide": 0.029,
+        "ester": 0.412,
+        "none": 0.081,
+        "phosphate": 0.051,
+        "thioether": 0.036,
+        "urea": 0.013
       },
-      "jensen_shannon_to_r0": 0.2447,
+      "jensen_shannon_to_r0": 0.0334,
       "n_categories_covered": 9,
       "r0": {
         "acetal": 0.011,
@@ -56,18 +56,18 @@
         "thioether": 0.121,
         "urea": 0.0
       },
-      "ratio_match": "off"
+      "ratio_match": "good"
     },
     "molecule_size": {
       "corpus": {
-        "41_64": 0.278,
-        "65_96": 0.217,
-        "97_128": 0.164,
-        "gt128": 0.024,
-        "le40": 0.317
+        "41_64": 0.665,
+        "65_96": 0.163,
+        "97_128": 0.041,
+        "gt128": 0.0,
+        "le40": 0.131
       },
-      "jensen_shannon_to_r0": 0.0506,
-      "n_categories_covered": 5,
+      "jensen_shannon_to_r0": 0.0346,
+      "n_categories_covered": 4,
       "r0": {
         "41_64": 0.495,
         "65_96": 0.211,
@@ -79,12 +79,12 @@
     },
     "n_basic_N": {
       "corpus": {
-        "1": 0.458,
-        "2": 0.324,
-        "3": 0.114,
-        "4plus": 0.104
+        "1": 0.265,
+        "2": 0.367,
+        "3": 0.186,
+        "4plus": 0.182
       },
-      "jensen_shannon_to_r0": 0.0056,
+      "jensen_shannon_to_r0": 0.0229,
       "n_categories_covered": 4,
       "r0": {
         "1": 0.384,
@@ -96,12 +96,12 @@
     },
     "n_branches": {
       "corpus": {
-        "0": 0.533,
-        "1": 0.137,
-        "2": 0.123,
-        "3plus": 0.207
+        "0": 0.561,
+        "1": 0.099,
+        "2": 0.12,
+        "3plus": 0.22
       },
-      "jensen_shannon_to_r0": 0.0124,
+      "jensen_shannon_to_r0": 0.0239,
       "n_categories_covered": 4,
       "r0": {
         "0": 0.522,
@@ -114,26 +114,26 @@
     "n_tails": {
       "corpus": {
         "0": 0.0,
-        "1": 0.099,
-        "2": 0.235,
-        "3plus": 0.667
+        "1": 0.0,
+        "2": 0.482,
+        "3plus": 0.518
       },
-      "jensen_shannon_to_r0": 0.1113,
-      "n_categories_covered": 3,
+      "jensen_shannon_to_r0": 0.0661,
+      "n_categories_covered": 2,
       "r0": {
         "0": 0.09,
         "1": 0.032,
         "2": 0.474,
         "3plus": 0.404
       },
-      "ratio_match": "off"
+      "ratio_match": "good"
     },
     "rings": {
       "corpus": {
-        "acyclic": 0.583,
-        "ring": 0.417
+        "acyclic": 0.668,
+        "ring": 0.332
       },
-      "jensen_shannon_to_r0": 0.0093,
+      "jensen_shannon_to_r0": 0.0289,
       "n_categories_covered": 2,
       "r0": {
         "acyclic": 0.47,
@@ -143,13 +143,13 @@
     },
     "tail_length": {
       "corpus": {
-        "13-17": 0.246,
-        "18-22": 0.479,
-        "8-12": 0.147,
-        "<=7": 0.042,
-        ">22": 0.087
+        "13-17": 0.274,
+        "18-22": 0.44,
+        "8-12": 0.229,
+        "<=7": 0.054,
+        ">22": 0.002
       },
-      "jensen_shannon_to_r0": 0.1237,
+      "jensen_shannon_to_r0": 0.0521,
       "n_categories_covered": 5,
       "r0": {
         "13-17": 0.19,
@@ -158,16 +158,16 @@
         "<=7": 0.185,
         ">22": 0.001
       },
-      "ratio_match": "off"
+      "ratio_match": "good"
     },
     "unsaturation": {
       "corpus": {
-        "0": 0.515,
-        "1": 0.108,
-        "2": 0.159,
-        "3plus": 0.219
+        "0": 0.521,
+        "1": 0.11,
+        "2": 0.165,
+        "3plus": 0.205
       },
-      "jensen_shannon_to_r0": 0.0217,
+      "jensen_shannon_to_r0": 0.018,
       "n_categories_covered": 4,
       "r0": {
         "0": 0.622,
@@ -179,16 +179,15 @@
     }
   },
   "format": "compose_lipid_structural_freedom_audit_v1",
-  "off_ratio_axes": [
-    "n_tails",
-    "tail_length",
-    "linker_type",
-    "head_size"
-  ],
+  "off_ratio_axes": [],
   "r0_n": 2500,
   "well_matched_axes": [
+    "n_tails",
+    "tail_length",
     "n_branches",
     "unsaturation",
+    "linker_type",
+    "head_size",
     "n_basic_N",
     "molecule_size",
     "charge",

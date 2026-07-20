@@ -86,10 +86,10 @@ Answers "does head/tail SAR transfer well enough for a single oracle to rank nov
 Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a **general linker-agnostic** insane lipid generator (Fig 2/3, Arm A); (2) downstream = fine-tune / linker-freeze on the novel Michael linker (Fig 6, Arm B). The corpus stays broad/general. The corpus diversity/coverage metrics double as the **Fig 2/3 generator-qualification yardstick** (validity, non-memorization via NN curves, fidelity via marginals, coverage via LNPDB recall, architecture, synthesis-eligibility, family generalization).
 
 ## Exact next actions
-1. **Corpus (top priority — surfaced by metrics):** add **multi-tail architecture** — iterative reaction application so polyamine heads carry 2–4 tails, closing the arch-Hill gap (5.5→~11) and the tail-count/size JS gaps to R0. This is the biggest fidelity lever.
-2. **Corpus:** scale/diversify the building-block pool (more heads, cyclic/heteroatom tails; commercial catalog when available) → 50–100k pilot → 500k; add held-reaction-family + held-component splits.
-3. **Oracle (paused):** finish the intrinsic head-pKa feature (fix MolGpKa batch bug; cross-validate vs xtb) and test held-head transfer lift; then the head-aware AD gate.
-4. ~~**Oracle:** integrate LiON lung slice for leave-study-out on airway heads.~~ **Done (M17)** — became **leave-*library*-out**: the LiON A549 screen carries per-library annotations, so we hold out whole chemistry libraries. See finding below.
+1. **Corpus — scale to 500k:** now a pool-size problem, not machinery. The two-tier realism-match + all-DOF audit is done (M18); enumeration yields ~464k unique products today. Grow the building-block pool (more heads, cyclic/heteroatom tails, commercial catalog when available) so the realism-matched draw reaches 500k without inflating redundancy (current intra-NN 0.956 vs R0 0.884).
+2. **Oracle — frozen-embedding cell (R3):** blocked on encoder availability (no `transformers`/`molfeat`/`unimol`/`torch_geometric` installed — RDKit only). Decide: install a small encoder (network permitting) vs a richer RDKit descriptor representation labelled honestly. Motivating question: does a better representation lift the LiON cross-library transfer (0.077) toward the positive-control 0.633?
+3. **Fine-tune substrate (Fig 6):** decide whether to add a **general propiolate/ynoate aza-Michael family** (→ β-enamine-ester, the novel BEAE motif's class) to *pretraining* vs keeping it in the linker fine-tune. Default: keep pretraining general (user prior); propiolate goes in the fine-tune. Validate real BEAE SMILES through the AD gate + head-pKa when provided.
+4. ~~**Oracle:** integrate LiON lung slice for leave-study-out on airway heads.~~ **Done (M17)** — became **leave-*library*-out** + positive control (see finding below). ~~**Corpus:** multi-tail (M8) + realism-match all DOF (M18).~~ **Done.**
 
 ## Key artifact paths
 - `configs/lipid_reactions/qualified_reactions_v1.json` — qualified Ugi-3CR registry (hash-bound).
@@ -119,6 +119,7 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 - `56e8706` M14: freeze leakage-resistant corpus splits (family/scaffold/head/study; all leak-free) — Fig 2 contract + generator handoff.
 - `eac99bf` M15: wire oracle end-to-end — `candidate → admit/rank/abstain` nomination engine (Fig 4).
 - `b74b134` M16: corpus coverage-audit card — all-encompassing evidence (10/11 linkers, C/N/O/S/P, 12 families, 8 head classes).
+- `52eb15e` M18: two-tier realism-match — IPF over n_tails/tail_length/head_size/linker + per-family coverage floor. **All 10 DOF match R0 (JS ≤ 0.07, off-ratio: none); all 12 families visible (≥40 each); core Hill 188 vs R0 188.** Closes the "full diversity at appropriate ratios" mandate. (M17 = LiON leave-library-out + positive control, `d14b001`/`c1a4f18`.)
 
 ## LiON leave-library-out — cross-chemistry transfer (M17)
 The LiON A549 lung screen (1,801 lipids on disk) carries `Library_ID` annotations grouping it into distinct chemistry libraries — critically a **`RM_Michael_addition_branched`** library (1,177 lipids), the **exact novel-linker chemistry class**, plus `IR_Reductive_amination` (467) and `other` (157). Holding out an entire library and predicting it from an oracle trained on the others (`scripts/qualify_lion_leave_library.py` → `diagnostics/lion_leave_library_transfer.json`) tests cross-chemistry rank transfer with **real lung data**:
