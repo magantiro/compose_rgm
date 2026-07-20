@@ -1,0 +1,121 @@
+{
+  "corpus_scope": "general linker-agnostic reaction-grounded pilot (R1)",
+  "enumeration": {
+    "raw_products_by_family": {
+      "amide_coupling_acid_amine": 2040,
+      "aza_michael_amine_acrylate": 2040,
+      "epoxide_opening_amine": 2040,
+      "passerini_3cr": 37800,
+      "reductive_amination_amine_aldehyde": 2856,
+      "ugi_3cr_agile": 85680
+    },
+    "total_raw_applications": 132456,
+    "total_unique_products": 132456
+  },
+  "environment": {
+    "rdkit": "2025.09.6",
+    "seed": 20260720
+  },
+  "format": "compose_lipid_corpus_pilot_metrics_v1",
+  "lnpdb_coverage": {
+    "median_r0_nn_to_corpus": 0.507,
+    "r0_sampled": 2000,
+    "recall_at_tanimoto_0.4": 0.836
+  },
+  "nn_redundancy_intra_corpus": {
+    "frac_nn_ge_0.9": 0.577,
+    "frac_nn_ge_0.95": 0.468,
+    "median_nn_tanimoto": 0.935,
+    "sampled": 1036
+  },
+  "physchem_marginals": {
+    "aromatic_rings": {
+      "mean": 0.07,
+      "median": 0.0,
+      "p5": 0.0,
+      "p95": 1.0
+    },
+    "charge": {
+      "mean": 0.0,
+      "median": 0.0,
+      "p5": 0.0,
+      "p95": 0.0
+    },
+    "hba": {
+      "mean": 3.86,
+      "median": 3.0,
+      "p5": 1.0,
+      "p95": 8.0
+    },
+    "hbd": {
+      "mean": 2.15,
+      "median": 2.0,
+      "p5": 1.0,
+      "p95": 6.0
+    },
+    "heavy": {
+      "mean": 37.96,
+      "median": 35.5,
+      "p5": 18.0,
+      "p95": 66.0
+    },
+    "logp": {
+      "mean": 8.81,
+      "median": 7.89,
+      "p5": 2.87,
+      "p95": 19.91
+    },
+    "mw": {
+      "mean": 535.72,
+      "median": 499.87,
+      "p5": 256.2,
+      "p95": 932.57
+    },
+    "rings": {
+      "mean": 0.35,
+      "median": 0.0,
+      "p5": 0.0,
+      "p95": 1.0
+    },
+    "rot": {
+      "mean": 29.06,
+      "median": 26.0,
+      "p5": 11.0,
+      "p95": 56.0
+    },
+    "tpsa": {
+      "mean": 61.02,
+      "median": 55.4,
+      "p5": 20.31,
+      "p95": 120.47
+    }
+  },
+  "scaffold_diversity": {
+    "murcko_per_1k": 10.6,
+    "unique_murcko_scaffolds": 11
+  },
+  "selection": {
+    "family_balance_selected": {
+      "amide_coupling_acid_amine": 120,
+      "aza_michael_amine_acrylate": 172,
+      "epoxide_opening_amine": 129,
+      "passerini_3cr": 180,
+      "reductive_amination_amine_aldehyde": 135,
+      "ugi_3cr_agile": 300
+    },
+    "note": "raw enumeration is family-skewed by combinatorial count; stratified reservoir rebalances.",
+    "quota_per_stratum": 60,
+    "selected_pilot_size": 1036
+  },
+  "size_eligibility": {
+    "frac_le_64_heavy": 0.884,
+    "frac_le_96_heavy": 1.0,
+    "max_heavy": 76,
+    "median_heavy": 35,
+    "min_heavy": 11
+  },
+  "validity": {
+    "all_single_component_sanitized": true,
+    "uniqueness": 1.0
+  }
+}

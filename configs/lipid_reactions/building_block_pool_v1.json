@@ -1,0 +1,3644 @@
+{
+  "blocks": [
+    {
+      "block_id": "acrylate:0001",
+      "canonical_smiles": "C=CC(=O)OCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0013",
+      "canonical_smiles": "C=CC(=O)OCCCCC/C=C\\C/C=C\\CCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0006",
+      "canonical_smiles": "C=CC(=O)OCCCCC/C=C\\CCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0003",
+      "canonical_smiles": "C=CC(=O)OCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0017",
+      "canonical_smiles": "C=CC(=O)OCCCCCC/C=C\\C/C=C\\CCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0009",
+      "canonical_smiles": "C=CC(=O)OCCCCCC/C=C\\CCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0000",
+      "canonical_smiles": "C=CC(=O)OCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0021",
+      "canonical_smiles": "C=CC(=O)OCCCCCCC/C=C\\C/C=C\\CCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0012",
+      "canonical_smiles": "C=CC(=O)OCCCCCCC/C=C\\CCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0005",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0025",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCC/C=C\\C/C=C\\CCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0016",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCC/C=C\\CCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0002",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0029",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCC/C=C\\C/C=C\\CCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 27,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0020",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCC/C=C\\CCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0008",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0024",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCC/C=C\\CCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0004",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0028",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCC/C=C\\CCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 28,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0011",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0007",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0015",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0010",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0019",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0014",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0023",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0018",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0027",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCCCCCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 28,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0022",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 26,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "acrylate:0026",
+      "canonical_smiles": "C=CC(=O)OCCCCCCCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "acrylate",
+      "heavy_atoms": 28,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_acrylate_or_acrylamide_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0030",
+      "canonical_smiles": "C#CCCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 20,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0031",
+      "canonical_smiles": "C=CCCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 20,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0001",
+      "canonical_smiles": "CCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 8,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0003",
+      "canonical_smiles": "CCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0032",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 27,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0033",
+      "canonical_smiles": "CCCCCC(C)CCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 19,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0005",
+      "canonical_smiles": "CCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0034",
+      "canonical_smiles": "CCCCCCC/C=C/C(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 19,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0035",
+      "canonical_smiles": "CCCCCCC/C=C\\C(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 19,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0000",
+      "canonical_smiles": "CCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 8,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0036",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 27,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0037",
+      "canonical_smiles": "CCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 18,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0008",
+      "canonical_smiles": "CCCCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0002",
+      "canonical_smiles": "CCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0038",
+      "canonical_smiles": "CCCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 19,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0039",
+      "canonical_smiles": "CCCCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 20,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0011",
+      "canonical_smiles": "CCCCCCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0004",
+      "canonical_smiles": "CCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0015",
+      "canonical_smiles": "CCCCCCCCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0007",
+      "canonical_smiles": "CCCCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0019",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0040",
+      "canonical_smiles": "CCCCCCCCCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 25,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0023",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0041",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCC(=O)OCCCCCC=O",
+      "descriptors": {},
+      "handle": "aldehyde",
+      "heavy_atoms": 27,
+      "provenance": {
+        "agile_component": "B",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0027",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(C)CCC=O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "aldehyde:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCC=O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "aldehyde",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "aldehyde_body",
+        "aldehyde_tail",
+        "oxoester_aldehyde_body_tail"
+      ]
+    },
+    {
+      "block_id": "amine:0028",
+      "canonical_smiles": "C1CCNC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "pyrrolidine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0026",
+      "canonical_smiles": "C1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "piperidine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0023",
+      "canonical_smiles": "C1CNCCN1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "piperazine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0030",
+      "canonical_smiles": "C1CNCCNC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "homopiperazine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0025",
+      "canonical_smiles": "C1COCCN1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "morpholine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0037",
+      "canonical_smiles": "CC(C)(C)CN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "neopentylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0035",
+      "canonical_smiles": "CC(C)(C)N",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "tert-butylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0034",
+      "canonical_smiles": "CC(C)N",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 4,
+      "provenance": {
+        "name": "isopropylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0044",
+      "canonical_smiles": "CC(C)N(CCN)C(C)C",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0036",
+      "canonical_smiles": "CCCCC(CC)CN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "2-ethylhexylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0006",
+      "canonical_smiles": "CCCCCCCCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 13,
+      "provenance": {
+        "name": "dodecylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0005",
+      "canonical_smiles": "CCCCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "octylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0004",
+      "canonical_smiles": "CCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "hexylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0003",
+      "canonical_smiles": "CCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "butylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0045",
+      "canonical_smiles": "CCCCN(CCCC)CCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 13,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0009",
+      "canonical_smiles": "CCCCNC",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "N-methylbutylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0002",
+      "canonical_smiles": "CCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 4,
+      "provenance": {
+        "name": "propylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0001",
+      "canonical_smiles": "CCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 3,
+      "provenance": {
+        "name": "ethylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0046",
+      "canonical_smiles": "CCN(CC)CCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0047",
+      "canonical_smiles": "CCN(CC)CCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0048",
+      "canonical_smiles": "CCN1CCCC1CN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0008",
+      "canonical_smiles": "CCNCC",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "diethylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0000",
+      "canonical_smiles": "CN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 2,
+      "provenance": {
+        "name": "methylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0049",
+      "canonical_smiles": "CN(C)CCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0015",
+      "canonical_smiles": "CN(C)CCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "dmapa",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0050",
+      "canonical_smiles": "CN(CCCN)CCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0051",
+      "canonical_smiles": "CN1CCC(N)CC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0024",
+      "canonical_smiles": "CN1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "n-methylpiperazine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0007",
+      "canonical_smiles": "CNC",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 3,
+      "provenance": {
+        "name": "dimethylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0052",
+      "canonical_smiles": "Cc1cc(N)n(C)n1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0038",
+      "canonical_smiles": "NC1CCCCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "cyclohexylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0027",
+      "canonical_smiles": "NC1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "4-aminopiperidine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0012",
+      "canonical_smiles": "NCC(O)CO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "name": "aminopropanediol",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0022",
+      "canonical_smiles": "NCCCCCCNCCCCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 15,
+      "provenance": {
+        "name": "bis-hexamethylenetriamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0018",
+      "canonical_smiles": "NCCCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "name": "spermidine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0014",
+      "canonical_smiles": "NCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 5,
+      "provenance": {
+        "name": "13-diaminopropane",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0053",
+      "canonical_smiles": "NCCCN1CCCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0040",
+      "canonical_smiles": "NCCCN1CCOCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "name": "3-morpholinopropylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0019",
+      "canonical_smiles": "NCCCNCCCCNCCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 14,
+      "provenance": {
+        "name": "spermine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0013",
+      "canonical_smiles": "NCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 4,
+      "provenance": {
+        "name": "ethylenediamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0021",
+      "canonical_smiles": "NCCN(CCN)CCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "name": "tren",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0054",
+      "canonical_smiles": "NCCN1CCCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0031",
+      "canonical_smiles": "NCCN1CCCCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "2-piperidin-1-ylethanamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0029",
+      "canonical_smiles": "NCCN1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "1-2-aminoethylpiperazine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0032",
+      "canonical_smiles": "NCCN1CCOCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "4-2-aminoethylmorpholine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0016",
+      "canonical_smiles": "NCCNCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "deta",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0017",
+      "canonical_smiles": "NCCNCCNCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 10,
+      "provenance": {
+        "name": "teta",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0020",
+      "canonical_smiles": "NCCNCCNCCNCCNCCN",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 16,
+      "provenance": {
+        "name": "peha",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0010",
+      "canonical_smiles": "NCCO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 4,
+      "provenance": {
+        "name": "ethanolamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0043",
+      "canonical_smiles": "NCCc1ccccc1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "phenethylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0039",
+      "canonical_smiles": "NCCc1cnc[nH]1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "histamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0042",
+      "canonical_smiles": "NCc1ccccc1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 8,
+      "provenance": {
+        "name": "benzylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0041",
+      "canonical_smiles": "NCc1ccco1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "furfurylamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0055",
+      "canonical_smiles": "NN1CCCCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0056",
+      "canonical_smiles": "NN1CCOCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0057",
+      "canonical_smiles": "Nc1cn[nH]c1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 6,
+      "provenance": {
+        "agile_component": "A",
+        "source": "agile_measured"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0033",
+      "canonical_smiles": "OCCN1CCNCC1",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 9,
+      "provenance": {
+        "name": "1-2-hydroxyethylpiperazine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "amine:0011",
+      "canonical_smiles": "OCCNCCO",
+      "descriptors": {},
+      "handle": "amine",
+      "heavy_atoms": 7,
+      "provenance": {
+        "name": "diethanolamine",
+        "source": "curated_literature"
+      },
+      "reaction_roles": [
+        "amine_head"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0001",
+      "canonical_smiles": "CCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0003",
+      "canonical_smiles": "CCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0000",
+      "canonical_smiles": "CCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0005",
+      "canonical_smiles": "CCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0002",
+      "canonical_smiles": "CCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0008",
+      "canonical_smiles": "CCCCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0004",
+      "canonical_smiles": "CCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0011",
+      "canonical_smiles": "CCCCCCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0007",
+      "canonical_smiles": "CCCCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0015",
+      "canonical_smiles": "CCCCCCCCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0019",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0023",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0027",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(C)CCC(=O)O",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "carboxylic_acid:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCC(=O)O",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "carboxylic_acid",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "carboxylic_acid_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0001",
+      "canonical_smiles": "CCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0013",
+      "canonical_smiles": "CCCC/C=C\\C/C=C\\CCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0006",
+      "canonical_smiles": "CCCC/C=C\\CCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0003",
+      "canonical_smiles": "CCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0017",
+      "canonical_smiles": "CCCCC/C=C\\C/C=C\\CCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0009",
+      "canonical_smiles": "CCCCC/C=C\\CCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0021",
+      "canonical_smiles": "CCCCCC/C=C\\C/C=C\\CCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0012",
+      "canonical_smiles": "CCCCCC/C=C\\CCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0005",
+      "canonical_smiles": "CCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0025",
+      "canonical_smiles": "CCCCCCC/C=C\\C/C=C\\CCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0016",
+      "canonical_smiles": "CCCCCCC/C=C\\CCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0000",
+      "canonical_smiles": "CCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 9,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0029",
+      "canonical_smiles": "CCCCCCCC/C=C\\C/C=C\\CCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0020",
+      "canonical_smiles": "CCCCCCCC/C=C\\CCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0008",
+      "canonical_smiles": "CCCCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0024",
+      "canonical_smiles": "CCCCCCCCC/C=C\\CCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0002",
+      "canonical_smiles": "CCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 11,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0028",
+      "canonical_smiles": "CCCCCCCCCC/C=C\\CCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0011",
+      "canonical_smiles": "CCCCCCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0004",
+      "canonical_smiles": "CCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 13,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0015",
+      "canonical_smiles": "CCCCCCCCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0007",
+      "canonical_smiles": "CCCCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0019",
+      "canonical_smiles": "CCCCCCCCCCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0010",
+      "canonical_smiles": "CCCCCCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0023",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0014",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0027",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC(C)CCC1CO1",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0018",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0022",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "epoxide:0026",
+      "canonical_smiles": "CCCCCCCCCCCCCCCCCCCCCCC1CO1",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "epoxide",
+      "heavy_atoms": 25,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "alkyl_epoxide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0001",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 8,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0003",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0005",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0008",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0011",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0015",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCCCCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0019",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0023",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0027",
+      "canonical_smiles": "[C-]#[N+]CCC(C)CCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": true,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0013",
+      "canonical_smiles": "[C-]#[N+]CCCC/C=C\\C/C=C\\CCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 2
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 15,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0006",
+      "canonical_smiles": "[C-]#[N+]CCCC/C=C\\CCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0017",
+      "canonical_smiles": "[C-]#[N+]CCCCC/C=C\\C/C=C\\CCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 2
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 17,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0009",
+      "canonical_smiles": "[C-]#[N+]CCCCC/C=C\\CCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0000",
+      "canonical_smiles": "[C-]#[N+]CCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 6,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 8,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0021",
+      "canonical_smiles": "[C-]#[N+]CCCCCC/C=C\\C/C=C\\CCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 2
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 19,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0012",
+      "canonical_smiles": "[C-]#[N+]CCCCCC/C=C\\CCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0025",
+      "canonical_smiles": "[C-]#[N+]CCCCCCC/C=C\\C/C=C\\CCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 2
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 21,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0016",
+      "canonical_smiles": "[C-]#[N+]CCCCCCC/C=C\\CCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0002",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 8,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 10,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0029",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCC/C=C\\C/C=C\\CCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 2
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 23,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0020",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCC/C=C\\CCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0024",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCC/C=C\\CCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0004",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 10,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 12,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0028",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCC/C=C\\CCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 1
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0007",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 12,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 14,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0010",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 14,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 16,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0014",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 16,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 18,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0018",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 18,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 20,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0022",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 20,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 22,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    },
+    {
+      "block_id": "isocyanide:0026",
+      "canonical_smiles": "[C-]#[N+]CCCCCCCCCCCCCCCCCCCCCC",
+      "descriptors": {
+        "branched": false,
+        "chain_length": 22,
+        "unsaturation": 0
+      },
+      "handle": "isocyanide",
+      "heavy_atoms": 24,
+      "provenance": {
+        "source": "programmatic_rational"
+      },
+      "reaction_roles": [
+        "isocyanide_tail"
+      ]
+    }
+  ],
+  "blocks_by_handle": {
+    "acrylate": 30,
+    "aldehyde": 42,
+    "amine": 58,
+    "carboxylic_acid": 30,
+    "epoxide": 30,
+    "isocyanide": 30
+  },
+  "blocks_by_source": {
+    "agile_measured": 26,
+    "curated_literature": 44,
+    "programmatic_rational": 150
+  },
+  "format": "compose_lipid_building_block_pool_v1",
+  "note": "Reactive substrates (not finished-lipid fragments) for the general linker-agnostic corpus.",
+  "reaction_role_coverage": {
+    "aldehyde_body": 42,
+    "aldehyde_tail": 42,
+    "alkyl_acrylate_or_acrylamide_tail": 30,
+    "alkyl_epoxide_tail": 30,
+    "amine_head": 58,
+    "carboxylic_acid_tail": 30,
+    "isocyanide_tail": 30,
+    "oxoester_aldehyde_body_tail": 42
+  },
+  "total_blocks": 220
+}
