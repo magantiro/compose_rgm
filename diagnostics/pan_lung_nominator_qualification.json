@@ -1,0 +1,27 @@
+{
+  "admission_rate": 0.989,
+  "all_novel_heads_abstain": true,
+  "decision_breakdown": {
+    "rank": 174,
+    "reject_no_ionizable_head": 2
+  },
+  "format": "compose_pan_lung_nominator_qualification_v1",
+  "in_sample_ranking_spearman_score_vs_potency": 0.959,
+  "interpretation": "99% of real A549 lipids are admitted and ranked; the rest abstain (off molecular-AD or head domain) rather than being scored on extrapolation. Novel/non-ionizable heads all abstain. Honest domain-bounded nomination.",
+  "novel_head_candidates": {
+    "amidine_head": {
+      "abstained": true,
+      "decision": "abstain_novel_head"
+    },
+    "guanidine_head": {
+      "abstained": true,
+      "decision": "abstain_novel_head"
+    },
+    "non_ionizable_ester": {
+      "abstained": true,
+      "decision": "reject_no_ionizable_head"
+    }
+  },
+  "ranking_note": "in-sample (filtering bundle trained on A549); a directional check that scores track potency, not held-out validation",
+  "real_a549_lipids": 176
+}
