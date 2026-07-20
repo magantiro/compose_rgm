@@ -1,0 +1,43 @@
+{
+  "format": "compose_v4_griddd_trained_sidecar_molecule_qed_smoke_v1",
+  "verdict": "negative_no_positive_molecule_level_qed_effect",
+  "efficacy_claim_authorized": false,
+  "fixed_lead_panel_authorized": false,
+  "benchmark_800x20_authorized": false,
+  "base_checkpoint_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+  "sidecar": "compose-v4-griddd-qed-frozen-residual-pilot-20260720-v5-canonical/checkpoint.best.pt (step 500, val loss 11.1448)",
+  "qualification_manifest_sha256": "3abc2cbd27c1c0f60a6c71772bebefd4ae4c9d5fe59790a7679cd633eb49e46f",
+  "sidecar_live_target_present_family_rate_delta": 0.10794,
+  "missing_condition_identity_error": 0.0,
+  "lead_qed": 0.7435,
+  "target_qed": 0.9,
+  "n_seeds": 5,
+  "max_events": 24,
+  "operational_horizon": 6.0,
+  "arms": {
+    "direct": {
+      "qed_mean": 0.47719175770996347,
+      "qed_min": 0.40151391803303166,
+      "qed_max": 0.6336268103758989,
+      "similarity_mean": 0.4996447321675285,
+      "success_at_0.90": 0,
+      "count_beat_lead": 0
+    },
+    "controller": {
+      "qed_mean": 0.5511884761554449,
+      "qed_min": 0.41914017331971837,
+      "qed_max": 0.7245733662713248,
+      "similarity_mean": 0.5482517702906957,
+      "success_at_0.90": 0,
+      "count_beat_lead": 0
+    },
+    "combined": {
+      "qed_mean": 0.47719175770996347,
+      "qed_min": 0.40151391803303166,
+      "qed_max": 0.6336268103758989,
+      "similarity_mean": 0.4996447321675285,
+      "success_at_0.90": 0,
+      "count_beat_lead": 0
+    }
+  }
+}
