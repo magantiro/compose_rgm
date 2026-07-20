@@ -1,0 +1,89 @@
+{
+  "corpus_products_audited": 2159,
+  "covered": {
+    "elements": [
+      "C",
+      "N",
+      "O",
+      "S",
+      "P"
+    ],
+    "head_classes": [
+      "tertiary_amine",
+      "secondary_amine",
+      "primary_amine",
+      "amino_alcohol_head",
+      "piperazine",
+      "morpholine",
+      "piperidine_ring",
+      "polyamine_2plus_N"
+    ],
+    "linkers": [
+      "ester",
+      "amide",
+      "carbamate",
+      "urea",
+      "thioether",
+      "disulfide",
+      "acetal_ketal",
+      "amino_alcohol",
+      "phosphate",
+      "ether"
+    ]
+  },
+  "design_reference": "Arral & Whitehead, Nat Rev Bioeng 4:417-434 (2026)",
+  "element_coverage": {
+    "C": 1.0,
+    "N": 0.9055,
+    "O": 0.8425,
+    "P": 0.1853,
+    "S": 0.0889
+  },
+  "format": "compose_lipid_corpus_coverage_card_v1",
+  "gaps": {
+    "elements": [],
+    "linkers": [
+      "carbonate"
+    ]
+  },
+  "head_class_coverage": {
+    "amino_alcohol_head": 0.157,
+    "morpholine": 0.025,
+    "piperazine": 0.0848,
+    "piperidine_ring": 0.0528,
+    "polyamine_2plus_N": 0.5452,
+    "primary_amine": 0.1792,
+    "secondary_amine": 0.314,
+    "tertiary_amine": 0.5938
+  },
+  "linker_motif_coverage": {
+    "acetal_ketal": 0.0185,
+    "amide": 0.1644,
+    "amino_alcohol": 0.157,
+    "carbamate": 0.0926,
+    "carbonate": 0.0,
+    "disulfide": 0.044,
+    "ester": 0.3182,
+    "ether": 0.3548,
+    "phosphate": 0.1853,
+    "thioether": 0.0394,
+    "urea": 0.0926
+  },
+  "reaction_families": {
+    "count": 12,
+    "families": [
+      "acetal_aldehyde_diol",
+      "amide_coupling_acid_amine",
+      "aza_michael_amine_acrylate",
+      "carbamate_amine_chloroformate",
+      "disulfide_coupling",
+      "epoxide_opening_amine",
+      "iphos_amine_dioxaphospholane",
+      "passerini_3cr",
+      "reductive_amination_amine_aldehyde",
+      "thiol_michael_thioether",
+      "ugi_3cr_agile",
+      "urea_amine_isocyanate"
+    ]
+  }
+}
