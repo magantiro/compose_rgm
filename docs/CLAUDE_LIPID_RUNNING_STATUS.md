@@ -62,12 +62,16 @@ Answers "does head/tail SAR transfer well enough for a single oracle to rank nov
 | Ugi-3CR chemoselectivity negatives rejected | 5/5 |
 | Smoke unique route-certified products | 1,320 |
 | Smoke exact route-replay of released library | 1200/1200 = 100.00% |
-| Qualified reaction families | 1 of ≥6 target |
-| Pan-lung oracle cells complete | R1/R2 × M1/M2/M3 + M6 ensembles + **R1×M4** (this session) |
-| Canonical pan-lung rows | 4,783 head-rows / 4,339 measurements / 7 typed heads |
-| R1×M4 held-lipid Spearman (A549 / LUMI) | 0.592 / 0.885 |
+| Qualified reaction families | **6** (Ugi-3CR + aza-Michael, epoxide, Passerini, red-amination, amide) |
+| Building-block pool | 220 role-annotated (26 AGILE, 44 curated amines, 150 programmatic) |
+| Pilot enumeration | 132,456 unique products from 220 blocks (500k = pool-size, not machinery) |
+| Corpus core diversity (Hill Simpson) | 161 vs R0 214 effective heteroatom-cores |
+| Corpus NN vs R0 intra-NN | 0.933 vs **0.887** (high NN is intrinsic to lipids, not duplication) |
+| Corpus architecture Hill vs R0 | **5.5 vs 11.4** — GAP: need multi-tail architecture |
+| LNPDB recall@Tanimoto 0.4 | 0.79–0.84 |
+| Pan-lung oracle cells complete | R1/R2 × M1/M2/M3 + M6 ensembles + **R1×M4** |
 | Head-axis transfer (A549 / LUMI held-head) | 0.158 / 0.475 (vs baseline 0.568 / 0.830) |
-| Tests passing | 73 (31 added this session) |
+| Tests passing | 91 |
 
 ---
 
@@ -76,11 +80,14 @@ Answers "does head/tail SAR transfer well enough for a single oracle to rank nov
 - R3 cell needs a justified **frozen molecular encoder**; leave-study-out needs **>1 source per airway head** (LiON lung slice is the next admission).
 - Corpus pilot (50–100k) blocked until **≥3–4 families qualified** (diversity metrics require multiple families).
 
+## Corpus positioning (Nature Biotech)
+Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a **general linker-agnostic** insane lipid generator (Fig 2/3, Arm A); (2) downstream = fine-tune / linker-freeze on the novel Michael linker (Fig 6, Arm B). The corpus stays broad/general. The corpus diversity/coverage metrics double as the **Fig 2/3 generator-qualification yardstick** (validity, non-memorization via NN curves, fidelity via marginals, coverage via LNPDB recall, architecture, synthesis-eligibility, family generalization).
+
 ## Exact next actions
-1. **Oracle (design-driven):** build the **head-aware applicability-domain gate** — extend the AD so novel-head candidates abstain; decompose scoring so tail/secondary SAR is ranked while head/linker gate admission. Directly implements the milestone-4 decision.
-2. **Corpus:** qualify breadth batch — epoxide opening, aza-Michael, Passerini — reusing the enumerator/registry machinery (each needs its own primary-source evidence packet + exact reconstruction).
-3. **Corpus:** stratified 50–100k pilot across the qualified family batch with coverage/leakage gates.
-4. **Oracle:** integrate LiON lung slice (already on disk) to enable leave-study-out on the airway heads; R3 frozen-embedding cell is lower priority given the transfer finding.
+1. **Corpus (top priority — surfaced by metrics):** add **multi-tail architecture** — iterative reaction application so polyamine heads carry 2–4 tails, closing the arch-Hill gap (5.5→~11) and the tail-count/size JS gaps to R0. This is the biggest fidelity lever.
+2. **Corpus:** scale/diversify the building-block pool (more heads, cyclic/heteroatom tails; commercial catalog when available) → 50–100k pilot → 500k; add held-reaction-family + held-component splits.
+3. **Oracle (paused):** finish the intrinsic head-pKa feature (fix MolGpKa batch bug; cross-validate vs xtb) and test held-head transfer lift; then the head-aware AD gate.
+4. **Oracle:** integrate LiON lung slice (on disk) for leave-study-out on airway heads.
 
 ## Key artifact paths
 - `configs/lipid_reactions/qualified_reactions_v1.json` — qualified Ugi-3CR registry (hash-bound).
@@ -92,7 +99,10 @@ Answers "does head/tail SAR transfer well enough for a single oracle to rank nov
 - Tests: `tests/test_ugi_3cr_qualification.py`, `tests/test_ugi_3cr_smoke.py`.
 
 ## Commit log
-- `5dd44c4` Milestone 1: qualify Ugi-3CR transform + route-replay smoke.
-- `ee87690` Milestone 2: canonical row-level pan-lung manifest.
-- `d9c7ebf` Milestone 3: R1xM4 masked multitask MLP cell + negative-transfer finding.
-- (pending) Milestone 4: component-transfer qualification + oracle design decision.
+- `5dd44c4` M1: qualify Ugi-3CR transform + route-replay smoke.
+- `ee87690` M2: canonical row-level pan-lung manifest.
+- `d9c7ebf` M3: R1xM4 masked multitask MLP cell + negative-transfer finding.
+- `9b72cce` M4: component-transfer qualification + head-aware oracle design decision.
+- `b646133` M5: qualify 5 complementary reaction families (6 total).
+- `20496ab` M6: building-block pool (220) + stratified pilot + diversity metrics harness.
+- (pending) M7: lipid-appropriate v2 metrics (core Hill + NN-vs-R0 + faithfulness JS); architecture gap finding.
