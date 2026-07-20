@@ -117,6 +117,8 @@ Two-stage story ([[generator-general-then-linker-finetune]]): (1) headline = a *
 - `264cc33`/`3480a46`/`013df74`/`7492958` (pKa feature, 34k scale, balanced selection, status).
 - `aed2bb6` M13: complete linker palette — urea/acetal/iPhos (12 families, +P); elements C/N/O/S/P.
 - `56e8706` M14: freeze leakage-resistant corpus splits (family/scaffold/head/study; all leak-free) — Fig 2 contract + generator handoff.
+- `eac99bf` M15: wire oracle end-to-end — `candidate → admit/rank/abstain` nomination engine (Fig 4).
+- `b74b134` M16: corpus coverage-audit card — all-encompassing evidence (10/11 linkers, C/N/O/S/P, 12 families, 8 head classes).
 
 ## Oracle applicability-domain decision (locked)
 Head axis doesn't transfer → the oracle's honest domain is **known heads (large: 1,183 head-region scaffolds from R0+corpus, ~435 LNPDB head SMILES)**. High-ranked candidates come from this rich known-head space; novel-head candidates **abstain → small active-learning round**. Uses **intrinsic** head-pKa (~9), not apparent (~6.4). Head-pKa feature lifts within-domain head ranking (+42%). Next: wire the gate + pKa into the deployed filtering bundle.
