@@ -1,0 +1,127 @@
+{
+  "boundary": "LuT excluded (component-only, R2 lane). Held-lipid grouping is global by canonical structure.",
+  "cell_id": "R1xM4",
+  "comparison_multitask_vs_single": {
+    "airway_a549_in_vitro_expression": {
+      "multitask_minus_single": 0.0162,
+      "multitask_spearman": 0.5921,
+      "multitask_top_decile_enrichment": 3.024,
+      "rows": 1801,
+      "single_task_spearman": 0.5759
+    },
+    "airway_hbe_in_vitro_expression": {
+      "multitask_minus_single": -0.0001,
+      "multitask_spearman": 0.8846,
+      "multitask_top_decile_enrichment": 6.823,
+      "rows": 1920,
+      "single_task_spearman": 0.8846
+    },
+    "airway_hbec_ali_in_vitro_expression": {
+      "multitask_minus_single": -0.0335,
+      "multitask_spearman": -0.0593,
+      "multitask_top_decile_enrichment": 0.0,
+      "rows": 29,
+      "single_task_spearman": -0.0258
+    },
+    "local_intratracheal_functional_expression": {
+      "multitask_minus_single": 0.0669,
+      "multitask_spearman": -0.1033,
+      "multitask_top_decile_enrichment": 0.0,
+      "rows": 49,
+      "single_task_spearman": -0.1702
+    },
+    "systemic_iv_barcoded_lung_uptake": {
+      "multitask_minus_single": -0.0087,
+      "multitask_spearman": -0.0608,
+      "multitask_top_decile_enrichment": 0.0,
+      "rows": 96,
+      "single_task_spearman": -0.0521
+    }
+  },
+  "config": {
+    "dropout": 0.1,
+    "epochs": 400,
+    "folds": 5,
+    "hidden": [
+      256,
+      128
+    ],
+    "lr": 0.001,
+    "seed": 20260720
+  },
+  "format": "compose_pan_lung_multitask_mlp_R1M4_v1",
+  "heads": [
+    "airway_a549_in_vitro_expression",
+    "airway_hbe_in_vitro_expression",
+    "airway_hbec_ali_in_vitro_expression",
+    "local_intratracheal_functional_expression",
+    "systemic_iv_barcoded_lung_uptake"
+  ],
+  "model": "M4_shallow_masked_multitask_mlp",
+  "multitask_per_head": {
+    "airway_a549_in_vitro_expression": {
+      "mae": 0.6398355968223588,
+      "n": 1801,
+      "spearman": 0.5921363378983592,
+      "top_decile_enrichment": 3.0235646042550597
+    },
+    "airway_hbe_in_vitro_expression": {
+      "mae": 1.3911976709970229,
+      "n": 1920,
+      "spearman": 0.8845625988837241,
+      "top_decile_enrichment": 6.822916666666666
+    },
+    "airway_hbec_ali_in_vitro_expression": {
+      "mae": 1.03675661908672,
+      "n": 29,
+      "spearman": -0.05931415935404308,
+      "top_decile_enrichment": 0.0
+    },
+    "local_intratracheal_functional_expression": {
+      "mae": 0.8519825489427413,
+      "n": 49,
+      "spearman": -0.1032827602352061,
+      "top_decile_enrichment": 0.0
+    },
+    "systemic_iv_barcoded_lung_uptake": {
+      "mae": 1.1547038362678765,
+      "n": 96,
+      "spearman": -0.06077594624027774,
+      "top_decile_enrichment": 0.0
+    }
+  },
+  "representation": "R1_morgan2048_plus_rdkit_descriptors",
+  "single_task_per_head": {
+    "airway_a549_in_vitro_expression": {
+      "mae": 0.6513401603304882,
+      "n": 1801,
+      "spearman": 0.5759179925912516,
+      "top_decile_enrichment": 2.69372119288178
+    },
+    "airway_hbe_in_vitro_expression": {
+      "mae": 1.3864641864141622,
+      "n": 1920,
+      "spearman": 0.8846197694587145,
+      "top_decile_enrichment": 6.770833333333333
+    },
+    "airway_hbec_ali_in_vitro_expression": {
+      "mae": 1.0051771072050324,
+      "n": 29,
+      "spearman": -0.02581034549297272,
+      "top_decile_enrichment": 0.0
+    },
+    "local_intratracheal_functional_expression": {
+      "mae": 1.0300361054954732,
+      "n": 49,
+      "spearman": -0.17016090399146824,
+      "top_decile_enrichment": 0.0
+    },
+    "systemic_iv_barcoded_lung_uptake": {
+      "mae": 1.2928287296157843,
+      "n": 96,
+      "spearman": -0.05212417377311364,
+      "top_decile_enrichment": 0.0
+    }
+  },
+  "split": "held_lipid_groupkfold_global"
+}

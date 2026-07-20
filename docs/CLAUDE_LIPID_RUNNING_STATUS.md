@@ -16,6 +16,12 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 - Frozen results reproduce: LuT baselines **bit-exact** (0.00 diff / 240 metrics); LUMI baselines to 4 decimals; corpus counts exact (R0=15,433, union=26,509, AGILE-only=11,076).
 - Test suite green: **42 lipid/oracle/reaction tests pass**.
 
+### Oracle — Milestone 3: R1×M4 masked multitask MLP cell (+ negative-transfer finding)
+- New matrix cell `R1×M4`: shared molecular trunk (Morgan2048 + RDKit descriptors) with typed per-head outputs, masked loss, held-lipid GroupKFold (global grouping). Trained multitask vs single-task under identical folds/features.
+- Held-lipid Spearman (multitask / single-task): A549 **0.592**/0.576 · LUMI-HBE **0.885**/0.885 · HBEC-ALI −0.06/−0.03 · intratracheal −0.10/−0.17 · IV-barcode −0.06/−0.05.
+- **Finding (reported negative transfer):** shared-representation multitask is competitive on the large full-SMILES heads (A549 edges the frozen ExtraTrees 0.568) but **does not rescue the small in-vivo/local heads** — they stay near-zero regardless of sharing. Confirms those heads must remain auxiliary/AD-gated (as the filtering bundle already does); they need formulation context or active-learning, not more representation sharing.
+- LuT excluded (component-only → R2 lane); no molecular-graph imputation.
+
 ### Oracle — Milestone 2: canonical row-level pan-lung manifest
 - Materialized `artifacts/oracles/pan_lung_canonical_v1/{canonical_rows.csv,manifest.json}` — the stated blocker for R3/R4/R5.
 - **4,783 head-measurement rows** from **4,339 distinct measurements** (reconciles with the frozen corpus manifest). Grain = (measurement × typed head); LuT's 444 compounds → 888 paired expression+selectivity rows.
@@ -42,7 +48,10 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 | Smoke unique route-certified products | 1,320 |
 | Smoke exact route-replay of released library | 1200/1200 = 100.00% |
 | Qualified reaction families | 1 of ≥6 target |
-| Pan-lung oracle cells complete | R1/R2 × M1/M2/M3 + M6 ensembles (filtering bundle serialized) |
+| Pan-lung oracle cells complete | R1/R2 × M1/M2/M3 + M6 ensembles + **R1×M4** (this session) |
+| Canonical pan-lung rows | 4,783 head-rows / 4,339 measurements / 7 typed heads |
+| R1×M4 held-lipid Spearman (A549 / LUMI) | 0.592 / 0.885 |
+| Tests passing | 70 (28 added this session) |
 
 ---
 
@@ -52,10 +61,10 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 - Corpus pilot (50–100k) blocked until **≥3–4 families qualified** (diversity metrics require multiple families).
 
 ## Exact next actions
-1. **Oracle:** materialize canonical row-level pan-lung manifest (LNPDB-lung 1,975 + LUMI 1,920 + LuT 444 = 4,339 typed rows) with preserved covariates + frozen split groups. Unblocks R3/M4.
-2. **Corpus:** qualify breadth batch — epoxide opening, aza-Michael, Passerini — reusing the enumerator/registry machinery.
-3. **Oracle:** R3 frozen embeddings + M4 masked multitask MLP over the canonical table vs frozen R1/R2 trees.
-4. **Corpus:** stratified 50–100k pilot across qualified families with coverage/leakage gates.
+1. **Corpus:** qualify breadth batch — epoxide opening, aza-Michael, Passerini — reusing the enumerator/registry machinery (each needs its own primary-source evidence packet + exact reconstruction).
+2. **Oracle:** R3 frozen molecular embeddings cell (needs a justified frozen encoder) over the canonical table; add leave-study-out once >1 source per head is admitted.
+3. **Corpus:** stratified 50–100k pilot across the qualified family batch with coverage/leakage gates.
+4. **Oracle:** integrate LiON lung slice (already on disk) to enable leave-study-out on the airway heads.
 
 ## Key artifact paths
 - `configs/lipid_reactions/qualified_reactions_v1.json` — qualified Ugi-3CR registry (hash-bound).
@@ -68,4 +77,5 @@ Run tests/scripts with `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=s
 
 ## Commit log
 - `5dd44c4` Milestone 1: qualify Ugi-3CR transform + route-replay smoke.
-- (pending) Milestone 2: canonical row-level pan-lung manifest.
+- `ee87690` Milestone 2: canonical row-level pan-lung manifest.
+- (pending) Milestone 3: R1xM4 masked multitask MLP cell + negative-transfer finding.
