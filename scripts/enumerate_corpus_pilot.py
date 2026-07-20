@@ -125,6 +125,30 @@ def select_pilot(products: list, quota: int, seed: str = "compose_lipid_pilot_v1
     return reservoir.selected()
 
 
+def select_family_balanced(products: list, per_family_quota: int, cap_per_core: int,
+                           seed: str = "compose_lipid_pilot_v1") -> list:
+    """Select per family independently so small families (disulfide/thioether/
+    Passerini) are not starved by a global core cap. Each family contributes up
+    to per_family_quota after within-family stratification + core de-dup; small
+    families contribute all they have."""
+    by_family: dict[str, list] = {}
+    for p in products:
+        by_family.setdefault(p.reaction_id, []).append(p)
+    selected: list = []
+    for family, prods in sorted(by_family.items()):
+        # Within-family stratification on architecture axes gives diversity; core
+        # de-dup is NOT applied here because tail-diversity-dominated families
+        # (disulfide, thioether) legitimately share one heteroatom core and would
+        # be starved. Global mode still core-dedups.
+        axes = ("size_bin", "charge_bin", "ring_bin", "unsaturation_bin", "branching_bin")
+        reservoir = StratifiedReservoir(axes=axes, quota_per_stratum=cap_per_core, seed=f"{seed}:{family}")
+        for p in prods:
+            reservoir.consider(p)
+        family_selected = reservoir.selected()[:per_family_quota]
+        selected.extend(family_selected)
+    return selected
+
+
 def _descriptors(smiles: str) -> dict:
     m = Chem.MolFromSmiles(smiles)
     return {
@@ -264,6 +288,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--quota", type=int, default=120, help="max products per size/charge/ring stratum")
     parser.add_argument("--cap-per-core", type=int, default=6, help="max products per heteroatom core")
+    parser.add_argument("--per-family-quota", type=int, default=0,
+                        help="if >0, select family-balanced (each family up to this many)")
     parser.add_argument("--out-dir", type=Path,
                         default=REPO_ROOT / "artifacts/datasets/compose_lipid_pretraining_v1/corpus_pilot_v1")
     parser.add_argument("--seed", type=int, default=20260720)
@@ -273,8 +299,12 @@ def main() -> None:
 
     products, per_family_raw = enumerate_all()
     total_unique = len(products)
-    candidate = select_pilot(products, args.quota)
-    selected = core_deredundant(candidate, args.cap_per_core)
+    if args.per_family_quota > 0:
+        candidate = products
+        selected = select_family_balanced(products, args.per_family_quota, args.cap_per_core)
+    else:
+        candidate = select_pilot(products, args.quota)
+        selected = core_deredundant(candidate, args.cap_per_core)
 
     sel_smiles = [p.canonical_smiles for p in selected]
     sel_fps = [f for f in (fingerprint(s) for s in sel_smiles) if f is not None]
