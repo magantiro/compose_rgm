@@ -119,6 +119,7 @@ def value_guided_smc(
     lookahead_rollouts: int = 0,
     lookahead_depth: int = 4,
     scaffold_mol=None,
+    measure_scaffold_mol=None,
 ):
     """Propagate a particle population under the base CTMC toward high reward
     inside the hard similarity fiber. Returns a result dict."""
@@ -262,10 +263,23 @@ def value_guided_smc(
 
     best_similarity = DataStructs.TanimotoSimilarity(lead_fp, _fp(best_state))
     diversity = _mean_pairwise_diversity(list(feasible_population.values()))
+    check_scaffold = scaffold_mol if scaffold_mol is not None else measure_scaffold_mol
     scaffold_preserved = True
     if scaffold_mol is not None:
         best_mol = Chem.MolFromSmiles(_canon(best_state))
         scaffold_preserved = best_mol is not None and best_mol.HasSubstructMatch(scaffold_mol)
+    # fraction of the distinct feasible population that preserves the scaffold --
+    # with the constraint ON this is 1.0 by construction; with it OFF (measure_only)
+    # this is the generate-then-filter baseline's usable fraction.
+    scaffold_fraction = None
+    if check_scaffold is not None:
+        n_pop = n_ok = 0
+        for pop_key in feasible_population:
+            pop_mol = Chem.MolFromSmiles(pop_key)
+            if pop_mol is not None:
+                n_pop += 1
+                n_ok += int(pop_mol.HasSubstructMatch(check_scaffold))
+        scaffold_fraction = (n_ok / n_pop) if n_pop else None
     return {
         "lead_qed": float(lead_qed),
         "best_feasible_qed": float(best_qed),
@@ -274,6 +288,7 @@ def value_guided_smc(
         "distinct_feasible": len(feasible_population),
         "population_diversity": float(diversity),
         "scaffold_preserved": bool(scaffold_preserved),
+        "scaffold_preservation_fraction": scaffold_fraction,
     }
 
 
@@ -320,7 +335,7 @@ def main() -> None:
     parser.add_argument("--value-lookahead-depth", type=int, default=4)
     parser.add_argument(
         "--scaffold-constraint",
-        choices=("none", "murcko"),
+        choices=("none", "murcko", "measure_only"),
         default="none",
         help="'murcko': require each lead's Bemis-Murcko scaffold in EVERY candidate "
         "(exact fiber constraint -- the decisive hard-structural-constraint experiment).",
@@ -348,10 +363,15 @@ def main() -> None:
             results.append({"lead_index": index, "error": str(error)})
             continue
         scaffold_mol = None
-        if args.scaffold_constraint == "murcko":
+        measure_scaffold_mol = None
+        if args.scaffold_constraint in ("murcko", "measure_only"):
             lead_mol = Chem.MolFromSmiles(smiles)
             scaf = MurckoScaffold.GetScaffoldForMol(lead_mol) if lead_mol is not None else None
-            scaffold_mol = scaf if scaf is not None and scaf.GetNumAtoms() > 0 else None
+            scaf = scaf if scaf is not None and scaf.GetNumAtoms() > 0 else None
+            if args.scaffold_constraint == "murcko":
+                scaffold_mol = scaf
+            else:
+                measure_scaffold_mol = scaf
         outcome = value_guided_smc(
             state,
             sampler=sampler,
@@ -371,6 +391,7 @@ def main() -> None:
             lookahead_rollouts=args.value_lookahead_rollouts,
             lookahead_depth=args.value_lookahead_depth,
             scaffold_mol=scaffold_mol,
+            measure_scaffold_mol=measure_scaffold_mol,
         )
         success = bool(
             outcome["best_feasible_qed"] >= args.target_qed

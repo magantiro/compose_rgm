@@ -1,0 +1,73 @@
+{
+  "format": "compose_v4_value_guided_smc_controller_v1",
+  "method": "value_guided_sequential_monte_carlo_reward_potential_hard_fiber",
+  "base_checkpoint": "/private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt",
+  "atom_delete_log_rate_adjustment": 0.0,
+  "value_twist": null,
+  "value_lookahead_rollouts": 0,
+  "leads_scored": 4,
+  "success_at_target": 0,
+  "success_rate": 0.0,
+  "mean_best_feasible_qed": 0.8716529644069575,
+  "mean_population_diversity": 0.6008522628391293,
+  "target_qed": 0.9,
+  "similarity_minimum": 0.4,
+  "budget_per_lead": 300,
+  "n_particles": 16,
+  "griddd_reference_success_rate": 0.451,
+  "best_first_ceiling_success_rate": 0.3333,
+  "results": [
+    {
+      "lead_index": "6",
+      "lead_smiles": "Cc1cc(CNC(=O)Nc2cc(-c3ccccc3)on2)no1",
+      "success": false,
+      "lead_qed": 0.7720336173282724,
+      "best_feasible_qed": 0.8881062232761541,
+      "best_similarity": 0.4126984126984127,
+      "oracle_calls": 215,
+      "distinct_feasible": 216,
+      "population_diversity": 0.6411972420248733,
+      "scaffold_preserved": true,
+      "scaffold_preservation_fraction": 0.1574074074074074
+    },
+    {
+      "lead_index": "9",
+      "lead_smiles": "COc1ccccc1N1CCN(c2ccc(=O)n(CC(=O)NC3CC3)n2)CC1",
+      "success": false,
+      "lead_qed": 0.7970285903923898,
+      "best_feasible_qed": 0.8840570583126196,
+      "best_similarity": 0.45588235294117646,
+      "oracle_calls": 260,
+      "distinct_feasible": 260,
+      "population_diversity": 0.6005614628215725,
+      "scaffold_preserved": true,
+      "scaffold_preservation_fraction": 0.07307692307692308
+    },
+    {
+      "lead_index": "11",
+      "lead_smiles": "C=CCNC(=O)Nc1ccc(F)c(NC(=O)OC)c1",
+      "success": false,
+      "lead_qed": 0.7322662047627018,
+      "best_feasible_qed": 0.824490943654104,
+      "best_similarity": 0.6,
+      "oracle_calls": 259,
+      "distinct_feasible": 259,
+      "population_diversity": 0.5910209775020017,
+      "scaffold_preserved": true,
+      "scaffold_preservation_fraction": 1.0
+    },
+    {
+      "lead_index": "12",
+      "lead_smiles": "c1cnn(CC2CN(CCCOc3ccc4c(c3)OCO4)CCO2)c1",
+      "success": false,
+      "lead_qed": 0.7132314643342162,
+      "best_feasible_qed": 0.8899576323849524,
+      "best_similarity": 0.5352112676056338,
+      "oracle_calls": 93,
+      "distinct_feasible": 93,
+      "population_diversity": 0.5706293690080698,
+      "scaffold_preserved": true,
+      "scaffold_preservation_fraction": 0.010752688172043012
+    }
+  ]
+}
