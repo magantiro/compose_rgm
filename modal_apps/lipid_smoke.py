@@ -72,11 +72,43 @@ def _argv(recipe, corpus=LIPID_CORPUS):
                                            quality_reference_file=Path(LIPID_REF)))
 
 
-def _run_trainer(argv):
-    import subprocess
-    subprocess.run(["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv],
-                   check=True)
+def _run_trainer(argv, tag="trainer", commit_every=90):
+    """Run the trainer as a subprocess and commit the volume every `commit_every`s.
+
+    The commit runs in THIS (parent) process while training proceeds in the
+    subprocess, so it never pauses training -- it just flushes finished shards and
+    the interim `checkpoint.best_so_far.pt` to durable storage as they appear, so a
+    crash keeps progress AND a separate sampler can read the latest checkpoint."""
+    import subprocess, time
+    proc = subprocess.Popen(
+        ["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv])
+    while proc.poll() is None:
+        time.sleep(commit_every)
+        try:
+            artifacts.commit()
+            print(f"  [commit] flushed volume ({tag})", flush=True)
+        except Exception as exc:  # best-effort; never kill the run over a commit
+            print(f"  [commit] skipped: {type(exc).__name__}", flush=True)
+    if proc.returncode != 0:
+        artifacts.commit()
+        raise RuntimeError(f"{tag} exited {proc.returncode}")
     artifacts.commit()
+
+
+def _extract_smiles(run_dir, name="rollouts.pt"):
+    import torch
+    from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+    out = []
+    try:
+        payload = torch.load(run_dir / name, weights_only=False)
+        for r in payload["rollouts"]:
+            state = getattr(r, "final_state", None) or getattr(r, "state", None) or r
+            smi = molecular_graph_to_smiles(state)
+            if smi:
+                out.append(smi)
+    except Exception as exc:
+        out = [f"<extraction failed: {type(exc).__name__}: {exc}>"]
+    return out
 
 
 @app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
@@ -85,25 +117,12 @@ def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CO
     artifacts volume. Commits INCREMENTALLY (every 90s) so a mid-compile crash
     keeps every shard finished so far -- the paths are the expensive part, and
     they're worth saving even if the container dies before the full corpus is done."""
-    import sys, subprocess, time
+    import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label)
     recipe["arguments"]["device"] = "cpu"
     print(f"STAGE 1 COMPILE: {train_size} lipids from {corpus} on 64 CPUs (incremental commits) ...", flush=True)
-    argv = _argv(recipe, corpus) + ["--compile-paths-only"]
-    proc = subprocess.Popen(
-        ["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv])
-    while proc.poll() is None:
-        time.sleep(90)
-        try:
-            artifacts.commit()  # flush finished shards to durable storage
-            print(f"  [checkpoint] committed compiled-path shards to volume ({label})", flush=True)
-        except Exception as exc:  # commit is best-effort; never kill the compile over it
-            print(f"  [checkpoint] commit skipped: {type(exc).__name__}", flush=True)
-    if proc.returncode != 0:
-        artifacts.commit()  # save whatever finished before the failure
-        raise RuntimeError(f"compile exited {proc.returncode}")
-    artifacts.commit()
+    _run_trainer(_argv(recipe, corpus) + ["--compile-paths-only"], tag=f"compile:{label}")
     return {"compiled": True}
 
 
@@ -117,24 +136,55 @@ def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware
     if region_aware:
         extra += ["--region-aware", "--region-prior-table", "/root/compose_v4/region_prior.json"]
     print(f"STAGE 2 TRAIN on H100 (region_aware={region_aware}, loading cached paths) ...", flush=True)
-    _run_trainer(_argv(recipe, corpus) + extra)
+    _run_trainer(_argv(recipe, corpus) + extra, tag=f"train:{label}")
 
-    import torch
-    from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
     metrics = json.loads((run_dir / "metrics.json").read_text())
-    samples: list[str] = []
-    try:
-        payload = torch.load(run_dir / "rollouts.pt", weights_only=False)
-        for r in payload["rollouts"]:
-            state = getattr(r, "final_state", None) or getattr(r, "state", None) or r
-            smi = molecular_graph_to_smiles(state)
-            if smi:
-                samples.append(smi)
-    except Exception as exc:
-        samples = [f"<extraction failed: {type(exc).__name__}: {exc}>"]
+    samples = _extract_smiles(run_dir)
     return {"n_samples": len(samples), "samples": samples[:60],
             "generated_validity": metrics.get("generated_nonnull_smiles"),
             "rollout": metrics.get("rollout")}
+
+
+@app.function(image=image, gpu="H100", cpu=8.0, timeout=3600, volumes=VOLS)
+def sample_checkpoint(label, n=64, train_size=38000, steps=4000,
+                      corpus=LIPID_CORPUS, region_aware=True):
+    """Off-training-GPU peek: load the interim best checkpoint a running train job
+    has committed and roll out N lipids. Runs on its OWN container, so it never
+    slows the training job. Writes to peek_* paths so it can't clobber the real
+    training outputs sharing the run dir."""
+    import sys
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    artifacts.reload()  # pull the latest committed checkpoint
+    recipe, run_dir = _base_recipe(train_size, steps, n, 16, label)
+    recipe["arguments"].update({
+        "device": "cuda", "rollout_workers": 8, "rollout_samples": n,
+        "output": str(run_dir / "peek_metrics.json"),
+        "rollout_cache": str(run_dir / "peek_rollouts.pt"),
+        "checkpoint": str(run_dir / "peek_checkpoint.pt"),
+    })
+    best = run_dir / "checkpoint.best_so_far.pt"
+    if not best.exists():
+        return {"error": f"no interim checkpoint committed yet under {label} "
+                          f"(train run may not have hit its first eval)"}
+    extra = ["--require-path-cache", "--load-checkpoint", str(best)]
+    if region_aware:
+        extra += ["--region-aware", "--region-prior-table", "/root/compose_v4/region_prior.json"]
+    print(f"PEEK: sampling {n} lipids from {best.name} (evaluation-only, off training GPU) ...", flush=True)
+    _run_trainer(_argv(recipe, corpus) + extra, tag=f"peek:{label}")
+    samples = _extract_smiles(run_dir, "peek_rollouts.pt")
+    return {"n_samples": len(samples), "samples": samples[:n]}
+
+
+@app.local_entrypoint()
+def peek(label: str, n: int = 64, train_size: int = 38000, steps: int = 4000,
+         corpus: str = LIPID_CORPUS, region_aware: bool = True) -> None:
+    out = sample_checkpoint.remote(label, n, train_size, steps, corpus, region_aware)
+    if "error" in out:
+        print("PEEK:", out["error"])
+        return
+    print(f"=== {out['n_samples']} lipids from the interim checkpoint of {label} ===")
+    for s in out["samples"]:
+        print(" ", s)
 
 
 @app.local_entrypoint()
