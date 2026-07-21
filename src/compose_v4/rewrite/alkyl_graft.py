@@ -39,6 +39,8 @@ from compose_v4.rewrite.tracelets import (
 
 _C_IDX = ELEMENT_TO_IDX["C"]
 _CARBON_VALENCE = 4
+# A graft adds a run of 1..ALKYL_MAX_LENGTH carbons (the rate-model length templates).
+ALKYL_MAX_LENGTH = 18
 
 
 def _hd(order: int) -> int:

@@ -106,6 +106,27 @@ def test_model_samples_and_applies_alkyl_graft():
     assert n_ok == n_alkyl, "sampled alkyl_graft failed to apply"
 
 
+def test_teacher_collapse_reconstructs_and_grafts():
+    from compose_v4.rewrite.tracelet_compiler import compile_null_to_target_tracelets
+    from compose_v4.rewrite.kernel import default_rewrite_system
+    from compose_v4.rewrite.alkyl_teacher import collapse_alkyl_runs
+    rt = default_rewrite_system()
+    smi = "CCCCCCCCCCC(CCCCCCCC)OC(=O)CCN(CCCN(C)C)CCC(=O)OCC(CCCCCC)CCCCCCCC"  # RM-60 skeleton
+    trace = compile_null_to_target_tracelets(smiles_to_molecular_graph(smi), system=rt)
+    col = collapse_alkyl_runs(trace, rt)
+    assert col is not trace, "collapse did not apply"
+    assert sum(1 for s in col.steps if s.rule_name == "alkyl_graft") >= 3
+    assert len(col.steps) < len(trace.steps)
+
+    def recon(t):
+        st = t.source
+        for s in t.steps:
+            st = rt.apply(st, s.rule_name, s.action)
+        return Chem.CanonSmiles(molecular_graph_to_smiles(st))
+
+    assert recon(col) == recon(trace)  # graph-identical to the original teacher program
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

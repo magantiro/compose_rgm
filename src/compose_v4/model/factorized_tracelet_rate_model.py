@@ -39,7 +39,7 @@ from compose_v4.chem.molecular_graph import (
     SCAR_IDX,
     is_element,
 )
-from compose_v4.rewrite.alkyl_graft import AlkylGraft, build_graft
+from compose_v4.rewrite.alkyl_graft import ALKYL_MAX_LENGTH, AlkylGraft, build_graft
 from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES, CNOF_VALENCE
 from compose_v4.rewrite.operators import (
     AtomDelete,
@@ -100,8 +100,6 @@ MARK_RULE_NAMES = (
     "alkyl_graft",
 )
 MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
-# AlkylGraft length templates: a graft adds a run of 1..ALKYL_MAX_LENGTH carbons.
-ALKYL_MAX_LENGTH = 18
 _CNOF_TO_INDEX = {int(atom_type): index for index, atom_type in enumerate(CNOF_ATOM_TYPES)}
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 
