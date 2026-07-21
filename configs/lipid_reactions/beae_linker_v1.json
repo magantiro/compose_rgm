@@ -1,0 +1,26 @@
+{
+  "format": "compose_beae_linker_definition_v1",
+  "role": "The invariant BEAE connecting core -- the FROZEN scaffold for the Fig-6 / L5 linker-frozen optimization, and the canonical head/tail decomposition for BEAE lipids.",
+  "concept": "A BEAE lipid = (variable head) + (variable tail1) + (variable tail2) fused by a FIXED 12-atom linker (11 frozen core atoms + the shared central N's 3 attachment carbons). The head/tails vary; the linker does not.",
+  "linker_smarts": "[NX3:1]([CH2:2][CH2:3][CX3:4](=[OX1:5])[OX2:6][#6:12])([CH:7]=[CH:8][CX3:9](=[OX1:10])[OX2:11][#6:13])[#6:14]",
+  "atom_map_legend": {
+    "1": "central branch-point N (weakly-basic enamine junction; LINKER, not head)",
+    "2-3": "acrylate-arm CH2-CH2 (beta-amino ester)",
+    "4-5-6": "acrylate-arm C(=O)-O ester (carbonyl C, =O, ester O)",
+    "7-8": "propiolate-arm CH=CH (E-enamine)",
+    "9-10-11": "propiolate-arm C(=O)-O ester",
+    "12": "tail1 attachment carbon (first atom of tail1; NOT frozen)",
+    "13": "tail2 attachment carbon (first atom of tail2; NOT frozen)",
+    "14": "head attachment carbon (first atom of the head spacer; NOT frozen)"
+  },
+  "frozen_atom_maps": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "attachment_points": {"head": 14, "tail1": 12, "tail2": 13},
+  "invariant": "11 frozen linker-core atoms in every BEAE lipid, independent of head/tail identity (verified on RM-60, Example-2, H1-H4 heads).",
+  "generator_usage": {
+    "fig6_linker_frozen": "beae_linker_atoms(lead) -> the protected atom set; enforce as a HARD legal-fiber condition (remove any rewrite touching a frozen atom) so the linker survives by construction while the generator optimizes head + tail1 + tail2. Start from a measured lead via FixedMolecularStatePrior.",
+    "decomposition": "beae_decompose(mol) -> {linker, head, tail1, tail2} atom sets (partition covers all heavy atoms)."
+  },
+  "region_labeling_relationship": "This is the HARD version of the head/linker/tail split; lipid_region_labels is the SOFT per-atom version used for the region embedding + region-conditioned prior. Both put the central enamine N in the linker and the ionizable amine in the head.",
+  "module": "src/compose_v4/lipids/beae_linker.py",
+  "provenance": {"scaffold_source": "user figures (BEAE template + RM-60 + Example-2 + H1-H4)", "not_in_general_pretraining": true}
+}
