@@ -66,9 +66,9 @@ def _base_recipe(train_size, steps, rollout, batch_size, label):
     return recipe, run_dir
 
 
-def _argv(recipe):
+def _argv(recipe, corpus=LIPID_CORPUS):
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
-    return list(build_tracelet_recipe_argv(recipe, smiles_file=Path(LIPID_CORPUS),
+    return list(build_tracelet_recipe_argv(recipe, smiles_file=Path(corpus),
                                            quality_reference_file=Path(LIPID_REF)))
 
 
@@ -80,7 +80,7 @@ def _run_trainer(argv):
 
 
 @app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
-def compile_paths(train_size, steps, rollout, batch_size, label):
+def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CORPUS):
     """Compile teacher paths on CPU and persist the sharded cache to the durable
     artifacts volume. Commits INCREMENTALLY (every 90s) so a mid-compile crash
     keeps every shard finished so far -- the paths are the expensive part, and
@@ -89,8 +89,8 @@ def compile_paths(train_size, steps, rollout, batch_size, label):
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label)
     recipe["arguments"]["device"] = "cpu"
-    print(f"STAGE 1 COMPILE: {train_size} lipids on 64 CPUs (incremental commits) ...", flush=True)
-    argv = _argv(recipe) + ["--compile-paths-only"]
+    print(f"STAGE 1 COMPILE: {train_size} lipids from {corpus} on 64 CPUs (incremental commits) ...", flush=True)
+    argv = _argv(recipe, corpus) + ["--compile-paths-only"]
     proc = subprocess.Popen(
         ["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv])
     while proc.poll() is None:
@@ -108,7 +108,7 @@ def compile_paths(train_size, steps, rollout, batch_size, label):
 
 
 @app.function(image=image, gpu="H100", cpu=8.0, timeout=14400, volumes=VOLS)
-def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware=True):
+def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware=True, corpus=LIPID_CORPUS):
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     recipe, run_dir = _base_recipe(train_size, steps, rollout, batch_size, label)
@@ -117,7 +117,7 @@ def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware
     if region_aware:
         extra += ["--region-aware", "--region-prior-table", "/root/compose_v4/region_prior.json"]
     print(f"STAGE 2 TRAIN on H100 (region_aware={region_aware}, loading cached paths) ...", flush=True)
-    _run_trainer(_argv(recipe) + extra)
+    _run_trainer(_argv(recipe, corpus) + extra)
 
     import torch
     from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
@@ -140,15 +140,15 @@ def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware
 @app.local_entrypoint()
 def main(train_size: int = 4000, steps: int = 4000, rollout: int = 128,
          batch_size: int = 16, label: str = "lipid_staged_v1", region_aware: bool = True,
-         compile_only: bool = False) -> None:
-    print(f"=== STAGE 1: compile {train_size} lipid paths on CPU (no GPU) ===", flush=True)
-    compile_paths.remote(train_size, steps, rollout, batch_size, label)
+         compile_only: bool = False, corpus: str = LIPID_CORPUS) -> None:
+    print(f"=== STAGE 1: compile {train_size} lipid paths from {corpus} on CPU (no GPU) ===", flush=True)
+    compile_paths.remote(train_size, steps, rollout, batch_size, label, corpus)
     if compile_only:
         print(f"=== compile-only: {train_size}-lipid path cache is now cached under label={label}; "
               f"future runs reuse it via --require-path-cache ===", flush=True)
         return
     print(f"=== STAGE 2: train (region_aware={region_aware}) + sample on H100 ===", flush=True)
-    out = train_and_sample.remote(train_size, steps, rollout, batch_size, label, region_aware)
+    out = train_and_sample.remote(train_size, steps, rollout, batch_size, label, region_aware, corpus)
     print(json.dumps({k: v for k, v in out.items() if k != "samples"}, indent=2))
     print("\n=== generated lipid SMILES ===")
     for s in out["samples"]:
