@@ -199,6 +199,7 @@ def value_guided_smc(
     log_weights = np.zeros(n_particles)
 
     best_qed, best_state = lead_qed, lead_state
+    best_qed_trace: list[tuple[int, float]] = [(0, float(lead_qed))]  # (oracle_calls, best_so_far)
     feasible_population: dict[str, object] = {}  # canon -> fingerprint
 
     for step in range(max_steps):
@@ -256,6 +257,8 @@ def value_guided_smc(
             feasible_population[key] = fingerprint
             if new_qed > best_qed:
                 best_qed, best_state = new_qed, successor
+            # anytime trace: best feasible reward vs distinct oracle calls so far
+            best_qed_trace.append((len(qed_cache) - 1, float(best_qed)))
 
         # normalize, measure ESS, resample if degenerate
         shifted = log_weights - log_weights.max()
@@ -306,6 +309,7 @@ def value_guided_smc(
         "scaffold_preservation_fraction": _pop_frac(check_scaffold, True),
         "required_satisfaction_fraction": _pop_frac(req_pattern, True),
         "forbidden_satisfaction_fraction": _pop_frac(forb_pattern, False),
+        "best_qed_trace": best_qed_trace,  # anytime curve: (oracle_calls, best_so_far)
     }
 
 
