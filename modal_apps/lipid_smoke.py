@@ -165,6 +165,23 @@ def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CO
     return {"compiled": True}
 
 
+@app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
+def compile_shard(train_size, steps, rollout, batch_size, label, corpus, source_prior,
+                  shard_count, shard_index):
+    """Distributed-compile worker: compile ONLY this worker's train transport shards
+    (disjoint by shard_index) into the shared volume, then exit. A finalize pass
+    (plain compile_paths) resumes all shards + does val/test + the manifest."""
+    import sys
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label, source_prior)
+    recipe["arguments"]["device"] = "cpu"
+    extra = ["--compile-paths-only", "--compile-shard-count", str(shard_count),
+             "--compile-shard-index", str(shard_index), "--compile-train-shards-only"]
+    print(f"COMPILE SHARD {shard_index}/{shard_count}: train shards on 64 CPUs ...", flush=True)
+    _run_trainer(_argv(recipe, corpus) + extra, tag=f"cshard:{label}:{shard_index}")
+    return {"shard": shard_index}
+
+
 @app.function(image=image, gpu="H100", cpu=8.0, timeout=14400, volumes=VOLS)
 def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware=True, corpus=LIPID_CORPUS, source_prior=None):
     import sys
@@ -230,9 +247,19 @@ def peek(label: str, n: int = 64, train_size: int = 38000, steps: int = 4000,
 @app.local_entrypoint()
 def main(train_size: int = 4000, steps: int = 4000, rollout: int = 128,
          batch_size: int = 16, label: str = "lipid_staged_v1", region_aware: bool = True,
-         compile_only: bool = False, corpus: str = LIPID_CORPUS, source_prior: str = "") -> None:
-    print(f"=== STAGE 1: compile {train_size} lipid paths from {corpus} on CPU (no GPU) ===", flush=True)
-    compile_paths.remote(train_size, steps, rollout, batch_size, label, corpus, source_prior or None)
+         compile_only: bool = False, corpus: str = LIPID_CORPUS, source_prior: str = "",
+         n_workers: int = 1) -> None:
+    if n_workers > 1:
+        print(f"=== STAGE 1 (distributed): {n_workers} CPU compile-workers over train shards ===", flush=True)
+        handles = [compile_shard.spawn(train_size, steps, rollout, batch_size, label, corpus,
+                                       source_prior or None, n_workers, k) for k in range(n_workers)]
+        for h in handles:
+            h.get()
+        print("=== STAGE 1b: finalize (resume all shards + val/test + manifest) ===", flush=True)
+        compile_paths.remote(train_size, steps, rollout, batch_size, label, corpus, source_prior or None)
+    else:
+        print(f"=== STAGE 1: compile {train_size} lipid paths from {corpus} on CPU (no GPU) ===", flush=True)
+        compile_paths.remote(train_size, steps, rollout, batch_size, label, corpus, source_prior or None)
     if compile_only:
         print(f"=== compile-only: {train_size}-lipid path cache is now cached under label={label}; "
               f"future runs reuse it via --require-path-cache ===", flush=True)
