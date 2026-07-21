@@ -536,6 +536,12 @@ def _compile_tracelet_proposal_partition_shards(
     records: list[PathRecord] = []
     total_shards = (len(smiles) + args.path_shard_size - 1) // args.path_shard_size
     for shard_index, start in enumerate(range(0, len(smiles), args.path_shard_size)):
+        if (
+            partition == "train"
+            and int(getattr(args, "compile_shard_count", 1)) > 1
+            and shard_index % int(args.compile_shard_count) != int(args.compile_shard_index)
+        ):
+            continue  # distributed worker: this train shard belongs to another worker
         stop = min(start + args.path_shard_size, len(smiles))
         shard_smiles = smiles[start:stop]
         shard_path = cache_root / f"{partition}-{shard_index:05d}.pt"
@@ -610,6 +616,12 @@ def _compile_tree_transport_partition_shards(
     records: list[PathRecord] = []
     total_shards = (len(smiles) + args.path_shard_size - 1) // args.path_shard_size
     for shard_index, start in enumerate(range(0, len(smiles), args.path_shard_size)):
+        if (
+            partition == "train"
+            and int(getattr(args, "compile_shard_count", 1)) > 1
+            and shard_index % int(args.compile_shard_count) != int(args.compile_shard_index)
+        ):
+            continue  # distributed worker: this train shard belongs to another worker
         stop = min(start + args.path_shard_size, len(smiles))
         shard_smiles = smiles[start:stop]
         shard_path = cache_root / f"{partition}-{shard_index:05d}.pt"
@@ -955,6 +967,19 @@ def main() -> None:
         "--compile-paths-only",
         action="store_true",
         help="compile and validate the path cache, then exit before model work",
+    )
+    parser.add_argument(
+        "--compile-shard-count", type=int, default=1,
+        help="distributed compile: total number of shard-workers over the TRAIN partition",
+    )
+    parser.add_argument(
+        "--compile-shard-index", type=int, default=0,
+        help="distributed compile: this worker's index in [0, compile-shard-count)",
+    )
+    parser.add_argument(
+        "--compile-train-shards-only", action="store_true",
+        help="distributed worker: compile only this worker's TRAIN transport shards, then exit "
+             "(a finalize pass resumes them + does val/test + the manifest)",
     )
     parser.add_argument(
         "--require-path-cache",
@@ -1528,6 +1553,11 @@ def main() -> None:
                     signature=path_cache_signature,
                     executor=path_executor,
                 )
+                if args.compile_train_shards_only:
+                    print(json.dumps({"phase": "train_shards_worker_done",
+                                      "shard_index": int(args.compile_shard_index),
+                                      "shard_count": int(args.compile_shard_count)}), flush=True)
+                    raise SystemExit(0)
                 raw_validation_records = _compile_tree_transport_partition_shards(
                     partition="validation",
                     smiles=split.validation,
