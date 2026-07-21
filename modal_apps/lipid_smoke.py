@@ -51,7 +51,7 @@ def _base_recipe(train_size, steps, rollout, batch_size, label):
         "train_size": train_size, "steps": steps, "schedule_steps": steps,
         "warmup_steps": max(1, min(25, steps // 2 or 1)),
         "evaluation_every": max(1, min(50, steps)),
-        "fast_split": train_size < 500,
+        "fast_split": train_size <= 8000,  # <=8k: quick first-N split (real R0 lipids); larger: random scan over 429k
         "path_workers": 48, "corpus_workers": 48,
         "rollout_samples": rollout, "batch_size": batch_size,
         "output": str(run_dir / "metrics.json"), "checkpoint": str(run_dir / "checkpoint.pt"),
