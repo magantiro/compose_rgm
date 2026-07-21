@@ -203,7 +203,7 @@ def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware
 
 @app.function(image=image, gpu="H100", cpu=8.0, timeout=3600, volumes=VOLS)
 def sample_checkpoint(label, n=64, train_size=38000, steps=4000,
-                      corpus=LIPID_CORPUS, region_aware=True):
+                      corpus=LIPID_CORPUS, region_aware=True, source_prior=None):
     """Off-training-GPU peek: load the interim best checkpoint a running train job
     has committed and roll out N lipids. Runs on its OWN container, so it never
     slows the training job. Writes to peek_* paths so it can't clobber the real
@@ -211,7 +211,7 @@ def sample_checkpoint(label, n=64, train_size=38000, steps=4000,
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     artifacts.reload()  # pull the latest committed checkpoint
-    recipe, run_dir = _base_recipe(train_size, steps, n, 16, label)
+    recipe, run_dir = _base_recipe(train_size, steps, n, 16, label, source_prior)
     recipe["arguments"].update({
         "device": "cuda", "rollout_workers": 8, "rollout_samples": n,
         "output": str(run_dir / "peek_metrics.json"),
@@ -233,8 +233,8 @@ def sample_checkpoint(label, n=64, train_size=38000, steps=4000,
 
 @app.local_entrypoint()
 def peek(label: str, n: int = 64, train_size: int = 38000, steps: int = 4000,
-         corpus: str = LIPID_CORPUS, region_aware: bool = True) -> None:
-    out = sample_checkpoint.remote(label, n, train_size, steps, corpus, region_aware)
+         corpus: str = LIPID_CORPUS, region_aware: bool = True, source_prior: str = "") -> None:
+    out = sample_checkpoint.remote(label, n, train_size, steps, corpus, region_aware, source_prior or None)
     if "error" in out:
         print("PEEK:", out["error"])
         return
