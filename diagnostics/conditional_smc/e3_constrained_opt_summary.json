@@ -1,0 +1,13 @@
+{
+  "experiment": "E3_constrained_qed_optimization_scaffold_enforced",
+  "n_leads": 12,
+  "scaffold_preserved_fraction": 1.0,
+  "mean_qed_gain_under_constraint": 0.07246583214115455,
+  "leads_improved": 12,
+  "mean_gain_when_improved": 0.07246583214115455,
+  "mean_lead_qed": 0.7547164294636421,
+  "mean_best_feasible_qed": 0.8271822616047969,
+  "oracle_efficiency": 1.0,
+  "mean_oracle_calls": 154.91666666666666,
+  "anytime_mean_calls_to_90pct_gain": 35.166666666666664
+}
