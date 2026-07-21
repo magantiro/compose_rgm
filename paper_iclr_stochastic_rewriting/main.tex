@@ -347,7 +347,7 @@ The evaluation stages sufficiency before control: we first establish that \metho
 The reported evaluation uses ZINC-250k restricted to C/N/O/F with charged N$^+$/O$^-$, matching the preprocessing of our primary flexible-size comparator GrIDDD \citep{ninniri2025griddd} so the comparison is on equal chemical footing. We canonicalize with a frozen RDKit version, declare the atom/charge/bond vocabulary and $N_{\max}=40$, and hash the accepted split. The conditional leads are the CNOF subset of the Jin et al.\ constrained-optimization test set (QED $\in[0.7,0.8]$). All exclusions and typed-ring catalog coverage are reported by split; validation and test molecules never construct proposal vocabularies or source-size statistics. A GuacaMol distribution-learning table under the standard protocol is deferred to the final version and is not required for the control claims.
 
 \paragraph{Metrics.}
-\emph{De novo sufficiency} is reported by validity, uniqueness, novelty, physicochemical descriptor-distribution distances (logP, QED, molecular weight, TPSA, and ring descriptors, in the MOSES/GuacaMol convention), internal diversity, and train-support coverage; FCD is reported only where informative and is deliberately not a headline (we do not stage an FCD arms race). \emph{Control} is reported by the exact constraint-satisfaction rate, the generate-then-filter usable fraction stratified by constraint hardness, usable-oracle efficiency (feasible-scored over all oracle calls), constrained property gain at fixed scaffold, and anytime best-so-far reward versus oracle calls. Path metrics count every committed state, zero-hazard stalls, event-budget exhaustion, per-family events, source-edge survival, and invalid attempts; because masked actions should be impossible, any all-step failure is reported as a software violation rather than averaged away.
+\emph{De novo sufficiency} is reported by validity, uniqueness, novelty, physicochemical descriptor-distribution distances (logP, QED, molecular weight, TPSA, and ring descriptors, in the MOSES/GuacaMol convention), internal diversity, and train-support coverage; FCD is deferred to the final GuacaMol distribution-learning table and is not reported here (we do not stage an FCD arms race). \emph{Control} is reported by the exact constraint-satisfaction rate, the generate-then-filter usable fraction stratified by constraint hardness, usable-oracle efficiency (feasible-scored over all oracle calls), constrained property gain at fixed scaffold, and anytime best-so-far reward versus oracle calls. Path metrics count every committed state, zero-hazard stalls, event-budget exhaustion, per-family events, source-edge survival, and invalid attempts; because masked actions should be impossible, any all-step failure is reported as a software violation rather than averaged away.
 
 \paragraph{Baselines and fairness.}
 We compare with DiGress, DeFoG, GrIDDD, Morph, CoCoGraph, and grammar/fragment systems only where an official artifact can be evaluated under compatible chemistry and splits. Rerun and paper-reported values are labeled separately. DDSBM is evaluated as a graph-transformation neighbor, not presented as an unconditional de novo baseline. Parameter count, preprocessing, accelerator hours, sampling evaluations, and sanitization policy are reported.
@@ -358,7 +358,7 @@ We compare with DiGress, DeFoG, GrIDDD, Morph, CoCoGraph, and grammar/fragment s
 All results here are frozen committed artifacts on ZINC-250k CNOF with the Lineage-B base. The generate-then-filter baseline draws proposals from the \emph{same} base model and applies each constraint as a post-hoc filter, isolating the value of enforcing constraints \emph{in the legal fiber} rather than after scoring.
 
 \paragraph{Exact rule-closed constraints (Q2).}
-Fixing a Murcko scaffold, or a required/forbidden SMARTS motif, removes violating marks from $\A(G)$, so \method satisfies the constraint by construction: \ComposeScaffoldSatisfaction{} scaffold satisfaction and \ComposeSubstructureSatisfaction{} required/forbidden-substructure satisfaction across all leads. The matched generate-then-filter baseline does not degrade gracefully: its usable fraction collapses monotonically with scaffold size (\cref{tab:scaffold}), from \ComposeBaselineScaffoldEasy{} on small scaffolds ($\le 8$ atoms) to \ComposeBaselineScaffoldHard{} on the hardest ($\ge 23$ atoms). On the $32/47$ leads whose scaffolds have $\ge 16$ atoms the baseline averages $\approx 19\%$ usable ($\approx 3.8$ of $20$ candidates) versus $20/20$ for \method.
+Fixing a Murcko scaffold, or a required/forbidden SMARTS motif, removes violating marks from $\A(G)$, so \method satisfies the constraint by construction: \ComposeScaffoldSatisfaction{} scaffold satisfaction and \ComposeSubstructureSatisfaction{} required/forbidden-substructure satisfaction across all leads. The matched generate-then-filter baseline does not degrade gracefully: its usable fraction collapses monotonically with scaffold size (\cref{tab:scaffold}; \cref{fig:scaffold_collapse}), from \ComposeBaselineScaffoldEasy{} on small scaffolds ($\le 8$ atoms) to \ComposeBaselineScaffoldHard{} on the hardest ($\ge 23$ atoms). On the $32/47$ leads whose scaffolds have $\ge 16$ atoms the baseline averages $\approx 19\%$ usable ($\approx 3.8$ of $20$ candidates) versus $20/20$ for \method.
 
 \begin{table}[t]
 \centering
@@ -375,11 +375,25 @@ Generate-then-filter & 95.7\% & 79.9\% & 29.4\% & 12.0\% & 39.8\%\\
 \end{tabular*}
 \end{table}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.74\textwidth]{figures/scaffold_collapse.pdf}
+\caption{\textbf{Exact scaffold satisfaction versus generate-then-filter collapse.} Enforcing a fixed Murcko scaffold in the legal fiber holds \method at $100\%$ satisfaction for all leads (blue), whereas drawing the same base model's proposals and filtering post hoc collapses monotonically with scaffold size (terracotta: per-lead points, with binned means annotated). The shaded region is the widening advantage of in-fiber enforcement. Data: 47 ZINC-CNOF leads.}
+\label{fig:scaffold_collapse}
+\end{figure}
+
 \paragraph{Usable-oracle efficiency (Q3).}
 Because feasibility is checked before scoring, every oracle call \method makes lands on a feasible candidate---\ComposeOracleEfficiency{} usable-oracle efficiency by construction. Generate-then-filter must score every candidate before discarding, so its efficiency equals its constraint-satisfaction fraction: \ComposeBaselineOracleEfficiency{} overall, wasting up to \ComposeBaselineOracleWastedHard{} of the oracle budget on the hardest scaffolds. This is a structural, not tuned, sample-efficiency advantage on the axis oracle-budgeted optimization is measured.
 
 \paragraph{Constrained optimization and anytime behaviour (Q4).}
-Value-guided sequential Monte Carlo over the rewrite CTMC, with the scaffold enforced in the fiber, improves QED on \ComposeConstrainedLeadsImproved{} leads (mean \ComposeConstrainedQEDFrom{}$\to$\ComposeConstrainedQEDTo{}, \ComposeConstrainedQEDGain{}) while preserving the scaffold on every lead at \ComposeOracleEfficiency{} oracle efficiency. Because every committed state is a usable molecule, the process is anytime: best-so-far feasible reward reaches $\approx 90\%$ of its final gain within \ComposeAnytimeCalls{} oracle calls, and sampling can be stopped, inspected, or resumed at any intermediate. We deliberately do \emph{not} report an unconstrained QED success-rate race: our oracle-guided SMC is oracle-hungry and is not a matched comparison to oracle-light conditional models (\cref{sec:limits}); QED here is the objective inside a constrained task, not a leaderboard claim.
+Value-guided sequential Monte Carlo over the rewrite CTMC, with the scaffold enforced in the fiber, improves QED on \ComposeConstrainedLeadsImproved{} leads (mean \ComposeConstrainedQEDFrom{}$\to$\ComposeConstrainedQEDTo{}, \ComposeConstrainedQEDGain{}) while preserving the scaffold on every lead at \ComposeOracleEfficiency{} oracle efficiency. Because every committed state is a usable molecule, the process is anytime (\cref{fig:anytime}): most of the gain is realized early---the median lead reaches $\approx 90\%$ of its final gain within \ComposeAnytimeCalls{} oracle calls---while a minority improve through a later jump, and sampling can be stopped, inspected, or resumed at any intermediate. We deliberately do \emph{not} report an unconstrained QED success-rate race: our oracle-guided SMC is oracle-hungry and is not a matched comparison to oracle-light conditional models (\cref{sec:limits}); QED here is the objective inside a constrained task, not a leaderboard claim.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/anytime.pdf}
+\caption{\textbf{Anytime constrained optimization.} With the Murcko scaffold enforced in the fiber, best-so-far feasible QED climbs quickly and plateaus, so every intermediate is a usable, improving candidate (left: 12 per-lead traces with bold mean). Right: fraction of each lead's final gain versus oracle calls (median with interquartile band); the median lead reaches $90\%$ of its final gain within ${\sim}\ComposeAnytimeCalls{}$ oracle calls, with a minority improving via a later jump.}
+\label{fig:anytime}
+\end{figure}
 
 \paragraph{Exactness anchor (Q5).}
 On an exhaustive $118$-state size-capped slice of the production legal-event CTMC, the Doob $h$-transform of the learned generator enforces a rule-closed target-set condition exactly: the tilted one-step kernels reproduce the exact Bayes conditional endpoint to machine precision ($\ell_\infty$ error \ComposeExactnessLinf{}), the tilted generator $Q^h$ is a valid generator (off-diagonal negativity $0.0$, row-sum error $2\times10^{-13}$), and generator-level integration converges first-order to the exact conditional, across conditioning predicates. This is the one place we claim exactness: in the full state space the harmonic function is intractable, so property conditioning uses the approximate value-guided SMC above, and \cref{cor:endpoint} gives the endpoint law only under an exact model.
@@ -390,20 +404,19 @@ The de novo tables below are the sufficiency gate of \cref{sec:control}, not a d
 
 \begin{table}[t]
 \centering
-\caption{De novo sufficiency, ZINC-CNOF (recognized reporting suite; FCD non-headline). \textbf{Every entry is intentionally XXX until a frozen matched evaluation is complete}; no developmental value is promoted into this table.}
+\caption{De novo sufficiency on ZINC-CNOF. This is the sufficiency gate for \cref{sec:control}, not a distribution-learning leaderboard; FCD is deferred to the final GuacaMol table and not reported here. \method validity is $100\%$ \emph{by construction} (\cref{prop:closure}); its remaining entries are from the frozen sufficiency run, and baseline cells are to be run or cited. Desc.\ $W_1$ is the mean physicochemical descriptor Wasserstein distance (logP, QED, MW, TPSA, rings).}
 \label{tab:main}
 \small
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc}
 \toprule
-Method & Valid $\uparrow$ & Unique $\uparrow$ & Novel $\uparrow$ & FCD $\downarrow$ & KL $\uparrow$ & Scaffold div. $\uparrow$\\
+Method & Valid $\uparrow$ & Unique $\uparrow$ & Novel $\uparrow$ & Desc.\ $W_1\downarrow$ & Int.\ div.\ $\uparrow$ & Train cov.\ $\uparrow$\\
 \midrule
 DiGress & XXX & XXX & XXX & XXX & XXX & XXX\\
 DeFoG & XXX & XXX & XXX & XXX & XXX & XXX\\
-CoCoGraph & XXX & XXX & XXX & XXX & XXX & XXX\\
 GrIDDD & XXX & XXX & XXX & XXX & XXX & XXX\\
 Morph & XXX & XXX & XXX & XXX & XXX & XXX\\
 \midrule
-\method & \ComposeValidity & \ComposeUniqueness & \ComposeNovelty & \ComposeFCD & \ComposeKL & XXX\\
+\method & \ComposeValidity & \ComposeUniqueness & \ComposeNovelty & \ComposeDescriptorW & \ComposeDiversity & \ComposeCoverage\\
 \bottomrule
 \end{tabular*}
 \end{table}
@@ -429,12 +442,12 @@ Flexible-size Graft & \ComposeTrajectoryValidity & \ComposeTrajectoryConnectivit
 
 \begin{table}[t]
 \centering
-\caption{Matched ablations. Path length is measured on compiled teachers; FCD and ring TV are measured from target-free learned samples. All values remain XXX pending the frozen study.}
+\caption{Matched ablations isolating which construction choices produce the observed behaviour. Path length is measured on compiled teachers; the distribution distance (mean physicochemical descriptor $W_1$) and ring-size TV are measured from target-free learned samples. All values remain XXX pending the frozen study.}
 \label{tab:ablations}
 \small
 \begin{tabular}{lccc}
 \toprule
-Variant & FCD $\downarrow$ & Mean teacher length $\downarrow$ & Ring-size TV $\downarrow$\\
+Variant & Desc.\ $W_1\downarrow$ & Mean teacher length $\downarrow$ & Ring-size TV $\downarrow$\\
 \midrule
 Null source & \NullPriorFCD & XXX & XXX\\
 Primitive tree (delete/regrow) & \PrimitiveTreeFCD & XXX & XXX\\
