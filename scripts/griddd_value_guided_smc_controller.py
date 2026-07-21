@@ -124,6 +124,7 @@ def value_guided_smc(
     forbidden_smarts=None,
     measure_required_smarts=None,
     measure_forbidden_smarts=None,
+    dump_population=False,
 ):
     """Propagate a particle population under the base CTMC toward high reward
     inside the hard similarity fiber. Returns a result dict."""
@@ -310,6 +311,9 @@ def value_guided_smc(
         "required_satisfaction_fraction": _pop_frac(req_pattern, True),
         "forbidden_satisfaction_fraction": _pop_frac(forb_pattern, False),
         "best_qed_trace": best_qed_trace,  # anytime curve: (oracle_calls, best_so_far)
+        # the distinct feasible-population SMILES (canonical), for offline evaluation of a
+        # multi-constraint design spec (the conjunction feasibility funnel).
+        "population_smiles": sorted(feasible_population.keys()) if dump_population else None,
     }
 
 
@@ -372,6 +376,11 @@ def main() -> None:
         type=str,
         default=None,
         help="SMARTS every candidate must NOT contain (hard fiber constraint).",
+    )
+    parser.add_argument(
+        "--dump-population",
+        action="store_true",
+        help="emit the distinct feasible-population SMILES for offline design-spec evaluation.",
     )
     args = parser.parse_args()
 
@@ -436,6 +445,7 @@ def main() -> None:
             forbidden_smarts=forbidden_smarts,
             measure_required_smarts=measure_required_smarts,
             measure_forbidden_smarts=measure_forbidden_smarts,
+            dump_population=args.dump_population,
         )
         success = bool(
             outcome["best_feasible_qed"] >= args.target_qed
