@@ -1,0 +1,220 @@
+{
+  "counts": {
+    "generated": 1500,
+    "reference": 1500,
+    "train": 6000
+  },
+  "format": "compose_lipid_generator_panel_v1",
+  "generic_quality": {
+    "descriptor_distributions": {
+      "aromatic_atom_fraction": {
+        "generated_mean": 0.008241250192928961,
+        "reference_mean": 0.006493367424786309,
+        "standardized_wasserstein": 0.06370225487640496,
+        "wasserstein_distance": 0.001865491450416602
+      },
+      "fraction_csp3": {
+        "generated_mean": 0.9053144281823895,
+        "reference_mean": 0.9056638910304466,
+        "standardized_wasserstein": 0.046886547822570776,
+        "wasserstein_distance": 0.0030078725420307445
+      },
+      "h_bond_acceptors": {
+        "generated_mean": 4.142,
+        "reference_mean": 4.126666666666667,
+        "standardized_wasserstein": 0.04348462943888388,
+        "wasserstein_distance": 0.07400000000000015
+      },
+      "h_bond_donors": {
+        "generated_mean": 2.3546666666666667,
+        "reference_mean": 2.3506666666666667,
+        "standardized_wasserstein": 0.05325741627770157,
+        "wasserstein_distance": 0.07200000000000008
+      },
+      "logp": {
+        "generated_mean": 12.401609826666657,
+        "reference_mean": 12.398289853333326,
+        "standardized_wasserstein": 0.03310669124028883,
+        "wasserstein_distance": 0.1526057866666672
+      },
+      "molecular_weight": {
+        "generated_mean": 699.6780119999997,
+        "reference_mean": 699.6727199999997,
+        "standardized_wasserstein": 0.032230553241227505,
+        "wasserstein_distance": 6.034971999999992
+      },
+      "qed": {
+        "generated_mean": 0.06707912099879156,
+        "reference_mean": 0.06979342021649197,
+        "standardized_wasserstein": 0.0482835752796655,
+        "wasserstein_distance": 0.0030039061703564414
+      },
+      "rotatable_bonds": {
+        "generated_mean": 37.72666666666667,
+        "reference_mean": 37.64533333333333,
+        "standardized_wasserstein": 0.0380325700832603,
+        "wasserstein_distance": 0.44933333333333286
+      },
+      "sa_score": {
+        "generated_mean": 3.695236566901845,
+        "reference_mean": 3.679291718588953,
+        "standardized_wasserstein": 0.04075865109313441,
+        "wasserstein_distance": 0.020580239721501564
+      },
+      "tpsa": {
+        "generated_mean": 72.36176,
+        "reference_mean": 72.90093333333333,
+        "standardized_wasserstein": 0.03635115645643974,
+        "wasserstein_distance": 1.0084666666666675
+      }
+    },
+    "novel_to_train_fraction": 1.0,
+    "requested_samples": 1500,
+    "ring_systems": {
+      "generated_aromatic_ring_fraction": 0.2419753086419753,
+      "generated_bridged_fraction": 0.002,
+      "generated_fused_fraction": 0.002,
+      "generated_mean_aromatic_rings": 0.06533333333333333,
+      "generated_mean_rings": 0.27,
+      "generated_spiro_fraction": 0.0013333333333333333,
+      "reference_aromatic_ring_fraction": 0.19437340153452684,
+      "reference_bridged_fraction": 0.0,
+      "reference_fused_fraction": 0.0,
+      "reference_mean_aromatic_rings": 0.050666666666666665,
+      "reference_mean_rings": 0.26066666666666666,
+      "reference_spiro_fraction": 0.0,
+      "ring_size_total_variation": 0.02954122067506549
+    },
+    "scaffolds": {
+      "acyclic_fraction": 0.7433333333333333,
+      "novel_scaffold_fraction": 0.004666666666666667,
+      "unique_scaffold_fraction": 0.014666666666666666
+    },
+    "similarity": {
+      "internal_diversity": 0.6321730153964953,
+      "mean_nearest_train_tanimoto": 0.8623630075519163
+    },
+    "unique_fraction": 1.0,
+    "valid_fraction": 1.0
+  },
+  "label": "lipid_corpus_selfcheck",
+  "lipid_marginals": {
+    "generated": {
+      "architecture": {
+        "basic_nitrogen_count": {
+          "1": 0.4647,
+          "2": 0.306,
+          "3": 0.14,
+          "4plus": 0.0893
+        },
+        "branching": {
+          "0": 0.3293,
+          "1": 0.2167,
+          "2": 0.2393,
+          "3plus": 0.2147
+        },
+        "n_tails": {
+          "0": 0.002,
+          "1": 0.0013,
+          "2": 0.272,
+          "3plus": 0.7247
+        },
+        "region_atom_share": {
+          "head": 0.2112,
+          "linker": 0.0811,
+          "other": 0.0128,
+          "tail": 0.6949
+        },
+        "tail_length": {
+          "13-17": 0.2987,
+          "18-22": 0.4607,
+          "8-12": 0.1427,
+          "<=7": 0.0253,
+          ">22": 0.0727
+        },
+        "unsaturation": {
+          "0": 0.466,
+          "1": 0.206,
+          "2": 0.2,
+          "3plus": 0.128
+        }
+      },
+      "degradable_linker_rate": 0.9347,
+      "linker_type_distribution": {
+        "acetal": 0.0037,
+        "amide": 0.5945,
+        "carbamate": 0.0225,
+        "carbonate": 0.0018,
+        "ester": 0.2763,
+        "ether": 0.028,
+        "urea": 0.0731
+      },
+      "n": 1500
+    },
+    "js_generated_vs_reference": {
+      "basic_nitrogen_count": 0.0002,
+      "branching": 0.0005,
+      "n_tails": 0.001,
+      "tail_length": 0.0007,
+      "unsaturation": 0.0006
+    },
+    "reference": {
+      "architecture": {
+        "basic_nitrogen_count": {
+          "1": 0.458,
+          "2": 0.3133,
+          "3": 0.1467,
+          "4plus": 0.082
+        },
+        "branching": {
+          "0": 0.336,
+          "1": 0.2,
+          "2": 0.2553,
+          "3plus": 0.2087
+        },
+        "n_tails": {
+          "0": 0.0013,
+          "1": 0.0053,
+          "2": 0.2687,
+          "3plus": 0.7247
+        },
+        "region_atom_share": {
+          "head": 0.2058,
+          "linker": 0.0844,
+          "other": 0.0127,
+          "tail": 0.6972
+        },
+        "tail_length": {
+          "13-17": 0.276,
+          "18-22": 0.4627,
+          "8-12": 0.1593,
+          "<=7": 0.0253,
+          ">22": 0.0767
+        },
+        "unsaturation": {
+          "0": 0.4507,
+          "1": 0.2287,
+          "2": 0.194,
+          "3plus": 0.1267
+        }
+      },
+      "degradable_linker_rate": 0.946,
+      "linker_type_distribution": {
+        "acetal": 0.0045,
+        "amide": 0.5948,
+        "carbamate": 0.0249,
+        "carbonate": 0.0005,
+        "ester": 0.2608,
+        "ether": 0.0267,
+        "urea": 0.0878
+      },
+      "n": 1500
+    }
+  },
+  "lipid_scaffold_novelty": {
+    "evaluated": 1500,
+    "lipid_scaffold_novelty": 0.128,
+    "train_cores": 1087
+  },
+  "note": "L1/P2-G3 panel. When run with a held-out corpus split as --generated, generated marginals should match reference (low JS) -- a panel self-check. Swap --generated for rollout SMILES once the generator trains."
+}
