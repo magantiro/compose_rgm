@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from rdkit import Chem
 
-from compose_v4.oracles.head_domain import head_region_atoms
+from compose_v4.lipids.head_region import head_region_atoms
 
 # region codes (stable ordering for embeddings / prior tables)
 OTHER, HEAD, LINKER, TAIL = 0, 1, 2, 3

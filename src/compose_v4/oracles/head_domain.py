@@ -21,47 +21,17 @@ import numpy as np
 from rdkit import Chem, DataStructs, rdBase
 from rdkit.Chem import rdFingerprintGenerator
 
-# A protonatable ionizable-head amine: exclude amides, imines, cations, AND
-# vinylogous amides / enamine-esters (N-C=C-C=O, e.g. the BEAE central N) -- those
-# are conjugated into a carbonyl and are weakly basic linker junctions, not the head.
-_BASIC_AMINE = Chem.MolFromSmarts(
-    "[NX3;!$(NC=O);!$(N=*);!$([N+]);!$([NX3][CX3]=[CX3][CX3]=[OX1])]"
+# Head detection lives in the lightweight, oracle-dep-free lipids.head_region so the
+# generator's region labeler can reuse the exact same definition without importing
+# this (joblib-bearing) oracle package. Re-exported here for backward compatibility.
+from compose_v4.lipids.head_region import (  # noqa: E402
+    _BASIC_AMINE,
+    _HEAD_RADIUS_BONDS,
+    basic_nitrogens,
+    head_region_atoms,
 )
+
 _HEAD_FP = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=1024)
-_HEAD_RADIUS_BONDS = 3
-
-
-def basic_nitrogens(mol: Chem.Mol) -> list[int]:
-    return [m[0] for m in mol.GetSubstructMatches(_BASIC_AMINE)]
-
-
-def head_region_atoms(mol: Chem.Mol, radius: int = _HEAD_RADIUS_BONDS) -> set[int]:
-    """Atoms within `radius` bonds of any basic amine N, plus whole ring systems
-    touched. This is the ionizable-head neighborhood (excludes long tails)."""
-    starts = basic_nitrogens(mol)
-    if not starts:
-        return set()
-    keep: set[int] = set()
-    ring_info = mol.GetRingInfo().AtomRings()
-    for start in starts:
-        seen = {start: 0}
-        queue: deque[int] = deque([start])
-        while queue:
-            idx = queue.popleft()
-            depth = seen[idx]
-            keep.add(idx)
-            if depth >= radius:
-                continue
-            for nbr in mol.GetAtomWithIdx(idx).GetNeighbors():
-                j = nbr.GetIdx()
-                if j not in seen:
-                    seen[j] = depth + 1
-                    queue.append(j)
-    # pull in any ring fully/partly reached so head heterocycles stay intact
-    for ring in ring_info:
-        if keep & set(ring):
-            keep.update(ring)
-    return keep
 
 
 def head_region_fingerprint(smiles: str):
