@@ -120,6 +120,8 @@ def value_guided_smc(
     lookahead_depth: int = 4,
     scaffold_mol=None,
     measure_scaffold_mol=None,
+    required_smarts=None,
+    forbidden_smarts=None,
 ):
     """Propagate a particle population under the base CTMC toward high reward
     inside the hard similarity fiber. Returns a result dict."""
@@ -227,10 +229,16 @@ def value_guided_smc(
                     continue
                 if DataStructs.TanimotoSimilarity(lead_fp, fingerprint) < similarity_minimum:
                     continue  # HARD fiber: similarity constraint
-                if scaffold_mol is not None:
+                if scaffold_mol is not None or required_smarts is not None or forbidden_smarts is not None:
                     successor_mol = Chem.MolFromSmiles(key)
-                    if successor_mol is None or not successor_mol.HasSubstructMatch(scaffold_mol):
-                        continue  # HARD fiber: exact fixed-scaffold constraint (never soft)
+                    if successor_mol is None:
+                        continue
+                    if scaffold_mol is not None and not successor_mol.HasSubstructMatch(scaffold_mol):
+                        continue  # HARD fiber: exact fixed-scaffold constraint
+                    if required_smarts is not None and not successor_mol.HasSubstructMatch(required_smarts):
+                        continue  # HARD fiber: required substructure (must be present)
+                    if forbidden_smarts is not None and successor_mol.HasSubstructMatch(forbidden_smarts):
+                        continue  # HARD fiber: forbidden substructure (must be absent)
                 accepted = (successor, key, fingerprint)
                 break
             if accepted is None:
@@ -340,6 +348,18 @@ def main() -> None:
         help="'murcko': require each lead's Bemis-Murcko scaffold in EVERY candidate "
         "(exact fiber constraint -- the decisive hard-structural-constraint experiment).",
     )
+    parser.add_argument(
+        "--required-substructure",
+        type=str,
+        default=None,
+        help="SMARTS every candidate MUST contain (hard fiber constraint).",
+    )
+    parser.add_argument(
+        "--forbidden-substructure",
+        type=str,
+        default=None,
+        help="SMARTS every candidate must NOT contain (hard fiber constraint).",
+    )
     args = parser.parse_args()
 
     sampler, qed_oracle = _load_base_sampler(
@@ -353,6 +373,8 @@ def main() -> None:
         else:
             from griddd_value_twist import load_value_twist
         twist = load_value_twist(str(args.value_twist_checkpoint))
+    required_smarts = Chem.MolFromSmarts(args.required_substructure) if args.required_substructure else None
+    forbidden_smarts = Chem.MolFromSmarts(args.forbidden_substructure) if args.forbidden_substructure else None
     leads = json.loads(args.leads.read_text())[: args.max_leads]
 
     results: list[dict[str, object]] = []
@@ -392,6 +414,8 @@ def main() -> None:
             lookahead_depth=args.value_lookahead_depth,
             scaffold_mol=scaffold_mol,
             measure_scaffold_mol=measure_scaffold_mol,
+            required_smarts=required_smarts,
+            forbidden_smarts=forbidden_smarts,
         )
         success = bool(
             outcome["best_feasible_qed"] >= args.target_qed
