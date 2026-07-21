@@ -1,0 +1,54 @@
+{
+  "format": "compose_beae_finetune_substrate_qualification_v1",
+  "role": "Fig-6 linker fine-tune substrate (NOT general pretraining corpus)",
+  "propiolate_smarts": "[NX3;H2,H1:1].[CH:2]#[C:3][CX3:4](=[OX1:5])[OX2:6][#6:7]>>[N:1]/[CH:2]=[CH:3]/[C:4](=[O:5])[O:6][#6:7]",
+  "acrylate_smarts": "[NX3;H2,H1:1].[CH2:2]=[CH1:3][CX3:4](=[OX1:5])[#7,#8:6]>>[N:1][CH2:2][CH2:3][CX3:4](=[OX1:5])[*:6]",
+  "leads": {
+    "RM-60": {
+      "target": "CCCCCCCCCCC(CCCCCCCC)OC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCC(CCCCCC)CCCCCCCC",
+      "reconstructed_forward": true,
+      "reconstructed_reverse_order": true,
+      "has_E_enamine_ester": true,
+      "qualified": true
+    },
+    "Example-2": {
+      "target": "CCCCC/C=C\\C/C=C\\CCCCCCCCOC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCCCCCCCCC(C)C",
+      "reconstructed_forward": true,
+      "reconstructed_reverse_order": true,
+      "has_E_enamine_ester": true,
+      "qualified": true
+    }
+  },
+  "negatives": [
+    {
+      "amine": "CCCCCCCCCCCCN",
+      "acceptor": "C=CC(=O)OCC",
+      "reason": "acrylate has C=C not C#C -> no propiolate (enamine) product",
+      "n_products": 0,
+      "rejected": true
+    },
+    {
+      "amine": "CCCCCCCCCCCCN",
+      "acceptor": "CC#CC(=O)OCC",
+      "reason": "internal alkynoate has no terminal =CH -> not a propiolate handle",
+      "n_products": 0,
+      "rejected": true
+    },
+    {
+      "amine": "CCCCCCCCCCCCN",
+      "acceptor": "C#CCCCCCC",
+      "reason": "terminal alkyne without a conjugated ester is not a Michael acceptor",
+      "n_products": 0,
+      "rejected": true
+    },
+    {
+      "amine": "CCCCCCCCCCCCO",
+      "acceptor": "C#CC(=O)OCC",
+      "reason": "alcohol is not an amine N-H nucleophile",
+      "n_products": 0,
+      "rejected": true
+    }
+  ],
+  "e_enamine_smarts": "[NX3]/[CH]=[CH]/[CX3](=O)[OX2]",
+  "all_qualified": true
+}
