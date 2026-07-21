@@ -81,12 +81,29 @@ def _run_trainer(argv):
 
 @app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
 def compile_paths(train_size, steps, rollout, batch_size, label):
-    import sys
+    """Compile teacher paths on CPU and persist the sharded cache to the durable
+    artifacts volume. Commits INCREMENTALLY (every 90s) so a mid-compile crash
+    keeps every shard finished so far -- the paths are the expensive part, and
+    they're worth saving even if the container dies before the full corpus is done."""
+    import sys, subprocess, time
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label)
     recipe["arguments"]["device"] = "cpu"
-    print(f"STAGE 1 COMPILE: {train_size} lipids on 64 CPUs ...", flush=True)
-    _run_trainer(_argv(recipe) + ["--compile-paths-only"])
+    print(f"STAGE 1 COMPILE: {train_size} lipids on 64 CPUs (incremental commits) ...", flush=True)
+    argv = _argv(recipe) + ["--compile-paths-only"]
+    proc = subprocess.Popen(
+        ["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv])
+    while proc.poll() is None:
+        time.sleep(90)
+        try:
+            artifacts.commit()  # flush finished shards to durable storage
+            print(f"  [checkpoint] committed compiled-path shards to volume ({label})", flush=True)
+        except Exception as exc:  # commit is best-effort; never kill the compile over it
+            print(f"  [checkpoint] commit skipped: {type(exc).__name__}", flush=True)
+    if proc.returncode != 0:
+        artifacts.commit()  # save whatever finished before the failure
+        raise RuntimeError(f"compile exited {proc.returncode}")
+    artifacts.commit()
     return {"compiled": True}
 
 
