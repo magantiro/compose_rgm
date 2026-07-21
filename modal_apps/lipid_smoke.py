@@ -55,7 +55,7 @@ def _base_recipe(train_size, steps, rollout, batch_size, label):
         "evaluation_every": max(1, min(200, steps)),
         "early_stopping_patience": 100000,  # effectively disabled -- train the full step budget
         "fast_split": train_size <= 8000,  # <=8k: quick first-N split (real R0 lipids); larger: random scan over 429k
-        "path_workers": 48, "corpus_workers": 48,
+        "path_workers": 64, "corpus_workers": 64,
         "rollout_samples": rollout, "batch_size": batch_size,
         "output": str(run_dir / "metrics.json"), "checkpoint": str(run_dir / "checkpoint.pt"),
         "path_cache": str(run_dir / "compiled_paths.pt"), "rollout_cache": str(run_dir / "rollouts.pt"),
@@ -122,9 +122,14 @@ def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware
 
 @app.local_entrypoint()
 def main(train_size: int = 4000, steps: int = 4000, rollout: int = 128,
-         batch_size: int = 16, label: str = "lipid_staged_v1", region_aware: bool = True) -> None:
+         batch_size: int = 16, label: str = "lipid_staged_v1", region_aware: bool = True,
+         compile_only: bool = False) -> None:
     print(f"=== STAGE 1: compile {train_size} lipid paths on CPU (no GPU) ===", flush=True)
     compile_paths.remote(train_size, steps, rollout, batch_size, label)
+    if compile_only:
+        print(f"=== compile-only: {train_size}-lipid path cache is now cached under label={label}; "
+              f"future runs reuse it via --require-path-cache ===", flush=True)
+        return
     print(f"=== STAGE 2: train (region_aware={region_aware}) + sample on H100 ===", flush=True)
     out = train_and_sample.remote(train_size, steps, rollout, batch_size, label, region_aware)
     print(json.dumps({k: v for k, v in out.items() if k != "samples"}, indent=2))
