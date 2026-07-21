@@ -124,29 +124,39 @@ originally made.
   legal move. Region-awareness already tells the model *where* a tail is.
 
 ## Implementation status (2026-07-21)
-- **DONE + tested:** `src/compose_v4/lipids/alkyl_graft.py` — `AlkylGraft`/`AlkylPrune`
-  operators, `apply`/`is_valid`, `build_graft` builder, carbon-typing enforced.
-  `tests/test_alkyl_graft.py` (5 tests, all green): saturated extend, unsaturation
-  (double bond at chosen run position), mid-chain branching, graft↔prune round-trip,
-  non-carbon rejection. Additive — modifies no core file; 90 existing rewrite tests
-  still pass. This proves the move mechanically.
-- **NOT done (deliberate — coupled + checkpoint-breaking, needs a fresh train):**
-  1. kernel.py — register the two `RewriteRule`s (additive).
-  2. trace.py — `alkyl_graft ↔ alkyl_prune` in `inverse_step` (only exercised once
-     traces contain grafts).
-  3. fiber.py + factorized_fiber.py — enumerate grafts behind `allow_alkyl_graft`.
-  4. tracelet_compiler.py `_compile_null_to_target_tracelets` — collapse a linear
-     alkyl run into one `AlkylGraft` in the teacher program.
-  5. **factorized_tracelet_rate_model.py — the hard step:** append `"alkyl_graft"`
-     to `MARK_RULE_NAMES` (**widens `family_head` → breaks every existing checkpoint;
-     requires fresh training**), add the family head + `_action_tables` block +
-     `_teacher_action_score` + `_sample_action_from_family` branches, with the exact
-     within-family log-partition and successor-slot grouping (Codex-core coordination).
-  6. bump `path_cache_signature` format_version + stream versions.
+**DONE + tested (committed):**
+- `src/compose_v4/rewrite/alkyl_graft.py` — `AlkylGraft`/`AlkylPrune` operators,
+  `apply`/`is_valid`, `build_graft`, carbon-typing enforced. Lives in core `rewrite/`.
+- Registered in `kernel.py` `default_rewrite_system` (step 2) and the
+  `alkyl_graft ↔ alkyl_prune` inverse pair in `trace.py` `inverse_step` (step 3).
+- `tests/test_alkyl_graft.py` (6 tests green): saturated extend, unsaturation,
+  mid-chain branching, graft↔prune round-trip, non-carbon rejection, AND the
+  kernel-registered `runtime.apply` + inverse-registry round-trip (graft→prune and
+  prune→graft reconstruction). **147 existing rewrite/kernel/trace tests still pass.**
 
-  Steps 1-4 are additive; step 5 is the payoff and the risk. De-novo-via-graft only
-  produces candidates after step 5 + a training run — hence not done under time
-  pressure, to avoid a plausible-but-wrong rate-partition bug.
+**REMAINING (the model-coupled phase — needs a fresh train):**
+- 4. **fiber.py + factorized_fiber.py** — enumerate saturated grafts behind
+  `allow_alkyl_graft`: for each carbon anchor (H≥1), each `length in 1..L_MAX` with
+  `len(null) ≥ length`, emit `build_graft(anchor, (1,)*(length-1), null[:length])`
+  (canonical slot assignment). Unsaturation comes from existing `bond_reorder` on the
+  grafted chain in v1.
+- 5. **tracelet_compiler.py** `_compile_null_to_target_tracelets` — detect a maximal
+  linear saturated-C run off an anchor and `commit("alkyl_graft", ...)` once.
+- 6. **factorized_tracelet_rate_model.py** — **DE-RISKED: mirror `cycle_attach`
+  exactly.** "Templates" = chain lengths 1..L_MAX. Add `alkyl_query`/`alkyl_key`
+  template head; `alkyl_mask = real-carbon-anchor & (n_null ≥ length) & (H ≥ 1)`;
+  append `_masked_logsumexp(alkyl_logits, alkyl_mask)` to `family_z` in the new
+  `"alkyl_graft"` slot; branch `_teacher_action_score`/`_sample_action_from_family`
+  by `AlkylGraft`, keying the length template like `cycle_attach` keys `_attach_to_index`.
+  **Canonical `null[:length]` = one presentation per (anchor,length) → no successor-
+  grouping gauge issue.** Name `alkyl_*` (the model's existing `graft_*` is bond_reroute).
+  Widening `MARK_RULE_NAMES` → 11 breaks every checkpoint → **fresh train required**.
+  Rate math is unit-testable (teacher-score ↔ sample consistency) before any training.
+- 7. bump `path_cache_signature` format_version + stream versions (teacher programs change).
+
+De-novo-via-graft produces clean tails only after 4–7 + a training run. Not rushed
+under time pressure — step 6's rate math is verifiable, so it will be built with
+consistency tests, then trained, not faked.
 
 ## Payoff
 - **De-novo tails become reliable** (clean chains by construction, few moves, no drift).
