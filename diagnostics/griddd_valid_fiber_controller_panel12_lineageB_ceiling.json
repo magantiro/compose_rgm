@@ -1,0 +1,176 @@
+{
+  "format": "compose_v4_valid_fiber_controller_panel_v1",
+  "method": "hard_constrained_best_first_valid_fiber_search_ceiling",
+  "note": "upper-bound/ceiling + label generator; NOT the deployable diverse method",
+  "leads_scored": 12,
+  "success_at_target": 4,
+  "success_rate": 0.3333333333333333,
+  "beat_lead_and_feasible": 12,
+  "mean_best_feasible_qed": 0.8809005538046623,
+  "griddd_reference_success_rate": 0.451,
+  "target_qed": 0.9,
+  "similarity_minimum": 0.4,
+  "budget_per_lead": 640,
+  "results": [
+    {
+      "lead_index": "6",
+      "lead_smiles": "Cc1cc(CNC(=O)Nc2cc(-c3ccccc3)on2)no1",
+      "lead_qed": 0.7720336173282724,
+      "best_feasible_qed": 0.8894356547593844,
+      "best_similarity": 0.42857142857142855,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 314
+    },
+    {
+      "lead_index": "9",
+      "lead_smiles": "COc1ccccc1N1CCN(c2ccc(=O)n(CC(=O)NC3CC3)n2)CC1",
+      "lead_qed": 0.7970285903923898,
+      "best_feasible_qed": 0.8775562231889272,
+      "best_similarity": 0.4411764705882353,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 464
+    },
+    {
+      "lead_index": "11",
+      "lead_smiles": "C=CCNC(=O)Nc1ccc(F)c(NC(=O)OC)c1",
+      "lead_qed": 0.7322662047627018,
+      "best_feasible_qed": 0.8593105750576577,
+      "best_similarity": 0.4,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 346
+    },
+    {
+      "lead_index": "12",
+      "lead_smiles": "c1cnn(CC2CN(CCCOc3ccc4c(c3)OCO4)CCO2)c1",
+      "lead_qed": 0.7132314643342162,
+      "best_feasible_qed": 0.8899576323849524,
+      "best_similarity": 0.5352112676056338,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 282
+    },
+    {
+      "lead_index": "13",
+      "lead_smiles": "COc1cc(C(=O)Nc2ccccc2Oc2ccccc2)on1",
+      "lead_qed": 0.7770170903470117,
+      "best_feasible_qed": 0.9137847947706328,
+      "best_similarity": 0.5423728813559322,
+      "success": true,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 347
+    },
+    {
+      "lead_index": "15",
+      "lead_smiles": "COC(=O)c1ccc(CNc2ccn(C)n2)[nH]1",
+      "lead_qed": 0.7782309999981653,
+      "best_feasible_qed": 0.9040179038668719,
+      "best_similarity": 0.45614035087719296,
+      "success": true,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 376
+    },
+    {
+      "lead_index": "18",
+      "lead_smiles": "CCCC1NC(=O)N(CC(=O)Nc2ccccc2Oc2ccccc2)C1=O",
+      "lead_qed": 0.7361457249914917,
+      "best_feasible_qed": 0.8279595690813449,
+      "best_similarity": 0.4142857142857143,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 386
+    },
+    {
+      "lead_index": "26",
+      "lead_smiles": "N#CCCCCNC(=O)NC(c1ccccc1F)C1CCCC1",
+      "lead_qed": 0.7451087054903043,
+      "best_feasible_qed": 0.9310327063231487,
+      "best_similarity": 0.55,
+      "success": true,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 338
+    },
+    {
+      "lead_index": "27",
+      "lead_smiles": "N#CC1=C(N)OC2=C(C(=O)CCC2)C1C1CC=CCC1",
+      "lead_qed": 0.7431259323318189,
+      "best_feasible_qed": 0.7935226096741793,
+      "best_similarity": 0.45901639344262296,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 437
+    },
+    {
+      "lead_index": "29",
+      "lead_smiles": "O=C(Nc1cccc(N2CCCNC2=O)c1)C(=O)N1CCc2cc(F)ccc2C1",
+      "lead_qed": 0.7644262825084965,
+      "best_feasible_qed": 0.8969815549954039,
+      "best_similarity": 0.4,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 522
+    },
+    {
+      "lead_index": "31",
+      "lead_smiles": "COc1ccc(N2CCN(C(=O)COC(=O)c3ccc(C)c(C)c3)CC2)cc1",
+      "lead_qed": 0.7445406712216054,
+      "best_feasible_qed": 0.8723232756210398,
+      "best_similarity": 0.47619047619047616,
+      "success": false,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 406
+    },
+    {
+      "lead_index": "33",
+      "lead_smiles": "CC[NH+]1CCC2(CC1)OCC(C(=O)[O-])N2C(=O)c1ccc(F)cc1",
+      "lead_qed": 0.7534418698572324,
+      "best_feasible_qed": 0.9149241459324041,
+      "best_similarity": 0.4,
+      "success": true,
+      "oracle_calls": 640,
+      "distinct_feasible_scored": 451
+    }
+  ],
+  "provenance": {
+    "gathered_by": "subagent claude/generator-cond-uncond; matched evidence only, NOT a promotion",
+    "lineage": "B \u2014 quotient-correct flexible-Graft + whole-ring-system (handoff V2 section 2.2)",
+    "checkpoint_path": "/private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt",
+    "checkpoint_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "checkpoint_sha256_expected_section_2_2": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "checkpoint_sha256_match": true,
+    "modal_volume": "compose-v4-artifacts",
+    "modal_remote_path": "compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt",
+    "training_run": "compose-v4-stage3-flexible-graft-3k-1ac6f19-v1",
+    "leads_file": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/cnof_leads.json",
+    "leads_file_sha256": "76329a4f5271f7b7a9e2b7a014d3a343707deb7a400b9876fefaf88e9df1fdc2",
+    "leads_file_first12_indices": [
+      "6",
+      "9",
+      "11",
+      "12",
+      "13",
+      "15",
+      "18",
+      "26",
+      "27",
+      "29",
+      "31",
+      "33"
+    ],
+    "settings_matched_to": "diagnostics/griddd_valid_fiber_controller_panel12_ceiling.json (pancake base)",
+    "args": {
+      "max_leads": 12,
+      "seed": 20260726,
+      "similarity_minimum": 0.4,
+      "target_qed": 0.9,
+      "budget": 640,
+      "proposals_per_expansion": 16,
+      "frontier_maximum": 48,
+      "n_slots": 40
+    },
+    "sampler_adapter": "AnalyticPancakeQuotientSampler (same wrapper as pancake panel; identical oracle accounting)",
+    "comparison_baseline": "pancake checkpoint /private/tmp/pancake_checkpoint/checkpoint.recovery.pt sha256 47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf"
+  }
+}

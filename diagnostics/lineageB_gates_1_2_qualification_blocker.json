@@ -1,0 +1,89 @@
+{
+  "format": "compose_v4_lineageB_section10_gates_1_2_blocker_v1",
+  "note": "Evidence-gathering only; NOT a promotion and NOT a qualification pass. Records that the section-10 Gate-1 and Gate-2 tooling is cryptographically pinned to the retained pancake checkpoint and cannot be executed on the Lineage B checkpoint as written.",
+  "gathered_by": "subagent claude/generator-cond-uncond",
+  "git_head": "517889f38fe2f18a493bed92b96d20a563ddb3a4",
+  "env": {
+    "KMP_DUPLICATE_LIB_OK": "TRUE",
+    "PYTHONPATH_includes": ["src", "scripts"],
+    "python": "/opt/homebrew/bin/python3",
+    "torch": "2.11.0"
+  },
+  "lineage_b_checkpoint": {
+    "path": "/private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt",
+    "sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "bytes": 38387536,
+    "model_modes_verified": {
+      "property_condition_dim": 0,
+      "empirical_mark_prior_mode": "none",
+      "ring_family_mass_mode": "boolean",
+      "tree_source_prior_present": true
+    },
+    "model_mode_preconditions_pass": true
+  },
+  "retained_pancake_sha256": "47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf",
+  "gate_1": {
+    "name": "exact canonical-successor execution + backbone qualification",
+    "script": "scripts/qualify_analytic_pancake_quotient_backbone.py",
+    "script_sha256": "0dbabaecd232d42fa14ee622aaf91c60600d94969bef4255f3b71d7d9c5f1655",
+    "exact_command": "KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=src:scripts python3 scripts/qualify_analytic_pancake_quotient_backbone.py --checkpoint /private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt --rate-evidence diagnostics/canonical_successor_analytic_rate_equivalence_panel_lineageB.json --qualification diagnostics/canonical_successor_analytic_backbone_qualification_lineageB.json",
+    "result": "FAIL_HARD_BLOCK",
+    "error": "ValueError: checkpoint is not the retained step-6250 pancake",
+    "error_location": "scripts/qualify_analytic_pancake_quotient_backbone.py:71-72",
+    "blocker_reason": "Script raises unless file_sha256(--checkpoint) == RETAINED_PANCAKE_CHECKPOINT_SHA256 (griddd_conditional.py:74). B's SHA differs; the guard fires before any qualification math runs. The default --panel (artifacts/canonical_successor_backbone_qualification/panel_manifest.json) also binds the pancake SHA (checkpoint_sha256=47716924...), and line 76 requires panel.checkpoint_sha256 == checkpoint_sha256, so B has no bound panel either.",
+    "output_written": false
+  },
+  "gate_2": {
+    "name": "zero-sidecar equivalence to the unconditional law",
+    "script": "scripts/run_griddd_analytic_zero_sidecar_smoke.py",
+    "script_sha256": "9deac107dda2c9bf056b2b4871dbbb9903440fce173b296c6aa14f246b7d1526",
+    "exact_command": "KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=src:scripts python3 scripts/run_griddd_analytic_zero_sidecar_smoke.py --checkpoint /private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt --qualification diagnostics/canonical_successor_analytic_backbone_qualification.json --output diagnostics/griddd_analytic_zero_sidecar_rewrite_smoke_lineageB.json",
+    "result": "FAIL_HARD_BLOCK",
+    "error": "ValueError: qualified unconditional checkpoint hash mismatch: expected 47716924f7798ed24556c5aa8fb10c533c55dbd1f02f8f53a463cf2ad80ae2bf, observed c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "error_location": "griddd_conditional.py:269-275 (UnconditionalBackboneQualification.assert_checkpoint_file), invoked at run_griddd_analytic_zero_sidecar_smoke.py:96",
+    "blocker_reason": "Gate 2 requires a Gate-1 qualification manifest whose bound checkpoint SHA equals the --checkpoint SHA. The only loadable analytic manifest binds the pancake SHA. A B-bound analytic manifest is not loadable because load_unconditional_backbone_qualification -> from_payload requires checkpoint_sha256 == RETAINED_PANCAKE for ANALYTIC format (griddd_conditional.py:215). A native (BACKBONE_QUALIFICATION_FORMAT) manifest binding B's SHA would load, but Gate 2 then crashes at run_griddd_analytic_zero_sidecar_smoke.py:135 with float(qualification.small_ring_log_rate_adjustment)=float(None) because native manifests leave calibration fields None; and no script produces such a native manifest for B's exact checkpoint.",
+    "zero_sidecar_assertion_never_reached": true,
+    "intended_assertion_if_reachable": {
+      "flag": "direct_conditioning_has_learned_effect=false (script constant); zero_initialization_identity.exact",
+      "equality_tolerance": "EXACT (== 0.0) on target-vs-base family-rate abs error, missing-vs-base family-rate abs error, target-vs-base total-hazard abs error, and max abs family log-hazard residual (run_griddd_analytic_zero_sidecar_smoke.py:209-218)"
+    },
+    "output_written": false
+  },
+  "calibration_wiring": {
+    "atom_delete_log_rate_adjustment": {
+      "value": -0.5,
+      "where_defined": "PancakeQuotientCalibration default (canonical_successor_distillation.py:175)",
+      "applied_by": [
+        "AnalyticPancakeQuotientSampler.calibration default (canonical_successor_distillation.py:572) -> rate_table",
+        "build_calibrated_pancake_quotient_target calibration default arg (canonical_successor_distillation.py:1172,1189)"
+      ],
+      "cli_or_env_knob": false,
+      "gate1_passes_override": false
+    },
+    "small_ring_log_rate_adjustment": {
+      "value": -1.5,
+      "not_part_of_PancakeQuotientCalibration": true,
+      "where_defined": "rewrite/backbone layer (griddd_conditional.py:637 FrozenResidualConditionalBackbone default; calibrated_rewrite_sampling.py)",
+      "enters_gate1_only_as": "hardcoded requirement on --rollout profile (qualify_analytic_pancake_quotient_backbone.py:212-213) and hardcoded output block (238-240)",
+      "cli_or_env_knob": false
+    },
+    "zero_calibration_expressible": false,
+    "zero_calibration_reason": "For ANALYTIC_BACKBONE_QUALIFICATION_FORMAT the loader from_payload hard-requires atom_delete==-0.5 AND small_ring==-1.5 (griddd_conditional.py:237-238, raising 'analytic qualification changed the passed calibration') and small_ring_maximum_size==4 (line 239-240). Gate-1 script exposes no calibration knob and always writes -0.5/-1.5. There is no code path to qualify any checkpoint as an analytic conditional base with zero calibration.",
+    "no_escape_hatch": "No environ/getenv/override/allow-bypass flag exists in either gate script or in the qualification loader for the SHA pin or the calibration pin."
+  },
+  "alternative_native_path_checked": {
+    "script": "scripts/qualify_pancake_quotient_distillation.py",
+    "viable_for_B": false,
+    "reasons": [
+      "Emits weight_source 'step6250_pancake_plus_panel_quotient_distilled_family_hazard_heads', which is NOT in the loader's allowed set {pancake_derived, canonical_successor_native} (griddd_conditional.py:174), so its manifest cannot feed Gate 2.",
+      "It distills/trains new family-hazard heads and mints a NEW qualified checkpoint (a different SHA), i.e. it does not qualify B's exact verified checkpoint c9d927...; task forbids using any file other than B's checkpoint.",
+      "Requires --validation-paths training data not provided."
+    ]
+  },
+  "conclusion": {
+    "gate_1": "FAIL — cannot execute on B (cryptographic pancake-SHA pin).",
+    "gate_2": "FAIL — cannot execute on B (qualification/checkpoint SHA-mismatch; and the analytic manifest B would need is unloadable).",
+    "lineage_b_qualifiable_as_conditional_base_without_calibration_bandaid": "NOT DETERMINABLE with current tooling — the §10 Gate-1/Gate-2 scripts are pinned to the pancake checkpoint AND to the exact -0.5/-1.5 calibration; a zero-calibration qualification is not expressible. Answering the scientific question requires a tooling change (generalize the SHA pin to bind B, and make calibration a declared+verified parameter rather than a hardcoded -0.5/-1.5), which is code work, not evidence gathering, and was not performed here.",
+    "gates_3_4_5_contrast": "Gates 3/4/5 could be gathered for B (diagnostics/griddd_valid_fiber_controller_panel12_lineageB_ceiling.json) because scripts/griddd_valid_fiber_controller_panel.py has NO SHA guard and accepts any --checkpoint. Gates 1/2 differ: their scripts (and the shared qualification loader) hard-pin the pancake SHA and calibration."
+  }
+}

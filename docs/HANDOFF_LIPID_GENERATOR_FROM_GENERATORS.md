@@ -2,7 +2,14 @@
 
 **From:** Claude generator lane (`claude/generator-cond-uncond`)
 **To:** Claude lipid/oracle lane (`claude/lipid-corpus-oracle`)
-**Date:** 2026-07-20
+**Date:** 2026-07-20 · **Rev 2** (base decision now evidenced)
+
+> **Rev-2 changelog (read §0.5):** the recommended architectural base moved from
+> the pre-quotient **pancake** checkpoint to **Lineage B** (quotient-correct
+> flexible-Graft), now backed by a matched controller measurement (B **33.3%** vs
+> pancake **16.7%** constrained-optimization success on an identical panel), plus a
+> precise element-set analysis (§7) and the in-flight-improvement reassessment
+> (§13). All Rev-1 content below is preserved and still valid.
 
 Everything the lipid workstream needs to port the COMPOSE generator to lipids —
 the code/config/weights, **and** how the ported generator maps onto the Paper 2
@@ -34,6 +41,82 @@ git merge claude/generator-cond-uncond      # or rebase through main
 ```
 
 Then modify freely on your own branch. Branch is on origin for review/backup.
+
+---
+
+## 0.5. Base decision (EVIDENCED): Lineage B, not pancake
+
+**What changed and why.** An audit of the unconditional run history found the
+generator lane had three evidence-bearing lineages, not one, and that the earlier
+pancake recommendation was the **weakest** of the three:
+
+- **Lineage A = "pancake"** (pre-quotient, SHA `47716924…ae2bf`): thrashes — the
+  sampler spends the majority of events on Graft/reroute and canonical
+  self-transitions, dumps rings late (≈99% of ring events in the last decile,
+  time position 0.978), and shows long delete runs. Drug-like C/N/O/F weights.
+- **Lineage B = quotient-correct flexible-Graft + whole-ring-system** (Modal run
+  `compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`): **clean edit dynamics** —
+  zero canonical self-events, no delete-to-one collapse. This is the
+  distinguishing property for lipids.
+- **Lineage C = factorized-tree** (`tree_fcd_transfer_stage1_factorized_v1`): good
+  topology calibration but an initial delete-collapse run and off-thesis primitive
+  ring substrate — worse for an editing task.
+
+**Measured evidence (not a guess).** Both A and B were run through the *same*
+hard-constrained valid-fiber controller (a ceiling estimator for constrained QED
+optimization) on an identical 12-lead panel, identical settings, only the
+checkpoint differing:
+
+| metric (QED ≥0.90 @ Tanimoto ≥0.40) | pancake (A) | **Lineage B** |
+|---|---|---|
+| success rate | 2/12 = **16.7%** | 4/12 = **33.3%** |
+| beat-lead-and-feasible | 9/12 | **12/12** |
+| mean best-feasible QED | 0.824 | **0.881** |
+| proposal productivity (distinct scored, mean / min) | 355.6 / **2** | 389.1 / **282** |
+| leads collapsed to no-improvement (sim=1.0) | **3 of 12** | **0** |
+
+B nearly doubled the success rate and **erased the no-op collapse** (pancake had
+three leads where the search never found a single improving molecule in 640
+oracle calls — one with only 2 distinct feasible states; B never stalls). B is
+**not** uniformly better per-lead (pancake wins 2 leads); the win is
+distributional + productivity, exactly what "zero self-events" predicts. Artifacts:
+`diagnostics/griddd_valid_fiber_controller_panel12_lineageB_ceiling.json` vs
+`…_ceiling.json` (pancake).
+
+**Provenance (pin these exactly; never substitute a same-step different-hash file):**
+- Volume/path: `compose-v4-artifacts` : `compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt`
+- SHA-256: `c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c` (verified, 38,387,536 bytes)
+- Local pull used here: `/private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt`
+- B's exact config: `tree_transport=flexible_size_graft`, `source_prior=carbon_tree`
+  (`DegreeBoundedCarbonTreePrior` sizes 4..40, max_degree 4, `tree_size_prior=empirical`),
+  `teacher_ordering=sequential`, `training_backend=factorized_marks`,
+  `ring_proposals=typed_catalog`, `ring_electronic_mode=factorized_local`,
+  `bond_representation=aromatic`, `hidden_dim=256`, `message_passing_steps=6`,
+  `operational_horizon=16.0`, `training_steps=3000`, `seed=20260717`.
+  Rate knobs are the **pre-fix defaults**: `rate_factorization=hierarchical`,
+  `ring_template_factorization=flat`, `ring_family_mass_mode=boolean`,
+  `empirical_mark_prior_mode=none` (so B carries the drug-like ring defect the
+  §13 fix targets — irrelevant to you, see §13).
+
+**CRITICAL — "base" means architecture + dynamics + optional warm-start, NOT
+drop-in weights.** B's weights are **drug-like C/N/O/F**; do **not** ship them as
+the lipid generator. Adopt B as: (a) the architecture/config/sampler template
+(flexible-Graft quotient substrate + clean editing), and (b) an *optional*
+compatible-init encoder / general-mark warm-start source **iff** the lipid kernel
+shapes overlap. The lipid **model is still trained on the lipid corpus** (§6,
+"general first, linker fine-tune second"). This supersedes the Rev-1 §6/§13
+pointer at the pancake/combined GuacaMol checkpoints as the warm-start source.
+
+**Conditional re-qualification status (§10-style gates, for when you do Arm A/B).**
+Of the five gates that qualify a new base for guided optimization: the **frozen
+fixed-lead panel, identical oracle accounting, and matched-vs-pancake comparison
+are already satisfied** by the run above; **canonical-successor execution** and
+**zero-sidecar equivalence** are one bounded script each and are in progress on
+the generator lane. Note the pancake base qualified only *with* a calibration
+band-aid (`atom_delete −0.5`, `small_ring −1.5`); B is being checked for
+qualification **without** any calibration (its native design removes the
+self-transitions/collapse that band-aid compensated for). Treat B as **converging
+to a re-qualified base**, not yet frozen — but already the correct target.
 
 ---
 
@@ -161,9 +244,24 @@ Michael/linker specialization is a downstream fine-tune, not the base.
 ## 7. Lipid chemistry the kernel must support (P2-G2)
 
 Audit and declare before training (paper2 P2-G2, lipid-design memory):
-- **Atom types / charges:** C/N/O(/F) plus any P if in scope; **neutral and
-  protonated forms** of the ionizable amine; formal-charge policy; stereochemistry
-  policy. Confirm whether the C/N/O/F kernel needs new atom types.
+- **Atom types / charges — the real gating question, scoped precisely:** the
+  atom-type *vocabulary* already includes `B, C, N, O, F, P, S, Cl, Br, I` (plus
+  `null`/`SCAR`), so the **state representation is NOT the blocker**. What is
+  CNOF-restricted is the trained **rewrite fiber** (`enumerate_tracelet_cnof_fiber`),
+  the ring/attachment **catalog**, the **corpus**, and the training **gate**
+  (`train_tracelet_cnof_gate.py`). Consequence:
+    - **Ionizable amino-lipids are mostly C/H/O/N** (esters, amides, ethers,
+      amines) → **in scope of the existing CNOF fiber**. Good news: no extension
+      needed for the common case.
+    - **P (phosphate heads / phospholipids) and S (thioesters, some ionizable
+      lipids) are OUT of the trained fiber.** Extending is a scoped
+      "add fiber actions + templates for P/S + a P/S-containing corpus + retrain"
+      job — **not** a representation overhaul (the vocab already has them). It is
+      shared-RGM-core, so **coordinate with Codex**; it pairs with the ~48-atom
+      kernel bump. **Action: histogram your corpus's elements FIRST**; if a
+      material fraction needs P/S, scope the fiber extension before training.
+  Also declare: **neutral and protonated forms** of the ionizable amine;
+  formal-charge policy; stereochemistry policy.
 - **Size:** heavy-atom range to ~**48+** (AGILE mean 47.77); long/repeated tails;
   practical throughput at this size is a real P2-G2 requirement.
 - **Architecture (Fig 2 marginals):** ionizable **head**, **linker(s)** (incl.
@@ -259,15 +357,72 @@ recovery objective is a hard prerequisite before Fig-6 candidates are locked.
 
 ## 12. One-line summary to paste into the lipid chat
 
-> Merge `claude/generator-cond-uncond`. Base = `calibrated_rewrite_sampling`
-> (graft/self-events solved) + `corpus_residual_v1` chemistry re-fit on the lipid
-> corpus + atom-delete −0.5 (size); **restrict the ring family** (lipids
-> ring-simple). Optimization (Arm A/B) = reuse `molecular_property_conditioning`
-> / `guided_rewrite_sampling` / `griddd_conditional` accounting with the pan-lung
-> oracle in place of QED; enforce linker preservation as a **hard legal-fiber
-> condition** and build the **recovery curriculum** before round-2 (Fig 6). Train
-> fresh on the lipid corpus (don't reuse GuacaMol weights; general first, linker
-> fine-tune second). Kernel size bump (~48 atoms, protonation, ≥6 reaction
-> families) is shared RGM core → **coordinate with Codex**. Targets P2-G2/G3/G5,
-> L1/L3/L5. Keep the four-claim boundary and "to our knowledge". `modal run
-> --detach`, `.json` recipes.
+> **Generator → lipid handoff (Rev 2, base=B).** Merge, don't copy:
+> `git merge claude/generator-cond-uncond`. Read `docs/GENERATOR_INTERNALS_FROM_ZERO.md`
+> then this doc (§0.5 base decision, §7 elements, §13 in-flight fixes). **Base =
+> Lineage B, not pancake** — quotient-correct flexible-Graft, clean dynamics;
+> evidenced 33% vs 17% on a matched constrained-QED controller. Pin
+> `compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt`
+> (SHA c9d9275103…) by run-ID+SHA, but treat "base" as architecture/config/sampler
+> + optional encoder warm-start — **train the lipid model on the lipid corpus**
+> (general first, linker fine-tune second; B's weights are drug-like C/N/O/F).
+> Start now (base-agnostic + mergeable): pan-lung oracle swap (reuse
+> `griddd_conditional` accounting), corpus, optimization loop; enforce linker
+> preservation as a **hard legal-fiber condition**; build the **recovery
+> curriculum** before round-2 (Fig 6). Don't wait for our ring fix (off your
+> critical path); `git merge` again later to inherit it. **Real gate = element
+> set:** vocab has P/S but the trained fiber (`enumerate_tracelet_cnof_fiber`) is
+> CNOF-only — amino-lipids fit; phospholipid P / thioester S need a
+> fiber+corpus+retrain extension (shared RGM core → **coordinate with Codex**,
+> pairs with the ~48-atom kernel bump). **Histogram corpus elements first.**
+> Restrict/down-weight the ring family (lipids ring-simple). Targets
+> P2-G2/G3/G5, L1/L3/L5. Keep the four-claim boundary + "to our knowledge".
+> `modal run --detach`, `.json` recipes.
+
+---
+
+## 13. Reassessment: what the generator lane is improving, and when to re-merge
+
+**Start now; do not wait for any of the below.** Your long-pole — pan-lung oracle
+swap, lipid corpus + element audit (§7), optimization-loop scaffolding (§8) — is
+**base-agnostic and mergeable**. Because the handoff is **git-merge, not copy**,
+you `git merge claude/generator-cond-uncond` again later to inherit every
+improvement below for free. Nothing here is on your critical path.
+
+**Three improvements in flight on `claude/generator-cond-uncond`:**
+
+1. **Ring-hazard fix (§9.3) — OFF your critical path.** Repairs de-novo drug-like
+   small-ring/bridged over-production via `rate_factorization="superposed"` +
+   `ring_template_factorization="topology_cycle_hierarchical"` (the topology-group
+   intensities compete unnormalized, so losing common-ring support *lowers* ring
+   hazard instead of renormalizing onto rare small rings). The **mechanism is
+   proven** by a zero-GPU falsifier unit test
+   (`tests/test_topology_group_intensity_ring_hazard.py`): superposed drops ring
+   mass on support loss, hierarchical (the defect) does not. It then warm-starts
+   Lineage B into that combo for a bounded convergence (audit-scoped: ~250–500
+   updates, 200 rollouts, 5–10 min A100). **Why it's irrelevant to you:** lipid
+   optimization is an *editing* task on ring-simple molecules, so clean edit
+   dynamics matter, not de-novo ring-building marginals. You should still
+   **restrict/down-weight the ring family** per §5 regardless.
+
+2. **Lineage-B re-qualification as a guided-optimization base (§0.5).** Three of
+   the five qualification gates are already satisfied by the matched controller
+   run; the remaining two (canonical-successor execution, zero-sidecar
+   equivalence) are one bounded script each, in progress — plus the check that B
+   qualifies **without** the pancake calibration band-aid. When this lands, B is a
+   frozen, re-qualified base you can warm-start from with confidence.
+
+3. **Calibrated sampler (already landed, use it now):** `calibrated_rewrite_sampling`
+   — self-Graft virtualization + immediate-backtrack safety + the `atom-delete
+   −0.5` size knob. This is a sampler/config technique (not weights), so it
+   transfers directly (§4). It is what gives the clean dynamics measured in §0.5.
+
+**Re-merge signal.** Re-run `git merge claude/generator-cond-uncond` when the
+generator lane registers, in the shared result registry (S8, §11): (a) the
+re-qualified Lineage-B checkpoint (run-ID + SHA), and (b) the ring-fixed
+unconditional checkpoint with its sufficiency panel. Until then, build on B's
+architecture/config/sampler (§0.5) and **pin B by run-ID + SHA** (never a
+same-step different-hash file).
+
+**Do not hard-wire:** pancake checkpoint paths; `hierarchical`/`flat`/`boolean`
+rate-mode assumptions; or CNOF-only support if your element audit (§7) shows P/S.

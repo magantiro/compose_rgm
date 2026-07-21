@@ -2684,6 +2684,13 @@ def main() -> None:
             mismatches.pop("empirical_mark_priors", None)
             mismatches.pop("ring_family_mass_mode", None)
             mismatches.pop("ring_template_factorization", None)
+            # rate_factorization (hierarchical <-> superposed) changes only the
+            # forward rate-composition in _masked_family_logits, never a tensor
+            # shape, so the shape-exact transfer stays valid and the newly added
+            # topology-group head still fresh-inits.  Permitted exactly like
+            # ring_template_factorization above -- this is the section-9.3
+            # ring-hazard fix (superposed + topology_cycle_hierarchical).
+            mismatches.pop("rate_factorization", None)
             mismatches.pop("trainable_parameter_scope", None)
             source_ring_mode = checkpoint_payload.get(
                 "ring_electronic_mode",
