@@ -1,0 +1,31 @@
+{
+  "schema_version": "2.0",
+  "created_at": "2026-07-20T20:00:00-04:00",
+  "purpose": "Seal the corrected unconditional-generator run lineage, evidence, and core implementation inspected for the V2 Claude decision package.",
+  "target_worktree": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators",
+  "target_branch": "claude/generator-cond-uncond",
+  "observed_head": "517889f38fe2f18a493bed92b96d20a563ddb3a4",
+  "notes": [
+    "This supplements rather than rewrites CLAUDE_GENERATOR_HANDOFF_MANIFEST_V1.json.",
+    "FCD values from different chemistry subsets and denominators are not directly interchangeable.",
+    "The quotient checkpoint binary must be located remotely by exact run ID and SHA before reuse."
+  ],
+  "sha256": {
+    "docs/HANDOFF_GENERATOR_RUN_LINEAGE_CORRECTION_V2.md": "6a82a9d9aefde41b4867e77ac4461b8701cb72f49f97cb48e18319630f923b83",
+    "CLAUDE_GENERATOR_READ_NOW.md": "0f880e4775f3b8df8c97e142755f73ba378ff052c0498a3e2cfe4defb3d6c66a",
+    "results/diagnostics/README.md": "d8ae54f63390d664cb4fc4669b18239879c727bbc422334eae4907182a6de274",
+    "results/diagnostics/step1000_ring_topology_comparison.json": "f1843b07e28d985d5a8f3c166e360b2d89af88312398e8391e8c6ad258550908",
+    "results/tree_fcd_transfer_stage1_factorized_v1/metrics.json": "4cf12f9757cc1cfb74fabb7212f75f8fe8ef49c4c270a1a9b1eff39588d2f1b1",
+    "results/tree_fcd_transfer_stage1_factorized_v1/audit_v1/audit.json": "cc2ee83ab9fd3bb3f9bc9aab968278467cebfa94d806bf6072eacb4c344f4f5b",
+    "results/tree_fcd_transfer_stage1_factorized_v1/manifest.json": "e45b32e8dff3e073222c2011a9cd2c9d9207a59a85ff8f2c7904406104369e5e",
+    "diagnostics/pancake_step6250_eval2000_event_audit.json": "0bfda5d3696c1429fe60b9bd74cbd6704d27119ac3e6bcb280dbe36d54adfde8",
+    "diagnostics/pancake6250_calibration_eval600_metrics.json": "2a829bee193e82d73cd8ffd137e4c47cf694d3ccca8c49d7b929d13da358c744",
+    "docs/audits/2026-07-19_pancake_to_quotient_run_audit.md": "4532f60c21e8c9750d25797e0c741450636b0bb6826692226531e4c1e917928a",
+    "src/compose_v4/model/factorized_tracelet_rate_model.py": "c70d4752ed4302e5f33a653e8c8835b42147935e6070a16e2a840e0e13e93e54",
+    "src/compose_v4/rewrite/tree_transport.py": "4f1bb53f8fe60ff6e7dcf00408cf43d66dc79a0ce4e80bde7d70e72708a736aa",
+    "src/compose_v4/rewrite/ring_system_fiber.py": "1bfdf92a68738882cf990f297e2f94afcdeba7481c920720e9473bdc9fafc8ee",
+    "src/compose_v4/rewrite/tracelets.py": "55342a1ad3dc80addbd3eb9f64519016b12b775c798515f8b6c1f456ef74fb2b",
+    "src/compose_v4/experiments/canonical_successor_distillation.py": "00ede099bcf169270ca821c3c9a6b5d4c29b55f0c456b1a4acb81f126a350a0d",
+    "scripts/train_tracelet_cnof_gate.py": "d02c4bab78ca70562e2874d6aebe7163bc4d7a4b043839a4b83042827be3f5de"
+  }
+}

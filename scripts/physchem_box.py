@@ -16,6 +16,7 @@ scatters. Reports in-box yield (all properties jointly) for each.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -39,7 +40,10 @@ from griddd_value_guided_smc_controller import _load_base_sampler, value_guided_
 RDLogger.DisableLog("rdApp.*")
 
 ROOT = Path(__file__).resolve().parents[1]
-SC = "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad"
+_ROOT = Path(__file__).resolve().parents[1]
+SC = os.environ.get("COMPOSE_SCRATCH", str(_ROOT / "scratch"))
+os.makedirs(SC, exist_ok=True)
+LEADS = str(_ROOT / "configs" / "benchmarks" / "cnof_leads.json")
 OUTFIG = ROOT / "paper_iclr_stochastic_rewriting" / "figures"
 OUTDIAG = ROOT / "diagnostics" / "conditional_smc"
 CKPT = "/private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt"
@@ -72,7 +76,7 @@ def _scaffold(smi):
 def run():
     sampler, _ = _load_base_sampler(CKPT, 0.0)
     rewrite = de_novo_rewrite_system()
-    leads = json.load(open(f"{SC}/cnof_leads.json"))[:N_LEADS]
+    leads = json.load(open(LEADS))[:N_LEADS]
 
     TOPK = 10
     ours_pts = []            # CONVERGED output points (top-k per lead) for the figure

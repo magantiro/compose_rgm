@@ -16,6 +16,7 @@ collapse + the implied generate-then-filter cost (1 / final yield).
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import matplotlib
@@ -30,7 +31,10 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 RDLogger.DisableLog("rdApp.*")
 
 ROOT = Path(__file__).resolve().parents[1]
-SC = "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad"
+_ROOT = Path(__file__).resolve().parents[1]
+SC = os.environ.get("COMPOSE_SCRATCH", str(_ROOT / "scratch"))
+os.makedirs(SC, exist_ok=True)
+LEADS = str(_ROOT / "configs" / "benchmarks" / "cnof_leads.json")
 OUTFIG = ROOT / "paper_iclr_stochastic_rewriting" / "figures"
 OUTDIAG = ROOT / "diagnostics" / "conditional_smc"
 

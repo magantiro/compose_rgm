@@ -1,165 +1,138 @@
-# COMPOSE v4
+# COMPOSE — Rewrite Generator Matching for pathwise-constrained molecular generation
 
-**Rewrite Generator Matching for validity-preserving molecular generation.**
+COMPOSE learns a **validity-closed, flexible-size molecular generator**: a
+continuous-time Markov chain (CTMC) over molecular graphs whose committed states
+are complete, chemically valid, connected molecules and whose transitions are
+**executable chemical rewrites**. Generator Matching learns the contextual firing
+rates of those rewrites from endpoint-conditioned programs; at inference the
+process is target-free, ancestral, and **non-monotone** (it grows *and* shrinks) —
+no endpoint, beam search, candidate bank, or terminal repair.
 
-COMPOSE v4 is a clean research implementation of a learned continuous-time
-jump process on molecular graph rewrite rules. Molecules are complete states;
-typed, executable rewrites are transitions; a neural model learns their time-
-dependent firing rates with Generator Matching.
+## Paper 1 thesis — *pathwise*-constrained molecular generation
 
-The project intentionally starts smaller than `compose_v3`. It reuses the
-chemistry state representation and validity semantics that survived testing,
-but does not inherit the old destruction-noising objective, oracle inversion
-labels, beam/candidate-bank ring decoder, or MIS-centric reverse sampler.
+Every guided generator constrains the **endpoint**: the final molecule must
+satisfy a predicate `P`. COMPOSE can constrain the **path** — `P` holds at *every
+committed state*, not just the last one. This is a problem class expressible
+**only because our intermediates are molecules**, which is exactly the structural
+gap of diffusion/flow models (their intermediates are latents / partial graphs,
+so `P` can't even be evaluated mid-generation). Formalizing pathwise-constrained
+generation, and showing COMPOSE solving instances of it, is the paper's spine.
 
-## Start here
+> **New to the project?** Read (1) this file, (2)
+> [`docs/CONDITIONAL_RESULTS_AND_SCOPING.md`](docs/CONDITIONAL_RESULTS_AND_SCOPING.md)
+> — the current, honest results + scoping, then (3) the paper in
+> [`paper_iclr_stochastic_rewriting/`](paper_iclr_stochastic_rewriting/)
+> (`main.tex`, builds to `main.pdf` with `latexmk -pdf`). Everything else under
+> `docs/` is historical — see the index at the bottom.
 
-For a collaborator taking over the project, read
-[`docs/HANDOFF.md`](docs/HANDOFF.md) first. The complete artifact map is in
-[`docs/ARTIFACT_INDEX.md`](docs/ARTIFACT_INDEX.md), and the dated live workstream
-is in [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md). The three canonical
-HTML research plans are versioned in [`docs/research_plans/`](docs/research_plans/),
-and the full historical “pancaking” trajectory that motivated the Graft
-successor quotient is preserved under
-[`docs/trajectory_diagnostics/legacy_prequotient/`](docs/trajectory_diagnostics/legacy_prequotient/).
+## The contribution, graded by claim hardness
 
-The step-6,250 trajectory and FCD bundle is deliberately labeled legacy: it
-predates the exact successor quotient and current semantic ring-support code.
-It is diagnostic evidence for a repaired failure mode, not a result of the
-corrected generator.
+The paper grades its own claims so a reviewer can trust the self-assessment.
 
-## Base formulation
+| Layer | What it is | Status | Number |
+|---|---|---|---|
+| **Spotlight** — pathwise **safety** (Tier 1) | never pass through a reactive/toxicophore state; exact invariant in the legal fiber | committed | endpoint-only generation traverses a reactive intermediate in **66.9%** of even its *clean-ending* trajectories; COMPOSE **0%** audited (3,067 states), at QED cost **−0.016** (free) |
+| **Structural control** | exact fixed-scaffold + required/forbidden-substructure satisfaction, where generate-then-filter collapses and no learned constrained generator can even *represent* the constraint | committed | scaffold **100%** vs baseline **96%→12%**; substructure **100%**; multi-property physchem box under exact scaffold **17.8% vs 3.5% per sample (5×)**, 100% scaffold |
+| **Oracle efficiency / anytime** | oracle spent only on in-fiber candidates; every intermediate usable | committed | **100%** usable-oracle vs **39.8%**; median lead reaches 90% of its gain by **~13** oracle calls |
+| **Foundation (rigor)** | exact conditioning verified; guidance measured against ground truth | committed | Doob h-transform reproduces the exact conditional to **1.1e-16**; finite-particle guidance provably converges to it |
+| **De novo sufficiency** | the base is a credible generator (not a distribution-learning leaderboard entry) | in progress | validity/uniqueness/novelty ≈ 100% (smoke); V/U/N + descriptor Wassersteins, **no FCD arms race** |
 
-For the legal action fiber `A_c(G)` at molecule `G` under condition `c`,
+**What we do *not* claim:** exact *property* conditioning (property targeting is
+*steered*, only rule-closed structural constraints are exact); unconditional
+distribution SOTA (FCD is deferred, not a headline); a head-to-head win on
+oracle-*light* property optimization (our SMC is oracle-hungry — GrIDDD's home
+turf, which we do not contest). See `docs/CONDITIONAL_RESULTS_AND_SCOPING.md`.
 
-```text
-(L_theta,t,c f)(G)
-  = integral_[a in A_c(G)] [f(T_a(G)) - f(G)] q_theta,t(da | G, c).
+## Repository map
+
+```
+paper_iclr_stochastic_rewriting/   the ICLR paper (main.tex, numbers.tex, references.bib, figures/)
+src/compose_v4/                    the model: chem state, rewrite kernel/fibers, Generator Matching, experiments
+scripts/                           experiment drivers (see "Results" below)
+diagnostics/conditional_smc/       committed conditional result JSONs
+diagnostics/exactness/             committed E0 / guidance-ground-truth JSONs
+configs/benchmarks/                frozen inputs (cnof_leads.json = 271 CNOF optimization leads, Jin QED set)
+modal_apps/                        distributed training / rollout evaluation on Modal
+tests/                             pytest (E0 exactness, reward-FT, value-twist, ring-hazard)
+docs/                              documentation (see index at bottom; canonical vs historical)
 ```
 
-The base implementation now includes a deterministic validity-closed runtime,
-random legal trace compiler, conditional CTMC teachers, a whole-graph rate
-network, canonical successor aggregation, and target-free ancestral sampling.
-The production scaling path uses the stochastic-rewriting lift: one batched
-graph encoding predicts a total hazard and normalized probabilities over
-analytically legal rule matches. It instantiates only the sampled mark; the
-exhaustive canonical-successor fiber remains a correctness oracle.
+## Results at a glance (script → figure → data)
 
-See [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) for the staged plan and
-[docs/V3_REUSE_LEDGER.md](docs/V3_REUSE_LEDGER.md) for the reuse boundary. The
-distinction from fragment assembly is explicit in
-[docs/FRAGMENT_METHOD_BOUNDARY.md](docs/FRAGMENT_METHOD_BOUNDARY.md). See
-[docs/GENERATOR_MATCHING_INTUITION.md](docs/GENERATOR_MATCHING_INTUITION.md) for
-the relationship to flow matching and diffusion. The first held-out corpus gate
-is documented in
-[docs/CNOF_CONDITIONAL_GATE.md](docs/CNOF_CONDITIONAL_GATE.md).
-The scoped literature claim and distinctions from Morph, Edit Flows, DDSBM,
-graph grammars, and fragment assembly are maintained in
-[docs/NOVELTY_POSITIONING.md](docs/NOVELTY_POSITIONING.md).
-The universal micro ring semantics and implemented verified cycle/ear/electronic
-tracelet hierarchy are specified in
-[docs/RING_REWRITE_ARCHITECTURE.md](docs/RING_REWRITE_ARCHITECTURE.md).
-The structured alkane-tree source, atomic bridge-reroute semantics, and required
-reachability/ring-commitment gates are specified in
-[docs/TREE_SOURCE_TRANSPORT.md](docs/TREE_SOURCE_TRANSPORT.md).
-The exact meanings of source prior, teacher coupling, proposal support, learned
-rates, sampling, and future guidance are summarized in
-[docs/CURRENT_MODEL.md](docs/CURRENT_MODEL.md).
-The evidence-based transfer from the sibling `rank_d500k` model that reported
-FCD 9.96, including the frozen first tree-source quality recipe and covariance
-diagnostic, is documented in
-[docs/FCD_TRANSFER_FROM_RANK_D500K.md](docs/FCD_TRANSFER_FROM_RANK_D500K.md).
+Each conditional result is a self-contained script; figures land in
+`paper_iclr_stochastic_rewriting/figures/`, summaries in `diagnostics/`.
 
-## Development setup
+| Result | Script | Figure | Data |
+|---|---|---|---|
+| Pathwise safety (spotlight) | `scripts/tier1_pathwise_safety.py` | `pathwise_safety.pdf` | `diagnostics/conditional_smc/tier1_pathwise_safety.json` |
+| Scaffold collapse curve | `scripts/make_paper_figures.py` | `scaffold_collapse.pdf` | `diagnostics/conditional_smc/smc_scaffold_control48.json` |
+| Physchem box under exact scaffold | `scripts/physchem_box.py` | `physchem_box.pdf` | `diagnostics/conditional_smc/physchem_box.json` |
+| Anytime | `scripts/make_paper_figures.py` | `anytime.pdf` | `diagnostics/conditional_smc/scaffold_opt_panel12.json` |
+| Property dial (warm-up) | `scripts/property_dial.py` | `property_dial.pdf` | `diagnostics/conditional_smc/property_dial.json` |
+| E0 Doob exactness | `scripts/e0_toy_h_exactness.py` | — | `diagnostics/exactness/e0_toy_h_*.json` |
+| Guidance ground truth | `scripts/doob_guidance_ground_truth.py` | `doob_guidance_ground_truth.pdf` | `diagnostics/exactness/doob_guidance_ground_truth.json` |
+| Usable-oracle efficiency | (from scaffold data) | — | `diagnostics/conditional_smc/usable_oracle_efficiency.json` |
+| De novo sufficiency (E1) | `scripts/e1_unconditional_metrics.py` | — | (run pending) |
+
+The conditional-control machinery is the value-guided SMC controller
+`scripts/griddd_value_guided_smc_controller.py` (hard scaffold / similarity /
+required-SMARTS / forbidden-SMARTS(tuple) fiber constraints, arbitrary
+state→float objective, population dump, best-molecule + anytime traces).
+
+## Reproduce
 
 ```bash
-python -m pip install -e ".[dev,cloud,eval]"
-pytest
+# environment: python 3.12+, rdkit, torch, numpy, scipy, matplotlib (see pyproject.toml)
+export PYTHONPATH=src:scripts
+export KMP_DUPLICATE_LIB_OK=TRUE           # macOS OpenMP guard
+# optional: where scratch outputs go (default: ./scratch)
+export COMPOSE_SCRATCH=./scratch
+
+# base checkpoint (Lineage B) — pull once from the Modal artifact volume
+#   compose-v4-artifacts : compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt
+# scripts default to /private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt (override CKPT in-script)
+
+python scripts/tier1_pathwise_safety.py      # the spotlight result + figure
+python scripts/physchem_box.py               # multi-property box under exact scaffold
+python scripts/e0_toy_h_exactness.py         # exactness (self-contained, no checkpoint)
+python -m pytest tests/test_e0_toy_h_exactness.py -q
 ```
 
-## Current status
+Notes: leads are read from `configs/benchmarks/cnof_leads.json` (tracked). The
+E1 de novo run additionally needs a one-SMILES-per-line ZINC/GuacaMol file
+(extract the `smiles` column from the source CSV). SMC runs are single-process
+(no fork) — the multiprocessing rollout path deadlocks on some macOS setups, so
+prefer serial for local runs and Modal (`modal_apps/`) for scale.
 
-- Molecular graph state and RDKit validity layer imported from v3.
-- Minimal executable rewrite basis implemented.
-- Checkpoint-compatible structured-source mode implemented: an explicit
-  degree-bounded carbon-tree prior, primitive leaf-delete/regrow transport,
-  atomic subtree Graft, and flexible-size grow/shrink-plus-Graft transport.
-  Every compiler reaches the exact target through valid connected states; the
-  production Graft paths commit each complete cyclic component with one atomic
-  `ring_system_grow` event. The learned factorization contains no ring-ear or
-  scalar-closure family. Ring marks use a hierarchical topology, exact legal
-  scaffold-match, and valence-masked atom-label decoder rather than a flat
-  enumeration of every topology-placement pair.
-- Rewrite registry, hard-condition hooks, and successor-rate alias aggregation
-  implemented.
-- Exact null-to-target compiler reconstructs acyclic, charged, monocyclic,
-  fused, bridged, and spiro fixtures through valid micro-rewrite programs.
-- Exact inverse-program construction and randomized slot-permutation fuzzing
-  implemented.
-- Phase 0 stress gate passed: 10,020 validity-checked commits, 580 exact forward
-  and inverse programs, and 580 canonical slot-permutation matches.
-- Closed-form conditional progress CTMC and complete-successor rate Bregman
-  objective implemented and numerically tested.
-- Exact connected C/N/O/F action fiber over all six micro-rule families.
-- Slot-quotiented, valence-factorized C/N/O/F fiber with exact successor-set
-  equivalence and 21-30x measured evaluation speedup on representative states.
-- Hierarchically normalized total-hazard, rule-family, and operand rate model.
-- Permutation-equivariant whole-graph neural marked-rate model implemented.
-- Dense marked-rewrite backend implemented: batched graph/message encoding,
-  tensorized family/template/site masks, deterministic persistent data workers,
-  pinned prefetch, BF16 GPU training, direct ancestral mark sampling, and an
-  exact index-stable recovery stream. The selected production configuration is
-  A100 + 32 CPU cores + 24 data workers: its final preflight interval reached
-  54.52 examples/s versus 51.80 for the measured H100 configuration, with
-  effectively identical validation metrics and lower total container cost.
-- Deterministic 16-process path compilation now stores exact byte-packed graph
-  checkpoints instead of every dense intermediate, writes atomic proposal and
-  transport shards, and resumes from a signature-validated manifest. On 54
-  representative 40-slot Graft paths, interval-8 checkpoints reduced serialized
-  storage from 14.62 MB to 1.38 MB (10.6x); the previous full 99,738-path cache
-  was measured at 29.0 GiB. Modal runs compile and audit on CPU before an A100
-  stage that refuses to start without a complete cache. Training releases the
-  GPU before the retry-safe CPU 2,000-sample/FCD evaluation. Immutable stage
-  manifests bind resumes to code, recipe, and data provenance.
-- Exact per-row ring support is compiled into content-addressed CSR shards
-  before GPU training. Shard-aligned absolute ranges can be built concurrently
-  by isolated Modal CPU containers, and the trainer fails rather than reverting
-  to expensive online chemistry when any requested row is missing. The cache
-  retains deterministic Generator Matching semantics across neural or optimizer
-  changes and is invalidated by rewrite/path-signature changes.
-- First end-to-end learned gate passed: 1,000 target-free rollouts were 100%
-  valid/connected, 99.8% non-null, 99.5% on tiny reference support, recovered
-  all reference modes, and reached total variation 0.0523.
-- First held-out corpus gate completed on a 96/16/16 neutral C/N/O/F split. The
-  selected late-time-calibrated checkpoint produced 100/100 valid, connected,
-  non-null, unique, target-free samples; mean size was 10.05 versus 10.50 and
-  mean cycle rank 1.39 versus 1.19 in the reference corpus.
-- A full-scan 1,333-molecule C/N/O/F gate and matched corpus-marginal rewrite
-  baseline are complete. The first prior tilt gave a mixed structural result.
-  The follow-up topology-aware, trust-regularized generator uses deferred bond-
-  order teachers and retains 100% valid/connected/non-null/unique sampling. It
-  improves matched-prior FCD from 22.24 to 19.42, ring-size TV from 0.284 to
-  0.054, cycle-rank TV from 0.254 to 0.094, QED from 0.511 to 0.539, and SA from
-  5.727 to 4.771. Aromaticity remains the dominant measured bottleneck.
-- Full result boundaries and diagnostics are recorded in
-  [docs/TINY_RATE_GATE.md](docs/TINY_RATE_GATE.md) and
-  [docs/CNOF_CONDITIONAL_GATE.md](docs/CNOF_CONDITIONAL_GATE.md). The scaled
-  comparison is in [docs/SCALE16_GATE.md](docs/SCALE16_GATE.md).
-- A block/ear tracelet compiler, finite C/N/O/F tracelet fiber, exact inverses,
-  and validity-checked micro lowerings are implemented. The compiler builds a
-  neutral carbon ring scaffold before ring-contextual atom/electronic
-  refinement; it exactly handles monocyclic, fused, bridged, spiro, cage,
-  macrocyclic, heterocyclic, aromatic, and partially unsaturated fixtures.
-- The 1,067-molecule training split compiles in 11,952 visible events versus
-  21,909 verified micro lowerings (1.83x path compression). A ring-frequency
-  audit records both molecule-level topology prevalence and operator-mark
-  frequencies; it is saved in `results/ring_tracelet_frequency_audit.json`.
-- Tracelet teacher successors are verified to lie in the production marked
-  fiber, and the factorized semantic ring decoder is integrated into both
-  teacher scoring and ancestral sampling. Exact-support throughput and the
-  A100/H100 resource gate are complete. The fresh commit-`2be9258`
-  quotient-correct 30,000-update run is active under the immutable artifact
-  label `compose-v4-stage3-flexible-graft-prod-2be9258-v1`, with validation
-  early stopping, an automatic credible-checkpoint 100-sample preview, and CPU
-  final evaluation;
-  the archived step-6,250 FCD and trajectories remain diagnostic only.
+## Current state & honest caveats
+
+- **Base = Lineage B**, GuacaMol-trained (C/N/O/F), a **step-1,000 preview** of a
+  3,000-step schedule, chosen for clean edit dynamics. It **overproduces small
+  rings** — an open defect. Read
+  [`docs/HANDOFF_GENERATOR_RUN_LINEAGE_CORRECTION_V2.md`](docs/HANDOFF_GENERATOR_RUN_LINEAGE_CORRECTION_V2.md)
+  before committing to a final backbone or another large unconditional run.
+- Conditional results are **mechanism-driven and base-independent** (fiber +
+  SMC), so they carry to whatever backbone is finalized; only **E1 (unconditional
+  quality)** and the pathwise-safety *magnitude* depend on the base.
+- The pathwise-safety 67% is partly inflated by the small-ring defect (aziridine/
+  epoxide dominate the per-alert incidence); the **phenomenon, the 0% guarantee,
+  and the free cost are base-robust**, and the traversed alerts are not only
+  strained rings.
+- **Corpus:** base trained on **GuacaMol**; constrained-design **leads** are
+  ZINC-derived (Jin QED set). "Matches GrIDDD" holds at the *element* level
+  (CNOF), not the corpus.
+
+## Documentation index
+
+**Read these (current):**
+- `docs/CONDITIONAL_RESULTS_AND_SCOPING.md` — canonical conditional results + scoping (option A + pathwise).
+- `docs/HANDOFF_GENERATOR_RUN_LINEAGE_CORRECTION_V2.md` — the unconditional-backbone decision (read before large runs).
+- `paper_iclr_stochastic_rewriting/main.tex` — the paper.
+
+**Historical / superseded** (kept for provenance, not the current framing):
+`docs/HANDOFF*.md`, `docs/PROJECT_STATUS.md`, `docs/ACTIVE_LANES.md`,
+`docs/48_HOUR_RESULTS_TRACKER.md`, `docs/PAPER_POSITIONING_EXACT_CONTROL.md`
+(superseded by the pathwise framing), the gate docs (`*_GATE.md`,
+`SCALE16_GATE.md`), and the `docs/research_plans/` HTML plans (the original
+distribution-learning framing, now reframed to structural + pathwise control).
+```

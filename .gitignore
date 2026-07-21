@@ -35,3 +35,12 @@ paper_iclr_stochastic_rewriting/*.blg
 paper_iclr_stochastic_rewriting/*.log
 paper_iclr_stochastic_rewriting/*.out
 paper_iclr_stochastic_rewriting/tmp/
+scratch/
+paper_iclr_stochastic_rewriting/main.aux
+paper_iclr_stochastic_rewriting/main.log
+paper_iclr_stochastic_rewriting/main.out
+paper_iclr_stochastic_rewriting/main.fls
+paper_iclr_stochastic_rewriting/main.fdb_latexmk
+paper_iclr_stochastic_rewriting/main.bbl
+paper_iclr_stochastic_rewriting/main.blg
+scripts/presentation/__pycache__/
