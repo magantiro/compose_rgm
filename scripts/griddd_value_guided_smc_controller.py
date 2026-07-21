@@ -28,6 +28,7 @@ from pathlib import Path
 import numpy as np
 from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import rdFingerprintGenerator
+from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from compose_v4.chem.molecular_graph import (
     molecular_graph_to_smiles,
@@ -117,6 +118,7 @@ def value_guided_smc(
     twist=None,
     lookahead_rollouts: int = 0,
     lookahead_depth: int = 4,
+    scaffold_mol=None,
 ):
     """Propagate a particle population under the base CTMC toward high reward
     inside the hard similarity fiber. Returns a result dict."""
@@ -223,7 +225,11 @@ def value_guided_smc(
                 if fingerprint is None:
                     continue
                 if DataStructs.TanimotoSimilarity(lead_fp, fingerprint) < similarity_minimum:
-                    continue  # HARD fiber: infeasible successor never accepted
+                    continue  # HARD fiber: similarity constraint
+                if scaffold_mol is not None:
+                    successor_mol = Chem.MolFromSmiles(key)
+                    if successor_mol is None or not successor_mol.HasSubstructMatch(scaffold_mol):
+                        continue  # HARD fiber: exact fixed-scaffold constraint (never soft)
                 accepted = (successor, key, fingerprint)
                 break
             if accepted is None:
@@ -256,6 +262,10 @@ def value_guided_smc(
 
     best_similarity = DataStructs.TanimotoSimilarity(lead_fp, _fp(best_state))
     diversity = _mean_pairwise_diversity(list(feasible_population.values()))
+    scaffold_preserved = True
+    if scaffold_mol is not None:
+        best_mol = Chem.MolFromSmiles(_canon(best_state))
+        scaffold_preserved = best_mol is not None and best_mol.HasSubstructMatch(scaffold_mol)
     return {
         "lead_qed": float(lead_qed),
         "best_feasible_qed": float(best_qed),
@@ -263,6 +273,7 @@ def value_guided_smc(
         "oracle_calls": len(qed_cache) - 1,
         "distinct_feasible": len(feasible_population),
         "population_diversity": float(diversity),
+        "scaffold_preserved": bool(scaffold_preserved),
     }
 
 
@@ -307,6 +318,13 @@ def main() -> None:
         help="V2: exact Monte-Carlo lookahead rollouts per state (0 = off). Budget-counted.",
     )
     parser.add_argument("--value-lookahead-depth", type=int, default=4)
+    parser.add_argument(
+        "--scaffold-constraint",
+        choices=("none", "murcko"),
+        default="none",
+        help="'murcko': require each lead's Bemis-Murcko scaffold in EVERY candidate "
+        "(exact fiber constraint -- the decisive hard-structural-constraint experiment).",
+    )
     args = parser.parse_args()
 
     sampler, qed_oracle = _load_base_sampler(
@@ -329,6 +347,11 @@ def main() -> None:
         except Exception as error:  # noqa: BLE001
             results.append({"lead_index": index, "error": str(error)})
             continue
+        scaffold_mol = None
+        if args.scaffold_constraint == "murcko":
+            lead_mol = Chem.MolFromSmiles(smiles)
+            scaf = MurckoScaffold.GetScaffoldForMol(lead_mol) if lead_mol is not None else None
+            scaffold_mol = scaf if scaf is not None and scaf.GetNumAtoms() > 0 else None
         outcome = value_guided_smc(
             state,
             sampler=sampler,
@@ -347,6 +370,7 @@ def main() -> None:
             twist=twist,
             lookahead_rollouts=args.value_lookahead_rollouts,
             lookahead_depth=args.value_lookahead_depth,
+            scaffold_mol=scaffold_mol,
         )
         success = bool(
             outcome["best_feasible_qed"] >= args.target_qed
