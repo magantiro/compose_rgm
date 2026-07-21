@@ -1,0 +1,59 @@
+{
+  "phase": "E0_exactness",
+  "n_states": 118,
+  "n_target_states": 94,
+  "cap": 3,
+  "horizon": 1.0,
+  "target": "size_max",
+  "start_smiles": "C",
+  "P_reach_target_from_start": 0.9395981326704733,
+  "exact_propagator_chain": {
+    "Linf_vs_exact_conditional": 9.71445146547012e-17,
+    "mass_outside_target_at_T": 0.0,
+    "machine_exact": true
+  },
+  "Qh_valid_generator": {
+    "max_offdiagonal_negativity": 0.0,
+    "max_abs_rowsum": 2.2737367544323206e-13,
+    "is_valid_generator": true
+  },
+  "generator_integration_convergence": [
+    {
+      "grid": 50,
+      "dt": 0.02,
+      "Linf": 0.002584950810736824,
+      "mass_in_target": 0.9796680753229693
+    },
+    {
+      "grid": 100,
+      "dt": 0.01,
+      "Linf": 0.0014965381147494835,
+      "mass_in_target": 0.9888972016013483
+    },
+    {
+      "grid": 200,
+      "dt": 0.005,
+      "Linf": 0.000794069775798144,
+      "mass_in_target": 0.9942476717216536
+    },
+    {
+      "grid": 400,
+      "dt": 0.0025,
+      "Linf": 0.00040657557771019837,
+      "mass_in_target": 0.9970829700183089
+    },
+    {
+      "grid": 800,
+      "dt": 0.00125,
+      "Linf": 0.0002052575444186176,
+      "mass_in_target": 0.998533169047671
+    }
+  ],
+  "convergence_ratios_halving_dt": [
+    1.7272869867197054,
+    1.884643088506003,
+    1.9530680624504857,
+    1.9808069850090269
+  ],
+  "converges_to_exact": true
+}
