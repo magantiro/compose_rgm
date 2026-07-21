@@ -1,0 +1,85 @@
+{
+  "format": "compose_beae_substrate_enumeration_v1",
+  "role": "Fig-6 linker fine-tune substrate (combinatorial head x acrylate-tail x propiolate-tail); NOT general pretraining",
+  "pool": {
+    "heads": [
+      "dmapa",
+      "deapa",
+      "pyrrolidinyl_propyl",
+      "morpholinyl_propyl",
+      "dmaea"
+    ],
+    "tails": [
+      "2-ethylhexyl",
+      "n-dodecyl",
+      "2-hexyldecyl",
+      "oleyl",
+      "linoleyl"
+    ]
+  },
+  "combinations_attempted": 125,
+  "valid_beae_lipids": 125,
+  "heads_covered": [
+    "deapa",
+    "dmaea",
+    "dmapa",
+    "morpholinyl_propyl",
+    "pyrrolidinyl_propyl"
+  ],
+  "tails_covered": [
+    "2-ethylhexyl",
+    "2-hexyldecyl",
+    "linoleyl",
+    "n-dodecyl",
+    "oleyl"
+  ],
+  "mw_range": [
+    454.7,
+    787.27
+  ],
+  "all_have_both_motifs": true,
+  "examples": [
+    {
+      "smiles": "CCCCC(CC)COC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCC(CC)CCCC",
+      "head": "dmapa",
+      "acrylate_tail": "2-ethylhexyl",
+      "propiolate_tail": "2-ethylhexyl",
+      "mw": 468.72
+    },
+    {
+      "smiles": "CCCCCCCCCCCCOC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCC(CC)CCCC",
+      "head": "dmapa",
+      "acrylate_tail": "2-ethylhexyl",
+      "propiolate_tail": "n-dodecyl",
+      "mw": 524.83
+    },
+    {
+      "smiles": "CCCCCCCCC(CCCCCC)COC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCC(CC)CCCC",
+      "head": "dmapa",
+      "acrylate_tail": "2-ethylhexyl",
+      "propiolate_tail": "2-hexyldecyl",
+      "mw": 580.94
+    },
+    {
+      "smiles": "CCCCCCCC/C=C\\CCCCCCCCOC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCC(CC)CCCC",
+      "head": "dmapa",
+      "acrylate_tail": "2-ethylhexyl",
+      "propiolate_tail": "oleyl",
+      "mw": 606.98
+    },
+    {
+      "smiles": "CCCCC/C=C\\C/C=C\\CCCCCCCCOC(=O)/C=C/N(CCCN(C)C)CCC(=O)OCC(CC)CCCC",
+      "head": "dmapa",
+      "acrylate_tail": "2-ethylhexyl",
+      "propiolate_tail": "linoleyl",
+      "mw": 604.96
+    },
+    {
+      "smiles": "CCCCCCCCCCCCOC(=O)CCN(/C=C/C(=O)OCC(CC)CCCC)CCCN(C)C",
+      "head": "dmapa",
+      "acrylate_tail": "n-dodecyl",
+      "propiolate_tail": "2-ethylhexyl",
+      "mw": 524.83
+    }
+  ]
+}
