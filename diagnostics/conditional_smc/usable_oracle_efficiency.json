@@ -1,0 +1,18 @@
+{
+  "metric": "usable_oracle_efficiency",
+  "definition": "fraction of oracle calls spent on a FEASIBLE (in-constraint) candidate; wasted = 1 - efficiency",
+  "ours_efficiency": 1.0,
+  "ours_mechanism": "oracle (scored_qed) is called ONLY on in-fiber successors -- all feasibility checks (similarity/scaffold/substructure) precede scoring, so infeasible proposals are never scored",
+  "baseline": "generate-then-filter must score every candidate before discarding; usable fraction = constraint-satisfaction fraction",
+  "n_leads": 47,
+  "baseline_efficiency_overall": 0.398,
+  "ours_efficiency_overall": 1.0,
+  "baseline_wasted_overall": 0.602,
+  "by_scaffold_size": {
+    "<=8":   {"n": 4,  "baseline_efficiency": 0.957, "ours": 1.0, "baseline_wasted": 0.043},
+    "9-15":  {"n": 11, "baseline_efficiency": 0.799, "ours": 1.0, "baseline_wasted": 0.201},
+    "16-22": {"n": 13, "baseline_efficiency": 0.294, "ours": 1.0, "baseline_wasted": 0.706},
+    ">=23":  {"n": 19, "baseline_efficiency": 0.120, "ours": 1.0, "baseline_wasted": 0.880}
+  },
+  "source": "diagnostics/conditional_smc/smc_scaffold_control48.json (measure_only baseline scaffold_preservation_fraction = generate-then-filter usable fraction)"
+}
