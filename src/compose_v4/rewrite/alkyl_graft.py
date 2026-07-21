@@ -7,7 +7,7 @@ the same move grafted onto a mid-chain carbon. Grafted atoms are constrained to
 CARBON (the specialized-macro typing the factorized model assumes).
 
 This module is additive: it reuses the tracelet lowering helpers and the micro
-runtime, and does not modify the core kernel. It lowers to N `atom_insert` micro
+runtime, and lowers to micro atom-inserts (the executor stays the source of truth). It lowers to N `atom_insert` micro
 steps, so the executor remains the single source of truth for validity.
 
 See docs/CHAIN_REWRITE_DESIGN.md.

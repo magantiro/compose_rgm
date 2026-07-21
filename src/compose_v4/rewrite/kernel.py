@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterable
 
 from compose_v4.chem.molecular_graph import MolecularGraph, molecular_graph_to_smiles
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
+from compose_v4.rewrite import alkyl_graft as graft
 from compose_v4.rewrite import operators as ops
 from compose_v4.rewrite import tracelets
 
@@ -169,6 +170,18 @@ def default_rewrite_system(constraints: Iterable[Constraint] = ()) -> RewriteSys
                 tracelets.RingSystemDelete,
                 tracelets.is_valid_ring_system_delete,
                 tracelets.apply_ring_system_delete,
+            ),
+            RewriteRule(
+                "alkyl_graft",
+                graft.AlkylGraft,
+                graft.is_valid_alkyl_graft,
+                graft.apply_alkyl_graft,
+            ),
+            RewriteRule(
+                "alkyl_prune",
+                graft.AlkylPrune,
+                graft.is_valid_alkyl_prune,
+                graft.apply_alkyl_prune,
             ),
         ),
         constraints=constraints,

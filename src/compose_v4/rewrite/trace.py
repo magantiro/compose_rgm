@@ -8,6 +8,7 @@ from typing import Any, Iterable
 import numpy as np
 
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.rewrite.alkyl_graft import AlkylGraft, AlkylPrune
 from compose_v4.rewrite.kernel import RewriteSystem, default_rewrite_system
 from compose_v4.rewrite.operators import (
     AtomDelete,
@@ -181,6 +182,37 @@ def inverse_step(source: MolecularGraph, step: RewriteStep) -> RewriteStep:
                 bond_orders=tuple(
                     int(source.bonds[slots[i], slots[(i + 1) % len(slots)]])
                     for i in range(len(slots))
+                ),
+                attachment_order=int(source.bonds[anchor, slots[0]]),
+            ),
+        )
+    if step.rule_name == "alkyl_graft":
+        return RewriteStep(
+            "alkyl_prune",
+            AlkylPrune(
+                anchor=int(action.anchor),
+                slots=tuple(int(atom.slot) for atom in action.atoms),
+            ),
+        )
+    if step.rule_name == "alkyl_prune":
+        anchor = int(action.anchor)
+        slots = tuple(int(v) for v in action.slots)
+        return RewriteStep(
+            "alkyl_graft",
+            AlkylGraft(
+                anchor=anchor,
+                atoms=tuple(
+                    AtomPayload(
+                        slot=v,
+                        atom_type=int(source.atom_types[v]),
+                        formal_charge=int(source.formal_charges[v]),
+                        implicit_h_count=int(source.implicit_h_counts[v]),
+                    )
+                    for v in slots
+                ),
+                bond_orders=tuple(
+                    int(source.bonds[slots[i], slots[i + 1]])
+                    for i in range(len(slots) - 1)
                 ),
                 attachment_order=int(source.bonds[anchor, slots[0]]),
             ),

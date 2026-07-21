@@ -5,7 +5,7 @@ from compose_v4.chem.molecular_graph import (
     BOND_DOUBLE, BOND_SINGLE, molecular_graph_to_smiles, smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
-from compose_v4.lipids.alkyl_graft import (
+from compose_v4.rewrite.alkyl_graft import (
     AlkylPrune, apply_alkyl_graft, apply_alkyl_prune, build_graft,
     is_valid_alkyl_graft, is_valid_alkyl_prune,
 )
@@ -52,7 +52,7 @@ def test_graft_prune_roundtrip():
 
 
 def test_graft_rejects_non_carbon():
-    from compose_v4.lipids.alkyl_graft import AlkylGraft
+    from compose_v4.rewrite.alkyl_graft import AlkylGraft
     from compose_v4.rewrite.tracelets import AtomPayload
     from compose_v4.chem.molecular_graph import ELEMENT_TO_IDX
     n, padded = _pad("CCC", 4)
@@ -60,6 +60,25 @@ def test_graft_rejects_non_carbon():
                      atoms=(AtomPayload(slot=n, atom_type=ELEMENT_TO_IDX["N"], formal_charge=0, implicit_h_count=2),),
                      bond_orders=(), attachment_order=BOND_SINGLE)
     assert not is_valid_alkyl_graft(padded, bad)  # typing constraint: carbon only
+
+
+def test_kernel_registered_apply_and_inverse():
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.trace import RewriteStep, inverse_step
+    n, padded = _pad("CCC", 12)
+    graft = build_graft(anchor=0, bond_orders=[1] * 5, null_slots=range(n, n + 6))
+    rt = de_novo_rewrite_system()
+    grafted = rt.apply(padded, "alkyl_graft", graft)  # official runtime path
+    assert Chem.CanonSmiles(molecular_graph_to_smiles(grafted)) == Chem.CanonSmiles("CCCCCCCCC")  # C3+C6=C9
+    # graft -> prune inverse, applied via runtime, returns to source
+    prune_step = inverse_step(padded, RewriteStep("alkyl_graft", graft))
+    assert prune_step.rule_name == "alkyl_prune"
+    back = rt.apply(grafted, prune_step.rule_name, prune_step.action)
+    assert Chem.CanonSmiles(molecular_graph_to_smiles(back)) == Chem.CanonSmiles("CCC")
+    # prune -> graft inverse reconstructs the chain from the grafted source
+    regraft = inverse_step(grafted, prune_step)
+    assert regraft.rule_name == "alkyl_graft"
+    assert Chem.CanonSmiles(molecular_graph_to_smiles(rt.apply(padded, "alkyl_graft", regraft.action))) == Chem.CanonSmiles("CCCCCCCCC")
 
 
 if __name__ == "__main__":
