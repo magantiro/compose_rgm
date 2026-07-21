@@ -1,0 +1,48 @@
+{
+  "format": "compose_lipid_region_heteroatom_abundance_v1",
+  "interpretation": "Heteroatom abundance is strongly region-specific -- tails near-pure carbon, linkers O/N-rich, heads N-rich. A GLOBAL element-insertion prior misplaces heteroatoms; this justifies a region-conditioned prior + region embedding.",
+  "per_region": {
+    "head": {
+      "atoms": 60333,
+      "element_fraction": {
+        "C": 0.7093,
+        "N": 0.2222,
+        "O": 0.0685
+      },
+      "heteroatom_fraction": 0.2907
+    },
+    "linker": {
+      "atoms": 24816,
+      "element_fraction": {
+        "C": 0.4052,
+        "N": 0.172,
+        "O": 0.4228
+      },
+      "heteroatom_fraction": 0.5948
+    },
+    "other": {
+      "atoms": 3711,
+      "element_fraction": {
+        "C": 0.938,
+        "F": 0.0003,
+        "N": 0.0129,
+        "O": 0.0488
+      },
+      "heteroatom_fraction": 0.062
+    },
+    "tail": {
+      "atoms": 208265,
+      "element_fraction": {
+        "C": 1.0
+      },
+      "heteroatom_fraction": 0.0
+    }
+  },
+  "region_atom_share": {
+    "head": 0.2031,
+    "linker": 0.0835,
+    "other": 0.0125,
+    "tail": 0.7009
+  },
+  "sample_molecules": 6000
+}
