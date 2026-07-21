@@ -18,6 +18,7 @@ from compose_v4.chem.molecular_graph import (
     molecular_graph_to_smiles,
     smiles_to_molecular_graph,
 )
+from compose_v4.chem.lipid_source_prior import LipidCarbonTreePrior
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.cnof import load_cnof_corpus_split
@@ -808,7 +809,7 @@ def main() -> None:
     parser.add_argument("--max-ring-system-templates", type=int, default=4096)
     parser.add_argument(
         "--source-prior",
-        choices=("null", "carbon_tree"),
+        choices=("null", "carbon_tree", "lipid_carbon_tree"),
         default="null",
     )
     parser.add_argument(
@@ -1294,16 +1295,17 @@ def main() -> None:
 
     if args.ring_proposals == "typed_catalog" and args.model != "from_scratch":
         raise ValueError("the typed-catalog diagnostic currently requires --model from_scratch")
-    if args.source_prior == "carbon_tree" and (
+    _carbon_tree_modes = {"carbon_tree", "lipid_carbon_tree"}
+    if args.source_prior in _carbon_tree_modes and (
         args.model != "from_scratch" or args.ring_proposals != "typed_catalog"
     ):
         raise ValueError(
             "carbon-tree transport currently requires --model from_scratch "
             "and --ring-proposals typed_catalog"
         )
-    if args.source_prior == "carbon_tree" and args.teacher_ordering != "sequential":
+    if args.source_prior in _carbon_tree_modes and args.teacher_ordering != "sequential":
         raise ValueError("carbon-tree transport first gates the sequential teacher")
-    if args.tree_transport != "primitive" and args.source_prior != "carbon_tree":
+    if args.tree_transport != "primitive" and args.source_prior not in _carbon_tree_modes:
         raise ValueError("non-primitive tree transport requires --source-prior carbon_tree")
     if args.tree_couplings_per_target <= 0:
         raise ValueError("--tree-couplings-per-target must be positive")
@@ -1351,16 +1353,19 @@ def main() -> None:
     )
     print(json.dumps({"phase": "split_loaded"}), flush=True)
     tree_source_prior = None
-    if args.source_prior == "carbon_tree":
+    if args.source_prior in {"carbon_tree", "lipid_carbon_tree"}:
+        prior_cls = (
+            LipidCarbonTreePrior
+            if args.source_prior == "lipid_carbon_tree"
+            else DegreeBoundedCarbonTreePrior
+        )
         if args.tree_size_prior == "empirical":
             size_counts = Counter(
                 smiles_to_molecular_graph(text).n_real_atoms for text in split.train
             )
-            tree_source_prior = DegreeBoundedCarbonTreePrior.from_size_counts(dict(size_counts))
+            tree_source_prior = prior_cls.from_size_counts(dict(size_counts))
         else:
-            tree_source_prior = DegreeBoundedCarbonTreePrior(
-                sizes=tuple(range(1, args.max_atoms + 1))
-            )
+            tree_source_prior = prior_cls(sizes=tuple(range(1, args.max_atoms + 1)))
         print(
             json.dumps(
                 {
