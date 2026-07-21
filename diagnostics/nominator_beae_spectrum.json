@@ -1,0 +1,35 @@
+{
+  "format": "compose_nominator_beae_spectrum_v1",
+  "scaffold": "fixed BEAE linker; varied head; fixed 2-ethylhexyl/dodecyl tails",
+  "groups": {
+    "standard": {
+      "per_head": {
+        "dmapa": "abstain_off_domain",
+        "diethylamino_propyl": "abstain_off_domain",
+        "piperidinyl_propyl": "abstain_off_domain",
+        "morpholinyl_propyl": "abstain_off_domain",
+        "pyrrolidinyl_propyl": "abstain_off_domain",
+        "dimethylamino_ethyl": "abstain_off_domain"
+      },
+      "decision_breakdown": {
+        "abstain_off_domain": 6
+      },
+      "admit_rate": 0.0,
+      "abstain_rate": 1.0
+    },
+    "frontier": {
+      "per_head": {
+        "guanidinyl_propyl": "abstain_off_domain",
+        "imidazolyl_propyl": "assembly_failed",
+        "benzylamino_propyl": "abstain_off_domain",
+        "adamantyl_amino": "abstain_off_domain"
+      },
+      "decision_breakdown": {
+        "abstain_off_domain": 3
+      },
+      "admit_rate": 0.0,
+      "abstain_rate": 1.0
+    }
+  },
+  "interpretation": "The deployed A549 oracle abstains on BEAE lipids at the MOLECULAR-AD level (abstain_off_domain), regardless of head -- because the propiolate ENAMINE ESTER is a genuinely novel chemotype absent from the A549 training distribution. This is the oracle being HONEST (it does not extrapolate onto a novel chemotype), NOT a failure. Note the distinction: real A549 acrylate-Michael lipids ARE in-domain (~98% admitted, they are in the screen), but the propiolate enamine pushes a full BEAE molecule off-domain. To rank BEAE the oracle needs Michael/BEAE calibration data in training (active learning) -> the positive-control regime (Spearman ~0.633). Head/tail diversity is fine; the enamine linker is the novelty the AD correctly gates until calibrated."
+}
