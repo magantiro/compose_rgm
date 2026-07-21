@@ -3294,6 +3294,36 @@ class FactorizedTraceletRateModel(nn.Module):
             return batch.ring_restate_actions[0][action_index]
         raise ValueError(f"unsupported sampled rule family: {rule_name}")
 
+    def _atom_node_features(
+        self,
+        batch: FactorizedMarkBatch,
+        atom_types: Tensor,
+        charges: Tensor,
+        hydrogens: Tensor,
+        real_float: Tensor,
+    ) -> Tensor:
+        """Per-atom node features fed to the encoder (extract-method hook).
+
+        Base returns the unchanged atom/charge/hydrogen/ring-topology embedding.
+        Subclasses (e.g. the lipid region-aware model) may extend this to add a
+        per-atom region embedding; behaviour is identical to the previous inline
+        expression when not overridden."""
+        return (
+            self.atom_embedding(atom_types)
+            + self.charge_embedding(charges)
+            + self.hydrogen_embedding(hydrogens)
+            + self.atom_ring_embedding(batch.atom_topology)
+        ) * real_float
+
+    def _connected_atom_order_prior(self, batch: FactorizedMarkBatch) -> Tensor:
+        """Base-rate log-prior over (bond-order x element) for a connected atom
+        insertion, added to the grow_option logits (extract-method hook).
+
+        Base returns the global ``[1, 1, order, type]`` prior (broadcast over all
+        atoms). Subclasses may return a per-atom ``[batch, n_slots, order, type]``
+        region-conditioned prior. Behaviour is identical when not overridden."""
+        return self.connected_atom_order_log_prior.unsqueeze(0).unsqueeze(0)
+
     def _encode_batch(
         self,
         batch: FactorizedMarkBatch,
@@ -3341,12 +3371,9 @@ class FactorizedTraceletRateModel(nn.Module):
             ):
                 raise ValueError("unconditional model received property conditions")
             context_state = time_state
-        node = (
-            self.atom_embedding(atom_types)
-            + self.charge_embedding(charges)
-            + self.hydrogen_embedding(hydrogens)
-            + self.atom_ring_embedding(batch.atom_topology)
-        ) * real_float
+        node = self._atom_node_features(
+            batch, atom_types, charges, hydrogens, real_float
+        )
         edge_mask = (bonds != 0).unsqueeze(-1)
         edge_state = self.bond_embedding(bonds)
         batch_size, n_slots = atom_types.shape
@@ -3443,7 +3470,7 @@ class FactorizedTraceletRateModel(nn.Module):
         ) / sqrt(self.mark_dim)
         connected_grow_logits = (
             connected_grow_logits
-            + self.connected_atom_order_log_prior.unsqueeze(0).unsqueeze(0)
+            + self._connected_atom_order_prior(batch)
         )
         type_h = self.cnof_valences.view(1, 1, 1, -1) - order_values.view(1, 1, -1, 1)
         connected_grow_mask = (
