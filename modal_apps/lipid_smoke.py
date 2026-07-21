@@ -111,6 +111,43 @@ def _extract_smiles(run_dir, name="rollouts.pt"):
     return out
 
 
+def _lipid_quality(samples):
+    """Mid-training quality eval on generated SMILES: validity, region balance
+    (the 'heads look like tails' diagnostic), linker chemistry, physchem."""
+    from rdkit import Chem, RDLogger
+    from rdkit.Chem import Descriptors, Crippen
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.lipids.region_labels import lipid_region_labels, REGION_NAMES
+    from compose_v4.lipids.head_region import basic_nitrogens
+    ester = Chem.MolFromSmarts("[CX3](=[OX1])[OX2][#6]")
+    amide = Chem.MolFromSmarts("[CX3](=[OX1])[NX3]")
+    valid = [m for m in (Chem.MolFromSmiles(s) for s in samples if isinstance(s, str)) if m is not None]
+    n, nv = len(samples), len(valid)
+    if not valid:
+        return {"n": n, "validity": 0.0}
+    reg = {name: 0 for name in REGION_NAMES.values()}
+    hasE = hasA = hasN = 0
+    mw, logp = [], []
+    for m in valid:
+        labs = lipid_region_labels(m)
+        for code, name in REGION_NAMES.items():
+            reg[name] += labs.count(code)
+        hasE += bool(m.HasSubstructMatch(ester))
+        hasA += bool(m.HasSubstructMatch(amide))
+        hasN += 1 if basic_nitrogens(m) else 0
+        mw.append(Descriptors.MolWt(m))
+        logp.append(Crippen.MolLogP(m))
+    tot = sum(reg.values()) or 1
+    med = lambda x: round(sorted(x)[len(x) // 2], 1)
+    return {
+        "n": n, "validity": round(nv / n, 3),
+        "region_pct": {k: round(100 * v / tot, 1) for k, v in reg.items()},
+        "pct_ester": round(100 * hasE / nv, 1), "pct_amide": round(100 * hasA / nv, 1),
+        "pct_basic_amine_head": round(100 * hasN / nv, 1),
+        "mw_median": med(mw), "logp_median": med(logp),
+    }
+
+
 @app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
 def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CORPUS):
     """Compile teacher paths on CPU and persist the sharded cache to the durable
@@ -172,7 +209,7 @@ def sample_checkpoint(label, n=64, train_size=38000, steps=4000,
     print(f"PEEK: sampling {n} lipids from {best.name} (evaluation-only, off training GPU) ...", flush=True)
     _run_trainer(_argv(recipe, corpus) + extra, tag=f"peek:{label}")
     samples = _extract_smiles(run_dir, "peek_rollouts.pt")
-    return {"n_samples": len(samples), "samples": samples[:n]}
+    return {"n_samples": len(samples), "samples": samples[:n], "quality": _lipid_quality(samples)}
 
 
 @app.local_entrypoint()
@@ -183,6 +220,7 @@ def peek(label: str, n: int = 64, train_size: int = 38000, steps: int = 4000,
         print("PEEK:", out["error"])
         return
     print(f"=== {out['n_samples']} lipids from the interim checkpoint of {label} ===")
+    print("mid-training quality:", json.dumps(out.get("quality", {}), indent=2))
     for s in out["samples"]:
         print(" ", s)
 
