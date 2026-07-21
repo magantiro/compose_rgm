@@ -39,7 +39,7 @@ LIPID_CORPUS = "/guacamol/lipid_corpus_cnof_v1.smiles"
 LIPID_REF = "/guacamol/lipid_heldout_ref_5000.smiles"
 
 
-@app.function(image=image, gpu="A100", timeout=7200,
+@app.function(image=image, gpu="A100", cpu=16.0, timeout=14400,
               volumes={"/guacamol": guacamol, "/artifacts": artifacts})
 def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int, label: str) -> dict:
     import subprocess
@@ -54,7 +54,7 @@ def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int,
         "train_size": train_size, "steps": steps, "schedule_steps": steps,
         "warmup_steps": max(1, min(int(recipe["arguments"].get("warmup_steps", 25)), steps // 2 or 1)),
         "evaluation_every": max(1, min(int(recipe["arguments"].get("evaluation_every", 50)), steps)),
-        "fast_split": True,
+        "fast_split": train_size < 500,  # tiny runs: skip the full scan; real runs: random split over all 429k
         "rollout_samples": rollout, "batch_size": batch_size, "device": "cuda",
         "output": str(run_dir / "metrics.json"), "checkpoint": str(run_dir / "checkpoint.pt"),
         "path_cache": str(run_dir / "compiled_paths.pt"), "rollout_cache": str(run_dir / "rollouts.pt"),
