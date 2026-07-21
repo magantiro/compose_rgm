@@ -122,6 +122,8 @@ def value_guided_smc(
     measure_scaffold_mol=None,
     required_smarts=None,
     forbidden_smarts=None,
+    measure_required_smarts=None,
+    measure_forbidden_smarts=None,
 ):
     """Propagate a particle population under the base CTMC toward high reward
     inside the hard similarity fiber. Returns a result dict."""
@@ -279,15 +281,20 @@ def value_guided_smc(
     # fraction of the distinct feasible population that preserves the scaffold --
     # with the constraint ON this is 1.0 by construction; with it OFF (measure_only)
     # this is the generate-then-filter baseline's usable fraction.
-    scaffold_fraction = None
-    if check_scaffold is not None:
-        n_pop = n_ok = 0
-        for pop_key in feasible_population:
-            pop_mol = Chem.MolFromSmiles(pop_key)
-            if pop_mol is not None:
-                n_pop += 1
-                n_ok += int(pop_mol.HasSubstructMatch(check_scaffold))
-        scaffold_fraction = (n_ok / n_pop) if n_pop else None
+    population_mols = [Chem.MolFromSmiles(k) for k in feasible_population]
+    population_mols = [m for m in population_mols if m is not None]
+
+    def _pop_frac(pattern, want_present):
+        # fraction of the distinct feasible population that SATISFIES the rule.
+        # With the rule enforced this is 1.0 by construction; measured OFF it is
+        # the generate-then-filter baseline's usable fraction.
+        if pattern is None or not population_mols:
+            return None
+        ok = sum(int(m.HasSubstructMatch(pattern) == want_present) for m in population_mols)
+        return ok / len(population_mols)
+
+    req_pattern = required_smarts if required_smarts is not None else measure_required_smarts
+    forb_pattern = forbidden_smarts if forbidden_smarts is not None else measure_forbidden_smarts
     return {
         "lead_qed": float(lead_qed),
         "best_feasible_qed": float(best_qed),
@@ -296,7 +303,9 @@ def value_guided_smc(
         "distinct_feasible": len(feasible_population),
         "population_diversity": float(diversity),
         "scaffold_preserved": bool(scaffold_preserved),
-        "scaffold_preservation_fraction": scaffold_fraction,
+        "scaffold_preservation_fraction": _pop_frac(check_scaffold, True),
+        "required_satisfaction_fraction": _pop_frac(req_pattern, True),
+        "forbidden_satisfaction_fraction": _pop_frac(forb_pattern, False),
     }
 
 
@@ -373,8 +382,13 @@ def main() -> None:
         else:
             from griddd_value_twist import load_value_twist
         twist = load_value_twist(str(args.value_twist_checkpoint))
-    required_smarts = Chem.MolFromSmarts(args.required_substructure) if args.required_substructure else None
-    forbidden_smarts = Chem.MolFromSmarts(args.forbidden_substructure) if args.forbidden_substructure else None
+    _req = Chem.MolFromSmarts(args.required_substructure) if args.required_substructure else None
+    _forb = Chem.MolFromSmarts(args.forbidden_substructure) if args.forbidden_substructure else None
+    _measure = args.scaffold_constraint == "measure_only"  # measure baseline, don't enforce
+    required_smarts = None if _measure else _req
+    forbidden_smarts = None if _measure else _forb
+    measure_required_smarts = _req if _measure else None
+    measure_forbidden_smarts = _forb if _measure else None
     leads = json.loads(args.leads.read_text())[: args.max_leads]
 
     results: list[dict[str, object]] = []
@@ -416,6 +430,8 @@ def main() -> None:
             measure_scaffold_mol=measure_scaffold_mol,
             required_smarts=required_smarts,
             forbidden_smarts=forbidden_smarts,
+            measure_required_smarts=measure_required_smarts,
+            measure_forbidden_smarts=measure_forbidden_smarts,
         )
         success = bool(
             outcome["best_feasible_qed"] >= args.target_qed
