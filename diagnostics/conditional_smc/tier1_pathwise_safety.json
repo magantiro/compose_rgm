@@ -1,0 +1,39 @@
+{
+  "experiment": "tier1_pathwise_safety",
+  "n_leads": 12,
+  "alerts": [
+    "nitro",
+    "aldehyde",
+    "michael_acceptor",
+    "epoxide",
+    "aziridine",
+    "peroxide",
+    "acyl_halide_like_anhydride",
+    "geminal_N_O_aminal"
+  ],
+  "baseline_endpoint_only": {
+    "trajectories": 240,
+    "state_violation_rate": 0.3151041666666667,
+    "endpoint_clean_frac": 0.6791666666666667,
+    "P_dirty_intermediate_given_endpoint_clean": 0.6687116564417178,
+    "per_alert_state_incidence": {
+      "nitro": 0.0,
+      "aldehyde": 0.0033854166666666668,
+      "michael_acceptor": 0.07916666666666666,
+      "epoxide": 0.04027777777777778,
+      "aziridine": 0.11085069444444444,
+      "peroxide": 0.08359375,
+      "acyl_halide_like_anhydride": 0.0011284722222222221,
+      "geminal_N_O_aminal": 0.017534722222222222
+    }
+  },
+  "compose_pathwise": {
+    "audited_intermediate_violation_rate": 0.0,
+    "audited_population": 3067,
+    "mean_best_qed": 0.8744554299313408,
+    "mean_distinct_molecules": 255.58333333333334,
+    "mean_internal_diversity": 0.7034894541730145
+  },
+  "compose_unconstrained_mean_best_qed": 0.8583249823310272,
+  "qed_cost_of_pathwise_safety": -0.01613044760031368
+}

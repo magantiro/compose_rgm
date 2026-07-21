@@ -241,8 +241,10 @@ def value_guided_smc(
                         continue  # HARD fiber: exact fixed-scaffold constraint
                     if required_smarts is not None and not successor_mol.HasSubstructMatch(required_smarts):
                         continue  # HARD fiber: required substructure (must be present)
-                    if forbidden_smarts is not None and successor_mol.HasSubstructMatch(forbidden_smarts):
-                        continue  # HARD fiber: forbidden substructure (must be absent)
+                    if forbidden_smarts is not None:
+                        _forb = forbidden_smarts if isinstance(forbidden_smarts, (list, tuple)) else (forbidden_smarts,)
+                        if any(successor_mol.HasSubstructMatch(f) for f in _forb):
+                            continue  # HARD fiber: forbidden substructure(s) absent at EVERY committed state (pathwise)
                 accepted = (successor, key, fingerprint)
                 break
             if accepted is None:
@@ -291,10 +293,12 @@ def value_guided_smc(
     def _pop_frac(pattern, want_present):
         # fraction of the distinct feasible population that SATISFIES the rule.
         # With the rule enforced this is 1.0 by construction; measured OFF it is
-        # the generate-then-filter baseline's usable fraction.
+        # the generate-then-filter baseline's usable fraction. `pattern` may be a
+        # single mol or a tuple of forbidden mols (satisfied = matches none).
         if pattern is None or not population_mols:
             return None
-        ok = sum(int(m.HasSubstructMatch(pattern) == want_present) for m in population_mols)
+        pats = pattern if isinstance(pattern, (list, tuple)) else (pattern,)
+        ok = sum(int(any(m.HasSubstructMatch(p) for p in pats) == want_present) for m in population_mols)
         return ok / len(population_mols)
 
     req_pattern = required_smarts if required_smarts is not None else measure_required_smarts
