@@ -35,7 +35,7 @@ The base checkpoint for the committed conditional results is **Lineage B**:
 - `rate_factorization=hierarchical`;
 - `ring_template_factorization=flat`;
 - `max_atoms=40`;
-- ZINC-250k CNOF with charged N+/O- preprocessing matched to GrIDDD;
+- trained on GuacaMol (C/N/O/F) with charged N+/O-; constrained-design leads are held-out CNOF optimization leads from the Jin et al. set (ZINC-derived); C/N/O/F elements match GrIDDD (which trains on ZINC-250k), base corpora differ;
 - seed `20260717`.
 
 Lineage B was selected for clean, interpretable edit dynamics. Its remaining ring-marginal
