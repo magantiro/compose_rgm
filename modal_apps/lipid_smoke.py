@@ -52,6 +52,9 @@ def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int,
     run_dir.mkdir(parents=True, exist_ok=True)
     recipe["arguments"].update({
         "train_size": train_size, "steps": steps, "schedule_steps": steps,
+        "warmup_steps": max(1, min(int(recipe["arguments"].get("warmup_steps", 25)), steps // 2 or 1)),
+        "evaluation_every": max(1, min(int(recipe["arguments"].get("evaluation_every", 50)), steps)),
+        "fast_split": True,
         "rollout_samples": rollout, "batch_size": batch_size, "device": "cuda",
         "output": str(run_dir / "metrics.json"), "checkpoint": str(run_dir / "checkpoint.pt"),
         "path_cache": str(run_dir / "compiled_paths.pt"), "rollout_cache": str(run_dir / "rollouts.pt"),
@@ -62,8 +65,14 @@ def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int,
     argv = build_tracelet_recipe_argv(recipe, smiles_file=Path(LIPID_CORPUS),
                                       quality_reference_file=Path(LIPID_REF))
     print("RUNNING:", " ".join(argv[:6]), "...", flush=True)
-    subprocess.run(["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv],
-                   check=True)
+    proc = subprocess.run(
+        ["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv],
+        capture_output=True, text=True)
+    if proc.returncode != 0:
+        print("=== TRAINER STDOUT (tail) ===\n" + proc.stdout[-6000:], flush=True)
+        print("=== TRAINER STDERR (tail) ===\n" + proc.stderr[-6000:], flush=True)
+        raise RuntimeError(f"trainer exit {proc.returncode}")
+    print(proc.stdout[-2000:], flush=True)
     artifacts.commit()
 
     # extract generated lipid SMILES from the rollout cache
