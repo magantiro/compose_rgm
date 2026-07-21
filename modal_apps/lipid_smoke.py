@@ -39,7 +39,7 @@ LIPID_CORPUS = "/guacamol/lipid_corpus_cnof_v1.smiles"
 LIPID_REF = "/guacamol/lipid_heldout_ref_5000.smiles"
 
 
-@app.function(image=image, gpu="A100", cpu=16.0, timeout=14400,
+@app.function(image=image, gpu="A100", cpu=32.0, timeout=21600,
               volumes={"/guacamol": guacamol, "/artifacts": artifacts})
 def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int, label: str) -> dict:
     import subprocess
@@ -55,6 +55,7 @@ def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int,
         "warmup_steps": max(1, min(int(recipe["arguments"].get("warmup_steps", 25)), steps // 2 or 1)),
         "evaluation_every": max(1, min(int(recipe["arguments"].get("evaluation_every", 50)), steps)),
         "fast_split": train_size < 500,  # tiny runs: skip the full scan; real runs: random split over all 429k
+        "path_workers": 32, "corpus_workers": 32, "data_workers": 8, "fiber_workers": 16,
         "rollout_samples": rollout, "batch_size": batch_size, "device": "cuda",
         "output": str(run_dir / "metrics.json"), "checkpoint": str(run_dir / "checkpoint.pt"),
         "path_cache": str(run_dir / "compiled_paths.pt"), "rollout_cache": str(run_dir / "rollouts.pt"),
@@ -65,14 +66,10 @@ def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int,
     argv = build_tracelet_recipe_argv(recipe, smiles_file=Path(LIPID_CORPUS),
                                       quality_reference_file=Path(LIPID_REF))
     print("RUNNING:", " ".join(argv[:6]), "...", flush=True)
-    proc = subprocess.run(
-        ["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv],
-        capture_output=True, text=True)
-    if proc.returncode != 0:
-        print("=== TRAINER STDOUT (tail) ===\n" + proc.stdout[-6000:], flush=True)
-        print("=== TRAINER STDERR (tail) ===\n" + proc.stderr[-6000:], flush=True)
-        raise RuntimeError(f"trainer exit {proc.returncode}")
-    print(proc.stdout[-2000:], flush=True)
+    # stream the trainer's output live (visible in `modal run` logs) so we see
+    # compile/train progress and any error immediately.
+    subprocess.run(["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv],
+                   check=True)
     artifacts.commit()
 
     # extract generated lipid SMILES from the rollout cache
