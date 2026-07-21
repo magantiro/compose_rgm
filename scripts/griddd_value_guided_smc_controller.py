@@ -311,6 +311,7 @@ def value_guided_smc(
         "required_satisfaction_fraction": _pop_frac(req_pattern, True),
         "forbidden_satisfaction_fraction": _pop_frac(forb_pattern, False),
         "best_qed_trace": best_qed_trace,  # anytime curve: (oracle_calls, best_so_far)
+        "best_state_smiles": _canon(best_state),  # the argmax-reward molecule
         # the distinct feasible-population SMILES (canonical), for offline evaluation of a
         # multi-constraint design spec (the conjunction feasibility funnel).
         "population_smiles": sorted(feasible_population.keys()) if dump_population else None,
