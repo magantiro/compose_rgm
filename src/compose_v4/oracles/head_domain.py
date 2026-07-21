@@ -21,7 +21,12 @@ import numpy as np
 from rdkit import Chem, DataStructs, rdBase
 from rdkit.Chem import rdFingerprintGenerator
 
-_BASIC_AMINE = Chem.MolFromSmarts("[NX3;!$(NC=O);!$(N=*);!$([N+])]")
+# A protonatable ionizable-head amine: exclude amides, imines, cations, AND
+# vinylogous amides / enamine-esters (N-C=C-C=O, e.g. the BEAE central N) -- those
+# are conjugated into a carbonyl and are weakly basic linker junctions, not the head.
+_BASIC_AMINE = Chem.MolFromSmarts(
+    "[NX3;!$(NC=O);!$(N=*);!$([N+]);!$([NX3][CX3]=[CX3][CX3]=[OX1])]"
+)
 _HEAD_FP = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=1024)
 _HEAD_RADIUS_BONDS = 3
 

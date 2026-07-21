@@ -26,6 +26,9 @@ REGION_NAMES = {OTHER: "other", HEAD: "head", LINKER: "linker", TAIL: "tail"}
 
 # degradable / connecting linker motifs -- the heteroatom-dense junctions.
 _LINKER_SMARTS = {
+    # enamine-ester junction (BEAE propiolate arm): the conjugated N-C=C-C(=O)-O -- the
+    # central N is part of THIS linker, not a head (whatever the head is, it is elsewhere).
+    "enamine_ester": "[NX3][CX3]=[CX3][CX3](=[OX1])[OX2]",
     "ester": "[CX3](=[OX1])[OX2][#6]",
     "amide": "[CX3](=[OX1])[NX3]",
     "carbonate": "[OX2][CX3](=[OX1])[OX2]",

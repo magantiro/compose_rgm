@@ -46,6 +46,26 @@ def test_tail_is_near_pure_carbon() -> None:
     assert tail_syms and all(s == "C" for s in tail_syms)
 
 
+def test_beae_central_enamine_n_is_linker_not_head_head_agnostic() -> None:
+    from compose_v4.oracles.head_domain import basic_nitrogens, head_region_atoms
+    from compose_v4.lipids.region_labels import LINKER, lipid_region_labels
+    # same BEAE core, different heads -- the enamine N is always linker; the real head varies
+    cores = {
+        "dmapa": "CN(C)CCCN(CCC(=O)OCC(CC)CCCC)/C=C/C(=O)OCC(CCCCCC)CCCCCCCC",
+        "diethylamino": "CCN(CC)CCCN(CCC(=O)OCC(CC)CCCC)/C=C/C(=O)OCC(CCCCCC)CCCCCCCC",
+        "morpholinyl": "O1CCN(CC1)CCCN(CCC(=O)OCC(CC)CCCC)/C=C/C(=O)OCC(CCCCCC)CCCCCCCC",
+    }
+    enamine = Chem.MolFromSmarts("[NX3][CX3]=[CX3][CX3]=[OX1]")
+    for name, smi in cores.items():
+        m = Chem.MolFromSmiles(smi)
+        central_n = m.GetSubstructMatch(enamine)[0]
+        labels = lipid_region_labels(m)
+        assert labels[central_n] == LINKER, name          # enamine N -> linker, never head
+        assert central_n not in head_region_atoms(m), name  # excluded from the head region
+        assert central_n not in basic_nitrogens(m), name    # not a protonatable head
+        assert basic_nitrogens(m), name                     # the real (variable) head IS found
+
+
 @pytest.mark.skipif(not DIAG.exists(), reason="region heteroatom diagnostic not generated")
 def test_corpus_heteroatom_pattern_is_region_specific() -> None:
     d = json.loads(DIAG.read_text())
