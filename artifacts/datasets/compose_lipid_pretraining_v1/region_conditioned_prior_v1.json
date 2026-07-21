@@ -1,0 +1,162 @@
+{
+  "format": "compose_lipid_region_conditioned_prior_v1",
+  "purpose": "region-conditioned base-rate for the model's connected_atom_order prior (grow_option) and grow_root prior; the model learns a residual above the per-region base-rate (corpus_residual_v1).",
+  "axes": {
+    "order": [
+      1,
+      2,
+      3
+    ],
+    "element": [
+      "C",
+      "N",
+      "O",
+      "F"
+    ],
+    "region": [
+      "other",
+      "head",
+      "linker",
+      "tail"
+    ]
+  },
+  "sample_molecules": 15000,
+  "connected_atom_order_prior": {
+    "global": [
+      [
+        0.86332,
+        0.06075,
+        0.01653,
+        1e-05
+      ],
+      [
+        0.02445,
+        0.00017,
+        0.03426,
+        0.0
+      ],
+      [
+        0.00051,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "per_region": {
+      "other": [
+        [
+          0.9238,
+          6e-05,
+          0.04801,
+          0.00105
+        ],
+        [
+          0.02647,
+          0.00017,
+          0.00017,
+          6e-05
+        ],
+        [
+          6e-05,
+          6e-05,
+          6e-05,
+          6e-05
+        ]
+      ],
+      "head": [
+        [
+          0.70108,
+          0.22152,
+          0.01889,
+          0.0
+        ],
+        [
+          0.00831,
+          0.00081,
+          0.04916,
+          0.0
+        ],
+        [
+          0.00022,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "linker": [
+        [
+          0.40494,
+          0.17124,
+          0.1412,
+          1e-05
+        ],
+        [
+          2e-05,
+          1e-05,
+          0.28254,
+          1e-05
+        ],
+        [
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05
+        ]
+      ],
+      "tail": [
+        [
+          0.96706,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.03226,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.00067,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  },
+  "root_atom_prior": {
+    "other": [
+      0.88462,
+      0.03846,
+      0.03846,
+      0.03846
+    ],
+    "head": [
+      0.75,
+      0.08333,
+      0.08333,
+      0.08333
+    ],
+    "linker": [
+      0.625,
+      0.125,
+      0.125,
+      0.125
+    ],
+    "tail": [
+      0.9999,
+      3e-05,
+      3e-05,
+      3e-05
+    ]
+  },
+  "js_divergence_to_global": {
+    "other": 0.0538,
+    "head": 0.0454,
+    "linker": 0.2141,
+    "tail": 0.0584
+  },
+  "js_tail_vs_linker": 0.3994,
+  "interpretation": "Large per-region JS to the global prior => a single global element-insertion prior is a poor base-rate; the region-conditioned table is the correct initialization."
+}
