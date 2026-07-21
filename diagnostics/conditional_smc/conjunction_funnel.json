@@ -1,0 +1,34 @@
+{
+  "experiment": "conjunction_feasibility_funnel",
+  "spec": [
+    "sim $\\geq$ 0.4",
+    "scaffold",
+    "no nitro",
+    "no aldehyde",
+    "MW $\\in$ [200,450]",
+    "logP $\\in$ [0,4]",
+    "QED $\\geq$ 0.6"
+  ],
+  "n_leads": 4,
+  "leads_meeting_full_spec": 4,
+  "baseline_yield_by_prefix": [
+    1.0,
+    0.31030925466409337,
+    0.31030925466409337,
+    0.2842474786023173,
+    0.2842474786023173,
+    0.2804013247561635,
+    0.08736749422233292
+  ],
+  "ours_yield_by_prefix": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "full_spec_baseline_yield": 0.08736749422233292,
+  "implied_generate_then_filter_draws_per_hit": 11.445904554103368
+}

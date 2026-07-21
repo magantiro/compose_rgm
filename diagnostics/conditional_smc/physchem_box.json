@@ -1,0 +1,25 @@
+{
+  "experiment": "physchem_box_under_exact_scaffold",
+  "box": {
+    "logp": [
+      1.0,
+      3.0
+    ],
+    "tpsa": [
+      40.0,
+      90.0
+    ],
+    "qed": [
+      0.7,
+      1.01
+    ]
+  },
+  "ours_scaffold_satisfaction": 1.0,
+  "ours_in_box_yield_topk": 0.7416666666666667,
+  "ours_in_box_yield_best": 0.9166666666666666,
+  "ours_in_box_yield_population": 0.17797356828193833,
+  "baseline_in_box_yield_given_scaffold": 0.09100418410041841,
+  "baseline_n_scaffold_preserving": 956,
+  "n_leads": 12,
+  "topk": 10
+}
