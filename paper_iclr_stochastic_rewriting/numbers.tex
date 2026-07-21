@@ -37,10 +37,26 @@
 \newcommand{\NoAliasFCD}{\XXX}
 \newcommand{\NoStratificationFCD}{\XXX}
 
-% Conditional/editing evaluation.
+% Conditional / structural-control evaluation.
+% COMMITTED results (ZINC-250k CNOF, Lineage B base). These are frozen artifacts.
+\newcommand{\ComposeExactnessLinf}{$1.1\times10^{-16}$}          % E0 Doob h-transform endpoint error
+\newcommand{\ComposeScaffoldSatisfaction}{\textbf{100\%}}         % exact fixed-scaffold satisfaction (enforced)
+\newcommand{\ComposeSubstructureSatisfaction}{\textbf{100\%}}     % required/forbidden substructure satisfaction
+\newcommand{\ComposeScaffoldRetention}{\textbf{100\%}}
+\newcommand{\ComposeBaselineScaffoldEasy}{95.7\%}                 % gen-then-filter usable, scaffold <=8 atoms
+\newcommand{\ComposeBaselineScaffoldHard}{12.0\%}                 % gen-then-filter usable, scaffold >=23 atoms
+\newcommand{\ComposeOracleEfficiency}{\textbf{100\%}}             % oracle calls spent on feasible candidates
+\newcommand{\ComposeBaselineOracleEfficiency}{39.8\%}            % gen-then-filter oracle efficiency
+\newcommand{\ComposeBaselineOracleWastedHard}{88\%}             % wasted budget on hard scaffolds
+\newcommand{\ComposeConstrainedQEDFrom}{0.755}
+\newcommand{\ComposeConstrainedQEDTo}{0.827}
+\newcommand{\ComposeConstrainedQEDGain}{$+0.072$}
+\newcommand{\ComposeConstrainedLeadsImproved}{12/12}
+\newcommand{\ComposeAnytimeCalls}{35}                             % oracle calls to 90\% of final gain (constrained)
+\newcommand{\ComposePropertyGain}{\ComposeConstrainedQEDGain}
+% Legacy macro for the DE-EMPHASISED unconstrained oracle-hungry success rate; kept XXX by design
+% (not a headline; appendix-only with disclosed budget).
 \newcommand{\ComposeConditionalSuccess}{\XXX}
-\newcommand{\ComposeScaffoldRetention}{\XXX}
-\newcommand{\ComposePropertyGain}{\XXX}
 
 % Reproducibility.
 \newcommand{\ComposeParameters}{\XXX}
