@@ -81,6 +81,31 @@ def test_kernel_registered_apply_and_inverse():
     assert Chem.CanonSmiles(molecular_graph_to_smiles(rt.apply(padded, "alkyl_graft", regraft.action))) == Chem.CanonSmiles("CCCCCCCCC")
 
 
+def test_model_samples_and_applies_alkyl_graft():
+    import numpy as np
+    import torch
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        FactorizedTraceletRateModel, MARK_RULE_NAMES,
+    )
+    from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    assert MARK_RULE_NAMES[-1] == "alkyl_graft" and len(MARK_RULE_NAMES) == 11
+    torch.manual_seed(0)
+    model = FactorizedTraceletRateModel(TypedRingCatalog((), (), ()), hidden_dim=16, message_passing_steps=1).eval()
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCCC"), 24)
+    rt = de_novo_rewrite_system()
+    rng = np.random.default_rng(0)
+    n_alkyl = n_ok = 0
+    for _ in range(300):
+        mark = model.sample_rewrite_mark(state, 0.5, rng)
+        if mark.rule_name == "alkyl_graft":
+            n_alkyl += 1
+            if molecular_graph_to_smiles(rt.apply(state, "alkyl_graft", mark.action)):
+                n_ok += 1
+    assert n_alkyl > 0, "alkyl_graft never sampled"
+    assert n_ok == n_alkyl, "sampled alkyl_graft failed to apply"
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

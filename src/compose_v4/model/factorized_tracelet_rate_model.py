@@ -29,6 +29,7 @@ from compose_v4.chem.molecular_graph import (
     BOND_AROMATIC,
     BOND_CLASSES,
     BOND_CLASS_TO_H_CHANGE,
+    BOND_SINGLE,
     H_COUNT_CLASSES,
     K,
     M,
@@ -38,6 +39,7 @@ from compose_v4.chem.molecular_graph import (
     SCAR_IDX,
     is_element,
 )
+from compose_v4.rewrite.alkyl_graft import AlkylGraft, build_graft
 from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES, CNOF_VALENCE
 from compose_v4.rewrite.operators import (
     AtomDelete,
@@ -95,8 +97,11 @@ MARK_RULE_NAMES = (
     "ring_system_grow",
     "ring_system_delete",
     "ring_system_restate",
+    "alkyl_graft",
 )
 MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
+# AlkylGraft length templates: a graft adds a run of 1..ALKYL_MAX_LENGTH carbons.
+ALKYL_MAX_LENGTH = 18
 _CNOF_TO_INDEX = {int(atom_type): index for index, atom_type in enumerate(CNOF_ATOM_TYPES)}
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 
@@ -1851,6 +1856,9 @@ class FactorizedTraceletRateModel(nn.Module):
         self.cycle_key = nn.Embedding(max(len(self.cycle_templates), 1), mark_dim)
         self.attach_query = nn.Linear(hidden_dim, mark_dim)
         self.attach_key = nn.Embedding(max(len(self.attach_templates), 1), mark_dim)
+        # AlkylGraft: template head over chain lengths 1..ALKYL_MAX_LENGTH (mirrors cycle_attach)
+        self.alkyl_query = nn.Linear(hidden_dim, mark_dim)
+        self.alkyl_key = nn.Embedding(ALKYL_MAX_LENGTH, mark_dim)
         self.ring_system_template_query = nn.Linear(hidden_dim, mark_dim)
         self.ring_system_template_key = nn.Embedding(
             max(len(self.ring_system_templates), 1),
@@ -1928,6 +1936,17 @@ class FactorizedTraceletRateModel(nn.Module):
                     for template in self.attach_templates
                 ]
             ),
+            persistent=False,
+        )
+        # AlkylGraft: span = chain length (new atoms); a single attachment bond needs 1 anchor H.
+        self.register_buffer(
+            "alkyl_spans",
+            torch.arange(1, ALKYL_MAX_LENGTH + 1, dtype=torch.long),
+            persistent=False,
+        )
+        self.register_buffer(
+            "alkyl_required_h",
+            torch.ones(ALKYL_MAX_LENGTH, dtype=torch.long),
             persistent=False,
         )
 
@@ -3178,6 +3197,18 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             template = self.attach_templates[template_index]
             return template.instantiate(anchor, null_slots[: template.span])
+        if rule_name == "alkyl_graft":
+            anchor, length_index = _sample_masked_coordinate(
+                logits["alkyl_graft"][0],
+                masks["alkyl_graft"][0],
+                rng,
+            )
+            length = length_index + 1
+            return build_graft(
+                int(anchor),
+                (BOND_SINGLE,) * (length - 1),
+                null_slots[:length],
+            )
         if rule_name == "ring_system_grow":
             exact_template_mask = torch.tensor(
                 self._ring_grow_support(state),
@@ -3583,6 +3614,20 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["cycle_attach"] = attach_mask
         logits["cycle_attach"] = attach_logits
 
+        # AlkylGraft: per-anchor logit over chain lengths; legal where the anchor is
+        # real, enough NULL slots exist, and the anchor has a free H for one bond.
+        alkyl_logits = _template_logits(
+            self.alkyl_query(node + global_state.unsqueeze(1)),
+            self.alkyl_key.weight[: self.alkyl_spans.shape[0]],
+        )
+        alkyl_mask = (
+            real.unsqueeze(-1)
+            & (n_null.view(-1, 1, 1) >= self.alkyl_spans.view(1, 1, -1))
+            & (hydrogens.unsqueeze(-1) >= self.alkyl_required_h.view(1, 1, -1))
+        )
+        masks["alkyl_graft"] = alkyl_mask
+        logits["alkyl_graft"] = alkyl_logits
+
         ring_grow_logits, ring_grow_mask = self._ring_grow_template_logits(
             batch,
             global_state,
@@ -3620,6 +3665,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 _masked_logsumexp(ring_grow_logits, ring_grow_mask),
                 _masked_logsumexp(ring_delete_logits, ring_delete_mask),
                 _masked_logsumexp(ring_restate_logits, ring_restate_mask),
+                _masked_logsumexp(alkyl_logits, alkyl_mask),
             ),
             dim=-1,
         )
@@ -3775,6 +3821,15 @@ class FactorizedTraceletRateModel(nn.Module):
             template_index = self._attach_to_index[attach_template(action)]
             key = (batch_index, int(action.anchor), template_index)
             return logits["cycle_attach"][key], masks["cycle_attach"][key]
+        if isinstance(action, AlkylGraft):
+            template_index = len(action.atoms) - 1  # length -> template row
+            if not 0 <= template_index < int(self.alkyl_spans.shape[0]):
+                return (
+                    logits["alkyl_graft"].new_zeros(()),
+                    torch.zeros((), dtype=torch.bool, device=self.device),
+                )
+            key = (batch_index, int(action.anchor), template_index)
+            return logits["alkyl_graft"][key], masks["alkyl_graft"][key]
         if isinstance(action, RingSystemGrow):
             teacher_placement = ring_system_placement(action)
             teacher_placement_key = ring_system_placement_key(teacher_placement)
