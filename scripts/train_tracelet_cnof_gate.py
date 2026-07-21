@@ -696,6 +696,10 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--message-passing-steps", type=int, default=3)
+    parser.add_argument("--region-aware", action="store_true",
+                        help="use the lipid region-aware rate model (per-atom head/linker/tail signal)")
+    parser.add_argument("--region-prior-table", type=str, default=None,
+                        help="path to region_conditioned_prior_v1.json for the region-conditioned insertion prior")
     parser.add_argument(
         "--training-backend",
         choices=("exact_fiber", "factorized_marks"),
@@ -2505,7 +2509,22 @@ def main() -> None:
     if args.model == "from_scratch" and args.training_backend == "factorized_marks":
         if ring_catalog is None:
             raise RuntimeError("factorized marked model requires a typed ring catalog")
-        model = FactorizedTraceletRateModel(
+        _model_cls = FactorizedTraceletRateModel
+        _extra_kwargs: dict[str, object] = {}
+        if getattr(args, "region_aware", False):
+            from compose_v4.lipids.region_aware_rate_model import (
+                RegionAwareFactorizedTraceletRateModel,
+            )
+            _model_cls = RegionAwareFactorizedTraceletRateModel
+            _table = None
+            if getattr(args, "region_prior_table", None):
+                _table = RegionAwareFactorizedTraceletRateModel.prior_table_from_json(
+                    args.region_prior_table
+                )
+            _extra_kwargs["region_prior_table"] = _table
+            print(json.dumps({"phase": "region_aware_model",
+                              "prior_table": bool(_table is not None)}), flush=True)
+        model = _model_cls(
             ring_catalog,
             hidden_dim=args.hidden_dim,
             message_passing_steps=args.message_passing_steps,
@@ -2516,6 +2535,7 @@ def main() -> None:
             empirical_mark_priors=empirical_mark_priors,
             ring_family_mass_mode=args.ring_family_mass_mode,
             ring_template_factorization=args.ring_template_factorization,
+            **_extra_kwargs,
         ).to(device)
     elif args.model == "from_scratch":
         model = TraceletRateModel(

@@ -29,6 +29,8 @@ image = (
     .add_local_dir(ROOT / "src", str(REMOTE_ROOT / "src"), copy=True, ignore=IGNORE)
     .add_local_dir(ROOT / "scripts", str(REMOTE_ROOT / "scripts"), copy=True, ignore=IGNORE)
     .add_local_dir(ROOT / "recipes", str(REMOTE_ROOT / "recipes"), copy=True, ignore=IGNORE)
+    .add_local_file(ROOT / "artifacts/datasets/compose_lipid_pretraining_v1/region_conditioned_prior_v1.json",
+                    "/root/compose_v4/region_prior.json", copy=True)
 )
 
 app = modal.App("compose-v4-lipid-smoke")
@@ -49,8 +51,9 @@ def _base_recipe(train_size, steps, rollout, batch_size, label):
     # identical path-determining args in BOTH stages so the path-cache signature matches
     recipe["arguments"].update({
         "train_size": train_size, "steps": steps, "schedule_steps": steps,
-        "warmup_steps": max(1, min(25, steps // 2 or 1)),
-        "evaluation_every": max(1, min(50, steps)),
+        "warmup_steps": max(1, min(50, steps // 5 or 1)),
+        "evaluation_every": max(1, min(200, steps)),
+        "early_stopping_patience": 100000,  # effectively disabled -- train the full step budget
         "fast_split": train_size <= 8000,  # <=8k: quick first-N split (real R0 lipids); larger: random scan over 429k
         "path_workers": 48, "corpus_workers": 48,
         "rollout_samples": rollout, "batch_size": batch_size,
@@ -88,13 +91,16 @@ def compile_paths(train_size, steps, rollout, batch_size, label):
 
 
 @app.function(image=image, gpu="H100", cpu=8.0, timeout=14400, volumes=VOLS)
-def train_and_sample(train_size, steps, rollout, batch_size, label):
+def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware=True):
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     recipe, run_dir = _base_recipe(train_size, steps, rollout, batch_size, label)
     recipe["arguments"].update({"device": "cuda", "data_workers": 8, "fiber_workers": 8, "rollout_workers": 8})
-    print("STAGE 2 TRAIN on H100 (loading cached paths) ...", flush=True)
-    _run_trainer(_argv(recipe) + ["--require-path-cache"])
+    extra = ["--require-path-cache"]
+    if region_aware:
+        extra += ["--region-aware", "--region-prior-table", "/root/compose_v4/region_prior.json"]
+    print(f"STAGE 2 TRAIN on H100 (region_aware={region_aware}, loading cached paths) ...", flush=True)
+    _run_trainer(_argv(recipe) + extra)
 
     import torch
     from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
@@ -115,12 +121,12 @@ def train_and_sample(train_size, steps, rollout, batch_size, label):
 
 
 @app.local_entrypoint()
-def main(train_size: int = 100000, steps: int = 2000, rollout: int = 128,
-         batch_size: int = 16, label: str = "lipid_staged_v1") -> None:
+def main(train_size: int = 4000, steps: int = 4000, rollout: int = 128,
+         batch_size: int = 16, label: str = "lipid_staged_v1", region_aware: bool = True) -> None:
     print(f"=== STAGE 1: compile {train_size} lipid paths on CPU (no GPU) ===", flush=True)
     compile_paths.remote(train_size, steps, rollout, batch_size, label)
-    print("=== STAGE 2: train + sample on H100 ===", flush=True)
-    out = train_and_sample.remote(train_size, steps, rollout, batch_size, label)
+    print(f"=== STAGE 2: train (region_aware={region_aware}) + sample on H100 ===", flush=True)
+    out = train_and_sample.remote(train_size, steps, rollout, batch_size, label, region_aware)
     print(json.dumps({k: v for k, v in out.items() if k != "samples"}, indent=2))
     print("\n=== generated lipid SMILES ===")
     for s in out["samples"]:
