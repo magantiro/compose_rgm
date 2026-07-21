@@ -1,12 +1,12 @@
-"""Standalone Modal GPU run: train the unconditional LIPID generator + sample lipids.
+"""Staged Modal run: compile teacher paths on CPU, then train + sample on H100.
 
-Runs the core trainer end-to-end (compile paths -> support -> train -> rollout) on
-the LIPID corpus (/guacamol/lipid_corpus_cnof_v1.smiles, NOT guacamol drug-like),
-with the Lineage-B lipid recipe at max_atoms=96, then extracts the generated lipid
-SMILES. Reuses the launcher's image + recipe->argv conversion so args match exactly.
+Stage 1 (CPU-only, 64 cores): compile teacher paths for the lipid corpus and write
+the sharded path cache (--compile-paths-only). No GPU -> cheap, and it's the
+embarrassingly-parallel bottleneck, so we throw cores at it.
+Stage 2 (H100): load the cache (--require-path-cache, zero recompile) -> train ->
+sample lipids. The H100 only spins up for actual training, never idles on compile.
 
-    modal run --detach modal_apps/lipid_smoke.py --train-size 60 --steps 8 --rollout 8   # cheap validation
-    modal run --detach modal_apps/lipid_smoke.py --train-size 2500 --steps 400 --rollout 96  # real-ish
+    modal run modal_apps/lipid_smoke.py --train-size 100000 --steps 2000 --rollout 128
 """
 
 from __future__ import annotations
@@ -34,45 +34,68 @@ image = (
 app = modal.App("compose-v4-lipid-smoke")
 guacamol = modal.Volume.from_name("guacamol", create_if_missing=False)
 artifacts = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=True)
-
+VOLS = {"/guacamol": guacamol, "/artifacts": artifacts}
 LIPID_CORPUS = "/guacamol/lipid_corpus_cnof_v1.smiles"
 LIPID_REF = "/guacamol/lipid_heldout_ref_5000.smiles"
 
 
-@app.function(image=image, gpu="A100", cpu=32.0, timeout=21600,
-              volumes={"/guacamol": guacamol, "/artifacts": artifacts})
-def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int, label: str) -> dict:
-    import subprocess
+def _base_recipe(train_size, steps, rollout, batch_size, label):
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-    from compose_v4.experiments.recipe import build_tracelet_recipe_argv, load_tracelet_recipe
-
+    from compose_v4.experiments.recipe import load_tracelet_recipe
     recipe = load_tracelet_recipe(REMOTE_ROOT / "recipes" / "lipid_unconditional_cnof_v1_smoke.json")
     run_dir = Path("/artifacts") / label
     run_dir.mkdir(parents=True, exist_ok=True)
+    # identical path-determining args in BOTH stages so the path-cache signature matches
     recipe["arguments"].update({
         "train_size": train_size, "steps": steps, "schedule_steps": steps,
-        "warmup_steps": max(1, min(int(recipe["arguments"].get("warmup_steps", 25)), steps // 2 or 1)),
-        "evaluation_every": max(1, min(int(recipe["arguments"].get("evaluation_every", 50)), steps)),
-        "fast_split": train_size < 500,  # tiny runs: skip the full scan; real runs: random split over all 429k
-        "path_workers": 32, "corpus_workers": 32, "data_workers": 8, "fiber_workers": 16,
-        "rollout_samples": rollout, "batch_size": batch_size, "device": "cuda",
+        "warmup_steps": max(1, min(25, steps // 2 or 1)),
+        "evaluation_every": max(1, min(50, steps)),
+        "fast_split": train_size < 500,
+        "path_workers": 48, "corpus_workers": 48,
+        "rollout_samples": rollout, "batch_size": batch_size,
         "output": str(run_dir / "metrics.json"), "checkpoint": str(run_dir / "checkpoint.pt"),
         "path_cache": str(run_dir / "compiled_paths.pt"), "rollout_cache": str(run_dir / "rollouts.pt"),
         "evaluation_cache_dir": "/artifacts/_shared/evaluation_batches",
         "training_support_cache_dir": str(run_dir / "training_support"),
         "training_support_shard_size": 16000,
     })
-    argv = build_tracelet_recipe_argv(recipe, smiles_file=Path(LIPID_CORPUS),
-                                      quality_reference_file=Path(LIPID_REF))
-    print("RUNNING:", " ".join(argv[:6]), "...", flush=True)
-    # stream the trainer's output live (visible in `modal run` logs) so we see
-    # compile/train progress and any error immediately.
+    return recipe, run_dir
+
+
+def _argv(recipe):
+    from compose_v4.experiments.recipe import build_tracelet_recipe_argv
+    return list(build_tracelet_recipe_argv(recipe, smiles_file=Path(LIPID_CORPUS),
+                                           quality_reference_file=Path(LIPID_REF)))
+
+
+def _run_trainer(argv):
+    import subprocess
     subprocess.run(["python", str(REMOTE_ROOT / "scripts" / "train_tracelet_cnof_gate.py"), *argv],
                    check=True)
     artifacts.commit()
 
-    # extract generated lipid SMILES from the rollout cache
+
+@app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
+def compile_paths(train_size, steps, rollout, batch_size, label):
+    import sys
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label)
+    recipe["arguments"]["device"] = "cpu"
+    print(f"STAGE 1 COMPILE: {train_size} lipids on 64 CPUs ...", flush=True)
+    _run_trainer(_argv(recipe) + ["--compile-paths-only"])
+    return {"compiled": True}
+
+
+@app.function(image=image, gpu="H100", cpu=8.0, timeout=14400, volumes=VOLS)
+def train_and_sample(train_size, steps, rollout, batch_size, label):
+    import sys
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    recipe, run_dir = _base_recipe(train_size, steps, rollout, batch_size, label)
+    recipe["arguments"].update({"device": "cuda", "data_workers": 8, "fiber_workers": 8, "rollout_workers": 8})
+    print("STAGE 2 TRAIN on H100 (loading cached paths) ...", flush=True)
+    _run_trainer(_argv(recipe) + ["--require-path-cache"])
+
     import torch
     from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
     metrics = json.loads((run_dir / "metrics.json").read_text())
@@ -84,16 +107,19 @@ def train_and_sample(train_size: int, steps: int, rollout: int, batch_size: int,
             smi = molecular_graph_to_smiles(state)
             if smi:
                 samples.append(smi)
-    except Exception as exc:  # keep metrics even if extraction shape differs
+    except Exception as exc:
         samples = [f"<extraction failed: {type(exc).__name__}: {exc}>"]
-    return {"metrics_keys": sorted(metrics)[:40], "n_samples": len(samples), "samples": samples[:40],
+    return {"n_samples": len(samples), "samples": samples[:60],
             "generated_validity": metrics.get("generated_nonnull_smiles"),
             "rollout": metrics.get("rollout")}
 
 
 @app.local_entrypoint()
-def main(train_size: int = 60, steps: int = 8, rollout: int = 8, batch_size: int = 16,
-         label: str = "lipid_smoke_live") -> None:
+def main(train_size: int = 100000, steps: int = 2000, rollout: int = 128,
+         batch_size: int = 16, label: str = "lipid_staged_v1") -> None:
+    print(f"=== STAGE 1: compile {train_size} lipid paths on CPU (no GPU) ===", flush=True)
+    compile_paths.remote(train_size, steps, rollout, batch_size, label)
+    print("=== STAGE 2: train + sample on H100 ===", flush=True)
     out = train_and_sample.remote(train_size, steps, rollout, batch_size, label)
     print(json.dumps({k: v for k, v in out.items() if k != "samples"}, indent=2))
     print("\n=== generated lipid SMILES ===")
