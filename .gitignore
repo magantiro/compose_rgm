@@ -35,3 +35,4 @@ paper_iclr_stochastic_rewriting/*.blg
 paper_iclr_stochastic_rewriting/*.log
 paper_iclr_stochastic_rewriting/*.out
 paper_iclr_stochastic_rewriting/tmp/
+artifacts/datasets/compose_lipid_pretraining_v1/generator_corpus_cnof_v1.smiles

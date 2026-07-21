@@ -1,0 +1,25 @@
+{
+  "config": {
+    "couplings_per_target": 2,
+    "n_slots": 96,
+    "sample": 250,
+    "seed": 20260720,
+    "source_prior": "carbon_tree",
+    "transport": "flexible_size_graft"
+  },
+  "coupling_record_rate": 1.0,
+  "format": "compose_lipid_path_compile_smoke_v1",
+  "interpretation": "Every sampled CNOF lipid compiled to a certified seed->target program under the Lineage-B transport at max_atoms=96 -- P2-G2 support holds at lipid scale locally (full 10k-scale + rollout stays on Modal, gated by P1-G7).",
+  "program_length": {
+    "max": 93,
+    "mean": 39.4,
+    "median": 36,
+    "min": 18
+  },
+  "purpose": "P2-G2 evidence (local CPU): lipid SMILES -> certified teacher programs at lipid scale",
+  "sample_heavy_atoms": {
+    "max": 94,
+    "median": 48
+  },
+  "target_program_coverage": 1.0
+}

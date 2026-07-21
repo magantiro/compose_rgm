@@ -1,0 +1,23 @@
+{
+  "format": "compose_lipid_kernel_element_scope_v1",
+  "purpose": "P2-G2 element declaration (handoff §5/§7): audit corpus elements before training; the generative kernel is CNOF-only, so v1 trains on the CNOF-clean subset.",
+  "corpus": "artifacts/datasets/compose_lipid_pretraining_v1/r1_reaction_grounded_corpus_v1.csv (464,265 unique R1) + R0",
+  "element_presence_r1": {
+    "C": 464265, "N": 459975, "O": 451998, "S": 18654, "P": 16590, "F": 0, "halogen": 0, "B": 0
+  },
+  "element_presence_fraction_r1": {"C": 1.0, "N": 0.991, "O": 0.974, "S": 0.04, "P": 0.036},
+  "cnof_clean_r1": {"count": 429660, "fraction": 0.925},
+  "linker_type_distribution_r1": {
+    "amide": 310461, "urea": 54012, "none": 28245, "ester": 24933, "phosphate": 16590,
+    "carbamate": 16305, "disulfide": 7290, "thioether": 4440, "acetal": 1989
+  },
+  "v1_scope": {
+    "kernel": "CNOF (C/N/O/F) generative heads; the seed is pure carbon and atoms enter only by CNOF insertion",
+    "trainable_now": "the CNOF-clean subset (~92.5% of R1) -> exported to generator_corpus_cnof_v1.smiles (429,335 unique, <=96 heavy, neutral, incl. R0 anchor)",
+    "covers": "amine heads + ester/amide/carbamate/urea/ether/aza-Michael/Ugi/Passerini/reductive-amination/epoxide/acetal linkers; ALL BEAE-class chemistry (amine + acrylate + propiolate enamine-ester = C/N/O)"
+  },
+  "deferred_to_v2": {
+    "scope": "S (thioether/disulfide, 4.0%) + P (iPhos phosphate, 3.6%) = ~7.6% of reachable support -- the degradable-linker/phospholipid families",
+    "requires": "widen CNOF_ATOM_TYPES (factorized_fiber.py:51) + generative heads + valence/H masks + empirical prior regen + the two hard gates (_in_scope in data/cnof.py, _assert_supported_state in factorized_fiber.py); SHARED RGM core -> coordinate with Codex (pairs with the ~48-atom kernel bump)"
+  }
+}
