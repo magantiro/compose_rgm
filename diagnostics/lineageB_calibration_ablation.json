@@ -1,0 +1,124 @@
+{
+  "calibration": {
+    "default": {
+      "atom_delete_log_rate_adjustment": -0.5,
+      "elapsed_seconds": 5010.552343082847,
+      "small_ring_log_rate_adjustment": -1.5,
+      "small_ring_maximum_size": 4,
+      "virtual_event_rule_counts": {
+        "<VIRTUAL_RATE_CALIBRATION:small_ring>": 109
+      }
+    },
+    "zero": {
+      "atom_delete_log_rate_adjustment": 0.0,
+      "elapsed_seconds": 4868.942697999999,
+      "small_ring_log_rate_adjustment": 0.0,
+      "virtual_event_rule_counts": {}
+    }
+  },
+  "format": "compose_v4_lineageB_calibration_ablation_v1",
+  "gathered_by": "subagent claude/generator-cond-uncond",
+  "note": "Unconditional productive-quotient rollout of Lineage B under two calibrations, holding the AnalyticPancakeQuotientSampler productive base fixed; only the calibration knobs differ. Diagnostics engine detects canonical self-events/backtracks/collapse directly from committed-trajectory canonical keys, so no safety-wrapper masking.",
+  "provenance": {
+    "checkpoint": "/private/tmp/lineage_b_checkpoint/checkpoint.best_so_far.pt",
+    "checkpoint_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "max_events": 128,
+    "n_slots": 40,
+    "operational_horizon": 16.0,
+    "reference_cnof_matched": 400,
+    "reference_file": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+    "samples_per_arm": 120,
+    "seed": 20260721,
+    "time_step": 0.1,
+    "torch": "2.11.0",
+    "workers": 6
+  },
+  "results": {
+    "default": {
+      "connected_or_null_fraction": 1.0,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.09099772505687358,
+        "atom_insert": 0.1797205069873253,
+        "atom_restate": 0.10529736756581086,
+        "bond_reorder": 0.027299317517062074,
+        "bond_reroute": 0.47871303217419564,
+        "ring_system_grow": 0.11797205069873253
+      },
+      "mean_atoms": 28.975,
+      "mean_bonds": 31.558333333333334,
+      "mean_cycle_rank": 3.5833333333333335,
+      "mean_events": 25.641666666666666,
+      "non_null_fraction": 1.0,
+      "trajectory": {
+        "all_step_valid_trajectory_fraction": 1.0,
+        "available": true,
+        "available_rollouts": 120,
+        "canonical_self_event_count": 0,
+        "canonical_self_event_fraction": 0.0,
+        "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+        "delete_to_one_then_regrow_fraction": 0.0,
+        "hit_null_after_source_fraction": 0.0,
+        "hit_one_atom_trajectory_fraction": 0.0,
+        "immediate_backtrack_count": 40,
+        "immediate_backtrack_per_opportunity_fraction": 0.013527223537368955,
+        "immediate_backtrack_rule_pair_counts": {
+          "atom_delete -> atom_insert": 3,
+          "atom_insert -> atom_delete": 8,
+          "bond_reroute -> bond_reroute": 29
+        },
+        "mean_unique_state_fraction": 0.9856998762843858,
+        "minimum_atom_count": 9,
+        "trajectories_with_canonical_self_event_fraction": 0.0,
+        "trajectories_with_immediate_backtrack_fraction": 0.20833333333333334
+      },
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    },
+    "zero": {
+      "connected_or_null_fraction": 1.0,
+      "event_budget_exhaustion_fraction": 0.0,
+      "event_rule_fractions": {
+        "atom_delete": 0.1336448598130841,
+        "atom_insert": 0.18099688473520248,
+        "atom_restate": 0.10529595015576323,
+        "bond_reorder": 0.024922118380062305,
+        "bond_reroute": 0.4320872274143302,
+        "ring_system_grow": 0.12305295950155763
+      },
+      "mean_atoms": 27.966666666666665,
+      "mean_bonds": 30.725,
+      "mean_cycle_rank": 3.7583333333333333,
+      "mean_events": 26.75,
+      "non_null_fraction": 1.0,
+      "trajectory": {
+        "all_step_valid_trajectory_fraction": 1.0,
+        "available": true,
+        "available_rollouts": 120,
+        "canonical_self_event_count": 0,
+        "canonical_self_event_fraction": 0.0,
+        "collapsed_from_larger_source_to_one_atom_fraction": 0.0,
+        "delete_to_one_then_regrow_fraction": 0.0,
+        "hit_null_after_source_fraction": 0.0,
+        "hit_one_atom_trajectory_fraction": 0.0,
+        "immediate_backtrack_count": 47,
+        "immediate_backtrack_per_opportunity_fraction": 0.015210355987055016,
+        "immediate_backtrack_rule_pair_counts": {
+          "atom_delete -> atom_insert": 6,
+          "atom_insert -> atom_delete": 7,
+          "bond_reroute -> bond_reroute": 34
+        },
+        "mean_unique_state_fraction": 0.9828542196561398,
+        "minimum_atom_count": 9,
+        "trajectories_with_canonical_self_event_fraction": 0.0,
+        "trajectories_with_immediate_backtrack_fraction": 0.24166666666666667
+      },
+      "unique_fraction": 1.0,
+      "valid_fraction": 1.0
+    }
+  },
+  "sampler_construction": {
+    "arm_default": "ThinnedRateCalibrationSampler(AnalyticPancakeQuotientSampler(base, calibration=PancakeQuotientCalibration(atom_delete_log_rate_adjustment=-0.5)), small_ring_log_rate_adjustment=-1.5, small_ring_maximum_size=4)",
+    "arm_zero": "AnalyticPancakeQuotientSampler(base, calibration=PancakeQuotientCalibration(atom_delete_log_rate_adjustment=0.0))"
+  }
+}
