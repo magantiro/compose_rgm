@@ -605,7 +605,7 @@ Let $p(k\mid t,Z)$ be the binomial progress law and $h(k\mid Z)$ a family-balanc
 
 \subsection{Neural architecture}
 
-The graph encoder embeds atom type, formal charge, implicit hydrogen count, bond class, model time, and ring/topology context. Message passing produces node and graph representations. A graph head predicts total hazard; a masked family head predicts the rule schema; atom, pair, and template heads predict operands and typed payloads. Hierarchical normalization prevents a family with many raw matches from receiving probability solely because of multiplicity. Exact final values are: hidden width \XXX, layers \XXX, parameters \ComposeParameters, batch size \XXX, optimizer \XXX, learning rate \XXX, time schedule \XXX, and training updates \XXX.
+The graph encoder embeds atom type, formal charge, implicit hydrogen count, bond class, model time, and ring/topology context. Message passing produces node and graph representations. A graph head predicts total hazard; a masked family head predicts the rule schema; atom, pair, and template heads predict operands and typed payloads. Hierarchical normalization prevents a family with many raw matches from receiving probability solely because of multiplicity. The reported base uses hidden width $256$, $6$ message-passing layers, \ComposeParameters{} parameters, batch size $64$, the AdamW optimizer with decoupled weight decay $10^{-5}$, learning rate $3\times10^{-4}$ with $500$ warm-up steps, the linear schedule $\alpha(t)=t$ under operational time, and $1{,}000$ training updates of a $3{,}000$-step schedule (selected by held-out RGM loss). Final frozen-model values will be reported at full training.
 
 \subsection{Training estimator}
 
