@@ -41,13 +41,15 @@ LIPID_CORPUS = "/guacamol/lipid_corpus_cnof_v1.smiles"
 LIPID_REF = "/guacamol/lipid_heldout_ref_5000.smiles"
 
 
-def _base_recipe(train_size, steps, rollout, batch_size, label):
+def _base_recipe(train_size, steps, rollout, batch_size, label, source_prior=None):
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     from compose_v4.experiments.recipe import load_tracelet_recipe
     recipe = load_tracelet_recipe(REMOTE_ROOT / "recipes" / "lipid_unconditional_cnof_v1_smoke.json")
     run_dir = Path("/artifacts") / label
     run_dir.mkdir(parents=True, exist_ok=True)
+    if source_prior:
+        recipe["arguments"]["source_prior"] = source_prior
     # identical path-determining args in BOTH stages so the path-cache signature matches
     recipe["arguments"].update({
         "train_size": train_size, "steps": steps, "schedule_steps": steps,
@@ -149,14 +151,14 @@ def _lipid_quality(samples):
 
 
 @app.function(image=image, cpu=64.0, timeout=10800, volumes=VOLS)
-def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CORPUS):
+def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CORPUS, source_prior=None):
     """Compile teacher paths on CPU and persist the sharded cache to the durable
     artifacts volume. Commits INCREMENTALLY (every 90s) so a mid-compile crash
     keeps every shard finished so far -- the paths are the expensive part, and
     they're worth saving even if the container dies before the full corpus is done."""
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-    recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label)
+    recipe, _ = _base_recipe(train_size, steps, rollout, batch_size, label, source_prior)
     recipe["arguments"]["device"] = "cpu"
     print(f"STAGE 1 COMPILE: {train_size} lipids from {corpus} on 64 CPUs (incremental commits) ...", flush=True)
     _run_trainer(_argv(recipe, corpus) + ["--compile-paths-only"], tag=f"compile:{label}")
@@ -164,10 +166,10 @@ def compile_paths(train_size, steps, rollout, batch_size, label, corpus=LIPID_CO
 
 
 @app.function(image=image, gpu="H100", cpu=8.0, timeout=14400, volumes=VOLS)
-def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware=True, corpus=LIPID_CORPUS):
+def train_and_sample(train_size, steps, rollout, batch_size, label, region_aware=True, corpus=LIPID_CORPUS, source_prior=None):
     import sys
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-    recipe, run_dir = _base_recipe(train_size, steps, rollout, batch_size, label)
+    recipe, run_dir = _base_recipe(train_size, steps, rollout, batch_size, label, source_prior)
     recipe["arguments"].update({"device": "cuda", "data_workers": 8, "fiber_workers": 8, "rollout_workers": 8})
     extra = ["--require-path-cache"]
     if region_aware:
@@ -228,15 +230,15 @@ def peek(label: str, n: int = 64, train_size: int = 38000, steps: int = 4000,
 @app.local_entrypoint()
 def main(train_size: int = 4000, steps: int = 4000, rollout: int = 128,
          batch_size: int = 16, label: str = "lipid_staged_v1", region_aware: bool = True,
-         compile_only: bool = False, corpus: str = LIPID_CORPUS) -> None:
+         compile_only: bool = False, corpus: str = LIPID_CORPUS, source_prior: str = "") -> None:
     print(f"=== STAGE 1: compile {train_size} lipid paths from {corpus} on CPU (no GPU) ===", flush=True)
-    compile_paths.remote(train_size, steps, rollout, batch_size, label, corpus)
+    compile_paths.remote(train_size, steps, rollout, batch_size, label, corpus, source_prior or None)
     if compile_only:
         print(f"=== compile-only: {train_size}-lipid path cache is now cached under label={label}; "
               f"future runs reuse it via --require-path-cache ===", flush=True)
         return
     print(f"=== STAGE 2: train (region_aware={region_aware}) + sample on H100 ===", flush=True)
-    out = train_and_sample.remote(train_size, steps, rollout, batch_size, label, region_aware, corpus)
+    out = train_and_sample.remote(train_size, steps, rollout, batch_size, label, region_aware, corpus, source_prior or None)
     print(json.dumps({k: v for k, v in out.items() if k != "samples"}, indent=2))
     print("\n=== generated lipid SMILES ===")
     for s in out["samples"]:
