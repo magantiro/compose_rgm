@@ -4,9 +4,13 @@ from rdkit import Chem, RDLogger
 RDLogger.DisableLog("rdApp.*")
 
 CSV = "artifacts/datasets/compose_lipid_pretraining_v1/r1_reaction_grounded_corpus_v1.csv"
-OUT = "artifacts/datasets/compose_lipid_pretraining_v1/generator_corpus_michael_v1.smiles"
 MICHAEL = "aza_michael_amine_acrylate"
-TARGET_TOTAL = 41500          # -> train_size 40000 + val/test headroom
+# usage: build_michael_skewed_corpus.py [TARGET_TOTAL] [OUT_PATH]
+# Michael unique caps at ~16k (loader dedups), so past ~42k Michael stays the #1
+# family but its SHARE necessarily drops -- that is expected, not a bug.
+TARGET_TOTAL = int(sys.argv[1]) if len(sys.argv) > 1 else 41500
+OUT = sys.argv[2] if len(sys.argv) > 2 else \
+    "artifacts/datasets/compose_lipid_pretraining_v1/generator_corpus_michael_v1.smiles"
 CNOF = {1, 6, 7, 8, 9}
 random.seed(21)
 
