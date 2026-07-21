@@ -1,0 +1,12 @@
+{
+  "experiment": "constrained_diversity_diagnostic",
+  "source": "scaffold-enforced E3 run (scaffold_opt_panel12.json), 12 leads",
+  "distinct_molecules_per_lead_mean": 155,
+  "distinct_min": 64,
+  "distinct_max": 283,
+  "internal_diversity_mean_pairwise_tanimoto": 0.503,
+  "diversity_min": 0.42,
+  "leads_collapsed": 0,
+  "n_leads": 12,
+  "verdict": "no collapse under hard scaffold constraint; capability demos (box/scaffold-hop) viable"
+}
