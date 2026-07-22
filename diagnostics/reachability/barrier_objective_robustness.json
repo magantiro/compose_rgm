@@ -1,0 +1,36 @@
+{
+  "experiment": "barrier_objective_robustness",
+  "cap": 4,
+  "n_states": 739,
+  "pairs": {
+    "logP+TPSA": {
+      "mean_frac_dirs_suboptimal": 0.18646864686468648,
+      "worst_lead": 0.33663366336633666
+    },
+    "QED+-SA": {
+      "mean_frac_dirs_suboptimal": 0.041254125412541254,
+      "worst_lead": 0.15841584158415842
+    },
+    "logP+QED": {
+      "mean_frac_dirs_suboptimal": 0.08910891089108912,
+      "worst_lead": 0.26732673267326734
+    },
+    "MW+TPSA": {
+      "mean_frac_dirs_suboptimal": 0.049504950495049514,
+      "worst_lead": 0.09900990099009901
+    },
+    "QED+HBD": {
+      "mean_frac_dirs_suboptimal": 0.1831683168316832,
+      "worst_lead": 0.46534653465346537
+    },
+    "-SA+TPSA": {
+      "mean_frac_dirs_suboptimal": 0.15346534653465346,
+      "worst_lead": 0.36633663366336633
+    },
+    "logP+rings": {
+      "mean_frac_dirs_suboptimal": 0.13861386138613863,
+      "worst_lead": 0.7425742574257426
+    }
+  },
+  "conclusion": "barrier present in all 7 objective pairs; stronger for more-conflicting objectives"
+}
