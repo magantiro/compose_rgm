@@ -44,3 +44,4 @@ paper_iclr_stochastic_rewriting/main.fdb_latexmk
 paper_iclr_stochastic_rewriting/main.bbl
 paper_iclr_stochastic_rewriting/main.blg
 scripts/presentation/__pycache__/
+.claude/settings.local.json
