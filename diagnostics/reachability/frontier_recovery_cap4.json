@@ -1,0 +1,204 @@
+{
+  "phase": "frontier_recovery",
+  "cap": 4,
+  "slices": {
+    "logp+tpsa": {
+      "aggregate": {
+        "objectives": [
+          "logp",
+          "tpsa"
+        ],
+        "mean_greedy_coverage": 0.3541666666666667,
+        "mean_detour_matched_coverage": 0.1875,
+        "mean_detour_full_coverage": 1.0,
+        "mean_matched_detour_minus_greedy": -0.16666666666666666,
+        "mean_greedy_oracle": 115.5,
+        "mean_detour_full_oracle": 722.6666666666666,
+        "mean_greedy_hv_frac": 0.926108642497154,
+        "mean_detour_matched_hv_frac": 0.8600340356715455,
+        "mean_detour_full_hv_frac": 1.0
+      },
+      "per_source": [
+        {
+          "source_index": 712,
+          "n_reachable": 739,
+          "frontier_size": 8,
+          "greedy_coverage": 0.25,
+          "detour_matched_coverage": 0.125,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 156,
+          "detour_matched_oracle_calls": 156,
+          "detour_full_oracle_calls": 721,
+          "greedy_hv_frac": 0.7075446080876475,
+          "detour_matched_hv_frac": 0.870357761736014,
+          "detour_full_hv_frac": 1.0,
+          "source_smiles": "[nH]1c2[nH]c1=2"
+        },
+        {
+          "source_index": 554,
+          "n_reachable": 739,
+          "frontier_size": 8,
+          "greedy_coverage": 0.375,
+          "detour_matched_coverage": 0.375,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 101,
+          "detour_matched_oracle_calls": 101,
+          "detour_full_oracle_calls": 723,
+          "greedy_hv_frac": 0.9695099009175249,
+          "detour_matched_hv_frac": 0.8586746376869084,
+          "detour_full_hv_frac": 1.0,
+          "source_smiles": "NN(N)N"
+        },
+        {
+          "source_index": 270,
+          "n_reachable": 739,
+          "frontier_size": 8,
+          "greedy_coverage": 0.375,
+          "detour_matched_coverage": 0.125,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 155,
+          "detour_matched_oracle_calls": 155,
+          "detour_full_oracle_calls": 720,
+          "greedy_hv_frac": 0.9613285251991114,
+          "detour_matched_hv_frac": 0.7768238803692477,
+          "detour_full_hv_frac": 1.0,
+          "source_smiles": "CCCC"
+        },
+        {
+          "source_index": 484,
+          "n_reachable": 739,
+          "frontier_size": 8,
+          "greedy_coverage": 0.25,
+          "detour_matched_coverage": 0.25,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 31,
+          "detour_matched_oracle_calls": 31,
+          "detour_full_oracle_calls": 721,
+          "greedy_hv_frac": 0.9613285251991114,
+          "detour_matched_hv_frac": 0.9489105209145761,
+          "detour_full_hv_frac": 1.0,
+          "source_smiles": "N=NN=N"
+        },
+        {
+          "source_index": 435,
+          "n_reachable": 739,
+          "frontier_size": 8,
+          "greedy_coverage": 0.5,
+          "detour_matched_coverage": 0.125,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 138,
+          "detour_matched_oracle_calls": 138,
+          "detour_full_oracle_calls": 723,
+          "greedy_hv_frac": 0.9956117703804174,
+          "detour_matched_hv_frac": 0.8679786066425497,
+          "detour_full_hv_frac": 1.0,
+          "source_smiles": "N1NON1"
+        },
+        {
+          "source_index": 4,
+          "n_reachable": 739,
+          "frontier_size": 8,
+          "greedy_coverage": 0.375,
+          "detour_matched_coverage": 0.125,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 112,
+          "detour_matched_oracle_calls": 112,
+          "detour_full_oracle_calls": 728,
+          "greedy_hv_frac": 0.9613285251991114,
+          "detour_matched_hv_frac": 0.8374588066799765,
+          "detour_full_hv_frac": 1.0,
+          "source_smiles": "C#CC#C"
+        }
+      ]
+    },
+    "logp+tpsa+qed": {
+      "aggregate": {
+        "objectives": [
+          "logp",
+          "tpsa",
+          "qed"
+        ],
+        "mean_greedy_coverage": 0.25268817204301075,
+        "mean_detour_matched_coverage": 0.29032258064516125,
+        "mean_detour_full_coverage": 1.0,
+        "mean_matched_detour_minus_greedy": 0.03763440860215054,
+        "mean_greedy_oracle": 152.83333333333334,
+        "mean_detour_full_oracle": 732.8333333333334
+      },
+      "per_source": [
+        {
+          "source_index": 186,
+          "n_reachable": 739,
+          "frontier_size": 31,
+          "greedy_coverage": 0.3225806451612903,
+          "detour_matched_coverage": 0.25806451612903225,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 206,
+          "detour_matched_oracle_calls": 206,
+          "detour_full_oracle_calls": 733,
+          "source_smiles": "C=CON"
+        },
+        {
+          "source_index": 554,
+          "n_reachable": 739,
+          "frontier_size": 31,
+          "greedy_coverage": 0.2903225806451613,
+          "detour_matched_coverage": 0.16129032258064516,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 156,
+          "detour_matched_oracle_calls": 156,
+          "detour_full_oracle_calls": 732,
+          "source_smiles": "NN(N)N"
+        },
+        {
+          "source_index": 270,
+          "n_reachable": 739,
+          "frontier_size": 31,
+          "greedy_coverage": 0.16129032258064516,
+          "detour_matched_coverage": 0.3548387096774194,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 193,
+          "detour_matched_oracle_calls": 193,
+          "detour_full_oracle_calls": 732,
+          "source_smiles": "CCCC"
+        },
+        {
+          "source_index": 20,
+          "n_reachable": 739,
+          "frontier_size": 31,
+          "greedy_coverage": 0.25806451612903225,
+          "detour_matched_coverage": 0.3225806451612903,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 150,
+          "detour_matched_oracle_calls": 150,
+          "detour_full_oracle_calls": 736,
+          "source_smiles": "C#CNN"
+        },
+        {
+          "source_index": 484,
+          "n_reachable": 739,
+          "frontier_size": 31,
+          "greedy_coverage": 0.22580645161290322,
+          "detour_matched_coverage": 0.25806451612903225,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 71,
+          "detour_matched_oracle_calls": 71,
+          "detour_full_oracle_calls": 732,
+          "source_smiles": "N=NN=N"
+        },
+        {
+          "source_index": 504,
+          "n_reachable": 739,
+          "frontier_size": 31,
+          "greedy_coverage": 0.25806451612903225,
+          "detour_matched_coverage": 0.3870967741935484,
+          "detour_full_coverage": 1.0,
+          "greedy_oracle_calls": 141,
+          "detour_matched_oracle_calls": 141,
+          "detour_full_oracle_calls": 732,
+          "source_smiles": "NC(N)=O"
+        }
+      ]
+    }
+  }
+}
