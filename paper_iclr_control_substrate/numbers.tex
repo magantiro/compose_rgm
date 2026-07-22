@@ -1,13 +1,26 @@
-% Centralized placeholders for the final confirmatory evaluation.
-% Replace XXX only after the corresponding artifact is frozen and audited.
-\newcommand{\XXX}{\textbf{XXX}}
+% Centralized placeholders for the control-substrate reframe.
+%
+% FRAMING-ONLY DRAFT (2026-07-22 author override): EVERY numerical *result* is \XXX,
+% including results we already have committed artifacts for (barrier-mechanism
+% percentages, structural-control satisfaction rates, oracle efficiency, the Doob
+% endpoint error, de-novo validity/uniqueness/diversity, etc.). Numbers may still move
+% after the source-conditioned (Stage B) and ring-fix retrains, so nothing is committed
+% here. Each macro's comment says exactly what result belongs there and where the frozen
+% artifact lives, so the value can be dropped in later without touching prose. Only
+% non-result design hyperparameters (N_max, width, depth, lr, schedule) are kept as real
+% numbers, and those live inline in the method/appendix, not here.
+\newcommand{\XXX}{\textcolor{red}{XXX}}
 
-% De novo sufficiency (ZINC-CNOF). Validity and all-step validity/connectivity are
-% 100% BY CONSTRUCTION (Prop. closure), not empirical estimates. Uniqueness/novelty/
-% descriptor distances/diversity/coverage are filled from the frozen sufficiency run.
-\newcommand{\ComposeValidity}{\textbf{100\%}}
-\newcommand{\ComposeTrajectoryValidity}{\textbf{100\%}}
-\newcommand{\ComposeTrajectoryConnectivity}{\textbf{100\%}}
+% ---------------------------------------------------------------------------
+% De novo sufficiency (GuacaMol C/N/O/F base). Validity and all-step validity/
+% connectivity are 100% BY CONSTRUCTION (Prop. closure); we nonetheless leave the
+% reported *rate* as \XXX pending the frozen multi-seed run. Uniqueness / novelty /
+% internal diversity / descriptor distances / coverage are all \XXX; the ring-taxonomy
+% defect means the final numbers await the ring-fix at-scale retrain.
+% ---------------------------------------------------------------------------
+\newcommand{\ComposeValidity}{\XXX}
+\newcommand{\ComposeTrajectoryValidity}{\XXX}
+\newcommand{\ComposeTrajectoryConnectivity}{\XXX}
 \newcommand{\ComposeUniqueness}{\XXX}
 \newcommand{\ComposeNovelty}{\XXX}
 \newcommand{\ComposeDescriptorW}{\XXX}
@@ -15,10 +28,22 @@
 \newcommand{\ComposeCoverage}{\XXX}
 \newcommand{\ComposeMeanEvents}{\XXX}
 \newcommand{\ComposeThroughput}{\XXX}
-% FCD / GuacaMol KL are deferred to the final GuacaMol table; NOT reported in the
-% CNOF control paper (we do not stage an FCD arms race).
+% FCD / GuacaMol KL deferred to the final GuacaMol table; not a headline here.
 \newcommand{\ComposeFCD}{\XXX}
 \newcommand{\ComposeKL}{\XXX}
+
+% De-novo ring-taxonomy defect (honest partial; the mechanism-proven fix is untrained).
+\newcommand{\DenovoSmallRing}{\XXX}       % small-ring (3--4) fraction, ring-defective base
+\newcommand{\DenovoSmallRingRef}{\XXX}    % reference small-ring fraction
+\newcommand{\DenovoAromatic}{\XXX}        % aromatic-atom fraction, base
+\newcommand{\DenovoAromaticRef}{\XXX}     % reference aromatic-atom fraction
+
+% Soft property steering (de-novo, controller Psi only): a demonstration of the control
+% law's preference knob, NOT a sample-efficiency leaderboard entry.
+\newcommand{\DenovoQEDRaw}{\XXX}          % raw de-novo mean QED
+\newcommand{\DenovoQEDControlled}{\XXX}   % mean best QED under a QED-tilted controller
+\newcommand{\DenovoQEDSuccess}{\XXX}      % QED success rate under control
+\newcommand{\DenovoLogpDialErr}{\XXX}     % median |generated logP - target| across the dial
 
 % Structural distribution metrics.
 \newcommand{\ComposeSizeTV}{\XXX}
@@ -44,28 +69,78 @@
 \newcommand{\NoAliasFCD}{\XXX}
 \newcommand{\NoStratificationFCD}{\XXX}
 
-% Conditional / structural-control evaluation.
-% COMMITTED results (Lineage B base, GuacaMol-trained; CNOF optimization leads). Frozen artifacts.
-\newcommand{\ComposeExactnessLinf}{$1.1\times10^{-16}$}          % E0 Doob h-transform endpoint error
-\newcommand{\ComposeScaffoldSatisfaction}{\textbf{100\%}}         % exact fixed-scaffold satisfaction (enforced)
-\newcommand{\ComposeSubstructureSatisfaction}{\textbf{100\%}}     % required/forbidden substructure satisfaction
-\newcommand{\ComposeScaffoldRetention}{\textbf{100\%}}
-\newcommand{\ComposeBaselineScaffoldEasy}{95.7\%}                 % gen-then-filter usable, scaffold <=8 atoms
-\newcommand{\ComposeBaselineScaffoldHard}{12.0\%}                 % gen-then-filter usable, scaffold >=23 atoms
-\newcommand{\ComposeOracleEfficiency}{\textbf{100\%}}             % oracle calls spent on feasible candidates
-\newcommand{\ComposeBaselineOracleEfficiency}{39.8\%}            % gen-then-filter oracle efficiency
-\newcommand{\ComposeBaselineOracleWastedHard}{88\%}             % wasted budget on hard scaffolds
-\newcommand{\ComposeConstrainedQEDFrom}{0.755}
-\newcommand{\ComposeConstrainedQEDTo}{0.827}
-\newcommand{\ComposeConstrainedQEDGain}{$+0.072$}
-\newcommand{\ComposeConstrainedLeadsImproved}{12/12}
-\newcommand{\ComposeAnytimeCalls}{13}                             % median lead: oracle calls to 90\% of its final gain (constrained; mean 35, skewed by late-jumpers)
-\newcommand{\ComposePropertyGain}{\ComposeConstrainedQEDGain}
-% Legacy macro for the DE-EMPHASISED unconstrained oracle-hungry success rate; kept XXX by design
-% (not a headline; appendix-only with disclosed budget).
-\newcommand{\ComposeConditionalSuccess}{\XXX}
+% ---------------------------------------------------------------------------
+% Mechanistic spotlight: Pareto reachability depends on path topology.
+% Exact enumerated rewrite graphs; frozen artifacts in
+% diagnostics/reachability/{pareto_reachability_cap4,pareto_reachability_cap5,
+% frontier_recovery_cap4}.json (mean over 6 sources). All \XXX in this draft.
+% ---------------------------------------------------------------------------
+\newcommand{\ReachStatesCapFour}{\XXX}          % enumerated states, cap-4 graph
+\newcommand{\ReachEdgesCapFour}{\XXX}           % enumerated edges, cap-4 graph
+\newcommand{\ReachStatesCapFive}{\XXX}          % enumerated states, cap-5 graph
+\newcommand{\BarrierSuboptTwoObj}{\XXX}         % cap-4, 2-obj: frac preference dirs monotone-suboptimal (mean)
+\newcommand{\BarrierSuboptThreeObj}{\XXX}       % cap-4, 3-obj (mean)
+\newcommand{\BarrierSuboptWorstTwoObj}{\XXX}    % cap-4, 2-obj: worst single source
+\newcommand{\BarrierSuboptWorstThreeObj}{\XXX}  % cap-4, 3-obj: worst single source
+\newcommand{\BarrierForfeitMean}{\XXX}          % mean fraction of reachable improvement forfeited when suboptimal
+\newcommand{\BarrierForfeitMax}{\XXX}           % max (strict local maximum)
+\newcommand{\BarrierInterior}{\XXX}             % interior-state incidence (size-cap-artifact control)
+\newcommand{\BarrierBoundary}{\XXX}             % boundary-state incidence
+\newcommand{\BarrierLookaheadTwo}{\XXX}         % cap-4, 2-obj: incidence under 2-edit evaluation lookahead
+\newcommand{\BarrierLookaheadThree}{\XXX}       % cap-4, 2-obj: 3-edit lookahead
+\newcommand{\BarrierSuboptCapFive}{\XXX}        % cap-5, 2-obj (mean)
+\newcommand{\BarrierSuboptWorstCapFive}{\XXX}   % cap-5, 2-obj: worst single source
+\newcommand{\BarrierForfeitCapFive}{\XXX}       % cap-5 mean forfeit
+% Frontier recovery (exact): greedy structural ceiling vs detour-capable control.
+% NOTE: recovery *efficiency* (matched-budget) is UNDECIDED -> stays \XXX by design.
+\newcommand{\GreedyCoverageTwoObj}{\XXX}        % greedy frontier coverage ceiling, 2-obj
+\newcommand{\GreedyHVTwoObj}{\XXX}              % greedy hypervolume fraction, 2-obj
+\newcommand{\GreedyCoverageThreeObj}{\XXX}      % greedy frontier coverage ceiling, 3-obj
+\newcommand{\DetourCoverageFull}{\XXX}          % detour-capable coverage at (unbounded) budget
 
-% Reproducibility.
-\newcommand{\ComposeParameters}{6.3M}
+% ---------------------------------------------------------------------------
+% Structural control (hard constraints in the legal fiber vs generate-then-filter).
+% Frozen CNOF-lead artifacts; all \XXX in this draft.
+% ---------------------------------------------------------------------------
+\newcommand{\ComposeScaffoldSatisfaction}{\XXX}      % in-fiber fixed-scaffold satisfaction
+\newcommand{\ComposeSubstructureSatisfaction}{\XXX}  % required/forbidden SMARTS satisfaction
+\newcommand{\ComposeScaffoldRetention}{\XXX}
+\newcommand{\ComposeBaselineScaffoldEasy}{\XXX}      % gen-then-filter usable, small scaffolds
+\newcommand{\ComposeBaselineScaffoldHard}{\XXX}      % gen-then-filter usable, largest scaffolds
+\newcommand{\ComposeOracleEfficiency}{\XXX}          % oracle calls landing on feasible candidates
+\newcommand{\ComposeBaselineOracleEfficiency}{\XXX}  % gen-then-filter oracle efficiency
+\newcommand{\ComposeBaselineOracleWastedHard}{\XXX}  % wasted budget on hard scaffolds
+\newcommand{\PhyschemBoxInFiber}{\XXX}               % per-sample: scaffold AND physchem box (COMPOSE)
+\newcommand{\PhyschemBoxBaseline}{\XXX}              % per-sample: scaffold AND physchem box (gen-then-filter)
+\newcommand{\PhyschemBoxFactor}{\XXX}                % per-sample advantage factor
+\newcommand{\ConjunctionFullSpec}{\XXX}              % gen-then-filter usable yield at full conjoined spec
+
+% Constrained optimization / anytime behaviour.
+\newcommand{\ComposeConstrainedQEDFrom}{\XXX}
+\newcommand{\ComposeConstrainedQEDTo}{\XXX}
+\newcommand{\ComposeConstrainedQEDGain}{\XXX}
+\newcommand{\ComposeConstrainedLeadsImproved}{\XXX}
+\newcommand{\ComposeAnytimeCalls}{\XXX}              % median lead: oracle calls to 90% of final gain
+\newcommand{\ComposePropertyGain}{\ComposeConstrainedQEDGain}
+\newcommand{\ComposeConditionalSuccess}{\XXX}        % de-emphasised unconstrained oracle-hungry success rate
+
+% Exactness anchor (Doob h-transform on an exact enumerated CTMC slice).
+\newcommand{\ComposeExactnessStates}{\XXX}           % enumerated states of the exact slice
+\newcommand{\ComposeExactnessLinf}{\XXX}             % endpoint L-infinity error vs exact Bayes conditional
+\newcommand{\ExactHParticleFactor}{\XXX}             % particle saving of exact-h twist vs untwisted SMC
+
+% ---------------------------------------------------------------------------
+% Anytime Pareto editing (the designed hero): FUTURE / needs the source-conditioned
+% Stage B retrain. Every metric here is \XXX by design, not merely pending a freeze.
+% ---------------------------------------------------------------------------
+\newcommand{\EditFeasibleHV}{\XXX}          % feasible hypervolume AUC vs oracle calls
+\newcommand{\EditUniqueND}{\XXX}            % unique nondominated molecules in the archive
+\newcommand{\EditFrontierCoverage}{\XXX}    % source-relative frontier coverage
+\newcommand{\EditSourceDistance}{\XXX}      % median source edit distance
+\newcommand{\EditRetention}{\XXX}           % protected-structure retention
+\newcommand{\EditLearnedVsUniform}{\XXX}    % learned-quotient vs uniform-legal proposal efficiency
+
+% Reproducibility (design specs; kept out of the results but still \XXX in this draft).
+\newcommand{\ComposeParameters}{\XXX}
 \newcommand{\ComposeTrainHours}{\XXX}
 \newcommand{\ComposePeakMemory}{\XXX}
