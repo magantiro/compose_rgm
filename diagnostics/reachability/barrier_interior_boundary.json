@@ -1,0 +1,13 @@
+{
+  "interior_heavy_le_3": {
+    "mean_frac_dirs_monotone_suboptimal": 0.16980198019801981,
+    "n_sources": 20,
+    "sources_with_any_barrier": 11
+  },
+  "boundary_heavy_eq_4": {
+    "mean_frac_dirs_monotone_suboptimal": 0.18217821782178217,
+    "n_sources": 20,
+    "sources_with_any_barrier": 11
+  },
+  "conclusion": "barrier is NOT a size-cap artifact: interior and boundary sources barrier at the same rate"
+}
