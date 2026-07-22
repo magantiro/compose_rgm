@@ -31,3 +31,17 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   Green invocation: `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src pytest tests/` → 427/427.
   Real root cause is that `.venv` isn't a clean single-source install (`uv sync`/`pip install -e .`
   would put one OpenMP + compose_v4 in the venv); don't reinstall reactively — document + move on.
+
+- **Rigor pass on the Pareto-reachability spotlight (control-substrate reframe).** Before trusting a
+  "greedy vs optimal" gap, stress it three ways: fair accounting, sensitivity, evaluation-lookahead.
+  (1) The frontier-**recovery** "matched-budget negative" (unguided detours lose to greedy) did NOT
+  survive: it was confounded (asymmetric archiving; the walk never cooled) and, once fixed, purely a
+  temperature dial (t0=0.3→0.21, t0=0.02→0.54==greedy). **Retracted.** (2) The **barrier diagnostic**
+  DID survive: its monotone comparator is a generous upper bound on greedy, and giving greedy a full
+  edit of *evaluation* lookahead changes nothing — provably, since every exterior neighbour of the
+  monotone-reachable set has strictly lower U (`frac_dirs_suboptimal_lookahead1 == lookahead0`). The
+  barrier only erodes with genuine ≥2-edit lookahead (cap4 2-obj: 18.6%→16.0%@d2→8.9%@d3) and the
+  cap5 worst-lead 91% is unchanged at d1. So: greedy has a real structural ceiling; efficient
+  *recovery* of the barrier-gated frontier is undecided by the toy (needs the learned model on real
+  leads). Lesson: a scalar-U movement gap ≠ Pareto-frontier coverage — state which metric, and test
+  evaluation-fairness before claiming a controller "can't reach" something.

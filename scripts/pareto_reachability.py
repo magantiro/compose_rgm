@@ -188,6 +188,46 @@ def simplex_grid(d: int, divisions: int) -> list[tuple[float, ...]]:
     return out
 
 
+def _dilate(adj: list[list[int]], mask: np.ndarray, depth: int) -> np.ndarray:
+    """Add every node within `depth` edges of `mask` (evaluation-lookahead frontier)."""
+    cur = mask.copy()
+    for _ in range(depth):
+        nxt = cur.copy()
+        for i in np.where(cur)[0]:
+            for v in adj[i]:
+                nxt[v] = True
+        cur = nxt
+    return cur
+
+
+def lookahead_robustness(adj, Sn, sources, weights, tol):
+    """Rigor check: is the barrier a monotone-MOVEMENT artifact, or does it survive a
+    controller that also EVALUATES its candidate edits (and archives what it scores)?
+
+    Reports the fraction of directions whose U-optimum stays unreachable when the
+    monotone-reachable set is dilated by d edges of evaluation lookahead. d=1 is
+    provably identical to d=0 (every exterior neighbour of the monotone set has
+    strictly lower U -- that's why it is exterior), so 1-hop evaluation CANNOT beat
+    monotone movement; the barrier only erodes with genuine multi-edit lookahead."""
+    depths = (0, 2, 3)
+    acc = {d: [] for d in depths}
+    for s in sources:
+        R = reachable_from(adj, s)
+        Ridx = np.where(R)[0]
+        cnt = {d: 0 for d in depths}
+        for w in weights:
+            U = Sn @ np.asarray(w)
+            u_star = U[Ridx].max()
+            M = monotone_reachable(adj, U, s, tol)
+            for d in depths:
+                reach = _dilate(adj, M, d) if d else M
+                if u_star - U[reach].max() > tol:
+                    cnt[d] += 1
+        for d in depths:
+            acc[d].append(cnt[d] / len(weights))
+    return {f"frac_dirs_suboptimal_lookahead{d}": float(np.mean(acc[d])) for d in depths}
+
+
 def farthest_point_sources(Sn: np.ndarray, heavy: list[int], cap: int, k: int) -> list[int]:
     """Spread-out sources among 'mature' states (heavy >= cap-1), deterministic."""
     cand = [i for i, h in enumerate(heavy) if h >= cap - 1]
@@ -310,6 +350,9 @@ def main() -> None:
             adj, raw, Sn, heavy, args.cap, names, div, args.n_sources, args.tol)
         for ps in per_source:
             ps["source_smiles"] = smiles[ps["source_index"]]
+        # rigor: barrier must survive a controller that evaluates its candidate edits
+        robust = lookahead_robustness(adj, Sn, sources, simplex_grid(len(names), div), args.tol)
+        agg.update(robust)
         key = "+".join(names)
         result["slices"][key] = {"aggregate": agg, "per_source": per_source}
         print(json.dumps({"slice": key, **agg}, indent=2), flush=True)

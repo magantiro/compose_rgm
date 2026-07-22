@@ -21,7 +21,10 @@
         "worst_source_index": 554,
         "mean_gap_frac_of_reach_when_positive": 0.7733095612405071,
         "max_gap_frac_of_reach_any_source": 1.0,
-        "max_barrier_any_source": 0.16946654072211353
+        "max_barrier_any_source": 0.16946654072211353,
+        "frac_dirs_suboptimal_lookahead0": 0.18646864686468648,
+        "frac_dirs_suboptimal_lookahead2": 0.1600660066006601,
+        "frac_dirs_suboptimal_lookahead3": 0.08910891089108912
       },
       "per_source": [
         {
@@ -128,7 +131,10 @@
         "worst_source_index": 484,
         "mean_gap_frac_of_reach_when_positive": 0.5606310090188416,
         "max_gap_frac_of_reach_any_source": 1.0,
-        "max_barrier_any_source": 0.16333708483374787
+        "max_barrier_any_source": 0.16333708483374787,
+        "frac_dirs_suboptimal_lookahead0": 0.2736111111111111,
+        "frac_dirs_suboptimal_lookahead2": 0.2041666666666667,
+        "frac_dirs_suboptimal_lookahead3": 0.14027777777777778
       },
       "per_source": [
         {
