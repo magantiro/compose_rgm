@@ -26,8 +26,9 @@ detail lives in the imported context files below and in scoped `CLAUDE.md`s.
 
 ```bash
 uv sync                          # .venv + deps (or: pip install -e ".[dev]"); then activate .venv
-export PYTHONPATH=src:scripts    # experiment scripts import from both
-export KMP_DUPLICATE_LIB_OK=TRUE # macOS OpenMP guard
+export PYTHONPATH=src:scripts    # both for scripts; `src` also lets parallel-rollout worker subprocesses find compose_v4
+export KMP_DUPLICATE_LIB_OK=TRUE # macOS OpenMP guard (silences the abort)
+export OMP_NUM_THREADS=1         # REQUIRED locally: torch's bundled OpenMP + brew's collide → suite segfaults without it (see learnings)
 pytest tests/                    # full suite (427 tests, pythonpath=["src"] -> `from compose_v4.…`)
 pytest tests/test_e0_toy_h_exactness.py -q   # one file
 ruff check .                     # lint (line-length 100, target py310)
