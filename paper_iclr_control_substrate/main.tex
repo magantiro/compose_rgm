@@ -503,16 +503,6 @@ Real specifications are conjunctions. As independent constraints---a similarity 
 \label{fig:conjunction}
 \end{figure}
 
-\paragraph{Pathwise support control composes (\cref{fig:pathwise_safety}).}
-Hard support also applies \emph{pathwise}: forbidding a motif at \emph{every} committed state, not only the endpoint, is a rule-closed invariant (delete every $a$ with $\lnot P(\T_aG)$ from $\A(G)$), and it is strictly stronger than endpoint filtering. This is only expressible because intermediates are molecules. As a demonstration we forbid a set of reactive-alert SMARTS pathwise: \method audits \XXX{} violations across \XXX{} committed states, while a matched endpoint-only baseline traverses a forbidden intermediate in \XXX{} of its clean-ending trajectories, at a property cost of \XXX{}. We frame this as \emph{support-level} control---a forbidden-motif invariant on the design space---not a claim about synthesis safety: a rewrite trajectory is not a synthesis route, so the guarantee is molecular-state closure, not physical reachability. The same mechanism expresses protected-pharmacophore retention and property floors.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.82\textwidth]{figures/pathwise_safety.pdf}
-\caption{\textbf{Pathwise support control: constrain the path, not just the endpoint.} Per-motif incidence among the committed states of an endpoint-only baseline (bars): a fraction \XXX{} of its \emph{clean-ending} trajectories still traverse a forbidden intermediate. \method forbids the motifs in the legal fiber, so no committed state can contain one (line at $0$). Frozen values \XXX.}
-\label{fig:pathwise_safety}
-\end{figure}
-
 \subsection{Oracle efficiency and anytime behaviour}
 \label{sec:oracle}
 
@@ -580,16 +570,6 @@ Reference & \DenovoSmallRingRef & \DenovoAromaticRef & \XXX & \XXX & \XXX & \XXX
 \bottomrule
 \end{tabular*}
 \end{table}
-
-\paragraph{Soft property steering---the \texorpdfstring{$\Psi$}{Psi} knob (\cref{fig:dial}).}
-The control law's preference component works on the unconditional base. With a soft logP tilt the generated median tracks a target logP dial across its range (median error \DenovoLogpDialErr{}), and a QED-tilted controller raises mean best QED from \DenovoQEDRaw{} (raw) to \DenovoQEDControlled{} (success rate \DenovoQEDSuccess{}). These demonstrate that $\Psi$ steers the substrate; they are oracle-guided demonstrations of the interface, \emph{not} sample-efficiency leaderboard entries, and the caution that simple baselines are strong applies (\cref{sec:limits}).
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.72\textwidth]{figures/property_dial.pdf}
-\caption{\textbf{Soft property steering.} A soft preference tilt $\Psi$ dials the de novo generator's median logP toward an arbitrary target (dashed: ideal); topology-changing moves are legitimate candidates throughout. This is the $\Psi$ knob of the control law on the unconditional base. Values illustrative; frozen numbers \XXX.}
-\label{fig:dial}
-\end{figure}
 
 \begin{table}[t]
 \centering
@@ -711,7 +691,7 @@ The released model is a universal edit prior trained from carbon-tree trajectori
 The current base overproduces small rings and underproduces aromaticity (\cref{tab:ring}); we do not claim de novo state of the art, and the fix is mechanism-proven but untrained at scale. Our oracle-guided SMC is also oracle-hungry and is not a matched comparison to oracle-light conditional models; a learned oracle-light route (classifier-free conditioning, reward fine-tuning) remains weak and is future work. QED is reported only inside constrained tasks or as a $\Psi$-steering demonstration, never as a standalone leaderboard.
 
 \paragraph{Scope of the closure guarantee.}
-The declared domain is connected, valence-admissible 2D molecular graphs with implicit hydrogens. This is \emph{molecular-state} closure, not comprehensive chemical feasibility: it does not guarantee synthesizability, 3D plausibility, stereochemistry, or oracle reliability, and a rewrite trajectory is not a synthesis route (so pathwise constraints are support control on the design space, not synthesis safety). Stereochemistry, conformers, radicals, metals, and multi-center bonding need extensions; a finite typed ring catalog can under-cover rare programs; and the compiler introduces inductive bias by concentrating supervision on one of many valid paths.
+The declared domain is connected, valence-admissible 2D molecular graphs with implicit hydrogens. This is \emph{molecular-state} closure, not comprehensive chemical feasibility: it does not guarantee synthesizability, 3D plausibility, stereochemistry, or oracle reliability, and a rewrite trajectory is not a synthesis route, so all-step molecular validity is closure of the design space rather than physical synthesizability. Stereochemistry, conformers, radicals, metals, and multi-center bonding need extensions; a finite typed ring catalog can under-cover rare programs; and the compiler introduces inductive bias by concentrating supervision on one of many valid paths.
 
 \paragraph{Comparisons to verify.}
 Our characterizations of external controllers and editors (MOG-DFM, AReUReDi, pCoMole, MARS, MIMOSA) originate in a strategy memo and are treated as claims to verify against primary sources before any head-to-head result; the already-verified ConStruct/PRODIGY/CoCoGraph positioning is stated as fact and the remainder as to-check. Hard support guarantees do not imply low FCD, likelihood optimality, rapid mixing, or chemical usefulness.
