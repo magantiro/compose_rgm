@@ -1,0 +1,749 @@
+\documentclass{article}
+
+% Official ICLR 2026 style and bibliography format from the prior COMPOSE submission.
+\usepackage{iclr2026_conference,times}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{amsthm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{xspace}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{pifont}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\hypersetup{colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\input{numbers}
+
+\newcommand{\method}{\textsc{Compose}\xspace}
+\newcommand{\rgm}{\textsc{RGM}\xspace}
+\newcommand{\M}{\mathcal{M}_{\Gamma}}
+\newcommand{\Rset}{\mathcal{R}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Sset}{\mathcal{S}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\pdata}{p_{\mathrm{data}}}
+\newcommand{\pzero}{\pi_0}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\legal}{\mathsf{Legal}}
+\newcommand{\Match}{\mathsf{Match}}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\partialmark}{\ensuremath{\triangle}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\one}{\mathbf{1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\crefname{assumption}{assumption}{assumptions}
+\Crefname{assumption}{Assumption}{Assumptions}
+
+\title{\method: Generator-Matched Stochastic Rewriting for Valid Molecular Generation and Editing}
+\author{Anonymous Authors}
+\date{}
+% \iclrfinalcopy
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Flexible molecular generation should support both distribution learning and molecular design: a model must change atom count, composition, bonding, and ring topology while keeping every state exposed to a constraint or property oracle a complete, connected molecule. Existing flexible-size diffusion and flow models typically traverse ambient graph spaces, whereas validity-preserving grammars and constrained processes are largely constructive or confined to fixed molecular fibers. We introduce \emph{Rewrite Generator Matching} (\rgm), a generative construction that instantiates Generator Matching on an executable stochastic rewrite system. Stochastic rewriting supplies the state-dependent legal rule--match events and their guarded successors; endpoint-conditioned rewrite programs supply tractable conditional generators; and Generator Matching learns their marginal, time-dependent firing rates. At inference, this yields target-free ancestral CTMC sampling without an endpoint, beam search, candidate bank, or terminal repair. We instantiate \rgm as \method, a flexible-size molecular generator and editor combining general grow, shrink, retype, and bond rewrites with subtree Graft and whole-ring-system moves. Every committed jump preserves connectivity and a declared 2D molecular grammar, while the derived moves coordinate difficult topology changes without reducing the model to fragment assembly. The same rewrite process supports unconditional generation, property targeting, molecular optimization, and source-conditioned editing. Because every committed state is a complete molecule, structural constraints act on the legal event set by construction and property oracles score meaningful intermediates throughout generation, at which \method maintains all-step validity and connectivity. On GuacaMol (C/N/O/F) \method is a sufficiently competitive \emph{de novo} generator, while its distinctive strength is controlled molecular design on held-out CNOF optimization leads. Its strongest form is \emph{pathwise}-constrained generation---constraints that hold at every committed molecule, not just the endpoint, a problem class expressible only because intermediates are molecules: we formulate it and expose a failure mode of endpoint-only generation, that $67\%$ of even its clean-ending trajectories traverse a reactive intermediate, while \method guarantees zero such intermediates by construction at no objective cost. It also satisfies fixed-scaffold and required/forbidden-substructure constraints \emph{exactly} (\ComposeScaffoldSatisfaction{}) where a matched generate-then-filter baseline collapses with constraint hardness (to \ComposeBaselineScaffoldHard{} usable on the hardest scaffolds); it spends \ComposeOracleEfficiency{} of its oracle calls on feasible candidates against \ComposeBaselineOracleEfficiency{} for filtering; and it optimizes QED under an exact scaffold constraint (\ComposeConstrainedQEDGain{} on \ComposeConstrainedLeadsImproved{} leads, from \ComposeConstrainedQEDFrom{} to \ComposeConstrainedQEDTo{}) while preserving the scaffold on every lead. On a small exhaustive-state slice of the learned generator, rule-closed conditioning is enforced exactly by the Doob $h$-transform (endpoint error \ComposeExactnessLinf{}). These results establish executable rewriting as a process substrate for Generator Matching, and pathwise chemical closure as a substrate for exact, oracle-efficient molecular control.
+\end{abstract}
+
+\section{Introduction}
+
+Molecular generative modeling asks one model to solve several versions of the same structural problem. In unconditional generation, it must reproduce a molecular distribution. In property targeting and optimization, it must move probability toward desired regions of chemical space. In editing, it must preserve specified structure while revising the rest. All three require freedom to change atom count, composition, bonding, and cyclic topology. They also expose a requirement that endpoint-only metrics can hide: any state consumed by a property oracle, scaffold constraint, or human-interpretable edit should itself be a molecule. Terminal sanitization cannot make an earlier oracle query chemically meaningful.
+
+Graph diffusion and flow models have substantially advanced molecular distribution learning \citep{jo2022gdss,vignac2023digress,jo2023grum,xu2024disco,siraudin2024cometh,qin2025defog}. Their node, edge, and coordinate processes are expressive, but generally evolve in an ambient graph space whose intermediate states need not be connected or valence-admissible. GrIDDD, Edit Flows, and Morph extend this paradigm with insertion, deletion, or substitution, establishing flexible cardinality within learned generative dynamics \citep{ninniri2025griddd,havasi2025editflows,franke2026morph}. A complementary line makes constraints structural: ConStruct restricts graph diffusion, molecular grammars generate through legal productions, CoCoGraph performs validity-preserving swaps, and reaction-based GFlowNets traverse executable synthesis or editing transformations \citep{madeira2024construct,kajino2019mhg,guo2022grammar,ruizbotella2026cocograph,koziarski2024rgfn,zhu2026spacegfn}. These are important precedents rather than isolated ingredients to be claimed anew. We are unaware, however, of a Generator-Matched probability path from a directly samplable molecular prior to a data distribution whose learned transitions are simultaneously flexible-size, non-monotone, and closed over complete molecular states.
+
+We obtain such a path by making the interface between two established theories explicit and operational for de novo molecular generation. Stochastic graph rewriting defines qualitative rules, their concrete matches and application conditions, and the CTMC semantics induced by match propensities \citep{danos2015thermodynamic,behr2021rewriting}. Generator Matching provides a regression principle for recovering a marginal infinitesimal generator from tractable conditional generators \citep{holderrieth2025generator}. The former does not explain how to learn a source-to-data generative transport, and the latter does not choose a molecular state space, executable event vocabulary, or chemistry-closed transition relation. We formulate \emph{Rewrite Generator Matching} (\rgm) to supply those objects: endpoint-conditioned executable rewrite programs define conditional generators, and Generator Matching learns their time- and context-dependent marginal firing rates on the rewrite state graph. Thus, established tools produce a new generative construction rather than a validity mask attached to an ambient graph process.
+
+Our molecular realization is \method---\textbf{COM}positional \textbf{P}robabilistic \textbf{O}perator \textbf{S}ampling and \textbf{E}diting. A state is a complete, connected graph admitted by a declared 2D atom/bond/charge/implicit-hydrogen grammar. A typed rewrite at a concrete match is a marked jump; application conditions define its state-dependent legal support. Multiple marks can name the same chemical transition because of graph symmetries or alternative executable lowerings, so their rates are aggregated at the canonical molecular successor. This quotient is correctness machinery with precedent in stochastic rewriting and symmetry-aware graph generation, not a separate novelty claim. The important consequence is operational: probability evolves between molecules by executing rules, rather than between unconstrained atom--edge tensors by later interpreting or repairing them.
+
+Training begins with a target-independent, degree-bounded carbon tree $G_0\sim\pzero$ and a data molecule $G_1\sim\pdata$. A randomized compiler produces a certified source-to-target rewrite program, and a progress CTMC on that program supplies the conditional rates required by Generator Matching. Marginalizing the target, coupling, program, and progress state yields a generator on observed molecular states, following the conditional-to-marginal and latent-process principles of Generator Matching \citep{holderrieth2025generator,billera2026latent}. The compiler is supervision, not a decoder. At inference, a fresh source is transformed by ancestral sampling from the learned CTMC without access to a target, trace, candidate bank, beam search, or terminal repair.
+
+The choice of rewrite paths is also an inductive bias. A purely local compiler can technically correct size, labels, bonds, and topology, yet do so through long or ambiguous programs: a mismatched tree may be pruned and regrown, and a ring system may require tightly coordinated local events. We therefore retain general grow, shrink, retype, and bond rewrites while introducing two verified derived actions. \emph{Subtree Graft} moves a bridge-attached component and reconnects it atomically, revising global topology without exposing a disconnected state. \emph{Whole-ring-system rewrites} coordinate the growth or deletion of supported monocyclic, fused, bridged, spiro, aromatic, and non-aromatic systems. Each derived action has validity-checked primitive lowering and inverse semantics. They compress difficult paths within a universal edit substrate; they do not turn \method into a fragment vocabulary.
+
+Pathwise closure is especially relevant to molecular design. Hard structural constraints can remove violating matches, conditioning can alter learned rates, and inference-time guidance can reweight only executable molecular successors. Every committed proposal can therefore be scored by a molecular graph oracle, while non-monotone size and topology changes retain the ability to revise rather than merely decorate a structure. This architectural argument is not itself evidence of better optimization. We consequently stage the evaluation: first establish sufficient unconditional fidelity, coverage, and diversity; then test property targeting, oracle-budgeted optimization, and source-conditioned editing against matched filtering, repair, and guidance baselines. All comparisons account for oracle calls, proposals, samples, and wall-clock cost.
+
+Our contributions are:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Rewrite Generator Matching.} We formulate Generator Matching over executable stochastic rewrite systems: certified endpoint-conditioned programs define conditional generators, and neural time-dependent rule--match intensities define a target-free marginal rewrite CTMC. To our knowledge, this is the first instantiation of Generator Matching on a formal, chemistry-closed stochastic graph-rewrite system.
+    \item \textbf{A flexible-size, validity-closed molecular realization.} \method supports non-monotone changes to size, composition, bonds, and ring topology while every committed state remains connected and admitted by the declared 2D molecular grammar. General local rewrites coexist with verified Graft and whole-ring-system path-compression operators.
+    \item \textbf{Pathwise-constrained molecular generation.} We formulate constraints that must hold at \emph{every committed state} of the generation path, not only at the endpoint---a problem class expressible only when intermediate states are complete molecules. We expose that endpoint-only generation traverses forbidden intermediates in the majority of even its clean-ending trajectories, and show \method enforces the pathwise constraint as an exact invariant, at no objective cost.
+    \item \textbf{Mechanism- and capability-centered evidence.} We evaluate one rewrite model family across unconditional generation, property targeting, molecular optimization, and editing. All-state audits and matched closure, source, quotient, and micro-versus-macro ablations test which parts of the construction produce the observed behavior.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.95\linewidth}
+\centering
+\textbf{Training}\qquad
+$G_0\sim\pzero,\;G_1\sim\pdata$
+$\xrightarrow{\text{couple + compile}}$
+$z=(G_0\xrightarrow{a_1}\cdots\xrightarrow{a_K}G_1)$
+
+\vspace{5pt}
+$z\xrightarrow{\text{sample }(t,k)}$
+$(G_k,t,\;q_t^z)$
+$\xrightarrow{\text{Generator Matching}}$
+$q_\theta(a\mid G_k,t)$
+
+\vspace{5pt}
+\textbf{Inference}\qquad
+$\widetilde G_0\sim\pzero$
+$\xrightarrow[\text{no endpoint; no compiler; no beam}]{\text{ancestral learned rewrite CTMC}}$
+$\widetilde G_T\sim p_\theta$
+\end{minipage}}
+\caption{\textbf{Method overview.} The endpoint and rewrite program are latent training variables. Generator Matching learns their state-conditional marginal generator; inference repeatedly samples and executes legal marked rewrites.}
+\label{fig:overview}
+\end{figure}
+
+\section{Background and Positioning}
+
+\subsection{Generators and Generator Matching}
+
+The infinitesimal generator characterizes a Markov process through its action on test functions. A deterministic flow has $(L_tf)(x)=v_t(x)^\top\nabla f(x)$, a diffusion adds a second-order term, and a pure jump process has
+\begin{equation}
+ (L_tf)(x)=\sum_{y\neq x}Q_t(x,y)[f(y)-f(x)].
+\end{equation}
+Generator Matching is a learning principle across these process classes \citep{holderrieth2025generator}: construct tractable endpoint-conditional generators, then regress their conditional expectation given the current state. It does not prescribe a molecular representation, allowed transitions, or source-to-target coupling. \rgm contributes those objects for rewrite systems; \method contributes their chemistry-specific implementation.
+
+\subsection{Graph diffusion, flows, and flexible size}
+
+DiGress and related discrete diffusion models corrupt node and edge categories and learn a denoising process \citep{vignac2023digress,austin2021d3pm,campbell2022ctdd}; DeFoG formulates graph generation by discrete flow matching \citep{qin2025defog}. Their intermediate tensors are discrete graphs but are not restricted to connected valence-admissible molecules. GrIDDD adds monotone node insertion and deletion to graph diffusion \citep{ninniri2025griddd}. Edit Flows constructs insertion, deletion, and substitution flows for variable-length objects \citep{havasi2025editflows}. Morph uses unbalanced optimal transport to change the cardinality of 3D geometric molecular graphs \citep{franke2026morph}. DDSBM learns CTMC bridges for graph transformation using independent node/edge modifications and iterative bridge fitting \citep{kim2025ddsbm}. These are close in flexibility or mathematical machinery. \method differs in the support and semantics of its generator: one jump is an executable, guarded chemical rewrite between complete molecules, and de novo inference does not condition on a paired endpoint.
+
+Morph is the closest overlap in its use of Generator Matching, structural priors, and insertion/deletion during molecular generation. Accordingly, neither flexible cardinality, prior-to-data transport, nor Generator Matching by itself is a claimed novelty here. The distinction is that \rgm makes a legal rule match---rather than an independently parameterized node, edge, or coordinate update---the marked infinitesimal event, quotients syntactic aliases at the molecular-successor level, and samples entirely within the rewrite-defined chemical state space.
+
+\begin{table}[H]
+\centering
+\caption{Conceptual comparison. ``Path support'' describes visible generative states, not endpoint validity. ``Size edits'' means changing cardinality within one trajectory, rather than drawing a size before generation.}
+\label{tab:positioning}
+\small
+\begin{tabularx}{\textwidth}{lYYYY}
+\toprule
+Family & Learned infinitesimal object & Path support & Size edits & Typical endpoint information\\
+\midrule
+DiGress / DeFoG & node/edge transition rates & categorical graph tensors & no & none\\
+DDSBM & node/edge bridge rates & categorical graph tensors & no & target distribution / bridge\\
+GrIDDD / Edit Flows & insert, delete, and substitute rates & variable-cardinality objects & yes & none\\
+Morph & unbalanced geometric transport & flexible-size 3D graphs & yes & none or condition\\
+CoCoGraph & valid double-edge-swap process & fixed formula/degree fiber & no & formula and degree sequence\\
+Molecular grammars & derivation policy & grammar-valid partial derivations & yes & none\\
+Stochastic rewriting & rule-match propensity & rule-defined graph states & rule-dependent & none\\
+\midrule
+\method & legal rewrite-match rate & complete grammar-valid connected molecules & yes & none at inference\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Constraints, grammars, and stochastic rewriting}
+
+ConStruct projects a discrete graph diffusion process onto selected structural constraints \citep{madeira2024construct}; CoCoGraph uses connectivity-preserving double-edge swaps inside fixed composition/degree fibers \citep{ruizbotella2026cocograph}. Molecular hypergraph grammars can make validity structural and improve data efficiency \citep{kajino2019mhg,guo2022grammar}; fragment and junction-tree models generate through a learned or predefined motif vocabulary \citep{jin2018jtvae}. Stochastic graph rewriting provides the closest operational precedent: qualitative rules define matches and application conditions, while contextual propensities induce a CTMC \citep{danos2015thermodynamic,behr2021rewriting}. \method imports this rule/rate separation, but replaces fixed or thermodynamic propensities with a time-inhomogeneous neural generator learned from endpoint-conditioned programs. Its primitive operators, deletion and correction semantics, and source-independent sampling also distinguish it from a fragment assembly ontology.
+
+\section{Rewrite Generator Matching}
+
+\subsection{Molecular states, legal match fibers, and quotient rates}
+
+Let a padded heavy-atom graph be $G=(V,E,\ell,b)$, where $\ell_v$ contains element, formal charge, and implicit-hydrogen state and $b_{uv}$ is a discrete bond class. Given chemistry grammar $\Gamma$ and atom cap $N_{\max}$, define
+\begin{equation}
+\M=\{G:1\le |V|\le N_{\max},\;G\text{ is connected and valence-admissible under }\Gamma\}.
+\label{eq:state-space}
+\end{equation}
+This is a representation-level domain: it does not assert synthesizability, low strain, or 3D feasibility.
+
+A rule $r\in\Rset$ has a left pattern, a right pattern, and application conditions. A concrete mark $a=(r,m,\xi)$ consists of a match $m\in\Match_r(G)$ and a typed payload $\xi$ (for example a new atom state, bond order, or ring program). Its executor $\T_a$ is partial. The legal marked-action fiber is
+\begin{equation}
+\A(G)=\{(r,m,\xi):m\in\Match_r(G),\;\legal(G,r,m,\xi)=1\},
+\quad \T_aG\in\M\;\;\forall a\in\A(G).
+\label{eq:legal-fiber}
+\end{equation}
+A neural marked rate $q_\theta(a\mid G,t)\ge0$ defines
+\begin{equation}
+(L_{\theta,t}f)(G)=\sum_{a\in\A(G)}q_\theta(a\mid G,t)[f(\T_aG)-f(G)].
+\label{eq:marked-generator}
+\end{equation}
+The marked representation is not unique: graph automorphisms, Kekul\'e alternatives, or distinct macro lowerings can name the same successor. Let $a\sim_G a'$ iff $\T_aG$ and $\T_{a'}G$ are the same canonical chemical state. The quotient successor fiber and its rate are
+\begin{align}
+\Sset(G)&=\{H\in\M:\exists a\in\A(G),\;H\simeq\T_aG\},\\
+Q_{\theta,t}(G,H)&=\sum_{a\in\A(G):\;\T_aG\simeq H}q_\theta(a\mid G,t).
+\label{eq:quotient-rate}
+\end{align}
+Equation~\eqref{eq:quotient-rate} is essential: a model may parameterize named matches, but probability evolves on chemical states through the sum of all aliases.
+
+\subsection{Latent rewrite programs as conditional probability paths}
+
+Sample a source--target pair from a coupling $\gamma$ with marginals $\pzero$ and $\pdata$. A randomized compiler samples a certified program
+\begin{equation}
+Z=(G_0,a_1,G_1^Z,\ldots,a_K,G_K^Z),\qquad
+G_{k+1}^Z=\T_{a_{k+1}}G_k^Z\in\M,quad G_K^Z\simeq G_1.
+\label{eq:program}
+\end{equation}
+The superscript distinguishes program states from the paired endpoint. The compiler distribution is part of the training coupling; multiple programs or source draws may be sampled for one endpoint.
+
+Let $\alpha:[0,1]\to[0,1]$ be increasing with $\alpha(0)=0$ and $\alpha(1)=1$. Conditional on a length-$K$ program, define progress $K_t\sim\operatorname{Binomial}(K,\alpha(t))$ and $X_t=G_{K_t}^Z$. The pure-birth realization fires only the next instruction at latent progress $k<K$, with marked rate
+\begin{equation}
+r_t^Z(a\mid k)=
+\one\{a=a_{k+1}\}(K-k)\frac{\alpha'(t)}{1-\alpha(t)}.
+\label{eq:conditional-rate}
+\end{equation}
+For $\alpha(t)=t$, operational time $s=-\log(1-t)$ removes the terminal singularity and gives rate $K-k$. Sampling $k$ directly from its binomial marginal avoids simulating the teacher chain during training. If a program revisits the same molecular state, $k$ remains part of the latent variable; the learned rate conditions only on $X_t$ and therefore averages over those occurrences.
+
+The conditional successor rate is
+\begin{equation}
+R_t^Z(H\mid X_t,k)=\sum_{a:\T_aX_t\simeq H}r_t^Z(a\mid k),
+\end{equation}
+and the marginal generator to be learned is
+\begin{equation}
+Q_t(G,H)=\E\!\left[R_t^Z(H\mid X_t,K_t)\mid X_t=G\right].
+\label{eq:marginal-generator}
+\end{equation}
+This conditional expectation is the step inherited from general Generator Matching. The rewrite state space, program construction, legal fibers, and successor quotient are specific to \rgm.
+
+\subsection{Poisson--Bregman Generator Matching objective}
+
+For $\phi(u)=u\log u-u$, the Bregman divergence between nonnegative rates gives, up to target-only constants,
+\begin{equation}
+\mathcal L_{\mathrm{RGM}}(\theta)=
+\E_{t,Z,K_t}\left[
+\sum_{H\in\Sset(X_t)}
+Q_{\theta,t}(X_t,H)-
+R_t^Z(H\mid X_t,K_t)\log Q_{\theta,t}(X_t,H)
+\right].
+\label{eq:gm-objective}
+\end{equation}
+The first term calibrates total firing mass; the second rewards the conditional teacher successor. Unlike a classification loss over the observed action, it is proper for rates. Training can oversample rare rule-family progress positions using a mixture proposal $\widetilde p(k\mid t,Z)$ and weight by $p(k\mid t,Z)/\widetilde p(k\mid t,Z)$; this changes variance, not the population objective.
+
+\section{COMPOSE: A Molecular Rewrite Process}
+
+\subsection{Primitive and derived operator systems}
+
+\begin{table}[t]
+\centering
+\caption{Rewrite families. A derived rule is admitted only if its macro transaction and verified lowering satisfy the same executor contract.}
+\label{tab:operators}
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+Family & Semantic effect & Generative role\\
+\midrule
+Grow / shrink & attach a typed atom; delete a removable atom & variable size with no disconnected state\\
+Atom restate & jointly change element, charge, and implicit H & composition and local-valence correction\\
+Bond edit & insert/delete a non-bridge bond or change bond class & ring repair and unsaturation\\
+Subtree Graft & cut one bridge and reattach the detached component atomically & global topology revision without atom churn\\
+Ring ear & insert/delete a path between anchors, including same-anchor cycles & coordinated cyclic, fused, bridged, and spiro topology\\
+Ring restate & verified joint electronic restatement on a fixed cyclic system & aromatic and heteroatom coordination\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The micro language contains leaf insertion/deletion, atom restatement, bond insertion/deletion, and bond reordering. It is expressive but can be statistically inefficient: a full ring requires coordinated local decisions, while tree topology may be changed only after destructive atom churn. Derived rules compress recurring valid programs into one semantic mark. They do not create a fragment vocabulary: payloads factorize over topology, anchors, atom/bond states, and span, and the micro rules retain support for uncommon structures.
+
+\paragraph{Subtree Graft.}
+Choose a bridge $(u,v)$, conceptually remove it, choose endpoints in the two induced components, and add a new cross-component bond in the same atomic transaction. The old bridge cannot be exposed as a visible disconnected state. Graft preserves atom count and the full detached component, providing direct supervision for correction of random source-tree wiring.
+
+\paragraph{Coordinated rings.}
+Root-cycle and attached-cycle rules introduce a closed cyclic block; an open-ear rule inserts a path between two existing anchors; a same-anchor ear introduces a spiro petal; and a ring-system restatement coordinates common bond-order/heteroatom patterns. Open-ear decomposition supplies a compact topological substrate for monocyclic, fused, and bridged biconnected blocks, while same-anchor composition covers spiro articulation. Aromaticity is represented by executable bond/atom states, not an unconstrained post-hoc label. All ring sizes remain structurally possible subject to $N_{\max}$ and grammar guards; corpus frequencies belong in learned rates, not hard support.
+
+\subsection{A directly samplable carbon-tree prior}
+
+The principal de novo prior first samples a heavy-atom count $N\sim\mu$, then a degree-bounded tree by a capped Pr\"ufer construction, and realizes it as a neutral, single-bonded carbon graph. Thus $G_0\sim\pzero$ is connected, valence-admissible, and sampled without a target. The random tree is structured noise, not a retained scaffold; every atom may be retyped, moved by Graft, deleted, or replaced.
+
+Coupling source and target sizes can shorten teacher paths without leaking an endpoint at inference. In the size-matched experiment, $N_0=N_1$ and $N_1\sim\mu$; hence the unconditional source-size marginal is still $\mu$. Our first flexible-size compiler instead draws $N_0\sim\mu$ independently of $N_1$, which exactly matches the ancestral prior and directly supervises both grow and shrink, but can produce longer programs. A lower-variance alternative is a size-jitter kernel $J(N_0\mid N_1)$ satisfying stationarity $\sum_n\mu(n)J(m\mid n)=\mu(m)$; a reversible Metropolis kernel on atom counts is one construction. The source wiring remains independent given $N_0$. We separately evaluate a null prior, an independently sized tree, a size-matched tree, and stationary size-jitter so that topology and cardinality effects are not conflated.
+
+\subsection{Certified program compilation}
+
+For equal-sized source trees, the compiler aligns temporary slots, selects a target spanning tree that maximizes overlap with the source, and uses Graft edge exchanges to reach that scaffold. It then restates atom states and retained bond classes and installs omitted target chords through ring-ear rewrites. Size-mismatched programs first delete or insert atoms under connectivity guards. Every emitted action is executed immediately, every intermediate is validated, and the final canonical graph must equal the target.
+
+This offline planning problem is distinct from sampling. The compiler may use deterministic tie-breaking, bounded search, or a constructive fallback because it sees both endpoints. The learned sampler sees none of these. Calling inference ``ancestral'' means that each next event is sampled from the current learned hazard and then becomes part of the conditioning state; it does not mean fixed-order autoregression.
+
+\subsection{Factorized neural rates and exact support masks}
+
+Enumerating and encoding every successor separately is prohibitive. \method encodes the molecular graph once and factorizes a marked rate as
+\begin{equation}
+q_\theta(a\mid G,t)=\lambda_\theta(G,t)\,
+p_\theta(r\mid G,t)\,
+p_\theta(m,\xi\mid r,G,t),
+\label{eq:factorization}
+\end{equation}
+where both categorical factors are normalized after analytic legality masks. A message-passing encoder provides graph, node, pair, and ring-context features. The total-hazard head learns how fast events occur; family and operand heads learn which legal event fires. Only the sampled mark is instantiated and passed to the full executor. An exhaustive canonical-successor enumerator remains a small-system oracle for mask equivalence, alias aggregation, and sampling tests.
+
+\subsection{Target-free ancestral CTMC sampling}
+
+Starting at $G\sim\pzero$, the sampler evaluates $\lambda_\theta(G,t)$, draws a waiting time, samples a masked family and payload, commits the rewrite, and recomputes rates from the successor. Rates are piecewise frozen between time-grid boundaries. There is no target, path compiler, candidate bank, beam, or terminal repair. Algorithm~\ref{alg:sampling} is detailed in \cref{app:sampler}.
+
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.94\linewidth}
+\textbf{Ancestral rewrite sampling.} Sample $G\sim\pzero$ and set operational time $s=0$. While $s<S$ and the event budget is not exhausted: (i) predict total legal hazard and masked marked probabilities; (ii) draw an exponential waiting time; (iii) if it crosses a frozen-rate boundary, advance to that boundary; otherwise sample one legal marked rewrite, execute $G\leftarrow\T_aG$, and advance by the waiting time. Return the current complete molecule.
+\end{minipage}}
+\caption{Target-free inference. A returned state is meaningful at every stopping time because the process never leaves $\M$.}
+\label{alg:sampling}
+\end{figure}
+
+\section{Theoretical Properties}
+
+We separate support guarantees, which follow from the rewrite system, from distributional correctness, which additionally requires exact Generator Matching.
+
+\begin{assumption}[Finite closed rewrite system]\label{ass:finite}
+$N_{\max}$ and all type vocabularies are finite; every committed action satisfies \eqref{eq:legal-fiber}; and the total rate is locally bounded on the finite time horizon.
+\end{assumption}
+
+\begin{assumption}[Conditional path consistency]\label{ass:path}
+The program sampler has endpoint marginals $G_0\sim\pzero$ and $G_K^Z\sim\pdata$, and every sampled program satisfies \eqref{eq:program}.
+\end{assumption}
+
+\begin{proposition}[Pathwise molecular closure]\label{prop:closure}
+Under \cref{ass:finite}, if $G_0\in\M$, every state committed by the teacher or learned CTMC lies in $\M$ almost surely.
+\end{proposition}
+
+\begin{proposition}[Connected topological reachability]\label{prop:reachability}
+Ignoring chemical labels, any two finite connected simple graphs can be connected by a finite sequence of leaf insertions/deletions and non-bridge edge insertions/deletions, with every intermediate connected. For equal-order trees, subtree Grafts suffice using at most $(n-1)-|E(T_0)\cap E(T_1)|$ edge exchanges under a fixed vertex alignment.
+\end{proposition}
+
+\begin{remark}
+The first statement is topological, not a universal chemistry theorem. In \method, every proposed step must also satisfy the valence grammar. Dataset-pair reachability is therefore certified constructively by compiler replay rather than inferred from \cref{prop:reachability} alone.
+\end{remark}
+
+\begin{proposition}[Population RGM minimizer]\label{prop:gm}
+For every occupied $(G,t)$ and successor $H$, the unrestricted nonnegative-rate minimizer of \eqref{eq:gm-objective} is the marginal quotient rate $Q_t(G,H)$ in \eqref{eq:marginal-generator}.
+\end{proposition}
+
+\begin{corollary}[Endpoint law under an exact model]\label{cor:endpoint}
+Under \cref{ass:finite,ass:path}, if $Q_{\theta,t}=Q_t$ on occupied states and the learned process starts at $\pzero$, its time marginals match the program-mixture marginals; in particular its terminal law is $\pdata$.
+\end{corollary}
+
+The proofs are in \cref{app:proofs}. These claims do not imply that a finite network attains the population minimizer, that teacher programs are optimal, or that 2D validity implies synthetic accessibility.
+
+\section{Experiments}
+
+\subsection{Questions, hypotheses, and protocol}
+
+The evaluation stages sufficiency before control: we first establish that \method is a credible \emph{de novo} generator, then test the paper's empirical thesis---exact, oracle-efficient structural control---against matched filtering baselines. It is organized around falsifiable questions.
+\begin{enumerate}[leftmargin=*]
+    \item[Q1.] \textbf{De novo sufficiency:} is \method a valid, diverse, non-memorizing generator with faithful marginals and coverage---a credible base, not a distribution-learning leaderboard entry?
+    \item[Q2.] \textbf{Exact structural control:} does \method satisfy fixed-scaffold and required/forbidden-substructure constraints by construction, and how does a matched generate-then-filter baseline degrade as the constraint hardens?
+    \item[Q3.] \textbf{Oracle efficiency:} because feasibility is enforced before scoring, what fraction of oracle calls does \method spend on feasible candidates relative to filtering?
+    \item[Q4.] \textbf{Constrained optimization and anytime use:} does \method improve a property (QED) while holding a scaffold exactly, with every intermediate a usable, improving candidate?
+    \item[Q5.] \textbf{Exactness anchor:} on a tractable exhaustive-state slice, does the Doob $h$-transform of the learned generator enforce rule-closed conditioning exactly?
+    \item[Q6.] \textbf{Support and mechanism:} do all accepted intermediates remain valid and connected, and do Graft, coordinated rings, and non-monotone grow/shrink/retype behave as designed (no executor/mask discrepancy, no delete-to-one collapse)?
+\end{enumerate}
+
+\paragraph{Data and preprocessing.}
+The de novo generator is trained on GuacaMol \citep{brown2019guacamol} restricted to C/N/O/F with charged N$^+$/O$^-$; the constrained-design tasks use held-out CNOF optimization leads (QED $\in[0.7,0.8]$) from the Jin et al.\ constrained-optimization benchmark. The C/N/O/F element chemistry matches our primary flexible-size comparator GrIDDD \citep{ninniri2025griddd} (which trains on ZINC-250k), so element coverage is on equal footing even though the base corpora differ. We canonicalize with a frozen RDKit version, declare the atom/charge/bond vocabulary and $N_{\max}=40$, and hash the accepted split; validation and test molecules never construct proposal vocabularies or source-size statistics. A full GuacaMol distribution-learning table under the standard protocol is deferred to the final version and is not required for the control claims.
+
+\paragraph{Metrics.}
+\emph{De novo sufficiency} is reported by validity, uniqueness, novelty, physicochemical descriptor-distribution distances (logP, QED, molecular weight, TPSA, and ring descriptors, in the MOSES/GuacaMol convention), internal diversity, and train-support coverage; FCD is deferred to the final GuacaMol distribution-learning table and is not reported here (we do not stage an FCD arms race). \emph{Control} is reported by the exact constraint-satisfaction rate, the generate-then-filter usable fraction stratified by constraint hardness, usable-oracle efficiency (feasible-scored over all oracle calls), constrained property gain at fixed scaffold, and anytime best-so-far reward versus oracle calls. Path metrics count every committed state, zero-hazard stalls, event-budget exhaustion, per-family events, source-edge survival, and invalid attempts; because masked actions should be impossible, any all-step failure is reported as a software violation rather than averaged away.
+
+\paragraph{Baselines and fairness.}
+We compare with DiGress, DeFoG, GrIDDD, Morph, CoCoGraph, and grammar/fragment systems only where an official artifact can be evaluated under compatible chemistry and splits. Rerun and paper-reported values are labeled separately. DDSBM is evaluated as a graph-transformation neighbor, not presented as an unconditional de novo baseline. Parameter count, preprocessing, accelerator hours, sampling evaluations, and sanitization policy are reported.
+
+\subsection{Controlled molecular design (primary results)}
+\label{sec:control}
+
+All results here are frozen committed artifacts: the Lineage-B base (GuacaMol-trained, C/N/O/F) evaluated on held-out CNOF optimization leads. The generate-then-filter baseline draws proposals from the \emph{same} base model and applies each constraint as a post-hoc filter, isolating the value of enforcing constraints \emph{in the legal fiber} rather than after scoring.
+
+The constraints we study---a fixed scaffold, a required or forbidden motif---are the ones molecular design actually uses, yet they are \emph{subgraph-existence} conditions rather than global graph properties. This is precisely why they are not ``easy'': a diffusion in an ambient graph space cannot mask them mid-process, because whether a trajectory will \emph{end} containing a specified labeled substructure is undecidable from an incomplete, possibly disconnected intermediate, and prior learned constrained generators instead enforce graph-theoretic (planarity, acyclicity, degree) or formula/degree constraints. Because every committed \method state is a complete molecule, the same conditions are checkable---and therefore enforceable in the legal fiber---at every step by construction. It is the process structure, not a choice of easy constraints, that makes the design-relevant constraints exact for \method and out of reach for the dominant paradigm.
+
+No prior \emph{learned} constrained generator can represent these constraints, which is why generate-then-filter is the matched control rather than a straw man. ConStruct's projector is provably confined to edge-deletion-invariant topological properties---planarity, acyclicity, lobster structure, bounded degree---whereas a required Murcko scaffold or required SMARTS motif is edge-\emph{insertion}-invariant, the opposite class, and cannot be expressed \citep{madeira2024construct}. PRODIGY projects onto aggregate count and threshold sets (edge, triangle, and atom counts, degree, valency, molecular weight) and provides no operator for a specific labeled subgraph \citep{sharma2024prodigy}. CoCoGraph fixes the molecular formula, valence/degree sequence, and connectivity through double-edge swaps that deliberately rewire which atoms bond, so a designated scaffold is not representable \citep{ruizbotella2026cocograph}. Generate-then-filter---drawing from the same base model and rejecting violations post hoc---is thus the only baseline that can \emph{target} these labeled-subgraph constraints at all; it satisfies them only by chance, and that chance vanishes as the constraint hardens (\cref{fig:scaffold_collapse}).
+
+\paragraph{Pathwise-constrained generation, the strongest form (Q2a).}
+Every guided-generation method constrains the \emph{endpoint}: the final molecule must satisfy a predicate $P$. Pathwise generation flips the quantifier from the last state to every committed state.
+\begin{definition}[Pathwise-constrained generation]\label{def:pathwise}
+For a predicate $P$ on $\M$, a trajectory $G_0\to\cdots\to G_L$ is \emph{pathwise-$P$} if $P(G_k)$ holds for \emph{every} committed $G_k$, not only $G_L$. When $P$ is rule-closed it is enforced by construction: delete every $a\in\A(G)$ with $\lnot P(\T_aG)$ from the legal fiber, so $P$ is an invariant of the process.
+\end{definition}
+Pathwise predicates are expressible only when intermediates are molecules---the property diffusion lacks---so this is a problem class the ambient-space paradigm cannot pose. It splits into three tiers by how hard the guarantee is: \textbf{safety} (an invariant never to be violated, e.g.\ ``no reactive substructure at any step''; exact by construction), \textbf{viability} (every intermediate is itself drug-like; hard parts invariant, soft parts steered), and \textbf{monotonicity} (the property never worsens; enforceable only near-monotonically). We report the exact tier and treat the softer tiers honestly.
+
+\paragraph{Pathwise safety exposes a failure mode of endpoint constraints (\cref{fig:pathwise_safety}).}
+Enforcing a set of reactive/toxicophore alerts pathwise---no committed state may contain one---\method attains \textbf{$0\%$ violation audited across $3{,}067$ committed states} (an invariant, not steered), while still optimizing QED (mean best $0.874$) with a diverse population ($256$ distinct molecules per lead, internal diversity $0.70$). What makes this non-tautological is the endpoint-only baseline: on $240$ trajectories from the \emph{same} base, \textbf{$66.9\%$ of the trajectories whose endpoint is clean nonetheless traverse a reactive intermediate}. Endpoint constraints are therefore insufficient---unsafe intermediates are routinely traversed en route to a clean endpoint---and only pathwise enforcement, which only a validity-closed process can express, guarantees against it. The guarantee is essentially free: the QED cost of a clean path is $-0.016$ (pathwise slightly \emph{exceeds} the unconstrained $0.858$, within noise). Honest caveat: the violation \emph{magnitude} partly reflects our base's small-ring overproduction (aziridine and epoxide dominate the per-alert incidence), but the phenomenon, the guarantee, and the near-zero cost are base-robust, and the traversed alerts are not only strained rings---peroxides, Michael acceptors, and aldehydes appear as well.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/pathwise_safety.pdf}
+\caption{\textbf{Pathwise safety: constrain the path, not just the endpoint.} Per reactive-alert incidence among the committed states of the endpoint-only baseline (bars); $66.9\%$ of its \emph{clean-ending} trajectories still traverse a reactive intermediate. \method forbids the alerts in the legal fiber, so no committed state can contain one---$0\%$ violation audited across $3{,}067$ states (blue line at $0$), at a QED cost of $-0.016$.}
+\label{fig:pathwise_safety}
+\end{figure}
+
+\paragraph{Exact rule-closed constraints (Q2).}
+Fixing a Murcko scaffold, or a required/forbidden SMARTS motif, removes violating marks from $\A(G)$, so \method satisfies the constraint by construction: \ComposeScaffoldSatisfaction{} scaffold satisfaction and \ComposeSubstructureSatisfaction{} required/forbidden-substructure satisfaction across all leads. The matched generate-then-filter baseline does not degrade gracefully: its usable fraction collapses monotonically with scaffold size (\cref{tab:scaffold}; \cref{fig:scaffold_collapse}), from \ComposeBaselineScaffoldEasy{} on small scaffolds ($\le 8$ atoms) to \ComposeBaselineScaffoldHard{} on the hardest ($\ge 23$ atoms). On the $32/47$ leads whose scaffolds have $\ge 16$ atoms the baseline averages $\approx 19\%$ usable ($\approx 3.8$ of $20$ candidates) versus $20/20$ for \method.
+
+\begin{table}[t]
+\centering
+\caption{Fixed-scaffold satisfaction by scaffold size (47 CNOF optimization leads, Jin et al.). \method enforces the scaffold in the legal fiber; generate-then-filter applies it as a post-hoc filter. Entries are the fraction of scored candidates that satisfy the constraint---equivalently, the usable-oracle efficiency of that method.}
+\label{tab:scaffold}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccc}
+\toprule
+Scaffold heavy atoms & $\le 8$ & $9\text{--}15$ & $16\text{--}22$ & $\ge 23$ & overall\\
+\midrule
+Generate-then-filter & 95.7\% & 79.9\% & 29.4\% & 12.0\% & 39.8\%\\
+\method (in-fiber) & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} & \textbf{100\%}\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.74\textwidth]{figures/scaffold_collapse.pdf}
+\caption{\textbf{Exact scaffold satisfaction versus generate-then-filter collapse.} Enforcing a fixed Murcko scaffold in the legal fiber holds \method at $100\%$ satisfaction for all leads (blue), whereas drawing the same base model's proposals and filtering post hoc collapses monotonically with scaffold size (terracotta: per-lead points, with binned means annotated). The shaded region is the widening advantage of in-fiber enforcement. Data: 47 CNOF optimization leads (Jin et al.).}
+\label{fig:scaffold_collapse}
+\end{figure}
+
+\paragraph{Usable-oracle efficiency (Q3).}
+Because feasibility is checked before scoring, every oracle call \method makes lands on a feasible candidate---\ComposeOracleEfficiency{} usable-oracle efficiency by construction. Generate-then-filter must score every candidate before discarding, so its efficiency equals its constraint-satisfaction fraction: \ComposeBaselineOracleEfficiency{} overall, wasting up to \ComposeBaselineOracleWastedHard{} of the oracle budget on the hardest scaffolds. This is a structural, not tuned, sample-efficiency advantage on the axis oracle-budgeted optimization is measured.
+
+\paragraph{Constrained optimization and anytime behaviour (Q4).}
+Value-guided sequential Monte Carlo over the rewrite CTMC, with the scaffold enforced in the fiber, improves QED on \ComposeConstrainedLeadsImproved{} leads (mean \ComposeConstrainedQEDFrom{}$\to$\ComposeConstrainedQEDTo{}, \ComposeConstrainedQEDGain{}) while preserving the scaffold on every lead at \ComposeOracleEfficiency{} oracle efficiency. Because every committed state is a usable molecule, the process is anytime (\cref{fig:anytime}): most of the gain is realized early---the median lead reaches $\approx 90\%$ of its final gain within \ComposeAnytimeCalls{} oracle calls---while a minority improve through a later jump, and sampling can be stopped, inspected, or resumed at any intermediate. We deliberately do \emph{not} report an unconstrained QED success-rate race: our oracle-guided SMC is oracle-hungry and is not a matched comparison to oracle-light conditional models (\cref{sec:limits}); QED here is the objective inside a constrained task, not a leaderboard claim.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/anytime.pdf}
+\caption{\textbf{Anytime constrained optimization.} With the Murcko scaffold enforced in the fiber, best-so-far feasible QED climbs quickly and plateaus, so every intermediate is a usable, improving candidate (left: 12 per-lead traces with bold mean). Right: fraction of each lead's final gain versus oracle calls (median with interquartile band); the median lead reaches $90\%$ of its final gain within ${\sim}\ComposeAnytimeCalls{}$ oracle calls, with a minority improving via a later jump.}
+\label{fig:anytime}
+\end{figure}
+
+\paragraph{Exactness anchor (Q5).}
+On an exhaustive $118$-state size-capped slice of the production legal-event CTMC, the Doob $h$-transform of the learned generator enforces a rule-closed target-set condition exactly: the tilted one-step kernels reproduce the exact Bayes conditional endpoint to machine precision ($\ell_\infty$ error \ComposeExactnessLinf{}), the tilted generator $Q^h$ is a valid generator (off-diagonal negativity $0.0$, row-sum error $2\times10^{-13}$), and generator-level integration converges first-order to the exact conditional, across conditioning predicates. This is the one place we claim exactness: in the full state space the harmonic function is intractable, so property conditioning uses the approximate value-guided SMC above, and \cref{cor:endpoint} gives the endpoint law only under an exact model.
+
+\subsection{De novo sufficiency (confirmatory evaluation pending)}
+
+The de novo tables below are the sufficiency gate of \cref{sec:control}, not a distribution-learning leaderboard; developmental smoke values (\cref{sec:dev}) are near-$100\%$ valid/unique/novel with element-distribution TV $\approx 0.03$, but final entries remain \textbf{XXX} until a frozen multi-seed evaluation at $\ge 10{,}000$ samples is complete.
+
+\begin{table}[t]
+\centering
+\caption{De novo sufficiency on GuacaMol (C/N/O/F). This is the sufficiency gate for \cref{sec:control}, not a distribution-learning leaderboard; FCD is deferred to the final GuacaMol table and not reported here. \method validity is $100\%$ \emph{by construction} (\cref{prop:closure}); its remaining entries are from the frozen sufficiency run, and baseline cells are to be run or cited. Desc.\ $W_1$ is the mean physicochemical descriptor Wasserstein distance (logP, QED, MW, TPSA, rings).}
+\label{tab:main}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc}
+\toprule
+Method & Valid $\uparrow$ & Unique $\uparrow$ & Novel $\uparrow$ & Desc.\ $W_1\downarrow$ & Int.\ div.\ $\uparrow$ & Train cov.\ $\uparrow$\\
+\midrule
+DiGress & XXX & XXX & XXX & XXX & XXX & XXX\\
+DeFoG & XXX & XXX & XXX & XXX & XXX & XXX\\
+GrIDDD & XXX & XXX & XXX & XXX & XXX & XXX\\
+Morph & XXX & XXX & XXX & XXX & XXX & XXX\\
+\midrule
+\method & \ComposeValidity & \ComposeUniqueness & \ComposeNovelty & \ComposeDescriptorW & \ComposeDiversity & \ComposeCoverage\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Path and structural fidelity. All-step metrics audit every accepted intermediate, not only endpoints. Values are pending confirmatory evaluation.}
+\label{tab:path}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccccc}
+\toprule
+Variant & Step valid & Step conn. & Size TV & Cycle TV & Ring TV & Budget & Events\\
+\midrule
+Null prior & XXX & XXX & XXX & XXX & XXX & XXX & XXX\\
+Independent tree & XXX & XXX & XXX & XXX & XXX & XXX & XXX\\
+Size-matched Graft & XXX & XXX & XXX & XXX & XXX & XXX & XXX\\
+Flexible-size Graft & \ComposeTrajectoryValidity & \ComposeTrajectoryConnectivity & \ComposeSizeTV & \ComposeCycleRankTV & \ComposeRingSizeTV & XXX & \ComposeMeanEvents\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Ablations and process diagnostics}
+
+\begin{table}[t]
+\centering
+\caption{Matched ablations isolating which construction choices produce the observed behaviour. Path length is measured on compiled teachers; the distribution distance (mean physicochemical descriptor $W_1$) and ring-size TV are measured from target-free learned samples. All values remain XXX pending the frozen study.}
+\label{tab:ablations}
+\small
+\begin{tabular}{lccc}
+\toprule
+Variant & Desc.\ $W_1\downarrow$ & Mean teacher length $\downarrow$ & Ring-size TV $\downarrow$\\
+\midrule
+Null source & \NullPriorFCD & XXX & XXX\\
+Primitive tree (delete/regrow) & \PrimitiveTreeFCD & XXX & XXX\\
+Tree + Graft & \GraftTreeFCD & \ComposePathLength & XXX\\
+No coordinated ring macros & \NoMacroFCD & XXX & XXX\\
+No successor alias aggregation & \NoAliasFCD & XXX & XXX\\
+No importance-correct stratification & \NoStratificationFCD & XXX & XXX\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reachability alone does not establish learned capability. We therefore report event fractions for Graft (\ComposeGraftFraction), grow (\ComposeGrowFraction), shrink (\ComposeShrinkFraction), retype (\ComposeRetypeFraction), and ring events (\ComposeRingFraction), stratified by model time and source/endpoint size. We additionally measure whether source edges survive, whether paths visit the one-atom state, and whether samples have the covariance collapse that aggregate FCD can obscure.
+
+\subsection{Developmental evidence is not a benchmark result}
+\label{sec:dev}
+
+Current engineering evidence establishes executability, not final quality. In a developmental size-matched Graft run, the compiler produced 99,738 supported programs for 49,869 of 50,000 targets; a 3,000-update checkpoint reduced held-out RGM loss from 84.09 to 28.14 and reached 90.2\% teacher family accuracy. Separately, an early 1,000-sample gate produced 100\% valid/connected accepted rollouts on its restricted chemistry. These values diagnose the implementation and motivate the confirmatory experiment. They are not directly comparable to full GuacaMol baselines, are not inserted into Tables~\ref{tab:main}--\ref{tab:ablations}, and will be replaced by frozen multi-seed results.
+
+\section{Discussion and Limitations}
+\label{sec:limits}
+
+The intended contribution is a new division of labor. Rewriting defines a valid state graph and executable event semantics; Generator Matching learns how probability should flow on that graph. The payoff is where intermediate molecules are consumed: online guidance scores every state, scaffold and substructure constraints remove actions from the legal fiber, and source-conditioned editing reuses the same correction operators. \Cref{sec:control} reports these as primary results---exact rule-closed constraints, usable-oracle efficiency, an exactness anchor, and constrained optimization. What we do \emph{not} claim is a competitive \emph{unconstrained} property-optimization result: our oracle-guided SMC is oracle-hungry ($\approx 560$ calls) and is not a matched comparison to oracle-light conditional models such as GrIDDD ($\approx 20$ calls); a learned oracle-light route (classifier-free conditioning, reward fine-tuning) remains weak and is left to future work. QED optimization is therefore reported only inside constrained tasks, never as a standalone success-rate leaderboard.
+
+The current state is a 2D heavy-atom graph with implicit hydrogens. Stereochemistry, conformers, radicals, metals, and multi-center bonding require extensions. Declared valence and RDKit sanitization are not guarantees of synthesizability. A finite typed ring catalog can under-cover rare teacher programs; the factorized ring decoder must be evaluated against that failure mode. The compiler introduces inductive bias and may concentrate supervision on one of many valid paths. A carbon-tree prior is useful only if it improves learned transport rather than merely shortening teachers. Finally, hard support guarantees do not imply low FCD, likelihood optimality, rapid mixing, or chemical usefulness.
+
+\section{Conclusion}
+
+\method turns stochastic molecular graph rewriting from a hand-designed simulator or grammar into the transition substrate of a learned generative process. Endpoint-conditioned valid programs provide exact jump-rate targets; Generator Matching removes the endpoint and program; guarded execution preserves the declared chemical state space at every committed event. Subtree Grafts and coordinated ring rules make the universal operator story practical without replacing it with fragment assembly. The committed results make pathwise chemical closure a substrate for \emph{exact, oracle-efficient molecular control}: rule-closed constraints satisfied by construction where generate-then-filter collapses, all oracle calls spent on feasible candidates, an exactness anchor verified to machine precision, and property optimization under an exactly held scaffold. The remaining confirmatory tests, marked XXX, establish de novo sufficiency at frozen multi-seed scale.
+
+\bibliography{references}
+\bibliographystyle{iclr2026_conference}
+
+\appendix
+
+\section{Operator Semantics and Contracts}\label{app:operators}
+
+For each $r$, $\Match_r(G)$ is the finite set of pattern monomorphisms satisfying structural application conditions. The payload $\xi$ contains new atom/bond states or a macro program. Rule, match, and payload define a partial map $\T_{r,m,\xi}:\M\rightharpoonup\M$. The implementation follows a propose--validate--commit discipline: construct a candidate copy, update implicit hydrogens and bond states jointly, run local valence and global sanitization/connectivity checks, then commit or expose no transition.
+
+\begin{table}[h]
+\centering
+\caption{Minimum application conditions. The implementation may impose additional grammar-specific checks.}
+\small
+\begin{tabularx}{\textwidth}{lX X}
+\toprule
+Rule & Structural condition & Chemical/transaction condition\\
+\midrule
+Atom insert & empty slot; occupied anchor & allowed atom/bond; endpoint valences feasible\\
+Atom delete & removable atom; remainder connected & neighbor H compensation; sanitized successor\\
+Atom restate & occupied slot & joint element/charge/H state allowed\\
+Bond insert & absent edge; endpoints occupied & allowed order; valence feasible; nonidentity\\
+Bond delete & existing non-bridge edge & endpoint H compensation; sanitized successor\\
+Bond reorder & existing edge & joint order/H update feasible\\
+Subtree Graft & old edge is a bridge; new endpoints cross its cut & atomic cut+attach; all endpoint valences feasible\\
+Ring ear insert & valid anchors and fresh internal slots & joint typed path closes; full lowering replays\\
+Ring ear delete & matched removable ear; remainder connected & exact inverse payload; full lowering replays\\
+Ring restate & fixed matched cyclic system & coordinated atom/bond state passes executor\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Why macros remain rewrite events.}
+A macro has one chemically interpretable successor and one learned rate. Its lowering is a proof-carrying implementation artifact: each micro state must also lie in $\M$, but inference exposes the macro as one marked CTMC event. This avoids treating arbitrary edit bundles as simultaneous jumps. Unrelated micro events may conflict on valence, fail to commute, and create an exponential bundle space; only verified compound semantics are promoted.
+
+\paragraph{Ring topology coverage.}
+Every 2-connected simple graph admits an open-ear decomposition starting from a cycle. Consequently, root/attached cycles plus distinct-anchor ears span biconnected cyclic topology at the graph level. Spiro systems join blocks at an articulation and are represented by same-anchor cycles. Repeated composition covers fused, bridged, spiro, linked, and mixed polycycles. Chemical feasibility remains enforced per typed payload; the graph theorem does not certify strain or synthesis.
+
+\section{Source Priors and Couplings}\label{app:prior}
+
+\subsection{Degree-bounded carbon-tree sampler}
+
+Given size law $\mu$ on $\{1,\ldots,N_{\max}\}$:
+\begin{enumerate}[leftmargin=*]
+    \item sample $N\sim\mu$;
+    \item sample a Pr\"ufer sequence with rejection or capped construction so every degree is at most four;
+    \item decode the tree, assign neutral carbon atom states and single bonds, and derive implicit hydrogens;
+    \item assert connectivity, valence validity, and the declared slot count.
+\end{enumerate}
+The source sampler consumes only $\mu$ and an RNG seed. For a training pair, the tree draw is independent of the endpoint conditional on the selected source size.
+
+\subsection{Stationary size jitter}
+
+Let $J$ be a Markov kernel on sizes with stationary law $\mu$. Drawing $N_1\sim\mu$ then $N_0\sim J(\cdot\mid N_1)$ preserves the source marginal:
+\begin{equation}
+\Pr(N_0=m)=\sum_n\mu(n)J(m\mid n)=\mu(m).
+\end{equation}
+A local proposal $n\to n\pm1$ with a Metropolis--Hastings accept/reject correction is a simple reversible choice. The jitter scale controls teacher transport cost but must not be confused with the source law. At inference, $N_0$ is drawn directly from $\mu$ without sampling a target size.
+
+\section{Program Compilation Algorithms}\label{app:compiler}
+
+\subsection{Primitive connectivity-preserving transport}
+
+For completeness, any source can be reduced topologically to one retained atom: delete non-tree edges to expose a spanning tree, then remove leaves. Reverse the construction for a target spanning tree, add chords, and apply typed restatements. The production compiler uses direct common structure and Grafts because the one-atom route is valid but statistically wasteful.
+
+\subsection{Graft transport}
+
+Given equal-order carbon tree $T_0$ and target $G_1$:
+\begin{enumerate}[leftmargin=*]
+    \item align temporary source slots with target slots and choose a spanning tree $T_1\subseteq G_1$ maximizing $|E(T_0)\cap E(T_1)|$;
+    \item while $T\neq T_1$, select $e\in E(T_1)\setminus E(T)$; adding $e$ creates a unique cycle, from which select $f\in E(T)\setminus E(T_1)$; execute the corresponding atomic subtree Graft and validate;
+    \item restate retained atom states and tree-bond classes in a guard-feasible order;
+    \item install target chords with verified ring-ear or bond events;
+    \item canonicalize and assert exact equality with $G_1$; replay the complete program independently.
+\end{enumerate}
+The graph-level edge-exchange loop performs at most $(n-1)-|E(T_0)\cap E(T_1)|$ iterations. Chemistry guards may reject a nominal exchange, so the implementation searches alternative cycle edges and uses a constructive fallback. A compilation failure is explicit; it is never converted to a truncated target.
+
+\subsection{Ring catalog construction}\label{app:ring-catalog}
+
+The current finite proposal catalog is mined only from training programs:
+\begin{enumerate}[leftmargin=*]
+    \item decompose each target into biconnected blocks and its block--cut tree;
+    \item compile cyclic blocks into root/attached cycles, open ears, same-anchor cycles, and electronic restatements;
+    \item canonicalize marks modulo slot permutation and chemically equivalent aliases;
+    \item count marks and retain a declared training-only vocabulary or factorized fields;
+    \item audit full-program coverage independently on train, validation, and test.
+\end{enumerate}
+Frequency initializes or stratifies learning but does not define structural legality. The final factorized decoder predicts family, anchors, span, and typed atom/bond payload so that uncommon combinations need not occur as memorized fragments.
+
+\subsection{Program-cache reproducibility}
+
+Programs are stored as rewrite instructions plus byte-packed exact graph checkpoints rather than a dense graph at every progress position. A sampled state replays at most $c-1$ validated actions from the nearest checkpoint. CPU compilation writes atomic, signature-validated shards with a manifest containing split hashes, compiler version, chemistry grammar, prior/coupling configuration, ring catalog hash, seeds, and checkpoint interval. A GPU training stage refuses to start from an incomplete cache. These choices change throughput and storage, not the mathematical path distribution.
+
+\section{Proofs}\label{app:proofs}
+
+\subsection{Proof of \cref{prop:closure}}
+
+Induct on committed events. The base state is in $\M$. If $G_n\in\M$, the CTMC has support only on $a\in\A(G_n)$; by \eqref{eq:legal-fiber}, $G_{n+1}=\T_aG_n\in\M$. Local boundedness excludes explosion on the finite horizon, so only finitely many jumps occur almost surely. The conclusion applies equally to teacher programs and learned sampling because both invoke the same executor. \qed
+
+\subsection{Proof of \cref{prop:reachability}}
+
+For connected $G$, choose a spanning tree $T_G$. Delete every edge in $E(G)\setminus E(T_G)$; each is on a cycle at deletion and is therefore not a bridge, so connectivity is preserved. Repeatedly delete leaves until one vertex remains. From one vertex, reverse leaf insertions to construct a spanning tree $T_H$ of $H$, then insert edges in $E(H)\setminus E(T_H)$. Every intermediate is connected.
+
+For aligned trees $T$ and $T_1$, take $e\in E(T_1)\setminus E(T)$. Adding $e$ creates a unique cycle. That cycle contains an edge $f\in E(T)\setminus E(T_1)$; otherwise $T_1$ would contain a cycle. Replacing $f$ by $e$ is one subtree Graft, preserves the tree property, and increases overlap with $T_1$ by one. Repetition terminates after at most $(n-1)-|E(T_0)\cap E(T_1)|$ exchanges. \qed
+
+\subsection{Proof of \cref{prop:gm}}
+
+Fix occupied $(G,t,H)$ and let $Y=R_t^Z(H\mid X_t,K_t)$ conditional on $X_t=G$. The part of \eqref{eq:gm-objective} depending on scalar prediction $u\ge0$ is
+\begin{equation}
+\ell(u)=u-\E[Y\mid X_t=G]\log u,
+\end{equation}
+with target-only terms omitted. For $u>0$, $\ell'(u)=1-\E[Y\mid X_t=G]/u$ and $\ell''(u)=\E[Y\mid X_t=G]/u^2\ge0$. If the mean is positive, the unique minimizer is its value; if zero, the infimum is attained at $u=0$ by continuity. Finite sums commute with conditional expectation, so the result applies after alias aggregation. \qed
+
+\subsection{Proof of \cref{cor:endpoint}}
+
+The program mixture induces marginal law $p_t$ satisfying the Kolmogorov forward equation with $Q_t$ from \eqref{eq:marginal-generator}; this is the standard conditional-to-marginal Generator Matching identity. Under \cref{ass:finite}, the finite-state forward equation has a unique solution. If $Q_{\theta,t}=Q_t$ and both laws begin at $\pzero$, their marginals agree for all $t$. By \cref{ass:path}, the program mixture terminates at $\pdata$, hence so does the exact learned process. \qed
+
+\subsection{Importance-correct progress stratification}
+
+Let $p(k\mid t,Z)$ be the binomial progress law and $h(k\mid Z)$ a family-balanced proposal. Sample from $\widetilde p=(1-\rho)p+\rho h$ and weight by $w=p/\widetilde p$. For any integrable per-progress loss $g$, $\E_{\widetilde p}[wg]=\sum_kp(k)g(k)=\E_p[g]$. Since $\widetilde p\ge(1-\rho)p$, support is retained for $\rho<1$.
+
+\section{Model, Training, and Sampling Details}\label{app:model}
+
+\subsection{Neural architecture}
+
+The graph encoder embeds atom type, formal charge, implicit hydrogen count, bond class, model time, and ring/topology context. Message passing produces node and graph representations. A graph head predicts total hazard; a masked family head predicts the rule schema; atom, pair, and template heads predict operands and typed payloads. Hierarchical normalization prevents a family with many raw matches from receiving probability solely because of multiplicity. The reported base uses hidden width $256$, $6$ message-passing layers, \ComposeParameters{} parameters, batch size $64$, the AdamW optimizer with decoupled weight decay $10^{-5}$, learning rate $3\times10^{-4}$ with $500$ warm-up steps, the linear schedule $\alpha(t)=t$ under operational time, and $1{,}000$ training updates of a $3{,}000$-step schedule (selected by held-out RGM loss). Final frozen-model values will be reported at full training.
+
+\subsection{Training estimator}
+
+For each minibatch item:
+\begin{enumerate}[leftmargin=*]
+    \item draw or load $(G_0,G_1,Z)$ from the declared coupling and compiled cache;
+    \item sample time $t$ and progress $k$, optionally from the importance-correct stratified proposal;
+    \item reconstruct $X_t=G_k^Z$ from its nearest packed checkpoint;
+    \item encode $X_t$ once, form analytic legality masks, and evaluate \eqref{eq:gm-objective};
+    \item aggregate aliases for the teacher successor and update $\theta$.
+\end{enumerate}
+We log hazard, family/operand accuracy, illegal-mask disagreements, gradient norm, and held-out RGM loss. Model selection uses a declared validation criterion without test FCD.
+
+\subsection{Exact ancestral sampler}\label{app:sampler}
+
+Let $0=s_0<\cdots<s_J=S$ be the operational-time grid. Starting from $G\sim\pzero$, at grid interval $j$:
+\begin{enumerate}[leftmargin=*]
+    \item compute $\lambda=\lambda_\theta(G,s)$ and masked marked probabilities;
+    \item if $\lambda=0$, advance to $s_{j+1}$ and log a stall;
+    \item otherwise draw $\Delta\sim\mathrm{Exponential}(\lambda)$;
+    \item if $s+\Delta\ge s_{j+1}$, set $s=s_{j+1}$ without an event;
+    \item else sample $a$ hierarchically, execute $G\leftarrow\T_aG$, set $s\leftarrow s+\Delta$, and recompute all rates.
+\end{enumerate}
+The event budget is a numerical safeguard and its hit rate is reported. There is no rejection loop over invalid actions: analytic masks and the executor define zero support, and any disagreement is an auditable implementation error.
+
+\subsection{Complexity}
+
+Let $n\le N_{\max}$, $d$ be hidden width, $L$ message-passing layers, and $C_r(G)$ the tensorized candidate count for family $r$. One rate evaluation costs the graph encoder plus masked heads, approximately $O(L(n d^2+|E|d)+\sum_r C_r(G)d)$ for the dense implementation, rather than one graph encoding per canonical successor. Compilation is offline and program-dependent; Graft tree alignment is polynomial and each edge exchange is validated. Final measured preprocessing time, peak memory, train throughput, and sample throughput are \ComposeTrainHours, \ComposePeakMemory, \XXX, and \ComposeThroughput.
+
+\section{Complete Experimental Protocol}\label{app:experiments}
+
+\subsection{Frozen data contract}
+
+We will release raw input hashes, canonicalization code, exact accepted SMILES, split indices, $N_{\max}$, element/charge/bond vocabularies, every exclusion count, and the ring-catalog audit. Test molecules do not influence the source-size law, templates, hyperparameters, or checkpoint selection.
+
+\subsection{FCD contract}
+
+FCD is computed with one frozen ChemNet implementation and environment. Invalid or null samples are not replaced. We report generated/reference counts, total FCD, additive mean and covariance terms, generated/reference covariance traces, multi-seed mean and standard deviation, and bootstrap intervals. We use at least \XXX independent samples per final seed; any 2,000-sample diagnostic is labeled preliminary.
+
+\subsection{Ablation protocols}
+
+\paragraph{Prior/coupling.}
+Hold architecture, data, steps, and sampler fixed; compare null, independently sized carbon tree, size-matched tree, and stationary size-jitter. Report teacher length as well as learned endpoint metrics.
+
+\paragraph{Graft.}
+Compare primitive delete/regrow transport with Graft-enabled transport on identical sampled source--target pairs. Measure compilation success, path length, one-atom visits, source-edge survival, training throughput, event use, and endpoint FCD/topology.
+
+\paragraph{Rings.}
+Compare scalar bond construction, topology-only ears, typed ears, and typed ears plus ring-system restatement. Report per-class recall/TV for aromatic, saturated, fused, bridged, spiro, small rings (3--4), ordinary rings (5--7), and macrocycles under the dataset definition.
+
+\paragraph{Objective and quotient.}
+Ablate total-hazard learning, importance-correct stratification, and canonical alias aggregation. The last ablation tests whether symmetric syntactic multiplicity biases chemical successor rates.
+
+\subsection{Trajectory audits}
+
+For every sampled event we record time, rule family, operands, pre/post canonical keys, hazard, and validity/connectivity flags. Aggregates include:
+\begin{itemize}[leftmargin=*]
+    \item rule-family and inverse-pair utilization by time and size;
+    \item source-edge survival, topology edit distance, and one-atom-state visitation;
+    \item ring class before and after every cyclic event;
+    \item aliases per successor and marked-versus-quotient calibration;
+    \item event-budget exhaustion, zero-hazard stalls, and time-grid sensitivity;
+    \item agreement of analytic masks/direct sampling with exhaustive fibers on small graphs.
+\end{itemize}
+
+\subsection{Additional pending results}
+
+\begin{table}[h]
+\centering
+\caption{Ring taxonomy distribution distances; all values pending.}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Method & Aromatic & Saturated & Fused & Bridged & Spiro & Macrocycle\\
+\midrule
+DiGress & XXX & XXX & XXX & XXX & XXX & XXX\\
+Morph & XXX & XXX & XXX & XXX & XXX & XXX\\
+\method & XXX & XXX & XXX & XXX & XXX & XXX\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Compute and storage; preprocessing is included and all values are pending.}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Method & Parameters & Compile h & Train h & Peak memory & Molecules/s\\
+\midrule
+\method & \ComposeParameters & XXX & \ComposeTrainHours & \ComposePeakMemory & \ComposeThroughput\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Controlled-design and editing protocol}
+
+Controlled molecular design is the paper's primary empirical thrust (\cref{sec:control}). We initialize from held-out CNOF leads, optionally freeze a scaffold or SMARTS motif by removing incompatible actions from $\A(G)$, and evaluate constraint satisfaction, generate-then-filter usable fraction by hardness, usable-oracle efficiency, constrained property gain, scaffold retention, anytime best-so-far reward, edit count, diversity, and all-step validity. The committed scaffold-retention, property-gain, and constraint-satisfaction values are \ComposeScaffoldRetention{}, \ComposePropertyGain{}, and \ComposeScaffoldSatisfaction{}. The separate unconstrained oracle-hungry success rate (\ComposeConditionalSuccess) is reported only in this appendix with disclosed oracle budget and search-method comparators, never as a headline. Reward fine-tuning or inference guidance is reported separately from the unguided generator.
+
+\section{Failure Modes, Broader Impact, and Reproducibility}
+
+\paragraph{Failure modes.}
+We stratify failures into compiler support, proposal-mask false negatives, executor discrepancies, zero-hazard stalls, event-budget exhaustion, source-memory artifacts, invalid ring electronics, over-fusion, macrocycle excess, and endpoint distribution mismatch. Chemical examples are selected by predeclared strata rather than only visual appeal.
+
+\paragraph{Broader impact.}
+The model can generate valid but unsafe, toxic, or controlled compounds. A distribution-learning score is not evidence of therapeutic value. Downstream property guidance requires access control, dual-use review, toxicity assessment, and wet-lab governance. Corpus bias and cheminformatics blind spots remain even when formal validity is guaranteed.
+
+\paragraph{Artifact checklist.}
+The final release will contain:
+\begin{itemize}[leftmargin=*]
+    \item code version, environment lockfile, and RDKit/ChemNet versions: \XXX;
+    \item dataset, split, vocabulary, and canonicalization hashes: \XXX;
+    \item all hyperparameters, seeds, source draws, and coupling settings: \XXX;
+    \item compiled-program manifest, ring catalog, and recovery checkpoints: \XXX;
+    \item generated SMILES, per-event trajectories, and raw metric outputs: \XXX;
+    \item multi-seed summaries, confidence intervals, and failed-run disclosure: \XXX.
+\end{itemize}
+
+\section{Large Language Model Usage Statement}
+
+Large language models were used for drafting and code assistance. All mathematical claims, citations, implementation details, and empirical values require author verification. No generated reference or result is retained without checking a primary source or frozen experiment artifact.
+
+\end{document}

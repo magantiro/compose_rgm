@@ -1,0 +1,71 @@
+% Centralized placeholders for the final confirmatory evaluation.
+% Replace XXX only after the corresponding artifact is frozen and audited.
+\newcommand{\XXX}{\textbf{XXX}}
+
+% De novo sufficiency (ZINC-CNOF). Validity and all-step validity/connectivity are
+% 100% BY CONSTRUCTION (Prop. closure), not empirical estimates. Uniqueness/novelty/
+% descriptor distances/diversity/coverage are filled from the frozen sufficiency run.
+\newcommand{\ComposeValidity}{\textbf{100\%}}
+\newcommand{\ComposeTrajectoryValidity}{\textbf{100\%}}
+\newcommand{\ComposeTrajectoryConnectivity}{\textbf{100\%}}
+\newcommand{\ComposeUniqueness}{\XXX}
+\newcommand{\ComposeNovelty}{\XXX}
+\newcommand{\ComposeDescriptorW}{\XXX}
+\newcommand{\ComposeDiversity}{\XXX}
+\newcommand{\ComposeCoverage}{\XXX}
+\newcommand{\ComposeMeanEvents}{\XXX}
+\newcommand{\ComposeThroughput}{\XXX}
+% FCD / GuacaMol KL are deferred to the final GuacaMol table; NOT reported in the
+% CNOF control paper (we do not stage an FCD arms race).
+\newcommand{\ComposeFCD}{\XXX}
+\newcommand{\ComposeKL}{\XXX}
+
+% Structural distribution metrics.
+\newcommand{\ComposeSizeTV}{\XXX}
+\newcommand{\ComposeCycleRankTV}{\XXX}
+\newcommand{\ComposeRingSizeTV}{\XXX}
+\newcommand{\ComposeElementTV}{\XXX}
+\newcommand{\ComposeBondTV}{\XXX}
+
+% Operator and coupling diagnostics.
+\newcommand{\ComposeGraftFraction}{\XXX}
+\newcommand{\ComposeGrowFraction}{\XXX}
+\newcommand{\ComposeShrinkFraction}{\XXX}
+\newcommand{\ComposeRetypeFraction}{\XXX}
+\newcommand{\ComposeRingFraction}{\XXX}
+\newcommand{\ComposePathLength}{\XXX}
+\newcommand{\ComposeCatalogCoverage}{\XXX}
+
+% Ablations.
+\newcommand{\NullPriorFCD}{\XXX}
+\newcommand{\PrimitiveTreeFCD}{\XXX}
+\newcommand{\GraftTreeFCD}{\XXX}
+\newcommand{\NoMacroFCD}{\XXX}
+\newcommand{\NoAliasFCD}{\XXX}
+\newcommand{\NoStratificationFCD}{\XXX}
+
+% Conditional / structural-control evaluation.
+% COMMITTED results (Lineage B base, GuacaMol-trained; CNOF optimization leads). Frozen artifacts.
+\newcommand{\ComposeExactnessLinf}{$1.1\times10^{-16}$}          % E0 Doob h-transform endpoint error
+\newcommand{\ComposeScaffoldSatisfaction}{\textbf{100\%}}         % exact fixed-scaffold satisfaction (enforced)
+\newcommand{\ComposeSubstructureSatisfaction}{\textbf{100\%}}     % required/forbidden substructure satisfaction
+\newcommand{\ComposeScaffoldRetention}{\textbf{100\%}}
+\newcommand{\ComposeBaselineScaffoldEasy}{95.7\%}                 % gen-then-filter usable, scaffold <=8 atoms
+\newcommand{\ComposeBaselineScaffoldHard}{12.0\%}                 % gen-then-filter usable, scaffold >=23 atoms
+\newcommand{\ComposeOracleEfficiency}{\textbf{100\%}}             % oracle calls spent on feasible candidates
+\newcommand{\ComposeBaselineOracleEfficiency}{39.8\%}            % gen-then-filter oracle efficiency
+\newcommand{\ComposeBaselineOracleWastedHard}{88\%}             % wasted budget on hard scaffolds
+\newcommand{\ComposeConstrainedQEDFrom}{0.755}
+\newcommand{\ComposeConstrainedQEDTo}{0.827}
+\newcommand{\ComposeConstrainedQEDGain}{$+0.072$}
+\newcommand{\ComposeConstrainedLeadsImproved}{12/12}
+\newcommand{\ComposeAnytimeCalls}{13}                             % median lead: oracle calls to 90\% of its final gain (constrained; mean 35, skewed by late-jumpers)
+\newcommand{\ComposePropertyGain}{\ComposeConstrainedQEDGain}
+% Legacy macro for the DE-EMPHASISED unconstrained oracle-hungry success rate; kept XXX by design
+% (not a headline; appendix-only with disclosed budget).
+\newcommand{\ComposeConditionalSuccess}{\XXX}
+
+% Reproducibility.
+\newcommand{\ComposeParameters}{6.3M}
+\newcommand{\ComposeTrainHours}{\XXX}
+\newcommand{\ComposePeakMemory}{\XXX}
