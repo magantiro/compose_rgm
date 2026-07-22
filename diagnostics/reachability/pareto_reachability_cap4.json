@@ -1,0 +1,221 @@
+{
+  "phase": "pareto_reachability",
+  "cap": 4,
+  "n_slots": 8,
+  "seed_smiles": "C",
+  "slices": {
+    "logp+tpsa": {
+      "aggregate": {
+        "objectives": [
+          "logp",
+          "tpsa"
+        ],
+        "n_states": 739,
+        "n_edges": 9870,
+        "global_pareto_size": 8,
+        "n_sources": 6,
+        "n_weights": 101,
+        "mean_frac_dirs_monotone_suboptimal": 0.18646864686468648,
+        "mean_frac_dirs_barrier_positive": 0.16006600660066006,
+        "worst_source_frac_dirs_monotone_suboptimal": 0.33663366336633666,
+        "worst_source_index": 554,
+        "mean_gap_frac_of_reach_when_positive": 0.7733095612405071,
+        "max_gap_frac_of_reach_any_source": 1.0,
+        "max_barrier_any_source": 0.16946654072211353
+      },
+      "per_source": [
+        {
+          "source_smiles": "[nH]1c2[nH]c1=2",
+          "source_index": 712,
+          "n_reachable": 739,
+          "n_weights": 101,
+          "frac_dirs_monotone_suboptimal": 0.1188118811881188,
+          "frac_dirs_barrier_positive": 0.0,
+          "gap_mean_when_positive": 0.09068051843165466,
+          "gap_frac_of_reach_mean_when_positive": 0.26157639199225685,
+          "barrier_mean_when_positive": 0.0,
+          "gap_max": 0.17825091357413658,
+          "gap_frac_of_reach_max": 0.4989546198421558,
+          "barrier_max": 0.0
+        },
+        {
+          "source_smiles": "NN(N)N",
+          "source_index": 554,
+          "n_reachable": 739,
+          "n_weights": 101,
+          "frac_dirs_monotone_suboptimal": 0.33663366336633666,
+          "frac_dirs_barrier_positive": 0.297029702970297,
+          "gap_mean_when_positive": 0.12697938734316164,
+          "gap_frac_of_reach_mean_when_positive": 0.9162202421814042,
+          "barrier_mean_when_positive": 0.09021147867611784,
+          "gap_max": 0.21420920943575006,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.16946654072211353
+        },
+        {
+          "source_smiles": "CCCC",
+          "source_index": 270,
+          "n_reachable": 739,
+          "n_weights": 101,
+          "frac_dirs_monotone_suboptimal": 0.33663366336633666,
+          "frac_dirs_barrier_positive": 0.33663366336633666,
+          "gap_mean_when_positive": 0.19057042930347864,
+          "gap_frac_of_reach_mean_when_positive": 1.0,
+          "barrier_mean_when_positive": 0.04301559580660391,
+          "gap_max": 0.3725133252775319,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.09424013658998442
+        },
+        {
+          "source_smiles": "N=NN=N",
+          "source_index": 484,
+          "n_reachable": 739,
+          "n_weights": 101,
+          "frac_dirs_monotone_suboptimal": 0.32673267326732675,
+          "frac_dirs_barrier_positive": 0.32673267326732675,
+          "gap_mean_when_positive": 0.07981239874456586,
+          "gap_frac_of_reach_mean_when_positive": 0.9154416107883675,
+          "barrier_mean_when_positive": 0.10885362254489499,
+          "gap_max": 0.21190931027548765,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.16872757367026725
+        },
+        {
+          "source_smiles": "N1NON1",
+          "source_index": 435,
+          "n_reachable": 739,
+          "n_weights": 101,
+          "frac_dirs_monotone_suboptimal": 0.0,
+          "frac_dirs_barrier_positive": 0.0,
+          "gap_mean_when_positive": 0.0,
+          "gap_frac_of_reach_mean_when_positive": 0.0,
+          "barrier_mean_when_positive": 0.0,
+          "gap_max": 0.0,
+          "gap_frac_of_reach_max": 0.0,
+          "barrier_max": 0.0
+        },
+        {
+          "source_smiles": "C#CC#C",
+          "source_index": 4,
+          "n_reachable": 739,
+          "n_weights": 101,
+          "frac_dirs_monotone_suboptimal": 0.0,
+          "frac_dirs_barrier_positive": 0.0,
+          "gap_mean_when_positive": 0.0,
+          "gap_frac_of_reach_mean_when_positive": 0.0,
+          "barrier_mean_when_positive": 0.0,
+          "gap_max": 0.0,
+          "gap_frac_of_reach_max": 0.0,
+          "barrier_max": 0.0
+        }
+      ]
+    },
+    "logp+tpsa+qed": {
+      "aggregate": {
+        "objectives": [
+          "logp",
+          "tpsa",
+          "qed"
+        ],
+        "n_states": 739,
+        "n_edges": 9870,
+        "global_pareto_size": 31,
+        "n_sources": 6,
+        "n_weights": 120,
+        "mean_frac_dirs_monotone_suboptimal": 0.2736111111111111,
+        "mean_frac_dirs_barrier_positive": 0.19305555555555554,
+        "worst_source_frac_dirs_monotone_suboptimal": 0.5333333333333333,
+        "worst_source_index": 484,
+        "mean_gap_frac_of_reach_when_positive": 0.5606310090188416,
+        "max_gap_frac_of_reach_any_source": 1.0,
+        "max_barrier_any_source": 0.16333708483374787
+      },
+      "per_source": [
+        {
+          "source_smiles": "C=CON",
+          "source_index": 186,
+          "n_reachable": 739,
+          "n_weights": 120,
+          "frac_dirs_monotone_suboptimal": 0.06666666666666667,
+          "frac_dirs_barrier_positive": 0.0,
+          "gap_mean_when_positive": 0.05215822630414017,
+          "gap_frac_of_reach_mean_when_positive": 0.1703551659195747,
+          "barrier_mean_when_positive": 0.0,
+          "gap_max": 0.11334096583331732,
+          "gap_frac_of_reach_max": 0.3419995587283439,
+          "barrier_max": 0.0
+        },
+        {
+          "source_smiles": "NN(N)N",
+          "source_index": 554,
+          "n_reachable": 739,
+          "n_weights": 120,
+          "frac_dirs_monotone_suboptimal": 0.175,
+          "frac_dirs_barrier_positive": 0.10833333333333334,
+          "gap_mean_when_positive": 0.07492727309223446,
+          "gap_frac_of_reach_mean_when_positive": 0.6404274351266815,
+          "barrier_mean_when_positive": 0.07644181458151718,
+          "gap_max": 0.20244694174053846,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.16333708483374787
+        },
+        {
+          "source_smiles": "CCCC",
+          "source_index": 270,
+          "n_reachable": 739,
+          "n_weights": 120,
+          "frac_dirs_monotone_suboptimal": 0.4083333333333333,
+          "frac_dirs_barrier_positive": 0.30833333333333335,
+          "gap_mean_when_positive": 0.06156397945089264,
+          "gap_frac_of_reach_mean_when_positive": 0.6192444082552395,
+          "barrier_mean_when_positive": 0.048503529769511375,
+          "gap_max": 0.3394327987367949,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.11973121637824014
+        },
+        {
+          "source_smiles": "C#CNN",
+          "source_index": 20,
+          "n_reachable": 739,
+          "n_weights": 120,
+          "frac_dirs_monotone_suboptimal": 0.0,
+          "frac_dirs_barrier_positive": 0.0,
+          "gap_mean_when_positive": 0.0,
+          "gap_frac_of_reach_mean_when_positive": 0.0,
+          "barrier_mean_when_positive": 0.0,
+          "gap_max": 0.0,
+          "gap_frac_of_reach_max": 0.0,
+          "barrier_max": 0.0
+        },
+        {
+          "source_smiles": "N=NN=N",
+          "source_index": 484,
+          "n_reachable": 739,
+          "n_weights": 120,
+          "frac_dirs_monotone_suboptimal": 0.5333333333333333,
+          "frac_dirs_barrier_positive": 0.4083333333333333,
+          "gap_mean_when_positive": 0.10161685339200104,
+          "gap_frac_of_reach_mean_when_positive": 0.8538609208171666,
+          "barrier_mean_when_positive": 0.0788268814171918,
+          "gap_max": 0.23530285395832695,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.14377160463494887
+        },
+        {
+          "source_smiles": "NC(N)=O",
+          "source_index": 504,
+          "n_reachable": 739,
+          "n_weights": 120,
+          "frac_dirs_monotone_suboptimal": 0.4583333333333333,
+          "frac_dirs_barrier_positive": 0.3333333333333333,
+          "gap_mean_when_positive": 0.06769646296325753,
+          "gap_frac_of_reach_mean_when_positive": 0.5192671149755458,
+          "barrier_mean_when_positive": 0.05770002226274008,
+          "gap_max": 0.18513646110363036,
+          "gap_frac_of_reach_max": 1.0,
+          "barrier_max": 0.09670810221758064
+        }
+      ]
+    }
+  }
+}
