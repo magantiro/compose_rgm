@@ -2839,6 +2839,57 @@ def enumerate_structured_ring_system_deletes(
     return tuple(sorted(actions, key=_delete_sort_key))
 
 
+def enumerate_clean_ring_system_deletes(
+    state: MolecularGraph,
+    catalog: TypedRingCatalog,
+) -> tuple[RingSystemDelete, ...]:
+    """Like ``enumerate_structured_ring_system_deletes`` but DECORATION-PRESERVING (see
+    ``_instantiate_clean_delete``): open a ring back to its acyclic scaffold while KEEPING each atom's
+    element, so heteroatoms survive. This is the editing delete -- its inverse (``inverse_ring_system_
+    delete``) re-cyclizes exactly, so a corruption can teach ring add/remove on real leads round-trip."""
+    host = _state_graph(state, include_atom_labels=False)
+    cyclic_components = _cyclic_components(host)
+    if not cyclic_components:
+        return ()
+    perceived = resonance_invariant_bond_classes(state)
+    actions: set[RingSystemDelete] = set()
+    index = _structured_delete_index_by_identity(catalog.ring_system_templates)
+    for members in cyclic_components:
+        component = nx.Graph()
+        component.add_nodes_from(sorted(members))
+        component.add_edges_from(
+            (int(a), int(b), {"color": int(perceived[int(a), int(b)])})
+            for offset, a in enumerate(sorted(members))
+            for b in sorted(members)[offset + 1 :]
+            if int(perceived[int(a), int(b)]) != 0
+        )
+        key = (
+            component.number_of_nodes(),
+            nx.weisfeiler_lehman_graph_hash(component, edge_attr="color"),
+        )
+        selected: RingSystemDelete | None = None
+        for template, pattern in index.get(key, ()):
+            matcher = nx.algorithms.isomorphism.GraphMatcher(
+                component,
+                pattern,
+                edge_match=lambda left, right: left["color"] == right["color"],
+            )
+            for host_to_pattern in matcher.isomorphisms_iter():
+                mapping = {
+                    int(pattern_slot): int(host_slot)
+                    for host_slot, pattern_slot in host_to_pattern.items()
+                }
+                action = _instantiate_clean_delete(template, mapping, state, perceived)
+                if action is not None:
+                    selected = action
+                    break
+            if selected is not None:
+                break
+        if selected is not None:
+            actions.add(selected)
+    return tuple(sorted(actions, key=_delete_sort_key))
+
+
 def _state_graph(
     state: MolecularGraph,
     *,
@@ -3016,6 +3067,64 @@ def _instantiate_structured_delete(
         atom_deletions=(),
         atom_payloads=atom_payloads,
         bond_reorders=bond_reorders,
+        source_aromatic_edges=(),
+        aromatic_edges=aromatic_edges,
+        topology_class=template.topology_class,
+    )
+
+
+def _instantiate_clean_delete(
+    template: RingSystemTemplate,
+    mapping: dict[int, int],
+    state: MolecularGraph,
+    perceived: np.ndarray,
+) -> RingSystemDelete | None:
+    """Decoration-PRESERVING ring delete: open the ring's closing bonds and KEEP each atom's element
+    (unlike ``_instantiate_structured_delete``, which retypes every member to carbon). Each atom loses
+    only the opened bonds, so its H is re-derived from its OWN valence -- making this the exact inverse of
+    the grow that builds the ring, so ``inverse_ring_system_delete`` round-trips it. States are Kekule, so
+    this generalizes across saturated/aromatic rings of any size and fused/spiro/bridged systems."""
+    members = tuple(sorted(mapping.values()))
+    inserted_edges = tuple(
+        (min(mapping[a], mapping[b]), max(mapping[a], mapping[b]))
+        for a, b, _ in template.inserted_bonds
+    )
+    post_delete_bonds = state.bonds.copy()
+    for a, b in inserted_edges:
+        post_delete_bonds[a, b] = post_delete_bonds[b, a] = 0
+    payloads: list[AtomPayload] = []
+    for slot in members:
+        atom_type = int(state.atom_types[slot])
+        post_delete_valence = sum(
+            int(BOND_CLASS_TO_H_CHANGE[int(order)]) for order in post_delete_bonds[slot]
+        )
+        hydrogens = int(CNOF_VALENCE[atom_type]) - post_delete_valence
+        if not 0 <= hydrogens <= MAX_H_COUNT:
+            return None
+        payloads.append(
+            AtomPayload(
+                slot=slot,
+                atom_type=atom_type,
+                formal_charge=int(state.formal_charges[slot]),
+                implicit_h_count=hydrogens,
+            )
+        )
+    bond_deletions = tuple(
+        sorted(RingBond(a, b, int(state.bonds[a, b])) for a, b in inserted_edges)
+    )
+    aromatic_edges = tuple(
+        (a, b)
+        for offset, a in enumerate(members)
+        for b in members[offset + 1 :]
+        if int(perceived[a, b]) == BOND_AROMATIC
+    )
+    return RingSystemDelete(
+        system_atoms=members,
+        retained_system_atoms=(),
+        bond_deletions=bond_deletions,
+        atom_deletions=(),
+        atom_payloads=tuple(payloads),
+        bond_reorders=(),
         source_aromatic_edges=(),
         aromatic_edges=aromatic_edges,
         topology_class=template.topology_class,
