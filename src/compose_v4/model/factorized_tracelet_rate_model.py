@@ -50,6 +50,7 @@ from compose_v4.rewrite.ring_system_fiber import (
     build_semantic_ring_system_decoder,
     enumerate_executable_ring_grow_candidates,
     enumerate_ring_system_template_placements,
+    enumerate_clean_ring_system_deletes,
     enumerate_structured_ring_system_deletes,
     instantiate_semantic_ring_system_grow,
     matching_ring_system_template_indices,
@@ -824,13 +825,14 @@ def prepare_factorized_mark_batch(
     use_aromatic_bond_view: bool = True,
     ring_catalog: TypedRingCatalog | None = None,
     chemistry_feature_cache: MutableMapping[
-        tuple[int, bool, bool, StateCacheKey], ChemistryStateFeatures
+        tuple[int, bool, bool, bool, StateCacheKey], ChemistryStateFeatures
     ]
     | None = None,
     chemistry_feature_cache_limit: int = 2048,
     compute_ring_grow_support: bool = True,
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
+    compute_ring_opening: bool = False,
     property_condition_values: tuple[tuple[float, ...], ...] | None = None,
     property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
 ) -> FactorizedMarkBatch:
@@ -903,6 +905,7 @@ def prepare_factorized_mark_batch(
             0 if ring_catalog is None else id(ring_catalog),
             bool(use_aromatic_bond_view),
             bool(compute_cyclic_graft),
+            bool(compute_ring_opening),
             molecular_state_cache_key(state),
         )
         features = (
@@ -940,6 +943,8 @@ def prepare_factorized_mark_batch(
                 ring_delete_actions=(
                     None
                     if ring_catalog is None
+                    else enumerate_clean_ring_system_deletes(state, ring_catalog)
+                    if compute_ring_opening
                     else enumerate_structured_ring_system_deletes(state, ring_catalog)
                 ),
             )
@@ -1615,6 +1620,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_ring_restates: bool = False,
         enable_cyclic_graft: bool = False,
         enable_heteroatom_scan: bool = False,
+        enable_ring_opening: bool = False,
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
@@ -1630,6 +1636,9 @@ class FactorizedTraceletRateModel(nn.Module):
         self.enable_cyclic_graft = bool(enable_cyclic_graft)
         # ungate atom_restate on ring atoms -> heteroatom scanning (pyridine<->benzene); off for de-novo B
         self.enable_heteroatom_scan = bool(enable_heteroatom_scan)
+        # swap the carbon-izing structured ring_system_delete for the decoration-preserving clean delete
+        # (ring OPENING that keeps heteroatoms; its inverse re-cyclizes); off for de-novo B, on for B-edit
+        self.enable_ring_opening = bool(enable_ring_opening)
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)
@@ -2395,9 +2404,10 @@ class FactorizedTraceletRateModel(nn.Module):
         key = self._state_cache_key(state)
         cached = self._ring_delete_candidate_cache.get(key)
         if cached is None:
-            cached = enumerate_structured_ring_system_deletes(
-                state,
-                self.ring_catalog,
+            cached = (
+                enumerate_clean_ring_system_deletes(state, self.ring_catalog)
+                if self.enable_ring_opening
+                else enumerate_structured_ring_system_deletes(state, self.ring_catalog)
             )
             self._ring_delete_candidate_cache[key] = cached
             if len(self._ring_delete_candidate_cache) > self._ring_candidate_cache_limit:
@@ -3057,6 +3067,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 ring_catalog=self.ring_catalog,
                 compute_ring_restates=self.enable_ring_restates,
                 compute_cyclic_graft=self.enable_cyclic_graft,
+                compute_ring_opening=self.enable_ring_opening,
             )
             self._sampling_state_cache[cache_key] = cached_batch
             if len(self._sampling_state_cache) > self._sampling_state_cache_limit:

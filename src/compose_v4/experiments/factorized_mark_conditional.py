@@ -322,6 +322,7 @@ class FactorizedMarkCollator:
     chemistry_feature_cache_limit: int = 2048
     compute_ring_restates: bool = False
     compute_cyclic_graft: bool = False
+    compute_ring_opening: bool = False
     _chemistry_feature_cache: OrderedDict[
         tuple[int, bool, bool, tuple[bytes, bytes, bytes, bytes]],
         ChemistryStateFeatures,
@@ -365,6 +366,7 @@ class FactorizedMarkCollator:
             compute_ring_grow_support=not has_precomputed_ring_support,
             compute_ring_restates=self.compute_ring_restates,
             compute_cyclic_graft=self.compute_cyclic_graft,
+            compute_ring_opening=self.compute_ring_opening,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
                 if has_conditions
@@ -438,6 +440,7 @@ def factorized_mark_loader(
     ring_family_mass_mode: str = "boolean",
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
+    compute_ring_opening: bool = False,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
         raise ValueError("start step lies outside the training horizon")
@@ -480,6 +483,7 @@ def factorized_mark_loader(
             ring_catalog,
             compute_ring_restates=compute_ring_restates,
             compute_cyclic_graft=compute_cyclic_graft,
+            compute_ring_opening=compute_ring_opening,
         ),
         pin_memory=pin_memory,
         drop_last=True,
@@ -1093,6 +1097,7 @@ def train_factorized_mark_model(
         ring_family_mass_mode=model.ring_family_mass_mode,
         compute_ring_restates=model.enable_ring_restates,
         compute_cyclic_graft=model.enable_cyclic_graft,
+        compute_ring_opening=model.enable_ring_opening,
     )
     timing_loop_started = perf_counter()
     iterator: Iterator[FactorizedMarkBatch] = iter(loader)
