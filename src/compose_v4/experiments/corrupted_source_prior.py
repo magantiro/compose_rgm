@@ -32,6 +32,7 @@ def build_corrupted_prior_records(
     depth_max: int = 5,
     spec: ActionFiberSpec | None = None,
     system=None,
+    catalog=None,
     seed: int = 0,
     couplings_per_target: int = 1,
     checkpoint_interval: int | None = None,
@@ -60,7 +61,9 @@ def build_corrupted_prior_records(
         for _ in range(couplings_per_target):
             attempted += 1
             depth = int(rng.integers(1, depth_max + 1))  # varied, short "noise level"
-            trim, grow = make_edit_pair(target, depth, spec=spec, system=system, rng=rng)
+            trim, grow = make_edit_pair(
+                target, depth, spec=spec, system=system, rng=rng, catalog=catalog
+            )
             traces = (trim, grow) if both_directions else (grow,)
             for trace in traces:
                 if trace is None:

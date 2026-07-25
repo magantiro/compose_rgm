@@ -2037,6 +2037,7 @@ def main() -> None:
             n_slots=args.max_atoms,
             depth_max=5,
             seed=args.seed + 7,
+            catalog=ring_catalog,  # enables the clean ring-opening corruption family (de-cyclize)
         )
         # Keep an equal-sized de-novo subset so uniform sampling sees a real ~50/50 edit ratio; the model
         # already knows de-novo via the warm-start, so a subset suffices for retention. (Sizing this to
@@ -2567,6 +2568,7 @@ def main() -> None:
             enable_ring_restates=args.corrupted_prior_mix,
             enable_cyclic_graft=args.corrupted_prior_mix,
             enable_heteroatom_scan=args.corrupted_prior_mix,
+            enable_ring_opening=args.corrupted_prior_mix,
         ).to(device)
     elif args.model == "from_scratch":
         model = TraceletRateModel(

@@ -19,12 +19,20 @@ Vocabulary implemented here (ring-count-preserving; both directions exact, no fi
     "walk a substituent to a new position" edit); the ring core is fixed. B gates graft to carbon trees,
     so the model enumerates the cyclic subset via compute_cyclic_graft (pendant_graft_candidates, shared
     so the teacher graft always lands in the mask it is scored against).
+  - ring_system_delete (clean) -- decoration-PRESERVING ring OPENING (de-cyclize): remove a ring's
+    closing bonds keeping every atom's element (enumerate_clean_ring_system_deletes), so heteroatoms
+    survive -- the editing upgrade of B's carbon-izing structured delete. Taught TRIM-ONLY (de-cyclize a
+    real lead's ring), across saturated/aromatic rings of any size and fused/spiro/bridged systems; needs
+    the ring catalog (threaded in), a no-op without it.
 
-Ring-ADDING stays retained from B's de-novo ring_system_grow (not corrupted here).
+Ring-CLOSING (re-cyclize) stays retained from B's de-novo ring_system_grow. The clean delete's exact
+inverse IS a ring_system_grow (inverse_ring_system_delete, scaffold-fixed) but on a HETEROATOM scaffold,
+which B's carbon-scaffold grow vocabulary cannot score -- so that direction is not emitted. B-edit thus
+reaches B's whole ring vocabulary (grow retained + clean delete + restate), delete upgraded to keep
+decoration.
 
-EXCLUDED: the carbon-izing structured ring_system_delete -- it is topology-only (retypes every ring
-atom->C), so it destroys the ring's decoration and its inverse ring_system_grow cannot round-trip. Clean
-whole-ring removal (rare) would need the exact inverse-of-grow relationship and is deferred.
+EXCLUDED: the carbon-izing structured ring_system_delete (enumerate_structured_ring_system_deletes) --
+it retypes every ring atom->C, destroying decoration; the clean delete replaces it for the edit regime.
 
 make_edit_pair returns BOTH directions exactly: TRIM (source = the real molecule; recorded forward
 edits) and GROW (source = the corrupted molecule; per-step inverse_step), each replaying through valid
@@ -46,6 +54,7 @@ from compose_v4.rewrite.factorized_fiber import (_factorized_candidates,
                                                  enumerate_pendant_graft_actions)
 from compose_v4.rewrite.fiber import ActionFiberSpec
 from compose_v4.rewrite.kernel import RewriteSystem, canonical_state_key
+from compose_v4.rewrite.ring_system_fiber import enumerate_clean_ring_system_deletes
 from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace, inverse_step
 
@@ -59,11 +68,15 @@ _MICRO_WEIGHTS = {
 }
 _RESTATE_WEIGHT = 2.0      # ring_system_restate: aromatize<->de-aromatize -> inverse ring_system_restate
 _GRAFT_WEIGHT = 2.0        # bond_reroute: relocate a pendant tree             -> inverse bond_reroute
+_RING_DELETE_WEIGHT = 2.0  # ring_system_delete (clean): open a ring keeping decoration -> inverse re-grows
 _FAMILY_WEIGHTS = {
     **_MICRO_WEIGHTS,
     "ring_system_restate": _RESTATE_WEIGHT,
     "bond_reroute": _GRAFT_WEIGHT,
+    "ring_system_delete": _RING_DELETE_WEIGHT,
 }
+# Families allowed to CHANGE the ring count (ring-topology edits); every other family preserves it.
+_RING_TOPOLOGY_FAMILIES = ("ring_system_delete",)
 FORBIDDEN_FAMILIES = ("bond_insert", "bond_delete")  # not trainable mark families -- never emit
 
 
@@ -93,6 +106,7 @@ def corrupt_to_source(
     system: RewriteSystem,
     rng,
     restate_prob: float = 1.0,
+    catalog=None,
 ):
     """Walk ``target`` a few legal micro edits to a nearby valid ``source`` over B's real-molecule
     vocabulary. Returns ``(steps, states)`` (``states[i]`` is the pre-step state of ``steps[i]``). Every
@@ -126,6 +140,10 @@ def corrupt_to_source(
         graft_actions = enumerate_pendant_graft_actions(node)  # relocate a pendant tree (bond_reroute)
         if graft_actions:
             by_family["bond_reroute"] = list(graft_actions)
+        if catalog is not None:  # clean ring OPENING: de-cyclize keeping decoration (inverse re-grows)
+            ring_deletes = enumerate_clean_ring_system_deletes(node, catalog)
+            if ring_deletes:
+                by_family["ring_system_delete"] = list(ring_deletes)
         if not by_family:
             break
         # Draw a family by its weight, then try that family's instances until one is a valid,
@@ -150,7 +168,10 @@ def corrupt_to_source(
                 sm = Chem.MolFromSmiles(ssmi or "")
                 if sm is None or "." in (ssmi or "") or canonical_state_key(succ) == cur_key:
                     continue
-                if Descriptors.RingCount(sm) != base_rings:  # edits are ring-count-preserving
+                if (  # micro/bioisostere/graft preserve ring count; ring_system_delete may drop one
+                    rule_name not in _RING_TOPOLOGY_FAMILIES
+                    and Descriptors.RingCount(sm) != base_rings
+                ):
                     continue
                 node = succ
                 steps.append((rule_name, action))
@@ -172,6 +193,7 @@ def make_edit_pair(
     system: RewriteSystem,
     rng,
     restate_prob: float = 1.0,
+    catalog=None,
 ) -> tuple[RewriteTrace | None, RewriteTrace | None]:
     """Return ``(trim_trace, grow_trace)`` (either may be ``None``), built exactly and without search.
     TRIM: source = the real target, steps = the recorded forward edits. GROW: source = the corrupted
@@ -179,7 +201,7 @@ def make_edit_pair(
     target -- so the model learns to add atoms, substitute (bioisostere), change bond order, and flip
     ring aromaticity (aromatize<->de-aromatize)."""
     steps, states = corrupt_to_source(
-        target, depth, spec=spec, system=system, rng=rng, restate_prob=restate_prob
+        target, depth, spec=spec, system=system, rng=rng, restate_prob=restate_prob, catalog=catalog
     )
     if len(states) < 2:
         return None, None
@@ -190,6 +212,12 @@ def make_edit_pair(
         metadata={"prior": "corrupted_source_trim", "n_steps": len(steps)},
     )
     grow: RewriteTrace | None = None
+    if any(rule_name == "ring_system_delete" for rule_name, _ in steps):
+        # Ring OPENING is taught TRIM-ONLY (de-cyclize from the real lead). Its exact inverse is a
+        # ring_system_grow on a HETEROATOM scaffold (the opened ring keeps its N/O), which B's
+        # carbon-scaffold grow vocabulary cannot score (-> inf teacher-rate). Ring-CLOSING stays
+        # retained from B's de-novo grow, so B-edit reaches parity with B's ring vocabulary.
+        return trim, None
     try:
         grow_steps = tuple(
             inverse_step(states[i], RewriteStep(rule_name, action))
