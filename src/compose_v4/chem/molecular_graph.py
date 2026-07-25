@@ -266,6 +266,20 @@ def atom_valence_class_index(
     return ORGANIC_VOCABULARY.class_index(atom_type_idx, bond_order_sum, implicit_h_count, formal_charge)
 
 
+def canonical_h_count(atom_type_idx: int, bond_order_sum: int) -> int | None:
+    """Implicit-H for an atom at its natural (smallest-fitting) valence: the smallest allowed valence
+    >= bond_order_sum, minus bond_order_sum. Generalizes ``CNOF_VALENCE[type] - bond_sum`` to the
+    hypervalent elements (S/P/I pick the smallest valence that accommodates their heavy bonds; a ring
+    thioether S is v2, a sulfone S is v6). None if no allowed valence fits (over-bonded) or H is out of
+    range. Single-valence elements reproduce the old CNOF derivation exactly."""
+    for valence in ALLOWED_VALENCES[IDX_TO_ELEMENT[int(atom_type_idx)]]:  # ascending
+        if valence >= bond_order_sum:
+            hydrogens = int(valence) - int(bond_order_sum)
+            if 0 <= hydrogens <= MAX_H_COUNT:
+                return hydrogens
+    return None
+
+
 # Soft cap on bond count per atom — used as a sanity check during data prep.
 MAX_BONDS: dict[str, int] = {
     "null": 0,

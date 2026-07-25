@@ -16,6 +16,7 @@ from compose_v4.chem.molecular_graph import (
     ELEMENT_TO_IDX,
     MAX_H_COUNT,
     MolecularGraph,
+    canonical_h_count,
     is_element,
     per_atom_valence_check,
 )
@@ -3098,8 +3099,8 @@ def _instantiate_clean_delete(
         post_delete_valence = sum(
             int(BOND_CLASS_TO_H_CHANGE[int(order)]) for order in post_delete_bonds[slot]
         )
-        hydrogens = int(CNOF_VALENCE[atom_type]) - post_delete_valence
-        if not 0 <= hydrogens <= MAX_H_COUNT:
+        hydrogens = canonical_h_count(atom_type, post_delete_valence)
+        if hydrogens is None:
             return None
         payloads.append(
             AtomPayload(
