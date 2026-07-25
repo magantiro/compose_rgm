@@ -1152,6 +1152,13 @@ def main() -> None:
         help="append corrupted-molecule source-prior (B-edit) records to train_records and enable the "
         "ring_system_restate + cyclic bond_reroute editing marks (fine-tune B -> B-edit)",
     )
+    parser.add_argument(
+        "--corrupted-prior-count",
+        type=int,
+        default=6000,
+        help="number of leads to corrupt for the B-edit mix; bounds the fine-tune data-gen cost and, "
+        "with a matched de-novo subset, gives a ~50/50 edit ratio under uniform sampling",
+    )
     args = parser.parse_args()
 
     checkpoint_modes = sum(
@@ -2024,14 +2031,18 @@ def main() -> None:
         # path cache, so B's carbon-tree cache stays reusable under --train-only. Sized ~50/50 against
         # the de-novo records; the support-cache signature carries a corrupted_prior_mix discriminator
         # so the mixed tuple recompiles its support instead of silently reusing the carbon-only cache.
-        edit_smiles = tuple(split.train)[: max(1, len(train_records) // 2)]
+        edit_smiles = tuple(split.train)[: max(1, args.corrupted_prior_count)]
         edit_records, edit_attempted = build_corrupted_prior_records(
             edit_smiles,
             n_slots=args.max_atoms,
             depth_max=5,
             seed=args.seed + 7,
         )
-        train_records = tuple(train_records) + tuple(edit_records)
+        # Keep an equal-sized de-novo subset so uniform sampling sees a real ~50/50 edit ratio; the model
+        # already knows de-novo via the warm-start, so a subset suffices for retention. (Sizing this to
+        # the full corpus would run the CPU corruption for tens of hours on the training GPU.)
+        denovo_keep = min(len(train_records), len(edit_records))
+        train_records = tuple(train_records)[:denovo_keep] + tuple(edit_records)
         print(
             json.dumps(
                 {
