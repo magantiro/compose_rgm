@@ -48,8 +48,8 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
-from compose_v4.chem.molecular_graph import (MolecularGraph, is_element,
-                                             molecular_graph_to_smiles)
+from compose_v4.chem.molecular_graph import (CNOF_VOCABULARY, MolecularGraph,
+                                             is_element, molecular_graph_to_smiles)
 from compose_v4.rewrite.factorized_fiber import (_factorized_candidates,
                                                  enumerate_pendant_graft_actions)
 from compose_v4.rewrite.fiber import ActionFiberSpec
@@ -107,6 +107,7 @@ def corrupt_to_source(
     rng,
     restate_prob: float = 1.0,
     catalog=None,
+    vocabulary=CNOF_VOCABULARY,
 ):
     """Walk ``target`` a few legal micro edits to a nearby valid ``source`` over B's real-molecule
     vocabulary. Returns ``(steps, states)`` (``states[i]`` is the pre-step state of ``steps[i]``). Every
@@ -127,7 +128,9 @@ def corrupt_to_source(
         # atom_restate reaches RING atoms too (heteroatom scanning; the model ungates it via
         # enable_heteroatom_scan). bond_reorder stays OFF ring bonds -- a single ring-bond reorder is
         # outside B's dense mask (ring bond orders are ring_system_restate's coordinated job).
-        for rule_name, action in _factorized_candidates(node, allow_bond_reroute=False):
+        for rule_name, action in _factorized_candidates(
+            node, allow_bond_reroute=False, vocabulary=vocabulary
+        ):
             if rule_name not in _MICRO_WEIGHTS:
                 continue
             if rule_name == "bond_reorder" and frozenset((int(action.a), int(action.b))) in cycle_edges:
@@ -194,6 +197,7 @@ def make_edit_pair(
     rng,
     restate_prob: float = 1.0,
     catalog=None,
+    vocabulary=CNOF_VOCABULARY,
 ) -> tuple[RewriteTrace | None, RewriteTrace | None]:
     """Return ``(trim_trace, grow_trace)`` (either may be ``None``), built exactly and without search.
     TRIM: source = the real target, steps = the recorded forward edits. GROW: source = the corrupted
@@ -201,7 +205,8 @@ def make_edit_pair(
     target -- so the model learns to add atoms, substitute (bioisostere), change bond order, and flip
     ring aromaticity (aromatize<->de-aromatize)."""
     steps, states = corrupt_to_source(
-        target, depth, spec=spec, system=system, rng=rng, restate_prob=restate_prob, catalog=catalog
+        target, depth, spec=spec, system=system, rng=rng, restate_prob=restate_prob,
+        catalog=catalog, vocabulary=vocabulary,
     )
     if len(states) < 2:
         return None, None

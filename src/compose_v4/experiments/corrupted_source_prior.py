@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from compose_v4.chem.molecular_graph import (MolecularGraphError,
+from compose_v4.chem.molecular_graph import (CNOF_VOCABULARY, MolecularGraphError,
                                              smiles_to_molecular_graph)
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.cnof_conditional import PathRecord
@@ -33,6 +33,7 @@ def build_corrupted_prior_records(
     spec: ActionFiberSpec | None = None,
     system=None,
     catalog=None,
+    vocabulary=CNOF_VOCABULARY,
     seed: int = 0,
     couplings_per_target: int = 1,
     checkpoint_interval: int | None = None,
@@ -62,7 +63,8 @@ def build_corrupted_prior_records(
             attempted += 1
             depth = int(rng.integers(1, depth_max + 1))  # varied, short "noise level"
             trim, grow = make_edit_pair(
-                target, depth, spec=spec, system=system, rng=rng, catalog=catalog
+                target, depth, spec=spec, system=system, rng=rng, catalog=catalog,
+                vocabulary=vocabulary,
             )
             traces = (trim, grow) if both_directions else (grow,)
             for trace in traces:
