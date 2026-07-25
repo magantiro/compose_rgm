@@ -45,3 +45,119 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   *recovery* of the barrier-gated frontier is undecided by the toy (needs the learned model on real
   leads). Lesson: a scalar-U movement gap ≠ Pareto-frontier coverage — state which metric, and test
   evaluation-fairness before claiming a controller "can't reach" something.
+
+## 2026-07-24
+- **B's REAL editing vocabulary on a real (cyclic, unsaturated) molecule — traced, not assumed.** For
+  the corrupted-source-prior editing model (B-edit), what B can actually apply to a complete drug-like
+  molecule is narrower than the 10 mark families suggest:
+  - **Graft (`bond_reroute`) is gated to `all_single_tree`** — `factorized_tracelet_rate_model.py:1073`
+    (`real and nx.is_tree(graph) and all bonds single`). The `graft_mask` starts all-zeros and is only
+    populated inside `if all_single_tree:`. So B graft fires only in the carbon-skeleton PHASE (early,
+    pre-ring/pre-double-bond); it CANNOT propose graft on a real lead. (Not "carbon-tree at t=0 only" —
+    any tree-like state, but a real molecule is never one.)
+  - **Aromaticity is ONE-WAY.** B can aromatize (saturated→aromatic): `ring_system_grow` places
+    aromatic rings via `aromatic_edges`; the only aromatic restate enumerator filters to
+    `perceived_aromatic_ring_count(successor) > before` (`tracelet_fiber.py` `_validated_aromatic_restates`).
+    B CANNOT de-aromatize: `ring_system_restate` is dead at inference (candidates hardcoded to `()` in
+    `prepare_factorized_mark_batch` ~`factorized_tracelet_rate_model.py:960`) AND `is_valid_bond_reorder`
+    hard-rejects aromatic bonds (`operators.py:168`: `old_order==BOND_AROMATIC → False`). Aromaticity is
+    ring-level (delocalized), so single-bond `bond_reorder` correctly can't touch it — coordinated
+    `ring_system_restate` is the only mechanism, and only its aromatizing direction was wired (a de-novo
+    choice: build toward drug-like).
+  - **Ring building IS fully parametric** (so the user's memory was right): `RingSystemGrow` carries
+    `atom_payloads` (per-atom identity), `scaffold_bonds`+`system_atoms` (ring size/topology, incl.
+    fused/spiro via the template structure — `topology_class` itself is only a coarse "cyclic" label),
+    `aromatic_edges` (aromatic vs saturated).
+  - **The structured ring delete is decoration-LOSSY — wrong tool.** `enumerate_structured_ring_system_deletes`
+    → `_instantiate_structured_delete` (`ring_system_fiber.py`) opens the cycle bonds and **retypes every
+    ring atom to carbon** (`atom_type=carbon`, `atom_deletions=()`, `retained_system_atoms=()`). Topology-
+    only; destroys heteroatoms/aromaticity, so its inverse `ring_system_grow` can't cleanly round-trip
+    (empirically: `ring_system_delete` fires in trim, `ring_system_grow` never survives the grow-replay).
+    DROPPED from the corrupted prior. Clean whole-ring editing needs the exact inverse relationship
+    (`inverse_ring_system_grow` ↔ delete), which preserves decoration; whole-ring *removal* is rare and
+    lower-priority than de-aromatization + graft.
+- **Design call (locked with user): full B-edit editing vocabulary in ONE retrain (v2), not v1-clean-then-enrich.**
+  Vocabulary = micro (peripheral `atom_insert/delete`, bioisostere `atom_restate` incl. ring atoms,
+  non-aromatic `bond_reorder`) [done, data-only] + **de-aromatization** (wire `ring_system_restate` at
+  inference + a de-aromatizing enumerator) + **graft-for-editing** (ungate graft to cyclic bridge-pendant
+  subtrees) + retained `ring_system_grow` (ring-adding); drop the carbon-izing ring-delete. The two
+  additions are MODEL-INTERNAL changes. **Gating constraint:** they must be enumeration/mask/quotient
+  changes that REUSE B's existing heads (`bond_reroute`, `ring_system_restate` heads already exist),
+  preserving parameter shapes so the warm-start (`--initialize-from-source-checkpoint`, strict) still
+  loads B — verify architecture-preserving before writing model code.
+- **De-aromatization BUILT (native, architecture-preserving, verified).** Key fact: executable states
+  are **Kekule** (integer bond orders; "aromatic" = RDKit perception on the round-tripped SMILES, never
+  a stored class-4 bond — `chem/molecular_graph.py:509` kekulizes on load), so aromatic->saturated is a
+  validity-checked double->single lowering that adds implicit H. Implementation: (1) new
+  `enumerate_ring_system_restate_actions` (tracelet_fiber.py) returns restates that CHANGE perceived
+  aromaticity — BOTH directions; the de-aromatizing all-single successor was already produced by
+  `_ring_system_restate_candidates` (:386-387), only discarded by the `>` filter in
+  `_validated_aromatic_restates` (:559). Refactored to `_validated_restates(..., keep)`; aromatize keeps
+  `after>before`, the new enumerator keeps `after!=before`. (2) collator `prepare_factorized_mark_batch`
+  gained `compute_ring_restates: bool = False` (default off preserves B perf + behavior); on -> enumerate
+  restates, reviving the ring_system_restate head that was dead (`restate_actions.append(())`). Verified:
+  flag off -> [], on -> toluene/cyclohexane populate. (3) corruption samples restates (`_RESTATE_WEIGHT`,
+  `restate_prob=1.0`). inverse_step handles ring_system_restate -> both directions replay (28/28). Reuses
+  B's existing `ring_restate_head`/`restate_order_embedding` -> strict warm-start safe. Config plumbing
+  (`self.enable_ring_restates` -> the `:2984` sampling call + the training collator) is deferred to the
+  recipe-wiring phase; the CAPABILITY is complete.
+- **Corruption selection must be family-first** (draw a mark family by weight, THEN try its instances),
+  not a weighted permutation over all instances: the latter over-picks whichever family is most reliably
+  valid (bond_reorder ballooned to 40%, restate to 52%). Family-first tracks the weights — realized mix
+  ~ peripheral + bioisostere dominant, bond-order + aromaticity-flip smaller. All edits are
+  ring-count-preserving (ring topology add is left to B's retained ring_system_grow).
+- **Graft-for-editing BUILT (cyclic pendant relocation, architecture-preserving, verified).** B gates its
+  dense graft mask to `all_single_tree` -- its colored-tree canonicalizer peels leaves and asserts a tree,
+  so it CRASHES on a cycle -- hence B cannot graft a real molecule. The editing model adds a
+  `compute_cyclic_graft` branch (default OFF -> B byte-identical; also keyed into the feature cache) that
+  enumerates the well-defined subset: relocate a PENDANT tree fragment across a SINGLE-bond bridge (ring
+  core fixed, no ring travels). Facts nailed from the code, not assumed: the model graft is a RESTRICTED
+  reroute -- `BondReroute(a=moved, b=removed_neighbor, u=moved, v=target)` so u must be a cut endpoint
+  (teacher `_teacher_action_score` rejects `u not in {a,b}`; sampler rebuilds the identical form); default
+  `new_order=BOND_SINGLE` matches the 2D (moved,target) mask (no bond-order axis). The successor quotient
+  uses the GENERAL canonical key (`canonical_state_key` of the relocated state), never the tree
+  canonicalizer. Shared enumerator `pendant_graft_candidates` / `enumerate_pendant_graft_actions`
+  (`rewrite/factorized_fiber.py`) is used by BOTH the model mask and the corruption -> a teacher graft
+  always lands in the mask it is scored against (DRY = the correctness guarantee). Reuses B's `graft_head`
+  (`3*hidden->hidden->1`, shape depends only on hidden_dim) -> strict warm-start safe. Verified: propyl-
+  benzene 11 grafts (off->0), benzene 0, benzene|pyridine-linker 0 (ring fragment = deferred v3), 11/11
+  execute through the real executor AND match the quotient successor, group ids partition grafts exactly
+  by molecule (`tests/test_cyclic_graft.py`, 4 tests). Corruption both directions replay 73/73
+  (inverse_step handles bond_reroute). Realized v2 edit mix: bioisostere 26 / bond-order 20 / graft 17 /
+  peripheral 26 / aromaticity-flip 9 %. **Full suite 440 passed.** Still TODO (recipe phase): a model-config
+  flag driving `compute_ring_restates` + `compute_cyclic_graft` at the `:2984` sampling call and the
+  training collator, so both light up for B-edit but stay off for de-novo B.
+- **A corrupted-prior/edit teacher mark must come from the fiber the model's DENSE MASK represents,
+  restricted to the sites that mask supports -- executor validity is a strict SUPERSET of dense-mask
+  legality.** The corrupted-prior training loss was `+inf` until two corruption<->mask inconsistencies
+  were fixed (found only because the corruption had never been *training*-smoked -- the dataset histogram
+  + replay checks pass regardless). (1) It enumerated micro edits with `fiber._candidate_actions` (the
+  GENERAL fiber: every atom x every `spec.atom_state`, executor-valid but a superset of B's mask). B is
+  trained on the FACTORIZED fiber -> use `factorized_fiber._factorized_candidates(node,
+  allow_bond_reroute=False)`, whose `atom_restate` uses the canonical derived h-count
+  (`CNOF_VALENCE[type] - row_sum`) the dense head scores. (2) B's `atom_restate`/`bond_reorder` masks are
+  **PERIPHERAL-ONLY** -- they exclude RING atoms and RING (cycle) bonds, because tree-transport teachers
+  never restate/reorder a ring site (ring-atom identity is `ring_system_grow`'s job, ring bond orders are
+  `ring_system_restate`'s), so the derived mask has no support there. A ring-site micro teacher mark is
+  outside the mask -> grouped logsumexp `-inf` -> rate 0 -> bregman loss `+inf` (NOT an exception; it
+  survives forward+backward as inf/nan). Fix: restrict the corruption's `atom_restate` to non-ring atoms
+  and `bond_reorder` to non-cycle-edge bonds (`_ring_atoms_and_cycle_edges` in source_corruption.py).
+  **CORRECTS the earlier "atom_restate covers ring-atom bioisostere" claim -- it does NOT**; pyridine<->
+  benzene ring-atom swaps are OUTSIDE B's micro vocabulary (only aromaticity flips via ring_system_restate
+  touch a ring). After both fixes all 6 marks score FINITE, the mixed batch backprops, 440 tests pass.
+  **LESSON: always training-smoke a new teacher source (forward_mark_batch + bregman_loss FINITE) before a
+  Modal launch** -- histogram/replay checks do not exercise the dense-mask scoring path.
+- **B-edit recipe WIRED + training verified.** `--corrupted-prior-mix` in train_tracelet_cnof_gate.py
+  constructs the factorized model with `enable_ring_restates` + `enable_cyclic_graft`, appends
+  corrupted-prior records to `train_records` IN MEMORY right after the empty-partition check (never
+  persisted, so B's carbon path cache stays reusable under `--train-only`), and adds a
+  `corrupted_prior_mix` discriminator to `_training_support_cache_signature` so the mixed tuple recompiles
+  its support. The collator flags thread via the MODEL (`train_factorized_mark_model` reads `model.enable_*`
+  -> `factorized_mark_loader` -> `FactorizedMarkCollator`), so the gate only sets them once at model
+  construction. Warm-start is SAFE: `--initialize-from-source-checkpoint` does `load_state_dict` (weights)
+  into the flag-constructed model, so `enable_*` is preserved. Verified: `train_factorized_mark_model`
+  runs on mixed de-novo+edit records with FINITE loss + backprop, collator picks up True/True. REMAINING
+  before Modal: modal-app passthrough (add `corrupted_prior_mix` to `modal_apps/train_tracelet_gm.py`
+  `main` -> `recipe["arguments"]`, check `build_tracelet_recipe_argv` bool handling), and the inference
+  LOAD side (read the `corrupted_prior_mix` checkpoint-metadata flag when reconstructing B-edit for the
+  editing experiments so `enable_*` turns on at sampling) -- both are Modal-launch / Phase-3 prep.
