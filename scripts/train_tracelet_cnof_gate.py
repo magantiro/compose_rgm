@@ -24,6 +24,7 @@ from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_metrics
+from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
 from compose_v4.experiments.tracelet_conditional import (
     build_tracelet_path_records,
     build_tree_transport_path_records,
@@ -239,6 +240,7 @@ def _training_support_cache_signature(
     operational_horizon: float,
     progress_stratification_fraction: float,
     ring_electronic_mode: str,
+    corrupted_prior_mix: bool = False,
 ) -> dict[str, object]:
     """Identify the infinite deterministic row stream independent of its horizon."""
 
@@ -253,6 +255,9 @@ def _training_support_cache_signature(
         "ring_electronic_mode": _ring_support_semantics_mode(
             ring_electronic_mode
         ),
+        # The mixed (de-novo + corrupted-prior) records are a different deterministic row stream than
+        # B's carbon-only cache; this discriminator forces a recompile instead of a silent misalignment.
+        "corrupted_prior_mix": bool(corrupted_prior_mix),
     }
 
 
@@ -1141,6 +1146,12 @@ def main() -> None:
         type=Path,
         help="reuse a persisted rollout cache instead of sampling",
     )
+    parser.add_argument(
+        "--corrupted-prior-mix",
+        action="store_true",
+        help="append corrupted-molecule source-prior (B-edit) records to train_records and enable the "
+        "ring_system_restate + cyclic bond_reroute editing marks (fine-tune B -> B-edit)",
+    )
     args = parser.parse_args()
 
     checkpoint_modes = sum(
@@ -2008,6 +2019,31 @@ def main() -> None:
             f"{empty_partitions}; enlarge the training/catalog split or increase "
             "the typed-template limits"
         )
+    if args.corrupted_prior_mix:
+        # Append corrupted-molecule source-prior (B-edit) records IN MEMORY -- never persisted to the
+        # path cache, so B's carbon-tree cache stays reusable under --train-only. Sized ~50/50 against
+        # the de-novo records; the support-cache signature carries a corrupted_prior_mix discriminator
+        # so the mixed tuple recompiles its support instead of silently reusing the carbon-only cache.
+        edit_smiles = tuple(split.train)[: max(1, len(train_records) // 2)]
+        edit_records, edit_attempted = build_corrupted_prior_records(
+            edit_smiles,
+            n_slots=args.max_atoms,
+            depth_max=5,
+            seed=args.seed + 7,
+        )
+        train_records = tuple(train_records) + tuple(edit_records)
+        print(
+            json.dumps(
+                {
+                    "phase": "corrupted_prior_mix",
+                    "edit_records": len(edit_records),
+                    "edit_attempted": edit_attempted,
+                    "train_total": len(train_records),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     training_support_cache = None
     if args.training_support_cache_dir is not None:
         training_support_signature = _training_support_cache_signature(
@@ -2017,6 +2053,7 @@ def main() -> None:
             operational_horizon=args.operational_horizon,
             progress_stratification_fraction=args.progress_stratification_fraction,
             ring_electronic_mode=args.ring_electronic_mode,
+            corrupted_prior_mix=args.corrupted_prior_mix,
         )
         training_support_cache = ShardedTrainingSupportCache(
             args.training_support_cache_dir,
@@ -2516,6 +2553,8 @@ def main() -> None:
             empirical_mark_priors=empirical_mark_priors,
             ring_family_mass_mode=args.ring_family_mass_mode,
             ring_template_factorization=args.ring_template_factorization,
+            enable_ring_restates=args.corrupted_prior_mix,
+            enable_cyclic_graft=args.corrupted_prior_mix,
         ).to(device)
     elif args.model == "from_scratch":
         model = TraceletRateModel(
@@ -2542,6 +2581,7 @@ def main() -> None:
     checkpoint_metadata = {
         "model": args.model,
         "training_backend": args.training_backend,
+        "corrupted_prior_mix": bool(args.corrupted_prior_mix),
         "use_bf16": args.use_bf16,
         "data_workers": args.data_workers,
         "data_prefetch_factor": args.data_prefetch_factor,
