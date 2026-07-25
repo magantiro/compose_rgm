@@ -77,6 +77,9 @@ from compose_v4.rewrite.tracelets import (
     RingSystemRestate,
     is_valid_ring_system_grow,
 )
+from compose_v4.rewrite.factorized_fiber import pendant_graft_candidates
+from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
+from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
 from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
     attach_template,
@@ -821,11 +824,13 @@ def prepare_factorized_mark_batch(
     use_aromatic_bond_view: bool = True,
     ring_catalog: TypedRingCatalog | None = None,
     chemistry_feature_cache: MutableMapping[
-        tuple[int, bool, StateCacheKey], ChemistryStateFeatures
+        tuple[int, bool, bool, StateCacheKey], ChemistryStateFeatures
     ]
     | None = None,
     chemistry_feature_cache_limit: int = 2048,
     compute_ring_grow_support: bool = True,
+    compute_ring_restates: bool = False,
+    compute_cyclic_graft: bool = False,
     property_condition_values: tuple[tuple[float, ...], ...] | None = None,
     property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
 ) -> FactorizedMarkBatch:
@@ -891,10 +896,13 @@ def prepare_factorized_mark_batch(
         if ring_catalog is None or not compute_ring_grow_support
         else structured_ring_system_template_aliases(ring_catalog)
     )
+    # Built once (not per state) so the restate validator does not rebuild the executor each call.
+    restate_system = de_novo_rewrite_system() if compute_ring_restates else None
     for state in states:
         feature_key = (
             0 if ring_catalog is None else id(ring_catalog),
             bool(use_aromatic_bond_view),
+            bool(compute_cyclic_graft),
             molecular_state_cache_key(state),
         )
         features = (
@@ -911,7 +919,9 @@ def prepare_factorized_mark_batch(
                 graft_mask,
                 graft_remove_neighbor,
                 graft_successor_group,
-            ) = _graph_application_masks(state, atom_topo)
+            ) = _graph_application_masks(
+                state, atom_topo, compute_cyclic_graft=compute_cyclic_graft
+            )
             features = ChemistryStateFeatures(
                 atom_topology=atom_topo,
                 closure_topology=closure_topo,
@@ -952,12 +962,15 @@ def prepare_factorized_mark_batch(
         graft_remove_neighbors.append(features.graft_remove_neighbors)
         graft_successor_groups.append(features.graft_successor_groups)
         neural_bonds.append(features.neural_bonds)
-        # Atomic RingSystemGrow already commits the complete typed electronic
-        # state in the production carbon-tree teachers.  Those paths contain
-        # no independent RingSystemRestate marks, so enumerating an exhaustive
-        # restatement fiber here would consume roughly half of collator time
-        # for a family that is always masked out by the current objective.
-        restate_actions.append(())
+        # ring_system_restate is dead by default: carbon-tree teachers carry no restate marks, and
+        # enumerating restates ~doubles collator time. The corrupted-prior editing model turns it on
+        # via compute_ring_restates, so aromatize<->de-aromatize become proposable at inference and
+        # scoreable as restate teacher marks (both directions; see enumerate_ring_system_restate_actions).
+        restate_actions.append(
+            enumerate_ring_system_restate_actions(state, system=restate_system)
+            if compute_ring_restates
+            else ()
+        )
         if ring_catalog is not None and ring_system_templates is not None:
             ring_grow_support_masks.append(
                 np.asarray(
@@ -1015,11 +1028,32 @@ def prepare_factorized_mark_batch(
     )
 
 
+def _relocated_pendant_state(
+    state: MolecularGraph,
+    moved: int,
+    removed_neighbor: int,
+    target: int,
+    single_h_delta: int,
+) -> MolecularGraph:
+    """Successor of relocating the pendant fragment rooted at ``moved`` across a single bond: cut the
+    ``(moved, removed_neighbor)`` bridge and add ``(moved, target)``. ``moved``'s freed and consumed H
+    cancel at order 1; ``removed_neighbor`` regains the freed H and ``target`` spends one for the new
+    bond -- matching the executor's ``BondReroute`` bookkeeping exactly."""
+    bonds = state.bonds.copy()
+    bonds[moved, removed_neighbor] = bonds[removed_neighbor, moved] = 0
+    bonds[moved, target] = bonds[target, moved] = 1
+    hydrogens = state.implicit_h_counts.copy()
+    hydrogens[removed_neighbor] += single_h_delta
+    hydrogens[target] -= single_h_delta
+    return MolecularGraph(state.atom_types, state.formal_charges, hydrogens, bonds)
+
+
 def _graph_application_masks(
     state: MolecularGraph,
     atom_topology: np.ndarray,
     *,
     optimize_graft_canonicalization: bool = True,
+    compute_cyclic_graft: bool = False,
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -1201,6 +1235,29 @@ def _graph_application_masks(
                 graft_mask[moved, target] = True
                 graft_remove_neighbor[moved, target] = removed_neighbor
                 graft_successor_group[moved, target] = group
+    elif compute_cyclic_graft:
+        # B's tree graft is undefined on a cyclic (or non-single-bond) molecule: its colored-tree
+        # canonicalizer peels leaves and asserts a tree. Editing still wants graft, so enumerate the
+        # well-defined subset -- relocate a PENDANT tree fragment across a SINGLE-bond bridge while the
+        # ring core stays fixed. ``moved`` is the bridge endpoint on the acyclic side, so
+        # BondReroute(a=moved, b=removed_neighbor, u=moved, v=target) matches the sampler and teacher
+        # exactly; the successor quotient uses the general canonical key (the tree one crashes on cycles).
+        cyclic_successor_groups: dict[Any, int] = {}
+        single_h_delta = int(BOND_CLASS_TO_H_CHANGE[1])
+        source_key = canonical_state_key(state)
+        for moved, removed_neighbor, target in pendant_graft_candidates(state):
+            successor = _relocated_pendant_state(
+                state, moved, removed_neighbor, target, single_h_delta
+            )
+            successor_key = canonical_state_key(successor)
+            if successor_key == source_key:
+                continue  # a graft to a symmetric position is gauge, not a jump
+            group = cyclic_successor_groups.setdefault(
+                successor_key, len(cyclic_successor_groups)
+            )
+            graft_mask[moved, target] = True
+            graft_remove_neighbor[moved, target] = removed_neighbor
+            graft_successor_group[moved, target] = group
     return (
         delete_mask,
         cycle_edge_mask,
@@ -1555,6 +1612,8 @@ class FactorizedTraceletRateModel(nn.Module):
         empirical_mark_priors: FactorizedMarkEmpiricalPriors | None = None,
         ring_family_mass_mode: str = "boolean",
         ring_template_factorization: str = "flat",
+        enable_ring_restates: bool = False,
+        enable_cyclic_graft: bool = False,
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
@@ -1564,6 +1623,10 @@ class FactorizedTraceletRateModel(nn.Module):
         if property_condition_dim < 0:
             raise ValueError("property condition dimension must be non-negative")
         self.ring_catalog = ring_catalog
+        # Editing capabilities B lacks: aromatize<->de-aromatize restates and cyclic pendant graft.
+        # Off for de-novo B (byte-identical); the corrupted-prior fine-tune (B-edit) turns them on.
+        self.enable_ring_restates = bool(enable_ring_restates)
+        self.enable_cyclic_graft = bool(enable_cyclic_graft)
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)
@@ -2989,6 +3052,8 @@ class FactorizedTraceletRateModel(nn.Module):
                 (0.0,),
                 use_aromatic_bond_view=True,
                 ring_catalog=self.ring_catalog,
+                compute_ring_restates=self.enable_ring_restates,
+                compute_cyclic_graft=self.enable_cyclic_graft,
             )
             self._sampling_state_cache[cache_key] = cached_batch
             if len(self._sampling_state_cache) > self._sampling_state_cache_limit:
