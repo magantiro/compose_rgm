@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 from pathlib import Path
 
 import numpy as np
@@ -38,6 +37,7 @@ from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.canonical_successor_distillation import (
     PancakeQuotientCalibration,
 )
+from compose_v4.model.time_convention import frozen_time
 from compose_v4.rewrite.kernel import de_novo_rewrite_system
 
 RDLogger.DisableLog("rdApp.*")
@@ -160,7 +160,7 @@ def value_guided_smc(
             for _ in range(lookahead_depth):
                 if len(qed_cache) - 1 >= budget:
                     break
-                mark = sampler.sample_rewrite_mark(node, node_time, rng)
+                mark = sampler.sample_rewrite_mark(node, frozen_time(node_time), rng)
                 if mark.action is None:
                     break
                 try:
@@ -217,7 +217,7 @@ def value_guided_smc(
             for _ in range(feasible_attempts):
                 if len(qed_cache) - 1 >= budget:
                     break
-                mark = sampler.sample_rewrite_mark(current, times[i], rng)
+                mark = sampler.sample_rewrite_mark(current, frozen_time(times[i]), rng)
                 if mark.action is None:  # TERMINAL: productive hazard ~ 0
                     terminal[i] = True
                     break

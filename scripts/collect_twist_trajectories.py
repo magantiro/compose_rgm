@@ -22,6 +22,7 @@ from rdkit import DataStructs
 
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+from compose_v4.model.time_convention import frozen_time
 from compose_v4.rewrite.kernel import de_novo_rewrite_system
 
 
@@ -58,7 +59,7 @@ def rollout_trajectory(
     for _ in range(max_events):
         if time >= horizon:
             break
-        mark = sampler.sample_rewrite_mark(state, time, rng)
+        mark = sampler.sample_rewrite_mark(state, frozen_time(time), rng)
         if mark.action is None:
             break
         try:

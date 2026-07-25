@@ -29,6 +29,7 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.model.time_convention import frozen_time
 from compose_v4.rewrite.kernel import de_novo_rewrite_system
 
 RDLogger.DisableLog("rdApp.*")
@@ -101,7 +102,7 @@ def best_first_constrained(
         for _ in range(proposals_per_expansion):
             if calls >= budget:
                 break
-            mark = sampler.sample_rewrite_mark(node, node_time, rng)
+            mark = sampler.sample_rewrite_mark(node, frozen_time(node_time), rng)
             if mark.action is None:
                 continue
             try:

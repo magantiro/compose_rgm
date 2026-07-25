@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from compose_v4.chem.molecular_graph import molecular_graph_to_smiles, smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.model.time_convention import frozen_time
 from compose_v4.rewrite.kernel import de_novo_rewrite_system
 from griddd_value_guided_smc_controller import _load_base_sampler
 
@@ -67,7 +68,7 @@ def rollout_states(sampler, rewrite, start, rng, max_events=48, time_step=0.1, h
     for _ in range(max_events):
         if t >= horizon:
             break
-        mark = sampler.sample_rewrite_mark(node, t, rng)
+        mark = sampler.sample_rewrite_mark(node, frozen_time(t), rng)
         if mark.action is None:
             break
         try:
