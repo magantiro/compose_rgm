@@ -30,6 +30,7 @@ from compose_v4.chem.molecular_graph import (
     BOND_AROMATIC,
     BOND_CLASSES,
     BOND_CLASS_TO_H_CHANGE,
+    CNOF_RING_ELEMENTS,
     CNOF_VOCABULARY,
     H_COUNT_CLASSES,
     K,
@@ -1624,6 +1625,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_heteroatom_scan: bool = False,
         enable_ring_opening: bool = False,
         atom_vocabulary: AtomVocabulary | None = None,
+        ring_atom_elements: tuple[int, ...] | None = None,
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
@@ -1647,6 +1649,14 @@ class FactorizedTraceletRateModel(nn.Module):
         # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
         # classes) covers the drug-like subset with every valence-state its own class (sink-free restate).
         self.atom_vocabulary = atom_vocabulary if atom_vocabulary is not None else CNOF_VOCABULARY
+        # Ring-atom element vocabulary (element x role); CNOF by default (byte-identical), +S/P for the
+        # organic model so ring_system_grow can build heteroaromatic rings (thiophene, thiazole, phosphole).
+        self.ring_atom_elements = (
+            tuple(int(e) for e in ring_atom_elements)
+            if ring_atom_elements is not None
+            else CNOF_RING_ELEMENTS
+        )
+        self._ring_element_to_index = {int(e): i for i, e in enumerate(self.ring_atom_elements)}
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)
@@ -1817,10 +1827,8 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             atom_restate_log_prior = torch.zeros(len(self.atom_vocabulary))
             bond_reorder_log_prior = torch.zeros(3)
-            # ring path uses (element x role), its own element vocabulary -- CNOF for now (leads' hetero-
-            # aromatic rings are read+preserved via the input embedding; de-novo heteroaromatic generation
-            # is a scoped follow-up), so it stays sized on CNOF_ATOM_TYPES, not the micro valence-classes.
-            ring_electronic_log_prior = torch.zeros(2 * len(CNOF_ATOM_TYPES))
+            # ring path is (element x role) over the ring-atom element vocabulary (CNOF or +S/P).
+            ring_electronic_log_prior = torch.zeros(2 * len(self.ring_atom_elements))
         else:
             root_atom_log_prior = torch.tensor(
                 empirical_mark_priors.root_atom_log_probabilities,
@@ -1959,8 +1967,8 @@ class FactorizedTraceletRateModel(nn.Module):
         self.ring_system_atom_head = nn.Sequential(
             nn.Linear(2 * hidden_dim, hidden_dim),
             nn.SiLU(),
-            # ring atom prediction is (element x role); CNOF element vocabulary for now (see note above)
-            nn.Linear(hidden_dim, len(CNOF_ATOM_TYPES)),
+            # ring atom prediction is (element x role) over the ring-atom element vocabulary
+            nn.Linear(hidden_dim, len(self.ring_atom_elements)),
         )
         self.ring_system_role_head = nn.Sequential(
             nn.Linear(2 * hidden_dim, hidden_dim),
@@ -1968,7 +1976,7 @@ class FactorizedTraceletRateModel(nn.Module):
             nn.Linear(hidden_dim, 2),
         )
         if self.ring_electronic_mode == "factorized_contextual":
-            ring_category_count = 2 * len(CNOF_ATOM_TYPES)
+            ring_category_count = 2 * len(self.ring_atom_elements)
             # A complete ring installation is one atomic rewrite event, but
             # its electronic mark is decoded as a finite sequence. These
             # zero-started pair potentials learn joint ring composition and
@@ -2614,7 +2622,7 @@ class FactorizedTraceletRateModel(nn.Module):
         role_logits = self.ring_system_role_head(features)
         residual_logits = (
             type_logits.unsqueeze(-1) + role_logits.unsqueeze(-2)
-        ).reshape(decoder.span, 2 * len(CNOF_ATOM_TYPES))
+        ).reshape(decoder.span, 2 * len(self.ring_atom_elements))
         return residual_logits + self.ring_electronic_log_prior.unsqueeze(0)
 
     def _ring_semantic_sequence_log_probability(
@@ -2681,7 +2689,7 @@ class FactorizedTraceletRateModel(nn.Module):
         base = category_logits[position]
         if self.ring_electronic_mode != "factorized_contextual" or not prefix:
             return base
-        category_count = 2 * len(CNOF_ATOM_TYPES)
+        category_count = 2 * len(self.ring_atom_elements)
         if base.shape != (category_count,):
             raise ValueError("ring semantic category table has the wrong shape")
         if any(not 0 <= int(value) < category_count for value in prefix):
@@ -2882,7 +2890,7 @@ class FactorizedTraceletRateModel(nn.Module):
             placement_index = placement_to_index[candidate.placement]
             label_logits, label_mask = atom_tables[placement_index]
             selected = torch.tensor(
-                tuple(_CNOF_TO_INDEX[int(atom_type)] for atom_type in candidate.atom_types),
+                tuple(self._ring_element_to_index[int(atom_type)] for atom_type in candidate.atom_types),
                 dtype=torch.long,
                 device=self.device,
             )

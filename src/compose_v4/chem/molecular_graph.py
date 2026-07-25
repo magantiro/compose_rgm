@@ -210,6 +210,14 @@ ATOM_VALENCE_CLASS_TO_INDEX: dict[tuple[int, int], int] = {
     cls: idx for idx, cls in enumerate(ATOM_VALENCE_CLASSES)
 }
 
+# Ring-atom element vocabularies for ring_system_atom_head / ring_electronic, which predict a ring atom's
+# ELEMENT (aromatic/saturated ROLE is a separate head dimension, so these are ELEMENTS, not valence-
+# classes -- the valence follows from element + role + ring bonds). CNOF (4) reproduces the historical
+# ring head; ORGANIC adds S and P (the drug-relevant ring heteroatoms -- thiophene/thiazole/phosphole;
+# halogens and B are never ring atoms). CNOF-first so a 4-wide ring head warm-starts into the first rows.
+CNOF_RING_ELEMENTS: tuple[int, ...] = tuple(ELEMENT_TO_IDX[s] for s in ("C", "N", "O", "F"))
+ORGANIC_RING_ELEMENTS: tuple[int, ...] = tuple(ELEMENT_TO_IDX[s] for s in ("C", "N", "O", "F", "S", "P"))
+
 
 class AtomVocabulary:
     """An ordered set of (element, valence) atom classes the atom-type heads predict over -- the single
