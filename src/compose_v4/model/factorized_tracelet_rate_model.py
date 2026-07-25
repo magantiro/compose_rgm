@@ -26,9 +26,11 @@ from compose_v4.chem.graph_primitives import (
     compute_topology_features,
 )
 from compose_v4.chem.molecular_graph import (
+    AtomVocabulary,
     BOND_AROMATIC,
     BOND_CLASSES,
     BOND_CLASS_TO_H_CHANGE,
+    CNOF_VOCABULARY,
     H_COUNT_CLASSES,
     K,
     M,
@@ -1621,6 +1623,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_cyclic_graft: bool = False,
         enable_heteroatom_scan: bool = False,
         enable_ring_opening: bool = False,
+        atom_vocabulary: AtomVocabulary | None = None,
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
@@ -1639,6 +1642,11 @@ class FactorizedTraceletRateModel(nn.Module):
         # swap the carbon-izing structured ring_system_delete for the decoration-preserving clean delete
         # (ring OPENING that keeps heteroatoms; its inverse re-cyclizes); off for de-novo B, on for B-edit
         self.enable_ring_opening = bool(enable_ring_opening)
+        # Atom-type prediction vocabulary shared by the heads, candidate masks, sampling, and teacher-
+        # scoring, so head width and the fiber it is scored against never drift. Default CNOF_VOCABULARY
+        # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
+        # classes) covers the drug-like subset with every valence-state its own class (sink-free restate).
+        self.atom_vocabulary = atom_vocabulary if atom_vocabulary is not None else CNOF_VOCABULARY
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)
@@ -1802,13 +1810,16 @@ class FactorizedTraceletRateModel(nn.Module):
         )
 
         if empirical_mark_priors is None:
-            root_atom_log_prior = torch.zeros(len(CNOF_ATOM_TYPES))
+            root_atom_log_prior = torch.zeros(len(self.atom_vocabulary))
             connected_atom_order_log_prior = torch.zeros(
                 3,
-                len(CNOF_ATOM_TYPES),
+                len(self.atom_vocabulary),
             )
-            atom_restate_log_prior = torch.zeros(len(CNOF_ATOM_TYPES))
+            atom_restate_log_prior = torch.zeros(len(self.atom_vocabulary))
             bond_reorder_log_prior = torch.zeros(3)
+            # ring path uses (element x role), its own element vocabulary -- CNOF for now (leads' hetero-
+            # aromatic rings are read+preserved via the input embedding; de-novo heteroaromatic generation
+            # is a scoped follow-up), so it stays sized on CNOF_ATOM_TYPES, not the micro valence-classes.
             ring_electronic_log_prior = torch.zeros(2 * len(CNOF_ATOM_TYPES))
         else:
             root_atom_log_prior = torch.tensor(
@@ -1910,11 +1921,11 @@ class FactorizedTraceletRateModel(nn.Module):
             nn.SiLU(),
             nn.Linear(hidden_dim, len(MARK_RULE_NAMES)),
         )
-        self.grow_root_head = nn.Linear(hidden_dim, len(CNOF_ATOM_TYPES))
+        self.grow_root_head = nn.Linear(hidden_dim, len(self.atom_vocabulary))
         self.grow_query = nn.Linear(hidden_dim, mark_dim)
-        self.grow_option = nn.Embedding(3 * len(CNOF_ATOM_TYPES), mark_dim)
+        self.grow_option = nn.Embedding(3 * len(self.atom_vocabulary), mark_dim)
         self.delete_head = nn.Linear(hidden_dim, 1)
-        self.restate_head = nn.Linear(hidden_dim, len(CNOF_ATOM_TYPES))
+        self.restate_head = nn.Linear(hidden_dim, len(self.atom_vocabulary))
         self.reorder_head = nn.Linear(hidden_dim, 3)
         self.graft_head = nn.Sequential(
             nn.Linear(3 * hidden_dim, hidden_dim),
@@ -1948,6 +1959,7 @@ class FactorizedTraceletRateModel(nn.Module):
         self.ring_system_atom_head = nn.Sequential(
             nn.Linear(2 * hidden_dim, hidden_dim),
             nn.SiLU(),
+            # ring atom prediction is (element x role); CNOF element vocabulary for now (see note above)
             nn.Linear(hidden_dim, len(CNOF_ATOM_TYPES)),
         )
         self.ring_system_role_head = nn.Sequential(
@@ -1982,7 +1994,7 @@ class FactorizedTraceletRateModel(nn.Module):
 
         self.register_buffer(
             "cnof_valences",
-            torch.tensor([CNOF_VALENCE[item] for item in CNOF_ATOM_TYPES]),
+            torch.tensor([valence for _, valence in self.atom_vocabulary.classes]),
             persistent=False,
         )
         self.register_buffer(
@@ -3180,22 +3192,22 @@ class FactorizedTraceletRateModel(nn.Module):
             slot = null_slots[0]
             if group == 0:
                 atom_index = coordinate[0]
-                atom_type = int(CNOF_ATOM_TYPES[atom_index])
+                atom_type = int(self.atom_vocabulary.element_of(atom_index))
                 return AtomInsert(
                     slot,
                     atom_type,
                     0,
-                    int(CNOF_VALENCE[atom_type]),
+                    int(self.cnof_valences[atom_index]),
                     (),
                 )
             neighbor, order_index, atom_index = coordinate
             order = order_index + 1
-            atom_type = int(CNOF_ATOM_TYPES[atom_index])
+            atom_type = int(self.atom_vocabulary.element_of(atom_index))
             return AtomInsert(
                 slot,
                 atom_type,
                 0,
-                int(CNOF_VALENCE[atom_type] - order),
+                int(self.cnof_valences[atom_index]) - order,
                 ((neighbor, order),),
             )
         if rule_name == "atom_delete":
@@ -3211,7 +3223,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 masks["atom_restate"][0],
                 rng,
             )
-            atom_type = int(CNOF_ATOM_TYPES[atom_index])
+            atom_type = int(self.atom_vocabulary.element_of(atom_index))
             bond_valence = sum(
                 int(BOND_CLASS_TO_H_CHANGE[int(order)]) for order in state.bonds[vertex]
             )
@@ -3219,7 +3231,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 vertex,
                 atom_type,
                 0,
-                int(CNOF_VALENCE[atom_type] - bond_valence),
+                int(self.cnof_valences[atom_index]) - bond_valence,
             )
         if rule_name == "bond_reorder":
             a, b, order_index = _sample_masked_coordinate(
@@ -3507,12 +3519,12 @@ class FactorizedTraceletRateModel(nn.Module):
             + self.root_atom_log_prior.unsqueeze(0)
         )
         root_grow_mask = (
-            ((n_real == 0) & (n_null > 0)).unsqueeze(-1).expand(-1, len(CNOF_ATOM_TYPES))
+            ((n_real == 0) & (n_null > 0)).unsqueeze(-1).expand(-1, len(self.atom_vocabulary))
         )
         grow_query = self.grow_query(node)
         grow_option = self.grow_option.weight.reshape(
             3,
-            len(CNOF_ATOM_TYPES),
+            len(self.atom_vocabulary),
             self.mark_dim,
         )
         connected_grow_logits = torch.einsum(
@@ -3570,7 +3582,7 @@ class FactorizedTraceletRateModel(nn.Module):
             & (restate_h >= 0)
             & (restate_h <= MAX_H_COUNT)
             & (
-                (batch.atom_types.unsqueeze(-1) != torch.tensor(CNOF_ATOM_TYPES, device=device))
+                (batch.atom_types.unsqueeze(-1) != torch.tensor(self.atom_vocabulary.element_index, device=device))
                 | (batch.implicit_h_counts.unsqueeze(-1) != restate_h)
                 | (batch.formal_charges.unsqueeze(-1) != 0)
             )
@@ -3771,7 +3783,11 @@ class FactorizedTraceletRateModel(nn.Module):
         logits: dict[str, Tensor],
     ) -> tuple[Tensor, Tensor]:
         if isinstance(action, AtomInsert):
-            atom_index = _CNOF_TO_INDEX[int(action.atom_type)]
+            atom_index = self.atom_vocabulary.class_index(
+                int(action.atom_type),
+                sum(int(BOND_CLASS_TO_H_CHANGE[int(o)]) for _, o in action.neighbors),
+                int(action.implicit_h_count),
+            )
             if not action.neighbors:
                 return (
                     logits["grow_root"][batch_index, atom_index],
@@ -3787,7 +3803,13 @@ class FactorizedTraceletRateModel(nn.Module):
             key = (batch_index, int(action.v))
             return logits["atom_delete"][key], masks["atom_delete"][key]
         if isinstance(action, AtomRestate):
-            atom_index = _CNOF_TO_INDEX[int(action.atom_type)]
+            bond_valence = sum(
+                int(BOND_CLASS_TO_H_CHANGE[int(o)])
+                for o in batch.bonds[batch_index, int(action.v)]
+            )
+            atom_index = self.atom_vocabulary.class_index(
+                int(action.atom_type), bond_valence, int(action.implicit_h_count)
+            )
             key = (batch_index, int(action.v), atom_index)
             return logits["atom_restate"][key], masks["atom_restate"][key]
         if isinstance(action, BondReorder):
