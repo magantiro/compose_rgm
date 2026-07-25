@@ -2566,6 +2566,7 @@ def main() -> None:
             ring_template_factorization=args.ring_template_factorization,
             enable_ring_restates=args.corrupted_prior_mix,
             enable_cyclic_graft=args.corrupted_prior_mix,
+            enable_heteroatom_scan=args.corrupted_prior_mix,
         ).to(device)
     elif args.model == "from_scratch":
         model = TraceletRateModel(

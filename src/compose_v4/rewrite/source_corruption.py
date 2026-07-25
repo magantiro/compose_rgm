@@ -8,7 +8,9 @@ inverses, so it can EDIT real leads with B's own vocabulary.
 Vocabulary implemented here (ring-count-preserving; both directions exact, no fiber search):
   - atom_delete / atom_insert -- peripheral add/remove. (atom_insert carries its bond; there is no
     trainable bond_insert/bond_delete mark family, so they are excluded.)
-  - atom_restate -- bioisostere, INCLUDING ring-atom identity (e.g. pyridine<->benzene); ring-preserving.
+  - atom_restate -- bioisostere, INCLUDING RING-ATOM heteroatom scanning (pyridine<->benzene, N<->C);
+    ring-preserving. B gates atom_restate to PERIPHERAL atoms; the model ungates ring atoms for the edit
+    regime via enable_heteroatom_scan, so heteroatom scanning is a scoreable edit.
   - bond_reorder -- bond-order change on NON-aromatic bonds (the executor freezes aromatic bonds).
   - ring_system_restate -- aromatize <-> DE-aromatize (coordinated ring bond orders; e.g. pyridine<->
     piperidine). Both directions per pair: trim de-aromatizes a real ring, grow re-aromatizes it. B
@@ -69,21 +71,18 @@ def _mol(node: MolecularGraph):
     return Chem.MolFromSmiles(molecular_graph_to_smiles(node) or "")
 
 
-def _ring_atoms_and_cycle_edges(node: MolecularGraph):
-    """Return ``(ring_atoms, cycle_edges)`` in slot indices. B's peripheral atom_restate / bond_reorder
-    dense masks exclude these -- ring-atom identity is set by ring_system_grow and ring bond orders by
-    ring_system_restate -- so a micro edit on a ring site is outside the mask and scores as +inf loss."""
+def _cycle_edges(node: MolecularGraph):
+    """Return the cycle (non-bridge) edges in slot indices. B's ``bond_reorder`` dense mask excludes them
+    (a single ring-bond reorder is outside the mask; ring bond orders are ``ring_system_restate``'s job),
+    so the corruption must not emit one. (``atom_restate`` DOES now reach ring atoms -- heteroatom
+    scanning -- so ring *atoms* are no longer excluded, only ring *bonds* for reorder.)"""
     real = [int(v) for v in np.flatnonzero(is_element(node.atom_types))]
     graph = nx.Graph()
     graph.add_nodes_from(real)
     graph.add_edges_from(
         (a, b) for a, b in combinations(real, 2) if int(node.bonds[a, b]) != 0
     )
-    ring_atoms = {int(v) for cycle in nx.cycle_basis(graph) for v in cycle}
-    cycle_edges = {frozenset(e) for e in graph.edges()} - {
-        frozenset(e) for e in nx.bridges(graph)
-    }
-    return ring_atoms, cycle_edges
+    return {frozenset(e) for e in graph.edges()} - {frozenset(e) for e in nx.bridges(graph)}
 
 
 def corrupt_to_source(
@@ -97,8 +96,8 @@ def corrupt_to_source(
 ):
     """Walk ``target`` a few legal micro edits to a nearby valid ``source`` over B's real-molecule
     vocabulary. Returns ``(steps, states)`` (``states[i]`` is the pre-step state of ``steps[i]``). Every
-    step is a RING-COUNT-PRESERVING micro edit (peripheral / bioisostere / bond-order); ring topology is
-    left to B's retained ring_system_grow and is never corrupted here."""
+    step is RING-COUNT-PRESERVING (peripheral add/remove, bioisostere incl. ring-atom heteroatom scan,
+    non-ring bond-order); ring TOPOLOGY (add/remove a whole ring) is left to B's ring_system family."""
     steps: list[tuple[str, object]] = []
     states = [target]
     node = target
@@ -108,18 +107,17 @@ def corrupt_to_source(
             break
         base_rings = Descriptors.RingCount(m)
         cur_key = canonical_state_key(node)
-        ring_atoms, cycle_edges = _ring_atoms_and_cycle_edges(node)
+        cycle_edges = _cycle_edges(node)
         by_family: dict[str, list] = {}
-        # The MODEL-CONSISTENT micro fiber (canonical derived h-counts, not fiber._candidate_actions),
-        # restricted to PERIPHERAL sites: B's atom_restate / bond_reorder dense masks exclude ring atoms
-        # / ring bonds, so a ring-site micro edit is outside the mask and scores as +inf loss.
+        # Model-consistent micro fiber (canonical derived h-counts, not fiber._candidate_actions).
+        # atom_restate reaches RING atoms too (heteroatom scanning; the model ungates it via
+        # enable_heteroatom_scan). bond_reorder stays OFF ring bonds -- a single ring-bond reorder is
+        # outside B's dense mask (ring bond orders are ring_system_restate's coordinated job).
         for rule_name, action in _factorized_candidates(node, allow_bond_reroute=False):
             if rule_name not in _MICRO_WEIGHTS:
                 continue
-            if rule_name == "atom_restate" and int(action.v) in ring_atoms:
-                continue  # ring-atom identity is ring_system_grow's job
             if rule_name == "bond_reorder" and frozenset((int(action.a), int(action.b))) in cycle_edges:
-                continue  # ring bond orders are ring_system_restate's job
+                continue
             by_family.setdefault(rule_name, []).append(action)
         if rng.random() < restate_prob:  # aromatize<->de-aromatize offered occasionally (freq + cost)
             restates = enumerate_ring_system_restate_actions(node, system=system)

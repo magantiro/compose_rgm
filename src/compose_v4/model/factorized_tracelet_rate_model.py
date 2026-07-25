@@ -1614,6 +1614,7 @@ class FactorizedTraceletRateModel(nn.Module):
         ring_template_factorization: str = "flat",
         enable_ring_restates: bool = False,
         enable_cyclic_graft: bool = False,
+        enable_heteroatom_scan: bool = False,
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
@@ -1627,6 +1628,8 @@ class FactorizedTraceletRateModel(nn.Module):
         # Off for de-novo B (byte-identical); the corrupted-prior fine-tune (B-edit) turns them on.
         self.enable_ring_restates = bool(enable_ring_restates)
         self.enable_cyclic_graft = bool(enable_cyclic_graft)
+        # ungate atom_restate on ring atoms -> heteroatom scanning (pyridine<->benzene); off for de-novo B
+        self.enable_heteroatom_scan = bool(enable_heteroatom_scan)
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)
@@ -3548,9 +3551,11 @@ class FactorizedTraceletRateModel(nn.Module):
                 continue
             bond_valence = bond_valence + (batch.bonds == order).sum(dim=-1) * int(delta)
         restate_h = self.cnof_valences.view(1, 1, -1) - bond_valence.unsqueeze(-1)
+        # Peripheral by default; the editing model ungates ring atoms so heteroatom scanning
+        # (e.g. pyridine<->benzene) is a scoreable restate. The valence + no-op checks below still gate it.
+        restate_site = real if self.enable_heteroatom_scan else (real & (batch.atom_topology == 0))
         restate_mask = (
-            real.unsqueeze(-1)
-            & (batch.atom_topology == 0).unsqueeze(-1)
+            restate_site.unsqueeze(-1)
             & (restate_h >= 0)
             & (restate_h <= MAX_H_COUNT)
             & (
