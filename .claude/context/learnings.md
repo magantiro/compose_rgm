@@ -161,3 +161,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `main` -> `recipe["arguments"]`, check `build_tracelet_recipe_argv` bool handling), and the inference
   LOAD side (read the `corrupted_prior_mix` checkpoint-metadata flag when reconstructing B-edit for the
   editing experiments so `enable_*` turns on at sampling) -- both are Modal-launch / Phase-3 prep.
+
+## 2026-07-25
+- **Ring-atom heteroatom scanning ENABLED for B-edit** (updates the 07-24 "ring-atom bioisostere is
+  outside B's vocabulary" note -- true for de-novo B, but the edit regime ungates it). `enable_heteroatom_
+  scan` drops the `atom_topology==0` peripheral gate on the `atom_restate` dense mask, so pyridine<->
+  benzene (N<->C) ring-atom swaps score FINITE. Off for de-novo B (byte-identical). Verified
+  `Cc1ccncc1->Cc1ccccc1` finite with the flag, inf without.
+- **Clean (decoration-preserving) ring editing for B-edit.** B's structured `ring_system_delete`
+  carbon-izes (retypes every ring atom->C, destroying decoration); its inverse `ring_system_grow`
+  cyclizes CARBON scaffolds (retyping). Added `enumerate_clean_ring_system_deletes` (open a ring keeping
+  each atom's element, H re-derived per atom; Kekule states so it covers saturated/aromatic/any-size/
+  fused/spiro/bridged) + `enable_ring_opening` to swap it into the model's sampling AND teacher-candidate
+  enumeration. Verified: keeps N/O where structured->all-C (pyridine: `CCCCCC` vs `CC=CC=NC`), round-trips
+  5/5 via inverse_step.
+- **The clean delete is taught TRIM-ONLY.** Its exact inverse is a `ring_system_grow` on a HETEROATOM
+  scaffold, and B's grow vocabulary only cyclizes CARBON scaffolds -> that grow teacher mark is
+  mask-illegal (loss split: DELETE-trim FINITE 2.30, GROW-inverse inf). So ring-OPENING (de-cyclize
+  keeping heteroatoms) is taught; ring-CLOSING stays retained from B's de-novo grow. B-edit thus reaches
+  parity with B's ring vocabulary (grow retained + clean delete + restate), the delete upgraded to keep
+  decoration. Full mixed corruption batch (all 7 families incl. `ring_system_delete`) backprops FINITE
+  (4.63); 440 tests pass. Heteroatom re-cyclization would need a NEW grow mode (grows on heteroatom
+  scaffolds) -- deferred, not a regression vs B (B never cyclized heteroatom scaffolds either).
+- **`inverse_ring_system_delete` latent scaffold bug fixed:** it read `scaffold_bonds` off the pre-delete
+  ring, so the closing bonds double-counted (scaffold + `bond_insertions`), yielding an invalid grow;
+  exclude the reinserted bonds. Only reachable via `inverse_step` on a `ring_system_delete` (untested) ->
+  latent. **LESSON reaffirmed:** split the finite-loss smoke by direction -- the mixed batch hid that
+  DELETE was fine and only GROW was inf.
