@@ -211,25 +211,59 @@ ATOM_VALENCE_CLASS_TO_INDEX: dict[tuple[int, int], int] = {
 }
 
 
-def valence_class_h_count(
-    class_index: int, bond_order_sum: int, formal_charge: int = 0
-) -> int | None:
-    """Implicit-H implied by an (element, valence) class at a site with this heavy-bond sum and charge:
-    ``h = valence + charge - bond_sum``. Returns None if outside ``[0, MAX_H_COUNT]`` (the class is
-    infeasible here). Single-valence elements reproduce the old ``CNOF_VALENCE[type] - bond_sum`` exactly."""
-    _, valence = ATOM_VALENCE_CLASSES[class_index]
-    h = int(valence) + int(formal_charge) - int(bond_order_sum)
-    return h if 0 <= h <= MAX_H_COUNT else None
+class AtomVocabulary:
+    """An ordered set of (element, valence) atom classes the atom-type heads predict over -- the single
+    object the model, the candidate fiber, sampling, and teacher-scoring all share, so a checkpoint's head
+    width and the fiber it is scored against can never drift apart. ``CNOF_VOCABULARY`` (4 classes)
+    reproduces the historical CNOF model byte-for-byte; ``ORGANIC_VOCABULARY`` (15) covers the drug-like
+    organic subset. Each class pins one valence, so H is a pure function of bond-sum + charge, and every
+    allowed valence-state being its own class is what keeps atom_restate a symmetric (sink-free) operator."""
+
+    def __init__(self, classes: tuple[tuple[int, int], ...]) -> None:
+        self.classes: tuple[tuple[int, int], ...] = tuple((int(e), int(v)) for e, v in classes)
+        self._to_index: dict[tuple[int, int], int] = {c: i for i, c in enumerate(self.classes)}
+        self.element_index: tuple[int, ...] = tuple(e for e, _ in self.classes)
+
+    def __len__(self) -> int:
+        return len(self.classes)
+
+    def element_of(self, class_index: int) -> int:
+        return self.classes[class_index][0]
+
+    def h_count(self, class_index: int, bond_order_sum: int, formal_charge: int = 0) -> int | None:
+        """Implicit-H implied by a class at a site with this heavy-bond sum and charge:
+        ``h = valence + charge - bond_sum``; None if outside ``[0, MAX_H_COUNT]`` (class infeasible here).
+        Single-valence classes reproduce the old ``CNOF_VALENCE[type] - bond_sum`` derivation exactly."""
+        _, valence = self.classes[class_index]
+        h = int(valence) + int(formal_charge) - int(bond_order_sum)
+        return h if 0 <= h <= MAX_H_COUNT else None
+
+    def class_index(
+        self, element: int, bond_order_sum: int, implicit_h_count: int, formal_charge: int = 0
+    ) -> int | None:
+        """Inverse: the class of an EXISTING atom. The class valence is the NEUTRAL valence
+        ``bond_sum + H - charge`` (charged hypervalence keeps the neutral class plus a nonzero charge).
+        None if the atom's (element, valence) is not in this vocabulary."""
+        valence = int(bond_order_sum) + int(implicit_h_count) - int(formal_charge)
+        return self._to_index.get((int(element), valence))
+
+
+CNOF_VOCABULARY = AtomVocabulary(
+    tuple((ELEMENT_TO_IDX[sym], ALLOWED_VALENCES[sym][0]) for sym in _CNOF_CLASS_SYMBOLS)
+)
+ORGANIC_VOCABULARY = AtomVocabulary(ATOM_VALENCE_CLASSES)
+
+
+def valence_class_h_count(class_index: int, bond_order_sum: int, formal_charge: int = 0) -> int | None:
+    """Module-level convenience over the ORGANIC vocabulary; see ``AtomVocabulary.h_count``."""
+    return ORGANIC_VOCABULARY.h_count(class_index, bond_order_sum, formal_charge)
 
 
 def atom_valence_class_index(
     atom_type_idx: int, bond_order_sum: int, implicit_h_count: int, formal_charge: int = 0
 ) -> int | None:
-    """Inverse of ``valence_class_h_count``: the (element, valence) class of an EXISTING atom. The class
-    valence is the NEUTRAL valence ``bond_sum + H - charge`` (charged hypervalence keeps the neutral class
-    plus a nonzero charge). None if the atom's (element, valence) is not a registered class."""
-    valence = int(bond_order_sum) + int(implicit_h_count) - int(formal_charge)
-    return ATOM_VALENCE_CLASS_TO_INDEX.get((int(atom_type_idx), valence))
+    """Module-level convenience over the ORGANIC vocabulary; see ``AtomVocabulary.class_index``."""
+    return ORGANIC_VOCABULARY.class_index(atom_type_idx, bond_order_sum, implicit_h_count, formal_charge)
 
 
 # Soft cap on bond count per atom — used as a sanity check during data prep.
