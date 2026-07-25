@@ -20,6 +20,8 @@ from itertools import combinations
 import numpy as np
 
 from compose_v4.chem.molecular_graph import (
+    AtomVocabulary,
+    CNOF_VOCABULARY,
     ELEMENT_TO_IDX,
     MAX_H_COUNT,
     MolecularGraph,
@@ -134,6 +136,7 @@ def _factorized_candidates(
     state: MolecularGraph,
     *,
     allow_bond_reroute: bool,
+    vocabulary: AtomVocabulary = CNOF_VOCABULARY,
 ):
     real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
     null = tuple(int(v) for v in np.flatnonzero(state.atom_types == NULL_IDX))
@@ -141,12 +144,15 @@ def _factorized_candidates(
     if null:
         slot = null[0]
         if not real:
-            for atom_type in CNOF_ATOM_TYPES:
+            for class_index in range(len(vocabulary)):
+                hydrogen_count = vocabulary.h_count(class_index, 0)
+                if hydrogen_count is None:
+                    continue
                 yield "atom_insert", AtomInsert(
                     slot=slot,
-                    atom_type=atom_type,
+                    atom_type=vocabulary.element_of(class_index),
                     formal_charge=0,
-                    implicit_h_count=CNOF_VALENCE[atom_type],
+                    implicit_h_count=hydrogen_count,
                     neighbors=(),
                 )
         else:
@@ -155,16 +161,17 @@ def _factorized_candidates(
                 for order in MICRO_BOND_CLASSES:
                     if order > available_h:
                         continue
-                    for atom_type in CNOF_ATOM_TYPES:
-                        hydrogen_count = CNOF_VALENCE[atom_type] - order
-                        if 0 <= hydrogen_count <= MAX_H_COUNT:
-                            yield "atom_insert", AtomInsert(
-                                slot=slot,
-                                atom_type=atom_type,
-                                formal_charge=0,
-                                implicit_h_count=hydrogen_count,
-                                neighbors=((neighbor, order),),
-                            )
+                    for class_index in range(len(vocabulary)):
+                        hydrogen_count = vocabulary.h_count(class_index, order)
+                        if hydrogen_count is None:
+                            continue
+                        yield "atom_insert", AtomInsert(
+                            slot=slot,
+                            atom_type=vocabulary.element_of(class_index),
+                            formal_charge=0,
+                            implicit_h_count=hydrogen_count,
+                            neighbors=((neighbor, order),),
+                        )
 
     for v in real:
         if _connected_after_atom_deletion(state, v) and all(
@@ -175,10 +182,11 @@ def _factorized_candidates(
             yield "atom_delete", AtomDelete(v)
 
         row_sum = int(state.bonds[v].sum())
-        for atom_type in CNOF_ATOM_TYPES:
-            hydrogen_count = CNOF_VALENCE[atom_type] - row_sum
-            if not 0 <= hydrogen_count <= MAX_H_COUNT:
+        for class_index in range(len(vocabulary)):
+            hydrogen_count = vocabulary.h_count(class_index, row_sum)
+            if hydrogen_count is None:
                 continue
+            atom_type = vocabulary.element_of(class_index)
             if (
                 atom_type == int(state.atom_types[v])
                 and hydrogen_count == int(state.implicit_h_counts[v])
