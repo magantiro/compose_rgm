@@ -320,8 +320,10 @@ class FactorizedMarkCollator:
     use_aromatic_bond_view: bool
     ring_catalog: TypedRingCatalog | None = None
     chemistry_feature_cache_limit: int = 2048
+    compute_ring_restates: bool = False
+    compute_cyclic_graft: bool = False
     _chemistry_feature_cache: OrderedDict[
-        tuple[int, bool, tuple[bytes, bytes, bytes, bytes]],
+        tuple[int, bool, bool, tuple[bytes, bytes, bytes, bytes]],
         ChemistryStateFeatures,
     ] = field(default_factory=OrderedDict, init=False, repr=False, compare=False)
 
@@ -361,6 +363,8 @@ class FactorizedMarkCollator:
             chemistry_feature_cache=self._chemistry_feature_cache,
             chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
             compute_ring_grow_support=not has_precomputed_ring_support,
+            compute_ring_restates=self.compute_ring_restates,
+            compute_cyclic_graft=self.compute_cyclic_graft,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
                 if has_conditions
@@ -432,6 +436,8 @@ def factorized_mark_loader(
     target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
     condition_dropout_probability: float = 0.0,
     ring_family_mass_mode: str = "boolean",
+    compute_ring_restates: bool = False,
+    compute_cyclic_graft: bool = False,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
         raise ValueError("start step lies outside the training horizon")
@@ -469,7 +475,12 @@ def factorized_mark_loader(
         batch_size=batch_size,
         shuffle=False,
         num_workers=workers,
-        collate_fn=FactorizedMarkCollator(use_aromatic_bond_view, ring_catalog),
+        collate_fn=FactorizedMarkCollator(
+            use_aromatic_bond_view,
+            ring_catalog,
+            compute_ring_restates=compute_ring_restates,
+            compute_cyclic_graft=compute_cyclic_graft,
+        ),
         pin_memory=pin_memory,
         drop_last=True,
         generator=loader_generator,
@@ -1080,6 +1091,8 @@ def train_factorized_mark_model(
         target_property_conditions=target_property_conditions,
         condition_dropout_probability=condition_dropout_probability,
         ring_family_mass_mode=model.ring_family_mass_mode,
+        compute_ring_restates=model.enable_ring_restates,
+        compute_cyclic_graft=model.enable_cyclic_graft,
     )
     timing_loop_started = perf_counter()
     iterator: Iterator[FactorizedMarkBatch] = iter(loader)
