@@ -185,6 +185,53 @@ ALLOWED_VALENCES: dict[str, list[int]] = {
 }
 
 
+# ---- (element, valence) atom classes for the atom-type prediction heads ----
+#
+# The root/insert/restate/grow heads predict over these CLASSES, not bare elements. Each class pins ONE
+# valence, so the implicit-H count follows uniquely from the atom's heavy-bond sum and formal charge (the
+# head picks a class; H is derived). Registering EVERY allowed valence-state as its own class is what
+# keeps atom_restate SYMMETRIC -- at a fixed bond-sum any valence-state is both reachable and leavable, so
+# the edit fiber has NO valence sinks. Where restate alone cannot move (a bond-sum with a single feasible
+# valence, e.g. P at bond-sum 4 -> only v5), bond_reorder changes the bond-sum and restate then collapses
+# the valence; the two together make the whole operator graph strongly connected.
+#
+# CNOF classes lead, so a 4-wide CNOF checkpoint warm-starts into the first four rows unchanged.
+ORGANIC_SUBSET_SYMBOLS: tuple[str, ...] = ("C", "N", "O", "F", "S", "P", "Cl", "Br", "I", "B")
+_CNOF_CLASS_SYMBOLS: tuple[str, ...] = ("C", "N", "O", "F")
+ATOM_VALENCE_CLASSES: tuple[tuple[int, int], ...] = tuple(
+    (ELEMENT_TO_IDX[sym], valence)
+    for sym in (
+        *_CNOF_CLASS_SYMBOLS,
+        *(s for s in ORGANIC_SUBSET_SYMBOLS if s not in _CNOF_CLASS_SYMBOLS),
+    )
+    for valence in ALLOWED_VALENCES[sym]
+)
+ATOM_VALENCE_CLASS_TO_INDEX: dict[tuple[int, int], int] = {
+    cls: idx for idx, cls in enumerate(ATOM_VALENCE_CLASSES)
+}
+
+
+def valence_class_h_count(
+    class_index: int, bond_order_sum: int, formal_charge: int = 0
+) -> int | None:
+    """Implicit-H implied by an (element, valence) class at a site with this heavy-bond sum and charge:
+    ``h = valence + charge - bond_sum``. Returns None if outside ``[0, MAX_H_COUNT]`` (the class is
+    infeasible here). Single-valence elements reproduce the old ``CNOF_VALENCE[type] - bond_sum`` exactly."""
+    _, valence = ATOM_VALENCE_CLASSES[class_index]
+    h = int(valence) + int(formal_charge) - int(bond_order_sum)
+    return h if 0 <= h <= MAX_H_COUNT else None
+
+
+def atom_valence_class_index(
+    atom_type_idx: int, bond_order_sum: int, implicit_h_count: int, formal_charge: int = 0
+) -> int | None:
+    """Inverse of ``valence_class_h_count``: the (element, valence) class of an EXISTING atom. The class
+    valence is the NEUTRAL valence ``bond_sum + H - charge`` (charged hypervalence keeps the neutral class
+    plus a nonzero charge). None if the atom's (element, valence) is not a registered class."""
+    valence = int(bond_order_sum) + int(implicit_h_count) - int(formal_charge)
+    return ATOM_VALENCE_CLASS_TO_INDEX.get((int(atom_type_idx), valence))
+
+
 # Soft cap on bond count per atom — used as a sanity check during data prep.
 MAX_BONDS: dict[str, int] = {
     "null": 0,
