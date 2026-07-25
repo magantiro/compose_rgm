@@ -838,6 +838,14 @@ def inverse_ring_system_delete(
     action: RingSystemDelete,
 ) -> RingSystemGrow:
     inverse = _invert_micro_program(source, lower_ring_system_delete(source, action))
+    # The grow's scaffold is the OPENED graph (post-delete): the ring bonds MINUS the closing bonds that
+    # this inverse re-adds as bond_insertions. Reading scaffold_bonds straight off ``source`` (the still-
+    # closed ring) would double-count those bonds and produce an invalid grow (scaffold ∩ insertions ≠ ∅).
+    reinserted = {
+        frozenset((int(item.a), int(item.b)))
+        for rule, item in inverse
+        if rule == "bond_insert"
+    }
     return RingSystemGrow(
         system_atoms=action.system_atoms,
         interface_atoms=action.retained_system_atoms,
@@ -846,6 +854,7 @@ def inverse_ring_system_delete(
             for offset, a in enumerate(action.system_atoms)
             for b in action.system_atoms[offset + 1 :]
             if int(source.bonds[a, b]) != 0
+            and frozenset((int(a), int(b))) not in reinserted
         ),
         bond_reorders=tuple(
             BondOrderChange(int(item.a), int(item.b), int(item.new_order))
