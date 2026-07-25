@@ -543,22 +543,56 @@ def enumerate_aromatic_restate_actions(
     )
 
 
-def _validated_aromatic_restates(
+def enumerate_ring_system_restate_actions(
+    state: MolecularGraph,
+    *,
+    system: RewriteSystem | None = None,
+) -> tuple[RingSystemRestate, ...]:
+    """Return exact executable ring-system restates that CHANGE perceived aromaticity -- both
+    aromatizing (saturated->aromatic) AND de-aromatizing (aromatic->saturated) -- excluding
+    aromaticity-neutral Kekule resonance reshuffles (canonical no-ops: a delta of 0 means the
+    successor is the same molecule). This wires the ``ring_system_restate`` family at inference so the
+    model can flip ring saturation in either direction; B ships aromatize-only
+    (``enumerate_aromatic_restate_actions``). Same candidate space + validator; states are Kekule, so
+    de-aromatization is a validity-checked double->single lowering that adds implicit H."""
+
+    return tuple(
+        action
+        for action, _ in _validated_restates(
+            state, system=system, keep=lambda before, after: after != before
+        )
+    )
+
+
+def _validated_restates(
     state: MolecularGraph,
     *,
     system: RewriteSystem | None,
+    keep,
 ) -> tuple[tuple[RingSystemRestate, MolecularGraph], ...]:
+    """Validate every ``_ring_system_restate_candidates`` action through the rewrite system (the
+    validity gate) and keep those whose perceived-aromatic-ring delta satisfies ``keep(before, after)``.
+    Every returned successor is therefore valence-safe and connected."""
     runtime = system or de_novo_rewrite_system()
-    aromatic_rings_before = perceived_aromatic_ring_count(state)
+    before = perceived_aromatic_ring_count(state)
     validated = []
     for action in _ring_system_restate_candidates(state):
         try:
             successor = runtime.apply(state, "ring_system_restate", action)
         except InvalidRewrite:
             continue
-        if perceived_aromatic_ring_count(successor) > aromatic_rings_before:
+        if keep(before, perceived_aromatic_ring_count(successor)):
             validated.append((action, successor))
     return tuple(validated)
+
+
+def _validated_aromatic_restates(
+    state: MolecularGraph,
+    *,
+    system: RewriteSystem | None,
+) -> tuple[tuple[RingSystemRestate, MolecularGraph], ...]:
+    # Aromatizing only (saturated -> aromatic): the training closure fiber's application condition.
+    return _validated_restates(state, system=system, keep=lambda before, after: after > before)
 
 
 def _append_generic_cycle(

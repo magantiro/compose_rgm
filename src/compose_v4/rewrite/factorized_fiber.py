@@ -284,6 +284,60 @@ def _reachable_without_edge(
     return seen
 
 
+def _induced_is_tree(state: MolecularGraph, vertices: tuple[int, ...]) -> bool:
+    """True if the subgraph induced on ``vertices`` is a tree. ``vertices`` is one side of a bridge
+    bipartition, hence already connected, so a tree has exactly ``len(vertices) - 1`` internal edges."""
+    edges = sum(
+        1
+        for offset, a in enumerate(vertices)
+        for b in vertices[offset + 1 :]
+        if int(state.bonds[a, b]) != 0
+    )
+    return edges == len(vertices) - 1
+
+
+def pendant_graft_candidates(
+    state: MolecularGraph,
+) -> tuple[tuple[int, int, int], ...]:
+    """``(moved, removed_neighbor, target)`` for every legal PENDANT-tree graft: cut a single-bond bridge
+    whose ``moved`` side is an acyclic tree and re-attach ``moved`` to ``target`` in the other side.
+
+    This is the well-defined graft subset on a cyclic molecule -- the ring core stays fixed and no ring
+    travels with the fragment. The tuple is exactly what the dense graft head consumes, i.e.
+    ``BondReroute(a=moved, b=removed_neighbor, u=moved, v=target)``. Shared by the model's graft mask and
+    the corrupted-source prior so a corruption graft always lands in the mask it will be scored against.
+    """
+    real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
+    candidates: list[tuple[int, int, int]] = []
+    for a, b, left, right in _bridge_partitions(state, real):
+        if int(state.bonds[a, b]) != 1:
+            continue  # single-bond bridges only: the dense (moved, target) form carries no bond order
+        for moved, removed_neighbor, pendant, main in (
+            (a, b, left, right),
+            (b, a, right, left),
+        ):
+            if not _induced_is_tree(state, pendant):
+                continue  # the moved fragment must be a tree -- no ring may travel with it
+            if int(state.implicit_h_counts[removed_neighbor]) >= MAX_H_COUNT:
+                continue
+            for target in main:
+                if target == removed_neighbor or int(state.bonds[moved, target]) != 0:
+                    continue
+                if int(state.implicit_h_counts[target]) < 1:
+                    continue
+                candidates.append((int(moved), int(removed_neighbor), int(target)))
+    return tuple(candidates)
+
+
+def enumerate_pendant_graft_actions(state: MolecularGraph) -> tuple[BondReroute, ...]:
+    """Executable ``BondReroute`` for every pendant-tree graft (see ``pendant_graft_candidates``), in the
+    restricted ``u == moved`` form the dense graft head scores."""
+    return tuple(
+        BondReroute(a=moved, b=removed_neighbor, u=moved, v=target)
+        for moved, removed_neighbor, target in pendant_graft_candidates(state)
+    )
+
+
 def _connected_after_atom_deletion(state: MolecularGraph, removed: int) -> bool:
     remaining = {
         int(v)
