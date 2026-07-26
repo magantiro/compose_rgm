@@ -16,7 +16,6 @@ from compose_v4.chem.state import (
     is_valid_state,
     pad_molecular_graph,
 )
-from compose_v4.rewrite.fiber import ActionFiberSpec
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.source_corruption import FORBIDDEN_FAMILIES, make_edit_pair
 from compose_v4.rewrite.trace import execute_trace
@@ -35,13 +34,12 @@ _MARK_RULE_NAMES = {
 
 
 def _pairs(seed_offset: int = 0):
-    spec = ActionFiberSpec.neutral_cnof()
     system = de_novo_rewrite_system()
     out = []
     for i, smi in enumerate(_LEADS):
         target = pad_molecular_graph(smiles_to_molecular_graph(smi), 40)
         trim, grow = make_edit_pair(
-            target, 5, spec=spec, system=system, rng=np.random.default_rng(i + seed_offset)
+            target, 5, system=system, rng=np.random.default_rng(i + seed_offset)
         )
         out.append((trim, grow, system))
     return out
@@ -67,10 +65,9 @@ def test_both_directions_replay_valid_and_only_mark_families() -> None:
 def test_trim_source_is_the_real_molecule() -> None:
     # The crucial property: the trim direction puts the REAL molecule as the source (progress 0), so
     # real leads are in-distribution and the model does not want to terminate at a complete molecule.
-    spec = ActionFiberSpec.neutral_cnof()
     system = de_novo_rewrite_system()
     target = pad_molecular_graph(smiles_to_molecular_graph(_LEADS[0]), 40)
-    trim, _grow = make_edit_pair(target, 5, spec=spec, system=system, rng=np.random.default_rng(0))
+    trim, _grow = make_edit_pair(target, 5, system=system, rng=np.random.default_rng(0))
     assert trim is not None
     assert canonical_state_key(trim.source) == canonical_state_key(target)
 

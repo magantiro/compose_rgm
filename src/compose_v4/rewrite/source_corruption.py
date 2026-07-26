@@ -52,7 +52,6 @@ from compose_v4.chem.molecular_graph import (CNOF_VOCABULARY, MolecularGraph,
                                              is_element, molecular_graph_to_smiles)
 from compose_v4.rewrite.factorized_fiber import (_factorized_candidates,
                                                  enumerate_pendant_graft_actions)
-from compose_v4.rewrite.fiber import ActionFiberSpec
 from compose_v4.rewrite.kernel import RewriteSystem, canonical_state_key
 from compose_v4.rewrite.ring_system_fiber import enumerate_clean_ring_system_deletes
 from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
@@ -124,7 +123,6 @@ def corrupt_to_source(
     target: MolecularGraph,
     depth: int,
     *,
-    spec: ActionFiberSpec,
     system: RewriteSystem,
     rng,
     restate_prob: float = 1.0,
@@ -217,7 +215,6 @@ def make_edit_pair(
     target: MolecularGraph,
     depth: int,
     *,
-    spec: ActionFiberSpec,
     system: RewriteSystem,
     rng,
     restate_prob: float = 1.0,
@@ -230,7 +227,7 @@ def make_edit_pair(
     target -- so the model learns to add atoms, substitute (bioisostere), change bond order, and flip
     ring aromaticity (aromatize<->de-aromatize)."""
     steps, states = corrupt_to_source(
-        target, depth, spec=spec, system=system, rng=rng, restate_prob=restate_prob,
+        target, depth, system=system, rng=rng, restate_prob=restate_prob,
         catalog=catalog, vocabulary=vocabulary,
     )
     if len(states) < 2:

@@ -19,7 +19,6 @@ from compose_v4.chem.molecular_graph import (CNOF_VOCABULARY, MolecularGraphErro
                                              smiles_to_molecular_graph)
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.cnof_conditional import PathRecord
-from compose_v4.rewrite.fiber import ActionFiberSpec
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.progress import TraceProgressCTMC
 from compose_v4.rewrite.source_corruption import make_edit_pair
@@ -30,7 +29,6 @@ def build_corrupted_prior_records(
     *,
     n_slots: int,
     depth_max: int = 5,
-    spec: ActionFiberSpec | None = None,
     system=None,
     catalog=None,
     vocabulary=CNOF_VOCABULARY,
@@ -43,7 +41,6 @@ def build_corrupted_prior_records(
     of legal mark-family edits (``depth ~ U[1, depth_max]``) and emits up to two ``PathRecord``s: the
     trim direction (real molecule as source) and the grow direction (corrupted source). Molecules
     outside the model vocabulary or larger than ``n_slots`` are skipped; the yield is worth logging."""
-    spec = spec or ActionFiberSpec.neutral_cnof()
     system = system or de_novo_rewrite_system()
     rng = np.random.default_rng(seed)
     records = []
@@ -63,7 +60,7 @@ def build_corrupted_prior_records(
             attempted += 1
             depth = int(rng.integers(1, depth_max + 1))  # varied, short "noise level"
             trim, grow = make_edit_pair(
-                target, depth, spec=spec, system=system, rng=rng, catalog=catalog,
+                target, depth, system=system, rng=rng, catalog=catalog,
                 vocabulary=vocabulary,
             )
             traces = (trim, grow) if both_directions else (grow,)

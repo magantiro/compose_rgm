@@ -25,7 +25,6 @@ from compose_v4.chem.molecular_graph import (MolecularGraphError,
                                              molecular_graph_to_smiles,
                                              smiles_to_molecular_graph)
 from compose_v4.chem.state import pad_molecular_graph
-from compose_v4.rewrite.fiber import ActionFiberSpec
 from compose_v4.rewrite.kernel import de_novo_rewrite_system
 from compose_v4.rewrite.source_corruption import make_edit_pair
 
@@ -37,7 +36,8 @@ _FP = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
 
 
 def _tanimoto(a: str, b: str):
-    ma = Chem.MolFromSmiles(a or ""); mb = Chem.MolFromSmiles(b or "")
+    ma = Chem.MolFromSmiles(a or "")
+    mb = Chem.MolFromSmiles(b or "")
     if ma is None or mb is None:
         return None
     return float(DataStructs.TanimotoSimilarity(_FP.GetFingerprint(ma), _FP.GetFingerprint(mb)))
@@ -57,7 +57,6 @@ def main() -> None:
     p.add_argument("--output", type=Path, default=None)
     args = p.parse_args()
 
-    spec = ActionFiberSpec.neutral_cnof()
     system = de_novo_rewrite_system()
     rng = np.random.default_rng(0)
     smis = [line.strip() for line in open(CORPUS) if line.strip()]
@@ -79,7 +78,7 @@ def main() -> None:
         processed += 1
         target = pad_molecular_graph(graph, args.n_slots)
         depth = int(rng.integers(1, args.depth_max + 1))
-        trim, grow = make_edit_pair(target, depth, spec=spec, system=system, rng=rng)
+        trim, grow = make_edit_pair(target, depth, system=system, rng=rng)
         if trim is not None and grow is not None:
             both_yield += 1
         for trace in (trim, grow):

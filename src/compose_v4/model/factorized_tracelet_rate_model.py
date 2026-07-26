@@ -104,7 +104,6 @@ MARK_RULE_NAMES = (
     "ring_system_restate",
 )
 MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
-_CNOF_TO_INDEX = {int(atom_type): index for index, atom_type in enumerate(CNOF_ATOM_TYPES)}
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 
 
