@@ -326,6 +326,12 @@ def _factorized_rate_table(
             (None,),
             (0.0,),
             ring_catalog=model.ring_catalog,
+            # Propagate the checkpoint's editing-operator capabilities into the legal-mark
+            # enumeration so the quotient table scores the SAME family support the model was
+            # trained on.  Omitting these silently falls back to the de-novo B vocabulary
+            # (ring restate / clean ring opening never enumerated).
+            compute_ring_restates=model.enable_ring_restates,
+            compute_ring_opening=model.enable_ring_opening,
         )
         model._sampling_state_cache[state_cache_key] = cached_batch
         while len(model._sampling_state_cache) > model._sampling_state_cache_limit:
@@ -438,6 +444,11 @@ def _build_analytic_pancake_quotient_context(
             (None,),
             (0.0,),
             ring_catalog=teacher.ring_catalog,
+            # See _factorized_rate_table: the analytic sampler must enumerate the checkpoint's
+            # editing vocabulary, not the de-novo default, or a B-edit checkpoint samples the
+            # wrong process (its wide organic heads load but their families stay masked-off).
+            compute_ring_restates=teacher.enable_ring_restates,
+            compute_ring_opening=teacher.enable_ring_opening,
         )
         teacher._sampling_state_cache[state_cache_key] = cached_batch
         while len(teacher._sampling_state_cache) > teacher._sampling_state_cache_limit:
