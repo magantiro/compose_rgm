@@ -173,6 +173,12 @@ class PancakeQuotientCalibration:
     """
 
     atom_delete_log_rate_adjustment: float = -0.5
+    # A7: production normalizes the graft family over the QUOTIENT partition Zq (survival[graft] == 1),
+    # so the analytic pancake sampler induces the same canonical-successor kernel as the GM loss / raw
+    # sampler. Set True ONLY to reproduce the historical raw-partition + survival convention (Zr; self-
+    # grafts included then thinned), which under-weights graft vs the trained quotient kernel -- a named
+    # ablation, never the default.
+    legacy_raw_graft_survival: bool = False
 
     def __post_init__(self) -> None:
         value = float(self.atom_delete_log_rate_adjustment)
@@ -479,26 +485,31 @@ def _build_analytic_pancake_quotient_context(
         require_exact_ring_support=False,
     )
     quotient_mask = masks["bond_reroute"][0]
-    raw_mask_array, _ = _legacy_prequotient_graft_tables(state)
-    raw_mask = torch.from_numpy(raw_mask_array).to(teacher.device)
-    raw_graft_log_z = _masked_logsumexp(logits["bond_reroute"][0], raw_mask)
+    # Raw (pre-quotient) graft mask: self-grafts + aliases.  Retained for the raw_graft_mark_count
+    # diagnostic and, under the legacy ablation only, for the graft family normalization.  It is
+    # tree-gated (empty on a cyclic lead), so it is never used for production normalization.
+    raw_mask = torch.from_numpy(_legacy_prequotient_graft_tables(state)[0]).to(teacher.device)
     productive_graft_log_z = _masked_logsumexp(
         logits["bond_reroute"][0],
         quotient_mask,
     )
-    # Cyclic-graft regime: the legacy pre-quotient raw mask (_legacy_prequotient_graft_tables) is
-    # tree-gated and EMPTY on a cyclic lead, but the quotient (cyclic) mask is already the productive
-    # graft support -- self-grafts were dropped at enumeration and aliases were grouped by the general
-    # canonical successor key, which is exactly the measure B-edit training normalizes graft over
-    # (there is no legacy raw cyclic normalization).  Fall the raw partition back to the quotient
-    # partition so survival[graft] == exp(Zq - Zq) == 1 (no raw over-count to thin) and every
-    # downstream use (family softmax, survival, group logsumexp) stays finite.  A tree state ALWAYS
-    # has a finite raw partition (raw non-empty <=> all_single_tree), so this never fires on trees and
-    # leaves the validated de-novo tree survival untouched.
-    if not torch.isfinite(raw_graft_log_z):
-        raw_graft_log_z = productive_graft_log_z
+    # A7 (full-Zq fidelity): normalize graft over the QUOTIENT partition Zq for BOTH tree and cyclic
+    # grafts, so the pancake sampler induces the same canonical-successor kernel as the GM loss / raw
+    # sampler -- P(x,y) = sum_{a:T(x,a)=y} p_theta(a|x), each successor-group mass = logsumexp over its
+    # quotient mark encodings.  survival[graft] == 1: there is no raw over-count to thin, because the
+    # quotient mask already dropped self-grafts and grouped aliases by the general canonical successor
+    # key (exactly the successor measure training normalizes graft over).  The legacy raw-partition +
+    # survival convention (Zr; self-grafts included then thinned) under-weights graft vs the trained
+    # kernel and is retained ONLY as an explicit historical ablation.
+    if calibration.legacy_raw_graft_survival:
+        raw_graft_log_z = _masked_logsumexp(logits["bond_reroute"][0], raw_mask)
+        if not torch.isfinite(raw_graft_log_z):
+            raw_graft_log_z = productive_graft_log_z  # cyclic: empty raw mask -> quotient partition
+        graft_family_log_z = raw_graft_log_z
+    else:
+        graft_family_log_z = productive_graft_log_z
     raw_action_log_z = quotient_action_log_z.clone()
-    raw_action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = raw_graft_log_z
+    raw_action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = graft_family_log_z
     enabled = torch.isfinite(raw_action_log_z)
     raw_family_logits = _masked_family_logits(
         teacher._family_base_logits(batch, global_state),
@@ -517,9 +528,10 @@ def _build_analytic_pancake_quotient_context(
     delete_index = MARK_RULE_TO_INDEX["atom_delete"]
     graft_index = MARK_RULE_TO_INDEX["bond_reroute"]
     survival[delete_index] = exp(float(calibration.atom_delete_log_rate_adjustment))
-    if torch.isfinite(raw_graft_log_z) and torch.isfinite(productive_graft_log_z):
+    if torch.isfinite(graft_family_log_z) and torch.isfinite(productive_graft_log_z):
+        # production: graft_family_log_z == productive_graft_log_z (Zq) -> survival == 1.
         survival[graft_index] = torch.exp(
-            productive_graft_log_z - raw_graft_log_z
+            productive_graft_log_z - graft_family_log_z
         )
     else:
         survival[graft_index] = 0.0
@@ -537,7 +549,7 @@ def _build_analytic_pancake_quotient_context(
         group_log_mass = _masked_logsumexp(logits["bond_reroute"][0], group_mask)
         group_rates.append(
             raw_family_rates[graft_index]
-            * torch.exp(group_log_mass - raw_graft_log_z)
+            * torch.exp(group_log_mass - graft_family_log_z)
         )
     graft_successor_rates = (
         torch.stack(group_rates)
@@ -564,7 +576,9 @@ def _build_analytic_pancake_quotient_context(
         raw_total_hazard=raw_total_hazard.detach(),
         raw_family_rates=raw_family_rates.detach(),
         productive_survival_fractions=survival.detach(),
-        raw_graft_log_partition=raw_graft_log_z.detach(),
+        # partition actually used for the graft family normalization: Zq in production, Zr under the
+        # legacy ablation (equals productive_graft_log_partition in production).
+        raw_graft_log_partition=graft_family_log_z.detach(),
         productive_graft_log_partition=productive_graft_log_z.detach(),
     )
     return _AnalyticPancakeQuotientContext(
@@ -1207,11 +1221,14 @@ def build_calibrated_pancake_quotient_target(
     """Project the frozen pancake marked law onto productive molecular jumps."""
 
     with torch.no_grad():
+        # A7: default to the QUOTIENT graft partition (Zq) so the calibrated target matches the
+        # analytic sampler and the GM-trained kernel; the raw partition (Zr; self-graft thinning) is
+        # the named historical ablation.
         raw = _factorized_rate_table(
             teacher,
             state,
             time,
-            legacy_prequotient_graft=True,
+            legacy_prequotient_graft=calibration.legacy_raw_graft_survival,
         )
         productive_family_rates = raw.family_rates.clone()
         graft_index = MARK_RULE_TO_INDEX["bond_reroute"]

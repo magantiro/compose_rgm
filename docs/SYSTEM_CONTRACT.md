@@ -129,16 +129,18 @@ over the declared space `{non-graft coordinates} ∪ {graft successor groups}`, 
 and the raw sampler `sample_rewrite_mark` draws successors with that same `p_θ` (bootstrap-TV PASS, incl.
 neopentane's 12-fold graft group; `unseen=0`).
 
-**Cyclic-graft quotient (RESOLVED).** The pancake sampler's graft quotient corrects the de-novo *tree*-graft
-over-count via a raw-vs-quotient "survival" ratio whose raw mask is tree-gated (`:690,:714`). Cyclic graft
-is **already quotiented by the general canonical successor key** (self-grafts dropped at enumeration, aliases
-grouped) — the measure training normalizes graft over — so on a cyclic lead the empty raw partition falls
-back to the quotient partition, giving `survival[graft]=1` and finite rates
-(`canonical_successor_distillation.py`, cyclic-graft fix; verified `rate == Σ successor-group rates`, inert
-on trees). **Caveat (A7, pre-existing, owner decision):** the *tree*-graft path still uses `Zr+survival`,
-which does not equal training's `Zq` — a measure mismatch that does not affect B-edit editing (tree graft
-never fires on cyclic leads) but should be decided before relying on the pancake sampler in a de-novo/tree
-regime. De-novo generation itself uses the raw `Zq`-consistent sampler, not the pancake.
+**Graft quotient — full-Zq (RESOLVED, A2 + A7).** The pancake sampler normalizes the graft family AND each
+successor group over the **quotient partition `Zq`** for BOTH tree and cyclic grafts, so it induces exactly
+the GM-trained canonical-successor kernel that the raw `sample_rewrite_mark` sampler reproduces:
+`P_θ(x,y) = Σ_{a:T(x,a)=y} p_θ(a|x)`, group mass = logsumexp over the quotient encodings, `survival[graft]=1`.
+Cyclic graft is already quotiented by the general canonical successor key (self-grafts dropped, aliases
+grouped); tree graft now uses the same convention (the earlier `Zr`+survival tree path under-weighted graft
+vs training — 0.097 vs 0.136 on octane). Verified: the pancake family kernel equals the raw sampler's to
+`<1e-5` on tree/symmetric-tree/self-graft/cyclic/acyclic/post-ring-opening states, graft family mass = Σ
+successor-group rates, Monte-Carlo successor frequencies agree within the null band, and group
+representatives share one canonical successor (`tests/test_pancake_graft_kernel_equality.py`). The legacy
+`Zr`+survival convention is preserved only behind `PancakeQuotientCalibration.legacy_raw_graft_survival`
+(a named historical ablation, never the default).
 
 ## 8. The generator-matching training target
 
