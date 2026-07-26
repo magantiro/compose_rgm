@@ -1,0 +1,35 @@
+{
+  "manifest_version": 1,
+  "purpose": "Mark pre-fix editing outputs as INVALID and exclude them from any aggregation, table, or figure. Produced 2026-07-26 after the B-edit editing-sampler correctness audit.",
+  "superseded_by_commits": {
+    "A1_capability_propagation": "d26817c",
+    "A2_cyclic_graft_quotient": "207c76f"
+  },
+  "why_stale": "These runs went through AnalyticPancakeQuotientSampler BEFORE the audit fixes. Two defects make their editing/composition numbers structurally uninformative: (1) the sampler dropped the editing-capability flags, so it enumerated the DE-NOVO vocabulary rather than any editing vocabulary (fixed in A1); and (2) the de-novo tree-graft path uses a raw-partition + survival normalization (Zr+survival) that does not equal the quotient measure the GM loss trains (Zq) [A7, pre-existing, open]. They also predate any B-edit checkpoint, so they measured an editing/composition objective on a de-novo base that cannot edit real leads. Result was a negative HV delta and must not be cited as evidence about the editing paradigm.",
+  "stale_outputs": [
+    {
+      "path": "diagnostics/composition/composition_learned_vs_uniform.json",
+      "produced": "2026-07-22",
+      "status": "INVALID",
+      "exclude_from_aggregation": true,
+      "rerun_required": true,
+      "rerun_after": "a verified B-edit checkpoint exists and the editing controller runs on the post-fix pancake sampler (A1+A2), with the A7 tree-graft convention decided"
+    },
+    {
+      "path": "diagnostics/composition/composition_learned_vs_uniform_frozentime_fix.json",
+      "produced": "2026-07-23",
+      "status": "INVALID",
+      "exclude_from_aggregation": true,
+      "rerun_required": true,
+      "rerun_after": "a verified B-edit checkpoint exists and the editing controller runs on the post-fix pancake sampler (A1+A2), with the A7 tree-graft convention decided"
+    }
+  ],
+  "explicitly_not_invalidated": {
+    "note": "The de-novo Lineage-B SMC spine and rigor results are NOT invalidated by A1 (a de-novo checkpoint has all editing flags False, so dropping them changes nothing sampled). A7 (pancake tree-graft measure) may perturb de-novo graft *weighting* in pancake-sampled panels; re-confirm before headline use, but these remain the bankable claims-3/4 evidence.",
+    "paths_prefixes": [
+      "diagnostics/exactness/",
+      "diagnostics/reachability/",
+      "diagnostics/conditional_smc/"
+    ]
+  }
+}
