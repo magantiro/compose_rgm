@@ -14,12 +14,14 @@ decision rather than blindly changed, per the deriving agent's own recommendatio
 ### Committed audit state (frozen — do not verify against a dirty tree)
 - **A1** (capability propagation, ring-restate + ring-opening) → commit **`d26817c`**
 - **A2** (cyclic-graft successor quotient, `survival=1`) → commit **`207c76f`**
-- Docs + stale-results manifest → commit **`2f887bb`** (this record itself is a docs-only follow-up).
-- **Clean-worktree gate** — a *fresh* `git worktree` at `2f887bb`, pristine (empty `git status`), run with
-  the main venv interpreter and `PYTHONPATH=<worktree>/src`:
+- Docs + stale-results manifest → commit **`2f887bb`**; clean-gate record → **`4ef029b`**
+- **A7** (full-Zq graft normalization for tree + cyclic; legacy `Zr` behind a flag) → commit **`61bbcde`**
+- **Clean-worktree gate** — a *fresh* `git worktree` at HEAD **`61bbcde`**, pristine (empty `git status`),
+  run with the main venv interpreter and `PYTHONPATH=<worktree>/src`:
   `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src pytest tests/` →
-  **`446 passed, 6 warnings in 41.78s`**. No untracked source/test file is required for the pass; the
-  committed state verifies independently of the working tree's pre-existing uncommitted files.
+  **`453 passed, 6 warnings in 102.57s`** (446 base + 7 kernel-equality; A1/A2 tests are within the 446).
+  No untracked source/test file is required for the pass; the committed state verifies independently of
+  the working tree's pre-existing uncommitted files.
 - **Only** these files are part of the audit commits (the pre-existing uncommitted paper/script/diagnostic
   changes in the working tree are NOT included): `src/compose_v4/experiments/canonical_successor_distillation.py`,
   `tests/test_editing_sampler_capabilities.py` (6 tests), `docs/SYSTEM_CONTRACT.md`, `docs/AUDIT_REPORT.md`,
