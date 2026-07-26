@@ -331,6 +331,14 @@ def _factorized_rate_table(
             # trained on.  Omitting these silently falls back to the de-novo B vocabulary
             # (ring restate / clean ring opening never enumerated).
             compute_ring_restates=model.enable_ring_restates,
+            # Cyclic graft is already quotiented by the general canonical successor key (self-grafts
+            # dropped at enumeration, aliases grouped by canonical successor) -- exactly the measure
+            # training normalizes graft over.  The student path (legacy=False) normalizes over the
+            # quotient mask and its group loop guards a non-finite denominator, so the gate flip
+            # suffices here.  NOTE: the legacy=True path (build_calibrated_pancake_quotient_target)
+            # normalizes over the tree-gated raw mask, which is empty on cyclic leads -> it silently
+            # drops cyclic graft mass; that distillation-teacher path is not the B-edit sampling path.
+            compute_cyclic_graft=model.enable_cyclic_graft,
             compute_ring_opening=model.enable_ring_opening,
         )
         model._sampling_state_cache[state_cache_key] = cached_batch
@@ -448,6 +456,9 @@ def _build_analytic_pancake_quotient_context(
             # editing vocabulary, not the de-novo default, or a B-edit checkpoint samples the
             # wrong process (its wide organic heads load but their families stay masked-off).
             compute_ring_restates=teacher.enable_ring_restates,
+            # Cyclic graft: enumerate it; the raw-partition fallback below makes the quotient
+            # partition the graft partition (survival == 1) on cyclic leads, matching training.
+            compute_cyclic_graft=teacher.enable_cyclic_graft,
             compute_ring_opening=teacher.enable_ring_opening,
         )
         teacher._sampling_state_cache[state_cache_key] = cached_batch
@@ -475,6 +486,17 @@ def _build_analytic_pancake_quotient_context(
         logits["bond_reroute"][0],
         quotient_mask,
     )
+    # Cyclic-graft regime: the legacy pre-quotient raw mask (_legacy_prequotient_graft_tables) is
+    # tree-gated and EMPTY on a cyclic lead, but the quotient (cyclic) mask is already the productive
+    # graft support -- self-grafts were dropped at enumeration and aliases were grouped by the general
+    # canonical successor key, which is exactly the measure B-edit training normalizes graft over
+    # (there is no legacy raw cyclic normalization).  Fall the raw partition back to the quotient
+    # partition so survival[graft] == exp(Zq - Zq) == 1 (no raw over-count to thin) and every
+    # downstream use (family softmax, survival, group logsumexp) stays finite.  A tree state ALWAYS
+    # has a finite raw partition (raw non-empty <=> all_single_tree), so this never fires on trees and
+    # leaves the validated de-novo tree survival untouched.
+    if not torch.isfinite(raw_graft_log_z):
+        raw_graft_log_z = productive_graft_log_z
     raw_action_log_z = quotient_action_log_z.clone()
     raw_action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = raw_graft_log_z
     enabled = torch.isfinite(raw_action_log_z)

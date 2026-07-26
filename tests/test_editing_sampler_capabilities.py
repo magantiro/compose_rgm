@@ -134,6 +134,42 @@ def test_pancake_sampler_clean_ring_opening_preserves_heteroatom() -> None:
     assert not struct_keeps_n, "structured delete unexpectedly preserved N (mutation ineffective)"
 
 
+def test_pancake_sampler_cyclic_graft_finite_and_matches_quotient() -> None:
+    # Cyclic graft (pendant relocation on a cyclic lead) is quotiented by the GENERAL canonical
+    # successor key (self-grafts dropped, aliases grouped), so the pancake sampler's raw graft
+    # partition (tree-gated, empty on a cycle) falls back to the quotient partition -> survival == 1.
+    # The productive graft rate must be FINITE (no NaN), positive, equal to the sum of its
+    # successor-group rates, and sample valid+connected successors. Regression for the raw->quotient
+    # fallback (removing it reintroduces 0*exp(mass-(-inf)) = NaN on cyclic leads).
+    catalog = _catalog()
+    model = _model(catalog, enable_cyclic_graft=True)
+    sampler = AnalyticPancakeQuotientSampler(model, calibration=PancakeQuotientCalibration())
+    state = _state("c1ccccc1CCC")  # propylbenzene: aromatic ring + pendant propyl
+    tbl = sampler.rate_table(state, 0.5)
+    gi = MARK_RULE_TO_INDEX["bond_reroute"]
+    rate = float(tbl.productive_family_rates[gi])
+    assert np.isfinite(rate) and rate > 0.0, "cyclic graft rate must be finite & positive (no NaN)"
+    assert np.isfinite(float(tbl.productive_total_hazard))
+    # survival == 1: graft family mass equals the sum of its successor-group rates.
+    assert np.isclose(rate, float(tbl.graft_successor_rates.sum()), rtol=1e-5)
+    succ = _sample_family_successors(model, state, "bond_reroute")
+    assert succ, "cyclic graft never sampled though rate > 0"
+    assert all(is_valid_state(y) and is_connected_or_null(y) for y in succ)
+
+
+def test_pancake_cyclic_graft_fix_inert_on_trees() -> None:
+    # The raw->quotient fallback keys on "raw partition empty" (<=> not all_single_tree), so it must
+    # NEVER fire on a tree: a tree lead's graft rate is identical whether cyclic graft is enabled.
+    catalog = _catalog()
+    tree = _state("CCCCCCCC")  # octane: all-single tree, de-novo graft regime
+    gi = MARK_RULE_TO_INDEX["bond_reroute"]
+    r_off = float(_sampler(_model(catalog, enable_cyclic_graft=False)).rate_table(tree, 0.5)
+                  .productive_family_rates[gi])
+    r_on = float(_sampler(_model(catalog, enable_cyclic_graft=True)).rate_table(tree, 0.5)
+                 .productive_family_rates[gi])
+    assert np.isclose(r_off, r_on, rtol=1e-6), "cyclic-graft fix perturbed the de-novo tree graft rate"
+
+
 def test_pancake_sampler_heteroatom_scan_reaches_ring_atom_bioisosterism() -> None:
     # enable_heteroatom_scan ungates ring atoms in the atom_restate dense mask, so ring-atom element
     # swaps (pyridine ring N -> C) become sampleable; without it only peripheral atoms restate.
