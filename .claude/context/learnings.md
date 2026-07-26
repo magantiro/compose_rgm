@@ -188,3 +188,40 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   exclude the reinserted bonds. Only reachable via `inverse_step` on a `ring_system_delete` (untested) ->
   latent. **LESSON reaffirmed:** split the finite-loss smoke by direction -- the mixed batch hid that
   DELETE was fine and only GROW was inf.
+
+## 2026-07-26
+- **Pre-launch B-edit audit (3 independent code sweeps + empirical model runs) found + fixed 2 real
+  blockers; everything else verified clean.** Local gate green throughout (440 + ruff).
+- **CHARGE was a training blocker (fixed).** ~6% of GuacaMol and 29% of the Jin-800 leads are charged
+  (nitro/N-oxide/ammonium). Charged atoms broke teacher-scoring TWO ways: (1) `class_index` was called
+  WITHOUT the atom's `formal_charge` at the two teacher sites (`factorized_tracelet_rate_model.py:3812,
+  :3836`), so for a charged restate/insert (an inverse mark reconstructing the lead's aromatic N+) it
+  returned `None` → `logits[...,None]` = a vocab-wide `[15]` tensor → `RuntimeError` in
+  `_selected_mark_log_probability`; (2) `ring_system_restate` on a charged ring → "outside exact dynamic
+  candidates". The dense edit heads encode only NEUTRAL `(element,valence)` classes, so charged atoms are
+  unrepresentable. **Fix = (a) pass `formal_charge` to `class_index` (neutral atoms byte-identical), and
+  (b) PROTECT charged atoms in the corruption** (`source_corruption.py` `_touches_charged`: no edit may
+  change a charged atom's element/charge/H/bonds — a uniform successor-level guard, slot-stable states).
+  Charges are preserved (verified 219/219), edits land on the neutral scaffold. This is a scope, not a
+  limitation — charge/protonation edits are ~out-of-scope for (QED, similarity). **LESSON: the dev
+  finite-loss smoke used small NEUTRAL molecules and never hit a charged restate target; always smoke on
+  a charged, drug-like lead.**
+- **Inference LOAD side wired (experiment blocker, fixed).** `load_factorized_rollout_checkpoint`
+  (`evaluate_tracelet_rollouts.py`) reconstructed the model with default CNOF vocab + `enable_*` off, so a
+  B-edit organic checkpoint CRASHED on load (15-wide vs 4-wide heads) and a CNOF-corrupted checkpoint
+  silently sampled like de-novo B. Fix: persist `organic_vocabulary` in `checkpoint_metadata`
+  (`train_tracelet_cnof_gate.py`) and, at load, set `atom_vocabulary=ORGANIC_VOCABULARY` +
+  `enable_*=corrupted_prior_mix` (absent keys → CNOF + off, so de-novo B loads byte-identical). Verified:
+  organic ckpt → vocab 15 + all flags on; de-novo ckpt → vocab 4 + off.
+- **Ring open/close, corrected (I had it wrong first).** OPEN (`ring_system_delete`, clean) covers all
+  sizes 3–7, N/O/S (heteroatoms PRESERVED), fused/spiro/bridged. CLOSE works: the MODEL SAMPLER proposes
+  `ring_system_grow` on SATURATED chains for EVERY element (C/N/O/S/P, ~15–20%). **Do NOT test grow with
+  `enumerate_ring_system_grows` — it returns 0 while the model samples grow 74× (it is NOT the model's
+  grow enumerator).** The open form is Kekulé (unsaturated) but grow needs a SATURATED chain, so the
+  round-trip is open → `bond_reorder`(saturate) → grow → `restate`(re-aromatize). Only genuine gap: S/P
+  *aromatic* ring BUILDING (electronic model is CNOF; `factorized_tracelet_rate_model.py:1665` guard) —
+  deferred, doesn't bite editing (leads' S/P rings are read/opened/restated/grafted, not built).
+- **Hypervalent = no sink (verified).** S₂/S₄/S₆, P₃/P₅ all resolve their `(element,valence)` class and
+  round-trip both directions (2/2) → every valence-change edit has a working inverse. `cycle_insert`/
+  `cycle_attach`/`ring_ear_insert` are legacy null-prior ops, dead for B and B-edit (correct — ring adds
+  go through `ring_system_grow`).

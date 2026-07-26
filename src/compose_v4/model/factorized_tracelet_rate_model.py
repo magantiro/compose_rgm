@@ -41,7 +41,7 @@ from compose_v4.chem.molecular_graph import (
     SCAR_IDX,
     is_element,
 )
-from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES, CNOF_VALENCE
+from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES
 from compose_v4.rewrite.operators import (
     AtomDelete,
     AtomInsert,
@@ -1830,6 +1830,13 @@ class FactorizedTraceletRateModel(nn.Module):
             persistent=False,
         )
 
+        if empirical_mark_priors is not None and len(self.atom_vocabulary) != len(CNOF_VOCABULARY):
+            # Empirical mark priors are CNOF-shaped (validated against len(CNOF_ATOM_TYPES)); they would
+            # silently shape-mismatch the wider organic heads. The organic model uses zero priors.
+            raise NotImplementedError(
+                "empirical mark priors are CNOF-shaped and unsupported with a non-CNOF atom_vocabulary; "
+                "construct the organic model with empirical_mark_priors=None"
+            )
         if empirical_mark_priors is None:
             root_atom_log_prior = torch.zeros(len(self.atom_vocabulary))
             connected_atom_order_log_prior = torch.zeros(
@@ -3806,6 +3813,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 int(action.atom_type),
                 sum(int(BOND_CLASS_TO_H_CHANGE[int(o)]) for _, o in action.neighbors),
                 int(action.implicit_h_count),
+                formal_charge=int(action.formal_charge),
             )
             if not action.neighbors:
                 return (
@@ -3827,7 +3835,8 @@ class FactorizedTraceletRateModel(nn.Module):
                 for o in batch.bonds[batch_index, int(action.v)]
             )
             atom_index = self.atom_vocabulary.class_index(
-                int(action.atom_type), bond_valence, int(action.implicit_h_count)
+                int(action.atom_type), bond_valence, int(action.implicit_h_count),
+                formal_charge=int(action.formal_charge),
             )
             key = (batch_index, int(action.v), atom_index)
             return logits["atom_restate"][key], masks["atom_restate"][key]

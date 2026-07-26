@@ -98,6 +98,28 @@ def _cycle_edges(node: MolecularGraph):
     return {frozenset(e) for e in graph.edges()} - {frozenset(e) for e in nx.bridges(graph)}
 
 
+def _charged_atoms(node: MolecularGraph):
+    """Real atoms carrying a nonzero formal charge. The dense edit heads represent only NEUTRAL
+    (element, valence) classes, so the corruption PROTECTS charged atoms: no edit may touch a charged
+    atom's element/charge or its bond environment (which would emit a teacher mark the heads cannot
+    score -- e.g. an inverse ``atom_restate`` reconstructing an aromatic N+, or a ``ring_system_restate``
+    over a charged ring). Charged centers (nitro, ammonium, carboxylate, N-oxide) are kept fixed -- a
+    protected-atom scope, chemically sensible for (QED, similarity) editing, not a limitation."""
+    real = is_element(node.atom_types)
+    return tuple(int(v) for v in np.flatnonzero(real & (node.formal_charges != 0)))
+
+
+def _touches_charged(node: MolecularGraph, succ: MolecularGraph, charged) -> bool:
+    """True if ``succ`` changed any charged atom's element, charge, H, or bonds (slot-stable states)."""
+    return any(
+        int(succ.atom_types[c]) != int(node.atom_types[c])
+        or int(succ.formal_charges[c]) != int(node.formal_charges[c])
+        or int(succ.implicit_h_counts[c]) != int(node.implicit_h_counts[c])
+        or not np.array_equal(succ.bonds[c], node.bonds[c])
+        for c in charged
+    )
+
+
 def corrupt_to_source(
     target: MolecularGraph,
     depth: int,
@@ -123,6 +145,7 @@ def corrupt_to_source(
         base_rings = Descriptors.RingCount(m)
         cur_key = canonical_state_key(node)
         cycle_edges = _cycle_edges(node)
+        charged = _charged_atoms(node)
         by_family: dict[str, list] = {}
         # Model-consistent micro fiber (canonical derived h-counts, not fiber._candidate_actions).
         # atom_restate reaches RING atoms too (heteroatom scanning; the model ungates it via
@@ -176,6 +199,8 @@ def corrupt_to_source(
                     and Descriptors.RingCount(sm) != base_rings
                 ):
                     continue
+                if charged and _touches_charged(node, succ, charged):
+                    continue  # protect charged atoms -- the neutral-class heads cannot score the mark
                 node = succ
                 steps.append((rule_name, action))
                 states.append(node)
