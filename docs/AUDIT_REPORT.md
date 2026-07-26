@@ -14,10 +14,12 @@ decision rather than blindly changed, per the deriving agent's own recommendatio
 ### Committed audit state (frozen — do not verify against a dirty tree)
 - **A1** (capability propagation, ring-restate + ring-opening) → commit **`d26817c`**
 - **A2** (cyclic-graft successor quotient, `survival=1`) → commit **`207c76f`**
-- Docs + stale-results manifest → commit **`<DOCS_COMMIT>`** (recorded on commit)
-- **Clean-worktree gate** (fresh checkout at the audited HEAD, no dirty tree):
+- Docs + stale-results manifest → commit **`2f887bb`** (this record itself is a docs-only follow-up).
+- **Clean-worktree gate** — a *fresh* `git worktree` at `2f887bb`, pristine (empty `git status`), run with
+  the main venv interpreter and `PYTHONPATH=<worktree>/src`:
   `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src pytest tests/` →
-  **`<GATE_OUTPUT>`** (recorded after the clean-worktree run).
+  **`446 passed, 6 warnings in 41.78s`**. No untracked source/test file is required for the pass; the
+  committed state verifies independently of the working tree's pre-existing uncommitted files.
 - **Only** these files are part of the audit commits (the pre-existing uncommitted paper/script/diagnostic
   changes in the working tree are NOT included): `src/compose_v4/experiments/canonical_successor_distillation.py`,
   `tests/test_editing_sampler_capabilities.py` (6 tests), `docs/SYSTEM_CONTRACT.md`, `docs/AUDIT_REPORT.md`,
