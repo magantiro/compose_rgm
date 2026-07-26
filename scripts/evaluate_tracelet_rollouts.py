@@ -17,7 +17,7 @@ from pathlib import Path
 
 import torch
 
-from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY, molecular_graph_to_smiles
 from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_calibration import undesirable_small_ring_mask
@@ -165,6 +165,9 @@ def load_factorized_rollout_checkpoint(
         if empirical_prior_payload is None
         else FactorizedMarkEmpiricalPriors.from_dict(empirical_prior_payload)
     )
+    # B-edit checkpoints carry the wider organic heads + editing families; reconstruct them from the
+    # metadata (absent on de-novo B -> CNOF vocab + editing families off, byte-identical to before).
+    corrupted_prior_mix = bool(payload.get("corrupted_prior_mix"))
     model = FactorizedTraceletRateModel(
         payload["ring_catalog"],
         hidden_dim=int(payload["hidden_dim"]),
@@ -182,6 +185,13 @@ def load_factorized_rollout_checkpoint(
         ring_template_factorization=str(
             payload.get("ring_template_factorization", "flat")
         ),
+        atom_vocabulary=(
+            ORGANIC_VOCABULARY if bool(payload.get("organic_vocabulary")) else None
+        ),
+        enable_ring_restates=corrupted_prior_mix,
+        enable_cyclic_graft=corrupted_prior_mix,
+        enable_heteroatom_scan=corrupted_prior_mix,
+        enable_ring_opening=corrupted_prior_mix,
     )
     incompatible = model.load_state_dict(payload["state_dict"], strict=False)
     missing_keys = set(incompatible.missing_keys)

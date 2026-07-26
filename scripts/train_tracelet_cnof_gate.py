@@ -2613,6 +2613,9 @@ def main() -> None:
         "model": args.model,
         "training_backend": args.training_backend,
         "corrupted_prior_mix": bool(args.corrupted_prior_mix),
+        # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
+        # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
+        "organic_vocabulary": bool(args.organic_vocabulary),
         "use_bf16": args.use_bf16,
         "data_workers": args.data_workers,
         "data_prefetch_factor": args.data_prefetch_factor,
