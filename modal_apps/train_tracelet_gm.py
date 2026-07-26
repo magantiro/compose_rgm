@@ -696,6 +696,7 @@ def _run_remote(
     training_support_wait_seconds: float = 600.0,
     minimum_training_support_rows_per_second: float = 0.0,
     corrupted_prior_mix: bool = False,
+    organic_vocabulary: bool = False,
 ) -> dict[str, object]:
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
 
@@ -743,6 +744,10 @@ def _run_remote(
         # Emit --corrupted-prior-mix to the gate (fine-tune B -> B-edit): mixed corrupted-prior records
         # + the ring_system_restate / cyclic bond_reroute editing marks. Weights preserved by warm-start.
         recipe["arguments"]["corrupted_prior_mix"] = True
+    if organic_vocabulary:
+        # Emit --organic-vocabulary: predict/edit the whole drug-like organic subset (15 (element,
+        # valence) classes over C/N/O/F/S/P/Cl/Br/I/B) instead of CNOF-only. Warm-start B compatibly.
+        recipe["arguments"]["organic_vocabulary"] = True
     if path_cache_source_run is not None:
         _validate_run_label(path_cache_source_run, field="path-cache source run")
         source_path_cache = (
@@ -1432,6 +1437,7 @@ def train_stage(
     initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
     compatible_initialization: bool = False,
     corrupted_prior_mix: bool = False,
+    organic_vocabulary: bool = False,
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
@@ -1448,6 +1454,7 @@ def train_stage(
         initialization_checkpoint_name=initialization_checkpoint_name,
         compatible_initialization=compatible_initialization,
         corrupted_prior_mix=corrupted_prior_mix,
+        organic_vocabulary=organic_vocabulary,
     )
 
 
@@ -2267,6 +2274,7 @@ def main(
     initialize_from_source_checkpoint: bool = False,
     initialize_compatible_from_source_checkpoint: bool = False,
     corrupted_prior_mix: bool = False,
+    organic_vocabulary: bool = False,
 ) -> None:
     modes = sum(
         (
@@ -2503,6 +2511,7 @@ def main(
             checkpoint_name,
             initialize_compatible_from_source_checkpoint,
             corrupted_prior_mix,
+            organic_vocabulary,
         )
         phase = "train_spawned"
     else:
