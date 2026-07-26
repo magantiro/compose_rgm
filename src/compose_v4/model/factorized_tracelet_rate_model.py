@@ -1657,6 +1657,17 @@ class FactorizedTraceletRateModel(nn.Module):
             else CNOF_RING_ELEMENTS
         )
         self._ring_element_to_index = {int(e): i for i, e in enumerate(self.ring_atom_elements)}
+        if tuple(self.ring_atom_elements) != tuple(CNOF_RING_ELEMENTS):
+            # The organic ring head is wired, but the ring-GENERATION electronic model (Huckel pi-electron
+            # decoder + cached category masks) is still CNOF -- de-novo heteroaromatic BUILDING is a
+            # scoped follow-up. Editing existing heteroaromatic rings (read + destroy + restate + graft)
+            # is fully organic and uses the default CNOF ring head, so guard the un-wired combination.
+            raise NotImplementedError(
+                "ring_atom_elements beyond CNOF requires the organic ring-generation electronic model "
+                "(de-novo heteroaromatic ring building), which is not wired; the organic editing model "
+                "uses the default CNOF ring head (leads' heteroaromatic rings are read and edited, not "
+                "built de-novo)."
+            )
         self.hidden_dim = int(hidden_dim)
         self.message_passing_steps = int(message_passing_steps)
         self.mark_dim = int(mark_dim)

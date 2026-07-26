@@ -15,6 +15,8 @@ import numpy as np
 import torch
 
 from compose_v4.chem.molecular_graph import (
+    CNOF_VOCABULARY,
+    ORGANIC_VOCABULARY,
     molecular_graph_to_smiles,
     smiles_to_molecular_graph,
 )
@@ -241,6 +243,7 @@ def _training_support_cache_signature(
     progress_stratification_fraction: float,
     ring_electronic_mode: str,
     corrupted_prior_mix: bool = False,
+    organic_vocabulary: bool = False,
 ) -> dict[str, object]:
     """Identify the infinite deterministic row stream independent of its horizon."""
 
@@ -258,6 +261,8 @@ def _training_support_cache_signature(
         # The mixed (de-novo + corrupted-prior) records are a different deterministic row stream than
         # B's carbon-only cache; this discriminator forces a recompile instead of a silent misalignment.
         "corrupted_prior_mix": bool(corrupted_prior_mix),
+        # Organic (15-class) teacher marks are a different deterministic row stream than the CNOF ones.
+        "organic_vocabulary": bool(organic_vocabulary),
     }
 
 
@@ -1153,6 +1158,15 @@ def main() -> None:
         "ring_system_restate + cyclic bond_reroute editing marks (fine-tune B -> B-edit)",
     )
     parser.add_argument(
+        "--organic-vocabulary",
+        action="store_true",
+        help="predict/edit the whole drug-like organic subset (C,N,O,F,S,P,Cl,Br,I,B) via 15 "
+        "(element, valence) atom classes instead of CNOF-only; the micro editing path + the corruption "
+        "go organic. Ring atom GENERATION stays CNOF (heteroaromatic rings are read + edited, not built "
+        "de-novo). Warm-start B with --initialize-compatible-checkpoint (body/embeddings transfer, the "
+        "wider atom-type heads keep fresh init).",
+    )
+    parser.add_argument(
         "--corrupted-prior-count",
         type=int,
         default=6000,
@@ -2038,6 +2052,7 @@ def main() -> None:
             depth_max=5,
             seed=args.seed + 7,
             catalog=ring_catalog,  # enables the clean ring-opening corruption family (de-cyclize)
+            vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else CNOF_VOCABULARY,
         )
         # Keep an equal-sized de-novo subset so uniform sampling sees a real ~50/50 edit ratio; the model
         # already knows de-novo via the warm-start, so a subset suffices for retention. (Sizing this to
@@ -2066,6 +2081,7 @@ def main() -> None:
             progress_stratification_fraction=args.progress_stratification_fraction,
             ring_electronic_mode=args.ring_electronic_mode,
             corrupted_prior_mix=args.corrupted_prior_mix,
+            organic_vocabulary=args.organic_vocabulary,
         )
         training_support_cache = ShardedTrainingSupportCache(
             args.training_support_cache_dir,
@@ -2569,6 +2585,7 @@ def main() -> None:
             enable_cyclic_graft=args.corrupted_prior_mix,
             enable_heteroatom_scan=args.corrupted_prior_mix,
             enable_ring_opening=args.corrupted_prior_mix,
+            atom_vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else None,
         ).to(device)
     elif args.model == "from_scratch":
         model = TraceletRateModel(
