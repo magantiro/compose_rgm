@@ -203,6 +203,8 @@ def load_factorized_rollout_checkpoint(
         enable_ring_opening=corrupted_prior_mix,
         # Compositional ring-op families (cycle_close/cycle_open); absent metadata -> off -> byte-identical.
         enable_cycle_ops=bool(payload.get("enable_cycle_ops")),
+        # RING_CORE_V1 disables the legacy whole-ring grow macro; absent metadata -> True -> byte-identical.
+        enable_ring_grow_macro=bool(payload.get("enable_ring_grow_macro", True)),
     )
     incompatible = model.load_state_dict(payload["state_dict"], strict=False)
     missing_keys = set(incompatible.missing_keys)
