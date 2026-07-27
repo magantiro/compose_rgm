@@ -23,6 +23,7 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.cnof import load_cnof_corpus_split
+from compose_v4.data.organic_corpus import BROAD_ORGANIC_V1, load_organic_corpus_split
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_metrics
@@ -1387,16 +1388,41 @@ def main() -> None:
         ),
         flush=True,
     )
-    split = load_cnof_corpus_split(
-        args.smiles_file,
-        train_size=args.train_size,
-        validation_size=args.validation_size,
-        test_size=args.test_size,
-        max_atoms=args.max_atoms,
-        seed=args.seed,
-        scan_all=not args.fast_split,
-        workers=args.corpus_workers,
-    )
+    # Broad-organic B-edit uses the SHARED scope loader (the same mining/validation/eval use) so the
+    # production edit path never runs the CNOF-neutral filter. The CNOF loader stays only for the de-novo
+    # CNOF base / ablation (organic_vocabulary off).
+    if args.organic_vocabulary:
+        corpus_scope = BROAD_ORGANIC_V1
+        if args.max_atoms < corpus_scope.max_atoms:
+            raise ValueError(
+                f"--max-atoms {args.max_atoms} < scope max_atoms {corpus_scope.max_atoms}; the model "
+                "representation must fit every scope-eligible molecule")
+        split = load_organic_corpus_split(
+            args.smiles_file,
+            scope=corpus_scope,
+            train_size=args.train_size,
+            validation_size=args.validation_size,
+            test_size=args.test_size,
+            seed=args.seed,
+            scan_all=not args.fast_split,
+            workers=args.corpus_workers,
+        )
+        corpus_scope_descriptor = split.scope
+        print(json.dumps({"phase": "corpus_scope", **corpus_scope_descriptor,
+                          "census": {k: split.census[k] for k in ("retained", "total", "rejected")}},
+                         sort_keys=True), flush=True)
+    else:
+        corpus_scope_descriptor = {"scope_name": "cnof_neutral", "scope_hash": None}
+        split = load_cnof_corpus_split(
+            args.smiles_file,
+            train_size=args.train_size,
+            validation_size=args.validation_size,
+            test_size=args.test_size,
+            max_atoms=args.max_atoms,
+            seed=args.seed,
+            scan_all=not args.fast_split,
+            workers=args.corpus_workers,
+        )
     print(json.dumps({"phase": "split_loaded"}), flush=True)
     tree_source_prior = None
     if args.source_prior == "carbon_tree":
@@ -2658,6 +2684,10 @@ def main() -> None:
         # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
         # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
         "organic_vocabulary": bool(args.organic_vocabulary),
+        # Pin the corpus SCOPE so any data/checkpoint load under a different scope can fail loudly (mining,
+        # training, validation, sampling, eval must all agree on the same broad-organic scope).
+        "corpus_scope": corpus_scope_descriptor.get("scope_name"),
+        "corpus_scope_hash": corpus_scope_descriptor.get("scope_hash"),
         # Pin the versioned ring-system definition used for corruption (clean ring-opening), enumeration,
         # the executor, and sampling, so a checkpoint records the exact catalog it was trained against.
         "ring_catalog_fingerprint": (
