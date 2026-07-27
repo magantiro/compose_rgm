@@ -118,8 +118,13 @@ def _read_smiles_file(path: Path, *, limit: int) -> tuple[str, ...]:
 
 def load_factorized_rollout_checkpoint(
     path: Path,
+    *,
+    expected_scope_hash: str | None = None,
 ) -> tuple[FactorizedTraceletRateModel, dict[str, object]]:
-    """Reconstruct a rollout-ready model and validate inference metadata."""
+    """Reconstruct a rollout-ready model and validate inference metadata. If ``expected_scope_hash`` is
+    given, the checkpoint's persisted ``corpus_scope_hash`` must match it -- loading a model trained under a
+    different corpus scope (e.g. CNOF-neutral vs broad-organic) fails loudly rather than sampling silently
+    off-scope."""
 
     raw_payload = torch.load(path, map_location="cpu", weights_only=False)
     if not isinstance(raw_payload, dict):
@@ -155,6 +160,10 @@ def load_factorized_rollout_checkpoint(
     missing = sorted(required - payload.keys())
     if missing:
         raise ValueError(f"checkpoint lacks rollout metadata: {missing}")
+    if expected_scope_hash is not None and payload.get("corpus_scope_hash") != expected_scope_hash:
+        raise ValueError(
+            f"checkpoint corpus_scope_hash {payload.get('corpus_scope_hash')!r} != expected "
+            f"{expected_scope_hash!r}; refusing to load a model trained under a different corpus scope")
     if payload["training_backend"] != "factorized_marks":
         raise ValueError("rollout-only evaluation currently requires factorized_marks")
     if payload["source_prior"] != "carbon_tree":
