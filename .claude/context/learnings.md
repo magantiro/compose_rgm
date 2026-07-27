@@ -270,3 +270,23 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   at the committed launch tag (never the dirty dev tree), gated by `prelaunch_gate.py`; a `_provenance`
   git call + `corpus_scope_hash` in every checkpoint/manifest so a cross-scope load fails loudly
   (`load_factorized_rollout_checkpoint(expected_scope_hash=...)`, `broad_preflight_gate.py`).
+- **Compositional ring support RESOLVES the §9 "ring_system_grow fresh AND unsupervised" finding at the
+  SUPPORT level (not by fixing the macro).** The redesign (owner-authorized, overrides "don't touch audited
+  operator semantics"): ring generation SUPPORT = compositional `cycle_close`/`cycle_open` (add/remove a
+  single non-bridge ring bond = `BondInsert`/`BondDelete`), which round-trip 400/400 and are densely
+  supervised by `build_cycle_op_records` (real molecule → per-ring-bond open/close, both directions). The
+  finite whole-ring catalog / `ring_system_grow` macro is ACCELERATION only and must NOT define support.
+  Wired as `enable_cycle_ops` (default OFF → B byte-identical) overriding the dead `cycle_insert`/
+  `cycle_attach` family slots 5/6, so `family_head` width stays 10 and the warm-start is strict-safe. The
+  `--cycle-op-mix` chain is end-to-end: gate → Modal recipe (`build_tracelet_recipe_argv` bool → bare flag)
+  → inference load (`enable_cycle_ops=bool(payload.get(...))`, absent → off → byte-identical). Subtype-gate
+  run on 150 held-out broad-organic leads: cycle_close/cycle_open **588 targets each** + all 7 corruption
+  families ≥44 → `GO_SUBTYPE_SUPERVISION`. See [[paper-master-plan]].
+- **GOTCHA — a subtype-supervision audit MUST alias executor rule_names to their scoring family.** The
+  cycle-op teacher marks are recorded under EXECUTOR names (`bond_insert`/`bond_delete`) but the dense head
+  scores them under FAMILIES `cycle_insert`/`cycle_attach` (via `_CYCLE_OP_EXECUTOR_TO_FAMILY` in the rate
+  model). Counting raw rule_names reports the cycle ops as unsupervised even when they are the most-supervised
+  families — always pass `family_aliases=_CYCLE_OP_EXECUTOR_TO_FAMILY` to
+  `operator_subtype_supervision_gate.check_operator_subtype_supervision`. The gate deliberately NO_GOs if
+  `ring_system_grow` is enabled before its P4 K-macro supervision lands (proves it catches the macro gap,
+  not silently passes — the exact false-positive `cold_vocab_audit` had).
