@@ -201,6 +201,8 @@ def load_factorized_rollout_checkpoint(
         enable_cyclic_graft=corrupted_prior_mix,
         enable_heteroatom_scan=corrupted_prior_mix,
         enable_ring_opening=corrupted_prior_mix,
+        # Compositional ring-op families (cycle_close/cycle_open); absent metadata -> off -> byte-identical.
+        enable_cycle_ops=bool(payload.get("enable_cycle_ops")),
     )
     incompatible = model.load_state_dict(payload["state_dict"], strict=False)
     missing_keys = set(incompatible.missing_keys)
