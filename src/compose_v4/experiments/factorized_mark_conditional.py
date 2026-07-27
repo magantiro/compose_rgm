@@ -94,6 +94,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
         condition_dropout_probability: float = 0.0,
         ring_family_mass_mode: str = "boolean",
+        record_index_sampler: object | None = None,
     ) -> None:
         if not records:
             raise ValueError("factorized mark training records must be non-empty")
@@ -149,6 +150,12 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self.target_property_conditions = target_property_conditions
         self.condition_dropout_probability = float(condition_dropout_probability)
         self.ring_family_mass_mode = str(ring_family_mass_mode)
+        # Optional hierarchical record sampler (layer -> curriculum bin -> example). None -> uniform draw
+        # over records, byte-identical to the de-novo path. Must expose a stateless ``draw(rng) -> int``.
+        if record_index_sampler is not None and len(getattr(record_index_sampler, "tags", records)) \
+                != len(records):
+            raise ValueError("record_index_sampler tags must align 1:1 with the training records")
+        self.record_index_sampler = record_index_sampler
         self._ring_support_model: FactorizedTraceletRateModel | None = None
         self._ring_support_examples_since_reset = 0
 
@@ -184,7 +191,10 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             raise IndexError(index)
         absolute_index = self.start_index + int(index)
         rng = np.random.default_rng(np.random.SeedSequence((self.seed, absolute_index)))
-        record = self.records[int(rng.integers(len(self.records)))]
+        if self.record_index_sampler is not None:
+            record = self.records[int(self.record_index_sampler.draw(rng))]
+        else:
+            record = self.records[int(rng.integers(len(self.records)))]
         if rng.random() < self.late_time_fraction:
             operational_time = float(rng.uniform(0.0, self.operational_horizon))
             time = 1.0 - exp(-operational_time)
@@ -441,6 +451,7 @@ def factorized_mark_loader(
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
+    record_index_sampler: object | None = None,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
         raise ValueError("start step lies outside the training horizon")
@@ -464,6 +475,7 @@ def factorized_mark_loader(
         target_property_conditions=target_property_conditions,
         condition_dropout_probability=condition_dropout_probability,
         ring_family_mass_mode=ring_family_mass_mode,
+        record_index_sampler=record_index_sampler,
     )
     options: dict[str, Any] = {}
     if workers > 0:
@@ -968,6 +980,7 @@ def train_factorized_mark_model(
     target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
     condition_dropout_probability: float = 0.0,
     trainable_parameter_scope: str = "all",
+    record_index_sampler: object | None = None,
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
         raise ValueError("steps, batch size, and learning rate must be positive")
@@ -1098,6 +1111,7 @@ def train_factorized_mark_model(
         compute_ring_restates=model.enable_ring_restates,
         compute_cyclic_graft=model.enable_cyclic_graft,
         compute_ring_opening=model.enable_ring_opening,
+        record_index_sampler=record_index_sampler,
     )
     timing_loop_started = perf_counter()
     iterator: Iterator[FactorizedMarkBatch] = iter(loader)

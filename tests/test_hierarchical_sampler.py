@@ -68,6 +68,64 @@ def test_deterministic_given_seed() -> None:
     assert len(list(HierarchicalMarkSampler(tags, **kw))) == 500
 
 
+def test_draw_is_stateless_and_reweights_layers() -> None:
+    import numpy as np
+    tags = _corpus()  # 90% corruption / 10% mmp by count
+    sampler = HierarchicalMarkSampler(tags, layer_weights={CORRUPTION: 0.5, MMP: 0.5}, seed=0)
+    rng = np.random.default_rng(0)
+    layers = Counter(tags[sampler.draw(rng)].layer for _ in range(4000))
+    assert 0.42 < layers[MMP] / 4000 < 0.58                       # draws the configured 50/50
+    # weights == counts reproduces the count ratio.
+    uni = HierarchicalMarkSampler(tags, layer_weights={CORRUPTION: 0.9, MMP: 0.1}, seed=0)
+    rng2 = np.random.default_rng(1)
+    layers2 = Counter(tags[uni.draw(rng2)].layer for _ in range(4000))
+    assert abs(layers2[CORRUPTION] / 4000 - 0.90) < 0.05
+
+
+def test_draw_cold_floor_guarantees_coverage() -> None:
+    import numpy as np
+    tags = _corpus()
+    sampler = HierarchicalMarkSampler(tags, layer_weights={CORRUPTION: 0.3, MMP: 0.7},
+                                      cold_element_floor=0.1, seed=0)
+    rng = np.random.default_rng(2)
+    s_frac = sum("S" in tags[sampler.draw(rng)].target_elements for _ in range(4000)) / 4000
+    assert s_frac >= 0.09, s_frac
+
+
+def test_tag_records_extracts_layer_and_path_length() -> None:
+    from compose_v4.experiments.hierarchical_sampler import tag_records
+
+    class _P:
+        def __init__(self, pl):
+            self.path = type("t", (), {"path_length": pl})()
+
+    tags = tag_records([_P(3), _P(7)], layer=MMP)
+    assert [t.path_length for t in tags] == [3, 7]
+    assert all(t.layer == MMP and not t.target_elements for t in tags)
+
+
+def test_build_layered_sampler_indexes_the_concatenation() -> None:
+    import numpy as np
+    from compose_v4.experiments.hierarchical_sampler import build_layered_sampler
+
+    class _P:
+        def __init__(self, pl):
+            self.path = type("t", (), {"path_length": pl})()
+
+    corruption = [_P((i % 4) + 1) for i in range(80)]
+    mmp = [_P((i % 4) + 1) for i in range(20)]
+    sampler = build_layered_sampler(
+        {"corruption": corruption, "mmp": mmp},
+        layer_weights={"corruption": 0.5, "mmp": 0.5}, path_length_bins=(1, 2, 4), seed=0)
+    assert len(sampler.tags) == 100                       # 1:1 with concat(corruption, mmp)
+    # indices >= 80 must be the mmp slice (the concatenation order is preserved).
+    assert all(sampler.tags[i].layer == "mmp" for i in range(80, 100))
+    rng = np.random.default_rng(0)
+    idxs = [sampler.draw(rng) for _ in range(2000)]
+    frac_mmp = sum(i >= 80 for i in idxs) / 2000
+    assert 0.42 < frac_mmp < 0.58                         # 50/50 despite mmp being 20% by count
+
+
 def test_curriculum_bins_partition_by_path_length() -> None:
     tags = [RecordTag(layer=CORRUPTION, path_length=pl, target_elements=frozenset({"C"}))
             for pl in (1, 1, 2, 3, 5, 8)]

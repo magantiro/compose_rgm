@@ -46,6 +46,33 @@ class RecordTag:
         return frozenset(self.target_elements) - _CNOF
 
 
+def tag_records(records, *, layer: str, cold_elements_of=None) -> list[RecordTag]:
+    """Build RecordTags for a homogeneous-layer batch of PathRecords: path_length from the trace, and the
+    non-CNOF target elements from ``cold_elements_of(record)`` if given (else no cold-element floor applies
+    to this batch). Pure -- the caller supplies element extraction so this module stays dependency-free."""
+    tags: list[RecordTag] = []
+    for record in records:
+        path_length = int(record.path.path_length)
+        elems = frozenset(cold_elements_of(record)) if cold_elements_of else frozenset()
+        tags.append(RecordTag(layer=layer, path_length=path_length, target_elements=elems))
+    return tags
+
+
+def build_layered_sampler(records_by_layer, *, layer_weights, path_length_bins=(1, 2, 4),
+                          cold_element_floor=0.0, cold_elements_of=None, seed=0):
+    """One-call integration: build a HierarchicalMarkSampler over records grouped by layer. The returned
+    sampler's record indices are ABSOLUTE indices into the concatenation of ``records_by_layer.values()``
+    IN ORDER -- so the caller MUST assemble the trainer's ``train_records`` as exactly that concatenation,
+    or the 1:1 tag alignment guard rejects it. ``records_by_layer`` should be an ordered mapping
+    {layer_name: records_slice}; ``cold_elements_of(record) -> iterable[str]`` enables the coverage floors."""
+    tags: list[RecordTag] = []
+    for layer, records in records_by_layer.items():
+        tags.extend(tag_records(records, layer=layer, cold_elements_of=cold_elements_of))
+    return HierarchicalMarkSampler(
+        tags, layer_weights=dict(layer_weights), path_length_bins=tuple(path_length_bins),
+        cold_element_floor=float(cold_element_floor), seed=int(seed))
+
+
 def _bin_index(path_length: int, edges: tuple[int, ...]) -> int:
     """Bin a path length into [0, len(edges)] half-open buckets by ascending edges."""
     idx = 0
@@ -100,6 +127,23 @@ class HierarchicalMarkSampler:
             ly: sorted(b for (lyr, b) in self._groups if lyr == ly and self._groups[(lyr, b)])
             for ly in self._layers
         }
+        self._cold_elements = sorted(self._cold_groups)
+
+    def draw(self, rng) -> int:
+        """One STATELESS hierarchical draw of a record index, for a streamed dataset whose __getitem__
+        picks a record per seeded index. Cold-element floors become a per-draw probability (expected epoch
+        coverage ~ floor per element); weights proportional to counts + no floor reproduce a uniform draw."""
+        if self.cold_element_floor > 0.0 and self._cold_elements:
+            total_floor = min(0.5, self.cold_element_floor * len(self._cold_elements))
+            if float(rng.random()) < total_floor:
+                elem = self._cold_elements[int(rng.integers(len(self._cold_elements)))]
+                idxs = self._cold_groups[elem]
+                return int(idxs[int(rng.integers(len(idxs)))])
+        layer = self._layers[int(rng.choice(len(self._layers), p=self._layer_probs))]
+        bins = self._layer_bins[layer]
+        b = int(bins[int(rng.integers(len(bins)))])
+        idxs = self._groups[(layer, b)]
+        return int(idxs[int(rng.integers(len(idxs)))])
 
     def realized_layer_fractions(self) -> dict[str, float]:
         """The layer mix a long uniform-count draw would give (diagnostic; == count ratio)."""
