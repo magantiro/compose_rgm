@@ -17,8 +17,9 @@ Validation shard:
 The app module is deliberately named ``*_app`` to avoid colliding with the ``mine_edit_traces`` scripts
 module it imports (Modal loads the entrypoint file by its stem into ``sys.modules``).
 
-The shard job does the ONE-TIME full-corpus scan+split (deterministic, the same ``load_cnof_corpus_split``
-the trainer uses -> TRAIN-only, no val/test leakage), then maps+groups+compiles a single stride shard and
+The shard job does the ONE-TIME full-corpus scan+split (deterministic, the same broad-organic
+``load_organic_corpus_split`` the trainer uses -> TRAIN-only, no val/test leakage), then maps+groups+
+compiles a single stride shard and
 writes the pool + summary to the artifact volume. Grouping a single shard is a LOWER BOUND on pool yield:
 the full run merges every shard's emissions before the global core/scaffold grouping, so cross-shard pairs
 that a single shard cannot see are recovered there.

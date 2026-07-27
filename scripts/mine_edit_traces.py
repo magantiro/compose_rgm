@@ -25,8 +25,8 @@ Sharding is a genuine map -> global-group -> compile -> global-reduce, NOT indep
   GLOBAL REDUCE (dedup + cap):
      dedup directed (source_smiles, target_key) across layers; per-source / per-core / per-family caps.
 
-Determinism: the corpus -> TRAIN partition split is the SAME ``load_cnof_corpus_split`` the trainer uses
-(so mining never leaks val/test); the shard rule is a fixed stride over the canonical-sorted train list;
+Determinism: the corpus -> TRAIN partition split is the SAME shared ``load_organic_corpus_split`` (broad
+scope) the trainer uses (so mining never leaks val/test); the shard rule is a fixed stride over train;
 corruption uses a seeded rng. Nothing is hardcoded to 500k -- corpus id/path, split sizes, shard count,
 caps, and the output location are all config fields.
 """
@@ -64,7 +64,11 @@ from compose_v4.chem.molecular_graph import (  # noqa: E402
 )
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior  # noqa: E402
 from compose_v4.chem.state import pad_molecular_graph  # noqa: E402
-from compose_v4.data.cnof import load_cnof_corpus_split  # noqa: E402
+from compose_v4.data.organic_corpus import (  # noqa: E402
+    BROAD_ORGANIC_NEUTRAL_V1,
+    BROAD_ORGANIC_V1,
+    load_organic_corpus_split,
+)
 from compose_v4.rewrite.kernel import de_novo_rewrite_system  # noqa: E402
 from compose_v4.rewrite.source_corruption import make_edit_pair  # noqa: E402
 from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target  # noqa: E402
@@ -88,7 +92,7 @@ class MiningConfig:
     test_size: int = 10_000
     max_atoms: int = 48
     split_seed: int = 20260714
-    split_strategy: str = "random"
+    scope_name: str = "broad_organic_v1"  # LOCKED B-edit scope; neutral/CNOF are ablations only
     scan_all: bool = True
     split_workers: int = 0  # >1 parallelizes the one-time full-corpus canonicalization scan
     # sharding: a fixed stride over the canonical-sorted train list. shard_index is None for the full run.
@@ -119,20 +123,33 @@ class MiningConfig:
 
 
 # ---- deterministic corpus -> train partition -> shard -------------------------------------------------
-def train_partition(config: MiningConfig) -> tuple[str, ...]:
-    """The TRAIN split, via the same loader the trainer uses -- guarantees no val/test leakage."""
-    split = load_cnof_corpus_split(
+_SCOPES = {"broad_organic_v1": BROAD_ORGANIC_V1, "broad_organic_neutral_v1": BROAD_ORGANIC_NEUTRAL_V1}
+
+
+def resolve_scope(config: MiningConfig):
+    if config.scope_name not in _SCOPES:
+        raise ValueError(f"unknown corpus scope {config.scope_name!r}; known {sorted(_SCOPES)}")
+    scope = _SCOPES[config.scope_name]
+    if config.max_atoms < scope.max_atoms:
+        raise ValueError(
+            f"mining slots max_atoms={config.max_atoms} < scope max_atoms={scope.max_atoms}; "
+            "a scope-eligible molecule would not fit the mining representation")
+    return scope
+
+
+def train_partition(config: MiningConfig):
+    """The broad-organic TRAIN split, via the SHARED loader the trainer uses -- guarantees no val/test
+    leakage and the same scope everywhere. Returns the full split (train + census + scope descriptor)."""
+    return load_organic_corpus_split(
         REPO / config.corpus_path,
+        scope=resolve_scope(config),
         train_size=config.train_size,
         validation_size=config.validation_size,
         test_size=config.test_size,
-        max_atoms=config.max_atoms,
         seed=config.split_seed,
-        split_strategy=config.split_strategy,
         scan_all=config.scan_all,
         workers=config.split_workers,
     )
-    return split.train
 
 
 def shard_of(smiles: tuple[str, ...], config: MiningConfig) -> list[str]:
@@ -422,7 +439,8 @@ def run_pipeline(config: MiningConfig) -> dict:
     reads them all -- the group/compile/reduce below are identical. Phase timing is recorded so a single
     validation shard projects the full-run cost (one-time scan + per-shard map/compile x n_shards)."""
     t0 = time.time()
-    train = train_partition(config)  # ONE-TIME full-corpus scan + deterministic split
+    split = train_partition(config)  # ONE-TIME broad-organic scan + deterministic split (+ census)
+    train = split.train
     t_scan = time.time() - t0
     shard = shard_of(train, config)
 
@@ -443,8 +461,10 @@ def run_pipeline(config: MiningConfig) -> dict:
         "config": asdict(config),
         "provenance": _provenance(config),
         "corpus": {
+            "scope": split.scope,
             "train_partition_size": len(train), "shard_size": len(shard),
             "supported": emission.supported, "skipped": emission.skipped,
+            "census": split.census,
         },
         "layers": {
             "corruption": corruption,
@@ -471,6 +491,8 @@ def _provenance(config: MiningConfig) -> dict:
         "commit": commit,
         "corpus_id": config.corpus_id,
         "corpus_sha256": config.corpus_sha256,
+        "corpus_scope": config.scope_name,
+        "corpus_scope_hash": resolve_scope(config).scope_hash(),
         "standardization_hash": _hash_sources(
             ["src/compose_v4/chem/molecular_graph.py", "src/compose_v4/chem/state.py"]),
         "operator_registry": _hash_sources(
@@ -478,6 +500,7 @@ def _provenance(config: MiningConfig) -> dict:
              "src/compose_v4/rewrite/factorized_fiber.py"]),
         "compiler_mmp": _hash_sources(["scripts/build_analogue_trace_pool.py"]),
         "compiler_corruption": _hash_sources(["src/compose_v4/rewrite/source_corruption.py"]),
+        "corpus_scope_module": _hash_sources(["src/compose_v4/data/organic_corpus.py"]),
         "miner": _hash_sources(["scripts/mine_edit_traces.py"]),
     }
 
