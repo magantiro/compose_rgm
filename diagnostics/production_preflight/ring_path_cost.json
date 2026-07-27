@@ -1,0 +1,410 @@
+{
+  "atom_bound_respected": true,
+  "by_topology": {
+    "bridged/aromatic/carbocycle": {
+      "introduction": {
+        "frac_gt_budget": 0.667,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 20,
+        "median": 20,
+        "n": 3,
+        "p75": 20,
+        "p90": 20
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 4,
+        "median": 4,
+        "n": 3,
+        "p75": 4,
+        "p90": 4
+      }
+    },
+    "bridged/aromatic/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.9,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 38,
+        "median": 24.0,
+        "n": 20,
+        "p75": 30,
+        "p90": 35
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.5,
+        "frac_le_8": 1.0,
+        "max": 7,
+        "median": 4.5,
+        "n": 20,
+        "p75": 5,
+        "p90": 6
+      }
+    },
+    "bridged/saturated/carbocycle": {
+      "introduction": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 13,
+        "median": 13,
+        "n": 1,
+        "p75": 13,
+        "p90": 13
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 3,
+        "median": 3,
+        "n": 1,
+        "p75": 3,
+        "p90": 3
+      }
+    },
+    "bridged/saturated/hetero": {
+      "introduction": {
+        "frac_gt_budget": 1.0,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 31,
+        "median": 24,
+        "n": 5,
+        "p75": 28,
+        "p90": 31
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.4,
+        "frac_le_8": 1.0,
+        "max": 6,
+        "median": 5,
+        "n": 5,
+        "p75": 6,
+        "p90": 6
+      }
+    },
+    "fused/aromatic/carbocycle": {
+      "introduction": {
+        "frac_gt_budget": 0.429,
+        "frac_le_12": 0.429,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 26,
+        "median": 13.0,
+        "n": 14,
+        "p75": 19,
+        "p90": 24
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 4,
+        "median": 2.0,
+        "n": 14,
+        "p75": 3,
+        "p90": 4
+      }
+    },
+    "fused/aromatic/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.936,
+        "frac_le_12": 0.042,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 42,
+        "median": 24.0,
+        "n": 360,
+        "p75": 26,
+        "p90": 31
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.789,
+        "frac_le_8": 1.0,
+        "max": 7,
+        "median": 4.0,
+        "n": 360,
+        "p75": 4,
+        "p90": 5
+      }
+    },
+    "fused/saturated/carbocycle": {
+      "introduction": {
+        "frac_gt_budget": 0.833,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 26,
+        "median": 21.0,
+        "n": 6,
+        "p75": 26,
+        "p90": 26
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.667,
+        "frac_le_8": 1.0,
+        "max": 5,
+        "median": 4.0,
+        "n": 6,
+        "p75": 5,
+        "p90": 5
+      }
+    },
+    "fused/saturated/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.333,
+        "frac_le_12": 0.333,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 24,
+        "median": 16.0,
+        "n": 6,
+        "p75": 18,
+        "p90": 24
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.833,
+        "frac_le_8": 1.0,
+        "max": 5,
+        "median": 3.0,
+        "n": 6,
+        "p75": 3,
+        "p90": 5
+      }
+    },
+    "macrocycle/saturated/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.5,
+        "frac_le_12": 0.5,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 21,
+        "median": 15.5,
+        "n": 2,
+        "p75": 21,
+        "p90": 21
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 1,
+        "median": 1.0,
+        "n": 2,
+        "p75": 1,
+        "p90": 1
+      }
+    },
+    "monocycle/aromatic/carbocycle": {
+      "introduction": {
+        "frac_gt_budget": 0.146,
+        "frac_le_12": 0.329,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.329,
+        "max": 27,
+        "median": 14.0,
+        "n": 82,
+        "p75": 14,
+        "p90": 21
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 4,
+        "median": 2.0,
+        "n": 82,
+        "p75": 2,
+        "p90": 3
+      }
+    },
+    "monocycle/aromatic/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.664,
+        "frac_le_12": 0.067,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.03,
+        "max": 37,
+        "median": 20.0,
+        "n": 268,
+        "p75": 21,
+        "p90": 27
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.97,
+        "frac_le_8": 1.0,
+        "max": 6,
+        "median": 3.0,
+        "n": 268,
+        "p75": 3,
+        "p90": 4
+      }
+    },
+    "monocycle/saturated/carbocycle": {
+      "introduction": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.5,
+        "frac_le_8": 1.0,
+        "max": 6,
+        "median": 5.0,
+        "n": 2,
+        "p75": 6,
+        "p90": 6
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 1,
+        "median": 1.0,
+        "n": 2,
+        "p75": 1,
+        "p90": 1
+      }
+    },
+    "monocycle/saturated/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.333,
+        "frac_le_12": 0.333,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.25,
+        "max": 25,
+        "median": 13.5,
+        "n": 12,
+        "p75": 21,
+        "p90": 21
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 4,
+        "median": 2.0,
+        "n": 12,
+        "p75": 3,
+        "p90": 3
+      }
+    },
+    "spiro/aromatic/hetero": {
+      "introduction": {
+        "frac_gt_budget": 1.0,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 40,
+        "median": 26,
+        "n": 17,
+        "p75": 30,
+        "p90": 36
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 0.588,
+        "frac_le_8": 1.0,
+        "max": 6,
+        "median": 4,
+        "n": 17,
+        "p75": 5,
+        "p90": 6
+      }
+    },
+    "spiro/saturated/hetero": {
+      "introduction": {
+        "frac_gt_budget": 0.5,
+        "frac_le_12": 0.0,
+        "frac_le_4": 0.0,
+        "frac_le_8": 0.0,
+        "max": 17,
+        "median": 15.0,
+        "n": 2,
+        "p75": 17,
+        "p90": 17
+      },
+      "restructure": {
+        "frac_gt_budget": 0.0,
+        "frac_le_12": 1.0,
+        "frac_le_4": 1.0,
+        "frac_le_8": 1.0,
+        "max": 3,
+        "median": 2.5,
+        "n": 2,
+        "p75": 3,
+        "p90": 3
+      }
+    }
+  },
+  "compilation_success": 1.0,
+  "interpretation": "ring_restructure_steps = cycle_close/open count when ring atoms are present (the direct cost of a ring open/close/reshape edit). ring_introduction_steps = atom_inserts + closures to build a ring de-novo (the UPPER bound the whole-ring macro would collapse to 1 step). frac_gt_budget is the fraction of ring changes exceeding the production edit budget.",
+  "max_temporary_path_atoms": 40,
+  "measurement": "compositional edit length for ring-changing transformations (ring-system <-> ring-opened precursor), executor-verified over real held-out GuacaMol ring systems.",
+  "n_measured": 800,
+  "production_edit_budget": 16,
+  "ring_introduction_steps_overall": {
+    "frac_gt_budget": 0.735,
+    "frac_le_12": 0.094,
+    "frac_le_4": 0.001,
+    "frac_le_8": 0.05,
+    "max": 42,
+    "median": 20.0,
+    "n": 800,
+    "p75": 25,
+    "p90": 29
+  },
+  "ring_restructure_steps_overall": {
+    "frac_gt_budget": 0.0,
+    "frac_le_12": 1.0,
+    "frac_le_4": 0.866,
+    "frac_le_8": 1.0,
+    "max": 7,
+    "median": 3.0,
+    "n": 800,
+    "p75": 4,
+    "p90": 5
+  },
+  "topology_counts": {
+    "bridged/aromatic/carbocycle": 3,
+    "bridged/aromatic/hetero": 20,
+    "bridged/saturated/carbocycle": 1,
+    "bridged/saturated/hetero": 5,
+    "fused/aromatic/carbocycle": 14,
+    "fused/aromatic/hetero": 360,
+    "fused/saturated/carbocycle": 6,
+    "fused/saturated/hetero": 6,
+    "macrocycle/saturated/hetero": 2,
+    "monocycle/aromatic/carbocycle": 82,
+    "monocycle/aromatic/hetero": 268,
+    "monocycle/saturated/carbocycle": 2,
+    "monocycle/saturated/hetero": 12,
+    "spiro/aromatic/hetero": 17,
+    "spiro/saturated/hetero": 2
+  }
+}

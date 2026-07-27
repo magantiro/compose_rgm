@@ -61,7 +61,27 @@ forced sampling executes ✅ · natural sampling after a 120-step overfit ✅ (*
 states are cycle ops) · save/reload equivalent ✅. Artifact:
 `diagnostics/production_preflight/ring_topology_capability.json`.
 
-## 3. Compositional path-cost study 🔶
+## 3. Compositional path-cost study ✅
+The pilot analogue pool has **no** ring-changing pairs (53 pairs, all `variable_ring_atoms=0`, atom_insert/
+delete only), so path cost is measured directly on **800 real held-out GuacaMol ring systems** via the
+executor-verified spanning-tree decomposition (ring-system ↔ ring-opened precursor is the canonical
+ring-changing transformation; its compositional edit length is exactly the cycle_close/cycle_open count).
+**100% compilation success**, max temp atoms 40 (bound respected). Budget = 16 (sampler horizon).
+
+Two costs (`diagnostics/production_preflight/ring_path_cost.json`):
+- **Ring restructuring** (cycle_close/open when the ring atoms are present — the common lead-opt ring edit:
+  open/close/reshape/fuse): median **3**, p75 4, p90 5, **max 7**. **86.6% ≤4 edits, 100% ≤8, 0% exceed the
+  budget.** Cheap for *every* topology (per-topology medians 2–4.5, max 7 incl. fused/spiro/bridged/aromatic/
+  hetero). ⇒ the whole-ring macro adds little to ring restructuring.
+- **Ring introduction** (build a whole new ring system from fresh atoms = atom_inserts + closures — the
+  UPPER bound a macro collapses to ~1 step): median **20**, **73.5% exceed the budget** (fused/hetero 24 /
+  93.6%, spiro 26 / 100%, monocarbocycle 14 / 15%). ⇒ de-novo whole-ring construction is where a macro
+  would help — but that is a de-novo move, not the dominant lead-editing operation.
+
+**Read for the macro decision:** restructuring existing rings (the editing regime's ring work) is
+compositionally cheap and always within budget; only building a *whole new* fused/hetero ring de-novo is
+expensive. Whether that bites RingCore in practice depends on how often trained ring edits are whole-ring
+introductions vs restructurings — measured in §6.
 ## 4. P5 calibration for the compositional core ⏳
 ## 5. Regenerated RingCore manifest + cache hashes ⏳
 ## 6. Bounded RingCore preflight (≤750 steps) ⏳
