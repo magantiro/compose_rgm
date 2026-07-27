@@ -123,6 +123,19 @@ def main() -> int:
     check("CORPUS_CHARGED_ATOM_MOLECULES", census["contains_charged_atom"], "manifest contains_charged_atom")
     check("CORPUS_SHA256", manifest["corpus_sha256"][:16], "manifest corpus_sha256[:16]")
 
+    # ---- 2b. corpus accounting identity (the 33-record delta, machine-checked) --
+    check("CORPUS_CANONICAL_DUPLICATES", census["canonical_duplicates"], "manifest canonical_duplicates")
+    check("CORPUS_SOURCE_LINES", census["total"], "manifest census total")
+    ident = census["retained"] + census["canonical_duplicates"] + census["rejected"]
+    if ident != census["total"]:
+        failures.append(f"accounting identity broken: retained+dup+rejected={ident} != total {census['total']}")
+    reasons_sum = sum(census["rejection_reasons"].values())
+    if reasons_sum != census["rejected"]:
+        failures.append(f"rejection reasons sum {reasons_sum} != rejected {census['rejected']}")
+    chain = charac.get("corpus_accounting", {}).get("exclusive_chain", {})
+    if chain.get("retained_unique") != census["retained"] or chain.get("nonempty_source_lines") != census["total"]:
+        failures.append("characterization corpus_accounting.exclusive_chain endpoints disagree with the manifest census")
+
     # ---- 3. production pool + curriculum + versioned hashes ---------------------
     check("PROD_MMP_PAIRS", pool["mmp_pairs_grouped"], "manifest mmp_pairs_grouped")
     check("PROD_RECORDS", pool["row_count"], "manifest pool row_count")

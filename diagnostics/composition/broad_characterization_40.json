@@ -6,8 +6,26 @@
     "supersedes": {"max_atoms": 48, "scope_hash": "e59fb09801459470", "status": "INVALID_FOR_BEDIT40_PRODUCTION"}
   },
   "source_mining_commit": "3375e62",
+  "corpus_accounting": {
+    "identity": "total_nonempty_lines = retained_unique + canonical_duplicates + rejected",
+    "check": "466483 + 33 + 33484 = 500000 (EXACT); rejected == sum(rejection_reasons)",
+    "exclusive_chain": {
+      "nonempty_source_lines": 500000,
+      "unparseable": 201,
+      "parseable": 499799,
+      "unsupported_element": 1112,
+      "too_big_above_40_atoms": 32171,
+      "disconnected_multicomponent": 0,
+      "unsupported_class": 0,
+      "accepted_before_dedup": 466516,
+      "canonical_duplicates": 33,
+      "retained_unique": 466483
+    },
+    "not_measured_locally": "physical_lines_including_blank -- the loader counts nonempty lines (line.strip()); nonempty == 500000 matches the nominal subset size, confirm with `wc -l` on the volume during preflight.",
+    "note": "The 33 records that appeared unclassified against (retained + rejected) are canonical_duplicates: accepted molecules whose canonical SMILES was already seen, so deduplicated (not rejected). This category was always in the manifest census; it is now surfaced in the top-line accounting."
+  },
   "corpus_census_500k": {
-    "retained": 466483, "total": 500000, "retained_fraction": 0.9330,
+    "retained": 466483, "total": 500000, "canonical_duplicates": 33, "retained_fraction": 0.9330,
     "rejected": 33484,
     "rejection_reasons": {"too_big_above_40_atoms": 32171, "unsupported_element": 1112, "unparseable": 201},
     "element_molecule_count": {"C": 466462, "N": 435269, "O": 433338, "S": 153135, "F": 85591,

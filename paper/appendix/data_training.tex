@@ -19,7 +19,10 @@ cutoff. Under this scope \ConfigValue{CORPUS_ELIGIBLE_FRACTION_BROAD} of the sub
 vocabulary nearly doubles coverage while the atom bound retains most of it. The
 \ConfigValue{CORPUS_REJECTED_TOTAL} rejected molecules are \ConfigValue{CORPUS_REJECT_TOOBIG} above the
 40-atom bound, \ConfigValue{CORPUS_REJECT_UNSUPPORTED_ELEMENT} unsupported-element, and
-\ConfigValue{CORPUS_REJECT_UNPARSEABLE} unparseable. Every acceptance and rejection is counted with an
+\ConfigValue{CORPUS_REJECT_UNPARSEABLE} unparseable; a further \ConfigValue{CORPUS_CANONICAL_DUPLICATES}
+accepted molecules are canonical duplicates removed post-standardization, so the
+\ConfigValue{CORPUS_SOURCE_LINES} nonempty source lines reconcile exactly as eligible $+$ duplicates $+$
+rejected. Every acceptance and rejection is counted with an
 explicit reason, the scope carries a deterministic hash (\ConfigValue{SCOPE_HASH}) recorded in every manifest
 and checkpoint, and mining/training use the \textsc{train} partition only, so val/test never leak.
 

@@ -133,6 +133,14 @@ CORPUS_REJECT_UNPARSEABLE:
   value: "201"
   source: "manifest corpus_census.rejection_reasons.unparseable"
 
+CORPUS_CANONICAL_DUPLICATES:
+  value: "33"
+  source: "manifest corpus_census.canonical_duplicates (accepted molecules whose canonical SMILES was already seen; deduplicated, NOT rejected)"
+
+CORPUS_SOURCE_LINES:
+  value: "500{,}000"
+  source: "manifest corpus_census.total (nonempty source lines); exact identity 500{,}000 = 466{,}483 retained + 33 canonical duplicates + 33{,}484 rejected"
+
 # ---- Charge policy -----------------------------------------------------------
 CHARGE_POLICY:
   value: "retain representable charges; charge-preserving edits"

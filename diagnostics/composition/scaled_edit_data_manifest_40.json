@@ -120,6 +120,16 @@
     },
     "scan_all": true
   },
+  "corpus_accounting": {
+    "identity": "total = retained + canonical_duplicates + rejected",
+    "total": 500000,
+    "retained": 466483,
+    "canonical_duplicates": 33,
+    "rejected": 33484,
+    "sum": 500000,
+    "exact": true,
+    "note": "Additive surface of the corpus_census identity: the 33 records short of (retained + rejected) are canonical_duplicates (post-canonicalization collisions among accepted molecules, deduplicated). All values equal corpus_census; no census value changed."
+  },
   "corpus_id": "guacamol_subset_500000_seed0",
   "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
   "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)",
