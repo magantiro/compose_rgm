@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -89,6 +90,7 @@ class MiningConfig:
     split_seed: int = 20260714
     split_strategy: str = "random"
     scan_all: bool = True
+    split_workers: int = 0  # >1 parallelizes the one-time full-corpus canonicalization scan
     # sharding: a fixed stride over the canonical-sorted train list. shard_index is None for the full run.
     n_shards: int = 1
     shard_index: int | None = None
@@ -128,6 +130,7 @@ def train_partition(config: MiningConfig) -> tuple[str, ...]:
         seed=config.split_seed,
         split_strategy=config.split_strategy,
         scan_all=config.scan_all,
+        workers=config.split_workers,
     )
     return split.train
 
@@ -416,18 +419,25 @@ def characterize_corruption(smiles: tuple[str, ...], config: MiningConfig) -> di
 def run_pipeline(config: MiningConfig) -> dict:
     """In-process map -> group -> compile -> global-reduce (for the local fixture AND a single Modal
     shard). For a true multi-container run, map_shard writes an emission per container and this reduce
-    reads them all -- the group/compile/reduce below are identical."""
-    train = train_partition(config)
+    reads them all -- the group/compile/reduce below are identical. Phase timing is recorded so a single
+    validation shard projects the full-run cost (one-time scan + per-shard map/compile x n_shards)."""
+    t0 = time.time()
+    train = train_partition(config)  # ONE-TIME full-corpus scan + deterministic split
+    t_scan = time.time() - t0
     shard = shard_of(train, config)
-    emission = map_shard(shard, config)
 
+    t0 = time.time()
+    emission = map_shard(shard, config)
     mmp_pairs = group_mmp_pairs(emission, config)
     scaffold_cands = group_scaffold_pairs(emission, config)
     mmp_records = compile_mmp(mmp_pairs, config)
     scaffold_records, scaffold_deferred = compile_scaffold(scaffold_cands, config)
     pool, cap_report = dedup_and_cap(mmp_records + scaffold_records, config)
+    t_shard = time.time() - t0
 
+    t0 = time.time()
     corruption = characterize_corruption(tuple(shard), config)
+    t_corruption = time.time() - t0
 
     return {
         "config": asdict(config),
@@ -442,6 +452,11 @@ def run_pipeline(config: MiningConfig) -> dict:
             "scaffold_nn": {"candidates_grouped": len(scaffold_cands),
                             "records_compiled": len(scaffold_records),
                             "a2_3_deferred": scaffold_deferred},
+        },
+        "timing_seconds": {
+            "corpus_scan_split_one_time": round(t_scan, 2),
+            "shard_map_group_compile": round(t_shard, 2),
+            "corruption_characterization": round(t_corruption, 2),
         },
         "global_reduce": cap_report,
         "pool": pool,
