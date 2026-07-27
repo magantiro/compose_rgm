@@ -10,6 +10,7 @@ unrestricted factorized mark decoder.
 
 from __future__ import annotations
 
+import hashlib
 from collections import Counter
 from dataclasses import dataclass
 from typing import Iterable
@@ -952,10 +953,25 @@ def _most_common_stable_items(counter: Counter, limit: int) -> tuple[tuple, ...]
     return tuple(ranked[:limit])
 
 
+def ring_catalog_fingerprint(catalog: TypedRingCatalog) -> str:
+    """A stable, order-independent content fingerprint of a ring catalog's templates.
+
+    Recorded in the data manifest, training config, and checkpoint metadata so every consumer -- the
+    rewrite system, legal-action enumeration, the executor, the data-loader corruption, and sampling --
+    can cross-check that they used the SAME versioned ring-system definition (never an ad hoc catalog).
+    """
+    parts = tuple(
+        tuple(sorted(repr(template) for template in getattr(catalog, field, ())))
+        for field in ("cycle_templates", "attach_templates", "ear_templates", "ring_system_templates")
+    )
+    return hashlib.sha256(repr(parts).encode()).hexdigest()[:16]
+
+
 __all__ = [
     "AttachTemplate",
     "CycleTemplate",
     "EarTemplate",
+    "ring_catalog_fingerprint",
     "RING_SYSTEM_ELECTRONIC_ALIAS_VERSION",
     "RingSystemElectronicAlias",
     "RingSystemElectronicAliasVersionError",

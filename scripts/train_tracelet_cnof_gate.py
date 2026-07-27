@@ -79,6 +79,7 @@ from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
     build_typed_ring_catalog,
     build_typed_ring_catalog_from_paths,
+    ring_catalog_fingerprint,
 )
 from compose_v4.rewrite.ring_system_fiber import structured_ring_trace_supported
 from compose_v4.rewrite.kernel import canonical_state_key
@@ -2657,6 +2658,11 @@ def main() -> None:
         # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
         # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
         "organic_vocabulary": bool(args.organic_vocabulary),
+        # Pin the versioned ring-system definition used for corruption (clean ring-opening), enumeration,
+        # the executor, and sampling, so a checkpoint records the exact catalog it was trained against.
+        "ring_catalog_fingerprint": (
+            ring_catalog_fingerprint(ring_catalog) if ring_catalog is not None else None
+        ),
         "use_bf16": args.use_bf16,
         "data_workers": args.data_workers,
         "data_prefetch_factor": args.data_prefetch_factor,

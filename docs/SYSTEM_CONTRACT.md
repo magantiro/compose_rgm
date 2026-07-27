@@ -75,11 +75,16 @@ ring_system_grow, ring_system_delete, ring_system_restate`.
   molecules), `compute_ring_opening` (decoration-preserving clean ring delete).
 
 **Capability gating (audit-critical).** Which editing families are legal at sampling MUST equal what the
-checkpoint was trained with. Those three flags are sourced from the model's `enable_ring_restates /
+checkpoint was trained with. The three enumeration flags are sourced from the model's `enable_ring_restates /
 enable_cyclic_graft / enable_ring_opening` (set at load from checkpoint metadata,
-`evaluate_tracelet_rollouts.py:191`). The raw model sampler passes them (`factorized_tracelet_rate_model.py:3105`);
-the pancake sampler now passes ring-restate + ring-opening (`canonical_successor_distillation.py:322,:434`),
-with **cyclic graft gated off + a fail-fast guard** pending the quotient derivation (§7 / AUDIT_REPORT).
+`evaluate_tracelet_rollouts.py:191`). Both the raw model sampler (`factorized_tracelet_rate_model.py:3105`)
+and the pancake sampler (`canonical_successor_distillation.py`) pass all three — cyclic graft included, now
+that its quotient is derived (§7, full-Zq). **Ring catalog:** clean ring-opening (`ring_system_delete`) uses
+one **shared versioned `TypedRingCatalog`** — the same definition used by the rewrite system, enumeration,
+executor, and sampling — and the corruption data-loader threads that catalog so `ring_system_delete` is
+*supervised* (`source_corruption` gates ring deletes on `catalog is not None`; the trainer passes
+`catalog=ring_catalog`). The catalog's `ring_catalog_fingerprint` (`typed_ring_catalog.py`) is recorded in
+checkpoint metadata so a checkpoint pins the exact ring definition it was trained against.
 
 ## 5. The executor T(x,a) = y
 

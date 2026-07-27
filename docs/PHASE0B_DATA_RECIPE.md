@@ -92,11 +92,17 @@ clear every safeguard; (c) the operator-family support (below) is non-degenerate
   36/98 traces (top-1 37%, top-5 51%), only 29 unique transformations. This is the small-pool `C(n,2)`
   concentration the master plan warns about — **not a code defect**; the fix is at-scale mining + per-scaffold
   caps + uniform-group sampling. Do not train on this pilot pool as the analogue layer.
-- **Rare-operator family — TRIGGERED: `ring_system_delete` has ZERO support.** `make_edit_pair` was run
-  without a ring `catalog`, so clean ring-opening is a no-op; the corruption never emitted a ring delete.
-  **Action:** to supervise clean ring-opening, thread a ring catalog into the corruption generator; otherwise
-  the enabled `ring_system_delete`/`enable_ring_opening` head trains on ~no data. (Cross-check: the editing-
-  sampler capability tests confirm the family is *reachable* — this is about *training support*, task #34.)
+- **Rare-operator family — `ring_system_delete` zero support was a CHARACTERIZATION-CONFIG artifact, not a
+  trainer gap (RESOLVED).** The characterization ran `make_edit_pair` *without* a ring `catalog`, so clean
+  ring-opening is a no-op there (`source_corruption`: ring deletes are gated on `catalog is not None`). The
+  **trainer already threads `catalog=ring_catalog`** at its corruption call site
+  (`train_tracelet_cnof_gate.py`), so `ring_system_delete` *is* supervised in the real recipe: with a
+  catalog, 92/200 corruption trims contain a ring delete, and a `ring_system_delete` teacher gives POSITIVE
+  supervision (a short overfit raises its probability; the family head gets a nonzero gradient) — verified in
+  `tests/test_ring_opening_supervision.py` (aromatic carbocycle / heterocycle / saturated / fused / a
+  not-openable acyclic negative; replay validity; heteroatom preservation; inverse round-trip). The ring
+  catalog is the SAME versioned definition used by enumeration / executor / sampling, and its
+  `ring_catalog_fingerprint` is recorded in checkpoint metadata + this data manifest.
 - **No ring-count change in either layer — BY DESIGN.** Ring-topology *adding* is retained from B's de-novo
   `ring_system_grow`; the edit layers preserve ring count. Acceptable, but the corpus alone does not teach
   ring growth — the warm-start from B carries it.

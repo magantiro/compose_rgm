@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "git_commit": "60e8074",
+  "git_commit": "1f9d23b",
   "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)",
   "source_corpus": {
     "partition": "guacamol_heldout_val_5000_seed0",
@@ -22,6 +22,11 @@
       "ring_system_restate"
     ],
     "hash": "9197401e8dc3a7ae"
+  },
+  "ring_catalog": {
+    "definition": "one shared versioned TypedRingCatalog used by the rewrite system, legal-action enumeration, the executor, sampling, AND the corruption data-loader (never an ad hoc ring perception).",
+    "corruption_gate": "source_corruption threads the catalog -> enumerate_clean_ring_system_deletes, which enables ring_system_delete (clean ring-opening) supervision.",
+    "fingerprint": "recorded as checkpoint_metadata.ring_catalog_fingerprint (ring_catalog_fingerprint(), typed_ring_catalog.py) -- the catalog is built at training time from B's ring traces, so its fingerprint is pinned per checkpoint, not in this data-only manifest."
   },
   "compiler_version": {
     "corruption": "cf6bfd623115b760",

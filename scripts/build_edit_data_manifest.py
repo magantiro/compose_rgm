@@ -106,6 +106,16 @@ def build_manifest(characterization_path: str, out_path: str) -> dict:
                 "src/compose_v4/rewrite/factorized_fiber.py",
             ]),
         },
+        "ring_catalog": {
+            "definition": "one shared versioned TypedRingCatalog used by the rewrite system, legal-action "
+                          "enumeration, the executor, sampling, AND the corruption data-loader (never an "
+                          "ad hoc ring perception).",
+            "corruption_gate": "source_corruption threads the catalog -> enumerate_clean_ring_system_deletes, "
+                               "which enables ring_system_delete (clean ring-opening) supervision.",
+            "fingerprint": "recorded as checkpoint_metadata.ring_catalog_fingerprint (ring_catalog_fingerprint(), "
+                           "typed_ring_catalog.py) -- the catalog is built at training time from B's ring traces, "
+                           "so its fingerprint is pinned per checkpoint, not in this data-only manifest.",
+        },
         "compiler_version": {
             "corruption": _hash_sources(["src/compose_v4/rewrite/source_corruption.py"]),
             "mmp_analogue": _hash_sources(["scripts/build_analogue_trace_pool.py"]),
