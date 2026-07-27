@@ -289,6 +289,23 @@ def _semantic_partial_checkpoint_initialization(
     return initialized, copied_exact, fresh_or_partial, row_table, transfer_map_hash
 
 
+_SEMANTIC_TRANSFER_IMPL_VERSION = "semantic_partial_v1"
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _vocabulary_hash(vocabulary) -> str:
+    return hashlib.sha256(
+        json.dumps([list(cls) for cls in vocabulary.classes], sort_keys=True).encode()
+    ).hexdigest()[:16]
+
+
 def _path_cache_fingerprint(signature: dict[str, object]) -> str:
     """Return a stable identifier without copying the full split into every shard."""
 
@@ -3094,12 +3111,68 @@ def main() -> None:
             model.load_state_dict(checkpoint_payload["state_dict"])
             phase = "checkpoint_initialized_fresh_optimizer"
         elif args.initialize_compatible_checkpoint is not None:
-            initialized_state, transferred, retained = _compatible_checkpoint_initialization(
-                model.state_dict(),
-                checkpoint_payload,
+            source_vocab = (
+                ORGANIC_VOCABULARY
+                if checkpoint_payload.get("organic_vocabulary")
+                else CNOF_VOCABULARY
             )
+            dest_vocab = getattr(model, "atom_vocabulary", None)
+            widening = (
+                dest_vocab is not None
+                and tuple(dest_vocab.classes) != tuple(source_vocab.classes)
+            )
+            if widening:
+                # B->B-edit vocabulary expansion: SEMANTIC partial transfer -- shared (element,valence) rows
+                # copy from the source by LABEL, genuinely-new S/P/Cl/Br/I/B rows keep the fresh init. The
+                # shape-exact path alone would discard B's learned CNOF output rows on the widened heads.
+                (
+                    initialized_state,
+                    transferred,
+                    retained,
+                    transfer_row_table,
+                    transfer_map_hash,
+                ) = _semantic_partial_checkpoint_initialization(
+                    model.state_dict(),
+                    checkpoint_payload,
+                    source_classes=source_vocab.classes,
+                    dest_classes=dest_vocab.classes,
+                )
+                phase = "checkpoint_semantically_initialized_fresh_optimizer"
+            else:
+                initialized_state, transferred, retained = (
+                    _compatible_checkpoint_initialization(
+                        model.state_dict(),
+                        checkpoint_payload,
+                    )
+                )
+                transfer_row_table, transfer_map_hash = [], None
+                phase = "checkpoint_compatibly_initialized_fresh_optimizer"
             model.load_state_dict(initialized_state, strict=True)
-            phase = "checkpoint_compatibly_initialized_fresh_optimizer"
+            # Warm-start transfer provenance recorded in the saved checkpoint (fail-closed on reload).
+            checkpoint_metadata["warmstart_source_sha256"] = _file_sha256(
+                selected_checkpoint_path
+            )
+            checkpoint_metadata["warmstart_transfer_impl_version"] = (
+                _SEMANTIC_TRANSFER_IMPL_VERSION
+            )
+            checkpoint_metadata["warmstart_semantic_transfer_map_hash"] = transfer_map_hash
+            checkpoint_metadata["warmstart_source_vocab_hash"] = _vocabulary_hash(source_vocab)
+            checkpoint_metadata["warmstart_dest_vocab_hash"] = (
+                _vocabulary_hash(dest_vocab) if dest_vocab is not None else None
+            )
+            checkpoint_metadata["warmstart_rows_copied"] = sum(
+                1 for row in transfer_row_table if row["status"] == "COPIED_WITH_INDEX_MAP"
+            )
+            checkpoint_metadata["warmstart_rows_fresh"] = sum(
+                1 for row in transfer_row_table if row["status"] == "FRESH_NEW_CLASS"
+            )
+            checkpoint_metadata["warmstart_row_table_hash"] = (
+                hashlib.sha256(
+                    json.dumps(transfer_row_table, sort_keys=True).encode()
+                ).hexdigest()[:16]
+                if transfer_row_table
+                else None
+            )
         else:
             resume_state = checkpoint_payload
             model.load_state_dict(resume_state["current_state_dict"])
