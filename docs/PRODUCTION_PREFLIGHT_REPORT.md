@@ -143,6 +143,22 @@ Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on iden
   regenerate catalog/corruption/manifest + recompile catalog-dependent caches. **The production ring-catalog
   and operator-capability hash will change** → no final cache compile / Stage-7 until the rebuild lands.
 
+## 10. §9 root-cause of the supervision false-positive ✅
+`cold_vocab_audit.py` counted positive targets **only per `(element,valence)` atom class**, only from
+`atom_insert`/`atom_restate` marks (line 71) — it had **no ring-template / operator-subtype notion**, so
+`ring_system_grow` was never checked. "All families supervised" was really "all atom classes supervised."
+**Fix (rebuild §8):** a subtype/template-level supervision gate + a regression test that fails when any
+`production_enabled` operator subtype has zero positive selected targets.
+
+## Ring-grow rebuild plan (§4–§10; the production catalog + operator hash WILL change)
+| Phase | Where | Work |
+|---|---|---|
+| A (local) | §1, §9 | reconfirm grow supervision at the exact target level; subtype-level supervision gate + regression test |
+| B (local, heavy) | §4, §5 | build the reversible ring-delete→grow dataset from GuacaMol; derive a **data-derived** catalog, pick size from a coverage curve (32…1024), round-trip verified |
+| C (local) | §6, §7, §8 | balance grow supervision in the corruption recipe; calibrate fresh template rows from the selected-target dist; subtype/template tests |
+| D (Modal) | §10 | regenerate catalog/corruption/manifest (new scope+operator+catalog hashes); recompile catalog-dependent caches; re-run preflight gates |
+| E | — | cache + no-update throughput → cost; final GO/NO-GO |
+
 ## Pending (before the STOP report)
 - §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
   updates (runs during the bounded preflight); apply the §7 bias policy at init.
