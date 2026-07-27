@@ -1,0 +1,25 @@
+{
+  "benchmark": "jin_iclr19_qed_test_exact_v1",
+  "smiles_column": "canonical_nonisomeric_smiles",
+  "n_leads": 800,
+  "accepted": {
+    "broad_organic_v1": 800,
+    "broad_organic_neutral_v1": 557,
+    "cnof_neutral": 264
+  },
+  "accepted_fraction": {
+    "broad_organic_v1": 1.0,
+    "broad_organic_neutral_v1": 0.6963,
+    "cnof_neutral": 0.33
+  },
+  "broad_recovers_over_cnof": 536,
+  "excluded_features_broad_scope": {},
+  "excluded_features_neutral_scope": {
+    "charged_not_allowed": 243
+  },
+  "leads_with_nonzero_net_charge": 233,
+  "scope_hashes": {
+    "broad_organic_v1": "e59fb09801459470",
+    "broad_organic_neutral_v1": "034d3f535bc56314"
+  }
+}
