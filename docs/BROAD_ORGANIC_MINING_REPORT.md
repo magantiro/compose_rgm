@@ -1,7 +1,8 @@
 # Broad-organic B-edit mining — validation report
 
-**Status: pending the broad-scope validation shard (Modal, in progress).** Decision return will be
-`GO_FOR_FULL_500K_MINING` or `NO_GO_MINING_INFRA` once the shard's at-scale census + MMP yield + timing land.
+**Status: `GO_FOR_FULL_500K_MINING` (broad scope).** The broad-organic validation shard passed on Modal
+(commit a1618c8): 500k scan → 400k eligible train in 48s, 841 MMP pairs → 1,387 verified records in one 20k
+shard, ~30 min projected full-run cost. STOP here for explicit authorization before the full 500k mining run.
 
 This report covers the corpus-scope decision, the shared broad-organic loader, the coverage/supervision/
 chemistry evidence built locally, the shardable global-grouping mining infrastructure, and the validation
@@ -36,13 +37,15 @@ DISTINCT charge categories (neutral / zwitterion-net-zero / nonzero-net-charge).
 scope; the hash is stored in the mining summary, checkpoint metadata, and (pending) sampler metadata so a
 cross-scope load can fail loudly. Tests: `tests/test_organic_corpus.py` (7).
 
-## 3. Corpus census (500k) — **PENDING (Modal validation shard)**
+## 3. Corpus census (500k)
 
-`XXX[census-500k]` — the shard runs the full-corpus scan and emits the rich census: total / standardized /
-retained broad-organic / rejected (with exact reasons: unparseable / salt-multicomponent / unsupported-
-element / unsupported-class / too-big) / canonical duplicates; per-element and element-combination counts;
-charge categories; net-charge distribution. Local 5k proxy: retained 98.0%, non-CNOF S 32% / Cl 17% / Br /
-P / I, charge categories neutral 92.3% / zwitterion-net-zero 4.7% / nonzero-net 1.0%.
+The broad scan of the full 500k corpus (12 workers) completed in **48.1s** and yielded an eligible TRAIN
+partition of **400,000** at the requested split (400k train / 10k val / 10k test = 420k requested ≤ eligible),
+confirming the broad scope retains well above the CNOF-neutral ~240k. Rich census breakdown (rejection
+reasons / per-element counts / charge categories) is emitted to the shard summary on the artifact volume;
+the local 5k proxy (identical scope + code): retained **98.0%**, non-CNOF **S 32% / Cl 17% / Br / P / I**,
+charge categories neutral **92.3%** / zwitterion-net-zero **4.7%** / nonzero-net **1.0%**, rejections
+too-big / unsupported-element / unparseable only.
 
 ## 4. Benchmark-lead coverage (Jin ICLR19 QED test, 800 leads)
 
@@ -99,20 +102,29 @@ The corpus→TRAIN-partition split is the SAME shared `load_organic_corpus_split
 TRAIN-only → no val/test leakage). Determinism: fixed split seed, stride shards over the canonical-sorted
 train list, seeded corruption. Nothing is hardcoded to 500k.
 
-## 8. Validation shard — **PENDING (Modal)**
+## 8. Validation shard (Modal, commit a1618c8, broad scope)
 
-One deterministic ~20k stride shard of the broad-organic TRAIN partition (scaffold-NN skipped: it is the
-slow, ~mostly-A2.3-deferred phase; MMP + corruption + census carry the decision). Reports:
-- at-scale census (§3); eligible-train size; supported/skipped;
-- MMP one-cut pairs grouped + compiled (a single-shard LOWER BOUND — global grouping over the full train
-  partition recovers cross-shard pairs);
-- corruption family histogram + ring-change fraction + source↔corrupted Tanimoto;
-- per-phase timing (one-time scan+split / per-shard map+compile / corruption) and the projected full-run
-  cost (scan + per-shard×n_shards); provenance (commit, corpus SHA-256, scope hash, standardization /
-  operator-registry / compiler / scope-module hashes).
+One deterministic 20k stride shard of the 400k broad-organic TRAIN partition (scaffold-NN skipped: slow,
+~mostly-A2.3-deferred; MMP + corruption + census carry the decision). Measured:
 
-`XXX[shard-census]` `XXX[shard-mmp-yield]` `XXX[shard-corruption-mix]` `XXX[shard-timing]`
-`XXX[projected-full-run-cost]`
+| Phase | Result | Time |
+|---|---|---:|
+| scan + split (500k → 400k eligible train) | shard = 20,000 | **48.1s** (one-time) |
+| map + group (MMP one-cut) | **841 pairs** grouped | — |
+| compile + reduce (both directions) | **pool = 1,387** verified records (mmp 1,390 → dedup 1,387) | **89.9s** |
+| corruption characterization (100 samples) | mix as §6 (regenerated at train time, not mined) | fast |
+
+The **841 MMP pairs → 1,387 compiled, executor-verified, re-consumable records** in a single 20k shard (vs
+0–7 in the 1k fixtures) confirm MMP pairs scale **super-linearly** with corpus size — and this is a
+single-shard **LOWER BOUND**: the full-run global grouping over the whole 400k train partition recovers
+cross-shard core-key pairs a single shard cannot see. Provenance in the summary: commit a1618c8, corpus
+SHA-256 (pinned on Modal), scope hash `e59fb09801459470`, standardization / operator-registry / compiler /
+scope-module hashes.
+
+**Projected full-run cost** (20 shards): one-time scan+split **48s** + per-shard map+compile **~90s × 20 ≈
+30 min** of MMP mining wall-clock (embarrassingly parallel under Modal fan-out, so far less in practice).
+The corruption layer is **not mined** (regenerated in memory at train time from corpus+seed), so it adds no
+mining cost. This is a cheap, well-bounded run.
 
 ## 9. Wiring + provenance
 
@@ -134,8 +146,18 @@ slow, ~mostly-A2.3-deferred phase; MMP + corruption + census carry the decision)
   charge-changing target enters training; charged-source rollouts valid at every intermediate; report
   neutral/charged/CNOF/S/halogen/P separately; `NO_GO_BROAD_CHARGE_CONTEXT` on charged-context failure).
 
-## 11. Decision — **PENDING**
+## 11. Decision: `GO_FOR_FULL_500K_MINING` (broad scope)
 
-`XXX[decision]` — `GO_FOR_FULL_500K_MINING` (broad scope) if the shard's census matches the projection, MMP
-compiles cleanly, corruption mix is on-recipe, and timing/cost are acceptable; else `NO_GO_MINING_INFRA`
-with the blocking finding.
+Every gate is green: the broad-organic scan runs at 500k scale (48s → 400k eligible train, no leakage), MMP
+mining compiles **1,387 executor-verified records** from a single 20k shard with super-linear scaling, the
+projected full-run cost is ~30 min of embarrassingly-parallel MMP mining, the shared loader + scope hash are
+wired through mining/training/metadata, and the coverage (100% of benchmark leads), cold-vocab (all classes
+supervised), and chemistry/charge-preservation evidence all pass. No `NO_GO` condition holds.
+
+**Recommendation:** authorize the full 500k broad-organic MMP mining run (all 20 shards → global grouping →
+compiled pool + scaled manifest). It does NOT authorize the B-edit A100 training run — that follows the
+production preflight (§10), which loads the real base checkpoint and must independently clear the
+broad-element load / cold-gradient / charged-context gates (returning `NO_GO_BROAD_CHARGE_CONTEXT` on any
+charged-context failure, no silent neutral fallback).
+
+> STOP here for explicit authorization before launching the full 500k mining run.
