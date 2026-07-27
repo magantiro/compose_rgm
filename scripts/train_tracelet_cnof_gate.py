@@ -408,6 +408,7 @@ def _training_support_cache_signature(
     organic_vocabulary: bool = False,
     analogue_trace_pool: bool = False,
     cycle_op_mix: bool = False,
+    disable_ring_grow_macro: bool = False,
 ) -> dict[str, object]:
     """Identify the infinite deterministic row stream independent of its horizon."""
 
@@ -431,6 +432,8 @@ def _training_support_cache_signature(
         "analogue_trace_pool": bool(analogue_trace_pool),
         # Compositional ring-op (cycle_open/cycle_close) supervision is another deterministic row stream.
         "cycle_op_mix": bool(cycle_op_mix),
+        # Disabling the legacy grow macro drops grow support rows -> a different support stream.
+        "disable_ring_grow_macro": bool(disable_ring_grow_macro),
     }
 
 
@@ -1333,6 +1336,13 @@ def main() -> None:
         "growth/closure). Requires --corrupted-prior-mix.",
     )
     parser.add_argument(
+        "--disable-ring-grow-macro",
+        action="store_true",
+        help="RING_CORE_V1: disable the legacy whole-ring ring_system_grow macro so ring ADDITION is "
+        "purely compositional (cycle_close). The grow head params are retained (warm-start-safe); the "
+        "family is masked dead (never sampled/taught). Typically paired with --cycle-op-mix.",
+    )
+    parser.add_argument(
         "--organic-vocabulary",
         action="store_true",
         help="predict/edit the whole drug-like organic subset (C,N,O,F,S,P,Cl,Br,I,B) via 15 "
@@ -1471,6 +1481,10 @@ def main() -> None:
         raise ValueError("--scaled-manifest requires --corrupted-prior-mix")
     if args.cycle_op_mix and not args.corrupted_prior_mix:
         raise ValueError("--cycle-op-mix requires --corrupted-prior-mix")
+    if args.disable_ring_grow_macro and not args.cycle_op_mix:
+        # Disabling the legacy grow macro removes whole-ring addition; compositional cycle_close must be
+        # present to keep ring-generation support (RING_CORE_V1). Guards against a support-losing config.
+        raise ValueError("--disable-ring-grow-macro requires --cycle-op-mix (compositional ring support)")
     if args.scaled_manifest and (
         args.require_training_support_cache or args.compile_training_support_steps
     ):
@@ -2373,6 +2387,7 @@ def main() -> None:
             organic_vocabulary=args.organic_vocabulary,
             analogue_trace_pool=bool(args.analogue_trace_pool),
             cycle_op_mix=bool(args.cycle_op_mix),
+            disable_ring_grow_macro=bool(args.disable_ring_grow_macro),
         )
         training_support_cache = ShardedTrainingSupportCache(
             args.training_support_cache_dir,
@@ -2877,6 +2892,7 @@ def main() -> None:
             enable_heteroatom_scan=args.corrupted_prior_mix,
             enable_ring_opening=args.corrupted_prior_mix,
             enable_cycle_ops=args.cycle_op_mix,
+            enable_ring_grow_macro=not args.disable_ring_grow_macro,
             atom_vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else None,
         ).to(device)
     elif args.model == "from_scratch":
@@ -2906,6 +2922,10 @@ def main() -> None:
         "training_backend": args.training_backend,
         "corrupted_prior_mix": bool(args.corrupted_prior_mix),
         "enable_cycle_ops": bool(args.cycle_op_mix),
+        # RING_CORE_V1: legacy whole-ring grow macro disabled (ring addition is purely compositional).
+        # enable_ring_macros is the forward-looking P4 hybrid flag; always False until RING_HYBRID_V2.
+        "enable_ring_grow_macro": not bool(args.disable_ring_grow_macro),
+        "enable_ring_macros": False,
         # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
         # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
         "organic_vocabulary": bool(args.organic_vocabulary),
