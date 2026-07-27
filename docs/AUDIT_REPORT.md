@@ -73,6 +73,31 @@ the remaining correctness gates below pass.**
   successors, inverse round-trips, decoration preserved (clean keeps ring N; structured carbon-izes) —
   `tests/test_editing_sampler_capabilities.py` (4 tests), full suite 444 passed.
 
+## ε full-support analysis (recipe prerequisite)
+
+**Question:** is an ε full-support mixture `P_ε = (1−ε)·P_θ + ε·P_legal` *required*, or an optional
+exploration/robustness ablation?
+
+**Finding — optional, not a prerequisite.** The model's mark law is a softmax over the dense-mask-legal
+marks, so **every mark with a finite logit receives strictly positive probability** — `P_θ` already has
+full support over its declared mark/successor space. Verified empirically
+(`tests/test_epsilon_support_analysis.py`): every mark the model can sample gets strictly positive, finite
+probability (`min p ≈ 2e-3–2e-2`) on `CCC=O` / neopentane / `CCOCC` / `C`. The `Σexp=1` normalization was
+confirmed independently by the measure agent.
+
+The only transitions with **zero** probability are **out-of-vocabulary by design**, not hard-gated *legal*
+actions: (a) families the model does not represent — standalone `bond_insert` / `bond_delete`
+(`MARK_RULE_NAMES` has neither); and (b) executor-legal but mask-illegal marks — non-root-free grafts
+(`u∉{a,b}`), and ring-site restates without `enable_heteroatom_scan`. These are model-side vocabulary /
+gating choices; ε does not "rescue a legal action," it would *add model-untrained transitions*.
+
+**Recommendation:** classify ε as an **optional exploration/robustness ablation**, not a training-recipe
+prerequisite. If ever enabled, it must mix on the **post-quotient fixed-step molecular kernel**
+`P(x,y)=Σ_{a:T(x,a)=y}p_θ(a|x)` that editing actually samples — **never** on a CTMC hazard editing discards
+(§10). Support preservation (a Doob/controlled process cannot reach a successor `P_θ` assigns zero) is then
+a *deliberate* scope: the controller steers within the model's trained vocabulary. Do not add ε to the main
+recipe.
+
 ## Correctness gates before the A100 headline run (tracking)
 
 1. Vocabulary round-trips exact — *pending explicit test (task #26 machinery).*
