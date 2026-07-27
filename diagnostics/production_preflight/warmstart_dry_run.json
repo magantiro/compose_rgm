@@ -1,0 +1,948 @@
+{
+  "verdict": "GO_WARMSTART_DRY_RUN",
+  "checkpoint": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/base_b/checkpoint.best_so_far.pt",
+  "source_vocab": "CNOF",
+  "A_strict_fails_on_widened_heads": true,
+  "B_semantic_init_loads": true,
+  "C_all_tensors_accounted": true,
+  "D_widened": [
+    "grow_option.weight",
+    "grow_root_head.bias",
+    "grow_root_head.weight",
+    "restate_head.bias",
+    "restate_head.weight"
+  ],
+  "D_source_only": [],
+  "D_dest_only": [],
+  "E_forward_finite": true,
+  "counts": {
+    "copied_exact": 109,
+    "widened": 5,
+    "rows_copied_with_semantic_map": 20,
+    "rows_fresh_new_class": 55
+  },
+  "transfer_map_hash": "bb89525b6021adb1",
+  "row_table": [
+    {
+      "head": "restate_head.weight",
+      "class": [
+        2,
+        4
+      ],
+      "role": 0,
+      "source_row": 0,
+      "dest_row": 0,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "bbbd6a6ae1d4",
+      "dest_checksum": "bbbd6a6ae1d4"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        3,
+        3
+      ],
+      "role": 0,
+      "source_row": 1,
+      "dest_row": 1,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "04d8f567fdbf",
+      "dest_checksum": "04d8f567fdbf"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        4,
+        2
+      ],
+      "role": 0,
+      "source_row": 2,
+      "dest_row": 2,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "82e6f19ec84b",
+      "dest_checksum": "82e6f19ec84b"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        5,
+        1
+      ],
+      "role": 0,
+      "source_row": 3,
+      "dest_row": 3,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "271fa8e2dbcc",
+      "dest_checksum": "271fa8e2dbcc"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        7,
+        2
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 4,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "74d93fb3648a"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        7,
+        4
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 5,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "77a08125de36"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        7,
+        6
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 6,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "8b996fbdfea1"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        6,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 7,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "7246a30829e3"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        6,
+        5
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 8,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "aabcdbf173f1"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        8,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 9,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "dbbdc098913b"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        9,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 10,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "992139259a70"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        10,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 11,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "065a0577a232"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        10,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 12,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "26fbf27c0db9"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        10,
+        5
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 13,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "98a0a7db244f"
+    },
+    {
+      "head": "restate_head.weight",
+      "class": [
+        1,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 14,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "5f74ed261aab"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        2,
+        4
+      ],
+      "role": 0,
+      "source_row": 0,
+      "dest_row": 0,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "988f2dcfe026",
+      "dest_checksum": "988f2dcfe026"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        3,
+        3
+      ],
+      "role": 0,
+      "source_row": 1,
+      "dest_row": 1,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "a63d97ea9fd7",
+      "dest_checksum": "a63d97ea9fd7"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        4,
+        2
+      ],
+      "role": 0,
+      "source_row": 2,
+      "dest_row": 2,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "be706e106b05",
+      "dest_checksum": "be706e106b05"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        5,
+        1
+      ],
+      "role": 0,
+      "source_row": 3,
+      "dest_row": 3,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "5557105b6dd9",
+      "dest_checksum": "5557105b6dd9"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        7,
+        2
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 4,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "84950822768a"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        7,
+        4
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 5,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "5534104748eb"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        7,
+        6
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 6,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "72675020507c"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        6,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 7,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "93111fa61816"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        6,
+        5
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 8,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "fa32876b77af"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        8,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 9,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "73c10b7c4d60"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        9,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 10,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "69f2f2028002"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        10,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 11,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "fd5cd7386989"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        10,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 12,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "059676394557"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        10,
+        5
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 13,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "06bf396482ab"
+    },
+    {
+      "head": "grow_root_head.weight",
+      "class": [
+        1,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 14,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "06fcd295be60"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        2,
+        4
+      ],
+      "role": 0,
+      "source_row": 0,
+      "dest_row": 0,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "cead4d808301",
+      "dest_checksum": "cead4d808301"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        3,
+        3
+      ],
+      "role": 0,
+      "source_row": 1,
+      "dest_row": 1,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "25f7781e8a8f",
+      "dest_checksum": "25f7781e8a8f"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        4,
+        2
+      ],
+      "role": 0,
+      "source_row": 2,
+      "dest_row": 2,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "b11e074ab108",
+      "dest_checksum": "b11e074ab108"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        5,
+        1
+      ],
+      "role": 0,
+      "source_row": 3,
+      "dest_row": 3,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "f479f11be316",
+      "dest_checksum": "f479f11be316"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        2
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 4,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "26551d7aef56"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        4
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 5,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "16814258383c"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        6
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 6,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "f44730ba24e3"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        6,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 7,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "76960f7b1123"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        6,
+        5
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 8,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "8d7d739416ec"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        8,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 9,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "c3fc40fc9c52"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        9,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 10,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "9de46d637ec1"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        1
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 11,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "8b6f85c541fc"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 12,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "92ed2153a20b"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        5
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 13,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "534615a19bb8"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        1,
+        3
+      ],
+      "role": 0,
+      "source_row": null,
+      "dest_row": 14,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "fcf76a7b6a28"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        2,
+        4
+      ],
+      "role": 1,
+      "source_row": 4,
+      "dest_row": 15,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "7232c5a1b2c8",
+      "dest_checksum": "7232c5a1b2c8"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        3,
+        3
+      ],
+      "role": 1,
+      "source_row": 5,
+      "dest_row": 16,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "453faeed49ff",
+      "dest_checksum": "453faeed49ff"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        4,
+        2
+      ],
+      "role": 1,
+      "source_row": 6,
+      "dest_row": 17,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "ea80d965b836",
+      "dest_checksum": "ea80d965b836"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        5,
+        1
+      ],
+      "role": 1,
+      "source_row": 7,
+      "dest_row": 18,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "a6b128454097",
+      "dest_checksum": "a6b128454097"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        2
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 19,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "49ca45c821d8"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        4
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 20,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "0c4e9e547b39"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        6
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 21,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "577efd3b50ad"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        6,
+        3
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 22,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "2ee727b71b6c"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        6,
+        5
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 23,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "470f6831d6ac"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        8,
+        1
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 24,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "58f6e98e3f81"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        9,
+        1
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 25,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "eba4b06da862"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        1
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 26,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "ca2b8de6da4d"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        3
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 27,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "0c0289dd7b5c"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        5
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 28,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "dfcabe3bd265"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        1,
+        3
+      ],
+      "role": 1,
+      "source_row": null,
+      "dest_row": 29,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "08dbc1122553"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        2,
+        4
+      ],
+      "role": 2,
+      "source_row": 8,
+      "dest_row": 30,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "a58b52468977",
+      "dest_checksum": "a58b52468977"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        3,
+        3
+      ],
+      "role": 2,
+      "source_row": 9,
+      "dest_row": 31,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "e3a4d62b1acd",
+      "dest_checksum": "e3a4d62b1acd"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        4,
+        2
+      ],
+      "role": 2,
+      "source_row": 10,
+      "dest_row": 32,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "14c80648ee8d",
+      "dest_checksum": "14c80648ee8d"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        5,
+        1
+      ],
+      "role": 2,
+      "source_row": 11,
+      "dest_row": 33,
+      "status": "COPIED_WITH_INDEX_MAP",
+      "source_checksum": "07022b4dbfe7",
+      "dest_checksum": "07022b4dbfe7"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        2
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 34,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "77c8f9526d51"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        4
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 35,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "479acdc39809"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        7,
+        6
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 36,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "08ad5fe7a1a0"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        6,
+        3
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 37,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "5ba02acbfc7d"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        6,
+        5
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 38,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "da2b645a888d"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        8,
+        1
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 39,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "26be33edb9ce"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        9,
+        1
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 40,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "fdcfb05bc0de"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        1
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 41,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "fd6f19fec59a"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        3
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 42,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "ebf7dbf445e9"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        10,
+        5
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 43,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "16d755a72a53"
+    },
+    {
+      "head": "grow_option.weight",
+      "class": [
+        1,
+        3
+      ],
+      "role": 2,
+      "source_row": null,
+      "dest_row": 44,
+      "status": "FRESH_NEW_CLASS",
+      "dest_checksum": "174807cb9620"
+    }
+  ],
+  "failures": []
+}

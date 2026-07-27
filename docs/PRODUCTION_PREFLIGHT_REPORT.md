@@ -86,12 +86,22 @@ finalized once (2) is decided.
 
 ---
 
+## 7. Warm-start wiring + dry-run (§2, §3) ✅
+- Semantic transfer wired into `--initialize-compatible-from-source-checkpoint` (gate); transfer provenance
+  (source SHA, impl version, map hash, source/dest vocab hashes, copied/fresh counts, row-table hash) stored
+  in checkpoint metadata. The config-mismatch gate is unaffected (vocab/scope/edit flags not in `expected`).
+- **Real-checkpoint dry-run gate `scripts/warmstart_dry_run.py` → `GO_WARMSTART_DRY_RUN`**: (A) strict init
+  fails on the widened heads; (B) semantic init loads; (C) all 114 tensors accounted (109 COPIED_EXACT + 5
+  widened); (D) no unrecognized/missing keys; (E) finite no-update forward/sample. 20 rows copied-by-map / 55
+  fresh; map `bb89525b6021adb1`. Artifact: `diagnostics/production_preflight/warmstart_dry_run.json`.
+- Tests: `test_semantic_partial_transfer.py` (10), `test_warmstart_launch_flag.py` (2, doc can't revert to
+  the strict flag). Commits: #1 `30c92d0` (impl+tests), #2 `047bf03` (wiring), #4 `325dff4` (provenance/docs).
+
 ## Pending (before the STOP report)
-- §2 wire semantic transfer into `--initialize-compatible-from-source-checkpoint` + mismatch allow-list +
-  checkpoint metadata + runtime map check.
-- §3 real-checkpoint dry-run gate + launch-command regression test.
-- §4 semantic-transfer tests (11) + final row-level artifact.
-- §6 CNOF calibration panel (whole-head-reset vs semantic); new-support mass; policy if needed (§7).
-- §8 zero-mixture branch (skip de-novo cache; ring-catalog from B) + validation decision.
+- §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
+  updates (runs during the bounded preflight).
+- §6 CNOF calibration panel (whole-head-reset vs semantic); shared-support fidelity; new-support mass
+  (`alpha_new_mark`, `alpha_new_successor`); low-mass fresh-row policy only if they over-draw (§7).
+- §8 zero-mixture branch (skip de-novo cache; ring-catalog from B's checkpoint) + validation decision.
 - Cache compilation (much smaller than the old launch doc) + no-update throughput probe → 300/500/750/1000-step cost.
 - Final GO/NO-GO.
