@@ -93,13 +93,19 @@ partition, standardization and operator-registry hashes, compiler versions, spli
 counts, and curriculum-bin definitions.
 
 \subsection{Training}
-The edit prior is warm-started from the de novo carbon-tree base checkpoint: shape-compatible body and
-embedding parameters transfer, and the wider organic $(\text{element},\text{valence})$ heads (width
-\ConfigValue{ORGANIC_VOCAB_SIZE}, versus \ConfigValue{CNOF_VOCAB_SIZE} for the four-element base) retain
-the first four transferred rows and freshly initialize the rest, so a four-element checkpoint loads without
-a width crash and a de novo checkpoint reloads byte-identically. We state the warm-start honestly: it carries the de novo
-ring-growth vocabulary (which the edit layers do not teach) and is a starting point, not the trained edit
-prior. Save/reload is exact---a reloaded checkpoint reproduces the sampled mark, hazard, and a fixed-seed
+The base model was trained on a deterministic \ConfigValue{BASE_TRAIN_SUBSET}-molecule CNOF-neutral subset
+(of \ConfigValue{BASE_TRAIN_CNOF_ELIGIBLE} CNOF-neutral eligible) of the same version-pinned
+\ConfigValue{PROD_CORPUS_SIZE}-molecule source corpus from which we build the edit corpus; it supplies a
+learned CNOF de novo initialization that the edit prior adapts to editing and expands to broad-organic
+chemistry. The warm-start initializes the shared encoder, hazard model, embeddings, and semantically
+overlapping $(\text{element},\text{valence})$ output rows from the base checkpoint, while newly introduced
+organic-vocabulary rows (widening the heads to width \ConfigValue{ORGANIC_VOCAB_SIZE} from
+\ConfigValue{CNOF_VOCAB_SIZE}) retain fresh initialization. Shared rows are matched by semantic class label,
+not row position, so a four-element checkpoint loads without a width crash and a de novo checkpoint reloads
+byte-identically. We state the warm-start honestly: copied input-embedding rows for non-CNOF elements are
+inherited-cold (present but untrained in the base run) and are trained by the edit corpus, and the
+initialization carries the de novo ring-growth vocabulary (which the edit layers do not teach)---it is a
+starting point, not the trained edit prior. Save/reload is exact---a reloaded checkpoint reproduces the sampled mark, hazard, and a fixed-seed
 trajectory, and a checkpoint missing required metadata fails loudly. The optimizer, schedule, batch size,
 loss normalization, precision, hardware, step budget, checkpoint selection (held-out validation only, never
 the test set), and seeds are recorded with each run and released with the code. ``Universal'' means one

@@ -1,9 +1,24 @@
 # B-edit (broad-organic) training launch — reviewed spec
 
-**Status: WIRED + verified (498 tests green), NOT yet launched.** The corpus is mined, the recipe is
-locked, and both training-recipe wiring pieces are done (`36b741a`). What remains before the A100 run is
-operational, not code: confirm B's path/eval/support caches (or recompile), choose steps/count, and launch
-from a clean committed worktree with the prelaunch gate green.
+**Status: WIRED + verified, NOT yet launched.** The corpus is mined, the recipe is
+locked. What remains before the A100 run is operational, not code: resolve the cache dependencies, choose
+steps/count, and launch from a clean committed worktree with the prelaunch gate green.
+
+> **⚠️ 2026-07-27 CORRECTIONS (this header supersedes the stale body below; authoritative status lives in
+> `docs/PRODUCTION_PREFLIGHT_REPORT.md`):**
+> 1. **Scope is max_atoms=40, not 48.** Corpus 466,483 eligible (not 490,466); scope_hash `3721d69851110fdd`;
+>    pool `/artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl` (363,456 records); manifest
+>    `scaled_edit_data_manifest_40.json`.
+> 2. **Warm-start flag: use `--initialize-compatible-from-source-checkpoint`.** The `--initialize-from-source-
+>    checkpoint` (strict) command below **CRASHES** — B has CNOF 4-class heads, B-edit has organic 15-class;
+>    strict `load_state_dict` raises a `restate_head/grow_root_head` size mismatch. The compatible path does
+>    semantic partial transfer (shared C/N/O/F rows copied by label; new S/P/Cl/Br/I/B rows fresh).
+> 3. **Base checkpoint** `…3k-1ac6f19-v1/checkpoint.best_so_far.pt` SHA `c9d927…`, trained on a deterministic
+>    **50,000-molecule CNOF-neutral subset** (of 225,149 CNOF-eligible ≤40) — NOT all 500k; `b_train_sha256
+>    83cebcef…`. B-edit mining/training must not be reduced to that 50k CNOF subset.
+> 4. **Caches: v2 (`--scaled-manifest`) needs NO de-novo path cache and NO support cache** (`denovo_keep=0`
+>    discards de-novo records; support is on-the-fly). The de-novo `--compile-only` step below is unnecessary
+>    once the zero-mixture branch lands. See the preflight report §6.
 
 ## Inputs (all verified)
 
@@ -99,7 +114,7 @@ modal run --detach modal_apps/train_tracelet_gm.py --train-only \
   --scaled-manifest /artifacts/edit_mining_full_broad/scaled_edit_data_manifest.json \
   --run-label compose-v4-bedit-broad-<COMMIT>-v1 \
   --source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 \
-  --initialize-from-source-checkpoint \
+  --initialize-compatible-from-source-checkpoint \
   --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 \
   --checkpoint-name checkpoint.best_so_far.pt \
   --training-steps <STEPS> --schedule-steps <STEPS>

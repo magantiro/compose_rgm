@@ -38,6 +38,16 @@ evidenced by the committed scope change, the complete 500k re-mine, corpus chara
   466,483 / 500,000 retained (93.3%); rejected 33,484 = 32,171 too-big (>40 heavy atoms) + 1,112
   unsupported-element + 201 unparseable. (The 48→40 change specifically removes the 23,983-molecule
   41–48-atom sub-tail; the remaining too-big have ≥49 atoms.)
+- **Base checkpoint & warm-start (initialization).** B-edit warm-starts base B
+  (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt`, SHA `c9d927…`), trained on a
+  deterministic **50,000-molecule CNOF-neutral subset** of this same corpus (of 225,149 CNOF-eligible ≤40;
+  `b_train_sha256 83cebcef…`) — B supplies a learned CNOF de-novo initialization; B-edit adapts it to editing
+  and expands it to broad-organic chemistry. Head widening (CNOF 4 → organic 15 `(element,valence)` classes)
+  uses **semantic partial transfer** via `--initialize-compatible-from-source-checkpoint`; the strict
+  `--initialize-from-source-checkpoint` raises on the 4→15 `restate_head`/`grow_root_head`/`grow_option`
+  mismatch. Shared classes copy by `(element,valence)` label; genuinely-new S/P/Cl/Br/I/B rows fresh-init. The
+  12-wide `atom_embedding` copies exactly, but its non-CNOF rows are **INHERITED_COLD** (never trained in B's
+  CNOF run) and are trained by the broad edit corpus.
 
 **All-intermediate atom-bound invariant (enforced at ENUMERATION, not by post-hoc rejection):**
 

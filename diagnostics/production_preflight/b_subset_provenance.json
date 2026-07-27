@@ -1,0 +1,15 @@
+{
+  "b_train_size": 50000,
+  "b_validation_size": 2000,
+  "b_test_size": 2000,
+  "cnof_eligible_at_max40": 225149,
+  "scanned_lines": 500000,
+  "b_subset_selection": "load_cnof_corpus_split(train=50000,val=2000,test=2000,max_atoms=40,seed=20260717,scan_all=True,random); first 50000 of seed-shuffled CNOF-neutral<=40 accepted set",
+  "b_train_sha256_ordered": "83cebcef9a7a880a4d44f80dc67b6b5b5ed57dd0d16966da9c5738a0eb1bb00d",
+  "b_train_sha256_sorted": "650178e4150ea6c63173e3814ba1808bb9ecf57b0850689cc8ea051a44b6e17b",
+  "sample_first3": [
+    "Cc1ccc(CN2CCN(Cc3ccc(-c4nnc5n4-c4cccnc4Nc4ccccc4-5)cc3)CC2)cc1",
+    "Cc1cc(C)cc(Oc2ccc(C(=NO)NCc3ccccn3)cn2)c1",
+    "CCCCC(O)c1cc(OC)c(C)c(=O)o1"
+  ]
+}

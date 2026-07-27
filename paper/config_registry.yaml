@@ -141,6 +141,23 @@ CORPUS_SOURCE_LINES:
   value: "500{,}000"
   source: "manifest corpus_census.total (nonempty source lines); exact identity 500{,}000 = 466{,}483 retained + 33 canonical duplicates + 33{,}484 rejected"
 
+# ---- Base checkpoint provenance (B warm-start source) ------------------------
+BASE_TRAIN_SUBSET:
+  value: "50{,}000"
+  source: "diagnostics/production_preflight/b_subset_provenance.json b_train_size (deterministic CNOF-neutral <=40 subset, seed 20260717, verified)"
+
+BASE_TRAIN_CNOF_ELIGIBLE:
+  value: "225{,}149"
+  source: "b_subset_provenance.json cnof_eligible_at_max40 (CNOF-neutral <=40 molecules in the 500k corpus)"
+
+BASE_CHECKPOINT_SHA:
+  value: "\\texttt{c9d927}"
+  source: "base B checkpoint.best_so_far.pt SHA-256 (first 6 hex); matches recorded Lineage B"
+
+BASE_TRAIN_SHA:
+  value: "\\texttt{83cebcef}"
+  source: "b_subset_provenance.json b_train_sha256_ordered (first 8 hex; deterministic 50k subset)"
+
 # ---- Charge policy -----------------------------------------------------------
 CHARGE_POLICY:
   value: "retain representable charges; charge-preserving edits"
