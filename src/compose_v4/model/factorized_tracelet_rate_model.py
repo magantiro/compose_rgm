@@ -1623,6 +1623,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_cyclic_graft: bool = False,
         enable_heteroatom_scan: bool = False,
         enable_ring_opening: bool = False,
+        enable_cycle_ops: bool = False,
         atom_vocabulary: AtomVocabulary | None = None,
         ring_atom_elements: tuple[int, ...] | None = None,
     ) -> None:
@@ -1643,6 +1644,11 @@ class FactorizedTraceletRateModel(nn.Module):
         # swap the carbon-izing structured ring_system_delete for the decoration-preserving clean delete
         # (ring OPENING that keeps heteroatoms; its inverse re-cyclizes); off for de-novo B, on for B-edit
         self.enable_ring_opening = bool(enable_ring_opening)
+        # Support-complete COMPOSITIONAL ring closure/opening (cycle_close = bond_insert between two existing
+        # atoms; cycle_open = bond_delete of a non-bridge cycle edge). Defines ring-generation support; the
+        # ring_system_* macros are an acceleration cache. Off for de-novo B + current B-edit (byte-identical:
+        # the cycle heads below are absent), on for the ring-support B-edit fine-tune.
+        self.enable_cycle_ops = bool(enable_cycle_ops)
         # Atom-type prediction vocabulary shared by the heads, candidate masks, sampling, and teacher-
         # scoring, so head width and the fiber it is scored against never drift. Default CNOF_VOCABULARY
         # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
@@ -1957,6 +1963,12 @@ class FactorizedTraceletRateModel(nn.Module):
             nn.SiLU(),
             nn.Linear(hidden_dim, 1),
         )
+        # Compositional ring-op heads over PAIR features (added only when enabled -> byte-identical when off).
+        # cycle_close: a ring-closing bond over a nonbonded same-component pair x bond order (1/2/3);
+        # cycle_open: remove a non-bridge cycle edge (per-edge score). Support-complete; template-free.
+        if self.enable_cycle_ops:
+            self.cycle_close_head = nn.Linear(hidden_dim, 3)
+            self.cycle_open_head = nn.Linear(hidden_dim, 1)
 
         self.cycle_query = nn.Linear(hidden_dim, mark_dim)
         self.cycle_key = nn.Embedding(max(len(self.cycle_templates), 1), mark_dim)
