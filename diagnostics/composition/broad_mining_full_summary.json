@@ -1,0 +1,225 @@
+{
+  "config": {
+    "corpus_id": "guacamol_subset_500000_seed0",
+    "corpus_path": "/guacamol/guacamol_subset_500000_seed0.smiles",
+    "train_size": 400000,
+    "validation_size": 10000,
+    "test_size": 10000,
+    "max_atoms": 48,
+    "split_seed": 20260714,
+    "scope_name": "broad_organic_v1",
+    "scan_all": true,
+    "split_workers": 12,
+    "n_shards": 1,
+    "shard_index": 0,
+    "shard_rule": "stride",
+    "max_variable_atoms": 8,
+    "max_pairs_per_core": 12,
+    "scaffold_k": 0,
+    "scaffold_max_per_scaffold": 24,
+    "scaffold_max_per_transformation": 40,
+    "scaffold_mcs_candidates": 16,
+    "scaffold_mcs_timeout": 2,
+    "scaffold_max_group_size": 200,
+    "max_pairs_per_source": 8,
+    "corruption_depth_max": 5,
+    "corruption_couplings_per_target": 1,
+    "corruption_sample_size": 500,
+    "corruption_seed": 7,
+    "organic_vocabulary": true,
+    "out_dir": "/artifacts/edit_mining_full_broad",
+    "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+  },
+  "provenance": {
+    "commit": "09b6558",
+    "corpus_id": "guacamol_subset_500000_seed0",
+    "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+    "corpus_scope": "broad_organic_v1",
+    "corpus_scope_hash": "e59fb09801459470",
+    "standardization_hash": "a8d574cc91c89cb3",
+    "operator_registry": "34234a88b8cc642a",
+    "compiler_mmp": "cf0f2131e7e8a959",
+    "compiler_corruption": "58909c28ef8d17dc",
+    "corpus_scope_module": "79485d014eb782e4",
+    "miner": "9b5d1a711a5a6c3a"
+  },
+  "corpus": {
+    "scope": {
+      "scope_name": "broad_organic_v1",
+      "scope_hash": "e59fb09801459470",
+      "vocabulary_name": "ORGANIC_VOCABULARY",
+      "allowed_elements": [
+        "B",
+        "Br",
+        "C",
+        "Cl",
+        "F",
+        "I",
+        "N",
+        "O",
+        "P",
+        "S"
+      ],
+      "charge_policy": "retain_representable_charges",
+      "max_atoms": 48,
+      "standardization": "molecular_graph_canonical_smiles",
+      "disconnected_policy": "reject_multicomponent",
+      "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class"
+    },
+    "train_partition_size": 400000,
+    "shard_size": 400000,
+    "supported": 400000,
+    "skipped": 0,
+    "census": {
+      "scope": {
+        "scope_name": "broad_organic_v1",
+        "scope_hash": "e59fb09801459470",
+        "vocabulary_name": "ORGANIC_VOCABULARY",
+        "allowed_elements": [
+          "B",
+          "Br",
+          "C",
+          "Cl",
+          "F",
+          "I",
+          "N",
+          "O",
+          "P",
+          "S"
+        ],
+        "charge_policy": "retain_representable_charges",
+        "max_atoms": 48,
+        "standardization": "molecular_graph_canonical_smiles",
+        "disconnected_policy": "reject_multicomponent",
+        "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class"
+      },
+      "total": 500000,
+      "retained": 490466,
+      "rejected": 9498,
+      "canonical_duplicates": 36,
+      "retained_fraction": 0.9809,
+      "rejection_reasons": {
+        "too_big": 8185,
+        "unsupported_element": 1112,
+        "unparseable": 201
+      },
+      "element_molecule_count": {
+        "C": 490445,
+        "N": 457350,
+        "O": 456999,
+        "S": 160260,
+        "F": 91704,
+        "Cl": 86033,
+        "Br": 20864,
+        "P": 6385,
+        "I": 2659,
+        "B": 685
+      },
+      "non_cnof_element_combination_count": {
+        "(cnof_only)": 253346,
+        "S": 124334,
+        "Cl": 54915,
+        "Cl+S": 27650,
+        "Br": 12367,
+        "Br+S": 5736,
+        "P": 4458,
+        "I": 1792,
+        "Br+Cl": 1739,
+        "P+S": 1018,
+        "Br+Cl+S": 713,
+        "Cl+P": 538,
+        "I+S": 464,
+        "B": 459,
+        "Cl+I": 214,
+        "Br+P": 159,
+        "B+S": 117,
+        "Cl+P+S": 109,
+        "Br+I": 72,
+        "Cl+I+S": 61,
+        "B+Cl": 56,
+        "I+P": 38,
+        "Br+P+S": 27,
+        "B+P": 15,
+        "Br+Cl+P": 13,
+        "B+Br": 12,
+        "B+Cl+S": 8,
+        "B+Br+S": 7,
+        "Br+I+S": 7,
+        "Br+Cl+I": 6
+      },
+      "charge_category": {
+        "neutral": 461296,
+        "nonzero_net_charge": 5300,
+        "zwitterion_net_zero": 23870
+      },
+      "contains_charged_atom": 29170,
+      "net_charge_distribution": {
+        "-2": 1,
+        "-1": 39,
+        "0": 485166,
+        "1": 4638,
+        "2": 598,
+        "3": 19,
+        "4": 5
+      },
+      "scan_all": true
+    }
+  },
+  "corruption": {
+    "sample_attempted": 500,
+    "trim_yield": 500,
+    "grow_yield": 331,
+    "family_histogram": {
+      "bond_reorder": 103,
+      "atom_restate": 488,
+      "atom_delete": 343,
+      "bond_reroute": 156,
+      "ring_system_restate": 219,
+      "ring_system_delete": 182
+    },
+    "family_fraction": {
+      "bond_reorder": 0.0691,
+      "atom_restate": 0.3273,
+      "atom_delete": 0.23,
+      "bond_reroute": 0.1046,
+      "ring_system_restate": 0.1469,
+      "ring_system_delete": 0.1221
+    },
+    "ring_change_fraction": 0.59,
+    "depth_mean": 2.982,
+    "source_target_tanimoto": {
+      "mean": 0.358,
+      "p10": 0.1016,
+      "p90": 0.6762
+    },
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "depth_max": 5,
+    "couplings_per_target": 1,
+    "vocabulary": "organic"
+  },
+  "timing_seconds": {
+    "corpus_scan_split_one_time": 47.93,
+    "map_group": 591.82,
+    "corruption_characterization": 424.59
+  },
+  "mmp_pairs_grouped": 206715,
+  "records_compiled_pre_dedup": 356935,
+  "global_reduce": {
+    "records_in": 356935,
+    "records_out": 347793,
+    "dropped_duplicate": 0,
+    "dropped_per_source_cap": 9142,
+    "family_histogram": {
+      "atom_delete": 1032837,
+      "atom_insert": 1031447
+    },
+    "direction_balance": {
+      "forward": 171214,
+      "reverse": 176579
+    },
+    "layer_counts": {
+      "mmp_one_cut": 347793
+    }
+  },
+  "pool_size": 347793
+}
