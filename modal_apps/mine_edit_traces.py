@@ -35,9 +35,12 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose_v4")
-if REMOTE_ROOT.is_dir():
+if REMOTE_ROOT.is_dir():  # inside the Modal container
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
+else:  # local launcher: the @app.local_entrypoint imports the miner (MiningConfig) here
+    sys.path.insert(0, str(ROOT / "scripts"))
+    sys.path.insert(0, str(ROOT / "src"))
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
