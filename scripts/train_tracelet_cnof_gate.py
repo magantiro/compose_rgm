@@ -26,6 +26,7 @@ from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_metrics
+from compose_v4.experiments.analogue_prior import build_analogue_prior_records
 from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
 from compose_v4.experiments.tracelet_conditional import (
     build_tracelet_path_records,
@@ -244,6 +245,7 @@ def _training_support_cache_signature(
     ring_electronic_mode: str,
     corrupted_prior_mix: bool = False,
     organic_vocabulary: bool = False,
+    analogue_trace_pool: bool = False,
 ) -> dict[str, object]:
     """Identify the infinite deterministic row stream independent of its horizon."""
 
@@ -263,6 +265,8 @@ def _training_support_cache_signature(
         "corrupted_prior_mix": bool(corrupted_prior_mix),
         # Organic (15-class) teacher marks are a different deterministic row stream than the CNOF ones.
         "organic_vocabulary": bool(organic_vocabulary),
+        # Real analogue-pair (A->B / B->A MMP) traces are yet another deterministic row stream.
+        "analogue_trace_pool": bool(analogue_trace_pool),
     }
 
 
@@ -1173,6 +1177,21 @@ def main() -> None:
         help="number of leads to corrupt for the B-edit mix; bounds the fine-tune data-gen cost and, "
         "with a matched de-novo subset, gives a ~50/50 edit ratio under uniform sampling",
     )
+    parser.add_argument(
+        "--analogue-trace-pool",
+        type=str,
+        default=None,
+        help="path to a verified analogue-pair trace pool (scripts/build_analogue_trace_pool.py output, "
+        "JSONL): appends real-molecule A->B / B->A MMP edit traces as GM PathRecords (Layer 1 of the "
+        "universal-edit-prior mixture); omit for corruption-only",
+    )
+    parser.add_argument(
+        "--analogue-trace-count",
+        type=int,
+        default=0,
+        help="cap on analogue traces appended (0 = the whole pool); tune against --corrupted-prior-count "
+        "to set the corruption:MMP mixture proportions",
+    )
     args = parser.parse_args()
 
     checkpoint_modes = sum(
@@ -2071,6 +2090,27 @@ def main() -> None:
             ),
             flush=True,
         )
+    if args.analogue_trace_pool:
+        # Append verified real analogue-pair edit traces (A->B / B->A MMP transitions between real drug
+        # molecules) as GM PathRecords -- Layer 1 of the universal-edit-prior mixture (see
+        # docs/PAPER_MASTER_PLAN.md §0b). Appended IN MEMORY like the corruption records; the support-cache
+        # signature carries an analogue_trace_pool discriminator so the mixed tuple recompiles its support.
+        analogue_records = build_analogue_prior_records(
+            args.analogue_trace_pool,
+            count=(args.analogue_trace_count or None),
+        )
+        train_records = tuple(train_records) + tuple(analogue_records)
+        print(
+            json.dumps(
+                {
+                    "phase": "analogue_prior_mix",
+                    "analogue_records": len(analogue_records),
+                    "train_total": len(train_records),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     training_support_cache = None
     if args.training_support_cache_dir is not None:
         training_support_signature = _training_support_cache_signature(
@@ -2082,6 +2122,7 @@ def main() -> None:
             ring_electronic_mode=args.ring_electronic_mode,
             corrupted_prior_mix=args.corrupted_prior_mix,
             organic_vocabulary=args.organic_vocabulary,
+            analogue_trace_pool=bool(args.analogue_trace_pool),
         )
         training_support_cache = ShardedTrainingSupportCache(
             args.training_support_cache_dir,
