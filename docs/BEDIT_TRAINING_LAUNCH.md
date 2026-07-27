@@ -1,8 +1,9 @@
 # B-edit (broad-organic) training launch — reviewed spec
 
-**Status: reviewed, NOT yet launched.** The training corpus is mined + the recipe is locked. This spec is
-the exact command + the small remaining wiring to hand off. Two bounded wiring changes remain (below); once
-they land + the prelaunch gate is green, launch from a clean committed worktree.
+**Status: WIRED + verified (498 tests green), NOT yet launched.** The corpus is mined, the recipe is
+locked, and both training-recipe wiring pieces are done (`36b741a`). What remains before the A100 run is
+operational, not code: confirm B's path/eval/support caches (or recompile), choose steps/count, and launch
+from a clean committed worktree with the prelaunch gate green.
 
 ## Inputs (all verified)
 
@@ -14,27 +15,37 @@ they land + the prelaunch gate is green, launch from a clean committed worktree.
 | Corpus | `guacamol_subset_500000_seed0.smiles` (broad-organic scope, 490,466 eligible) |
 | Locked mixture / curriculum | corruption 0.55 / mmp 0.45 / scaffold 0 ; path-length bins [5, 9, 13] ; cold-element floor 0.02 |
 
-## Remaining wiring (bounded — do first, then re-gate)
+## Wiring status: DONE (`36b741a`, 498 tests green)
 
-Both are opt-in and fail-safe; de-novo B is byte-identical when the new flags are absent.
+Both pieces are wired, opt-in, and fail-safe (de-novo B byte-identical when the flags are absent):
+- **Modal passthrough** — `analogue_trace_pool` / `analogue_trace_count` / `corrupted_prior_count` /
+  `scaled_manifest` thread `main → train_stage.spawn → train_stage → _run_remote → recipe["arguments"]`.
+- **Gate `--scaled-manifest`** — builds the hierarchical sampler from the layer slices + the manifest and
+  passes it to `train_factorized_mark_model` (verified on real records: mmp draw fraction 0.448 ≈ 0.45).
 
-1. **Modal app passthrough** (`modal_apps/train_tracelet_gm.py`): add 4 args and thread them through the
-   entrypoint `main` (:2276) → `train_stage` (:1439) → `_run_remote` (:698), emitting into
-   `recipe["arguments"]` (the recipe→argv converter already handles str/int: `--flag value`):
-   - `analogue_trace_pool: str | None` → `recipe["arguments"]["analogue_trace_pool"]`
-   - `analogue_trace_count: int = 0` → `["analogue_trace_count"]` (0 = whole pool)
-   - `corrupted_prior_count: int | None` → `["corrupted_prior_count"]`
-   - `scaled_manifest: str | None` → `["scaled_manifest"]`
-2. **Gate hierarchical sampler** (`scripts/train_tracelet_cnof_gate.py`): add `--scaled-manifest`; capture
-   the layer boundaries (`denovo_keep`, `len(edit_records)`, `len(analogue_records)` at :2106/:2126); when
-   set, build `record_index_sampler = build_layered_sampler({corruption: edit slice, mmp: analogue slice},
-   layer_weights=<manifest>, path_length_bins=<manifest [5,9,13]>, cold_element_floor=<manifest>,
-   cold_elements_of=<non-CNOF of record.path.trace.target>)` and pass it to `train_factorized_mark_model`
-   at :3057 (the param + full plumbing already exist + are tested). Set `denovo_keep=0` under
-   `--scaled-manifest` (the mixture is manifest-controlled; de-novo retained via the warm-start).
+## Two recipes: v1 (fast, cached) vs v2 (hierarchical)
 
-Smoke both with `--smoke` before the real launch (the mixed-record path must build the sampler + backprop
-FINITE, as the local training smoke already verifies).
+The training-support-cache COMPILER draws records uniformly (a separate path from the dataset), so the
+hierarchical sampler cannot reuse a pre-compiled cache — the gate GUARDS `--scaled-manifest` against a
+pre-compiled cache.
+
+- **v1 (recommended first run):** UNIFORM sampling + the support cache (fast, correct). Hit the 55/45
+  mixture by COUNT — `--corrupted-prior-count`/`--analogue-trace-count`. Omit `--scaled-manifest`. This is
+  the launch command above.
+- **v2 (curriculum + cold-element floors):** add `--scaled-manifest ...`, and run WITHOUT
+  `--require-training-support-cache` (support computed on the fly — slower, correct). Use once v1 trains.
+
+## Timing / duration (honest)
+
+Early stopping + checkpointing are implemented and were used to train B: `--early-stopping-patience 6`,
+`evaluation_every 250`, min-delta 0.1%, restoring best state; periodic `checkpoint.best_so_far.pt` +
+`checkpoint.recovery.pt`; the A100 `train_stage` runs `--detach`, 24h timeout, 1 retry that resumes from
+recovery. So the run is **self-limiting** (stops at convergence, ~1–3k steps for a warm-start fine-tune) and
+resumable. There is **no recorded A100 steps/sec for the organic 15-class config**, so any wall-clock is a
+guess. To measure it: run a short `--train-only --training-steps 300` and read the logged steps/sec + the
+one-time support-compile cost. That probe is a real A100 op with prerequisites — the base checkpoint is on
+the volume (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt`) but B's **path /
+eval / support caches must be present (or recompiled)** first; verify before the probe.
 
 ## Launch sequence (from a clean committed worktree at the launch tag)
 
