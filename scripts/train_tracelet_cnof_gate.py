@@ -32,6 +32,7 @@ from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_metrics
 from compose_v4.experiments.analogue_prior import build_analogue_prior_records
 from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
+from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
 from compose_v4.experiments.tracelet_conditional import (
     build_tracelet_path_records,
     build_tree_transport_path_records,
@@ -406,6 +407,7 @@ def _training_support_cache_signature(
     corrupted_prior_mix: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: bool = False,
+    cycle_op_mix: bool = False,
 ) -> dict[str, object]:
     """Identify the infinite deterministic row stream independent of its horizon."""
 
@@ -427,6 +429,8 @@ def _training_support_cache_signature(
         "organic_vocabulary": bool(organic_vocabulary),
         # Real analogue-pair (A->B / B->A MMP) traces are yet another deterministic row stream.
         "analogue_trace_pool": bool(analogue_trace_pool),
+        # Compositional ring-op (cycle_open/cycle_close) supervision is another deterministic row stream.
+        "cycle_op_mix": bool(cycle_op_mix),
     }
 
 
@@ -1322,6 +1326,13 @@ def main() -> None:
         "ring_system_restate + cyclic bond_reroute editing marks (fine-tune B -> B-edit)",
     )
     parser.add_argument(
+        "--cycle-op-mix",
+        action="store_true",
+        help="enable the compositional cycle_close/cycle_open ring families + append real-molecule "
+        "ring-bond (cycle_open/cycle_close) supervision to the edit records (support-complete ring "
+        "growth/closure). Requires --corrupted-prior-mix.",
+    )
+    parser.add_argument(
         "--organic-vocabulary",
         action="store_true",
         help="predict/edit the whole drug-like organic subset (C,N,O,F,S,P,Cl,Br,I,B) via 15 "
@@ -1458,6 +1469,8 @@ def main() -> None:
         )
     if args.scaled_manifest and not args.corrupted_prior_mix:
         raise ValueError("--scaled-manifest requires --corrupted-prior-mix")
+    if args.cycle_op_mix and not args.corrupted_prior_mix:
+        raise ValueError("--cycle-op-mix requires --corrupted-prior-mix")
     if args.scaled_manifest and (
         args.require_training_support_cache or args.compile_training_support_steps
     ):
@@ -2288,6 +2301,23 @@ def main() -> None:
             catalog=ring_catalog,  # enables the clean ring-opening corruption family (de-cyclize)
             vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else CNOF_VOCABULARY,
         )
+        if args.cycle_op_mix:
+            # Compositional ring-op supervision (P3): real-molecule cycle_open/cycle_close teacher traces,
+            # folded into the in-memory edit records so support-complete ring growth/closure gets positive
+            # supervision (every ring bond, both directions, round-trip-verified). Enabled at the model via
+            # enable_cycle_ops below.
+            cycle_records, cycle_attempted = build_cycle_op_records(
+                edit_smiles, n_slots=args.max_atoms, seed=args.seed + 8,
+            )
+            edit_records = tuple(edit_records) + tuple(cycle_records)
+            print(
+                json.dumps(
+                    {"phase": "cycle_op_mix", "cycle_records": len(cycle_records),
+                     "cycle_attempted": cycle_attempted},
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
         # Keep an equal-sized de-novo subset so uniform sampling sees a real ~50/50 edit ratio; the model
         # already knows de-novo via the warm-start, so a subset suffices for retention. (Sizing this to
         # the full corpus would run the CPU corruption for tens of hours on the training GPU.)
@@ -2342,6 +2372,7 @@ def main() -> None:
             corrupted_prior_mix=args.corrupted_prior_mix,
             organic_vocabulary=args.organic_vocabulary,
             analogue_trace_pool=bool(args.analogue_trace_pool),
+            cycle_op_mix=bool(args.cycle_op_mix),
         )
         training_support_cache = ShardedTrainingSupportCache(
             args.training_support_cache_dir,
@@ -2845,6 +2876,7 @@ def main() -> None:
             enable_cyclic_graft=args.corrupted_prior_mix,
             enable_heteroatom_scan=args.corrupted_prior_mix,
             enable_ring_opening=args.corrupted_prior_mix,
+            enable_cycle_ops=args.cycle_op_mix,
             atom_vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else None,
         ).to(device)
     elif args.model == "from_scratch":
@@ -2873,6 +2905,7 @@ def main() -> None:
         "model": args.model,
         "training_backend": args.training_backend,
         "corrupted_prior_mix": bool(args.corrupted_prior_mix),
+        "enable_cycle_ops": bool(args.cycle_op_mix),
         # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
         # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
         "organic_vocabulary": bool(args.organic_vocabulary),
