@@ -79,18 +79,17 @@ PROD_CORPUS_SIZE:
   source: "guacamol_subset_500000_seed0.smiles (nominal subset size)"
 
 CORPUS_ELIGIBLE_FRACTION_BROAD:
-  value: "\\ensuremath{\\approx}98\\%"
-  source: "broad-organic scope projection; at-scale GuacaMol-TRAIN census in progress"
-  note: "SCOPE PROJECTION, not an experimental result: the exact 500k count is produced by the running mine. ~490k of 500k eligible."
+  value: "98.1\\%"
+  source: "measured 500k GuacaMol census (broad-organic scope): 490{,}466 / 500{,}000 eligible"
+  note: "DATASET COUNT (implementation fact), not an experimental result. Measured on the artifact volume; the local 5k proxy matched at 98.0%."
 
 CORPUS_ELIGIBLE_FRACTION_CNOF:
-  value: "\\ensuremath{\\approx}48\\%"
-  source: "legacy CNOF-neutral filter projection (contrast used to motivate the broad scope)"
-  note: "SCOPE PROJECTION; the CNOF-neutral loader that broad-organic replaces retained roughly half the corpus."
+  value: "47.6\\%"
+  source: "measured: the legacy CNOF-neutral filter retained 237{,}945 / 500{,}000 (contrast motivating the broad scope; broad is 2.05x)"
 
 CORPUS_ELIGIBLE_COUNT_BROAD:
-  value: "\\ensuremath{\\approx}490{,}000"
-  source: "broad-organic scope projection over the 500k subset"
+  value: "490{,}466"
+  source: "measured 500k GuacaMol census under the broad-organic scope"
 
 # ---- Charge policy -----------------------------------------------------------
 CHARGE_POLICY:
