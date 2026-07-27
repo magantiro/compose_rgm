@@ -1,0 +1,63 @@
+{
+  "stage": "6 (local end-to-end wiring + smoke-training gate)",
+  "status": "GO_FOR_PRODUCTION_PREFLIGHT",
+  "status_ceiling_note": "GO_FOR_FULL_A100 is intentionally NOT returnable from this local stage: it requires the at-scale GuacaMol trace pool, the final mixture locked from measured statistics, and a short production-environment preflight loading the REAL B checkpoint. No Modal was touched.",
+  "commit": "c7fe5ff",
+  "environment": {
+    "python": "3.14.2",
+    "torch": "2.11.0", "numpy": "2.4.2", "rdkit": "2025.09.6", "scipy": "1.17.1", "networkx": "3.6.1",
+    "gate": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src pytest tests/"
+  },
+  "reproducibility": {
+    "pipeline_source_committed": true,
+    "analogue_pool_sha256_reproduced_in_clean_worktree": true,
+    "pool_sha256": "58ace3f46a79a9bceaaf2d8e...",
+    "clean_worktree_gate": "463 passed at e88cf81 (+ new stage-6 tests since)"
+  },
+  "ring_catalog_supervision": {
+    "finding": "the pilot 'ring_system_delete zero support' was a characterization-config artifact (char ran make_edit_pair without a catalog); the trainer threads catalog=ring_catalog and supervises it",
+    "corruption_ring_delete_rate_with_catalog": "92/200 trims",
+    "fingerprint_recorded_in_checkpoint_metadata": true,
+    "tests": "tests/test_ring_opening_supervision.py (5)"
+  },
+  "enabled_family_contract": {
+    "production_enabled": 8,
+    "all_supervised_current_recipe": true,
+    "disabled_everywhere": ["cycle_insert", "cycle_attach"],
+    "table": "diagnostics/composition/stage6a_family_contract.json"
+  },
+  "tiny_overfit": {
+    "n_examples": 23, "distinct_states": 23,
+    "per_example_lower_bound_r_1_minus_log_r": 1.0,
+    "loss_initial": 5.2346, "loss_final": 1.1382, "gap_above_lower_bound": 0.1382,
+    "every_family_probability_rose": true, "passed": true,
+    "test": "tests/test_stage6a_coverage_overfit.py"
+  },
+  "mixture_loader": {
+    "law": "FactorizedMarkDataset draws uniformly over the record tuple -> realized layer mixture == count ratio",
+    "multinomial_check": "requested 0.400 vs observed 0.4005, |z|=0.08",
+    "caveat": "a long trace yields more state-action rows (one PathRecord -> many rows); the path-length curriculum bins are the balancing lever. Reverse pairs are separate equal-count records (balanced)."
+  },
+  "checkpoint_path": {
+    "b_to_bedit_compatible_init": "shape-compatible body/embeddings transfer; wider (element,valence) heads retain fresh init (no 4-vs-15 crash)",
+    "save_reload_exact": true,
+    "loud_fail_on_missing_metadata": true,
+    "de_novo_b_reloads_byte_identical": true,
+    "tests": "tests/test_checkpoint_roundtrip_and_init.py (4)"
+  },
+  "heldout_rollout": {
+    "leads": ["O=C(Nc1ccccc1)c1ccncc1", "COc1ccc(CCN)cc1", "CC(=O)Nc1ccc(O)cc1", "c1ccc(-c2ccncc2)cc1"],
+    "budgets": [1, 2, 4, 8],
+    "starts_at_lead_not_carbon_tree": true,
+    "all_intermediate_validity": "100% (assert every intermediate valid+connected)",
+    "degeneracy_diagnostic": "measured for plumbing; QUALITY reading requires the trained model (an untrained fixture is near-random by design, not degenerate-by-collapse)",
+    "tests": "tests/test_heldout_rollout_wiring.py (2)"
+  },
+  "remaining_production_dependencies_unverified_locally": [
+    "the REAL trained B / B-edit checkpoint (none on disk locally -- only a fixture was loaded)",
+    "the at-scale GuacaMol-TRAIN analogue trace pool (pilot is 53 pairs, too concentrated: scaffold Gini 0.39)",
+    "A2.2 fused-ring / A2.3 sparse-NN scaffold-pair compilation",
+    "the final locked mixture percentages (proposed, not locked)",
+    "the goal/region-conditioned controller h_phi(b,x,z), docking oracle, and external baselines (post-training)"
+  ]
+}
