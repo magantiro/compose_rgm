@@ -443,19 +443,28 @@ def run_pipeline(config: MiningConfig) -> dict:
     train = split.train
     t_scan = time.time() - t0
     shard = shard_of(train, config)
+    print(f"[mine] scan+split done: eligible-train={len(train)} shard={len(shard)} ({t_scan:.1f}s)",
+          flush=True)
 
     t0 = time.time()
     emission = map_shard(shard, config)
     mmp_pairs = group_mmp_pairs(emission, config)
-    scaffold_cands = group_scaffold_pairs(emission, config)
+    # The scaffold-NN layer's rdFMCS k-NN is the slow phase and is ~mostly A2.3-deferred; skip it when
+    # scaffold_k<=0 (validation shards) -- the MMP + corruption layers carry the pool.
+    scaffold_cands = group_scaffold_pairs(emission, config) if config.scaffold_k > 0 else []
+    print(f"[mine] map+group done: mmp_pairs={len(mmp_pairs)} scaffold_cands={len(scaffold_cands)}",
+          flush=True)
     mmp_records = compile_mmp(mmp_pairs, config)
     scaffold_records, scaffold_deferred = compile_scaffold(scaffold_cands, config)
     pool, cap_report = dedup_and_cap(mmp_records + scaffold_records, config)
     t_shard = time.time() - t0
+    print(f"[mine] compile+reduce done: pool={len(pool)} "
+          f"(mmp={len(mmp_records)} scaffold={len(scaffold_records)}) ({t_shard:.1f}s)", flush=True)
 
     t0 = time.time()
     corruption = characterize_corruption(tuple(shard), config)
     t_corruption = time.time() - t0
+    print(f"[mine] corruption characterization done ({t_corruption:.1f}s)", flush=True)
 
     return {
         "config": asdict(config),

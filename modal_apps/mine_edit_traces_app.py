@@ -147,7 +147,8 @@ def main(
     test_size: int = 10_000,
     max_atoms: int = 48,
     split_workers: int = 12,
-    corruption_sample_size: int = 2_000,
+    corruption_sample_size: int = 1_000,
+    scaffold_k: int = 0,  # 0 skips the slow, ~mostly-deferred scaffold-NN MCS on a validation shard
     out_subdir: str = "edit_mining_validation",
 ) -> None:
     # The launcher stays THIN: it does not import the miner (rdkit/etc. live only in the container).
@@ -167,7 +168,7 @@ def main(
         "corpus_path": f"/guacamol/{corpus}",
         "train_size": train_size, "validation_size": validation_size, "test_size": test_size,
         "max_atoms": max_atoms, "n_shards": n_shards, "shard_index": shard_index,
-        "split_workers": split_workers,
+        "split_workers": split_workers, "scaffold_k": scaffold_k,
         "corruption_sample_size": corruption_sample_size, "out_dir": f"/artifacts/{out_subdir}",
     }
     print(f"launching validation shard {shard_index}/{n_shards} of {corpus} at commit {commit}")
