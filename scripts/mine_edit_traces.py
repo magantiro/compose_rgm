@@ -492,6 +492,44 @@ def run_pipeline(config: MiningConfig) -> dict:
     }
 
 
+def mine_mmp_pairs(config: MiningConfig) -> dict:
+    """Phase A of the multi-container fan-out: scan+split, map the FULL train partition, GLOBAL-group the
+    MMP one-cut pairs, and characterize corruption -- but do NOT compile. Returns the pairs (JSON-friendly
+    ``[sa, sb, core]``) for parallel compilation + census + corruption + provenance. Scaffold-NN is skipped
+    (scaffold_k<=0). The compile of the (very many) pairs is fanned out over containers via ``compile_mmp``,
+    then merged with ``dedup_and_cap`` -- see modal_apps/mine_edit_traces_app.py."""
+    t0 = time.time()
+    split = train_partition(config)
+    train = split.train
+    t_scan = time.time() - t0
+    shard = shard_of(train, config)
+    print(f"[mine] scan+split done: eligible-train={len(train)} shard={len(shard)} ({t_scan:.1f}s)",
+          flush=True)
+
+    t0 = time.time()
+    emission = map_shard(shard, config)
+    mmp_pairs = group_mmp_pairs(emission, config)
+    t_map = time.time() - t0
+    print(f"[mine] map+group done: mmp_pairs={len(mmp_pairs)} ({t_map:.1f}s)", flush=True)
+
+    t0 = time.time()
+    corruption = characterize_corruption(tuple(shard), config)
+    t_corruption = time.time() - t0
+    print(f"[mine] corruption characterization done ({t_corruption:.1f}s)", flush=True)
+
+    return {
+        "config": asdict(config),
+        "provenance": _provenance(config),
+        "corpus": {"scope": split.scope, "train_partition_size": len(train), "shard_size": len(shard),
+                   "supported": emission.supported, "skipped": emission.skipped, "census": split.census},
+        "corruption": corruption,
+        "pairs": [[sa, sb, core] for (sa, sb, core) in mmp_pairs],
+        "timing_seconds": {"corpus_scan_split_one_time": round(t_scan, 2),
+                           "map_group": round(t_map, 2),
+                           "corruption_characterization": round(t_corruption, 2)},
+    }
+
+
 def _provenance(config: MiningConfig) -> dict:
     import subprocess
     try:  # the Modal container has no git binary; the caller (mine_shard) overrides with the launch commit
