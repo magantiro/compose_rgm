@@ -11,8 +11,11 @@ Gated use (do not skip a step):
   3. STOP for explicit authorization; only then the full sweep (all shards) below.
 
 Validation shard:
-    modal run modal_apps/mine_edit_traces.py \
-        --corpus guacamol_subset_500000_seed0.smiles --n-shards 24 --shard-index 0
+    modal run modal_apps/mine_edit_traces_app.py \
+        --corpus guacamol_subset_500000_seed0.smiles --n-shards 20 --shard-index 0
+
+The app module is deliberately named ``*_app`` to avoid colliding with the ``mine_edit_traces`` scripts
+module it imports (Modal loads the entrypoint file by its stem into ``sys.modules``).
 
 The shard job does the ONE-TIME full-corpus scan+split (deterministic, the same ``load_cnof_corpus_split``
 the trainer uses -> TRAIN-only, no val/test leakage), then maps+groups+compiles a single stride shard and
