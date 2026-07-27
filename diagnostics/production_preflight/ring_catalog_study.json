@@ -1,0 +1,19 @@
+{
+  "status": "NO_GO_TEMPLATE_SEMANTICS (current key) -> GO_REBUILD_WITH_RING_CATALOG_K after simplifying the template identity",
+  "section1_data": {
+    "method": "catalog-free: compile_carbon_tree_to_target(carbon_tree_source, real GuacaMol molecule) -> the ring_system_grow steps ARE the grow events; their template keys are the catalog candidates. Same construction as the seed catalog, scaled to the corpus.",
+    "sample": "1500-3000 broad-organic <=40 molecules",
+    "source_independent": true,
+    "note": "the clean ring-DELETE enumerator is catalog-gated (chicken-and-egg for deriving a catalog); the carbon-tree->target compile is catalog-free and is the correct derivation."
+  },
+  "section0_section6_template_identity": {
+    "finding": "The current ring_system_grow_electronic_key is OVER-SPECIFIC: 3781 grow events -> 2835 distinct keys (1.3x collapse); K=1024 covers only 52%; NO template reaches even 25 supporting events. A frequency-ranked catalog over this key CANNOT achieve 95% coverage with supported rows -> NO_GO_TEMPLATE_SEMANTICS for the current key.",
+    "remedy_verified": "A SIMPLIFIED canonical ring-graph key (element + aromaticity WL-hash of the ring pattern graph, context-free) collapses 3781 events -> 121 distinct CHEMICAL templates (31x collapse). Coverage: K=32=97.1%, K=64=98.5%, K=128=100%. Support (at 1500 molecules): >=50 for 4 templates, >=25 for 6, >=10 for 16; benzene alone is 56.5% of grow events.",
+    "interpretation": "The over-specificity is source/placement operands leaking into the learned template CLASS. Per section-0 these belong in the ACTION INSTANCE, not the class. Splitting reusable chemical ring identity (canonical typed ring graph + elements + aromaticity + topology) from the source-specific placement makes ring_system_grow supervisable."
+  },
+  "section2_coverage_curve_simplified_key": {"K32": 97.1, "K64": 98.5, "K128": 100.0, "K256": 100.0, "K512": 100.0, "K1024": 100.0},
+  "hybrid_rule_tentative_K": "K=64 (smallest >=95% held-out coverage: K=32=97.1% already clears 95%; K=32->64 adds +1.4pp>1pp so consider 64 at 98.5%; K=64->128 adds +1.5pp to 100% but those marginal templates are rare -- pending the support-learning floor + full-corpus run). At 400k-molecule scale, per-template support scales ~250x, so the ~64-121 chemical templates are adequately supported.",
+  "consequence": "The rebuild now REQUIRES a section-6 model change FIRST: simplify the ring_system_template_key identity to the canonical ring-graph class (move placement to the action instance), aligned across model + enumeration + executor. THEN build the data-derived catalog over the simplified key (K~64), supervise (reversible grow traces), calibrate, and regenerate manifest/caches. This changes the ring_system_grow parameterization, the operator/catalog hashes, and the checkpoint contract for the ring head.",
+  "still_pending": ["full-corpus (400k) coverage + per-template support at the simplified key", "empirical support-learning floor N_min (section-3, tiny-trains)", "topology-stratum coverage with the corrected aromatic/saturated x carbo/hetero + fused/spiro/bridged + S/P descriptor (section-4)", "canonical branching + A100 throughput (section-5)", "family + template init priors (section-7)"],
+  "guardrails": "No template-identity model change, catalog/manifest regeneration, cache compile, or Stage-7 optimizer update until this path is reviewed."
+}

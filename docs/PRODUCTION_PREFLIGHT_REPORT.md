@@ -159,6 +159,27 @@ Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on iden
 | D (Modal) | §10 | regenerate catalog/corruption/manifest (new scope+operator+catalog hashes); recompile catalog-dependent caches; re-run preflight gates |
 | E | — | cache + no-update throughput → cost; final GO/NO-GO |
 
+## 11. Ring-catalog study (§0–§6) — root cause found: over-specific template identity
+Catalog-free reversible grow data (`compile_carbon_tree_to_target` over GuacaMol → the `ring_system_grow`
+steps are the grow events). Decisive comparison (`diagnostics/production_preflight/ring_catalog_study.json`):
+
+| Template key | distinct | K=32 cov | K=64 cov | ≥50 support |
+|---|---|---|---|---|
+| **current `electronic_key`** | 2835 | 11% | 16% | **0** → `NO_GO_TEMPLATE_SEMANTICS` |
+| **simplified ring-graph** | **121** | **97.1%** | **98.5%** | 4 (benzene = 56% of events) |
+
+- The current `ring_system_grow` template key is **massively over-specific** (source/placement operands leak
+  into the learned class) — 1.3× collapse, K=1024 covers only 52%, no template ever reaches ≥25 support. This
+  is **why grow was unsupervisable** and quietly left unsupervised.
+- A **canonical ring-graph identity** (element+aromaticity, context-free) collapses 31× → **121 chemical
+  templates**, K=64 covers **98.5%**; at 400k scale the common templates are heavily supported.
+- **Status: `NO_GO_TEMPLATE_SEMANTICS` (current key) → `GO_REBUILD_WITH_RING_CATALOG_K≈64` after a §6
+  template-identity simplification** (move placement to the action instance; align model + enumeration +
+  executor). Tentative **K=64** (hybrid rule), pending the full-corpus curve + support-learning floor.
+- ⇒ the rebuild now requires a **model change to the `ring_system_grow` parameterization first** (changes the
+  operator/catalog hashes + the ring-head checkpoint contract), then catalog + supervision + calibration +
+  regenerate. Still pending: §3 support floor, §4 corrected topology strata, §5 branching/throughput, §7 priors.
+
 ## Pending (before the STOP report)
 - §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
   updates (runs during the bounded preflight); apply the §7 bias policy at init.
