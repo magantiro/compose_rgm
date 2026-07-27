@@ -201,22 +201,40 @@ terminal, `<TERMINAL>`, `:3194`, `canonical_successor_distillation.py:630`); or 
 
 ## Appendix A — finite-horizon Doob control for the editing embedded chain
 
-Because editing is a fixed-`K`-step embedded chain `P_k(x,y)` (§10), exact terminal-reward steering is the
-**finite-horizon Doob transform** (this is the object the controller approximates; NOT the continuous-time
-generator transform):
+Editing is a fixed-`K`-step embedded jump chain `P(x,y)` (§10) — the hazard/time is discarded, so the control
+object is **NOT** the continuous-time generator transform. The exact desirability therefore depends on the
+**remaining edit budget** `b`, not on a continuous time `t`. The controller is budget-conditioned:
+
+    h_φ(b, x; x_src, z, m)
+
+(`b` = remaining budget, `x` = current state, `x_src` = immutable lead, `z` = objective/preference, `m` =
+protected mask). The **exact finite-horizon Doob transform**, with `h` indexed by *remaining* budget `b`:
 
 ```
-h_K(x) = g(x)                                   # terminal desirability
-h_k(x) = Σ_y P_k(x,y) h_{k+1}(y)                # backward value recursion
-P_k^g(x,y) = P_k(x,y) · h_{k+1}(y) / h_k(x)     # controlled transition
+h_0(x) = g(x)                                # 0 steps left -> terminal desirability
+h_b(x) = Σ_y P(x,y) h_{b-1}(y)               # b steps left   ( = (P^b g)(x) )
+P_b^g(x,y) = P(x,y) · h_{b-1}(y) / h_b(x)     # controlled step with b steps left
 ```
 
-Then on an enumerable state space `Pr^g(X_K=y | X_0=x_0) = Pr(X_K=y | X_0=x_0)·g(y) / h_0(x_0)` (exact
-terminal reweighting), verifiable within Monte-Carlo error. Dynamic steering = replace `g` at an intermediate
-step and apply the exact continuation transform over the remaining budget. Exact Doob steering **is**
-available for editing — on the embedded chain, not the timed generator. **[Enumerable verification: task #35.]**
+From `x_0` with a `K`-step budget the controlled endpoint is the exact terminal tilt
 
----
+    Pr^g(X_K=y | X_0=x_0) = Pr(X_K=y | x_0) · g(y) / h_K(x_0),   h_K(x_0) = Σ_y Pr(X_K=y|x_0) g(y)
 
-*Pending items (`[...]` above) are under adversarial verification (three Fable-5 agents in flight); this
-contract will be finalized with their evidence in AUDIT_REPORT.md.*
+(the normalizer is `h_K(x_0)` — the value with the *full* budget at the start, NOT `h_0`). **Verified
+machine-exact** on an enumerable molecular embedded chain (`tests/test_finite_horizon_editing_doob.py`,
+572-state cap-4 chain): terminal-tilt TV `8e-17`.
+
+**Dynamic steering.** Replace the objective `g → g'` at an intermediate state and apply the exact
+continuation transform for the *remaining* budget `b'` — the continuation endpoint is the `g'`-tilt from that
+state. Verified exact (TV `9e-17`). This is why the controller must condition on `b`: the continuation is a
+fresh finite-horizon transform at `(x, b', g')`.
+
+**Exactness is budget-specific — do NOT claim arbitrary early stopping follows the terminal tilted law.** The
+controlled marginal after fewer than `K` steps is *not* the terminal tilt (verified TV `> 0.02` two steps
+early); the terminal law holds only at the declared horizon, and only with a budget-conditioned controller.
+
+**All controllers operate on the same kernel.** Every controller (exact Doob, learned `h_φ`, MOG-style,
+scalarized, SMC) must steer the **one post-quotient canonical-successor kernel** `P(x,y)=Σ_{a:T(x,a)=y}p_θ(a|x)`
+that the raw sampler and the full-Zq pancake sampler share (§7) — never a mix of raw-mark and canonical-
+successor views. The controller reweights this `P`; it never introduces new support (illegal transitions stay
+zero).
