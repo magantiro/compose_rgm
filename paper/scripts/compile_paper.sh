@@ -16,7 +16,12 @@ export PATH="/Library/TeX/texbin:$PATH"
 MODE="${1:-draft}"
 PY="${PYTHON:-python3}"
 
-build() {  # $1 = mode
+build() {  # $1 = mode -- regenerate results.tex, guarded by the max_atoms=40 scope contract
+  "$PY" scripts/check_scope_consistency.py || {
+    echo "compile_paper: scope-consistency gate FAILED -- registry drifts from the max_atoms=40 contract;"
+    echo "               refusing to generate results.tex. Fix config_registry.yaml or the manifest."
+    return 9
+  }
   "$PY" scripts/build_results_tex.py --mode "$1"
 }
 compile() {

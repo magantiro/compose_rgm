@@ -14,6 +14,7 @@ paper-final:
 	bash scripts/compile_paper.sh final
 
 checks:
+	python3 scripts/check_scope_consistency.py
 	python3 scripts/check_claim_registry.py
 	python3 scripts/check_placeholders.py
 

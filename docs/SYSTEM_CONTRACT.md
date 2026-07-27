@@ -11,6 +11,65 @@ trained/sampled path.)
 
 ---
 
+## 0. Production state-space contract (max_atoms = 40, broad-organic, charge-preserving)
+
+The **validated production state space** for B and B-edit: **connected broad-organic molecular graphs with
+at most 40 represented heavy atoms, under the declared charge-preserving scope.** This is a formal
+state-space *definition* — a bound on the CTMC's state set — not a dataloader knob. Locked 2026-07-27,
+evidenced by the committed scope change, the complete 500k re-mine, corpus characterization, a
+10,096-record replay gate with zero over-cap accepted trajectories, the production manifest
+(`diagnostics/composition/scaled_edit_data_manifest_40.json`), and a clean local suite.
+
+- **`max_atoms = 40`.** `n_slots == max_atoms == scope bound` — equality, everywhere (miner, corruption,
+  compiler, trainer, sampler, evaluator). `data/organic_corpus.py` `BROAD_ORGANIC_V1.max_atoms` (:143);
+  the miner (`scripts/mine_edit_traces.py resolve_scope`) and the training gate
+  (`scripts/train_tracelet_cnof_gate.py`) assert equality and fail loudly on any mismatch.
+- **Scope hash `3721d69851110fdd`** (`BROAD_ORGANIC_V1.scope_hash()`, `organic_corpus.py:110`) — binds the
+  element vocabulary, charge policy, and `max_atoms` into one fingerprint recorded in every manifest,
+  training config, checkpoint metadata, and sampler metadata. A cross-scope load fails loudly.
+- **Active vocabulary `ORGANIC_VOCABULARY`** — 15 neutral `(element,valence)` head classes over
+  {C,N,O,F,S,P,Cl,Br,I,B}; `sha256(classes)[:16] = 4e728cfc132e7e04`, bound into the scope hash.
+- **Charge policy: retain, preserve, never optimize.** A charged state is in scope iff every atom's
+  `(element,valence,charge)` is a representable class (`class_index`); the corruption's net-charge
+  invariance guard (`rewrite/source_corruption.py`) forbids any edit that changes an atom's
+  charge/element/H at a charged center. 27,733 retained molecules carry a formal charge; charge labels are
+  preserved on every trajectory (§3 restates that heads emit neutral `(element,valence)` only).
+- **Corpus `guacamol_subset_500000_seed0`**, `sha256 70526d92f1f08d8e…`. Census under this scope:
+  466,483 / 500,000 retained (93.3%); rejected 33,484 = 32,171 too-big (>40 heavy atoms) + 1,112
+  unsupported-element + 201 unparseable. (The 48→40 change specifically removes the 23,983-molecule
+  41–48-atom sub-tail; the remaining too-big have ≥49 atoms.)
+
+**All-intermediate atom-bound invariant (enforced at ENUMERATION, not by post-hoc rejection):**
+
+```
+|V(x_k)| <= 40   for every accepted or sampled trajectory state x_k
+```
+
+The legal fiber offers a size-increasing edit (`atom_insert`, `ring_system_grow`) only into a **free padded
+slot**; a state with 40 real atoms in 40 slots has none, so no over-cap successor is ever *enumerated* — the
+bound holds before scoring, not by the executor rejecting an over-cap state after the fact. **Legality at
+capacity:** at `|V(x)| = 40` every size-increasing family is empty in `A(x)`, while grafts (which relocate a
+pendant fragment without adding atoms) and every size-preserving/-decreasing family stay legal;
+`atom_insert`/`ring_system_grow` re-open only once an `atom_delete`/`ring_system_delete` frees a slot.
+Verified by `tests/test_max_atoms_invariant.py` (a full-40 state exposes no size-increasing edit; a 39-atom
+state's edits stay ≤40; the corruption never records an over-cap state; a reversed trace is independently
+≤40) and the 10,096-record production replay (max-intermediate atoms = 40, zero exceedances, replay gate
+PASS).
+
+**Compatibility requirements (fail-closed).** Corpus, trace pool, checkpoint, sampler, and evaluator must
+agree on the state-space contract: identical `max_atoms = 40`, identical `scope_hash 3721d69851110fdd`,
+identical `n_slots`. B-edit warm-starts base B, which was architected at `max_atoms = 40`, so the
+padded-slot count is shared by construction; loading data or a checkpoint under a different
+`max_atoms`/`scope_hash` must raise, never silently pad or truncate.
+
+**Superseded scope (INVALID).** The earlier `max_atoms = 48` scope (`scope_hash e59fb09801459470`; 490,466
+retained) is **`INVALID_FOR_BEDIT40_PRODUCTION`** (`diagnostics/composition/INVALID_FOR_BEDIT40_PRODUCTION.md`).
+Its artifacts survive only as clearly-labelled diagnostic inputs for the 48→40 distributional comparison;
+they must fail every compatibility check against the production configuration and appear in no active
+production path.
+
+---
+
 ## 1. Molecular state representation
 
 A committed state is a fixed-slot padded `MolecularGraph` (`src/compose_v4/chem/molecular_graph.py`,

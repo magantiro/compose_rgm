@@ -10,13 +10,18 @@ The production corpus is the \ConfigValue{PROD_CORPUS_SIZE}-molecule \ConfigValu
 a representable class under the same derivation the model's heads use. Charged molecular states are
 \emph{retained} ($\ConfigValue{CHARGE_POLICY}$); the scope decides membership only and never authorizes a
 charge-changing edit. The representation drops isotopes and stereochemistry and treats radicals or
-non-representable valences as out of scope. Under this scope roughly \ConfigValue{CORPUS_ELIGIBLE_FRACTION_BROAD}
-of the subset (about \ConfigValue{CORPUS_ELIGIBLE_COUNT_BROAD} molecules) is eligible, versus
-\ConfigValue{CORPUS_ELIGIBLE_FRACTION_CNOF} under the earlier neutral four-element (C/N/O/F) filter it replaces; the exact
-at-scale count is produced by the running mine and stored in the data manifest. Every acceptance and
-rejection is counted with an explicit reason (unparseable, salt/multicomponent, too large, unsupported
-element, unsupported class), the scope carries a deterministic hash recorded in every manifest and
-checkpoint, and mining/training use the \textsc{train} partition only, so val/test never leak.
+non-representable valences as out of scope. The \ConfigValue{SCOPE_MAX_ATOMS}-heavy-atom bound is the base
+model's own state-space bound---the edit prior warm-starts from that architecture, and every intended
+benchmark lead lies within it---so it is part of the state-space \emph{definition}, not a preprocessing
+cutoff. Under this scope \ConfigValue{CORPUS_ELIGIBLE_FRACTION_BROAD} of the subset
+(\ConfigValue{CORPUS_ELIGIBLE_COUNT_BROAD} molecules) is eligible, versus \ConfigValue{CORPUS_ELIGIBLE_FRACTION_CNOF}
+(\ConfigValue{CORPUS_ELIGIBLE_COUNT_CNOF}) under the four-element (C/N/O/F) restriction it replaces: the broad
+vocabulary nearly doubles coverage while the atom bound retains most of it. The
+\ConfigValue{CORPUS_REJECTED_TOTAL} rejected molecules are \ConfigValue{CORPUS_REJECT_TOOBIG} above the
+40-atom bound, \ConfigValue{CORPUS_REJECT_UNSUPPORTED_ELEMENT} unsupported-element, and
+\ConfigValue{CORPUS_REJECT_UNPARSEABLE} unparseable. Every acceptance and rejection is counted with an
+explicit reason, the scope carries a deterministic hash (\ConfigValue{SCOPE_HASH}) recorded in every manifest
+and checkpoint, and mining/training use the \textsc{train} partition only, so val/test never leak.
 
 \subsection{From corpus to sampler}
 \begin{figure}[h]
@@ -49,7 +54,13 @@ bond-order, ring, and graft families at pilot scale. Every compiled path is veri
 all-intermediate validity and connectedness, exact endpoint isomorphism, forward and inverse replay,
 repeated- and immediately-reversed-edit rates, protected-core invariance, operator-family usage, and the
 round-trip $A\!\to\!B\!\to\!A$; a path that reaches the right canonical SMILES but breaks the attachment
-mapping or needs gratuitous cycles is rejected.
+mapping or needs gratuitous cycles is rejected. The locked production pool compiles \ConfigValue{PROD_RECORDS}
+directed edit records from \ConfigValue{PROD_MMP_PAIRS} one-cut constant-core groups
+(\ConfigValue{PROD_RECORDS_FWD} forward / \ConfigValue{PROD_RECORDS_REV} reverse; the compiled pool is exactly
+direction-balanced and the residual imbalance is entirely the per-source cap, which keys on each record's
+source molecule), with curriculum terciles at path lengths \ConfigValue{CURRICULUM_BIN_EDGES} and the pool,
+operator-registry (\ConfigValue{OPERATOR_REGISTRY_HASH}), ring-catalog (\ConfigValue{RING_CATALOG_HASH}), and
+standardization (\ConfigValue{STANDARDIZATION_HASH}) hashes pinned in the manifest.
 
 \subsection{Anti-concentration safeguards and curriculum}
 Each safeguard has a measured signal and a gate: identity traces are dropped ($\text{identity fraction}

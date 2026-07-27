@@ -9,7 +9,7 @@
   "corpus_census_500k": {
     "retained": 466483, "total": 500000, "retained_fraction": 0.9330,
     "rejected": 33484,
-    "rejection_reasons": {"too_big_41_to_48_atoms": 32171, "unsupported_element": 1112, "unparseable": 201},
+    "rejection_reasons": {"too_big_above_40_atoms": 32171, "unsupported_element": 1112, "unparseable": 201},
     "element_molecule_count": {"C": 466462, "N": 435269, "O": 433338, "S": 153135, "F": 85591,
                                "Cl": 82303, "Br": 20353, "P": 5639, "I": 2564, "B": 625},
     "charge_category": {"neutral": 438750, "zwitterion_net_zero": 22855, "nonzero_net_charge": 4878}
@@ -41,15 +41,51 @@
     "cold_element_floor": 0.02,
     "cold_element_pool_coverage": {"S": 100702, "Cl": 63450, "B": 19006, "Br": 18166, "P": 6250, "I": 2959}
   },
+  "cnof_contrast": {
+    "broad_retained": 466483, "broad_fraction": 0.933,
+    "cnof_only_retained": 239867, "cnof_only_fraction": 0.4797,
+    "broad_over_cnof_multiplier": 1.945,
+    "note": "cnof_only = retained-broad molecules using only C/N/O/F (manifest non_cnof_element_combination_count['(cnof_only)']), measured at max_atoms=40. The broad organic vocabulary nearly doubles element coverage; separately, 27,733 charged-atom molecules are retained (charge-preserving)."
+  },
   "comparison_48_to_40": {
-    "corpus_retained": {"48": 490466, "40": 466483, "delta": -23983, "note": "the 41-48 atom tail"},
-    "mmp_pairs": {"48": 206715, "40": 216183, "note": "+4.6%: denser shared cores among smaller molecules"},
-    "pool_records": {"48": 347793, "40": 363456},
+    "mining_params_identical_except_max_atoms": true,
+    "shared_params": {"corpus_sha256_prefix": "70526d92f1f08d8e", "split_seed": 20260714,
+                      "max_variable_atoms": 8, "max_pairs_per_core": 12, "max_pairs_per_source": 8,
+                      "scaffold_k": 0, "corruption_sample_size": 500},
+    "corpus_retained": {"48": 490466, "40": 466483, "delta": -23983, "note": "the 41-48 heavy-atom tail, removed by the max_atoms=40 bound"},
+    "mmp_pairs": {"48": 206715, "40": 216183, "delta": 9468, "pct": "+4.58%"},
+    "records_compiled_pre_dedup": {"48": 356935, "40": 373356},
+    "pool_records": {"48": 347793, "40": 363456, "delta": 15663},
+    "records_per_pair": {"48": 1.682, "40": 1.681},
     "curriculum_bins": {"48": [5, 9, 13], "40": [5, 9, 13], "note": "unchanged -- stable path-length distribution"},
+    "pairs_increase_explained": {
+      "cause": "per-core / per-source cap reallocation on an INDEPENDENT re-mine (NOT a filter of the 48 pool, NOT re-indexing, NOT a seed change, NOT NN selection [scaffold_k=0], NOT dedup [dropped_duplicate=0])",
+      "mechanism": "All mining params are identical except max_atoms. records-per-pair is unchanged (1.682->1.681), so the growth is in pair COUNT, not per-pair yield. The one-cut MMP pairing caps each constant-core group at max_pairs_per_core=12 and each source at max_pairs_per_source=8. The removed 41-48 tail contributed few qualifying one-cut pairs (their variable fragments frequently exceed max_variable_atoms=8), so removing it costs little; meanwhile the freed per-core/per-source cap budget is reallocated to the denser drug-like <=40 pool, where smaller variable fragments qualify more often. Net +9,468 grouped pairs.",
+      "not_an_unexpected_shift": true
+    },
+    "direction_balance_explained": {
+      "pre_cap_balanced": true,
+      "records_compiled_pre_dedup": 373356,
+      "pre_cap_per_direction": 186678,
+      "dropped_per_source_cap_total": 9900,
+      "forward_dropped_by_cap": 7881,
+      "reverse_dropped_by_cap": 2019,
+      "check": "186678-178797=7881 forward; 186678-184659=2019 reverse; 7881+2019=9900=dropped_per_source_cap (EXACT)",
+      "final": {"forward": 178797, "reverse": 184659, "reverse_over_forward": 1.033},
+      "cause": "The compiled pool is EXACTLY direction-balanced (373,356/2 = 186,678 each). The max_pairs_per_source=8 cap then removes 9,900 records, 7,881 forward vs 2,019 reverse, because the cap keys on each record's SOURCE molecule: a forward record's source is the pair's A side, a reverse record's source is the B side, and A-side sources are more prolific (more analogue edits per source), so forwards are capped ~4x more often. The residual 1.6% tilt is a cap artifact, not a modeling choice; both directions remain fully represented."
+    },
     "no_unexpected_distributional_shift": true
   },
   "hashes": {
     "corpus_scope_hash": "3721d69851110fdd",
-    "corpus_id": "guacamol_subset_500000_seed0"
+    "vocab_classes_hash": "4e728cfc132e7e04",
+    "operator_registry_hash": "34234a88b8cc642a",
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "standardization_hash": "a8d574cc91c89cb3",
+    "corpus_id": "guacamol_subset_500000_seed0",
+    "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+    "trace_pool_sha256": "3b29d7b84de92a7d2fdf931f55c1bf99c5783d6b2115aa5bf2429471007e4a64",
+    "manifest_commit": "4fbca88",
+    "source_mining_commit": "3375e62"
   }
 }
