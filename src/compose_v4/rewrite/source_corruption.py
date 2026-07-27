@@ -119,6 +119,12 @@ def _touches_charged(node: MolecularGraph, succ: MolecularGraph, charged) -> boo
     )
 
 
+def _net_charge(node: MolecularGraph) -> int:
+    """Total formal charge over real atoms."""
+    real = is_element(node.atom_types)
+    return int(node.formal_charges[real].sum())
+
+
 def corrupt_to_source(
     target: MolecularGraph,
     depth: int,
@@ -141,6 +147,7 @@ def corrupt_to_source(
         if m is None:
             break
         base_rings = Descriptors.RingCount(m)
+        base_charge = _net_charge(node)
         cur_key = canonical_state_key(node)
         cycle_edges = _cycle_edges(node)
         charged = _charged_atoms(node)
@@ -199,6 +206,11 @@ def corrupt_to_source(
                     continue
                 if charged and _touches_charged(node, succ, charged):
                     continue  # protect charged atoms -- the neutral-class heads cannot score the mark
+                if _net_charge(succ) != base_charge:
+                    # protect charged MOTIFS: no edit may neutralize/introduce/shift the net formal charge
+                    # (e.g. deleting a neutral carbonyl O of a carboxylate re-derives O- -> OH). Universal so
+                    # a neutral molecule can never silently GAIN a charge either.
+                    continue
                 node = succ
                 steps.append((rule_name, action))
                 states.append(node)
