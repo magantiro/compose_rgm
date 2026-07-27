@@ -1,0 +1,26 @@
+% H1 external optimizers (appendix). Contextual comparison; differ in scale and
+% representation. Every cell is a result-registry placeholder.
+\begin{table}[h]
+\centering
+\caption{\textbf{RQ2 external optimizers (contextual).} These methods differ from ours in scale and
+representation, so they contextualize rather than isolate the control law; where possible each is
+additionally run on our legal proposal set (\Cref{sec:fairness}). Same conventions and reference point as
+Table~\ref{tab:h1}; the Diversity column (internal diversity of the nondominated set) is included here
+for completeness. Placeholders are filled from the registry when the runs complete.}
+\label{tab:h1ext}
+\footnotesize
+\setlength{\tabcolsep}{3.6pt}
+\begin{tabular}{l ccccccc}
+\toprule
+Method & nHV\,$\uparrow$ & HV-AUC\,$\uparrow$ & IGD+\,$\downarrow$ & \#Feas\,$\uparrow$
+       & Src-sim\,$\uparrow$ & Div\,$\uparrow$ & Orc-eff\,$\uparrow$ \\
+\midrule
+GraphGA & \Result{H1_NHV_GRAPHGA} & \Result{H1_HVAUC_GRAPHGA} & \Result{H1_IGD_GRAPHGA} & \Result{H1_FEASIBLE_GRAPHGA} & \Result{H1_SOURCESIM_GRAPHGA} & \Result{H1_DIVERSITY_GRAPHGA} & \Result{H1_ORACLEEFF_GRAPHGA}\\
+MARS & \Result{H1_NHV_MARS} & \Result{H1_HVAUC_MARS} & \Result{H1_IGD_MARS} & \Result{H1_FEASIBLE_MARS} & \Result{H1_SOURCESIM_MARS} & \Result{H1_DIVERSITY_MARS} & \Result{H1_ORACLEEFF_MARS}\\
+GenMol & \Result{H1_NHV_GENMOL} & \Result{H1_HVAUC_GENMOL} & \Result{H1_IGD_GENMOL} & \Result{H1_FEASIBLE_GENMOL} & \Result{H1_SOURCESIM_GENMOL} & \Result{H1_DIVERSITY_GENMOL} & \Result{H1_ORACLEEFF_GENMOL}\\
+RetMol & \Result{H1_NHV_RETMOL} & \Result{H1_HVAUC_RETMOL} & \Result{H1_IGD_RETMOL} & \Result{H1_FEASIBLE_RETMOL} & \Result{H1_SOURCESIM_RETMOL} & \Result{H1_DIVERSITY_RETMOL} & \Result{H1_ORACLEEFF_RETMOL}\\
+\multicolumn{8}{l}{\emph{Same-base controllers (Table~\ref{tab:h1}) additionally with the Diversity column:}}\\
+Learned Doob (ours) & \Result{H1_NHV_LEARNEDDOOB} & \Result{H1_HVAUC_LEARNEDDOOB} & \Result{H1_IGD_LEARNEDDOOB} & \Result{H1_FEASIBLE_LEARNEDDOOB} & \Result{H1_SOURCESIM_LEARNEDDOOB} & \Result{H1_DIVERSITY_LEARNEDDOOB} & \Result{H1_ORACLEEFF_LEARNEDDOOB}\\
+\bottomrule
+\end{tabular}
+\end{table}

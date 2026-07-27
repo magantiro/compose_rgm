@@ -1,0 +1,41 @@
+\section{Problem setup and notation}
+\label{sec:setup}
+
+\emph{State space and edits.} A state $x$ is a connected molecular graph over a declared broad-organic
+vocabulary (elements \ConfigValue{ORGANIC_ELEMENTS}, integer Kekul\'e bond orders, formal charges,
+implicit hydrogens) in which every atom satisfies its valence constraint. We write $\XVN$ for such graphs
+with at most $N$ heavy atoms; it is a \emph{bounded, discrete, combinatorial} state space, not a manifold.
+The representation excludes stereochemistry, isotopes, and radicals (\Cref{sec:limitations}), and states
+may carry formal charges but no edit changes them, so net charge and charged centers are preserved. At
+$x$, the finite \emph{legal-mark} set $\Aof{x}$ collects the executable edits admissible at $x$; a mark
+$a=(\text{family},\text{operands})$ names a typed rewrite at a match, and an executor applies it,
+$\Texec(x,a)=y$, with $\Texec$ mapping $\XVN$ into itself (\Cref{prop:closure}), so the process never
+visits an invalid intermediate. Marks come from \ConfigValue{NUM_ENABLED_FAMILIES} production families
+(\ConfigValue{ENABLED_FAMILIES}; registry in \Cref{app:operators}).
+
+\emph{Trajectories, objectives, constraints.} For optimization we initialize $x_0=\xsrc\in\XVN$ and take a
+fixed $\horizon$ edit steps (the budget); $\budget$ is the budget remaining. Editing thus uses the
+fixed-$\horizon$ embedded jump chain and discards the continuous-time hazard (\Cref{sec:kernel}). The base
+prior is source-agnostic---it reads only the current molecule and a clock, never $\xsrc$; source memory
+enters only through initialization, a protected mask $\pmask$ (atoms/bonds that may not change), a
+similarity constraint $\simfun(x,\xsrc)\ge\tau$, and the controller. A property map $\Fobj:\XVN\to\Rbb^d$
+gives the $d$ objectives; we keep an empirical nondominated archive $\mathcal{A}$ and a feasible region
+$\mathcal{F}$, and compute hypervolume over $\mathcal{A}\cap\mathcal{F}$ against a fixed reference point
+(\Cref{sec:fairness}).
+
+\emph{Preferences and desirability.} A goal descriptor $\descr$ encodes the current preference---a weight
+vector, an objective-space region $\Bset_\descr$, or a reference direction---and the controller steers
+toward a positive terminal desirability, in one of two forms:
+\begin{align}
+\text{(soft)}\ \desir_\descr(x)=\exp\{\beta U_\descr(x)-\lambda d(x,\xsrc)\}\,\one[c(x)],
+\qquad
+\text{(hard)}\ \desir_\descr(x)=\one[\Fobj(x)\in\Bset_\descr\wedge\simfun(x,\xsrc)\ge\tau],
+\label{eq:g}
+\end{align}
+with $U_\descr$ a preference utility (Chebyshev or box), $d(\cdot,\xsrc)$ penalizing departure from the
+source, and $\one[c(x)]$ ($\one$ the indicator) any state-level predicate. The soft form realizes a
+Boltzmann tilt; the hard form realizes exact conditioning on a reachable target event (\Cref{sec:doob}).
+The base prior and operator system are trained artifacts; the value function realizing $\desir_\descr$ at
+scale is the controller of \Cref{sec:controller}, exact where enumerable and evaluated as an approximation
+otherwise. ``Universal'' means one edit prior shared across sources and objectives \emph{within the
+declared vocabulary}, not across all chemical space.

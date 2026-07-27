@@ -1,0 +1,89 @@
+\section{Algorithms}
+\label{app:algorithms}
+
+We collect the three algorithms referenced in the main text. Algorithm~\ref{alg:train} trains the
+universal edit prior by generator matching; Algorithm~\ref{alg:steer} performs one goal-conditioned
+controlled steer; Algorithm~\ref{alg:exact} computes the exact controller on an enumerable state space.
+The Pareto-exploration loop repeatedly invokes Algorithm~\ref{alg:steer} with region-selected goals.
+
+\begin{algorithm}[h]
+\caption{Universal edit-prior training (generator matching)}
+\label{alg:train}
+\begin{algorithmic}[1]
+\REQUIRE layered trace corpus (MMP / shared-scaffold / corruption), hierarchical sampler, model
+$(\Ltot,\pmark)_\theta$
+\WHILE{not converged}
+  \STATE draw a layer by its mixture weight; draw a curriculum bin (measured path-length tercile); draw a
+         balanced example under the per-scaffold / per-transformation / per-family caps
+  \STATE take a supervised committed transition $(x,a^\star,r)$ from the trace (both directions taught)
+  \STATE enumerate the factorized legal fiber at $x$; verify $a^\star$ is in-fiber (else the loss is
+         non-finite by design)
+  \STATE compute $\Ltot(x)$, $\pmark(a^\star\mid x)$ (Graft scored at its canonical-successor group)
+  \STATE take a gradient step on the Poisson--Bregman loss~\eqref{eq:bregman}
+\ENDWHILE
+\STATE \textbf{return} $\theta$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Goal-conditioned controlled editing (one steer)}
+\label{alg:steer}
+\begin{algorithmic}[1]
+\REQUIRE source $\xsrc$, budget $\horizon$, base kernel $\Ptheta$, controller $\hval_\phi$, goal
+$\descr$, protected mask $\pmask$, objectives $\Fobj$, archive $\mathcal{A}$
+\STATE $x\gets \xsrc$; record $\Fobj(x)$
+\FOR{$\budget=\horizon,\dots,1$}
+  \STATE enumerate $\Aof{x}$ and aggregate to the canonical successor kernel $\Ptheta(\cdot\mid x)$
+         \COMMENT{\Cref{prop:kernel}}
+  \STATE restrict support to marks respecting $\pmask$ and any active pathwise constraint
+         \COMMENT{\Cref{cor:pathwise}}
+  \IF{support is empty} \STATE \textbf{break} \COMMENT{terminal; every prefix is a valid molecule} \ENDIF
+  \STATE form $\Pkernel^{\phi}_{\budget}(x,\cdot)$ by \eqref{eq:controlledphi} using
+         $\hval_\phi(\budget{-}1,\cdot;\xsrc,\descr,\pmask)$
+  \STATE sample $y\sim \Pkernel^{\phi}_{\budget}(x,\cdot)$; commit $x\gets y$; evaluate and record
+         $\Fobj(x)$ \COMMENT{$x$ is a complete molecule}
+  \STATE update $\mathcal{A}$ with $x$ if nondominated and feasible
+\ENDFOR
+\STATE \textbf{return} trajectory and updated archive $\mathcal{A}$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Exact enumerable controller (ground truth)}
+\label{alg:exact}
+\begin{algorithmic}[1]
+\REQUIRE source $x_0$, budget $\horizon$, base kernel $\Ptheta$, desirability $\desir$
+\STATE enumerate the reachable set $S$ from $x_0$ within $\horizon$ steps (breadth-first over the legal
+       fiber); build the row-stochastic kernel $\Pkernel$ over $S$
+\STATE $\hval_{\horizon}(x)\gets \desir(x)$ for all $x\in S$
+\FOR{$k=\horizon-1,\dots,0$}
+  \STATE $\hval_k(x)\gets \sum_{y}\Pkernel(x,y)\hval_{k+1}(y)$ for all $x\in S$
+\ENDFOR
+\STATE steer with $\Pkernel^{\desir}_k(x,y)=\Pkernel(x,y)\hval_{k+1}(y)/\hval_k(x)$ where $\hval_k(x)>0$
+\STATE \textbf{return} the exact controlled kernels $\{\Pkernel^{\desir}_k\}$ and terminal
+       tilt~\eqref{eq:terminaltilt}
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Controller design and its evaluation as an approximation}
+\label{app:controller}
+
+The amortized controller $\hval_\phi(\budget,x;\xsrc,\descr,\pmask)$ approximates the finite-horizon value $\hval_{\horizon-\budget}
+(x)=\Ebb[\desir_\descr(X_\horizon)\mid X_{\budget\text{-to-go}}=x]$ of \Cref{thm:doob}; no separate control
+objective is introduced. Two estimators of this value target are consistent with the theory and are the
+design space we finalize empirically (and report as \Cref{app:experiments} keys): a rollout Monte-Carlo
+target, in which base-chain rollouts from $x$ under the remaining budget estimate the expected
+desirability directly; and a bootstrapped backward-recursion target, in which $\hval_\phi(\budget,x)$
+regresses onto $\sum_y\Ptheta(y\mid x)\hval_\phi(\budget-1,y)$ with $\hval_\phi(0,\cdot)=\desir_\descr$.
+The parameterization conditions on the remaining budget $\budget$, source-relative features of $\xsrc$
+(similarity, protected-mask indicators), and an encoding of the goal $\descr$; it shares the state encoder
+with the base model. Because the target is a value, not a policy, and because the controlled
+kernel~\eqref{eq:controlledphi} is self-normalized over the base support, an inaccurate $\hval_\phi$
+cannot violate validity (it can only misallocate probability). We therefore evaluate $\hval_\phi$ as an
+approximation, reporting: (i) value calibration against the exact $\hval$ on the enumerable benchmark;
+(ii) the backward-equation residual $\lVert\hval_\phi(\budget,\cdot)-\Ptheta\hval_\phi(\budget-1,\cdot)
+\rVert$; and (iii) control quality (total variation to the exact terminal law) versus the exact
+controller. Where an unbiased terminal law is required despite residual value error, the optional
+twisted-SMC corrector of \Cref{sec:controller} is applied and its effective sample size reported. This
+section states the design honestly: the exact controller is realized and verified, and the amortized
+controller is trained and measured against it rather than assumed exact.

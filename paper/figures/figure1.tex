@@ -1,0 +1,69 @@
+% Figure 1 -- conceptual framework. NO NUMBERS. Grayscale + CVD-safe blue/orange.
+\begin{figure}[t]
+\centering
+\definecolor{cbblue}{RGB}{31,119,180}
+\definecolor{cborange}{RGB}{217,95,2}
+\definecolor{cbgray}{RGB}{120,120,120}
+\definecolor{cblight}{RGB}{225,225,225}
+\newcommand{\molnode}[3]{%
+  \node[regular polygon, regular polygon sides=6, draw=cbgray, fill=#3,
+        minimum size=4mm, inner sep=0pt, line width=0.4pt] (#1) at #2 {};}
+\begin{tikzpicture}[>=Latex, font=\scriptsize, scale=0.85, every node/.style={transform shape}]
+% ---- Panel A: learned edit prior ----
+\begin{scope}[local bounding box=A]
+  \molnode{a1}{(0,0)}{cblight} \molnode{a2}{(1.35,0.45)}{cblight} \molnode{a3}{(1.4,-0.5)}{cblight}
+  \molnode{a4}{(2.7,0.12)}{cblight} \molnode{a5}{(2.75,-0.85)}{cblight}
+  \node[regular polygon, regular polygon sides=6, draw=cbblue, line width=1pt, minimum size=5.4mm,
+        inner sep=0pt] at (0,0) {};
+  \node[cbblue, below=0pt of a1, inner sep=1pt] {$\xsrc$};
+  \draw[->,cbgray] (a1)--node[above,sloped,inner sep=0.5pt,black]{\tiny restate}(a2);
+  \draw[->,cbgray] (a1)--node[below,sloped,inner sep=0.5pt,black]{\tiny graft}(a3);
+  \draw[->,cbgray] (a2)--node[above,sloped,inner sep=0.5pt,black]{\tiny ring}(a4);
+  \draw[->,cbgray] (a3)--(a4); \draw[->,cbgray] (a3)--(a5); \draw[->,cbgray] (a4)--(a5);
+\end{scope}
+\node[above=0pt of A.north, font=\scriptsize\bfseries] {Learned edit prior (generator matching)};
+% ---- Panel B: Doob-controlled ----
+\begin{scope}[shift={(5.6,0)}, local bounding box=B]
+  \molnode{b1}{(0,0)}{cblight} \molnode{b2}{(1.35,0.45)}{cblight} \molnode{b3}{(1.4,-0.5)}{cblight}
+  \molnode{b4}{(2.7,0.12)}{cblight} \molnode{b5}{(2.75,-0.85)}{cblight}
+  \node[regular polygon, regular polygon sides=6, draw=cbblue, line width=1pt, minimum size=5.4mm,
+        inner sep=0pt] at (0,0) {};
+  \begin{scope}[on background layer]
+    \node[ellipse, fill=cborange!18, draw=cborange, dashed, line width=0.5pt,
+          minimum width=1.6cm, minimum height=1.55cm] at (2.72,-0.36) {};
+  \end{scope}
+  \node[cborange, font=\tiny] at (2.72,-1.45) {region $\Bset_\descr$};
+  \draw[->,cbgray,line width=0.4pt] (b1)--(b2);
+  \draw[->,cborange,line width=0.5pt] (b1)--(b3);
+  \draw[->,cborange,line width=1.3pt] (b3)--node[below,sloped,inner sep=0.5pt,cborange]
+        {\tiny $\times\hval(y)/\hval(x)$}(b5);
+  \draw[->,cborange,line width=1.1pt] (b2)--(b4);
+  \draw[->,cborange,line width=0.9pt] (b3)--(b4); \draw[->,cborange,line width=1.3pt] (b4)--(b5);
+\end{scope}
+\node[above=0pt of B.north, font=\scriptsize\bfseries] {Doob-controlled process};
+\draw[->,line width=0.9pt,cbblue] (A.east)++(0.05,0) -- ++(0.75,0)
+  node[midway,above,black,font=\tiny]{steer};
+% ---- bottom causal chain ----
+\begin{scope}[shift={(0,-1.6)}, font=\tiny]
+\tikzstyle{cbox}=[draw=cbgray, rounded corners=1.5pt, fill=cblight, align=center, inner sep=2pt,
+                  minimum height=5mm, text width=1.85cm]
+\node[cbox] (c1) at (0,0) {validity-closed operators};
+\node[cbox,right=4pt of c1] (c2) {every state an evaluable molecule};
+\node[cbox,right=4pt of c2] (c3) {control throughout the trajectory};
+\node[cbox,right=4pt of c3] (c4) {exact terminal reweighting (exact $\hval$)};
+\node[cbox,right=4pt of c4,fill=cbblue!15,draw=cbblue] (c5) {dynamic multi-objective design};
+\draw[->,cbgray](c1)--(c2);\draw[->,cbgray](c2)--(c3);\draw[->,cbgray](c3)--(c4);\draw[->,cbblue](c4)--(c5);
+\end{scope}
+\end{tikzpicture}
+\caption{\textbf{Valid-path generator matching for controllable molecular optimization.} \emph{Left:}
+the learned, source-agnostic edit prior is a generator-matched jump process on an operator-closed space
+of connected, valence-valid molecular graphs; each node is a complete molecule, each edge an executable
+edit with a learned rate, and a trajectory starts at the source lead $\xsrc$. \emph{Right:} a
+finite-horizon Doob transform reweights the \emph{existing} rates by a value ratio $\hval(y)/\hval(x)$
+(edge thickness, schematic) toward a target region $\Bset_\descr$; multiplying existing rates cannot
+create edges the prior assigns zero probability, so legal support---and hence validity---is preserved.
+\emph{Bottom:} the causal chain organizing the paper. Conceptual; no numerical results. Colors stay
+distinguishable under common color-vision deficiencies and in grayscale (blue = source/control,
+orange = target/steering, gray = base process).}
+\label{fig:framework}
+\end{figure}

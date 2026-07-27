@@ -1,0 +1,137 @@
+%=============================================================================
+% math_commands.tex
+%   (a) public method identity + mathematical notation macros;
+%   (b) the result/config placeholder system (\Result, \ResultCI,
+%       \ResultSentence, \ConfigValue). Storage macros are populated by the
+%       auto-generated results.tex (built by scripts/build_results_tex.py).
+% Load AFTER xcolor and amsmath in the main preamble.
+%=============================================================================
+
+% ---- public method identity -------------------------------------------------
+% If a hard naming conflict is ever found, change ONLY this line.
+\newcommand{\method}{\textsc{Compose}\xspace}
+
+% ---- draft/final toggle (results.tex overrides this default) -----------------
+\newif\ifdraftmode
+\draftmodetrue
+
+%=============================================================================
+% Result / config placeholder system
+%=============================================================================
+\makeatletter
+
+% storage setters (called from the generated results.tex) ---------------------
+\newcommand{\defconfigvalue}[2]{\expandafter\gdef\csname cfg@val@#1\endcsname{#2}}
+\newcommand{\defresultvalue}[4]{% key, value, ci-string, unit
+  \expandafter\gdef\csname res@val@#1\endcsname{#2}%
+  \expandafter\gdef\csname res@ci@#1\endcsname{#3}%
+  \expandafter\gdef\csname res@unit@#1\endcsname{#4}}
+\newcommand{\defresultpending}[2]{% key, unit
+  \expandafter\gdef\csname res@pending@#1\endcsname{1}%
+  \expandafter\gdef\csname res@unit@#1\endcsname{#2}}
+\newcommand{\defresultsentence}[2]{\expandafter\gdef\csname res@sent@#1\endcsname{#2}}
+
+% loud placeholder (draft) / hard error (final) -------------------------------
+% Compact by design so it fits inside dense table cells. The specific key is not
+% printed (it would overflow tables); check_placeholders.py enumerates pending
+% keys from the registry, and build_results_tex.py logs them.
+\newcommand{\@placeholderbox}[1]{% #1 = tag (XXX/??)
+  {\setlength{\fboxsep}{1pt}\colorbox{red!18}{\textcolor{red!60!black}{\scriptsize\textsf{#1}}}}}
+\newcommand{\ResultPlaceholder}[1]{%
+  \ifdraftmode \@placeholderbox{xxx}%
+  \else \GenericError{}{results.tex: unfilled result key '#1' in FINAL mode}{}{Fill it in results_registry.yaml or build in draft mode.}\fi}
+\newcommand{\@unknownkey}[1]{%
+  \ifdraftmode {\setlength{\fboxsep}{1pt}\colorbox{orange!30}{\textcolor{red!70!black}{\scriptsize\textsf{??\,\detokenize{#1}}}}}%
+  \else \GenericError{}{results.tex: unknown registry key '#1'}{}{Add it to the registry.}\fi}
+
+% accessors -------------------------------------------------------------------
+\newcommand{\ConfigValue}[1]{%
+  \ifcsname cfg@val@#1\endcsname \csname cfg@val@#1\endcsname
+  \else \@unknownkey{#1}\fi}
+
+\newcommand{\Result}[1]{%
+  \ifcsname res@val@#1\endcsname \csname res@val@#1\endcsname
+  \else
+    \ifcsname res@pending@#1\endcsname \ResultPlaceholder{#1}%
+    \else \@unknownkey{#1}\fi
+  \fi}
+
+% value with confidence interval (CI shown small, in brackets) ----------------
+\newcommand{\ResultCI}[1]{%
+  \ifcsname res@val@#1\endcsname
+    \csname res@val@#1\endcsname
+    \ifcsname res@ci@#1\endcsname
+      \edef\@ci{\csname res@ci@#1\endcsname}%
+      \ifx\@ci\@empty\else\,{\footnotesize\csname res@ci@#1\endcsname}\fi
+    \fi
+  \else
+    \ifcsname res@pending@#1\endcsname \ResultPlaceholder{#1}%
+    \else \@unknownkey{#1}\fi
+  \fi}
+
+% prewritten interpretation sentence (template embeds \Result/\ConfigValue) ---
+\newcommand{\ResultSentence}[1]{%
+  \ifcsname res@sent@#1\endcsname \csname res@sent@#1\endcsname
+  \else \@unknownkey{#1}\fi}
+
+% pending-figure placeholder: a plot that will render from a machine-readable
+% artifact once the run completes. Visible in draft; loud error in final.
+% #1 = height (e.g. 3.2cm), #2 = short description of the intended plot.
+\newcommand{\pendingfigure}[2]{%
+  \ifdraftmode
+    \begingroup\centering\setlength{\fboxsep}{6pt}%
+    \fcolorbox{red!45}{red!6}{\parbox[c][#1][c]{0.86\linewidth}{\centering
+      \textcolor{red!60!black}{\textbf{FIGURE PENDING}}\\[2pt]
+      {\footnotesize renders from a machine-readable artifact when the run completes\\[1pt] #2}}}%
+    \par\endgroup
+  \else \GenericError{}{pendingfigure in FINAL mode}{}{The plotting artifact is not yet available.}\fi}
+
+% author-facing method-definition sentinel (MUST be zero in an author-ready
+% draft; check_placeholders.py fails on any occurrence) -----------------------
+\newcommand{\METHODCHECK}[1]{%
+  \ifdraftmode {\setlength{\fboxsep}{1.5pt}\colorbox{orange!35}{\textbf{\texttt{METHODCHECK:}}\ #1}}%
+  \else \GenericError{}{METHODCHECK present in FINAL mode}{}{Resolve the method definition.}\fi}
+\makeatother
+
+%=============================================================================
+% Mathematical notation
+%=============================================================================
+% sets / spaces
+\newcommand{\Xspace}{\mathcal{X}}                 % supported state space
+\newcommand{\XVN}{\mathcal{X}_{V,N}}              % bounded supported state space
+\newcommand{\Aset}{\mathcal{A}}                   % legal action / mark set
+\newcommand{\Yset}{\mathcal{Y}}                   % objective / descriptor space
+\newcommand{\Zset}{\mathcal{Z}}                   % preference / goal space
+\newcommand{\Bset}{\mathcal{B}}                   % target region in objective space
+\newcommand{\Rbb}{\mathbb{R}}
+\newcommand{\Nbb}{\mathbb{N}}
+\newcommand{\Ebb}{\mathbb{E}}
+\newcommand{\Pbb}{\mathbb{P}}
+\newcommand{\one}{\mathbf{1}}
+
+% objects
+\newcommand{\xsrc}{x_{\mathrm{src}}}              % immutable source lead
+\newcommand{\Texec}{T}                            % executor T(x,a)=y
+\newcommand{\Aof}[1]{\Aset(#1)}                   % legal marks at a state
+\newcommand{\Gof}[1]{\mathcal{G}_{#1}}            % canonical successor group
+\newcommand{\horizon}{K}                          % edit horizon (budget)
+\newcommand{\budget}{b}                           % remaining budget
+\newcommand{\Fobj}{F}                             % objective / descriptor map
+\newcommand{\descr}{z}                            % objective-space target descriptor
+\newcommand{\pmask}{m}                            % protected mask
+\newcommand{\desir}{g}                            % terminal desirability
+\newcommand{\hval}{h}                             % Doob value function
+
+% generators / kernels
+\newcommand{\Ltot}{\Lambda_\theta}                % total hazard (rate)
+\newcommand{\pmark}{p_\theta}                     % conditional mark distribution
+\newcommand{\Qgen}{Q_\theta}                      % state-level CTMC generator
+\newcommand{\Pkernel}{P}                          % canonical-successor embedded kernel
+\newcommand{\Pctrl}{P^{\desir}}                   % controlled kernel
+\newcommand{\Ptheta}{P_\theta}                    % model successor kernel
+\newcommand{\simfun}{\mathrm{sim}}
+\newcommand{\TV}{\mathrm{TV}}
+\newcommand{\softplus}{\mathrm{softplus}}
+\newcommand{\iso}{\cong}                          % graph isomorphism
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}

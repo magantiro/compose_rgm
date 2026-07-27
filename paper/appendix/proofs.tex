@@ -1,0 +1,148 @@
+\section{Proofs}
+\label{app:proofs}
+
+Every finite-state identity below is additionally verified numerically against the implemented process on
+the enumerable benchmark (\Cref{app:impl}); we state the residual tolerances there. We do not replace any
+central proof with an observed validity rate.
+
+\subsection{State space}
+\label{app:state}
+The state space $\XVN$ is the set of connected molecular graphs over the declared vocabulary with at most
+$N$ heavy atoms in which every atom $v$ satisfies the valence identity $\sum_{u}\mathrm{ord}(v,u)+
+\mathrm{H}(v)-\mathrm{charge}(v)\in\mathrm{Val}(\mathrm{elem}(v))$, where bond orders are integers
+(Kekul\'e) and $\mathrm{H}(v)$ is the implicit-hydrogen count. $\XVN$ is finite: elements, charges,
+hydrogen counts, and bond orders each range over finite sets, and the heavy-atom count is bounded by $N$,
+so the number of labeled graphs is finite and the quotient by graph isomorphism is finite. It is a
+discrete set with no metric or differential structure assumed; we never treat it as a manifold. Two graphs
+are identified iff they are isomorphic as labeled molecular graphs after canonicalization; membership,
+equality, and the executor are all defined on these canonical representatives.
+
+\subsection{Operator closure (per family)}
+\label{app:closure}
+We prove \Cref{prop:closure}: for $x\in\XVN$ and $a\in\Aof{x}$, $\Texec(x,a)\in\XVN$. Recall $\Aof{x}$ is
+the set of marks admitted by the executor, which (i) validates that $x\in\XVN$, (ii) checks the family's
+application condition at the concrete match, (iii) executes the local rewrite, and (iv) re-validates the
+successor for per-atom valence, connectivity, and RDKit sanitizability, admitting the mark only if all
+pass and the successor is not isomorphic to $x$. Since admission requires (iv), it suffices to show each
+family's rewrite \emph{can} produce a valid successor and that the guard rejects the rest; we show the
+former family by family, so that $\Aof{x}$ is nonempty exactly where a valid edit exists.
+
+\emph{atom\_insert / atom\_delete.} A peripheral atom is added with an incident bond of declared order, or
+a peripheral atom (degree one, or a leaf whose removal keeps the graph connected) is removed; the touched
+neighbor's implicit-hydrogen count is re-derived from its valence class so its valence identity holds, and
+all other atoms are unchanged. Heavy-atom count changes by $\pm1$, staying within $N$ by the guard.
+\emph{atom\_restate.} An atom's valence class is changed among the classes feasible at its current
+heavy-bond sum; the implicit-hydrogen count is re-derived, preserving the valence identity, and no bond or
+other atom changes, so connectivity is preserved. \emph{bond\_reorder.} A non-ring bond's order changes;
+the two endpoints' hydrogen counts re-derive to preserve their valence identities; the edge support is
+unchanged, so connectivity is preserved. \emph{bond\_reroute (Graft).} A pendant subtree attached across a
+single bridging bond is detached and reattached at a new site; the operation is lowered to a delete of the
+bridging bond followed by an insert at the target, each validity-checked, and the moved fragment is
+internally unchanged, so valence identities hold and the result is connected by construction (the fragment
+reconnects to the retained core). \emph{ring\_system\_grow / \_delete / \_restate.} A whole supported ring
+system is added, opened, or restated using a versioned typed ring catalog whose templates carry per-atom
+identity, ring topology, and aromatic/saturated role; each template instantiation is lowered to
+validity-checked primitive edits, the opened or added atoms re-derive hydrogen counts, and the successor
+is re-validated for connectivity. In every family untouched atoms are unchanged and touched atoms re-derive
+their hydrogen counts to satisfy the valence identity; the connectivity re-check in (iv) rejects any
+instantiation that would disconnect the graph. Hence every admitted mark yields $\Texec(x,a)\in\XVN$, and
+closure is a property of the operators and the legality filter. $\qquad\square$
+
+\subsection{Generator-matching objective}
+\label{app:gm}
+We derive \eqref{eq:bregman}. The Poisson (generalized-KL) Bregman divergence between a model marked-rate
+measure $q_\theta(x\to a)=\Ltot(x)\pmark(a\mid x)$ and a teacher measure $q^\star$ with a single nonzero
+mark $a^\star$ of rate $r$ is $D(q^\star\Vert q_\theta)=\sum_a[q_\theta(a)-q^\star(a)-q^\star(a)\log
+(q_\theta(a)/q^\star(a))]=\sum_a q_\theta(a)-r-r\log(q_\theta(a^\star)/r)$, using $\sum_a q^\star(a)=r$.
+Since $\pmark$ normalizes, $\sum_a q_\theta(a)=\Ltot(x)$, and $\log q_\theta(a^\star)=\log\Ltot(x)+
+\log\pmark(a^\star\mid x)$. Dropping the $\theta$-independent constants $-r-r\log r$ leaves
+$\Ltot(x)-r[\log\Ltot(x)+\log\pmark(a^\star\mid x)]$, which is \eqref{eq:bregman}; at $r=0$ only
+$\Ltot(x)$ remains. If $a^\star\notin\Aof{x}$ then $\pmark(a^\star\mid x)=0$ and $\log\pmark=-\infty$, so
+the loss is non-finite---the guard that forces every teacher mark into the factorized fiber. The identity
+$\sum_a\pmark(a\mid x)=1$ (used above) is the normalization of the family-then-action softmax over the
+declared mark space, verified numerically to $\sim10^{-7}$ (\Cref{app:impl}). $\qquad\square$
+
+\subsection{Canonical quotient}
+\label{app:quotient}
+We prove \Cref{prop:kernel}. The map $\rho:a\mapsto[\Texec(x,a)]$ sends each legal mark to the isomorphism
+class of its executed successor. Isomorphism classes are disjoint, and every $a\in\Aof{x}$ has exactly one
+image (the executor is a function and self-loops---marks with $\Texec(x,a)\iso x$---are excluded from
+$\Aof{x}$), so $\{\rho^{-1}(y)\}_y=\{\Gof{y}(x)\}_y$ partitions $\Aof{x}$. Therefore $\sum_y\Ptheta(y\mid
+x)=\sum_y\sum_{a\in\Gof{y}(x)}\pmark(a\mid x)=\sum_{a\in\Aof{x}}\pmark(a\mid x)=1$. \emph{Graft
+supervision.} The Graft family is scored at the successor group: its loss contribution uses
+$\log\sum_{a\in\Gof{y}(x)}\exp(\cdot)$ (group-logsumexp), so generator matching supervises the molecular
+transition rate $\Ptheta(y\mid x)$, not an individual coordinate. For non-Graft families, distinct
+coordinates mapping to one successor (e.g.\ deleting either of two symmetric methyls) each carry their own
+logit under a per-coordinate normalizer, so their probabilities \emph{sum} to the successor rate---no
+over-count. This is why the successor sampler draws Graft one-representative-per-group but non-Graft
+per-coordinate; both induce the same kernel $\Ptheta$, verified equal to the raw sampler to
+$<\ConfigValue{QUOTIENT_KERNEL_EQ_TOL}$ (\Cref{app:impl}). $\qquad\square$
+
+\subsection{Finite-horizon Doob transform (all edge cases)}
+\label{app:doob}
+We prove \Cref{thm:doob} for a time-inhomogeneous sequence $\Pkernel_0,\dots,\Pkernel_{\horizon-1}$, with
+$\hval_k$ and $\Pkernel^{\desir}_k$ as defined in the theorem (backward recursion
+$\hval_k=\Pkernel_k\hval_{k+1}$, $\hval_\horizon=\desir$; controlled kernel $\Pkernel^{\desir}_k(x,y)=
+\Pkernel_k(x,y)\hval_{k+1}(y)/\hval_k(x)$ on $\{\hval_k>0\}$). \emph{(i) Stochasticity.} For $x$ with
+$\hval_k(x)>0$, $\sum_y\Pkernel^{\desir}_k(x,y)=
+\frac{1}{\hval_k(x)}\sum_y\Pkernel_k(x,y)\hval_{k+1}(y)=1$, and each summand is $\ge0$.
+\emph{(iv) Zero-value boundary.} If $\hval_k(x)=0$ then, since $\Pkernel_k,\hval_{k+1}\ge0$,
+$\sum_y\Pkernel_k(x,y)\hval_{k+1}(y)=0$ forces $\Pkernel_k(x,y)\hval_{k+1}(y)=0$ for all $y$. By induction
+from $x_0$ with $\hval_0(x_0)>0$, the controlled one-step probability to $y$ is
+$\propto\Pkernel_k(x,y)\hval_{k+1}(y)$, zero whenever $\hval_{k+1}(y)=0$; hence every reachable state has
+positive $\hval$ and the controlled kernel is never evaluated where undefined. \emph{(ii) Terminal law.} For a
+path $x_0,\dots,x_\horizon=y$ with all $\hval_k(x_k)>0$, the controlled path probability telescopes:
+$\prod_{k=0}^{\horizon-1}\Pkernel^{\desir}_k(x_k,x_{k+1})=\big(\prod_k\Pkernel_k(x_k,x_{k+1})\big)
+\hval_\horizon(y)/\hval_0(x_0)$, since interior $\hval$ cancel. As $\hval_\horizon(y)=\desir(y)$, summing
+over interior paths gives \eqref{eq:terminaltilt}, with $\hval_0(x_0)=\sum_y\Pbb(X_\horizon=y\mid x_0)
+\desir(y)$ by unrolling the recursion (Chapman--Kolmogorov); paths through a zero-value state contribute
+zero on both sides by (iv). \emph{(iii) Support.} $\Pkernel^{\desir}_k(x,y)>0$ requires $\Pkernel_k(x,y)>0$
+as the multiplier is finite. \emph{Event conditioning.} For $\desir=\one[\cdot\in E]$, $\hval_0(x_0)=
+\Pbb(X_\horizon\in E\mid x_0)$ and the terminal law is $\Pbb(X_\horizon=y\mid x_0,X_\horizon\in E)$;
+undefined iff $E$ is unreachable. \emph{CTMC-vs-fixed-step.} This transforms the embedded jump chain (the
+hazard is discarded in editing), not the continuous-time generator, and $\hval$ is indexed by the discrete
+step / remaining budget, not a continuous time. $\qquad\square$
+
+\subsection{Dynamic retargeting}
+\label{app:dynamic}
+We prove \Cref{cor:dynamic}. Fix an intermediate state $x_\tau$, replace $\desir$ by $\desir'$, and define
+$\hval'_j$ by the backward recursion over the remaining $\horizon-\tau$ steps with $\hval'_{\horizon-\tau}
+=\desir'$. Applying \Cref{thm:doob} to the shifted chain $\Pkernel_\tau,\dots,\Pkernel_{\horizon-1}$
+started at $x_\tau$ gives the continuation terminal law $\Pbb(X_\horizon=y\mid x_\tau)\desir'(y)/
+\hval'_0(x_\tau)$: the exact $\desir'$-tilt over the remaining budget \emph{conditioned on $x_\tau$}. This
+differs from the tilt obtained by using $\desir'$ from step $0$, whose value functions propagate from
+$x_0$; the two agree only if $x_\tau$ has probability one under the from-$0$ tilt at step $\tau$, which is
+not generic. Hence continuation and restart are distinct laws, and the controller must condition on the
+remaining budget. Budget-specificity: for $j<\horizon-\tau$ the controlled marginal at step $\tau+j$ is
+$\hval'_{\horizon-\tau-j}$-weighted, \emph{not} the terminal tilt unless $j=\horizon-\tau$. Verified exact,
+TV $\ConfigValue{DYNAMIC_ENUM_TV_RESIDUAL}$ (\Cref{app:impl}). $\qquad\square$
+
+\subsection{Pathwise constraints and state augmentation}
+\label{app:pathwise}
+We prove \Cref{cor:pathwise}. \emph{Rule-closed constraints.} Let $c:\XVN\to\{0,1\}$ be a state predicate,
+requiring $c(X_k)=1$ for all $k$. Define $\Aof{x}^c=\{a\in\Aof{x}:c(\Texec(x,a))=1\}$ and the restricted
+kernel $\Pkernel^c$ from $\pmark$ renormalized over $\Aof{x}^c$ (a valid embedded chain by the partition
+argument of \Cref{prop:kernel} when $\Aof{x}^c\neq\varnothing$; an empty $\Aof{x}^c$ is terminal). Every
+trajectory of $\Pkernel^c$ satisfies $c$ at every committed state by construction, and \Cref{thm:doob}
+applied to $\Pkernel^c$ gives the exact constraint-restricted terminal tilt; feasibility is a property of
+the support, so it is exact regardless of value error. \emph{Cumulative constraints.} For a path
+functional $\phi_k=\Phi(\phi_{k-1},X_k)$ (running maximum violation, accumulated cost, visited-motif set),
+augment $\tilde{X}_k=(X_k,\phi_k)$; the augmented process is Markov with kernel
+$\tilde{\Pkernel}_k((x,\phi),(y,\phi'))=\Pkernel_k(x,y)\one[\phi'=\Phi(\phi,y)]$, and a path-dependent
+event becomes a terminal event on $\tilde{X}_\horizon$, to which \Cref{thm:doob} applies. The augmentation
+is exactly what turns a path functional into a terminal one; its cost is the enlarged state space.
+$\qquad\square$
+
+\subsection{Approximation analysis}
+\label{app:approx}
+On non-enumerable spaces the amortized $\hval_\phi$ replaces $\hval$ in \eqref{eq:controlledphi}, which is
+self-normalized. Two facts bound the consequences. \emph{Validity is unconditional:}
+\eqref{eq:controlledphi} is supported on the base successor set for any nonnegative $\hval_\phi$, so the
+support and validity consequences of \Cref{thm:doob} hold regardless of value error---an approximate
+controller misallocates probability but never leaves the valid state space. \emph{Bias vanishes with an
+exact value:} \eqref{eq:controlledphi} equals the exact controlled kernel of \Cref{thm:doob} when
+$\hval_\phi=\hval$, so the terminal-law error is controlled by the value error. We do not claim a closed-form bound on real spaces;
+instead we measure value calibration, the backward-equation residual, and total variation to the exact
+controller on the enumerable benchmark, and, when an unbiased law is required, restore asymptotic
+exactness with the twisted-SMC corrector (\Cref{sec:controller}). We deliberately avoid asserting a
+distribution-level guarantee at scale, per \Cref{sec:limitations}.

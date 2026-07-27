@@ -1,0 +1,65 @@
+\section{Extended experimental protocol}
+\label{app:experiments}
+
+This appendix gives the full protocol behind \Cref{sec:experiments}: metric definitions stated before any
+result, per-baseline documentation, and the figure/table scaffolds. All empirical cells are result-registry
+placeholders.
+
+\subsection{RQ1 panels (enumerable benchmark)}
+Each conditioning task is evaluated by total variation between a method's controlled terminal law and the
+exact target: exact Doob (\Result{E0_EXACT_TV}, with maximum per-state error \Result{E0_EXACT_MAX_ERROR}),
+the learned controller (\Result{E0_LEARNED_TV}), one-step greedy (\Result{E0_GREEDY_TV}), endpoint
+reranking (\Result{E0_RERANK_TV}), and dynamic retargeting (\Result{E0_DYNAMIC_TV}); the target-event-%
+probability error under indicator conditioning is \Result{E0_EVENT_ERROR}, and support violations are
+\Result{E0_SUPPORT_VIOLATIONS} (zero by construction).
+
+\begin{figure}[h]
+\centering
+\pendingfigure{3.0cm}{Panels: (a) unconditioned vs desired-tilted vs exact-Doob vs greedy endpoint
+histograms on the enumerable chain; (b) TV to the exact law per method; (c) $\hval_\phi$ calibration vs
+exact $\hval$; (d) backward-equation residual vs training. Rendered from the enumerable-benchmark artifact.}
+\caption{\textbf{Exactness on the enumerable chemical state space (RQ1).} Exact Doob is expected to match
+the analytic target to numerical precision while reward-local controllers attain high reward at a
+different distribution; the figure is populated from the enumerable-benchmark artifact when the run
+completes.}
+\label{fig:e0}
+\end{figure}
+
+\subsection{Adaptation regret (defined before results)}
+For a preference switch to $\descr'$ at trajectory fraction $\tau/\horizon$, let $U_{\descr'}$ be the new
+utility and $U^\star_{\descr'}(x_\tau,b)$ the best achievable expected utility from state $x_\tau$ with
+remaining budget $b=\horizon-\tau$ under the base process. The \emph{adaptation regret} of a method that
+reaches terminal utility $U_{\descr'}(X_\horizon)$ is $R=U^\star_{\descr'}(x_\tau,b)-\Ebb[U_{\descr'}
+(X_\horizon)]$, estimated with the exact controller as the reference on enumerable slices and with a
+matched-budget oracle-best on real leads; lower is better. Steps-to-region counts committed edits until
+$\Fobj(X_k)\in\Bset_{\descr'}$, and retention is the fraction of the pre-switch objective's gain preserved
+at the terminal state. These are fixed here so RQ3 reports them without post-hoc definition.
+
+\subsection{Per-baseline documentation}
+\emph{Same-base controllers} (all steer the identical canonical-successor kernel $\Ptheta$): \emph{unguided}
+samples $\Ptheta$; \emph{endpoint$+$rerank} samples $\Ptheta$ and reranks terminal candidates by the
+objective; \emph{greedy $\Delta\Fobj$} picks the successor of maximal immediate objective gain;
+\emph{local Boltzmann} reweights $\Ptheta$ by $\exp(\beta\Delta\Fobj)$; \emph{MOG-DFM-style} applies a
+rank-directional score with an adaptive hypercone filter over $\Ptheta$'s successors; \emph{SMC/Feynman--Kac}
+runs a twisted-SMC population with resampling; \emph{learned Doob} uses \eqref{eq:controlledphi}. \emph{External
+optimizers} (contextual; Table~\ref{tab:h1ext}): GraphGA (graph genetic algorithm), MARS (annealed
+fragment-edit MCMC), GenMol (masked discrete-diffusion generalist), and RetMol (retrieval-controlled
+generation); each is run at a matched oracle budget with its released configuration, and where possible
+additionally over our legal proposal set to separate the control law from the edit vocabulary. Any
+asymmetric tuning is disclosed with the result.
+
+\subsection{Hypervolume hygiene}
+Objective bounds and the reference point are fixed before evaluation and published; the archive is capped
+per method; hypervolume is reported against oracle calls (HV-AUC), not only at the final budget; and
+hypervolume is paired with IGD+ and coverage so a single indicator does not carry the claim. All oracle
+evaluations---including intermediates, rejected, invalid, reranked, and SMC particles---are counted
+(\Cref{sec:fairness}).
+
+\subsection{Secondary: de novo generation}
+De novo generation from the target-independent carbon-tree prior is evaluated on all-step validity
+(\Result{DENOVO_VALIDITY}), uniqueness, novelty, Fr\'echet ChemNet Distance (\Result{DENOVO_FCD}), and
+property divergence, as evidence that the operators form a genuine generative process. It is secondary; the
+paper's claims do not depend on carbon-tree intermediates being useful lead-optimization states.
+
+\input{tables/h1_external}
+\input{figures/fig_fan}

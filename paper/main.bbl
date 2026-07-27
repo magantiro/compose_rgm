@@ -1,0 +1,487 @@
+\begin{thebibliography}{65}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Behr et~al.(2021)Behr, Danos, and Garnier]{behr2021rewriting}
+Nicolas Behr, Vincent Danos, and Ilias Garnier.
+\newblock Stochastic mechanics of graph rewriting.
+\newblock \emph{arXiv preprint arXiv:2003.02132}, 2021.
+
+\bibitem[Bengio et~al.(2021)Bengio, Jain, Korablyov, Precup, and
+  Bengio]{bengio2021gflownet}
+Emmanuel Bengio, Moksh Jain, Maksym Korablyov, Doina Precup, and Yoshua Bengio.
+\newblock Flow network based generative models for non-iterative diverse
+  candidate generation.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2021.
+\newblock arXiv:2106.04399.
+
+\bibitem[Bengio et~al.(2023)Bengio, Lahlou, Deleu, Hu, Tiwari, and
+  Bengio]{bengio2023gflownetfoundations}
+Yoshua Bengio, Salem Lahlou, Tristan Deleu, Edward~J. Hu, Mo~Tiwari, and
+  Emmanuel Bengio.
+\newblock {GFlowNet} foundations.
+\newblock \emph{Journal of Machine Learning Research}, 24, 2023.
+
+\bibitem[Beume et~al.(2007)Beume, Naujoks, and Emmerich]{beume2007smsemoa}
+Nicola Beume, Boris Naujoks, and Michael Emmerich.
+\newblock {SMS-EMOA}: Multiobjective selection based on dominated hypervolume.
+\newblock \emph{European Journal of Operational Research}, 181\penalty0
+  (3):\penalty0 1653--1669, 2007.
+
+\bibitem[Bickerton et~al.(2012)Bickerton, Paolini, Besnard, Muresan, and
+  Hopkins]{bickerton2012qed}
+G.~Richard Bickerton, Gaia~V. Paolini, J\'er\'emy Besnard, Sorel Muresan, and
+  Andrew~L. Hopkins.
+\newblock Quantifying the chemical beauty of drugs.
+\newblock \emph{Nature Chemistry}, 4\penalty0 (2):\penalty0 90--98, 2012.
+
+\bibitem[Black et~al.(2024)Black, Janner, Du, Kostrikov, and
+  Levine]{black2024ddpo}
+Kevin Black, Michael Janner, Yilun Du, Ilya Kostrikov, and Sergey Levine.
+\newblock Training diffusion models with reinforcement learning.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2024.
+\newblock arXiv:2305.13301.
+
+\bibitem[Brown et~al.(2019)Brown, Fiscato, Segler, and
+  Vaucher]{brown2019guacamol}
+Nathan Brown, Marco Fiscato, Marwin H.~S. Segler, and Alain~C. Vaucher.
+\newblock Guacamol: Benchmarking models for de novo molecular design.
+\newblock \emph{Journal of Chemical Information and Modeling}, 59\penalty0
+  (3):\penalty0 1096--1108, 2019.
+
+\bibitem[Campbell et~al.(2022)Campbell, Benton, De~Bortoli, Rainforth,
+  Deligiannidis, and Doucet]{campbell2022continuous}
+Andrew Campbell, Joe Benton, Valentin De~Bortoli, Tom Rainforth, George
+  Deligiannidis, and Arnaud Doucet.
+\newblock A continuous time framework for discrete denoising models.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2022.
+\newblock arXiv:2205.14987.
+
+\bibitem[Campbell et~al.(2024)Campbell, Yim, Barzilay, Rainforth, and
+  Jaakkola]{campbell2024generative}
+Andrew Campbell, Jason Yim, Regina Barzilay, Tom Rainforth, and Tommi Jaakkola.
+\newblock Generative flows on discrete state-spaces: Enabling multimodal flows
+  with applications to protein co-design.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2024.
+\newblock arXiv:2402.04997.
+
+\bibitem[Chen et~al.(2025{\natexlab{a}})Chen, Zhang, and
+  Chatterjee]{chen2025areuredi}
+Tong Chen, Yinuo Zhang, and Pranam Chatterjee.
+\newblock {AReUReDi}: Annealed rectified updates for refining discrete flows
+  with multi-objective guidance.
+\newblock \emph{arXiv preprint arXiv:2510.00352}, 2025{\natexlab{a}}.
+
+\bibitem[Chen et~al.(2025{\natexlab{b}})Chen, Zhang, Tang, and
+  Chatterjee]{chen2025mogdfm}
+Tong Chen, Yinuo Zhang, Sophia Tang, and Pranam Chatterjee.
+\newblock Multi-objective-guided discrete flow matching for controllable
+  biological sequence design.
+\newblock \emph{arXiv preprint arXiv:2505.07086}, 2025{\natexlab{b}}.
+\newblock ICML 2025 GenBio Workshop (spotlight).
+
+\bibitem[Chen et~al.(2021)Chen, Min, Parthasarathy, and Ning]{chen2021modof}
+Ziqi Chen, Martin~Renqiang Min, Srinivasan Parthasarathy, and Xia Ning.
+\newblock A deep generative model for molecule optimization via one fragment
+  modification.
+\newblock \emph{Nature Machine Intelligence}, 3\penalty0 (12):\penalty0
+  1040--1049, 2021.
+
+\bibitem[Dalke et~al.(2018)Dalke, Hert, and Kramer]{dalke2018mmpdb}
+Andrew Dalke, J\'er\^ome Hert, and Christian Kramer.
+\newblock mmpdb: An open-source matched molecular pair platform for large
+  multiproperty data sets.
+\newblock \emph{Journal of Chemical Information and Modeling}, 58\penalty0
+  (5):\penalty0 902--910, 2018.
+
+\bibitem[Danos et~al.(2015)Danos, Heindel, Honorato-Zimmer, and
+  Stucki]{danos2015thermodynamic}
+Vincent Danos, Tobias Heindel, Ricardo Honorato-Zimmer, and Sandro Stucki.
+\newblock Thermodynamic graph rewriting.
+\newblock \emph{Logical Methods in Computer Science}, 2015.
+
+\bibitem[Daulton et~al.(2020)Daulton, Balandat, and Bakshy]{daulton2020qehvi}
+Samuel Daulton, Maximilian Balandat, and Eytan Bakshy.
+\newblock Differentiable expected hypervolume improvement for parallel
+  multi-objective bayesian optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2020.
+\newblock arXiv:2006.05078.
+
+\bibitem[De~Bortoli et~al.(2021)De~Bortoli, Thornton, Heng, and
+  Doucet]{debortoli2021diffusion}
+Valentin De~Bortoli, James Thornton, Jeremy Heng, and Arnaud Doucet.
+\newblock Diffusion schr\"odinger bridge with applications to score-based
+  generative modeling.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2021.
+\newblock arXiv:2106.01357.
+
+\bibitem[Deb \& Jain(2014)Deb and Jain]{deb2014nsga3}
+Kalyanmoy Deb and Himanshu Jain.
+\newblock An evolutionary many-objective optimization algorithm using
+  reference-point-based nondominated sorting approach, part i: Solving problems
+  with box constraints.
+\newblock \emph{IEEE Transactions on Evolutionary Computation}, 18\penalty0
+  (4):\penalty0 577--601, 2014.
+
+\bibitem[Deb et~al.(2002)Deb, Pratap, Agarwal, and Meyarivan]{deb2002nsga2}
+Kalyanmoy Deb, Amrit Pratap, Sameer Agarwal, and T.~Meyarivan.
+\newblock A fast and elitist multiobjective genetic algorithm: {NSGA-II}.
+\newblock \emph{IEEE Transactions on Evolutionary Computation}, 6\penalty0
+  (2):\penalty0 182--197, 2002.
+
+\bibitem[Del~Moral(2004)]{delmoral2004feynman}
+Pierre Del~Moral.
+\newblock \emph{Feynman-Kac Formulae: Genealogical and Interacting Particle
+  Systems with Applications}.
+\newblock Springer, 2004.
+
+\bibitem[Dhariwal \& Nichol(2021)Dhariwal and Nichol]{dhariwal2021diffusion}
+Prafulla Dhariwal and Alexander Nichol.
+\newblock Diffusion models beat {GAN}s on image synthesis.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2021.
+\newblock arXiv:2105.05233.
+
+\bibitem[Domingo-Enrich et~al.(2025)Domingo-Enrich, Drozdzal, Karrer, and
+  Chen]{domingoenrich2025adjoint}
+Carles Domingo-Enrich, Michal Drozdzal, Brian Karrer, and Ricky T.~Q. Chen.
+\newblock Adjoint matching: Fine-tuning flow and diffusion generative models
+  with memoryless stochastic optimal control.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2025.
+\newblock arXiv:2409.08861.
+
+\bibitem[Doob(1984)]{doob1984classical}
+Joseph~L. Doob.
+\newblock \emph{Classical Potential Theory and Its Probabilistic Counterpart}.
+\newblock Springer-Verlag, 1984.
+
+\bibitem[Doucet et~al.(2001)Doucet, de~Freitas, and Gordon]{doucet2001smc}
+Arnaud Doucet, Nando de~Freitas, and Neil Gordon (eds.).
+\newblock \emph{Sequential Monte Carlo Methods in Practice}.
+\newblock Springer, 2001.
+
+\bibitem[Du \& Mordatch(2019)Du and Mordatch]{du2019implicit}
+Yilun Du and Igor Mordatch.
+\newblock Implicit generation and modeling with energy-based models.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2019.
+\newblock arXiv:1903.08689.
+
+\bibitem[Ertl \& Schuffenhauer(2009)Ertl and Schuffenhauer]{ertl2009sascore}
+Peter Ertl and Ansgar Schuffenhauer.
+\newblock Estimation of synthetic accessibility score of drug-like molecules
+  based on molecular complexity and fragment contributions.
+\newblock \emph{Journal of Cheminformatics}, 1:\penalty0 8, 2009.
+
+\bibitem[Fan et~al.(2023)Fan, Watkins, Du, Liu, Ryu, Boutilier, Abbeel,
+  Ghavamzadeh, Lee, and Lee]{fan2023dpok}
+Ying Fan, Olivia Watkins, Yuqing Du, Hao Liu, Moonkyung Ryu, Craig Boutilier,
+  Pieter Abbeel, Mohammad Ghavamzadeh, Kangwook Lee, and Kimin Lee.
+\newblock {DPOK}: Reinforcement learning for fine-tuning text-to-image
+  diffusion models.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2023.
+\newblock arXiv:2305.16381.
+
+\bibitem[Feng et~al.(2025)]{feng2025moleditrl}
+Yuanxin Feng et~al.
+\newblock {MolEditRL}: Structure-preserving molecular editing via discrete
+  diffusion and reinforcement learning.
+\newblock \emph{arXiv preprint arXiv:2505.20131}, 2025.
+
+\bibitem[Gao et~al.(2022)Gao, Fu, Sun, and Coley]{gao2022pmo}
+Wenhao Gao, Tianfan Fu, Jimeng Sun, and Connor~W. Coley.
+\newblock Sample efficiency matters: A benchmark for practical molecular
+  optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)
+  Datasets and Benchmarks Track}, 2022.
+\newblock arXiv:2206.12411.
+
+\bibitem[Gat et~al.(2024)Gat, Remez, Shaul, Kreuk, Chen, Synnaeve, Adi, and
+  Lipman]{gat2024discrete}
+Itai Gat, Tal Remez, Neta Shaul, Felix Kreuk, Ricky T.~Q. Chen, Gabriel
+  Synnaeve, Yossi Adi, and Yaron Lipman.
+\newblock Discrete flow matching.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2024.
+\newblock arXiv:2407.15595.
+
+\bibitem[Guo \& Schwaller(2024{\natexlab{a}})Guo and
+  Schwaller]{guo2024augmentedmemory}
+Jeff Guo and Philippe Schwaller.
+\newblock Augmented memory: Sample-efficient generative molecular design with
+  reinforcement learning.
+\newblock \emph{JACS Au}, 4\penalty0 (6):\penalty0 2160--2172,
+  2024{\natexlab{a}}.
+
+\bibitem[Guo \& Schwaller(2024{\natexlab{b}})Guo and Schwaller]{guo2024saturn}
+Jeff Guo and Philippe Schwaller.
+\newblock Saturn: Sample-efficient generative molecular design using memory
+  manipulation.
+\newblock \emph{arXiv preprint arXiv:2405.17066}, 2024{\natexlab{b}}.
+
+\bibitem[Ho \& Salimans(2022)Ho and Salimans]{ho2022classifierfree}
+Jonathan Ho and Tim Salimans.
+\newblock Classifier-free diffusion guidance.
+\newblock \emph{arXiv preprint arXiv:2207.12598}, 2022.
+
+\bibitem[Holderrieth et~al.(2025)Holderrieth, Havasi, Yim, Shaul, Gat,
+  Jaakkola, Karrer, Chen, and Lipman]{holderrieth2025generator}
+Peter Holderrieth, Marton Havasi, Jason Yim, Neta Shaul, Itai Gat, Tommi
+  Jaakkola, Brian Karrer, Ricky T.~Q. Chen, and Yaron Lipman.
+\newblock Generator matching: Generative modeling with arbitrary markov
+  processes.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2025.
+\newblock arXiv:2410.20587.
+
+\bibitem[Hussain \& Rea(2010)Hussain and Rea]{hussain2010mmp}
+Jameed Hussain and Ceara Rea.
+\newblock Computationally efficient algorithm to identify matched molecular
+  pairs (mmps) in large data sets.
+\newblock \emph{Journal of Chemical Information and Modeling}, 50\penalty0
+  (3):\penalty0 339--348, 2010.
+
+\bibitem[Irwin et~al.(2012)Irwin, Sterling, Mysinger, Bolstad, and
+  Coleman]{irwin2012zinc}
+John~J. Irwin, Teague Sterling, Michael~M. Mysinger, Erin~S. Bolstad, and
+  Ryan~G. Coleman.
+\newblock {ZINC}: A free tool to discover chemistry for biology.
+\newblock \emph{Journal of Chemical Information and Modeling}, 52\penalty0
+  (7):\penalty0 1757--1768, 2012.
+
+\bibitem[Ishibuchi et~al.(2015)Ishibuchi, Masuda, Tanigaki, and
+  Nojima]{ishibuchi2015igdplus}
+Hisao Ishibuchi, Hiroyuki Masuda, Yuki Tanigaki, and Yusuke Nojima.
+\newblock Modified distance calculation in generational distance and inverted
+  generational distance.
+\newblock In \emph{Evolutionary Multi-Criterion Optimization (EMO)}, 2015.
+
+\bibitem[Jain et~al.(2023)Jain, Raparthy, Hern\'andez-Garc\'ia, Rector-Brooks,
+  Bengio, Miret, and Bengio]{jain2023mogfn}
+Moksh Jain, Sharath~Chandra Raparthy, Alex Hern\'andez-Garc\'ia, Jarrid
+  Rector-Brooks, Yoshua Bengio, Santiago Miret, and Emmanuel Bengio.
+\newblock Multi-objective gflownets.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2023.
+\newblock arXiv:2210.12765.
+
+\bibitem[Jensen(2019)]{jensen2019graphga}
+Jan~H. Jensen.
+\newblock A graph-based genetic algorithm and generative model/monte carlo tree
+  search for the exploration of chemical space.
+\newblock \emph{Chemical Science}, 10\penalty0 (12):\penalty0 3567--3572, 2019.
+
+\bibitem[Jin et~al.(2018)Jin, Barzilay, and Jaakkola]{jin2018jtvae}
+Wengong Jin, Regina Barzilay, and Tommi Jaakkola.
+\newblock Junction tree variational autoencoder for molecular graph generation.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2018.
+\newblock arXiv:1802.04364.
+
+\bibitem[Jin et~al.(2019)Jin, Yang, Barzilay, and Jaakkola]{jin2019g2g}
+Wengong Jin, Kevin Yang, Regina Barzilay, and Tommi Jaakkola.
+\newblock Learning multimodal graph-to-graph translation for molecular
+  optimization.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2019.
+\newblock arXiv:1812.01070.
+
+\bibitem[Jin et~al.(2020)Jin, Barzilay, and Jaakkola]{jin2020hiervae}
+Wengong Jin, Regina Barzilay, and Tommi Jaakkola.
+\newblock Hierarchical generation of molecular graphs using structural motifs.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
+\newblock arXiv:2002.03230.
+
+\bibitem[Kaech et~al.(2025)Kaech, Wyss, Borgwardt, and
+  Grasso]{kaech2025invirtuogen}
+Benno Kaech, Luis Wyss, Karsten Borgwardt, and Gianvito Grasso.
+\newblock Refine drugs, don't complete them: Uniform-source discrete flows for
+  fragment-based drug discovery.
+\newblock \emph{arXiv preprint arXiv:2509.26405}, 2025.
+
+\bibitem[Kim et~al.(2024)Kim, Kim, Choi, and Park]{kim2024geneticgfn}
+Hyeonah Kim, Minsu Kim, Sanghyeok Choi, and Jinkyoo Park.
+\newblock Genetic-guided gflownets for sample efficient molecular optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2024.
+\newblock arXiv:2402.05961.
+
+\bibitem[Koziarski et~al.(2024)Koziarski, Rekesh, Shevchuk, van~der Sloot,
+  Gai\'nski, Bengio, Liu, Tyers, and Batey]{koziarski2024rgfn}
+Micha{\l} Koziarski, Andrei Rekesh, Dmytro Shevchuk, Almer van~der Sloot, Piotr
+  Gai\'nski, Yoshua Bengio, Cheng-Hao Liu, Mike Tyers, and Robert Batey.
+\newblock {RGFN}: Synthesizable molecular generation using gflownets.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2024.
+\newblock arXiv:2406.08506.
+
+\bibitem[Lee et~al.(2025)Lee, Kreis, Veccham, Liu, Reidenbach, Peng, Paliwal,
+  Nie, and Vahdat]{lee2025genmol}
+Seul Lee, Karsten Kreis, Srimukh~Prasad Veccham, Meng Liu, Danny Reidenbach,
+  Yuxing Peng, Saee Paliwal, Weili Nie, and Arash Vahdat.
+\newblock {GenMol}: A drug discovery generalist with discrete diffusion.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2025.
+\newblock arXiv:2501.06158.
+
+\bibitem[Lipman et~al.(2023)Lipman, Chen, Ben-Hamu, Nickel, and
+  Le]{lipman2023flow}
+Yaron Lipman, Ricky T.~Q. Chen, Heli Ben-Hamu, Maximilian Nickel, and Matt Le.
+\newblock Flow matching for generative modeling.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2023.
+\newblock arXiv:2210.02747.
+
+\bibitem[Loeffler et~al.(2024)Loeffler, He, Tibo, Janet, Voronov, Mervin, and
+  Engkvist]{loeffler2024reinvent4}
+Hannes~H. Loeffler, Jiazhen He, Alessandro Tibo, Jon~Paul Janet, Alexey
+  Voronov, Lewis~H. Mervin, and Ola Engkvist.
+\newblock Reinvent 4: Modern ai-driven generative molecule design.
+\newblock \emph{Journal of Cheminformatics}, 16:\penalty0 20, 2024.
+
+\bibitem[Lou et~al.(2024)Lou, Meng, and Ermon]{lou2024discrete}
+Aaron Lou, Chenlin Meng, and Stefano Ermon.
+\newblock Discrete diffusion modeling by estimating the ratios of the data
+  distribution.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2024.
+\newblock arXiv:2310.16834.
+
+\bibitem[Preuer et~al.(2018)Preuer, Renz, Unterthiner, Hochreiter, and
+  Klambauer]{preuer2018fcd}
+Kristina Preuer, Philipp Renz, Thomas Unterthiner, Sepp Hochreiter, and
+  G\"unter Klambauer.
+\newblock Fr\'echet chemnet distance: A metric for generative models for
+  molecules in drug discovery.
+\newblock \emph{Journal of Chemical Information and Modeling}, 58\penalty0
+  (9):\penalty0 1736--1741, 2018.
+
+\bibitem[Qiao et~al.(2026)Qiao, Pan, Pang, Zhang, Zhang, and
+  Zhao]{qiao2026molworld}
+Yang Qiao, Bo~Pan, Hao-Wei Pang, Peter~Zhiping Zhang, Liying Zhang, and Liang
+  Zhao.
+\newblock {MolWorld}: Molecule world models for actionable molecular
+  optimization.
+\newblock \emph{arXiv preprint arXiv:2605.08954}, 2026.
+
+\bibitem[Rogers \& Hahn(2010)Rogers and Hahn]{rogers2010ecfp}
+David Rogers and Mathew Hahn.
+\newblock Extended-connectivity fingerprints.
+\newblock \emph{Journal of Chemical Information and Modeling}, 50\penalty0
+  (5):\penalty0 742--754, 2010.
+
+\bibitem[Rogers \& Williams(2000)Rogers and Williams]{rogers2000diffusions}
+L.~C.~G. Rogers and David Williams.
+\newblock \emph{Diffusions, Markov Processes and Martingales, Volume 1:
+  Foundations}.
+\newblock Cambridge University Press, 2nd edition, 2000.
+
+\bibitem[Singhal et~al.(2025)Singhal, Horvitz, Teehan, Ren, Yu, McKeown, and
+  Ranganath]{singhal2025fksteering}
+Raghav Singhal, Zachary Horvitz, Ryan Teehan, Mengye Ren, Zhou Yu, Kathleen
+  McKeown, and Rajesh Ranganath.
+\newblock A general framework for inference-time scaling and steering of
+  diffusion models.
+\newblock \emph{arXiv preprint arXiv:2501.06848}, 2025.
+
+\bibitem[Skreta et~al.(2025)Skreta, Akhound-Sadegh, Ohanesian, Bondesan,
+  Aspuru-Guzik, Doucet, Brekelmans, Tong, and Neklyudov]{skreta2025feynman}
+Marta Skreta, Tara Akhound-Sadegh, Viktor Ohanesian, Roberto Bondesan, Al\'an
+  Aspuru-Guzik, Arnaud Doucet, Rob Brekelmans, Alexander Tong, and Kirill
+  Neklyudov.
+\newblock Feynman-kac correctors in diffusion: Annealing, guidance, and product
+  of experts.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2025.
+\newblock arXiv:2503.02819.
+
+\bibitem[Wang et~al.(2025)Wang, Uehara, He, Wang, Biancalani, Lal, Jaakkola,
+  Levine, Wang, and Regev]{wang2025drakes}
+Chenyu Wang, Masatoshi Uehara, Yichun He, Amy Wang, Tommaso Biancalani,
+  Avantika Lal, Tommi Jaakkola, Sergey Levine, Hanchen Wang, and Aviv Regev.
+\newblock Fine-tuning discrete diffusion models via reward optimization with
+  applications to {DNA} and protein design.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2025.
+\newblock arXiv:2410.13643.
+
+\bibitem[Wang et~al.(2023)Wang, Nie, Qiao, Xiao, Baraniuk, and
+  Anandkumar]{wang2023retmol}
+Zichao Wang, Weili Nie, Zhuoran Qiao, Chaowei Xiao, Richard~G. Baraniuk, and
+  Anima Anandkumar.
+\newblock Retrieval-based controllable molecule generation.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2023.
+\newblock arXiv:2208.11126.
+
+\bibitem[Wu et~al.(2023)Wu, Trippe, Naesseth, Blei, and
+  Cunningham]{wu2023twisted}
+Luhuan Wu, Brian~L. Trippe, Christian~A. Naesseth, David~M. Blei, and John~P.
+  Cunningham.
+\newblock Practical and asymptotically exact conditional sampling in diffusion
+  models.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2023.
+\newblock arXiv:2306.17775.
+
+\bibitem[Xie et~al.(2021)Xie, Shi, Zhou, Yang, Zhang, Yu, and Li]{xie2021mars}
+Yutong Xie, Chence Shi, Hao Zhou, Yuwei Yang, Weinan Zhang, Yong Yu, and Lei
+  Li.
+\newblock {MARS}: Markov molecular sampling for multi-objective drug discovery.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+\newblock arXiv:2103.10432.
+
+\bibitem[Yuan et~al.(2025)Yuan, Chen, Pal, and Liu]{yuan2025paretoflow}
+Ye~Yuan, Can Chen, Christopher Pal, and Xue Liu.
+\newblock {ParetoFlow}: Guided flows in multi-objective optimization.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2025.
+\newblock arXiv:2412.03718.
+
+\bibitem[Zekri \& Boull\'e(2025)Zekri and Boull\'e]{zekri2025sepo}
+Oussama Zekri and Nicolas Boull\'e.
+\newblock Fine-tuning discrete diffusion models with policy gradient methods.
+\newblock \emph{arXiv preprint arXiv:2502.01384}, 2025.
+
+\bibitem[Zhang \& Li(2007)Zhang and Li]{zhang2007moead}
+Qingfu Zhang and Hui Li.
+\newblock {MOEA/D}: A multiobjective evolutionary algorithm based on
+  decomposition.
+\newblock \emph{IEEE Transactions on Evolutionary Computation}, 11\penalty0
+  (6):\penalty0 712--731, 2007.
+
+\bibitem[Zhou et~al.(2024)Zhou, Lou, Khanna, and Ermon]{zhou2024ddbm}
+Linqi Zhou, Aaron Lou, Samar Khanna, and Stefano Ermon.
+\newblock Denoising diffusion bridge models.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2024.
+\newblock arXiv:2309.16948.
+
+\bibitem[Zhou et~al.(2019)Zhou, Kearnes, Li, Zare, and Riley]{zhou2019moldqn}
+Zhenpeng Zhou, Steven Kearnes, Li~Li, Richard~N. Zare, and Patrick Riley.
+\newblock Optimization of molecules via deep reinforcement learning.
+\newblock \emph{Scientific Reports}, 9:\penalty0 10752, 2019.
+
+\bibitem[Zitzler \& Thiele(1999)Zitzler and Thiele]{zitzler1999hypervolume}
+Eckart Zitzler and Lothar Thiele.
+\newblock Multiobjective evolutionary algorithms: A comparative case study and
+  the strength pareto approach.
+\newblock \emph{IEEE Transactions on Evolutionary Computation}, 3\penalty0
+  (4):\penalty0 257--271, 1999.
+
+\bibitem[Zitzler et~al.(2003)Zitzler, Thiele, Laumanns, Fonseca, and Grunert~da
+  Fonseca]{zitzler2003performance}
+Eckart Zitzler, Lothar Thiele, Marco Laumanns, Carlos~M. Fonseca, and Viviane
+  Grunert~da Fonseca.
+\newblock Performance assessment of multiobjective optimizers: An analysis and
+  review.
+\newblock \emph{IEEE Transactions on Evolutionary Computation}, 7\penalty0
+  (2):\penalty0 117--132, 2003.
+
+\end{thebibliography}

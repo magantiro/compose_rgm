@@ -1,0 +1,20 @@
+\begin{abstract}
+We formulate source-conditioned molecular optimization as stochastic control of a
+generator-matched jump process on an operator-closed space of connected, valence-valid molecular
+graphs. Because every committed state is a complete molecule and every transition is an executable
+chemical edit, property oracles, structural constraints, and user preferences apply throughout
+generation, not only at an endpoint. We learn a source-agnostic edit prior by generator
+matching over this rewrite process, aggregate raw edits at their canonical molecular successor, and
+steer the fixed-budget embedded jump chain with a finite-horizon Doob transform. The
+transform reweights existing transition rates, so it cannot leave the legal operator support, and it
+realizes a specified terminal reweighting exactly when its desirability function is exact. Steering
+conditions on the remaining edit budget: a preference change made mid-trajectory is served by exact
+continuation, not restart, and a constraint can be enforced at every intermediate molecule, not only
+the last. Our primary application is similarity-constrained lead optimization, cast as budgeted
+multi-objective Pareto exploration; de novo generation from a carbon-tree prior is a secondary
+demonstration that the operators form a genuine generative process. On enumerable
+chemical state spaces the transform matches analytic target laws to numerical precision; at scale we
+study control quality, dynamic preference switching, pathwise constraints, ablations, and robustness to a
+held-out evaluator. Every step is a molecule, every edge a legal edit, and every preference update changes
+the controller, not the prior.
+\end{abstract}

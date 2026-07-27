@@ -1,0 +1,30 @@
+% H1 aggregate (main): the scientifically load-bearing same-base controller block.
+% External optimizers are Table~\ref{tab:h1ext} in the appendix. Every cell is a
+% result-registry placeholder; no cell is pre-bolded.
+\begin{table}[t]
+\centering
+\caption{\textbf{Multi-objective similarity-constrained lead optimization (RQ2): same-base controller
+comparison} (aggregate over sources at a matched oracle budget). All rows share the base process, so
+differences isolate the control law. Arrows give the improving direction; each cell reports the point
+estimate, with paired bootstrap $95\%$ intervals (resampling unit: source) in \Cref{app:experiments}.
+Reference point, objective bounds, and archive cap are fixed before evaluation (\Cref{sec:fairness}); no
+cell is emphasized. External optimizers (GraphGA, MARS, GenMol, RetMol) are contextual and reported in
+Table~\ref{tab:h1ext}. Placeholders (\emph{xxx}) are filled from the registry when the runs complete.}
+\label{tab:h1}
+\footnotesize
+\setlength{\tabcolsep}{4.2pt}
+\begin{tabular}{l cccccc}
+\toprule
+Controller (same base) & nHV\,$\uparrow$ & HV-AUC\,$\uparrow$ & IGD+\,$\downarrow$ & \#Feas\,$\uparrow$
+       & Src-sim\,$\uparrow$ & Orc-eff\,$\uparrow$ \\
+\midrule
+Unguided edit prior & \Result{H1_NHV_UNGUIDED} & \Result{H1_HVAUC_UNGUIDED} & \Result{H1_IGD_UNGUIDED} & \Result{H1_FEASIBLE_UNGUIDED} & \Result{H1_SOURCESIM_UNGUIDED} & \Result{H1_ORACLEEFF_UNGUIDED}\\
+Endpoint $+$ rerank & \Result{H1_NHV_RERANK} & \Result{H1_HVAUC_RERANK} & \Result{H1_IGD_RERANK} & \Result{H1_FEASIBLE_RERANK} & \Result{H1_SOURCESIM_RERANK} & \Result{H1_ORACLEEFF_RERANK}\\
+Greedy $\Delta\Fobj$ & \Result{H1_NHV_GREEDY} & \Result{H1_HVAUC_GREEDY} & \Result{H1_IGD_GREEDY} & \Result{H1_FEASIBLE_GREEDY} & \Result{H1_SOURCESIM_GREEDY} & \Result{H1_ORACLEEFF_GREEDY}\\
+Local Boltzmann & \Result{H1_NHV_BOLTZMANN} & \Result{H1_HVAUC_BOLTZMANN} & \Result{H1_IGD_BOLTZMANN} & \Result{H1_FEASIBLE_BOLTZMANN} & \Result{H1_SOURCESIM_BOLTZMANN} & \Result{H1_ORACLEEFF_BOLTZMANN}\\
+MOG-DFM-style & \Result{H1_NHV_MOGDFM} & \Result{H1_HVAUC_MOGDFM} & \Result{H1_IGD_MOGDFM} & \Result{H1_FEASIBLE_MOGDFM} & \Result{H1_SOURCESIM_MOGDFM} & \Result{H1_ORACLEEFF_MOGDFM}\\
+SMC / Feynman--Kac & \Result{H1_NHV_SMCFK} & \Result{H1_HVAUC_SMCFK} & \Result{H1_IGD_SMCFK} & \Result{H1_FEASIBLE_SMCFK} & \Result{H1_SOURCESIM_SMCFK} & \Result{H1_ORACLEEFF_SMCFK}\\
+Learned Doob (ours) & \Result{H1_NHV_LEARNEDDOOB} & \Result{H1_HVAUC_LEARNEDDOOB} & \Result{H1_IGD_LEARNEDDOOB} & \Result{H1_FEASIBLE_LEARNEDDOOB} & \Result{H1_SOURCESIM_LEARNEDDOOB} & \Result{H1_ORACLEEFF_LEARNEDDOOB}\\
+\bottomrule
+\end{tabular}
+\end{table}

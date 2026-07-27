@@ -1,0 +1,18 @@
+\section{Anonymous-release checklist}
+\label{app:repromap}
+
+A code and data release accompanying this paper will be scrubbed for double-blind review against the
+following checklist before posting; each item is a required pre-release check. \emph{Identity:} remove
+author and affiliation names, acknowledgements, and grant numbers; remove any user, account, or cluster
+names. \emph{Paths and infrastructure:} rewrite absolute home-directory paths, remove cloud-profile and
+compute-account names, and strip internal hostnames and repository remotes. \emph{Self-citation:} phrase
+all references to prior work by the same authors in the third person and remove links that would reveal
+identity through a personal or lab domain. \emph{Artifacts:} scrub PDF metadata (author, title, producer),
+strip identifying strings from supplementary archives and notebooks, and remove identifying comments and
+environment files from the code. \emph{Links:} replace tracking or identity-revealing URLs with anonymized
+mirrors. \emph{Terminology:} the manuscript uses only public method terminology (base prior, edit prior,
+canonical successor kernel, controlled editing process, source-conditioned controller); internal
+engineering codenames are confined to the authors' private reproducibility notes and never appear in the
+released paper or code comments. The released bundle will include the result registry, the plotting
+artifacts backing every figure and table, the enumerable-benchmark harness, and the data manifest with its
+scope and operator-registry hashes, so that every claim in the paper maps to a runnable check.

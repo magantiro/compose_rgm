@@ -1,0 +1,63 @@
+\section{Finite-horizon Doob control}
+\label{sec:doob}
+
+Editing is a fixed-budget embedded jump chain with (possibly step-dependent) kernels
+$\Pkernel_0,\dots,\Pkernel_{\horizon-1}$, $\Pkernel_k\equiv\Ptheta(\cdot\mid\cdot,t_k)$. Because the
+hazard is discarded, the exact control object is the finite-horizon Doob transform of this chain, whose
+value is indexed by the step---equivalently the remaining budget $\budget=\horizon-k$---which is what the
+controller conditions on.
+
+\begin{theorem}[Finite-horizon Doob transform]
+\label{thm:doob}
+For a terminal desirability $\desir:\XVN\to\Rbb_{\ge0}$ define
+$\hval_{\horizon}(x)=\desir(x)$ and $\hval_k(x)=\sum_y\Pkernel_k(x,y)\hval_{k+1}(y)$ for $0\le k<\horizon$,
+and on $\{\hval_k(x)>0\}$ the controlled kernel
+$\Pkernel^{\desir}_k(x,y)=\Pkernel_k(x,y)\,\hval_{k+1}(y)/\hval_k(x)$.
+Then \emph{(i)} $\Pkernel^{\desir}_k(x,\cdot)$ is a probability distribution; \emph{(ii)} from $x_0$ with
+$\hval_0(x_0)>0$,
+\begin{equation}
+\Pbb^{\desir}(X_{\horizon}=y\mid x_0)=\Pbb(X_{\horizon}=y\mid x_0)\,\frac{\desir(y)}{\hval_0(x_0)},\qquad
+\hval_0(x_0)=\textstyle\sum_y\Pbb(X_{\horizon}=y\mid x_0)\desir(y),
+\label{eq:terminaltilt}
+\end{equation}
+the exact base terminal law tilted by $\desir$, normalized by the full-budget value at the start;
+\emph{(iii)} $\Pkernel^{\desir}_k(x,y)>0\Rightarrow\Pkernel_k(x,y)>0$ (controlled support $\subseteq$ base
+support); and \emph{(iv)} states with $\hval_k(x)=0$ carry zero controlled forward probability, so the
+ratio is never evaluated where undefined.
+\end{theorem}
+\begin{proof}[Proof sketch]
+(i) $\sum_y\Pkernel_k(x,y)\hval_{k+1}(y)=\hval_k(x)$, so the ratios sum to one. (ii) Telescoping the
+controlled path measure cancels each interior $\hval$, leaving $\Pbb(\text{path})\desir(y)/\hval_0(x_0)$;
+sum over interior paths. (iii)--(iv) the multiplier is finite and nonnegative where defined and can only
+rescale, never create, an edge; a zero-value state is entered with zero probability. Full time-%
+inhomogeneous, zero-$\hval$, and event-conditioning details are \Cref{app:doob}, checked numerically in
+\Cref{app:impl}.
+\end{proof}
+
+The transform is machine-exact on an enumerable molecular chain: the controlled terminal law matches the
+analytic tilt to total variation \ConfigValue{DOOB_ENUM_TV_RESIDUAL}, with no support violations.
+
+\emph{Immediate consequences (\Cref{thm:doob}).} \textbf{Validity:} controlled support $\subseteq$ base
+support $\subseteq$ legal edits (\Cref{prop:closure}), so every controlled state is valid---validity is
+inherited from the support, not created by the transform, and a controller cannot guide off the valid
+state space. \textbf{Exact events:} for $\desir=\one[x\in E]$ with $E$ base-reachable,
+\eqref{eq:terminaltilt} is the base law conditioned on $\{X_\horizon\in E\}$, realized exactly; an
+unreachable $E$ leaves it undefined, as no controller can manufacture missing support.
+
+\begin{corollary}[Dynamic retargeting]
+\label{cor:dynamic}
+Replacing $\desir$ by $\desir'$ at $x_\tau$ and transforming the remaining budget $\horizon-\tau$ yields
+the exact $\desir'$-tilt over that budget \emph{conditioned on $x_\tau$}---in general \emph{not} the law
+from using $\desir'$ at step $0$, so continuation-versus-restart is a substantive question (verified
+exact, TV \ConfigValue{DYNAMIC_ENUM_TV_RESIDUAL}). Exactness is budget-specific, so the controller
+conditions on $\budget$.
+\end{corollary}
+
+\begin{corollary}[Pathwise constraints]
+\label{cor:pathwise}
+A constraint required at every committed state is path-dependent. When rule-closed (a state predicate
+partitioning marks into allowed/forbidden), it is enforced exactly by deleting violating marks from
+$\Aof{\cdot}$---a support restriction giving a valid embedded chain to which \Cref{thm:doob} applies---so
+pathwise feasibility holds by construction; a genuinely cumulative constraint is handled by augmenting the
+state with the running statistic and conditioning on the augmented terminal event (\Cref{app:pathwise}).
+\end{corollary}

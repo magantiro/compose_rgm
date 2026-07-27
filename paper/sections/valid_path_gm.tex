@@ -1,0 +1,66 @@
+\section{Valid-path generator matching}
+\label{sec:validgm}
+
+\emph{Operators and legal support.} Each family is a typed graph rewrite with an application condition:
+\emph{atom insert/delete} grow or trim a peripheral atom (carrying the incident bond order); \emph{atom
+restate} changes an atom's valence state within the vocabulary; \emph{bond reorder} changes a non-ring
+bond order; \emph{bond reroute} (Graft) detaches a bridge-attached pendant fragment and reattaches it
+atomically; and the \emph{ring-system} family grows, deletes, or restates a whole supported ring system
+(mono-/fused/bridged/spiro, aromatic or saturated). A mark instantiates a family at a match, and
+$\Aof{x}$ is the set of marks whose condition holds and whose executed successor is a valid, connected
+molecule distinct from $x$ (self-loops excluded). Two legacy families are disabled everywhere
+(\ConfigValue{DISABLED_FAMILIES}); the registry with inverses is \Cref{app:operators}.
+
+\begin{proposition}[Operator closure]
+\label{prop:closure}
+For $x\in\XVN$ and $a\in\Aof{x}$, assuming (i) the heavy-atom count stays within $N$, (ii) each family's
+rewrite preserves the valence constraint at every atom it touches and leaves untouched atoms unchanged,
+and (iii) the successor is required connected, we have $\Texec(x,a)\in\XVN$. Hence every reachable state
+is a connected, valence-valid molecule.
+\end{proposition}
+\begin{proof}[Proof sketch]
+$\Aof{x}$ is the fiber of marks passing the executor's guards (validate source; check condition; execute;
+re-validate successor for per-atom valence, connectivity, and sanitizability). It suffices that each
+family preserves the invariants at the atoms it edits, verified family by family in \Cref{app:closure};
+closure is thus a property of the operators and the legality filter, not inferred from sampled validity.
+\end{proof}
+
+\emph{Generator-matching parameterization.} The learned process is a continuous-time Markov jump process
+whose marked off-diagonal rate factors into a state rate and a conditional mark law,
+\begin{equation}
+q_\theta(x\!\to\!a,t)=\Ltot(x,t)\,\pmark(a\mid x,t),\qquad
+\Ltot(x,t)=\softplus(s_\theta(x,t))\cdot\one[\Aof{x}\neq\varnothing],
+\label{eq:rate}
+\end{equation}
+so $\Ltot\ge0$ vanishes at states with no legal mark (a terminal, no numerical fallback), and
+$\pmark(\cdot\mid x,t)$ is a categorical over \emph{complete legal marks}, factorized as family times
+within-family action. Illegal marks get zero probability and, since $\pmark$ normalizes,
+$\sum_a\Ltot\,\pmark(a\mid x)=\Ltot$: the total hazard is the productive exit rate, and training and
+sampling share this factorization. Given a supervised transition with target mark $a^\star$ and rate $r$,
+generator matching regresses the model marked rate onto the teacher's via the Poisson (generalized-KL)
+Bregman divergence; up to target-only constants,
+\begin{equation}
+\ell_\theta(x,t)=\Ltot(x,t)-r\big[\log\Ltot(x,t)+\log\pmark(a^\star\mid x,t)\big],\quad r>0,
+\label{eq:bregman}
+\end{equation}
+and $\ell_\theta=\Ltot$ at a terminal ($r{=}0$), driving $\Ltot\to0$. An illegal or out-of-mask teacher
+mark yields $\log\pmark=-\infty$ and a non-finite loss---a deliberate guard forcing every teacher mark
+into the factorized fiber the model normalizes over (\Cref{app:gm}).
+
+\emph{Source-agnostic prior; source-conditioned control.} The base process~\eqref{eq:rate} observes only
+$(x,t)$; the immutable $\xsrc$ enters generation only through $x_0=\xsrc$, the source-relative
+desirability~\eqref{eq:g}, the protected mask, the similarity constraint, and the controller
+(\Cref{sec:controller}). This keeps the molecular dynamics reusable across sources and objectives, keeps
+the Doob analysis clean (one process, different boundary conditions), and makes a preference change a
+controller swap that leaves the prior fixed.
+
+\emph{Editing training distribution.} The prior is trained on real molecule-to-molecule trajectories from
+three layers so it learns transformations, not identity reconstruction: compiled one-cut
+matched-molecular-pair analogue paths; sparse shared-scaffold analogue paths (nearest analogue neighbours
+within a Bemis--Murcko group, never all-pairs cliques); and synthetic reversible legal-corruption paths,
+all taught both directions. A hierarchical sampler draws a layer (proposed shares
+\ConfigValue{MIX_SHARE_CORRUPTION}/\ConfigValue{MIX_SHARE_MMP}/\ConfigValue{MIX_SHARE_SCAFFOLD_NN}, an
+ablation target finalized from at-scale statistics), then a \emph{measured} path-length curriculum bin
+(\ConfigValue{CURRICULUM_BINS}, never preset), then a balanced example under anti-concentration
+safeguards that drop identity traces and cap per scaffold, transformation, and family, each with a signal
+and a gate. The corpus scope, census, mining, safeguards, and pilot characterization are \Cref{app:data}.

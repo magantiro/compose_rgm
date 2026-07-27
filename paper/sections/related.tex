@@ -1,0 +1,47 @@
+\section{Related work}
+\label{sec:related}
+
+\emph{Molecular generators and editing.} Learned generators span latent graph
+models~\citep{jin2018jtvae,jin2020hiervae}, RL atom/bond editors~\citep{zhou2019moldqn}, retrieval
+control~\citep{wang2023retmol}, discrete-diffusion generalists serving hit and lead
+optimization~\citep{lee2025genmol,gat2024discrete,kaech2025invirtuogen}, and graph-to-graph or
+one-fragment optimizers from paired supervision~\citep{jin2019g2g,chen2021modof}; matched molecular pairs
+supply the local transformations we use as supervision~\citep{hussain2010mmp,dalke2018mmpdb}. We do not
+claim that editing valid molecules is new---fragment MCMC~\citep{xie2021mars}, graph genetic
+algorithms~\citep{jensen2019graphga}, reaction GFlowNets~\citep{koziarski2024rgfn}, structure-preserving
+diffusion editors~\citep{feng2025moleditrl}, and reachability/world-model
+editors~\citep{qiao2026molworld} all move between complete molecules. Our distinction is a \emph{learned
+generator-matched process} on an operator-closed molecular state space whose steering is a Doob
+transform, rather than heuristic proposals scored at the endpoint or a code that is a molecule only after
+decoding.
+
+\emph{Multi-objective and Pareto methods.} We adopt the metric and search machinery of evolutionary
+optimizers~\citep{deb2002nsga2,deb2014nsga3,zhang2007moead,beume2007smsemoa,daulton2020qehvi} and its
+indicators (normalized hypervolume, IGD+, additive $\epsilon$)~\citep{zitzler1999hypervolume,%
+ishibuchi2015igdplus,zitzler2003performance}; preference/goal-conditioned GFlowNets and flow-matching
+optimizers sample Pareto-diverse candidates~\citep{jain2023mogfn,bengio2021gflownet,%
+bengio2023gflownetfoundations,yuan2025paretoflow,chen2025areuredi}. For fairness we let such operators
+act on \emph{our} legal proposal set (\Cref{sec:experiments}). MOG-DFM steers a pretrained discrete
+flow-matching generator by a rank-directional score and hypercone filter on peptide/DNA
+design~\citep{chen2025mogdfm}; it addresses \emph{how to choose} among transitions, whereas we
+\emph{define} the chemistry-native transition system and supply exact path control. The two are
+orthogonal: we place a MOG-DFM-style controller over our identical kernel in the same-base table, not as
+an external baseline.
+
+\emph{Stochastic control and generative flows.} Generator matching learns a marginal Markov generator
+from tractable conditional generators, subsuming diffusion, flow matching, and jump
+processes~\citep{holderrieth2025generator,lipman2023flow,campbell2024generative,campbell2022continuous,%
+lou2024discrete}; we instantiate it on an executable rewrite process, with rewriting semantics from
+graph-rewriting theory~\citep{danos2015thermodynamic,behr2021rewriting}. Our controller is a
+finite-horizon Doob $h$-transform~\citep{doob1984classical,rogers2000diffusions}, familiar from diffusion
+and Schr\"odinger bridges~\citep{zhou2024ddbm,debortoli2021diffusion}. It contrasts with reward/classifier
+guidance, which lacks a discrete distributional guarantee~\citep{dhariwal2021diffusion,ho2022classifierfree};
+with reward and adjoint fine-tuning, which change \emph{weights} rather than steer a fixed
+prior~\citep{black2024ddpo,fan2023dpok,domingoenrich2025adjoint,wang2025drakes,zekri2025sepo}; and with
+twisted-SMC/Feynman--Kac correctors, an optional asymptotically-exact knob~\citep{wu2023twisted,%
+skreta2025feynman,singhal2025fksteering,delmoral2004feynman,doucet2001smc,du2019implicit}. Conservatively,
+our contribution is that a learned generator-matched process over an operator-closed molecular state space
+makes exact, retargetable, support-preserving control well-defined and applicable throughout budgeted lead
+optimization; standardized corpora and metrics are used where
+noted~\citep{brown2019guacamol,gao2022pmo,irwin2012zinc,bickerton2012qed,ertl2009sascore,rogers2010ecfp,%
+preuer2018fcd,guo2024saturn,kim2024geneticgfn,loeffler2024reinvent4,guo2024augmentedmemory}.

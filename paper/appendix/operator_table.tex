@@ -1,0 +1,55 @@
+\section{Operator registry}
+\label{app:operators}
+
+Table~\ref{tab:operators} is the full registry of the \ConfigValue{NUM_ENABLED_FAMILIES} production
+operator families (of \ConfigValue{NUM_MARK_FAMILIES_TOTAL} defined; \ConfigValue{DISABLED_FAMILIES} are
+disabled everywhere and enumerate no candidates). Every family's rewrite is lowered to validity-checked
+primitives; the ``successor invariant'' column states what the family guarantees beyond the universal
+connected-and-valence-valid closure of \Cref{prop:closure}. Charge is preserved by every family (there is
+no charge-changing transition). ``Training source'' names which training layer typically supervises the
+family (\Cref{app:data}); ring-topology growth is retained from the de novo carbon-tree prior because the
+edit layers preserve ring count.
+
+\begin{table}[h]
+\centering
+\caption{Production operator families. All families preserve connectivity, per-atom valence, and net
+charge (\Cref{prop:closure}); implicit hydrogens re-derive from each touched atom's valence class.}
+\label{tab:operators}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}l Y Y l@{}}
+\toprule
+Family & Operands / applicability & Successor invariant \& inverse & Training source \\
+\midrule
+atom\_insert & peripheral site + element/valence class + incident bond order & adds one heavy atom
+($\le N$); inverse = atom\_delete & corruption; MMP graft-in \\
+atom\_delete & peripheral (leaf) atom whose removal keeps connectivity & removes one heavy atom; inverse =
+atom\_insert & corruption; MMP peel \\
+atom\_restate & non-ring atom; new valence class feasible at its heavy-bond sum & element fixed, valence
+class changed, H re-derived; self-inverse family & corruption (bioisostere) \\
+bond\_reorder & non-ring (acyclic) bond; new integer order & bond order changed, endpoints' H re-derived;
+self-inverse family & corruption \\
+bond\_reroute (Graft) & pendant subtree across a single bridging bond; target attachment site & subtree
+relocated, ring core fixed; scored at canonical successor group; inverse = reroute back & corruption;
+shared-scaffold \\
+ring\_system\_grow & saturated chain match; typed ring template (mono/fused/bridged/spiro; aromatic/sat.)
+& adds a whole ring system with per-atom identity; inverse = ring\_system\_delete & retained from de novo
+prior \\
+ring\_system\_delete & a supported ring system; decoration-preserving open & opens a ring keeping each
+atom's element (Kekul\'e); inverse = ring\_system\_grow on the matching scaffold & corruption (ring-open,
+trim direction) \\
+ring\_system\_restate & a ring system; aromaticity-changing restate (both directions) & changes perceived
+aromaticity via a validity-checked bond-order relayout; self-inverse family & corruption
+(aromatize$\leftrightarrow$de-aromatize) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\emph{Disabled families.} \ConfigValue{DISABLED_FAMILIES} are legacy null-prior operators retained in the
+mark enumeration for historical compatibility but enumerate no candidates and receive no training signal;
+ring additions go through \texttt{ring\_system\_grow}. \emph{Charge.} No family alters an atom's formal
+charge; charged centers are protected in the corruption and the net charge is invariant under every edit,
+so charge is preserved but not designed (\Cref{sec:limitations}). \emph{Aromaticity.} States are Kekul\'e;
+``aromatic'' is a perception on the round-tripped molecule, so \texttt{ring\_system\_restate} realizes
+aromatization and de-aromatization as validity-checked integer bond-order relayouts rather than edits of a
+stored aromatic bond class.

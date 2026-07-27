@@ -1,0 +1,13 @@
+\section{Limitations}
+\label{sec:limitations}
+
+Graph validity is not synthetic feasibility: our operators guarantee connected, valence-admissible
+molecules, not synthesizable ones (we say ``graph-valid'', never ``synthesizable''), and the
+representation excludes stereochemistry, isotopes, radicals, and charge-changing edits---we preserve a
+source charge state rather than design over charge. The operator vocabulary bounds the reachable
+chemistry, and support-preserving control cannot manufacture a transformation no enabled edit realizes.
+Exactness holds only where the value function is exact (enumerable spaces); at scale the amortized
+controller is an approximation we measure rather than assume, the oracles are exploitable surrogates
+evaluated against an independent one, and a better computational front is not experimental efficacy.
+External optimizers differ in scale and representation, so the controller comparison is the attributable
+one (extended limitations in \Cref{app:experiments}).

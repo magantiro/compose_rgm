@@ -1,0 +1,80 @@
+\section{Introduction}
+\label{sec:intro}
+
+Lead optimization is a source-conditioned problem. A medicinal chemist begins from a known molecule
+and searches nearby chemical space for analogues that improve several properties at once---potency,
+selectivity, solubility, safety, synthetic tractability---while preserving the parts of the molecule
+responsible for its activity. The search is iterative and revisable: intermediate candidates are
+evaluated, preferences are revised in light of what is seen, and constraints such as a frozen scaffold
+or a forbidden toxicophore must hold throughout, not merely at the end. Any state that a property
+oracle scores, a constraint filters, or a chemist inspects should therefore itself be a complete,
+chemically admissible molecule. Terminal sanitization cannot make an earlier oracle query meaningful.
+
+Most learned molecular generators do not expose their intermediates as molecules: graph diffusion and
+flow models evolve node--edge tensors whose intermediate states need not be connected or
+valence-admissible, and masked or latent generalists denoise a code that is a molecule only at the
+end~\citep{jin2018jtvae,lee2025genmol,gat2024discrete}. Heuristic graph-edit search does keep every state
+valid---fragment MCMC, graph genetic algorithms, and reachability-aware editors move between complete
+molecules~\citep{xie2021mars,jensen2019graphga,qiao2026molworld}---but it optimizes with hand-designed
+proposals rather than a learned reference path distribution and steers by endpoint scoring rather than a
+principled control law. Neither family gives a learned generative \emph{process} whose every state is a
+molecule \emph{and} whose steering is exact when its value function is. We target that intersection,
+because it is what budgeted, revisable, constraint-respecting lead optimization needs.
+
+Our framework makes the interface between two established theories explicit for molecular design.
+Stochastic graph rewriting supplies a state space of complete molecules, a vocabulary of executable
+edits with state-dependent legality, and continuous-time Markov semantics on the induced state
+graph~\citep{danos2015thermodynamic,behr2021rewriting}. Generator matching supplies a regression
+principle that recovers a marginal Markov generator from tractable conditional
+generators~\citep{holderrieth2025generator}. Composing them yields \emph{valid-path generator
+matching}: a learned jump process on an operator-closed space of connected, valence-valid molecular
+graphs, in which probability moves between molecules by executing chemical rules rather than between
+unconstrained tensors that must later be interpreted or repaired. We call the molecular instantiation
+\method. Its causal chain is the organizing idea of this paper (\Cref{fig:framework}): validity-closed
+operators make every reachable state an evaluable molecule; every state being evaluable makes control
+applicable throughout a trajectory; a finite-horizon Doob transform turns that into exact terminal
+reweighting when the desirability is exact; and amortized control turns \emph{that} into dynamic,
+source-conditioned, multi-objective optimization at scale.
+
+\input{figures/figure1}
+
+The control result is a finite-horizon Doob transform on the fixed-budget embedded jump chain that
+editing induces. It reweights the \emph{existing} transition rates by a ratio of value functions, so
+a controlled trajectory can never reach a state the base prior assigns zero probability: guidance
+cannot leave the legal operator support, and validity is inherited from the support rather than
+imposed by the transform. When the value function is exact---as it is on enumerable state
+spaces---the controlled terminal law is exactly the base law tilted by the desirability, giving exact
+conditioning on rare substructures, property intervals, and objective-space regions. Because the value
+function is indexed by the remaining edit budget, a preference change made after inspecting an
+intermediate is served by an exact continuation transform on the remaining budget rather than by
+restarting from the lead, and a constraint required at every committed molecule is enforced by
+restricting the legal support pathwise. These are capabilities that endpoint-conditioned masked
+generation cannot express and that heuristic edit search cannot make distributionally principled.
+
+We demonstrate the framework primarily on similarity-constrained lead optimization, formulated as
+budgeted multi-objective Pareto exploration: trajectories start at a source lead, the base edit prior is
+held fixed, and a goal-conditioned controller reweights the canonical-successor kernel toward
+under-covered regions of the objective front while a similarity constraint and protected mask keep
+candidates analogue to the source. The same held-fixed process supports dynamic preference switching, a
+branching ``Pareto fan'' of preference-conditioned trajectories from a shared prefix, and hard pathwise
+constraints. De novo generation from a carbon-tree prior is a secondary demonstration that the operators
+form a genuine generative process, not the setting where the valid-path property is most consequential;
+we neither claim nor require that carbon-tree intermediates are useful lead states.
+
+We are explicit about status. The mathematical claims---operator closure, canonical-kernel
+normalization, the finite-horizon Doob transform with dynamic retargeting, and support preservation---are
+proved and, on the enumerable benchmark, verified against the implemented process to numerical precision.
+The large-scale empirical study is in progress (at-scale trace mining, the goal-conditioned controller,
+the oracles, and the external baselines), so we carry every at-scale value through a result registry and
+assert no number before its run completes. Concretely: \textbf{(1)} we instantiate generator matching on an
+executable, operator-closed molecular rewrite system, learning a source-agnostic edit prior whose every
+state is a complete molecule, and prove operator closure and that aggregating raw edits at their
+canonical successor yields a normalized transition kernel on which all controllers act
+(\Cref{sec:validgm,sec:kernel}); \textbf{(2)} we derive a budget-indexed finite-horizon Doob transform of
+the embedded jump chain, prove it preserves the legal support and realizes the exact terminal tilt under
+an exact value function, and prove that mid-trajectory preference switching is served by an exact
+continuation transform distinct from restarting (\Cref{sec:doob,sec:controller}); and \textbf{(3)} we
+cast similarity-constrained lead optimization as budgeted Pareto exploration under a goal-conditioned
+controller and specify its evaluation---a same-base controller comparison, an exact enumerable benchmark,
+dynamic-steering, pathwise-constraint, ablation, and held-out-oracle studies, with fairness fixed in
+advance (\Cref{sec:multiobj,sec:experiments}).

@@ -1,0 +1,80 @@
+\section{Experiments}
+\label{sec:experiments}
+
+We answer five questions. \textbf{RQ1 (exactness):} does the Doob transform realize a computable target
+law exactly, and where do reward-local controllers fail? \textbf{RQ2 (primary):} holding the process
+fixed, does control improve the multi-objective lead-optimization front at a matched budget, attributably
+to the control law? \textbf{RQ3 (dynamic):} can preferences change mid-trajectory without restarting?
+\textbf{RQ4 (pathwise):} can constraints hold at \emph{every} committed molecule, more efficiently than
+endpoint filtering? \textbf{RQ5 (attribution/robustness):} which component causes the effect, and does it
+survive a held-out evaluator? Sources, objectives, budgets, and statistics are fixed in
+\Cref{sec:fairness} before any result; every empirical cell comes from a result registry, shown here as a
+visible placeholder until its run completes. Implementation correctness (closure, kernel normalization,
+machine-exact Doob residual, quotient-kernel equality, tiny-corpus convergence, all-intermediate
+validity) is \emph{implementation-validation} evidence (\Cref{app:impl}), not a headline result.
+
+\textbf{RQ1 --- Exact conditioning on an enumerable chain.} \textit{Protocol:} enumerate a bounded
+molecular embedded chain by breadth-first expansion of the real legal fiber from methane
+(\ConfigValue{E0_ENUM_MAX_HEAVY} heavy atoms, \ConfigValue{E0_ENUM_STATES} states), compute the exact
+terminal law and value by the backward recursion of \Cref{thm:doob}, and condition on a rare substructure, a property
+interval, two simultaneous constraints, a Boltzmann tilt, and a region, plus mid-trajectory retargeting.
+\textit{Baselines:} exact Doob, learned controller, greedy $\Delta\Fobj$, local Boltzmann,
+classifier-value guidance, endpoint reranking, MOG-DFM-style, SMC corrector---all on the identical
+kernel. \textit{Metrics:} total variation to the exact law, target-event error, value calibration and
+backward residual, support violations. \textit{Result:} \ResultSentence{E0_MAIN_CONCLUSION} (panels in
+\Cref{app:experiments}). \textit{Interpretation:} a near-zero exact-Doob TV against a larger greedy TV
+means reward-local control finds high reward at the wrong distribution. \textit{Limitation:} exactness is
+shown only where enumeration is possible.
+
+\textbf{RQ2 --- Multi-objective similarity-constrained lead optimization (primary).} \textit{Protocol:}
+from a provenance-documented lead set (\ResultSentence{H1_SOURCE_PROVENANCE}), each method optimizes an
+objective vector (predicted affinity, drug-likeness, a synthetic-tractability surrogate, source
+similarity) under a fixed budget, reference point, archive cap, and identical constraints; we report a
+vector-valued front, not a best-docking scalar. \textit{Baselines:} the same-base controller hierarchy
+(unguided, endpoint$+$rerank, greedy, local Boltzmann, MOG-DFM-style, SMC, learned Doob) plus external
+optimizers (GraphGA, MARS, GenMol, RetMol), documented per baseline in \Cref{app:experiments}.
+\textit{Metrics:} normalized hypervolume and HV-AUC vs oracle calls (primary); IGD+, \#feasible
+(secondary); source similarity, diversity, oracle efficiency, with paired bootstrap CIs over sources.
+\textit{Result:} \Cref{tab:h1}; \ResultSentence{H1_MAIN_CONCLUSION} \textit{Interpretation:} the
+load-bearing comparison is same-base---exceeding the other controllers on the identical kernel isolates
+the control law; external optimizers on our proposal set separate law from vocabulary.
+\textit{Limitation:} better computational hypervolume is not experimental efficacy.
+
+\input{tables/h1_aggregate}
+
+\textbf{RQ3 --- Dynamic preference steering.} \textit{Protocol:} preferences switch (potency$+$%
+drug-likeness $\to$ solubility$+$safety $\to$ structural preservation) at fixed fractions; adaptation
+regret is defined mathematically in \Cref{app:experiments} before it is reported. \textit{Baselines:}
+static compromise, continue-unchanged, restart-from-lead, restart-with-a-conventional-optimizer, greedy,
+MOG-DFM-style, endpoint rerank. \textit{Metrics:} steps-to-region, adaptation regret, retention of prior
+gains, final hypervolume, oracle cost vs restart. \textit{Result:} \ResultSentence{H2_MAIN_CONCLUSION}
+The Pareto fan---one lead, a shared prefix, several preference-conditioned valid branches, every molecule
+from a real run---is \Cref{fig:fan} (rendered in \Cref{app:experiments} and promoted to the main text once
+the run completes). \textit{Interpretation:} continuation at lower regret and cost than restart shows
+budget-conditioned control adapts without discarding progress. \textit{Limitation:} regret is measured
+against the switch-time archive, not long-run optimality.
+
+\textbf{RQ4 --- Pathwise (not endpoint-only) constraints.} \textit{Protocol:} state-defined constraints
+(never alter a protected scaffold; never realize a forbidden substructure; stay in a size/charge range;
+keep $\simfun(x,\xsrc)\ge\tau$) hold throughout generation. \textit{Baselines:} hard operator-support
+masking, Feynman--Kac running penalty, terminal penalty, endpoint rejection. \textit{Metrics:}
+completely-feasible-trajectory fraction, integrated and maximum violation, final quality, feasible
+hypervolume, oracle calls wasted on rejected trajectories. \textit{Result:}
+\ResultSentence{H3_MAIN_CONCLUSION} \textit{Interpretation:} a rule-closed constraint is exact under
+support restriction by construction (\Cref{cor:pathwise}); the question is how much budget endpoint
+filtering wastes. \textit{Limitation:} only rule-closed constraints are exact; cumulative ones need state
+augmentation.
+
+\textbf{RQ5 --- Causal ablations and oracle robustness.} \textit{Protocol:} decompose the system along
+its four factors (valid operator support, learned prior, control law, goal policy), and separately
+optimize one oracle while evaluating with an independent one at matched out-of-distribution distance.
+\textit{Baselines:} full system; uniform legal proposals for the prior; control removed; goal policy
+replaced by fixed scalarization; a known-buggy legacy sampler is \emph{not} revived (appendix diagnostic
+only, \Cref{app:impl}). \textit{Metrics:} normalized hypervolume per ablation; guidance-to-evaluator gap,
+uncertainty, OOD distance, alert statistics. \textit{Result:} \ResultSentence{H4_MAIN_CONCLUSION}
+\ResultSentence{H5_MAIN_CONCLUSION} \textit{Interpretation:} the ablation attributes the effect to
+components; the held-out gap bounds oracle exploitation, to which a flexible legal editor is exactly the
+vulnerable optimizer. \textit{Limitation:} held-out evaluators are themselves imperfect. As a secondary
+demonstration that the operators form a genuine generative process, de novo carbon-tree generation
+(validity, uniqueness, novelty, FCD; keys \texttt{DENOVO\_VALIDITY}, \texttt{DENOVO\_FCD}) is reported in
+\Cref{app:experiments}, on which the paper's claims do not depend.

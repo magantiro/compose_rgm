@@ -1,0 +1,37 @@
+\section{The canonical molecular successor kernel}
+\label{sec:kernel}
+
+Several distinct marks can name the same chemical transition---symmetric matches, alternative executable
+lowerings, or different slot presentations of one relabeled graph. Control must act on molecules, so we
+aggregate marks at their canonical successor before steering. For $x\in\XVN$ and successor $y$,
+\begin{equation}
+\Gof{y}(x)=\{a\in\Aof{x}:\Texec(x,a)\iso y\},\qquad
+\Ptheta(y\mid x,t)=\sum_{a\in\Gof{y}(x)}\pmark(a\mid x,t),
+\label{eq:quotient}
+\end{equation}
+with $\iso$ isomorphism on canonicalized molecules; $\Ptheta$ is the transition kernel of the embedded
+jump chain over molecular states.
+
+\begin{proposition}[Canonical-kernel normalization]
+\label{prop:kernel}
+The groups $\{\Gof{y}(x)\}_y$ partition $\Aof{x}$ (each legal mark has one canonical successor; self-loops
+excluded), so $\Ptheta(\cdot\mid x,t)$ is a distribution over distinct successors:
+$\sum_y\Ptheta(y\mid x,t)=\sum_{a\in\Aof{x}}\pmark(a\mid x,t)=1$.
+\end{proposition}
+\begin{proof}[Proof sketch]
+Isomorphism is an equivalence on $\{\Texec(x,a)\}$, and $a\mapsto[\Texec(x,a)]$ assigns each mark a unique
+class, so the fibers are disjoint and cover $\Aof{x}$; summing the normalized mark law over a partition
+preserves mass one. The successor-level (group-logsumexp) supervision of Graft, and why it does not
+over-count symmetric non-Graft successors, is \Cref{app:quotient}.
+\end{proof}
+
+\emph{Three distinct objects} share these rates and must not be conflated. \emph{(i) Mark training}
+supervises $\pmark(a\mid x)$ via \eqref{eq:bregman}, with Graft scored at the successor group so generator
+matching supervises the molecular transition. \emph{(ii) Successor sampling} draws
+$y\sim\Ptheta(\cdot\mid x)$ from \eqref{eq:quotient} and keeps a representative executable mark; a
+canonical-successor quotient sampler induces exactly this kernel, verified equal to the raw mark sampler's
+to within \ConfigValue{QUOTIENT_KERNEL_EQ_TOL} across five state classes (\Cref{app:impl}). \emph{(iii)
+The timed process:} de novo generation is a timed CTMC whose hazard sets the waiting time (Gillespie),
+whereas editing \emph{discards} the hazard, taking a fixed budget of steps from $\Ptheta$ and reading only
+whether a state is terminal. Editing is thus the embedded jump chain over a fixed budget; all controllers
+act on this one kernel $\Ptheta$, and we reserve ``CTMC''/``Gillespie'' for de novo.

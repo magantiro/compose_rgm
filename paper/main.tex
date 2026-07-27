@@ -1,0 +1,99 @@
+\documentclass{article}
+
+% ==== Temporary style layer (ISOLATED: swap this ONE line for ICLR 2027) ======
+\usepackage{iclr2026_conference,times}
+% =============================================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{amsthm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{xspace}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{pifont}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds,shapes.geometric}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\hypersetup{colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black}
+
+% ---- notation + result/config placeholder macros ----
+\input{math_commands}
+% ---- auto-generated storage for \Result / \ConfigValue (mode toggle inside) ----
+\input{results}
+
+% Modest, template-preserving vertical tightening (paragraph and display skips
+% only; margins, font size, and text dimensions are UNCHANGED so the ICLR
+% format check is unaffected).
+\setlength{\parskip}{2pt plus 1pt minus 1pt}
+\setlength{\abovedisplayskip}{3.5pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{3.5pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{1pt plus 1pt}
+\setlength{\belowdisplayshortskip}{1.5pt plus 1pt minus 1pt}
+
+% ---- theorem environments ----
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\crefname{assumption}{assumption}{assumptions}
+\Crefname{assumption}{Assumption}{Assumptions}
+
+\newcommand{\cmark}{\textcolor{black}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{black}{\ding{55}}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% Title deliberately foregrounds control/optimization; "lead optimization"
+% appears in the abstract and primary-experiment section, not the main title.
+\title{Every Step Is a Molecule: Valid-Path Generator Matching\\ for Controllable Molecular Optimization}
+\author{Anonymous authors\\Paper under double-blind review}
+\date{}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/intro}
+\input{sections/setup}
+\input{sections/valid_path_gm}
+\input{sections/canonical_kernel}
+\input{sections/doob}
+\input{sections/controller}
+\input{sections/multiobjective}
+\input{sections/related}
+\input{sections/experiments}
+\input{sections/fairness}
+\input{sections/limitations}
+\input{sections/conclusion}
+\label{mainbodyend}% page-limit sentinel: intro..conclusion must be <= 9 pages (ethics/repro excluded)
+\input{sections/ethics}
+\input{sections/reproducibility}
+
+\bibliography{references}
+\bibliographystyle{iclr2026_conference}
+
+\appendix
+\input{appendix/proofs}
+\input{appendix/operator_table}
+\input{appendix/algorithms}
+\input{appendix/data_training}
+\input{appendix/impl_validation}
+\input{appendix/extended_experiments}
+\input{appendix/llm_use}
+\input{appendix/repro_map}
+
+\end{document}

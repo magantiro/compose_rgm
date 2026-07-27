@@ -1,0 +1,225 @@
+# config_registry.yaml
+# -----------------------------------------------------------------------------
+# CONFIGURATION / IMPLEMENTATION FACTS (not empirical results).
+# Every entry here is a value that is TRUE NOW, reconstructed from the live
+# repository (file:line evidence in the `source` field) or fixed by design.
+# These are rendered by \ConfigValue{KEY} and are ALLOWED to be non-empty in
+# both draft and final mode (they are not experimental placeholders).
+#
+# Empirical measurements live in results_registry.yaml and must stay `pending`
+# until the runs complete.
+#
+# Evidence commit for this registry: ee5a6ca (tag stage6-preflight-baseline is
+# an ancestor); branch claude/control-closed-pareto-editing.
+# -----------------------------------------------------------------------------
+
+# ---- Vocabulary / representation --------------------------------------------
+ORGANIC_VOCAB_SIZE:
+  value: "15"
+  source: "chem/molecular_graph.py ATOM_VALENCE_CLASSES (ORGANIC_VOCABULARY)"
+  note: "(element,valence) head classes: (C,4)(N,3)(O,2)(F,1) S(2,4,6) P(3,5) Cl(1) Br(1) I(1,3,5) B(3)"
+
+CNOF_VOCAB_SIZE:
+  value: "4"
+  source: "chem/molecular_graph.py CNOF_VOCABULARY"
+  note: "historical CNOF head width; warm-starts into the first four organic rows"
+
+ORGANIC_ELEMENTS:
+  value: "C, N, O, F, S, P, Cl, Br, I, B"
+  source: "chem/molecular_graph.py ORGANIC_SUBSET_SYMBOLS"
+
+RAW_EMBED_VOCAB_SIZE:
+  value: "12"
+  source: "chem/molecular_graph.py ELEMENTS (null + B,C,N,O,F,P,S,Cl,Br,I + SCAR)"
+
+BOND_CLASSES:
+  value: "5"
+  source: "chem/molecular_graph.py BOND_NULL/SINGLE/DOUBLE/TRIPLE/AROMATIC"
+
+CHARGE_CLASSES:
+  value: "5"
+  source: "chem/molecular_graph.py FORMAL_CHARGES in {-2..2}"
+
+HCOUNT_CLASSES:
+  value: "5"
+  source: "chem/molecular_graph.py H_COUNT_CLASSES (implicit H in {0..4})"
+
+# ---- Operator families -------------------------------------------------------
+NUM_ENABLED_FAMILIES:
+  value: "8"
+  source: "MARK_RULE_NAMES minus cycle_insert/cycle_attach (factorized_tracelet_rate_model.py:94)"
+
+ENABLED_FAMILIES:
+  value: "atom\\_insert, atom\\_delete, atom\\_restate, bond\\_reorder, bond\\_reroute (graft), ring\\_system\\_grow, ring\\_system\\_delete, ring\\_system\\_restate"
+  source: "MARK_RULE_NAMES (factorized_tracelet_rate_model.py:94)"
+
+DISABLED_FAMILIES:
+  value: "cycle\\_insert, cycle\\_attach"
+  source: "legacy null-prior ops, no candidates enumerated (SYSTEM_CONTRACT sec.4)"
+
+NUM_MARK_FAMILIES_TOTAL:
+  value: "10"
+  source: "MARK_RULE_NAMES tuple length (factorized_tracelet_rate_model.py:94)"
+
+# ---- Corpus / scope ----------------------------------------------------------
+SCOPE_NAME:
+  value: "broad\\_organic\\_v1"
+  source: "data/organic_corpus.py BROAD_ORGANIC_V1"
+
+SCOPE_MAX_ATOMS:
+  value: "48"
+  source: "data/organic_corpus.py BROAD_ORGANIC_V1.max_atoms"
+
+PROD_CORPUS_NAME:
+  value: "GuacaMol"
+  source: "master plan sec.0b; guacamol_subset_500000_seed0.smiles"
+
+PROD_CORPUS_SIZE:
+  value: "500{,}000"
+  source: "guacamol_subset_500000_seed0.smiles (nominal subset size)"
+
+CORPUS_ELIGIBLE_FRACTION_BROAD:
+  value: "\\ensuremath{\\approx}98\\%"
+  source: "broad-organic scope projection; at-scale GuacaMol-TRAIN census in progress"
+  note: "SCOPE PROJECTION, not an experimental result: the exact 500k count is produced by the running mine. ~490k of 500k eligible."
+
+CORPUS_ELIGIBLE_FRACTION_CNOF:
+  value: "\\ensuremath{\\approx}48\\%"
+  source: "legacy CNOF-neutral filter projection (contrast used to motivate the broad scope)"
+  note: "SCOPE PROJECTION; the CNOF-neutral loader that broad-organic replaces retained roughly half the corpus."
+
+CORPUS_ELIGIBLE_COUNT_BROAD:
+  value: "\\ensuremath{\\approx}490{,}000"
+  source: "broad-organic scope projection over the 500k subset"
+
+# ---- Charge policy -----------------------------------------------------------
+CHARGE_POLICY:
+  value: "retain representable charges; charge-preserving edits"
+  source: "data/organic_corpus.py BROAD_ORGANIC_V1(allow_charges=True); source_corruption.py net-charge invariance"
+
+# ---- Time / horizon ----------------------------------------------------------
+DENOVO_HORIZON:
+  value: "7.0"
+  source: "tracelet_conditional.py operational_horizon (de-novo Gillespie)"
+
+DENOVO_TIMESTEP:
+  value: "0.1"
+  source: "tracelet_conditional.py piecewise-constant time_step"
+
+FROZEN_TIME_TRAIN:
+  value: "\\ensuremath{1-\\exp(-t)}"
+  source: "factorized_mark_conditional.py:190"
+
+FROZEN_TIME_SAMPLE:
+  value: "\\ensuremath{1-\\exp(-(t+\\Delta)/2)}"
+  source: "tracelet_conditional.py:1155; model/time_convention.py"
+
+# ---- Training-data layers (pilot statistics; PROPOSED, not locked) -----------
+# NOTE: mixture SHARES are proposed, not locked; final fractions await at-scale
+# statistics. Pilot layer characterization: edit_trace_characterization.json.
+MIX_SHARE_CORRUPTION:
+  value: "\\ensuremath{\\sim}50\\%"
+  source: "PHASE0B_DATA_RECIPE.md proposed mixture (NOT LOCKED)"
+
+MIX_SHARE_MMP:
+  value: "\\ensuremath{\\sim}35\\%"
+  source: "PHASE0B_DATA_RECIPE.md proposed mixture (NOT LOCKED)"
+
+MIX_SHARE_SCAFFOLD_NN:
+  value: "\\ensuremath{\\sim}15\\%"
+  source: "PHASE0B_DATA_RECIPE.md proposed mixture (NOT LOCKED)"
+
+PILOT_CORRUPTION_TRACES:
+  value: "700"
+  source: "edit_trace_characterization.json corruption.trace_count (pilot)"
+
+PILOT_ANALOGUE_TRACES:
+  value: "98"
+  source: "edit_trace_characterization.json analogue.trace_count (49 pairs x 2, pilot)"
+
+PILOT_ANALOGUE_PAIRS:
+  value: "49"
+  source: "edit_trace_characterization.json (one-cut MMP pairs, pilot fixture)"
+
+PILOT_CORRUPTION_IDENTITY_FRAC:
+  value: "0.29\\%"
+  source: "edit_trace_characterization.json corruption.identity_fraction"
+
+PILOT_CORRUPTION_ACTIVE_FAMILIES:
+  value: "6"
+  source: "edit_trace_characterization.json corruption.operator_family.n_families"
+
+PILOT_CORRUPTION_SCAFFOLD_GINI:
+  value: "0.14"
+  source: "edit_trace_characterization.json corruption.scaffold_concentration.gini"
+
+PILOT_CORRUPTION_AROMATIC_CHANGE_FRAC:
+  value: "47\\%"
+  source: "edit_trace_characterization.json corruption aromatic_ring_change_fraction"
+
+PILOT_CORRUPTION_TANIMOTO_MEDIAN:
+  value: "0.40"
+  source: "edit_trace_characterization.json corruption source_target_tanimoto.median"
+
+CURRICULUM_AXIS:
+  value: "compiled path length (data-driven empirical terciles)"
+  source: "PHASE0B_DATA_RECIPE.md; analogue_curriculum_stats.py _quantile_bins"
+
+CURRICULUM_BINS:
+  value: "micro / lead-opt / scaffold"
+  source: "edit_trace_characterization.json curriculum_bins (terciles, never preset)"
+
+# ---- Enumerable-benchmark configuration (E0) --------------------------------
+E0_ENUM_SEED:
+  value: "methane (C), BFS over the real factorized fiber"
+  source: "tests/test_finite_horizon_editing_doob.py _enumerate_embedded_chain"
+
+E0_ENUM_STATES:
+  value: "572"
+  source: "SYSTEM_CONTRACT Appendix A (cap-4 enumerable embedded chain)"
+
+E0_ENUM_MAX_HEAVY:
+  value: "4"
+  source: "tests/test_finite_horizon_editing_doob.py _MAX_HEAVY (heavy-atom cap)"
+
+# ---- Implementation-validation gate (appendix, NOT a headline result) --------
+GATE_TESTS_AUDIT:
+  value: "453"
+  source: "AUDIT_REPORT.md clean-worktree gate at commit 61bbcde (446 base + 7 kernel-equality)"
+
+GATE_TESTS_STAGE6:
+  value: "463"
+  source: "STAGE6_SMOKE_REPORT.md clean-worktree gate at commit e88cf81 (+ stage-6 tests since)"
+
+DOOB_ENUM_TV_RESIDUAL:
+  value: "\\ensuremath{8\\times10^{-17}}"
+  source: "SYSTEM_CONTRACT Appendix A; tests/test_finite_horizon_editing_doob.py (terminal-tilt TV, asserted <1e-9)"
+
+DYNAMIC_ENUM_TV_RESIDUAL:
+  value: "\\ensuremath{9\\times10^{-17}}"
+  source: "SYSTEM_CONTRACT Appendix A dynamic-steering continuation (asserted <1e-9)"
+
+QUOTIENT_KERNEL_EQ_TOL:
+  value: "\\ensuremath{10^{-5}}"
+  source: "tests/test_pancake_graft_kernel_equality.py (pancake family kernel == raw sampler)"
+
+TINY_OVERFIT_LOSS_INITIAL:
+  value: "5.23"
+  source: "stage6_smoke_summary.json tiny_overfit.loss_initial"
+
+TINY_OVERFIT_LOSS_FINAL:
+  value: "1.14"
+  source: "stage6_smoke_summary.json tiny_overfit.loss_final"
+
+TINY_OVERFIT_LOWER_BOUND:
+  value: "1.0"
+  source: "stage6_smoke_summary.json per-example Poisson-Bregman lower bound r(1-log r)"
+
+# ---- Evidence provenance ----------------------------------------------------
+EVIDENCE_COMMIT:
+  value: "ee5a6ca"
+  source: "branch claude/control-closed-pareto-editing HEAD at drafting time"
+
+EVIDENCE_TAG:
+  value: "stage6-preflight-baseline"
+  source: "clean lineage tag (ancestor of the evidence commit)"

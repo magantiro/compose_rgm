@@ -1,0 +1,14 @@
+\section*{Ethics statement}
+\label{sec:ethics}
+This work concerns computational molecular optimization. Its intended positive impact is more
+sample-efficient, constraint-respecting lead optimization that reduces wasted oracle and synthesis
+effort. As with any molecular generator, the same machinery could in principle be directed toward
+harmful compounds; our method optimizes user-specified objectives and does not itself target toxicity,
+and its outputs are graph-valid but not established to be synthesizable, active, or safe---every
+candidate would require standard experimental and regulatory evaluation before any use. We use public
+benchmark corpora and computational property surrogates only, with no human subjects, no personal data,
+and no wet-lab experiments. The pathwise-constraint machinery can be used to \emph{exclude} forbidden
+substructures throughout generation, which we view as a safety-relevant capability. We disclose the use
+of learned property oracles and their exploitability (\Cref{sec:limitations}) so that reported
+computational gains are not mistaken for demonstrated biological efficacy. A separate, factual account
+of large language model use in preparing this work is given in \Cref{app:llm}.

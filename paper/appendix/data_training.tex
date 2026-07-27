@@ -1,0 +1,93 @@
+\section{Data and training}
+\label{app:data}
+
+\subsection{Corpus and scope}
+The production corpus is the \ConfigValue{PROD_CORPUS_SIZE}-molecule \ConfigValue{PROD_CORPUS_NAME} subset
+(standardized ChEMBL). Membership is decided by a single versioned \emph{broad-organic} scope
+(\ConfigValue{SCOPE_NAME}): a molecule is in scope iff it is connected, has at most
+\ConfigValue{SCOPE_MAX_ATOMS} heavy atoms, every element is in the active organic vocabulary
+(\ConfigValue{ORGANIC_ELEMENTS}), and every atom's exact $(\text{element},\text{valence},\text{charge})$ is
+a representable class under the same derivation the model's heads use. Charged molecular states are
+\emph{retained} ($\ConfigValue{CHARGE_POLICY}$); the scope decides membership only and never authorizes a
+charge-changing edit. The representation drops isotopes and stereochemistry and treats radicals or
+non-representable valences as out of scope. Under this scope roughly \ConfigValue{CORPUS_ELIGIBLE_FRACTION_BROAD}
+of the subset (about \ConfigValue{CORPUS_ELIGIBLE_COUNT_BROAD} molecules) is eligible, versus
+\ConfigValue{CORPUS_ELIGIBLE_FRACTION_CNOF} under the earlier neutral four-element (C/N/O/F) filter it replaces; the exact
+at-scale count is produced by the running mine and stored in the data manifest. Every acceptance and
+rejection is counted with an explicit reason (unparseable, salt/multicomponent, too large, unsupported
+element, unsupported class), the scope carries a deterministic hash recorded in every manifest and
+checkpoint, and mining/training use the \textsc{train} partition only, so val/test never leak.
+
+\subsection{From corpus to sampler}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[>=Latex, font=\scriptsize, node distance=3pt]
+\tikzstyle{b}=[draw, rounded corners=2pt, align=center, inner sep=3pt, minimum height=8mm, text width=2.05cm]
+\node[b] (c) {broad-organic corpus (scope-hashed)};
+\node[b, right=8pt of c] (l) {three layers: MMP / scaffold-NN / corruption};
+\node[b, right=8pt of l] (cur) {measured curriculum bins (path-length terciles)};
+\node[b, right=8pt of cur] (s) {hierarchical sampler + anti-conc.\ caps};
+\node[b, right=8pt of s] (t) {GM training (Poisson--Bregman)};
+\draw[->](c)--(l);\draw[->](l)--(cur);\draw[->](cur)--(s);\draw[->](s)--(t);
+\end{tikzpicture}
+\caption{Corpus-to-sampler flow. Each stage records a version hash into the data manifest so the corpus
+cannot silently drift from the code that produced it.}
+\label{fig:dataflow}
+\end{figure}
+
+\subsection{Trace layers, compiler, and replay checks}
+\emph{Compiled MMP analogue paths.} One-cut matched molecular pairs (constant core; small variable
+fragment; bounded atom-count difference; no ring opened across the variable region) are compiled to
+executable rewrite programs using mmpdb's constant-fragment and labelled-attachment mapping (not an
+unconstrained MCS): preserve the core, delete the source variable fragment leaf-to-root, retype and
+reorder as needed, insert the target fragment attachment-outward, replay through the \emph{real} executor,
+and check endpoint graph isomorphism, in both directions. \emph{Shared-scaffold analogue paths} connect
+each molecule to its $k$ nearest analogue neighbours within a Bemis--Murcko group (sparse nearest
+neighbours, never all-pairs cliques). \emph{Corruption paths} walk a real molecule a few reversible legal
+edits to a nearby valid source, taught both directions, and are the only layer that exercises the restate,
+bond-order, ring, and graft families at pilot scale. Every compiled path is verified for
+all-intermediate validity and connectedness, exact endpoint isomorphism, forward and inverse replay,
+repeated- and immediately-reversed-edit rates, protected-core invariance, operator-family usage, and the
+round-trip $A\!\to\!B\!\to\!A$; a path that reaches the right canonical SMILES but breaks the attachment
+mapping or needs gratuitous cycles is rejected.
+
+\subsection{Anti-concentration safeguards and curriculum}
+Each safeguard has a measured signal and a gate: identity traces are dropped ($\text{identity fraction}
+\approx0$); a per-scaffold cap bounds Bemis--Murcko-scaffold Gini and top-$k$ share; a per-transformation
+cap and de-duplication bound transformation top-$k$ share; and every enabled family is floored to a
+minimum supervised-trace count (rare families are covered by oversampling corruption instances that
+exercise them). Curriculum bins are the \emph{measured} terciles of compiled path length
+(\ConfigValue{CURRICULUM_BINS}), refined by ring complexity and attachment count---never preset. The
+hierarchical sampler draws a layer by its (proposed) mixture weight, then a curriculum bin, then a
+balanced example under the caps.
+
+\subsection{Pilot characterization (wiring fixture, not the production mixture)}
+At pilot scale (\ConfigValue{PILOT_CORRUPTION_TRACES} corruption traces from real$\to$corrupt and
+corrupt$\to$real, and \ConfigValue{PILOT_ANALOGUE_TRACES} analogue traces from
+\ConfigValue{PILOT_ANALOGUE_PAIRS} one-cut MMP pairs): the corruption layer has
+\ConfigValue{PILOT_CORRUPTION_ACTIVE_FAMILIES} active families, scaffold Gini
+\ConfigValue{PILOT_CORRUPTION_SCAFFOLD_GINI}, aromatic-ring change on
+\ConfigValue{PILOT_CORRUPTION_AROMATIC_CHANGE_FRAC} of traces, source--target median Tanimoto
+\ConfigValue{PILOT_CORRUPTION_TANIMOTO_MEDIAN}, and identity fraction
+\ConfigValue{PILOT_CORRUPTION_IDENTITY_FRAC}; the one-cut analogue layer contributes only insert/delete by
+construction, which is why a corruption-only or analogue-only corpus is wrong. This pilot pool is a wiring
+fixture---its scaffold concentration is too high and its analogue count too small to be the production
+analogue layer---and its percentages are \emph{not} the production mixture; the proposed starting shares
+(\ConfigValue{MIX_SHARE_CORRUPTION}/\ConfigValue{MIX_SHARE_MMP}/\ConfigValue{MIX_SHARE_SCAFFOLD_NN}) are an
+ablation target finalized only from the at-scale statistics. A versioned data manifest records the
+partition, standardization and operator-registry hashes, compiler versions, split identifiers, trace
+counts, and curriculum-bin definitions.
+
+\subsection{Training}
+The edit prior is warm-started from the de novo carbon-tree base checkpoint: shape-compatible body and
+embedding parameters transfer, and the wider organic $(\text{element},\text{valence})$ heads (width
+\ConfigValue{ORGANIC_VOCAB_SIZE}, versus \ConfigValue{CNOF_VOCAB_SIZE} for the four-element base) retain
+the first four transferred rows and freshly initialize the rest, so a four-element checkpoint loads without
+a width crash and a de novo checkpoint reloads byte-identically. We state the warm-start honestly: it carries the de novo
+ring-growth vocabulary (which the edit layers do not teach) and is a starting point, not the trained edit
+prior. Save/reload is exact---a reloaded checkpoint reproduces the sampled mark, hazard, and a fixed-seed
+trajectory, and a checkpoint missing required metadata fails loudly. The optimizer, schedule, batch size,
+loss normalization, precision, hardware, step budget, checkpoint selection (held-out validation only, never
+the test set), and seeds are recorded with each run and released with the code. ``Universal'' means one
+edit prior shared across sources and objectives within the declared vocabulary---not all of chemical
+space.

@@ -1,0 +1,33 @@
+\section{The goal-conditioned controller}
+\label{sec:controller}
+
+Realizing \Cref{thm:doob} requires the value function $\hval$, in three regimes we evaluate separately.
+\emph{Exact dynamic programming} applies where the reachable set from $x_0$ within budget $\horizon$ can
+be enumerated: we compute $\hval$ by the backward recursion and steer with the exact controlled kernel.
+This is the regime in which the terminal tilt, event conditioning, and dynamic retargeting are all
+machine-exact (\Cref{sec:doob,app:impl}); it is the ground truth for every approximate controller and is
+realized in the implementation. \emph{Amortized learned control} applies at scale, where enumeration is
+impossible: a network $\hval_\phi(\budget,x;\xsrc,\descr,\pmask)\approx\hval_{\horizon-\budget}(x)$
+conditions on the remaining budget $\budget$ (essential; the exact value depends on it,
+\Cref{cor:dynamic}), the source $\xsrc$ (via source-relative features and the protected mask $\pmask$),
+and the goal $\descr$. Its regression target is the finite-horizon value of \Cref{thm:doob} itself---the
+expected terminal desirability under the base chain,
+$\hval_{\horizon-\budget}(x)=\Ebb[\desir_\descr(X_\horizon)\mid X_{\budget\text{-to-go}}=x]$---so we
+introduce no separate control objective; the estimator and parameterization are specified in
+\Cref{app:controller}, where $\hval_\phi$ is evaluated \emph{as an approximation} (value calibration,
+backward-equation residual, control quality against the exact controller), not assumed exact. Because it
+is approximate, $\hval_\phi$ is used self-normalized over the successor set,
+\begin{equation}
+\Pkernel^{\phi}_{\budget}(x,y)=\frac{\Ptheta(y\mid x)\,\hval_\phi(\budget{-}1,y;\xsrc,\descr,\pmask)}
+{\sum_{y'}\Ptheta(y'\mid x)\,\hval_\phi(\budget{-}1,y';\xsrc,\descr,\pmask)},
+\label{eq:controlledphi}
+\end{equation}
+a proper kernel on the base support for any nonnegative $\hval_\phi$ that reduces to \Cref{thm:doob} when
+$\hval_\phi=\hval$; it reweights $\Ptheta$ and never adds support, so validity holds for the learned
+controller regardless of value error---an imperfect controller can misallocate probability but cannot
+produce an invalid molecule. When an unbiased terminal law is required despite value error, an
+\emph{optional} twisted-SMC corrector runs a population under~\eqref{eq:controlledphi} with $\hval_\phi$
+as the twist, asymptotically exact in the particle count~\citep{wu2023twisted,skreta2025feynman}; we
+report its effective sample size rather than defaulting to it. In all cases the controller changes
+\emph{which} legal edits fire, never the chemistry prior, so a preference switch is a controller swap
+(\Cref{cor:dynamic}) and the base process is held fixed across every controller comparison.

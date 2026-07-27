@@ -1,0 +1,18 @@
+\section{Fairness, budgets, and statistics}
+\label{sec:fairness}
+
+We fix the protocol before any result. \emph{Matched conditions:} within a question every method receives
+identical sources, objective vector and bounds, hard constraints and protected masks, oracle-call budget,
+per-method archive cap, and a single published hypervolume reference point, with normalization fixed in
+advance; the load-bearing comparison holds the process fixed and varies only the controller
+(\Cref{tab:h1}), while external optimizers are contextual and, where possible, additionally run on
+\emph{our} legal proposal set. \emph{Oracle accounting:} we count every oracle evaluation---on committed
+intermediates, rejected proposals, invalid or repaired candidates, reranked candidates, and all SMC
+particles---and report hypervolume against oracle calls, not only its final value; we separately report,
+never conflating, oracle calls, forward passes, successors scored, accepted edits, and
+wall-clock/GPU-hours, so a controller that scores many successors per accepted edit is charged for them.
+\emph{Statistics:} each configuration runs over multiple seeds, comparisons are paired across identical
+sources, and we report paired bootstrap $95\%$ intervals with the resampling unit stated per metric
+(source, target-event, or trajectory), both per-task and aggregate. \emph{Selection hygiene:} no
+checkpoint, hyperparameter, or preference schedule is chosen on the test set, and any asymmetric tuning is
+disclosed. These rules are why the registry stores a resampling unit and interval for every cell.

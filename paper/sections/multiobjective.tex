@@ -1,0 +1,26 @@
+\section{Multi-objective and dynamic control}
+\label{sec:multiobj}
+
+\emph{Goal-conditioned, not scalarized.} Linear scalarization $U_w(x)=w^\top\Fobj(x)$ undersamples
+non-convex fronts and slides to extremes, so instead of a fixed weight the descriptor $\descr$ specifies
+an objective-space region $\Bset_\descr$ (a box, Chebyshev direction, or band) and the controller steers
+toward $\desir_\descr$~\eqref{eq:g}. For a region indicator, $\hval_{\horizon-\budget}(x)=\Pbb(\Fobj(X_\horizon)
+\in\Bset_\descr\mid X_{\budget\text{-to-go}}=x)$ (exact-events consequence of \Cref{thm:doob}) is exactly
+the probability of reaching the region within the remaining budget, so a goal-conditioned value function
+is a reachability-to-region map and different $\descr$ reuse the same base process.
+
+\emph{Pareto exploration.} We grow hypervolume directly rather than search over weights: maintaining the
+nondominated archive $\mathcal{A}$, we repeatedly (i) identify an under-covered or high-contribution
+region of the current front, (ii) set $\descr$ to it, (iii) steer or branch a controlled trajectory
+toward it under a fixed base process, and (iv) fold the evaluated committed states into $\mathcal{A}$.
+Branching from a saved archive intermediate is exact continuation (\Cref{cor:dynamic}): a shared prefix
+fans into several preference-conditioned trajectories without restarting (the ``Pareto fan'' of
+\Cref{sec:experiments}). A mid-run preference change is served by continuation, and a mid-run constraint
+injection by pathwise support restriction (\Cref{cor:pathwise}).
+
+One controlled steer (Algorithm~\ref{alg:steer}) enumerates $\Aof{x}$, aggregates to
+$\Ptheta(\cdot\mid x)$, restricts the support to marks respecting $\pmask$ and any pathwise constraint,
+reweights by~\eqref{eq:controlledphi}, samples a successor, and folds it into $\mathcal{A}$; every scored
+state is a committed molecule. Universal edit-prior training, the exact enumerable controller, the
+single-steer routine, and the region-selecting exploration loop are Algorithms~\ref{alg:train}--%
+\ref{alg:exact} in \Cref{app:algorithms}, budgeted per \Cref{sec:fairness}.

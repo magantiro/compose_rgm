@@ -1,0 +1,57 @@
+\section{Implementation validation}
+\label{app:impl}
+
+This appendix reports \emph{implementation-validation} evidence: checks that the code implements the stated
+mathematics. These are not headline empirical results (which are the RQ studies of \Cref{sec:experiments},
+carried as registry placeholders), and we are careful not to present a passing test as a scientific
+finding.
+
+\subsection{Enumerable-benchmark construction and Doob residuals}
+The enumerable chain is built by breadth-first expansion of the real legal fiber from methane, capping
+successors at \ConfigValue{E0_ENUM_MAX_HEAVY} heavy atoms, yielding a \ConfigValue{E0_ENUM_STATES}-state
+row-stochastic embedded kernel over canonical molecular states. On this chain the finite-horizon Doob
+transform is verified against its closed form: the controlled terminal law matches the analytic tilt to
+total variation \ConfigValue{DOOB_ENUM_TV_RESIDUAL} (\Cref{thm:doob}); dynamic-retargeting continuation
+matches the $\desir'$-tilt from the switch state to \ConfigValue{DYNAMIC_ENUM_TV_RESIDUAL}
+(\Cref{cor:dynamic}); and an early-stop marginal is confirmed \emph{not} to equal the terminal tilt
+(TV~$>2\times10^{-2}$ two steps early), so exactness is budget-specific. No sampled controlled transition
+leaves the base support.
+
+\subsection{Kernel, measure, and quotient}
+The successor-sampling kernel of the canonical-successor quotient sampler equals the raw mark sampler's
+induced kernel to $<\ConfigValue{QUOTIENT_KERNEL_EQ_TOL}$ on tree, symmetric-tree, self-graft, cyclic, and
+post-ring-opening states (\Cref{prop:kernel}); the mark law is a proper distribution ($\sum_a\pmark(a\mid
+x)=1$ to $\sim10^{-7}$ on every molecule tested), Graft group mass equals the sum of its successor-group
+rates, and Monte-Carlo successor frequencies agree within the null band with no out-of-support draws.
+
+\subsection{Objective, gradients, and tiny-corpus convergence}
+On a tiny verified corpus over distinct states (no conflicting targets), the Poisson--Bregman loss
+descends from \ConfigValue{TINY_OVERFIT_LOSS_INITIAL} to \ConfigValue{TINY_OVERFIT_LOSS_FINAL}, within
+$0.14$ of the per-example lower bound \ConfigValue{TINY_OVERFIT_LOWER_BOUND}, and every production family's
+selected-mark probability rises---so each enabled head receives a finite, non-suppressive gradient from a
+positive teacher, and the model can overfit the verified corpus. This is a wiring check, not a quality
+claim.
+
+\subsection{Closure, charge, save/reload, held-out rollouts}
+A random legal-edit fuzz produces valid, connected successors across families (\Cref{prop:closure});
+charged, drug-like leads round-trip with net charge and charged centers preserved (no edit changes a
+formal charge); save/reload is exact and reconstructs the organic vocabulary and editing capabilities from
+checkpoint metadata (a de novo checkpoint reloads byte-identically; a checkpoint missing required metadata
+fails loudly); and over held-out drug-like leads at budgets $1$--$8$, rollouts start at the lead (never a
+carbon-tree seed), recompute the legal set per state, commit only executor-accepted edits, and maintain
+$100\%$ all-intermediate validity and connectivity. The degeneracy/reversal diagnostics are measured for
+plumbing; their \emph{quality} reading requires the trained model.
+
+\subsection{Test suite and clean-lineage provenance}
+The committed suite passes on a pristine worktree (recorded gates: \ConfigValue{GATE_TESTS_AUDIT} at the
+audited commit and \ConfigValue{GATE_TESTS_STAGE6} at the Stage-6 commit; the count grows with each added
+check). The evidence lineage for this manuscript is commit \ConfigValue{EVIDENCE_COMMIT} on the clean
+lineage tagged \ConfigValue{EVIDENCE_TAG}. Pre-fix editing outputs (which sampled the de novo vocabulary
+for an edit checkpoint) are treated as stale and are never cited.
+
+\subsection{Legacy-sampler correctness diagnostic (not a competitor)}
+A prior sampler variant normalized the Graft family over the raw (self-graft-inclusive) partition rather
+than the quotient partition, giving a graft family rate that disagreed with training (e.g.\ $0.097$ vs
+$0.136$ on octane). This is retained only as a named historical ablation to \emph{diagnose} the quotient
+convention; it is not a controller and is never run as a baseline in \Cref{sec:experiments}, because a
+known-incorrect sampler is not a fair scientific competitor.

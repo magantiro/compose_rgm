@@ -1,0 +1,484 @@
+# results_registry.yaml
+# -----------------------------------------------------------------------------
+# EMPIRICAL RESULTS. Every entry is `status: pending` until the corresponding
+# run completes and a machine-readable artifact is attached (`source_artifact`).
+# NOTHING here may be filled by hand from memory or expectation.
+#
+# Rendered by \Result{KEY} (scalar), \ResultCI{KEY} (value with CI), and
+# \ResultSentence{KEY} (prewritten interpretation sentence). In DRAFT mode a
+# pending key renders as a loud red placeholder box; in FINAL mode
+# check_placeholders.py FAILS the build while any pending key remains.
+#
+# Per-key schema:
+#   status:          pending | final
+#   value:           null while pending; the number/string when final
+#   ci:              null | [lo, hi]      (95% interval; see resampling_unit)
+#   unit:            display unit (TV, %, kcal/mol, calls, ...)
+#   direction:       lower_better | higher_better | none
+#   n_seeds:         stochastic repetitions backing the estimate (null pending)
+#   n_tasks:         tasks/sources aggregated (null pending)
+#   resampling_unit: bootstrap unit (source | task | trajectory | ...)
+#   description:     what the number measures (one line)
+#   source_artifact: path to the machine-readable artifact (null pending)
+#   claim_key:       CLAIM_LEDGER.md ID this number supports
+# -----------------------------------------------------------------------------
+
+meta:
+  evidence_commit: "ee5a6ca"
+  status: "ALL_PENDING"
+  note: >
+    At-scale mining is running; the goal/region-conditioned controller, docking
+    oracle, and external baselines are post-training. No empirical cell is filled.
+
+# =============================================================================
+# Individual (scalar + sentence) result keys
+# =============================================================================
+results:
+
+  # ---- E0: exact enumerable Doob benchmark ----------------------------------
+  E0_EXACT_TV:
+    status: pending
+    value: null
+    ci: null
+    unit: "TV"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "target-event"
+    description: "Total variation between the exact-Doob endpoint law and the analytic tilted target on the enumerable chain."
+    source_artifact: null
+    claim_key: "C-EXACT-DOOB"
+
+  E0_EXACT_MAX_ERROR:
+    status: pending
+    value: null
+    ci: null
+    unit: "L-inf"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "state"
+    description: "Max per-state absolute error of the exact-Doob endpoint law vs the analytic target."
+    source_artifact: null
+    claim_key: "C-EXACT-DOOB"
+
+  E0_LEARNED_TV:
+    status: pending
+    value: null
+    ci: null
+    unit: "TV"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "target-event"
+    description: "TV between the learned-controller endpoint law and the analytic target on the enumerable chain."
+    source_artifact: null
+    claim_key: "C-LEARNED-CAL"
+
+  E0_GREEDY_TV:
+    status: pending
+    value: null
+    ci: null
+    unit: "TV"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "target-event"
+    description: "TV between the one-step reward-greedy endpoint law and the analytic target."
+    source_artifact: null
+    claim_key: "C-GREEDY-WRONG-LAW"
+
+  E0_RERANK_TV:
+    status: pending
+    value: null
+    ci: null
+    unit: "TV"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "target-event"
+    description: "TV between the endpoint-reranking sampler law and the analytic target."
+    source_artifact: null
+    claim_key: "C-GREEDY-WRONG-LAW"
+
+  E0_EVENT_ERROR:
+    status: pending
+    value: null
+    ci: null
+    unit: "abs. prob."
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "target-event"
+    description: "Absolute error of the realized target-event probability under indicator-g conditioning."
+    source_artifact: null
+    claim_key: "C-EXACT-DOOB"
+
+  E0_DYNAMIC_TV:
+    status: pending
+    value: null
+    ci: null
+    unit: "TV"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "target-event"
+    description: "TV between the dynamic-retargeting continuation law and the exact g'-tilt from the switch state."
+    source_artifact: null
+    claim_key: "C-DYNAMIC-EXACT"
+
+  E0_SUPPORT_VIOLATIONS:
+    status: pending
+    value: null
+    ci: null
+    unit: "count"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "trajectory"
+    description: "Number of sampled controlled transitions that fall outside the base legal support (must be 0 by construction)."
+    source_artifact: null
+    claim_key: "C-SUPPORT-PRESERVE"
+
+  E0_MAIN_CONCLUSION:
+    status: pending
+    kind: sentence
+    template: >
+      On the enumerable chain the exact Doob transform realizes the analytic target law to within
+      \Result{E0_EXACT_TV} total variation and its terminal-tilt derivation is machine-exact
+      (\ConfigValue{DOOB_ENUM_TV_RESIDUAL}), whereas one-step reward-greedy control attains
+      \Result{E0_GREEDY_TV} and endpoint reranking \Result{E0_RERANK_TV}; the sign and magnitude of
+      this gap determine whether reward-local steering recovers the correct conditional distribution
+      or only its high-reward mode.
+    claim_key: "C-GREEDY-WRONG-LAW"
+
+  # ---- H1: multi-objective similarity-constrained lead optimization ---------
+  H1_MAIN_CONCLUSION:
+    status: pending
+    kind: sentence
+    template: >
+      Holding the molecular process fixed and varying only the controller, the learned Doob controller
+      attains normalized hypervolume \Result{H1_NHV_LEARNEDDOOB} against \Result{H1_NHV_UNGUIDED} for
+      unguided editing and \Result{H1_NHV_GREEDY} for greedy control at a matched oracle budget, while
+      retaining source similarity \Result{H1_SOURCESIM_LEARNEDDOOB}; the ordering of these values
+      against the same-base baselines determines whether the improvement is attributable to the control
+      law rather than the state space.
+    claim_key: "C-HV-IMPROVE"
+
+  H1_SOURCE_PROVENANCE:
+    status: pending
+    kind: sentence
+    template: >
+      The lead set comprises \Result{H1_NUM_LEADS} sources drawn from \Result{H1_SOURCE_NAME}; its
+      provenance and license are documented in the data appendix, and it is used with a primary citation
+      rather than as an unattributed internal benchmark.
+    claim_key: "C-LEADOPT-BENCH"
+
+  H1_NUM_LEADS:
+    status: pending
+    value: null
+    ci: null
+    unit: "count"
+    direction: none
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Number of similarity-constrained lead-optimization source molecules."
+    source_artifact: null
+    claim_key: "C-LEADOPT-BENCH"
+
+  H1_SOURCE_NAME:
+    status: pending
+    value: null
+    ci: null
+    unit: "name"
+    direction: none
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Provenance-verified name of the lead-optimization source set (with primary citation)."
+    source_artifact: null
+    claim_key: "C-LEADOPT-BENCH"
+
+  # ---- H2: dynamic steering -------------------------------------------------
+  H2_ADAPT_REGRET_LEARNEDDOOB:
+    status: pending
+    value: null
+    ci: null
+    unit: "regret"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Adaptation regret after a mid-trajectory preference switch (defined in-text before results)."
+    source_artifact: null
+    claim_key: "C-DYNAMIC-STEER"
+
+  H2_ADAPT_REGRET_RESTART:
+    status: pending
+    value: null
+    ci: null
+    unit: "regret"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Adaptation regret for restart-from-lead under the new preference."
+    source_artifact: null
+    claim_key: "C-DYNAMIC-STEER"
+
+  H2_STEPS_TO_REGION_LEARNEDDOOB:
+    status: pending
+    value: null
+    ci: null
+    unit: "edits"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Edits to reach the new target region after a preference switch."
+    source_artifact: null
+    claim_key: "C-DYNAMIC-STEER"
+
+  H2_RETENTION_LEARNEDDOOB:
+    status: pending
+    value: null
+    ci: null
+    unit: "%"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Retention of prior-objective gains after switching to the new objective."
+    source_artifact: null
+    claim_key: "C-DYNAMIC-STEER"
+
+  H2_COMPUTE_VS_RESTART:
+    status: pending
+    value: null
+    ci: null
+    unit: "x"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Oracle-call ratio of continuation vs restart to reach the new region."
+    source_artifact: null
+    claim_key: "C-DYNAMIC-STEER"
+
+  H2_MAIN_CONCLUSION:
+    status: pending
+    kind: sentence
+    template: >
+      After a mid-trajectory preference switch, dynamic continuation reaches the new target region in
+      \Result{H2_STEPS_TO_REGION_LEARNEDDOOB} edits with adaptation regret \Result{H2_ADAPT_REGRET_LEARNEDDOOB},
+      against \Result{H2_ADAPT_REGRET_RESTART} for restarting from the lead, at \Result{H2_COMPUTE_VS_RESTART}
+      the oracle cost; whether continuation dominates restart is read directly from these paired quantities.
+    claim_key: "C-DYNAMIC-STEER"
+
+  # ---- H3: pathwise constraints ---------------------------------------------
+  H3_FEASIBLE_TRAJ_SUPPORT:
+    status: pending
+    value: null
+    ci: null
+    unit: "%"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "trajectory"
+    description: "Fraction of completely-feasible trajectories under legal-support restriction (must be 100% for rule-closed constraints)."
+    source_artifact: null
+    claim_key: "C-PATHWISE"
+
+  H3_FEASIBLE_TRAJ_RUNPENALTY:
+    status: pending
+    value: null
+    ci: null
+    unit: "%"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "trajectory"
+    description: "Fraction of completely-feasible trajectories under a Feynman-Kac running penalty."
+    source_artifact: null
+    claim_key: "C-PATHWISE"
+
+  H3_FEASIBLE_TRAJ_ENDFILTER:
+    status: pending
+    value: null
+    ci: null
+    unit: "%"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "trajectory"
+    description: "Fraction of completely-feasible trajectories under endpoint rejection."
+    source_artifact: null
+    claim_key: "C-PATHWISE"
+
+  H3_WASTED_ORACLE_ENDFILTER:
+    status: pending
+    value: null
+    ci: null
+    unit: "%"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "trajectory"
+    description: "Oracle calls spent on trajectories later rejected for a pathwise violation, endpoint-filter arm."
+    source_artifact: null
+    claim_key: "C-PATHWISE"
+
+  H3_MAIN_CONCLUSION:
+    status: pending
+    kind: sentence
+    template: >
+      For a rule-closed pathwise constraint, legal-support restriction yields
+      \Result{H3_FEASIBLE_TRAJ_SUPPORT} completely-feasible trajectories by construction, against
+      \Result{H3_FEASIBLE_TRAJ_ENDFILTER} for endpoint filtering, which wastes
+      \Result{H3_WASTED_ORACLE_ENDFILTER} of its oracle budget on trajectories rejected only at the end.
+    claim_key: "C-PATHWISE"
+
+  # ---- H4: causal decomposition ablation ------------------------------------
+  H4_NHV_FULL:
+    status: pending
+    value: null
+    ci: null
+    unit: "nHV"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Normalized hypervolume of the full system (valid operators + learned edit prior + Doob control + goal policy)."
+    source_artifact: null
+    claim_key: "C-ABLATION"
+
+  H4_NHV_NO_LEARNED_PRIOR:
+    status: pending
+    value: null
+    ci: null
+    unit: "nHV"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Normalized hypervolume with the learned edit prior replaced by uniform legal proposals (operators + control only)."
+    source_artifact: null
+    claim_key: "C-ABLATION"
+
+  H4_NHV_NO_CONTROL:
+    status: pending
+    value: null
+    ci: null
+    unit: "nHV"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Normalized hypervolume with the control law removed (edit prior only)."
+    source_artifact: null
+    claim_key: "C-ABLATION"
+
+  H4_MAIN_CONCLUSION:
+    status: pending
+    kind: sentence
+    template: >
+      Decomposing the system, normalized hypervolume moves from \Result{H4_NHV_NO_CONTROL} (edit prior,
+      no control) to \Result{H4_NHV_FULL} (full system), while removing the learned prior in favor of
+      uniform legal proposals gives \Result{H4_NHV_NO_LEARNED_PRIOR}; the relative sizes of these steps
+      attribute the effect to the operator support, the learned prior, and the control law respectively.
+    claim_key: "C-ABLATION"
+
+  # ---- H5: oracle-exploitation robustness -----------------------------------
+  H5_GUIDE_EVAL_GAP:
+    status: pending
+    value: null
+    ci: null
+    unit: "score"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Gap between the guidance oracle score and an independent held-out evaluator on selected molecules."
+    source_artifact: null
+    claim_key: "C-ORACLE-ROBUST"
+
+  H5_HELDOUT_HV:
+    status: pending
+    value: null
+    ci: null
+    unit: "nHV"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "source"
+    description: "Normalized hypervolume recomputed under the independent evaluator."
+    source_artifact: null
+    claim_key: "C-ORACLE-ROBUST"
+
+  H5_MAIN_CONCLUSION:
+    status: pending
+    kind: sentence
+    template: >
+      Under an independent held-out evaluator the guidance-to-evaluator score gap is
+      \Result{H5_GUIDE_EVAL_GAP} and the re-scored hypervolume is \Result{H5_HELDOUT_HV}; the size of
+      the degradation relative to the in-oracle result bounds how much of the apparent gain survives a
+      change of evaluator.
+    claim_key: "C-ORACLE-ROBUST"
+
+  # ---- Secondary: de novo generation ----------------------------------------
+  DENOVO_VALIDITY:
+    status: pending
+    value: null
+    ci: null
+    unit: "%"
+    direction: higher_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "sample"
+    description: "All-step validity of de novo carbon-tree-prior generation (secondary demonstration)."
+    source_artifact: null
+    claim_key: "C-DENOVO-SECONDARY"
+
+  DENOVO_FCD:
+    status: pending
+    value: null
+    ci: null
+    unit: "FCD"
+    direction: lower_better
+    n_seeds: null
+    n_tasks: null
+    resampling_unit: "sample"
+    description: "Frechet ChemNet Distance of de novo samples to the reference distribution (secondary)."
+    source_artifact: null
+    claim_key: "C-DENOVO-SECONDARY"
+
+# =============================================================================
+# Grid-expanded comparison tables (DRY). build_results_tex.py expands each
+# grid into pending keys <prefix>_<metric.key>_<method.key>, all status:pending.
+# =============================================================================
+grids:
+
+  - prefix: "H1"
+    resampling_unit: "source"
+    claim_key: "C-HV-IMPROVE"
+    metrics:
+      - {key: "NHV",        unit: "nHV",     direction: higher_better, description: "Normalized hypervolume at the shared oracle budget."}
+      - {key: "HVAUC",      unit: "HV-AUC",  direction: higher_better, description: "Hypervolume area under the oracle-call curve."}
+      - {key: "IGD",        unit: "IGD+",    direction: lower_better,  description: "Inverted generational distance plus to the pooled reference front."}
+      - {key: "FEASIBLE",   unit: "count",   direction: higher_better, description: "Number of feasible nondominated molecules."}
+      - {key: "SOURCESIM",  unit: "sim",     direction: higher_better, description: "Median Morgan similarity of nondominated molecules to their source."}
+      - {key: "DIVERSITY",  unit: "div",     direction: higher_better, description: "Internal diversity of the nondominated set."}
+      - {key: "ORACLEEFF",  unit: "%",       direction: higher_better, description: "Fraction of oracle calls spent on feasible candidates."}
+    methods:
+      - {key: "UNGUIDED",    label: "Unguided edit prior"}
+      - {key: "RERANK",      label: "Endpoint + rerank"}
+      - {key: "GREEDY",      label: "Greedy $\\Delta f$"}
+      - {key: "BOLTZMANN",   label: "Local Boltzmann"}
+      - {key: "MOGDFM",      label: "MOG-DFM-style"}
+      - {key: "SMCFK",       label: "SMC / Feynman--Kac"}
+      - {key: "LEARNEDDOOB", label: "Learned Doob (ours)"}
+      - {key: "GRAPHGA",     label: "GraphGA"}
+      - {key: "MARS",        label: "MARS"}
+      - {key: "GENMOL",      label: "GenMol"}
+      - {key: "RETMOL",      label: "RetMol"}
