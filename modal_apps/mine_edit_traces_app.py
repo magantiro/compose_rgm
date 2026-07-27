@@ -162,7 +162,7 @@ def main(
     train_size: int = 400_000,
     validation_size: int = 10_000,
     test_size: int = 10_000,
-    max_atoms: int = 48,
+    max_atoms: int = 40,
     split_workers: int = 12,
     corruption_sample_size: int = 500,
     n_compile_shards: int = 20,

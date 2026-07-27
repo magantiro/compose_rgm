@@ -90,7 +90,7 @@ class MiningConfig:
     train_size: int = 480_000
     validation_size: int = 10_000
     test_size: int = 10_000
-    max_atoms: int = 48
+    max_atoms: int = 40
     split_seed: int = 20260714
     scope_name: str = "broad_organic_v1"  # LOCKED B-edit scope; neutral/CNOF are ablations only
     scan_all: bool = True

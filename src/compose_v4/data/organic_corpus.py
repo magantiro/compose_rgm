@@ -140,7 +140,7 @@ class CorpusScope:
 BROAD_ORGANIC_V1 = CorpusScope(
     name="broad_organic_v1",
     allow_charges=True,
-    max_atoms=48,
+    max_atoms=40,
     standardization="molecular_graph_canonical_smiles",
     disconnected_policy="reject_multicomponent",
     isotope_stereo_radical_policy="graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class",
@@ -150,7 +150,7 @@ BROAD_ORGANIC_V1 = CorpusScope(
 BROAD_ORGANIC_NEUTRAL_V1 = CorpusScope(
     name="broad_organic_neutral_v1",
     allow_charges=False,
-    max_atoms=48,
+    max_atoms=40,
     standardization="molecular_graph_canonical_smiles",
     disconnected_policy="reject_multicomponent",
     isotope_stereo_radical_policy="graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class",
