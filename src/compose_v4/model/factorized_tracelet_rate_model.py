@@ -3664,25 +3664,49 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["bond_reroute"] = graft_mask
         logits["bond_reroute"] = graft_logits
 
-        cycle_logits = _template_logits(
-            self.cycle_query(global_state),
-            self.cycle_key.weight[: len(self.cycle_templates)],
-        )
-        cycle_mask = (n_real == 0).unsqueeze(-1) & (
-            n_null.unsqueeze(-1) >= self.cycle_spans.unsqueeze(0)
-        )
+        if self.enable_cycle_ops:
+            # COMPOSITIONAL ring support: override the dead slots 5/6 with cycle_close/cycle_open. Same
+            # pair layout as bond_reorder, so family_z + the dicts + the per-family logsumexp all apply.
+            # cycle_close (slot "cycle_insert" -> executor bond_insert): add a ring-closing bond over a
+            # nonbonded pair x order (H decreases by the order, so both atoms need H >= order).
+            order_col = order_values.view(1, 1, 1, 3)
+            old_order = batch.bonds.unsqueeze(-1)
+            cycle_logits = self.cycle_close_head(pair)
+            cycle_mask = (
+                upper.view(1, n_slots, n_slots, 1)
+                & (old_order == 0)
+                & (hydrogens.unsqueeze(2).unsqueeze(-1) >= order_col)
+                & (hydrogens.unsqueeze(1).unsqueeze(-1) >= order_col)
+            )
+            # cycle_open (slot "cycle_attach" -> executor bond_delete): remove a non-bridge cycle edge (H
+            # increases by the removed order, so both atoms' resulting H must stay <= MAX_H_COUNT).
+            attach_logits = self.cycle_open_head(pair).squeeze(-1)
+            edge_order = batch.bonds
+            attach_mask = (
+                upper
+                & batch.cycle_edge_mask
+                & ((hydrogens.unsqueeze(2) + edge_order) <= MAX_H_COUNT)
+                & ((hydrogens.unsqueeze(1) + edge_order) <= MAX_H_COUNT)
+            )
+        else:
+            cycle_logits = _template_logits(
+                self.cycle_query(global_state),
+                self.cycle_key.weight[: len(self.cycle_templates)],
+            )
+            cycle_mask = (n_real == 0).unsqueeze(-1) & (
+                n_null.unsqueeze(-1) >= self.cycle_spans.unsqueeze(0)
+            )
+            attach_logits = _template_logits(
+                self.attach_query(node + global_state.unsqueeze(1)),
+                self.attach_key.weight[: len(self.attach_templates)],
+            )
+            attach_mask = (
+                real.unsqueeze(-1)
+                & (n_null.view(-1, 1, 1) >= self.attach_spans.view(1, 1, -1))
+                & (hydrogens.unsqueeze(-1) >= self.attach_required_h.view(1, 1, -1))
+            )
         masks["cycle_insert"] = cycle_mask
         logits["cycle_insert"] = cycle_logits
-
-        attach_logits = _template_logits(
-            self.attach_query(node + global_state.unsqueeze(1)),
-            self.attach_key.weight[: len(self.attach_templates)],
-        )
-        attach_mask = (
-            real.unsqueeze(-1)
-            & (n_null.view(-1, 1, 1) >= self.attach_spans.view(1, 1, -1))
-            & (hydrogens.unsqueeze(-1) >= self.attach_required_h.view(1, 1, -1))
-        )
         masks["cycle_attach"] = attach_mask
         logits["cycle_attach"] = attach_logits
 
