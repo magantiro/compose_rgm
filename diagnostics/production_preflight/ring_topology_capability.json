@@ -1,0 +1,329 @@
+{
+  "core_mechanism_checks": {
+    "final_overfit_loss": 1.8378,
+    "finite_gradients": true,
+    "forced_sampling_executes": true,
+    "grad_norm": 1.1799,
+    "n_union_records": 112,
+    "natural_cycle_draw_fraction": 1.0,
+    "natural_sampling_after_overfit": true,
+    "save_reload_equivalent": true
+  },
+  "n_supported_by_core": 14,
+  "note": "SUPPORTED_BY_CORE = compositional cycle_close/cycle_open construct+delete the class with all 14 properties. P2_MODE_REQUIRED classes (if any) need a minimal structured mode before the preflight.",
+  "per_topology": [
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "simple_saturated",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCCCC1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "aromatic_carbocycle",
+      "precursor_cycle_rank": 0,
+      "smiles": "c1ccccc1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "aromatic_heterocycle",
+      "precursor_cycle_rank": 0,
+      "smiles": "c1ccncc1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "saturated_heterocycle",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCNCC1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "macrocycle",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCCCCCCCCCC1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 2,
+      "name": "fused_aromatic",
+      "precursor_cycle_rank": 0,
+      "smiles": "c1ccc2ccccc2c1",
+      "supervision_records": 8,
+      "target_cycle_rank": 2,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 2,
+      "name": "fused_saturated",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCC2CCCCC2C1",
+      "supervision_records": 8,
+      "target_cycle_rank": 2,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 2,
+      "name": "spiro",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCC2(CC1)CCCCC2",
+      "supervision_records": 8,
+      "target_cycle_rank": 2,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 2,
+      "name": "bridged_bicyclic",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CC2CCC1C2",
+      "supervision_records": 8,
+      "target_cycle_rank": 2,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 3,
+      "name": "polycyclic_cage",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1C2CC3CC1CC(C2)C3",
+      "supervision_records": 8,
+      "target_cycle_rank": 3,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "sulfur_ring_aromatic",
+      "precursor_cycle_rank": 0,
+      "smiles": "c1ccsc1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "sulfur_ring_saturated",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCSC1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "phosphorus_ring",
+      "precursor_cycle_rank": 0,
+      "smiles": "C1CCPC1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    },
+    {
+      "checks": {
+        "all_intermediate_valid_connected": true,
+        "canonical_successor_identity": true,
+        "charge_preserving": true,
+        "cycle_rank_changes_correct": true,
+        "endpoint_isomorphism": true,
+        "inverse_open_close_exact": true,
+        "le_max_atoms_every_state": true,
+        "legal_compositional_sequence": true,
+        "positive_supervision": true
+      },
+      "n_ring_closing_bonds": 1,
+      "name": "charge_preserving_ring",
+      "precursor_cycle_rank": 0,
+      "smiles": "C[N+](C)(C)CCC1CCCCC1",
+      "supervision_records": 8,
+      "target_cycle_rank": 1,
+      "valid_start": true,
+      "verdict": "SUPPORTED_BY_CORE"
+    }
+  ],
+  "requires_structured_p2_mode": [],
+  "topology_matrix": {
+    "aromatic_carbocycle": "SUPPORTED_BY_CORE",
+    "aromatic_heterocycle": "SUPPORTED_BY_CORE",
+    "bridged_bicyclic": "SUPPORTED_BY_CORE",
+    "charge_preserving_ring": "SUPPORTED_BY_CORE",
+    "fused_aromatic": "SUPPORTED_BY_CORE",
+    "fused_saturated": "SUPPORTED_BY_CORE",
+    "macrocycle": "SUPPORTED_BY_CORE",
+    "phosphorus_ring": "SUPPORTED_BY_CORE",
+    "polycyclic_cage": "SUPPORTED_BY_CORE",
+    "saturated_heterocycle": "SUPPORTED_BY_CORE",
+    "simple_saturated": "SUPPORTED_BY_CORE",
+    "spiro": "SUPPORTED_BY_CORE",
+    "sulfur_ring_aromatic": "SUPPORTED_BY_CORE",
+    "sulfur_ring_saturated": "SUPPORTED_BY_CORE"
+  },
+  "unsupported_by_current_chemistry": [],
+  "verdict": "GO_RING_TOPOLOGY_CAPABILITY"
+}
