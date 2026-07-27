@@ -46,6 +46,8 @@ from compose_v4.rewrite.operators import (
     AtomDelete,
     AtomInsert,
     AtomRestate,
+    BondDelete,
+    BondInsert,
     BondReorder,
     BondReroute,
 )
@@ -104,6 +106,10 @@ MARK_RULE_NAMES = (
     "ring_system_restate",
 )
 MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
+# Compositional ring ops apply via the executor's bond_insert/bond_delete rules but are SELECTED by the model
+# on the repurposed slots 5/6 (cycle_insert/cycle_attach) when enable_cycle_ops. This maps a teacher/sampled
+# executor rule name back to its selecting family for the family-index lookup.
+_CYCLE_OP_EXECUTOR_TO_FAMILY = {"bond_insert": "cycle_insert", "bond_delete": "cycle_attach"}
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 
 
@@ -3202,7 +3208,14 @@ class FactorizedTraceletRateModel(nn.Module):
                         "<VIRTUAL_GRAFT>",
                         None,
                     )
-            return SampledRewriteMark(hazard, rule_name, action)
+            # cycle ops: the model family is slot 5/6 (cycle_insert/cycle_attach), but the executor rule is
+            # keyed on the action type -> apply via bond_insert/bond_delete.
+            applied_rule = rule_name
+            if isinstance(action, BondInsert):
+                applied_rule = "bond_insert"
+            elif isinstance(action, BondDelete):
+                applied_rule = "bond_delete"
+            return SampledRewriteMark(hazard, applied_rule, action)
         return SampledRewriteMark(0.0, "<TERMINAL>", None)
 
     def _sample_action_from_family(
@@ -3291,6 +3304,11 @@ class FactorizedTraceletRateModel(nn.Module):
                 v=target,
             )
         if rule_name == "cycle_insert":
+            if self.enable_cycle_ops:  # cycle_close: sample (a, b, order) -> BondInsert
+                a, b, order_index = _sample_masked_coordinate(
+                    logits["cycle_insert"][0], masks["cycle_insert"][0], rng
+                )
+                return BondInsert(a, b, order_index + 1)
             (template_index,) = _sample_masked_coordinate(
                 logits["cycle_insert"][0],
                 masks["cycle_insert"][0],
@@ -3299,6 +3317,11 @@ class FactorizedTraceletRateModel(nn.Module):
             template = self.cycle_templates[template_index]
             return template.instantiate(null_slots[: template.span])
         if rule_name == "cycle_attach":
+            if self.enable_cycle_ops:  # cycle_open: sample (a, b) -> BondDelete
+                a, b = _sample_masked_coordinate(
+                    logits["cycle_attach"][0], masks["cycle_attach"][0], rng
+                )
+                return BondDelete(a, b)
             anchor, template_index = _sample_masked_coordinate(
                 logits["cycle_attach"][0],
                 masks["cycle_attach"][0],
@@ -3803,9 +3826,12 @@ class FactorizedTraceletRateModel(nn.Module):
                 continue
             if action is None:
                 raise RuntimeError("nonterminal teacher is missing its rewrite mark")
-            if rule_name not in MARK_RULE_TO_INDEX:
+            family_name = rule_name
+            if self.enable_cycle_ops and rule_name in _CYCLE_OP_EXECUTOR_TO_FAMILY:
+                family_name = _CYCLE_OP_EXECUTOR_TO_FAMILY[rule_name]
+            if family_name not in MARK_RULE_TO_INDEX:
                 raise ValueError(f"unsupported factorized teacher family: {rule_name}")
-            family_index = MARK_RULE_TO_INDEX[rule_name]
+            family_index = MARK_RULE_TO_INDEX[family_name]
             action_score, legal = self._teacher_action_score(
                 index,
                 action,
@@ -3880,6 +3906,18 @@ class FactorizedTraceletRateModel(nn.Module):
             order_index = _ORDER_TO_INDEX[int(action.new_order)]
             key = (batch_index, a, b, order_index)
             return logits["bond_reorder"][key], masks["bond_reorder"][key]
+        if isinstance(action, BondInsert):
+            # cycle_close teacher: scored against slot 5 (holds cycle_close when enable_cycle_ops). Pair x
+            # order, per-coordinate like bond_reorder (symmetric closures sum correctly, no successor group).
+            a, b = sorted((int(action.a), int(action.b)))
+            order_index = _ORDER_TO_INDEX[int(action.order)]
+            key = (batch_index, a, b, order_index)
+            return logits["cycle_insert"][key], masks["cycle_insert"][key]
+        if isinstance(action, BondDelete):
+            # cycle_open teacher: scored against slot 6 (holds cycle_open when enable_cycle_ops). Per-edge.
+            a, b = sorted((int(action.a), int(action.b)))
+            key = (batch_index, a, b)
+            return logits["cycle_attach"][key], masks["cycle_attach"][key]
         if isinstance(action, BondReroute):
             moved = int(action.u)
             target = int(action.v)
