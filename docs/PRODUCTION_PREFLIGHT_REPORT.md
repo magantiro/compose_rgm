@@ -118,6 +118,23 @@ Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on iden
   sampler (§2), re-derived on a stratified held-out calibration panel (§4). **β values here are diagnostic;
   NOT applied to any optimizer update.** Artifact: `diagnostics/production_preflight/calibration.json`.
 
+## 9. Catalog semantic audit (§1–§5) ✅ transfer cleared; 🚨 ring_system_grow finding
+- **§1 dependency table:** built B-edit under 4 catalogs of different cardinality → **exactly 1** catalog-
+  indexed tensor (`ring_system_template_key.weight`); the other **113 are catalog-INDEPENDENT** (constant
+  shape) and copy safely. **No catalog-indexed tensor is positionally copied** → transfer CLEARED.
+  Artifact: `diagnostics/production_preflight/catalog_semantic_audit.json`.
+- **§2 template map:** base **4096** ring-system templates (hit the cap) vs production **5** (seeds);
+  **SHARED_EXACT = 0**, no duplicate/ambiguous keys. **§3:** `ring_system_template_key` is fully fresh
+  (all PRODUCTION_ONLY) — a safe FRESH_NEW_TEMPLATE, but **B's ring_system_grow template knowledge does NOT
+  transfer.**
+- **🚨 §5 finding — `ring_system_grow` is fresh AND unsupervised.** It is in `production_enabled`, but the
+  corruption families (restate/delete/reorder/reroute — **no grow**) and the MMP pool (atom insert/delete
+  only) give it **zero positive supervision**, and the catalog mismatch means it is also fresh (not retained
+  from B). Per §5 a fresh, unsupervised template capability must NOT be treated as learned → **DECISION
+  NEEDED: disable `ring_system_grow` for B-edit (recommended — matches the actual corruption families:
+  ring-opening + restate + graft, no ring-adding), or add grow supervision.** The prior "ring-closing
+  retained from B" assumption is broken by the catalog mismatch.
+
 ## Pending (before the STOP report)
 - §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
   updates (runs during the bounded preflight); apply the §7 bias policy at init.

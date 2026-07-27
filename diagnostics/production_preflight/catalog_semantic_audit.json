@@ -1,0 +1,37 @@
+{
+  "purpose": "Section-1..3 catalog semantic audit: prove no catalog-INDEXED parameter is copied positionally across the base/production catalog mismatch (base 50337de077f374db vs production 639ff6078c32d43c).",
+  "method": "Build B-edit with 4 catalogs of different cardinality (prod=5 seeds, base B, three=3 seeds, seven=7 seeds); a state_dict tensor whose shape VARIES with catalog cardinality is catalog-indexed, a constant-shape tensor is catalog-independent. Templates are frozen dataclasses (order=True) = their own semantic key.",
+  "catalog_cardinalities": {
+    "production": {"cycle": 0, "attach": 0, "ear": 3, "ring_system": 5, "fingerprint": "639ff6078c32d43c"},
+    "base_B": {"cycle": 0, "attach": 0, "ear": 3, "ring_system": 4096, "fingerprint": "50337de077f374db"},
+    "note": "B's ring_system catalog hit its max_ring_system_templates=4096 cap; the production B-edit catalog uses only the 5 fixed seed rings."
+  },
+  "catalog_dependency_table": {
+    "SEMANTICALLY_INDEPENDENT_copied_exact": {
+      "count": 113,
+      "evidence": "constant shape across prod/base/three/seven catalogs -> not indexed by catalog ordering, cardinality, or template identity; the ring scoring heads take hidden features, not per-template rows. Safe to copy.",
+      "examples": ["body/message-passing", "atom_embedding.weight", "total_hazard_head.*", "restate_head/grow_root_head/grow_option (widened -> semantic map)", "ring_restate_head.*", "ring_system_role_head.*", "reorder_head.*", "delete_head.*", "graft_head.*"]
+    },
+    "CATALOG_INDEXED": {
+      "count": 1,
+      "tensor": "ring_system_template_key.weight",
+      "shape_base_B": [3092, 32], "shape_production": [3, 32],
+      "catalog_indexed": true,
+      "semantic_key": "per ring-system template (RingSystemTemplate/electronic-alias)",
+      "transfer_policy": "FRESH_NEW_TEMPLATE (all production rows are PRODUCTION_ONLY; 0 SHARED_EXACT with base)",
+      "evidence": "shape varies with catalog cardinality (prod 3 / three 2 / seven 4); B(3092) vs prod(3) differ -> caught as widened, never positionally copied."
+    }
+  },
+  "ring_system_template_semantic_map": {
+    "base_templates": 4096, "production_templates": 5,
+    "SHARED_EXACT": 0, "PRODUCTION_ONLY": 5, "BASE_ONLY": 4096,
+    "duplicate_semantic_keys": {"base": false, "production": false},
+    "ambiguous": 0,
+    "consequence": "0 shared -> ring_system_template_key is FULLY fresh (no safe semantic row-transfer exists). B's 4096-template ring_system_grow knowledge does NOT transfer to B-edit; B-edit relearns its 5-template ring_system_grow from scratch."
+  },
+  "verdict": "TRANSFER CLEARED: no catalog-indexed tensor is positionally copied. The single catalog-indexed tensor (ring_system_template_key) is correctly fresh (0 shared templates). 113 catalog-independent tensors copy safely.",
+  "followups": [
+    "Section-5 catalog ADEQUACY: does the 5-template production catalog cover the production trace distribution? Positive-target + legal-opportunity counts per template from the scaled pool.",
+    "The 5-vs-4096 gap means B-edit ring_system_grow is a fresh, narrow (5-seed) capability -- NOT retained from B. Document + classify each production template POSITIVE_SUPERVISION / CONTEXT_ONLY / UNUSED_DISABLED / NO_GO."
+  ]
+}
