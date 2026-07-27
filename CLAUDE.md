@@ -29,14 +29,14 @@ uv sync                          # .venv + deps (or: pip install -e ".[dev]"); t
 export PYTHONPATH=src:scripts    # both for scripts; `src` also lets parallel-rollout worker subprocesses find compose_v4
 export KMP_DUPLICATE_LIB_OK=TRUE # macOS OpenMP guard (silences the abort)
 export OMP_NUM_THREADS=1         # REQUIRED locally: torch's bundled OpenMP + brew's collide → suite segfaults without it (see learnings)
-pytest tests/                    # full suite (427 tests, pythonpath=["src"] -> `from compose_v4.…`)
+pytest tests/                    # full suite (469 tests, pythonpath=["src"] -> `from compose_v4.…`)
 pytest tests/test_e0_toy_h_exactness.py -q   # one file
 ruff check .                     # lint (line-length 100, target py310)
-python scripts/sanity_check.py   # fast local gauntlet — run before any Modal launch
+python scripts/prelaunch_gate.py --corpus <name>  # pre-Modal-launch gate: tests+ruff+clean-tree+corpus+hashes
 ```
 
 Cloud training / rollout evaluation run on **Modal** (`modal_apps/`), against the
-`compose-v4-artifacts` volume. Never launch a Modal job before `sanity_check.py` is green.
+`compose-v4-artifacts` volume. Never launch a Modal job before `prelaunch_gate.py` is green.
 SMC experiment runs are single-process — the multiprocessing rollout path fork-deadlocks
 on some macOS setups; prefer serial locally, Modal for scale (see `learnings.md`).
 
@@ -52,7 +52,7 @@ on some macOS setups; prefer serial locally, Modal for scale (see `learnings.md`
   `<module-or-filename>: <one-line description>`, imperative, lowercase, no trailing period.
   **Never mention Claude / AI** — no `Co-Authored-By` or "generated with" trailer, in commits
   *or* PR bodies.
-- Feature branches → PR to `main`; both gates (`pytest tests/` + `scripts/sanity_check.py`)
+- Feature branches → PR to `main`; both gates (`pytest tests/` + `scripts/prelaunch_gate.py`)
   green before merge.
 
 ## Map

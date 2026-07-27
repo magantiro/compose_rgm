@@ -20,7 +20,7 @@ editing" overrides anything below when they conflict. Adopted from `KoshaTx/comp
 - `src/` is the core model and is kept ruff-clean; keep it that way. Scripts are drivers.
 
 ## Workflow
-- Feature branches → PR to `main`; both gates (`pytest tests/` + `scripts/sanity_check.py`) green before merge.
+- Feature branches → PR to `main`; both gates (`pytest tests/` + `scripts/prelaunch_gate.py`) green before merge.
 - **Commits atomic**: one self-contained change; subject `<module>: <one-line>`, imperative,
   lowercase, no trailing period. **Never mention Claude / AI** (no `Co-Authored-By` / "generated
   with"), in commits or PR bodies.
