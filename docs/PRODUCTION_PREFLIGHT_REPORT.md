@@ -150,10 +150,30 @@ Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on iden
 **Fix (rebuild §8):** a subtype/template-level supervision gate + a regression test that fails when any
 `production_enabled` operator subtype has zero positive selected targets.
 
+### 10a. Subtype gate WIRED + run against the ACTUAL production record builders ✅ `GO_SUBTYPE_SUPERVISION`
+`scripts/subtype_supervision_preflight.py` runs the exact production generators —
+`build_corrupted_prior_records` (micro + cyclic graft + clean ring-open + de-aromatization) and
+`build_cycle_op_records` (compositional cycle_close/cycle_open) — on **150** held-out-GuacaMol broad-organic
+leads (4,670/5,000 eligible = 93.4%, scope `3721d69851110fdd`), then applies the subtype gate. The cycle ops
+record executor names (`bond_insert`/`bond_delete`) that the model scores under `cycle_insert`/`cycle_attach`;
+the gate aliases them (`_CYCLE_OP_EXECUTOR_TO_FAMILY`) so a supervised cycle op is not misread as unsupervised.
+- **Positive selected targets / family** (1,437 records): `cycle_insert` 588 · `cycle_attach` 588 ·
+  `atom_restate` 215 · `bond_reroute` 122 (cyclic graft) · `ring_system_restate` 116 (de-arom) ·
+  `atom_delete` 106 · `bond_reorder` 92 · `atom_insert` 76 · `ring_system_delete` 44 (clean ring-open).
+- **`compositional_support` → GO** (all 9 enabled families supervised; `unsupervised=[]`). The compositional
+  cycle ops carry the ring-generation SUPPORT with **dense** supervision (588 each), so §9's "ring generation
+  is fresh AND unsupervised" is resolved at the support level — ring growth/closure no longer depends on the
+  unsupervised whole-ring macro.
+- **`with_grow_macro` → NO_GO** (`ring_system_grow` unsupervised) — recorded on purpose: it proves the gate
+  catches the still-open macro gap instead of silently passing it (the exact §10 false-positive). The
+  `ring_system_grow` **K-macro** supervision is P4 (acceleration only; must not define support).
+- Artifact: `diagnostics/production_preflight/subtype_supervision.json`. Tests:
+  `test_operator_subtype_supervision.py` (+2 cycle-op alias cases).
+
 ## Ring-grow rebuild plan (§4–§10; the production catalog + operator hash WILL change)
 | Phase | Where | Work |
 |---|---|---|
-| A (local) | §1, §9 | reconfirm grow supervision at the exact target level; subtype-level supervision gate + regression test |
+| A (local) ✅ | §1, §9 | subtype-level supervision gate + regression test WIRED (§10a); run on the production builders → `GO_SUBTYPE_SUPERVISION` (compositional cycle ops carry ring support, 588 targets each; gate fails iff `ring_system_grow` is enabled unsupervised) |
 | B (local, heavy) | §4, §5 | build the reversible ring-delete→grow dataset from GuacaMol; derive a **data-derived** catalog, pick size from a coverage curve (32…1024), round-trip verified |
 | C (local) | §6, §7, §8 | balance grow supervision in the corruption recipe; calibrate fresh template rows from the selected-target dist; subtype/template tests |
 | D (Modal) | §10 | regenerate catalog/corruption/manifest (new scope+operator+catalog hashes); recompile catalog-dependent caches; re-run preflight gates |

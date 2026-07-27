@@ -1,0 +1,69 @@
+{
+  "cycle_op_family_alias": {
+    "bond_delete": "cycle_attach",
+    "bond_insert": "cycle_insert"
+  },
+  "enabled_sets": {
+    "compositional_support": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "ring_system_delete",
+      "ring_system_restate",
+      "cycle_insert",
+      "cycle_attach"
+    ],
+    "with_grow_macro": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "ring_system_delete",
+      "ring_system_restate",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_grow"
+    ]
+  },
+  "note": "compositional_support MUST pass now (P1+P3). with_grow_macro is EXPECTED to NO_GO until P4 supplies data-derived ring_system_grow macro supervision; the failure proves the gate catches the still-open macro gap rather than silently passing it.",
+  "positive_targets_by_family": {
+    "atom_delete": 106,
+    "atom_insert": 76,
+    "atom_restate": 215,
+    "bond_reorder": 92,
+    "bond_reroute": 122,
+    "cycle_attach": 588,
+    "cycle_insert": 588,
+    "ring_system_delete": 44,
+    "ring_system_restate": 116
+  },
+  "records": {
+    "corrupted_prior": 261,
+    "cycle_op": 1176,
+    "total": 1437
+  },
+  "sample": {
+    "corpus_eligible": 4670,
+    "corpus_scanned": 5000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "sampled": 150
+  },
+  "verdict": "GO_SUBTYPE_SUPERVISION",
+  "verdicts": {
+    "compositional_support": {
+      "ok": true,
+      "unsupervised_enabled_families": [],
+      "verdict": "GO"
+    },
+    "with_grow_macro": {
+      "ok": false,
+      "unsupervised_enabled_families": [
+        "ring_system_grow"
+      ],
+      "verdict": "NO_GO_OPERATOR_SUBTYPE_SUPERVISION"
+    }
+  }
+}
