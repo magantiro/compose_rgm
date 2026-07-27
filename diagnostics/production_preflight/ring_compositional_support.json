@@ -1,0 +1,26 @@
+{
+  "design": "support-complete COMPOSITIONAL ring grow/delete (defines the support) + data-derived frequent-ring MACROS (acceleration cache only). The finite catalog must NOT define ring-generation support.",
+  "section1_supported_claim": "Within the declared state space (broad-organic atom/bond vocab, max_atoms=40, charge-preserving, no stereo/isotope/radical), the operator system supports construction+deletion of any ring topology -- isolated/macrocycle/aromatic/saturated/heterocycle/fused/spiro/bridged/polycyclic -- whenever the successor satisfies executor legality. Topological support completeness is separated from empirical chemically-valid path coverage.",
+  "section2_primitives_exist": {
+    "cycle_close": "BondInsert(a,b,order) -- adds a bond between two existing atoms (operators.py:36; rule 'bond_insert' kernel.py:110; is_valid_bond_insert/apply_bond_insert).",
+    "cycle_open": "BondDelete(a,b) -- removes a bond (operators.py:43; rule 'bond_delete' kernel.py:111).",
+    "gap": "bond_insert/bond_delete exist in the EXECUTOR + general fiber but are NOT in MARK_RULE_NAMES, so the factorized model cannot score/propose them. The redesign wires cycle_close/cycle_open as factorized families (heads + enumeration + supervision)."
+  },
+  "section3_support_completeness_verified": {
+    "method": "for 400 real broad-organic <=40 molecules with rings: open every non-spanning-tree edge (cycle_open) to a spanning tree, then close every edge back (cycle_close), through the production executor.",
+    "molecules_with_rings": 400, "total_ring_edges": 1346,
+    "cycle_rank_correct_every_step": "400/400",
+    "exact_recovery": "400/400", "failures": 0,
+    "verdict": "COMPOSITIONAL support-completeness holds at the executor level for all observed ring topologies -- no whole-ring template is required for support."
+  },
+  "supervision_implication": "The verified open/close decomposition IS the cycle_close/cycle_open teacher signal (every ring bond in the corpus, round-trip verified). So the compositional operators get massive, easy supervision -- unlike the whole-ring template catalog. Multiple valid decompositions per molecule avoid learning one arbitrary ring basis (section-9).",
+  "remaining_phases": {
+    "P1_model_wiring": "add cycle_close/cycle_open to MARK_RULE_NAMES + factorized heads (cycle_close: score atom pairs same-component nonbonded; cycle_open: score non-bridge cycle edges) + factorized-fiber enumeration + the GM loss path. Uses the existing executor primitives.",
+    "P2_macros": "structured ear/path insertion (2-anchor), spiro attachment (1-anchor), bond-only close, inverse deletes (section-4) as compositional shortcuts with exact canonical successors.",
+    "P3_supervision": "decompose real cyclic molecules into open/close (and ear/spiro macro) trajectories, both directions, multiple decompositions, scaffold-split (section-9).",
+    "P4_macro_cache": "the K~64 canonical-ring-graph macros as acceleration; a ring absent from macros stays reachable compositionally; aggregate macro+compositional mass on the same canonical successor (section-8).",
+    "P5_calibration_gate": "two-level ring-mass calibration (section-10); subtype/topology/template supervision gate (section-11, gate already built).",
+    "P6_reaudit_regenerate": "operator fuzzing, exact inverse, canonical-successor normalization, tiny-overfit, regenerate supervision+manifest+caches, warm-start transfer accounting, zero-mixture, no-update throughput; then GO_FULL_RING_SUPPORT_PREFLIGHT / NO_GO_*."
+  },
+  "guardrails": "No Stage-7 optimizer updates and no final cache compilation until the redesign is implemented + re-audited."
+}
