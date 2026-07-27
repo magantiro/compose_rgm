@@ -15,9 +15,16 @@
   },
   "section1_supervision": {
     "grow_positive_supervision": 0,
-    "evidence": "manifest corruption families = atom_restate/atom_delete/ring_system_restate/bond_reroute/ring_system_delete/bond_reorder (NO ring_system_grow); MMP pool family_histogram = atom_insert/atom_delete only. The clean ring-delete's grow-inverse is mask-illegal (heteroatom cyclization outside B's carbon-only grow vocabulary), so reversed delete traces do NOT produce a legal grow teacher mark.",
-    "note": "To be re-confirmed at the exact target level per section-1 (raw/reversed/batched/selected counts) during the rebuild."
+    "code_proof": "source_corruption.py:254-259 -- when a corruption trace contains ring_system_delete, the GROW direction is EXPLICITLY dropped (`return trim, None`), with a comment asserting the grow-inverse is mask-illegal 'so ring-closing stays retained from B's de-novo grow'. That assumption is FALSE given the catalog mismatch (B's grow does not transfer). No other corruption family produces ring_system_grow; MMP is atom_insert/atom_delete only. So grow supervision is ZERO -- code-verified, not inferred.",
+    "root_cause_of_missed_gate": "every supervision audit (cold_vocab_audit.py) counted targets only per (element,valence) atom class from atom_insert/atom_restate; no gate operated at the ring-operator-subtype / template level."
   },
+  "section0_template_semantic_key": {
+    "source_independent_within_code_version": true,
+    "evidence": "benzene and pyridine grown from two different carbon-tree source seeds each collapse to the SAME structured template (structured_ring_system_templates). So the current learned template key is a reusable chemical identity, not a source-specific one.",
+    "base_vs_production_zero_overlap_is_versioning": "B's stored catalog was built at an older commit (1ac6f19); its structured templates do not match the current-code templates -> 0 overlap is a VERSIONING artifact, not chemical non-overlap or source-dependence. A data-derived catalog over the CURRENT structured key is sound.",
+    "note": "Full section-0 audit (genuinely distinct sources; raw-operational-key vs structured-template collapse ratio) to be completed in Phase B before the catalog curve."
+  },
+  "catalog_size_selection_rule": "HYBRID coverage-constrained minimum-complexity (owner-specified): choose the SMALLEST candidate K achieving >=95% held-out sampler-weighted ring-grow event coverage, subject to per-template empirical learnability floor (N_min from a support-learning curve, not an arbitrary raw count), topology-diversity, and canonical-branching/throughput cost gates. Increase K to the next candidate ONLY if it adds >=~1 percentage-point held-out coverage OR a genuinely distinct, adequately-supported topology class. Report threshold sensitivity. If no candidate passes -> NO_GO_RING_CATALOG_SUPPORT. Never force K=1024; never select on Pareto/docking/test outcomes.",
   "consequence_per_section10": "RETAIN ring_system_grow + supervise it properly. Triggers section 4-10: build a real reversible ring-delete/grow dataset from broad-organic GuacaMol; derive a DATA-DERIVED production ring catalog (not the 5 fixed seeds; size chosen from a coverage curve); balance grow supervision in the corruption recipe; calibrate the fresh template rows from the selected-target distribution; add subtype/template-level tests; root-cause the Stage-6 false-positive; regenerate the catalog/corruption/manifest and recompile catalog-dependent caches. The production ring-catalog + operator-capability hash WILL change.",
   "gate": "Do NOT compile final production caches or begin Stage-7 optimizer updates until the rebuild lands (catalog + operator hash change)."
 }
