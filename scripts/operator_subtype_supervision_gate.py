@@ -16,23 +16,35 @@ from collections import Counter
 from typing import Iterable
 
 
-def subtype_target_counts(family_sequences: Iterable[Iterable[str]]) -> Counter:
+def subtype_target_counts(
+    family_sequences: Iterable[Iterable[str]],
+    family_aliases: dict[str, str] | None = None,
+) -> Counter:
     """Positive-target count per operator family, over the teacher-mark (rule_name) sequences of every
-    training record (both directions, after all pipeline transformations)."""
+    training record (both directions, after all pipeline transformations).
+
+    ``family_aliases`` maps a recorded EXECUTOR rule_name to the MODEL family that scores it, so a teacher
+    mark recorded under one name counts toward the family the dense head actually supervises. The
+    compositional ring ops need it: ``build_cycle_op_records`` records ``bond_insert``/``bond_delete`` steps
+    that the model scores under families ``cycle_insert``/``cycle_attach`` (via ``_CYCLE_OP_EXECUTOR_TO_FAMILY``
+    in the rate model). Default identity → callers with no aliasing are byte-identical."""
+    aliases = family_aliases or {}
     counts: Counter = Counter()
     for sequence in family_sequences:
         for family in sequence:
-            counts[str(family)] += 1
+            counts[aliases.get(str(family), str(family))] += 1
     return counts
 
 
 def check_operator_subtype_supervision(
     family_sequences: Iterable[Iterable[str]],
     enabled_families: Iterable[str],
+    family_aliases: dict[str, str] | None = None,
 ) -> tuple[bool, dict]:
     """(ok, report). ok is False iff any production-enabled family has ZERO positive selected targets.
-    This is intentionally at the operator-SUBTYPE level, not the atom-class level."""
-    counts = subtype_target_counts(family_sequences)
+    This is intentionally at the operator-SUBTYPE level, not the atom-class level. ``family_aliases`` is
+    applied to the recorded rule_names before counting (see ``subtype_target_counts``)."""
+    counts = subtype_target_counts(family_sequences, family_aliases)
     required = list(dict.fromkeys(str(f) for f in enabled_families))
     unsupervised = [f for f in required if counts.get(f, 0) == 0]
     return (not unsupervised, {
@@ -62,8 +74,14 @@ def main() -> int:
     parser.add_argument("--pool", type=Path, help="edit pool jsonl (records with a 'steps' family list)")
     parser.add_argument("--enabled", nargs="+", required=True, help="production-enabled operator families")
     parser.add_argument("--limit", type=int, default=100000)
+    parser.add_argument(
+        "--family-alias", nargs="*", default=(),
+        help="executor=family pairs mapping recorded rule_names to their scoring family "
+        "(e.g. bond_insert=cycle_insert bond_delete=cycle_attach)",
+    )
     args = parser.parse_args()
 
+    aliases = dict(pair.split("=", 1) for pair in args.family_alias) or None
     sequences: list[list[str]] = []
     if args.pool is not None:
         with args.pool.open() as handle:
@@ -73,7 +91,7 @@ def main() -> int:
                 record = json.loads(line)
                 steps = record.get("steps") or []
                 sequences.append([str(s.get("rule_name", s) if isinstance(s, dict) else s) for s in steps])
-    ok, report = check_operator_subtype_supervision(sequences, args.enabled)
+    ok, report = check_operator_subtype_supervision(sequences, args.enabled, aliases)
     print(json.dumps({"verdict": "OK" if ok else "NO_GO_OPERATOR_SUBTYPE_SUPERVISION", **report}, indent=2))
     return 0 if ok else 1
 

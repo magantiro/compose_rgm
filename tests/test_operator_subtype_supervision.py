@@ -56,3 +56,28 @@ def test_atom_class_coverage_alone_does_not_imply_family_coverage():
     counts = subtype_target_counts(_recipe_like_sequences())
     assert counts["atom_insert"] and counts["atom_restate"] and counts["atom_delete"]  # atoms fully covered
     assert counts.get("ring_system_grow", 0) == 0  # yet a production family is not
+
+
+# Compositional ring ops: build_cycle_op_records records EXECUTOR rule_names (bond_insert/bond_delete) that
+# the rate model scores under the cycle_insert/cycle_attach families (via _CYCLE_OP_EXECUTOR_TO_FAMILY). The
+# gate must alias them, else a fully-supervised cycle op reads as unsupervised.
+_CYCLE_ALIAS = {"bond_insert": "cycle_insert", "bond_delete": "cycle_attach"}
+
+
+def test_cycle_op_executor_marks_alias_to_their_scoring_family():
+    seqs = [["bond_delete"], ["bond_insert"], ["atom_restate", "bond_reorder"]]
+    counts = subtype_target_counts(seqs, _CYCLE_ALIAS)
+    assert counts["cycle_attach"] == 1 and counts["cycle_insert"] == 1
+    assert "bond_delete" not in counts and "bond_insert" not in counts
+
+
+def test_cycle_op_supervision_passes_only_with_the_alias():
+    enabled = ("atom_restate", "bond_reorder", "cycle_insert", "cycle_attach")
+    seqs = [["bond_delete"], ["bond_insert"], ["atom_restate"], ["bond_reorder"]]
+    # without the alias the cycle families read as unsupervised
+    ok_no_alias, report_no = check_operator_subtype_supervision(seqs, enabled)
+    assert not ok_no_alias
+    assert set(report_no["unsupervised_enabled_families"]) == {"cycle_insert", "cycle_attach"}
+    # with the alias every enabled family is supervised
+    ok_alias, _ = check_operator_subtype_supervision(seqs, enabled, _CYCLE_ALIAS)
+    assert ok_alias
