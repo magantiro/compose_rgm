@@ -494,8 +494,11 @@ def run_pipeline(config: MiningConfig) -> dict:
 
 def _provenance(config: MiningConfig) -> dict:
     import subprocess
-    commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"],
-                            capture_output=True, text=True).stdout.strip()
+    try:  # the Modal container has no git binary; the caller (mine_shard) overrides with the launch commit
+        commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"],
+                                capture_output=True, text=True).stdout.strip()
+    except (FileNotFoundError, OSError):
+        commit = ""
     return {
         "commit": commit,
         "corpus_id": config.corpus_id,
