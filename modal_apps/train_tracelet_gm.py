@@ -696,6 +696,7 @@ def _run_remote(
     training_support_wait_seconds: float = 600.0,
     minimum_training_support_rows_per_second: float = 0.0,
     corrupted_prior_mix: bool = False,
+    cycle_op_mix: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str | None = None,
     analogue_trace_count: int = 0,
@@ -748,6 +749,10 @@ def _run_remote(
         # Emit --corrupted-prior-mix to the gate (fine-tune B -> B-edit): mixed corrupted-prior records
         # + the ring_system_restate / cyclic bond_reroute editing marks. Weights preserved by warm-start.
         recipe["arguments"]["corrupted_prior_mix"] = True
+    if cycle_op_mix:
+        # Emit --cycle-op-mix: compositional cycle_close/cycle_open ring families + real-molecule ring-bond
+        # (cycle_open/cycle_close) supervision -- support-complete ring growth/closure.
+        recipe["arguments"]["cycle_op_mix"] = True
     if organic_vocabulary:
         # Emit --organic-vocabulary: predict/edit the whole drug-like organic subset (15 (element,
         # valence) classes over C/N/O/F/S/P/Cl/Br/I/B) instead of CNOF-only. Warm-start B compatibly.
@@ -1454,6 +1459,7 @@ def train_stage(
     initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
     compatible_initialization: bool = False,
     corrupted_prior_mix: bool = False,
+    cycle_op_mix: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str = "",
     analogue_trace_count: int = 0,
@@ -1475,6 +1481,7 @@ def train_stage(
         initialization_checkpoint_name=initialization_checkpoint_name,
         compatible_initialization=compatible_initialization,
         corrupted_prior_mix=corrupted_prior_mix,
+        cycle_op_mix=cycle_op_mix,
         organic_vocabulary=organic_vocabulary,
         analogue_trace_pool=analogue_trace_pool or None,
         analogue_trace_count=analogue_trace_count,
@@ -2299,6 +2306,7 @@ def main(
     initialize_from_source_checkpoint: bool = False,
     initialize_compatible_from_source_checkpoint: bool = False,
     corrupted_prior_mix: bool = False,
+    cycle_op_mix: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str = "",
     analogue_trace_count: int = 0,
@@ -2541,6 +2549,7 @@ def main(
             checkpoint_name,
             initialize_compatible_from_source_checkpoint,
             corrupted_prior_mix,
+            cycle_op_mix,
             organic_vocabulary,
             analogue_trace_pool,
             analogue_trace_count,
