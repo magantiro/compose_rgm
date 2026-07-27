@@ -37,15 +37,21 @@ DISTINCT charge categories (neutral / zwitterion-net-zero / nonzero-net-charge).
 scope; the hash is stored in the mining summary, checkpoint metadata, and (pending) sampler metadata so a
 cross-scope load can fail loudly. Tests: `tests/test_organic_corpus.py` (7).
 
-## 3. Corpus census (500k)
+## 3. Corpus census (500k, measured on Modal)
 
-The broad scan of the full 500k corpus (12 workers) completed in **48.1s** and yielded an eligible TRAIN
-partition of **400,000** at the requested split (400k train / 10k val / 10k test = 420k requested ≤ eligible),
-confirming the broad scope retains well above the CNOF-neutral ~240k. Rich census breakdown (rejection
-reasons / per-element counts / charge categories) is emitted to the shard summary on the artifact volume;
-the local 5k proxy (identical scope + code): retained **98.0%**, non-CNOF **S 32% / Cl 17% / Br / P / I**,
-charge categories neutral **92.3%** / zwitterion-net-zero **4.7%** / nonzero-net **1.0%**, rejections
-too-big / unsupported-element / unparseable only.
+The broad scan of the full 500k corpus (12 workers) completed in **48.3s** and retained **490,466 / 500,000
+= 98.1%** eligible broad-organic molecules (vs the CNOF-neutral filter's ~240k). Rejections: too-big 8,185 /
+unsupported-element 1,112 / unparseable 201 (9,498 total). This is a **2.05×** larger training corpus than
+CNOF-neutral.
+
+- **Elements (molecules containing):** C 490,445 · N 457,350 · O 456,999 · **S 160,260 (33%)** · F 91,704 ·
+  **Cl 86,033 (18%)** · Br 20,864 · P 6,385 · I 2,659 · B 685 — the S/Cl/Br/P/I mass CNOF-neutral discards.
+- **Charge categories (distinct):** neutral 461,296 · **zwitterion-net-zero 23,870** · nonzero-net-charge
+  5,300 — kept only by the charge-preserving broad scope.
+
+The full census is persisted to the shard summary on the artifact volume
+(`/artifacts/edit_mining_validation_broad/mining_summary_shard0000.json`). Local 5k proxy (identical scope +
+code) matched at 98.0% retained.
 
 ## 4. Benchmark-lead coverage (Jin ICLR19 QED test, 800 leads)
 
@@ -121,10 +127,17 @@ cross-shard core-key pairs a single shard cannot see. Provenance in the summary:
 SHA-256 (pinned on Modal), scope hash `e59fb09801459470`, standardization / operator-registry / compiler /
 scope-module hashes.
 
-**Projected full-run cost** (20 shards): one-time scan+split **48s** + per-shard map+compile **~90s × 20 ≈
-30 min** of MMP mining wall-clock (embarrassingly parallel under Modal fan-out, so far less in practice).
-The corruption layer is **not mined** (regenerated in memory at train time from corpus+seed), so it adds no
-mining cost. This is a cheap, well-bounded run.
+**Projected full-run cost** (20 shards, from the shard's measured phase timing): one-time scan+split **48.3s**
++ per-shard map+compile **90.4s** → **0.52 wall-hours serial (~31 min), ~0.52 CPU-hours**; embarrassingly
+parallel under Modal fan-out, so far less in practice. Projected compiled pool ≥ **27,740 records** (20 ×
+1,387, a strict LOWER BOUND — cross-shard global grouping recovers more). The corruption layer is **not
+mined** (regenerated in memory at train time from corpus+seed), so it adds no mining cost. Cheap and
+well-bounded. Full machine-readable summary: `diagnostics/composition/broad_mining_validation_shard_summary.json`.
+
+> **Bug caught + fixed during validation:** the Modal container image has no `git` binary, so the miner's
+> provenance call crashed at the end of the first two runs — after all mining, before the summary + pool
+> were written, which would have silently discarded the full-run output. Now git-safe (commit 183023e); the
+> launcher supplies the commit. The confirming run completed and persisted summary + pool.
 
 ## 9. Wiring + provenance
 
