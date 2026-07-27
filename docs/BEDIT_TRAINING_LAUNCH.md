@@ -47,6 +47,28 @@ one-time support-compile cost. That probe is a real A100 op with prerequisites �
 the volume (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt`) but B's **path /
 eval / support caches must be present (or recompiled)** first; verify before the probe.
 
+## Prerequisite (VERIFIED gap): caches must be compiled for the broad-organic config
+
+B's run dir (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`) holds only `checkpoint.best_so_far.pt` +
+`checkpoint.recovery.pt` + manifests — **no `compiled_paths.pt` / eval / support caches**. And B's path
+cache was compiled for the **CNOF-neutral** split; B-edit uses the **broad-organic** split (a different
+molecule set → different de-novo carbon-tree paths), so **B's cache is NOT reusable**. So before `--train-
+only`, compile fresh for the broad-organic config:
+
+1. `--compile-only --organic-vocabulary` → `compiled_paths.pt` for the broad-organic TRAIN split (+ eval
+   cache). Confirm the compile stage loads the broad-organic split (it goes through the same
+   `--organic-vocabulary` gate path).
+2. `--support-compile-only --corrupted-prior-mix --organic-vocabulary --analogue-trace-pool <pool>
+   [--corrupted-prior-count N]` → the mixed-tuple support cache (v1). (Skip for v2 `--scaled-manifest`,
+   which is on-the-fly.)
+
+Open question to resolve at setup: under `--scaled-manifest` the de-novo slice is dropped (denovo_keep=0)
+yet `--train-only` still requires the path cache to build the (then-sliced-away) de-novo records — either
+compile it anyway, or add a gate path that skips de-novo when denovo_keep=0. Straightforward, but decide it
+deliberately.
+
+Each stage is real (CPU) compute with config nuances — set it up + verify each stage green, do NOT batch-fire.
+
 ## Launch sequence (from a clean committed worktree at the launch tag)
 
 ```bash
