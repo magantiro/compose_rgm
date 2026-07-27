@@ -130,10 +130,13 @@ def resolve_scope(config: MiningConfig):
     if config.scope_name not in _SCOPES:
         raise ValueError(f"unknown corpus scope {config.scope_name!r}; known {sorted(_SCOPES)}")
     scope = _SCOPES[config.scope_name]
-    if config.max_atoms < scope.max_atoms:
+    if config.max_atoms != scope.max_atoms:
+        # EQUALITY, not >=: the padded state capacity (n_slots) must EQUAL the scope bound so the
+        # all-intermediate |V(x_k)| <= max_atoms invariant holds (a larger capacity would let an edit grow
+        # a scope-max molecule past the bound via the extra free slots).
         raise ValueError(
-            f"mining slots max_atoms={config.max_atoms} < scope max_atoms={scope.max_atoms}; "
-            "a scope-eligible molecule would not fit the mining representation")
+            f"mining slots max_atoms={config.max_atoms} != scope max_atoms={scope.max_atoms}; "
+            "the state capacity must equal the scope bound for the all-intermediate atom-count invariant")
     return scope
 
 

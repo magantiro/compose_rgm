@@ -1449,10 +1449,15 @@ def main() -> None:
     # CNOF base / ablation (organic_vocabulary off).
     if args.organic_vocabulary:
         corpus_scope = BROAD_ORGANIC_V1
-        if args.max_atoms < corpus_scope.max_atoms:
+        if args.max_atoms != corpus_scope.max_atoms:
+            # EQUALITY: the padded state capacity (n_slots == --max-atoms) must EQUAL the scope bound so the
+            # all-intermediate |V(x_k)| <= max_atoms invariant holds. A larger capacity would let an edit
+            # grow a scope-max molecule past the bound; a smaller one would drop scope-eligible molecules.
+            # This is the warm-start state-space contract: B, B-edit, scope, and evaluation must all use the
+            # SAME max_atoms.
             raise ValueError(
-                f"--max-atoms {args.max_atoms} < scope max_atoms {corpus_scope.max_atoms}; the model "
-                "representation must fit every scope-eligible molecule")
+                f"--max-atoms {args.max_atoms} != scope max_atoms {corpus_scope.max_atoms}; the padded "
+                "state capacity must equal the scope bound (state-space contract)")
         split = load_organic_corpus_split(
             args.smiles_file,
             scope=corpus_scope,
