@@ -29,7 +29,7 @@ uv sync                          # .venv + deps (or: pip install -e ".[dev]"); t
 export PYTHONPATH=src:scripts    # both for scripts; `src` also lets parallel-rollout worker subprocesses find compose_v4
 export KMP_DUPLICATE_LIB_OK=TRUE # macOS OpenMP guard (silences the abort)
 export OMP_NUM_THREADS=1         # REQUIRED locally: torch's bundled OpenMP + brew's collide → suite segfaults without it (see learnings)
-pytest tests/                    # full suite (469 tests, pythonpath=["src"] -> `from compose_v4.…`)
+pytest tests/                    # full suite (494 tests, pythonpath=["src"] -> `from compose_v4.…`)
 pytest tests/test_e0_toy_h_exactness.py -q   # one file
 ruff check .                     # lint (line-length 100, target py310)
 python scripts/prelaunch_gate.py --corpus <name>  # pre-Modal-launch gate: tests+ruff+clean-tree+corpus+hashes
@@ -63,7 +63,8 @@ on some macOS setups; prefer serial locally, Modal for scale (see `learnings.md`
 - `src/compose_v4/experiments/` — Generator Matching training, conditional (`cnof_conditional.py`,
   `tracelet_conditional.py`), value-guided sampling, calibrated/parallel sampling.
 - `src/compose_v4/eval/` — `molecular_quality.py` (V/U/N, descriptor Wassersteins, FCD).
-- `src/compose_v4/data/` — CNOF corpus loading/splits.
+- `src/compose_v4/data/` — corpus loading/splits: `cnof.py` (de-novo CNOF-neutral) and `organic_corpus.py`
+  (the LOCKED broad-organic B-edit scope + shared loader + census; see learnings 2026-07-27).
 - `scripts/` — experiment drivers. The conditional controller is
   `griddd_value_guided_smc_controller.py` (hard scaffold/similarity/required-/forbidden-SMARTS
   fibers, arbitrary state→float objective, population dump, anytime traces). Paper results:

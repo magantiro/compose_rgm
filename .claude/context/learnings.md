@@ -225,3 +225,48 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   round-trip both directions (2/2) → every valence-change edit has a working inverse. `cycle_insert`/
   `cycle_attach`/`ring_ear_insert` are legacy null-prior ops, dead for B and B-edit (correct — ring adds
   go through `ring_system_grow`).
+
+## 2026-07-27
+- **B-edit corpus scope LOCKED = broad-organic + retained charged contexts, charge-PRESERVING (owner
+  decision).** The de-novo loader `load_cnof_corpus_split` filters to C/N/O/F **and neutral** — only ~48%
+  of GuacaMol (measured 237,945 of 500k). But `ORGANIC_VOCABULARY` has S/P/Cl/Br/I heads and the benchmark
+  leads are majority S/Cl/charged, so a CNOF-only B-edit couldn't even *represent* them. New shared
+  `src/compose_v4/data/organic_corpus.py` (`CorpusScope`/`BROAD_ORGANIC_V1`, hash `e59fb09801459470`)
+  replaces the CNOF loader in EVERY production edit path (miner + trainer under `--organic-vocabulary`);
+  membership = every atom's element in the ACTIVE vocab AND `class_index(elem,val,charge) is not None` (the
+  same representability the teacher path uses — admits representable charges, no restated element list).
+  See [[broad-organic-corpus-scope]].
+- **Measured 500k broad census (Modal):** retained **490,466 / 500,000 = 98.1%** (2.05× the CNOF-neutral
+  ~240k); S in 160,260 mols (33%), Cl 86,033 (18%), Br/P/I smaller; charge categories neutral 461,296 /
+  **zwitterion-net-zero 23,870** / nonzero-net 5,300 (always report these THREE separately, never one
+  "charged"). Benchmark coverage: broad accepts **800/800** Jin-QED leads vs **33%** CNOF-neutral (29% of
+  leads are charged). The local 5k census proxy matched the 500k at 98.0% — trust it for quick estimates.
+- **Charge is PRESERVED not optimized — net-charge invariance guard + a slot-stable measurement trap.**
+  `source_corruption` now rejects any candidate whose successor changes the net formal charge (universal:
+  also blocks a neutral molecule silently GAINING charge). The per-atom `_touches_charged` guard was
+  INSUFFICIENT: deleting a *neutral* O of a delocalized carboxylate lets H re-derivation protonate the O⁻
+  (`CC(=O)[O-]` → net −1→0). **TRAP:** states are SLOT-STABLE (a delete leaves a null mid-array), so
+  `formal_charges[:n_real_atoms]` DROPS trailing real atoms and mis-measures net charge — always sum over
+  the `is_element(atom_types)` mask. This bug first masqueraded as a corruption bug.
+- **Cold-vocab audit (`scripts/cold_vocab_audit.py`): broad corruption supervises EVERY non-CNOF class.**
+  A molecule merely *containing* sulfur does not warm the S output slots — measure positive edit TARGETS
+  (`atom_insert`/`atom_restate` marks producing each `(element,valence)` class). Result: all 11 non-CNOF
+  classes (S v2/4/6, P v3/5, Cl, Br, I v1/3/5, B) get positive targets (chiefly via `atom_restate` /
+  heteroatom scan) → BEDIT_SUPERVISED, cold set empty. So B→B-edit head-widening + broad training warms
+  the widened slots.
+- **Full mining = map → global-group → PARALLEL-compile → reduce fan-out (owner: "just use 20 containers",
+  NOT a cap).** Global grouping over the full 400k TRAIN partition yields **206,715 MMP one-cut pairs** (vs
+  841 in a 20k shard — super-linear; global grouping >> per-shard). Compiling all serially in one container
+  ≈ 6 h (0.107 s/pair). The Modal app (`mine_edit_traces_app.py`) is now `mine_pairs` (1 container:
+  scan+map+group+corruption → writes `pairs.jsonl`) → `compile_shard` (N parallel, each a pair-stride) →
+  `reduce_pool` (dedup+cap). `mine_mmp_pairs`/`compile_mmp`/`dedup_and_cap` are the reusable phase fns.
+- **Two Modal-container gotchas that DISCARD a finished run at the very end:** (1) the debian_slim image has
+  **no `git` binary** → the miner's `_provenance` `subprocess.run(["git",...])` raised `FileNotFoundError`
+  AFTER all mining but BEFORE the summary/pool write, losing everything — catch `FileNotFoundError/OSError`,
+  the launcher supplies the commit. (2) the `mine_shard` function prints nothing interior → add per-phase
+  `print(..., flush=True)`; a black-box container hides both slowness and hangs. Corruption char is the
+  serial long pole on Modal (~10× local; ~0.5 s/sample), so keep the validation-shard sample small.
+- **Modal launch discipline that worked all session:** every launch from a CLEAN detached `git worktree`
+  at the committed launch tag (never the dirty dev tree), gated by `prelaunch_gate.py`; a `_provenance`
+  git call + `corpus_scope_hash` in every checkpoint/manifest so a cross-scope load fails loudly
+  (`load_factorized_rollout_checkpoint(expected_scope_hash=...)`, `broad_preflight_gate.py`).
