@@ -90,10 +90,15 @@ finalized once (2) is decided.
 - Semantic transfer wired into `--initialize-compatible-from-source-checkpoint` (gate); transfer provenance
   (source SHA, impl version, map hash, source/dest vocab hashes, copied/fresh counts, row-table hash) stored
   in checkpoint metadata. The config-mismatch gate is unaffected (vocab/scope/edit flags not in `expected`).
-- **Real-checkpoint dry-run gate `scripts/warmstart_dry_run.py` → `GO_WARMSTART_DRY_RUN`**: (A) strict init
-  fails on the widened heads; (B) semantic init loads; (C) all 114 tensors accounted (109 COPIED_EXACT + 5
-  widened); (D) no unrecognized/missing keys; (E) finite no-update forward/sample. 20 rows copied-by-map / 55
-  fresh; map `bb89525b6021adb1`. Artifact: `diagnostics/production_preflight/warmstart_dry_run.json`.
+- **Real-checkpoint dry-run gate `scripts/warmstart_dry_run.py` → `GO_WARMSTART_DRY_RUN`** (with the
+  PRODUCTION catalog): (A) strict init fails on the widened heads; (B) semantic init loads; (C) all 114
+  tensors accounted (**108 COPIED_EXACT + 6 widened**); (D) recognized; (E) finite no-update forward/sample.
+  20 rows copied-by-map / 55 fresh; map `bb89525b6021adb1`. Artifact: `…/warmstart_dry_run.json`.
+- **Ring-catalog compatibility (§8):** the production catalog is deterministic (5 fixed seeds) → rebuilds to
+  **`639ff6078c32d43c`** = the manifest fingerprint. **B's checkpoint catalog `50337de077f374db` MISMATCHES**
+  (built from B's CNOF de-novo paths at an older commit). B-edit uses the **production** catalog (authoritative,
+  §8); B's is rejected. The one catalog-specific tensor `ring_system_template_key.weight` is correctly **fresh**
+  (108 copied vs 109 with B's catalog), so B's stale template identity never leaks in.
 - Tests: `test_semantic_partial_transfer.py` (10), `test_warmstart_launch_flag.py` (2, doc can't revert to
   the strict flag). Commits: #1 `30c92d0` (impl+tests), #2 `047bf03` (wiring), #4 `325dff4` (provenance/docs).
 

@@ -41,22 +41,44 @@ from compose_v4.experiments.canonical_successor_distillation import (  # noqa: E
     AnalyticPancakeQuotientSampler,
     PancakeQuotientCalibration,
 )
+from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior  # noqa: E402
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel  # noqa: E402
 from compose_v4.model.time_convention import frozen_time  # noqa: E402
 from compose_v4.rewrite.kernel import de_novo_rewrite_system  # noqa: E402
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target  # noqa: E402
+from compose_v4.rewrite.typed_ring_catalog import (  # noqa: E402
+    build_typed_ring_catalog,
+    ring_catalog_fingerprint,
+)
 from train_tracelet_cnof_gate import (  # noqa: E402
     _ATOM_VOCAB_HEAD_LAYOUT,
     _semantic_partial_checkpoint_initialization,
 )
 
 _SLOTS = 40
+# The production ring catalog is built from these fixed seeds (mine_edit_traces._build_catalog); it is
+# DETERMINISTIC and must reproduce the manifest fingerprint. B-edit uses THIS catalog, not the base
+# checkpoint's (which was built from B's CNOF de-novo paths at an older commit and does NOT match).
+_PROD_CATALOG_SEEDS = ("c1ccccc1", "c1ccncc1", "C1CCNCC1", "C1CCOCC1", "c1ccc2ccccc2c1")
+# Catalog-DEPENDENT tensors: when B-edit uses the production catalog (which differs from B's older one),
+# these are legitimately shape-mismatched and stay FRESH, so B's stale template identity never leaks in.
+_CATALOG_DRIVEN_FRESH = frozenset({"ring_system_template_key.weight"})
 
 
-def _build_bedit(ck: dict) -> FactorizedTraceletRateModel:
-    """Reconstruct the destination B-edit model from the base checkpoint's own config (organic vocab +
-    editing families on), exactly as the trainer builds it for the warm-start."""
+def build_production_ring_catalog(max_atoms: int = _SLOTS):
+    def trace(smi):
+        t = pad_molecular_graph(smiles_to_molecular_graph(smi), max_atoms)
+        src = DegreeBoundedCarbonTreePrior(sizes=(t.n_real_atoms,)).sample(
+            np.random.default_rng(1), n_slots=max_atoms)
+        return compile_carbon_tree_to_target(src, t, use_bond_reroute=True, align_source=True)
+    return build_typed_ring_catalog(tuple(trace(s) for s in _PROD_CATALOG_SEEDS))
+
+
+def _build_bedit(ck: dict, catalog) -> FactorizedTraceletRateModel:
+    """Reconstruct the destination B-edit model with the PRODUCTION ring catalog (not the checkpoint's),
+    organic vocab + editing families on, exactly as the trainer builds it for the warm-start."""
     return FactorizedTraceletRateModel(
-        ck["ring_catalog"],
+        catalog,
         hidden_dim=int(ck["hidden_dim"]),
         message_passing_steps=int(ck["message_passing_steps"]),
         ring_electronic_mode=str(ck.get("ring_electronic_mode", "factorized_local")),
@@ -74,6 +96,8 @@ def _build_bedit(ck: dict) -> FactorizedTraceletRateModel:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--expected-catalog-fingerprint", default="639ff6078c32d43c",
+                        help="production ring-catalog fingerprint (manifest); the rebuilt seed catalog must match")
     parser.add_argument("--out", type=Path,
                         default=Path("diagnostics/production_preflight/warmstart_dry_run.json"))
     args = parser.parse_args()
@@ -83,7 +107,17 @@ def main() -> int:
     source_vocab = ORGANIC_VOCABULARY if ck.get("organic_vocabulary") else CNOF_VOCABULARY
     failures: list[str] = []
 
-    bedit = _build_bedit(ck)
+    # PRODUCTION ring catalog (deterministic 5-seed build) is authoritative -- verify it matches the manifest
+    # fingerprint. B-edit uses THIS, never the base checkpoint's (older, mismatched) catalog.
+    prod_catalog = build_production_ring_catalog(_SLOTS)
+    prod_fp = ring_catalog_fingerprint(prod_catalog)
+    b_catalog_fp = ring_catalog_fingerprint(ck["ring_catalog"])
+    if prod_fp != args.expected_catalog_fingerprint:
+        failures.append(f"CATALOG: rebuilt production fingerprint {prod_fp} != expected "
+                        f"{args.expected_catalog_fingerprint} (manifest)")
+    catalog_mismatch_b = prod_fp != b_catalog_fp  # EXPECTED: B's catalog is older; production is authoritative
+
+    bedit = _build_bedit(ck, prod_catalog)
     tgt = bedit.state_dict()
 
     # ---- classify every destination tensor -----------------------------------
@@ -97,10 +131,12 @@ def main() -> int:
             widened.append(name)
     source_only = [n for n in b_sd if n not in tgt]
 
-    # (D) every shape-mismatch is a known widened head; no unexpected source-only key
-    unrecognized = [n for n in widened if n not in _ATOM_VOCAB_HEAD_LAYOUT]
+    # (D) every shape-mismatch is a known widened head OR a catalog-driven tensor (correctly fresh under the
+    # production catalog, so B's older template identity never leaks in); no unexpected source-only key
+    recognized = set(_ATOM_VOCAB_HEAD_LAYOUT) | _CATALOG_DRIVEN_FRESH
+    unrecognized = [n for n in widened if n not in recognized]
     if unrecognized:
-        failures.append(f"D: shape-mismatched tensors not in the widened-head registry: {unrecognized}")
+        failures.append(f"D: shape-mismatched tensors not recognized (widened head or catalog-driven): {unrecognized}")
     if source_only:
         failures.append(f"D: unexpected source-only keys (in B, not B-edit): {source_only}")
     if dest_only:
@@ -110,7 +146,7 @@ def main() -> int:
     strict_ok = False
     strict_msg = ""
     try:
-        _build_bedit(ck).load_state_dict(b_sd)  # strict=True
+        _build_bedit(ck, prod_catalog).load_state_dict(b_sd)  # strict=True
         strict_ok = True
     except RuntimeError as exc:
         strict_msg = str(exc)
@@ -154,6 +190,15 @@ def main() -> int:
         "verdict": verdict,
         "checkpoint": str(args.checkpoint),
         "source_vocab": "ORGANIC" if source_vocab is ORGANIC_VOCABULARY else "CNOF",
+        "ring_catalog": {
+            "production_fingerprint": prod_fp,
+            "expected_manifest_fingerprint": args.expected_catalog_fingerprint,
+            "production_matches_manifest": prod_fp == args.expected_catalog_fingerprint,
+            "base_checkpoint_fingerprint": b_catalog_fp,
+            "base_mismatches_production": catalog_mismatch_b,
+            "note": "B-edit uses the production catalog (authoritative); B's older catalog is rejected. "
+                    "ring_system_template_key.weight is correctly fresh so B's stale templates never leak in.",
+        },
         "A_strict_fails_on_widened_heads": not strict_ok,
         "B_semantic_init_loads": "B: semantic init failed to load" not in " ".join(failures),
         "C_all_tensors_accounted": accounted == set(tgt),
