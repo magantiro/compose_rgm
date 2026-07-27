@@ -1308,8 +1308,10 @@ def compile_stage(
     run_label: str,
     recipe_name: str = RECIPE_NAME,
     path_cache_source_run: str | None = None,
+    organic_vocabulary: bool = False,
 ) -> dict[str, object]:
-    """Compile restart-safe path shards without renting a GPU."""
+    """Compile restart-safe path shards without renting a GPU. organic_vocabulary selects the broad-organic
+    corpus split (so the de-novo carbon-tree path cache matches the B-edit training corpus)."""
 
     return _run_remote(
         run_label=run_label,
@@ -1317,6 +1319,7 @@ def compile_stage(
         compile_paths_only=True,
         recipe_name=recipe_name,
         path_cache_source_run=path_cache_source_run,
+        organic_vocabulary=organic_vocabulary,
     )
 
 
@@ -2515,6 +2518,7 @@ def main(
             run_label,
             recipe_name,
             source_run_label or None,
+            organic_vocabulary,
         )
         phase = "compile_spawned"
     elif train_only:
