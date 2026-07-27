@@ -1,0 +1,127 @@
+{
+  "alias_exposure_policy": "internal repurposed slots cycle_insert/cycle_attach are engineering aliases for cycle_close/cycle_open and MUST NOT appear in the paper or checkpoint metadata; the public names are cycle_close / cycle_open.",
+  "capability": {
+    "atom_vocabulary": "ORGANIC_VOCABULARY",
+    "atom_vocabulary_classes": 15,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "cycle_op_semantic_hash": "27a823aeb6cf7548",
+    "deferred_p2_operators": [
+      "ring_ear_insert",
+      "ring_spiro_attach"
+    ],
+    "disabled_public_operators": [
+      "ring_grow_macro"
+    ],
+    "flags": {
+      "corrupted_prior_mix": true,
+      "enable_cycle_ops": true,
+      "enable_cyclic_graft": true,
+      "enable_heteroatom_scan": true,
+      "enable_ring_grow_macro": false,
+      "enable_ring_macros": false,
+      "enable_ring_opening": true,
+      "enable_ring_restates": true,
+      "organic_vocabulary": true
+    },
+    "operator_registry_hash": "9197401e8dc3a7ae",
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "ring_support_mechanism": "compositional cycle_close/cycle_open (NOT a finite macro catalog)",
+    "ring_support_semantics_version": 1,
+    "supported_public_operators": [
+      "cycle_close",
+      "cycle_open",
+      "ring_delete",
+      "ring_aromaticity_restate"
+    ],
+    "version": "RING_CORE_V1"
+  },
+  "capability_hash": "330473e319bfec19",
+  "cycle_operator_semantic_version": {
+    "hash": "27a823aeb6cf7548",
+    "ring_support_semantics_version": 1,
+    "sources": [
+      "src/compose_v4/experiments/cycle_op_prior.py",
+      "src/compose_v4/rewrite/operators.py",
+      "src/compose_v4/rewrite/kernel.py"
+    ]
+  },
+  "editing_families": {
+    "atom_delete": "peripheral atom+bond delete",
+    "atom_insert": "peripheral atom+bond insert",
+    "atom_restate": "bioisostere / heteroatom (element,valence) restate",
+    "bond_reorder": "non-aromatic bond-order change",
+    "bond_reroute": "cyclic graft (pendant fragment relocation across a single bond)"
+  },
+  "guardrails": "Do NOT implement P4 macros into this production path. Do NOT launch the full A100 run. Proceed only through the bounded RingCore preflight (<=750 steps).",
+  "operator_registry": {
+    "hash": "9197401e8dc3a7ae",
+    "mark_rule_names": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_grow",
+      "ring_system_delete",
+      "ring_system_restate"
+    ]
+  },
+  "public_operator_contract": {
+    "cycle_close": {
+      "executor_rule": "bond_insert",
+      "internal_family_slot": "cycle_insert",
+      "role": "bond-only cycle closure (ring SUPPORT: add one ring bond over a nonbonded same-component pair x order)",
+      "status": "SUPPORTED_BY_CORE"
+    },
+    "cycle_open": {
+      "executor_rule": "bond_delete",
+      "internal_family_slot": "cycle_attach",
+      "role": "cycle opening (ring SUPPORT: remove one non-bridge cycle bond)",
+      "status": "SUPPORTED_BY_CORE"
+    },
+    "ring_aromaticity_restate": {
+      "executor_rule": "ring_system_restate",
+      "internal_family_slot": "ring_system_restate",
+      "role": "ring electronic (de-)aromatization restate",
+      "status": "SUPPORTED_BY_CORE"
+    },
+    "ring_delete": {
+      "executor_rule": "ring_system_delete",
+      "internal_family_slot": "ring_system_delete",
+      "role": "whole removable-ring deletion (decoration-preserving clean delete)",
+      "status": "SUPPORTED_BY_CORE"
+    },
+    "ring_ear_insert": {
+      "executor_rule": null,
+      "internal_family_slot": null,
+      "role": "path/ear insertion (2-anchor)",
+      "status": "REQUIRES_STRUCTURED_P2_MODE"
+    },
+    "ring_grow_macro": {
+      "executor_rule": "ring_system_grow",
+      "internal_family_slot": "ring_system_grow",
+      "role": "legacy whole-ring growth macro (adds a full ring in one event)",
+      "status": "DISABLED_IN_CORE"
+    },
+    "ring_spiro_attach": {
+      "executor_rule": null,
+      "internal_family_slot": null,
+      "role": "one-anchor cyclic (spiro) attachment",
+      "status": "REQUIRES_STRUCTURED_P2_MODE"
+    }
+  },
+  "purpose": "frozen supervised compositional ring core; a separately-versioned production candidate. Ring reachability is defined by the compositional operators; the finite catalog is a later acceleration layer (RING_HYBRID_V2 / P4), never the support.",
+  "source_commit": "0016873cf71e5faa7db2e75bd210f6315ff112ad",
+  "subtype_supervision_artifact": {
+    "path": "diagnostics/production_preflight/subtype_supervision.json",
+    "sha256_16": "2adff7f19d927a95"
+  },
+  "training_recipe": {
+    "base_checkpoint_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "gate": "scripts/train_tracelet_cnof_gate.py --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --initialize-compatible-from-source-checkpoint",
+    "modal": "modal run modal_apps/train_tracelet_gm.py --train-only --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --initialize-compatible-from-source-checkpoint"
+  },
+  "version": "RING_CORE_V1"
+}
