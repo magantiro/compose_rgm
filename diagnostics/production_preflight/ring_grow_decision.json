@@ -1,0 +1,23 @@
+{
+  "decision": "RING_GROW_UNIQUE_AND_USEFUL",
+  "question": "Does ring_system_grow add unique molecular successors beyond cyclic_graft?",
+  "section3_grow_vs_cyclic_graft": {
+    "ring_system_grow": "cyclizes an existing chain into a ring: production structured templates have source_atoms == target_atoms (single_ring / bridged_or_fused) -> Delta_atoms=0, Delta_rings=+1. Ring-CLOSING on existing atoms.",
+    "cyclic_graft": "relocates a pendant tree fragment across a single bond -> Delta_atoms=0, Delta_rings=0 (verified: CCCc1ccccc1 16 grafts and CC(C)c1ccc(CC)cc1 34 grafts, EVERY successor (Delta_atoms,Delta_rings)=(0,0)).",
+    "verdict": "grow uniquely produces ring-count-INCREASING successors (ring closure). cyclic_graft cannot increase ring count. NOT redundant; grow is a distinct, scientifically useful lead-optimization capability (ring closure/annulation)."
+  },
+  "section2_count_reconciliation": {
+    "raw_catalog_ring_system_templates": {"production": 5, "base_B": 4096},
+    "structured_templates_embedding_rows": {"production": 3, "base_B": 3092},
+    "mechanism": "structured_ring_system_templates(catalog) dedups/normalizes the raw templates into the ring_system_template_key embedding rows (5->3, 4096->3092).",
+    "operational_template_overlap": 0,
+    "operational_overlap_is_an_artifact": "RingSystemTemplate encodes the COMPLETE rewrite incl. the carbon-tree SOURCE (source_atoms/source_bonds/grow_bond_reorders), so B's operational templates (from B's CNOF de-novo paths) differ from production's (from 5 seeds) EVEN for the same ring. The 0 operational overlap is a source/versioning artifact, NOT chemical non-overlap -- B knows benzene chemically, but its operational template key differs. ring_system_template_key is therefore correctly FRESH at the operational level (no safe row-transfer)."
+  },
+  "section1_supervision": {
+    "grow_positive_supervision": 0,
+    "evidence": "manifest corruption families = atom_restate/atom_delete/ring_system_restate/bond_reroute/ring_system_delete/bond_reorder (NO ring_system_grow); MMP pool family_histogram = atom_insert/atom_delete only. The clean ring-delete's grow-inverse is mask-illegal (heteroatom cyclization outside B's carbon-only grow vocabulary), so reversed delete traces do NOT produce a legal grow teacher mark.",
+    "note": "To be re-confirmed at the exact target level per section-1 (raw/reversed/batched/selected counts) during the rebuild."
+  },
+  "consequence_per_section10": "RETAIN ring_system_grow + supervise it properly. Triggers section 4-10: build a real reversible ring-delete/grow dataset from broad-organic GuacaMol; derive a DATA-DERIVED production ring catalog (not the 5 fixed seeds; size chosen from a coverage curve); balance grow supervision in the corruption recipe; calibrate the fresh template rows from the selected-target distribution; add subtype/template-level tests; root-cause the Stage-6 false-positive; regenerate the catalog/corruption/manifest and recompile catalog-dependent caches. The production ring-catalog + operator-capability hash WILL change.",
+  "gate": "Do NOT compile final production caches or begin Stage-7 optimizer updates until the rebuild lands (catalog + operator hash change)."
+}

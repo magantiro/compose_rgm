@@ -127,13 +127,21 @@ Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on iden
   **SHARED_EXACT = 0**, no duplicate/ambiguous keys. **§3:** `ring_system_template_key` is fully fresh
   (all PRODUCTION_ONLY) — a safe FRESH_NEW_TEMPLATE, but **B's ring_system_grow template knowledge does NOT
   transfer.**
-- **🚨 §5 finding — `ring_system_grow` is fresh AND unsupervised.** It is in `production_enabled`, but the
-  corruption families (restate/delete/reorder/reroute — **no grow**) and the MMP pool (atom insert/delete
-  only) give it **zero positive supervision**, and the catalog mismatch means it is also fresh (not retained
-  from B). Per §5 a fresh, unsupervised template capability must NOT be treated as learned → **DECISION
-  NEEDED: disable `ring_system_grow` for B-edit (recommended — matches the actual corruption families:
-  ring-opening + restate + graft, no ring-adding), or add grow supervision.** The prior "ring-closing
-  retained from B" assumption is broken by the catalog mismatch.
+- **🚨 §5 finding — `ring_system_grow` is fresh AND unsupervised** (in `production_enabled`, but the
+  corruption/MMP families never use grow, and the catalog mismatch makes its template rows fresh). Owner
+  decision: **do not disable — verify uniqueness first, then retain + supervise if unique.**
+- **DECISION: `RING_GROW_UNIQUE_AND_USEFUL`** (`diagnostics/production_preflight/ring_grow_decision.json`).
+  `ring_system_grow` **cyclizes a chain into a ring** (Δrings=+1, Δatoms=0); `cyclic_graft` **only relocates**
+  (verified: 16+34 grafts, every successor (Δatoms,Δrings)=(0,0)). grow uniquely increases ring count → a
+  distinct, useful lead-opt capability → **retain + supervise** (§10). Also: the 0 operational-template
+  overlap is a **source-encoding artifact** (templates encode the carbon-tree source), not chemical
+  non-overlap — B knows benzene chemically, but its operational key differs, so `ring_system_template_key`
+  is correctly fresh.
+- **⇒ triggers a catalog/supervision rebuild (§4–§10):** real reversible ring-delete/grow dataset from
+  GuacaMol; a **data-derived** production catalog (not the 5 seeds; size from a coverage curve); balanced grow
+  supervision; fresh-row calibration; subtype/template-level tests; root-cause the Stage-6 false-positive;
+  regenerate catalog/corruption/manifest + recompile catalog-dependent caches. **The production ring-catalog
+  and operator-capability hash will change** → no final cache compile / Stage-7 until the rebuild lands.
 
 ## Pending (before the STOP report)
 - §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
