@@ -182,6 +182,113 @@ def _compatible_checkpoint_initialization(
     return initialized, tuple(transferred), tuple(retained)
 
 
+# Categorical output heads whose row axis is the atom (element, valence) vocabulary. When the vocabulary is
+# widened (CNOF 4 -> ORGANIC 15) these heads change shape, so the shape-exact compatible transfer would leave
+# them entirely fresh. Semantic partial transfer instead copies the rows of every SHARED class (matched by
+# (element, valence) LABEL, not position) and keeps fresh init only for genuinely new classes.
+#   "row"        : tensor rows are the vocab classes in order        (Linear weight/bias: n_classes rows).
+#   "role_major" : tensor is reshape(k, n_classes, d) -> row r*n_classes + c is (role r, class c)
+#                  (grow_option Embedding: 3*n_classes rows; see factorized_tracelet_rate_model.py:3550).
+_ATOM_VOCAB_HEAD_LAYOUT: dict[str, tuple[str, int]] = {
+    "restate_head.weight": ("row", 1),
+    "restate_head.bias": ("row", 1),
+    "grow_root_head.weight": ("row", 1),
+    "grow_root_head.bias": ("row", 1),
+    "grow_option.weight": ("role_major", 3),
+}
+
+
+def _semantic_row_map(
+    source_classes: tuple, dest_classes: tuple
+) -> list[int | None]:
+    """Map dest row -> source row by semantic class LABEL (never raw position). ``None`` for a genuinely new
+    destination class. Fails loudly on duplicate labels or a source class absent from the destination (which
+    would silently drop learned rows)."""
+
+    if len(set(source_classes)) != len(source_classes):
+        raise ValueError("source vocabulary has duplicate class labels")
+    if len(set(dest_classes)) != len(dest_classes):
+        raise ValueError("destination vocabulary has duplicate class labels")
+    dest_index = {label: j for j, label in enumerate(dest_classes)}
+    missing = [label for label in source_classes if label not in dest_index]
+    if missing:
+        raise ValueError(
+            f"source vocabulary classes absent from destination (would drop learned rows): {missing}"
+        )
+    source_index = {label: i for i, label in enumerate(source_classes)}
+    return [source_index.get(label) for label in dest_classes]
+
+
+def _semantic_partial_checkpoint_initialization(
+    target_state: dict[str, torch.Tensor],
+    checkpoint_payload: dict[str, object],
+    *,
+    source_classes: tuple,
+    dest_classes: tuple,
+) -> tuple[dict[str, torch.Tensor], tuple[str, ...], tuple[str, ...], list[dict], str]:
+    """Shape-exact transfer PLUS semantic row-copy for the widened (element, valence) heads.
+
+    Every shape-identical tensor transfers as in ``_compatible_checkpoint_initialization`` (body, embeddings,
+    hazard, non-widened heads). For each widened atom-vocabulary head, the rows of every shared class copy
+    from the source by label; genuinely new classes keep the model's fresh initialization. Returns
+    ``(initialized_state, copied_exact, fresh_or_partial, row_table, transfer_map_hash)``. The row table is a
+    per-row audit (head, class, source row, dest row, status, source/dest checksum)."""
+
+    initialized, transferred, retained = _compatible_checkpoint_initialization(
+        target_state, checkpoint_payload
+    )
+    source_state = checkpoint_payload.get("state_dict")
+    if source_state is None:
+        source_state = checkpoint_payload.get("best_state_dict")
+    row_map = _semantic_row_map(source_classes, dest_classes)  # dest_j -> source_i | None
+    n_dest, n_src = len(dest_classes), len(source_classes)
+    row_table: list[dict] = []
+
+    def _cksum(tensor: torch.Tensor) -> str:
+        return hashlib.sha256(tensor.detach().to(torch.float64).numpy().tobytes()).hexdigest()[:12]
+
+    for name, (layout, k) in _ATOM_VOCAB_HEAD_LAYOUT.items():
+        if name not in retained or name not in source_state:
+            continue  # not widened here (same vocab) or absent -> nothing semantic to do
+        src = source_state[name]
+        dst = initialized[name].detach().clone()
+        record_rows = name.endswith(".weight")  # audit one representative tensor per head (skip bias echo)
+        for r in range(k):
+            for j, i in enumerate(row_map):
+                dest_row = r * n_dest + j
+                if i is None:
+                    if record_rows:
+                        row_table.append({
+                            "head": name, "class": list(dest_classes[j]), "role": r,
+                            "source_row": None, "dest_row": dest_row,
+                            "status": "FRESH_NEW_CLASS", "dest_checksum": _cksum(dst[dest_row]),
+                        })
+                    continue
+                source_row = r * n_src + i
+                dst[dest_row] = src[source_row].to(device=dst.device, dtype=dst.dtype)
+                if record_rows:
+                    row_table.append({
+                        "head": name, "class": list(dest_classes[j]), "role": r,
+                        "source_row": source_row, "dest_row": dest_row,
+                        "status": "COPIED_WITH_INDEX_MAP",
+                        "source_checksum": _cksum(src[source_row]), "dest_checksum": _cksum(dst[dest_row]),
+                    })
+        initialized[name] = dst
+
+    copied_exact = tuple(sorted(transferred))
+    fresh_or_partial = tuple(sorted(retained))  # widened heads are now PARTIALLY copied (see row_table)
+    map_payload = {
+        "source_classes": [list(c) for c in source_classes],
+        "dest_classes": [list(c) for c in dest_classes],
+        "row_map": row_map,
+        "heads": sorted(_ATOM_VOCAB_HEAD_LAYOUT),
+    }
+    transfer_map_hash = hashlib.sha256(
+        json.dumps(map_payload, sort_keys=True).encode()
+    ).hexdigest()[:16]
+    return initialized, copied_exact, fresh_or_partial, row_table, transfer_map_hash
+
+
 def _path_cache_fingerprint(signature: dict[str, object]) -> str:
     """Return a stable identifier without copying the full split into every shard."""
 
