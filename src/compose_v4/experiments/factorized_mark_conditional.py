@@ -22,6 +22,7 @@ from compose_v4.experiments.training_support_cache import (
 )
 from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.model.factorized_tracelet_rate_model import (
+    _CYCLE_OP_EXECUTOR_TO_FAMILY,
     ChemistryStateFeatures,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
@@ -208,7 +209,13 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         )
         if progress < record.path.path_length:
             step = record.path.trace.steps[progress]
-            if step.rule_name not in MARK_RULE_TO_INDEX:
+            # cycle ops record EXECUTOR names (bond_insert/bond_delete) that the model scores under the
+            # cycle_insert/cycle_attach slots; accept them (the rule_name stays the executor name, which
+            # _teacher_action_score dispatches on). Everything else must be a dense family.
+            if (
+                step.rule_name not in MARK_RULE_TO_INDEX
+                and step.rule_name not in _CYCLE_OP_EXECUTOR_TO_FAMILY
+            ):
                 raise ValueError(
                     f"compiled teacher uses unsupported dense family: {step.rule_name}"
                 )
@@ -330,6 +337,7 @@ class FactorizedMarkCollator:
     use_aromatic_bond_view: bool
     ring_catalog: TypedRingCatalog | None = None
     chemistry_feature_cache_limit: int = 2048
+    compute_ring_grow_support: bool = True
     compute_ring_restates: bool = False
     compute_cyclic_graft: bool = False
     compute_ring_opening: bool = False
@@ -373,7 +381,8 @@ class FactorizedMarkCollator:
             ring_catalog=self.ring_catalog,
             chemistry_feature_cache=self._chemistry_feature_cache,
             chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
-            compute_ring_grow_support=not has_precomputed_ring_support,
+            compute_ring_grow_support=self.compute_ring_grow_support
+            and not has_precomputed_ring_support,
             compute_ring_restates=self.compute_ring_restates,
             compute_cyclic_graft=self.compute_cyclic_graft,
             compute_ring_opening=self.compute_ring_opening,
@@ -448,6 +457,7 @@ def factorized_mark_loader(
     target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
     condition_dropout_probability: float = 0.0,
     ring_family_mass_mode: str = "boolean",
+    compute_ring_grow_support: bool = True,
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
@@ -493,6 +503,7 @@ def factorized_mark_loader(
         collate_fn=FactorizedMarkCollator(
             use_aromatic_bond_view,
             ring_catalog,
+            compute_ring_grow_support=compute_ring_grow_support,
             compute_ring_restates=compute_ring_restates,
             compute_cyclic_graft=compute_cyclic_graft,
             compute_ring_opening=compute_ring_opening,
@@ -806,7 +817,9 @@ def factorized_mark_metrics(
             loss = factorized_mark_bregman_loss(prediction, device_batch)
         teacher_family = torch.tensor(
             [
-                MARK_RULE_TO_INDEX[name] if name is not None else -1
+                MARK_RULE_TO_INDEX[_CYCLE_OP_EXECUTOR_TO_FAMILY.get(name, name)]
+                if name is not None
+                else -1
                 for name in device_batch.teacher_rule_names
             ],
             dtype=torch.long,
@@ -1108,6 +1121,7 @@ def train_factorized_mark_model(
         target_property_conditions=target_property_conditions,
         condition_dropout_probability=condition_dropout_probability,
         ring_family_mass_mode=model.ring_family_mass_mode,
+        compute_ring_grow_support=model.enable_ring_grow_macro,
         compute_ring_restates=model.enable_ring_restates,
         compute_cyclic_graft=model.enable_cyclic_graft,
         compute_ring_opening=model.enable_ring_opening,
