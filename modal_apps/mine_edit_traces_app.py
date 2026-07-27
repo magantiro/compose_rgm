@@ -38,12 +38,9 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose_v4")
-if REMOTE_ROOT.is_dir():  # inside the Modal container
+if REMOTE_ROOT.is_dir():  # inside the Modal container; the thin local launcher never imports the miner
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-else:  # local launcher: the @app.local_entrypoint imports the miner (MiningConfig) here
-    sys.path.insert(0, str(ROOT / "scripts"))
-    sys.path.insert(0, str(ROOT / "src"))
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -152,9 +149,9 @@ def main(
     corruption_sample_size: int = 2_000,
     out_subdir: str = "edit_mining_validation",
 ) -> None:
-    from mine_edit_traces import MiningConfig
-    from dataclasses import asdict
-
+    # The launcher stays THIN: it does not import the miner (rdkit/etc. live only in the container).
+    # It ships a plain config dict; mine_shard reconstructs MiningConfig(**config_dict) remotely, and any
+    # field omitted here falls back to the dataclass default.
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True).stdout.strip()
     dirty = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain"],
@@ -164,16 +161,16 @@ def main(
     if code_dirty:
         raise SystemExit(f"REFUSING to launch from a dirty code tree; run the prelaunch gate. {code_dirty}")
 
-    config = MiningConfig(
-        corpus_id=Path(corpus).stem,
-        corpus_path=f"/guacamol/{corpus}",
-        train_size=train_size, validation_size=validation_size, test_size=test_size,
-        max_atoms=max_atoms, n_shards=n_shards, shard_index=shard_index,
-        split_workers=split_workers,
-        corruption_sample_size=corruption_sample_size, out_dir=f"/artifacts/{out_subdir}",
-    )
+    config_dict = {
+        "corpus_id": Path(corpus).stem,
+        "corpus_path": f"/guacamol/{corpus}",
+        "train_size": train_size, "validation_size": validation_size, "test_size": test_size,
+        "max_atoms": max_atoms, "n_shards": n_shards, "shard_index": shard_index,
+        "split_workers": split_workers,
+        "corruption_sample_size": corruption_sample_size, "out_dir": f"/artifacts/{out_subdir}",
+    }
     print(f"launching validation shard {shard_index}/{n_shards} of {corpus} at commit {commit}")
-    summary = mine_shard.remote(asdict(config), commit, out_subdir)
+    summary = mine_shard.remote(config_dict, commit, out_subdir)
 
     summary["projected_full_run"] = _project_full_run(summary, n_shards)
     print(json.dumps(summary, indent=2))
