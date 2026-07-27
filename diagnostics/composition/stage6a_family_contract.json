@@ -1,0 +1,130 @@
+[
+  {
+    "family": "atom_insert",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.0032,
+      1.0
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "atom_delete",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.1638,
+      0.8333
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "atom_restate",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.0022,
+      0.6111
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "bond_reorder",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.0611,
+      1.0
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "bond_reroute",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.0695,
+      1.0
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "ring_system_restate",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.1216,
+      0.8333
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "ring_system_delete",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 3,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.1416,
+      1.0
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "ring_system_grow",
+    "checkpoint_enabled": true,
+    "executor_supported": true,
+    "enumerator_reachable": true,
+    "positive_training_targets": 2,
+    "gradient_observed": true,
+    "selected_prob_0_to_N": [
+      0.0,
+      1.0
+    ],
+    "forced_sampling_reaches": true,
+    "status": "SUPERVISED_CURRENT_RECIPE"
+  },
+  {
+    "family": "cycle_insert",
+    "checkpoint_enabled": false,
+    "executor_supported": true,
+    "enumerator_reachable": false,
+    "positive_training_targets": 0,
+    "status": "DISABLED_EVERYWHERE"
+  },
+  {
+    "family": "cycle_attach",
+    "checkpoint_enabled": false,
+    "executor_supported": true,
+    "enumerator_reachable": false,
+    "positive_training_targets": 0,
+    "status": "DISABLED_EVERYWHERE"
+  }
+]

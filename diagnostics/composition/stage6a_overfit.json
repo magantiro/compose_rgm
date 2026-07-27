@@ -1,0 +1,11 @@
+{
+  "n_examples": 23,
+  "distinct_states": 23,
+  "per_example_lower_bound_r_1_minus_log_r": 1.0,
+  "loss_initial": 5.2346,
+  "loss_final": 1.1382,
+  "gap_above_lower_bound": 0.1382,
+  "every_family_probability_rose": true,
+  "missing_families": [],
+  "overfit_passed": true
+}
