@@ -1,0 +1,273 @@
+{
+  "manifest_version": 2,
+  "kind": "scaled_broad_organic_lock",
+  "git_commit": "4fbca88",
+  "source_mining_commit": "3375e62",
+  "corpus_scope": {
+    "scope_name": "broad_organic_v1",
+    "scope_hash": "3721d69851110fdd",
+    "vocabulary_name": "ORGANIC_VOCABULARY",
+    "allowed_elements": [
+      "B",
+      "Br",
+      "C",
+      "Cl",
+      "F",
+      "I",
+      "N",
+      "O",
+      "P",
+      "S"
+    ],
+    "charge_policy": "retain_representable_charges",
+    "max_atoms": 40,
+    "standardization": "molecular_graph_canonical_smiles",
+    "disconnected_policy": "reject_multicomponent",
+    "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class"
+  },
+  "corpus_scope_hash": "3721d69851110fdd",
+  "corpus_census": {
+    "scope": {
+      "scope_name": "broad_organic_v1",
+      "scope_hash": "3721d69851110fdd",
+      "vocabulary_name": "ORGANIC_VOCABULARY",
+      "allowed_elements": [
+        "B",
+        "Br",
+        "C",
+        "Cl",
+        "F",
+        "I",
+        "N",
+        "O",
+        "P",
+        "S"
+      ],
+      "charge_policy": "retain_representable_charges",
+      "max_atoms": 40,
+      "standardization": "molecular_graph_canonical_smiles",
+      "disconnected_policy": "reject_multicomponent",
+      "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class"
+    },
+    "total": 500000,
+    "retained": 466483,
+    "rejected": 33484,
+    "canonical_duplicates": 33,
+    "retained_fraction": 0.933,
+    "rejection_reasons": {
+      "too_big": 32171,
+      "unsupported_element": 1112,
+      "unparseable": 201
+    },
+    "element_molecule_count": {
+      "C": 466462,
+      "N": 435269,
+      "O": 433338,
+      "S": 153135,
+      "F": 85591,
+      "Cl": 82303,
+      "Br": 20353,
+      "P": 5639,
+      "I": 2564,
+      "B": 625
+    },
+    "non_cnof_element_combination_count": {
+      "(cnof_only)": 239867,
+      "S": 118788,
+      "Cl": 52569,
+      "Cl+S": 26415,
+      "Br": 12115,
+      "Br+S": 5591,
+      "P": 3911,
+      "I": 1739,
+      "Br+Cl": 1674,
+      "P+S": 893,
+      "Br+Cl+S": 689,
+      "Cl+P": 507,
+      "I+S": 447,
+      "B": 409,
+      "Cl+I": 207,
+      "Br+P": 150,
+      "B+S": 111,
+      "Cl+P+S": 94,
+      "Br+I": 68,
+      "Cl+I+S": 57,
+      "B+Cl": 55,
+      "I+P": 29,
+      "Br+P+S": 19,
+      "B+P": 14,
+      "Br+Cl+P": 12,
+      "B+Br": 10,
+      "B+Cl+S": 8,
+      "B+Br+S": 7,
+      "Br+I+S": 7,
+      "Br+Cl+I": 5
+    },
+    "charge_category": {
+      "neutral": 438750,
+      "nonzero_net_charge": 4878,
+      "zwitterion_net_zero": 22855
+    },
+    "contains_charged_atom": 27733,
+    "net_charge_distribution": {
+      "-2": 1,
+      "-1": 38,
+      "0": 461605,
+      "1": 4365,
+      "2": 464,
+      "3": 8,
+      "4": 2
+    },
+    "scan_all": true
+  },
+  "corpus_id": "guacamol_subset_500000_seed0",
+  "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+  "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)",
+  "operator_registry": {
+    "mark_rule_names": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_grow",
+      "ring_system_delete",
+      "ring_system_restate"
+    ],
+    "production_enabled": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "ring_system_grow",
+      "ring_system_delete",
+      "ring_system_restate"
+    ],
+    "hash": "34234a88b8cc642a"
+  },
+  "standardization_hash": "a8d574cc91c89cb3",
+  "compiler_version": {
+    "corruption": "58909c28ef8d17dc",
+    "mmp": "cf0f2131e7e8a959",
+    "miner": "351123ec67ffde3b",
+    "corpus_scope_module": "7584943acda6f005"
+  },
+  "mmp_pool": {
+    "path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/edit_pool_full_40.jsonl",
+    "kind": "generated dataset (regenerate via the parallel mining fan-out); NOT a committed fixture",
+    "row_count": 363456,
+    "sha256": "3b29d7b84de92a7d2fdf931f55c1bf99c5783d6b2115aa5bf2429471007e4a64",
+    "record_schema": [
+      "diagnostics",
+      "direction",
+      "layer",
+      "metadata",
+      "n_slots",
+      "operator_histogram",
+      "pair_index",
+      "path_length",
+      "source_smiles",
+      "steps",
+      "target_key",
+      "target_smiles"
+    ],
+    "mmp_pairs_grouped": 216183
+  },
+  "measured_statistics": {
+    "path_length": {
+      "min": 2,
+      "max": 16,
+      "mean": 5.895,
+      "quantiles_p50_p80_p95": [
+        5,
+        9,
+        13
+      ],
+      "curriculum_bin_edges": [
+        5,
+        9,
+        13
+      ]
+    },
+    "family_histogram": {
+      "atom_delete": 1071945,
+      "atom_insert": 1070646
+    },
+    "layer_counts": {
+      "mmp_one_cut": 363456
+    },
+    "direction_balance": {
+      "forward": 178797,
+      "reverse": 184659
+    },
+    "cold_element_record_counts": {
+      "S": 100702,
+      "Cl": 63450,
+      "B": 19006,
+      "Br": 18166,
+      "P": 6250,
+      "I": 2959
+    }
+  },
+  "corruption_recipe": {
+    "sample_attempted": 500,
+    "trim_yield": 500,
+    "grow_yield": 358,
+    "family_histogram": {
+      "bond_reorder": 116,
+      "atom_restate": 498,
+      "atom_delete": 368,
+      "bond_reroute": 163,
+      "ring_system_restate": 193,
+      "ring_system_delete": 153
+    },
+    "family_fraction": {
+      "bond_reorder": 0.0778,
+      "atom_restate": 0.334,
+      "atom_delete": 0.2468,
+      "bond_reroute": 0.1093,
+      "ring_system_restate": 0.1294,
+      "ring_system_delete": 0.1026
+    },
+    "ring_change_fraction": 0.52,
+    "depth_mean": 2.982,
+    "source_target_tanimoto": {
+      "mean": 0.3634,
+      "p10": 0.1186,
+      "p90": 0.6621
+    },
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "depth_max": 5,
+    "couplings_per_target": 1,
+    "vocabulary": "organic"
+  },
+  "locked_mixture": {
+    "layer_weights": {
+      "corruption": 0.55,
+      "mmp": 0.45,
+      "scaffold": 0.0
+    },
+    "note": "hierarchical-sampler layer weights (LOCKED, superseding the proposed PHASE0B values); scaffold held at 0 until the A2.3 general compiler lands, its share folded into MMP.",
+    "cold_element_floor": 0.02,
+    "cold_elements": [
+      "S",
+      "P",
+      "Cl",
+      "Br",
+      "I",
+      "B"
+    ],
+    "curriculum_bin_edges": [
+      5,
+      9,
+      13
+    ]
+  },
+  "splits": {
+    "scheme": "the shared load_organic_corpus_split (seed 20260714); TRAIN-only mining -> no val/test leakage; reverse pairs are separate directed records (balanced)."
+  },
+  "notes": "Mixture + curriculum are LOCKED here from at-scale statistics (supersedes the PROPOSED docs/PHASE0B_DATA_RECIPE.md values). Load a checkpoint/data under a different corpus_scope_hash -> fail loudly."
+}

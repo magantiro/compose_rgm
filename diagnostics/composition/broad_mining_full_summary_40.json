@@ -1,0 +1,225 @@
+{
+  "config": {
+    "corpus_id": "guacamol_subset_500000_seed0",
+    "corpus_path": "/guacamol/guacamol_subset_500000_seed0.smiles",
+    "train_size": 400000,
+    "validation_size": 10000,
+    "test_size": 10000,
+    "max_atoms": 40,
+    "split_seed": 20260714,
+    "scope_name": "broad_organic_v1",
+    "scan_all": true,
+    "split_workers": 12,
+    "n_shards": 1,
+    "shard_index": 0,
+    "shard_rule": "stride",
+    "max_variable_atoms": 8,
+    "max_pairs_per_core": 12,
+    "scaffold_k": 0,
+    "scaffold_max_per_scaffold": 24,
+    "scaffold_max_per_transformation": 40,
+    "scaffold_mcs_candidates": 16,
+    "scaffold_mcs_timeout": 2,
+    "scaffold_max_group_size": 200,
+    "max_pairs_per_source": 8,
+    "corruption_depth_max": 5,
+    "corruption_couplings_per_target": 1,
+    "corruption_sample_size": 500,
+    "corruption_seed": 7,
+    "organic_vocabulary": true,
+    "out_dir": "/artifacts/edit_mining_full_broad_40",
+    "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+  },
+  "provenance": {
+    "commit": "3375e62",
+    "corpus_id": "guacamol_subset_500000_seed0",
+    "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+    "corpus_scope": "broad_organic_v1",
+    "corpus_scope_hash": "3721d69851110fdd",
+    "standardization_hash": "a8d574cc91c89cb3",
+    "operator_registry": "34234a88b8cc642a",
+    "compiler_mmp": "cf0f2131e7e8a959",
+    "compiler_corruption": "58909c28ef8d17dc",
+    "corpus_scope_module": "7584943acda6f005",
+    "miner": "dbe28e5a01b32c10"
+  },
+  "corpus": {
+    "scope": {
+      "scope_name": "broad_organic_v1",
+      "scope_hash": "3721d69851110fdd",
+      "vocabulary_name": "ORGANIC_VOCABULARY",
+      "allowed_elements": [
+        "B",
+        "Br",
+        "C",
+        "Cl",
+        "F",
+        "I",
+        "N",
+        "O",
+        "P",
+        "S"
+      ],
+      "charge_policy": "retain_representable_charges",
+      "max_atoms": 40,
+      "standardization": "molecular_graph_canonical_smiles",
+      "disconnected_policy": "reject_multicomponent",
+      "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class"
+    },
+    "train_partition_size": 400000,
+    "shard_size": 400000,
+    "supported": 400000,
+    "skipped": 0,
+    "census": {
+      "scope": {
+        "scope_name": "broad_organic_v1",
+        "scope_hash": "3721d69851110fdd",
+        "vocabulary_name": "ORGANIC_VOCABULARY",
+        "allowed_elements": [
+          "B",
+          "Br",
+          "C",
+          "Cl",
+          "F",
+          "I",
+          "N",
+          "O",
+          "P",
+          "S"
+        ],
+        "charge_policy": "retain_representable_charges",
+        "max_atoms": 40,
+        "standardization": "molecular_graph_canonical_smiles",
+        "disconnected_policy": "reject_multicomponent",
+        "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class"
+      },
+      "total": 500000,
+      "retained": 466483,
+      "rejected": 33484,
+      "canonical_duplicates": 33,
+      "retained_fraction": 0.933,
+      "rejection_reasons": {
+        "too_big": 32171,
+        "unsupported_element": 1112,
+        "unparseable": 201
+      },
+      "element_molecule_count": {
+        "C": 466462,
+        "N": 435269,
+        "O": 433338,
+        "S": 153135,
+        "F": 85591,
+        "Cl": 82303,
+        "Br": 20353,
+        "P": 5639,
+        "I": 2564,
+        "B": 625
+      },
+      "non_cnof_element_combination_count": {
+        "(cnof_only)": 239867,
+        "S": 118788,
+        "Cl": 52569,
+        "Cl+S": 26415,
+        "Br": 12115,
+        "Br+S": 5591,
+        "P": 3911,
+        "I": 1739,
+        "Br+Cl": 1674,
+        "P+S": 893,
+        "Br+Cl+S": 689,
+        "Cl+P": 507,
+        "I+S": 447,
+        "B": 409,
+        "Cl+I": 207,
+        "Br+P": 150,
+        "B+S": 111,
+        "Cl+P+S": 94,
+        "Br+I": 68,
+        "Cl+I+S": 57,
+        "B+Cl": 55,
+        "I+P": 29,
+        "Br+P+S": 19,
+        "B+P": 14,
+        "Br+Cl+P": 12,
+        "B+Br": 10,
+        "B+Cl+S": 8,
+        "B+Br+S": 7,
+        "Br+I+S": 7,
+        "Br+Cl+I": 5
+      },
+      "charge_category": {
+        "neutral": 438750,
+        "nonzero_net_charge": 4878,
+        "zwitterion_net_zero": 22855
+      },
+      "contains_charged_atom": 27733,
+      "net_charge_distribution": {
+        "-2": 1,
+        "-1": 38,
+        "0": 461605,
+        "1": 4365,
+        "2": 464,
+        "3": 8,
+        "4": 2
+      },
+      "scan_all": true
+    }
+  },
+  "corruption": {
+    "sample_attempted": 500,
+    "trim_yield": 500,
+    "grow_yield": 358,
+    "family_histogram": {
+      "bond_reorder": 116,
+      "atom_restate": 498,
+      "atom_delete": 368,
+      "bond_reroute": 163,
+      "ring_system_restate": 193,
+      "ring_system_delete": 153
+    },
+    "family_fraction": {
+      "bond_reorder": 0.0778,
+      "atom_restate": 0.334,
+      "atom_delete": 0.2468,
+      "bond_reroute": 0.1093,
+      "ring_system_restate": 0.1294,
+      "ring_system_delete": 0.1026
+    },
+    "ring_change_fraction": 0.52,
+    "depth_mean": 2.982,
+    "source_target_tanimoto": {
+      "mean": 0.3634,
+      "p10": 0.1186,
+      "p90": 0.6621
+    },
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "depth_max": 5,
+    "couplings_per_target": 1,
+    "vocabulary": "organic"
+  },
+  "timing_seconds": {
+    "corpus_scan_split_one_time": 46.35,
+    "map_group": 558.47,
+    "corruption_characterization": 374.71
+  },
+  "mmp_pairs_grouped": 216183,
+  "records_compiled_pre_dedup": 373356,
+  "global_reduce": {
+    "records_in": 373356,
+    "records_out": 363456,
+    "dropped_duplicate": 0,
+    "dropped_per_source_cap": 9900,
+    "family_histogram": {
+      "atom_delete": 1071945,
+      "atom_insert": 1070646
+    },
+    "direction_balance": {
+      "forward": 178797,
+      "reverse": 184659
+    },
+    "layer_counts": {
+      "mmp_one_cut": 363456
+    }
+  },
+  "pool_size": 363456
+}

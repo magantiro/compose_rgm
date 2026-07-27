@@ -1,0 +1,55 @@
+{
+  "scope": {
+    "name": "broad_organic_v1",
+    "max_atoms": 40,
+    "scope_hash": "3721d69851110fdd",
+    "supersedes": {"max_atoms": 48, "scope_hash": "e59fb09801459470", "status": "INVALID_FOR_BEDIT40_PRODUCTION"}
+  },
+  "source_mining_commit": "3375e62",
+  "corpus_census_500k": {
+    "retained": 466483, "total": 500000, "retained_fraction": 0.9330,
+    "rejected": 33484,
+    "rejection_reasons": {"too_big_41_to_48_atoms": 32171, "unsupported_element": 1112, "unparseable": 201},
+    "element_molecule_count": {"C": 466462, "N": 435269, "O": 433338, "S": 153135, "F": 85591,
+                               "Cl": 82303, "Br": 20353, "P": 5639, "I": 2564, "B": 625},
+    "charge_category": {"neutral": 438750, "zwitterion_net_zero": 22855, "nonzero_net_charge": 4878}
+  },
+  "mmp_pool": {
+    "pairs_grouped": 216183, "records_compiled_pre_dedup": 373356, "pool_records": 363456,
+    "dropped_per_source_cap": 9900, "dropped_duplicate": 0,
+    "direction_balance": {"forward": 178797, "reverse": 184659},
+    "family_histogram_steps": {"atom_delete": 1071945, "atom_insert": 1070646}
+  },
+  "corruption_recipe": {
+    "family_fraction": {"atom_restate": 0.334, "atom_delete": 0.2468, "ring_system_restate": 0.1294,
+                        "bond_reroute": 0.1093, "ring_system_delete": 0.1026, "bond_reorder": 0.0778},
+    "source_target_tanimoto": {"mean": 0.3634, "p10": 0.1186, "p90": 0.6621},
+    "ring_change_fraction": 0.52
+  },
+  "atom_bound_invariant": {
+    "sample_records": 10096, "replayed_ok": 10096, "replay_failures": 0,
+    "source_atoms": {"min": 3, "mean": 24.4, "max": 40, "p95": 36},
+    "target_atoms": {"min": 3, "mean": 24.5, "max": 40, "p95": 36},
+    "max_intermediate_atoms": {"min": 3, "mean": 25.3, "max": 40, "p95": 36},
+    "records_exceeding_40_intermediate": 0,
+    "INTERMEDIATE_MAX_ATOMS_EXCEEDED": 0,
+    "verdict": "ALL-INTERMEDIATE |V(x_k)| <= 40 HOLDS; replay gate PASS"
+  },
+  "locked_recipe": {
+    "curriculum_bin_edges": [5, 9, 13],
+    "layer_weights": {"corruption": 0.55, "mmp": 0.45, "scaffold": 0.0},
+    "cold_element_floor": 0.02,
+    "cold_element_pool_coverage": {"S": 100702, "Cl": 63450, "B": 19006, "Br": 18166, "P": 6250, "I": 2959}
+  },
+  "comparison_48_to_40": {
+    "corpus_retained": {"48": 490466, "40": 466483, "delta": -23983, "note": "the 41-48 atom tail"},
+    "mmp_pairs": {"48": 206715, "40": 216183, "note": "+4.6%: denser shared cores among smaller molecules"},
+    "pool_records": {"48": 347793, "40": 363456},
+    "curriculum_bins": {"48": [5, 9, 13], "40": [5, 9, 13], "note": "unchanged -- stable path-length distribution"},
+    "no_unexpected_distributional_shift": true
+  },
+  "hashes": {
+    "corpus_scope_hash": "3721d69851110fdd",
+    "corpus_id": "guacamol_subset_500000_seed0"
+  }
+}
