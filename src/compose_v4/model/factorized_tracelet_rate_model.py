@@ -1630,6 +1630,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_heteroatom_scan: bool = False,
         enable_ring_opening: bool = False,
         enable_cycle_ops: bool = False,
+        enable_ring_grow_macro: bool = True,
         atom_vocabulary: AtomVocabulary | None = None,
         ring_atom_elements: tuple[int, ...] | None = None,
     ) -> None:
@@ -1655,6 +1656,13 @@ class FactorizedTraceletRateModel(nn.Module):
         # ring_system_* macros are an acceleration cache. Off for de-novo B + current B-edit (byte-identical:
         # the cycle heads below are absent), on for the ring-support B-edit fine-tune.
         self.enable_cycle_ops = bool(enable_cycle_ops)
+        # Legacy whole-ring-system GROW macro (adds a full ring in one event; B's de-novo ring-adding path).
+        # Default True = byte-identical to B / current B-edit. RING_CORE_V1 sets this False so ring ADDITION
+        # is purely COMPOSITIONAL (cycle_close): the grow family is masked dead (all-zero template mask ->
+        # -inf family logit -> zero rate, never sampled, never a teacher target). The grow head params are
+        # retained (byte-identical shape) so a warm-start still loads them; they are simply never activated.
+        # Unlike the other enable_* flags this gates an EXISTING capability, hence the True default.
+        self.enable_ring_grow_macro = bool(enable_ring_grow_macro)
         # Atom-type prediction vocabulary shared by the heads, candidate masks, sampling, and teacher-
         # scoring, so head width and the fiber it is scored against never drift. Default CNOF_VOCABULARY
         # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
@@ -2478,6 +2486,14 @@ class FactorizedTraceletRateModel(nn.Module):
         *,
         require_exact_support: bool = True,
     ) -> tuple[Tensor, Tensor]:
+        if not self.enable_ring_grow_macro:
+            # RING_CORE_V1: legacy whole-ring grow macro disabled -> mask the family dead (all-False support
+            # -> family logsumexp = -inf -> zero rate, never sampled/taught). Shape matches the live path.
+            shape = (batch.batch_size, len(self.ring_system_templates))
+            return (
+                torch.zeros(shape, device=self.device),
+                torch.zeros(shape, dtype=torch.bool, device=self.device),
+            )
         logits = _template_logits(
             self.ring_system_template_query(global_state),
             self.ring_system_template_key.weight[: len(self.ring_system_templates)],
@@ -3120,6 +3136,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 (0.0,),
                 use_aromatic_bond_view=True,
                 ring_catalog=self.ring_catalog,
+                compute_ring_grow_support=self.enable_ring_grow_macro,
                 compute_ring_restates=self.enable_ring_restates,
                 compute_cyclic_graft=self.enable_cyclic_graft,
                 compute_ring_opening=self.enable_ring_opening,
