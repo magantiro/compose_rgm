@@ -697,6 +697,7 @@ def _run_remote(
     minimum_training_support_rows_per_second: float = 0.0,
     corrupted_prior_mix: bool = False,
     cycle_op_mix: bool = False,
+    disable_ring_grow_macro: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str | None = None,
     analogue_trace_count: int = 0,
@@ -753,6 +754,10 @@ def _run_remote(
         # Emit --cycle-op-mix: compositional cycle_close/cycle_open ring families + real-molecule ring-bond
         # (cycle_open/cycle_close) supervision -- support-complete ring growth/closure.
         recipe["arguments"]["cycle_op_mix"] = True
+    if disable_ring_grow_macro:
+        # Emit --disable-ring-grow-macro (RING_CORE_V1): disable the legacy whole-ring grow macro so ring
+        # addition is purely compositional. Grow head params retained (warm-start-safe), family masked dead.
+        recipe["arguments"]["disable_ring_grow_macro"] = True
     if organic_vocabulary:
         # Emit --organic-vocabulary: predict/edit the whole drug-like organic subset (15 (element,
         # valence) classes over C/N/O/F/S/P/Cl/Br/I/B) instead of CNOF-only. Warm-start B compatibly.
@@ -1460,6 +1465,7 @@ def train_stage(
     compatible_initialization: bool = False,
     corrupted_prior_mix: bool = False,
     cycle_op_mix: bool = False,
+    disable_ring_grow_macro: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str = "",
     analogue_trace_count: int = 0,
@@ -1482,6 +1488,7 @@ def train_stage(
         compatible_initialization=compatible_initialization,
         corrupted_prior_mix=corrupted_prior_mix,
         cycle_op_mix=cycle_op_mix,
+        disable_ring_grow_macro=disable_ring_grow_macro,
         organic_vocabulary=organic_vocabulary,
         analogue_trace_pool=analogue_trace_pool or None,
         analogue_trace_count=analogue_trace_count,
@@ -2307,6 +2314,7 @@ def main(
     initialize_compatible_from_source_checkpoint: bool = False,
     corrupted_prior_mix: bool = False,
     cycle_op_mix: bool = False,
+    disable_ring_grow_macro: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str = "",
     analogue_trace_count: int = 0,
@@ -2550,6 +2558,7 @@ def main(
             initialize_compatible_from_source_checkpoint,
             corrupted_prior_mix,
             cycle_op_mix,
+            disable_ring_grow_macro,
             organic_vocabulary,
             analogue_trace_pool,
             analogue_trace_count,
