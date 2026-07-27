@@ -97,11 +97,21 @@ finalized once (2) is decided.
 - Tests: `test_semantic_partial_transfer.py` (10), `test_warmstart_launch_flag.py` (2, doc can't revert to
   the strict flag). Commits: #1 `30c92d0` (impl+tests), #2 `047bf03` (wiring), #4 `325dff4` (provenance/docs).
 
+## 8. Calibration (§6) + low-mass fresh-row policy (§7) ✅ measured + policy verified
+Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on identical node features.
+- **(A) Shared-support fidelity — semantic preserves B's CNOF kernel EXACTLY**: restate/grow_root shared TV =
+  **0.0 / 0.0**, raw-logit max err = **0.0**. Whole-head-reset destroys it (TV 0.35 / 0.095).
+- **(B) New-support mass**: the 11 fresh S/P/Cl/Br/I/B rows **over-draw ~71–82%** of the restate/grow
+  categorical at init (vs a **2.6%** production non-CNOF target fraction) — a count artifact → triggers §7.
+- **(C) §7 policy (verified):** `new_bias[c] = log(smoothed_production_freq[c]) + β_head` (β 1.25 restate /
+  1.0 grow_root, fit on the panel to the 2.6% production rate). Drives α_new **0.82→0.026** / **0.71→0.026**;
+  **shared-support fidelity unchanged (TV=0)** — only new-class *bias* rows change, fresh weights retained
+  (nonzero trainable support, not masked). Derived from the predefined panel + production statistics only.
+  Artifact: `diagnostics/production_preflight/calibration.json`. **To be applied at the preflight init.**
+
 ## Pending (before the STOP report)
 - §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
-  updates (runs during the bounded preflight).
-- §6 CNOF calibration panel (whole-head-reset vs semantic); shared-support fidelity; new-support mass
-  (`alpha_new_mark`, `alpha_new_successor`); low-mass fresh-row policy only if they over-draw (§7).
+  updates (runs during the bounded preflight); apply the §7 bias policy at init.
 - §8 zero-mixture branch (skip de-novo cache; ring-catalog from B's checkpoint) + validation decision.
 - Cache compilation (much smaller than the old launch doc) + no-update throughput probe → 300/500/750/1000-step cost.
 - Final GO/NO-GO.

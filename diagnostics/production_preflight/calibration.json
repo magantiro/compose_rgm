@@ -1,0 +1,32 @@
+{
+  "panel": "8 fixed CNOF drug-like molecules (acetaminophen, benzamide-pyridine, anisole-ethylamine, biphenyl-pyridine, aspirin, caffeine, isonicotinamide, glycerol); 91 real atoms",
+  "base_checkpoint_sha256_prefix": "c9d927",
+  "comparison": "original B (CNOF) vs whole-head-reset B-edit vs semantic-transfer B-edit, on identical node features (body+embeddings COPIED_EXACT)",
+  "A_shared_support_fidelity": {
+    "semantic_restate_head": {"shared_TV_mean": 0.0, "shared_rawlogit_maxerr": 0.0},
+    "semantic_grow_root_head": {"shared_TV_mean": 0.0, "shared_rawlogit_maxerr": 0.0},
+    "wholereset_restate_head": {"shared_TV_mean": 0.3508},
+    "wholereset_grow_root_head": {"shared_TV_mean": 0.0948},
+    "verdict": "SEMANTIC transfer preserves B's shared CNOF conditional kernel EXACTLY (TV=0, raw-logit err=0); whole-head-reset does NOT (TV 0.35/0.095)."
+  },
+  "B_new_support_mass_alpha_new": {
+    "semantic_restate_head": {"mean": 0.8205, "median": 0.8156, "p90": 0.8868, "p95": 0.894, "max": 0.9284},
+    "semantic_grow_root_head": {"mean": 0.7138},
+    "verdict": "The 11 fresh S/P/Cl/Br/I/B rows OVER-DRAW (~71-82% of the restate/grow categorical mass) on CNOF molecules at init, ~30x the production non-CNOF target fraction. Triggers the section-7 low-mass policy."
+  },
+  "production_target_distribution": {
+    "source": "20k broad-organic corpus sample; per-atom (element,valence) class frequency (add-1 smoothed)",
+    "molecules_scanned": 18595, "atoms": 495872,
+    "p_target_new_total": 0.02598,
+    "cnof_class_freq": {"(C,4)": 0.73978, "(N,3)": 0.11324, "(O,2)": 0.10685, "(F,1)": 0.01415},
+    "note": "non-CNOF atoms are only 2.6% of the production corpus; C/N/O dominate."
+  },
+  "C_section7_policy": {
+    "policy": "new-row bias[c] = log(smoothed_production_freq[c]) + beta_head; shared rows and all fresh WEIGHTS untouched (nonzero trainable support retained, not masked)",
+    "beta_restate_head": 1.251, "beta_grow_root_head": 0.998,
+    "alpha_new_after": {"restate_head": 0.02598, "grow_root_head": 0.02598},
+    "shared_support_fidelity_after": "UNCHANGED (TV=0): the policy touches only NEW-class bias rows; the 4 shared logits stay bit-identical to B",
+    "derived_from": "predefined CNOF calibration panel + production trace statistics ONLY (not benchmark outcomes)",
+    "status": "designed + verified; to be APPLIED at the preflight init (grow_option embedding rows kept fresh + corpus-trained; grow is a rare family on complete leads)."
+  }
+}
