@@ -1,0 +1,91 @@
+{
+  "verdict": "GO_FOR_FULL_A100",
+  "scope": {
+    "ok": true,
+    "detail": "fixture (scope check skipped; runs on the real checkpoint)"
+  },
+  "heads": {
+    "ok": true,
+    "detail": "restate/grow_root heads 15-class (organic=15)"
+  },
+  "buckets": {
+    "neutral": {
+      "in_scope_leads": 2,
+      "intermediates": 12,
+      "valid": 12,
+      "advanced": 12,
+      "rejected_charge_changing": 0,
+      "editable_leads": 2,
+      "starts_at_lead": 2,
+      "finite": true,
+      "validity_ok": true,
+      "editable": true,
+      "charge_ok": true
+    },
+    "cnof": {
+      "in_scope_leads": 2,
+      "intermediates": 12,
+      "valid": 12,
+      "advanced": 12,
+      "rejected_charge_changing": 0,
+      "editable_leads": 2,
+      "starts_at_lead": 2,
+      "finite": true,
+      "validity_ok": true,
+      "editable": true,
+      "charge_ok": true
+    },
+    "sulfur": {
+      "in_scope_leads": 2,
+      "intermediates": 12,
+      "valid": 12,
+      "advanced": 12,
+      "rejected_charge_changing": 0,
+      "editable_leads": 2,
+      "starts_at_lead": 2,
+      "finite": true,
+      "validity_ok": true,
+      "editable": true,
+      "charge_ok": true
+    },
+    "halogen": {
+      "in_scope_leads": 2,
+      "intermediates": 12,
+      "valid": 12,
+      "advanced": 12,
+      "rejected_charge_changing": 0,
+      "editable_leads": 2,
+      "starts_at_lead": 2,
+      "finite": true,
+      "validity_ok": true,
+      "editable": true,
+      "charge_ok": true
+    },
+    "phosphorus": {
+      "in_scope_leads": 1,
+      "intermediates": 6,
+      "valid": 6,
+      "advanced": 6,
+      "rejected_charge_changing": 0,
+      "editable_leads": 1,
+      "starts_at_lead": 1,
+      "finite": true,
+      "validity_ok": true,
+      "editable": true,
+      "charge_ok": true
+    },
+    "charged": {
+      "in_scope_leads": 3,
+      "intermediates": 13,
+      "valid": 13,
+      "advanced": 13,
+      "rejected_charge_changing": 5,
+      "editable_leads": 3,
+      "starts_at_lead": 3,
+      "finite": true,
+      "validity_ok": true,
+      "editable": true,
+      "charge_ok": true
+    }
+  }
+}
