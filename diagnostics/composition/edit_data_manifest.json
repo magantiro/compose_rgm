@@ -1,0 +1,126 @@
+{
+  "manifest_version": 1,
+  "git_commit": "560009a",
+  "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)",
+  "source_corpus": {
+    "partition": "guacamol_heldout_val_5000_seed0",
+    "path": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+    "note": "PILOT uses the held-out VAL partition. The production universal-prior corpus MUST be mined from the GuacaMol TRAIN partition, with scaffold-disjoint train/val/test and no source-target pair leakage (see splits)."
+  },
+  "standardization_hash": "a8d574cc91c89cb3",
+  "operator_registry": {
+    "mark_rule_names": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_grow",
+      "ring_system_delete",
+      "ring_system_restate"
+    ],
+    "hash": "9197401e8dc3a7ae"
+  },
+  "compiler_version": {
+    "corruption": "cf6bfd623115b760",
+    "mmp_analogue": "cf0f2131e7e8a959",
+    "analogue_prior_loader": "3557092107490a18"
+  },
+  "splits": {
+    "scheme": "scaffold-disjoint train/val/test (Bemis-Murcko), no reverse-pair or MMP-core leakage",
+    "status": "TO DEFINE at production scale (the pilot mined the val partition only)."
+  },
+  "trace_counts": {
+    "corruption_traces": 700,
+    "analogue_traces": 98,
+    "guacamol_corpus": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators/results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+    "analogue_pool": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators/diagnostics/composition/analogue_trace_pool.jsonl",
+    "n_guacamol_used": 350,
+    "guacamol_parse_skips": 2,
+    "corruption_empty_pairs": 0,
+    "morgan_radius": 2,
+    "morgan_nbits": 2048,
+    "seed": 0
+  },
+  "curriculum_bins": {
+    "corruption": {
+      "axis": "compiled_path_length",
+      "method": "empirical_terciles (data-driven)",
+      "edges": [
+        2,
+        4
+      ],
+      "bins": [
+        {
+          "name": "local",
+          "predicate": "length <= 2",
+          "count": 266
+        },
+        {
+          "name": "lead_opt",
+          "predicate": "2 < length <= 4",
+          "count": 268
+        },
+        {
+          "name": "scaffold",
+          "predicate": "length > 4",
+          "count": 166
+        }
+      ]
+    },
+    "analogue": {
+      "axis": "compiled_path_length",
+      "method": "empirical_terciles (data-driven)",
+      "edges": [
+        7,
+        9
+      ],
+      "bins": [
+        {
+          "name": "local",
+          "predicate": "length <= 7",
+          "count": 48
+        },
+        {
+          "name": "lead_opt",
+          "predicate": "7 < length <= 9",
+          "count": 20
+        },
+        {
+          "name": "scaffold",
+          "predicate": "length > 9",
+          "count": 30
+        }
+      ]
+    },
+    "overall": {
+      "axis": "compiled_path_length",
+      "method": "empirical_terciles (data-driven)",
+      "edges": [
+        2,
+        4
+      ],
+      "bins": [
+        {
+          "name": "local",
+          "predicate": "length <= 2",
+          "count": 272
+        },
+        {
+          "name": "lead_opt",
+          "predicate": "2 < length <= 4",
+          "count": 287
+        },
+        {
+          "name": "scaffold",
+          "predicate": "length > 4",
+          "count": 239
+        }
+      ]
+    }
+  },
+  "characterization_report": "diagnostics/composition/edit_trace_characterization.json",
+  "notes": "Percentages/curriculum are PROPOSED (see docs/PHASE0B_DATA_RECIPE.md), not locked; they are finalized only after at-scale (GuacaMol-TRAIN) statistics exist."
+}

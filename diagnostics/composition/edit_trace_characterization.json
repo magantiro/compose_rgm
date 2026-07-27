@@ -1,0 +1,665 @@
+{
+  "corruption": {
+    "trace_count": 700,
+    "rdkit_skipped": 0,
+    "direction_counts": {
+      "real->corrupt": 350,
+      "corrupt->real": 350
+    },
+    "orientation_counts": {
+      "forward": 350,
+      "inverse": 350
+    },
+    "operator_family": {
+      "totals": {
+        "atom_restate": 686,
+        "bond_reorder": 320,
+        "atom_delete": 292,
+        "bond_reroute": 292,
+        "atom_insert": 292,
+        "ring_system_restate": 276
+      },
+      "fractions": {
+        "atom_delete": 0.13531047265987026,
+        "atom_insert": 0.13531047265987026,
+        "atom_restate": 0.3178869323447637,
+        "bond_reorder": 0.14828544949026876,
+        "bond_reroute": 0.13531047265987026,
+        "ring_system_restate": 0.1278962001853568
+      },
+      "per_trace_mean": {
+        "atom_delete": 0.41714285714285715,
+        "atom_insert": 0.41714285714285715,
+        "atom_restate": 0.98,
+        "bond_reorder": 0.45714285714285713,
+        "bond_reroute": 0.41714285714285715,
+        "ring_system_restate": 0.3942857142857143
+      },
+      "ops_per_trace_mean": 3.0828571428571427,
+      "n_families": 6
+    },
+    "path_length": {
+      "min": 1.0,
+      "median": 3.0,
+      "mean": 3.0828571428571427,
+      "max": 5.0,
+      "p25": 2.0,
+      "p75": 4.0,
+      "hist": {
+        "1": 124,
+        "2": 142,
+        "3": 152,
+        "4": 116,
+        "5": 166
+      },
+      "curriculum_bins": {
+        "axis": "compiled_path_length",
+        "method": "empirical_terciles (data-driven)",
+        "edges": [
+          2,
+          4
+        ],
+        "bins": [
+          {
+            "name": "local",
+            "predicate": "length <= 2",
+            "count": 266
+          },
+          {
+            "name": "lead_opt",
+            "predicate": "2 < length <= 4",
+            "count": 268
+          },
+          {
+            "name": "scaffold",
+            "predicate": "length > 4",
+            "count": 166
+          }
+        ]
+      }
+    },
+    "source_target_tanimoto": {
+      "min": 0.06493506493506493,
+      "median": 0.40300179211469533,
+      "mean": 0.4189529093981065,
+      "max": 1.0,
+      "frac_in_recognizable_band_0.4_0.9": 0.5028571428571429
+    },
+    "identity_fraction": 0.002857142857142857,
+    "ring_complexity": {
+      "source_ring_count": {
+        "min": 0.0,
+        "median": 3.0,
+        "mean": 3.3514285714285714,
+        "max": 9.0
+      },
+      "target_ring_count": {
+        "min": 0.0,
+        "median": 3.0,
+        "mean": 3.3514285714285714,
+        "max": 9.0
+      },
+      "source_aromatic_rings": {
+        "min": 0.0,
+        "median": 2.0,
+        "mean": 2.072857142857143,
+        "max": 6.0
+      },
+      "target_aromatic_rings": {
+        "min": 0.0,
+        "median": 2.0,
+        "mean": 2.072857142857143,
+        "max": 6.0
+      },
+      "ring_change_fraction": 0.0,
+      "aromatic_ring_change_fraction": 0.4742857142857143
+    },
+    "size_distribution": {
+      "source_heavy_atoms": {
+        "min": 8.0,
+        "median": 26.0,
+        "mean": 26.665714285714287,
+        "max": 52.0
+      },
+      "target_heavy_atoms": {
+        "min": 8.0,
+        "median": 26.0,
+        "mean": 26.665714285714287,
+        "max": 52.0
+      }
+    },
+    "scaffold_concentration": {
+      "n_items": 700,
+      "n_unique": 590,
+      "top1_share": 0.03,
+      "top5_share": 0.06142857142857143,
+      "gini": 0.14294915254237273,
+      "top5": [
+        [
+          "c1ccccc1",
+          21
+        ],
+        [
+          "",
+          12
+        ],
+        [
+          "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+          4
+        ],
+        [
+          "c1ccc(CNc2ccccc2)cc1",
+          3
+        ],
+        [
+          "O=S(=O)(Nc1ccccc1)c1ccccc1",
+          3
+        ]
+      ]
+    },
+    "transformation_concentration": {
+      "n_items": 700,
+      "n_unique": 209,
+      "top1_share": 0.06,
+      "top5_share": 0.17714285714285713,
+      "gini": 0.4765140123034861,
+      "top5": [
+        [
+          "C|atom_restate:1",
+          42
+        ],
+        [
+          "C|atom_restate:2",
+          26
+        ],
+        [
+          "C|atom_delete:1",
+          20
+        ],
+        [
+          "C|atom_insert:1",
+          20
+        ],
+        [
+          "C|bond_reroute:1",
+          16
+        ]
+      ]
+    },
+    "charged_fraction": 0.04857142857142857,
+    "safeguards": {
+      "identity_bias": {
+        "triggered": false,
+        "identity_fraction": 0.002857142857142857,
+        "threshold": 0.05
+      },
+      "scaffold_domination": {
+        "triggered": false,
+        "gini": 0.14294915254237273,
+        "top1_share": 0.03,
+        "top5_share": 0.06142857142857143
+      },
+      "transformation_duplication": {
+        "triggered": false,
+        "top5_share": 0.17714285714285713,
+        "n_unique": 209
+      },
+      "rare_operator_families": {
+        "triggered": true,
+        "rare_fractions": {},
+        "missing_expected": [
+          "ring_system_delete"
+        ]
+      }
+    }
+  },
+  "analogue": {
+    "trace_count": 98,
+    "rdkit_skipped": 0,
+    "direction_counts": {
+      "A->B": 49,
+      "B->A": 49
+    },
+    "orientation_counts": {
+      "forward": 49,
+      "inverse": 49
+    },
+    "operator_family": {
+      "totals": {
+        "atom_delete": 383,
+        "atom_insert": 383
+      },
+      "fractions": {
+        "atom_delete": 0.5,
+        "atom_insert": 0.5
+      },
+      "per_trace_mean": {
+        "atom_delete": 3.9081632653061225,
+        "atom_insert": 3.9081632653061225
+      },
+      "ops_per_trace_mean": 7.816326530612245,
+      "n_families": 2
+    },
+    "path_length": {
+      "min": 2.0,
+      "median": 8.0,
+      "mean": 7.816326530612245,
+      "max": 16.0,
+      "p25": 4.25,
+      "p75": 10.0,
+      "hist": {
+        "2": 6,
+        "3": 13,
+        "4": 6,
+        "5": 2,
+        "6": 4,
+        "7": 17,
+        "8": 10,
+        "9": 10,
+        "10": 8,
+        "11": 6,
+        "12": 1,
+        "13": 6,
+        "14": 5,
+        "15": 2,
+        "16": 2
+      },
+      "curriculum_bins": {
+        "axis": "compiled_path_length",
+        "method": "empirical_terciles (data-driven)",
+        "edges": [
+          7,
+          9
+        ],
+        "bins": [
+          {
+            "name": "local",
+            "predicate": "length <= 7",
+            "count": 48
+          },
+          {
+            "name": "lead_opt",
+            "predicate": "7 < length <= 9",
+            "count": 20
+          },
+          {
+            "name": "scaffold",
+            "predicate": "length > 9",
+            "count": 30
+          }
+        ]
+      }
+    },
+    "source_target_tanimoto": {
+      "min": 0.11764705882352941,
+      "median": 0.45454545454545453,
+      "mean": 0.4776513832309081,
+      "max": 0.84,
+      "frac_in_recognizable_band_0.4_0.9": 0.6122448979591837
+    },
+    "identity_fraction": 0.0,
+    "ring_complexity": {
+      "source_ring_count": {
+        "min": 0.0,
+        "median": 2.0,
+        "mean": 2.1020408163265305,
+        "max": 8.0
+      },
+      "target_ring_count": {
+        "min": 0.0,
+        "median": 2.0,
+        "mean": 2.1020408163265305,
+        "max": 8.0
+      },
+      "source_aromatic_rings": {
+        "min": 0.0,
+        "median": 1.0,
+        "mean": 1.7346938775510203,
+        "max": 5.0
+      },
+      "target_aromatic_rings": {
+        "min": 0.0,
+        "median": 1.0,
+        "mean": 1.7346938775510203,
+        "max": 5.0
+      },
+      "ring_change_fraction": 0.0,
+      "aromatic_ring_change_fraction": 0.0
+    },
+    "size_distribution": {
+      "source_heavy_atoms": {
+        "min": 9.0,
+        "median": 17.0,
+        "mean": 19.632653061224488,
+        "max": 40.0
+      },
+      "target_heavy_atoms": {
+        "min": 9.0,
+        "median": 17.0,
+        "mean": 19.632653061224488,
+        "max": 40.0
+      }
+    },
+    "scaffold_concentration": {
+      "n_items": 98,
+      "n_unique": 29,
+      "top1_share": 0.3673469387755102,
+      "top5_share": 0.5102040816326531,
+      "gini": 0.38986629134412376,
+      "top5": [
+        [
+          "c1ccccc1",
+          36
+        ],
+        [
+          "",
+          8
+        ],
+        [
+          "c1csc(-c2nc[nH]c2-c2ccc3c(c2)OCO3)n1",
+          2
+        ],
+        [
+          "O=S(=O)(Nc1ccccc1)c1ccccc1",
+          2
+        ],
+        [
+          "c1ccc(-c2nnc(-c3ccccc3)o2)cc1",
+          2
+        ]
+      ]
+    },
+    "transformation_concentration": {
+      "n_items": 98,
+      "n_unique": 29,
+      "top1_share": 0.3673469387755102,
+      "top5_share": 0.5102040816326531,
+      "gini": 0.38986629134412376,
+      "top5": [
+        [
+          "A|c1ccccc1>>c1ccccc1",
+          36
+        ],
+        [
+          "A|>>",
+          8
+        ],
+        [
+          "A|c1csc(-c2nc[nH]c2-c2ccc3c(c2)OCO3)n1>>c1csc(-c2nc[nH]c2-c2ccc3c(c2)OCO3)n1",
+          2
+        ],
+        [
+          "A|O=S(=O)(Nc1ccccc1)c1ccccc1>>O=S(=O)(Nc1ccccc1)c1ccccc1",
+          2
+        ],
+        [
+          "A|c1ccc(-c2nnc(-c3ccccc3)o2)cc1>>c1ccc(-c2nnc(-c3ccccc3)o2)cc1",
+          2
+        ]
+      ]
+    },
+    "charged_fraction": 0.02040816326530612,
+    "safeguards": {
+      "identity_bias": {
+        "triggered": false,
+        "identity_fraction": 0.0,
+        "threshold": 0.05
+      },
+      "scaffold_domination": {
+        "triggered": true,
+        "gini": 0.38986629134412376,
+        "top1_share": 0.3673469387755102,
+        "top5_share": 0.5102040816326531
+      },
+      "transformation_duplication": {
+        "triggered": true,
+        "top5_share": 0.5102040816326531,
+        "n_unique": 29
+      },
+      "rare_operator_families": {
+        "triggered": false,
+        "rare_fractions": {},
+        "missing_expected": []
+      }
+    }
+  },
+  "overall": {
+    "trace_count": 798,
+    "rdkit_skipped": 0,
+    "direction_counts": {
+      "real->corrupt": 350,
+      "corrupt->real": 350,
+      "A->B": 49,
+      "B->A": 49
+    },
+    "orientation_counts": {
+      "forward": 399,
+      "inverse": 399
+    },
+    "operator_family": {
+      "totals": {
+        "atom_restate": 686,
+        "atom_delete": 675,
+        "atom_insert": 675,
+        "bond_reorder": 320,
+        "bond_reroute": 292,
+        "ring_system_restate": 276
+      },
+      "fractions": {
+        "atom_delete": 0.23084815321477428,
+        "atom_insert": 0.23084815321477428,
+        "atom_restate": 0.23461012311901505,
+        "bond_reorder": 0.1094391244870041,
+        "bond_reroute": 0.09986320109439124,
+        "ring_system_restate": 0.09439124487004104
+      },
+      "per_trace_mean": {
+        "atom_delete": 0.8458646616541353,
+        "atom_insert": 0.8458646616541353,
+        "atom_restate": 0.8596491228070176,
+        "bond_reorder": 0.40100250626566414,
+        "bond_reroute": 0.3659147869674185,
+        "ring_system_restate": 0.3458646616541353
+      },
+      "ops_per_trace_mean": 3.664160401002506,
+      "n_families": 6
+    },
+    "path_length": {
+      "min": 1.0,
+      "median": 3.0,
+      "mean": 3.664160401002506,
+      "max": 16.0,
+      "p25": 2.0,
+      "p75": 5.0,
+      "hist": {
+        "1": 124,
+        "2": 148,
+        "3": 165,
+        "4": 122,
+        "5": 168,
+        "6": 4,
+        "7": 17,
+        "8": 10,
+        "9": 10,
+        "10": 8,
+        "11": 6,
+        "12": 1,
+        "13": 6,
+        "14": 5,
+        "15": 2,
+        "16": 2
+      },
+      "curriculum_bins": {
+        "axis": "compiled_path_length",
+        "method": "empirical_terciles (data-driven)",
+        "edges": [
+          2,
+          4
+        ],
+        "bins": [
+          {
+            "name": "local",
+            "predicate": "length <= 2",
+            "count": 272
+          },
+          {
+            "name": "lead_opt",
+            "predicate": "2 < length <= 4",
+            "count": 287
+          },
+          {
+            "name": "scaffold",
+            "predicate": "length > 4",
+            "count": 239
+          }
+        ]
+      }
+    },
+    "source_target_tanimoto": {
+      "min": 0.06493506493506493,
+      "median": 0.4153846153846154,
+      "mean": 0.4261614939038892,
+      "max": 1.0,
+      "frac_in_recognizable_band_0.4_0.9": 0.5162907268170426
+    },
+    "identity_fraction": 0.002506265664160401,
+    "ring_complexity": {
+      "source_ring_count": {
+        "min": 0.0,
+        "median": 3.0,
+        "mean": 3.1979949874686717,
+        "max": 9.0
+      },
+      "target_ring_count": {
+        "min": 0.0,
+        "median": 3.0,
+        "mean": 3.1979949874686717,
+        "max": 9.0
+      },
+      "source_aromatic_rings": {
+        "min": 0.0,
+        "median": 2.0,
+        "mean": 2.031328320802005,
+        "max": 6.0
+      },
+      "target_aromatic_rings": {
+        "min": 0.0,
+        "median": 2.0,
+        "mean": 2.031328320802005,
+        "max": 6.0
+      },
+      "ring_change_fraction": 0.0,
+      "aromatic_ring_change_fraction": 0.41604010025062654
+    },
+    "size_distribution": {
+      "source_heavy_atoms": {
+        "min": 8.0,
+        "median": 25.0,
+        "mean": 25.80200501253133,
+        "max": 52.0
+      },
+      "target_heavy_atoms": {
+        "min": 8.0,
+        "median": 25.0,
+        "mean": 25.80200501253133,
+        "max": 52.0
+      }
+    },
+    "scaffold_concentration": {
+      "n_items": 798,
+      "n_unique": 608,
+      "top1_share": 0.07142857142857142,
+      "top5_share": 0.11528822055137844,
+      "gini": 0.21798740271731964,
+      "top5": [
+        [
+          "c1ccccc1",
+          57
+        ],
+        [
+          "",
+          20
+        ],
+        [
+          "c1ccc(CNc2ccccc2)cc1",
+          5
+        ],
+        [
+          "O=S(=O)(Nc1ccccc1)c1ccccc1",
+          5
+        ],
+        [
+          "c1ccc(-c2nnc(-c3ccccc3)o2)cc1",
+          5
+        ]
+      ]
+    },
+    "transformation_concentration": {
+      "n_items": 798,
+      "n_unique": 238,
+      "top1_share": 0.05263157894736842,
+      "top5_share": 0.18045112781954886,
+      "gini": 0.47509530127840605,
+      "top5": [
+        [
+          "C|atom_restate:1",
+          42
+        ],
+        [
+          "A|c1ccccc1>>c1ccccc1",
+          36
+        ],
+        [
+          "C|atom_restate:2",
+          26
+        ],
+        [
+          "C|atom_delete:1",
+          20
+        ],
+        [
+          "C|atom_insert:1",
+          20
+        ]
+      ]
+    },
+    "charged_fraction": 0.045112781954887216,
+    "safeguards": {
+      "identity_bias": {
+        "triggered": false,
+        "identity_fraction": 0.002506265664160401,
+        "threshold": 0.05
+      },
+      "scaffold_domination": {
+        "triggered": false,
+        "gini": 0.21798740271731964,
+        "top1_share": 0.07142857142857142,
+        "top5_share": 0.11528822055137844
+      },
+      "transformation_duplication": {
+        "triggered": false,
+        "top5_share": 0.18045112781954886,
+        "n_unique": 238
+      },
+      "rare_operator_families": {
+        "triggered": true,
+        "rare_fractions": {},
+        "missing_expected": [
+          "ring_system_delete"
+        ]
+      }
+    }
+  },
+  "meta": {
+    "corruption_traces": 700,
+    "analogue_traces": 98,
+    "guacamol_corpus": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators/results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+    "analogue_pool": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators/diagnostics/composition/analogue_trace_pool.jsonl",
+    "n_guacamol_used": 350,
+    "guacamol_parse_skips": 2,
+    "corruption_empty_pairs": 0,
+    "morgan_radius": 2,
+    "morgan_nbits": 2048,
+    "seed": 0
+  }
+}
