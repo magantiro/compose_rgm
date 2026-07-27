@@ -697,6 +697,10 @@ def _run_remote(
     minimum_training_support_rows_per_second: float = 0.0,
     corrupted_prior_mix: bool = False,
     organic_vocabulary: bool = False,
+    analogue_trace_pool: str | None = None,
+    analogue_trace_count: int = 0,
+    corrupted_prior_count: int | None = None,
+    scaled_manifest: str | None = None,
 ) -> dict[str, object]:
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
 
@@ -748,6 +752,16 @@ def _run_remote(
         # Emit --organic-vocabulary: predict/edit the whole drug-like organic subset (15 (element,
         # valence) classes over C/N/O/F/S/P/Cl/Br/I/B) instead of CNOF-only. Warm-start B compatibly.
         recipe["arguments"]["organic_vocabulary"] = True
+    if analogue_trace_pool:
+        # Layer-2 MMP pool (the mined, executor-verified real-molecule edit traces) appended in memory.
+        recipe["arguments"]["analogue_trace_pool"] = analogue_trace_pool
+        if analogue_trace_count:
+            recipe["arguments"]["analogue_trace_count"] = int(analogue_trace_count)
+    if corrupted_prior_count:
+        recipe["arguments"]["corrupted_prior_count"] = int(corrupted_prior_count)
+    if scaled_manifest:
+        # Drive the hierarchical training sampler from the locked scaled manifest (mixture + curriculum).
+        recipe["arguments"]["scaled_manifest"] = scaled_manifest
     if path_cache_source_run is not None:
         _validate_run_label(path_cache_source_run, field="path-cache source run")
         source_path_cache = (
@@ -1438,6 +1452,10 @@ def train_stage(
     compatible_initialization: bool = False,
     corrupted_prior_mix: bool = False,
     organic_vocabulary: bool = False,
+    analogue_trace_pool: str = "",
+    analogue_trace_count: int = 0,
+    corrupted_prior_count: int = 0,
+    scaled_manifest: str = "",
 ) -> dict[str, object]:
     return _run_remote(
         run_label=run_label,
@@ -1455,6 +1473,10 @@ def train_stage(
         compatible_initialization=compatible_initialization,
         corrupted_prior_mix=corrupted_prior_mix,
         organic_vocabulary=organic_vocabulary,
+        analogue_trace_pool=analogue_trace_pool or None,
+        analogue_trace_count=analogue_trace_count,
+        corrupted_prior_count=corrupted_prior_count or None,
+        scaled_manifest=scaled_manifest or None,
     )
 
 
@@ -2275,6 +2297,10 @@ def main(
     initialize_compatible_from_source_checkpoint: bool = False,
     corrupted_prior_mix: bool = False,
     organic_vocabulary: bool = False,
+    analogue_trace_pool: str = "",
+    analogue_trace_count: int = 0,
+    corrupted_prior_count: int = 0,
+    scaled_manifest: str = "",
 ) -> None:
     modes = sum(
         (
@@ -2512,6 +2538,10 @@ def main(
             initialize_compatible_from_source_checkpoint,
             corrupted_prior_mix,
             organic_vocabulary,
+            analogue_trace_pool,
+            analogue_trace_count,
+            corrupted_prior_count,
+            scaled_manifest,
         )
         phase = "train_spawned"
     else:

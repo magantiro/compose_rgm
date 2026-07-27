@@ -16,7 +16,9 @@ import torch
 
 from compose_v4.chem.molecular_graph import (
     CNOF_VOCABULARY,
+    IDX_TO_ELEMENT,
     ORGANIC_VOCABULARY,
+    is_element,
     molecular_graph_to_smiles,
     smiles_to_molecular_graph,
 )
@@ -24,6 +26,7 @@ from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.data.organic_corpus import BROAD_ORGANIC_V1, load_organic_corpus_split
+from compose_v4.experiments.hierarchical_sampler import build_layered_sampler
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_metrics
@@ -235,6 +238,37 @@ def _evaluation_batch_cache_signature(
         ),
         "property_conditioning": property_conditioning,
     }
+
+
+_CNOF_SYMBOLS = frozenset({"C", "N", "O", "F"})
+
+
+def _record_cold_elements(record):
+    """Non-CNOF element symbols present in a record's trace target (drives the sampler cold-element floors)."""
+    target = record.path.trace.target
+    real = is_element(target.atom_types)
+    return {IDX_TO_ELEMENT[int(t)] for t in target.atom_types[real]} - _CNOF_SYMBOLS
+
+
+def _build_scaled_manifest_sampler(train_records, *, denovo_keep, n_corruption, manifest_path, seed):
+    """Build the hierarchical record sampler from a scaled manifest + the layer boundaries of train_records
+    (denovo[:denovo_keep] + corruption[n_corruption] + mmp[rest]). Returns None if the manifest has no
+    positive-weight layer. Tags align 1:1 with train_records (the dataset guard enforces it)."""
+    manifest = json.loads(Path(manifest_path).read_text())
+    locked = manifest.get("locked_mixture") or {}
+    weights = {k: float(v) for k, v in (locked.get("layer_weights") or {}).items() if float(v) > 0}
+    if not weights:
+        return None
+    edges = tuple(locked.get("curriculum_bin_edges") or (1, 2, 4))
+    floor = float(locked.get("cold_element_floor", 0.0))
+    records_by_layer: dict[str, tuple] = {}
+    if denovo_keep:
+        records_by_layer["denovo"] = tuple(train_records[:denovo_keep])
+    records_by_layer["corruption"] = tuple(train_records[denovo_keep:denovo_keep + n_corruption])
+    records_by_layer["mmp"] = tuple(train_records[denovo_keep + n_corruption:])
+    return build_layered_sampler(
+        records_by_layer, layer_weights=weights, path_length_bins=edges,
+        cold_element_floor=floor, cold_elements_of=_record_cold_elements, seed=seed)
 
 
 def _training_support_cache_signature(
@@ -1194,6 +1228,15 @@ def main() -> None:
         help="cap on analogue traces appended (0 = the whole pool); tune against --corrupted-prior-count "
         "to set the corruption:MMP mixture proportions",
     )
+    parser.add_argument(
+        "--scaled-manifest",
+        type=str,
+        default=None,
+        help="path to a scaled B-edit data manifest (scripts/build_scaled_edit_manifest.py output): drives "
+        "the hierarchical training sampler (LOCKED layer weights + curriculum bins + cold-element floors) "
+        "instead of uniform sampling. Requires --corrupted-prior-mix; drops the de-novo retention subset "
+        "(the mixture is manifest-controlled, de-novo retained via the warm-start).",
+    )
     args = parser.parse_args()
 
     checkpoint_modes = sum(
@@ -1289,6 +1332,19 @@ def main() -> None:
             "compile-training-support-steps and require-training-support-cache "
             "are mutually exclusive"
         )
+    if args.scaled_manifest and not args.corrupted_prior_mix:
+        raise ValueError("--scaled-manifest requires --corrupted-prior-mix")
+    if args.scaled_manifest and (
+        args.require_training_support_cache or args.compile_training_support_steps
+    ):
+        # The hierarchical sampler changes the row->record mapping, but the separate support COMPILER
+        # (compile_training_support_shards) draws uniformly -> a pre-compiled cache would misalign. Until the
+        # compiler shares the sampler, --scaled-manifest must compute support on the fly.
+        raise ValueError(
+            "--scaled-manifest is incompatible with a pre-compiled training-support cache (the hierarchical "
+            "sampler changes the row->record mapping); run without --require-training-support-cache so "
+            "support is computed on the fly, or tune --corrupted-prior-count/--analogue-trace-count for the "
+            "mixture under uniform sampling")
     support_start_row = args.compile_training_support_start_step * args.batch_size
     support_stop_row = (
         args.compile_training_support_start_step + args.compile_training_support_steps
@@ -2086,6 +2142,9 @@ def main() -> None:
             f"{empty_partitions}; enlarge the training/catalog split or increase "
             "the typed-template limits"
         )
+    # Layer boundaries of the final train_records tuple, for the scaled-manifest hierarchical sampler.
+    scaled_sampler_denovo_keep = 0
+    scaled_sampler_n_corruption = 0
     if args.corrupted_prior_mix:
         # Append corrupted-molecule source-prior (B-edit) records IN MEMORY -- never persisted to the
         # path cache, so B's carbon-tree cache stays reusable under --train-only. Sized ~50/50 against
@@ -2103,7 +2162,11 @@ def main() -> None:
         # Keep an equal-sized de-novo subset so uniform sampling sees a real ~50/50 edit ratio; the model
         # already knows de-novo via the warm-start, so a subset suffices for retention. (Sizing this to
         # the full corpus would run the CPU corruption for tens of hours on the training GPU.)
-        denovo_keep = min(len(train_records), len(edit_records))
+        # Under --scaled-manifest the hierarchical sampler controls the mixture, so drop the de-novo
+        # retention subset (de-novo is retained via the warm-start); else keep it for the uniform ~50/50.
+        denovo_keep = 0 if args.scaled_manifest else min(len(train_records), len(edit_records))
+        scaled_sampler_denovo_keep = denovo_keep
+        scaled_sampler_n_corruption = len(edit_records)
         train_records = tuple(train_records)[:denovo_keep] + tuple(edit_records)
         print(
             json.dumps(
@@ -3054,10 +3117,26 @@ def main() -> None:
         )
 
     if isinstance(model, FactorizedTraceletRateModel) and loaded_checkpoint is None:
+        edit_record_index_sampler = None
+        if args.scaled_manifest:
+            edit_record_index_sampler = _build_scaled_manifest_sampler(
+                train_records,
+                denovo_keep=scaled_sampler_denovo_keep,
+                n_corruption=scaled_sampler_n_corruption,
+                manifest_path=args.scaled_manifest,
+                seed=args.seed + 11,
+            )
+            print(json.dumps({
+                "phase": "hierarchical_sampler",
+                "records": len(train_records),
+                "realized_count_fractions": (None if edit_record_index_sampler is None
+                                             else edit_record_index_sampler.realized_layer_fractions()),
+            }, sort_keys=True), flush=True)
         history, selected_validation = train_factorized_mark_model(
             model,
             train_records,
             validation_examples,
+            record_index_sampler=edit_record_index_sampler,
             steps=args.steps,
             batch_size=args.batch_size,
             learning_rate=args.learning_rate,
