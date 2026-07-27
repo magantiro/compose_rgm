@@ -97,17 +97,21 @@ finalized once (2) is decided.
 - Tests: `test_semantic_partial_transfer.py` (10), `test_warmstart_launch_flag.py` (2, doc can't revert to
   the strict flag). Commits: #1 `30c92d0` (impl+tests), #2 `047bf03` (wiring), #4 `325dff4` (provenance/docs).
 
-## 8. Calibration (§6) + low-mass fresh-row policy (§7) ✅ measured + policy verified
+## 8. Calibration (§6) — diagnostic proposal, NOT applied
 Fixed 8-molecule CNOF panel; B vs whole-head-reset vs semantic-transfer, on identical node features.
-- **(A) Shared-support fidelity — semantic preserves B's CNOF kernel EXACTLY**: restate/grow_root shared TV =
-  **0.0 / 0.0**, raw-logit max err = **0.0**. Whole-head-reset destroys it (TV 0.35 / 0.095).
+- **(A) Shared HEAD-CONDITIONAL fidelity — semantic preserves B's CNOF head-conditional distributions
+  EXACTLY**: restate/grow_root shared TV = **0.0 / 0.0**, raw-logit max err = **0.0**. Whole-head-reset
+  destroys it (TV 0.35 / 0.095). *(Complete-mark + canonical-successor shared fidelity: pending §5 — the
+  "exact shared kernel" claim is deferred until then.)*
 - **(B) New-support mass**: the 11 fresh S/P/Cl/Br/I/B rows **over-draw ~71–82%** of the restate/grow
-  categorical at init (vs a **2.6%** production non-CNOF target fraction) — a count artifact → triggers §7.
-- **(C) §7 policy (verified):** `new_bias[c] = log(smoothed_production_freq[c]) + β_head` (β 1.25 restate /
-  1.0 grow_root, fit on the panel to the 2.6% production rate). Drives α_new **0.82→0.026** / **0.71→0.026**;
-  **shared-support fidelity unchanged (TV=0)** — only new-class *bias* rows change, fresh weights retained
-  (nonzero trainable support, not masked). Derived from the predefined panel + production statistics only.
-  Artifact: `diagnostics/production_preflight/calibration.json`. **To be applied at the preflight init.**
+  categorical at init — an **initialization failure**. A new-row-only bias correction reduces it without
+  changing shared-row logits.
+- **(C) DIAGNOSTIC_CALIBRATION_PROPOSAL (not applied):** `new_bias[c] = log(smoothed atom-freq[c]) + β`
+  drives α_new to the **broad-corpus non-CNOF atom fraction (2.6%)** while keeping shared fidelity TV=0. This
+  2.6% is an atom-occurrence PLACEHOLDER, **not** the action-conditioned selected-target rate. The
+  **production** policy target = the operator-conditioned **selected-target** distribution from the locked
+  sampler (§2), re-derived on a stratified held-out calibration panel (§4). **β values here are diagnostic;
+  NOT applied to any optimizer update.** Artifact: `diagnostics/production_preflight/calibration.json`.
 
 ## Pending (before the STOP report)
 - §5/§7 Stage-7 gradient checks: cold non-CNOF embedding rows + fresh output rows receive gradients + nonzero
