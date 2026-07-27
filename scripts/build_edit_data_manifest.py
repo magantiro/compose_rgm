@@ -35,6 +35,35 @@ def _hash_sources(paths: list[str]) -> str:
     return digest.hexdigest()[:16]
 
 
+def _sha256(path: Path) -> str | None:
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+
+
+def _trace_pool_provenance() -> dict:
+    """Record the GENERATED analogue trace pool by provenance (it is a derived dataset, not a committed
+    fixture): row count, content SHA-256, exact generation command, input-corpus id + hash, and schema."""
+    pool = REPO / "diagnostics/composition/analogue_trace_pool.jsonl"
+    corpus = REPO / "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles"
+    rows = sum(1 for line in pool.open() if line.strip()) if pool.exists() else 0
+    schema = sorted(json.loads(pool.open().readline()).keys()) if rows else []
+    return {
+        "analogue_trace_pool": {
+            "path": "diagnostics/composition/analogue_trace_pool.jsonl",
+            "kind": "generated dataset (NOT a committed fixture) -- regenerate from the command below",
+            "row_count": rows,
+            "sha256": _sha256(pool),
+            "generation_command": "PYTHONPATH=src:scripts python scripts/build_analogue_trace_pool.py",
+            "input_corpus": {
+                "id": "guacamol_heldout_val_5000_seed0",
+                "path": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+                "sha256": _sha256(corpus),
+                "tracked_in_git": True,
+            },
+            "record_schema": schema,
+        },
+    }
+
+
 def _git_commit() -> str:
     try:
         out = subprocess.run(
@@ -87,6 +116,7 @@ def build_manifest(characterization_path: str, out_path: str) -> dict:
             "status": "TO DEFINE at production scale (the pilot mined the val partition only).",
         },
         "trace_counts": char.get("meta", {}),
+        "trace_pool_provenance": _trace_pool_provenance(),
         "curriculum_bins": {layer: _bins(layer) for layer in ("corruption", "analogue", "overall")},
         "characterization_report": characterization_path,
         "notes": "Percentages/curriculum are PROPOSED (see docs/PHASE0B_DATA_RECIPE.md), not locked; they "

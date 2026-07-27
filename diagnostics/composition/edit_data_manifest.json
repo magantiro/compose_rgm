@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "git_commit": "560009a",
+  "git_commit": "60e8074",
   "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)",
   "source_corpus": {
     "partition": "guacamol_heldout_val_5000_seed0",
@@ -43,6 +43,34 @@
     "morgan_radius": 2,
     "morgan_nbits": 2048,
     "seed": 0
+  },
+  "trace_pool_provenance": {
+    "analogue_trace_pool": {
+      "path": "diagnostics/composition/analogue_trace_pool.jsonl",
+      "kind": "generated dataset (NOT a committed fixture) -- regenerate from the command below",
+      "row_count": 98,
+      "sha256": "58ace3f46a79a9bceaaf2d8e846555c2630ff2d4488fd2e30e5ce1cd0cb1613b",
+      "generation_command": "PYTHONPATH=src:scripts python scripts/build_analogue_trace_pool.py",
+      "input_corpus": {
+        "id": "guacamol_heldout_val_5000_seed0",
+        "path": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+        "sha256": "1f8e92f70018dfb94965977f87b7844dea791e4727ea8f7d251946925d1aa99f",
+        "tracked_in_git": true
+      },
+      "record_schema": [
+        "diagnostics",
+        "direction",
+        "metadata",
+        "n_slots",
+        "operator_histogram",
+        "pair_index",
+        "path_length",
+        "source_smiles",
+        "steps",
+        "target_key",
+        "target_smiles"
+      ]
+    }
   },
   "curriculum_bins": {
     "corruption": {
