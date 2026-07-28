@@ -690,6 +690,8 @@ def _run_remote(
     compatible_initialization: bool = False,
     training_steps: int | None = None,
     schedule_steps: int | None = None,
+    disable_early_stopping: bool = False,
+    snapshot_checkpoints: bool = False,
     training_support_workers: int = 12,
     training_support_microbatch_size: int = 4,
     training_support_prefetch_factor: int = 2,
@@ -748,6 +750,13 @@ def _run_remote(
         recipe["arguments"]["steps"] = int(training_steps)
     if schedule_steps is not None:
         recipe["arguments"]["schedule_steps"] = int(schedule_steps)
+    if disable_early_stopping:
+        # Run the full declared horizon: patience 0 disables performance-based early stopping, so the run
+        # terminates only on numerical/correctness failure and a post-hoc selection rule scores every
+        # snapshot. Required when the training objective is NOT the checkpoint-selection metric.
+        recipe["arguments"]["early_stopping_patience"] = 0
+    if snapshot_checkpoints:
+        recipe["arguments"]["snapshot_checkpoints"] = True
     if corrupted_prior_mix:
         # Emit --corrupted-prior-mix to the gate (fine-tune B -> B-edit): mixed corrupted-prior records
         # + the ring_system_restate / cyclic bond_reroute editing marks. Weights preserved by warm-start.
@@ -1597,6 +1606,8 @@ def train_stage(
     analogue_trace_count: int = 0,
     corrupted_prior_count: int = 0,
     scaled_manifest: str = "",
+    disable_early_stopping: bool = False,
+    snapshot_checkpoints: bool = False,
 ) -> dict[str, object]:
     # Zero-mixture (RING_CORE_V1 / --scaled-manifest): denovo_keep=0 so NO de-novo path cache is opened and
     # the training-support cache is built on-the-fly; a warm-started zero-mixture run must not require (or
@@ -1624,6 +1635,8 @@ def train_stage(
         analogue_trace_count=analogue_trace_count,
         corrupted_prior_count=corrupted_prior_count or None,
         scaled_manifest=scaled_manifest or None,
+        disable_early_stopping=disable_early_stopping,
+        snapshot_checkpoints=snapshot_checkpoints,
     )
 
 
@@ -2440,6 +2453,8 @@ def main(
     support_workers: int = 12,
     training_steps: int = 0,
     schedule_steps: int = 0,
+    disable_early_stopping: bool = False,
+    snapshot_checkpoints: bool = False,
     initialize_from_source_checkpoint: bool = False,
     initialize_compatible_from_source_checkpoint: bool = False,
     corrupted_prior_mix: bool = False,
@@ -2752,6 +2767,8 @@ def main(
             analogue_trace_count,
             corrupted_prior_count,
             scaled_manifest,
+            disable_early_stopping=disable_early_stopping,
+            snapshot_checkpoints=snapshot_checkpoints,
         )
         phase = "train_spawned"
     else:

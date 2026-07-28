@@ -1,0 +1,69 @@
+{
+  "rule_id": "ringcore_v1_checkpoint_selection",
+  "status": "FROZEN_BEFORE_LAUNCH",
+  "owner_decision_date": "2026-07-28",
+  "applies_to": "RingCore-V1 EDITING checkpoints (source-conditioned embedded-jump-chain deployment)",
+
+  "why": {
+    "finding": "CHECKPOINT_SELECTION_METRIC_MISMATCH",
+    "not": "a training failure",
+    "detail": "The training objective is the hazard-inclusive Poisson-Bregman GM loss L = Lambda_theta - r*(log Lambda_theta + log p_theta(selected)). The EDITING deployment is a fixed-budget embedded jump chain that DISCARDS the hazard and acts on the canonical-successor kernel. Selecting a checkpoint by the hazard-inclusive loss therefore optimizes a term the deployment ignores. In run compose-v4-ringcore-v1-full-6428901-v1 this selected step 500 (predicted hazard 0.617 nearest the teacher 0.510) even though selected-mark probability improved 3.8x (0.0316 -> 0.1189) and atom_restate top-3 improved 0.208 -> 0.528 by step 2000.",
+    "separate_issue": "The hazard mis-calibration (predicted ~0.98 vs teacher 0.510) is a RATE-CALIBRATION issue tracked separately. An editing checkpoint selected under this rule MUST NOT be used as the final timed de-novo model."
+  },
+
+  "primary_metric": {
+    "name": "production_weighted_canonical_successor_nll",
+    "definition": "L_edit = -mean log sum_{a : canonical(T(x,a)) == y_teacher} p_theta(a | x, t)",
+    "rationale": "The controller acts on the canonical-successor embedded chain -- not raw mark coordinates and not the continuous-time hazard.",
+    "direction": "minimize"
+  },
+  "secondary_metric": {
+    "name": "balanced_family_canonical_successor_nll",
+    "direction": "minimize",
+    "use": "decides statistical ties on the primary metric"
+  },
+  "tie_breakers": ["family_mass_calibration_tv_kl", "rollout_behavior"],
+
+  "gates_first": {
+    "hard_gates": "ALL must pass (validity, cycle-rank, charge preservation, executor/successor match, kernel normalization, no over-40, grow dead, no NaN/inf, identity match)",
+    "family_liveness": "no enabled family may be effectively dead (positive target probability, non-negligible updates, non-zero canonical-successor mass, present in natural rollouts where opportunities exist)"
+  },
+
+  "explicitly_forbidden": [
+    "selecting by the hazard-inclusive GM loss",
+    "using top-3 accuracy as the PRIMARY selection metric",
+    "modifying the GM training objective as part of this correction"
+  ],
+
+  "reported_per_checkpoint": [
+    "production_weighted_canonical_successor_nll",
+    "balanced_family_canonical_successor_nll",
+    "raw_mark_nll",
+    "selected_mark_probability",
+    "family_calibration_tv",
+    "family_calibration_kl",
+    "family_target_ranks",
+    "hard_gate_results",
+    "natural_family_utilization",
+    "hazard_calibration_separately"
+  ],
+
+  "corrected_run": {
+    "start_from": "base B FRESH (--initialize-compatible-from-source-checkpoint); clean lineage",
+    "training_steps": 3000,
+    "warmup_steps": 500,
+    "schedule_steps": 3000,
+    "scheduler_config_hash": "0b832985c65de1cc",
+    "early_stopping": "DISABLED (--disable-early-stopping -> patience 0); terminate early ONLY for numerical or correctness failure",
+    "snapshots": "--snapshot-checkpoints -> checkpoint.step<N>.pt at every recovery point (recovery_every=500) => 500, 1000, 1500, 2000, 2500, 3000",
+    "unchanged": ["model architecture", "generator-matching training loss", "data mixture", "curriculum", "optimizer", "teacher rates", "calibration policy", "operator support", "initialization"]
+  },
+
+  "provisional_checkpoint_protocol": {
+    "label": "PROVISIONAL_EDITING_CHECKPOINT",
+    "not": "the final scientific production checkpoint",
+    "permitted_use": ["controller code/debugging", "preliminary experiments"],
+    "forbidden_use": ["frozen Figure 4 results", "final load-bearing controller comparisons"],
+    "after_corrected_selection": "rerun every load-bearing controller comparison and regenerate final artifacts from that SINGLE checkpoint lineage"
+  }
+}

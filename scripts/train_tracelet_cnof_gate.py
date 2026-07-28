@@ -141,6 +141,13 @@ def _best_so_far_path(checkpoint: Path) -> Path:
     return checkpoint.with_name(f"{checkpoint.stem}.best_so_far{checkpoint.suffix}")
 
 
+def _step_snapshot_path(checkpoint: Path, completed_steps: int) -> Path:
+    """Step-stamped snapshot (``checkpoint.step1500.pt``). The rolling recovery file OVERWRITES itself, so
+    a post-hoc checkpoint-selection rule (choose the step minimizing a held-out metric) has nothing to
+    select from once a run ends. Opt-in via --snapshot-checkpoints; off by default (byte-identical)."""
+    return checkpoint.with_name(f"{checkpoint.stem}.step{int(completed_steps)}{checkpoint.suffix}")
+
+
 def _validation_baseline_for_run(
     observed_validation: dict[str, float],
     resume_state: dict[str, object] | None,
@@ -1360,6 +1367,15 @@ def main() -> None:
         type=int,
         default=200,
         help="training steps between exact recovery snapshots; 0 disables them",
+    )
+    parser.add_argument(
+        "--snapshot-checkpoints",
+        action="store_true",
+        help=(
+            "also persist a step-stamped checkpoint (checkpoint.step<N>.pt) at every recovery point, so a "
+            "post-hoc checkpoint-selection rule can score several steps; the rolling recovery file "
+            "overwrites itself and would otherwise leave only the final step"
+        ),
     )
     parser.add_argument(
         "--rollout-cache",
@@ -3519,6 +3535,24 @@ def main() -> None:
             "initial_validation": initial_validation,
         }
         _atomic_torch_save(payload, recovery_path)
+        if args.snapshot_checkpoints and args.checkpoint is not None:
+            # Step-stamped copy of the SAME exact-recovery payload, so a post-hoc selection rule can score
+            # each step's current_state_dict. The rolling recovery file overwrites itself every interval.
+            snapshot_path = _step_snapshot_path(
+                args.checkpoint, int(training_state["completed_steps"])  # type: ignore[arg-type]
+            )
+            _atomic_torch_save(payload, snapshot_path)
+            print(
+                json.dumps(
+                    {
+                        "phase": "step_snapshot_saved",
+                        "path": str(snapshot_path),
+                        "completed_steps": training_state["completed_steps"],
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
         if best_so_far_path is not None:
             _atomic_torch_save(
                 {
