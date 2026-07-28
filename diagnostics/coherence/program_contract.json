@@ -1,0 +1,49 @@
+{
+  "atom_vocabulary": "ORGANIC_VOCABULARY",
+  "base_b_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+  "calibration_policy_hash": "f534c0233e3bf4a0",
+  "canonical_successor_hash": "f83d2f43e489c3a2",
+  "capability_hash": "330473e319bfec19",
+  "charge_policy": "retain_representable_charges__charge_preserving",
+  "corpus_scope_hash": "3721d69851110fdd",
+  "corruption_policy_hash": "1bbb9fc32c360d7a",
+  "curriculum_bin_edges": [
+    5,
+    9,
+    13
+  ],
+  "cycle_op_semantic_hash": "27a823aeb6cf7548",
+  "denovo_keep": 0,
+  "editing_process_type": "fixed_step_embedded_jump_chain__source_conditioned",
+  "enable_cycle_ops": true,
+  "enable_ring_grow_macro": false,
+  "enable_ring_macros": false,
+  "eval_operator_capability_fingerprint": "5bedd317328c9ed7",
+  "evaluation_batch_cache_format_version": 2,
+  "executor_hash": "f83d2f43e489c3a2",
+  "mark_rule_names": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_grow",
+    "ring_system_delete",
+    "ring_system_restate"
+  ],
+  "max_atoms": 40,
+  "model_architecture_version": "factorized_tracelet_rate_model_v1",
+  "operator_registry_hash": "9197401e8dc3a7ae",
+  "program": "RING_CORE_V1",
+  "ring_catalog_fingerprint": "639ff6078c32d43c",
+  "sampler_mixture": {
+    "corruption": 0.55,
+    "denovo": 0.0,
+    "mmp": 0.45
+  },
+  "standardization_hash": "a8d574cc91c89cb3",
+  "state_space_version": "broad_organic_v1",
+  "teacher_filter_version": 1
+}

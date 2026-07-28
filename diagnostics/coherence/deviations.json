@@ -1,0 +1,27 @@
+{
+  "audit": "program_coherence_2026-07-28", "head": "4204c9d", "verdict": "COHESIVE_WITH_QUARANTINED_LEGACY",
+  "counts": {"CRITICAL": 0, "HIGH": 3, "MEDIUM": 8, "LOW": 14},
+  "high": [
+    {"id": "H1", "layer": "model construction", "issue": "no canonical model factory; trainer+loader duplicate the ~15-arg constructor", "status": "OPEN"},
+    {"id": "H2", "layer": "reward-FT sampler (experimental)", "issue": "trajectory_log_prob silently defaults editing capabilities off + drops ring catalog", "status": "OPEN"},
+    {"id": "DEV-CUDA", "layer": "warm-start device", "issue": "_cksum called .numpy() on a CUDA tensor without .cpu(); crashed the A100 bounded run", "status": "FIXED"}
+  ],
+  "priority_medium": [
+    {"id": "G1", "issue": "no gate assertion cycle_op_mix => disable_ring_grow_macro"},
+    {"id": "M1", "issue": "OperatorCapabilities not the single source in production"},
+    {"id": "L1", "issue": "capability fingerprint omits enable_cycle_ops (defining RingCore feature)"},
+    {"id": "R1", "issue": "ring_delete is catalog-bounded (live dependency); 'catalog acceleration-only' partial"},
+    {"id": "P1", "issue": "paper: base corpus described as charged N+/O- but loader is CNOF-neutral-only"},
+    {"id": "P2", "issue": "paper: catalog-independence claimed for released base, true only for unreleased core"}
+  ],
+  "confirmed_coherent": {
+    "one_executor": "RewriteSystem.apply kernel.py:51",
+    "one_canonical_successor": "canonical_state_key kernel.py:95",
+    "one_enumerator": "prepare_factorized_mark_batch (data-gen fibers = dense mask = sampler)",
+    "operator_ontology": "cycle_close/cycle_open aliasing complete + consistent at every teacher->family site",
+    "probabilistic_object": "levels cleanly separated; hazard retained in GM loss; editing=embedded chain, de-novo=rates",
+    "flags_threaded": "trainer persists == loader reads (verified symmetric)",
+    "legacy": "quarantined + not reachable-and-silently-wrong from canonical",
+    "paper": "no HIGH-risk archetype present"
+  }
+}

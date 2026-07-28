@@ -1,0 +1,26 @@
+{
+  "audit": "program_coherence_2026-07-28",
+  "active_run": {
+    "run_label": "compose-v4-ringcore-v1-bounded-4204c9d-v1",
+    "function_call_id": "fc-01KYMDN2KRPMF963RADCF5VME1",
+    "launch_commit": "4204c9dc0bec58a202ec64fbb93316c5487b5aba",
+    "repo_HEAD_at_launch": "4204c9dc0bec58a202ec64fbb93316c5487b5aba",
+    "commits_between_launch_and_HEAD": [],
+    "launch_command": "modal run --detach modal_apps/train_tracelet_gm.py --train-only --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --scaled-manifest /artifacts/ring_core_v1/ring_core_v1_scaled_manifest.json --analogue-trace-pool /artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl --analogue-trace-count 5000 --corrupted-prior-count 200 --source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 --initialize-compatible-from-source-checkpoint --checkpoint-name checkpoint.best_so_far.pt --training-steps 500 --schedule-steps 500",
+    "manifest_volume_path": "/artifacts/ring_core_v1/ring_core_v1_scaled_manifest.json",
+    "base_checkpoint_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "output_namespace": "compose-v4-artifacts/compose-v4-ringcore-v1-bounded-4204c9d-v1",
+    "status_label": "NON_SCIENTIFIC_PREFLIGHT"
+  },
+  "production_contract_fingerprint": "3917a0bf4a3de9830722663f",
+  "contract_hashes": {
+    "capability_hash": "330473e319bfec19",
+    "operator_registry_hash": "9197401e8dc3a7ae",
+    "cycle_op_semantic_hash": "27a823aeb6cf7548",
+    "calibration_policy_hash": "f534c0233e3bf4a0",
+    "scope_hash": "3721d69851110fdd",
+    "eval_operator_capability_fingerprint": "5bedd317328c9ed7",
+    "teacher_filter_hash": "f8137995181eeadc"
+  },
+  "note": "The active run is an execution of commit 4204c9d. Audit deliverables that advance repo HEAD do NOT alter the run's pinned provenance. Read-only-first: no production code changed during the mapping phase."
+}
