@@ -367,7 +367,13 @@ introductions are rare in practice.
 
 ## Paper position (§9)
 The method is written around the compositional ring core; the theoretical support claim does NOT depend on a
-finite macro dictionary. Macros, if later adopted (`RING_HYBRID_V2`), are optional learned shortcuts for
-frequent ring transformations. The compositional-only model is the **support-complete** variant, not a
-reduced-capability one — macros affect efficiency and finite-budget reachability. Required ablation:
-compositional-only / catalog-only / compositional+macros.
+finite macro dictionary. **Precision (R1) — "catalog-independent" is scoped to ring GENERATION, not all ring
+support:** ring GENERATION is compositional (`cycle_close`/`cycle_open`, catalog-independent) and ring
+RESTATE (`ring_system_restate`) is catalog-independent, but ring DELETION (`ring_system_delete`/`ring_delete`)
+remains catalog-bounded to the 5 seed topologies via `enumerate_clean_ring_system_deletes(state, catalog)` — a
+live catalog dependency, retained by design. So "macros disabled / catalog acceleration-only" is only
+partially realized: whole-ring deletion is a catalog-bounded operator. Macros, if later adopted
+(`RING_HYBRID_V2`), are optional learned shortcuts for frequent ring transformations. The compositional-only
+model is the **support-complete** variant for ring GENERATION, not a reduced-capability one — macros affect
+efficiency and finite-budget reachability. Required ablation: compositional-only / catalog-only /
+compositional+macros.

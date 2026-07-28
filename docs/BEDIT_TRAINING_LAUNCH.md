@@ -104,6 +104,17 @@ modal run modal_apps/train_tracelet_gm.py --support-compile-only \
   --run-label compose-v4-bedit-broad-<COMMIT>-v1 \
   --source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1
 
+# 2b. ONE-STEP GPU SMOKE (required; DEV-CUDA lesson). Early-exit dry-launch on the A100 with the REAL
+#     train args -- exercises the CUDA warm-start + first training forward + one validation forward that a
+#     CPU-only dry-launch structurally cannot. A CUDA-only bug (e.g. `.numpy()` on a cuda tensor, autocast/
+#     bf16 numerics) surfaces here, before the full run. Same flags as step 3 but `--gpu-smoke` + a distinct
+#     run-label; it early-exits before backward/optimizer.
+modal run --detach modal_apps/train_tracelet_gm.py --gpu-smoke \
+  <same corrupted-prior/cycle-op/vocab/manifest/warm-start flags + --training-steps/--schedule-steps as step 3> \
+  --run-label compose-v4-bedit-broad-<COMMIT>-gpusmoke-v1
+# GATE: /artifacts/<run-label>/gpu_smoke.json must have train_loss_finite && validation_loss_finite &&
+#       zero_mixture_ok && denovo_and_optimizer_all_zero before step 3.
+
 # 3. warm-start fine-tune B -> B-edit (A100). --train-only reuses B's path/eval caches + the recompiled
 #    support cache; strict warm-start loads B into the flag-constructed (organic, enable_*) model.
 modal run --detach modal_apps/train_tracelet_gm.py --train-only \
@@ -138,5 +149,7 @@ charged-context failure — no silent neutral fallback. It also enforces the `co
 
 ## Standing constraints
 - Never launch before `prelaunch_gate.py` is green; launch only from a clean committed worktree.
+- Always run the one-step GPU smoke (`--gpu-smoke`, step 2b) and confirm `gpu_smoke.json` is finite before
+  the full A100 run — a CPU-only dry-launch cannot validate the CUDA device path (DEV-CUDA lesson).
 - Do not modify the audited sampler / GM loss / executor / operator semantics / checkpoint contract.
 - The A100 run is the real spend — confirm steps + count + budget before `modal run --detach`.
