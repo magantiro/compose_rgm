@@ -1,0 +1,50 @@
+{
+  "artifact": "packed_trace_store_benchmark",
+  "corrections_to_earlier_claims": [
+    {
+      "claim": "validate=False will remove the load cost",
+      "measured": "1.1x only",
+      "why_wrong": "the validity checks live inside the executor's apply, not the decoder's optional verification"
+    },
+    {
+      "claim": "packed states give ~630x",
+      "measured": "2x at first, 98x after the second replay was removed",
+      "why_wrong": "the 630x micro-benchmark timed PackedMolecularGraph pack/unpack in isolation and omitted decode_trace_record, which still replayed"
+    },
+    {
+      "claim": "storing all states costs 3-6 GB",
+      "measured": "0.13 GB",
+      "why_wrong": "bond matrices are sparse and gzip well"
+    }
+  ],
+  "correctness": {
+    "accessors_verified": [
+      "trace",
+      "state_at",
+      "path_length",
+      "operational_jump_rate",
+      "marginal",
+      "jump_rate",
+      "sample_progress",
+      "states"
+    ],
+    "state_equality": "7854/7854 exact (canonical key)",
+    "trace_steps": "identical"
+  },
+  "date": "2026-07-28",
+  "load_ms_per_trace": {
+    "packed": 0.217,
+    "packed_with_2pct_replay_audit": 0.472,
+    "replay": 21.359
+  },
+  "measured_on": "real edit_precompile_v1 corruption/validation shard_0000 (1,985 traces, 7,854 states)",
+  "projection_full_train": {
+    "packed_minutes": 2.4,
+    "records": 664169,
+    "replay_hours": 3.9,
+    "store_gb": 0.13
+  },
+  "root_cause_of_the_load_cost": "decode_trace_record replays every step through the executor UNCONDITIONALLY -- `validate` gates only the canonical-key comparisons, not the replay, because the final state is needed as `target`. TraceProgressCTMC.__init__ then replays a SECOND time. Each apply() runs is_valid_state -> is_rdkit_valid -> molecular_graph_to_smiles, ~32 RDKit round-trips per record per replay.",
+  "safety_trade": "skipping replay means executor drift is no longer caught by re-execution at load; it is caught by refusing a store whose operator_registry_hash/codec_implementation_hash provenance disagrees, plus an on-demand verify_fraction replay audit (2% costs 0.47 ms/trace)",
+  "speedup": 98
+}
