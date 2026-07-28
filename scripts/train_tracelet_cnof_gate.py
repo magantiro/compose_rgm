@@ -2445,6 +2445,28 @@ def main() -> None:
             ),
             flush=True,
         )
+    if args.scaled_manifest and not validation_records:
+        # Zero-mixture edit VALIDATION (owner mandate §4): the de-novo validation partition is empty, so the
+        # held-out editing diagnostic is built from split.VALIDATION molecules (disjoint from split.train,
+        # which sourced the training edit records) -- covering the corrupted-prior + cycle-op editing families
+        # + broad-organic/charged contexts. NO de-novo/legacy evaluation cache is required.
+        _held_out = tuple(split.validation)[: max(1, min(args.corrupted_prior_count, len(split.validation)))]
+        _val_edit, _ = build_corrupted_prior_records(
+            _held_out, n_slots=args.max_atoms, depth_max=5, seed=args.seed + 17,
+            catalog=ring_catalog,
+            vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else CNOF_VOCABULARY,
+        )
+        if args.cycle_op_mix:
+            _val_cycle, _ = build_cycle_op_records(_held_out, n_slots=args.max_atoms, seed=args.seed + 18)
+            _val_edit = tuple(_val_edit) + tuple(_val_cycle)
+        validation_records = tuple(_val_edit)
+        print(
+            json.dumps(
+                {"phase": "zero_mixture_edit_validation", "validation_records": len(validation_records)},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     training_support_cache = None
     if args.training_support_cache_dir is not None:
         training_support_signature = _training_support_cache_signature(
@@ -2796,8 +2818,12 @@ def main() -> None:
             flush=True,
         )
         test_build_started = perf_counter()
+        # Zero-mixture: the de-novo test partition is empty; reuse the held-out edit validation records for the
+        # test batch (the test metric is diagnostic only, never a training/selection input). Keeps the batch
+        # non-empty without a de-novo cache.
+        _test_source = test_records if test_records else validation_records
         test_examples = sample_factorized_mark_batch(
-            test_records,
+            _test_source,
             batch_size=args.test_examples,
             seed=args.seed + 2,
             late_time_fraction=args.late_time_fraction,
