@@ -26,6 +26,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from compose_v4.data.packed_trace_store import read_packed_shard
 from compose_v4.data.scaffold_partition import (
     DEFAULT_RATIOS,
     SCAFFOLD_KEY_ALGORITHM,
@@ -131,10 +132,39 @@ def _shard_paths(root: Path, shard_layer: str, partition: str) -> list[Path]:
 
 
 def load_shard_layer_records(
-    root: Path, shard_layer: str, partition: str, *, checkpoint_interval: int | None = None
+    root: Path,
+    shard_layer: str,
+    partition: str,
+    *,
+    checkpoint_interval: int | None = None,
+    packed_root: Path | None = None,
+    verify_fraction: float = 0.0,
 ) -> tuple[PathRecord, ...]:
-    """Rebuild every trace of one precompiled (layer, partition) into a GM ``PathRecord``."""
+    """Rebuild every trace of one precompiled (layer, partition) into a GM ``PathRecord``.
+
+    With ``packed_root``, states come from the packed derivative store and no trace is replayed
+    (measured 21.36 -> 0.217 ms/trace). Without it, the audit shards are replayed -- correct but ~98x
+    slower. The packed path is an acceleration ONLY: both produce byte-identical states, which
+    tests/test_packed_trace_store.py asserts on every accessor the trainer touches.
+    """
     records: list[PathRecord] = []
+    if packed_root is not None:
+        # The derivative store must COVER the audit shards exactly. Without this, a packed shard that
+        # failed to build would silently shrink the training corpus -- a smaller run that still succeeds,
+        # which is the failure mode this whole loader exists to prevent.
+        audit_names = {path.name for path in _shard_paths(root, shard_layer, partition)}
+        packed_paths = _shard_paths(packed_root, shard_layer, partition)
+        packed_names = {path.name for path in packed_paths}
+        if packed_names != audit_names:
+            raise ProductionCorpusError(
+                f"packed store does not cover {shard_layer}/{partition}: "
+                f"missing {sorted(audit_names - packed_names)}, "
+                f"unexpected {sorted(packed_names - audit_names)}"
+            )
+        for path in packed_paths:
+            for trace, packed_path in read_packed_shard(path, verify_fraction=verify_fraction):
+                records.append(PathRecord(canonical_state_key(trace.target), packed_path))
+        return tuple(records)
     for path in _shard_paths(root, shard_layer, partition):
         for trace in load_trace_records(path):
             records.append(
@@ -211,6 +241,8 @@ def load_production_edit_corpus(
     cold_elements_of=None,
     mmp_limit: int | None = None,
     checkpoint_interval: int | None = None,
+    packed_root: Path | None = None,
+    verify_fraction: float = 0.0,
     seed: int = 0,
 ) -> LayeredEditCorpus:
     """Assemble the three-layer production corpus and its sampler from validated artifacts."""
@@ -220,7 +252,8 @@ def load_production_edit_corpus(
     by_layer: dict[str, tuple] = {}
     for shard_layer, production_layer in _SHARD_LAYER_TO_PRODUCTION.items():
         by_layer[production_layer] = load_shard_layer_records(
-            root, shard_layer, partition, checkpoint_interval=checkpoint_interval
+            root, shard_layer, partition, checkpoint_interval=checkpoint_interval,
+            packed_root=packed_root, verify_fraction=verify_fraction,
         )
     mmp_records, mmp_stats = load_mmp_records(
         mmp_pool_path,
@@ -248,6 +281,7 @@ def load_production_edit_corpus(
     )
     provenance = {
         "root": str(root),
+        "packed_root": None if packed_root is None else str(packed_root),
         "partition": partition,
         "configured_layer_weights": dict(layer_weights),
         "records_by_layer": {layer: len(rs) for layer, rs in ordered.items()},

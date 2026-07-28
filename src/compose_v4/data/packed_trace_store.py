@@ -119,6 +119,19 @@ def replay_verify(record: dict, states) -> None:
             )
 
 
+def source_shard_fingerprint(shard_path: Path) -> str:
+    """The ``content_sha256`` of the audit shard a packed store derives from.
+
+    The packed store is a DERIVATIVE: the audit shards remain the truth. Binding the derivative to its
+    source's content hash is what makes that hierarchy enforceable -- a rebuilt source shard invalidates
+    its packed store instead of silently pairing stale states with new traces.
+    """
+    manifest_path = Path(str(shard_path) + ".manifest.json")
+    if not manifest_path.exists():
+        raise PackedStoreError(f"source shard {shard_path} has no manifest to fingerprint")
+    return json.loads(manifest_path.read_text())["content_sha256"]
+
+
 def write_packed_shard(
     path: Path, entries: list[dict], *, provenance: dict
 ) -> dict:
@@ -127,7 +140,8 @@ def write_packed_shard(
     The manifest is not decoration: a store built under different capability flags enumerates different
     candidate families, and pairing it with a differently-configured trainer is the exact failure mode
     that produced "teacher outside exact dynamic candidates" on the eval path. ``read_packed_shard``
-    refuses a mismatch rather than training on it.
+    refuses a mismatch rather than training on it. ``provenance`` should carry the source shard's
+    ``content_sha256`` (see ``source_shard_fingerprint``) alongside the contract hashes.
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

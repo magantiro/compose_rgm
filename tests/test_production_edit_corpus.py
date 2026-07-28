@@ -204,3 +204,43 @@ def test_corrupt_shard_raises_rather_than_skipping(tmp_path):
         handle.write('{"schema": "compose.rewrite.trace", "schema_version": 99}\n')
     with pytest.raises(Exception):  # noqa: B017 -- any loud failure is acceptable; silence is not
         load_shard_layer_records(tmp_path, "corruption", "train")
+
+
+def test_packed_store_must_cover_every_audit_shard(tmp_path):
+    """An incomplete derivative store must RAISE, not silently train on a smaller corpus.
+
+    This was a real gap: with one of two audit shards packed, the loader happily returned half the
+    records. A run that succeeds on half the data is worse than one that crashes.
+    """
+    from compose_v4.data.production_edit_corpus import load_shard_layer_records
+
+    audit = tmp_path / "audit" / "corruption" / "train"
+    packed = tmp_path / "packed" / "corruption" / "train"
+    audit.mkdir(parents=True)
+    packed.mkdir(parents=True)
+    for name in ("shard_0000.jsonl.gz", "shard_0001.jsonl.gz"):
+        (audit / name).write_bytes(b"")
+    (packed / "shard_0000.jsonl.gz").write_bytes(b"")
+
+    with pytest.raises(ProductionCorpusError, match="does not cover"):
+        load_shard_layer_records(
+            tmp_path / "audit", "corruption", "train", packed_root=tmp_path / "packed"
+        )
+
+
+def test_packed_store_with_an_unexpected_shard_is_refused(tmp_path):
+    """Extra packed shards mean the derivative drifted from its source; refuse rather than over-train."""
+    from compose_v4.data.production_edit_corpus import load_shard_layer_records
+
+    audit = tmp_path / "audit" / "corruption" / "train"
+    packed = tmp_path / "packed" / "corruption" / "train"
+    audit.mkdir(parents=True)
+    packed.mkdir(parents=True)
+    (audit / "shard_0000.jsonl.gz").write_bytes(b"")
+    (packed / "shard_0000.jsonl.gz").write_bytes(b"")
+    (packed / "shard_9999.jsonl.gz").write_bytes(b"")
+
+    with pytest.raises(ProductionCorpusError, match="unexpected"):
+        load_shard_layer_records(
+            tmp_path / "audit", "corruption", "train", packed_root=tmp_path / "packed"
+        )
