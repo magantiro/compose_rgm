@@ -92,3 +92,26 @@ def test_seed_ring_catalog_reconstructs_deterministically():
     b = _build_ring_core_seed_ring_catalog(40)
     assert ring_catalog_fingerprint(a) == ring_catalog_fingerprint(b)  # deterministic
     assert len(a.statistics()) > 0
+
+
+def test_scaled_manifest_production_enabled_is_not_inverted():
+    """Regression: build_scaled_edit_manifest once computed production_enabled by EXCLUDING
+    cycle_insert/cycle_attach -- the inverse of the RingCore-V1 contract, which disables ring_system_grow
+    and keeps the compositional cycle families. It matters because operator_subtype_supervision_gate treats
+    production_enabled as the REQUIRED-supervision set: inverted, it demands supervision for the disabled
+    macro (spurious NO_GO) and lets cycle_close/cycle_open go unsupervised undetected. The live manifest was
+    correct only because build_ring_core_v1_manifest overwrote the field downstream."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    from build_scaled_edit_manifest import _LEGACY_DISABLED_FAMILIES
+
+    from compose_v4.model.factorized_tracelet_rate_model import MARK_RULE_NAMES
+
+    enabled = [m for m in MARK_RULE_NAMES if m not in _LEGACY_DISABLED_FAMILIES]
+    assert "ring_system_grow" not in enabled, "the disabled legacy macro must not be production-enabled"
+    assert "cycle_insert" in enabled and "cycle_attach" in enabled, (
+        "the compositional cycle families carry cycle_close/cycle_open and ARE production-enabled"
+    )
+    assert _LEGACY_DISABLED_FAMILIES == ("ring_system_grow",)

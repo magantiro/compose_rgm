@@ -44,6 +44,12 @@ _LOCKED_MIXTURE = {"corruption": 0.55, "mmp": 0.45, "scaffold": 0.0}
 _COLD_ELEMENT_FLOOR = 0.02  # >=2% of each epoch per cold non-CNOF element with supervision (measured)
 
 
+# Families DISABLED under the RingCore-V1 production contract. Ring addition is compositional
+# (cycle_close/cycle_open on the cycle_insert/cycle_attach slots); the legacy whole-ring grow
+# macro is masked dead with its params retained only for warm-start compatibility.
+_LEGACY_DISABLED_FAMILIES = ("ring_system_grow",)
+
+
 def _hash_sources(paths: list[str]) -> str:
     digest = hashlib.sha256()
     for rel in sorted(paths):
@@ -129,7 +135,15 @@ def build_manifest(summary_path: Path, pool_path: Path, out_path: Path) -> dict:
         "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)",
         "operator_registry": {
             "mark_rule_names": list(MARK_RULE_NAMES),
-            "production_enabled": [m for m in MARK_RULE_NAMES if m not in ("cycle_insert", "cycle_attach")],
+            # RingCore-V1: ring ADDITION is compositional, so cycle_insert/cycle_attach (the slots carrying
+            # cycle_close/cycle_open) ARE production-enabled; the legacy whole-ring macro is the disabled
+            # one. This list was previously inverted -- it excluded the two defining compositional families
+            # and retained the disabled macro. That matters because operator_subtype_supervision_gate.py
+            # treats production_enabled as the REQUIRED-supervision set: the inverted list would demand
+            # supervision for disabled ring_system_grow (spurious NO_GO) while allowing cycle_close/
+            # cycle_open to have zero supervision undetected.
+            "production_enabled": [m for m in MARK_RULE_NAMES if m not in _LEGACY_DISABLED_FAMILIES],
+            "legacy_disabled": list(_LEGACY_DISABLED_FAMILIES),
             "hash": _hash_sources([
                 "src/compose_v4/rewrite/operators.py", "src/compose_v4/rewrite/kernel.py",
                 "src/compose_v4/rewrite/factorized_fiber.py"]),
