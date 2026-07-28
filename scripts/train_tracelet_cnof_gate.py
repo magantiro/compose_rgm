@@ -2359,7 +2359,10 @@ def main() -> None:
         )
         if not records
     ]
-    if empty_partitions:
+    if empty_partitions and not args.scaled_manifest:
+        # Under zero-mixture (--scaled-manifest) the de-novo train/validation/test partitions are
+        # INTENTIONALLY empty (denovo_keep=0); the corrupted-prior + cycle-op edit records are appended
+        # below and become the training data. So an empty de-novo partition is expected here, not an error.
         raise ValueError(
             "typed ring support left empty path partitions: "
             f"{empty_partitions}; enlarge the training/catalog split or increase "
