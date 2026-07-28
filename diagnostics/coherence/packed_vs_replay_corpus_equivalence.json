@@ -1,0 +1,21 @@
+{
+  "mismatches": {
+    "path_length": 0,
+    "states": 0,
+    "target_key": 0
+  },
+  "note": "49x at the CORPUS-LOADER level vs 98x at the shard-read level: the loader also computes canonical_state_key(trace.target) per record, a fixed cost the packed path still pays. Report the loader number for schedule planning.",
+  "offline_pack_seconds": 84.1,
+  "records": {
+    "packed": 3973,
+    "replay": 3973
+  },
+  "scope": "corruption/validation, 2 real shards from edit_precompile_v1",
+  "seconds": {
+    "packed": 1.69,
+    "replay": 82.67
+  },
+  "speedup": 49,
+  "states_compared": 15455,
+  "verdict": "IDENTICAL"
+}
