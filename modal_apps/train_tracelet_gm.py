@@ -1516,6 +1516,62 @@ def dry_launch_stage(
 @app.function(
     image=image,
     gpu="A100",
+    cpu=16.0,
+    memory=65536,
+    timeout=3600,
+    volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
+)
+def gpu_smoke_stage(
+    run_label: str,
+    recipe_name: str = RECIPE_NAME,
+    initialization_source_run: str | None = None,
+    initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
+    compatible_initialization: bool = False,
+    corrupted_prior_mix: bool = False,
+    cycle_op_mix: bool = False,
+    disable_ring_grow_macro: bool = False,
+    organic_vocabulary: bool = False,
+    analogue_trace_pool: str = "",
+    analogue_trace_count: int = 0,
+    corrupted_prior_count: int = 0,
+    scaled_manifest: str = "",
+    training_steps: int | None = None,
+    schedule_steps: int | None = None,
+) -> dict[str, object]:
+    # One-step GPU smoke (Part D): the SAME early-exit dry-launch path as dry_launch_stage but on an A100, so
+    # it exercises the CUDA device path the CPU dry-launch cannot -- warm-start (where DEV-CUDA bit), the first
+    # training forward, and one edit-validation forward -- then exits before backward/optimizer. Runs with the
+    # real schedule-check args (training_steps=1000, schedule_steps=3000) so the launch-identity + scheduler
+    # guard fire on GPU exactly as the full run will; the early exit keeps it cheap.
+    return _run_remote(
+        run_label=run_label,
+        smoke=False,
+        require_path_cache=False,
+        require_training_support_cache=False,
+        skip_rollouts=True,
+        recipe_name=recipe_name,
+        path_cache_source_run=None,
+        dry_launch=True,
+        dry_launch_output=f"/artifacts/{run_label}/gpu_smoke.json",
+        training_steps=training_steps,
+        schedule_steps=schedule_steps,
+        initialization_source_run=initialization_source_run,
+        initialization_checkpoint_name=initialization_checkpoint_name,
+        compatible_initialization=compatible_initialization,
+        corrupted_prior_mix=corrupted_prior_mix,
+        cycle_op_mix=cycle_op_mix,
+        disable_ring_grow_macro=disable_ring_grow_macro,
+        organic_vocabulary=organic_vocabulary,
+        analogue_trace_pool=analogue_trace_pool or None,
+        analogue_trace_count=analogue_trace_count,
+        corrupted_prior_count=corrupted_prior_count or None,
+        scaled_manifest=scaled_manifest or None,
+    )
+
+
+@app.function(
+    image=image,
+    gpu="A100",
     cpu=32.0,
     memory=65536,
     timeout=24 * 3600,
@@ -2390,6 +2446,7 @@ def main(
     cycle_op_mix: bool = False,
     disable_ring_grow_macro: bool = False,
     dry_launch: bool = False,
+    gpu_smoke: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str = "",
     analogue_trace_count: int = 0,
@@ -2406,6 +2463,7 @@ def main(
             support_compile_only,
             train_only,
             dry_launch,
+            gpu_smoke,
             evaluate_only,
             rollout_evaluate_only,
             property_rollout_evaluate_only,
@@ -2438,7 +2496,7 @@ def main(
         raise ValueError("--training-steps must be non-negative")
     if schedule_steps < 0:
         raise ValueError("--schedule-steps must be non-negative")
-    if schedule_steps and not (train_only or dry_launch):
+    if schedule_steps and not (train_only or dry_launch or gpu_smoke):
         raise ValueError("--schedule-steps requires --train-only")
     if resume_source_run_label and not train_only:
         raise ValueError("--resume-source-run-label requires --train-only")
@@ -2458,7 +2516,9 @@ def main(
             "--initialize-from-source-checkpoint requires either "
             "--initialization-source-run-label or --source-run-label"
         )
-    if initialize_compatible_from_source_checkpoint and not (train_only or dry_launch):
+    if initialize_compatible_from_source_checkpoint and not (
+        train_only or dry_launch or gpu_smoke
+    ):
         raise ValueError(
             "--initialize-compatible-from-source-checkpoint requires --train-only"
         )
@@ -2639,6 +2699,32 @@ def main(
             schedule_steps=schedule_steps or None,
         )
         phase = "dry_launch_spawned"
+    elif gpu_smoke:
+        call = gpu_smoke_stage.spawn(
+            run_label,
+            recipe_name,
+            initialization_source_run=(
+                initialization_source_run_label or source_run_label
+                if (
+                    initialize_from_source_checkpoint
+                    or initialize_compatible_from_source_checkpoint
+                )
+                else None
+            ),
+            initialization_checkpoint_name=checkpoint_name,
+            compatible_initialization=initialize_compatible_from_source_checkpoint,
+            corrupted_prior_mix=corrupted_prior_mix,
+            cycle_op_mix=cycle_op_mix,
+            disable_ring_grow_macro=disable_ring_grow_macro,
+            organic_vocabulary=organic_vocabulary,
+            analogue_trace_pool=analogue_trace_pool,
+            analogue_trace_count=analogue_trace_count,
+            corrupted_prior_count=corrupted_prior_count,
+            scaled_manifest=scaled_manifest,
+            training_steps=training_steps or None,
+            schedule_steps=schedule_steps or None,
+        )
+        phase = "gpu_smoke_spawned"
     elif train_only:
         call = train_stage.spawn(
             run_label,
