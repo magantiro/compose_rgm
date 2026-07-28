@@ -1,0 +1,266 @@
+{
+  "best_by_primary_metric": "step500",
+  "checkpoints": {
+    "step1500": {
+      "alias_multiplicity_histogram": {
+        "1": 559,
+        "10": 1,
+        "11": 3,
+        "13": 3,
+        "14": 4,
+        "15": 2,
+        "16": 2,
+        "18": 2,
+        "2": 57,
+        "20": 4,
+        "21": 2,
+        "24": 1,
+        "25": 2,
+        "26": 2,
+        "3": 11,
+        "5": 2,
+        "6": 2,
+        "7": 1,
+        "8": 3
+      },
+      "balanced_family_canonical_successor_nll": 4.981328867975087,
+      "completed_steps": 1500,
+      "family_calibration_kl": 0.5638673022010453,
+      "family_calibration_tv": 0.46121248797236275,
+      "family_target_rank_by_family": {
+        "atom_delete": 1.1090909090909091,
+        "atom_insert": 3.627906976744186,
+        "atom_restate": 3.803738317757009,
+        "bond_reorder": 5.627906976744186,
+        "bond_reroute": 6.4375,
+        "cycle_attach": 2.35,
+        "cycle_insert": 1.75625,
+        "ring_system_delete": 7.833333333333333,
+        "ring_system_restate": 7.777777777777778
+      },
+      "hazard_calibration": {
+        "mean_absolute_hazard_error": 1.4320624678383047,
+        "mean_predicted_hazard": 2.598528407278104,
+        "mean_teacher_rate": 1.555052790346908
+      },
+      "mean_family_target_rank": 3.3484162895927603,
+      "path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/cont1500_recovery.pt",
+      "per_family_canonical_nll": {
+        "atom_delete": 2.385453820365235,
+        "atom_insert": 4.303687997249363,
+        "atom_restate": 7.920282141255864,
+        "bond_reorder": 5.076083804418686,
+        "bond_reroute": 8.292979791760445,
+        "cycle_attach": 5.13874107703778,
+        "cycle_insert": 2.3847768076478424,
+        "ring_system_delete": 4.089194587266533,
+        "ring_system_restate": 5.240759784774036
+      },
+      "production_weighted_canonical_successor_nll": 4.767086341595558,
+      "raw_mark_nll": 4.982496156142308,
+      "scored_examples": 663,
+      "selected_mark_probability": 0.11335864238148143,
+      "skipped_examples": 0,
+      "state_source": "current",
+      "teacher_examples_by_family": {
+        "atom_delete": 55,
+        "atom_insert": 43,
+        "atom_restate": 107,
+        "bond_reorder": 43,
+        "bond_reroute": 32,
+        "cycle_attach": 160,
+        "cycle_insert": 160,
+        "ring_system_delete": 18,
+        "ring_system_restate": 45
+      }
+    },
+    "step2000": {
+      "alias_multiplicity_histogram": {
+        "1": 559,
+        "10": 1,
+        "11": 3,
+        "13": 3,
+        "14": 4,
+        "15": 2,
+        "16": 2,
+        "18": 2,
+        "2": 57,
+        "20": 4,
+        "21": 2,
+        "24": 1,
+        "25": 2,
+        "26": 2,
+        "3": 11,
+        "5": 2,
+        "6": 2,
+        "7": 1,
+        "8": 3
+      },
+      "balanced_family_canonical_successor_nll": 5.063499652372069,
+      "completed_steps": 2000,
+      "family_calibration_kl": 0.6818956024210693,
+      "family_calibration_tv": 0.5183827793486429,
+      "family_target_rank_by_family": {
+        "atom_delete": 1.0909090909090908,
+        "atom_insert": 2.3488372093023258,
+        "atom_restate": 4.08411214953271,
+        "bond_reorder": 5.3023255813953485,
+        "bond_reroute": 6.96875,
+        "cycle_attach": 2.725,
+        "cycle_insert": 2.025,
+        "ring_system_delete": 8.277777777777779,
+        "ring_system_restate": 6.822222222222222
+      },
+      "hazard_calibration": {
+        "mean_absolute_hazard_error": 1.8855759904215599,
+        "mean_predicted_hazard": 3.1634244385707793,
+        "mean_teacher_rate": 1.555052790346908
+      },
+      "mean_family_target_rank": 3.416289592760181,
+      "path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/full_recovery.pt",
+      "per_family_canonical_nll": {
+        "atom_delete": 2.153993142149052,
+        "atom_insert": 3.5989456654118643,
+        "atom_restate": 8.333032773105208,
+        "bond_reorder": 5.352604932696132,
+        "bond_reroute": 8.39686143398285,
+        "cycle_attach": 5.522012159079965,
+        "cycle_insert": 2.5604889319061224,
+        "ring_system_delete": 4.424053098054364,
+        "ring_system_restate": 5.229504734963057
+      },
+      "production_weighted_canonical_successor_nll": 4.934964124498704,
+      "raw_mark_nll": 5.150231283984033,
+      "scored_examples": 663,
+      "selected_mark_probability": 0.11134902096613619,
+      "skipped_examples": 0,
+      "state_source": "current",
+      "teacher_examples_by_family": {
+        "atom_delete": 55,
+        "atom_insert": 43,
+        "atom_restate": 107,
+        "bond_reorder": 43,
+        "bond_reroute": 32,
+        "cycle_attach": 160,
+        "cycle_insert": 160,
+        "ring_system_delete": 18,
+        "ring_system_restate": 45
+      }
+    },
+    "step500": {
+      "alias_multiplicity_histogram": {
+        "1": 559,
+        "10": 1,
+        "11": 3,
+        "13": 3,
+        "14": 4,
+        "15": 2,
+        "16": 2,
+        "18": 2,
+        "2": 57,
+        "20": 4,
+        "21": 2,
+        "24": 1,
+        "25": 2,
+        "26": 2,
+        "3": 11,
+        "5": 2,
+        "6": 2,
+        "7": 1,
+        "8": 3
+      },
+      "balanced_family_canonical_successor_nll": 4.7510105782975245,
+      "completed_steps": null,
+      "family_calibration_kl": 0.3143651455543084,
+      "family_calibration_tv": 0.3591220559642681,
+      "family_target_rank_by_family": {
+        "atom_delete": 1.1818181818181819,
+        "atom_insert": 3.0930232558139537,
+        "atom_restate": 3.94392523364486,
+        "bond_reorder": 5.744186046511628,
+        "bond_reroute": 8.59375,
+        "cycle_attach": 2.425,
+        "cycle_insert": 2.56875,
+        "ring_system_delete": 7.777777777777778,
+        "ring_system_restate": 6.488888888888889
+      },
+      "hazard_calibration": {
+        "mean_absolute_hazard_error": 0.9043118887627286,
+        "mean_predicted_hazard": 1.6694903482948493,
+        "mean_teacher_rate": 1.555052790346908
+      },
+      "mean_family_target_rank": 3.579185520361991,
+      "path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/full_checkpoint.pt",
+      "per_family_canonical_nll": {
+        "atom_delete": 2.9391627172189425,
+        "atom_insert": 3.8983312906744576,
+        "atom_restate": 7.558805710986819,
+        "bond_reorder": 4.313080360855979,
+        "bond_reroute": 8.105172723531723,
+        "cycle_attach": 4.721132693718834,
+        "cycle_insert": 3.3567282714663924,
+        "ring_system_delete": 3.6194237017290507,
+        "ring_system_restate": 4.247257734495518
+      },
+      "production_weighted_canonical_successor_nll": 4.723433435602584,
+      "raw_mark_nll": 4.942872910837602,
+      "scored_examples": 663,
+      "selected_mark_probability": 0.048270572835240604,
+      "skipped_examples": 0,
+      "state_source": "state_dict",
+      "teacher_examples_by_family": {
+        "atom_delete": 55,
+        "atom_insert": 43,
+        "atom_restate": 107,
+        "bond_reorder": 43,
+        "bond_reroute": 32,
+        "cycle_attach": 160,
+        "cycle_insert": 160,
+        "ring_system_delete": 18,
+        "ring_system_restate": 45
+      }
+    }
+  },
+  "fixed_eval_set": {
+    "alias_search": true,
+    "examples": 663,
+    "molecules": 40,
+    "seed": 20260728,
+    "source": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles"
+  },
+  "primary_metric": "production_weighted_canonical_successor_nll",
+  "ranking_by_primary_metric": [
+    "step500",
+    "step1500",
+    "step2000"
+  ],
+  "rule": "configs/ringcore_v1_checkpoint_selection.json",
+  "secondary_metric": "balanced_family_canonical_successor_nll",
+  "verdict": {
+    "corrects_earlier_reading": "An earlier reading recommended promoting step 2000 on the basis of top-3 family accuracy (atom_restate 0.208->0.528) and mean selected-mark probability (0.032->0.119). Both are ranking/confidence statistics and BOTH improve while canonical-successor LIKELIHOOD degrades: the model grows more confident on easy marks and much worse on the tail. Per-family canonical NLL shows step500 best on 6/9 families including EVERY lower-frequency family (atom_restate 7.559->8.333, bond_reorder 4.313->5.353, bond_reroute 8.105->8.397, ring_system_delete 3.619->4.424, ring_system_restate 4.247->5.230 across 500->2000). The frozen rule forbidding top-3 as the primary metric caught this.",
+    "mix_sensitivity": {
+      "my_eval_set_mix": {
+        "step1500": 4.7671,
+        "step2000": 4.935,
+        "step500": 4.7234,
+        "winner": "step500"
+      },
+      "trainer_validation_mix_cycle_heavy": {
+        "step1500": 4.2728,
+        "step2000": 4.5017,
+        "step500": 4.3845,
+        "winner": "step1500"
+      },
+      "uniform_balanced": {
+        "step1500": 4.9813,
+        "step2000": 5.0635,
+        "step500": 4.751,
+        "winner": "step500"
+      }
+    },
+    "open_issue": "\"Production-weighted\" requires the PRODUCTION family mix (manifest corruption 0.55 / mmp 0.45). The MMP pool lives on the Modal volume, so the local eval set approximates it. Ranking is mix-dependent between step500 and step1500 (never step2000), so the production mix must be used for the final selection on the corrected run.",
+    "promote_step2000": false,
+    "reason": "Step 2000 is NOT best on the primary canonical-successor NLL under ANY family weighting tested (my eval-set mix, the trainer validation mix, uniform), and it is also WORSE on family-mass calibration (TV 0.518 vs 0.359 at step500). The protocol condition for promotion -- best on canonical-successor NLL, or statistically tied while superior on balanced-family recovery and calibration -- fails on both clauses.",
+    "step2000_never_wins": true
+  }
+}
