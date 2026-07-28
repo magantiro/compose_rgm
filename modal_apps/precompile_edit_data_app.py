@@ -86,6 +86,9 @@ _PARTITION_SHARE = {"train": 0.90, "validation": 0.05, "test": 0.05}
 # Measured compile rates (seconds per source), from local fixtures on real corpus molecules.
 _SECONDS_PER_SOURCE = {"corruption": 0.98, "cycle_ops": 0.049}
 _TARGET_SHARD_SECONDS = 600.0   # aim for ~10-minute shards
+# Must be >= the DERIVED task count, or the tail doubles: 45 tasks under a cap of 40 is two waves
+# (measured 18.6 min critical path) versus one wave (9.8 min). Raise this if source budgets grow.
+_MAX_CONTAINERS = 48
 
 
 def shards_for(layer: str, partition: str, layer_sources: int) -> int:
@@ -214,7 +217,7 @@ def partition_sources(subdir: str, corruption_sources: int, cycle_sources: int) 
     return result
 
 
-@app.function(image=image, cpu=8.0, timeout=4 * 3600, max_containers=40,
+@app.function(image=image, cpu=8.0, timeout=4 * 3600, max_containers=_MAX_CONTAINERS,
               volumes={"/artifacts": artifact_volume}, retries=modal.Retries(max_retries=2))
 def compile_shard(layer: str, partition: str, shard_index: int, n_shards: int,
                   subdir: str, seed: int) -> dict:
@@ -351,6 +354,7 @@ def reduce_and_validate(subdir: str, expected_ids: list, build_meta: dict) -> di
         "completed_shards": len(found_ids & set(expected_ids)),
         "missing_shards": missing,
         "unexpected_shards": unexpected,
+        "authorization": build_meta.get("authorization"),
         "reused_shards": build_meta.get("reused"),
         "recompiled_shards": build_meta.get("recompiled"),
         "failed_shards": build_meta.get("failed"),
@@ -375,7 +379,8 @@ def reduce_and_validate(subdir: str, expected_ids: list, build_meta: dict) -> di
     if census["BUILD_COMPLETE"]:
         marker.write_text(json.dumps(
             {"BUILD_COMPLETE": True, "reducer_checksum": census["reducer_checksum"],
-             "expected_shards": len(expected_ids), "totals": dict(totals), "contract": contract},
+             "expected_shards": len(expected_ids), "totals": dict(totals), "contract": contract,
+             "authorization": build_meta.get("authorization")},
             indent=2, sort_keys=True) + "\n")
     elif marker.exists():
         marker.unlink()      # a previously-complete build that no longer validates must not stay marked
@@ -387,14 +392,19 @@ def reduce_and_validate(subdir: str, expected_ids: list, build_meta: dict) -> di
 
 @app.function(image=image, cpu=2.0, timeout=12 * 3600,
               volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume})
-def driver(subdir: str, corruption_sources: int, cycle_sources: int, seed: int) -> dict:
+def driver(subdir: str, corruption_sources: int, cycle_sources: int, seed: int,
+           launch_commit: str = "unknown", gate_sha256: str = "unknown") -> dict:
     """Remote orchestration. `@app.local_entrypoint` runs on the CLIENT, so `modal run --detach` keeps
     already-spawned functions alive but silently drops the rest of the pipeline when the client
     disconnects -- the map and reduce would never be issued. Driving from inside a container makes the
     whole build survive client loss."""
     expected_ids = expected_shard_ids(corruption_sources, cycle_sources)
+    # Authorization provenance: a successful build must never inherit a STALE gate. The commit and the
+    # hash of the passing prelaunch-gate log are recorded here and carried into BUILD_COMPLETE.
+    authorization = {"launch_commit": launch_commit, "gate_sha256": gate_sha256}
     write_status(subdir, "RUNNING", expected_shards=len(expected_ids),
-                 corruption_sources=corruption_sources, cycle_sources=cycle_sources)
+                 corruption_sources=corruption_sources, cycle_sources=cycle_sources,
+                 authorization=authorization)
 
     # INVARIANT 3: idempotent. A complete, still-valid build is not rebuilt; anything else recompiles only
     # the stale/missing shards. Each shard has exactly ONE writer (its own map task + its own path), so two
@@ -434,7 +444,8 @@ def driver(subdir: str, corruption_sources: int, cycle_sources: int, seed: int) 
         write_status(subdir, "FAILED", stage="map", error=f"{type(exc).__name__}: {exc}")
         raise
 
-    census = reduce_and_validate.remote(subdir, expected_ids, build_meta)
+    census = reduce_and_validate.remote(subdir, expected_ids,
+                                        {**build_meta, "authorization": authorization})
     # INVARIANT 4: only the reducer's verdict decides terminal state. Source manifests or partial shards
     # never imply success.
     status = "COMPLETE" if census.get("BUILD_COMPLETE") else "PARTIAL"
@@ -443,6 +454,7 @@ def driver(subdir: str, corruption_sources: int, cycle_sources: int, seed: int) 
                  missing_shards=len(census.get("missing_shards") or []),
                  **build_meta,
                  reducer_checksum=census.get("reducer_checksum"),
+                 authorization=authorization,
                  problems=(census.get("problems") or [])[:5])
     print(json.dumps({"phase": "driver_complete", "status": status}), flush=True)
     return census
@@ -451,15 +463,27 @@ def driver(subdir: str, corruption_sources: int, cycle_sources: int, seed: int) 
 @app.local_entrypoint()
 def main(
     subdir: str = "edit_precompile_v1",
+    gate_log_path: str = "",
     corruption_sources: int = 24000,
     cycle_sources: int = 36000,
     seed: int = 20260728,
 ) -> None:
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True, check=False).stdout.strip()
-    call = driver.spawn(subdir, corruption_sources, cycle_sources, seed)
+    gate_log = Path(gate_log_path) if gate_log_path else None
+    gate_sha = "unknown"
+    if gate_log and gate_log.exists():
+        text = gate_log.read_text()
+        if "PRELAUNCH GATE: PASS" not in text:
+            raise SystemExit(f"refusing to launch: {gate_log} does not record a PASS")
+        if commit and commit not in text:
+            raise SystemExit(
+                f"refusing to launch: {gate_log} does not reference HEAD {commit} -- this looks like a "
+                f"STALE gate from an earlier commit")
+        gate_sha = hashlib.sha256(text.encode()).hexdigest()[:16]
+    call = driver.spawn(subdir, corruption_sources, cycle_sources, seed, commit, gate_sha)
     print(json.dumps({
         "phase": "driver_spawned", "function_call_id": call.object_id, "subdir": subdir,
-        "commit": commit, "corruption_sources": corruption_sources, "cycle_sources": cycle_sources,
+        "commit": commit, "gate_sha256": gate_sha, "corruption_sources": corruption_sources, "cycle_sources": cycle_sources,
         "note": "orchestration runs remotely; safe to disconnect (launch with --detach)",
     }))
