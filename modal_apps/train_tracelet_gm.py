@@ -2428,7 +2428,7 @@ def main(
         raise ValueError("--training-steps must be non-negative")
     if schedule_steps < 0:
         raise ValueError("--schedule-steps must be non-negative")
-    if schedule_steps and not train_only:
+    if schedule_steps and not (train_only or dry_launch):
         raise ValueError("--schedule-steps requires --train-only")
     if resume_source_run_label and not train_only:
         raise ValueError("--resume-source-run-label requires --train-only")
@@ -2448,7 +2448,7 @@ def main(
             "--initialize-from-source-checkpoint requires either "
             "--initialization-source-run-label or --source-run-label"
         )
-    if initialize_compatible_from_source_checkpoint and not train_only:
+    if initialize_compatible_from_source_checkpoint and not (train_only or dry_launch):
         raise ValueError(
             "--initialize-compatible-from-source-checkpoint requires --train-only"
         )
