@@ -1,0 +1,22 @@
+{
+  "census_mean_path_length": 2.9172,
+  "exact_terminal_share": 0.46954,
+  "family_count_hist": {
+    "1": 2436,
+    "2": 2717,
+    "3": 2301,
+    "4": 793,
+    "5": 76
+  },
+  "jump_share": 0.53046,
+  "mean_path_length": 2.9027,
+  "path_length_hist": {
+    "1": 1908,
+    "2": 1671,
+    "3": 1639,
+    "4": 1533,
+    "5": 1572
+  },
+  "records": 8323,
+  "shards_sampled": 4
+}

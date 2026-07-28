@@ -1,0 +1,98 @@
+{
+  "batch_size": 64,
+  "configured_trace_weight": {
+    "cycle_operations": 0.25,
+    "general_corruption": 0.4,
+    "mmp_analogue": 0.35
+  },
+  "exposure_by_steps": {
+    "12000": {
+      "cycle_operations": {
+        "record_exposure": 0.7524,
+        "transition_exposure": 0.2939
+      },
+      "general_corruption": {
+        "record_exposure": 4.0988,
+        "transition_exposure": 0.7453
+      },
+      "mmp_analogue": {
+        "record_exposure": 0.7396,
+        "transition_exposure": 0.0721
+      }
+    },
+    "16000": {
+      "cycle_operations": {
+        "record_exposure": 1.0033,
+        "transition_exposure": 0.3919
+      },
+      "general_corruption": {
+        "record_exposure": 5.465,
+        "transition_exposure": 0.9938
+      },
+      "mmp_analogue": {
+        "record_exposure": 0.9861,
+        "transition_exposure": 0.0962
+      }
+    },
+    "3000": {
+      "cycle_operations": {
+        "record_exposure": 0.1881,
+        "transition_exposure": 0.0735
+      },
+      "general_corruption": {
+        "record_exposure": 1.0247,
+        "transition_exposure": 0.1863
+      },
+      "mmp_analogue": {
+        "record_exposure": 0.1849,
+        "transition_exposure": 0.018
+      }
+    },
+    "6000": {
+      "cycle_operations": {
+        "record_exposure": 0.3762,
+        "transition_exposure": 0.147
+      },
+      "general_corruption": {
+        "record_exposure": 2.0494,
+        "transition_exposure": 0.3727
+      },
+      "mmp_analogue": {
+        "record_exposure": 0.3698,
+        "transition_exposure": 0.0361
+      }
+    },
+    "9000": {
+      "cycle_operations": {
+        "record_exposure": 0.5643,
+        "transition_exposure": 0.2204
+      },
+      "general_corruption": {
+        "record_exposure": 3.0741,
+        "transition_exposure": 0.559
+      },
+      "mmp_analogue": {
+        "record_exposure": 0.5547,
+        "transition_exposure": 0.0541
+      }
+    }
+  },
+  "jump_share_sources": {
+    "cycle_operations": "exact analytic: K=1, F=1 for every record",
+    "general_corruption": "4 real shards, 8,323 records (exact per-record)",
+    "mmp_analogue": "exact, full 363,456-record pool"
+  },
+  "jump_shares": {
+    "cycle_operations": 0.390625,
+    "general_corruption": 0.53046,
+    "mmp_analogue": 0.57484
+  },
+  "note": "layer weights are TRACE-DRAW weights; the realized share of teacher transitions differs because single-step cycle traces spend proportionally more mass on the terminal position",
+  "realized_transition_weight": {
+    "cycle_operations": 0.1911,
+    "general_corruption": 0.41521,
+    "mmp_analogue": 0.3937
+  },
+  "teacher_transition_share_of_all_draws": 0.51103,
+  "terminal_share_of_all_draws": 0.48897
+}
