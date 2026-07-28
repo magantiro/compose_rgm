@@ -263,7 +263,12 @@ def _semantic_partial_checkpoint_initialization(
     row_table: list[dict] = []
 
     def _cksum(tensor: torch.Tensor) -> str:
-        return hashlib.sha256(tensor.detach().to(torch.float64).numpy().tobytes()).hexdigest()[:12]
+        # .cpu() BEFORE .numpy(): the warm-start runs on the training device (cuda on A100), and a CUDA tensor
+        # cannot convert to numpy directly. The CPU dry-launch could not catch this (device=cpu makes .numpy()
+        # work); it fired only on the A100 bounded run's semantic-transfer row-table checksum.
+        return hashlib.sha256(
+            tensor.detach().cpu().to(torch.float64).numpy().tobytes()
+        ).hexdigest()[:12]
 
     for name, (layout, k) in _ATOM_VOCAB_HEAD_LAYOUT.items():
         if name not in retained or name not in source_state:
