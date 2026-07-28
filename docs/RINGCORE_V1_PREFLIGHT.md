@@ -10,6 +10,16 @@ Ring reachability is defined by the compositional operators; a finite ring catal
 
 Status legend: ✅ done · 🔶 in progress · ⏳ pending.
 
+> **Full-run prerequisite (scaling gate, NOT a bounded-preflight blocker):** corruption records are
+> regenerated **in-memory, serially (~0.5 s/sample on Modal)** at train time — fine for the bounded preflight
+> (200 source mols ≈ 3–4 min) but a hard bottleneck at production scale (~100k+ source mols ≈ **14+ h**,
+> GPU-blocking). The MMP pool is already precompiled to the volume (`edit_pool_full.jsonl`); corruption is not.
+> **Before any full run:** mine the corruption pool once to the volume via a parallel fan-out (extend
+> `mine_edit_traces_app.py`), applying the teacher-representability filter at mine time, then load it like
+> `--analogue-trace-pool`. RingCore's zero-mixture path has no de-novo cache (`denovo_keep=0`), so the
+> historical reason corruption stayed in-memory (preserve B's carbon cache under `--train-only`) no longer
+> applies — precompiling is clean. This is item 1 of the post-`GO_FOR_FULL_RINGCORE_TRAINING` scale-up.
+
 ---
 
 ## 1. Freeze — RING_CORE_V1 ✅
