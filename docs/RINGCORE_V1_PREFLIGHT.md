@@ -145,6 +145,24 @@ not assumed). Fixes (each pre-optimizer, ~0 A100 cost):
   teachers), so no stored artifact needs regeneration. Regression: `tests/test_teacher_in_candidates.py`
   (reproduces the failure + 0 mismatches across neutral/cation/anion/zwitterion/S/Cl/fused strata).
 
+## 5c. CPU dry-launch — `GO_CPU_DRY_LAUNCH` ✅
+The CPU-only `--dry-launch` of the REAL trainer (commit `898c4dd`, run `compose-v4-ringcore-v1-dry-898c4dd-v1`)
+reached the first editing training batch + one held-out editing validation batch with **zero optimizer steps**
+and passed every required counter:
+- **Zero-mixture (all de-novo counters 0):** `denovo_path_compile_calls`, `carbon_tree_prior_constructions`,
+  `denovo_cache_resolution_calls`, `denovo_cache_open_calls`, `denovo_support_cache_resolution/open_calls`,
+  `denovo_dataset/dataloader_constructions`, `denovo_training/validation_records_sampled` — **all 0**.
+- **Editing path reached:** `production_catalog_constructions=1` (fingerprint `639ff6078c32d43c`),
+  `edit_manifest_loads=1`, `edit_pool_open_calls=1`, `edit_dataset/dataloader_constructions=1`,
+  `edit_training_batches_emitted=1`, `edit_validation_batches_emitted=1`, `model_forward_calls=2`,
+  `gm_loss_calls=2`.
+- **Finite losses:** train GM **16.36**, validation GM **3.96**. `optimizer_steps=0`, `backward_calls=0`.
+- **`ring_system_grow` absent** (`teacher_examples_ring_system_grow=0`, family prob 0); **cycle families
+  present + dominant** (`cycle_insert=310`, `cycle_attach=350` teacher examples).
+- **Teacher-in-candidate invariant clean:** `dropped_unrepresentable_traces=13 / 351` at the data source; no
+  `TeacherOutsideCandidatesError` reached scoring. Warm-start verified (atom_restate head 94% accurate from B).
+- `zero_mixture_ok: true`, `failing_zero: {}`, `failing_positive: {}`.
+
 ## 6. Bounded RingCore preflight (≤750 steps) 🔶 READY TO LAUNCH (bounded Modal run)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep
