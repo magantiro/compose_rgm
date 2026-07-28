@@ -1,0 +1,320 @@
+{
+  "compiler_version": {
+    "corpus_scope_module": "7584943acda6f005",
+    "corruption": "58909c28ef8d17dc",
+    "miner": "351123ec67ffde3b",
+    "mmp": "cf0f2131e7e8a959"
+  },
+  "corpus_accounting": {
+    "canonical_duplicates": 33,
+    "exact": true,
+    "identity": "total = retained + canonical_duplicates + rejected",
+    "note": "Additive surface of the corpus_census identity: the 33 records short of (retained + rejected) are canonical_duplicates (post-canonicalization collisions among accepted molecules, deduplicated). All values equal corpus_census; no census value changed.",
+    "rejected": 33484,
+    "retained": 466483,
+    "sum": 500000,
+    "total": 500000
+  },
+  "corpus_census": {
+    "canonical_duplicates": 33,
+    "charge_category": {
+      "neutral": 438750,
+      "nonzero_net_charge": 4878,
+      "zwitterion_net_zero": 22855
+    },
+    "contains_charged_atom": 27733,
+    "element_molecule_count": {
+      "B": 625,
+      "Br": 20353,
+      "C": 466462,
+      "Cl": 82303,
+      "F": 85591,
+      "I": 2564,
+      "N": 435269,
+      "O": 433338,
+      "P": 5639,
+      "S": 153135
+    },
+    "net_charge_distribution": {
+      "-1": 38,
+      "-2": 1,
+      "0": 461605,
+      "1": 4365,
+      "2": 464,
+      "3": 8,
+      "4": 2
+    },
+    "non_cnof_element_combination_count": {
+      "(cnof_only)": 239867,
+      "B": 409,
+      "B+Br": 10,
+      "B+Br+S": 7,
+      "B+Cl": 55,
+      "B+Cl+S": 8,
+      "B+P": 14,
+      "B+S": 111,
+      "Br": 12115,
+      "Br+Cl": 1674,
+      "Br+Cl+I": 5,
+      "Br+Cl+P": 12,
+      "Br+Cl+S": 689,
+      "Br+I": 68,
+      "Br+I+S": 7,
+      "Br+P": 150,
+      "Br+P+S": 19,
+      "Br+S": 5591,
+      "Cl": 52569,
+      "Cl+I": 207,
+      "Cl+I+S": 57,
+      "Cl+P": 507,
+      "Cl+P+S": 94,
+      "Cl+S": 26415,
+      "I": 1739,
+      "I+P": 29,
+      "I+S": 447,
+      "P": 3911,
+      "P+S": 893,
+      "S": 118788
+    },
+    "rejected": 33484,
+    "rejection_reasons": {
+      "too_big": 32171,
+      "unparseable": 201,
+      "unsupported_element": 1112
+    },
+    "retained": 466483,
+    "retained_fraction": 0.933,
+    "scan_all": true,
+    "scope": {
+      "allowed_elements": [
+        "B",
+        "Br",
+        "C",
+        "Cl",
+        "F",
+        "I",
+        "N",
+        "O",
+        "P",
+        "S"
+      ],
+      "charge_policy": "retain_representable_charges",
+      "disconnected_policy": "reject_multicomponent",
+      "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class",
+      "max_atoms": 40,
+      "scope_hash": "3721d69851110fdd",
+      "scope_name": "broad_organic_v1",
+      "standardization": "molecular_graph_canonical_smiles",
+      "vocabulary_name": "ORGANIC_VOCABULARY"
+    },
+    "total": 500000
+  },
+  "corpus_id": "guacamol_subset_500000_seed0",
+  "corpus_scope": {
+    "allowed_elements": [
+      "B",
+      "Br",
+      "C",
+      "Cl",
+      "F",
+      "I",
+      "N",
+      "O",
+      "P",
+      "S"
+    ],
+    "charge_policy": "retain_representable_charges",
+    "disconnected_policy": "reject_multicomponent",
+    "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class",
+    "max_atoms": 40,
+    "scope_hash": "3721d69851110fdd",
+    "scope_name": "broad_organic_v1",
+    "standardization": "molecular_graph_canonical_smiles",
+    "vocabulary_name": "ORGANIC_VOCABULARY"
+  },
+  "corpus_scope_hash": "3721d69851110fdd",
+  "corpus_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+  "corruption_recipe": {
+    "couplings_per_target": 1,
+    "depth_max": 5,
+    "depth_mean": 2.982,
+    "family_fraction": {
+      "atom_delete": 0.2468,
+      "atom_restate": 0.334,
+      "bond_reorder": 0.0778,
+      "bond_reroute": 0.1093,
+      "ring_system_delete": 0.1026,
+      "ring_system_restate": 0.1294
+    },
+    "family_histogram": {
+      "atom_delete": 368,
+      "atom_restate": 498,
+      "bond_reorder": 116,
+      "bond_reroute": 163,
+      "ring_system_delete": 153,
+      "ring_system_restate": 193
+    },
+    "grow_yield": 358,
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "ring_change_fraction": 0.52,
+    "sample_attempted": 500,
+    "source_target_tanimoto": {
+      "mean": 0.3634,
+      "p10": 0.1186,
+      "p90": 0.6621
+    },
+    "trim_yield": 500,
+    "vocabulary": "organic"
+  },
+  "cycle_op_supervision": {
+    "both_directions": true,
+    "calibration_policy_hash": "f534c0233e3bf4a0",
+    "cycle_family_selected_target_rate": 0.61,
+    "executor_rule_names": [
+      "bond_insert",
+      "bond_delete"
+    ],
+    "families": [
+      "cycle_insert",
+      "cycle_attach"
+    ],
+    "folded_into_layer": "corruption",
+    "generator": "compose_v4.experiments.cycle_op_prior.build_cycle_op_records",
+    "note": "cycle records are regenerated in-memory at train time from the corruption source SMILES, so their count scales with --corrupted-prior-count; the corruption layer weight covers them."
+  },
+  "git_commit": "4fbca88",
+  "kind": "ring_core_v1_scaled_edit_manifest",
+  "locked_mixture": {
+    "cold_element_floor": 0.02,
+    "cold_elements": [
+      "S",
+      "P",
+      "Cl",
+      "Br",
+      "I",
+      "B"
+    ],
+    "curriculum_bin_edges": [
+      5,
+      9,
+      13
+    ],
+    "denovo_weight": 0.0,
+    "layer_weights": {
+      "corruption": 0.55,
+      "mmp": 0.45,
+      "scaffold": 0.0
+    },
+    "note": "hierarchical-sampler layer weights (LOCKED, superseding the proposed PHASE0B values); scaffold held at 0 until the A2.3 general compiler lands, its share folded into MMP.",
+    "zero_mixture": true
+  },
+  "manifest_self_sha256": "36c2da5b25564c6bed3182c66af911aa11d2f8ade9f044889e24e7dc31144295",
+  "manifest_version": "ring_core_v1",
+  "measured_statistics": {
+    "cold_element_record_counts": {
+      "B": 19006,
+      "Br": 18166,
+      "Cl": 63450,
+      "I": 2959,
+      "P": 6250,
+      "S": 100702
+    },
+    "direction_balance": {
+      "forward": 178797,
+      "reverse": 184659
+    },
+    "family_histogram": {
+      "atom_delete": 1071945,
+      "atom_insert": 1070646
+    },
+    "layer_counts": {
+      "mmp_one_cut": 363456
+    },
+    "path_length": {
+      "curriculum_bin_edges": [
+        5,
+        9,
+        13
+      ],
+      "max": 16,
+      "mean": 5.895,
+      "min": 2,
+      "quantiles_p50_p80_p95": [
+        5,
+        9,
+        13
+      ]
+    }
+  },
+  "mmp_pool": {
+    "kind": "generated dataset (regenerate via the parallel mining fan-out); NOT a committed fixture",
+    "mmp_pairs_grouped": 216183,
+    "path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/edit_pool_full_40.jsonl",
+    "record_schema": [
+      "diagnostics",
+      "direction",
+      "layer",
+      "metadata",
+      "n_slots",
+      "operator_histogram",
+      "pair_index",
+      "path_length",
+      "source_smiles",
+      "steps",
+      "target_key",
+      "target_smiles"
+    ],
+    "row_count": 363456,
+    "sha256": "3b29d7b84de92a7d2fdf931f55c1bf99c5783d6b2115aa5bf2429471007e4a64",
+    "volume_path": "/artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl"
+  },
+  "notes": "RING_CORE_V1 zero-mixture manifest: denovo_weight=0 so no de-novo path cache is opened; cycle ops define ring support (legacy ring_system_grow disabled). Measured corruption/MMP statistics + bin edges inherited from the broad-organic max_atoms=40 mining. NON_SCIENTIFIC_PREFLIGHT provenance.",
+  "operator_registry": {
+    "hash": "9197401e8dc3a7ae",
+    "legacy_disabled": [
+      "ring_system_grow"
+    ],
+    "mark_rule_names": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_grow",
+      "ring_system_delete",
+      "ring_system_restate"
+    ],
+    "production_enabled": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_delete",
+      "ring_system_restate"
+    ]
+  },
+  "ring_core_capability": {
+    "base_b_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "calibration_policy_hash": "f534c0233e3bf4a0",
+    "capability_hash": "330473e319bfec19",
+    "corpus_scope_hash": "3721d69851110fdd",
+    "cycle_op_semantic_hash": "27a823aeb6cf7548",
+    "enable_cycle_ops": true,
+    "enable_ring_grow_macro": false,
+    "enable_ring_macros": false,
+    "max_atoms": 40,
+    "operator_registry_hash": "9197401e8dc3a7ae"
+  },
+  "source_commit_tag": "ring-core-v1",
+  "source_mining_commit": "3375e62",
+  "splits": {
+    "scheme": "the shared load_organic_corpus_split (seed 20260714); TRAIN-only mining -> no val/test leakage; reverse pairs are separate directed records (balanced)."
+  },
+  "standardization_hash": "a8d574cc91c89cb3",
+  "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)"
+}
