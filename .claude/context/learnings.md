@@ -336,3 +336,44 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   model's exact candidates before recording (construct the teacher from the representable set, per the owner's
   §3).** Micro families (atom_*/bond_reorder) + cycle ops are per-coordinate (mask-derived) so they need no
   list check.
+
+## 2026-07-29
+- **The corpus-load bottleneck is DOUBLE executor replay, not validation.** Loading the precompiled edit
+  corpus cost ~21 ms/corruption-trace. `decode_trace_record` replays every step through the executor
+  **unconditionally** -- `validate=False` gates only the canonical-key COMPARISONS, not the replay, because
+  the final state is needed as `target` (measured speedup from `validate=False`: **1.1x**, not the large win
+  assumed). `TraceProgressCTMC.__init__` then replays a SECOND time. Each `apply()` runs `is_valid_state` ->
+  `is_rdkit_valid` -> `molecular_graph_to_smiles`: ~32 RDKit SMILES round-trips per record, per replay,
+  re-proving validity the build already certified. **Fix = `packed_trace_store`**: materialize all K+1 states
+  offline; `decode_packed_trace` rebuilds the `RewriteTrace` dataclass with ZERO executor calls (source =
+  states[0], target = states[-1], steps = pure `decode_action`), and `PackedTraceProgress` subclasses
+  `TraceProgressCTMC` overriding ONLY the replaying ctor so every other method is *inherited, not
+  reimplemented*. Measured end-to-end on a real shard: **21.36 -> 0.217 ms/trace (98x)**, 7854/7854 states
+  exact, full train partition 3.9 h -> 2.4 min, store 0.13 GB. Trade: executor drift is no longer caught by
+  re-execution at load -- it is caught by refusing a provenance (`operator_registry_hash`/
+  `codec_implementation_hash`) mismatch, plus an on-demand `verify_fraction` replay audit (2% = 0.47 ms/trace).
+- **LESSON -- micro-benchmark a COMPONENT, measure the PATH.** Timing `PackedMolecularGraph.from_graph/unpack`
+  in isolation predicted 630x; the first true end-to-end gave **2x**, because `read_packed_shard` still called
+  `decode_trace_record`, which still replayed. Only after removing that second replay did it reach 98x. A
+  component speedup is not a path speedup until the whole path is timed.
+- **LESSON -- an equivalence test whose reference is a COPY cannot fail usefully.** The first packed-sampler
+  panel compared against a local transcription of `_sample_tracelet_progress`; if the production function
+  drifted, the panel stayed green. `tests/test_packed_vs_live_sampler.py` now drives the LIVE function over
+  real `TraceProgressCTMC` records, and pins `PowerSurvivalScheduler.power == 1` (the packed path is
+  parameterized by `alpha` and treats `alpha == t`; a non-unit power silently breaks that identity).
+- **Sampling unit (measured, `scripts/sampling_unit_audit.py`):** one draw = one TRACE, then exactly ONE
+  progress position -- not all its transitions. So a K-step trace gives each of its steps ~1/K of the trace's
+  probability, and flattening transitions into a uniform urn would upweight long traces by ~K (a DIFFERENT
+  objective). `path_length` is the only trace property the progress law needs: `N_t ~ Binomial(K, alpha(t))`.
+  The terminal (no-jump) position is a legal landing and takes **48.9% of all draws** (cycle 61.0% since K=1
+  always, corruption 47.0%, MMP 42.5% exact over the full 363,456-row pool) -- it supervises the exit rate.
+  Family stratification (fraction 0.5) oversamples rare families then divides it back out via the importance
+  weight, so it buys COVERAGE, not expected family mass. Consequence: a layer weight is a weight over trace
+  draws, so configured 0.40/0.25/0.35 realizes as **41.5/19.1/39.4%** of teacher transitions.
+- **The MMP analogue pool bypasses the ringcore-v1 scaffold partition** (mined under `split_seed 20260714`).
+  Measured: **8.09%** of its rows fall in the held-out partitions (~29k records) -- they would train on
+  validation/test scaffolds and inflate the very learning curve used to select checkpoints.
+  `production_edit_corpus.load_mmp_records` routes every row through the same pure `partition_for_scaffold`,
+  and applies any `limit` AFTER filtering so it cannot regress into partition-blind prefix truncation.
+  GOTCHA: an empty SMILES **parses** to a zero-atom Mol, so it gets a partition bucket unless emptiness is
+  rejected explicitly -- `murcko_scaffold`'s None contract only covers UNPARSEABLE input.
