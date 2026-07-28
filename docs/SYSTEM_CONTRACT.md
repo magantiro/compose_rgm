@@ -131,9 +131,20 @@ The model trains and samples over **`MARK_RULE_NAMES` = 10 families** (`factoriz
 `atom_insert, atom_delete, atom_restate, bond_reorder, bond_reroute, cycle_insert, cycle_attach,
 ring_system_grow, ring_system_delete, ring_system_restate`.
 
-- **No standalone `bond_insert`/`bond_delete`** family — chain growth folds into `atom_insert`-with-neighbor
-  (the grow head carries the bond order); ring bonds go through `ring_system_*`.
-- `cycle_insert`/`cycle_attach` are **legacy null-prior ops, dead** for B and B-edit (no candidates enumerated).
+- **RING_CORE_V1 (compositional ring support).** Under `enable_cycle_ops` the two historically-dead slots
+  `cycle_insert`/`cycle_attach` are **repurposed** to the compositional ring primitives **`cycle_close`**
+  (`BondInsert(a,b,order)` over nonbonded same-component pairs — the executor `bond_insert`) and
+  **`cycle_open`** (`BondDelete(a,b)` over non-bridge cycle edges — the executor `bond_delete`). These DEFINE
+  ring-generation support (any topology is reachable via spanning-tree + close-non-tree-edges). The internal
+  slot names `cycle_insert`/`cycle_attach` are engineering aliases and **are not exposed publicly** — the
+  public/paper names are `cycle_close` / `cycle_open`.
+- **RING_CORE_V1 disables the legacy `ring_system_grow` whole-ring macro** (`enable_ring_grow_macro=False`):
+  the grow family is masked dead (all-zero support → −∞ family logit → never sampled/taught); the grow head
+  params are retained (byte-identical when enabled → warm-start-safe). Ring ADDITION is purely compositional
+  (`cycle_close`). A finite ring-macro catalog is a LATER `RING_HYBRID_V2`/P4 acceleration layer under a
+  separate `enable_ring_macros` flag, never the definition of support.
+- When `enable_cycle_ops` is off (de-novo B / non-RingCore B-edit), `cycle_insert`/`cycle_attach` remain
+  **legacy null-prior ops, dead** (no candidates enumerated) and grow is active — byte-identical to history.
 - A mark is a typed `(rule_name, action)`; the action is an operator dataclass (`rewrite/operators.py`,
   `rewrite/tracelets.py`).
 - The **legal fiber** at `x` is `enumerate_factorized_cnof_fiber(x, allow_bond_reroute=…)`
@@ -144,9 +155,11 @@ ring_system_grow, ring_system_delete, ring_system_restate`.
   molecules), `compute_ring_opening` (decoration-preserving clean ring delete).
 
 **Capability gating (audit-critical).** Which editing families are legal at sampling MUST equal what the
-checkpoint was trained with. The three enumeration flags are sourced from the model's `enable_ring_restates /
-enable_cyclic_graft / enable_ring_opening` (set at load from checkpoint metadata,
-`evaluate_tracelet_rollouts.py:191`). Both the raw model sampler (`factorized_tracelet_rate_model.py:3105`)
+checkpoint was trained with. The enumeration flags are sourced from the model's `enable_ring_restates /
+enable_cyclic_graft / enable_ring_opening / enable_cycle_ops` and the `enable_ring_grow_macro` gate (all set
+at load from checkpoint metadata, `evaluate_tracelet_rollouts.py`). RING_CORE_V1 metadata:
+`enable_cycle_ops=True`, `enable_ring_grow_macro=False`, `enable_ring_macros=False` (capability hash
+`330473e319bfec19`, tag `ring-core-v1`). Both the raw model sampler (`factorized_tracelet_rate_model.py:3105`)
 and the pancake sampler (`canonical_successor_distillation.py`) pass all three — cyclic graft included, now
 that its quotient is derived (§7, full-Zq). **Ring catalog:** clean ring-opening (`ring_system_delete`) uses
 one **shared versioned `TypedRingCatalog`** — the same definition used by the rewrite system, enumeration,

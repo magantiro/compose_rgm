@@ -1,0 +1,110 @@
+{
+  "affected_by_compositional_change": {
+    "cache_schema_discriminators": [
+      "corrupted_prior_mix",
+      "cycle_op_mix",
+      "disable_ring_grow_macro",
+      "organic_vocabulary",
+      "analogue_trace_pool"
+    ],
+    "calibration_policy_hash": "f534c0233e3bf4a0",
+    "capability_hash": "330473e319bfec19",
+    "checkpoint_metadata_contract": {
+      "corrupted_prior_mix": true,
+      "enable_cycle_ops": true,
+      "enable_ring_grow_macro": false,
+      "enable_ring_macros": false,
+      "organic_vocabulary": true
+    },
+    "operator_registry": {
+      "cycle_op_semantic_hash": "2b4e3865b4137529",
+      "hash": "9197401e8dc3a7ae",
+      "mark_rule_names": [
+        "atom_insert",
+        "atom_delete",
+        "atom_restate",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_insert",
+        "cycle_attach",
+        "ring_system_grow",
+        "ring_system_delete",
+        "ring_system_restate"
+      ]
+    },
+    "selected_target_distribution": {
+      "cycle_close_rate": 0.3051,
+      "cycle_close_share_within_family": 0.5,
+      "cycle_family_rate": 0.6101,
+      "cycle_open_rate": 0.3051,
+      "family_counts": {
+        "atom_delete": 145,
+        "atom_insert": 105,
+        "atom_restate": 263,
+        "bond_reorder": 148,
+        "bond_reroute": 142,
+        "cycle_attach": 784,
+        "cycle_insert": 784,
+        "ring_system_delete": 76,
+        "ring_system_restate": 123
+      },
+      "total_targets": 2570
+    },
+    "subtype_supervision_counts": {
+      "atom_delete": 106,
+      "atom_insert": 76,
+      "atom_restate": 215,
+      "bond_reorder": 92,
+      "bond_reroute": 122,
+      "cycle_attach": 588,
+      "cycle_insert": 588,
+      "ring_system_delete": 44,
+      "ring_system_restate": 116
+    },
+    "trace_schema": "PathRecord(canonical_state_key(target), TraceProgressCTMC(RewriteTrace)); cycle ops record executor rule_names bond_insert/bond_delete (scored under cycle_insert/cycle_attach).",
+    "training_recipe": {
+      "base_checkpoint_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+      "gate": "scripts/train_tracelet_cnof_gate.py --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --initialize-compatible-from-source-checkpoint",
+      "modal": "modal run modal_apps/train_tracelet_gm.py --train-only --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --initialize-compatible-from-source-checkpoint"
+    }
+  },
+  "git_commit": "16a8553b46e0a7c833f6cdfd232d62d69ad1ddb1",
+  "reused_unaffected": {
+    "base_checkpoint": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "mmp_scaffold_data": "the MMP/analogue pool uses only atom_insert/atom_delete families (measured: 0/98 traces touch any ring/cycle op); those families are UNCHANGED by the compositional-ring operator change, so the pool is reused as-is. Ring-changing analogue mining is separate (\u00a73 measured ring cost directly)."
+  },
+  "verdict": "GO_RING_CORE_REGEN",
+  "verification": {
+    "all_state_validity": "topology gate + path-cost: 100% valid+connected+<=40+charge-preserving",
+    "canonical_successor_normalization": {
+      "distinct_canonical_successors": 3367,
+      "max_per_state_multiplicity": 2.5778,
+      "mean_multiplicity": 1.4651,
+      "rate_conservation": "per-coordinate scoring (bond_reorder-style): each cycle mark scores its own masked normalizer, so summed marked rates equal the family rate -- no successor-group over-count.",
+      "raw_legal_cycle_marks": 4933
+    },
+    "data_sampler_distribution": {
+      "cycle_close_mass": 0.2978,
+      "cycle_family_mass": 0.5853,
+      "cycle_open_mass": 0.2875,
+      "total_draws": 3200
+    },
+    "operator_fuzz": {
+      "cleanly_rejected": 2043,
+      "corrupt_or_crash": 0,
+      "fuzz_ok": true,
+      "valid": 357
+    },
+    "save_reload": true,
+    "subtype_supervision_gate": "GO_SUBTYPE_SUPERVISION",
+    "tiny_overfit": true,
+    "trace_replay_and_inverse": {
+      "inverse_exact": 232,
+      "inverse_ok": true,
+      "records": 464,
+      "replay_exact": 464,
+      "replay_ok": true
+    }
+  },
+  "version": "RING_CORE_V1"
+}

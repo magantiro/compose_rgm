@@ -82,8 +82,38 @@ Two costs (`diagnostics/production_preflight/ring_path_cost.json`):
 compositionally cheap and always within budget; only building a *whole new* fused/hetero ring de-novo is
 expensive. Whether that bites RingCore in practice depends on how often trained ring edits are whole-ring
 introductions vs restructurings — measured in §6.
-## 4. P5 calibration for the compositional core ⏳
-## 5. Regenerated RingCore manifest + cache hashes ⏳
+## 4. P5 calibration for the compositional core ✅
+Calibrates the fresh cycle heads to the **selected-target** statistics (NOT raw corpus ring frequency),
+verified at three levels (`diagnostics/production_preflight/ring_core_calibration.json`).
+- **Selected-target teacher rate** (precise, 2,570 targets): cycle family **61.0%** (cycle_close 30.5% /
+  cycle_open 30.5%, a 50/50 within-family split) — the dominant edit family; other families atom_restate
+  10.2%, bond_reorder/bond_reroute ~5.7%, ring_system_restate 4.8%, ring_system_delete 3.0%.
+- **Initial sampler mass** (representative model): cycle family 30.3%.
+- **Calibration policy** (hash `f534c0233e3bf4a0`): the model is **hierarchical** — the family distribution
+  is `family_head`, independent of the within-family cycle-head partition — so the cycle-family mass is
+  calibrated on `family_head`'s bias at the cycle indices (5/6), refined for the softmax renormalization.
+  Shifts the sampler cycle mass **30.3% → 58.5%** (target 61.0%). **No macro/template prior.**
+- **Shared-kernel drift = 0.0**: the calibration touches only the cycle family_head bias; every delete/
+  restate/reorder head and every non-cycle family logit is byte-identical (structural, verified).
+- **Canonical-successor level**: mean multiplicity **1.47** raw legal cycle marks per distinct successor
+  (cycle ops are near-injective; per-coordinate scoring conserves rate — no successor-group over-count).
+- *Caveat:* absolute masses use a representative model; the policy + multiplicity + drift are
+  backbone-independent, finalized at Modal load with B's warm-started `family_head`.
+## 5. Regenerated RingCore manifest + verification battery ✅ `GO_RING_CORE_REGEN`
+`diagnostics/production_preflight/ring_core_data_manifest.json` regenerates only the artifacts affected by
+the compositional operator change (operator-registry + cycle-op semantic hashes, capability hash, trace
+schema, subtype-supervision counts, selected-target distribution, calibration-policy hash, training recipe,
+cache-schema discriminators `{corrupted_prior_mix, cycle_op_mix, disable_ring_grow_macro, organic_vocabulary,
+analogue_trace_pool}`, checkpoint-metadata contract). SYSTEM_CONTRACT §4 updated (cycle_close/cycle_open
+repurposed slots; grow disabled; public-alias policy).
+- **Reuse proof:** the MMP/analogue pool uses only `atom_insert`/`atom_delete` (measured 0/98 traces touch a
+  ring/cycle op) — families UNCHANGED by the compositional-ring change, so the pool is reused as-is.
+- **Verification battery:** operator fuzz **0 corrupt/crash** (357 valid / 2,043 cleanly rejected — the
+  executor never corrupts on random cycle ops) · trace replay **464/464 exact** · inverse open↔close
+  **232/232 exact** · all-state validity 100% (§2/§3) · subtype gate `GO_SUBTYPE_SUPERVISION` ·
+  canonical-successor normalization (multiplicity 1.47, rate-conserving) · tiny-overfit natural sampling ✅ ·
+  data-sampler distribution ✅ · save/reload equivalent ✅.
+
 ## 6. Bounded RingCore preflight (≤750 steps) ⏳
 ## 7. Unseen-lead + topology-stratified rollouts ⏳
 ## 8. Measured throughput ⏳
