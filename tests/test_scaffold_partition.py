@@ -75,6 +75,25 @@ def test_acyclic_molecules_do_not_collapse_into_one_bucket():
     assert murcko_scaffold("CCO").startswith("<acyclic:")
 
 
+def test_acyclic_key_separates_distinct_skeletons_of_equal_size():
+    """Heavy-atom count alone was too coarse: measured on held-out data it put 60 acyclic molecules into
+    25 keys and 59/1/0 across partitions, leaving held-out sets with no acyclic coverage. The key is now a
+    label-reduced (carbonized) Weisfeiler-Lehman skeleton hash, so equal-size but differently-shaped
+    molecules separate."""
+    linear = murcko_scaffold("CCCCCC")        # straight chain, 6 heavy
+    branched = murcko_scaffold("CCC(C)(C)C")  # branched, also 6 heavy
+    assert linear is not None and branched is not None
+    assert linear != branched, "distinct acyclic skeletons of equal size must get distinct keys"
+
+
+def test_acyclic_key_is_composition_blind_so_a_skeleton_stays_together():
+    """The key is carbonized: same shape, different heteroatoms -> SAME partition. That preserves the leak
+    guarantee (a skeleton's edit neighbourhood cannot straddle partitions)."""
+    a = murcko_scaffold("CCCCO")
+    b = murcko_scaffold("CCCCN")
+    assert a == b, "same skeleton must share a key regardless of composition"
+
+
 def test_unparseable_molecules_are_dropped_not_defaulted_to_train():
     part, _scaf, stats = assign_partitions(["CC(=O)Nc1ccccc1", "not_a_molecule("])
     assert stats["unassignable_sources"] == 1

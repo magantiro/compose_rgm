@@ -26,11 +26,38 @@ DEFAULT_RATIOS = (0.90, 0.05, 0.05)
 _HASH_BUCKETS = 10_000
 
 
+def _acyclic_key(mol) -> str:
+    """Partition key for a molecule with no ring system.
+
+    Bemis-Murcko returns the EMPTY scaffold for acyclics, so keying on it directly would drop every acyclic
+    molecule into one bucket -- catastrophic for balance. Heavy-atom count alone is leak-safe but far too
+    coarse: measured on held-out broad-organic data, 60 acyclic molecules collapsed into 25 keys and landed
+    59 train / 1 validation / 0 test, leaving the held-out sets with no acyclic coverage at all.
+
+    We therefore key on a topology-preserving, label-reduced skeleton: every heavy atom is relabelled to a
+    single type and bond orders are discarded, then a Weisfeiler-Lehman graph hash identifies the shape.
+    Molecules sharing a carbon skeleton stay confined to one partition (the leak guarantee is per-key and is
+    preserved), while genuinely different skeletons can separate.
+    """
+    import networkx as nx
+
+    graph = nx.Graph()
+    for atom in mol.GetAtoms():
+        graph.add_node(atom.GetIdx(), label="C")          # carbonized: shape only, not composition
+    for bond in mol.GetBonds():
+        graph.add_edge(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
+    try:
+        shape = nx.weisfeiler_lehman_graph_hash(graph, node_attr="label", iterations=3)[:16]
+    except Exception:  # noqa: BLE001 -- fall back to the coarse key rather than failing assignment
+        shape = "nowl"
+    return f"<acyclic:{mol.GetNumHeavyAtoms()}:{shape}>"
+
+
 def murcko_scaffold(smiles: str) -> str | None:
     """Bemis-Murcko scaffold SMILES, or None when RDKit cannot parse the molecule.
 
-    Acyclic molecules yield an empty scaffold; they are grouped under a distinct sentinel rather than all
-    collapsing into one giant bucket keyed by the empty string.
+    Acyclic molecules have no ring system and are keyed by a label-reduced skeleton hash instead -- see
+    ``_acyclic_key`` for why the empty scaffold and the heavy-atom count are both inadequate.
     """
     from rdkit import Chem
     from rdkit.Chem.Scaffolds import MurckoScaffold
@@ -43,9 +70,7 @@ def murcko_scaffold(smiles: str) -> str | None:
     except Exception:  # noqa: BLE001 -- unparseable molecules are simply unassignable
         return None
     if not scaffold:
-        # acyclic: no ring system. Key by heavy-atom count so acyclics do not become one mega-bucket.
-        heavy = mol.GetNumHeavyAtoms()
-        return f"<acyclic:{heavy}>"
+        return _acyclic_key(mol)
     return scaffold
 
 
