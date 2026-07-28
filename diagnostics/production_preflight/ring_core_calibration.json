@@ -1,0 +1,59 @@
+{
+  "calibrated_sampler_cycle_mass": {
+    "cycle_close_mass": 0.2978,
+    "cycle_family_mass": 0.5853,
+    "cycle_open_mass": 0.2875,
+    "total_draws": 3200
+  },
+  "calibration_policy": {
+    "applied_to": "family_head[2].bias at indices cycle_insert(5)/cycle_attach(6)",
+    "calibration_bias": 1.1964,
+    "macro_or_template_prior": "NONE (RingCore-V1 has no macro/template prior)",
+    "rate_factorization": "hierarchical (family distribution from family_head, independent of the within-family cycle-head partition)",
+    "target_cycle_family_rate": 0.6101,
+    "target_source": "selected-target teacher rate (NOT raw corpus ring frequency)"
+  },
+  "calibration_policy_hash": "f534c0233e3bf4a0",
+  "canonical_successor_level": {
+    "distinct_canonical_successors": 3367,
+    "max_per_state_multiplicity": 2.5778,
+    "mean_multiplicity": 1.4651,
+    "rate_conservation": "per-coordinate scoring (bond_reorder-style): each cycle mark scores its own masked normalizer, so summed marked rates equal the family rate -- no successor-group over-count.",
+    "raw_legal_cycle_marks": 4933
+  },
+  "caveat": "absolute family mass is representative-model; finalized at Modal load with B's warm-started family_head. The calibration policy + multiplicity + drift are backbone-independent.",
+  "factorized_head_level": {
+    "cycle_close_head": "Linear(hidden,3) [pair x order]",
+    "cycle_open_head": "Linear(hidden,1) [per non-bridge edge]",
+    "fresh": true
+  },
+  "initial_sampler_cycle_mass": {
+    "cycle_close_mass": 0.1547,
+    "cycle_family_mass": 0.3034,
+    "cycle_open_mass": 0.1487,
+    "total_draws": 3200
+  },
+  "shared_kernel_drift": {
+    "non_cycle_family_logit_drift": 0.0,
+    "note": "delete/restate/reorder heads AND non-cycle family_head logits are byte-identical; the calibration shifts only the cycle family_head bias, so the shared kernels are exactly preserved.",
+    "shared_head_weight_drift": 0.0
+  },
+  "teacher_selected_targets": {
+    "cycle_close_rate": 0.3051,
+    "cycle_close_share_within_family": 0.5,
+    "cycle_family_rate": 0.6101,
+    "cycle_open_rate": 0.3051,
+    "family_counts": {
+      "atom_delete": 145,
+      "atom_insert": 105,
+      "atom_restate": 263,
+      "bond_reorder": 148,
+      "bond_reroute": 142,
+      "cycle_attach": 784,
+      "cycle_insert": 784,
+      "ring_system_delete": 76,
+      "ring_system_restate": 123
+    },
+    "total_targets": 2570
+  }
+}
