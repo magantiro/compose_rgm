@@ -82,6 +82,32 @@ def _contract_hashes() -> dict:
     return out
 
 
+def expected_shard_ids(corruption_shards: int, cycle_shards: int) -> list[str]:
+    """The EXACT set of shard IDs this build must produce. The reducer rejects any missing, duplicated or
+    unexpected shard against this set -- 'some shards exist' must never be mistaken for completeness."""
+    ids = []
+    for layer, n in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
+        for partition in PARTITIONS:
+            for i in range(n):
+                ids.append(f"{layer}/{partition}/shard_{i:04d}")
+    return sorted(ids)
+
+
+def write_status(subdir: str, status: str, **fields) -> dict:
+    """Explicit terminal state. RUNNING | PARTIAL | FAILED | COMPLETE.
+
+    The presence of source manifests or some shards must NEVER imply success; only the reducer may declare
+    COMPLETE, and only after every checksum, contract hash, partition check and census has passed."""
+    payload = {"status": status, **fields}
+    out = Path("/artifacts") / subdir
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "build_status.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    artifact_volume.commit()
+    print(json.dumps({"phase": "status", **{k: v for k, v in payload.items() if k != "shards"}},
+                     sort_keys=True)[:900], flush=True)
+    return payload
+
+
 def _shard_is_reusable(shard: Path, manifest: Path, contract: dict) -> bool:
     """Restart rule: reuse ONLY if the manifest parses, the checksum matches, and every contract hash
     equals the current one. Anything else recompiles -- a stale-contract shard is never silently reused."""
@@ -221,7 +247,7 @@ def compile_shard(layer: str, partition: str, shard_index: int, n_shards: int,
 
 @app.function(image=image, cpu=16.0, timeout=4 * 3600,
               volumes={"/artifacts": artifact_volume})
-def reduce_and_validate(subdir: str, expected: dict) -> dict:
+def reduce_and_validate(subdir: str, expected_ids: list, build_meta: dict) -> dict:
     """Phase 3 (one container): verify shard completeness + checksums + contract hashes, then census.
 
     Checks the conditions a partial or stale build would violate, and the two the plan calls out
@@ -243,17 +269,22 @@ def reduce_and_validate(subdir: str, expected: dict) -> dict:
     families: dict[str, Counter] = defaultdict(Counter)
     totals: Counter = Counter()
 
+    # INVARIANT 1: expected-shard completeness -- exact set, no missing/unexpected/duplicate
+    found_ids: set[str] = set()
     for layer in LAYERS:
         for partition in PARTITIONS:
-            n_expected = expected.get(layer, {}).get(partition, 0)
-            shards = sorted((out / layer / partition).glob("shard_*.jsonl.gz")) \
-                if (out / layer / partition).is_dir() else []
-            if n_expected and not shards:
-                problems.append(f"{layer}/{partition}: expected shards, found none")
+            directory = out / layer / partition
+            shards = sorted(directory.glob("shard_*.jsonl.gz")) if directory.is_dir() else []
+            seen_here: set[str] = set()
             for shard in shards:
+                shard_id = f"{layer}/{partition}/{shard.name.split('.')[0]}"
+                if shard_id in seen_here:
+                    problems.append(f"{shard_id}: duplicate shard")
+                seen_here.add(shard_id)
+                found_ids.add(shard_id)
                 manifest = shard.with_suffix(".manifest.json")
                 if not _shard_is_reusable(shard, manifest, contract):
-                    problems.append(f"{shard.name}: failed checksum/contract validation")
+                    problems.append(f"{shard_id}: failed checksum/contract validation")
                     continue
                 for rec in read_shard(shard):
                     totals[f"{layer}_records"] += 1
@@ -267,6 +298,13 @@ def reduce_and_validate(subdir: str, expected: dict) -> dict:
                     # canonical transition identity for cross-layer overlap
                     for step in rec["steps"]:
                         transitions_by_layer[layer].add((rec["source_key"], step["successor_key"]))
+
+    missing = sorted(set(expected_ids) - found_ids)
+    unexpected = sorted(found_ids - set(expected_ids))
+    if missing:
+        problems.append(f"missing {len(missing)} expected shard(s): {missing[:5]}")
+    if unexpected:
+        problems.append(f"{len(unexpected)} unexpected shard(s): {unexpected[:5]}")
 
     # partition purity over the UNION of layers (a source crossing partitions VIA a different layer is
     # the dangerous case; the same source in two layers within one partition is fine)
@@ -291,6 +329,13 @@ def reduce_and_validate(subdir: str, expected: dict) -> dict:
 
     census = {
         "phase": "reduce_complete",
+        "expected_shards": len(expected_ids),
+        "completed_shards": len(found_ids & set(expected_ids)),
+        "missing_shards": missing,
+        "unexpected_shards": unexpected,
+        "reused_shards": build_meta.get("reused"),
+        "recompiled_shards": build_meta.get("recompiled"),
+        "failed_shards": build_meta.get("failed"),
         "contract": contract,
         "totals": dict(totals),
         "families_by_layer": {k: dict(v.most_common()) for k, v in families.items()},
@@ -302,7 +347,20 @@ def reduce_and_validate(subdir: str, expected: dict) -> dict:
         "problems": problems,
         "VALID": not problems,
     }
-    (out / "unified_census.json").write_text(json.dumps(census, indent=2, sort_keys=True) + "\n")
+    census["BUILD_COMPLETE"] = bool(not problems)
+    body = json.dumps(census, indent=2, sort_keys=True)
+    census["reducer_checksum"] = hashlib.sha256(body.encode()).hexdigest()[:16]
+    (out / "unified_census.json").write_text(
+        json.dumps(census, indent=2, sort_keys=True) + "\n")
+    # INVARIANT 2: BUILD_COMPLETE is written ONLY here, only after every check passed
+    marker = out / "BUILD_COMPLETE.json"
+    if census["BUILD_COMPLETE"]:
+        marker.write_text(json.dumps(
+            {"BUILD_COMPLETE": True, "reducer_checksum": census["reducer_checksum"],
+             "expected_shards": len(expected_ids), "totals": dict(totals), "contract": contract},
+            indent=2, sort_keys=True) + "\n")
+    elif marker.exists():
+        marker.unlink()      # a previously-complete build that no longer validates must not stay marked
     artifact_volume.commit()
     print(json.dumps({k: v for k, v in census.items() if k != "families_by_layer"},
                      sort_keys=True)[:2000], flush=True)
@@ -317,22 +375,58 @@ def driver(subdir: str, corruption_sources: int, cycle_sources: int,
     already-spawned functions alive but silently drops the rest of the pipeline when the client
     disconnects -- the map and reduce would never be issued. Driving from inside a container makes the
     whole build survive client loss."""
-    src = partition_sources.remote(subdir, corruption_sources, cycle_sources)
-    print(json.dumps({"phase": "partitioned", "counts": src["per_layer_source_counts"]}), flush=True)
+    expected_ids = expected_shard_ids(corruption_shards, cycle_shards)
+    write_status(subdir, "RUNNING", expected_shards=len(expected_ids),
+                 corruption_sources=corruption_sources, cycle_sources=cycle_sources)
 
-    jobs = []
-    for layer, n_shards in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
-        for partition in PARTITIONS:
-            for shard_index in range(n_shards):
-                jobs.append((layer, partition, shard_index, n_shards, subdir, seed))
-    print(json.dumps({"phase": "mapping", "shards": len(jobs)}), flush=True)
-    results = list(compile_shard.starmap(jobs))
-    reused = sum(1 for r in results if r.get("reused"))
-    print(json.dumps({"phase": "mapped", "shards": len(results), "reused": reused}), flush=True)
+    # INVARIANT 3: idempotent. A complete, still-valid build is not rebuilt; anything else recompiles only
+    # the stale/missing shards. Each shard has exactly ONE writer (its own map task + its own path), so two
+    # writers for one final path is structurally impossible.
+    out = Path("/artifacts") / subdir
+    marker = out / "BUILD_COMPLETE.json"
+    if marker.exists():
+        try:
+            prior = json.loads(marker.read_text())
+            if prior.get("contract") == _contract_hashes():
+                print(json.dumps({"phase": "build_already_complete"}), flush=True)
+                write_status(subdir, "COMPLETE", reused_existing_build=True,
+                             reducer_checksum=prior.get("reducer_checksum"))
+                return prior
+        except Exception:  # noqa: BLE001
+            pass
 
-    expected = {layer: {p: 1 for p in PARTITIONS} for layer in LAYERS}
-    census = reduce_and_validate.remote(subdir, expected)
-    print(json.dumps({"phase": "driver_complete", "VALID": census["VALID"]}), flush=True)
+    try:
+        src = partition_sources.remote(subdir, corruption_sources, cycle_sources)
+        print(json.dumps({"phase": "partitioned", "counts": src["per_layer_source_counts"]}), flush=True)
+
+        jobs = []
+        for layer, n_shards in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
+            for partition in PARTITIONS:
+                for shard_index in range(n_shards):
+                    jobs.append((layer, partition, shard_index, n_shards, subdir, seed))
+        print(json.dumps({"phase": "mapping", "shards": len(jobs)}), flush=True)
+
+        results = list(compile_shard.starmap(jobs, return_exceptions=True))
+        reused = sum(1 for r in results if isinstance(r, dict) and r.get("reused"))
+        failed = sum(1 for r in results if not isinstance(r, dict))
+        recompiled = len(results) - reused - failed
+        build_meta = {"reused": reused, "recompiled": recompiled, "failed": failed}
+        print(json.dumps({"phase": "mapped", **build_meta}), flush=True)
+    except Exception as exc:  # noqa: BLE001
+        write_status(subdir, "FAILED", stage="map", error=f"{type(exc).__name__}: {exc}")
+        raise
+
+    census = reduce_and_validate.remote(subdir, expected_ids, build_meta)
+    # INVARIANT 4: only the reducer's verdict decides terminal state. Source manifests or partial shards
+    # never imply success.
+    status = "COMPLETE" if census.get("BUILD_COMPLETE") else "PARTIAL"
+    write_status(subdir, status, expected_shards=len(expected_ids),
+                 completed_shards=census.get("completed_shards"),
+                 missing_shards=len(census.get("missing_shards") or []),
+                 **build_meta,
+                 reducer_checksum=census.get("reducer_checksum"),
+                 problems=(census.get("problems") or [])[:5])
+    print(json.dumps({"phase": "driver_complete", "status": status}), flush=True)
     return census
 
 
