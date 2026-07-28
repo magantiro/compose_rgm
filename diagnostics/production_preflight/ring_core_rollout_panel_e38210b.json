@@ -1,0 +1,395 @@
+{
+  "checkpoint_identity": {
+    "calibration_policy_hash": "f534c0233e3bf4a0",
+    "capability_hash": "330473e319bfec19",
+    "checkpoint_path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/ringcore_ckpt.pt",
+    "checkpoint_sha256": "9b9428db03cf95c45988e2f1b95bae655eb0d2e77fc9714b8cfbd98b325f1ed9",
+    "corpus_scope_hash": "3721d69851110fdd",
+    "cycle_op_semantic_hash": "27a823aeb6cf7548",
+    "enable_cycle_ops": true,
+    "enable_ring_grow_macro": false,
+    "enable_ring_macros": false,
+    "global_step": null,
+    "identity_ok": true,
+    "max_atoms": 40,
+    "operator_registry_hash": "9197401e8dc3a7ae",
+    "production_sampler_config_hash": "f91f60f66d81aacd",
+    "source_b_sha256": null,
+    "warning_step_0_or_unknown": true
+  },
+  "config": {
+    "horizon": 16,
+    "op_time": 12.0,
+    "rollouts_per_lead": 2,
+    "unseen_leads": 6
+  },
+  "interpretation": {
+    "next_action": "supply --training-log and confirm the compressed 500-step schedule matches the intended full-run schedule",
+    "reason": "correctness + natural compositional editing hold, but the 500-step diagnostic trace (training log) was not supplied to confirm the schedule is representative",
+    "verdict": "GO_AFTER_PRODUCTION_SCHEDULE_CHECK"
+  },
+  "learning_diagnostics": {
+    "available": false,
+    "note": "provide --training-log <jsonl> from the bounded run to fill steps 0/250/500 diagnostic loss, target log-prob, hazard error, and per-cycle-subtype grad/update norms."
+  },
+  "note": "NON_SCIENTIFIC_PREFLIGHT -- these rollouts/summaries must NOT enter manuscript results, benchmark aggregation, final model selection, or headline figures. With --self-validate the numbers prove the HARNESS on an untrained model; production numbers require the step-500 checkpoint.",
+  "paired_processes": {
+    "B_trained_step500": {
+      "topology": {
+        "10_canonical_branching": {
+          "max": 23.0,
+          "mean": 15.9,
+          "median": 15.0,
+          "p90": 23.0
+        },
+        "11_legal_mark_enumeration_cost_ms": 222.423,
+        "12_throughput_marks_per_s": 20.9,
+        "13_charge_preserved_rate": 0.95,
+        "1_all_state_validity": 1.0,
+        "2_cycle_rank_correctness": 1.0,
+        "3_all_op_counts": {
+          "atom_delete": 10,
+          "atom_insert": 269,
+          "atom_restate": 9,
+          "bond_delete": 14,
+          "bond_insert": 12,
+          "bond_reorder": 2,
+          "bond_reroute": 3,
+          "ring_system_delete": 1
+        },
+        "3_ring_op_target_counts": {
+          "bond_delete": 14,
+          "bond_insert": 12,
+          "ring_system_delete": 1
+        },
+        "4_natural_ring_op_usage": 0.9,
+        "5_topology_classes_reached": {
+          "acyclic": 9,
+          "fused/aromatic": 2,
+          "fused/saturated": 4,
+          "mono/aromatic": 2,
+          "mono/saturated": 3
+        },
+        "6_ring_edit_path_length": {
+          "max": 4.0,
+          "mean": 1.5,
+          "median": 1.0,
+          "p90": 3.0
+        },
+        "7_reversal_rate": 0.0,
+        "7_revisit_rate": 0.0094,
+        "8_return_to_source_rate": 0.0,
+        "9_net_structural_displacement": {
+          "max": 0.984,
+          "mean": 0.934,
+          "median": 0.95,
+          "p90": 0.982
+        },
+        "charge": {
+          "charged_context_rollouts": 2,
+          "net_formal_charge_preserved": 0.95,
+          "protected_charged_centers_preserved": 0.95,
+          "unexplained_charge_mutations": 1
+        },
+        "compositional_ring_behavior": {
+          "close_then_inverse_open": 0,
+          "cycle_close_count": 12,
+          "cycle_open_count": 14,
+          "cycle_ops_naturally_sampled": true,
+          "distinct_sources_per_subtype": {
+            "bond_delete": 9,
+            "bond_insert": 8,
+            "ring_system_delete": 1,
+            "ring_system_restate": 0
+          },
+          "net_ring_accumulation_rollouts": 6,
+          "net_ring_loss_rollouts": 10,
+          "productive_close": 12,
+          "productive_delete": 1,
+          "productive_open": 14,
+          "repeated_ring_toggle_rollouts": 2,
+          "ring_delete_count": 1,
+          "toggle_dominated": false
+        },
+        "grow_exclusion_probe": {
+          "grow_family_log_prob": -Infinity,
+          "grow_family_mass": 0.0,
+          "grow_in_capability_set": false,
+          "grow_legal_marks": 0,
+          "kernel_sum": 1.0
+        },
+        "hard_gate_violations": {
+          "unexplained_charge_change": 1
+        },
+        "hard_gates_all_zero": false,
+        "n_rollouts": 20,
+        "unique_states_per_path": {
+          "max": 17.0,
+          "mean": 16.85,
+          "median": 17.0,
+          "p90": 17.0
+        }
+      },
+      "unseen": {
+        "10_canonical_branching": {
+          "max": 23.0,
+          "mean": 21.5,
+          "median": 21.5,
+          "p90": 23.0
+        },
+        "11_legal_mark_enumeration_cost_ms": 272.79,
+        "12_throughput_marks_per_s": 2.5,
+        "13_charge_preserved_rate": 1.0,
+        "1_all_state_validity": 1.0,
+        "2_cycle_rank_correctness": 1.0,
+        "3_all_op_counts": {
+          "atom_delete": 1,
+          "atom_insert": 92,
+          "atom_restate": 28,
+          "bond_delete": 16,
+          "bond_insert": 35,
+          "bond_reorder": 4,
+          "bond_reroute": 11,
+          "ring_system_delete": 2,
+          "ring_system_restate": 3
+        },
+        "3_ring_op_target_counts": {
+          "bond_delete": 16,
+          "bond_insert": 35,
+          "ring_system_delete": 2,
+          "ring_system_restate": 3
+        },
+        "4_natural_ring_op_usage": 1.0,
+        "5_topology_classes_reached": {
+          "fused/aromatic": 7,
+          "fused/saturated": 1,
+          "mono/aromatic": 4
+        },
+        "6_ring_edit_path_length": {
+          "max": 11.0,
+          "mean": 4.667,
+          "median": 5.0,
+          "p90": 9.0
+        },
+        "7_reversal_rate": 0.0365,
+        "7_revisit_rate": 0.0052,
+        "8_return_to_source_rate": 0.0,
+        "9_net_structural_displacement": {
+          "max": 0.927,
+          "mean": 0.872,
+          "median": 0.88,
+          "p90": 0.919
+        },
+        "charge": {
+          "charged_context_rollouts": 0,
+          "net_formal_charge_preserved": 1.0,
+          "protected_charged_centers_preserved": 1.0,
+          "unexplained_charge_mutations": 0
+        },
+        "compositional_ring_behavior": {
+          "close_then_inverse_open": 1,
+          "cycle_close_count": 35,
+          "cycle_open_count": 16,
+          "cycle_ops_naturally_sampled": true,
+          "distinct_sources_per_subtype": {
+            "bond_delete": 6,
+            "bond_insert": 6,
+            "ring_system_delete": 1,
+            "ring_system_restate": 3
+          },
+          "net_ring_accumulation_rollouts": 7,
+          "net_ring_loss_rollouts": 4,
+          "productive_close": 35,
+          "productive_delete": 2,
+          "productive_open": 16,
+          "repeated_ring_toggle_rollouts": 1,
+          "ring_delete_count": 2,
+          "toggle_dominated": false
+        },
+        "grow_exclusion_probe": {
+          "grow_family_log_prob": -Infinity,
+          "grow_family_mass": 0.0,
+          "grow_in_capability_set": false,
+          "grow_legal_marks": 0,
+          "kernel_sum": 1.0
+        },
+        "hard_gate_violations": {},
+        "hard_gates_all_zero": true,
+        "n_rollouts": 12,
+        "unique_states_per_path": {
+          "max": 17.0,
+          "mean": 16.917,
+          "median": 17.0,
+          "p90": 17.0
+        }
+      }
+    },
+    "C_uniform_legal": {
+      "topology": {
+        "10_canonical_branching": {
+          "max": 19.0,
+          "mean": 12.2,
+          "median": 12.0,
+          "p90": 19.0
+        },
+        "11_legal_mark_enumeration_cost_ms": 15.204,
+        "12_throughput_marks_per_s": 210.4,
+        "13_charge_preserved_rate": 1.0,
+        "1_all_state_validity": 1.0,
+        "2_cycle_rank_correctness": 1.0,
+        "3_all_op_counts": {
+          "bond_delete": 14,
+          "bond_insert": 55
+        },
+        "3_ring_op_target_counts": {
+          "bond_delete": 14,
+          "bond_insert": 55
+        },
+        "4_natural_ring_op_usage": 0.7,
+        "5_topology_classes_reached": {
+          "acyclic": 1,
+          "fused/aromatic": 3,
+          "fused/saturated": 11,
+          "mono/aromatic": 4,
+          "mono/saturated": 1
+        },
+        "6_ring_edit_path_length": {
+          "max": 14.0,
+          "mean": 4.929,
+          "median": 3.5,
+          "p90": 11.0
+        },
+        "7_reversal_rate": 0.2899,
+        "7_revisit_rate": 0.0145,
+        "8_return_to_source_rate": 0.3,
+        "9_net_structural_displacement": {
+          "max": 0.947,
+          "mean": 0.593,
+          "median": 0.826,
+          "p90": 0.941
+        },
+        "charge": {
+          "charged_context_rollouts": 2,
+          "net_formal_charge_preserved": 1.0,
+          "protected_charged_centers_preserved": 1.0,
+          "unexplained_charge_mutations": 0
+        },
+        "compositional_ring_behavior": {
+          "close_then_inverse_open": 1,
+          "cycle_close_count": 55,
+          "cycle_open_count": 14,
+          "cycle_ops_naturally_sampled": true,
+          "distinct_sources_per_subtype": {
+            "bond_delete": 6,
+            "bond_insert": 8,
+            "ring_system_delete": 0,
+            "ring_system_restate": 0
+          },
+          "net_ring_accumulation_rollouts": 13,
+          "net_ring_loss_rollouts": 1,
+          "productive_close": 55,
+          "productive_delete": 0,
+          "productive_open": 14,
+          "repeated_ring_toggle_rollouts": 0,
+          "ring_delete_count": 0,
+          "toggle_dominated": false
+        },
+        "grow_exclusion_probe": null,
+        "hard_gate_violations": {},
+        "hard_gates_all_zero": true,
+        "n_rollouts": 20,
+        "unique_states_per_path": {
+          "max": 15.0,
+          "mean": 4.4,
+          "median": 3.0,
+          "p90": 12.0
+        }
+      },
+      "unseen": {
+        "10_canonical_branching": {
+          "max": 9.0,
+          "mean": 6.5,
+          "median": 7.0,
+          "p90": 9.0
+        },
+        "11_legal_mark_enumeration_cost_ms": 24.116,
+        "12_throughput_marks_per_s": 15.9,
+        "13_charge_preserved_rate": 1.0,
+        "1_all_state_validity": 1.0,
+        "2_cycle_rank_correctness": 1.0,
+        "3_all_op_counts": {
+          "bond_insert": 3
+        },
+        "3_ring_op_target_counts": {
+          "bond_insert": 3
+        },
+        "4_natural_ring_op_usage": 0.1667,
+        "5_topology_classes_reached": {
+          "fused/aromatic": 5,
+          "mono/aromatic": 7
+        },
+        "6_ring_edit_path_length": {
+          "max": 2.0,
+          "mean": 1.5,
+          "median": 1.5,
+          "p90": 2.0
+        },
+        "7_reversal_rate": 0.0,
+        "7_revisit_rate": 0.0,
+        "8_return_to_source_rate": 0.8333,
+        "9_net_structural_displacement": {
+          "max": 0.821,
+          "mean": 0.088,
+          "median": 0.0,
+          "p90": 0.232
+        },
+        "charge": {
+          "charged_context_rollouts": 0,
+          "net_formal_charge_preserved": 1.0,
+          "protected_charged_centers_preserved": 1.0,
+          "unexplained_charge_mutations": 0
+        },
+        "compositional_ring_behavior": {
+          "close_then_inverse_open": 0,
+          "cycle_close_count": 3,
+          "cycle_open_count": 0,
+          "cycle_ops_naturally_sampled": true,
+          "distinct_sources_per_subtype": {
+            "bond_delete": 0,
+            "bond_insert": 2,
+            "ring_system_delete": 0,
+            "ring_system_restate": 0
+          },
+          "net_ring_accumulation_rollouts": 2,
+          "net_ring_loss_rollouts": 0,
+          "productive_close": 3,
+          "productive_delete": 0,
+          "productive_open": 0,
+          "repeated_ring_toggle_rollouts": 0,
+          "ring_delete_count": 0,
+          "toggle_dominated": false
+        },
+        "grow_exclusion_probe": null,
+        "hard_gate_violations": {},
+        "hard_gates_all_zero": true,
+        "n_rollouts": 12,
+        "unique_states_per_path": {
+          "max": 3.0,
+          "mean": 1.25,
+          "median": 1.0,
+          "p90": 2.0
+        }
+      }
+    }
+  },
+  "provenance": {
+    "checkpoint_sha256": "9b9428db03cf95c45988e2f1b95bae655eb0d2e77fc9714b8cfbd98b325f1ed9",
+    "evaluation_config_hash": "3352f40b9f2e1364",
+    "harness_commit": "e38210b20fd04bdefbdd7f8e7d4781fd714d1486",
+    "lead_panel_hash": "e5b98c25ed9dbe0a",
+    "seed_list_hash": "0eba83e757b79452"
+  },
+  "quarantine": "NON_SCIENTIFIC_PREFLIGHT",
+  "schema_version": "ringcore_rollout_v2",
+  "status": "ANALYSIS_READY_FOR_RINGCORE_CHECKPOINT"
+}

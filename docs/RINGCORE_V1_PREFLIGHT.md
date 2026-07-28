@@ -192,7 +192,49 @@ The teacher-in-exact-candidates filter is a DECLARED production data contract (v
   flags + `denovo_keep=0` + cache-format v2); eval-cache v1 is unconditionally rejected (v2 + capability-hash
   key). The invariant `teacher ∈ A_exact(x)` is a hard failure condition, not a zero-weight example.
 
-## 6. Bounded RingCore preflight (≤750 steps) 🔶 READY TO LAUNCH (bounded Modal run)
+## 6–8. Bounded RingCore preflight — COMPLETE ✅ `GO_AFTER_PRODUCTION_SCHEDULE_CHECK`
+Run `compose-v4-ringcore-v1-bounded-e38210b-v1` (commit `e38210b`, A100, 500 steps). First launch (`4204c9d`)
+crashed at warm-start on **DEV-CUDA** (`_cksum` called `.numpy()` on a CUDA tensor — the CPU dry-launch could
+not catch it); fixed (`.cpu()` before `.numpy()`) and relaunched. NON_SCIENTIFIC_PREFLIGHT.
+
+**§6 learning (fixed diagnostic IMPROVES monotonically):** validation GM loss **3.97 → 2.79 → 2.30**
+(step 1/250/500), teacher-mark prob 0.0019 → 0.032 (16×), not early-stopped. **The compositional cycle
+families LEARN** (top-3 acc): cycle_close 0.48→0.75, cycle_open 0.15→0.91; atom_insert 0.04→0.85,
+atom_delete 0.00→0.56. `ring_system_grow` 0 examples / 0 acc (correctly dead). Some non-dominant families
+drop from their B-warmstart values (atom_restate 0.98→0.21, bond_reroute 0.82→0.00, ring_system_restate/delete
+→0) — consistent with the family head re-weighting off B's de-novo preferences onto the editing mixture during
+warmup + small per-family counts; too early (500 warmup steps) to call a collapse.
+
+**§5 schedule (the decisive caveat): the ENTIRE 500-step run is WARMUP.** `warmup_steps=500=training_steps`, so
+LR ramps 6e-7 → 1.5e-4 → 3e-4 and reaches full value only AT step 500 — it never enters the decay phase. The
+run validates that the model learns + the mechanics hold, but the loss trajectory is **not representative of the
+full-run schedule** (warmup→decay). This is the `GO_AFTER_PRODUCTION_SCHEDULE_CHECK` condition.
+
+**§7 rollout hard gates (trained checkpoint, hardened harness) — ALL PASS:**
+- Identity gate PASSED (`identity_ok`, capability `330473e319bfec19`, cycle-ops on, grow off, SHA recorded).
+- **hard_gate_violations = {} (zero):** all-state validity **1.0**, cycle-rank correctness **1.0**, charge
+  preserved **1.0** (net + protected centers, 0 unexplained mutations), executor/successor match, kernel
+  normalized (1.0), no over-40, no legacy-macro access.
+- **Grow exclusion:** grow family log-prob −∞, mass 0.0, 0 legal marks, out of capability set.
+- **Natural compositional ring editing:** the trained model samples cycle ops in **100%** of rollouts (vs
+  uniform 17%) — it LEARNED to prefer ring editing. cycle_close 35 / cycle_open 16, **all productive**,
+  `toggle_dominated=False` (net accumulation 7 / loss 4, only 1 close→inverse-open), ring_delete 2.
+
+**§10 macro decision: `MACROS_OPTIONAL_ABLATION`** (confirmed with trained-model evidence). The compositional
+core is support-complete (§2: 14/14 topologies), ring restructuring is cheap + in-budget (§3), and the trained
+model naturally + productively uses compositional cycle ops without toggling. Macros (P4/RING_HYBRID_V2) would
+only accelerate de-novo whole-ring construction (not the dominant editing operation) → optional efficiency
+ablation, not a correctness/support prerequisite.
+
+**Training verdict: `GO_AFTER_PRODUCTION_SCHEDULE_CHECK`** — every hard correctness gate passes, the model
+learns, and the defining compositional cycle families learn + are naturally + productively used; BUT the
+warmup-compressed 500-step schedule cannot authorize the full-run schedule. **Smallest next action:** a
+schedule check — a longer run that includes the decay phase (or a warmup+decay schedule with
+`schedule_steps > warmup_steps`) — before the full run. NOT `GO_FOR_FULL_RINGCORE_TRAINING` (schedule
+unconfirmed); NOT `GO_AFTER_RECIPE_ADJUSTMENT` (cycle ops occur naturally + aren't toggle-dominated; the
+non-dominant family drops are warmup re-weighting, to be re-checked with the decay-phase run).
+
+## 6-prev. Bounded RingCore preflight (≤750 steps) — launch recipe (superseded by the result above)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep
 (§1–§5) is committed; the code gates are green; the launch is a `--disable-ring-grow-macro --cycle-op-mix`
