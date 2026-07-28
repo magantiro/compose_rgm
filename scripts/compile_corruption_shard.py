@@ -94,6 +94,33 @@ def select_shard_sources(
     return mine, scaf_by, stats
 
 
+def _build_layer_records(layer: str, source: str, *, seed: int, catalog, depth_max: int,
+                         couplings_per_target: int, max_bonds_per_molecule: int):
+    """Dispatch to the production generator for this layer. Both return (records, n_attempted).
+
+    The two compositional cycle families (cycle_close/cycle_open) come from build_cycle_op_records, NOT
+    from the corruption generator -- so a corruption-only precompile would scale seven families while
+    leaving the two DEFINING RingCore families on a tiny in-memory dataset. Compiling both layers here, from
+    the SAME scaffold-partitioned sources through the SAME codec and validation, keeps them first-class.
+    """
+    if layer == "corruption":
+        from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
+
+        return build_corrupted_prior_records(
+            [source], n_slots=N_SLOTS, depth_max=depth_max, seed=seed,
+            catalog=catalog, vocabulary=ORGANIC_VOCABULARY,
+            couplings_per_target=couplings_per_target,
+        )
+    if layer == "cycle_ops":
+        from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
+
+        return build_cycle_op_records(
+            (source,), n_slots=N_SLOTS, seed=seed,
+            max_bonds_per_molecule=max_bonds_per_molecule,
+        )
+    raise ValueError(f"unknown layer {layer!r}")
+
+
 def compile_shard(
     sources: list[str],
     scaffold_by_smiles: dict[str, str],
@@ -101,13 +128,13 @@ def compile_shard(
     partition: str,
     shard_index: int,
     seed: int,
+    layer: str = "corruption",
     depth_max: int = 5,
     couplings_per_target: int = 2,
+    max_bonds_per_molecule: int = 4,
     catalog=None,
 ) -> tuple[list[dict], dict]:
-    """Generate + encode + validate corruption traces for this shard's sources."""
-    from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
-
+    """Generate + encode + validate traces for this shard's sources, for one layer."""
     if catalog is None:
         from warmstart_dry_run import build_production_ring_catalog
 
@@ -122,10 +149,10 @@ def compile_shard(
     for source in sources:
         source_seed = (seed * 1_000_003 + hash(source) % 1_000_003) % (2**31 - 1)
         try:
-            built, _log = build_corrupted_prior_records(
-                [source], n_slots=N_SLOTS, depth_max=depth_max, seed=source_seed,
-                catalog=catalog, vocabulary=ORGANIC_VOCABULARY,
+            built, _log = _build_layer_records(
+                layer, source, seed=source_seed, catalog=catalog, depth_max=depth_max,
                 couplings_per_target=couplings_per_target,
+                max_bonds_per_molecule=max_bonds_per_molecule,
             )
         except Exception as exc:  # noqa: BLE001
             rejections[f"generation:{type(exc).__name__}"] += 1
@@ -141,8 +168,9 @@ def compile_shard(
             try:
                 record = encode_trace_record(
                     trace, n_slots=N_SLOTS, seed=source_seed,
-                    trace_id=f"{partition}-s{shard_index:04d}-{len(records):06d}",
+                    trace_id=f"{layer}-{partition}-s{shard_index:04d}-{len(records):06d}",
                     partition=partition,
+                    layer=layer,
                     source_scaffold=scaffold_by_smiles.get(source, ""),
                     extra={"origin_smiles": source},
                 )
@@ -159,6 +187,7 @@ def compile_shard(
             records.append(record)
 
     stats = {
+        "layer": layer,
         "sources": len(sources),
         "accepted_traces": len(records),
         "accepted_transitions": sum(r["path_length"] for r in records),
@@ -174,6 +203,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sources", type=Path, required=True, help="newline SMILES file")
     parser.add_argument("--partition", default="train", choices=("train", "validation", "test"))
+    parser.add_argument("--layer", default="corruption", choices=("corruption", "cycle_ops"))
+    parser.add_argument("--max-bonds-per-molecule", type=int, default=4)
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--n-shards", type=int, default=1)
     parser.add_argument("--max-sources", type=int, default=None)
@@ -192,10 +223,11 @@ def main() -> int:
 
     records, report = compile_shard(
         sources, scaf_by, partition=args.partition, shard_index=args.shard_index,
-        seed=args.seed, depth_max=args.depth_max,
+        seed=args.seed, layer=args.layer, depth_max=args.depth_max,
         couplings_per_target=args.couplings_per_target,
+        max_bonds_per_molecule=args.max_bonds_per_molecule,
     )
-    shard_path = args.out_dir / args.partition / f"shard_{args.shard_index:04d}.jsonl.gz"
+    shard_path = args.out_dir / args.layer / args.partition / f"shard_{args.shard_index:04d}.jsonl.gz"
     shard_stats = write_shard(shard_path, records)
 
     try:
@@ -222,6 +254,7 @@ def main() -> int:
         extra={
             "shard_index": args.shard_index, "n_shards": args.n_shards, "seed": args.seed,
             # pin the partitioning semantics so a molecule cannot silently change partition later
+            "layer": args.layer,
             "partitioner": partitioner_provenance(),
             "depth_max": args.depth_max, "couplings_per_target": args.couplings_per_target,
         },

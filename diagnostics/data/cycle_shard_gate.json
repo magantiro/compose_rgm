@@ -1,0 +1,50 @@
+{
+  "GATE": "PASS",
+  "action_equality_rate": 1.0,
+  "boundaries": {
+    "collator_and_enumerator": {
+      "batch_size": 64,
+      "teacher_in_candidates": true
+    },
+    "decoded_to_dataset": {
+      "fingerprints_identical": true,
+      "mismatches": 0
+    },
+    "serialized_to_decoded": {
+      "distinct_fingerprints": 94,
+      "records": 150
+    }
+  },
+  "canonical_successor_match_rate": 1.0,
+  "executor_success_rate": 1.0,
+  "failures": [],
+  "families_with_zero_examples": [],
+  "family_coverage": {
+    "cycle_attach": 75,
+    "cycle_insert": 75
+  },
+  "forward_loss": 1.855617,
+  "forward_loss_finite": true,
+  "partition_disjointness": {
+    "scaffold_overlap": 0,
+    "scaffolds_per_partition": {
+      "test": 0,
+      "train": 50,
+      "validation": 0
+    },
+    "source_overlap": 0,
+    "sources_per_partition": {
+      "test": 0,
+      "train": 58,
+      "validation": 0
+    },
+    "verified": true
+  },
+  "records_checked": 150,
+  "save_reload_deterministic": true,
+  "shards": [
+    "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/layered_shards/cycle_ops/train/shard_0000.jsonl.gz"
+  ],
+  "teacher_in_candidate": true,
+  "transitions_checked": 150
+}
