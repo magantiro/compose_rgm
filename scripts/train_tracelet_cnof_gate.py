@@ -33,6 +33,7 @@ from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_m
 from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.analogue_prior import build_analogue_prior_records
 from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
+from compose_v4.rewrite.source_corruption import TEACHER_REPRESENTABILITY_FILTER_VERSION
 from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
 from compose_v4.experiments.tracelet_conditional import (
     build_tracelet_path_records,
@@ -3020,6 +3021,32 @@ def main() -> None:
             enable_ring_grow_macro=not args.disable_ring_grow_macro,
             atom_vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else None,
         ).to(device)
+        if args.cycle_op_mix and args.disable_ring_grow_macro:
+            # RING_CORE_V1 launch identity (owner finalization §4): print every frozen hash + capability flag
+            # at startup so a launch that drifts from the frozen contract is visible in the run log.
+            try:
+                import ring_core_identity as _rci
+
+                print(json.dumps({
+                    "phase": "ring_core_launch_identity",
+                    "capability_hash": _rci.CAPABILITY_HASH,
+                    "operator_registry_hash": _rci.recompute_operator_registry_hash(),
+                    "cycle_op_semantic_hash": _rci.recompute_cycle_op_semantic_hash(),
+                    "calibration_policy_hash": _rci.CALIBRATION_POLICY_HASH,
+                    "scope_hash": _rci.SCOPE_HASH,
+                    "base_b_sha256": _rci.BASE_B_SHA256,
+                    "eval_operator_capability_fingerprint": _eval_capabilities.fingerprint(),
+                    "teacher_representability_filter_version": TEACHER_REPRESENTABILITY_FILTER_VERSION,
+                    "evaluation_batch_cache_format_version": EVALUATION_BATCH_CACHE_FORMAT_VERSION,
+                    "denovo_keep": 0 if args.scaled_manifest else None,
+                    "enable_cycle_ops": True,
+                    "enable_ring_macros": False,
+                    "enable_ring_grow_macro": not args.disable_ring_grow_macro,
+                    "max_atoms": args.max_atoms,
+                    "scaled_manifest": args.scaled_manifest or None,
+                }, sort_keys=True), flush=True)
+            except Exception:  # noqa: BLE001 -- identity print must never break a launch
+                pass
     elif args.model == "from_scratch":
         model = TraceletRateModel(
             hidden_dim=args.hidden_dim,
@@ -3051,6 +3078,15 @@ def main() -> None:
         # enable_ring_macros is the forward-looking P4 hybrid flag; always False until RING_HYBRID_V2.
         "enable_ring_grow_macro": not bool(args.disable_ring_grow_macro),
         "enable_ring_macros": False,
+        # Teacher-in-exact-candidates filter (declared production data contract): every selected teacher
+        # belongs to the model's exact dynamic candidate set for its state; unrepresentable corruption traces
+        # are excluded at the data source. Versioned so a filtered corpus is never conflated across versions.
+        "teacher_representability_filter_version": (
+            TEACHER_REPRESENTABILITY_FILTER_VERSION if args.corrupted_prior_mix else None
+        ),
+        "eval_operator_capability_fingerprint": (
+            _eval_capabilities.fingerprint() if args.training_backend == "factorized_marks" else None
+        ),
         # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
         # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
         "organic_vocabulary": bool(args.organic_vocabulary),

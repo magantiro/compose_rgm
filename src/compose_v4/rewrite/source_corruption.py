@@ -223,6 +223,49 @@ def corrupt_to_source(
     return steps, states
 
 
+# Version of the teacher-in-exact-candidates filter (the declared production data contract: every selected
+# teacher action belongs to the model's exact dynamic candidate set for its state). Bump when the check's
+# semantics change so a filtered corpus is never conflated across versions.
+TEACHER_REPRESENTABILITY_FILTER_VERSION = 1
+
+
+def trace_teacher_representability_detail(
+    trace: RewriteTrace, *, system: RewriteSystem, catalog=None
+) -> tuple[bool, dict | None]:
+    """(ok, failure_detail). Like ``trace_teachers_representable`` but returns, on the FIRST unrepresentable
+    step, a detail dict {step, rule_name, direction, reason, enumerated} for characterization -- so the
+    declared filter's removals can be attributed by family/direction/reason (owner finalization §2)."""
+    direction = str((trace.metadata or {}).get("prior", "unknown"))
+    state = trace.source
+    for i, step in enumerate(trace.steps):
+        action, rule_name = step.action, step.rule_name
+        enumerated = None
+        if rule_name == "ring_system_restate":
+            cands = enumerate_ring_system_restate_actions(state, system=system)
+            enumerated = len(cands)
+            if action not in cands:
+                return False, {"step": i, "rule_name": rule_name, "direction": direction,
+                               "reason": "restate_outside_dense_candidates", "enumerated": enumerated}
+        elif rule_name == "ring_system_delete":
+            cands = () if catalog is None else enumerate_clean_ring_system_deletes(state, catalog)
+            enumerated = len(cands)
+            if action not in cands:
+                return False, {"step": i, "rule_name": rule_name, "direction": direction,
+                               "reason": "delete_outside_dense_candidates", "enumerated": enumerated}
+        elif rule_name == "bond_reroute":
+            cands = enumerate_pendant_graft_actions(state)
+            enumerated = len(cands)
+            if action not in cands:
+                return False, {"step": i, "rule_name": rule_name, "direction": direction,
+                               "reason": "graft_outside_dense_candidates", "enumerated": enumerated}
+        try:
+            state = system.apply(state, rule_name, action)
+        except Exception:  # noqa: BLE001
+            return False, {"step": i, "rule_name": rule_name, "direction": direction,
+                           "reason": "step_not_applicable", "enumerated": enumerated}
+    return True, None
+
+
 def trace_teachers_representable(trace: RewriteTrace, *, system: RewriteSystem, catalog=None) -> bool:
     """True iff EVERY step's teacher mark is in the model's exact dynamic candidate set for the state it
     applies to -- the ``teacher in A_exact(x)`` invariant enforced at the DATA SOURCE (construct the teacher
@@ -233,24 +276,8 @@ def trace_teachers_representable(trace: RewriteTrace, *, system: RewriteSystem, 
     enumerator offers on the saturated state. Micro families (atom_*/bond_reorder) + cycle ops score
     per-coordinate against masks derived by construction, so they need no list check here. Replays via the
     executor; a step that fails to apply makes the trace non-representable."""
-    state = trace.source
-    for step in trace.steps:
-        action = step.action
-        rule_name = step.rule_name
-        if rule_name == "ring_system_restate":
-            if action not in enumerate_ring_system_restate_actions(state, system=system):
-                return False
-        elif rule_name == "ring_system_delete":
-            if catalog is None or action not in enumerate_clean_ring_system_deletes(state, catalog):
-                return False
-        elif rule_name == "bond_reroute":
-            if action not in enumerate_pendant_graft_actions(state):
-                return False
-        try:
-            state = system.apply(state, rule_name, action)
-        except Exception:  # noqa: BLE001 -- a non-applicable step is non-representable
-            return False
-    return True
+    ok, _ = trace_teacher_representability_detail(trace, system=system, catalog=catalog)
+    return ok
 
 
 def make_edit_pair(

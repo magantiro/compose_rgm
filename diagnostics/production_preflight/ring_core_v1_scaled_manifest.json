@@ -208,7 +208,7 @@
     "note": "hierarchical-sampler layer weights (LOCKED, superseding the proposed PHASE0B values); scaffold held at 0 until the A2.3 general compiler lands, its share folded into MMP.",
     "zero_mixture": true
   },
-  "manifest_self_sha256": "36c2da5b25564c6bed3182c66af911aa11d2f8ade9f044889e24e7dc31144295",
+  "manifest_self_sha256": "19df27b9eb81413f25dac92497928b3e02f84e0cb00abca42c9574044a01ccda",
   "manifest_version": "ring_core_v1",
   "measured_statistics": {
     "cold_element_record_counts": {
@@ -316,5 +316,11 @@
     "scheme": "the shared load_organic_corpus_split (seed 20260714); TRAIN-only mining -> no val/test leakage; reverse pairs are separate directed records (balanced)."
   },
   "standardization_hash": "a8d574cc91c89cb3",
+  "teacher_representability_filter": {
+    "characterization": "diagnostics/production_preflight/teacher_filter_characterization.json",
+    "eval_operator_capability_fingerprint": "5bedd317328c9ed7",
+    "invariant": "every selected teacher action belongs to the exact dynamic candidate set for its state",
+    "version": 1
+  },
   "vocabulary": "ORGANIC_VOCABULARY (15 (element,valence) classes)"
 }

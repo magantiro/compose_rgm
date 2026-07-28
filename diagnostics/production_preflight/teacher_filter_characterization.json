@@ -1,0 +1,160 @@
+{
+  "counts": {
+    "accepted_traces": 1342,
+    "pre_filter_traces": 1370,
+    "removed_fraction": 0.0204,
+    "removed_traces": 28
+  },
+  "filter_policy": {
+    "capability_fingerprint": "5bedd317328c9ed7",
+    "cycle_op_semantic_hash": "27a823aeb6cf7548",
+    "filter_version": 1,
+    "invariant": "every selected teacher action belongs to the exact dynamic candidate set for its state",
+    "operator_registry_hash": "9197401e8dc3a7ae"
+  },
+  "note": "NON_SCIENTIFIC_PREFLIGHT. Removal rate is measured on a broad-organic held-out sample; the production corruption draws from split.train under the same policy, so this rate is representative.",
+  "post_filter_distribution": {
+    "by_direction": {
+      "corrupted_source_grow": 542,
+      "corrupted_source_trim": 800
+    },
+    "by_layer": {
+      "corruption": 1342
+    },
+    "cycle_note": "cycle_insert/cycle_attach come from build_cycle_op_records (separate path), not the corruption; this characterization covers the corruption layer's editing families.",
+    "family_selected_targets": {
+      "atom_delete": 631,
+      "atom_insert": 442,
+      "atom_restate": 1043,
+      "bond_reorder": 551,
+      "bond_reroute": 513,
+      "ring_system_delete": 256,
+      "ring_system_restate": 463
+    },
+    "path_length_bins": {
+      "1": 293,
+      "2-3": 556,
+      "4-5": 493
+    }
+  },
+  "production_enabled_families_checked": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "ring_system_delete",
+    "ring_system_restate"
+  ],
+  "removed_attribution": {
+    "charge": {
+      "neutral": 26,
+      "zwitterion": 2
+    },
+    "direction": {
+      "corrupted_source_grow": 28
+    },
+    "element": {
+      "organic": 28
+    },
+    "family": {
+      "ring_system_restate": 28
+    },
+    "path_bin": {
+      "1": 5,
+      "2-3": 6,
+      "4-5": 17
+    },
+    "subtype_reason": {
+      "restate_outside_dense_candidates": 28
+    },
+    "topology": {
+      "fused/aromatic": 21,
+      "fused/saturated": 5,
+      "mono/aromatic": 2
+    }
+  },
+  "removed_examples": [
+    {
+      "depth": 1,
+      "direction": "corrupted_source_grow",
+      "enumerated": 1,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "CC1CN(C2NC3C(C(=O)N(Cc4ccc(Cl)cc4)C(=O)N3C)N2C)CC(C)O1",
+      "step": 0
+    },
+    {
+      "depth": 4,
+      "direction": "corrupted_source_grow",
+      "enumerated": 1,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "O=C1C2CCC(C(F)(F)F)CC2C2(c3ccccc3)SCCN12",
+      "step": 3
+    },
+    {
+      "depth": 4,
+      "direction": "corrupted_source_grow",
+      "enumerated": 0,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "FC1=CC(c2nccnc3nnc([SH3])c2-3)=CI=C1",
+      "step": 0
+    },
+    {
+      "depth": 4,
+      "direction": "corrupted_source_grow",
+      "enumerated": 1,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "CC1NN(C)C2NCCNC(c3cccc(F)c3)C12",
+      "step": 3
+    },
+    {
+      "depth": 4,
+      "direction": "corrupted_source_grow",
+      "enumerated": 1,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "N[SH2](=O)OC1CCC2CC(c3ccccc3)C(=O)OC2C1",
+      "step": 2
+    },
+    {
+      "depth": 1,
+      "direction": "corrupted_source_grow",
+      "enumerated": 1,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "COc1ccc(C2CN(C)C3(C(=O)NC4CCC(Cl)CC43)C23CC2CC(OC)C(OC)CC2C3=O)cc1OC",
+      "step": 0
+    },
+    {
+      "depth": 1,
+      "direction": "corrupted_source_grow",
+      "enumerated": 0,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "CC(C)NCC(O)COC1CCC2C(=O)NCCOC2C1",
+      "step": 0
+    },
+    {
+      "depth": 4,
+      "direction": "corrupted_source_grow",
+      "enumerated": 1,
+      "reason": "restate_outside_dense_candidates",
+      "rule_name": "ring_system_restate",
+      "smiles": "CSC1NC(=O)C2CC(Cc3ccccc3)C(=O)NC2N1",
+      "step": 3
+    }
+  ],
+  "sample": {
+    "corpus": "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles",
+    "couplings": 2,
+    "depth_max": 5,
+    "size": 400
+  },
+  "teacher_filter_hash": "f8137995181eeadc",
+  "unsupervised_families_after_filter": [],
+  "verdict": "GO_TEACHER_FILTER_CHARACTERIZED"
+}

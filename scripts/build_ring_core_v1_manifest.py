@@ -17,6 +17,14 @@ import json
 from pathlib import Path
 
 import ring_core_identity as I
+from compose_v4.model.factorized_tracelet_rate_model import OperatorCapabilities
+from compose_v4.rewrite.source_corruption import TEACHER_REPRESENTABILITY_FILTER_VERSION
+
+# The RING_CORE_V1 eval/training editing capabilities (grow off; restate/graft/ring-opening on).
+_RING_CORE_CAPABILITIES = OperatorCapabilities(
+    compute_ring_grow_support=False, compute_ring_restates=True,
+    compute_cyclic_graft=True, compute_ring_opening=True,
+)
 
 REPO = Path(__file__).resolve().parent.parent
 _BASE = REPO / "diagnostics/composition/scaled_edit_data_manifest_40.json"
@@ -59,6 +67,15 @@ def build(base_path: Path, out_path: Path) -> dict:
     }
     # Cycle-op supervision: generated in-memory at train time (--cycle-op-mix) and folded into the corruption
     # layer, both directions, round-trip verified; calibrated per the frozen calibration policy.
+    # Teacher-in-exact-candidates filter (declared production data contract): unrepresentable corruption
+    # teachers (measured: ~2% -- all inverse/grow ring_system_restate on fused rings) are excluded at the
+    # data source so every selected teacher belongs to the model's exact dynamic candidate set.
+    manifest["teacher_representability_filter"] = {
+        "version": TEACHER_REPRESENTABILITY_FILTER_VERSION,
+        "invariant": "every selected teacher action belongs to the exact dynamic candidate set for its state",
+        "eval_operator_capability_fingerprint": _RING_CORE_CAPABILITIES.fingerprint(),
+        "characterization": "diagnostics/production_preflight/teacher_filter_characterization.json",
+    }
     manifest["cycle_op_supervision"] = {
         "generator": "compose_v4.experiments.cycle_op_prior.build_cycle_op_records",
         "families": ["cycle_insert", "cycle_attach"],

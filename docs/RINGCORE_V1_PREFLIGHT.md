@@ -163,6 +163,25 @@ and passed every required counter:
   `TeacherOutsideCandidatesError` reached scoring. Warm-start verified (atom_restate head 94% accurate from B).
 - `zero_mixture_ok: true`, `failing_zero: {}`, `failing_positive: {}`.
 
+## 5d. Teacher-filter versioning + characterization (pre-launch finalization §1–§3) ✅ `GO_TEACHER_FILTER_CHARACTERIZED`
+The teacher-in-exact-candidates filter is a DECLARED production data contract (version
+`TEACHER_REPRESENTABILITY_FILTER_VERSION=1`, hash `f8137995181eeadc`, eval capability fingerprint
+`5bedd317328c9ed7`), recorded in the checkpoint metadata, the scaled manifest, and here. Characterized on
+400 broad-organic held-out molecules (`diagnostics/production_preflight/teacher_filter_characterization.json`):
+- **Removal rate 2.04%** (28/1370 traces) — the measured full-scale rate (the pilot 3.7% was a small-sample
+  estimate); report this measured rate.
+- **Removals are surgical + one-dimensional:** 28/28 `ring_system_restate`, 28/28 `corrupted_source_grow`
+  (inverse) direction, 28/28 `restate_outside_dense_candidates`. Topology 21 fused/aromatic + 5 fused/saturated
+  + 2 mono/aromatic (93% fused). Charge 26 neutral + 2 zwitterion (NOT charge-driven). Every removed teacher is
+  a genuinely unscoreable inverse restate on a fused ring; no representable teacher is removed.
+- **No family collapses (§3):** post-filter every production-enabled corruption family keeps positive selected
+  targets — atom_restate 1043 · atom_delete 631 · bond_reorder 551 · bond_reroute 513 · atom_insert 442 ·
+  `ring_system_restate` 463 (healthy — only the ~5.7% unrepresentable grow-fused restates removed) ·
+  ring_system_delete 256. `unsupervised_after_filter: []`.
+- **Launch identity (§4):** the gate prints a `ring_core_launch_identity` line at startup (all frozen hashes +
+  flags + `denovo_keep=0` + cache-format v2); eval-cache v1 is unconditionally rejected (v2 + capability-hash
+  key). The invariant `teacher ∈ A_exact(x)` is a hard failure condition, not a zero-weight example.
+
 ## 6. Bounded RingCore preflight (≤750 steps) 🔶 READY TO LAUNCH (bounded Modal run)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep
