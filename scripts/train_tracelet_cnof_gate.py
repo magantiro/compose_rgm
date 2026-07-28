@@ -30,6 +30,7 @@ from compose_v4.experiments.hierarchical_sampler import build_layered_sampler
 from compose_v4.eval.molecular_quality import molecular_quality_report
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
 from compose_v4.experiments.cnof_conditional import PathRecord, corpus_rollout_metrics
+from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.analogue_prior import build_analogue_prior_records
 from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
 from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
@@ -88,6 +89,12 @@ from compose_v4.rewrite.typed_ring_catalog import (
 )
 from compose_v4.rewrite.ring_system_fiber import structured_ring_trace_supported
 from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
+
+# RING_CORE_V1 production ring-catalog seeds (deterministic; reproduces the production fingerprint
+# 639ff6078c32d43c). Under the zero-mixture --scaled-manifest path the catalog is reconstructed from THESE,
+# independent of any de-novo corpus path or B's checkpoint (owner mandate §2).
+_RING_CORE_CATALOG_SEEDS = ("c1ccccc1", "c1ccncc1", "C1CCNCC1", "C1CCOCC1", "c1ccc2ccccc2c1")
 
 
 TRANSPORT_SUPPORT_PROJECTION_VERSION = 3
@@ -394,6 +401,24 @@ def _build_scaled_manifest_sampler(train_records, *, denovo_keep, n_corruption, 
     return build_layered_sampler(
         records_by_layer, layer_weights=weights, path_length_bins=edges,
         cold_element_floor=floor, cold_elements_of=_record_cold_elements, seed=seed)
+
+
+def _build_ring_core_seed_ring_catalog(max_atoms: int) -> TypedRingCatalog:
+    """Reconstruct the RING_CORE_V1 production ring catalog DETERMINISTICALLY from the fixed seeds -- NOT from
+    de-novo corpus paths and NOT from B's checkpoint (owner mandate §2). Same 5-seed builder the warm-start
+    dry-run + freeze manifest used (fingerprint 639ff6078c32d43c). Reconstructing the catalog from 5 fixed
+    seed molecules is NOT a de-novo training-dataset instantiation."""
+
+    def _seed_trace(smi: str):
+        target = pad_molecular_graph(smiles_to_molecular_graph(smi), max_atoms)
+        source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+            np.random.default_rng(1), n_slots=max_atoms
+        )
+        return compile_carbon_tree_to_target(
+            source, target, use_bond_reroute=True, align_source=True
+        )
+
+    return build_typed_ring_catalog(tuple(_seed_trace(s) for s in _RING_CORE_CATALOG_SEEDS))
 
 
 def _training_support_cache_signature(
@@ -1637,7 +1662,11 @@ def main() -> None:
         )
     print(json.dumps({"phase": "split_loaded"}), flush=True)
     tree_source_prior = None
-    if args.source_prior == "carbon_tree":
+    # Zero-mixture (RING_CORE_V1 / --scaled-manifest): denovo_keep=0, so the carbon-tree source prior is NEVER
+    # constructed -- the de-novo path branch (gated on `tree_source_prior is not None`) then stays dead and no
+    # carbon-tree dataset is instantiated. The decision happens here, before any de-novo work.
+    if args.source_prior == "carbon_tree" and not args.scaled_manifest:
+        _zmi.bump("carbon_tree_prior_constructions")
         if args.tree_size_prior == "empirical":
             size_counts = Counter(
                 smiles_to_molecular_graph(text).n_real_atoms for text in split.train
@@ -1790,7 +1819,26 @@ def main() -> None:
         raise FileNotFoundError(f"complete compiled path cache required: {location}")
 
     tree_paths_ready = False
-    if loaded_path_cache is None and tree_source_prior is not None:
+    if args.scaled_manifest:
+        # ZERO-MIXTURE (RING_CORE_V1): denovo_keep=0, so NO de-novo path is compiled, NO carbon-tree dataset
+        # is instantiated, and NO de-novo/path cache is resolved. train_records=() (the corrupted-prior +
+        # cycle-op edit records are appended below); the production ring catalog is reconstructed from the
+        # fixed seeds, independent of any corpus path or B's checkpoint (owner mandate §1, §2).
+        train_records = ()
+        validation_records = ()
+        test_records = ()
+        ring_catalog = _build_ring_core_seed_ring_catalog(args.max_atoms)
+        tree_paths_ready = True
+        print(
+            json.dumps(
+                {"phase": "zero_mixture_denovo_skipped",
+                 "ring_catalog_fingerprint": ring_catalog_fingerprint(ring_catalog)},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    elif loaded_path_cache is None and tree_source_prior is not None:
+        _zmi.bump("denovo_path_compile_calls")
         if args.path_cache is not None:
             with tracelet_path_executor(
                 args.path_workers,
@@ -2001,7 +2049,12 @@ def main() -> None:
                 )
         tree_paths_ready = True
 
-    if loaded_path_cache is None and loaded_sharded_manifest is None and tree_source_prior is None:
+    if (
+        loaded_path_cache is None
+        and loaded_sharded_manifest is None
+        and tree_source_prior is None
+        and not args.scaled_manifest  # zero-mixture already built the seed catalog above; do NOT compile de-novo proposals
+    ):
         ring_catalog = None
         if args.ring_proposals == "typed_catalog":
             if tree_source_prior is not None and args.path_cache is not None:
@@ -2020,6 +2073,7 @@ def main() -> None:
                         executor=proposal_executor,
                     )
             else:
+                _zmi.bump("denovo_path_compile_calls")
                 proposal_records = build_tracelet_path_records(
                     split.train,
                     n_slots=args.max_atoms,
