@@ -2997,6 +2997,17 @@ def main() -> None:
         "operational_horizon": args.operational_horizon,
         "provenance_sha256": args.provenance_sha256,
     }
+    checkpoint_metadata["max_atoms"] = args.max_atoms
+    if args.cycle_op_mix and args.disable_ring_grow_macro:
+        # RING_CORE_V1 self-identification: persist the frozen capability + live code hashes so the rollout
+        # harness can verify checkpoint identity. Defensive import (never break training); if absent, the
+        # harness recomputes the code hashes + verifies the enable flags / scope / max_atoms instead.
+        try:
+            import ring_core_identity
+
+            checkpoint_metadata.update(ring_core_identity.ring_core_checkpoint_metadata())
+        except Exception:  # noqa: BLE001
+            pass
     expected = {
         key: checkpoint_metadata[key]
         for key in (

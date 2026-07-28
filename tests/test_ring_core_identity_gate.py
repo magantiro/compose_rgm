@@ -1,0 +1,104 @@
+"""Negative tests for the strict RING_CORE_V1 checkpoint-identity gate (requirement 1 of the rollout-harness
+hardening). A base-B checkpoint, wrong max_atoms, stale operator registry, cycle ops disabled, ring macros
+enabled, legacy grow enabled, or missing metadata must FAIL LOUDLY -- never be analyzed as RingCore."""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from ring_core_identity import (  # noqa: E402
+    BASE_B_SHA256,
+    SCOPE_HASH,
+    RingCoreIdentityError,
+    verify_checkpoint_identity,
+)
+
+
+def _valid_payload() -> dict:
+    return {
+        "state_dict": {},
+        "training_backend": "factorized_marks",
+        "corpus_scope_hash": SCOPE_HASH,
+        "enable_cycle_ops": True,
+        "enable_ring_macros": False,
+        "enable_ring_grow_macro": False,
+        "corrupted_prior_mix": True,
+        "max_atoms": 40,
+        "global_step": 500,
+        "initialization_source_sha256": BASE_B_SHA256,
+        "rate_factorization": "hierarchical",
+    }
+
+
+def test_valid_ring_core_payload_passes():
+    report = verify_checkpoint_identity(_valid_payload(), checkpoint_path=None)
+    assert report["identity_ok"] is True
+    assert report["enable_cycle_ops"] and not report["enable_ring_grow_macro"]
+
+
+def test_missing_checkpoint_file_fails():
+    with pytest.raises(RingCoreIdentityError, match="not found"):
+        verify_checkpoint_identity(_valid_payload(), checkpoint_path=Path("/nonexistent/ckpt.pt"))
+
+
+def test_base_b_checkpoint_fails():
+    payload = _valid_payload()
+    del payload["enable_cycle_ops"]
+    del payload["enable_ring_grow_macro"]
+    payload["corrupted_prior_mix"] = False
+    with pytest.raises(RingCoreIdentityError):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_wrong_max_atoms_fails():
+    payload = _valid_payload()
+    payload["max_atoms"] = 48
+    with pytest.raises(RingCoreIdentityError, match="max_atoms"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_stale_operator_registry_fails():
+    payload = _valid_payload()
+    payload["operator_registry_hash"] = "deadbeefdeadbeef"
+    with pytest.raises(RingCoreIdentityError, match="operator_registry_hash|operator-registry"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_cycle_ops_disabled_fails():
+    payload = _valid_payload()
+    payload["enable_cycle_ops"] = False
+    with pytest.raises(RingCoreIdentityError, match="cycle"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_ring_macros_enabled_fails():
+    payload = _valid_payload()
+    payload["enable_ring_macros"] = True
+    with pytest.raises(RingCoreIdentityError, match="macros"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_legacy_grow_enabled_fails():
+    payload = _valid_payload()
+    payload["enable_ring_grow_macro"] = True
+    with pytest.raises(RingCoreIdentityError, match="grow"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_wrong_scope_fails():
+    payload = _valid_payload()
+    payload["corpus_scope_hash"] = "0000000000000000"
+    with pytest.raises(RingCoreIdentityError, match="scope"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_missing_metadata_fails():
+    payload = _valid_payload()
+    del payload["state_dict"]
+    with pytest.raises(RingCoreIdentityError, match="missing"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
