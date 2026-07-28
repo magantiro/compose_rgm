@@ -39,6 +39,7 @@ from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY  # noqa: E402
 from compose_v4.data.organic_corpus import BROAD_ORGANIC_V1, classify_smiles  # noqa: E402
 from compose_v4.data.scaffold_partition import (  # noqa: E402
     assign_partitions,
+    partitioner_provenance,
     verify_partition_disjointness,
 )
 from compose_v4.rewrite.trace_shard import (  # noqa: E402
@@ -218,7 +219,12 @@ def main() -> int:
         program_contract_fingerprint=contract,
         operator_registry_hash=op_hash,
         capability_hash=cap_hash,
-        extra={"shard_index": args.shard_index, "n_shards": args.n_shards, "seed": args.seed},
+        extra={
+            "shard_index": args.shard_index, "n_shards": args.n_shards, "seed": args.seed,
+            # pin the partitioning semantics so a molecule cannot silently change partition later
+            "partitioner": partitioner_provenance(),
+            "depth_max": args.depth_max, "couplings_per_target": args.couplings_per_target,
+        },
     )
     manifest_path = shard_path.with_suffix(".manifest.json")
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

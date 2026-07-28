@@ -165,3 +165,32 @@ def verify_partition_disjointness(
         "scaffolds_per_partition": {k: len(v) for k, v in scaffolds.items()},
         "verified": True,
     }
+
+
+# Version of the scaffold-key ALGORITHM. Bump when the key changes meaning, so a molecule cannot silently
+# move partitions after a refactor: shard manifests record this and a mismatch is detectable.
+SCAFFOLD_KEY_ALGORITHM = "murcko+carbonized-wl3"
+SCAFFOLD_KEY_VERSION = 2   # v1 = murcko + heavy-atom-count acyclic key; v2 = murcko + carbonized WL hash
+
+
+def partitioner_provenance(
+    *, salt: str = "ringcore-v1", ratios: tuple[float, float, float] = DEFAULT_RATIOS
+) -> dict:
+    """Everything needed to prove two runs partitioned identically.
+
+    Pinned in every shard manifest. Without this, a future change to the scaffold key or the salt would
+    silently reassign molecules across train/validation/test while every downstream artifact still looked
+    self-consistent."""
+    import hashlib
+    from pathlib import Path
+
+    return {
+        "scaffold_key_algorithm": SCAFFOLD_KEY_ALGORITHM,
+        "scaffold_key_version": SCAFFOLD_KEY_VERSION,
+        "partition_salt": salt,
+        "split_ratios": list(ratios),
+        "hash_buckets": _HASH_BUCKETS,
+        "partitioner_implementation_hash": hashlib.sha256(
+            Path(__file__).read_bytes()
+        ).hexdigest()[:16],
+    }
