@@ -1472,14 +1472,18 @@ def train_stage(
     corrupted_prior_count: int = 0,
     scaled_manifest: str = "",
 ) -> dict[str, object]:
+    # Zero-mixture (RING_CORE_V1 / --scaled-manifest): denovo_keep=0 so NO de-novo path cache is opened and
+    # the training-support cache is built on-the-fly; a warm-started zero-mixture run must not require (or
+    # reuse) B's de-novo caches. Standard (non-scaled) runs keep the strict cache requirements.
+    zero_mixture = bool(scaled_manifest)
     return _run_remote(
         run_label=run_label,
         smoke=False,
-        require_path_cache=True,
-        require_training_support_cache=require_training_support_cache,
+        require_path_cache=not zero_mixture,
+        require_training_support_cache=require_training_support_cache and not zero_mixture,
         skip_rollouts=True,
         recipe_name=recipe_name,
-        path_cache_source_run=path_cache_source_run,
+        path_cache_source_run=None if zero_mixture else path_cache_source_run,
         training_steps=training_steps,
         schedule_steps=schedule_steps,
         resume_source_run=resume_source_run,
