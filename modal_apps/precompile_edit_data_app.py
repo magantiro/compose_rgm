@@ -82,13 +82,31 @@ def _contract_hashes() -> dict:
     return out
 
 
-def expected_shard_ids(corruption_shards: int, cycle_shards: int) -> list[str]:
+_PARTITION_SHARE = {"train": 0.90, "validation": 0.05, "test": 0.05}
+# Measured compile rates (seconds per source), from local fixtures on real corpus molecules.
+_SECONDS_PER_SOURCE = {"corruption": 0.98, "cycle_ops": 0.049}
+_TARGET_SHARD_SECONDS = 600.0   # aim for ~10-minute shards
+
+
+def shards_for(layer: str, partition: str, layer_sources: int) -> int:
+    """Shard count chosen so every shard takes roughly the same WALL TIME.
+
+    Neither uniform-per-partition nor proportional-to-share works. Uniform gives 23 heavy train shards
+    beside 48 near-idle validation/test shards. Proportional is worse: rounding floors the small partitions
+    at one shard, so validation/test end up with MORE sources per shard than train and become the critical
+    path (measured: 19.6 min vs train's 15.3). Sizing by target duration makes the tail flat."""
+    sources = layer_sources * _PARTITION_SHARE[partition]
+    seconds = sources * _SECONDS_PER_SOURCE[layer]
+    return max(1, int(-(-seconds // _TARGET_SHARD_SECONDS)))    # ceil
+
+
+def expected_shard_ids(corruption_sources: int, cycle_sources: int) -> list[str]:
     """The EXACT set of shard IDs this build must produce. The reducer rejects any missing, duplicated or
     unexpected shard against this set -- 'some shards exist' must never be mistaken for completeness."""
     ids = []
-    for layer, n in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
+    for layer, layer_sources in (("corruption", corruption_sources), ("cycle_ops", cycle_sources)):
         for partition in PARTITIONS:
-            for i in range(n):
+            for i in range(shards_for(layer, partition, layer_sources)):
                 ids.append(f"{layer}/{partition}/shard_{i:04d}")
     return sorted(ids)
 
@@ -196,7 +214,7 @@ def partition_sources(subdir: str, corruption_sources: int, cycle_sources: int) 
     return result
 
 
-@app.function(image=image, cpu=8.0, timeout=4 * 3600,
+@app.function(image=image, cpu=8.0, timeout=4 * 3600, max_containers=40,
               volumes={"/artifacts": artifact_volume}, retries=modal.Retries(max_retries=2))
 def compile_shard(layer: str, partition: str, shard_index: int, n_shards: int,
                   subdir: str, seed: int) -> dict:
@@ -369,13 +387,12 @@ def reduce_and_validate(subdir: str, expected_ids: list, build_meta: dict) -> di
 
 @app.function(image=image, cpu=2.0, timeout=12 * 3600,
               volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume})
-def driver(subdir: str, corruption_sources: int, cycle_sources: int,
-           corruption_shards: int, cycle_shards: int, seed: int) -> dict:
+def driver(subdir: str, corruption_sources: int, cycle_sources: int, seed: int) -> dict:
     """Remote orchestration. `@app.local_entrypoint` runs on the CLIENT, so `modal run --detach` keeps
     already-spawned functions alive but silently drops the rest of the pipeline when the client
     disconnects -- the map and reduce would never be issued. Driving from inside a container makes the
     whole build survive client loss."""
-    expected_ids = expected_shard_ids(corruption_shards, cycle_shards)
+    expected_ids = expected_shard_ids(corruption_sources, cycle_sources)
     write_status(subdir, "RUNNING", expected_shards=len(expected_ids),
                  corruption_sources=corruption_sources, cycle_sources=cycle_sources)
 
@@ -400,8 +417,9 @@ def driver(subdir: str, corruption_sources: int, cycle_sources: int,
         print(json.dumps({"phase": "partitioned", "counts": src["per_layer_source_counts"]}), flush=True)
 
         jobs = []
-        for layer, n_shards in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
+        for layer, layer_sources in (("corruption", corruption_sources), ("cycle_ops", cycle_sources)):
             for partition in PARTITIONS:
+                n_shards = shards_for(layer, partition, layer_sources)
                 for shard_index in range(n_shards):
                     jobs.append((layer, partition, shard_index, n_shards, subdir, seed))
         print(json.dumps({"phase": "mapping", "shards": len(jobs)}), flush=True)
@@ -435,14 +453,11 @@ def main(
     subdir: str = "edit_precompile_v1",
     corruption_sources: int = 24000,
     cycle_sources: int = 36000,
-    corruption_shards: int = 24,
-    cycle_shards: int = 8,
     seed: int = 20260728,
 ) -> None:
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True, check=False).stdout.strip()
-    call = driver.spawn(subdir, corruption_sources, cycle_sources,
-                        corruption_shards, cycle_shards, seed)
+    call = driver.spawn(subdir, corruption_sources, cycle_sources, seed)
     print(json.dumps({
         "phase": "driver_spawned", "function_call_id": call.object_id, "subdir": subdir,
         "commit": commit, "corruption_sources": corruption_sources, "cycle_sources": cycle_sources,
