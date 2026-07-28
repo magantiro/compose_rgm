@@ -300,6 +300,35 @@ It maps to the owner's pre-authorized fourth path: **correct + stable but lower-
 genuinely ambiguous at step 1000 → STOP AND REPORT.** The pre-authorized **step-1500 continuation under the same
 scheduler** (resume this checkpoint) is the diagnostic to confirm recovery; **not launched automatically**.
 
+## 6d. Step-1500 continuation diagnostic — `GO_FOR_FULL_RINGCORE_TRAINING` ✅
+Run `compose-v4-ringcore-v1-cont1500-48af1bd-v1` (commit `48af1bd`, A100): an EXACT resume from the step-1000
+recovery checkpoint (NOT base B) to step 1500 under the same locked scheduler. Full result:
+`diagnostics/coherence/continuation_1500_result.json`.
+
+- **§1 resume exactness (verified):** loaded global_step 1000; the reloaded step-1000 eval reproduces the
+  original (`gm_loss 2.4664`); optimizer + torch/CUDA RNG restored; scaler N/A (bf16); functional scheduler
+  CONTINUED (LR 2.728e-4→2.413e-4→2.015e-4 = 0.909→0.804→**0.672**× peak), never reset to warmup.
+- **§2/§3 all global metrics recover through the decay (1000→1500):** GM loss 2.4664→2.4429→**2.3175**
+  (−0.149, to +0.019 of the step-500 best); balanced top3 0.400→**0.437**; hazard error 0.907→**0.799**;
+  selected-mark prob 0.092→**0.118**.
+- **§4 lower-frequency families RECOVER/stabilize; none dead:** bond_reroute top3 0→**0.21** (mass 2.4×);
+  atom_restate mass 0.067→**0.079**; ring_system_restate mass 0.021→**0.034** (head grad INCREASING
+  0.049→0.073). atom_restate head grad 1.46→1.12→**0.59** = converging to its settled reweighted-down
+  behavior (largest specific-family grad, mass finite — not dying). grow head grad 0 (dead).
+- **§5 calibration IMPROVES:** complete-mark family TV 0.477→**0.429**, KL 0.666→**0.632** (1250 blip then
+  down) — lower-freq families gain calibrated mass, cycle ops strong but not count-artifact-driven.
+- **§6/§7 rollout hard gates (step-1500 current) — ALL PASS:** identity_ok (grow off, cycle on),
+  `hard_gates_all_zero` both strata, validity/cycle-rank/charge 1.0, 0 charge mutations, grow dead (mass 0,
+  −∞, 0 marks), `toggle_dominated=False` (72 productive closes / 58 opens), ring_restate + delete fire.
+
+**Verdict: `GO_FOR_FULL_RINGCORE_TRAINING`** — all hard gates pass, global validation recovers, no family dead,
+lower-frequency families improve/stabilize as the LR decays, family-mass calibration improves, compositional
+cycle behavior stays productive without suppressing the rest. **§9 next (owner-gated):** propose the CLEAN full
+run FRESH from base B (training_steps 3000, warmup 500, schedule_steps 3000, same scheduler hash) under a new
+production lineage — do NOT repurpose this preflight continuation checkpoint; await explicit authorization. The
+approved low-risk audit closures (G1, reward-FT, P1/P2, R1, GPU smoke) are landed; the canonical model-factory
+refactor stays deferred.
+
 ## 6-prev. Bounded RingCore preflight (≤750 steps) — launch recipe (superseded by the result above)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep

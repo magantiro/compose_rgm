@@ -34,7 +34,7 @@ ENABLED_FAMILIES = [
 CYCLE_FAMILIES = ["cycle_insert", "cycle_attach"]
 DISABLED_FAMILY = "ring_system_grow"
 FINITE_PROB_EPS = 1e-4  # a family with teacher targets must keep at least this much model family-mass
-EVAL_STEPS = [0, 250, 500, 750, 1000]
+EVAL_STEPS = [0, 250, 500, 750, 1000, 1250, 1500]  # covers the step-1500 continuation history too
 
 
 def _f(d: dict, key: str, default=float("nan")) -> float:

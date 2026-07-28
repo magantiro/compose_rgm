@@ -1,0 +1,88 @@
+{
+  "run_label": "compose-v4-ringcore-v1-cont1500-48af1bd-v1",
+  "resumed_from": "compose-v4-ringcore-v1-schedcheck-48af1bd-v1 (step-1000 recovery)",
+  "launch_commit": "48af1bd",
+  "scheduler_config_hash": "0b832985c65de1cc",
+  "status": "NON_SCIENTIFIC_PREFLIGHT",
+
+  "section_1_resume_exactness": {
+    "exact": true,
+    "loaded_global_step": 1000,
+    "step1000_reloaded_gm_loss": 2.4664,
+    "step1000_original_gm_loss": 2.4664,
+    "optimizer_state_restored": true,
+    "rng_state_restored": true,
+    "scaler": "n/a (bf16 autocast, no GradScaler)",
+    "scheduler": "functional (LR = f(step, config)); continued NOT reset",
+    "lr_continuation": {"1000": 2.727849e-04, "1250": 2.412594e-04, "1500": 2.015349e-04},
+    "lr_relative_to_peak": {"1000": 0.909, "1250": 0.804, "1500": 0.672},
+    "note": "step-1000 reloaded eval reproduces the original exactly; LR continued the cosine decay (never reset to 6e-7 warmup)"
+  },
+
+  "section_2_3_trajectory": {
+    "gm_loss": {"500": 2.2987, "750": 2.8624, "1000": 2.4664, "1250": 2.4429, "1500": 2.3175},
+    "best_gm_loss": 2.2987, "best_step": 500,
+    "gm_loss_delta_1000_to_1500": -0.1490,
+    "balanced_family_top3": {"1000": 0.4002, "1250": 0.4154, "1500": 0.4366},
+    "hazard_error": {"1000": 0.9068, "1250": 0.8599, "1500": 0.7993},
+    "selected_mark_probability": {"1000": 0.09217, "1250": 0.07302, "1500": 0.11772},
+    "note": "ALL global metrics recover/improve through the decay (1000->1500): loss -0.149 (to +0.019 of best), balanced top3 +0.036, hazard error -0.107, selected-mark prob +0.026"
+  },
+
+  "section_4_family_recovery": {
+    "dead_enabled_families": [],
+    "family_prob_top3_1000_1250_1500": {
+      "atom_restate": {"prob": [0.067, 0.062, 0.079], "top3": [0.42, 0.51, 0.47]},
+      "bond_reroute": {"prob": [0.026, 0.026, 0.062], "top3": [0.00, 0.07, 0.21]},
+      "ring_system_restate": {"prob": [0.021, 0.018, 0.034], "top3": [0.00, 0.00, 0.04]},
+      "bond_reorder": {"prob": [0.030, 0.021, 0.026], "top3": [0.00, 0.00, 0.00]},
+      "ring_system_delete": {"prob": [0.021, 0.017, 0.024], "top3": [0.00, 0.00, 0.00]},
+      "cycle_insert": {"prob": [0.314, 0.243, 0.377], "top3": [0.78, 0.75, 0.82]},
+      "cycle_attach": {"prob": [0.118, 0.092, 0.113], "top3": [0.96, 0.96, 0.98]}
+    },
+    "per_family_head_grad_norm_500_1000_1500": {
+      "atom_restate": [1.456, 1.118, 0.592],
+      "ring_system_restate": [0.024, 0.049, 0.073],
+      "bond_reroute": [0.006, 0.011, 0.010],
+      "bond_reorder": [0.050, 0.039, 0.026],
+      "cycle_insert": [0.079, 0.073, 0.027],
+      "cycle_attach": [0.017, 0.027, 0.022],
+      "ring_system_grow_DEAD": [0.0, 0.0, 0.0]
+    },
+    "note": "Lower-freq families RECOVER or STABILIZE as LR decays: bond_reroute top3 0->0.21 + mass 2.4x; atom_restate mass +0.012 + top3 recovered; ring_system_restate mass +0.013 + grad INCREASING 0.049->0.073. atom_restate grad shrinks 1.46->0.59 = converging to its settled (reweighted-down) behavior, not dying (largest specific-family grad, mass finite). grow grad 0 (dead). NO family meets any dead criterion (prob>0, grad>0, mass finite, rollout usage present)."
+  },
+
+  "section_5_calibration": {
+    "complete_mark_family": {"1000": {"TV": 0.4773, "KL": 0.6655}, "1250": {"TV": 0.5501, "KL": 0.8419}, "1500": {"TV": 0.4293, "KL": 0.6317}},
+    "step1000_verified_from_artifact": {"TV": 0.4773, "KL": 0.6655},
+    "note": "TV/KL DECREASE 1000->1500 (0.477->0.429, 0.666->0.632) with a 1250 blip -> clean recovery signal: lower-freq families gain calibrated mass, cycle ops remain strong but not count-artifact-driven"
+  },
+
+  "section_6_7_rollout_gates_step1500": {
+    "identity_ok": true, "global_step": 1500, "enable_ring_grow_macro": false, "enable_cycle_ops": true,
+    "hard_gates_all_zero": true,
+    "all_state_validity": 1.0, "cycle_rank_correctness": 1.0, "charge_preserved": 1.0, "unexplained_charge_mutations": 0,
+    "grow_exclusion": {"mass": 0.0, "log_prob": "-inf", "legal_marks": 0},
+    "compositional_ring": {"toggle_dominated": false, "cycle_close_unseen": 72, "cycle_open_unseen": 58, "productive_close": 72,
+                           "ring_restate_distinct_sources": 8, "ring_delete_distinct_sources": 8, "natural_ring_op_usage": "0.85-0.97", "return_to_source": 0.0},
+    "hard_gate_violations": {}
+  },
+
+  "section_8_verdict": "GO_FOR_FULL_RINGCORE_TRAINING",
+  "section_8_reasoning": [
+    "all hard gates pass (§7: hard_gates_all_zero both strata, validity/cycle-rank/charge 1.0, grow dead, 0 violations)",
+    "global validation stable/recovering (§3: GM loss recovers 2.4664->2.3175 near best; hazard error improves; selected-mark prob improves)",
+    "no enabled family effectively dead (§4: dead=[], all families getting gradient, grow dead)",
+    "lower-frequency family diagnostics improve or stabilize (§4: bond_reroute/atom_restate/ring_system_restate recover; bond_reorder/ring_system_delete stable finite)",
+    "family-mass calibration improves (§5: TV 0.477->0.429, KL 0.666->0.632)",
+    "compositional cycle behavior productive + non-toggle-dominated, cycle ops strong without suppressing the rest (§6)"
+  ],
+
+  "section_9_next": {
+    "action": "STOP. Propose the CLEAN full-training run FRESH from base B under a new production lineage; do NOT repurpose this preflight continuation checkpoint as the production checkpoint.",
+    "full_run": {"start_from": "base B (c9d927...) semantic warm-start", "training_steps": 3000, "warmup_steps": 500, "schedule_steps": 3000, "scheduler_config_hash": "0b832985c65de1cc"},
+    "prereqs_landed": "G1 guard, reward-FT capability fail-loud, paper P1/P2, ring-delete R1 wording, mandatory GPU smoke (all committed)",
+    "deferred": "canonical model-factory refactor (H1) -- NOT before the full run",
+    "authorization": "await explicit owner authorization before launching the full production run"
+  }
+}
