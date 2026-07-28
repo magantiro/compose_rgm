@@ -88,6 +88,50 @@ def test_old_no_flags_reproduces_the_failure():
     assert failures > 0, "expected the no-flags path to trip the teacher-in-candidate invariant"
 
 
+def test_corruption_teachers_are_representable_on_fused_rings():
+    """Data-source invariant: build_corrupted_prior_records must emit ONLY teachers inside the model's exact
+    dynamic candidates -- notably it must drop an inverse/grow ring_system_restate on a FUSED ring system
+    whose re-aromatization pattern the forward enumerator does not offer. Verified on complex multi-ring +
+    charged leads: every ring/graft teacher is enumerable on the state it applies to (zero mismatches)."""
+    from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
+    from compose_v4.rewrite.factorized_fiber import enumerate_pendant_graft_actions
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.ring_system_fiber import enumerate_clean_ring_system_deletes
+    from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
+
+    catalog = _catalog()
+    system = de_novo_rewrite_system()
+    fused = [
+        "O=C1NC(=O)c2ccccc21", "c1ccc2c(c1)ccc1ccccc12", "c1cnc2ccccc2c1",
+        "Cc1ccc(NC(=O)C2CCN(C(=O)C3CC4CCC(C)CC4CN3)CC2)cc1", "NC1CCCCN1C(=O)[O-]",
+    ]
+    mismatches = 0
+    checked = 0
+    for seed in range(6):
+        records, _ = build_corrupted_prior_records(
+            fused, n_slots=40, depth_max=5, seed=seed, catalog=catalog,
+            vocabulary=ORGANIC_VOCABULARY, couplings_per_target=2,
+        )
+        for r in records:
+            state = r.path.trace.source
+            for step in r.path.trace.steps:
+                if step.rule_name == "ring_system_restate":
+                    checked += 1
+                    if step.action not in enumerate_ring_system_restate_actions(state, system=system):
+                        mismatches += 1
+                elif step.rule_name == "ring_system_delete":
+                    checked += 1
+                    if step.action not in enumerate_clean_ring_system_deletes(state, catalog):
+                        mismatches += 1
+                elif step.rule_name == "bond_reroute":
+                    checked += 1
+                    if step.action not in enumerate_pendant_graft_actions(state):
+                        mismatches += 1
+                state = system.apply(state, step.rule_name, step.action)
+    assert checked > 0, "expected some ring/graft teachers in the corrupted records"
+    assert mismatches == 0, f"corruption emitted {mismatches} unrepresentable ring/graft teachers"
+
+
 def test_capability_object_drives_enumeration():
     """The immutable capability object is the single source of the editing-family enumeration; passing the
     model's operator_capabilities makes every teacher representable (no invariant trip)."""

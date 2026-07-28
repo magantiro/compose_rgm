@@ -319,3 +319,20 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   (before backward/optimizer); CPU Modal fn `dry_launch_stage`; instrumentation `zero_mixture_instrumentation`
   (denovo_*=0, edit_*/forward>0, optimizer_steps=0). **`main()` uses `.spawn()` → MUST `modal run --detach`** or
   the app stop kills the spawned fn. Result → `/artifacts/<run-label>/dry_launch.json` (poll the volume).
+- **The teacher-in-candidate invariant surfaced a SECOND, deeper corruption bug: inverse (GROW-direction)
+  `ring_system_restate` on FUSED ring systems is not in the model's dense enumeration.** After fixing the
+  eval-collator flags, the `assert_teachers_in_exact_candidates` safeguard fired on a complex fused molecule
+  (`O=C1NC(O)C2CCCCC12`): the grow trace's inverse restate teacher wants a 3-bond re-aromatization of ONE
+  6-ring of a fused system, but `enumerate_ring_system_restate_actions` on the saturated fused state offers a
+  DIFFERENT 4-bond fused-system pattern — so the inverse teacher is outside the dense candidates (same
+  inverse-mask-legality class as the 2026-07-25 "clean delete taught trim-only"). Only ~1-3% of traces, all
+  GROW-direction restates on fused systems. **Fix = enforce the invariant at the DATA SOURCE:**
+  `source_corruption.trace_teachers_representable(trace, system, catalog)` replays each trace and checks every
+  ring_system_restate / ring_system_delete / bond_reroute step's action IS in its dense enumeration;
+  `build_corrupted_prior_records` DROPS any trace that fails (logs `dropped_unrepresentable_traces`). Guarantees
+  `teacher ∈ A_exact(x)` by construction. Verified: 154 ring/graft teachers, 0 mismatches; a 256-example
+  validation batch on fused/bridged/charged leads scores finite. **LESSON: generating a trace via forward
+  enumeration does NOT guarantee its INVERSE steps are in the dense mask — validate BOTH directions against the
+  model's exact candidates before recording (construct the teacher from the representable set, per the owner's
+  §3).** Micro families (atom_*/bond_reorder) + cycle ops are per-coordinate (mask-derived) so they need no
+  list check.

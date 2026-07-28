@@ -13,6 +13,8 @@ module adds the ``PathRecord`` wrapper the GM trainer consumes.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 
 from compose_v4.chem.molecular_graph import (CNOF_VOCABULARY, MolecularGraphError,
@@ -21,7 +23,7 @@ from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.progress import TraceProgressCTMC
-from compose_v4.rewrite.source_corruption import make_edit_pair
+from compose_v4.rewrite.source_corruption import make_edit_pair, trace_teachers_representable
 
 
 def build_corrupted_prior_records(
@@ -45,6 +47,7 @@ def build_corrupted_prior_records(
     rng = np.random.default_rng(seed)
     records = []
     attempted = 0
+    dropped = 0  # traces dropped by the teacher-in-candidate invariant (unrepresentable teacher)
     for text in smiles:
         try:
             graph = smiles_to_molecular_graph(text)
@@ -67,10 +70,25 @@ def build_corrupted_prior_records(
             for trace in traces:
                 if trace is None:
                     continue
+                # teacher-in-candidate invariant at the data source: drop any trace whose teacher is outside
+                # the model's exact dynamic candidates (notably an inverse/grow ring_system_restate on a fused
+                # ring system). Guarantees GM scoring never raises "outside exact dynamic candidates".
+                if not trace_teachers_representable(trace, system=system, catalog=catalog):
+                    dropped += 1
+                    continue
                 records.append(
                     PathRecord(
                         canonical_state_key(trace.target),
                         TraceProgressCTMC(trace, checkpoint_interval=checkpoint_interval),
                     )
                 )
+    if dropped:
+        print(
+            json.dumps(
+                {"phase": "corrupted_prior_teacher_invariant",
+                 "dropped_unrepresentable_traces": dropped, "kept_records": len(records)},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     return tuple(records), attempted

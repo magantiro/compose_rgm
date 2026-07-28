@@ -223,6 +223,36 @@ def corrupt_to_source(
     return steps, states
 
 
+def trace_teachers_representable(trace: RewriteTrace, *, system: RewriteSystem, catalog=None) -> bool:
+    """True iff EVERY step's teacher mark is in the model's exact dynamic candidate set for the state it
+    applies to -- the ``teacher in A_exact(x)`` invariant enforced at the DATA SOURCE (construct the teacher
+    from the model-representable legal action set, don't generate broadly and crash at the loss). The
+    ring-system families (restate/delete) + graft (bond_reroute) carry explicit dynamic candidate LISTS whose
+    enumeration can diverge from a recorded action -- notably an INVERSE (grow-direction) ``ring_system_restate``
+    on a FUSED ring system, where re-aromatizing one ring of the fused system is not the pattern the forward
+    enumerator offers on the saturated state. Micro families (atom_*/bond_reorder) + cycle ops score
+    per-coordinate against masks derived by construction, so they need no list check here. Replays via the
+    executor; a step that fails to apply makes the trace non-representable."""
+    state = trace.source
+    for step in trace.steps:
+        action = step.action
+        rule_name = step.rule_name
+        if rule_name == "ring_system_restate":
+            if action not in enumerate_ring_system_restate_actions(state, system=system):
+                return False
+        elif rule_name == "ring_system_delete":
+            if catalog is None or action not in enumerate_clean_ring_system_deletes(state, catalog):
+                return False
+        elif rule_name == "bond_reroute":
+            if action not in enumerate_pendant_graft_actions(state):
+                return False
+        try:
+            state = system.apply(state, rule_name, action)
+        except Exception:  # noqa: BLE001 -- a non-applicable step is non-representable
+            return False
+    return True
+
+
 def make_edit_pair(
     target: MolecularGraph,
     depth: int,
