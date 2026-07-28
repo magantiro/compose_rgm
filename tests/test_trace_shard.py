@@ -113,3 +113,81 @@ def test_tampered_successor_key_is_rejected():
     record["steps"][0]["successor_key"] = "C"
     with pytest.raises(TraceShardError, match="replayed successor"):
         decode_trace_record(record, validate=True)
+
+
+# ---- the permanent proof that SMILES reconstruction is forbidden ----
+
+
+def test_same_molecule_two_slot_layouts_diverge_under_the_same_action():
+    """Two coordinate systems for ONE molecule; one serialized action; two different outcomes.
+
+    Canonical SMILES identifies the MOLECULE but not the COORDINATE SYSTEM an action is defined in.
+    Actions address persistent slots, so rebuilding a source from its canonical string can silently turn a
+    stored action into a different valid edit. This test constructs two slot layouts of the same molecule
+    (identical canonical key), applies the identical serialized action payload to both, and asserts the
+    outcomes are NOT interchangeable -- either different successors or illegal under one layout.
+
+    As long as this test passes, reconstruction-from-SMILES is provably unsafe and must stay forbidden.
+    """
+    from compose_v4.chem.molecular_graph import MolecularGraph, is_element
+    from compose_v4.rewrite.action_codec import decode_action, encode_action
+    from compose_v4.rewrite.kernel import InvalidRewrite, de_novo_rewrite_system
+    from compose_v4.rewrite.operators import AtomRestate
+
+    layout_a = pad_molecular_graph(smiles_to_molecular_graph("CC(=O)Nc1ccccc1"), 40)
+    real = [i for i, ok in enumerate(is_element(layout_a.atom_types)) if ok]
+    types = {i: int(layout_a.atom_types[i]) for i in real}
+    a, b = next((i, j) for i in real for j in real if i < j and types[i] != types[j])
+
+    perm = list(range(len(layout_a.atom_types)))
+    perm[a], perm[b] = perm[b], perm[a]
+    layout_b = MolecularGraph(
+        atom_types=layout_a.atom_types[perm],
+        formal_charges=layout_a.formal_charges[perm],
+        implicit_h_counts=layout_a.implicit_h_counts[perm],
+        bonds=layout_a.bonds[np.ix_(perm, perm)],
+    )
+
+    # same molecule, different coordinate system
+    assert canonical_state_key(layout_a) == canonical_state_key(layout_b)
+    assert not np.array_equal(layout_a.atom_types, layout_b.atom_types)
+
+    # ONE serialized action, decoded identically for both
+    action = AtomRestate(v=a, atom_type=types[b], formal_charge=0, implicit_h_count=1)
+    rule, decoded = decode_action(encode_action("atom_restate", action))
+    assert decoded == action
+
+    system = de_novo_rewrite_system()
+    outcomes = []
+    for state in (layout_a, layout_b):
+        try:
+            outcomes.append(canonical_state_key(system.apply(state, rule, decoded)))
+        except InvalidRewrite:
+            outcomes.append(None)          # illegal under this layout
+
+    assert outcomes[0] != outcomes[1], (
+        "the same action must not be interchangeable across slot layouts -- if it were, this test no "
+        "longer demonstrates why exact-state storage is required"
+    )
+    # and the source molecules were indistinguishable by canonical key, which is the whole point
+    assert canonical_state_key(layout_a) == canonical_state_key(layout_b)
+
+
+def test_exact_state_storage_survives_the_two_layout_hazard():
+    """Both layouts serialize to DISTINCT records and each reloads to its own coordinate system."""
+    from compose_v4.chem.molecular_graph import MolecularGraph, is_element
+
+    layout_a = pad_molecular_graph(smiles_to_molecular_graph("CC(=O)Nc1ccccc1"), 40)
+    real = [i for i, ok in enumerate(is_element(layout_a.atom_types)) if ok]
+    types = {i: int(layout_a.atom_types[i]) for i in real}
+    a, b = next((i, j) for i in real for j in real if i < j and types[i] != types[j])
+    perm = list(range(len(layout_a.atom_types)))
+    perm[a], perm[b] = perm[b], perm[a]
+    layout_b = MolecularGraph(
+        atom_types=layout_a.atom_types[perm], formal_charges=layout_a.formal_charges[perm],
+        implicit_h_counts=layout_a.implicit_h_counts[perm], bonds=layout_a.bonds[np.ix_(perm, perm)],
+    )
+    ra, rb = encode_state(layout_a), encode_state(layout_b)
+    assert ra != rb, "exact-state records must distinguish coordinate systems"
+    assert np.array_equal(decode_state(ra).atom_types, layout_a.atom_types)
+    assert np.array_equal(decode_state(rb).atom_types, layout_b.atom_types)
