@@ -120,6 +120,16 @@ def partition_sources(subdir: str, corruption_sources: int, cycle_sources: int) 
         verify_partition_disjointness,
     )
 
+    artifact_volume.reload()
+    existing = Path("/artifacts") / subdir / "source_manifest.json"
+    if existing.exists():
+        try:
+            prior = json.loads(existing.read_text())
+            if prior.get("per_layer_source_counts"):
+                print(json.dumps({"phase": "sources_reused", "path": str(existing)}), flush=True)
+                return prior
+        except Exception:  # noqa: BLE001 -- a corrupt manifest just recomputes
+            pass
     guacamol_volume.reload()
     corpus = Path(CORPUS)
     if not corpus.exists():
@@ -299,6 +309,33 @@ def reduce_and_validate(subdir: str, expected: dict) -> dict:
     return census
 
 
+@app.function(image=image, cpu=2.0, timeout=12 * 3600,
+              volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume})
+def driver(subdir: str, corruption_sources: int, cycle_sources: int,
+           corruption_shards: int, cycle_shards: int, seed: int) -> dict:
+    """Remote orchestration. `@app.local_entrypoint` runs on the CLIENT, so `modal run --detach` keeps
+    already-spawned functions alive but silently drops the rest of the pipeline when the client
+    disconnects -- the map and reduce would never be issued. Driving from inside a container makes the
+    whole build survive client loss."""
+    src = partition_sources.remote(subdir, corruption_sources, cycle_sources)
+    print(json.dumps({"phase": "partitioned", "counts": src["per_layer_source_counts"]}), flush=True)
+
+    jobs = []
+    for layer, n_shards in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
+        for partition in PARTITIONS:
+            for shard_index in range(n_shards):
+                jobs.append((layer, partition, shard_index, n_shards, subdir, seed))
+    print(json.dumps({"phase": "mapping", "shards": len(jobs)}), flush=True)
+    results = list(compile_shard.starmap(jobs))
+    reused = sum(1 for r in results if r.get("reused"))
+    print(json.dumps({"phase": "mapped", "shards": len(results), "reused": reused}), flush=True)
+
+    expected = {layer: {p: 1 for p in PARTITIONS} for layer in LAYERS}
+    census = reduce_and_validate.remote(subdir, expected)
+    print(json.dumps({"phase": "driver_complete", "VALID": census["VALID"]}), flush=True)
+    return census
+
+
 @app.local_entrypoint()
 def main(
     subdir: str = "edit_precompile_v1",
@@ -310,24 +347,10 @@ def main(
 ) -> None:
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True, check=False).stdout.strip()
-    print(json.dumps({"phase": "launch", "subdir": subdir, "commit": commit,
-                      "corruption_sources": corruption_sources, "cycle_sources": cycle_sources}))
-
-    src = partition_sources.remote(subdir, corruption_sources, cycle_sources)
-    print(json.dumps({"phase": "partitioned", "counts": src["per_layer_source_counts"]}))
-
-    jobs = []
-    for layer, n_shards in (("corruption", corruption_shards), ("cycle_ops", cycle_shards)):
-        for partition in PARTITIONS:
-            for shard_index in range(n_shards):
-                jobs.append((layer, partition, shard_index, n_shards, subdir, seed))
-    print(json.dumps({"phase": "mapping", "shards": len(jobs)}))
-    results = list(compile_shard.starmap(jobs))
-    reused = sum(1 for r in results if r.get("reused"))
-    print(json.dumps({"phase": "mapped", "shards": len(results), "reused": reused}))
-
-    expected = {layer: {p: 1 for p in PARTITIONS} for layer in LAYERS}
-    census = reduce_and_validate.remote(subdir, expected)
-    print(json.dumps({"phase": "done", "VALID": census["VALID"],
-                      "totals": census["totals"],
-                      "problems": census["problems"][:5]}))
+    call = driver.spawn(subdir, corruption_sources, cycle_sources,
+                        corruption_shards, cycle_shards, seed)
+    print(json.dumps({
+        "phase": "driver_spawned", "function_call_id": call.object_id, "subdir": subdir,
+        "commit": commit, "corruption_sources": corruption_sources, "cycle_sources": cycle_sources,
+        "note": "orchestration runs remotely; safe to disconnect (launch with --detach)",
+    }))
