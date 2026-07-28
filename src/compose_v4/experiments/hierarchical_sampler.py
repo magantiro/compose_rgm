@@ -31,6 +31,16 @@ import numpy as np
 CORRUPTION = "corruption"
 MMP = "mmp"
 SCAFFOLD = "scaffold"
+
+# ---- production (RingCore-V1) layers -----------------------------------------------------------------
+# Cycle supervision is its OWN layer, never folded into corruption: it defines RingCore, so its draw
+# probability must be independently configurable and independently auditable. Folding it in would let raw
+# artifact volume (cycle records are the cheapest to generate, and the most numerous) decide training mass.
+GENERAL_CORRUPTION = "general_corruption"
+CYCLE_OPS = "cycle_operations"
+MMP_ANALOGUE = "mmp_analogue"
+PRODUCTION_LAYERS = (GENERAL_CORRUPTION, CYCLE_OPS, MMP_ANALOGUE)
+
 _CNOF = frozenset({"C", "N", "O", "F"})
 
 
@@ -68,6 +78,14 @@ def build_layered_sampler(records_by_layer, *, layer_weights, path_length_bins=(
     tags: list[RecordTag] = []
     for layer, records in records_by_layer.items():
         tags.extend(tag_records(records, layer=layer, cold_elements_of=cold_elements_of))
+    # A positively-weighted layer that contributed no records is a silent mixture change: the remaining
+    # weights renormalize and the missing supervision simply disappears. Fail instead.
+    present = {layer for layer, records in records_by_layer.items() if records}
+    starved = sorted(
+        layer for layer, weight in layer_weights.items() if float(weight) > 0 and layer not in present
+    )
+    if starved:
+        raise ValueError(f"positively-weighted layers have no records: {starved}")
     return HierarchicalMarkSampler(
         tags, layer_weights=dict(layer_weights), path_length_bins=tuple(path_length_bins),
         cold_element_floor=float(cold_element_floor), seed=int(seed))

@@ -40,6 +40,33 @@ PRODUCTION_SCHEDULER = {
 }
 SCHEDULER_CONFIG_HASH = "0b832985c65de1cc"
 
+# ---- production training mixture (owner-locked, first scaled run) ------------------------------------
+# These are TRACE-DRAW weights over the three independent layers. They are the authoritative source and
+# are persisted into the run manifest and checkpoint metadata; sampling probability must NEVER be
+# inferred from artifact counts (cycle records are the cheapest and most numerous, so a size-derived
+# mixture would silently hand them the corpus).
+#
+# Because a draw may land on the terminal (no-jump) position -- and single-step cycle traces spend
+# proportionally more mass there -- the realized share of teacher TRANSITIONS differs from these weights.
+# Both are reported; see diagnostics/coherence/sampling_unit_audit.json.
+PRODUCTION_LAYER_WEIGHTS = {
+    "general_corruption": 0.40,
+    "cycle_operations": 0.25,
+    "mmp_analogue": 0.35,
+}
+LAYER_WEIGHTS_HASH = "794e6628f23465d8"
+
+
+def layer_weights_hash_from_mapping(weights: dict[str, float]) -> str:
+    """Stable short hash of a layer-weight mapping (rounded, so float noise cannot drift the hash)."""
+    canonical = {str(k): round(float(v), 6) for k, v in sorted(weights.items())}
+    payload = json.dumps(canonical, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+def recompute_layer_weights_hash() -> str:
+    return layer_weights_hash_from_mapping(PRODUCTION_LAYER_WEIGHTS)
+
 _OPERATOR_REGISTRY_SOURCES = [
     "src/compose_v4/rewrite/operators.py",
     "src/compose_v4/rewrite/kernel.py",
