@@ -1,5 +1,18 @@
 # Paper positioning: pathwise-meaningful, validity-closed molecular control
 
+> ## ⚠️ SUPERSEDED THESIS — 2026-07-28
+> **The framing/positioning in this document is SUPERSEDED by
+> [`PAPER1_FRAMING_AUTHORITATIVE.md`](PAPER1_FRAMING_AUTHORITATIVE.md)** (RGM-first, trans-dimensional).
+> Its positioning as the paper's central claim.
+>
+> **STILL VALID and deliberately preserved here — do not delete, this is the granular record:**
+> the corrected scoping of exactness (toy/enumerable only) and the retraction of the over-claimed 'diffusion can't do constraints' argument — both still binding.
+>
+> When this document and the authoritative framing conflict on thesis, positioning, title, contribution
+> order, or novelty claims, **the authoritative framing wins**. Operational detail below remains usable.
+
+
+
 **(Corrected framing — supersedes the earlier "exact controllability" draft, which
 overstated the guidance-exactness and the diffusion-can't-do-constraints claims.)**
 

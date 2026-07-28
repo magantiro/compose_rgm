@@ -1,5 +1,18 @@
 # Paper reframe — RGM as a control-closed molecular substrate (anytime Pareto editing)
 
+> ## ⚠️ SUPERSEDED THESIS — 2026-07-28
+> **The framing/positioning in this document is SUPERSEDED by
+> [`PAPER1_FRAMING_AUTHORITATIVE.md`](PAPER1_FRAMING_AUTHORITATIVE.md)** (RGM-first, trans-dimensional).
+> The control-substrate thesis it proposes (control as the paper's starting definition). Control is now the strongest CONSEQUENCE of the learned process, introduced after the framework and molecular kernel.
+>
+> **STILL VALID and deliberately preserved here — do not delete, this is the granular record:**
+> the verbatim advisor memo as a HISTORICAL RECORD of how the framing evolved, and its baseline-map addendum.
+>
+> When this document and the authoritative framing conflict on thesis, positioning, title, contribution
+> order, or novelty claims, **the authoritative framing wins**. Operational detail below remains usable.
+
+
+
 - **Date received:** 2026-07-22
 - **Status:** Incoming strategic reframe (advisor memo), preserved verbatim below. Not yet
   implemented. Intended to become the paper's thesis — **demoting** the pathwise-safety
@@ -402,3 +415,79 @@ Molecular generators are typically trained to produce valid endpoints, while the
 My strongest recommendation is therefore:
 
 Do not make hard constraints or "conditional generation" the thesis. Make the thesis that RGM turns a molecular generator into a modular, source-conditioned control process. Make anytime Pareto-set generation the hero use of that process, and make Pareto reachability through valid detours the scientific mechanism you test most aggressively.
+
+---
+
+## Baseline literature map (ours, not the memo's — verified 2026-07-26)
+
+**Provenance.** Deep-research sweep (104 agents, 21 primary sources, 24/25 falsifiable
+claims confirmed under 3-vote adversarial verification, 1 refuted). Cross-paper numbers
+are protocol-dependent — fix ONE evaluation protocol before tabulating ours beside them
+(caveat below).
+
+**The differentiation held up under verification:** no published method simultaneously
+offers (i) a complete, valid, oracle-scoreable molecule at *every* step, (ii) an anytime
+source-relative Pareto archive, (iii) mid-trajectory warm-started steering, and (iv)
+constraint-by-construction. Every graph baseline is either latent-decode-at-end or
+noisy-diffusion → **valid only at the endpoint**. That is exactly the hero-experiment
+wedge below.
+
+### Tier A — must-cite constrained-ZINC editors (all endpoint-only-valid → our contrast)
+
+| Method | Class | Per-step valid? | Objective | Published ZINC (δ≥0.4) |
+|---|---|---|---|---|
+| VJTNN / +GAN (ICLR'19) | JT-VAE graph→graph translation | No — latent, decode-at-end | baked (paired corpus, model/task) | plogP 3.55±1.67; QED 60.6%; DRD2 78.4% |
+| Modof (Nat.Mach.Intel.'21) | JT-VAE single-fragment editor | No — latent diff → AR decode | baked | plogP 5.00 / 5.89 (strongest plogP) |
+| GrIDDD (NeurIPS'25) | graph insert/delete DDPM | No — *re-noises* input to edit; admits illegal insert+delete / split mols | baked (classifier-free) | plogP 2.70±0.94; QED 45.1%; DRD2 5.0% |
+
+### Tier B — structural cousin, cite for framing not numbers
+**DDSBM** (ICLR'25) — discrete-diffusion Schrödinger bridge / CTMC-over-graphs. Closest in
+spirit (a CTMC over graphs) but a **noisy** bridge with no per-step validity; its ZINC "task"
+is bespoke distribution-transport (logP≈2→4), so **no citable constrained-QED/plogP number**.
+Contrast paragraph: validity-closed executable rewrite + objective-agnostic control vs. noisy
+bridge + fixed source/target distributions.
+
+### Tier C — oracle-efficiency context (endpoint-comparable only)
+MOGFN, HN-GFN (de-novo multi-objective GFlowNets; no ZINC constrained numbers). **GraphGA /
+PMO (Gao'22) is the flagged omission** — the PMO oracle-efficiency top performer a reviewer
+expects; cite for context even though de-novo.
+
+### Tier D — steering *philosophy*, related-work only (no ZINC)
+MOG-DFM, AReUReDi (objective-agnostic inference-time guidance on frozen bases — closest to our
+value-guided SMC idea, but peptide/DNA/SMILES only). The memo already names MOG-DFM / AReUReDi
+as controller instantiations; the lit search confirms they have **no** small-molecule/ZINC
+numbers → controllers / related work, never ZINC baselines.
+
+### Hero experiment this licenses
+**"Carve the Pareto frontier far more efficiently than endpoint-only-valid models."** Two forms:
+- **Internal (clean mechanism proof, needs no competitor code):** all-visited-state archive
+  vs. endpoint-only archive under **matched oracle calls** — feasible hypervolume AUC vs.
+  oracle calls. Every intermediate is already valid + scored + archivable; an endpoint-only
+  model harvests one archived molecule per full decode/denoise trajectory. This is the memo's
+  decisive-experiment row #1 and isolates "every step is a molecule."
+- **External (competitive story):** the JT-VAE / latent foil on our leads for the paradigm
+  axes (per-step validity, anytime archive, mid-trajectory steering) the published tables
+  don't measure, plus cited Tier-A numbers for endpoint competitiveness. Endpoint-only models
+  must re-noise/re-decode per preference ω → cannot warm-start mid-trajectory (claim 1) and
+  cannot contribute intermediates to the archive (claim 2).
+
+Metric of record (per the memo): **feasible hypervolume AUC vs. oracle calls**, plus unique
+nondominated molecules, frontier coverage, source edit distance, all-state validity, canonical
+cache-hit rate.
+
+### Caveat (protocol)
+Tier-A numbers span Jin'18 vs Jin'20 suites, best-of-20 candidates, differing similarity
+radius/thresholds → not strictly comparable. Fix one protocol (test set, oracle-call budget,
+candidate count, similarity radius, success thresholds) before any side-by-side table.
+penalized-logP is gameable/saturated → keep endpoint plogP/QED **defensive, competitive-not-
+SOTA**, never headline.
+
+### Sources
+- VJTNN/+GAN — arXiv:1812.01070 · Modof — PMC8856604 (Nat. Mach. Intel. 2021) ·
+  GrIDDD — arXiv:2506.15725 (NeurIPS 2025) · DDSBM — arXiv:2410.01500 (ICLR 2025)
+- MOGFN — Jain et al. ICML 2023 (PMLR v202) · HN-GFN — arXiv:2302.04040 ·
+  MOG-DFM — arXiv:2505.07086 · AReUReDi — arXiv:2510.00352 · PMO/GraphGA — arXiv:2206.12411
+- Unresolved flags: **EDM-SyCo** (Ketata'25, 3D-diffusion optimizer, beats GrIDDD in its own
+  appendix under a 400-round budget) not independently verified — decide if in-scope. **HierG2G
+  naming split:** arXiv:2002.03230 = HierVAE (unconditional); arXiv:1907.11223 = the HierG2G
+  *translation* model — attribute any constrained numbers to 1907.11223.

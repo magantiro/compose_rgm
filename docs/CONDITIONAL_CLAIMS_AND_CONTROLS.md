@@ -1,5 +1,18 @@
 # Conditional claims → controls → metrics (the experiment matrix)
 
+> ## ⚠️ SUPERSEDED THESIS — 2026-07-28
+> **The framing/positioning in this document is SUPERSEDED by
+> [`PAPER1_FRAMING_AUTHORITATIVE.md`](PAPER1_FRAMING_AUTHORITATIVE.md)** (RGM-first, trans-dimensional).
+> Its parent positioning doc and the *validity-closed structural control* thesis. The 'Option A locked' scoping no longer defines the paper.
+>
+> **STILL VALID and deliberately preserved here — do not delete, this is the granular record:**
+> **the claims → controls → metrics experiment matrix itself** — the highest-value operational artifact in docs/. Every conditional experiment in the new program (A–G) should still be traceable to a row here. Keep using it as the run-nothing-off-matrix discipline.
+>
+> When this document and the authoritative framing conflict on thesis, positioning, title, contribution
+> order, or novelty claims, **the authoritative framing wins**. Operational detail below remains usable.
+
+
+
 **Authority.** This operationalizes `PAPER_POSITIONING_EXACT_CONTROL.md` (the *corrected*
 positioning that supersedes earlier over-claimed drafts). Where this doc and ad-hoc framing
 (`COMPOSE_paradigm_advantages_talking_points.md`, the "barrier spotlight") conflict, the

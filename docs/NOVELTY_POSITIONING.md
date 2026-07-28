@@ -1,5 +1,18 @@
 # Novelty and positioning
 
+> ## ⚠️ SUPERSEDED THESIS — 2026-07-28
+> **The framing/positioning in this document is SUPERSEDED by
+> [`PAPER1_FRAMING_AUTHORITATIVE.md`](PAPER1_FRAMING_AUTHORITATIVE.md)** (RGM-first, trans-dimensional).
+> Its novelty framing predates the trans-dimensional and canonical-quotient contributions.
+>
+> **STILL VALID and deliberately preserved here — do not delete, this is the granular record:**
+> the RGM central-claim wording, which the new framing builds on directly.
+>
+> When this document and the authoritative framing conflict on thesis, positioning, title, contribution
+> order, or novelty claims, **the authoritative framing wins**. Operational detail below remains usable.
+
+
+
 ## Central claim
 
 **Rewrite Generator Matching (RGM) learns a continuous-time Markov generator

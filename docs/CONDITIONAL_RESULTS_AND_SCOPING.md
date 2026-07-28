@@ -1,5 +1,18 @@
 # Conditional / control results & scoping (Paper 1)
 
+> ## ⚠️ SUPERSEDED THESIS — 2026-07-28
+> **The framing/positioning in this document is SUPERSEDED by
+> [`PAPER1_FRAMING_AUTHORITATIVE.md`](PAPER1_FRAMING_AUTHORITATIVE.md)** (RGM-first, trans-dimensional).
+> The 'Option A locked' scoping decision.
+>
+> **STILL VALID and deliberately preserved here — do not delete, this is the granular record:**
+> the results scoping discipline and the committed conditional numbers' provenance — note that one figure sourced from this doc's PROSE (the ~560 oracle calls) was retracted as unsourced; see the retraction block in numbers.tex.
+>
+> When this document and the authoritative framing conflict on thesis, positioning, title, contribution
+> order, or novelty claims, **the authoritative framing wins**. Operational detail below remains usable.
+
+
+
 **Scoping decision (locked): Option A — the paper is about validity-closed structural
 control.** The contribution is exact rule-closed constraints, usable-oracle efficiency,
 anytime editing, and the exactness anchor. Property optimization is not a standalone

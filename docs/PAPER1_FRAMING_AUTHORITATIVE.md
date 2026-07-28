@@ -216,10 +216,30 @@ rule-closed constraints, bounded slots) · notation introduced once and never re
 (`diagnostics/coherence/program_state.json`).
 
 Every RingCore checkpoint to date trained on **6,922 unique records** (200 corruption source molecules +
-5,000 MMP traces — and the MMP loader takes a *contiguous prefix*, not a sample) against 363,456 available
-pool rows and 466,483 eligible corpus molecules: ~28 passes, with the textbook overfitting signature
-(train −24%, held-out +8%). All are labeled **`DATA_STARVED_BASELINE`** and barred from final scientific
-status.
+5,000 MMP traces) against 363,456 available pool rows and 466,483 eligible corpus molecules: ~28 passes,
+with the textbook overfitting signature (train −24%, held-out +8%). All are labeled
+**`DATA_STARVED_BASELINE`** and barred from final scientific status.
+
+**Measured baseline** (`diagnostics/data/mmp_pool_audit.json`, 2026-07-28). The MMP loader read the *first*
+N rows rather than sampling, so the severity was audited directly:
+
+| 5,000-row set | unique sources | unique Murcko scaffolds |
+|---|---|---|
+| historical prefix | 4,882 | 729 |
+| deterministic uniform | 4,915 | 919 |
+| deterministic stratified | 5,000 | **1,071** |
+| *(full pool, 363,456 rows)* | *158,105* | *18,435* |
+
+**Correction to an earlier hypothesis:** the prefix was NOT catastrophic for source diversity — the pool is
+not grouped by source (max contiguous run = 2), so the prefix still spanned 4,882 distinct sources. The
+real prefix penalty is **~32% fewer scaffolds**. **Volume, not prefix bias, is the dominant defect**:
+1.4% of rows, 3.1% of sources, 4.0% of scaffolds.
+
+Pool quality is otherwise high and shapes the fix: **duplicate rate 0.0** (already deduplicated),
+**low source concentration** (top-100 sources = 0.2% of rows; Gini 0.36) — so the whole pool is usable and
+there is no scientific reason to cap at a round number; scaffold concentration (Gini 0.64) is the one axis
+worth capping. **Only 64 unique transformation signatures** exist across 363k rows — a ceiling of MMP
+one-cut mining itself, not fixable by sampling, and the reason corruption-layer diversity is load-bearing.
 
 **Consequences for the manuscript:**
 - Every unconditional / transport / conditional number stays `\XXX`. Quote no RingCore result.
@@ -245,7 +265,41 @@ status.
 
 ---
 
-## 11. Do not change the production model for prose
+## 11. Document authority map — where the granular material lives
+
+**This document is the single authority on thesis, positioning, title, contribution order, novelty
+claims, section order, and length policy.** It is deliberately NOT a replacement for the granular
+operational documents. Nothing was deleted; each superseded doc carries a banner naming exactly what in it
+is superseded (thesis only) and what remains binding. Use this map to find detail rather than
+re-deriving it.
+
+| I need… | Go to | Status |
+|---|---|---|
+| **the experiment matrix** (claims → controls → metrics; the "run nothing off-matrix" discipline) | `CONDITIONAL_CLAIMS_AND_CONTROLS.md` | thesis superseded · **matrix binding** |
+| **baselines + head-to-head rationale**, critical ablations, metric hierarchy, goal-conditioned Doob/Pareto formulation, four-level claim hierarchy, MOG-DFM orthogonality | `PAPER_MASTER_PLAN.md` §5,§6,§8,§11,§12 | thesis superseded · **detail binding** |
+| **controller design** (value-guided SMC, V0/V1/V2 lanes) | `CONDITIONAL_CONTROLLER_DESIGN.md` | current |
+| **why the carbon-tree model is not the main control model** | `PAPER_MASTER_PLAN.md` §2 | argument still valid |
+| **exactness scoping** (toy/enumerable only) and the retracted "diffusion can't do constraints" over-claim | `PAPER_POSITIONING_EXACT_CONTROL.md` | positioning superseded · **scoping binding** |
+| **how the framing evolved** (advisor memo, verbatim) | `PAPER_REFRAME_CONTROL_SUBSTRATE.md` | historical record |
+| **RGM central-claim wording** the new framing builds on | `NOVELTY_POSITIONING.md` | superseded but foundational |
+| **production system contract** (state space, operators, loss, sampling law, schedule) | `SYSTEM_CONTRACT.md`, `PROGRAM_CONTRACT.md`, `OPERATOR_ONTOLOGY.md` | **authoritative, current** |
+| **RingCore preflight history + verdicts** | `RINGCORE_V1_PREFLIGHT.md` | current |
+| **coherence audit, deviations, legacy quarantine** | `PROGRAM_COHERENCE_REPORT.md`, `DEVIATION_REGISTER.md`, `LEGACY_QUARANTINE.md` | current |
+| **what the reframe actually changed in the manuscript** | `PAPER1_REFRAME_EXECUTION.md` | execution log |
+| **empirical/program state, data starvation** | `diagnostics/coherence/program_state.json` | **authoritative, current** |
+| **MMP pool census + prefix-truncation baseline** | `diagnostics/data/mmp_pool_audit.json` | **authoritative, current** |
+
+**Known trap:** `PAPER_REWRITE_BRIEF.md` targets `paper_iclr_control_substrate/main.tex` — a 2026-07-22
+**fork**, framing-only, all numbers `\XXX`, still carrying the uncorrected P1 charged-corpus claim. The live
+manuscript is `paper_iclr_stochastic_rewriting/main.tex`. Do not apply that brief to the live paper.
+
+**Precedence rule:** authoritative framing (this doc) > production contracts (`SYSTEM_CONTRACT`,
+`PROGRAM_CONTRACT`) on *claims*, but production contracts win on *what the code does*. If prose and
+contract disagree about the system, the contract is right and the prose is a bug.
+
+---
+
+## 12. Do not change the production model for prose
 
 This is a manuscript, experiment-plan and claim-hierarchy update. Any code change must correspond to a
 genuinely missing capability or experiment and **must be reported before implementation**. Keep edit and
