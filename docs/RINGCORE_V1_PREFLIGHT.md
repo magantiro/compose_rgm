@@ -114,13 +114,59 @@ repurposed slots; grow disabled; public-alias policy).
   canonical-successor normalization (multiplicity 1.47, rate-conserving) · tiny-overfit natural sampling ✅ ·
   data-sampler distribution ✅ · save/reload equivalent ✅.
 
-## 6. Bounded RingCore preflight (≤750 steps) ⏳
+## 6. Bounded RingCore preflight (≤750 steps) 🔶 READY TO LAUNCH (bounded Modal run)
+§6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
+on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep
+(§1–§5) is committed; the code gates are green; the launch is a `--disable-ring-grow-macro --cycle-op-mix`
+adaptation of `docs/BEDIT_TRAINING_LAUNCH.md`, warm-started + bounded:
+
+```bash
+# from a CLEAN detached worktree at tag ring-core-v1; prelaunch_gate green first.
+# 1) recompile the training-support cache over the mixed tuple (signature changed: +cycle_op_mix,
+#    +disable_ring_grow_macro) — CPU
+modal run modal_apps/train_tracelet_gm.py --support-compile-only \
+  --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary \
+  --analogue-trace-pool /artifacts/edit_mining_full_broad/edit_pool_full.jsonl \
+  --scaled-manifest /artifacts/edit_mining_full_broad/scaled_edit_data_manifest.json \
+  --run-label compose-v4-ringcore-v1-<COMMIT>-v1 \
+  --source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1
+# 2) bounded warm-start fine-tune (A100), hard cap 750 steps — nominal 500
+modal run --detach modal_apps/train_tracelet_gm.py --train-only \
+  --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary \
+  --analogue-trace-pool /artifacts/edit_mining_full_broad/edit_pool_full.jsonl \
+  --scaled-manifest /artifacts/edit_mining_full_broad/scaled_edit_data_manifest.json \
+  --corrupted-prior-count <N> \
+  --run-label compose-v4-ringcore-v1-<COMMIT>-v1 \
+  --source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 \
+  --initialize-compatible-from-source-checkpoint \
+  --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 \
+  --checkpoint-name checkpoint.best_so_far.pt \
+  --training-steps 500 --schedule-steps 500
+```
+Schedule: step 0 diagnostic eval · 250 eval + recovery ckpt + family/subtype gradient audit · 500 eval +
+ckpt + fresh-process save/reload + unseen-lead + ring-topology rollout panels. **Do not exceed 750; do not
+launch the full run.** Post-run gate: `broad_preflight_gate.py`. Rollout metrics to collect: all-state
+validity, cycle-rank correctness, ring-op target counts, natural ring-op usage, topology classes reached,
+ring-edit path length, reversal/cycle/return-to-source rates, net structural displacement, canonical
+branching, legal-mark enumeration cost, throughput, broad-element/charge preservation.
 ## 7. Unseen-lead + topology-stratified rollouts ⏳
 ## 8. Measured throughput ⏳
 ## 9. Projected full-run cost ⏳
-## 10. Decision ⏳
+## 10. Decision ⏳ (final call gated on §6)
 `CORE_SUFFICIENT_FOR_FULL_RUN` / `MACROS_REQUIRED_BEFORE_FULL_RUN` / `MACROS_OPTIONAL_ABLATION` /
 `NO_GO_RINGCORE_CORRECTNESS`.
+
+**Provisional read from §1–§5 (not final — §6 measures the trained-edit distribution + throughput):**
+leaning **`MACROS_OPTIONAL_ABLATION`**. Rationale: the compositional core is **support-complete** (§2:
+14/14 topologies, no P2 needed) and **correct+robust** (§5: fuzz 0-corrupt, replay/inverse exact,
+save/reload); ring **restructuring** — the dominant lead-editing ring operation — is **compositionally cheap
+and always within budget** (§3: median 3, 0% over budget, every topology); the cycle family is the dominant,
+well-calibratable, drift-free edit family (§4: 61% of targets, mass calibratable 0.30→0.59). The **only**
+expensive case is building a *whole new* fused/hetero ring de-novo (§3: median 20, 73.5% over budget) — a
+de-novo move, not lead editing; a macro would help there, so macros are a plausible **efficiency ablation**,
+not a correctness/support prerequisite. §6 flips this to `MACROS_REQUIRED` only if trained ring edits
+routinely exceed the budget or ring edits are rarely completed; to `CORE_SUFFICIENT` if whole-ring
+introductions are rare in practice.
 
 ## Paper position (§9)
 The method is written around the compositional ring core; the theoretical support claim does NOT depend on a
