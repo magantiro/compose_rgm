@@ -149,15 +149,48 @@ launch the full run.** Post-run gate: `broad_preflight_gate.py`. Rollout metrics
 validity, cycle-rank correctness, ring-op target counts, natural ring-op usage, topology classes reached,
 ring-edit path length, reversal/cycle/return-to-source rates, net structural displacement, canonical
 branching, legal-mark enumeration cost, throughput, broad-element/charge preservation.
-## 7. Unseen-lead + topology-stratified rollouts 🔶 HARNESS READY
-`scripts/ring_core_rollout_panel.py --checkpoint <RingCore ckpt>` runs the unseen-lead + topology-stratified
-panels and emits all 13 mandate metrics; it loads the RingCore checkpoint via
-`load_factorized_rollout_checkpoint` (scope-hash-gated) with the cycle-op + grow-disable metadata wiring.
-**Harness self-validated** on a representative (untrained) local model — all 13 metrics present + finite:
-validity 1.0, cycle-rank correctness 1.0, **no `ring_system_grow` in the op-counts** (disable holds in the
-rollout regime), charge preserved 1.0, throughput ~81 marks/s, canonical branching ~19, enumeration cost
-~207 ms/lead. (Untrained numbers prove the HARNESS; the production numbers come from the bounded checkpoint.)
-**On launch:** run the harness against the checkpoint → fills §6 rollout metrics + §7 panels + §8 throughput.
+## 7. Unseen-lead + topology-stratified rollouts 🔶 `ANALYSIS_READY_FOR_RINGCORE_CHECKPOINT`
+`scripts/ring_core_rollout_panel.py --checkpoint <ckpt> [--step0-checkpoint <ckpt0>] [--training-log <jsonl>]`
+— **hardened per the 10-requirement mandate** and self-validated end-to-end (all sections present, hard gates
+all-zero, verdict machinery returns `GO_AFTER_PRODUCTION_SCHEDULE_CHECK` when no training log is supplied —
+it does NOT return GO merely because states are valid):
+1. **Strict identity** (`ring_core_identity.verify_checkpoint_identity`) — SHA-256, step, source-B hash,
+   max_atoms=40, scope, capability `330473e319bfec19`, operator-registry `9197401e8dc3a7ae`, cycle-op
+   `27a823aeb6cf7548`, calibration `f534c0233e3bf4a0`, `enable_cycle_ops=true`, `enable_ring_macros=false`,
+   `ring_system_grow=false`, sampler-config hash — **fails loudly** on any mismatch. 10 negative tests
+   (`test_ring_core_identity_gate.py`). The trainer now self-identifies RingCore checkpoints.
+2. **Support-level legacy-macro exclusion** — per state: grow absent from legal enumeration (0 marks), 0
+   family mass (log-prob −∞), out of capability set, kernel sums to 1.0. Any access = hard fail.
+3. **Charge split** — net_formal_charge_preserved / protected_charged_centers_preserved (slot-tracked) /
+   unexplained_charge_mutations (require 0) / charged-context rollout count. Equal net charge alone ≠ pass.
+4. **Paired A/B/C** — identical leads+seeds for A (step-0 semantic init), B (step-500 trained), C
+   (uniform-legal). A runs when `--step0-checkpoint` is given.
+5. **Compositional-ring behaviour** — per-subtype opportunities/mass/counts/distinct-sources/rank-changes;
+   productive close/open/delete vs close→inverse-open toggling, repeated toggling, net accumulation/loss;
+   **dead-head detection** (no natural cycle op ⇒ `GO_AFTER_RECIPE_ADJUSTMENT`, not GO).
+6. **Exact-zero hard gates** — invalid/disconnected/>40 states, illegal actions, executor/successor
+   mismatch, unexplained charge, non-normalized kernel, legacy-macro access.
+7. **Learning diagnostics** — parses `--training-log` for steps 0/250/500 diagnostic loss + grad/update
+   norms (schema finalized against the real log).
+8. **Stable 13-metric schema** + provenance (harness commit, lead-panel/seed-list/checkpoint/eval-config
+   hashes, `schema_version=ringcore_rollout_v2`).
+9. **Interpretation gate** → `GO_FOR_FULL_RINGCORE_TRAINING` / `GO_AFTER_RECIPE_ADJUSTMENT` /
+   `GO_AFTER_PRODUCTION_SCHEDULE_CHECK` / `NO_GO_RINGCORE_TRAINING` + smallest required next action.
+10. Every artifact tagged **`NON_SCIENTIFIC_PREFLIGHT`** (excluded from paper/benchmark/model-selection).
+
+**On launch:** run against the step-500 checkpoint (+ `--step0-checkpoint`, `--training-log`) → fills §6–§9
+and the final report requirements below.
+
+### Final-report requirements to fill from the run (owner mandate)
+- Explain exactly what `--schedule-steps 500` controls (LR schedule / warm-up / curriculum / time sampling /
+  loss weights) and whether the 0→500 schedule reproduces the first 500 production steps or is a compressed
+  coverage/stress schedule (label it honestly).
+- Decompose the **61% cycle-family selected-target mass** by MMP/scaffold/corruption/cycle-op layer,
+  curriculum bin, subtype, topology stratum, source scaffold, rate-weighted vs unweighted — and state whether
+  61% is an enriched warm-up distribution or the intended long-run edit prior.
+- Step-0 init diagnostics · step-250 (grad/update norms by block + per cycle subtype + per fresh broad-element
+  row, mixture realized-vs-requested, recovery ckpt) · step-500 (eval, save/reload equality, fixed-seed
+  trajectory equality, unseen + topology + charged-context rollouts, cost projection).
 ## 8. Measured throughput ⏳
 ## 9. Projected full-run cost ⏳
 ## 10. Decision ⏳ (final call gated on §6)
