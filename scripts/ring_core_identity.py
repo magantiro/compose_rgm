@@ -23,6 +23,23 @@ SCOPE_HASH = "3721d69851110fdd"
 BASE_B_SHA256 = "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c"
 MAX_ATOMS = 40
 
+# ---- Owner-locked production scheduler (decision 2026-07-28) ----
+# The schedule-faithful 1,000-step check AND the eventual full RingCore run share this SAME schedule (only
+# training_steps differs); the check stops early at 1,000 inside the 3,000-step cosine decay. schedule_steps
+# is the cosine-decay horizon and is deliberately NOT the base-B de-novo 30,000 (which leaves LR ~peak over a
+# 1-3k warm-start window and never tests decay) nor 2,000 (too-aggressive cooling). Any RingCore launch whose
+# scheduler args do not reproduce SCHEDULER_CONFIG_HASH aborts before GPU (see the gate launch-identity guard).
+PRODUCTION_SCHEDULER = {
+    "optimizer": "AdamW",
+    "peak_learning_rate": 3e-4,
+    "weight_decay": 1e-05,
+    "warmup_steps": 500,
+    "schedule_steps": 3000,
+    "minimum_learning_rate_fraction": 0.05,
+    "schedule": "cosine_with_linear_warmup",
+}
+SCHEDULER_CONFIG_HASH = "0b832985c65de1cc"
+
 _OPERATOR_REGISTRY_SOURCES = [
     "src/compose_v4/rewrite/operators.py",
     "src/compose_v4/rewrite/kernel.py",
@@ -54,6 +71,41 @@ def recompute_cycle_op_semantic_hash() -> str:
     return _hash_sources(_CYCLE_OP_SEMANTIC_SOURCES)
 
 
+def _scheduler_hash(config: dict) -> str:
+    return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def recompute_scheduler_config_hash() -> str:
+    """Hash of the frozen PRODUCTION_SCHEDULER; must equal SCHEDULER_CONFIG_HASH (a self-check)."""
+    return _scheduler_hash(PRODUCTION_SCHEDULER)
+
+
+def scheduler_config_hash_from_args(
+    *,
+    warmup_steps: int,
+    schedule_steps: int,
+    minimum_learning_rate_fraction: float,
+    peak_learning_rate: float,
+    weight_decay: float,
+    optimizer: str = "AdamW",
+    schedule: str = "cosine_with_linear_warmup",
+) -> str:
+    """Hash a run's ACTUAL scheduler args in the canonical PRODUCTION_SCHEDULER shape. Excludes
+    training_steps by design -- the schedule-check (1,000) and the full run share the SAME LR schedule, so
+    both must produce SCHEDULER_CONFIG_HASH; only training_steps differs (the check stops early)."""
+    return _scheduler_hash(
+        {
+            "optimizer": optimizer,
+            "peak_learning_rate": peak_learning_rate,
+            "weight_decay": weight_decay,
+            "warmup_steps": warmup_steps,
+            "schedule_steps": schedule_steps,
+            "minimum_learning_rate_fraction": minimum_learning_rate_fraction,
+            "schedule": schedule,
+        }
+    )
+
+
 def production_sampler_config_hash(payload: dict) -> str:
     """Hash the sampler/config-relevant metadata so a changed inference config is detectable."""
     keys = (
@@ -75,6 +127,10 @@ def ring_core_checkpoint_metadata() -> dict:
         "cycle_op_semantic_hash": recompute_cycle_op_semantic_hash(),
         "calibration_policy_hash": CALIBRATION_POLICY_HASH,
         "ring_core_max_atoms": MAX_ATOMS,
+        # Owner-locked production scheduler (the gate asserts the run's actual scheduler reproduces this
+        # hash before GPU, so persisting the frozen constant is truthful for every RingCore checkpoint).
+        "scheduler_config_hash": SCHEDULER_CONFIG_HASH,
+        "production_scheduler": dict(PRODUCTION_SCHEDULER),
     }
 
 
@@ -166,6 +222,7 @@ def verify_checkpoint_identity(
         ("operator_registry_hash", OPERATOR_REGISTRY_HASH),
         ("cycle_op_semantic_hash", CYCLE_OP_SEMANTIC_HASH),
         ("calibration_policy_hash", CALIBRATION_POLICY_HASH),
+        ("scheduler_config_hash", SCHEDULER_CONFIG_HASH),
     ):
         declared = payload.get(key)
         if declared is not None and declared != frozen:

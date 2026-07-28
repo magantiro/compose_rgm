@@ -69,3 +69,15 @@
 \newcommand{\ComposeParameters}{6.3M}
 \newcommand{\ComposeTrainHours}{\XXX}
 \newcommand{\ComposePeakMemory}{\XXX}
+
+% RingCore-V1 production training schedule (owner-locked 2026-07-28; scheduler_config_hash 0b832985c65de1cc).
+% These are FROZEN (not XXX): AdamW, cosine LR with linear warmup. schedule_steps is the cosine-decay horizon
+% matched to the ~1-3k warm-start convergence scale (NOT the base-B de-novo 30000). The schedule-faithful
+% check (1000 steps) and the eventual full run share this schedule; only training_steps differs.
+\newcommand{\RingCoreOptimizer}{AdamW}
+\newcommand{\RingCorePeakLR}{$3\times10^{-4}$}
+\newcommand{\RingCoreWeightDecay}{$1\times10^{-5}$}
+\newcommand{\RingCoreWarmupSteps}{500}
+\newcommand{\RingCoreScheduleSteps}{3000}
+\newcommand{\RingCoreMinLRFraction}{0.05}
+\newcommand{\RingCoreSchedule}{cosine with linear warmup}

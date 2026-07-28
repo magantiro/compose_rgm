@@ -248,6 +248,29 @@ mark of rate `r`, using `Σ_marks q_θ(mark)=Λ_θ`. Term map: `Λ_θ`=`total_ha
 loss** (`:3789`); this is the guard that caught the earlier charge/ring-site mask bugs. Terminal states drive
 `Λ_θ → 0`.
 
+### 8a. Production training schedule (RingCore-V1, owner-locked 2026-07-28)
+
+The optimizer/LR schedule is a fixed part of the RingCore-V1 production contract
+(`scheduler_config_hash = 0b832985c65de1cc`; `scripts/ring_core_identity.py:PRODUCTION_SCHEDULER`):
+
+```
+optimizer                      = AdamW
+peak_learning_rate             = 3e-4
+weight_decay                   = 1e-5
+warmup_steps                   = 500          # linear warmup
+schedule_steps                 = 3000         # cosine-decay horizon (500 warmup + 2500 decay)
+minimum_learning_rate_fraction = 0.05
+schedule                       = cosine with linear warmup   (cosine_warmup_learning_rate)
+```
+
+`schedule_steps=3000` is matched to the observed 1-3k warm-start convergence scale; it is deliberately **not**
+base-B's de-novo `30000` (LR stays ~peak over the fine-tuning window, never decaying) nor `2000` (over-aggressive
+cooling). The schedule-faithful check (`training_steps=1000`) and the eventual full run **share this schedule**
+(only `training_steps` differs); the trainer aborts any RingCore launch whose scheduler args do not reproduce
+`scheduler_config_hash` (gate launch-identity guard). This is a scheduler contract, **not** a change to the
+model, operator support, data mixture, curriculum, teacher filter, calibration, optimizer family, or validation
+distribution.
+
 ## 9. Trajectory orientation & time
 
 - Source `x_0` → target `x_T`. Training predicts the **forward** committed transition at the current state.

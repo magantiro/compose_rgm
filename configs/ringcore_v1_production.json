@@ -1,0 +1,82 @@
+{
+  "config_id": "ringcore_v1_production",
+  "status": "OWNER_APPROVED_PRODUCTION_CONFIG",
+  "owner_decision_date": "2026-07-28",
+  "production_contract_fingerprint": "3917a0bf4a3de9830722663f",
+  "source_commit": "51806d0",
+
+  "scheduler": {
+    "optimizer": "AdamW",
+    "peak_learning_rate": 0.0003,
+    "weight_decay": 1e-05,
+    "warmup_steps": 500,
+    "schedule_steps": 3000,
+    "minimum_learning_rate_fraction": 0.05,
+    "schedule": "cosine_with_linear_warmup"
+  },
+  "scheduler_config_hash": "0b832985c65de1cc",
+  "scheduler_note": "The schedule-check run and the eventual full RingCore run MUST share scheduler_config_hash. Only training_steps differs between them; the gate aborts a RingCore launch whose scheduler args do not reproduce this hash.",
+
+  "frozen_recipe_hashes": {
+    "base_b_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+    "capability_hash": "330473e319bfec19",
+    "operator_registry_hash": "9197401e8dc3a7ae",
+    "cycle_op_semantic_hash": "27a823aeb6cf7548",
+    "calibration_policy_hash": "f534c0233e3bf4a0",
+    "corpus_scope_hash": "3721d69851110fdd",
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "teacher_filter_hash": "f8137995181eeadc",
+    "teacher_representability_filter_version": 1,
+    "evaluation_cache_version": 2,
+    "data_mixture_hash": "8c3cab2bde7be6ed",
+    "curriculum_hash": "dcd7634f1268b52f",
+    "optimizer_config_hash": "987c59692fd72963"
+  },
+
+  "capability_flags": {
+    "corrupted_prior_mix": true,
+    "cycle_op_mix": true,
+    "disable_ring_grow_macro": true,
+    "organic_vocabulary": true,
+    "scaled_manifest": true,
+    "enable_ring_macros": false,
+    "max_atoms": 40
+  },
+
+  "data": {
+    "scaled_manifest": "ring_core_v1_scaled_manifest.json",
+    "layer_weights": {"corruption": 0.55, "mmp": 0.45, "denovo": 0.0},
+    "curriculum_bin_edges": [5, 9, 13],
+    "validation": "held-out edit records from split.validation (disjoint from split.train)"
+  },
+
+  "warm_start": {
+    "mode": "--initialize-compatible-from-source-checkpoint",
+    "source": "base B (c9d927...); semantic (element,valence) row transfer; new S/P/Cl/Br/I/B + cycle heads fresh",
+    "start_from_step_500_preflight": false,
+    "reason": "the superseded step-500 preflight followed a schedule_steps=500 (all-warmup) LR trajectory; a schedule-faithful run must start fresh from B"
+  },
+
+  "runs": {
+    "schedule_check": {
+      "training_steps": 1000,
+      "schedule_steps": 3000,
+      "warmup_steps": 500,
+      "evaluate_at_steps": [0, 250, 500, 750, 1000],
+      "status": "NON_SCIENTIFIC_PREFLIGHT",
+      "purpose": "verify warmup->decay transition + stability + continued validation improvement + lower-frequency family survival + family-mass calibration + productive compositional cycle editing + unchanged rollout correctness",
+      "not_for": "convergence or final molecular quality"
+    },
+    "full_run": {
+      "training_steps": "TBD (owner-authorized after a passing schedule check; ~3000, early-stopping at convergence)",
+      "schedule_steps": 3000,
+      "warmup_steps": 500,
+      "status": "NOT_AUTHORIZED (propose exact command/cost after a passing check; do not launch without explicit authorization)"
+    }
+  },
+
+  "do_not_modify_during_check": [
+    "model", "operator_support", "data_mixture", "curriculum",
+    "teacher_filter", "calibration", "optimizer", "validation_distribution"
+  ]
+}

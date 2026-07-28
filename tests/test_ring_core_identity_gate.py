@@ -13,8 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from ring_core_identity import (  # noqa: E402
     BASE_B_SHA256,
+    SCHEDULER_CONFIG_HASH,
     SCOPE_HASH,
     RingCoreIdentityError,
+    recompute_scheduler_config_hash,
+    scheduler_config_hash_from_args,
     verify_checkpoint_identity,
 )
 
@@ -102,3 +105,65 @@ def test_missing_metadata_fails():
     del payload["state_dict"]
     with pytest.raises(RingCoreIdentityError, match="missing"):
         verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+# ---- Owner-locked production scheduler (decision 2026-07-28) ----
+
+
+def test_frozen_scheduler_dict_matches_constant():
+    # the frozen PRODUCTION_SCHEDULER must hash to the pinned SCHEDULER_CONFIG_HASH
+    assert recompute_scheduler_config_hash() == SCHEDULER_CONFIG_HASH == "0b832985c65de1cc"
+
+
+def test_locked_scheduler_args_reproduce_hash():
+    # a launch using the owner-locked scheduler values reproduces the frozen hash
+    assert (
+        scheduler_config_hash_from_args(
+            warmup_steps=500,
+            schedule_steps=3000,
+            minimum_learning_rate_fraction=0.05,
+            peak_learning_rate=3e-4,
+            weight_decay=1e-5,
+        )
+        == SCHEDULER_CONFIG_HASH
+    )
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {"schedule_steps": 30000},  # base-B de-novo horizon (never decays over a warm-start window)
+        {"schedule_steps": 2000},  # over-aggressive cooling
+        {"schedule_steps": 500},  # the superseded all-warmup preflight
+        {"warmup_steps": 0},  # no warmup
+        {"peak_learning_rate": 2e-3},  # the gate default lr, not the locked 3e-4
+        {"weight_decay": 0.0},  # the gate default wd, not the locked 1e-5
+        {"minimum_learning_rate_fraction": 1.0},  # no decay floor
+    ],
+)
+def test_scheduler_drift_changes_hash(override):
+    # any drift from the locked scheduler yields a different hash -> the gate launch guard aborts
+    base = dict(
+        warmup_steps=500,
+        schedule_steps=3000,
+        minimum_learning_rate_fraction=0.05,
+        peak_learning_rate=3e-4,
+        weight_decay=1e-5,
+    )
+    base.update(override)
+    assert scheduler_config_hash_from_args(**base) != SCHEDULER_CONFIG_HASH
+
+
+def test_declared_scheduler_hash_mismatch_fails_identity():
+    # a RingCore checkpoint self-declaring a drifted scheduler hash fails the strict identity gate
+    payload = _valid_payload()
+    payload["scheduler_config_hash"] = "deadbeefdeadbeef"
+    with pytest.raises(RingCoreIdentityError, match="scheduler_config_hash"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+def test_declared_locked_scheduler_hash_passes_identity():
+    payload = _valid_payload()
+    payload["scheduler_config_hash"] = SCHEDULER_CONFIG_HASH
+    report = verify_checkpoint_identity(payload, checkpoint_path=None)
+    assert report["identity_ok"] is True

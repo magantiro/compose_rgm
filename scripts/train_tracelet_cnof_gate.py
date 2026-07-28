@@ -3029,15 +3029,36 @@ def main() -> None:
         if args.cycle_op_mix and args.disable_ring_grow_macro:
             # RING_CORE_V1 launch identity (owner finalization §4): print every frozen hash + capability flag
             # at startup so a launch that drifts from the frozen contract is visible in the run log.
-            try:
-                import ring_core_identity as _rci
+            import ring_core_identity as _rci
 
+            # Owner-locked production scheduler guard (decision 2026-07-28): the schedule-check run and the
+            # eventual full RingCore run MUST share the locked LR schedule. Assert the run's ACTUAL scheduler
+            # args reproduce SCHEDULER_CONFIG_HASH; abort BEFORE GPU on any drift (outside the try below so it
+            # is never swallowed). training_steps is intentionally excluded -- only the schedule must match.
+            _run_scheduler_hash = _rci.scheduler_config_hash_from_args(
+                warmup_steps=args.warmup_steps,
+                schedule_steps=resolved_schedule_steps,
+                minimum_learning_rate_fraction=args.minimum_learning_rate_fraction,
+                peak_learning_rate=args.learning_rate,
+                weight_decay=args.weight_decay,
+            )
+            if _run_scheduler_hash != _rci.SCHEDULER_CONFIG_HASH:
+                raise SystemExit(
+                    f"RING_CORE_V1 scheduler drift: run scheduler hash {_run_scheduler_hash} != "
+                    f"owner-locked {_rci.SCHEDULER_CONFIG_HASH}. A RingCore launch MUST use the locked "
+                    f"production scheduler (AdamW peak_lr=3e-4 wd=1e-5 warmup=500 schedule_steps=3000 "
+                    f"min_lr_fraction=0.05 cosine+linear-warmup); got warmup={args.warmup_steps} "
+                    f"schedule_steps={resolved_schedule_steps} min_lr={args.minimum_learning_rate_fraction} "
+                    f"peak_lr={args.learning_rate} weight_decay={args.weight_decay}."
+                )
+            try:
                 print(json.dumps({
                     "phase": "ring_core_launch_identity",
                     "capability_hash": _rci.CAPABILITY_HASH,
                     "operator_registry_hash": _rci.recompute_operator_registry_hash(),
                     "cycle_op_semantic_hash": _rci.recompute_cycle_op_semantic_hash(),
                     "calibration_policy_hash": _rci.CALIBRATION_POLICY_HASH,
+                    "scheduler_config_hash": _run_scheduler_hash,
                     "scope_hash": _rci.SCOPE_HASH,
                     "base_b_sha256": _rci.BASE_B_SHA256,
                     "eval_operator_capability_fingerprint": _eval_capabilities.fingerprint(),
@@ -3047,6 +3068,9 @@ def main() -> None:
                     "enable_cycle_ops": True,
                     "enable_ring_macros": False,
                     "enable_ring_grow_macro": not args.disable_ring_grow_macro,
+                    "training_steps": args.steps,
+                    "schedule_steps": resolved_schedule_steps,
+                    "warmup_steps": args.warmup_steps,
                     "max_atoms": args.max_atoms,
                     "scaled_manifest": args.scaled_manifest or None,
                 }, sort_keys=True), flush=True)

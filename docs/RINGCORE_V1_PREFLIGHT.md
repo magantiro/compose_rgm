@@ -234,6 +234,42 @@ schedule check — a longer run that includes the decay phase (or a warmup+decay
 unconfirmed); NOT `GO_AFTER_RECIPE_ADJUSTMENT` (cycle ops occur naturally + aren't toggle-dominated; the
 non-dominant family drops are warmup re-weighting, to be re-checked with the decay-phase run).
 
+## 6a. Production-scheduler decision — OWNER-LOCKED (2026-07-28) ✅
+The full-run LR schedule was **not** previously locked for RingCore: the base recipe declares
+`schedule_steps=30000`, but that is base-B's *de-novo* recipe and B (a warm-start fine-tune) self-limited at
+~1–3k steps. Over that window a 30000-horizon cosine stays ≥98% of peak — it never decays, so it cannot test
+the decay behaviour that blocks full-run authorization. Owner decision:
+
+**RingCore-V1 production scheduler (LOCKED, `scheduler_config_hash = 0b832985c65de1cc`):**
+`AdamW` · peak_lr `3e-4` · weight_decay `1e-5` · `warmup_steps=500` · **`schedule_steps=3000`** ·
+`minimum_learning_rate_fraction=0.05` · cosine with linear warmup. **500 warmup + 2500 decay.**
+- **Not `30000`** (de-novo horizon; LR ~peak over the fine-tuning window, never tests decay).
+- **Not `2000`** (compresses decay too aggressively; risks reading rapid-cooling under-training as a
+  model/data failure for the *initial* production model).
+- Historical B early-stop (~1–3k) is **supporting evidence, not a guarantee** RingCore stops there.
+
+**Expected relative LR trajectory** (fraction of peak): step 0 ≈ 0 · 250 = 0.50 · 500 = 1.00 · 750 = 0.977 ·
+1000 = 0.909 · 1500 = 0.672 · 3000 = 0.05. The schedule-check and the eventual full run **share this hash**
+(only `training_steps` differs); the gate aborts any RingCore launch whose scheduler args do not reproduce it.
+
+Recorded in: production config (`configs/ringcore_v1_production.json`), config registry
+(`scripts/ring_core_identity.py` `PRODUCTION_SCHEDULER`/`SCHEDULER_CONFIG_HASH`), schedule-check baseline
+(`diagnostics/coherence/schedule_check_baseline.json`), `SYSTEM_CONTRACT.md`, the paper reproducibility
+appendix (`numbers.tex`), and every RingCore checkpoint's metadata.
+
+## 6b. Schedule-faithful check — spec (start fresh from base B) 🔶
+`training_steps=1000`, `schedule_steps=3000`, `warmup_steps=500`, **fresh semantic warm-start from base B**
+(NOT the superseded step-500 preflight checkpoint — it followed a `schedule_steps=500` all-warmup trajectory).
+One-step **GPU smoke first** (catch CUDA-only failures the CPU dry-launch cannot; cf. DEV-CUDA). Eval at steps
+**0/250/500/750/1000**, recording LR at each. Purpose: verify the warmup→decay transition; stability under the
+production scheduler; continued validation improvement after step 500; survival/recovery of lower-frequency
+edit families; family-mass calibration; productive (non-toggle-dominated) compositional cycle editing; and
+unchanged rollout correctness. **Not** for convergence or final molecular quality. Verdict targets:
+`GO_FOR_FULL_RINGCORE_TRAINING` / `GO_AFTER_RECIPE_ADJUSTMENT` (only for a demonstrated family-distribution
+imbalance) / `NO_GO_PRODUCTION_SCHEDULE` (instability from the warmup→decay transition). Do not extend past
+step 1000 automatically; a step-1500 continuation under the same scheduler may be authorized as a diagnostic if
+lower-frequency-family recovery is genuinely ambiguous.
+
 ## 6-prev. Bounded RingCore preflight (≤750 steps) — launch recipe (superseded by the result above)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep
