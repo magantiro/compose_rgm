@@ -16,6 +16,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from compose_v4.model.factorized_tracelet_rate_model import production_enabled_families
+
 import ring_core_identity as I
 from compose_v4.model.factorized_tracelet_rate_model import OperatorCapabilities
 from compose_v4.rewrite.source_corruption import TEACHER_REPRESENTABILITY_FILTER_VERSION
@@ -32,10 +34,9 @@ _VOLUME_POOL = "/artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl"
 
 # RingCore-V1 production-enabled operator families: NO ring_system_grow (legacy macro disabled); the
 # compositional cycle_close/cycle_open live on the cycle_insert/cycle_attach slots.
-_RING_CORE_PRODUCTION_ENABLED = [
-    "atom_insert", "atom_delete", "atom_restate", "bond_reorder", "bond_reroute",
-    "cycle_insert", "cycle_attach", "ring_system_delete", "ring_system_restate",
-]
+_RING_CORE_PRODUCTION_ENABLED = production_enabled_families(
+    enable_cycle_ops=True, enable_ring_grow_macro=False
+)
 
 
 def build(base_path: Path, out_path: Path) -> dict:

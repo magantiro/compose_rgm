@@ -111,6 +111,37 @@ MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
 # executor rule name back to its selecting family for the family-index lookup.
 _CYCLE_OP_EXECUTOR_TO_FAMILY = {"bond_insert": "cycle_insert", "bond_delete": "cycle_attach"}
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
+# Families gated by a capability flag; everything else in MARK_RULE_NAMES is always production-enabled.
+_CYCLE_OP_FAMILIES = ("cycle_insert", "cycle_attach")
+_RING_GROW_MACRO_FAMILY = "ring_system_grow"
+
+
+def production_enabled_families(
+    *, enable_cycle_ops: bool, enable_ring_grow_macro: bool
+) -> list[str]:
+    """The operator families a run actually enables, DERIVED from the capability flags that gate them.
+
+    Single source for every manifest/contract/gate that records a "production_enabled" set. Two families
+    are flag-gated and mirror each other -- compositional ring addition (``cycle_insert``/``cycle_attach``,
+    carrying cycle_close/cycle_open) versus the legacy whole-ring macro (``ring_system_grow``):
+
+        RingCore-V1 (cycle ops on, grow off)  -> everything except ring_system_grow
+        de-novo base B (cycle ops off, grow on) -> everything except the two cycle families
+
+    Deriving this rather than hand-writing a name filter is deliberate. The scaled-manifest builder
+    previously hard-coded the SECOND list; it was correct for base B and silently stale after RingCore
+    inverted both flags. ``operator_subtype_supervision_gate`` consumes this set as the REQUIRED-supervision
+    families, so a stale list demands supervision for a disabled family (spurious NO_GO) while allowing an
+    enabled one to go unsupervised undetected -- both failure directions at once.
+
+    Order follows MARK_RULE_NAMES so manifests compare byte-for-byte across builders.
+    """
+    disabled: set[str] = set()
+    if not enable_cycle_ops:
+        disabled.update(_CYCLE_OP_FAMILIES)
+    if not enable_ring_grow_macro:
+        disabled.add(_RING_GROW_MACRO_FAMILY)
+    return [name for name in MARK_RULE_NAMES if name not in disabled]
 
 
 StateCacheKey = tuple[bytes, bytes, bytes, bytes]
