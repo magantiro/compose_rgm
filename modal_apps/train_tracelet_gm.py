@@ -1546,6 +1546,8 @@ def gpu_smoke_stage(
     scaled_manifest: str = "",
     training_steps: int | None = None,
     schedule_steps: int | None = None,
+    disable_early_stopping: bool = False,
+    snapshot_checkpoints: bool = False,
 ) -> dict[str, object]:
     # One-step GPU smoke (Part D): the SAME early-exit dry-launch path as dry_launch_stage but on an A100, so
     # it exercises the CUDA device path the CPU dry-launch cannot -- warm-start (where DEV-CUDA bit), the first
@@ -1575,6 +1577,10 @@ def gpu_smoke_stage(
         analogue_trace_count=analogue_trace_count,
         corrupted_prior_count=corrupted_prior_count or None,
         scaled_manifest=scaled_manifest or None,
+        # Mirror the REAL run's flags so the smoke validates the config that will actually train (a smoke
+        # that silently drops a launch flag cannot certify the launch).
+        disable_early_stopping=disable_early_stopping,
+        snapshot_checkpoints=snapshot_checkpoints,
     )
 
 
@@ -2738,6 +2744,8 @@ def main(
             scaled_manifest=scaled_manifest,
             training_steps=training_steps or None,
             schedule_steps=schedule_steps or None,
+            disable_early_stopping=disable_early_stopping,
+            snapshot_checkpoints=snapshot_checkpoints,
         )
         phase = "gpu_smoke_spawned"
     elif train_only:
