@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 
 import numpy as np
+import pytest
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -62,6 +63,33 @@ def test_disable_kills_the_grow_family():
     assert fams.get("ring_system_grow", 0) == 0
     # the mass is not lost -- other families still fire (the family is dead, the sampler is not)
     assert sum(fams.values()) == 400 and len(fams) >= 4
+
+
+def test_cycle_ops_with_grow_macro_is_rejected():
+    # Guard G1: enabling compositional cycle ops alongside the legacy grow macro (a forgetful launch that
+    # forgot --disable-ring-grow-macro) must FAIL LOUDLY at construction -- never a silent two-mechanism model.
+    catalog = _catalog()
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        FactorizedTraceletRateModel(
+            catalog,
+            hidden_dim=16,
+            message_passing_steps=1,
+            enable_cycle_ops=True,
+            enable_ring_grow_macro=True,
+        )
+
+
+def test_cycle_ops_with_grow_disabled_is_accepted():
+    # the RingCore-V1 combination (cycle ops on, grow off) constructs cleanly
+    catalog = _catalog()
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+    )
+    assert model.enable_cycle_ops and not model.enable_ring_grow_macro
 
 
 def test_grow_head_params_retained_when_disabled():

@@ -1692,6 +1692,18 @@ class FactorizedTraceletRateModel(nn.Module):
         # retained (byte-identical shape) so a warm-start still loads them; they are simply never activated.
         # Unlike the other enable_* flags this gates an EXISTING capability, hence the True default.
         self.enable_ring_grow_macro = bool(enable_ring_grow_macro)
+        # Guard G1 (fail-loud): compositional cycle ops REPLACE the legacy grow macro; they must never both be
+        # live, which would give a two-ring-addition-mechanism model outside the RingCore-V1 contract (ring
+        # addition would be attributable to both cycle_close and grow). A forgetful launch that passes
+        # --cycle-op-mix without --disable-ring-grow-macro is rejected here at construction (every caller --
+        # trainer, loader, reward-FT -- hits this single source). Combining the two is a future RING_HYBRID_V2
+        # decision, gated by enable_ring_macros, not this flag pair.
+        if self.enable_cycle_ops and self.enable_ring_grow_macro:
+            raise ValueError(
+                "enable_cycle_ops and enable_ring_grow_macro are mutually exclusive: compositional cycle "
+                "ops replace the legacy ring_system_grow macro (RingCore-V1). Pass "
+                "enable_ring_grow_macro=False when enabling cycle ops (launch: --disable-ring-grow-macro)."
+            )
         # Atom-type prediction vocabulary shared by the heads, candidate masks, sampling, and teacher-
         # scoring, so head width and the fiber it is scored against never drift. Default CNOF_VOCABULARY
         # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
