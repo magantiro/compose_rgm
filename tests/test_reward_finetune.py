@@ -74,6 +74,28 @@ def test_trajectory_log_prob_is_finite_and_differentiable() -> None:
     assert any(p.grad is not None for p in model.parameters())
 
 
+def test_trajectory_log_prob_inherits_editing_capabilities() -> None:
+    # H2 fix: a ring_system_restate mark is OUTSIDE a model's dense candidates unless the batch is built with
+    # compute_ring_restates + the ring_catalog. trajectory_log_prob must INHERIT model.operator_capabilities +
+    # model.ring_catalog so an edit model scores its OWN editing marks finite. Without inheriting (the old
+    # behavior), even a restate-enabled model raises "teacher ring restate outside exact dynamic candidates".
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
+
+    catalog, _ = _benzene_trajectory()
+    state = pad_molecular_graph(smiles_to_molecular_graph("c1ccccc1C"), 12)
+    restates = enumerate_ring_system_restate_actions(state)
+    assert restates, "expected a ring_system_restate candidate on toluene"
+    edit = FactorizedTraceletRateModel(
+        catalog, hidden_dim=16, message_passing_steps=1, enable_ring_restates=True
+    )
+    log_p = trajectory_log_prob(
+        edit, (state,), (0.4,), (restates[0],), ("ring_system_restate",), (1.0,)
+    )
+    assert torch.isfinite(log_p)  # capability inherited -> the model's editing mark is scored, not dropped
+
+
 def test_reward_finetuner_train_step_runs_and_lowers_a_high_residual() -> None:
     catalog, tau = _benzene_trajectory()
     policy = FactorizedTraceletRateModel(catalog, hidden_dim=16, message_passing_steps=1)
@@ -83,4 +105,4 @@ def test_reward_finetuner_train_step_runs_and_lowers_a_high_residual() -> None:
     assert loss0 >= 0.0
     # a few steps should not blow up and should keep producing finite losses
     losses = [tuner.train_step([tau]) for _ in range(3)]
-    assert all(l == l for l in losses)  # not NaN
+    assert all(loss == loss for loss in losses)  # not NaN

@@ -49,10 +49,31 @@ def trajectory_log_prob(
 
     Uses the executed (state, action) marks -- the same objects the teacher path
     uses -- so the score is exact for the sampled trajectory, not an ELBO.
+
+    The batch INHERITS the model's `operator_capabilities` + `ring_catalog` (H2): without them a ring /
+    editing / cycle mark falls outside the dense candidate set and scores -inf, silently poisoning the RTB
+    residual with inf/nan. A non-finite score after inheriting the model's own capabilities means the mark
+    is genuinely unrepresentable for this model -- we FAIL LOUDLY rather than propagate it.
     """
-    batch = prepare_factorized_mark_batch(states, times, actions, rule_names, jump_rates)
+    caps = model.operator_capabilities
+    batch = prepare_factorized_mark_batch(
+        states, times, actions, rule_names, jump_rates,
+        ring_catalog=model.ring_catalog,
+        compute_ring_grow_support=caps.compute_ring_grow_support,
+        compute_ring_restates=caps.compute_ring_restates,
+        compute_cyclic_graft=caps.compute_cyclic_graft,
+        compute_ring_opening=caps.compute_ring_opening,
+    )
     prediction = model.forward_mark_batch(batch)
-    return prediction.selected_mark_log_probability.sum()
+    log_prob = prediction.selected_mark_log_probability
+    if not bool(torch.isfinite(log_prob).all()):
+        raise ValueError(
+            "reward-FT trajectory has a mark outside the model's dense candidate set (non-finite "
+            "log-prob) even after inheriting model.operator_capabilities + model.ring_catalog; the "
+            "offending mark is unrepresentable for this model (e.g. a ring/editing family the model was "
+            "not built with). Reward-FT does not silently propagate inf/nan into the RTB residual."
+        )
+    return log_prob.sum()
 
 
 def rtb_loss(
