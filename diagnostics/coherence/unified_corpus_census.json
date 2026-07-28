@@ -1,0 +1,176 @@
+{
+  "a100_cost": {
+    "proposal": "a bounded timed probe (~200 steps on A100, the real mixed corpus) before committing to a multi-hour horizon",
+    "reason": "no seconds/step recorded in any prior run manifest; the Modal app history no longer retains the schedule-check app",
+    "status": "UNMEASURED"
+  },
+  "artifact": "unified_corpus_census",
+  "batch_size": 64,
+  "blocking_findings": [
+    {
+      "detail": "scripts/train_tracelet_cnof_gate.py::_build_scaled_manifest_sampler hardcodes positional layers denovo/corruption/mmp with n_corruption=len(corruption)+len(cycle); cycle ops are inside 'corruption' and cannot be weighted independently.",
+      "id": "F1",
+      "requires": "code change (report before implementing)",
+      "severity": "blocking",
+      "title": "sampler has no independent cycle_ops layer"
+    },
+    {
+      "detail": "analogue_prior.build_analogue_prior_records reads the pool in FILE ORDER with a count cap and applies NO partition filter. Pool split_seed=20260714 (random 400k) != ringcore-v1 scaffold partition, so MMP training records can share scaffolds with the new validation/test partitions.",
+      "id": "F2",
+      "requires": "owner decision: re-partition the pool under the ringcore-v1 scaffold key, or exclude MMP",
+      "severity": "blocking",
+      "title": "MMP pool bypasses the scaffold partition"
+    },
+    {
+      "detail": "the gate still rebuilds corruption in-memory via build_corrupted_prior_records(edit_smiles,...); nothing reads edit_precompile_v1. Stage 2 loader is required before the precompiled corpus can be trained on.",
+      "id": "F3",
+      "requires": "Stage 2 packed-cache reader",
+      "severity": "blocking",
+      "title": "trainer does not read the precompiled shards"
+    }
+  ],
+  "build": {
+    "authorization": {
+      "gate_sha256": "9617b590e1cb4739",
+      "launch_commit": "c0ff477"
+    },
+    "completed_shards": 45,
+    "contract": {
+      "capability_hash": "330473e319bfec19",
+      "codec_implementation_hash": "baaa75367f25a8c6",
+      "operator_registry_hash": "9197401e8dc3a7ae",
+      "partitioner": {
+        "partition_salt": "ringcore-v1",
+        "partitioner_implementation_hash": "9eb97923e8ec065b",
+        "scaffold_key_algorithm": "murcko+carbonized-wl3",
+        "scaffold_key_version": 2,
+        "split_ratios": [
+          0.9,
+          0.05,
+          0.05
+        ]
+      },
+      "scope_hash": "3721d69851110fdd",
+      "trace_schema_version": 2
+    },
+    "expected_shards": 45,
+    "failed": 0,
+    "missing": [],
+    "partition_purity_ok": true,
+    "phase": "reduce_complete",
+    "reducer_checksum": "fd14600ff4429f7c",
+    "unexpected": []
+  },
+  "date": "2026-07-28",
+  "diversity": {
+    "cross_layer_transition_overlap": 1162,
+    "unique_canonical_transitions": {
+      "corruption": 238782,
+      "cycle_ops": 278698
+    },
+    "unique_scaffolds": {
+      "test": 1053,
+      "train": 18557,
+      "validation": 989
+    },
+    "unique_sources": {
+      "test": 1656,
+      "train": 32383,
+      "validation": 1724
+    }
+  },
+  "held_out": {
+    "corruption": {
+      "test": {
+        "records": 3874,
+        "transitions": 11618
+      },
+      "validation": {
+        "records": 3973,
+        "transitions": 11482
+      }
+    },
+    "cycle_ops": {
+      "test": {
+        "records": 13032,
+        "transitions": 13032
+      },
+      "validation": {
+        "records": 13656,
+        "transitions": 13656
+      }
+    }
+  },
+  "rejections": {
+    "generation:no_records": 760
+  },
+  "schedule_options": {
+    "A_equal_exposure": {
+      "steps_for_max_E": {
+        "1": 10837,
+        "2": 21674,
+        "3": 32511
+      },
+      "weights": {
+        "corruption": 0.108,
+        "cycle_ops": 0.368,
+        "mmp": 0.524
+      }
+    },
+    "B_family_weighted": {
+      "steps_for_max_E": {
+        "1": 2928,
+        "2": 5855,
+        "3": 8783
+      },
+      "weights": {
+        "corruption": 0.4,
+        "cycle_ops": 0.25,
+        "mmp": 0.35
+      }
+    }
+  },
+  "starvation_comparison": {
+    "baseline_records": 6922,
+    "baseline_regime": "3000 steps x batch 64 = 192,000 draws over 6,922 records ~= 28 passes (memorization)",
+    "conclusion": "DATA_STARVATION_CURED_BY_VOLUME; the locked 3,000-step schedule is already non-starved",
+    "new_records": 693573,
+    "new_regime_same_schedule": "192,000 draws over 693,573 records -> max 1.02 passes/record",
+    "ratio": 100.2
+  },
+  "status": "AWAITING_OWNER_SCHEDULE_APPROVAL",
+  "train_partition": {
+    "corruption": {
+      "families": {
+        "atom_delete": 34524,
+        "atom_insert": 25875,
+        "atom_restate": 65103,
+        "bond_reorder": 30363,
+        "bond_reroute": 29906,
+        "ring_system_delete": 10646,
+        "ring_system_restate": 22224
+      },
+      "records": 74949,
+      "transitions": 218641
+    },
+    "cycle_ops": {
+      "families": {
+        "cycle_attach": 127584,
+        "cycle_insert": 127584
+      },
+      "records": 255168,
+      "transitions": 255168
+    },
+    "mmp": {
+      "caveat": "NOT partitioned by the ringcore-v1 scaffold key; built under split_seed 20260714",
+      "families": {
+        "atom_delete": 1071945,
+        "atom_insert": 1070646
+      },
+      "records": 363456,
+      "transitions": 2142591
+    },
+    "total_records": 693573,
+    "total_transitions": 2616400
+  }
+}
