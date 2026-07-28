@@ -1233,6 +1233,16 @@ def _run_remote(
         )
         return summary
 
+    if dry_launch:
+        # The dry launch exits the trainer after the first forward + validation forward (no full training),
+        # so it writes dry_launch.json, not metrics.json. Return its verdict artifact and commit the volume.
+        dry_path = run_dir / "dry_launch.json"
+        dry_report = json.loads(dry_path.read_text()) if dry_path.is_file() else {}
+        artifact_volume.commit()
+        summary = {"phase": "dry_launch_stage_complete", "run_label": run_label, **dry_report}
+        print(json.dumps(summary, sort_keys=True), flush=True)
+        return summary
+
     metrics_path = run_dir / "metrics.json"
     if not metrics_path.is_file():
         raise RuntimeError(f"training completed without metrics artifact: {metrics_path}")
