@@ -31,6 +31,7 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
+    OperatorCapabilities,
     RingTeacherSemanticCertificate,
     SparseBinaryRows,
     factorized_mark_bregman_loss,
@@ -520,6 +521,45 @@ def factorized_mark_loader(
     )
 
 
+class TeacherOutsideCandidatesError(ValueError):
+    """A batch was built whose teacher mark is outside the model's exact dynamic candidate set -- raised
+    immediately after batch construction (before scoring) with the molecule, teacher, and candidate context,
+    so the representability failure is reported precisely instead of surfacing as a cryptic loss-time crash."""
+
+
+def assert_teachers_in_exact_candidates(batch: FactorizedMarkBatch) -> None:
+    """Global invariant: every nonterminal teacher whose family carries an explicit dynamic candidate LIST
+    (ring_system_restate, ring_system_delete) must be present in that list for its example -- otherwise the
+    editing enumeration for the batch did not match the teacher support (e.g. a batch builder omitted a
+    capability flag). Per-coordinate families (atom_*, bond_reorder, cycle_close/open) are validated by their
+    masks at scoring; graft (bond_reroute) by its successor-group mask. Raises with rich context on mismatch."""
+    restate_cands = batch.ring_restate_actions
+    delete_cands = batch.ring_delete_actions
+    for i, (rule_name, action) in enumerate(zip(batch.teacher_rule_names, batch.teacher_actions)):
+        if rule_name is None or action is None:
+            continue
+        candidates = None
+        if rule_name == "ring_system_restate":
+            candidates = restate_cands[i] if restate_cands is not None else ()
+        elif rule_name == "ring_system_delete":
+            candidates = delete_cands[i] if delete_cands is not None else ()
+        if candidates is None:
+            continue  # family validated via its per-coordinate mask, not a candidate list
+        if action not in candidates:
+            try:
+                from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+
+                smiles = molecular_graph_to_smiles(batch.states[i])
+            except Exception:  # noqa: BLE001
+                smiles = "<unrenderable>"
+            raise TeacherOutsideCandidatesError(
+                f"teacher '{rule_name}' outside the exact dynamic candidates for example {i} "
+                f"(smiles={smiles}, enumerated={len(candidates)} candidates). The batch builder likely did "
+                f"not enable this editing family's enumeration -- pass the active model's operator "
+                f"capabilities so the batch enumerates the same families the teacher was generated under."
+            )
+
+
 def sample_factorized_mark_batch(
     records: tuple[PathRecord, ...],
     *,
@@ -535,9 +575,23 @@ def sample_factorized_mark_batch(
     target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
     condition_dropout_probability: float = 0.0,
     ring_family_mass_mode: str = "boolean",
+    capabilities: OperatorCapabilities | None = None,
+    compute_ring_grow_support: bool = True,
+    compute_ring_restates: bool = False,
+    compute_cyclic_graft: bool = False,
+    compute_ring_opening: bool = False,
 ) -> FactorizedMarkBatch:
     if workers < 0:
         raise ValueError("evaluation workers must be non-negative")
+    # Prefer the immutable capability object (model.operator_capabilities) -- it is the single source of the
+    # editing-family enumeration, so the eval/validation/test batch enumerates the SAME families as training
+    # and a teacher is never silently excluded from the exact candidates. The individual flags remain for
+    # de-novo callers but the object overrides them when supplied.
+    if capabilities is not None:
+        compute_ring_grow_support = capabilities.compute_ring_grow_support
+        compute_ring_restates = capabilities.compute_ring_restates
+        compute_cyclic_graft = capabilities.compute_cyclic_graft
+        compute_ring_opening = capabilities.compute_ring_opening
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
     dataset = FactorizedMarkDataset(
@@ -554,9 +608,22 @@ def sample_factorized_mark_batch(
         condition_dropout_probability=condition_dropout_probability,
         ring_family_mass_mode=ring_family_mass_mode,
     )
-    collator = FactorizedMarkCollator(use_aromatic_bond_view, ring_catalog)
+    # The eval/validation/test batch must enumerate the SAME editing families as training (one shared
+    # representability contract); otherwise an editing teacher (ring_system_restate / ring_system_delete /
+    # bond_reroute) lands outside the batch's dynamic candidates and scoring raises "outside exact dynamic
+    # candidates". The flags mirror FactorizedMarkCollator's training defaults (sourced from model.enable_*).
+    collator = FactorizedMarkCollator(
+        use_aromatic_bond_view,
+        ring_catalog,
+        compute_ring_grow_support=compute_ring_grow_support,
+        compute_ring_restates=compute_ring_restates,
+        compute_cyclic_graft=compute_cyclic_graft,
+        compute_ring_opening=compute_ring_opening,
+    )
     if workers == 0:
-        return collator([dataset[index] for index in range(batch_size)])
+        batch = collator([dataset[index] for index in range(batch_size)])
+        assert_teachers_in_exact_candidates(batch)
+        return batch
     loader = DataLoader(
         dataset,
         batch_size=min(batch_size, 32),
@@ -566,7 +633,9 @@ def sample_factorized_mark_batch(
         pin_memory=False,
         drop_last=False,
     )
-    return _concatenate_factorized_mark_batches(tuple(loader))
+    batch = _concatenate_factorized_mark_batches(tuple(loader))
+    assert_teachers_in_exact_candidates(batch)
+    return batch
 
 
 def attach_property_conditions(
@@ -1160,6 +1229,9 @@ def train_factorized_mark_model(
         started = perf_counter()
         cpu_batch = next(iterator)
         loaded_at = perf_counter()
+        # Global teacher-in-candidate invariant, checked before the scoring forward so a representability
+        # mismatch reports the molecule/teacher/candidates directly instead of a loss-time crash.
+        assert_teachers_in_exact_candidates(cpu_batch)
         batch = cpu_batch.to(model.device, non_blocking=model.device.type == "cuda")
         transferred_at = perf_counter()
         optimizer.zero_grad(set_to_none=True)

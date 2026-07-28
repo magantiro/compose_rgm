@@ -290,3 +290,32 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `operator_subtype_supervision_gate.check_operator_subtype_supervision`. The gate deliberately NO_GOs if
   `ring_system_grow` is enabled before its P4 K-macro supervision lands (proves it catches the macro gap,
   not silently passes — the exact false-positive `cold_vocab_audit` had).
+
+## 2026-07-28
+- **RingCore-V1 CPU dry-launch found a real EVAL-PATH bug: `sample_factorized_mark_batch` didn't enable the
+  editing-family enumeration flags.** The eval/validation/test batch builder constructed
+  `FactorizedMarkCollator(view, catalog)` with DEFAULT flags (`compute_ring_restates/opening/cyclic_graft=False`),
+  while the TRAINING loader threads them from `model.enable_*`. So any `ring_system_restate` / `ring_system_delete`
+  / `bond_reroute` teacher landed outside the eval batch's dynamic candidates → `RuntimeError: teacher ring
+  restate is outside exact dynamic candidates` (factorized_tracelet_rate_model.py:4159) on the FIRST validation
+  forward. Fails on NEUTRAL and CHARGED molecules alike — **charge is a RED HERRING** (a first `if not charged`
+  guard was DISPROVEN: 5/13 neutral+charged fail without flags, 0/13 with). `cycle_close/cycle_open` never failed
+  (per-coordinate scoring, no candidate list). **Fix = one shared representability contract:**
+  `sample_factorized_mark_batch` gained the 4 `compute_*` flags; the gate passes them (from `corrupted_prior_mix`
+  / `disable_ring_grow_macro`) at both validation+test sites; eval-batch-cache FORMAT_VERSION 1→2 (v1 caches built
+  without flags are invalid). Teachers are DYNAMIC-only (stored MMP pool has 0 editing-ring teachers) → no pool
+  regen. Regression `tests/test_teacher_in_candidates.py` reproduces the old failure + proves 0 mismatches across
+  neutral/cation/anion/zwitterion/S/Cl/fused strata. **LESSON: any batch builder that scores editing teachers
+  MUST enable the same editing-family enumeration flags as training — reaffirms the "teacher must be in the dense
+  mask" rule, now for the EVAL path (train worked, eval didn't).**
+- **Zero-mixture (`--scaled-manifest`) training path (RingCore-V1, no de-novo).** Under `--scaled-manifest`,
+  `denovo_keep=0`, so the gate must NOT compile de-novo paths / open B's path cache / build a carbon-tree dataset.
+  Coupled fixes: (a) Modal `train_stage` sets `require_path_cache=False` + `path_cache_source_run=None`; (b) gate
+  skips `tree_source_prior` construction + the de-novo compile branch + reconstructs the ring catalog from the 5
+  fixed production seeds (`_build_ring_core_seed_ring_catalog`, fingerprint `639ff6078c32d43c`); (c) skips the
+  empty-partition guard (the de-novo partitions are intentionally empty); (d) builds edit VALIDATION from
+  `split.validation` (disjoint from the `split.train` that sourced training edits) since the de-novo val partition
+  is empty. `--dry-launch` = early exit from the REAL trainer after the first forward + one edit-validation forward
+  (before backward/optimizer); CPU Modal fn `dry_launch_stage`; instrumentation `zero_mixture_instrumentation`
+  (denovo_*=0, edit_*/forward>0, optimizer_steps=0). **`main()` uses `.spawn()` → MUST `modal run --detach`** or
+  the app stop kills the spawned fn. Result → `/artifacts/<run-label>/dry_launch.json` (poll the volume).

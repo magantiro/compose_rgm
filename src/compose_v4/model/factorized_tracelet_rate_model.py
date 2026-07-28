@@ -305,6 +305,35 @@ class RingTeacherSemanticCertificate:
 
 
 @dataclass(frozen=True)
+class OperatorCapabilities:
+    """Immutable editing-operator enumeration capabilities -- the single source of which editing families a
+    batch builder must enumerate so its dynamic candidate set matches the teacher support. Threading this ONE
+    object through every batch-building path (training loader, eval/validation/test builder) enforces one
+    shared representability contract: a teacher generated under editing support is always inside the batch's
+    exact candidates. Derive it from the active model (``model.operator_capabilities``) or the edit config;
+    never let a batch builder fall back to silent de-novo defaults."""
+
+    compute_ring_grow_support: bool = True
+    compute_ring_restates: bool = False
+    compute_cyclic_graft: bool = False
+    compute_ring_opening: bool = False
+
+    @classmethod
+    def de_novo(cls) -> OperatorCapabilities:
+        """The de-novo (base-B) capabilities: no editing families, legacy grow macro on."""
+        return cls()
+
+    def fingerprint(self) -> str:
+        import hashlib
+
+        payload = (
+            f"{int(self.compute_ring_grow_support)}{int(self.compute_ring_restates)}"
+            f"{int(self.compute_cyclic_graft)}{int(self.compute_ring_opening)}"
+        )
+        return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+@dataclass(frozen=True)
 class SparseBinaryRows:
     """CSR storage for a Boolean matrix with exact dense reconstruction."""
 
@@ -2072,6 +2101,18 @@ class FactorizedTraceletRateModel(nn.Module):
     @property
     def device(self) -> torch.device:
         return next(self.parameters()).device
+
+    @property
+    def operator_capabilities(self) -> OperatorCapabilities:
+        """The editing-family enumeration capabilities this model was configured with -- the single source a
+        batch builder must use so its dynamic candidate set matches the teacher support (one shared
+        representability contract)."""
+        return OperatorCapabilities(
+            compute_ring_grow_support=self.enable_ring_grow_macro,
+            compute_ring_restates=self.enable_ring_restates,
+            compute_cyclic_graft=self.enable_cyclic_graft,
+            compute_ring_opening=self.enable_ring_opening,
+        )
 
     def clear_ring_candidate_caches(self) -> None:
         """Release state-dependent chemistry caches without changing rates."""

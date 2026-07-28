@@ -75,8 +75,10 @@ from compose_v4.experiments.tracelet_prior_tilted import (
 )
 from compose_v4.model.tracelet_rate_model import TraceletRateModel
 from compose_v4.model.factorized_tracelet_rate_model import (
+    MARK_RULE_NAMES,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
+    OperatorCapabilities,
     SparseBinaryRows,
 )
 from compose_v4.model.device import resolve_torch_device
@@ -98,8 +100,15 @@ _RING_CORE_CATALOG_SEEDS = ("c1ccccc1", "c1ccncc1", "C1CCNCC1", "C1CCOCC1", "c1c
 
 
 TRANSPORT_SUPPORT_PROJECTION_VERSION = 3
-EVALUATION_BATCH_CACHE_FORMAT_VERSION = 1
+# v2: the eval/validation/test batch now enumerates the editing families (ring_system_restate/delete,
+# cyclic graft) to match training's dynamic candidates -- v1 caches (built without these) are invalid.
+EVALUATION_BATCH_CACHE_FORMAT_VERSION = 2
 TRAINING_SUPPORT_STREAM_FORMAT_VERSION = 1
+
+# Stable hash of the operator-registry family list -- part of the eval-cache key so a cache built under a
+# different operator registry (family set) is never reused (capability/operator invalidation, not just
+# FORMAT_VERSION).
+MARK_RULE_NAMES_HASH = hashlib.sha256("|".join(MARK_RULE_NAMES).encode()).hexdigest()[:16]
 
 
 def _atomic_torch_save(payload: object, path: Path) -> None:
@@ -351,12 +360,19 @@ def _evaluation_batch_cache_signature(
     bond_representation: str,
     ring_electronic_mode: str,
     property_conditioning: dict[str, object] | None = None,
+    operator_capability_fingerprint: str | None = None,
+    operator_registry_hash: str | None = None,
 ) -> dict[str, object]:
     """Identify every scientific choice that fixes the evaluation tensors."""
 
     return {
         "format_version": EVALUATION_BATCH_CACHE_FORMAT_VERSION,
         "path_cache_fingerprint": _path_cache_fingerprint(path_cache_signature),
+        # The editing-family enumeration capabilities + operator-registry semantics that determine which
+        # dynamic candidates the eval batch enumerates. A cache built under one capability set must never be
+        # reused under another (a de-novo-capability cache has no editing candidates and would fail scoring).
+        "operator_capability_fingerprint": operator_capability_fingerprint,
+        "operator_registry_hash": operator_registry_hash,
         "training_backend": str(training_backend),
         "seed": int(seed),
         "validation_examples": int(validation_examples),
@@ -2613,6 +2629,12 @@ def main() -> None:
         }
     )
 
+    _eval_capabilities = OperatorCapabilities(
+        compute_ring_grow_support=not args.disable_ring_grow_macro,
+        compute_ring_restates=args.corrupted_prior_mix,
+        compute_cyclic_graft=args.corrupted_prior_mix,
+        compute_ring_opening=args.corrupted_prior_mix,
+    )
     evaluation_signature = _evaluation_batch_cache_signature(
         path_cache_signature,
         training_backend=args.training_backend,
@@ -2625,6 +2647,8 @@ def main() -> None:
         bond_representation=args.bond_representation,
         ring_electronic_mode=args.ring_electronic_mode,
         property_conditioning=property_conditioning_signature,
+        operator_capability_fingerprint=_eval_capabilities.fingerprint(),
+        operator_registry_hash=MARK_RULE_NAMES_HASH,
     )
     evaluation_cache_path = (
         None
@@ -2805,6 +2829,9 @@ def main() -> None:
             ring_electronic_mode=args.ring_electronic_mode,
             target_property_conditions=validation_property_conditions,
             condition_dropout_probability=0.0,
+            # The active model's editing-family capabilities -- one shared representability contract, so an
+            # editing teacher never lands outside the eval batch's dynamic candidates.
+            capabilities=_eval_capabilities,
         )
         print(
             json.dumps(
@@ -2835,6 +2862,7 @@ def main() -> None:
             ring_electronic_mode=args.ring_electronic_mode,
             target_property_conditions=test_property_conditions,
             condition_dropout_probability=0.0,
+            capabilities=_eval_capabilities,
         )
         print(
             json.dumps(

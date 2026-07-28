@@ -114,6 +114,37 @@ repurposed slots; grow disabled; public-alias policy).
   canonical-successor normalization (multiplicity 1.47, rate-conserving) · tiny-overfit natural sampling ✅ ·
   data-sampler distribution ✅ · save/reload equivalent ✅.
 
+## 5b. Zero-mixture launch orchestration + the eval-collator representability fix 🔶
+The bounded run is `--scaled-manifest` (zero-mixture: `denovo_keep=0`, no de-novo path cache). Getting the
+REAL trainer to the first editing batch surfaced a chain of orchestration + one genuine correctness bug, all
+found by a **CPU-only `--dry-launch`** (early exit from the real trainer after the first training forward + one
+edit-validation forward, before backward/optimizer; instrumented so `denovo_*`/`optimizer_steps`=0 are proven,
+not assumed). Fixes (each pre-optimizer, ~0 A100 cost):
+- Zero-mixture gate path: skip de-novo compilation + carbon-tree dataset; reconstruct the production ring
+  catalog from the 5 fixed seeds (`639ff6078c32d43c`); skip the empty-partition guard; build edit VALIDATION
+  from `split.validation` (disjoint from `split.train`). Modal `train_stage`/`dry_launch_stage` drop the
+  de-novo path/support cache requirement under `--scaled-manifest`.
+- **Root cause of the first-forward crash (`teacher ring restate is outside exact dynamic candidates`):** the
+  evaluation/validation/test collator constructed its dynamic candidate set with default **de-novo** capability
+  flags, while teachers were generated under the editing operator support. This excluded valid editing-family
+  teachers (`ring_system_restate` / `ring_system_delete` / `bond_reroute`) from the exact candidate set.
+  **Threading the active model capabilities (`OperatorCapabilities`) through all batch-building paths restored
+  one shared representability contract.**
+- **Charge retraction:** formal charge was NOT causal. Neutral, cationic, anionic, and zwitterionic examples
+  are scoreable under the corrected candidate configuration (proven: 0/13 fail with capabilities on vs 5/13
+  without), while existing local charged-atom protections (`_touches_charged`) preserve the intended charge
+  semantics. No new charge limitation belongs in `SYSTEM_CONTRACT.md`. Verdict:
+  `GO_LOCAL_CHARGE_PRESERVING_RESTATE`.
+- **Safeguards added:** (1) `OperatorCapabilities` immutable object + `model.operator_capabilities` — batch
+  builders take the capability object instead of silently defaulting editing families off; (2) a global
+  `teacher ∈ A_exact(x)` invariant (`assert_teachers_in_exact_candidates`) checked immediately after batch
+  construction (training + eval), raising rich context (molecule, teacher, candidate count) before the scoring
+  loss; (3) eval-batch-cache key now includes the capability fingerprint + operator-registry hash (not just
+  `FORMAT_VERSION` 1→2), so a cache built under one capability set is never reused under another.
+- §7 data check: the invalid teachers are DYNAMIC-only (the stored MMP/scaffold pool has 0 editing-ring
+  teachers), so no stored artifact needs regeneration. Regression: `tests/test_teacher_in_candidates.py`
+  (reproduces the failure + 0 mismatches across neutral/cation/anion/zwitterion/S/Cl/fused strata).
+
 ## 6. Bounded RingCore preflight (≤750 steps) 🔶 READY TO LAUNCH (bounded Modal run)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep
