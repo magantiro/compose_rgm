@@ -433,6 +433,63 @@ def _build_scaled_manifest_sampler(train_records, *, denovo_keep, n_corruption, 
         cold_element_floor=floor, cold_elements_of=_record_cold_elements, seed=seed)
 
 
+def _load_precompiled_corpus(args, *, partition: str, seed: int):
+    """Load one partition of the validated precompiled corpus and its explicit three-layer sampler.
+
+    This is the production data path. It NEVER calls build_corrupted_prior_records /
+    build_cycle_op_records / build_analogue_prior_records: those regenerate a few hundred sources per
+    launch (the DATA_STARVED_BASELINE), carry no partition discipline and no contract hashes. Any
+    contract drift, missing shard or empty positively-weighted layer aborts here -- before the GPU.
+    """
+    from compose_v4.data.production_edit_corpus import (
+        load_production_edit_corpus,
+        measure_realized_layer_frequencies,
+    )
+    from ring_core_identity import (
+        LAYER_WEIGHTS_HASH,
+        PRODUCTION_LAYER_WEIGHTS,
+        recompute_layer_weights_hash,
+    )
+
+    if recompute_layer_weights_hash() != LAYER_WEIGHTS_HASH:
+        raise SystemExit(
+            "production layer weights drifted from their locked hash "
+            f"({recompute_layer_weights_hash()} != {LAYER_WEIGHTS_HASH}); refusing to train"
+        )
+    root = Path(args.precompiled_corpus)
+    contract = json.loads((root / "BUILD_COMPLETE.json").read_text()).get("contract", {})
+    corpus = load_production_edit_corpus(
+        root,
+        mmp_pool_path=Path(args.precompiled_mmp_pool),
+        partition=partition,
+        layer_weights=PRODUCTION_LAYER_WEIGHTS,
+        expected_contract=contract,
+        path_length_bins=(5, 9, 13),
+        checkpoint_interval=args.path_checkpoint_interval,
+        seed=seed,
+    )
+    realized = measure_realized_layer_frequencies(corpus, draws=20000, seed=seed + 1)
+    print(
+        json.dumps(
+            {
+                "phase": "precompiled_corpus",
+                "partition": partition,
+                "records_by_layer": corpus.provenance["records_by_layer"],
+                "transitions_by_layer": corpus.provenance["transitions_by_layer"],
+                "configured_layer_weights": dict(PRODUCTION_LAYER_WEIGHTS),
+                "realized_layer_frequency": {k: round(v, 5) for k, v in realized.items()},
+                "layer_weights_hash": LAYER_WEIGHTS_HASH,
+                "mmp_partition_filter": corpus.provenance["mmp_partition_filter"],
+                "reducer_checksum": corpus.provenance["reducer_checksum"],
+                "authorization": corpus.provenance["authorization"],
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    return corpus
+
+
 def _build_ring_core_seed_ring_catalog(max_atoms: int) -> TypedRingCatalog:
     """Reconstruct the RING_CORE_V1 production ring catalog DETERMINISTICALLY from the fixed seeds -- NOT from
     de-novo corpus paths and NOT from B's checkpoint (owner mandate §2). Same 5-seed builder the warm-start
@@ -1456,8 +1513,32 @@ def main() -> None:
         "instead of uniform sampling. Requires --corrupted-prior-mix; drops the de-novo retention subset "
         "(the mixture is manifest-controlled, de-novo retained via the warm-start).",
     )
+    parser.add_argument(
+        "--precompiled-corpus",
+        type=str,
+        default=None,
+        help="root of a VALIDATED precompiled edit corpus (modal_apps/precompile_edit_data_app.py output, "
+        "containing BUILD_COMPLETE.json + <layer>/<partition>/*.jsonl.gz). Replaces the in-memory "
+        "corruption/cycle/analogue builders entirely: records come from the validated artifact, the "
+        "explicit three-layer sampler drives the mixture, and every contract hash is verified before any "
+        "GPU work. Mutually exclusive with --corrupted-prior-count/--analogue-trace-count sizing.",
+    )
+    parser.add_argument(
+        "--precompiled-mmp-pool",
+        type=str,
+        default=None,
+        help="analogue-trace pool consumed as the mmp_analogue layer of --precompiled-corpus. Rows are "
+        "routed by the SAME ringcore-v1 scaffold key as the shards, so held-out partitions stay disjoint "
+        "(the raw pool predates that partitioner; ~8%% of it falls in validation/test).",
+    )
     args = parser.parse_args()
     _zmi.reset()  # zero-mixture instrumentation accumulates over this whole run (catalog/manifest/pool/train)
+
+    if args.precompiled_corpus and not args.precompiled_mmp_pool:
+        raise SystemExit(
+            "--precompiled-corpus requires --precompiled-mmp-pool: the mmp_analogue layer carries a "
+            "positive weight, and a silently-empty layer would renormalize the mixture"
+        )
 
     checkpoint_modes = sum(
         item is not None
@@ -2409,7 +2490,20 @@ def main() -> None:
     # Layer boundaries of the final train_records tuple, for the scaled-manifest hierarchical sampler.
     scaled_sampler_denovo_keep = 0
     scaled_sampler_n_corruption = 0
-    if args.corrupted_prior_mix:
+    precompiled_corpus = None
+    precompiled_validation_corpus = None
+    if args.precompiled_corpus:
+        # PRODUCTION PATH. Records come from the validated artifact; the in-memory builders below are
+        # unreachable in this branch by construction, which is the point -- regenerating a few hundred
+        # sources at launch is what produced the data-starved baseline.
+        precompiled_corpus = _load_precompiled_corpus(args, partition="train", seed=args.seed + 21)
+        precompiled_validation_corpus = _load_precompiled_corpus(
+            args, partition="validation", seed=args.seed + 22
+        )
+        train_records = precompiled_corpus.records
+        validation_records = precompiled_validation_corpus.records
+        edit_record_index_sampler_precompiled = precompiled_corpus.sampler
+    elif args.corrupted_prior_mix:
         # Append corrupted-molecule source-prior (B-edit) records IN MEMORY -- never persisted to the
         # path cache, so B's carbon-tree cache stays reusable under --train-only. Sized ~50/50 against
         # the de-novo records; the support-cache signature carries a corrupted_prior_mix discriminator
@@ -2461,7 +2555,7 @@ def main() -> None:
             ),
             flush=True,
         )
-    if args.analogue_trace_pool:
+    if args.analogue_trace_pool and not args.precompiled_corpus:
         # Append verified real analogue-pair edit traces (A->B / B->A MMP transitions between real drug
         # molecules) as GM PathRecords -- Layer 1 of the universal-edit-prior mixture (see
         # docs/PAPER_MASTER_PLAN.md §0b). Appended IN MEMORY like the corruption records; the support-cache
@@ -2483,7 +2577,7 @@ def main() -> None:
             ),
             flush=True,
         )
-    if args.scaled_manifest and not validation_records:
+    if args.scaled_manifest and not validation_records and not args.precompiled_corpus:
         # Zero-mixture edit VALIDATION (owner mandate §4): the de-novo validation partition is empty, so the
         # held-out editing diagnostic is built from split.VALIDATION molecules (disjoint from split.train,
         # which sourced the training edit records) -- covering the corrupted-prior + cycle-op editing families
@@ -3591,7 +3685,11 @@ def main() -> None:
 
     if isinstance(model, FactorizedTraceletRateModel) and loaded_checkpoint is None:
         edit_record_index_sampler = None
-        if args.scaled_manifest:
+        if args.precompiled_corpus:
+            # The precompiled corpus already built its explicit three-layer sampler over exactly
+            # this record tuple, so reuse it rather than re-deriving boundaries positionally.
+            edit_record_index_sampler = edit_record_index_sampler_precompiled
+        elif args.scaled_manifest:
             edit_record_index_sampler = _build_scaled_manifest_sampler(
                 train_records,
                 denovo_keep=scaled_sampler_denovo_keep,
