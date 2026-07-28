@@ -270,6 +270,36 @@ imbalance) / `NO_GO_PRODUCTION_SCHEDULE` (instability from the warmup→decay tr
 step 1000 automatically; a step-1500 continuation under the same scheduler may be authorized as a diagnostic if
 lower-frequency-family recovery is genuinely ambiguous.
 
+## 6c. Schedule-faithful check RESULT — `CORRECT_AND_STABLE_RECOVERY_AMBIGUOUS` 🔶
+Run `compose-v4-ringcore-v1-schedcheck-48af1bd-v1` (commit `48af1bd`, A100, 1000 steps, `schedule_steps=3000`,
+warm-started fresh from base B). GPU smoke passed first (CUDA warm-start + 2 forwards finite). Launch-identity
+confirmed `scheduler_config_hash=0b832985c65de1cc`. NON_SCIENTIFIC_PREFLIGHT. Full result:
+`diagnostics/coherence/schedule_check_result.json`.
+
+- **§E schedule (faithful):** LR reached the DECAY phase — 0.909× peak at step 1000 (matches the locked
+  trajectory), unlike the all-warmup bounded run. GM loss 3.97→2.30 (500)→2.86 (750)→**2.47 (1000)**; best =
+  step 500. The 750 spike is at near-peak LR (mid-reweighting) and recovers toward baseline by 1000.
+- **§F families:** `balanced_family_top3` improves **monotonically** 0.32→0.40 (rises through the decay phase).
+  The compositional **cycle ops learn strongly + keep improving** in the decay phase (cycle_insert top1
+  0.16→**0.41** at 750→1000; cycle_attach top3 0.96). Lower-freq families drop from B's de-novo over-preference
+  (atom_restate family-prob 0.80→0.047, early recovery →0.068; bond_reroute top3 0.82→0) but retain **finite
+  probability** — **no family dead**.
+- **§G calibration:** TV 0.477 / KL 0.666 — borderline (over-concentrates on the dominant cycle families).
+- **§H stability:** all eval losses finite, no NaN/inf, no early-stop — no warmup→decay instability.
+- **§I rollout hard gates (step-1000 ckpt) — ALL PASS:** identity_ok, `hard_gates_all_zero` both strata,
+  validity 1.0, cycle-rank 1.0, **charge preserved 1.0** (0 unexplained mutations), **grow dead** (log-prob
+  −∞, mass 0, 0 legal marks), cycle editing **productive + `toggle_dominated=False`** (110 close / 35 open,
+  ring_system_restate + delete fire), natural ring-op usage 0.85–1.0 vs uniform 0.41.
+
+**Verdict: `CORRECT_AND_STABLE_RECOVERY_AMBIGUOUS`** — the RingCore compositional core is VALIDATED at the
+mechanism level (hard gates zero, grow dead, charge preserved, cycle ops strongly learned + productive). It is
+NOT a clean `GO_FOR_FULL_RINGCORE_TRAINING` (strict "validation improves after step 500" not met on GM loss;
+lower-freq recovery unconfirmed where LR has barely decayed), NOT `NO_GO_PRODUCTION_SCHEDULE` (no instability),
+NOT `GO_AFTER_RECIPE_ADJUSTMENT` (no distribution DEFECT — the drops are expected reweighting, families finite).
+It maps to the owner's pre-authorized fourth path: **correct + stable but lower-frequency-family recovery
+genuinely ambiguous at step 1000 → STOP AND REPORT.** The pre-authorized **step-1500 continuation under the same
+scheduler** (resume this checkpoint) is the diagnostic to confirm recovery; **not launched automatically**.
+
 ## 6-prev. Bounded RingCore preflight (≤750 steps) — launch recipe (superseded by the result above)
 §6 needs base checkpoint **B** (`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`, SHA `c9d927…`), which lives
 on the `compose-v4-artifacts` Modal volume — so the bounded run is a **Modal** job, not local. All local prep

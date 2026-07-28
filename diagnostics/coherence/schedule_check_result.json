@@ -1,0 +1,61 @@
+{
+  "run_label": "compose-v4-ringcore-v1-schedcheck-48af1bd-v1",
+  "launch_commit": "48af1bd",
+  "scheduler_config_hash": "0b832985c65de1cc",
+  "status": "NON_SCIENTIFIC_PREFLIGHT",
+  "schedule": {"training_steps": 1000, "schedule_steps": 3000, "warmup_steps": 500,
+               "peak_lr": 0.0003, "min_lr_fraction": 0.05, "schedule": "cosine_with_linear_warmup"},
+  "warm_start": "base B (c9d927...) semantic; 108 tensors transferred, 10 heads fresh (cycle/restate/grow)",
+
+  "part_e_lr_and_loss": {
+    "schedule_faithful": true,
+    "lr_relative_to_peak": {"0": 0.002, "250": 0.500, "500": 1.000, "750": 0.977, "1000": 0.909},
+    "gm_loss": {"0": 3.9689, "250": 2.7932, "500": 2.2987, "750": 2.8624, "1000": 2.4664},
+    "best_checkpoint_step": 500,
+    "gm_loss_improved_after_step500": false,
+    "note": "LR confirmed IN the decay phase (0.909x peak at 1000) -- schedule-faithful, unlike the all-warmup bounded run. GM-loss spiked at 750 (near-peak LR, mid-reweighting) and recovered toward baseline by 1000."
+  },
+
+  "part_f_families": {
+    "balanced_family_top3_trajectory": {"0": 0.323, "250": 0.361, "500": 0.364, "750": 0.387, "1000": 0.400},
+    "balanced_family_top3_monotone_improving": true,
+    "dead_enabled_families": [],
+    "cycle_ops_learn": {"cycle_insert_top1": {"500": 0.155, "750": 0.158, "1000": 0.406},
+                        "cycle_attach_top3": {"500": 0.911, "750": 0.960, "1000": 0.957}},
+    "lower_frequency_family_final": {
+      "atom_restate": {"n": 53, "top3": 0.415, "family_prob": 0.068, "family_prob_trajectory": {"0": 0.802, "500": 0.091, "750": 0.047, "1000": 0.068}},
+      "bond_reroute": {"n": 28, "top3": 0.000, "family_prob": 0.027},
+      "ring_system_restate": {"n": 24, "top3": 0.000, "family_prob": 0.021},
+      "bond_reorder": {"n": 18, "top3": 0.000, "family_prob": 0.030},
+      "ring_system_delete": {"n": 10, "top3": 0.000, "family_prob": 0.021}
+    },
+    "note": "Cycle families (the RingCore-defining ops, 660/852 teacher examples) learn strongly and IMPROVE in the decay phase. Lower-freq families drop from B's de-novo over-preference (reweighting) but retain FINITE probability; atom_restate shows early recovery (0.047->0.068). None dead."
+  },
+
+  "part_g_calibration": {"kl_target_model": 0.666, "tv": 0.477, "note": "borderline; model over-concentrates on the dominant cycle families relative to the flatter teacher family distribution"},
+
+  "part_h_stability": {"all_eval_losses_finite": true, "early_stopped": false, "nan_or_inf": false,
+                       "gm_loss_monotone_after_warmup": false,
+                       "note": "no instability across the warmup->decay transition; grad/update norms not in metrics.json (training log not captured)"},
+
+  "part_i_rollout_hard_gates": {
+    "identity_ok": true, "capability_hash": "330473e319bfec19", "corpus_scope_hash": "3721d69851110fdd",
+    "hard_gates_all_zero": true,
+    "all_state_validity": 1.0, "cycle_rank_correctness": 1.0,
+    "charge": {"net_formal_charge_preserved": 1.0, "protected_charged_centers_preserved": 1.0, "unexplained_charge_mutations": 0},
+    "grow_exclusion": {"grow_family_log_prob": "-inf", "grow_family_mass": 0.0, "grow_legal_marks": 0, "grow_in_capability_set": false},
+    "compositional_ring": {"cycle_ops_naturally_sampled": true, "toggle_dominated": false,
+                           "productive_close_unseen": 110, "productive_open_unseen": 35, "ring_system_restate_fires": true},
+    "natural_ring_op_usage": {"trained": "0.85-1.0", "uniform_baseline": "0.41-0.85"}
+  },
+
+  "part_j_verdict": "CORRECT_AND_STABLE_RECOVERY_AMBIGUOUS",
+  "part_j_reasoning": [
+    "NOT GO_FOR_FULL_RINGCORE_TRAINING: strict 'validation stable/improves after step 500' is not met on GM loss (2.299->2.466); lower-frequency-family (atom_restate/bond_reroute) recovery is unconfirmed at step 1000, where the LR has barely decayed (0.909x peak).",
+    "NOT NO_GO_PRODUCTION_SCHEDULE: no instability from the warmup->decay transition -- all eval losses finite, transition smooth, balanced family accuracy improves monotonically, the GM-loss spike recovers, all rollout hard gates pass.",
+    "NOT GO_AFTER_RECIPE_ADJUSTMENT: no demonstrated data/family-distribution DEFECT -- the cycle-dominant distribution is by design, the lower-freq drops are expected editing-family reweighting, and every family retains finite probability + updates.",
+    "MAPS TO the owner's pre-authorized fourth path: results are correct and stable but recovery of the lower-frequency families is genuinely ambiguous at step 1000 -> STOP AND REPORT."
+  ],
+  "recommended_next": "The pre-authorized step-1500 continuation under the SAME scheduler (schedule_steps=3000, resume from this checkpoint) as a diagnostic to confirm lower-frequency-family recovery in the (now steeper) decay phase. NOT launched automatically -- owner decision. Alternatively, proceed to the full 3000-step run (which contains the recovery window steps 1500-3000).",
+  "core_validation": "The RingCore compositional core is VALIDATED at the mechanism level: hard gates all zero, grow dead, charge preserved, cycle ops productive + non-toggle-dominated + strongly learned. The open question is optimization-schedule (lower-freq recovery), not correctness."
+}
