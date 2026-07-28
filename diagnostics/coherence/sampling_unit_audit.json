@@ -1,0 +1,216 @@
+{
+  "census_consistency": {
+    "cycle_operations": {
+      "census_mean_path_length": 1.0,
+      "fixture_mean_path_length": 1.0
+    },
+    "general_corruption": {
+      "census_mean_path_length": 2.9172,
+      "fixture_mean_path_length": 2.8179
+    },
+    "mmp_analogue": {
+      "census_mean_path_length": 5.895,
+      "fixture_mean_path_length": 7.8186
+    }
+  },
+  "exposure": {
+    "10000_steps": {
+      "cycle_operations": {
+        "draws": 160000,
+        "jump_share": 0.3865,
+        "record_exposure": 0.627,
+        "transition_exposure": 0.2424,
+        "weight": 0.25
+      },
+      "general_corruption": {
+        "draws": 256000,
+        "jump_share": 0.5261,
+        "record_exposure": 3.4157,
+        "transition_exposure": 0.616,
+        "weight": 0.4
+      },
+      "mmp_analogue": {
+        "draws": 224000,
+        "jump_share": 0.59208,
+        "record_exposure": 0.6163,
+        "transition_exposure": 0.0619,
+        "weight": 0.35
+      }
+    },
+    "3000_steps": {
+      "cycle_operations": {
+        "draws": 48000,
+        "jump_share": 0.3865,
+        "record_exposure": 0.1881,
+        "transition_exposure": 0.0727,
+        "weight": 0.25
+      },
+      "general_corruption": {
+        "draws": 76800,
+        "jump_share": 0.5261,
+        "record_exposure": 1.0247,
+        "transition_exposure": 0.1848,
+        "weight": 0.4
+      },
+      "mmp_analogue": {
+        "draws": 67200,
+        "jump_share": 0.59208,
+        "record_exposure": 0.1849,
+        "transition_exposure": 0.0186,
+        "weight": 0.35
+      }
+    },
+    "8000_steps": {
+      "cycle_operations": {
+        "draws": 128000,
+        "jump_share": 0.3865,
+        "record_exposure": 0.5016,
+        "transition_exposure": 0.1939,
+        "weight": 0.25
+      },
+      "general_corruption": {
+        "draws": 204800,
+        "jump_share": 0.5261,
+        "record_exposure": 2.7325,
+        "transition_exposure": 0.4928,
+        "weight": 0.4
+      },
+      "mmp_analogue": {
+        "draws": 179200,
+        "jump_share": 0.59208,
+        "record_exposure": 0.493,
+        "transition_exposure": 0.0495,
+        "weight": 0.35
+      }
+    },
+    "9000_steps": {
+      "cycle_operations": {
+        "draws": 144000,
+        "jump_share": 0.3865,
+        "record_exposure": 0.5643,
+        "transition_exposure": 0.2181,
+        "weight": 0.25
+      },
+      "general_corruption": {
+        "draws": 230400,
+        "jump_share": 0.5261,
+        "record_exposure": 3.0741,
+        "transition_exposure": 0.5544,
+        "weight": 0.4
+      },
+      "mmp_analogue": {
+        "draws": 201600,
+        "jump_share": 0.59208,
+        "record_exposure": 0.5547,
+        "transition_exposure": 0.0557,
+        "weight": 0.35
+      }
+    }
+  },
+  "fixture_records": {
+    "cycle_operations": 440,
+    "general_corruption": 118,
+    "mmp_analogue": 98
+  },
+  "layers": {
+    "cycle_operations": {
+      "draws": 40000,
+      "gradient_share": {
+        "<TERMINAL>": 0.72076,
+        "bond_delete": 0.1401,
+        "bond_insert": 0.13914
+      },
+      "landing_share": {
+        "<TERMINAL>": 0.6135,
+        "bond_delete": 0.19307,
+        "bond_insert": 0.19343
+      },
+      "mean_importance_weight": {
+        "<TERMINAL>": 1.17645,
+        "bond_delete": 0.72663,
+        "bond_insert": 0.72034
+      },
+      "mean_path_length": 1.0,
+      "terminal_share": 0.6135
+    },
+    "general_corruption": {
+      "draws": 40000,
+      "gradient_share": {
+        "<TERMINAL>": 0.59605,
+        "atom_delete": 0.05196,
+        "atom_insert": 0.04852,
+        "atom_restate": 0.13147,
+        "bond_reorder": 0.07714,
+        "bond_reroute": 0.05092,
+        "ring_system_restate": 0.04394
+      },
+      "landing_share": {
+        "<TERMINAL>": 0.4739,
+        "atom_delete": 0.06795,
+        "atom_insert": 0.06325,
+        "atom_restate": 0.16667,
+        "bond_reorder": 0.0979,
+        "bond_reroute": 0.06995,
+        "ring_system_restate": 0.06037
+      },
+      "mean_importance_weight": {
+        "<TERMINAL>": 1.2549,
+        "atom_delete": 0.763,
+        "atom_insert": 0.7654,
+        "atom_restate": 0.78701,
+        "bond_reorder": 0.78612,
+        "bond_reroute": 0.72631,
+        "ring_system_restate": 0.72618
+      },
+      "mean_path_length": 2.8179,
+      "terminal_share": 0.4739
+    },
+    "mmp_analogue": {
+      "draws": 40000,
+      "gradient_share": {
+        "<TERMINAL>": 0.48489,
+        "atom_delete": 0.23861,
+        "atom_insert": 0.2765
+      },
+      "landing_share": {
+        "<TERMINAL>": 0.40792,
+        "atom_delete": 0.28632,
+        "atom_insert": 0.30575
+      },
+      "mean_importance_weight": {
+        "<TERMINAL>": 1.18743,
+        "atom_delete": 0.83248,
+        "atom_insert": 0.90338
+      },
+      "mean_path_length": 7.8186,
+      "terminal_share": 0.40792
+    }
+  },
+  "realized_mixture": {
+    "configured_trace_weight": {
+      "cycle_operations": 0.25,
+      "general_corruption": 0.4,
+      "mmp_analogue": 0.35
+    },
+    "realized_transition_weight": {
+      "cycle_operations": 0.18788,
+      "general_corruption": 0.40918,
+      "mmp_analogue": 0.40294
+    },
+    "teacher_transition_share_of_all_draws": 0.51429,
+    "terminal_share_of_all_draws": 0.48571
+  },
+  "semantics": {
+    "draw_unit": "ONE trace (PathRecord), then ONE progress position inside it",
+    "family_stratification": "with probability 0.5 the position is drawn family-uniformly over the families present on THAT trace (terminal counts as a family); the returned importance weight divides the oversampling back out, so the gradient EXPECTATION remains the Generator Matching law -- stratification buys coverage/variance, not expected family mass",
+    "long_trace_weighting": "a trace is drawn with probability independent of its length, so each of its transitions receives roughly 1/path_length of that probability: long MMP traces dilute per-transition exposure relative to single-step cycle records",
+    "parameters": {
+      "batch_size": 64,
+      "late_time_fraction": 0.5,
+      "operational_horizon": 16.0,
+      "progress_stratification_fraction": 0.5
+    },
+    "steps_contributing_loss_per_draw": 1,
+    "terminal_position": "path_length is a legal landing -> a no-jump (rate-only) example"
+  }
+}
