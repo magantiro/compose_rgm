@@ -68,10 +68,17 @@
       "not_for": "convergence or final molecular quality"
     },
     "full_run": {
-      "training_steps": "TBD (owner-authorized after a passing schedule check; ~3000, early-stopping at convergence)",
+      "training_steps": 3000,
       "schedule_steps": 3000,
       "warmup_steps": 500,
-      "status": "NOT_AUTHORIZED (propose exact command/cost after a passing check; do not launch without explicit authorization)"
+      "start_from": "base B FRESH (--initialize-compatible-from-source-checkpoint); NEW production lineage -- do NOT repurpose the preflight schedule-check / continuation checkpoints",
+      "launch_tag": "ringcore-v1-full-production (commit 6428901)",
+      "run_label": "compose-v4-ringcore-v1-full-6428901-v1",
+      "preflight_verdict": "GO_FOR_FULL_RINGCORE_TRAINING (step-1500 continuation; diagnostics/coherence/continuation_1500_result.json)",
+      "prelaunch_gate": "PASS (567 tests) at 6428901",
+      "gpu_smoke": "in flight at hold time (compose-v4-ringcore-v1-full-6428901-gpusmoke-v1); must be finite before launch",
+      "status": "READY-BUT-HELD at owner request (updating claude) -- launch ONLY on explicit go, after confirming the GPU smoke is finite",
+      "launch_command": "cd <clean worktree at tag ringcore-v1-full-production> && modal run --detach modal_apps/train_tracelet_gm.py --train-only --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --analogue-trace-pool /artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl --analogue-trace-count 5000 --corrupted-prior-count 200 --scaled-manifest /artifacts/ring_core_v1/ring_core_v1_scaled_manifest.json --initialize-compatible-from-source-checkpoint --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 --checkpoint-name checkpoint.best_so_far.pt --training-steps 3000 --schedule-steps 3000 --run-label compose-v4-ringcore-v1-full-6428901-v1"
     }
   },
 
