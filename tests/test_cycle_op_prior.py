@@ -98,7 +98,8 @@ def test_cycle_op_records_are_in_mask_finite():
     cat = _catalog()
     torch.manual_seed(0)
     model = FactorizedTraceletRateModel(
-        cat, hidden_dim=16, message_passing_steps=1, enable_cycle_ops=True
+        cat, hidden_dim=16, message_passing_steps=1,
+        enable_cycle_ops=True, enable_ring_grow_macro=False,  # RingCore: cycle ops replace grow (guard G1)
     ).eval()
     records, _ = build_cycle_op_records(_MOLS, n_slots=40, seed=2)
     assert records

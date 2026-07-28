@@ -69,9 +69,12 @@ def test_disabling_editing_capabilities_trips_the_teacher_invariant():
     assert tripped, "omitting editing capabilities must trip the teacher-in-candidate invariant"
 
 
-def test_ring_grow_macro_reenable_is_observable_in_sampling():
-    """§17: re-enabling the legacy ring_system_grow macro in the SAMPLER must be observable (grow gets drawn),
-    so a sampler that silently re-enables it cannot pass unnoticed."""
+def test_ring_grow_macro_reenable_is_caught_or_observable():
+    """§17: the 'silently re-enable the legacy ring_system_grow macro' divergence must be caught. Under the
+    RingCore contract (cycle ops on) re-enabling grow is now rejected at CONSTRUCTION by guard G1 -- a stronger
+    guarantee than sampling-observability (the divergent model cannot even be built). In the de-novo regime
+    (cycle ops off) grow is legitimately samplable, and toggling it is observable in sampling -- so a sampler
+    that silently re-enables grow cannot pass unnoticed either way."""
     from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY, smiles_to_molecular_graph
     from compose_v4.chem.state import pad_molecular_graph
     from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
@@ -79,18 +82,27 @@ def test_ring_grow_macro_reenable_is_observable_in_sampling():
 
     catalog = build_production_ring_catalog(40)
     chain = pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCC"), 40)  # saturated chain -> grow fires
+
+    # RingCore regime: re-enabling grow alongside cycle ops is caught at construction (guard G1).
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        FactorizedTraceletRateModel(
+            catalog, hidden_dim=16, message_passing_steps=1, atom_vocabulary=ORGANIC_VOCABULARY,
+            enable_cycle_ops=True, enable_ring_grow_macro=True,
+        )
+
+    # De-novo regime (cycle ops off): toggling grow is observable in sampling.
     draws = {}
     for enable in (False, True):
         torch.manual_seed(0)
         model = FactorizedTraceletRateModel(
             catalog, hidden_dim=16, message_passing_steps=1, atom_vocabulary=ORGANIC_VOCABULARY,
-            enable_cycle_ops=True, enable_ring_grow_macro=enable,
+            enable_cycle_ops=False, enable_ring_grow_macro=enable,
         ).eval()
         rng = np.random.default_rng(0)
         draws[enable] = sum(
             model.sample_rewrite_mark(chain, 0.3, rng).rule_name == "ring_system_grow" for _ in range(200)
         )
-    assert draws[False] == 0, "RingCore (grow disabled) must never sample ring_system_grow"
+    assert draws[False] == 0, "grow disabled must never sample ring_system_grow"
     assert draws[True] > 0, "the mutation (grow enabled) must be observable as grow draws"
 
 

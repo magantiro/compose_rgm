@@ -46,8 +46,11 @@ def _catalog():
 
 def _model(enable: bool):
     torch.manual_seed(0)
+    # cycle ops REPLACE the legacy grow macro (guard G1): grow=False iff cycle ops on. When cycle ops are
+    # off, grow stays at its default True so the model is byte-identical to B (test_off_is_byte_identical).
     return FactorizedTraceletRateModel(
-        _catalog(), hidden_dim=16, message_passing_steps=1, enable_cycle_ops=enable
+        _catalog(), hidden_dim=16, message_passing_steps=1,
+        enable_cycle_ops=enable, enable_ring_grow_macro=not enable,
     ).eval()
 
 
