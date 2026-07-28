@@ -25,15 +25,17 @@ def test_instrumentation_counters():
     zmi.reset()
     assert zmi.snapshot()["denovo_path_compile_calls"] == 0
     ok, _ = zmi.zero_mixture_ok()
-    assert not ok  # edit counters not yet positive
-    zmi.bump("edit_dataset_constructions")
-    zmi.bump("edit_batches_emitted")
-    zmi.bump("validation_edit_batches_emitted")
+    assert not ok  # required-positive counters not yet met
+    for name, floor in zmi.REQUIRED_POSITIVE:
+        zmi.bump(name, floor)
     ok, report = zmi.zero_mixture_ok()
-    assert ok and report["denovo_all_zero"] and report["edit_path_reached"]
-    zmi.bump("denovo_path_compile_calls")
-    ok2, _ = zmi.zero_mixture_ok()
-    assert not ok2  # any de-novo work breaks the invariant
+    assert ok and report["denovo_and_optimizer_all_zero"] and report["required_positive_met"]
+    zmi.bump("denovo_cache_open_calls")  # any de-novo work breaks the invariant
+    ok2, report2 = zmi.zero_mixture_ok()
+    assert not ok2 and "denovo_cache_open_calls" in report2["failing_zero_counters"]
+    zmi.bump("optimizer_steps")  # and any optimizer step
+    ok3, report3 = zmi.zero_mixture_ok()
+    assert not ok3 and "optimizer_steps" in report3["failing_zero_counters"]
     zmi.reset()
 
 

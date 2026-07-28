@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import copy
+import json
 from collections import OrderedDict
 from contextlib import nullcontext
 from dataclasses import dataclass, field, replace
 from math import cos, exp, pi
+from pathlib import Path
 from time import perf_counter
 from typing import Any, Callable, Iterator, Mapping
 
@@ -16,6 +18,7 @@ from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.training_support_cache import (
     ShardedTrainingSupportCache,
@@ -470,6 +473,8 @@ def factorized_mark_loader(
     remaining_steps = steps - start_step
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
+    _zmi.bump("edit_dataset_constructions")
+    _zmi.bump("edit_dataloader_constructions")
     dataset = FactorizedMarkDataset(
         records,
         start_index=start_step * batch_size,
@@ -960,6 +965,8 @@ def train_factorized_mark_model(
     train_records: tuple[PathRecord, ...],
     validation_batch: FactorizedMarkBatch,
     *,
+    dry_launch: bool = False,
+    dry_launch_output: str | None = None,
     steps: int,
     batch_size: int,
     learning_rate: float,
@@ -1164,14 +1171,52 @@ def train_factorized_mark_model(
         with context:
             prediction = model.forward_mark_batch(batch)
             loss = factorized_mark_bregman_loss(prediction, batch)
+        if dry_launch:
+            # CPU dry-launch (owner mandate §1): exit after the FIRST real training forward + one real
+            # editing-validation forward, BEFORE backward/optimizer -- proving the zero-mixture path reaches
+            # the first editing batch with a finite loss and zero optimizer updates on the real code path.
+            _zmi.bump("edit_training_batches_emitted")
+            _zmi.bump("model_forward_calls")
+            _zmi.bump("gm_loss_calls")
+            model.eval()
+            val_metrics = factorized_mark_metrics(
+                model, validation_batch, use_bf16=use_bf16, microbatch_size=evaluation_batch_size,
+            )
+            _zmi.bump("edit_validation_batches_emitted")
+            _zmi.bump("model_forward_calls")
+            _zmi.bump("gm_loss_calls")
+            ok, zmi_report = _zmi.zero_mixture_ok()
+            result = {
+                "phase": "dry_launch_first_batch",
+                "train_gm_loss": float(loss),
+                "train_loss_finite": bool(torch.isfinite(loss)),
+                "validation_gm_loss": float(val_metrics.get("factorized_gm_loss", float("nan"))),
+                "validation_loss_finite": bool(
+                    torch.isfinite(torch.tensor(float(val_metrics.get("factorized_gm_loss", float("nan")))))
+                ),
+                "train_batch_size": int(batch.batch_size),
+                "validation_batch_size": int(validation_batch.batch_size),
+                "zero_mixture_ok": ok,
+                "zero_mixture_report": zmi_report,
+            }
+            if dry_launch_output:
+                Path(dry_launch_output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+            print(json.dumps({"phase": "dry_launch_first_batch",
+                              "train_gm_loss": result["train_gm_loss"],
+                              "validation_gm_loss": result["validation_gm_loss"],
+                              "zero_mixture_ok": ok}, sort_keys=True), flush=True)
+            return result
         if profile_timing:
             _synchronize(model.device)
         forwarded_at = perf_counter()
+        _zmi.bump("backward_calls")
         loss.backward()
         if profile_timing:
             _synchronize(model.device)
         backward_at = perf_counter()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
+        _zmi.bump("optimizer_steps")
+        _zmi.bump("optimizer_step_calls")
         optimizer.step()
         if profile_timing:
             _synchronize(model.device)

@@ -386,6 +386,7 @@ def _build_scaled_manifest_sampler(train_records, *, denovo_keep, n_corruption, 
     """Build the hierarchical record sampler from a scaled manifest + the layer boundaries of train_records
     (denovo[:denovo_keep] + corruption[n_corruption] + mmp[rest]). Returns None if the manifest has no
     positive-weight layer. Tags align 1:1 with train_records (the dataset guard enforces it)."""
+    _zmi.bump("edit_manifest_loads")
     manifest = json.loads(Path(manifest_path).read_text())
     locked = manifest.get("locked_mixture") or {}
     weights = {k: float(v) for k, v in (locked.get("layer_weights") or {}).items() if float(v) > 0}
@@ -418,6 +419,7 @@ def _build_ring_core_seed_ring_catalog(max_atoms: int) -> TypedRingCatalog:
             source, target, use_bond_reroute=True, align_source=True
         )
 
+    _zmi.bump("production_catalog_constructions")
     return build_typed_ring_catalog(tuple(_seed_trace(s) for s in _RING_CORE_CATALOG_SEEDS))
 
 
@@ -1368,6 +1370,15 @@ def main() -> None:
         "family is masked dead (never sampled/taught). Typically paired with --cycle-op-mix.",
     )
     parser.add_argument(
+        "--dry-launch",
+        action="store_true",
+        help="CPU dry-launch: run the REAL trainer through model/warm-start/dataloader/first forward + one "
+        "editing-validation forward, then EXIT before backward/optimizer (optimizer_steps=0). Serializes the "
+        "zero-mixture instrumentation counters -- proves the --scaled-manifest path reaches the first editing "
+        "batch with a finite loss + zero de-novo work. No parameter is updated.",
+    )
+    parser.add_argument("--dry-launch-output", default="", help="path to write the dry-launch JSON artifact")
+    parser.add_argument(
         "--organic-vocabulary",
         action="store_true",
         help="predict/edit the whole drug-like organic subset (C,N,O,F,S,P,Cl,Br,I,B) via 15 "
@@ -1408,6 +1419,7 @@ def main() -> None:
         "(the mixture is manifest-controlled, de-novo retained via the warm-start).",
     )
     args = parser.parse_args()
+    _zmi.reset()  # zero-mixture instrumentation accumulates over this whole run (catalog/manifest/pool/train)
 
     checkpoint_modes = sum(
         item is not None
@@ -1829,6 +1841,7 @@ def main() -> None:
         test_records = ()
         ring_catalog = _build_ring_core_seed_ring_catalog(args.max_atoms)
         tree_paths_ready = True
+        _zmi.bump("production_catalog_fingerprint_checks")
         print(
             json.dumps(
                 {"phase": "zero_mixture_denovo_skipped",
@@ -2412,6 +2425,7 @@ def main() -> None:
         # molecules) as GM PathRecords -- Layer 1 of the universal-edit-prior mixture (see
         # docs/PAPER_MASTER_PLAN.md §0b). Appended IN MEMORY like the corruption records; the support-cache
         # signature carries an analogue_trace_pool discriminator so the mixed tuple recompiles its support.
+        _zmi.bump("edit_pool_open_calls")
         analogue_records = build_analogue_prior_records(
             args.analogue_trace_pool,
             count=(args.analogue_trace_count or None),
@@ -3435,10 +3449,12 @@ def main() -> None:
                 "realized_count_fractions": (None if edit_record_index_sampler is None
                                              else edit_record_index_sampler.realized_layer_fractions()),
             }, sort_keys=True), flush=True)
-        history, selected_validation = train_factorized_mark_model(
+        _trainer_result = train_factorized_mark_model(
             model,
             train_records,
             validation_examples,
+            dry_launch=args.dry_launch,
+            dry_launch_output=(args.dry_launch_output or None),
             record_index_sampler=edit_record_index_sampler,
             steps=args.steps,
             batch_size=args.batch_size,
@@ -3478,6 +3494,30 @@ def main() -> None:
             condition_dropout_probability=args.condition_dropout_probability,
             trainable_parameter_scope=args.trainable_parameter_scope,
         )
+        if args.dry_launch:
+            _dry_ok, _dry_report = _zmi.zero_mixture_ok()
+            _finite = bool(_trainer_result.get("train_loss_finite")) and bool(
+                _trainer_result.get("validation_loss_finite")
+            )
+            _verdict = "GO_CPU_DRY_LAUNCH" if (_dry_ok and _finite) else "NO_GO_ZERO_MIXTURE_GATE"
+            print(
+                json.dumps(
+                    {
+                        "phase": "dry_launch_complete",
+                        "verdict": _verdict,
+                        "zero_mixture_ok": _dry_ok,
+                        "train_gm_loss": _trainer_result.get("train_gm_loss"),
+                        "validation_gm_loss": _trainer_result.get("validation_gm_loss"),
+                        "counters": _dry_report["counters"],
+                        "failing_zero": _dry_report["failing_zero_counters"],
+                        "failing_positive": _dry_report["failing_positive_counters"],
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            return
+        history, selected_validation = _trainer_result
     elif isinstance(model, torch.nn.Module) and loaded_checkpoint is None:
         training_fiber_cache = {}
         with tracelet_fiber_executor(

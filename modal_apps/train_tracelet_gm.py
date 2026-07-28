@@ -698,6 +698,8 @@ def _run_remote(
     corrupted_prior_mix: bool = False,
     cycle_op_mix: bool = False,
     disable_ring_grow_macro: bool = False,
+    dry_launch: bool = False,
+    dry_launch_output: str | None = None,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str | None = None,
     analogue_trace_count: int = 0,
@@ -758,6 +760,12 @@ def _run_remote(
         # Emit --disable-ring-grow-macro (RING_CORE_V1): disable the legacy whole-ring grow macro so ring
         # addition is purely compositional. Grow head params retained (warm-start-safe), family masked dead.
         recipe["arguments"]["disable_ring_grow_macro"] = True
+    if dry_launch:
+        # CPU dry-launch: the gate runs the real trainer to the first editing batch + one validation forward,
+        # then exits before backward/optimizer (proves the zero-mixture path; optimizer_steps=0).
+        recipe["arguments"]["dry_launch"] = True
+        if dry_launch_output:
+            recipe["arguments"]["dry_launch_output"] = dry_launch_output
     if organic_vocabulary:
         # Emit --organic-vocabulary: predict/edit the whole drug-like organic subset (15 (element,
         # valence) classes over C/N/O/F/S/P/Cl/Br/I/B) instead of CNOF-only. Warm-start B compatibly.
@@ -1441,6 +1449,58 @@ def audit_teacher_stage(
     }
     print(json.dumps({"phase": "remote_audit_complete", **summary}), flush=True)
     return summary
+
+
+@app.function(
+    image=image,
+    cpu=8.0,
+    memory=65536,
+    timeout=2 * 3600,
+    volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
+)
+def dry_launch_stage(
+    run_label: str,
+    recipe_name: str = RECIPE_NAME,
+    initialization_source_run: str | None = None,
+    initialization_checkpoint_name: str = "checkpoint.best_so_far.pt",
+    compatible_initialization: bool = False,
+    corrupted_prior_mix: bool = False,
+    cycle_op_mix: bool = False,
+    disable_ring_grow_macro: bool = False,
+    organic_vocabulary: bool = False,
+    analogue_trace_pool: str = "",
+    analogue_trace_count: int = 0,
+    corrupted_prior_count: int = 0,
+    scaled_manifest: str = "",
+    training_steps: int | None = None,
+    schedule_steps: int | None = None,
+) -> dict[str, object]:
+    # CPU-only dry launch of the REAL trainer (owner mandate §2): zero-mixture, no de-novo cache required,
+    # no A100. resolve_torch_device auto-selects CPU (no CUDA on this container).
+    return _run_remote(
+        run_label=run_label,
+        smoke=False,
+        require_path_cache=False,
+        require_training_support_cache=False,
+        skip_rollouts=True,
+        recipe_name=recipe_name,
+        path_cache_source_run=None,
+        dry_launch=True,
+        dry_launch_output=f"/artifacts/{run_label}/dry_launch.json",
+        training_steps=training_steps,
+        schedule_steps=schedule_steps,
+        initialization_source_run=initialization_source_run,
+        initialization_checkpoint_name=initialization_checkpoint_name,
+        compatible_initialization=compatible_initialization,
+        corrupted_prior_mix=corrupted_prior_mix,
+        cycle_op_mix=cycle_op_mix,
+        disable_ring_grow_macro=disable_ring_grow_macro,
+        organic_vocabulary=organic_vocabulary,
+        analogue_trace_pool=analogue_trace_pool or None,
+        analogue_trace_count=analogue_trace_count,
+        corrupted_prior_count=corrupted_prior_count or None,
+        scaled_manifest=scaled_manifest or None,
+    )
 
 
 @app.function(
@@ -2319,6 +2379,7 @@ def main(
     corrupted_prior_mix: bool = False,
     cycle_op_mix: bool = False,
     disable_ring_grow_macro: bool = False,
+    dry_launch: bool = False,
     organic_vocabulary: bool = False,
     analogue_trace_pool: str = "",
     analogue_trace_count: int = 0,
@@ -2334,6 +2395,7 @@ def main(
             compile_only,
             support_compile_only,
             train_only,
+            dry_launch,
             evaluate_only,
             rollout_evaluate_only,
             property_rollout_evaluate_only,
@@ -2541,6 +2603,32 @@ def main(
             organic_vocabulary,
         )
         phase = "compile_spawned"
+    elif dry_launch:
+        call = dry_launch_stage.spawn(
+            run_label,
+            recipe_name,
+            initialization_source_run=(
+                initialization_source_run_label or source_run_label
+                if (
+                    initialize_from_source_checkpoint
+                    or initialize_compatible_from_source_checkpoint
+                )
+                else None
+            ),
+            initialization_checkpoint_name=checkpoint_name,
+            compatible_initialization=initialize_compatible_from_source_checkpoint,
+            corrupted_prior_mix=corrupted_prior_mix,
+            cycle_op_mix=cycle_op_mix,
+            disable_ring_grow_macro=disable_ring_grow_macro,
+            organic_vocabulary=organic_vocabulary,
+            analogue_trace_pool=analogue_trace_pool,
+            analogue_trace_count=analogue_trace_count,
+            corrupted_prior_count=corrupted_prior_count,
+            scaled_manifest=scaled_manifest,
+            training_steps=training_steps or None,
+            schedule_steps=schedule_steps or None,
+        )
+        phase = "dry_launch_spawned"
     elif train_only:
         call = train_stage.spawn(
             run_label,
