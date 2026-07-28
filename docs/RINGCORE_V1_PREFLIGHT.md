@@ -149,7 +149,15 @@ launch the full run.** Post-run gate: `broad_preflight_gate.py`. Rollout metrics
 validity, cycle-rank correctness, ring-op target counts, natural ring-op usage, topology classes reached,
 ring-edit path length, reversal/cycle/return-to-source rates, net structural displacement, canonical
 branching, legal-mark enumeration cost, throughput, broad-element/charge preservation.
-## 7. Unseen-lead + topology-stratified rollouts ⏳
+## 7. Unseen-lead + topology-stratified rollouts 🔶 HARNESS READY
+`scripts/ring_core_rollout_panel.py --checkpoint <RingCore ckpt>` runs the unseen-lead + topology-stratified
+panels and emits all 13 mandate metrics; it loads the RingCore checkpoint via
+`load_factorized_rollout_checkpoint` (scope-hash-gated) with the cycle-op + grow-disable metadata wiring.
+**Harness self-validated** on a representative (untrained) local model — all 13 metrics present + finite:
+validity 1.0, cycle-rank correctness 1.0, **no `ring_system_grow` in the op-counts** (disable holds in the
+rollout regime), charge preserved 1.0, throughput ~81 marks/s, canonical branching ~19, enumeration cost
+~207 ms/lead. (Untrained numbers prove the HARNESS; the production numbers come from the bounded checkpoint.)
+**On launch:** run the harness against the checkpoint → fills §6 rollout metrics + §7 panels + §8 throughput.
 ## 8. Measured throughput ⏳
 ## 9. Projected full-run cost ⏳
 ## 10. Decision ⏳ (final call gated on §6)

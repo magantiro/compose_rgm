@@ -1,0 +1,116 @@
+{
+  "config": {
+    "horizon": 16,
+    "op_time": 12.0,
+    "rollouts_per_lead": 4,
+    "unseen_leads": 12
+  },
+  "model": {
+    "enable_cycle_ops": true,
+    "enable_ring_grow_macro": false,
+    "source": "representative_local_model_UNTRAINED"
+  },
+  "note": "with --checkpoint absent these numbers validate the HARNESS on an untrained model (metrics present + finite); the production numbers come from the bounded RingCore checkpoint.",
+  "topology_stratified_panel": {
+    "10_canonical_branching": {
+      "max": 20.0,
+      "mean": 16.1,
+      "median": 16.0,
+      "p90": 19.0
+    },
+    "11_legal_mark_enumeration_cost_ms": 111.892,
+    "12_throughput_marks_per_s": 137.3,
+    "13_charge_preserved_rate": 1.0,
+    "1_all_state_validity": 1.0,
+    "2_cycle_rank_correctness": 1.0,
+    "3_all_op_counts": {
+      "atom_delete": 104,
+      "atom_insert": 111,
+      "atom_restate": 128,
+      "bond_delete": 83,
+      "bond_insert": 111,
+      "bond_reorder": 78,
+      "bond_reroute": 10,
+      "ring_system_delete": 15
+    },
+    "3_ring_op_target_counts": {
+      "bond_delete": 83,
+      "bond_insert": 111,
+      "ring_system_delete": 15
+    },
+    "4_natural_ring_op_usage": 1.0,
+    "5_topology_classes_reached": {
+      "acyclic": 11,
+      "fused/aromatic": 1,
+      "fused/saturated": 14,
+      "mono/saturated": 14
+    },
+    "6_ring_edit_path_length": {
+      "max": 10.0,
+      "mean": 5.225,
+      "median": 6.0,
+      "p90": 8.0
+    },
+    "7_reversal_rate": 0.0703,
+    "7_revisit_rate": 0.0437,
+    "8_return_to_source_rate": 0.0,
+    "9_net_structural_displacement": {
+      "max": 1.0,
+      "mean": 0.956,
+      "median": 0.96,
+      "p90": 1.0
+    },
+    "n_rollouts": 40
+  },
+  "unseen_lead_panel": {
+    "10_canonical_branching": {
+      "max": 22.0,
+      "mean": 19.0,
+      "median": 19.0,
+      "p90": 20.0
+    },
+    "11_legal_mark_enumeration_cost_ms": 206.908,
+    "12_throughput_marks_per_s": 80.7,
+    "13_charge_preserved_rate": 1.0,
+    "1_all_state_validity": 1.0,
+    "2_cycle_rank_correctness": 1.0,
+    "3_all_op_counts": {
+      "atom_delete": 144,
+      "atom_insert": 120,
+      "atom_restate": 144,
+      "bond_delete": 121,
+      "bond_insert": 115,
+      "bond_reorder": 90,
+      "ring_system_delete": 34
+    },
+    "3_ring_op_target_counts": {
+      "bond_delete": 121,
+      "bond_insert": 115,
+      "ring_system_delete": 34
+    },
+    "4_natural_ring_op_usage": 1.0,
+    "5_topology_classes_reached": {
+      "acyclic": 9,
+      "fused/aromatic": 20,
+      "fused/saturated": 7,
+      "mono/aromatic": 2,
+      "mono/saturated": 10
+    },
+    "6_ring_edit_path_length": {
+      "max": 9.0,
+      "mean": 5.625,
+      "median": 5.5,
+      "p90": 8.0
+    },
+    "7_reversal_rate": 0.0612,
+    "7_revisit_rate": 0.0169,
+    "8_return_to_source_rate": 0.0,
+    "9_net_structural_displacement": {
+      "max": 0.958,
+      "mean": 0.892,
+      "median": 0.899,
+      "p90": 0.934
+    },
+    "n_rollouts": 48
+  }
+}
