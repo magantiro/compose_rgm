@@ -152,15 +152,28 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
+    import math
+
     import torch
 
     from compose_v4.data.production_edit_corpus import load_production_edit_corpus
     from compose_v4.data.representability_overlay import load_overlay
+    from compose_v4.experiments.factorized_mark_conditional import (
+        assert_teachers_in_exact_candidates,
+        factorized_mark_bregman_loss,
+        sample_factorized_mark_batch,
+    )
+    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
+    from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
     from ring_core_identity import PRODUCTION_LAYER_WEIGHTS
 
     artifact_volume.reload()
     overlay = load_overlay(Path(OVERLAY_PATH))
     contract = json.loads((Path(audit_root) / "BUILD_COMPLETE.json").read_text()).get("contract", {})
+
+    from train_tracelet_cnof_gate import _build_ring_core_seed_ring_catalog
+
+    corpus_ring_catalog = _build_ring_core_seed_ring_catalog(40)
 
     corpus = load_production_edit_corpus(
         Path(audit_root), mmp_pool_path=Path(mmp_pool), partition="validation",
@@ -168,17 +181,79 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
         packed_root=Path(packed_root), packed_mmp_root=Path(mmp_root),
         representability_overlay=overlay, path_length_bins=(5, 9, 13), seed=5,
     )
-    # Every remaining trace must be scoreable: load_production_edit_corpus already raises on an unlisted
-    # unsupported teacher, so reaching here means zero unlisted violations across the whole partition.
+
+    # Reaching here already proves ZERO UNLISTED unsupported teachers across the whole partition:
+    # load_production_edit_corpus raises on any unsupported teacher the overlay does not list.
+    records = corpus.records
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # The PRODUCTION capability flags. Representability is a property of the configured heads, so the
+    # gate must use the same enable_* set the scientific run uses -- untrained weights are fine, since
+    # this asserts scoreability and finiteness, never quality.
+    model = FactorizedTraceletRateModel(
+        corpus_ring_catalog,
+        hidden_dim=256,
+        message_passing_steps=6,
+        ring_electronic_mode="factorized_local",
+        rate_factorization="hierarchical",
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    ).to(device)
+    model.eval()
+
+    # Traverse the COMPLETE validation corpus through the real batch builder, the exact candidate
+    # enumerator, the teacher-in-candidate invariant, the model forward, and the canonical-successor loss.
+    batch_size = 64
+    batches = 0
+    teacher_violations = 0
+    nonfinite = 0
+    losses = []
+    total = len(records)
+    for start in range(0, total, batch_size):
+        chunk = records[start:start + batch_size]
+        if not chunk:
+            continue
+        batch = sample_factorized_mark_batch(
+            tuple(chunk), batch_size=len(chunk), seed=1000 + start,
+            late_time_fraction=0.5, operational_horizon=16.0,
+            progress_stratification_fraction=0.5,
+            ring_catalog=corpus_ring_catalog,
+            compute_ring_restates=True, compute_cyclic_graft=True, compute_ring_opening=True,
+        )
+        try:
+            assert_teachers_in_exact_candidates(batch)
+        except Exception as exc:  # noqa: BLE001 -- a violation is the thing we are testing for
+            teacher_violations += 1
+            return {"phase": "EVALUATION_PATH_GATE", "verdict": "FAIL",
+                    "reason": f"teacher outside exact candidates at record {start}: {exc}"}
+        with torch.no_grad():
+            prediction = model.forward_mark_batch(batch.to(device))
+            loss = factorized_mark_bregman_loss(prediction, batch.to(device))
+        value = float(loss.detach().cpu())
+        if not math.isfinite(value):
+            nonfinite += 1
+        losses.append(value)
+        batches += 1
+
+    verdict = "PASS" if (teacher_violations == 0 and nonfinite == 0 and batches > 0) else "FAIL"
     result = {
         "phase": "EVALUATION_PATH_GATE",
-        "validation_records": len(corpus.records),
+        "verdict": verdict,
+        "validation_records_traversed": total,
+        "batches": batches,
+        "teacher_in_candidate_violations": teacher_violations,
+        "teacher_in_candidate_rate": 1.0 if teacher_violations == 0 else 0.0,
+        "nonfinite_losses": nonfinite,
+        "mean_loss": (sum(losses) / len(losses)) if losses else None,
         "records_by_layer": corpus.provenance["records_by_layer"],
         "layer_storage": corpus.provenance["layer_storage"],
         "unlisted_unsupported_teachers": 0,
         "overlay_checksum": overlay["effective_corpus_checksum"],
-        "torch_finite_check": bool(torch.isfinite(torch.tensor([0.0])).all()),
-        "verdict": "PASS",
+        "device": str(device),
     }
     print(json.dumps(result, sort_keys=True), flush=True)
     return result
