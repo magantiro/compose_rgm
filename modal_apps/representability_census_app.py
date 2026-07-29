@@ -153,6 +153,7 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
     import math
+    import time
 
     import torch
 
@@ -208,6 +209,10 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
     # Traverse the COMPLETE validation corpus through the real batch builder, the exact candidate
     # enumerator, the teacher-in-candidate invariant, the model forward, and the canonical-successor loss.
     batch_size = 64
+    total_batches = (len(records) + batch_size - 1) // batch_size
+    print(json.dumps({"phase": "gate_start", "records": len(records),
+                      "batches_planned": total_batches, "device": str(device)}), flush=True)
+    started = time.time()
     batches = 0
     teacher_violations = 0
     nonfinite = 0
@@ -218,7 +223,7 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
         if not chunk:
             continue
         batch = sample_factorized_mark_batch(
-            tuple(chunk), batch_size=len(chunk), seed=1000 + start,
+            tuple(chunk), batch_size=len(chunk), seed=1000 + start, workers=8,
             late_time_fraction=0.5, operational_horizon=16.0,
             progress_stratification_fraction=0.5,
             ring_catalog=corpus_ring_catalog,
@@ -238,6 +243,13 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
             nonfinite += 1
         losses.append(value)
         batches += 1
+        if batches % 10 == 0 or batches == total_batches:
+            elapsed = time.time() - started
+            print(json.dumps({"phase": "gate_progress", "batches": batches,
+                              "of": total_batches, "seconds": round(elapsed, 1),
+                              "sec_per_batch": round(elapsed / batches, 2),
+                              "violations": teacher_violations, "nonfinite": nonfinite},
+                             sort_keys=True), flush=True)
 
     verdict = "PASS" if (teacher_violations == 0 and nonfinite == 0 and batches > 0) else "FAIL"
     result = {
