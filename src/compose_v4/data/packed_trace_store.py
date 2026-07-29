@@ -21,6 +21,7 @@ mmp 0.091 ms; full train partition ~0.63 min instead of hours, at ~102 B/trace g
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 from pathlib import Path
 
@@ -35,9 +36,51 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 PACKED_STORE_SCHEMA = "compose.data.packed_trace"
 PACKED_STORE_SCHEMA_VERSION = 1
 
+# The packed progress sampler is a CLOSED FORM valid only under the unit-power scheduler: it substitutes
+# alpha for t because alpha(t) = 1 - (1-t)^1 = t. A future scheduler change must invalidate this store (or
+# force it through a generalized path) rather than silently reuse unit-power logic, so the scheduler
+# identity travels with the artifact and is checked on load.
+PROGRESS_SAMPLER_VERSION = 1
+_SAMPLER_IMPLEMENTATION_SOURCES = (
+    "src/compose_v4/data/packed_edit_cache.py",
+    "src/compose_v4/rewrite/progress.py",
+    "src/compose_v4/experiments/tracelet_conditional.py",
+)
+
 
 class PackedStoreError(RuntimeError):
     """The packed store is unusable or was built under a different contract."""
+
+
+def sampler_contract() -> dict:
+    """Identity of the progress/time sampling law this store's closed forms assume."""
+    from compose_v4.rewrite.progress import PowerSurvivalScheduler
+
+    scheduler = PowerSurvivalScheduler()
+    repo = Path(__file__).resolve().parents[3]
+    digest = hashlib.sha256()
+    for rel in _SAMPLER_IMPLEMENTATION_SOURCES:
+        source = repo / rel
+        digest.update(rel.encode())
+        digest.update(source.read_bytes() if source.exists() else b"<MISSING>")
+    return {
+        "scheduler_type": type(scheduler).__name__,
+        "scheduler_power": float(scheduler.power),
+        "time_sampling_implementation_hash": digest.hexdigest()[:16],
+        "progress_sampler_version": PROGRESS_SAMPLER_VERSION,
+    }
+
+
+def assert_closed_form_applies() -> None:
+    """The packed sampler treats alpha == t. Refuse to build or load a store when that is false."""
+    from compose_v4.rewrite.progress import PowerSurvivalScheduler
+
+    power = float(PowerSurvivalScheduler().power)
+    if power != 1.0:
+        raise PackedStoreError(
+            f"packed progress sampling assumes alpha(t) == t (unit scheduler power), but power == {power}; "
+            "the closed forms in packed_edit_cache must be generalized before this store can be used"
+        )
 
 
 class PackedTraceProgress(TraceProgressCTMC):
@@ -58,6 +101,13 @@ class PackedTraceProgress(TraceProgressCTMC):
             )
         self.trace = trace
         self.scheduler = scheduler or PowerSurvivalScheduler()
+        # The module-level guard only inspects the DEFAULT scheduler; an explicitly-supplied non-unit one
+        # would otherwise slip past it and be used by the packed closed-form progress sampler.
+        if float(self.scheduler.power) != 1.0:
+            raise PackedStoreError(
+                f"packed progress sampling assumes alpha(t) == t, but the supplied scheduler has "
+                f"power == {self.scheduler.power}"
+            )
         self.system = system  # only needed by the replaying paths, which this class never takes
         self.checkpoint_interval = None
         self._states = states
@@ -148,9 +198,11 @@ def write_packed_shard(
     with gzip.open(path, "wt") as handle:
         for entry in entries:
             handle.write(json.dumps(entry, sort_keys=True) + "\n")
+    assert_closed_form_applies()
     manifest = {
         "schema": PACKED_STORE_SCHEMA,
         "schema_version": PACKED_STORE_SCHEMA_VERSION,
+        "sampler_contract": sampler_contract(),
         "entries": len(entries),
         "states": sum(len(entry["states"]) for entry in entries),
         "provenance": dict(provenance),
@@ -186,6 +238,16 @@ def read_packed_shard(
             f"packed-store schema version {manifest.get('schema_version')!r} != "
             f"{PACKED_STORE_SCHEMA_VERSION}; rebuild the store"
         )
+    assert_closed_form_applies()
+    stored_contract = manifest.get("sampler_contract") or {}
+    current_contract = sampler_contract()
+    for key in ("scheduler_type", "scheduler_power", "progress_sampler_version"):
+        if stored_contract.get(key) != current_contract[key]:
+            raise PackedStoreError(
+                f"sampler contract mismatch on {key}: store built under {stored_contract.get(key)!r}, "
+                f"current is {current_contract[key]!r}; the packed closed-form progress law no longer "
+                "applies to this store"
+            )
     if expected_provenance:
         got = manifest.get("provenance") or {}
         for key, value in expected_provenance.items():
@@ -210,3 +272,33 @@ def read_packed_shard(
 def build_packed_entry(trace_record: dict, path: TraceProgressCTMC) -> dict:
     """One packed store row: the original trace record plus its materialized states."""
     return {"trace": trace_record, "states": pack_path(path)}
+
+
+# ---- integrity policy ---------------------------------------------------------------------------------
+# Production training loads with verify_fraction=0: the audit shards are authoritative, the Modal reducer
+# fully verified them, and each packed shard is bound to its source's content hash. Re-executing every
+# rewrite on every load would spend hours re-proving what the immutable source already certifies.
+#
+# What production DOES run is this fixed sentinel: a small, deterministic, first-N replay at startup. It
+# is not random and not per-worker -- random replay inside dataloader workers would multiply the cost by
+# the worker count, vary run to run, and still not be a proof.
+SENTINEL_REPLAY_ENTRIES = 8
+
+
+def sentinel_replay_check(shard_path: Path, *, entries: int = SENTINEL_REPLAY_ENTRIES) -> dict:
+    """Replay the first ``entries`` packed traces and assert they reproduce their stored states.
+
+    Deterministic by construction (first N, not sampled), so a failure is reproducible and a pass means
+    the same thing on every run. Cheap enough to sit in the startup path of a multi-hour training job.
+    """
+    checked = 0
+    with gzip.open(shard_path, "rt") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or checked >= entries:
+                break
+            entry = json.loads(line)
+            states = [decode_state(payload) for payload in entry["states"]]
+            replay_verify(entry["trace"], states)
+            checked += 1
+    return {"shard": str(shard_path), "sentinel_entries_replayed": checked}

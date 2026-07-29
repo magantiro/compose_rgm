@@ -218,3 +218,86 @@ def test_missing_manifest_is_refused(tmp_path):
     shard.write_bytes(b"")
     with pytest.raises(PackedStoreError, match="no manifest"):
         list(read_packed_shard(shard))
+
+
+# ---- sampler contract: the closed form must not outlive its assumptions ------------------------------
+
+
+def test_sampler_contract_records_the_scheduler_identity():
+    from compose_v4.data.packed_trace_store import PROGRESS_SAMPLER_VERSION, sampler_contract
+
+    contract = sampler_contract()
+    assert contract["scheduler_type"] == "PowerSurvivalScheduler"
+    assert contract["scheduler_power"] == 1.0
+    assert contract["progress_sampler_version"] == PROGRESS_SAMPLER_VERSION
+    assert len(contract["time_sampling_implementation_hash"]) == 16
+
+
+def test_non_unit_scheduler_power_blocks_the_packed_path(monkeypatch):
+    """A future scheduler change must invalidate the closed form, not silently reuse unit-power logic."""
+    import compose_v4.rewrite.progress as progress_module
+    from compose_v4.data.packed_trace_store import PackedStoreError, assert_closed_form_applies
+
+    original = progress_module.PowerSurvivalScheduler
+    # NB: subclassing and setting `power = 2.0` would NOT work -- the dataclass __init__ reassigns the
+    # original field default. Patch with a factory that builds a genuinely non-unit scheduler.
+    monkeypatch.setattr(progress_module, "PowerSurvivalScheduler", lambda: original(power=2.0))
+    with pytest.raises(PackedStoreError, match="assumes alpha\\(t\\) == t"):
+        assert_closed_form_applies()
+
+
+def test_stored_contract_mismatch_is_refused_on_load(tmp_path, monkeypatch):
+    """A store built under one sampling law must not load under another."""
+    if not POOL.exists():
+        pytest.skip("local analogue pool sample unavailable")
+    import compose_v4.data.packed_trace_store as store
+    from compose_v4.rewrite.trace_shard import encode_trace_record
+
+    record = json.loads(POOL.read_text().splitlines()[0])
+    replayed = TraceProgressCTMC(rewrite_trace_from_record(record))
+    shard = tmp_path / "packed_0000.jsonl.gz"
+    store.write_packed_shard(
+        shard,
+        [
+            store.build_packed_entry(
+                encode_trace_record(
+                    replayed.trace, n_slots=40, seed=0, trace_id="t0",
+                    partition="train", layer="mmp",
+                ),
+                replayed,
+            )
+        ],
+        provenance={},
+    )
+    monkeypatch.setattr(store, "PROGRESS_SAMPLER_VERSION", 99)
+    with pytest.raises(store.PackedStoreError, match="sampler contract mismatch"):
+        list(store.read_packed_shard(shard))
+
+
+def test_sentinel_replay_is_deterministic_and_passes_on_a_good_store(tmp_path):
+    """Fixed first-N replay: same entries every run, so a pass/failure means the same thing each time."""
+    if not POOL.exists():
+        pytest.skip("local analogue pool sample unavailable")
+    import compose_v4.data.packed_trace_store as store
+    from compose_v4.rewrite.trace_shard import encode_trace_record
+
+    entries = []
+    for i, line in enumerate(POOL.read_text().splitlines()[:5]):
+        if not line.strip():
+            continue
+        replayed = TraceProgressCTMC(rewrite_trace_from_record(json.loads(line)))
+        entries.append(
+            store.build_packed_entry(
+                encode_trace_record(
+                    replayed.trace, n_slots=40, seed=0, trace_id=f"t{i}",
+                    partition="train", layer="mmp",
+                ),
+                replayed,
+            )
+        )
+    shard = tmp_path / "packed_0000.jsonl.gz"
+    store.write_packed_shard(shard, entries, provenance={})
+    first = store.sentinel_replay_check(shard, entries=3)
+    second = store.sentinel_replay_check(shard, entries=3)
+    assert first == second, "the sentinel must be deterministic, not sampled"
+    assert first["sentinel_entries_replayed"] == 3

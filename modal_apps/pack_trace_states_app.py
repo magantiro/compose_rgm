@@ -87,6 +87,7 @@ def pack_shard(source_subdir: str, dest_subdir: str, layer: str, partition: str,
     import time
 
     from compose_v4.data.packed_trace_store import (
+        assert_closed_form_applies,
         build_packed_entry,
         source_shard_fingerprint,
         write_packed_shard,
@@ -95,6 +96,7 @@ def pack_shard(source_subdir: str, dest_subdir: str, layer: str, partition: str,
     from compose_v4.rewrite.trace_shard import decode_trace_record, read_shard
     from ring_core_identity import recompute_operator_registry_hash
 
+    assert_closed_form_applies()
     artifact_volume.reload()
     source = Path("/artifacts") / source_subdir / layer / partition / name
     dest = Path("/artifacts") / dest_subdir / layer / partition / name
