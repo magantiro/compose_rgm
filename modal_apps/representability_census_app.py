@@ -175,17 +175,39 @@ def gate_shard(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: str,
     from ring_core_identity import PRODUCTION_LAYER_WEIGHTS
     from train_tracelet_cnof_gate import _build_ring_core_seed_ring_catalog
 
-    artifact_volume.reload()
-    overlay = load_overlay(Path(OVERLAY_PATH))
-    contract = json.loads((Path(audit_root) / "BUILD_COMPLETE.json").read_text()).get("contract", {})
-    ring_catalog = _build_ring_core_seed_ring_catalog(40)
+    import traceback
 
-    corpus = load_production_edit_corpus(
-        Path(audit_root), mmp_pool_path=Path(mmp_pool), partition=partition,
-        layer_weights=PRODUCTION_LAYER_WEIGHTS, expected_contract=contract,
-        packed_root=Path(packed_root), packed_mmp_root=Path(mmp_root),
-        representability_overlay=overlay, path_length_bins=(5, 9, 13), seed=5,
-    )
+    def _as_error(exc):
+        detail = {"partition": partition, "slice": slice_index, "records_checked": 0,
+                  "violations": 1, "nonfinite": 0, "mean_loss": None, "seconds": 0.0,
+                  "error_type": type(exc).__name__, "error": str(exc)[:600],
+                  "traceback": traceback.format_exc()[-1200:],
+                  "first_violation": f"{type(exc).__name__}: {str(exc)[:300]}"}
+        print(json.dumps({"phase": "gate_shard_error", **{k: v for k, v in detail.items()
+                                                          if k != "traceback"}}, sort_keys=True), flush=True)
+        print(detail["traceback"], flush=True)
+        return detail
+
+    try:
+        artifact_volume.reload()
+        overlay = load_overlay(Path(OVERLAY_PATH))
+        contract = json.loads(
+            (Path(audit_root) / "BUILD_COMPLETE.json").read_text()
+        ).get("contract", {})
+        ring_catalog = _build_ring_core_seed_ring_catalog(40)
+    except Exception as exc:  # noqa: BLE001 -- surfaced as data, never as an undeserializable raise
+        return _as_error(exc)
+
+    try:
+        corpus = load_production_edit_corpus(
+            Path(audit_root), mmp_pool_path=Path(mmp_pool), partition=partition,
+            layer_weights=PRODUCTION_LAYER_WEIGHTS, expected_contract=contract,
+            packed_root=Path(packed_root), packed_mmp_root=Path(mmp_root),
+            representability_overlay=overlay, path_length_bins=(5, 9, 13), seed=5,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return _as_error(exc)
+
     # stride slice: interleaved, so every slice sees all three layers rather than one contiguous block
     records = corpus.records[slice_index::n_slices]
     if cap:
@@ -204,30 +226,33 @@ def gate_shard(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: str,
     started = time.time()
     batch_size, checked, violations, nonfinite, losses = 64, 0, 0, 0, []
     first_violation = None
-    for offset in range(0, len(records), batch_size):
-        chunk = records[offset:offset + batch_size]
-        if not chunk:
-            continue
-        batch = sample_factorized_mark_batch(
-            tuple(chunk), batch_size=len(chunk), seed=7000 + slice_index * 100000 + offset,
-            late_time_fraction=0.5, operational_horizon=16.0,
-            progress_stratification_fraction=0.5, workers=4, ring_catalog=ring_catalog,
-            compute_ring_restates=True, compute_cyclic_graft=True, compute_ring_opening=True,
-        )
-        try:
-            assert_teachers_in_exact_candidates(batch)
-        except Exception as exc:  # noqa: BLE001 -- the condition under test
-            violations += 1
-            first_violation = f"{partition} slice {slice_index} offset {offset}: {exc}"[:400]
-            break
-        with torch.no_grad():
-            moved = batch.to(device)
-            value = float(factorized_mark_bregman_loss(model.forward_mark_batch(moved), moved)
-                          .detach().cpu())
-        if not math.isfinite(value):
-            nonfinite += 1
-        losses.append(value)
-        checked += len(chunk)
+    try:
+      for offset in range(0, len(records), batch_size):
+          chunk = records[offset:offset + batch_size]
+          if not chunk:
+              continue
+          batch = sample_factorized_mark_batch(
+              tuple(chunk), batch_size=len(chunk), seed=7000 + slice_index * 100000 + offset,
+              late_time_fraction=0.5, operational_horizon=16.0,
+              progress_stratification_fraction=0.5, workers=4, ring_catalog=ring_catalog,
+              compute_ring_restates=True, compute_cyclic_graft=True, compute_ring_opening=True,
+          )
+          try:
+              assert_teachers_in_exact_candidates(batch)
+          except Exception as exc:  # noqa: BLE001 -- the condition under test
+              violations += 1
+              first_violation = f"{partition} slice {slice_index} offset {offset}: {exc}"[:400]
+              break
+          with torch.no_grad():
+              moved = batch.to(device)
+              value = float(factorized_mark_bregman_loss(model.forward_mark_batch(moved), moved)
+                            .detach().cpu())
+          if not math.isfinite(value):
+              nonfinite += 1
+          losses.append(value)
+          checked += len(chunk)
+    except Exception as exc:  # noqa: BLE001
+        return {**_as_error(exc), "records_checked": checked}
 
     result = {"partition": partition, "slice": slice_index, "records_checked": checked,
               "violations": violations, "nonfinite": nonfinite,
