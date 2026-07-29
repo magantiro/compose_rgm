@@ -19,14 +19,16 @@ from compose_v4.experiments.successor_kernel import (
     KernelIdentity,
     SuccessorBatch,
     SuccessorKernelViolation,
+    SupportSignature,
     UniformSuccessorKernel,
     assert_arms_comparable,
     validate_successor_batch,
 )
 
-_IDENTITY = KernelIdentity(
-    implementation="test", capability_flags=(("enable_cycle_ops", True),), operator_registry_hash="abc123"
+_SIGNATURE = SupportSignature(
+    operator_registry_hash="abc123", capability_flags=(("enable_cycle_ops", True),)
 )
+_IDENTITY = KernelIdentity(implementation="test", support_signature=_SIGNATURE)
 
 
 def _batch(rows, *, source="x0", identity=_IDENTITY, virtual_mass=0.0):
@@ -143,7 +145,8 @@ def test_arms_with_different_capability_flags_are_refused():
 
         def identity(self):
             return KernelIdentity(
-                implementation="other", capability_flags=(("enable_cycle_ops", False),)
+                implementation="other",
+                support_signature=SupportSignature(capability_flags=(("enable_cycle_ops", False),)),
             )
 
     class _Ours:
@@ -152,7 +155,8 @@ def test_arms_with_different_capability_flags_are_refused():
 
         def identity(self):
             return KernelIdentity(
-                implementation="ours", capability_flags=(("enable_cycle_ops", True),)
+                implementation="ours",
+                support_signature=SupportSignature(capability_flags=(("enable_cycle_ops", True),)),
             )
 
     with pytest.raises(SuccessorKernelViolation, match="support-determining"):
@@ -161,8 +165,9 @@ def test_arms_with_different_capability_flags_are_refused():
 
 def test_differing_checkpoint_alone_remains_comparable():
     """A baseline legitimately has no checkpoint; only support-determining fields must agree."""
-    left = KernelIdentity(implementation="learned", capability_flags=(("a", True),), checkpoint_sha256="ff")
-    right = KernelIdentity(implementation="uniform", capability_flags=(("a", True),), checkpoint_sha256=None)
+    shared = SupportSignature(capability_flags=(("a", True),))
+    left = KernelIdentity(implementation="learned", support_signature=shared, checkpoint_sha256="ff")
+    right = KernelIdentity(implementation="uniform", support_signature=shared, checkpoint_sha256=None)
     assert left.differs_only_in_law(right)
 
 

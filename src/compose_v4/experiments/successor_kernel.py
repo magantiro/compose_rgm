@@ -29,13 +29,29 @@ Invariants maintained (checked by ``validate_successor_batch``)
 * virtual (self / immediate-backtrack) mass is reported EXPLICITLY rather than silently renormalized away,
   because deleting it and renormalizing changes every productive rate.
 
-Relationship to existing code
------------------------------
-``experiments.canonical_successor_distillation.aggregate_canonical_successor_rates`` already performs the
-rate-space alias merge and the productive/virtual split, and its aggregation logic is executor-agnostic --
-the rewrite runtime is used at exactly one point, to execute a mark. The production implementation of this
-protocol therefore DELEGATES to that function (parameterizing its runtime, which is currently pinned to the
-de-novo system) instead of reimplementing the merge. This module deliberately adds no second aggregation.
+Relationship to existing code -- established by tracing, not assumption
+-----------------------------------------------------------------------
+The trained objective is MARK-LEVEL. ``factorized_mark_bregman_loss`` is
+
+    loss = total_hazard - teacher_rate * (log_hazard + selected_mark_log_probability)
+
+a Poisson-KL Generator Matching loss "in normalized marked-rate form" that scores the selected teacher
+MARK. Consequently there is **no production canonical-successor aggregator wired into training or
+rollout**: both ``model.segmented_successor`` and
+``experiments.canonical_successor_distillation.aggregate_canonical_successor_rates`` have test callers
+only. The single exception is the graft family, which already receives a within-fiber quotient at training
+time via ``graft_successor_groups`` -- so the trained law is mark-level EXCEPT for graft.
+
+Two consequences, both load-bearing:
+
+1. The molecular kernel is a DERIVED object: production mark log-probabilities -> execute each mark through
+   the production executor -> group by the production ``canonical_state_key`` -> aggregate. The "one
+   kernel" discipline is therefore about implementing that DERIVATION exactly once, which is what the
+   unified evaluator is for. ``model.segmented_successor`` is the authoritative aggregation implementation
+   for that step; the distillation aggregator is a CROSS-CHECK only, never a second production definition.
+2. E5 is not a nicety. The paper states the process lives on molecules while the objective is trained on
+   marks; quotient invariance is precisely what licenses the derivation. The graft asymmetry must be
+   handled explicitly there rather than averaged over.
 """
 from __future__ import annotations
 
@@ -61,29 +77,57 @@ class SuccessorKernelViolation(ValueError):
 
 
 @dataclass(frozen=True)
+class SupportSignature:
+    """Every field that determines which molecular successors are LEGAL.
+
+    Capability flags and the operator registry alone are not the complete support signature: element and
+    charge vocabularies, the atom size bound, the valence policy, the canonicalizer and executor versions,
+    the persistent-slot schema, the supported AtomInsert arity, the jump-chain policy and the RingCore
+    configuration all change the legal successor set. Two arms may differ in weights, in the name of the
+    probability law, and in controller -- they may NOT differ here, or the comparison between them is not a
+    comparison of laws over a common support.
+    """
+
+    operator_registry_hash: str | None = None
+    capability_flags: tuple[tuple[str, bool], ...] = ()
+    element_vocabulary: tuple[str, ...] = ()
+    charge_vocabulary: tuple[int, ...] = ()
+    max_atoms: int | None = None
+    valence_policy: str | None = None
+    canonicalizer_version: str | None = None
+    executor_version: str | None = None
+    persistent_slot_schema: str | None = None
+    # Production supports AtomInsert with 0 neighbours (grow_root) or exactly 1 (grow_connected); >=2
+    # (vertex subdivision) has no head. Recorded because a change here silently alters legal support.
+    atom_insert_arity_support: tuple[int, ...] = (0, 1)
+    embedded_jump_chain_policy: str | None = None
+    ringcore_configuration: str | None = None
+
+
+@dataclass(frozen=True)
 class KernelIdentity:
     """What kernel produced a batch, so two consumers can prove they used the same process.
 
-    Comparing identities is how the fairness contract between arms is enforced: a learned arm and its
-    uniform control must differ ONLY in the probability assignment, so every other field must be equal.
+    ``support_signature`` is the load-bearing field: it must be EQUAL across arms. ``implementation`` and
+    ``checkpoint_sha256`` are free to differ -- a baseline legitimately has no checkpoint, and differing in
+    the probability law is the entire point of the comparison.
     """
 
     implementation: str
-    capability_flags: tuple[tuple[str, bool], ...]
-    operator_registry_hash: str | None = None
+    support_signature: SupportSignature = SupportSignature()
     checkpoint_sha256: str | None = None
 
-    def differs_only_in_law(self, other: KernelIdentity) -> bool:
-        """True when the two kernels share support-determining configuration.
+    @property
+    def capability_flags(self) -> tuple[tuple[str, bool], ...]:
+        return self.support_signature.capability_flags
 
-        The implementation name and the checkpoint may differ (that is the point of a baseline); the
-        capability flags and operator registry may not, because those determine the LEGAL SUPPORT. A
-        support difference would make any comparison between the arms meaningless.
-        """
-        return (
-            self.capability_flags == other.capability_flags
-            and self.operator_registry_hash == other.operator_registry_hash
-        )
+    @property
+    def operator_registry_hash(self) -> str | None:
+        return self.support_signature.operator_registry_hash
+
+    def differs_only_in_law(self, other: KernelIdentity) -> bool:
+        """True when the two kernels share the ENTIRE support signature."""
+        return self.support_signature == other.support_signature
 
 
 # ---- successors ---------------------------------------------------------------------------------------
@@ -101,7 +145,13 @@ class CanonicalSuccessor:
 
 @dataclass(frozen=True)
 class SuccessorBatch:
-    """The molecular jump law out of one state, over distinct canonical successors."""
+    """The molecular jump law out of one state, over distinct canonical successors.
+
+    Normalization convention: probabilities are over PRODUCTIVE canonical successors CONDITIONED ON
+    TAKING A JUMP. Virtual mass (self-transitions, immediate backtracks) and any terminal/no-jump mass are
+    recorded separately in ``virtual_mass`` and are NOT folded into the productive law -- deleting them and
+    renormalizing would change every productive rate. A wrapper inherits ``virtual_mass`` unchanged.
+    """
 
     source_key: str
     successors: tuple[CanonicalSuccessor, ...]
@@ -253,8 +303,8 @@ class UniformSuccessorKernel:
         base = self._base.identity()
         return KernelIdentity(
             implementation=f"uniform_over_canonical_successors({base.implementation})",
-            capability_flags=base.capability_flags,
-            operator_registry_hash=base.operator_registry_hash,
+            # The support signature is INHERITED verbatim: the wrapper changes the law, never the support.
+            support_signature=base.support_signature,
             checkpoint_sha256=base.checkpoint_sha256,
         )
 
@@ -301,7 +351,7 @@ class ExplicitGraphKernel:
         )
 
     def identity(self) -> KernelIdentity:
-        return KernelIdentity(implementation=self._implementation, capability_flags=())
+        return KernelIdentity(implementation=self._implementation)
 
 
 def _fixture_key(state: MolecularState, states: dict[str, MolecularState]) -> str:

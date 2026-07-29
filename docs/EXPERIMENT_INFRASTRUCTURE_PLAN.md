@@ -19,19 +19,62 @@ editing checkpoint · **[lane]** parallel de-novo lane with its own gates.
    `configs/ringcore_v1_production.json`, or `src/compose_v4/data/**`. `_source_fingerprint()` hashes `src/`,
    `scripts/`, `recipes/` and the Modal app, so edits there change run identity; `configs/`, `docs/`,
    `diagnostics/`, `tests/`, `results/` are outside the fingerprint.
-2. **From scratch.** No reuse of `scripts/exact_doob_enumerable_benchmark.py`,
-   `scripts/doob_guidance_ground_truth.py`, `scripts/e0_toy_h_exactness.py`; the untracked
-   `diagnostics/exactness/exact_doob_enumerable_cap{4,5}.json` are **non-evidence**.
-3. **One evaluator.** No experiment reconstructs successor probabilities. Enforced by test, not intent.
-4. **The evaluator validates, not just reports.** Capability flags are compared against the checkpoint's
+2. **The reuse boundary (owner decision).** Not "reuse everything" and not "reimplement everything", but:
+   **production process definition + fresh experimental logic + independent reference verification.**
+
+   **Reuse as authoritative** — these DEFINE the trained stochastic process, so reimplementing them would
+   evaluate a different process than the one optimized: checkpoint reconstruction · production executor ·
+   legal-action enumerators · persistent-slot semantics · `canonical_state_key` · operator registry and
+   capability resolution · the one authoritative canonical aggregation · standard external primitives
+   (RDKit descriptors, the frozen ChemNet embedding).
+
+   **Write from scratch** — registry migration and protocol freeze · task construction · the uniform
+   canonical-successor law · exact reachable-graph builder · finite-horizon Doob solver · controllers ·
+   learned-value training · dynamic / Pareto-fan / pathwise-constraint harnesses · chemical-space recall ·
+   topology-distribution metric · result schemas · statistical analysis · plots and tables.
+
+   **Never reuse or cite** — `scripts/exact_doob_enumerable_benchmark.py`,
+   `scripts/doob_guidance_ground_truth.py`, `scripts/e0_toy_h_exactness.py`, the untracked
+   `diagnostics/exactness/exact_doob_enumerable_cap{4,5}.json`, old benchmark task selections, old
+   controller code with uncertain semantics, and any cached output from earlier attempts.
+
+3. **Independent reference verification (test oracle only).** A fresh, deliberately slow reference
+   aggregator: enumerate raw actions with the production enumerator, execute each through the production
+   executor, take its production canonical key, group in a plain Python dict, and sum probability mass
+   explicitly. Used ONLY for fixtures, mutation tests, tiny exact graphs and equivalence checks — it never
+   produces a reported number. Hierarchy:
+
+   | role | implementation |
+   |---|---|
+   | main paper results | production segmented-successor path |
+   | independent test oracle | fresh dictionary-based reference |
+   | optional cross-check | distillation aggregator |
+
+   A disagreement between any two is a **finding to resolve**, never a licence to pick the nicer output.
+
+4. **TRACE RESULT — the trained objective is MARK-LEVEL (established, not assumed).**
+   `factorized_mark_bregman_loss` is
+   `total_hazard - teacher_rate*(log_hazard + selected_mark_log_probability)`, a Poisson-KL GM loss "in
+   normalized marked-rate form" scoring the selected teacher **mark**. So **no production
+   canonical-successor aggregator is wired into training or rollout** — `model.segmented_successor` and
+   `canonical_successor_distillation.aggregate_canonical_successor_rates` both have test callers only. The
+   sole exception is the graft family, already quotiented at training time via `graft_successor_groups`.
+
+   Consequences: (a) the molecular kernel is a **derived** object (mark log-probs → production executor →
+   `canonical_state_key` → aggregate), so the one-kernel rule is about implementing that *derivation* once;
+   `segmented_successor` is authoritative for it and the distillation path is a cross-check only. (b) E5 is
+   load-bearing rather than decorative — it is what licenses the derivation — and must treat the graft
+   asymmetry explicitly instead of averaging over it.
+5. **One evaluator.** No experiment reconstructs successor probabilities. Enforced by test, not intent.
+6. **The evaluator validates, not just reports.** Capability flags are compared against the checkpoint's
    scientific contract *and* the experiment registry; disagreement fails the run.
-5. **Atomic commits**; subject `<module>: <one-line imperative, lowercase, no trailing period>`; never
+7. **Atomic commits**; subject `<module>: <one-line imperative, lowercase, no trailing period>`; never
    mention Claude/AI in commits or PR bodies.
-6. **Gates.** `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q` and
+8. **Gates.** `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q` and
    `./.venv/bin/ruff check` (ruff is NOT on PATH). Read the SKIP count, not just PASS.
-7. **No result claims before the checkpoint is selected.** Harnesses may be complete while their numbers are
+9. **No result claims before the checkpoint is selected.** Harnesses may be complete while their numbers are
    unproduced.
-8. **Test isolation.** No test-set oracle output is used to train, tune, or select anything.
+10. **Test isolation.** No test-set oracle output is used to train, tune, or select anything.
 
 ---
 
