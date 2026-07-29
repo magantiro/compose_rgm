@@ -1663,7 +1663,13 @@ def gpu_smoke_stage(
     memory=65536,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
-    retries=modal.Retries(max_retries=1, backoff_coefficient=2.0),
+    # Preemption is an EXPECTED event on a multi-hour GPU run, not a code failure: the first
+    # RingCore-V1 scientific run was preempted once, at step 1500. With max_retries=1 a single
+    # preemption exhausts the budget, so a 16,000-step run could not survive two. Each retry resumes
+    # from the recovery checkpoint (written every `recovery_every` steps), so retries make forward
+    # progress rather than repeating work -- which is what makes a larger budget safe here. A
+    # deterministic failure still terminates the run, just after a bounded number of resumed attempts.
+    retries=modal.Retries(max_retries=5, backoff_coefficient=2.0),
 )
 def train_stage(
     run_label: str,
