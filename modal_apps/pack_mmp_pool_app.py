@@ -65,6 +65,9 @@ _TARGET_SHARD_SECONDS = 240        # ~4 min: well above container startup, so ov
 _CONTAINER_MARGIN = 5
 _VERIFY_FRACTION = 0.02
 _SENTINEL_ENTRIES = 8
+# v1: partition by target scaffold only (LEAKED: 1,325 sources spanned partitions)
+# v2: require BOTH endpoints to map to the same partition; drop straddling pairs, counted
+_MMP_PARTITION_RULE_VERSION = 2
 
 
 def shards_for(record_count: int) -> int:
@@ -73,6 +76,29 @@ def shards_for(record_count: int) -> int:
         return 0
     seconds = record_count * _PACK_RATE["pack_ms_per_record"] / 1000.0
     return max(1, round(seconds / _TARGET_SHARD_SECONDS) or 1)
+
+
+def pair_partition(source_smiles: str, target_smiles: str) -> tuple[str | None, str, str]:
+    """Partition for one MMP pair, or None when its endpoints disagree.
+
+    Returns ``(partition_or_None, source_scaffold, target_scaffold)``. An MMP pair has TWO endpoints;
+    partitioning on the target alone let one source molecule reach several partitions through
+    differently-scaffolded targets (measured: 1,325 sources spanned partitions). Both endpoints must map
+    to the same partition, which makes molecule-level leakage impossible by construction.
+    """
+    source = (source_smiles or "").strip()
+    target = (target_smiles or "").strip()
+    if not source or not target:
+        return None, "", ""
+    source_scaffold = murcko_scaffold(source)
+    target_scaffold = murcko_scaffold(target)
+    if not source_scaffold or not target_scaffold:
+        return None, source_scaffold or "", target_scaffold or ""
+    source_partition = partition_for_scaffold(source_scaffold, salt="ringcore-v1")
+    target_partition = partition_for_scaffold(target_scaffold, salt="ringcore-v1")
+    if source_partition != target_partition:
+        return None, source_scaffold, target_scaffold
+    return source_partition, source_scaffold, target_scaffold
 
 
 def _status(subdir: str, status: str, **fields) -> dict:
@@ -137,8 +163,6 @@ def partition_pool(subdir: str) -> dict:
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
-    from compose_v4.data.scaffold_partition import murcko_scaffold, partition_for_scaffold
-
     artifact_volume.reload()
     started = time.time()
     out_root = Path("/artifacts") / subdir / "_raw"
@@ -158,6 +182,9 @@ def partition_pool(subdir: str) -> dict:
             if (
                 previous.get("pool_sha256") == current_pool_sha
                 and previous.get("contract", {}).get("partitioner") == _contract()["partitioner"]
+                # the app's OWN pairing rule is not covered by the partitioner provenance hash;
+                # without this, a rebuild would silently reuse a partitioning built under the old rule
+                and previous.get("mmp_partition_rule_version") == _MMP_PARTITION_RULE_VERSION
                 and previous.get("scanned") == EXPECTED_POOL_RECORDS
                 and all(
                     (out_root / e["partition"] / e["shard"]).exists() for e in previous.get("shards", [])
@@ -186,13 +213,17 @@ def partition_pool(subdir: str) -> dict:
             if not target:
                 rejects["empty_target_smiles"] = rejects.get("empty_target_smiles", 0) + 1
                 continue
-            scaffold = murcko_scaffold(target)
-            if not scaffold:
-                rejects["unassignable_scaffold"] = rejects.get("unassignable_scaffold", 0) + 1
+            partition, source_scaffold, scaffold = pair_partition(
+                record.get("source_smiles", ""), target
+            )
+            if partition is None:
+                reason = ("unassignable_scaffold" if not (source_scaffold and scaffold)
+                          else "endpoints_straddle_partitions")
+                rejects[reason] = rejects.get(reason, 0) + 1
                 continue
-            partition = partition_for_scaffold(scaffold, salt="ringcore-v1")
             record["_row_id"] = scanned - 1          # exact original row index
             record["_scaffold"] = scaffold
+            record["_source_scaffold"] = source_scaffold
             rows_by_partition[partition].append(record)
             sources_by_partition[partition].add(record.get("source_smiles", ""))
             scaffolds_by_partition[partition].add(scaffold)
@@ -233,6 +264,7 @@ def partition_pool(subdir: str) -> dict:
         "scanned": scanned,
         "kept": kept,
         "rejects": rejects,
+        "mmp_partition_rule_version": _MMP_PARTITION_RULE_VERSION,
         "expected_shards": len(plan),
         "shards": plan,
         "counts_by_partition": {p: len(rows_by_partition[p]) for p in PARTITIONS},
