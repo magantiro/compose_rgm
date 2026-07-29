@@ -1,335 +1,387 @@
-# Experiment infrastructure plan (E1–E7)
+# Experiment infrastructure plan v2 (E1–E7)
 
 Build plan for the paper's experimental program, executed while the RingCore-V1 editing prior trains.
-Authoritative experiment specs live in `configs/experiment_registry.yaml` (commit `310e5b7`); this document
-is the *build* plan for the harnesses that registry describes.
+Experiment specs live in `configs/experiment_registry.yaml`; this document is the *build* plan.
 
-Status legend: **[done]** committed · **[now]** buildable without the trained checkpoint · **[frozen-gated]**
-needs the selected editing checkpoint · **[lane]** separate de-novo lane with its own gates.
+**v2 incorporates the owner review's five required corrections.** v1 is commit `3cdc56d`; the corrections are
+recorded in §2 rather than silently applied, so the revision is auditable.
+
+Status legend: **[now]** buildable without the trained checkpoint · **[frozen-gated]** needs the selected
+editing checkpoint · **[lane]** parallel de-novo lane with its own gates.
 
 ---
 
 ## 0. Ground rules
 
-1. **Nothing touches the live run.** The training run `compose-v4-ringcore-v1-scientific-a7546e2-v1` is
-   pinned to commit `a7546e2` in its own clean worktree. Do not modify
-   `scripts/train_tracelet_cnof_gate.py`, `modal_apps/train_tracelet_gm.py`, `scripts/ring_core_identity.py`,
-   `configs/ringcore_v1_production.json`, or `src/compose_v4/data/**`. Note `_source_fingerprint()` hashes
-   `src/`, `scripts/`, `recipes/` and the Modal app, so edits there would change run identity; `configs/`,
-   `docs/`, `diagnostics/`, `tests/` and `results/` are outside the fingerprint and safe to commit.
-2. **From scratch.** Per owner instruction, the exact-control work does **not** reuse
-   `scripts/exact_doob_enumerable_benchmark.py`, `scripts/doob_guidance_ground_truth.py`, or
-   `scripts/e0_toy_h_exactness.py`, and the untracked `diagnostics/exactness/exact_doob_enumerable_cap{4,5}.json`
-   are treated as **non-evidence**. No imports from those modules.
-3. **One evaluator.** No experiment reconstructs successor probabilities. Enforced by a test, not intent (A1.4).
-4. **Atomic commits**, subject `<module>: <one-line imperative, lowercase, no trailing period>`. Never mention
-   Claude/AI in a commit message or PR body.
-5. **Gates.** `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q` and
-   `./.venv/bin/ruff check` (ruff is NOT on PATH). `src/` stays ruff-clean. Read the SKIP count, not just PASS.
-6. **No result claims before the checkpoint is selected.** Harnesses may be complete while their numbers
-   remain unproduced; the plan says so explicitly per piece rather than implying results.
+1. **Nothing touches the live run.** `compose-v4-ringcore-v1-scientific-a7546e2-v1` is pinned to commit
+   `a7546e2` in its own clean worktree. Do not modify `scripts/train_tracelet_cnof_gate.py`,
+   `modal_apps/train_tracelet_gm.py`, `scripts/ring_core_identity.py`,
+   `configs/ringcore_v1_production.json`, or `src/compose_v4/data/**`. `_source_fingerprint()` hashes `src/`,
+   `scripts/`, `recipes/` and the Modal app, so edits there change run identity; `configs/`, `docs/`,
+   `diagnostics/`, `tests/`, `results/` are outside the fingerprint.
+2. **From scratch.** No reuse of `scripts/exact_doob_enumerable_benchmark.py`,
+   `scripts/doob_guidance_ground_truth.py`, `scripts/e0_toy_h_exactness.py`; the untracked
+   `diagnostics/exactness/exact_doob_enumerable_cap{4,5}.json` are **non-evidence**.
+3. **One evaluator.** No experiment reconstructs successor probabilities. Enforced by test, not intent.
+4. **The evaluator validates, not just reports.** Capability flags are compared against the checkpoint's
+   scientific contract *and* the experiment registry; disagreement fails the run.
+5. **Atomic commits**; subject `<module>: <one-line imperative, lowercase, no trailing period>`; never
+   mention Claude/AI in commits or PR bodies.
+6. **Gates.** `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q` and
+   `./.venv/bin/ruff check` (ruff is NOT on PATH). Read the SKIP count, not just PASS.
+7. **No result claims before the checkpoint is selected.** Harnesses may be complete while their numbers are
+   unproduced.
+8. **Test isolation.** No test-set oracle output is used to train, tune, or select anything.
 
 ---
 
 ## 1. Verified facts this plan rests on
 
-Measured, not assumed:
-
 | Fact | Evidence |
 |---|---|
-| `load_factorized_rollout_checkpoint` reconstructs vocab **15** + `enable_ring_restates/cyclic_graft/heteroatom_scan/ring_opening = True` from `organic_vocabulary=True, corrupted_prior_mix=True` | ran on `_bedit_ckpt.pt` |
-| Same loader reconstructs vocab **4** + all capability flags **False** when those keys are absent | ran on `_denovo_ckpt.pt` |
-| `expected_scope_hash` **fails loudly** when the payload carries no `corpus_scope_hash` | raises `ValueError: checkpoint corpus_scope_hash None != expected …` |
-| `enable_cycle_ops` is **False** in both local fixtures | neither payload has `cycle_op_mix`; the production run sets it |
-| Snapshots are written every 500 steps as `checkpoint.step<N>.pt`, each a full `exact_training_recovery` payload | `_step_snapshot_path`; dead run wrote step500/1000/1500 |
-| The loader already accepts `exact_training_recovery` payloads | explicit branch in the loader |
-| The live run has written **0** checkpoints as of writing | volume listing |
-| Canonical aggregation exists with a loop reference **and** a vectorized path, aggregating per `(example, successor)` pair | `src/compose_v4/model/segmented_successor.py` |
+| Loader reconstructs vocab **15** + `ring_restates/cyclic_graft/heteroatom_scan/ring_opening=True` from `organic_vocabulary=True, corrupted_prior_mix=True` | ran on `_bedit_ckpt.pt` |
+| Loader reconstructs vocab **4** + all capability flags **False** when those keys are absent | ran on `_denovo_ckpt.pt` |
+| `expected_scope_hash` **fails loudly** when the payload has no `corpus_scope_hash` | raises `ValueError` |
+| `enable_cycle_ops` is **False** in both local fixtures — production sets it | neither payload has `cycle_op_mix` |
+| Snapshots every 500 steps as `checkpoint.step<N>.pt`, each a full `exact_training_recovery` payload | `_step_snapshot_path`; live run at step 500 |
+| Loader already accepts `exact_training_recovery` payloads | explicit branch |
+| Canonical aggregation exists with loop reference **and** vectorized path, per `(example, successor)` pair | `segmented_successor.py` |
+| **Doob prunes but never creates support**; equality iff next-state value is strictly positive; kernel undefined where `h_k(x)=0` | numerical check, §2.2 |
+| **Mark-level power tilt is not refinement-invariant**: aggregate mass 0.500 vs 0.200 at β=2, 0.500 vs 0.667 at β=0.5, equal only at β=1 | numerical check, §2.7 |
 
-**Consequence for A1:** the two local fixtures cover the vocab-width and capability-flag branches, but **not**
-the `enable_cycle_ops=True` branch — that is only exercised by the production checkpoint. A1 must therefore
-carry a test that constructs a model with cycle ops on directly, and must not claim coverage it lacks.
-
----
-
-## 2. Adversarial findings against an earlier draft of this plan
-
-Recorded so the corrections are auditable.
-
-1. **Dependency error.** Quotient check 6 ("exact control on the quotient is invariant to encoding
-   refinement") requires the exact solver. Fixtures were ordered *before* the solver. → A5 precedes A4;
-   checks 1–5 may land earlier.
-2. **Overstated checkpoint independence.** Doob exactness is a property of the kernel algebra over the real
-   state graph and needs no trained weights; the `learned_value` controller arm genuinely does. Stated per arm.
-3. **"Enumerable" is empirical.** The reachable-set size under the real executor must be *measured* before the
-   bounded chemistry is fixed. If it explodes there is no exact solver. Sizing is a deliverable (A5.1).
-4. **Uniform baseline had no stopping rule** → path length, reversals and oracle cost were meaningless.
-   It inherits the fixed-step embedded jump chain, applied identically to both arms.
-5. **Baseline fairness is flag-sensitive.** Identical executor, identical capability flags, identical
-   enumeration; only the probability assignment differs. A flag mismatch silently invalidates E2.
-6. **"Frozen before the checkpoint" as a timestamp is fragile.** Replaced with a structural property: splits
-   are built from corpus statistics with **no model output inspected**, provable by construction. The highest
-   existing snapshot step at freeze time is recorded alongside (currently 0).
-7. **Single-evaluator rule needed enforcement**, not intent → A1.4 test.
-8. **Output schema needs versioning**, additive-only, else Phase B/D break Phase A consumers.
-9. **Evaluator must be validated against a real payload**, not only a fresh model, or the vocab-width,
-   capability-flag and scope-hash paths go untested.
-10. **A2 is a harness, not a result.** Its metrics cannot produce numbers until the checkpoint freezes.
+**Consequence:** the fixtures cover the vocab-width and capability-flag branches but **not**
+`enable_cycle_ops=True`. A1 needs a dedicated test constructing that branch directly, and must not claim
+coverage it lacks.
 
 ---
 
-## 3. Dependency graph
+## 2. Owner review: required corrections (all accepted)
 
-```
-A1 evaluator ──┬── A2 uniform baseline harness ──┐
-               ├── A3 frozen task splits ────────┤
-               └── A4 quotient fixtures (1-5)    ├── Phase D: E2, E3, E4, E7  [frozen-gated]
-A5 exact graph + Doob ──┬── A4 check 6           │
-                        └── E6 results           │
-Phase B controller iface + oracle protocol ──────┘
-Phase C post-training queue ── selects the checkpoint Phase D consumes
-Phase E de-novo lane ── E1  [lane, own gates]
-Phase F external baselines, figure artifacts
-```
+### 2.1 Protocol freezing hoisted to Phase A0
+B2 (oracle/task protocol) and B3 (dynamic protocols) move **before** any E2–E7 output is inspected, in
+parallel with A1. Definitions may carry a placeholder for the selected checkpoint hash; everything else is
+content-hashed first.
+
+### 2.2 Doob support statement corrected — v1 was mathematically wrong
+v1 said the transform "neither creates nor destroys support." For
+`P^g_k(x,y) = P_k(x,y) · h_{k+1}(y) / h_k(x)` the correct statement has **four** parts:
+
+1. **Always:** `supp P^g_k(x,·) ⊆ supp P_k(x,·)`. No transition absent from the base kernel is ever created.
+2. **Equality** iff `h_{k+1}(y) > 0` for every `y ∈ supp P_k(x,·)`; sufficient condition is strictly positive
+   desirability on reachable terminal states with all reachable backward values positive.
+3. **Hard conditioning prunes:** support is restricted to transitions from which the target event remains
+   reachable within the remaining budget. Verified: base `[0.5,0.3,0.2]` with `h_{k+1}=[1,0,0.4]` gives
+   controlled `[0.862,0,0.138]` — three base edges become two.
+4. **Undefined where `h_k(x)=0`** (0/0); the controlled chain lives on `{x : h_k(x) > 0}`.
+
+Propagates to: theorem wording, A5.4, acceptance criteria, tests, paper prose.
+
+### 2.3 Learned-controller training added as a workstream (§5)
+v1 defined the `learned_value` *interface* but never said how the value model is trained — the largest
+omission. New Phase B1.5.
+
+### 2.4 Development vs final task artifacts (§7 A3)
+Two immutable artifacts: a **development** set from the validation partition (debugging, controller
+training/selection, thresholds, preliminary plots, failure analysis) and a **final** set from the test
+partition generated by the already-frozen algorithm, used once.
+
+### 2.5 De-novo promoted to a parallel critical path
+Unconditional generation is a spotlight gate, not an appendix. Preparation starts now in a separate worktree;
+training still waits for its own gates.
+
+### 2.6 Exact benchmark = K-step reachable graph, not the full bounded state space
+`S_K(x_0) = {x : reachable from x_0 in ≤ K steps}`, expanded breadth-first with canonical merging. Two-stage:
+solver verified now on a simple fixed kernel, then instantiated on the *same* graph with the selected learned
+checkpoint. Plus independent verification (DP vs explicit path enumeration) on the smallest slice.
+
+### 2.7 Mark-level negative result added (A4.7)
+Successor-level control is refinement-invariant; mark-level power/top-k/nucleus/family controls are not.
+Verified numerically above. This sharpens the quotient contribution from "our aggregation is consistent" to
+"successor-level is the only level at which these controls are well-defined."
+
+### 2.8 Metric hierarchy, compute accounting, semantic panel IDs
+1–3 preregistered primary metrics per experiment (§6); full compute accounting for controller fairness (§5.4);
+semantic panel IDs instead of hard-coded figure numbers (§6.2).
 
 ---
 
-## Phase A — buildable now
+## 3. DELIVERABLE 1 — updated dependency DAG
 
-### A1. Unified checkpoint evaluator  *(priority 2, directive item 2)* **[now]**
-
-The single entry point every experiment consumes. Its value is that it exists **once**: divergent
-reimplementations would make the paper's numbers incomparable.
-
-**Files**
-- `src/compose_v4/experiments/checkpoint_evaluator.py` (new)
-- `src/compose_v4/experiments/evaluate_checkpoint.py` (new, CLI `python -m …`)
-- `tests/test_checkpoint_evaluator.py` (new)
-
-**CLI**
 ```
-python -m compose_v4.experiments.evaluate_checkpoint \
-    --checkpoint <path> --registry configs/experiment_registry.yaml \
-    --experiment E2 --seed 0 [--expected-scope-hash 3721d69851110fdd] [--output <json>]
+PHASE A0  (freeze first, no model output inspected)
+  A0.1 objective + oracle registry (identities, versions)
+  A0.2 benchmark protocol: sources, normalization bounds, similarity floors,
+       edit + oracle budgets, constraint definitions, seeds, statistical units
+  A0.3 multi-objective predeclarations: HV reference points, dominance/epsilon,
+       diversity measure, source-similarity floor, 2/3/4-5-objective task sets
+  A0.4 dynamic protocols: switch times, restart variants, regret definitions
+  A0.5 primary/secondary metric table (§6)
+  A0.6 compute-accounting schema (§5.4)
+  A0.7 semantic panel IDs (§6.2)
+  A0.8 exact-sizing policy, preregistered (§4)
+  A0.9 task-generation algorithm + config hash (consumed by A3)
+        │
+        ├─────────────────────────────────────────────┐
+        v                                             v
+PHASE A1  shared kernel infrastructure          PHASE A2  exact control
+  A1.1 evaluator skeleton, provenance,            A2.1 sizing sweep (uses A0.8)
+       versioned schema, contract validation      A2.2 K-step reachable graph
+  A1.2 enumeration + canonical aggregation        A2.3 exact finite-horizon solver
+  A1.3 CLI + registry-driven metrics              A2.4 independent DP-vs-path check
+  A1.4 single-evaluator enforcement test          A2.5 support theorem tests (§2.2)
+  A1.5 uniform canonical-successor baseline       A2.6 tilts
+  A1.6 development task generator (A0.9)          A2.7 controller arms vs exact optimum
+  A1.7 quotient checks 1-5                             │
+        │                                              ├── A4.6 quotient check 6
+        │                                              └── A4.7 mark-level counterexample
+        v                                              v
+PHASE B  controller system
+  B1   same-base controller interface (+ compute accounting)
+  B1.5 learned value/controller training pipeline (§5)   <-- needs A2 for calibration
+  B1.6 controller checkpoint selection on controller-validation only
+        │
+        v
+PHASE C  post-training selection
+  C1 leaderboard over checkpoint.step<N>.pt   C2 predeclared selection rule
+  C3 freeze editing prior                     C4 low-cost diagnostics gate
+        │
+        v
+PHASE D  final runs  [frozen-gated]
+  final task artifacts generated from frozen algorithm -> E2, E3, E4, E7
+  A2 re-instantiated with the selected checkpoint (stage 2 of §2.6)
+
+PARALLEL LANE (starts now, own gates)          PHASE F  artifacts
+  L1 de-novo bond_reorder repair                 F1 external baseline environments
+  L2 timed-CTMC hazard semantics                 F2 immutable result schemas
+  L3 broad-organic reference distribution        F3 plot/table generators
+  L4 de-novo source process + manifest/contract  F4 manuscript mapping by panel ID
+  L5 unconditional metrics + baselines
+  L6 de-novo gate -> training -> E1
 ```
 
-**Centralized responsibilities** (each exactly once, for all experiments)
+**Critical-path note.** A0 gates everything that produces numbers. A2 no longer waits on A1 (it needs a
+kernel, not *the* kernel), so A1 and A2 proceed in parallel. B1.5 needs A2 for its calibration target.
 
-| # | Responsibility | Implementation note |
+---
+
+## 4. DELIVERABLE 2 — exact-sizing policy (preregistered)
+
+Frozen **before** any sizing result is used, so the exact benchmark cannot be chosen because one candidate
+gives nicer controller numbers.
+
+**Enumeration target.** `S_K(x_0)` = states reachable from source `x_0` in ≤ K steps under the **real
+production executor**, expanded breadth-first, identical molecular states merged by canonical key. Record
+per-depth layer sizes and branching factors. Not the full bounded molecular space.
+
+**Operator set.** RingCore-V1: compositional `cycle_close`/`cycle_open` (executor `bond_insert`/`bond_delete`,
+scored as families `cycle_insert`/`cycle_attach`); `ring_system_grow` macro **disabled**.
+
+**Acceptance window.** `N_min = 500 ≤ |S_K| ≤ N_max = 20,000` states, with a hard memory cap; per-budget
+transition operators stored sparsely.
+
+**Selection rule (preregistered).** Choose the **smallest** candidate satisfying the window **and** containing
+at least one atom-birth/death transition **and** at least one cycle transition **and** at least one
+same-cardinality transition. Ties broken by smaller `|S_K|`, then lexicographically by candidate id.
+
+**Shrinking sequence**, applied in this order until the window is met:
+1. lower heavy-atom cap; 2. lower edit budget K; 3. restrict element vocabulary; 4. simpler source molecule.
+
+**Fallback.** If no single feasible graph contains both cardinality and cycle behaviour, build **two** exact
+benchmarks — a trans-dimensional slice and a cycle/topology slice — rather than omitting either capability or
+reporting an intractable graph. If even the smallest candidate exceeds the cap, report **infeasible**; never
+approximate and call it exact.
+
+**Reporting.** Every candidate evaluated is reported with its layer sizes, whether it met the window, and why
+it was or wasn't selected — so the selection is auditable and no silent search happened.
+
+---
+
+## 5. DELIVERABLE 3 — learned controller training plan (Phase B1.5)
+
+### 5.1 Object
+```
+h_φ(b, x; x_src, z, m) ≈ E_{P_θ}[ g_z(X_K) | X_{K-b} = x ]
+```
+`b` remaining budget · `x` current molecule · `x_src` source · `z` goal descriptor · `m` protected mask.
+Base kernel `P_θ` is the **frozen** editing prior; the controller never fine-tunes it.
+
+### 5.2 Targets (both implemented; the exact benchmark decides)
+1. **Monte-Carlo terminal desirability** under base-prior rollouts from `(b, x)`.
+2. **Bootstrapped backward target** `h_φ(b,x) ← Σ_y P_θ(y|x) h_φ(b-1,y)`, using the canonical-successor
+   kernel from A1 — never a mark-level surrogate.
+
+Selection between them is made on controller-validation calibration and backward-residual, not on test tasks.
+
+### 5.3 Architecture, loss, data
+- Reuse the frozen model's graph encoder; condition on `(b, z, m, x_src)`. Value head trained; encoder frozen
+  or lightly adapted — declared before training, not chosen post hoc.
+- Regression in log-desirability with an explicit non-negativity/positivity treatment, since `h=0` is exactly
+  the support-pruning case in §2.2 and must be representable.
+- **Three disjoint splits:** controller-train goals/sources · controller-validation goals/sources · final test
+  sources and objective schedules. No test oracle output touches training or selection.
+
+### 5.4 Validation metrics and compute accounting
+Validation: value calibration · backward-equation residual · successor ranking quality · **terminal-law TV
+versus exact Doob on the enumerable graphs** · reachability-event calibration · control quality versus the
+exact optimum · robustness across budgets and goals.
+
+Compute accounting recorded for **every** controller arm, because "same prior and budget" is insufficient when
+methods score different numbers of successors or particles:
+
+| counted separately | why |
+|---|---|
+| property-oracle calls | the primary cost axis for E7 |
+| model forward passes | learned controllers pay here, reranking does not |
+| successors scored | reranking/greedy inflate this |
+| particles propagated | SMC inflates this |
+| accepted edits | committed-state count |
+| wall-clock, GPU-hours | reported separately, never as the primary axis |
+
+Primary E7 curve is **hypervolume versus all oracle calls**. Counting committed states for one method while
+ignoring evaluated particles or reranked candidates for another is explicitly disallowed.
+
+---
+
+## 6. DELIVERABLE 4 — primary metric table
+
+One to three preregistered primary metrics per experiment; everything else is a diagnostic.
+
+| Exp | Primary (load-bearing) | Secondary / diagnostic |
 |---|---|---|
-| 1 | model construction | delegate to `load_factorized_rollout_checkpoint`; do **not** reimplement |
-| 2 | capability configuration | report the flags actually set; `ring_system_grow` macro stays disabled |
-| 3 | persistent slot state | mask with the real-element predicate; **never** slice `[:n_real_atoms]` |
-| 4 | legal-successor enumeration | production enumerators only |
-| 5 | canonical aggregation | `segmented_successor.py`; per `(example, successor)` pair |
-| 6 | budget convention | fixed-step embedded jump chain; editing discards the hazard |
-| 7 | oracle loading | interface here; concrete oracles frozen in Phase B |
-| 8 | metrics | per-experiment, driven by the registry |
-| 9 | provenance | checkpoint sha256, registry hash, capability flags, operator-registry hash, seed |
-| 10 | output schema | versioned, additive-only |
+| **E1** unconditional *(proposed — needs owner confirmation)* | all-step validity; FCD; coverage (precision/recall) | endpoint validity, connectedness, uniqueness, novelty, internal diversity, scaffold novelty, size/property + ring/topology distributions, nearest-neighbour & memorization, throughput |
+| **E2** learned transport | held-out canonical-successor NLL; target/analogue recovery **at matched edit budget**; path overhead vs shortest/compiler path | reversals, repeated states, net vs gross displacement, endpoint fidelity, diversity |
+| **E3** cardinality adaptation | target atom-count success; edits/oracle calls to success; retained source similarity | overshoot/correction, steps to enter interval, validity, connectedness, per-step cardinality trace |
+| **E4** topology adaptation | target topology success; valid-path rate; edit efficiency | cycle rank, ring-system count, ring-size distribution, ring-op utilization, unnecessary open/close, final property/similarity |
+| **E5** quotient invariance | successor-mass invariance residual under slot relabeling and action refinement (exact to tolerance); **mark-level divergence demonstrated** | raw mark multiplicity, sampled-frequency agreement at declared n and seed |
+| **E6** exact control | terminal-law TV to the analytic target | support-subset conformance, per-arm regret vs exact optimum, backward-value residual |
+| **E7** multi-objective / dynamic | normalized hypervolume; **HV-AUC versus all oracle calls** | IGD+, feasible count, source similarity, diversity, held-out evaluator performance, adaptation regret, prefix reuse |
 
-**Namespace hazard.** Executor rule names and model family names are different namespaces:
-`bond_insert`/`bond_delete` are executor names; the dense head scores them as `cycle_insert`/`cycle_attach`.
-Use `_CYCLE_OP_EXECUTOR_TO_FAMILY`; never hand-map.
+E1's primaries are my proposal — the review did not specify them; flagged for confirmation.
 
-**Representability hazard.** `AtomInsert` is scoreable only with 0 neighbours (`grow_root`) or exactly 1
-(`grow_connected`). ≥2 is outside production support.
+### 6.2 Semantic panel IDs (no hard-coded figure numbers)
+`GEN_UNCONDITIONAL` · `TRANSPORT_LEARNED_VS_UNIFORM` · `CARDINALITY_ADAPTATION` ·
+`TOPOLOGY_ADAPTATION` · `EXACT_TERMINAL_TILT` · `QUOTIENT_INVARIANCE` · `PARETO_SAME_BASE` ·
+`DYNAMIC_SWITCH` · `PARETO_FAN` · `PATHWISE_CONSTRAINTS`
 
-**Sub-pieces / commit granularity**
-- **A1.1** module skeleton + provenance + versioned output schema + registry loading; unknown experiment id
-  fails loudly.
-- **A1.2** enumeration + canonical aggregation; kernel sums to 1 per example; matches the loop reference.
-- **A1.3** CLI + metrics dispatch driven by the registry.
-- **A1.4** enforcement test: fails if any experiment script calls the rate model directly instead of routing
-  through the evaluator (pattern mirrors the existing anti-concatenation scan test).
-
-**Acceptance criteria**
-- Loads both local fixtures, reporting vocab 15/flags-on and vocab 4/flags-off respectively.
-- Loads a model constructed with `enable_cycle_ops=True` (fixtures do not cover it).
-- `sum_y P(y|x) == 1` per example to float tolerance, on benzene/toluene/pyridine via the real chemistry stack.
-- Aggregated log-probs equal `reference_successor_logprobs` exactly.
-- Unknown experiment id, missing checkpoint, and scope-hash mismatch each fail loudly.
-- No trained checkpoint required for tests.
-
-**Risks.** Fixtures are `hidden_dim=32` toy models — they validate *plumbing*, not numerics. Real-checkpoint
-numerics are validated in Phase D.
+Result artifacts carry the panel ID; the manuscript build maps IDs onto whatever final layout fits the page
+budget, so merging exact and dynamic panels needs no code change.
 
 ---
 
-### A2. Uniform legal-successor baseline harness  *(priority 3, directive item 3)* **[now]** (numbers **[frozen-gated]**)
+## 7. DELIVERABLE 5 — revised registry schema (v2)
 
-E2's control arm. Assigns **uniform probability over canonical molecular successors**, `1/|N(x)|`, *not* over
-raw action marks — the registry encodes this and it is the whole point of the comparison.
+`configs/experiment_registry.yaml` moves `schema_version: 1 → 2`. Additive except where noted.
 
-**Files** `src/compose_v4/experiments/uniform_successor_baseline.py`, `tests/test_uniform_successor_baseline.py`
+```yaml
+schema: compose.experiments.registry
+schema_version: 2
 
-**Fairness contract (load-bearing).** Both arms share: the same executor, the same capability flags, the same
-enumeration, the same step budget, the same seeds. The *only* difference is the probability assignment. The
-harness asserts flag equality between arms and refuses to run on mismatch.
+protocol:                       # extended
+  successor_kernel: canonical
+  editing_budget_convention: fixed_step_embedded_jump_chain
+  held_out_policy: <ringcore-v1 scaffold key, 0.9/0.05/0.05, verified disjoint>
+  similarity: {fingerprint: ECFP4, radius: 2, bits: 2048, metric: tanimoto}
+  seeds: [0, 1, 2, 3, 4]
+  normalization_policy: declared_before_any_model_output_inspected
+  independent_evaluation_oracle: required_where_available
+  # --- new in v2 ---
+  protocol_freeze:              # A0
+    frozen_at_commit: <sha>
+    content_hash: <hash of the frozen protocol block>
+    highest_existing_snapshot_step: <int>     # 0 = frozen before any checkpoint
+  objectives:                   # A0.1
+    - {id, definition, oracle_id, oracle_version, normalization_bounds, direction}
+  multi_objective:              # A0.3
+    hypervolume_reference_points: {<task_id>: [...]}
+    dominance_convention: <pareto|epsilon>
+    epsilon: <float|null>
+    diversity_measure: <id>
+    source_similarity_floor: <float>
+    task_arities: {two: [...], three: [...], stress: [...]}
+  dynamic:                      # A0.4
+    switch_steps: [...]
+    restart_variants: [continuation, restart_from_source, restart_under_separate_sampler,
+                       static_compromise]
+    regret_definition: <id>
+  compute_accounting:           # A0.6 -- all required per arm
+    [oracle_calls, forward_passes, successors_scored, particles_propagated,
+     accepted_edits, wall_clock_seconds, gpu_hours]
+  task_generation:              # A0.9
+    algorithm_id: <id>
+    config_hash: <hash>
+    development_partition: validation
+    final_partition: test
+    preregistered_exclusions: [invalid_source, oracle_failure, unreachable_under_claimed_support]
 
-**Stopping rule.** Fixed-step embedded jump chain, identical for both arms. Without this, path length,
-reversal counts and oracle-cost-per-endpoint are undefined for the baseline.
+experiments:
+  E<n>:
+    title, question, maps_to, priority
+    checkpoint: none | any | editing_prior | denovo
+    status: READY | BLOCKED | FROZEN_GATED
+    # --- changed in v2: primary/secondary split replaces a flat metric list ---
+    primary_metrics: [...]        # 1-3, load-bearing
+    secondary_metrics: [...]      # diagnostics
+    panel_id: <semantic id>        # replaces `panel: "Figure 2 (size)"`
+    task_artifacts:                # new
+      development: configs/tasks/<id>.development.json
+      final: configs/tasks/<id>.final.json
+    arms: [...]           baselines: [...]        ablations: [...]
+    budgets: {...}        failure_criterion: <str>
+    outputs: [...]        per_step_records: [...]
+    support_caveats: [...]   # e.g. spiro/bridged marked unsupported if unreachable
 
-**Metrics** (all 11 from the directive): held-out canonical-successor NLL; analogue/target recovery;
-productive molecular displacement; fraction of steps improving endpoint similarity/objective; path length;
-path overhead; immediate reversals; longer cycles; net vs gross edits; endpoint distribution fidelity;
-oracle calls per successful endpoint.
+controllers:                    # new top-level, directive item 8
+  - id, kind, requires_checkpoint, oracle_uses, compute_profile
+learned_controller:             # new top-level, §5
+  target_object, target_estimators, splits, architecture, loss,
+  validation_metrics, selection_rule, budget
+post_training_queue:            # new top-level, directive item 13
+  snapshot_glob: "checkpoint.step*.pt"
+  steps: [wait_for_artifact, verify_provenance, production_weighted_successor_nll,
+          balanced_family_nll, update_leaderboard, apply_selection_rule, freeze_winner,
+          low_cost_diagnostics, full_suite]
+  selection_rule: <predeclared>
+dag: [...]                      # §3
+```
 
-**Acceptance.** Uniform mass is over distinct canonical successors (a molecule reachable by 5 marks gets the
-same mass as one reachable by 1); mass sums to 1; per-step records carry every field the metrics need.
-
----
-
-### A3. Frozen task splits  *(priority 1b/4, directive items 4–5)* **[now]**
-
-**Files** `src/compose_v4/data/adaptation_tasks.py`, `scripts/build_adaptation_tasks.py`,
-`configs/tasks/*.json`, `tests/test_adaptation_tasks.py`
-*(new module under `src/compose_v4/data/` is permitted; existing files there are not modified)*
-
-**Split policy — reuse, do not invent.** ringcore-v1 scaffold key (murcko + carbonized-wl3, salt
-`ringcore-v1`, 0.9/0.05/0.05); tasks drawn from validation/test only; disjointness **verified numerically**.
-Similarity ECFP4 r=2, 2048 bits, Tanimoto. Seeds `[0,1,2,3,4]`.
-
-**Anti-tuning property.** Structural: constructed from corpus statistics with no model output inspected.
-Recorded per artifact: `frozen_before_checkpoint`, the highest existing snapshot step at freeze, the training
-commit, the corpus scope hash, the split-policy identity, and a content hash.
-
-**E3 families** source_too_small_target_larger · source_too_large_target_smaller ·
-grow_then_switch_to_smaller_preferred_range (target interval changes mid-trajectory) · held_out_atom_count_bins ·
-**matched_sources_unsolvable_at_fixed_cardinality** (load-bearing: makes cardinality change provably necessary;
-the verification argument must be documented, not asserted).
-Per-step records: active atom count, insertions, deletions, net change, overshoot, correction, steps to enter
-interval, terminal success, similarity retained, validity, connectedness.
-
-**E4 families** cycle_creation · cycle_opening · ring_size_change · fused_system_modification ·
-spiro_or_bridged_where_supported · topology_simplification · topology_addition_then_reversal_after_switch.
-**If the production operator set cannot reach spiro/bridged changes, those tasks are marked unsupported —
-not fabricated, and the disabled `ring_system_grow` macro is not re-enabled to manufacture them.**
-
-**Slot hazard.** Atom counting must mask on the real-element predicate; slot-stable states leave nulls mid-array
-and `[:n_real_atoms]` silently drops trailing real atoms.
-
-**Acceptance.** Held-out disjointness verified; deterministic under seed; content hash changes when any task
-changes; the unsolvable set is unsolvable by the documented argument.
-
----
-
-### A5. Exact enumerable RingCore graph + Doob solver  *(priority 5, directive item 7)* **[now]**, `learned_value` arm **[frozen-gated]**
-
-**Written from scratch.** No prior-art imports; prior JSONs are non-evidence.
-
-**Files** `src/compose_v4/experiments/enumerable_ringcore.py`,
-`src/compose_v4/experiments/exact_finite_horizon_control.py`,
-`scripts/run_e6_exact_control.py`, `results/E6_exact_control.json`, `tests/test_e6_exact_control.py`
-
-**A5.1 Sizing first (gate on the rest).** Measure the reachable-set size and branching under the **real
-production executor** for candidate bounded chemistries; report the numbers; only then fix the chemistry.
-Operator set is RingCore-V1: compositional `cycle_close`/`cycle_open` (executor `bond_insert`/`bond_delete`,
-families `cycle_insert`/`cycle_attach`), `ring_system_grow` macro **disabled**. If no candidate is
-enumerable, that is the finding and the exact panel is reported as infeasible rather than approximated.
-
-**A5.2 Precompute** every valid state; every legal action; canonical successors; aggregate rates; transition
-matrices **indexed by remaining budget** (finite horizon ⇒ time-inhomogeneous); connected components;
-terminal distributions; exact backward values.
-
-**A5.3 Exact finite-horizon Doob transform** + primary metric
-`terminal_law_total_variation_residual` vs the analytic tilt. Report the **actual magnitude**; at solver
-tolerance expect ~1e-10. A tolerance is never loosened to make a test pass; a non-exact result is reported
-as the finding.
-
-**A5.4 Support preservation** — the transform neither creates nor destroys support.
-
-**A5.5 Controller arms** scored against the exact optimum: `endpoint_reranking`, `greedy_reward`,
-`local_boltzmann`, `smc_feynman_kac`; `learned_value` interface defined and reported checkpoint-gated.
-
-**A5.6 Dynamic** objective replacement, exact continuation from an intermediate state, restart control —
-these underpin the paper's dynamic-switching claim, so exactness here is load-bearing.
-
-**A5.7 Tilts** rare motif · atom-count interval · property interval · two simultaneous constraints ·
-Boltzmann reward · small objective-space region.
-
-**Acceptance.** Enumeration provably closed under the executor (completeness); every transition matrix's rows
-sum to 1; Doob terminal law matches the analytic tilt to stated tolerance; support preserved.
+Breaking change: `metrics`/`panel` → `primary_metrics`/`secondary_metrics`/`panel_id`. A loader test will
+fail on a v1 registry rather than silently misread it.
 
 ---
 
-### A4. Canonical-quotient invariance fixtures  *(priority 6, directive item 6)* **[now]**, check 6 needs A5
+## 8. DELIVERABLE 6 — implementation order
 
-**Files** `src/compose_v4/experiments/quotient_invariance.py`, `tests/test_quotient_invariance.py`
+| # | Piece | Phase | Gate |
+|---|---|---|---|
+| 1 | A0.1–A0.9 protocol freeze + registry v2 | A0 | **[now]**, blocks all numbers |
+| 2 | A1.1 evaluator skeleton, provenance, versioned schema, contract validation | A1 | **[now]** |
+| 3 | A2.1 sizing sweep under the preregistered policy | A2 | **[now]**, parallel with 2 |
+| 4 | A1.2 enumeration + canonical aggregation | A1 | needs 2 |
+| 5 | A2.2–A2.3 K-step graph + exact solver on a fixed kernel | A2 | needs 3 |
+| 6 | A1.3–A1.4 CLI, registry-driven metrics, single-evaluator enforcement | A1 | needs 4 |
+| 7 | A2.4–A2.5 independent DP-vs-path check + support theorem tests | A2 | needs 5 |
+| 8 | A1.5 uniform canonical-successor baseline harness | A1 | needs 4 |
+| 9 | A1.6 development task generator (validation partition) | A1 | needs A0.9 |
+| 10 | A1.7 quotient checks 1–5 | A1 | needs 4 |
+| 11 | A2.6–A2.7 tilts + controller arms vs exact optimum | A2 | needs 7 |
+| 12 | A4.6–A4.7 quotient check 6 + mark-level counterexample | A2/A4 | needs 11 |
+| 13 | B1 same-base controller interface + compute accounting | B | needs 6, A0.6 |
+| 14 | B1.5 learned value/controller training | B | needs 13, 11 |
+| 15 | B1.6 controller selection on controller-validation | B | needs 14 |
+| 16 | C1–C4 leaderboard, selection rule, freeze, diagnostics gate | C | needs 6 |
+| 17 | Final task artifacts from the frozen algorithm | D | needs A0.9, 16 |
+| 18 | E2, E3, E4, E7 final runs; A2 stage-2 with selected checkpoint | D | **[frozen-gated]** |
+| 19 | F1–F4 external baselines, result schemas, generators, panel mapping | F | needs 18 |
+| L | L1–L6 de-novo lane, **parallel from now** | lane | own gates; E1 after L6 |
 
-Symmetric molecules where several marks produce the same molecular successor. All six checks:
-1. raw mark multiplicity differs;
-2. aggregate canonical successor mass is identical;
-3. sampled successor frequency matches aggregate mass — needs a **declared sample size and fixed seed** so
-   the test is not flaky; this is a sampler property and needs no trained weights;
-4. renaming persistent slots does not change the molecular kernel;
-5. splitting one internal action encoding into equivalent sub-actions does not change the state-level law;
-6. **exact control computed on the quotient is invariant to encoding refinement** — requires A5's solver.
-
----
-
-## Phase B — protocol freezing (must land before any result is inspected)
-
-- **B1. Same-base controller interface** *(item 8)*. One interface for: unguided prior · endpoint reranking ·
-  greedy one-step reward · local Boltzmann · scalarized guidance · MOG-DFM-style control · SMC/Feynman–Kac ·
-  learned Doob/value. Records generated endpoints, all intermediate states, base-kernel log probability,
-  controller correction, oracle calls, compute, effective sample size, constraint violations, success and
-  Pareto metrics.
-- **B2. Frozen oracle and task protocol** *(item 9)*. Per benchmark: source molecules, property objectives,
-  scaffold/source splits, similarity policy, objective normalization, constraint thresholds, optimization
-  budget, oracle-call budget, seeds, success definitions. Multi-objective predeclarations: 2-objective tasks
-  for Pareto visualization, 3-objective, 4–5-objective stress tests, **hypervolume reference points**,
-  epsilon/dominance convention, diversity measurement, source-similarity floor. Independent evaluation oracle
-  where available. **Normalization declared before any model output is inspected; post-hoc renormalization
-  forbidden.**
-- **B3. Dynamic experiment protocols** *(item 10)*. Dynamic preference switching (continuation vs restart vs
-  restart-under-separate-sampler vs static compromise; adaptation regret, retained old-objective gain, new
-  gain, edit/oracle cost, time to adapt); Pareto fan (prefix reuse, endpoint spread, hypervolume, region
-  coverage, branch diversity, cost vs independent restarts); pathwise constraints (scaffold protection,
-  pharmacophore retention, atom-count interval, charge policy, structural-alert exclusion, optional similarity
-  corridor) compared against endpoint-only filtering, reporting invalid/forbidden intermediate states, wasted
-  oracle calls, endpoint yield, path feasibility, cost.
-- **B4. Registry extension** to cover items 8, 10 and 13, which it currently does not.
+De-novo lane (L) runs in its own worktree concurrently with 1–18 and never blocks on them.
 
 ---
 
-## Phase C — automated post-training queue *(item 13)*
+## 9. Open questions
 
-`scripts/checkpoint_leaderboard.py` + `scripts/post_training_queue.py`.
-Steps: wait for checkpoint + evaluation artifact → verify provenance → production-weighted canonical-successor
-NLL → balanced-family NLL → update leaderboard → apply the **predeclared** selection rule → freeze the winner
-once the run completes → launch low-cost diagnostics first → launch the full same-base suite after freeze.
-Consumes `checkpoint.step<N>.pt` snapshots (every 500 steps).
-
-## Phase D — experiment runs **[frozen-gated]**
-
-E2, E3, E4, E7 against the frozen checkpoint, seeds `[0,1,2,3,4]`, outputs to `results/E*.json`.
-
-## Phase E — de-novo lane **[lane]** *(item 11, priority 8)*
-
-Repair + regression-test the deferred de-novo `bond_reorder` defect; verify timed CTMC hazard semantics;
-define the de-novo source distribution; build its training manifest and contract; confirm RingCore-V1
-compositional cycle operations active and legacy whole-ring growth disabled; unconditional evaluation scripts;
-baseline environments. Unconditional metrics: all-step validity, endpoint validity, connectedness, uniqueness,
-novelty, internal diversity, FCD, precision/recall or coverage, scaffold novelty, size/property distributions,
-ring/topology distributions, nearest-neighbour and memorization analysis, throughput.
-**E1 only behind its own gates. The editing checkpoint is never evidence for unconditional generation.**
-
-## Phase F — baselines and figures *(items 12, priorities 9–10)*
-
-External baseline environments; then figures as executable artifacts: Figure 2 (generation, size, topology,
-learned transport), Figure 3 (exact control), Figure 4 (conditional/dynamic), tables for unconditional
-benchmarks / transport ablations / same-base controllers / external baselines, Extended Data for quotient
-fixtures, operator support, held-out bins, failure cases, full Pareto fronts.
-
----
-
-## 4. Open questions for the owner
-
-1. **Phase B timing.** The priority list puts A5 (5) before dynamic protocols (7). But "freeze the protocol
-   before looking at results" argues for B2 earlier. Current plan follows your priority order; say the word to
-   hoist B2.
-2. **E6 scope if sizing fails.** If no bounded chemistry under the real executor is enumerable at reasonable
-   cost, preference: report infeasible, or shrink the chemistry until it is enumerable even if less chemically
-   interesting?
-3. **Spiro/bridged E4 tasks.** Confirmed intent: mark unsupported rather than re-enable the macro.
+1. **E1 primary metrics** (§6) are my proposal — confirm or replace.
+2. **`N_min=500`, `N_max=20,000`** (§4) are my proposed window; they are preregistered only once you accept
+   them, since changing them after seeing sizing results would defeat the purpose.
+3. **Encoder freezing for the value head** (§5.3) must be declared before training — frozen encoder, or light
+   adaptation?
