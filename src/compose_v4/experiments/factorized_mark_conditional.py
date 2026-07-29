@@ -1029,6 +1029,70 @@ def factorized_mark_metrics(
     return metrics
 
 
+def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
+    """Steady-state throughput report. Operational only -- the checkpoint is meaningless and discarded.
+
+    Steady state excludes the first ``warmup`` recorded steps: kernel autotuning, the first shard open and
+    dataloader cache population all land there and would otherwise flatter (or distort) seconds/step.
+    """
+    import statistics
+
+    n = len(bench["step"])
+    keep = slice(min(warmup, max(n - 1, 0)), n)
+    steady = {k: v[keep] for k, v in bench.items()}
+    count = len(steady["total"])
+    if count == 0:
+        raise RuntimeError("benchmark produced no steady-state steps; lower benchmark_warmup")
+
+    def stat(key):
+        values = steady[key]
+        return {
+            "mean": statistics.fmean(values),
+            "median": statistics.median(values),
+            "p90": sorted(values)[int(0.9 * (len(values) - 1))],
+            "total": sum(values),
+        }
+
+    phases = {k: stat(k) for k in ("data_wait", "transfer", "forward", "backward", "optimizer", "total")}
+    seconds_per_step = phases["total"]["mean"]
+    report = {
+        "artifact": "a100_throughput_benchmark",
+        "steps_recorded": n,
+        "warmup_excluded": min(warmup, max(n - 1, 0)),
+        "steady_state_steps": count,
+        "seconds_per_step": seconds_per_step,
+        "phase_seconds": phases,
+        "phase_fraction_of_step": {
+            k: (phases[k]["mean"] / seconds_per_step if seconds_per_step else 0.0)
+            for k in ("data_wait", "transfer", "forward", "backward", "optimizer")
+        },
+        "throughput": {
+            "examples_per_second": statistics.fmean(steady["examples"]) / seconds_per_step,
+            "candidate_actions_per_second": statistics.fmean(steady["candidates"]) / seconds_per_step,
+            "successor_groups_per_second": statistics.fmean(steady["successor_groups"]) / seconds_per_step,
+            "mean_candidates_per_batch": statistics.fmean(steady["candidates"]),
+            "mean_successor_groups_per_batch": statistics.fmean(steady["successor_groups"]),
+        },
+        "precision": {"bf16_autocast": bool(use_bf16), "device": str(model.device)},
+        "last_loss": last_loss,
+        "projected_runtime_hours": {
+            str(h): h * seconds_per_step / 3600.0 for h in (8000, 12000, 16000)
+        },
+    }
+    if torch.cuda.is_available():
+        report["gpu"] = {
+            "name": torch.cuda.get_device_name(0),
+            "max_memory_allocated_gb": torch.cuda.max_memory_allocated() / 1e9,
+            "max_memory_reserved_gb": torch.cuda.max_memory_reserved() / 1e9,
+        }
+    if output:
+        Path(output).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({"phase": "benchmark_complete", **{
+        k: report[k] for k in ("seconds_per_step", "steady_state_steps", "projected_runtime_hours")
+    }}, sort_keys=True), flush=True)
+    return report
+
+
 def train_factorized_mark_model(
     model: FactorizedTraceletRateModel,
     train_records: tuple[PathRecord, ...],
@@ -1036,6 +1100,9 @@ def train_factorized_mark_model(
     *,
     dry_launch: bool = False,
     dry_launch_output: str | None = None,
+    benchmark_steps: int = 0,
+    benchmark_warmup: int = 0,
+    benchmark_output: str | None = None,
     steps: int,
     batch_size: int,
     learning_rate: float,
@@ -1208,6 +1275,12 @@ def train_factorized_mark_model(
     cumulative_data_wait = 0.0
     cumulative_update_time = 0.0
     maximum_data_wait = 0.0
+    # Benchmark accumulators. Steady state EXCLUDES the warmup window so kernel autotuning, the first
+    # shard open and cache population do not contaminate the per-step estimate.
+    _bench: dict[str, list] = {
+        "step": [], "data_wait": [], "transfer": [], "forward": [], "backward": [],
+        "optimizer": [], "total": [], "candidates": [], "successor_groups": [], "examples": [],
+    }
     data_wait_history: list[float] = []
     resolved_evaluation_interval = (
         evaluation_interval
@@ -1293,6 +1366,29 @@ def train_factorized_mark_model(
         if profile_timing:
             _synchronize(model.device)
         optimized_at = perf_counter()
+        if benchmark_steps:
+            _n_cand = int(batch.graft_successor_groups.numel()) if hasattr(batch, "graft_successor_groups") else 0
+            _n_groups = (
+                int(torch.unique(batch.graft_successor_groups).numel())
+                if getattr(batch, "graft_successor_groups", None) is not None
+                and batch.graft_successor_groups.numel()
+                else 0
+            )
+            _bench["step"].append(step)
+            _bench["data_wait"].append(loaded_at - started)
+            _bench["transfer"].append(transferred_at - loaded_at)
+            _bench["forward"].append(forwarded_at - transferred_at)
+            _bench["backward"].append(backward_at - forwarded_at)
+            _bench["optimizer"].append(optimized_at - backward_at)
+            _bench["total"].append(optimized_at - started)
+            _bench["candidates"].append(_n_cand)
+            _bench["successor_groups"].append(_n_groups)
+            _bench["examples"].append(int(batch.atom_types.shape[0]))
+            if completed_steps >= benchmark_steps:
+                return _finalize_benchmark(
+                    _bench, benchmark_warmup, benchmark_output, model, use_bf16,
+                    float(loss.detach().cpu()),
+                )
         data_wait = loaded_at - started
         update_time = optimized_at - started
         cumulative_data_wait += data_wait

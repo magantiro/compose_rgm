@@ -1514,6 +1514,18 @@ def main() -> None:
         "(the mixture is manifest-controlled, de-novo retained via the warm-start).",
     )
     parser.add_argument(
+        "--benchmark-steps", type=int, default=0,
+        help="OPERATIONAL throughput benchmark: run the REAL training loop for N steps and emit a "
+        "steady-state timing report, then exit. The checkpoint is meaningless and must be discarded; the "
+        "loss must NOT be used for scientific interpretation.",
+    )
+    parser.add_argument(
+        "--benchmark-warmup", type=int, default=30,
+        help="steps excluded from the steady-state statistics (kernel autotuning, first shard open, "
+        "dataloader cache population all land here)",
+    )
+    parser.add_argument("--benchmark-output", default="", help="path for the benchmark JSON artifact")
+    parser.add_argument(
         "--precompiled-corpus",
         type=str,
         default=None,
@@ -3737,7 +3749,12 @@ def main() -> None:
             checkpoint_interval=args.recovery_every,
             checkpoint_callback=(save_recovery if recovery_path is not None else None),
             resume_state=resume_state,
-            profile_timing=args.fast_split,
+            # A benchmark REQUIRES synchronized phase boundaries; without them the forward/backward/
+            # optimizer splits are just async-launch times and the report would be fiction.
+            profile_timing=args.fast_split or bool(args.benchmark_steps),
+            benchmark_steps=args.benchmark_steps,
+            benchmark_warmup=args.benchmark_warmup,
+            benchmark_output=(args.benchmark_output or None),
             evaluation_batch_size=args.evaluation_batch_size,
             initial_validation_metrics=observed_validation,
             training_support_cache=(
