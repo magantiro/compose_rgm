@@ -215,15 +215,19 @@ def load_shard_layer_records(
             )
         # Exclusions come ONLY from the frozen overlay. An unsupported teacher that is not listed
         # raises -- production support changed, so the corpus is no longer what the manifest claims.
+        # The overlay is keyed by PRODUCTION layer name (general_corruption / cycle_operations), while
+        # shards live in directories named for the compiler (corruption / cycle_ops). Looking up with the
+        # directory name silently matches nothing, so every listed exclusion reads as unlisted.
+        overlay_layer = _SHARD_LAYER_TO_PRODUCTION.get(shard_layer, shard_layer)
         allowed = (
-            excluded_keys(representability_overlay, shard_layer, partition)
+            excluded_keys(representability_overlay, overlay_layer, partition)
             if representability_overlay else set()
         )
         excluded = 0
         for path in packed_paths:
             for trace, packed_path in read_packed_shard(path, verify_fraction=verify_fraction):
                 if check_unlisted(trace, trace_key(trace), allowed,
-                                  layer=shard_layer, partition=partition):
+                                  layer=overlay_layer, partition=partition):
                     excluded += 1
                     continue
                 records.append(PathRecord(canonical_state_key(trace.target), packed_path))

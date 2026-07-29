@@ -300,3 +300,33 @@ def test_manifest_without_its_shard_is_refused(tmp_path):
     (directory / "shard_0000.jsonl.manifest.json").write_text("{}")
     with pytest.raises(ProductionCorpusError, match="has no shard"):
         declared_shard_names(root)
+
+
+def test_overlay_lookup_uses_the_production_layer_name_not_the_shard_directory():
+    """Regression: exclusions are keyed by PRODUCTION layer name, shards by compiler directory name.
+
+    The census records `general_corruption`; shards live in `corruption/`. Looking up with the directory
+    name matched nothing, so every listed exclusion read as unlisted and the loader refused to load --
+    a loud failure, but for the wrong reason.
+    """
+    from compose_v4.data.production_edit_corpus import _SHARD_LAYER_TO_PRODUCTION
+
+    assert _SHARD_LAYER_TO_PRODUCTION["corruption"] == "general_corruption"
+    assert _SHARD_LAYER_TO_PRODUCTION["cycle_ops"] == "cycle_operations"
+
+    module = (Path(__file__).resolve().parent.parent
+              / "src/compose_v4/data/production_edit_corpus.py").read_text()
+    assert "overlay_layer = _SHARD_LAYER_TO_PRODUCTION.get(shard_layer, shard_layer)" in module
+    assert "excluded_keys(representability_overlay, overlay_layer, partition)" in module
+    assert "excluded_keys(representability_overlay, shard_layer, partition)" not in module
+
+
+def test_excluded_keys_returns_nothing_for_the_wrong_layer_name():
+    """Demonstrate the failure mode directly, so the aliasing is load-bearing rather than cosmetic."""
+    from compose_v4.data.representability_overlay import excluded_keys
+
+    overlay = {"exclusions": [
+        {"layer": "general_corruption", "partition": "train", "trace_key": "sha:abc"}
+    ]}
+    assert excluded_keys(overlay, "general_corruption", "train") == {"sha:abc"}
+    assert excluded_keys(overlay, "corruption", "train") == set()
