@@ -488,6 +488,28 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
         checkpoint_interval=args.path_checkpoint_interval,
         seed=seed,
     )
+    if args.require_scientific_contract:
+        if not args.unified_packed_manifest:
+            raise SystemExit(
+                "--require-scientific-contract needs --unified-packed-manifest: the contract is a property "
+                "of the whole corpus, so it cannot be inferred from the shards a single run happens to open"
+            )
+        unified = json.loads(Path(args.unified_packed_manifest).read_text())
+        level = (unified.get("contract_levels") or {}).get("SCIENTIFIC_TRAINING_CONTRACT")
+        if level != "PASS":
+            raise SystemExit(
+                f"SCIENTIFIC_TRAINING_CONTRACT not satisfied by {args.unified_packed_manifest}: {level}. "
+                "Refusing to run scientific training on BENCHMARK_CONTRACT-only data."
+            )
+        print(
+            json.dumps({"phase": "SCIENTIFIC_CONTRACT_VERIFIED",
+                        "manifest": args.unified_packed_manifest,
+                        "manifest_checksum": unified.get("manifest_checksum"),
+                        "layer_weights": unified.get("layer_weights"),
+                        "totals": unified.get("totals")}, sort_keys=True),
+            flush=True,
+        )
+
     storage = corpus.provenance["layer_storage"]
     if args.packed_corpus:
         unpacked = sorted(k for k, v in storage.items() if v != "packed")
@@ -1563,6 +1585,19 @@ def main() -> None:
         "corruption/cycle/analogue builders entirely: records come from the validated artifact, the "
         "explicit three-layer sampler drives the mixture, and every contract hash is verified before any "
         "GPU work. Mutually exclusive with --corrupted-prior-count/--analogue-trace-count sizing.",
+    )
+    parser.add_argument(
+        "--unified-packed-manifest",
+        type=str,
+        default=None,
+        help="UNIFIED_PACKED_MANIFEST.json. With --require-scientific-contract the run ABORTS unless it "
+        "reports SCIENTIFIC_TRAINING_CONTRACT: PASS -- BENCHMARK_CONTRACT-only data is good enough to "
+        "time a run, never to produce a reported number.",
+    )
+    parser.add_argument(
+        "--require-scientific-contract",
+        action="store_true",
+        help="refuse to train unless the unified manifest passes SCIENTIFIC_TRAINING_CONTRACT",
     )
     parser.add_argument(
         "--packed-corpus",

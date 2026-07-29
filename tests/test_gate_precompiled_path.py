@@ -243,3 +243,44 @@ def test_candidate_counting_measures_legal_candidates_not_padding():
     assert "_n_cand = int(batch.graft_successor_groups.numel())" not in loop
     assert "atom_delete_mask" in loop and "cyclic_pair_mask" in loop
     assert "Count LEGAL candidates, not padded tensor elements" in loop
+
+
+def test_scientific_launcher_refuses_benchmark_only_data():
+    """The training launcher must refuse what the benchmark tolerates."""
+    source = GATE.read_text()
+    assert "--require-scientific-contract" in source
+    assert "SCIENTIFIC_TRAINING_CONTRACT not satisfied" in source
+    assert "Refusing to run scientific training on BENCHMARK_CONTRACT-only data" in source
+
+
+def test_scientific_contract_needs_the_unified_manifest():
+    """The contract is a property of the whole corpus, not of the shards one run happens to open."""
+    source = GATE.read_text()
+    assert "needs --unified-packed-manifest" in source
+    assert '"phase": "SCIENTIFIC_CONTRACT_VERIFIED"' in source
+
+
+def test_recipe_chain_carries_the_scientific_contract_flags():
+    import subprocess
+    import sys as _sys
+
+    _sys.path.insert(0, str(REPO / "src"))
+    from compose_v4.experiments.recipe import build_tracelet_recipe_argv
+
+    argv = build_tracelet_recipe_argv(
+        {"arguments": {
+            "precompiled_corpus": "/artifacts/edit_precompile_v1",
+            "packed_corpus": "/artifacts/edit_packed_v1",
+            "packed_mmp_corpus": "/artifacts/mmp_packed_v1",
+            "unified_packed_manifest": "/artifacts/UNIFIED_PACKED_MANIFEST.json",
+            "require_scientific_contract": True,
+        }},
+        smiles_file=Path("/g/x.smiles"),
+    )
+    assert "--unified-packed-manifest" in argv
+    assert "--require-scientific-contract" in argv
+    result = subprocess.run(
+        [_sys.executable, str(GATE), *argv, "--help"], capture_output=True, text=True
+    )
+    bad = [ln for ln in (result.stderr or "").splitlines() if "unrecognized" in ln or "invalid" in ln]
+    assert not bad, bad
