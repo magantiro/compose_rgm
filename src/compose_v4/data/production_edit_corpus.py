@@ -288,6 +288,7 @@ def load_production_edit_corpus(
     mmp_limit: int | None = None,
     checkpoint_interval: int | None = None,
     packed_root: Path | None = None,
+    packed_mmp_root: Path | None = None,
     verify_fraction: float = 0.0,
     require_packed_mmp: bool = True,
     seed: int = 0,
@@ -304,7 +305,14 @@ def load_production_edit_corpus(
             packed_root=packed_root, verify_fraction=verify_fraction,
             declared_names=declared_names,
         )
-    packed_mmp = None if packed_root is None else Path(packed_root) / PACKED_MMP_LAYER
+    # The MMP store is built by its own app and normally lives at its own root; fall back to a
+    # subdirectory of the packed root only if no explicit root was given.
+    if packed_mmp_root is not None:
+        packed_mmp = Path(packed_mmp_root)
+    elif packed_root is not None:
+        packed_mmp = Path(packed_root) / PACKED_MMP_LAYER
+    else:
+        packed_mmp = None
     if packed_mmp is not None and packed_mmp.is_dir():
         # PRODUCTION PATH: packed MMP. Loading the raw pool cost 13.74 ms/row scanned -> 83 min per
         # partition, and it was rescanned once per partition. Packed shards are already partitioned.
@@ -350,6 +358,7 @@ def load_production_edit_corpus(
         "root": str(root),
         "declared_shards": sum(len(v) for v in declared_names.values()),
         "packed_root": None if packed_root is None else str(packed_root),
+        "packed_mmp_root": None if packed_mmp_root is None else str(packed_mmp_root),
         "partition": partition,
         "configured_layer_weights": dict(layer_weights),
         "records_by_layer": {layer: len(rs) for layer, rs in ordered.items()},

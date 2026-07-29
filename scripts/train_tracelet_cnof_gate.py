@@ -461,6 +461,9 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
     corpus = load_production_edit_corpus(
         root,
         mmp_pool_path=Path(args.precompiled_mmp_pool),
+        packed_root=(Path(args.packed_corpus) if args.packed_corpus else None),
+        packed_mmp_root=(Path(args.packed_mmp_corpus) if args.packed_mmp_corpus else None),
+        require_packed_mmp=bool(args.packed_corpus),
         partition=partition,
         layer_weights=PRODUCTION_LAYER_WEIGHTS,
         expected_contract=contract,
@@ -1534,6 +1537,21 @@ def main() -> None:
         "corruption/cycle/analogue builders entirely: records come from the validated artifact, the "
         "explicit three-layer sampler drives the mixture, and every contract hash is verified before any "
         "GPU work. Mutually exclusive with --corrupted-prior-count/--analogue-trace-count sizing.",
+    )
+    parser.add_argument(
+        "--packed-corpus",
+        type=str,
+        default=None,
+        help="root of the PACKED store for the audit layers (pack_trace_states_app output). Serves "
+        "pre-materialized states so no trace is replayed at load (measured 21.36 -> 0.217 ms/trace). "
+        "Must cover every audit shard exactly.",
+    )
+    parser.add_argument(
+        "--packed-mmp-corpus",
+        type=str,
+        default=None,
+        help="root of the PACKED MMP store (pack_mmp_pool_app output). Required with --packed-corpus: "
+        "without it the MMP layer falls back to replaying the raw pool (~83 min per partition).",
     )
     parser.add_argument(
         "--precompiled-mmp-pool",

@@ -709,6 +709,8 @@ def _run_remote(
     scaled_manifest: str | None = None,
     precompiled_corpus: str | None = None,
     precompiled_mmp_pool: str | None = None,
+    packed_corpus: str | None = None,
+    packed_mmp_corpus: str | None = None,
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
 ) -> dict[str, object]:
@@ -797,6 +799,9 @@ def _run_remote(
         # Production data path: validated shard corpus + packed states + explicit three-layer sampler.
         recipe["arguments"]["precompiled_corpus"] = precompiled_corpus
         recipe["arguments"]["precompiled_mmp_pool"] = precompiled_mmp_pool or ""
+        if packed_corpus:
+            recipe["arguments"]["packed_corpus"] = packed_corpus
+            recipe["arguments"]["packed_mmp_corpus"] = packed_mmp_corpus or ""
     if benchmark_steps:
         # OPERATIONAL throughput measurement through the REAL training loop. The checkpoint it writes is
         # meaningless and must be discarded; the loss must not be read as a scientific signal.
@@ -1507,6 +1512,8 @@ def dry_launch_stage(
     scaled_manifest: str = "",
     precompiled_corpus: str = "",
     precompiled_mmp_pool: str = "",
+    packed_corpus: str = "",
+    packed_mmp_corpus: str = "",
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
     training_steps: int | None = None,
@@ -1632,6 +1639,8 @@ def train_stage(
     scaled_manifest: str = "",
     precompiled_corpus: str = "",
     precompiled_mmp_pool: str = "",
+    packed_corpus: str = "",
+    packed_mmp_corpus: str = "",
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
     disable_early_stopping: bool = False,
@@ -1666,6 +1675,8 @@ def train_stage(
         scaled_manifest=scaled_manifest or None,
         precompiled_corpus=precompiled_corpus or None,
         precompiled_mmp_pool=precompiled_mmp_pool or None,
+        packed_corpus=packed_corpus or None,
+        packed_mmp_corpus=packed_mmp_corpus or None,
         benchmark_steps=benchmark_steps,
         benchmark_warmup=benchmark_warmup,
         disable_early_stopping=disable_early_stopping,
@@ -2502,6 +2513,8 @@ def main(
     scaled_manifest: str = "",
     precompiled_corpus: str = "",
     precompiled_mmp_pool: str = "",
+    packed_corpus: str = "",
+    packed_mmp_corpus: str = "",
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
 ) -> None:
@@ -2808,6 +2821,8 @@ def main(
             scaled_manifest,
             precompiled_corpus=precompiled_corpus,
             precompiled_mmp_pool=precompiled_mmp_pool,
+            packed_corpus=packed_corpus,
+            packed_mmp_corpus=packed_mmp_corpus,
             benchmark_steps=benchmark_steps,
             benchmark_warmup=benchmark_warmup,
             disable_early_stopping=disable_early_stopping,
