@@ -139,15 +139,21 @@ def census(packed_root: str, mmp_root: str, commit: str) -> dict:
     return summary
 
 
-@app.function(image=image, gpu="A100", cpu=16.0, memory=65536, timeout=4 * 3600,
-              volumes={"/artifacts": artifact_volume})
-def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: str) -> dict:
-    """Traverse the COMPLETE corrected validation corpus through the real evaluation path.
+# Batch construction is CPU-bound (fiber enumeration for 64 molecules), so a single container leaves the
+# GPU idle and needs ~90 min for validation alone. Fan out the same way the packers do: each container
+# checks a stride slice, so wall clock is one slice, not the whole partition. That also makes it cheap
+# enough to cover a large TRAIN sample -- where the actual training exposure is, and where the record that
+# crashed the run actually lived.
+_GATE_SLICES = 16
 
-    This is the exact path that failed at step 250. It is a regression gate, not a quality preflight: it
-    trains nothing, selects nothing, and only asserts that every teacher is scoreable and every metric is
-    finite.
-    """
+
+# CPU, not GPU: the cost here is fiber ENUMERATION, and a batch-64 hidden-256 forward is small. Sixteen
+# mostly-idle A100s would cost ~6x a CPU fan-out for the same wall clock.
+@app.function(image=image, cpu=8.0, memory=32768, timeout=2 * 3600,
+              max_containers=20, volumes={"/artifacts": artifact_volume})
+def gate_shard(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: str,
+               partition: str, slice_index: int, n_slices: int, cap: int) -> dict:
+    """Check one stride slice of a partition through the REAL evaluation path."""
     import sys
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
@@ -157,6 +163,7 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
 
     import torch
 
+    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
     from compose_v4.data.production_edit_corpus import load_production_edit_corpus
     from compose_v4.data.representability_overlay import load_overlay
     from compose_v4.experiments.factorized_mark_conditional import (
@@ -164,111 +171,114 @@ def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: 
         factorized_mark_bregman_loss,
         sample_factorized_mark_batch,
     )
-    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
     from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
     from ring_core_identity import PRODUCTION_LAYER_WEIGHTS
+    from train_tracelet_cnof_gate import _build_ring_core_seed_ring_catalog
 
     artifact_volume.reload()
     overlay = load_overlay(Path(OVERLAY_PATH))
     contract = json.loads((Path(audit_root) / "BUILD_COMPLETE.json").read_text()).get("contract", {})
-
-    from train_tracelet_cnof_gate import _build_ring_core_seed_ring_catalog
-
-    corpus_ring_catalog = _build_ring_core_seed_ring_catalog(40)
+    ring_catalog = _build_ring_core_seed_ring_catalog(40)
 
     corpus = load_production_edit_corpus(
-        Path(audit_root), mmp_pool_path=Path(mmp_pool), partition="validation",
+        Path(audit_root), mmp_pool_path=Path(mmp_pool), partition=partition,
         layer_weights=PRODUCTION_LAYER_WEIGHTS, expected_contract=contract,
         packed_root=Path(packed_root), packed_mmp_root=Path(mmp_root),
         representability_overlay=overlay, path_length_bins=(5, 9, 13), seed=5,
     )
+    # stride slice: interleaved, so every slice sees all three layers rather than one contiguous block
+    records = corpus.records[slice_index::n_slices]
+    if cap:
+        records = records[:cap]
 
-    # Reaching here already proves ZERO UNLISTED unsupported teachers across the whole partition:
-    # load_production_edit_corpus raises on any unsupported teacher the overlay does not list.
-    records = corpus.records
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # The PRODUCTION capability flags. Representability is a property of the configured heads, so the
-    # gate must use the same enable_* set the scientific run uses -- untrained weights are fine, since
-    # this asserts scoreability and finiteness, never quality.
     model = FactorizedTraceletRateModel(
-        corpus_ring_catalog,
-        hidden_dim=256,
-        message_passing_steps=6,
-        ring_electronic_mode="factorized_local",
-        rate_factorization="hierarchical",
-        enable_ring_restates=True,
-        enable_cyclic_graft=True,
-        enable_heteroatom_scan=True,
-        enable_ring_opening=True,
-        enable_cycle_ops=True,
-        enable_ring_grow_macro=False,
+        ring_catalog, hidden_dim=256, message_passing_steps=6,
+        ring_electronic_mode="factorized_local", rate_factorization="hierarchical",
+        enable_ring_restates=True, enable_cyclic_graft=True, enable_heteroatom_scan=True,
+        enable_ring_opening=True, enable_cycle_ops=True, enable_ring_grow_macro=False,
         atom_vocabulary=ORGANIC_VOCABULARY,
     ).to(device)
     model.eval()
 
-    # Traverse the COMPLETE validation corpus through the real batch builder, the exact candidate
-    # enumerator, the teacher-in-candidate invariant, the model forward, and the canonical-successor loss.
-    batch_size = 64
-    total_batches = (len(records) + batch_size - 1) // batch_size
-    print(json.dumps({"phase": "gate_start", "records": len(records),
-                      "batches_planned": total_batches, "device": str(device)}), flush=True)
     started = time.time()
-    batches = 0
-    teacher_violations = 0
-    nonfinite = 0
-    losses = []
-    total = len(records)
-    for start in range(0, total, batch_size):
-        chunk = records[start:start + batch_size]
+    batch_size, checked, violations, nonfinite, losses = 64, 0, 0, 0, []
+    first_violation = None
+    for offset in range(0, len(records), batch_size):
+        chunk = records[offset:offset + batch_size]
         if not chunk:
             continue
         batch = sample_factorized_mark_batch(
-            tuple(chunk), batch_size=len(chunk), seed=1000 + start, workers=8,
+            tuple(chunk), batch_size=len(chunk), seed=7000 + slice_index * 100000 + offset,
             late_time_fraction=0.5, operational_horizon=16.0,
-            progress_stratification_fraction=0.5,
-            ring_catalog=corpus_ring_catalog,
+            progress_stratification_fraction=0.5, workers=4, ring_catalog=ring_catalog,
             compute_ring_restates=True, compute_cyclic_graft=True, compute_ring_opening=True,
         )
         try:
             assert_teachers_in_exact_candidates(batch)
-        except Exception as exc:  # noqa: BLE001 -- a violation is the thing we are testing for
-            teacher_violations += 1
-            return {"phase": "EVALUATION_PATH_GATE", "verdict": "FAIL",
-                    "reason": f"teacher outside exact candidates at record {start}: {exc}"}
+        except Exception as exc:  # noqa: BLE001 -- the condition under test
+            violations += 1
+            first_violation = f"{partition} slice {slice_index} offset {offset}: {exc}"[:400]
+            break
         with torch.no_grad():
-            prediction = model.forward_mark_batch(batch.to(device))
-            loss = factorized_mark_bregman_loss(prediction, batch.to(device))
-        value = float(loss.detach().cpu())
+            moved = batch.to(device)
+            value = float(factorized_mark_bregman_loss(model.forward_mark_batch(moved), moved)
+                          .detach().cpu())
         if not math.isfinite(value):
             nonfinite += 1
         losses.append(value)
-        batches += 1
-        if batches % 10 == 0 or batches == total_batches:
-            elapsed = time.time() - started
-            print(json.dumps({"phase": "gate_progress", "batches": batches,
-                              "of": total_batches, "seconds": round(elapsed, 1),
-                              "sec_per_batch": round(elapsed / batches, 2),
-                              "violations": teacher_violations, "nonfinite": nonfinite},
-                             sort_keys=True), flush=True)
+        checked += len(chunk)
 
-    verdict = "PASS" if (teacher_violations == 0 and nonfinite == 0 and batches > 0) else "FAIL"
-    result = {
-        "phase": "EVALUATION_PATH_GATE",
-        "verdict": verdict,
-        "validation_records_traversed": total,
-        "batches": batches,
-        "teacher_in_candidate_violations": teacher_violations,
-        "teacher_in_candidate_rate": 1.0 if teacher_violations == 0 else 0.0,
-        "nonfinite_losses": nonfinite,
-        "mean_loss": (sum(losses) / len(losses)) if losses else None,
-        "records_by_layer": corpus.provenance["records_by_layer"],
-        "layer_storage": corpus.provenance["layer_storage"],
-        "unlisted_unsupported_teachers": 0,
-        "overlay_checksum": overlay["effective_corpus_checksum"],
-        "device": str(device),
-    }
+    result = {"partition": partition, "slice": slice_index, "records_checked": checked,
+              "violations": violations, "nonfinite": nonfinite,
+              "first_violation": first_violation,
+              "mean_loss": (sum(losses) / len(losses)) if losses else None,
+              "seconds": round(time.time() - started, 1)}
     print(json.dumps(result, sort_keys=True), flush=True)
     return result
+
+
+@app.function(image=image, cpu=4.0, timeout=6 * 3600, volumes={"/artifacts": artifact_volume})
+def evaluation_gate(packed_root: str, mmp_root: str, audit_root: str, mmp_pool: str,
+                    train_cap_per_slice: int = 1500) -> dict:
+    """Fan the gate across containers: FULL validation, plus a large stratified train sample.
+
+    Validation is exhaustive. Train is 20x larger, so it is sampled by stride across all 16 slices --
+    which is where the record that crashed the scientific run actually lived, and where the slow
+    single-container gate gave no coverage at all.
+    """
+    artifact_volume.reload()
+    tasks = [(packed_root, mmp_root, audit_root, mmp_pool, "validation", i, _GATE_SLICES, 0)
+             for i in range(_GATE_SLICES)]
+    tasks += [(packed_root, mmp_root, audit_root, mmp_pool, "train", i, _GATE_SLICES,
+               train_cap_per_slice) for i in range(_GATE_SLICES)]
+    print(json.dumps({"phase": "gate_fanout", "tasks": len(tasks),
+                      "slices": _GATE_SLICES}), flush=True)
+    results = list(gate_shard.starmap(tasks))
+
+    by_partition: dict[str, dict] = {}
+    for row in results:
+        agg = by_partition.setdefault(row["partition"],
+                                      {"records_checked": 0, "violations": 0, "nonfinite": 0,
+                                       "first_violation": None})
+        agg["records_checked"] += row["records_checked"]
+        agg["violations"] += row["violations"]
+        agg["nonfinite"] += row["nonfinite"]
+        if row["first_violation"] and not agg["first_violation"]:
+            agg["first_violation"] = row["first_violation"]
+
+    violations = sum(v["violations"] for v in by_partition.values())
+    nonfinite = sum(v["nonfinite"] for v in by_partition.values())
+    verdict = "PASS" if violations == 0 and nonfinite == 0 else "FAIL"
+    payload = {"phase": "EVALUATION_PATH_GATE", "verdict": verdict,
+               "by_partition": by_partition,
+               "teacher_in_candidate_violations": violations, "nonfinite_losses": nonfinite,
+               "slices": _GATE_SLICES, "train_cap_per_slice": train_cap_per_slice}
+    Path("/artifacts/EVALUATION_PATH_GATE.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    artifact_volume.commit()
+    print(json.dumps(payload, sort_keys=True), flush=True)
+    return payload
 
 
 @app.local_entrypoint()
