@@ -707,6 +707,10 @@ def _run_remote(
     analogue_trace_count: int = 0,
     corrupted_prior_count: int | None = None,
     scaled_manifest: str | None = None,
+    precompiled_corpus: str | None = None,
+    precompiled_mmp_pool: str | None = None,
+    benchmark_steps: int = 0,
+    benchmark_warmup: int = 30,
 ) -> dict[str, object]:
     from compose_v4.experiments.recipe import build_tracelet_recipe_argv
 
@@ -789,6 +793,16 @@ def _run_remote(
     if scaled_manifest:
         # Drive the hierarchical training sampler from the locked scaled manifest (mixture + curriculum).
         recipe["arguments"]["scaled_manifest"] = scaled_manifest
+    if precompiled_corpus:
+        # Production data path: validated shard corpus + packed states + explicit three-layer sampler.
+        recipe["arguments"]["precompiled_corpus"] = precompiled_corpus
+        recipe["arguments"]["precompiled_mmp_pool"] = precompiled_mmp_pool or ""
+    if benchmark_steps:
+        # OPERATIONAL throughput measurement through the REAL training loop. The checkpoint it writes is
+        # meaningless and must be discarded; the loss must not be read as a scientific signal.
+        recipe["arguments"]["benchmark_steps"] = int(benchmark_steps)
+        recipe["arguments"]["benchmark_warmup"] = int(benchmark_warmup)
+        recipe["arguments"]["benchmark_output"] = str(run_dir / "benchmark.json")
     if path_cache_source_run is not None:
         _validate_run_label(path_cache_source_run, field="path-cache source run")
         source_path_cache = (
@@ -1491,6 +1505,10 @@ def dry_launch_stage(
     analogue_trace_count: int = 0,
     corrupted_prior_count: int = 0,
     scaled_manifest: str = "",
+    precompiled_corpus: str = "",
+    precompiled_mmp_pool: str = "",
+    benchmark_steps: int = 0,
+    benchmark_warmup: int = 30,
     training_steps: int | None = None,
     schedule_steps: int | None = None,
 ) -> dict[str, object]:
@@ -1612,13 +1630,18 @@ def train_stage(
     analogue_trace_count: int = 0,
     corrupted_prior_count: int = 0,
     scaled_manifest: str = "",
+    precompiled_corpus: str = "",
+    precompiled_mmp_pool: str = "",
+    benchmark_steps: int = 0,
+    benchmark_warmup: int = 30,
     disable_early_stopping: bool = False,
     snapshot_checkpoints: bool = False,
 ) -> dict[str, object]:
     # Zero-mixture (RING_CORE_V1 / --scaled-manifest): denovo_keep=0 so NO de-novo path cache is opened and
     # the training-support cache is built on-the-fly; a warm-started zero-mixture run must not require (or
     # reuse) B's de-novo caches. Standard (non-scaled) runs keep the strict cache requirements.
-    zero_mixture = bool(scaled_manifest)
+    # The precompiled corpus is likewise de-novo-free: no B path cache, no support cache reuse.
+    zero_mixture = bool(scaled_manifest) or bool(precompiled_corpus)
     return _run_remote(
         run_label=run_label,
         smoke=False,
@@ -1641,6 +1664,10 @@ def train_stage(
         analogue_trace_count=analogue_trace_count,
         corrupted_prior_count=corrupted_prior_count or None,
         scaled_manifest=scaled_manifest or None,
+        precompiled_corpus=precompiled_corpus or None,
+        precompiled_mmp_pool=precompiled_mmp_pool or None,
+        benchmark_steps=benchmark_steps,
+        benchmark_warmup=benchmark_warmup,
         disable_early_stopping=disable_early_stopping,
         snapshot_checkpoints=snapshot_checkpoints,
     )
@@ -2473,6 +2500,10 @@ def main(
     analogue_trace_count: int = 0,
     corrupted_prior_count: int = 0,
     scaled_manifest: str = "",
+    precompiled_corpus: str = "",
+    precompiled_mmp_pool: str = "",
+    benchmark_steps: int = 0,
+    benchmark_warmup: int = 30,
 ) -> None:
     modes = sum(
         (
@@ -2775,6 +2806,10 @@ def main(
             analogue_trace_count,
             corrupted_prior_count,
             scaled_manifest,
+            precompiled_corpus=precompiled_corpus,
+            precompiled_mmp_pool=precompiled_mmp_pool,
+            benchmark_steps=benchmark_steps,
+            benchmark_warmup=benchmark_warmup,
             disable_early_stopping=disable_early_stopping,
             snapshot_checkpoints=snapshot_checkpoints,
         )
