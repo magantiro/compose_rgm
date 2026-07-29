@@ -70,6 +70,19 @@ _SENTINEL_ENTRIES = 8
 _MMP_PARTITION_RULE_VERSION = 2
 
 
+def pair_rule_implementation_hash() -> str:
+    """Hash of ``pair_partition``'s SOURCE.
+
+    A hand-incremented version only invalidates a cache when someone remembers to bump it. Hashing the
+    function body means an edit to the rule invalidates every derived artifact whether or not the version
+    was touched.
+    """
+    import hashlib
+    import inspect
+
+    return hashlib.sha256(inspect.getsource(pair_partition).encode()).hexdigest()[:16]
+
+
 def shards_for(record_count: int) -> int:
     """Duration-targeted shard count. Small partitions get 1 shard, not a proportional sliver."""
     if record_count <= 0:
@@ -187,6 +200,7 @@ def partition_pool(subdir: str) -> dict:
                 # the app's OWN pairing rule is not covered by the partitioner provenance hash;
                 # without this, a rebuild would silently reuse a partitioning built under the old rule
                 and previous.get("mmp_partition_rule_version") == _MMP_PARTITION_RULE_VERSION
+                and previous.get("pair_rule_implementation_hash") == pair_rule_implementation_hash()
                 and previous.get("scanned") == EXPECTED_POOL_RECORDS
                 and all(
                     (out_root / e["partition"] / e["shard"]).exists() for e in previous.get("shards", [])
@@ -199,6 +213,16 @@ def partition_pool(subdir: str) -> dict:
     digest = hashlib.sha256()
     rows_by_partition: dict[str, list] = {p: [] for p in PARTITIONS}
     rejects: dict[str, int] = {}
+    dropped_row_ids: list[int] = []
+    molecules_by_partition: dict[str, set] = {p: set() for p in PARTITIONS}
+    dropped_bias: dict[str, dict] = {
+        k: {} for k in ("path_length", "direction", "atom_count_delta",
+                        "cycle_rank_delta", "operator_signature")
+    }
+
+    def _bump(counter: dict, key: str) -> None:
+        counter[key] = counter.get(key, 0) + 1
+
     sources_by_partition: dict[str, set] = {p: set() for p in PARTITIONS}
     scaffolds_by_partition: dict[str, set] = {p: set() for p in PARTITIONS}
     scanned = 0
@@ -222,6 +246,16 @@ def partition_pool(subdir: str) -> dict:
                 reason = ("unassignable_scaffold" if not (source_scaffold and scaffold)
                           else "endpoints_straddle_partitions")
                 rejects[reason] = rejects.get(reason, 0) + 1
+                dropped_row_ids.append(scanned - 1)
+                if reason == "endpoints_straddle_partitions":
+                    # Descriptive bias audit ONLY -- it must never feed back into the split rule. Its job
+                    # is to show the holdout correction did not quietly delete one transformation class.
+                    _bump(dropped_bias["path_length"], str(record.get("path_length")))
+                    _bump(dropped_bias["direction"], str(record.get("direction") or "unknown"))
+                    _bump(dropped_bias["atom_count_delta"], str(record.get("atom_count_delta")))
+                    _bump(dropped_bias["cycle_rank_delta"], str(record.get("cycle_rank_delta")))
+                    _bump(dropped_bias["operator_signature"],
+                          ",".join(sorted((record.get("operator_histogram") or {}))))
                 continue
             record["_row_id"] = scanned - 1          # exact original row index
             record["_scaffold"] = scaffold
@@ -229,6 +263,11 @@ def partition_pool(subdir: str) -> dict:
             rows_by_partition[partition].append(record)
             sources_by_partition[partition].add(record.get("source_smiles", ""))
             scaffolds_by_partition[partition].add(scaffold)
+            # BOTH molecules and BOTH scaffolds belong to the partition -- tracking only the source would
+            # miss exactly the leak this rule exists to prevent.
+            molecules_by_partition[partition].add(record.get("source_smiles", ""))
+            molecules_by_partition[partition].add(target)
+            scaffolds_by_partition[partition].add(source_scaffold)
 
     pool_sha256 = digest.hexdigest()
     if scanned != EXPECTED_POOL_RECORDS:
@@ -255,6 +294,21 @@ def partition_pool(subdir: str) -> dict:
                 ).hexdigest()[:16],
             })
 
+    # Zero overlap must hold at partition time. Discovering it in the reducer means the whole packing
+    # fan-out was already paid for -- which is exactly what happened on the v1 rule.
+    molecule_overlap, scaffold_overlap = {}, {}
+    for i, a in enumerate(PARTITIONS):
+        for b in PARTITIONS[i + 1:]:
+            shared_mols = molecules_by_partition[a] & molecules_by_partition[b]
+            shared_scaffolds = scaffolds_by_partition[a] & scaffolds_by_partition[b]
+            if shared_mols:
+                molecule_overlap[f"{a}|{b}"] = len(shared_mols)
+            if shared_scaffolds:
+                scaffold_overlap[f"{a}|{b}"] = len(shared_scaffolds)
+    if molecule_overlap or scaffold_overlap:
+        return _status(subdir, "FAILED", reason="partitions overlap after the pair rule",
+                       molecule_overlap=molecule_overlap, scaffold_overlap=scaffold_overlap)
+
     kept = sum(len(v) for v in rows_by_partition.values())
     if kept + sum(rejects.values()) != scanned:
         return _status(subdir, "FAILED", reason="record reconciliation failed",
@@ -266,7 +320,18 @@ def partition_pool(subdir: str) -> dict:
         "scanned": scanned,
         "kept": kept,
         "rejects": rejects,
+        "accepted_records": kept,
+        "endpoints_straddle_partitions": rejects.get("endpoints_straddle_partitions", 0),
+        "dropped_row_ids_sha256": hashlib.sha256(
+            ",".join(str(r) for r in sorted(dropped_row_ids)).encode()
+        ).hexdigest()[:16],
+        "dropped_row_ids_count": len(dropped_row_ids),
+        "unique_molecules_by_partition": {p: len(molecules_by_partition[p]) for p in PARTITIONS},
+        "molecule_overlap": molecule_overlap,
+        "scaffold_overlap": scaffold_overlap,
+        "dropped_bias": dropped_bias,
         "mmp_partition_rule_version": _MMP_PARTITION_RULE_VERSION,
+        "pair_rule_implementation_hash": pair_rule_implementation_hash(),
         "expected_shards": len(plan),
         "shards": plan,
         "counts_by_partition": {p: len(rows_by_partition[p]) for p in PARTITIONS},
@@ -470,6 +535,8 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
     problems = []
     if totals["entries"] != plan["kept"]:
         problems.append(f"packed {totals['entries']} entries but partitioning kept {plan['kept']}")
+    if plan["kept"] + sum(plan["rejects"].values()) != plan["scanned"]:
+        problems.append("accepted + rejects does not reconcile to the pool record count")
     if duplicate_rows:
         problems.append(f"{duplicate_rows} duplicate row ids")
     if leak_source:
@@ -504,6 +571,16 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
         "packed_entries": totals["entries"],
         "packed_states": totals["states"],
         "rejects": plan["rejects"],
+        "accepted_records": plan["accepted_records"],
+        "endpoints_straddle_partitions": plan["endpoints_straddle_partitions"],
+        "dropped_row_ids_sha256": plan["dropped_row_ids_sha256"],
+        "dropped_row_ids_count": plan["dropped_row_ids_count"],
+        "unique_molecules_by_partition": plan["unique_molecules_by_partition"],
+        "partition_time_molecule_overlap": plan["molecule_overlap"],
+        "partition_time_scaffold_overlap": plan["scaffold_overlap"],
+        "dropped_bias": plan["dropped_bias"],
+        "mmp_partition_rule_version": plan["mmp_partition_rule_version"],
+        "pair_rule_implementation_hash": plan["pair_rule_implementation_hash"],
         "entries_by_partition": by_partition,
         "expected_shards": plan["expected_shards"],
         "unique_row_ids": len(seen_rows),

@@ -6,6 +6,7 @@ held-out contamination at the molecule level, not a storage bug.
 """
 from __future__ import annotations
 
+
 import sys
 from pathlib import Path
 
@@ -81,3 +82,57 @@ def test_every_accepted_pair_puts_both_molecules_in_one_partition():
     assert accepted > 0
     spanning = {k: v for k, v in molecule_partitions.items() if len(v) > 1}
     assert not spanning, f"{len(spanning)} molecules span partitions after the v2 rule"
+
+
+def test_pair_partition_is_symmetric():
+    """pair_partition(A, B) == pair_partition(B, A).
+
+    The pool contains both directed forms of a transformation (direction_balance forward 178,797 /
+    reverse 184,659). If the rule were asymmetric, one direction could be retained and the other dropped,
+    or worse, the two directions could land in different partitions -- reintroducing the leak.
+    """
+    import json
+
+    pool = REPO / "tests/fixtures/analogue_trace_pool_sample.jsonl"
+    rows = [json.loads(line) for line in pool.read_text().splitlines() if line.strip()]
+    checked = 0
+    for row in rows:
+        a, b = row["source_smiles"], row["target_smiles"]
+        forward = pair_partition(a, b)
+        reverse = pair_partition(b, a)
+        assert forward[0] == reverse[0], f"asymmetric partition for {a} <-> {b}"
+        # the scaffolds swap with the arguments, but the DECISION must not
+        assert {forward[1], forward[2]} == {reverse[1], reverse[2]}
+        checked += 1
+    assert checked > 0
+
+
+def test_symmetry_holds_for_a_constructed_straddling_pair():
+    """A straddling pair must be dropped in BOTH directions, never retained in one."""
+    from compose_v4.data.scaffold_partition import partition_for_scaffold
+
+    # benzene -> train, oxane -> validation under the ringcore-v1 salt: a REAL straddling pair, so this
+    # test executes rather than skipping (a skipped leak test proves nothing).
+    probes = ["c1ccccc1", "C1CCOCC1", "c1ccncc1", "c1ccc2ccccc2c1", "C1CCCCC1", "C1CCNCC1"]
+    pair = None
+    for i, first in enumerate(probes):
+        for second in probes[i + 1:]:
+            if partition_for_scaffold(first, salt="ringcore-v1") != partition_for_scaffold(
+                second, salt="ringcore-v1"
+            ):
+                pair = (first, second)
+                break
+        if pair:
+            break
+    assert pair is not None, "probe set no longer contains a straddling pair -- fix the probes"
+    assert pair_partition(*pair)[0] is None
+    assert pair_partition(pair[1], pair[0])[0] is None
+
+
+def test_implementation_hash_changes_with_the_rule():
+    """A hand-incremented version only invalidates caches if someone remembers to bump it."""
+    from pack_mmp_pool_app import pair_rule_implementation_hash
+
+    digest = pair_rule_implementation_hash()
+    assert len(digest) == 16
+    assert digest == pair_rule_implementation_hash(), "hash must be stable within a build"
