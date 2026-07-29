@@ -141,3 +141,38 @@ def test_startup_reports_storage_for_every_layer():
     assert '"layer_storage"' in module
     assert '"audit_shard_replay"' in module
     assert '"layer_storage": corpus.provenance["layer_storage"]' in GATE.read_text()
+
+
+def test_precompiled_corpus_skips_all_denovo_compilation():
+    """Both zero-mixture modes must skip de-novo work, not just --scaled-manifest.
+
+    Regression: the de-novo branches were gated on args.scaled_manifest alone, so a --precompiled-corpus
+    run compiled 50,000 carbon-tree paths it never uses -- slow, and it crashed with InvalidRewrite before
+    the first optimizer step. Every such branch must consult the shared zero_denovo predicate.
+    """
+    source = GATE.read_text()
+    assert "zero_denovo = bool(args.scaled_manifest or args.precompiled_corpus)" in source
+    for branch in (
+        'if args.source_prior == "carbon_tree" and not zero_denovo:',
+        "tree_paths_ready = False\n    if zero_denovo:",
+        "if empty_partitions and not zero_denovo:",
+    ):
+        assert branch in source, f"de-novo branch not routed through zero_denovo: {branch!r}"
+
+
+def test_no_denovo_branch_still_keys_on_scaled_manifest_alone():
+    """Any NEW de-novo branch keyed on scaled_manifest alone would reintroduce the same bug."""
+    import re
+
+    source = GATE.read_text()
+    # the remaining scaled_manifest uses are validation, sizing, logging and the sampler selector --
+    # none may guard de-novo compilation
+    denovo_markers = ("carbon_tree", "tree_paths_ready", "empty_partitions", "compile de-novo")
+    for line_no, line in enumerate(source.splitlines(), 1):
+        if "args.scaled_manifest" not in line:
+            continue
+        if any(marker in line for marker in denovo_markers):
+            raise AssertionError(
+                f"line {line_no} guards de-novo work on scaled_manifest alone: {line.strip()!r}"
+            )
+    assert re.search(r"zero_denovo", source)

@@ -1573,6 +1573,12 @@ def main() -> None:
     args = parser.parse_args()
     _zmi.reset()  # zero-mixture instrumentation accumulates over this whole run (catalog/manifest/pool/train)
 
+    # Both zero-mixture modes supply train_records wholesale, so NEITHER may compile de-novo paths:
+    # --scaled-manifest was the original; --precompiled-corpus is the packed production path. Leaving this
+    # gated on scaled_manifest alone made a precompiled run compile 50,000 carbon-tree paths it never uses
+    # (slow, and it crashed on an InvalidRewrite before the first optimizer step).
+    zero_denovo = bool(args.scaled_manifest or args.precompiled_corpus)
+
     if args.precompiled_corpus and not args.precompiled_mmp_pool:
         raise SystemExit(
             "--precompiled-corpus requires --precompiled-mmp-pool: the mmp_analogue layer carries a "
@@ -1835,7 +1841,7 @@ def main() -> None:
     # Zero-mixture (RING_CORE_V1 / --scaled-manifest): denovo_keep=0, so the carbon-tree source prior is NEVER
     # constructed -- the de-novo path branch (gated on `tree_source_prior is not None`) then stays dead and no
     # carbon-tree dataset is instantiated. The decision happens here, before any de-novo work.
-    if args.source_prior == "carbon_tree" and not args.scaled_manifest:
+    if args.source_prior == "carbon_tree" and not zero_denovo:
         _zmi.bump("carbon_tree_prior_constructions")
         if args.tree_size_prior == "empirical":
             size_counts = Counter(
@@ -1989,7 +1995,7 @@ def main() -> None:
         raise FileNotFoundError(f"complete compiled path cache required: {location}")
 
     tree_paths_ready = False
-    if args.scaled_manifest:
+    if zero_denovo:
         # ZERO-MIXTURE (RING_CORE_V1): denovo_keep=0, so NO de-novo path is compiled, NO carbon-tree dataset
         # is instantiated, and NO de-novo/path cache is resolved. train_records=() (the corrupted-prior +
         # cycle-op edit records are appended below); the production ring catalog is reconstructed from the
@@ -2224,7 +2230,7 @@ def main() -> None:
         loaded_path_cache is None
         and loaded_sharded_manifest is None
         and tree_source_prior is None
-        and not args.scaled_manifest  # zero-mixture already built the seed catalog above; do NOT compile de-novo proposals
+        and not zero_denovo  # zero-mixture already built the seed catalog above; do NOT compile de-novo proposals
     ):
         ring_catalog = None
         if args.ring_proposals == "typed_catalog":
@@ -2517,7 +2523,7 @@ def main() -> None:
         )
         if not records
     ]
-    if empty_partitions and not args.scaled_manifest:
+    if empty_partitions and not zero_denovo:
         # Under zero-mixture (--scaled-manifest) the de-novo train/validation/test partitions are
         # INTENTIONALLY empty (denovo_keep=0); the corrupted-prior + cycle-op edit records are appended
         # below and become the training data. So an empty de-novo partition is expected here, not an error.
