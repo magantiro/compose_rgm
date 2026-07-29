@@ -230,3 +230,16 @@ def test_zero_denovo_asserts_no_denovo_records_were_built():
     source = GATE.read_text()
     assert "de-novo records were built" in source
     assert "a de-novo branch" in source
+
+
+def test_candidate_counting_measures_legal_candidates_not_padding():
+    """Regression: the benchmark reported dense-tensor elements as 'candidate actions'.
+
+    graft_successor_groups.numel() is [B, n_slots, n_slots] -- a configuration constant (64*40*40 =
+    102,400 on every batch), so 'candidate actions/second' was tensor elements/second. The count must sum
+    LEGAL entries across the family masks instead.
+    """
+    loop = (REPO / "src/compose_v4/experiments/factorized_mark_conditional.py").read_text()
+    assert "_n_cand = int(batch.graft_successor_groups.numel())" not in loop
+    assert "atom_delete_mask" in loop and "cyclic_pair_mask" in loop
+    assert "Count LEGAL candidates, not padded tensor elements" in loop

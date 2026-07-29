@@ -1,0 +1,111 @@
+{
+  "artifact": "a100_throughput_benchmark",
+  "bottleneck": {
+    "evidence": "mean data_wait 0.5428 s vs median 0.000417 s (1301x); median total step 0.2918 s equals the sum of median compute 0.2847 s, so a typical step waits ~0 for data",
+    "identified": "intermittent dataloader stalls",
+    "not_the_bottleneck": [
+      "GPU compute",
+      "canonical-successor aggregation",
+      "host-device transfer"
+    ],
+    "vectorization_decision": "DO NOT build the ragged GPU scoring path on this evidence (spec section 12)"
+  },
+  "gpu": {
+    "max_memory_allocated_gb": 1.627296256,
+    "max_memory_reserved_gb": 2.16006656,
+    "name": "NVIDIA A100-SXM4-40GB"
+  },
+  "invalid_metrics": {
+    "candidate_actions_per_second": "INVALID: counted graft_successor_groups.numel(), the dense [B,n_slots,n_slots] size (64*40*40 = 102400 constant). Measures tensor elements, not legal candidates. Instrumentation fixed; re-measure if a candidate-throughput number is needed."
+  },
+  "last_loss": 3.325584650039673,
+  "phase_fraction_of_step": {
+    "backward": 0.22108138697796342,
+    "data_wait": 0.6515400436293953,
+    "forward": 0.12100954673186136,
+    "optimizer": 0.004727404354852114,
+    "transfer": 0.0016416183059277884
+  },
+  "phase_seconds": {
+    "backward": {
+      "mean": 0.18419240837058357,
+      "median": 0.18036921499992786,
+      "p90": 0.21587399399982132,
+      "total": 31.312709422999205
+    },
+    "data_wait": {
+      "mean": 0.5428260217941162,
+      "median": 0.0004172985000536755,
+      "p90": 0.0015434120000463736,
+      "total": 92.28042370499975
+    },
+    "forward": {
+      "mean": 0.10081825590589366,
+      "median": 0.09957852100001219,
+      "p90": 0.12092794700004106,
+      "total": 17.139103504001923
+    },
+    "optimizer": {
+      "mean": 0.003938603811765434,
+      "median": 0.0034695465000140757,
+      "p90": 0.00529390000008334,
+      "total": 0.6695626480001238
+    },
+    "total": {
+      "mean": 0.8331429926705823,
+      "median": 0.29182985399995687,
+      "p90": 0.38232808499992643,
+      "total": 141.634308753999
+    },
+    "transfer": {
+      "mean": 0.0013677027882234892,
+      "median": 0.001242080499991971,
+      "p90": 0.0016830040000286317,
+      "total": 0.23250947399799315
+    }
+  },
+  "precision": {
+    "bf16_autocast": true,
+    "device": "cuda:0"
+  },
+  "projected_runtime_hours": {
+    "12000": 2.777143308901941,
+    "16000": 3.702857745202588,
+    "8000": 1.851428872601294
+  },
+  "provenance": {
+    "call_id": "fc-01KYP3R0BQH1EXA48N0V9PZCHX",
+    "checkpoint": "DISCARDED - operational measurement only; loss is not a scientific signal",
+    "commit": "d681001",
+    "contract_level": "BENCHMARK_CONTRACT",
+    "gate_sha256": "ecb8307a662a5c6b",
+    "layer_storage": {
+      "cycle_operations": "packed",
+      "general_corruption": "packed",
+      "mmp_analogue": "packed"
+    },
+    "realized_layer_frequency_train": {
+      "cycle_operations": 0.2534,
+      "general_corruption": 0.39805,
+      "mmp_analogue": 0.34855
+    },
+    "run_label": "compose-v4-ringcore-benchmark-d681001-v2",
+    "scheduler": {
+      "hash": "0b832985c65de1cc",
+      "schedule_steps": 3000,
+      "warmup_steps": 500
+    },
+    "unified_manifest_checksum": "ebb08a58cf5cc7b9"
+  },
+  "seconds_per_step": 0.8331429926705823,
+  "steady_state_steps": 170,
+  "steps_recorded": 200,
+  "throughput": {
+    "candidate_actions_per_second": 122908.07328495181,
+    "examples_per_second": 76.81754580309487,
+    "mean_candidates_per_batch": 102400.0,
+    "mean_successor_groups_per_batch": 371.28823529411767,
+    "successor_groups_per_second": 445.64767220087737
+  },
+  "warmup_excluded": 30
+}

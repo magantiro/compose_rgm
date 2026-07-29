@@ -1371,7 +1371,19 @@ def train_factorized_mark_model(
                               "device": str(model.device), "bf16": bool(use_bf16)},
                              sort_keys=True), flush=True)
         if benchmark_steps:
-            _n_cand = int(batch.graft_successor_groups.numel()) if hasattr(batch, "graft_successor_groups") else 0
+            # Count LEGAL candidates, not padded tensor elements. The first version used
+            # graft_successor_groups.numel(), which is the dense [B, n_slots, n_slots] size -- a
+            # configuration constant (64*40*40 = 102,400 every batch), so the reported
+            # "candidate actions/second" was tensor elements per second and meant nothing.
+            _n_cand = 0
+            for _mask_name in ("atom_delete_mask", "cycle_edge_mask", "cyclic_pair_mask", "graft_mask"):
+                _mask = getattr(batch, _mask_name, None)
+                if _mask is not None:
+                    _n_cand += int(_mask.sum().item())
+            for _actions_name in ("ring_restate_actions", "ring_delete_actions"):
+                _actions = getattr(batch, _actions_name, None)
+                if _actions:
+                    _n_cand += sum(len(_a) for _a in _actions if _a)
             _n_groups = (
                 int(torch.unique(batch.graft_successor_groups).numel())
                 if getattr(batch, "graft_successor_groups", None) is not None
