@@ -125,3 +125,19 @@ def test_mmp_stats_declare_their_source():
     module = (REPO / "src/compose_v4/data/production_edit_corpus.py").read_text()
     assert '"source": "packed"' in module
     assert '"raw_pool_replay"' in module
+
+
+def test_benchmark_contract_refuses_unpacked_layers():
+    """BENCHMARK_CONTRACT: every layer must be served from packed storage, or the run aborts."""
+    source = GATE.read_text()
+    assert "BENCHMARK_CONTRACT violation" in source
+    assert "layers not served from packed storage" in source
+    assert "refusing to run on a fallback path" in source
+
+
+def test_startup_reports_storage_for_every_layer():
+    """Startup must PROVE per-layer storage, not leave it inferable from an MMP-only stats blob."""
+    module = (REPO / "src/compose_v4/data/production_edit_corpus.py").read_text()
+    assert '"layer_storage"' in module
+    assert '"audit_shard_replay"' in module
+    assert '"layer_storage": corpus.provenance["layer_storage"]' in GATE.read_text()

@@ -365,6 +365,11 @@ def load_production_edit_corpus(
         "transitions_by_layer": {
             layer: sum(r.path.path_length for r in rs) for layer, rs in ordered.items()
         },
+        "layer_storage": {
+            GENERAL_CORRUPTION: "packed" if packed_root is not None else "audit_shard_replay",
+            CYCLE_OPS: "packed" if packed_root is not None else "audit_shard_replay",
+            MMP_ANALOGUE: mmp_stats.get("source", "unknown"),
+        },
         "mmp_partition_filter": {
             **mmp_stats,
             "scaffold_key_algorithm": SCAFFOLD_KEY_ALGORITHM,

@@ -471,12 +471,21 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
         checkpoint_interval=args.path_checkpoint_interval,
         seed=seed,
     )
+    storage = corpus.provenance["layer_storage"]
+    if args.packed_corpus:
+        unpacked = sorted(k for k, v in storage.items() if v != "packed")
+        if unpacked:
+            raise SystemExit(
+                f"BENCHMARK_CONTRACT violation: layers not served from packed storage: {unpacked} "
+                f"(storage={storage}); refusing to run on a fallback path"
+            )
     realized = measure_realized_layer_frequencies(corpus, draws=20000, seed=seed + 1)
     print(
         json.dumps(
             {
                 "phase": "precompiled_corpus",
                 "partition": partition,
+                "layer_storage": corpus.provenance["layer_storage"],
                 "records_by_layer": corpus.provenance["records_by_layer"],
                 "transitions_by_layer": corpus.provenance["transitions_by_layer"],
                 "configured_layer_weights": dict(PRODUCTION_LAYER_WEIGHTS),
