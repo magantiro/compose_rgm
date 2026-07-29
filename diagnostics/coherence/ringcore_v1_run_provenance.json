@@ -1,0 +1,89 @@
+{
+  "artifact": "ringcore_v1_scientific_run_provenance",
+  "base_B_checkpoint_id": "compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/checkpoint.best_so_far.pt",
+  "base_B_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+  "codec_implementation_hash": "baaa75367f25a8c6",
+  "corpus": {
+    "by_layer_train": {
+      "cycle_operations": 255168,
+      "general_corruption": 74946,
+      "mmp_analogue": 330991
+    },
+    "excluded_reason": "MULTI_NEIGHBOUR_ATOM_INSERT_UNSUPPORTED",
+    "excluded_traces": 3,
+    "test": 31159,
+    "train": 661105,
+    "validation": 33404
+  },
+  "date": "2026-07-29",
+  "effective_manifest_hash": "5c5c254e1054c081",
+  "evaluation_path_gate": {
+    "nonfinite": 0,
+    "train_records_sampled": 24000,
+    "validation_records": 33404,
+    "verdict": "PASS",
+    "violations": 0
+  },
+  "exclusion_overlay_hash": "32372dc5d73139a7",
+  "frozen_no_changes_during_run": [
+    "data mixture",
+    "scheduler",
+    "batch size",
+    "model architecture",
+    "representability policy",
+    "evaluation set",
+    "checkpoint-selection rule"
+  ],
+  "gate_hash": "1ea1655f847bfa9a",
+  "gate_result": "PASS - 856 passed, 0 skipped, clean worktree",
+  "git_commit": "6d067e9",
+  "layer_weights": {
+    "cycle_operations": 0.25,
+    "general_corruption": 0.4,
+    "mmp_analogue": 0.35
+  },
+  "note": "16,000 is the MAXIMUM OBSERVATION HORIZON and does not preselect the final checkpoint",
+  "operator_registry_hash": "9197401e8dc3a7ae",
+  "packed_store_schema_version": 1,
+  "representability_filter": "factorized_teacher_support_v2",
+  "run_id": "compose-v4-ringcore-v1-scientific-nitya-6d067e9-v1",
+  "sampler_hash": "794e6628f23465d8",
+  "schedule": {
+    "batch_size": 64,
+    "checkpoints": [
+      500,
+      1000,
+      2000,
+      3000,
+      4500,
+      6000,
+      9000,
+      12000,
+      14000,
+      16000
+    ],
+    "early_stopping": "DISABLED",
+    "evaluation_every": 250,
+    "maximum_steps": 16000,
+    "minimum_learning_rate_fraction": 0.05,
+    "peak_lr": 0.0003,
+    "schedule": "cosine_with_linear_warmup",
+    "schedule_steps": 16000,
+    "warmup_steps": 500,
+    "weight_decay": 1e-05
+  },
+  "scheduler_hash": "dafd4b5092414394",
+  "selection_rule": "production-weighted canonical-successor NLL (primary); balanced-family NLL (secondary); held-out safeguards and hazard calibration reported separately",
+  "startup_proof": {
+    "median_step_seconds": 0.3928,
+    "note": "mean 10.94 s/step is a cold-start artifact (one 23 s first-batch dataloader wait over 5 steps with zero warmup); median is the signal",
+    "optimizer_steps": 5,
+    "step1_loss": 3.969,
+    "verdict": "PASS"
+  },
+  "status": "IMMUTABLE_LAUNCH_RECORD",
+  "tensorization_implementation_hash": "7b0c88b166828f44",
+  "trace_schema_version": 2,
+  "training_seed": 20260717,
+  "workspace": "nitya"
+}
