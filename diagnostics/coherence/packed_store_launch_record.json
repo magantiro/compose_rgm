@@ -1,0 +1,51 @@
+{
+  "artifact": "packed_store_launch_record",
+  "corpus_contract": {
+    "capability_hash": "330473e319bfec19",
+    "codec_implementation_hash": "baaa75367f25a8c6",
+    "operator_registry_hash": "9197401e8dc3a7ae",
+    "scope_hash": "3721d69851110fdd",
+    "source_reducer_checksum": "fd14600ff4429f7c",
+    "trace_schema_version": 2
+  },
+  "date": "2026-07-28",
+  "gate": {
+    "artifact_path": "/private/tmp/claude-502/-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-compose-rgm-claude-generators/6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/gate_wt.log",
+    "artifact_sha256_16": "e8f28213d66904f0",
+    "authoritative": "clean-worktree prelaunch_gate.py",
+    "skip_cause": "29 tests skip in a CLEAN tree because their fixture diagnostics/composition/analogue_trace_pool.jsonl is untracked and therefore absent. They pass in the dev tree (772 passed, 0 skipped). This is a GATE COVERAGE GAP, not a failure: the authoritative gate verified less than its PASS implies.",
+    "tests_passed": 743,
+    "tests_skipped": 29,
+    "verdict": "PASS"
+  },
+  "launch": {
+    "commit": "c8a3209",
+    "dest_subdir": "edit_packed_v1",
+    "driver_call_id": "fc-01KYNMFSFJWJ9JBRHXBDE6QF2B",
+    "expected_shards": 45,
+    "modal_app": "ap-Xk9GJ48xeoSOnuuxKljz8i",
+    "source_subdir": "edit_precompile_v1",
+    "worktree": "clean detached worktree (main dev tree left untouched)"
+  },
+  "layer_weights": {
+    "hash": "794e6628f23465d8",
+    "values": {
+      "cycle_operations": 0.25,
+      "general_corruption": 0.4,
+      "mmp_analogue": 0.35
+    }
+  },
+  "packed_cache_contract": {
+    "progress_sampler_version": 1,
+    "scheduler_power": 1.0,
+    "scheduler_type": "PowerSurvivalScheduler",
+    "schema": "compose.data.packed_trace",
+    "schema_version": 1,
+    "time_sampling_implementation_hash": "fdbf297e5545522e"
+  },
+  "scheduler": {
+    "note": "alpha(t)=t; the packed closed-form progress law is valid ONLY at unit power",
+    "power": 1.0,
+    "type": "PowerSurvivalScheduler"
+  }
+}
