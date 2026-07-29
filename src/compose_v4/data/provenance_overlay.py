@@ -59,6 +59,27 @@ def overlay_path_for(shard_path: Path) -> Path:
     return Path(str(shard_path) + ".provenance.json")
 
 
+# The code that turns a packed record into model tensors. Two corpora built under different
+# tensorization are not interchangeable even when every other hash agrees, so it is part of the
+# scientific contract.
+_TENSORIZATION_SOURCES = (
+    "src/compose_v4/experiments/factorized_mark_conditional.py",
+    "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "src/compose_v4/chem/state.py",
+)
+
+
+def tensorization_implementation_hash() -> str:
+    """Hash of the collation/tensorization sources that turn packed records into model tensors."""
+    repo = Path(__file__).resolve().parents[3]
+    digest = hashlib.sha256()
+    for rel in _TENSORIZATION_SOURCES:
+        source = repo / rel
+        digest.update(rel.encode())
+        digest.update(source.read_bytes() if source.exists() else b"<MISSING>")
+    return digest.hexdigest()[:16]
+
+
 def upgrade_implementation_hash() -> str:
     """Hash of THIS module's source, so a changed overlay rule invalidates existing overlays."""
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:16]
