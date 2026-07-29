@@ -34,11 +34,38 @@ PRODUCTION_SCHEDULER = {
     "peak_learning_rate": 3e-4,
     "weight_decay": 1e-05,
     "warmup_steps": 500,
-    "schedule_steps": 3000,
+    "schedule_steps": 16000,
     "minimum_learning_rate_fraction": 0.05,
     "schedule": "cosine_with_linear_warmup",
 }
-SCHEDULER_CONFIG_HASH = "0b832985c65de1cc"
+SCHEDULER_CONFIG_HASH = "dafd4b5092414394"
+
+# Owner-approved scientific contract updates, newest last. This is an explicit APPROVED update, not
+# tolerated drift: the 3,000-step schedule was the last approved config before the A100 throughput
+# benchmark; 16,000 was approved afterwards as the MAXIMUM OBSERVATION HORIZON. It does not preselect the
+# final checkpoint -- selection remains the frozen canonical-successor rule, and may land earlier.
+SCHEDULER_LINEAGE = (
+    {
+        "scheduler_hash": "0b832985c65de1cc",
+        "schedule_steps": 3000,
+        "warmup_steps": 500,
+        "status": "SUPERSEDED",
+        "approved": "2026-07-28",
+        "note": "pre-benchmark production lock; used for the discarded throughput benchmark",
+    },
+    {
+        "scheduler_hash": "dafd4b5092414394",
+        "schedule_steps": 16000,
+        "warmup_steps": 500,
+        "status": "ACTIVE",
+        "approved": "2026-07-29",
+        "note": (
+            "owner-approved maximum observation horizon, chosen from measured throughput "
+            "(0.8331 s/step -> 3.70 h): corruption reaches ~1.0 transition exposure while cycle and "
+            "mmp each reach ~1.0 trace exposure"
+        ),
+    },
+)
 
 # ---- production training mixture (owner-locked, first scaled run) ------------------------------------
 # These are TRACE-DRAW weights over the three independent layers. They are the authoritative source and
