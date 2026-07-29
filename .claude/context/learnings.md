@@ -413,3 +413,42 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   packed-store projection ("2.4 min full train load") covered only the two packed layers while MMP still
   replayed at 13.74 ms/row -> 83 min PER PARTITION, rescanned per partition. Always state which components
   a projection covers.
+
+## 2026-07-29
+- **A preempted Modal container restarts with the SAME input, so a warm-started run carries its
+  initialization flag into the retry -- and that collides with resume.** The first RingCore-V1 scientific
+  16k run died this way at step 1500: `Container terminated due to preemption`, then the launcher added
+  `--resume-checkpoint` (a recovery checkpoint now existed) on top of the still-present
+  `--initialize-compatible-checkpoint`, and the gate rejected the pair as mutually exclusive
+  (`train_tracelet_cnof_gate.py:1687`). Two retries died identically, then the app stopped. The recovery
+  checkpoint on the volume was VALID the whole time -- the run was killed by argument parsing, not by data,
+  model, or chemistry. **Fix:** `_supersede_initialization_for_resume` drops
+  `initialize_compatible_checkpoint`/`initialize_checkpoint`/`load_checkpoint` when pointing at the
+  recovery state, which is also the semantically correct resolution (the recovery state already holds the
+  warm-started weights PLUS every completed step, so re-initializing would DISCARD progress). The
+  regression test extracts the excluded-argument set from the GATE'S OWN source rather than duplicating a
+  flag list, so adding a future checkpoint flag cannot silently reintroduce the collision.
+- **`retries=modal.Retries(max_retries=1)` cannot carry a multi-hour GPU run.** Preemption is an expected
+  event, not a code failure; one preemption exhausted a budget of 1. Raised to 5 for `train_stage`. This is
+  safe here precisely BECAUSE each retry resumes from the recovery checkpoint (`recovery_every=500`), so
+  retries make forward progress instead of repeating work -- a retry budget without a working resume path
+  just burns the same steps repeatedly.
+- **Changing the launcher necessarily changes the run identity -- you cannot fix the launcher and resume the
+  same run.** `_source_fingerprint()` hashes `modal_apps/train_tracelet_gm.py` ITSELF (line 211) alongside
+  `src/`, `scripts/`, `recipes/`, and `run_identity` includes that fingerprint; the immutable stage manifest
+  then refuses a run label whose identity changed. So a launcher bugfix forces a FRESH run label. That is
+  the guard working as designed (it stops silent mid-run code changes), not an obstacle to route around.
+  Corollary: `configs/`, `diagnostics/`, `tests/`, and `.claude/` are NOT in the fingerprint, so committing
+  there does not disturb a pinned launch worktree.
+- **To reproduce a launch exactly, diff the recipe FILE against the dead run's
+  `manifest.training.json` -> `run_identity.recipe.arguments`.** Every ADDED or CHANGED argument came from a
+  CLI flag or a launcher-computed path, which recovers the exact flag list even when the launch script is
+  lost or outdated. This caught that `early_stopping_patience 6 -> 0` came from `--disable-early-stopping`
+  (so early stopping was DISABLED and the rising loss could not have aborted the run) and that
+  `steps 30000 -> 16000` came from `--training-steps`.
+- **`nohup cmd &` inside a tool call reports the WRAPPER's exit, not the job's** -- the harness said "exit
+  code 0" seconds after launching a 10-minute gate whose log was still 0 bytes. Wait on the pid (or use a
+  real background task) before believing a gate result, and never read an empty log as success.
+- **The prelaunch gate needs `ruff` on PATH, which a fresh `git worktree` does not have** (ruff lives in the
+  main tree's `.venv/bin`, and the gate shells out to a bare `ruff`). A launch worktree therefore needs
+  `PATH="<main-repo>/.venv/bin:$PATH"`, or the gate dies with `FileNotFoundError: 'ruff'` AFTER the tests.
