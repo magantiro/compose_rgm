@@ -1,0 +1,98 @@
+{
+  "artifact": "ringcore_v1_scientific_launch_record",
+  "call_id": "fc-01KYQ86M98FH0AGZQJS0G3ZP58",
+  "commit": "3124277",
+  "contract": {
+    "enforced_at_startup": true,
+    "level": "SCIENTIFIC_TRAINING_CONTRACT",
+    "manifest_checksum": "ebb08a58cf5cc7b9",
+    "overlays": {
+      "cycle_operations": 5,
+      "general_corruption": 40,
+      "mmp_analogue": 18,
+      "total": 63
+    },
+    "unified_manifest": "/artifacts/UNIFIED_PACKED_MANIFEST.json"
+  },
+  "corpus": {
+    "all_layers_packed": true,
+    "by_layer": {
+      "cycle_operations": 255168,
+      "general_corruption": 74949,
+      "mmp_analogue": 330991
+    },
+    "de_novo_records": 0,
+    "raw_pool_fallback": false,
+    "train_records": 661108,
+    "validation_records": 33404
+  },
+  "date": "2026-07-29",
+  "do_not_change_during_run": [
+    "architecture",
+    "loss",
+    "layer weights",
+    "sampler law",
+    "optimizer",
+    "regularization",
+    "data mixture",
+    "scheduler"
+  ],
+  "gate_result": "839 passed, 0 skipped, clean worktree",
+  "gate_sha256": "40b7725afa87b833",
+  "layer_weights": {
+    "cycle_operations": 0.25,
+    "general_corruption": 0.4,
+    "mmp_analogue": 0.35
+  },
+  "layer_weights_hash": "794e6628f23465d8",
+  "projection": {
+    "cost_usd_range": [
+      7.5,
+      15.0
+    ],
+    "evaluation_hours_derived": 0.057,
+    "seconds_per_step_measured": 0.8331,
+    "total_hours_estimate": 3.76,
+    "training_hours": 3.7
+  },
+  "run_label": "compose-v4-ringcore-v1-scientific-3124277-v1",
+  "scheduler": {
+    "hash": "dafd4b5092414394",
+    "minimum_learning_rate_fraction": 0.05,
+    "optimizer": "AdamW",
+    "owner_approved": "2026-07-29",
+    "peak_learning_rate": 0.0003,
+    "schedule": "cosine_with_linear_warmup",
+    "schedule_steps": 16000,
+    "supersedes": "0b832985c65de1cc",
+    "warmup_steps": 500,
+    "weight_decay": 1e-05
+  },
+  "selection_rule": "frozen canonical-successor; 16000 is the MAXIMUM OBSERVATION HORIZON and does not preselect",
+  "status": "LAUNCHED",
+  "training": {
+    "batch_size": 64,
+    "checkpoints": [
+      500,
+      1000,
+      2000,
+      3000,
+      4500,
+      6000,
+      9000,
+      12000,
+      14000,
+      16000
+    ],
+    "early_stopping": "DISABLED",
+    "evaluation_every": 250,
+    "maximum_steps": 16000,
+    "stop_only_for": [
+      "non-finite state",
+      "exact contract violation",
+      "hard correctness failure",
+      "checkpoint corruption",
+      "infrastructure failure"
+    ]
+  }
+}
