@@ -798,5 +798,791 @@ provenance:
       run_id: compose-v4-ringcore-v1-scientific-nitya-6d067e9-v1
       scientific_contract_changed: false
     workspace: nitya
+controllers:
+- id: unguided_prior
+  oracle_uses: none
+  requires_checkpoint: true
+- id: endpoint_reranking
+  oracle_uses: endpoint_only
+  requires_checkpoint: true
+- id: greedy_one_step_reward
+  oracle_uses: per_successor
+  requires_checkpoint: true
+- id: local_boltzmann
+  oracle_uses: per_successor
+  requires_checkpoint: true
+- id: scalarized_guidance
+  oracle_uses: per_successor
+  requires_checkpoint: true
+- id: mog_dfm_style
+  oracle_uses: per_successor
+  requires_checkpoint: true
+- id: smc_feynman_kac
+  oracle_uses: per_particle
+  requires_checkpoint: true
+- id: learned_doob_value
+  oracle_uses: amortized
+  requires_checkpoint: true
+controllers_policy: 'All arms share ONE interface and the same base kernel. Every arm records the full
+  compute_accounting tuple. Successor-level control only: mark-level power/top-k/nucleus/family tilts
+  are NOT refinement-invariant (aggregate mass 0.500 vs 0.200 at beta=2 on a 1-mark vs 4-alias fiber)
+  and are reported as a negative result in E5, never used as a controller.'
+dag:
+- depends_on: []
+  id: E5
+  note: synthetic fixtures; runnable NOW
+- depends_on: []
+  id: E6
+  note: enumerable graph; runnable NOW on CPU
+- depends_on:
+  - editing_prior_frozen
+  id: E2
+- depends_on:
+  - editing_prior_frozen
+  id: E3
+- depends_on:
+  - editing_prior_frozen
+  id: E4
+- depends_on:
+  - editing_prior_frozen
+  - E2
+  id: E7
+- depends_on:
+  - denovo_checkpoint
+  id: E1
+  note: BLOCKED
+exact_sizing:
+  E_max: 2000000
+  N_max: 20000
+  N_min: 500
+  enumeration_target: K-step reachable set S_K(x0) under the REAL production executor
+  fallback: If no single feasible graph contains both trans-dimensional and cyclic behaviour, build TWO
+    exact benchmarks (a cardinality slice and a cycle/topology slice) rather than omitting either capability.
+    If even the smallest candidate exceeds the caps, report INFEASIBLE; never approximate and call it
+    exact.
+  independent_verification: on the smallest slice, dynamic-programming propagation is cross-checked against
+    explicit path enumeration; agreement is required, so the solver is not merely self-consistent
+  merge: identical molecular states merged by production canonical_state_key
+  non_degeneracy_note: 'multi_path_terminal_event is load-bearing: with a single route to each target,
+    several controllers become indistinguishable and the panel measures nothing.'
+  non_degeneracy_required:
+  - atom_birth
+  - atom_death
+  - cycle_change
+  - two_distinct_atom_counts
+  - two_distinct_cycle_ranks
+  - multi_path_terminal_event
+  reporting: every candidate evaluated is reported with layer sizes and why it was/was not chosen
+  selection: smallest_qualifying_candidate
+  shrink_order:
+  - heavy_atom_cap
+  - edit_budget_K
+  - element_vocabulary
+  - source_molecule
+  stages:
+    stage_1_now: solver verified on a simple fixed kernel (uniform canonical successors)
+    stage_2_after_freeze: same state graph instantiated with the selected learned checkpoint, then exact
+      terminal tilt, dynamic retargeting, learned-value comparison and the greedy/Boltzmann/SMC arms
+  tie_break:
+  - smaller_state_count
+  - smaller_edge_count
+  - lexicographic_candidate_id
+experiments:
+  E1:
+    blocking_note: Requires a SEPARATE de-novo checkpoint that does not exist. The editing run reports
+      `de_novo_records_built 0`; using it here would be a false claim about unconditional generation.
+    checkpoint: denovo
+    maps_to: A
+    outputs:
+    - results/E1_unconditional.json
+    panel_ids:
+    - GEN_UNCONDITIONAL
+    primary_metrics:
+    - frechet_chemnet_distance
+    - held_out_chemical_space_recall
+    - ring_topology_distribution_distance
+    priority: 8
+    question: Does the timed CTMC generate credible molecules de novo?
+    secondary_metrics:
+    - all_step_validity
+    - endpoint_validity
+    - connectedness
+    - uniqueness
+    - novelty
+    - internal_diversity
+    - fcd
+    - precision_recall_or_coverage
+    - scaffold_novelty
+    - size_distribution
+    - property_distribution
+    - ring_topology_distribution
+    - nearest_neighbor_memorization
+    - throughput
+    status: BLOCKED
+    task_artifacts:
+      development: configs/tasks/unconditional.development.json
+      final: configs/tasks/unconditional.final.json
+    title: Credible unconditional RingCore generation
+  E2:
+    arms:
+      learned: sample from P_theta(y|x) under the frozen editing kernel
+      uniform_legal: identical executor, identical legal successor set, uniform over CANONICAL MOLECULAR
+        SUCCESSORS (1/|N(x)|). Uniformity over raw action marks is WRONG here -- it would privilege successors
+        with more symmetric encodings, so the baseline must be built at the quotient level.
+    checkpoint: editing_prior
+    dataset: held-out MMP + scaffold source/target pairs (validation partition)
+    failure_criterion: learned arm fails to beat uniform-legal on canonical-successor NLL, or shows no
+      reduction in reversal/cycle rate -- i.e. the model adds no chemistry over legal-move enumeration.
+    maps_to: B
+    outputs:
+    - results/E2_learned_vs_uniform.json
+    panel_ids:
+    - TRANSPORT_LEARNED_VS_UNIFORM
+    primary_metrics:
+    - held_out_canonical_successor_nll
+    - target_recovery_at_matched_edit_budget
+    - path_overhead_vs_shortest_path
+    priority: 1
+    question: Did the neural process learn chemistry, or is it merely operating a hand-built valid rule
+      system?
+    secondary_metrics:
+    - analogue_target_recovery
+    - productive_molecular_displacement
+    - fraction_steps_improving_endpoint_similarity
+    - path_length
+    - path_overhead
+    - immediate_reversal_rate
+    - longer_cycle_rate
+    - net_vs_gross_edits
+    - endpoint_distribution_fidelity
+    - oracle_calls_per_successful_endpoint
+    task_artifacts:
+      development: configs/tasks/transport.development.json
+      final: configs/tasks/transport.final.json
+    title: Learned transport versus uniform legal rewriting
+  E3:
+    baselines:
+    - unguided_editing
+    - insertion_disabled
+    - deletion_disabled
+    - fixed_cardinality_operators
+    - endpoint_reranking
+    - greedy_local_controller
+    - full_learned_controller
+    checkpoint: editing_prior
+    failure_criterion: insertion/deletion-disabled arms match the full operator set -- would mean cardinality
+      change is not actually load-bearing.
+    maps_to: C
+    outputs:
+    - results/E3_size_adaptation.json
+    panel_ids:
+    - CARDINALITY_ADAPTATION
+    per_step_records:
+    - active_atom_count
+    - insertions
+    - deletions
+    - net_cardinality_change
+    - overshoot
+    - correction
+    - steps_to_enter_target_interval
+    - terminal_success
+    - similarity_retained
+    - validity
+    - connectedness
+    primary_metrics:
+    - fraction_reaching_target_atom_count_interval
+    - edits_and_oracle_calls_to_success
+    - retained_source_similarity
+    priority: 4
+    question: Does one trajectory change molecular cardinality on demand, including overshoot correction?
+    secondary_metrics: []
+    task_artifacts:
+      development: configs/tasks/cardinality.development.json
+      final: configs/tasks/cardinality.final.json
+    tasks:
+    - source_too_small_target_larger
+    - source_too_large_target_smaller
+    - grow_then_switch_to_smaller_preferred_range
+    - held_out_atom_count_bins
+    - matched_sources_unsolvable_at_fixed_cardinality
+    title: Trans-dimensional size adaptation
+  E4:
+    ablation_note: Do NOT re-enable the obsolete ring_system_grow macro just to manufacture an ablation.
+      Baselines must be runnable, scientifically meaningful alternatives.
+    ablations:
+    - ringcore_v1
+    - no_cycle_operations
+    - finite_catalog_alternative
+    checkpoint: editing_prior
+    failure_criterion: no-cycle-operations arm matches RingCore-V1 on topology recovery.
+    maps_to: D
+    outputs:
+    - results/E4_topology_adaptation.json
+    panel_ids:
+    - TOPOLOGY_ADAPTATION
+    primary_metrics:
+    - held_out_topology_class_recovery
+    - valid_path_rate
+    - edit_efficiency
+    priority: 4
+    question: Does the learned process restructure rings rather than only decorate them?
+    secondary_metrics:
+    - cycle_rank
+    - ring_system_count
+    - ring_size_distribution
+    - topology_class_recovery
+    - held_out_topology_success
+    - ring_operation_utilization
+    - unnecessary_cycle_open_close
+    - final_property
+    - final_similarity
+    task_artifacts:
+      development: configs/tasks/topology.development.json
+      final: configs/tasks/topology.final.json
+    tasks:
+    - cycle_creation
+    - cycle_opening
+    - ring_size_change
+    - fused_system_modification
+    - spiro_or_bridged_change_where_supported
+    - topology_simplification
+    - topology_addition_then_reversal_after_objective_switch
+    title: Topological adaptation
+  E5:
+    checkpoint: any
+    checks:
+    - raw_mark_multiplicity_differs
+    - aggregate_canonical_successor_mass_identical
+    - sampled_successor_frequency_matches_aggregate_mass
+    - persistent_slot_relabeling_leaves_kernel_unchanged
+    - within_fiber_action_refinement_leaves_state_law_unchanged
+    - exact_control_on_quotient_invariant_to_refinement
+    failure_criterion: any nonzero deviation beyond float tolerance.
+    maps_to: E
+    outputs:
+    - results/E5_quotient_invariance.json
+    panel_ids:
+    - QUOTIENT_INVARIANCE
+    primary_metrics:
+    - successor_mass_invariance_residual
+    - mark_level_divergence_demonstrated
+    priority: 6
+    question: Is the molecular kernel invariant to internal action encoding?
+    scope_caveat: Invariance holds when refinement occurs WITHIN a successor fiber and the controller
+      acts on successors. It does NOT hold for a controller that rewards particular mark encodings directly.
+      State this precisely; do not over-claim.
+    secondary_metrics:
+    - legacy_primary:max_abs_deviation_in_successor_mass
+    task_artifacts:
+      development: configs/tasks/quotient.development.json
+      final: configs/tasks/quotient.final.json
+    title: Canonical-successor quotient invariance
+  E6:
+    checkpoint: none
+    construction: Bounded chemistry where the PRODUCTION executor and RingCore semantics remain real but
+      the full reachable state graph is enumerable. Rebuild on the CURRENT production operator set --
+      not a historical one.
+    failure_criterion: Doob terminal law deviates from the analytic tilt beyond solver tolerance.
+    implement:
+    - exact_finite_horizon_doob
+    - support_preservation
+    - terminal_law_residual
+    - dynamic_objective_replacement
+    - exact_continuation_from_intermediate
+    - restart_control
+    - endpoint_reranking
+    - greedy_reward
+    - local_boltzmann
+    - learned_value
+    - smc_feynman_kac
+    maps_to: F
+    outputs:
+    - results/E6_exact_control.json
+    panel_ids:
+    - EXACT_TERMINAL_TILT
+    precompute:
+    - all_valid_states
+    - all_legal_actions
+    - canonical_successors
+    - aggregate_rates
+    - transition_matrices_by_remaining_budget
+    - connected_components
+    - terminal_distributions
+    - exact_backward_values
+    primary_metrics:
+    - terminal_law_total_variation_residual
+    priority: 5
+    question: Is the finite-horizon Doob transform exact on a real RingCore kernel?
+    secondary_metrics: []
+    task_artifacts:
+      development: configs/tasks/exact_control.development.json
+      final: configs/tasks/exact_control.final.json
+    tilts:
+    - rare_motif
+    - atom_count_interval
+    - property_interval
+    - two_simultaneous_constraints
+    - boltzmann_reward
+    - small_objective_space_region
+    title: Exact enumerable finite-horizon control
+  E7:
+    checkpoint: editing_prior
+    controllers:
+    - unguided_prior
+    - endpoint_reranking
+    - greedy_one_step_reward
+    - local_boltzmann
+    - scalarized_guidance
+    - mog_dfm_style
+    - smc_feynman_kac
+    - learned_doob_value
+    external_baselines:
+    - GraphGA
+    - MARS
+    - RetMol
+    - GenMol
+    - GrIDDD
+    - pareto_gflownet
+    external_note: Contextual only. They do NOT replace the same-base comparison, because only the same-base
+      table isolates the control law from the generative process.
+    failure_criterion: learned control does not beat greedy/reranking at matched oracle budget, or continuation
+      shows no advantage over restart after an objective switch.
+    flagship_studies:
+      dynamic_preference_switching:
+        arms:
+        - continuation_from_current_molecule
+        - restart_from_original_source
+        - restart_from_switch_state_separate_sampler
+        - static_compromise_objective
+        metrics:
+        - adaptation_regret
+        - retained_gain_on_old_objective
+        - final_gain_on_new_objective
+        - edit_cost
+        - oracle_cost
+        - time_to_adapt
+      pareto_fan:
+        design: one shared valid prefix branched under multiple preference vectors
+        metrics:
+        - prefix_reuse
+        - endpoint_spread
+        - hypervolume
+        - region_coverage
+        - branch_diversity
+        - cost_vs_independent_restarts
+      pathwise_constraints:
+        compare_against: endpoint_only_filtering
+        enforced_at_every_committed_state:
+        - scaffold_protection
+        - pharmacophore_retention
+        - atom_count_interval
+        - charge_policy
+        - structural_alert_exclusion
+        - similarity_corridor_optional
+        metrics:
+        - invalid_or_forbidden_intermediate_states
+        - wasted_oracle_calls
+        - endpoint_yield
+        - path_feasibility
+        - cost
+    maps_to: G
+    multi_objective_predeclared:
+      diversity_measurement: required
+      dominance_convention: epsilon-dominance, epsilon declared per objective
+      four_or_five_objective: aggregate stress test
+      hypervolume_reference_points: MUST be fixed before results are seen
+      source_similarity_floor: required
+      three_objective: stronger evaluation
+      two_objective: for clear Pareto visualization
+    outputs:
+    - results/E7_conditional_dynamic.json
+    panel_ids:
+    - PARETO_SAME_BASE
+    - DYNAMIC_SWITCH
+    - PARETO_FAN
+    - PATHWISE_CONSTRAINTS
+    primary_metrics:
+    - normalized_hypervolume
+    - hv_auc_versus_oracle_calls
+    priority: 2
+    question: Does control act on the kernel, and does it survive a mid-trajectory objective change?
+    records:
+    - generated_endpoints
+    - all_intermediate_states
+    - base_kernel_log_probability
+    - controller_correction
+    - oracle_calls
+    - compute
+    - effective_sample_size
+    - constraint_violations
+    - success
+    - pareto_metrics
+    same_base_requirement: Every controller shares the same frozen prior, executor, source molecules,
+      budgets, oracles and successor support. Only the control law varies -- that is what isolates the
+      causal claim.
+    secondary_metrics:
+    - legacy_primary:feasible_hypervolume_per_oracle_call
+    task_artifacts:
+      development: configs/tasks/conditional.development.json
+      final: configs/tasks/conditional.final.json
+    title: Conditional and dynamic molecular design
+learned_controller:
+  base_kernel: FROZEN editing prior; the controller never fine-tunes it
+  encoder_policy: frozen_base_with_trainable_adapter
+  estimator_selection: on controller-validation calibration and backward residual, never on test
+  loss: regression in log-desirability with h=0 representable (support pruning is meaningful)
+  secondary_ablation: copied_encoder_top_block_adaptation
+  secondary_ablation_constraint: must NEVER write back into the base generator
+  selection_rule: lowest backward-equation residual subject to calibration within tolerance
+  split_policy: no test oracle output is used to train or select the controller
+  splits:
+  - controller_train_goals_sources
+  - controller_validation_goals_sources
+  - final_test_sources_and_objective_schedules
+  target_estimators:
+  - definition: rollouts from (b,x) under the base prior, averaging g_z at the horizon
+    id: monte_carlo_terminal_desirability
+  - definition: h(b,x) <- sum_y P_theta(y|x) h(b-1,y) over CANONICAL successors
+    id: bootstrapped_backward
+    note: must use the canonical-successor kernel, never a mark-level surrogate
+  target_object: h_phi(b, x; x_src, z, m) ~= E_{P_theta}[ g_z(X_K) | X_{K-b} = x ]
+  trainable_modules:
+  - remaining_budget_embedding
+  - objective_preference_embedding
+  - protected_mask_embedding
+  - source_vs_current_comparison
+  - residual_adapter
+  - value_head
+  validation_metrics:
+  - value_calibration
+  - backward_equation_residual
+  - successor_ranking
+  - terminal_law_tv_versus_exact_doob
+  - reachability_event_calibration
+  - control_quality_versus_exact_optimum
+  - robustness_across_budgets_goals
+post_training_queue:
+  policy: the full suite launches only AFTER the winner is frozen
+  selection_rule: production-weighted canonical-successor NLL (primary); balanced-family canonical-successor
+    NLL (secondary); held-source/scaffold/topology safeguards; calibration and rollout behaviour as tie-breakers;
+    hazard calibration reported SEPARATELY and never used to select the editing checkpoint. 16,000 is
+    the maximum observation horizon and does not preselect.
+  snapshot_glob: checkpoint.step*.pt
+  snapshot_interval_steps: 500
+  steps:
+  - wait_for_checkpoint_and_evaluation_artifact
+  - verify_provenance
+  - production_weighted_canonical_successor_nll
+  - balanced_family_canonical_successor_nll
+  - update_leaderboard
+  - apply_predeclared_selection_rule
+  - freeze_winner
+  - launch_low_cost_diagnostics
+  - launch_full_same_base_suite
+protocol:
+  compute_accounting:
+    policy: '''same prior and budget'' is NOT sufficient: methods score different numbers of successors
+      or particles. Counting committed states for one arm while ignoring evaluated particles or reranked
+      candidates for another is forbidden. Wall-clock and GPU-hours are reported separately and are never
+      the primary axis.'
+    primary_cost_axis: oracle_calls
+    required_per_arm:
+    - oracle_calls
+    - forward_passes
+    - successors_scored
+    - particles_propagated
+    - accepted_edits
+    - wall_clock_seconds
+    - gpu_hours
+  dynamic:
+    horizon_steps: 16
+    pareto_fan:
+      report:
+      - prefix_reuse
+      - endpoint_spread
+      - hypervolume
+      - region_coverage
+      - branch_diversity
+      - cost_versus_independent_restarts
+    pathwise_constraints:
+      comparator: endpoint_only_filtering
+      enforced_at_every_committed_state:
+      - scaffold_protection
+      - pharmacophore_retention
+      - atom_count_interval
+      - charge_policy
+      - structural_alert_exclusion
+      optional:
+      - similarity_corridor
+      report:
+      - invalid_or_forbidden_intermediate_states
+      - wasted_oracle_calls
+      - endpoint_yield
+      - path_feasibility
+      - cost
+    regret_definition: adaptation regret = (best achievable new-objective value under the exact/reference
+      controller from the switch state) - (achieved new-objective value), at matched oracle budget measured
+      FROM the switch
+    report:
+    - adaptation_regret
+    - retained_gain_on_old_objective
+    - final_gain_on_new_objective
+    - edit_cost
+    - oracle_cost
+    - time_to_adapt
+    restart_variants:
+    - continuation
+    - restart_from_source
+    - restart_under_separate_sampler
+    - static_compromise
+    switch_steps:
+    - 8
+  editing_budget_convention: fixed_step_embedded_jump_chain
+  hard_gates:
+    policy: 'These must pass but are NOT primary metrics: validity is largely guaranteed by the executor,
+      so headlining it would undersell the contribution.'
+    unconditional:
+    - endpoint_validity
+    - all_step_validity
+    - connectedness
+    - uniqueness
+    - sanitization_success
+  held_out_policy: 'ringcore-v1 scaffold key (murcko+carbonized-wl3, salt ringcore-v1, 0.9/0.05/0.05).
+    Validation and test partitions are molecule-disjoint from train: verified 0 source and 0 scaffold
+    overlap.'
+  independent_evaluation_oracle: required_where_available
+  metric_definitions:
+    frechet_chemnet_distance:
+      generated_samples_per_seed: 10000
+      implementation: compose_v4.eval.molecular_quality (include_fcd=True, fcd_torch)
+      policy: identical sample count for every baseline
+      reference_samples: 10000
+      reporting: mean, standard deviation, AND every individual seed
+      seeds:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      status: EXISTS
+    held_out_chemical_space_recall:
+      definition: 'Improved-recall construction: each generated embedding carries a hypersphere of radius
+        equal to its distance to its k-th nearest neighbour AMONG GENERATED embeddings; recall is the
+        fraction of held-out real molecules falling inside at least one such sphere.'
+      distance: euclidean
+      embedding: frozen_chemnet_penultimate
+      embedding_source: fcd_torch.FCD.get_predictions
+      generated_samples_per_seed: 10000
+      k: 3
+      metric: chemnet_manifold_recall
+      note: ChemNet itself is reused, not reimplemented -- reimplementing it would add risk.
+      reference_samples: 10000
+      status: MUST_BE_IMPLEMENTED
+      verification: tested on synthetic embeddings with analytically known coverage
+    ring_topology_distribution_distance:
+      aggregate: mean of the five component distances (equal weight, 1/5 each)
+      components:
+      - definition: bonds - atoms + connected_components (first Betti number)
+        distance: normalized_wasserstein
+        feature: cycle_rank
+      - definition: connected components of rings sharing at least one ATOM
+        distance: normalized_wasserstein
+        feature: ring_system_count
+      - bins:
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+        - 10
+        - 11
+        - 12
+        - 13+
+        distance: jensen_shannon
+        feature: ring_size_histogram
+      - categories:
+        - fused
+        - spiro
+        - bridged
+        distance: jensen_shannon
+        feature: topology_categories
+      - bins:
+        - 0.0
+        - 0.2
+        - 0.4
+        - 0.6
+        - 0.8
+        - 1.0
+        distance: jensen_shannon
+        feature: aromatic_ring_fraction
+      existing_coverage: 'compose_v4.eval.molecular_quality._ring_statistics supplies ring count, fused/spiro/bridged
+        flags and a ring-size Counter. MISSING and to be built: cycle rank, ring-SYSTEM count (len(rings)
+        is SSSR rings, so a fused bicyclic counts as 2), and aromatic vs non-aromatic ring fractions.'
+      status: MUST_BE_IMPLEMENTED
+      verification: tested on hand-checkable molecules with known cycle rank and ring systems
+  multi_objective:
+    diversity_measure: mean pairwise ECFP4 Tanimoto distance within the nondominated archive
+    dominance_convention: pareto
+    epsilon: null
+    hypervolume_reference_note: Every objective is normalized to [0,1] and oriented to maximization before
+      HV, so the reference point is the origin. Declared HERE so it cannot be tuned per result.
+    hypervolume_reference_point: origin of the normalized maximization cube (all-zeros)
+    normalization_direction_policy: minimize objectives are negated AFTER min-max normalization, never
+      re-normalized post hoc
+    source_similarity_floor: 0.4
+    task_arities:
+      stress:
+      - qed+sa_score+similarity_to_source+tpsa
+      - qed+sa_score+similarity_to_source+tpsa+molecular_weight
+      three:
+      - qed+sa_score+similarity_to_source
+      two:
+      - qed+similarity_to_source
+      - qed+sa_score
+  normalization_policy: declared per objective BEFORE any model output is inspected; post-hoc renormalization
+    is forbidden.
+  objectives:
+  - definition: RDKit QED
+    direction: maximize
+    id: qed
+    normalization: identity (already in [0,1])
+    normalization_bounds:
+    - 0.0
+    - 1.0
+    oracle_id: qed_state_oracle
+    oracle_source: scripts.molecular_objectives.get_objective_oracle('qed')
+  - definition: Crippen logP - SA - ring penalty (Jin et al.)
+    direction: maximize
+    id: penalized_logp
+    normalization: clip to bounds then min-max; UNBOUNDED raw, so bounds are load-bearing
+    normalization_bounds:
+    - -10.0
+    - 10.0
+    oracle_id: penalized_logp_state_oracle
+    oracle_source: scripts.molecular_objectives.penalized_logp_state_oracle
+  - definition: RDKit contrib SA_Score synthetic accessibility
+    direction: minimize
+    id: sa_score
+    normalization: min-max on the RDKit SA range
+    normalization_bounds:
+    - 1.0
+    - 10.0
+    oracle_id: sa_score_descriptor
+    oracle_source: compose_v4.eval.molecular_quality.DESCRIPTORS['sa_score']
+  - definition: RDKit CalcTPSA
+    direction: interval
+    id: tpsa
+    normalization: min-max
+    normalization_bounds:
+    - 0.0
+    - 200.0
+    oracle_id: tpsa_descriptor
+    oracle_source: compose_v4.eval.molecular_quality.DESCRIPTORS['tpsa']
+  - definition: RDKit Descriptors.MolWt
+    direction: interval
+    id: molecular_weight
+    normalization: min-max
+    normalization_bounds:
+    - 100.0
+    - 600.0
+    oracle_id: molecular_weight_descriptor
+    oracle_source: compose_v4.eval.molecular_quality.DESCRIPTORS['molecular_weight']
+  - definition: ECFP4 r=2 2048-bit Tanimoto to the source lead
+    direction: constraint_floor
+    id: similarity_to_source
+    normalization: identity
+    normalization_bounds:
+    - 0.0
+    - 1.0
+    oracle_id: ecfp4_tanimoto
+    oracle_source: protocol.similarity
+  protocol_freeze:
+    content_hash: 0ab7fca58907478e
+    frozen_at_commit: c57abd7
+    highest_existing_snapshot_step: 5500
+    structural_guarantee: 'No checkpoint outputs or rollout results were inspected in selecting tasks,
+      thresholds, objectives, normalizations or reference points. Enforced by construction: the task builder
+      takes no checkpoint argument. The snapshot step above is PROVENANCE only -- knowing a checkpoint
+      exists is not result-informed tuning.'
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  similarity:
+    bits: 2048
+    fingerprint: ECFP4
+    metric: tanimoto
+    radius: 2
+  successor_kernel: canonical
+  task_generation:
+    algorithm_id: ringcore_adaptation_tasks_v1
+    builder_takes_no_checkpoint_argument: true
+    config_hash: null
+    development_partition: validation
+    final_partition: test
+    policy: Develop, debug and tune ONLY on development tasks derived from the validation partition. Final
+      tasks are generated from the test partition by the already-frozen algorithm and used once. Hand-inspecting
+      test tasks and replacing difficult ones is forbidden; only the preregistered automatic exclusions
+      above may remove a task.
+    preregistered_exclusions:
+    - invalid_source
+    - objective_oracle_failure
+    - unreachable_under_claimed_operator_support
+provenance:
+  denovo:
+    blocked_by:
+    - DENOVO_BOND_REORDER_INVALID_REWRITE
+    - timed-CTMC hazard semantics unverified
+    - de-novo corpus + contract + gates not built
+    run_id: null
+    status: DOES_NOT_EXIST
+  editing_prior:
+    checkpoints:
+    - 500
+    - 1000
+    - 2000
+    - 3000
+    - 4500
+    - 6000
+    - 9000
+    - 12000
+    - 14000
+    - 16000
+    effective_manifest_hash: 5c5c254e1054c081
+    exclusion_overlay_hash: 32372dc5d73139a7
+    git_commit: a7546e2
+    required_capabilities:
+      enable_cycle_ops: true
+      enable_cyclic_graft: true
+      enable_heteroatom_scan: true
+      enable_ring_grow_macro: false
+      enable_ring_opening: true
+      enable_ring_restates: true
+    required_capabilities_note: The production RingCore-V1 configuration. An evaluation of E2/E3/E4/E7
+      must load a model matching this exactly; handing those experiments a de-novo or pre-RingCore checkpoint
+      would silently score a different legal support. Checked by checkpoint_evaluator.validate_capabilities,
+      which cannot rely on the checkpoint echoing its own metadata (the loader derives the flags from
+      those same keys, so such a check would be tautological).
+    run_id: compose-v4-ringcore-v1-scientific-a7546e2-v1
+    sampler_hash: 794e6628f23465d8
+    scheduler_hash: dafd4b5092414394
+    selection_rule: production-weighted canonical-successor NLL (primary); balanced-family canonical-successor
+      NLL (secondary); held-source/scaffold/topology safeguards; calibration and rollout behaviour as
+      tie-breakers; hazard calibration reported SEPARATELY and never used to select the editing checkpoint.
+      16,000 is the maximum observation horizon and does not preselect.
+    status: TRAINING_IN_PROGRESS
+    supersedes:
+      cause: A100 preempted; the retry carried --initialize-compatible-checkpoint together with --resume-checkpoint,
+        which the gate rejects as mutually exclusive. Infrastructure failure, not data/model. Fixed in
+        2ffb4dd (resume supersedes initialization) and a7546e2 (retry budget 1 -> 5).
+      git_commit: 6d067e9
+      outcome: DIED_AT_STEP_1500
+      run_id: compose-v4-ringcore-v1-scientific-nitya-6d067e9-v1
+      scientific_contract_changed: false
+    workspace: nitya
 schema: compose.experiments.registry
 schema_version: 2
