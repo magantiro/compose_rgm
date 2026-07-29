@@ -60,11 +60,39 @@ editing checkpoint · **[lane]** parallel de-novo lane with its own gates.
    `canonical_successor_distillation.aggregate_canonical_successor_rates` both have test callers only. The
    sole exception is the graft family, already quotiented at training time via `graft_successor_groups`.
 
-   Consequences: (a) the molecular kernel is a **derived** object (mark log-probs → production executor →
-   `canonical_state_key` → aggregate), so the one-kernel rule is about implementing that *derivation* once;
-   `segmented_successor` is authoritative for it and the distillation path is a cross-check only. (b) E5 is
-   load-bearing rather than decorative — it is what licenses the derivation — and must treat the graft
-   asymmetry explicitly instead of averaging over it.
+   **The paper formulation (owner-corrected, conceptual precision):**
+
+   > COMPOSE learns a stochastic process over executable rewrite marks. Pushing this process through
+   > execution and molecular canonicalization induces a well-defined kernel over molecular successors. All
+   > control and state-level comparisons operate on this quotient kernel.
+
+   `learn executable rewrite dynamics at the mark level → derive molecular dynamics by quotienting
+   aliases → control molecules at the successor level.`
+
+   Formally `y = π_x(a)` and `P_θ(y|x) = Σ_{a: π_x(a)=y} q_θ(a|x)`. The trained objective is
+   `-log q_θ(a*|x)` (selected mark), **not** `-log P_θ(y*|x)` (canonical successor).
+
+   **What E5 does and does not license — I overstated this in v2.** E5 establishes that the *derived*
+   successor kernel and successor-level controllers are invariant to aliasing and within-fiber refinement.
+   It does **not** establish, and cannot retroactively make, the training objective successor-level. Saying
+   E5 "licenses the derivation" is wrong; it licenses the **quotient-level interpretation and control** of
+   the trained mark process after pushforward.
+
+   **The scientific object is defined mathematically, not by a source file.** The production molecular
+   kernel is the pushforward of the trained mark law through the production executor and canonicalizer,
+   summed over each fiber. `segmented_successor.py` *computes* that pushforward; the fresh
+   dictionary-based implementation *verifies* it on bounded fixtures. No module is the definition.
+
+   **Audit owed before any architectural judgment** (harness only; must not interrupt the run): on the full
+   validation set report the fraction of states with an aliased successor, the fraction of teacher
+   transitions whose successor has alias count > 1, the alias-count distribution, selected-mark NLL,
+   canonical-successor NLL, and the gap `Δ(x,a*) = -log q_θ(a*|x) + log P_θ(π_x(a*)|x)`. Rare aliasing with
+   a tiny gap ⇒ mark-level training is mostly an implementation distinction. Common aliasing with a
+   substantial gap ⇒ a real ablation or a stated limitation, and a short successor-level fine-tune could be
+   *considered* only after the frozen run is evaluated.
+
+   The graft family is already quotiented at training time via `graft_successor_groups`, so the trained law
+   is mark-level **except** for graft; E5 must handle that asymmetry explicitly.
 5. **One evaluator.** No experiment reconstructs successor probabilities. Enforced by test, not intent.
 6. **The evaluator validates, not just reports.** Capability flags are compared against the checkpoint's
    scientific contract *and* the experiment registry; disagreement fails the run.
@@ -541,3 +569,41 @@ discipline applied to the scheduler hash supersession.
 **Nothing blocking.** One judgement call is deferred to its own piece rather than guessed now: the exact
 `held_out_chemical_space_recall` implementation must be *named and frozen* during A0.1 (candidate: ChemNet
 embedding recall). It is listed as a decision inside A0, not left implicit.
+
+---
+
+## 11. Second owner review: eight corrections (all accepted)
+
+Recorded so the corrections stay auditable. Protocol content hash moved
+`0ab7fca58907478e -> b4cd905a640ab32a`, logged under `protocol_freeze.revisions` as an explicit
+owner-approved contract update with a reason -- not tolerated drift. No model outputs were inspected.
+
+1. **Mark-level vs successor-level made exact** (§2.4). E5 licenses the quotient-level interpretation and
+   control of the pushforward, NOT that training was successor-level. This was my overstatement.
+2. **Alias audit added** as an owed deliverable: alias prevalence, teacher alias counts, mark NLL,
+   successor NLL, and the gap. Harness only; must not interrupt the active run.
+3. **The kernel is defined mathematically as the pushforward.** `segmented_successor.py` computes it; the
+   fresh dictionary oracle verifies it. No source file is the definition.
+4. **Comparison types added -- this fixed a LIVE BUG.** `assert_arms_comparable` required identical support
+   signatures, which rejected E4's own registered `no_cycle_operations` ablation (confirmed by reproducing
+   the rejection). Now `law_only` / `support_ablation` (with preregistered
+   `allowed_support_differences`) / `external_baseline`, and capability differences are reported per FLAG so
+   an ablation can name exactly what may differ. E2 and E7 declare `law_only`; E4 declares
+   `support_ablation` limited to `enable_cycle_ops`; external arms use `external_baseline` and make no
+   support claim.
+5. **Vocabulary identity is the full ordered class table** plus a `vocabulary_hash()`, with
+   `charge_vocabulary`, `bond_vocabulary`, `aromaticity_policy`, `valence_policy` and `max_atoms` kept as
+   separate signature fields. Order matters (head semantics) and equal counts can hide different classes.
+6. **`source_prior: carbon_tree` left untouched** during the active run. A fixture test is owed to classify
+   it as `model_reconstruction_field` vs `editing_support_field` vs `de_novo_semantic_field`.
+7. **The weak symmetric-molecule assertion is replaced in A1.2** with a guaranteed-alias fixture requiring
+   `alias_count >= 2`, strict support compression, exact mass summation, reference equivalence, and
+   slot-relabeling invariance. The existing check stays only as an integration smoke and is NOT described as
+   evidence of correct alias aggregation.
+8. **Penalized-logP normalization frozen deterministically**: `clip((f-L)/(U-L), 0, 1)` with `L,U` from
+   training/development data only (never test outcomes), raw values always retained, so the hypervolume
+   origin precondition holds.
+
+**Checkpoint-selection reminder from the same review:** canonical-successor NLL is more closely aligned with
+the downstream molecular kernel than family accuracy, which is a diagnostic only. Selection waits for all
+snapshots and uses the preregistered rule.
