@@ -1,0 +1,29 @@
+{
+  "cause": "a corruption trace contained an atom_insert with TWO existing neighbours -- the inverse of deleting a BRIDGING (degree-2) atom. The factorized model routes AtomInsert to grow_root (0 neighbours) or grow_connected (exactly 1); there is no head for 2+.",
+  "date": "2026-07-29",
+  "defect_id": "UNSCOREABLE_MULTI_NEIGHBOR_ATOM_INSERT",
+  "error": "ValueError: factorized grow supports one existing neighbor",
+  "fix": "production_edit_corpus.trace_is_representable drops any trace with an atom_insert of >1 neighbour at packed load, counted and logged as unrepresentable_traces_dropped - the same policy build_corrupted_prior_records already applies to ring/graft steps",
+  "incidence": {
+    "mmp_layer": "0 of 50,000 sampled records - MMP is NOT a source",
+    "projected_in_train_layer": "~6 of 74,949 corruption records",
+    "rate": "0.008%",
+    "records_affected": 1,
+    "records_scanned": 12296
+  },
+  "not_done": "the model was NOT changed to score multi-neighbour inserts (that would be an architecture change)",
+  "observed_payload": "neighbors [[5,1],[16,1]] in packed corruption shard c_0016",
+  "run_affected": {
+    "call_id": "fc-01KYQ86M98FH0AGZQJS0G3ZP58",
+    "cancelled": true,
+    "progress_before_failure": "2 evaluations completed; loss 3.969 -> 3.149, balanced-family accuracy 0.109 -> 0.128",
+    "run_label": "compose-v4-ringcore-v1-scientific-3124277-v1"
+  },
+  "status": "FIXED",
+  "where": "factorized_tracelet_rate_model._teacher_action_score, AtomInsert branch (line ~3985)",
+  "why_not_caught_earlier": [
+    "the in-memory corruption used 200 sources - 375x too small to contain one",
+    "the 200-step A100 benchmark returns before the first evaluation at step 250, so it never ran far enough",
+    "trace_teachers_representable validates ring/graft steps but not atom_insert ARITY"
+  ]
+}
