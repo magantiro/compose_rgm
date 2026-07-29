@@ -94,8 +94,13 @@ editing checkpoint · **[lane]** parallel de-novo lane with its own gates.
    The graft family is already quotiented at training time via `graft_successor_groups`, so the trained law
    is mark-level **except** for graft; E5 must handle that asymmetry explicitly.
 5. **One evaluator.** No experiment reconstructs successor probabilities. Enforced by test, not intent.
-6. **The evaluator validates, not just reports.** Capability flags are compared against the checkpoint's
-   scientific contract *and* the experiment registry; disagreement fails the run.
+6. **The evaluator validates, not just reports.** Capability flags are compared against the configuration
+   the **registry** declares for the lineage an experiment depends on; disagreement fails the run. NOT
+   against the checkpoint's own metadata — the loader derives the flags from those same keys, so that check
+   is tautological and can never fail. Two checks that *can* fail are used instead: the whole-ring macro must
+   be off (the loader defaults it to on when the key is absent, catching pre-RingCore artifacts), and the
+   flags must match the registry's declared production configuration (catching a de-novo checkpoint handed
+   to an editing experiment).
 7. **Atomic commits**; subject `<module>: <one-line imperative, lowercase, no trailing period>`; never
    mention Claude/AI in commits or PR bodies.
 8. **Gates.** `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q` and
