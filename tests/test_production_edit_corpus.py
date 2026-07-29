@@ -248,3 +248,55 @@ def test_packed_store_with_an_unexpected_shard_is_refused(tmp_path):
         load_shard_layer_records(
             tmp_path / "audit", "corruption", "train", packed_root=tmp_path / "packed"
         )
+
+
+def test_declared_shard_names_cross_checks_the_build_count(tmp_path):
+    """Enumeration must be manifest-DECLARED: a glob alone silently absorbs a missing or extra shard."""
+    from compose_v4.data.production_edit_corpus import declared_shard_names
+
+    root = tmp_path
+    (root / "BUILD_COMPLETE.json").write_text(
+        json.dumps({"BUILD_COMPLETE": True, "expected_shards": 3, "contract": CONTRACT})
+    )
+    for layer, partition, names in (
+        ("corruption", "train", ["shard_0000.jsonl.gz", "shard_0001.jsonl.gz"]),
+        ("cycle_ops", "train", ["shard_0002.jsonl.gz"]),
+    ):
+        directory = root / layer / partition
+        directory.mkdir(parents=True)
+        for name in names:
+            (directory / name).write_bytes(b"")
+            (directory / name).with_suffix(".manifest.json").write_text("{}")
+    declared = declared_shard_names(root)
+    assert sum(len(v) for v in declared.values()) == 3
+    assert declared[("corruption", "train")] == ["shard_0000.jsonl.gz", "shard_0001.jsonl.gz"]
+
+
+def test_shard_census_disagreement_is_refused(tmp_path):
+    """One shard short of the declared count must abort, not train on a smaller corpus."""
+    from compose_v4.data.production_edit_corpus import declared_shard_names
+
+    root = tmp_path
+    (root / "BUILD_COMPLETE.json").write_text(
+        json.dumps({"BUILD_COMPLETE": True, "expected_shards": 45, "contract": CONTRACT})
+    )
+    directory = root / "corruption" / "train"
+    directory.mkdir(parents=True)
+    (directory / "shard_0000.jsonl.gz").write_bytes(b"")
+    (directory / "shard_0000.jsonl.manifest.json").write_text("{}")
+    with pytest.raises(ProductionCorpusError, match="shard census disagrees"):
+        declared_shard_names(root)
+
+
+def test_manifest_without_its_shard_is_refused(tmp_path):
+    from compose_v4.data.production_edit_corpus import declared_shard_names
+
+    root = tmp_path
+    (root / "BUILD_COMPLETE.json").write_text(
+        json.dumps({"BUILD_COMPLETE": True, "expected_shards": 1, "contract": CONTRACT})
+    )
+    directory = root / "corruption" / "train"
+    directory.mkdir(parents=True)
+    (directory / "shard_0000.jsonl.manifest.json").write_text("{}")
+    with pytest.raises(ProductionCorpusError, match="has no shard"):
+        declared_shard_names(root)

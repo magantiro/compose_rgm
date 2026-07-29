@@ -131,6 +131,43 @@ def _shard_paths(root: Path, shard_layer: str, partition: str) -> list[Path]:
     return sorted(directory.glob("*.jsonl.gz"))
 
 
+def declared_shard_names(root: Path) -> dict[tuple[str, str], list[str]]:
+    """Authoritative (layer, partition) -> shard names, cross-checked against the build's declared count.
+
+    Discovery must not be a permissive glob: a glob alone silently absorbs a missing or extra shard. Here
+    the per-shard manifests enumerate what exists and ``BUILD_COMPLETE.expected_shards`` declares how many
+    there should be; disagreement is an error, so the enumeration is manifest-DECLARED rather than merely
+    whatever happens to be on disk.
+    """
+    root = Path(root)
+    declared = int(json.loads((root / "BUILD_COMPLETE.json").read_text())["expected_shards"])
+    names: dict[tuple[str, str], list[str]] = {}
+    seen = 0
+    for shard_layer in _SHARD_LAYER_TO_PRODUCTION:
+        for partition in ("train", "validation", "test"):
+            directory = root / shard_layer / partition
+            if not directory.is_dir():
+                continue
+            found = []
+            for manifest in sorted(directory.glob("*.manifest.json")):
+                # "shard_0000.jsonl.manifest.json" -> "shard_0000.jsonl.gz". Chained with_suffix does NOT
+                # work here (it would yield "shard_0000.jsonl.jsonl.gz"); the manifest name is the shard
+                # name with ".gz" replaced, so reverse exactly that.
+                stem = manifest.name[: -len(".manifest.json")]
+                shard = directory / f"{stem}.gz"
+                if not shard.exists():
+                    raise ProductionCorpusError(f"manifest {manifest} has no shard {shard}")
+                found.append(shard.name)
+            names[(shard_layer, partition)] = found
+            seen += len(found)
+    if seen != declared:
+        raise ProductionCorpusError(
+            f"shard census disagrees with the build: {seen} manifests present, "
+            f"BUILD_COMPLETE declares {declared}"
+        )
+    return names
+
+
 def load_shard_layer_records(
     root: Path,
     shard_layer: str,
@@ -139,6 +176,7 @@ def load_shard_layer_records(
     checkpoint_interval: int | None = None,
     packed_root: Path | None = None,
     verify_fraction: float = 0.0,
+    declared_names: dict | None = None,
 ) -> tuple[PathRecord, ...]:
     """Rebuild every trace of one precompiled (layer, partition) into a GM ``PathRecord``.
 
@@ -152,7 +190,11 @@ def load_shard_layer_records(
         # The derivative store must COVER the audit shards exactly. Without this, a packed shard that
         # failed to build would silently shrink the training corpus -- a smaller run that still succeeds,
         # which is the failure mode this whole loader exists to prevent.
-        audit_names = {path.name for path in _shard_paths(root, shard_layer, partition)}
+        audit_names = set(
+            declared_names[(shard_layer, partition)]
+            if declared_names is not None
+            else [path.name for path in _shard_paths(root, shard_layer, partition)]
+        )
         packed_paths = _shard_paths(packed_root, shard_layer, partition)
         packed_names = {path.name for path in packed_paths}
         if packed_names != audit_names:
@@ -248,12 +290,14 @@ def load_production_edit_corpus(
     """Assemble the three-layer production corpus and its sampler from validated artifacts."""
     root = Path(root)
     build = verify_build_complete(root, expected_contract=expected_contract)
+    declared_names = declared_shard_names(root)
 
     by_layer: dict[str, tuple] = {}
     for shard_layer, production_layer in _SHARD_LAYER_TO_PRODUCTION.items():
         by_layer[production_layer] = load_shard_layer_records(
             root, shard_layer, partition, checkpoint_interval=checkpoint_interval,
             packed_root=packed_root, verify_fraction=verify_fraction,
+            declared_names=declared_names,
         )
     mmp_records, mmp_stats = load_mmp_records(
         mmp_pool_path,
@@ -281,6 +325,7 @@ def load_production_edit_corpus(
     )
     provenance = {
         "root": str(root),
+        "declared_shards": sum(len(v) for v in declared_names.values()),
         "packed_root": None if packed_root is None else str(packed_root),
         "partition": partition,
         "configured_layer_weights": dict(layer_weights),
