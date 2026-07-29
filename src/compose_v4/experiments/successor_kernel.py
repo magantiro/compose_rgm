@@ -1,14 +1,31 @@
-"""The single definition of the molecular process every experiment consumes.
+"""The single definition of the molecular process every experiment consumes: the PUSHFORWARD kernel.
 
-The paper's claims live on MOLECULES, not on action encodings: the kernel is
+What is actually learned, and what is derived
+--------------------------------------------
+COMPOSE learns a stochastic process over executable rewrite MARKS: ``q_theta(a | x)``. Pushing that process
+through execution and molecular canonicalization induces a well-defined kernel over molecular successors,
 
-    P(y | x) = sum_{a : T(x,a) ~= y} p(a | x)
+    y = pi_x(a),        P_theta(y | x) = sum_{a : pi_x(a) = y} q_theta(a | x)
 
-aggregated over the distinct canonical successors ``y``. Several syntactic marks routinely execute to the
-same molecule, so a mark-level law is not a molecular law -- and mark-level controls (power tilts, top-k,
-nucleus, family gating) are provably NOT invariant to how a fiber is encoded, while successor-level control
-is. That asymmetry is a result the paper reports, and it is only meaningful if every experiment agrees on
-one definition of the successor law.
+and all control and state-level comparisons operate on this quotient kernel. Both statements matter and
+they are NOT the same statement:
+
+* the trained objective is selected-mark likelihood, ``-log q_theta(a* | x)``;
+* it is NOT canonical-successor likelihood, ``-log P_theta(y* | x)``.
+
+Several syntactic marks routinely execute to the same molecule, so a mark-level law is not a molecular law.
+Mark-level controls (power tilts, top-k, nucleus, family gating) are provably NOT invariant to how a fiber
+is encoded, while successor-level control is -- verified numerically: a successor reachable by one mark
+versus four aliases keeps aggregate mass 0.500 under a beta=1 tilt but moves to 0.200 at beta=2 and 0.667 at
+beta=0.5. That asymmetry is a result the paper reports, and it is only meaningful if every experiment agrees
+on one definition of the successor law.
+
+What E5 does and does not license
+---------------------------------
+E5 establishes that the DERIVED successor kernel and successor-level controllers are invariant to aliasing
+and within-fiber refinement. It does **not** establish -- and cannot retroactively make -- the original
+training objective successor-level. Saying E5 "licenses the derivation" overstates it; E5 licenses the
+quotient-level interpretation and control of the trained mark process after pushforward.
 
 Hence this module defines a PROTOCOL rather than an implementation. Its purpose is to let the exact-control
 work (E6) proceed in parallel with the production evaluator without a second definition of the process
@@ -42,20 +59,29 @@ rollout**: both ``model.segmented_successor`` and
 only. The single exception is the graft family, which already receives a within-fiber quotient at training
 time via ``graft_successor_groups`` -- so the trained law is mark-level EXCEPT for graft.
 
-Two consequences, both load-bearing:
+Consequences, all load-bearing:
 
-1. The molecular kernel is a DERIVED object: production mark log-probabilities -> execute each mark through
-   the production executor -> group by the production ``canonical_state_key`` -> aggregate. The "one
-   kernel" discipline is therefore about implementing that DERIVATION exactly once, which is what the
-   unified evaluator is for. ``model.segmented_successor`` is the authoritative aggregation implementation
-   for that step; the distillation aggregator is a CROSS-CHECK only, never a second production definition.
-2. E5 is not a nicety. The paper states the process lives on molecules while the objective is trained on
-   marks; quotient invariance is precisely what licenses the derivation. The graft asymmetry must be
-   handled explicitly there rather than averaged over.
+1. The scientific object is defined MATHEMATICALLY, not by a source file. The production molecular kernel
+   is the pushforward of the trained mark law through (a) the production executor and (b) the production
+   canonical molecular key, summed over each successor fiber. ``model.segmented_successor`` *computes* that
+   pushforward; the fresh dictionary-based reference implementation *verifies* it on bounded fixtures. No
+   single module is the definition. The distillation aggregator is at most a cross-check, never a second
+   production definition.
+2. The "one kernel" discipline is therefore about implementing that DERIVATION exactly once -- which is the
+   unified evaluator's job.
+3. An audit is owed, not assumed: on the full validation set, measure how often aliasing actually occurs
+   (fraction of states with an aliased successor, fraction of teacher transitions whose successor has alias
+   count > 1, the alias-count distribution) together with selected-mark NLL, canonical-successor NLL and
+   their gap ``Delta(x,a*) = -log q_theta(a*|x) + log P_theta(pi_x(a*)|x)``. If aliasing is rare and the gap
+   tiny, mark-level training is mostly an implementation distinction; if common and substantial, it is a
+   real ablation or stated limitation. This audit must never interrupt the active run.
+4. The graft family is already quotiented at training time via ``graft_successor_groups``, so the trained
+   law is mark-level EXCEPT for graft. E5 must handle that asymmetry explicitly rather than average over it.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+import hashlib
+from dataclasses import dataclass, fields as dataclass_fields
 from math import isfinite
 from typing import Iterable, Protocol, runtime_checkable
 
@@ -90,8 +116,13 @@ class SupportSignature:
 
     operator_registry_hash: str | None = None
     capability_flags: tuple[tuple[str, bool], ...] = ()
+    # The FULL ORDERED (element, valence) class table, not a name or a count. Index order determines
+    # classifier-head semantics, the same count can hide different classes, and one element can occupy
+    # several valence classes -- so only the exact ordered table identifies the vocabulary.
     element_vocabulary: tuple[str, ...] = ()
     charge_vocabulary: tuple[int, ...] = ()
+    bond_vocabulary: tuple[str, ...] = ()
+    aromaticity_policy: str | None = None
     max_atoms: int | None = None
     valence_policy: str | None = None
     canonicalizer_version: str | None = None
@@ -102,6 +133,30 @@ class SupportSignature:
     atom_insert_arity_support: tuple[int, ...] = (0, 1)
     embedded_jump_chain_policy: str | None = None
     ringcore_configuration: str | None = None
+
+    def vocabulary_hash(self) -> str:
+        """Stable digest of the ordered class table, for compact provenance next to the full table."""
+        return hashlib.sha256("|".join(self.element_vocabulary).encode()).hexdigest()[:16]
+
+    def differing_fields(self, other: SupportSignature) -> tuple[str, ...]:
+        """Names of support fields that differ, reporting individual CAPABILITY FLAGS by name.
+
+        Flag-level granularity is what makes a preregistered support ablation expressible: E4 needs to say
+        "only ``enable_cycle_ops`` may differ", which is impossible if the whole ``capability_flags``
+        container is reported as one opaque difference.
+        """
+        differences: list[str] = []
+        for descriptor in dataclass_fields(self):
+            name = descriptor.name
+            if name == "capability_flags":
+                mine, theirs = dict(self.capability_flags), dict(other.capability_flags)
+                for flag in sorted(set(mine) | set(theirs)):
+                    if mine.get(flag) != theirs.get(flag):
+                        differences.append(flag)
+                continue
+            if getattr(self, name) != getattr(other, name):
+                differences.append(name)
+        return tuple(differences)
 
 
 @dataclass(frozen=True)
@@ -127,7 +182,7 @@ class KernelIdentity:
 
     def differs_only_in_law(self, other: KernelIdentity) -> bool:
         """True when the two kernels share the ENTIRE support signature."""
-        return self.support_signature == other.support_signature
+        return not self.support_signature.differing_fields(other.support_signature)
 
 
 # ---- successors ---------------------------------------------------------------------------------------
@@ -241,17 +296,61 @@ def validate_successor_batch(
         )
 
 
-def assert_arms_comparable(left: CanonicalSuccessorKernel, right: CanonicalSuccessorKernel) -> None:
-    """Refuse to compare two arms whose legal support could differ.
+# How two arms are meant to relate. Comparing arms without declaring this is how an unfair comparison, or
+# a wrongly-blocked legitimate ablation, sneaks in.
+LAW_ONLY = "law_only"                    # identical support; only the probability assignment differs
+SUPPORT_ABLATION = "support_ablation"    # support differs ONLY in preregistered fields
+EXTERNAL_BASELINE = "external_baseline"  # a different system entirely; support is NOT claimed equal
+COMPARISON_TYPES = frozenset({LAW_ONLY, SUPPORT_ABLATION, EXTERNAL_BASELINE})
 
-    The learned-versus-uniform comparison is only causal if the executor, capability flags and enumeration
-    are identical and ONLY the probability assignment changes. A capability-flag mismatch silently
-    invalidates it, so this is checked rather than documented.
+
+def assert_arms_comparable(
+    left: CanonicalSuccessorKernel,
+    right: CanonicalSuccessorKernel,
+    *,
+    comparison: str = LAW_ONLY,
+    allowed_support_differences: tuple[str, ...] = (),
+) -> None:
+    """Check that two arms relate the way the experiment claims they do.
+
+    A single blanket "supports must be identical" rule is wrong in both directions. It is necessary for a
+    learned-versus-uniform comparison, where only the probability assignment may change. But it would
+    WRONGLY BLOCK a legitimate support ablation -- E4's ``no_cycle_operations`` arm exists precisely to
+    remove a capability, and an earlier version of this function rejected it. So the intended relationship
+    is declared, and only undeclared differences fail:
+
+    * ``law_only`` -- every support field must match. Learned vs uniform.
+    * ``support_ablation`` -- support may differ ONLY in ``allowed_support_differences``, which must be
+      preregistered; any other difference fails. E4 RingCore vs no-cycle-ops.
+    * ``external_baseline`` -- no support claim is made. Do NOT pretend the supports match; compare
+      endpoints and compute transparently instead.
     """
-    if not left.identity().differs_only_in_law(right.identity()):
+    if comparison not in COMPARISON_TYPES:
         raise SuccessorKernelViolation(
-            "kernel arms differ in support-determining configuration, not only in their probability law:\n"
-            f"  left : {left.identity()}\n  right: {right.identity()}"
+            f"unknown comparison type {comparison!r}; expected one of {sorted(COMPARISON_TYPES)}"
+        )
+    if comparison == EXTERNAL_BASELINE:
+        return
+    if comparison == LAW_ONLY and allowed_support_differences:
+        raise SuccessorKernelViolation(
+            "law_only comparisons may not declare allowed_support_differences; if the support genuinely "
+            "differs the comparison is a support_ablation, and saying so is the point"
+        )
+    if comparison == SUPPORT_ABLATION and not allowed_support_differences:
+        raise SuccessorKernelViolation(
+            "a support_ablation must preregister which support fields may differ; with none declared, use "
+            "law_only"
+        )
+
+    differences = left.identity().support_signature.differing_fields(
+        right.identity().support_signature
+    )
+    undeclared = tuple(name for name in differences if name not in set(allowed_support_differences))
+    if undeclared:
+        raise SuccessorKernelViolation(
+            f"kernel arms differ in undeclared support-determining fields {list(undeclared)} under a "
+            f"{comparison} comparison. Declared differences: {list(allowed_support_differences)}.\n"
+            f"  left : {left.identity().implementation}\n  right: {right.identity().implementation}"
         )
 
 

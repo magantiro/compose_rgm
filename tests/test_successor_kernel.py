@@ -24,6 +24,11 @@ from compose_v4.experiments.successor_kernel import (
     assert_arms_comparable,
     validate_successor_batch,
 )
+from compose_v4.experiments.successor_kernel import (
+    EXTERNAL_BASELINE,
+    LAW_ONLY,
+    SUPPORT_ABLATION,
+)
 
 _SIGNATURE = SupportSignature(
     operator_registry_hash="abc123", capability_flags=(("enable_cycle_ops", True),)
@@ -186,3 +191,95 @@ def test_protocol_rejects_an_object_missing_identity():
             raise NotImplementedError
 
     assert not isinstance(_NoIdentity(), CanonicalSuccessorKernel)
+
+
+# ---- comparison types: a blanket "supports must match" rule is wrong in both directions ---------------
+
+
+def _flagged_arm(cycle_ops: bool, name: str, elements=("2:4",)):
+    class _Arm:
+        def successors(self, state):  # pragma: no cover - identity is what is compared
+            raise NotImplementedError
+
+        def identity(self):
+            return KernelIdentity(
+                implementation=name,
+                support_signature=SupportSignature(
+                    capability_flags=(("enable_cycle_ops", cycle_ops), ("enable_ring_opening", True)),
+                    element_vocabulary=elements,
+                ),
+            )
+
+    return _Arm()
+
+
+def test_a_preregistered_support_ablation_is_permitted():
+    """E4's no_cycle_operations arm exists to remove a capability; an earlier guard wrongly blocked it."""
+    assert_arms_comparable(
+        _flagged_arm(True, "ringcore_v1"),
+        _flagged_arm(False, "no_cycle_operations"),
+        comparison=SUPPORT_ABLATION,
+        allowed_support_differences=("enable_cycle_ops",),
+    )
+
+
+def test_the_same_difference_is_refused_under_law_only():
+    with pytest.raises(SuccessorKernelViolation, match="undeclared support-determining"):
+        assert_arms_comparable(
+            _flagged_arm(True, "a"), _flagged_arm(False, "b"), comparison=LAW_ONLY
+        )
+
+
+def test_an_undeclared_second_difference_is_caught_inside_an_ablation():
+    """Declaring one difference must not wave through another."""
+    with pytest.raises(SuccessorKernelViolation, match="element_vocabulary"):
+        assert_arms_comparable(
+            _flagged_arm(True, "a"),
+            _flagged_arm(False, "b", elements=("2:4", "7:2")),
+            comparison=SUPPORT_ABLATION,
+            allowed_support_differences=("enable_cycle_ops",),
+        )
+
+
+def test_external_baseline_makes_no_support_claim():
+    """Do not pretend an external method shares our support; compare endpoints and compute instead."""
+    assert_arms_comparable(
+        _flagged_arm(True, "ours"),
+        _flagged_arm(False, "external", elements=()),
+        comparison=EXTERNAL_BASELINE,
+    )
+
+
+def test_law_only_may_not_declare_allowed_differences():
+    with pytest.raises(SuccessorKernelViolation, match="may not declare"):
+        assert_arms_comparable(
+            _flagged_arm(True, "a"), _flagged_arm(True, "b"),
+            comparison=LAW_ONLY, allowed_support_differences=("enable_cycle_ops",),
+        )
+
+
+def test_a_support_ablation_must_preregister_something():
+    with pytest.raises(SuccessorKernelViolation, match="must preregister"):
+        assert_arms_comparable(
+            _flagged_arm(True, "a"), _flagged_arm(True, "b"), comparison=SUPPORT_ABLATION
+        )
+
+
+def test_an_unknown_comparison_type_is_refused():
+    with pytest.raises(SuccessorKernelViolation, match="unknown comparison type"):
+        assert_arms_comparable(_flagged_arm(True, "a"), _flagged_arm(True, "b"), comparison="whatever")
+
+
+def test_capability_differences_are_reported_by_flag_name_not_as_one_container():
+    """Flag-level granularity is what makes a preregistered ablation expressible at all."""
+    left = SupportSignature(capability_flags=(("enable_cycle_ops", True), ("enable_ring_opening", True)))
+    right = SupportSignature(capability_flags=(("enable_cycle_ops", False), ("enable_ring_opening", True)))
+    assert left.differing_fields(right) == ("enable_cycle_ops",)
+
+
+def test_vocabulary_identity_is_the_ordered_table_not_its_length():
+    """Same count, different order or content, must be a different vocabulary."""
+    a = SupportSignature(element_vocabulary=("2:4", "3:3"))
+    b = SupportSignature(element_vocabulary=("3:3", "2:4"))
+    assert a.vocabulary_hash() != b.vocabulary_hash()
+    assert a.differing_fields(b) == ("element_vocabulary",)
