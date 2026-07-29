@@ -169,6 +169,16 @@ def replay_verify(record: dict, states) -> None:
             )
 
 
+def manifest_path_for(shard_path: Path) -> Path:
+    """Sidecar manifest path for a shard, using the repo-wide convention.
+
+    ``Path.with_suffix`` replaces the LAST suffix, so ``shard_0009.jsonl.gz`` -> ``shard_0009.jsonl.manifest.json``
+    -- which is exactly what ``precompile_edit_data_app`` writes. Building it by string concatenation instead
+    yields ``shard_0009.jsonl.gz.manifest.json`` and finds nothing. One helper, one convention.
+    """
+    return Path(shard_path).with_suffix(".manifest.json")
+
+
 def source_shard_fingerprint(shard_path: Path) -> str:
     """The ``content_sha256`` of the audit shard a packed store derives from.
 
@@ -176,7 +186,7 @@ def source_shard_fingerprint(shard_path: Path) -> str:
     source's content hash is what makes that hierarchy enforceable -- a rebuilt source shard invalidates
     its packed store instead of silently pairing stale states with new traces.
     """
-    manifest_path = Path(str(shard_path) + ".manifest.json")
+    manifest_path = manifest_path_for(shard_path)
     if not manifest_path.exists():
         raise PackedStoreError(f"source shard {shard_path} has no manifest to fingerprint")
     return json.loads(manifest_path.read_text())["content_sha256"]
@@ -207,7 +217,7 @@ def write_packed_shard(
         "states": sum(len(entry["states"]) for entry in entries),
         "provenance": dict(provenance),
     }
-    Path(str(path) + ".manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    manifest_path_for(path).write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     return manifest
 
 
@@ -227,7 +237,7 @@ def read_packed_shard(
     if not 0.0 <= verify_fraction <= 1.0:
         raise ValueError("verify_fraction must lie in [0, 1]")
     path = Path(path)
-    manifest_path = Path(str(path) + ".manifest.json")
+    manifest_path = manifest_path_for(path)
     if not manifest_path.exists():
         raise PackedStoreError(f"packed shard {path} has no manifest; refusing to load")
     manifest = json.loads(manifest_path.read_text())

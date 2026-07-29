@@ -305,3 +305,59 @@ def test_sentinel_replay_is_deterministic_and_passes_on_a_good_store(tmp_path):
     second = store.sentinel_replay_check(shard, entries=3)
     assert first == second, "the sentinel must be deterministic, not sampled"
     assert first["sentinel_entries_replayed"] == 3
+
+
+# ---- manifest naming: the convention must match what the precompile app actually writes ---------------
+
+
+def test_manifest_path_uses_the_repo_convention():
+    """`.jsonl.gz` -> `.jsonl.manifest.json`, NOT `.jsonl.gz.manifest.json`.
+
+    Regression: source_shard_fingerprint originally built the path by string concatenation, so it looked
+    for `shard_0000.jsonl.gz.manifest.json` while precompile_edit_data_app writes
+    `shard_0000.jsonl.manifest.json` via Path.with_suffix. Every shard of the Modal build failed on it.
+    The local fixture had masked the bug because staging it RENAMED the manifest to the wrong convention.
+    """
+    from compose_v4.data.packed_trace_store import manifest_path_for
+
+    assert manifest_path_for(Path("a/b/shard_0000.jsonl.gz")).name == "shard_0000.jsonl.manifest.json"
+    assert manifest_path_for(Path("shard_0007.jsonl.gz")).name == "shard_0007.jsonl.manifest.json"
+
+
+def test_fingerprint_reads_a_manifest_written_the_way_the_precompile_app_writes_it(tmp_path):
+    """Build the sidecar exactly as precompile_edit_data_app does and require the fingerprint to find it."""
+    from compose_v4.data.packed_trace_store import source_shard_fingerprint
+
+    shard = tmp_path / "shard_0000.jsonl.gz"
+    shard.write_bytes(b"")
+    # precompile_edit_data_app.compile_shard: shard_path.with_suffix(".manifest.json")
+    shard.with_suffix(".manifest.json").write_text(json.dumps({"content_sha256": "abc123def456"}))
+    assert source_shard_fingerprint(shard) == "abc123def456"
+
+
+def test_packed_store_manifest_is_discoverable_by_the_same_rule(tmp_path):
+    """The packed store must use ONE convention with the audit shards, so either can be fingerprinted."""
+    import compose_v4.data.packed_trace_store as store
+
+    if not POOL.exists():
+        pytest.skip("local analogue pool sample unavailable")
+    from compose_v4.rewrite.trace_shard import encode_trace_record
+
+    replayed = TraceProgressCTMC(rewrite_trace_from_record(json.loads(POOL.read_text().splitlines()[0])))
+    shard = tmp_path / "packed_0000.jsonl.gz"
+    store.write_packed_shard(
+        shard,
+        [
+            store.build_packed_entry(
+                encode_trace_record(
+                    replayed.trace, n_slots=40, seed=0, trace_id="t0",
+                    partition="train", layer="mmp",
+                ),
+                replayed,
+            )
+        ],
+        provenance={},
+    )
+    assert (tmp_path / "packed_0000.jsonl.manifest.json").exists()
+    assert not (tmp_path / "packed_0000.jsonl.gz.manifest.json").exists()
+    assert len(list(store.read_packed_shard(shard))) == 1
