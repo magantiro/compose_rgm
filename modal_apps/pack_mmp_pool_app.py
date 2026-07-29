@@ -86,6 +86,8 @@ def pair_partition(source_smiles: str, target_smiles: str) -> tuple[str | None, 
     differently-scaffolded targets (measured: 1,325 sources spanned partitions). Both endpoints must map
     to the same partition, which makes molecule-level leakage impossible by construction.
     """
+    from compose_v4.data.scaffold_partition import murcko_scaffold, partition_for_scaffold
+
     source = (source_smiles or "").strip()
     target = (target_smiles or "").strip()
     if not source or not target:
