@@ -34,7 +34,11 @@ from compose_v4.experiments.analogue_prior import rewrite_trace_from_record  # n
 from compose_v4.rewrite.kernel import canonical_state_key  # noqa: E402
 from compose_v4.rewrite.progress import TraceProgressCTMC  # noqa: E402
 
-POOL = REPO / "diagnostics/composition/analogue_trace_pool.jsonl"
+_FIXTURE = Path(__file__).resolve().parent / "fixtures/analogue_trace_pool_sample.jsonl"
+_FULL = Path(__file__).resolve().parent.parent / "diagnostics/composition/analogue_trace_pool.jsonl"
+# Prefer the COMMITTED fixture so these tests run in a clean checkout -- the authoritative launch gate
+# runs from a clean worktree, where an untracked pool would silently skip them.
+POOL = _FIXTURE if _FIXTURE.exists() else _FULL
 
 
 def _pairs(limit=25):

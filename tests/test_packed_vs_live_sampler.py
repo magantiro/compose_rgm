@@ -35,7 +35,11 @@ from compose_v4.experiments.tracelet_conditional import (  # noqa: E402
 from compose_v4.rewrite.progress import PowerSurvivalScheduler, TraceProgressCTMC  # noqa: E402
 
 FRACTION = 0.5
-POOL = REPO / "diagnostics/composition/analogue_trace_pool.jsonl"
+_FIXTURE = Path(__file__).resolve().parent / "fixtures/analogue_trace_pool_sample.jsonl"
+_FULL = Path(__file__).resolve().parent.parent / "diagnostics/composition/analogue_trace_pool.jsonl"
+# Prefer the COMMITTED fixture so these tests run in a clean checkout -- the authoritative launch gate
+# runs from a clean worktree, where an untracked pool would silently skip them.
+POOL = _FIXTURE if _FIXTURE.exists() else _FULL
 
 
 def test_scheduler_power_is_one_so_alpha_equals_time():

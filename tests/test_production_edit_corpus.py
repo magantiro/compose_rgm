@@ -104,7 +104,11 @@ def test_partitioner_drift_is_refused(tmp_path):
 
 # ---- MMP partition discipline -----------------------------------------------------------------------
 
-_POOL = Path(__file__).resolve().parent.parent / "diagnostics/composition/analogue_trace_pool.jsonl"
+_FIXTURE = Path(__file__).resolve().parent / "fixtures/analogue_trace_pool_sample.jsonl"
+_FULL = Path(__file__).resolve().parent.parent / "diagnostics/composition/analogue_trace_pool.jsonl"
+# Prefer the COMMITTED fixture so these tests run in a clean checkout -- the authoritative launch gate
+# runs from a clean worktree, where an untracked pool would silently skip them.
+_POOL = _FIXTURE if _FIXTURE.exists() else _FULL
 
 
 @pytest.mark.skipif(not _POOL.exists(), reason="local analogue pool sample unavailable")

@@ -105,7 +105,7 @@ def test_production_loader_works_without_the_legacy_builders_importable(monkeypa
 
     from compose_v4.data.production_edit_corpus import load_mmp_records
 
-    pool = REPO / "diagnostics/composition/analogue_trace_pool.jsonl"
+    pool = REPO / "tests/fixtures/analogue_trace_pool_sample.jsonl"
     if not pool.exists():
         pytest.skip("local analogue pool sample unavailable")
     records, stats = load_mmp_records(pool, partition="train")
