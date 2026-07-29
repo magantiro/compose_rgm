@@ -222,6 +222,34 @@ def _source_fingerprint() -> str:
     return digest.hexdigest()
 
 
+# Checkpoint-loading arguments the gate treats as mutually exclusive with --resume-checkpoint.
+_INITIALIZATION_ARGUMENTS = (
+    "initialize_compatible_checkpoint",
+    "initialize_checkpoint",
+    "load_checkpoint",
+)
+
+
+def _supersede_initialization_for_resume(arguments: dict, *, recovery_path: Path) -> list[str]:
+    """Point ``arguments`` at the recovery state and drop the now-superseded initialization flags.
+
+    A preempted Modal container restarts with the SAME input, so a warm-started run still carries its
+    initialization flag on the retry -- and the gate rejects initialization together with resume as
+    mutually exclusive. That collision killed the first RingCore-V1 scientific run on its first
+    preemption, at step 1500, after the recovery checkpoint had been written successfully.
+
+    Dropping initialization is the semantically correct resolution, not merely the one that parses:
+    the recovery state already holds the warm-started weights PLUS every completed optimizer step, so
+    re-initializing from the source checkpoint would discard the run's progress. Returns the names
+    dropped so the launcher can record what it superseded.
+    """
+    dropped = [key for key in _INITIALIZATION_ARGUMENTS if key in arguments]
+    for key in dropped:
+        arguments.pop(key)
+    arguments["resume_checkpoint"] = str(recovery_path)
+    return dropped
+
+
 def _validate_run_label(value: str, *, field: str = "run label") -> None:
     """Reject traversal, nested paths, and ambiguous artifact labels."""
 
@@ -1091,7 +1119,14 @@ def _run_remote(
     if stage_kind == "training" and recovery_path.is_file():
         if recovery_path.stat().st_size == 0:
             raise ValueError("training recovery checkpoint is empty")
-        recipe["arguments"]["resume_checkpoint"] = str(recovery_path)
+        superseded = _supersede_initialization_for_resume(
+            recipe["arguments"], recovery_path=recovery_path
+        )
+        print(json.dumps({
+            "phase": "resume_from_recovery",
+            "recovery_checkpoint": str(recovery_path),
+            "superseded_initialization": superseded,
+        }, sort_keys=True), flush=True)
     elif (
         stage_kind == "training"
         and stage_manifest_existed
