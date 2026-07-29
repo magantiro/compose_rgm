@@ -4,19 +4,17 @@
   "owner_decision_date": "2026-07-28",
   "production_contract_fingerprint": "3917a0bf4a3de9830722663f",
   "source_commit": "51806d0",
-
   "scheduler": {
     "optimizer": "AdamW",
     "peak_learning_rate": 0.0003,
     "weight_decay": 1e-05,
     "warmup_steps": 500,
-    "schedule_steps": 3000,
+    "schedule_steps": 16000,
     "minimum_learning_rate_fraction": 0.05,
     "schedule": "cosine_with_linear_warmup"
   },
-  "scheduler_config_hash": "0b832985c65de1cc",
-  "scheduler_note": "The schedule-check run and the eventual full RingCore run MUST share scheduler_config_hash. Only training_steps differs between them; the gate aborts a RingCore launch whose scheduler args do not reproduce this hash.",
-
+  "scheduler_config_hash": "dafd4b5092414394",
+  "scheduler_note": "OWNER-APPROVED 2026-07-29: schedule_steps 3000 -> 16000 (hash 0b832985c65de1cc -> dafd4b5092414394). This is an explicit scientific contract update, not tolerated drift. 16,000 is the MAXIMUM OBSERVATION HORIZON chosen from measured throughput (0.8331 s/step -> 3.70 h); it does not preselect the final checkpoint, which is chosen by the frozen canonical-successor rule and may be earlier.",
   "frozen_recipe_hashes": {
     "base_b_sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
     "capability_hash": "330473e319bfec19",
@@ -32,7 +30,6 @@
     "curriculum_hash": "dcd7634f1268b52f",
     "optimizer_config_hash": "987c59692fd72963"
   },
-
   "capability_flags": {
     "corrupted_prior_mix": true,
     "cycle_op_mix": true,
@@ -42,34 +39,45 @@
     "enable_ring_macros": false,
     "max_atoms": 40
   },
-
   "data": {
     "scaled_manifest": "ring_core_v1_scaled_manifest.json",
-    "layer_weights": {"corruption": 0.55, "mmp": 0.45, "denovo": 0.0},
-    "curriculum_bin_edges": [5, 9, 13],
+    "layer_weights": {
+      "general_corruption": 0.4,
+      "cycle_operations": 0.25,
+      "mmp_analogue": 0.35
+    },
+    "curriculum_bin_edges": [
+      5,
+      9,
+      13
+    ],
     "validation": "held-out edit records from split.validation (disjoint from split.train)"
   },
-
   "warm_start": {
     "mode": "--initialize-compatible-from-source-checkpoint",
     "source": "base B (c9d927...); semantic (element,valence) row transfer; new S/P/Cl/Br/I/B + cycle heads fresh",
     "start_from_step_500_preflight": false,
     "reason": "the superseded step-500 preflight followed a schedule_steps=500 (all-warmup) LR trajectory; a schedule-faithful run must start fresh from B"
   },
-
   "runs": {
     "schedule_check": {
       "training_steps": 1000,
       "schedule_steps": 3000,
       "warmup_steps": 500,
-      "evaluate_at_steps": [0, 250, 500, 750, 1000],
+      "evaluate_at_steps": [
+        0,
+        250,
+        500,
+        750,
+        1000
+      ],
       "status": "NON_SCIENTIFIC_PREFLIGHT",
       "purpose": "verify warmup->decay transition + stability + continued validation improvement + lower-frequency family survival + family-mass calibration + productive compositional cycle editing + unchanged rollout correctness",
       "not_for": "convergence or final molecular quality"
     },
     "full_run": {
-      "training_steps": 3000,
-      "schedule_steps": 3000,
+      "training_steps": 16000,
+      "schedule_steps": 16000,
       "warmup_steps": 500,
       "start_from": "base B FRESH (--initialize-compatible-from-source-checkpoint); NEW production lineage -- do NOT repurpose the preflight schedule-check / continuation checkpoints",
       "launch_tag": "ringcore-v1-full-production (commit 6428901)",
@@ -77,13 +85,48 @@
       "preflight_verdict": "GO_FOR_FULL_RINGCORE_TRAINING (step-1500 continuation; diagnostics/coherence/continuation_1500_result.json)",
       "prelaunch_gate": "PASS (567 tests) at 6428901",
       "gpu_smoke": "in flight at hold time (compose-v4-ringcore-v1-full-6428901-gpusmoke-v1); must be finite before launch",
-      "status": "READY-BUT-HELD at owner request (updating claude) -- launch ONLY on explicit go, after confirming the GPU smoke is finite",
-      "launch_command": "cd <clean worktree at tag ringcore-v1-full-production> && modal run --detach modal_apps/train_tracelet_gm.py --train-only --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --analogue-trace-pool /artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl --analogue-trace-count 5000 --corrupted-prior-count 200 --scaled-manifest /artifacts/ring_core_v1/ring_core_v1_scaled_manifest.json --initialize-compatible-from-source-checkpoint --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 --checkpoint-name checkpoint.best_so_far.pt --training-steps 3000 --schedule-steps 3000 --run-label compose-v4-ringcore-v1-full-6428901-v1"
+      "status": "OWNER_APPROVED_AWAITING_LAUNCH",
+      "launch_command": "cd <clean worktree at tag ringcore-v1-full-production> && modal run --detach modal_apps/train_tracelet_gm.py --train-only --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary --analogue-trace-pool /artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl --analogue-trace-count 5000 --corrupted-prior-count 200 --scaled-manifest /artifacts/ring_core_v1/ring_core_v1_scaled_manifest.json --initialize-compatible-from-source-checkpoint --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 --checkpoint-name checkpoint.best_so_far.pt --training-steps 3000 --schedule-steps 3000 --run-label compose-v4-ringcore-v1-full-6428901-v1",
+      "checkpoint_steps": [
+        500,
+        1000,
+        2000,
+        3000,
+        4500,
+        6000,
+        9000,
+        12000,
+        14000,
+        16000
+      ],
+      "evaluation_every": 250,
+      "early_stopping": "DISABLED (no performance-based early stopping)",
+      "contract_required": "SCIENTIFIC_TRAINING_CONTRACT",
+      "data": "unified packed three-layer corpus (UNIFIED_PACKED_MANIFEST.json)"
     }
   },
-
   "do_not_modify_during_check": [
-    "model", "operator_support", "data_mixture", "curriculum",
-    "teacher_filter", "calibration", "optimizer", "validation_distribution"
+    "model",
+    "operator_support",
+    "data_mixture",
+    "curriculum",
+    "teacher_filter",
+    "calibration",
+    "optimizer",
+    "validation_distribution"
+  ],
+  "scheduler_lineage": [
+    {
+      "scheduler_hash": "0b832985c65de1cc",
+      "schedule_steps": 3000,
+      "status": "SUPERSEDED",
+      "note": "pre-benchmark lock; used for the discarded A100 throughput benchmark"
+    },
+    {
+      "scheduler_hash": "dafd4b5092414394",
+      "schedule_steps": 16000,
+      "status": "ACTIVE",
+      "approved": "2026-07-29"
+    }
   ]
 }

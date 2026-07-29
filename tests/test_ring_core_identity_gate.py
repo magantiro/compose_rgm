@@ -111,8 +111,10 @@ def test_missing_metadata_fails():
 
 
 def test_frozen_scheduler_dict_matches_constant():
-    # the frozen PRODUCTION_SCHEDULER must hash to the pinned SCHEDULER_CONFIG_HASH
-    assert recompute_scheduler_config_hash() == SCHEDULER_CONFIG_HASH == "0b832985c65de1cc"
+    # the frozen PRODUCTION_SCHEDULER must hash to the pinned SCHEDULER_CONFIG_HASH.
+    # ACTIVE contract is the owner-approved 16,000-step schedule (2026-07-29); the 3,000-step schedule
+    # (0b832985c65de1cc) is SUPERSEDED and is asserted to FAIL in test_approved_scheduler_contract.py.
+    assert recompute_scheduler_config_hash() == SCHEDULER_CONFIG_HASH == "dafd4b5092414394"
 
 
 def test_locked_scheduler_args_reproduce_hash():
@@ -120,7 +122,7 @@ def test_locked_scheduler_args_reproduce_hash():
     assert (
         scheduler_config_hash_from_args(
             warmup_steps=500,
-            schedule_steps=3000,
+            schedule_steps=16000,
             minimum_learning_rate_fraction=0.05,
             peak_learning_rate=3e-4,
             weight_decay=1e-5,
@@ -133,6 +135,8 @@ def test_locked_scheduler_args_reproduce_hash():
     "override",
     [
         {"schedule_steps": 30000},  # base-B de-novo horizon (never decays over a warm-start window)
+        {"schedule_steps": 3000},  # the SUPERSEDED pre-benchmark lock -- now drift
+        {"schedule_steps": 12000},  # a considered but unapproved horizon
         {"schedule_steps": 2000},  # over-aggressive cooling
         {"schedule_steps": 500},  # the superseded all-warmup preflight
         {"warmup_steps": 0},  # no warmup
@@ -145,7 +149,7 @@ def test_scheduler_drift_changes_hash(override):
     # any drift from the locked scheduler yields a different hash -> the gate launch guard aborts
     base = dict(
         warmup_steps=500,
-        schedule_steps=3000,
+        schedule_steps=16000,
         minimum_learning_rate_fraction=0.05,
         peak_learning_rate=3e-4,
         weight_decay=1e-5,
