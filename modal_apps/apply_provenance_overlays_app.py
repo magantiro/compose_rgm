@@ -46,7 +46,7 @@ _SENTINEL_ENTRIES = 4
 
 @app.function(image=image, cpu=16.0, memory=65536, timeout=4 * 3600,
               volumes={"/artifacts": artifact_volume})
-def apply_overlays(packed_root: str, commit: str) -> dict:
+def apply_overlays(packed_root: str, commit: str, mmp_root: str = "") -> dict:
     import sys
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
@@ -74,10 +74,17 @@ def apply_overlays(packed_root: str, commit: str) -> dict:
         "tensorization_implementation_hash": tensorization_implementation_hash(),
     }
 
+    # (layer_dir, root) pairs. The MMP store lives at its own root with partitions directly beneath it,
+    # and although its packer recorded codec/schema provenance it predates tensorization_implementation_hash
+    # -- so it needs an overlay for that field just as corruption/cycle need one for the codec fields.
+    targets = [(layer, root) for layer in LAYERS]
+    if mmp_root:
+        targets.append(("", Path(mmp_root)))
+
     written, reused, shards = 0, 0, []
-    for layer in LAYERS:
+    for layer, layer_root in targets:
         for partition in PARTITIONS:
-            directory = root / layer / partition
+            directory = (layer_root / layer / partition) if layer else (layer_root / partition)
             if not directory.is_dir():
                 continue
             for shard in sorted(directory.glob("*.jsonl.gz")):
@@ -100,7 +107,7 @@ def apply_overlays(packed_root: str, commit: str) -> dict:
                 )
                 overlay_path_for(shard).write_text(json.dumps(overlay, indent=2, sort_keys=True) + "\n")
                 written += 1
-                shards.append(f"{layer}/{partition}/{shard.name}")
+                shards.append(f"{layer or 'mmp_analogue'}/{partition}/{shard.name}")
 
     artifact_volume.commit()
     result = {"status": "COMPLETE", "overlays_written": written, "overlays_reused": reused,
@@ -111,5 +118,6 @@ def apply_overlays(packed_root: str, commit: str) -> dict:
 
 
 @app.local_entrypoint()
-def main(packed_root: str = "/artifacts/edit_packed_v1", commit: str = ""):
-    print(json.dumps(apply_overlays.remote(packed_root, commit), indent=2, sort_keys=True))
+def main(packed_root: str = "/artifacts/edit_packed_v1", commit: str = "",
+         mmp_root: str = "/artifacts/mmp_packed_v1"):
+    print(json.dumps(apply_overlays.remote(packed_root, commit, mmp_root), indent=2, sort_keys=True))
