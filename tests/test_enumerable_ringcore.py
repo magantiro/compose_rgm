@@ -347,3 +347,47 @@ def test_cycle_rank_has_a_single_definition_in_src():
         if line.strip().startswith("def cycle_rank")
     ]
     assert len(definitions) == 1, f"expected exactly one cycle_rank definition, found {definitions}"
+
+
+# ---- composite benchmark identity ---------------------------------------------------------------------
+
+
+def _identity(**overrides):
+    from compose_v4.experiments.enumerable_ringcore import benchmark_identity
+
+    candidate = overrides.pop("candidate", _tiny())
+    graph = build_reachable_graph(candidate, state_cap=10_000, edge_cap=1_000_000)
+    kwargs = {
+        "registry_protocol_hash": "aaaa",
+        "exact_sizing": {"N_min": 500},
+        "horizon": None,
+        "implementation_commit": "deadbee",
+    }
+    kwargs.update(overrides)
+    return benchmark_identity(graph, candidate, **kwargs)
+
+
+def test_benchmark_identity_is_deterministic():
+    assert _identity()["benchmark_identity_hash"] == _identity()["benchmark_identity_hash"]
+
+
+def test_benchmark_identity_captures_more_than_the_graph_fingerprint():
+    """The fingerprint identifies the GRAPH; it cannot identify the horizon, policy or sizing rule."""
+    base = _identity()
+    horizon_changed = _identity(horizon=4)
+    sizing_changed = _identity(exact_sizing={"N_min": 1000})
+    registry_changed = _identity(registry_protocol_hash="bbbb")
+    for label, other in (("horizon", horizon_changed), ("exact_sizing", sizing_changed),
+                         ("registry", registry_changed)):
+        assert other["graph_fingerprint"] == base["graph_fingerprint"], label
+        assert other["benchmark_identity_hash"] != base["benchmark_identity_hash"], (
+            f"changing {label} left the benchmark identity unchanged, so the identity is incomplete"
+        )
+
+
+def test_benchmark_identity_records_the_empty_state_policy_and_vocabulary():
+    identity = _identity()
+    assert identity["empty_state_policy"] == "included_as_distinguished_source"
+    assert identity["root_insertion_vocabulary"] == ["C"]
+    assert identity["canonicalizer_version"] == "canonical_state_key"
+    assert identity["operator_set"] == "ringcore_v1_compositional_cycle_ops"

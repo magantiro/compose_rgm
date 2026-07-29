@@ -208,6 +208,55 @@ def graph_fingerprint(graph: ReachableGraph) -> str:
     return digest.hexdigest()[:16]
 
 
+def benchmark_identity(
+    graph: ReachableGraph,
+    candidate: Candidate,
+    *,
+    registry_protocol_hash: str,
+    exact_sizing: dict[str, Any],
+    horizon: int | None,
+    implementation_commit: str | None = None,
+) -> dict[str, Any]:
+    """The composite scientific identity of an E6 benchmark.
+
+    The graph fingerprint identifies the enumerated GRAPH. It does not identify the policy that produced it,
+    the operator configuration, the horizon, or the probability law later assigned to its edges -- so the
+    fingerprint alone must not be cited as the identity of the experiment.
+
+    Likewise the registry's ``protocol_freeze.content_hash`` is a NARROW protocol-freeze hash covering the
+    frozen protocol block only. It legitimately stays unchanged when ``exact_sizing`` changes, which is
+    exactly why it must not be presented as the complete E6 identity either.
+    """
+    import hashlib  # noqa: PLC0415
+    import json  # noqa: PLC0415
+
+    sizing_hash = hashlib.sha256(
+        json.dumps(exact_sizing, sort_keys=True, separators=(",", ":"), default=str).encode()
+    ).hexdigest()[:16]
+    identity = {
+        "registry_protocol_content_hash": registry_protocol_hash,
+        "exact_sizing_hash": sizing_hash,
+        "graph_fingerprint": graph_fingerprint(graph),
+        "empty_state_policy": EMPTY_STATE_POLICY,
+        "empty_state_production_semantics": EMPTY_STATE_PRODUCTION_SEMANTICS,
+        "root_insertion_vocabulary": list(candidate.elements),
+        "declared_elements": list(candidate.elements),
+        "max_hydrogens": candidate.max_hydrogens,
+        "atom_slots": len(smiles_to_molecular_graph(candidate.seed_smiles).atom_types),
+        "horizon": horizon,
+        "executor_version": "de_novo_rewrite_system",
+        "canonicalizer_version": "canonical_state_key",
+        "operator_set": "ringcore_v1_compositional_cycle_ops",
+        "implementation_commit": implementation_commit,
+        "n_states": graph.n_states,
+        "n_edges": graph.n_edges,
+    }
+    identity["benchmark_identity_hash"] = hashlib.sha256(
+        json.dumps(identity, sort_keys=True, separators=(",", ":"), default=str).encode()
+    ).hexdigest()[:16]
+    return identity
+
+
 def build_reachable_graph(
     candidate: Candidate,
     *,

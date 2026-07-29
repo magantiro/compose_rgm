@@ -64,7 +64,7 @@
           "bond_insert": 89,
           "bond_reorder": 172
         },
-        "seconds": 0.326,
+        "seconds": 0.332,
         "states_with_multiple_distinct_parents": 50,
         "stop_reason": "closed"
       }
@@ -138,7 +138,7 @@
           "bond_insert": 624,
           "bond_reorder": 740
         },
-        "seconds": 1.997,
+        "seconds": 1.965,
         "states_with_multiple_distinct_parents": 195,
         "stop_reason": "closed"
       }
@@ -213,7 +213,7 @@
           "bond_insert": 4626,
           "bond_reorder": 4082
         },
-        "seconds": 14.538,
+        "seconds": 14.456,
         "states_with_multiple_distinct_parents": 964,
         "stop_reason": "closed"
       }
@@ -291,7 +291,7 @@
           "bond_insert": 35210,
           "bond_reorder": 24677
         },
-        "seconds": 111.983,
+        "seconds": 113.684,
         "states_with_multiple_distinct_parents": 5404,
         "stop_reason": "closed"
       }
@@ -366,7 +366,7 @@
           "bond_insert": 4626,
           "bond_reorder": 4082
         },
-        "seconds": 14.208,
+        "seconds": 14.124,
         "states_with_multiple_distinct_parents": 964,
         "stop_reason": "closed"
       }
@@ -442,13 +442,36 @@
           "bond_insert": 4958,
           "bond_reorder": 5092
         },
-        "seconds": 21.542,
+        "seconds": 21.389,
         "states_with_multiple_distinct_parents": 1698,
         "stop_reason": "closed"
       }
     }
   ],
-  "commit": "8977512",
+  "commit": "65c8660",
+  "e6_benchmark_identity": {
+    "atom_slots": 6,
+    "benchmark_identity_hash": "14dd572434ab0755",
+    "canonicalizer_version": "canonical_state_key",
+    "declared_elements": [
+      "C"
+    ],
+    "empty_state_policy": "included_as_distinguished_source",
+    "empty_state_production_semantics": "reversible_source",
+    "exact_sizing_hash": "9a7162ae28cf74e3",
+    "executor_version": "de_novo_rewrite_system",
+    "graph_fingerprint": "84121ff86cbc1ba8",
+    "horizon": null,
+    "implementation_commit": "65c8660",
+    "max_hydrogens": 3,
+    "n_edges": 14432,
+    "n_states": 967,
+    "operator_set": "ringcore_v1_compositional_cycle_ops",
+    "registry_protocol_content_hash": "b4cd905a640ab32a",
+    "root_insertion_vocabulary": [
+      "C"
+    ]
+  },
   "infeasible_reason": null,
   "measured_size_mechanism": "The reachable set is bounded by the seed's ATOM-SLOT COUNT: atom_insert fills a NULL slot and cannot extend the state array. Measured on cyclopropane, atom_insert fired 18 times without ever producing a 4-atom molecule. Slots are therefore the size dial.",
   "non_degeneracy_required": [
@@ -531,7 +554,7 @@
         "bond_insert": 4626,
         "bond_reorder": 4082
       },
-      "seconds": 14.538,
+      "seconds": 14.456,
       "states_with_multiple_distinct_parents": 964,
       "stop_reason": "closed"
     }

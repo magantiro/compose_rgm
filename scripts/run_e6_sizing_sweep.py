@@ -17,6 +17,8 @@ from pathlib import Path
 
 from compose_v4.experiments.enumerable_ringcore import (
     SizingInfeasible,
+    benchmark_identity,
+    build_reachable_graph,
     default_candidate_ladder,
     evaluate_candidate,
     select_candidate,
@@ -76,6 +78,19 @@ def main() -> int:
     commit = subprocess.run(
         ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True
     ).stdout.strip()
+    # Composite scientific identity of the selected benchmark. The graph fingerprint alone does not
+    # identify the policy, operator configuration, horizon or the probability law assigned later.
+    identity = None
+    if selection is not None:
+        chosen = next(c for c in default_candidate_ladder()
+                      if c.candidate_id == selection["candidate_id"])
+        graph = build_reachable_graph(chosen, state_cap=n_max + 1, edge_cap=e_max + 1,
+                                     deadline_seconds=arguments.deadline_seconds)
+        identity = benchmark_identity(
+            graph, chosen,
+            registry_protocol_hash=registry["protocol"]["protocol_freeze"]["content_hash"],
+            exact_sizing=sizing, horizon=chosen.horizon, implementation_commit=commit)
+        print(f"benchmark_identity_hash = {identity['benchmark_identity_hash']}", flush=True)
     payload = {
         "artifact": "e6_sizing_sweep",
         "commit": commit,
@@ -92,6 +107,7 @@ def main() -> int:
         "selection_independent_of_controller_performance": True,
         "candidates": reports,
         "selected": selection,
+        "e6_benchmark_identity": identity,
         "infeasible_reason": infeasible_reason,
     }
     output = Path(arguments.output)
