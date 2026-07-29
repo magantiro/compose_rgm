@@ -26,6 +26,14 @@ import json
 from pathlib import Path
 
 from compose_v4.data.packed_trace_store import manifest_path_for
+from compose_v4.data.provenance_overlay import (
+    BENCHMARK_CONTRACT,
+    SCIENTIFIC_TRAINING_CONTRACT,
+    ContractViolation,
+    check_contract,
+    effective_provenance,
+    load_overlay,
+)
 from compose_v4.experiments.hierarchical_sampler import (
     CYCLE_OPS,
     GENERAL_CORRUPTION,
@@ -66,12 +74,16 @@ def _layer_shards(root: Path, layer_dir: str) -> dict[str, list[dict]]:
             if not manifest_path.exists():
                 raise UnifiedManifestError(f"packed shard {shard} has no manifest")
             manifest = json.loads(manifest_path.read_text())
+            overlay = load_overlay(shard, manifest_path)
             rows.append({
                 "shard": str(shard.relative_to(root)),
                 "entries": int(manifest["entries"]),
                 "states": int(manifest["states"]),
                 "provenance": manifest.get("provenance", {}),
                 "sampler_contract": manifest.get("sampler_contract", {}),
+                # overlay-merged view: what the layer can actually prove about itself
+                "effective": effective_provenance(manifest, overlay),
+                "has_overlay": overlay is not None,
             })
         out[partition] = rows
     return out
@@ -138,6 +150,30 @@ def build(packed_root: Path, mmp_root: Path) -> dict:
         }
         for name, partitions in layers.items()
     }
+    # Contract level over the OVERLAY-MERGED provenance, so an overlay can lift a layer from
+    # BENCHMARK_CONTRACT to SCIENTIFIC_TRAINING_CONTRACT without the shard being rewritten.
+    # INTERSECTION, not union: a field counts for the layer only if EVERY shard proves it, with the same
+    # value. Unioning would let one tampered or overlay-less shard hide behind its siblings -- the layer
+    # would still look provable while part of the corpus was not.
+    effective_by_layer = {}
+    for name, partitions in layers.items():
+        shard_views = [row["effective"] for rows in partitions.values() for row in rows]
+        merged: dict = {}
+        if shard_views:
+            for key in set().union(*(view.keys() for view in shard_views)):
+                values = [view.get(key) for view in shard_views]
+                if all(v is not None and v == values[0] for v in values):
+                    merged[key] = values[0]
+        effective_by_layer[name] = merged
+
+    contract_levels = {}
+    for level in (BENCHMARK_CONTRACT, SCIENTIFIC_TRAINING_CONTRACT):
+        try:
+            check_contract(effective_by_layer, level=level)
+            contract_levels[level] = "PASS"
+        except ContractViolation as exc:
+            contract_levels[level] = f"FAIL: {exc}"
+
     digest = hashlib.sha256()
     for name in sorted(layers):
         for partition in PARTITIONS:
@@ -159,6 +195,12 @@ def build(packed_root: Path, mmp_root: Path) -> dict:
             "shards": sum(c[p]["shards"] for c in counts.values() for p in PARTITIONS),
         },
         "shared_contract": reference or {},
+        "contract_levels": contract_levels,
+        "effective_provenance_by_layer": effective_by_layer,
+        "overlays_present": {
+            name: sum(1 for rows in partitions.values() for r in rows if r["has_overlay"])
+            for name, partitions in layers.items()
+        },
         "source_completions": {
             "audit": {k: audit_complete.get(k) for k in
                       ("expected_shards", "totals", "authorization", "verify_fraction")},

@@ -113,3 +113,60 @@ def test_shard_without_manifest_is_refused(tmp_path):
     (mmp / "train" / "shard_0001.jsonl.gz").write_bytes(b"")
     with pytest.raises(UnifiedManifestError, match="has no manifest"):
         build(packed, mmp)
+
+
+def _with_overlay(shard_dir: Path, name: str, fields: dict):
+    """Write a VALID overlay next to a shard, as apply_provenance_overlays_app does."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(REPO / "src"))
+    from compose_v4.data.provenance_overlay import build_overlay, overlay_path_for
+
+    shard = shard_dir / name
+    manifest = shard_dir / (name.replace(".gz", "") + ".manifest.json")
+    overlay = build_overlay(shard, manifest, fields=fields, packer_commit="abc1234",
+                            certification={"replay_verified": True, "sentinel_entries_replayed": 4})
+    overlay_path_for(shard).write_text(json.dumps(overlay, indent=2, sort_keys=True))
+
+
+REPO = Path(__file__).resolve().parent.parent
+
+SCI = {
+    "codec_implementation_hash": "baaa75367f25a8c6",
+    "trace_schema_version": 2,
+    "packed_store_schema_version": 1,
+    "tensorization_implementation_hash": "7b0c88b166828f44",
+}
+
+
+def test_without_overlays_only_the_benchmark_contract_passes(tmp_path):
+    """The corpus as built: enough to time, not enough to publish."""
+    packed, mmp = _corpus(tmp_path, mmp_contract={**CONTRACT, **SCI})
+    manifest = build(packed, mmp)
+    assert manifest["contract_levels"]["BENCHMARK_CONTRACT"] == "PASS"
+    assert manifest["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"].startswith("FAIL")
+    assert manifest["overlays_present"]["general_corruption"] == 0
+
+
+def test_overlays_lift_the_corpus_to_the_scientific_contract(tmp_path):
+    """An overlay must be able to satisfy the scientific contract WITHOUT the shard being rewritten."""
+    packed, mmp = _corpus(tmp_path, mmp_contract={**CONTRACT, **SCI})
+    before = (packed / "corruption" / "train" / "shard_0000.jsonl.gz").read_bytes()
+    for layer in ("corruption", "cycle_ops"):
+        for partition in ("train", "validation", "test"):
+            _with_overlay(packed / layer / partition, "shard_0000.jsonl.gz", SCI)
+    manifest = build(packed, mmp)
+    assert manifest["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"] == "PASS"
+    assert manifest["overlays_present"]["general_corruption"] == 3
+    # the immutable shard must be untouched
+    assert (packed / "corruption" / "train" / "shard_0000.jsonl.gz").read_bytes() == before
+
+
+def test_a_tampered_shard_invalidates_its_overlay_and_drops_the_contract(tmp_path):
+    packed, mmp = _corpus(tmp_path, mmp_contract={**CONTRACT, **SCI})
+    for layer in ("corruption", "cycle_ops"):
+        for partition in ("train", "validation", "test"):
+            _with_overlay(packed / layer / partition, "shard_0000.jsonl.gz", SCI)
+    assert build(packed, mmp)["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"] == "PASS"
+    (packed / "corruption" / "train" / "shard_0000.jsonl.gz").write_bytes(b"tampered")
+    assert build(packed, mmp)["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"].startswith("FAIL")
