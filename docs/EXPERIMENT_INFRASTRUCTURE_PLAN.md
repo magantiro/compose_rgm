@@ -121,20 +121,27 @@ PHASE A0  (freeze first, no model output inspected)
   A0.8 exact-sizing policy, preregistered (§4)
   A0.9 task-generation algorithm + config hash (consumed by A3)
         │
+        v
+A1.0  FREEZE THE SHARED KERNEL PROTOCOL          <-- gates BOTH branches below
+      CanonicalSuccessorKernel: the single definition of the molecular process.
+      A2 may proceed in parallel ONLY against this contract, never around it.
+        │
         ├─────────────────────────────────────────────┐
         v                                             v
 PHASE A1  shared kernel infrastructure          PHASE A2  exact control
   A1.1 evaluator skeleton, provenance,            A2.1 sizing sweep (uses A0.8)
        versioned schema, contract validation      A2.2 K-step reachable graph
-  A1.2 enumeration + canonical aggregation        A2.3 exact finite-horizon solver
-  A1.3 CLI + registry-driven metrics              A2.4 independent DP-vs-path check
-  A1.4 single-evaluator enforcement test          A2.5 support theorem tests (§2.2)
-  A1.5 uniform canonical-successor baseline       A2.6 tilts
-  A1.6 development task generator (A0.9)          A2.7 controller arms vs exact optimum
+  A1.2 PRODUCTION implementation of the           A2.3 exact finite-horizon solver
+       protocol: enumeration + canonical          A2.4 independent DP-vs-path check
+       aggregation                                A2.5 support theorem tests (§2.2)
+  A1.3 CLI + registry-driven metrics              A2.6 tilts
+  A1.4 single-evaluator enforcement test          A2.7 controller arms vs exact optimum
+  A1.5 uniform canonical-successor baseline            │
+       (a PROBABILITY WRAPPER over the protocol,       ├── A4.6 quotient check 6
+        not a second enumeration)                      └── A4.7 mark-level counterexample
+  A1.6 development task generator (A0.9)               │
   A1.7 quotient checks 1-5                             │
-        │                                              ├── A4.6 quotient check 6
-        │                                              └── A4.7 mark-level counterexample
-        v                                              v
+        │                                              v
 PHASE B  controller system
   B1   same-base controller interface (+ compute accounting)
   B1.5 learned value/controller training pipeline (§5)   <-- needs A2 for calibration
@@ -159,8 +166,18 @@ PARALLEL LANE (starts now, own gates)          PHASE F  artifacts
   L6 de-novo gate -> training -> E1
 ```
 
-**Critical-path note.** A0 gates everything that produces numbers. A2 no longer waits on A1 (it needs a
-kernel, not *the* kernel), so A1 and A2 proceed in parallel. B1.5 needs A2 for its calibration target.
+**Critical-path note.** A0 gates everything that produces numbers. B1.5 needs A2 for its calibration target.
+
+**Parallelism correction (owner review).** v2 originally said A2 "needs a kernel, not *the* kernel." That
+phrasing was loose and would have licensed exactly the duplication this plan exists to prevent. The rule is:
+
+> A2 may proceed in parallel **only against the frozen `CanonicalSuccessorKernel` protocol (A1.0)**, testing
+> against a fixture implementation of it. A2 must **not** independently implement legal mark enumeration,
+> canonicalization, mark-to-successor aggregation, capability resolution, or slot masking. When A1.2 lands,
+> the production evaluator supplies the implementation and A2 switches to it with no change to A2's code.
+
+Same rule for A1.5: the uniform baseline is a *probability wrapper* over the protocol, not a second
+enumeration. Enforced by A1.4's scan test.
 
 ---
 
@@ -176,12 +193,35 @@ per-depth layer sizes and branching factors. Not the full bounded molecular spac
 **Operator set.** RingCore-V1: compositional `cycle_close`/`cycle_open` (executor `bond_insert`/`bond_delete`,
 scored as families `cycle_insert`/`cycle_attach`); `ring_system_grow` macro **disabled**.
 
-**Acceptance window.** `N_min = 500 ≤ |S_K| ≤ N_max = 20,000` states, with a hard memory cap; per-budget
-transition operators stored sparsely.
+**Acceptance window (owner-approved).** State count alone is *not* a sufficient tractability criterion — a
+20,000-state graph with enormous branching is harder than a larger sparse one — so the window bounds both
+states and edges:
 
-**Selection rule (preregistered).** Choose the **smallest** candidate satisfying the window **and** containing
-at least one atom-birth/death transition **and** at least one cycle transition **and** at least one
-same-cardinality transition. Ties broken by smaller `|S_K|`, then lexicographically by candidate id.
+```yaml
+exact_sizing:
+  N_min: 500          # large enough not to be a hand-written toy
+  N_max: 20000        # sparse exact DP stays manageable
+  E_max: 2000000      # max distinct canonical DIRECTED edges in the reachable graph
+  selection: smallest_qualifying_candidate
+```
+
+Per-budget transition operators stored sparsely, under a hard memory cap.
+
+**Non-degeneracy conditions (all required).** A qualifying candidate must contain:
+1. at least one atom-**birth** transition;
+2. at least one atom-**death** transition;
+3. at least one **cycle-changing** transition;
+4. at least **two distinct atom counts** represented;
+5. at least **two distinct cycle-rank values** represented;
+6. **at least one terminal event reachable by multiple distinct molecular paths.**
+
+Condition 6 is load-bearing for the control comparison: with a single route to each target, several controllers
+become indistinguishable and the panel would measure nothing.
+
+**Selection rule (preregistered).** Choose the **smallest** candidate satisfying the state window, the edge
+cap, and all six non-degeneracy conditions. Ties broken by smaller `|S_K|`, then by smaller edge count, then
+lexicographically by candidate id. Rationale for "smallest": for the exact panel, computational exactness and
+auditability matter more than chemical realism — the full-scale experiments supply the realism.
 
 **Shrinking sequence**, applied in this order until the window is met:
 1. lower heavy-atom cap; 2. lower edit budget K; 3. restrict element vocabulary; 4. simpler source molecule.
@@ -213,8 +253,26 @@ Base kernel `P_θ` is the **frozen** editing prior; the controller never fine-tu
 Selection between them is made on controller-validation calibration and backward-residual, not on test tasks.
 
 ### 5.3 Architecture, loss, data
-- Reuse the frozen model's graph encoder; condition on `(b, z, m, x_src)`. Value head trained; encoder frozen
-  or lightly adapted — declared before training, not chosen post hoc.
+
+**Encoder policy (owner decision): `frozen_base_with_trainable_adapter`.** The molecular encoder from the
+selected editing prior stays **frozen**:
+
+```
+e_x = E_θ(x),   e_s = E_θ(x_src)          E_θ frozen
+h_φ = H_φ(e_x, e_s, e_x - e_s, b, z, m)   H_φ trained
+```
+
+Trained components only: remaining-budget embedding · objective/preference embedding · protected-mask /
+constraint embedding · source-vs-current comparison module · a small residual adapter · the value head.
+
+Why this is the primary configuration: the base successor kernel stays genuinely fixed across controllers, so
+learned control cannot improve by silently altering the molecular prior; exact-vs-learned discrepancies are
+attributable to *value approximation* rather than a changed process; and it reduces overfitting to a small
+rollout-value dataset. Goal, budget and source information still enter through trainable modules.
+
+**Secondary ablation only:** `copied_encoder_top_block_adaptation` — a separately copied, lightly adapted
+encoder. It must **never write back into the base generator**. Report whether adaptation improves value
+calibration, but the frozen-encoder controller remains the main same-base causal test.
 - Regression in log-desirability with an explicit non-negativity/positivity treatment, since `h=0` is exactly
   the support-pruning case in §2.2 and must be representable.
 - **Three disjoint splits:** controller-train goals/sources · controller-validation goals/sources · final test
@@ -248,7 +306,7 @@ One to three preregistered primary metrics per experiment; everything else is a 
 
 | Exp | Primary (load-bearing) | Secondary / diagnostic |
 |---|---|---|
-| **E1** unconditional *(proposed — needs owner confirmation)* | all-step validity; FCD; coverage (precision/recall) | endpoint validity, connectedness, uniqueness, novelty, internal diversity, scaffold novelty, size/property + ring/topology distributions, nearest-neighbour & memorization, throughput |
+| **E1** unconditional *(owner-decided)* | `frechet_chemnet_distance`; `held_out_chemical_space_recall`; `ring_topology_distribution_distance` | novelty, internal diversity, nearest-neighbour similarity, memorization rate, size + physicochemical distributions, throughput, scaffold novelty, precision |
 | **E2** learned transport | held-out canonical-successor NLL; target/analogue recovery **at matched edit budget**; path overhead vs shortest/compiler path | reversals, repeated states, net vs gross displacement, endpoint fidelity, diversity |
 | **E3** cardinality adaptation | target atom-count success; edits/oracle calls to success; retained source similarity | overshoot/correction, steps to enter interval, validity, connectedness, per-step cardinality trace |
 | **E4** topology adaptation | target topology success; valid-path rate; edit efficiency | cycle rank, ring-system count, ring-size distribution, ring-op utilization, unnecessary open/close, final property/similarity |
@@ -256,7 +314,31 @@ One to three preregistered primary metrics per experiment; everything else is a 
 | **E6** exact control | terminal-law TV to the analytic target | support-subset conformance, per-arm regret vs exact optimum, backward-value residual |
 | **E7** multi-objective / dynamic | normalized hypervolume; **HV-AUC versus all oracle calls** | IGD+, feasible count, source similarity, diversity, held-out evaluator performance, adaptation regret, prefix reuse |
 
-E1's primaries are my proposal — the review did not specify them; flagged for confirmation.
+### 6.1 E1 specification (owner-decided, expanded)
+
+**Three primary metrics, no more.**
+
+1. **FCD against the held-out test distribution** — the primary global distribution-fidelity measure.
+   Protocol: 10,000 molecules per seed · five fixed seeds · compared against a fixed held-out test sample of
+   **equal size** · report mean, standard deviation **and every individual seed** · identical sample count for
+   every baseline.
+2. **Held-out chemical-space recall / coverage** — distinguishes genuine coverage from a narrow high-precision
+   mode. **One frozen implementation** (recall/coverage in ChemNet or another declared molecular embedding);
+   the definition may not be switched after results arrive.
+3. **Ring/topology distribution distance** — required because RingCore is a defining architectural
+   contribution, so unconditional generation must reproduce real topological diversity. Frozen topology vector:
+   cycle rank · ring-system count · ring-size histogram · fused-ring incidence · spiro incidence · bridged
+   incidence (where representable) · aromatic vs non-aromatic ring fractions. Preregistered aggregate: mean
+   Jensen–Shannon divergence across categorical features **plus** Wasserstein distance for ordered count
+   variables.
+
+**Hard gates — required but NOT headline metrics** (a new tier this plan did not previously have):
+endpoint validity · all-step validity · connectedness · uniqueness · basic sanitization success.
+These must pass, but validity is largely guaranteed by the executor, so headlining it would undersell the
+paper. Recorded as gates, reported as gates.
+
+**Secondary diagnostics:** novelty · internal diversity · nearest-neighbour similarity · memorization rate ·
+molecular-size distribution · physicochemical-property distributions · throughput · scaffold novelty · precision.
 
 ### 6.2 Semantic panel IDs (no hard-coded figure numbers)
 `GEN_UNCONDITIONAL` · `TRANSPORT_LEARNED_VS_UNIFORM` · `CARDINALITY_ADAPTATION` ·
@@ -288,7 +370,14 @@ protocol:                       # extended
   protocol_freeze:              # A0
     frozen_at_commit: <sha>
     content_hash: <hash of the frozen protocol block>
-    highest_existing_snapshot_step: <int>     # 0 = frozen before any checkpoint
+    # Provenance ONLY. Record the ACTUAL highest snapshot at freeze time -- the run is past step 1500, so
+    # writing 0 here would be false. The structural guarantee does not depend on this number:
+    #   "No checkpoint outputs or rollout results were inspected in selecting tasks, thresholds,
+    #    objectives or reference points."
+    # Enforced by construction: the task builder accepts NO checkpoint argument at all.
+    highest_existing_snapshot_step: <int, measured at freeze>
+  hard_gates:                   # E1 tier: required, never headline (§6.1)
+    [endpoint_validity, all_step_validity, connectedness, uniqueness, sanitization_success]
   objectives:                   # A0.1
     - {id, definition, oracle_id, oracle_version, normalization_bounds, direction}
   multi_objective:              # A0.3
@@ -353,10 +442,11 @@ fail on a v1 registry rather than silently misread it.
 
 | # | Piece | Phase | Gate |
 |---|---|---|---|
-| 1 | A0.1–A0.9 protocol freeze + registry v2 | A0 | **[now]**, blocks all numbers |
-| 2 | A1.1 evaluator skeleton, provenance, versioned schema, contract validation | A1 | **[now]** |
-| 3 | A2.1 sizing sweep under the preregistered policy | A2 | **[now]**, parallel with 2 |
-| 4 | A1.2 enumeration + canonical aggregation | A1 | needs 2 |
+| **0** | **A1.0 freeze the `CanonicalSuccessorKernel` protocol + fixture + duplication test** | A1 | **[now]**, required by owner review before piece 1 |
+| 1 | A0.1–A0.9 protocol freeze + registry v2 | A0 | needs 0; blocks all numbers |
+| 2 | A1.1 evaluator skeleton, provenance, versioned schema, contract validation | A1 | needs 0 |
+| 3 | A2.1 sizing sweep under the preregistered policy | A2 | needs 0; parallel with 2 |
+| 4 | A1.2 production implementation of the protocol (enumeration + canonical aggregation) | A1 | needs 2 |
 | 5 | A2.2–A2.3 K-step graph + exact solver on a fixed kernel | A2 | needs 3 |
 | 6 | A1.3–A1.4 CLI, registry-driven metrics, single-evaluator enforcement | A1 | needs 4 |
 | 7 | A2.4–A2.5 independent DP-vs-path check + support theorem tests | A2 | needs 5 |
@@ -378,10 +468,33 @@ De-novo lane (L) runs in its own worktree concurrently with 1–18 and never blo
 
 ---
 
-## 9. Open questions
+## 9. Owner decisions — RESOLVED, now preregistered
 
-1. **E1 primary metrics** (§6) are my proposal — confirm or replace.
-2. **`N_min=500`, `N_max=20,000`** (§4) are my proposed window; they are preregistered only once you accept
-   them, since changing them after seeing sizing results would defeat the purpose.
-3. **Encoder freezing for the value head** (§5.3) must be declared before training — frozen encoder, or light
-   adaptation?
+```yaml
+E1_primary_metrics:                       # §6.1
+  - frechet_chemnet_distance              # 10k mols x 5 seeds vs equal-size held-out sample
+  - held_out_chemical_space_recall        # one frozen implementation, never re-defined post hoc
+  - ring_topology_distribution_distance   # frozen topology vector, mean JSD + Wasserstein
+
+exact_graph:                              # §4
+  N_min: 500
+  N_max: 20000
+  E_max: 2000000                          # distinct canonical directed edges
+  selection: smallest_qualifying_candidate
+  non_degeneracy: [atom_birth, atom_death, cycle_change, two_atom_counts,
+                   two_cycle_ranks, multi_path_terminal_event]
+
+learned_controller:                       # §5.3
+  encoder_policy: frozen_base_with_trainable_adapter
+  secondary_ablation: copied_encoder_top_block_adaptation   # never writes back to the base
+```
+
+These are frozen as of this commit. Changing any of them after a corresponding result is inspected would
+defeat the purpose of A0, so revisions must be recorded as an explicit contract update with a reason — the same
+discipline applied to the scheduler hash supersession.
+
+## 10. Remaining open item
+
+**Nothing blocking.** One judgement call is deferred to its own piece rather than guessed now: the exact
+`held_out_chemical_space_recall` implementation must be *named and frozen* during A0.1 (candidate: ChemNet
+embedding recall). It is listed as a decision inside A0, not left implicit.
