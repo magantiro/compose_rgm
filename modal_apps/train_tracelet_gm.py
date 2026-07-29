@@ -712,6 +712,7 @@ def _run_remote(
     packed_corpus: str | None = None,
     packed_mmp_corpus: str | None = None,
     unified_packed_manifest: str | None = None,
+    representability_overlay: str | None = None,
     require_scientific_contract: bool = False,
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
@@ -806,6 +807,8 @@ def _run_remote(
             recipe["arguments"]["packed_mmp_corpus"] = packed_mmp_corpus or ""
         if unified_packed_manifest:
             recipe["arguments"]["unified_packed_manifest"] = unified_packed_manifest
+        if representability_overlay:
+            recipe["arguments"]["representability_overlay"] = representability_overlay
         if require_scientific_contract:
             recipe["arguments"]["require_scientific_contract"] = True
     if benchmark_steps:
@@ -1521,6 +1524,7 @@ def dry_launch_stage(
     packed_corpus: str = "",
     packed_mmp_corpus: str = "",
     unified_packed_manifest: str = "",
+    representability_overlay: str = "",
     require_scientific_contract: bool = False,
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
@@ -1650,6 +1654,7 @@ def train_stage(
     packed_corpus: str = "",
     packed_mmp_corpus: str = "",
     unified_packed_manifest: str = "",
+    representability_overlay: str = "",
     require_scientific_contract: bool = False,
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
@@ -1688,6 +1693,7 @@ def train_stage(
         packed_corpus=packed_corpus or None,
         packed_mmp_corpus=packed_mmp_corpus or None,
         unified_packed_manifest=unified_packed_manifest or None,
+        representability_overlay=representability_overlay or None,
         require_scientific_contract=require_scientific_contract,
         benchmark_steps=benchmark_steps,
         benchmark_warmup=benchmark_warmup,
@@ -2528,6 +2534,7 @@ def main(
     packed_corpus: str = "",
     packed_mmp_corpus: str = "",
     unified_packed_manifest: str = "",
+    representability_overlay: str = "",
     require_scientific_contract: bool = False,
     benchmark_steps: int = 0,
     benchmark_warmup: int = 30,
@@ -2838,6 +2845,7 @@ def main(
             packed_corpus=packed_corpus,
             packed_mmp_corpus=packed_mmp_corpus,
             unified_packed_manifest=unified_packed_manifest,
+            representability_overlay=representability_overlay,
             require_scientific_contract=require_scientific_contract,
             benchmark_steps=benchmark_steps,
             benchmark_warmup=benchmark_warmup,

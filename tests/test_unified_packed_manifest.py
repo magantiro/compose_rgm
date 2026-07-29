@@ -170,3 +170,56 @@ def test_a_tampered_shard_invalidates_its_overlay_and_drops_the_contract(tmp_pat
     assert build(packed, mmp)["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"] == "PASS"
     (packed / "corruption" / "train" / "shard_0000.jsonl.gz").write_bytes(b"tampered")
     assert build(packed, mmp)["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"].startswith("FAIL")
+
+
+def _overlay_file(tmp_path, exclusions=(), counts=None):
+    tmp_path = Path(tmp_path)
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    import sys as _sys
+
+    _sys.path.insert(0, str(REPO / "src"))
+    from compose_v4.data.representability_overlay import build_overlay as _bo
+
+    overlay = _bo(list(exclusions), counts=counts or {"general_corruption": {"accepted": 5}},
+                  enumerator_hash="enum1", packed_manifest_hashes={})
+    path = tmp_path / "REPRESENTABILITY_OVERLAY.json"
+    path.write_text(json.dumps(overlay))
+    return path, overlay
+
+
+def test_manifest_carries_the_overlay_and_effective_counts(tmp_path):
+    packed, mmp = _corpus(tmp_path, mmp_contract={**CONTRACT, **SCI})
+    path, overlay = _overlay_file(
+        tmp_path,
+        exclusions=[{"layer": "general_corruption", "partition": "train", "trace_key": "t1"}],
+        counts={"general_corruption": {"checked": 5, "accepted": 4, "excluded": 1}},
+    )
+    manifest = build(packed, mmp, path)
+    assert manifest["representability_overlay"]["exclusions"] == 1
+    assert manifest["representability_overlay"]["effective_corpus_checksum"] == (
+        overlay["effective_corpus_checksum"]
+    )
+    assert manifest["effective_counts"] == {"general_corruption": 4}
+
+
+def test_manifest_identity_changes_with_the_effective_corpus(tmp_path):
+    """A different effective corpus must NOT reuse the pre-overlay manifest checksum."""
+    packed, mmp = _corpus(tmp_path, mmp_contract={**CONTRACT, **SCI})
+    without = build(packed, mmp)["manifest_checksum"]
+
+    path_a, _ = _overlay_file(tmp_path / "a", exclusions=[
+        {"layer": "general_corruption", "partition": "train", "trace_key": "t1"}])
+    path_b, _ = _overlay_file(tmp_path / "b", exclusions=[
+        {"layer": "general_corruption", "partition": "train", "trace_key": "t2"}])
+    with_a = build(packed, mmp, path_a)["manifest_checksum"]
+    with_b = build(packed, mmp, path_b)["manifest_checksum"]
+
+    assert with_a != without, "manifest identity must move once an overlay applies"
+    assert with_a != with_b, "different exclusions must give different manifest identities"
+
+
+def test_manifest_without_overlay_reports_none(tmp_path):
+    packed, mmp = _corpus(tmp_path, mmp_contract={**CONTRACT, **SCI})
+    manifest = build(packed, mmp)
+    assert manifest["representability_overlay"] is None
+    assert manifest["effective_counts"] is None

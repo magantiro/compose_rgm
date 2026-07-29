@@ -98,8 +98,16 @@ def _require_complete(marker: Path, key: str) -> dict:
     return payload
 
 
-def build(packed_root: Path, mmp_root: Path) -> dict:
+def build(packed_root: Path, mmp_root: Path, overlay_path: Path | None = None) -> dict:
     packed_root, mmp_root = Path(packed_root), Path(mmp_root)
+    # The representability overlay changes the EFFECTIVE corpus, so the manifest must carry it and derive
+    # a distinct identity. Reusing the pre-overlay checksum would claim a corpus that is not being trained
+    # on -- the exact dishonesty the overlay exists to prevent.
+    representability = None
+    if overlay_path is not None:
+        from compose_v4.data.representability_overlay import load_overlay as _load_representability
+
+        representability = _load_representability(Path(overlay_path))
     audit_complete = _require_complete(packed_root / "PACK_COMPLETE.json", "PACK_COMPLETE")
     mmp_complete = _require_complete(mmp_root / "MMP_PACK_COMPLETE.json", "MMP_PACK_COMPLETE")
 
@@ -175,6 +183,9 @@ def build(packed_root: Path, mmp_root: Path) -> dict:
             contract_levels[level] = f"FAIL: {exc}"
 
     digest = hashlib.sha256()
+    if representability is not None:
+        digest.update(representability["effective_corpus_checksum"].encode())
+        digest.update(representability["filter_implementation_hash"].encode())
     for name in sorted(layers):
         for partition in PARTITIONS:
             for row in layers[name][partition]:
@@ -194,6 +205,21 @@ def build(packed_root: Path, mmp_root: Path) -> dict:
             "states": sum(c[p]["states"] for c in counts.values() for p in PARTITIONS),
             "shards": sum(c[p]["shards"] for c in counts.values() for p in PARTITIONS),
         },
+        "representability_overlay": (
+            None if representability is None else {
+                "representability_filter": representability["representability_filter"],
+                "filter_implementation_hash": representability["filter_implementation_hash"],
+                "candidate_enumerator_hash": representability["candidate_enumerator_hash"],
+                "effective_corpus_checksum": representability["effective_corpus_checksum"],
+                "exclusions": len(representability["exclusions"]),
+                "counts": representability["counts"],
+            }
+        ),
+        "effective_counts": (
+            None if representability is None else {
+                layer: values["accepted"] for layer, values in representability["counts"].items()
+            }
+        ),
         "shared_contract": reference or {},
         "contract_levels": contract_levels,
         "effective_provenance_by_layer": effective_by_layer,
@@ -217,10 +243,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--packed-root", required=True)
     parser.add_argument("--mmp-root", required=True)
+    parser.add_argument("--overlay", default=None,
+                        help="REPRESENTABILITY_OVERLAY.json; folds the effective corpus into "
+                             "the manifest identity")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
-    manifest = build(Path(args.packed_root), Path(args.mmp_root))
+    manifest = build(Path(args.packed_root), Path(args.mmp_root),
+                     Path(args.overlay) if args.overlay else None)
     Path(args.out).write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     print(json.dumps({k: manifest[k] for k in ("totals", "manifest_checksum", "layer_weights")},
                      indent=2, sort_keys=True))

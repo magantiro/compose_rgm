@@ -475,11 +475,28 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
         )
     root = Path(args.precompiled_corpus)
     contract = json.loads((root / "BUILD_COMPLETE.json").read_text()).get("contract", {})
+    overlay = None
+    if args.representability_overlay:
+        from compose_v4.data.representability_overlay import load_overlay as _load_overlay
+
+        overlay = _load_overlay(Path(args.representability_overlay))
+        print(
+            json.dumps({"phase": "REPRESENTABILITY_OVERLAY_LOADED",
+                        "path": args.representability_overlay,
+                        "filter": overlay["representability_filter"],
+                        "filter_implementation_hash": overlay["filter_implementation_hash"],
+                        "candidate_enumerator_hash": overlay["candidate_enumerator_hash"],
+                        "effective_corpus_checksum": overlay["effective_corpus_checksum"],
+                        "exclusions": len(overlay["exclusions"]),
+                        "counts": overlay["counts"]}, sort_keys=True),
+            flush=True,
+        )
     corpus = load_production_edit_corpus(
         root,
         mmp_pool_path=Path(args.precompiled_mmp_pool),
         packed_root=(Path(args.packed_corpus) if args.packed_corpus else None),
         packed_mmp_root=(Path(args.packed_mmp_corpus) if args.packed_mmp_corpus else None),
+        representability_overlay=overlay,
         require_packed_mmp=bool(args.packed_corpus),
         partition=partition,
         layer_weights=PRODUCTION_LAYER_WEIGHTS,
@@ -488,6 +505,11 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
         checkpoint_interval=args.path_checkpoint_interval,
         seed=seed,
     )
+    if args.require_scientific_contract and not args.representability_overlay:
+        raise SystemExit(
+            "--require-scientific-contract needs --representability-overlay: exclusions must come from a "
+            "frozen census, never from an open-ended runtime rule"
+        )
     if args.require_scientific_contract:
         if not args.unified_packed_manifest:
             raise SystemExit(
@@ -1585,6 +1607,14 @@ def main() -> None:
         "corruption/cycle/analogue builders entirely: records come from the validated artifact, the "
         "explicit three-layer sampler drives the mixture, and every contract hash is verified before any "
         "GPU work. Mutually exclusive with --corrupted-prior-count/--analogue-trace-count sizing.",
+    )
+    parser.add_argument(
+        "--representability-overlay",
+        type=str,
+        default=None,
+        help="frozen REPRESENTABILITY_OVERLAY.json. The loader may omit ONLY traces this overlay lists; "
+        "any other unsupported teacher raises. Required with --require-scientific-contract, because "
+        "without it the effective corpus is not the one the manifest describes.",
     )
     parser.add_argument(
         "--unified-packed-manifest",

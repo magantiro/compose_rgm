@@ -284,3 +284,43 @@ def test_recipe_chain_carries_the_scientific_contract_flags():
     )
     bad = [ln for ln in (result.stderr or "").splitlines() if "unrecognized" in ln or "invalid" in ln]
     assert not bad, bad
+
+
+def test_scientific_contract_requires_a_frozen_overlay():
+    """Exclusions must come from a frozen census, never an open-ended runtime rule."""
+    source = GATE.read_text()
+    assert "--representability-overlay" in source
+    assert "needs --representability-overlay" in source
+    assert "never from an open-ended runtime rule" in source
+
+
+def test_overlay_is_loaded_and_reported_then_handed_to_the_loader():
+    source = GATE.read_text()
+    assert '"phase": "REPRESENTABILITY_OVERLAY_LOADED"' in source
+    assert "representability_overlay=overlay," in source
+
+
+def test_recipe_chain_carries_the_overlay_flag():
+    import subprocess
+    import sys as _sys
+
+    _sys.path.insert(0, str(REPO / "src"))
+    from compose_v4.experiments.recipe import build_tracelet_recipe_argv
+
+    argv = build_tracelet_recipe_argv(
+        {"arguments": {
+            "precompiled_corpus": "/artifacts/edit_precompile_v1",
+            "packed_corpus": "/artifacts/edit_packed_v1",
+            "packed_mmp_corpus": "/artifacts/mmp_packed_v1",
+            "unified_packed_manifest": "/artifacts/UNIFIED_PACKED_MANIFEST.json",
+            "representability_overlay": "/artifacts/REPRESENTABILITY_OVERLAY.json",
+            "require_scientific_contract": True,
+        }},
+        smiles_file=Path("/g/x.smiles"),
+    )
+    assert "--representability-overlay" in argv
+    result = subprocess.run(
+        [_sys.executable, str(GATE), *argv, "--help"], capture_output=True, text=True
+    )
+    bad = [ln for ln in (result.stderr or "").splitlines() if "unrecognized" in ln or "invalid" in ln]
+    assert not bad, bad
