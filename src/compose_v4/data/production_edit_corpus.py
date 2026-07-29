@@ -27,6 +27,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from compose_v4.data.packed_trace_store import read_packed_shard
+from compose_v4.data.representability_overlay import (
+    check_unlisted,
+    excluded_keys,
+    trace_key,
+)
 from compose_v4.data.scaffold_partition import (
     DEFAULT_RATIOS,
     SCAFFOLD_KEY_ALGORITHM,
@@ -64,27 +69,6 @@ _CONTRACT_KEYS = (
     "scope_hash",
     "trace_schema_version",
 )
-
-
-def trace_is_representable(trace) -> bool:
-    """Can every teacher step of this trace be SCORED by the factorized model?
-
-    ``_teacher_action_score`` scores an ``AtomInsert`` through the grow heads: ``grow_root`` for a
-    rootless insert and ``grow_connected`` for exactly ONE existing neighbor. An insert with two or more
-    neighbours -- the inverse of deleting a BRIDGING atom -- has no head to score it and raises
-    ``ValueError: factorized grow supports one existing neighbor`` mid-training.
-
-    Measured incidence in the packed corruption layer: 1 in 12,296 records (0.008%), so roughly 6 of
-    74,949 -- rare enough that the 200-source in-memory corruption never contained one, and certain to be
-    drawn over a million-draw run. This mirrors the existing ``trace_teachers_representable`` policy for
-    ring/graft steps: a teacher must lie in the dense mask that scores it, and traces that do not are
-    dropped and COUNTED rather than crashing the run.
-    """
-    for step in trace.steps:
-        neighbors = getattr(step.action, "neighbors", None)
-        if neighbors is not None and len(neighbors) > 1:
-            return False
-    return True
 
 
 class ProductionCorpusError(RuntimeError):
@@ -202,6 +186,7 @@ def load_shard_layer_records(
     packed_root: Path | None = None,
     verify_fraction: float = 0.0,
     declared_names: dict | None = None,
+    representability_overlay: dict | None = None,
 ) -> tuple[PathRecord, ...]:
     """Rebuild every trace of one precompiled (layer, partition) into a GM ``PathRecord``.
 
@@ -228,19 +213,25 @@ def load_shard_layer_records(
                 f"missing {sorted(audit_names - packed_names)}, "
                 f"unexpected {sorted(packed_names - audit_names)}"
             )
-        dropped = 0
+        # Exclusions come ONLY from the frozen overlay. An unsupported teacher that is not listed
+        # raises -- production support changed, so the corpus is no longer what the manifest claims.
+        allowed = (
+            excluded_keys(representability_overlay, shard_layer, partition)
+            if representability_overlay else set()
+        )
+        excluded = 0
         for path in packed_paths:
             for trace, packed_path in read_packed_shard(path, verify_fraction=verify_fraction):
-                if not trace_is_representable(trace):
-                    dropped += 1
+                if check_unlisted(trace, trace_key(trace), allowed,
+                                  layer=shard_layer, partition=partition):
+                    excluded += 1
                     continue
                 records.append(PathRecord(canonical_state_key(trace.target), packed_path))
-        if dropped:
+        if excluded:
             print(
-                json.dumps({"phase": "unrepresentable_traces_dropped", "layer": shard_layer,
-                            "partition": partition, "dropped": dropped,
-                            "reason": "atom_insert with >1 neighbor has no factorized grow head"},
-                           sort_keys=True),
+                json.dumps({"phase": "representability_exclusions_applied", "layer": shard_layer,
+                            "partition": partition, "excluded": excluded,
+                            "listed_in_overlay": len(allowed)}, sort_keys=True),
                 flush=True,
             )
         return tuple(records)
@@ -322,6 +313,7 @@ def load_production_edit_corpus(
     checkpoint_interval: int | None = None,
     packed_root: Path | None = None,
     packed_mmp_root: Path | None = None,
+    representability_overlay: dict | None = None,
     verify_fraction: float = 0.0,
     require_packed_mmp: bool = True,
     seed: int = 0,
@@ -336,7 +328,7 @@ def load_production_edit_corpus(
         by_layer[production_layer] = load_shard_layer_records(
             root, shard_layer, partition, checkpoint_interval=checkpoint_interval,
             packed_root=packed_root, verify_fraction=verify_fraction,
-            declared_names=declared_names,
+            declared_names=declared_names, representability_overlay=representability_overlay,
         )
     # The MMP store is built by its own app and normally lives at its own root; fall back to a
     # subdirectory of the packed root only if no explicit root was given.
@@ -349,13 +341,23 @@ def load_production_edit_corpus(
     if packed_mmp is not None and packed_mmp.is_dir():
         # PRODUCTION PATH: packed MMP. Loading the raw pool cost 13.74 ms/row scanned -> 83 min per
         # partition, and it was rescanned once per partition. Packed shards are already partitioned.
-        mmp_records = tuple(
-            PathRecord(canonical_state_key(trace.target), packed_path)
-            for shard in _shard_paths(packed_mmp, "", partition)
-            for trace, packed_path in read_packed_shard(shard, verify_fraction=verify_fraction)
+        mmp_allowed = (
+            excluded_keys(representability_overlay, "mmp_analogue", partition)
+            if representability_overlay else set()
         )
-        mmp_stats = {"source": "packed", "kept": len(mmp_records), "scanned": len(mmp_records),
-                     "other_partition": 0, "unassignable": 0, "unbuildable": 0}
+        mmp_list, mmp_excluded = [], 0
+        for shard in _shard_paths(packed_mmp, "", partition):
+            for trace, packed_path in read_packed_shard(shard, verify_fraction=verify_fraction):
+                if check_unlisted(trace, trace_key(trace), mmp_allowed,
+                                  layer="mmp_analogue", partition=partition):
+                    mmp_excluded += 1
+                    continue
+                mmp_list.append(PathRecord(canonical_state_key(trace.target), packed_path))
+        mmp_records = tuple(mmp_list)
+        mmp_stats = {"source": "packed", "kept": len(mmp_records),
+                     "scanned": len(mmp_records) + mmp_excluded, "other_partition": 0,
+                     "unassignable": 0, "unbuildable": 0,
+                     "representability_excluded": mmp_excluded}
     elif require_packed_mmp:
         raise ProductionCorpusError(
             f"packed MMP layer missing at {packed_mmp}; refusing to fall back to the raw pool "
