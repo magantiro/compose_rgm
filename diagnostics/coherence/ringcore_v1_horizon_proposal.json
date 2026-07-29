@@ -1,0 +1,83 @@
+{
+  "alternatives": {
+    "12000": {
+      "hours": 2.78
+    },
+    "8000": {
+      "hours": 1.85
+    }
+  },
+  "artifact": "ringcore_v1_scientific_horizon_proposal",
+  "batch_size": 64,
+  "blocking_before_launch": [
+    "owner approval of this scheduler hash (the drift guard will refuse until ring_core_identity is updated)",
+    "provenance overlays for the corruption/cycle packed shards (they lack codec/schema provenance)"
+  ],
+  "checkpoint_schedule": [
+    500,
+    1000,
+    2000,
+    3000,
+    4500,
+    6000,
+    9000,
+    12000,
+    14000,
+    16000
+  ],
+  "contract_required_at_launch": "SCIENTIFIC_TRAINING_CONTRACT",
+  "evaluation_every": 250,
+  "evaluations": 64,
+  "evidence": "diagnostics/coherence/a100_throughput_benchmark.json (run compose-v4-ringcore-benchmark-d681001-v2)",
+  "expected_exposures_at_max": {
+    "cycle_operations": {
+      "records": 255168,
+      "trace_exposure": 1.003,
+      "transition_exposure": 0.3919,
+      "transitions": 255168
+    },
+    "general_corruption": {
+      "records": 74949,
+      "trace_exposure": 5.465,
+      "transition_exposure": 0.9938,
+      "transitions": 218641
+    },
+    "mmp_analogue": {
+      "records": 330991,
+      "trace_exposure": 1.083,
+      "transition_exposure": 0.1053,
+      "transitions": 1955849
+    }
+  },
+  "layer_weights": {
+    "cycle_operations": 0.25,
+    "general_corruption": 0.4,
+    "mmp_analogue": 0.35
+  },
+  "layer_weights_hash": "794e6628f23465d8",
+  "maximum_steps": 16000,
+  "new_scheduler_hash": "dafd4b5092414394",
+  "projected": {
+    "caveat": "evaluation and checkpoint overhead are DERIVED from the measured forward time, not measured directly: the benchmark returns at step 200 and the first evaluation is at 250",
+    "checkpoint_writes": 10,
+    "cost_usd_range_at_2_to_4_per_hour": [
+      7.5,
+      15.0
+    ],
+    "evaluation_hours_derived": 0.057,
+    "measured_seconds_per_step": 0.8331,
+    "total_hours_estimate": 3.76,
+    "training_hours": 3.7
+  },
+  "scheduler": {
+    "minimum_learning_rate_fraction": 0.05,
+    "optimizer": "AdamW",
+    "peak_learning_rate": 0.0003,
+    "schedule": "cosine_with_linear_warmup",
+    "schedule_steps": 16000,
+    "warmup_steps": 500,
+    "weight_decay": 1e-05
+  },
+  "status": "AWAITING_OWNER_APPROVAL",
+  "superseded_hash": "0b832985c65de1cc"
+}
