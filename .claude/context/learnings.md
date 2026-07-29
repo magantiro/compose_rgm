@@ -377,3 +377,39 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   and applies any `limit` AFTER filtering so it cannot regress into partition-blind prefix truncation.
   GOTCHA: an empty SMILES **parses** to a zero-atom Mol, so it gets a partition bucket unless emptiness is
   rejected explicitly -- `murcko_scaffold`'s None contract only covers UNPARSEABLE input.
+
+## 2026-07-29 (packed corpus + MMP partitioning)
+- **A PAIR artifact cannot be partitioned by one endpoint.** The MMP packed build FAILED its reducer with
+  `1325 sources span partitions`. Cause: partitioning used `murcko_scaffold(target_smiles)` alone, but an
+  MMP one-cut pair has TWO endpoints and one source is paired with up to 8 targets
+  (`max_pairs_per_source=8`) whose scaffolds can fall in different partitions -- so the same molecule
+  appeared in train AND validation. That is molecule-level contamination of the very held-out set used for
+  checkpoint selection, and it is invisible to any count-based census. **Fix = require BOTH endpoints to
+  map to the same partition** (`pair_partition()`); drop the straddlers, counted as
+  `endpoints_straddle_partitions`. Measured cost: **0.56% of pairs (~2,044 of 363,456)**; 99.44% already
+  agreed, and 0/15,052 molecules mapped to >1 partition by their own scaffold (the partitioner is sound).
+  Distinguish this from the earlier 8.09% pool leak: that was a MISSING filter, this was a filter on the
+  WRONG KEY.
+- **A reuse cache must key on the RULE, not just the inputs.** Partition reuse keyed on the pool content
+  hash + `partitioner_provenance()`. Neither changes when the APP's own pairing rule changes, so a rebuild
+  would have silently reused the leaking v1 partitioning. Added `_MMP_PARTITION_RULE_VERSION` to the reuse
+  key and the manifest. Any derived-artifact cache needs the derivation logic's version in its key.
+- **Two schemas in one store is a divergence path.** The MMP pool is V1 (`steps[].rule`), the packed loader
+  decodes V2 (`steps[].action` via the codec), so storing raw pool rows would have failed at read time on
+  every shard. Normalize V1->V2 ONCE at pack time (`encode_trace_record`, pool identity carried in `extra`)
+  so the loader has one path. The pre-existing round-trip test had passed only because it converted to V2
+  first -- a fixture shaped to the CODE rather than to the ARTIFACT.
+- **Sidecar manifest naming: `.jsonl.gz` -> `.jsonl.manifest.json`** via `Path.with_suffix`, NOT string
+  concatenation (which yields `.jsonl.gz.manifest.json` and finds nothing). This bug had TWO homes -- the
+  library helper and a duplicate copy inside the Modal reducer -- so fixing only the library left the
+  reducer reporting all 45 packed shards missing. One `manifest_path_for()` helper now, plus a test that
+  scans `src/` and `modal_apps/` and FAILS if any module rebuilds the path by concatenation. NB chained
+  `with_suffix` also fails when reversing (`shard.jsonl.manifest.json` -> `shard.jsonl.jsonl.gz`).
+- **A clean-worktree gate can PASS while testing less than it claims.** The authoritative launch gate ran
+  743 passed + **29 SKIPPED**, because the new tests' fixture (`diagnostics/composition/analogue_trace_pool
+  .jsonl`) was UNTRACKED and therefore absent from any clean checkout. Committed a 40-record real-molecule
+  fixture (`tests/fixtures/`, 47 KB, K 2-16) -> 0 skips. Always read the gate's SKIP count, not just PASS.
+- **Micro-benchmarks lie about paths.** See the 630x -> 2x -> 98x sequence in the entry above; and here the
+  packed-store projection ("2.4 min full train load") covered only the two packed layers while MMP still
+  replayed at 13.74 ms/row -> 83 min PER PARTITION, rescanned per partition. Always state which components
+  a projection covers.
