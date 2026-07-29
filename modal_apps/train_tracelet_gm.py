@@ -1663,18 +1663,12 @@ def gpu_smoke_stage(
     memory=65536,
     timeout=24 * 3600,
     volumes={"/guacamol": guacamol_volume, "/artifacts": artifact_volume},
-    # A multi-hour scientific run must not be scheduled on preemptible capacity. The first RingCore-V1
-    # 16,000-step run was PREEMPTED at step 1500 and then died on restart; running the training stage on
-    # a nonpreemptible instance removes that failure mode at the source rather than only recovering from
-    # it. Nonpreemptible capacity can be scarcer and costs more per hour -- an acceptable trade for a run
-    # whose whole value depends on reaching its horizon. Only the TRAINING stage sets this; the short
-    # CPU/smoke stages are cheap to retry and stay on default placement.
-    nonpreemptible=True,
-    # Defense in depth: nonpreemptible removes preemption, not every way a container can die (node
-    # failure, infrastructure error). Each retry resumes from the recovery checkpoint (written every
-    # `recovery_every` steps) with the optimizer, LR-schedule position, dataloader offset and RNG state
-    # restored, so a retry continues the same optimization trajectory instead of repeating work -- which
-    # is what makes a larger budget safe. max_retries=1 could not survive even one preemption.
+    # Preemption is an EXPECTED event on a multi-hour GPU run, not a code failure: the first
+    # RingCore-V1 scientific run was preempted once, at step 1500. With max_retries=1 a single
+    # preemption exhausts the budget, so a 16,000-step run could not survive two. Each retry resumes
+    # from the recovery checkpoint (written every `recovery_every` steps), so retries make forward
+    # progress rather than repeating work -- which is what makes a larger budget safe here. A
+    # deterministic failure still terminates the run, just after a bounded number of resumed attempts.
     retries=modal.Retries(max_retries=5, backoff_coefficient=2.0),
 )
 def train_stage(
