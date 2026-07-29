@@ -1,0 +1,21 @@
+{
+  "artifact": "edit_packed_v1",
+  "deterministic": true,
+  "sentinel": [
+    {
+      "name": "corruption_train_shard_0000.jsonl.gz",
+      "seconds": 0.024,
+      "sentinel_entries_replayed": 8
+    },
+    {
+      "name": "corruption_validation_shard_0000.jsonl.gz",
+      "seconds": 0.12,
+      "sentinel_entries_replayed": 8
+    },
+    {
+      "name": "cycle_ops_train_shard_0000.jsonl.gz",
+      "seconds": 0.009,
+      "sentinel_entries_replayed": 8
+    }
+  ]
+}
