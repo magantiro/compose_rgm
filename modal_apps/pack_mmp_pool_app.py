@@ -111,6 +111,17 @@ def _contract() -> dict:
     }
 
 
+def _pool_sha256() -> str:
+    """Streaming content hash of the authoritative pool, used to decide partition reuse."""
+    import hashlib
+
+    digest = hashlib.sha256()
+    with open(POOL_PATH, "rb") as raw:
+        for chunk in iter(lambda: raw.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 @app.function(image=image, cpu=8.0, memory=32768, timeout=4 * 3600,
               volumes={"/artifacts": artifact_volume})
 def partition_pool(subdir: str) -> dict:
@@ -132,6 +143,29 @@ def partition_pool(subdir: str) -> dict:
     started = time.time()
     out_root = Path("/artifacts") / subdir / "_raw"
     out_root.mkdir(parents=True, exist_ok=True)
+
+    # Reuse a prior partitioning when the pool and the partitioner are unchanged. The scan is cheap
+    # (measured 127 s for 363,456 records) but it is pure overhead on a rebuild, and skipping it keeps
+    # raw shard membership byte-identical -- which is what lets packed shards be reused too.
+    existing_manifest = Path("/artifacts") / subdir / "partition_manifest.json"
+    if existing_manifest.exists():
+        try:
+            previous = json.loads(existing_manifest.read_text())
+        except json.JSONDecodeError:
+            previous = None
+        if previous:
+            current_pool_sha = _pool_sha256()
+            if (
+                previous.get("pool_sha256") == current_pool_sha
+                and previous.get("contract", {}).get("partitioner") == _contract()["partitioner"]
+                and previous.get("scanned") == EXPECTED_POOL_RECORDS
+                and all(
+                    (out_root / e["partition"] / e["shard"]).exists() for e in previous.get("shards", [])
+                )
+            ):
+                print(json.dumps({"phase": "partition_reuse", "pool_sha256": current_pool_sha[:16],
+                                  "shards": previous["expected_shards"]}), flush=True)
+                return previous
 
     digest = hashlib.sha256()
     rows_by_partition: dict[str, list] = {p: [] for p in PARTITIONS}
