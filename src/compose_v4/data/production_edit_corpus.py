@@ -66,6 +66,27 @@ _CONTRACT_KEYS = (
 )
 
 
+def trace_is_representable(trace) -> bool:
+    """Can every teacher step of this trace be SCORED by the factorized model?
+
+    ``_teacher_action_score`` scores an ``AtomInsert`` through the grow heads: ``grow_root`` for a
+    rootless insert and ``grow_connected`` for exactly ONE existing neighbor. An insert with two or more
+    neighbours -- the inverse of deleting a BRIDGING atom -- has no head to score it and raises
+    ``ValueError: factorized grow supports one existing neighbor`` mid-training.
+
+    Measured incidence in the packed corruption layer: 1 in 12,296 records (0.008%), so roughly 6 of
+    74,949 -- rare enough that the 200-source in-memory corruption never contained one, and certain to be
+    drawn over a million-draw run. This mirrors the existing ``trace_teachers_representable`` policy for
+    ring/graft steps: a teacher must lie in the dense mask that scores it, and traces that do not are
+    dropped and COUNTED rather than crashing the run.
+    """
+    for step in trace.steps:
+        neighbors = getattr(step.action, "neighbors", None)
+        if neighbors is not None and len(neighbors) > 1:
+            return False
+    return True
+
+
 class ProductionCorpusError(RuntimeError):
     """The corpus artifact does not satisfy the production contract."""
 
@@ -207,9 +228,21 @@ def load_shard_layer_records(
                 f"missing {sorted(audit_names - packed_names)}, "
                 f"unexpected {sorted(packed_names - audit_names)}"
             )
+        dropped = 0
         for path in packed_paths:
             for trace, packed_path in read_packed_shard(path, verify_fraction=verify_fraction):
+                if not trace_is_representable(trace):
+                    dropped += 1
+                    continue
                 records.append(PathRecord(canonical_state_key(trace.target), packed_path))
+        if dropped:
+            print(
+                json.dumps({"phase": "unrepresentable_traces_dropped", "layer": shard_layer,
+                            "partition": partition, "dropped": dropped,
+                            "reason": "atom_insert with >1 neighbor has no factorized grow head"},
+                           sort_keys=True),
+                flush=True,
+            )
         return tuple(records)
     for path in _shard_paths(root, shard_layer, partition):
         for trace in load_trace_records(path):
