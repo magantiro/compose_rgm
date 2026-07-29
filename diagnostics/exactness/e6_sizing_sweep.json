@@ -31,9 +31,9 @@
         },
         "branching": {
           "max": 13,
-          "mean": 7.314,
+          "mean": 7.333,
           "median": 7,
-          "min": 0
+          "min": 1
         },
         "cycle_rank_distribution": {
           "0": 20,
@@ -42,6 +42,9 @@
           "3": 3
         },
         "depth": 5,
+        "empty_state_policy": "included_as_distinguished_source",
+        "empty_state_production_semantics": "reversible_source",
+        "graph_fingerprint": "47e8a5f1c3670d76",
         "layer_sizes": [
           1,
           10,
@@ -50,18 +53,18 @@
           3,
           0
         ],
-        "n_edges": 373,
+        "n_edges": 374,
         "n_states": 51,
         "n_states_excluding_null": 50,
         "null_state_reachable": true,
         "rule_counts": {
           "atom_delete": 148,
-          "atom_insert": 69,
+          "atom_insert": 70,
           "bond_delete": 118,
           "bond_insert": 89,
           "bond_reorder": 172
         },
-        "seconds": 0.332,
+        "seconds": 0.326,
         "states_with_multiple_distinct_parents": 50,
         "stop_reason": "closed"
       }
@@ -97,9 +100,9 @@
         },
         "branching": {
           "max": 20,
-          "mean": 10.858,
+          "mean": 10.863,
           "median": 11,
-          "min": 0
+          "min": 1
         },
         "cycle_rank_distribution": {
           "0": 47,
@@ -111,6 +114,9 @@
           "6": 1
         },
         "depth": 7,
+        "empty_state_policy": "included_as_distinguished_source",
+        "empty_state_production_semantics": "reversible_source",
+        "graph_fingerprint": "98d50e4ea31fb90b",
         "layer_sizes": [
           1,
           14,
@@ -121,18 +127,18 @@
           1,
           0
         ],
-        "n_edges": 2139,
+        "n_edges": 2140,
         "n_states": 197,
         "n_states_excluding_null": 196,
         "null_state_reachable": true,
         "rule_counts": {
           "atom_delete": 715,
-          "atom_insert": 292,
+          "atom_insert": 293,
           "bond_delete": 720,
           "bond_insert": 624,
           "bond_reorder": 740
         },
-        "seconds": 1.967,
+        "seconds": 1.997,
         "states_with_multiple_distinct_parents": 195,
         "stop_reason": "closed"
       }
@@ -167,9 +173,9 @@
         },
         "branching": {
           "max": 30,
-          "mean": 14.923,
+          "mean": 14.925,
           "median": 15,
-          "min": 0
+          "min": 1
         },
         "cycle_rank_distribution": {
           "0": 131,
@@ -182,6 +188,9 @@
           "7": 1
         },
         "depth": 8,
+        "empty_state_policy": "included_as_distinguished_source",
+        "empty_state_production_semantics": "reversible_source",
+        "graph_fingerprint": "84121ff86cbc1ba8",
         "layer_sizes": [
           1,
           20,
@@ -193,18 +202,18 @@
           2,
           0
         ],
-        "n_edges": 14431,
+        "n_edges": 14432,
         "n_states": 967,
         "n_states_excluding_null": 966,
         "null_state_reachable": true,
         "rule_counts": {
           "atom_delete": 4301,
-          "atom_insert": 1301,
+          "atom_insert": 1302,
           "bond_delete": 4910,
           "bond_insert": 4626,
           "bond_reorder": 4082
         },
-        "seconds": 14.278,
+        "seconds": 14.538,
         "states_with_multiple_distinct_parents": 964,
         "stop_reason": "closed"
       }
@@ -242,7 +251,7 @@
           "max": 42,
           "mean": 19.889,
           "median": 20,
-          "min": 0
+          "min": 1
         },
         "cycle_rank_distribution": {
           "0": 378,
@@ -256,6 +265,9 @@
           "8": 2
         },
         "depth": 9,
+        "empty_state_policy": "included_as_distinguished_source",
+        "empty_state_production_semantics": "reversible_source",
+        "graph_fingerprint": "1c876e0ae918556a",
         "layer_sizes": [
           1,
           26,
@@ -268,18 +280,18 @@
           4,
           0
         ],
-        "n_edges": 107539,
+        "n_edges": 107540,
         "n_states": 5407,
         "n_states_excluding_null": 5406,
         "null_state_reachable": true,
         "rule_counts": {
           "atom_delete": 28766,
-          "atom_insert": 6932,
+          "atom_insert": 6933,
           "bond_delete": 35613,
           "bond_insert": 35210,
           "bond_reorder": 24677
         },
-        "seconds": 110.987,
+        "seconds": 111.983,
         "states_with_multiple_distinct_parents": 5404,
         "stop_reason": "closed"
       }
@@ -314,9 +326,9 @@
         },
         "branching": {
           "max": 30,
-          "mean": 14.923,
+          "mean": 14.925,
           "median": 15,
-          "min": 0
+          "min": 1
         },
         "cycle_rank_distribution": {
           "0": 131,
@@ -329,6 +341,9 @@
           "7": 1
         },
         "depth": 8,
+        "empty_state_policy": "included_as_distinguished_source",
+        "empty_state_production_semantics": "reversible_source",
+        "graph_fingerprint": "84121ff86cbc1ba8",
         "layer_sizes": [
           1,
           8,
@@ -340,18 +355,18 @@
           1,
           0
         ],
-        "n_edges": 14431,
+        "n_edges": 14432,
         "n_states": 967,
         "n_states_excluding_null": 966,
         "null_state_reachable": true,
         "rule_counts": {
           "atom_delete": 4301,
-          "atom_insert": 1301,
+          "atom_insert": 1302,
           "bond_delete": 4910,
           "bond_insert": 4626,
           "bond_reorder": 4082
         },
-        "seconds": 14.012,
+        "seconds": 14.208,
         "states_with_multiple_distinct_parents": 964,
         "stop_reason": "closed"
       }
@@ -386,9 +401,9 @@
         },
         "branching": {
           "max": 36,
-          "mean": 14.992,
+          "mean": 14.993,
           "median": 15,
-          "min": 1
+          "min": 2
         },
         "cycle_rank_distribution": {
           "0": 519,
@@ -400,6 +415,9 @@
           "6": 1
         },
         "depth": 9,
+        "empty_state_policy": "included_as_distinguished_source",
+        "empty_state_production_semantics": "reversible_source",
+        "graph_fingerprint": "163c0bd5c59a10c9",
         "layer_sizes": [
           1,
           17,
@@ -412,25 +430,25 @@
           5,
           0
         ],
-        "n_edges": 25472,
+        "n_edges": 25473,
         "n_states": 1699,
         "n_states_excluding_null": 1698,
         "null_state_reachable": true,
         "rule_counts": {
           "atom_delete": 5892,
-          "atom_insert": 2609,
+          "atom_insert": 2606,
           "atom_restate": 6501,
           "bond_delete": 5349,
           "bond_insert": 4958,
           "bond_reorder": 5092
         },
-        "seconds": 21.678,
+        "seconds": 21.542,
         "states_with_multiple_distinct_parents": 1698,
         "stop_reason": "closed"
       }
     }
   ],
-  "commit": "3ec3b38",
+  "commit": "8977512",
   "infeasible_reason": null,
   "measured_size_mechanism": "The reachable set is bounded by the seed's ATOM-SLOT COUNT: atom_insert fills a NULL slot and cannot extend the state array. Measured on cyclopropane, atom_insert fired 18 times without ever producing a 4-atom molecule. Slots are therefore the size dial.",
   "non_degeneracy_required": [
@@ -473,9 +491,9 @@
       },
       "branching": {
         "max": 30,
-        "mean": 14.923,
+        "mean": 14.925,
         "median": 15,
-        "min": 0
+        "min": 1
       },
       "cycle_rank_distribution": {
         "0": 131,
@@ -488,6 +506,9 @@
         "7": 1
       },
       "depth": 8,
+      "empty_state_policy": "included_as_distinguished_source",
+      "empty_state_production_semantics": "reversible_source",
+      "graph_fingerprint": "84121ff86cbc1ba8",
       "layer_sizes": [
         1,
         20,
@@ -499,18 +520,18 @@
         2,
         0
       ],
-      "n_edges": 14431,
+      "n_edges": 14432,
       "n_states": 967,
       "n_states_excluding_null": 966,
       "null_state_reachable": true,
       "rule_counts": {
         "atom_delete": 4301,
-        "atom_insert": 1301,
+        "atom_insert": 1302,
         "bond_delete": 4910,
         "bond_insert": 4626,
         "bond_reorder": 4082
       },
-      "seconds": 14.278,
+      "seconds": 14.538,
       "states_with_multiple_distinct_parents": 964,
       "stop_reason": "closed"
     }

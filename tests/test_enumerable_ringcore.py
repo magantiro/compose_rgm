@@ -11,6 +11,8 @@ import pytest
 pytest.importorskip("rdkit")
 
 from compose_v4.experiments.enumerable_ringcore import (  # noqa: E402
+    EMPTY_STATE_POLICY,
+    EMPTY_STATE_PRODUCTION_SEMANTICS,
     NULL_KEY,
     Candidate,
     SizingInfeasible,
@@ -19,7 +21,9 @@ from compose_v4.experiments.enumerable_ringcore import (  # noqa: E402
     default_candidate_ladder,
     evaluate_candidate,
     graph_statistics,
+    graph_fingerprint,
     non_degeneracy,
+    root_insertion_transitions,
     select_candidate,
 )
 
@@ -221,3 +225,125 @@ def test_the_default_ladder_is_ordered_smallest_first():
     assert slot_counts == sorted(slot_counts), slot_counts
     assert len(primary) >= 3, "the ladder must span several sizes so the window can be bracketed"
     assert len({c.candidate_id for c in ladder}) == len(ladder), "candidate ids must be unique"
+
+
+# ---- the null state: a distinguished reversible source, vocabulary-restricted --------------------------
+
+
+def test_the_null_state_is_included_as_a_distinguished_source():
+    """Production treats the empty graph as a reversible source, so the slice must not make it absorbing."""
+    assert EMPTY_STATE_POLICY == "included_as_distinguished_source"
+    assert EMPTY_STATE_PRODUCTION_SEMANTICS == "reversible_source"
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    assert NULL_KEY in graph.states
+
+
+def test_null_has_exactly_one_outgoing_edge_under_a_single_element_vocabulary():
+    """null -> C is admitted; null -> {N, O, F} leave the declared carbon-only slice and are omitted."""
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    outgoing = sorted(target for source, target in graph.edges if source == NULL_KEY)
+    assert outgoing == ["C"], outgoing
+
+
+def test_null_keeps_its_incoming_deletion_edge():
+    """Excluding it would delete a transition production genuinely exposes (C -> null)."""
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    incoming = sorted(source for source, target in graph.edges if target == NULL_KEY)
+    assert "C" in incoming, incoming
+
+
+def test_the_null_source_is_not_absorbing():
+    """An absorbing null would park terminal-law mass in a cemetery the real process grows out of."""
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    assert any(source == NULL_KEY for source, _ in graph.edges)
+
+
+def test_no_state_leaves_the_declared_element_vocabulary():
+    """The restriction that admits null -> C must not leak N/O/F in through the root insertion."""
+    import re
+
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    intruders = {
+        key
+        for key in graph.states
+        if key != NULL_KEY and set(re.findall(r"[A-Z][a-z]?", key)) - {"C"}
+    }
+    assert not intruders, intruders
+
+
+def test_root_insertion_is_filtered_to_the_declared_vocabulary():
+    """Production offers {C, N, O, F} from null; a carbon-only slice must keep exactly one."""
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    system = de_novo_rewrite_system()
+    carbon_only = root_insertion_transitions(graph.states[NULL_KEY], _tiny(), system)
+    assert sorted(t.successor_key for t in carbon_only) == ["C"]
+    wider = Candidate("cnof", "CCC", ("C", "N", "O", "F"), 3)
+    widened = root_insertion_transitions(graph.states[NULL_KEY], wider, system)
+    assert sorted(t.successor_key for t in widened) == ["C", "F", "N", "O"], (
+        "the filter must be the declared vocabulary, not a hardcoded carbon rule"
+    )
+
+
+# ---- graph fingerprint --------------------------------------------------------------------------------
+
+
+def test_fingerprint_is_deterministic_and_content_addressed():
+    first = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    second = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    assert graph_fingerprint(first) == graph_fingerprint(second)
+
+
+def test_fingerprint_changes_when_an_edge_changes():
+    """A support-rule correction must yield a visibly different graph identity, not silently replace one."""
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    before = graph_fingerprint(graph)
+    graph.edges.discard(next(iter(sorted(graph.edges))))
+    assert graph_fingerprint(graph) != before
+
+
+# ---- cycle rank must stay ONE implementation ----------------------------------------------------------
+
+
+def test_no_module_relabels_calcnumrings_as_cycle_rank():
+    """Scan guard: SSSR/ring count, ring-SYSTEM count and graph cycle rank are three different quantities.
+
+    Conflating them is not hypothetical -- this module originally used CalcNumRings as cycle rank and
+    mis-reported every bridged state. cycle_rank feeds E1's topology-distribution distance, E4's topology
+    recovery, task construction and the exact-graph report, so the definition must not drift back.
+    """
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    offenders = []
+    for directory in ("src", "scripts"):
+        base = root / directory
+        if not base.is_dir():
+            continue
+        for path in base.rglob("*.py"):
+            text = path.read_text(errors="replace")
+            if "CalcNumRings" not in text:
+                continue
+            # Using CalcNumRings is fine; calling it a cycle rank is not.
+            for number, line in enumerate(text.splitlines(), 1):
+                if "CalcNumRings" in line and "cycle_rank" in line:
+                    offenders.append(f"{path.relative_to(root)}:{number}")
+    assert not offenders, (
+        "CalcNumRings (symmetrized SSSR) is being used as a cycle rank; the cycle rank is the Betti number "
+        f"|E| - |V| + c and lives in enumerable_ringcore.cycle_rank. Offenders: {offenders}"
+    )
+
+
+def test_cycle_rank_has_a_single_definition_in_src():
+    """More than one `def cycle_rank` would let two definitions of the same quantity diverge."""
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent / "src"
+    definitions = [
+        f"{path.relative_to(root)}:{number}"
+        for path in root.rglob("*.py")
+        for number, line in enumerate(path.read_text(errors="replace").splitlines(), 1)
+        if line.strip().startswith("def cycle_rank")
+    ]
+    assert len(definitions) == 1, f"expected exactly one cycle_rank definition, found {definitions}"

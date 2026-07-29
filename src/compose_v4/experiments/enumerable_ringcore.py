@@ -13,19 +13,21 @@ carbon-only chemistry: 14 states reachable, atom counts ``{0:1, 1:1, 2:3, 3:9}``
 times without ever producing a 4-atom molecule, because every insertion merely refilled a slot a prior
 ``atom_delete`` had emptied. Consequently the slot count is the size dial:
 
-    slots 4 ->    51 states,    373 edges
-    slots 5 ->   197 states,  2,139 edges
-    slots 6 ->   967 states, 14,431 edges
+    slots 4 ->    51 states,    374 edges
+    slots 5 ->   197 states,  2,140 edges
+    slots 6 ->   967 states, 14,432 edges
 
-roughly 5x per added slot. Both endpoints of a shared component close to the same set: ``CCCCCC`` and
-``C1CCCCC1`` both yield 967 states / 14,431 edges from different BFS layer profiles.
+roughly 5x per added slot. Both endpoints of a shared component close to the SAME GRAPH, not merely the same
+counts: ``CCCCCC`` and ``C1CCCCC1`` share the fingerprint ``84121ff86cbc1ba8`` from different BFS profiles.
 
 Reuse boundary
 --------------
-Transitions come from the PRODUCTION enumerator (``rewrite.fiber.enumerate_action_fiber``, which routes every
-candidate through the production runtime and drops identity transitions) and the PRODUCTION canonical key.
-The reachability search, statistics, non-degeneracy tests and selection rule are written here from scratch.
-No prior exact-control script is imported.
+Transitions come from PRODUCTION enumerators and the PRODUCTION canonical key:
+``rewrite.fiber.enumerate_action_fiber`` for every non-null state (it routes each candidate through the
+production runtime and drops identity transitions), and ``factorized_fiber._factorized_candidates`` for the
+null state's root insertions, filtered to the declared element vocabulary. The reachability search,
+statistics, fingerprint, non-degeneracy tests and selection rule are written here from scratch. No prior
+exact-control script is imported.
 """
 from __future__ import annotations
 
@@ -42,9 +44,51 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.rewrite.fiber import ActionFiberSpec, AtomState, enumerate_action_fiber
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 
-# The zero-atom state. Reachable (delete the last atom) but not a molecule; reported separately rather than
-# silently counted as chemistry.
+# The zero-atom state, whose canonical key the production canonicalizer special-cases.
 NULL_KEY = "<NULL>"
+
+# ---- the empty-state boundary (resolved by audit, not by solver convenience) --------------------------
+#
+# Audited against the real production enumerator and executor:
+#
+#   * ``canonical_state_key`` has an explicit ``<NULL>`` branch, so the empty state is anticipated;
+#   * ``is_rdkit_valid(empty)`` returns True and ``molecular_graph_to_smiles(empty)`` returns "" -- an empty
+#     SMILES parses to a zero-atom Mol, so validity does NOT block it;
+#   * deleting the final atom IS legally exposed: the production factorized enumerator on 1-atom "C" offers
+#     4 candidates, one of which empties the molecule;
+#   * from the empty state the production enumerator offers 4 ``atom_insert`` root insertions, all of which
+#     execute, giving {C, N, O, F}.
+#
+# So PRODUCTION treats the empty graph as a REVERSIBLE SOURCE (delete in, root-insert out), not a cemetery.
+# That is coherent and is not a defect -- and it means a de-novo generative process may legitimately start
+# from the empty state.
+#
+# RESOLUTION (owner decision): the empty graph is INCLUDED as a distinguished reversible source, with its
+# root insertion restricted to the declared element vocabulary -- the same restriction already applied to
+# every other action in the slice. E6 is a carbon-only six-slot restriction of production, so from the empty
+# state the restriction admits
+#
+#     null -> C          and omits          null -> {N, O, F}
+#
+# giving the closed slice
+#
+#     S_{C,6} = {null} u { G : 1 <= |V(G)| <= 6, G connected, valence-valid, carbon-only }
+#
+# in which null <-> C is a genuine two-way production-derived transition. This is a VOCABULARY-RESTRICTED
+# PRODUCTION KERNEL, not a solver-only exception.
+#
+# Excluding null was rejected because it would delete a transition production genuinely exposes (C -> null)
+# and impose an artificial reflecting boundary at one atom. The upper six-slot bound is forced by the
+# representation; the lower bound is not -- production intentionally permits both death to null and birth
+# from it. Admitting N/O/F was rejected because it would convert the benchmark to a mixed-element chemistry,
+# requiring resizing and yielding less interpretable exact results, with nothing gained for the theorem.
+#
+# Terminology, which the manuscript must keep honest: the empty graph is NOT a molecule. Every NON-NULL
+# committed state is a valid connected molecule, with a distinguished null source enabling trans-dimensional
+# generation from zero atoms. Chemical descriptors and topology summaries EXCLUDE null; probability
+# calculations INCLUDE it.
+EMPTY_STATE_POLICY = "included_as_distinguished_source"
+EMPTY_STATE_PRODUCTION_SEMANTICS = "reversible_source"
 
 # Executor rule names, and the structural role each plays in the non-degeneracy conditions.
 ATOM_BIRTH_RULES = frozenset({"atom_insert"})
@@ -102,6 +146,68 @@ class ReachableGraph:
         return len(self.edges)
 
 
+def _successor_elements(key: str) -> set[str]:
+    """Element symbols present in a canonical key, for the declared-vocabulary restriction."""
+    if key == NULL_KEY:
+        return set()
+    from rdkit import Chem  # noqa: PLC0415
+
+    molecule = Chem.MolFromSmiles(key, sanitize=False)
+    if molecule is None:
+        return {"?"}
+    return {atom.GetSymbol() for atom in molecule.GetAtoms()}
+
+
+def root_insertion_transitions(
+    empty_state: MolecularGraph, candidate: Candidate, system
+) -> list[Any]:
+    """Production root insertions from the empty state, restricted to the declared element vocabulary.
+
+    The E6 fiber language cannot supply these: its atom insertions attach to an existing atom, so it returns
+    nothing from the empty state. The PRODUCTION factorized enumerator does offer them (4 candidates ->
+    {C, N, O, F}), so they are taken from production and then filtered by the same element restriction that
+    governs every other action in the slice. Filtering on the SUCCESSOR rather than on the action payload
+    keeps this robust to the payload representation.
+    """
+    from compose_v4.rewrite.factorized_fiber import _factorized_candidates  # noqa: PLC0415
+    from compose_v4.rewrite.fiber import MarkedTransition  # noqa: PLC0415
+
+    allowed = set(candidate.elements)
+    transitions = []
+    for rule_name, action in _factorized_candidates(empty_state, allow_bond_reroute=False):
+        try:
+            successor = system.apply(empty_state, rule_name, action)
+        except Exception:
+            continue
+        key = canonical_state_key(successor)
+        if key == NULL_KEY:
+            continue
+        if _successor_elements(key) <= allowed:
+            transitions.append(MarkedTransition(rule_name, action, successor, key))
+    return transitions
+
+
+def graph_fingerprint(graph: ReachableGraph) -> str:
+    """Deterministic identity of the exact graph: sorted canonical states plus sorted directed edges.
+
+    A2.2 and every downstream exact-control result cite this, so a graph that changes for any reason -- a
+    support-rule correction, an operator change -- gets a visibly different identity instead of silently
+    replacing an earlier one.
+    """
+    import hashlib  # noqa: PLC0415
+
+    digest = hashlib.sha256()
+    for key in sorted(graph.states):
+        digest.update(b"S")
+        digest.update(key.encode())
+    for source, target in sorted(graph.edges):
+        digest.update(b"E")
+        digest.update(source.encode())
+        digest.update(b">")
+        digest.update(target.encode())
+    return digest.hexdigest()[:16]
+
+
 def build_reachable_graph(
     candidate: Candidate,
     *,
@@ -146,7 +252,12 @@ def build_reachable_graph(
             if len(edges) >= edge_cap:
                 stop_reason = "edge_cap"
                 break
-            transitions = enumerate_action_fiber(states[key], spec=spec, system=system)
+            if key == NULL_KEY:
+                # Distinguished source: production root insertions, restricted to the declared
+                # vocabulary. The E6 fiber attaches to an existing atom and yields nothing here.
+                transitions = root_insertion_transitions(states[key], candidate, system)
+            else:
+                transitions = enumerate_action_fiber(states[key], spec=spec, system=system)
             out_degree[key] = len({transition.successor_key for transition in transitions})
             for transition in transitions:
                 rule_counts[transition.rule_name] += 1
@@ -205,6 +316,9 @@ def graph_statistics(graph: ReachableGraph) -> dict[str, Any]:
     degrees = sorted(graph.out_degree.values())
     multi_path = sum(1 for count in graph.parent_counts.values() if count >= 2)
     return {
+        "graph_fingerprint": graph_fingerprint(graph),
+        "empty_state_policy": EMPTY_STATE_POLICY,
+        "empty_state_production_semantics": EMPTY_STATE_PRODUCTION_SEMANTICS,
         "n_states": graph.n_states,
         "n_states_excluding_null": sum(1 for key in graph.states if key != NULL_KEY),
         "n_edges": graph.n_edges,
