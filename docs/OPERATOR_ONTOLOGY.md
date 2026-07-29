@@ -11,10 +11,27 @@ ambiguously map to one operation within the model. 5 deviations, all LOW/MEDIUM 
   model maps it to a **family slot** for scoring. Identical names for most families; the exception is the
   cycle-op repurposing.
 
+## Trans-dimensional classification (added 2026-07-28, for Paper 1)
+
+The paper classifies every operator by its action on the strata `X_n` (connected molecular graphs with
+`n` ACTIVE atoms), because that classification is the trans-dimensional claim:
+
+| kind | map | operators |
+|---|---|---|
+| **birth** | `X_n -> X_{n+1}` | `atom_insert` (+ the DISABLED `ring_grow_macro`, multi-atom) |
+| **death** | `X_n -> X_{n-1}` | `atom_delete`; `ring_delete` (multi-atom) |
+| **same-cardinality** | `X_n -> X_n` | `atom_restate`, `bond_reorder`, `graft`, `cycle_close`, `cycle_open`, `ring_aromaticity_restate` |
+
+Two consequences the manuscript leans on: (1) cardinality and topology are controlled by **different**
+operators, so size adaptation and ring redesign can be ablated independently (experiments C and D);
+(2) the bounded persistent-slot array is a **coordinate system** — the semantic state is the active
+graph, so a birth is not a padding flip. Terminology: use *atom birth and death* / *creation and
+destruction of typed graph entities*; never "tokens".
+
 ## The 10 model families (public · slot(idx) · teacher rule · builder · executor · enable flag · RingCore)
 | # | Public | Slot (idx) | Teacher rule | Candidate builder | Executor | enable flag | RingCore |
 |--|--|--|--|--|--|--|--|
-|1|atom_insert|atom_insert(0)|atom_insert|`_factorized_candidates`|atom_insert|— |ENABLED|
+|1|atom_insert|atom_insert(0)|atom_insert|`_factorized_candidates`|atom_insert|— |ENABLED|  <!-- attachment arity: 0 or 1 only; see below -->
 |2|atom_delete|atom_delete(1)|atom_delete|`_factorized_candidates`|atom_delete|— |ENABLED|
 |3|atom_restate (bioisostere)|atom_restate(2)|atom_restate|`_factorized_candidates`|atom_restate|`enable_heteroatom_scan`|ENABLED|
 |4|bond_reorder|bond_reorder(3)|bond_reorder|`_factorized_candidates`|bond_reorder|— |ENABLED|
@@ -52,3 +69,33 @@ alias; every other use is a hard-coded literal). **The aliasing is complete and 
   `logits["cycle_insert"]`). Unreachable in RingCore (no de-novo tracelet teachers mixed with `enable_cycle_ops`).
 - **D5 (LOW):** `griddd_conditional.py:682` hard-codes a copy of the `MARK_RULE_NAMES` 10-tuple instead of
   importing it — silent DRY drift if the constant is reordered.
+
+## Declared production support: AtomInsert attachment arity
+
+The production factorization scores atom birth through two heads:
+
+| form | head | supported |
+|---|---|---|
+| insertion with **zero** existing neighbours (a new fragment root) | `grow_root` | yes |
+| insertion with **exactly one** existing neighbour | `grow_connected` | yes |
+| insertion connecting **two or more** existing atoms (vertex subdivision) | *(none)* | **no** |
+
+The executor can *describe* a multi-attachment insertion and it is a chemically valid rewrite, but the
+model has no head to score it: `_teacher_action_score` raises
+`ValueError: factorized grow supports one existing neighbor`.
+
+Consequence for claims. Atom birth and death change molecular cardinality, and the trans-dimensional
+statement is unaffected. But **do not claim that every atom deletion has a representable inverse
+insertion**: deleting a bridging (degree-2) atom has an inverse that is outside declared production
+support. The precise statement is:
+
+> Atom birth and death change molecular cardinality; the current factorization supports root and
+> single-attachment insertion, while multi-attachment vertex insertion is outside the declared
+> production support.
+
+Multi-attachment insertion is recorded as a **deferred optional extension**, not a blocker: it was
+measured at roughly 0.008% of packed corruption traces, and adding a head for it immediately before
+training would be an architecture change made for a handful of records. Affected traces are excluded via
+the frozen `factorized_teacher_support_v2` representability overlay
+(`REASON = MULTI_NEIGHBOUR_ATOM_INSERT_UNSUPPORTED`), which lists every excluded trace and makes any
+*unlisted* unsupported teacher a loud failure.
