@@ -1366,6 +1366,10 @@ def train_factorized_mark_model(
         if profile_timing:
             _synchronize(model.device)
         optimized_at = perf_counter()
+        if benchmark_steps and completed_steps == 1:
+            print(json.dumps({"phase": "OPTIMIZER_STEP_1", "step": completed_steps,
+                              "device": str(model.device), "bf16": bool(use_bf16)},
+                             sort_keys=True), flush=True)
         if benchmark_steps:
             _n_cand = int(batch.graft_successor_groups.numel()) if hasattr(batch, "graft_successor_groups") else 0
             _n_groups = (

@@ -1,0 +1,21 @@
+{
+  "blocks": [],
+  "date_observed": "2026-07-29",
+  "defect_id": "DENOVO_BOND_REORDER_INVALID_REWRITE",
+  "does_not_block": [
+    "RingCore editing-prior training",
+    "the packed three-layer corpus",
+    "the A100 throughput benchmark"
+  ],
+  "error": "compose_v4.rewrite.kernel.InvalidRewrite: invalid bond_reorder instance: BondReorder(a=18, b=19, new_order=2)",
+  "next_action": "reproduce with a minimal carbon-tree transport case, identify why a bond_reorder to order=2 is proposed on a bond the executor rejects, add a regression test",
+  "observed_in": {
+    "call_id": "fc-01KYP1GN076X1NBG013FA79W3T",
+    "commit": "30d91ce",
+    "run_label": "compose-v4-ringcore-benchmark-30d91ce-v1"
+  },
+  "status": "DEFERRED_NOT_BLOCKING_EDITING",
+  "where": "de-novo carbon-tree path compilation (tree transport), inside the corpus_workers thread pool; raised during startup of a run that had --source-prior carbon_tree active",
+  "why_deferred": "the editing path never compiles carbon-tree de-novo paths (de-novo weight is 0 in the production mixture), so this is unreachable for RingCore training",
+  "why_it_still_matters": "the paper now includes UNCONDITIONAL GENERATION as a main experiment, so the carbon-tree de-novo path will need its own repair and regression tests before that experiment can be run or reported"
+}

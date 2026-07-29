@@ -433,6 +433,23 @@ def _build_scaled_manifest_sampler(train_records, *, denovo_keep, n_corruption, 
         cold_element_floor=floor, cold_elements_of=_record_cold_elements, seed=seed)
 
 
+def _resolve_denovo_weight(args) -> float:
+    """De-novo weight from the AUTHORITATIVE mixture for this run's mode.
+
+    Storage mode (packed vs replay) must never decide scientific mixture. Under --precompiled-corpus the
+    mixture is the owner-locked PRODUCTION_LAYER_WEIGHTS, which contain no de-novo layer; under
+    --scaled-manifest it is the manifest's locked_mixture. Anything else is an ordinary de-novo run.
+    """
+    if args.precompiled_corpus:
+        from ring_core_identity import PRODUCTION_LAYER_WEIGHTS
+
+        return float(PRODUCTION_LAYER_WEIGHTS.get("denovo", 0.0))
+    if args.scaled_manifest:
+        locked = json.loads(Path(args.scaled_manifest).read_text()).get("locked_mixture") or {}
+        return float((locked.get("layer_weights") or {}).get("denovo", 0.0))
+    return 1.0
+
+
 def _load_precompiled_corpus(args, *, partition: str, seed: int):
     """Load one partition of the validated precompiled corpus and its explicit three-layer sampler.
 
@@ -1573,11 +1590,18 @@ def main() -> None:
     args = parser.parse_args()
     _zmi.reset()  # zero-mixture instrumentation accumulates over this whole run (catalog/manifest/pool/train)
 
-    # Both zero-mixture modes supply train_records wholesale, so NEITHER may compile de-novo paths:
-    # --scaled-manifest was the original; --precompiled-corpus is the packed production path. Leaving this
-    # gated on scaled_manifest alone made a precompiled run compile 50,000 carbon-tree paths it never uses
-    # (slow, and it crashed on an InvalidRewrite before the first optimizer step).
-    zero_denovo = bool(args.scaled_manifest or args.precompiled_corpus)
+    # De-novo compilation is skipped because the SCIENTIFIC MIXTURE gives de-novo zero weight -- never
+    # because of how the data happens to be STORED. Those are different things: a future packed run with a
+    # positive de-novo weight must still compile de-novo paths. (Keying this on storage mode alone made a
+    # precompiled run compile 50,000 carbon-tree paths it never uses, and it crashed on an InvalidRewrite
+    # before the first optimizer step.)
+    denovo_weight = _resolve_denovo_weight(args)
+    zero_denovo = denovo_weight == 0.0
+    print(
+        json.dumps({"phase": "mixture_resolved", "denovo_weight": denovo_weight,
+                    "zero_denovo": zero_denovo}, sort_keys=True),
+        flush=True,
+    )
 
     if args.precompiled_corpus and not args.precompiled_mmp_pool:
         raise SystemExit(
@@ -2545,9 +2569,31 @@ def main() -> None:
         precompiled_validation_corpus = _load_precompiled_corpus(
             args, partition="validation", seed=args.seed + 22
         )
+        # Assert, don't assume: zero de-novo weight must mean zero de-novo records were built.
+        denovo_built = len(train_records)
+        if zero_denovo and denovo_built:
+            raise SystemExit(
+                f"zero_denovo is set but {denovo_built} de-novo records were built; a de-novo branch "
+                "is still reachable and the mixture would not be what the manifest declares"
+            )
         train_records = precompiled_corpus.records
         validation_records = precompiled_validation_corpus.records
         edit_record_index_sampler_precompiled = precompiled_corpus.sampler
+        storage = precompiled_corpus.provenance["layer_storage"]
+        print(
+            json.dumps(
+                {
+                    "phase": "PACKED_CORPUS_READY",
+                    "zero_denovo": zero_denovo,
+                    "de_novo_records_built": denovo_built,
+                    **{k: v for k, v in storage.items()},
+                    "train_records": len(train_records),
+                    "validation_records": len(validation_records),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     elif args.corrupted_prior_mix:
         # Append corrupted-molecule source-prior (B-edit) records IN MEMORY -- never persisted to the
         # path cache, so B's carbon-tree cache stays reusable under --train-only. Sized ~50/50 against
