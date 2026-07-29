@@ -391,3 +391,63 @@ def test_benchmark_identity_records_the_empty_state_policy_and_vocabulary():
     assert identity["root_insertion_vocabulary"] == ["C"]
     assert identity["canonicalizer_version"] == "canonical_state_key"
     assert identity["operator_set"] == "ringcore_v1_compositional_cycle_ops"
+
+
+# ---- exact atom-state serialization -------------------------------------------------------------------
+
+
+def test_root_insertion_atom_states_masks_null_padding():
+    """Regression: NULL padding has atom_type index 0, so a `>= 0` test counts empty slots as atoms."""
+    from compose_v4.experiments.enumerable_ringcore import root_insertion_atom_states
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    states = root_insertion_atom_states(graph.states[NULL_KEY], _tiny(), de_novo_rewrite_system())
+    assert len(states) == 1, states
+    assert states[0]["element"] == "C"
+    assert all(entry["element"] != "null" for entry in states)
+
+
+def test_atom_state_serialization_carries_charge_and_hydrogens():
+    """Element symbols alone leave the support ambiguous; the exact class fields are the identity."""
+    from compose_v4.experiments.enumerable_ringcore import declared_action_target_atom_states
+
+    table = declared_action_target_atom_states(_tiny())
+    assert {entry["element"] for entry in table} == {"C"}
+    assert sorted(entry["implicit_h_count"] for entry in table) == [0, 1, 2, 3]
+    assert all(entry["formal_charge"] == 0 for entry in table)
+    assert all("atom_type_index" in entry for entry in table)
+
+
+def test_action_target_table_is_not_the_set_of_reachable_atom_states():
+    """A real distinction, so the field must not be named 'allowed atom states'.
+
+    Methane's carbon carries implicit_h_count = 4, which a max_hydrogens=3 target table cannot express --
+    yet methane is reachable (delete one carbon of ethane).
+    """
+    from compose_v4.experiments.enumerable_ringcore import (
+        declared_action_target_atom_states,
+        root_insertion_atom_states,
+    )
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    targets = {entry["implicit_h_count"] for entry in declared_action_target_atom_states(_tiny())}
+    graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
+    reached = {
+        entry["implicit_h_count"]
+        for entry in root_insertion_atom_states(graph.states[NULL_KEY], _tiny(), de_novo_rewrite_system())
+    }
+    assert reached - targets, (
+        "expected a reachable atom state outside the declared action-target table; if this no longer holds "
+        "the naming distinction can be revisited"
+    )
+
+
+def test_semantics_hash_is_stable_across_a_commit_change_while_provenance_moves():
+    """Identical science across non-semantic code changes must stay recognizable."""
+    first = _identity(implementation_commit="aaaaaaa")
+    second = _identity(implementation_commit="bbbbbbb")
+    assert first["benchmark_semantics_hash"] == second["benchmark_semantics_hash"]
+    assert first["artifact_provenance_hash"] != second["artifact_provenance_hash"]
+    # the retained legacy name tracks provenance, not semantics
+    assert first["benchmark_identity_hash"] == first["artifact_provenance_hash"]

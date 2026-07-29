@@ -64,7 +64,7 @@
           "bond_insert": 89,
           "bond_reorder": 172
         },
-        "seconds": 0.332,
+        "seconds": 0.323,
         "states_with_multiple_distinct_parents": 50,
         "stop_reason": "closed"
       }
@@ -138,7 +138,7 @@
           "bond_insert": 624,
           "bond_reorder": 740
         },
-        "seconds": 1.965,
+        "seconds": 1.961,
         "states_with_multiple_distinct_parents": 195,
         "stop_reason": "closed"
       }
@@ -213,7 +213,7 @@
           "bond_insert": 4626,
           "bond_reorder": 4082
         },
-        "seconds": 14.456,
+        "seconds": 13.989,
         "states_with_multiple_distinct_parents": 964,
         "stop_reason": "closed"
       }
@@ -291,7 +291,7 @@
           "bond_insert": 35210,
           "bond_reorder": 24677
         },
-        "seconds": 113.684,
+        "seconds": 109.389,
         "states_with_multiple_distinct_parents": 5404,
         "stop_reason": "closed"
       }
@@ -366,7 +366,7 @@
           "bond_insert": 4626,
           "bond_reorder": 4082
         },
-        "seconds": 14.124,
+        "seconds": 13.925,
         "states_with_multiple_distinct_parents": 964,
         "stop_reason": "closed"
       }
@@ -442,17 +442,45 @@
           "bond_insert": 4958,
           "bond_reorder": 5092
         },
-        "seconds": 21.389,
+        "seconds": 21.24,
         "states_with_multiple_distinct_parents": 1698,
         "stop_reason": "closed"
       }
     }
   ],
-  "commit": "65c8660",
+  "commit": "656f393",
   "e6_benchmark_identity": {
+    "artifact_provenance_hash": "22ed535e759b279b",
     "atom_slots": 6,
-    "benchmark_identity_hash": "14dd572434ab0755",
+    "benchmark_identity_hash": "22ed535e759b279b",
+    "benchmark_semantics_hash": "3647e87f8f75b038",
     "canonicalizer_version": "canonical_state_key",
+    "declared_action_target_atom_states": [
+      {
+        "atom_type_index": 2,
+        "element": "C",
+        "formal_charge": 0,
+        "implicit_h_count": 0
+      },
+      {
+        "atom_type_index": 2,
+        "element": "C",
+        "formal_charge": 0,
+        "implicit_h_count": 1
+      },
+      {
+        "atom_type_index": 2,
+        "element": "C",
+        "formal_charge": 0,
+        "implicit_h_count": 2
+      },
+      {
+        "atom_type_index": 2,
+        "element": "C",
+        "formal_charge": 0,
+        "implicit_h_count": 3
+      }
+    ],
     "declared_elements": [
       "C"
     ],
@@ -462,12 +490,21 @@
     "executor_version": "de_novo_rewrite_system",
     "graph_fingerprint": "84121ff86cbc1ba8",
     "horizon": null,
-    "implementation_commit": "65c8660",
+    "implementation_commit": "656f393",
     "max_hydrogens": 3,
     "n_edges": 14432,
     "n_states": 967,
     "operator_set": "ringcore_v1_compositional_cycle_ops",
     "registry_protocol_content_hash": "b4cd905a640ab32a",
+    "root_insertion_atom_states": [
+      {
+        "atom_type_index": 2,
+        "element": "C",
+        "formal_charge": 0,
+        "implicit_h_count": 4,
+        "successor_key": "C"
+      }
+    ],
     "root_insertion_vocabulary": [
       "C"
     ]
@@ -554,7 +591,7 @@
         "bond_insert": 4626,
         "bond_reorder": 4082
       },
-      "seconds": 14.456,
+      "seconds": 13.989,
       "states_with_multiple_distinct_parents": 964,
       "stop_reason": "closed"
     }

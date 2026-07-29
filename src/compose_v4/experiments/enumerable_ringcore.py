@@ -208,6 +208,67 @@ def graph_fingerprint(graph: ReachableGraph) -> str:
     return digest.hexdigest()[:16]
 
 
+def serialize_atom_state(state: Any) -> dict[str, Any]:
+    """Exact serialization of one declared atom state.
+
+    Support identity is defined by element-valence CLASSES, not element symbols: recording only ``["C"]``
+    leaves the charge and hydrogen count ambiguous, so the bounded support would not be reproducible from
+    the artifact. Every field of the production ``AtomState`` is therefore emitted.
+    """
+    from compose_v4.chem.molecular_graph import IDX_TO_ELEMENT  # noqa: PLC0415
+
+    atom_type = int(getattr(state, "atom_type"))
+    return {
+        "element": str(IDX_TO_ELEMENT[atom_type]),
+        "atom_type_index": atom_type,
+        "formal_charge": int(getattr(state, "formal_charge")),
+        "implicit_h_count": int(getattr(state, "implicit_h_count")),
+    }
+
+
+def declared_action_target_atom_states(candidate: Candidate) -> list[dict[str, Any]]:
+    """The atom-state table the declared E6 language offers as ACTION TARGETS, in enumerator order.
+
+    Named precisely: this is the set of atom states ``atom_insert``/``atom_restate`` may TARGET, NOT the set
+    of atom states occurring in reachable molecules. The two genuinely differ -- methane's carbon carries
+    ``implicit_h_count = 4`` while a table built with ``max_hydrogens = 3`` tops out at 3, yet methane is a
+    reachable state (it is what remains after deleting one carbon of ethane). Calling this "allowed atom
+    states" would therefore be a false claim about the state space.
+    """
+    return [serialize_atom_state(state) for state in candidate.spec().atom_states]
+
+
+def root_insertion_atom_states(
+    empty_state: MolecularGraph, candidate: Candidate, system
+) -> list[dict[str, Any]]:
+    """The atom states actually reachable by root insertion from null, after the vocabulary restriction.
+
+    Derived from the executed successors rather than from the action payload, matching how
+    ``root_insertion_transitions`` filters, so the artifact records what the slice really admits.
+    """
+    from compose_v4.chem.molecular_graph import IDX_TO_ELEMENT  # noqa: PLC0415
+
+    from compose_v4.chem.molecular_graph import is_element  # noqa: PLC0415
+
+    states = []
+    for transition in root_insertion_transitions(empty_state, candidate, system):
+        successor = transition.successor
+        # Mask with the REAL-ELEMENT predicate. NULL padding has atom_type index 0, so a `>= 0` test counts
+        # empty slots as atoms -- the slot-stable trap that has bitten this repo before.
+        real = is_element(successor.atom_types)
+        for index in [i for i, keep in enumerate(real) if bool(keep)]:
+            states.append(
+                {
+                    "element": str(IDX_TO_ELEMENT[int(successor.atom_types[index])]),
+                    "atom_type_index": int(successor.atom_types[index]),
+                    "formal_charge": int(successor.formal_charges[index]),
+                    "implicit_h_count": int(successor.implicit_h_counts[index]),
+                    "successor_key": transition.successor_key,
+                }
+            )
+    return states
+
+
 def benchmark_identity(
     graph: ReachableGraph,
     candidate: Candidate,
@@ -216,6 +277,7 @@ def benchmark_identity(
     exact_sizing: dict[str, Any],
     horizon: int | None,
     implementation_commit: str | None = None,
+    system: Any = None,
 ) -> dict[str, Any]:
     """The composite scientific identity of an E6 benchmark.
 
@@ -233,27 +295,47 @@ def benchmark_identity(
     sizing_hash = hashlib.sha256(
         json.dumps(exact_sizing, sort_keys=True, separators=(",", ":"), default=str).encode()
     ).hexdigest()[:16]
-    identity = {
+    runtime = system if system is not None else de_novo_rewrite_system()
+    root_states: list[dict[str, Any]] = []
+    if NULL_KEY in graph.states:
+        root_states = root_insertion_atom_states(graph.states[NULL_KEY], candidate, runtime)
+
+    # SEMANTICS: the chemistry, graph, horizon, operator and policy choices. Two runs sharing this hash are
+    # the same scientific benchmark even if the implementing code changed for non-semantic reasons.
+    semantics = {
         "registry_protocol_content_hash": registry_protocol_hash,
         "exact_sizing_hash": sizing_hash,
         "graph_fingerprint": graph_fingerprint(graph),
         "empty_state_policy": EMPTY_STATE_POLICY,
         "empty_state_production_semantics": EMPTY_STATE_PRODUCTION_SEMANTICS,
-        "root_insertion_vocabulary": list(candidate.elements),
         "declared_elements": list(candidate.elements),
         "max_hydrogens": candidate.max_hydrogens,
+        # Element symbols are NOT the support identity: the exact atom-state tables are.
+        "declared_action_target_atom_states": declared_action_target_atom_states(candidate),
+        "root_insertion_atom_states": root_states,
+        "root_insertion_vocabulary": sorted({entry["element"] for entry in root_states}),
         "atom_slots": len(smiles_to_molecular_graph(candidate.seed_smiles).atom_types),
         "horizon": horizon,
         "executor_version": "de_novo_rewrite_system",
         "canonicalizer_version": "canonical_state_key",
         "operator_set": "ringcore_v1_compositional_cycle_ops",
-        "implementation_commit": implementation_commit,
         "n_states": graph.n_states,
         "n_edges": graph.n_edges,
     }
-    identity["benchmark_identity_hash"] = hashlib.sha256(
-        json.dumps(identity, sort_keys=True, separators=(",", ":"), default=str).encode()
+    semantics_hash = hashlib.sha256(
+        json.dumps(semantics, sort_keys=True, separators=(",", ":"), default=str).encode()
     ).hexdigest()[:16]
+    identity = dict(semantics)
+    identity["benchmark_semantics_hash"] = semantics_hash
+    identity["implementation_commit"] = implementation_commit
+    # PROVENANCE: semantics plus the implementing commit, so an artifact is traceable to the code that made
+    # it while the semantics hash stays stable across non-semantic changes.
+    identity["artifact_provenance_hash"] = hashlib.sha256(
+        json.dumps({"semantics": semantics_hash, "commit": implementation_commit},
+                   sort_keys=True, separators=(",", ":"), default=str).encode()
+    ).hexdigest()[:16]
+    # Retained for continuity with the artifact already committed under this name.
+    identity["benchmark_identity_hash"] = identity["artifact_provenance_hash"]
     return identity
 
 
