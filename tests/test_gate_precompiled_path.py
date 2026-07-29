@@ -111,3 +111,17 @@ def test_production_loader_works_without_the_legacy_builders_importable(monkeypa
     records, stats = load_mmp_records(pool, partition="train")
     assert stats["scanned"] > 0
     assert len(records) == stats["kept"]
+
+
+def test_production_refuses_raw_pool_fallback_for_mmp():
+    """The raw-pool path replays every trace (~83 min/partition). Production must never take it."""
+    module = (REPO / "src/compose_v4/data/production_edit_corpus.py").read_text()
+    assert "require_packed_mmp" in module
+    assert "refusing to fall back to the raw pool" in module
+
+
+def test_mmp_stats_declare_their_source():
+    """The launch log must say whether MMP came from the packed store or a replay fallback."""
+    module = (REPO / "src/compose_v4/data/production_edit_corpus.py").read_text()
+    assert '"source": "packed"' in module
+    assert '"raw_pool_replay"' in module

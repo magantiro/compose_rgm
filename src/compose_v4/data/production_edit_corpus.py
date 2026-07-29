@@ -53,6 +53,10 @@ _SHARD_LAYER_TO_PRODUCTION = {
     "cycle_ops": CYCLE_OPS,
 }
 
+# When the MMP layer is packed it lives under this directory of the packed root, alongside the other
+# two layers, and the raw 363,456-row pool is never opened.
+PACKED_MMP_LAYER = "mmp_analogue"
+
 _CONTRACT_KEYS = (
     "capability_hash",
     "codec_implementation_hash",
@@ -125,7 +129,7 @@ def verify_build_complete(root: Path, *, expected_contract: dict | None = None) 
 
 
 def _shard_paths(root: Path, shard_layer: str, partition: str) -> list[Path]:
-    directory = Path(root) / shard_layer / partition
+    directory = (Path(root) / shard_layer / partition) if shard_layer else (Path(root) / partition)
     if not directory.is_dir():
         raise ProductionCorpusError(f"missing shard directory: {directory}")
     return sorted(directory.glob("*.jsonl.gz"))
@@ -285,6 +289,7 @@ def load_production_edit_corpus(
     checkpoint_interval: int | None = None,
     packed_root: Path | None = None,
     verify_fraction: float = 0.0,
+    require_packed_mmp: bool = True,
     seed: int = 0,
 ) -> LayeredEditCorpus:
     """Assemble the three-layer production corpus and its sampler from validated artifacts."""
@@ -299,12 +304,30 @@ def load_production_edit_corpus(
             packed_root=packed_root, verify_fraction=verify_fraction,
             declared_names=declared_names,
         )
-    mmp_records, mmp_stats = load_mmp_records(
-        mmp_pool_path,
-        partition=partition,
-        limit=mmp_limit,
-        checkpoint_interval=checkpoint_interval,
-    )
+    packed_mmp = None if packed_root is None else Path(packed_root) / PACKED_MMP_LAYER
+    if packed_mmp is not None and packed_mmp.is_dir():
+        # PRODUCTION PATH: packed MMP. Loading the raw pool cost 13.74 ms/row scanned -> 83 min per
+        # partition, and it was rescanned once per partition. Packed shards are already partitioned.
+        mmp_records = tuple(
+            PathRecord(canonical_state_key(trace.target), packed_path)
+            for shard in _shard_paths(packed_mmp, "", partition)
+            for trace, packed_path in read_packed_shard(shard, verify_fraction=verify_fraction)
+        )
+        mmp_stats = {"source": "packed", "kept": len(mmp_records), "scanned": len(mmp_records),
+                     "other_partition": 0, "unassignable": 0, "unbuildable": 0}
+    elif require_packed_mmp:
+        raise ProductionCorpusError(
+            f"packed MMP layer missing at {packed_mmp}; refusing to fall back to the raw pool "
+            "(the fallback replays every trace and would spend hours before the first optimizer step)"
+        )
+    else:
+        mmp_records, mmp_stats = load_mmp_records(
+            mmp_pool_path,
+            partition=partition,
+            limit=mmp_limit,
+            checkpoint_interval=checkpoint_interval,
+        )
+        mmp_stats["source"] = "raw_pool_replay"
     by_layer[MMP_ANALOGUE] = mmp_records
 
     # Concatenate in the canonical layer order so sampler indices are well defined.
