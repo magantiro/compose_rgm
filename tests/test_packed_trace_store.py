@@ -361,3 +361,23 @@ def test_packed_store_manifest_is_discoverable_by_the_same_rule(tmp_path):
     assert (tmp_path / "packed_0000.jsonl.manifest.json").exists()
     assert not (tmp_path / "packed_0000.jsonl.gz.manifest.json").exists()
     assert len(list(store.read_packed_shard(shard))) == 1
+
+
+def test_no_module_reimplements_the_manifest_path():
+    """One convention, one helper.
+
+    The sidecar-naming bug had TWO homes: the library helper and a duplicate string-concatenation copy
+    inside the Modal reducer. Fixing only the library left the reducer reporting all 45 packed shards as
+    missing. This forbids the duplicate from reappearing anywhere.
+    """
+    import re
+
+    repo = Path(__file__).resolve().parent.parent
+    offenders = [
+        str(path.relative_to(repo))
+        for path in list((repo / "src").rglob("*.py")) + list((repo / "modal_apps").rglob("*.py"))
+        if re.search(r'\+\s*"\.manifest\.json"', path.read_text())
+    ]
+    assert not offenders, (
+        f"these modules build a manifest path by concatenation instead of manifest_path_for: {offenders}"
+    )

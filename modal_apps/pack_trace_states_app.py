@@ -89,6 +89,7 @@ def pack_shard(source_subdir: str, dest_subdir: str, layer: str, partition: str,
     from compose_v4.data.packed_trace_store import (
         assert_closed_form_applies,
         build_packed_entry,
+        manifest_path_for,
         source_shard_fingerprint,
         write_packed_shard,
     )
@@ -107,7 +108,7 @@ def pack_shard(source_subdir: str, dest_subdir: str, layer: str, partition: str,
         "operator_registry_hash": recompute_operator_registry_hash(),
     }
 
-    manifest_path = Path(str(dest) + ".manifest.json")
+    manifest_path = manifest_path_for(dest)
     if dest.exists() and manifest_path.exists():
         existing = json.loads(manifest_path.read_text()).get("provenance", {})
         if existing.get("source_content_sha256") == fingerprint:
@@ -137,7 +138,11 @@ def reduce_and_verify(source_subdir: str, dest_subdir: str, expected: list, buil
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
 
-    from compose_v4.data.packed_trace_store import read_packed_shard, source_shard_fingerprint
+    from compose_v4.data.packed_trace_store import (
+        manifest_path_for,
+        read_packed_shard,
+        source_shard_fingerprint,
+    )
 
     artifact_volume.reload()
     source_root = Path("/artifacts") / source_subdir
@@ -147,7 +152,7 @@ def reduce_and_verify(source_subdir: str, dest_subdir: str, expected: list, buil
     per_layer: dict[str, int] = {}
     for layer, partition, name in (tuple(item) for item in expected):
         packed = dest_root / layer / partition / name
-        manifest_path = Path(str(packed) + ".manifest.json")
+        manifest_path = manifest_path_for(packed)
         if not packed.exists() or not manifest_path.exists():
             missing.append(f"{layer}/{partition}/{name}")
             continue
