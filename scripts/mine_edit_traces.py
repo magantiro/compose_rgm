@@ -33,16 +33,20 @@ caps, and the output location are all config fields.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import platform
 import sys
 import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Sequence
 
+import networkx as nx
 import numpy as np
 from rdkit import Chem, DataStructs
-from rdkit import RDLogger
+from rdkit import RDLogger, rdBase
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # reuse the committed mining primitives
@@ -69,6 +73,11 @@ from compose_v4.data.organic_corpus import (  # noqa: E402
     BROAD_ORGANIC_V1,
     load_organic_corpus_split,
 )
+from compose_v4.data.mmp_pool_freezer import (  # noqa: E402
+    build_compiler_identity,
+    deterministic_dedup_and_cap,
+)
+from compose_v4.experiments.analogue_prior import ANALOGUE_SUPPORT_CONTRACT  # noqa: E402
 from compose_v4.rewrite.kernel import de_novo_rewrite_system  # noqa: E402
 from compose_v4.rewrite.source_corruption import make_edit_pair  # noqa: E402
 from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target  # noqa: E402
@@ -79,6 +88,38 @@ from compose_v4.rewrite.typed_ring_catalog import (  # noqa: E402
 
 RDLogger.DisableLog("rdApp.*")
 REPO = Path(__file__).resolve().parent.parent
+_V2_COMPILER_IDENTITY_SOURCES = (
+    "scripts/build_analogue_trace_pool.py",
+    "scripts/mine_edit_traces.py",
+    "src/compose_v4/chem/molecular_graph.py",
+    "src/compose_v4/chem/persistent_state_identity.py",
+    "src/compose_v4/chem/state.py",
+    "src/compose_v4/data/mmp_pool_freezer.py",
+    "src/compose_v4/experiments/analogue_prior.py",
+    "src/compose_v4/rewrite/action_codec.py",
+    "src/compose_v4/rewrite/factorized_fiber.py",
+    "src/compose_v4/rewrite/kernel.py",
+    "src/compose_v4/rewrite/operators.py",
+    "src/compose_v4/rewrite/trace.py",
+)
+
+
+def compiler_identity_v2() -> dict:
+    """Full source-byte identity for every implementation defining V2 MMP pool semantics."""
+    source_hashes = {
+        relative: hashlib.sha256((REPO / relative).read_bytes()).hexdigest()
+        for relative in _V2_COMPILER_IDENTITY_SOURCES
+    }
+    return build_compiler_identity(
+        source_hashes,
+        runtime_versions={
+            "networkx": nx.__version__,
+            "numpy": np.__version__,
+            "python": platform.python_version(),
+            "rdkit": rdBase.rdkitVersion,
+        },
+        support_contract=ANALOGUE_SUPPORT_CONTRACT,
+    )
 
 
 # ---- config (corpus-agnostic: every corpus/size/cap/output is a field) --------------------------------
@@ -300,9 +341,27 @@ def _compile_directed(sa: str, sb: str, index: int, layer: str, extra: dict,
     return records
 
 
-def compile_mmp(pairs: list[tuple[str, str, str]], config: MiningConfig) -> list[dict]:
+def compile_mmp(
+    pairs: list[tuple[str, str, str]],
+    config: MiningConfig,
+    *,
+    pair_indices: Sequence[int] | None = None,
+) -> list[dict]:
+    """Compile pairs with stable global indices.
+
+    ``pair_indices`` is optional for backward-compatible local callers.  Distributed callers must pass
+    the original positions from ``pairs.jsonl`` rather than restarting at zero in every worker.
+    """
+    indices = tuple(range(len(pairs))) if pair_indices is None else tuple(pair_indices)
+    if len(indices) != len(pairs):
+        raise ValueError("pair_indices length must equal pairs length")
+    if (
+        any(isinstance(index, bool) or not isinstance(index, int) or index < 0 for index in indices)
+        or len(set(indices)) != len(indices)
+    ):
+        raise ValueError("pair_indices must be unique nonnegative integers")
     records = []
-    for index, (sa, sb, core) in enumerate(pairs):
+    for index, (sa, sb, core) in zip(indices, pairs, strict=True):
         records.extend(_compile_directed(sa, sb, index, "mmp_one_cut", {"core_smiles": core}, config))
     return records
 
@@ -326,35 +385,10 @@ def compile_scaffold(candidates: list[dict], config: MiningConfig) -> tuple[list
 def dedup_and_cap(records: list[dict], config: MiningConfig) -> tuple[list[dict], dict]:
     """Dedup directed (source_smiles, target_key) across layers; enforce the per-source cap; balance
     reverse pairs (they are separate directed records). Returns (final_pool, cap_report)."""
-    seen: set[tuple[str, str]] = set()
-    per_source: Counter = Counter()
-    final, dropped_dup, dropped_cap = [], 0, 0
-    family_counts: Counter = Counter()
-    direction_counts: Counter = Counter()
-    layer_counts: Counter = Counter()
-    for record in records:
-        key = (record["source_smiles"], record["target_key"])
-        if key in seen:
-            dropped_dup += 1
-            continue
-        if per_source[record["source_smiles"]] >= config.max_pairs_per_source:
-            dropped_cap += 1
-            continue
-        seen.add(key)
-        per_source[record["source_smiles"]] += 1
-        final.append(record)
-        for fam, n in record["operator_histogram"].items():
-            family_counts[fam] += n
-        direction_counts[record["direction"]] += 1
-        layer_counts[record["layer"]] += 1
-    report = {
-        "records_in": len(records), "records_out": len(final),
-        "dropped_duplicate": dropped_dup, "dropped_per_source_cap": dropped_cap,
-        "family_histogram": dict(family_counts),
-        "direction_balance": dict(direction_counts),
-        "layer_counts": dict(layer_counts),
-    }
-    return final, report
+    return deterministic_dedup_and_cap(
+        records,
+        max_pairs_per_source=config.max_pairs_per_source,
+    )
 
 
 # ---- corruption layer: characterize a sample (records are regenerated at train time) ------------------
@@ -555,6 +589,7 @@ def _provenance(config: MiningConfig) -> dict:
         "compiler_corruption": _hash_sources(["src/compose_v4/rewrite/source_corruption.py"]),
         "corpus_scope_module": _hash_sources(["src/compose_v4/data/organic_corpus.py"]),
         "miner": _hash_sources(["scripts/mine_edit_traces.py"]),
+        "compiler_identity_v2": compiler_identity_v2(),
     }
 
 
