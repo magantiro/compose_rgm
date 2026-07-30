@@ -16,12 +16,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from compose_v4.data.production_edit_corpus import (  # noqa: E402
+from compose_v4.data.production_edit_corpus import (
     ProductionCorpusError,
     load_mmp_records,
     verify_build_complete,
 )
-from compose_v4.data.scaffold_partition import (  # noqa: E402
+from compose_v4.data.scaffold_partition import (
     murcko_scaffold,
     partition_for_scaffold,
 )
@@ -267,7 +267,7 @@ def test_packed_production_records_retain_their_immutable_corpus_address(tmp_pat
             continue
         try:
             candidate = rewrite_trace_from_record(json.loads(line))
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001,S112 -- fixture scan is intentionally best-effort
             continue
         if not unsupported_steps(candidate):
             trace = candidate
@@ -356,6 +356,86 @@ def test_packed_production_records_retain_their_immutable_corpus_address(tmp_pat
                 packed_root=packed_root,
                 declared_names={("corruption", "train"): [name]},
             )
+
+
+@pytest.mark.skipif(not _POOL.exists(), reason="local analogue pool sample unavailable")
+def test_active8_admission_filters_before_path_records_are_exposed(tmp_path):
+    """A whole-trace exclusion removes the trace before progress sampling."""
+
+    from compose_v4.data.packed_trace_store import build_packed_entry, write_packed_shard
+    from compose_v4.data.production_edit_corpus import load_shard_layer_records
+    from compose_v4.data.representability_overlay import unsupported_steps
+    from compose_v4.experiments.analogue_prior import rewrite_trace_from_record
+    from compose_v4.rewrite.progress import TraceProgressCTMC
+    from compose_v4.rewrite.trace_shard import encode_trace_record
+
+    trace = None
+    for line in _POOL.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            candidate = rewrite_trace_from_record(json.loads(line))
+        except Exception:  # noqa: BLE001,S112 -- fixture scan is intentionally best-effort
+            continue
+        if not unsupported_steps(candidate):
+            trace = candidate
+            break
+    if trace is None:
+        pytest.skip("no representable trace in the analogue fixture")
+
+    name = "shard_0000.jsonl.gz"
+    audit_root = tmp_path / "audit"
+    packed_root = tmp_path / "packed"
+    audit_dir = audit_root / "corruption" / "train"
+    packed_dir = packed_root / "corruption" / "train"
+    audit_dir.mkdir(parents=True)
+    packed_dir.mkdir(parents=True)
+    (audit_dir / name).write_bytes(b"authoritative-audit-placeholder")
+    path = TraceProgressCTMC(trace)
+    packed_shard = packed_dir / name
+    entries = []
+    for entry_index, trace_id in enumerate(("accepted", "excluded-whole-trace")):
+        entries.append(
+            build_packed_entry(
+                encode_trace_record(
+                    trace,
+                    n_slots=len(trace.source.atom_types),
+                    seed=entry_index,
+                    trace_id=trace_id,
+                    partition="train",
+                    layer="corruption",
+                ),
+                path,
+            )
+        )
+    write_packed_shard(
+        packed_shard,
+        entries,
+        provenance={"capability_hash": "active8-loader-test"},
+    )
+    packed_sha256 = hashlib.sha256(packed_shard.read_bytes()).hexdigest()
+
+    class _Admission:
+        def expected_source_digest(self, **_kwargs):
+            return packed_sha256
+
+        def is_accepted(self, address):
+            return address.entry_index == 0
+
+        def assert_complete_source_shard(self, **kwargs):
+            assert kwargs["observed_digest"] == packed_sha256
+            assert kwargs["observed_entries"] == 2
+
+    records = load_shard_layer_records(
+        audit_root,
+        "corruption",
+        "train",
+        packed_root=packed_root,
+        declared_names={("corruption", "train"): [name]},
+        active8_admission=_Admission(),
+    )
+    assert len(records) == 1
+    assert records[0].corpus_address.trace_id == "accepted"
 
 
 def test_declared_shard_names_cross_checks_the_build_count(tmp_path):

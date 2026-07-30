@@ -26,6 +26,10 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from compose_v4.data.active8_trace_inventory import (
+    Active8TraceAdmission,
+    Active8TraceInventoryError,
+)
 from compose_v4.data.packed_trace_store import read_addressed_packed_shard
 from compose_v4.data.representability_overlay import (
     check_unlisted,
@@ -207,6 +211,7 @@ def load_shard_layer_records(
     verify_fraction: float = 0.0,
     declared_names: dict | None = None,
     representability_overlay: dict | None = None,
+    active8_admission: Active8TraceAdmission | None = None,
 ) -> tuple[PathRecord, ...]:
     """Rebuild every trace of one precompiled (layer, partition) into a GM ``PathRecord``.
 
@@ -244,7 +249,19 @@ def load_shard_layer_records(
             if representability_overlay else set()
         )
         excluded = 0
+        active8_excluded = 0
         for path in packed_paths:
+            expected_digest = (
+                None
+                if active8_admission is None
+                else active8_admission.expected_source_digest(
+                    packed_shard_name=path.name,
+                    layer=shard_layer,
+                    partition=partition,
+                )
+            )
+            observed_digest: str | None = None
+            observed_entries = 0
             for addressed in read_addressed_packed_shard(
                 path,
                 verify_fraction=verify_fraction,
@@ -255,9 +272,43 @@ def load_shard_layer_records(
                     expected_partition=partition,
                 )
                 trace, packed_path = addressed.trace, addressed.path
-                if check_unlisted(trace, trace_key(trace), allowed,
-                                  layer=overlay_layer, partition=partition):
+                address = addressed.address
+                observed_entries += 1
+                if observed_digest is None:
+                    observed_digest = address.packed_shard_content_sha256
+                elif observed_digest != address.packed_shard_content_sha256:
+                    raise ProductionCorpusError(
+                        "one packed source shard yielded multiple physical digests"
+                    )
+                if (
+                    expected_digest is not None
+                    and address.packed_shard_content_sha256 != expected_digest
+                ):
+                    raise ProductionCorpusError(
+                        "packed source shard bytes disagree with the active-8 inventory"
+                    )
+                active8_accepted = (
+                    True
+                    if active8_admission is None
+                    else active8_admission.is_accepted(address)
+                )
+                overlay_excluded = check_unlisted(
+                    trace,
+                    trace_key(trace),
+                    allowed,
+                    layer=overlay_layer,
+                    partition=partition,
+                )
+                if overlay_excluded and active8_accepted:
+                    raise ProductionCorpusError(
+                        "representability overlay excludes a trace admitted by "
+                        "the active-8 whole-trace inventory"
+                    )
+                if overlay_excluded:
                     excluded += 1
+                    continue
+                if not active8_accepted:
+                    active8_excluded += 1
                     continue
                 records.append(
                     PathRecord(
@@ -266,11 +317,35 @@ def load_shard_layer_records(
                         corpus_address=addressed.address,
                     )
                 )
+            if active8_admission is not None:
+                try:
+                    active8_admission.assert_complete_source_shard(
+                        packed_shard_name=path.name,
+                        layer=shard_layer,
+                        partition=partition,
+                        observed_digest=observed_digest,
+                        observed_entries=observed_entries,
+                    )
+                except Active8TraceInventoryError as error:
+                    raise ProductionCorpusError(str(error)) from error
         if excluded:
             print(
                 json.dumps({"phase": "representability_exclusions_applied", "layer": shard_layer,
                             "partition": partition, "excluded": excluded,
                             "listed_in_overlay": len(allowed)}, sort_keys=True),
+                flush=True,
+            )
+        if active8_excluded:
+            print(
+                json.dumps(
+                    {
+                        "phase": "active8_whole_trace_exclusions_applied",
+                        "layer": shard_layer,
+                        "partition": partition,
+                        "excluded": active8_excluded,
+                    },
+                    sort_keys=True,
+                ),
                 flush=True,
             )
         return tuple(records)
@@ -353,12 +428,19 @@ def load_production_edit_corpus(
     packed_root: Path | None = None,
     packed_mmp_root: Path | None = None,
     representability_overlay: dict | None = None,
+    active8_admission: Active8TraceAdmission | None = None,
     verify_fraction: float = 0.0,
     require_packed_mmp: bool = True,
     seed: int = 0,
 ) -> LayeredEditCorpus:
     """Assemble the three-layer production corpus and its sampler from validated artifacts."""
     root = Path(root)
+    if active8_admission is not None and (
+        packed_root is None or packed_mmp_root is None
+    ):
+        raise ProductionCorpusError(
+            "active-8 whole-trace admission requires both packed corpus roots"
+        )
     build = verify_build_complete(root, expected_contract=expected_contract)
     declared_names = declared_shard_names(root)
 
@@ -368,6 +450,7 @@ def load_production_edit_corpus(
             root, shard_layer, partition, checkpoint_interval=checkpoint_interval,
             packed_root=packed_root, verify_fraction=verify_fraction,
             declared_names=declared_names, representability_overlay=representability_overlay,
+            active8_admission=active8_admission,
         )
     # The MMP store is built by its own app and normally lives at its own root; fall back to a
     # subdirectory of the packed root only if no explicit root was given.
@@ -384,8 +467,19 @@ def load_production_edit_corpus(
             excluded_keys(representability_overlay, "mmp_analogue", partition)
             if representability_overlay else set()
         )
-        mmp_list, mmp_excluded = [], 0
+        mmp_list, mmp_excluded, mmp_active8_excluded = [], 0, 0
         for shard in _shard_paths(packed_mmp, "", partition):
+            expected_digest = (
+                None
+                if active8_admission is None
+                else active8_admission.expected_source_digest(
+                    packed_shard_name=shard.name,
+                    layer=PACKED_MMP_LAYER,
+                    partition=partition,
+                )
+            )
+            observed_digest: str | None = None
+            observed_entries = 0
             for addressed in read_addressed_packed_shard(
                 shard,
                 verify_fraction=verify_fraction,
@@ -396,9 +490,43 @@ def load_production_edit_corpus(
                     expected_partition=partition,
                 )
                 trace, packed_path = addressed.trace, addressed.path
-                if check_unlisted(trace, trace_key(trace), mmp_allowed,
-                                  layer="mmp_analogue", partition=partition):
+                address = addressed.address
+                observed_entries += 1
+                if observed_digest is None:
+                    observed_digest = address.packed_shard_content_sha256
+                elif observed_digest != address.packed_shard_content_sha256:
+                    raise ProductionCorpusError(
+                        "one packed MMP shard yielded multiple physical digests"
+                    )
+                if (
+                    expected_digest is not None
+                    and address.packed_shard_content_sha256 != expected_digest
+                ):
+                    raise ProductionCorpusError(
+                        "packed MMP shard bytes disagree with the active-8 inventory"
+                    )
+                active8_accepted = (
+                    True
+                    if active8_admission is None
+                    else active8_admission.is_accepted(address)
+                )
+                overlay_excluded = check_unlisted(
+                    trace,
+                    trace_key(trace),
+                    mmp_allowed,
+                    layer="mmp_analogue",
+                    partition=partition,
+                )
+                if overlay_excluded and active8_accepted:
+                    raise ProductionCorpusError(
+                        "representability overlay excludes an MMP trace admitted "
+                        "by the active-8 whole-trace inventory"
+                    )
+                if overlay_excluded:
                     mmp_excluded += 1
+                    continue
+                if not active8_accepted:
+                    mmp_active8_excluded += 1
                     continue
                 mmp_list.append(
                     PathRecord(
@@ -407,11 +535,23 @@ def load_production_edit_corpus(
                         corpus_address=addressed.address,
                     )
                 )
+            if active8_admission is not None:
+                try:
+                    active8_admission.assert_complete_source_shard(
+                        packed_shard_name=shard.name,
+                        layer=PACKED_MMP_LAYER,
+                        partition=partition,
+                        observed_digest=observed_digest,
+                        observed_entries=observed_entries,
+                    )
+                except Active8TraceInventoryError as error:
+                    raise ProductionCorpusError(str(error)) from error
         mmp_records = tuple(mmp_list)
         mmp_stats = {"source": "packed", "kept": len(mmp_records),
                      "scanned": len(mmp_records) + mmp_excluded, "other_partition": 0,
                      "unassignable": 0, "unbuildable": 0,
-                     "representability_excluded": mmp_excluded}
+                     "representability_excluded": mmp_excluded,
+                     "active8_excluded": mmp_active8_excluded}
     elif require_packed_mmp:
         raise ProductionCorpusError(
             f"packed MMP layer missing at {packed_mmp}; refusing to fall back to the raw pool "
@@ -426,6 +566,24 @@ def load_production_edit_corpus(
         )
         mmp_stats["source"] = "raw_pool_replay"
     by_layer[MMP_ANALOGUE] = mmp_records
+
+    if active8_admission is not None:
+        observed_shards = {
+            (shard_layer, partition, path.name)
+            for shard_layer in _SHARD_LAYER_TO_PRODUCTION
+            for path in _shard_paths(Path(packed_root), shard_layer, partition)
+        }
+        observed_shards.update(
+            (PACKED_MMP_LAYER, partition, path.name)
+            for path in _shard_paths(Path(packed_mmp), "", partition)
+        )
+        try:
+            active8_admission.assert_partition_shards(
+                partition,
+                observed_shards,
+            )
+        except Active8TraceInventoryError as error:
+            raise ProductionCorpusError(str(error)) from error
 
     # Concatenate in the canonical layer order so sampler indices are well defined.
     ordered = {layer: by_layer[layer] for layer in PRODUCTION_LAYERS}
@@ -467,6 +625,20 @@ def load_production_edit_corpus(
         "contract": build.get("contract", {}),
         "authorization": build.get("authorization", {}),
         "reducer_checksum": build.get("reducer_checksum"),
+        "active8_trace_inventory": (
+            None
+            if active8_admission is None
+            else {
+                "manifest_file_sha256": (
+                    active8_admission.manifest_file_sha256
+                ),
+                "inventory_sha256": active8_admission.inventory_sha256,
+                "effective_source_corpus_cache_sha256": (
+                    active8_admission.effective_source_corpus_cache_sha256
+                ),
+                "counts": dict(active8_admission.counts),
+            }
+        ),
     }
     corpus = LayeredEditCorpus(
         records=tuple(records), layer_bounds=bounds, sampler=sampler, provenance=provenance

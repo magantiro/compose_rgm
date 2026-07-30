@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -16,11 +18,13 @@ from compose_v4.data.active8_trace_inventory import (
     accepted_trace_keys,
     build_active8_trace_inventory,
     inventory_record_for_trace,
+    load_active8_trace_admission,
 )
 from compose_v4.data.packed_trace_store import (
     AddressedPackedTrace,
     PackedTraceAddress,
     PackedTraceProgress,
+    read_addressed_packed_shard,
     write_packed_shard,
 )
 from compose_v4.experiments.factorized_successor_training import (
@@ -324,6 +328,52 @@ def test_immutable_inventory_reader_exposes_only_whole_accepted_traces(
     assert only[1:] == (0, "accepted")
 
     manifest_path = output / "ACTIVE8_TRACE_INVENTORY.json"
+    admission = load_active8_trace_admission(
+        manifest_path,
+        expected_manifest_file_sha256=hashlib.sha256(
+            manifest_path.read_bytes()
+        ).hexdigest(),
+        expected_inventory_sha256=manifest["inventory_sha256"],
+        expected_effective_source_corpus_cache_sha256=manifest[
+            "source_identity"
+        ]["effective_source_corpus_cache_sha256"],
+    )
+    addressed = tuple(read_addressed_packed_shard(shard))
+    assert admission.is_accepted(addressed[0].address)
+    assert not admission.is_accepted(addressed[1].address)
+    admission.assert_complete_source_shard(
+        packed_shard_name=shard.name,
+        layer="corruption",
+        partition="train",
+        observed_digest=addressed[0].address.packed_shard_content_sha256,
+        observed_entries=2,
+    )
+    admission.assert_partition_shards(
+        "train",
+        {("corruption", "train", shard.name)},
+    )
+    with pytest.raises(
+        Active8TraceInventoryError,
+        match="trace ID disagrees",
+    ):
+        admission.is_accepted(
+            SimpleNamespace(
+                packed_shard_content_sha256=(
+                    addressed[0].address.packed_shard_content_sha256
+                ),
+                entry_index=0,
+                trace_id="substituted-trace",
+            )
+        )
+    with pytest.raises(
+        Active8TraceInventoryError,
+        match="file SHA-256 mismatch",
+    ):
+        load_active8_trace_admission(
+            manifest_path,
+            expected_manifest_file_sha256="f" * 64,
+        )
+
     original_manifest = manifest_path.read_bytes()
     original_decision_shard = (
         output / manifest["shards"][0]["inventory_shard"]
