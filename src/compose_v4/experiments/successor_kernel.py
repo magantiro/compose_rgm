@@ -53,11 +53,13 @@ The trained objective is MARK-LEVEL. ``factorized_mark_bregman_loss`` is
     loss = total_hazard - teacher_rate * (log_hazard + selected_mark_log_probability)
 
 a Poisson-KL Generator Matching loss "in normalized marked-rate form" that scores the selected teacher
-MARK. Consequently there is **no production canonical-successor aggregator wired into training or
-rollout**: both ``model.segmented_successor`` and
-``experiments.canonical_successor_distillation.aggregate_canonical_successor_rates`` have test callers
-only. The single exception is the graft family, which already receives a within-fiber quotient at training
-time via ``graft_successor_groups`` -- so the trained law is mark-level EXCEPT for graft.
+MARK. Consequently the completed run did **not** train a general canonical-successor objective. The
+production evaluator now derives the complete pushforward in ``production_successor_kernel``, using
+``model.segmented_successor`` for aggregation. A bounded differentiable replacement-training bridge now
+exists in ``factorized_successor_training``; it is not yet wired into the packed full trainer and therefore
+does not change the completed run's semantics. The single completed-run exception is the graft family,
+which already receives a within-fiber quotient at training time via ``graft_successor_groups`` -- so the
+completed trained law is mark-level EXCEPT for graft.
 
 Consequences, all load-bearing:
 

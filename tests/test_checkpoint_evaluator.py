@@ -91,6 +91,9 @@ def _write_checkpoint(path: Path, *, editing: bool, cycle_ops: bool, macro: bool
             "corrupted_prior_mix": editing,
             "enable_cycle_ops": cycle_ops,
             "enable_ring_grow_macro": macro,
+            "max_atoms": 8,
+            "bond_representation": "aromatic",
+            "rate_factorization": "hierarchical",
         },
         path,
     )
@@ -190,6 +193,9 @@ def test_support_signature_is_populated_from_the_model(conforming):
     assert signature.embedded_jump_chain_policy == "fixed_step_embedded_jump_chain"
     assert signature.ringcore_configuration == "ringcore_v1_compositional_cycle_ops"
     assert signature.canonicalizer_version == "canonical_state_key"
+    assert signature.max_atoms == 8
+    assert signature.aromaticity_policy == "aromatic"
+    assert signature.charge_vocabulary == (-2, -1, 0, 1, 2)
     # the organic vocabulary must actually be read, not left empty
     assert len(signature.element_vocabulary) > 4, signature.element_vocabulary
 
@@ -224,6 +230,27 @@ def test_context_builds_for_an_editing_experiment(conforming, registry):
     assert context.registry_protocol_hash == (
         registry["protocol"]["protocol_freeze"]["content_hash"]
     )
+
+
+def test_context_constructs_the_shared_production_successor_kernel(
+    conforming, registry
+):
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+
+    context = build_context(
+        checkpoint=conforming,
+        registry=registry,
+        experiment_id="E2",
+        seed=0,
+    )
+    kernel = context.successor_kernel(time=0.5)
+    batch = kernel.successors(
+        pad_molecular_graph(smiles_to_molecular_graph("CCO"), 8)
+    )
+    assert batch.identity.checkpoint_sha256 == context.checkpoint.sha256
+    assert batch.identity.support_signature == context.support_signature
+    assert batch.support_size > 0
 
 
 def test_unknown_experiment_id_fails_loudly(conforming, registry):

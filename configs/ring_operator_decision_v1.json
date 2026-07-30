@@ -1,0 +1,349 @@
+{
+  "schema": "compose.ring_operator_decision_contract",
+  "schema_version": 1,
+  "contract_id": "compose-ring-operator-decision-v1",
+  "status": "DESIGN_FROZEN_IMPLEMENTATION_BLOCKED",
+  "current_default": "primitive_ringcore",
+  "scientific_question": "Does retaining primitive cycle closing and opening while adding ring_system_grow as an optional one-event accelerator improve source-conditioned molecular editing under fair cost and control comparisons?",
+  "scope": {
+    "model": "property_agnostic_source_conditioned_canonical_successor_editing_prior",
+    "inference": "fixed_budget_embedded_canonical_successor_jump_chain",
+    "de_novo_checkpoint_out_of_scope": true,
+    "null_source_out_of_scope": true,
+    "max_active_atoms": 40,
+    "stereochemistry": "out_of_scope",
+    "formal_charge_policy": "charge_preserving"
+  },
+  "non_negotiable_operator_boundary": {
+    "required_in_every_arm": [
+      "cycle_insert",
+      "cycle_attach"
+    ],
+    "cycle_insert_semantics": "add_one_legal_bond_between_existing_atoms_to_close_a_cycle",
+    "cycle_attach_semantics": "delete_one_non_bridge_cycle_bond_to_open_a_cycle",
+    "macro_under_test": "ring_system_grow",
+    "macro_can_replace_cycle_insert": false,
+    "macro_can_replace_cycle_attach": false,
+    "macro_only_arm_is_scientifically_adequate": false,
+    "reason": "Ring growth cannot provide ring opening, dynamic topology reversal, or compositional ring support."
+  },
+  "regimes": [
+    {
+      "id": "primitive_ringcore",
+      "enable_cycle_insert": true,
+      "enable_cycle_attach": true,
+      "enable_ring_system_grow": false,
+      "role": "primary_default_and_compositional_support_definition"
+    },
+    {
+      "id": "hybrid_optional_ring_growth",
+      "enable_cycle_insert": true,
+      "enable_cycle_attach": true,
+      "enable_ring_system_grow": true,
+      "role": "candidate_optional_efficiency_accelerator"
+    }
+  ],
+  "current_implementation_readiness": {
+    "model_allows_cycle_primitives_plus_macro": false,
+    "production_successor_evaluator_enumerates_macro": false,
+    "dictionary_oracle_covers_macro_aliases": false,
+    "packed_successor_training_covers_macro_aliases": false,
+    "atomic_constraint_filter_covers_macro": false,
+    "macro_primitive_lowering_certificate_available": true,
+    "paired_training_corpus_compiled": false
+  },
+  "successor_quotient_contract": {
+    "identity": "canonical_molecular_successor",
+    "aggregate_all_marks_with_same_successor": true,
+    "aggregate_slot_symmetry_template_and_operand_aliases": true,
+    "aggregate_macro_and_non_macro_marks_when_they_share_a_one_step_successor": true,
+    "productive_self_or_virtual_event_policy_must_match_across_regimes": true,
+    "training_primary_object": "canonical_successor_probability",
+    "evaluation_primary_object": "canonical_successor_probability",
+    "controller_object": "canonical_successor_probability",
+    "mark_level_power_topk_or_nucleus_controller_forbidden": true,
+    "required_equivalence_test": "production_segmented_equals_fresh_dictionary_oracle"
+  },
+  "macro_execution_contract": {
+    "complete_executable_mark_required": true,
+    "deterministic_executor_required": true,
+    "certified_primitive_lowering_required": true,
+    "all_lowering_intermediates_supported_connected_and_valid": true,
+    "no_repair_or_posthoc_sanitization": true,
+    "macro_failure_rejects_entire_mark": true
+  },
+  "hard_constraint_contract": {
+    "application": "atomic_whole_action_filter_before_successor_aggregation_and_controller_renormalization",
+    "partial_macro_execution_forbidden": true,
+    "posthoc_endpoint_filtering_is_not_constraint_enforcement": true,
+    "reject_entire_macro_if_any_touched_atom_or_bond_is_protected": true,
+    "successor_must_satisfy_all_path_constraints": true,
+    "macro_lowering_must_preserve_executor_validity": true,
+    "enforced_constraints": [
+      "scaffold_protection",
+      "pharmacophore_retention",
+      "protected_atom_and_bond_mapping",
+      "atom_count_interval",
+      "charge_policy",
+      "structural_alert_exclusion",
+      "similarity_corridor_when_registered"
+    ]
+  },
+  "support_claim_contract": {
+    "one_step_support": "expected_to_differ_because_the_macro_adds_a_shortcut_edge",
+    "reachable_transitive_closure": "must_be_audited_separately",
+    "accelerator_claim_requires_every_macro_successor_to_have_a_certified_primitive_path": true,
+    "primitive_path_must_respect_declared_state_space": true,
+    "constraint_conditioned_accelerator_claim_requires_a_constraint_feasible_primitive_path": true,
+    "support_changing_result_label": "extended_support_model_not_optional_accelerator",
+    "support_changing_result_cannot_replace_primary_model_without_explicit_reframing": true,
+    "forbidden_claims": [
+      "identical_one_step_support",
+      "macro_is_required_for_ring_support_without_reachability_evidence",
+      "macro_only_is_bidirectional_topology_control",
+      "event_count_improvement_is_chemistry_efficiency"
+    ]
+  },
+  "training_fairness": {
+    "shared_across_regimes": [
+      "train_validation_and_sealed_test_partitions",
+      "source_target_endpoint_units",
+      "primitive_cycle_open_and_close_records",
+      "molecule_scaffold_and_series_groups",
+      "backbone_and_total_parameter_shapes",
+      "initialization_distribution_or_identical_shared_initialization",
+      "optimizer_and_learning_rate_schedule",
+      "batch_size_and_optimizer_update_count",
+      "molecular_endpoint_draw_schedule",
+      "effective_endpoint_target_coefficient",
+      "random_seeds",
+      "checkpoint_schedule",
+      "checkpoint_selection_rule"
+    ],
+    "macro_data_must_be_paired_with_a_primitive_decomposition_of_the_same_endpoint_unit": true,
+    "macro_only_molecules_or_endpoint_targets_forbidden": true,
+    "raw_mark_uniform_sampling_forbidden": true,
+    "extra_macro_rows_cannot_increase_endpoint_exposure": true,
+    "report_effective_coefficients_by_operator_semantic_cell": true,
+    "matched_views": [
+      "equal_optimizer_updates_and_endpoint_exposures",
+      "equal_training_gpu_hour_ceiling"
+    ],
+    "validation_only_checkpoint_selection": true,
+    "test_metrics_for_checkpoint_or_regime_selection_forbidden": true
+  },
+  "evaluation_fairness": {
+    "shared_across_regimes": [
+      "source_molecules",
+      "goal_and_preference_schedules",
+      "protected_mappings_and_path_constraints",
+      "property_oracles_and_normalization",
+      "controller_architecture_and_training_budget",
+      "controller_validation_rule",
+      "random_seeds",
+      "event_count_budgets",
+      "primitive_equivalent_chemistry_cost_budgets",
+      "oracle_call_budgets",
+      "candidate_or_particle_budget",
+      "success_definitions",
+      "hypervolume_reference_points",
+      "epsilon_dominance_convention"
+    ],
+    "paired_source_level_evaluation_required": true,
+    "held_out_scaffold_and_topology_strata_required": true,
+    "same_number_of_generated_trajectories_required": true,
+    "wall_clock_and_gpu_hours_reported_not_used_as_sole_primary_axis": true
+  },
+  "budget_contract": {
+    "event_count": {
+      "definition": "one_committed_rewrite_equals_one_event_including_one_ring_system_grow",
+      "purpose": "measures_control_horizon_and_intervention_points",
+      "macro_advantage_is_mechanical": true
+    },
+    "primitive_equivalent_chemistry_cost": {
+      "definition": "sum_of_certified_production_primitive_lowering_lengths",
+      "primitive_cycle_insert_cost": 1,
+      "primitive_cycle_attach_cost": 1,
+      "macro_cost": "number_of_steps_in_its_frozen_certified_primitive_lowering",
+      "arbitrary_learned_or_property_dependent_weights_forbidden": true,
+      "purpose": "prevents_a_multi_edit_macro_from_counting_as_one_unit_of_chemical_change"
+    },
+    "required_reporting_axes": [
+      "event_count",
+      "primitive_equivalent_chemistry_cost",
+      "oracle_calls",
+      "model_forward_passes",
+      "canonical_successors_scored",
+      "accepted_edits",
+      "wall_clock_seconds",
+      "gpu_hours"
+    ],
+    "event_count_only_win_is_insufficient_for_hybrid_selection": true
+  },
+  "task_matrix": [
+    {
+      "id": "source_conditioned_lead_transport",
+      "experiment": "E2",
+      "required": true,
+      "capability": "recover_held_out_analogue_targets_without_unproductive_ring_shortcuts"
+    },
+    {
+      "id": "coupled_size_and_ring_adaptation",
+      "experiment": "E3",
+      "required": true,
+      "capability": "change_ring_and_atom_count_while_retaining_source_similarity"
+    },
+    {
+      "id": "cycle_creation",
+      "experiment": "E4",
+      "required": true,
+      "capability": "increase_graph_cycle_rank"
+    },
+    {
+      "id": "cycle_opening",
+      "experiment": "E4",
+      "required": true,
+      "capability": "decrease_graph_cycle_rank"
+    },
+    {
+      "id": "ring_size_change",
+      "experiment": "E4",
+      "required": true,
+      "capability": "change_ring_size_through_valid_committed_states"
+    },
+    {
+      "id": "fused_spiro_or_bridged_modification_where_reachable",
+      "experiment": "E4",
+      "required": true,
+      "capability": "modify_nontrivial_topology_without_template_only_claims"
+    },
+    {
+      "id": "topology_simplification",
+      "experiment": "E4",
+      "required": true,
+      "capability": "remove_unwanted_topology"
+    },
+    {
+      "id": "topology_addition_then_dynamic_reversal",
+      "experiment": "E7",
+      "required": true,
+      "capability": "reverse_a_prior_ring_decision_after_a_preference_switch"
+    },
+    {
+      "id": "pareto_archive_exploration",
+      "experiment": "E7",
+      "required": true,
+      "capability": "reach_undercovered_objective_regions_at_matched_oracle_cost"
+    },
+    {
+      "id": "pareto_fan_from_shared_prefix",
+      "experiment": "E7",
+      "required": true,
+      "capability": "branch_one_valid_prefix_toward_multiple_preferences"
+    },
+    {
+      "id": "protected_path_constraints",
+      "experiment": "E7",
+      "required": true,
+      "capability": "satisfy_hard_constraints_at_every_committed_state"
+    }
+  ],
+  "metric_contract": {
+    "primary_non_tautological": [
+      "topology_target_success_at_matched_primitive_equivalent_cost",
+      "normalized_hypervolume_auc_at_matched_oracle_calls",
+      "dynamic_adaptation_regret_at_matched_oracle_and_primitive_equivalent_cost",
+      "path_feasible_endpoint_yield_at_matched_oracle_calls"
+    ],
+    "required_effectiveness": [
+      "held_out_canonical_successor_nll",
+      "held_out_analogue_target_recovery",
+      "held_out_topology_class_recovery",
+      "retained_source_similarity",
+      "feasible_nondominated_count",
+      "pareto_region_coverage",
+      "pareto_branch_diversity",
+      "topology_round_trip_success",
+      "ring_add_then_open_reversal_success"
+    ],
+    "required_efficiency": [
+      "committed_events_to_success",
+      "primitive_equivalent_cost_to_success",
+      "oracle_calls_to_success",
+      "canonical_successors_scored_to_success",
+      "wall_clock_seconds_to_success",
+      "gpu_hours"
+    ],
+    "required_control_granularity": [
+      "valid_intervention_points_per_primitive_equivalent_cost",
+      "dynamic_time_to_adapt",
+      "prefix_reuse",
+      "constraint_feasible_branch_count",
+      "unnecessary_cycle_open_close_rate"
+    ],
+    "hard_gates": [
+      "all_committed_states_supported_connected_and_valid",
+      "zero_atomic_hard_constraint_violations",
+      "successor_quotient_dictionary_equivalence",
+      "cycle_insert_successor_learnability",
+      "cycle_attach_successor_learnability",
+      "no_material_cycle_open_or_close_regression",
+      "held_out_topology_generalization",
+      "dynamic_reversal_noninferiority",
+      "no_test_selection"
+    ],
+    "forbidden_as_decision_evidence": [
+      "family_choice_accuracy_alone",
+      "mark_topk_alone",
+      "committed_event_count_alone",
+      "training_loss_alone",
+      "validity_alone",
+      "wall_clock_alone"
+    ]
+  },
+  "statistical_contract": {
+    "paired_by_source_goal_schedule_and_seed": true,
+    "report_every_seed": true,
+    "source_group_bootstrap_confidence_intervals": true,
+    "multiplicity_correction_for_primary_metrics": true,
+    "effect_sizes_and_uncertainty_required": true,
+    "selection_partition": "validation",
+    "sealed_test_used_once_after_decision_freeze": true
+  },
+  "decision_rule": {
+    "primitive_ringcore_remains_default_unless_all_hybrid_conditions_pass": true,
+    "hybrid_conditions": [
+      "all_implementation_readiness_checks_true",
+      "all_hard_gates_pass",
+      "all_macro_successors_have_constraint_appropriate_certified_primitive_paths",
+      "cycle_open_and_close_noninferiority_margins_pass",
+      "at_least_one_primary_non_tautological_metric_improves_with_predeclared_uncertainty_rule",
+      "improvement_generalizes_to_held_out_scaffolds_and_topology_strata",
+      "no_material_regression_in_dynamic_reversal_pareto_or_path_constraint_tasks",
+      "compute_and_candidate_expansion_are_reported"
+    ],
+    "committed_event_reduction_alone_selects_hybrid": false,
+    "if_support_parity_fails": "classify_as_extended_support_model_and_require_explicit_scientific_reframing",
+    "if_hybrid_conditions_fail": "retain_primitive_ringcore",
+    "if_hybrid_conditions_pass": "include_ring_system_grow_as_optional_ablatable_accelerator_while_primitives_define_support"
+  },
+  "thresholds_to_freeze_before_paired_training": {
+    "cycle_insert_successor_nll_noninferiority_margin": null,
+    "cycle_attach_successor_nll_noninferiority_margin": null,
+    "dynamic_reversal_noninferiority_margin": null,
+    "path_feasible_yield_noninferiority_margin": null,
+    "minimum_primary_effect_size": null,
+    "confidence_level": null,
+    "minimum_sources_per_task_stratum": null,
+    "maximum_macro_endpoint_template_concentration": null,
+    "maximum_training_gpu_hours_per_regime": null
+  },
+  "task_artifacts": {
+    "development": null,
+    "validation": null,
+    "sealed_test": null
+  },
+  "paired_training_authorized": false,
+  "paired_training_completed": false,
+  "paired_final_evaluation_authorized": false
+}

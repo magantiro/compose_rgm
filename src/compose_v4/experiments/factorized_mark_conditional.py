@@ -5,12 +5,13 @@ from __future__ import annotations
 import copy
 import json
 from collections import OrderedDict
+from collections.abc import Callable, Iterator, Mapping
 from contextlib import nullcontext
 from dataclasses import dataclass, field, replace
 from math import cos, exp, pi
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Callable, Iterator, Mapping
+from typing import Any
 
 import numpy as np
 import torch
@@ -20,17 +21,17 @@ from torch.utils.data import DataLoader, Dataset
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.cnof_conditional import PathRecord
+from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.experiments.training_support_cache import (
     ShardedTrainingSupportCache,
 )
-from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
+    MARK_RULE_NAMES,
+    MARK_RULE_TO_INDEX,
     ChemistryStateFeatures,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
-    MARK_RULE_NAMES,
-    MARK_RULE_TO_INDEX,
     OperatorCapabilities,
     RingTeacherSemanticCertificate,
     SparseBinaryRows,
@@ -965,18 +966,29 @@ def factorized_mark_metrics(
         if current_terminal_count:
             terminal_hazard_sum += float(prediction.total_hazard[terminal].sum())
             terminal_count += current_terminal_count
+    family_choice_accuracy = (
+        family_hits_sum / nonterminal_count if nonterminal_count else 0.0
+    )
+    family_choice_top3_recall = (
+        family_top3_hits_sum / nonterminal_count if nonterminal_count else 0.0
+    )
+    mean_teacher_full_mark_probability = (
+        teacher_probability_sum / nonterminal_count if nonterminal_count else 0.0
+    )
     metrics = {
         "factorized_gm_loss": loss_sum / batch.batch_size,
-        "mean_teacher_mark_probability": (
-            teacher_probability_sum / nonterminal_count if nonterminal_count else 0.0
-        ),
+        # Explicit names prevent these diagnostics from being mistaken for
+        # complete-action or canonical-successor accuracy.  Keep the legacy
+        # keys below for checkpoint/report compatibility.
+        "mean_teacher_full_mark_probability": mean_teacher_full_mark_probability,
+        "family_choice_accuracy": family_choice_accuracy,
+        "family_choice_top3_recall": family_choice_top3_recall,
+        "mean_teacher_mark_probability": mean_teacher_full_mark_probability,
         "mean_teacher_family_probability": (
             teacher_family_probability_sum / nonterminal_count if nonterminal_count else 0.0
         ),
-        "family_accuracy": (family_hits_sum / nonterminal_count if nonterminal_count else 0.0),
-        "family_top3_accuracy": (
-            family_top3_hits_sum / nonterminal_count if nonterminal_count else 0.0
-        ),
+        "family_accuracy": family_choice_accuracy,
+        "family_top3_accuracy": family_choice_top3_recall,
         "mean_terminal_hazard": (terminal_hazard_sum / terminal_count if terminal_count else 0.0),
         "mean_predicted_hazard": predicted_hazard_sum / batch.batch_size,
         "mean_teacher_hazard": teacher_hazard_sum / batch.batch_size,
@@ -990,7 +1002,7 @@ def factorized_mark_metrics(
     represented_family_indices = [
         index for index, count in enumerate(family_counts) if count
     ]
-    metrics["balanced_family_accuracy"] = (
+    balanced_family_choice_accuracy = (
         sum(
             family_hits[index] / family_counts[index]
             for index in represented_family_indices
@@ -999,7 +1011,7 @@ def factorized_mark_metrics(
         if represented_family_indices
         else 0.0
     )
-    metrics["balanced_family_top3_accuracy"] = (
+    balanced_family_choice_top3_recall = (
         sum(
             family_top3_hits[index] / family_counts[index]
             for index in represented_family_indices
@@ -1008,16 +1020,28 @@ def factorized_mark_metrics(
         if represented_family_indices
         else 0.0
     )
+    metrics["balanced_family_choice_accuracy"] = balanced_family_choice_accuracy
+    metrics["balanced_family_choice_top3_recall"] = (
+        balanced_family_choice_top3_recall
+    )
+    # Backward-compatible aliases.  These are family-choice diagnostics, not
+    # full-mark accuracy and not canonical-successor accuracy.
+    metrics["balanced_family_accuracy"] = balanced_family_choice_accuracy
+    metrics["balanced_family_top3_accuracy"] = balanced_family_choice_top3_recall
     metrics["represented_families"] = float(len(represented_family_indices))
     for family_index, family_name in enumerate(MARK_RULE_NAMES):
         count = family_counts[family_index]
-        metrics[f"teacher_examples_{family_name}"] = float(count)
-        metrics[f"family_accuracy_{family_name}"] = (
-            family_hits[family_index] / count if count else 0.0
-        )
-        metrics[f"family_top3_accuracy_{family_name}"] = (
+        family_choice_recall = family_hits[family_index] / count if count else 0.0
+        family_choice_top3_recall = (
             family_top3_hits[family_index] / count if count else 0.0
         )
+        metrics[f"teacher_examples_{family_name}"] = float(count)
+        metrics[f"family_choice_recall_{family_name}"] = family_choice_recall
+        metrics[f"family_choice_top3_recall_{family_name}"] = (
+            family_choice_top3_recall
+        )
+        metrics[f"family_accuracy_{family_name}"] = family_choice_recall
+        metrics[f"family_top3_accuracy_{family_name}"] = family_choice_top3_recall
         metrics[f"mean_teacher_family_probability_{family_name}"] = (
             family_teacher_probability_sums[family_index] / count if count else 0.0
         )
@@ -1709,11 +1733,11 @@ __all__ = [
     "FactorizedMarkCollator",
     "FactorizedMarkDataset",
     "FactorizedMarkExample",
-    "factorized_mark_loader",
-    "factorized_mark_metrics",
-    "factorized_adamw_parameter_groups",
     "configure_factorized_trainable_parameters",
     "cosine_warmup_learning_rate",
+    "factorized_adamw_parameter_groups",
+    "factorized_mark_loader",
+    "factorized_mark_metrics",
     "sample_factorized_mark_batch",
     "train_factorized_mark_model",
 ]

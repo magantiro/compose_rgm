@@ -28,11 +28,12 @@ loader defaults it to True when the key is absent, so a pre-RingCore checkpoint 
 must match the registry's declared production configuration (so an editing experiment cannot be handed a
 de-novo checkpoint).
 
-Scope of A1.1
--------------
-Construction, capability resolution, support signature and the versioned output schema. Enumeration and
-canonical aggregation land in A1.2 and are deliberately absent here rather than stubbed with a placeholder
-implementation that could be mistaken for real.
+Evaluator surface
+-----------------
+Construction, capability resolution, support signature and the versioned output schema live here.
+``EvaluationContext.successor_kernel`` is the sole experiment-facing constructor for the production
+factorized canonical-successor kernel.  The implementation itself lives in one focused module, but
+experiments never construct it independently.
 """
 from __future__ import annotations
 
@@ -81,6 +82,9 @@ class CheckpointProvenance:
     corrupted_prior_mix: bool
     enable_cycle_ops: bool
     corpus_scope_hash: str | None
+    max_atoms: int | None
+    bond_representation: str | None
+    rate_factorization: str | None
 
 
 @dataclass(frozen=True)
@@ -100,6 +104,20 @@ class EvaluationContext:
             implementation=implementation,
             support_signature=self.support_signature,
             checkpoint_sha256=self.checkpoint.sha256,
+        )
+
+    def successor_kernel(self, *, time: float):
+        """Construct the one production molecular kernel experiments consume."""
+        from compose_v4.experiments.production_successor_kernel import (  # noqa: PLC0415
+            FactorizedCanonicalSuccessorKernel,
+        )
+
+        return FactorizedCanonicalSuccessorKernel(
+            self.model,
+            time=float(time),
+            identity=self.kernel_identity(
+                "factorized_ringcore_segmented_pushforward"
+            ),
         )
 
 
@@ -214,6 +232,19 @@ def read_checkpoint_provenance(path: Path) -> CheckpointProvenance:
         # The gate persists "enable_cycle_ops" (checkpoint_metadata), NOT "cycle_op_mix".
         enable_cycle_ops=bool(payload.get("enable_cycle_ops", False)),
         corpus_scope_hash=payload.get("corpus_scope_hash"),
+        max_atoms=(
+            None if payload.get("max_atoms") is None else int(payload["max_atoms"])
+        ),
+        bond_representation=(
+            None
+            if payload.get("bond_representation") is None
+            else str(payload["bond_representation"])
+        ),
+        rate_factorization=(
+            None
+            if payload.get("rate_factorization") is None
+            else str(payload["rate_factorization"])
+        ),
     )
 
 
@@ -243,10 +274,13 @@ def build_support_signature(
         operator_registry_hash=_operator_registry_hash(),
         capability_flags=tuple((name, flags[name]) for name in CAPABILITY_FLAGS),
         element_vocabulary=elements,
-        max_atoms=getattr(model, "max_atoms", None),
-        valence_policy=str(getattr(model, "ring_electronic_mode", None) or "unknown"),
+        charge_vocabulary=(-2, -1, 0, 1, 2),
+        bond_vocabulary=("none", "single", "double", "triple", "aromatic"),
+        aromaticity_policy=provenance.bond_representation,
+        max_atoms=provenance.max_atoms,
+        valence_policy="declared_element_valence_classes_plus_hydrogen_budget",
         canonicalizer_version="canonical_state_key",
-        executor_version=str(getattr(model, "rate_factorization", None) or "unknown"),
+        executor_version=_operator_registry_hash(),
         persistent_slot_schema="slot_stable_v1",
         atom_insert_arity_support=(0, 1),
         embedded_jump_chain_policy="fixed_step_embedded_jump_chain",

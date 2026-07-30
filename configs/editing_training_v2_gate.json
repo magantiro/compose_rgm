@@ -1,0 +1,242 @@
+{
+  "schema": "compose.editing_training_gate_contract",
+  "schema_version": 1,
+  "contract_id": "compose-editing-training-v2-prelaunch",
+  "status": "DESIGN_NOT_TRAINING_AUTHORIZED",
+  "scope": "source_conditioned_embedded_canonical_successor_editing_prior",
+  "dependencies": {
+    "corpus_contract": "configs/editing_corpus_v2_contract.json",
+    "accuracy_architecture_audit": "docs/RINGCORE_V1_ACCURACY_AND_ARCHITECTURE_AUDIT_2026-07-30.md",
+    "checkpoint_inventory": "diagnostics/coherence/ringcore_v1_scientific_a7546e2_frozen_inventory.json"
+  },
+  "metric_contract": {
+    "primary": [
+      "production_weighted_canonical_successor_nll",
+      "balanced_semantic_cell_canonical_successor_nll"
+    ],
+    "required_diagnostics": [
+      "teacher_successor_probability",
+      "teacher_successor_rank",
+      "teacher_successor_mrr",
+      "teacher_successor_topk_recall",
+      "uniform_successor_nll",
+      "uniform_normalized_successor_lift",
+      "raw_mark_count",
+      "canonical_successor_count",
+      "alias_multiplicity",
+      "productive_mass",
+      "virtual_self_mass",
+      "family_choice_accuracy",
+      "family_choice_top3_recall"
+    ],
+    "hazard_reported_separately": [
+      "hazard_nll_or_bregman",
+      "hazard_calibration",
+      "terminal_hazard"
+    ],
+    "forbidden_as_primary_or_checkpoint_selector": [
+      "family_accuracy",
+      "family_top3_accuracy",
+      "balanced_family_accuracy",
+      "balanced_family_top3_accuracy",
+      "raw_mark_top1_accuracy",
+      "aggregate_factorized_gm_loss"
+    ]
+  },
+  "development_panels": {
+    "required_semantic_slices": [
+      "atom_insert_growth",
+      "atom_delete_shrinkage",
+      "atom_restate_local_substitution",
+      "bond_reorder_electronic_change",
+      "bond_reroute_attachment_relocation",
+      "cycle_insert_ring_closure",
+      "cycle_attach_ring_opening"
+    ],
+    "conditional_slices": [
+      "ring_system_restate"
+    ],
+    "panel_axes": [
+      "candidate_count",
+      "canonical_successor_count",
+      "alias_multiplicity",
+      "graph_diameter",
+      "edit_context_radius",
+      "atom_count",
+      "ring_size",
+      "ring_system_type",
+      "broad_organic_element_valence",
+      "path_length",
+      "data_lane"
+    ],
+    "unique_state_deterministic_panels_required": true,
+    "repeated_state_distribution_panels_required": true
+  },
+  "gates": [
+    {
+      "id": "M0_metric_semantics",
+      "maximum_optimizer_steps": 0,
+      "requirements": [
+        "canonical_successor_evaluator_is_single_production_entry_point",
+        "production_segmented_equals_dictionary_oracle",
+        "legacy_family_accuracy_names_are_not_action_accuracy",
+        "checkpoint_snapshot_scores_current_state_not_embedded_best_state"
+      ]
+    },
+    {
+      "id": "S0_support_and_labels",
+      "maximum_optimizer_steps": 0,
+      "requirements": [
+        "all_teacher_actions_legal",
+        "all_teacher_actions_execute_to_stored_exact_successor",
+        "all_teacher_successor_fibers_nonempty",
+        "all_packed_rows_preserve_persistent_slot_state",
+        "all_undirected_endpoint_conventions_unique",
+        "all_required_semantic_cells_nonempty",
+        "split_overlap_zero"
+      ]
+    },
+    {
+      "id": "T1_true_successor_micro_overfit",
+      "maximum_optimizer_steps": 500,
+      "examples_per_slice": {
+        "minimum": 64,
+        "maximum": 128
+      },
+      "requirements": [
+        "every_required_slice_has_finite_nonzero_gradients",
+        "unique_state_panels_memorize_canonical_successor",
+        "repeated_state_panels_fit_empirical_successor_distribution",
+        "family_mass_and_within_family_successor_metrics_both_reported",
+        "high_candidate_and_aliased_states_included"
+      ],
+      "numeric_thresholds": {
+        "minimum_unique_state_teacher_successor_top1": null,
+        "minimum_unique_state_teacher_successor_probability": null,
+        "maximum_unique_state_teacher_successor_nll": null,
+        "maximum_repeated_state_excess_nll_over_empirical_entropy": null
+      }
+    },
+    {
+      "id": "P50_gradient_and_collapse_sentinel",
+      "maximum_optimizer_steps": 100,
+      "requirements": [
+        "loss_finite",
+        "gradients_finite",
+        "every_required_family_receives_gradient",
+        "no_required_family_probability_collapses",
+        "training_law_matches_frozen_effective_coefficient_audit"
+      ],
+      "numeric_thresholds": {
+        "minimum_gradient_updates_per_required_slice": null,
+        "maximum_required_slice_successor_nll_regression": null,
+        "maximum_inherited_probe_nll_regression": null
+      }
+    },
+    {
+      "id": "P500_mixed_pilot",
+      "maximum_optimizer_steps": 500,
+      "requirements": [
+        "every_required_successor_slice_beats_uniform",
+        "production_weighted_successor_nll_improves",
+        "balanced_semantic_successor_nll_improves",
+        "graft_retention_probe_passes",
+        "cycle_open_and_close_both_pass",
+        "productive_rollouts_have_no_obvious_delete_or_size_drift"
+      ],
+      "numeric_thresholds": {
+        "minimum_uniform_normalized_lift_per_required_slice": null,
+        "minimum_production_weighted_nll_improvement": null,
+        "minimum_balanced_semantic_nll_improvement": null,
+        "minimum_productive_rollout_fraction": null
+      }
+    },
+    {
+      "id": "P2000_scientific_pilot",
+      "maximum_optimizer_steps": 2000,
+      "requirements": [
+        "held_analogue_transport_beats_uniform_successor_rewriting",
+        "cardinality_growth_and_shrinkage_tasks_pass",
+        "cycle_creation_and_opening_tasks_pass",
+        "all_required_family_safeguards_pass",
+        "no_required_capability_depends_only_on_legal_smoothing",
+        "calibration_and_productive_rollouts_stable"
+      ],
+      "numeric_thresholds": {
+        "minimum_held_analogue_recovery_lift": null,
+        "minimum_size_task_success": null,
+        "minimum_topology_task_success": null,
+        "maximum_path_overhead": null
+      }
+    }
+  ],
+  "bounded_design_comparison": {
+    "factors": {
+      "identity_objective": [
+        "selected_mark",
+        "canonical_successor"
+      ],
+      "sampler": [
+        "completed_run_law",
+        "semantic_cell_balanced"
+      ],
+      "hazard_training": [
+        "joint",
+        "separated"
+      ],
+      "initialization": [
+        "scratch",
+        "compatible_warm_start",
+        "compatible_warm_start_with_retention"
+      ]
+    },
+    "full_factorial_not_required": true,
+    "comparison_plan_must_be_frozen_before_results": true
+  },
+  "architecture_escalation": {
+    "control_backbone": {
+      "hidden_dim": 256,
+      "message_passing_steps": 6
+    },
+    "head_change_allowed_only_after": [
+      "support_and_label_gate_passes",
+      "true_successor_micro_overfit_fails_for_that_head",
+      "gradient_route_is_finite_and_nonzero"
+    ],
+    "backbone_capacity_change_allowed_only_after": [
+      "corrected_loss_and_sampler_tested",
+      "targeted_head_or_feature_repair_tested",
+      "training_successor_nll_still_underfits",
+      "controlled_capacity_comparison_predeclared"
+    ],
+    "bounded_candidate_repairs": {
+      "bond_reroute": [
+        "moved_target_pair_representation",
+        "cut_edge_pair_representation",
+        "moved_fragment_size",
+        "path_or_topology_features"
+      ],
+      "cycle_and_reorder": [
+        "family_specific_pair_mlp_if_current_pair_head_fails"
+      ],
+      "family_gate": [
+        "alias_normalized_candidate_summary_features"
+      ]
+    }
+  },
+  "checkpoint_selection": {
+    "partition": "validation_only",
+    "primary": "production_weighted_canonical_successor_nll",
+    "secondary": "balanced_semantic_cell_canonical_successor_nll",
+    "hard_safeguards": [
+      "graft_retention",
+      "cycle_open",
+      "cycle_close",
+      "bond_reorder",
+      "atom_insert",
+      "atom_delete"
+    ],
+    "test_metrics_forbidden": true
+  },
+  "full_training_authorized": false
+}

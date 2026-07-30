@@ -16,7 +16,7 @@ from compose_v4.chem.molecular_graph import MolecularGraphError, smiles_to_molec
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
-from compose_v4.rewrite.operators import AtomDelete, AtomInsert
+from compose_v4.rewrite.operators import AtomDelete, AtomInsert, AtomRestate
 from compose_v4.rewrite.progress import TraceProgressCTMC
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace, execute_trace
 
@@ -35,6 +35,16 @@ def _dict_to_step(entry: dict) -> RewriteStep:
                 formal_charge=int(entry["formal_charge"]),
                 implicit_h_count=int(entry["implicit_h_count"]),
                 neighbors=tuple((int(n), int(o)) for n, o in entry["neighbors"]),
+            ),
+        )
+    if entry["rule"] == "atom_restate":
+        return RewriteStep(
+            "atom_restate",
+            AtomRestate(
+                v=int(entry["v"]),
+                atom_type=int(entry["atom_type"]),
+                formal_charge=int(entry["formal_charge"]),
+                implicit_h_count=int(entry["implicit_h_count"]),
             ),
         )
     raise ValueError(f"unknown analogue-trace rule {entry['rule']!r}")

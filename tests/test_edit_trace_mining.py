@@ -12,7 +12,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from build_analogue_trace_pool import rewrite_trace_from_record  # noqa: E402
+from build_analogue_trace_pool import (  # noqa: E402
+    _compile_verify,
+    _pool_record,
+    rewrite_trace_from_record,
+)
 from mine_edit_traces import (  # noqa: E402
     MiningConfig,
     ShardEmission,
@@ -23,6 +27,9 @@ from mine_edit_traces import (  # noqa: E402
     shard_of,
 )
 
+from compose_v4.experiments.analogue_prior import (  # noqa: E402
+    rewrite_trace_from_record as production_rewrite_trace_from_record,
+)
 from compose_v4.rewrite.kernel import canonical_state_key  # noqa: E402
 
 _CFG = MiningConfig(max_atoms=32, corruption_sample_size=3)
@@ -73,6 +80,29 @@ def test_compiled_pool_records_are_reconsumable() -> None:
         assert canonical_state_key(trace.target) == record["target_key"]
         assert record["direction"] in ("forward", "reverse")
         assert record["layer"] == "mmp_one_cut"
+
+
+def test_terminal_atom_swap_prefers_real_atom_restate_supervision() -> None:
+    result = _compile_verify(
+        "Fc1ccccc1",
+        "Clc1ccccc1",
+        n_slots=16,
+        max_variable_atoms=8,
+    )
+    assert result["outcome"] == "ok"
+    assert result["path_length"] == 1
+    assert result["operator_histogram"] == {"atom_restate": 1}
+    assert result["meta"]["compiler_path_class"] == "direct_atom_restate"
+
+    record = _pool_record(0, "forward", "Fc1ccccc1", result, 16)
+    rebuilt = rewrite_trace_from_record(record)
+    assert tuple(step.rule_name for step in rebuilt.steps) == ("atom_restate",)
+    assert canonical_state_key(rebuilt.target) == record["target_key"]
+    production_rebuilt = production_rewrite_trace_from_record(record)
+    assert tuple(step.rule_name for step in production_rebuilt.steps) == (
+        "atom_restate",
+    )
+    assert canonical_state_key(production_rebuilt.target) == record["target_key"]
 
 
 def test_corruption_drift_tanimoto_is_a_recognizable_variant() -> None:

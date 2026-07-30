@@ -37,11 +37,12 @@ import numpy as np
 from rdkit import Chem, RDLogger
 from rdkit.Chem import rdmolops
 
-from compose_v4.chem.molecular_graph import (MolecularGraphError, is_element,
+from compose_v4.chem.molecular_graph import (MolecularGraphError, ORGANIC_VOCABULARY, is_element,
                                              molecular_graph_to_smiles, smiles_to_molecular_graph)
 from compose_v4.chem.state import is_connected_or_null, is_valid_state, pad_molecular_graph
+from compose_v4.rewrite.factorized_fiber import _factorized_candidates
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
-from compose_v4.rewrite.operators import AtomDelete, AtomInsert
+from compose_v4.rewrite.operators import AtomDelete, AtomInsert, AtomRestate
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace, execute_trace, inverse_step
 
 RDLogger.DisableLog("rdApp.*")
@@ -177,6 +178,64 @@ def remap_inserts(inserts, sigma, core_a):
     return out
 
 
+def _direct_atom_restate(a, b, r_a, r_b, sigma):
+    """Return a one-step atom-swap program when the production fiber represents it.
+
+    The legacy one-cut compiler explained every terminal one-atom substitution by
+    deleting the source atom and inserting the target atom.  That is executable,
+    but it withholds real-analogue supervision from ``atom_restate`` and doubles
+    the path length.  Reuse the source variable slot only when the two terminal
+    atoms have the same mapped core attachment and bond order, the charge policy
+    is preserved, and the exact production candidate set contains the action.
+    """
+
+    if len(r_a) != 1 or len(r_b) != 1:
+        return None
+    source_slot = int(next(iter(r_a)))
+    target_slot = int(next(iter(r_b)))
+    source_neighbors = tuple(int(v) for v in np.flatnonzero(a.bonds[source_slot] != 0))
+    target_neighbors = tuple(int(v) for v in np.flatnonzero(b.bonds[target_slot] != 0))
+    if len(source_neighbors) != 1 or len(target_neighbors) != 1:
+        return None
+    source_neighbor = source_neighbors[0]
+    target_neighbor = target_neighbors[0]
+    if int(sigma.get(target_neighbor, -1)) != source_neighbor:
+        return None
+    if int(a.bonds[source_slot, source_neighbor]) != int(
+        b.bonds[target_slot, target_neighbor]
+    ):
+        return None
+    if (
+        int(a.formal_charges[source_slot]) != 0
+        or int(b.formal_charges[target_slot]) != 0
+    ):
+        return None
+
+    action = AtomRestate(
+        v=source_slot,
+        atom_type=int(b.atom_types[target_slot]),
+        formal_charge=0,
+        implicit_h_count=int(b.implicit_h_counts[target_slot]),
+    )
+    represented = any(
+        rule_name == "atom_restate" and candidate == action
+        for rule_name, candidate in _factorized_candidates(
+            a,
+            allow_bond_reroute=True,
+            vocabulary=ORGANIC_VOCABULARY,
+        )
+    )
+    if not represented:
+        return None
+    try:
+        successor = SYSTEM.apply(a, "atom_restate", action)
+    except Exception:  # noqa: BLE001
+        return None
+    if canonical_state_key(successor) != canonical_state_key(b):
+        return None
+    return (RewriteStep("atom_restate", action),)
+
+
 def _cut_descriptors(smi_a, smi_b, core_smi, r_a, r_b) -> dict:
     mol_a = Chem.MolFromSmiles(smi_a)
     mol_b = Chem.MolFromSmiles(smi_b)
@@ -230,11 +289,20 @@ def compile_one_cut(smi_a, smi_b, *, n_slots: int, max_variable_atoms: int = 8):
         sigma = core_isomorphism(core_b, core_a)
         if sigma is None:
             return None, "iso_fail", meta
+        direct = _direct_atom_restate(a, b, r_a, r_b, sigma)
+        if direct is not None:
+            return direct, "compiled_direct_atom_restate", {
+                **meta,
+                "compiler_path_class": "direct_atom_restate",
+            }
         inserts_b = [inverse_step(states_b[i], del_b[i]) for i in reversed(range(len(del_b)))]
         grow = remap_inserts(inserts_b, sigma, core_a)
         if grow is None:
             return None, "remap_fail", meta
-        return tuple(del_a) + tuple(grow), "compiled", meta
+        return tuple(del_a) + tuple(grow), "compiled_delete_insert_fallback", {
+            **meta,
+            "compiler_path_class": "delete_insert_fallback",
+        }
     return None, "no_matching_core", None
 
 
@@ -274,7 +342,15 @@ def _step_to_dict(step) -> dict:
                 "formal_charge": int(action.formal_charge),
                 "implicit_h_count": int(action.implicit_h_count),
                 "neighbors": [[int(n), int(o)] for n, o in action.neighbors]}
-    raise ValueError(f"A2.1 traces emit only atom_delete/atom_insert, got {step.rule_name!r}")
+    if step.rule_name == "atom_restate":
+        return {
+            "rule": "atom_restate",
+            "v": int(action.v),
+            "atom_type": int(action.atom_type),
+            "formal_charge": int(action.formal_charge),
+            "implicit_h_count": int(action.implicit_h_count),
+        }
+    raise ValueError(f"unsupported analogue-trace rule {step.rule_name!r}")
 
 
 def _dict_to_step(entry: dict):
@@ -286,6 +362,16 @@ def _dict_to_step(entry: dict):
             formal_charge=int(entry["formal_charge"]),
             implicit_h_count=int(entry["implicit_h_count"]),
             neighbors=tuple((int(n), int(o)) for n, o in entry["neighbors"])))
+    if entry["rule"] == "atom_restate":
+        return RewriteStep(
+            "atom_restate",
+            AtomRestate(
+                v=int(entry["v"]),
+                atom_type=int(entry["atom_type"]),
+                formal_charge=int(entry["formal_charge"]),
+                implicit_h_count=int(entry["implicit_h_count"]),
+            ),
+        )
     raise ValueError(f"unknown rule {entry['rule']!r}")
 
 
@@ -331,9 +417,11 @@ def _pool_record(pair_index, direction, source_smi, result, n_slots) -> dict:
         "operator_histogram": result["operator_histogram"],
         "steps": [_step_to_dict(step) for step in steps],
         "metadata": {"prior": "analogue_mmp_one_cut", "direction": direction,
-                     "n_steps": len(steps), "pair_type": meta.get("pair_type")},
+                     "n_steps": len(steps), "pair_type": meta.get("pair_type"),
+                     "compiler_path_class": meta.get("compiler_path_class")},
         "diagnostics": {
             "pair_type": meta.get("pair_type"),
+            "compiler_path_class": meta.get("compiler_path_class"),
             "attachment_count": meta.get("attachment_count"),
             "constant_core_heavy": meta.get("constant_core_heavy"),
             "source_variable_heavy": meta.get("source_variable_heavy"),

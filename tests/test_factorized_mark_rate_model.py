@@ -9,15 +9,16 @@ import numpy as np
 import pytest
 import torch
 
-from compose_v4.chem.molecular_graph import is_element, smiles_to_molecular_graph
 from compose_v4.chem.graph_primitives import compute_topology_features
-from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.chem.molecular_graph import is_element, smiles_to_molecular_graph
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
+from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_mark_conditional import (
-    _concatenate_factorized_mark_batches,
     FactorizedMarkCollator,
     FactorizedMarkDataset,
     FactorizedMarkExample,
+    _concatenate_factorized_mark_batches,
     configure_factorized_trainable_parameters,
     cosine_warmup_learning_rate,
     factorized_adamw_parameter_groups,
@@ -28,15 +29,15 @@ from compose_v4.experiments.factorized_mark_conditional import (
 from compose_v4.experiments.factorized_mark_priors import (
     fit_factorized_mark_empirical_priors,
 )
-from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.tracelet_conditional import build_tracelet_path_records
 from compose_v4.experiments.training_support_compiler import (
     attach_ring_teacher_semantic_certificates,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    MARK_RULE_NAMES,
+    MARK_RULE_TO_INDEX,
     FactorizedMarkEmpiricalPriors,
     FactorizedTraceletRateModel,
-    MARK_RULE_TO_INDEX,
     SparseBinaryRows,
     _graph_application_masks,
     _hierarchical_ring_template_logits,
@@ -48,10 +49,6 @@ from compose_v4.model.factorized_tracelet_rate_model import (
 from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.operators import AtomInsert, AtomRestate, BondReorder, BondReroute
-from compose_v4.rewrite.typed_ring_catalog import (
-    build_typed_ring_catalog,
-    build_typed_ring_catalog_from_paths,
-)
 from compose_v4.rewrite.progress import TraceProgressCTMC
 from compose_v4.rewrite.ring_system_fiber import (
     build_semantic_ring_system_decoder,
@@ -64,8 +61,12 @@ from compose_v4.rewrite.ring_system_fiber import (
     semantic_ring_prefix_is_completable,
     structured_ring_trace_supported,
 )
-from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 from compose_v4.rewrite.tracelets import is_valid_ring_system_grow
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
+from compose_v4.rewrite.typed_ring_catalog import (
+    build_typed_ring_catalog,
+    build_typed_ring_catalog_from_paths,
+)
 
 
 def _catalog_and_records(smiles: tuple[str, ...]):
@@ -1102,6 +1103,29 @@ def test_streamed_factorized_metrics_match_full_batch() -> None:
     assert full["family_top3_accuracy"] >= full["family_accuracy"]
     assert 0.0 <= full["balanced_family_accuracy"] <= 1.0
     assert full["balanced_family_top3_accuracy"] >= full["balanced_family_accuracy"]
+    assert (
+        full["mean_teacher_full_mark_probability"]
+        == full["mean_teacher_mark_probability"]
+    )
+    assert full["family_choice_accuracy"] == full["family_accuracy"]
+    assert full["family_choice_top3_recall"] == full["family_top3_accuracy"]
+    assert (
+        full["balanced_family_choice_accuracy"]
+        == full["balanced_family_accuracy"]
+    )
+    assert (
+        full["balanced_family_choice_top3_recall"]
+        == full["balanced_family_top3_accuracy"]
+    )
+    for family_name in MARK_RULE_NAMES:
+        assert (
+            full[f"family_choice_recall_{family_name}"]
+            == full[f"family_accuracy_{family_name}"]
+        )
+        assert (
+            full[f"family_choice_top3_recall_{family_name}"]
+            == full[f"family_top3_accuracy_{family_name}"]
+        )
     assert full["represented_families"] >= 1.0
 
 

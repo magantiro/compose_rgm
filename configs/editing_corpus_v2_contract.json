@@ -1,0 +1,237 @@
+{
+  "schema": "compose.editing_corpus_contract",
+  "schema_version": 1,
+  "contract_id": "compose-editing-corpus-v2-prebuild",
+  "status": "DESIGN_NOT_TRAINING_AUTHORIZED",
+  "scientific_scope": {
+    "model": "property-agnostic canonical molecular-successor editing prior",
+    "controller_only_inputs": [
+      "immutable_source",
+      "goal_or_preference",
+      "remaining_budget",
+      "protected_mapping",
+      "path_constraint_state"
+    ],
+    "separate_lanes": {
+      "editing": "fixed-budget embedded canonical-successor jump chain",
+      "de_novo": "separate checkpoint and timed CTMC"
+    },
+    "max_active_atoms": 40,
+    "stereochemistry": "out_of_scope",
+    "formal_charge_changes": "out_of_scope_charge_preserving_only"
+  },
+  "operator_basis": {
+    "required": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach"
+    ],
+    "conditional_on_reachability_audit": [
+      "ring_system_restate"
+    ],
+    "disabled_by_default": [
+      "ring_system_delete",
+      "ring_system_grow"
+    ],
+    "not_addable_without_measured_gap": [
+      "multi_neighbor_atom_insert",
+      "fragment_replace_macro",
+      "ring_template_macro"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "local_substituent_and_bioisostere",
+      "experiments": ["E2", "E7"],
+      "evidence_lanes": ["observed_local_analogue", "reversible_synthetic_walk"],
+      "required_families_any": ["atom_restate", "bond_reorder", "atom_insert", "atom_delete"],
+      "real_endpoint_required": true,
+      "mixed_family_path_required": false,
+      "branch_group_required": true
+    },
+    {
+      "id": "cardinality_growth_and_shrinkage",
+      "experiments": ["E3", "E7"],
+      "evidence_lanes": ["observed_local_analogue", "operator_aware_real_endpoint", "reversible_synthetic_walk"],
+      "required_families_all": ["atom_insert", "atom_delete"],
+      "real_endpoint_required": true,
+      "required_endpoint_deltas": ["atom_count_positive", "atom_count_negative"],
+      "mixed_family_path_required": true,
+      "branch_group_required": true
+    },
+    {
+      "id": "linker_and_attachment_relocation",
+      "experiments": ["E2", "E7"],
+      "evidence_lanes": ["linker_positional_topology_analogue", "operator_aware_real_endpoint"],
+      "required_families_all": ["bond_reroute"],
+      "required_families_any": ["atom_insert", "atom_delete", "bond_reorder"],
+      "real_endpoint_required": true,
+      "mixed_family_path_required": true,
+      "branch_group_required": true
+    },
+    {
+      "id": "electronic_and_bond_state_adaptation",
+      "experiments": ["E2", "E7"],
+      "evidence_lanes": ["observed_local_analogue", "operator_aware_real_endpoint"],
+      "required_families_any": ["atom_restate", "bond_reorder", "ring_system_restate"],
+      "real_endpoint_required": true,
+      "mixed_family_path_required": false,
+      "branch_group_required": false
+    },
+    {
+      "id": "ring_and_topology_adaptation",
+      "experiments": ["E4", "E7"],
+      "evidence_lanes": ["linker_positional_topology_analogue", "reversible_synthetic_walk"],
+      "required_families_all": ["cycle_insert", "cycle_attach"],
+      "real_endpoint_required": false,
+      "required_endpoint_deltas": ["cycle_rank_positive", "cycle_rank_negative"],
+      "mixed_family_path_required": true,
+      "branch_group_required": true
+    },
+    {
+      "id": "multi_operator_compositional_transport",
+      "experiments": ["E2", "E7"],
+      "evidence_lanes": ["observed_series_path", "reversible_synthetic_walk"],
+      "minimum_distinct_operator_families_per_path": 2,
+      "real_endpoint_required": true,
+      "mixed_family_path_required": true,
+      "alternative_path_group_required": true,
+      "branch_group_required": true
+    },
+    {
+      "id": "dynamic_correction_and_partial_reversal",
+      "experiments": ["E3", "E4", "E7"],
+      "evidence_lanes": ["observed_series_path", "reversible_synthetic_walk"],
+      "minimum_distinct_operator_families_per_path": 2,
+      "real_endpoint_required": false,
+      "inverse_or_correction_pair_required": true,
+      "mixed_family_path_required": true,
+      "branch_group_required": true
+    },
+    {
+      "id": "constraint_compatible_alternative_routes",
+      "experiments": ["E7"],
+      "evidence_lanes": ["observed_series_path", "reversible_synthetic_walk"],
+      "protected_mapping_required": true,
+      "real_endpoint_required": false,
+      "mixed_family_path_required": true,
+      "alternative_path_group_required": true,
+      "branch_group_required": true
+    }
+  ],
+  "data_lanes": [
+    {
+      "id": "observed_local_analogue",
+      "evidence_class": "real",
+      "purpose": "context-matched local substitutions and size changes"
+    },
+    {
+      "id": "operator_aware_real_endpoint",
+      "evidence_class": "real",
+      "purpose": "compile observed endpoint pairs with direct restate, reorder, reroute, insertion/deletion, and cycle operations before delete/rebuild fallback"
+    },
+    {
+      "id": "linker_positional_topology_analogue",
+      "evidence_class": "real_preferred_synthetic_supplement_allowed",
+      "purpose": "two-cut linkers, positional isomers, attachment relocation, and topology-changing analogues"
+    },
+    {
+      "id": "observed_series_path",
+      "evidence_class": "real",
+      "purpose": "short and medium paths through observed analogue-series intermediates with shared-source branches"
+    },
+    {
+      "id": "reversible_synthetic_walk",
+      "evidence_class": "synthetic",
+      "purpose": "rare operator contexts, mixed-family composition, correction, and inverse coverage under the production executor"
+    }
+  ],
+  "required_record_fields": [
+    "record_id",
+    "partition",
+    "data_lane",
+    "evidence_class",
+    "source_state_exact",
+    "successor_states_exact",
+    "target_state_exact",
+    "canonical_state_keys",
+    "executable_actions",
+    "operator_sequence",
+    "operator_family_set",
+    "source_group_id",
+    "scaffold_group_id",
+    "series_group_id",
+    "transformation_signature",
+    "branch_group_id",
+    "alternative_path_group_id",
+    "inverse_record_id",
+    "constant_core_mapping",
+    "protected_mapping",
+    "atom_count_delta",
+    "graph_cycle_rank_delta",
+    "path_length",
+    "maximum_intermediate_source_distance",
+    "immediate_reversal_count",
+    "repeated_state_count",
+    "compiler_candidates_considered",
+    "compiler_choice_reason",
+    "compiler_failure_reason",
+    "source_provenance",
+    "operator_contract_hash",
+    "canonicalizer_hash",
+    "compiler_hash"
+  ],
+  "split_contract": {
+    "group_keys": [
+      "molecule_identity",
+      "scaffold_group_id",
+      "series_group_id",
+      "document_or_source_group_id",
+      "transformation_signature"
+    ],
+    "cross_partition_pairs_forbidden": true,
+    "new_sealed_final_holdout_required": true
+  },
+  "sampling_contract": {
+    "hierarchy": [
+      "data_lane",
+      "series_scaffold_or_source_group",
+      "semantic_capability_cell",
+      "endpoint_pair_or_path",
+      "progress_state"
+    ],
+    "raw_pair_uniform_sampling_forbidden": true,
+    "report_effective_teacher_coefficient": true,
+    "report_path_position_coefficient": true
+  },
+  "pretraining_gates": {
+    "structural": {
+      "all_actions_execute": true,
+      "all_committed_states_supported_connected_and_valid": true,
+      "teacher_successor_fibers_recoverable": true,
+      "split_overlap_zero": true,
+      "unsupported_pairs_retained_as_audit_records": true,
+      "path_lengths_fit_registered_edit_budgets": true,
+      "every_required_capability_cell_nonempty": true
+    },
+    "thresholds_to_freeze_after_development_census": {
+      "minimum_unique_sources_per_capability_cell": null,
+      "minimum_unique_scaffolds_per_capability_cell": null,
+      "minimum_effective_teacher_coefficient_per_capability_cell": null,
+      "maximum_single_series_share": null,
+      "maximum_single_transformation_share": null,
+      "maximum_delete_insert_fallback_share_where_direct_semantic_path_exists": null,
+      "minimum_real_mixed_family_path_share": null,
+      "minimum_shared_source_branch_groups": null,
+      "minimum_inverse_or_correction_pairs": null
+    },
+    "micro_overfit_required": true,
+    "step_500_stop_go_required": true,
+    "step_2000_stop_go_required": true
+  },
+  "training_authorized": false
+}
