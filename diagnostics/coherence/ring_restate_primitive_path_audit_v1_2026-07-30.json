@@ -1,0 +1,3017 @@
+{
+  "all_hard_checks_pass": true,
+  "all_partitions": {
+    "budget_fit": {
+      "16": {
+        "events": 24509,
+        "fraction": 0.9999592003263974
+      },
+      "8": {
+        "events": 24347,
+        "fraction": 0.9933496532027744
+      }
+    },
+    "change_count_histogram": {
+      "10": 56,
+      "11": 21,
+      "12": 46,
+      "13": 9,
+      "14": 9,
+      "15": 2,
+      "2": 4378,
+      "20": 1,
+      "3": 14696,
+      "4": 2724,
+      "5": 1191,
+      "6": 756,
+      "7": 254,
+      "8": 348,
+      "9": 19
+    },
+    "charge_policy_preserving_primitive_path_fraction": 1.0,
+    "connected_primitive_path_fraction": 1.0,
+    "declared_primitive7_event_membership": {
+      "not_fully_declared": 24510
+    },
+    "declared_primitive7_step_count": 0,
+    "declared_primitive7_step_fraction": 0.0,
+    "direction_histogram": {
+      "aromatizing": 10112,
+      "dearomatizing": 14398
+    },
+    "exact_macro_and_primitive_endpoint_fraction": 1.0,
+    "failure_code_counts": {},
+    "hard_failure_fraction": 0.0,
+    "heterocycle_histogram": {
+      "false": 12403,
+      "true": 12107
+    },
+    "lowering_length_histogram": {
+      "10": 56,
+      "11": 21,
+      "12": 46,
+      "13": 9,
+      "14": 9,
+      "15": 2,
+      "2": 4378,
+      "20": 1,
+      "3": 14696,
+      "4": 2724,
+      "5": 1191,
+      "6": 756,
+      "7": 254,
+      "8": 348,
+      "9": 19
+    },
+    "primitive_family_sequence_histogram": {
+      "bond_reorder -> bond_reorder": 4378,
+      "bond_reorder -> bond_reorder -> bond_reorder": 14696,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2724,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1191,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 756,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 254,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 348,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 19,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 56,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 21,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 46,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1
+    },
+    "source_system_saturation_histogram": {
+      "false": 15489,
+      "true": 9021
+    },
+    "system_cycle_rank_histogram": {
+      "1": 17747,
+      "2": 5082,
+      "3": 1191,
+      "4": 332,
+      "5": 119,
+      "6": 25,
+      "7": 14
+    },
+    "target_system_saturation_histogram": {
+      "false": 11009,
+      "true": 13501
+    },
+    "teacher_events": 24510,
+    "teacher_events_with_hard_failures": 0,
+    "total_lowering_step_count": 80600,
+    "valid_primitive_path_fraction": 1.0
+  },
+  "artifact_sha256": "ff2a3aacb6f0b371d327915c655063b488100c11b4a9b68ab277be06792acad6",
+  "by_chemistry_stratum_all_partitions": {
+    "direction/aromatizing": {
+      "budget_fit": {
+        "16": {
+          "events": 10111,
+          "fraction": 0.9999011075949367
+        },
+        "8": {
+          "events": 10033,
+          "fraction": 0.9921875
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 26,
+        "11": 5,
+        "12": 24,
+        "13": 4,
+        "14": 4,
+        "15": 1,
+        "2": 1905,
+        "20": 1,
+        "3": 6103,
+        "4": 1025,
+        "5": 468,
+        "6": 264,
+        "7": 109,
+        "8": 159,
+        "9": 14
+      },
+      "system_cycle_rank_histogram": {
+        "1": 7954,
+        "2": 1811,
+        "3": 292,
+        "4": 44,
+        "5": 7,
+        "6": 4
+      },
+      "teacher_events": 10112,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction/dearomatizing": {
+      "budget_fit": {
+        "16": {
+          "events": 14398,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 14314,
+          "fraction": 0.9941658563689402
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 30,
+        "11": 16,
+        "12": 22,
+        "13": 5,
+        "14": 5,
+        "15": 1,
+        "2": 2473,
+        "3": 8593,
+        "4": 1699,
+        "5": 723,
+        "6": 492,
+        "7": 145,
+        "8": 189,
+        "9": 5
+      },
+      "system_cycle_rank_histogram": {
+        "1": 9793,
+        "2": 3271,
+        "3": 899,
+        "4": 288,
+        "5": 112,
+        "6": 21,
+        "7": 14
+      },
+      "teacher_events": 14398,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/aromatizing|carbocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 5485,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 5458,
+          "fraction": 0.995077484047402
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 6,
+        "11": 1,
+        "12": 11,
+        "13": 3,
+        "2": 43,
+        "3": 5154,
+        "4": 63,
+        "5": 131,
+        "6": 24,
+        "7": 18,
+        "8": 25,
+        "9": 6
+      },
+      "system_cycle_rank_histogram": {
+        "1": 5217,
+        "2": 174,
+        "3": 72,
+        "4": 17,
+        "5": 4,
+        "6": 1
+      },
+      "teacher_events": 5485,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/aromatizing|heterocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 4626,
+          "fraction": 0.9997838772422736
+        },
+        "8": {
+          "events": 4575,
+          "fraction": 0.9887616165982278
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 20,
+        "11": 4,
+        "12": 13,
+        "13": 1,
+        "14": 4,
+        "15": 1,
+        "2": 1862,
+        "20": 1,
+        "3": 949,
+        "4": 962,
+        "5": 337,
+        "6": 240,
+        "7": 91,
+        "8": 134,
+        "9": 8
+      },
+      "system_cycle_rank_histogram": {
+        "1": 2737,
+        "2": 1637,
+        "3": 220,
+        "4": 27,
+        "5": 3,
+        "6": 3
+      },
+      "teacher_events": 4627,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/dearomatizing|carbocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 6918,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 6893,
+          "fraction": 0.9963862387973402
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 7,
+        "11": 4,
+        "12": 12,
+        "13": 1,
+        "2": 6,
+        "3": 6574,
+        "4": 56,
+        "5": 161,
+        "6": 55,
+        "7": 26,
+        "8": 15,
+        "9": 1
+      },
+      "system_cycle_rank_histogram": {
+        "1": 6490,
+        "2": 268,
+        "3": 128,
+        "4": 28,
+        "5": 3,
+        "6": 1
+      },
+      "teacher_events": 6918,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/dearomatizing|heterocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 7480,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 7421,
+          "fraction": 0.9921122994652406
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 23,
+        "11": 12,
+        "12": 10,
+        "13": 4,
+        "14": 5,
+        "15": 1,
+        "2": 2467,
+        "3": 2019,
+        "4": 1643,
+        "5": 562,
+        "6": 437,
+        "7": 119,
+        "8": 174,
+        "9": 4
+      },
+      "system_cycle_rank_histogram": {
+        "1": 3303,
+        "2": 3003,
+        "3": 771,
+        "4": 260,
+        "5": 109,
+        "6": 20,
+        "7": 14
+      },
+      "teacher_events": 7480,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "ring_chemistry/carbocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 12403,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 12351,
+          "fraction": 0.9958074659356607
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 13,
+        "11": 5,
+        "12": 23,
+        "13": 4,
+        "2": 49,
+        "3": 11728,
+        "4": 119,
+        "5": 292,
+        "6": 79,
+        "7": 44,
+        "8": 40,
+        "9": 7
+      },
+      "system_cycle_rank_histogram": {
+        "1": 11707,
+        "2": 442,
+        "3": 200,
+        "4": 45,
+        "5": 7,
+        "6": 2
+      },
+      "teacher_events": 12403,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "ring_chemistry/heterocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 12106,
+          "fraction": 0.9999174031551995
+        },
+        "8": {
+          "events": 11996,
+          "fraction": 0.9908317502271413
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 43,
+        "11": 16,
+        "12": 23,
+        "13": 5,
+        "14": 9,
+        "15": 2,
+        "2": 4329,
+        "20": 1,
+        "3": 2968,
+        "4": 2605,
+        "5": 899,
+        "6": 677,
+        "7": 210,
+        "8": 308,
+        "9": 12
+      },
+      "system_cycle_rank_histogram": {
+        "1": 6040,
+        "2": 4640,
+        "3": 991,
+        "4": 287,
+        "5": 112,
+        "6": 23,
+        "7": 14
+      },
+      "teacher_events": 12107,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "source_electronics/aromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 14799,
+          "fraction": 0.9999324324324325
+        },
+        "8": {
+          "events": 14653,
+          "fraction": 0.9900675675675675
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 52,
+        "11": 19,
+        "12": 42,
+        "13": 9,
+        "14": 8,
+        "15": 1,
+        "2": 2561,
+        "20": 1,
+        "3": 8601,
+        "4": 1743,
+        "5": 729,
+        "6": 520,
+        "7": 215,
+        "8": 284,
+        "9": 15
+      },
+      "system_cycle_rank_histogram": {
+        "1": 9793,
+        "2": 3516,
+        "3": 1034,
+        "4": 305,
+        "5": 114,
+        "6": 24,
+        "7": 14
+      },
+      "teacher_events": 14800,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "source_electronics/saturated": {
+      "budget_fit": {
+        "16": {
+          "events": 9021,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 9017,
+          "fraction": 0.9995565901784724
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "2": 1661,
+        "3": 6016,
+        "4": 745,
+        "5": 445,
+        "6": 102,
+        "7": 34,
+        "8": 14,
+        "9": 1
+      },
+      "system_cycle_rank_histogram": {
+        "1": 7663,
+        "2": 1199,
+        "3": 140,
+        "4": 16,
+        "5": 2,
+        "6": 1
+      },
+      "teacher_events": 9021,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "source_electronics/unsaturated_nonaromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 689,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 677,
+          "fraction": 0.9825834542815675
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 3,
+        "11": 1,
+        "12": 3,
+        "14": 1,
+        "15": 1,
+        "2": 156,
+        "3": 79,
+        "4": 236,
+        "5": 17,
+        "6": 134,
+        "7": 5,
+        "8": 50,
+        "9": 3
+      },
+      "system_cycle_rank_histogram": {
+        "1": 291,
+        "2": 367,
+        "3": 17,
+        "4": 11,
+        "5": 3
+      },
+      "teacher_events": 689,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "target_electronics/aromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 10371,
+          "fraction": 0.9999035865792518
+        },
+        "8": {
+          "events": 10239,
+          "fraction": 0.9871770150404936
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 48,
+        "11": 11,
+        "12": 41,
+        "13": 8,
+        "14": 7,
+        "15": 2,
+        "2": 1950,
+        "20": 1,
+        "3": 6106,
+        "4": 1057,
+        "5": 470,
+        "6": 290,
+        "7": 113,
+        "8": 253,
+        "9": 15
+      },
+      "system_cycle_rank_histogram": {
+        "1": 7954,
+        "2": 1952,
+        "3": 404,
+        "4": 50,
+        "5": 8,
+        "6": 4
+      },
+      "teacher_events": 10372,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "target_electronics/saturated": {
+      "budget_fit": {
+        "16": {
+          "events": 13501,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 13477,
+          "fraction": 0.9982223538997111
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 7,
+        "11": 9,
+        "12": 2,
+        "14": 2,
+        "2": 2281,
+        "3": 8571,
+        "4": 1436,
+        "5": 711,
+        "6": 311,
+        "7": 128,
+        "8": 39,
+        "9": 4
+      },
+      "system_cycle_rank_histogram": {
+        "1": 9608,
+        "2": 2693,
+        "3": 773,
+        "4": 281,
+        "5": 111,
+        "6": 21,
+        "7": 14
+      },
+      "teacher_events": 13501,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "target_electronics/unsaturated_nonaromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 637,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 631,
+          "fraction": 0.9905808477237049
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 1,
+        "11": 1,
+        "12": 3,
+        "13": 1,
+        "2": 147,
+        "3": 19,
+        "4": 231,
+        "5": 10,
+        "6": 155,
+        "7": 13,
+        "8": 56
+      },
+      "system_cycle_rank_histogram": {
+        "1": 185,
+        "2": 437,
+        "3": 14,
+        "4": 1
+      },
+      "teacher_events": 637,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    }
+  },
+  "by_chemistry_stratum_selection_partitions": {
+    "direction/aromatizing": {
+      "budget_fit": {
+        "16": {
+          "events": 9625,
+          "fraction": 0.9998961146893829
+        },
+        "8": {
+          "events": 9550,
+          "fraction": 0.992104716393102
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 26,
+        "11": 4,
+        "12": 23,
+        "13": 4,
+        "14": 4,
+        "15": 1,
+        "2": 1819,
+        "20": 1,
+        "3": 5805,
+        "4": 970,
+        "5": 452,
+        "6": 257,
+        "7": 100,
+        "8": 147,
+        "9": 13
+      },
+      "system_cycle_rank_histogram": {
+        "1": 7569,
+        "2": 1720,
+        "3": 286,
+        "4": 40,
+        "5": 7,
+        "6": 4
+      },
+      "teacher_events": 9626,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction/dearomatizing": {
+      "budget_fit": {
+        "16": {
+          "events": 13689,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 13610,
+          "fraction": 0.9942289429468917
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 29,
+        "11": 15,
+        "12": 19,
+        "13": 5,
+        "14": 5,
+        "15": 1,
+        "2": 2352,
+        "3": 8155,
+        "4": 1606,
+        "5": 698,
+        "6": 481,
+        "7": 141,
+        "8": 177,
+        "9": 5
+      },
+      "system_cycle_rank_histogram": {
+        "1": 9308,
+        "2": 3103,
+        "3": 863,
+        "4": 277,
+        "5": 105,
+        "6": 21,
+        "7": 12
+      },
+      "teacher_events": 13689,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/aromatizing|carbocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 5226,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 5200,
+          "fraction": 0.9950248756218906
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 6,
+        "11": 1,
+        "12": 10,
+        "13": 3,
+        "2": 42,
+        "3": 4910,
+        "4": 61,
+        "5": 125,
+        "6": 22,
+        "7": 18,
+        "8": 22,
+        "9": 6
+      },
+      "system_cycle_rank_histogram": {
+        "1": 4970,
+        "2": 168,
+        "3": 68,
+        "4": 15,
+        "5": 4,
+        "6": 1
+      },
+      "teacher_events": 5226,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/aromatizing|heterocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 4399,
+          "fraction": 0.9997727272727273
+        },
+        "8": {
+          "events": 4350,
+          "fraction": 0.9886363636363636
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 20,
+        "11": 3,
+        "12": 13,
+        "13": 1,
+        "14": 4,
+        "15": 1,
+        "2": 1777,
+        "20": 1,
+        "3": 895,
+        "4": 909,
+        "5": 327,
+        "6": 235,
+        "7": 82,
+        "8": 125,
+        "9": 7
+      },
+      "system_cycle_rank_histogram": {
+        "1": 2599,
+        "2": 1552,
+        "3": 218,
+        "4": 25,
+        "5": 3,
+        "6": 3
+      },
+      "teacher_events": 4400,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/dearomatizing|carbocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 6571,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 6548,
+          "fraction": 0.9964997717242429
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 7,
+        "11": 4,
+        "12": 10,
+        "13": 1,
+        "2": 5,
+        "3": 6246,
+        "4": 56,
+        "5": 152,
+        "6": 51,
+        "7": 26,
+        "8": 12,
+        "9": 1
+      },
+      "system_cycle_rank_histogram": {
+        "1": 6169,
+        "2": 252,
+        "3": 120,
+        "4": 26,
+        "5": 3,
+        "6": 1
+      },
+      "teacher_events": 6571,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "direction_x_ring_chemistry/dearomatizing|heterocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 7118,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 7062,
+          "fraction": 0.9921326215228997
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 22,
+        "11": 11,
+        "12": 9,
+        "13": 4,
+        "14": 5,
+        "15": 1,
+        "2": 2347,
+        "3": 1909,
+        "4": 1550,
+        "5": 546,
+        "6": 430,
+        "7": 115,
+        "8": 165,
+        "9": 4
+      },
+      "system_cycle_rank_histogram": {
+        "1": 3139,
+        "2": 2851,
+        "3": 743,
+        "4": 251,
+        "5": 102,
+        "6": 20,
+        "7": 12
+      },
+      "teacher_events": 7118,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "ring_chemistry/carbocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 11797,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 11748,
+          "fraction": 0.9958464016275325
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 13,
+        "11": 5,
+        "12": 20,
+        "13": 4,
+        "2": 47,
+        "3": 11156,
+        "4": 117,
+        "5": 277,
+        "6": 73,
+        "7": 44,
+        "8": 34,
+        "9": 7
+      },
+      "system_cycle_rank_histogram": {
+        "1": 11139,
+        "2": 420,
+        "3": 188,
+        "4": 41,
+        "5": 7,
+        "6": 2
+      },
+      "teacher_events": 11797,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "ring_chemistry/heterocycle": {
+      "budget_fit": {
+        "16": {
+          "events": 11517,
+          "fraction": 0.9999131793714187
+        },
+        "8": {
+          "events": 11412,
+          "fraction": 0.9907970133703768
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 42,
+        "11": 14,
+        "12": 22,
+        "13": 5,
+        "14": 9,
+        "15": 2,
+        "2": 4124,
+        "20": 1,
+        "3": 2804,
+        "4": 2459,
+        "5": 873,
+        "6": 665,
+        "7": 197,
+        "8": 290,
+        "9": 11
+      },
+      "system_cycle_rank_histogram": {
+        "1": 5738,
+        "2": 4403,
+        "3": 961,
+        "4": 276,
+        "5": 105,
+        "6": 23,
+        "7": 12
+      },
+      "teacher_events": 11518,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "source_electronics/aromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 14065,
+          "fraction": 0.9999289065832504
+        },
+        "8": {
+          "events": 13927,
+          "fraction": 0.9901180150718043
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 51,
+        "11": 17,
+        "12": 38,
+        "13": 9,
+        "14": 8,
+        "15": 1,
+        "2": 2438,
+        "20": 1,
+        "3": 8163,
+        "4": 1645,
+        "5": 704,
+        "6": 505,
+        "7": 204,
+        "8": 268,
+        "9": 14
+      },
+      "system_cycle_rank_histogram": {
+        "1": 9308,
+        "2": 3329,
+        "3": 992,
+        "4": 294,
+        "5": 107,
+        "6": 24,
+        "7": 12
+      },
+      "teacher_events": 14066,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "source_electronics/saturated": {
+      "budget_fit": {
+        "16": {
+          "events": 8588,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 8584,
+          "fraction": 0.999534233814625
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "2": 1583,
+        "3": 5720,
+        "4": 706,
+        "5": 429,
+        "6": 102,
+        "7": 34,
+        "8": 10,
+        "9": 1
+      },
+      "system_cycle_rank_histogram": {
+        "1": 7289,
+        "2": 1144,
+        "3": 140,
+        "4": 12,
+        "5": 2,
+        "6": 1
+      },
+      "teacher_events": 8588,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "source_electronics/unsaturated_nonaromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 661,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 649,
+          "fraction": 0.9818456883509834
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 3,
+        "11": 1,
+        "12": 3,
+        "14": 1,
+        "15": 1,
+        "2": 150,
+        "3": 77,
+        "4": 225,
+        "5": 17,
+        "6": 131,
+        "7": 3,
+        "8": 46,
+        "9": 3
+      },
+      "system_cycle_rank_histogram": {
+        "1": 280,
+        "2": 350,
+        "3": 17,
+        "4": 11,
+        "5": 3
+      },
+      "teacher_events": 661,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "target_electronics/aromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 9861,
+          "fraction": 0.9998986006895153
+        },
+        "8": {
+          "events": 9735,
+          "fraction": 0.9871222875684446
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 48,
+        "11": 10,
+        "12": 37,
+        "13": 8,
+        "14": 7,
+        "15": 2,
+        "2": 1860,
+        "20": 1,
+        "3": 5808,
+        "4": 994,
+        "5": 454,
+        "6": 278,
+        "7": 104,
+        "8": 237,
+        "9": 14
+      },
+      "system_cycle_rank_histogram": {
+        "1": 7569,
+        "2": 1847,
+        "3": 388,
+        "4": 46,
+        "5": 8,
+        "6": 4
+      },
+      "teacher_events": 9862,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "target_electronics/saturated": {
+      "budget_fit": {
+        "16": {
+          "events": 12843,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 12821,
+          "fraction": 0.9982870045939423
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 6,
+        "11": 8,
+        "12": 2,
+        "14": 2,
+        "2": 2168,
+        "3": 8136,
+        "4": 1362,
+        "5": 687,
+        "6": 309,
+        "7": 125,
+        "8": 34,
+        "9": 4
+      },
+      "system_cycle_rank_histogram": {
+        "1": 9129,
+        "2": 2559,
+        "3": 748,
+        "4": 270,
+        "5": 104,
+        "6": 21,
+        "7": 12
+      },
+      "teacher_events": 12843,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "target_electronics/unsaturated_nonaromatic": {
+      "budget_fit": {
+        "16": {
+          "events": 610,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 604,
+          "fraction": 0.9901639344262295
+        }
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_step_fraction": 0.0,
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "fully_declared_primitive7_event_fraction": 0.0,
+      "hard_failure_fraction": 0.0,
+      "lowering_length_histogram": {
+        "10": 1,
+        "11": 1,
+        "12": 3,
+        "13": 1,
+        "2": 143,
+        "3": 16,
+        "4": 220,
+        "5": 9,
+        "6": 151,
+        "7": 12,
+        "8": 53
+      },
+      "system_cycle_rank_histogram": {
+        "1": 179,
+        "2": 417,
+        "3": 13,
+        "4": 1
+      },
+      "teacher_events": 610,
+      "teacher_events_with_hard_failures": 0,
+      "valid_primitive_path_fraction": 1.0
+    }
+  },
+  "by_layer": {
+    "general_corruption": {
+      "budget_fit": {
+        "16": {
+          "events": 24509,
+          "fraction": 0.9999592003263974
+        },
+        "8": {
+          "events": 24347,
+          "fraction": 0.9933496532027744
+        }
+      },
+      "change_count_histogram": {
+        "10": 56,
+        "11": 21,
+        "12": 46,
+        "13": 9,
+        "14": 9,
+        "15": 2,
+        "2": 4378,
+        "20": 1,
+        "3": 14696,
+        "4": 2724,
+        "5": 1191,
+        "6": 756,
+        "7": 254,
+        "8": 348,
+        "9": 19
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_event_membership": {
+        "not_fully_declared": 24510
+      },
+      "declared_primitive7_step_count": 0,
+      "declared_primitive7_step_fraction": 0.0,
+      "direction_histogram": {
+        "aromatizing": 10112,
+        "dearomatizing": 14398
+      },
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "failure_code_counts": {},
+      "hard_failure_fraction": 0.0,
+      "heterocycle_histogram": {
+        "false": 12403,
+        "true": 12107
+      },
+      "lowering_length_histogram": {
+        "10": 56,
+        "11": 21,
+        "12": 46,
+        "13": 9,
+        "14": 9,
+        "15": 2,
+        "2": 4378,
+        "20": 1,
+        "3": 14696,
+        "4": 2724,
+        "5": 1191,
+        "6": 756,
+        "7": 254,
+        "8": 348,
+        "9": 19
+      },
+      "primitive_family_sequence_histogram": {
+        "bond_reorder -> bond_reorder": 4378,
+        "bond_reorder -> bond_reorder -> bond_reorder": 14696,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2724,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1191,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 756,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 254,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 348,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 19,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 56,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 21,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 46,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1
+      },
+      "source_system_saturation_histogram": {
+        "false": 15489,
+        "true": 9021
+      },
+      "system_cycle_rank_histogram": {
+        "1": 17747,
+        "2": 5082,
+        "3": 1191,
+        "4": 332,
+        "5": 119,
+        "6": 25,
+        "7": 14
+      },
+      "target_system_saturation_histogram": {
+        "false": 11009,
+        "true": 13501
+      },
+      "teacher_events": 24510,
+      "teacher_events_with_hard_failures": 0,
+      "total_lowering_step_count": 80600,
+      "valid_primitive_path_fraction": 1.0
+    }
+  },
+  "by_partition": {
+    "test": {
+      "budget_fit": {
+        "16": {
+          "events": 1195,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 1187,
+          "fraction": 0.9933054393305439
+        }
+      },
+      "change_count_histogram": {
+        "10": 1,
+        "11": 2,
+        "12": 4,
+        "2": 207,
+        "3": 736,
+        "4": 148,
+        "5": 41,
+        "6": 18,
+        "7": 13,
+        "8": 24,
+        "9": 1
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_event_membership": {
+        "not_fully_declared": 1195
+      },
+      "declared_primitive7_step_count": 0,
+      "declared_primitive7_step_fraction": 0.0,
+      "direction_histogram": {
+        "aromatizing": 486,
+        "dearomatizing": 709
+      },
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "failure_code_counts": {},
+      "hard_failure_fraction": 0.0,
+      "heterocycle_histogram": {
+        "false": 606,
+        "true": 589
+      },
+      "lowering_length_histogram": {
+        "10": 1,
+        "11": 2,
+        "12": 4,
+        "2": 207,
+        "3": 736,
+        "4": 148,
+        "5": 41,
+        "6": 18,
+        "7": 13,
+        "8": 24,
+        "9": 1
+      },
+      "primitive_family_sequence_histogram": {
+        "bond_reorder -> bond_reorder": 207,
+        "bond_reorder -> bond_reorder -> bond_reorder": 736,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 148,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 41,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 18,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 13,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 24,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 4
+      },
+      "source_system_saturation_histogram": {
+        "false": 762,
+        "true": 433
+      },
+      "system_cycle_rank_histogram": {
+        "1": 870,
+        "2": 259,
+        "3": 42,
+        "4": 15,
+        "5": 7,
+        "7": 2
+      },
+      "target_system_saturation_histogram": {
+        "false": 537,
+        "true": 658
+      },
+      "teacher_events": 1195,
+      "teacher_events_with_hard_failures": 0,
+      "total_lowering_step_count": 3899,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "train": {
+      "budget_fit": {
+        "16": {
+          "events": 22223,
+          "fraction": 0.999955003599712
+        },
+        "8": {
+          "events": 22076,
+          "fraction": 0.9933405327573794
+        }
+      },
+      "change_count_histogram": {
+        "10": 51,
+        "11": 18,
+        "12": 42,
+        "13": 9,
+        "14": 9,
+        "15": 2,
+        "2": 4014,
+        "20": 1,
+        "3": 13347,
+        "4": 2440,
+        "5": 1032,
+        "6": 712,
+        "7": 227,
+        "8": 304,
+        "9": 16
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_event_membership": {
+        "not_fully_declared": 22224
+      },
+      "declared_primitive7_step_count": 0,
+      "declared_primitive7_step_fraction": 0.0,
+      "direction_histogram": {
+        "aromatizing": 9168,
+        "dearomatizing": 13056
+      },
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "failure_code_counts": {},
+      "hard_failure_fraction": 0.0,
+      "heterocycle_histogram": {
+        "false": 11266,
+        "true": 10958
+      },
+      "lowering_length_histogram": {
+        "10": 51,
+        "11": 18,
+        "12": 42,
+        "13": 9,
+        "14": 9,
+        "15": 2,
+        "2": 4014,
+        "20": 1,
+        "3": 13347,
+        "4": 2440,
+        "5": 1032,
+        "6": 712,
+        "7": 227,
+        "8": 304,
+        "9": 16
+      },
+      "primitive_family_sequence_histogram": {
+        "bond_reorder -> bond_reorder": 4014,
+        "bond_reorder -> bond_reorder -> bond_reorder": 13347,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2440,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1032,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 712,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 227,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 304,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 16,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 51,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 18,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 42,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1
+      },
+      "source_system_saturation_histogram": {
+        "false": 14049,
+        "true": 8175
+      },
+      "system_cycle_rank_histogram": {
+        "1": 16149,
+        "2": 4530,
+        "3": 1100,
+        "4": 304,
+        "5": 110,
+        "6": 21,
+        "7": 10
+      },
+      "target_system_saturation_histogram": {
+        "false": 9976,
+        "true": 12248
+      },
+      "teacher_events": 22224,
+      "teacher_events_with_hard_failures": 0,
+      "total_lowering_step_count": 72931,
+      "valid_primitive_path_fraction": 1.0
+    },
+    "validation": {
+      "budget_fit": {
+        "16": {
+          "events": 1091,
+          "fraction": 1.0
+        },
+        "8": {
+          "events": 1084,
+          "fraction": 0.9935838680109991
+        }
+      },
+      "change_count_histogram": {
+        "10": 4,
+        "11": 1,
+        "2": 157,
+        "3": 613,
+        "4": 136,
+        "5": 118,
+        "6": 26,
+        "7": 14,
+        "8": 20,
+        "9": 2
+      },
+      "charge_policy_preserving_primitive_path_fraction": 1.0,
+      "connected_primitive_path_fraction": 1.0,
+      "declared_primitive7_event_membership": {
+        "not_fully_declared": 1091
+      },
+      "declared_primitive7_step_count": 0,
+      "declared_primitive7_step_fraction": 0.0,
+      "direction_histogram": {
+        "aromatizing": 458,
+        "dearomatizing": 633
+      },
+      "exact_macro_and_primitive_endpoint_fraction": 1.0,
+      "failure_code_counts": {},
+      "hard_failure_fraction": 0.0,
+      "heterocycle_histogram": {
+        "false": 531,
+        "true": 560
+      },
+      "lowering_length_histogram": {
+        "10": 4,
+        "11": 1,
+        "2": 157,
+        "3": 613,
+        "4": 136,
+        "5": 118,
+        "6": 26,
+        "7": 14,
+        "8": 20,
+        "9": 2
+      },
+      "primitive_family_sequence_histogram": {
+        "bond_reorder -> bond_reorder": 157,
+        "bond_reorder -> bond_reorder -> bond_reorder": 613,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 136,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 118,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 26,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 14,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 20,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 4,
+        "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1
+      },
+      "source_system_saturation_histogram": {
+        "false": 678,
+        "true": 413
+      },
+      "system_cycle_rank_histogram": {
+        "1": 728,
+        "2": 293,
+        "3": 49,
+        "4": 13,
+        "5": 2,
+        "6": 4,
+        "7": 2
+      },
+      "target_system_saturation_histogram": {
+        "false": 496,
+        "true": 595
+      },
+      "teacher_events": 1091,
+      "teacher_events_with_hard_failures": 0,
+      "total_lowering_step_count": 3770,
+      "valid_primitive_path_fraction": 1.0
+    }
+  },
+  "checkpoint_dependency": "none",
+  "coverage": {
+    "audited_event_identity_sha256": "a302af5fc6772d1ba8b590ee98f252c178a632590de9730a39885657d31c06be",
+    "charge_exclusion_addresses_seen": 20370,
+    "representability_exclusions_seen": 3,
+    "reused_exact_teacher_case_count": 1063,
+    "ring_system_restate_teacher_counts": {
+      "audited": 24510,
+      "charge_policy_excluded": 0,
+      "raw": 24510,
+      "representability_excluded": 0
+    },
+    "trace_counts": {
+      "audited_eligible": 705298,
+      "charge_policy_excluded": 20370,
+      "raw": 725671,
+      "representability_excluded": 3
+    },
+    "unique_exact_teacher_cases": 23447
+  },
+  "failures": [],
+  "implementation": {
+    "implementation_sha256": "e0b9a529caf0b8759b3423da66495f23e99c585c57ca122b8f221c07d2bf864b",
+    "sources": {
+      "src/compose_v4/chem/aromaticity.py": "12669b174e2e2e0a08ab9e88eb33b2dc2da50c0d69b826242bf578d2c64f1127",
+      "src/compose_v4/chem/persistent_state_identity.py": "4a3d4bdcf206b50c45ed19b010a1f9c86508460e36bdb7b4f24a024add50804b",
+      "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "src/compose_v4/data/charge_policy.py": "bd7db7dec3aaa690cdbae3b4c411aec41fbee1460ff06cd95b14ee02b8384899",
+      "src/compose_v4/data/packed_trace_store.py": "2c0894f1369b5d354522e6d1983a533d3c3be1934b8e9cd9ae9f043b4812781a",
+      "src/compose_v4/data/representability_overlay.py": "a3bba5a270f2c1818a387b3e267169ba7202f0d14b94a3b623f3762a902f69e1",
+      "src/compose_v4/experiments/editing_operator_support.py": "80f48076fad6c0d8cd4c556a6f42f6e89c5fa8d8bd9d491157090eb6fd703c08",
+      "src/compose_v4/experiments/ring_restate_primitive_path_audit.py": "6975d99058d664ec38500d96656d4dfde483ee2dda101703d2ed5692339f8ded",
+      "src/compose_v4/rewrite/action_codec.py": "56607896c67e554bb83aa3f4d40f38912d24e6c6941f9a433a2a8a431b8f9230",
+      "src/compose_v4/rewrite/kernel.py": "6c3dff1efceee7232289e0ca8ee0065643ddeae2c3921ac1cda691a8f42015f7",
+      "src/compose_v4/rewrite/tracelets.py": "c1610b04f5da55570f2bd709ec49f4ab57db83d171cac2761cdab2cd3812ce0c"
+    }
+  },
+  "inputs": {
+    "charge_policy_audit_file_sha256": "db365686581ea4b787fae608fa4bc37478183714399e1d407dfecf8bf3737dd3",
+    "charge_policy_exclusion_payload_sha256": "ad18e751b2423ebfe47e6d2684f0932eec0fbe8008ca28342f5c45d59889fc55",
+    "charge_policy_exclusions_file_sha256": "64eb6e7029827a6c11c39a7e4d4a9c9fdde0572be4d083d380c1ee9212176139",
+    "charge_policy_source_input_inventory_sha256": "679816385f7c85dc3f3f8a51103bd38c29435c495312b5407acce95b6dd94321",
+    "declared_shards": 63,
+    "representability_effective_corpus_checksum": "32372dc5d73139a7",
+    "representability_overlay_sha256": "e735ea6b25b4cec97bbae3deaf0ef8c4f68d30e7888733c8e6bea22cdeb5222a",
+    "unified_manifest_checksum": "5c5c254e1054c081",
+    "unified_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758"
+  },
+  "interpretation_boundary": {
+    "does_not_establish": [
+      "learned probability or calibration",
+      "whether another non-authoritative primitive7 path reaches the same endpoint",
+      "whether a macro is easier to learn than a widened cyclic bond-reorder family",
+      "complete candidate-fiber size or normalization burden under either basis",
+      "final operator choice without bounded pilot evidence"
+    ],
+    "establishes": [
+      "production macro versus packed exact endpoint equality",
+      "authoritative lowering endpoint equality",
+      "validity, connectedness, and charge preservation of every intermediate",
+      "lowering-length and registered-budget coverage",
+      "membership of authoritative lowering steps in current primitive7 support"
+    ]
+  },
+  "method": {
+    "authoritative_lowering": "lower_ring_system_restate",
+    "charge_policy": "charge_policy_preserved both source-to-intermediate and consecutive-intermediate",
+    "connectedness": "is_connected_or_null",
+    "declared_primitive7_membership": "editing_operator_support._primitive_candidate_is_declared with the exact cyclic-bond exclusion short-circuit",
+    "edit_budgets": [
+      8,
+      16
+    ],
+    "exact_endpoint_identity": "persistent slot arrays and canonical molecular key",
+    "macro_executor": "de_novo_rewrite_system.apply",
+    "selection_partitions": [
+      "train",
+      "validation"
+    ],
+    "teacher_source": "every addressed packed ring_system_restate teacher in the unified V1 corpus",
+    "test_partition_role": "reported separately for completeness; not used for the V2 operator choice",
+    "validity": "is_valid_state"
+  },
+  "o0_operator_decision": {
+    "budget_implication": "the macro consumes one committed edit; its certified primitive-equivalent cost is the audited lowering length, so dropping the macro in favor of a hypothetical widened basis would spend 2-to-20 edit events before any other objective repair",
+    "claim_boundary": "this supports retaining restate for bounded pilots; it does not establish learned superiority over a separately implemented and trained widened cyclic-bond-reorder basis",
+    "current_primitive7": {
+      "authoritative_lowering_paths_fully_in_support": 0,
+      "authoritative_lowering_steps_in_support": 0,
+      "authoritative_lowering_steps_total": 76701,
+      "blocking_semantic": "cyclic bond_reorder is masked by the current primitive7 O0 basis",
+      "conclusion": "current primitive7 does not realize any audited authoritative ring-system-restatement lowering"
+    },
+    "decision_scope": "imminent bounded editing pilots only",
+    "evidence_population": {
+      "partitions": [
+        "train",
+        "validation"
+      ],
+      "teacher_events": 23315,
+      "test_partition_used_for_decision": false
+    },
+    "hypothetical_widened_cyclic_bond_reorder_basis": {
+      "candidate_count_boundary": "this teacher-path audit does not enumerate or compare complete candidate-fiber sizes",
+      "candidate_implication": "the widened basis would expose state-dependent scalar cyclic-reorder choices at successive intermediates, whereas restate exposes coordinated complete marks",
+      "conditional_reachability_statement": "if the bond_reorder family were widened to admit the exact audited cyclic reorder instructions, every audited teacher endpoint would be reachable by its authoritative 2-to-20-step lowering",
+      "fits_budget_16": {
+        "events": 23314,
+        "fraction": 0.9999571091571949
+      },
+      "fits_budget_8": {
+        "events": 23160,
+        "fraction": 0.9933519193652155
+      },
+      "lowering_length_maximum": 20,
+      "lowering_length_minimum": 2,
+      "status": "separate_unimplemented_untested_operator_change"
+    },
+    "pilot_rationale": [
+      "the current packed corpus contains direct restatement teachers",
+      "all audited macro actions and lowerings are exact and validity closed",
+      "none of their authoritative lowerings is in current primitive7 support",
+      "retaining restate avoids simultaneously changing support and recompiling supervision before the bounded capacity pilot"
+    ],
+    "primitive7_plus_ring_system_restate": {
+      "certified_exact_teacher_endpoints": 23315,
+      "certified_valid_connected_charge_clean_path_events": 23315,
+      "committed_event_cost": 1,
+      "conclusion": "ring_system_restate supplies certified one-step support for every audited selection-partition teacher endpoint"
+    },
+    "production_operator_freeze": "still pending bounded pilot evidence",
+    "recommended_bounded_pilot_basis": "primitive7_plus_ring_system_restate"
+  },
+  "per_shard": [
+    {
+      "envelope_layer": "cycle_ops",
+      "manifest_layer": "cycle_operations",
+      "observed_entries": 85000,
+      "packed_shard_content_sha256": "482afb090817b333813ef9689bfa71f49b61c8cff4e51fa41c2207303a887fcc",
+      "partition": "train",
+      "relative_path": "cycle_ops/train/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 84826,
+        "charge_policy_excluded": 174,
+        "raw": 85000
+      }
+    },
+    {
+      "envelope_layer": "cycle_ops",
+      "manifest_layer": "cycle_operations",
+      "observed_entries": 85102,
+      "packed_shard_content_sha256": "9efd8e11e5672125ab759d935a02981e4d44b07a9f7f60e4b6ee881739717bd2",
+      "partition": "train",
+      "relative_path": "cycle_ops/train/shard_0001.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 84968,
+        "charge_policy_excluded": 134,
+        "raw": 85102
+      }
+    },
+    {
+      "envelope_layer": "cycle_ops",
+      "manifest_layer": "cycle_operations",
+      "observed_entries": 85066,
+      "packed_shard_content_sha256": "cd9ca1b1ff933b51fd0088f1b309db00e74a889771de68357a5c9f91d603bd4a",
+      "partition": "train",
+      "relative_path": "cycle_ops/train/shard_0002.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 84916,
+        "charge_policy_excluded": 150,
+        "raw": 85066
+      }
+    },
+    {
+      "envelope_layer": "cycle_ops",
+      "manifest_layer": "cycle_operations",
+      "observed_entries": 13656,
+      "packed_shard_content_sha256": "6065e5fc80cc37e2ab9208fa5239e890c47d3174277484bc82af8649a5e2134f",
+      "partition": "validation",
+      "relative_path": "cycle_ops/validation/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 13630,
+        "charge_policy_excluded": 26,
+        "raw": 13656
+      }
+    },
+    {
+      "envelope_layer": "cycle_ops",
+      "manifest_layer": "cycle_operations",
+      "observed_entries": 13032,
+      "packed_shard_content_sha256": "da39d88a3c8e55bd1be5b137added26bf5c2533e99ed194e92165d51911462b7",
+      "partition": "test",
+      "relative_path": "cycle_ops/test/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 12976,
+        "charge_policy_excluded": 56,
+        "raw": 13032
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2087,
+      "packed_shard_content_sha256": "d5dce3f31d46ea18f82838a91ceb143f852f8d3bc83248ff45c7028931739915",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 624,
+        "raw": 624
+      },
+      "trace_counts": {
+        "audited_eligible": 2087,
+        "raw": 2087
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2073,
+      "packed_shard_content_sha256": "9c891c1aad311f66f6d6cd7362e86a13815e07e8ac3a21feaf910540b20d0c3e",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0001.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 580,
+        "raw": 580
+      },
+      "trace_counts": {
+        "audited_eligible": 2073,
+        "raw": 2073
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2077,
+      "packed_shard_content_sha256": "5313cda90a8e9545683c788bc87cfbc048a46dc3c3a7950e23131c4a7f933706",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0002.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 599,
+        "raw": 599
+      },
+      "trace_counts": {
+        "audited_eligible": 2077,
+        "raw": 2077
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2069,
+      "packed_shard_content_sha256": "46b916c1374aa565617918104d18a7d285c371211ec8f6d5ea3a4da33beb8d40",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0003.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 586,
+        "raw": 586
+      },
+      "trace_counts": {
+        "audited_eligible": 2069,
+        "raw": 2069
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2111,
+      "packed_shard_content_sha256": "75f2da8a11cd1519fd1c410e6e355d51bc94e60b5bb15287898296daf68691f6",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0004.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 622,
+        "raw": 622
+      },
+      "trace_counts": {
+        "audited_eligible": 2111,
+        "raw": 2111
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2057,
+      "packed_shard_content_sha256": "2151912e9e71556f312bdf62a2f1dbcf815ac6821375e87539075884191e6cc8",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0005.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 584,
+        "raw": 584
+      },
+      "trace_counts": {
+        "audited_eligible": 2057,
+        "raw": 2057
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2098,
+      "packed_shard_content_sha256": "d2a2901dae71ae113c074928341b9ae031572a531cfe496900648b396743eb50",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0006.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 638,
+        "raw": 638
+      },
+      "trace_counts": {
+        "audited_eligible": 2098,
+        "raw": 2098
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2067,
+      "packed_shard_content_sha256": "f8d6f0ab663086f5fad30717ba114e711749d6d7039fc1b38a1665e49e39369a",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0007.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 618,
+        "raw": 618
+      },
+      "trace_counts": {
+        "audited_eligible": 2067,
+        "raw": 2067
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2075,
+      "packed_shard_content_sha256": "74007c5889ce2da5beb159babbbfbba55c520f3ac6d3c6c5625e4afd55f16990",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0008.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 593,
+        "raw": 593
+      },
+      "trace_counts": {
+        "audited_eligible": 2075,
+        "raw": 2075
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2066,
+      "packed_shard_content_sha256": "ac35604482010ef45091a8595ea9a4473299dcf9eac4f8adbaf543026bb54aba",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0009.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 561,
+        "raw": 561
+      },
+      "trace_counts": {
+        "audited_eligible": 2066,
+        "raw": 2066
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2114,
+      "packed_shard_content_sha256": "9f4ac5432e4d38b29b486f365ec7e4d831c9b425973b948f217f30e2effeafb0",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0010.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 568,
+        "raw": 568
+      },
+      "trace_counts": {
+        "audited_eligible": 2114,
+        "raw": 2114
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2096,
+      "packed_shard_content_sha256": "1a711b18a5ae2c109ce1788e93a8fd69f9f2b4091083311f187971f0529c23e3",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0011.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 670,
+        "raw": 670
+      },
+      "trace_counts": {
+        "audited_eligible": 2096,
+        "raw": 2096
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2066,
+      "packed_shard_content_sha256": "143ed6973245225cc107f60b618a7d23e8fbc385fef1b8c4149e5d3d951ccfba",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0012.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 616,
+        "raw": 616,
+        "representability_excluded": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 2065,
+        "raw": 2066,
+        "representability_excluded": 1
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2070,
+      "packed_shard_content_sha256": "3119893a651d7e0e036f16337de64a9ba84872d162bdf36956218bc52a9d6960",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0013.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 613,
+        "raw": 613
+      },
+      "trace_counts": {
+        "audited_eligible": 2070,
+        "raw": 2070
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2087,
+      "packed_shard_content_sha256": "68f6b7c0c3badd9c03d84e3abefed545af087620534c8a6e8441a044f8775f0c",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0014.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 635,
+        "raw": 635
+      },
+      "trace_counts": {
+        "audited_eligible": 2087,
+        "raw": 2087
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2077,
+      "packed_shard_content_sha256": "7b004bf02226f4bd3359f594cb1be4af50a8b2d60e878faf0aa0eb798932d205",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0015.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 628,
+        "raw": 628,
+        "representability_excluded": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 2076,
+        "raw": 2077,
+        "representability_excluded": 1
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2086,
+      "packed_shard_content_sha256": "7e5b0da601f101fae2946b33336c2721ea485d4022481619354cc11db090ea27",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0016.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 616,
+        "raw": 616,
+        "representability_excluded": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 2085,
+        "raw": 2086,
+        "representability_excluded": 1
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2112,
+      "packed_shard_content_sha256": "a08fe81388e101800f203e038f68800be9703f617f405c38b391bc3d82d06742",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0017.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 663,
+        "raw": 663
+      },
+      "trace_counts": {
+        "audited_eligible": 2112,
+        "raw": 2112
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2055,
+      "packed_shard_content_sha256": "67b0d5a34c45fe5d07a091ae1d913312135a0d1b71e8eebc434254f69f0f4591",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0018.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 657,
+        "raw": 657
+      },
+      "trace_counts": {
+        "audited_eligible": 2055,
+        "raw": 2055
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2079,
+      "packed_shard_content_sha256": "a5cca29874d57ab88c9c90f1defd14acbfedb66abf714446e1d593e967a1b743",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0019.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 584,
+        "raw": 584
+      },
+      "trace_counts": {
+        "audited_eligible": 2079,
+        "raw": 2079
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2058,
+      "packed_shard_content_sha256": "7554617e424bcf870bd4b735dd5448365a2fa6ea5756fc7f1830fcef8115c80d",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0020.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 581,
+        "raw": 581
+      },
+      "trace_counts": {
+        "audited_eligible": 2058,
+        "raw": 2058
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2097,
+      "packed_shard_content_sha256": "40ac82b65fccefceab9b1c25d65649e7c782aca0d5bc3e7a4795c3ead79fa289",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0021.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 625,
+        "raw": 625
+      },
+      "trace_counts": {
+        "audited_eligible": 2097,
+        "raw": 2097
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2084,
+      "packed_shard_content_sha256": "74e5946ef58f5364b46f389ecaf9d1e79348285a8a4f180c64ecc7c5e5250956",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0022.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 626,
+        "raw": 626
+      },
+      "trace_counts": {
+        "audited_eligible": 2084,
+        "raw": 2084
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2084,
+      "packed_shard_content_sha256": "1d09eba9c017d25c9105dfd12e67475e0fe1852696c5997de0cbce8dab826f3a",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0023.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 574,
+        "raw": 574
+      },
+      "trace_counts": {
+        "audited_eligible": 2084,
+        "raw": 2084
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2102,
+      "packed_shard_content_sha256": "566ac0b8b5207db4a770e7a2dcb277fb93ccb1442b8d6c01f9d6dcb645bcad7b",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0024.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 637,
+        "raw": 637
+      },
+      "trace_counts": {
+        "audited_eligible": 2102,
+        "raw": 2102
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2082,
+      "packed_shard_content_sha256": "a1e854b86ac2b23347c55b504aa9bc977b83ddcc073879097e375c4351696d0a",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0025.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 598,
+        "raw": 598
+      },
+      "trace_counts": {
+        "audited_eligible": 2082,
+        "raw": 2082
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2090,
+      "packed_shard_content_sha256": "63745c9a5003e746bc429539e0c81049a2e92b82b9582724f84ac3b1fd1e9026",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0026.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 689,
+        "raw": 689
+      },
+      "trace_counts": {
+        "audited_eligible": 2090,
+        "raw": 2090
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2097,
+      "packed_shard_content_sha256": "ce31dae41b81ab5dd2759f4a6806e01a0b2d404dac09bd640bf0cdd0125cd001",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0027.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 624,
+        "raw": 624
+      },
+      "trace_counts": {
+        "audited_eligible": 2097,
+        "raw": 2097
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2088,
+      "packed_shard_content_sha256": "0048576a97c0ae358966943fa8dac6414b9d7ea4a59c28453c16a284e53320de",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0028.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 676,
+        "raw": 676
+      },
+      "trace_counts": {
+        "audited_eligible": 2088,
+        "raw": 2088
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2085,
+      "packed_shard_content_sha256": "f82398a08825937268cfaec6b41ce50fe2d6e40408d638d7fc61e73f08b585f2",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0029.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 649,
+        "raw": 649
+      },
+      "trace_counts": {
+        "audited_eligible": 2085,
+        "raw": 2085
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2081,
+      "packed_shard_content_sha256": "30baed90faee96ca93144c92b91a4a61ef4cbc57a86acd18f92a5a5db5288cf8",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0030.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 650,
+        "raw": 650
+      },
+      "trace_counts": {
+        "audited_eligible": 2081,
+        "raw": 2081
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2043,
+      "packed_shard_content_sha256": "4360b6355b4a5732d71bc2c932e4e9c17fe22c68b69055f016da45810fab1d32",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0031.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 568,
+        "raw": 568
+      },
+      "trace_counts": {
+        "audited_eligible": 2043,
+        "raw": 2043
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2103,
+      "packed_shard_content_sha256": "a79fe4513542e89e0835ecd22c2c06b24ecc1bf892a1ab551b122099ada08989",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0032.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 617,
+        "raw": 617
+      },
+      "trace_counts": {
+        "audited_eligible": 2103,
+        "raw": 2103
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2066,
+      "packed_shard_content_sha256": "f39362e195b8563223f4584ce864253b0719755a2af1a3fdbd161b762df1bcde",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0033.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 617,
+        "raw": 617
+      },
+      "trace_counts": {
+        "audited_eligible": 2066,
+        "raw": 2066
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2093,
+      "packed_shard_content_sha256": "53bcc713c065c42d2baf53079319ffaed45002d3ef53d976987607ee692b92c2",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0034.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 631,
+        "raw": 631
+      },
+      "trace_counts": {
+        "audited_eligible": 2093,
+        "raw": 2093
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 2074,
+      "packed_shard_content_sha256": "350e20b90cbd92744a9d819b2a3d58a56686b991d259b16e10837f67fe795f0e",
+      "partition": "train",
+      "relative_path": "corruption/train/shard_0035.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 607,
+        "raw": 607
+      },
+      "trace_counts": {
+        "audited_eligible": 2074,
+        "raw": 2074
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 1985,
+      "packed_shard_content_sha256": "a91cb235f6414061efe06b2d1cfedf04a8281d317ac996463031c7adf5096f23",
+      "partition": "validation",
+      "relative_path": "corruption/validation/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 570,
+        "raw": 570
+      },
+      "trace_counts": {
+        "audited_eligible": 1985,
+        "raw": 1985
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 1988,
+      "packed_shard_content_sha256": "17a54ef38274f1ae4022504123745a589a55588480ee4886e01a62ede152f782",
+      "partition": "validation",
+      "relative_path": "corruption/validation/shard_0001.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 521,
+        "raw": 521
+      },
+      "trace_counts": {
+        "audited_eligible": 1988,
+        "raw": 1988
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 1938,
+      "packed_shard_content_sha256": "f2278960ca111801de0bca8a81111fc0632666e455a056aaad4c7aeb969fce35",
+      "partition": "test",
+      "relative_path": "corruption/test/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 588,
+        "raw": 588
+      },
+      "trace_counts": {
+        "audited_eligible": 1938,
+        "raw": 1938
+      }
+    },
+    {
+      "envelope_layer": "corruption",
+      "manifest_layer": "general_corruption",
+      "observed_entries": 1936,
+      "packed_shard_content_sha256": "37bef7c464ff4592d0d3b20c92b1a6df93db63030c7964b550254dd5f4c5ed03",
+      "partition": "test",
+      "relative_path": "corruption/test/shard_0001.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "audited": 607,
+        "raw": 607
+      },
+      "trace_counts": {
+        "audited_eligible": 1936,
+        "raw": 1936
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "02040c6ab6208971c3d21730c0d467280e5b6bb6c45439dde25fe5ccdd0b3248",
+      "partition": "train",
+      "relative_path": "train/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19517,
+        "charge_policy_excluded": 1170,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "3d898557ed0946c57b49ac046faa14b2e77abf33fc5e0093e2843465bee3c301",
+      "partition": "train",
+      "relative_path": "train/shard_0001.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19546,
+        "charge_policy_excluded": 1141,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "3e74857cbd0d7df073a804b116f80e3776d78c8c4e1474c886b836e347d242d9",
+      "partition": "train",
+      "relative_path": "train/shard_0002.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19520,
+        "charge_policy_excluded": 1167,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "35455ae9a3de50043eef0aaeaee584b1302d4371b6540633dd1ecc00fa80a9b3",
+      "partition": "train",
+      "relative_path": "train/shard_0003.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19513,
+        "charge_policy_excluded": 1174,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "779b5d503959925a1792956ebd9bdb731f3dae65e02c361cc4dc9889768fe571",
+      "partition": "train",
+      "relative_path": "train/shard_0004.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19559,
+        "charge_policy_excluded": 1128,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "23b2398deca69c1702ee0ced88a4205219bb6f4d1c7aa941e1e7a15c42687cf4",
+      "partition": "train",
+      "relative_path": "train/shard_0005.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19544,
+        "charge_policy_excluded": 1143,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "e093cb42a2934f40ecc11ca123b160f0108f4de2fd2773ca9cdd5883b85ac7f4",
+      "partition": "train",
+      "relative_path": "train/shard_0006.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19531,
+        "charge_policy_excluded": 1156,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "bac98fe72a618005716b71446199a794c3c92a89ecd2c5f8b0d60a54e77f8355",
+      "partition": "train",
+      "relative_path": "train/shard_0007.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19580,
+        "charge_policy_excluded": 1107,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "7f17254a4e0bc3766fabf0f606f3c6ddd6c1ca67ef0e99643c460b2f8acf773e",
+      "partition": "train",
+      "relative_path": "train/shard_0008.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19568,
+        "charge_policy_excluded": 1119,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "955f385ec92cb2b473561c6a359b8926ebb05b17079d7a611a249b3f5db55dfd",
+      "partition": "train",
+      "relative_path": "train/shard_0009.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19582,
+        "charge_policy_excluded": 1105,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "9f22f20059d4b4e09d93066a503be2f5f7def462fe77d41ad64b499e52680502",
+      "partition": "train",
+      "relative_path": "train/shard_0010.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19583,
+        "charge_policy_excluded": 1104,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "9de2b66c5511d4aae577157435bd8503e2c6127890888647a6c4e3ecb5160b3f",
+      "partition": "train",
+      "relative_path": "train/shard_0011.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19547,
+        "charge_policy_excluded": 1140,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "7ab716866c2c98116256557dc5e4b3a4a1dcaf5689fdc8d121f187d9d7574729",
+      "partition": "train",
+      "relative_path": "train/shard_0012.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19580,
+        "charge_policy_excluded": 1107,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "35e845187430f3673c0104edc32b261c193fbec0603f569a19e005a7168ecdb0",
+      "partition": "train",
+      "relative_path": "train/shard_0013.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19560,
+        "charge_policy_excluded": 1127,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20687,
+      "packed_shard_content_sha256": "a5bd6fbc8e5013443c5d4d33dcf4615b871a8e83c8d3057e7e53c678d205945e",
+      "partition": "train",
+      "relative_path": "train/shard_0014.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19504,
+        "charge_policy_excluded": 1183,
+        "raw": 20687
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 20686,
+      "packed_shard_content_sha256": "bd2042b6de080272df0e7cdac45ce91b6ae011037d2850b1162bc13bf01feb0a",
+      "partition": "train",
+      "relative_path": "train/shard_0015.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 19482,
+        "charge_policy_excluded": 1204,
+        "raw": 20686
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 15775,
+      "packed_shard_content_sha256": "198c8091a80d03a38b6aaa9cb1cfef9ad28811b0fa04d2b3c336c8952bd67f27",
+      "partition": "validation",
+      "relative_path": "validation/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 14973,
+        "charge_policy_excluded": 802,
+        "raw": 15775
+      }
+    },
+    {
+      "envelope_layer": "mmp_analogue",
+      "manifest_layer": "mmp_analogue",
+      "observed_entries": 14253,
+      "packed_shard_content_sha256": "ebce5cff3f651cd0f87cf44be05ed632f630a4822d28a088a447031e2221b084",
+      "partition": "test",
+      "relative_path": "test/shard_0000.jsonl.gz",
+      "ring_system_restate_teacher_counts": {
+        "charge_policy_excluded": 0,
+        "raw": 0
+      },
+      "trace_counts": {
+        "audited_eligible": 13500,
+        "charge_policy_excluded": 753,
+        "raw": 14253
+      }
+    }
+  ],
+  "production_support_mutated": false,
+  "schema": "compose.editing.ring_restate_primitive_path_audit",
+  "schema_version": 1,
+  "selection_partitions_train_validation": {
+    "budget_fit": {
+      "16": {
+        "events": 23314,
+        "fraction": 0.9999571091571949
+      },
+      "8": {
+        "events": 23160,
+        "fraction": 0.9933519193652155
+      }
+    },
+    "change_count_histogram": {
+      "10": 55,
+      "11": 19,
+      "12": 42,
+      "13": 9,
+      "14": 9,
+      "15": 2,
+      "2": 4171,
+      "20": 1,
+      "3": 13960,
+      "4": 2576,
+      "5": 1150,
+      "6": 738,
+      "7": 241,
+      "8": 324,
+      "9": 18
+    },
+    "charge_policy_preserving_primitive_path_fraction": 1.0,
+    "connected_primitive_path_fraction": 1.0,
+    "declared_primitive7_event_membership": {
+      "not_fully_declared": 23315
+    },
+    "declared_primitive7_step_count": 0,
+    "declared_primitive7_step_fraction": 0.0,
+    "direction_histogram": {
+      "aromatizing": 9626,
+      "dearomatizing": 13689
+    },
+    "exact_macro_and_primitive_endpoint_fraction": 1.0,
+    "failure_code_counts": {},
+    "hard_failure_fraction": 0.0,
+    "heterocycle_histogram": {
+      "false": 11797,
+      "true": 11518
+    },
+    "lowering_length_histogram": {
+      "10": 55,
+      "11": 19,
+      "12": 42,
+      "13": 9,
+      "14": 9,
+      "15": 2,
+      "2": 4171,
+      "20": 1,
+      "3": 13960,
+      "4": 2576,
+      "5": 1150,
+      "6": 738,
+      "7": 241,
+      "8": 324,
+      "9": 18
+    },
+    "primitive_family_sequence_histogram": {
+      "bond_reorder -> bond_reorder": 4171,
+      "bond_reorder -> bond_reorder -> bond_reorder": 13960,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2576,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1150,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 738,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 241,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 324,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 18,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 55,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 19,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 42,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 9,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 2,
+      "bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder -> bond_reorder": 1
+    },
+    "source_system_saturation_histogram": {
+      "false": 14727,
+      "true": 8588
+    },
+    "system_cycle_rank_histogram": {
+      "1": 16877,
+      "2": 4823,
+      "3": 1149,
+      "4": 317,
+      "5": 112,
+      "6": 25,
+      "7": 12
+    },
+    "target_system_saturation_histogram": {
+      "false": 10472,
+      "true": 12843
+    },
+    "teacher_events": 23315,
+    "teacher_events_with_hard_failures": 0,
+    "total_lowering_step_count": 76701,
+    "valid_primitive_path_fraction": 1.0
+  },
+  "status": "CHECKPOINT_INDEPENDENT_OPERATOR_EVIDENCE_NO_PRODUCTION_MUTATION",
+  "training_authorized": false
+}
