@@ -1,0 +1,85 @@
+{
+  "schema": "compose.experiments.e5_quotient_invariance_contract",
+  "schema_version": 1,
+  "status": "FROZEN_DEVELOPMENT_MECHANISM_CONTRACT_NO_PAPER_CLAIM",
+  "experiment_id": "E5",
+  "panel_id": "QUOTIENT_INVARIANCE",
+  "paper_claim_authorized": false,
+  "checkpoint_required": false,
+  "model_fixture": {
+    "seed": 20260730,
+    "hidden_dim": 12,
+    "message_passing_steps": 1,
+    "mark_dim": 8,
+    "max_atoms": 12,
+    "time": 0.37,
+    "enable_ring_restates": true,
+    "enable_cyclic_graft": true,
+    "enable_heteroatom_scan": true,
+    "enable_ring_opening": true,
+    "enable_cycle_ops": true,
+    "enable_ring_grow_macro": false,
+    "enable_ring_system_delete": false,
+    "ring_catalog_seed_smiles": [
+      "c1ccccc1",
+      "C1CCNCC1"
+    ]
+  },
+  "real_state_panel": [
+    {
+      "state_id": "acyclic_hetero",
+      "smiles": "CCO"
+    },
+    {
+      "state_id": "branched_symmetric",
+      "smiles": "CC(C)C"
+    },
+    {
+      "state_id": "aromatic_cycle",
+      "smiles": "c1ccccc1"
+    },
+    {
+      "state_id": "aliphatic_cycle",
+      "smiles": "C1CCCCC1"
+    },
+    {
+      "state_id": "heterocycle",
+      "smiles": "C1CCNCC1"
+    }
+  ],
+  "slot_relabeling": {
+    "seed": 20260731
+  },
+  "within_fiber_refinement": {
+    "split_weights": [
+      0.25,
+      0.75
+    ]
+  },
+  "sampling": {
+    "seed": 20260732,
+    "draws_per_state": 200000,
+    "familywise_error_probability": 1e-09,
+    "tolerance_rule": "sqrt(log(2*K/alpha)/(2*n))"
+  },
+  "negative_mark_controls": {
+    "power_beta": 2.0,
+    "top_k": 1
+  },
+  "numeric_tolerances": {
+    "production_vs_dictionary_oracle": 2e-07,
+    "successor_mass_invariance": 2e-10,
+    "slot_relabeling": 2e-06,
+    "controlled_law_invariance": 2e-10
+  },
+  "required_registry_checks": [
+    "raw_mark_multiplicity_differs",
+    "aggregate_canonical_successor_mass_identical",
+    "sampled_successor_frequency_matches_aggregate_mass",
+    "persistent_slot_relabeling_leaves_kernel_unchanged",
+    "within_fiber_action_refinement_leaves_state_law_unchanged",
+    "exact_control_on_quotient_invariant_to_refinement"
+  ],
+  "scope_caveat": "This development mechanism check validates the derived successor kernel and successor-level control under semantically valid slot relabeling and within-fiber action refinement. It does not make the historical mark-level training objective successor-level.",
+  "contract_sha256": "a66648cf47d281ac47ca138a0a193962eefae42d71b2946d2c047d90936cd894"
+}
