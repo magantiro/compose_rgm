@@ -3,8 +3,7 @@
 Self-contained handoff. Assumes no prior context from the session that produced it.
 
 **Branch:** `claude/control-closed-pareto-editing`
-**Full test suite:** 967 passed, 0 skipped (measured at commit `4489370`; PART II and the registry
-status update landed after, adding no tests)
+**Full test suite:** 978 passed, 0 skipped (re-measured at the handoff commit)
 **Handoff commit:** see `git log --oneline` for the commit whose subject begins `docs: hand off the
 RingCore-V1`. The lineage commits are listed in PART II §C.5.
 **State:** 16,000-step training run COMPLETE. Two capability failures diagnosed. No checkpoint selected.
@@ -722,6 +721,6 @@ This document was adversarially checked against the repo rather than written fro
 Defects the check FOUND and fixed: a stale HEAD hash; `learnings.md` stated as ~330 lines when it is 454;
 an imprecise "test callers only" claim for `segmented_successor`.
 
-**Known remaining imprecision:** the 967-test count was measured at `4489370`; PART II and the registry
-status update landed after and add no tests, but the count has not been re-measured. Re-run the suite before
-relying on it.
+**Re-measured after fixing the above:** full suite **978 passed, 0 skipped** at the handoff commit. The
+earlier 967 figure in this document's first draft predated the E6 null-state, benchmark-identity,
+atom-state and slot-safety tests.
