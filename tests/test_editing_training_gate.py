@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 from pathlib import Path
 
 import pytest
 
 from compose_v4.experiments.editing_training_gate import (
+    BOUNDED_PILOT_DISABLED_FAMILIES,
+    P50_PREREQUISITE_EVIDENCE_FIELDS,
     REQUIRED_P50_FAMILIES,
     EditingTrainingGateError,
     assert_full_training_launch_authorized,
@@ -13,8 +16,13 @@ from compose_v4.experiments.editing_training_gate import (
     full_training_launch_blockers,
     load_editing_training_gate,
     p50_launch_blockers,
+    resolve_p50_prerequisite_evidence,
     resolve_p50_thresholds,
     validate_editing_training_gate,
+    verify_p50_prerequisite_artifacts,
+)
+from compose_v4.experiments.successor_micro_overfit import (
+    RINGCORE_EDITING_FAMILIES,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +69,44 @@ def test_p50_is_exactly_fifty_optimizer_steps() -> None:
         validate_editing_training_gate(broken)
 
 
+def test_bounded_pilot_requires_exact_active_eight_without_production_promotion() -> None:
+    contract = load_editing_training_gate(CONTRACT_PATH)
+    freeze = contract["bounded_pilot_operator_freeze"]
+    assert REQUIRED_P50_FAMILIES == RINGCORE_EDITING_FAMILIES
+    assert tuple(freeze["required_families"]) == RINGCORE_EDITING_FAMILIES
+    assert tuple(freeze["disabled_families"]) == BOUNDED_PILOT_DISABLED_FAMILIES
+    assert freeze["final_production_support_authorized"] is False
+    assert "ring_system_restate" in contract["development_panels"][
+        "required_semantic_slices"
+    ]
+    assert contract["development_panels"]["conditional_slices"] == []
+
+    for mutation in ("missing_restate", "enable_delete", "promote_production"):
+        broken = copy.deepcopy(contract)
+        if mutation == "missing_restate":
+            broken["bounded_pilot_operator_freeze"]["required_families"].pop()
+        elif mutation == "enable_delete":
+            broken["bounded_pilot_operator_freeze"]["disabled_families"].remove(
+                "ring_system_delete"
+            )
+        else:
+            broken["bounded_pilot_operator_freeze"][
+                "final_production_support_authorized"
+            ] = True
+        with pytest.raises(EditingTrainingGateError, match="operator freeze"):
+            validate_editing_training_gate(broken)
+
+    conditional = copy.deepcopy(contract)
+    conditional["development_panels"]["required_semantic_slices"].remove(
+        "ring_system_restate"
+    )
+    conditional["development_panels"]["conditional_slices"] = [
+        "ring_system_restate"
+    ]
+    with pytest.raises(EditingTrainingGateError, match="required bounded-pilot"):
+        validate_editing_training_gate(conditional)
+
+
 def test_test_partition_cannot_select_checkpoint() -> None:
     contract = load_editing_training_gate(CONTRACT_PATH)
     broken = copy.deepcopy(contract)
@@ -93,7 +139,8 @@ def test_unfrozen_p50_thresholds_refuse_before_loader_construction() -> None:
         initialization_regime="scratch",
     )
     assert blockers
-    assert "per-family object" in blockers[0]
+    assert any("per-family object" in blocker for blocker in blockers)
+    assert any("prerequisite evidence is not frozen" in blocker for blocker in blockers)
     with pytest.raises(
         EditingTrainingGateError,
         match="before loader construction",
@@ -101,6 +148,78 @@ def test_unfrozen_p50_thresholds_refuse_before_loader_construction() -> None:
         assert_p50_launch_authorized(
             contract,
             initialization_regime="scratch",
+        )
+
+
+def test_frozen_numeric_thresholds_cannot_bypass_missing_p50_prerequisites() -> None:
+    contract = _freeze_p50_thresholds(
+        load_editing_training_gate(CONTRACT_PATH)
+    )
+    blockers = p50_launch_blockers(
+        contract,
+        initialization_regime="scratch",
+    )
+    assert len(blockers) == len(P50_PREREQUISITE_EVIDENCE_FIELDS) + 2
+    assert any("bounded_p50_authorized is not true" in item for item in blockers)
+    assert any("status is not FROZEN_BOUNDED_P50_AUTHORIZED" in item for item in blockers)
+    assert sum(
+        "prerequisite evidence is not frozen" in item for item in blockers
+    ) == len(P50_PREREQUISITE_EVIDENCE_FIELDS)
+
+    for index, field in enumerate(P50_PREREQUISITE_EVIDENCE_FIELDS, start=1):
+        contract["gates"][3]["prerequisite_evidence"][field] = str(index) * 64
+    contract["status"] = "FROZEN_BOUNDED_P50_AUTHORIZED"
+    contract["bounded_p50_authorized"] = True
+    resolved = assert_p50_launch_authorized(
+        contract,
+        initialization_regime="scratch",
+    )
+    assert resolved.required_families == REQUIRED_P50_FAMILIES
+    assert resolve_p50_prerequisite_evidence(contract) == {
+        field: str(index) * 64
+        for index, field in enumerate(
+            P50_PREREQUISITE_EVIDENCE_FIELDS,
+            start=1,
+        )
+    }
+
+
+def test_hash_matching_arbitrary_json_cannot_authorize_p50(
+    tmp_path,
+) -> None:
+    contract = _freeze_p50_thresholds(
+        load_editing_training_gate(CONTRACT_PATH)
+    )
+    paths = {}
+    for index, field in enumerate(P50_PREREQUISITE_EVIDENCE_FIELDS):
+        path = tmp_path / f"prerequisite-{index}.json"
+        path.write_text(f'{{"field": "{field}"}}\n')
+        paths[field] = path
+        contract["gates"][3]["prerequisite_evidence"][field] = (
+            hashlib.sha256(path.read_bytes()).hexdigest()
+        )
+
+    contract["status"] = "FROZEN_BOUNDED_P50_AUTHORIZED"
+    contract["bounded_p50_authorized"] = True
+    with pytest.raises(
+        EditingTrainingGateError,
+        match="prerequisite semantic validation failed",
+    ):
+        verify_p50_prerequisite_artifacts(
+            contract,
+            paths,
+            expected_launch={},
+        )
+
+    paths[P50_PREREQUISITE_EVIDENCE_FIELDS[-1]].write_text("mutated recipe")
+    with pytest.raises(
+        EditingTrainingGateError,
+        match="prerequisite artifact SHA-256 mismatch",
+    ):
+        verify_p50_prerequisite_artifacts(
+            contract,
+            paths,
+            expected_launch={},
         )
 
 

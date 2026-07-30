@@ -50,6 +50,7 @@ from compose_v4.rewrite.operators import AtomInsert
 
 ACTIVE8_TRACE_INVENTORY_SCHEMA = "compose.data.active8_trace_inventory"
 ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION = 1
+ACTIVE8_TRACE_INVENTORY_STATUS = "IMMUTABLE_WHOLE_TRACE_ACTIVE8_BOUNDARY"
 ACTIVE8_TRACE_DECISION_SCHEMA = "compose.data.active8_trace_decision"
 ACTIVE8_TRACE_DECISION_SCHEMA_VERSION = 1
 
@@ -97,6 +98,8 @@ class Active8TraceAdmission:
     manifest_path: Path
     manifest_file_sha256: str
     inventory_sha256: str
+    unified_packed_manifest_sha256: str
+    support_contract_sha256: str
     effective_source_corpus_cache_sha256: str
     decisions_by_digest: Mapping[str, tuple[tuple[str, bool], ...]]
     shard_digest_by_lane: Mapping[tuple[str, str, str], str]
@@ -108,6 +111,8 @@ class Active8TraceAdmission:
         for field in (
             "manifest_file_sha256",
             "inventory_sha256",
+            "unified_packed_manifest_sha256",
+            "support_contract_sha256",
             "effective_source_corpus_cache_sha256",
         ):
             if not _is_sha256(getattr(self, field)):
@@ -357,6 +362,77 @@ def implementation_identity(*, repo_root: Path | None = None) -> dict[str, objec
         "sources": sources,
         "implementation_sha256": _sha256_bytes(sources),
     }
+
+
+def _selection_policy() -> dict[str, object]:
+    return {
+        "unit": "complete_packed_trace",
+        "active_families": list(ACTIVE8_FAMILIES),
+        "all_nonterminal_teachers_must_match_exact_candidates": True,
+        "excluded_trace_emits_progress_rows": False,
+        "accepted_trace_retains_terminal_row": True,
+        "multi_neighbor_atom_insert_supported": False,
+    }
+
+
+def _persistent_state_identity() -> dict[str, object]:
+    return {
+        "schema": PERSISTENT_STATE_DIGEST_SCHEMA,
+        "schema_version": PERSISTENT_STATE_DIGEST_VERSION,
+    }
+
+
+def _validate_inventory_semantics(payload: Mapping[str, object]) -> None:
+    if payload.get("status") != ACTIVE8_TRACE_INVENTORY_STATUS:
+        raise Active8TraceInventoryError(
+            "active-8 inventory has an unauthorized boundary status"
+        )
+    if payload.get("training_authorized") is not False:
+        raise Active8TraceInventoryError(
+            "active-8 inventory cannot carry training authority"
+        )
+    if payload.get("selection_policy") != _selection_policy():
+        raise Active8TraceInventoryError(
+            "active-8 inventory selection policy differs from the "
+            "complete-trace Active8 contract"
+        )
+    if payload.get("persistent_state_identity") != _persistent_state_identity():
+        raise Active8TraceInventoryError(
+            "active-8 inventory persistent-state identity differs from "
+            "production"
+        )
+    if payload.get("implementation_identity") != implementation_identity():
+        raise Active8TraceInventoryError(
+            "active-8 inventory implementation identity differs from "
+            "the live admission implementation"
+        )
+
+    source_identity = payload.get("source_identity")
+    source_fields = (
+        "unified_packed_manifest_sha256",
+        "unified_packed_manifest_semantic_sha256",
+        "support_contract_sha256",
+        "physical_shard_binding_sha256",
+    )
+    if (
+        not isinstance(source_identity, Mapping)
+        or set(source_identity)
+        != {*source_fields, "effective_source_corpus_cache_sha256"}
+        or any(not _is_sha256(source_identity.get(field)) for field in source_fields)
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 inventory source identity is malformed"
+        )
+    expected_effective_sha256 = _sha256_bytes(
+        {field: source_identity[field] for field in source_fields}
+    )
+    if (
+        source_identity.get("effective_source_corpus_cache_sha256")
+        != expected_effective_sha256
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 inventory effective source identity is inconsistent"
+        )
 
 
 class ProductionExactCandidateChecker:
@@ -952,20 +1028,10 @@ def build_active8_trace_inventory(
     payload: dict[str, object] = {
         "schema": ACTIVE8_TRACE_INVENTORY_SCHEMA,
         "schema_version": ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION,
-        "status": "IMMUTABLE_WHOLE_TRACE_ACTIVE8_BOUNDARY",
+        "status": ACTIVE8_TRACE_INVENTORY_STATUS,
         "training_authorized": False,
-        "selection_policy": {
-            "unit": "complete_packed_trace",
-            "active_families": list(ACTIVE8_FAMILIES),
-            "all_nonterminal_teachers_must_match_exact_candidates": True,
-            "excluded_trace_emits_progress_rows": False,
-            "accepted_trace_retains_terminal_row": True,
-            "multi_neighbor_atom_insert_supported": False,
-        },
-        "persistent_state_identity": {
-            "schema": PERSISTENT_STATE_DIGEST_SCHEMA,
-            "schema_version": PERSISTENT_STATE_DIGEST_VERSION,
-        },
+        "selection_policy": _selection_policy(),
+        "persistent_state_identity": _persistent_state_identity(),
         "source_identity": source_identity,
         "implementation_identity": implementation_identity(),
         "counts": dict(totals),
@@ -990,6 +1056,10 @@ def load_active8_trace_inventory(path: Path) -> dict[str, object]:
         raise Active8TraceInventoryError(
             f"cannot read active-8 inventory manifest: {source}"
         ) from error
+    if not isinstance(payload, dict):
+        raise Active8TraceInventoryError(
+            "active-8 inventory manifest must be a JSON object"
+        )
     if payload.get("schema") != ACTIVE8_TRACE_INVENTORY_SCHEMA:
         raise Active8TraceInventoryError("unexpected active-8 inventory schema")
     if payload.get("schema_version") != ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION:
@@ -999,6 +1069,7 @@ def load_active8_trace_inventory(path: Path) -> dict[str, object]:
     payload["inventory_sha256"] = expected
     if not _is_sha256(expected) or expected != observed:
         raise Active8TraceInventoryError("active-8 inventory self-hash mismatch")
+    _validate_inventory_semantics(payload)
     return payload
 
 
@@ -1008,6 +1079,7 @@ def load_active8_trace_admission(
     expected_manifest_file_sha256: str | None = None,
     expected_inventory_sha256: str | None = None,
     expected_effective_source_corpus_cache_sha256: str | None = None,
+    expected_support_contract_sha256: str | None = None,
 ) -> Active8TraceAdmission:
     """Load every decision into a verified immutable production admission index."""
 
@@ -1039,9 +1111,19 @@ def load_active8_trace_admission(
     effective_source_sha256 = source_identity.get(
         "effective_source_corpus_cache_sha256"
     )
-    if not _is_sha256(effective_source_sha256):
+    unified_packed_manifest_sha256 = source_identity.get(
+        "unified_packed_manifest_sha256"
+    )
+    support_contract_sha256 = source_identity.get(
+        "support_contract_sha256"
+    )
+    if (
+        not _is_sha256(effective_source_sha256)
+        or not _is_sha256(unified_packed_manifest_sha256)
+        or not _is_sha256(support_contract_sha256)
+    ):
         raise Active8TraceInventoryError(
-            "active-8 inventory lacks its effective source-corpus identity"
+            "active-8 inventory lacks its source or support-contract identity"
         )
     if (
         expected_effective_source_corpus_cache_sha256 is not None
@@ -1050,6 +1132,13 @@ def load_active8_trace_admission(
     ):
         raise Active8TraceInventoryError(
             "active-8 effective source-corpus SHA-256 mismatch"
+        )
+    if (
+        expected_support_contract_sha256 is not None
+        and support_contract_sha256 != expected_support_contract_sha256
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 Gate-0 support-contract SHA-256 mismatch"
         )
 
     decisions_by_digest: dict[str, tuple[tuple[str, bool], ...]] = {}
@@ -1192,6 +1281,8 @@ def load_active8_trace_admission(
         manifest_path=manifest_path,
         manifest_file_sha256=manifest_file_sha256,
         inventory_sha256=inventory_sha256,
+        unified_packed_manifest_sha256=unified_packed_manifest_sha256,
+        support_contract_sha256=support_contract_sha256,
         effective_source_corpus_cache_sha256=effective_source_sha256,
         decisions_by_digest=MappingProxyType(decisions_by_digest),
         shard_digest_by_lane=MappingProxyType(shard_digest_by_lane),
@@ -1295,6 +1386,7 @@ __all__ = [
     "ACTIVE8_FAMILIES",
     "ACTIVE8_TRACE_INVENTORY_SCHEMA",
     "ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION",
+    "ACTIVE8_TRACE_INVENTORY_STATUS",
     "Active8SourceShard",
     "Active8TraceAdmission",
     "Active8TraceInventoryError",

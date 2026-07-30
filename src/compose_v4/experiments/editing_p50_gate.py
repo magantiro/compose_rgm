@@ -277,7 +277,10 @@ def _validate_resolved_thresholds(
         raise P50GateError("resolved P50 thresholds have an unknown initialization regime")
     required = tuple(REQUIRED_P50_FAMILIES)
     if thresholds.required_families != required:
-        raise P50GateError("resolved P50 thresholds must cover the ordered editing core")
+        raise P50GateError(
+            "resolved P50 thresholds must cover the ordered eight-family "
+            "bounded pilot"
+        )
 
     minimum_pairs = thresholds.minimum_gradient_updates
     regression_pairs = thresholds.maximum_family_nll_regression

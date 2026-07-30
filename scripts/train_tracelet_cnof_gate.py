@@ -317,6 +317,176 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _load_gate_zero_support_contract_sha256(path: Path) -> str:
+    """Return the Gate0 runtime-contract identity from exact structural evidence."""
+
+    from compose_v4.experiments.editing_gate_zero_runtime import (
+        EDITING_GATE_ZERO_RUNTIME_EVIDENCE_SCHEMA,
+        EDITING_GATE_ZERO_RUNTIME_EVIDENCE_VERSION,
+        EDITING_GATE_ZERO_RUNTIME_STATUS,
+    )
+
+    source = Path(path)
+    try:
+        payload = json.loads(source.read_bytes())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(
+            f"Gate-0 structural evidence is unreadable or invalid: {source}"
+        ) from error
+    if not isinstance(payload, dict):
+        raise TypeError("Gate-0 structural evidence must be a JSON object")
+    if (
+        payload.get("schema") != EDITING_GATE_ZERO_RUNTIME_EVIDENCE_SCHEMA
+        or payload.get("schema_version")
+        != EDITING_GATE_ZERO_RUNTIME_EVIDENCE_VERSION
+        or payload.get("status") != EDITING_GATE_ZERO_RUNTIME_STATUS
+        or payload.get("training_authorized") is not False
+    ):
+        raise ValueError(
+            "Gate-0 structural evidence has unauthorized schema, status, "
+            "or training authority"
+        )
+    evidence_sha256 = payload.get("evidence_sha256")
+    evidence_body = {
+        key: value for key, value in payload.items() if key != "evidence_sha256"
+    }
+    observed_evidence_sha256 = hashlib.sha256(
+        json.dumps(
+            evidence_body,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+    if (
+        not isinstance(evidence_sha256, str)
+        or len(evidence_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in evidence_sha256)
+        or evidence_sha256 != observed_evidence_sha256
+    ):
+        raise ValueError("Gate-0 structural evidence self-hash mismatch")
+    runtime_contract_sha256 = payload.get("runtime_contract_sha256")
+    if (
+        not isinstance(runtime_contract_sha256, str)
+        or len(runtime_contract_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in runtime_contract_sha256
+        )
+    ):
+        raise ValueError(
+            "Gate-0 structural evidence lacks a valid runtime-contract SHA-256"
+        )
+    return runtime_contract_sha256
+
+
+def _p50_launch_recipe_projection(
+    args,
+    *,
+    denovo_weight: float,
+) -> dict[str, object]:
+    """Project the live launcher onto the exact frozen P50 recipe fields."""
+
+    from compose_v4.experiments.editing_training_gate import (
+        BOUNDED_PILOT_DISABLED_FAMILIES,
+        REQUIRED_P50_FAMILIES,
+    )
+
+    required_paths = {
+        "unified_packed_manifest": args.unified_packed_manifest,
+        "representability_overlay": args.representability_overlay,
+    }
+    missing = sorted(name for name, value in required_paths.items() if value is None)
+    if missing:
+        raise ValueError(
+            "P50 recipe projection lacks required immutable inputs: "
+            f"{missing}"
+        )
+    return {
+        "optimizer_steps": int(args.steps),
+        "batch_size": int(args.batch_size),
+        "learning_rate": float(args.learning_rate),
+        "weight_decay": float(args.weight_decay),
+        "warmup_steps": int(args.warmup_steps),
+        "schedule_steps": int(
+            args.steps if args.schedule_steps == 0 else args.schedule_steps
+        ),
+        "minimum_learning_rate_fraction": float(
+            args.minimum_learning_rate_fraction
+        ),
+        "seed": int(args.seed + 3),
+        "initialization_regime": str(
+            args.successor_p50_initialization_regime
+        ),
+        "factorized_training_objective": str(
+            args.factorized_training_objective
+        ),
+        "successor_objective_mode": str(args.successor_objective_mode),
+        "successor_hazard_weight": float(args.successor_hazard_weight),
+        "hidden_dim": int(args.hidden_dim),
+        "message_passing_steps": int(args.message_passing_steps),
+        "mark_dim": 32,
+        "rate_factorization": str(args.rate_factorization),
+        "empirical_mark_prior_mode": str(args.empirical_mark_prior_mode),
+        "empirical_mark_prior_smoothing": float(
+            args.empirical_mark_prior_smoothing
+        ),
+        "ring_family_mass_mode": str(args.ring_family_mass_mode),
+        "ring_template_factorization": str(
+            args.ring_template_factorization
+        ),
+        "trainable_parameter_scope": str(args.trainable_parameter_scope),
+        "late_time_fraction": float(args.late_time_fraction),
+        "operational_horizon": float(args.operational_horizon),
+        "progress_stratification_fraction": float(
+            args.progress_stratification_fraction
+        ),
+        "bond_representation": str(args.bond_representation),
+        "ring_electronic_mode": str(args.ring_electronic_mode),
+        "teacher_ordering": str(args.teacher_ordering),
+        "condition_dropout_probability": float(
+            args.condition_dropout_probability
+        ),
+        "property_conditions": list(args.property_condition),
+        "use_bf16": bool(args.use_bf16),
+        "denovo_weight": float(denovo_weight),
+        "corrupted_prior_mix": bool(args.corrupted_prior_mix),
+        "cycle_op_mix": bool(args.cycle_op_mix),
+        "disable_ring_grow_macro": bool(args.disable_ring_grow_macro),
+        "organic_vocabulary": bool(args.organic_vocabulary),
+        "evaluation_every": int(args.evaluation_every),
+        "evaluation_batch_size": int(args.evaluation_batch_size),
+        "validation_examples": int(args.validation_examples),
+        "validation_size": int(args.validation_size),
+        "max_atoms": int(args.max_atoms),
+        "required_families": list(REQUIRED_P50_FAMILIES),
+        "disabled_families": list(BOUNDED_PILOT_DISABLED_FAMILIES),
+        "resume": args.resume_checkpoint is not None,
+        "early_stopping_patience": int(args.early_stopping_patience),
+        "benchmark_steps": int(args.benchmark_steps),
+        "snapshot_checkpoints": bool(args.snapshot_checkpoints),
+        "source_corpus_inventory_sha256": str(
+            args.successor_source_corpus_inventory_sha256
+        ),
+        "successor_cache_inventory_sha256": str(
+            args.successor_cache_inventory_sha256
+        ),
+        "successor_cache_compatibility_sha256": str(
+            args.successor_cache_compatibility_sha256
+        ),
+        "semantic_sidecar_manifest_sha256": str(
+            args.successor_semantic_sidecar_manifest_sha256
+        ),
+        "unified_packed_manifest_sha256": _file_sha256(
+            Path(args.unified_packed_manifest)
+        ),
+        "representability_overlay_sha256": _file_sha256(
+            Path(args.representability_overlay)
+        ),
+    }
+
+
 def _vocabulary_hash(vocabulary) -> str:
     return hashlib.sha256(
         json.dumps([list(cls) for cls in vocabulary.classes], sort_keys=True).encode()
@@ -437,7 +607,13 @@ def _resolve_denovo_weight(args) -> float:
     return 1.0
 
 
-def _load_precompiled_corpus(args, *, partition: str, seed: int):
+def _load_precompiled_corpus(
+    args,
+    *,
+    partition: str,
+    seed: int,
+    active8_admission=None,
+):
     """Load one partition of the validated precompiled corpus and its explicit three-layer sampler.
 
     This is the production data path. It NEVER calls build_corrupted_prior_records /
@@ -478,12 +654,93 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
                         "counts": overlay["counts"]}, sort_keys=True),
             flush=True,
         )
+    unified = None
+    if args.require_scientific_contract:
+        if active8_admission is None:
+            raise SystemExit(
+                "--require-scientific-contract needs the verified Active8 "
+                "whole-trace admission inventory before any PathRecord is built"
+            )
+        if not args.representability_overlay:
+            raise SystemExit(
+                "--require-scientific-contract needs --representability-overlay: exclusions must come from a "
+                "frozen census, never from an open-ended runtime rule"
+            )
+        if not args.unified_packed_manifest:
+            raise SystemExit(
+                "--require-scientific-contract needs --unified-packed-manifest: the contract is a property of the "
+                "whole corpus, so it cannot be inferred from the shards a "
+                "single run happens to open"
+            )
+        if not args.packed_corpus or not args.packed_mmp_corpus:
+            raise SystemExit(
+                "--require-scientific-contract needs both packed corpus roots "
+                "for byte and partition-isolation validation"
+            )
+        from build_unified_packed_manifest import (
+            UnifiedManifestError,
+            validate as validate_unified_packed_manifest,
+        )
+
+        try:
+            unified = validate_unified_packed_manifest(
+                Path(args.unified_packed_manifest),
+                packed_root=Path(args.packed_corpus),
+                mmp_root=Path(args.packed_mmp_corpus),
+                overlay_path=Path(args.representability_overlay),
+            )
+        except UnifiedManifestError as exc:
+            raise SystemExit(
+                "unified packed-corpus pre-loader validation failed: "
+                f"{exc}"
+            ) from exc
+        unified_manifest_file_sha256 = _file_sha256(
+            Path(args.unified_packed_manifest)
+        )
+        if (
+            active8_admission.unified_packed_manifest_sha256
+            != unified_manifest_file_sha256
+        ):
+            raise SystemExit(
+                "Active8 whole-trace admission and the recomputed scientific "
+                "corpus name different unified packed manifests"
+            )
+        level = (unified.get("contract_levels") or {}).get(
+            "SCIENTIFIC_TRAINING_CONTRACT"
+        )
+        if level != "PASS":
+            raise SystemExit(
+                "SCIENTIFIC_TRAINING_CONTRACT not satisfied by "
+                f"{args.unified_packed_manifest}: {level}. "
+                "Refusing to run scientific training on BENCHMARK_CONTRACT-only data."
+            )
+        print(
+            json.dumps(
+                {
+                    "phase": "SCIENTIFIC_CONTRACT_VERIFIED",
+                    "manifest": args.unified_packed_manifest,
+                    "manifest_file_sha256": unified_manifest_file_sha256,
+                    "manifest_checksum": unified.get("manifest_checksum"),
+                    "packed_corpus_inventory_sha256": unified.get(
+                        "packed_corpus_inventory_sha256"
+                    ),
+                    "partition_isolation": unified.get(
+                        "partition_isolation"
+                    ),
+                    "layer_weights": unified.get("layer_weights"),
+                    "totals": unified.get("totals"),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
     corpus = load_production_edit_corpus(
         root,
         mmp_pool_path=Path(args.precompiled_mmp_pool),
         packed_root=(Path(args.packed_corpus) if args.packed_corpus else None),
         packed_mmp_root=(Path(args.packed_mmp_corpus) if args.packed_mmp_corpus else None),
         representability_overlay=overlay,
+        active8_admission=active8_admission,
         require_packed_mmp=bool(args.packed_corpus),
         partition=partition,
         layer_weights=PRODUCTION_LAYER_WEIGHTS,
@@ -492,32 +749,6 @@ def _load_precompiled_corpus(args, *, partition: str, seed: int):
         checkpoint_interval=args.path_checkpoint_interval,
         seed=seed,
     )
-    if args.require_scientific_contract and not args.representability_overlay:
-        raise SystemExit(
-            "--require-scientific-contract needs --representability-overlay: exclusions must come from a "
-            "frozen census, never from an open-ended runtime rule"
-        )
-    if args.require_scientific_contract:
-        if not args.unified_packed_manifest:
-            raise SystemExit(
-                "--require-scientific-contract needs --unified-packed-manifest: the contract is a property "
-                "of the whole corpus, so it cannot be inferred from the shards a single run happens to open"
-            )
-        unified = json.loads(Path(args.unified_packed_manifest).read_text())
-        level = (unified.get("contract_levels") or {}).get("SCIENTIFIC_TRAINING_CONTRACT")
-        if level != "PASS":
-            raise SystemExit(
-                f"SCIENTIFIC_TRAINING_CONTRACT not satisfied by {args.unified_packed_manifest}: {level}. "
-                "Refusing to run scientific training on BENCHMARK_CONTRACT-only data."
-            )
-        print(
-            json.dumps({"phase": "SCIENTIFIC_CONTRACT_VERIFIED",
-                        "manifest": args.unified_packed_manifest,
-                        "manifest_checksum": unified.get("manifest_checksum"),
-                        "layer_weights": unified.get("layer_weights"),
-                        "totals": unified.get("totals")}, sort_keys=True),
-            flush=True,
-        )
 
     storage = corpus.provenance["layer_storage"]
     if args.packed_corpus:
@@ -1033,18 +1264,22 @@ def _resolve_ring_system_delete_capability(
     *,
     canonical_successor_backend: bool,
 ) -> bool:
-    """Resolve the historical default without hiding a canonical-run choice."""
+    """Preserve legacy defaults while freezing delete off for the bounded pilot."""
 
     if requested is None:
         if canonical_successor_backend:
             raise ValueError(
-                "canonical-successor launch requires an explicit ring-system-delete "
-                "capability: pass --enable-ring-system-delete or "
-                "--no-enable-ring-system-delete"
+                "bounded canonical-successor P50 requires the explicit "
+                "--no-enable-ring-system-delete operator freeze"
             )
         return True
     if type(requested) is not bool:
         raise TypeError("ring-system-delete capability must be Boolean or None")
+    if canonical_successor_backend and requested:
+        raise ValueError(
+            "bounded canonical-successor P50 requires ring-system delete "
+            "disabled; enabling it would train another scientific object"
+        )
     return requested
 
 
@@ -1054,18 +1289,22 @@ def _resolve_ring_restates_capability(
     canonical_successor_backend: bool,
     corrupted_prior_mix: bool,
 ) -> bool:
-    """Make new editing support explicit while preserving old launch behavior."""
+    """Preserve legacy defaults while requiring restate in the bounded pilot."""
 
     if requested is None:
         if canonical_successor_backend:
             raise ValueError(
-                "canonical-successor launch requires an explicit ring-restate "
-                "capability: pass --enable-ring-restates or "
-                "--no-enable-ring-restates"
+                "bounded canonical-successor P50 requires the explicit "
+                "--enable-ring-restates operator freeze"
             )
         return bool(corrupted_prior_mix)
     if type(requested) is not bool:
         raise TypeError("ring-restate capability must be Boolean or None")
+    if canonical_successor_backend and not requested:
+        raise ValueError(
+            "bounded canonical-successor P50 requires ring-system restate; "
+            "disabling it would train another scientific object"
+        )
     return requested
 
 
@@ -1162,6 +1401,7 @@ def main() -> None:
     parser.add_argument("--successor-cache-inventory", type=Path, default=None)
     parser.add_argument("--successor-cache-inventory-sha256", type=str, default=None)
     parser.add_argument("--successor-cache-compatibility-sha256", type=str, default=None)
+    parser.add_argument("--successor-source-corpus-inventory", type=Path, default=None)
     parser.add_argument("--successor-source-corpus-inventory-sha256", type=str, default=None)
     parser.add_argument("--successor-semantic-sidecar", type=Path, default=None)
     parser.add_argument("--successor-semantic-sidecar-manifest", type=Path, default=None)
@@ -1171,6 +1411,9 @@ def main() -> None:
     parser.add_argument("--successor-cache-max-open-shards", type=int, default=2)
     parser.add_argument("--editing-training-gate-contract", type=Path, default=None)
     parser.add_argument("--editing-training-gate-contract-sha256", type=str, default=None)
+    parser.add_argument("--editing-gate-zero-evidence", type=Path, default=None)
+    parser.add_argument("--editing-t1-decision-evidence", type=Path, default=None)
+    parser.add_argument("--editing-p50-recipe", type=Path, default=None)
     parser.add_argument(
         "--successor-p50-initialization-regime",
         choices=(
@@ -1818,6 +2061,8 @@ def main() -> None:
     )
     p50_thresholds = None
     p50_gate_contract_sha256 = None
+    p50_prerequisite_evidence = None
+    active8_support_contract_sha256 = None
 
     # De-novo compilation is skipped because the SCIENTIFIC MIXTURE gives de-novo zero weight -- never
     # because of how the data happens to be STORED. Those are different things: a future packed run with a
@@ -1893,6 +2138,22 @@ def main() -> None:
             "--disable-ring-grow-macro": bool(args.disable_ring_grow_macro),
             "--organic-vocabulary": bool(args.organic_vocabulary),
             "--max-atoms=40": args.max_atoms == 40,
+            "--hidden-dim=256": args.hidden_dim == 256,
+            "--message-passing-steps=6": (
+                args.message_passing_steps == 6
+            ),
+            "--rate-factorization=hierarchical": (
+                args.rate_factorization == "hierarchical"
+            ),
+            "--empirical-mark-prior-mode=none": (
+                args.empirical_mark_prior_mode == "none"
+            ),
+            "--ring-family-mass-mode=boolean": (
+                args.ring_family_mass_mode == "boolean"
+            ),
+            "--ring-template-factorization=flat": (
+                args.ring_template_factorization == "flat"
+            ),
         }
         missing_editing_configuration = sorted(
             name
@@ -1996,14 +2257,69 @@ def main() -> None:
             from compose_v4.experiments.editing_training_gate import (
                 assert_p50_launch_authorized,
                 load_editing_training_gate,
+                resolve_p50_prerequisite_evidence,
+                verify_p50_prerequisite_artifacts,
             )
 
+            gate_contract = load_editing_training_gate(gate_path)
             p50_thresholds = assert_p50_launch_authorized(
-                load_editing_training_gate(gate_path),
+                gate_contract,
                 initialization_regime=(
                     args.successor_p50_initialization_regime
                 ),
             )
+            p50_prerequisite_evidence = resolve_p50_prerequisite_evidence(
+                gate_contract
+            )
+            missing_prerequisite_paths = sorted(
+                name
+                for name, value in {
+                    "--successor-source-corpus-inventory": (
+                        args.successor_source_corpus_inventory
+                    ),
+                    "--successor-source-corpus-inventory-sha256": (
+                        args.successor_source_corpus_inventory_sha256
+                    ),
+                    "--editing-gate-zero-evidence": (
+                        args.editing_gate_zero_evidence
+                    ),
+                    "--editing-t1-decision-evidence": (
+                        args.editing_t1_decision_evidence
+                    ),
+                    "--editing-p50-recipe": args.editing_p50_recipe,
+                }.items()
+                if value is None
+            )
+            if missing_prerequisite_paths:
+                raise ValueError(
+                    "P50 launch is missing frozen prerequisite artifacts: "
+                    f"{missing_prerequisite_paths}"
+                )
+            source_inventory_sha256 = str(
+                args.successor_source_corpus_inventory_sha256
+            )
+            expected_source_inventory_sha256 = p50_prerequisite_evidence[
+                "frozen_source_corpus_inventory_sha256"
+            ]
+            if source_inventory_sha256 != expected_source_inventory_sha256:
+                raise ValueError(
+                    "P50 frozen source-corpus inventory identity disagrees "
+                    "with the canonical-successor launch identity: "
+                    f"gate={expected_source_inventory_sha256}, "
+                    f"launch={source_inventory_sha256}"
+                )
+            prerequisite_paths = {
+                "frozen_source_corpus_inventory_sha256": Path(
+                    args.successor_source_corpus_inventory
+                ),
+                "gate_zero_structural_evidence_sha256": Path(
+                    args.editing_gate_zero_evidence
+                ),
+                "t1_successor_gate_decision_sha256": Path(
+                    args.editing_t1_decision_evidence
+                ),
+                "frozen_p50_recipe_sha256": Path(args.editing_p50_recipe),
+            }
             initialized_compatibly = (
                 args.initialize_compatible_checkpoint is not None
             )
@@ -2039,9 +2355,13 @@ def main() -> None:
             "--successor-cache-compatibility-sha256": (
                 args.successor_cache_compatibility_sha256
             ),
+            "--successor-source-corpus-inventory": (
+                args.successor_source_corpus_inventory
+            ),
             "--successor-source-corpus-inventory-sha256": (
                 args.successor_source_corpus_inventory_sha256
             ),
+            "--editing-gate-zero-evidence": args.editing_gate_zero_evidence,
             "--successor-semantic-sidecar": args.successor_semantic_sidecar,
             "--successor-semantic-sidecar-manifest": (
                 args.successor_semantic_sidecar_manifest
@@ -2066,6 +2386,20 @@ def main() -> None:
                 "canonical-successor launch is missing exact frozen inputs: "
                 f"{missing_successor_values}"
             )
+        if optimizing_canonical_pilot:
+            p50_prerequisite_evidence = verify_p50_prerequisite_artifacts(
+                gate_contract,
+                prerequisite_paths,
+                expected_launch=_p50_launch_recipe_projection(
+                    args,
+                    denovo_weight=denovo_weight,
+                ),
+            )
+        active8_support_contract_sha256 = (
+            _load_gate_zero_support_contract_sha256(
+                Path(args.editing_gate_zero_evidence)
+            )
+        )
         if (
             not args.precompiled_corpus
             or not args.packed_corpus
@@ -3025,13 +3359,67 @@ def main() -> None:
     scaled_sampler_n_corruption = 0
     precompiled_corpus = None
     precompiled_validation_corpus = None
+    active8_admission = None
     if args.precompiled_corpus:
         # PRODUCTION PATH. Records come from the validated artifact; the in-memory builders below are
         # unreachable in this branch by construction, which is the point -- regenerating a few hundred
         # sources at launch is what produced the data-starved baseline.
-        precompiled_corpus = _load_precompiled_corpus(args, partition="train", seed=args.seed + 21)
+        if args.require_scientific_contract:
+            from compose_v4.data.active8_trace_inventory import (
+                load_active8_trace_admission,
+            )
+
+            if (
+                args.successor_source_corpus_inventory is None
+                or args.successor_source_corpus_inventory_sha256 is None
+            ):
+                raise SystemExit(
+                    "the scientific production editing corpus requires "
+                    "--successor-source-corpus-inventory and its physical "
+                    "SHA-256; this artifact is the Active8 whole-trace boundary"
+                )
+            active8_admission = load_active8_trace_admission(
+                args.successor_source_corpus_inventory,
+                expected_manifest_file_sha256=(
+                    args.successor_source_corpus_inventory_sha256
+                ),
+                expected_support_contract_sha256=(
+                    active8_support_contract_sha256
+                ),
+            )
+            print(
+                json.dumps(
+                    {
+                        "phase": "ACTIVE8_WHOLE_TRACE_ADMISSION_VERIFIED",
+                        "manifest": str(
+                            args.successor_source_corpus_inventory
+                        ),
+                        "manifest_file_sha256": (
+                            active8_admission.manifest_file_sha256
+                        ),
+                        "inventory_sha256": (
+                            active8_admission.inventory_sha256
+                        ),
+                        "effective_source_corpus_cache_sha256": (
+                            active8_admission.effective_source_corpus_cache_sha256
+                        ),
+                        "counts": dict(active8_admission.counts),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+        precompiled_corpus = _load_precompiled_corpus(
+            args,
+            partition="train",
+            seed=args.seed + 21,
+            active8_admission=active8_admission,
+        )
         precompiled_validation_corpus = _load_precompiled_corpus(
-            args, partition="validation", seed=args.seed + 22
+            args,
+            partition="validation",
+            seed=args.seed + 22,
+            active8_admission=active8_admission,
         )
         # Assert, don't assume: zero de-novo weight must mean zero de-novo records were built.
         denovo_built = len(train_records)
@@ -3828,6 +4216,12 @@ def main() -> None:
                 source_corpus_inventory_sha256=(
                     args.successor_source_corpus_inventory_sha256
                 ),
+                source_corpus_inventory_path=(
+                    args.successor_source_corpus_inventory
+                ),
+                source_support_contract_sha256=(
+                    active8_support_contract_sha256
+                ),
                 unified_packed_manifest_path=Path(args.unified_packed_manifest),
                 representability_overlay_path=Path(args.representability_overlay),
                 semantic_sidecar_path=args.successor_semantic_sidecar,
@@ -3847,6 +4241,7 @@ def main() -> None:
             ),
             model,
             max_atoms=args.max_atoms,
+            source_admission=active8_admission,
         )
         successor_training_objective = canonical_successor_objective(
             mode=args.successor_objective_mode,
@@ -4002,6 +4397,7 @@ def main() -> None:
                     if p50_thresholds is None
                     else p50_thresholds.initialization_regime
                 ),
+                "p50_prerequisite_evidence": p50_prerequisite_evidence,
                 **successor_runtime.checkpoint_metadata(),
             }
         )
@@ -4060,12 +4456,16 @@ def main() -> None:
                     "successor_cache_inventory_sha256",
                     "successor_cache_compatibility_sha256",
                     "successor_source_corpus_inventory_sha256",
+                    "successor_source_corpus_inventory_logical_sha256",
+                    "successor_effective_source_corpus_cache_sha256",
+                    "successor_source_support_contract_sha256",
                     "successor_unified_packed_manifest_sha256",
                     "successor_representability_overlay_sha256",
                     "successor_semantic_sidecar_manifest_sha256",
                     "successor_cache_storage_backend",
                     "successor_training_scope",
                     "successor_full_training_authorized",
+                    "p50_prerequisite_evidence",
                     "enable_ring_restates",
                     "enable_ring_system_delete",
                 )
@@ -4170,6 +4570,9 @@ def main() -> None:
                     "successor_cache_inventory_sha256",
                     "successor_cache_compatibility_sha256",
                     "successor_source_corpus_inventory_sha256",
+                    "successor_source_corpus_inventory_logical_sha256",
+                    "successor_effective_source_corpus_cache_sha256",
+                    "successor_source_support_contract_sha256",
                     "successor_unified_packed_manifest_sha256",
                     "successor_representability_overlay_sha256",
                     "successor_semantic_sidecar_manifest_sha256",
@@ -4556,6 +4959,23 @@ def main() -> None:
                     require_semantic_cells=False,
                 )
                 p50_exposure_report = asdict(exposure)
+                if p50_prerequisite_evidence is None:
+                    raise RuntimeError(
+                        "P50 exposure preflight lacks semantically verified "
+                        "prerequisite evidence"
+                    )
+                for field in (
+                    "ordered_address_stream_sha256",
+                    "ordered_training_stream_sha256",
+                ):
+                    expected_stream_sha256 = p50_prerequisite_evidence[field]
+                    observed_stream_sha256 = p50_exposure_report[field]
+                    if observed_stream_sha256 != expected_stream_sha256:
+                        raise RuntimeError(
+                            "P50 live exposure differs from the frozen recipe "
+                            f"for {field}: expected={expected_stream_sha256}, "
+                            f"observed={observed_stream_sha256}"
+                        )
                 p50_live_exposure_observer = P50LiveExposureObserver(
                     planned=exposure,
                     required_families=p50_thresholds.required_families,

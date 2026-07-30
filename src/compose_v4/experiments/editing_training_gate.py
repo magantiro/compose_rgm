@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from math import isfinite
 from pathlib import Path
 from typing import Any
+
+from compose_v4.experiments.successor_micro_overfit import (
+    RINGCORE_EDITING_FAMILIES,
+)
 
 EXPECTED_SCHEMA = "compose.editing_training_gate_contract"
 EXPECTED_SCHEMA_VERSION = 1
@@ -50,20 +56,24 @@ MISLEADING_LEGACY_METRICS = {
     "balanced_family_accuracy",
     "balanced_family_top3_accuracy",
 }
-REQUIRED_P50_FAMILIES = (
-    "atom_insert",
-    "atom_delete",
-    "atom_restate",
-    "bond_reorder",
-    "bond_reroute",
-    "cycle_insert",
-    "cycle_attach",
+REQUIRED_P50_FAMILIES = RINGCORE_EDITING_FAMILIES
+BOUNDED_PILOT_DISABLED_FAMILIES = (
+    "ring_system_delete",
+    "ring_system_grow",
+)
+BOUNDED_PILOT_SCOPE = "gate0_t1_p50_development_only"
+P50_PREREQUISITE_EVIDENCE_FIELDS = (
+    "frozen_source_corpus_inventory_sha256",
+    "gate_zero_structural_evidence_sha256",
+    "t1_successor_gate_decision_sha256",
+    "frozen_p50_recipe_sha256",
 )
 P50_INITIALIZATION_REGIMES = (
     "scratch",
     "compatible_warm_start",
     "compatible_warm_start_with_retention",
 )
+P50_AUTHORIZED_STATUS = "FROZEN_BOUNDED_P50_AUTHORIZED"
 
 
 class EditingTrainingGateError(ValueError):
@@ -111,6 +121,47 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         raise EditingTrainingGateError("unexpected editing-training schema")
     if contract.get("schema_version") != EXPECTED_SCHEMA_VERSION:
         raise EditingTrainingGateError("unexpected editing-training schema version")
+    if type(contract.get("bounded_p50_authorized")) is not bool:
+        raise EditingTrainingGateError(
+            "bounded_p50_authorized must be an explicit Boolean"
+        )
+
+    operator_freeze = contract.get("bounded_pilot_operator_freeze")
+    expected_operator_freeze_fields = {
+        "scope",
+        "required_families",
+        "disabled_families",
+        "final_production_support_authorized",
+    }
+    if (
+        not isinstance(operator_freeze, dict)
+        or set(operator_freeze) != expected_operator_freeze_fields
+        or operator_freeze.get("scope") != BOUNDED_PILOT_SCOPE
+        or tuple(operator_freeze.get("required_families") or ())
+        != REQUIRED_P50_FAMILIES
+        or tuple(operator_freeze.get("disabled_families") or ())
+        != BOUNDED_PILOT_DISABLED_FAMILIES
+        or operator_freeze.get("final_production_support_authorized") is not False
+    ):
+        raise EditingTrainingGateError(
+            "bounded Gate0/T1/P50 operator freeze must require the ordered "
+            "eight-family pilot, disable ring-system delete/grow, and grant "
+            "no final production authority"
+        )
+
+    panels = contract.get("development_panels")
+    if not isinstance(panels, dict):
+        raise EditingTrainingGateError("development panels must be an object")
+    required_slices = tuple(panels.get("required_semantic_slices") or ())
+    conditional_slices = tuple(panels.get("conditional_slices") or ())
+    if (
+        "ring_system_restate" not in required_slices
+        or conditional_slices
+    ):
+        raise EditingTrainingGateError(
+            "ring-system restate must be a required bounded-pilot slice, not "
+            "a conditional P50 family"
+        )
 
     metric_contract = contract.get("metric_contract") or {}
     primary = [str(name) for name in metric_contract.get("primary") or ()]
@@ -156,6 +207,20 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
             raise EditingTrainingGateError(
                 f"{gate.get('id')} has no requirements"
             )
+    p50_gate = next(
+        gate
+        for gate in gates
+        if gate["id"] == "P50_gradient_and_collapse_sentinel"
+    )
+    prerequisites = p50_gate.get("prerequisite_evidence")
+    if (
+        not isinstance(prerequisites, dict)
+        or set(prerequisites) != set(P50_PREREQUISITE_EVIDENCE_FIELDS)
+    ):
+        raise EditingTrainingGateError(
+            "P50 prerequisite evidence must name the ordered frozen corpus, "
+            "Gate0, T1 decision, and recipe identities"
+        )
     support_gate = next(
         gate for gate in gates if gate["id"] == "S0_support_and_labels"
     )
@@ -356,14 +421,176 @@ def p50_launch_blockers(
     required_families: tuple[str, ...] = REQUIRED_P50_FAMILIES,
 ) -> list[str]:
     try:
+        validate_editing_training_gate(contract)
+    except EditingTrainingGateError as error:
+        return [str(error)]
+    blockers: list[str] = []
+    if contract.get("bounded_p50_authorized") is not True:
+        blockers.append("bounded_p50_authorized is not true")
+    if contract.get("status") != P50_AUTHORIZED_STATUS:
+        blockers.append(f"status is not {P50_AUTHORIZED_STATUS}")
+    prerequisites = _p50_gate(contract)["prerequisite_evidence"]
+    blockers.extend(
+        f"P50 prerequisite evidence is not frozen: {field}"
+        for field in P50_PREREQUISITE_EVIDENCE_FIELDS
+        if (
+            not isinstance(prerequisites[field], str)
+            or len(prerequisites[field]) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in prerequisites[field]
+            )
+        )
+    )
+    try:
         resolve_p50_thresholds(
             contract,
             initialization_regime=initialization_regime,
             required_families=required_families,
         )
     except EditingTrainingGateError as error:
-        return [str(error)]
-    return []
+        blockers.append(str(error))
+    return blockers
+
+
+def resolve_p50_prerequisite_evidence(
+    contract: dict[str, Any],
+) -> dict[str, str]:
+    """Resolve the exact frozen artifacts that must precede any P50 data load."""
+
+    validate_editing_training_gate(contract)
+    prerequisites = _p50_gate(contract)["prerequisite_evidence"]
+    resolved: dict[str, str] = {}
+    for field in P50_PREREQUISITE_EVIDENCE_FIELDS:
+        value = prerequisites[field]
+        if (
+            not isinstance(value, str)
+            or len(value) != 64
+            or any(character not in "0123456789abcdef" for character in value)
+        ):
+            raise EditingTrainingGateError(
+                f"P50 prerequisite evidence is not frozen: {field}"
+            )
+        resolved[field] = value
+    return resolved
+
+
+def verify_p50_prerequisite_artifacts(
+    contract: dict[str, Any],
+    artifact_paths: Mapping[str, str | Path],
+    *,
+    expected_launch: Mapping[str, object],
+) -> dict[str, object]:
+    """Hash, parse, and cross-link every prerequisite before data construction."""
+
+    resolved = resolve_p50_prerequisite_evidence(contract)
+    if set(artifact_paths) != set(P50_PREREQUISITE_EVIDENCE_FIELDS):
+        raise EditingTrainingGateError(
+            "P50 prerequisite artifact paths must exactly cover the frozen "
+            "corpus, Gate0, T1 decision, and recipe identities"
+        )
+    physical_sha256: dict[str, str] = {}
+    payloads: dict[str, object] = {}
+    for field in P50_PREREQUISITE_EVIDENCE_FIELDS:
+        path = Path(artifact_paths[field])
+        if not path.is_file():
+            raise EditingTrainingGateError(
+                f"P50 prerequisite artifact is absent: {path}"
+            )
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1 << 20), b""):
+                digest.update(chunk)
+        observed_sha256 = digest.hexdigest()
+        if observed_sha256 != resolved[field]:
+            raise EditingTrainingGateError(
+                "P50 prerequisite artifact SHA-256 mismatch for "
+                f"{field}: expected={resolved[field]}, "
+                f"observed={observed_sha256}"
+            )
+        physical_sha256[field] = observed_sha256
+        try:
+            payloads[field] = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError) as error:
+            raise EditingTrainingGateError(
+                f"P50 prerequisite is not readable JSON: {path}"
+            ) from error
+
+    from compose_v4.data.active8_trace_inventory import (
+        Active8TraceInventoryError,
+        load_active8_trace_admission,
+    )
+    from compose_v4.experiments.editing_p50_prerequisites import (
+        EditingP50PrerequisiteError,
+        VerifiedP50Prerequisites,
+        validate_gate_zero_structural_evidence,
+        validate_p50_recipe,
+        validate_t1_p50_decision,
+    )
+
+    try:
+        source_admission = load_active8_trace_admission(
+            Path(
+                artifact_paths[
+                    "frozen_source_corpus_inventory_sha256"
+                ]
+            ),
+            expected_manifest_file_sha256=physical_sha256[
+                "frozen_source_corpus_inventory_sha256"
+            ],
+        )
+        gate_zero = validate_gate_zero_structural_evidence(
+            payloads["gate_zero_structural_evidence_sha256"],
+            source_admission=source_admission,
+        )
+        t1_decision = validate_t1_p50_decision(
+            payloads["t1_successor_gate_decision_sha256"],
+            source_admission=source_admission,
+            source_inventory_file_sha256=physical_sha256[
+                "frozen_source_corpus_inventory_sha256"
+            ],
+            gate_zero_evidence_file_sha256=physical_sha256[
+                "gate_zero_structural_evidence_sha256"
+            ],
+        )
+        recipe = validate_p50_recipe(
+            payloads["frozen_p50_recipe_sha256"],
+            source_admission=source_admission,
+            source_inventory_file_sha256=physical_sha256[
+                "frozen_source_corpus_inventory_sha256"
+            ],
+            gate_zero_evidence_file_sha256=physical_sha256[
+                "gate_zero_structural_evidence_sha256"
+            ],
+            t1_decision_file_sha256=physical_sha256[
+                "t1_successor_gate_decision_sha256"
+            ],
+            expected_launch=expected_launch,
+        )
+    except (Active8TraceInventoryError, EditingP50PrerequisiteError) as error:
+        raise EditingTrainingGateError(
+            f"P50 prerequisite semantic validation failed: {error}"
+        ) from error
+
+    verified = VerifiedP50Prerequisites(
+        physical_sha256=physical_sha256,
+        source_inventory_sha256=source_admission.inventory_sha256,
+        unified_packed_manifest_sha256=(
+            source_admission.unified_packed_manifest_sha256
+        ),
+        support_contract_sha256=source_admission.support_contract_sha256,
+        gate_zero_evidence_sha256=str(gate_zero["evidence_sha256"]),
+        t1_decision_sha256=str(t1_decision["decision_sha256"]),
+        recipe_sha256=str(recipe["recipe_sha256"]),
+        launch_sha256=str(recipe["launch_sha256"]),
+        ordered_address_stream_sha256=str(
+            recipe["planned_stream"]["ordered_address_stream_sha256"]
+        ),
+        ordered_training_stream_sha256=str(
+            recipe["planned_stream"]["ordered_training_stream_sha256"]
+        ),
+    )
+    return verified.checkpoint_metadata()
 
 
 def assert_p50_launch_authorized(
@@ -398,7 +625,11 @@ def assert_full_training_launch_authorized(contract: dict[str, Any]) -> None:
 
 
 __all__ = [
+    "BOUNDED_PILOT_DISABLED_FAMILIES",
+    "BOUNDED_PILOT_SCOPE",
+    "P50_AUTHORIZED_STATUS",
     "P50_INITIALIZATION_REGIMES",
+    "P50_PREREQUISITE_EVIDENCE_FIELDS",
     "REQUIRED_P50_FAMILIES",
     "EditingTrainingGateError",
     "ResolvedP50Thresholds",
@@ -407,6 +638,8 @@ __all__ = [
     "full_training_launch_blockers",
     "load_editing_training_gate",
     "p50_launch_blockers",
+    "resolve_p50_prerequisite_evidence",
     "resolve_p50_thresholds",
     "validate_editing_training_gate",
+    "verify_p50_prerequisite_artifacts",
 ]

@@ -18,6 +18,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from compose_v4.data.active8_trace_inventory import (
+    Active8TraceAdmission,
+    Active8TraceInventoryError,
+    load_active8_trace_admission,
+)
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.data.packed_trace_store import (
     PACKED_STORE_SCHEMA,
     PACKED_STORE_SCHEMA_VERSION,
@@ -37,6 +43,9 @@ from compose_v4.data.successor_fiber_cache import (
 )
 from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.cnof_conditional import PathRecord
+from compose_v4.experiments.editing_gate_zero_runtime import (
+    PRODUCTION_ACTION_TABLE_VOCABULARY,
+)
 from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
     FactorizedMarkDataset,
@@ -63,29 +72,17 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     MARK_RULE_NAMES,
     FactorizedTraceletRateModel,
 )
+from compose_v4.rewrite.ring_system_fiber import (
+    warm_ring_system_candidate_indices,
+)
 from compose_v4.rewrite.trace_shard import (
     TRACE_SCHEMA,
     TRACE_SCHEMA_VERSION,
 )
 from compose_v4.rewrite.typed_ring_catalog import ring_catalog_fingerprint
-from compose_v4.rewrite.ring_system_fiber import (
-    warm_ring_system_candidate_indices,
-)
 
 CANONICAL_SUCCESSOR_P50_STEPS = 50
 SUCCESSOR_COORDINATE_SCHEMA_VERSION = 1
-PRODUCTION_ACTION_TABLE_VOCABULARY = (
-    "grow_root",
-    "grow_connected",
-    "atom_delete",
-    "atom_restate",
-    "bond_reorder",
-    "bond_reroute",
-    "cycle_insert",
-    "cycle_attach",
-    "ring_system_delete",
-    "ring_system_restate",
-)
 _OPERATOR_REGISTRY_SOURCES = (
     "src/compose_v4/rewrite/operators.py",
     "src/compose_v4/rewrite/kernel.py",
@@ -152,6 +149,8 @@ class CanonicalSuccessorRuntimeConfig:
     inventory_sha256: str
     compatibility_sha256: str
     source_corpus_inventory_sha256: str
+    source_corpus_inventory_path: Path
+    source_support_contract_sha256: str
     unified_packed_manifest_path: Path
     representability_overlay_path: Path
     semantic_sidecar_path: Path
@@ -166,6 +165,7 @@ class CanonicalSuccessorRuntimeConfig:
             "inventory_sha256",
             "compatibility_sha256",
             "source_corpus_inventory_sha256",
+            "source_support_contract_sha256",
             "semantic_sidecar_manifest_sha256",
             "semantic_sidecar_config_sha256",
             "semantic_sidecar_provenance_sha256",
@@ -183,6 +183,7 @@ class CanonicalSuccessorRuntime:
     inventory: SuccessorFiberCacheInventory
     validation_sidecar: LoadedSemanticCellSidecar
     config: CanonicalSuccessorRuntimeConfig
+    source_admission: Active8TraceAdmission | None = None
 
     @property
     def full_training_authorized(self) -> bool:
@@ -201,6 +202,19 @@ class CanonicalSuccessorRuntime:
             ),
             "successor_source_corpus_inventory_sha256": (
                 self.inventory.source_corpus_inventory_sha256
+            ),
+            "successor_source_corpus_inventory_logical_sha256": (
+                None
+                if self.source_admission is None
+                else self.source_admission.inventory_sha256
+            ),
+            "successor_effective_source_corpus_cache_sha256": (
+                None
+                if self.source_admission is None
+                else self.source_admission.effective_source_corpus_cache_sha256
+            ),
+            "successor_source_support_contract_sha256": (
+                self.config.source_support_contract_sha256
             ),
             "successor_unified_packed_manifest_sha256": (
                 self.inventory.unified_packed_manifest_sha256
@@ -274,6 +288,7 @@ def _validate_live_compatibility(
         "atom_vocabulary": expected_vocabulary,
         "max_atoms": int(max_atoms),
         "atom_insert_arity_support": [0, 1],
+        "charge_policy": CHARGE_POLICY_VERSION,
         "catalog_fingerprint": ring_catalog_fingerprint(model.ring_catalog),
         **expected_flags,
         "embedded_jump_chain_policy": "productive_canonical_successors",
@@ -307,6 +322,7 @@ def _validate_live_compatibility(
         "trace_codec_schema_version": TRACE_SCHEMA_VERSION,
         "tensorization_implementation_hash": (tensorization_implementation_hash()),
         "fiber_compiler_implementation_hash": (fiber_compiler_implementation_hash()),
+        "charge_policy_version": CHARGE_POLICY_VERSION,
     }
     payload_disagreements = {
         field: {
@@ -340,6 +356,7 @@ def open_canonical_successor_runtime(
     model: FactorizedTraceletRateModel,
     *,
     max_atoms: int,
+    source_admission: Active8TraceAdmission | None = None,
 ) -> CanonicalSuccessorRuntime:
     """Open and fully parent-validate a bounded indexed cache before training."""
 
@@ -357,6 +374,44 @@ def open_canonical_successor_runtime(
         raise EditingSuccessorTrainerError(
             "successor cache names another frozen source-corpus inventory"
         )
+    _require_file_sha256(
+        config.source_corpus_inventory_path,
+        inventory.source_corpus_inventory_sha256,
+        name="frozen source-corpus inventory",
+    )
+    if source_admission is None:
+        try:
+            source_admission = load_active8_trace_admission(
+                config.source_corpus_inventory_path,
+                expected_manifest_file_sha256=(
+                    inventory.source_corpus_inventory_sha256
+                ),
+                expected_support_contract_sha256=(
+                    config.source_support_contract_sha256
+                ),
+            )
+        except Active8TraceInventoryError as error:
+            raise EditingSuccessorTrainerError(
+                "frozen source-corpus inventory is not a valid Active8 "
+                "whole-trace admission artifact"
+            ) from error
+    elif (
+        source_admission.manifest_path.resolve()
+        != config.source_corpus_inventory_path.resolve()
+        or source_admission.manifest_file_sha256
+        != inventory.source_corpus_inventory_sha256
+    ):
+        raise EditingSuccessorTrainerError(
+            "preloaded Active8 admission disagrees with the frozen "
+            "source-corpus inventory"
+        )
+    if (
+        source_admission.support_contract_sha256
+        != config.source_support_contract_sha256
+    ):
+        raise EditingSuccessorTrainerError(
+            "Active8 source inventory names another Gate-0 support contract"
+        )
     if inventory.storage_backend != SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND:
         raise EditingSuccessorTrainerError(
             "bounded training requires the qualified indexed successor cache"
@@ -366,6 +421,14 @@ def open_canonical_successor_runtime(
         inventory.unified_packed_manifest_sha256,
         name="unified packed manifest",
     )
+    if (
+        source_admission.unified_packed_manifest_sha256
+        != inventory.unified_packed_manifest_sha256
+    ):
+        raise EditingSuccessorTrainerError(
+            "Active8 source inventory and successor cache name different "
+            "unified packed manifests"
+        )
     _require_file_sha256(
         config.representability_overlay_path,
         inventory.representability_overlay_sha256,
@@ -405,6 +468,7 @@ def open_canonical_successor_runtime(
         inventory=inventory,
         validation_sidecar=sidecar,
         config=config,
+        source_admission=source_admission,
     )
 
 
@@ -629,11 +693,11 @@ def canonical_successor_objective(
 
 __all__ = [
     "CANONICAL_SUCCESSOR_P50_STEPS",
+    "PRODUCTION_ACTION_TABLE_VOCABULARY",
+    "SUCCESSOR_COORDINATE_SCHEMA_VERSION",
     "CanonicalSuccessorRuntime",
     "CanonicalSuccessorRuntimeConfig",
     "EditingSuccessorTrainerError",
-    "PRODUCTION_ACTION_TABLE_VOCABULARY",
-    "SUCCESSOR_COORDINATE_SCHEMA_VERSION",
     "assert_records_covered_by_successor_cache",
     "build_canonical_successor_loader_factory",
     "build_canonical_successor_validation_batch",

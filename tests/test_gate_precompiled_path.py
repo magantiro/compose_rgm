@@ -273,6 +273,44 @@ def test_unified_byte_and_partition_validation_precedes_corpus_load():
         "load_production_edit_corpus("
     )
     assert "unified packed-corpus pre-loader validation failed" in function
+    assert (
+        "active8_admission.unified_packed_manifest_sha256"
+        in function
+    )
+    assert function.index(
+        "active8_admission.unified_packed_manifest_sha256"
+    ) < function.index("load_production_edit_corpus(")
+
+
+def test_scientific_loader_requires_active8_before_path_record_construction():
+    """Unsupported middle steps cannot leak neighboring progress rows."""
+
+    source = GATE.read_text()
+    function = source[
+        source.index("def _load_precompiled_corpus("):
+        source.index("def _build_ring_core_seed_ring_catalog(")
+    ]
+    assert "active8_admission is None" in function
+    assert "whole-trace admission inventory" in function
+    assert "active8_admission=active8_admission" in function
+    assert function.index("active8_admission is None") < function.index(
+        "load_production_edit_corpus("
+    )
+
+
+def test_p50_frozen_stream_identity_is_checked_before_optimizer_entry():
+    source = GATE.read_text()
+    preflight = source.index(
+        "P50 live exposure differs from the frozen recipe"
+    )
+    optimizer = source.index("train_factorized_mark_model(")
+    assert preflight < optimizer
+    assert "ordered_address_stream_sha256" in source[
+        preflight - 1000:preflight
+    ]
+    assert "ordered_training_stream_sha256" in source[
+        preflight - 1000:preflight
+    ]
 
 
 def test_recipe_chain_carries_the_scientific_contract_flags():

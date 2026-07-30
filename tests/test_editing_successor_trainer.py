@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
+import json
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -14,7 +15,23 @@ from compose_v4.chem.molecular_graph import (
     ORGANIC_VOCABULARY,
     smiles_to_molecular_graph,
 )
+from compose_v4.chem.persistent_state_identity import (
+    PERSISTENT_STATE_DIGEST_SCHEMA,
+    PERSISTENT_STATE_DIGEST_VERSION,
+)
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.active8_trace_inventory import (
+    ACTIVE8_FAMILIES,
+    ACTIVE8_TRACE_INVENTORY_SCHEMA,
+    ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION,
+    ACTIVE8_TRACE_INVENTORY_STATUS,
+    Active8TraceInventoryError,
+    load_active8_trace_inventory,
+)
+from compose_v4.data.active8_trace_inventory import (
+    implementation_identity as active8_implementation_identity,
+)
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.data.packed_trace_store import (
     PACKED_STORE_SCHEMA,
     PACKED_STORE_SCHEMA_VERSION,
@@ -24,6 +41,7 @@ from compose_v4.data.provenance_overlay import (
     tensorization_implementation_hash,
 )
 from compose_v4.data.sharded_successor_fiber_cache import (
+    SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
     SuccessorFiberCacheCompatibility,
 )
 from compose_v4.data.successor_fiber_cache import (
@@ -34,15 +52,16 @@ from compose_v4.data.successor_fiber_cache import (
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.editing_successor_trainer import (
     CANONICAL_SUCCESSOR_P50_STEPS,
+    PRODUCTION_ACTION_TABLE_VOCABULARY,
     CanonicalSuccessorRuntime,
     CanonicalSuccessorRuntimeConfig,
     EditingSuccessorTrainerError,
-    PRODUCTION_ACTION_TABLE_VOCABULARY,
+    _mark_collator,
     _source_set_sha256,
     _validate_live_compatibility,
-    _mark_collator,
     assert_records_covered_by_successor_cache,
     build_canonical_successor_loader_factory,
+    open_canonical_successor_runtime,
 )
 from compose_v4.experiments.factorized_successor_objective import (
     CanonicalSuccessorTrainingObjective,
@@ -67,10 +86,73 @@ from scripts.train_tracelet_cnof_gate import (
     _resolve_ring_restates_capability,
     _resolve_ring_system_delete_capability,
     _ring_core_v1_identity_applies,
+)
+from scripts.train_tracelet_cnof_gate import (
     main as training_main,
 )
 
 _PACKED_SHA256 = "1" * 64
+
+
+def _canonical_sha256(payload: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _active8_manifest_payload() -> dict[str, object]:
+    source_identity = {
+        "unified_packed_manifest_sha256": "7" * 64,
+        "unified_packed_manifest_semantic_sha256": "8" * 64,
+        "support_contract_sha256": "9" * 64,
+        "physical_shard_binding_sha256": "a" * 64,
+    }
+    source_identity["effective_source_corpus_cache_sha256"] = _canonical_sha256(
+        source_identity
+    )
+    payload: dict[str, object] = {
+        "schema": ACTIVE8_TRACE_INVENTORY_SCHEMA,
+        "schema_version": ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION,
+        "status": ACTIVE8_TRACE_INVENTORY_STATUS,
+        "training_authorized": False,
+        "selection_policy": {
+            "unit": "complete_packed_trace",
+            "active_families": list(ACTIVE8_FAMILIES),
+            "all_nonterminal_teachers_must_match_exact_candidates": True,
+            "excluded_trace_emits_progress_rows": False,
+            "accepted_trace_retains_terminal_row": True,
+            "multi_neighbor_atom_insert_supported": False,
+        },
+        "persistent_state_identity": {
+            "schema": PERSISTENT_STATE_DIGEST_SCHEMA,
+            "schema_version": PERSISTENT_STATE_DIGEST_VERSION,
+        },
+        "source_identity": source_identity,
+        "implementation_identity": active8_implementation_identity(),
+        "counts": {},
+        "exclusions_by_reason": {},
+        "accepted_nonterminal_rows_by_family": {
+            family: 0 for family in ACTIVE8_FAMILIES
+        },
+        "shards": [],
+    }
+    payload["inventory_sha256"] = _canonical_sha256(payload)
+    return payload
+
+
+def _write_self_hashed_active8_manifest(
+    path: Path,
+    payload: dict[str, object],
+) -> None:
+    payload.pop("inventory_sha256", None)
+    payload["inventory_sha256"] = _canonical_sha256(payload)
+    path.write_text(json.dumps(payload))
 
 
 def _record(*, partition: str = "train") -> PathRecord:
@@ -158,6 +240,7 @@ def _compatibility(model, *, capability_hash: str | None = None):
         ],
         "max_atoms": 6,
         "atom_insert_arity_support": [0, 1],
+        "charge_policy": CHARGE_POLICY_VERSION,
         "catalog_fingerprint": ring_catalog_fingerprint(model.ring_catalog),
         "enable_ring_restates": model.enable_ring_restates,
         "enable_cyclic_graft": model.enable_cyclic_graft,
@@ -188,6 +271,7 @@ def _compatibility(model, *, capability_hash: str | None = None):
             "executor_implementation_hash": "executor-v1",
             "action_enumerator_implementation_hash": "enumerator-v1",
             "fiber_compiler_implementation_hash": (fiber_compiler_implementation_hash()),
+            "charge_policy_version": CHARGE_POLICY_VERSION,
             "persistent_state_digest_schema": ("compose.chem.persistent_slot_state"),
             "persistent_state_digest_schema_version": 1,
             "packed_corpus_schema": PACKED_STORE_SCHEMA,
@@ -244,6 +328,215 @@ def test_live_model_capability_mismatch_fails_before_training() -> None:
         _validate_live_compatibility(mismatched, model, max_atoms=6)
 
 
+@pytest.mark.parametrize(
+    ("field", "nested", "message"),
+    (
+        ("charge_policy_version", False, "compatibility differs"),
+        ("charge_policy", True, "support signature"),
+    ),
+)
+def test_live_model_rejects_stale_charge_policy_identity(
+    field: str,
+    nested: bool,
+    message: str,
+) -> None:
+    model = _model()
+    payload = dict(_compatibility(model).payload)
+    if nested:
+        payload["support_signature"] = {
+            **payload["support_signature"],
+            field: "stale-charge-policy",
+        }
+    else:
+        payload[field] = "stale-charge-policy"
+    stale = SimpleNamespace(
+        compatibility=SuccessorFiberCacheCompatibility.from_payload(payload)
+    )
+
+    with pytest.raises(
+        EditingSuccessorTrainerError,
+        match=message,
+    ):
+        _validate_live_compatibility(stale, model, max_atoms=6)
+
+
+def test_runtime_hashes_the_frozen_source_inventory_before_cache_open(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    from compose_v4.experiments import editing_successor_trainer as module
+
+    source_sha256 = "3" * 64
+    inventory = SimpleNamespace(
+        source_corpus_inventory_sha256=source_sha256,
+    )
+    monkeypatch.setattr(
+        module,
+        "read_successor_fiber_cache_inventory",
+        lambda *_args, **_kwargs: inventory,
+    )
+    config = CanonicalSuccessorRuntimeConfig(
+        cache_root=tmp_path,
+        inventory_path=tmp_path / "inventory.json",
+        inventory_sha256="1" * 64,
+        compatibility_sha256="2" * 64,
+        source_corpus_inventory_sha256=source_sha256,
+        source_corpus_inventory_path=tmp_path / "source-inventory.json",
+        source_support_contract_sha256="7" * 64,
+        unified_packed_manifest_path=tmp_path / "unified.json",
+        representability_overlay_path=tmp_path / "overlay.json",
+        semantic_sidecar_path=tmp_path / "cells.jsonl.gz",
+        semantic_sidecar_manifest_path=tmp_path / "cells.manifest.json",
+        semantic_sidecar_manifest_sha256="4" * 64,
+        semantic_sidecar_config_sha256="5" * 64,
+        semantic_sidecar_provenance_sha256="6" * 64,
+    )
+    with pytest.raises(
+        EditingSuccessorTrainerError,
+        match="frozen source-corpus inventory is absent",
+    ):
+        open_canonical_successor_runtime(config, None, max_atoms=6)
+
+    config.source_corpus_inventory_path.write_text("wrong source inventory")
+    with pytest.raises(
+        EditingSuccessorTrainerError,
+        match="frozen source-corpus inventory SHA-256 mismatch",
+    ):
+        open_canonical_successor_runtime(config, None, max_atoms=6)
+
+
+def test_runtime_rejects_active8_inventory_for_another_unified_manifest(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    from compose_v4.experiments import editing_successor_trainer as module
+
+    source_path = tmp_path / "source-inventory.json"
+    source_path.write_bytes(b"active8-source")
+    source_sha256 = hashlib.sha256(source_path.read_bytes()).hexdigest()
+    unified_path = tmp_path / "unified.json"
+    unified_path.write_bytes(b"unified-corpus")
+    unified_sha256 = hashlib.sha256(unified_path.read_bytes()).hexdigest()
+    inventory = SimpleNamespace(
+        source_corpus_inventory_sha256=source_sha256,
+        storage_backend=SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+        unified_packed_manifest_sha256=unified_sha256,
+    )
+    monkeypatch.setattr(
+        module,
+        "read_successor_fiber_cache_inventory",
+        lambda *_args, **_kwargs: inventory,
+    )
+    monkeypatch.setattr(
+        module,
+        "load_active8_trace_admission",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            support_contract_sha256="7" * 64,
+            unified_packed_manifest_sha256="f" * 64,
+        ),
+    )
+    config = CanonicalSuccessorRuntimeConfig(
+        cache_root=tmp_path,
+        inventory_path=tmp_path / "inventory.json",
+        inventory_sha256="1" * 64,
+        compatibility_sha256="2" * 64,
+        source_corpus_inventory_sha256=source_sha256,
+        source_corpus_inventory_path=source_path,
+        source_support_contract_sha256="7" * 64,
+        unified_packed_manifest_path=unified_path,
+        representability_overlay_path=tmp_path / "overlay.json",
+        semantic_sidecar_path=tmp_path / "cells.jsonl.gz",
+        semantic_sidecar_manifest_path=tmp_path / "cells.manifest.json",
+        semantic_sidecar_manifest_sha256="4" * 64,
+        semantic_sidecar_config_sha256="5" * 64,
+        semantic_sidecar_provenance_sha256="6" * 64,
+    )
+    with pytest.raises(
+        EditingSuccessorTrainerError,
+        match="different unified packed manifests",
+    ):
+        open_canonical_successor_runtime(config, None, max_atoms=6)
+
+
+def test_runtime_rejects_active8_inventory_for_another_gate_zero_support_contract(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    from compose_v4.experiments import editing_successor_trainer as module
+
+    source_path = tmp_path / "source-inventory.json"
+    source_path.write_bytes(b"active8-source")
+    source_sha256 = hashlib.sha256(source_path.read_bytes()).hexdigest()
+    monkeypatch.setattr(
+        module,
+        "read_successor_fiber_cache_inventory",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            source_corpus_inventory_sha256=source_sha256,
+        ),
+    )
+    config = CanonicalSuccessorRuntimeConfig(
+        cache_root=tmp_path,
+        inventory_path=tmp_path / "inventory.json",
+        inventory_sha256="1" * 64,
+        compatibility_sha256="2" * 64,
+        source_corpus_inventory_sha256=source_sha256,
+        source_corpus_inventory_path=source_path,
+        source_support_contract_sha256="7" * 64,
+        unified_packed_manifest_path=tmp_path / "unified.json",
+        representability_overlay_path=tmp_path / "overlay.json",
+        semantic_sidecar_path=tmp_path / "cells.jsonl.gz",
+        semantic_sidecar_manifest_path=tmp_path / "cells.manifest.json",
+        semantic_sidecar_manifest_sha256="4" * 64,
+        semantic_sidecar_config_sha256="5" * 64,
+        semantic_sidecar_provenance_sha256="6" * 64,
+    )
+    admission = SimpleNamespace(
+        manifest_path=source_path,
+        manifest_file_sha256=source_sha256,
+        support_contract_sha256="8" * 64,
+    )
+
+    with pytest.raises(
+        EditingSuccessorTrainerError,
+        match="another Gate-0 support contract",
+    ):
+        open_canonical_successor_runtime(
+            config,
+            None,
+            max_atoms=6,
+            source_admission=admission,
+        )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    (
+        ("status", "boundary status"),
+        ("selection_policy", "selection policy"),
+        ("implementation_identity", "implementation identity"),
+    ),
+)
+def test_active8_loader_rejects_semantic_contract_mutation(
+    mutation: str,
+    message: str,
+    tmp_path,
+) -> None:
+    payload = _active8_manifest_payload()
+    if mutation == "status":
+        payload["status"] = "STALE_BOUNDARY"
+    elif mutation == "selection_policy":
+        payload["selection_policy"]["unit"] = "individual_progress_row"
+    elif mutation == "implementation_identity":
+        payload["implementation_identity"]["implementation_sha256"] = "f" * 64
+    else:
+        raise AssertionError(f"unknown mutation: {mutation}")
+    path = tmp_path / f"{mutation}.json"
+    _write_self_hashed_active8_manifest(path, payload)
+
+    with pytest.raises(Active8TraceInventoryError, match=message):
+        load_active8_trace_inventory(path)
+
+
 def test_ring_system_delete_choice_is_explicit_and_threads_to_collator() -> None:
     assert (
         _resolve_ring_system_delete_capability(
@@ -252,9 +545,17 @@ def test_ring_system_delete_choice_is_explicit_and_threads_to_collator() -> None
         )
         is True
     )
-    with pytest.raises(ValueError, match="requires an explicit ring-system-delete"):
+    with pytest.raises(
+        ValueError,
+        match="requires the explicit.*no-enable-ring-system-delete",
+    ):
         _resolve_ring_system_delete_capability(
             None,
+            canonical_successor_backend=True,
+        )
+    with pytest.raises(ValueError, match="requires ring-system delete disabled"):
+        _resolve_ring_system_delete_capability(
+            True,
             canonical_successor_backend=True,
         )
     assert (
@@ -308,20 +609,21 @@ def test_ring_restate_choice_is_explicit_with_historical_metadata_fallback() -> 
         )
         is False
     )
-    with pytest.raises(ValueError, match="requires an explicit ring-restate"):
+    with pytest.raises(
+        ValueError,
+        match="requires the explicit.*enable-ring-restates",
+    ):
         _resolve_ring_restates_capability(
             None,
             canonical_successor_backend=True,
             corrupted_prior_mix=True,
         )
-    assert (
+    with pytest.raises(ValueError, match="requires ring-system restate"):
         _resolve_ring_restates_capability(
             False,
             canonical_successor_backend=True,
             corrupted_prior_mix=True,
         )
-        is False
-    )
     assert _checkpoint_ring_restates_capability(
         {"corrupted_prior_mix": True}
     )
@@ -360,6 +662,8 @@ def test_runtime_and_loader_authorize_only_exact_p50(
         inventory_sha256="1" * 64,
         compatibility_sha256="2" * 64,
         source_corpus_inventory_sha256="3" * 64,
+        source_corpus_inventory_path=tmp_path / "source-inventory.json",
+        source_support_contract_sha256="7" * 64,
         unified_packed_manifest_path=tmp_path / "unified.json",
         representability_overlay_path=tmp_path / "overlay.json",
         semantic_sidecar_path=tmp_path / "cells.jsonl.gz",
@@ -385,6 +689,10 @@ def test_runtime_and_loader_authorize_only_exact_p50(
     assert (
         runtime.checkpoint_metadata()["successor_training_scope"]
         == "bounded_development_p50_only"
+    )
+    assert (
+        runtime.checkpoint_metadata()["successor_source_support_contract_sha256"]
+        == "7" * 64
     )
     with pytest.raises(
         EditingSuccessorTrainerError,
@@ -471,8 +779,12 @@ def _canonical_launcher_argv(
         "--organic-vocabulary",
         "--max-atoms",
         "40",
+        "--hidden-dim",
+        "256",
+        "--message-passing-steps",
+        "6",
         "--enable-ring-restates",
-        "--enable-ring-system-delete",
+        "--no-enable-ring-system-delete",
         "--steps",
         str(steps),
         "--checkpoint",

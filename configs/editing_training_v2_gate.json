@@ -3,7 +3,26 @@
   "schema_version": 1,
   "contract_id": "compose-editing-training-v2-prelaunch",
   "status": "DESIGN_NOT_TRAINING_AUTHORIZED",
+  "bounded_p50_authorized": false,
   "scope": "source_conditioned_embedded_canonical_successor_editing_prior",
+  "bounded_pilot_operator_freeze": {
+    "scope": "gate0_t1_p50_development_only",
+    "required_families": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ],
+    "disabled_families": [
+      "ring_system_delete",
+      "ring_system_grow"
+    ],
+    "final_production_support_authorized": false
+  },
   "dependencies": {
     "corpus_contract": "configs/editing_corpus_v2_contract.json",
     "accuracy_architecture_audit": "docs/RINGCORE_V1_ACCURACY_AND_ARCHITECTURE_AUDIT_2026-07-30.md",
@@ -51,11 +70,10 @@
       "bond_reorder_electronic_change",
       "bond_reroute_attachment_relocation",
       "cycle_insert_ring_closure",
-      "cycle_attach_ring_opening"
-    ],
-    "conditional_slices": [
+      "cycle_attach_ring_opening",
       "ring_system_restate"
     ],
+    "conditional_slices": [],
     "panel_axes": [
       "candidate_count",
       "canonical_successor_count",
@@ -132,6 +150,12 @@
         "no_required_family_probability_collapses",
         "training_law_matches_frozen_effective_coefficient_audit"
       ],
+      "prerequisite_evidence": {
+        "frozen_source_corpus_inventory_sha256": null,
+        "gate_zero_structural_evidence_sha256": null,
+        "t1_successor_gate_decision_sha256": null,
+        "frozen_p50_recipe_sha256": null
+      },
       "numeric_thresholds": {
         "minimum_gradient_updates_per_required_slice": null,
         "maximum_required_slice_successor_nll_regression": null,
