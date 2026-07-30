@@ -29,6 +29,9 @@
 \RequirePackage{xspace}
 \RequirePackage{xcolor}
 \RequirePackage{enumitem}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{flafter}
 \RequirePackage{natbib}
 \RequirePackage{fancyhdr}
 \RequirePackage{tikz}
@@ -37,6 +40,7 @@
 \definecolor{composepanel}{HTML}{F1F3F5}
 \definecolor{composetext}{HTML}{20242A}
 \definecolor{composelink}{HTML}{2468C4}
+\definecolor{composepending}{HTML}{A23B2A}
 
 \hypersetup{
   colorlinks=true,
@@ -123,6 +127,26 @@
 \newcommand{\composeabstract}[1]{%
   \vspace{15pt}%
   {\sffamily\fontsize{9.2}{11.4}\selectfont #1\par}%
+}
+
+\newcommand{\resultpending}[1]{%
+  % Keep the stable result key in the TeX source while rendering the compact
+  % token requested for the paper-shaped draft.  The Makefile inventories the
+  % source key and therefore does not depend on a long, unbreakable PDF label.
+  \textcolor{composepending}{\sffamily\bfseries XXX}%
+}
+
+\newcommand{\composefigureplaceholder}[2][1.45in]{%
+  \begin{center}%
+  \colorbox{composepanel}{%
+    \begin{minipage}[c][#1][c]{\dimexpr\linewidth-22pt\relax}%
+      \centering
+      {\sffamily\bfseries\color{composepending} XXX FIGURE\par}%
+      \vspace{4pt}%
+      {\sffamily\small #2\par}%
+    \end{minipage}%
+  }%
+  \end{center}%
 }
 
 \renewcommand{\refname}{References}

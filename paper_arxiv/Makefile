@@ -3,9 +3,10 @@ SHELL := /bin/sh
 MAIN := main
 RENDER_DIR := ../tmp/pdfs/compose_arxiv_current
 ARXIV_ARCHIVE := COMPOSE_arxiv_source.tar.gz
-ARXIV_SOURCES := main.tex compose_arxiv.sty references.bib README.md STYLE_SPEC.md SCIENTIFIC_TRACEABILITY.md Makefile
+ARXIV_SOURCES := main.tex sections/compose.tex sections/experiments.tex sections/results.tex sections/discussion.tex compose_arxiv.sty references.bib README.md STYLE_SPEC.md SCIENTIFIC_TRACEABILITY.md COMPLETION_PLAN.md Makefile
+MANUSCRIPT_TEX := main.tex sections/compose.tex sections/experiments.tex sections/results.tex sections/discussion.tex
 
-.PHONY: all pdf render check qa clean arxiv-source
+.PHONY: all pdf render check placeholders release-check qa clean arxiv-source
 
 all: pdf
 
@@ -26,6 +27,18 @@ check: pdf
 	  exit 1; \
 	else \
 	  printf '%s\n' 'none'; \
+	fi
+
+placeholders:
+	@printf '%s\n' '--- Pending manuscript result fields ---'
+	@rg -n '\\resultpending|\bXXX\b' $(MANUSCRIPT_TEX) || true
+
+release-check: qa
+	@if rg -n '\\resultpending|\bXXX\b' $(MANUSCRIPT_TEX); then \
+	  printf '%s\n' 'Release blocked: unresolved result placeholders remain.'; \
+	  exit 1; \
+	else \
+	  printf '%s\n' 'Release placeholder check passed.'; \
 	fi
 
 qa: render check

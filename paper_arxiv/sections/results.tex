@@ -1,0 +1,214 @@
+\section{Results}
+\label{sec:results}
+
+This draft fixes the result layout and interpretation rules before final
+measurements exist. Red \textsf{XXX} tokens below are filled only from frozen,
+provenance-validated artifacts; they are not estimates.
+
+\subsection{The learned law improves executable molecular transport}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Editing-prior capability results.} Every row uses the frozen
+  validation-selected editing checkpoint. Uniform transport is uniform over
+  canonical successors, not marks.}
+  \label{tab:editing-results}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXXXX@{}}
+    \toprule
+    Method & Successor NLL $\downarrow$ & Target recovery $\uparrow$ &
+    Path overhead $\downarrow$ & Required-family gates \\
+    \midrule
+    Uniform legal &
+    \resultpending{E2_NLL_UNIFORM} &
+    \resultpending{E2_RECOVERY_UNIFORM} &
+    \resultpending{E2_OVERHEAD_UNIFORM} &
+    n/a \\
+    COMPOSE &
+    \resultpending{E2_NLL_COMPOSE} &
+    \resultpending{E2_RECOVERY_COMPOSE} &
+    \resultpending{E2_OVERHEAD_COMPOSE} &
+    \resultpending{EDITING_GATE_SUMMARY} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The registered E2 conclusion is
+\resultpending{E2_TRANSPORT_CONCLUSION}. This sentence must distinguish proper
+successor likelihood from top-1 family-choice accuracy and must report any
+semantic slice on which uniform legal rewriting is not improved.
+
+\subsection{One process adapts size and ring topology}
+
+\begin{figure}[htbp]
+  \composefigureplaceholder[2.05in]{%
+    Figure 2 artwork: learned versus uniform transport; grow/shrink and
+    grow-then-switch atom-count traces; cycle close/open and topology-reversal
+    examples; fixed-cardinality and no-cycle ablations.}
+  \caption{\textbf{Learned transport and structural adaptation.} Every depicted
+  intermediate will be selected by a frozen rule and independently replayed
+  through the executor.}
+  \label{fig:transport-adaptation}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Trans-dimensional and topology adaptation.} Success is
+  measured at matched edit and oracle budgets; path validity includes every
+  committed non-null state.}
+  \label{tab:adaptation}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXXX@{}}
+    \toprule
+    Arm & Target success $\uparrow$ & Valid path $\uparrow$ &
+    Edits/oracles to success $\downarrow$ \\
+    \midrule
+    Full COMPOSE, size &
+    \resultpending{E3_SIZE_SUCCESS_FULL} &
+    \resultpending{E3_VALID_PATH_FULL} &
+    \resultpending{E3_COST_FULL} \\
+    Fixed cardinality &
+    \resultpending{E3_SIZE_SUCCESS_FIXED} &
+    \resultpending{E3_VALID_PATH_FIXED} &
+    \resultpending{E3_COST_FIXED} \\
+    Full COMPOSE, topology &
+    \resultpending{E4_TOPOLOGY_SUCCESS_FULL} &
+    \resultpending{E4_VALID_PATH_FULL} &
+    \resultpending{E4_COST_FULL} \\
+    No cycle operations &
+    \resultpending{E4_TOPOLOGY_SUCCESS_NOCYCLE} &
+    \resultpending{E4_VALID_PATH_NOCYCLE} &
+    \resultpending{E4_COST_NOCYCLE} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The registered cardinality conclusion is
+\resultpending{E3_CARDINALITY_CONCLUSION}. The registered topology conclusion is
+\resultpending{E4_TOPOLOGY_CONCLUSION}. Failures on fused, spiro, bridged, or
+ring-size strata remain visible rather than being absorbed into one aggregate.
+
+\subsection{The quotient is invariant and finite-state control is exact}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Quotient and exact-control verification.} E5 uses the final
+  frozen quotient task; E6 uses the enumerable carbon-only slice.}
+  \label{tab:exact-results}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXX@{}}
+    \toprule
+    Check & Residual $\downarrow$ & Decision \\
+    \midrule
+    Slot relabeling &
+    \resultpending{E5_SLOT_RESIDUAL} &
+    \resultpending{E5_SLOT_DECISION} \\
+    Within-fiber refinement &
+    \resultpending{E5_REFINEMENT_RESIDUAL} &
+    \resultpending{E5_REFINEMENT_DECISION} \\
+    Successor-controlled law &
+    \resultpending{E5_CONTROL_RESIDUAL} &
+    \resultpending{E5_CONTROL_DECISION} \\
+    Negative mark-level controller &
+    \resultpending{E5_MARK_DIVERGENCE} &
+    divergence required \\
+    Exact terminal tilt TV &
+    \resultpending{E6_TERMINAL_TV} &
+    \resultpending{E6_TERMINAL_DECISION} \\
+    Dynamic continuation TV &
+    \resultpending{E6_DYNAMIC_TV} &
+    \resultpending{E6_DYNAMIC_DECISION} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The final statement of quotient invariance is
+\resultpending{E5_QUOTIENT_CONCLUSION}; it is restricted to
+probability-preserving refinements within one successor fiber and
+successor-level controllers. The exact-control conclusion is
+\resultpending{E6_EXACT_CONTROL_CONCLUSION}; it is restricted to the enumerated
+verification graph and exact backward values.
+
+\subsection{Remaining-budget control supports Pareto and dynamic design}
+
+\begin{figure}[htbp]
+  \composefigureplaceholder[2.15in]{%
+    Figure 3 artwork: analytic versus exact-Doob terminal law; dynamic
+    preference-switch continuation; Pareto fan from one prefix; pathwise
+    constraint trajectory; hypervolume versus oracle calls.}
+  \caption{\textbf{Exact and dynamic control on the canonical molecular
+  kernel.} The left panel is the bounded exact check; molecular-scale panels
+  use the selected editing prior and explicitly approximate value.}
+  \label{fig:exact-dynamic}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Same-base controller comparison.} Every row shares one
+  editing prior and support. Hypervolume AUC uses all property-oracle calls.}
+  \label{tab:controllers}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXXXX@{}}
+    \toprule
+    Controller & Norm. HV $\uparrow$ & HV-AUC $\uparrow$ &
+    Feasible set $\uparrow$ & Oracle calls $\downarrow$ \\
+    \midrule
+    Unguided prior &
+    \resultpending{E7_HV_PRIOR} & \resultpending{E7_AUC_PRIOR} &
+    \resultpending{E7_FEAS_PRIOR} & \resultpending{E7_CALLS_PRIOR} \\
+    Endpoint rerank &
+    \resultpending{E7_HV_RERANK} & \resultpending{E7_AUC_RERANK} &
+    \resultpending{E7_FEAS_RERANK} & \resultpending{E7_CALLS_RERANK} \\
+    Greedy/local &
+    \resultpending{E7_HV_GREEDY} & \resultpending{E7_AUC_GREEDY} &
+    \resultpending{E7_FEAS_GREEDY} & \resultpending{E7_CALLS_GREEDY} \\
+    MOG-DFM-style &
+    \resultpending{E7_HV_MOGDFM} & \resultpending{E7_AUC_MOGDFM} &
+    \resultpending{E7_FEAS_MOGDFM} & \resultpending{E7_CALLS_MOGDFM} \\
+    SMC/Feynman--Kac &
+    \resultpending{E7_HV_SMC} & \resultpending{E7_AUC_SMC} &
+    \resultpending{E7_FEAS_SMC} & \resultpending{E7_CALLS_SMC} \\
+    Learned value &
+    \resultpending{E7_HV_VALUE} & \resultpending{E7_AUC_VALUE} &
+    \resultpending{E7_FEAS_VALUE} & \resultpending{E7_CALLS_VALUE} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The Pareto result is \resultpending{E7_PARETO_CONCLUSION}. The preference-switch
+result is \resultpending{E7_SWITCH_CONCLUSION}. The Pareto-fan result is
+\resultpending{E7_FAN_CONCLUSION}. The pathwise-constraint result is
+\resultpending{E7_PATH_CONSTRAINT_CONCLUSION}. Each conclusion must report
+oracle and compute cost and cannot infer exact molecular-scale Doob control
+from improved endpoints alone.
+
+\subsection{Timed de novo generation is a separate result}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Broad-organic unconditional generation.} Results come only
+  from the separately trained timed-CTMC checkpoint.}
+  \label{tab:denovo}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXXXX@{}}
+    \toprule
+    Method & FCD $\downarrow$ & Manifold recall $\uparrow$ &
+    Topology distance $\downarrow$ & All-step validity $\uparrow$ \\
+    \midrule
+    COMPOSE de novo &
+    \resultpending{E1_FCD_COMPOSE} &
+    \resultpending{E1_RECALL_COMPOSE} &
+    \resultpending{E1_TOPOLOGY_COMPOSE} &
+    \resultpending{E1_ALLSTEP_VALIDITY} \\
+    \resultpending{E1_BASELINE_NAME} &
+    \resultpending{E1_FCD_BASELINE} &
+    \resultpending{E1_RECALL_BASELINE} &
+    \resultpending{E1_TOPOLOGY_BASELINE} &
+    \resultpending{E1_VALIDITY_BASELINE} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The unconditional-generation conclusion is
+\resultpending{E1_DENOVO_CONCLUSION}. It must remain separate from the editing
+checkpoint and from the carbon-only exact verification slice.

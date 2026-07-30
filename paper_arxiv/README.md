@@ -1,15 +1,19 @@
 # COMPOSE arXiv manuscript
 
-This is the clean arXiv-format manuscript package. Phase 1 established the
-title, abstract, Introduction, and related-work framing. Phase 2 adds the
-formal Rewrite Generator Matching section, including the marked process, raw
-canonical pushforward, productive editing kernel, successor-aware objectives,
-and the separation between fixed-budget editing and timed de novo generation.
-Phase 3 adds the checkpoint-independent finite-horizon control section:
-budget-indexed backward values, the exact terminal tilt, support conditions,
-dynamic continuation, Pareto branching, path-constraint semantics, and the
-boundary between bounded exactness and molecular-scale approximation. No
-empirical result table or unverified numerical claim is included.
+This is the clean arXiv-format manuscript package. It is now a complete
+paper-shaped draft: front matter, framework, Rewrite Generator Matching,
+canonical molecular pushforward, finite-horizon control, the COMPOSE molecular
+implementation, experimental design, results layout, limitations, and
+conclusion are all present. Empirical result tables and figure slots are
+included, but unresolved measurements and conclusions remain explicit
+placeholders rather than unverified claims.
+
+`COMPLETION_PLAN.md` defines the full-paper section map and the result-slot
+policy. During drafting, each unresolved empirical field retains a stable
+`\resultpending{KEY}` in source and renders visibly as `XXX` in the PDF.
+`make placeholders` prints the keyed inventory across the complete manuscript;
+`make release-check` fails until every placeholder has been replaced from a
+frozen result artifact.
 
 `SCIENTIFIC_TRACEABILITY.md` records the authoritative source and claim boundary
 for each load-bearing sentence introduced so far.

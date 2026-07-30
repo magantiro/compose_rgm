@@ -10,8 +10,8 @@ content.
   `86d181a8abe43c119e1d84b8ff251df8badce74b9a0df94c2e6a5556c1ceebae`
 - Reference geometry: U.S. letter, single column, 612 x 792 pt.
 - Reference typography: embedded Latin Modern Roman, Sans, and Math fonts.
-- Phase 1 manuscript scope: title, abstract, Introduction, and the references
-  cited by the Introduction. Later sections are intentionally absent.
+- Current manuscript scope: a complete paper-shaped draft with explicit
+  result and figure placeholders where frozen empirical evidence is pending.
 
 ## Page system
 
@@ -51,7 +51,8 @@ content.
 
 ## Deliberate deviations from the reference
 
-- The title-panel abstract is Sans because this Phase 1 design brief explicitly
+- The title-panel abstract is Sans because the design brief explicitly
   requests a Sans title, author line, and abstract.
-- The reference's content-specific figure/table styles are not copied in Phase
-  1. They will be specified when the corresponding COMPOSE sections are written.
+- COMPOSE figures and tables use restrained gray panels, booktabs rules, and
+  compact red `XXX` tokens for pending evidence. The source retains stable
+  placeholder keys even though the PDF renders only the compact token.

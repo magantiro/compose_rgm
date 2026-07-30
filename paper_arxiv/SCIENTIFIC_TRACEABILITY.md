@@ -28,11 +28,21 @@ the current manuscript. It is an audit aid, not submission prose.
 | Dynamic retargeting is exact as a continuation from the current state. | `docs/SYSTEM_CONTRACT.md` Appendix A; telescoping argument restarted at the current state and remaining budget. | It is not claimed to reproduce the counterfactual law obtained by using the new objective from the original source. |
 | General path constraints require killed or augmented-state semantics. | `docs/PAPER_MASTER_PLAN.md` §7. | A terminal desirability is not claimed to enforce arbitrary intermediate constraints. |
 | Molecular-scale value control is approximate. | Pasted handoff §§8 and 16; experiment registry E7. | Exactness remains confined to the bounded enumerable verification slice. |
+| The production molecular representation is 2D, broad-organic, persistent-slot, charge-preserving, and bounded at 40 active atoms. | Pasted authoritative handoff §§5.1 and 18; `configs/editing_gate_zero_runtime_v2.json`; active-element predicates in production state handling. | The manuscript does not claim stereochemical, isotopic, radical, protonation-state, 3D, or synthetic-accessibility support. |
+| The bounded editing rebuild exposes eight active operator families. | `configs/editing_gate_zero_runtime_v2.json`; `configs/editing_t1_successor_gate_v3.json`; `diagnostics/coherence/editing_t1_successor_panel_v3_active8_2026-07-30.json`. | The paper describes the bounded rebuild, not a final trained checkpoint. `ring_system_grow` and `ring_system_delete` remain disabled; training authorization remains false until gates pass. |
+| Atom insertion supports root and one-neighbor birth, not general multi-neighbor insertion. | Pasted handoff §5.3; active action factorization and Gate-0 contract. | Birth/death is trans-dimensional, but one-step inverse closure is not claimed for every deletion. |
+| Ring-system restatement is currently a necessary coordinated accelerator under the primitive bond-reorder mask. | `diagnostics/coherence/ring_restate_primitive_path_audit_v1_2026-07-30.json` and its audited implementation. | The qualitative support conclusion is used; development counts are not promoted to paper results. Ring growth is not restored, and ring-system deletion remains excluded pending a separate reachability justification. |
+| Corpus construction is capability-directed and leakage-aware. | `configs/editing_corpus_v2_contract.json`; Section 4 corpus contract. | Final lane counts, sampling coefficients, and checkpoint identity remain `\resultpending` fields until their frozen artifacts exist. |
+| Long training is gated by deterministic, support, successor, and pilot checks. | Active Gate-0/T1/P50 contracts and the registered P500/P2000 protocol. | Passing development infrastructure does not authorize a long run; thresholds and training authorization must be frozen independently. |
+| Experimental comparisons are divided into law-only, support-ablation, and external task-level comparisons. | `configs/experiment_registry.yaml`; `docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md`. | External methods are not described as support-matched unless they actually share the production successor graph. |
+| The exact verification graph has 967 states and 14,432 canonical directed edges. | Pasted handoff §§16-17 and the registered `carbon_6_slots` benchmark identity. | These are benchmark-identity facts, not chemical-performance results; the slice is carbon-only and non-representative. |
+| Every rendered `XXX` is an unresolved empirical value or conclusion. | `COMPLETION_PLAN.md`; keyed `\resultpending{...}` calls in the section sources. | A placeholder is filled only from a frozen provenance-validated artifact; development-only E5 and T1 diagnostics cannot silently fill paper results. |
 
 ## Empirical-status policy
 
-The current manuscript contains no endpoint-quality, likelihood, accuracy, benchmark, Pareto,
-or calibration result. The only run-specific statement identifies the
+The current manuscript contains result tables and a complete interpretation
+structure, but no filled endpoint-quality, likelihood, accuracy, benchmark,
+Pareto, or calibration result. The only run-specific statement identifies the
 completed run's training objective and diagnostic status, both fixed by the
-authoritative handoff. Empirical claims are deferred until checkpoint selection
-and the relevant frozen experiments pass.
+authoritative handoff. Empirical claims remain visibly deferred until
+checkpoint selection and the relevant frozen experiments pass.

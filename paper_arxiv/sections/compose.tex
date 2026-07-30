@@ -1,0 +1,214 @@
+\section{COMPOSE: a molecular rewrite process}
+\label{sec:compose}
+
+\method instantiates the preceding construction as a stochastic process on
+two-dimensional molecular graphs. This section fixes the chemistry boundary,
+rewrite basis, parameterization, and training contract. Exact model and corpus
+identities are reported only after the gated editing rebuild is frozen.
+
+\subsection{Molecular state and closure contract}
+
+\paragraph{Broad-organic state.}
+A non-null state contains at most 40 active atoms represented by an ordered
+15-class element--valence vocabulary, explicit bond and aromaticity state,
+implicit hydrogen counts, and formal charge. Production uses persistent slots
+so an action can address the same atom across a trajectory. A slot can hold an
+element, a null value, or an inert deletion marker; only the authoritative
+element predicate contributes a molecular atom. Canonical molecular identity
+is used to merge semantic states, but exact slot-addressed tensors are retained
+for executable replay.
+
+The process models a 2D molecular graph. Stereochemistry, isotope labels,
+radicals, and charge-changing edits are outside the current editing contract.
+Charged molecules may appear, but a retained charged center cannot be created,
+deleted, moved, retyped, or have an incident bond changed by a training edit.
+This charge-preserving rule prevents a graph edit from silently standing in for
+an unspecified protonation or standardization operation.
+
+\paragraph{Closure.}
+The legal enumerator applies family-specific structural masks before a mark can
+be sampled. The executor then checks the complete proposed rewrite, including
+active-slot state, bond representation, per-atom valence, connectedness, and
+molecular sanitization. Accepted non-null successors therefore remain in the
+declared state space. This is a graph-validity and representation claim, not a
+claim of synthetic accessibility, favorable three-dimensional geometry, or
+biological activity.
+
+\begin{figure}[t]
+  \composefigureplaceholder[1.75in]{%
+    Figure 1 artwork: disjoint cardinality strata; atom birth/death between
+    strata; same-cardinality restate, reroute, and cycle operations; executable
+    marks merging into canonical successor fibers; successor-level control.}
+  \caption{\textbf{Rewrite Generator Matching with executable molecular
+  events.} The final artwork will visualize the causal chain from legal marked
+  rewrites to a canonical molecular kernel and finite-horizon control.}
+  \label{fig:framework}
+\end{figure}
+
+\subsection{Minimal editing basis}
+\label{sec:operator-basis}
+
+Table~\ref{tab:operators} gives the eight-family basis entering the bounded
+editing gates. Atom birth and death alter cardinality; the other families
+change composition, electronics, connectivity, or topology at fixed
+cardinality. The final checkpoint must declare the identical support or the
+table and every support-sensitive experiment must be revised before results
+are inspected.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Editing rewrite basis entering the gated rebuild.}
+  ``Same'' means the active-atom cardinality is unchanged. Internal model-slot
+  names for cycle operations are intentionally omitted.}
+  \label{tab:operators}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lclX@{}}
+    \toprule
+    Public family & $\Delta n$ & Status & Molecular role \\
+    \midrule
+    atom insert & $+1$ & core & Root or single-attachment atom birth \\
+    atom delete & $-1$ & core & Legal atom death with connected successor \\
+    atom restate & $0$ & core & Element--valence change at a retained site \\
+    bond reorder & $0$ & core & Bond-order and local electronic change \\
+    bond reroute & $0$ & core & Move an attached fragment to a legal target \\
+    cycle close & $0$ & core & Add a legal bond that increases cycle rank \\
+    cycle open & $0$ & core & Remove a cyclic bond while preserving connectivity \\
+    ring-system restate & $0$ & accelerator & Coordinated cyclic electronic restatement \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\paragraph{Birth and death.}
+The factorized birth head supports a new root with zero existing neighbors and
+a connected insertion with exactly one existing neighbor. It does not score an
+atom attached simultaneously to two or more existing atoms. Consequently,
+atom birth and death make the semantic process trans-dimensional, but the
+operator set is not one-step inverse-closed for every deletion: the inverse of
+deleting a degree-two bridging atom can require an unsupported multi-attachment
+insertion. Such insertions are added only if a frozen reachability or path-cost
+audit establishes a material task gap.
+
+\paragraph{Connectivity and topology.}
+Bond rerouting preserves an attached fragment while changing its attachment,
+which can express positional and linker edits more directly than deleting and
+rebuilding the fragment. Primitive cycle close and cycle open define the ring
+topology support compositionally; neither depends on a finite catalog of named
+ring templates. Ring-system restatement is retained as a coordinated
+electronic accelerator for the bounded pilot. An exhaustive training-corpus
+audit found that its stored teachers lower to valid sequences of cyclic bond
+reorders, but the current primitive bond-reorder mask excludes every such
+lowering. Removing it would therefore silently remove those teachers rather
+than simplify an equivalent support.
+
+Whole-ring growth and ring-system deletion are disabled in the bounded rebuild.
+The former would reintroduce a finite topology catalog. The latter remains
+excluded unless a frozen reachability audit establishes a meaningful
+successor class or path benefit beyond primitive cycle opening. A future macro
+can be added as an explicitly costed accelerator only if it preserves or
+explicitly extends the declared reachable set and demonstrates a material
+finite-budget gain.
+
+\subsection{Rate network and action factorization}
+
+The network encodes the current persistent-slot graph and progress variable,
+then predicts a total marked-event hazard and a hierarchical conditional mark
+law. At a high level,
+\[
+  p_\theta(a\mid x,t)
+  =
+  p_\theta(k\mid x,t)\,
+  p_\theta(o,\eta\mid k,x,t),
+\]
+where $k$ is an operator family, $o$ denotes its concrete operands or matched
+sites, and $\eta$ denotes typed payload such as an atom class or bond state.
+Family-specific candidate builders and masks define the finite legal
+coordinates scored by the second factor. Candidate scores are normalized only
+over supported coordinates. Canonical-successor probabilities are obtained
+after the complete factorized mark has been scored and executed.
+
+The reference architecture uses a shared molecular message-passing encoder,
+a pooled graph--time representation for the family gate, and family-specific
+node, pair, or reroute scorers. The final width, depth, candidate features,
+initialization, and parameter count are
+\resultpending{EDITING_ARCHITECTURE_CONTRACT}. The property-agnostic base
+network does not receive the immutable source molecule, optimization objective,
+remaining budget, or protected mask. Those variables belong to the value or
+controller, which permits all controllers to share one frozen base kernel.
+
+\subsection{Endpoint programs and editing corpus}
+\label{sec:editing-corpus}
+
+\paragraph{Program compilation.}
+Training records are executable paths between exact endpoint states. For a real
+endpoint pair, the compiler tests direct semantic explanations---restate,
+reorder, reroute, birth/death, and cycle operations---before accepting a
+delete-and-rebuild fallback. Every proposed path is replayed through the
+production executor; its committed states, endpoint identity, charge policy,
+operator sequence, aliases, and failure reason are recorded. Exact slot states,
+not reparsed canonical strings, are the source of truth for replay.
+
+\paragraph{Evidence lanes.}
+The corpus contract distinguishes five types of evidence:
+
+\begin{enumerate}
+  \item observed local analogues for context-matched substitutions and size
+  changes;
+  \item operator-aware compilations of real endpoint pairs;
+  \item linker, positional, attachment, and topology analogues;
+  \item short and medium paths through observed analogue series, including
+  shared-source branches; and
+  \item reversible synthetic legal walks for rare contexts, mixed-family
+  composition, correction, and inverse coverage.
+\end{enumerate}
+
+Real and synthetic evidence remain separately identifiable. Synthetic paths
+establish executable support coverage; they are not evidence of medicinal
+chemistry frequency. The frozen counts, unique sources and scaffolds, path
+lengths, semantic-cell coverage, and effective training coefficients are
+\resultpending{EDITING_CORPUS_CENSUS}.
+
+\paragraph{Splits and sampling.}
+Molecule, scaffold, series, document/source group, and transformation signature
+are split before path construction; no pair may cross partitions. Because the
+previous final test aggregate was inspected during diagnosis, the replacement
+model requires a new sealed final holdout. Training samples hierarchically by
+data lane, series/scaffold/source group, semantic capability cell, path, and
+progress state. This prevents long serializations, large analogue series, or
+one common transformation from dominating merely by row count. The final
+mixture and measured effective coefficients are
+\resultpending{EDITING_SAMPLER_CONTRACT}.
+
+\subsection{Objective selection and no-waste training gates}
+\label{sec:training-gates}
+
+The editing experiments consume the productive embedded successor kernel, so
+the replacement protocol compares the embedded successor likelihood in
+\eqref{eq:productive-identity-loss} with the successor-generator objective in
+\eqref{eq:successor-gm-loss}. Selected-mark training is retained as a bounded
+ablation, not silently relabeled. The final objective, hazard weight, and
+initialization are \resultpending{EDITING_OBJECTIVE_CONTRACT}.
+
+No long run is authorized directly from aggregate validation loss. A sequence
+of immutable gates tests the intended scientific object:
+
+\begin{enumerate}
+  \item \textbf{D0/O0: corpus and support.} Every teacher executes, every
+  successor fiber is recoverable, every capability cell is represented, and
+  the operator basis meets frozen reachability and path-cost requirements.
+  \item \textbf{T1: successor micro-overfit.} Unique-state panels must memorize
+  their canonical successors; repeated-state panels must fit their empirical
+  multi-successor law. Family mass alone is insufficient.
+  \item \textbf{P50: gradient and collapse sentinel.} Fifty exact optimizer
+  updates must expose every required family, preserve finite nonzero gradients,
+  and avoid immediate capability collapse.
+  \item \textbf{P500: mixed pilot.} Every required successor slice must improve
+  over its registered baseline without deletion, size, or topology drift.
+  \item \textbf{P2000: scientific pilot.} Held-analogue transport, cardinality
+  adaptation, topology adaptation, calibration, and productive rollouts must
+  pass before a full schedule is released.
+\end{enumerate}
+
+The optimizer, data-stream position, RNG state, and scheduler are continuous
+across passing pilot stages; a pilot is not retrospectively warm-started with a
+different law. The frozen full-run identity, selected checkpoint, and selection
+metrics are \resultpending{EDITING_CHECKPOINT_FREEZE}.
