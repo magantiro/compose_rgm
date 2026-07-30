@@ -1,0 +1,217 @@
+{
+  "action_identity": "full SHA-256 of canonical RewriteActionCodecV2 JSON",
+  "corpus_wide_proof": false,
+  "covered_families": [
+    "atom_delete",
+    "atom_insert",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_attach",
+    "cycle_insert",
+    "ring_system_delete",
+    "ring_system_restate"
+  ],
+  "evidence_command": "PYTHONPATH=src .venv/bin/python scripts/run_ringcore_support_invariance_qualification.py --output diagnostics/coherence/ringcore_support_invariance_qualification.json",
+  "implementation_sha256s": {
+    "src/compose_v4/experiments/factorized_successor_training.py": "80bd4a799acb3234d54955537489fefe9ea01a2dba8ab6add4b2a195c3cd27d0",
+    "src/compose_v4/experiments/production_successor_kernel.py": "e13c97930aa0209cd39f51a42c31d974ad5555f5d90d77e90a0fb13b77d0a3d8",
+    "src/compose_v4/experiments/support_invariance_qualification.py": "eea5827683a05bbf1cdaba08f2070c228da007e81bdb785d6dbe3cf92c63487a",
+    "src/compose_v4/model/factorized_tracelet_rate_model.py": "6064d9b981309b1c9c7c5d34952fcfb870d5cae9587374cd13038e1ddad3b4c5",
+    "src/compose_v4/rewrite/action_codec.py": "56607896c67e554bb83aa3f4d40f38912d24e6c6941f9a433a2a8a431b8f9230",
+    "src/compose_v4/rewrite/kernel.py": "6c3dff1efceee7232289e0ca8ee0065643ddeae2c3921ac1cda691a8f42015f7"
+  },
+  "limitations": [
+    "This is a deterministic stratified development panel, not a corpus-wide support proof.",
+    "Unseen molecular states, slot capacities, catalogs, and future capability configurations are outside this result.",
+    "The production enumerator remains operationally score-coupled; this gate detects support drift but does not remove its neural forward pass.",
+    "SHA-256 collision resistance is assumed; the digest is not a mathematical proof of action equality."
+  ],
+  "maximum_probability_l1": 0.46518435377405803,
+  "model_parameter_sha256s": {
+    "independent_seed_101": "598f80e5521938bb792b0100ea6bcada42d7f1f69504091c8d103f7a0f4f00e9",
+    "independent_seed_202": "cc9de0febe1d49c1b54f3aeef74b066843fd09f911944f894d3c9cde423f3f74"
+  },
+  "probability_comparisons": [
+    {
+      "l1_from_reference": 0.0031281864905104914,
+      "max_abs_from_reference": 0.0007838795847430469,
+      "model_name": "independent_seed_101",
+      "state_name": "null_root_birth",
+      "time": 0.79
+    },
+    {
+      "l1_from_reference": 0.0014802505299106445,
+      "max_abs_from_reference": 0.0004211201025846878,
+      "model_name": "independent_seed_101",
+      "state_name": "acyclic_general_edit",
+      "time": 0.79
+    },
+    {
+      "l1_from_reference": 0.0009057627236676116,
+      "max_abs_from_reference": 3.718241940950384e-05,
+      "model_name": "independent_seed_101",
+      "state_name": "ring_topology_and_electronics",
+      "time": 0.79
+    },
+    {
+      "l1_from_reference": 0.2725437286565459,
+      "max_abs_from_reference": 0.049643816039260304,
+      "model_name": "independent_seed_202",
+      "state_name": "null_root_birth",
+      "time": 0.13
+    },
+    {
+      "l1_from_reference": 0.46518435377405803,
+      "max_abs_from_reference": 0.06026429870203234,
+      "model_name": "independent_seed_202",
+      "state_name": "acyclic_general_edit",
+      "time": 0.13
+    },
+    {
+      "l1_from_reference": 0.3600948894162795,
+      "max_abs_from_reference": 0.008916794185664628,
+      "model_name": "independent_seed_202",
+      "state_name": "ring_topology_and_electronics",
+      "time": 0.13
+    },
+    {
+      "l1_from_reference": 0.271868644138337,
+      "max_abs_from_reference": 0.049404838076433956,
+      "model_name": "independent_seed_202",
+      "state_name": "null_root_birth",
+      "time": 0.79
+    },
+    {
+      "l1_from_reference": 0.46500715479052346,
+      "max_abs_from_reference": 0.06043365473823714,
+      "model_name": "independent_seed_202",
+      "state_name": "acyclic_general_edit",
+      "time": 0.79
+    },
+    {
+      "l1_from_reference": 0.36091447192348075,
+      "max_abs_from_reference": 0.00936251115783096,
+      "model_name": "independent_seed_202",
+      "state_name": "ring_topology_and_electronics",
+      "time": 0.79
+    }
+  ],
+  "probability_variation_observed": true,
+  "required_families": [
+    "atom_delete",
+    "atom_insert",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_attach",
+    "cycle_insert",
+    "ring_system_delete",
+    "ring_system_restate"
+  ],
+  "schema": "compose.support_invariance_qualification",
+  "schema_version": 1,
+  "scope": "deterministic_stratified_development_panel",
+  "scoring_times": [
+    0.13,
+    0.79
+  ],
+  "states": [
+    {
+      "canonical_successor_count": 12,
+      "marks_by_family": [
+        [
+          "atom_insert",
+          12
+        ]
+      ],
+      "name": "null_root_birth",
+      "raw_mark_count": 12,
+      "source_key": "<NULL>",
+      "source_state_sha256": "4c05ce980af837c35988f5e322c8d32f48d17a88e5b49d5315e572740335d381",
+      "support_signature_sha256": "89a4dead110b5e5c9730cb51315f27038ab41b89e0bfd67a1fb05256d9887485",
+      "virtual_mark_count": 0
+    },
+    {
+      "canonical_successor_count": 116,
+      "marks_by_family": [
+        [
+          "atom_delete",
+          2
+        ],
+        [
+          "atom_insert",
+          73
+        ],
+        [
+          "atom_restate",
+          36
+        ],
+        [
+          "bond_reorder",
+          3
+        ],
+        [
+          "bond_reroute",
+          1
+        ],
+        [
+          "cycle_insert",
+          1
+        ]
+      ],
+      "name": "acyclic_general_edit",
+      "raw_mark_count": 116,
+      "source_key": "CCO",
+      "source_state_sha256": "b25a3d3d375b76e5f55233452466c3cec3a359cd48a5b181ac3a025fbef8b3c6",
+      "support_signature_sha256": "e97afc133ff13a3bbe4049a8a34444caedc5124b5076881a08e895b135ef4383",
+      "virtual_mark_count": 0
+    },
+    {
+      "canonical_successor_count": 27,
+      "marks_by_family": [
+        [
+          "atom_insert",
+          84
+        ],
+        [
+          "atom_restate",
+          48
+        ],
+        [
+          "cycle_attach",
+          6
+        ],
+        [
+          "cycle_insert",
+          9
+        ],
+        [
+          "ring_system_delete",
+          1
+        ],
+        [
+          "ring_system_restate",
+          1
+        ]
+      ],
+      "name": "ring_topology_and_electronics",
+      "raw_mark_count": 149,
+      "source_key": "c1ccccc1",
+      "source_state_sha256": "f2a5a0202ef588d1c45a7f95070afb37cb57dc51fd7cd6d7653f90409caedda4",
+      "support_signature_sha256": "946111c8be739b64c7cec3f9f1ab0b71d6df16851338f8e4c70c4a35fc0d2749",
+      "virtual_mark_count": 0
+    }
+  ],
+  "status": "pass",
+  "support_invariant": true,
+  "support_path": "production scored marked-law enumerator -> executor -> canonical/exact successor grouping",
+  "support_signature_excludes": [
+    "mark_probability",
+    "family_probability",
+    "total_hazard",
+    "logits",
+    "scoring_time",
+    "model_parameters"
+  ]
+}

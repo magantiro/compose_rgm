@@ -3,9 +3,10 @@
 Date: 2026-07-30
 
 Status: address/cache/dataset bridge, indexed backend, parent-validated
-DataLoader worker receipts, shared successor objective, and bounded
-state-centric compiler implemented and focused-tested; no training compute
-launched; full-corpus cache build remains blocked
+DataLoader worker receipts, shared successor objective, bounded state-centric
+compiler, and stratified support-invariance gate implemented and
+focused-tested; no training compute launched; full-corpus cache build remains
+blocked
 
 ## Decision
 
@@ -71,8 +72,7 @@ The bounded core data path is now implemented:
 The inventory is explicitly `BOUNDED_DEVELOPMENT_ONLY`, regardless of storage
 backend. It cannot authorize a full-corpus run. The 63-shard build waits for a
 production-sized real-inventory DataLoader benchmark, a resumable parallel
-build orchestrator, stratified support invariance, and a frozen complete-corpus
-inventory.
+build orchestrator, and a frozen complete-corpus inventory.
 
 ### Sampling and batching
 
@@ -432,9 +432,16 @@ same support contract. Cache contents must not depend on learned weights.
    each packed shard byte hash, cache byte hash, manifest/overlay identities,
    active trace census and declared exclusions, but it has not been built for
    all 63 shards.
-3. **Support/scoring coupling:** the current compiler traverses a scored law.
-   A one-state invariance regression exists; a stratified multi-family gate or
-   support-only enumerator is required before the complete build.
+3. **Support/scoring coupling:** the current compiler still traverses a scored
+   law, but the bounded stratified gate now holds action identities,
+   canonical/exact successor grouping, and all nine active RingCore-V1
+   families fixed across two independent initializations and times 0.13/0.79
+   on null, acyclic and aromatic states. Aligned probability L1 changes by as
+   much as 0.465184 while support remains identical. This closes the
+   preregistered stratified development gate, not a corpus-wide proof. The
+   complete build must retain its executor/action census and any new catalog,
+   slot capacity, capability configuration or operator subtype requires
+   requalification.
 4. **Semantic cells:** balanced-cell checkpoint selection requires a frozen
    per-example cell sidecar not currently present in `FactorizedMarkBatch`.
 5. **Validation artifact:** the existing 535.4 MiB evaluation batch lacks
@@ -461,8 +468,8 @@ same support contract. Cache contents must not depend on learned weights.
 3. ~~Add the lazy O(1) sharded development cache inventory/store.~~
 4. ~~Add successor dataset/collator/batch alignment tests, including
    multiworker, pinning, subbatching and resume.~~
-5. Prove support invariance across a stratified set of times, initializations
-   and active families.
+5. ~~Prove support invariance across a stratified set of times,
+   initializations and active families.~~
 6. Build tiny caches from real corruption, cycle-open/close and MMP traces;
    compare every loaded fiber to fresh production compilation.
 7. ~~Benchmark the indexed backend on a bounded 170,000-row artifact, qualify
