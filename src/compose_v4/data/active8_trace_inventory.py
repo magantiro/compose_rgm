@@ -24,7 +24,7 @@ import tempfile
 from collections import Counter, OrderedDict
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any, Protocol
 
@@ -289,6 +289,52 @@ def _sha256_file(path: Path) -> str:
         while block := handle.read(1 << 20):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _inventory_decision_path(
+    manifest_path: Path,
+    relative_path: object,
+) -> Path:
+    """Resolve a local or content-store decision object without path escape."""
+
+    if not isinstance(relative_path, str) or not relative_path:
+        raise Active8TraceInventoryError(
+            "active-8 decision path must be nonempty text"
+        )
+    pure = PurePosixPath(relative_path)
+    if (
+        pure.is_absolute()
+        or pure == PurePosixPath(".")
+        or "\\" in relative_path
+        or any(character in relative_path for character in "*?[]")
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 decision path is unsafe"
+        )
+    manifest_parent = Path(manifest_path).parent.resolve()
+    if ".." not in pure.parts:
+        trusted_root = manifest_parent
+    elif (
+        pure.parts[0] == ".."
+        and pure.parts.count("..") == 1
+        and len(pure.parts) >= 3
+        and pure.parts[1] == "decisions"
+        and manifest_parent.name == "manifests"
+    ):
+        # The distributed content store places the manifest at
+        # objects/manifests/<sha>.json and decisions at
+        # objects/decisions/<prefix>/<sha>.jsonl.gz.
+        trusted_root = manifest_parent.parent
+    else:
+        raise Active8TraceInventoryError(
+            "active-8 decision path escapes its artifact namespace"
+        )
+    candidate = (manifest_parent / Path(*pure.parts)).resolve()
+    if not candidate.is_relative_to(trusted_root):
+        raise Active8TraceInventoryError(
+            "active-8 decision path escapes its trusted root"
+        )
+    return candidate
 
 
 def implementation_identity(*, repo_root: Path | None = None) -> dict[str, object]:
@@ -1039,7 +1085,6 @@ def load_active8_trace_admission(
             or not isinstance(partition, str)
             or not partition
             or not isinstance(decision_name, str)
-            or Path(decision_name).name != decision_name
             or not _is_sha256(decision_sha256)
             or not isinstance(counts, Mapping)
         ):
@@ -1055,7 +1100,10 @@ def load_active8_trace_admission(
             raise Active8TraceInventoryError(
                 "active-8 inventory repeats a source-shard lane"
             )
-        decision_path = manifest_path.parent / decision_name
+        decision_path = _inventory_decision_path(
+            manifest_path,
+            decision_name,
+        )
         if (
             not decision_path.is_file()
             or _sha256_file(decision_path) != decision_sha256
@@ -1168,7 +1216,10 @@ def iter_inventory_decisions(
     manifest = load_active8_trace_inventory(manifest_path)
     total = 0
     for shard in manifest["shards"]:
-        path = manifest_path.parent / shard["inventory_shard"]
+        path = _inventory_decision_path(
+            manifest_path,
+            shard["inventory_shard"],
+        )
         if not path.is_file() or _sha256_file(path) != shard["inventory_shard_sha256"]:
             raise Active8TraceInventoryError(
                 f"active-8 decision shard hash mismatch: {path}"
