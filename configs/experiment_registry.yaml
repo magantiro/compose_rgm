@@ -893,6 +893,7 @@ provenance:
       enable_ring_grow_macro: false
       enable_ring_opening: true
       enable_ring_restates: true
+      enable_ring_system_delete: true
     required_capabilities_note: The production RingCore-V1 configuration. An evaluation of E2/E3/E4/E7
       must load a model matching this exactly; handing those experiments a de-novo or pre-RingCore checkpoint
       would silently score a different legal support. Checked by checkpoint_evaluator.validate_capabilities,

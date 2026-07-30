@@ -21,8 +21,8 @@ asserted on. A mismatch is a hard failure: a silently different support turns a 
 two unrelated measurements.
 
 Note what is deliberately NOT done. Checking a flag against the checkpoint metadata it was derived from
-would be tautological -- the production loader sets the four editing flags from ``corrupted_prior_mix`` and
-reads ``enable_cycle_ops``/``enable_ring_grow_macro`` directly, so such a check can never fail and would
+would be tautological -- the production loader preserves the historical ``corrupted_prior_mix`` fallback
+for old editing metadata and reads explicit support flags for new checkpoints, so such a check can never fail and would
 give false assurance. Two checks that CAN fail are used instead: the whole-ring macro must be off (the
 loader defaults it to True when the key is absent, so a pre-RingCore checkpoint is caught), and the flags
 must match the registry's declared production configuration (so an editing experiment cannot be handed a
@@ -59,6 +59,7 @@ CAPABILITY_FLAGS = (
     "enable_heteroatom_scan",
     "enable_ring_opening",
     "enable_cycle_ops",
+    "enable_ring_system_delete",
 )
 
 # RingCore-V1 replaced the whole-ring macro with compositional cycle_close/cycle_open. The macro must be
@@ -68,6 +69,24 @@ REQUIRED_MACRO_STATE = {"enable_ring_grow_macro": False}
 
 class EvaluationError(RuntimeError):
     """The evaluator refused to run: bad checkpoint, capability mismatch, or unknown experiment."""
+
+
+def _historical_optional_bool(
+    payload: dict[str, Any],
+    key: str,
+    *,
+    default: bool,
+) -> bool:
+    """Read an optional checkpoint Boolean without accepting truthy malformed metadata."""
+
+    if key not in payload:
+        return default
+    value = payload[key]
+    if type(value) is not bool:
+        raise EvaluationError(
+            f"checkpoint metadata {key!r} must be a literal Boolean when present"
+        )
+    return value
 
 
 @dataclass(frozen=True)
@@ -80,7 +99,9 @@ class CheckpointProvenance:
     checkpoint_kind: str | None
     organic_vocabulary: bool
     corrupted_prior_mix: bool
+    enable_ring_restates: bool
     enable_cycle_ops: bool
+    enable_ring_system_delete: bool
     corpus_scope_hash: str | None
     max_atoms: int | None
     bond_representation: str | None
@@ -171,8 +192,8 @@ def validate_capabilities(
     """Check the resolved flags against what the REGISTRY requires for this experiment.
 
     Deliberately NOT checked against the checkpoint's own metadata. The production loader derives every
-    capability flag from those same metadata keys (``corrupted_prior_mix`` drives the four editing flags,
-    ``enable_cycle_ops`` and ``enable_ring_grow_macro`` are read directly), so comparing the resolved flag
+    capability flag from those same metadata keys (legacy ``corrupted_prior_mix`` metadata supplies the
+    historical fallback, while new support flags are read directly), so comparing the resolved flag
     to the key it came from is tautological -- it can never fail and would give false assurance.
 
     The check that can actually fail compares against the registry's declared production configuration.
@@ -222,15 +243,40 @@ def read_checkpoint_provenance(path: Path) -> CheckpointProvenance:
     payload = torch.load(path, map_location="cpu", weights_only=False)
     if not isinstance(payload, dict):
         raise EvaluationError(f"checkpoint payload is not a mapping: {path}")
+    from compose_v4.experiments.p50_completion import (  # noqa: PLC0415
+        P50CompletionError,
+        validate_p50_completion_member,
+    )
+
+    try:
+        validate_p50_completion_member(path, payload)
+    except P50CompletionError as error:
+        raise EvaluationError(str(error)) from error
+    corrupted_prior_mix = _historical_optional_bool(
+        payload,
+        "corrupted_prior_mix",
+        default=False,
+    )
     return CheckpointProvenance(
         path=str(path),
         sha256=file_sha256(path),
         bytes=path.stat().st_size,
         checkpoint_kind=payload.get("checkpoint_kind"),
         organic_vocabulary=bool(payload.get("organic_vocabulary", False)),
-        corrupted_prior_mix=bool(payload.get("corrupted_prior_mix", False)),
+        corrupted_prior_mix=corrupted_prior_mix,
+        enable_ring_restates=_historical_optional_bool(
+            payload,
+            "enable_ring_restates",
+            default=corrupted_prior_mix,
+        ),
         # The gate persists "enable_cycle_ops" (checkpoint_metadata), NOT "cycle_op_mix".
         enable_cycle_ops=bool(payload.get("enable_cycle_ops", False)),
+        # Historical checkpoints implicitly enabled the family.
+        enable_ring_system_delete=_historical_optional_bool(
+            payload,
+            "enable_ring_system_delete",
+            default=True,
+        ),
         corpus_scope_hash=payload.get("corpus_scope_hash"),
         max_atoms=(
             None if payload.get("max_atoms") is None else int(payload["max_atoms"])

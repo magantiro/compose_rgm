@@ -93,7 +93,8 @@ def audit_successor_exposure_plan(
     *,
     expected_steps: int,
     required_families: tuple[str, ...],
-    minimum_teacher_examples: Mapping[str, int],
+    minimum_teacher_examples: Mapping[str, int] | None = None,
+    minimum_gradient_opportunities: Mapping[str, int] | None = None,
     require_semantic_cells: bool = True,
 ) -> SuccessorExposurePlan:
     """Preflight the exact deterministic pilot stream before GPU optimization."""
@@ -104,15 +105,21 @@ def audit_successor_exposure_plan(
         set(required_families)
     ):
         raise ValueError("required_families must be nonempty and unique")
-    if set(minimum_teacher_examples) != set(required_families):
-        raise ValueError(
-            "minimum teacher-example thresholds must exactly cover required families"
-        )
-    if any(
-        type(value) is not int or value <= 0
-        for value in minimum_teacher_examples.values()
+    for name, thresholds in (
+        ("teacher-example", minimum_teacher_examples),
+        ("gradient-opportunity", minimum_gradient_opportunities),
     ):
-        raise ValueError("minimum teacher-example thresholds must be positive")
+        if thresholds is None:
+            continue
+        if set(thresholds) != set(required_families):
+            raise ValueError(
+                f"minimum {name} thresholds must exactly cover required families"
+            )
+        if any(
+            type(value) is not int or value <= 0
+            for value in thresholds.values()
+        ):
+            raise ValueError(f"minimum {name} thresholds must be positive")
 
     iterator = iter(batches)
     family_counts: Counter[str] = Counter()
@@ -163,7 +170,10 @@ def audit_successor_exposure_plan(
             )
         per_step_nonterminal.append(nonterminal)
         family_counts.update(current_families)
-        gradient_opportunities.update(current_families)
+        # A family can receive at most one optimizer-update opportunity per
+        # batch, irrespective of how many teachers of that family are in it.
+        # P50 thresholds are update counts, not example counts.
+        gradient_opportunities.update(current_families.keys())
         weights = tuple(
             float(value)
             for value in batch.mark_batch.importance_weights.detach()
@@ -322,17 +332,36 @@ def audit_successor_exposure_plan(
             "pilot loader contains more batches than its frozen step ceiling"
         )
 
-    shortfalls = {
-        family: {
-            "observed": family_counts[family],
-            "required": minimum_teacher_examples[family],
+    teacher_shortfalls = (
+        {}
+        if minimum_teacher_examples is None
+        else {
+            family: {
+                "observed": family_counts[family],
+                "required": minimum_teacher_examples[family],
+            }
+            for family in required_families
+            if family_counts[family] < minimum_teacher_examples[family]
         }
-        for family in required_families
-        if family_counts[family] < minimum_teacher_examples[family]
-    }
-    if shortfalls:
+    )
+    gradient_shortfalls = (
+        {}
+        if minimum_gradient_opportunities is None
+        else {
+            family: {
+                "observed": gradient_opportunities[family],
+                "required": minimum_gradient_opportunities[family],
+            }
+            for family in required_families
+            if gradient_opportunities[family]
+            < minimum_gradient_opportunities[family]
+        }
+    )
+    if teacher_shortfalls or gradient_shortfalls:
         raise EditingTrainingSentinelError(
-            f"pilot exposure plan starves required families: {shortfalls}"
+            "pilot exposure plan starves required families: "
+            f"teacher_examples={teacher_shortfalls}, "
+            f"gradient_opportunities={gradient_shortfalls}"
         )
     if batch_size is None:
         raise EditingTrainingSentinelError("pilot exposure stream is empty")
@@ -394,6 +423,65 @@ def assert_successor_exposure_matches(
             "live pilot exposure counts or effective coefficients differ "
             "from the frozen plan"
         )
+
+
+class P50LiveExposureObserver:
+    """Bind the 50 batches consumed by optimization to the preflight plan."""
+
+    expected_steps = 50
+
+    def __init__(
+        self,
+        *,
+        planned: SuccessorExposurePlan,
+        required_families: tuple[str, ...],
+        minimum_gradient_opportunities: Mapping[str, int],
+    ) -> None:
+        if planned.expected_steps != self.expected_steps:
+            raise ValueError("P50 preflight plan must contain exactly 50 steps")
+        if set(minimum_gradient_opportunities) != set(required_families):
+            raise ValueError(
+                "live exposure thresholds must exactly cover required families"
+            )
+        self.planned = planned
+        self.required_families = required_families
+        self.minimum_gradient_opportunities = dict(
+            minimum_gradient_opportunities
+        )
+        self._batches: list[FactorizedSuccessorBatch] = []
+
+    def __call__(self, batch: Any, completed_step: int) -> None:
+        if completed_step != len(self._batches) + 1:
+            raise EditingTrainingSentinelError(
+                "P50 live batch observations are not contiguous"
+            )
+        if completed_step > self.expected_steps:
+            raise EditingTrainingSentinelError(
+                "P50 live batch observation exceeded its 50-step ceiling"
+            )
+        if not isinstance(batch, FactorizedSuccessorBatch):
+            raise EditingTrainingSentinelError(
+                "P50 live batch observer received another batch type"
+            )
+        self._batches.append(batch)
+
+    def finalize(self) -> SuccessorExposurePlan:
+        if len(self._batches) != self.expected_steps:
+            raise EditingTrainingSentinelError(
+                "P50 live exposure ended after "
+                f"{len(self._batches)} batches, expected exactly 50"
+            )
+        observed = audit_successor_exposure_plan(
+            tuple(self._batches),
+            expected_steps=self.expected_steps,
+            required_families=self.required_families,
+            minimum_gradient_opportunities=(
+                self.minimum_gradient_opportunities
+            ),
+            require_semantic_cells=False,
+        )
+        assert_successor_exposure_matches(self.planned, observed)
+        return observed
 
 
 class P50GradientCollapseSentinel:
@@ -694,6 +782,7 @@ __all__ = [
     "FAMILY_PARAMETER_PREFIXES",
     "EditingTrainingSentinelError",
     "P50GradientCollapseSentinel",
+    "P50LiveExposureObserver",
     "SuccessorExposurePlan",
     "assert_successor_exposure_matches",
     "audit_successor_exposure_plan",

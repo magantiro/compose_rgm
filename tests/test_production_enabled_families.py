@@ -43,6 +43,20 @@ def test_ordering_follows_mark_rule_names():
     assert enabled == [m for m in MARK_RULE_NAMES if m in set(enabled)]
 
 
+def test_ring_system_delete_is_an_explicit_optional_accelerator():
+    enabled = production_enabled_families(
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        enable_ring_system_delete=False,
+    )
+    assert "ring_system_delete" not in enabled
+    assert "cycle_insert" in enabled and "cycle_attach" in enabled
+    assert set(enabled) == set(MARK_RULE_NAMES) - {
+        "ring_system_grow",
+        "ring_system_delete",
+    }
+
+
 def test_scaled_manifest_builder_uses_the_derivation():
     """The builder must call the shared derivation, not re-filter names locally."""
     src = (Path(__file__).resolve().parent.parent / "scripts" / "build_scaled_edit_manifest.py").read_text()

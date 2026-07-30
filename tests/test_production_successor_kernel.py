@@ -196,6 +196,32 @@ def test_compositional_ring_close_and_open_are_both_in_the_marked_law(model):
     assert not any(mark.family_name == "ring_system_grow" for mark in cyclic.marks)
 
 
+def test_delete_disabled_direct_kernel_identity_and_support_are_explicit(
+    ring_catalog,
+):
+    model = FactorizedTraceletRateModel(
+        ring_catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        enable_ring_system_delete=False,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    ).eval()
+    result = canonical_successor_result(model, _state("C1CCCCC1"), 0.5)
+
+    flags = dict(result.batch.identity.support_signature.capability_flags)
+    assert flags["enable_ring_system_delete"] is False
+    assert result.batch.identity.support_signature.ringcore_configuration.endswith(
+        ":ring_system_delete_disabled"
+    )
+    assert not any(
+        mark.family_name == "ring_system_delete" for mark in result.marked_law.marks
+    )
+    assert any(mark.family_name == "cycle_attach" for mark in result.marked_law.marks)
+
+
 def test_legacy_ring_macro_fails_closed(ring_catalog):
     model = FactorizedTraceletRateModel(
         ring_catalog,

@@ -63,6 +63,7 @@ def trajectory_log_prob(
         compute_ring_restates=caps.compute_ring_restates,
         compute_cyclic_graft=caps.compute_cyclic_graft,
         compute_ring_opening=caps.compute_ring_opening,
+        compute_ring_system_delete=caps.compute_ring_system_delete,
     )
     prediction = model.forward_mark_batch(batch)
     log_prob = prediction.selected_mark_log_probability

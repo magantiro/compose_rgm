@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import fields
+from dataclasses import fields, replace
 
 import numpy as np
 import pytest
@@ -146,6 +146,68 @@ def test_differentiable_fiber_probability_matches_production_mark_sum(model):
     )
 
 
+def test_alias_aggregation_changes_loss_and_gradients(model):
+    """The trainer optimizes aggregate successor mass, not one chosen alias."""
+
+    source = _state("c1ccccc1")
+    result = canonical_successor_result(model.eval(), source, 0.41)
+    target_successor = max(
+        result.batch.successors,
+        key=lambda successor: successor.alias_count,
+    )
+    fiber = compile_teacher_successor_fiber(
+        model,
+        source,
+        target_successor.state,
+        time=0.41,
+    )
+    assert len(fiber.aliases) > 1
+    incomplete_single_alias = replace(fiber, aliases=(fiber.aliases[0],))
+    batch = prepare_factorized_mark_batch(
+        (source,),
+        (0.41,),
+        (None,),
+        (None,),
+        (1.0,),
+        use_aromatic_bond_view=True,
+        ring_catalog=model.ring_catalog,
+        compute_ring_grow_support=False,
+        compute_ring_restates=True,
+        compute_cyclic_graft=True,
+        compute_ring_opening=True,
+    )
+
+    def loss_and_gradients(selected_fiber):
+        model.zero_grad(set_to_none=True)
+        prediction = forward_teacher_successor_batch(
+            model,
+            batch,
+            (selected_fiber,),
+        )
+        loss = factorized_successor_identity_loss(prediction, batch)
+        loss.backward()
+        gradients = {
+            name: parameter.grad.detach().clone()
+            for name, parameter in model.named_parameters()
+            if parameter.grad is not None
+        }
+        return float(loss.detach()), gradients
+
+    aggregate_loss, aggregate_gradients = loss_and_gradients(fiber)
+    single_loss, single_gradients = loss_and_gradients(incomplete_single_alias)
+    assert aggregate_loss < single_loss
+    assert aggregate_gradients.keys() == single_gradients.keys()
+    assert any(
+        not torch.allclose(
+            aggregate_gradients[name],
+            single_gradients[name],
+            atol=1e-9,
+            rtol=1e-7,
+        )
+        for name in aggregate_gradients
+    )
+
+
 def test_successor_bregman_path_backpropagates(model):
     source = _state("C1CCCCC1")
     result = canonical_successor_result(model.eval(), source, 0.37)
@@ -212,6 +274,12 @@ def test_terminal_row_requires_and_accepts_productive_state_support(model):
         abs=2e-6,
     )
     assert torch.isfinite(factorized_successor_bregman_loss(prediction, batch))
+    assert float(prediction.selected_successor_log_probability) == 0.0
+    with pytest.raises(
+        SuccessorTrainingError,
+        match="requires at least one molecular jump",
+    ):
+        factorized_successor_identity_loss(prediction, batch)
 
 
 def test_hot_path_checks_exact_slots_without_quotienting_atom_relabeling(model):

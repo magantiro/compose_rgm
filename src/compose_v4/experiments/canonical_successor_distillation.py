@@ -346,6 +346,7 @@ def _factorized_rate_table(
             # drops cyclic graft mass; that distillation-teacher path is not the B-edit sampling path.
             compute_cyclic_graft=model.enable_cyclic_graft,
             compute_ring_opening=model.enable_ring_opening,
+            compute_ring_system_delete=model.enable_ring_system_delete,
         )
         model._sampling_state_cache[state_cache_key] = cached_batch
         while len(model._sampling_state_cache) > model._sampling_state_cache_limit:
@@ -466,6 +467,7 @@ def _build_analytic_pancake_quotient_context(
             # partition the graft partition (survival == 1) on cyclic leads, matching training.
             compute_cyclic_graft=teacher.enable_cyclic_graft,
             compute_ring_opening=teacher.enable_ring_opening,
+            compute_ring_system_delete=teacher.enable_ring_system_delete,
         )
         teacher._sampling_state_cache[state_cache_key] = cached_batch
         while len(teacher._sampling_state_cache) > teacher._sampling_state_cache_limit:

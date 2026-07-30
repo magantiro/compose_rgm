@@ -63,12 +63,30 @@ def _benzene_trajectory():
     return catalog, tau
 
 
-def test_trajectory_log_prob_is_finite_and_differentiable() -> None:
+def test_trajectory_log_prob_is_finite_and_differentiable(monkeypatch) -> None:
+    import griddd_reward_finetune as reward_module
+
     catalog, tau = _benzene_trajectory()
-    model = FactorizedTraceletRateModel(catalog, hidden_dim=16, message_passing_steps=1)
+    model = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=1,
+        enable_ring_system_delete=False,
+    )
+    captured = {}
+    real_prepare = reward_module.prepare_factorized_mark_batch
+
+    def capture_prepare(*args, **kwargs):
+        captured["compute_ring_system_delete"] = kwargs.get(
+            "compute_ring_system_delete"
+        )
+        return real_prepare(*args, **kwargs)
+
+    monkeypatch.setattr(reward_module, "prepare_factorized_mark_batch", capture_prepare)
     log_p = trajectory_log_prob(
         model, tau["states"], tau["times"], tau["actions"], tau["rule_names"], tau["jump_rates"]
     )
+    assert captured["compute_ring_system_delete"] is False
     assert torch.isfinite(log_p)
     log_p.backward()  # gradients flow back into the policy
     assert any(p.grad is not None for p in model.parameters())

@@ -85,6 +85,8 @@ def factorized_successor_metrics(
     cell_weight_sums: dict[str, float] = defaultdict(float)
     family_loss_sums: dict[str, float] = defaultdict(float)
     family_weight_sums: dict[str, float] = defaultdict(float)
+    family_gate_loss_sums: dict[str, float] = defaultdict(float)
+    within_family_loss_sums: dict[str, float] = defaultdict(float)
 
     for start in range(0, batch.batch_size, resolved_microbatch):
         cpu_batch = batch.subbatch(
@@ -190,6 +192,20 @@ def factorized_successor_metrics(
                     float(identity_nll[local_index]) * weight
                 )
                 family_weight_sums[family] += weight
+                family_gate_loss_sums[family] += (
+                    -float(
+                        prediction.teacher_family_log_probability[local_index]
+                    )
+                    * weight
+                )
+                within_family_loss_sums[family] += (
+                    -float(
+                        prediction.selected_within_teacher_family_log_probability[
+                            local_index
+                        ]
+                    )
+                    * weight
+                )
         if bool(terminal.any()):
             terminal_hazard_sum += float(prediction.total_hazard[terminal].sum())
             terminal_count += int(terminal.sum())
@@ -258,6 +274,17 @@ def factorized_successor_metrics(
                 for rule_name in batch.mark_batch.teacher_rule_names
                 if _teacher_family_name(rule_name) == family
             )
+        )
+        family_weight = family_weight_sums.get(family, 0.0)
+        metrics[f"teacher_family_nll_{family}"] = (
+            family_gate_loss_sums[family] / family_weight
+            if family_weight > 0.0
+            else 0.0
+        )
+        metrics[f"within_family_successor_nll_{family}"] = (
+            within_family_loss_sums[family] / family_weight
+            if family_weight > 0.0
+            else 0.0
         )
     if any(not isfinite(value) for value in metrics.values()):
         raise SuccessorTrainingError("successor validation produced nonfinite metrics")

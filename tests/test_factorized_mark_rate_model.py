@@ -1376,6 +1376,73 @@ def test_factorized_training_resume_preserves_validation_and_patience_trajectory
         assert torch.equal(terminal.state_dict()[name], value)
 
 
+def test_explicit_null_objective_adapter_preserves_legacy_training() -> None:
+    """The launcher can pass null adapters without changing the mark backend."""
+
+    catalog, records = _catalog_and_records(("CCO", "CCN"))
+    validation = sample_factorized_mark_batch(
+        records,
+        batch_size=2,
+        seed=71,
+        late_time_fraction=0.5,
+        operational_horizon=2.0,
+        ring_catalog=catalog,
+    )
+    torch.manual_seed(99)
+    template = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    initial_state = copy.deepcopy(template.state_dict())
+    common = {
+        "train_records": records,
+        "validation_batch": validation,
+        "steps": 1,
+        "batch_size": 1,
+        "learning_rate": 1e-3,
+        "weight_decay": 0.0,
+        "seed": 17,
+        "workers": 0,
+        "late_time_fraction": 0.5,
+        "operational_horizon": 2.0,
+        "progress_stratification_fraction": 0.5,
+        "use_aromatic_bond_view": True,
+        "use_bf16": False,
+        "ring_catalog": catalog,
+        "evaluation_interval": 1,
+    }
+
+    implicit = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    explicit = FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=8,
+        message_passing_steps=1,
+    )
+    implicit.load_state_dict(initial_state)
+    explicit.load_state_dict(initial_state)
+    torch.manual_seed(1234)
+    implicit_history, implicit_best = train_factorized_mark_model(
+        implicit,
+        **common,
+    )
+    torch.manual_seed(1234)
+    explicit_history, explicit_best = train_factorized_mark_model(
+        explicit,
+        training_objective=None,
+        training_loader_factory=None,
+        **common,
+    )
+    assert explicit_history == implicit_history
+    assert explicit_best == implicit_best
+    for name, value in implicit.state_dict().items():
+        assert torch.equal(explicit.state_dict()[name], value)
+
+
 def test_support_worker_cache_cap_and_clear_preserve_exact_support() -> None:
     catalog, _ = _catalog_and_records(("CCO", "c1ccccc1", "C1CCCCC1"))
     model = FactorizedTraceletRateModel(

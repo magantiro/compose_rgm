@@ -327,6 +327,25 @@ def test_probe_is_deterministic_under_source_and_sidecar_order(
     assert first.cache_shards[0].encoded == second.cache_shards[0].encoded
 
 
+def test_public_selection_helper_matches_probe_complete_trace_selection(
+    fixture_bundle,
+) -> None:
+    _model, records = fixture_bundle
+    selected = probe.select_gate_zero_successor_probe_records(
+        tuple(reversed(records)),
+        semantic_cell_ids=dict(reversed(tuple(_semantic_cells(records).items()))),
+        config=probe.GateZeroSuccessorProbeConfig(
+            required_families=("atom_delete", "atom_insert"),
+            required_semantic_cells=(
+                "cell:atom_delete",
+                "cell:atom_insert",
+            ),
+        ),
+    )
+
+    assert tuple(record.corpus_address.trace_id for record in selected) == ("round-trip",)
+
+
 def test_probe_fails_closed_on_missing_obligation_or_sidecar_row(
     fixture_bundle,
     monkeypatch,

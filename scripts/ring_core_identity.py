@@ -176,6 +176,7 @@ def ring_core_checkpoint_metadata() -> dict:
     checkpoint self-identifies. Code hashes are recomputed live (authoritative), then cross-checked here."""
     return {
         "ring_core_v1": True,
+        "enable_ring_restates": True,
         "ring_core_capability_hash": CAPABILITY_HASH,
         "operator_registry_hash": recompute_operator_registry_hash(),
         "cycle_op_semantic_hash": recompute_cycle_op_semantic_hash(),
@@ -245,9 +246,46 @@ def verify_checkpoint_identity(
     enable_ring_macros = bool(payload.get("enable_ring_macros"))
     grow_present = "enable_ring_grow_macro" in payload
     enable_ring_grow_macro = bool(payload.get("enable_ring_grow_macro", True))
+    corrupted_prior_present = "corrupted_prior_mix" in payload
+    raw_corrupted_prior_mix = payload.get("corrupted_prior_mix", False)
+    if corrupted_prior_present and type(raw_corrupted_prior_mix) is not bool:
+        corrupted_prior_mix = None
+        problems.append(
+            "corrupted_prior_mix must be a literal Boolean when used as the "
+            "historical ring-restate fallback"
+        )
+    else:
+        corrupted_prior_mix = bool(raw_corrupted_prior_mix)
+    delete_present = "enable_ring_system_delete" in payload
+    raw_enable_ring_system_delete = payload.get("enable_ring_system_delete", True)
+    if delete_present and type(raw_enable_ring_system_delete) is not bool:
+        enable_ring_system_delete = None
+        problems.append(
+            "enable_ring_system_delete must be a literal Boolean when present"
+        )
+    else:
+        enable_ring_system_delete = bool(raw_enable_ring_system_delete)
+    restate_present = "enable_ring_restates" in payload
+    raw_enable_ring_restates = payload.get(
+        "enable_ring_restates",
+        corrupted_prior_mix,
+    )
+    if restate_present and type(raw_enable_ring_restates) is not bool:
+        enable_ring_restates = None
+        problems.append(
+            "enable_ring_restates must be a literal Boolean when present"
+        )
+    else:
+        enable_ring_restates = (
+            None
+            if raw_enable_ring_restates is None
+            else bool(raw_enable_ring_restates)
+        )
     report["enable_cycle_ops"] = enable_cycle_ops
     report["enable_ring_macros"] = enable_ring_macros
     report["enable_ring_grow_macro"] = enable_ring_grow_macro
+    report["enable_ring_restates"] = enable_ring_restates
+    report["enable_ring_system_delete"] = enable_ring_system_delete
     if not enable_cycle_ops:
         problems.append("enable_cycle_ops is not True (cycle operators disabled)")
     if enable_ring_macros:
@@ -256,9 +294,17 @@ def verify_checkpoint_identity(
         problems.append("enable_ring_grow_macro absent (base-B / non-RingCore checkpoint)")
     elif enable_ring_grow_macro:
         problems.append("enable_ring_grow_macro is True (legacy grow macro must be disabled)")
+    if enable_ring_system_delete is False:
+        problems.append(
+            "enable_ring_system_delete is False (delete-disabled V2 support is not RingCore-V1)"
+        )
+    if enable_ring_restates is False:
+        problems.append(
+            "enable_ring_restates is False (restate-disabled support is not RingCore-V1)"
+        )
 
     # base-B (carbon-tree-only) checkpoint
-    if not bool(payload.get("corrupted_prior_mix")):
+    if corrupted_prior_mix is not True:
         problems.append("corrupted_prior_mix is not True (carbon-tree-only / base-B checkpoint)")
 
     # code hashes (recomputed from source; must equal frozen)

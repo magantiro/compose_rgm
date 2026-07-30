@@ -1,0 +1,54 @@
+{
+  "schema": "compose.editing.t1_successor_runtime_contract",
+  "schema_version": 3,
+  "status": "FROZEN_BOUNDED_CAPACITY_DIAGNOSTIC_NO_TRAINING_AUTHORITY",
+  "training_authorized": false,
+  "gate_zero_runtime_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+  "panel_artifact_sha256": "d580e1c8ef881a10c73d9f5f70ddab58a5908493fe6ab86699ea6650354dcdd9",
+  "forensics_file_sha256": "f2460f1def0b41e5be5a05bfee01d1d1c295296968c860d8075c344b0f6c7020",
+  "charge_policy_audit_file_sha256": "db365686581ea4b787fae608fa4bc37478183714399e1d407dfecf8bf3737dd3",
+  "charge_policy_exclusions_file_sha256": "64eb6e7029827a6c11c39a7e4d4a9c9fdde0572be4d083d380c1ee9212176139",
+  "charge_policy_exclusion_payload_sha256": "ad18e751b2423ebfe47e6d2684f0932eec0fbe8008ca28342f5c45d59889fc55",
+  "charge_policy_source_input_inventory_sha256": "679816385f7c85dc3f3f8a51103bd38c29435c495312b5407acce95b6dd94321",
+  "implementation_sha256": "42210a767622d6113a262506c02a173f3ab7e6ee1346361a226891de2b493fb4",
+  "families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "panel_kinds": [
+    "unique_state",
+    "global_repeated_state_distribution",
+    "within_family_repeated_state_distribution"
+  ],
+  "optimization": {
+    "steps": 500,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "scopes": [
+      "heads_only",
+      "heads_plus_pair_projection",
+      "all"
+    ],
+    "report_points": [
+      1,
+      10,
+      50,
+      100,
+      250,
+      500
+    ]
+  },
+  "thresholds": {
+    "minimum_unique_state_teacher_successor_top1": null,
+    "minimum_unique_state_teacher_successor_probability": null,
+    "maximum_unique_state_teacher_successor_nll": null,
+    "maximum_global_repeated_state_excess_nll_over_empirical_entropy": null
+  },
+  "contract_sha256": "456ef807cd86c4349db093d9a0d859c71b89c5f66db9b504abd58f2a3a5ab415"
+}

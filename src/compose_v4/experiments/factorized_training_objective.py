@@ -45,14 +45,18 @@ class FactorizedTrainingObjective(Protocol):
 
 
 TrainingLoaderFactory = Callable[[int], Iterable[Any]]
+TrainingBatchAuditCallback = Callable[[Any, int], None]
 GradientAuditCallback = Callable[
     [FactorizedTraceletRateModel, FactorizedMarkBatch, int, Tensor],
     None,
 ]
+ValidationAuditCallback = Callable[[int, dict[str, float]], None]
 
 
 __all__ = [
     "FactorizedTrainingObjective",
     "GradientAuditCallback",
+    "TrainingBatchAuditCallback",
     "TrainingLoaderFactory",
+    "ValidationAuditCallback",
 ]

@@ -9,6 +9,7 @@ import torch
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.experiments.cnof_conditional import CompactTrajectoryDiagnostics
+from compose_v4.experiments.p50_completion import publish_p50_completion
 from compose_v4.experiments.tracelet_conditional import (
     TraceletRollout,
     build_tracelet_path_records,
@@ -66,6 +67,111 @@ def test_rollout_checkpoint_is_self_contained(tmp_path: Path) -> None:
     assert not loaded.training
     for key, value in expected.state_dict().items():
         assert torch.equal(loaded.state_dict()[key], value)
+
+
+def test_rollout_loader_requires_p50_completion_manifest_membership(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source.pt"
+    expected = _checkpoint(source)
+    selected = torch.load(source, map_location="cpu", weights_only=False)
+    published = publish_p50_completion(
+        tmp_path / "candidate.pt",
+        selected_payload=selected,
+        recovery_payload={
+            "checkpoint_kind": "exact_training_recovery",
+            "completed_steps": 50,
+            "current_state_dict": expected.state_dict(),
+            "optimizer_state_dict": {"state": {}, "param_groups": []},
+            "best_state_dict": expected.state_dict(),
+            "best_metrics": {"loss": 0.0},
+            "history": [],
+        },
+    )
+    loaded, _ = load_factorized_rollout_checkpoint(
+        published.selected_checkpoint
+    )
+    for key, value in expected.state_dict().items():
+        assert torch.equal(loaded.state_dict()[key], value)
+
+    payload = torch.load(
+        published.selected_checkpoint,
+        map_location="cpu",
+        weights_only=False,
+    )
+    copied = tmp_path / published.selected_checkpoint.name
+    torch.save(payload, copied)
+    with pytest.raises(
+        RuntimeError,
+        match="outside its declared immutable namespace",
+    ):
+        load_factorized_rollout_checkpoint(copied)
+
+
+def test_rollout_checkpoint_ring_delete_flag_is_strict_and_legacy_safe(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "checkpoint.pt"
+    _checkpoint(path)
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+
+    payload["enable_ring_system_delete"] = False
+    torch.save(payload, path)
+    loaded, _ = load_factorized_rollout_checkpoint(path)
+    assert loaded.enable_ring_system_delete is False
+
+    payload.pop("enable_ring_system_delete")
+    torch.save(payload, path)
+    loaded, _ = load_factorized_rollout_checkpoint(path)
+    assert loaded.enable_ring_system_delete is True
+
+    payload["enable_ring_system_delete"] = "false"
+    torch.save(payload, path)
+    with pytest.raises(ValueError, match="literal Boolean"):
+        load_factorized_rollout_checkpoint(path)
+
+
+def test_rollout_checkpoint_ring_restate_flag_is_strict_and_legacy_safe(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "checkpoint.pt"
+    _checkpoint(path)
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    payload["corrupted_prior_mix"] = True
+
+    payload["enable_ring_restates"] = False
+    torch.save(payload, path)
+    loaded, _ = load_factorized_rollout_checkpoint(path)
+    assert loaded.enable_ring_restates is False
+
+    payload.pop("enable_ring_restates")
+    torch.save(payload, path)
+    loaded, _ = load_factorized_rollout_checkpoint(path)
+    assert loaded.enable_ring_restates is True
+
+    payload["enable_ring_restates"] = "false"
+    torch.save(payload, path)
+    with pytest.raises(ValueError, match="literal Boolean"):
+        load_factorized_rollout_checkpoint(path)
+
+
+@pytest.mark.parametrize("malformed", ["false", 0, 1, None])
+def test_rollout_checkpoint_rejects_malformed_legacy_restate_fallback(
+    tmp_path: Path,
+    malformed,
+) -> None:
+    path = tmp_path / "checkpoint.pt"
+    _checkpoint(path)
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    payload.pop("enable_ring_restates", None)
+    payload["corrupted_prior_mix"] = malformed
+    torch.save(payload, path)
+
+    with pytest.raises(
+        ValueError,
+        match="corrupted_prior_mix.*literal Boolean",
+    ):
+        load_factorized_rollout_checkpoint(path)
 
 
 def test_rollout_checkpoint_restores_empirical_base_measure_configuration(

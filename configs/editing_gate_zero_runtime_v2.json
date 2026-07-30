@@ -1,0 +1,44 @@
+{
+  "schema": "compose.editing.gate_zero_runtime_contract",
+  "schema_version": 2,
+  "status": "FROZEN_STRUCTURAL_PROBE_CONTRACT_NO_TRAINING_AUTHORITY",
+  "training_authorized": false,
+  "sidecar": {
+    "manifest_sha256": "0102714b662a7225e6575a5b76b4d3f93366c1c4536aab946e246a63563b1336",
+    "config_sha256": "185f76e657e104159dfa66b18e35acf7d6c9792803fa8a8ef87ada7b4951b94a",
+    "provenance_sha256": "33bc9aae2b1b2a61f2a94bccdcde321626a3fb790c2712655077258199d17dc1",
+    "semantic_census_sha256": "da1a2bb253418231db312194a06fe03175bef524c7c129f7a80fec5462674c46",
+    "nonempty_semantic_cell_count": 110,
+    "unified_packed_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758",
+    "representability_overlay_sha256": "e735ea6b25b4cec97bbae3deaf0ef8c4f68d30e7888733c8e6bea22cdeb5222a"
+  },
+  "model": {
+    "seed": 20260730,
+    "max_atoms": 40,
+    "hidden_dim": 256,
+    "message_passing_steps": 6,
+    "mark_dim": 32,
+    "atom_vocabulary_class_count": 15,
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "operator_capability_fingerprint": "e787c852410c6b63",
+    "enable_ring_restates": true,
+    "enable_cyclic_graft": true,
+    "enable_heteroatom_scan": true,
+    "enable_ring_opening": true,
+    "enable_cycle_ops": true,
+    "enable_ring_grow_macro": false,
+    "enable_ring_system_delete": false
+  },
+  "required_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "audit_batch_size": 16,
+  "contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5"
+}

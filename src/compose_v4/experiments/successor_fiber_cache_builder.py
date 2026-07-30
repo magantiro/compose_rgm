@@ -208,8 +208,17 @@ def _compile_occurrences(
                         occurrence.target_state_sha256,
                     )
                 except SuccessorTrainingError as error:
+                    address = occurrence.cache_address
                     raise SuccessorFiberCacheBuildError(
-                        "stored exact trace target is absent from source support"
+                        "stored exact trace target is absent from source support: "
+                        f"shard={address.packed_shard_content_sha256}, "
+                        f"entry_index={address.entry_index}, "
+                        f"progress_index={address.progress_index}, "
+                        f"trace_id={address.trace_id!r}, "
+                        f"teacher_rule={occurrence.teacher_step.rule_name!r}, "
+                        f"source_state_sha256={occurrence.source_state_sha256}, "
+                        "target_state_sha256="
+                        f"{occurrence.target_state_sha256}"
                     ) from error
                 try:
                     teacher_action_sha256 = rewrite_action_codec_sha256(

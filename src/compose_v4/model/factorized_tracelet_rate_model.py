@@ -114,10 +114,14 @@ _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 # Families gated by a capability flag; everything else in MARK_RULE_NAMES is always production-enabled.
 _CYCLE_OP_FAMILIES = ("cycle_insert", "cycle_attach")
 _RING_GROW_MACRO_FAMILY = "ring_system_grow"
+_RING_DELETE_MACRO_FAMILY = "ring_system_delete"
 
 
 def production_enabled_families(
-    *, enable_cycle_ops: bool, enable_ring_grow_macro: bool
+    *,
+    enable_cycle_ops: bool,
+    enable_ring_grow_macro: bool,
+    enable_ring_system_delete: bool = True,
 ) -> list[str]:
     """The operator families a run actually enables, DERIVED from the capability flags that gate them.
 
@@ -141,6 +145,8 @@ def production_enabled_families(
         disabled.update(_CYCLE_OP_FAMILIES)
     if not enable_ring_grow_macro:
         disabled.add(_RING_GROW_MACRO_FAMILY)
+    if not enable_ring_system_delete:
+        disabled.add(_RING_DELETE_MACRO_FAMILY)
     return [name for name in MARK_RULE_NAMES if name not in disabled]
 
 
@@ -348,6 +354,7 @@ class OperatorCapabilities:
     compute_ring_restates: bool = False
     compute_cyclic_graft: bool = False
     compute_ring_opening: bool = False
+    compute_ring_system_delete: bool = True
 
     @classmethod
     def de_novo(cls) -> OperatorCapabilities:
@@ -361,6 +368,11 @@ class OperatorCapabilities:
             f"{int(self.compute_ring_grow_support)}{int(self.compute_ring_restates)}"
             f"{int(self.compute_cyclic_graft)}{int(self.compute_ring_opening)}"
         )
+        # True is the historical behavior and intentionally preserves the old
+        # fingerprint.  Only the newly expressible disabled basis adds a
+        # suffix, so existing caches/checkpoints retain their exact identity.
+        if not self.compute_ring_system_delete:
+            payload += ":ring_system_delete=0"
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
@@ -893,7 +905,7 @@ def prepare_factorized_mark_batch(
     use_aromatic_bond_view: bool = True,
     ring_catalog: TypedRingCatalog | None = None,
     chemistry_feature_cache: MutableMapping[
-        tuple[int, bool, bool, bool, StateCacheKey], ChemistryStateFeatures
+        tuple[int, bool, bool, bool, bool, StateCacheKey], ChemistryStateFeatures
     ]
     | None = None,
     chemistry_feature_cache_limit: int = 2048,
@@ -901,6 +913,7 @@ def prepare_factorized_mark_batch(
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
+    compute_ring_system_delete: bool = True,
     property_condition_values: tuple[tuple[float, ...], ...] | None = None,
     property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
 ) -> FactorizedMarkBatch:
@@ -974,6 +987,7 @@ def prepare_factorized_mark_batch(
             bool(use_aromatic_bond_view),
             bool(compute_cyclic_graft),
             bool(compute_ring_opening),
+            bool(compute_ring_system_delete),
             molecular_state_cache_key(state),
         )
         features = (
@@ -1011,6 +1025,8 @@ def prepare_factorized_mark_batch(
                 ring_delete_actions=(
                     None
                     if ring_catalog is None
+                    else ()
+                    if not compute_ring_system_delete
                     else enumerate_clean_ring_system_deletes(state, ring_catalog)
                     if compute_ring_opening
                     else enumerate_structured_ring_system_deletes(state, ring_catalog)
@@ -1691,6 +1707,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_ring_opening: bool = False,
         enable_cycle_ops: bool = False,
         enable_ring_grow_macro: bool = True,
+        enable_ring_system_delete: bool = True,
         atom_vocabulary: AtomVocabulary | None = None,
         ring_atom_elements: tuple[int, ...] | None = None,
     ) -> None:
@@ -1723,6 +1740,10 @@ class FactorizedTraceletRateModel(nn.Module):
         # retained (byte-identical shape) so a warm-start still loads them; they are simply never activated.
         # Unlike the other enable_* flags this gates an EXISTING capability, hence the True default.
         self.enable_ring_grow_macro = bool(enable_ring_grow_macro)
+        # Whole-ring deletion is a catalog-bounded acceleration macro, not the
+        # primitive cycle-opening support.  Historical checkpoints had it on
+        # implicitly; V2 can now disable it without changing parameter shapes.
+        self.enable_ring_system_delete = bool(enable_ring_system_delete)
         # Guard G1 (fail-loud): compositional cycle ops REPLACE the legacy grow macro; they must never both be
         # live, which would give a two-ring-addition-mechanism model outside the RingCore-V1 contract (ring
         # addition would be attributable to both cycle_close and grow). A forgetful launch that passes
@@ -2155,6 +2176,7 @@ class FactorizedTraceletRateModel(nn.Module):
             compute_ring_restates=self.enable_ring_restates,
             compute_cyclic_graft=self.enable_cyclic_graft,
             compute_ring_opening=self.enable_ring_opening,
+            compute_ring_system_delete=self.enable_ring_system_delete,
         )
 
     def clear_ring_candidate_caches(self) -> None:
@@ -2548,6 +2570,8 @@ class FactorizedTraceletRateModel(nn.Module):
         self,
         state: MolecularGraph,
     ) -> tuple[RingSystemDelete, ...]:
+        if not self.enable_ring_system_delete:
+            return ()
         key = self._state_cache_key(state)
         cached = self._ring_delete_candidate_cache.get(key)
         if cached is None:
@@ -3075,6 +3099,12 @@ class FactorizedTraceletRateModel(nn.Module):
         global_state: Tensor,
         pair: Tensor,
     ) -> tuple[Tensor, Tensor]:
+        if not self.enable_ring_system_delete:
+            shape = (batch.batch_size, 1)
+            return (
+                node.new_zeros(shape),
+                torch.zeros(shape, dtype=torch.bool, device=self.device),
+            )
         candidates = (
             tuple(self._ring_delete_candidates(state) for state in batch.states)
             if batch.ring_delete_actions is None
@@ -3224,6 +3254,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 compute_ring_restates=self.enable_ring_restates,
                 compute_cyclic_graft=self.enable_cyclic_graft,
                 compute_ring_opening=self.enable_ring_opening,
+                compute_ring_system_delete=self.enable_ring_system_delete,
             )
             self._sampling_state_cache[cache_key] = cached_batch
             if len(self._sampling_state_cache) > self._sampling_state_cache_limit:

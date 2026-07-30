@@ -409,6 +409,15 @@ class _ScannedPath:
         return frozenset(obligation for row in self.rows for obligation in row.obligation_keys)
 
 
+@dataclass(frozen=True)
+class _CoveragePath:
+    """Addressed trace projected only to set-cover obligations."""
+
+    record: PathRecord
+    address: PackedTraceAddress
+    obligations: frozenset[tuple[str, str]]
+
+
 def _require_address(record: PathRecord) -> PackedTraceAddress:
     address = record.corpus_address
     if address is None:
@@ -741,6 +750,183 @@ def _select_complete_paths(
     return tuple(sorted(selected, key=lambda path: _address_sort_key(path.address)))
 
 
+def _scan_coverage_paths(
+    records: Sequence[PathRecord],
+    semantic_cell_ids: Mapping[
+        SuccessorSemanticCellKey,
+        str | None,
+    ],
+) -> tuple[_CoveragePath, ...]:
+    """Validate the complete exact-address census needed for set cover.
+
+    Chemistry is not replayed over the full validation corpus here. Selected
+    traces receive the full state, executor, and action checks in the probe
+    builder. The real runtime separately binds every source record to immutable
+    packed-shard bytes before calling this helper.
+    """
+
+    if not records:
+        raise GateZeroSuccessorProbeError("Gate-0 successor probe source cannot be empty")
+    if not isinstance(semantic_cell_ids, Mapping):
+        raise TypeError("semantic_cell_ids must be an exact-address mapping")
+    _validate_semantic_cell_sidecar(semantic_cell_ids)
+    materialized = tuple(records)
+    if any(not isinstance(record, PathRecord) for record in materialized):
+        raise TypeError("records must contain PathRecord values only")
+    addresses = tuple(_require_address(record) for record in materialized)
+    if any(address.partition != GATE_ZERO_SUCCESSOR_PROBE_PARTITION for address in addresses):
+        raise GateZeroSuccessorProbeError(
+            "Gate-0 successor probes accept validation PathRecords only"
+        )
+    exact_trace_keys = tuple(
+        (address.packed_shard_content_sha256, address.entry_index) for address in addresses
+    )
+    if len(exact_trace_keys) != len(set(exact_trace_keys)):
+        raise GateZeroSuccessorProbeError(
+            "Gate-0 successor probe source repeats an immutable packed entry"
+        )
+    ordered = tuple(
+        record
+        for _address, record in sorted(
+            zip(addresses, materialized, strict=True),
+            key=lambda item: _address_sort_key(item[0]),
+        )
+    )
+    expected_keys: set[SuccessorSemanticCellKey] = set()
+    coverage: list[_CoveragePath] = []
+    for record in ordered:
+        address = _require_address(record)
+        path = record.path
+        if (
+            path.path_length != address.path_length
+            or len(path.trace.steps) != address.path_length
+            or record.target_key != address.target_key
+        ):
+            raise GateZeroSuccessorProbeError(
+                "packed address and trace envelope disagree during probe selection"
+            )
+        obligations: set[tuple[str, str]] = set()
+        for progress_index in range(address.path_length + 1):
+            key = (
+                address.packed_shard_content_sha256,
+                address.entry_index,
+                progress_index,
+            )
+            expected_keys.add(key)
+            if key not in semantic_cell_ids:
+                raise GateZeroSuccessorProbeError(
+                    f"semantic-cell sidecar is missing exact row {key!r}"
+                )
+            cell = semantic_cell_ids[key]
+            if progress_index == address.path_length:
+                if cell is not None:
+                    raise GateZeroSuccessorProbeError(
+                        "terminal semantic-cell assignment must be null"
+                    )
+                continue
+            if not isinstance(cell, str) or not cell:
+                raise GateZeroSuccessorProbeError(
+                    "nonterminal semantic-cell assignment must be nonempty text"
+                )
+            try:
+                family = canonical_family(path.trace.steps[progress_index].rule_name)
+            except Exception as error:
+                raise GateZeroSuccessorProbeError(
+                    "a source teacher has no canonical production family"
+                ) from error
+            if family not in _PRODUCTION_FAMILIES:
+                raise GateZeroSuccessorProbeError(
+                    "probe selection encountered a disabled or unknown family"
+                )
+            obligations.add(("family", family))
+            obligations.add(("semantic_cell", cell))
+        coverage.append(
+            _CoveragePath(
+                record=record,
+                address=address,
+                obligations=frozenset(obligations),
+            )
+        )
+    observed_keys = set(semantic_cell_ids)
+    if observed_keys != expected_keys:
+        missing = sorted(expected_keys - observed_keys)
+        unexpected = sorted(observed_keys - expected_keys)
+        raise GateZeroSuccessorProbeError(
+            "semantic-cell sidecar must be an exact census of the supplied "
+            f"validation rows; missing={missing[:20]!r}, "
+            f"unexpected={unexpected[:20]!r}"
+        )
+    return tuple(coverage)
+
+
+def _select_coverage_paths(
+    paths: tuple[_CoveragePath, ...],
+    config: GateZeroSuccessorProbeConfig,
+) -> tuple[_CoveragePath, ...]:
+    uncovered = {
+        *(("family", family) for family in config.required_families),
+        *(("semantic_cell", cell) for cell in config.required_semantic_cells),
+    }
+    selected: list[_CoveragePath] = []
+    remaining = list(paths)
+    while uncovered:
+        ranked = sorted(
+            (
+                (
+                    len(path.obligations & uncovered),
+                    _address_sort_key(path.address),
+                    path,
+                )
+                for path in remaining
+            ),
+            key=lambda item: (-item[0], item[1]),
+        )
+        if not ranked or ranked[0][0] == 0:
+            missing_families = tuple(value for kind, value in sorted(uncovered) if kind == "family")
+            missing_cells = tuple(
+                value for kind, value in sorted(uncovered) if kind == "semantic_cell"
+            )
+            raise GateZeroSuccessorProbeError(
+                "validation source cannot cover the explicit Gate-0 "
+                f"obligations; missing_families={missing_families!r}, "
+                f"missing_semantic_cells={missing_cells!r}"
+            )
+        chosen = ranked[0][2]
+        selected.append(chosen)
+        uncovered -= chosen.obligations
+        remaining.remove(chosen)
+    return tuple(sorted(selected, key=lambda path: _address_sort_key(path.address)))
+
+
+def select_gate_zero_successor_probe_records(
+    records: Sequence[PathRecord],
+    *,
+    semantic_cell_ids: Mapping[
+        SuccessorSemanticCellKey,
+        str | None,
+    ],
+    config: GateZeroSuccessorProbeConfig,
+) -> tuple[PathRecord, ...]:
+    """Select the exact complete traces a Gate-0 probe will compile.
+
+    Selection validates the complete exact address/semantic-cell census and
+    trace envelopes. The returned traces subsequently receive full exact
+    state, executor, and action validation in
+    :func:`build_gate_zero_successor_probe`. It is exposed so a caller can
+    construct provenance for exactly the selected packed shards before
+    invoking the compiler. It does not compile support, write an artifact, or
+    authorize optimization.
+    """
+
+    if not isinstance(config, GateZeroSuccessorProbeConfig):
+        raise TypeError("config must be GateZeroSuccessorProbeConfig")
+    coverage_paths = _scan_coverage_paths(
+        records,
+        semantic_cell_ids,
+    )
+    return tuple(path.record for path in _select_coverage_paths(coverage_paths, config))
+
+
 def _validate_provenance(
     model: FactorizedTraceletRateModel,
     selected_paths: tuple[_ScannedPath, ...],
@@ -837,7 +1023,11 @@ def build_gate_zero_successor_probe(
             )
         except SuccessorFiberCacheBuildError as error:
             raise GateZeroSuccessorProbeError(
-                "production successor-fiber compilation failed for a selected Gate-0 trace"
+                "production successor-fiber compilation failed for selected "
+                "Gate-0 trace: "
+                f"shard={path.address.packed_shard_content_sha256}, "
+                f"entry_index={path.address.entry_index}, "
+                f"trace_id={path.address.trace_id!r}"
             ) from error
         _validate_compiled_trace(path, compiled)
         shard_sha256 = path.address.packed_shard_content_sha256
@@ -924,4 +1114,5 @@ __all__ = [
     "GateZeroSuccessorProbeError",
     "GateZeroSuccessorProbeRow",
     "build_gate_zero_successor_probe",
+    "select_gate_zero_successor_probe_records",
 ]

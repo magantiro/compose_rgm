@@ -114,9 +114,74 @@ def test_provenance_reads_the_keys_the_gate_actually_persists(conforming):
     provenance = read_checkpoint_provenance(conforming)
     assert provenance.organic_vocabulary is True
     assert provenance.corrupted_prior_mix is True
+    assert provenance.enable_ring_restates is True
     assert provenance.enable_cycle_ops is True
+    assert provenance.enable_ring_system_delete is True
     assert provenance.sha256 == file_sha256(conforming)
     assert provenance.bytes > 0
+
+
+def test_ring_system_delete_provenance_is_strict_and_legacy_safe(
+    conforming, tmp_path
+):
+    payload = torch.load(conforming, map_location="cpu", weights_only=False)
+
+    disabled = tmp_path / "delete-disabled.pt"
+    payload["enable_ring_system_delete"] = False
+    torch.save(payload, disabled)
+    assert read_checkpoint_provenance(disabled).enable_ring_system_delete is False
+
+    legacy = tmp_path / "legacy.pt"
+    payload.pop("enable_ring_system_delete")
+    torch.save(payload, legacy)
+    assert read_checkpoint_provenance(legacy).enable_ring_system_delete is True
+
+    malformed = tmp_path / "malformed.pt"
+    payload["enable_ring_system_delete"] = "false"
+    torch.save(payload, malformed)
+    with pytest.raises(EvaluationError, match="literal Boolean"):
+        read_checkpoint_provenance(malformed)
+
+
+def test_ring_restate_provenance_is_strict_and_legacy_safe(
+    conforming, tmp_path
+):
+    payload = torch.load(conforming, map_location="cpu", weights_only=False)
+
+    disabled = tmp_path / "restate-disabled.pt"
+    payload["enable_ring_restates"] = False
+    torch.save(payload, disabled)
+    assert read_checkpoint_provenance(disabled).enable_ring_restates is False
+
+    legacy = tmp_path / "legacy-restate.pt"
+    payload.pop("enable_ring_restates")
+    torch.save(payload, legacy)
+    assert read_checkpoint_provenance(legacy).enable_ring_restates is True
+
+    malformed = tmp_path / "malformed-restate.pt"
+    payload["enable_ring_restates"] = "false"
+    torch.save(payload, malformed)
+    with pytest.raises(EvaluationError, match="literal Boolean"):
+        read_checkpoint_provenance(malformed)
+
+
+@pytest.mark.parametrize("malformed_value", ["false", 0, 1, None])
+def test_provenance_rejects_malformed_legacy_restate_fallback(
+    conforming,
+    tmp_path,
+    malformed_value,
+):
+    payload = torch.load(conforming, map_location="cpu", weights_only=False)
+    payload.pop("enable_ring_restates", None)
+    payload["corrupted_prior_mix"] = malformed_value
+    malformed = tmp_path / f"malformed-fallback-{malformed_value!s}.pt"
+    torch.save(payload, malformed)
+
+    with pytest.raises(
+        EvaluationError,
+        match="corrupted_prior_mix.*literal Boolean",
+    ):
+        read_checkpoint_provenance(malformed)
 
 
 def test_missing_and_empty_checkpoints_fail_loudly(tmp_path):

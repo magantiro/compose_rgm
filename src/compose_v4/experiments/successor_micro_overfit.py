@@ -40,6 +40,7 @@ from compose_v4.experiments.production_successor_kernel import (
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
+    MARK_RULE_TO_INDEX,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     prepare_factorized_mark_batch,
@@ -60,6 +61,11 @@ CORE_EDITING_FAMILIES = (
     "bond_reroute",
     "cycle_insert",
     "cycle_attach",
+)
+
+RINGCORE_EDITING_FAMILIES = (
+    *CORE_EDITING_FAMILIES,
+    "ring_system_restate",
 )
 
 
@@ -142,9 +148,9 @@ def examples_from_traces(
     """
 
     wanted = tuple(dict.fromkeys(str(name) for name in families))
-    unknown = set(wanted) - set(CORE_EDITING_FAMILIES)
+    unknown = set(wanted) - set(RINGCORE_EDITING_FAMILIES)
     if unknown:
-        raise ValueError(f"unknown core editing families: {sorted(unknown)}")
+        raise ValueError(f"unknown editing families: {sorted(unknown)}")
     if maximum_per_family is not None and maximum_per_family <= 0:
         raise ValueError("maximum_per_family must be positive")
     runtime = system or de_novo_rewrite_system()
@@ -168,13 +174,9 @@ def examples_from_traces(
             if family_name in counts:
                 source_key = canonical_state_key(state)
                 at_limit = (
-                    maximum_per_family is not None
-                    and counts[family_name] >= maximum_per_family
+                    maximum_per_family is not None and counts[family_name] >= maximum_per_family
                 )
-                duplicate = (
-                    unique_source_molecules
-                    and source_key in seen_sources[family_name]
-                )
+                duplicate = unique_source_molecules and source_key in seen_sources[family_name]
                 if not at_limit and not duplicate:
                     examples.append(
                         SuccessorSupervisionExample(
@@ -191,9 +193,7 @@ def examples_from_traces(
                     seen_sources[family_name].add(source_key)
             state = successor
         if canonical_state_key(state) != canonical_state_key(trace.target):
-            raise SuccessorMicroOverfitError(
-                "trace endpoint does not match its recorded target"
-            )
+            raise SuccessorMicroOverfitError("trace endpoint does not match its recorded target")
         if maximum_per_family is not None and all(
             count >= maximum_per_family for count in counts.values()
         ):
@@ -208,11 +208,38 @@ def prepare_successor_panel(
     """Tensorize examples and compile the exact production successor fibers."""
 
     rows = tuple(examples)
+    fibers = tuple(
+        compile_teacher_successor_fiber(
+            model,
+            row.state,
+            row.target,
+            time=row.time,
+        )
+        for row in rows
+    )
+    return prepare_cached_successor_panel(model, rows, fibers)
+
+
+def prepare_cached_successor_panel(
+    model: FactorizedTraceletRateModel,
+    examples: Iterable[SuccessorSupervisionExample],
+    fibers: Iterable[TeacherSuccessorFiber],
+) -> PreparedSuccessorPanel:
+    """Tensorize examples against exact, externally validated cached fibers.
+
+    The cache is accepted only when its exact persistent-slot source and
+    target identities, canonical keys, and scored coordinates all agree with
+    the current model batch.  This lets every T1 capacity arm share one
+    immutable support compilation without silently trusting stale aliases.
+    """
+
+    rows = tuple(examples)
+    cached_fibers = tuple(fibers)
     if not rows:
         raise ValueError("cannot prepare an empty successor panel")
-    slot_counts = {row.state.n_atoms for row in rows} | {
-        row.target.n_atoms for row in rows
-    }
+    if len(cached_fibers) != len(rows):
+        raise ValueError("cached successor fibers do not align with examples")
+    slot_counts = {row.state.n_atoms for row in rows} | {row.target.n_atoms for row in rows}
     if len(slot_counts) != 1:
         raise ValueError("successor panel mixes persistent-slot capacities")
     capabilities = model.operator_capabilities
@@ -229,8 +256,20 @@ def prepare_successor_panel(
         compute_ring_restates=capabilities.compute_ring_restates,
         compute_cyclic_graft=capabilities.compute_cyclic_graft,
         compute_ring_opening=capabilities.compute_ring_opening,
+        compute_ring_system_delete=capabilities.compute_ring_system_delete,
     )
     assert_teachers_in_exact_candidates(batch)
+
+    for index, (row, fiber) in enumerate(zip(rows, cached_fibers, strict=True)):
+        if (
+            fiber.source_key != row.source_key
+            or fiber.target_key != row.target_key
+            or fiber.state_support.source_state_sha256 != persistent_slot_state_sha256(row.state)
+            or fiber.target_state_sha256 != persistent_slot_state_sha256(row.target)
+        ):
+            raise SuccessorMicroOverfitError(
+                f"cached successor fiber disagrees with exact example identity at row {index}"
+            )
 
     was_training = model.training
     model.eval()
@@ -246,27 +285,22 @@ def prepare_successor_panel(
                 "teacher_action": repr(row.teacher_action),
             }
             for index, row in enumerate(rows)
-            if not bool(
-                torch.isfinite(
-                    mark_prediction.selected_mark_log_probability[index]
-                )
-            )
+            if not bool(torch.isfinite(mark_prediction.selected_mark_log_probability[index]))
         ]
         raise SuccessorMicroOverfitError(
-            "at least one recorded teacher mark is outside the scored support: "
-            f"{failing}"
+            f"at least one recorded teacher mark is outside the scored support: {failing}"
         )
-    fibers = tuple(
-        compile_teacher_successor_fiber(
+    # Indexing every cached alias through the differentiable production bridge
+    # catches a cache built under another action-table layout even when the
+    # molecular keys happen to agree.
+    with torch.no_grad():
+        forward_teacher_successor_batch(
             model,
-            row.state,
-            row.target,
-            time=row.time,
+            batch.to(model.device),
+            cached_fibers,
         )
-        for row in rows
-    )
     model.train(was_training)
-    return PreparedSuccessorPanel(rows, batch, fibers)
+    return PreparedSuccessorPanel(rows, batch, cached_fibers)
 
 
 def _weighted_mean(values: Tensor, weights: Tensor) -> float:
@@ -294,15 +328,24 @@ def successor_panel_metrics(
         panel.fibers,
     )
     weights = device_batch.importance_weights
-    conditioned_log_probability = (
-        prediction.selected_productive_successor_log_probability
-    )
+    conditioned_log_probability = prediction.selected_productive_successor_log_probability
     nll = -conditioned_log_probability
     teacher_probability = conditioned_log_probability.exp()
     family_probability = prediction.teacher_family_log_probability.exp()
-    within_family_probability = (
-        prediction.selected_within_teacher_family_log_probability.exp()
+    within_family_probability = prediction.selected_within_teacher_family_log_probability.exp()
+    within_family_nll = -prediction.selected_within_teacher_family_log_probability
+    teacher_family_indices = torch.tensor(
+        [MARK_RULE_TO_INDEX[row.family_name] for row in panel.examples],
+        dtype=torch.long,
+        device=prediction.family_log_probabilities.device,
     )
+    teacher_family_scores = prediction.family_log_probabilities.gather(
+        1,
+        teacher_family_indices[:, None],
+    ).squeeze(1)
+    family_ranks_tensor = 1 + (
+        prediction.family_log_probabilities > teacher_family_scores[:, None] + 1e-12
+    ).sum(dim=1)
 
     ranks: list[int] = []
     support_sizes: list[int] = []
@@ -319,11 +362,7 @@ def successor_panel_metrics(
             prepared_batch=panel.batch.subbatch(index, index + 1),
         )
         target = next(
-            (
-                successor
-                for successor in result.batch.successors
-                if successor.key == row.target_key
-            ),
+            (successor for successor in result.batch.successors if successor.key == row.target_key),
             None,
         )
         if target is None:
@@ -332,8 +371,7 @@ def successor_panel_metrics(
             )
         probability = float(target.probability)
         rank = 1 + sum(
-            successor.probability > probability + 1e-12
-            for successor in result.batch.successors
+            successor.probability > probability + 1e-12 for successor in result.batch.successors
         )
         support_size = result.batch.support_size
         ranks.append(rank)
@@ -358,12 +396,13 @@ def successor_panel_metrics(
                     "alias_multiplicity": target.alias_count,
                     "productive_mass": result.diagnostics.raw_productive_mass,
                     "virtual_self_mass": result.diagnostics.virtual_self_mass,
-                    "teacher_family_probability": float(
-                        family_probability[index]
-                    ),
+                    "teacher_family_probability": float(family_probability[index]),
+                    "teacher_family_nll": float(-prediction.teacher_family_log_probability[index]),
+                    "teacher_family_rank": int(family_ranks_tensor[index]),
                     "within_teacher_family_successor_probability": float(
                         within_family_probability[index]
                     ),
+                    "within_teacher_family_successor_nll": float(within_family_nll[index]),
                 }
             )
 
@@ -387,9 +426,7 @@ def successor_panel_metrics(
         group_row_indices[group].append(index)
 
     multi_target_groups = {
-        group
-        for group, target_weights in group_target_weights.items()
-        if len(target_weights) > 1
+        group for group, target_weights in group_target_weights.items() if len(target_weights) > 1
     }
     deterministic_groups = set(group_target_weights) - multi_target_groups
 
@@ -403,14 +440,10 @@ def successor_panel_metrics(
         )
 
     repeated_indices = tuple(
-        index
-        for group in sorted(multi_target_groups)
-        for index in group_row_indices[group]
+        index for group in sorted(multi_target_groups) for index in group_row_indices[group]
     )
     deterministic_indices = tuple(
-        index
-        for group in sorted(deterministic_groups)
-        for index in group_row_indices[group]
+        index for group in sorted(deterministic_groups) for index in group_row_indices[group]
     )
 
     def subset_weighted_mean(values: Tensor, indices: tuple[int, ...]) -> float:
@@ -447,8 +480,18 @@ def successor_panel_metrics(
             family_probability,
             weights,
         ),
+        "teacher_family_nll": _weighted_mean(
+            -prediction.teacher_family_log_probability,
+            weights,
+        ),
+        "teacher_family_top1_recall": float((family_ranks_tensor <= 1).to(torch.float32).mean()),
+        "teacher_family_top3_recall": float((family_ranks_tensor <= 3).to(torch.float32).mean()),
         "within_teacher_family_successor_probability": _weighted_mean(
             within_family_probability,
+            weights,
+        ),
+        "within_teacher_family_successor_nll": _weighted_mean(
+            within_family_nll,
             weights,
         ),
         "uniform_successor_nll": _weighted_mean(uniform_nll_tensor, weights),
@@ -468,23 +511,17 @@ def successor_panel_metrics(
         "mean_virtual_self_mass": float(np.mean(virtual_masses)),
         "exact_state_time_group_count": len(group_target_weights),
         "deterministic_state_group_count": len(deterministic_groups),
-        "repeated_multi_successor_state_group_count": len(
-            multi_target_groups
-        ),
+        "repeated_multi_successor_state_group_count": len(multi_target_groups),
         "deterministic_state_canonical_successor_nll": (
             subset_weighted_mean(nll, deterministic_indices)
         ),
         "deterministic_state_teacher_successor_top1_recall": (
-            float(np.mean(deterministic_ranks <= 1))
-            if len(deterministic_ranks)
-            else 0.0
+            float(np.mean(deterministic_ranks <= 1)) if len(deterministic_ranks) else 0.0
         ),
         "repeated_state_canonical_successor_nll": repeated_nll,
         "repeated_state_empirical_entropy": repeated_empirical_entropy,
         "repeated_state_excess_nll_over_empirical_entropy": (
-            repeated_nll - repeated_empirical_entropy
-            if repeated_indices
-            else 0.0
+            repeated_nll - repeated_empirical_entropy if repeated_indices else 0.0
         ),
     }
     if include_per_example:
@@ -501,6 +538,15 @@ _HEAD_PREFIXES_BY_FAMILY = {
     "bond_reroute": ("graft_head.",),
     "cycle_insert": ("cycle_close_head.",),
     "cycle_attach": ("cycle_open_head.",),
+    "ring_system_delete": ("ring_system_delete_head.",),
+    "ring_system_restate": ("ring_restate_head.",),
+}
+
+_LOCAL_ADAPTER_PREFIXES_BY_FAMILY = {
+    "bond_reorder": ("pair_project.",),
+    "cycle_insert": ("pair_project.",),
+    "cycle_attach": ("pair_project.",),
+    "ring_system_restate": ("restate_order_embedding.",),
 }
 
 
@@ -521,12 +567,9 @@ def configure_micro_overfit_parameters(
     prefixes = ["family_head."]
     for family in sorted(family_set):
         prefixes.extend(_HEAD_PREFIXES_BY_FAMILY[family])
-    if scope == "heads_plus_pair_projection" and family_set & {
-        "bond_reorder",
-        "cycle_insert",
-        "cycle_attach",
-    }:
-        prefixes.append("pair_project.")
+    if scope == "heads_plus_pair_projection":
+        for family in sorted(family_set):
+            prefixes.extend(_LOCAL_ADAPTER_PREFIXES_BY_FAMILY.get(family, ()))
 
     selected: list[str] = []
     for name, parameter in model.named_parameters():
@@ -535,9 +578,7 @@ def configure_micro_overfit_parameters(
         if trainable:
             selected.append(name)
     if not selected:
-        raise SuccessorMicroOverfitError(
-            "micro-overfit parameter scope selected nothing"
-        )
+        raise SuccessorMicroOverfitError("micro-overfit parameter scope selected nothing")
     return tuple(selected)
 
 
@@ -563,6 +604,18 @@ def train_successor_micro_panel(
         families,
         scope=scope,
     )
+    required_component_prefixes = {
+        "family_head": ("family_head.",),
+        **{family: _HEAD_PREFIXES_BY_FAMILY[family] for family in families},
+    }
+    if scope == "heads_plus_pair_projection":
+        required_component_prefixes.update(
+            {
+                f"{family}_local_adapter": prefixes
+                for family in families
+                if (prefixes := _LOCAL_ADAPTER_PREFIXES_BY_FAMILY.get(family))
+            }
+        )
     trainable_parameters = [
         parameter for parameter in model.parameters() if parameter.requires_grad
     ]
@@ -575,10 +628,10 @@ def train_successor_micro_panel(
     requested_points = {int(point) for point in report_points if 0 < int(point) <= steps}
     requested_points.update({1, steps})
     history: list[dict[str, float]] = []
-    finite_nonzero_gradient_seen = {
-        name: False
-        for name in trainable_names
-    }
+    finite_nonzero_gradient_seen = {name: False for name in trainable_names}
+    gradient_update_counts = {name: 0 for name in trainable_names}
+    component_gradient_update_counts = {component: 0 for component in required_component_prefixes}
+    optimizer_steps_with_nonzero_gradient = 0
 
     initial = successor_panel_metrics(
         model,
@@ -595,22 +648,28 @@ def train_successor_micro_panel(
         )
         loss = factorized_successor_identity_loss(prediction, device_batch)
         if not bool(torch.isfinite(loss)):
-            raise SuccessorMicroOverfitError(
-                f"non-finite successor identity loss at step {step}"
-            )
+            raise SuccessorMicroOverfitError(f"non-finite successor identity loss at step {step}")
         loss.backward()
         squared_gradient_norm = 0.0
+        step_had_nonzero_gradient = False
+        nonzero_gradient_names: set[str] = set()
         for name, parameter in model.named_parameters():
             if not parameter.requires_grad or parameter.grad is None:
                 continue
             if not bool(torch.isfinite(parameter.grad).all()):
-                raise SuccessorMicroOverfitError(
-                    f"non-finite gradient for {name!r} at step {step}"
-                )
+                raise SuccessorMicroOverfitError(f"non-finite gradient for {name!r} at step {step}")
             gradient_norm = float(parameter.grad.norm())
             squared_gradient_norm += gradient_norm * gradient_norm
             if gradient_norm > 0.0:
                 finite_nonzero_gradient_seen[name] = True
+                gradient_update_counts[name] += 1
+                nonzero_gradient_names.add(name)
+                step_had_nonzero_gradient = True
+        if step_had_nonzero_gradient:
+            optimizer_steps_with_nonzero_gradient += 1
+        for component, prefixes in required_component_prefixes.items():
+            if any(name.startswith(prefixes) for name in nonzero_gradient_names):
+                component_gradient_update_counts[component] += 1
         torch.nn.utils.clip_grad_norm_(trainable_parameters, max_norm=10.0)
         optimizer.step()
         if step in requested_points:
@@ -627,24 +686,10 @@ def train_successor_micro_panel(
         include_per_example=True,
     )
     never_received_gradient = sorted(
-        name
-        for name, seen in finite_nonzero_gradient_seen.items()
-        if not seen
+        name for name, seen in finite_nonzero_gradient_seen.items() if not seen
     )
-    required_component_prefixes = {
-        "family_head": ("family_head.",),
-        **{
-            family: _HEAD_PREFIXES_BY_FAMILY[family]
-            for family in families
-        },
-    }
     required_components_without_gradient = sorted(
-        component
-        for component, prefixes in required_component_prefixes.items()
-        if not any(
-            seen and name.startswith(prefixes)
-            for name, seen in finite_nonzero_gradient_seen.items()
-        )
+        component for component, count in component_gradient_update_counts.items() if count == 0
     )
     return {
         "scope": scope,
@@ -657,9 +702,10 @@ def train_successor_micro_panel(
         ),
         "trainable_tensor_count": len(trainable_names),
         "never_received_nonzero_gradient": never_received_gradient,
-        "required_components_without_gradient": (
-            required_components_without_gradient
-        ),
+        "gradient_update_counts": gradient_update_counts,
+        "component_gradient_update_counts": (component_gradient_update_counts),
+        "optimizer_steps_with_nonzero_gradient": (optimizer_steps_with_nonzero_gradient),
+        "required_components_without_gradient": (required_components_without_gradient),
         "initial": initial,
         "final": final,
         "history": history,
@@ -668,11 +714,13 @@ def train_successor_micro_panel(
 
 __all__ = [
     "CORE_EDITING_FAMILIES",
+    "RINGCORE_EDITING_FAMILIES",
     "PreparedSuccessorPanel",
     "SuccessorMicroOverfitError",
     "SuccessorSupervisionExample",
     "configure_micro_overfit_parameters",
     "examples_from_traces",
+    "prepare_cached_successor_panel",
     "prepare_successor_panel",
     "successor_panel_metrics",
     "train_successor_micro_panel",

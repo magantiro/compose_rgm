@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from concurrent.futures import Executor
+from dataclasses import asdict
 import hashlib
 import json
 import os
@@ -71,6 +72,12 @@ from compose_v4.experiments.training_support_compiler import (
 )
 from compose_v4.experiments.parallel_tracelet_sampling import (
     sample_tracelet_ancestral_many,
+)
+from compose_v4.experiments.p50_completion import (
+    PublishedP50Completion,
+    assert_p50_completion_targets_absent,
+    publish_p50_completion,
+    validate_p50_completion_member,
 )
 from compose_v4.experiments.tracelet_corpus_marginal import (
     fit_tracelet_corpus_marginal_rate_model,
@@ -1021,6 +1028,85 @@ def _compile_tree_transport_partition_shards(
     return tuple(records)
 
 
+def _resolve_ring_system_delete_capability(
+    requested: bool | None,
+    *,
+    canonical_successor_backend: bool,
+) -> bool:
+    """Resolve the historical default without hiding a canonical-run choice."""
+
+    if requested is None:
+        if canonical_successor_backend:
+            raise ValueError(
+                "canonical-successor launch requires an explicit ring-system-delete "
+                "capability: pass --enable-ring-system-delete or "
+                "--no-enable-ring-system-delete"
+            )
+        return True
+    if type(requested) is not bool:
+        raise TypeError("ring-system-delete capability must be Boolean or None")
+    return requested
+
+
+def _resolve_ring_restates_capability(
+    requested: bool | None,
+    *,
+    canonical_successor_backend: bool,
+    corrupted_prior_mix: bool,
+) -> bool:
+    """Make new editing support explicit while preserving old launch behavior."""
+
+    if requested is None:
+        if canonical_successor_backend:
+            raise ValueError(
+                "canonical-successor launch requires an explicit ring-restate "
+                "capability: pass --enable-ring-restates or "
+                "--no-enable-ring-restates"
+            )
+        return bool(corrupted_prior_mix)
+    if type(requested) is not bool:
+        raise TypeError("ring-restate capability must be Boolean or None")
+    return requested
+
+
+def _checkpoint_ring_restates_capability(
+    payload: dict[str, object],
+) -> bool:
+    """Read explicit V2 metadata or derive the historical coupled default."""
+
+    if "enable_ring_restates" not in payload:
+        legacy_value = payload.get("corrupted_prior_mix", False)
+        if type(legacy_value) is not bool:
+            raise ValueError(
+                "checkpoint metadata 'corrupted_prior_mix' must be a literal "
+                "Boolean when used as the historical ring-restate fallback"
+            )
+        return legacy_value
+    value = payload["enable_ring_restates"]
+    if type(value) is not bool:
+        raise ValueError(
+            "checkpoint metadata 'enable_ring_restates' must be a literal Boolean"
+        )
+    return value
+
+
+def _ring_core_v1_identity_applies(
+    *,
+    cycle_op_mix: bool,
+    disable_ring_grow_macro: bool,
+    enable_ring_restates: bool,
+    enable_ring_system_delete: bool,
+) -> bool:
+    """Whether the exact historical RingCore-V1 identity is truthful."""
+
+    return bool(
+        cycle_op_mix
+        and disable_ring_grow_macro
+        and enable_ring_restates
+        and enable_ring_system_delete
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("smiles_file", type=Path)
@@ -1048,6 +1134,51 @@ def main() -> None:
         choices=("exact_fiber", "factorized_marks"),
         default="exact_fiber",
         help="exact successor oracle or scalable dense marked-rewrite training",
+    )
+    parser.add_argument(
+        "--factorized-training-objective",
+        choices=("selected_mark", "canonical_successor"),
+        default="selected_mark",
+        help=(
+            "retain the historical selected-mark objective or use the bounded "
+            "P50-only canonical molecular-successor cache path"
+        ),
+    )
+    parser.add_argument(
+        "--successor-objective-mode",
+        choices=(
+            "productive_identity",
+            "productive_identity_plus_hazard",
+            "successor_generator_bregman",
+        ),
+        default="productive_identity",
+        help=(
+            "canonical-successor identity objective; hazard is separate and "
+            "weighted only in the explicit identity-plus-hazard mode"
+        ),
+    )
+    parser.add_argument("--successor-hazard-weight", type=float, default=0.0)
+    parser.add_argument("--successor-cache-root", type=Path, default=None)
+    parser.add_argument("--successor-cache-inventory", type=Path, default=None)
+    parser.add_argument("--successor-cache-inventory-sha256", type=str, default=None)
+    parser.add_argument("--successor-cache-compatibility-sha256", type=str, default=None)
+    parser.add_argument("--successor-source-corpus-inventory-sha256", type=str, default=None)
+    parser.add_argument("--successor-semantic-sidecar", type=Path, default=None)
+    parser.add_argument("--successor-semantic-sidecar-manifest", type=Path, default=None)
+    parser.add_argument("--successor-semantic-sidecar-manifest-sha256", type=str, default=None)
+    parser.add_argument("--successor-semantic-sidecar-config-sha256", type=str, default=None)
+    parser.add_argument("--successor-semantic-sidecar-provenance-sha256", type=str, default=None)
+    parser.add_argument("--successor-cache-max-open-shards", type=int, default=2)
+    parser.add_argument("--editing-training-gate-contract", type=Path, default=None)
+    parser.add_argument("--editing-training-gate-contract-sha256", type=str, default=None)
+    parser.add_argument(
+        "--successor-p50-initialization-regime",
+        choices=(
+            "scratch",
+            "compatible_warm_start",
+            "compatible_warm_start_with_retention",
+        ),
+        default=None,
     )
     parser.add_argument(
         "--data-workers",
@@ -1500,8 +1631,8 @@ def main() -> None:
     parser.add_argument(
         "--corrupted-prior-mix",
         action="store_true",
-        help="append corrupted-molecule source-prior (B-edit) records to train_records and enable the "
-        "ring_system_restate + cyclic bond_reroute editing marks (fine-tune B -> B-edit)",
+        help="append corrupted-molecule source-prior (B-edit) records to train_records; legacy selected-mark "
+        "launches also derive ring-restate support from this flag when no explicit capability is supplied",
     )
     parser.add_argument(
         "--cycle-op-mix",
@@ -1516,6 +1647,27 @@ def main() -> None:
         help="RING_CORE_V1: disable the legacy whole-ring ring_system_grow macro so ring ADDITION is "
         "purely compositional (cycle_close). The grow head params are retained (warm-start-safe); the "
         "family is masked dead (never sampled/taught). Typically paired with --cycle-op-mix.",
+    )
+    parser.add_argument(
+        "--enable-ring-restates",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help=(
+            "explicitly enable or disable ring-system electronic restates. "
+            "Canonical-successor pilots must choose one value; legacy launches "
+            "that omit both preserve the historical corrupted-prior-mix coupling."
+        ),
+    )
+    parser.add_argument(
+        "--enable-ring-system-delete",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help=(
+            "explicitly enable or disable the whole-ring deletion macro. "
+            "Canonical-successor P50 launches must choose "
+            "--enable-ring-system-delete or --no-enable-ring-system-delete; "
+            "legacy launches that omit both retain the historical enabled behavior."
+        ),
     )
     parser.add_argument(
         "--dry-launch",
@@ -1634,6 +1786,38 @@ def main() -> None:
     )
     args = parser.parse_args()
     _zmi.reset()  # zero-mixture instrumentation accumulates over this whole run (catalog/manifest/pool/train)
+    canonical_successor_backend = (
+        args.factorized_training_objective == "canonical_successor"
+    )
+    resolved_enable_ring_restates = _resolve_ring_restates_capability(
+        args.enable_ring_restates,
+        canonical_successor_backend=canonical_successor_backend,
+        corrupted_prior_mix=bool(args.corrupted_prior_mix),
+    )
+    resolved_enable_ring_system_delete = _resolve_ring_system_delete_capability(
+        args.enable_ring_system_delete,
+        canonical_successor_backend=canonical_successor_backend,
+    )
+    ring_core_v1_identity_applied = _ring_core_v1_identity_applies(
+        cycle_op_mix=args.cycle_op_mix,
+        disable_ring_grow_macro=args.disable_ring_grow_macro,
+        enable_ring_restates=resolved_enable_ring_restates,
+        enable_ring_system_delete=resolved_enable_ring_system_delete,
+    )
+    ring_core_v1_scheduler_identity_applied = (
+        ring_core_v1_identity_applied and not canonical_successor_backend
+    )
+    canonical_successor_operator_identity = (
+        None
+        if not canonical_successor_backend
+        else (
+            "ringcore_v1_support_bounded"
+            if ring_core_v1_identity_applied
+            else "editing_v2_explicit_capabilities_support_bounded"
+        )
+    )
+    p50_thresholds = None
+    p50_gate_contract_sha256 = None
 
     # De-novo compilation is skipped because the SCIENTIFIC MIXTURE gives de-novo zero weight -- never
     # because of how the data happens to be STORED. Those are different things: a future packed run with a
@@ -1684,6 +1868,241 @@ def main() -> None:
         raise ValueError("--empirical-mark-prior-smoothing must be positive")
     if len(set(args.property_condition)) != len(args.property_condition):
         raise ValueError("--property-condition values must be unique")
+    if canonical_successor_backend:
+        from compose_v4.experiments.editing_successor_trainer import (
+            CANONICAL_SUCCESSOR_P50_STEPS,
+        )
+
+        if args.model != "from_scratch" or args.training_backend != "factorized_marks":
+            raise ValueError(
+                "canonical-successor training requires factorized from-scratch model construction"
+            )
+        if not args.skip_rollouts:
+            raise ValueError(
+                "canonical-successor editing pilots require --skip-rollouts; "
+                "the legacy timed/null ancestral rollout path is not the "
+                "source-conditioned embedded molecular jump chain"
+            )
+        if args.load_rollouts is not None or args.rollout_cache is not None:
+            raise ValueError(
+                "canonical-successor editing pilots reject legacy rollout cache inputs"
+            )
+        required_editing_configuration = {
+            "--corrupted-prior-mix": bool(args.corrupted_prior_mix),
+            "--cycle-op-mix": bool(args.cycle_op_mix),
+            "--disable-ring-grow-macro": bool(args.disable_ring_grow_macro),
+            "--organic-vocabulary": bool(args.organic_vocabulary),
+            "--max-atoms=40": args.max_atoms == 40,
+        }
+        missing_editing_configuration = sorted(
+            name
+            for name, satisfied in required_editing_configuration.items()
+            if not satisfied
+        )
+        if missing_editing_configuration:
+            raise ValueError(
+                "canonical-successor editing pilots require the declared "
+                "broad-organic compositional operator regime; missing or "
+                f"inconsistent={missing_editing_configuration}"
+            )
+        optimizing_canonical_pilot = (
+            args.load_checkpoint is None and not args.dry_launch
+        )
+        if optimizing_canonical_pilot and args.resume_checkpoint is not None:
+            raise ValueError(
+                "the exact P50 sentinel is non-resumable; restart its 50-update "
+                "stream from the declared initialization"
+            )
+        if optimizing_canonical_pilot and args.steps != 50:
+            raise ValueError(
+                "the real canonical-successor launcher currently authorizes "
+                "exactly the P50 sentinel (50 updates); P500 remains blocked "
+                "until its pass-input and numeric gates are wired"
+            )
+        if args.load_checkpoint is None and args.steps != CANONICAL_SUCCESSOR_P50_STEPS:
+            raise ValueError(
+                "canonical-successor construction is restricted to the exact "
+                f"P50 configuration ({CANONICAL_SUCCESSOR_P50_STEPS} steps); "
+                "P500 remains blocked"
+            )
+        if optimizing_canonical_pilot and args.early_stopping_patience:
+            raise ValueError(
+                "P50 requires exactly 50 contiguous updates; early stopping must be disabled"
+            )
+        if optimizing_canonical_pilot and args.benchmark_steps:
+            raise ValueError(
+                "P50 cannot use the throughput-benchmark early-return path"
+            )
+        if optimizing_canonical_pilot and args.checkpoint is None:
+            raise ValueError(
+                "P50 requires --checkpoint so its passing selected and exact "
+                "step-50 recovery states can be published atomically"
+            )
+        if optimizing_canonical_pilot and args.snapshot_checkpoints:
+            raise ValueError(
+                "P50 publishes one immutable completion namespace; legacy "
+                "--snapshot-checkpoints are not permitted"
+            )
+        if optimizing_canonical_pilot:
+            assert_p50_completion_targets_absent(args.checkpoint)
+        if optimizing_canonical_pilot:
+            missing_gate_values = sorted(
+                name
+                for name, value in {
+                    "--editing-training-gate-contract": (
+                        args.editing_training_gate_contract
+                    ),
+                    "--editing-training-gate-contract-sha256": (
+                        args.editing_training_gate_contract_sha256
+                    ),
+                    "--successor-p50-initialization-regime": (
+                        args.successor_p50_initialization_regime
+                    ),
+                }.items()
+                if value is None
+            )
+            if missing_gate_values:
+                raise ValueError(
+                    "P50 launch is missing its frozen gate identity: "
+                    f"{missing_gate_values}"
+                )
+            expected_gate_sha256 = str(
+                args.editing_training_gate_contract_sha256
+            )
+            if (
+                len(expected_gate_sha256) != 64
+                or expected_gate_sha256.lower() != expected_gate_sha256
+                or any(
+                    character not in "0123456789abcdef"
+                    for character in expected_gate_sha256
+                )
+            ):
+                raise ValueError(
+                    "editing-training gate contract identity must be a "
+                    "lowercase SHA-256"
+                )
+            gate_path = Path(args.editing_training_gate_contract)
+            if not gate_path.is_file():
+                raise FileNotFoundError(
+                    f"editing-training gate contract is absent: {gate_path}"
+                )
+            p50_gate_contract_sha256 = _file_sha256(gate_path)
+            if p50_gate_contract_sha256 != expected_gate_sha256:
+                raise ValueError(
+                    "editing-training gate contract SHA-256 mismatch: "
+                    f"expected={expected_gate_sha256}, "
+                    f"observed={p50_gate_contract_sha256}"
+                )
+            from compose_v4.experiments.editing_training_gate import (
+                assert_p50_launch_authorized,
+                load_editing_training_gate,
+            )
+
+            p50_thresholds = assert_p50_launch_authorized(
+                load_editing_training_gate(gate_path),
+                initialization_regime=(
+                    args.successor_p50_initialization_regime
+                ),
+            )
+            initialized_compatibly = (
+                args.initialize_compatible_checkpoint is not None
+            )
+            if (
+                p50_thresholds.initialization_regime == "scratch"
+                and initialized_compatibly
+            ):
+                raise ValueError(
+                    "scratch P50 cannot use a compatible initialization checkpoint"
+                )
+            if (
+                p50_thresholds.initialization_regime != "scratch"
+                and not initialized_compatibly
+            ):
+                raise ValueError(
+                    "warm-start P50 regimes require "
+                    "--initialize-compatible-checkpoint"
+                )
+            if args.initialize_checkpoint is not None:
+                raise ValueError(
+                    "P50 initialization must be scratch or use the audited "
+                    "shape/semantic compatible transfer path"
+                )
+            if p50_thresholds.inherited_retention_status == "REQUIRED":
+                raise ValueError(
+                    "warm-start P50 remains blocked until the frozen inherited "
+                    "probe is connected to its resolved retention threshold"
+                )
+        required_successor_values = {
+            "--successor-cache-root": args.successor_cache_root,
+            "--successor-cache-inventory": args.successor_cache_inventory,
+            "--successor-cache-inventory-sha256": args.successor_cache_inventory_sha256,
+            "--successor-cache-compatibility-sha256": (
+                args.successor_cache_compatibility_sha256
+            ),
+            "--successor-source-corpus-inventory-sha256": (
+                args.successor_source_corpus_inventory_sha256
+            ),
+            "--successor-semantic-sidecar": args.successor_semantic_sidecar,
+            "--successor-semantic-sidecar-manifest": (
+                args.successor_semantic_sidecar_manifest
+            ),
+            "--successor-semantic-sidecar-manifest-sha256": (
+                args.successor_semantic_sidecar_manifest_sha256
+            ),
+            "--successor-semantic-sidecar-config-sha256": (
+                args.successor_semantic_sidecar_config_sha256
+            ),
+            "--successor-semantic-sidecar-provenance-sha256": (
+                args.successor_semantic_sidecar_provenance_sha256
+            ),
+            "--unified-packed-manifest": args.unified_packed_manifest,
+            "--representability-overlay": args.representability_overlay,
+        }
+        missing_successor_values = sorted(
+            name for name, value in required_successor_values.items() if value is None
+        )
+        if missing_successor_values:
+            raise ValueError(
+                "canonical-successor launch is missing exact frozen inputs: "
+                f"{missing_successor_values}"
+            )
+        if (
+            not args.precompiled_corpus
+            or not args.packed_corpus
+            or not args.packed_mmp_corpus
+            or not args.require_scientific_contract
+        ):
+            raise ValueError(
+                "canonical-successor training requires the addressed packed "
+                "production corpus under the scientific contract"
+            )
+        if args.compile_evaluation_cache or args.require_evaluation_cache:
+            raise ValueError(
+                "legacy mark-only evaluation caches cannot be used for "
+                "canonical-successor checkpoint selection"
+            )
+        if args.compile_paths_only:
+            raise ValueError(
+                "canonical-successor objective is a training/evaluation path, "
+                "not a path-cache compiler"
+            )
+        if args.successor_cache_max_open_shards <= 0:
+            raise ValueError("successor-cache-max-open-shards must be positive")
+        if (
+            not np.isfinite(args.successor_hazard_weight)
+            or args.successor_hazard_weight < 0.0
+        ):
+            raise ValueError("successor-hazard-weight must be finite and nonnegative")
+        if args.successor_objective_mode == "productive_identity_plus_hazard":
+            if args.successor_hazard_weight <= 0.0:
+                raise ValueError(
+                    "productive_identity_plus_hazard requires a positive "
+                    "successor-hazard-weight"
+                )
+        elif args.successor_hazard_weight != 0.0:
+            raise ValueError(
+                f"{args.successor_objective_mode} does not use a separate hazard weight"
+            )
     if args.property_condition and (
         args.model != "from_scratch" or args.training_backend != "factorized_marks"
     ):
@@ -2883,9 +3302,10 @@ def main() -> None:
 
     _eval_capabilities = OperatorCapabilities(
         compute_ring_grow_support=not args.disable_ring_grow_macro,
-        compute_ring_restates=args.corrupted_prior_mix,
+        compute_ring_restates=resolved_enable_ring_restates,
         compute_cyclic_graft=args.corrupted_prior_mix,
         compute_ring_opening=args.corrupted_prior_mix,
+        compute_ring_system_delete=resolved_enable_ring_system_delete,
     )
     evaluation_signature = _evaluation_batch_cache_signature(
         path_cache_signature,
@@ -2915,7 +3335,11 @@ def main() -> None:
     )
     validation_examples = None
     test_examples = None
-    if evaluation_cache_path is not None and evaluation_cache_path.is_file():
+    if (
+        not canonical_successor_backend
+        and evaluation_cache_path is not None
+        and evaluation_cache_path.is_file()
+    ):
         cache_load_started = perf_counter()
         validation_examples, test_examples = _load_evaluation_batch_cache(
             evaluation_cache_path,
@@ -2990,7 +3414,8 @@ def main() -> None:
                     flush=True,
                 )
     elif (
-        args.require_evaluation_cache
+        not canonical_successor_backend
+        and args.require_evaluation_cache
         and evaluation_cache_path is not None
         and property_conditioning_signature is not None
     ):
@@ -3061,13 +3486,17 @@ def main() -> None:
             ),
             flush=True,
         )
-    elif args.require_evaluation_cache:
+    elif not canonical_successor_backend and args.require_evaluation_cache:
         raise FileNotFoundError(
             f"required evaluation batch cache is missing: {evaluation_cache_path}"
         )
 
     evaluation_build_started = perf_counter()
-    if validation_examples is None and args.training_backend == "factorized_marks":
+    if (
+        not canonical_successor_backend
+        and validation_examples is None
+        and args.training_backend == "factorized_marks"
+    ):
         validation_examples = sample_factorized_mark_batch(
             validation_records,
             batch_size=args.validation_examples,
@@ -3127,7 +3556,7 @@ def main() -> None:
             ),
             flush=True,
         )
-    elif validation_examples is None:
+    elif not canonical_successor_backend and validation_examples is None:
         fiber_cache = {}
         with tracelet_fiber_executor(
             args.fiber_workers,
@@ -3169,9 +3598,16 @@ def main() -> None:
                 flush=True,
             )
 
-    if validation_examples is None or test_examples is None:
+    if (
+        not canonical_successor_backend
+        and (validation_examples is None or test_examples is None)
+    ):
         raise RuntimeError("evaluation batch construction produced an empty partition")
-    if evaluation_cache_path is not None and not evaluation_cache_path.is_file():
+    if (
+        not canonical_successor_backend
+        and evaluation_cache_path is not None
+        and not evaluation_cache_path.is_file()
+    ):
         _atomic_shared_torch_save(
             {
                 "signature": evaluation_signature,
@@ -3264,15 +3700,16 @@ def main() -> None:
             empirical_mark_priors=empirical_mark_priors,
             ring_family_mass_mode=args.ring_family_mass_mode,
             ring_template_factorization=args.ring_template_factorization,
-            enable_ring_restates=args.corrupted_prior_mix,
+            enable_ring_restates=resolved_enable_ring_restates,
             enable_cyclic_graft=args.corrupted_prior_mix,
             enable_heteroatom_scan=args.corrupted_prior_mix,
             enable_ring_opening=args.corrupted_prior_mix,
             enable_cycle_ops=args.cycle_op_mix,
             enable_ring_grow_macro=not args.disable_ring_grow_macro,
+            enable_ring_system_delete=resolved_enable_ring_system_delete,
             atom_vocabulary=ORGANIC_VOCABULARY if args.organic_vocabulary else None,
         ).to(device)
-        if args.cycle_op_mix and args.disable_ring_grow_macro:
+        if ring_core_v1_scheduler_identity_applied:
             # RING_CORE_V1 launch identity (owner finalization §4): print every frozen hash + capability flag
             # at startup so a launch that drifts from the frozen contract is visible in the run log.
             import ring_core_identity as _rci
@@ -3314,6 +3751,8 @@ def main() -> None:
                     "enable_cycle_ops": True,
                     "enable_ring_macros": False,
                     "enable_ring_grow_macro": not args.disable_ring_grow_macro,
+                    "enable_ring_restates": resolved_enable_ring_restates,
+                    "enable_ring_system_delete": resolved_enable_ring_system_delete,
                     "training_steps": args.steps,
                     "schedule_steps": resolved_schedule_steps,
                     "warmup_steps": args.warmup_steps,
@@ -3322,6 +3761,28 @@ def main() -> None:
                 }, sort_keys=True), flush=True)
             except Exception:  # noqa: BLE001 -- identity print must never break a launch
                 pass
+        elif canonical_successor_backend:
+            print(
+                json.dumps(
+                    {
+                        "phase": "canonical_successor_operator_identity",
+                        "identity": canonical_successor_operator_identity,
+                        "ring_core_v1": ring_core_v1_identity_applied,
+                        "ring_core_v1_scheduler_identity_applied": False,
+                        "enable_cycle_ops": bool(args.cycle_op_mix),
+                        "enable_ring_grow_macro": (
+                            not bool(args.disable_ring_grow_macro)
+                        ),
+                        "enable_ring_restates": resolved_enable_ring_restates,
+                        "enable_ring_system_delete": (
+                            resolved_enable_ring_system_delete
+                        ),
+                        "full_training_authorized": False,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
     elif args.model == "from_scratch":
         model = TraceletRateModel(
             hidden_dim=args.hidden_dim,
@@ -3344,14 +3805,95 @@ def main() -> None:
             raise RuntimeError("corpus-marginal evaluation requires a fitted prior")
         model = prior
 
+    successor_runtime = None
+    successor_training_objective = None
+    if canonical_successor_backend:
+        from compose_v4.experiments.editing_successor_trainer import (
+            CanonicalSuccessorRuntimeConfig,
+            build_canonical_successor_validation_batch,
+            canonical_successor_objective,
+            open_canonical_successor_runtime,
+        )
+
+        if not isinstance(model, FactorizedTraceletRateModel):
+            raise TypeError(
+                "canonical-successor objective requires the production FactorizedTraceletRateModel"
+            )
+        successor_runtime = open_canonical_successor_runtime(
+            CanonicalSuccessorRuntimeConfig(
+                cache_root=args.successor_cache_root,
+                inventory_path=args.successor_cache_inventory,
+                inventory_sha256=args.successor_cache_inventory_sha256,
+                compatibility_sha256=args.successor_cache_compatibility_sha256,
+                source_corpus_inventory_sha256=(
+                    args.successor_source_corpus_inventory_sha256
+                ),
+                unified_packed_manifest_path=Path(args.unified_packed_manifest),
+                representability_overlay_path=Path(args.representability_overlay),
+                semantic_sidecar_path=args.successor_semantic_sidecar,
+                semantic_sidecar_manifest_path=(
+                    args.successor_semantic_sidecar_manifest
+                ),
+                semantic_sidecar_manifest_sha256=(
+                    args.successor_semantic_sidecar_manifest_sha256
+                ),
+                semantic_sidecar_config_sha256=(
+                    args.successor_semantic_sidecar_config_sha256
+                ),
+                semantic_sidecar_provenance_sha256=(
+                    args.successor_semantic_sidecar_provenance_sha256
+                ),
+                max_open_shards=args.successor_cache_max_open_shards,
+            ),
+            model,
+            max_atoms=args.max_atoms,
+        )
+        successor_training_objective = canonical_successor_objective(
+            mode=args.successor_objective_mode,
+            hazard_weight=args.successor_hazard_weight,
+        )
+        validation_examples = build_canonical_successor_validation_batch(
+            successor_runtime,
+            model,
+            validation_records,
+            batch_size=args.validation_examples,
+            seed=args.seed + 1,
+            workers=evaluation_workers,
+            late_time_fraction=args.late_time_fraction,
+            operational_horizon=args.operational_horizon,
+            progress_stratification_fraction=args.progress_stratification_fraction,
+            use_aromatic_bond_view=args.bond_representation == "aromatic",
+            ring_electronic_mode=args.ring_electronic_mode,
+            target_property_conditions=validation_property_conditions,
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "canonical_successor_runtime_ready",
+                    "full_training_authorized": False,
+                    "bounded_development_lane": "P50_only",
+                    "development_exact_steps": CANONICAL_SUCCESSOR_P50_STEPS,
+                    "objective": successor_training_objective.name,
+                    "selection_metric": successor_training_objective.selection_metric,
+                    "enable_ring_restates": resolved_enable_ring_restates,
+                    "enable_ring_system_delete": resolved_enable_ring_system_delete,
+                    **successor_runtime.checkpoint_metadata(),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
     checkpoint_metadata = {
         "model": args.model,
         "training_backend": args.training_backend,
         "corrupted_prior_mix": bool(args.corrupted_prior_mix),
+        "enable_ring_restates": resolved_enable_ring_restates,
         "enable_cycle_ops": bool(args.cycle_op_mix),
         # RING_CORE_V1: legacy whole-ring grow macro disabled (ring addition is purely compositional).
         # enable_ring_macros is the forward-looking P4 hybrid flag; always False until RING_HYBRID_V2.
         "enable_ring_grow_macro": not bool(args.disable_ring_grow_macro),
+        "enable_ring_system_delete": resolved_enable_ring_system_delete,
         "enable_ring_macros": False,
         # Teacher-in-exact-candidates filter (declared production data contract): every selected teacher
         # belongs to the model's exact dynamic candidate set for its state; unrepresentable corruption traces
@@ -3362,8 +3904,8 @@ def main() -> None:
         "eval_operator_capability_fingerprint": (
             _eval_capabilities.fingerprint() if args.training_backend == "factorized_marks" else None
         ),
-        # Persist the organic-vocab flag so inference can reconstruct the wider heads + editing families
-        # (the enable_* flags are derived from corrupted_prior_mix at load, mirroring construction).
+        # Persist the organic-vocab flag so inference can reconstruct the wider heads.
+        # Support-changing capabilities are recorded independently above.
         "organic_vocabulary": bool(args.organic_vocabulary),
         # Pin the corpus SCOPE so any data/checkpoint load under a different scope can fail loudly (mining,
         # training, validation, sampling, eval must all agree on the same broad-organic scope).
@@ -3433,8 +3975,38 @@ def main() -> None:
         "operational_horizon": args.operational_horizon,
         "provenance_sha256": args.provenance_sha256,
     }
+    if canonical_successor_backend:
+        if successor_runtime is None or successor_training_objective is None:
+            raise RuntimeError("canonical-successor runtime was not initialized")
+        checkpoint_metadata.update(
+            {
+                "factorized_training_objective": "canonical_successor",
+                "successor_objective_mode": args.successor_objective_mode,
+                "successor_hazard_weight": args.successor_hazard_weight,
+                "training_objective_name": successor_training_objective.name,
+                "training_selection_metric": (
+                    successor_training_objective.selection_metric
+                ),
+                "canonical_successor_operator_identity": (
+                    canonical_successor_operator_identity
+                ),
+                "ring_core_v1": ring_core_v1_identity_applied,
+                "ring_core_v1_scheduler_identity_applied": (
+                    ring_core_v1_scheduler_identity_applied
+                ),
+                "editing_training_gate_contract_sha256": (
+                    p50_gate_contract_sha256
+                ),
+                "successor_p50_initialization_regime": (
+                    None
+                    if p50_thresholds is None
+                    else p50_thresholds.initialization_regime
+                ),
+                **successor_runtime.checkpoint_metadata(),
+            }
+        )
     checkpoint_metadata["max_atoms"] = args.max_atoms
-    if args.cycle_op_mix and args.disable_ring_grow_macro:
+    if ring_core_v1_scheduler_identity_applied:
         # RING_CORE_V1 self-identification: persist the frozen capability + live code hashes so the rollout
         # harness can verify checkpoint identity. Defensive import (never break training); if absent, the
         # harness recomputes the code hashes + verifies the enable flags / scope / max_atoms instead.
@@ -3468,8 +4040,37 @@ def main() -> None:
             "property_condition_dim",
             "property_conditioning",
             "trainable_parameter_scope",
+            "enable_ring_restates",
+            "enable_ring_system_delete",
         )
     }
+    if canonical_successor_backend:
+        expected.update(
+            {
+                key: checkpoint_metadata[key]
+                for key in (
+                    "factorized_training_objective",
+                    "successor_objective_mode",
+                    "successor_hazard_weight",
+                    "training_objective_name",
+                    "training_selection_metric",
+                    "canonical_successor_operator_identity",
+                    "ring_core_v1",
+                    "ring_core_v1_scheduler_identity_applied",
+                    "successor_cache_inventory_sha256",
+                    "successor_cache_compatibility_sha256",
+                    "successor_source_corpus_inventory_sha256",
+                    "successor_unified_packed_manifest_sha256",
+                    "successor_representability_overlay_sha256",
+                    "successor_semantic_sidecar_manifest_sha256",
+                    "successor_cache_storage_backend",
+                    "successor_training_scope",
+                    "successor_full_training_authorized",
+                    "enable_ring_restates",
+                    "enable_ring_system_delete",
+                )
+            }
+        )
     checkpoint_defaults = {
         "training_backend": "exact_fiber",
         "teacher_ordering": "sequential",
@@ -3486,6 +4087,7 @@ def main() -> None:
         "property_condition_dim": 0,
         "property_conditioning": None,
         "trainable_parameter_scope": "all",
+        "enable_ring_system_delete": True,
     }
 
     loaded_checkpoint = None
@@ -3506,13 +4108,30 @@ def main() -> None:
             map_location=device,
             weights_only=False,
         )
+        if not isinstance(checkpoint_payload, dict):
+            raise ValueError("checkpoint payload must be a dictionary")
+        validate_p50_completion_member(
+            selected_checkpoint_path,
+            checkpoint_payload,
+        )
+        checkpoint_comparison_payload = dict(checkpoint_payload)
+        checkpoint_comparison_payload["enable_ring_restates"] = (
+            _checkpoint_ring_restates_capability(checkpoint_payload)
+        )
         mismatches = {
             key: (
-                checkpoint_payload.get(key, checkpoint_defaults.get(key)),
+                checkpoint_comparison_payload.get(
+                    key,
+                    checkpoint_defaults.get(key),
+                ),
                 value,
             )
             for key, value in expected.items()
-            if checkpoint_payload.get(key, checkpoint_defaults.get(key)) != value
+            if checkpoint_comparison_payload.get(
+                key,
+                checkpoint_defaults.get(key),
+            )
+            != value
         }
         if args.initialize_compatible_checkpoint is not None:
             # A direct conditional model is deliberately warm-started from
@@ -3535,6 +4154,32 @@ def main() -> None:
             # ring-hazard fix (superposed + topology_cycle_hierarchical).
             mismatches.pop("rate_factorization", None)
             mismatches.pop("trainable_parameter_scope", None)
+            if canonical_successor_backend:
+                # Target optimizer/corpus identities do not constrain source
+                # weights used for a compatible warm start. Initialization
+                # parity and the semantic row-transfer map remain mandatory.
+                for key in (
+                    "factorized_training_objective",
+                    "successor_objective_mode",
+                    "successor_hazard_weight",
+                    "training_objective_name",
+                    "training_selection_metric",
+                    "canonical_successor_operator_identity",
+                    "ring_core_v1",
+                    "ring_core_v1_scheduler_identity_applied",
+                    "successor_cache_inventory_sha256",
+                    "successor_cache_compatibility_sha256",
+                    "successor_source_corpus_inventory_sha256",
+                    "successor_unified_packed_manifest_sha256",
+                    "successor_representability_overlay_sha256",
+                    "successor_semantic_sidecar_manifest_sha256",
+                    "successor_cache_storage_backend",
+                    "successor_training_scope",
+                    "successor_full_training_authorized",
+                    "enable_ring_restates",
+                    "enable_ring_system_delete",
+                ):
+                    mismatches.pop(key, None)
             source_ring_mode = checkpoint_payload.get(
                 "ring_electronic_mode",
                 checkpoint_defaults["ring_electronic_mode"],
@@ -3710,12 +4355,22 @@ def main() -> None:
             )
 
     if isinstance(model, FactorizedTraceletRateModel):
-        observed_validation = factorized_mark_metrics(
-            model,
-            validation_examples,
-            use_bf16=args.use_bf16,
-            microbatch_size=args.evaluation_batch_size,
-        )
+        if canonical_successor_backend:
+            if successor_training_objective is None:
+                raise RuntimeError("canonical-successor objective was not initialized")
+            observed_validation = successor_training_objective.metrics(
+                model,
+                validation_examples,
+                use_bf16=args.use_bf16,
+                microbatch_size=args.evaluation_batch_size,
+            )
+        else:
+            observed_validation = factorized_mark_metrics(
+                model,
+                validation_examples,
+                use_bf16=args.use_bf16,
+                microbatch_size=args.evaluation_batch_size,
+            )
     else:
         observed_validation = tracelet_conditional_metrics(model, validation_examples)
     validation_phase = "resume_validation" if resume_state is not None else "initial_validation"
@@ -3750,6 +4405,13 @@ def main() -> None:
             f"restored initial validation contains non-finite metrics: {nonfinite_baseline}"
         )
     history = []
+    p50_exposure_report = None
+    p50_observed_exposure_report = None
+    p50_live_exposure_observer = None
+    p50_sentinel = None
+    p50_sentinel_report = None
+    p50_completion: PublishedP50Completion | None = None
+    pending_p50_recovery_state = None
     recovery_path = (
         _recovery_path(args.checkpoint) if args.checkpoint is not None else args.resume_checkpoint
     )
@@ -3819,6 +4481,12 @@ def main() -> None:
             flush=True,
         )
 
+    def capture_p50_recovery(training_state: dict[str, object]) -> None:
+        """Hold exact current state in memory until the sentinel passes."""
+
+        nonlocal pending_p50_recovery_state
+        pending_p50_recovery_state = training_state
+
     if isinstance(model, FactorizedTraceletRateModel) and loaded_checkpoint is None:
         edit_record_index_sampler = None
         if args.precompiled_corpus:
@@ -3839,6 +4507,82 @@ def main() -> None:
                 "realized_count_fractions": (None if edit_record_index_sampler is None
                                              else edit_record_index_sampler.realized_layer_fractions()),
             }, sort_keys=True), flush=True)
+        successor_loader_factory = None
+        if canonical_successor_backend:
+            from compose_v4.experiments.editing_successor_trainer import (
+                build_canonical_successor_loader_factory,
+            )
+
+            if successor_runtime is None or successor_training_objective is None:
+                raise RuntimeError(
+                    "canonical-successor training assets were not initialized"
+                )
+            successor_loader_factory = build_canonical_successor_loader_factory(
+                successor_runtime,
+                model,
+                train_records,
+                steps=args.steps,
+                batch_size=args.batch_size,
+                seed=args.seed + 3,
+                workers=args.data_workers,
+                data_prefetch_factor=args.data_prefetch_factor,
+                late_time_fraction=args.late_time_fraction,
+                operational_horizon=args.operational_horizon,
+                progress_stratification_fraction=args.progress_stratification_fraction,
+                use_aromatic_bond_view=args.bond_representation == "aromatic",
+                ring_electronic_mode=args.ring_electronic_mode,
+                target_property_conditions=train_property_conditions,
+                condition_dropout_probability=args.condition_dropout_probability,
+                record_index_sampler=edit_record_index_sampler,
+                training_support_cache=(
+                    training_support_cache if args.require_training_support_cache else None
+                ),
+                require_cached_support=args.require_training_support_cache,
+            )
+            if p50_thresholds is not None:
+                from compose_v4.experiments.editing_training_sentinel import (
+                    P50GradientCollapseSentinel,
+                    P50LiveExposureObserver,
+                    audit_successor_exposure_plan,
+                )
+
+                exposure = audit_successor_exposure_plan(
+                    successor_loader_factory(0),
+                    expected_steps=50,
+                    required_families=p50_thresholds.required_families,
+                    minimum_gradient_opportunities=(
+                        p50_thresholds.minimum_gradient_update_map
+                    ),
+                    require_semantic_cells=False,
+                )
+                p50_exposure_report = asdict(exposure)
+                p50_live_exposure_observer = P50LiveExposureObserver(
+                    planned=exposure,
+                    required_families=p50_thresholds.required_families,
+                    minimum_gradient_opportunities=(
+                        p50_thresholds.minimum_gradient_update_map
+                    ),
+                )
+                print(
+                    json.dumps(
+                        {
+                            "phase": "p50_successor_exposure_preflight_passed",
+                            **p50_exposure_report,
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
+                p50_sentinel = P50GradientCollapseSentinel(
+                    required_families=p50_thresholds.required_families,
+                    minimum_gradient_updates=(
+                        p50_thresholds.minimum_gradient_update_map
+                    ),
+                    maximum_family_nll_regression=(
+                        p50_thresholds.maximum_family_nll_regression_map
+                    ),
+                    baseline_validation_metrics=observed_validation,
+                )
         _trainer_result = train_factorized_mark_model(
             model,
             train_records,
@@ -3871,7 +4615,17 @@ def main() -> None:
                 flush=True,
             ),
             checkpoint_interval=args.recovery_every,
-            checkpoint_callback=(save_recovery if recovery_path is not None else None),
+            # P50 is deliberately non-resumable. Do not publish recovery or
+            # interim-best artifacts before finalize() proves every gradient
+            # and collapse condition; the selected checkpoint below is the
+            # first completion artifact for this lane.
+            checkpoint_callback=(
+                capture_p50_recovery
+                if p50_sentinel is not None
+                else save_recovery
+                if recovery_path is not None
+                else None
+            ),
             resume_state=resume_state,
             # A benchmark REQUIRES synchronized phase boundaries; without them the forward/backward/
             # optimizer splits are just async-launch times and the report would be fiction.
@@ -3888,31 +4642,123 @@ def main() -> None:
             target_property_conditions=train_property_conditions,
             condition_dropout_probability=args.condition_dropout_probability,
             trainable_parameter_scope=args.trainable_parameter_scope,
+            training_objective=successor_training_objective,
+            training_loader_factory=successor_loader_factory,
+            training_batch_audit_callback=p50_live_exposure_observer,
+            gradient_audit_callback=p50_sentinel,
+            validation_audit_callback=(
+                None
+                if p50_sentinel is None
+                else lambda completed_step, metrics: p50_sentinel.observe_validation(
+                    completed_step=completed_step,
+                    metrics=metrics,
+                )
+            ),
         )
         if args.dry_launch:
             _dry_ok, _dry_report = _zmi.zero_mixture_ok()
-            _finite = bool(_trainer_result.get("train_loss_finite")) and bool(
-                _trainer_result.get("validation_loss_finite")
+            _validation_finite = (
+                _trainer_result.get("validation_selection_finite")
+                if canonical_successor_backend
+                else _trainer_result.get("validation_loss_finite")
             )
-            _verdict = "GO_CPU_DRY_LAUNCH" if (_dry_ok and _finite) else "NO_GO_ZERO_MIXTURE_GATE"
+            _finite = bool(_trainer_result.get("train_loss_finite")) and bool(
+                _validation_finite
+            )
+            _verdict = (
+                (
+                    "FINITE_BOUNDED_DRY_LAUNCH_NO_TRAINING_AUTHORITY"
+                    if (_dry_ok and _finite)
+                    else "BOUNDED_DRY_LAUNCH_FAILED"
+                )
+                if canonical_successor_backend
+                else (
+                    "GO_CPU_DRY_LAUNCH"
+                    if (_dry_ok and _finite)
+                    else "NO_GO_ZERO_MIXTURE_GATE"
+                )
+            )
+            dry_payload = {
+                "phase": "dry_launch_complete",
+                "verdict": _verdict,
+                "zero_mixture_ok": _dry_ok,
+                "counters": _dry_report["counters"],
+                "failing_zero": _dry_report["failing_zero_counters"],
+                "failing_positive": _dry_report["failing_positive_counters"],
+            }
+            if canonical_successor_backend:
+                dry_payload.update(
+                    {
+                        "training_objective": _trainer_result.get("training_objective"),
+                        "train_objective_loss": _trainer_result.get(
+                            "train_objective_loss"
+                        ),
+                        "selection_metric": _trainer_result.get("selection_metric"),
+                        "validation_selection_value": _trainer_result.get(
+                            "validation_selection_value"
+                        ),
+                    }
+                )
+            else:
+                dry_payload.update(
+                    {
+                        "train_gm_loss": _trainer_result.get("train_gm_loss"),
+                        "validation_gm_loss": _trainer_result.get("validation_gm_loss"),
+                    }
+                )
+            print(json.dumps(dry_payload, sort_keys=True), flush=True)
+            return
+        history, selected_validation = _trainer_result
+        if p50_sentinel is not None:
+            if p50_live_exposure_observer is None:
+                raise RuntimeError("P50 live exposure observer was not initialized")
+            observed_exposure = p50_live_exposure_observer.finalize()
+            p50_observed_exposure_report = asdict(observed_exposure)
+            p50_sentinel_report = p50_sentinel.finalize()
+            checkpoint_metadata.update(
+                {
+                    "p50_exposure_plan": p50_exposure_report,
+                    "p50_observed_exposure": (
+                        p50_observed_exposure_report
+                    ),
+                    "p50_gradient_collapse_report": p50_sentinel_report,
+                }
+            )
+            if (
+                pending_p50_recovery_state is None
+                or int(pending_p50_recovery_state["completed_steps"]) != 50
+            ):
+                raise RuntimeError(
+                    "P50 passed its sentinel without an exact step-50 recovery state"
+                )
+            if args.checkpoint is None:
+                raise RuntimeError("P50 completion target disappeared")
+            p50_completion = publish_p50_completion(
+                args.checkpoint,
+                selected_payload={
+                    **checkpoint_metadata,
+                    "checkpoint_kind": "selected_evaluation_model",
+                    "state_dict": model.state_dict(),
+                    "selected_validation": selected_validation,
+                },
+                recovery_payload={
+                    **checkpoint_metadata,
+                    **pending_p50_recovery_state,
+                    "checkpoint_kind": "exact_training_recovery",
+                    "initial_validation": initial_validation,
+                },
+            )
             print(
                 json.dumps(
                     {
-                        "phase": "dry_launch_complete",
-                        "verdict": _verdict,
-                        "zero_mixture_ok": _dry_ok,
-                        "train_gm_loss": _trainer_result.get("train_gm_loss"),
-                        "validation_gm_loss": _trainer_result.get("validation_gm_loss"),
-                        "counters": _dry_report["counters"],
-                        "failing_zero": _dry_report["failing_zero_counters"],
-                        "failing_positive": _dry_report["failing_positive_counters"],
+                        "phase": "p50_completion_published",
+                        **p50_sentinel_report,
+                        **p50_completion.report(),
                     },
                     sort_keys=True,
                 ),
                 flush=True,
             )
-            return
-        history, selected_validation = _trainer_result
     elif isinstance(model, torch.nn.Module) and loaded_checkpoint is None:
         training_fiber_cache = {}
         with tracelet_fiber_executor(
@@ -3951,7 +4797,14 @@ def main() -> None:
     else:
         selected_validation = dict(initial_validation)
         selected_validation["selected_step"] = 0.0
-    if isinstance(model, FactorizedTraceletRateModel):
+    if canonical_successor_backend:
+        # P50 never uses the already-inspected final test partition for
+        # selection or repair; renewed/external final evaluation is separate.
+        final_test = {
+            "canonical_successor_test_withheld": 1.0,
+            "test_used_for_checkpoint_selection": 0.0,
+        }
+    elif isinstance(model, FactorizedTraceletRateModel):
         final_test = factorized_mark_metrics(
             model,
             test_examples,
@@ -3960,7 +4813,11 @@ def main() -> None:
         )
     else:
         final_test = tracelet_conditional_metrics(model, test_examples)
-    if args.checkpoint is not None and isinstance(model, torch.nn.Module):
+    if (
+        args.checkpoint is not None
+        and isinstance(model, torch.nn.Module)
+        and p50_sentinel is None
+    ):
         _atomic_torch_save(
             {
                 **checkpoint_metadata,
@@ -4014,6 +4871,38 @@ def main() -> None:
             "generated_nonnull_smiles": 0,
             "rollout": {"skipped": True},
         }
+        if canonical_successor_backend:
+            report["training"].update(
+                {
+                    "factorized_training_objective": args.factorized_training_objective,
+                    "successor_objective_mode": args.successor_objective_mode,
+                    "successor_hazard_weight": args.successor_hazard_weight,
+                    "canonical_successor_operator_identity": (
+                        canonical_successor_operator_identity
+                    ),
+                    "enable_ring_restates": resolved_enable_ring_restates,
+                    "enable_ring_system_delete": (
+                        resolved_enable_ring_system_delete
+                    ),
+                    "editing_training_gate_contract_sha256": (
+                        p50_gate_contract_sha256
+                    ),
+                    "successor_p50_initialization_regime": (
+                        None
+                        if p50_thresholds is None
+                        else p50_thresholds.initialization_regime
+                    ),
+                    "p50_exposure_plan": p50_exposure_report,
+                    "p50_observed_exposure": p50_observed_exposure_report,
+                    "p50_gradient_collapse_report": p50_sentinel_report,
+                    "p50_completion": (
+                        None
+                        if p50_completion is None
+                        else p50_completion.report()
+                    ),
+                    "successor_full_training_authorized": False,
+                }
+            )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -4226,6 +5115,36 @@ def main() -> None:
     }
     if generated_smiles:
         report["generated_ring_taxonomy"] = ring_taxonomy_report(generated_smiles)
+    if canonical_successor_backend:
+        report["training"].update(
+            {
+                "factorized_training_objective": args.factorized_training_objective,
+                "successor_objective_mode": args.successor_objective_mode,
+                "successor_hazard_weight": args.successor_hazard_weight,
+                "canonical_successor_operator_identity": (
+                    canonical_successor_operator_identity
+                ),
+                "enable_ring_restates": resolved_enable_ring_restates,
+                "enable_ring_system_delete": resolved_enable_ring_system_delete,
+                "editing_training_gate_contract_sha256": (
+                    p50_gate_contract_sha256
+                ),
+                "successor_p50_initialization_regime": (
+                    None
+                    if p50_thresholds is None
+                    else p50_thresholds.initialization_regime
+                ),
+                "p50_exposure_plan": p50_exposure_report,
+                "p50_observed_exposure": p50_observed_exposure_report,
+                "p50_gradient_collapse_report": p50_sentinel_report,
+                "p50_completion": (
+                    None
+                    if p50_completion is None
+                    else p50_completion.report()
+                ),
+                "successor_full_training_authorized": False,
+            }
+        )
     if args.quality_metrics and generated_smiles:
         quality_reference = split.test
         if args.quality_reference_file is not None:

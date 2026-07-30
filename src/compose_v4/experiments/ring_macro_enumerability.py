@@ -477,6 +477,7 @@ def _enumerate_ring_macro_action_law(
         compute_ring_restates=model.enable_ring_restates,
         compute_cyclic_graft=model.enable_cyclic_graft,
         compute_ring_opening=model.enable_ring_opening,
+        compute_ring_system_delete=model.enable_ring_system_delete,
     ).to(model.device)
 
     action_masses: dict[RingSystemGrow, _MutableActionMass] = {}

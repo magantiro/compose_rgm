@@ -24,7 +24,9 @@ from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_training_objective import (
     FactorizedTrainingObjective,
     GradientAuditCallback,
+    TrainingBatchAuditCallback,
     TrainingLoaderFactory,
+    ValidationAuditCallback,
 )
 from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.experiments.training_support_cache import (
@@ -356,8 +358,9 @@ class FactorizedMarkCollator:
     compute_ring_restates: bool = False
     compute_cyclic_graft: bool = False
     compute_ring_opening: bool = False
+    compute_ring_system_delete: bool = True
     _chemistry_feature_cache: OrderedDict[
-        tuple[int, bool, bool, tuple[bytes, bytes, bytes, bytes]],
+        tuple[int, bool, bool, bool, bool, tuple[bytes, bytes, bytes, bytes]],
         ChemistryStateFeatures,
     ] = field(default_factory=OrderedDict, init=False, repr=False, compare=False)
 
@@ -401,6 +404,7 @@ class FactorizedMarkCollator:
             compute_ring_restates=self.compute_ring_restates,
             compute_cyclic_graft=self.compute_cyclic_graft,
             compute_ring_opening=self.compute_ring_opening,
+            compute_ring_system_delete=self.compute_ring_system_delete,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
                 if has_conditions
@@ -476,6 +480,7 @@ def factorized_mark_loader(
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
+    compute_ring_system_delete: bool = True,
     record_index_sampler: object | None = None,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
@@ -524,6 +529,7 @@ def factorized_mark_loader(
             compute_ring_restates=compute_ring_restates,
             compute_cyclic_graft=compute_cyclic_graft,
             compute_ring_opening=compute_ring_opening,
+            compute_ring_system_delete=compute_ring_system_delete,
         ),
         pin_memory=pin_memory,
         drop_last=True,
@@ -591,6 +597,7 @@ def sample_factorized_mark_batch(
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
+    compute_ring_system_delete: bool = True,
 ) -> FactorizedMarkBatch:
     if workers < 0:
         raise ValueError("evaluation workers must be non-negative")
@@ -603,6 +610,7 @@ def sample_factorized_mark_batch(
         compute_ring_restates = capabilities.compute_ring_restates
         compute_cyclic_graft = capabilities.compute_cyclic_graft
         compute_ring_opening = capabilities.compute_ring_opening
+        compute_ring_system_delete = capabilities.compute_ring_system_delete
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
     dataset = FactorizedMarkDataset(
@@ -630,6 +638,7 @@ def sample_factorized_mark_batch(
         compute_ring_restates=compute_ring_restates,
         compute_cyclic_graft=compute_cyclic_graft,
         compute_ring_opening=compute_ring_opening,
+        compute_ring_system_delete=compute_ring_system_delete,
     )
     if workers == 0:
         batch = collator([dataset[index] for index in range(batch_size)])
@@ -1218,7 +1227,9 @@ def train_factorized_mark_model(
     record_index_sampler: object | None = None,
     training_objective: FactorizedTrainingObjective | None = None,
     training_loader_factory: TrainingLoaderFactory | None = None,
+    training_batch_audit_callback: TrainingBatchAuditCallback | None = None,
     gradient_audit_callback: GradientAuditCallback | None = None,
+    validation_audit_callback: ValidationAuditCallback | None = None,
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
         raise ValueError("steps, batch size, and learning rate must be positive")
@@ -1382,6 +1393,7 @@ def train_factorized_mark_model(
             compute_ring_restates=model.enable_ring_restates,
             compute_cyclic_graft=model.enable_cyclic_graft,
             compute_ring_opening=model.enable_ring_opening,
+            compute_ring_system_delete=model.enable_ring_system_delete,
             record_index_sampler=record_index_sampler,
         )
         if training_loader_factory is None
@@ -1422,6 +1434,8 @@ def train_factorized_mark_model(
         # Objective-specific support is checked before scoring so a cache,
         # representability, or alignment failure cannot reach an optimizer step.
         objective.validate_batch(cpu_batch)
+        if training_batch_audit_callback is not None:
+            training_batch_audit_callback(cpu_batch, completed_steps)
         batch = cpu_batch.to(model.device, non_blocking=model.device.type == "cuda")
         transferred_at = perf_counter()
         optimizer.zero_grad(set_to_none=True)
@@ -1600,6 +1614,8 @@ def train_factorized_mark_model(
                 and evaluations_without_improvement >= early_stopping_patience
             )
             metrics["early_stopped"] = float(should_early_stop)
+            if validation_audit_callback is not None:
+                validation_audit_callback(completed_steps, metrics)
             history.append(metrics)
             if progress_callback is not None:
                 observed_updates = completed_steps - start_step

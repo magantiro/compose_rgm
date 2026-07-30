@@ -70,12 +70,8 @@ def _repeated_cycle_open_examples():
         unique_source_molecules=False,
     )
     first = examples[0]
-    second = next(
-        row for row in examples[1:] if row.target_key != first.target_key
-    )
-    assert persistent_slot_state_sha256(
-        first.state
-    ) == persistent_slot_state_sha256(second.state)
+    second = next(row for row in examples[1:] if row.target_key != first.target_key)
+    assert persistent_slot_state_sha256(first.state) == persistent_slot_state_sha256(second.state)
     return (
         replace(first, data_lane="repeated_state_3_to_1"),
         replace(first, data_lane="repeated_state_3_to_1"),
@@ -98,11 +94,7 @@ def test_panel_reports_successor_family_and_within_family_metrics():
     assert metrics["canonical_successor_nll"] >= 0.0
     assert 0.0 <= metrics["teacher_successor_top1_recall"] <= 1.0
     assert 0.0 < metrics["teacher_family_probability"] <= 1.0
-    assert (
-        0.0
-        < metrics["within_teacher_family_successor_probability"]
-        <= 1.0
-    )
+    assert 0.0 < metrics["within_teacher_family_successor_probability"] <= 1.0
     assert all(row["alias_multiplicity"] >= 1 for row in metrics["per_example"])
 
 
@@ -132,6 +124,11 @@ def test_repeated_state_metrics_use_empirical_successor_distribution():
     )
 
     assert not report["required_components_without_gradient"]
+    assert report["optimizer_steps_with_nonzero_gradient"] == report["steps"]
+    assert all(
+        0 < count <= report["steps"]
+        for count in report["component_gradient_update_counts"].values()
+    )
     assert (
         report["final"]["repeated_state_excess_nll_over_empirical_entropy"]
         < initial["repeated_state_excess_nll_over_empirical_entropy"]
@@ -144,9 +141,7 @@ def test_repeated_state_metrics_use_empirical_successor_distribution():
 
 def test_one_example_all_parameter_micro_overfit_improves_successor_nll():
     model = _model()
-    example = next(
-        row for row in _cycle_examples() if row.family_name == "cycle_attach"
-    )
+    example = next(row for row in _cycle_examples() if row.family_name == "cycle_attach")
     panel = prepare_successor_panel(model, (example,))
     report = train_successor_micro_panel(
         model,
@@ -159,10 +154,12 @@ def test_one_example_all_parameter_micro_overfit_improves_successor_nll():
     )
 
     assert not report["required_components_without_gradient"]
-    assert (
-        report["final"]["canonical_successor_nll"]
-        < report["initial"]["canonical_successor_nll"]
+    assert report["optimizer_steps_with_nonzero_gradient"] == report["steps"]
+    assert all(
+        0 < count <= report["steps"]
+        for count in report["component_gradient_update_counts"].values()
     )
+    assert report["final"]["canonical_successor_nll"] < report["initial"]["canonical_successor_nll"]
     assert (
         report["final"]["teacher_successor_probability"]
         > report["initial"]["teacher_successor_probability"]

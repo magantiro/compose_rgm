@@ -28,6 +28,7 @@ from compose_v4.experiments.editing_training_sentinel import (
     FAMILY_PARAMETER_PREFIXES,
     EditingTrainingSentinelError,
     P50GradientCollapseSentinel,
+    P50LiveExposureObserver,
     assert_successor_exposure_matches,
     audit_successor_exposure_plan,
 )
@@ -544,8 +545,12 @@ def test_successor_objective_metrics_microbatch_and_gradients(
         "successor_generator_bregman_loss",
         "hazard_bregman_loss",
         "mean_teacher_productive_successor_probability",
+        "teacher_family_nll_atom_insert",
+        "within_family_successor_nll_atom_insert",
     ):
         assert streamed[metric] == pytest.approx(full[metric], abs=2e-6)
+    assert full["teacher_family_nll_atom_insert"] >= 0.0
+    assert full["within_family_successor_nll_atom_insert"] >= 0.0
 
     trainable = copy.deepcopy(model).train()
     objective = CanonicalSuccessorTrainingObjective(
@@ -573,6 +578,32 @@ def test_successor_objective_metrics_microbatch_and_gradients(
             missing_cells,
             use_bf16=False,
         )
+
+
+def test_productive_identity_objective_has_no_hazard_gradient(
+    fixture_bundle,
+) -> None:
+    record, catalog, template, cache_records = fixture_bundle
+    batch = _validation_batch(record, catalog, template, cache_records)
+    model = copy.deepcopy(template).train()
+    objective = CanonicalSuccessorTrainingObjective(
+        mode="productive_identity",
+        hazard_weight=0.0,
+    )
+
+    model.zero_grad(set_to_none=True)
+    loss = objective.loss(model, batch)
+    assert torch.isfinite(loss)
+    loss.backward()
+
+    hazard_parameters = tuple(model.total_hazard_head.parameters())
+    assert hazard_parameters
+    assert all(parameter.grad is None for parameter in hazard_parameters)
+    assert any(
+        parameter.grad is not None
+        and float(parameter.grad.abs().sum()) > 0.0
+        for parameter in model.family_head.parameters()
+    )
 
 
 def test_exposure_preflight_and_p50_gradient_sentinel(fixture_bundle) -> None:
@@ -606,6 +637,7 @@ def test_exposure_preflight_and_p50_gradient_sentinel(fixture_bundle) -> None:
         minimum_teacher_examples={"atom_insert": 1},
     )
     assert exposure.teacher_examples_by_family["atom_insert"] > 0
+    assert exposure.gradient_opportunities_by_family["atom_insert"] == 2
     assert exposure.nonterminal_examples_by_step[0] > 0
     assert len(exposure.ordered_address_stream_sha256) == 64
     assert len(exposure.ordered_training_stream_sha256) == 64
@@ -698,6 +730,27 @@ def test_exposure_preflight_and_p50_gradient_sentinel(fixture_bundle) -> None:
                 "atom_delete": 1,
             },
         )
+    gradient_starved_loader = factorized_successor_loader(
+        _mark_dataset(record, length=16),
+        cache,
+        _mark_collator(catalog, template),
+        batch_size=8,
+        workers=0,
+        pin_memory=False,
+        seed=31,
+        semantic_cell_ids=_semantic_cells(cache_records),
+        require_semantic_cell_ids=True,
+    )
+    with pytest.raises(
+        EditingTrainingSentinelError,
+        match="gradient_opportunities",
+    ):
+        audit_successor_exposure_plan(
+            gradient_starved_loader,
+            expected_steps=2,
+            required_families=("atom_insert",),
+            minimum_gradient_opportunities={"atom_insert": 3},
+        )
 
     validation = _validation_batch(
         record,
@@ -743,6 +796,74 @@ def test_exposure_preflight_and_p50_gradient_sentinel(fixture_bundle) -> None:
     )
     assert report["final_validation_metrics"] == pytest.approx(baseline)
     assert report["final_family_nll_regressions"]["atom_insert"] == 0.0
+
+
+def test_p50_live_observer_binds_actual_batches_to_preflight(fixture_bundle) -> None:
+    record, catalog, template, cache_records = fixture_bundle
+    cache = _ExactCacheStub(
+        {
+            (
+                row.address.packed_shard_content_sha256,
+                row.address.entry_index,
+                row.address.progress_index,
+            ): row
+            for row in cache_records
+        }
+    )
+    loader = factorized_successor_loader(
+        _mark_dataset(record, length=16),
+        cache,
+        _mark_collator(catalog, template),
+        batch_size=8,
+        workers=0,
+        pin_memory=False,
+        seed=31,
+        semantic_cell_ids=_semantic_cells(cache_records),
+        require_semantic_cell_ids=True,
+    )
+    base_batches = tuple(loader)
+    frozen_batches = base_batches * 25
+    planned = audit_successor_exposure_plan(
+        frozen_batches,
+        expected_steps=50,
+        required_families=("atom_insert",),
+        minimum_gradient_opportunities={"atom_insert": 50},
+    )
+    observer = P50LiveExposureObserver(
+        planned=planned,
+        required_families=("atom_insert",),
+        minimum_gradient_opportunities={"atom_insert": 50},
+    )
+    for completed_step, batch in enumerate(frozen_batches, start=1):
+        observer(batch, completed_step)
+    assert observer.finalize() == planned
+
+    first = frozen_batches[0]
+    mutated_first = replace(
+        first,
+        cache_addresses=(
+            replace(
+                first.cache_addresses[0],
+                packed_shard_name="live-stream-mutated.jsonl.gz",
+            ),
+            *first.cache_addresses[1:],
+        ),
+    )
+    mismatched = P50LiveExposureObserver(
+        planned=planned,
+        required_families=("atom_insert",),
+        minimum_gradient_opportunities={"atom_insert": 50},
+    )
+    for completed_step, batch in enumerate(
+        (mutated_first, *frozen_batches[1:]),
+        start=1,
+    ):
+        mismatched(batch, completed_step)
+    with pytest.raises(
+        EditingTrainingSentinelError,
+        match="address stream differs",
+    ):
+        mismatched.finalize()
 
 
 @pytest.mark.parametrize("dead_route", ("family_gate", "action_route"))
@@ -918,7 +1039,9 @@ def test_shared_trainer_executes_successor_dry_and_update_paths(
         assert torch.equal(dry_model.state_dict()[name], value)
 
     recovery_states = []
+    training_batch_steps = []
     gradient_steps = []
+    validation_steps = []
 
     def gradient_audit(_model, _batch, completed_step, loss):
         assert torch.isfinite(loss)
@@ -928,17 +1051,29 @@ def test_shared_trainer_executes_successor_dry_and_update_paths(
         )
         gradient_steps.append(completed_step)
 
+    def training_batch_audit(batch, completed_step):
+        assert isinstance(batch, FactorizedSuccessorBatch)
+        training_batch_steps.append(completed_step)
+
+    def validation_audit(completed_step, metrics):
+        assert objective.selection_metric in metrics
+        validation_steps.append(completed_step)
+
     trained = copy.deepcopy(template)
     history, best = train_factorized_mark_model(
         trained,
         checkpoint_interval=1,
         checkpoint_callback=recovery_states.append,
+        training_batch_audit_callback=training_batch_audit,
         gradient_audit_callback=gradient_audit,
+        validation_audit_callback=validation_audit,
         **common,
     )
     assert len(history) == steps
     assert objective.selection_metric in best
+    assert training_batch_steps == [1, 2]
     assert gradient_steps == [1, 2]
+    assert validation_steps == [1, 2]
     assert recovery_states
     assert recovery_states[-1]["training_objective_name"] == objective.name
     assert (
@@ -969,6 +1104,40 @@ def test_shared_trainer_executes_successor_dry_and_update_paths(
                 "training_objective": incompatible,
             },
         )
+
+    blocked_checkpoints = []
+
+    def reject_validation(_completed_step, _metrics):
+        raise EditingTrainingSentinelError("sentinel rejected validation")
+
+    with pytest.raises(
+        EditingTrainingSentinelError,
+        match="sentinel rejected validation",
+    ):
+        train_factorized_mark_model(
+            copy.deepcopy(template),
+            checkpoint_interval=1,
+            checkpoint_callback=blocked_checkpoints.append,
+            validation_audit_callback=reject_validation,
+            **common,
+        )
+    assert blocked_checkpoints == []
+
+    def reject_live_batch(_batch, _completed_step):
+        raise EditingTrainingSentinelError("live exposure differs")
+
+    with pytest.raises(
+        EditingTrainingSentinelError,
+        match="live exposure differs",
+    ):
+        train_factorized_mark_model(
+            copy.deepcopy(template),
+            checkpoint_interval=1,
+            checkpoint_callback=blocked_checkpoints.append,
+            training_batch_audit_callback=reject_live_batch,
+            **common,
+        )
+    assert blocked_checkpoints == []
 
 
 def test_builder_refuses_unaddressed_trace(fixture_bundle) -> None:

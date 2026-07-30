@@ -6,6 +6,15 @@ import json
 from pathlib import Path
 from typing import Any
 
+_BOOLEAN_OPTIONAL_ARGUMENTS = frozenset(
+    {
+        # argparse.BooleanOptionalAction in train_tracelet_cnof_gate.py.
+        # False is an explicit support choice, not the absence of a store_true flag.
+        "enable_ring_restates",
+        "enable_ring_system_delete",
+    }
+)
+
 
 def load_tracelet_recipe(path: Path) -> dict[str, Any]:
     recipe = json.loads(path.read_text())
@@ -39,12 +48,32 @@ def build_tracelet_recipe_argv(
     arguments = recipe.get("arguments")
     if not isinstance(arguments, dict):
         raise ValueError("recipe requires an arguments object")
+    if arguments.get("factorized_training_objective") == "canonical_successor":
+        if arguments.get("skip_rollouts") is not True:
+            raise ValueError(
+                "canonical-successor editing recipes must freeze skip_rollouts=true"
+            )
+        missing_capabilities = [
+            name
+            for name in (
+                "enable_ring_restates",
+                "enable_ring_system_delete",
+            )
+            if type(arguments.get(name)) is not bool
+        ]
+        if missing_capabilities:
+            raise ValueError(
+                "canonical-successor editing recipes must explicitly freeze "
+                f"Boolean capabilities: {missing_capabilities}"
+            )
     argv = [str(smiles_file)]
     for name, value in arguments.items():
         flag = f"--{name.replace('_', '-')}"
         if isinstance(value, bool):
             if value:
                 argv.append(flag)
+            elif name in _BOOLEAN_OPTIONAL_ARGUMENTS:
+                argv.append(f"--no-{name.replace('_', '-')}")
             continue
         argv.extend((flag, str(value)))
     if quality_reference_file is not None:

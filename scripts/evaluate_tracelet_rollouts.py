@@ -32,6 +32,9 @@ from compose_v4.experiments.calibrated_rewrite_sampling import (
 from compose_v4.experiments.parallel_tracelet_sampling import (
     sample_tracelet_ancestral_many,
 )
+from compose_v4.experiments.p50_completion import (
+    validate_p50_completion_member,
+)
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedMarkEmpiricalPriors,
     FactorizedTraceletRateModel,
@@ -59,6 +62,24 @@ def _file_sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _historical_optional_bool(
+    payload: dict[str, object],
+    key: str,
+    *,
+    default: bool,
+) -> bool:
+    """Read optional legacy metadata without accepting truthy strings or null."""
+
+    if key not in payload:
+        return default
+    value = payload[key]
+    if type(value) is not bool:
+        raise ValueError(
+            f"checkpoint metadata {key!r} must be a literal Boolean when present"
+        )
+    return value
 
 
 def load_reusable_rollouts(
@@ -130,6 +151,7 @@ def load_factorized_rollout_checkpoint(
     if not isinstance(raw_payload, dict):
         raise ValueError("checkpoint payload must be a dictionary")
     payload = dict(raw_payload)
+    validate_p50_completion_member(path, payload)
     if (
         "state_dict" not in payload
         and payload.get("checkpoint_kind") == "exact_training_recovery"
@@ -176,7 +198,16 @@ def load_factorized_rollout_checkpoint(
     )
     # B-edit checkpoints carry the wider organic heads + editing families; reconstruct them from the
     # metadata (absent on de-novo B -> CNOF vocab + editing families off, byte-identical to before).
-    corrupted_prior_mix = bool(payload.get("corrupted_prior_mix"))
+    corrupted_prior_mix = _historical_optional_bool(
+        payload,
+        "corrupted_prior_mix",
+        default=False,
+    )
+    enable_ring_restates = _historical_optional_bool(
+        payload,
+        "enable_ring_restates",
+        default=corrupted_prior_mix,
+    )
     model = FactorizedTraceletRateModel(
         payload["ring_catalog"],
         hidden_dim=int(payload["hidden_dim"]),
@@ -197,7 +228,7 @@ def load_factorized_rollout_checkpoint(
         atom_vocabulary=(
             ORGANIC_VOCABULARY if bool(payload.get("organic_vocabulary")) else None
         ),
-        enable_ring_restates=corrupted_prior_mix,
+        enable_ring_restates=enable_ring_restates,
         enable_cyclic_graft=corrupted_prior_mix,
         enable_heteroatom_scan=corrupted_prior_mix,
         enable_ring_opening=corrupted_prior_mix,
@@ -205,6 +236,13 @@ def load_factorized_rollout_checkpoint(
         enable_cycle_ops=bool(payload.get("enable_cycle_ops")),
         # RING_CORE_V1 disables the legacy whole-ring grow macro; absent metadata -> True -> byte-identical.
         enable_ring_grow_macro=bool(payload.get("enable_ring_grow_macro", True)),
+        # Historical checkpoints always exposed whole-ring deletion.  V2 may
+        # explicitly disable that accelerator while keeping primitive opening.
+        enable_ring_system_delete=_historical_optional_bool(
+            payload,
+            "enable_ring_system_delete",
+            default=True,
+        ),
     )
     incompatible = model.load_state_dict(payload["state_dict"], strict=False)
     missing_keys = set(incompatible.missing_keys)

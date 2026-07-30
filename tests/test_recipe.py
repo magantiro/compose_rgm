@@ -2,10 +2,54 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from compose_v4.experiments.recipe import (
     build_tracelet_recipe_argv,
     load_tracelet_recipe,
 )
+
+
+def test_boolean_optional_false_is_not_dropped_from_recipe_argv() -> None:
+    argv = build_tracelet_recipe_argv(
+        {
+            "arguments": {
+                "enable_ring_restates": False,
+                "enable_ring_system_delete": False,
+                "quality_metrics": False,
+            }
+        },
+        smiles_file=Path("train.smi"),
+    )
+
+    assert "--no-enable-ring-restates" in argv
+    assert "--no-enable-ring-system-delete" in argv
+    assert "--quality-metrics" not in argv
+
+
+def test_canonical_successor_recipe_requires_no_rollouts_and_explicit_support() -> None:
+    base = {
+        "factorized_training_objective": "canonical_successor",
+        "skip_rollouts": True,
+        "enable_ring_restates": True,
+        "enable_ring_system_delete": False,
+    }
+    argv = build_tracelet_recipe_argv(
+        {"arguments": base},
+        smiles_file=Path("train.smi"),
+    )
+    assert "--skip-rollouts" in argv
+    assert "--enable-ring-restates" in argv
+    assert "--no-enable-ring-system-delete" in argv
+
+    for missing in ("skip_rollouts", "enable_ring_restates"):
+        arguments = dict(base)
+        arguments.pop(missing)
+        with pytest.raises(ValueError):
+            build_tracelet_recipe_argv(
+                {"arguments": arguments},
+                smiles_file=Path("train.smi"),
+            )
 
 
 def test_frozen_tree_fcd_recipe_materializes_expected_command() -> None:

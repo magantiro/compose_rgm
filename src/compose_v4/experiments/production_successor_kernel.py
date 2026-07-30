@@ -158,6 +158,7 @@ def _one_state_batch(
             compute_ring_restates=capabilities.compute_ring_restates,
             compute_cyclic_graft=capabilities.compute_cyclic_graft,
             compute_ring_opening=capabilities.compute_ring_opening,
+            compute_ring_system_delete=capabilities.compute_ring_system_delete,
         )
     if prepared_batch.batch_size != 1:
         raise ProductionSuccessorKernelError(
@@ -174,6 +175,39 @@ def _one_state_batch(
         prepared_batch,
         times=torch.tensor((float(time),), dtype=prepared_batch.times.dtype),
     ).to(model.device)
+
+
+def _default_kernel_identity(
+    model: FactorizedTraceletRateModel,
+) -> KernelIdentity:
+    """Capability-bearing fallback for direct callers outside the shared evaluator."""
+
+    capabilities = model.operator_capabilities
+    flags = (
+        ("enable_ring_restates", capabilities.compute_ring_restates),
+        ("enable_cyclic_graft", capabilities.compute_cyclic_graft),
+        ("enable_heteroatom_scan", model.enable_heteroatom_scan),
+        ("enable_ring_opening", capabilities.compute_ring_opening),
+        ("enable_cycle_ops", model.enable_cycle_ops),
+        ("enable_ring_system_delete", capabilities.compute_ring_system_delete),
+    )
+    if model.enable_cycle_ops:
+        ringcore_configuration = "ringcore_v1_compositional_cycle_ops"
+    elif model.enable_ring_grow_macro:
+        ringcore_configuration = "legacy_ring_grow_macro"
+    else:
+        ringcore_configuration = "cycle_and_ring_grow_disabled"
+    if not model.enable_ring_system_delete:
+        ringcore_configuration += ":ring_system_delete_disabled"
+    return KernelIdentity(
+        implementation="factorized_ringcore_segmented_pushforward",
+        support_signature=SupportSignature(
+            capability_flags=flags,
+            canonicalizer_version="canonical_state_key",
+            embedded_jump_chain_policy="fixed_step_embedded_jump_chain",
+            ringcore_configuration=ringcore_configuration,
+        ),
+    )
 
 
 def _coordinate_action(
@@ -453,14 +487,7 @@ def canonical_successor_result(
         successor_marks.setdefault(key, []).append(mark)
 
     ordered_keys = tuple(sorted(successor_marks))
-    identity = identity or KernelIdentity(
-        implementation="factorized_ringcore_segmented_pushforward",
-        support_signature=SupportSignature(
-            canonicalizer_version="canonical_state_key",
-            embedded_jump_chain_policy="fixed_step_embedded_jump_chain",
-            ringcore_configuration="ringcore_v1_compositional_cycle_ops",
-        ),
-    )
+    identity = identity or _default_kernel_identity(model)
     if not ordered_keys:
         batch = SuccessorBatch(
             source_key=source_key,
@@ -562,14 +589,7 @@ class FactorizedCanonicalSuccessorKernel:
     ) -> None:
         self.model = model
         self.time = float(time)
-        self._identity = identity or KernelIdentity(
-            implementation="factorized_ringcore_segmented_pushforward",
-            support_signature=SupportSignature(
-                canonicalizer_version="canonical_state_key",
-                embedded_jump_chain_policy="fixed_step_embedded_jump_chain",
-                ringcore_configuration="ringcore_v1_compositional_cycle_ops",
-            ),
-        )
+        self._identity = identity or _default_kernel_identity(model)
         self.system = system or de_novo_rewrite_system()
 
     def successors(self, state: MolecularGraph) -> SuccessorBatch:

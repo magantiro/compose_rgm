@@ -42,6 +42,33 @@ def test_valid_ring_core_payload_passes():
     report = verify_checkpoint_identity(_valid_payload(), checkpoint_path=None)
     assert report["identity_ok"] is True
     assert report["enable_cycle_ops"] and not report["enable_ring_grow_macro"]
+    assert report["enable_ring_restates"] is True
+    assert report["enable_ring_system_delete"] is True
+
+
+@pytest.mark.parametrize("value", [False, None, "false", 0])
+def test_delete_disabled_or_malformed_payload_cannot_masquerade_as_v1(value):
+    payload = _valid_payload()
+    payload["enable_ring_system_delete"] = value
+    with pytest.raises(RingCoreIdentityError, match="ring_system_delete"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+@pytest.mark.parametrize("value", [False, None, "false", 0])
+def test_restate_disabled_or_malformed_payload_cannot_masquerade_as_v1(value):
+    payload = _valid_payload()
+    payload["enable_ring_restates"] = value
+    with pytest.raises(RingCoreIdentityError, match="ring_restates"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
+
+
+@pytest.mark.parametrize("value", [None, "false", 0, 1])
+def test_malformed_legacy_restate_fallback_cannot_masquerade_as_v1(value):
+    payload = _valid_payload()
+    payload.pop("enable_ring_restates", None)
+    payload["corrupted_prior_mix"] = value
+    with pytest.raises(RingCoreIdentityError, match="corrupted_prior_mix"):
+        verify_checkpoint_identity(payload, checkpoint_path=None)
 
 
 def test_missing_checkpoint_file_fails():
