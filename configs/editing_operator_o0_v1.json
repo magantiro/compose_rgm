@@ -1,0 +1,221 @@
+{
+  "schema": "compose.editing_operator_o0",
+  "version": 1,
+  "status": "METHOD_FROZEN_TASK_ARTIFACT_PENDING",
+  "scientific_role": "checkpoint-independent structural support and path-cost screen before any operator, architecture, or training change",
+  "checkpoint_dependency": "none",
+  "production_mutation_authorized": false,
+  "required_experiments": [
+    "E3",
+    "E4",
+    "E7"
+  ],
+  "required_task_kinds": {
+    "E3": [
+      "size_grow",
+      "size_shrink",
+      "grow_then_switch_smaller",
+      "coupled_size_and_cycle_rank_change"
+    ],
+    "E4": [
+      "cycle_create",
+      "cycle_open",
+      "ring_size_change",
+      "fused_system_modify",
+      "topology_simplify",
+      "topology_add_then_reverse",
+      "spiro_or_bridged_if_reachable"
+    ],
+    "E7": [
+      "preference_switch",
+      "pareto_fan_shared_prefix",
+      "protected_scaffold_path",
+      "protected_pharmacophore_path",
+      "hard_atom_count_corridor"
+    ]
+  },
+  "operator_bases": [
+    {
+      "basis_id": "primitive7",
+      "families": [
+        "atom_insert",
+        "atom_delete",
+        "atom_restate",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_insert",
+        "cycle_attach"
+      ]
+    },
+    {
+      "basis_id": "primitive7_no_graft",
+      "remove_from": "primitive7",
+      "families_removed": [
+        "bond_reroute"
+      ]
+    },
+    {
+      "basis_id": "primitive7_no_cycles",
+      "remove_from": "primitive7",
+      "families_removed": [
+        "cycle_insert",
+        "cycle_attach"
+      ]
+    },
+    {
+      "basis_id": "primitive7_plus_ring_system_restate",
+      "add_to": "primitive7",
+      "families_added": [
+        "ring_system_restate"
+      ]
+    },
+    {
+      "basis_id": "primitive7_plus_ring_system_delete",
+      "add_to": "primitive7",
+      "families_added": [
+        "ring_system_delete"
+      ],
+      "support_provider": "explicit_typed_ring_catalog_required"
+    },
+    {
+      "basis_id": "primitive7_plus_two_neighbor_atom_insert",
+      "add_to": "primitive7",
+      "families_added": [
+        "two_neighbor_atom_insert"
+      ]
+    },
+    {
+      "basis_id": "primitive7_plus_ring_system_grow_screen",
+      "add_to": "primitive7",
+      "families_added": [
+        "ring_system_grow"
+      ],
+      "support_provider": "audited_complete_action_enumerator_required",
+      "production_hybrid_enabled": false
+    }
+  ],
+  "cost_views": {
+    "event_cost": "one per committed operator event",
+    "primitive_equivalent_cost": "length of an exact executor-replayed lowering",
+    "required_objectives": [
+      "events_then_primitive",
+      "primitive_then_events"
+    ],
+    "unsupported_lowering_policy": "report_explicitly_and_do_not_call_accelerator",
+    "unsupported_lowering_result": {
+      "event_search": "retain_action_with_null_primitive_cost",
+      "event_target_status": "reached_with_unsupported_lowering",
+      "primitive_search": "primitive_cost_undefined",
+      "accelerator_claim": "forbidden"
+    }
+  },
+  "hard_constraint_order": "apply_to_raw_executable_marks_before_canonical_successor_quotient",
+  "search_state_identity": [
+    "canonical_molecular_key",
+    "persistent_slot_state_sha256",
+    "constraint_state",
+    "event_cost"
+  ],
+  "negative_result_semantics": {
+    "complete": "not_reached_within_complete_event_bound",
+    "resource_exhausted": "incomplete_resource_bound"
+  },
+  "resource_limits": {
+    "max_events": 16,
+    "dynamic_switch_step": 8,
+    "max_expanded_labels": 25000,
+    "max_generated_marks": 2000000,
+    "max_wall_seconds_per_search": 120
+  },
+  "required_task_row_fields": [
+    "task_id",
+    "experiment",
+    "task_kind",
+    "evidence_class",
+    "split",
+    "source_state_ref",
+    "source_state_sha256",
+    "target_spec",
+    "max_events",
+    "constraint_spec",
+    "atom_count_delta",
+    "graph_cycle_rank_delta",
+    "topology_strata",
+    "chemistry_strata",
+    "provenance"
+  ],
+  "evidence_classes": [
+    "observed_heldout_edit",
+    "executor_constructed_stress_case"
+  ],
+  "stratification_axes": {
+    "signed_deltas": [
+      "atom_count_delta",
+      "graph_cycle_rank_delta"
+    ],
+    "topology": [
+      "monocycle",
+      "fused",
+      "spiro",
+      "bridged",
+      "macrocycle"
+    ],
+    "ring_chemistry": [
+      "aromatic",
+      "saturated",
+      "unsaturated_nonaromatic",
+      "heterocycle",
+      "carbocycle"
+    ],
+    "vocabulary": [
+      "CNOF",
+      "expanded_broad_organic"
+    ],
+    "charge_context": [
+      "neutral",
+      "protected_charged_center"
+    ],
+    "path_scale": [
+      "1_to_2",
+      "3_to_6",
+      "7_to_12",
+      "13_to_16",
+      "over_16_or_incomplete"
+    ],
+    "branching": [
+      "single_target",
+      "shared_prefix_multiple_targets",
+      "inverse_roundtrip"
+    ]
+  },
+  "split_rules": {
+    "selection_data": "development_or_validation_only",
+    "test_data": "never_used_for_operator_selection",
+    "grouping": [
+      "source",
+      "scaffold",
+      "series",
+      "transformation"
+    ]
+  },
+  "task_artifact": null,
+  "launch_gate": {
+    "open": false,
+    "reason": "exact task rows and their self-hash must be frozen before aggregate comparison"
+  },
+  "interpretation_boundary": {
+    "can_establish": [
+      "bounded executable reachability",
+      "bounded shortest event cost",
+      "bounded shortest primitive-equivalent cost",
+      "constraint-conditioned support differences"
+    ],
+    "cannot_establish": [
+      "learned successor probability",
+      "calibration",
+      "rollout search efficiency",
+      "training retention",
+      "final operator selection without downstream pilot evidence"
+    ]
+  }
+}
