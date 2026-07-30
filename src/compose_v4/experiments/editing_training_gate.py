@@ -30,6 +30,20 @@ REQUIRED_PRIMARY_METRICS = {
     "production_weighted_canonical_successor_nll",
     "balanced_semantic_cell_canonical_successor_nll",
 }
+REQUIRED_S0_REQUIREMENTS = {
+    "initialization_transfer_plan_complete",
+    "initialized_state_matches_transfer_plan_exactly",
+    "all_teacher_actions_legal",
+    "all_teacher_actions_execute_to_stored_exact_successor",
+    "all_teacher_successor_fibers_nonempty",
+    "all_required_families_have_teachers_and_production_candidates",
+    "all_legal_marks_execute",
+    "canonical_successor_pushforward_finite_and_normalized",
+    "all_packed_rows_preserve_persistent_slot_state",
+    "all_undirected_endpoint_conventions_unique",
+    "all_required_semantic_cells_nonempty",
+    "split_overlap_zero",
+}
 MISLEADING_LEGACY_METRICS = {
     "family_accuracy",
     "family_top3_accuracy",
@@ -142,6 +156,17 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
             raise EditingTrainingGateError(
                 f"{gate.get('id')} has no requirements"
             )
+    support_gate = next(
+        gate for gate in gates if gate["id"] == "S0_support_and_labels"
+    )
+    missing_support_requirements = REQUIRED_S0_REQUIREMENTS - set(
+        support_gate["requirements"]
+    )
+    if missing_support_requirements:
+        raise EditingTrainingGateError(
+            "S0 is missing fail-closed initialization or successor-support "
+            f"requirements: {sorted(missing_support_requirements)!r}"
+        )
 
     selection = contract.get("checkpoint_selection") or {}
     if selection.get("partition") != "validation_only":

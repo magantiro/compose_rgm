@@ -35,6 +35,10 @@ from compose_v4.experiments.analogue_prior import build_analogue_prior_records
 from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records
 from compose_v4.rewrite.source_corruption import TEACHER_REPRESENTABILITY_FILTER_VERSION
 from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
+from compose_v4.experiments.editing_step_zero_gate import (
+    ATOM_VOCABULARY_HEAD_LAYOUT as _ATOM_VOCAB_HEAD_LAYOUT,
+    semantic_row_map as _step_zero_semantic_row_map,
+)
 from compose_v4.experiments.tracelet_conditional import (
     build_tracelet_path_records,
     build_tree_transport_path_records,
@@ -207,22 +211,6 @@ def _compatible_checkpoint_initialization(
     return initialized, tuple(transferred), tuple(retained)
 
 
-# Categorical output heads whose row axis is the atom (element, valence) vocabulary. When the vocabulary is
-# widened (CNOF 4 -> ORGANIC 15) these heads change shape, so the shape-exact compatible transfer would leave
-# them entirely fresh. Semantic partial transfer instead copies the rows of every SHARED class (matched by
-# (element, valence) LABEL, not position) and keeps fresh init only for genuinely new classes.
-#   "row"        : tensor rows are the vocab classes in order        (Linear weight/bias: n_classes rows).
-#   "role_major" : tensor is reshape(k, n_classes, d) -> row r*n_classes + c is (role r, class c)
-#                  (grow_option Embedding: 3*n_classes rows; see factorized_tracelet_rate_model.py:3550).
-_ATOM_VOCAB_HEAD_LAYOUT: dict[str, tuple[str, int]] = {
-    "restate_head.weight": ("row", 1),
-    "restate_head.bias": ("row", 1),
-    "grow_root_head.weight": ("row", 1),
-    "grow_root_head.bias": ("row", 1),
-    "grow_option.weight": ("role_major", 3),
-}
-
-
 def _semantic_row_map(
     source_classes: tuple, dest_classes: tuple
 ) -> list[int | None]:
@@ -230,18 +218,10 @@ def _semantic_row_map(
     destination class. Fails loudly on duplicate labels or a source class absent from the destination (which
     would silently drop learned rows)."""
 
-    if len(set(source_classes)) != len(source_classes):
-        raise ValueError("source vocabulary has duplicate class labels")
-    if len(set(dest_classes)) != len(dest_classes):
-        raise ValueError("destination vocabulary has duplicate class labels")
-    dest_index = {label: j for j, label in enumerate(dest_classes)}
-    missing = [label for label in source_classes if label not in dest_index]
-    if missing:
-        raise ValueError(
-            f"source vocabulary classes absent from destination (would drop learned rows): {missing}"
-        )
-    source_index = {label: i for i, label in enumerate(source_classes)}
-    return [source_index.get(label) for label in dest_classes]
+    try:
+        return list(_step_zero_semantic_row_map(source_classes, dest_classes))
+    except RuntimeError as error:
+        raise ValueError(str(error)) from error
 
 
 def _semantic_partial_checkpoint_initialization(
