@@ -45,6 +45,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.experiments.successor_kernel import KernelIdentity, SupportSignature
 
 # Bump ONLY additively: consumers of an earlier version must keep working. A field may be added; a field
@@ -321,6 +322,7 @@ def build_support_signature(
         capability_flags=tuple((name, flags[name]) for name in CAPABILITY_FLAGS),
         element_vocabulary=elements,
         charge_vocabulary=(-2, -1, 0, 1, 2),
+        charge_policy=CHARGE_POLICY_VERSION,
         bond_vocabulary=("none", "single", "double", "triple", "aromatic"),
         aromaticity_policy=provenance.bond_representation,
         max_atoms=provenance.max_atoms,

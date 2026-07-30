@@ -117,6 +117,7 @@ _COMPATIBILITY_FIELDS = {
     "executor_implementation_hash",
     "action_enumerator_implementation_hash",
     "fiber_compiler_implementation_hash",
+    "charge_policy_version",
     "persistent_state_digest_schema",
     "persistent_state_digest_schema_version",
     "packed_corpus_schema",

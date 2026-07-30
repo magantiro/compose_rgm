@@ -32,6 +32,7 @@ import numpy as np
 import torch
 
 from compose_v4.chem.molecular_graph import NULL_IDX, MolecularGraph
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.experiments.successor_kernel import (
     CanonicalSuccessor,
     KernelIdentity,
@@ -203,6 +204,7 @@ def _default_kernel_identity(
         implementation="factorized_ringcore_segmented_pushforward",
         support_signature=SupportSignature(
             capability_flags=flags,
+            charge_policy=CHARGE_POLICY_VERSION,
             canonicalizer_version="canonical_state_key",
             embedded_jump_chain_policy="fixed_step_embedded_jump_chain",
             ringcore_configuration=ringcore_configuration,

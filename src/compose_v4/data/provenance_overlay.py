@@ -66,6 +66,7 @@ _TENSORIZATION_SOURCES = (
     "src/compose_v4/experiments/factorized_mark_conditional.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
     "src/compose_v4/chem/state.py",
+    "src/compose_v4/data/charge_policy.py",
 )
 
 

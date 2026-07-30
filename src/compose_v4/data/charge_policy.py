@@ -22,6 +22,8 @@ import numpy as np
 
 from compose_v4.chem.molecular_graph import MolecularGraph
 
+CHARGE_POLICY_VERSION = "exact_charged_center_preservation_v1"
+
 FORMAL_CHARGE_ARRAY_CHANGED = "formal_charge_array_changed"
 CHARGED_CENTER_ELEMENT_CHANGED = "charged_center_element_changed"
 CHARGED_CENTER_H_CHANGED = "charged_center_implicit_h_changed"
@@ -175,6 +177,7 @@ def charge_policy_preserved(
 
 
 __all__ = [
+    "CHARGE_POLICY_VERSION",
     "CHARGE_POLICY_VIOLATION_TYPES",
     "CHARGED_CENTER_BOND_ROW_CHANGED",
     "CHARGED_CENTER_ELEMENT_CHANGED",

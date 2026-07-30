@@ -90,6 +90,7 @@ _COMPILER_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/factorized_successor_training.py",
     "src/compose_v4/experiments/production_successor_kernel.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "src/compose_v4/data/charge_policy.py",
     "src/compose_v4/chem/persistent_state_identity.py",
     "src/compose_v4/rewrite/action_codec.py",
 )

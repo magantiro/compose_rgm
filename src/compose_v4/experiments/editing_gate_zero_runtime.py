@@ -39,6 +39,7 @@ from compose_v4.chem.persistent_state_identity import (
 )
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.data.packed_trace_store import (
     PACKED_STORE_SCHEMA,
     PACKED_STORE_SCHEMA_VERSION,
@@ -743,7 +744,7 @@ def _support_signature_payload(
             "triple",
             "aromatic",
         ],
-        "charge_policy": "carried_not_designed",
+        "charge_policy": CHARGE_POLICY_VERSION,
         "valence_policy": "declared_element_valence_classes_plus_hydrogen_budget",
         "catalog_fingerprint": ring_catalog_fingerprint(model.ring_catalog),
         "enable_ring_restates": model.enable_ring_restates,

@@ -125,6 +125,7 @@ class SupportSignature:
     # several valence classes -- so only the exact ordered table identifies the vocabulary.
     element_vocabulary: tuple[str, ...] = ()
     charge_vocabulary: tuple[int, ...] = ()
+    charge_policy: str | None = None
     bond_vocabulary: tuple[str, ...] = ()
     aromaticity_policy: str | None = None
     max_atoms: int | None = None

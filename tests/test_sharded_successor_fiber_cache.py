@@ -20,6 +20,7 @@ from compose_v4.chem.persistent_state_identity import (
 from compose_v4.data.indexed_successor_fiber_cache import (
     write_indexed_successor_fiber_cache,
 )
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.data.sharded_successor_fiber_cache import (
     SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
@@ -146,6 +147,7 @@ def _compatibility() -> SuccessorFiberCacheCompatibility:
                 "capability_flags": [["enable_cycle_ops", True]],
                 "max_atoms": 4,
                 "atom_insert_arity_support": [0, 1],
+                "charge_policy": CHARGE_POLICY_VERSION,
             },
             "ordered_family_vocabulary": [
                 "atom_insert",
@@ -164,6 +166,7 @@ def _compatibility() -> SuccessorFiberCacheCompatibility:
             "executor_implementation_hash": "executor-v1",
             "action_enumerator_implementation_hash": "enumerator-v1",
             "fiber_compiler_implementation_hash": "e" * 64,
+            "charge_policy_version": CHARGE_POLICY_VERSION,
             "persistent_state_digest_schema": (
                 "compose.chem.persistent_slot_state"
             ),
@@ -175,6 +178,16 @@ def _compatibility() -> SuccessorFiberCacheCompatibility:
             "tensorization_implementation_hash": "tensorization-v1",
         }
     )
+
+
+def test_cache_compatibility_requires_charge_policy_version() -> None:
+    payload = dict(_compatibility().payload)
+    payload.pop("charge_policy_version")
+    with pytest.raises(
+        ShardedSuccessorFiberCacheError,
+        match="charge_policy_version",
+    ):
+        SuccessorFiberCacheCompatibility.from_payload(payload)
 
 
 def _provenance(

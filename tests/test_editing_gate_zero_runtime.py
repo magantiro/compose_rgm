@@ -15,6 +15,7 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.data.packed_trace_store import (
     AddressedPackedTrace,
     PackedTraceAddress,
@@ -196,6 +197,14 @@ def test_frozen_runtime_contract_is_self_hashed_and_non_authorizing(
         match="self-hash",
     ):
         runtime.load_gate_zero_runtime_contract(path)
+
+
+def test_gate_zero_support_signature_binds_exact_charge_policy() -> None:
+    record = _record(shard_sha256="1" * 64)
+    model = _tiny_model(record)
+    signature = runtime._support_signature_payload(model, max_atoms=6)
+
+    assert signature["charge_policy"] == CHARGE_POLICY_VERSION
 
 
 def test_exact_validation_loader_binds_every_fixture_byte(

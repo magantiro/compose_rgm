@@ -41,6 +41,7 @@ from compose_v4.chem.molecular_graph import (
     SCAR_IDX,
     is_element,
 )
+from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES
 from compose_v4.rewrite.operators import (
     AtomDelete,
@@ -84,7 +85,12 @@ from compose_v4.rewrite.tracelets import (
     is_valid_ring_system_grow,
 )
 from compose_v4.rewrite.factorized_fiber import pendant_graft_candidates
-from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
+from compose_v4.rewrite.kernel import (
+    InvalidRewrite,
+    RewriteSystem,
+    canonical_state_key,
+    de_novo_rewrite_system,
+)
 from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
 from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
@@ -843,6 +849,114 @@ def _masked_family_logits(
     )
 
 
+def _apply_charge_policy_to_action_masks(
+    batch: FactorizedMarkBatch,
+    masks: Mapping[str, Tensor],
+) -> dict[str, Tensor]:
+    """Intersect primitive support with exact charged-center preservation.
+
+    Every primitive editing action leaves the formal-charge array unchanged
+    only when it acts on charge-zero slots.  Bond-changing actions additionally
+    have to protect every charged endpoint whose full bond row would change.
+    These vectorized masks are the fast form of
+    :func:`charge_policy_preserved`; focused tests compare them exhaustively
+    against executor materialization on charged fixtures.
+
+    Ring-system macro tuples are filtered by exact execution during batch
+    preparation because their changed slots are action-dependent.
+    """
+
+    required = {
+        "grow_root",
+        "grow_connected",
+        "atom_delete",
+        "atom_restate",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_insert",
+        "cycle_attach",
+    }
+    missing = required - set(masks)
+    if missing:
+        raise RuntimeError(
+            f"charge-policy masking is missing action tables: {sorted(missing)}"
+        )
+
+    result = dict(masks)
+    charged = batch.formal_charges != 0
+    # This is both the overwhelmingly common fast path and the strongest
+    # compatibility guarantee: neutral-state support is returned byte-for-byte
+    # unchanged, including historical non-RingCore table layouts.
+    if not bool(charged.any()):
+        return result
+    charge_zero = ~charged
+    charge_zero_pair = charge_zero.unsqueeze(2) & charge_zero.unsqueeze(1)
+
+    # The executor writes the lowest-index persistent null slot.  Valid padded
+    # states carry charge zero in every null slot; selecting the exact written
+    # slot also makes this mask equal to the executor oracle on malformed
+    # diagnostic fixtures instead of conservatively rejecting unrelated nulls.
+    null_slots = batch.atom_types == NULL_IDX
+    first_null = null_slots & (null_slots.to(torch.int64).cumsum(dim=1) == 1)
+    insertion_storage_safe = ~(first_null & charged).any(dim=1)
+    result["grow_root"] = result["grow_root"] & insertion_storage_safe.unsqueeze(-1)
+    result["grow_connected"] = (
+        result["grow_connected"]
+        & insertion_storage_safe[:, None, None, None]
+        & charge_zero[:, :, None, None]
+    )
+
+    charged_neighbor = (
+        (batch.bonds != 0) & charged.unsqueeze(1)
+    ).any(dim=-1)
+    result["atom_delete"] = (
+        result["atom_delete"] & charge_zero & ~charged_neighbor
+    )
+    result["atom_restate"] = (
+        result["atom_restate"] & charge_zero.unsqueeze(-1)
+    )
+    result["bond_reorder"] = (
+        result["bond_reorder"] & charge_zero_pair.unsqueeze(-1)
+    )
+
+    removed = batch.graft_remove_neighbors
+    valid_removed = removed >= 0
+    removed_lookup = removed.clamp_min(0).reshape(batch.batch_size, -1)
+    removed_charged = torch.gather(
+        charged,
+        dim=1,
+        index=removed_lookup,
+    ).reshape_as(removed)
+    result["bond_reroute"] = (
+        result["bond_reroute"]
+        & charge_zero_pair
+        & valid_removed
+        & ~removed_charged
+    )
+
+    if result["cycle_insert"].ndim == 4:
+        # Production RingCore: nonbonded endpoint pair x bond order.
+        result["cycle_insert"] = (
+            result["cycle_insert"] & charge_zero_pair.unsqueeze(-1)
+        )
+    else:
+        # Historical root-cycle templates are outside the production process.
+        # A charged source cannot be a legal root source, so fail them closed.
+        result["cycle_insert"] = (
+            result["cycle_insert"] & ~charged.any(dim=1).unsqueeze(-1)
+        )
+    if tuple(result["cycle_attach"].shape) == tuple(charge_zero_pair.shape):
+        # Production RingCore: deletable cycle-edge endpoint pair.
+        result["cycle_attach"] = result["cycle_attach"] & charge_zero_pair
+    else:
+        # Historical cycle-attachment templates are indexed by anchor x
+        # template, and only the existing anchor is mutated.
+        result["cycle_attach"] = (
+            result["cycle_attach"] & charge_zero.unsqueeze(-1)
+        )
+    return result
+
+
 def _hierarchical_ring_template_logits(
     template_logits: Tensor,
     support: Tensor,
@@ -892,6 +1006,26 @@ def _hierarchical_ring_template_logits(
         combined = combined.masked_fill(~member_support, float("-inf"))
         result.index_copy_(1, members, combined)
     return result
+
+
+def _charge_preserving_macro_actions(
+    state: MolecularGraph,
+    rule_name: str,
+    actions: tuple[Any, ...],
+    *,
+    system: RewriteSystem,
+) -> tuple[Any, ...]:
+    """Retain only executable macro actions satisfying the exact charge policy."""
+
+    retained: list[Any] = []
+    for action in actions:
+        try:
+            successor = system.apply(state, rule_name, action)
+        except InvalidRewrite:
+            continue
+        if charge_policy_preserved(state, successor):
+            retained.append(action)
+    return tuple(retained)
 
 
 def prepare_factorized_mark_batch(
@@ -979,8 +1113,14 @@ def prepare_factorized_mark_batch(
         if ring_catalog is None or not compute_ring_grow_support
         else structured_ring_system_template_aliases(ring_catalog)
     )
-    # Built once (not per state) so the restate validator does not rebuild the executor each call.
-    restate_system = de_novo_rewrite_system() if compute_ring_restates else None
+    # Built once (not per state) so exact macro filtering does not reconstruct
+    # the executor for every candidate or state.
+    macro_system = (
+        de_novo_rewrite_system()
+        if compute_ring_restates
+        or (ring_catalog is not None and compute_ring_system_delete)
+        else None
+    )
     for state in states:
         feature_key = (
             0 if ring_catalog is None else id(ring_catalog),
@@ -1007,6 +1147,30 @@ def prepare_factorized_mark_batch(
             ) = _graph_application_masks(
                 state, atom_topo, compute_cyclic_graft=compute_cyclic_graft
             )
+            ring_delete_candidates: tuple[Any, ...] | None
+            if ring_catalog is None:
+                ring_delete_candidates = None
+            elif not compute_ring_system_delete:
+                ring_delete_candidates = ()
+            else:
+                raw_ring_delete_candidates = (
+                    enumerate_clean_ring_system_deletes(state, ring_catalog)
+                    if compute_ring_opening
+                    else enumerate_structured_ring_system_deletes(
+                        state,
+                        ring_catalog,
+                    )
+                )
+                if macro_system is None:
+                    raise RuntimeError(
+                        "ring-system-delete filtering lacks a production executor"
+                    )
+                ring_delete_candidates = _charge_preserving_macro_actions(
+                    state,
+                    "ring_system_delete",
+                    tuple(raw_ring_delete_candidates),
+                    system=macro_system,
+                )
             features = ChemistryStateFeatures(
                 atom_topology=atom_topo,
                 closure_topology=closure_topo,
@@ -1022,15 +1186,7 @@ def prepare_factorized_mark_batch(
                     if use_aromatic_bond_view
                     else state.bonds
                 ),
-                ring_delete_actions=(
-                    None
-                    if ring_catalog is None
-                    else ()
-                    if not compute_ring_system_delete
-                    else enumerate_clean_ring_system_deletes(state, ring_catalog)
-                    if compute_ring_opening
-                    else enumerate_structured_ring_system_deletes(state, ring_catalog)
-                ),
+                ring_delete_actions=ring_delete_candidates,
             )
             if chemistry_feature_cache is not None:
                 chemistry_feature_cache[feature_key] = features
@@ -1055,11 +1211,25 @@ def prepare_factorized_mark_batch(
         # enumerating restates ~doubles collator time. The corrupted-prior editing model turns it on
         # via compute_ring_restates, so aromatize<->de-aromatize become proposable at inference and
         # scoreable as restate teacher marks (both directions; see enumerate_ring_system_restate_actions).
-        restate_actions.append(
-            enumerate_ring_system_restate_actions(state, system=restate_system)
-            if compute_ring_restates
-            else ()
-        )
+        if compute_ring_restates:
+            if macro_system is None:
+                raise RuntimeError(
+                    "ring-system-restate filtering lacks a production executor"
+                )
+            raw_restate_actions = enumerate_ring_system_restate_actions(
+                state,
+                system=macro_system,
+            )
+            restate_actions.append(
+                _charge_preserving_macro_actions(
+                    state,
+                    "ring_system_restate",
+                    tuple(raw_restate_actions),
+                    system=macro_system,
+                )
+            )
+        else:
+            restate_actions.append(())
         if ring_catalog is not None and ring_system_templates is not None:
             ring_grow_support_masks.append(
                 np.asarray(
@@ -2575,10 +2745,16 @@ class FactorizedTraceletRateModel(nn.Module):
         key = self._state_cache_key(state)
         cached = self._ring_delete_candidate_cache.get(key)
         if cached is None:
-            cached = (
+            raw_candidates = (
                 enumerate_clean_ring_system_deletes(state, self.ring_catalog)
                 if self.enable_ring_opening
                 else enumerate_structured_ring_system_deletes(state, self.ring_catalog)
+            )
+            cached = _charge_preserving_macro_actions(
+                state,
+                "ring_system_delete",
+                tuple(raw_candidates),
+                system=de_novo_rewrite_system(),
             )
             self._ring_delete_candidate_cache[key] = cached
             if len(self._ring_delete_candidate_cache) > self._ring_candidate_cache_limit:
@@ -3291,11 +3467,12 @@ class FactorizedTraceletRateModel(nn.Module):
                 batch,
                 graft_remove_neighbors=raw_removed.unsqueeze(0),
             )
+            masks = _apply_charge_policy_to_action_masks(batch, masks)
             action_log_z = action_log_z.clone()
             action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = (
                 _masked_logsumexp(
                     logits["bond_reroute"][0].unsqueeze(0),
-                    raw_mask.unsqueeze(0),
+                    masks["bond_reroute"],
                 )[0]
             )
         enabled = torch.isfinite(action_log_z[0]).clone()
@@ -3567,7 +3744,12 @@ class FactorizedTraceletRateModel(nn.Module):
                 masks["ring_system_delete"][0],
                 rng,
             )
-            return self._ring_delete_candidates(state)[action_index]
+            candidates = (
+                self._ring_delete_candidates(state)
+                if batch.ring_delete_actions is None
+                else batch.ring_delete_actions[0]
+            )
+            return candidates[action_index]
         if rule_name == "ring_system_restate":
             (action_index,) = _sample_masked_coordinate(
                 logits["ring_system_restate"][0],
@@ -3751,16 +3933,6 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["grow_connected"] = connected_grow_mask
         logits["grow_root"] = root_grow_logits
         logits["grow_connected"] = connected_grow_logits
-        atom_insert_z = torch.logsumexp(
-            torch.stack(
-                (
-                    _masked_logsumexp(root_grow_logits, root_grow_mask),
-                    _masked_logsumexp(connected_grow_logits, connected_grow_mask),
-                ),
-                dim=-1,
-            ),
-            dim=-1,
-        )
 
         delete_logits = self.delete_head(node).squeeze(-1)
         delete_mask = batch.atom_delete_mask
@@ -3901,18 +4073,66 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["ring_system_restate"] = ring_restate_mask
         logits["ring_system_restate"] = ring_restate_logits
 
+        # This intersection is part of semantic support, not an inference-time
+        # rejection policy.  It must happen before the within-family partitions
+        # and family normalization are computed.
+        masks = _apply_charge_policy_to_action_masks(batch, masks)
+        atom_insert_z = torch.logsumexp(
+            torch.stack(
+                (
+                    _masked_logsumexp(
+                        logits["grow_root"],
+                        masks["grow_root"],
+                    ),
+                    _masked_logsumexp(
+                        logits["grow_connected"],
+                        masks["grow_connected"],
+                    ),
+                ),
+                dim=-1,
+            ),
+            dim=-1,
+        )
+
         family_z = torch.stack(
             (
                 atom_insert_z,
-                _masked_logsumexp(delete_logits, delete_mask),
-                _masked_logsumexp(restate_logits, restate_mask),
-                _masked_logsumexp(reorder_logits, reorder_mask),
-                _masked_logsumexp(graft_logits, graft_mask),
-                _masked_logsumexp(cycle_logits, cycle_mask),
-                _masked_logsumexp(attach_logits, attach_mask),
-                _masked_logsumexp(ring_grow_logits, ring_grow_mask),
-                _masked_logsumexp(ring_delete_logits, ring_delete_mask),
-                _masked_logsumexp(ring_restate_logits, ring_restate_mask),
+                _masked_logsumexp(
+                    logits["atom_delete"],
+                    masks["atom_delete"],
+                ),
+                _masked_logsumexp(
+                    logits["atom_restate"],
+                    masks["atom_restate"],
+                ),
+                _masked_logsumexp(
+                    logits["bond_reorder"],
+                    masks["bond_reorder"],
+                ),
+                _masked_logsumexp(
+                    logits["bond_reroute"],
+                    masks["bond_reroute"],
+                ),
+                _masked_logsumexp(
+                    logits["cycle_insert"],
+                    masks["cycle_insert"],
+                ),
+                _masked_logsumexp(
+                    logits["cycle_attach"],
+                    masks["cycle_attach"],
+                ),
+                _masked_logsumexp(
+                    logits["ring_system_grow"],
+                    masks["ring_system_grow"],
+                ),
+                _masked_logsumexp(
+                    logits["ring_system_delete"],
+                    masks["ring_system_delete"],
+                ),
+                _masked_logsumexp(
+                    logits["ring_system_restate"],
+                    masks["ring_system_restate"],
+                ),
             ),
             dim=-1,
         )

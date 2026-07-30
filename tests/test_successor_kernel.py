@@ -283,3 +283,11 @@ def test_vocabulary_identity_is_the_ordered_table_not_its_length():
     b = SupportSignature(element_vocabulary=("3:3", "2:4"))
     assert a.vocabulary_hash() != b.vocabulary_hash()
     assert a.differing_fields(b) == ("element_vocabulary",)
+
+
+def test_charge_policy_version_is_support_determining():
+    current = SupportSignature(
+        charge_policy="exact_charged_center_preservation_v1"
+    )
+    stale = SupportSignature(charge_policy="carried_not_designed")
+    assert current.differing_fields(stale) == ("charge_policy",)
