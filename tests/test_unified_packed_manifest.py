@@ -6,6 +6,8 @@ would train fine and mean something else. Agreement is asserted here, not assume
 """
 from __future__ import annotations
 
+import gzip
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -16,7 +18,11 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from build_unified_packed_manifest import UnifiedManifestError, build  # noqa: E402
+from build_unified_packed_manifest import (  # noqa: E402
+    UnifiedManifestError,
+    build,
+    validate,
+)
 
 CONTRACT = {
     "codec_implementation_hash": "baaa75367f25a8c6",
@@ -30,10 +36,47 @@ CONTRACT = {
 }
 
 
-def _shard(directory: Path, name: str, *, entries=10, states=40, contract=None):
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _shard(
+    directory: Path,
+    name: str,
+    *,
+    entries=10,
+    states=40,
+    contract=None,
+    shared_molecule: str | None = None,
+    omit_isolation: bool = False,
+):
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / name).write_bytes(b"")
-    (directory / name).with_suffix(".manifest.json").write_text(
+    shard = directory / name
+    partition = directory.name
+    layer = directory.parent.name
+    with gzip.open(shard, "wt") as handle:
+        for index in range(entries):
+            metadata = {}
+            if not omit_isolation:
+                metadata["partition_isolation"] = {
+                    "schema": "compose.data.partition_isolation",
+                    "schema_version": 1,
+                    "molecule_ids": [
+                        (
+                            shared_molecule
+                            if index == 0 and shared_molecule is not None
+                            else f"{partition}:{layer}:molecule:{index}"
+                        )
+                    ],
+                    "scaffold_ids": [
+                        f"{partition}:{layer}:scaffold:{index}"
+                    ],
+                    "source_group_id": (
+                        f"{partition}:{layer}:source-group:{index}"
+                    ),
+                }
+            handle.write(json.dumps({"trace": {"metadata": metadata}}) + "\n")
+    shard.with_suffix(".manifest.json").write_text(
         json.dumps({
             "entries": entries, "states": states,
             "provenance": dict(contract or CONTRACT),
@@ -42,23 +85,100 @@ def _shard(directory: Path, name: str, *, entries=10, states=40, contract=None):
     )
 
 
-def _corpus(tmp_path, *, mmp_contract=None, mmp_complete=True, audit_complete=True):
+def _shard_artifact(
+    root: Path,
+    shard: Path,
+    *,
+    layer: str | None,
+) -> dict:
+    manifest = shard.with_suffix(".manifest.json")
+    payload = json.loads(manifest.read_text())
+    result = {
+        "partition": shard.parent.name,
+        "shard": shard.name,
+        "packed_sha256": _sha256(shard),
+        "manifest_sha256": _sha256(manifest),
+        "entries": payload["entries"],
+        "states": payload["states"],
+    }
+    if layer is not None:
+        result["layer"] = layer
+    return result
+
+
+def _corpus(
+    tmp_path,
+    *,
+    mmp_contract=None,
+    mmp_complete=True,
+    audit_complete=True,
+    overlap=False,
+    omit_isolation=False,
+):
     packed, mmp = tmp_path / "packed", tmp_path / "mmp"
     for layer in ("corruption", "cycle_ops"):
         for partition in ("train", "validation", "test"):
-            _shard(packed / layer / partition, "shard_0000.jsonl.gz")
+            _shard(
+                packed / layer / partition,
+                "shard_0000.jsonl.gz",
+                shared_molecule=(
+                    "shared-cross-partition-molecule"
+                    if overlap
+                    and layer == "corruption"
+                    and partition == "train"
+                    else None
+                ),
+                omit_isolation=(
+                    omit_isolation
+                    and layer == "corruption"
+                    and partition == "train"
+                ),
+            )
     for partition in ("train", "validation", "test"):
-        _shard(mmp / partition, "shard_0000.jsonl.gz", contract=mmp_contract)
+        _shard(
+            mmp / partition,
+            "shard_0000.jsonl.gz",
+            contract=mmp_contract,
+            shared_molecule=(
+                "shared-cross-partition-molecule"
+                if overlap and partition == "validation"
+                else None
+            ),
+        )
     packed.mkdir(parents=True, exist_ok=True)
+    audit_artifacts = sorted(
+        [
+            _shard_artifact(
+                packed,
+                shard,
+                layer=shard.parents[1].name,
+            )
+            for shard in packed.glob("*/*/*.jsonl.gz")
+        ],
+        key=lambda item: (
+            item["layer"],
+            item["partition"],
+            item["shard"],
+        ),
+    )
+    mmp_artifacts = sorted(
+        [
+            _shard_artifact(mmp, shard, layer=None)
+            for shard in mmp.glob("*/*.jsonl.gz")
+        ],
+        key=lambda item: (item["partition"], item["shard"]),
+    )
     (packed / "PACK_COMPLETE.json").write_text(
         json.dumps({"PACK_COMPLETE": audit_complete, "expected_shards": 6,
-                    "totals": {"entries": 60}, "verify_fraction": 0.02, "authorization": {}})
+                    "totals": {"entries": 60}, "verify_fraction": 0.02,
+                    "authorization": {}, "shard_artifacts": audit_artifacts})
     )
     (mmp / "MMP_PACK_COMPLETE.json").write_text(
         json.dumps({"MMP_PACK_COMPLETE": mmp_complete, "expected_shards": 3, "pool_records": 363456,
                     "packed_entries": 30, "pool_sha256": "abc", "duplicate_row_ids": 0,
                     "cross_partition_source_leaks": 0, "cross_partition_scaffold_leaks": 0,
-                    "verify_fraction": 0.02, "authorization": {}})
+                    "verify_fraction": 0.02, "authorization": {},
+                    "shard_artifacts": mmp_artifacts})
     )
     return packed, mmp
 
@@ -72,6 +192,15 @@ def test_coherent_corpus_builds(tmp_path):
     assert manifest["totals"]["shards"] == 9
     assert manifest["totals"]["entries"] == 90
     assert len(manifest["manifest_checksum"]) == 16
+    assert len(manifest["packed_corpus_inventory_sha256"]) == 64
+    assert manifest["partition_isolation"]["status"] == "PASS"
+    assert manifest["partition_isolation"][
+        "cross_partition_overlap_counts"
+    ] == {
+        "molecule_ids": 0,
+        "scaffold_ids": 0,
+        "source_group_ids": 0,
+    }
 
 
 def test_missing_mmp_completion_is_refused(tmp_path):
@@ -112,6 +241,87 @@ def test_shard_without_manifest_is_refused(tmp_path):
     packed, mmp = _corpus(tmp_path)
     (mmp / "train" / "shard_0001.jsonl.gz").write_bytes(b"")
     with pytest.raises(UnifiedManifestError, match="has no manifest"):
+        build(packed, mmp)
+
+
+def test_completion_without_byte_inventory_is_refused(tmp_path):
+    packed, mmp = _corpus(tmp_path)
+    marker = packed / "PACK_COMPLETE.json"
+    payload = json.loads(marker.read_text())
+    del payload["shard_artifacts"]
+    marker.write_text(json.dumps(payload))
+    with pytest.raises(
+        UnifiedManifestError,
+        match="PACK_COMPLETE lacks shard_artifacts",
+    ):
+        build(packed, mmp)
+
+
+def test_missing_explicit_partition_identifiers_block_manifest(tmp_path):
+    packed, mmp = _corpus(tmp_path, omit_isolation=True)
+    with pytest.raises(
+        UnifiedManifestError,
+        match="will not infer partition identities",
+    ):
+        build(packed, mmp)
+
+
+def test_all_packed_producers_emit_the_explicit_isolation_envelope():
+    compiler = (REPO / "scripts" / "compile_corruption_shard.py").read_text()
+    audit_packer = (
+        REPO / "modal_apps" / "pack_trace_states_app.py"
+    ).read_text()
+    mmp_packer = (
+        REPO / "modal_apps" / "pack_mmp_pool_app.py"
+    ).read_text()
+
+    assert '"partition_isolation"' in compiler
+    assert '"source_group_id"' in compiler
+    assert '"shard_artifacts"' in audit_packer
+    assert '"packed_sha256"' in audit_packer
+    assert '"manifest_sha256"' in audit_packer
+    assert '"partition_isolation"' in mmp_packer
+    assert 'record.get("_source_scaffold"' in mmp_packer
+
+
+def test_cross_layer_partition_overlap_is_refused(tmp_path):
+    packed, mmp = _corpus(tmp_path, overlap=True)
+    with pytest.raises(
+        UnifiedManifestError,
+        match="cross-layer partition isolation failed",
+    ):
+        build(packed, mmp)
+
+
+def test_validator_recomputes_every_referenced_byte(tmp_path):
+    packed, mmp = _corpus(tmp_path)
+    path = tmp_path / "UNIFIED_PACKED_MANIFEST.json"
+    path.write_text(json.dumps(build(packed, mmp), indent=2, sort_keys=True))
+    assert validate(path, packed_root=packed, mmp_root=mmp)[
+        "partition_isolation"
+    ]["status"] == "PASS"
+
+    shard = packed / "corruption" / "train" / "shard_0000.jsonl.gz"
+    shard.write_bytes(shard.read_bytes() + b"tampered")
+    with pytest.raises(UnifiedManifestError):
+        validate(path, packed_root=packed, mmp_root=mmp)
+
+
+def test_manifest_sidecar_tamper_is_refused(tmp_path):
+    packed, mmp = _corpus(tmp_path)
+    sidecar = (
+        packed
+        / "cycle_ops"
+        / "validation"
+        / "shard_0000.jsonl.manifest.json"
+    )
+    payload = json.loads(sidecar.read_text())
+    payload["states"] += 1
+    sidecar.write_text(json.dumps(payload))
+    with pytest.raises(
+        UnifiedManifestError,
+        match="shard_artifacts disagree",
+    ):
         build(packed, mmp)
 
 
@@ -169,7 +379,8 @@ def test_a_tampered_shard_invalidates_its_overlay_and_drops_the_contract(tmp_pat
             _with_overlay(packed / layer / partition, "shard_0000.jsonl.gz", SCI)
     assert build(packed, mmp)["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"] == "PASS"
     (packed / "corruption" / "train" / "shard_0000.jsonl.gz").write_bytes(b"tampered")
-    assert build(packed, mmp)["contract_levels"]["SCIENTIFIC_TRAINING_CONTRACT"].startswith("FAIL")
+    with pytest.raises(UnifiedManifestError):
+        build(packed, mmp)
 
 
 def _overlay_file(tmp_path, exclusions=(), counts=None):

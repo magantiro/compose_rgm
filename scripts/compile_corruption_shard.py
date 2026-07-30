@@ -172,7 +172,18 @@ def compile_shard(
                     partition=partition,
                     layer=layer,
                     source_scaffold=scaffold_by_smiles.get(source, ""),
-                    extra={"origin_smiles": source},
+                    extra={
+                        "origin_smiles": source,
+                        "partition_isolation": {
+                            "schema": "compose.data.partition_isolation",
+                            "schema_version": 1,
+                            "molecule_ids": [source],
+                            "scaffold_ids": [
+                                scaffold_by_smiles.get(source, "")
+                            ],
+                            "source_group_id": source,
+                        },
+                    },
                 )
             except Exception as exc:  # noqa: BLE001 -- codec rejection is a real rejection reason
                 rejections[f"encode:{type(exc).__name__}"] += 1

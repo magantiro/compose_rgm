@@ -18,6 +18,7 @@ by real executor replay.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -150,6 +151,15 @@ def reduce_and_verify(source_subdir: str, dest_subdir: str, expected: list, buil
 
     missing, stale, totals = [], [], {"entries": 0, "states": 0}
     per_layer: dict[str, int] = {}
+    shard_artifacts = []
+
+    def _file_sha256(path: Path) -> str:
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1 << 20), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
     for layer, partition, name in (tuple(item) for item in expected):
         packed = dest_root / layer / partition / name
         manifest_path = manifest_path_for(packed)
@@ -164,9 +174,28 @@ def reduce_and_verify(source_subdir: str, dest_subdir: str, expected: list, buil
         totals["entries"] += manifest["entries"]
         totals["states"] += manifest["states"]
         per_layer[layer] = per_layer.get(layer, 0) + manifest["entries"]
+        shard_artifacts.append(
+            {
+                "layer": layer,
+                "partition": partition,
+                "shard": name,
+                "packed_sha256": _file_sha256(packed),
+                "manifest_sha256": _file_sha256(manifest_path),
+                "entries": int(manifest["entries"]),
+                "states": int(manifest["states"]),
+            }
+        )
 
     if missing or stale:
         return _pack_status(dest_subdir, "PARTIAL", missing=missing, stale=stale, totals=totals)
+    shard_artifacts = sorted(
+        shard_artifacts,
+        key=lambda item: (
+            item["layer"],
+            item["partition"],
+            item["shard"],
+        ),
+    )
 
     # Sampled replay audit -- the only check that re-proves the stored states follow from the actions.
     audited = 0
@@ -187,6 +216,7 @@ def reduce_and_verify(source_subdir: str, dest_subdir: str, expected: list, buil
         "verify_fraction": _VERIFY_FRACTION,
         "audited_entries": audited,
         "source_subdir": source_subdir,
+        "shard_artifacts": shard_artifacts,
         **build_meta,
     }
     (dest_root / "PACK_COMPLETE.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")

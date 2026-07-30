@@ -260,6 +260,21 @@ def test_scientific_contract_needs_the_unified_manifest():
     assert '"phase": "SCIENTIFIC_CONTRACT_VERIFIED"' in source
 
 
+def test_unified_byte_and_partition_validation_precedes_corpus_load():
+    """No packed row may load before the manifest is recomputed from exact bytes."""
+
+    source = GATE.read_text()
+    function = source[
+        source.index("def _load_precompiled_corpus("):
+        source.index("def _build_ring_core_seed_ring_catalog(")
+    ]
+    assert "validate_unified_packed_manifest(" in function
+    assert function.index("validate_unified_packed_manifest(") < function.index(
+        "load_production_edit_corpus("
+    )
+    assert "unified packed-corpus pre-loader validation failed" in function
+
+
 def test_recipe_chain_carries_the_scientific_contract_flags():
     import subprocess
     import sys as _sys

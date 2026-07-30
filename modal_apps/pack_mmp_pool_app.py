@@ -1136,13 +1136,32 @@ def pack_mmp_shard(
             partition=partition,
             layer=LAYER,
             direction=str(record.get("direction", "")),
-            source_scaffold=str(record.get("_scaffold", "")),
+            source_scaffold=str(record.get("_source_scaffold", "")),
             extra={
                 **dict(trace.metadata or {}),
                 "row_id": int(record["_row_id"]),
                 "scaffold": str(record.get("_scaffold", "")),
                 "source_smiles": str(record.get("source_smiles", "")),
                 "target_smiles": str(record.get("target_smiles", "")),
+                "partition_isolation": {
+                    "schema": "compose.data.partition_isolation",
+                    "schema_version": 1,
+                    "molecule_ids": sorted(
+                        {
+                            str(record.get("source_smiles", "")),
+                            str(record.get("target_smiles", "")),
+                        }
+                    ),
+                    "scaffold_ids": sorted(
+                        {
+                            str(record.get("_source_scaffold", "")),
+                            str(record.get("_scaffold", "")),
+                        }
+                    ),
+                    "source_group_id": str(
+                        record.get("source_smiles", "")
+                    ),
+                },
             },
         )
         entries.append(build_packed_entry(v2, TraceProgressCTMC(trace)))

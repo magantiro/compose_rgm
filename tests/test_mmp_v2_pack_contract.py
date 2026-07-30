@@ -392,3 +392,13 @@ def test_packer_source_uses_five_writer_containers_and_shared_immutable_publicat
     assert "write_bytes_if_absent_modal_volume_v1" in source
     assert ".replace(manifest_path)" not in source
     assert ".replace(dest)" not in source
+
+
+def test_packer_emits_explicit_partition_isolation_identifiers():
+    source = (REPO / "modal_apps" / "pack_mmp_pool_app.py").read_text()
+    packer_surface = source[source.index("def pack_mmp_shard("):]
+    assert '"partition_isolation"' in packer_surface
+    assert '"molecule_ids"' in packer_surface
+    assert '"scaffold_ids"' in packer_surface
+    assert '"source_group_id"' in packer_surface
+    assert 'record.get("_source_scaffold"' in packer_surface
