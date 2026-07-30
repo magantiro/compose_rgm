@@ -290,10 +290,9 @@ def inventory_self_hash(inventory: Mapping[str, Any]) -> str:
 def encode_semantic_cell(axis_values: Mapping[str, str]) -> str:
     """Encode one complete joint semantic cell without result-dependent merging.
 
-    The per-axis *labelers* still need to be implemented against the packed
-    validation records.  Once labels are supplied, this identity function is
-    fixed: all six axes are required, extras are rejected, and key ordering
-    cannot alter the id.
+    Per-axis labels are supplied by ``ringcore_semantic_axes``.  This identity
+    function remains independently strict: all six axes are required, extras
+    are rejected, and key ordering cannot alter the id.
     """
 
     observed = set(axis_values)

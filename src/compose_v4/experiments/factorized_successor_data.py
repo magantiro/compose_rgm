@@ -154,7 +154,9 @@ class FactorizedSuccessorDataset(Dataset[FactorizedSuccessorExample]):
         mark_dataset: FactorizedMarkDataset,
         successor_cache: ShardedSuccessorFiberCache,
         *,
-        semantic_cell_ids: Mapping[SuccessorSemanticCellKey, str] | None = None,
+        semantic_cell_ids: (
+            Mapping[SuccessorSemanticCellKey, str | None] | None
+        ) = None,
         require_semantic_cell_ids: bool = False,
     ) -> None:
         if not isinstance(mark_dataset, FactorizedMarkDataset):
@@ -178,8 +180,10 @@ class FactorizedSuccessorDataset(Dataset[FactorizedSuccessorExample]):
                 if (
                     not isinstance(key, tuple)
                     or len(key) != 3
-                    or not isinstance(value, str)
-                    or not value
+                    or (
+                        value is not None
+                        and (not isinstance(value, str) or not value)
+                    )
                 )
             )
             if invalid:
@@ -261,15 +265,26 @@ class FactorizedSuccessorDataset(Dataset[FactorizedSuccessorExample]):
             address.entry_index,
             progress_index,
         )
-        semantic_cell_id = (
-            None
-            if self.semantic_cell_ids is None
-            else self.semantic_cell_ids.get(cell_key)
+        cell_is_present = (
+            self.semantic_cell_ids is not None
+            and cell_key in self.semantic_cell_ids
         )
-        if self.require_semantic_cell_ids and semantic_cell_id is None:
+        semantic_cell_id = (
+            self.semantic_cell_ids[cell_key] if cell_is_present else None
+        )
+        if self.require_semantic_cell_ids and not cell_is_present:
             raise FactorizedSuccessorDataError(
                 "sampled row is absent from the frozen semantic-cell sidecar"
             )
+        if cell_is_present:
+            if is_terminal and semantic_cell_id is not None:
+                raise FactorizedSuccessorDataError(
+                    "terminal sampled row must carry an explicit null semantic cell"
+                )
+            if not is_terminal and semantic_cell_id is None:
+                raise FactorizedSuccessorDataError(
+                    "nonterminal sampled row must carry a nonempty semantic cell"
+                )
         return FactorizedSuccessorExample(
             mark_example=mark_example,
             cache_record=cache_record,
@@ -335,7 +350,9 @@ def factorized_successor_loader(
     pin_memory: bool,
     seed: int,
     prefetch_factor: int = 2,
-    semantic_cell_ids: Mapping[SuccessorSemanticCellKey, str] | None = None,
+    semantic_cell_ids: (
+        Mapping[SuccessorSemanticCellKey, str | None] | None
+    ) = None,
     require_semantic_cell_ids: bool = False,
 ) -> DataLoader[FactorizedSuccessorBatch]:
     """Batch an already-configured deterministic mark stream with exact joins."""

@@ -196,7 +196,11 @@ def _semantic_cells(cache_records):
             row.address.packed_shard_content_sha256,
             row.address.entry_index,
             row.address.progress_index,
-        ): f"progress-{row.address.progress_index}"
+        ): (
+            None
+            if row.address.is_terminal
+            else f"progress-{row.address.progress_index}"
+        )
         for row in cache_records
     }
 
@@ -342,6 +346,115 @@ def test_wrapper_requires_addresses_cells_and_exact_next_state(
         match="exact next path state",
     ):
         dataset[matching_index]
+
+
+def test_semantic_sidecar_distinguishes_missing_from_explicit_terminal_null(
+    fixture_bundle,
+) -> None:
+    record, _catalog, _model, cache_records = fixture_bundle
+    mark_dataset = _mark_dataset(record, length=256)
+    cache = _ExactCacheStub(
+        {
+            (
+                row.address.packed_shard_content_sha256,
+                row.address.entry_index,
+                row.address.progress_index,
+            ): row
+            for row in cache_records
+        }
+    )
+    cells = _semantic_cells(cache_records)
+    terminal_progress = record.path.path_length
+    terminal_index = next(
+        index
+        for index in range(len(mark_dataset))
+        if mark_dataset[index].progress_index == terminal_progress
+    )
+    explicit = FactorizedSuccessorDataset(
+        mark_dataset,
+        cache,
+        semantic_cell_ids=cells,
+        require_semantic_cell_ids=True,
+    )[terminal_index]
+    assert explicit.semantic_cell_id is None
+
+    terminal_key = next(
+        key for key in cells if key[2] == terminal_progress
+    )
+    missing_terminal = dict(cells)
+    missing_terminal.pop(terminal_key)
+    with pytest.raises(
+        FactorizedSuccessorDataError,
+        match="absent from the frozen semantic-cell sidecar",
+    ):
+        FactorizedSuccessorDataset(
+            mark_dataset,
+            cache,
+            semantic_cell_ids=missing_terminal,
+            require_semantic_cell_ids=True,
+        )[terminal_index]
+
+
+def test_semantic_sidecar_enforces_terminal_and_nonterminal_value_shapes(
+    fixture_bundle,
+) -> None:
+    record, _catalog, _model, cache_records = fixture_bundle
+    mark_dataset = _mark_dataset(record, length=256)
+    cache = _ExactCacheStub(
+        {
+            (
+                row.address.packed_shard_content_sha256,
+                row.address.entry_index,
+                row.address.progress_index,
+            ): row
+            for row in cache_records
+        }
+    )
+    cells = _semantic_cells(cache_records)
+    terminal_progress = record.path.path_length
+    terminal_index = next(
+        index
+        for index in range(len(mark_dataset))
+        if mark_dataset[index].progress_index == terminal_progress
+    )
+    nonterminal_index = next(
+        index
+        for index in range(len(mark_dataset))
+        if mark_dataset[index].progress_index < terminal_progress
+    )
+    terminal_key = next(
+        key for key in cells if key[2] == terminal_progress
+    )
+    nonterminal_progress = mark_dataset[nonterminal_index].progress_index
+    nonterminal_key = next(
+        key for key in cells if key[2] == nonterminal_progress
+    )
+
+    wrong_terminal = dict(cells)
+    wrong_terminal[terminal_key] = "not-null"
+    with pytest.raises(
+        FactorizedSuccessorDataError,
+        match="terminal sampled row must carry an explicit null",
+    ):
+        FactorizedSuccessorDataset(
+            mark_dataset,
+            cache,
+            semantic_cell_ids=wrong_terminal,
+            require_semantic_cell_ids=True,
+        )[terminal_index]
+
+    wrong_nonterminal = dict(cells)
+    wrong_nonterminal[nonterminal_key] = None
+    with pytest.raises(
+        FactorizedSuccessorDataError,
+        match="nonterminal sampled row must carry a nonempty",
+    ):
+        FactorizedSuccessorDataset(
+            mark_dataset,
+            cache,
+            semantic_cell_ids=wrong_nonterminal,
+            require_semantic_cell_ids=True,
+        )[nonterminal_index]
 
 
 def test_collator_batch_alignment_subbatch_move_and_pin(
