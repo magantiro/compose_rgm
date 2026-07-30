@@ -1,0 +1,77 @@
+{
+  "schema": "compose.experiments.e6_a2_3_readiness_contract",
+  "schema_version": 1,
+  "status": "FROZEN_FAIL_CLOSED_READINESS_CONTRACT",
+  "experiment_id": "E6",
+  "milestone": "A2.3",
+  "paper_claim_authorized": false,
+  "solver_execution_authorized": false,
+  "inputs": {
+    "registry_path": "configs/experiment_registry.yaml",
+    "infrastructure_plan_path": "docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md",
+    "handoff_path": "docs/HANDOFF_RINGCORE_V1_POSTRUN.md",
+    "a2_2b_contract_path": "configs/exact_control_a2_2b_graph_audit_v1.json",
+    "a2_2b_artifact_path": "diagnostics/exactness/e6_carbon_6_slots_a2_2b_graph_audit_v1_2026-07-30.json",
+    "expected_a2_2b_contract_sha256": "91b900c8cd0cdccde0be8a94125fc8910c9f5b5f0c3f4a1d4ca289077ce12382",
+    "expected_a2_2b_artifact_sha256": "b774592671d60728e01facddfc2fff8afca50495e7dde332e6e2217ad22670e8",
+    "expected_graph_audit_hash": "3d293710de9e9b4273e46d17d6b073676e3685c82b3b16f1abeb9457ef6af97b",
+    "expected_structural_graph_fingerprint": "84121ff86cbc1ba8",
+    "expected_state_index_sha256": "4fe916579503e2b4750556e4dff479127a812d33b0df1f4f1dc2db23036d676c"
+  },
+  "confirmed_stage_1_kernel": {
+    "name": "uniform_over_distinct_productive_canonical_successors",
+    "level": "canonical_molecular_successor",
+    "row_definition": "P(y|x)=1/|N(x)| for each distinct productive canonical successor y in N(x)",
+    "self_and_virtual_events": "excluded from the embedded molecular jump chain",
+    "mark_alias_multiplicity": "ignored after canonical aggregation",
+    "time_dependence": "fixed time-homogeneous stage-1 verification kernel",
+    "is_a2_2b_diagnostic_mark_law": false,
+    "materialization_authorized_only_after_full_control_semantics_freeze": true
+  },
+  "required_unresolved_decisions": [
+    {
+      "decision_id": "finite_control_horizon",
+      "required_value": "one positive integer K for the E6 stage-1 verification",
+      "current_value": null,
+      "why_required": "defines the backward recursion, path length, terminal base law and analytic tilted law"
+    },
+    {
+      "decision_id": "terminal_desirability",
+      "required_value": "an immutable nonnegative finite value g(x) for every indexed terminal state, or a deterministic fully specified builder with content hash",
+      "current_value": null,
+      "why_required": "the Doob transform and analytic terminal tilt are undefined without g"
+    },
+    {
+      "decision_id": "initial_law",
+      "required_value": "one indexed source state or a normalized initial distribution over indexed states",
+      "current_value": null,
+      "why_required": "terminal-law TV and unreachable h_K(x)=0 cases are source dependent"
+    },
+    {
+      "decision_id": "solver_tolerances",
+      "required_value": "frozen row-stochastic, backward-recursion, support and terminal-law TV tolerances",
+      "current_value": null,
+      "why_required": "the registry failure criterion says beyond solver tolerance but does not give a number"
+    },
+    {
+      "decision_id": "explicit_path_check",
+      "required_value": "a deterministic smallest-slice identity, source, horizon and desirability for the independent DP-versus-path check",
+      "current_value": null,
+      "why_required": "the plan requires an independent path check but does not identify its exact finite instance"
+    }
+  ],
+  "required_task_artifacts": [
+    "configs/tasks/exact_control.development.json",
+    "configs/tasks/exact_control.final.json"
+  ],
+  "fail_closed_policy": {
+    "blocked_status": "BLOCKED_MISSING_FROZEN_CONTROL_SEMANTICS",
+    "forbid_solver_execution": true,
+    "forbid_kernel_materialization": true,
+    "forbid_terminal_law_metrics": true,
+    "forbid_paper_claim": true,
+    "note": "The E7 dynamic horizon is a different experiment and cannot be imported as the E6 horizon."
+  },
+  "scope_caveat": "This readiness artifact audits whether A2.3 is scientifically specified. It is not a control result, does not instantiate a Doob kernel, and does not authorize a paper claim.",
+  "contract_sha256": "3ae6ce18623579256b401f8c8940739cd72adad30b6ee3bc9c4f63ec8293a0d4"
+}
