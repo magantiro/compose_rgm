@@ -1,6 +1,6 @@
-"""Pack the MMP analogue pool: partition once -> parallel pack -> reduce -> MMP_PACK_COMPLETE.
+"""Pack one frozen V2 MMP analogue pool: partition once -> parallel pack -> reduce.
 
-    authoritative pool (363,456 records)
+    caller-frozen pool identity
       -> ONE streaming partition pass (scaffold-keyed, exact reconciliation)
       -> N parallel packers (one per raw shard, atomic finalize)
       -> reducer (coverage, checksums, overlap, replay audit)
@@ -15,16 +15,36 @@ Sharding arithmetic is MEASURED, not assumed (see _PACK_RATE): 86.4 records/s si
 306 gz bytes/record -> 1.17 h serial, ~0.11 GB packed. Shards are duration-targeted so validation and test
 do not become a long tail behind train.
 
-The pool stays authoritative; this store is a deterministic derivative bound to the pool's content hash and
-the full contract. A changed pool invalidates it rather than silently pairing stale states with new rows.
+The pool stays authoritative; this store is a deterministic derivative bound to the pool's content hash,
+record count, frozen completion contract, compiler support contract and launch authorization. The V2
+entrypoint has no default pool path, count or output directory. Its output namespace is content-addressed
+and is structurally unable to target ``mmp_packed_v1``.
 
-    modal run --detach modal_apps/pack_mmp_pool_app.py --commit <sha> --gate-sha <sha16>
+Before launching, freeze a JSON contract with this exact semantic payload (additional provenance fields are
+allowed and become part of its SHA-256 identity):
+
+    {
+      "schema": "compose.mmp_analogue_pool.v2",
+      "MMP_POOL_COMPLETE": true,
+      "pool_path": "/artifacts/<v2-mining-run>/edit_pool_full.jsonl",
+      "pool_sha256": "<64 lowercase hex>",
+      "pool_records": 123,
+      "analogue_support_contract": "<frozen compiler support contract>"
+    }
+
+Then launch with every required identity field explicitly supplied. A mismatch fails before partitioning or
+packing begins; this app never infers a new scientific identity from whatever happens to occupy a path.
 """
+
 from __future__ import annotations
 
+import hashlib
 import json
 import os
-from pathlib import Path
+import re
+import subprocess
+from pathlib import Path, PurePosixPath
+from typing import Any, Mapping
 
 import modal
 
@@ -33,25 +53,40 @@ REMOTE_ROOT = Path("/root/compose")
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .pip_install("torch==2.4.0", "numpy==1.26.4", "scipy==1.13.1", "networkx==3.3", "rdkit==2024.3.5")
-    .env({
-        "PYTHONPATH": os.pathsep.join((str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))),
-        "PYTHONUNBUFFERED": "1",
-        "OMP_NUM_THREADS": "1",
-    })
-    .add_local_dir(ROOT / "src", str(REMOTE_ROOT / "src"), copy=True,
-                   ignore=("**/__pycache__/**", "**/*.pyc"))
-    .add_local_dir(ROOT / "scripts", str(REMOTE_ROOT / "scripts"), copy=True,
-                   ignore=("**/__pycache__/**", "**/*.pyc"))
+    .pip_install(
+        "torch==2.4.0", "numpy==1.26.4", "scipy==1.13.1", "networkx==3.3", "rdkit==2024.3.5"
+    )
+    .env(
+        {
+            "PYTHONPATH": os.pathsep.join((str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))),
+            "PYTHONUNBUFFERED": "1",
+            "OMP_NUM_THREADS": "1",
+        }
+    )
+    .add_local_dir(
+        ROOT / "src", str(REMOTE_ROOT / "src"), copy=True, ignore=("**/__pycache__/**", "**/*.pyc")
+    )
+    .add_local_dir(
+        ROOT / "scripts",
+        str(REMOTE_ROOT / "scripts"),
+        copy=True,
+        ignore=("**/__pycache__/**", "**/*.pyc"),
+    )
 )
 
 app = modal.App("compose-v4-pack-mmp-pool")
 artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=True)
 
-POOL_PATH = "/artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl"
-EXPECTED_POOL_RECORDS = 363_456
 PARTITIONS = ("train", "validation", "test")
 LAYER = "mmp_analogue"
+POOL_CONTRACT_SCHEMA = "compose.mmp_analogue_pool.v2"
+PACK_REQUEST_SCHEMA = "compose.mmp_packing_request.v2"
+PACK_OUTPUT_SCHEMA = "compose.mmp_packed_store.v2"
+_PACK_REQUEST_FILENAME = "V2_PACK_REQUEST.json"
+_V2_OUTPUT_PREFIX = "mmp_packed_v2_"
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_COMMIT_RE = re.compile(r"^[0-9a-f]{7,40}$")
+_GATE_RE = re.compile(r"^[0-9a-f]{16,64}$")
 
 # ---- measured sharding arithmetic (scripts-derived, persisted into the manifest) --------------------
 _PACK_RATE = {
@@ -61,13 +96,327 @@ _PACK_RATE = {
     "gz_bytes_per_record": 306,
     "measured_on": "600-record stride sample of the real pool, mean K 6.08 vs pool 5.895",
 }
-_TARGET_SHARD_SECONDS = 240        # ~4 min: well above container startup, so overhead stays <25%
+_TARGET_SHARD_SECONDS = 240  # ~4 min: well above container startup, so overhead stays <25%
 _CONTAINER_MARGIN = 5
 _VERIFY_FRACTION = 0.02
 _SENTINEL_ENTRIES = 8
 # v1: partition by target scaffold only (LEAKED: 1,325 sources spanned partitions)
 # v2: require BOTH endpoints to map to the same partition; drop straddling pairs, counted
 _MMP_PARTITION_RULE_VERSION = 2
+
+
+class PackRequestError(ValueError):
+    """A V2 pack request is incomplete, mutable, ambiguous or points outside its safe namespace."""
+
+
+def _canonical_sha256(payload: Mapping[str, Any]) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _require_full_sha256(value: str, *, field: str) -> str:
+    normalized = str(value or "").strip()
+    if not _SHA256_RE.fullmatch(normalized):
+        raise PackRequestError(f"{field} must be a full 64-character lowercase SHA-256")
+    return normalized
+
+
+def _require_artifact_file(value: str, *, field: str) -> str:
+    """Return one normalized file below /artifacts; reject aliases and traversal."""
+    raw = str(value or "").strip()
+    candidate = PurePosixPath(raw)
+    if not candidate.is_absolute() or not candidate.parts or candidate.parts[1] != "artifacts":
+        raise PackRequestError(f"{field} must be an absolute file below /artifacts")
+    if ".." in candidate.parts or raw.endswith("/"):
+        raise PackRequestError(f"{field} must not contain traversal or name a directory")
+    normalized = str(candidate)
+    if normalized != raw or normalized == "/artifacts":
+        raise PackRequestError(f"{field} must be a normalized file path below /artifacts")
+    return normalized
+
+
+def build_pack_request(
+    *,
+    pool_path: str,
+    expected_pool_sha256: str,
+    expected_pool_records: int,
+    pool_contract_path: str,
+    expected_pool_contract_sha256: str,
+    expected_analogue_support_contract: str,
+    launch_commit: str,
+    gate_sha256: str,
+) -> dict[str, Any]:
+    """Construct the only accepted V2 launch request and its content-addressed output identity."""
+    normalized_pool_path = _require_artifact_file(pool_path, field="pool_path")
+    normalized_contract_path = _require_artifact_file(
+        pool_contract_path, field="pool_contract_path"
+    )
+    if normalized_contract_path == normalized_pool_path:
+        raise PackRequestError("pool_contract_path must be distinct from pool_path")
+    if (
+        isinstance(expected_pool_records, bool)
+        or not isinstance(expected_pool_records, int)
+        or expected_pool_records <= 0
+    ):
+        raise PackRequestError("expected_pool_records must be a positive integer")
+    support_contract = str(expected_analogue_support_contract or "").strip()
+    if not support_contract:
+        raise PackRequestError("expected_analogue_support_contract must be explicit and non-empty")
+    commit = str(launch_commit or "").strip()
+    if not _COMMIT_RE.fullmatch(commit):
+        raise PackRequestError("launch_commit must be a 7-40 character lowercase Git SHA")
+    gate = str(gate_sha256 or "").strip()
+    if not _GATE_RE.fullmatch(gate):
+        raise PackRequestError("gate_sha256 must be a 16-64 character lowercase hexadecimal digest")
+
+    frozen_input = {
+        "schema": PACK_REQUEST_SCHEMA,
+        "pool_path": normalized_pool_path,
+        "expected_pool_sha256": _require_full_sha256(
+            expected_pool_sha256, field="expected_pool_sha256"
+        ),
+        "expected_pool_records": expected_pool_records,
+        "pool_contract_path": normalized_contract_path,
+        "expected_pool_contract_sha256": _require_full_sha256(
+            expected_pool_contract_sha256, field="expected_pool_contract_sha256"
+        ),
+        "expected_analogue_support_contract": support_contract,
+    }
+    input_identity = _canonical_sha256(frozen_input)
+    authorization = {"launch_commit": commit, "gate_sha256": gate}
+    output_identity = _canonical_sha256(
+        {
+            "schema": PACK_OUTPUT_SCHEMA,
+            "input_identity": input_identity,
+            "authorization": authorization,
+        }
+    )
+    return {
+        **frozen_input,
+        "input_identity": input_identity,
+        "authorization": authorization,
+        "output_identity": output_identity,
+        "output_subdir": f"{_V2_OUTPUT_PREFIX}{output_identity[:20]}",
+    }
+
+
+def validate_pack_request(request: Mapping[str, Any]) -> dict[str, Any]:
+    """Reconstruct and compare a serialized request so no identity field can be hand-edited."""
+    if not isinstance(request, Mapping):
+        raise PackRequestError("pack request must be a mapping")
+    expected_keys = {
+        "schema",
+        "pool_path",
+        "expected_pool_sha256",
+        "expected_pool_records",
+        "pool_contract_path",
+        "expected_pool_contract_sha256",
+        "expected_analogue_support_contract",
+        "input_identity",
+        "authorization",
+        "output_identity",
+        "output_subdir",
+    }
+    missing = sorted(expected_keys - set(request))
+    extra = sorted(set(request) - expected_keys)
+    if missing or extra:
+        raise PackRequestError(f"pack request fields disagree: missing={missing}, extra={extra}")
+    authorization = request.get("authorization")
+    if not isinstance(authorization, Mapping):
+        raise PackRequestError("authorization must be a mapping")
+    rebuilt = build_pack_request(
+        pool_path=str(request.get("pool_path", "")),
+        expected_pool_sha256=str(request.get("expected_pool_sha256", "")),
+        expected_pool_records=request.get("expected_pool_records", 0),
+        pool_contract_path=str(request.get("pool_contract_path", "")),
+        expected_pool_contract_sha256=str(request.get("expected_pool_contract_sha256", "")),
+        expected_analogue_support_contract=str(
+            request.get("expected_analogue_support_contract", "")
+        ),
+        launch_commit=str(authorization.get("launch_commit", "")),
+        gate_sha256=str(authorization.get("gate_sha256", "")),
+    )
+    if dict(request) != rebuilt:
+        raise PackRequestError("serialized pack request does not match its computed identities")
+    if rebuilt["output_subdir"] == "mmp_packed_v1" or not rebuilt["output_subdir"].startswith(
+        _V2_OUTPUT_PREFIX
+    ):
+        raise PackRequestError("V2 packing may only write its computed mmp_packed_v2_* namespace")
+    return rebuilt
+
+
+def _mounted_artifact_path(path: str, artifact_root: Path) -> Path:
+    normalized = _require_artifact_file(path, field="artifact path")
+    return artifact_root / PurePosixPath(normalized).relative_to("/artifacts")
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def preflight_frozen_input(
+    request: Mapping[str, Any], *, artifact_root: Path = Path("/artifacts")
+) -> dict[str, Any]:
+    """Verify the immutable upstream contract, pool bytes and row count before any expensive work."""
+    checked = validate_pack_request(request)
+    contract_path = _mounted_artifact_path(checked["pool_contract_path"], artifact_root)
+    pool_path = _mounted_artifact_path(checked["pool_path"], artifact_root)
+    if not contract_path.is_file():
+        raise PackRequestError(f"frozen pool contract is absent: {checked['pool_contract_path']}")
+    if not pool_path.is_file():
+        raise PackRequestError(f"frozen pool is absent: {checked['pool_path']}")
+
+    contract_bytes = contract_path.read_bytes()
+    observed_contract_sha = hashlib.sha256(contract_bytes).hexdigest()
+    if observed_contract_sha != checked["expected_pool_contract_sha256"]:
+        raise PackRequestError(
+            "frozen pool contract SHA-256 mismatch: "
+            f"expected {checked['expected_pool_contract_sha256']}, got {observed_contract_sha}"
+        )
+    try:
+        pool_contract = json.loads(contract_bytes)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise PackRequestError(f"frozen pool contract is not valid JSON: {exc}") from exc
+    if not isinstance(pool_contract, Mapping):
+        raise PackRequestError("frozen pool contract must be a JSON object")
+    required_contract = {
+        "schema": POOL_CONTRACT_SCHEMA,
+        "MMP_POOL_COMPLETE": True,
+        "pool_path": checked["pool_path"],
+        "pool_sha256": checked["expected_pool_sha256"],
+        "pool_records": checked["expected_pool_records"],
+        "analogue_support_contract": checked["expected_analogue_support_contract"],
+    }
+
+    def _matches_contract_field(key: str, expected: Any) -> bool:
+        observed = pool_contract.get(key)
+        if key == "MMP_POOL_COMPLETE":
+            return observed is True
+        if key == "pool_records":
+            return (
+                isinstance(observed, int)
+                and not isinstance(observed, bool)
+                and observed == expected
+            )
+        return observed == expected
+
+    disagreements = {
+        key: {"expected": value, "observed": pool_contract.get(key)}
+        for key, value in required_contract.items()
+        if not _matches_contract_field(key, value)
+    }
+    if disagreements:
+        raise PackRequestError(
+            f"frozen pool contract disagrees with the launch request: {disagreements}"
+        )
+
+    digest = hashlib.sha256()
+    records = 0
+    first_row_error: str | None = None
+    with pool_path.open("rb") as handle:
+        for line_number, line in enumerate(handle, start=1):
+            digest.update(line)
+            if not line.strip():
+                continue
+            records += 1
+            if first_row_error is not None:
+                continue
+            try:
+                row = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                first_row_error = f"line {line_number} is not valid JSON: {exc}"
+                continue
+            if not isinstance(row, Mapping):
+                first_row_error = f"line {line_number} is not a JSON object"
+                continue
+            metadata = row.get("metadata")
+            row_support = (
+                metadata.get("support_contract") if isinstance(metadata, Mapping) else None
+            )
+            if row_support != checked["expected_analogue_support_contract"]:
+                first_row_error = (
+                    f"line {line_number} support contract is {row_support!r}; expected "
+                    f"{checked['expected_analogue_support_contract']!r}"
+                )
+    observed_pool_sha = digest.hexdigest()
+    if observed_pool_sha != checked["expected_pool_sha256"]:
+        raise PackRequestError(
+            "frozen pool SHA-256 mismatch: "
+            f"expected {checked['expected_pool_sha256']}, got {observed_pool_sha}"
+        )
+    if records != checked["expected_pool_records"]:
+        raise PackRequestError(
+            f"frozen pool has {records} records; expected {checked['expected_pool_records']}"
+        )
+    if first_row_error is not None:
+        raise PackRequestError(f"frozen pool row contract failed: {first_row_error}")
+    return {
+        "input_identity": checked["input_identity"],
+        "pool_sha256": observed_pool_sha,
+        "pool_records": records,
+        "pool_contract_sha256": observed_contract_sha,
+        "row_support_contract_verified": True,
+    }
+
+
+def validate_existing_output_claim(existing: Mapping[str, Any], request: Mapping[str, Any]) -> None:
+    """Permit an interrupted V2 build to resume only under its byte-identical request."""
+    checked = validate_pack_request(request)
+    if dict(existing) != checked:
+        raise PackRequestError(
+            "output namespace is already claimed by a different pack request; choose nothing manually"
+        )
+
+
+def require_unchanged_completed_shards(
+    prior_complete: Mapping[str, Any],
+    observed_shard_artifacts: list[dict[str, Any]],
+) -> None:
+    """Refuse a completed-store reuse when any packed or manifest byte changed."""
+
+    expected = prior_complete.get("shard_artifacts")
+    if not isinstance(expected, list):
+        raise PackRequestError("existing completion artifact lacks packed-shard byte identities")
+    if expected != observed_shard_artifacts:
+        raise PackRequestError(
+            "completed packed-shard bytes or manifests changed after freeze; "
+            "refusing reuse or re-blessing"
+        )
+
+
+def verify_local_launch_commit(launch_commit: str, *, repo: Path = ROOT) -> None:
+    """Bind the caller-supplied commit to the actual clean code that Modal will serialize."""
+    result = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    actual = result.stdout.strip().lower()
+    if not actual.startswith(launch_commit):
+        raise PackRequestError(
+            f"launch_commit {launch_commit!r} does not identify local HEAD {actual!r}"
+        )
+    dirty = subprocess.run(
+        ["git", "-C", str(repo), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    code_dirty = [
+        line
+        for line in dirty.splitlines()
+        if line[3:].startswith(("src/", "scripts/", "modal_apps/"))
+    ]
+    if code_dirty:
+        raise PackRequestError(
+            "refusing to launch from a dirty serialized-code tree; commit the V2 packer first: "
+            f"{code_dirty[:12]}"
+        )
 
 
 def pair_rule_implementation_hash() -> str:
@@ -123,14 +472,22 @@ def _status(subdir: str, status: str, **fields) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     (out / "mmp_pack_status.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     artifact_volume.commit()
-    print(json.dumps({"phase": "status", **{k: v for k, v in payload.items()
-                                            if k not in ("shards", "missing", "stale")}},
-                     sort_keys=True)[:900], flush=True)
+    print(
+        json.dumps(
+            {
+                "phase": "status",
+                **{k: v for k, v in payload.items() if k not in ("shards", "missing", "stale")},
+            },
+            sort_keys=True,
+        )[:900],
+        flush=True,
+    )
     return payload
 
 
 def _contract() -> dict:
     import sys
+
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
     from compose_v4.data.packed_trace_store import (
@@ -156,63 +513,144 @@ def _contract() -> dict:
     }
 
 
-def _pool_sha256() -> str:
-    """Streaming content hash of the authoritative pool, used to decide partition reuse."""
-    import hashlib
+def _assert_runtime_contract(request: Mapping[str, Any]) -> dict[str, Any]:
+    """The caller freezes compiler semantics; current source code may not silently replace them."""
+    checked = validate_pack_request(request)
+    contract = _contract()
+    observed = contract.get("analogue_support_contract")
+    expected = checked["expected_analogue_support_contract"]
+    if observed != expected:
+        raise PackRequestError(
+            "runtime analogue support contract disagrees with the frozen input contract: "
+            f"expected {expected!r}, runtime exposes {observed!r}"
+        )
+    return contract
 
-    digest = hashlib.sha256()
-    with open(POOL_PATH, "rb") as raw:
-        for chunk in iter(lambda: raw.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+
+def _claim_output_namespace(
+    request: Mapping[str, Any], runtime_contract: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Claim or resume the computed V2 namespace; never rewrite an already complete derivative."""
+    checked = validate_pack_request(request)
+    subdir = checked["output_subdir"]
+    root = Path("/artifacts") / subdir
+    claim_path = root / _PACK_REQUEST_FILENAME
+    complete_path = root / "MMP_PACK_COMPLETE.json"
+
+    if root.exists():
+        contents = sorted(path.name for path in root.iterdir())
+        if contents and not claim_path.is_file():
+            raise PackRequestError(
+                f"{subdir} already contains data but has no {_PACK_REQUEST_FILENAME}; refusing adoption"
+            )
+    if claim_path.is_file():
+        try:
+            existing_claim = json.loads(claim_path.read_text())
+        except json.JSONDecodeError as exc:
+            raise PackRequestError(f"{subdir} has an invalid pack-request claim") from exc
+        validate_existing_output_claim(existing_claim, checked)
+    else:
+        root.mkdir(parents=True, exist_ok=True)
+        tmp = claim_path.with_name(claim_path.name + f".tmp-{os.getpid()}")
+        tmp.write_text(json.dumps(checked, indent=2, sort_keys=True) + "\n")
+        tmp.replace(claim_path)
+        artifact_volume.commit()
+
+    if complete_path.is_file():
+        try:
+            complete = json.loads(complete_path.read_text())
+        except json.JSONDecodeError as exc:
+            raise PackRequestError(f"{subdir} has an invalid completion artifact") from exc
+        if (
+            complete.get("MMP_PACK_COMPLETE") is not True
+            or complete.get("input_identity") != checked["input_identity"]
+            or complete.get("output_identity") != checked["output_identity"]
+            or complete.get("pack_request") != checked
+            or complete.get("contract") != dict(runtime_contract)
+            or not isinstance(complete.get("shard_artifacts"), list)
+        ):
+            raise PackRequestError(
+                f"{subdir} has a completion artifact that disagrees with its frozen request"
+            )
+        return {"reused_complete": True, "payload": complete}
+    return {"reused_complete": False}
 
 
-@app.function(image=image, cpu=8.0, memory=32768, timeout=4 * 3600,
-              volumes={"/artifacts": artifact_volume})
-def partition_pool(subdir: str) -> dict:
-    """Stream the pool EXACTLY ONCE: hash it, assign partitions, and write raw intermediate shards.
+@app.function(
+    image=image, cpu=8.0, memory=32768, timeout=4 * 3600, volumes={"/artifacts": artifact_volume}
+)
+def partition_pool(request: dict[str, Any]) -> dict:
+    """Re-verify, then stream the pool once to assign partitions and write raw intermediate shards.
 
-    Letting every packing worker scan all 363,456 records would multiply an 83-minute scan by the worker
+    Letting every packing worker scan the full pool would multiply the scan by the worker
     count. Partition assignment happens here, once, and every record is accounted for -- reconciliation to
     the expected total is required, and any rejection is counted with a reason rather than dropped.
     """
-    import hashlib
     import sys
     import time
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
     artifact_volume.reload()
+    checked = validate_pack_request(request)
+    preflight_frozen_input(checked)
+    contract = _assert_runtime_contract(checked)
+    subdir = checked["output_subdir"]
+    pool_path = checked["pool_path"]
+    expected_pool_sha256 = checked["expected_pool_sha256"]
+    expected_pool_records = checked["expected_pool_records"]
     started = time.time()
     out_root = Path("/artifacts") / subdir / "_raw"
-    out_root.mkdir(parents=True, exist_ok=True)
 
     # Reuse a prior partitioning when the pool and the partitioner are unchanged. The scan is cheap
-    # (measured 127 s for 363,456 records) but it is pure overhead on a rebuild, and skipping it keeps
+    # relative to packing but it is pure overhead on a rebuild, and skipping it keeps
     # raw shard membership byte-identical -- which is what lets packed shards be reused too.
     existing_manifest = Path("/artifacts") / subdir / "partition_manifest.json"
     if existing_manifest.exists():
         try:
             previous = json.loads(existing_manifest.read_text())
-        except json.JSONDecodeError:
-            previous = None
-        if previous:
-            current_pool_sha = _pool_sha256()
-            if (
-                previous.get("pool_sha256") == current_pool_sha
-                and previous.get("contract", {}).get("partitioner") == _contract()["partitioner"]
-                # the app's OWN pairing rule is not covered by the partitioner provenance hash;
-                # without this, a rebuild would silently reuse a partitioning built under the old rule
-                and previous.get("mmp_partition_rule_version") == _MMP_PARTITION_RULE_VERSION
-                and previous.get("pair_rule_implementation_hash") == pair_rule_implementation_hash()
-                and previous.get("scanned") == EXPECTED_POOL_RECORDS
-                and all(
-                    (out_root / e["partition"] / e["shard"]).exists() for e in previous.get("shards", [])
-                )
-            ):
-                print(json.dumps({"phase": "partition_reuse", "pool_sha256": current_pool_sha[:16],
-                                  "shards": previous["expected_shards"]}), flush=True)
-                return previous
+        except json.JSONDecodeError as exc:
+            raise PackRequestError(
+                "existing partition manifest is invalid; refusing adoption"
+            ) from exc
+        frozen_fields_match = (
+            previous.get("pool_sha256") == expected_pool_sha256
+            and previous.get("input_identity") == checked["input_identity"]
+            and previous.get("output_identity") == checked["output_identity"]
+            and previous.get("pack_request") == checked
+            and previous.get("contract") == contract
+            # The app's own pairing rule is not covered by the partitioner provenance hash.
+            and previous.get("mmp_partition_rule_version") == _MMP_PARTITION_RULE_VERSION
+            and previous.get("pair_rule_implementation_hash") == pair_rule_implementation_hash()
+            and previous.get("scanned") == expected_pool_records
+        )
+        if not frozen_fields_match:
+            raise PackRequestError(
+                "existing partition manifest disagrees with the frozen request/runtime contract; "
+                "refusing overwrite or re-blessing"
+            )
+        raw_mismatches = []
+        for entry in previous.get("shards", []):
+            raw_path = out_root / entry["partition"] / entry["shard"]
+            if not raw_path.is_file() or _file_sha256(raw_path) != entry.get("raw_content_sha256"):
+                raw_mismatches.append(f"{entry['partition']}/{entry['shard']}")
+        if not raw_mismatches:
+            print(
+                json.dumps(
+                    {
+                        "phase": "partition_reuse",
+                        "pool_sha256": expected_pool_sha256[:16],
+                        "shards": previous["expected_shards"],
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            return previous
+        raise PackRequestError(
+            "existing raw partition shards are missing or changed; refusing overwrite: "
+            f"{raw_mismatches[:8]}"
+        )
 
     digest = hashlib.sha256()
     rows_by_partition: dict[str, list] = {p: [] for p in PARTITIONS}
@@ -220,8 +658,14 @@ def partition_pool(subdir: str) -> dict:
     dropped_row_ids: list[int] = []
     molecules_by_partition: dict[str, set] = {p: set() for p in PARTITIONS}
     dropped_bias: dict[str, dict] = {
-        k: {} for k in ("path_length", "direction", "atom_count_delta",
-                        "cycle_rank_delta", "operator_signature")
+        k: {}
+        for k in (
+            "path_length",
+            "direction",
+            "atom_count_delta",
+            "cycle_rank_delta",
+            "operator_signature",
+        )
     }
 
     def _bump(counter: dict, key: str) -> None:
@@ -231,7 +675,7 @@ def partition_pool(subdir: str) -> dict:
     scaffolds_by_partition: dict[str, set] = {p: set() for p in PARTITIONS}
     scanned = 0
 
-    with open(POOL_PATH, "rb") as raw:
+    with open(pool_path, "rb") as raw:
         for line in raw:
             digest.update(line)
             text = line.strip()
@@ -247,8 +691,11 @@ def partition_pool(subdir: str) -> dict:
                 record.get("source_smiles", ""), target
             )
             if partition is None:
-                reason = ("unassignable_scaffold" if not (source_scaffold and scaffold)
-                          else "endpoints_straddle_partitions")
+                reason = (
+                    "unassignable_scaffold"
+                    if not (source_scaffold and scaffold)
+                    else "endpoints_straddle_partitions"
+                )
                 rejects[reason] = rejects.get(reason, 0) + 1
                 dropped_row_ids.append(scanned - 1)
                 if reason == "endpoints_straddle_partitions":
@@ -258,10 +705,12 @@ def partition_pool(subdir: str) -> dict:
                     _bump(dropped_bias["direction"], str(record.get("direction") or "unknown"))
                     _bump(dropped_bias["atom_count_delta"], str(record.get("atom_count_delta")))
                     _bump(dropped_bias["cycle_rank_delta"], str(record.get("cycle_rank_delta")))
-                    _bump(dropped_bias["operator_signature"],
-                          ",".join(sorted((record.get("operator_histogram") or {}))))
+                    _bump(
+                        dropped_bias["operator_signature"],
+                        ",".join(sorted((record.get("operator_histogram") or {}))),
+                    )
                 continue
-            record["_row_id"] = scanned - 1          # exact original row index
+            record["_row_id"] = scanned - 1  # exact original row index
             record["_scaffold"] = scaffold
             record["_source_scaffold"] = source_scaffold
             rows_by_partition[partition].append(record)
@@ -274,35 +723,57 @@ def partition_pool(subdir: str) -> dict:
             scaffolds_by_partition[partition].add(source_scaffold)
 
     pool_sha256 = digest.hexdigest()
-    if scanned != EXPECTED_POOL_RECORDS:
-        return _status(subdir, "FAILED", reason=f"pool has {scanned} records, expected "
-                       f"{EXPECTED_POOL_RECORDS}", pool_sha256=pool_sha256)
+    if pool_sha256 != expected_pool_sha256:
+        return _status(
+            subdir,
+            "FAILED",
+            reason=(
+                f"pool SHA-256 changed during partitioning: expected {expected_pool_sha256}, "
+                f"got {pool_sha256}"
+            ),
+            input_identity=checked["input_identity"],
+            output_identity=checked["output_identity"],
+        )
+    if scanned != expected_pool_records:
+        return _status(
+            subdir,
+            "FAILED",
+            reason=f"pool has {scanned} records, expected {expected_pool_records}",
+            pool_sha256=pool_sha256,
+            input_identity=checked["input_identity"],
+            output_identity=checked["output_identity"],
+        )
 
     # deterministic shard assignment inside each partition, duration-targeted
+    out_root.mkdir(parents=True, exist_ok=True)
     plan: list[dict] = []
     for partition in PARTITIONS:
         records = rows_by_partition[partition]
         n_shards = shards_for(len(records))
         for shard_index in range(n_shards):
-            slice_rows = records[shard_index::n_shards]     # stride keeps path-length mix even
+            slice_rows = records[shard_index::n_shards]  # stride keeps path-length mix even
             name = f"shard_{shard_index:04d}.jsonl"
             directory = out_root / partition
             directory.mkdir(parents=True, exist_ok=True)
-            (directory / name).write_text(
-                "".join(json.dumps(r, sort_keys=True) + "\n" for r in slice_rows)
+            raw_content = "".join(json.dumps(r, sort_keys=True) + "\n" for r in slice_rows)
+            (directory / name).write_text(raw_content)
+            plan.append(
+                {
+                    "partition": partition,
+                    "shard": name,
+                    "records": len(slice_rows),
+                    "raw_content_sha256": hashlib.sha256(raw_content.encode()).hexdigest(),
+                    "row_ids_sha256": hashlib.sha256(
+                        ",".join(str(r["_row_id"]) for r in slice_rows).encode()
+                    ).hexdigest()[:16],
+                }
             )
-            plan.append({
-                "partition": partition, "shard": name, "records": len(slice_rows),
-                "row_ids_sha256": hashlib.sha256(
-                    ",".join(str(r["_row_id"]) for r in slice_rows).encode()
-                ).hexdigest()[:16],
-            })
 
     # Zero overlap must hold at partition time. Discovering it in the reducer means the whole packing
     # fan-out was already paid for -- which is exactly what happened on the v1 rule.
     molecule_overlap, scaffold_overlap = {}, {}
     for i, a in enumerate(PARTITIONS):
-        for b in PARTITIONS[i + 1:]:
+        for b in PARTITIONS[i + 1 :]:
             shared_mols = molecules_by_partition[a] & molecules_by_partition[b]
             shared_scaffolds = scaffolds_by_partition[a] & scaffolds_by_partition[b]
             if shared_mols:
@@ -310,17 +781,34 @@ def partition_pool(subdir: str) -> dict:
             if shared_scaffolds:
                 scaffold_overlap[f"{a}|{b}"] = len(shared_scaffolds)
     if molecule_overlap or scaffold_overlap:
-        return _status(subdir, "FAILED", reason="partitions overlap after the pair rule",
-                       molecule_overlap=molecule_overlap, scaffold_overlap=scaffold_overlap)
+        return _status(
+            subdir,
+            "FAILED",
+            reason="partitions overlap after the pair rule",
+            molecule_overlap=molecule_overlap,
+            scaffold_overlap=scaffold_overlap,
+        )
 
     kept = sum(len(v) for v in rows_by_partition.values())
     if kept + sum(rejects.values()) != scanned:
-        return _status(subdir, "FAILED", reason="record reconciliation failed",
-                       scanned=scanned, kept=kept, rejects=rejects)
+        return _status(
+            subdir,
+            "FAILED",
+            reason="record reconciliation failed",
+            scanned=scanned,
+            kept=kept,
+            rejects=rejects,
+        )
 
     manifest = {
-        "pool_path": POOL_PATH,
+        "schema": PACK_OUTPUT_SCHEMA,
+        "pack_request": checked,
+        "input_identity": checked["input_identity"],
+        "output_identity": checked["output_identity"],
+        "pool_path": pool_path,
         "pool_sha256": pool_sha256,
+        "pool_contract_path": checked["pool_contract_path"],
+        "pool_contract_sha256": checked["expected_pool_contract_sha256"],
         "scanned": scanned,
         "kept": kept,
         "rejects": rejects,
@@ -348,23 +836,46 @@ def partition_pool(subdir: str) -> dict:
             "max_containers": len(plan) + _CONTAINER_MARGIN,
             "expected_critical_path_seconds": _TARGET_SHARD_SECONDS,
         },
-        "contract": _contract(),
+        "contract": contract,
         "seconds": round(time.time() - started, 1),
     }
     (Path("/artifacts") / subdir / "partition_manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     )
     artifact_volume.commit()
-    print(json.dumps({"phase": "partitioned", "scanned": scanned, "kept": kept,
-                      "shards": len(plan), "rejects": rejects,
-                      "counts": manifest["counts_by_partition"]}, sort_keys=True), flush=True)
+    print(
+        json.dumps(
+            {
+                "phase": "partitioned",
+                "scanned": scanned,
+                "kept": kept,
+                "shards": len(plan),
+                "rejects": rejects,
+                "counts": manifest["counts_by_partition"],
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
     return manifest
 
 
-@app.function(image=image, cpu=4.0, memory=16384, timeout=4 * 3600,
-              max_containers=64, volumes={"/artifacts": artifact_volume})
-def pack_mmp_shard(subdir: str, partition: str, name: str, pool_sha256: str,
-                   row_ids_sha256: str) -> dict:
+@app.function(
+    image=image,
+    cpu=4.0,
+    memory=16384,
+    timeout=4 * 3600,
+    max_containers=64,
+    volumes={"/artifacts": artifact_volume},
+)
+def pack_mmp_shard(
+    request: dict[str, Any],
+    partition: str,
+    name: str,
+    pool_sha256: str,
+    row_ids_sha256: str,
+    raw_content_sha256: str,
+) -> dict:
     """Pack one raw shard. Atomic finalize; reuse only on a full contract + identity match."""
     import sys
     import time
@@ -383,11 +894,19 @@ def pack_mmp_shard(subdir: str, partition: str, name: str, pool_sha256: str,
 
     assert_closed_form_applies()
     artifact_volume.reload()
-    contract = _contract()
+    checked = validate_pack_request(request)
+    if pool_sha256 != checked["expected_pool_sha256"]:
+        raise PackRequestError("shard task pool identity disagrees with its frozen pack request")
+    contract = _assert_runtime_contract(checked)
+    subdir = checked["output_subdir"]
     provenance = {
         "layer": LAYER,
+        "input_identity": checked["input_identity"],
+        "output_identity": checked["output_identity"],
+        "pool_contract_sha256": checked["expected_pool_contract_sha256"],
         "source_pool_sha256": pool_sha256,
         "row_ids_sha256": row_ids_sha256,
+        "raw_content_sha256": raw_content_sha256,
         "partition": partition,
         **contract,
     }
@@ -402,16 +921,38 @@ def pack_mmp_shard(subdir: str, partition: str, name: str, pool_sha256: str,
             existing = {}
         stored = existing.get("provenance", {})
         if (
-            stored.get("source_pool_sha256") == pool_sha256
+            stored.get("input_identity") == checked["input_identity"]
+            and stored.get("output_identity") == checked["output_identity"]
+            and stored.get("pool_contract_sha256") == checked["expected_pool_contract_sha256"]
+            and stored.get("source_pool_sha256") == pool_sha256
             and stored.get("row_ids_sha256") == row_ids_sha256
+            and stored.get("raw_content_sha256") == raw_content_sha256
             and all(stored.get(k) == v for k, v in contract.items())
         ):
             print(json.dumps({"phase": "reuse", "shard": f"{partition}/{packed_name}"}), flush=True)
-            return {"partition": partition, "shard": packed_name, "reused": True,
-                    "entries": existing.get("entries", 0)}
+            return {
+                "partition": partition,
+                "shard": packed_name,
+                "reused": True,
+                "entries": existing.get("entries", 0),
+            }
+        raise PackRequestError(
+            f"existing packed shard {partition}/{packed_name} disagrees with the frozen request; "
+            "refusing overwrite or re-blessing"
+        )
+    if dest.exists() != manifest_path.exists():
+        raise PackRequestError(
+            f"existing packed shard {partition}/{packed_name} is incomplete; refusing overwrite"
+        )
 
     started = time.time()
     raw = Path("/artifacts") / subdir / "_raw" / partition / name
+    observed_raw_sha256 = _file_sha256(raw)
+    if observed_raw_sha256 != raw_content_sha256:
+        raise PackRequestError(
+            f"raw shard {partition}/{name} SHA-256 mismatch: expected {raw_content_sha256}, "
+            f"got {observed_raw_sha256}"
+        )
     entries, unbuildable = [], 0
     for line in raw.read_text().splitlines():
         if not line.strip():
@@ -422,8 +963,8 @@ def pack_mmp_shard(subdir: str, partition: str, name: str, pool_sha256: str,
         except Exception:  # noqa: BLE001 -- counted, never silently dropped
             unbuildable += 1
             continue
-        # Normalize the V1 pool row to the V2 trace schema. The packed loader decodes actions with the
-        # V2 codec, so storing raw V1 rows would fail at read time; normalizing here also gives the MMP
+        # Normalize the compiler pool row to the V2 trace schema. The packed loader decodes actions with
+        # the V2 codec; normalizing here also gives the MMP
         # layer the same schema and provenance as corruption/cycle_ops -- ONE loader path, not two.
         v2 = encode_trace_record(
             trace,
@@ -451,16 +992,23 @@ def pack_mmp_shard(subdir: str, partition: str, name: str, pool_sha256: str,
     manifest_path_for(tmp).replace(manifest_path)
     tmp.replace(dest)
     artifact_volume.commit()
-    result = {"partition": partition, "shard": packed_name, "reused": False,
-              "entries": manifest["entries"], "states": manifest["states"],
-              "unbuildable": unbuildable, "seconds": round(time.time() - started, 1)}
+    result = {
+        "partition": partition,
+        "shard": packed_name,
+        "reused": False,
+        "entries": manifest["entries"],
+        "states": manifest["states"],
+        "unbuildable": unbuildable,
+        "seconds": round(time.time() - started, 1),
+    }
     print(json.dumps({"phase": "packed", **result}, sort_keys=True), flush=True)
     return result
 
 
-@app.function(image=image, cpu=16.0, memory=65536, timeout=4 * 3600,
-              volumes={"/artifacts": artifact_volume})
-def reduce_mmp(subdir: str, build_meta: dict) -> dict:
+@app.function(
+    image=image, cpu=16.0, memory=65536, timeout=4 * 3600, volumes={"/artifacts": artifact_volume}
+)
+def reduce_mmp(request: dict[str, Any]) -> dict:
     """Refuse MMP_PACK_COMPLETE unless coverage, reconciliation, overlap and replay all pass."""
     import sys
 
@@ -473,11 +1021,49 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
     )
 
     artifact_volume.reload()
+    checked = validate_pack_request(request)
+    subdir = checked["output_subdir"]
     root = Path("/artifacts") / subdir
     plan = json.loads((root / "partition_manifest.json").read_text())
-    contract = _contract()
+    contract = _assert_runtime_contract(checked)
+    complete_path = root / "MMP_PACK_COMPLETE.json"
+    prior_complete = None
+    if complete_path.is_file():
+        try:
+            prior_complete = json.loads(complete_path.read_text())
+        except json.JSONDecodeError as exc:
+            raise PackRequestError(
+                "existing MMP completion artifact is invalid; refusing adoption"
+            ) from exc
+        if (
+            prior_complete.get("MMP_PACK_COMPLETE") is not True
+            or prior_complete.get("pack_request") != checked
+            or prior_complete.get("input_identity") != checked["input_identity"]
+            or prior_complete.get("output_identity") != checked["output_identity"]
+            or prior_complete.get("contract") != contract
+            or not isinstance(prior_complete.get("shard_artifacts"), list)
+        ):
+            raise PackRequestError(
+                "existing MMP completion artifact disagrees with the frozen request"
+            )
+    if (
+        plan.get("pack_request") != checked
+        or plan.get("input_identity") != checked["input_identity"]
+        or plan.get("output_identity") != checked["output_identity"]
+        or plan.get("pool_sha256") != checked["expected_pool_sha256"]
+        or plan.get("pool_contract_sha256") != checked["expected_pool_contract_sha256"]
+        or plan.get("scanned") != checked["expected_pool_records"]
+    ):
+        return _status(
+            subdir,
+            "FAILED",
+            reason="partition manifest disagrees with the frozen V2 pack request",
+            input_identity=checked["input_identity"],
+            output_identity=checked["output_identity"],
+        )
 
     missing, stale, totals = [], [], {"entries": 0, "states": 0}
+    shard_artifacts = []
     by_partition: dict[str, int] = {}
     for entry in plan["shards"]:
         partition, name = entry["partition"], entry["shard"] + ".gz"
@@ -489,8 +1075,12 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
         manifest = json.loads(manifest_path.read_text())
         stored = manifest.get("provenance", {})
         if (
-            stored.get("source_pool_sha256") != plan["pool_sha256"]
+            stored.get("input_identity") != checked["input_identity"]
+            or stored.get("output_identity") != checked["output_identity"]
+            or stored.get("pool_contract_sha256") != checked["expected_pool_contract_sha256"]
+            or stored.get("source_pool_sha256") != plan["pool_sha256"]
             or stored.get("row_ids_sha256") != entry["row_ids_sha256"]
+            or stored.get("raw_content_sha256") != entry["raw_content_sha256"]
             or any(stored.get(k) != v for k, v in contract.items())
         ):
             stale.append(f"{partition}/{name}")
@@ -498,18 +1088,48 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
         totals["entries"] += manifest["entries"]
         totals["states"] += manifest["states"]
         by_partition[partition] = by_partition.get(partition, 0) + manifest["entries"]
+        shard_artifacts.append(
+            {
+                "partition": partition,
+                "shard": name,
+                "packed_sha256": _file_sha256(shard),
+                "manifest_sha256": _file_sha256(manifest_path),
+                "entries": int(manifest["entries"]),
+                "states": int(manifest["states"]),
+            }
+        )
 
     # an unexpected packed shard means the derivative drifted from its plan
     expected_names = {(e["partition"], e["shard"] + ".gz") for e in plan["shards"]}
     unexpected = [
         f"{p}/{f.name}"
         for p in PARTITIONS
-        for f in sorted((root / p).glob("*.jsonl.gz")) if (root / p).is_dir()
+        for f in sorted((root / p).glob("*.jsonl.gz"))
+        if (root / p).is_dir()
         if (p, f.name) not in expected_names
     ]
     if missing or stale or unexpected:
-        return _status(subdir, "PARTIAL", missing=missing, stale=stale,
-                       unexpected=unexpected, totals=totals)
+        return _status(
+            subdir, "PARTIAL", missing=missing, stale=stale, unexpected=unexpected, totals=totals
+        )
+    shard_artifacts = sorted(
+        shard_artifacts,
+        key=lambda item: (item["partition"], item["shard"]),
+    )
+    if prior_complete is not None:
+        try:
+            require_unchanged_completed_shards(
+                prior_complete,
+                shard_artifacts,
+            )
+        except PackRequestError as exc:
+            return _status(
+                subdir,
+                "FAILED",
+                reason=str(exc),
+                input_identity=checked["input_identity"],
+                output_identity=checked["output_identity"],
+            )
 
     # exact reconciliation + zero duplicate row ids + zero cross-partition source/scaffold leakage
     seen_rows: set[int] = set()
@@ -554,8 +1174,10 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
     audited = 0
     try:
         for entry in plan["shards"][: min(len(plan["shards"]), 8)]:
-            for _ in read_packed_shard(root / entry["partition"] / (entry["shard"] + ".gz"),
-                                       verify_fraction=_VERIFY_FRACTION):
+            for _ in read_packed_shard(
+                root / entry["partition"] / (entry["shard"] + ".gz"),
+                verify_fraction=_VERIFY_FRACTION,
+            ):
                 audited += 1
     except Exception as exc:  # noqa: BLE001
         return _status(subdir, "FAILED", reason=f"replay audit failed: {exc}", totals=totals)
@@ -564,14 +1186,22 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
     for partition in ("train", "validation"):
         shard = next((e for e in plan["shards"] if e["partition"] == partition), None)
         if shard:
-            sentinels.append(sentinel_replay_check(
-                root / partition / (shard["shard"] + ".gz"), entries=_SENTINEL_ENTRIES
-            ))
+            sentinels.append(
+                sentinel_replay_check(
+                    root / partition / (shard["shard"] + ".gz"), entries=_SENTINEL_ENTRIES
+                )
+            )
 
     payload = {
+        "schema": PACK_OUTPUT_SCHEMA,
         "MMP_PACK_COMPLETE": True,
+        "pack_request": checked,
+        "input_identity": checked["input_identity"],
+        "output_identity": checked["output_identity"],
         "layer": LAYER,
         "pool_sha256": plan["pool_sha256"],
+        "pool_contract_path": checked["pool_contract_path"],
+        "pool_contract_sha256": checked["expected_pool_contract_sha256"],
         "pool_records": plan["scanned"],
         "packed_entries": totals["entries"],
         "packed_states": totals["states"],
@@ -597,43 +1227,133 @@ def reduce_mmp(subdir: str, build_meta: dict) -> dict:
         "audited_entries": audited,
         "sentinels": sentinels,
         "contract": contract,
+        "shard_artifacts": shard_artifacts,
         "sharding_arithmetic": plan["sharding_arithmetic"],
-        **build_meta,
+        "authorization": checked["authorization"],
     }
-    (root / "MMP_PACK_COMPLETE.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    (root / "MMP_PACK_COMPLETE.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    )
     artifact_volume.commit()
-    _status(subdir, "COMPLETE", packed_entries=totals["entries"],
-            expected_shards=plan["expected_shards"])
+    _status(
+        subdir,
+        "COMPLETE",
+        packed_entries=totals["entries"],
+        expected_shards=plan["expected_shards"],
+    )
     return payload
 
 
 @app.function(image=image, cpu=2.0, timeout=12 * 3600, volumes={"/artifacts": artifact_volume})
-def driver(subdir: str, commit: str, gate_sha: str) -> dict:
+def driver(request: dict[str, Any]) -> dict:
     """Remote orchestration so --detach survives a client disconnect."""
     artifact_volume.reload()
-    build_meta = {"authorization": {"launch_commit": commit, "gate_sha256": gate_sha}}
-    _status(subdir, "RUNNING", **build_meta)
+    checked = validate_pack_request(request)
+    runtime_contract = _assert_runtime_contract(checked)
+    # All bytes/counts/contracts are checked before claiming an output path or starting the fan-out.
+    preflight = preflight_frozen_input(checked)
+    claim = _claim_output_namespace(checked, runtime_contract)
+    if claim["reused_complete"]:
+        print(
+            json.dumps(
+                {
+                    "phase": "complete_reuse_revalidation",
+                    "output_subdir": checked["output_subdir"],
+                    "output_identity": checked["output_identity"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return reduce_mmp.remote(checked)
 
-    plan = partition_pool.remote(subdir)
+    subdir = checked["output_subdir"]
+    _status(
+        subdir,
+        "RUNNING",
+        pack_request=checked,
+        input_identity=checked["input_identity"],
+        output_identity=checked["output_identity"],
+        preflight=preflight,
+        authorization=checked["authorization"],
+    )
+
+    plan = partition_pool.remote(checked)
     if plan.get("status") == "FAILED":
         return plan
     tasks = [
-        (subdir, e["partition"], e["shard"], plan["pool_sha256"], e["row_ids_sha256"])
+        (
+            checked,
+            e["partition"],
+            e["shard"],
+            plan["pool_sha256"],
+            e["row_ids_sha256"],
+            e["raw_content_sha256"],
+        )
         for e in plan["shards"]
     ]
-    print(json.dumps({"phase": "map_start", "tasks": len(tasks),
-                      "max_containers": len(tasks) + _CONTAINER_MARGIN}), flush=True)
+    print(
+        json.dumps(
+            {
+                "phase": "map_start",
+                "tasks": len(tasks),
+                "max_containers": len(tasks) + _CONTAINER_MARGIN,
+            }
+        ),
+        flush=True,
+    )
     results = list(pack_mmp_shard.starmap(tasks))
-    print(json.dumps({"phase": "map_done", "shards": len(results),
-                      "reused": sum(1 for r in results if r.get("reused"))}), flush=True)
-    return reduce_mmp.remote(subdir, build_meta)
+    print(
+        json.dumps(
+            {
+                "phase": "map_done",
+                "shards": len(results),
+                "reused": sum(1 for r in results if r.get("reused")),
+            }
+        ),
+        flush=True,
+    )
+    return reduce_mmp.remote(checked)
 
 
 @app.local_entrypoint()
-def main(subdir: str = "mmp_packed_v1", commit: str = "", gate_sha: str = ""):
-    call = driver.spawn(subdir, commit, gate_sha)
-    print(json.dumps({
-        "phase": "launched", "driver_call_id": call.object_id, "subdir": subdir,
-        "commit": commit, "gate_sha256": gate_sha,
-        "poll": f"modal volume get compose-v4-artifacts {subdir}/mmp_pack_status.json -",
-    }, indent=2, sort_keys=True))
+def main(
+    pool_path: str,
+    expected_pool_sha256: str,
+    expected_pool_records: int,
+    pool_contract_path: str,
+    expected_pool_contract_sha256: str,
+    expected_analogue_support_contract: str,
+    commit: str,
+    gate_sha: str,
+):
+    request = build_pack_request(
+        pool_path=pool_path,
+        expected_pool_sha256=expected_pool_sha256,
+        expected_pool_records=expected_pool_records,
+        pool_contract_path=pool_contract_path,
+        expected_pool_contract_sha256=expected_pool_contract_sha256,
+        expected_analogue_support_contract=expected_analogue_support_contract,
+        launch_commit=commit,
+        gate_sha256=gate_sha,
+    )
+    verify_local_launch_commit(request["authorization"]["launch_commit"])
+    call = driver.spawn(request)
+    print(
+        json.dumps(
+            {
+                "phase": "launched",
+                "driver_call_id": call.object_id,
+                "input_identity": request["input_identity"],
+                "output_identity": request["output_identity"],
+                "output_subdir": request["output_subdir"],
+                "authorization": request["authorization"],
+                "poll": (
+                    "modal volume get compose-v4-artifacts "
+                    f"{request['output_subdir']}/mmp_pack_status.json -"
+                ),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
