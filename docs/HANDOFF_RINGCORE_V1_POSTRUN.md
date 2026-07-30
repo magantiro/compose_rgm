@@ -1,3 +1,83 @@
+# START HERE — instructions for the receiving agent
+
+You have been handed an in-progress ICLR-track research program. This file is your entry point; read it top
+to bottom before touching anything.
+
+## Your position
+
+- **Branch:** `claude/control-closed-pareto-editing` — **LOCAL ONLY, no upstream.** If you cloned from a
+  remote you do not have this work. Confirm with `git log --oneline -1`; you should see a commit whose
+  subject begins `docs: re-measure the suite count in the handoff`.
+- **A 16,000-step training run is COMPLETE.** Nothing is running. No GPU job is live. Nothing is waiting.
+- **No checkpoint has been selected**, and selection is constrained — see PART I §7 before you touch it.
+
+## Read in this order, before doing any work
+
+1. **This file, in full.** PART I is the diagnosis; PART II is the repo map, lineage and environment.
+2. **`.claude/context/learnings.md` — all 454 lines.** Non-negotiable. It is dated, hard-won gotchas about
+   data, training and the executor. PART I §11 is a summary, not a substitute. Most bugs this project has
+   hit are in there already.
+3. **`CLAUDE.md`** and `.claude/context/{conventions,glossary}.md` — auto-loaded conventions.
+4. **`configs/experiment_registry.yaml`** — the frozen experimental protocol. Load it with
+   `compose_v4.experiments.registry.load_registry`, which validates it; do not hand-parse it.
+5. **`docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md`** — the E1–E7 build plan with two rounds of review recorded.
+
+## Environment
+
+```bash
+uv sync                              # or: pip install -e ".[dev]" ; then activate .venv
+export PYTHONPATH=src:scripts
+export KMP_DUPLICATE_LIB_OK=TRUE     # macOS OpenMP guard
+export OMP_NUM_THREADS=1             # REQUIRED locally, or the suite segfaults (dual OpenMP)
+KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q   # expect 978 passed, 0 skipped
+./.venv/bin/ruff check src/          # ruff is NOT on PATH; src/ must stay clean
+```
+
+## Do NOT do these
+
+1. **Do not re-enable the `ring_system_grow` macro.** Ring opening (`cycle_attach`) is not broken — it
+   passes a micro-overfit at family probability → 1.0 in 50 steps (PART I §4.5). The macro cannot open rings
+   at all, so restoring it would produce a model that is *unable* to open rings, and ring opening is a
+   declared E4 task family. PART I §5 exists specifically to head off this instinct.
+2. **Do not re-run the ruled-out diagnostics.** PART I §4 records four eliminated hypotheses with their
+   measurements: aliasing, candidate-space difficulty, structural masking, cross-direction ambiguity.
+3. **Do not select a checkpoint by raw loss, family accuracy, or the trainer's `selected_step = 8500`.**
+   The frozen rule is production-weighted canonical-successor NLL on **validation**. PART I §7.
+4. **Do not use the final-test table for selection or as a sealed holdout** — it has been inspected.
+5. **Do not change production operator semantics to make a result work.** Report first.
+6. **Do not launch any Modal job before `scripts/prelaunch_gate.py` is green**, and only from a clean
+   committed detached worktree. `--detach` is mandatory (`main()` uses `.spawn()`).
+7. **Do not mention Claude/AI in commit messages or PR bodies.** No co-author trailer. Commit subjects:
+   `<module>: <one-line imperative, lowercase, no trailing period>`.
+8. **Do not launch another full 16k run** until the staged gates in PART I §6 pass.
+
+## Where to begin
+
+**PART II §12 item 1: build the per-family sentinel and abort gates.** This is first for a reason — the
+entire failure documented here reached step 16,000 undetected because monitoring tracked only aggregate loss
+and balanced accuracy. Nothing downstream is trustworthy until per-family retention and learnability are
+enforced, and the sentinel is reusable for the de-novo lane too.
+
+The two alarms it must implement, either of which would have caught this within ~500 steps:
+
+- **capability retention** — an inherited family falling materially below its initialization value
+  (would have fired on graft: top-3 0.821 → 0)
+- **new-family learnability** — a family with substantial teacher mass showing no or negative movement
+  (would have fired on `cycle_attach`: family prob 0.253 → 0.026)
+
+## The one-paragraph summary
+
+A 16,000-step editing-prior run finished cleanly and improved in aggregate, but two operator families were
+destroyed during training: ring opening (`cycle_attach`) and graft (`bond_reroute`). Both were *working at
+initialization* — graft at top-3 0.821 inherited from base B, ring opening at family probability 0.253 — and
+both were driven to ~0 while ring closing and atom edits improved. A micro-overfit proves ring opening is
+fully learnable in isolation, so these are **catastrophic forgetting and training-mixture competition, not
+broken operators**. Graft received 2.9% of supervision against cycle ops' 78%, with no replay, distillation,
+differential learning rates or frozen-body phase. The repair is entirely recipe-level. The mechanism behind
+the ring-opening collapse specifically is still unresolved (PART I §4.6) and is the main open question.
+
+---
+
 # Handoff: RingCore-V1 post-run diagnosis and repair plan
 
 Self-contained handoff. Assumes no prior context from the session that produced it.
