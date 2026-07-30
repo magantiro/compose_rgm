@@ -1,11 +1,14 @@
 # COMPOSE arXiv manuscript
 
-This is the clean arXiv-format manuscript package. Phase 1 deliberately ends
-after the Introduction and its bibliography; no result table, theorem, figure,
-or later-section placeholder is included.
+This is the clean arXiv-format manuscript package. Phase 1 established the
+title, abstract, Introduction, and related-work framing. Phase 2 adds the
+formal Rewrite Generator Matching section, including the marked process, raw
+canonical pushforward, productive editing kernel, successor-aware objectives,
+and the separation between fixed-budget editing and timed de novo generation.
+No empirical result table or unverified theorem is included.
 
 `SCIENTIFIC_TRACEABILITY.md` records the authoritative source and claim boundary
-for each load-bearing sentence introduced in this phase.
+for each load-bearing sentence introduced so far.
 
 ## Build
 
@@ -23,7 +26,7 @@ make render
 make check
 ```
 
-Rendered pages are written to `../tmp/pdfs/compose_arxiv_phase1/`. The `check`
+Rendered pages are written to `../tmp/pdfs/compose_arxiv_current/`. The `check`
 target prints PDF metadata, embedded fonts, unresolved-reference warnings, and
 any overfull or underfull boxes. Visual inspection of every rendered page is
 still required.
@@ -38,7 +41,7 @@ This creates `COMPOSE_arxiv_source.tar.gz` from the self-contained manuscript
 sources. The author line is intentionally anonymous while the author list is
 not frozen.
 
-## Scientific boundary for Phase 1
+## Scientific boundary
 
 The title, abstract, and Introduction follow the current authoritative thesis:
 

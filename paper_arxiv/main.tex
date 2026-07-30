@@ -129,21 +129,23 @@ fiber
 \[
   \G_y(x)=\{a\in\A(x):\T(x,a)\cong y\}.
 \]
-The state-level molecular law is not any one representative mark. It is the
-pushforward
+The state-level molecular law is not any one representative mark. Its raw
+canonical pushforward is
 \[
-  P_\theta(y\mid x,t)
+  \bar p_\theta(y\mid x,t)
   =
   \sum_{a\in\G_y(x)}p_\theta(a\mid x,t),
 \]
-with the embedded-chain convention treating molecular self or virtual events
-consistently. This distinction is essential. Refining or coarsening marks
-within one successor fiber, while preserving their aggregate mass, leaves the
-molecular process unchanged. It also leaves any controller defined on
-canonical successors unchanged. A mark-level power tilt, top-$k$ rule, nucleus
-filter, or family-wise bias generally lacks that invariance. We therefore
-control and evaluate the process at the molecular-successor level even when
-the internal model is factorized over marks.
+which may assign mass to canonical self-events. The fixed-budget editing
+kernel conditions this law on a productive, non-self molecular jump; the
+formal normalization appears in Section~\ref{sec:productive-kernel}. This distinction
+is essential. Refining or coarsening marks within one successor fiber, while
+preserving their aggregate mass, leaves the molecular process unchanged. It
+also leaves any controller defined on canonical successors unchanged. A
+mark-level power tilt, top-$k$ rule, nucleus filter, or family-wise bias
+generally lacks that invariance. We therefore control and evaluate the process
+at the molecular-successor level even when the internal model is factorized
+over marks.
 
 This transition-level aggregation is closely related to pushforward Generator
 Matching for deterministic images of latent processes
@@ -237,6 +239,250 @@ pushforward, and successor-level exact and dynamic control.
 Pushforward Generator Matching supplies the closest general result for
 deterministic images of latent processes \citep{billera2026latent}; we do not
 claim that generic theorem as a contribution.
+
+\section{Rewrite Generator Matching}
+\label{sec:rgm}
+
+This section separates the marked event process that is parameterized by the
+network from the molecular state process induced by execution and
+canonicalization. The distinction matters whenever several marks share one
+successor or an executable mark is a canonical self-event.
+
+\subsection{Executable marked rewrite processes}
+\label{sec:marked-process}
+
+\paragraph{Rewrite system.}
+Let $\X$ be a countable structured state space. An executable rewrite system is
+a triple
+\[
+  (\X,\A,\T),
+\]
+where $\A(x)$ is the finite fiber of legal marks at $x$ and
+$\T:\{(x,a):a\in\A(x)\}\rightarrow\X$ is a deterministic executor. A mark
+contains the complete information required to execute an event: its rule,
+concrete match or address, and typed payload. Closure is imposed at this
+interface: if $a\in\A(x)$, then $\T(x,a)\in\X$. Application conditions may
+therefore depend on the complete current state and the complete proposed
+action.
+
+\paragraph{Marked rates.}
+The model assigns a total marked-event hazard and a normalized conditional
+mark law,
+\begin{align}
+  \lambda_\theta(a\mid x,t)
+  &=
+  \Lambda_\theta(x,t)\,p_\theta(a\mid x,t),
+  \label{eq:marked-rate}\\
+  \sum_{a\in\A(x)}p_\theta(a\mid x,t)
+  &=1.
+\end{align}
+The resulting time-inhomogeneous generator is
+\begin{equation}
+  (\mathcal L_{\theta,t}f)(x)
+  =
+  \sum_{a\in\A(x)}
+  \lambda_\theta(a\mid x,t)
+  \left[f(\T(x,a))-f(x)\right].
+  \label{eq:marked-generator}
+\end{equation}
+Here $\Lambda_\theta$ is the hazard of the \emph{marked event process}. It is
+not necessarily the exit hazard of the induced molecular state process:
+different marked events may execute to the same canonical state, including
+the current state.
+
+\subsection{Mark-level Generator-Matching supervision}
+\label{sec:mark-gm}
+
+Training examples are compiled as executable programs connecting endpoints.
+Conditioned on a program and a sampled progress state, its scheduling law
+provides a teacher mark $a^\star$ and a nonnegative teacher rate $r$. With an
+importance weight $w$, the implemented selected-mark Poisson--Bregman loss is,
+up to terms independent of $\theta$,
+\begin{equation}
+  \ell_{\mathrm{mark}}
+  =
+  w\left[
+    \Lambda_\theta(x,t)
+    -
+    r\left\{
+      \log\Lambda_\theta(x,t)
+      +
+      \log p_\theta(a^\star\mid x,t)
+    \right\}
+  \right].
+  \label{eq:mark-gm-loss}
+\end{equation}
+For a no-jump row, $r=0$ and only the positive hazard term remains. In
+expectation, this Poisson Bregman regression targets conditional marked rates
+under the teacher process \citep{holderrieth2025generator}. The compiler must
+therefore certify both that $a^\star\in\A(x)$ and that executing it yields the
+stored successor.
+
+Equation~\eqref{eq:mark-gm-loss} trains a process over executable marks. It is
+sensitive to how teacher mass is divided among equivalent mark encodings. The
+completed 16,000-step diagnostic editing run used this selected-mark objective
+except where its implementation explicitly aggregated internal aliases; it
+was not generally trained by canonical-successor likelihood. We retain that
+fact as a claim boundary rather than reinterpret the historical run after
+evaluation.
+
+\subsection{Canonical pushforward and productive molecular jumps}
+\label{sec:productive-kernel}
+
+Let $c:\X\rightarrow\mathcal Y$ map an executor state to its canonical
+molecular identity, and define the state-dependent event map
+\[
+  \pi_x(a)=c(\T(x,a)).
+\]
+For $y\in\mathcal Y$, the raw pushforward of the mark law is
+\begin{equation}
+  \bar p_\theta(y\mid x,t)
+  =
+  \sum_{a\in\A(x):\,\pi_x(a)=y}
+  p_\theta(a\mid x,t).
+  \label{eq:raw-pushforward}
+\end{equation}
+This is a normalized distribution over canonical outcomes of marked events,
+but it need not be a distribution over \emph{molecular jumps}: marks whose
+canonical outcome is $c(x)$ leave the molecular state unchanged. Define their
+aggregate mass and the remaining productive mass by
+\begin{equation}
+  v_\theta(x,t)
+  =
+  \bar p_\theta(c(x)\mid x,t),
+  \qquad
+  z_\theta(x,t)=1-v_\theta(x,t).
+  \label{eq:virtual-productive-mass}
+\end{equation}
+
+The off-diagonal rate of the induced molecular process is
+\begin{equation}
+  Q_{\theta,t}(x,y)
+  =
+  \Lambda_\theta(x,t)\bar p_\theta(y\mid x,t),
+  \qquad y\neq c(x),
+  \label{eq:molecular-offdiagonal-rate}
+\end{equation}
+and its exit hazard is
+\begin{equation}
+  \Lambda_\theta^{\mathrm{prod}}(x,t)
+  =
+  \Lambda_\theta(x,t)z_\theta(x,t).
+  \label{eq:productive-hazard}
+\end{equation}
+Thus canonical self-events vanish from the state generator even though they
+remain events in the marked representation.
+
+Source-conditioned editing uses the productive embedded molecular jump
+kernel
+\begin{equation}
+  P_{\theta,t}^{\mathrm{edit}}(y\mid x)
+  =
+  \frac{\bar p_\theta(y\mid x,t)}
+       {z_\theta(x,t)},
+  \qquad
+  y\neq c(x),
+  \label{eq:productive-editing-kernel}
+\end{equation}
+whenever $z_\theta(x,t)>0$. If $z_\theta(x,t)=0$, the state is terminal under
+this convention. History-dependent rejection, such as suppressing an
+immediate return to the preceding molecule, is not part of this base Markov
+kernel and must be represented by a separate wrapper or an augmented state.
+
+The scientific definition in
+\eqref{eq:raw-pushforward}--\eqref{eq:productive-editing-kernel} is execution
+followed by canonical molecular identity and, for editing, conditioning on a
+productive jump. The production segmented implementation is an efficient
+evaluation of that definition. A separate dictionary implementation that
+enumerates marks, executes them, canonicalizes successors, and sums by key is
+used only as a verification oracle.
+
+\paragraph{Within-fiber invariance.}
+Suppose an internal mark is refined into several marks that all lie in the
+same successor fiber, and their aggregate probability is preserved. Then
+$\bar p_\theta$, $v_\theta$, $Q_{\theta,t}$, and
+$P_{\theta,t}^{\mathrm{edit}}$ are unchanged. Consequently, any controller
+that depends only on canonical successors is unchanged. This statement does
+not cover a controller that tilts, truncates, or regularizes individual marks:
+such a controller can change when one mark is replaced by several aliases.
+Multi-step representation independence additionally requires consistent
+canonical-state handling after each committed transition; we test that
+separately rather than assuming it from the one-step identity.
+
+\subsection{Successor-aware objectives for editing}
+\label{sec:successor-objectives}
+
+The implementation exposes three successor-aware losses, and their meanings
+are different. For a productive teacher transition $x\rightarrow y^\star$,
+the editing-specific identity loss is the importance-weighted negative
+log-likelihood under the embedded kernel,
+\begin{equation}
+  \mathcal L_{\mathrm{id}}
+  =
+  -
+  \frac{
+    \sum_{i:r_i>0}w_i
+    \log
+    P_{\theta,t_i}^{\mathrm{edit}}(y_i^\star\mid x_i)
+  }{
+    \sum_{i:r_i>0}w_i
+  }.
+  \label{eq:productive-identity-loss}
+\end{equation}
+It excludes terminal rows and sends no gradient through
+$\Lambda_\theta$. It is therefore an embedded-chain likelihood, not a
+Generator-Matching rate objective.
+
+The canonical-successor Poisson--Bregman alternative is
+\begin{equation}
+  \ell_{\mathrm{succGM}}
+  =
+  w\left[
+    \Lambda_\theta^{\mathrm{prod}}(x,t)
+    -
+    r\log\left\{
+      \Lambda_\theta(x,t)
+      \bar p_\theta(y^\star\mid x,t)
+    \right\}
+  \right],
+  \label{eq:successor-gm-loss}
+\end{equation}
+again up to teacher-only constants. This objective matches the off-diagonal
+canonical molecular generator and is the successor-aware mode that is
+properly described as Poisson--Bregman Generator Matching. A third hybrid adds
+a separately weighted total-hazard loss to
+\eqref{eq:productive-identity-loss}; it is not generally algebraically equal
+to \eqref{eq:successor-gm-loss}.
+
+These choices cannot be hidden behind a common name. Every reported checkpoint
+must declare which objective it used. The current successor-aware training
+bridge is restricted to bounded development gates; it does not authorize a
+full-corpus run. The final editing protocol is selected only after
+successor-level micro-overfit and short-pilot evidence establishes that the
+chosen loss preserves all load-bearing operator capabilities.
+
+\subsection{Two inference regimes}
+\label{sec:inference-regimes}
+
+\paragraph{Fixed-budget editing.}
+Editing starts from a supplied molecule and takes a registered number of
+productive molecular jumps using
+\eqref{eq:productive-editing-kernel}. The magnitude of
+$\Lambda_\theta$ is discarded. If model time changes with progress, the
+resulting sequence is a budget-indexed family of kernels rather than one
+homogeneous transition matrix. This is the base process used for lead
+optimization, Pareto branching, dynamic retargeting, and pathwise
+constraints.
+
+\paragraph{Timed de novo generation.}
+De novo generation is a separate lane with its own source distribution,
+training mixture, checkpoint, and hazard validation. It simulates the marked
+process in continuous time, or equivalently the molecular process with
+off-diagonal rates in \eqref{eq:molecular-offdiagonal-rate} and exit hazard in
+\eqref{eq:productive-hazard}, with self-events thinned consistently. The
+framework defines this Gillespie-style regime, but the current editing
+checkpoint is not evidence that its timed semantics or unconditional
+generation quality have been validated.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

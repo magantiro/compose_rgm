@@ -1,7 +1,7 @@
 SHELL := /bin/sh
 
 MAIN := main
-RENDER_DIR := ../tmp/pdfs/compose_arxiv_phase1
+RENDER_DIR := ../tmp/pdfs/compose_arxiv_current
 ARXIV_ARCHIVE := COMPOSE_arxiv_source.tar.gz
 ARXIV_SOURCES := main.tex compose_arxiv.sty references.bib README.md STYLE_SPEC.md SCIENTIFIC_TRACEABILITY.md Makefile
 
