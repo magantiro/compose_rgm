@@ -216,6 +216,43 @@ def validate_leaderboard_config(config: Mapping[str, Any]) -> None:
         raise SuccessorLeaderboardError("semantic-cell panel field is not frozen")
     if tuple(cells.get("required_axes") or ()) != SEMANTIC_CELL_AXES:
         raise SuccessorLeaderboardError("semantic-cell axes are absent or reordered")
+    production_panel = (config.get("panels") or {}).get("production_law") or {}
+    if (
+        production_panel.get(
+            "minimum_active_family_nonterminal_examples_before_selection"
+        )
+        != 64
+    ):
+        raise SuccessorLeaderboardError(
+            "production-panel active-family minimum must remain frozen at 64"
+        )
+
+    bootstrap = (config.get("statistics") or {}).get("paired_bootstrap") or {}
+    expected_bootstrap = {
+        "schema_version": 1,
+        "seed": 2026072903,
+        "replicates": 10000,
+        "chunk_replicates": 128,
+        "resampling_unit": "fixed validation panel draw",
+        "estimator": "self-normalized importance-weighted paired mean difference",
+        "exact_draw_id_alignment_required": True,
+        "checkpoint_order_or_ranking_performed": False,
+    }
+    bootstrap_mismatch = {
+        key: {"expected": expected, "observed": bootstrap.get(key)}
+        for key, expected in expected_bootstrap.items()
+        if bootstrap.get(key) != expected
+    }
+    if bootstrap_mismatch:
+        raise SuccessorLeaderboardError(
+            f"paired-bootstrap contract mismatch: {bootstrap_mismatch}"
+        )
+    for interval_name in ("two_sided_interval", "one_sided_lower_bound"):
+        interval = bootstrap.get(interval_name) or {}
+        if interval.get("confidence") != 0.95 or interval.get("method") != "percentile":
+            raise SuccessorLeaderboardError(
+                f"paired-bootstrap {interval_name} is not frozen at 95% percentile"
+            )
 
     execution = config.get("execution_contract") or {}
     required_execution = {
@@ -951,8 +988,8 @@ def readiness_summary(
         )
     blockers.extend(
         (
-            "fixed production-law and family-forensics validation panel artifacts are not built",
-            "all-32 production-kernel scoring runner and paired bootstrap gate are not implemented",
+            "fixed production-law and family-forensics panel artifacts are not built",
+            "all-32 production-kernel scoring runner and hard-gate integration are not implemented",
             "remote snapshot files are not locally available for SHA/payload/capability verification",
         )
     )
@@ -976,6 +1013,10 @@ def readiness_summary(
             "current_state_dict_required": True,
             "future_ranking_requires_all_snapshot_provenance_and_hard_gates": True,
             "future_selection_requires_all_snapshot_provenance_and_hard_gates": True,
+            "fixed_panel_schema_and_validator_present": True,
+            "panel_metric_vectors_are_validation_and_current_snapshot_bound": True,
+            "paired_bootstrap_is_exact_panel_bound": True,
+            "expansion_primitives_perform_no_ranking_or_selection": True,
             "semantic_cell_nll_role": "secondary_after_primary_statistical_tie",
             "test_partition_input_accepted": False,
             "validation_partition_required": True,

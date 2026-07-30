@@ -1,0 +1,95 @@
+{
+  "schema": "compose.successor_capacity_ladder",
+  "schema_version": 1,
+  "status": "DEVELOPMENT_DIAGNOSTIC_NOT_PAPER_EVIDENCE",
+  "date": "2026-07-30",
+  "scientific_question": "Can the production-size factorized editor memorize a fixed unique-state panel of graft molecular successors, and is the failure consistent with an intrinsic architecture-capacity limit?",
+  "family": {
+    "model_name": "bond_reroute",
+    "semantic_name": "graft_reroute"
+  },
+  "panel": {
+    "examples": 64,
+    "unique_canonical_source_molecule_per_example": true,
+    "data_lane": "production_support_capacity_probe",
+    "source_smiles_path": "configs/benchmarks/cnof_leads.json",
+    "source_smiles_sha256": "76329a4f5271f7b7a9e2b7a014d3a343707deb7a400b9876fefaf88e9df1fdc2",
+    "persistent_slots": 40,
+    "model_time": 0.5,
+    "target_definition": "production_executor_then_canonical_state_key",
+    "mean_raw_mark_count": 640.578125,
+    "mean_canonical_successor_count": 553.109375,
+    "mean_teacher_successor_alias_multiplicity": 1.234375,
+    "maximum_teacher_successor_alias_multiplicity": 6
+  },
+  "architecture": {
+    "hidden_dim": 256,
+    "message_passing_steps": 6,
+    "total_parameter_count": 6171835,
+    "atom_vocabulary_classes": 15,
+    "cycle_ops": true,
+    "ring_system_grow": false
+  },
+  "optimization": {
+    "steps": 100,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "seed": 20260730,
+    "objective": "productive_conditioned_canonical_successor_nll"
+  },
+  "arms": {
+    "heads_only": {
+      "trainable_parameter_count": 265483,
+      "required_components_without_gradient": [],
+      "initial": {
+        "canonical_successor_nll": 5.616771697998047,
+        "teacher_successor_top1_recall": 0.0,
+        "teacher_successor_top3_recall": 0.0,
+        "teacher_successor_probability": 0.0047167278826236725,
+        "teacher_family_probability": 0.1449761539697647,
+        "within_teacher_family_successor_probability": 0.03261888399720192
+      },
+      "final": {
+        "canonical_successor_nll": 1.9397602081298828,
+        "teacher_successor_top1_recall": 0.4375,
+        "teacher_successor_top3_recall": 0.65625,
+        "teacher_successor_probability": 0.22744745016098022,
+        "teacher_family_probability": 0.9734763503074646,
+        "within_teacher_family_successor_probability": 0.23356273770332336
+      }
+    },
+    "all": {
+      "trainable_parameter_count": 6171835,
+      "required_components_without_gradient": [],
+      "initial": {
+        "canonical_successor_nll": 5.607079029083252,
+        "teacher_successor_top1_recall": 0.0,
+        "teacher_successor_top3_recall": 0.0,
+        "teacher_successor_probability": 0.0046777320094406605,
+        "teacher_family_probability": 0.14399507641792297,
+        "within_teacher_family_successor_probability": 0.03250934183597565
+      },
+      "final": {
+        "canonical_successor_nll": 0.026423951610922813,
+        "teacher_successor_top1_recall": 1.0,
+        "teacher_successor_top3_recall": 1.0,
+        "teacher_successor_probability": 0.9796209335327148,
+        "teacher_family_probability": 1.0,
+        "within_teacher_family_successor_probability": 0.9796209335327148
+      }
+    }
+  },
+  "bounded_interpretation": [
+    "The graft teacher support is executable and the production-size architecture has enough capacity to memorize this fixed unique-state panel.",
+    "The head-only arm learns much of the family gate but does not fully solve within-family successor discrimination.",
+    "Updating the complete representation memorizes the panel, so the completed-run graft collapse is not explained by an intrinsic lack of capacity in the production architecture.",
+    "The result strengthens the case for a checkpoint-by-checkpoint retention audit and replay or distillation safeguards before considering a larger backbone."
+  ],
+  "forbidden_interpretations": [
+    "This is not held-out generalization evidence.",
+    "This is not evidence that the production training corpus contains enough graft examples.",
+    "This does not prove catastrophic forgetting without the base-B and checkpoint trajectory audit.",
+    "This does not establish a checkpoint-selection threshold.",
+    "This does not authorize a long training run."
+  ]
+}

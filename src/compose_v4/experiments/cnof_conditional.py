@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections import Counter
 from dataclasses import dataclass
-import hashlib
 from math import exp
 
 import numpy as np
@@ -23,6 +23,7 @@ from compose_v4.chem.state import (
     is_valid_state,
     pad_molecular_graph,
 )
+from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.gm.loss import rate_bregman_loss
 from compose_v4.model.rate_model import FactorizedRateModel
 from compose_v4.rewrite.compiler import compile_null_to_target
@@ -38,6 +39,7 @@ from compose_v4.rewrite.progress import TraceProgressCTMC
 class PathRecord:
     target_key: str
     path: TraceProgressCTMC
+    corpus_address: PackedTraceAddress | None = None
 
 
 @dataclass(frozen=True)

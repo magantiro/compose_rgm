@@ -26,7 +26,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from compose_v4.data.packed_trace_store import read_packed_shard
+from compose_v4.data.packed_trace_store import read_addressed_packed_shard
 from compose_v4.data.representability_overlay import (
     check_unlisted,
     excluded_keys,
@@ -73,6 +73,26 @@ _CONTRACT_KEYS = (
 
 class ProductionCorpusError(RuntimeError):
     """The corpus artifact does not satisfy the production contract."""
+
+
+def _validate_address_envelope(
+    address,
+    *,
+    expected_layer: str,
+    expected_partition: str,
+) -> None:
+    """Refuse a row whose immutable envelope disagrees with its shard lane."""
+
+    if address.layer != expected_layer:
+        raise ProductionCorpusError(
+            "packed trace envelope layer "
+            f"{address.layer!r} != shard lane {expected_layer!r}"
+        )
+    if address.partition != expected_partition:
+        raise ProductionCorpusError(
+            "packed trace envelope partition "
+            f"{address.partition!r} != shard partition {expected_partition!r}"
+        )
 
 
 @dataclass(frozen=True)
@@ -225,12 +245,27 @@ def load_shard_layer_records(
         )
         excluded = 0
         for path in packed_paths:
-            for trace, packed_path in read_packed_shard(path, verify_fraction=verify_fraction):
+            for addressed in read_addressed_packed_shard(
+                path,
+                verify_fraction=verify_fraction,
+            ):
+                _validate_address_envelope(
+                    addressed.address,
+                    expected_layer=shard_layer,
+                    expected_partition=partition,
+                )
+                trace, packed_path = addressed.trace, addressed.path
                 if check_unlisted(trace, trace_key(trace), allowed,
                                   layer=overlay_layer, partition=partition):
                     excluded += 1
                     continue
-                records.append(PathRecord(canonical_state_key(trace.target), packed_path))
+                records.append(
+                    PathRecord(
+                        addressed.address.target_key,
+                        packed_path,
+                        corpus_address=addressed.address,
+                    )
+                )
         if excluded:
             print(
                 json.dumps({"phase": "representability_exclusions_applied", "layer": shard_layer,
@@ -351,12 +386,27 @@ def load_production_edit_corpus(
         )
         mmp_list, mmp_excluded = [], 0
         for shard in _shard_paths(packed_mmp, "", partition):
-            for trace, packed_path in read_packed_shard(shard, verify_fraction=verify_fraction):
+            for addressed in read_addressed_packed_shard(
+                shard,
+                verify_fraction=verify_fraction,
+            ):
+                _validate_address_envelope(
+                    addressed.address,
+                    expected_layer=PACKED_MMP_LAYER,
+                    expected_partition=partition,
+                )
+                trace, packed_path = addressed.trace, addressed.path
                 if check_unlisted(trace, trace_key(trace), mmp_allowed,
                                   layer="mmp_analogue", partition=partition):
                     mmp_excluded += 1
                     continue
-                mmp_list.append(PathRecord(canonical_state_key(trace.target), packed_path))
+                mmp_list.append(
+                    PathRecord(
+                        addressed.address.target_key,
+                        packed_path,
+                        corpus_address=addressed.address,
+                    )
+                )
         mmp_records = tuple(mmp_list)
         mmp_stats = {"source": "packed", "kept": len(mmp_records),
                      "scanned": len(mmp_records) + mmp_excluded, "other_partition": 0,

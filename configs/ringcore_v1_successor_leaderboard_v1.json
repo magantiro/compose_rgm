@@ -69,6 +69,7 @@
       "seed": 2026072901,
       "initial_draws": 4096,
       "expanded_draws": 16384,
+      "minimum_active_family_nonterminal_examples_before_selection": 64,
       "stream_prefix_rule": "the 4096-row panel is the exact prefix of the 16384-row panel",
       "expansion_trigger": "expand before selection if the top two primary-metric checkpoints have a paired 95% bootstrap confidence interval containing zero, any active family has fewer than 64 nonterminal examples, or a hard-gate estimate is numerically inconclusive",
       "checkpoint_coverage": "every snapshot is scored on the same final panel size"
@@ -143,6 +144,26 @@
       "family mass calibration KL",
       "hazard calibration reported separately"
     ]
+  },
+  "statistics": {
+    "paired_bootstrap": {
+      "schema_version": 1,
+      "seed": 2026072903,
+      "replicates": 10000,
+      "chunk_replicates": 128,
+      "resampling_unit": "fixed validation panel draw",
+      "estimator": "self-normalized importance-weighted paired mean difference",
+      "two_sided_interval": {
+        "confidence": 0.95,
+        "method": "percentile"
+      },
+      "one_sided_lower_bound": {
+        "confidence": 0.95,
+        "method": "percentile"
+      },
+      "exact_draw_id_alignment_required": true,
+      "checkpoint_order_or_ranking_performed": false
+    }
   },
   "hard_gates": {
     "all_checkpoints": [

@@ -1,16 +1,20 @@
 {
   "blockers": [
     "semantic-axis labelers and the validation cell census are not frozen",
-    "fixed production-law and family-forensics validation panel artifacts are not built",
-    "all-32 production-kernel scoring runner and paired bootstrap gate are not implemented",
+    "fixed production-law and family-forensics panel artifacts are not built",
+    "all-32 production-kernel scoring runner and hard-gate integration are not implemented",
     "remote snapshot files are not locally available for SHA/payload/capability verification"
   ],
   "evidence_paths": {
     "contract": "configs/ringcore_v1_successor_leaderboard_v1.json",
     "exact_inventory": "diagnostics/coherence/ringcore_v1_scientific_a7546e2_frozen_inventory.json",
     "metric_and_preparation_code": "src/compose_v4/experiments/ringcore_successor_leaderboard.py",
+    "panel_and_statistics_code": "src/compose_v4/experiments/ringcore_validation_panel.py",
     "production_pushforward": "src/compose_v4/experiments/production_successor_kernel.py",
-    "tests": "tests/test_ringcore_successor_leaderboard.py"
+    "tests": [
+      "tests/test_ringcore_successor_leaderboard.py",
+      "tests/test_ringcore_validation_panel.py"
+    ]
   },
   "explicit_non_actions": [
     "no checkpoint evaluated",
@@ -40,6 +44,10 @@
     "current_state_dict_required": true,
     "future_ranking_requires_all_snapshot_provenance_and_hard_gates": true,
     "future_selection_requires_all_snapshot_provenance_and_hard_gates": true,
+    "fixed_panel_schema_and_validator_present": true,
+    "panel_metric_vectors_are_validation_and_current_snapshot_bound": true,
+    "paired_bootstrap_is_exact_panel_bound": true,
+    "expansion_primitives_perform_no_ranking_or_selection": true,
     "semantic_cell_nll_role": "secondary_after_primary_statistical_tie",
     "test_partition_input_accepted": false,
     "validation_partition_required": true

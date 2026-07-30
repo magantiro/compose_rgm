@@ -62,6 +62,8 @@ class FactorizedMarkExample:
     ring_grow_enablement_is_exact: bool = False
     ring_topology_local_support_log_mass: float | None = None
     ring_teacher_semantic_certificate: RingTeacherSemanticCertificate | None = None
+    record_index: int | None = None
+    progress_index: int | None = None
 
     @property
     def ring_grow_support_mask(self) -> tuple[bool, ...] | None:
@@ -198,9 +200,10 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         absolute_index = self.start_index + int(index)
         rng = np.random.default_rng(np.random.SeedSequence((self.seed, absolute_index)))
         if self.record_index_sampler is not None:
-            record = self.records[int(self.record_index_sampler.draw(rng))]
+            record_index = int(self.record_index_sampler.draw(rng))
         else:
-            record = self.records[int(rng.integers(len(self.records)))]
+            record_index = int(rng.integers(len(self.records)))
+        record = self.records[record_index]
         if rng.random() < self.late_time_fraction:
             operational_time = float(rng.uniform(0.0, self.operational_horizon))
             time = 1.0 - exp(-operational_time)
@@ -334,6 +337,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                 ring_topology_local_support_log_mass
             ),
             ring_teacher_semantic_certificate=ring_teacher_semantic_certificate,
+            record_index=record_index,
+            progress_index=int(progress),
         )
 
 

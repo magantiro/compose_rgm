@@ -40,6 +40,22 @@ def _state(smiles: str):
     return pad_molecular_graph(smiles_to_molecular_graph(smiles), _SLOTS)
 
 
+def _model(catalog, *, seed: int) -> FactorizedTraceletRateModel:
+    torch.manual_seed(seed)
+    return FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=16,
+        message_passing_steps=2,
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    )
+
+
 @pytest.fixture
 def model():
     target = _state("c1ccccc1")
@@ -53,19 +69,7 @@ def model():
         align_source=True,
     )
     catalog = build_typed_ring_catalog((trace,))
-    torch.manual_seed(17)
-    return FactorizedTraceletRateModel(
-        catalog,
-        hidden_dim=16,
-        message_passing_steps=2,
-        enable_ring_restates=True,
-        enable_cyclic_graft=True,
-        enable_heteroatom_scan=True,
-        enable_ring_opening=True,
-        enable_cycle_ops=True,
-        enable_ring_grow_macro=False,
-        atom_vocabulary=ORGANIC_VOCABULARY,
-    )
+    return _model(catalog, seed=17)
 
 
 def test_differentiable_fiber_probability_matches_production_mark_sum(model):
@@ -200,3 +204,38 @@ def test_terminal_row_requires_and_accepts_productive_state_support(model):
         abs=2e-6,
     )
     assert torch.isfinite(factorized_successor_bregman_loss(prediction, batch))
+
+
+def test_compiled_support_is_invariant_to_model_weights_and_time(model):
+    """The cache is a support derivative, never a checkpoint-dependent score."""
+
+    source = _state("c1ccccc1")
+    result = canonical_successor_result(model.eval(), source, 0.17)
+    target = max(
+        result.batch.successors,
+        key=lambda successor: successor.alias_count,
+    ).state
+
+    independently_initialized = _model(model.ring_catalog, seed=991).eval()
+    early = compile_teacher_successor_fiber(
+        model,
+        source,
+        target,
+        time=0.03,
+    )
+    late = compile_teacher_successor_fiber(
+        independently_initialized,
+        source,
+        target,
+        time=0.97,
+    )
+    assert early == late
+    assert compile_state_productive_support(
+        model,
+        source,
+        time=0.03,
+    ) == compile_state_productive_support(
+        independently_initialized,
+        source,
+        time=0.97,
+    )

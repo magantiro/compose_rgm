@@ -7,6 +7,7 @@ Every case here asserts a loud failure or a measured correction, never a best-ef
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -248,6 +249,113 @@ def test_packed_store_with_an_unexpected_shard_is_refused(tmp_path):
         load_shard_layer_records(
             tmp_path / "audit", "corruption", "train", packed_root=tmp_path / "packed"
         )
+
+
+@pytest.mark.skipif(not _POOL.exists(), reason="local analogue pool sample unavailable")
+def test_packed_production_records_retain_their_immutable_corpus_address(tmp_path):
+    from compose_v4.data.packed_trace_store import build_packed_entry, write_packed_shard
+    from compose_v4.data.production_edit_corpus import load_shard_layer_records
+    from compose_v4.data.representability_overlay import unsupported_steps
+    from compose_v4.experiments.analogue_prior import rewrite_trace_from_record
+    from compose_v4.rewrite.kernel import canonical_state_key
+    from compose_v4.rewrite.progress import TraceProgressCTMC
+    from compose_v4.rewrite.trace_shard import encode_trace_record
+
+    trace = None
+    for line in _POOL.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            candidate = rewrite_trace_from_record(json.loads(line))
+        except Exception:  # noqa: BLE001
+            continue
+        if not unsupported_steps(candidate):
+            trace = candidate
+            break
+    if trace is None:
+        pytest.skip("no representable trace in the analogue fixture")
+
+    name = "shard_0000.jsonl.gz"
+    audit_root = tmp_path / "audit"
+    packed_root = tmp_path / "packed"
+    audit_dir = audit_root / "corruption" / "train"
+    packed_dir = packed_root / "corruption" / "train"
+    audit_dir.mkdir(parents=True)
+    packed_dir.mkdir(parents=True)
+    (audit_dir / name).write_bytes(b"authoritative-audit-placeholder")
+
+    path = TraceProgressCTMC(trace)
+    packed_shard = packed_dir / name
+    write_packed_shard(
+        packed_shard,
+        [
+            build_packed_entry(
+                encode_trace_record(
+                    trace,
+                    n_slots=len(trace.source.atom_types),
+                    seed=0,
+                    trace_id="corruption-train-s0000-000000",
+                    partition="train",
+                    layer="corruption",
+                ),
+                path,
+            )
+        ],
+        provenance={"capability_hash": "address-test"},
+    )
+    records = load_shard_layer_records(
+        audit_root,
+        "corruption",
+        "train",
+        packed_root=packed_root,
+        declared_names={("corruption", "train"): [name]},
+    )
+
+    assert len(records) == 1
+    record = records[0]
+    address = record.corpus_address
+    assert address is not None
+    assert address.packed_shard_content_sha256 == hashlib.sha256(
+        packed_shard.read_bytes()
+    ).hexdigest()
+    assert address.packed_shard_name == name
+    assert address.entry_index == 0
+    assert address.trace_id == "corruption-train-s0000-000000"
+    assert address.layer == "corruption"
+    assert address.partition == "train"
+    assert address.source_key == canonical_state_key(record.path.state_at(0))
+    assert address.target_key == canonical_state_key(
+        record.path.state_at(record.path.path_length)
+    )
+    assert address.path_length == record.path.path_length
+    assert record.target_key == address.target_key
+
+    for wrong_field, wrong_value, expected_message in (
+        ("layer", "general_corruption", "envelope layer"),
+        ("partition", "test", "envelope partition"),
+    ):
+        envelope = encode_trace_record(
+            trace,
+            n_slots=len(trace.source.atom_types),
+            seed=0,
+            trace_id=f"wrong-{wrong_field}",
+            partition="train",
+            layer="corruption",
+        )
+        envelope[wrong_field] = wrong_value
+        write_packed_shard(
+            packed_shard,
+            [build_packed_entry(envelope, path)],
+            provenance={"capability_hash": "address-test"},
+        )
+        with pytest.raises(ProductionCorpusError, match=expected_message):
+            load_shard_layer_records(
+                audit_root,
+                "corruption",
+                "train",
+                packed_root=packed_root,
+                declared_names={("corruption", "train"): [name]},
+            )
 
 
 def test_declared_shard_names_cross_checks_the_build_count(tmp_path):

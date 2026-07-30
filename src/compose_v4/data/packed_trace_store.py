@@ -23,10 +23,16 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
+from compose_v4.data.provenance_overlay import (
+    load_overlay,
+    overlay_path_for,
+    shard_content_sha256,
+)
 from compose_v4.rewrite.action_codec import decode_action
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.progress import PowerSurvivalScheduler, TraceProgressCTMC
@@ -50,6 +56,59 @@ _SAMPLER_IMPLEMENTATION_SOURCES = (
 
 class PackedStoreError(RuntimeError):
     """The packed store is unusable or was built under a different contract."""
+
+
+@dataclass(frozen=True)
+class PackedTraceAddress:
+    """Immutable identity of one trace inside one exact packed-shard artifact.
+
+    ``entry_index`` is the zero-based nonblank JSONL row index in the packed
+    shard. It is deliberately not the record's position in a concatenated
+    training corpus: representability exclusions and layer concatenation may
+    change that position, while this address must continue to identify the
+    original immutable row.
+    """
+
+    packed_shard_content_sha256: str
+    packed_shard_name: str
+    entry_index: int
+    trace_id: str
+    layer: str
+    partition: str
+    source_key: str
+    target_key: str
+    path_length: int
+
+    def __post_init__(self) -> None:
+        digest = self.packed_shard_content_sha256
+        if (
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest)
+        ):
+            raise ValueError(
+                "packed_shard_content_sha256 must be a lowercase SHA-256 digest"
+            )
+        if (
+            not isinstance(self.packed_shard_name, str)
+            or not self.packed_shard_name
+            or Path(self.packed_shard_name).name != self.packed_shard_name
+        ):
+            raise ValueError("packed_shard_name must be one non-empty basename")
+        for name in (
+            "trace_id",
+            "layer",
+            "partition",
+            "source_key",
+            "target_key",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ValueError(f"{name} must be a non-empty string")
+        for name in ("entry_index", "path_length"):
+            value = getattr(self, name)
+            if type(value) is not int or value < 0:
+                raise ValueError(f"{name} must be a nonnegative integer")
 
 
 def sampler_contract() -> dict:
@@ -119,6 +178,24 @@ class PackedTraceProgress(TraceProgressCTMC):
             and np.array_equal(endpoint.formal_charges, target.formal_charges)
         ):
             raise PackedStoreError("packed endpoint state does not equal the trace target")
+
+
+@dataclass(frozen=True)
+class AddressedPackedTrace:
+    """One decoded packed row paired with its immutable corpus address."""
+
+    address: PackedTraceAddress
+    trace: RewriteTrace
+    path: PackedTraceProgress
+
+
+@dataclass(frozen=True)
+class _DecodedPackedTrace:
+    """Shared internal row representation for legacy and addressed readers."""
+
+    trace: RewriteTrace
+    path: PackedTraceProgress
+    address: PackedTraceAddress | None
 
 
 def pack_path(path: TraceProgressCTMC) -> list[dict]:
@@ -221,21 +298,13 @@ def write_packed_shard(
     return manifest
 
 
-def read_packed_shard(
+def _validated_packed_manifest(
     path: Path,
     *,
     expected_provenance: dict | None = None,
-    verify_fraction: float = 0.0,
-    verify_seed: int = 0,
-):
-    """Yield ``(trace, PackedTraceProgress)`` pairs, refusing an off-contract store.
+) -> tuple[Path, dict]:
+    """Validate one packed sidecar and return its path and decoded payload."""
 
-    ``verify_fraction`` replays that fraction of entries through the real executor and asserts they
-    reproduce the stored states. 0.0 (default) is the fast production path; a small positive value gives
-    a sampled integrity audit without paying full re-execution.
-    """
-    if not 0.0 <= verify_fraction <= 1.0:
-        raise ValueError("verify_fraction must lie in [0, 1]")
     path = Path(path)
     manifest_path = manifest_path_for(path)
     if not manifest_path.exists():
@@ -265,7 +334,109 @@ def read_packed_shard(
                 raise PackedStoreError(
                     f"packed store provenance mismatch on {key}: {got.get(key)!r} != {value!r}"
                 )
+    return manifest_path, manifest
+
+
+def _packed_shard_address_digest(path: Path, manifest_path: Path) -> str:
+    """Return the exact packed-byte SHA, rejecting a present but invalid overlay."""
+
+    sidecar = overlay_path_for(path)
+    if not sidecar.exists():
+        return shard_content_sha256(path)
+    overlay = load_overlay(path, manifest_path)
+    if overlay is None:
+        raise PackedStoreError(
+            f"packed shard {path} has an invalid provenance overlay; refusing addressed load"
+        )
+    digest = overlay.get("packed_shard_content_sha256")
+    if not isinstance(digest, str):
+        raise PackedStoreError(
+            f"packed shard {path} provenance overlay lacks its content SHA-256"
+        )
+    return digest
+
+
+def _required_address_string(record: dict, field: str) -> str:
+    value = record.get(field)
+    if not isinstance(value, str) or not value:
+        raise PackedStoreError(
+            f"packed trace address field {field!r} must be a non-empty string"
+        )
+    return value
+
+
+def _address_for_packed_trace(
+    *,
+    shard_path: Path,
+    shard_digest: str,
+    entry_index: int,
+    record: dict,
+    trace: RewriteTrace,
+    path: PackedTraceProgress,
+    verify_endpoint_keys: bool,
+) -> PackedTraceAddress:
+    stored_path_length = record.get("path_length")
+    if type(stored_path_length) is not int or stored_path_length < 0:
+        raise PackedStoreError(
+            "packed trace address field 'path_length' must be a nonnegative integer"
+        )
+    if stored_path_length != path.path_length:
+        raise PackedStoreError(
+            f"packed trace path_length {stored_path_length} != decoded {path.path_length}"
+        )
+    source_key = _required_address_string(record, "source_key")
+    target_key = _required_address_string(record, "target_key")
+    if verify_endpoint_keys:
+        # Canonical molecular identity invokes RDKit. Keep it on the explicit
+        # sampled audit path: doing this for every one of ~725k rows would
+        # defeat the packed store's zero-RDKit production-load contract. The
+        # exact shard-byte digest still binds these stored envelope values.
+        decoded_source_key = canonical_state_key(trace.source)
+        decoded_target_key = canonical_state_key(trace.target)
+        if source_key != decoded_source_key:
+            raise PackedStoreError(
+                f"packed trace source_key {source_key!r} != decoded {decoded_source_key!r}"
+            )
+        if target_key != decoded_target_key:
+            raise PackedStoreError(
+                f"packed trace target_key {target_key!r} != decoded {decoded_target_key!r}"
+            )
+    return PackedTraceAddress(
+        packed_shard_content_sha256=shard_digest,
+        packed_shard_name=shard_path.name,
+        entry_index=entry_index,
+        trace_id=_required_address_string(record, "trace_id"),
+        layer=_required_address_string(record, "layer"),
+        partition=_required_address_string(record, "partition"),
+        source_key=source_key,
+        target_key=target_key,
+        path_length=stored_path_length,
+    )
+
+
+def _iter_decoded_packed_shard(
+    path: Path,
+    *,
+    expected_provenance: dict | None,
+    verify_fraction: float,
+    verify_seed: int,
+    require_address: bool,
+):
+    """Shared decoder used by both public packed-shard readers."""
+
+    if not 0.0 <= verify_fraction <= 1.0:
+        raise ValueError("verify_fraction must lie in [0, 1]")
+    path = Path(path)
+    manifest_path, manifest = _validated_packed_manifest(
+        path,
+        expected_provenance=expected_provenance,
+    )
+    shard_digest = (
+        _packed_shard_address_digest(path, manifest_path) if require_address else None
+    )
     rng = np.random.default_rng(verify_seed)
+    seen_trace_ids: set[str] = set()
+    entry_index = 0
     with gzip.open(path, "rt") as handle:
         for line in handle:
             line = line.strip()
@@ -274,9 +445,92 @@ def read_packed_shard(
             entry = json.loads(line)
             states = [decode_state(payload) for payload in entry["states"]]
             trace = decode_packed_trace(entry["trace"], states)
-            if verify_fraction and rng.random() < verify_fraction:
+            verify_row = bool(verify_fraction and rng.random() < verify_fraction)
+            if verify_row:
                 replay_verify(entry["trace"], states)
-            yield trace, PackedTraceProgress(trace, states)
+            packed_path = PackedTraceProgress(trace, states)
+            address = None
+            if require_address:
+                assert shard_digest is not None
+                address = _address_for_packed_trace(
+                    shard_path=path,
+                    shard_digest=shard_digest,
+                    entry_index=entry_index,
+                    record=entry["trace"],
+                    trace=trace,
+                    path=packed_path,
+                    verify_endpoint_keys=verify_row,
+                )
+                if address.trace_id in seen_trace_ids:
+                    raise PackedStoreError(
+                        f"duplicate trace_id {address.trace_id!r} in packed shard {path}"
+                    )
+                seen_trace_ids.add(address.trace_id)
+            yield _DecodedPackedTrace(trace=trace, path=packed_path, address=address)
+            entry_index += 1
+    if require_address and manifest.get("entries") != entry_index:
+        raise PackedStoreError(
+            f"packed shard manifest declares {manifest.get('entries')!r} entries "
+            f"but addressed reader decoded {entry_index}"
+        )
+
+
+def read_addressed_packed_shard(
+    path: Path,
+    *,
+    expected_provenance: dict | None = None,
+    verify_fraction: float = 0.0,
+    verify_seed: int = 0,
+):
+    """Yield decoded rows with immutable packed-shard addresses.
+
+    Unlike the legacy reader, this path requires complete trace-envelope
+    identity fields and validates path length, row count and trace-ID
+    uniqueness. The exact shard-byte digest binds the stored endpoint keys;
+    rows selected by ``verify_fraction`` additionally recanonicalize endpoint
+    states and compare those keys. A present provenance overlay must validate
+    against the exact shard and manifest bytes.
+    """
+
+    for row in _iter_decoded_packed_shard(
+        path,
+        expected_provenance=expected_provenance,
+        verify_fraction=verify_fraction,
+        verify_seed=verify_seed,
+        require_address=True,
+    ):
+        assert row.address is not None
+        yield AddressedPackedTrace(
+            address=row.address,
+            trace=row.trace,
+            path=row.path,
+        )
+
+
+def read_packed_shard(
+    path: Path,
+    *,
+    expected_provenance: dict | None = None,
+    verify_fraction: float = 0.0,
+    verify_seed: int = 0,
+):
+    """Yield ``(trace, PackedTraceProgress)`` pairs, refusing an off-contract store.
+
+    This legacy projection intentionally does not require the new address
+    metadata, so previously readable stores and all callers retain their return
+    shape and validation behavior. ``verify_fraction`` replays that fraction of
+    entries through the real executor and asserts they reproduce the stored
+    states.
+    """
+
+    for row in _iter_decoded_packed_shard(
+        path,
+        expected_provenance=expected_provenance,
+        verify_fraction=verify_fraction,
+        verify_seed=verify_seed,
+        require_address=False,
+    ):
+        yield row.trace, row.path
 
 
 def build_packed_entry(trace_record: dict, path: TraceProgressCTMC) -> dict:

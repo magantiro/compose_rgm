@@ -1,0 +1,116 @@
+{
+  "schema": "compose.successor_capacity_ladder",
+  "schema_version": 1,
+  "status": "DEVELOPMENT_DIAGNOSTIC_NOT_PAPER_EVIDENCE",
+  "date": "2026-07-30",
+  "scientific_question": "Can the production-size factorized editor memorize a fixed unique-state panel of primitive ring-opening molecular successors, and which parameter scope is required?",
+  "family": {
+    "model_name": "cycle_attach",
+    "executor_name": "bond_delete",
+    "semantic_name": "primitive_ring_open"
+  },
+  "panel": {
+    "examples": 64,
+    "unique_canonical_source_molecule_per_example": true,
+    "data_lane": "real_cycle_bond_roundtrip",
+    "source_smiles_path": "configs/benchmarks/cnof_leads.json",
+    "source_smiles_sha256": "76329a4f5271f7b7a9e2b7a014d3a343707deb7a400b9876fefaf88e9df1fdc2",
+    "persistent_slots": 40,
+    "model_time": 0.5,
+    "target_definition": "production_executor_then_canonical_state_key",
+    "mean_raw_mark_count": 632.90625,
+    "mean_canonical_successor_count": 548.6875,
+    "mean_teacher_successor_alias_multiplicity": 1.21875,
+    "maximum_teacher_successor_alias_multiplicity": 6
+  },
+  "architecture": {
+    "hidden_dim": 256,
+    "message_passing_steps": 6,
+    "total_parameter_count": 6171835,
+    "atom_vocabulary_classes": 15,
+    "cycle_ops": true,
+    "ring_system_grow": false
+  },
+  "optimization": {
+    "steps": 100,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "seed": 20260730,
+    "objective": "productive_conditioned_canonical_successor_nll"
+  },
+  "arms": {
+    "heads_only": {
+      "trainable_parameter_count": 68619,
+      "required_components_without_gradient": [],
+      "initial": {
+        "canonical_successor_nll": 4.61905574798584,
+        "teacher_successor_top1_recall": 0.0,
+        "teacher_successor_top3_recall": 0.0,
+        "teacher_successor_probability": 0.011105416342616081,
+        "teacher_family_probability": 0.13744419813156128,
+        "within_teacher_family_successor_probability": 0.08142894506454468
+      },
+      "final": {
+        "canonical_successor_nll": 2.6333539485931396,
+        "teacher_successor_top1_recall": 0.171875,
+        "teacher_successor_top3_recall": 0.375,
+        "teacher_successor_probability": 0.08174437284469604,
+        "teacher_family_probability": 0.972648024559021,
+        "within_teacher_family_successor_probability": 0.08419409394264221
+      }
+    },
+    "heads_plus_pair_projection": {
+      "trainable_parameter_count": 855819,
+      "required_components_without_gradient": [],
+      "initial": {
+        "canonical_successor_nll": 4.61905574798584,
+        "teacher_successor_top1_recall": 0.0,
+        "teacher_successor_top3_recall": 0.0,
+        "teacher_successor_probability": 0.011105416342616081,
+        "teacher_family_probability": 0.13744419813156128,
+        "within_teacher_family_successor_probability": 0.08142894506454468
+      },
+      "final": {
+        "canonical_successor_nll": 1.352220892906189,
+        "teacher_successor_top1_recall": 0.609375,
+        "teacher_successor_top3_recall": 0.8125,
+        "teacher_successor_probability": 0.4173978269100189,
+        "teacher_family_probability": 0.9723770618438721,
+        "within_teacher_family_successor_probability": 0.42988234758377075
+      }
+    },
+    "all": {
+      "trainable_parameter_count": 6171835,
+      "required_components_without_gradient": [],
+      "initial": {
+        "canonical_successor_nll": 4.539906978607178,
+        "teacher_successor_top1_recall": 0.0,
+        "teacher_successor_top3_recall": 0.0,
+        "teacher_successor_probability": 0.011939708143472672,
+        "teacher_family_probability": 0.14836722612380981,
+        "within_teacher_family_successor_probability": 0.08127762377262115
+      },
+      "final": {
+        "canonical_successor_nll": 0.07596695423126221,
+        "teacher_successor_top1_recall": 1.0,
+        "teacher_successor_top3_recall": 1.0,
+        "teacher_successor_probability": 0.9451704621315002,
+        "teacher_family_probability": 0.9999473094940186,
+        "within_teacher_family_successor_probability": 0.9452214241027832
+      }
+    }
+  },
+  "bounded_interpretation": [
+    "The primitive ring-opening teacher support is executable and the production-size architecture has enough capacity to memorize this fixed unique-state panel.",
+    "The head-only arm mainly learns the family gate and is insufficient to discriminate ring edges across this panel.",
+    "Updating the shared pair projection materially improves within-family selection, while updating the complete representation memorizes the panel.",
+    "These results motivate a bounded family-specific ring-edge representation or adapter comparison before any backbone-width increase."
+  ],
+  "forbidden_interpretations": [
+    "This is not held-out generalization evidence.",
+    "This is not a corpus-adequacy result.",
+    "This does not establish a checkpoint-selection threshold.",
+    "This does not authorize a long training run.",
+    "This does not compare primitive ring opening with ring_system_grow."
+  ]
+}

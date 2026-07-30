@@ -19,6 +19,17 @@ The preparation path now guarantees:
 - hard failure if a nonterminal teacher successor is absent, duplicated after grouping, non-finite, or
   silently skipped.
 
+The next checkpoint-independent prerequisite is also implemented:
+
+- a versioned, immutable validation-panel artifact schema;
+- exact protocol, inventory, corpus, persistent-state, row, and draw-census hashes;
+- distinct `production_law` and `family_forensics` panel contracts;
+- self-hashed metric vectors bound to the exact panel and either an inventory-listed `current_state_dict`
+  snapshot or the declared uniform canonical-successor reference;
+- deterministic paired percentile bootstrap over exact panel draw IDs and frozen importance weights;
+- preregistered production and per-family expansion decisions that emit reasons and target sizes but never
+  rank, select, or pass/fail a checkpoint.
+
 ## Corrections made before any leaderboard result
 
 The previous leaderboard JSON named balanced-family NLL as the secondary criterion. That was inconsistent
@@ -62,13 +73,14 @@ requires the explicit `:current` state source. The new preparation module does n
 1. Implement and freeze the six semantic-axis labelers over packed validation records, then freeze the
    resulting nonempty cell census. The versioned joint-cell identity function is implemented; the
    chemistry/data-derived labels are not yet inferred from the corpus.
-2. Build the deterministic 4,096-row production panel and the minimum-256-per-family forensic panel from
-   the actual packed validation layers. Include terminal rows only for hazard reporting and exclude them
-   from successor NLL.
+2. Build and freeze the deterministic 4,096-row production panel and the minimum-256-per-family forensic
+   panel from the actual packed validation layers using the implemented artifact schema. Include terminal
+   rows only for hazard reporting and exclude them from successor NLL.
 3. Implement the all-32 runner around the shared checkpoint evaluator and production pushforward. It must
    score every snapshot on the same final panel size and write per-row records.
-4. Implement paired bootstrap comparisons, the 4,096-to-16,384 expansion rule, and the per-family
-   256-to-1,024 ambiguity expansion without emitting a winner.
+4. Integrate the implemented paired-bootstrap and expansion primitives after all 32 snapshots have complete
+   per-row outputs and structural gates. The primitives themselves do not identify the compared pair or
+   emit a winner.
 5. On the artifact volume, resolve each snapshot and recheck its frozen SHA, payload, current-state source,
    and RingCore capability signature before the first model forward pass.
 

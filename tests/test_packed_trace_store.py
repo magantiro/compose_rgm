@@ -11,8 +11,10 @@ in small hand-built graphs.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
+from dataclasses import FrozenInstanceError
 from pathlib import Path
 
 import numpy as np
@@ -26,6 +28,7 @@ from compose_v4.data.packed_trace_store import (  # noqa: E402
     PackedTraceProgress,
     build_packed_entry,
     pack_path,
+    read_addressed_packed_shard,
     read_packed_shard,
     unpack_path,
     write_packed_shard,
@@ -60,6 +63,49 @@ def _pairs(limit=25):
     if not out:
         pytest.skip("no rebuildable pool records")
     return out
+
+
+def _write_address_fixture(
+    tmp_path: Path,
+    *,
+    trace_ids: tuple[str, ...],
+    layer: str = "mmp_analogue",
+) -> tuple[Path, list[dict]]:
+    """Write real packed rows with controlled immutable trace-envelope IDs."""
+
+    if not POOL.exists():
+        pytest.skip("local analogue pool sample unavailable")
+    from compose_v4.rewrite.trace_shard import encode_trace_record
+
+    entries: list[dict] = []
+    for line in POOL.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            trace = rewrite_trace_from_record(json.loads(line))
+        except Exception:  # noqa: BLE001
+            continue
+        replayed = TraceProgressCTMC(trace)
+        entries.append(
+            build_packed_entry(
+                encode_trace_record(
+                    trace,
+                    n_slots=40,
+                    seed=0,
+                    trace_id=trace_ids[len(entries)],
+                    partition="train",
+                    layer=layer,
+                ),
+                replayed,
+            )
+        )
+        if len(entries) == len(trace_ids):
+            break
+    if len(entries) != len(trace_ids):
+        pytest.skip("not enough rebuildable pool records")
+    shard = tmp_path / "shard_0000.jsonl.gz"
+    write_packed_shard(shard, entries, provenance={"capability_hash": "address-test"})
+    return shard, entries
 
 
 def test_path_length_matches():
@@ -189,6 +235,121 @@ def test_roundtrip_through_a_written_shard(tmp_path):
             assert canonical_state_key(packed.state_at(progress)) == canonical_state_key(
                 replayed.state_at(progress)
             )
+
+
+def test_addressed_reader_roundtrips_exact_row_identity_and_projects_legacy_pairs(
+    tmp_path,
+):
+    shard, entries = _write_address_fixture(
+        tmp_path,
+        trace_ids=("trace-a", "trace-b", "trace-c"),
+    )
+    addressed = list(
+        read_addressed_packed_shard(
+            shard,
+            expected_provenance={"capability_hash": "address-test"},
+        )
+    )
+
+    digest = hashlib.sha256(shard.read_bytes()).hexdigest()
+    assert [row.address.entry_index for row in addressed] == [0, 1, 2]
+    assert len({row.address for row in addressed}) == len(addressed)
+    assert len({row.address.trace_id for row in addressed}) == len(addressed)
+    for index, (row, entry) in enumerate(zip(addressed, entries)):
+        envelope = entry["trace"]
+        assert row.address.packed_shard_content_sha256 == digest
+        assert row.address.packed_shard_name == shard.name
+        assert row.address.entry_index == index
+        assert row.address.trace_id == envelope["trace_id"]
+        assert row.address.layer == envelope["layer"]
+        assert row.address.partition == envelope["partition"]
+        assert row.address.source_key == envelope["source_key"]
+        assert row.address.target_key == envelope["target_key"]
+        assert row.address.path_length == envelope["path_length"]
+        assert row.path.trace is row.trace
+        assert row.path.path_length == row.address.path_length
+
+    with pytest.raises(FrozenInstanceError):
+        addressed[0].address.entry_index = 99
+
+    legacy = list(
+        read_packed_shard(
+            shard,
+            expected_provenance={"capability_hash": "address-test"},
+        )
+    )
+    assert len(legacy) == len(addressed)
+    for (legacy_trace, legacy_path), row in zip(legacy, addressed):
+        assert legacy_trace.steps == row.trace.steps
+        assert legacy_path.path_length == row.path.path_length
+        for progress in range(row.path.path_length + 1):
+            legacy_state = legacy_path.state_at(progress)
+            addressed_state = row.path.state_at(progress)
+            assert np.array_equal(
+                legacy_state.atom_types,
+                addressed_state.atom_types,
+            )
+            assert np.array_equal(legacy_state.bonds, addressed_state.bonds)
+            assert np.array_equal(
+                legacy_state.formal_charges,
+                addressed_state.formal_charges,
+            )
+
+
+def test_addressed_reader_rejects_duplicate_trace_ids_without_tightening_legacy_reader(
+    tmp_path,
+):
+    shard, _ = _write_address_fixture(
+        tmp_path,
+        trace_ids=("duplicate-id", "duplicate-id"),
+    )
+    with pytest.raises(PackedStoreError, match="duplicate trace_id"):
+        list(read_addressed_packed_shard(shard))
+    assert len(list(read_packed_shard(shard))) == 2
+
+
+def test_addressed_reader_requires_identity_fields_but_legacy_reader_remains_compatible(
+    tmp_path,
+):
+    shard, entries = _write_address_fixture(tmp_path, trace_ids=("legacy-row",))
+    entries[0]["trace"].pop("layer")
+    write_packed_shard(shard, entries, provenance={"capability_hash": "address-test"})
+
+    assert len(list(read_packed_shard(shard))) == 1
+    with pytest.raises(PackedStoreError, match="'layer'.*non-empty string"):
+        list(read_addressed_packed_shard(shard))
+
+
+def test_addressed_reader_keeps_rdkit_endpoint_checks_on_explicit_audit_path(
+    tmp_path,
+):
+    shard, entries = _write_address_fixture(tmp_path, trace_ids=("tampered-key",))
+    entries[0]["trace"]["source_key"] = "not-the-decoded-source"
+    write_packed_shard(shard, entries, provenance={"capability_hash": "address-test"})
+
+    # The production path binds the stored envelope to exact shard bytes but
+    # performs no per-row RDKit canonicalization.
+    addressed = list(read_addressed_packed_shard(shard))
+    assert addressed[0].address.source_key == "not-the-decoded-source"
+
+    # Corpus certification can request sampled or exhaustive semantic replay.
+    with pytest.raises(PackedStoreError, match="source_key.*decoded"):
+        list(read_addressed_packed_shard(shard, verify_fraction=1.0))
+
+
+def test_addressed_reader_reconciles_contiguous_indices_with_manifest_count(tmp_path):
+    shard, _ = _write_address_fixture(
+        tmp_path,
+        trace_ids=("trace-a", "trace-b"),
+    )
+    manifest_path = shard.with_suffix(".manifest.json")
+    manifest = json.loads(manifest_path.read_text())
+    manifest["entries"] += 1
+    manifest_path.write_text(json.dumps(manifest))
+
+    with pytest.raises(PackedStoreError, match="manifest declares 3 entries"):
+        list(read_addressed_packed_shard(shard))
+    assert len(list(read_packed_shard(shard))) == 2
 
 
 def test_provenance_mismatch_is_refused(tmp_path):

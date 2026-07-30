@@ -1070,6 +1070,129 @@ def test_factorized_dataset_is_index_deterministic_and_resume_stable() -> None:
         assert expected.teacher_action == actual.teacher_action
         assert expected.teacher_rate == actual.teacher_rate
         assert expected.state == actual.state
+        assert expected.record_index == actual.record_index
+        assert expected.progress_index == actual.progress_index
+        assert expected.record_index is not None
+        assert expected.progress_index is not None
+        selected = records[expected.record_index]
+        assert selected.path.state_at(expected.progress_index) == expected.state
+
+
+def test_factorized_dataset_address_metadata_preserves_legacy_draw_and_rng_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Metadata must observe the existing draw, never perturb or replay it."""
+
+    from math import exp
+
+    import compose_v4.experiments.factorized_mark_conditional as dataset_module
+    from compose_v4.experiments.hierarchical_sampler import (
+        HierarchicalMarkSampler,
+        RecordTag,
+    )
+
+    _, records = _catalog_and_records(("CCO", "CCN", "CCF", "c1ccccc1"))
+    tags = [
+        RecordTag(
+            layer="left" if index < 2 else "right",
+            path_length=record.path.path_length,
+        )
+        for index, record in enumerate(records)
+    ]
+    hierarchical = HierarchicalMarkSampler(
+        tags,
+        layer_weights={"left": 0.35, "right": 0.65},
+        path_length_bins=(2, 5, 9),
+        seed=999,
+    )
+    seed = 314
+    late_time_fraction = 0.4
+    operational_horizon = 2.5
+    progress_stratification_fraction = 0.6
+    real_default_rng = np.random.default_rng
+    legacy_progress_sampler = dataset_module._sample_tracelet_progress
+
+    def legacy_draw(absolute_index: int, record_sampler):
+        rng = real_default_rng(np.random.SeedSequence((seed, absolute_index)))
+        if record_sampler is None:
+            record_index = int(rng.integers(len(records)))
+        else:
+            record_index = int(record_sampler.draw(rng))
+        record = records[record_index]
+        if rng.random() < late_time_fraction:
+            operational_time = float(rng.uniform(0.0, operational_horizon))
+            time = 1.0 - exp(-operational_time)
+        else:
+            time = float(rng.uniform(0.01, 0.99))
+        progress, importance_weight = legacy_progress_sampler(
+            record.path,
+            time=time,
+            rng=rng,
+            stratification_fraction=progress_stratification_fraction,
+        )
+        if progress < record.path.path_length:
+            step = record.path.trace.steps[progress]
+            teacher_action = step.action
+            teacher_rule_name = step.rule_name
+            teacher_rate = record.path.operational_jump_rate(progress)
+        else:
+            teacher_action = None
+            teacher_rule_name = None
+            teacher_rate = 0.0
+        return {
+            "record_index": record_index,
+            "progress_index": int(progress),
+            "state": record.path.state_at(progress),
+            "time": time,
+            "teacher_action": teacher_action,
+            "teacher_rule_name": teacher_rule_name,
+            "teacher_rate": teacher_rate,
+            "importance_weight": importance_weight,
+            "rng_state": copy.deepcopy(rng.bit_generator.state),
+        }
+
+    created_generators = []
+
+    def tracking_default_rng(*args, **kwargs):
+        generator = real_default_rng(*args, **kwargs)
+        created_generators.append(generator)
+        return generator
+
+    monkeypatch.setattr(dataset_module.np.random, "default_rng", tracking_default_rng)
+    for record_sampler in (None, hierarchical):
+        dataset = FactorizedMarkDataset(
+            records,
+            start_index=11,
+            length=32,
+            seed=seed,
+            late_time_fraction=late_time_fraction,
+            operational_horizon=operational_horizon,
+            progress_stratification_fraction=progress_stratification_fraction,
+            record_index_sampler=record_sampler,
+        )
+        for local_index in range(len(dataset)):
+            expected = legacy_draw(11 + local_index, record_sampler)
+            generators_before = len(created_generators)
+            actual = dataset[local_index]
+
+            assert len(created_generators) == generators_before + 1
+            assert created_generators[-1].bit_generator.state == expected["rng_state"]
+            assert actual.record_index == expected["record_index"]
+            assert actual.progress_index == expected["progress_index"]
+            assert actual.state == expected["state"]
+            assert actual.time == expected["time"]
+            assert actual.teacher_action == expected["teacher_action"]
+            assert actual.teacher_rule_name == expected["teacher_rule_name"]
+            assert actual.teacher_rate == expected["teacher_rate"]
+            assert actual.importance_weight == expected["importance_weight"]
+            assert actual.property_condition_values is None
+            assert actual.property_condition_mask is None
+            assert actual.ring_grow_support_indices is None
+            assert actual.ring_grow_support_width == 0
+            assert not actual.ring_grow_support_is_exact
+            assert not actual.ring_grow_enablement_is_exact
+            assert actual.ring_topology_local_support_log_mass is None
+            assert actual.ring_teacher_semantic_certificate is None
 
 
 def test_streamed_factorized_metrics_match_full_batch() -> None:
