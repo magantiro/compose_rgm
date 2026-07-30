@@ -3,8 +3,8 @@ SHELL := /bin/sh
 MAIN := main
 RENDER_DIR := ../tmp/pdfs/compose_arxiv_current
 ARXIV_ARCHIVE := COMPOSE_arxiv_source.tar.gz
-ARXIV_SOURCES := main.tex sections/compose.tex sections/experiments.tex sections/results.tex sections/discussion.tex figures/framework.tikz compose_arxiv.sty references.bib README.md STYLE_SPEC.md SCIENTIFIC_TRACEABILITY.md COMPLETION_PLAN.md Makefile
-MANUSCRIPT_TEX := main.tex sections/compose.tex sections/experiments.tex sections/results.tex sections/discussion.tex
+ARXIV_SOURCES := main.tex sections/compose.tex sections/experiments.tex sections/results.tex sections/discussion.tex sections/appendix_algorithms_proofs.tex sections/appendix_experiments.tex figures/framework.tikz compose_arxiv.sty references.bib README.md STYLE_SPEC.md SCIENTIFIC_TRACEABILITY.md COMPLETION_PLAN.md Makefile
+MANUSCRIPT_TEX := main.tex sections/compose.tex sections/experiments.tex sections/results.tex sections/discussion.tex sections/appendix_algorithms_proofs.tex sections/appendix_experiments.tex
 
 .PHONY: all pdf render check placeholders release-check qa clean arxiv-source
 

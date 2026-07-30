@@ -1,0 +1,689 @@
+\section{Complete experimental and implementation protocol}
+\label{app:experimental-protocol}
+
+This appendix records the protocol that turns the executable-process
+definitions in the main text into claim-bearing experiments.  It is deliberately
+more specific than a conventional implementation summary.  A legal executor
+can make validity nearly automatic while still producing an uninformative
+transition law; conversely, an optimizer can improve endpoints while obscuring
+an unusable base process.  We therefore separate support, learning, control,
+and task-level evidence throughout.
+
+\subsection{Evidence, freezing, and attempted-sample accounting}
+\label{app:evidence-freeze}
+
+\paragraph{Evidence classes.}
+Each reported item is classified as a mathematical derivation, a frozen
+implementation fact, a registered protocol, or a measured result.  Result
+artifacts are accepted only when they contain the expected schema, physical
+file hashes, implementation and configuration identities, partition identity,
+seed, and exact checkpoint hash.  A development artifact may validate code but
+cannot fill a final result cell.  Historical measurements are labeled
+diagnostic and do not select the production checkpoint.
+
+\paragraph{Partition use.}
+Training data fit parameters.  Development panels are used to repair
+factorizations and set pilot thresholds.  Validation data choose checkpoints
+and controller hyperparameters under the frozen rules below.  The final test
+partition is opened once after the checkpoint, tasks, thresholds, and
+comparators are frozen.  Because diagnostics from the completed 16,000-step
+run have already been inspected, a repaired model uses a new sealed final
+holdout.
+
+\paragraph{Denominators.}
+Every attempted trajectory remains in the denominator for validity, target
+success, constraint satisfaction, and budget compliance.  A failed proposal,
+zero-value control state, exhausted successor fiber, timeout, or external
+baseline failure is recorded under a distinct reason code rather than silently
+resampled.  Molecules that fail independent standardization or evaluation are
+reported separately and count as failed task attempts whenever that evaluator
+is part of the registered endpoint.
+
+\paragraph{Compute.}
+The primary control cost is the number of property-oracle calls.  We also
+record model forward passes, raw marks scored, canonical successors scored,
+particles propagated, accepted productive edits, executor calls, wall-clock
+time, accelerator hours, and peak memory.  Training reports optimizer steps,
+examples, unique exact states, successor-cache hits, and effective
+family/capability coefficients.  A controller that evaluates $m$ candidates or
+propagates $m$ particles pays for all $m$, not only for the committed
+successor.
+
+\subsection{Editing corpus construction}
+\label{app:editing-corpus}
+
+\paragraph{Training target.}
+The editing model is a property-agnostic prior over canonical molecular
+successors.  Source molecule, goal, remaining budget, protected mapping, and
+path-constraint state are controller inputs and are not leaked into the base
+prior.  Each stored trace contains exact persistent-slot states and executable
+actions.  Canonical strings are molecular identity metadata; training never
+reconstructs a slot-addressed state by reparsing a canonical string.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Editing-corpus evidence lanes.} ``Real endpoint'' means both
+  endpoints occur in the underlying molecular source; intermediate states are
+  still executor-certified.  Final counts and effective coefficients are
+  filled only from the frozen V2 inventory.}
+  \label{tab:appendix-corpus-lanes}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYY@{}}
+    \toprule
+    Lane & Purpose & Required evidence & Frozen inventory \\
+    \midrule
+    Observed local analogue &
+    substitutions, bioisosteres, and local size changes &
+    real endpoint; shared-source branches where available &
+    \resultpending{APP_CORPUS_LOCAL} \\
+    Operator-aware real endpoint &
+    prefer direct restate, reorder, reroute, birth/death, and cycle programs
+    over delete--rebuild fallbacks &
+    executable direct path or explicit compiler failure reason &
+    \resultpending{APP_CORPUS_OPERATOR_AWARE} \\
+    Linker/positional/topology analogue &
+    attachment relocation, linker changes, and topology changes &
+    real endpoint preferred; certified synthetic supplement allowed &
+    \resultpending{APP_CORPUS_LINKER_TOPOLOGY} \\
+    Observed series path &
+    short paths, shared prefixes, and alternative routes through observed
+    analogue series &
+    molecule-, scaffold-, series-, and source-group provenance &
+    \resultpending{APP_CORPUS_SERIES} \\
+    Reversible synthetic walk &
+    rare contexts, inverse/correction coverage, and mixed-family composition &
+    production executor, closure, charge policy, and exact replay &
+    \resultpending{APP_CORPUS_REVERSIBLE} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The lanes are evidence categories rather than automatically equal mixture
+components.  In particular, a forward/reverse encoding of one matched pair is
+not by itself an observed series, a branch group, or a dynamic correction
+example.  Conversely, the local Markov prior need not memorize complete
+Pareto-optimal trajectories: controllers compose local transitions at
+inference.  The final corpus census therefore determines which multi-step
+lanes add measured coverage beyond real local endpoints and reversible
+executor walks; an aspirational field is not allowed to block a bounded pilot
+without a demonstrated capability gap.
+
+\paragraph{Compiler order.}
+For a real endpoint pair, the compiler first searches direct semantic
+operations supported by the production factorization.  Only then may it use a
+multi-step delete/insert or other primitive composition.  Both directions are
+compiled independently because executability and path length can differ.
+Every retained trace replays from its stored exact source to its stored exact
+target.  Unsupported pairs remain in an audit inventory with a typed failure
+reason.
+
+\paragraph{Splits.}
+Molecule identity, scaffold component, series group, upstream
+document/source group, and transformation signature are group-level split
+keys.  Both endpoints of a pair must belong to the same partition;
+cross-partition pairs are dropped before trace generation.  The frozen
+manifest reports molecule, scaffold, series, and source-group overlaps both
+within each layer and across layers.  Manifest identity is computed from the
+bytes of every packed shard, not only its path and row count.
+
+\paragraph{Sampling law.}
+Sampling is hierarchical:
+\[
+  \text{data lane}
+  \rightarrow
+  \text{series/scaffold/source group}
+  \rightarrow
+  \text{semantic capability cell}
+  \rightarrow
+  \text{endpoint program}
+  \rightarrow
+  \text{progress state}.
+\]
+Raw-pair-uniform sampling is disallowed because common delete/insert traces
+would dominate rare but load-bearing cycle and reroute events.  For every run
+we reconstruct the realized coefficient of each teacher family, capability
+cell, and path position.  Packed transition addressability is an
+implementation optimization and does not change this hierarchy.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Frozen editing-corpus census.} Counts are reported after all
+  representability, charge, split, and whole-trace support exclusions.}
+  \label{tab:appendix-corpus-census}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYYY@{}}
+    \toprule
+    Layer/lane & Traces & Exact states & Unique sources & Unique scaffolds \\
+    \midrule
+    General corruption &
+    \resultpending{APP_CENSUS_CORRUPTION_TRACES} &
+    \resultpending{APP_CENSUS_CORRUPTION_STATES} &
+    \resultpending{APP_CENSUS_CORRUPTION_SOURCES} &
+    \resultpending{APP_CENSUS_CORRUPTION_SCAFFOLDS} \\
+    Cycle operations &
+    \resultpending{APP_CENSUS_CYCLE_TRACES} &
+    \resultpending{APP_CENSUS_CYCLE_STATES} &
+    \resultpending{APP_CENSUS_CYCLE_SOURCES} &
+    \resultpending{APP_CENSUS_CYCLE_SCAFFOLDS} \\
+    Real-endpoint analogues &
+    \resultpending{APP_CENSUS_ANALOGUE_TRACES} &
+    \resultpending{APP_CENSUS_ANALOGUE_STATES} &
+    \resultpending{APP_CENSUS_ANALOGUE_SOURCES} &
+    \resultpending{APP_CENSUS_ANALOGUE_SCAFFOLDS} \\
+    Reversible/mixed-family supplements &
+    \resultpending{APP_CENSUS_SUPPLEMENT_TRACES} &
+    \resultpending{APP_CENSUS_SUPPLEMENT_STATES} &
+    \resultpending{APP_CENSUS_SUPPLEMENT_SOURCES} &
+    \resultpending{APP_CENSUS_SUPPLEMENT_SCAFFOLDS} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Production support and chemistry audits}
+\label{app:chemistry-audits}
+
+\paragraph{State contract.}
+The molecular state uses at most 40 persistent slots and the declared
+broad-organic element--valence vocabulary.  Active atoms are identified by the
+authoritative element predicate; neither nonzero atom-state indices nor a
+prefix slice of the padded tensor defines the molecule.  The SCAR bookkeeping
+state is occupied but is not an element.  Graph cycle rank is always
+$|E|-|V|+c$ and is reported separately from SSSR ring count and ring-system
+count.
+
+\paragraph{Charge policy.}
+Formal-charge design is outside the current action space.  A legal editing
+transition preserves the complete persistent-slot charge array and protects
+the element, implicit hydrogen count, and full bond row of every initially
+charged slot.  The same predicate must filter training traces, the model's
+legal candidate masks, successor-cache construction, sampling, and evaluation.
+Protecting only net charge is insufficient.  The final support audit enumerates
+charged-source candidates and requires zero policy-violating probability mass:
+\resultpending{APP_CHARGE_SUPPORT_AUDIT}.
+
+\paragraph{Operator basis.}
+The bounded rebuild tests the eight families in
+Table~\ref{tab:operators}.  Ring-system deletion and whole-ring growth are
+disabled.  Ring-system restatement is a coordinated accelerator under the
+current primitive bond-order masks; its inclusion in the bounded pilot does
+not authorize it as final production support.  Final support is frozen only
+after successor-level capacity, retention, rollout, and topology-task audits.
+
+\paragraph{Birth and death.}
+Insertion is either a root birth from the null state or a one-neighbor
+connected birth.  General simultaneous multi-neighbor insertion is absent.
+Deleting a degree-two atom may therefore lack a one-step insertion inverse,
+although its endpoint can sometimes be reached by birth followed by cycle
+closure and restatement.  We report primitive path cost instead of claiming
+one-step inverse closure.
+
+\paragraph{Cycles.}
+Cycle closure adds one executable bond and cycle opening deletes one executable
+ring edge.  Whole-ring templates do not define support.  Candidate audits
+report teacher presence, exact execution, undirected endpoint
+canonicalization, raw mark count, distinct canonical successor count, alias
+multiplicity, and candidate-count-matched random baselines separately for
+closure and opening.
+
+\subsection{No-waste training and checkpoint selection}
+\label{app:training-gates}
+
+Long optimization is authorized only after the staged gates in
+Table~\ref{tab:appendix-training-gates}.  A gate failure is diagnostic evidence,
+not a reason to relax its threshold after viewing the result.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Training release ladder.} A later stage cannot compensate
+  for a failed earlier invariant.}
+  \label{tab:appendix-training-gates}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYY@{}}
+    \toprule
+    Stage & Purpose & Required evidence & Failure action \\
+    \midrule
+    Gate 0 &
+    deterministic construction and support parity &
+    exact corpus/cache/config hashes; teacher recovery; legal masks; nonempty
+    active families &
+    repair data or implementation \\
+    T1 &
+    bounded successor-level capacity &
+    tiny unique-state and repeated-state panels; family NLL, probability,
+    rank, candidates, aliases &
+    repair labels/factorization/head \\
+    P50 &
+    gradient and collapse sentinel &
+    50 exact updates; every family exposed; finite gradients; no probability
+    collapse; immutable completion &
+    repair recipe or sampling \\
+    P500 &
+    early learning and retention &
+    successor improvement in every load-bearing family; inherited-capability
+    sentinel when applicable &
+    rebalance, distill, or change learning rates \\
+    P2000 &
+    generalization, rollouts, and calibration &
+    held-source/scaffold/topology metrics; productive rollouts; no divergence &
+    stop before long run \\
+    Full run &
+    final model fitting &
+    all prior gates; frozen stopping/selection rule; resumable scientific
+    identity &
+    abort or keep preregistered best checkpoint \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\paragraph{T1 panels.}
+Panel construction is whole-trace support aware.  Filtering one displayed
+teacher row is not sufficient when another progress state in the same trace
+uses a disabled family: every progress transition needed by cache
+materialization must belong to the exact active support.  Unique-state panels
+test memorization of unambiguous local targets.  Repeated-state panels compare
+the learned successor distribution with the empirical teacher distribution
+and its entropy floor.
+
+\paragraph{Long-run monitoring.}
+Each recovery checkpoint contains model and optimizer state, scheduler
+position, random-number states, completed optimizer steps, corpus and shard
+inventory hashes, representability and charge overlays, successor-cache
+identity, operator freeze, objective and sampler versions, sentinel panel
+identity, and the frozen threshold/stopping policy.  A resume with any
+different scientific field fails closed.
+
+At every registered checkpoint we compute production-weighted and
+family-balanced canonical-successor NLL; per-family NLL, probability, rank,
+candidate count, successor count, and alias multiplicity; required-capability
+retention; productive rollout statistics; and, where applicable, hazard
+calibration.  The monitor returns one of three statuses:
+\emph{continue}, \emph{stop and retain the registered best validation
+checkpoint}, or \emph{abort for invariant/capability failure}.  Test metrics
+never influence these decisions.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Operator-resolved validation report for the selected editing
+  checkpoint.} Mark accuracy is auxiliary; successor NLL and probability are
+  the primary local-capacity measures.}
+  \label{tab:appendix-family-diagnostics}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYYYY@{}}
+    \toprule
+    Family & Succ. NLL $\downarrow$ & Teacher mass $\uparrow$ & MRR $\uparrow$ &
+    Raw/canonical candidates & Alias multiplicity \\
+    \midrule
+    Atom insert & \resultpending{APP_FAM_INSERT_NLL} &
+    \resultpending{APP_FAM_INSERT_PROB} & \resultpending{APP_FAM_INSERT_MRR} &
+    \resultpending{APP_FAM_INSERT_CAND} & \resultpending{APP_FAM_INSERT_ALIAS} \\
+    Atom delete & \resultpending{APP_FAM_DELETE_NLL} &
+    \resultpending{APP_FAM_DELETE_PROB} & \resultpending{APP_FAM_DELETE_MRR} &
+    \resultpending{APP_FAM_DELETE_CAND} & \resultpending{APP_FAM_DELETE_ALIAS} \\
+    Atom restate & \resultpending{APP_FAM_RESTATE_NLL} &
+    \resultpending{APP_FAM_RESTATE_PROB} & \resultpending{APP_FAM_RESTATE_MRR} &
+    \resultpending{APP_FAM_RESTATE_CAND} & \resultpending{APP_FAM_RESTATE_ALIAS} \\
+    Bond reorder & \resultpending{APP_FAM_REORDER_NLL} &
+    \resultpending{APP_FAM_REORDER_PROB} & \resultpending{APP_FAM_REORDER_MRR} &
+    \resultpending{APP_FAM_REORDER_CAND} & \resultpending{APP_FAM_REORDER_ALIAS} \\
+    Bond reroute & \resultpending{APP_FAM_REROUTE_NLL} &
+    \resultpending{APP_FAM_REROUTE_PROB} & \resultpending{APP_FAM_REROUTE_MRR} &
+    \resultpending{APP_FAM_REROUTE_CAND} & \resultpending{APP_FAM_REROUTE_ALIAS} \\
+    Cycle close & \resultpending{APP_FAM_CLOSE_NLL} &
+    \resultpending{APP_FAM_CLOSE_PROB} & \resultpending{APP_FAM_CLOSE_MRR} &
+    \resultpending{APP_FAM_CLOSE_CAND} & \resultpending{APP_FAM_CLOSE_ALIAS} \\
+    Cycle open & \resultpending{APP_FAM_OPEN_NLL} &
+    \resultpending{APP_FAM_OPEN_PROB} & \resultpending{APP_FAM_OPEN_MRR} &
+    \resultpending{APP_FAM_OPEN_CAND} & \resultpending{APP_FAM_OPEN_ALIAS} \\
+    Ring restate & \resultpending{APP_FAM_RING_RESTATE_NLL} &
+    \resultpending{APP_FAM_RING_RESTATE_PROB} &
+    \resultpending{APP_FAM_RING_RESTATE_MRR} &
+    \resultpending{APP_FAM_RING_RESTATE_CAND} &
+    \resultpending{APP_FAM_RING_RESTATE_ALIAS} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\paragraph{Checkpoint selection.}
+All registered checkpoints are evaluated on the fixed validation corpus.
+Primary selection minimizes production-weighted canonical-successor NLL;
+balanced-family successor NLL is secondary.  Held-source, scaffold, topology,
+charge-support, calibration, and productive-rollout safeguards can veto a
+candidate.  Hazard metrics cannot select the fixed-budget editing checkpoint.
+The complete leaderboard is frozen before the final test is opened.
+
+\subsection{E2--E4: transport and structural adaptation}
+\label{app:e2-e4-protocols}
+
+\paragraph{E2 matched-law comparison.}
+The learned and uniform arms use identical sources, canonical successor sets,
+executor, random seeds, and productive-edit budgets.  The uniform arm assigns
+$1/|\mathcal N(x)|$ to distinct molecular successors, not to marks.  Target
+recovery credits a trajectory when its endpoint canonical identity equals the
+held-out target within the registered budget.  Path overhead compares accepted
+productive edits with the frozen verified compiler path or, on the exact
+subset, the shortest path.  We separately report immediate reversals, repeated
+states, longer cycles, net and gross atom/bond displacement, and termination
+due to an empty productive fiber.
+
+\paragraph{E3 cardinality.}
+Sources and target atom-count intervals are stratified by initial count,
+requested signed displacement, scaffold, and whether the target is impossible
+under fixed cardinality.  Full \method is compared with no insertion, no
+deletion, and fixed-cardinality support.  Dynamic trials first target a larger
+interval and then switch to a smaller interval at the registered step.  Every
+intermediate count, first hitting time, overshoot, correction count, source
+similarity, and oracle call is retained.
+
+\paragraph{E4 topology.}
+Tasks include cycle creation, opening, ring-size change, topology
+simplification, fused-system modification, and a create-then-reverse switch.
+Spiro and bridged strata are included only when an independent reachability
+builder finds a legal path under the frozen operator set.  Results are
+stratified by graph cycle-rank delta, ring-size transition, ring-system count,
+and fused/spiro/bridged category.  The no-cycle ablation removes only cycle
+close/open; it does not reintroduce a ring template macro.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Detailed size and topology adaptation.} The main text
+  reports aggregates; this table preserves the registered difficult strata.}
+  \label{tab:appendix-adaptation-strata}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYYY@{}}
+    \toprule
+    Stratum & Sources & Target success $\uparrow$ & Valid path $\uparrow$ &
+    Edits/oracles $\downarrow$ \\
+    \midrule
+    Grow & \resultpending{APP_E3_GROW_N} &
+    \resultpending{APP_E3_GROW_SUCCESS} &
+    \resultpending{APP_E3_GROW_VALID} & \resultpending{APP_E3_GROW_COST} \\
+    Shrink & \resultpending{APP_E3_SHRINK_N} &
+    \resultpending{APP_E3_SHRINK_SUCCESS} &
+    \resultpending{APP_E3_SHRINK_VALID} & \resultpending{APP_E3_SHRINK_COST} \\
+    Grow then shrink & \resultpending{APP_E3_SWITCH_N} &
+    \resultpending{APP_E3_SWITCH_SUCCESS} &
+    \resultpending{APP_E3_SWITCH_VALID} & \resultpending{APP_E3_SWITCH_COST} \\
+    Cycle creation & \resultpending{APP_E4_CREATE_N} &
+    \resultpending{APP_E4_CREATE_SUCCESS} &
+    \resultpending{APP_E4_CREATE_VALID} & \resultpending{APP_E4_CREATE_COST} \\
+    Cycle opening & \resultpending{APP_E4_OPEN_N} &
+    \resultpending{APP_E4_OPEN_SUCCESS} &
+    \resultpending{APP_E4_OPEN_VALID} & \resultpending{APP_E4_OPEN_COST} \\
+    Fused/spiro/bridged reachable set & \resultpending{APP_E4_COMPLEX_N} &
+    \resultpending{APP_E4_COMPLEX_SUCCESS} &
+    \resultpending{APP_E4_COMPLEX_VALID} & \resultpending{APP_E4_COMPLEX_COST} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{E5--E6: quotient and exact-control verification}
+\label{app:e5-e6-protocols}
+
+\paragraph{E5 quotient interventions.}
+For each source, the evaluator records every raw mark, executor successor,
+canonical key, and aggregate mass.  The interventions are: a persistent-slot
+permutation with action transport; a deterministic refinement of selected
+marks into aliases whose masses sum to the original; and the inverse
+coarsening.  We compare raw mark multiplicities, aggregate successor mass,
+sampled molecular frequencies, and successor-level controlled rows.  A fresh
+dictionary evaluator independently enumerates, executes, canonicalizes, and
+groups marks.  Negative controls apply a mark-level power tilt and mark-level
+top-$k$, which should change when alias count changes.
+
+\paragraph{E6 graph.}
+The \texttt{carbon\_6\_slots} graph contains 967 canonical states and 14,432
+directed canonical edges and includes the distinguished null source.  It is a
+bounded carbon-only verification language.  The graph audit requires
+deterministic state indexing, exhaustive action disposition, explicit
+vocabulary-boundary exclusions, no productive action outside the closed
+slice, raw-mark-to-edge compression and alias counts, productive versus
+virtual mass reconstruction, and production segmented aggregation against a
+fresh dictionary oracle.  These checks establish the graph supplied to the
+solver; they are not themselves an exact-control result.
+
+The claim-bearing solver contract separately freezes the row-stochastic base
+kernel, initial state or distribution, horizon $K$, terminal desirability
+$g$, numeric tolerances, and a smaller explicit-path fixture.  Missing any one
+of these fields blocks solver execution.  Exact values are obtained by
+backward dynamic programming; $h_b(x)=0$ is represented exactly and the
+controlled row is not numerically patched.  We compare the propagated
+terminal law with the analytic tilted terminal law, verify the support subset
+row by row, and restart the recursion from registered switch states for the
+dynamic-continuation check.
+
+\subsection{E7: same-base Pareto and dynamic control}
+\label{app:e7-protocol}
+
+\paragraph{Controller inputs.}
+The learned value receives remaining budget, current molecule, immutable
+source, goal, and protected/path-constraint context.  The base
+editing prior remains frozen and goal independent.  Every same-base arm uses
+the identical productive successor kernel and differs only in how supported
+successors are scored, resampled, or backed up.
+
+\paragraph{Pareto archive.}
+All objectives are oriented so larger is better and normalized to $[0,1]$
+using bounds frozen from training/development data or a fixed literature
+convention.  The hypervolume reference is the origin of this normalized
+maximization cube.  Raw objective values are retained.  The archive uses the
+registered dominance convention, similarity floor, feasibility predicate, and
+duplicate identity rule.  Primary endpoints are terminal normalized
+hypervolume and hypervolume area under the oracle-call curve; IGD+, feasible
+nondominated count, source similarity, structural diversity, and independent
+held-out evaluator performance are secondary.
+
+\paragraph{Dynamic switch.}
+At the registered switch step, the new controller starts from the actual
+current molecule and remaining budget.  Comparators continue under the new
+goal, restart from the source, restart from the switch molecule under a
+separate sampler, or pursue a static compromise.  Adaptation regret is
+measured from the switch state at matched post-switch oracle cost.
+
+\paragraph{Pareto fan.}
+One valid prefix is branched toward multiple registered target regions.
+Endpoint spread, region coverage, hypervolume, branch diversity, prefix reuse,
+and total cost are compared with independent restarts.  Branches contribute
+all feasible visited states to the common archive under one frozen
+deduplication rule.
+
+\paragraph{Path constraints.}
+Scaffold, pharmacophore, atom-count, charge, and structural-alert constraints
+are checked at every committed state.  Endpoint-only filtering is the matched
+waste baseline.  A prefix-closed state constraint masks violating successors;
+a history-dependent constraint augments controller state or kills the path.
+We report path feasibility, forbidden intermediates, endpoint yield, and
+wasted oracle calls.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Dynamic-control diagnostics.} These complement the aggregate
+  controller table in the main text.}
+  \label{tab:appendix-dynamic}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYYY@{}}
+    \toprule
+    Protocol & Success/coverage $\uparrow$ & Regret $\downarrow$ &
+    Prefix reuse $\uparrow$ & Oracle cost $\downarrow$ \\
+    \midrule
+    Preference switch, learned value &
+    \resultpending{APP_E7_SWITCH_SUCCESS} &
+    \resultpending{APP_E7_SWITCH_REGRET} & n/a &
+    \resultpending{APP_E7_SWITCH_COST} \\
+    Restart from source &
+    \resultpending{APP_E7_RESTART_SUCCESS} &
+    \resultpending{APP_E7_RESTART_REGRET} & 0 &
+    \resultpending{APP_E7_RESTART_COST} \\
+    Pareto fan &
+    \resultpending{APP_E7_FAN_COVERAGE} &
+    \resultpending{APP_E7_FAN_REGRET} &
+    \resultpending{APP_E7_FAN_REUSE} &
+    \resultpending{APP_E7_FAN_COST} \\
+    Pathwise control &
+    \resultpending{APP_E7_PATH_SUCCESS} &
+    \resultpending{APP_E7_PATH_WASTE} &
+    \resultpending{APP_E7_PATH_PREFIX} &
+    \resultpending{APP_E7_PATH_COST} \\
+    Endpoint-only filter &
+    \resultpending{APP_E7_FILTER_SUCCESS} &
+    \resultpending{APP_E7_FILTER_WASTE} & n/a &
+    \resultpending{APP_E7_FILTER_COST} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{E1: separate timed de novo protocol}
+\label{app:e1-protocol}
+
+The unconditional model uses a separate broad-organic corpus with nonzero de
+novo mixture, a separate checkpoint, and the timed marked CTMC.  The source
+distribution includes the null state and the reversible
+$\varnothing\rightleftarrows$ one-atom interface.  Gillespie sampling uses the
+calibrated productive molecular exit hazard; a fixed number of embedded edits
+is not substituted for time.
+
+Every model and baseline generates the registered number of molecules for
+each of five seeds.  FCD uses the same ChemNet implementation and reference
+sample count.  Held-out manifold recall uses frozen ChemNet embeddings and the
+registered $k$-nearest-neighbor coverage construction.  Topology distance is
+the equal-weight aggregate of graph cycle rank, ring-system count, ring-size
+histogram, fused/spiro/bridged category, and aromatic-ring fraction distances.
+All-step validity, endpoint validity, connectedness, and uniqueness are hard
+gates; novelty, scaffold coverage, memorization, size/property distributions,
+and throughput are secondary.
+
+\subsection{Comparator definitions}
+\label{app:comparators}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Comparator roles.} Inclusion requires a runnable artifact
+  and a compatible task contract; naming a method here does not imply that its
+  published support equals COMPOSE support.}
+  \label{tab:appendix-comparators}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYYY@{}}
+    \toprule
+    Comparator & Role & Support relation & Required accounting \\
+    \midrule
+    Uniform canonical successor &
+    test learned transport &
+    identical successor support &
+    identical seeds, edit budget, executor \\
+    Operator ablations &
+    identify load-bearing birth/death/cycle families &
+    preregistered support removal &
+    otherwise identical prior/training or sampling contract \\
+    Unguided, rerank, greedy, Boltzmann &
+    local control baselines &
+    identical frozen successor kernel &
+    every scored successor and oracle call \\
+    Scalarized and MOG-DFM-style guidance &
+    preference-conditioned local guidance &
+    identical frozen successor kernel &
+    direction samples, forward passes, oracle calls \\
+    SMC/Feynman--Kac &
+    sequential population control &
+    identical frozen successor kernel &
+    particles, resampling, all oracle calls \\
+    GraphGA, MARS &
+    graph-search/valid-editor context &
+    external, generally different &
+    matched sources, objectives, constraints, budgets \\
+    RetMol, GenMol &
+    retrieval/discrete-generation context &
+    external, generally different &
+    independently runnable standardized endpoints \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+External rows are omitted when their released artifacts cannot honor the same
+source panel, objective, similarity/constraint contract, and oracle budget.
+Published numbers from a different standardization pipeline are contextual and
+never enter paired tests.  One-shot methods receive ``not applicable'' for
+pathwise metrics rather than an assumed zero violation rate.
+
+\subsection{Statistics and reporting}
+\label{app:statistics}
+
+The independent resampling unit is the highest-level unit that can carry
+shared chemistry: source/scaffold component for editing tasks and the
+registered reference-sample component for distributional generation.
+Trajectories, controller seeds, branches, and particles are nested replicates,
+not independent molecules.  Primary method contrasts use paired
+component-level bootstrap intervals.  Multiplicity correction is applied
+within each preregistered family of primary comparisons; secondary diagnostics
+are labeled exploratory.  We report the estimate, interval, number of
+independent units, number of attempted trajectories, every seed-level result,
+and all exclusions with reason codes.  Means across seeds are never presented
+as corpus-level uncertainty.
+
+\section{Reproducibility and audit inventory}
+\label{app:reproducibility}
+
+\subsection{Production primitives and experiment-only code}
+
+Experiments reuse only the primitives that define the trained scientific
+object: checkpoint reconstruction, legal enumerators, deterministic executor,
+persistent-slot semantics, canonical molecular identity, operator/capability
+configuration, and authoritative segmented successor aggregation.  Task
+builders, exact graph construction, exact solver, controllers, learned-value
+training, metrics, statistical analysis, and plots are written as experiment
+code under the frozen registry.  Historical exact-Doob scripts, old exactness
+JSON files, data-starved checkpoints, and pre-RingCore figures are not evidence.
+
+\subsection{Required artifact chain}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Claim-bearing artifact chain.} Every arrow is checked by
+  physical SHA-256 and semantic identity, not inferred from filenames.}
+  \label{tab:appendix-artifacts}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYY@{}}
+    \toprule
+    Stage & Required immutable artifacts & Final identity \\
+    \midrule
+    Corpus &
+    source shards, compiler contract, packed shards, exclusion overlays,
+    capability census, split audit &
+    \resultpending{APP_ARTIFACT_CORPUS} \\
+    Gate 0/T1 &
+    operator freeze, exact panels, cache inventory, support/charge audit,
+    threshold decision &
+    \resultpending{APP_ARTIFACT_T1} \\
+    Pilot/full training &
+    recipe, ordered stream, monitor policy, recovery checkpoints, validation
+    leaderboard &
+    \resultpending{APP_ARTIFACT_TRAINING} \\
+    Selected editing model &
+    checkpoint bytes, reconstruction contract, capability and rollout report &
+    \resultpending{APP_ARTIFACT_EDITING_MODEL} \\
+    Exact control &
+    graph audit, solver task, base kernel, values, controlled rows, path oracle &
+    \resultpending{APP_ARTIFACT_E6} \\
+    Controllers &
+    frozen prior, tasks, objective normalization, oracle and compute logs &
+    \resultpending{APP_ARTIFACT_E7} \\
+    De novo &
+    separate corpus, timed recipe, checkpoint, hazard calibration, samples &
+    \resultpending{APP_ARTIFACT_E1} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Known implementation boundaries}
+
+The final release records four boundary groups explicitly.
+\textbf{State semantics:} the null source is not a molecule, and persistent
+padding is a coordinate representation rather than semantic fixed dimension.
+\textbf{Chemical scope:} insertion supports zero or one existing neighbor;
+formal charge is preserved rather than designed; and stereochemistry,
+isotopes, radicals, explicit protonation changes, and 3D geometry are outside
+the current state.  Chemical validity alone does not imply stability,
+synthesis, potency, or safety.  \textbf{Topology and control:} cycle close/open
+provides primitive topology support, while coordinated ring restatement is an
+empirically retained accelerator; exact control is restricted to the bounded
+enumerable graph, and molecular-scale value control is approximate.
+\textbf{Regime separation:} editing and timed de novo checkpoints are not
+interchangeable.

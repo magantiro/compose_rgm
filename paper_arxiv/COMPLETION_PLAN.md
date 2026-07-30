@@ -35,7 +35,7 @@ diagnostic. They never fill a production result placeholder.
 | 6 | results organized by scientific question | scaffolded | replace registered `XXX` keys only from frozen result artifacts |
 | 7 | discussion and limitations | scaffolded | update only conclusions licensed by Section 6 |
 | 8 | conclusion | scaffolded | one final evidence-bound revision |
-| Appendices | algorithms, chemistry contract, data provenance, exact-control details | planned | expand alongside implementation freezes and page-budget review |
+| Appendices | algorithms, proofs, chemistry/support contract, data provenance, complete protocols, and audit inventory | written and visually audited | keep synchronized with frozen implementation contracts; replace only registered result fields |
 
 ## Result-placeholder policy
 
@@ -87,3 +87,16 @@ diagnostic. They never fill a production result placeholder.
 8. Fill E1 only from its separate de novo checkpoint.
 9. Run the claim ledger, citation audit, visual PDF audit, and
    `make release-check`.
+
+## Appendix inclusion rule
+
+Appendix material must close a reproducibility gap, provide a proof omitted
+from the main flow, or answer a likely reviewer question with evidence. It is
+not a repository dump. Duplicate main-text exposition, raw hash listings,
+superseded implementation archaeology, speculative task families, and tables
+without a scientific estimand are removed during the page-budget pass.
+
+The current appendix occupies 12 pages: two pages of executable algorithms,
+three pages of formal assumptions and proofs, and seven pages of experimental
+and reproducibility protocols. This is a working page budget, not a target to
+fill; material is added only when it satisfies the inclusion rule above.
