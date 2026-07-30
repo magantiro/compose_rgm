@@ -2,8 +2,11 @@
 
 Self-contained handoff. Assumes no prior context from the session that produced it.
 
-**Branch:** `claude/control-closed-pareto-editing` · **HEAD at handoff:** `4489370`
-**Full test suite:** 967 passed, 0 skipped
+**Branch:** `claude/control-closed-pareto-editing`
+**Full test suite:** 967 passed, 0 skipped (measured at commit `4489370`; PART II and the registry
+status update landed after, adding no tests)
+**Handoff commit:** see `git log --oneline` for the commit whose subject begins `docs: hand off the
+RingCore-V1`. The lineage commits are listed in PART II §C.5.
 **State:** 16,000-step training run COMPLETE. Two capability failures diagnosed. No checkpoint selected.
 No architecture changed. Repair is a training-recipe problem, not an operator-design problem.
 
@@ -401,3 +404,324 @@ unconditional result.
 3. Is the ~2.5× wall-clock tax from dataloader stalls worth fixing before the repaired run? Measured:
    data_wait is 65% of mean step time but the MEDIAN wait is 0.4 ms — rare, large stalls (shard opens), not
    steady starvation. Typical step 0.29 s vs effective 0.73 s.
+
+---
+
+# PART II — repo map, lineage and environment
+
+Added so this handoff is pickup-able without the originating session. **Scope honesty:** the repo contains
+59 docs, 115 scripts, 11 Modal apps, 113 test files, 153 diagnostics JSONs and ~79 `src` modules. No document
+can inline that. What follows is a navigation map plus the non-obvious knowledge that is NOT recoverable from
+reading the code. Where I have not personally verified a document this session, it is marked *unverified*.
+
+---
+
+## A. Repo map
+
+```
+src/compose_v4/
+  chem/         (6)   MolecularGraph, padded/slot-stable state, validity, canonicalization,
+                      ELEMENT_TO_IDX / IDX_TO_ELEMENT, NULL_IDX=0, SCAR_IDX, is_element, is_occupied,
+                      ORGANIC_VOCABULARY (15 classes), CNOF_VOCABULARY (4)
+  rewrite/      (21)  the rewrite kernel + legal-event FIBERS:
+                        fiber.py               exact action fiber (ActionFiberSpec, enumerate_action_fiber)
+                        factorized_fiber.py    the model's factorized candidates (_factorized_candidates)
+                        tracelet_fiber.py      tracelet family enumerators
+                        ring_system_fiber.py   whole-ring ops (macro; DISABLED in production)
+                        kernel.py              RewriteSystem executor, canonical_state_key,
+                                               de_novo_rewrite_system
+                        typed_ring_catalog.py  build_typed_ring_catalog
+  model/        (7)    factorized_tracelet_rate_model.py  <-- the production model (~4300 lines)
+                        MARK_RULE_NAMES (10 family slots), _CYCLE_OP_EXECUTOR_TO_FAMILY,
+                        prepare_factorized_mark_batch, forward_mark_batch,
+                        factorized_mark_bregman_loss
+                      segmented_successor.py   canonical-successor aggregation (loop ref + vectorized).
+                                               NO production code path calls it -- verified by grep; the
+                                               only non-test reference is a prose mention inside
+                                               experiments/successor_kernel.py's docstring
+  experiments/  (32)   training/eval drivers, conditional controllers, and the NEW paper infrastructure
+                      (successor_kernel, reference_successor_kernel, registry, checkpoint_evaluator,
+                       enumerable_ringcore) -- see PART I section 8
+  eval/         (4)    molecular_quality.py: DESCRIPTORS dict (qed, sa_score, MolWt, logp, tpsa, ...),
+                       FCD via fcd_torch, _ring_statistics, descriptor Wassersteins
+  data/         (9)    corpus loading + the production edit corpus:
+                        organic_corpus.py           BROAD_ORGANIC_V1 scope + shared loader
+                        production_edit_corpus.py   the ONLY sanctioned training data path
+                        packed_trace_store.py       zero-executor-replay trace store
+                        representability_overlay.py frozen exclusion overlay
+                        provenance_overlay.py       BENCHMARK / SCIENTIFIC contract levels
+                        packed_edit_cache.py        progress sampling over packed rows
+  gm/, lipids/, oracles/   adjacent lanes; not part of this run
+scripts/       (115)  drivers. train_tracelet_cnof_gate.py is THE trainer (~4300 lines) that the Modal app
+                     subprocesses. prelaunch_gate.py is the mandatory launch gate. ring_core_identity.py
+                     holds PRODUCTION_SCHEDULER, layer weights and recompute_operator_registry_hash().
+modal_apps/    (11)  train_tracelet_gm.py is the training launcher (_run_remote, train_stage,
+                     _source_fingerprint). Others: mining, packing, census, manifest unification.
+tests/         (113) pytest; pythonpath=["src"]; no conftest.py, tests use local underscore helpers
+diagnostics/   (153) committed result JSONs. results/ is for E1-E7 outputs.
+```
+
+### Entry points that matter
+
+| task | command |
+|---|---|
+| full suite | `KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest tests/ -q` |
+| lint | `./.venv/bin/ruff check src/` (ruff is NOT on PATH; `src/` must stay clean) |
+| launch gate | `PYTHONPATH=src:scripts python3 scripts/prelaunch_gate.py --corpus guacamol_subset_500000_seed0.smiles [--expected-commit <sha>]` |
+| E6 sizing sweep | `PYTHONPATH=src python3 scripts/run_e6_sizing_sweep.py` |
+| training launch | `MODAL_PROFILE=nitya modal run --detach modal_apps/train_tracelet_gm.py --train-only ...` (see PART II §D) |
+
+---
+
+## B. Authoritative documents
+
+Verified this session (trust these):
+
+| doc | what it is |
+|---|---|
+| `CLAUDE.md` + `.claude/context/{conventions,glossary,learnings}.md` | auto-loaded context. **`learnings.md` is 454 lines of dated, hard-won gotchas — READ IT IN FULL before touching data or training.** PART I §11 is a summary, not a substitute. |
+| `docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md` | the E1–E7 build plan, with two rounds of adversarial review and their corrections recorded |
+| `configs/experiment_registry.yaml` | the frozen experimental protocol (schema v2) |
+| `docs/HANDOFF_RINGCORE_V1_POSTRUN.md` | this file |
+
+Named as authoritative by `CLAUDE.md` or by memory, *not re-verified this session*:
+
+| doc | claimed role |
+|---|---|
+| `docs/PAPER_MASTER_PLAN.md` | AUTHORITATIVE paper plan; read before positioning/training/baseline/terminology decisions |
+| `docs/PAPER1_FRAMING_AUTHORITATIVE.md` | §7 holds the A–G experiment table that E1–E7 maps onto |
+| `docs/HANDOFF_GENERATOR_RUN_LINEAGE_CORRECTION_V2.md` | base-B lineage caveats; read before large unconditional runs |
+| `docs/CONDITIONAL_CLAIMS_AND_CONTROLS.md` | the locked claims/controls matrix |
+| `docs/RINGCORE_V1_PREFLIGHT.md` | the preflight that authorized this run |
+| `docs/CHECKPOINT_LINEAGE.md`, `docs/GENERATOR_LINEAGE_MAP.md` | prior checkpoint lineage |
+| `docs/CLAIM_LEDGER.md`, `docs/DEVIATION_REGISTER.md`, `docs/PROGRAM_CONTRACT.md` | claim/deviation tracking |
+
+The other ~40 docs are historical or lane-specific. Do not assume any of them is current without checking
+against `learnings.md` and the registry.
+
+---
+
+## C. Result lineage
+
+### C.1 Model lineage
+
+```
+"pancake" (retired, pre-quotient marked teacher)
+        |
+        v
+Lineage B  = compose-v4-stage3-flexible-graft-3k-1ac6f19-v1  (base B)
+        de-novo generator, carbon-tree source prior, GuacaMol-trained (NOT ZINC),
+        CNOF 4-class vocabulary, flexible-Graft + whole-ring-system macro,
+        checkpoint.best_so_far.pt, SHA c9d927, step-1000 PREVIEW with an open
+        small-ring defect (overproduces aziridine/epoxide)
+        |
+        | --initialize-compatible-from-source-checkpoint  (STRICT fails: 4 -> 15 head widening;
+        |   shared body warm-started, new vocabulary rows freshly initialized)
+        v
+RingCore-V1 editing prior  = compose-v4-ringcore-v1-scientific-a7546e2-v1   <-- THIS RUN
+        broad-organic 15-class vocabulary, corrupted-molecule source prior,
+        whole-ring macro DISABLED, compositional cycle_close/cycle_open ENABLED,
+        16,000 steps, COMPLETE, UNSELECTED
+```
+
+**Superseded attempt:** `compose-v4-ringcore-v1-scientific-nitya-6d067e9-v1` (commit `6d067e9`) died at step
+1500 — A100 preempted, then the retry passed `--initialize-compatible-checkpoint` together with
+`--resume-checkpoint`, which the gate rejects as mutually exclusive; `max_retries=1` exhausted the budget.
+Infrastructure failure only; the scientific contract was unchanged. Its first eight evaluations are
+bit-identical to this run's, which is good evidence the relaunch was a faithful deterministic rerun.
+
+**Also relevant:** an earlier attempt failed at step 250 on a multi-neighbour `atom_insert` (vertex
+subdivision), which the production factorization cannot score. Resolved by a frozen versioned exclusion
+overlay, not a runtime drop.
+
+### C.2 Data corpus lineage (all hashes verified in the registry/manifest)
+
+```
+GuacaMol 500k  (guacamol_subset_500000_seed0.smiles, volume `guacamol`)
+    |
+    | BROAD_ORGANIC_V1 scope filter (scope hash e59fb09801459470)
+    |   retained 490,466 / 500,000 = 98.1%  (2.05x the old CNOF-neutral ~240k)
+    |   S in 33% of molecules, Cl 18%; neutral 461,296 / zwitterion-net-zero 23,870 / nonzero-net 5,300
+    |   benchmark coverage: 800/800 Jin-QED leads (vs 33% under CNOF-neutral)
+    v
+scaffold partition  (ringcore-v1 key: murcko + carbonized-wl3, salt "ringcore-v1", 0.9/0.05/0.05)
+    |
+    +-- MMP one-cut mining over the 400k TRAIN partition -> 206,715 pairs -> 363,456 pool rows
+    |     pair_partition() requires BOTH endpoints in the same partition (2,044 straddlers dropped, 0.56%)
+    |     _MMP_PARTITION_RULE_VERSION = 2 is part of the reuse cache key
+    +-- corruption precompile (general_corruption layer)
+    +-- cycle-op records (cycle_operations layer)
+    |
+    v
+packed trace store   21.36 -> 0.217 ms/trace (98x); zero executor calls at load
+    |
+    v
+UNIFIED_PACKED_MANIFEST.json   63 shards, 725,671 entries, checksum 5c5c254e1054c081
+REPRESENTABILITY_OVERLAY.json  filter factorized_teacher_support_v2, checksum 32372dc5d73139a7,
+                               3 exclusions from 725,671 checked (multi-neighbour atom_insert)
+    |
+    v
+training corpus:  train 661,108 · validation 33,404
+  by layer: cycle_operations 255,168 · general_corruption 74,949 · mmp_analogue 330,991
+  layer weights (hash 794e6628f23465d8): general_corruption 0.40 / cycle_operations 0.25 /
+    mmp_analogue 0.35, REALIZING 41.5 / 19.1 / 39.4 % of teacher transitions
+```
+
+### C.3 Contract hashes
+
+| artifact | hash |
+|---|---|
+| unified packed manifest | `5c5c254e1054c081` |
+| representability overlay | `32372dc5d73139a7` |
+| sampler / layer weights | `794e6628f23465d8` |
+| scheduler (16,000 steps) | `dafd4b5092414394` (supersedes `0b832985c65de1cc` @ 3,000) |
+| operator registry | `9197401e8dc3a7ae` |
+| codec implementation | `baaa75367f25a8c6` |
+| tensorization | `7b0c88b166828f44` |
+| capability fingerprint | `330473e319bfec19` |
+| corpus scope (training) | `3721d69851110fdd` |
+| broad-organic scope | `e59fb09801459470` |
+| registry protocol freeze | `b4cd905a640ab32a` |
+| E6 structural graph | `84121ff86cbc1ba8` |
+| E6 benchmark semantics | `3647e87f8f75b038` |
+
+### C.4 Sampling law (do not change casually)
+
+One draw = one TRACE, then exactly ONE progress position — **not** all of its transitions. `N_t ~
+Binomial(K, alpha(t))`, with `alpha(t) = t` at `PowerSurvivalScheduler.power == 1` (a non-unit power silently
+breaks the packed path's closed form). The terminal (no-jump) position takes **48.9%** of all draws and
+supervises the exit rate. Family stratification (fraction 0.5) oversamples rare families and divides it back
+out via the importance weight, so it buys COVERAGE, not expected family mass. A layer weight is a weight over
+TRACE draws.
+
+---
+
+## D. Environment and operations
+
+```bash
+uv sync                              # or pip install -e ".[dev]"; then activate .venv
+export PYTHONPATH=src:scripts        # `src` also lets rollout worker subprocesses find compose_v4
+export KMP_DUPLICATE_LIB_OK=TRUE     # macOS OpenMP guard
+export OMP_NUM_THREADS=1             # REQUIRED locally: dual OpenMP otherwise segfaults the suite
+./.venv/bin/ruff check src/          # ruff is NOT on PATH
+```
+
+- **Modal:** workspace `nitya`, volumes `compose-v4-artifacts` and `guacamol`. Use `MODAL_PROFILE=nitya`
+  per-command; do not switch the active profile. **Do not accept or hold account credentials.**
+- Non-preemptible GPU costs **3x** base (~$24 vs ~$8 for a 3.76 h A100 run). Owner decision: stay
+  preemptible and absorb preemption via the exact-recovery path.
+- SMC / rollout work is single-process locally (macOS fork deadlock at `workers>=2`); use Modal for scale.
+  If you kill the parent, `pkill -9 -f tracelet_sampling_worker` too or workers leak.
+- A supervisor script pattern exists for keeping a run alive across preemption: watch **app liveness**, not
+  just log lines; require two consecutive dead polls; re-check liveness immediately before relaunching
+  (two trainers under one run label would corrupt each other's checkpoints); refuse to relaunch without
+  forward progress since the last relaunch.
+
+### The training launch command (reproduces this run's contract exactly)
+
+```
+MODAL_PROFILE=nitya modal run --detach modal_apps/train_tracelet_gm.py --train-only \
+  --corrupted-prior-mix --cycle-op-mix --disable-ring-grow-macro --organic-vocabulary \
+  --precompiled-corpus /artifacts/edit_precompile_v1 \
+  --precompiled-mmp-pool /artifacts/edit_mining_full_broad_40/edit_pool_full.jsonl \
+  --packed-corpus /artifacts/edit_packed_v1 \
+  --packed-mmp-corpus /artifacts/mmp_packed_v1 \
+  --unified-packed-manifest /artifacts/UNIFIED_PACKED_MANIFEST.json \
+  --representability-overlay /artifacts/REPRESENTABILITY_OVERLAY.json \
+  --require-scientific-contract \
+  --initialize-compatible-from-source-checkpoint \
+  --initialization-source-run-label compose-v4-stage3-flexible-graft-3k-1ac6f19-v1 \
+  --checkpoint-name checkpoint.best_so_far.pt \
+  --snapshot-checkpoints --disable-early-stopping \
+  --training-steps 16000 --schedule-steps 16000 \
+  --run-label <NEW-LABEL>
+```
+
+Notes: `--detach` is MANDATORY (`main()` uses `.spawn()`). `--precompiled-mmp-pool` points at a path that
+does **not exist** in the `nitya` workspace and is provably never read once `--packed-mmp-corpus` is supplied
+— kept only to preserve argument-level identity with the audited run. To recover a launch command from any
+past run, diff the recipe file against that run's `manifest.training.json ->
+run_identity.recipe.arguments`; every ADDED or CHANGED argument came from a CLI flag.
+
+---
+
+## E. Where prior results live
+
+- `diagnostics/` (153 JSONs) — committed results. Notable: `diagnostics/coherence/` holds the launch record,
+  run provenance, A100 throughput benchmark and packed-store benchmark; `diagnostics/exactness/` holds the E6
+  sizing sweep (and two untracked `exact_doob_enumerable_cap{4,5}.json` that are **non-evidence**, produced by
+  prior-art scripts excluded by owner instruction); `diagnostics/composition/` holds mining and
+  learned-vs-uniform diagnostics; `diagnostics/defects/` holds recorded defects.
+- `results/` — reserved for E1–E7 outputs (per the registry's `outputs` fields).
+- The 32 snapshots and `metrics.json` live on the Modal volume under the run label, not in git.
+
+---
+
+## F. What is genuinely NOT captured here
+
+Be aware of these gaps rather than assuming completeness:
+
+1. I have **not** read all 59 docs or 153 diagnostics this session. Section B marks what is verified.
+2. `learnings.md` (454 lines of dated entries) is summarized in PART I §11 but **must be read in full**.
+3. The **de-novo lane** is barely started: a deferred `bond_reorder` invalid-rewrite defect is recorded in
+   `diagnostics/defects/`, timed-CTMC hazard semantics are unverified, and there is no de-novo corpus,
+   contract or gate yet. E1 is BLOCKED on all of it.
+4. **Per-checkpoint family forensics have not been run** — the 32 snapshots have not been evaluated at all.
+5. **No SHA-256 for the snapshots yet.**
+6. The mechanism behind the `cycle_attach` collapse is **unresolved** (PART I §4.6).
+7. Adjacent lanes (`gm/`, `lipids/`, `oracles/`, and the sibling `KoshaTx/compose` discrete-diffusion repo)
+   are out of scope here and were not reviewed.
+
+---
+
+## C.5 Commit lineage of this session (newest first)
+
+```
+docs: hand off the RingCore-V1 post-run diagnosis and repair plan
+test_slot_safety: enforce the real-slot predicate and fix a scar over-count in diagnostics   4489370
+enumerable_ringcore: serialize exact atom states and split semantics from artifact provenance 59a90db
+enumerable_ringcore: give E6 a composite benchmark identity beyond the graph fingerprint      656f393
+enumerable_ringcore: include the null graph as a vocabulary-restricted distinguished source   65c8660
+enumerable_ringcore: measure bounded chemistries and select the exact benchmark by the rule   8977512
+docs: correct the evaluator validation rule to the non-tautological form                      3ec3b38
+docs: record the pushforward framing and the second review's eight corrections                6b87128
+successor_kernel: declare comparison types so a preregistered support ablation is not blocked e243676
+checkpoint_evaluator: construct and validate an evaluation target against the frozen registry 6ecff97
+experiment_registry: freeze the benchmark protocol as schema v2 with a validating loader       7e4553b
+successor_kernel: add the full support signature and an independent aggregation oracle        c57abd7
+successor_kernel: freeze the shared canonical-successor contract for every experiment         70c51c6
+docs: preregister the owner decisions and gate parallel work on a shared kernel protocol      0a74825
+docs: revise the experiment plan for the review's five required corrections                   3fbf91c
+docs: plan the E1-E7 experiment infrastructure build with its adversarial review              3cdc56d
+train_tracelet_gm: keep the training stage on preemptible capacity                            0edbf02
+train_tracelet_gm: schedule the training stage on nonpreemptible capacity  (reverted by above) 76b7795
+learnings: record the preemption/resume collision that killed the first scientific run        84e5d53
+train_tracelet_gm: raise the training retry budget so a run survives repeated preemption      a7546e2  <-- RUN LAUNCH COMMIT
+train_tracelet_gm: let the recovery state supersede initialization on a preemption retry      2ffb4dd
+experiment_registry: freeze the A-G paper program as an executable specification              310e5b7
+```
+
+`a7546e2` is the commit the completed run was launched from. A resume of that run must reproduce that
+source fingerprint exactly; later commits change it, which is why a relaunch needed a new run label.
+
+---
+
+## G. Verification record for this handoff
+
+This document was adversarially checked against the repo rather than written from memory. Verified OK:
+
+- `_CYCLE_OP_EXECUTOR_TO_FAMILY` at `factorized_tracelet_rate_model.py:112`
+- `family_hits` accumulation at `factorized_mark_conditional.py:952`
+- `len(MARK_RULE_NAMES) == 10`; `ORGANIC_VOCABULARY.classes == 15`; `CNOF_VOCABULARY.classes == 4`;
+  `NULL_IDX == 0`
+- module counts: chem 6 · rewrite 21 · model 7 · experiments 32 · eval 4 · data 9
+- inventory: 59 docs · 115 scripts · 11 modal_apps · 113 test files · 153 diagnostics JSONs
+- `segmented_successor` has no production caller (only a docstring mention)
+- registry protocol content hash `b4cd905a640ab32a` recomputes correctly
+
+Defects the check FOUND and fixed: a stale HEAD hash; `learnings.md` stated as ~330 lines when it is 454;
+an imprecise "test callers only" claim for `segmented_successor`.
+
+**Known remaining imprecision:** the 967-test count was measured at `4489370`; PART II and the registry
+status update landed after and add no tests, but the count has not been re-measured. Re-run the suite before
+relying on it.
