@@ -234,6 +234,119 @@ def test_indexed_round_trip_is_exact_and_deterministic(
     assert len(cache._decoded) == 1
 
 
+def test_parent_validated_receipt_reopens_without_full_worker_scan(
+    tmp_path,
+    provenance,
+    monkeypatch,
+) -> None:
+    path = tmp_path / "cache.sqlite"
+    metadata = write_indexed_successor_fiber_cache(
+        path,
+        _records(),
+        provenance=provenance,
+    )
+    parent = _open(path, metadata, provenance)
+    parent.require_entry_census(
+        packed_entry_count=1,
+        excluded_entry_indices=(),
+    )
+    receipt = pickle.loads(
+        pickle.dumps(parent.parent_validated_open_receipt)
+    )
+    schema_modes: list[bool] = []
+    original_schema_validation = indexed_cache_module._validate_sqlite_schema
+
+    def record_schema_mode(connection, *, run_integrity_check=True):
+        schema_modes.append(run_integrity_check)
+        return original_schema_validation(
+            connection,
+            run_integrity_check=run_integrity_check,
+        )
+
+    def forbid_full_scan(*args, **kwargs):
+        raise AssertionError("worker attempted a full cache scan")
+
+    monkeypatch.setattr(
+        indexed_cache_module,
+        "_validate_sqlite_schema",
+        record_schema_mode,
+    )
+    monkeypatch.setattr(indexed_cache_module, "_sha256_file", forbid_full_scan)
+    monkeypatch.setattr(
+        indexed_cache_module,
+        "_audit_indexed_records",
+        forbid_full_scan,
+    )
+    worker = open_indexed_successor_fiber_cache(
+        path,
+        expected_provenance=provenance,
+        expected_content_sha256=metadata.content_sha256,
+        expected_file_sha256=metadata.file_sha256,
+        expected_file_bytes=metadata.file_bytes,
+        parent_validated_open_receipt=receipt,
+    )
+
+    assert schema_modes == [False]
+    worker.require_entry_census(
+        packed_entry_count=1,
+        excluded_entry_indices=(),
+    )
+    assert worker.require_packed_address(
+        _packed_address(),
+        progress_index=0,
+    ) == _records()[0]
+
+
+def test_parent_validated_receipt_fails_on_identity_or_contract_drift(
+    tmp_path,
+    provenance,
+    monkeypatch,
+) -> None:
+    path = tmp_path / "cache.sqlite"
+    metadata = write_indexed_successor_fiber_cache(
+        path,
+        _records(),
+        provenance=provenance,
+    )
+    parent = _open(path, metadata, provenance)
+    receipt = parent.parent_validated_open_receipt
+
+    with pytest.raises(
+        IndexedSuccessorFiberCacheError,
+        match="worker open expectations",
+    ):
+        open_indexed_successor_fiber_cache(
+            path,
+            expected_provenance=provenance,
+            expected_content_sha256="f" * 64,
+            expected_file_sha256=metadata.file_sha256,
+            expected_file_bytes=metadata.file_bytes,
+            parent_validated_open_receipt=receipt,
+        )
+
+    def forbid_fallback(*args, **kwargs):
+        raise AssertionError("receipt mismatch fell back to full validation")
+
+    monkeypatch.setattr(
+        indexed_cache_module,
+        "_sha256_file",
+        forbid_fallback,
+    )
+    path.touch()
+    with pytest.raises(
+        IndexedSuccessorFiberCacheError,
+        match="identity changed",
+    ):
+        open_indexed_successor_fiber_cache(
+            path,
+            expected_provenance=provenance,
+            expected_content_sha256=metadata.content_sha256,
+            expected_file_sha256=metadata.file_sha256,
+            expected_file_bytes=metadata.file_bytes,
+            parent_validated_open_receipt=receipt,
+        )
+
+
 def test_indexed_cache_refuses_identity_drift_and_missing_rows(
     tmp_path,
     provenance,

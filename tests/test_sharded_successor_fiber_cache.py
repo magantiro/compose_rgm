@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import multiprocessing
 import pickle
 from dataclasses import replace
 from pathlib import Path
@@ -11,6 +12,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+import compose_v4.data.indexed_successor_fiber_cache as indexed_cache_module
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
@@ -50,6 +52,63 @@ _UNIFIED_SHA256 = "7" * 64
 _OVERLAY_SHA256 = "8" * 64
 _MANIFEST_SHA256 = "5" * 64
 _PROVENANCE_OVERLAY_SHA256 = "6" * 64
+
+
+def _forbid_full_indexed_scan(*args, **kwargs):
+    raise AssertionError("worker attempted a full indexed-cache scan")
+
+
+def _worker_lookup_with_full_scans_forbidden(
+    store,
+    address,
+    source_state,
+    sender,
+) -> None:
+    indexed_cache_module._sha256_file = _forbid_full_indexed_scan
+    indexed_cache_module._audit_indexed_records = _forbid_full_indexed_scan
+    try:
+        record = store.require(
+            address,
+            progress_index=0,
+            source_state=source_state,
+        )
+        sender.send(
+            (
+                "ok",
+                record.source_state_sha256,
+                store.worker_open_receipt_digests,
+            )
+        )
+    except Exception as error:  # noqa: BLE001 - relay worker failure
+        sender.send(("error", type(error).__name__, str(error)))
+    finally:
+        sender.close()
+
+
+class _PreparedReceiptLookupDataset:
+    """Small spawn-pickled stand-in for the production training Dataset."""
+
+    def __init__(self, store, address, length: int) -> None:
+        self.store = store
+        self.address = address
+        self.length = length
+        self.states = (_state(), _state(target=True))
+
+    def __len__(self) -> int:
+        return self.length
+
+    def __getitem__(self, index: int) -> int:
+        indexed_cache_module._sha256_file = _forbid_full_indexed_scan
+        indexed_cache_module._audit_indexed_records = (
+            _forbid_full_indexed_scan
+        )
+        progress_index = index % 2
+        record = self.store.require(
+            self.address,
+            progress_index=progress_index,
+            source_state=self.states[progress_index],
+        )
+        return record.address.progress_index
 
 
 def _canonical_hash(value: object) -> str:
@@ -499,6 +558,148 @@ def test_indexed_store_uses_same_exact_join_without_materializing_shard(
     ):
         _store(tmp_path, wrong_lane_inventory).require(
             replace(address, layer="another-lane"),
+            progress_index=0,
+            source_state=_state(),
+        )
+
+
+@pytest.mark.parametrize(
+    "start_method",
+    sorted(
+        {"fork", "spawn"}.intersection(
+            multiprocessing.get_all_start_methods()
+        )
+    ),
+)
+def test_prepared_indexed_receipt_survives_worker_process_transfer(
+    tmp_path,
+    start_method,
+) -> None:
+    compatibility = _compatibility()
+    spec, address = _write_indexed_shard(
+        tmp_path,
+        packed_sha256="1" * 64,
+        compatibility=compatibility,
+        name="only.fibers.sqlite",
+    )
+    _, inventory = _inventory(
+        (spec,),
+        compatibility,
+        storage_backend=SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+    )
+    store = _store(tmp_path, inventory)
+    assert store.worker_open_receipt_digests == ()
+    assert store.prepare_indexed_worker_open_receipts() == ("1" * 64,)
+    assert store.worker_open_receipts_prepared
+
+    context = multiprocessing.get_context(start_method)
+    receiver, sender = context.Pipe(duplex=False)
+    process = context.Process(
+        target=_worker_lookup_with_full_scans_forbidden,
+        args=(store, address, _state(), sender),
+    )
+    process.start()
+    sender.close()
+    assert receiver.poll(30), f"{start_method} worker did not return"
+    result = receiver.recv()
+    receiver.close()
+    process.join(timeout=30)
+    if process.is_alive():
+        process.terminate()
+        process.join(timeout=5)
+        pytest.fail(f"{start_method} worker did not exit")
+    assert process.exitcode == 0
+    assert result == (
+        "ok",
+        persistent_slot_state_sha256(_state()),
+        ("1" * 64,),
+    )
+
+
+@pytest.mark.skipif(
+    "spawn" not in multiprocessing.get_all_start_methods(),
+    reason="spawn multiprocessing is unavailable",
+)
+def test_prepared_indexed_receipt_works_through_torch_dataloader(
+    tmp_path,
+) -> None:
+    torch = pytest.importorskip("torch")
+    compatibility = _compatibility()
+    spec, address = _write_indexed_shard(
+        tmp_path,
+        packed_sha256="1" * 64,
+        compatibility=compatibility,
+        name="only.fibers.sqlite",
+    )
+    _, inventory = _inventory(
+        (spec,),
+        compatibility,
+        storage_backend=SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+    )
+    store = _store(tmp_path, inventory)
+    store.prepare_indexed_worker_open_receipts()
+    assert_store_is_pickle_safe(store)
+    dataset = _PreparedReceiptLookupDataset(store, address, length=512)
+    loader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=None,
+        num_workers=2,
+        multiprocessing_context="spawn",
+    )
+
+    observed = list(loader)
+
+    assert observed == [index % 2 for index in range(len(dataset))]
+
+
+def test_prepared_indexed_receipt_never_falls_back_after_file_drift(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    compatibility = _compatibility()
+    spec, address = _write_indexed_shard(
+        tmp_path,
+        packed_sha256="1" * 64,
+        compatibility=compatibility,
+        name="only.fibers.sqlite",
+    )
+    _, inventory = _inventory(
+        (spec,),
+        compatibility,
+        storage_backend=SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+    )
+    store = _store(tmp_path, inventory)
+    store.prepare_indexed_worker_open_receipts()
+    restored = pickle.loads(pickle.dumps(store))
+
+    def forbid_fallback(*args, **kwargs):
+        raise AssertionError("worker fell back to full indexed validation")
+
+    monkeypatch.setattr(
+        indexed_cache_module,
+        "_sha256_file",
+        forbid_fallback,
+    )
+    (tmp_path / spec.cache_relative_path).touch()
+    with pytest.raises(
+        ShardedSuccessorFiberCacheError,
+        match="failed verification",
+    ):
+        restored.require(
+            address,
+            progress_index=0,
+            source_state=_state(),
+        )
+
+    lost_receipt = pickle.loads(pickle.dumps(store))
+    lost_receipt._loaded.clear()
+    lost_receipt._worker_open_receipts.clear()
+    with pytest.raises(
+        ShardedSuccessorFiberCacheError,
+        match="lost a required",
+    ):
+        lost_receipt.require(
+            address,
             progress_index=0,
             source_state=_state(),
         )

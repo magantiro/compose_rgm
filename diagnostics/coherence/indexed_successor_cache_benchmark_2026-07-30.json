@@ -1,6 +1,6 @@
 {
   "schema": "compose.diagnostics.indexed_successor_cache_benchmark",
-  "schema_version": 2,
+  "schema_version": 3,
   "status": "BOUNDED_STORAGE_AND_PROCESS_QUALIFIED_NOT_TRAINING_AUTHORIZATION",
   "indexed_cache_schema_version": 2,
   "storage_stress_artifact": {
@@ -152,8 +152,39 @@
       "The actual ShardedSuccessorFiberCache plus DataLoader startup path remains to be qualified."
     ]
   },
+  "sharded_dataloader_receipt_qualification": {
+    "status": "BOUNDED_FUNCTIONAL_QUALIFICATION_NOT_PRODUCTION_SCALE",
+    "mechanism": "one full parent validation emits a same-launch immutable open receipt; workers recheck absolute path, filesystem identity, query-only mode, application_id, user_version, exact DDL and columns, metadata payload/object, validation limits and packed-entry census without repeating byte hashing, quick_check or semantic row audit",
+    "fail_closed_properties": [
+      "a prepared sharded cache cannot silently fall back to an unreceipted full scan",
+      "a missing receipt after preparation is rejected",
+      "path, device, inode, size, mtime, ctime, expected hash, provenance, metadata, limits or packed-census drift is rejected",
+      "forked and spawned workers discard process-local SQLite connections and decoded rows"
+    ],
+    "tested_worker_paths": {
+      "direct_receipt_reopen": true,
+      "fork_process_transfer": true,
+      "spawn_process_transfer": true,
+      "torch_dataloader_spawn_workers": 2,
+      "torch_dataloader_fixture_lookups": 512,
+      "full_hash_and_semantic_scan_functions_poisoned_in_workers": true
+    },
+    "focused_cache_and_data_tests_passed": 102,
+    "one_off_170000_row_warm_cache_diagnostic": {
+      "full_parent_verified_open_seconds_under_current_load": 21.64,
+      "receipt_open_median_seconds": 0.00115,
+      "receipt_open_trials": 20,
+      "through_dataloader": false
+    },
+    "limitations": [
+      "The actual DataLoader test used a small deterministic fixture, not the 170000-row stress artifact or a complete real shard.",
+      "The one-off receipt timing used a warm page cache in one process and is diagnostic rather than a production throughput claim.",
+      "Production-sized sharded DataLoader startup, throughput and RSS remain to be measured on the frozen real inventory.",
+      "Receipts are trusted same-launch capabilities and rely on coherent filesystem identity metadata."
+    ]
+  },
   "remaining_gates": [
-    "actual sharded indexed DataLoader startup, validation reuse, throughput and RSS",
+    "production-sized sharded indexed DataLoader startup, throughput and RSS on the frozen real inventory",
     "complete real-shard indexed census",
     "stratified support-invariance qualification",
     "resumable parallel state-centric compiler",

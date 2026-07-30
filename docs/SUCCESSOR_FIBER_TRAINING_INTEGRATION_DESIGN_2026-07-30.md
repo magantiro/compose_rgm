@@ -2,9 +2,10 @@
 
 Date: 2026-07-30
 
-Status: address/cache/dataset bridge, indexed backend, shared successor
-objective, and bounded state-centric compiler implemented and focused-tested;
-no training compute launched; full-corpus cache build remains blocked
+Status: address/cache/dataset bridge, indexed backend, parent-validated
+DataLoader worker receipts, shared successor objective, and bounded
+state-centric compiler implemented and focused-tested; no training compute
+launched; full-corpus cache build remains blocked
 
 ## Decision
 
@@ -68,9 +69,9 @@ The bounded core data path is now implemented:
   and discards the transient map.
 
 The inventory is explicitly `BOUNDED_DEVELOPMENT_ONLY`, regardless of storage
-backend. It cannot authorize a full-corpus run. The 63-shard build waits for
-an actual sharded-DataLoader startup qualification, a resumable parallel build
-orchestrator, stratified support invariance, and a frozen complete-corpus
+backend. It cannot authorize a full-corpus run. The 63-shard build waits for a
+production-sized real-inventory DataLoader benchmark, a resumable parallel
+build orchestrator, stratified support invariance, and a frozen complete-corpus
 inventory.
 
 ### Sampling and batching
@@ -250,6 +251,16 @@ packed_shard_content_sha256
   state;
 - fail on missing, duplicate or extra trace-progress rows.
 
+Before worker creation,
+`prepare_indexed_worker_open_receipts()` can fully validate every indexed shard
+once in the trusted parent. Its same-launch receipt binds the resolved path,
+device/inode/size/mtime/ctime, expected hashes and provenance, exact validated
+metadata, resource limits, and packed-entry census. Forked or spawned workers
+must then reopen query-only and recheck file identity, application ID, schema,
+metadata, and census. They do not repeat file hashing, `quick_check`, or the
+semantic row scan. Once receipt mode is prepared, a missing or mismatched
+receipt is an error; there is no silent fallback.
+
 The inventory additionally binds the complete active/excluded entry census.
 This prevents an internally complete subset of traces from masquerading as a
 complete shard derivative. Raw cache-file SHA-256 and byte count are checked
@@ -412,10 +423,11 @@ same support contract. Cache contents must not depend on learned weights.
    correctness oracle, and an immutable indexed SQLite backend now passes
    bounded single-process and direct fork/spawn process-isolation,
    throughput, RSS and mutation checks without materializing shard-sized
-   Python object graphs. Full qualification still requires the actual
-   `ShardedSuccessorFiberCache` plus `DataLoader` startup path, proof that
-   workers do not repeat the full semantic scan, and one complete real-shard
-   census.
+   Python object graphs. The actual two-worker spawn `DataLoader` path also
+   passes with full-scan functions deliberately disabled in workers, proving
+   validation reuse on a bounded fixture. Full qualification still requires a
+   production-sized sharded DataLoader startup/throughput/RSS measurement and
+   one complete real-shard census.
 2. **No frozen complete-corpus inventory yet:** the inventory schema now binds
    each packed shard byte hash, cache byte hash, manifest/overlay identities,
    active trace census and declared exclusions, but it has not been built for
@@ -453,10 +465,11 @@ same support contract. Cache contents must not depend on learned weights.
    and active families.
 6. Build tiny caches from real corruption, cycle-open/close and MMP traces;
    compare every loaded fiber to fresh production compilation.
-7. ~~Benchmark the indexed backend on a bounded 170,000-row artifact and
-   qualify direct fork/spawn lookup isolation, throughput and RSS.~~ Run the
-   actual sharded-cache `DataLoader` startup benchmark, then freeze the storage
-   backend and complete-corpus inventory.
+7. ~~Benchmark the indexed backend on a bounded 170,000-row artifact, qualify
+   direct fork/spawn lookup isolation, and prove on the actual sharded-cache
+   `DataLoader` path that workers reuse parent validation.~~ Measure
+   production-sized real-inventory DataLoader startup, throughput and RSS,
+   then freeze the storage backend and complete-corpus inventory.
 8. ~~Add successor metrics and successor-level checkpoint selection to the
    shared optimizer loop.~~
 9. Run a CPU dry launch with one real batch and zero optimizer steps.
@@ -564,12 +577,26 @@ owned by the worker PID; every requested address matched; synthetic
 device/inode/size/mtime/ctime changes failed closed; and the source artifact's
 bytes and identity were unchanged after all trials.
 
-This is process/backend qualification, not yet a production-DataLoader result.
-The trials passed an already fully validated handle, used a warm page cache,
-and measured a synthetic at-most-two-alias workload on macOS. In particular,
-spawn startup was substantial and the actual sharded wrapper may otherwise
-repeat the 7.2-second full validation in each worker. That path remains a
-blocking measurement.
+Those trials are process/backend qualification rather than a
+production-DataLoader result: they passed an already fully validated handle,
+used a warm page cache, and measured a synthetic at-most-two-alias workload on
+macOS.
+
+The sharded wrapper now closes the validation-reuse gap. A fully validated
+parent creates immutable same-launch receipts, and fork/spawn process-transfer
+tests plus an actual two-worker spawn `torch.utils.data.DataLoader` test
+deliberately poison file hashing and semantic row-audit functions inside each
+worker. All 512 requested fixture rows resolve exactly, showing that workers do
+not repeat the full scans. File drift and lost receipts fail without fallback.
+Across the affected cache/data suite, 102 tests pass.
+
+One warm-cache diagnostic on the same 170,000-row artifact measured a
+21.64-second full verified parent open under the then-current host load and a
+1.15-millisecond median receipt open over 20 trials. This comparison isolates
+open-path reuse; it was not run through DataLoader and is not a production
+throughput result. A production-sized sharded DataLoader startup,
+throughput/RSS measurement on the frozen real inventory therefore remains
+blocking.
 
 A separate read-only census over the three representative real shards used
 only `persistent_slot_state_sha256`; it did not invoke RDKit, canonicalization

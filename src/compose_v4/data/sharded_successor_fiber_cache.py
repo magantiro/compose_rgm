@@ -2,8 +2,10 @@
 
 The canonical-JSON backend remains the bounded correctness oracle. The indexed
 SQLite backend resolves one row at a time without materializing a shard-sized
-Python object graph. Both remain development-only until a complete corpus
-inventory and the preregistered training gates explicitly authorize a run.
+Python object graph. Indexed stores can explicitly validate all shards in the
+parent and carry immutable open receipts into DataLoader workers. Both remain
+development-only until a complete corpus inventory and the preregistered
+training gates explicitly authorize a run.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ from compose_v4.data.indexed_successor_fiber_cache import (
     INDEXED_SUCCESSOR_FIBER_STORAGE_BACKEND,
     IndexedSuccessorFiberCache,
     IndexedSuccessorFiberCacheError,
+    IndexedSuccessorFiberCacheOpenReceipt,
     open_indexed_successor_fiber_cache,
 )
 from compose_v4.data.packed_trace_store import PackedTraceAddress
@@ -934,6 +937,11 @@ class ShardedSuccessorFiberCache:
             str,
             SuccessorFiberCache | IndexedSuccessorFiberCache,
         ] = OrderedDict()
+        self._worker_open_receipts: dict[
+            str,
+            IndexedSuccessorFiberCacheOpenReceipt,
+        ] = {}
+        self._worker_open_receipts_prepared = False
         compatibility = inventory.compatibility.payload
         support_signature_hash = hashlib.sha256(
             _canonical_json_bytes(compatibility["support_signature"])
@@ -985,6 +993,18 @@ class ShardedSuccessorFiberCache:
     @property
     def loaded_shard_digests(self) -> tuple[str, ...]:
         return tuple(self._loaded)
+
+    @property
+    def worker_open_receipt_digests(self) -> tuple[str, ...]:
+        """Packed-shard digests fully validated in this trusted parent."""
+
+        return tuple(sorted(self._worker_open_receipts))
+
+    @property
+    def worker_open_receipts_prepared(self) -> bool:
+        """Whether every indexed shard is required to use a receipt."""
+
+        return self._worker_open_receipts_prepared
 
     def _path_for(self, spec: SuccessorFiberShardSpec) -> Path:
         root = self.cache_root.resolve()
@@ -1074,6 +1094,13 @@ class ShardedSuccessorFiberCache:
         spec: SuccessorFiberShardSpec,
     ) -> SuccessorFiberCache | IndexedSuccessorFiberCache:
         digest = spec.packed_shard_content_sha256
+        if (
+            self._worker_open_receipts_prepared
+            and digest not in self._worker_open_receipts
+        ):
+            raise ShardedSuccessorFiberCacheError(
+                "prepared worker cache lost a required indexed open receipt"
+            )
         cached = self._loaded.get(digest)
         if cached is not None:
             self._loaded.move_to_end(digest)
@@ -1084,6 +1111,7 @@ class ShardedSuccessorFiberCache:
                 f"declared cache shard is absent: {path}"
             )
         if self.inventory.storage_backend == SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND:
+            receipt = self._worker_open_receipts.get(digest)
             try:
                 cache = open_indexed_successor_fiber_cache(
                     path,
@@ -1092,6 +1120,7 @@ class ShardedSuccessorFiberCache:
                     expected_file_sha256=spec.cache_file_sha256,
                     expected_file_bytes=spec.cache_file_bytes,
                     limits=self.limits,
+                    parent_validated_open_receipt=receipt,
                 )
             except IndexedSuccessorFiberCacheError as error:
                 raise ShardedSuccessorFiberCacheError(
@@ -1118,6 +1147,13 @@ class ShardedSuccessorFiberCache:
             raise ShardedSuccessorFiberCacheError(
                 "indexed successor-cache shard failed its inventory census"
             ) from error
+        if isinstance(cache, IndexedSuccessorFiberCache):
+            # Store only after both the full indexed audit and the inventory's
+            # packed-entry census have succeeded. A worker carrying this
+            # receipt must fail on disagreement; _load never retries unreceipted.
+            self._worker_open_receipts[digest] = (
+                cache.parent_validated_open_receipt
+            )
         self._loaded[digest] = cache
         self._loaded.move_to_end(digest)
         while len(self._loaded) > self.max_open_shards:
@@ -1125,6 +1161,32 @@ class ShardedSuccessorFiberCache:
             if isinstance(evicted, IndexedSuccessorFiberCache):
                 evicted.close()
         return cache
+
+    def prepare_indexed_worker_open_receipts(self) -> tuple[str, ...]:
+        """Fully validate every indexed shard once before workers are created.
+
+        This is an explicit parent-side preparation step. It does not authorize
+        training or change the inventory's bounded-development status.
+        """
+
+        if (
+            self.inventory.storage_backend
+            != SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND
+        ):
+            raise ShardedSuccessorFiberCacheError(
+                "worker open receipts are available only for indexed SQLite "
+                "successor caches"
+            )
+        for spec in self.inventory.entries:
+            self._load(spec)
+        expected = set(self._specs)
+        observed = set(self._worker_open_receipts)
+        if observed != expected:
+            raise ShardedSuccessorFiberCacheError(
+                "parent validation did not produce a receipt for every shard"
+            )
+        self._worker_open_receipts_prepared = True
+        return self.worker_open_receipt_digests
 
     def require(
         self,
@@ -1190,6 +1252,17 @@ def assert_store_is_pickle_safe(store: ShardedSuccessorFiberCache) -> None:
     if restored.loaded_shard_digests:
         raise ShardedSuccessorFiberCacheError(
             "pickled successor cache retained worker-unsafe loaded shards"
+        )
+    if restored._worker_open_receipts != store._worker_open_receipts:
+        raise ShardedSuccessorFiberCacheError(
+            "pickled successor cache lost parent-validated worker receipts"
+        )
+    if (
+        restored.worker_open_receipts_prepared
+        != store.worker_open_receipts_prepared
+    ):
+        raise ShardedSuccessorFiberCacheError(
+            "pickled successor cache lost its worker-receipt preparation state"
         )
 
 

@@ -4,8 +4,10 @@ The canonical-JSON cache remains the correctness oracle. This backend stores
 the same validated support coordinates in one read-only SQLite file per packed
 shard and resolves rows by ``(entry_index, progress_index)``. Opening a shard
 verifies its frozen byte SHA-256, semantic content identity, exact provenance,
-schema, and census. A lookup decodes one compact row and never invokes RDKit,
-the executor, or the support compiler.
+schema, and census. A fully validated parent may transfer an identity-bound
+receipt so trusted workers recheck immutable schema and metadata without
+repeating the byte or row scans. A lookup decodes one compact row and never
+invokes RDKit, the executor, or the support compiler.
 
 This module does not authorize full-corpus training. That decision belongs to
 the frozen inventory after representative throughput/RSS benchmarks pass.
@@ -21,7 +23,7 @@ import sqlite3
 import tempfile
 from collections import OrderedDict
 from contextlib import suppress
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -660,7 +662,11 @@ def _read_metadata(connection: sqlite3.Connection) -> dict[str, object]:
     return payload
 
 
-def _validate_sqlite_schema(connection: sqlite3.Connection) -> None:
+def _validate_sqlite_schema(
+    connection: sqlite3.Connection,
+    *,
+    run_integrity_check: bool = True,
+) -> None:
     application_id = int(
         connection.execute("PRAGMA application_id").fetchone()[0]
     )
@@ -675,11 +681,12 @@ def _validate_sqlite_schema(connection: sqlite3.Connection) -> None:
         raise IndexedSuccessorFiberCacheError(
             "SQLite user_version does not match the indexed-cache schema"
         )
-    quick_check = connection.execute("PRAGMA quick_check(1)").fetchone()
-    if quick_check != ("ok",):
-        raise IndexedSuccessorFiberCacheError(
-            "indexed cache fails SQLite structural integrity"
-        )
+    if run_integrity_check:
+        quick_check = connection.execute("PRAGMA quick_check(1)").fetchone()
+        if quick_check != ("ok",):
+            raise IndexedSuccessorFiberCacheError(
+                "indexed cache fails SQLite structural integrity"
+            )
     objects = tuple(
         (str(row[0]), str(row[1]), row[2])
         for row in connection.execute(
@@ -902,6 +909,236 @@ def _require_file_identity(path: Path, expected: _FileIdentity) -> None:
         )
 
 
+@dataclass(frozen=True)
+class IndexedSuccessorFiberCacheOpenReceipt:
+    """Trusted intra-launch proof that a parent fully validated one shard.
+
+    The receipt is deliberately stronger than a path plus hashes: it binds the
+    resolved absolute path, the exact filesystem object observed around the
+    parent's byte and semantic audit, the expected scientific identities, the
+    validated SQLite metadata payload, and the resource limits under which all
+    rows were checked. It is a process-transfer capability for workers in the
+    same trusted launch, not a persistent substitute for full validation.
+    """
+
+    absolute_path: str
+    device: int
+    inode: int
+    size: int
+    modified_ns: int
+    changed_ns: int
+    expected_file_sha256: str
+    expected_content_sha256: str
+    expected_provenance: SuccessorFiberCacheProvenance
+    validated_metadata: IndexedSuccessorFiberCacheMetadata
+    validated_metadata_payload: bytes
+    validated_limits: SuccessorFiberCacheLimits
+    validated_packed_entry_count: int | None = None
+    validated_excluded_entry_indices: tuple[int, ...] = ()
+
+    @property
+    def file_identity(self) -> _FileIdentity:
+        return _FileIdentity(
+            device=self.device,
+            inode=self.inode,
+            size=self.size,
+            modified_ns=self.modified_ns,
+            changed_ns=self.changed_ns,
+        )
+
+
+def _validate_open_receipt_contract(
+    receipt: IndexedSuccessorFiberCacheOpenReceipt,
+    *,
+    path: Path,
+    expected_provenance: SuccessorFiberCacheProvenance,
+    expected_content_sha256: str,
+    expected_file_sha256: str,
+    expected_file_bytes: int,
+    limits: SuccessorFiberCacheLimits,
+) -> tuple[Path, _FileIdentity]:
+    if not isinstance(receipt, IndexedSuccessorFiberCacheOpenReceipt):
+        raise TypeError(
+            "parent-validated receipt must be an indexed-cache open receipt"
+        )
+    receipt_path = Path(receipt.absolute_path)
+    if not receipt_path.is_absolute():
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt path is not absolute"
+        )
+    try:
+        source = Path(path).resolve(strict=True)
+    except OSError as error:
+        raise IndexedSuccessorFiberCacheError(
+            "indexed cache file disappeared before worker open"
+        ) from error
+    if source != receipt_path:
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt names another absolute cache path"
+        )
+    if (
+        receipt.expected_provenance != expected_provenance
+        or receipt.expected_content_sha256 != expected_content_sha256
+        or receipt.expected_file_sha256 != expected_file_sha256
+        or receipt.size != expected_file_bytes
+        or receipt.validated_limits != limits
+    ):
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt disagrees with worker open expectations"
+        )
+    metadata = receipt.validated_metadata
+    if (
+        metadata.provenance != receipt.expected_provenance
+        or metadata.content_sha256 != receipt.expected_content_sha256
+        or metadata.file_sha256 != receipt.expected_file_sha256
+        or metadata.file_bytes != receipt.size
+    ):
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt metadata disagrees with its identities"
+        )
+    try:
+        decoded_payload = json.loads(
+            receipt.validated_metadata_payload,
+            parse_constant=lambda value: (_ for _ in ()).throw(
+                ValueError(f"non-finite JSON constant {value}")
+            ),
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt metadata is not finite JSON"
+        ) from error
+    if not isinstance(decoded_payload, dict):
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt metadata must be an object"
+        )
+    reconstructed = IndexedSuccessorFiberCacheMetadata.from_payload(
+        decoded_payload,
+        file_sha256=receipt.expected_file_sha256,
+        file_bytes=receipt.size,
+    )
+    if reconstructed != metadata:
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt metadata payload is inconsistent"
+        )
+    if receipt.validated_packed_entry_count is None:
+        if receipt.validated_excluded_entry_indices:
+            raise IndexedSuccessorFiberCacheError(
+                "parent-validated receipt has exclusions without an entry census"
+            )
+    else:
+        packed_entry_count = receipt.validated_packed_entry_count
+        excluded = receipt.validated_excluded_entry_indices
+        if (
+            type(packed_entry_count) is not int
+            or packed_entry_count <= 0
+            or excluded != tuple(sorted(set(excluded)))
+            or any(
+                type(index) is not int
+                or not 0 <= index < packed_entry_count
+                for index in excluded
+            )
+        ):
+            raise IndexedSuccessorFiberCacheError(
+                "parent-validated receipt has an invalid entry census"
+            )
+    identity = receipt.file_identity
+    if (
+        any(
+            type(value) is not int or value < 0
+            for value in (
+                identity.device,
+                identity.inode,
+                identity.size,
+                identity.modified_ns,
+                identity.changed_ns,
+            )
+        )
+        or identity.size <= 0
+    ):
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated receipt has an invalid file identity"
+        )
+    return source, identity
+
+
+def _connect_from_parent_validated_receipt(
+    receipt: IndexedSuccessorFiberCacheOpenReceipt,
+    *,
+    path: Path,
+    expected_provenance: SuccessorFiberCacheProvenance,
+    expected_content_sha256: str,
+    expected_file_sha256: str,
+    expected_file_bytes: int,
+    limits: SuccessorFiberCacheLimits,
+) -> tuple[
+    sqlite3.Connection,
+    IndexedSuccessorFiberCacheMetadata,
+    Path,
+    _FileIdentity,
+]:
+    """Lightweight worker open; never hashes or audits the records table."""
+
+    source, identity = _validate_open_receipt_contract(
+        receipt,
+        path=path,
+        expected_provenance=expected_provenance,
+        expected_content_sha256=expected_content_sha256,
+        expected_file_sha256=expected_file_sha256,
+        expected_file_bytes=expected_file_bytes,
+        limits=limits,
+    )
+    _require_file_identity(source, identity)
+    try:
+        connection = _connect_read_only(source)
+        try:
+            _require_file_identity(source, identity)
+            if int(connection.execute("PRAGMA query_only").fetchone()[0]) != 1:
+                raise IndexedSuccessorFiberCacheError(
+                    "worker SQLite connection is not query-only"
+                )
+            database_path = connection.execute("PRAGMA database_list").fetchone()
+            if (
+                database_path is None
+                or len(database_path) < 3
+                or Path(str(database_path[2])).resolve(strict=True) != source
+            ):
+                raise IndexedSuccessorFiberCacheError(
+                    "worker SQLite connection opened another cache path"
+                )
+            _validate_sqlite_schema(
+                connection,
+                run_integrity_check=False,
+            )
+            payload = _read_metadata(connection)
+            if (
+                _canonical_json_bytes(payload)
+                != receipt.validated_metadata_payload
+            ):
+                raise IndexedSuccessorFiberCacheError(
+                    "worker SQLite metadata differs from the parent validation"
+                )
+            metadata = IndexedSuccessorFiberCacheMetadata.from_payload(
+                payload,
+                file_sha256=expected_file_sha256,
+                file_bytes=expected_file_bytes,
+            )
+            if metadata != receipt.validated_metadata:
+                raise IndexedSuccessorFiberCacheError(
+                    "worker SQLite metadata object differs from its receipt"
+                )
+            _require_file_identity(source, identity)
+        except Exception:
+            connection.close()
+            raise
+    except IndexedSuccessorFiberCacheError:
+        raise
+    except (OSError, sqlite3.DatabaseError) as error:
+        raise IndexedSuccessorFiberCacheError(
+            "parent-validated indexed cache failed lightweight worker open"
+        ) from error
+    return connection, metadata, source, identity
+
+
 class IndexedSuccessorFiberCache:
     """Lazy per-process read-only handle with a bounded decoded-row LRU."""
 
@@ -915,11 +1152,19 @@ class IndexedSuccessorFiberCache:
         expected_file_bytes: int,
         decoded_row_cache_size: int = 4096,
         limits: SuccessorFiberCacheLimits = DEFAULT_SUCCESSOR_FIBER_CACHE_LIMITS,
+        parent_validated_open_receipt: (
+            IndexedSuccessorFiberCacheOpenReceipt | None
+        ) = None,
     ) -> None:
-        source = Path(path)
+        try:
+            source = Path(path).resolve(strict=True)
+        except OSError as error:
+            raise IndexedSuccessorFiberCacheError(
+                f"indexed cache file does not exist: {path}"
+            ) from error
         if not source.is_file():
             raise IndexedSuccessorFiberCacheError(
-                f"indexed cache file does not exist: {source}"
+                f"indexed cache path is not a file: {source}"
             )
         if not _is_sha256(expected_content_sha256) or not _is_sha256(
             expected_file_sha256
@@ -938,6 +1183,29 @@ class IndexedSuccessorFiberCache:
             or decoded_row_cache_size <= 0
         ):
             raise ValueError("decoded-row cache size must be positive")
+        if parent_validated_open_receipt is not None:
+            connection, metadata, source, verified_identity = (
+                _connect_from_parent_validated_receipt(
+                    parent_validated_open_receipt,
+                    path=source,
+                    expected_provenance=expected_provenance,
+                    expected_content_sha256=expected_content_sha256,
+                    expected_file_sha256=expected_file_sha256,
+                    expected_file_bytes=expected_file_bytes,
+                    limits=limits,
+                )
+            )
+            self.path = source
+            self.metadata = metadata
+            self.decoded_row_cache_size = decoded_row_cache_size
+            self._limits = limits
+            self._file_identity = verified_identity
+            self._open_receipt = parent_validated_open_receipt
+            self._connection = connection
+            self._connection_pid = os.getpid()
+            self._runtime_pid = os.getpid()
+            self._decoded = OrderedDict()
+            return
         verified_identity = _FileIdentity.inspect(source)
         if verified_identity.size != expected_file_bytes:
             raise IndexedSuccessorFiberCacheError(
@@ -955,6 +1223,7 @@ class IndexedSuccessorFiberCache:
                 _require_file_identity(source, verified_identity)
                 _validate_sqlite_schema(connection)
                 payload = _read_metadata(connection)
+                metadata_payload = _canonical_json_bytes(payload)
                 metadata = IndexedSuccessorFiberCacheMetadata.from_payload(
                     payload,
                     file_sha256=observed_file_sha256,
@@ -1013,9 +1282,25 @@ class IndexedSuccessorFiberCache:
         self.path = source
         self.metadata = metadata
         self.decoded_row_cache_size = decoded_row_cache_size
+        self._limits = limits
         self._file_identity = verified_identity
+        self._open_receipt = IndexedSuccessorFiberCacheOpenReceipt(
+            absolute_path=str(source),
+            device=verified_identity.device,
+            inode=verified_identity.inode,
+            size=verified_identity.size,
+            modified_ns=verified_identity.modified_ns,
+            changed_ns=verified_identity.changed_ns,
+            expected_file_sha256=expected_file_sha256,
+            expected_content_sha256=expected_content_sha256,
+            expected_provenance=expected_provenance,
+            validated_metadata=metadata,
+            validated_metadata_payload=metadata_payload,
+            validated_limits=limits,
+        )
         self._connection: sqlite3.Connection | None = None
         self._connection_pid: int | None = None
+        self._runtime_pid: int | None = os.getpid()
         self._decoded: OrderedDict[
             tuple[int, int],
             SuccessorFiberCacheRecord,
@@ -1024,6 +1309,14 @@ class IndexedSuccessorFiberCache:
     @property
     def content_sha256(self) -> str:
         return self.metadata.content_sha256
+
+    @property
+    def parent_validated_open_receipt(
+        self,
+    ) -> IndexedSuccessorFiberCacheOpenReceipt:
+        """Return the trusted same-launch worker-open capability."""
+
+        return self._open_receipt
 
     def require_entry_census(
         self,
@@ -1055,6 +1348,18 @@ class IndexedSuccessorFiberCache:
             raise IndexedSuccessorFiberCacheError(
                 "indexed cache active-trace count disagrees with the packed census"
             )
+        receipt = self._open_receipt
+        if receipt.validated_packed_entry_count is not None:
+            if (
+                receipt.validated_packed_entry_count != packed_entry_count
+                or receipt.validated_excluded_entry_indices
+                != excluded_entry_indices
+            ):
+                raise IndexedSuccessorFiberCacheError(
+                    "requested packed-entry census omits or invents indices "
+                    "relative to the parent-validated receipt"
+                )
+            return
         connection = self._connection_for_process()
         try:
             row = connection.execute(
@@ -1097,22 +1402,44 @@ class IndexedSuccessorFiberCache:
             raise IndexedSuccessorFiberCacheError(
                 "indexed cache omits or invents packed entry indices"
             )
+        self._open_receipt = replace(
+            receipt,
+            validated_packed_entry_count=packed_entry_count,
+            validated_excluded_entry_indices=excluded_entry_indices,
+        )
 
     def _connection_for_process(self) -> sqlite3.Connection:
         process_id = os.getpid()
+        if self._runtime_pid != process_id:
+            self.close()
+            self._decoded = OrderedDict()
+            self._runtime_pid = process_id
         if (
             self._connection is not None
             and self._connection_pid == process_id
         ):
             return self._connection
         self.close()
-        _require_file_identity(self.path, self._file_identity)
-        connection = _connect_read_only(self.path)
-        try:
-            _require_file_identity(self.path, self._file_identity)
-        except IndexedSuccessorFiberCacheError:
+        connection, metadata, source, identity = (
+            _connect_from_parent_validated_receipt(
+                self._open_receipt,
+                path=self.path,
+                expected_provenance=self.metadata.provenance,
+                expected_content_sha256=self.metadata.content_sha256,
+                expected_file_sha256=self.metadata.file_sha256,
+                expected_file_bytes=self.metadata.file_bytes,
+                limits=self._limits,
+            )
+        )
+        if (
+            source != self.path
+            or identity != self._file_identity
+            or metadata != self.metadata
+        ):
             connection.close()
-            raise
+            raise IndexedSuccessorFiberCacheError(
+                "worker cache open disagrees with the validated cache object"
+            )
         self._connection = connection
         self._connection_pid = process_id
         return self._connection
@@ -1135,6 +1462,10 @@ class IndexedSuccessorFiberCache:
             0 <= progress_index <= address.path_length
         ):
             raise ValueError("progress_index lies outside the packed trace")
+        if self._runtime_pid != os.getpid():
+            # Forked processes must discard inherited decoded rows and prove
+            # the immutable SQLite identity/metadata before serving anything.
+            self._connection_for_process()
         _require_file_identity(self.path, self._file_identity)
         metadata = self.metadata
         if (
@@ -1221,6 +1552,7 @@ class IndexedSuccessorFiberCache:
         state = dict(self.__dict__)
         state["_connection"] = None
         state["_connection_pid"] = None
+        state["_runtime_pid"] = None
         state["_decoded"] = OrderedDict()
         return state
 
@@ -1241,6 +1573,9 @@ def open_indexed_successor_fiber_cache(
     expected_file_bytes: int,
     decoded_row_cache_size: int = 4096,
     limits: SuccessorFiberCacheLimits = DEFAULT_SUCCESSOR_FIBER_CACHE_LIMITS,
+    parent_validated_open_receipt: (
+        IndexedSuccessorFiberCacheOpenReceipt | None
+    ) = None,
 ) -> IndexedSuccessorFiberCache:
     return IndexedSuccessorFiberCache(
         path,
@@ -1250,6 +1585,7 @@ def open_indexed_successor_fiber_cache(
         expected_file_bytes=expected_file_bytes,
         decoded_row_cache_size=decoded_row_cache_size,
         limits=limits,
+        parent_validated_open_receipt=parent_validated_open_receipt,
     )
 
 
@@ -1261,6 +1597,13 @@ def assert_indexed_cache_is_pickle_safe(
         raise IndexedSuccessorFiberCacheError(
             "pickled indexed cache retained process-local state"
         )
+    if (
+        restored.parent_validated_open_receipt
+        != cache.parent_validated_open_receipt
+    ):
+        raise IndexedSuccessorFiberCacheError(
+            "pickled indexed cache lost its parent validation receipt"
+        )
 
 
 __all__ = [
@@ -1271,6 +1614,7 @@ __all__ = [
     "IndexedSuccessorFiberCache",
     "IndexedSuccessorFiberCacheError",
     "IndexedSuccessorFiberCacheMetadata",
+    "IndexedSuccessorFiberCacheOpenReceipt",
     "assert_indexed_cache_is_pickle_safe",
     "open_indexed_successor_fiber_cache",
     "write_indexed_successor_fiber_cache",
