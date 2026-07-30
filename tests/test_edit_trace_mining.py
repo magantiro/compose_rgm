@@ -10,14 +10,18 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import numpy as np
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from build_analogue_trace_pool import (  # noqa: E402
+from build_analogue_trace_pool import (
+    ANALOGUE_SUPPORT_CONTRACT,
     _compile_verify,
     _pool_record,
     rewrite_trace_from_record,
 )
-from mine_edit_traces import (  # noqa: E402
+from mine_edit_traces import (
     MiningConfig,
     ShardEmission,
     characterize_corruption,
@@ -27,10 +31,14 @@ from mine_edit_traces import (  # noqa: E402
     shard_of,
 )
 
-from compose_v4.experiments.analogue_prior import (  # noqa: E402
+from compose_v4.experiments.analogue_prior import (
     rewrite_trace_from_record as production_rewrite_trace_from_record,
 )
-from compose_v4.rewrite.kernel import canonical_state_key  # noqa: E402
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace_shard import (
+    decode_trace_record,
+    encode_trace_record,
+)
 
 _CFG = MiningConfig(max_atoms=32, corruption_sample_size=3)
 # toluene and ethylbenzene share the benzene core under a single acyclic cut (CH3 vs C2H5 R-group).
@@ -103,6 +111,133 @@ def test_terminal_atom_swap_prefers_real_atom_restate_supervision() -> None:
         "atom_restate",
     )
     assert canonical_state_key(production_rebuilt.target) == record["target_key"]
+
+
+@pytest.mark.parametrize(
+    ("source_smiles", "target_smiles", "family"),
+    (
+        ("OCCc1ccccc1", "O=CCc1ccccc1", "bond_reorder"),
+        ("CCCc1ccccc1", "CC(C)c1ccccc1", "bond_reroute"),
+    ),
+)
+def test_unique_production_edit_precedes_delete_rebuild_fallback(
+    source_smiles: str,
+    target_smiles: str,
+    family: str,
+) -> None:
+    result = _compile_verify(
+        source_smiles,
+        target_smiles,
+        n_slots=20,
+        max_variable_atoms=8,
+    )
+    assert result["outcome"] == "ok"
+    assert result["path_length"] == 1
+    assert result["operator_histogram"] == {family: 1}
+    assert result["meta"]["compiler_path_class"] == f"direct_{family}"
+    assert result["meta"]["direct_path_match_count"] == 1
+
+    source, target = result["states"]
+    assert np.array_equal(source.atom_types, target.atom_types)
+    assert np.array_equal(source.formal_charges, target.formal_charges)
+
+    record = _pool_record(0, "forward", source_smiles, result, 20)
+    assert record["metadata"]["support_contract"] == ANALOGUE_SUPPORT_CONTRACT
+    assert record["diagnostics"]["support_contract"] == ANALOGUE_SUPPORT_CONTRACT
+    for loader in (rewrite_trace_from_record, production_rewrite_trace_from_record):
+        rebuilt = loader(record)
+        assert tuple(step.rule_name for step in rebuilt.steps) == (family,)
+        assert canonical_state_key(rebuilt.target) == record["target_key"]
+
+    trace = production_rewrite_trace_from_record(record)
+    packed = encode_trace_record(
+        trace,
+        n_slots=20,
+        seed=0,
+        trace_id="support-contract-roundtrip",
+        partition="train",
+        layer="mmp_analogue",
+        extra={**trace.metadata, "row_id": 0},
+    )
+    assert (
+        decode_trace_record(packed).metadata["support_contract"]
+        == ANALOGUE_SUPPORT_CONTRACT
+    )
+
+    wrong_contract = {
+        **record,
+        "metadata": {
+            **record["metadata"],
+            "support_contract": "unknown-contract",
+        },
+    }
+    missing_contract = {
+        **record,
+        "metadata": {
+            key: value
+            for key, value in record["metadata"].items()
+            if key != "support_contract"
+        },
+    }
+    for invalid in (wrong_contract, missing_contract):
+        for loader in (rewrite_trace_from_record, production_rewrite_trace_from_record):
+            with pytest.raises(
+                ValueError,
+                match="not bound to the current editing-support contract",
+            ):
+                loader(invalid)
+
+
+def test_same_family_aliases_do_not_force_delete_rebuild() -> None:
+    result = _compile_verify(
+        "CCOc1ccccc1",
+        "CCc1ccccc1O",
+        n_slots=20,
+        max_variable_atoms=8,
+    )
+    assert result["outcome"] == "ok"
+    assert result["path_length"] == 1
+    assert result["operator_histogram"] == {"bond_reroute": 1}
+    assert result["meta"]["compiler_path_class"] == "direct_bond_reroute"
+    assert result["meta"]["direct_path_status"] == "direct_bond_reroute"
+    assert result["meta"]["direct_path_match_count"] == 2
+
+
+def test_charge_changing_endpoint_pair_is_rejected() -> None:
+    result = _compile_verify(
+        "NCc1ccccc1",
+        "[NH3+]Cc1ccccc1",
+        n_slots=20,
+        max_variable_atoms=8,
+    )
+    assert result["outcome"] == "charge_change_unsupported"
+    assert result["steps"] is None
+
+
+def test_fallback_cannot_modify_a_preserved_charged_center() -> None:
+    result = _compile_verify(
+        "C[NH2+]Cc1ccccc1",
+        "C[NH2+]CCc1ccccc1",
+        n_slots=20,
+        max_variable_atoms=8,
+    )
+    assert result["outcome"] == "charge_policy_violation"
+    assert result["states"] is None
+
+
+def test_multistep_size_change_remains_delete_insert_fallback() -> None:
+    result = _compile_verify(
+        _TOLUENE,
+        _ETHYLBENZENE,
+        n_slots=20,
+        max_variable_atoms=8,
+    )
+    assert result["outcome"] == "ok"
+    assert result["path_length"] == 3
+    assert result["operator_histogram"] == {"atom_delete": 1, "atom_insert": 2}
+    assert result["meta"]["compiler_path_class"] == "delete_insert_fallback"
+    assert result["meta"]["direct_path_status"] == "direct_cardinality_mismatch"
+    assert result["meta"]["direct_path_match_count"] == 0
 
 
 def test_corruption_drift_tanimoto_is_a_recognizable_variant() -> None:

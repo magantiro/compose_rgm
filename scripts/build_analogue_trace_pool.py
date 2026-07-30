@@ -3,10 +3,16 @@
 trainer-consumable rewrite trace (both directions), with per-pair curriculum diagnostics.
 
 Method (per pair sharing a constant core via one acyclic single-bond cut, acyclic variable fragment):
-    A --peel R_a leaf-to-root (atom_delete)--> core_a   (A's padded-slot layout)
-    core_a --graft R_b (atom_insert)--> B, where each R_b insert is the exact inverse (inverse_step,
-        so h/charge are exact) of B's own peel, remapped into A's layout through a typed core graph
-        isomorphism core_b -> core_a with fresh free slots for the R_b atoms.
+    First prefer a one-step atom_restate, bond_reorder, or pendant bond_reroute already exposed by the
+    RingCore-V1 editing support, but only after executing it through the production runtime and proving
+    its canonical successor is B. Multiple same-family marks in one canonical-successor fiber are retained
+    as alias multiplicity: a deterministic exact representative defines the persistent trace while the
+    successor objective aggregates the complete fiber. Cross-family ambiguity is not resolved arbitrarily.
+    Otherwise:
+        A --peel R_a leaf-to-root (atom_delete)--> core_a   (A's padded-slot layout)
+        core_a --graft R_b (atom_insert)--> B, where each R_b insert is the exact inverse (inverse_step,
+            so h/charge are exact) of B's own peel, remapped into A's layout through a typed core graph
+            isomorphism core_b -> core_a with fresh free slots for the R_b atoms.
 Both directions are compiled INDEPENDENTLY (A->B and B->A) so neither carries database-ordering bias,
 and each is verified STRONGER than endpoint replay: every intermediate valid + connected, exact
 endpoint canonical isomorphism vs target, forward AND inverse replay (round-trip source ->pi target
@@ -37,12 +43,30 @@ import numpy as np
 from rdkit import Chem, RDLogger
 from rdkit.Chem import rdmolops
 
-from compose_v4.chem.molecular_graph import (MolecularGraphError, ORGANIC_VOCABULARY, is_element,
-                                             molecular_graph_to_smiles, smiles_to_molecular_graph)
+from compose_v4.chem.molecular_graph import (
+    NULL_IDX,
+    ORGANIC_VOCABULARY,
+    MolecularGraphError,
+    is_element,
+    molecular_graph_to_smiles,
+    smiles_to_molecular_graph,
+)
+from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.chem.state import is_connected_or_null, is_valid_state, pad_molecular_graph
-from compose_v4.rewrite.factorized_fiber import _factorized_candidates
+from compose_v4.experiments.analogue_prior import ANALOGUE_SUPPORT_CONTRACT
+from compose_v4.rewrite.action_codec import canonical_json, encode_action
+from compose_v4.rewrite.factorized_fiber import (
+    _factorized_candidates,
+    enumerate_pendant_graft_actions,
+)
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
-from compose_v4.rewrite.operators import AtomDelete, AtomInsert, AtomRestate
+from compose_v4.rewrite.operators import (
+    AtomDelete,
+    AtomInsert,
+    AtomRestate,
+    BondReorder,
+    BondReroute,
+)
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace, execute_trace, inverse_step
 
 RDLogger.DisableLog("rdApp.*")
@@ -51,8 +75,6 @@ _ROOT = Path(__file__).resolve().parents[1]
 CORPUS = _ROOT / "results/tree_fcd_transfer_stage1_factorized_v1/guacamol_heldout_val_5000_seed0.smiles"
 OUT_DIR = _ROOT / "diagnostics" / "composition"
 SYSTEM = de_novo_rewrite_system()
-
-
 # ---- molecular graph <-> networkx (typed) for the peel + core isomorphism ----
 def _state_graph(state) -> nx.Graph:
     real = [int(v) for v in np.flatnonzero(is_element(state.atom_types))]
@@ -115,7 +137,7 @@ def mine_one_cut_pairs(smiles, *, max_variable_atoms: int = 8):
     return pairs
 
 
-# ---- the A2.1 compiler: peel source R, graft target R via inverted-peel remap ----
+# ---- the A2.1 compiler: exact direct edit, else peel R + inverted-peel graft ----
 def peel_delete(state, variable_atoms):
     """Delete variable_atoms leaf-to-root (atom_delete on the current degree-1 atom). Returns
     (steps, states) with states[0]=state and states[-1]=core, or (None, None) on no valid order."""
@@ -156,15 +178,17 @@ def core_isomorphism(core_b, core_a):
 def remap_inserts(inserts, sigma, core_a):
     """Remap B's inverted peel (atom_insert steps, target-R atoms outward) into A's core layout,
     allocating fresh free slots and rewriting every neighbour through sigma."""
-    free = [int(v) for v in np.flatnonzero(~is_element(core_a.atom_types))]
+    free = [
+        int(v)
+        for v in np.flatnonzero(core_a.atom_types == NULL_IDX)
+    ]
     sigma = dict(sigma)
-    out, next_free = [], 0
-    for step in inserts:
+    out = []
+    for next_free, step in enumerate(inserts):
         action = step.action
         if next_free >= len(free):
             return None
         new_slot = free[next_free]
-        next_free += 1
         sigma[int(action.slot)] = new_slot
         new_neighbors = []
         for neighbor, order in action.neighbors:
@@ -178,62 +202,192 @@ def remap_inserts(inserts, sigma, core_a):
     return out
 
 
-def _direct_atom_restate(a, b, r_a, r_b, sigma):
-    """Return a one-step atom-swap program when the production fiber represents it.
+def _cycle_edges(state) -> set[frozenset[int]]:
+    graph = _state_graph(state)
+    return {
+        frozenset((int(a), int(b))) for a, b in graph.edges()
+    } - {
+        frozenset((int(a), int(b))) for a, b in nx.bridges(graph)
+    }
 
-    The legacy one-cut compiler explained every terminal one-atom substitution by
-    deleting the source atom and inserting the target atom.  That is executable,
-    but it withholds real-analogue supervision from ``atom_restate`` and doubles
-    the path length.  Reuse the source variable slot only when the two terminal
-    atoms have the same mapped core attachment and bond order, the charge policy
-    is preserved, and the exact production candidate set contains the action.
+
+def _touches_charged_atom(state, rule_name, action) -> bool:
+    if rule_name == "atom_restate":
+        vertices = (int(action.v),)
+    elif rule_name == "bond_reorder":
+        vertices = (int(action.a), int(action.b))
+    elif rule_name == "bond_reroute":
+        vertices = (
+            int(action.a),
+            int(action.b),
+            int(action.u),
+            int(action.v),
+        )
+    else:
+        raise ValueError(f"not a direct analogue operator: {rule_name!r}")
+    return any(int(state.formal_charges[vertex]) != 0 for vertex in vertices)
+
+
+def _ringcore_v1_direct_candidates(state):
+    """Yield direct actions represented by the frozen editing support contract.
+
+    Atom labels and bond changes come from the same factorized support
+    enumerators used to construct production masks, never from an inferred
+    source/target atom map.  This contract requires broad-organic vocabulary,
+    heteroatom scanning, neutral charge preservation, non-ring bond reorder,
+    and the production pendant-tree graft subset.
     """
 
-    if len(r_a) != 1 or len(r_b) != 1:
-        return None
-    source_slot = int(next(iter(r_a)))
-    target_slot = int(next(iter(r_b)))
-    source_neighbors = tuple(int(v) for v in np.flatnonzero(a.bonds[source_slot] != 0))
-    target_neighbors = tuple(int(v) for v in np.flatnonzero(b.bonds[target_slot] != 0))
-    if len(source_neighbors) != 1 or len(target_neighbors) != 1:
-        return None
-    source_neighbor = source_neighbors[0]
-    target_neighbor = target_neighbors[0]
-    if int(sigma.get(target_neighbor, -1)) != source_neighbor:
-        return None
-    if int(a.bonds[source_slot, source_neighbor]) != int(
-        b.bonds[target_slot, target_neighbor]
+    cycle_edges = _cycle_edges(state)
+    for rule_name, action in _factorized_candidates(
+        state,
+        allow_bond_reroute=False,
+        vocabulary=ORGANIC_VOCABULARY,
     ):
-        return None
-    if (
-        int(a.formal_charges[source_slot]) != 0
-        or int(b.formal_charges[target_slot]) != 0
-    ):
-        return None
+        if rule_name == "atom_restate":
+            if (
+                int(action.formal_charge) == 0
+                and not _touches_charged_atom(state, rule_name, action)
+            ):
+                yield rule_name, action
+        elif rule_name == "bond_reorder":
+            edge = frozenset((int(action.a), int(action.b)))
+            old_order = int(state.bonds[int(action.a), int(action.b)])
+            if (
+                edge not in cycle_edges
+                and old_order in (1, 2, 3)
+                and not _touches_charged_atom(state, rule_name, action)
+            ):
+                yield rule_name, action
+    for action in enumerate_pendant_graft_actions(state):
+        if not _touches_charged_atom(state, "bond_reroute", action):
+            yield "bond_reroute", action
 
-    action = AtomRestate(
-        v=source_slot,
-        atom_type=int(b.atom_types[target_slot]),
-        formal_charge=0,
-        implicit_h_count=int(b.implicit_h_counts[target_slot]),
+
+def _ringcore_v1_action_is_supported(state, step: RewriteStep) -> bool:
+    """Require exact membership in the declared support-only action fiber."""
+
+    if step.rule_name == "bond_reroute":
+        return (
+            not _touches_charged_atom(state, step.rule_name, step.action)
+            and step.action in enumerate_pendant_graft_actions(state)
+        )
+    if step.rule_name not in {
+        "atom_insert",
+        "atom_delete",
+        "atom_restate",
+        "bond_reorder",
+    }:
+        return False
+    for rule_name, action in _factorized_candidates(
+        state,
+        allow_bond_reroute=False,
+        vocabulary=ORGANIC_VOCABULARY,
+    ):
+        if rule_name != step.rule_name or action != step.action:
+            continue
+        if rule_name == "atom_restate" and (
+            int(action.formal_charge) != 0
+            or _touches_charged_atom(state, rule_name, action)
+        ):
+            return False
+        return not (
+            rule_name == "bond_reorder"
+            and (
+                frozenset((int(action.a), int(action.b)))
+                in _cycle_edges(state)
+                or _touches_charged_atom(state, rule_name, action)
+            )
+        )
+    return False
+
+
+def _charge_policy_preserved(source, successor) -> bool:
+    """Protect exact charged centers and forbid creating/deleting/moving charge."""
+
+    if not np.array_equal(source.formal_charges, successor.formal_charges):
+        return False
+    charged = np.flatnonzero(source.formal_charges != 0)
+    return all(
+        int(source.atom_types[v]) == int(successor.atom_types[v])
+        and int(source.implicit_h_counts[v])
+        == int(successor.implicit_h_counts[v])
+        and np.array_equal(source.bonds[v], successor.bonds[v])
+        for v in charged
     )
-    represented = any(
-        rule_name == "atom_restate" and candidate == action
-        for rule_name, candidate in _factorized_candidates(
-            a,
-            allow_bond_reroute=True,
-            vocabulary=ORGANIC_VOCABULARY,
+
+
+def _action_sort_key(step: RewriteStep) -> str:
+    return canonical_json(encode_action(step.rule_name, step.action))
+
+
+def _local_environment_invariant(state) -> tuple[tuple, ...]:
+    """Cheap necessary invariant for canonical molecular equality.
+
+    This is deliberately only a rejection filter.  Every real atom contributes
+    its element, charge, hydrogens, and sorted labeled one-hop environment.
+    Isomorphic molecular graphs must agree, but agreement still proceeds to
+    the authoritative canonical identity.
+    """
+
+    real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
+    return tuple(
+        sorted(
+            (
+                int(state.atom_types[v]),
+                int(state.formal_charges[v]),
+                int(state.implicit_h_counts[v]),
+                tuple(
+                    sorted(
+                        (
+                            int(state.atom_types[u]),
+                            int(state.formal_charges[u]),
+                            int(state.bonds[v, u]),
+                        )
+                        for u in real
+                        if int(state.bonds[v, u]) != 0
+                    )
+                ),
+            )
+            for v in real
         )
     )
-    if not represented:
-        return None
-    try:
-        successor = SYSTEM.apply(a, "atom_restate", action)
-    except Exception:  # noqa: BLE001
-        return None
-    if canonical_state_key(successor) != canonical_state_key(b):
-        return None
-    return (RewriteStep("atom_restate", action),)
+
+
+def _executor_verified_direct_path(source, target):
+    """Return one production-represented canonical-successor path, or reject.
+
+    Canonical endpoint equality proves the molecular transformation. Multiple
+    marks from one family are within-fiber aliases under successor supervision;
+    their deterministic minimum supplies the exact persistent trace. A
+    cross-family match remains unresolved because choosing its teacher family
+    would change family-route diagnostics.
+    """
+
+    source_key = canonical_state_key(source)
+    target_key = canonical_state_key(target)
+    if source_key == target_key:
+        return None, "self_target", 0
+    if source.n_real_atoms != target.n_real_atoms:
+        return None, "direct_cardinality_mismatch", 0
+    target_invariant = _local_environment_invariant(target)
+    matches = []
+    for rule_name, action in _ringcore_v1_direct_candidates(source):
+        try:
+            successor = SYSTEM.apply(source, rule_name, action)
+        except Exception:  # noqa: BLE001, S112
+            continue
+        if _local_environment_invariant(successor) != target_invariant:
+            continue
+        if canonical_state_key(successor) == target_key:
+            matches.append(RewriteStep(rule_name, action))
+    matched_families = {step.rule_name for step in matches}
+    if len(matched_families) == 1:
+        step = min(matches, key=_action_sort_key)
+        return (step,), f"direct_{step.rule_name}", len(matches)
+    if matches:
+        return None, "ambiguous_direct_family", len(matches)
+    return None, "no_direct_action", 0
 
 
 def _cut_descriptors(smi_a, smi_b, core_smi, r_a, r_b) -> dict:
@@ -270,6 +424,11 @@ def compile_one_cut(smi_a, smi_b, *, n_slots: int, max_variable_atoms: int = 8):
         b = pad_molecular_graph(smiles_to_molecular_graph(smi_b), n_slots)
     except (MolecularGraphError, ValueError):
         return None, "unsupported_element", None
+    if int(a.formal_charges[is_element(a.atom_types)].sum()) != int(
+        b.formal_charges[is_element(b.atom_types)].sum()
+    ):
+        return None, "charge_change_unsupported", None
+    direct_steps, direct_status, direct_match_count = _executor_verified_direct_path(a, b)
     cuts_b: dict[str, frozenset] = {}
     for core_smi, variable in iter_one_cut_transformations(
             smi_b, max_variable_atoms=max_variable_atoms):
@@ -289,11 +448,12 @@ def compile_one_cut(smi_a, smi_b, *, n_slots: int, max_variable_atoms: int = 8):
         sigma = core_isomorphism(core_b, core_a)
         if sigma is None:
             return None, "iso_fail", meta
-        direct = _direct_atom_restate(a, b, r_a, r_b, sigma)
-        if direct is not None:
-            return direct, "compiled_direct_atom_restate", {
+        if direct_steps is not None:
+            return direct_steps, f"compiled_{direct_status}", {
                 **meta,
-                "compiler_path_class": "direct_atom_restate",
+                "compiler_path_class": direct_status,
+                "direct_path_status": direct_status,
+                "direct_path_match_count": direct_match_count,
             }
         inserts_b = [inverse_step(states_b[i], del_b[i]) for i in reversed(range(len(del_b)))]
         grow = remap_inserts(inserts_b, sigma, core_a)
@@ -302,13 +462,16 @@ def compile_one_cut(smi_a, smi_b, *, n_slots: int, max_variable_atoms: int = 8):
         return tuple(del_a) + tuple(grow), "compiled_delete_insert_fallback", {
             **meta,
             "compiler_path_class": "delete_insert_fallback",
+            "direct_path_status": direct_status,
+            "direct_path_match_count": direct_match_count,
         }
     return None, "no_matching_core", None
 
 
 def verify_trace(source_smi, target_smi, steps, *, n_slots: int):
     """Return (status, states). status=='ok' requires every intermediate valid + connected, exact
-    endpoint canonical isomorphism vs target, and the inverse round-trip back to the source."""
+    endpoint canonical isomorphism vs target, exact production-support membership, charge-policy
+    preservation, and a persistent-slot-exact inverse round-trip back to the source."""
     source = pad_molecular_graph(smiles_to_molecular_graph(source_smi), n_slots)
     target = pad_molecular_graph(smiles_to_molecular_graph(target_smi), n_slots)
     try:
@@ -318,6 +481,16 @@ def verify_trace(source_smi, target_smi, steps, *, n_slots: int):
     for state in states:
         if not (is_valid_state(state) and is_connected_or_null(state)):
             return "invalid_intermediate", None
+    for step, before, after in zip(
+        steps,
+        states[:-1],
+        states[1:],
+        strict=True,
+    ):
+        if not _ringcore_v1_action_is_supported(before, step):
+            return "teacher_outside_ringcore_v1_support", None
+        if not _charge_policy_preserved(before, after):
+            return "charge_policy_violation", None
     if canonical_state_key(states[-1]) != canonical_state_key(target):
         return "endpoint_mismatch", None
     walk = states[-1]
@@ -327,8 +500,8 @@ def verify_trace(source_smi, target_smi, steps, *, n_slots: int):
             walk = SYSTEM.apply(walk, inverse.rule_name, inverse.action)
     except Exception:  # noqa: BLE001
         return "roundtrip_exec_fail", None
-    if canonical_state_key(walk) != canonical_state_key(states[0]):
-        return "roundtrip_mismatch", None
+    if persistent_slot_state_sha256(walk) != persistent_slot_state_sha256(states[0]):
+        return "persistent_slot_roundtrip_mismatch", None
     return "ok", states
 
 
@@ -349,6 +522,22 @@ def _step_to_dict(step) -> dict:
             "atom_type": int(action.atom_type),
             "formal_charge": int(action.formal_charge),
             "implicit_h_count": int(action.implicit_h_count),
+        }
+    if step.rule_name == "bond_reorder":
+        return {
+            "rule": "bond_reorder",
+            "a": int(action.a),
+            "b": int(action.b),
+            "new_order": int(action.new_order),
+        }
+    if step.rule_name == "bond_reroute":
+        return {
+            "rule": "bond_reroute",
+            "a": int(action.a),
+            "b": int(action.b),
+            "u": int(action.u),
+            "v": int(action.v),
+            "new_order": int(action.new_order),
         }
     raise ValueError(f"unsupported analogue-trace rule {step.rule_name!r}")
 
@@ -372,6 +561,26 @@ def _dict_to_step(entry: dict):
                 implicit_h_count=int(entry["implicit_h_count"]),
             ),
         )
+    if entry["rule"] == "bond_reorder":
+        return RewriteStep(
+            "bond_reorder",
+            BondReorder(
+                a=int(entry["a"]),
+                b=int(entry["b"]),
+                new_order=int(entry["new_order"]),
+            ),
+        )
+    if entry["rule"] == "bond_reroute":
+        return RewriteStep(
+            "bond_reroute",
+            BondReroute(
+                a=int(entry["a"]),
+                b=int(entry["b"]),
+                u=int(entry["u"]),
+                v=int(entry["v"]),
+                new_order=int(entry["new_order"]),
+            ),
+        )
     raise ValueError(f"unknown rule {entry['rule']!r}")
 
 
@@ -379,12 +588,23 @@ def rewrite_trace_from_record(record: dict) -> RewriteTrace:
     """Rebuild the RewriteTrace a pool record encodes (the GM-trainer entry point). The source is
     rebuilt from its exact SMILES (deterministic atom order) padded to the recorded n_slots; the
     target is the executed endpoint, so trace.target is array-identical to compile time."""
+    metadata = dict(record.get("metadata", {}))
+    support_contract = metadata.get("support_contract")
+    if support_contract != ANALOGUE_SUPPORT_CONTRACT:
+        raise ValueError(
+            "analogue row is not bound to the current editing-support contract: "
+            f"expected {ANALOGUE_SUPPORT_CONTRACT!r}, got {support_contract!r}"
+        )
     source = pad_molecular_graph(smiles_to_molecular_graph(record["source_smiles"]),
                                  int(record["n_slots"]))
     steps = tuple(_dict_to_step(entry) for entry in record["steps"])
     target = execute_trace(source, steps, system=SYSTEM)
-    return RewriteTrace(source=source, target=target, steps=steps,
-                        metadata=dict(record.get("metadata", {})))
+    return RewriteTrace(
+        source=source,
+        target=target,
+        steps=steps,
+        metadata=metadata,
+    )
 
 
 def _compile_verify(source_smi, target_smi, *, n_slots, max_variable_atoms) -> dict:
@@ -418,10 +638,16 @@ def _pool_record(pair_index, direction, source_smi, result, n_slots) -> dict:
         "steps": [_step_to_dict(step) for step in steps],
         "metadata": {"prior": "analogue_mmp_one_cut", "direction": direction,
                      "n_steps": len(steps), "pair_type": meta.get("pair_type"),
-                     "compiler_path_class": meta.get("compiler_path_class")},
+                     "support_contract": ANALOGUE_SUPPORT_CONTRACT,
+                     "compiler_path_class": meta.get("compiler_path_class"),
+                     "direct_path_status": meta.get("direct_path_status"),
+                     "direct_path_match_count": meta.get("direct_path_match_count")},
         "diagnostics": {
             "pair_type": meta.get("pair_type"),
+            "support_contract": ANALOGUE_SUPPORT_CONTRACT,
             "compiler_path_class": meta.get("compiler_path_class"),
+            "direct_path_status": meta.get("direct_path_status"),
+            "direct_path_match_count": meta.get("direct_path_match_count"),
             "attachment_count": meta.get("attachment_count"),
             "constant_core_heavy": meta.get("constant_core_heavy"),
             "source_variable_heavy": meta.get("source_variable_heavy"),
@@ -489,8 +715,18 @@ def main() -> None:
             "heavy_delta": meta.get("heavy_delta"),
             "forward_outcome": forward["outcome"], "forward_path_length": forward["path_length"],
             "forward_operator_histogram": forward["operator_histogram"],
+            "forward_compiler_path_class": (forward["meta"] or {}).get("compiler_path_class"),
+            "forward_direct_path_status": (forward["meta"] or {}).get("direct_path_status"),
+            "forward_direct_path_match_count": (forward["meta"] or {}).get(
+                "direct_path_match_count"
+            ),
             "reverse_outcome": reverse["outcome"], "reverse_path_length": reverse["path_length"],
             "reverse_operator_histogram": reverse["operator_histogram"],
+            "reverse_compiler_path_class": (reverse["meta"] or {}).get("compiler_path_class"),
+            "reverse_direct_path_status": (reverse["meta"] or {}).get("direct_path_status"),
+            "reverse_direct_path_match_count": (reverse["meta"] or {}).get(
+                "direct_path_match_count"
+            ),
             "both_directions_ok": forward["outcome"] == "ok" and reverse["outcome"] == "ok",
         })
         for direction, source_smi, result in (("A->B", sa, forward), ("B->A", sb, reverse)):
@@ -502,11 +738,11 @@ def main() -> None:
     diag_path = args.out_dir / "analogue_pair_diagnostics.jsonl"
     summary_path = args.out_dir / "analogue_trace_pool_summary.json"
     with open(pool_path, "w") as handle:
-        for record in pool_records:
-            handle.write(json.dumps(record) + "\n")
+        handle.writelines(json.dumps(record) + "\n" for record in pool_records)
     with open(diag_path, "w") as handle:
-        for record in pair_diagnostics:
-            handle.write(json.dumps(record) + "\n")
+        handle.writelines(
+            json.dumps(record) + "\n" for record in pair_diagnostics
+        )
 
     checked, check_fail = 0, 0
     for record in pool_records[:max(args.self_check, 0)]:
@@ -519,8 +755,21 @@ def main() -> None:
 
     lengths = [record["path_length"] for record in pool_records]
     operator_totals = Counter()
+    compiler_path_totals = Counter()
+    direct_status_totals = Counter()
+    direct_match_count_totals = Counter()
     for record in pool_records:
         operator_totals.update(record["operator_histogram"])
+        metadata = record["metadata"]
+        compiler_path_totals.update(
+            (str(metadata.get("compiler_path_class") or "missing"),)
+        )
+        direct_status_totals.update(
+            (str(metadata.get("direct_path_status") or "missing"),)
+        )
+        direct_match_count_totals.update(
+            (str(metadata.get("direct_path_match_count")),)
+        )
     both_ok = sum(1 for record in pair_diagnostics if record["both_directions_ok"])
     denom = max(len(pairs), 1)
     summary = {
@@ -535,7 +784,13 @@ def main() -> None:
         "reverse_success_rate": reverse_outcomes["ok"] / denom,
         "both_direction_success_rate": both_ok / denom,
         "pool_records": len(pool_records),
+        "support_contract": ANALOGUE_SUPPORT_CONTRACT,
         "operator_totals": dict(operator_totals.most_common()),
+        "compiler_path_totals": dict(compiler_path_totals.most_common()),
+        "direct_path_status_totals": dict(direct_status_totals.most_common()),
+        "direct_path_match_count_totals": dict(
+            direct_match_count_totals.most_common()
+        ),
         "path_length_min": min(lengths) if lengths else None,
         "path_length_median": float(np.median(lengths)) if lengths else None,
         "path_length_mean": float(np.mean(lengths)) if lengths else None,

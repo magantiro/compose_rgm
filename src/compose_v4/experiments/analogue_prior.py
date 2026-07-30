@@ -16,11 +16,21 @@ from compose_v4.chem.molecular_graph import MolecularGraphError, smiles_to_molec
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
-from compose_v4.rewrite.operators import AtomDelete, AtomInsert, AtomRestate
+from compose_v4.rewrite.operators import (
+    AtomDelete,
+    AtomInsert,
+    AtomRestate,
+    BondReorder,
+    BondReroute,
+)
 from compose_v4.rewrite.progress import TraceProgressCTMC
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace, execute_trace
 
 _SYSTEM = de_novo_rewrite_system()
+ANALOGUE_SUPPORT_CONTRACT = (
+    "ringcore_v1_broad_organic_heteroatom_scan_"
+    "charge_preserving_protected_centers_nonring_reorder_pendant_graft_v1"
+)
 
 
 def _dict_to_step(entry: dict) -> RewriteStep:
@@ -47,17 +57,49 @@ def _dict_to_step(entry: dict) -> RewriteStep:
                 implicit_h_count=int(entry["implicit_h_count"]),
             ),
         )
+    if entry["rule"] == "bond_reorder":
+        return RewriteStep(
+            "bond_reorder",
+            BondReorder(
+                a=int(entry["a"]),
+                b=int(entry["b"]),
+                new_order=int(entry["new_order"]),
+            ),
+        )
+    if entry["rule"] == "bond_reroute":
+        return RewriteStep(
+            "bond_reroute",
+            BondReroute(
+                a=int(entry["a"]),
+                b=int(entry["b"]),
+                u=int(entry["u"]),
+                v=int(entry["v"]),
+                new_order=int(entry["new_order"]),
+            ),
+        )
     raise ValueError(f"unknown analogue-trace rule {entry['rule']!r}")
 
 
 def rewrite_trace_from_record(record: dict) -> RewriteTrace:
     """Rebuild the ``RewriteTrace`` a verified pool record encodes."""
+    metadata = dict(record.get("metadata", {}))
+    support_contract = metadata.get("support_contract")
+    if support_contract != ANALOGUE_SUPPORT_CONTRACT:
+        raise ValueError(
+            "analogue row is not bound to the current editing-support contract: "
+            f"expected {ANALOGUE_SUPPORT_CONTRACT!r}, got {support_contract!r}"
+        )
     source = pad_molecular_graph(
         smiles_to_molecular_graph(record["source_smiles"]), int(record["n_slots"])
     )
     steps = tuple(_dict_to_step(entry) for entry in record["steps"])
     target = execute_trace(source, steps, system=_SYSTEM)
-    return RewriteTrace(source=source, target=target, steps=steps, metadata=dict(record.get("metadata", {})))
+    return RewriteTrace(
+        source=source,
+        target=target,
+        steps=steps,
+        metadata=metadata,
+    )
 
 
 def build_analogue_prior_records(

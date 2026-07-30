@@ -138,6 +138,9 @@ def _contract() -> dict:
         sampler_contract,
     )
     from compose_v4.data.scaffold_partition import partitioner_provenance
+    from compose_v4.experiments.analogue_prior import (
+        ANALOGUE_SUPPORT_CONTRACT,
+    )
     from compose_v4.rewrite.action_codec import codec_implementation_hash
     from compose_v4.rewrite.trace_shard import TRACE_SCHEMA_VERSION
     from ring_core_identity import recompute_operator_registry_hash
@@ -147,6 +150,7 @@ def _contract() -> dict:
         "trace_schema_version": TRACE_SCHEMA_VERSION,
         "codec_implementation_hash": codec_implementation_hash(),
         "operator_registry_hash": recompute_operator_registry_hash(),
+        "analogue_support_contract": ANALOGUE_SUPPORT_CONTRACT,
         "partitioner": partitioner_provenance(),
         **sampler_contract(),
     }
@@ -431,6 +435,7 @@ def pack_mmp_shard(subdir: str, partition: str, name: str, pool_sha256: str,
             direction=str(record.get("direction", "")),
             source_scaffold=str(record.get("_scaffold", "")),
             extra={
+                **dict(trace.metadata or {}),
                 "row_id": int(record["_row_id"]),
                 "scaffold": str(record.get("_scaffold", "")),
                 "source_smiles": str(record.get("source_smiles", "")),
