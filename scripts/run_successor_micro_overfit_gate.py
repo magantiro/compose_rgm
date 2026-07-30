@@ -282,16 +282,38 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if args.collect_only:
         return report
 
+    selected_families = tuple(
+        part.strip()
+        for part in args.families.split(",")
+        if part.strip()
+    )
+    unknown_families = set(selected_families) - set(CORE_EDITING_FAMILIES)
+    if unknown_families or not selected_families:
+        raise ValueError(
+            "micro-overfit families must be a nonempty subset of the core: "
+            f"{sorted(unknown_families)}"
+        )
+    report["optimization"]["families"] = list(selected_families)
     scopes = tuple(
         part.strip()
         for part in args.scopes.split(",")
         if part.strip()
     )
-    for family_index, family in enumerate(CORE_EDITING_FAMILIES):
+    for family_index, family in enumerate(selected_families):
         family_rows = tuple(
             row for row in examples if row.family_name == family
         )
         report["reports"][family] = {}
+        support_model = _model(
+            hidden_dim=args.hidden_dim,
+            message_passing_steps=args.message_passing_steps,
+            seed=args.seed + 1000 * family_index,
+        ).to(torch.device(args.device))
+        # Fibers contain only support coordinates and exact molecular keys;
+        # they are independent of learned weights and can be reused by every
+        # identically configured initialization/scope arm.
+        panel = prepare_successor_panel(support_model, family_rows)
+        del support_model
         for scope_index, scope in enumerate(scopes):
             model_seed = args.seed + 1000 * family_index + 100 * scope_index
             model = _model(
@@ -299,7 +321,6 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 message_passing_steps=args.message_passing_steps,
                 seed=model_seed,
             ).to(torch.device(args.device))
-            panel = prepare_successor_panel(model, family_rows)
             report["reports"][family][scope] = train_successor_micro_panel(
                 model,
                 panel,
@@ -333,6 +354,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--weight-decay", type=float, default=0.0)
     parser.add_argument("--scopes", default="heads_only,all")
+    parser.add_argument(
+        "--families",
+        default=",".join(CORE_EDITING_FAMILIES),
+    )
     parser.add_argument("--seed", type=int, default=20260730)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--collect-only", action="store_true")

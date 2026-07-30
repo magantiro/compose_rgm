@@ -165,6 +165,7 @@
       "primitive_cycle_insert_cost": 1,
       "primitive_cycle_attach_cost": 1,
       "macro_cost": "number_of_steps_in_its_frozen_certified_primitive_lowering",
+      "all_other_active_tracelet_or_macro_cost": "number_of_steps_in_its_registered_frozen_production_lowering",
       "arbitrary_learned_or_property_dependent_weights_forbidden": true,
       "purpose": "prevents_a_multi_edit_macro_from_counting_as_one_unit_of_chemical_change"
     },
@@ -327,6 +328,232 @@
     "if_hybrid_conditions_fail": "retain_primitive_ringcore",
     "if_hybrid_conditions_pass": "include_ring_system_grow_as_optional_ablatable_accelerator_while_primitives_define_support"
   },
+  "audited_implementation_blockers": [
+    {
+      "id": "H0_explicit_hybrid_opt_in",
+      "files": [
+        "src/compose_v4/model/factorized_tracelet_rate_model.py:FactorizedTraceletRateModel.__init__",
+        "scripts/train_tracelet_cnof_gate.py",
+        "scripts/evaluate_tracelet_rollouts.py:load_factorized_rollout_checkpoint"
+      ],
+      "current_fact": "The model constructor rejects enable_cycle_ops=True together with enable_ring_grow_macro=True. Trainer flags can request that combination but construction fails. The loader reconstructs only the two legacy booleans.",
+      "existing_foundation": "The macro head is retained even when disabled, and the primitive cycle heads occupy distinct family slots from ring_system_grow.",
+      "required_interface": "Add a new explicit hybrid authorization/profile field, default false, that permits both capabilities only under the frozen hybrid identity. Do not remove the existing fail-loud behavior for callers lacking that opt-in.",
+      "acceptance": "Old RingCore-V1 calls still reject an accidental two-mechanism model; the explicit hybrid constructs; all checkpoint metadata and capability hashes identify the regime."
+    },
+    {
+      "id": "H1_complete_macro_marked_law",
+      "files": [
+        "src/compose_v4/experiments/production_successor_kernel.py:enumerate_factorized_marked_law",
+        "src/compose_v4/model/factorized_tracelet_rate_model.py:_teacher_action_score",
+        "src/compose_v4/model/factorized_tracelet_rate_model.py:sample_rewrite_mark_conditioned",
+        "src/compose_v4/rewrite/ring_system_fiber.py"
+      ],
+      "current_fact": "The production marked-law enumerator fails whenever ring_system_grow is enabled and its table registry omits the family. The action table exposes only template mass; a complete macro probability also contains placement and electronic-decoder factors.",
+      "existing_foundation": "Sampling produces complete RingSystemGrow actions, and _teacher_action_score computes the differentiable aggregate score of a supplied complete macro action across matching template and placement aliases.",
+      "required_interface": "Expose a deterministic iterator over every distinct legal complete RingSystemGrow action and its aggregate unnormalized action score. For semantic electronic modes this requires exact prefix-completion enumeration; a template-only iterator is invalid.",
+      "acceptance": "Within-family macro mass sums to one after normalization; every action executes; duplicate internal encodings preserve aggregate mass; candidate counts and wall time pass frozen bounded caps."
+    },
+    {
+      "id": "H2_successor_quotient_and_dictionary_oracle",
+      "files": [
+        "src/compose_v4/experiments/production_successor_kernel.py:canonical_successor_result",
+        "src/compose_v4/experiments/reference_successor_kernel.py:reference_successor_batch",
+        "src/compose_v4/model/segmented_successor.py"
+      ],
+      "current_fact": "Segmented and dictionary aggregation are generic once a complete marked law exists, but no current test includes macro marks or cross-template macro aliases.",
+      "existing_foundation": "Both aggregators execute actions through the production RewriteSystem and key successors with canonical_state_key.",
+      "required_interface": "Feed complete scored macro actions into the same marked-law stream, preserve stable internal provenance addresses, and group all primitive or macro marks sharing a one-step canonical successor before productive conditioning.",
+      "acceptance": "Segmented and fresh dictionary results agree in keys, probabilities, virtual mass, and alias multiplicity on symmetric, persistent-slot, multi-template, and macro/non-macro collision fixtures."
+    },
+    {
+      "id": "H3_successor_training_and_packed_fibers",
+      "files": [
+        "src/compose_v4/experiments/factorized_successor_training.py",
+        "src/compose_v4/data/packed_edit_cache.py",
+        "src/compose_v4/experiments/training_support_cache.py",
+        "src/compose_v4/experiments/training_support_compiler.py"
+      ],
+      "current_fact": "TeacherSuccessorAlias assumes a dense action-table coordinate. A macro probability is a structured template-placement-electronic score and cannot be recovered by indexing the template table. The support cache can already store macro template support and teacher semantic certificates, but not complete successor fibers.",
+      "existing_foundation": "The model teacher scorer and semantic certificates provide a differentiable score for a supplied RingSystemGrow teacher.",
+      "required_interface": "Add a tagged macro alias address or encoded complete action plus certificate, score it through the existing macro teacher-scoring semantics, and serialize complete productive and teacher successor fibers without chemistry replay in the hot loop.",
+      "acceptance": "Differentiable macro successor probability equals the complete production marked-law sum and has finite nonzero gradients; packed and freshly compiled fibers are identical."
+    },
+    {
+      "id": "H4_action_codec_and_paired_corpus",
+      "files": [
+        "src/compose_v4/rewrite/action_codec.py",
+        "src/compose_v4/data/packed_trace_store.py",
+        "src/compose_v4/rewrite/tree_transport.py"
+      ],
+      "current_fact": "RewriteActionCodecV2 explicitly rejects ring_system_grow, omits RingSystemGrow from its payload allowlist, and is used by the packed trace store. Existing tree transport can construct macro traces, but no paired endpoint-unit corpus enforces equal exposure against a primitive decomposition.",
+      "existing_foundation": "RingSystemGrow is a frozen dataclass of explicitly typed nested payloads and every admitted action has a certified primitive lowering.",
+      "required_interface": "Create a new regime-specific codec/schema version without relaxing V2, then compile each macro training unit together with the exact same endpoint unit's primitive path and a shared sampling identifier.",
+      "acceptance": "Exact round trip and replay pass; no macro-only endpoint enters the hybrid arm; raw extra rows do not increase endpoint exposure; split and provenance hashes match."
+    },
+    {
+      "id": "H5_checkpoint_identity_and_support_signature",
+      "files": [
+        "src/compose_v4/experiments/checkpoint_evaluator.py",
+        "src/compose_v4/experiments/successor_kernel.py:SupportSignature",
+        "scripts/ring_core_identity.py",
+        "scripts/coherence/program_contract.py"
+      ],
+      "current_fact": "The evaluator hard-requires enable_ring_grow_macro=False, omits that flag from CAPABILITY_FLAGS and CheckpointProvenance, and labels any cycle-enabled signature as ringcore_v1_compositional_cycle_ops. RingCore-V1 identity correctly rejects a macro.",
+      "existing_foundation": "SupportSignature already compares capability flags and ringcore_configuration field-by-field.",
+      "required_interface": "Keep the RingCore-V1 validator unchanged and add a separate hybrid evaluator profile, provenance fields, support signature, implementation name, and identity hash. The arm comparison must be registered as a support ablation, never law-only.",
+      "acceptance": "Primitive and hybrid checkpoints cannot be confused; their only declared operator-support difference is the macro profile; old or missing metadata fails closed."
+    },
+    {
+      "id": "H6_atomic_constraint_conditioning",
+      "files": [
+        "src/compose_v4/rewrite/kernel.py:RewriteSystem.apply",
+        "src/compose_v4/experiments/production_successor_kernel.py:canonical_successor_result",
+        "src/compose_v4/experiments/successor_kernel.py:CanonicalSuccessorKernel"
+      ],
+      "current_fact": "RewriteSystem has a complete-action constraint hook, but the repository has no production protected-map, pharmacophore, alert, atom-count, or similarity-corridor constraint implementations. The successor kernel treats any RewriteSystem rejection as an evaluator inconsistency rather than a normal controlled-support prune.",
+      "existing_foundation": "The outer executor validates a complete source-action-successor triple. Macro lowering separately proves every internal microstate valid and connected.",
+      "required_interface": "Keep the unconstrained base kernel unchanged. Add a controller-side transition filter that evaluates the complete semantic action before quotient aggregation, carries and deterministically updates constraint state, drops forbidden mark mass, groups survivors by canonical molecular successor plus updated constraint state when necessary, and renormalizes only afterward.",
+      "acceptance": "Zero forbidden committed states; a rejected macro never partially commits; aliases with different constraint-state updates are not incorrectly merged; within-fiber representation refinements preserving semantic transition mass leave the controlled law unchanged."
+    },
+    {
+      "id": "H7_primitive_equivalent_cost_ledger",
+      "files": [
+        "src/compose_v4/rewrite/tracelets.py:lower_ring_system_grow",
+        "src/compose_v4/rewrite/tracelets.py:lower_ring_system_restate",
+        "src/compose_v4/rewrite/tracelets.py:lower_ring_system_delete",
+        "src/compose_v4/rewrite/tracelet_compiler.py"
+      ],
+      "current_fact": "lower_ring_system_grow already returns the deterministic validity-closed primitive program, but no rollout kernel or experiment ledger charges its length. Existing tracelet compiler accounting does not special-case ring_system_grow.",
+      "existing_foundation": "The certified lowering supplies a non-learned, property-independent primitive-equivalent cost for every admitted macro action.",
+      "required_interface": "Define one versioned action-cost function: declared primitive operations cost one and every active macro or tracelet costs the length of its frozen production lowering. Record per-step and cumulative event, primitive-equivalent, oracle, successor-scoring, forward-pass, wall-time, and GPU costs.",
+      "acceptance": "A macro always costs one committed event but exactly len(lower_ring_system_grow(source, action)) primitive-equivalent units; trajectory totals equal the sum of audited per-action costs."
+    },
+    {
+      "id": "H8_non_grow_operator_parity",
+      "files": [
+        "configs/editing_corpus_v2_contract.json",
+        "src/compose_v4/model/factorized_tracelet_rate_model.py:_action_tables"
+      ],
+      "current_fact": "The V2 corpus contract disables ring_system_delete by default, while the current model still constructs and scores its family whenever candidates exist. This is not a grow-macro difference, but leaving it unresolved would make the paired arm definition ambiguous.",
+      "existing_foundation": "All non-grow capability flags and parameter shapes can be shared between arms.",
+      "required_interface": "Freeze one identical non-grow operator basis for both arms and expose any required family-disable flag explicitly. Do not add an inverse macro only to make the grow arm look symmetric.",
+      "acceptance": "Support signatures and effective training coefficients are identical outside ring_system_grow."
+    },
+    {
+      "id": "H9_task_and_statistical_freeze",
+      "files": [
+        "configs/ring_operator_decision_v1.json",
+        "configs/experiment_registry.yaml"
+      ],
+      "current_fact": "The task matrix and metric names are frozen, but numerical noninferiority/effect thresholds and development, validation, and sealed-test artifacts are intentionally unset.",
+      "existing_foundation": "The decision contract already blocks paired training and final evaluation while any item is unset.",
+      "required_interface": "Build task artifacts from development data, freeze thresholds and budgets before paired training, and reserve sealed test for the one-time post-decision evaluation.",
+      "acceptance": "The fail-closed validator reports no blocker only after every artifact, threshold, implementation check, and authorization state is frozen."
+    }
+  ],
+  "smallest_scientifically_valid_implementation_sequence": [
+    {
+      "order": 1,
+      "id": "bounded_macro_enumerability_probe",
+      "action": "Without enabling the hybrid, use the existing macro-only model profile to implement and test complete scored RingSystemGrow action enumeration on a bounded development panel.",
+      "required_evidence": [
+        "within_family_probability_normalization",
+        "executor_success_for_every_enumerated_action",
+        "candidate_count_and_wall_time_distribution",
+        "template_placement_and_electronic_alias_counts"
+      ],
+      "abort_if": "Complete enumeration is not exact or exceeds the frozen candidate/time cap; in that case retain primitive_ringcore or preregister a restricted finite accelerator before doing hybrid work."
+    },
+    {
+      "order": 2,
+      "id": "macro_only_quotient_proof",
+      "action": "Connect the complete macro iterator to production segmented aggregation in a macro-only development profile and compare it with the fresh dictionary oracle.",
+      "required_evidence": [
+        "keys_mass_virtual_mass_and_alias_counts_match",
+        "slot_relabeling_and_multi_template_alias_tests_pass",
+        "macro_successors_have_certified_primitive_lowerings"
+      ]
+    },
+    {
+      "order": 3,
+      "id": "versioned_identity_and_codec",
+      "action": "Add an explicit hybrid opt-in, separate identity/profile, and new action codec version while preserving every RingCore-V1 rejection guard.",
+      "required_evidence": [
+        "accidental_hybrid_still_fails",
+        "explicit_hybrid_constructs",
+        "old_checkpoints_and_v2_codec_keep_their_semantics",
+        "hybrid_checkpoint_provenance_is_unambiguous"
+      ]
+    },
+    {
+      "order": 4,
+      "id": "hybrid_complete_kernel",
+      "action": "Enable the already-proved macro iterator in the explicit hybrid marked law and canonical successor kernel.",
+      "required_evidence": [
+        "complete_marked_law_normalizes",
+        "primitive_close_open_and_macro_all_have_mass_when_legal",
+        "segmented_equals_dictionary",
+        "support_signature_diff_is_declared_as_support_ablation"
+      ]
+    },
+    {
+      "order": 5,
+      "id": "differentiable_macro_successor_fibers",
+      "action": "Extend successor aliases and packed fibers with structured macro scoring through the existing teacher-action semantics.",
+      "required_evidence": [
+        "fresh_and_packed_fibers_match",
+        "differentiable_and_production_successor_probabilities_match",
+        "finite_nonzero_macro_gradients",
+        "macro_successor_micro_overfit_passes"
+      ]
+    },
+    {
+      "order": 6,
+      "id": "paired_endpoint_corpus",
+      "action": "Compile paired macro and primitive representations from the same endpoint units, then freeze equal endpoint exposure and compute schedules.",
+      "required_evidence": [
+        "no_macro_only_endpoints",
+        "all_primitive_decompositions_execute",
+        "same_splits_sources_scaffolds_and_endpoint_coefficients",
+        "held_out_template_concentration_audit"
+      ]
+    },
+    {
+      "order": 7,
+      "id": "constraint_and_cost_layers",
+      "action": "Add controller-side atomic constraint conditioning and the versioned primitive-equivalent cost ledger before any dynamic, Pareto, or hard-constraint comparison.",
+      "required_evidence": [
+        "forbidden_aliases_filtered_before_aggregation",
+        "constraint_state_updates_preserved",
+        "macro_never_partially_commits",
+        "event_and_lowered_cost_totals_reconcile"
+      ]
+    },
+    {
+      "order": 8,
+      "id": "short_gated_training",
+      "action": "Run macro successor micro-overfit, then paired 50, 500, and 2000-step gates only.",
+      "required_evidence": [
+        "both_primitive_ring_directions_remain_noninferior",
+        "macro_beats_uniform_on_its_successor_cells",
+        "no_pareto_dynamic_or_constraint_sentinel_regression",
+        "at_least_one_non_tautological_development_metric_is_promising"
+      ],
+      "abort_if": "The macro only reduces committed event count, degrades primitive topology control, or fails to improve a chemistry-cost- or oracle-normalized development metric."
+    },
+    {
+      "order": 9,
+      "id": "paired_validation_then_one_time_test",
+      "action": "Select the regime on frozen validation criteria, freeze the decision, and only then run the sealed final comparison.",
+      "required_evidence": [
+        "all_hard_gates_pass",
+        "paired_uncertainty_analysis_complete",
+        "held_out_scaffold_and_topology_generalization",
+        "all_cost_axes_reported"
+      ]
+    }
+  ],
   "thresholds_to_freeze_before_paired_training": {
     "cycle_insert_successor_nll_noninferiority_margin": null,
     "cycle_attach_successor_nll_noninferiority_margin": null,

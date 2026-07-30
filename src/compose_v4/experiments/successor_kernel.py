@@ -43,8 +43,10 @@ Invariants maintained (checked by ``validate_successor_batch``)
 * probabilities are finite, nonnegative, and sum to 1 for a non-terminal state;
 * ``alias_count >= 1`` for every successor, and records the pre-quotient mark multiplicity;
 * no successor carries the source key -- a self-transition is not a molecular jump;
-* virtual (self / immediate-backtrack) mass is reported EXPLICITLY rather than silently renormalized away,
-  because deleting it and renormalizing changes every productive rate.
+* canonical self-event mass is reported EXPLICITLY rather than silently discarded;
+* an immediate backtrack is a legal successor of the state-only base kernel.  It
+  can be suppressed only by a declared history-aware wrapper whose state also
+  includes the previous molecular key.
 
 Relationship to existing code -- established by tracing, not assumption
 -----------------------------------------------------------------------
@@ -205,16 +207,17 @@ class SuccessorBatch:
     """The molecular jump law out of one state, over distinct canonical successors.
 
     Normalization convention: probabilities are over PRODUCTIVE canonical successors CONDITIONED ON
-    TAKING A JUMP. Virtual mass (self-transitions, immediate backtracks) and any terminal/no-jump mass are
-    recorded separately in ``virtual_mass`` and are NOT folded into the productive law -- deleting them and
-    renormalizing would change every productive rate. A wrapper inherits ``virtual_mass`` unchanged.
+    TAKING A JUMP. Canonical self-event mass is recorded separately in ``virtual_mass`` and is NOT folded
+    into the productive law. A declared history-aware wrapper may additionally reject a return to its
+    previous molecular key, but that rejection is not a property of this state-only base kernel.
     """
 
     source_key: str
     successors: tuple[CanonicalSuccessor, ...]
     identity: KernelIdentity
-    # Proposal mass that is not a molecular jump (self-transitions, immediate backtracks). Reported so a
-    # consumer can account for it; never folded into the productive law by this module.
+    # Proposal mass that is not a molecular jump. In the state-only base kernel
+    # this means canonical self-events. A history-aware wrapper may add its own
+    # rejected mass (for example, an immediate return to its previous key).
     virtual_mass: float = 0.0
 
     @property

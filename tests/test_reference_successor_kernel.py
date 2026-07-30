@@ -84,7 +84,7 @@ def test_self_transition_becomes_virtual_mass_and_is_excluded_from_the_law():
     assert batch.successors[0].probability == pytest.approx(1.0)
 
 
-def test_immediate_backtrack_is_routed_to_virtual_mass():
+def test_declared_history_aware_wrapper_routes_immediate_return_to_virtual_mass():
     source, previous, forward = _mol("CCO"), _mol("CC"), _mol("CCC")
     system = _StubSystem({("back", "b"): previous, ("fwd", "f"): forward})
     batch = reference_successor_batch(
@@ -95,6 +95,19 @@ def test_immediate_backtrack_is_routed_to_virtual_mass():
     )
     assert batch.virtual_mass == pytest.approx(0.7)
     assert batch.keys == (canonical_state_key(forward),)
+
+
+def test_state_only_base_kernel_keeps_a_possible_return_as_a_legal_successor():
+    source, previous, forward = _mol("CCO"), _mol("CC"), _mol("CCC")
+    system = _StubSystem({("back", "b"): previous, ("fwd", "f"): forward})
+    batch = reference_successor_batch(
+        source,
+        [("back", "b", 0.7), ("fwd", "f", 0.3)],
+        system=system,
+    )
+    assert batch.virtual_mass == pytest.approx(0.0)
+    assert batch.probability_of(canonical_state_key(previous)) == pytest.approx(0.7)
+    assert batch.probability_of(canonical_state_key(forward)) == pytest.approx(0.3)
 
 
 def test_all_mass_virtual_yields_a_terminal_batch():

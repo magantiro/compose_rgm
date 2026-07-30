@@ -57,9 +57,10 @@ def reference_successor_batch(
     """Aggregate marked mass into distinct canonical successors with explicit loops.
 
     ``system`` is required rather than defaulted: the de-novo and editing regimes have different legal
-    supports, and defaulting would silently pick one. ``previous_state_key`` routes an immediate return to
-    the prior state into virtual mass, matching the production convention that a backtrack advances the
-    proposal clock without being a productive molecular jump.
+    supports, and defaulting would silently pick one. With ``previous_state_key=None`` this is the
+    state-only base molecular kernel. Supplying ``previous_state_key`` explicitly applies a history-aware
+    no-immediate-return wrapper and routes its rejected mass into ``virtual_mass``; that wrapper is not part
+    of the base Markov kernel.
     """
     source_key = canonical_state_key(state)
     productive: dict[str, float] = {}

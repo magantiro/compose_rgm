@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
-"""Canonical-successor checkpoint selection for RingCore-V1 EDITING checkpoints.
+"""LEGACY diagnostic for early RingCore-V1 checkpoint comparisons.
 
-Implements the FROZEN selection rule in ``configs/ringcore_v1_checkpoint_selection.json``. The editing
-controller acts on the canonical-successor embedded jump chain -- not raw mark coordinates and not the
-continuous-time hazard -- so the load-bearing metric is the canonical-successor negative log-likelihood
+This script is **not** the frozen all-snapshot leaderboard and its outputs are
+not eligible checkpoint-selection evidence. It predates the packed validation
+panels and the authoritative production pushforward, performs an independent
+best-effort alias search, and can skip examples. See
+``docs/RINGCORE_V1_SUCCESSOR_LEADERBOARD_READINESS_2026-07-30.md``.
+
+It originally approximated an earlier selection rule. The editing controller
+acts on the canonical-successor embedded jump chain -- not raw mark coordinates
+and not the continuous-time hazard -- so its intended diagnostic is the
+canonical-successor negative log-likelihood
 
     L_edit = -mean log sum_{a : canonical(T(x,a)) == y_teacher} p_theta(a | x, t)
 
@@ -15,12 +22,14 @@ comparison is paired. Hazard calibration is reported SEPARATELY -- never folded 
 
 Usage:
   python scripts/ring_core_checkpoint_selection.py \
-      --checkpoint step500=/path/ckpt.pt --checkpoint step2000=/path/rec.pt:current \
+      --checkpoint step500=/path/rec500.pt:current \
+      --checkpoint step2000=/path/rec2000.pt:current \
       --examples 200 --output diagnostics/coherence/checkpoint_selection.json
 
-A ``label=path`` pair scores the checkpoint's own ``state_dict``; ``label=path:current`` overrides it with
-that file's ``current_state_dict`` (the step-N model inside an exact-recovery payload, whose ``state_dict``
-would otherwise be the BEST -- i.e. a different step).
+Only ``label=path:current`` is accepted. The explicit suffix installs that
+file's ``current_state_dict`` (the step-N model inside an exact-recovery
+payload, whose rollout ``state_dict`` would otherwise be the BEST -- i.e. a
+different step).
 """
 from __future__ import annotations
 
@@ -413,22 +422,30 @@ def score_checkpoint(model, examples: list[dict], *, alias_search: bool) -> dict
 def _load(spec: str):
     label, _, rest = spec.partition("=")
     path, _, mode = rest.partition(":")
+    if mode != "current":
+        raise ValueError(
+            "legacy diagnostics require an explicit :current suffix; scoring "
+            "state_dict/best_state_dict is forbidden for step snapshots"
+        )
     model, meta = load_factorized_rollout_checkpoint(
         Path(path), expected_scope_hash=BROAD_ORGANIC_V1.scope_hash()
     )
     step = meta.get("completed_steps") if isinstance(meta, dict) else None
-    if mode == "current":
-        payload = torch.load(path, map_location="cpu", weights_only=False)
-        model.load_state_dict(payload["current_state_dict"])
-        step = payload.get("completed_steps")
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    model.load_state_dict(payload["current_state_dict"])
+    step = payload.get("completed_steps")
     model.eval()
-    return label, model, {"path": path, "state_source": mode or "state_dict", "completed_steps": step}
+    return label, model, {
+        "path": path,
+        "state_source": "current_state_dict",
+        "completed_steps": step,
+    }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", action="append", required=True,
-                        help="label=path[:current] (repeatable)")
+                        help="label=path:current (repeatable; current is mandatory)")
     parser.add_argument("--molecules", type=int, default=60)
     parser.add_argument("--seed", type=int, default=20260728)
     parser.add_argument("--no-alias-search", action="store_true",
@@ -457,12 +474,12 @@ def main() -> int:
         result = score_checkpoint(model, examples, alias_search=not args.no_alias_search)
         report["checkpoints"][label] = {**meta, **result}
 
-    ranked = sorted(
-        report["checkpoints"].items(),
-        key=lambda kv: kv[1]["production_weighted_canonical_successor_nll"],
-    )
-    report["ranking_by_primary_metric"] = [k for k, _ in ranked]
-    report["best_by_primary_metric"] = ranked[0][0] if ranked else None
+    # Deliberately do not sort, rank, or identify a best checkpoint. This legacy
+    # diagnostic lacks the frozen packed panels and hard gates, so emitting a
+    # winner-shaped field would create an unsafe selection bypass even when the
+    # docstring calls the output non-evidence.
+    report["evidence_status"] = "LEGACY_NON_SELECTION_DIAGNOSTIC"
+    report["selection_performed"] = False
     text = json.dumps(report, indent=2, sort_keys=True)
     if args.output:
         args.output.write_text(text + "\n")

@@ -1,0 +1,211 @@
+{
+  "schema": "compose.ringcore.successor_leaderboard",
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_CANONICAL_SUCCESSOR_SCORING",
+  "frozen_at": "2026-07-29",
+  "protocol_correction_at": "2026-07-30",
+  "protocol_correction": "Before any canonical-successor results were produced, the secondary metric was aligned to the editing V2 gate: balance joint semantic cells rather than operator families. Family-balanced metrics remain diagnostics.",
+  "purpose": "Select or reject the completed RingCore-V1 editing checkpoints using the molecular process actually deployed: the canonical productive embedded jump chain.",
+  "scientific_object": {
+    "trained_law": "normalized executable-mark law, except bond_reroute is already grouped within its canonical graft-successor fiber",
+    "evaluated_law": "pushforward through the production executor and canonical_state_key, summed by the production segmented-successor implementation",
+    "self_events": "reported as virtual mass and excluded before conditioning on a productive molecular jump",
+    "immediate_backtracks": "legal molecular successors in the base Markov kernel; a history-aware controller may suppress them only by augmenting state or declaring a wrapper",
+    "hazard": "reported separately and never used to select the fixed-budget editing checkpoint"
+  },
+  "run": {
+    "run_label": "compose-v4-ringcore-v1-scientific-a7546e2-v1",
+    "git_commit": "a7546e2",
+    "frozen_inventory_sha256": "df815175f8b75a319cc87c01b923db431e53834e28d8b6c5f232ac34e66ddbc0",
+    "snapshot_count": 32,
+    "snapshot_steps": {
+      "start": 500,
+      "stop": 16000,
+      "interval": 500
+    },
+    "source_run_mutation_forbidden": true,
+    "snapshot_model_state": "current_state_dict",
+    "embedded_best_state_forbidden": true,
+    "inventory_note": "The checked-in diagnostics inventory is the exact immutable freezer output. Execution must recompute its self-hash and require frozen_inventory_sha256 before resolving any snapshot."
+  },
+  "validation_data": {
+    "partition": "validation",
+    "test_partition_forbidden_for_selection": true,
+    "unified_manifest_checksum": "5c5c254e1054c081",
+    "representability_overlay_checksum": "32372dc5d73139a7",
+    "layer_weights_hash": "794e6628f23465d8",
+    "operator_registry_hash": "9197401e8dc3a7ae",
+    "layers": {
+      "general_corruption": {
+        "trace_draw_weight": 0.4,
+        "records": 3973
+      },
+      "cycle_operations": {
+        "trace_draw_weight": 0.25,
+        "records": 13656
+      },
+      "mmp_analogue": {
+        "trace_draw_weight": 0.35,
+        "records": 15775
+      }
+    },
+    "record_sampling": "production HierarchicalMarkSampler: layer by frozen weight, then uniform over nonempty path-length bins, then uniform record within bin",
+    "time_sampling": {
+      "late_time_fraction": 0.5,
+      "operational_horizon": 16.0,
+      "ordinary_interval": [
+        0.01,
+        0.99
+      ]
+    },
+    "progress_sampling": {
+      "stratification_fraction": 0.5,
+      "importance_weights_required": true,
+      "terminal_rows": "included for hazard diagnostics and excluded from successor NLL"
+    }
+  },
+  "panels": {
+    "production_law": {
+      "seed": 2026072901,
+      "initial_draws": 4096,
+      "expanded_draws": 16384,
+      "stream_prefix_rule": "the 4096-row panel is the exact prefix of the 16384-row panel",
+      "expansion_trigger": "expand before selection if the top two primary-metric checkpoints have a paired 95% bootstrap confidence interval containing zero, any active family has fewer than 64 nonterminal examples, or a hard-gate estimate is numerically inconclusive",
+      "checkpoint_coverage": "every snapshot is scored on the same final panel size"
+    },
+    "family_forensics": {
+      "seed": 2026072902,
+      "active_families": [
+        "atom_insert",
+        "atom_delete",
+        "atom_restate",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_insert",
+        "cycle_attach",
+        "ring_system_delete",
+        "ring_system_restate"
+      ],
+      "initial_minimum_nonterminal_examples_per_family": 256,
+      "expanded_minimum_nonterminal_examples_per_ambiguous_family": 1024,
+      "maximum_stream_draws": 262144,
+      "selection_role": "capability safeguards and diagnosis only; never substitute its balanced distribution for the production-law primary metric"
+    },
+    "semantic_cells": {
+      "definition_source": "docs/EDITING_MODEL_FIRST_PRINCIPLES_SPEC.md",
+      "encoder_version": "joint_semantic_axes_v1",
+      "required_axes": [
+        "capability_regime",
+        "evidence_origin",
+        "path_scale",
+        "cardinality_topology_delta",
+        "chemistry_charge_stratum",
+        "split_unit"
+      ],
+      "panel_field": "semantic_cell_id",
+      "cell_id_rule": "deterministic versioned encoder over every required axis; no result-dependent merging",
+      "balance_rule": "importance-weighted canonical-successor NLL within each frozen nonempty cell, then equal mean over cells",
+      "execution_status": "BLOCKED_UNTIL_AXIS_LABELERS_AND_CELL_CENSUS_ARE_FROZEN"
+    }
+  },
+  "reported_metrics": {
+    "primary": "importance-weighted production-law canonical-successor NLL, conditioned on a nonterminal teacher event",
+    "secondary": "equal mean of importance-weighted canonical-successor NLL across frozen joint semantic cells",
+    "metric_ids": {
+      "primary": "production_weighted_canonical_successor_nll",
+      "secondary": "balanced_semantic_cell_canonical_successor_nll"
+    },
+    "per_family": [
+      "training-target NLL",
+      "canonical-successor NLL",
+      "canonical-successor probability",
+      "canonical-successor rank",
+      "mean reciprocal rank",
+      "uniform-canonical-successor NLL",
+      "paired learned-minus-uniform log-likelihood advantage",
+      "raw legal mark count",
+      "productive mark count",
+      "canonical successor count",
+      "teacher-successor alias multiplicity",
+      "maximum alias multiplicity",
+      "virtual self mass",
+      "teacher family probability",
+      "family top-1",
+      "family top-3"
+    ],
+    "aggregate": [
+      "selected-mark versus canonical-successor NLL gap",
+      "family-balanced canonical-successor NLL as a diagnostic only",
+      "fraction of states with any aliased successor",
+      "fraction of teacher successors with alias multiplicity greater than one",
+      "alias multiplicity histogram",
+      "family mass calibration TV",
+      "family mass calibration KL",
+      "hazard calibration reported separately"
+    ]
+  },
+  "hard_gates": {
+    "all_checkpoints": [
+      "checkpoint SHA-256 and provenance match the frozen inventory",
+      "production capability signature matches RingCore-V1 exactly",
+      "every nonterminal teacher successor is present exactly once after canonical grouping",
+      "every enumerated legal mark executes successfully",
+      "every nonterminal successor row is finite, nonnegative, distinct and normalized",
+      "no canonical self event appears as a productive successor",
+      "ring_system_grow has zero legal marks and zero probability"
+    ],
+    "checkpoint_adequacy": [
+      "all nine active families have finite successor metrics on at least 256 fixed forensic examples",
+      "each active family has positive mean learned-versus-uniform canonical log-likelihood advantage",
+      "the one-sided paired 95% bootstrap lower bound on that advantage is positive; if initially ambiguous, expand that family to 1024 examples before deciding",
+      "cycle_attach ring opening and bond_reroute graft both pass the same successor-level rule; mark-level top-k cannot waive this gate",
+      "held-out validation transport beats uniform canonical rewriting before a checkpoint is frozen for downstream controller experiments"
+    ]
+  },
+  "selection_rule": {
+    "eligible_set": "checkpoints passing every structural and capability gate",
+    "metric_order": [
+      "production_weighted_canonical_successor_nll",
+      "balanced_semantic_cell_canonical_successor_nll"
+    ],
+    "first": "minimum primary metric",
+    "statistical_tie": "paired 95% bootstrap interval for the primary NLL difference contains zero",
+    "second": "minimum balanced-semantic-cell secondary metric among statistically tied checkpoints",
+    "secondary_applies_only_after_primary_statistical_tie": true,
+    "tie_breakers": [
+      "held-source/scaffold/topology safeguards",
+      "family-mass calibration",
+      "productive validation rollouts"
+    ],
+    "explicitly_forbidden": [
+      "test-set selection",
+      "trainer selected_step",
+      "final-step preference",
+      "raw hazard-inclusive GM loss as the editing selector",
+      "family top-k as the sole capability criterion",
+      "changing panel seeds, thresholds, weights, or expansion rules after canonical results are inspected"
+    ]
+  },
+  "execution_contract": {
+    "partition": "validation",
+    "test_partition_forbidden": true,
+    "snapshot_state_source": "current_state_dict",
+    "all_32_snapshots_required": true,
+    "same_panel_for_every_snapshot": true,
+    "skipped_nonterminal_rows_allowed": false,
+    "best_checkpoint_field_emitted_before_all_gates": false,
+    "ranking_performed_by_preparation_or_scoring_code": false,
+    "selection_performed_by_preparation_or_scoring_code": false,
+    "future_ranking_requires_all_snapshot_provenance_and_hard_gates": true,
+    "future_selection_requires_all_snapshot_provenance_and_hard_gates": true,
+    "production_kernel_entry_point": "compose_v4.experiments.production_successor_kernel.canonical_successor_result",
+    "independent_alias_enumeration_for_evidence_forbidden": true
+  },
+  "decision_outcomes": {
+    "existing_checkpoint": "freeze only if at least one snapshot passes all gates",
+    "retraining": "required if every snapshot fails ring opening, graft, another active-family safeguard, or validation learned-versus-uniform transport",
+    "from_scratch_allowed": true,
+    "warm_start_required": false,
+    "repaired_run_final_evaluation": "use a new sealed final holdout or external benchmark because current final-test aggregates have already been inspected"
+  }
+}
