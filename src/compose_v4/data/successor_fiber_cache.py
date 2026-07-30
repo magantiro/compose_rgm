@@ -39,7 +39,7 @@ from compose_v4.experiments.factorized_successor_training import (
 )
 
 SUCCESSOR_FIBER_CACHE_SCHEMA = "compose.data.successor_fiber_cache"
-SUCCESSOR_FIBER_CACHE_SCHEMA_VERSION = 2
+SUCCESSOR_FIBER_CACHE_SCHEMA_VERSION = 3
 
 _PROVENANCE_FIELDS = (
     "operator_registry_hash",
@@ -72,6 +72,8 @@ _RECORD_FIELDS = (
     "layer",
     "partition",
     "trace_id",
+    "trace_source_key",
+    "trace_target_key",
     "progress_index",
     "path_length",
     "source_key",
@@ -208,6 +210,8 @@ class SuccessorFiberCacheAddress:
     layer: str
     partition: str
     trace_id: str
+    trace_source_key: str
+    trace_target_key: str
     progress_index: int
     path_length: int
 
@@ -229,7 +233,13 @@ class SuccessorFiberCacheAddress:
             raise ValueError("packed_shard_name must be one nonempty basename")
         if type(self.entry_index) is not int or self.entry_index < 0:
             raise ValueError("entry_index must be a nonnegative integer")
-        for name in ("layer", "partition", "trace_id"):
+        for name in (
+            "layer",
+            "partition",
+            "trace_id",
+            "trace_source_key",
+            "trace_target_key",
+        ):
             value = getattr(self, name)
             if not isinstance(value, str) or not value:
                 raise ValueError(f"{name} must be a nonempty string")
@@ -245,7 +255,9 @@ class SuccessorFiberCacheAddress:
         return self.progress_index == self.path_length
 
     @property
-    def trace_key(self) -> tuple[str, str, int, str, str, str]:
+    def trace_key(
+        self,
+    ) -> tuple[str, str, int, str, str, str, str, str, int]:
         return (
             self.packed_shard_content_sha256,
             self.packed_shard_name,
@@ -253,6 +265,9 @@ class SuccessorFiberCacheAddress:
             self.layer,
             self.partition,
             self.trace_id,
+            self.trace_source_key,
+            self.trace_target_key,
+            self.path_length,
         )
 
     @classmethod
@@ -269,6 +284,8 @@ class SuccessorFiberCacheAddress:
             layer=address.layer,
             partition=address.partition,
             trace_id=address.trace_id,
+            trace_source_key=address.source_key,
+            trace_target_key=address.target_key,
             progress_index=progress_index,
             path_length=address.path_length,
         )
@@ -577,6 +594,8 @@ def _validate_record(
         ("layer", address.layer),
         ("partition", address.partition),
         ("trace_id", address.trace_id),
+        ("trace_source_key", address.trace_source_key),
+        ("trace_target_key", address.trace_target_key),
         ("source_key", record.source_key),
         ("source_state_sha256", record.source_state_sha256),
     ):
@@ -611,6 +630,21 @@ def _validate_record(
     return alias_count
 
 
+def validate_successor_fiber_cache_record(
+    record: SuccessorFiberCacheRecord,
+    *,
+    provenance: SuccessorFiberCacheProvenance,
+    limits: SuccessorFiberCacheLimits = DEFAULT_SUCCESSOR_FIBER_CACHE_LIMITS,
+) -> int:
+    """Validate one decoded record under the shared backend contract."""
+
+    return _validate_record(
+        record,
+        provenance=provenance,
+        limits=limits,
+    )
+
+
 def _canonical_records(
     records: Iterable[SuccessorFiberCacheRecord],
     *,
@@ -640,7 +674,7 @@ def _canonical_records(
         )
 
     grouped: dict[
-        tuple[str, str, int, str, str, str],
+        tuple[str, str, int, str, str, str, str, str, int],
         list[SuccessorFiberCacheRecord],
     ] = defaultdict(list)
     for record in ordered:
@@ -669,7 +703,36 @@ def _canonical_records(
                     f"progress {current.address.progress_index} and "
                     f"{following.address.progress_index}"
                 )
+        if (
+            trace_records[0].source_key
+            != trace_records[0].address.trace_source_key
+        ):
+            raise SuccessorFiberCacheError(
+                f"trace {trace_key!r} first state disagrees with its packed source"
+            )
+        if (
+            trace_records[-1].source_key
+            != trace_records[-1].address.trace_target_key
+        ):
+            raise SuccessorFiberCacheError(
+                f"trace {trace_key!r} terminal state disagrees with its packed target"
+            )
     return ordered
+
+
+def canonical_successor_fiber_records(
+    records: Iterable[SuccessorFiberCacheRecord],
+    *,
+    provenance: SuccessorFiberCacheProvenance,
+    limits: SuccessorFiberCacheLimits = DEFAULT_SUCCESSOR_FIBER_CACHE_LIMITS,
+) -> tuple[SuccessorFiberCacheRecord, ...]:
+    """Validate and canonically order records for any immutable backend."""
+
+    return _canonical_records(
+        records,
+        provenance=provenance,
+        limits=limits,
+    )
 
 
 def _alias_payload(alias: TeacherSuccessorAlias) -> dict[str, Any]:
@@ -695,6 +758,8 @@ def _record_payload(record: SuccessorFiberCacheRecord) -> dict[str, Any]:
         "layer": record.address.layer,
         "partition": record.address.partition,
         "trace_id": record.address.trace_id,
+        "trace_source_key": record.address.trace_source_key,
+        "trace_target_key": record.address.trace_target_key,
         "progress_index": record.address.progress_index,
         "path_length": record.address.path_length,
         "source_key": record.source_key,
@@ -794,6 +859,8 @@ def _decode_record(payload: Any) -> SuccessorFiberCacheRecord:
             layer=payload["layer"],
             partition=payload["partition"],
             trace_id=payload["trace_id"],
+            trace_source_key=payload["trace_source_key"],
+            trace_target_key=payload["trace_target_key"],
             progress_index=payload["progress_index"],
             path_length=payload["path_length"],
         )

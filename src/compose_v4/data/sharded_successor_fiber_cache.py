@@ -1,10 +1,9 @@
 """Exact lazy lookup over provenance-bound successor-fiber cache shards.
 
-This first backend intentionally supports bounded development artifacts only.
-It proves the address, inventory, LRU, and dataset interfaces while keeping the
-existing canonical-JSON cache as a test oracle. A full 63-shard corpus build is
-not authorized until a bounded storage benchmark selects a production backend
-that avoids materializing large JSON object graphs in every DataLoader worker.
+The canonical-JSON backend remains the bounded correctness oracle. The indexed
+SQLite backend resolves one row at a time without materializing a shard-sized
+Python object graph. Both remain development-only until a complete corpus
+inventory and the preregistered training gates explicitly authorize a run.
 """
 
 from __future__ import annotations
@@ -23,7 +22,15 @@ from typing import Any
 
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.chem.persistent_state_identity import (
+    PERSISTENT_STATE_DIGEST_SCHEMA,
+    PERSISTENT_STATE_DIGEST_VERSION,
     persistent_slot_state_sha256,
+)
+from compose_v4.data.indexed_successor_fiber_cache import (
+    INDEXED_SUCCESSOR_FIBER_STORAGE_BACKEND,
+    IndexedSuccessorFiberCache,
+    IndexedSuccessorFiberCacheError,
+    open_indexed_successor_fiber_cache,
 )
 from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.data.successor_fiber_cache import (
@@ -37,10 +44,6 @@ from compose_v4.data.successor_fiber_cache import (
     SuccessorFiberCacheRecord,
     read_successor_fiber_cache,
 )
-from compose_v4.chem.persistent_state_identity import (
-    PERSISTENT_STATE_DIGEST_SCHEMA,
-    PERSISTENT_STATE_DIGEST_VERSION,
-)
 
 SUCCESSOR_FIBER_INVENTORY_SCHEMA = (
     "compose.data.sharded_successor_fiber_cache_inventory"
@@ -48,6 +51,15 @@ SUCCESSOR_FIBER_INVENTORY_SCHEMA = (
 SUCCESSOR_FIBER_INVENTORY_SCHEMA_VERSION = 1
 SUCCESSOR_FIBER_INVENTORY_STATUS = "BOUNDED_DEVELOPMENT_ONLY"
 SUCCESSOR_FIBER_STORAGE_BACKEND = "canonical_json_lru_development_v1"
+SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND = (
+    INDEXED_SUCCESSOR_FIBER_STORAGE_BACKEND
+)
+SUPPORTED_SUCCESSOR_FIBER_STORAGE_BACKENDS = frozenset(
+    (
+        SUCCESSOR_FIBER_STORAGE_BACKEND,
+        SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+    )
+)
 MAX_INVENTORY_BYTES = 16 << 20
 
 _ROOT_FIELDS = {
@@ -503,13 +515,13 @@ class SuccessorFiberCacheInventory:
             raise ValueError("inventory_sha256 must be a lowercase SHA-256")
         if self.status != SUCCESSOR_FIBER_INVENTORY_STATUS:
             raise ValueError("inventory status is not bounded-development")
-        if self.storage_backend != SUCCESSOR_FIBER_STORAGE_BACKEND:
+        if self.storage_backend not in SUPPORTED_SUCCESSOR_FIBER_STORAGE_BACKENDS:
             raise ValueError("inventory storage backend is unsupported")
         if type(self.full_corpus_training_authorized) is not bool:
             raise TypeError("full_corpus_training_authorized must be Boolean")
         if self.full_corpus_training_authorized:
             raise ValueError(
-                "the canonical-JSON development backend cannot authorize "
+                "a bounded-development successor cache cannot authorize "
                 "full-corpus training"
             )
         for entry in self.entries:
@@ -567,6 +579,7 @@ def seal_successor_fiber_cache_inventory(
     compatibility: SuccessorFiberCacheCompatibility,
     unified_packed_manifest_sha256: str,
     representability_overlay_sha256: str,
+    storage_backend: str = SUCCESSOR_FIBER_STORAGE_BACKEND,
 ) -> tuple[bytes, SuccessorFiberCacheInventory]:
     """Create canonical, self-hashed bounded-development inventory bytes."""
 
@@ -580,7 +593,7 @@ def seal_successor_fiber_cache_inventory(
         "schema": SUCCESSOR_FIBER_INVENTORY_SCHEMA,
         "schema_version": SUCCESSOR_FIBER_INVENTORY_SCHEMA_VERSION,
         "status": SUCCESSOR_FIBER_INVENTORY_STATUS,
-        "storage_backend": SUCCESSOR_FIBER_STORAGE_BACKEND,
+        "storage_backend": storage_backend,
         "full_corpus_training_authorized": False,
         "source_corpus_inventory_sha256": source_corpus_inventory_sha256,
         "compatibility_payload": compatibility.payload,
@@ -698,7 +711,10 @@ def deserialize_successor_fiber_cache_inventory(
         )
     if payload["status"] != SUCCESSOR_FIBER_INVENTORY_STATUS:
         raise ShardedSuccessorFiberCacheError("cache inventory status drifted")
-    if payload["storage_backend"] != SUCCESSOR_FIBER_STORAGE_BACKEND:
+    if (
+        payload["storage_backend"]
+        not in SUPPORTED_SUCCESSOR_FIBER_STORAGE_BACKENDS
+    ):
         raise ShardedSuccessorFiberCacheError(
             "cache inventory backend drifted"
         )
@@ -884,7 +900,7 @@ def summarize_successor_fiber_cache(
 
 
 class ShardedSuccessorFiberCache:
-    """Lazy exact-address cache with one bounded JSON LRU per worker."""
+    """Lazy exact-address cache over one frozen backend per inventory."""
 
     def __init__(
         self,
@@ -914,7 +930,10 @@ class ShardedSuccessorFiberCache:
         self.max_open_shards = max_open_shards
         self.limits = limits
         self._specs = dict(inventory.by_packed_digest)
-        self._loaded: OrderedDict[str, SuccessorFiberCache] = OrderedDict()
+        self._loaded: OrderedDict[
+            str,
+            SuccessorFiberCache | IndexedSuccessorFiberCache,
+        ] = OrderedDict()
         compatibility = inventory.compatibility.payload
         support_signature_hash = hashlib.sha256(
             _canonical_json_bytes(compatibility["support_signature"])
@@ -980,10 +999,22 @@ class ShardedSuccessorFiberCache:
 
     def _verify_loaded(
         self,
-        cache: SuccessorFiberCache,
+        cache: SuccessorFiberCache | IndexedSuccessorFiberCache,
         spec: SuccessorFiberShardSpec,
     ) -> None:
-        observed = summarize_successor_fiber_cache(cache)
+        if isinstance(cache, IndexedSuccessorFiberCache):
+            metadata = cache.metadata
+            observed = {
+                "active_trace_count": metadata.active_trace_count,
+                "progress_record_count": metadata.record_count,
+                "jump_record_count": metadata.jump_record_count,
+                "terminal_record_count": metadata.terminal_record_count,
+                "teacher_alias_count": metadata.teacher_alias_count,
+                "virtual_alias_count": metadata.virtual_alias_count,
+                "maximum_alias_count": metadata.maximum_alias_count,
+            }
+        else:
+            observed = summarize_successor_fiber_cache(cache)
         expected = {
             "active_trace_count": spec.active_trace_count,
             "progress_record_count": spec.progress_record_count,
@@ -998,6 +1029,20 @@ class ShardedSuccessorFiberCache:
                 f"cache shard census mismatch: expected={expected}, "
                 f"observed={observed}"
             )
+        if isinstance(cache, IndexedSuccessorFiberCache):
+            if (
+                cache.metadata.packed_shard_name != spec.packed_shard_name
+                or cache.metadata.layer != spec.layer
+                or cache.metadata.partition != spec.partition
+            ):
+                raise ShardedSuccessorFiberCacheError(
+                    "indexed cache envelope disagrees with its inventory entry"
+                )
+            cache.require_entry_census(
+                packed_entry_count=spec.packed_entry_count,
+                excluded_entry_indices=spec.excluded_entry_indices,
+            )
+            return
         for record in cache.records:
             address = record.address
             if (
@@ -1024,7 +1069,10 @@ class ShardedSuccessorFiberCache:
                 f"missing={missing[:20]}, unexpected={unexpected[:20]}"
             )
 
-    def _load(self, spec: SuccessorFiberShardSpec) -> SuccessorFiberCache:
+    def _load(
+        self,
+        spec: SuccessorFiberShardSpec,
+    ) -> SuccessorFiberCache | IndexedSuccessorFiberCache:
         digest = spec.packed_shard_content_sha256
         cached = self._loaded.get(digest)
         if cached is not None:
@@ -1035,25 +1083,47 @@ class ShardedSuccessorFiberCache:
             raise ShardedSuccessorFiberCacheError(
                 f"declared cache shard is absent: {path}"
             )
-        if path.stat().st_size != spec.cache_file_bytes:
-            raise ShardedSuccessorFiberCacheError(
-                "cache shard byte count disagrees with inventory"
+        if self.inventory.storage_backend == SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND:
+            try:
+                cache = open_indexed_successor_fiber_cache(
+                    path,
+                    expected_provenance=spec.provenance,
+                    expected_content_sha256=spec.cache_content_sha256,
+                    expected_file_sha256=spec.cache_file_sha256,
+                    expected_file_bytes=spec.cache_file_bytes,
+                    limits=self.limits,
+                )
+            except IndexedSuccessorFiberCacheError as error:
+                raise ShardedSuccessorFiberCacheError(
+                    "indexed successor-cache shard failed verification"
+                ) from error
+        else:
+            if path.stat().st_size != spec.cache_file_bytes:
+                raise ShardedSuccessorFiberCacheError(
+                    "cache shard byte count disagrees with inventory"
+                )
+            if _sha256_file(path) != spec.cache_file_sha256:
+                raise ShardedSuccessorFiberCacheError(
+                    "cache shard byte SHA-256 disagrees with inventory"
+                )
+            cache = read_successor_fiber_cache(
+                path,
+                expected_provenance=spec.provenance,
+                expected_content_sha256=spec.cache_content_sha256,
+                limits=self.limits,
             )
-        if _sha256_file(path) != spec.cache_file_sha256:
+        try:
+            self._verify_loaded(cache, spec)
+        except IndexedSuccessorFiberCacheError as error:
             raise ShardedSuccessorFiberCacheError(
-                "cache shard byte SHA-256 disagrees with inventory"
-            )
-        cache = read_successor_fiber_cache(
-            path,
-            expected_provenance=spec.provenance,
-            expected_content_sha256=spec.cache_content_sha256,
-            limits=self.limits,
-        )
-        self._verify_loaded(cache, spec)
+                "indexed successor-cache shard failed its inventory census"
+            ) from error
         self._loaded[digest] = cache
         self._loaded.move_to_end(digest)
         while len(self._loaded) > self.max_open_shards:
-            self._loaded.popitem(last=False)
+            _, evicted = self._loaded.popitem(last=False)
+            if isinstance(evicted, IndexedSuccessorFiberCache):
+                evicted.close()
         return cache
 
     def require(
@@ -1087,7 +1157,7 @@ class ShardedSuccessorFiberCache:
                 address,
                 progress_index=progress_index,
             )
-        except KeyError as error:
+        except (KeyError, IndexedSuccessorFiberCacheError) as error:
             raise ShardedSuccessorFiberCacheError(
                 "successor cache has no exact sampled trace-progress row"
             ) from error
@@ -1108,8 +1178,8 @@ class ShardedSuccessorFiberCache:
 
     def assert_full_corpus_training_authorized(self) -> None:
         raise ShardedSuccessorFiberCacheError(
-            "canonical-JSON successor caches are bounded-development only; "
-            "a measured production storage backend has not been frozen"
+            "this successor-cache inventory is bounded-development only; "
+            "complete corpus and training-gate evidence has not been frozen"
         )
 
 
@@ -1125,10 +1195,12 @@ def assert_store_is_pickle_safe(store: ShardedSuccessorFiberCache) -> None:
 
 __all__ = [
     "MAX_INVENTORY_BYTES",
+    "SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND",
     "SUCCESSOR_FIBER_INVENTORY_SCHEMA",
     "SUCCESSOR_FIBER_INVENTORY_SCHEMA_VERSION",
     "SUCCESSOR_FIBER_INVENTORY_STATUS",
     "SUCCESSOR_FIBER_STORAGE_BACKEND",
+    "SUPPORTED_SUCCESSOR_FIBER_STORAGE_BACKENDS",
     "ShardedSuccessorFiberCache",
     "ShardedSuccessorFiberCacheError",
     "SuccessorFiberCacheCompatibility",

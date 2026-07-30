@@ -1,0 +1,68 @@
+{
+  "schema": "compose.diagnostics.indexed_successor_cache_benchmark",
+  "schema_version": 1,
+  "status": "PRELIMINARY_BOUNDED_NOT_TRAINING_AUTHORIZATION",
+  "indexed_cache_schema_version": 2,
+  "storage_stress_artifact": {
+    "construction": "170000 complete rows synthesized by repeating corrected real-corruption smoke records under distinct immutable addresses",
+    "chemistry_representative": false,
+    "record_count": 170000,
+    "file_bytes": 45674496,
+    "bytes_per_record": 268.6735058823529,
+    "write_seconds": 3.339002375025302,
+    "write_records_per_second": 50913.41092523535,
+    "verified_semantic_open_seconds": 7.181321332929656,
+    "forced_uncached_lookup_count": 100000,
+    "forced_uncached_lookup_seconds": 5.975883916951716,
+    "forced_uncached_lookups_per_second": 16733.926125360507,
+    "content_sha256": "477474d2e8bd375cd41b939e000b27aa00d8657ec4e9db352a8d5882008623ed",
+    "file_sha256": "105fcd28ab6fb32a8b43039543ab9b564d71fb4d0206afa789fa8f6358ec489d"
+  },
+  "real_shard_exact_state_census": {
+    "method": "persistent_slot_state_sha256 only; no RDKit, canonicalization, executor replay or file mutation",
+    "elapsed_seconds": 20.571,
+    "lanes": {
+      "corruption": {
+        "packed_shard_sha256": "d5dce3f31d46ea18f82838a91ceb143f852f8d3bc83248ff45c7028931739915",
+        "progress_states": 8187,
+        "unique_exact_states": 4180,
+        "support_compile_calls_saved_fraction": 0.48943446928056675,
+        "jumps": 6100,
+        "unique_exact_directed_pairs": 6032
+      },
+      "cycle_operations": {
+        "packed_shard_sha256": "482afb090817b333813ef9689bfa71f49b61c8cff4e51fa41c2207303a887fcc",
+        "progress_states": 170000,
+        "unique_exact_states": 53126,
+        "support_compile_calls_saved_fraction": 0.6874941176470588,
+        "jumps": 85000,
+        "unique_exact_directed_pairs": 85000
+      },
+      "mmp_analogues": {
+        "packed_shard_sha256": "02040c6ab6208971c3d21730c0d467280e5b6bb6c45439dde25fe5ccdd0b3248",
+        "progress_states": 142482,
+        "unique_exact_states": 129963,
+        "support_compile_calls_saved_fraction": 0.08786373015538806,
+        "jumps": 121795,
+        "unique_exact_directed_pairs": 116032
+      }
+    },
+    "combined": {
+      "progress_states": 320669,
+      "unique_exact_states": 185924,
+      "support_compile_calls_saved": 134745,
+      "support_compile_calls_saved_fraction": 0.4201996451169274,
+      "jumps": 212895,
+      "unique_exact_directed_pairs": 207027,
+      "directed_pair_compile_calls_saved": 5868,
+      "directed_pair_compile_calls_saved_fraction": 0.02756288311139299
+    }
+  },
+  "remaining_gates": [
+    "actual indexed DataLoader fork/spawn throughput and RSS",
+    "complete real-shard indexed census",
+    "support-invariance qualification",
+    "state-centric resumable parallel compiler",
+    "frozen complete-corpus inventory"
+  ]
+}

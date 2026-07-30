@@ -52,20 +52,22 @@ The first four data-path stages are now implemented:
   entry index and trace envelope through `PathRecord`;
 - `FactorizedMarkExample` exposes the already-selected record and progress
   indices without adding an RNG call;
-- `successor_fiber_cache.py` schema v2 binds exact persistent-slot source and
-  target SHA-256 identities and provides an O(1) primary lookup keyed by
+- `successor_fiber_cache.py` schema v3 binds the complete packed source/target
+  envelope plus exact persistent-slot source and target SHA-256 identities and
+  provides an O(1) primary lookup keyed by
   `(packed_shard_sha256, entry_index, progress_index)`;
 - `sharded_successor_fiber_cache.py` provides a self-hashed, provenance-bound,
-  immutable inventory and lazy bounded JSON LRU for development panels;
+  immutable inventory and selects either the JSON oracle or indexed SQLite
+  backend for development panels;
 - `factorized_successor_data.py` performs a fail-closed post-draw join and
   returns aligned `FactorizedSuccessorBatch` objects;
 - `successor_fiber_cache_builder.py` compiles complete addressed development
   traces for correctness tests.
 
-The canonical-JSON backend is explicitly
-`BOUNDED_DEVELOPMENT_ONLY`. It cannot authorize a full-corpus run. The 63-shard
-build waits for measured JSON/columnar-mmap/SQLite storage results and a frozen
-complete-corpus inventory.
+The inventory is explicitly `BOUNDED_DEVELOPMENT_ONLY`, regardless of storage
+backend. It cannot authorize a full-corpus run. The 63-shard build waits for
+the remaining indexed-worker qualification and a frozen complete-corpus
+inventory.
 
 ### Sampling and batching
 
@@ -402,10 +404,11 @@ same support contract. Cache contents must not depend on learned weights.
 
 ## Unresolved blockers
 
-1. **Production storage backend:** deterministic JSON is the correctness oracle,
-   but loading large shards materializes Python object graphs per worker. Measure
-   one representative corruption, cycle and large-MMP shard before choosing a
-   dense columnar mmap backend or SQLite.
+1. **Production storage qualification:** deterministic JSON remains the
+   correctness oracle, and an immutable indexed SQLite backend now passes the
+   bounded storage/lookup benchmark without materializing shard-sized Python
+   object graphs. Full qualification still requires an actual indexed
+   multiworker `DataLoader` throughput/RSS run and one complete shard census.
 2. **No frozen complete-corpus inventory yet:** the inventory schema now binds
    each packed shard byte hash, cache byte hash, manifest/overlay identities,
    active trace census and declared exclusions, but it has not been built for
@@ -425,9 +428,10 @@ same support contract. Cache contents must not depend on learned weights.
    The historical mark objective remains the default and resume artifacts bind
    the objective identity and selector, so a mark checkpoint cannot silently
    resume as successor training.
-7. **Build cost:** the corpus contains 3,370,821 progress states. Measure
-   compilation throughput and exact-state/fiber deduplication on a bounded
-   sample before launching a 63-shard CPU build.
+7. **Build cost:** the corpus contains 3,370,821 progress states. A real-shard
+   exact-state census shows useful reuse, but the state-centric compiler and
+   resumable parallel build have not yet been implemented. No 63-shard build
+   is authorized.
 
 ## Implementation and verification order
 
@@ -441,8 +445,9 @@ same support contract. Cache contents must not depend on learned weights.
    and active families.
 6. Build tiny caches from real corruption, cycle-open/close and MMP traces;
    compare every loaded fiber to fresh production compilation.
-7. Benchmark representative JSON shards, then freeze the measured production
-   storage backend and complete-corpus inventory.
+7. ~~Benchmark the indexed backend on a bounded 170,000-row artifact.~~ Run the
+   real indexed multiworker/RSS benchmark, then freeze the storage backend and
+   complete-corpus inventory.
 8. ~~Add successor metrics and successor-level checkpoint selection to the
    shared optimizer loop.~~
 9. Run a CPU dry launch with one real batch and zero optimizer steps.
@@ -497,3 +502,55 @@ measurements, not a production throughput claim.  They rule out a naive serial
 3.37-million-state build and reinforce the requirement to benchmark parallel
 compilation plus indexed, non-materializing storage before authorizing all 63
 shards.
+
+## Indexed storage and exact-state reuse measurements
+
+The indexed schema stores one immutable SQLite artifact per packed shard and
+resolves rows by `(entry_index, progress_index)`. It now independently verifies
+the byte SHA-256, exact SQLite schema, resource bounds, recomputed semantic
+content hash, derived census, complete trace chains, full packed source/target
+envelope, and persistent-slot state identity. Read handles are process-local,
+pickle-safe and bounded by a decoded-row LRU. File identity is checked before
+and after every lookup, including device, inode, size, modification time and
+change time. The sharded inventory remains
+`BOUNDED_DEVELOPMENT_ONLY`; this implementation does not itself authorize
+training.
+
+A 170,000-row storage stress artifact was constructed by repeating complete
+records from the corrected 36-state real-corruption smoke under new immutable
+addresses. It is a storage/index stress test, not a representative chemistry or
+alias-distribution sample. Under indexed schema v2:
+
+- file bytes: 45,674,496;
+- bytes per progress row: 268.67;
+- deterministic write: 3.339 seconds, 50,913 rows/second;
+- full byte/schema/semantic/census verification on open: 7.181 seconds;
+- 100,000 forced uncached single-process lookups: 16,734/second;
+- semantic content SHA-256:
+  `477474d2e8bd375cd41b939e000b27aa00d8657ec4e9db352a8d5882008623ed`;
+- file SHA-256:
+  `105fcd28ab6fb32a8b43039543ab9b564d71fb4d0206afa789fa8f6358ec489d`.
+
+The lookup margin is sufficient for a bounded pilot. The 7.2-second open is an
+intentional full-audit cost; before full-corpus use, parent-process
+verification must be structured so each worker does not repeat every semantic
+scan.
+
+A separate read-only census over the three representative real shards used
+only `persistent_slot_state_sha256`; it did not invoke RDKit, canonicalization
+or executor replay:
+
+| Lane | Progress states | Unique exact states | Exact support calls saved | Jumps | Unique exact directed pairs |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| corruption | 8,187 | 4,180 | 48.94% | 6,100 | 6,032 |
+| cycle operations | 170,000 | 53,126 | 68.75% | 85,000 | 85,000 |
+| MMP analogues | 142,482 | 129,963 | 8.79% | 121,795 | 116,032 |
+| combined | 320,669 | 185,924 | 42.02% | 212,895 | 207,027 |
+
+Thus a state-centric compiler can reduce 320,669 support enumerations to
+185,924 on these shards. Caching only exact directed teacher pairs is much less
+valuable (2.76% combined reuse), while cross-lane sharing adds only 1,345 state
+hits. These are exact call-count reductions, not claimed wall-clock speedups.
+The safe implementation is to enumerate and group all canonical successors
+once per exact source state, emit only the requested teacher fibers for that
+state's trace occurrences, then discard the full successor map.

@@ -15,8 +15,12 @@ from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
 )
+from compose_v4.data.indexed_successor_fiber_cache import (
+    write_indexed_successor_fiber_cache,
+)
 from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.data.sharded_successor_fiber_cache import (
+    SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
     ShardedSuccessorFiberCache,
     ShardedSuccessorFiberCacheError,
     SuccessorFiberCacheCompatibility,
@@ -184,6 +188,8 @@ def _records(
             layer="mmp_analogue",
             partition="train",
             trace_id=trace_id,
+            trace_source_key="C",
+            trace_target_key="CC",
             progress_index=progress_index,
             path_length=1,
         )
@@ -258,16 +264,75 @@ def _write_shard(
     return spec, address
 
 
+def _write_indexed_shard(
+    root: Path,
+    *,
+    packed_sha256: str,
+    compatibility: SuccessorFiberCacheCompatibility,
+    name: str,
+) -> tuple[SuccessorFiberShardSpec, PackedTraceAddress]:
+    shard_name = name.replace(".fibers.sqlite", ".packed.jsonl.gz")
+    provenance = _provenance(packed_sha256, compatibility)
+    path = root / name
+    metadata = write_indexed_successor_fiber_cache(
+        path,
+        _records(packed_sha256, shard_name=shard_name),
+        provenance=provenance,
+    )
+    spec = SuccessorFiberShardSpec(
+        packed_shard_content_sha256=packed_sha256,
+        packed_shard_name=shard_name,
+        layer="mmp_analogue",
+        partition="train",
+        packed_manifest_sha256=_MANIFEST_SHA256,
+        packed_provenance_overlay_sha256=_PROVENANCE_OVERLAY_SHA256,
+        cache_relative_path=name,
+        cache_content_sha256=metadata.content_sha256,
+        cache_file_sha256=metadata.file_sha256,
+        cache_file_bytes=metadata.file_bytes,
+        packed_entry_count=1,
+        active_trace_count=metadata.active_trace_count,
+        excluded_entry_indices=(),
+        progress_record_count=metadata.record_count,
+        jump_record_count=metadata.jump_record_count,
+        terminal_record_count=metadata.terminal_record_count,
+        teacher_alias_count=metadata.teacher_alias_count,
+        virtual_alias_count=metadata.virtual_alias_count,
+        maximum_alias_count=metadata.maximum_alias_count,
+        provenance=provenance,
+    )
+    address = PackedTraceAddress(
+        packed_shard_content_sha256=packed_sha256,
+        packed_shard_name=shard_name,
+        entry_index=0,
+        trace_id="trace-0",
+        layer="mmp_analogue",
+        partition="train",
+        source_key="C",
+        target_key="CC",
+        path_length=1,
+    )
+    return spec, address
+
+
 def _inventory(
     specs: tuple[SuccessorFiberShardSpec, ...],
     compatibility: SuccessorFiberCacheCompatibility,
+    *,
+    storage_backend: str | None = None,
 ):
+    options = (
+        {}
+        if storage_backend is None
+        else {"storage_backend": storage_backend}
+    )
     return seal_successor_fiber_cache_inventory(
         specs,
         source_corpus_inventory_sha256="a" * 64,
         compatibility=compatibility,
         unified_packed_manifest_sha256=_UNIFIED_SHA256,
         representability_overlay_sha256=_OVERLAY_SHA256,
+        **options,
     )
 
 
@@ -373,6 +438,67 @@ def test_store_requires_exact_address_and_persistent_state(tmp_path) -> None:
     ):
         store.require(
             replace(address, layer="cycle_ops"),
+            progress_index=0,
+            source_state=_state(),
+        )
+
+
+def test_indexed_store_uses_same_exact_join_without_materializing_shard(
+    tmp_path,
+) -> None:
+    compatibility = _compatibility()
+    spec, address = _write_indexed_shard(
+        tmp_path,
+        packed_sha256="1" * 64,
+        compatibility=compatibility,
+        name="only.fibers.sqlite",
+    )
+    _, inventory = _inventory(
+        (spec,),
+        compatibility,
+        storage_backend=SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+    )
+    store = _store(tmp_path, inventory)
+    record = store.require(
+        address,
+        progress_index=0,
+        source_state=_state(),
+    )
+    assert record.address.entry_index == 0
+    assert store.loaded_shard_digests == ("1" * 64,)
+    with pytest.raises(
+        ShardedSuccessorFiberCacheError,
+        match="no exact sampled",
+    ):
+        store.require(
+            replace(address, trace_id="wrong-trace"),
+            progress_index=0,
+            source_state=_state(),
+        )
+
+    restored = pickle.loads(pickle.dumps(store))
+    assert restored.loaded_shard_digests == ()
+    assert (
+        restored.require(
+            address,
+            progress_index=1,
+            source_state=_state(target=True),
+        ).teacher_fiber
+        is None
+    )
+
+    wrong_lane_spec = replace(spec, layer="another-lane")
+    _, wrong_lane_inventory = _inventory(
+        (wrong_lane_spec,),
+        compatibility,
+        storage_backend=SUCCESSOR_FIBER_INDEXED_STORAGE_BACKEND,
+    )
+    with pytest.raises(
+        ShardedSuccessorFiberCacheError,
+        match="envelope",
+    ):
+        _store(tmp_path, wrong_lane_inventory).require(
+            replace(address, layer="another-lane"),
             progress_index=0,
             source_state=_state(),
         )
