@@ -186,6 +186,12 @@
     "compiler_hash"
   ],
   "split_contract": {
+    "partition_roles": [
+      "train",
+      "validation",
+      "controller_validation",
+      "final_test"
+    ],
     "group_keys": [
       "molecule_identity",
       "scaffold_group_id",

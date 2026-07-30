@@ -10,6 +10,22 @@ from typing import Any
 EXPECTED_SCHEMA = "compose.editing_corpus_contract"
 EXPECTED_SCHEMA_VERSION = 1
 REQUIRED_EXPERIMENTS = frozenset({"E2", "E3", "E4", "E7"})
+REQUIRED_PARTITION_ROLES = (
+    "train",
+    "validation",
+    "controller_validation",
+    "final_test",
+)
+REQUIRED_DATA_LANES = (
+    ("observed_local_analogue", "real"),
+    ("operator_aware_real_endpoint", "real"),
+    (
+        "linker_positional_topology_analogue",
+        "real_preferred_synthetic_supplement_allowed",
+    ),
+    ("observed_series_path", "real"),
+    ("reversible_synthetic_walk", "synthetic"),
+)
 REQUIRED_CORE_FAMILIES = frozenset(
     {
         "atom_insert",
@@ -49,12 +65,17 @@ def validate_editing_corpus_contract(contract: dict[str, Any]) -> None:
     if contract.get("schema_version") != EXPECTED_SCHEMA_VERSION:
         raise EditingCorpusContractError("unexpected editing-corpus schema version")
 
+    split_contract = contract.get("split_contract") or {}
+    if tuple(split_contract.get("partition_roles") or ()) != REQUIRED_PARTITION_ROLES:
+        raise EditingCorpusContractError(
+            "split_contract.partition_roles must declare the ordered train, validation, "
+            "controller-validation, and final-test roles"
+        )
+
     basis = contract.get("operator_basis") or {}
     required_families = set(basis.get("required") or ())
     if required_families != REQUIRED_CORE_FAMILIES:
-        raise EditingCorpusContractError(
-            "required operator basis must equal the seven-family core"
-        )
+        raise EditingCorpusContractError("required operator basis must equal the seven-family core")
     disabled = set(basis.get("disabled_by_default") or ())
     overlap = required_families & disabled
     if overlap:
@@ -66,8 +87,12 @@ def validate_editing_corpus_contract(contract: dict[str, Any]) -> None:
     lane_ids = [str(lane.get("id")) for lane in lanes]
     duplicate_lanes = _duplicates(lane_ids)
     if duplicate_lanes:
+        raise EditingCorpusContractError(f"duplicate data-lane identifiers: {duplicate_lanes}")
+    lane_contract = tuple((str(lane.get("id")), str(lane.get("evidence_class"))) for lane in lanes)
+    if lane_contract != REQUIRED_DATA_LANES:
         raise EditingCorpusContractError(
-            f"duplicate data-lane identifiers: {duplicate_lanes}"
+            "data-lane identifiers, evidence classes, or ordering disagree "
+            "with editing-corpus schema version 1"
         )
     known_lanes = set(lane_ids)
 
@@ -90,13 +115,11 @@ def validate_editing_corpus_contract(contract: dict[str, Any]) -> None:
         family_names = set(capability.get("required_families_all") or ())
         family_names.update(capability.get("required_families_any") or ())
         unknown_families = family_names - (
-            required_families
-            | set(basis.get("conditional_on_reachability_audit") or ())
+            required_families | set(basis.get("conditional_on_reachability_audit") or ())
         )
         if unknown_families:
             raise EditingCorpusContractError(
-                f"{capability_id} references undeclared families: "
-                f"{sorted(unknown_families)}"
+                f"{capability_id} references undeclared families: {sorted(unknown_families)}"
             )
         covered_experiments.update(capability.get("experiments") or ())
 
@@ -109,9 +132,7 @@ def validate_editing_corpus_contract(contract: dict[str, Any]) -> None:
     required_fields = [str(field) for field in contract.get("required_record_fields") or ()]
     duplicate_fields = _duplicates(required_fields)
     if duplicate_fields:
-        raise EditingCorpusContractError(
-            f"duplicate required record fields: {duplicate_fields}"
-        )
+        raise EditingCorpusContractError(f"duplicate required record fields: {duplicate_fields}")
     for field in (
         "source_state_exact",
         "target_state_exact",
@@ -133,9 +154,8 @@ def training_launch_blockers(contract: dict[str, Any]) -> list[str]:
         blockers.append("training_authorized is not true")
     if contract.get("status") != "FROZEN_TRAINING_AUTHORIZED":
         blockers.append("status is not FROZEN_TRAINING_AUTHORIZED")
-    thresholds = (
-        contract.get("pretraining_gates", {})
-        .get("thresholds_to_freeze_after_development_census", {})
+    thresholds = contract.get("pretraining_gates", {}).get(
+        "thresholds_to_freeze_after_development_census", {}
     )
     for name, value in sorted(thresholds.items()):
         if value is None:

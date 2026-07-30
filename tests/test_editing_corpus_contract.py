@@ -35,9 +35,43 @@ def test_contract_rejects_unknown_capability_lane() -> None:
         validate_editing_corpus_contract(broken)
 
 
+@pytest.mark.parametrize("mutation", ["reorder", "evidence_class"])
+def test_contract_rejects_lane_identity_or_evidence_drift(
+    mutation: str,
+) -> None:
+    contract = load_editing_corpus_contract(CONTRACT_PATH)
+    broken = copy.deepcopy(contract)
+    if mutation == "reorder":
+        broken["data_lanes"][0], broken["data_lanes"][1] = (
+            broken["data_lanes"][1],
+            broken["data_lanes"][0],
+        )
+    else:
+        broken["data_lanes"][0]["evidence_class"] = "synthetic"
+    with pytest.raises(EditingCorpusContractError, match="data-lane"):
+        validate_editing_corpus_contract(broken)
+
+
 def test_contract_rejects_required_disabled_operator_overlap() -> None:
     contract = load_editing_corpus_contract(CONTRACT_PATH)
     broken = copy.deepcopy(contract)
     broken["operator_basis"]["disabled_by_default"].append("atom_insert")
     with pytest.raises(EditingCorpusContractError, match="both required and disabled"):
+        validate_editing_corpus_contract(broken)
+
+
+@pytest.mark.parametrize(
+    "roles",
+    [
+        ["train", "validation", "final_test"],
+        ["train", "controller_validation", "validation", "final_test"],
+    ],
+)
+def test_contract_rejects_missing_or_reordered_partition_roles(
+    roles: list[str],
+) -> None:
+    contract = load_editing_corpus_contract(CONTRACT_PATH)
+    broken = copy.deepcopy(contract)
+    broken["split_contract"]["partition_roles"] = roles
+    with pytest.raises(EditingCorpusContractError, match="partition"):
         validate_editing_corpus_contract(broken)
