@@ -460,3 +460,40 @@ nonfinite loss/gradients, missing family-specific gradient routes, required
 family NLL collapse, a non-contiguous stream, and anything other than exactly
 50 updates.  It remains deliberately unrunnable as a scientific PASS until
 development-only thresholds and the exact production exposure plan are frozen.
+
+## First real-shard smoke finding
+
+A bounded read-only smoke used the frozen `shard_0000` artifacts from all three
+training lanes:
+
+- corruption SHA-256
+  `d5dce3f31d46ea18f82838a91ceb143f852f8d3bc83248ff45c7028931739915`;
+- cycle-operation SHA-256
+  `482afb090817b333813ef9689bfa71f49b61c8cff4e51fa41c2207303a887fcc`;
+- MMP SHA-256
+  `02040c6ab6208971c3d21730c0d467280e5b6bb6c45439dde25fe5ccdd0b3248`.
+
+The first pass found that two of the first eight corruption traces reached the
+null state and failed fresh support compilation.  The broad-organic
+`grow_root` mask had admitted neutral hypervalent classes whose implied
+zero-heavy-bond hydrogen counts were five or six, above the representation's
+`MAX_H_COUNT=4`.  The executor correctly rejected those marks.  The mask now
+requires the isolated atom's implied hydrogen count to lie within the same
+bound; those valence classes remain available for connected insertion and
+restatement when heavy bonds reduce the implied hydrogen count.  The identical
+eight-trace sample then compiled all 36 progress states without failure, and a
+null-source regression executes every marked root action through the production
+executor.
+
+This changes only null-state root support, but it means any checkpoint used for
+the separate de novo lane must be evaluated under the corrected mask.  It is
+also direct evidence that the full cache census and zero-step support gate must
+precede training.
+
+Preliminary single-core compilation on eight traces per lane was only about
+0.7--1.6 progress states/second, while canonical JSON occupied roughly
+0.62--0.66 KiB per compiled progress row.  These are bounded development
+measurements, not a production throughput claim.  They rule out a naive serial
+3.37-million-state build and reinforce the requirement to benchmark parallel
+compilation plus indexed, non-materializing storage before authorizing all 63
+shards.

@@ -17,7 +17,7 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
-from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.chem.state import empty_molecular_graph, pad_molecular_graph
 from compose_v4.experiments.production_successor_kernel import (
     ProductionSuccessorKernelError,
     canonical_successor_result,
@@ -86,6 +86,22 @@ def test_complete_marked_law_is_normalized_and_executable(model, smiles):
     assert law.marks
     assert law.total_probability == pytest.approx(1.0, abs=2e-5)
     assert law.total_hazard > 0.0
+    for mark in law.marks:
+        successor = _SYSTEM.apply(
+            state,
+            mark.executor_rule_name,
+            mark.action,
+        )
+        assert canonical_state_key(successor)
+
+
+def test_null_root_marked_law_contains_only_executable_valence_classes(model):
+    state = empty_molecular_graph(_SLOTS)
+    law = enumerate_factorized_marked_law(model, state, 0.37)
+
+    assert law.marks
+    assert {mark.family_name for mark in law.marks} == {"atom_insert"}
+    assert law.total_probability == pytest.approx(1.0, abs=2e-5)
     for mark in law.marks:
         successor = _SYSTEM.apply(
             state,

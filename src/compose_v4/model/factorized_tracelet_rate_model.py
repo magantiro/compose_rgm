@@ -3679,8 +3679,19 @@ class FactorizedTraceletRateModel(nn.Module):
             self.grow_root_head(global_state)
             + self.root_atom_log_prior.unsqueeze(0)
         )
+        # A valence class is not automatically a legal isolated atom.  The
+        # persistent graph representation caps implicit H at MAX_H_COUNT, so
+        # hypervalent neutral classes such as S(VI), P(V) and I(V) cannot be
+        # instantiated from the null state with zero heavy-atom bonds.  Keep
+        # them available for connected insertion/restatement when the heavy
+        # bond sum brings the implied H count into range.
+        root_atom_mask = (
+            (self.cnof_valences >= 0)
+            & (self.cnof_valences <= MAX_H_COUNT)
+        )
         root_grow_mask = (
-            ((n_real == 0) & (n_null > 0)).unsqueeze(-1).expand(-1, len(self.atom_vocabulary))
+            ((n_real == 0) & (n_null > 0)).unsqueeze(-1)
+            & root_atom_mask.unsqueeze(0)
         )
         grow_query = self.grow_query(node)
         grow_option = self.grow_option.weight.reshape(
