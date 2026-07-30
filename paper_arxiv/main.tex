@@ -1,0 +1,244 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{compose_arxiv}
+
+\newcommand{\method}{\textsc{Compose}\xspace}
+\newcommand{\rgm}{\textsc{RGM}\xspace}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\E}{\mathbb{E}}
+
+\hypersetup{
+  pdftitle={COMPOSE: Generator Matching over Stochastic Rewrites for Trans-Dimensional Molecular Generation and Control},
+  pdfauthor={Anonymous Authors},
+  pdfsubject={Executable stochastic graph rewrites for molecular generation and control},
+  pdfkeywords={molecular generation, graph rewriting, generator matching, trans-dimensional processes, stochastic control},
+  pdfcreator={LaTeX with hyperref}
+}
+
+\begin{document}
+
+\begin{composefrontmatter}
+\composetitle{COMPOSE: Generator Matching over Stochastic Rewrites for
+Trans-Dimensional Molecular Generation and Control}
+\composeauthors{Anonymous Authors}
+\composeabstract{%
+Generative models for molecular graphs commonly learn to reverse a convenient
+corruption on an ambient representation. Such transitions need not be
+executable chemical edits, and intermediate states need not be complete
+molecules. We introduce \emph{Rewrite Generator Matching} (RGM), a framework
+that instead learns a time-inhomogeneous marked jump process over the
+state-dependent fiber of legal executable rewrites. A total hazard determines
+when an event occurs and a conditional mark law determines which rewrite
+fires. We instantiate RGM as COMPOSE on disjoint cardinality strata, including
+a distinguished null source that is not a molecule. Its marks create, delete,
+restate, reconnect, and cyclize molecular structure, while the executor keeps
+every non-null committed state inside a declared space of connected,
+valence-valid molecules. Because different marks can execute to the same
+molecule, we define the molecular transition law as the pushforward of the
+learned mark law through execution and canonical molecular identity. This
+successor kernel is invariant to probability-preserving refinements within a
+successor fiber and is the object on which finite-horizon conditioning, hard
+support constraints, and dynamic retargeting act. Exact control is claimed
+only on bounded enumerable state spaces; learned values approximate it at
+molecular scale. Source-conditioned editing and timed de novo generation
+require separate checkpoints and inference regimes.}
+\end{composefrontmatter}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Much of modern generative modeling begins by choosing a tractable corruption
+process and learning to reverse it. Gaussian noise, categorical replacement,
+and continuous-time discrete corruption have produced powerful general
+formalisms \citep{ho2020ddpm,austin2021d3pm,campbell2022ctdd}; their graph
+instantiations place probability on represented node and edge states
+\citep{vignac2023digress,qin2025defog}. For molecular design, however, the
+transition mechanism is more than mathematical scaffolding. A useful
+intermediate should be a molecule on which a property model, constraint, or
+chemist can act, and a transition should specify an operation that can actually
+be executed. Generic corruptions do not promise either property: intermediate
+graphs need not belong to the molecular state space, and a tensor change need
+not correspond to a chemically meaningful edit.
+
+We ask whether the generative process itself can instead be a stochastic
+program of executable rewrites. The premise is simple. When a domain supplies
+typed rewrite rules, state-dependent application conditions, and a
+deterministic executor, those objects can define the infinitesimal events of a
+learned jump process. The model then learns transport through operations that
+already possess domain meaning, rather than learning to undo a process chosen
+only for analytical convenience. This changes the role of an edit vocabulary:
+it is not merely a proposal mechanism attached to an optimizer, but the legal
+support of the generative process.
+
+\paragraph{Generator Matching over executable marks.}
+We formalize this idea as \emph{Rewrite Generator Matching} (\rgm). At state
+$x$, the rewrite system exposes a finite, state-dependent action fiber
+$\A(x)$. A mark $a\in\A(x)$ is a complete executable operation---a rule,
+concrete match or address, and typed payload---and the deterministic executor
+$\T(x,a)$ returns its successor. The model factorizes the marked rate as
+\begin{equation}
+  \lambda_\theta(a\mid x,t)
+  =
+  \Lambda_\theta(x,t)\,p_\theta(a\mid x,t),
+  \qquad
+  a\in\A(x),
+\end{equation}
+where $\Lambda_\theta$ is the total event hazard and $p_\theta$ is the
+conditional mark law. Its generator acts on test functions by
+$\sum_{a\in\A(x)}\lambda_\theta(a\mid x,t)
+[f(\T(x,a))-f(x)]$. Generator Matching supplies the rate-fitting principle
+\citep{holderrieth2025generator}; the executable rewrite system supplies the
+state space, event fibers, legal support, and endpoint-conditioned programs
+from which teacher events are drawn. The learned object is therefore a marked
+stochastic rewrite process, not an unconstrained prediction followed by
+repair.
+
+\paragraph{A genuinely trans-dimensional molecular process.}
+\method instantiates \rgm on the disjoint union
+\[
+  \X=\bigsqcup_{n=0}^{N}\X_n,
+  \qquad
+  \X_0=\{\varnothing\}.
+\]
+For $n\geq 1$, $\X_n$ contains supported, connected, valence-valid molecular
+graphs with $n$ active atoms. The distinguished null state $\varnothing$ is
+\emph{not} a molecule; it is a reversible source connected to supported
+one-atom states. Production tensors use persistent padded slots, but padding is
+only a coordinate system. Atom birth and death change the active graph and
+therefore move between different cardinality strata.
+
+The molecular marks create and delete atoms, restate atom type and valence,
+change bond order, reroute attached subgraphs, and close or open cycles. The
+legal fiber depends on the current
+molecule, and every committed action is executed before the successor is
+accepted. Consequently, every \emph{non-null} committed state is a complete
+molecule and every transition is an executable rewrite. This is the structural
+reason a trajectory can support mid-course property evaluation, protected
+substructures, interruption, branching, size correction, and topology
+redesign. It does not imply synthetic accessibility, and the declared operator
+set need not be one-step inverse-closed for every operation.
+
+\paragraph{The molecular law is a pushforward.}
+Different executable marks can yield the same molecular successor because of
+symmetry, persistent-slot aliases, operand ordering, or alternative internal
+refinements. For a canonical molecular successor $y$, define its successor
+fiber
+\[
+  \G_y(x)=\{a\in\A(x):\T(x,a)\cong y\}.
+\]
+The state-level molecular law is not any one representative mark. It is the
+pushforward
+\[
+  P_\theta(y\mid x,t)
+  =
+  \sum_{a\in\G_y(x)}p_\theta(a\mid x,t),
+\]
+with the embedded-chain convention treating molecular self or virtual events
+consistently. This distinction is essential. Refining or coarsening marks
+within one successor fiber, while preserving their aggregate mass, leaves the
+molecular process unchanged. It also leaves any controller defined on
+canonical successors unchanged. A mark-level power tilt, top-$k$ rule, nucleus
+filter, or family-wise bias generally lacks that invariance. We therefore
+control and evaluate the process at the molecular-successor level even when
+the internal model is factorized over marks.
+
+This transition-level aggregation is closely related to pushforward Generator
+Matching for deterministic images of latent processes
+\citep{billera2026latent}. That theory is the closest generic precedent; here
+aliases are executable event marks, the map
+$a\mapsto\operatorname{canon}(\T(x,a))$ depends on the current molecule, and
+the aggregated kernel is retained as the molecular control interface.
+
+\paragraph{Control follows from the kernel.}
+Because every productive edge in $P_\theta$ is legal and every non-null state
+admits molecular evaluation, the induced kernel is an intervention substrate.
+Hard path constraints restrict its support; soft objectives reweight supported
+successors; and a remaining-budget value permits continuation after an
+objective changes. For a fixed kernel $P$, terminal desirability $g$, and
+remaining budget $b$, the finite-horizon value
+$h_b(x)=\E_P[g(X_b)\mid X_0=x]$ gives the Doob-controlled law
+$P_b^g(y\mid x)=P(y\mid x)h_{b-1}(y)/h_b(x)$ whenever $h_b(x)>0$.
+The transform never creates an illegal edge, although hard conditioning may
+prune base support. We claim exactness only on bounded state spaces that can be
+enumerated and audited. At molecular scale, a learned value function is an
+approximation and must be calibrated as such.
+
+\paragraph{Two checkpoints, two inference regimes.}
+The framework supports two related but distinct uses. Source-conditioned
+editing starts from a supplied molecule and follows a fixed-budget embedded
+molecular jump chain; it does not use the magnitude of the continuous-time
+hazard. Unconditional de novo generation starts from its own source
+distribution, includes the reversible null source, and uses a timed
+Gillespie-style CTMC \citep{gillespie1977}. These regimes require separate data
+mixtures, hazard contracts, checkpoints, and evaluations. An editing
+checkpoint is not evidence for unconditional generation, even though both
+instantiate the same rewrite framework.
+
+\paragraph{Training and claim boundary.}
+The trained random variable and the induced molecular random variable must not
+be conflated. The completed 16,000-step editing run optimized the implemented
+mark-level Generator-Matching objective, with successor aggregation only where
+that implementation explicitly provided it, and remains a diagnostic rather
+than a selected paper model. A repaired protocol that optimizes
+canonical-successor likelihood is a distinct training protocol; it does not
+retroactively make that run successor-trained. In either case, the scientific
+definition of the molecular kernel is execution followed by canonical
+pushforward, not the particular segmented algorithm used to compute it.
+The conditional-loss result of \citet{billera2026latent} applies when the model
+and loss parameterize the image-space generator under its assumptions; it does
+not turn a selected-mark objective into a successor objective.
+
+\paragraph{Contributions.}
+One causal chain organizes the paper: executable state-dependent rewrites lead
+to Generator Matching, which yields a trans-dimensional molecular process;
+canonical pushforward turns that marked process into a representation-independent
+molecular kernel; and that kernel supports exact finite-state and approximate
+large-scale control. Our contributions are:
+
+\begin{enumerate}
+  \item \textbf{Generator Matching over stochastic rewrites.} We formulate a
+  learned marked jump process over state-dependent executable action fibers,
+  separating total event hazard from the conditional identity and location of
+  a rewrite.
+
+  \item \textbf{COMPOSE and the canonical molecular-successor law.} We
+  instantiate the framework with molecular birth, death, relabeling,
+  reconnection, and compositional cycle operations across cardinality strata,
+  and operationalize its molecular control kernel by aggregating executable
+  marks through canonical molecular identity.
+
+  \item \textbf{Generation and control on one legal molecular substrate.} We
+  provide a common successor-kernel interface for exact finite-horizon
+  conditioning on bounded enumerable spaces and for learned approximations to
+  dynamic retargeting, Pareto branching, and pathwise constraints at molecular
+  scale, while keeping fixed-budget editing and timed de novo generation
+  explicitly separate.
+\end{enumerate}
+
+\paragraph{Relation to prior work.}
+None of atom insertion or deletion, valid molecular editing, graph grammars,
+Generator Matching, variable-dimension generation, Pareto optimization, or
+Doob control is individually new. Discrete diffusion and flow models provide
+general graph-generation mechanisms
+\citep{austin2021d3pm,campbell2022ctdd,vignac2023digress,qin2025defog};
+recent edit-based processes make insertion and deletion first-class
+\citep{havasi2025editflows,ninniri2025griddd}. Molecular grammars define
+structured legal support \citep{kajino2019mhg,guo2022grammar}, while stochastic
+graph rewriting supplies rule applications and CTMC semantics
+\citep{danos2015thermodynamic,behr2021rewriting}. Molecular editors and
+optimization systems already traverse valid molecular neighborhoods
+\citep{xie2021mars,fu2021mimosa,gao2022pmo}. The contribution here is their
+particular formal composition: a Generator-Matched executable rewrite process
+with trans-dimensional molecular semantics, a canonical successor
+pushforward, and successor-level exact and dynamic control.
+Pushforward Generator Matching supplies the closest general result for
+deterministic images of latent processes \citep{billera2026latent}; we do not
+claim that generic theorem as a contribution.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
