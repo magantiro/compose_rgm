@@ -1,0 +1,84 @@
+{
+  "schema": "compose.experiments.e6_a2_2b_graph_audit_contract",
+  "schema_version": 1,
+  "status": "FROZEN_GRAPH_AUDIT_CONTRACT_NO_CONTROL_RESULT",
+  "experiment_id": "E6",
+  "milestone": "A2.2b",
+  "paper_claim_authorized": false,
+  "checkpoint_required": false,
+  "benchmark": {
+    "candidate_id": "carbon_6_slots",
+    "seed_smiles": "CCCCCC",
+    "elements": [
+      "C"
+    ],
+    "max_hydrogens": 3,
+    "horizon": null,
+    "expected_n_states": 967,
+    "expected_n_edges": 14432,
+    "expected_structural_graph_fingerprint": "84121ff86cbc1ba8"
+  },
+  "enumeration_contract": {
+    "nonnull_candidate_source": "compose_v4.rewrite.fiber._candidate_actions with Candidate.spec",
+    "null_candidate_source": "compose_v4.rewrite.factorized_fiber._factorized_candidates with allow_bond_reroute=false",
+    "executor": "compose_v4.rewrite.kernel.de_novo_rewrite_system",
+    "canonicalizer": "compose_v4.rewrite.kernel.canonical_state_key",
+    "declared_executor_rules": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_insert",
+      "bond_delete",
+      "bond_reorder"
+    ],
+    "declared_model_families": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "cycle_insert",
+      "cycle_attach",
+      "bond_reorder"
+    ],
+    "outside_declared_language": [
+      "bond_reroute",
+      "ring_system_restate",
+      "ring_system_delete",
+      "ring_system_grow"
+    ],
+    "slot_capacity_policy": "atom_insert has no candidate when no persistent NULL slot exists",
+    "null_vocabulary_policy": "execute production root candidates then include only successors within the declared carbon vocabulary"
+  },
+  "action_dispositions": [
+    "included_productive",
+    "virtual_self",
+    "excluded_executor_invalid",
+    "excluded_vocabulary_boundary",
+    "excluded_outside_closed_slice"
+  ],
+  "diagnostic_mark_law": {
+    "name": "uniform_over_in_slice_executable_marks",
+    "normalization": "uniform over included_productive plus virtual_self marks; reported successor law is conditioned on productive molecular jumps",
+    "is_solver_kernel": false,
+    "purpose": "segmented aggregation and productive-versus-virtual mass audit only"
+  },
+  "numeric_tolerances": {
+    "normalization": 1e-12,
+    "production_vs_dictionary_oracle": 1e-12
+  },
+  "required_invariants": [
+    "registry_selected_identity_matches_contract",
+    "reachable_search_closed",
+    "deterministic_sorted_canonical_state_index",
+    "structural_graph_fingerprint_unchanged",
+    "every_raw_action_has_exactly_one_disposition",
+    "no_productive_action_leaves_closed_slice",
+    "every_structural_edge_has_at_least_one_productive_mark",
+    "reconstructed_edge_set_equals_structural_edge_set",
+    "segmented_successor_rows_normalized",
+    "raw_mark_alias_compression_reported",
+    "productive_and_virtual_mass_reconstruct_executable_mass",
+    "graph_audit_hash_separate_from_structural_fingerprint"
+  ],
+  "scope_caveat": "This is an algebraic audit of the bounded carbon_6_slots verification slice. It is not representative drug-like chemistry, does not instantiate a learned checkpoint, and does not establish an exact full-scale molecular controller.",
+  "contract_sha256": "91b900c8cd0cdccde0be8a94125fc8910c9f5b5f0c3f4a1d4ca289077ce12382"
+}
