@@ -51,8 +51,9 @@ diagnostic. They never fill a production result placeholder.
 
 ## Planned figure and table sequence
 
-1. **Figure 1 — Framework.** Disjoint cardinality strata, executable marks,
-   canonical successor quotient, and control interface.
+1. **Figure 1 — Framework (complete).** Definition-only vector artwork showing
+   cardinality strata, executable marks, the canonical successor quotient, and
+   the control interface.
 2. **Table 1 — Molecular rewrite basis.** Cardinality effect, semantic role,
    inverse/accelerator status, and final enabled support.
 3. **Table 2 — Corpus and training contract.** Data lanes, split units,
@@ -77,7 +78,8 @@ diagnostic. They never fill a production result placeholder.
 2. Preserve the complete Section 6 layout and fill only registered result
    slots.
 3. Keep Sections 7 and 8 evidence-bounded as results arrive.
-4. Replace the Figure 1 schematic slot with definition-only artwork.
+4. Keep the completed definition-only Figure 1 synchronized with any formal
+   notation changes.
 5. Fill E5 and E6 first because they do not require the selected editing
    checkpoint.
 6. Fill E2--E4 after the editing checkpoint freezes.

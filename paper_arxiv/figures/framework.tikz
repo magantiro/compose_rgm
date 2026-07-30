@@ -1,0 +1,118 @@
+\begin{tikzpicture}[
+  x=1cm,
+  y=1cm,
+  font=\sffamily\scriptsize,
+  panel/.style={
+    draw=black!13,
+    fill=composepanel,
+    rounded corners=4pt,
+    line width=0.5pt
+  },
+  state/.style={
+    draw=composelink!62,
+    fill=white,
+    rounded corners=3pt,
+    minimum height=0.62cm,
+    minimum width=0.75cm,
+    inner sep=3pt,
+    line width=0.6pt
+  },
+  actionmark/.style={
+    draw=composelink!48,
+    fill=composeaccent,
+    rounded corners=2pt,
+    minimum height=0.43cm,
+    minimum width=0.57cm,
+    inner sep=2pt,
+    line width=0.5pt
+  },
+  formula/.style={
+    draw=composelink!48,
+    fill=white,
+    rounded corners=3pt,
+    align=center,
+    inner xsep=5pt,
+    inner ysep=4pt,
+    line width=0.55pt
+  },
+  flow/.style={
+    -{Stealth[length=4.5pt,width=3.5pt]},
+    draw=composelink,
+    line width=0.7pt
+  },
+  bidir/.style={
+    {Stealth[length=4.2pt,width=3.2pt]}-{Stealth[length=4.2pt,width=3.2pt]},
+    draw=composelink,
+    line width=0.65pt
+  },
+  muted/.style={text=black!62},
+  paneltitle/.style={font=\sffamily\bfseries\small, anchor=west}
+]
+  % Panel 1: semantic state and trans-dimensional moves.
+  \node[panel, minimum width=5.00cm, minimum height=4.05cm, anchor=south west]
+    (p1) at (0,0) {};
+  \node[paneltitle] at (0.24,3.72) {1.\; Executable state changes};
+
+  \node[state] (null) at (0.58,2.28) {$\varnothing$};
+  \node[state] (xone) at (1.82,2.28) {$\mathcal X_{1}$};
+  \node[font=\sffamily\bfseries, text=black!45] at (2.78,2.28) {$\cdots$};
+  \node[state, minimum width=0.92cm] (xn) at (3.76,2.28) {$\mathcal X_{n}$};
+
+  \draw[bidir] (null) -- node[above, muted] {\scriptsize source} (xone);
+  \draw[bidir] (xone) -- node[above, muted] {\scriptsize birth/death} (2.55,2.28);
+  \draw[bidir] (3.02,2.28) -- (xn);
+  \draw[flow] (xn.north east)
+    to[out=52,in=128,looseness=4.2]
+    node[pos=0.5, below=2pt, fill=composepanel, inner sep=1pt, muted]
+      {\scriptsize fixed-$n$ rewrite}
+    (xn.north west);
+
+  \node[align=center, text width=4.35cm, muted] at (2.50,0.83) {%
+    Each legal mark is a complete graph rewrite.\\
+    Non-null successors satisfy the declared molecular contract.};
+
+  % Panel 2: marks execute and aliases merge by molecular identity.
+  \node[panel, minimum width=5.70cm, minimum height=4.05cm, anchor=south west]
+    (p2) at (5.20,0) {};
+  \node[paneltitle] at (5.44,3.72) {2.\; Execute marks, quotient aliases};
+
+  \node[state] (x) at (5.67,2.24) {$x$};
+  \node[draw=black!16, fill=white, rounded corners=3pt, minimum width=1.55cm,
+        minimum height=2.02cm] (fiber) at (7.14,2.13) {};
+  \node[font=\sffamily\bfseries, muted] at (7.14,2.91) {$\mathcal A(x)$};
+  \node[actionmark] (a1) at (7.14,2.66) {$a_1$};
+  \node[actionmark] (a2) at (7.14,2.15) {$a_2$};
+  \node[actionmark] (a3) at (7.14,1.64) {$a_3$};
+  \node[state, minimum width=0.86cm] (y1) at (9.65,2.48) {$[y_1]$};
+  \node[state, minimum width=0.86cm] (y2) at (9.65,1.55) {$[y_2]$};
+
+  \draw[flow] (x) -- (fiber.west);
+  \node[muted] at (8.52,2.96) {\scriptsize execute $T$};
+  \draw[flow] (a1.east) -- (y1.west);
+  \draw[flow] (a2.east) -- (y1.west);
+  \draw[flow] (a3.east) -- (y2.west);
+
+  \node[align=center, text width=5.02cm, muted] at (8.05,0.63) {%
+    Distinct slot- or symmetry-level marks can execute to the same
+    canonical molecular successor.};
+
+  % Panel 3: pushforward kernel and successor-level control.
+  \node[panel, minimum width=5.90cm, minimum height=4.05cm, anchor=south west]
+    (p3) at (11.10,0) {};
+  \node[paneltitle] at (11.34,3.72) {3.\; Molecular kernel and control};
+
+  \node[formula, text width=4.96cm] (marklaw) at (14.05,2.96) {%
+    $\lambda_\theta(a\mid x,t)
+      =\Lambda_\theta(x,t)\,p_\theta(a\mid x,t)$};
+  \node[formula, text width=4.96cm] (pushforward) at (14.05,2.02) {%
+    $\displaystyle
+      P_\theta(y\mid x,t)
+      =\sum_{a:\,T(x,a)\cong y}p_\theta(a\mid x,t)$};
+  \node[formula, text width=4.96cm] (doob) at (14.05,0.93) {%
+    $\displaystyle
+      P^g_b(y\mid x)
+      =P(y\mid x)\frac{h_{b-1}(y)}{h_b(x)}$};
+
+  \draw[flow] (marklaw) -- (pushforward);
+  \draw[flow] (pushforward) -- (doob);
+\end{tikzpicture}
