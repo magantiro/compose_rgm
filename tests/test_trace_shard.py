@@ -32,11 +32,34 @@ from compose_v4.rewrite.trace_shard import (  # noqa: E402
     load_trace_records,
     write_shard,
 )
+from compile_corruption_shard import deterministic_source_seed  # noqa: E402
 
 _PANEL = [
     "O=C1NC(=O)c2ccccc21", "Cc1ccc(cc1)C(=O)Nc1ccccc1", "C1CCNCC1C(=O)O",
     "C[N+](C)(C)CCO", "CC(=O)[O-]", "O=C(O)c1ccc(cc1)S(=O)(=O)N",
 ]
+
+
+def test_corruption_source_seed_is_byte_stable() -> None:
+    assert deterministic_source_seed(7, "CC(=O)Nc1ccccc1") == 463_181_437
+    assert deterministic_source_seed(7, "CC(=O)Nc1ccccc1") == (
+        deterministic_source_seed(7, "CC(=O)Nc1ccccc1")
+    )
+    assert deterministic_source_seed(8, "CC(=O)Nc1ccccc1") != (
+        deterministic_source_seed(7, "CC(=O)Nc1ccccc1")
+    )
+
+
+@pytest.mark.parametrize(
+    ("seed", "source"),
+    [
+        (True, "CC"),
+        (7, ""),
+    ],
+)
+def test_corruption_source_seed_rejects_ambiguous_inputs(seed, source) -> None:
+    with pytest.raises((TypeError, ValueError)):
+        deterministic_source_seed(seed, source)
 
 
 def _records(seed: int = 11):

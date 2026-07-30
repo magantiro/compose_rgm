@@ -24,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -51,6 +52,7 @@ from compose_v4.rewrite.trace_shard import (  # noqa: E402
 )
 
 N_SLOTS = 40
+SOURCE_SEED_SCHEMA = "compose.corruption.source_seed.v1"
 
 
 def _git_commit() -> str:
@@ -121,6 +123,18 @@ def _build_layer_records(layer: str, source: str, *, seed: int, catalog, depth_m
     raise ValueError(f"unknown layer {layer!r}")
 
 
+def deterministic_source_seed(seed: int, source: str) -> int:
+    """Derive a byte-stable per-source seed independent of Python hash randomization."""
+
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TypeError("seed must be an integer")
+    if not isinstance(source, str) or not source:
+        raise ValueError("source must be a nonempty string")
+    payload = f"{SOURCE_SEED_SCHEMA}\0{seed}\0{source}".encode()
+    digest = hashlib.sha256(payload).digest()
+    return int.from_bytes(digest[:8], byteorder="big") % (2**31 - 1)
+
+
 def compile_shard(
     sources: list[str],
     scaffold_by_smiles: dict[str, str],
@@ -147,7 +161,7 @@ def compile_shard(
 
     # Deterministic per-source seed so a source's trajectories are reproducible independent of shard layout.
     for source in sources:
-        source_seed = (seed * 1_000_003 + hash(source) % 1_000_003) % (2**31 - 1)
+        source_seed = deterministic_source_seed(seed, source)
         try:
             built, _log = _build_layer_records(
                 layer, source, seed=source_seed, catalog=catalog, depth_max=depth_max,
