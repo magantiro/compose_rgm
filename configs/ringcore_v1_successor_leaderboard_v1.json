@@ -49,7 +49,27 @@
         "records": 15775
       }
     },
-    "record_sampling": "production HierarchicalMarkSampler: layer by frozen weight, then uniform over nonempty path-length bins, then uniform record within bin",
+    "record_sampling": {
+      "implementation": "production FactorizedMarkDataset over HierarchicalMarkSampler",
+      "implementation_sha256": "518465d7289ea8772ed32f40f52d31371508fa7c4b65bcf8a9bb4320ba6d21b8",
+      "hierarchy": [
+        "layer_by_frozen_trace_draw_weight",
+        "uniform_nonempty_path_length_bin",
+        "uniform_record_within_bin"
+      ],
+      "curriculum_bin_edges": [
+        5,
+        9,
+        13
+      ],
+      "cold_element_floor": 0.0,
+      "record_order": [
+        "general_corruption",
+        "cycle_operations",
+        "mmp_analogue"
+      ],
+      "draw_identity": "example i is a pure function of (panel_seed, i)"
+    },
     "time_sampling": {
       "late_time_fraction": 0.5,
       "operational_horizon": 16.0,
@@ -106,7 +126,18 @@
       "panel_field": "semantic_cell_id",
       "cell_id_rule": "deterministic versioned encoder over every required axis; no result-dependent merging",
       "balance_rule": "importance-weighted canonical-successor NLL within each frozen nonempty cell, then equal mean over cells",
-      "execution_status": "BLOCKED_UNTIL_AXIS_LABELERS_AND_CELL_CENSUS_ARE_FROZEN"
+      "execution_status": "LABELER_AND_FULL_VALIDATION_CENSUS_FROZEN_BEFORE_CHECKPOINT_SCORING",
+      "labeler_contract_sha256": "7f2f39d9cbeebb85c218a0aef874ada5ff6b0d37b87b4ad8fc6b2fb4d68e8d9e",
+      "full_validation_census": {
+        "artifact": "diagnostics/coherence/ringcore_v1_validation_semantic_cell_census_full_2026-07-30.json",
+        "artifact_sha256": "23c31924633754d6222999c1b97ce44f3c01eff21a3b3d37a7eaf7d397909b26",
+        "census_sha256": "da1a2bb253418231db312194a06fe03175bef524c7c129f7a80fec5462674c46",
+        "validation_traces": 33404,
+        "nonterminal_rows": 115231,
+        "nonempty_cells": 110,
+        "singleton_cells": 0,
+        "selection_role": "qualifies the fixed semantic taxonomy; checkpoint selection uses only the subsequently frozen production-law panel"
+      }
     }
   },
   "reported_metrics": {

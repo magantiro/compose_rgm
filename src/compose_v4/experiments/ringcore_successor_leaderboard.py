@@ -188,6 +188,59 @@ def validate_leaderboard_config(config: Mapping[str, Any]) -> None:
         raise SuccessorLeaderboardError("checkpoint selection must use validation")
     if validation.get("test_partition_forbidden_for_selection") is not True:
         raise SuccessorLeaderboardError("test selection is not explicitly forbidden")
+    sampling = validation.get("record_sampling")
+    if not isinstance(sampling, Mapping):
+        raise SuccessorLeaderboardError("validation record-sampling contract is not frozen")
+    expected_sampling = {
+        "implementation": ("production FactorizedMarkDataset over HierarchicalMarkSampler"),
+        "hierarchy": [
+            "layer_by_frozen_trace_draw_weight",
+            "uniform_nonempty_path_length_bin",
+            "uniform_record_within_bin",
+        ],
+        "curriculum_bin_edges": [5, 9, 13],
+        "cold_element_floor": 0.0,
+        "record_order": [
+            "general_corruption",
+            "cycle_operations",
+            "mmp_analogue",
+        ],
+        "draw_identity": "example i is a pure function of (panel_seed, i)",
+    }
+    sampling_mismatch = {
+        key: {"expected": expected, "observed": sampling.get(key)}
+        for key, expected in expected_sampling.items()
+        if sampling.get(key) != expected
+    }
+    if sampling_mismatch:
+        raise SuccessorLeaderboardError(
+            f"validation record-sampling contract mismatch: {sampling_mismatch}"
+        )
+    if _SHA256.fullmatch(str(sampling.get("implementation_sha256", ""))) is None:
+        raise SuccessorLeaderboardError("validation sampler lacks a full implementation SHA-256")
+    if set(sampling) != set(expected_sampling) | {"implementation_sha256"}:
+        raise SuccessorLeaderboardError(
+            "validation record-sampling contract has extra or missing fields"
+        )
+    layers = validation.get("layers")
+    expected_layer_weights = {
+        "general_corruption": 0.40,
+        "cycle_operations": 0.25,
+        "mmp_analogue": 0.35,
+    }
+    if not isinstance(layers, Mapping) or set(layers) != set(expected_layer_weights):
+        raise SuccessorLeaderboardError(
+            "validation layers do not cover the frozen production mixture"
+        )
+    for layer, weight in expected_layer_weights.items():
+        payload = layers[layer]
+        if (
+            not isinstance(payload, Mapping)
+            or payload.get("trace_draw_weight") != weight
+            or type(payload.get("records")) is not int
+            or int(payload["records"]) <= 0
+        ):
+            raise SuccessorLeaderboardError(f"validation layer {layer!r} is off-contract")
 
     metric_ids = (config.get("reported_metrics") or {}).get("metric_ids") or {}
     if metric_ids.get("primary") != PRIMARY_METRIC:
@@ -202,8 +255,7 @@ def validate_leaderboard_config(config: Mapping[str, Any]) -> None:
         SECONDARY_METRIC,
     ):
         raise SuccessorLeaderboardError(
-            "selection metric order must place production-law NLL before "
-            "balanced semantic-cell NLL"
+            "selection metric order must place production-law NLL before balanced semantic-cell NLL"
         )
     if selection.get("secondary_applies_only_after_primary_statistical_tie") is not True:
         raise SuccessorLeaderboardError(
@@ -216,13 +268,29 @@ def validate_leaderboard_config(config: Mapping[str, Any]) -> None:
         raise SuccessorLeaderboardError("semantic-cell panel field is not frozen")
     if tuple(cells.get("required_axes") or ()) != SEMANTIC_CELL_AXES:
         raise SuccessorLeaderboardError("semantic-cell axes are absent or reordered")
-    production_panel = (config.get("panels") or {}).get("production_law") or {}
     if (
-        production_panel.get(
-            "minimum_active_family_nonterminal_examples_before_selection"
-        )
-        != 64
+        cells.get("execution_status")
+        != "LABELER_AND_FULL_VALIDATION_CENSUS_FROZEN_BEFORE_CHECKPOINT_SCORING"
     ):
+        raise SuccessorLeaderboardError("semantic-axis labeler and census are not frozen")
+    if _SHA256.fullmatch(str(cells.get("labeler_contract_sha256", ""))) is None:
+        raise SuccessorLeaderboardError("semantic-axis labeler lacks a full contract SHA-256")
+    census = cells.get("full_validation_census")
+    if not isinstance(census, Mapping):
+        raise SuccessorLeaderboardError("semantic-cell full-validation census is absent")
+    expected_census_counts = {
+        "validation_traces": 33404,
+        "nonterminal_rows": 115231,
+        "nonempty_cells": 110,
+        "singleton_cells": 0,
+    }
+    for field in ("artifact_sha256", "census_sha256"):
+        if _SHA256.fullmatch(str(census.get(field, ""))) is None:
+            raise SuccessorLeaderboardError(f"semantic-cell census {field} is invalid")
+    if any(census.get(field) != expected for field, expected in expected_census_counts.items()):
+        raise SuccessorLeaderboardError("semantic-cell full-validation census counts drifted")
+    production_panel = (config.get("panels") or {}).get("production_law") or {}
+    if production_panel.get("minimum_active_family_nonterminal_examples_before_selection") != 64:
         raise SuccessorLeaderboardError(
             "production-panel active-family minimum must remain frozen at 64"
         )
@@ -244,9 +312,7 @@ def validate_leaderboard_config(config: Mapping[str, Any]) -> None:
         if bootstrap.get(key) != expected
     }
     if bootstrap_mismatch:
-        raise SuccessorLeaderboardError(
-            f"paired-bootstrap contract mismatch: {bootstrap_mismatch}"
-        )
+        raise SuccessorLeaderboardError(f"paired-bootstrap contract mismatch: {bootstrap_mismatch}")
     for interval_name in ("two_sided_interval", "one_sided_lower_bound"):
         interval = bootstrap.get(interval_name) or {}
         if interval.get("confidence") != 0.95 or interval.get("method") != "percentile":
@@ -274,9 +340,7 @@ def validate_leaderboard_config(config: Mapping[str, Any]) -> None:
         if execution.get(key) != expected
     }
     if mismatch:
-        raise SuccessorLeaderboardError(
-            f"leaderboard execution contract mismatch: {mismatch}"
-        )
+        raise SuccessorLeaderboardError(f"leaderboard execution contract mismatch: {mismatch}")
 
 
 def inventory_self_hash(inventory: Mapping[str, Any]) -> str:
@@ -306,9 +370,7 @@ def encode_semantic_cell(axis_values: Mapping[str, str]) -> str:
     for axis in SEMANTIC_CELL_AXES:
         value = str(axis_values[axis]).strip()
         if not value:
-            raise SuccessorLeaderboardError(
-                f"semantic-cell axis {axis!r} has an empty label"
-            )
+            raise SuccessorLeaderboardError(f"semantic-cell axis {axis!r} has an empty label")
         normalized[axis] = value
     digest = stable_json_sha256(
         {
@@ -335,9 +397,7 @@ def validate_inventory(
     validate_leaderboard_config(config)
     if inventory.get("artifact_kind") != "frozen_training_run_inventory":
         raise SuccessorLeaderboardError("unexpected inventory artifact kind")
-    if inventory.get("source_run_label") != (config.get("run") or {}).get(
-        "run_label"
-    ):
+    if inventory.get("source_run_label") != (config.get("run") or {}).get("run_label"):
         raise SuccessorLeaderboardError("inventory run label disagrees with protocol")
     claimed = str(inventory.get("inventory_sha256", ""))
     expected = str((config.get("run") or {}).get("frozen_inventory_sha256", ""))
@@ -365,9 +425,7 @@ def validate_inventory(
         if verification.get(key) != expected_value
     }
     if mismatch:
-        raise SuccessorLeaderboardError(
-            f"frozen inventory verification is incomplete: {mismatch}"
-        )
+        raise SuccessorLeaderboardError(f"frozen inventory verification is incomplete: {mismatch}")
 
     expected_steps = _expected_steps(config)
     contract = inventory.get("snapshot_contract") or {}
@@ -391,14 +449,10 @@ def validate_inventory(
                 f"snapshot name/step mismatch at expected step {expected_step}"
             )
         if int(row.get("completed_steps", -1)) != expected_step:
-            raise SuccessorLeaderboardError(
-                f"snapshot payload step mismatch at {expected_step}"
-            )
+            raise SuccessorLeaderboardError(f"snapshot payload step mismatch at {expected_step}")
         digest = str(row.get("sha256", ""))
         if _SHA256.fullmatch(digest) is None:
-            raise SuccessorLeaderboardError(
-                f"snapshot {name} lacks a full SHA-256"
-            )
+            raise SuccessorLeaderboardError(f"snapshot {name} lacks a full SHA-256")
         if int(row.get("bytes", 0)) <= 0:
             raise SuccessorLeaderboardError(f"snapshot {name} has no bytes")
         if name in names or digest in digests:
@@ -451,9 +505,7 @@ def verify_snapshot_artifact(spec: SnapshotEvaluationSpec, path: str | Path) -> 
         )
     observed_sha = file_sha256(resolved)
     if observed_sha != spec.sha256:
-        raise SuccessorLeaderboardError(
-            f"snapshot SHA-256 {observed_sha} != frozen {spec.sha256}"
-        )
+        raise SuccessorLeaderboardError(f"snapshot SHA-256 {observed_sha} != frozen {spec.sha256}")
     return resolved
 
 
@@ -476,15 +528,11 @@ def validate_current_snapshot_payload(
     }
     missing = sorted(required - payload.keys())
     if missing:
-        raise SuccessorLeaderboardError(
-            f"snapshot lacks exact-recovery fields: {missing}"
-        )
+        raise SuccessorLeaderboardError(f"snapshot lacks exact-recovery fields: {missing}")
     if payload["checkpoint_kind"] != "exact_training_recovery":
         raise SuccessorLeaderboardError("snapshot is not an exact recovery checkpoint")
     if int(payload["completed_steps"]) != spec.step:
-        raise SuccessorLeaderboardError(
-            "snapshot completed_steps disagrees with its frozen step"
-        )
+        raise SuccessorLeaderboardError("snapshot completed_steps disagrees with its frozen step")
     history = payload["history"]
     if not isinstance(history, Sequence) or not history:
         raise SuccessorLeaderboardError("snapshot history is absent")
@@ -550,9 +598,7 @@ def load_current_snapshot_model(
         not isinstance(expected_run_identity_sha256, str)
         or _SHA256.fullmatch(expected_run_identity_sha256) is None
     ):
-        raise SuccessorLeaderboardError(
-            "exact inventory lacks the frozen run identity SHA-256"
-        )
+        raise SuccessorLeaderboardError("exact inventory lacks the frozen run identity SHA-256")
 
     resolved = verify_snapshot_artifact(spec, path)
     import torch  # noqa: PLC0415
@@ -704,9 +750,7 @@ def _weighted_mean(rows: Sequence[SuccessorRowMetrics], field: str) -> float:
     denominator = sum(row.importance_weight for row in rows)
     if denominator <= 0.0:
         raise SuccessorLeaderboardError(f"no positive weight for {field}")
-    numerator = sum(
-        row.importance_weight * float(getattr(row, field)) for row in rows
-    )
+    numerator = sum(row.importance_weight * float(getattr(row, field)) for row in rows)
     result = numerator / denominator
     if not math.isfinite(result):
         raise SuccessorLeaderboardError(f"non-finite aggregate {field}")
@@ -738,17 +782,11 @@ def aggregate_validation_rows(
         raise SuccessorLeaderboardError("panel draw identities are not unique")
     expected_indices = tuple(int(index) for index in expected_nonterminal_draw_indices)
     if not expected_indices:
-        raise SuccessorLeaderboardError(
-            "frozen nonterminal panel-index census is empty"
-        )
+        raise SuccessorLeaderboardError("frozen nonterminal panel-index census is empty")
     if any(index < 0 for index in expected_indices):
-        raise SuccessorLeaderboardError(
-            "frozen nonterminal panel indices must be nonnegative"
-        )
+        raise SuccessorLeaderboardError("frozen nonterminal panel indices must be nonnegative")
     if len(set(expected_indices)) != len(expected_indices):
-        raise SuccessorLeaderboardError(
-            "frozen nonterminal panel indices are duplicated"
-        )
+        raise SuccessorLeaderboardError("frozen nonterminal panel indices are duplicated")
     observed_indices = {row.draw_index for row in rows}
     required_indices = set(expected_indices)
     if observed_indices != required_indices:
@@ -786,9 +824,9 @@ def aggregate_validation_rows(
         }
         for cell in required
     }
-    secondary = sum(
-        metrics["canonical_successor_nll"] for metrics in per_cell.values()
-    ) / len(per_cell)
+    secondary = sum(metrics["canonical_successor_nll"] for metrics in per_cell.values()) / len(
+        per_cell
+    )
     primary = _weighted_mean(rows, "canonical_successor_nll")
 
     per_family = {
@@ -862,9 +900,7 @@ def aggregate_validation_rows(
         for family, family_rows in sorted(by_family.items())
     }
     for family, family_rows in sorted(by_family.items()):
-        mark_presence = [
-            row.training_target_nll is not None for row in family_rows
-        ]
+        mark_presence = [row.training_target_nll is not None for row in family_rows]
         if any(mark_presence) and not all(mark_presence):
             raise SuccessorLeaderboardError(
                 f"family {family} mixes present and absent training-target scores"
@@ -877,17 +913,11 @@ def aggregate_validation_rows(
 
     total_weight = sum(row.importance_weight for row in rows)
     teacher_family_mass = {
-        family: sum(
-            row.importance_weight for row in rows if row.family == family
-        )
-        / total_weight
+        family: sum(row.importance_weight for row in rows if row.family == family) / total_weight
         for family in MARK_RULE_NAMES
     }
     predicted_family_mass = {
-        family: sum(
-            row.importance_weight * row.family_probabilities[index]
-            for row in rows
-        )
+        family: sum(row.importance_weight * row.family_probabilities[index] for row in rows)
         / total_weight
         for index, family in enumerate(MARK_RULE_NAMES)
     }
@@ -897,23 +927,17 @@ def aggregate_validation_rows(
     )
     family_kl = sum(
         teacher_family_mass[family]
-        * math.log(
-            teacher_family_mass[family]
-            / max(predicted_family_mass[family], 1e-300)
-        )
+        * math.log(teacher_family_mass[family] / max(predicted_family_mass[family], 1e-300))
         for family in MARK_RULE_NAMES
         if teacher_family_mass[family] > 0.0
     )
 
-    alias_histogram = Counter(
-        row.teacher_successor_alias_multiplicity for row in rows
-    )
+    alias_histogram = Counter(row.teacher_successor_alias_multiplicity for row in rows)
     result: dict[str, Any] = {
         PRIMARY_METRIC: primary,
         SECONDARY_METRIC: secondary,
         "family_balanced_canonical_successor_nll_diagnostic": sum(
-            metrics["canonical_successor_nll"]
-            for metrics in per_family.values()
+            metrics["canonical_successor_nll"] for metrics in per_family.values()
         )
         / len(per_family),
         "per_semantic_cell": per_cell,
@@ -947,9 +971,7 @@ def aggregate_validation_rows(
         "mean_virtual_self_mass": _weighted_mean(rows, "virtual_self_mass"),
         "mean_productive_mass": _weighted_mean(rows, "productive_mass"),
     }
-    rows_with_mark = [
-        row for row in rows if row.training_target_nll is not None
-    ]
+    rows_with_mark = [row for row in rows if row.training_target_nll is not None]
     if rows_with_mark:
         result["training_target_nll"] = _weighted_mean(
             rows_with_mark,
@@ -970,21 +992,15 @@ def readiness_summary(
 
     validate_inventory(config, inventory, require_exact_self_hash=True)
     specs = prepare_snapshot_specs(config, inventory)
-    exact_hash_matches = inventory_self_hash(inventory) == inventory.get(
-        "inventory_sha256"
-    )
-    semantic_status = (
-        ((config.get("panels") or {}).get("semantic_cells") or {}).get(
-            "execution_status"
-        )
+    exact_hash_matches = inventory_self_hash(inventory) == inventory.get("inventory_sha256")
+    semantic_status = ((config.get("panels") or {}).get("semantic_cells") or {}).get(
+        "execution_status"
     )
     blockers = []
     if not exact_hash_matches:
         blockers.append("exact immutable inventory self-hash does not match")
     if semantic_status != "FROZEN_READY":
-        blockers.append(
-            "semantic-axis labelers and the validation cell census are not frozen"
-        )
+        blockers.append("semantic-axis labelers and the validation cell census are not frozen")
     blockers.extend(
         (
             "fixed production-law and family-forensics panel artifacts are not built",

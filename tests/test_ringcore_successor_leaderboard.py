@@ -42,10 +42,7 @@ from compose_v4.model.factorized_tracelet_rate_model import MARK_RULE_NAMES
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs" / "ringcore_v1_successor_leaderboard_v1.json"
 INVENTORY_PATH = (
-    ROOT
-    / "diagnostics"
-    / "coherence"
-    / "ringcore_v1_scientific_a7546e2_frozen_inventory.json"
+    ROOT / "diagnostics" / "coherence" / "ringcore_v1_scientific_a7546e2_frozen_inventory.json"
 )
 
 
@@ -86,9 +83,7 @@ def test_exact_inventory_self_hash_is_locally_enforceable(config, inventory):
 
 def test_stale_family_balanced_secondary_is_refused(config):
     stale = copy.deepcopy(config)
-    stale["reported_metrics"]["metric_ids"]["secondary"] = (
-        "balanced_family_canonical_successor_nll"
-    )
+    stale["reported_metrics"]["metric_ids"]["secondary"] = "balanced_family_canonical_successor_nll"
     with pytest.raises(SuccessorLeaderboardError, match="semantic cells"):
         validate_leaderboard_config(stale)
 
@@ -129,6 +124,34 @@ def test_test_partition_and_best_state_are_refused(config):
     bad_state["run"]["snapshot_model_state"] = "best_state_dict"
     with pytest.raises(SuccessorLeaderboardError, match="current_state_dict"):
         validate_leaderboard_config(bad_state)
+
+
+def test_validation_stream_and_semantic_census_are_fully_bound(config):
+    validate_leaderboard_config(config)
+
+    wrong_bins = copy.deepcopy(config)
+    wrong_bins["validation_data"]["record_sampling"]["curriculum_bin_edges"] = [4, 8, 12]
+    with pytest.raises(
+        SuccessorLeaderboardError,
+        match="record-sampling contract mismatch",
+    ):
+        validate_leaderboard_config(wrong_bins)
+
+    missing_sampler_hash = copy.deepcopy(config)
+    missing_sampler_hash["validation_data"]["record_sampling"]["implementation_sha256"] = None
+    with pytest.raises(
+        SuccessorLeaderboardError,
+        match="implementation SHA-256",
+    ):
+        validate_leaderboard_config(missing_sampler_hash)
+
+    stale_census = copy.deepcopy(config)
+    stale_census["panels"]["semantic_cells"]["full_validation_census"]["nonempty_cells"] = 111
+    with pytest.raises(
+        SuccessorLeaderboardError,
+        match="census counts drifted",
+    ):
+        validate_leaderboard_config(stale_census)
 
 
 def test_inventory_step_or_hash_tampering_is_refused(config, inventory):
@@ -269,9 +292,7 @@ def test_current_snapshot_loader_rejects_a_free_floating_spec(monkeypatch):
 
 def _kernel_result() -> SuccessorKernelResult:
     family_logp = tuple(
-        math.log(0.4)
-        if name == "cycle_attach"
-        else math.log(0.6 / (len(MARK_RULE_NAMES) - 1))
+        math.log(0.4) if name == "cycle_attach" else math.log(0.6 / (len(MARK_RULE_NAMES) - 1))
         for name in MARK_RULE_NAMES
     )
     law = FactorizedMarkedLaw(
@@ -388,9 +409,7 @@ def test_aggregation_preserves_production_weights_but_balances_semantic_cells():
     )
 
     assert metrics[PRIMARY_METRIC] == pytest.approx((3 * 1 + 1 * 3 + 1 * 5) / 5)
-    assert metrics["per_semantic_cell"]["cell_a"]["canonical_successor_nll"] == pytest.approx(
-        1.5
-    )
+    assert metrics["per_semantic_cell"]["cell_a"]["canonical_successor_nll"] == pytest.approx(1.5)
     assert metrics[SECONDARY_METRIC] == pytest.approx((1.5 + 5.0) / 2)
     assert metrics["fraction_teacher_successors_aliased"] == 1.0
 

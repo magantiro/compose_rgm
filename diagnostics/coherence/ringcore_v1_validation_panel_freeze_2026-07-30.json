@@ -1,0 +1,103 @@
+{
+  "schema": "compose.ringcore.validation_panel_freeze",
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_CANONICAL_SUCCESSOR_SCORING",
+  "frozen_at": "2026-07-30",
+  "leaderboard_protocol_sha256": "8b9a6ed016165fc6347a1a89123a0a574d5dbbb8421ec46ad98be868b3694ffe",
+  "inventory_sha256": "df815175f8b75a319cc87c01b923db431e53834e28d8b6c5f232ac34e66ddbc0",
+  "sampler_implementation_sha256": "518465d7289ea8772ed32f40f52d31371508fa7c4b65bcf8a9bb4320ba6d21b8",
+  "semantic_axis_labeler_contract_sha256": "7f2f39d9cbeebb85c218a0aef874ada5ff6b0d37b87b4ad8fc6b2fb4d68e8d9e",
+  "source_corpus": {
+    "unified_manifest_checksum": "5c5c254e1054c081",
+    "representability_overlay_checksum": "32372dc5d73139a7",
+    "records_by_layer": {
+      "general_corruption": 3973,
+      "cycle_operations": 13656,
+      "mmp_analogue": 15775
+    }
+  },
+  "production_law_initial": {
+    "panel_artifact_sha256": "f3cd2d0023ddb0b3f61c204ac68fd8250478fe789aa601ec206e06088d499819",
+    "plain_json_sha256": "7797cafab9691c09123cfaf0f9c43ab435f0ce812e1ffc0e46d9d1c44ca72024",
+    "rows": 4096,
+    "nonterminal_rows": 2111,
+    "terminal_rows": 1985,
+    "family_nonterminal_census": {
+      "atom_insert": 527,
+      "atom_delete": 553,
+      "atom_restate": 225,
+      "bond_reorder": 117,
+      "bond_reroute": 152,
+      "cycle_insert": 210,
+      "cycle_attach": 187,
+      "ring_system_delete": 47,
+      "ring_system_restate": 93
+    },
+    "semantic_cell_census": {
+      "nonempty_cells": 97,
+      "singleton_cells": 10,
+      "cells_with_fewer_than_5_rows": 33,
+      "cells_with_fewer_than_10_rows": 50
+    }
+  },
+  "expansion_decision": {
+    "expanded": true,
+    "checkpoint_results_inspected": false,
+    "reason": "ring_system_delete had 47 nonterminal examples, below the preregistered minimum of 64",
+    "initial_is_exact_prefix_of_expanded": true
+  },
+  "production_law_expanded": {
+    "artifact": "diagnostics/coherence/ringcore_v1_production_panel_expanded_2026-07-30.json.gz",
+    "gzip_sha256": "1d480c0b3fa8c2d39ad3c1072d31641be45f7edbf60959078befaa34da5d38c6",
+    "plain_json_sha256": "c08c021d184bcc7402fabaf31cdb354ee77a2958fb01084076eb8752977d2ec8",
+    "panel_artifact_sha256": "e63f896980b0d8bf999d8ce8ebc8bef41bd037e5b5ccca43d5a4084a222f0c16",
+    "rows": 16384,
+    "nonterminal_rows": 8466,
+    "terminal_rows": 7918,
+    "family_nonterminal_census": {
+      "atom_insert": 2192,
+      "atom_delete": 2125,
+      "atom_restate": 963,
+      "bond_reorder": 491,
+      "bond_reroute": 541,
+      "cycle_insert": 774,
+      "cycle_attach": 820,
+      "ring_system_delete": 194,
+      "ring_system_restate": 366
+    },
+    "semantic_cell_census": {
+      "nonempty_cells": 108,
+      "singleton_cells": 4,
+      "cells_with_fewer_than_5_rows": 20,
+      "cells_with_fewer_than_10_rows": 34
+    }
+  },
+  "family_forensics_initial": {
+    "artifact": "diagnostics/coherence/ringcore_v1_family_forensics_initial_2026-07-30.json.gz",
+    "gzip_sha256": "f2460f1def0b41e5be5a05bfee01d1d1c295296968c860d8075c344b0f6c7020",
+    "plain_json_sha256": "aff4520e401132a11f857c77be001caa12b37215ea980f68bebe623cd2ec1353",
+    "panel_artifact_sha256": "203f3ba17ec28507ab0f576fa0b9b0d455fbd713f6c0aaed278d5ad595d823cc",
+    "stream_draws_consumed": 20111,
+    "rows": 2304,
+    "nonterminal_rows_per_family": 256,
+    "terminal_rows": 0,
+    "semantic_cell_census": {
+      "nonempty_cells": 103,
+      "singleton_cells": 11,
+      "cells_with_fewer_than_5_rows": 25,
+      "cells_with_fewer_than_10_rows": 49
+    }
+  },
+  "scientific_interpretation": {
+    "production_primary_metric": "adequately family-covered on the expanded fixed panel",
+    "semantic_secondary_metric": "four singleton cells remain; require uncertainty-aware tie handling before using it to select between primary-metric ties",
+    "family_forensics_role": "capability safeguards and diagnosis only; never substitute for the production-law primary metric"
+  },
+  "explicit_non_actions": {
+    "training_authorized": false,
+    "checkpoint_scoring_performed": false,
+    "checkpoint_ranking_performed": false,
+    "checkpoint_selection_performed": false,
+    "test_partition_used": false
+  }
+}
