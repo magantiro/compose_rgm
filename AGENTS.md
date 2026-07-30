@@ -1,0 +1,633 @@
+# AGENTS.md: Production Generative Machine Learning Research
+
+Read this file completely before doing anything. It is the working contract for this repository.
+Project-specific plans, acceptance criteria, data contracts, and decision logs may narrow this
+contract, but they may not silently weaken its scientific-validity rules.
+
+## Project identity
+
+Before implementation begins, record:
+
+- the scientific or product problem;
+- the primary model output;
+- the central claim that the project is intended to test;
+- the experimental or operational setting in which that claim will be validated;
+- the primary baselines and causal ablations;
+- the declared support of the model, including data, representation, size, modality, and domain limits.
+
+Keep the platform identity distinct from any one experimental instantiation. A comparison or ablation
+may explain why a method works without becoming the identity of the project.
+
+## Authorized scope
+
+The current milestone, and only the current milestone, defines authorized implementation scope.
+
+- Read the applicable task and its acceptance criteria before editing.
+- Do not start later-stage model training, data generation, deployment, or experiments merely because
+  prerequisite code exists.
+- If a task appears to require a meaningful scope expansion, stop and report the dependency.
+- Do not weaken a scientific gate, alter a split after inspecting test results, or broaden a claim to
+  make a milestone appear complete.
+- Prefer the smallest complete change that satisfies the contract.
+- Avoid speculative abstractions, framework adoption, and unrelated cleanup.
+
+Record project-specific prohibitions here, such as:
+
+- training runs that require explicit authorization;
+- datasets or endpoints that cannot be used for selection;
+- upstream repositories that are read-only;
+- claims that require prospective evidence;
+- frozen transforms, registries, schemas, or evaluation protocols.
+
+## Scientific-validity rules
+
+These rules take precedence over green tests and attractive metrics.
+
+1. Never relax a preregistered or frozen gate to make it pass. Fail loudly and report the negative
+   result.
+2. Split data before extracting reusable components, templates, fragments, motifs, statistics, or
+   learned preprocessing state. Deriving these objects from held-out examples and then measuring
+   recovery is leakage.
+3. Fit scalers, imputers, feature selectors, target transforms, vocabularies, calibration models, and
+   other learned preprocessing on training data only.
+4. Do not select architectures or hyperparameters using outer-test results. Use training and
+   calibration evidence, then evaluate the frozen choice once on the outer test.
+5. Preserve random splits only as diagnostics when the intended use involves scaffold, component,
+   family, source, temporal, or other structured distribution shifts.
+6. Audit class, source, family, and template imbalance before sampling. Do not sample raw records when
+   a dominant family would collapse the learned distribution. Use an explicit, justified weighting or
+   balancing policy.
+7. Distinguish model support from training density. An architecture may represent objects outside an
+   enumerated corpus even when the training mixture concentrates probability near that corpus.
+8. Never claim universal expressibility. State that examples are representable only within the
+   declared vocabulary, topology, size, conditioning, and representation support.
+9. Never silently reduce support to make an implementation fit in memory or run faster. Report the
+   failure and change the parameterization, batching strategy, or scientific scope explicitly.
+10. Identify degenerate metrics or rules that appear strong because they match nearly everything.
+    Exclude them from headline conclusions and preserve the exclusion rationale.
+11. Report both coverage and precision when evaluating recovery, decomposition, retrieval, routing,
+    or constraint satisfaction. Coverage alone does not establish correctness.
+12. Distinguish observed, inferred, enumerated, generated, verified, and prospectively validated
+    evidence. Do not promote one category into another.
+13. Treat robustness stress tests as secondary unless the scientific claim explicitly makes them a
+    hard requirement.
+14. Report failed, null, blocked, and abstaining outcomes with the same discipline as positive
+    results. Negative results are first-class deliverables.
+15. If labels are unavailable, use the data only for its legitimate role, such as representation
+    learning, applicability analysis, or distance analysis. Do not invent targets or interpret
+    proximity as predictive validation.
+16. Keep applicability domains explicit. A model may be selected as the best tested model while still
+    being unauthorized for guidance or deployment in unsupported domains.
+17. When uncertainty is used for decision-making, validate its calibration under the shifts relevant
+    to intended use. Do not maximize raw predicted means in regions where uncertainty is unearned.
+18. Distinguish predictive association from causal or mechanistic evidence.
+19. Do not fabricate, synthesize, or silently substitute missing source data. Report the exact missing
+    asset and expected identity or hash.
+20. Keep upstream projects or source repositories immutable when the project consumes them as
+    versioned inputs. Vendor or reference exact revisions rather than modifying upstream history.
+
+## Generative-model design rules
+
+- Define the generated object and its representation precisely. State whether generation is atom,
+  token, graph, sequence, image, route, program, component, or whole-object generation.
+- Keep generated-object support separate from downstream evaluator support. A narrow oracle, route
+  corpus, reward model, or verifier must not silently redefine the support of a broader generator.
+- If supervision is dense for one level and sparse for another, use a data-aligned factorization.
+  Jointly model densely paired variables and use conditional, hierarchical, retrieval-based, or
+  hybrid reasoning for sparsely supervised variables.
+- A modular or hierarchical model is not post-hoc merely because its modules are separate. Guidance
+  is integrated when downstream value changes transition probabilities before the candidate is
+  locked.
+- Preserve a same-generator post-hoc baseline. Hold the base generator fixed and apply assessment only
+  after sampling to isolate the causal effect of in-loop guidance.
+- Match compute and candidate budgets where possible. Report generator calls, evaluator calls,
+  verifier calls, wall-clock time, accelerator time, and final experimental budget.
+- Sweep guidance strength. Evaluate objective value together with validity, diversity, novelty,
+  support coverage, calibration, and collapse toward common training components.
+- Choose the operating point by maximizing the target objective subject to frozen floors on diversity,
+  realism, broad-distribution coverage, and novelty.
+- Separate whole-object novelty from component, motif, scaffold, or combination novelty.
+- Demonstrate open-endedness on actual generated and locked candidates, not only through an
+  architectural argument.
+- Define abstention and failure states explicitly. A missing-knowledge failure is different from an
+  impossible, incompatible, or out-of-scope candidate.
+- Use a frozen candidate lock before prospective evaluation. Report every attempted candidate and all
+  deviations from the planned workflow.
+
+## Data contracts and provenance
+
+- Every source asset must have a documented origin, license or access basis, version, and SHA-256 hash.
+- Keep observed data, programmatic enumeration, inferred labels, synthetic negatives, and prospective
+  outcomes in distinguishable fields or datasets.
+- Never describe a structure corpus as a reaction corpus unless records contain the required reaction
+  objects.
+- Preserve source identifiers and row-level provenance through cleaning, deduplication, reconciliation,
+  and splitting.
+- Deduplicate using the representation appropriate to the scientific question. Preserve excluded or
+  merged identities in a reconciliation ledger.
+- Freeze train, calibration, and test assignments before model fitting. Validate zero group leakage
+  under every grouping variable used by the evaluation.
+- Record exclusions with reason codes. Do not delete inconvenient examples without an auditable
+  ledger.
+- Version schemas. Document intentional schema changes and provide migration logic or an explicit
+  incompatibility error.
+- Sort mappings and collections in serialized artifacts when order is not meaningful.
+- Use deterministic serialization where possible. Generated artifacts should be byte-stable across
+  reruns in the supported environment.
+
+## Code organization
+
+- Keep domain logic in typed, testable functions or small dataclasses.
+- Keep command-line parsing, orchestration, network access, and filesystem I/O thin.
+- Separate:
+  - configuration and policy;
+  - data loading and validation;
+  - pure transformations;
+  - model definitions;
+  - training loops;
+  - evaluation and calibration;
+  - artifact serialization;
+  - command-line entry points.
+- Read settled domain definitions, transforms, roles, vocabularies, and policies from versioned
+  registries or configuration. Do not duplicate them in code or retype them from memory.
+- Validate inputs at boundaries. Error messages must identify the bad file, field, value, or invariant.
+- Avoid broad exception handling. Do not hide errors or silently coerce invalid records.
+- Avoid partial outputs. Compute into a temporary location, validate, then publish the complete
+  artifact atomically or through an equivalent safe handoff.
+- Preserve backward compatibility unless the task explicitly changes a contract.
+- Add dependencies only when the standard library and existing dependencies are insufficient. Place
+  optional tooling in the appropriate dependency group.
+- Do not introduce a framework when plain functions and the existing stack are sufficient.
+- Keep public interfaces small and explicit. Avoid hidden global state.
+- Make device, dtype, precision, worker count, seed, and determinism settings explicit.
+- Keep inference and training configuration serializable and hashable.
+- Do not commit credentials, tokens, private keys, personally identifying information, or
+  machine-specific secrets.
+
+## Compute efficiency and portability
+
+- Use available CPU and GPU hardware efficiently.
+- Batch and vectorize hot paths.
+- Avoid repeated parsing, Python loops over tensors, unnecessary host-device transfers, and implicit
+  synchronization.
+- Keep memory bounded through streaming, chunking, memory mapping where appropriate, and configurable
+  batch sizes.
+- Profile representative inputs before non-trivial optimization.
+- Record a representative before-and-after benchmark for performance changes.
+- Never gain speed by dropping records, shrinking scientific support, changing labels, or weakening
+  gates without an explicit scientific decision.
+- Mixed precision and nondeterministic kernels are opt-in. Require a numerical-equivalence or
+  decision-equivalence check for affected outputs.
+- Make resume and checkpoint behavior explicit for long-running work.
+- Checkpoints must include model state, optimizer and scheduler state when applicable, epoch or step,
+  random-number generator states, configuration, data identity, and software version.
+- A resumed run must not silently change data order, objective, schedule, or random state.
+- Design expensive analyses for independent partitions when valid, but ensure deterministic reduction
+  and bounded concurrency.
+- Report throughput, peak memory, hardware, precision, batch size, and representative input scale.
+
+## Testing
+
+Add tests in proportion to risk:
+
+- a focused happy-path test for public behavior;
+- a regression test for every fixed defect or protected scientific invariant;
+- boundary and malformed-input tests when failure might otherwise be silent;
+- leakage tests for splits, preprocessing, and reused components;
+- determinism and provenance assertions for scripts that produce numbers;
+- schema assertions for persisted JSON, CSV, checkpoint, or database artifacts;
+- round-trip tests for encoders, decoders, transformations, or serialization;
+- numerical tests with justified tolerances;
+- CPU tests for core logic, plus targeted GPU tests where device behavior materially differs;
+- resume and interruption tests for long-running jobs;
+- tests that gates fail when their prerequisites are not met.
+
+Testing rules:
+
+- Prefer small fixtures and behavior-level assertions.
+- Do not copy production logic into tests.
+- Tests must not require network access.
+- Mark tests that require vendored data and skip only when the documented asset is absent.
+- Never skip or weaken a test because its result is inconvenient.
+- Run the narrowest relevant test while iterating.
+- Run formatting and lint checks for touched code.
+- Run the repository-wide verification and test suite before declaring a milestone complete.
+- Inspect generated artifacts and the final diff.
+- Never describe an unrun check as passing.
+
+## Reproducible numerical artifacts
+
+Every script that produces a scientific number must record:
+
+- exact input paths or immutable identifiers;
+- SHA-256 hashes of all material inputs;
+- code revision;
+- complete configuration;
+- deterministic seeds and seed derivation;
+- software and relevant library versions;
+- hardware and precision where they can affect results;
+- sample counts and exclusions;
+- split identities;
+- output schema version;
+- timestamps when operational state matters.
+
+Write numeric findings to a stable task-specific result directory. Pair machine-readable artifacts with
+a concise human-readable interpretation. A result without provenance is not an authoritative result.
+
+## Definition of done
+
+A task is complete only when all of the following hold:
+
+1. The written acceptance criteria are met by a runnable command.
+2. Focused tests, formatting, lint, repository verification, and the required full test suite pass.
+3. Numeric findings are stored in versioned machine-readable artifacts with input hashes.
+4. The decision log records what was measured or decided, including negative results.
+5. Documentation identifies limitations, residual risk, and unresolved human decisions.
+6. Generated artifacts and the final diff have been inspected.
+7. No unrelated user work was overwritten.
+8. Changes are committed in intentional, reviewable units.
+9. The branch is pushed only after verification and only when authorized.
+
+## Git and change discipline
+
+- Treat existing changes as user-owned unless their origin is known.
+- Do not overwrite or revert unrelated work.
+- Keep commits scoped to one coherent concern.
+- Separate data corrections, implementation, tests, generated artifacts, and documentation when that
+  improves reviewability.
+- Use descriptive commit messages that state the outcome.
+- Do not combine unrelated completed work into one large commit.
+- Do not use destructive history or worktree commands without explicit authorization.
+- Inspect `git status`, the staged diff, and `git diff --check` before committing.
+- Report the commits, verification performed, and any unpushed state.
+
+## Scientific writing
+
+### Build an evidence ledger first
+
+Classify every material claim:
+
+- **Measured:** directly observed in an experiment or primary source data.
+- **Computed:** produced by a versioned and reproducible analysis.
+- **Reported:** taken from a verified external primary source.
+- **Inferred:** an explicitly labeled interpretation of measured, computed, or reported evidence.
+- **Proposed:** future work, design choice, hypothesis, or untested mechanism.
+
+Use computed results only when their artifacts record input hashes and required verification passed.
+If evidence is missing, state the gap or omit the claim. Never invent a citation, count, yield,
+uncertainty, protocol outcome, benchmark, or causal explanation.
+
+### Preserve claim boundaries
+
+- State denominators, split definitions, units, uncertainty, and evaluation conditions alongside
+  headline numbers.
+- Distinguish retrospective computation from prospective validation.
+- Report negative and null results with the same prominence as positive outcomes.
+- Separate predictive association from causal or mechanistic claims.
+- Identify model and data applicability limits, including support, modality, size, source,
+  experimental setting, and endpoint.
+- Treat human review and PI decisions as unresolved until recorded.
+- Prefer primary literature and primary data.
+- Keep quotations minimal and verify them exactly.
+- Do not turn architecture, intent, feasibility, or planned experiments into completed results.
+- Use settled terminology consistently.
+
+### Match prose to the section
+
+- **Results:** lead with the finding, then give quantitative evidence, robustness checks, and the
+  limitation.
+- **Methods:** provide enough information to reproduce the work. Name frozen inputs, splits,
+  parameters, software, seeds, exclusions, and decision rules.
+- **Discussion:** interpret without repeating every result. Distinguish evidence, inference, and
+  proposal.
+- **Captions:** make each figure or table interpretable without the main text. Define cohorts, panels,
+  statistics, units, and error bars.
+- **Abstract and title:** claim no more than the completed evidence supports. Use cautious framing until
+  prospective evidence exists.
+- **Reviewer response:** answer directly, point to changed evidence or text, and acknowledge valid
+  limitations without rhetorical defensiveness.
+
+### Style
+
+- Use precise, compact scientific prose.
+- Prefer concrete subjects and strong verbs.
+- Keep terminology consistent.
+- Organize each short paragraph around one claim.
+- Lead with the scientific or practical problem and outcome before implementation detail.
+- Put mathematical and architectural rigor where technical reviewers can inspect it without making the
+  abstract inaccessible to the field's primary audience.
+- Avoid promotional adjectives, vague novelty claims, anthropomorphism, and claims of universality.
+- Avoid comparison-first framing when the platform contribution is broader than one ablation.
+- Do not use em dashes in manuscript prose. Use commas, parentheses, colons, semicolons, or separate
+  sentences.
+- Define every acronym on first use.
+- Verify every number against its source artifact.
+- Verify every citation against the cited source.
+- Flag every sentence that depends on unresolved human judgment.
+
+## Reporting work to collaborators
+
+Lead with the outcome. Report:
+
+- what changed;
+- the exact checks that ran;
+- the authoritative artifact or file;
+- the scientific interpretation;
+- negative findings and abstentions;
+- remaining risks or decisions;
+- the next safe action.
+
+Do not present ongoing, blocked, or unverified work as complete.
+
+## COMPOSE project-specific contract
+
+This section instantiates the general contract for this repository. It does not replace the frozen
+registries, run contracts, decision artifacts, or task-specific acceptance criteria. When a current,
+self-hashed contract is stricter than this prose, the contract governs. When documents disagree, stop,
+identify the conflicting revisions, and resolve the lineage instead of choosing the convenient version.
+
+### Objective and primary claim
+
+- **Scientific problem:** learn an executable stochastic molecular editing process whose committed
+  non-null states are complete supported molecules and whose transitions can change atom identity,
+  cardinality, connectivity, and ring topology.
+- **Primary model output:** a state- and time-dependent marked rate law over complete legal rewrite
+  actions. Executing and canonicalizing the marks induces a molecular-successor kernel.
+- **Central claim under test:** COMPOSE learns an executable, trans-dimensional stochastic rewrite
+  process over molecular graphs and turns its induced canonical molecular-successor process into a
+  substrate for exact and dynamic molecular design.
+- **Platform identity:** Rewrite Generator Matching and COMPOSE are the framework. Lead optimization,
+  Pareto exploration, dynamic retargeting, exact Doob control, and topology or size adaptation are
+  experimental consequences, not the identity of the framework.
+- **Primary validation setting:** source-conditioned molecular editing under a fixed embedded-jump
+  budget, followed by exact finite-horizon verification on a bounded persistent-slot graph and dynamic
+  multiobjective design experiments. Unconditional de novo generation is a separate timed-CTMC lane
+  with its own checkpoint, source distribution, hazard requirements, and gates.
+
+### Current authorized milestone
+
+As of the current editing-V2 rebuild, the authorized sequence is:
+
+1. finish and freeze the content-addressed editing corpus derivatives;
+2. build and validate whole-trace Active8 admission;
+3. rebuild Gate 0 structural evidence on the exact admitted corpus;
+4. run the T1 successor-level capacity and micro-overfit gate;
+5. run the bounded P50 pilot only after its semantic prerequisites authorize it;
+6. advance to P500 and P2000 only after their preceding decision artifacts pass;
+7. authorize a long run only after the staged retention and learnability gates pass.
+
+The current existence of trainer, launcher, or checkpoint code does not authorize a later stage. A stale,
+null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not training authority.
+
+### Project-specific forbidden actions
+
+- Do not launch P50, P500, P2000, a long editing run, or a de novo run without the exact current
+  prerequisite and authorization artifacts.
+- Do not launch a Modal scientific job from a dirty serialized-code tree. Use a clean committed
+  worktree or clone, bind the exact commit, use the required detached or spawned execution mode, and
+  preserve the content-addressed output namespace.
+- Do not mention an AI assistant in commit messages or pull-request text. Use the repository convention
+  `<module>: <one-line imperative, lowercase, no trailing period>` when it applies.
+- Do not select a checkpoint by raw Generator-Matching loss, mark-level family accuracy, final step, or
+  a trainer-internal `selected_step`. Apply the frozen validation-only canonical-successor rule.
+- Do not use the already inspected legacy final-test aggregates to select or repair a model. A repaired
+  model requires a new sealed final holdout or external final evaluation.
+- Do not use an editing checkpoint as evidence for unconditional generation.
+- Do not re-enable `ring_system_grow` or add a finite whole-ring template catalog merely to improve one
+  metric. Any macro proposal is an optional efficiency ablation and requires its own support analysis.
+- Do not enable `ring_system_delete` in the current Active8 pilot without a recorded support and task
+  decision. It is outside the current eight-family pilot.
+- Do not silently add multi-neighbor atom insertion. Current supported birth is root insertion or
+  insertion with exactly one existing neighbor. If a task requires bond subdivision or another
+  multi-attachment birth, record the support expansion and redesign the factorization explicitly.
+- Do not alter executor semantics, legal fibers, persistent-slot identity, canonicalization, operator
+  mappings, charge policy, or representability rules to make a gate pass.
+- Do not reconstruct exact slot-addressed states from canonical SMILES for training or replay.
+- Do not independently reimplement molecular-successor probabilities in experiment scripts. Use the
+  one production evaluator and the independent dictionary implementation only as a bounded test oracle.
+- Do not reuse old exact-Doob scripts, old exactness JSONs, stale pre-RingCore figures, data-starved
+  checkpoints, or old task selections as scientific evidence.
+- Do not apply mark-level top-k, nucleus, power, or per-family control and describe it as
+  representation-invariant molecular control.
+- Do not call the null state a molecule, claim exactness at full molecular scale, claim universal
+  expressibility, or claim every deletion has a one-step insertion inverse.
+- Do not change objectives, normalization, hypervolume references, task thresholds, budgets, or dynamic
+  protocols after inspecting corresponding evaluation outputs.
+
+### Frozen terminology and process semantics
+
+- The semantic state space is a disjoint union over active atom cardinality and includes a distinguished
+  reversible null source. The padded persistent-slot tensor is a coordinate representation, not the
+  semantic dimension.
+- The model parameterizes a stochastic process over complete executable rewrite **marks**. The completed
+  16,000-step RingCore-V1 diagnostic run used mark-level Generator Matching. The editing-V2 bounded
+  training lane instead declares a canonical-successor objective for the productive embedded jump chain,
+  with any hazard term separate and explicit. Bind objective identity in contracts and checkpoints. Do not
+  describe the historical run as successor-trained or silently resume a mark-objective checkpoint under
+  the successor objective.
+- The molecular kernel is the pushforward of the mark law through the production executor and canonical
+  molecular identity, with all marks in a successor fiber summed.
+- Successor-level control is invariant to refinements that preserve aggregate mass within one canonical
+  successor fiber. Arbitrary mark-level controllers are not.
+- `cycle_insert` is the model-family name for executor `bond_insert` and means ring closing.
+  `cycle_attach` is the model-family name for executor `bond_delete` and means ring opening. The inherited
+  name `cycle_attach` does not mean attaching a ring.
+- Use graph cycle rank `|E| - |V| + c`. Keep it distinct from SSSR ring count and ring-system count.
+- Determine real atoms with the authoritative element predicate. SCAR is occupied but is not an element.
+
+### Declared bounded editing support
+
+- **Object:** connected, supported molecular graphs represented by exact persistent-slot states.
+- **Vocabulary:** the declared broad-organic 15-class element-valence vocabulary, including represented
+  sulfur, phosphorus, and halogen classes. The legacy CNOF four-class model is not the production
+  scientific model.
+- **Size:** at most 40 active atoms in the current production editing contract.
+- **Charge and valence:** the frozen production charge, aromaticity, bond, and valence policies.
+- **Stereochemistry:** out of scope in the current editing-V2 corpus contract. Do not interpret the 2D
+  molecular graph law as stereochemical generation or preservation evidence.
+- **Formal-charge changes:** out of scope. The current editing contract is charge-preserving only.
+- **Current Gate0, T1, and P50 Active8 development families:** `atom_insert`, `atom_delete`,
+  `atom_restate`, `bond_reorder`, `bond_reroute`, `cycle_insert`, `cycle_attach`, and
+  `ring_system_restate`.
+- **Disabled in the bounded pilot:** `ring_system_delete` and `ring_system_grow`.
+- Active8 is a development-only operator freeze for Gate0, T1, and P50. It does not authorize final
+  production support. Final operator support remains undecided until the registered reachability,
+  capacity, and downstream pilot evidence is recorded.
+- **Birth factorization:** zero-neighbor root birth and exactly one-neighbor connected birth.
+- Every non-null committed state must be valid, connected, and within declared support. The null source is
+  reversible but is not a molecule.
+- This support declaration does not imply uniform training density, one-step inverse closure, reachability
+  of every broad-organic molecule, or representative drug-like chemistry in the exact carbon benchmark.
+
+### Data sources and immutable boundaries
+
+- Use exact slot-addressed source states, semantic actions, exact successors, and canonical molecular keys
+  only as identity metadata. Never make SMILES reparsing the source of truth.
+- Partition by source and scaffold before trajectory generation. For molecular matched-pair records, both
+  endpoints must belong to the same partition; record and drop cross-partition pairs.
+- The editing-V2 corpus contract declares five evidence lanes:
+  `observed_local_analogue`, `operator_aware_real_endpoint`,
+  `linker_positional_topology_analogue`, `observed_series_path`, and
+  `reversible_synthetic_walk`. Preserve each lane's real, synthetic, or mixed evidence class.
+- Preserve the legacy corruption, cycle-operation, and matched-pair inputs as distinguishable provenance
+  sources where they contribute records, but do not substitute the legacy three-layer mixture for the
+  editing-V2 five-lane capability contract.
+- Sample through the declared hierarchy `data_lane` to `series_scaffold_or_source_group` to
+  `semantic_capability_cell` to `endpoint_pair_or_path` to `progress_state`. Raw pair-uniform sampling is
+  forbidden. The corpus contract remains `DESIGN_NOT_TRAINING_AUTHORIZED`; freeze exact lane and cell
+  weights, stream identity, effective teacher coefficients, and path-position coefficients before
+  optimization. Report all importance corrections.
+- Apply representability, charge, and Active8 decisions as immutable whole-trace admission where the
+  contract requires it. A disallowed middle action excludes every neighboring progress row from that trace.
+- Bind packed shards, overlays, source-corpus cache, unified manifest, operator capability, support
+  contract, sampler, scheduler, codec, and implementation identities by physical and semantic hashes.
+- Preserve train, validation, controller-validation, and final-test roles. Do not use test aggregates for
+  threshold setting, recipe selection, architecture choice, or early stopping.
+- Treat the completed 16,000-step RingCore-V1 run as a scientifically valid diagnostic baseline, not as a
+  selected production model.
+
+### Training and early-abort gates
+
+- Gate 0 must verify exact architecture and capability identity, active teachers and candidates, inherited
+  initialization parity where applicable, and corpus or support provenance.
+- T1 must measure canonical-successor capacity for every load-bearing family on bounded development
+  panels. A family that cannot overfit its small successor-level panel blocks a larger run.
+- A scratch model is allowed. Warm-starting is not a scientific requirement. If used, inherited
+  capabilities require explicit retention probes, replay or distillation where justified, and drift gates.
+- Monitor family-resolved canonical-successor NLL, teacher-successor probability and rank, raw mark count,
+  canonical successor count, alias multiplicity, effective update mass, gradient exposure, and retention
+  relative to initialization. Aggregate loss is insufficient.
+- The first bounded pilot must stop on unsupported teachers, missing candidates, zero or nonfinite
+  gradients, corpus or stream identity drift, inherited-capability collapse, new-family non-learning,
+  exploding support, nonfinite loss, or validation divergence.
+- Freeze exact address and training streams before optimization. A resumed run must reconstruct the same
+  stream and all optimizer, scheduler, RNG, data, and implementation identities.
+- Run P50 before P500, P500 before P2000, and P2000 before a full schedule. Do not continue merely because
+  the process remains numerically stable.
+
+### Primary baselines and causal ablations
+
+- This list is a summary. `configs/comparator_registry_v1.json` is the complete comparator authority. Its
+  `PREIMPLEMENTATION` status declares required planned arms, not completed or runnable baselines.
+- **E2 transport:** learned canonical-successor transport versus both uniform over canonical molecular
+  successors and the state-independent empirical-family law, with the learned unguided prior as the
+  reference arm, at matched support, seeds, source set, and edit budget.
+- **Editing control:** same frozen base prior with unguided sampling, endpoint reranking, greedy one-step
+  reward, local Boltzmann and static scalarized guidance, a declared MOG-DFM-style comparator where
+  faithfully runnable, sequential Monte Carlo or Feynman-Kac control, and learned Doob or value control.
+- **Post-hoc causal baseline:** keep the generator fixed and evaluate or rerank only after sampling.
+- **E3 cardinality ablations:** full COMPOSE, no insertion, no deletion, and fixed cardinality.
+- **E4 topology ablations:** full RingCore, no cycle operations, and a finite-catalog comparator only when
+  a legitimate, support-honest implementation is available.
+- **E3 and E4 attachment ablation:** include the registered no-`bond_reroute` support ablation.
+- **E7 Pareto search:** include NSGA-II over COMPOSE successors as a required same-base comparator, with
+  MOEA/D and the AReUReDi-style adaptation only under their registered conditional gates.
+- **External small-molecule baselines:** apply the registry's adapter and task-compatibility gates to
+  InVirtuoGen, GenMol, GraphGA, MARS, RetMol, and HN-GFN. Do not claim equal support or substitute
+  published numbers when task, oracle, constraint, budget, and selection contracts differ.
+- **E5 quotient ablations:** slot relabeling, within-fiber refinement, aggregate successor-mass checks,
+  sampled successor frequencies, controlled-law invariance, and the negative mark-level controller
+  counterexample.
+- Match edit, oracle, successor-scoring, particle, wall-clock, and accelerator budgets where required.
+  Report unmatched compute explicitly.
+
+### Primary endpoints and experimental gates
+
+- Checkpoint selection uses production-weighted validation canonical-successor NLL as the primary
+  criterion and balanced-semantic-cell canonical-successor NLL as secondary. Family-balanced metrics are
+  diagnostics only. Apply the frozen held-source, scaffold, topology, calibration, and
+  productive-rollout safeguards.
+- E1 de novo generation has its own broad-organic timed-CTMC checkpoint. Primary endpoints are FCD,
+  held-out chemical-space recall, and ring or topology distribution distance. Endpoint validity and
+  all-step validity are separate hard gates, together with connectedness, uniqueness, and sanitization.
+- E2 primary endpoints are held-out canonical-successor NLL, analogue or target recovery at matched
+  budget, and path overhead.
+- E3 primary endpoints are atom-count target success, edits or oracle calls to success, and retained
+  source similarity.
+- E4 primary endpoints are topology target success, valid-path rate, and edit efficiency.
+- E5 primary endpoint is quotient-level successor-mass and controlled-law invariance, accompanied by a
+  demonstrated mark-level negative result.
+- E6 establishes exact finite-horizon identities only on the frozen bounded verification graph. Report
+  unreachable states where the backward value is zero instead of numerically patching them.
+- E7 primary endpoints are normalized hypervolume and hypervolume area under the curve versus all oracle
+  calls. Report IGD+, feasible nondominated count, source similarity, diversity, held-out evaluation,
+  dynamic adaptation, and prefix reuse as declared secondary metrics.
+- Dynamic experiments include preference switching, Pareto fan or branching, and pathwise constraints.
+  Remaining-budget values, not original-budget values, govern continuation after a switch.
+
+### Authoritative files and artifact locations
+
+- Local traceability for the 2026-07-29 authoritative pasted handoff:
+  `docs/HANDOFF_COMPOSE_TRACEABILITY_2026-07-29.md`. It records precedence and claim boundaries but is not
+  a replacement for the pasted handoff.
+- Historical RingCore-V1 diagnostic handoff: `docs/HANDOFF_RINGCORE_V1_POSTRUN.md`. Use its completed-run
+  measurements only when they do not conflict with the newer handoff, current code, or current self-hashed
+  editing-V2 contracts. Its branch, live-run, context-file, and historical suite instructions are stale.
+- Experimental build plan: `docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md`.
+- Frozen experiment registry: `configs/experiment_registry.yaml`, loaded through its validating API rather
+  than hand-parsed in scientific code.
+- Paper framing and title: `docs/PAPER1_FRAMING_AUTHORITATIVE.md` and the applicable portions of
+  `docs/PAPER_MASTER_PLAN.md`. Stale mathematical or empirical paper text does not override the handoff,
+  current code, or self-hashed contracts.
+- Evidence status: `docs/CLAIM_LEDGER.md` plus authoritative machine-readable artifacts. Revalidate its
+  entries against current evidence before using them in manuscript prose.
+- Training authorization and recipe contracts: current files under `configs/`, plus their physically
+  hashed prerequisite artifacts. Filenames alone do not establish currency.
+- Decision-log policy: prospective scientific decisions live in task-specific, self-hashed contracts under
+  `configs/`, such as `editing_corpus_v2_contract.json`, `editing_training_v2_gate.json`, and
+  `ring_operator_decision_v1.json`. Measured gate decisions and deviations live in task-specific,
+  provenance-bound artifacts under `diagnostics/coherence/` or the registry-declared `results/` path and
+  must name the governing contract hash. `docs/DEVIATION_REGISTER.md` is a historical register at its
+  declared source revision, not a current global decision log unless revalidated.
+- Machine-readable diagnostics belong under task-specific `diagnostics/` paths; final E1-E7 experimental
+  outputs belong under their registry-declared `results/` paths.
+- Remote data and checkpoint artifacts live in content-addressed namespaces on the declared Modal volume.
+  Preserve exact workspace, volume, path, commit, and SHA-256 identities.
+
+### Repository-specific verification
+
+- While iterating, run the narrowest focused tests for every touched invariant.
+- For the current Python environment, use `.venv/bin/python -m pytest` and
+  `.venv/bin/python -m ruff check` so the repository-pinned toolchain is used.
+- On macOS, set `KMP_DUPLICATE_LIB_OK=TRUE` and `OMP_NUM_THREADS=1` for the full scientific suite when the
+  native dependency stack requires the documented OpenMP guard.
+- Run `git diff --check`, inspect generated artifacts, and inspect the exact staged diff before committing.
+- Run repository-wide verification before declaring a milestone complete. Record the actual pass, fail, and
+  skip counts. Do not reuse historical suite counts as current evidence.
+- Scientific jobs require the applicable prelaunch or release-gate command, a clean exact source revision,
+  and verification of every physical prerequisite. A green unit-test suite alone does not authorize
+  training.
+
+### Decision and reporting discipline
+
+- Record operator, corpus, architecture, recipe, threshold, checkpoint, and experimental-protocol decisions
+  before inspecting the outputs they govern.
+- Record negative findings such as ring-opening collapse, graft forgetting, failed gates, unreachable
+  control states, unsupported tasks, or noncompetitive baselines without hiding them.
+- Keep the evidence ledger synchronized with manuscript prose. Results placeholders remain placeholders
+  until authoritative artifacts exist.
+- The current core thesis is fixed unless an explicit scientific revision is recorded:
+
+  > COMPOSE learns an executable, trans-dimensional stochastic rewrite process, pushes its mark law to a
+  > canonical molecular-successor kernel, and uses that kernel for exact and dynamic molecular design.
+
+## Portability note
+
+Before adopting this file in another repository, replace the COMPOSE project-specific section with:
+
+- project objective and primary claim;
+- current authorized milestone;
+- forbidden actions;
+- data sources and immutable boundaries;
+- frozen terminology;
+- model support declaration;
+- primary endpoint;
+- required splits and baselines;
+- acceptance gates;
+- verification commands;
+- artifact locations;
+- decision-log location;
+- repository-specific formatting and testing commands.
+
+Do not copy project-specific scientific claims from another repository unless they are genuinely valid
+for the new project.
