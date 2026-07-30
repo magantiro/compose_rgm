@@ -5,7 +5,11 @@ title, abstract, Introduction, and related-work framing. Phase 2 adds the
 formal Rewrite Generator Matching section, including the marked process, raw
 canonical pushforward, productive editing kernel, successor-aware objectives,
 and the separation between fixed-budget editing and timed de novo generation.
-No empirical result table or unverified theorem is included.
+Phase 3 adds the checkpoint-independent finite-horizon control section:
+budget-indexed backward values, the exact terminal tilt, support conditions,
+dynamic continuation, Pareto branching, path-constraint semantics, and the
+boundary between bounded exactness and molecular-scale approximation. No
+empirical result table or unverified numerical claim is included.
 
 `SCIENTIFIC_TRACEABILITY.md` records the authoritative source and claim boundary
 for each load-bearing sentence introduced so far.

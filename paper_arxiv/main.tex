@@ -484,6 +484,141 @@ framework defines this Gillespie-style regime, but the current editing
 checkpoint is not evidence that its timed semantics or unconditional
 generation quality have been validated.
 
+\section{Finite-horizon control on molecular successors}
+\label{sec:finite-control}
+
+The productive kernel provides a common control interface because its states
+and edges already have molecular meaning. This section states the exact
+finite-horizon construction for the editing regime. The result is classical;
+the contribution of \method is the executable molecular process to which it
+can be applied.
+
+\subsection{Budget-indexed Doob transform}
+
+Allow the base editing law to depend on the remaining budget. Let
+$P_b(y\mid x)$ be the row-stochastic canonical-successor kernel used when
+$b\geq 1$ productive edits remain, and let $g:\mathcal Y\to[0,\infty)$ be a
+terminal desirability. Define the backward values
+\begin{align}
+  h_0(x) &= g(x), \\
+  h_b(x) &= \sum_y P_b(y\mid x)h_{b-1}(y).
+  \label{eq:backward-value}
+\end{align}
+At a state for which $h_b(x)>0$, the controlled transition is
+\begin{equation}
+  P_b^g(y\mid x)
+  =
+  P_b(y\mid x)\frac{h_{b-1}(y)}{h_b(x)}.
+  \label{eq:finite-doob}
+\end{equation}
+The denominator in \eqref{eq:finite-doob} is the value with the
+\emph{remaining} budget, not the terminal value $h_0$. If $h_b(x)=0$, the
+desired terminal event has zero base probability from $(b,x)$ and the
+controlled row is undefined. We report such a state as unreachable rather
+than adding numerical mass to unsupported successors.
+
+\paragraph{Exact terminal tilt.}
+Equation~\eqref{eq:backward-value} makes
+\eqref{eq:finite-doob} row-stochastic. Along a length-$K$ path
+$x_{0:K}$, its likelihood ratio relative to the base path telescopes:
+\begin{equation}
+  \prod_{j=0}^{K-1}
+  \frac{
+    P_{K-j}^g(x_{j+1}\mid x_j)
+  }{
+    P_{K-j}(x_{j+1}\mid x_j)
+  }
+  =
+  \frac{g(x_K)}{h_K(x_0)}.
+  \label{eq:path-telescope}
+\end{equation}
+Consequently the terminal law is exactly
+\begin{equation}
+  \Pr^g(X_K=y\mid X_0=x_0)
+  =
+  \frac{
+    \Pr(X_K=y\mid X_0=x_0)g(y)
+  }{
+    h_K(x_0)
+  }.
+  \label{eq:terminal-tilt}
+\end{equation}
+An indicator desirability therefore gives exact conditioning on a reachable
+terminal event. This statement is horizon-specific: a marginal observed
+before the declared final budget is generally not the corresponding terminal
+tilt.
+
+\paragraph{Support and within-fiber invariance.}
+For every reachable $(b,x)$,
+\[
+  \operatorname{supp}P_b^g(x,\cdot)
+  \subseteq
+  \operatorname{supp}P_b(x,\cdot).
+\]
+More precisely, a base edge to $y$ is retained exactly when
+$h_{b-1}(y)>0$; the two row supports are equal only when every base successor
+has positive next-state value. Thus the transform never creates an illegal
+molecular rewrite, but hard conditioning can prune legal base edges. Because
+the recursion uses only canonical-successor probabilities, any
+probability-preserving refinement within a successor fiber leaves every
+$h_b$ and every controlled row unchanged. The same claim would not hold for a
+controller applied separately to the refined marks.
+
+\subsection{Dynamic objectives, Pareto branches, and path constraints}
+
+\paragraph{Dynamic continuation.}
+Suppose a trajectory reaches molecule $x$ with $b$ edits remaining and the
+objective changes from $g$ to $g'$. Recomputing
+\eqref{eq:backward-value} for $g'$ and applying
+\eqref{eq:finite-doob} from $(b,x)$ produces the exact $g'$-tilted
+continuation of the base process from that state. It does not reproduce the
+counterfactual trajectory that would have used $g'$ from the original source.
+The remaining budget is therefore a necessary controller input, not merely a
+sampling parameter.
+
+\paragraph{Pareto branching.}
+A shared molecular prefix can be branched toward multiple terminal regions by
+using desirabilities $\{g_z\}$ indexed by a preference, reference direction,
+or target box. Each branch reweights the same frozen successor kernel and can
+contribute its visited molecules to a common nondominated archive. Linear
+scalarization is only one possible definition of $g_z$; target-region and
+achievement-scalarizing desirabilities permit branches aimed at non-convex or
+under-covered portions of an empirical frontier. Whether this improves
+hypervolume per oracle call is an empirical question, not a consequence of
+the transform.
+
+\paragraph{Hard and pathwise constraints.}
+A state-local, prefix-closed constraint can be enforced by removing violating
+successors from the legal base row before computing the backward values.
+General history-dependent constraints require either a killed process or an
+augmented state that records the relevant path statistic; cumulative rewards
+require the corresponding Feynman--Kac construction. A terminal desirability
+alone does not establish intermediate path feasibility. In all cases, a
+zero backward value is a genuine reachability failure under the declared
+support, constraint, and budget.
+
+\subsection{Exact verification and molecular-scale approximation}
+
+Exactness requires complete enumeration of the relevant state graph and exact
+backward values. We therefore reserve the term \emph{exact} for a bounded
+persistent-slot verification slice built with the same executor and canonical
+identity as the production process. There we can compare the controlled
+terminal distribution with \eqref{eq:terminal-tilt}, audit every support
+relation, and verify the backward recursion without Monte Carlo error.
+
+At molecular scale, the value
+\[
+  h_\phi(b,x;x_{\mathrm{src}},z,m)
+  \approx
+  \E_P[g_z(X_b)\mid X_0=x]
+\]
+is learned or estimated, where $x_{\mathrm{src}}$ is the immutable source and
+$m$ describes protected structure or other control context. Such a controller
+is approximate even though every proposed transition remains a legal
+successor. Calibration, backward-equation residual, successor ranking, and
+control quality must therefore be measured separately from the exact
+finite-state result.
+
 \bibliographystyle{plainnat}
 \bibliography{references}
 

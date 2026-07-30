@@ -22,6 +22,12 @@ the current manuscript. It is an audit aid, not submission prose.
 | Productive-successor identity loss is embedded-chain likelihood, not rate matching. | `src/compose_v4/experiments/factorized_successor_training.py`; `src/compose_v4/experiments/factorized_successor_objective.py`. | The manuscript does not call `productive_identity` Generator Matching or claim a hazard gradient. |
 | Successor-generator Bregman loss matches the off-diagonal canonical generator. | Same objective sources as above. | It is distinguished from both productive identity and identity-plus-hazard. |
 | The successor-aware bridge is development-bounded. | `src/compose_v4/experiments/editing_successor_trainer.py`. | The manuscript explicitly says the bridge does not authorize a full-corpus run. |
+| The budget-indexed Doob law realizes the exact terminal tilt. | `docs/SYSTEM_CONTRACT.md` Appendix A; direct telescoping argument in Eqs. (path-telescope)--(terminal-tilt). | Exactness requires exact backward values and is claimed only at the declared horizon. |
+| Doob control cannot create an unsupported molecular transition. | `docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md` §2.2; follows directly from the multiplicative controlled kernel. | Support equality is not claimed under hard conditioning; zero-value successors can be pruned. |
+| A state with zero remaining-budget value is unreachable under the declared target and budget. | Pasted handoff §8; `docs/HANDOFF_COMPOSE_TRACEABILITY_2026-07-29.md` §8. | The controlled row is declared undefined; no epsilon patch is licensed. |
+| Dynamic retargeting is exact as a continuation from the current state. | `docs/SYSTEM_CONTRACT.md` Appendix A; telescoping argument restarted at the current state and remaining budget. | It is not claimed to reproduce the counterfactual law obtained by using the new objective from the original source. |
+| General path constraints require killed or augmented-state semantics. | `docs/PAPER_MASTER_PLAN.md` §7. | A terminal desirability is not claimed to enforce arbitrary intermediate constraints. |
+| Molecular-scale value control is approximate. | Pasted handoff §§8 and 16; experiment registry E7. | Exactness remains confined to the bounded enumerable verification slice. |
 
 ## Empirical-status policy
 
