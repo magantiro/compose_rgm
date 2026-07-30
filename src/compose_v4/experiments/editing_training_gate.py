@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
 from typing import Any
 
@@ -34,10 +36,44 @@ MISLEADING_LEGACY_METRICS = {
     "balanced_family_accuracy",
     "balanced_family_top3_accuracy",
 }
+REQUIRED_P50_FAMILIES = (
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+)
+P50_INITIALIZATION_REGIMES = (
+    "scratch",
+    "compatible_warm_start",
+    "compatible_warm_start_with_retention",
+)
 
 
 class EditingTrainingGateError(ValueError):
     """The editing-training contract is malformed or not launch-ready."""
+
+
+@dataclass(frozen=True)
+class ResolvedP50Thresholds:
+    """Finite, exact-family thresholds resolved before pilot construction."""
+
+    initialization_regime: str
+    required_families: tuple[str, ...]
+    minimum_gradient_updates: tuple[tuple[str, int], ...]
+    maximum_family_nll_regression: tuple[tuple[str, float], ...]
+    inherited_retention_status: str
+    maximum_inherited_probe_nll_regression: float | None
+
+    @property
+    def minimum_gradient_update_map(self) -> dict[str, int]:
+        return dict(self.minimum_gradient_updates)
+
+    @property
+    def maximum_family_nll_regression_map(self) -> dict[str, float]:
+        return dict(self.maximum_family_nll_regression)
 
 
 def load_editing_training_gate(path: str | Path) -> dict[str, Any]:
@@ -131,12 +167,201 @@ def full_training_launch_blockers(contract: dict[str, Any]) -> list[str]:
         blockers.append("full_training_authorized is not true")
     if contract.get("status") != "FROZEN_FULL_TRAINING_AUTHORIZED":
         blockers.append("status is not FROZEN_FULL_TRAINING_AUTHORIZED")
+
+    def unresolved_paths(value: object, prefix: str) -> list[str]:
+        if value is None:
+            return [prefix]
+        if isinstance(value, dict):
+            return [
+                path
+                for key, child in sorted(value.items())
+                for path in unresolved_paths(child, f"{prefix}.{key}")
+            ]
+        if isinstance(value, list):
+            return [
+                path
+                for index, child in enumerate(value)
+                for path in unresolved_paths(child, f"{prefix}[{index}]")
+            ]
+        return []
+
     for gate in contract.get("gates") or ():
         thresholds = gate.get("numeric_thresholds") or {}
         for name, value in sorted(thresholds.items()):
-            if value is None:
-                blockers.append(f"{gate['id']} has unfrozen threshold: {name}")
+            blockers.extend(
+                f"{gate['id']} has unfrozen threshold: {path}"
+                for path in unresolved_paths(value, name)
+            )
     return blockers
+
+
+def _p50_gate(contract: dict[str, Any]) -> dict[str, Any]:
+    return next(
+        gate
+        for gate in contract["gates"]
+        if gate["id"] == "P50_gradient_and_collapse_sentinel"
+    )
+
+
+def _exact_family_mapping(
+    value: object,
+    *,
+    name: str,
+    required_families: tuple[str, ...],
+) -> dict[str, object]:
+    if not isinstance(value, dict):
+        raise EditingTrainingGateError(
+            f"P50 threshold {name} must be a per-family object"
+        )
+    if set(value) != set(required_families):
+        raise EditingTrainingGateError(
+            f"P50 threshold {name} must exactly cover required families"
+        )
+    return value
+
+
+def resolve_p50_thresholds(
+    contract: dict[str, Any],
+    *,
+    initialization_regime: str,
+    required_families: tuple[str, ...] = REQUIRED_P50_FAMILIES,
+) -> ResolvedP50Thresholds:
+    """Resolve a non-null P50 contract before a loader or optimizer exists."""
+
+    validate_editing_training_gate(contract)
+    if (
+        initialization_regime not in P50_INITIALIZATION_REGIMES
+        or initialization_regime
+        not in set(
+            contract.get("bounded_design_comparison", {})
+            .get("factors", {})
+            .get("initialization", ())
+        )
+    ):
+        raise EditingTrainingGateError(
+            f"unregistered P50 initialization regime: {initialization_regime!r}"
+        )
+    if (
+        not required_families
+        or len(required_families) != len(set(required_families))
+    ):
+        raise EditingTrainingGateError(
+            "P50 required families must be nonempty and unique"
+        )
+    thresholds = _p50_gate(contract).get("numeric_thresholds") or {}
+    minimum_raw = _exact_family_mapping(
+        thresholds.get("minimum_gradient_updates_per_required_slice"),
+        name="minimum_gradient_updates_per_required_slice",
+        required_families=required_families,
+    )
+    maximum_raw = _exact_family_mapping(
+        thresholds.get("maximum_required_slice_successor_nll_regression"),
+        name="maximum_required_slice_successor_nll_regression",
+        required_families=required_families,
+    )
+    minimum: list[tuple[str, int]] = []
+    maximum: list[tuple[str, float]] = []
+    for family in required_families:
+        minimum_value = minimum_raw[family]
+        if (
+            type(minimum_value) is not int
+            or not 1 <= minimum_value <= 50
+        ):
+            raise EditingTrainingGateError(
+                "P50 minimum gradient updates must be integers in [1, 50]"
+            )
+        maximum_value = maximum_raw[family]
+        if (
+            isinstance(maximum_value, bool)
+            or not isinstance(maximum_value, (int, float))
+            or not isfinite(float(maximum_value))
+            or float(maximum_value) < 0.0
+        ):
+            raise EditingTrainingGateError(
+                "P50 maximum family NLL regressions must be finite and "
+                "nonnegative"
+            )
+        minimum.append((family, minimum_value))
+        maximum.append((family, float(maximum_value)))
+
+    retention = thresholds.get("maximum_inherited_probe_nll_regression")
+    if not isinstance(retention, dict) or set(retention) != set(
+        P50_INITIALIZATION_REGIMES
+    ):
+        raise EditingTrainingGateError(
+            "P50 inherited-retention threshold must exactly cover "
+            "initialization regimes"
+        )
+    selected_retention = retention[initialization_regime]
+    if initialization_regime == "scratch":
+        if selected_retention != "NOT_APPLICABLE":
+            raise EditingTrainingGateError(
+                "scratch P50 must explicitly declare inherited retention "
+                "NOT_APPLICABLE"
+            )
+        retention_status = "NOT_APPLICABLE"
+        maximum_inherited = None
+    else:
+        if (
+            isinstance(selected_retention, bool)
+            or not isinstance(selected_retention, (int, float))
+            or not isfinite(float(selected_retention))
+            or float(selected_retention) < 0.0
+        ):
+            raise EditingTrainingGateError(
+                "warm-start P50 requires a finite nonnegative inherited-probe "
+                "regression threshold"
+            )
+        retention_status = "REQUIRED"
+        maximum_inherited = float(selected_retention)
+    return ResolvedP50Thresholds(
+        initialization_regime=initialization_regime,
+        required_families=required_families,
+        minimum_gradient_updates=tuple(minimum),
+        maximum_family_nll_regression=tuple(maximum),
+        inherited_retention_status=retention_status,
+        maximum_inherited_probe_nll_regression=maximum_inherited,
+    )
+
+
+def p50_launch_blockers(
+    contract: dict[str, Any],
+    *,
+    initialization_regime: str,
+    required_families: tuple[str, ...] = REQUIRED_P50_FAMILIES,
+) -> list[str]:
+    try:
+        resolve_p50_thresholds(
+            contract,
+            initialization_regime=initialization_regime,
+            required_families=required_families,
+        )
+    except EditingTrainingGateError as error:
+        return [str(error)]
+    return []
+
+
+def assert_p50_launch_authorized(
+    contract: dict[str, Any],
+    *,
+    initialization_regime: str,
+    required_families: tuple[str, ...] = REQUIRED_P50_FAMILIES,
+) -> ResolvedP50Thresholds:
+    blockers = p50_launch_blockers(
+        contract,
+        initialization_regime=initialization_regime,
+        required_families=required_families,
+    )
+    if blockers:
+        raise EditingTrainingGateError(
+            "editing-training contract blocks P50 before loader construction: "
+            + "; ".join(blockers)
+        )
+    return resolve_p50_thresholds(
+        contract,
+        initialization_regime=initialization_regime,
+        required_families=required_families,
+    )
 
 
 def assert_full_training_launch_authorized(contract: dict[str, Any]) -> None:
@@ -148,9 +373,15 @@ def assert_full_training_launch_authorized(contract: dict[str, Any]) -> None:
 
 
 __all__ = [
+    "P50_INITIALIZATION_REGIMES",
+    "REQUIRED_P50_FAMILIES",
     "EditingTrainingGateError",
+    "ResolvedP50Thresholds",
     "assert_full_training_launch_authorized",
+    "assert_p50_launch_authorized",
     "full_training_launch_blockers",
     "load_editing_training_gate",
+    "p50_launch_blockers",
+    "resolve_p50_thresholds",
     "validate_editing_training_gate",
 ]

@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections import Counter
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from math import isfinite
 from typing import Any
 
 import torch
 from torch import Tensor
 
+from compose_v4.experiments.editing_training_gate import REQUIRED_P50_FAMILIES
 from compose_v4.experiments.factorized_successor_data import (
     FactorizedSuccessorBatch,
 )
@@ -20,16 +23,9 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
 )
+from compose_v4.rewrite.action_codec import ActionCodecError, encode_action
 
-DEFAULT_REQUIRED_EDITING_FAMILIES = (
-    "atom_insert",
-    "atom_delete",
-    "atom_restate",
-    "bond_reorder",
-    "bond_reroute",
-    "cycle_insert",
-    "cycle_attach",
-)
+DEFAULT_REQUIRED_EDITING_FAMILIES = REQUIRED_P50_FAMILIES
 
 FAMILY_PARAMETER_PREFIXES: Mapping[str, tuple[str, ...]] = {
     "atom_insert": ("grow_root_head.", "grow_query.", "grow_option."),
@@ -64,10 +60,32 @@ class SuccessorExposurePlan:
     nonterminal_examples_by_step: tuple[int, ...]
     represented_semantic_cells: tuple[str, ...]
     teacher_alias_count: int
+    ordered_address_stream_sha256: str
+    ordered_training_stream_sha256: str
+    examples_by_layer: Mapping[str, int]
+    examples_by_semantic_cell: Mapping[str, int]
+    terminal_example_count: int
+    nonterminal_example_count: int
+    summed_importance_weight: float
+    terminal_importance_weight: float
+    identity_importance_weight_by_family: Mapping[str, float]
+    generator_teacher_coefficient_by_family: Mapping[str, float]
 
     @property
     def total_examples(self) -> int:
         return self.expected_steps * self.batch_size
+
+
+def _update_canonical_hash(digest: Any, value: object) -> None:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    digest.update(len(encoded).to_bytes(8, "big"))
+    digest.update(encoded)
 
 
 def audit_successor_exposure_plan(
@@ -101,7 +119,17 @@ def audit_successor_exposure_plan(
     gradient_opportunities: Counter[str] = Counter()
     per_step_nonterminal: list[int] = []
     cells: set[str] = set()
+    layer_counts: Counter[str] = Counter()
+    cell_counts: Counter[str] = Counter()
+    identity_importance_weights: Counter[str] = Counter()
+    generator_teacher_coefficients: Counter[str] = Counter()
     total_aliases = 0
+    terminal_count = 0
+    nonterminal_count = 0
+    summed_importance_weight = 0.0
+    terminal_importance_weight = 0.0
+    address_digest = hashlib.sha256()
+    training_stream_digest = hashlib.sha256()
     batch_size: int | None = None
     for step in range(1, expected_steps + 1):
         try:
@@ -136,19 +164,155 @@ def audit_successor_exposure_plan(
         per_step_nonterminal.append(nonterminal)
         family_counts.update(current_families)
         gradient_opportunities.update(current_families)
-        for fiber, cell in zip(
-            batch.fibers,
-            batch.semantic_cell_ids,
-            strict=True,
+        weights = tuple(
+            float(value)
+            for value in batch.mark_batch.importance_weights.detach()
+            .cpu()
+            .tolist()
+        )
+        teacher_rates = tuple(
+            float(value)
+            for value in batch.mark_batch.teacher_rates.detach().cpu().tolist()
+        )
+        times = tuple(
+            float(value)
+            for value in batch.mark_batch.times.detach().cpu().tolist()
+        )
+        property_values_tensor = batch.mark_batch.property_condition_values
+        property_mask_tensor = batch.mark_batch.property_condition_mask
+        if (property_values_tensor is None) != (property_mask_tensor is None):
+            raise EditingTrainingSentinelError(
+                "pilot property values and observation masks are not jointly present"
+            )
+        property_values = (
+            (None,) * batch.batch_size
+            if property_values_tensor is None
+            else tuple(
+                tuple(float(value) for value in row)
+                for row in property_values_tensor.detach().cpu().tolist()
+            )
+        )
+        property_masks = (
+            (None,) * batch.batch_size
+            if property_mask_tensor is None
+            else tuple(
+                tuple(bool(value) for value in row)
+                for row in property_mask_tensor.detach().cpu().tolist()
+            )
+        )
+        if (
+            len(weights) != batch.batch_size
+            or len(teacher_rates) != batch.batch_size
+            or len(times) != batch.batch_size
+            or len(property_values) != batch.batch_size
+            or len(property_masks) != batch.batch_size
         ):
+            raise EditingTrainingSentinelError(
+                "pilot exposure coefficient tensors are not batch-aligned"
+            )
+        for offset, (
+            fiber,
+            cell,
+            address,
+            rule_name,
+            weight,
+            teacher_rate,
+            time,
+            teacher_action,
+            condition_values,
+            condition_mask,
+        ) in enumerate(
+            zip(
+                batch.fibers,
+                batch.semantic_cell_ids,
+                batch.cache_addresses,
+                batch.mark_batch.teacher_rule_names,
+                weights,
+                teacher_rates,
+                times,
+                batch.mark_batch.teacher_actions,
+                property_values,
+                property_masks,
+                strict=True,
+            )
+        ):
+            if (
+                not isfinite(weight)
+                or weight <= 0.0
+                or not isfinite(teacher_rate)
+                or teacher_rate < 0.0
+                or not isfinite(time)
+                or not 0.0 <= time < 1.0
+                or (
+                    condition_values is not None
+                    and any(not isfinite(value) for value in condition_values)
+                )
+            ):
+                raise EditingTrainingSentinelError(
+                    "pilot exposure has a nonfinite or invalid time, condition, "
+                    "or objective coefficient"
+                )
+            ordered_address = {
+                "step": step,
+                "batch_offset": offset,
+                "address": asdict(address),
+            }
+            _update_canonical_hash(address_digest, ordered_address)
+            if (rule_name is None) != (teacher_action is None):
+                raise EditingTrainingSentinelError(
+                    "pilot teacher action and rule are not jointly present"
+                )
+            try:
+                encoded_action = (
+                    None
+                    if rule_name is None
+                    else encode_action(rule_name, teacher_action)
+                )
+            except ActionCodecError as error:
+                raise EditingTrainingSentinelError(
+                    "pilot teacher action cannot be encoded under the frozen "
+                    "production ontology"
+                ) from error
+            _update_canonical_hash(
+                training_stream_digest,
+                {
+                    **ordered_address,
+                    "time": time,
+                    "teacher_rule_name": rule_name,
+                    "teacher_action": encoded_action,
+                    "teacher_rate": teacher_rate,
+                    "importance_weight": weight,
+                    "semantic_cell_id": cell,
+                    "property_condition_values": condition_values,
+                    "property_condition_mask": condition_mask,
+                },
+            )
+            layer_counts[address.layer] += 1
+            summed_importance_weight += weight
+            family = _family_name(rule_name)
             if fiber is not None:
+                nonterminal_count += 1
                 total_aliases += len(fiber.aliases)
+                if family is None or teacher_rate <= 0.0:
+                    raise EditingTrainingSentinelError(
+                        "pilot jump lacks a positive family-specific coefficient"
+                    )
+                identity_importance_weights[family] += weight
+                generator_teacher_coefficients[family] += weight * teacher_rate
                 if cell is None and require_semantic_cells:
                     raise EditingTrainingSentinelError(
                         "pilot stream contains a jump without a semantic cell"
                     )
                 if cell is not None:
                     cells.add(cell)
+                    cell_counts[cell] += 1
+            else:
+                terminal_count += 1
+                terminal_importance_weight += weight
+                if family is not None or teacher_rate != 0.0:
+                    raise EditingTrainingSentinelError(
+                        "pilot terminal row carries a family or teacher rate"
+                    )
     try:
         next(iterator)
     except StopIteration:
@@ -182,7 +346,54 @@ def audit_successor_exposure_plan(
         nonterminal_examples_by_step=tuple(per_step_nonterminal),
         represented_semantic_cells=tuple(sorted(cells)),
         teacher_alias_count=total_aliases,
+        ordered_address_stream_sha256=address_digest.hexdigest(),
+        ordered_training_stream_sha256=training_stream_digest.hexdigest(),
+        examples_by_layer=dict(sorted(layer_counts.items())),
+        examples_by_semantic_cell=dict(sorted(cell_counts.items())),
+        terminal_example_count=terminal_count,
+        nonterminal_example_count=nonterminal_count,
+        summed_importance_weight=summed_importance_weight,
+        terminal_importance_weight=terminal_importance_weight,
+        identity_importance_weight_by_family=dict(
+            sorted(identity_importance_weights.items())
+        ),
+        generator_teacher_coefficient_by_family=dict(
+            sorted(generator_teacher_coefficients.items())
+        ),
     )
+
+
+def assert_successor_exposure_matches(
+    planned: SuccessorExposurePlan,
+    observed: SuccessorExposurePlan,
+) -> None:
+    """Require the live pilot stream to equal the frozen preflight exactly."""
+
+    if not isinstance(planned, SuccessorExposurePlan) or not isinstance(
+        observed,
+        SuccessorExposurePlan,
+    ):
+        raise TypeError("planned and observed exposures must be typed plans")
+    if (
+        observed.ordered_address_stream_sha256
+        != planned.ordered_address_stream_sha256
+    ):
+        raise EditingTrainingSentinelError(
+            "live pilot address stream differs from its frozen exposure plan"
+        )
+    if (
+        observed.ordered_training_stream_sha256
+        != planned.ordered_training_stream_sha256
+    ):
+        raise EditingTrainingSentinelError(
+            "live pilot times, teachers, cells, or objective weights differ "
+            "from the frozen exposure plan"
+        )
+    if observed != planned:
+        raise EditingTrainingSentinelError(
+            "live pilot exposure counts or effective coefficients differ "
+            "from the frozen plan"
+        )
 
 
 class P50GradientCollapseSentinel:
@@ -261,9 +472,12 @@ class P50GradientCollapseSentinel:
         self.last_step = 0
         self.last_validation_step = 0
         self.teacher_examples: Counter[str] = Counter()
-        self.gradient_updates: Counter[str] = Counter()
+        self.family_gate_gradient_updates: Counter[str] = Counter()
+        self.action_route_gradient_updates: Counter[str] = Counter()
         self.minimum_global_gradient_norm = float("inf")
         self.maximum_global_gradient_norm = 0.0
+        self.final_validation_metrics: dict[str, float] | None = None
+        self.final_family_nll_regressions: dict[str, float] | None = None
 
     def __call__(
         self,
@@ -326,18 +540,20 @@ class P50GradientCollapseSentinel:
             if step_families[family] == 0:
                 continue
             prefixes = FAMILY_PARAMETER_PREFIXES[family]
-            route_squared_sum = 0.0
-            matching_parameters = 0
+            action_squared_sum = 0.0
+            action_parameters = 0
             for name, parameter in named_parameters:
                 if not name.startswith(prefixes):
                     continue
                 if not parameter.requires_grad:
                     continue
-                matching_parameters += 1
+                action_parameters += 1
                 if parameter.grad is not None:
                     norm = float(parameter.grad.norm())
-                    route_squared_sum += norm * norm
+                    action_squared_sum += norm * norm
             family_index = MARK_RULE_TO_INDEX[family]
+            gate_squared_sum = 0.0
+            gate_parameters = 0
             for name, parameter in named_parameters:
                 if name not in {
                     "family_head.2.weight",
@@ -346,17 +562,23 @@ class P50GradientCollapseSentinel:
                     continue
                 if not parameter.requires_grad:
                     continue
-                matching_parameters += 1
+                gate_parameters += 1
                 if parameter.grad is not None:
                     row_gradient = parameter.grad[family_index]
                     norm = float(row_gradient.norm())
-                    route_squared_sum += norm * norm
-            if matching_parameters == 0:
+                    gate_squared_sum += norm * norm
+            if action_parameters == 0:
                 raise EditingTrainingSentinelError(
-                    f"required family {family!r} has no trainable gradient route"
+                    f"required family {family!r} has no trainable action route"
                 )
-            if route_squared_sum**0.5 > self.gradient_epsilon:
-                self.gradient_updates[family] += 1
+            if gate_parameters == 0:
+                raise EditingTrainingSentinelError(
+                    f"required family {family!r} has no trainable family gate"
+                )
+            if action_squared_sum**0.5 > self.gradient_epsilon:
+                self.action_route_gradient_updates[family] += 1
+            if gate_squared_sum**0.5 > self.gradient_epsilon:
+                self.family_gate_gradient_updates[family] += 1
         self.last_step = completed_step
 
     def observe_validation(
@@ -369,6 +591,7 @@ class P50GradientCollapseSentinel:
             raise EditingTrainingSentinelError(
                 "P50 validation steps are stale, future, or duplicated"
             )
+        regressions: dict[str, float] = {}
         for family in self.required_families:
             count = float(metrics.get(f"teacher_examples_{family}", 0.0))
             if count <= 0.0:
@@ -383,6 +606,7 @@ class P50GradientCollapseSentinel:
                 )
             baseline = self.baseline_validation_metrics[key]
             regression = current - baseline
+            regressions[family] = regression
             if regression > self.maximum_family_nll_regression[family]:
                 raise EditingTrainingSentinelError(
                     f"P50 required-family collapse at step {completed_step}: "
@@ -390,6 +614,10 @@ class P50GradientCollapseSentinel:
                     f"{self.maximum_family_nll_regression[family]:.6g}"
                 )
         self.last_validation_step = completed_step
+        self.final_validation_metrics = {
+            str(key): float(value) for key, value in metrics.items()
+        }
+        self.final_family_nll_regressions = regressions
 
     def finalize(self) -> dict[str, Any]:
         if self.last_step != self.expected_steps:
@@ -400,15 +628,17 @@ class P50GradientCollapseSentinel:
             raise EditingTrainingSentinelError(
                 "P50 has no validation observation at exactly step 50"
             )
-        shortfalls = {
-            family: {
-                "observed": self.gradient_updates[family],
-                "required": self.minimum_gradient_updates[family],
-            }
-            for family in self.required_families
-            if self.gradient_updates[family]
-            < self.minimum_gradient_updates[family]
-        }
+        shortfalls = {}
+        for family in self.required_families:
+            required = self.minimum_gradient_updates[family]
+            gate_observed = self.family_gate_gradient_updates[family]
+            action_observed = self.action_route_gradient_updates[family]
+            if gate_observed < required or action_observed < required:
+                shortfalls[family] = {
+                    "family_gate_observed": gate_observed,
+                    "action_route_observed": action_observed,
+                    "required_each": required,
+                }
         if shortfalls:
             raise EditingTrainingSentinelError(
                 f"P50 required-family gradient shortfalls: {shortfalls}"
@@ -424,7 +654,31 @@ class P50GradientCollapseSentinel:
                 sorted(self.teacher_examples.items())
             ),
             "gradient_updates_by_family": dict(
-                sorted(self.gradient_updates.items())
+                sorted(
+                    (
+                        family,
+                        min(
+                            self.family_gate_gradient_updates[family],
+                            self.action_route_gradient_updates[family],
+                        ),
+                    )
+                    for family in self.required_families
+                )
+            ),
+            "family_gate_gradient_updates_by_family": dict(
+                sorted(self.family_gate_gradient_updates.items())
+            ),
+            "action_route_gradient_updates_by_family": dict(
+                sorted(self.action_route_gradient_updates.items())
+            ),
+            "baseline_validation_metrics": dict(
+                sorted(self.baseline_validation_metrics.items())
+            ),
+            "final_validation_metrics": dict(
+                sorted((self.final_validation_metrics or {}).items())
+            ),
+            "final_family_nll_regressions": dict(
+                sorted((self.final_family_nll_regressions or {}).items())
             ),
             "minimum_global_gradient_norm": (
                 self.minimum_global_gradient_norm
@@ -437,9 +691,10 @@ class P50GradientCollapseSentinel:
 
 __all__ = [
     "DEFAULT_REQUIRED_EDITING_FAMILIES",
-    "EditingTrainingSentinelError",
     "FAMILY_PARAMETER_PREFIXES",
+    "EditingTrainingSentinelError",
     "P50GradientCollapseSentinel",
     "SuccessorExposurePlan",
+    "assert_successor_exposure_matches",
     "audit_successor_exposure_plan",
 ]

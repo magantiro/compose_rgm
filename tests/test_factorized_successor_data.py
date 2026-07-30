@@ -25,8 +25,10 @@ from compose_v4.data.successor_fiber_cache import (
 )
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.editing_training_sentinel import (
+    FAMILY_PARAMETER_PREFIXES,
     EditingTrainingSentinelError,
     P50GradientCollapseSentinel,
+    assert_successor_exposure_matches,
     audit_successor_exposure_plan,
 )
 from compose_v4.experiments.factorized_mark_conditional import (
@@ -55,6 +57,7 @@ from compose_v4.experiments.successor_fiber_cache_builder import (
     compile_successor_fiber_trace,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    MARK_RULE_TO_INDEX,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
 )
@@ -491,6 +494,72 @@ def test_exposure_preflight_and_p50_gradient_sentinel(fixture_bundle) -> None:
     )
     assert exposure.teacher_examples_by_family["atom_insert"] > 0
     assert exposure.nonterminal_examples_by_step[0] > 0
+    assert len(exposure.ordered_address_stream_sha256) == 64
+    assert len(exposure.ordered_training_stream_sha256) == 64
+    assert exposure.examples_by_layer == {"corruption": 16}
+    assert (
+        exposure.terminal_example_count + exposure.nonterminal_example_count
+        == exposure.total_examples
+    )
+    assert exposure.identity_importance_weight_by_family["atom_insert"] > 0.0
+    assert (
+        exposure.generator_teacher_coefficient_by_family["atom_insert"] > 0.0
+    )
+
+    matching_loader = factorized_successor_loader(
+        _mark_dataset(record, length=16),
+        cache,
+        _mark_collator(catalog, template),
+        batch_size=8,
+        workers=0,
+        pin_memory=False,
+        seed=31,
+        semantic_cell_ids=_semantic_cells(cache_records),
+        require_semantic_cell_ids=True,
+    )
+    matching_exposure = audit_successor_exposure_plan(
+        matching_loader,
+        expected_steps=2,
+        required_families=("atom_insert",),
+        minimum_teacher_examples={"atom_insert": 1},
+    )
+    assert_successor_exposure_matches(exposure, matching_exposure)
+
+    mutated_loader = factorized_successor_loader(
+        _mark_dataset(record, length=16),
+        cache,
+        _mark_collator(catalog, template),
+        batch_size=8,
+        workers=0,
+        pin_memory=False,
+        seed=31,
+        semantic_cell_ids=_semantic_cells(cache_records),
+        require_semantic_cell_ids=True,
+    )
+    mutated_batches = list(mutated_loader)
+    first_batch = mutated_batches[0]
+    mutated_address = replace(
+        first_batch.cache_addresses[0],
+        packed_shard_name="mutated.jsonl.gz",
+    )
+    mutated_batches[0] = replace(
+        first_batch,
+        cache_addresses=(
+            mutated_address,
+            *first_batch.cache_addresses[1:],
+        ),
+    )
+    mutated_exposure = audit_successor_exposure_plan(
+        mutated_batches,
+        expected_steps=2,
+        required_families=("atom_insert",),
+        minimum_teacher_examples={"atom_insert": 1},
+    )
+    with pytest.raises(
+        EditingTrainingSentinelError,
+        match="address stream differs",
+    ):
+        assert_successor_exposure_matches(exposure, mutated_exposure)
 
     starved_loader = factorized_successor_loader(
         _mark_dataset(record, length=16),
@@ -553,6 +622,87 @@ def test_exposure_preflight_and_p50_gradient_sentinel(fixture_bundle) -> None:
     report = sentinel.finalize()
     assert report["completed_optimizer_steps"] == 50
     assert report["gradient_updates_by_family"]["atom_insert"] == 50
+    assert (
+        report["family_gate_gradient_updates_by_family"]["atom_insert"] == 50
+    )
+    assert (
+        report["action_route_gradient_updates_by_family"]["atom_insert"] == 50
+    )
+    assert report["final_validation_metrics"] == pytest.approx(baseline)
+    assert report["final_family_nll_regressions"]["atom_insert"] == 0.0
+
+
+@pytest.mark.parametrize("dead_route", ("family_gate", "action_route"))
+def test_p50_cannot_hide_one_dead_family_gradient_route(
+    fixture_bundle,
+    dead_route,
+) -> None:
+    record, catalog, template, cache_records = fixture_bundle
+    validation = _validation_batch(
+        record,
+        catalog,
+        template,
+        cache_records,
+    )
+    objective = CanonicalSuccessorTrainingObjective(
+        mode="productive_identity",
+        hazard_weight=0.0,
+    )
+    baseline = objective.metrics(
+        template,
+        validation,
+        use_bf16=False,
+        microbatch_size=None,
+    )
+    model = copy.deepcopy(template).train()
+    model.zero_grad(set_to_none=True)
+    loss = objective.loss(model, validation)
+    loss.backward()
+
+    family = "atom_insert"
+    family_index = MARK_RULE_TO_INDEX[family]
+    for name, parameter in model.named_parameters():
+        if parameter.grad is None:
+            continue
+        if dead_route == "family_gate" and name in {
+            "family_head.2.weight",
+            "family_head.2.bias",
+        }:
+            parameter.grad[family_index].zero_()
+        if dead_route == "action_route" and name.startswith(
+            FAMILY_PARAMETER_PREFIXES[family]
+        ):
+            parameter.grad.zero_()
+
+    sentinel = P50GradientCollapseSentinel(
+        required_families=(family,),
+        minimum_gradient_updates={family: 1},
+        maximum_family_nll_regression={family: 0.0},
+        baseline_validation_metrics=baseline,
+    )
+    for step in range(1, 51):
+        sentinel(model, validation.mark_batch, step, loss.detach())
+    sentinel.observe_validation(
+        completed_step=50,
+        metrics=baseline,
+    )
+    expected_live_route = (
+        sentinel.action_route_gradient_updates
+        if dead_route == "family_gate"
+        else sentinel.family_gate_gradient_updates
+    )
+    expected_dead_route = (
+        sentinel.family_gate_gradient_updates
+        if dead_route == "family_gate"
+        else sentinel.action_route_gradient_updates
+    )
+    assert expected_live_route[family] == 50
+    assert expected_dead_route[family] == 0
+    with pytest.raises(
+        EditingTrainingSentinelError,
+        match="gradient shortfalls",
+    ):
+        sentinel.finalize()
 
 
 def test_shared_trainer_executes_successor_dry_and_update_paths(
