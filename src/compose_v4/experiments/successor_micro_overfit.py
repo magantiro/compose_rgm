@@ -13,6 +13,7 @@ factorization, and head capacity before any expensive mixed-corpus run.
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 from math import log
 from typing import Any, Iterable
@@ -22,6 +23,9 @@ import torch
 from torch import Tensor
 
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.chem.persistent_state_identity import (
+    persistent_slot_state_sha256,
+)
 from compose_v4.experiments.factorized_mark_conditional import (
     assert_teachers_in_exact_candidates,
 )
@@ -372,6 +376,65 @@ def successor_panel_metrics(
     )
     excess_over_uniform = nll - uniform_nll_tensor
     normalized_lift = -excess_over_uniform / uniform_nll_tensor.clamp_min(1e-12)
+    group_target_weights: dict[
+        tuple[str, float],
+        dict[str, float],
+    ] = defaultdict(lambda: defaultdict(float))
+    group_row_indices: dict[tuple[str, float], list[int]] = defaultdict(list)
+    for index, row in enumerate(panel.examples):
+        group = (persistent_slot_state_sha256(row.state), float(row.time))
+        group_target_weights[group][row.target_key] += float(weights[index])
+        group_row_indices[group].append(index)
+
+    multi_target_groups = {
+        group
+        for group, target_weights in group_target_weights.items()
+        if len(target_weights) > 1
+    }
+    deterministic_groups = set(group_target_weights) - multi_target_groups
+
+    def group_entropy(group: tuple[str, float]) -> float:
+        target_weights = group_target_weights[group]
+        total = sum(target_weights.values())
+        return -sum(
+            (weight / total) * log(weight / total)
+            for weight in target_weights.values()
+            if weight > 0.0
+        )
+
+    repeated_indices = tuple(
+        index
+        for group in sorted(multi_target_groups)
+        for index in group_row_indices[group]
+    )
+    deterministic_indices = tuple(
+        index
+        for group in sorted(deterministic_groups)
+        for index in group_row_indices[group]
+    )
+
+    def subset_weighted_mean(values: Tensor, indices: tuple[int, ...]) -> float:
+        if not indices:
+            return 0.0
+        selected = torch.tensor(indices, dtype=torch.long, device=values.device)
+        return _weighted_mean(values[selected], weights[selected])
+
+    repeated_weight = sum(float(weights[index]) for index in repeated_indices)
+    repeated_empirical_entropy = (
+        sum(
+            sum(group_target_weights[group].values()) * group_entropy(group)
+            for group in multi_target_groups
+        )
+        / repeated_weight
+        if repeated_weight > 0.0
+        else 0.0
+    )
+    repeated_nll = subset_weighted_mean(nll, repeated_indices)
+    deterministic_ranks = (
+        rank_array[np.asarray(deterministic_indices, dtype=np.int64)]
+        if deterministic_indices
+        else np.asarray([], dtype=np.float64)
+    )
     metrics: dict[str, Any] = {
         "n_examples": len(panel.examples),
         "families": sorted({row.family_name for row in panel.examples}),
@@ -403,6 +466,26 @@ def successor_panel_metrics(
         "mean_alias_multiplicity": float(np.mean(alias_multiplicities)),
         "maximum_alias_multiplicity": int(max(alias_multiplicities)),
         "mean_virtual_self_mass": float(np.mean(virtual_masses)),
+        "exact_state_time_group_count": len(group_target_weights),
+        "deterministic_state_group_count": len(deterministic_groups),
+        "repeated_multi_successor_state_group_count": len(
+            multi_target_groups
+        ),
+        "deterministic_state_canonical_successor_nll": (
+            subset_weighted_mean(nll, deterministic_indices)
+        ),
+        "deterministic_state_teacher_successor_top1_recall": (
+            float(np.mean(deterministic_ranks <= 1))
+            if len(deterministic_ranks)
+            else 0.0
+        ),
+        "repeated_state_canonical_successor_nll": repeated_nll,
+        "repeated_state_empirical_entropy": repeated_empirical_entropy,
+        "repeated_state_excess_nll_over_empirical_entropy": (
+            repeated_nll - repeated_empirical_entropy
+            if repeated_indices
+            else 0.0
+        ),
     }
     if include_per_example:
         metrics["per_example"] = per_example

@@ -535,6 +535,23 @@ def factorized_successor_identity_loss(
     ).sum() / denominator
 
 
+def factorized_hazard_bregman_loss(
+    prediction: FactorizedSuccessorPrediction,
+    batch: FactorizedMarkBatch,
+) -> Tensor:
+    """Poisson-KL total-hazard loss kept separate from successor identity."""
+
+    teacher_rates = batch.teacher_rates.to(prediction.total_hazard.device)
+    weights = batch.importance_weights.to(prediction.total_hazard.device)
+    log_hazard = torch.log(prediction.total_hazard.clamp_min(1e-12))
+    teacher_term = torch.where(
+        teacher_rates > 0,
+        teacher_rates * log_hazard,
+        torch.zeros_like(teacher_rates),
+    )
+    return ((prediction.total_hazard - teacher_term) * weights).mean()
+
+
 __all__ = [
     "FactorizedSuccessorPrediction",
     "StateProductiveSupport",
@@ -543,6 +560,7 @@ __all__ = [
     "TeacherSuccessorFiber",
     "compile_state_productive_support",
     "compile_teacher_successor_fiber",
+    "factorized_hazard_bregman_loss",
     "factorized_successor_bregman_loss",
     "factorized_successor_identity_loss",
     "forward_teacher_successor_batch",

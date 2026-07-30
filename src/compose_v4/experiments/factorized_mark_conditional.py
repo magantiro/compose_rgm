@@ -21,6 +21,11 @@ from torch.utils.data import DataLoader, Dataset
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.cnof_conditional import PathRecord
+from compose_v4.experiments.factorized_training_objective import (
+    FactorizedTrainingObjective,
+    GradientAuditCallback,
+    TrainingLoaderFactory,
+)
 from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
 from compose_v4.experiments.training_support_cache import (
     ShardedTrainingSupportCache,
@@ -1058,6 +1063,51 @@ def factorized_mark_metrics(
     return metrics
 
 
+@dataclass(frozen=True)
+class MarkGeneratorMatchingObjective:
+    """Default adapter preserving the historical mark-level trainer exactly."""
+
+    name: str = "factorized_mark_generator_matching_v1"
+    selection_metric: str = "factorized_gm_loss"
+
+    def validate_batch(self, batch: Any) -> None:
+        if not isinstance(batch, FactorizedMarkBatch):
+            raise TypeError("mark objective requires FactorizedMarkBatch")
+        assert_teachers_in_exact_candidates(batch)
+
+    def mark_batch(self, batch: Any) -> FactorizedMarkBatch:
+        if not isinstance(batch, FactorizedMarkBatch):
+            raise TypeError("mark objective requires FactorizedMarkBatch")
+        return batch
+
+    def loss(
+        self,
+        model: FactorizedTraceletRateModel,
+        batch: Any,
+    ) -> Tensor:
+        mark_batch = self.mark_batch(batch)
+        prediction = model.forward_mark_batch(mark_batch)
+        return factorized_mark_bregman_loss(prediction, mark_batch)
+
+    def metrics(
+        self,
+        model: FactorizedTraceletRateModel,
+        batch: Any,
+        *,
+        use_bf16: bool,
+        microbatch_size: int | None,
+    ) -> dict[str, float]:
+        return factorized_mark_metrics(
+            model,
+            self.mark_batch(batch),
+            use_bf16=use_bf16,
+            microbatch_size=microbatch_size,
+        )
+
+
+DEFAULT_MARK_TRAINING_OBJECTIVE = MarkGeneratorMatchingObjective()
+
+
 def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
     """Steady-state throughput report. Operational only -- the checkpoint is meaningless and discarded.
 
@@ -1125,7 +1175,7 @@ def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
 def train_factorized_mark_model(
     model: FactorizedTraceletRateModel,
     train_records: tuple[PathRecord, ...],
-    validation_batch: FactorizedMarkBatch,
+    validation_batch: Any,
     *,
     dry_launch: bool = False,
     dry_launch_output: str | None = None,
@@ -1166,6 +1216,9 @@ def train_factorized_mark_model(
     condition_dropout_probability: float = 0.0,
     trainable_parameter_scope: str = "all",
     record_index_sampler: object | None = None,
+    training_objective: FactorizedTrainingObjective | None = None,
+    training_loader_factory: TrainingLoaderFactory | None = None,
+    gradient_audit_callback: GradientAuditCallback | None = None,
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
         raise ValueError("steps, batch size, and learning rate must be positive")
@@ -1188,6 +1241,15 @@ def train_factorized_mark_model(
         raise ValueError("evaluation batch size must be positive")
     if not 0.0 <= early_stopping_min_relative_delta < 1.0:
         raise ValueError("early-stopping minimum relative delta must lie in [0, 1)")
+    objective = (
+        DEFAULT_MARK_TRAINING_OBJECTIVE
+        if training_objective is None
+        else training_objective
+    )
+    if not isinstance(objective, FactorizedTrainingObjective):
+        raise TypeError("training_objective does not implement the shared protocol")
+    if not objective.name or not objective.selection_metric:
+        raise ValueError("training objective identity and selector must be nonempty")
     configure_factorized_trainable_parameters(
         model,
         scope=trainable_parameter_scope,
@@ -1200,7 +1262,7 @@ def train_factorized_mark_model(
         start_step = 0
         model.eval()
         best_metrics = (
-            factorized_mark_metrics(
+            objective.metrics(
                 model,
                 validation_batch,
                 use_bf16=use_bf16,
@@ -1209,11 +1271,18 @@ def train_factorized_mark_model(
             if initial_validation_metrics is None
             else {str(key): float(value) for key, value in initial_validation_metrics.items()}
         )
+        if objective.selection_metric not in best_metrics:
+            raise ValueError(
+                "initial validation metrics lack the objective selector "
+                f"{objective.selection_metric!r}"
+            )
         best_metrics["selected_step"] = 0.0
         best_state = _clone_model_state(model)
         history: list[dict[str, float]] = []
         evaluations_without_improvement = 0
-        early_stopping_reference_loss = float(best_metrics["factorized_gm_loss"])
+        early_stopping_reference_loss = float(
+            best_metrics[objective.selection_metric]
+        )
     else:
         required = {
             "completed_steps",
@@ -1230,6 +1299,21 @@ def train_factorized_mark_model(
             raise ValueError(f"factorized recovery state is missing: {missing}")
         if resume_state["optimizer_kind"] != "adamw_decoupled_v1":
             raise ValueError("factorized recovery checkpoint uses an incompatible optimizer")
+        recorded_objective = resume_state.get(
+            "training_objective_name",
+            DEFAULT_MARK_TRAINING_OBJECTIVE.name,
+        )
+        recorded_selector = resume_state.get(
+            "training_selection_metric",
+            DEFAULT_MARK_TRAINING_OBJECTIVE.selection_metric,
+        )
+        if (
+            recorded_objective != objective.name
+            or recorded_selector != objective.selection_metric
+        ):
+            raise ValueError(
+                "factorized recovery checkpoint uses another training objective"
+            )
         start_step = int(resume_state["completed_steps"])
         model.load_state_dict(resume_state["current_state_dict"])  # type: ignore[arg-type]
         optimizer.load_state_dict(resume_state["optimizer_state_dict"])  # type: ignore[arg-type]
@@ -1257,7 +1341,7 @@ def train_factorized_mark_model(
         early_stopping_reference_loss = float(
             resume_state.get(
                 "early_stopping_reference_loss",
-                best_metrics["factorized_gm_loss"],
+                best_metrics[objective.selection_metric],
             )
         )
 
@@ -1273,34 +1357,38 @@ def train_factorized_mark_model(
         model.eval()
         return history, best_metrics
 
-    loader = factorized_mark_loader(
-        train_records,
-        steps=steps,
-        batch_size=batch_size,
-        start_step=start_step,
-        seed=seed,
-        workers=workers,
-        late_time_fraction=late_time_fraction,
-        operational_horizon=operational_horizon,
-        progress_stratification_fraction=progress_stratification_fraction,
-        use_aromatic_bond_view=use_aromatic_bond_view,
-        pin_memory=model.device.type == "cuda",
-        ring_catalog=ring_catalog,
-        prefetch_factor=data_prefetch_factor,
-        ring_electronic_mode=ring_electronic_mode,
-        training_support_cache=training_support_cache,
-        require_cached_support=require_cached_support,
-        target_property_conditions=target_property_conditions,
-        condition_dropout_probability=condition_dropout_probability,
-        ring_family_mass_mode=model.ring_family_mass_mode,
-        compute_ring_grow_support=model.enable_ring_grow_macro,
-        compute_ring_restates=model.enable_ring_restates,
-        compute_cyclic_graft=model.enable_cyclic_graft,
-        compute_ring_opening=model.enable_ring_opening,
-        record_index_sampler=record_index_sampler,
+    loader = (
+        factorized_mark_loader(
+            train_records,
+            steps=steps,
+            batch_size=batch_size,
+            start_step=start_step,
+            seed=seed,
+            workers=workers,
+            late_time_fraction=late_time_fraction,
+            operational_horizon=operational_horizon,
+            progress_stratification_fraction=progress_stratification_fraction,
+            use_aromatic_bond_view=use_aromatic_bond_view,
+            pin_memory=model.device.type == "cuda",
+            ring_catalog=ring_catalog,
+            prefetch_factor=data_prefetch_factor,
+            ring_electronic_mode=ring_electronic_mode,
+            training_support_cache=training_support_cache,
+            require_cached_support=require_cached_support,
+            target_property_conditions=target_property_conditions,
+            condition_dropout_probability=condition_dropout_probability,
+            ring_family_mass_mode=model.ring_family_mass_mode,
+            compute_ring_grow_support=model.enable_ring_grow_macro,
+            compute_ring_restates=model.enable_ring_restates,
+            compute_cyclic_graft=model.enable_cyclic_graft,
+            compute_ring_opening=model.enable_ring_opening,
+            record_index_sampler=record_index_sampler,
+        )
+        if training_loader_factory is None
+        else training_loader_factory(start_step)
     )
     timing_loop_started = perf_counter()
-    iterator: Iterator[FactorizedMarkBatch] = iter(loader)
+    iterator: Iterator[Any] = iter(loader)
     cumulative_data_wait = 0.0
     cumulative_update_time = 0.0
     maximum_data_wait = 0.0
@@ -1331,9 +1419,9 @@ def train_factorized_mark_model(
         started = perf_counter()
         cpu_batch = next(iterator)
         loaded_at = perf_counter()
-        # Global teacher-in-candidate invariant, checked before the scoring forward so a representability
-        # mismatch reports the molecule/teacher/candidates directly instead of a loss-time crash.
-        assert_teachers_in_exact_candidates(cpu_batch)
+        # Objective-specific support is checked before scoring so a cache,
+        # representability, or alignment failure cannot reach an optimizer step.
+        objective.validate_batch(cpu_batch)
         batch = cpu_batch.to(model.device, non_blocking=model.device.type == "cuda")
         transferred_at = perf_counter()
         optimizer.zero_grad(set_to_none=True)
@@ -1343,8 +1431,7 @@ def train_factorized_mark_model(
             else nullcontext()
         )
         with context:
-            prediction = model.forward_mark_batch(batch)
-            loss = factorized_mark_bregman_loss(prediction, batch)
+            loss = objective.loss(model, batch)
         if dry_launch:
             # CPU dry-launch (owner mandate §1): exit after the FIRST real training forward + one real
             # editing-validation forward, BEFORE backward/optimizer -- proving the zero-mixture path reaches
@@ -1353,31 +1440,46 @@ def train_factorized_mark_model(
             _zmi.bump("model_forward_calls")
             _zmi.bump("gm_loss_calls")
             model.eval()
-            val_metrics = factorized_mark_metrics(
-                model, validation_batch, use_bf16=use_bf16, microbatch_size=evaluation_batch_size,
+            val_metrics = objective.metrics(
+                model,
+                validation_batch,
+                use_bf16=use_bf16,
+                microbatch_size=evaluation_batch_size,
             )
             _zmi.bump("edit_validation_batches_emitted")
             _zmi.bump("model_forward_calls")
             _zmi.bump("gm_loss_calls")
             ok, zmi_report = _zmi.zero_mixture_ok()
+            validation_selection_value = float(
+                val_metrics.get(objective.selection_metric, float("nan"))
+            )
             result = {
                 "phase": "dry_launch_first_batch",
-                "train_gm_loss": float(loss),
+                "training_objective": objective.name,
+                "selection_metric": objective.selection_metric,
+                "train_objective_loss": float(loss.detach()),
                 "train_loss_finite": bool(torch.isfinite(loss)),
-                "validation_gm_loss": float(val_metrics.get("factorized_gm_loss", float("nan"))),
-                "validation_loss_finite": bool(
-                    torch.isfinite(torch.tensor(float(val_metrics.get("factorized_gm_loss", float("nan")))))
+                "validation_selection_value": validation_selection_value,
+                "validation_selection_finite": bool(
+                    torch.isfinite(torch.tensor(validation_selection_value))
                 ),
                 "train_batch_size": int(batch.batch_size),
                 "validation_batch_size": int(validation_batch.batch_size),
                 "zero_mixture_ok": ok,
                 "zero_mixture_report": zmi_report,
             }
+            if objective is DEFAULT_MARK_TRAINING_OBJECTIVE:
+                result["train_gm_loss"] = result["train_objective_loss"]
+                result["validation_gm_loss"] = validation_selection_value
+                result["validation_loss_finite"] = result[
+                    "validation_selection_finite"
+                ]
             if dry_launch_output:
                 Path(dry_launch_output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
             print(json.dumps({"phase": "dry_launch_first_batch",
-                              "train_gm_loss": result["train_gm_loss"],
-                              "validation_gm_loss": result["validation_gm_loss"],
+                              "training_objective": objective.name,
+                              "train_objective_loss": result["train_objective_loss"],
+                              "validation_selection_value": validation_selection_value,
                               "zero_mixture_ok": ok}, sort_keys=True), flush=True)
             return result
         if profile_timing:
@@ -1385,6 +1487,13 @@ def train_factorized_mark_model(
         forwarded_at = perf_counter()
         _zmi.bump("backward_calls")
         loss.backward()
+        if gradient_audit_callback is not None:
+            gradient_audit_callback(
+                model,
+                objective.mark_batch(batch),
+                completed_steps,
+                loss.detach(),
+            )
         if profile_timing:
             _synchronize(model.device)
         backward_at = perf_counter()
@@ -1404,19 +1513,20 @@ def train_factorized_mark_model(
             # graft_successor_groups.numel(), which is the dense [B, n_slots, n_slots] size -- a
             # configuration constant (64*40*40 = 102,400 every batch), so the reported
             # "candidate actions/second" was tensor elements per second and meant nothing.
+            benchmark_batch = objective.mark_batch(batch)
             _n_cand = 0
             for _mask_name in ("atom_delete_mask", "cycle_edge_mask", "cyclic_pair_mask", "graft_mask"):
-                _mask = getattr(batch, _mask_name, None)
+                _mask = getattr(benchmark_batch, _mask_name, None)
                 if _mask is not None:
                     _n_cand += int(_mask.sum().item())
             for _actions_name in ("ring_restate_actions", "ring_delete_actions"):
-                _actions = getattr(batch, _actions_name, None)
+                _actions = getattr(benchmark_batch, _actions_name, None)
                 if _actions:
                     _n_cand += sum(len(_a) for _a in _actions if _a)
             _n_groups = (
-                int(torch.unique(batch.graft_successor_groups).numel())
-                if getattr(batch, "graft_successor_groups", None) is not None
-                and batch.graft_successor_groups.numel()
+                int(torch.unique(benchmark_batch.graft_successor_groups).numel())
+                if getattr(benchmark_batch, "graft_successor_groups", None) is not None
+                and benchmark_batch.graft_successor_groups.numel()
                 else 0
             )
             _bench["step"].append(step)
@@ -1428,7 +1538,9 @@ def train_factorized_mark_model(
             _bench["total"].append(optimized_at - started)
             _bench["candidates"].append(_n_cand)
             _bench["successor_groups"].append(_n_groups)
-            _bench["examples"].append(int(batch.atom_types.shape[0]))
+            _bench["examples"].append(
+                int(benchmark_batch.atom_types.shape[0])
+            )
             if completed_steps >= benchmark_steps:
                 return _finalize_benchmark(
                     _bench, benchmark_warmup, benchmark_output, model, use_bf16,
@@ -1448,7 +1560,7 @@ def train_factorized_mark_model(
         should_early_stop = False
         if evaluated:
             model.eval()
-            metrics = factorized_mark_metrics(
+            metrics = objective.metrics(
                 model,
                 validation_batch,
                 use_bf16=use_bf16,
@@ -1457,8 +1569,12 @@ def train_factorized_mark_model(
             metrics["step"] = float(completed_steps)
             metrics["train_batch_loss"] = float(loss.detach())
             metrics["learning_rate"] = float(current_learning_rate)
-            current_validation_loss = float(metrics["factorized_gm_loss"])
-            improved = current_validation_loss < best_metrics["factorized_gm_loss"]
+            current_validation_loss = float(
+                metrics[objective.selection_metric]
+            )
+            improved = current_validation_loss < best_metrics[
+                objective.selection_metric
+            ]
             if improved:
                 best_metrics = {
                     key: value
@@ -1534,6 +1650,8 @@ def train_factorized_mark_model(
                     history=history,
                     evaluations_without_improvement=(evaluations_without_improvement),
                     early_stopping_reference_loss=early_stopping_reference_loss,
+                    training_objective_name=objective.name,
+                    training_selection_metric=objective.selection_metric,
                 )
             )
         if should_early_stop:
@@ -1707,9 +1825,13 @@ def _factorized_recovery_state(
     history: list[dict[str, float]],
     evaluations_without_improvement: int,
     early_stopping_reference_loss: float,
+    training_objective_name: str,
+    training_selection_metric: str,
 ) -> dict[str, object]:
     return {
         "optimizer_kind": "adamw_decoupled_v1",
+        "training_objective_name": training_objective_name,
+        "training_selection_metric": training_selection_metric,
         "completed_steps": int(completed_steps),
         "current_state_dict": _clone_model_state(model),
         "optimizer_state_dict": copy.deepcopy(optimizer.state_dict()),
@@ -1735,9 +1857,11 @@ def _synchronize(device: torch.device) -> None:
 
 
 __all__ = [
+    "DEFAULT_MARK_TRAINING_OBJECTIVE",
     "FactorizedMarkCollator",
     "FactorizedMarkDataset",
     "FactorizedMarkExample",
+    "MarkGeneratorMatchingObjective",
     "configure_factorized_trainable_parameters",
     "cosine_warmup_learning_rate",
     "factorized_adamw_parameter_groups",

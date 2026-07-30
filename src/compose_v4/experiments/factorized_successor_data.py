@@ -12,7 +12,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, fields
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
@@ -25,6 +25,7 @@ from compose_v4.data.successor_fiber_cache import (
     SuccessorFiberCacheRecord,
 )
 from compose_v4.experiments.factorized_mark_conditional import (
+    FactorizedMarkCollator,
     FactorizedMarkDataset,
     FactorizedMarkExample,
 )
@@ -324,6 +325,54 @@ class FactorizedSuccessorCollator:
         )
 
 
+def factorized_successor_loader(
+    mark_dataset: FactorizedMarkDataset,
+    successor_cache: ShardedSuccessorFiberCache,
+    mark_collator: FactorizedMarkCollator,
+    *,
+    batch_size: int,
+    workers: int,
+    pin_memory: bool,
+    seed: int,
+    prefetch_factor: int = 2,
+    semantic_cell_ids: Mapping[SuccessorSemanticCellKey, str] | None = None,
+    require_semantic_cell_ids: bool = False,
+) -> DataLoader[FactorizedSuccessorBatch]:
+    """Batch an already-configured deterministic mark stream with exact joins."""
+
+    if batch_size <= 0:
+        raise ValueError("successor loader batch size must be positive")
+    if workers < 0:
+        raise ValueError("successor loader workers must be nonnegative")
+    if prefetch_factor <= 0:
+        raise ValueError("successor loader prefetch factor must be positive")
+    dataset = FactorizedSuccessorDataset(
+        mark_dataset,
+        successor_cache,
+        semantic_cell_ids=semantic_cell_ids,
+        require_semantic_cell_ids=require_semantic_cell_ids,
+    )
+    options: dict[str, object] = {}
+    if workers > 0:
+        options.update(
+            persistent_workers=True,
+            prefetch_factor=prefetch_factor,
+        )
+    loader_generator = torch.Generator(device="cpu")
+    loader_generator.manual_seed(int(seed))
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=workers,
+        collate_fn=FactorizedSuccessorCollator(mark_collator),
+        pin_memory=pin_memory,
+        drop_last=True,
+        generator=loader_generator,
+        **options,
+    )
+
+
 def assert_successor_wrapper_is_rng_neutral(
     mark_dataset: FactorizedMarkDataset,
     successor_dataset: FactorizedSuccessorDataset,
@@ -359,4 +408,5 @@ __all__ = [
     "FactorizedSuccessorExample",
     "SuccessorSemanticCellKey",
     "assert_successor_wrapper_is_rng_neutral",
+    "factorized_successor_loader",
 ]

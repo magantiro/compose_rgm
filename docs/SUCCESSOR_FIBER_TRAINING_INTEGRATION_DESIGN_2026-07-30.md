@@ -417,9 +417,14 @@ same support contract. Cache contents must not depend on learned weights.
    per-example cell sidecar not currently present in `FactorizedMarkBatch`.
 5. **Validation artifact:** the existing 535.4 MiB evaluation batch lacks
    successor fibers and terminal supports.
-6. **Successor optimizer integration:** the RNG-neutral dataset/collator/batch
-   bridge exists, but the production loop still invokes the mark objective and
-   mark-level checkpoint selector.
+6. **Successor optimizer integration:** the shared optimizer loop now accepts a
+   typed objective/loader adapter.  The canonical-successor adapter trains the
+   productive embedded successor identity (with an explicitly separate
+   optional hazard term), evaluates production-weighted and balanced-semantic
+   successor NLL, and selects checkpoints by the registered successor metric.
+   The historical mark objective remains the default and resume artifacts bind
+   the objective identity and selector, so a mark checkpoint cannot silently
+   resume as successor training.
 7. **Build cost:** the corpus contains 3,370,821 progress states. Measure
    compilation throughput and exact-state/fiber deduplication on a bounded
    sample before launching a 63-shard CPU build.
@@ -438,11 +443,20 @@ same support contract. Cache contents must not depend on learned weights.
    compare every loaded fiber to fresh production compilation.
 7. Benchmark representative JSON shards, then freeze the measured production
    storage backend and complete-corpus inventory.
-8. Add successor metrics and successor-level checkpoint selection to the shared
-   optimizer loop.
+8. ~~Add successor metrics and successor-level checkpoint selection to the
+   shared optimizer loop.~~
 9. Run a CPU dry launch with one real batch and zero optimizer steps.
 10. Freeze numeric sentinel thresholds from development-only panels and run the
-    exactly-50-step gradient/collapse pilot.
+   exactly-50-step gradient/collapse pilot.
 11. Only after the fail-closed gates pass, authorize 500 and 2,000 steps.
 
 No long training or full cache build is authorized by this design.
+
+The optimizer integration is covered by deterministic fixture tests for a
+zero-update dry launch, a real backward/update, checkpoint metadata, and exact
+resume.  These tests do not replace step 9: the required artifact must still
+use one frozen production-addressed batch.  The P50 implementation now rejects
+nonfinite loss/gradients, missing family-specific gradient routes, required
+family NLL collapse, a non-contiguous stream, and anything other than exactly
+50 updates.  It remains deliberately unrunnable as a scientific PASS until
+development-only thresholds and the exact production exposure plan are frozen.
