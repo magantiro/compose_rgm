@@ -5,6 +5,8 @@ Nothing launches on import.  A caller must provide a fresh run label:
     MODAL_PROFILE=nitya modal run \
       modal_apps/run_editing_t1_successor_gate.py \
       --run-label editing-t1-<commit>-v1 \
+      --active8-inventory active8_trace_inventory_v1/ACTIVE8_TRACE_INVENTORY.json \
+      --active8-inventory-file-sha256 <sha256> \
       --families cycle_attach
 
 That command launches exactly one ``unique_state`` / ``heads_only`` arm on an
@@ -32,6 +34,16 @@ from pathlib import Path
 import modal
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
+    EDITING_T1_LOCAL_ADAPTER_FAMILIES,
+    EditingT1RuntimeError,
+    require_editing_t1_family_scope_applicable,
+)
+
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 RUN_LABEL = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
@@ -45,7 +57,8 @@ FAMILIES = (
     "cycle_attach",
     "ring_system_restate",
 )
-SCOPES = ("heads_only", "heads_plus_pair_projection", "all")
+SCOPES = ("heads_only", "heads_plus_local_adapter", "all")
+LOCAL_ADAPTER_FAMILIES = EDITING_T1_LOCAL_ADAPTER_FAMILIES
 PANEL_KINDS = (
     "unique_state",
     "global_repeated_state_distribution",
@@ -122,6 +135,35 @@ def _validate_run_label(run_label: str) -> None:
         raise ValueError("run_label must be a safe 1-128 character artifact basename")
 
 
+def _resolve_active8_launch_binding(
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
+) -> tuple[str, str]:
+    if (
+        len(active8_inventory_file_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in active8_inventory_file_sha256
+        )
+    ):
+        raise ValueError(
+            "active8_inventory_file_sha256 must be a lowercase SHA-256"
+        )
+    if not active8_inventory.strip():
+        raise ValueError("active8_inventory must be selected explicitly")
+    candidate = Path(active8_inventory)
+    if not candidate.is_absolute():
+        candidate = ARTIFACT_ROOT / candidate
+    normalized = candidate.resolve(strict=False)
+    try:
+        normalized.relative_to(ARTIFACT_ROOT)
+    except ValueError:
+        raise ValueError(
+            "active8_inventory must resolve inside the mounted artifact volume"
+        ) from None
+    return str(normalized), active8_inventory_file_sha256
+
+
 def _resolve_selection(
     raw: str,
     allowed: tuple[str, ...],
@@ -158,10 +200,16 @@ def build_task_matrix(
     scopes: str = "",
     all_families: bool = False,
     all_scopes: bool = False,
-) -> tuple[tuple[str, str, str, str], ...]:
+    active8_inventory: str = "",
+    active8_inventory_file_sha256: str = "",
+) -> tuple[tuple[str, str, str, str, str, str], ...]:
     """Build an explicit valid arm matrix without silently broadening it."""
 
     _validate_run_label(run_label)
+    active8_path, active8_file_sha256 = _resolve_active8_launch_binding(
+        active8_inventory,
+        active8_inventory_file_sha256,
+    )
     selected_families = _resolve_selection(
         families,
         (*FAMILIES, GLOBAL_FAMILY_SELECTOR),
@@ -202,12 +250,30 @@ def build_task_matrix(
                 "no empirical within-family repeated multi-successor panel exists for "
                 f"selected families: {unsupported}"
             )
-    return tuple(
-        (run_label, family, panel_kind, scope)
-        for family in selected_families
-        for panel_kind in selected_panel_kinds
-        for scope in selected_scopes
-    )
+    tasks: list[tuple[str, str, str, str, str, str]] = []
+    for family in selected_families:
+        for panel_kind in selected_panel_kinds:
+            for scope in selected_scopes:
+                try:
+                    require_editing_t1_family_scope_applicable(
+                        family,
+                        scope,
+                    )
+                except EditingT1RuntimeError as error:
+                    if all_scopes:
+                        continue
+                    raise ValueError(str(error)) from error
+                tasks.append(
+                    (
+                        run_label,
+                        family,
+                        panel_kind,
+                        scope,
+                        active8_path,
+                        active8_file_sha256,
+                    )
+                )
+    return tuple(tasks)
 
 
 def _run_arm_impl(
@@ -215,14 +281,24 @@ def _run_arm_impl(
     family: str,
     panel_kind: str,
     scope: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
     *,
     requested_gpu_class: str,
 ) -> dict[str, object]:
     """Execute one immutable T1 arm inside an already provisioned worker."""
 
     _validate_run_label(run_label)
-    if family not in (*FAMILIES, GLOBAL_FAMILY_SELECTOR) or scope not in SCOPES:
-        raise ValueError("unknown T1 family or scope")
+    active8_inventory, active8_inventory_file_sha256 = (
+        _resolve_active8_launch_binding(
+            active8_inventory,
+            active8_inventory_file_sha256,
+        )
+    )
+    try:
+        require_editing_t1_family_scope_applicable(family, scope)
+    except EditingT1RuntimeError as error:
+        raise ValueError(str(error)) from error
     if panel_kind not in PANEL_KINDS:
         raise ValueError("unknown T1 panel kind")
     if requested_gpu_class not in GPU_CLASSES:
@@ -246,6 +322,10 @@ def _run_arm_impl(
         str(REMOTE_ROOT / "scripts" / "run_editing_t1_successor_gate.py"),
         "--transfer-root",
         str(ARTIFACT_ROOT),
+        "--active8-inventory",
+        active8_inventory,
+        "--active8-inventory-file-sha256",
+        active8_inventory_file_sha256,
         "--family",
         family,
         "--panel-kind",
@@ -278,6 +358,8 @@ def _run_arm_impl(
         or not isinstance(payload.get("result_sha256"), str)
         or not isinstance(payload.get("cache_receipts"), list)
         or not payload["cache_receipts"]
+        or payload.get("active8_inventory_manifest_file_sha256")
+        != active8_inventory_file_sha256
     ):
         raise RuntimeError("T1 worker output is not a sealed decision-free durable result")
     artifact_volume.commit()
@@ -294,6 +376,19 @@ def _run_arm_impl(
         "result_sha256": payload["result_sha256"],
         "contract_sha256": payload["contract_sha256"],
         "panel_artifact_sha256": payload["panel_artifact_sha256"],
+        "active8_inventory_manifest_file_sha256": (
+            payload["active8_inventory_manifest_file_sha256"]
+        ),
+        "active8_inventory_sha256": payload["active8_inventory_sha256"],
+        "active8_effective_source_corpus_cache_sha256": (
+            payload["active8_effective_source_corpus_cache_sha256"]
+        ),
+        "active8_unified_packed_manifest_sha256": (
+            payload["active8_unified_packed_manifest_sha256"]
+        ),
+        "active8_support_contract_sha256": (
+            payload["active8_support_contract_sha256"]
+        ),
         "cache_receipts": payload["cache_receipts"],
         "worker_stdout_tail": completed.stdout[-1000:],
         "training_authorized": False,
@@ -314,12 +409,16 @@ def run_arm_l4(
     family: str,
     panel_kind: str,
     scope: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
 ) -> dict[str, object]:
     return _run_arm_impl(
         run_label,
         family,
         panel_kind,
         scope,
+        active8_inventory,
+        active8_inventory_file_sha256,
         requested_gpu_class="L4",
     )
 
@@ -337,12 +436,16 @@ def run_arm_a10(
     family: str,
     panel_kind: str,
     scope: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
 ) -> dict[str, object]:
     return _run_arm_impl(
         run_label,
         family,
         panel_kind,
         scope,
+        active8_inventory,
+        active8_inventory_file_sha256,
         requested_gpu_class="A10",
     )
 
@@ -360,12 +463,16 @@ def run_arm_a100(
     family: str,
     panel_kind: str,
     scope: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
 ) -> dict[str, object]:
     return _run_arm_impl(
         run_label,
         family,
         panel_kind,
         scope,
+        active8_inventory,
+        active8_inventory_file_sha256,
         requested_gpu_class="A100",
     )
 
@@ -386,6 +493,8 @@ def _runner_for_gpu(gpu_class: str) -> modal.Function:
 @app.local_entrypoint()
 def main(
     run_label: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
     families: str = "",
     panel_kinds: str = "",
     scopes: str = "",
@@ -400,6 +509,8 @@ def main(
         scopes=scopes,
         all_families=all_families,
         all_scopes=all_scopes,
+        active8_inventory=active8_inventory,
+        active8_inventory_file_sha256=active8_inventory_file_sha256,
     )
     runner = _runner_for_gpu(gpu_class)
     results = list(runner.starmap(tasks))
@@ -409,13 +520,24 @@ def main(
                 "run_label": run_label,
                 "arm_count": len(results),
                 "gpu_class": gpu_class,
+                "active8_inventory": active8_inventory,
+                "active8_inventory_file_sha256": (
+                    active8_inventory_file_sha256
+                ),
                 "tasks": [
                     {
                         "family": family,
                         "panel_kind": panel_kind,
                         "scope": scope,
                     }
-                    for _, family, panel_kind, scope in tasks
+                    for (
+                        _,
+                        family,
+                        panel_kind,
+                        scope,
+                        _,
+                        _,
+                    ) in tasks
                 ],
                 "results": results,
                 "training_authorized": False,

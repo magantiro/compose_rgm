@@ -23,6 +23,9 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from compose_v4.data.active8_trace_inventory import (  # noqa: E402
+    load_active8_trace_admission,
+)
 from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
     build_scratch_ringcore_model,
     load_frozen_validation_source,
@@ -32,14 +35,18 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
     EDITING_T1_UNIQUE_PANEL_KIND,
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
+    active8_t1_identity,
     load_editing_t1_panel,
     validate_charge_policy_exclusions,
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
-    load_editing_t1_runtime_contract,
+    EditingT1RuntimeError,
     load_editing_t1_result,
+    load_editing_t1_runtime_contract,
     materialize_t1_panel,
+    require_editing_t1_family_scope_applicable,
     run_editing_t1_arm,
+    validate_t1_active8_runtime_binding,
 )
 from compose_v4.experiments.ringcore_successor_leaderboard import (  # noqa: E402
     load_json_object,
@@ -104,6 +111,12 @@ def _parser() -> argparse.ArgumentParser:
         "--gate-zero-contract",
         type=Path,
         default=ROOT / "configs" / "editing_gate_zero_runtime_v2.json",
+    )
+    parser.add_argument("--active8-inventory", type=Path, required=True)
+    parser.add_argument(
+        "--active8-inventory-file-sha256",
+        required=True,
+        help="Expected SHA-256 of the physical Active8 inventory manifest.",
     )
     parser.add_argument(
         "--panel",
@@ -189,7 +202,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--scope",
-        choices=("heads_only", "heads_plus_pair_projection", "all"),
+        choices=("heads_only", "heads_plus_local_adapter", "all"),
         default="heads_only",
     )
     parser.add_argument("--device", default="cpu")
@@ -200,10 +213,46 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = _parser().parse_args()
+    try:
+        require_editing_t1_family_scope_applicable(
+            args.family,
+            args.scope,
+        )
+    except EditingT1RuntimeError as error:
+        raise SystemExit(str(error)) from error
     t1_contract = load_editing_t1_runtime_contract(args.t1_contract)
     gate_zero_contract = load_gate_zero_runtime_contract(args.gate_zero_contract)
     if gate_zero_contract.sha256 != t1_contract.payload["gate_zero_runtime_contract_sha256"]:
         raise SystemExit("T1/Gate-0 runtime contract hash mismatch")
+    if (
+        gate_zero_contract.sha256
+        != t1_contract.payload["active8_support_contract_sha256"]
+    ):
+        raise SystemExit("T1 Gate-0/Active8 support-contract hash mismatch")
+    if (
+        args.active8_inventory_file_sha256
+        != t1_contract.payload["active8_inventory_manifest_file_sha256"]
+    ):
+        raise SystemExit(
+            "T1 launch and runtime contract name different physical Active8 inventories"
+        )
+    active8_admission = load_active8_trace_admission(
+        args.active8_inventory,
+        expected_manifest_file_sha256=(
+            t1_contract.payload["active8_inventory_manifest_file_sha256"]
+        ),
+        expected_inventory_sha256=(
+            t1_contract.payload["active8_inventory_sha256"]
+        ),
+        expected_effective_source_corpus_cache_sha256=(
+            t1_contract.payload[
+                "active8_effective_source_corpus_cache_sha256"
+            ]
+        ),
+        expected_support_contract_sha256=(
+            t1_contract.payload["active8_support_contract_sha256"]
+        ),
+    )
     with gzip.open(args.forensics, "rt") as handle:
         forensics = json.load(handle)
     forensics_file_sha256 = _sha256(args.forensics)
@@ -262,6 +311,17 @@ def main() -> int:
         charge_policy_audit_file_sha256=charge_policy_audit_file_sha256,
         charge_policy_exclusions=charge_policy_exclusions,
         charge_policy_exclusions_file_sha256=(charge_policy_exclusions_file_sha256),
+        active8_admission=active8_admission,
+        gate_zero_unified_packed_manifest_sha256=(
+            source.unified_packed_manifest_sha256
+        ),
+    )
+    active8_identity = validate_t1_active8_runtime_binding(
+        contract=t1_contract,
+        gate_zero_contract=gate_zero_contract,
+        source=source,
+        panel=panel,
+        active8_admission=active8_admission,
     )
     device = torch.device(args.device)
     if device.type == "cuda" and not torch.cuda.is_available():
@@ -278,6 +338,7 @@ def main() -> int:
             panel_kind=args.panel_kind,
             max_atoms=int(gate_zero_contract.model["max_atoms"]),
             excluded_trace_ids=excluded_trace_ids,
+            active8_admission=active8_admission,
         )
         result = {
             "status": "T1_PANEL_CACHE_AUDIT_COMPLETE_NO_OPTIMIZATION",
@@ -289,6 +350,7 @@ def main() -> int:
             "charge_policy_source_input_inventory_sha256": (
                 charge_policy_exclusions["source_input_inventory_sha256"]
             ),
+            **active8_t1_identity(active8_admission),
             "family": args.family,
             "panel_kind": args.panel_kind,
             "panel_role": (
@@ -330,6 +392,7 @@ def main() -> int:
             scope=args.scope,
             device=device,
             excluded_trace_ids=excluded_trace_ids,
+            active8_admission=active8_admission,
         )
     if args.output is not None:
         _write_if_absent(args.output, result)
@@ -339,6 +402,7 @@ def main() -> int:
                 expected_result_sha256=result["result_sha256"],
                 expected_contract_sha256=t1_contract.sha256,
                 expected_panel_artifact_sha256=panel["artifact_sha256"],
+                expected_active8_identity=active8_identity,
                 expected_cache_receipts=result["cache_receipts"],
             )
     print(json.dumps(result, sort_keys=True))

@@ -31,10 +31,15 @@ import os
 import tempfile
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
-from pathlib import Path
+from dataclasses import dataclass
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any
 
+from compose_v4.data.active8_trace_inventory import (
+    Active8TraceAdmission,
+    Active8TraceInventoryError,
+)
 from compose_v4.experiments.ringcore_semantic_sidecar import (
     LoadedSemanticCellSidecar,
 )
@@ -48,8 +53,9 @@ EDITING_T1_PANEL_STATUS = "FROZEN_DEVELOPMENT_CAPACITY_PANEL_NO_DECISION"
 EDITING_T1_UNIQUE_EXAMPLES_PER_FAMILY = 64
 EDITING_T1_SUPPORT_TIME = 0.5
 EDITING_T1_SELECTION_ALGORITHM = (
-    "active8_forensics_stream_first_globally_deterministic_unique_exact_state_64_"
-    "per_family_plus_all_global_and_within_family_multitarget_exact_state_groups_v3"
+    "physical_active8_whole_trace_admission_then_forensics_stream_first_globally_"
+    "deterministic_unique_exact_state_64_per_family_plus_all_global_and_within_"
+    "family_multitarget_exact_state_groups_v3"
 )
 EDITING_T1_GLOBAL_FAMILY_SELECTOR = "all_families"
 EDITING_T1_UNIQUE_PANEL_KIND = "unique_state"
@@ -59,7 +65,7 @@ EDITING_T1_DIAGNOSTIC_ONLY_FAMILIES: tuple[str, ...] = ()
 EDITING_T1_OPERATOR_FREEZE_EXCLUDED_FAMILIES = ("ring_system_delete",)
 EDITING_T1_REQUIRED_SCOPES = (
     "heads_only",
-    "heads_plus_pair_projection",
+    "heads_plus_local_adapter",
     "all",
 )
 
@@ -94,6 +100,11 @@ _SOURCE_FIELDS = {
     "charge_policy_source_input_inventory_sha256",
     "charge_policy_audit_implementation_sha256",
     "charge_policy_excluded_unique_trace_addresses",
+    "active8_inventory_manifest_file_sha256",
+    "active8_inventory_sha256",
+    "active8_effective_source_corpus_cache_sha256",
+    "active8_unified_packed_manifest_sha256",
+    "active8_support_contract_sha256",
 }
 _SELECTION_FIELDS = {
     "algorithm",
@@ -107,6 +118,7 @@ _SELECTION_FIELDS = {
     "conditional_repeated_state_relationship",
     "operator_freeze_exclusion_policy",
     "charge_policy_exclusion_policy",
+    "active8_whole_trace_admission_policy",
     "support_time",
 }
 _ARCHITECTURE_FIELDS = {
@@ -169,6 +181,153 @@ _CHARGE_EXCLUSION_ENTRY_FIELDS = {
 
 class EditingT1PanelError(RuntimeError):
     """The T1 panel or one of its frozen sources is invalid."""
+
+
+ACTIVE8_T1_IDENTITY_FIELDS = (
+    "active8_inventory_manifest_file_sha256",
+    "active8_inventory_sha256",
+    "active8_effective_source_corpus_cache_sha256",
+    "active8_unified_packed_manifest_sha256",
+    "active8_support_contract_sha256",
+)
+
+
+@dataclass(frozen=True)
+class _ForensicsTraceAddress:
+    packed_shard_content_sha256: str
+    entry_index: int
+    trace_id: str
+
+
+def active8_t1_identity(
+    admission: Active8TraceAdmission,
+) -> Mapping[str, str]:
+    """Project the five non-interchangeable Active8 identities used by T1."""
+
+    if not isinstance(admission, Active8TraceAdmission):
+        raise TypeError("T1 requires a verified Active8TraceAdmission")
+    return MappingProxyType(
+        {
+            "active8_inventory_manifest_file_sha256": (
+                admission.manifest_file_sha256
+            ),
+            "active8_inventory_sha256": admission.inventory_sha256,
+            "active8_effective_source_corpus_cache_sha256": (
+                admission.effective_source_corpus_cache_sha256
+            ),
+            "active8_unified_packed_manifest_sha256": (
+                admission.unified_packed_manifest_sha256
+            ),
+            "active8_support_contract_sha256": (
+                admission.support_contract_sha256
+            ),
+        }
+    )
+
+
+def _forensics_trace_address(
+    row: Mapping[str, Any],
+    admission: Active8TraceAdmission,
+) -> _ForensicsTraceAddress:
+    state_ref = row.get("exact_state_ref")
+    if not isinstance(state_ref, Mapping):
+        raise EditingT1PanelError(
+            "forensics row lacks an exact packed-state reference"
+        )
+    shard_digest = state_ref.get("shard_sha256")
+    record_index = state_ref.get("record_index")
+    shard_name = state_ref.get("shard_name")
+    record_key = row.get("record_key")
+    partition = row.get("partition")
+    if (
+        not _is_sha256(shard_digest)
+        or type(record_index) is not int
+        or record_index < 0
+        or not isinstance(shard_name, str)
+        or not shard_name
+        or not isinstance(record_key, str)
+        or not record_key
+        or not isinstance(partition, str)
+        or not partition
+    ):
+        raise EditingT1PanelError(
+            "forensics row lacks a complete Active8 trace address"
+        )
+    shard_path = PurePosixPath(shard_name)
+    if (
+        shard_path.is_absolute()
+        or ".." in shard_path.parts
+        or len(shard_path.parts) < 3
+        or shard_path.parts[-2] != partition
+    ):
+        raise EditingT1PanelError(
+            "forensics packed shard path disagrees with its partition"
+        )
+    prefix = f"{shard_name}:{record_index}:"
+    if not record_key.startswith(prefix) or len(record_key) == len(prefix):
+        raise EditingT1PanelError(
+            "forensics record key disagrees with its exact packed address"
+        )
+    trace_id = record_key[len(prefix) :]
+    try:
+        expected_digest = admission.expected_source_digest(
+            packed_shard_name=shard_path.name,
+            layer=shard_path.parts[-3],
+            partition=partition,
+        )
+    except Active8TraceInventoryError as error:
+        raise EditingT1PanelError(
+            "forensics row names a shard absent from the physical Active8 inventory"
+        ) from error
+    if expected_digest != shard_digest:
+        raise EditingT1PanelError(
+            "forensics row shard digest disagrees with the physical Active8 inventory"
+        )
+    return _ForensicsTraceAddress(
+        packed_shard_content_sha256=shard_digest,
+        entry_index=record_index,
+        trace_id=trace_id,
+    )
+
+
+def filter_active8_forensics_rows(
+    rows: Sequence[Mapping[str, Any]],
+    admission: Active8TraceAdmission,
+) -> tuple[tuple[Mapping[str, Any], ...], int, int]:
+    """Apply the immutable whole-trace decision before any T1 row selection.
+
+    Returns ``(accepted_rows, excluded_row_count, excluded_trace_count)``.
+    One excluded middle action therefore removes every otherwise usable
+    prefix, suffix, and terminal observation from the trace.
+    """
+
+    if not isinstance(admission, Active8TraceAdmission):
+        raise TypeError("T1 requires a verified Active8TraceAdmission")
+    accepted_rows: list[Mapping[str, Any]] = []
+    excluded_traces: set[tuple[str, int, str]] = set()
+    for row in rows:
+        address = _forensics_trace_address(row, admission)
+        try:
+            accepted = admission.is_accepted(address)
+        except Active8TraceInventoryError as error:
+            raise EditingT1PanelError(
+                "forensics row disagrees with its whole-trace Active8 decision"
+            ) from error
+        if accepted:
+            accepted_rows.append(row)
+        else:
+            excluded_traces.add(
+                (
+                    address.packed_shard_content_sha256,
+                    address.entry_index,
+                    address.trace_id,
+                )
+            )
+    return (
+        tuple(accepted_rows),
+        len(rows) - len(accepted_rows),
+        len(excluded_traces),
+    )
 
 
 def _canonical_json_bytes(value: object) -> bytes:
@@ -500,10 +659,14 @@ def _panel_census(
     *,
     source_rows: Sequence[Mapping[str, Any]],
     source_row_count: int,
+    active8_eligible_row_count: int,
+    active8_excluded_row_count: int,
+    active8_excluded_trace_count: int,
     charge_eligible_row_count: int,
+    charge_excluded_row_count: int,
     pilot_eligible_row_count: int,
     operator_freeze_excluded_row_count: int,
-    excluded_forensics_trace_count: int,
+    charge_excluded_forensics_trace_count: int,
 ) -> dict[str, Any]:
     conditional_group_counts = {
         family: len(conditional_repeated[family]) for family in RINGCORE_EDITING_FAMILIES
@@ -583,11 +746,16 @@ def _panel_census(
 
     return {
         "source_forensics_rows_total": source_row_count,
-        "charge_policy_eligible_forensics_rows_total": charge_eligible_row_count,
-        "charge_policy_excluded_forensics_rows_total": (
-            source_row_count - charge_eligible_row_count
+        "active8_eligible_forensics_rows_total": active8_eligible_row_count,
+        "active8_excluded_forensics_rows_total": active8_excluded_row_count,
+        "active8_excluded_unique_forensics_trace_addresses": (
+            active8_excluded_trace_count
         ),
-        "charge_policy_excluded_unique_forensics_trace_addresses": (excluded_forensics_trace_count),
+        "charge_policy_eligible_forensics_rows_total": charge_eligible_row_count,
+        "charge_policy_excluded_forensics_rows_total": charge_excluded_row_count,
+        "charge_policy_excluded_unique_forensics_trace_addresses": (
+            charge_excluded_forensics_trace_count
+        ),
         "pilot_family_eligible_forensics_rows_total": pilot_eligible_row_count,
         "operator_freeze_excluded_forensics_rows_total": operator_freeze_excluded_row_count,
         "unique_rows_by_family": {
@@ -639,10 +807,14 @@ def _artifact_body(
     conditional_repeated: Mapping[str, Sequence[Mapping[str, Any]]],
     source_rows: Sequence[Mapping[str, Any]],
     source_row_count: int,
+    active8_eligible_row_count: int,
+    active8_excluded_row_count: int,
+    active8_excluded_trace_count: int,
     charge_eligible_row_count: int,
+    charge_excluded_row_count: int,
     pilot_eligible_row_count: int,
     operator_freeze_excluded_row_count: int,
-    excluded_forensics_trace_count: int,
+    charge_excluded_forensics_trace_count: int,
 ) -> dict[str, Any]:
     return {
         "schema": EDITING_T1_PANEL_SCHEMA,
@@ -659,9 +831,10 @@ def _artifact_body(
             ),
             "unique_examples_per_family": (EDITING_T1_UNIQUE_EXAMPLES_PER_FAMILY),
             "global_determinism_policy": (
-                "after operator-freeze and charge-policy exclusions, unique family "
-                "panels exclude an exact source whenever the full active eight-family "
-                "pilot projection records more than one distinct canonical teacher successor"
+                "after whole-trace Active8 admission, operator-freeze, and "
+                "charge-policy exclusions, unique family panels exclude an exact "
+                "source whenever the full active eight-family pilot projection "
+                "records more than one distinct canonical teacher successor"
             ),
             "primary_repeated_state_policy": (
                 "all exact persistent-slot source groups with more than one distinct "
@@ -690,6 +863,13 @@ def _artifact_body(
                 "the frozen exact-state charge-policy index contains its "
                 "(packed_shard_content_sha256, entry_index); selected addresses "
                 "are checked again against indexed trace_id at runtime"
+            ),
+            "active8_whole_trace_admission_policy": (
+                "load and physically hash the immutable Active8 inventory and every "
+                "decision shard, then require the exact "
+                "(packed_shard_content_sha256, entry_index, trace_id) decision before "
+                "any T1 selection; if any middle action is excluded, no neighboring "
+                "row from that trace may enter any T1 panel"
             ),
             "support_time": EDITING_T1_SUPPORT_TIME,
         },
@@ -726,10 +906,16 @@ def _artifact_body(
             conditional_repeated,
             source_rows=source_rows,
             source_row_count=source_row_count,
+            active8_eligible_row_count=active8_eligible_row_count,
+            active8_excluded_row_count=active8_excluded_row_count,
+            active8_excluded_trace_count=active8_excluded_trace_count,
             charge_eligible_row_count=charge_eligible_row_count,
+            charge_excluded_row_count=charge_excluded_row_count,
             pilot_eligible_row_count=pilot_eligible_row_count,
             operator_freeze_excluded_row_count=operator_freeze_excluded_row_count,
-            excluded_forensics_trace_count=excluded_forensics_trace_count,
+            charge_excluded_forensics_trace_count=(
+                charge_excluded_forensics_trace_count
+            ),
         ),
     }
 
@@ -745,6 +931,8 @@ def build_editing_t1_panel(
     charge_policy_audit_file_sha256: str,
     charge_policy_exclusions: Mapping[str, Any],
     charge_policy_exclusions_file_sha256: str,
+    active8_admission: Active8TraceAdmission,
+    gate_zero_unified_packed_manifest_sha256: str,
 ) -> dict[str, Any]:
     """Derive the exact T1 panels from validated frozen inputs."""
 
@@ -760,6 +948,10 @@ def build_editing_t1_panel(
             "charge_policy_exclusions_file_sha256",
             charge_policy_exclusions_file_sha256,
         ),
+        (
+            "gate_zero_unified_packed_manifest_sha256",
+            gate_zero_unified_packed_manifest_sha256,
+        ),
     ):
         if not _is_sha256(value):
             raise ValueError(f"{name} must be a lowercase SHA-256")
@@ -774,7 +966,24 @@ def build_editing_t1_panel(
         if not _is_sha256(value):
             raise EditingT1PanelError(f"forensics source lacks {name}")
     manifest = sidecar.manifest
+    provenance = manifest.get("provenance")
+    if (
+        not isinstance(provenance, Mapping)
+        or provenance.get("unified_packed_manifest_sha256")
+        != gate_zero_unified_packed_manifest_sha256
+        or active8_admission.unified_packed_manifest_sha256
+        != gate_zero_unified_packed_manifest_sha256
+    ):
+        raise EditingT1PanelError(
+            "Gate0 validation source, semantic sidecar, and Active8 inventory "
+            "name different unified packed manifests"
+        )
     rows = _validate_forensics_rows(forensics, sidecar)
+    (
+        active8_eligible_rows,
+        active8_excluded_row_count,
+        active8_excluded_trace_count,
+    ) = filter_active8_forensics_rows(rows, active8_admission)
     excluded_trace_ids = validate_charge_policy_exclusions(
         audit=charge_policy_audit,
         audit_file_sha256=charge_policy_audit_file_sha256,
@@ -783,7 +992,7 @@ def build_editing_t1_panel(
     )
     charge_eligible_rows = tuple(
         row
-        for row in rows
+        for row in active8_eligible_rows
         if (
             str(row["exact_state_ref"]["shard_sha256"]),
             int(row["exact_state_ref"]["record_index"]),
@@ -796,7 +1005,7 @@ def build_editing_t1_panel(
     )
     operator_freeze_excluded_row_count = sum(
         str(row["teacher_family"]) in EDITING_T1_OPERATOR_FREEZE_EXCLUDED_FAMILIES
-        for row in rows
+        for row in charge_eligible_rows
     )
     excluded_forensics_trace_count = len(
         {
@@ -804,7 +1013,7 @@ def build_editing_t1_panel(
                 str(row["exact_state_ref"]["shard_sha256"]),
                 int(row["exact_state_ref"]["record_index"]),
             )
-            for row in rows
+            for row in active8_eligible_rows
             if (
                 str(row["exact_state_ref"]["shard_sha256"]),
                 int(row["exact_state_ref"]["record_index"]),
@@ -836,6 +1045,7 @@ def build_editing_t1_panel(
         "charge_policy_excluded_unique_trace_addresses": (
             charge_policy_exclusions["excluded_unique_trace_addresses"]
         ),
+        **active8_t1_identity(active8_admission),
     }
     body = _artifact_body(
         source=source,
@@ -844,10 +1054,16 @@ def build_editing_t1_panel(
         conditional_repeated=conditional_repeated,
         source_rows=rows,
         source_row_count=len(rows),
+        active8_eligible_row_count=len(active8_eligible_rows),
+        active8_excluded_row_count=active8_excluded_row_count,
+        active8_excluded_trace_count=active8_excluded_trace_count,
         charge_eligible_row_count=len(charge_eligible_rows),
+        charge_excluded_row_count=(
+            len(active8_eligible_rows) - len(charge_eligible_rows)
+        ),
         pilot_eligible_row_count=len(eligible_rows),
         operator_freeze_excluded_row_count=operator_freeze_excluded_row_count,
-        excluded_forensics_trace_count=excluded_forensics_trace_count,
+        charge_excluded_forensics_trace_count=excluded_forensics_trace_count,
     )
     return {**body, "artifact_sha256": _stable_sha256(body)}
 
@@ -885,6 +1101,8 @@ def validate_editing_t1_panel(
     charge_policy_audit_file_sha256: str,
     charge_policy_exclusions: Mapping[str, Any],
     charge_policy_exclusions_file_sha256: str,
+    active8_admission: Active8TraceAdmission,
+    gate_zero_unified_packed_manifest_sha256: str,
 ) -> None:
     """Validate the artifact and re-derive its complete selection."""
 
@@ -982,6 +1200,10 @@ def validate_editing_t1_panel(
         charge_policy_audit_file_sha256=charge_policy_audit_file_sha256,
         charge_policy_exclusions=charge_policy_exclusions,
         charge_policy_exclusions_file_sha256=(charge_policy_exclusions_file_sha256),
+        active8_admission=active8_admission,
+        gate_zero_unified_packed_manifest_sha256=(
+            gate_zero_unified_packed_manifest_sha256
+        ),
     )
     if dict(payload) != expected:
         raise EditingT1PanelError("T1 panel does not equal the deterministic source re-derivation")
@@ -1000,6 +1222,8 @@ def load_editing_t1_panel(
     charge_policy_audit_file_sha256: str,
     charge_policy_exclusions: Mapping[str, Any],
     charge_policy_exclusions_file_sha256: str,
+    active8_admission: Active8TraceAdmission,
+    gate_zero_unified_packed_manifest_sha256: str,
     max_file_bytes: int = 1 << 24,
 ) -> Mapping[str, Any]:
     """Load a self-hashed T1 artifact and bind it to every exact source."""
@@ -1024,6 +1248,10 @@ def load_editing_t1_panel(
         charge_policy_audit_file_sha256=charge_policy_audit_file_sha256,
         charge_policy_exclusions=charge_policy_exclusions,
         charge_policy_exclusions_file_sha256=(charge_policy_exclusions_file_sha256),
+        active8_admission=active8_admission,
+        gate_zero_unified_packed_manifest_sha256=(
+            gate_zero_unified_packed_manifest_sha256
+        ),
     )
     if panel["artifact_sha256"] != expected_artifact_sha256:
         raise EditingT1PanelError("T1 panel artifact hash mismatch")
@@ -1120,6 +1348,7 @@ def write_editing_t1_panel(
 
 
 __all__ = [
+    "ACTIVE8_T1_IDENTITY_FIELDS",
     "EDITING_T1_DIAGNOSTIC_ONLY_FAMILIES",
     "EDITING_T1_GLOBAL_FAMILY_SELECTOR",
     "EDITING_T1_GLOBAL_REPEATED_PANEL_KIND",
@@ -1134,7 +1363,9 @@ __all__ = [
     "EDITING_T1_UNIQUE_PANEL_KIND",
     "EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND",
     "EditingT1PanelError",
+    "active8_t1_identity",
     "build_editing_t1_panel",
+    "filter_active8_forensics_rows",
     "load_editing_t1_panel",
     "selected_source_rows",
     "validate_charge_policy_exclusions",

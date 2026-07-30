@@ -18,6 +18,12 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from compose_v4.data.active8_trace_inventory import (  # noqa: E402
+    load_active8_trace_admission,
+)
+from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
+    load_gate_zero_runtime_contract,
+)
 from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     build_editing_t1_panel,
     validate_editing_t1_panel,
@@ -44,6 +50,17 @@ def _sha256(path: Path) -> str:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--gate-zero-contract",
+        type=Path,
+        default=ROOT / "configs" / "editing_gate_zero_runtime_v2.json",
+    )
+    parser.add_argument("--active8-inventory", type=Path, required=True)
+    parser.add_argument(
+        "--active8-inventory-file-sha256",
+        required=True,
+        help="Expected SHA-256 of the physical Active8 inventory manifest.",
+    )
     parser.add_argument(
         "--forensics",
         type=Path,
@@ -112,6 +129,27 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = _parser().parse_args()
+    gate_zero_contract = load_gate_zero_runtime_contract(
+        args.gate_zero_contract
+    )
+    active8_admission = load_active8_trace_admission(
+        args.active8_inventory,
+        expected_manifest_file_sha256=(
+            args.active8_inventory_file_sha256
+        ),
+        expected_support_contract_sha256=gate_zero_contract.sha256,
+    )
+    gate_zero_unified_packed_manifest_sha256 = str(
+        gate_zero_contract.sidecar["unified_packed_manifest_sha256"]
+    )
+    if (
+        active8_admission.unified_packed_manifest_sha256
+        != gate_zero_unified_packed_manifest_sha256
+    ):
+        raise SystemExit(
+            "Gate0 validation source and Active8 inventory name different "
+            "unified packed manifests"
+        )
     with gzip.open(args.forensics, "rt") as handle:
         forensics = json.load(handle)
     config = load_json_object(args.leaderboard_config)
@@ -139,6 +177,10 @@ def main() -> int:
         "charge_policy_audit_file_sha256": _sha256(args.charge_policy_audit),
         "charge_policy_exclusions": load_json_object(args.charge_policy_exclusions),
         "charge_policy_exclusions_file_sha256": _sha256(args.charge_policy_exclusions),
+        "active8_admission": active8_admission,
+        "gate_zero_unified_packed_manifest_sha256": (
+            gate_zero_unified_packed_manifest_sha256
+        ),
     }
     panel = build_editing_t1_panel(**kwargs)
     validate_editing_t1_panel(panel, **kwargs)

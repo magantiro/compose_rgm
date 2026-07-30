@@ -6,16 +6,32 @@ import copy
 import gzip
 import hashlib
 import json
+import sys
+from dataclasses import replace
 from pathlib import Path
+from types import MappingProxyType, SimpleNamespace
 
 import pytest
 import torch
 
-from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
+from compose_v4.chem.molecular_graph import (
+    ORGANIC_VOCABULARY,
+    smiles_to_molecular_graph,
+)
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
 )
-from compose_v4.data.packed_trace_store import PackedTraceAddress
+from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.active8_trace_inventory import (
+    Active8TraceAdmission,
+    ExactCandidateEvidence,
+    inventory_record_for_trace,
+)
+from compose_v4.data.packed_trace_store import (
+    AddressedPackedTrace,
+    PackedTraceAddress,
+    PackedTraceProgress,
+)
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
 from compose_v4.experiments.editing_gate_zero_runtime import (
@@ -28,25 +44,35 @@ from compose_v4.experiments.editing_t1_panel import (
     EDITING_T1_UNIQUE_PANEL_KIND,
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
     EditingT1PanelError,
+    active8_t1_identity,
     build_editing_t1_panel,
+    filter_active8_forensics_rows,
     load_editing_t1_panel,
     selected_source_rows,
     validate_charge_policy_exclusions,
     validate_editing_t1_panel,
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (
+    EDITING_T1_LOCAL_ADAPTER_FAMILIES,
     EDITING_T1_RESULT_SCHEMA,
     EDITING_T1_RESULT_STATUS,
     EDITING_T1_RESULT_VERSION,
+    EditingT1RuntimeContract,
     EditingT1RuntimeError,
     T1CacheShardReceipt,
     editing_t1_implementation_sha256,
     editing_t1_implementation_sources,
-    load_editing_t1_runtime_contract,
     load_editing_t1_result,
+    load_editing_t1_runtime_contract,
     materialize_t1_panel,
+    require_editing_t1_family_scope_applicable,
+    run_editing_t1_arm,
     validate_editing_t1_result,
+    validate_t1_active8_runtime_binding,
     validate_t1_cache_shard_receipt,
+)
+from compose_v4.experiments.factorized_successor_training import (
+    rewrite_action_codec_sha256,
 )
 from compose_v4.experiments.ringcore_semantic_sidecar import (
     LoadedSemanticCellSidecar,
@@ -61,17 +87,19 @@ from compose_v4.experiments.ringcore_validation_panel import (
     validate_validation_panel_artifact,
 )
 from compose_v4.experiments.successor_micro_overfit import (
+    RINGCORE_EDITING_FAMILIES,
+    SuccessorMicroOverfitError,
     configure_micro_overfit_parameters,
-)
-from compose_v4.experiments.factorized_successor_training import (
-    rewrite_action_codec_sha256,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
 )
-from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 from compose_v4.rewrite.action_codec import canonical_family
 from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.operators import AtomDelete
+from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
+from compose_v4.rewrite.tracelets import RingSystemDelete
+from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
 FORENSICS = (
@@ -107,6 +135,91 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _active8_admission_for_forensics(
+    forensics: dict,
+    *,
+    excluded: set[tuple[str, int]] | None = None,
+    unified_packed_manifest_sha256: str = "3" * 64,
+) -> Active8TraceAdmission:
+    excluded = set() if excluded is None else set(excluded)
+    decisions: dict[str, list[tuple[str, bool]]] = {}
+    lanes: dict[tuple[str, str, str], str] = {}
+    metadata: dict[str, MappingProxyType] = {}
+    for row in forensics["rows"]:
+        state_ref = row["exact_state_ref"]
+        digest = state_ref["shard_sha256"]
+        entry_index = state_ref["record_index"]
+        shard_path = Path(state_ref["shard_name"])
+        prefix = f"{state_ref['shard_name']}:{entry_index}:"
+        assert row["record_key"].startswith(prefix)
+        trace_id = row["record_key"][len(prefix) :]
+        current = decisions.setdefault(digest, [])
+        while len(current) <= entry_index:
+            current.append((f"unobserved-{len(current)}", True))
+        prior_id, prior_decision = current[entry_index]
+        accepted = (digest, entry_index) not in excluded
+        if not prior_id.startswith("unobserved-"):
+            assert (prior_id, prior_decision) == (trace_id, accepted)
+        current[entry_index] = (trace_id, accepted)
+        lane = (shard_path.parts[-3], row["partition"], shard_path.name)
+        prior_digest = lanes.setdefault(lane, digest)
+        assert prior_digest == digest
+        metadata.setdefault(digest, MappingProxyType({}))
+    return Active8TraceAdmission(
+        manifest_path=Path("/fixture/ACTIVE8_TRACE_INVENTORY.json"),
+        manifest_file_sha256="1" * 64,
+        inventory_sha256="2" * 64,
+        unified_packed_manifest_sha256=unified_packed_manifest_sha256,
+        support_contract_sha256="4" * 64,
+        effective_source_corpus_cache_sha256="5" * 64,
+        decisions_by_digest=MappingProxyType(
+            {digest: tuple(values) for digest, values in decisions.items()}
+        ),
+        shard_digest_by_lane=MappingProxyType(lanes),
+        shard_metadata_by_digest=MappingProxyType(metadata),
+        counts=MappingProxyType({}),
+    )
+
+
+def _active8_admission_for_record(
+    record: PathRecord,
+    *,
+    accepted: bool,
+    support_contract_sha256: str = "4" * 64,
+    unified_packed_manifest_sha256: str = "4" * 64,
+) -> Active8TraceAdmission:
+    address = record.corpus_address
+    assert address is not None
+    return Active8TraceAdmission(
+        manifest_path=Path("/fixture/ACTIVE8_TRACE_INVENTORY.json"),
+        manifest_file_sha256="1" * 64,
+        inventory_sha256="2" * 64,
+        unified_packed_manifest_sha256=unified_packed_manifest_sha256,
+        support_contract_sha256=support_contract_sha256,
+        effective_source_corpus_cache_sha256="5" * 64,
+        decisions_by_digest=MappingProxyType(
+            {
+                address.packed_shard_content_sha256: (
+                    (address.trace_id, accepted),
+                )
+            }
+        ),
+        shard_digest_by_lane=MappingProxyType(
+            {
+                (
+                    address.layer,
+                    address.partition,
+                    address.packed_shard_name,
+                ): address.packed_shard_content_sha256
+            }
+        ),
+        shard_metadata_by_digest=MappingProxyType(
+            {address.packed_shard_content_sha256: MappingProxyType({})}
+        ),
+        counts=MappingProxyType({}),
+    )
+
+
 @pytest.fixture(scope="module")
 def frozen_inputs():
     with gzip.open(FORENSICS, "rt") as handle:
@@ -129,6 +242,7 @@ def frozen_inputs():
         expected_config_sha256=manifest["config_sha256"],
         expected_provenance_sha256=manifest["provenance_sha256"],
     )
+    unified_packed_manifest_sha256 = manifest["provenance"]["unified_packed_manifest_sha256"]
     kwargs = {
         "forensics": forensics,
         "forensics_file_sha256": _sha256(FORENSICS),
@@ -139,23 +253,45 @@ def frozen_inputs():
         "charge_policy_audit_file_sha256": _sha256(CHARGE_POLICY_AUDIT),
         "charge_policy_exclusions": load_json_object(CHARGE_POLICY_EXCLUSIONS),
         "charge_policy_exclusions_file_sha256": _sha256(CHARGE_POLICY_EXCLUSIONS),
+        "active8_admission": _active8_admission_for_forensics(
+            forensics,
+            unified_packed_manifest_sha256=(unified_packed_manifest_sha256),
+        ),
+        "gate_zero_unified_packed_manifest_sha256": (unified_packed_manifest_sha256),
     }
     return forensics, kwargs
 
 
-def test_frozen_t1_panel_equals_complete_deterministic_rederivation(
+def test_active8_t1_panel_is_complete_deterministic_rederivation(
     frozen_inputs,
+    tmp_path,
 ):
     forensics, kwargs = frozen_inputs
     expected = build_editing_t1_panel(**kwargs)
-    observed = json.loads(FROZEN_PANEL.read_text())
+    stale_pre_inventory_panel = json.loads(FROZEN_PANEL.read_text())
+    assert stale_pre_inventory_panel != expected
+    with pytest.raises(EditingT1PanelError, match="T1 source fields disagree"):
+        validate_editing_t1_panel(
+            stale_pre_inventory_panel,
+            **kwargs,
+        )
+    panel_path = tmp_path / "editing-t1-active8-panel.json"
+    panel_path.write_text(json.dumps(expected))
+    observed = expected
 
-    assert observed == expected
     assert observed["training_authorized"] is False
     assert all(value is None for value in observed["thresholds"].values())
     assert set(observed["census"]["unique_rows_by_family"].values()) == {64}
     assert observed["census"]["unique_rows_total"] == 512
     assert observed["census"]["source_forensics_rows_total"] == 2304
+    assert observed["census"]["active8_eligible_forensics_rows_total"] == 2304
+    assert observed["census"]["active8_excluded_forensics_rows_total"] == 0
+    assert (
+        observed["census"][
+            "active8_excluded_unique_forensics_trace_addresses"
+        ]
+        == 0
+    )
     assert observed["census"]["charge_policy_eligible_forensics_rows_total"] == 2292
     assert observed["census"]["charge_policy_excluded_forensics_rows_total"] == 12
     assert observed["census"]["charge_policy_excluded_unique_forensics_trace_addresses"] == 12
@@ -237,7 +373,7 @@ def test_frozen_t1_panel_equals_complete_deterministic_rederivation(
         ) not in excluded_trace_ids
 
     loaded = load_editing_t1_panel(
-        FROZEN_PANEL,
+        panel_path,
         expected_artifact_sha256=observed["artifact_sha256"],
         **kwargs,
     )
@@ -327,6 +463,24 @@ def test_repeated_panel_is_empirical_and_never_synthesized(frozen_inputs):
             family="atom_delete",
             panel_kind=EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
         )
+
+
+def test_panel_build_rejects_active8_for_another_gate_zero_unified_manifest(
+    frozen_inputs,
+):
+    _forensics, kwargs = frozen_inputs
+    mismatched = {
+        **kwargs,
+        "active8_admission": replace(
+            kwargs["active8_admission"],
+            unified_packed_manifest_sha256="0" * 64,
+        ),
+    }
+    with pytest.raises(
+        EditingT1PanelError,
+        match="name different unified packed manifests",
+    ):
+        build_editing_t1_panel(**mismatched)
 
 
 def test_t1_panel_rejects_row_reference_and_threshold_tampering(
@@ -435,15 +589,243 @@ def test_charge_policy_exclusion_index_is_self_hashed_and_exactly_addressed():
         )
 
 
-def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
-    contract = load_editing_t1_runtime_contract(
-        ROOT / "configs" / "editing_t1_successor_gate_v3.json"
+def test_disallowed_middle_action_removes_neighboring_rows_before_t1_selection():
+    state = pad_molecular_graph(smiles_to_molecular_graph("CC"), 8)
+    steps = (
+        RewriteStep("atom_delete", AtomDelete(1)),
+        RewriteStep(
+            "ring_system_delete",
+            RingSystemDelete(
+                system_atoms=(0, 1),
+                retained_system_atoms=(0,),
+                bond_deletions=(),
+                atom_deletions=(1,),
+                atom_payloads=(),
+                bond_reorders=(),
+                source_aromatic_edges=(),
+                aromatic_edges=(),
+                topology_class="fixture",
+            ),
+        ),
+        RewriteStep("atom_delete", AtomDelete(0)),
     )
+    trace = RewriteTrace(
+        source=state,
+        target=state,
+        steps=steps,
+        metadata={"fixture": "T1 whole-trace admission"},
+    )
+    address = PackedTraceAddress(
+        packed_shard_content_sha256="a" * 64,
+        packed_shard_name="fixture.jsonl.gz",
+        entry_index=0,
+        trace_id="middle-disallowed",
+        layer="corruption",
+        partition="validation",
+        source_key="CC",
+        target_key="CC",
+        path_length=len(steps),
+    )
+    addressed = AddressedPackedTrace(
+        address=address,
+        trace=trace,
+        path=PackedTraceProgress(
+            trace,
+            tuple(state for _ in range(len(steps) + 1)),
+        ),
+    )
+
+    decision = inventory_record_for_trace(
+        addressed,
+        exact_candidate_checker=lambda *_: ExactCandidateEvidence(
+            supported=True,
+            action_sha256="b" * 64,
+        ),
+    )
+    assert decision["decision"] == "excluded"
+    assert decision["progress_rows"] == []
+    assert decision["exclusions"][0]["step_index"] == 1
+
+    admission = Active8TraceAdmission(
+        manifest_path=Path("/fixture/ACTIVE8_TRACE_INVENTORY.json"),
+        manifest_file_sha256="1" * 64,
+        inventory_sha256="2" * 64,
+        unified_packed_manifest_sha256="3" * 64,
+        support_contract_sha256="4" * 64,
+        effective_source_corpus_cache_sha256="5" * 64,
+        decisions_by_digest=MappingProxyType(
+            {"a" * 64: (("middle-disallowed", False),)}
+        ),
+        shard_digest_by_lane=MappingProxyType(
+            {
+                (
+                    "corruption",
+                    "validation",
+                    "fixture.jsonl.gz",
+                ): "a" * 64
+            }
+        ),
+        shard_metadata_by_digest=MappingProxyType(
+            {"a" * 64: MappingProxyType({})}
+        ),
+        counts=MappingProxyType({}),
+    )
+    neighboring_rows = (
+        {
+            "record_key": (
+                "corruption/validation/fixture.jsonl.gz:0:middle-disallowed"
+            ),
+            "partition": "validation",
+            "exact_state_ref": {
+                "shard_sha256": "a" * 64,
+                "record_index": 0,
+                "progress_index": 0,
+                "shard_name": "corruption/validation/fixture.jsonl.gz",
+            },
+        },
+        {
+            "record_key": (
+                "corruption/validation/fixture.jsonl.gz:0:middle-disallowed"
+            ),
+            "partition": "validation",
+            "exact_state_ref": {
+                "shard_sha256": "a" * 64,
+                "record_index": 0,
+                "progress_index": 2,
+                "shard_name": "corruption/validation/fixture.jsonl.gz",
+            },
+        },
+    )
+
+    accepted_rows, excluded_rows, excluded_traces = (
+        filter_active8_forensics_rows(neighboring_rows, admission)
+    )
+    assert accepted_rows == ()
+    assert excluded_rows == 2
+    assert excluded_traces == 1
+
+
+def test_shared_t1_family_scope_guard_defines_global_and_local_semantics():
+    assert EDITING_T1_LOCAL_ADAPTER_FAMILIES == (
+        "bond_reorder",
+        "cycle_insert",
+        "cycle_attach",
+        "ring_system_restate",
+    )
+    assert (
+        require_editing_t1_family_scope_applicable(
+            EDITING_T1_GLOBAL_FAMILY_SELECTOR,
+            "heads_plus_local_adapter",
+        )
+        == RINGCORE_EDITING_FAMILIES
+    )
+    assert require_editing_t1_family_scope_applicable(
+        "atom_insert",
+        "heads_only",
+    ) == ("atom_insert",)
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="changes no parameters beyond heads_only",
+    ):
+        require_editing_t1_family_scope_applicable(
+            "atom_insert",
+            "heads_plus_local_adapter",
+        )
+
+
+def test_direct_t1_runtime_rejects_duplicate_local_adapter_arm_before_inputs():
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="changes no parameters beyond heads_only",
+    ):
+        run_editing_t1_arm(
+            contract=None,
+            gate_zero_contract=None,
+            source=None,
+            panel={},
+            forensics={},
+            family="atom_insert",
+            panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
+            scope="heads_plus_local_adapter",
+            device=torch.device("cpu"),
+            excluded_trace_ids={},
+            active8_admission=None,
+        )
+
+
+def test_direct_t1_cli_rejects_duplicate_local_adapter_arm(
+    monkeypatch,
+    tmp_path,
+):
+    from scripts import run_editing_t1_successor_gate as t1_cli
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_editing_t1_successor_gate.py",
+            "--transfer-root",
+            str(tmp_path),
+            "--active8-inventory",
+            str(tmp_path / "ACTIVE8_TRACE_INVENTORY.json"),
+            "--active8-inventory-file-sha256",
+            "a" * 64,
+            "--family",
+            "atom_insert",
+            "--scope",
+            "heads_plus_local_adapter",
+        ],
+    )
+    with pytest.raises(
+        SystemExit,
+        match="changes no parameters beyond heads_only",
+    ):
+        t1_cli.main()
+
+
+def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
+    contract_path = ROOT / "configs" / "editing_t1_successor_gate_v3.json"
+    with pytest.raises(EditingT1RuntimeError):
+        load_editing_t1_runtime_contract(contract_path)
+    payload = json.loads(contract_path.read_text())
+    payload.update(
+        {
+            "active8_inventory_manifest_file_sha256": "1" * 64,
+            "active8_inventory_sha256": "2" * 64,
+            "active8_effective_source_corpus_cache_sha256": "5" * 64,
+            "active8_unified_packed_manifest_sha256": "3" * 64,
+            "active8_support_contract_sha256": payload[
+                "gate_zero_runtime_contract_sha256"
+            ],
+            "implementation_sha256": editing_t1_implementation_sha256(),
+        }
+    )
+    payload["optimization"] = {
+        **payload["optimization"],
+        "scopes": [
+            "heads_only",
+            "heads_plus_local_adapter",
+            "all",
+        ],
+    }
+    payload["contract_sha256"] = hashlib.sha256(
+        json.dumps(
+            {
+                key: value
+                for key, value in payload.items()
+                if key != "contract_sha256"
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
+    contract = EditingT1RuntimeContract(payload)
     assert contract.training_authorized is False
     assert contract.optimization["steps"] == 500
     assert tuple(contract.optimization["scopes"]) == (
         "heads_only",
-        "heads_plus_pair_projection",
+        "heads_plus_local_adapter",
         "all",
     )
     assert tuple(contract.payload["panel_kinds"]) == (
@@ -484,11 +866,21 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
     selected = configure_micro_overfit_parameters(
         model,
         ("ring_system_restate",),
-        scope="heads_plus_pair_projection",
+        scope="heads_plus_local_adapter",
     )
     assert any(name.startswith("ring_restate_head.") for name in selected)
+    assert any(name.startswith("pair_project.") for name in selected)
     assert any(name.startswith("restate_order_embedding.") for name in selected)
     assert any(name.startswith("family_head.") for name in selected)
+    with pytest.raises(
+        SuccessorMicroOverfitError,
+        match="changes no parameters beyond heads_only",
+    ):
+        configure_micro_overfit_parameters(
+            model,
+            ("atom_insert",),
+            scope="heads_plus_local_adapter",
+        )
 
 
 def _runtime_fixture():
@@ -598,8 +990,48 @@ def _runtime_fixture():
     return source, {"rows": [row]}, panel, family
 
 
+def test_t1_runtime_fails_on_gate_zero_active8_identity_mismatch():
+    source, _forensics, _panel, _family = _runtime_fixture()
+    admission = _active8_admission_for_record(
+        source.records[0],
+        accepted=True,
+        support_contract_sha256="4" * 64,
+        unified_packed_manifest_sha256=(
+            source.unified_packed_manifest_sha256
+        ),
+    )
+    identity = dict(active8_t1_identity(admission))
+    panel = {"source": dict(identity)}
+    contract = SimpleNamespace(payload=dict(identity))
+
+    observed = validate_t1_active8_runtime_binding(
+        contract=contract,
+        gate_zero_contract=SimpleNamespace(sha256="4" * 64),
+        source=source,
+        panel=panel,
+        active8_admission=admission,
+    )
+    assert dict(observed) == identity
+
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="Gate0 runtime contract and Active8 support contract disagree",
+    ):
+        validate_t1_active8_runtime_binding(
+            contract=contract,
+            gate_zero_contract=SimpleNamespace(sha256="6" * 64),
+            source=source,
+            panel=panel,
+            active8_admission=admission,
+        )
+
+
 def test_runtime_fixture_round_trips_exact_production_cache():
     source, forensics, panel, family = _runtime_fixture()
+    active8_admission = _active8_admission_for_record(
+        source.records[0],
+        accepted=True,
+    )
     torch.manual_seed(7)
     model = FactorizedTraceletRateModel(
         build_typed_ring_catalog(()),
@@ -623,6 +1055,7 @@ def test_runtime_fixture_round_trips_exact_production_cache():
         panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
         max_atoms=12,
         excluded_trace_ids={},
+        active8_admission=active8_admission,
     )
 
     assert len(materialized.examples) == 1
@@ -648,6 +1081,7 @@ def test_runtime_fixture_round_trips_exact_production_cache():
             panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
             max_atoms=12,
             excluded_trace_ids={exact_trace_key: source.records[0].corpus_address.trace_id},
+            active8_admission=active8_admission,
         )
     with pytest.raises(Exception, match="trace_id disagrees"):
         materialize_t1_panel(
@@ -659,6 +1093,7 @@ def test_runtime_fixture_round_trips_exact_production_cache():
             panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
             max_atoms=12,
             excluded_trace_ids={exact_trace_key: "wrong-trace-id"},
+            active8_admission=active8_admission,
         )
 
     repeated_panel = copy.deepcopy(panel)
@@ -680,6 +1115,7 @@ def test_runtime_fixture_round_trips_exact_production_cache():
         panel_kind=EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
         max_atoms=12,
         excluded_trace_ids={},
+        active8_admission=active8_admission,
     )
     assert len(repeated.examples) == 2
     assert repeated.unique_progress_address_count == 1
@@ -700,6 +1136,26 @@ def test_runtime_fixture_round_trips_exact_production_cache():
             panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
             max_atoms=12,
             excluded_trace_ids={},
+            active8_admission=active8_admission,
+        )
+
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="whole-trace Active8-excluded",
+    ):
+        materialize_t1_panel(
+            model,
+            source=source,
+            panel=panel,
+            forensics=forensics,
+            family=family,
+            panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
+            max_atoms=12,
+            excluded_trace_ids={},
+            active8_admission=_active8_admission_for_record(
+                source.records[0],
+                accepted=False,
+            ),
         )
 
 
@@ -722,6 +1178,11 @@ def _durable_result_fixture():
         "panel_artifact_sha256": "6" * 64,
         "charge_policy_exclusion_payload_sha256": "7" * 64,
         "charge_policy_source_input_inventory_sha256": "8" * 64,
+        "active8_inventory_manifest_file_sha256": "d" * 64,
+        "active8_inventory_sha256": "e" * 64,
+        "active8_effective_source_corpus_cache_sha256": "f" * 64,
+        "active8_unified_packed_manifest_sha256": "0" * 64,
+        "active8_support_contract_sha256": "5" * 64,
         "family": "atom_insert",
         "family_status": "CURRENT_ACTIVE_FAMILY",
         "panel_kind": EDITING_T1_UNIQUE_PANEL_KIND,
@@ -769,6 +1230,21 @@ def test_t1_durable_result_and_cache_receipts_fail_closed(tmp_path):
         "expected_result_sha256": result["result_sha256"],
         "expected_contract_sha256": result["contract_sha256"],
         "expected_panel_artifact_sha256": result["panel_artifact_sha256"],
+        "expected_active8_identity": {
+            "active8_inventory_manifest_file_sha256": (
+                result["active8_inventory_manifest_file_sha256"]
+            ),
+            "active8_inventory_sha256": result["active8_inventory_sha256"],
+            "active8_effective_source_corpus_cache_sha256": (
+                result["active8_effective_source_corpus_cache_sha256"]
+            ),
+            "active8_unified_packed_manifest_sha256": (
+                result["active8_unified_packed_manifest_sha256"]
+            ),
+            "active8_support_contract_sha256": (
+                result["active8_support_contract_sha256"]
+            ),
+        },
         "expected_cache_receipts": (receipt,),
     }
     observed = validate_editing_t1_result(result, **expected)
@@ -794,6 +1270,20 @@ def test_t1_durable_result_and_cache_receipts_fail_closed(tmp_path):
             **{
                 **expected,
                 "expected_panel_artifact_sha256": "e" * 64,
+            },
+        )
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="another physical or logical Active8 corpus",
+    ):
+        validate_editing_t1_result(
+            result,
+            **{
+                **expected,
+                "expected_active8_identity": {
+                    **expected["expected_active8_identity"],
+                    "active8_inventory_sha256": "a" * 64,
+                },
             },
         )
 

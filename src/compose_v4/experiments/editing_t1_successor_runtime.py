@@ -25,6 +25,10 @@ import torch
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
 )
+from compose_v4.data.active8_trace_inventory import (
+    Active8TraceAdmission,
+    Active8TraceInventoryError,
+)
 from compose_v4.data.successor_fiber_cache import (
     SuccessorFiberCacheAddress,
     SuccessorFiberCacheRecord,
@@ -41,6 +45,7 @@ from compose_v4.experiments.editing_p50_gate import (
     state_dict_semantic_sha256,
 )
 from compose_v4.experiments.editing_t1_panel import (
+    ACTIVE8_T1_IDENTITY_FIELDS,
     EDITING_T1_DIAGNOSTIC_ONLY_FAMILIES,
     EDITING_T1_GLOBAL_FAMILY_SELECTOR,
     EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
@@ -49,6 +54,7 @@ from compose_v4.experiments.editing_t1_panel import (
     EDITING_T1_UNIQUE_PANEL_KIND,
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
     EditingT1PanelError,
+    active8_t1_identity,
     selected_source_rows,
 )
 from compose_v4.experiments.factorized_successor_training import (
@@ -59,10 +65,13 @@ from compose_v4.experiments.successor_fiber_cache_builder import (
     compile_successor_fiber_trace,
 )
 from compose_v4.experiments.successor_micro_overfit import (
+    MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES,
     RINGCORE_EDITING_FAMILIES,
     PreparedSuccessorPanel,
+    SuccessorMicroOverfitError,
     SuccessorSupervisionExample,
     prepare_cached_successor_panel,
+    require_micro_overfit_scope_applicable,
     train_successor_micro_panel,
 )
 from compose_v4.rewrite.action_codec import canonical_family
@@ -90,6 +99,7 @@ _CONTRACT_FIELDS = {
     "charge_policy_exclusions_file_sha256",
     "charge_policy_exclusion_payload_sha256",
     "charge_policy_source_input_inventory_sha256",
+    *ACTIVE8_T1_IDENTITY_FIELDS,
     "implementation_sha256",
     "families",
     "panel_kinds",
@@ -122,6 +132,7 @@ _RESULT_FIELDS = {
     "panel_artifact_sha256",
     "charge_policy_exclusion_payload_sha256",
     "charge_policy_source_input_inventory_sha256",
+    *ACTIVE8_T1_IDENTITY_FIELDS,
     "family",
     "family_status",
     "panel_kind",
@@ -150,6 +161,38 @@ class EditingT1RuntimeError(RuntimeError):
     """A real T1 arm is off-contract or scientifically incomplete."""
 
 
+EDITING_T1_LOCAL_ADAPTER_FAMILIES = MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES
+
+
+def require_editing_t1_family_scope_applicable(
+    family: str,
+    scope: str,
+) -> tuple[str, ...]:
+    """Require one non-duplicate T1 family/scope arm.
+
+    ``all_families`` denotes the complete ordered active-eight family universe.
+    Its local-adapter rung is therefore applicable and the lower training
+    guard rechecks the families actually present in the materialized panel.
+    """
+
+    if family == EDITING_T1_GLOBAL_FAMILY_SELECTOR:
+        projected_families = RINGCORE_EDITING_FAMILIES
+    elif family in RINGCORE_EDITING_FAMILIES:
+        projected_families = (family,)
+    else:
+        raise EditingT1RuntimeError(f"unknown T1 family {family!r}")
+    if scope not in EDITING_T1_REQUIRED_SCOPES:
+        raise EditingT1RuntimeError(f"unknown T1 scope {scope!r}")
+    try:
+        require_micro_overfit_scope_applicable(
+            projected_families,
+            scope=scope,
+        )
+    except (SuccessorMicroOverfitError, ValueError) as error:
+        raise EditingT1RuntimeError(str(error)) from error
+    return tuple(projected_families)
+
+
 _IMPLEMENTATION_ENTRYPOINT_SOURCES = (
     "modal_apps/run_editing_t1_successor_gate.py",
     "scripts/build_editing_t1_successor_panel.py",
@@ -162,6 +205,7 @@ _IMPLEMENTATION_ENTRYPOINT_SOURCES = (
     "src/compose_v4/experiments/production_successor_kernel.py",
     "src/compose_v4/experiments/successor_fiber_cache_builder.py",
     "src/compose_v4/data/successor_fiber_cache.py",
+    "src/compose_v4/data/active8_trace_inventory.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
 )
 
@@ -363,10 +407,18 @@ class EditingT1RuntimeContract:
             "charge_policy_exclusions_file_sha256",
             "charge_policy_exclusion_payload_sha256",
             "charge_policy_source_input_inventory_sha256",
+            *ACTIVE8_T1_IDENTITY_FIELDS,
             "implementation_sha256",
         ):
             if not _is_sha256(frozen[field]):
                 raise EditingT1RuntimeError(f"T1 contract {field} must be a SHA-256")
+        if (
+            frozen["active8_support_contract_sha256"]
+            != frozen["gate_zero_runtime_contract_sha256"]
+        ):
+            raise EditingT1RuntimeError(
+                "T1 contract Gate0 and Active8 support identities disagree"
+            )
         if frozen["implementation_sha256"] != (editing_t1_implementation_sha256()):
             raise EditingT1RuntimeError("T1 implementation source hash drifted")
         if tuple(frozen["families"]) != RINGCORE_EDITING_FAMILIES:
@@ -525,12 +577,31 @@ def _validated_receipt_sequence(
     return receipts
 
 
+def _validated_active8_identity(
+    value: Mapping[str, Any],
+    *,
+    name: str,
+) -> Mapping[str, str]:
+    payload = _require_exact_fields(
+        value,
+        set(ACTIVE8_T1_IDENTITY_FIELDS),
+        name=name,
+    )
+    for field in ACTIVE8_T1_IDENTITY_FIELDS:
+        if not _is_sha256(payload[field]):
+            raise EditingT1RuntimeError(f"{name} {field} must be a SHA-256")
+    return MappingProxyType(
+        {field: str(payload[field]) for field in ACTIVE8_T1_IDENTITY_FIELDS}
+    )
+
+
 def validate_editing_t1_result(
     result: Mapping[str, Any],
     *,
     expected_result_sha256: str,
     expected_contract_sha256: str,
     expected_panel_artifact_sha256: str,
+    expected_active8_identity: Mapping[str, Any],
     expected_cache_receipts: Sequence[Mapping[str, Any] | T1CacheShardReceipt],
 ) -> Mapping[str, Any]:
     """Validate one durable T1 result against independently retained identities."""
@@ -560,10 +631,29 @@ def validate_editing_t1_result(
         raise EditingT1RuntimeError("T1 durable result is bound to another runtime contract")
     if payload["panel_artifact_sha256"] != expected_panel_artifact_sha256:
         raise EditingT1RuntimeError("T1 durable result is bound to another panel artifact")
+    retained_active8_identity = _validated_active8_identity(
+        expected_active8_identity,
+        name="expected T1 Active8 identity",
+    )
+    observed_active8_identity = {
+        field: payload[field] for field in ACTIVE8_T1_IDENTITY_FIELDS
+    }
+    if observed_active8_identity != dict(retained_active8_identity):
+        raise EditingT1RuntimeError(
+            "T1 durable result is bound to another physical or logical Active8 corpus"
+        )
+    if (
+        payload["gate_zero_runtime_contract_sha256"]
+        != payload["active8_support_contract_sha256"]
+    ):
+        raise EditingT1RuntimeError(
+            "T1 durable result Gate0 and Active8 support identities disagree"
+        )
     for field in (
         "gate_zero_runtime_contract_sha256",
         "charge_policy_exclusion_payload_sha256",
         "charge_policy_source_input_inventory_sha256",
+        *ACTIVE8_T1_IDENTITY_FIELDS,
         "final_model_state_sha256",
     ):
         if not _is_sha256(payload[field]):
@@ -668,6 +758,7 @@ def load_editing_t1_result(
     expected_result_sha256: str,
     expected_contract_sha256: str,
     expected_panel_artifact_sha256: str,
+    expected_active8_identity: Mapping[str, Any],
     expected_cache_receipts: Sequence[Mapping[str, Any] | T1CacheShardReceipt],
     max_file_bytes: int = 1 << 27,
 ) -> Mapping[str, Any]:
@@ -690,6 +781,7 @@ def load_editing_t1_result(
         expected_result_sha256=expected_result_sha256,
         expected_contract_sha256=expected_contract_sha256,
         expected_panel_artifact_sha256=expected_panel_artifact_sha256,
+        expected_active8_identity=expected_active8_identity,
         expected_cache_receipts=expected_cache_receipts,
     )
 
@@ -710,6 +802,115 @@ def _record_index(
             raise EditingT1RuntimeError("frozen validation source repeats an exact packed entry")
         result[key] = record
     return MappingProxyType(result)
+
+
+def validate_t1_active8_runtime_binding(
+    *,
+    contract: EditingT1RuntimeContract,
+    gate_zero_contract: GateZeroRuntimeContract,
+    source: FrozenValidationSource,
+    panel: Mapping[str, Any],
+    active8_admission: Active8TraceAdmission,
+) -> Mapping[str, str]:
+    """Bind T1 to one physical inventory, logical corpus, and Gate0 support."""
+
+    identity = active8_t1_identity(active8_admission)
+    panel_source = panel.get("source")
+    if not isinstance(panel_source, Mapping):
+        raise EditingT1RuntimeError("T1 panel lacks its Active8 source identity")
+    for field in ACTIVE8_T1_IDENTITY_FIELDS:
+        if contract.payload[field] != identity[field]:
+            raise EditingT1RuntimeError(
+                f"T1 contract/Active8 admission mismatch for {field}"
+            )
+        if panel_source.get(field) != identity[field]:
+            raise EditingT1RuntimeError(
+                f"T1 panel/Active8 admission mismatch for {field}"
+            )
+    if active8_admission.support_contract_sha256 != gate_zero_contract.sha256:
+        raise EditingT1RuntimeError(
+            "Gate0 runtime contract and Active8 support contract disagree"
+        )
+    if (
+        active8_admission.unified_packed_manifest_sha256
+        != source.unified_packed_manifest_sha256
+    ):
+        raise EditingT1RuntimeError(
+            "frozen T1 source and Active8 inventory name different unified corpora"
+        )
+    return identity
+
+
+def _require_active8_record(
+    record: Any,
+    *,
+    active8_admission: Active8TraceAdmission,
+) -> None:
+    address = record.corpus_address
+    if address is None:
+        raise EditingT1RuntimeError(
+            "T1 Active8 guard received an unaddressed packed trace"
+        )
+    try:
+        expected_digest = active8_admission.expected_source_digest(
+            packed_shard_name=address.packed_shard_name,
+            layer=address.layer,
+            partition=address.partition,
+        )
+        accepted = active8_admission.is_accepted(address)
+    except Active8TraceInventoryError as error:
+        raise EditingT1RuntimeError(
+            "T1 packed trace disagrees with the physical Active8 inventory"
+        ) from error
+    if expected_digest != address.packed_shard_content_sha256:
+        raise EditingT1RuntimeError(
+            "T1 packed trace digest disagrees with its Active8 shard binding"
+        )
+    if not accepted:
+        raise EditingT1RuntimeError(
+            "T1 panel selected a whole-trace Active8-excluded exact trace"
+        )
+
+
+def _preflight_selected_active8_rows(
+    *,
+    source: FrozenValidationSource,
+    panel: Mapping[str, Any],
+    forensics: Mapping[str, Any],
+    family: str,
+    panel_kind: str,
+    active8_admission: Active8TraceAdmission,
+) -> None:
+    """Reject any stale selected row before model construction or optimization."""
+
+    try:
+        rows = selected_source_rows(
+            panel,
+            forensics,
+            family=family,
+            panel_kind=panel_kind,
+        )
+    except EditingT1PanelError as error:
+        raise EditingT1RuntimeError(
+            "requested T1 panel is absent or invalid"
+        ) from error
+    record_by_address = _record_index(source)
+    for row in rows:
+        state_ref = row["exact_state_ref"]
+        trace_key = (
+            str(state_ref["shard_sha256"]),
+            int(state_ref["record_index"]),
+        )
+        try:
+            record = record_by_address[trace_key]
+        except KeyError:
+            raise EditingT1RuntimeError(
+                "Active8-guarded T1 row is absent from the frozen source"
+            ) from None
+        _require_active8_record(
+            record,
+            active8_admission=active8_admission,
+        )
 
 
 def _resolve_example(
@@ -807,6 +1008,7 @@ def materialize_t1_panel(
     panel_kind: str,
     max_atoms: int,
     excluded_trace_ids: Mapping[tuple[str, int], str],
+    active8_admission: Active8TraceAdmission,
 ) -> MaterializedT1Panel:
     """Resolve, compile, serialize, reload, and tensorize one exact T1 panel."""
 
@@ -834,6 +1036,16 @@ def materialize_t1_panel(
         trace_key = (
             str(state_ref["shard_sha256"]),
             int(state_ref["record_index"]),
+        )
+        try:
+            selected_record = record_by_address[trace_key]
+        except KeyError:
+            raise EditingT1RuntimeError(
+                "Active8-guarded T1 row is absent from the frozen source"
+            ) from None
+        _require_active8_record(
+            selected_record,
+            active8_admission=active8_admission,
         )
         excluded_trace_id = excluded_trace_ids.get(trace_key)
         if excluded_trace_id is None:
@@ -965,9 +1177,11 @@ def run_editing_t1_arm(
     scope: str,
     device: torch.device,
     excluded_trace_ids: Mapping[tuple[str, int], str],
+    active8_admission: Active8TraceAdmission,
 ) -> dict[str, Any]:
     """Run one family/panel/scope arm from the common exact scratch state."""
 
+    require_editing_t1_family_scope_applicable(family, scope)
     if gate_zero_contract.sha256 != contract.payload["gate_zero_runtime_contract_sha256"]:
         raise EditingT1RuntimeError("T1 contract is bound to another Gate-0 runtime contract")
     if gate_zero_contract.model.get("enable_ring_system_delete") is not False:
@@ -976,6 +1190,13 @@ def run_editing_t1_arm(
         )
     if panel["artifact_sha256"] != contract.payload["panel_artifact_sha256"]:
         raise EditingT1RuntimeError("T1 contract is bound to another panel artifact")
+    active8_identity = validate_t1_active8_runtime_binding(
+        contract=contract,
+        gate_zero_contract=gate_zero_contract,
+        source=source,
+        panel=panel,
+        active8_admission=active8_admission,
+    )
     for contract_field, source_field in (
         ("charge_policy_audit_file_sha256", "charge_policy_audit_file_sha256"),
         (
@@ -1010,6 +1231,14 @@ def run_editing_t1_arm(
     if scope not in tuple(contract.optimization["scopes"]):
         raise EditingT1RuntimeError("requested T1 scope is off-contract")
 
+    _preflight_selected_active8_rows(
+        source=source,
+        panel=panel,
+        forensics=forensics,
+        family=family,
+        panel_kind=panel_kind,
+        active8_admission=active8_admission,
+    )
     model, parity = build_scratch_ringcore_model(gate_zero_contract)
     model = model.to(device)
     initial_state_sha256 = state_dict_semantic_sha256(model.state_dict())
@@ -1022,6 +1251,7 @@ def run_editing_t1_arm(
         panel_kind=panel_kind,
         max_atoms=int(gate_zero_contract.model["max_atoms"]),
         excluded_trace_ids=excluded_trace_ids,
+        active8_admission=active8_admission,
     )
     optimization = contract.optimization
     training_report = train_successor_micro_panel(
@@ -1050,6 +1280,7 @@ def run_editing_t1_arm(
         "charge_policy_source_input_inventory_sha256": contract.payload[
             "charge_policy_source_input_inventory_sha256"
         ],
+        **active8_identity,
         "family": family,
         "family_status": (
             "PRIMARY_MIXED_FAMILY_SUCCESSOR_LAW"
@@ -1097,12 +1328,14 @@ def run_editing_t1_arm(
         expected_result_sha256=sealed["result_sha256"],
         expected_contract_sha256=contract.sha256,
         expected_panel_artifact_sha256=str(panel["artifact_sha256"]),
+        expected_active8_identity=active8_identity,
         expected_cache_receipts=materialized.cache_receipts,
     )
     return sealed
 
 
 __all__ = [
+    "EDITING_T1_LOCAL_ADAPTER_FAMILIES",
     "EDITING_T1_RESULT_SCHEMA",
     "EDITING_T1_RESULT_STATUS",
     "EDITING_T1_RESULT_VERSION",
@@ -1115,10 +1348,12 @@ __all__ = [
     "T1CacheShardReceipt",
     "editing_t1_implementation_sha256",
     "editing_t1_implementation_sources",
-    "load_editing_t1_runtime_contract",
     "load_editing_t1_result",
+    "load_editing_t1_runtime_contract",
     "materialize_t1_panel",
+    "require_editing_t1_family_scope_applicable",
     "run_editing_t1_arm",
     "validate_editing_t1_result",
+    "validate_t1_active8_runtime_binding",
     "validate_t1_cache_shard_receipt",
 ]

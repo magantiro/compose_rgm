@@ -52,7 +52,6 @@ from compose_v4.rewrite.kernel import (
 )
 from compose_v4.rewrite.trace import RewriteTrace
 
-
 CORE_EDITING_FAMILIES = (
     "atom_insert",
     "atom_delete",
@@ -546,8 +545,43 @@ _LOCAL_ADAPTER_PREFIXES_BY_FAMILY = {
     "bond_reorder": ("pair_project.",),
     "cycle_insert": ("pair_project.",),
     "cycle_attach": ("pair_project.",),
-    "ring_system_restate": ("restate_order_embedding.",),
+    "ring_system_restate": (
+        "pair_project.",
+        "restate_order_embedding.",
+    ),
 }
+
+MICRO_OVERFIT_PARAMETER_SCOPES = (
+    "heads_only",
+    "heads_plus_local_adapter",
+    "all",
+)
+MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES = tuple(_LOCAL_ADAPTER_PREFIXES_BY_FAMILY)
+
+
+def require_micro_overfit_scope_applicable(
+    families: Iterable[str],
+    *,
+    scope: str,
+) -> tuple[str, ...]:
+    """Require that a named scope adds a distinct trainable parameter surface."""
+
+    ordered = tuple(dict.fromkeys(str(family) for family in families))
+    if not ordered:
+        raise ValueError("micro-overfit scope applicability requires a family")
+    unknown = set(ordered) - set(_HEAD_PREFIXES_BY_FAMILY)
+    if unknown:
+        raise ValueError(f"unknown micro-overfit families: {sorted(unknown)}")
+    if scope not in MICRO_OVERFIT_PARAMETER_SCOPES:
+        raise ValueError(f"unknown micro-overfit parameter scope: {scope}")
+    if scope == "heads_plus_local_adapter" and set(ordered).isdisjoint(
+        MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES
+    ):
+        raise SuccessorMicroOverfitError(
+            "heads_plus_local_adapter changes no parameters beyond heads_only "
+            f"for families {list(ordered)!r}"
+        )
+    return ordered
 
 
 def configure_micro_overfit_parameters(
@@ -558,16 +592,16 @@ def configure_micro_overfit_parameters(
 ) -> tuple[str, ...]:
     """Select the bounded architecture surface used by the capacity ladder."""
 
-    family_set = set(families)
-    unknown = family_set - set(_HEAD_PREFIXES_BY_FAMILY)
-    if unknown:
-        raise ValueError(f"unknown micro-overfit families: {sorted(unknown)}")
-    if scope not in {"heads_only", "heads_plus_pair_projection", "all"}:
-        raise ValueError(f"unknown micro-overfit parameter scope: {scope}")
+    family_set = set(
+        require_micro_overfit_scope_applicable(
+            families,
+            scope=scope,
+        )
+    )
     prefixes = ["family_head."]
     for family in sorted(family_set):
         prefixes.extend(_HEAD_PREFIXES_BY_FAMILY[family])
-    if scope == "heads_plus_pair_projection":
+    if scope == "heads_plus_local_adapter":
         for family in sorted(family_set):
             prefixes.extend(_LOCAL_ADAPTER_PREFIXES_BY_FAMILY.get(family, ()))
 
@@ -608,7 +642,7 @@ def train_successor_micro_panel(
         "family_head": ("family_head.",),
         **{family: _HEAD_PREFIXES_BY_FAMILY[family] for family in families},
     }
-    if scope == "heads_plus_pair_projection":
+    if scope == "heads_plus_local_adapter":
         required_component_prefixes.update(
             {
                 f"{family}_local_adapter": prefixes
@@ -714,6 +748,8 @@ def train_successor_micro_panel(
 
 __all__ = [
     "CORE_EDITING_FAMILIES",
+    "MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES",
+    "MICRO_OVERFIT_PARAMETER_SCOPES",
     "RINGCORE_EDITING_FAMILIES",
     "PreparedSuccessorPanel",
     "SuccessorMicroOverfitError",
@@ -722,6 +758,7 @@ __all__ = [
     "examples_from_traces",
     "prepare_cached_successor_panel",
     "prepare_successor_panel",
+    "require_micro_overfit_scope_applicable",
     "successor_panel_metrics",
     "train_successor_micro_panel",
 ]
