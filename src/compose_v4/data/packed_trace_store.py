@@ -270,7 +270,11 @@ def source_shard_fingerprint(shard_path: Path) -> str:
 
 
 def write_packed_shard(
-    path: Path, entries: list[dict], *, provenance: dict
+    path: Path,
+    entries: list[dict],
+    *,
+    provenance: dict,
+    deterministic_gzip: bool = False,
 ) -> dict:
     """Write a packed shard plus a sidecar manifest recording the contract it was built under.
 
@@ -282,9 +286,27 @@ def write_packed_shard(
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with gzip.open(path, "wt") as handle:
-        for entry in entries:
-            handle.write(json.dumps(entry, sort_keys=True) + "\n")
+    if deterministic_gzip:
+        # ``gzip.open(path, ...)`` embeds both wall-clock time and ``path.name``
+        # in the header.  A retried remote task would therefore publish
+        # different bytes for the same logical shard.  V2 immutable derivatives
+        # opt into a stable header while legacy callers retain their historical
+        # behavior.
+        with path.open("wb") as raw_handle:
+            with gzip.GzipFile(
+                filename="",
+                mode="wb",
+                fileobj=raw_handle,
+                mtime=0,
+            ) as compressed:
+                for entry in entries:
+                    compressed.write(
+                        (json.dumps(entry, sort_keys=True) + "\n").encode("utf-8")
+                    )
+    else:
+        with gzip.open(path, "wt") as handle:
+            for entry in entries:
+                handle.write(json.dumps(entry, sort_keys=True) + "\n")
     assert_closed_form_applies()
     manifest = {
         "schema": PACKED_STORE_SCHEMA,

@@ -16,17 +16,21 @@ sys.path.insert(0, str(REPO / "modal_apps"))
 
 import pack_mmp_pool_app as packer  # noqa: E402
 from pack_mmp_pool_app import (  # noqa: E402
+    MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
     PACK_OUTPUT_SCHEMA,
     PACK_REQUEST_SCHEMA,
     POOL_CONTRACT_SCHEMA,
     PackRequestError,
     build_pack_request,
+    packing_concurrency_plan,
     preflight_frozen_input,
     require_unchanged_completed_shards,
+    validate_pack_task_plan,
     validate_existing_output_claim,
     validate_pack_request,
     verify_local_launch_commit,
 )
+from compose_v4.data.packed_trace_store import write_packed_shard  # noqa: E402
 
 POOL_PATH = "/artifacts/mining_v2/edit_pool_full.jsonl"
 CONTRACT_PATH = "/artifacts/mining_v2/MMP_POOL_COMPLETE.json"
@@ -314,3 +318,77 @@ def test_every_row_must_carry_the_frozen_compiler_support_contract(tmp_path):
 
 def test_completion_schema_is_distinct_from_request_schema():
     assert PACK_OUTPUT_SCHEMA != PACK_REQUEST_SCHEMA
+
+
+def _pack_task(index: int, *, partition: str = "train") -> dict:
+    return {
+        "partition": partition,
+        "shard": f"shard_{index:04d}.jsonl",
+        "records": 3,
+        "row_ids_sha256": f"{index:016x}",
+        "raw_content_sha256": f"{index:064x}",
+    }
+
+
+def test_volume_v1_writer_budget_queues_logical_tasks_without_changing_plan():
+    tasks = [_pack_task(index) for index in range(18)]
+
+    checked = validate_pack_task_plan(tasks, expected_shards=18)
+    concurrency = packing_concurrency_plan(len(checked))
+
+    assert checked == tasks
+    assert MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS == 5
+    assert concurrency == {
+        "logical_tasks": 18,
+        "configured_writer_container_limit": 5,
+        "max_active_writer_containers": 5,
+        "queued_tasks_after_first_wave": 13,
+        "scheduled_waves": 4,
+        "estimated_map_critical_path_seconds": 960,
+        "peak_total_containers_including_driver": 6,
+        "requires_exclusive_volume_writer_budget": True,
+    }
+
+
+def test_pack_task_plan_rejects_worker_destination_aliases():
+    duplicate = [_pack_task(0), _pack_task(0)]
+
+    with pytest.raises(PackRequestError, match="aliases worker destination"):
+        validate_pack_task_plan(duplicate, expected_shards=2)
+
+
+def test_v2_packed_gzip_bytes_are_stable_across_paths(tmp_path):
+    first = tmp_path / "first.jsonl.gz"
+    second = tmp_path / "second.jsonl.gz"
+    entries = [{"trace": {"trace_id": "t0"}, "states": []}]
+
+    manifest_a = write_packed_shard(
+        first,
+        entries,
+        provenance={"source": "frozen"},
+        deterministic_gzip=True,
+    )
+    manifest_b = write_packed_shard(
+        second,
+        entries,
+        provenance={"source": "frozen"},
+        deterministic_gzip=True,
+    )
+
+    assert first.read_bytes() == second.read_bytes()
+    assert manifest_a == manifest_b
+
+
+def test_packer_source_uses_five_writer_containers_and_shared_immutable_publication():
+    source = (REPO / "modal_apps" / "pack_mmp_pool_app.py").read_text()
+    packer_surface = source[source.index("@app.function", source.index("def partition_pool")) :]
+
+    assert "max_containers=64" not in packer_surface
+    assert (
+        "max_containers=MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS"
+        in packer_surface
+    )
+    assert source.count("max_containers=1") == 3
+    assert "write_bytes_if_absent_modal_volume_v1" in source
+    assert ".replace(manifest_path)" not in source
+    assert ".replace(dest)" not in source

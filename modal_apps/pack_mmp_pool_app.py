@@ -2,7 +2,7 @@
 
     caller-frozen pool identity
       -> ONE streaming partition pass (scaffold-keyed, exact reconciliation)
-      -> N parallel packers (one per raw shard, atomic finalize)
+      -> N queued packers (one per raw shard, at most five concurrent immutable publishers)
       -> reducer (coverage, checksums, overlap, replay audit)
       -> MMP_PACK_COMPLETE
 
@@ -43,6 +43,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
@@ -87,6 +88,7 @@ _V2_OUTPUT_PREFIX = "mmp_packed_v2_"
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _GATE_RE = re.compile(r"^[0-9a-f]{16,64}$")
+_RAW_SHARD_RE = re.compile(r"^shard_[0-9]{4}\.jsonl$")
 
 # ---- measured sharding arithmetic (scripts-derived, persisted into the manifest) --------------------
 _PACK_RATE = {
@@ -97,7 +99,10 @@ _PACK_RATE = {
     "measured_on": "600-record stride sample of the real pool, mean K 6.08 vs pool 5.895",
 }
 _TARGET_SHARD_SECONDS = 240  # ~4 min: well above container startup, so overhead stays <25%
-_CONTAINER_MARGIN = 5
+# Modal Volume v1 supports at most five concurrent small commit writers.  The
+# logical task count may be larger; Modal queues it behind this function-level
+# cap.  This budget assumes no other app is writing the same Volume concurrently.
+MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
 _VERIFY_FRACTION = 0.02
 _SENTINEL_ENTRIES = 8
 # v1: partition by target scaffold only (LEAKED: 1,325 sources spanned partitions)
@@ -107,6 +112,126 @@ _MMP_PARTITION_RULE_VERSION = 2
 
 class PackRequestError(ValueError):
     """A V2 pack request is incomplete, mutable, ambiguous or points outside its safe namespace."""
+
+
+def _write_immutable_bytes(path: Path, content: bytes) -> bool:
+    """Publish through the shared Modal-v1-compatible no-overwrite primitive."""
+
+    import sys
+
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from compose_v4.data.mmp_pool_freezer import write_bytes_if_absent_modal_volume_v1
+
+    return write_bytes_if_absent_modal_volume_v1(path, content)
+
+
+def _replace_mutable_bytes(path: Path, content: bytes) -> None:
+    """Atomically replace one non-authoritative mutable status file."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_name = handle.name
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_name, path)
+        temporary_name = None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
+
+
+def packing_concurrency_plan(logical_tasks: int) -> dict[str, Any]:
+    """Describe the exact writer and total-container peak for one driver."""
+
+    if (
+        isinstance(logical_tasks, bool)
+        or not isinstance(logical_tasks, int)
+        or logical_tasks < 0
+    ):
+        raise PackRequestError("logical packing task count must be a nonnegative integer")
+    active_writers = min(logical_tasks, MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS)
+    scheduled_waves = (
+        logical_tasks + MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS - 1
+    ) // MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
+    return {
+        "logical_tasks": logical_tasks,
+        "configured_writer_container_limit": MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
+        "max_active_writer_containers": active_writers,
+        "queued_tasks_after_first_wave": max(0, logical_tasks - active_writers),
+        "scheduled_waves": scheduled_waves,
+        "estimated_map_critical_path_seconds": scheduled_waves * _TARGET_SHARD_SECONDS,
+        "peak_total_containers_including_driver": 1 + active_writers,
+        "requires_exclusive_volume_writer_budget": True,
+    }
+
+
+def validate_pack_task_plan(
+    plan: object,
+    *,
+    expected_shards: object,
+) -> list[dict[str, Any]]:
+    """Reject aliased or unsafe worker destinations before submitting the map."""
+
+    if not isinstance(plan, list):
+        raise PackRequestError("packing task plan must be a list")
+    if (
+        isinstance(expected_shards, bool)
+        or not isinstance(expected_shards, int)
+        or expected_shards != len(plan)
+    ):
+        raise PackRequestError(
+            f"packing task plan has {len(plan)} shards; expected {expected_shards!r}"
+        )
+    seen: set[tuple[str, str]] = set()
+    checked: list[dict[str, Any]] = []
+    for index, raw_entry in enumerate(plan):
+        if not isinstance(raw_entry, Mapping):
+            raise PackRequestError(f"packing task {index} must be a mapping")
+        entry = dict(raw_entry)
+        partition = entry.get("partition")
+        shard = entry.get("shard")
+        records = entry.get("records")
+        row_ids_sha256 = entry.get("row_ids_sha256")
+        raw_content_sha256 = entry.get("raw_content_sha256")
+        if partition not in PARTITIONS:
+            raise PackRequestError(
+                f"packing task {index} has invalid partition {partition!r}"
+            )
+        if not isinstance(shard, str) or not _RAW_SHARD_RE.fullmatch(shard):
+            raise PackRequestError(f"packing task {index} has unsafe shard name {shard!r}")
+        if isinstance(records, bool) or not isinstance(records, int) or records <= 0:
+            raise PackRequestError(
+                f"packing task {index} must contain a positive record count"
+            )
+        if not isinstance(row_ids_sha256, str) or not re.fullmatch(
+            r"[0-9a-f]{16}", row_ids_sha256
+        ):
+            raise PackRequestError(
+                f"packing task {index} has invalid row-id digest"
+            )
+        if not isinstance(raw_content_sha256, str) or not _SHA256_RE.fullmatch(
+            raw_content_sha256
+        ):
+            raise PackRequestError(
+                f"packing task {index} has invalid raw-content digest"
+            )
+        destination = (partition, shard)
+        if destination in seen:
+            raise PackRequestError(
+                f"packing task plan aliases worker destination {partition}/{shard}"
+            )
+        seen.add(destination)
+        checked.append(entry)
+    return checked
 
 
 def _canonical_sha256(payload: Mapping[str, Any]) -> str:
@@ -470,7 +595,10 @@ def _status(subdir: str, status: str, **fields) -> dict:
     payload = {"status": status, **fields}
     out = Path("/artifacts") / subdir
     out.mkdir(parents=True, exist_ok=True)
-    (out / "mmp_pack_status.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _replace_mutable_bytes(
+        out / "mmp_pack_status.json",
+        (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode(),
+    )
     artifact_volume.commit()
     print(
         json.dumps(
@@ -551,9 +679,10 @@ def _claim_output_namespace(
         validate_existing_output_claim(existing_claim, checked)
     else:
         root.mkdir(parents=True, exist_ok=True)
-        tmp = claim_path.with_name(claim_path.name + f".tmp-{os.getpid()}")
-        tmp.write_text(json.dumps(checked, indent=2, sort_keys=True) + "\n")
-        tmp.replace(claim_path)
+        _write_immutable_bytes(
+            claim_path,
+            (json.dumps(checked, indent=2, sort_keys=True) + "\n").encode(),
+        )
         artifact_volume.commit()
 
     if complete_path.is_file():
@@ -577,7 +706,12 @@ def _claim_output_namespace(
 
 
 @app.function(
-    image=image, cpu=8.0, memory=32768, timeout=4 * 3600, volumes={"/artifacts": artifact_volume}
+    image=image,
+    cpu=8.0,
+    memory=32768,
+    timeout=4 * 3600,
+    max_containers=1,
+    volumes={"/artifacts": artifact_volume},
 )
 def partition_pool(request: dict[str, Any]) -> dict:
     """Re-verify, then stream the pool once to assign partitions and write raw intermediate shards.
@@ -629,8 +763,12 @@ def partition_pool(request: dict[str, Any]) -> dict:
                 "existing partition manifest disagrees with the frozen request/runtime contract; "
                 "refusing overwrite or re-blessing"
             )
+        previous_entries = validate_pack_task_plan(
+            previous.get("shards"),
+            expected_shards=previous.get("expected_shards"),
+        )
         raw_mismatches = []
-        for entry in previous.get("shards", []):
+        for entry in previous_entries:
             raw_path = out_root / entry["partition"] / entry["shard"]
             if not raw_path.is_file() or _file_sha256(raw_path) != entry.get("raw_content_sha256"):
                 raw_mismatches.append(f"{entry['partition']}/{entry['shard']}")
@@ -755,19 +893,38 @@ def partition_pool(request: dict[str, Any]) -> dict:
             name = f"shard_{shard_index:04d}.jsonl"
             directory = out_root / partition
             directory.mkdir(parents=True, exist_ok=True)
-            raw_content = "".join(json.dumps(r, sort_keys=True) + "\n" for r in slice_rows)
-            (directory / name).write_text(raw_content)
+            raw_content = "".join(
+                json.dumps(r, sort_keys=True) + "\n" for r in slice_rows
+            ).encode()
+            _write_immutable_bytes(directory / name, raw_content)
             plan.append(
                 {
                     "partition": partition,
                     "shard": name,
                     "records": len(slice_rows),
-                    "raw_content_sha256": hashlib.sha256(raw_content.encode()).hexdigest(),
+                    "raw_content_sha256": hashlib.sha256(raw_content).hexdigest(),
                     "row_ids_sha256": hashlib.sha256(
                         ",".join(str(r["_row_id"]) for r in slice_rows).encode()
                     ).hexdigest()[:16],
                 }
             )
+    plan = validate_pack_task_plan(plan, expected_shards=len(plan))
+    expected_raw_paths = {
+        out_root / entry["partition"] / entry["shard"] for entry in plan
+    }
+    observed_raw_paths = {
+        path
+        for partition in PARTITIONS
+        for path in (out_root / partition).glob("*.jsonl")
+        if (out_root / partition).is_dir()
+    }
+    if observed_raw_paths != expected_raw_paths:
+        unexpected = sorted(str(path) for path in observed_raw_paths - expected_raw_paths)
+        missing = sorted(str(path) for path in expected_raw_paths - observed_raw_paths)
+        raise PackRequestError(
+            "raw partition inventory disagrees with the deterministic task plan: "
+            f"missing={missing[:8]}, unexpected={unexpected[:8]}"
+        )
 
     # Zero overlap must hold at partition time. Discovering it in the reducer means the whole packing
     # fan-out was already paid for -- which is exactly what happened on the v1 rule.
@@ -833,14 +990,18 @@ def partition_pool(request: dict[str, Any]) -> dict:
             **_PACK_RATE,
             "target_shard_seconds": _TARGET_SHARD_SECONDS,
             "shards": len(plan),
-            "max_containers": len(plan) + _CONTAINER_MARGIN,
-            "expected_critical_path_seconds": _TARGET_SHARD_SECONDS,
+            "max_containers": MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
+            "expected_critical_path_seconds": packing_concurrency_plan(len(plan))[
+                "estimated_map_critical_path_seconds"
+            ],
+            "concurrency": packing_concurrency_plan(len(plan)),
         },
         "contract": contract,
         "seconds": round(time.time() - started, 1),
     }
-    (Path("/artifacts") / subdir / "partition_manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    _write_immutable_bytes(
+        Path("/artifacts") / subdir / "partition_manifest.json",
+        (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode(),
     )
     artifact_volume.commit()
     print(
@@ -865,7 +1026,7 @@ def partition_pool(request: dict[str, Any]) -> dict:
     cpu=4.0,
     memory=16384,
     timeout=4 * 3600,
-    max_containers=64,
+    max_containers=MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
     volumes={"/artifacts": artifact_volume},
 )
 def pack_mmp_shard(
@@ -876,7 +1037,7 @@ def pack_mmp_shard(
     row_ids_sha256: str,
     raw_content_sha256: str,
 ) -> dict:
-    """Pack one raw shard. Atomic finalize; reuse only on a full contract + identity match."""
+    """Pack one raw shard. Immutable finalize; reuse only on a full contract + identity match."""
     import sys
     import time
 
@@ -940,9 +1101,10 @@ def pack_mmp_shard(
             f"existing packed shard {partition}/{packed_name} disagrees with the frozen request; "
             "refusing overwrite or re-blessing"
         )
-    if dest.exists() != manifest_path.exists():
+    if manifest_path.exists() and not dest.exists():
         raise PackRequestError(
-            f"existing packed shard {partition}/{packed_name} is incomplete; refusing overwrite"
+            f"existing packed shard {partition}/{packed_name} has a manifest but no data; "
+            "refusing adoption"
         )
 
     started = time.time()
@@ -985,12 +1147,21 @@ def pack_mmp_shard(
         )
         entries.append(build_packed_entry(v2, TraceProgressCTMC(trace)))
 
-    # Write to a unique temp path, then rename: a killed container must never leave a half shard that a
-    # later reducer could mistake for complete.
-    tmp = dest.with_name(dest.name + f".tmp-{os.getpid()}")
-    manifest = write_packed_shard(tmp, entries, provenance=provenance)
-    manifest_path_for(tmp).replace(manifest_path)
-    tmp.replace(dest)
+    # Serialize on container-local storage, then publish both artifacts through
+    # the shared no-overwrite primitive.  Data is published first; if a worker
+    # dies before its manifest is created, an exact deterministic retry may
+    # finish the pair.  A different byte is always rejected.
+    with tempfile.TemporaryDirectory(prefix="compose-mmp-pack-") as temporary_directory:
+        temporary_shard = Path(temporary_directory) / packed_name
+        manifest = write_packed_shard(
+            temporary_shard,
+            entries,
+            provenance=provenance,
+            deterministic_gzip=True,
+        )
+        temporary_manifest = manifest_path_for(temporary_shard)
+        _write_immutable_bytes(dest, temporary_shard.read_bytes())
+        _write_immutable_bytes(manifest_path, temporary_manifest.read_bytes())
     artifact_volume.commit()
     result = {
         "partition": partition,
@@ -1006,7 +1177,12 @@ def pack_mmp_shard(
 
 
 @app.function(
-    image=image, cpu=16.0, memory=65536, timeout=4 * 3600, volumes={"/artifacts": artifact_volume}
+    image=image,
+    cpu=16.0,
+    memory=65536,
+    timeout=4 * 3600,
+    max_containers=1,
+    volumes={"/artifacts": artifact_volume},
 )
 def reduce_mmp(request: dict[str, Any]) -> dict:
     """Refuse MMP_PACK_COMPLETE unless coverage, reconciliation, overlap and replay all pass."""
@@ -1025,6 +1201,10 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
     subdir = checked["output_subdir"]
     root = Path("/artifacts") / subdir
     plan = json.loads((root / "partition_manifest.json").read_text())
+    plan_entries = validate_pack_task_plan(
+        plan.get("shards"),
+        expected_shards=plan.get("expected_shards"),
+    )
     contract = _assert_runtime_contract(checked)
     complete_path = root / "MMP_PACK_COMPLETE.json"
     prior_complete = None
@@ -1065,7 +1245,7 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
     missing, stale, totals = [], [], {"entries": 0, "states": 0}
     shard_artifacts = []
     by_partition: dict[str, int] = {}
-    for entry in plan["shards"]:
+    for entry in plan_entries:
         partition, name = entry["partition"], entry["shard"] + ".gz"
         shard = root / partition / name
         manifest_path = manifest_path_for(shard)
@@ -1100,7 +1280,7 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
         )
 
     # an unexpected packed shard means the derivative drifted from its plan
-    expected_names = {(e["partition"], e["shard"] + ".gz") for e in plan["shards"]}
+    expected_names = {(e["partition"], e["shard"] + ".gz") for e in plan_entries}
     unexpected = [
         f"{p}/{f.name}"
         for p in PARTITIONS
@@ -1138,7 +1318,7 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
     scaffolds: dict[str, str] = {}
     leak_source, leak_scaffold = 0, 0
     path_lengths: dict[int, int] = {}
-    for entry in plan["shards"]:
+    for entry in plan_entries:
         partition, name = entry["partition"], entry["shard"] + ".gz"
         for trace, packed in read_packed_shard(root / partition / name):
             meta = trace.metadata or {}
@@ -1173,7 +1353,7 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
 
     audited = 0
     try:
-        for entry in plan["shards"][: min(len(plan["shards"]), 8)]:
+        for entry in plan_entries[: min(len(plan_entries), 8)]:
             for _ in read_packed_shard(
                 root / entry["partition"] / (entry["shard"] + ".gz"),
                 verify_fraction=_VERIFY_FRACTION,
@@ -1184,7 +1364,7 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
 
     sentinels = []
     for partition in ("train", "validation"):
-        shard = next((e for e in plan["shards"] if e["partition"] == partition), None)
+        shard = next((e for e in plan_entries if e["partition"] == partition), None)
         if shard:
             sentinels.append(
                 sentinel_replay_check(
@@ -1231,8 +1411,9 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
         "sharding_arithmetic": plan["sharding_arithmetic"],
         "authorization": checked["authorization"],
     }
-    (root / "MMP_PACK_COMPLETE.json").write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    _write_immutable_bytes(
+        root / "MMP_PACK_COMPLETE.json",
+        (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode(),
     )
     artifact_volume.commit()
     _status(
@@ -1244,11 +1425,25 @@ def reduce_mmp(request: dict[str, Any]) -> dict:
     return payload
 
 
-@app.function(image=image, cpu=2.0, timeout=12 * 3600, volumes={"/artifacts": artifact_volume})
+@app.function(
+    image=image,
+    cpu=2.0,
+    timeout=12 * 3600,
+    max_containers=1,
+    volumes={"/artifacts": artifact_volume},
+)
 def driver(request: dict[str, Any]) -> dict:
     """Remote orchestration so --detach survives a client disconnect."""
     artifact_volume.reload()
     checked = validate_pack_request(request)
+    from compose_v4.data.mmp_pool_freezer import run_write_once_storage_preflight
+
+    storage = run_write_once_storage_preflight("/artifacts")
+    artifact_volume.commit()
+    if storage.get("status") != "PASS":
+        raise PackRequestError(
+            f"artifact Volume immutable-publication preflight failed: {storage}"
+        )
     runtime_contract = _assert_runtime_contract(checked)
     # All bytes/counts/contracts are checked before claiming an output path or starting the fan-out.
     preflight = preflight_frozen_input(checked)
@@ -1281,6 +1476,10 @@ def driver(request: dict[str, Any]) -> dict:
     plan = partition_pool.remote(checked)
     if plan.get("status") == "FAILED":
         return plan
+    plan_entries = validate_pack_task_plan(
+        plan.get("shards"),
+        expected_shards=plan.get("expected_shards"),
+    )
     tasks = [
         (
             checked,
@@ -1290,14 +1489,16 @@ def driver(request: dict[str, Any]) -> dict:
             e["row_ids_sha256"],
             e["raw_content_sha256"],
         )
-        for e in plan["shards"]
+        for e in plan_entries
     ]
+    concurrency = packing_concurrency_plan(len(tasks))
     print(
         json.dumps(
             {
                 "phase": "map_start",
                 "tasks": len(tasks),
-                "max_containers": len(tasks) + _CONTAINER_MARGIN,
+                "max_containers": MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
+                "concurrency": concurrency,
             }
         ),
         flush=True,

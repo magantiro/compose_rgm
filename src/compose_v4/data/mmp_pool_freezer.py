@@ -456,6 +456,22 @@ def write_bytes_if_absent(path: str | Path, content: bytes) -> bool:
             Path(temporary_name).unlink(missing_ok=True)
 
 
+def write_bytes_if_absent_modal_volume_v1(path: str | Path, content: bytes) -> bool:
+    """Create immutable bytes on Modal Volume v1 without attempting a hard link.
+
+    The generic publisher prefers a staged hard link on filesystems that
+    support it.  Modal Volume v1 is known not to, so remote high-volume writers
+    use the same shared exclusive-create implementation directly instead of
+    paying for a guaranteed-failing staged copy on every artifact.
+    """
+
+    if not isinstance(content, bytes):
+        raise TypeError("immutable artifact content must be bytes")
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    return _exclusive_create_from_bytes(destination, content)
+
+
 def run_write_once_storage_preflight(
     artifact_root: str | Path,
 ) -> dict[str, Any]:

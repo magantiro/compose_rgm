@@ -34,6 +34,7 @@ from compose_v4.data.mmp_pool_freezer import (  # noqa: E402
     run_write_once_storage_preflight,
     validate_compile_inventory,
     write_bytes_if_absent,
+    write_bytes_if_absent_modal_volume_v1,
 )
 from compose_v4.experiments.analogue_prior import ANALOGUE_SUPPORT_CONTRACT  # noqa: E402
 
@@ -269,6 +270,23 @@ def test_modal_fallback_reuses_identical_bytes_and_rejects_collisions(
         write_bytes_if_absent(destination, b"collision")
     assert destination.read_bytes() == original
     assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_modal_v1_publisher_skips_the_known_unsupported_hard_link(
+    tmp_path,
+    monkeypatch,
+):
+    destination = tmp_path / "artifact.bin"
+
+    def unexpected_hard_link(_source, _destination):
+        raise AssertionError("Modal v1 publisher must not attempt os.link")
+
+    monkeypatch.setattr(os, "link", unexpected_hard_link)
+    assert write_bytes_if_absent_modal_volume_v1(destination, b"content") is True
+    assert write_bytes_if_absent_modal_volume_v1(destination, b"content") is False
+    with pytest.raises(MMPPoolFreezeError, match="different bytes"):
+        write_bytes_if_absent_modal_volume_v1(destination, b"collision")
+    assert destination.read_bytes() == b"content"
 
 
 def test_write_once_does_not_mask_non_capability_link_failures(
