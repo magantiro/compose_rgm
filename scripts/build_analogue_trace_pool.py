@@ -43,6 +43,9 @@ import numpy as np
 from rdkit import Chem, RDLogger
 from rdkit.Chem import rdmolops
 
+from compose_v4.data.charge_policy import (
+    charge_policy_preserved as _charge_policy_preserved,
+)
 from compose_v4.chem.molecular_graph import (
     NULL_IDX,
     ORGANIC_VOCABULARY,
@@ -300,21 +303,6 @@ def _ringcore_v1_action_is_supported(state, step: RewriteStep) -> bool:
             )
         )
     return False
-
-
-def _charge_policy_preserved(source, successor) -> bool:
-    """Protect exact charged centers and forbid creating/deleting/moving charge."""
-
-    if not np.array_equal(source.formal_charges, successor.formal_charges):
-        return False
-    charged = np.flatnonzero(source.formal_charges != 0)
-    return all(
-        int(source.atom_types[v]) == int(successor.atom_types[v])
-        and int(source.implicit_h_counts[v])
-        == int(successor.implicit_h_counts[v])
-        and np.array_equal(source.bonds[v], successor.bonds[v])
-        for v in charged
-    )
 
 
 def _action_sort_key(step: RewriteStep) -> str:
