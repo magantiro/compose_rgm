@@ -1,7 +1,7 @@
 {
   "schema": "compose.diagnostics.indexed_successor_cache_benchmark",
-  "schema_version": 1,
-  "status": "PRELIMINARY_BOUNDED_NOT_TRAINING_AUTHORIZATION",
+  "schema_version": 2,
+  "status": "BOUNDED_STORAGE_AND_PROCESS_QUALIFIED_NOT_TRAINING_AUTHORIZATION",
   "indexed_cache_schema_version": 2,
   "storage_stress_artifact": {
     "construction": "170000 complete rows synthesized by repeating corrected real-corruption smoke records under distinct immutable addresses",
@@ -58,11 +58,105 @@
       "directed_pair_compile_calls_saved_fraction": 0.02756288311139299
     }
   },
+  "multiprocessing_qualification": {
+    "platform": "darwin_arm64",
+    "host_logical_cores": 12,
+    "host_memory_gib": 32,
+    "python_version": "3.14.2",
+    "sqlite_version": "3.51.2",
+    "repeats_per_condition": 3,
+    "total_rows_per_trial": 170000,
+    "decoded_lru_rows_per_worker": 4096,
+    "verified_open_seconds": 7.2244167921599,
+    "verified_open_rss_delta_bytes": 2588672,
+    "all_72_worker_processes_exited_successfully": true,
+    "all_requested_exact_addresses_returned": true,
+    "all_worker_connections_process_local_after_first_miss": true,
+    "all_pickle_round_trips_stripped_connection_and_lru_state": true,
+    "all_synthetic_file_identity_mutations_failed_closed": true,
+    "artifact_identity_unchanged_after_trials": true,
+    "conditions": {
+      "direct": {
+        "workers": 0,
+        "median_rows_per_second": 19027.522981528644,
+        "rows_per_second_range": [
+          18932.4897986343,
+          19063.621453069736
+        ],
+        "speedup_over_direct": 1.0,
+        "median_lookup_seconds": 8.934426208026707
+      },
+      "fork_4": {
+        "workers": 4,
+        "median_rows_per_second": 67527,
+        "rows_per_second_range": [
+          67396,
+          67561
+        ],
+        "speedup_over_direct": 3.55,
+        "median_lookup_seconds": 2.518,
+        "median_ready_seconds": 0.015,
+        "median_full_process_lifecycle_seconds": 2.541,
+        "median_worker_rss_ready_mib": 70.69,
+        "median_worker_rss_after_mib": 429.52
+      },
+      "fork_8": {
+        "workers": 8,
+        "median_rows_per_second": 119832,
+        "rows_per_second_range": [
+          118727,
+          121156
+        ],
+        "speedup_over_direct": 6.3,
+        "median_lookup_seconds": 1.419,
+        "median_ready_seconds": 0.02,
+        "median_full_process_lifecycle_seconds": 1.447,
+        "median_worker_rss_ready_mib": 140.95,
+        "median_worker_rss_after_mib": 856.45
+      },
+      "spawn_4": {
+        "workers": 4,
+        "median_rows_per_second": 68473,
+        "rows_per_second_range": [
+          68427,
+          69033
+        ],
+        "speedup_over_direct": 3.6,
+        "median_lookup_seconds": 2.483,
+        "median_ready_seconds": 4.464,
+        "median_full_process_lifecycle_seconds": 7.542,
+        "median_worker_rss_ready_mib": 1095.95,
+        "median_worker_rss_after_mib": 1109.52
+      },
+      "spawn_8": {
+        "workers": 8,
+        "median_rows_per_second": 121129,
+        "rows_per_second_range": [
+          121112,
+          122635
+        ],
+        "speedup_over_direct": 6.37,
+        "median_lookup_seconds": 1.403,
+        "median_ready_seconds": 8.556,
+        "median_full_process_lifecycle_seconds": 10.535,
+        "median_worker_rss_ready_mib": 2048.22,
+        "median_worker_rss_after_mib": 2075.94
+      }
+    },
+    "limitations": [
+      "Trials passed one already fully validated indexed handle; they did not include repeated per-worker SHA, schema, or semantic validation.",
+      "The page cache was warm after hashing and semantic validation.",
+      "The artifact was synthetic with at most two aliases per row.",
+      "RSS is process RSS rather than USS or PSS; macOS denied proportional-memory inspection.",
+      "Forkserver and Linux were not exercised.",
+      "The actual ShardedSuccessorFiberCache plus DataLoader startup path remains to be qualified."
+    ]
+  },
   "remaining_gates": [
-    "actual indexed DataLoader fork/spawn throughput and RSS",
+    "actual sharded indexed DataLoader startup, validation reuse, throughput and RSS",
     "complete real-shard indexed census",
-    "support-invariance qualification",
-    "state-centric resumable parallel compiler",
+    "stratified support-invariance qualification",
+    "resumable parallel state-centric compiler",
     "frozen complete-corpus inventory"
   ]
 }

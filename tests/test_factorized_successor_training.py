@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import fields
 
 import numpy as np
 import pytest
@@ -15,12 +16,18 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.factorized_successor_training import (
+    CanonicalSuccessorAliasGroup,
+    CompiledStateSuccessorMap,
+    CompiledSuccessorMark,
     SuccessorTrainingError,
     compile_state_productive_support,
+    compile_state_successor_map,
     compile_teacher_successor_fiber,
     factorized_successor_bregman_loss,
     factorized_successor_identity_loss,
     forward_teacher_successor_batch,
+    teacher_successor_fiber_from_compiled_state,
+    teacher_successor_fiber_from_exact_digest,
 )
 from compose_v4.experiments.production_successor_kernel import (
     canonical_successor_result,
@@ -252,25 +259,74 @@ def test_compiled_support_is_invariant_to_model_weights_and_time(model):
     ).state
 
     independently_initialized = _model(model.ring_catalog, seed=991).eval()
-    early = compile_teacher_successor_fiber(
+    early_map = compile_state_successor_map(
+        model,
+        source,
+        time=0.03,
+    )
+    late_map = compile_state_successor_map(
+        independently_initialized,
+        source,
+        time=0.97,
+    )
+    assert early_map == late_map
+    early = teacher_successor_fiber_from_compiled_state(early_map, target)
+    late = teacher_successor_fiber_from_compiled_state(late_map, target)
+    assert early == late
+    assert early_map.state_support == late_map.state_support
+
+    forbidden_fragments = ("time", "prob", "logit", "hazard", "rate", "weight")
+    static_field_names = tuple(
+        field.name
+        for record_type in (
+            CompiledStateSuccessorMap,
+            CanonicalSuccessorAliasGroup,
+            CompiledSuccessorMark,
+        )
+        for field in fields(record_type)
+    )
+    assert not any(
+        fragment in field_name
+        for field_name in static_field_names
+        for fragment in forbidden_fragments
+    )
+    assert all(
+        len(mark.action_sha256) == 64
+        for group in early_map.successor_groups
+        for mark in group.marks
+    )
+
+
+def test_state_compiler_derivatives_preserve_public_fiber_behavior(model):
+    source = _state("C1CCCCC1")
+    result = canonical_successor_result(model.eval(), source, 0.31)
+    target = max(
+        result.batch.successors,
+        key=lambda successor: successor.alias_count,
+    ).state
+
+    compiled = compile_state_successor_map(model, source, time=0.31)
+    derived = teacher_successor_fiber_from_compiled_state(compiled, target)
+    strict = teacher_successor_fiber_from_exact_digest(
+        compiled,
+        derived.target_state_sha256,
+    )
+
+    assert strict == derived
+    assert compile_teacher_successor_fiber(
         model,
         source,
         target,
-        time=0.03,
-    )
-    late = compile_teacher_successor_fiber(
-        independently_initialized,
-        source,
-        target,
-        time=0.97,
-    )
-    assert early == late
+        time=0.31,
+    ) == derived
     assert compile_state_productive_support(
         model,
         source,
-        time=0.03,
-    ) == compile_state_productive_support(
-        independently_initialized,
-        source,
-        time=0.97,
-    )
+        time=0.31,
+    ) == compiled.state_support
+
+    with pytest.raises(
+        SuccessorTrainingError,
+        match="exact teacher successor is absent",
+    ):
+        teacher_successor_fiber_from_exact_digest(compiled, "f" * 64)

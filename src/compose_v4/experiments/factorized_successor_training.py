@@ -10,6 +10,7 @@ chemistry.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 
 import torch
@@ -30,6 +31,11 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     _masked_family_logits,
+)
+from compose_v4.rewrite.action_codec import (
+    ActionCodecError,
+    canonical_json,
+    encode_action,
 )
 from compose_v4.rewrite.kernel import (
     RewriteSystem,
@@ -116,6 +122,145 @@ class TeacherSuccessorFiber:
             raise ValueError("a teacher successor cannot also be a virtual self-event")
 
 
+@dataclass(frozen=True, order=True)
+class CompiledSuccessorMark:
+    """One enumerated mark tied to its alias and exact executor output."""
+
+    alias: TeacherSuccessorAlias
+    successor_state_sha256: str
+    action_sha256: str
+
+    def __post_init__(self) -> None:
+        for name in ("successor_state_sha256", "action_sha256"):
+            digest = getattr(self, name)
+            if (
+                len(digest) != 64
+                or any(character not in "0123456789abcdef" for character in digest)
+            ):
+                raise ValueError(f"{name} must be a lowercase SHA-256")
+
+
+@dataclass(frozen=True)
+class CanonicalSuccessorAliasGroup:
+    """Static enumerated marks for one canonical molecular successor.
+
+    Each entry associates the factorized table coordinate, full canonical
+    RewriteActionCodecV2 JSON SHA-256, and exact persistent-slot executor
+    output.  The group carries no model score, probability, rate, weight, or
+    time value and is discarded after cache-row projection.
+    """
+
+    target_key: str
+    marks: tuple[CompiledSuccessorMark, ...]
+
+    def __post_init__(self) -> None:
+        if not self.target_key:
+            raise ValueError("canonical successor alias-group key must be nonempty")
+        if not self.marks:
+            raise ValueError(
+                "canonical successor alias group must retain an enumerated mark"
+            )
+        if tuple(sorted(set(self.marks))) != self.marks:
+            raise ValueError(
+                "canonical successor marks must be sorted and unique"
+            )
+        aliases = tuple(mark.alias for mark in self.marks)
+        if len(set(aliases)) != len(aliases):
+            raise ValueError(
+                "canonical successor group repeats a factorized mark coordinate"
+            )
+
+    @property
+    def successor_state_sha256s(self) -> tuple[str, ...]:
+        return tuple(
+            sorted({mark.successor_state_sha256 for mark in self.marks})
+        )
+
+    @property
+    def aliases(self) -> tuple[TeacherSuccessorAlias, ...]:
+        return tuple(sorted(mark.alias for mark in self.marks))
+
+    def contains_exact_action(
+        self,
+        *,
+        successor_state_sha256: str,
+        action_sha256: str,
+    ) -> bool:
+        """Whether one enumerated mark has this action and exact output."""
+
+        return any(
+            mark.successor_state_sha256 == successor_state_sha256
+            and mark.action_sha256 == action_sha256
+            for mark in self.marks
+        )
+
+
+@dataclass(frozen=True)
+class CompiledStateSuccessorMap:
+    """Complete static successor-coordinate grouping for one exact source.
+
+    This is deliberately a transient compilation object.  Persistent cache
+    records retain only ``state_support`` and the one requested teacher fiber.
+    """
+
+    state_support: StateProductiveSupport
+    successor_groups: tuple[CanonicalSuccessorAliasGroup, ...]
+    virtual_marks: tuple[CompiledSuccessorMark, ...] = ()
+
+    def __post_init__(self) -> None:
+        target_keys = tuple(group.target_key for group in self.successor_groups)
+        if target_keys != tuple(sorted(set(target_keys))):
+            raise ValueError(
+                "compiled successor groups must have sorted unique target keys"
+            )
+        if self.state_support.source_key in target_keys:
+            raise ValueError(
+                "compiled productive successor groups contain a canonical self-event"
+            )
+        productive_marks = [
+            mark
+            for group in self.successor_groups
+            for mark in group.marks
+        ]
+        all_aliases = [mark.alias for mark in productive_marks]
+        if len(all_aliases) != len(set(all_aliases)):
+            raise ValueError(
+                "one legal mark coordinate appears in multiple successor groups"
+            )
+        if tuple(sorted(set(self.virtual_marks))) != self.virtual_marks:
+            raise ValueError("compiled virtual marks must be sorted and unique")
+        virtual_aliases = tuple(sorted(mark.alias for mark in self.virtual_marks))
+        if len(set(virtual_aliases)) != len(virtual_aliases):
+            raise ValueError(
+                "compiled virtual marks repeat a factorized mark coordinate"
+            )
+        if virtual_aliases != tuple(sorted(self.state_support.virtual_aliases)):
+            raise ValueError(
+                "compiled virtual mark identities disagree with state support"
+            )
+        if set(all_aliases) & set(virtual_aliases):
+            raise ValueError(
+                "one legal mark coordinate is both productive and virtual"
+            )
+        all_exact_digests = [
+            digest
+            for group in self.successor_groups
+            for digest in group.successor_state_sha256s
+        ]
+        if len(all_exact_digests) != len(set(all_exact_digests)):
+            raise ValueError(
+                "one exact successor state appears in multiple canonical groups"
+            )
+
+    @property
+    def source_key(self) -> str:
+        return self.state_support.source_key
+
+    @property
+    def source_state_sha256(self) -> str:
+        return self.state_support.source_state_sha256
+
+
 @dataclass(frozen=True)
 class FactorizedSuccessorPrediction:
     """Marked and productive molecular quantities for successor supervision."""
@@ -148,6 +293,180 @@ def _alias(
     )
 
 
+def rewrite_action_codec_sha256(
+    executor_rule_name: str,
+    action: object,
+) -> str:
+    """Full SHA-256 of one canonical RewriteActionCodecV2 JSON payload."""
+
+    try:
+        encoded = encode_action(executor_rule_name, action)
+    except ActionCodecError as error:
+        raise SuccessorTrainingError(
+            "rewrite action cannot be represented by RewriteActionCodecV2"
+        ) from error
+    return hashlib.sha256(canonical_json(encoded).encode("utf-8")).hexdigest()
+
+
+def compile_state_successor_map(
+    model: FactorizedTraceletRateModel,
+    source: MolecularGraph,
+    *,
+    time: float = 0.5,
+    system: RewriteSystem | None = None,
+) -> CompiledStateSuccessorMap:
+    """Execute and group every legal mark once for one exact source state."""
+
+    runtime = system or de_novo_rewrite_system()
+    try:
+        marked_law = enumerate_factorized_marked_law(model, source, float(time))
+    except ProductionSuccessorKernelError as error:
+        raise SuccessorTrainingError(
+            "could not enumerate the production marked law for state-successor compilation"
+        ) from error
+
+    source_key = marked_law.source_key
+    grouped_marks: dict[str, list[CompiledSuccessorMark]] = {}
+    virtual_marks: list[CompiledSuccessorMark] = []
+    for mark in marked_law.marks:
+        try:
+            successor = runtime.apply(
+                source,
+                mark.executor_rule_name,
+                mark.action,
+            )
+        except Exception as error:
+            raise SuccessorTrainingError(
+                "a production-enumerated mark failed during state-successor compilation"
+            ) from error
+        successor_key = canonical_state_key(successor)
+        compiled_alias = _alias(
+            family_name=mark.family_name,
+            table_name=mark.table_name,
+            coordinate=mark.coordinate,
+        )
+        compiled_mark = CompiledSuccessorMark(
+            alias=compiled_alias,
+            successor_state_sha256=persistent_slot_state_sha256(successor),
+            action_sha256=rewrite_action_codec_sha256(
+                mark.executor_rule_name,
+                mark.action,
+            ),
+        )
+        if successor_key == source_key:
+            virtual_marks.append(compiled_mark)
+            continue
+        grouped_marks.setdefault(successor_key, []).append(compiled_mark)
+
+    state_support = StateProductiveSupport(
+        source_key=source_key,
+        source_state_sha256=persistent_slot_state_sha256(source),
+        virtual_aliases=tuple(
+            sorted(mark.alias for mark in virtual_marks)
+        ),
+    )
+    return CompiledStateSuccessorMap(
+        state_support=state_support,
+        successor_groups=tuple(
+            CanonicalSuccessorAliasGroup(
+                target_key=target_key,
+                marks=tuple(sorted(marks)),
+            )
+            for target_key, marks in sorted(grouped_marks.items())
+        ),
+        virtual_marks=tuple(sorted(virtual_marks)),
+    )
+
+
+def teacher_successor_fiber_from_compiled_state(
+    compiled: CompiledStateSuccessorMap,
+    target: MolecularGraph,
+) -> TeacherSuccessorFiber:
+    """Derive the public teacher fiber for ``target`` without source replay."""
+
+    target_key = canonical_state_key(target)
+    if compiled.source_key == target_key:
+        raise SuccessorTrainingError(
+            "teacher successor equals the source; virtual events are not molecular jumps"
+        )
+    group = next(
+        (
+            candidate
+            for candidate in compiled.successor_groups
+            if candidate.target_key == target_key
+        ),
+        None,
+    )
+    if group is None:
+        raise SuccessorTrainingError(
+            "teacher successor is absent from the production marked support"
+        )
+    return TeacherSuccessorFiber(
+        source_key=compiled.source_key,
+        target_key=target_key,
+        target_state_sha256=persistent_slot_state_sha256(target),
+        aliases=group.aliases,
+        state_support=compiled.state_support,
+    )
+
+
+def _exact_successor_group(
+    compiled: CompiledStateSuccessorMap,
+    target_state_sha256: str,
+) -> CanonicalSuccessorAliasGroup:
+    matches = tuple(
+        group
+        for group in compiled.successor_groups
+        if target_state_sha256 in group.successor_state_sha256s
+    )
+    if len(matches) != 1:
+        raise SuccessorTrainingError(
+            "exact teacher successor is absent from the production marked support"
+            if not matches
+            else "exact teacher successor belongs to multiple canonical groups"
+        )
+    return matches[0]
+
+
+def teacher_successor_fiber_from_exact_digest(
+    compiled: CompiledStateSuccessorMap,
+    target_state_sha256: str,
+) -> TeacherSuccessorFiber:
+    """Derive a fiber only when an exact executor output matches the target.
+
+    This stricter builder path catches a stored trace transition that is merely
+    canonically equivalent to, but not the exact persistent-slot result of, a
+    legal production mark.
+    """
+
+    group = _exact_successor_group(compiled, target_state_sha256)
+    return TeacherSuccessorFiber(
+        source_key=compiled.source_key,
+        target_key=group.target_key,
+        target_state_sha256=target_state_sha256,
+        aliases=group.aliases,
+        state_support=compiled.state_support,
+    )
+
+
+def require_exact_successor_action_identity(
+    compiled: CompiledStateSuccessorMap,
+    *,
+    target_state_sha256: str,
+    action_sha256: str,
+) -> None:
+    """Require one enumerated action identity paired with this exact output."""
+
+    group = _exact_successor_group(compiled, target_state_sha256)
+    if not group.contains_exact_action(
+        successor_state_sha256=target_state_sha256,
+        action_sha256=action_sha256,
+    ):
+        raise SuccessorTrainingError(
+            "teacher action identity is absent from the exact successor marked support"
+        )
+
+
 def compile_teacher_successor_fiber(
     model: FactorizedTraceletRateModel,
     source: MolecularGraph,
@@ -158,57 +477,14 @@ def compile_teacher_successor_fiber(
 ) -> TeacherSuccessorFiber:
     """Compile every production mark from ``source`` that canonicalizes to ``target``."""
 
-    runtime = system or de_novo_rewrite_system()
-    source_key = canonical_state_key(source)
-    target_key = canonical_state_key(target)
-    if source_key == target_key:
-        raise SuccessorTrainingError(
-            "teacher successor equals the source; virtual events are not molecular jumps"
-        )
-    try:
-        marked_law = enumerate_factorized_marked_law(model, source, float(time))
-    except ProductionSuccessorKernelError as error:
-        raise SuccessorTrainingError(
-            "could not enumerate the production marked law for teacher-fiber compilation"
-        ) from error
-
-    aliases: list[TeacherSuccessorAlias] = []
-    virtual_aliases: list[TeacherSuccessorAlias] = []
-    for mark in marked_law.marks:
-        try:
-            successor = runtime.apply(
-                source,
-                mark.executor_rule_name,
-                mark.action,
-            )
-        except Exception as error:
-            raise SuccessorTrainingError(
-                "a production-enumerated mark failed during teacher-fiber compilation"
-            ) from error
-        successor_key = canonical_state_key(successor)
-        compiled_alias = _alias(
-            family_name=mark.family_name,
-            table_name=mark.table_name,
-            coordinate=mark.coordinate,
-        )
-        if successor_key == source_key:
-            virtual_aliases.append(compiled_alias)
-        if successor_key == target_key:
-            aliases.append(compiled_alias)
-    if not aliases:
-        raise SuccessorTrainingError(
-            "teacher successor is absent from the production marked support"
-        )
-    return TeacherSuccessorFiber(
-        source_key=source_key,
-        target_key=target_key,
-        target_state_sha256=persistent_slot_state_sha256(target),
-        aliases=tuple(sorted(aliases)),
-        state_support=StateProductiveSupport(
-            source_key=source_key,
-            source_state_sha256=persistent_slot_state_sha256(source),
-            virtual_aliases=tuple(sorted(virtual_aliases)),
+    return teacher_successor_fiber_from_compiled_state(
+        compile_state_successor_map(
+            model,
+            source,
+            time=time,
+            system=system,
         ),
+        target,
     )
 
 
@@ -221,39 +497,12 @@ def compile_state_productive_support(
 ) -> StateProductiveSupport:
     """Compile canonical self-event coordinates for a terminal/no-teacher row."""
 
-    runtime = system or de_novo_rewrite_system()
-    source_key = canonical_state_key(source)
-    try:
-        marked_law = enumerate_factorized_marked_law(model, source, float(time))
-    except ProductionSuccessorKernelError as error:
-        raise SuccessorTrainingError(
-            "could not enumerate the production marked law for state-support compilation"
-        ) from error
-    virtual_aliases: list[TeacherSuccessorAlias] = []
-    for mark in marked_law.marks:
-        try:
-            successor = runtime.apply(
-                source,
-                mark.executor_rule_name,
-                mark.action,
-            )
-        except Exception as error:
-            raise SuccessorTrainingError(
-                "a production-enumerated mark failed during state-support compilation"
-            ) from error
-        if canonical_state_key(successor) == source_key:
-            virtual_aliases.append(
-                _alias(
-                    family_name=mark.family_name,
-                    table_name=mark.table_name,
-                    coordinate=mark.coordinate,
-                )
-            )
-    return StateProductiveSupport(
-        source_key=source_key,
-        source_state_sha256=persistent_slot_state_sha256(source),
-        virtual_aliases=tuple(sorted(virtual_aliases)),
-    )
+    return compile_state_successor_map(
+        model,
+        source,
+        time=time,
+        system=system,
+    ).state_support
 
 
 def _log1mexp(log_probability: Tensor) -> Tensor:
@@ -553,15 +802,23 @@ def factorized_hazard_bregman_loss(
 
 
 __all__ = [
+    "CanonicalSuccessorAliasGroup",
+    "CompiledStateSuccessorMap",
+    "CompiledSuccessorMark",
     "FactorizedSuccessorPrediction",
     "StateProductiveSupport",
     "SuccessorTrainingError",
     "TeacherSuccessorAlias",
     "TeacherSuccessorFiber",
     "compile_state_productive_support",
+    "compile_state_successor_map",
     "compile_teacher_successor_fiber",
     "factorized_hazard_bregman_loss",
     "factorized_successor_bregman_loss",
     "factorized_successor_identity_loss",
     "forward_teacher_successor_batch",
+    "require_exact_successor_action_identity",
+    "rewrite_action_codec_sha256",
+    "teacher_successor_fiber_from_compiled_state",
+    "teacher_successor_fiber_from_exact_digest",
 ]

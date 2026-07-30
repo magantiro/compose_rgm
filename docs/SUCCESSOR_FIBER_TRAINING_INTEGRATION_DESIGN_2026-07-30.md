@@ -2,9 +2,9 @@
 
 Date: 2026-07-30
 
-Status: address/cache/dataset bridge implemented and focused-tested; production
-optimizer unchanged; no compute launched; full-corpus cache build blocked on a
-measured storage-backend decision
+Status: address/cache/dataset bridge, indexed backend, shared successor
+objective, and bounded state-centric compiler implemented and focused-tested;
+no training compute launched; full-corpus cache build remains blocked
 
 ## Decision
 
@@ -46,7 +46,7 @@ This preserves:
 
 ### Implementation checkpoint
 
-The first four data-path stages are now implemented:
+The bounded core data path is now implemented:
 
 - `PackedTraceAddress` preserves the exact packed-shard SHA-256, immutable
   entry index and trace envelope through `PathRecord`;
@@ -61,12 +61,16 @@ The first four data-path stages are now implemented:
   backend for development panels;
 - `factorized_successor_data.py` performs a fail-closed post-draw join and
   returns aligned `FactorizedSuccessorBatch` objects;
-- `successor_fiber_cache_builder.py` compiles complete addressed development
-  traces for correctness tests.
+- `successor_fiber_cache_builder.py` groups complete addressed shard
+  occurrences by exact persistent-slot source state, compiles the full static
+  successor map once per unique state, replays every stored teacher step
+  against the production executor, emits only the requested fibers/support,
+  and discards the transient map.
 
 The inventory is explicitly `BOUNDED_DEVELOPMENT_ONLY`, regardless of storage
 backend. It cannot authorize a full-corpus run. The 63-shard build waits for
-the remaining indexed-worker qualification and a frozen complete-corpus
+an actual sharded-DataLoader startup qualification, a resumable parallel build
+orchestrator, stratified support invariance, and a frozen complete-corpus
 inventory.
 
 ### Sampling and batching
@@ -405,10 +409,13 @@ same support contract. Cache contents must not depend on learned weights.
 ## Unresolved blockers
 
 1. **Production storage qualification:** deterministic JSON remains the
-   correctness oracle, and an immutable indexed SQLite backend now passes the
-   bounded storage/lookup benchmark without materializing shard-sized Python
-   object graphs. Full qualification still requires an actual indexed
-   multiworker `DataLoader` throughput/RSS run and one complete shard census.
+   correctness oracle, and an immutable indexed SQLite backend now passes
+   bounded single-process and direct fork/spawn process-isolation,
+   throughput, RSS and mutation checks without materializing shard-sized
+   Python object graphs. Full qualification still requires the actual
+   `ShardedSuccessorFiberCache` plus `DataLoader` startup path, proof that
+   workers do not repeat the full semantic scan, and one complete real-shard
+   census.
 2. **No frozen complete-corpus inventory yet:** the inventory schema now binds
    each packed shard byte hash, cache byte hash, manifest/overlay identities,
    active trace census and declared exclusions, but it has not been built for
@@ -428,10 +435,11 @@ same support contract. Cache contents must not depend on learned weights.
    The historical mark objective remains the default and resume artifacts bind
    the objective identity and selector, so a mark checkpoint cannot silently
    resume as successor training.
-7. **Build cost:** the corpus contains 3,370,821 progress states. A real-shard
-   exact-state census shows useful reuse, but the state-centric compiler and
-   resumable parallel build have not yet been implemented. No 63-shard build
-   is authorized.
+7. **Build cost:** the corpus contains 3,370,821 progress states. The bounded
+   state-centric compiler now realizes the measured exact-state reuse and
+   proves output equality against record-by-record compilation. A resumable
+   parallel build orchestrator and its failure/restart inventory have not yet
+   been implemented. No 63-shard build is authorized.
 
 ## Implementation and verification order
 
@@ -445,9 +453,10 @@ same support contract. Cache contents must not depend on learned weights.
    and active families.
 6. Build tiny caches from real corruption, cycle-open/close and MMP traces;
    compare every loaded fiber to fresh production compilation.
-7. ~~Benchmark the indexed backend on a bounded 170,000-row artifact.~~ Run the
-   real indexed multiworker/RSS benchmark, then freeze the storage backend and
-   complete-corpus inventory.
+7. ~~Benchmark the indexed backend on a bounded 170,000-row artifact and
+   qualify direct fork/spawn lookup isolation, throughput and RSS.~~ Run the
+   actual sharded-cache `DataLoader` startup benchmark, then freeze the storage
+   backend and complete-corpus inventory.
 8. ~~Add successor metrics and successor-level checkpoint selection to the
    shared optimizer loop.~~
 9. Run a CPU dry launch with one real batch and zero optimizer steps.
@@ -536,6 +545,32 @@ intentional full-audit cost; before full-corpus use, parent-process
 verification must be structured so each worker does not repeat every semantic
 scan.
 
+Three-repeat process qualification then partitioned the same fixed 170,000
+exact lookups across direct, fork and spawn workers. Throughput is computed
+from the slowest worker's synchronized lookup interval:
+
+| Start mode | Workers | Median lookups/s | Range | Speedup | Ready time | Full lifecycle |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| direct | 0 | 19,028 | 18,932--19,064 | 1.00x | -- | -- |
+| fork | 4 | 67,527 | 67,396--67,561 | 3.55x | 0.015 s | 2.541 s |
+| fork | 8 | 119,832 | 118,727--121,156 | 6.30x | 0.020 s | 1.447 s |
+| spawn | 4 | 68,473 | 68,427--69,033 | 3.60x | 4.464 s | 7.542 s |
+| spawn | 8 | 121,129 | 121,112--122,635 | 6.37x | 8.556 s | 10.535 s |
+
+All 72 workers exited successfully. Forked handles replaced the inherited
+connection on a guaranteed first miss; spawned and explicitly pickled handles
+started without a connection or decoded LRU; every reopened connection was
+owned by the worker PID; every requested address matched; synthetic
+device/inode/size/mtime/ctime changes failed closed; and the source artifact's
+bytes and identity were unchanged after all trials.
+
+This is process/backend qualification, not yet a production-DataLoader result.
+The trials passed an already fully validated handle, used a warm page cache,
+and measured a synthetic at-most-two-alias workload on macOS. In particular,
+spawn startup was substantial and the actual sharded wrapper may otherwise
+repeat the 7.2-second full validation in each worker. That path remains a
+blocking measurement.
+
 A separate read-only census over the three representative real shards used
 only `persistent_slot_state_sha256`; it did not invoke RDKit, canonicalization
 or executor replay:
@@ -553,4 +588,11 @@ valuable (2.76% combined reuse), while cross-lane sharing adds only 1,345 state
 hits. These are exact call-count reductions, not claimed wall-clock speedups.
 The safe implementation is to enumerate and group all canonical successors
 once per exact source state, emit only the requested teacher fibers for that
-state's trace occurrences, then discard the full successor map.
+state's trace occurrences, then discard the full successor map. The bounded
+builder now follows that design, preserves record-by-record output equality,
+and additionally proves that every stored teacher action itself executes to
+the stored exact next state **and** that its full canonical action identity is
+present in the enumerated marked support paired with that exact output. Action
+identities remain transient and are not written to cache rows. The remaining
+engineering work is resumable, parallel shard orchestration rather than
+another successor-cache semantics change.
