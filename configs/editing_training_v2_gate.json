@@ -119,7 +119,7 @@
     },
     {
       "id": "P50_gradient_and_collapse_sentinel",
-      "maximum_optimizer_steps": 100,
+      "maximum_optimizer_steps": 50,
       "requirements": [
         "loss_finite",
         "gradients_finite",

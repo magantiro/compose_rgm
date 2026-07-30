@@ -42,6 +42,21 @@ def test_gate_sequence_cannot_skip_short_pilots() -> None:
         validate_editing_training_gate(broken)
 
 
+def test_p50_is_exactly_fifty_optimizer_steps() -> None:
+    contract = load_editing_training_gate(CONTRACT_PATH)
+    p50 = next(
+        gate
+        for gate in contract["gates"]
+        if gate["id"] == "P50_gradient_and_collapse_sentinel"
+    )
+    assert p50["maximum_optimizer_steps"] == 50
+
+    broken = copy.deepcopy(contract)
+    broken["gates"][3]["maximum_optimizer_steps"] = 51
+    with pytest.raises(EditingTrainingGateError, match="exactly 50"):
+        validate_editing_training_gate(broken)
+
+
 def test_test_partition_cannot_select_checkpoint() -> None:
     contract = load_editing_training_gate(CONTRACT_PATH)
     broken = copy.deepcopy(contract)

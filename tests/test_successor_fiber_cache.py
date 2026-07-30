@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import replace
 
 import pytest
 
+from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.data.successor_fiber_cache import (
     SUCCESSOR_FIBER_CACHE_SCHEMA_VERSION,
     SuccessorFiberCacheAddress,
@@ -25,6 +27,10 @@ from compose_v4.experiments.factorized_successor_training import (
     TeacherSuccessorFiber,
 )
 
+_SHARD_SHA256 = "d" * 64
+_SOURCE_STATE_SHA256 = "1" * 64
+_TARGET_STATE_SHA256 = "2" * 64
+
 
 def _alias(
     family: str,
@@ -39,10 +45,18 @@ def provenance() -> SuccessorFiberCacheProvenance:
     return SuccessorFiberCacheProvenance(
         operator_registry_hash="a" * 16,
         capability_hash="b" * 16,
+        support_signature_sha256="3" * 64,
         canonicalization_version="c" * 16,
+        canonicalizer_contract_sha256="4" * 64,
         packed_corpus_schema="compose.data.packed_trace",
         packed_corpus_schema_version=1,
-        packed_corpus_content_sha256="d" * 64,
+        packed_shard_content_sha256=_SHARD_SHA256,
+        packed_manifest_sha256="5" * 64,
+        packed_provenance_overlay_sha256="6" * 64,
+        unified_packed_manifest_sha256="7" * 64,
+        representability_overlay_sha256="8" * 64,
+        coordinate_schema_version=1,
+        tensorization_implementation_hash="9" * 16,
         fiber_compiler_implementation_hash="e" * 64,
     )
 
@@ -50,6 +64,7 @@ def provenance() -> SuccessorFiberCacheProvenance:
 def _one_step_records(
     *,
     trace_id: str = "trace-7",
+    entry_index: int = 7,
 ) -> tuple[SuccessorFiberCacheRecord, ...]:
     teacher_aliases = (
         _alias("atom_insert", "atom_insert_bond_order", (0, 1, 0)),
@@ -63,17 +78,22 @@ def _one_step_records(
     )
     source_support = StateProductiveSupport(
         source_key="[CH4]",
+        source_state_sha256=_SOURCE_STATE_SHA256,
         virtual_aliases=source_virtual,
     )
     fiber = TeacherSuccessorFiber(
         source_key="[CH4]",
         target_key="CC",
+        target_state_sha256=_TARGET_STATE_SHA256,
         aliases=teacher_aliases,
         state_support=source_support,
     )
     return (
         SuccessorFiberCacheRecord(
             address=SuccessorFiberCacheAddress(
+                packed_shard_content_sha256=_SHARD_SHA256,
+                packed_shard_name="shard_0000.jsonl.gz",
+                entry_index=entry_index,
                 layer="mmp",
                 partition="train",
                 trace_id=trace_id,
@@ -85,6 +105,9 @@ def _one_step_records(
         ),
         SuccessorFiberCacheRecord(
             address=SuccessorFiberCacheAddress(
+                packed_shard_content_sha256=_SHARD_SHA256,
+                packed_shard_name="shard_0000.jsonl.gz",
+                entry_index=entry_index,
                 layer="mmp",
                 partition="train",
                 trace_id=trace_id,
@@ -93,6 +116,7 @@ def _one_step_records(
             ),
             state_support=StateProductiveSupport(
                 source_key="CC",
+                source_state_sha256=_TARGET_STATE_SHA256,
                 virtual_aliases=terminal_virtual,
             ),
             teacher_fiber=None,
@@ -153,11 +177,34 @@ def test_exact_round_trip_includes_virtual_and_terminal_support(
         partition="train",
         trace_id="trace-7",
     ) == records
+    packed_address = PackedTraceAddress(
+        packed_shard_content_sha256=_SHARD_SHA256,
+        packed_shard_name="shard_0000.jsonl.gz",
+        entry_index=7,
+        trace_id="trace-7",
+        layer="mmp",
+        partition="train",
+        source_key="[CH4]",
+        target_key="CC",
+        path_length=1,
+    )
+    assert loaded.require_packed_address(
+        packed_address,
+        progress_index=0,
+    ) == records[0]
+    with pytest.raises(KeyError, match="exact packed row"):
+        loaded.require_packed_address(
+            replace(
+                packed_address,
+                packed_shard_content_sha256="f" * 64,
+            ),
+            progress_index=0,
+        )
 
 
 def test_serialization_is_deterministic_under_record_input_order(provenance):
-    first = _one_step_records(trace_id="first")
-    second = _one_step_records(trace_id="second")
+    first = _one_step_records(trace_id="first", entry_index=7)
+    second = _one_step_records(trace_id="second", entry_index=8)
     encoded_a, cache_a = serialize_successor_fiber_cache(
         (*second, *first),
         provenance=provenance,
@@ -170,9 +217,36 @@ def test_serialization_is_deterministic_under_record_input_order(provenance):
     assert cache_a.content_sha256 == cache_b.content_sha256
 
 
+def test_writer_never_overwrites_a_frozen_cache_path(tmp_path, provenance):
+    path = tmp_path / "frozen.json"
+    records = _one_step_records()
+    first = write_successor_fiber_cache(
+        path,
+        records,
+        provenance=provenance,
+    )
+    assert write_successor_fiber_cache(
+        path,
+        records,
+        provenance=provenance,
+    ) == first
+    original_bytes = path.read_bytes()
+
+    with pytest.raises(FileExistsError, match="different content"):
+        write_successor_fiber_cache(
+            path,
+            _one_step_records(trace_id="different"),
+            provenance=provenance,
+        )
+    assert path.read_bytes() == original_bytes
+
+
 def test_zero_step_trace_serializes_terminal_support(provenance):
     record = SuccessorFiberCacheRecord(
         address=SuccessorFiberCacheAddress(
+            packed_shard_content_sha256=_SHARD_SHA256,
+            packed_shard_name="shard_0001.jsonl.gz",
+            entry_index=0,
             layer="corruption",
             partition="validation",
             trace_id="already-done",
@@ -181,6 +255,7 @@ def test_zero_step_trace_serializes_terminal_support(provenance):
         ),
         state_support=StateProductiveSupport(
             source_key="N",
+            source_state_sha256="3" * 64,
             virtual_aliases=(),
         ),
         teacher_fiber=None,
@@ -198,7 +273,7 @@ def test_zero_step_trace_serializes_terminal_support(provenance):
 
 
 def test_artifact_contains_no_weight_probability_rate_or_logit(provenance):
-    encoded, cache = serialize_successor_fiber_cache(
+    encoded, _cache = serialize_successor_fiber_cache(
         _one_step_records(),
         provenance=provenance,
     )
@@ -308,7 +383,8 @@ def test_missing_progress_and_target_chain_break_are_refused(provenance):
     wrong_terminal = SuccessorFiberCacheRecord(
         address=records[1].address,
         state_support=StateProductiveSupport(
-            source_key="CCC",
+            source_key="CC",
+            source_state_sha256="4" * 64,
             virtual_aliases=(),
         ),
         teacher_fiber=None,
@@ -326,6 +402,7 @@ def test_alias_order_and_resource_bounds_are_enforced(provenance):
     reversed_fiber = TeacherSuccessorFiber(
         source_key=fiber.source_key,
         target_key=fiber.target_key,
+        target_state_sha256=fiber.target_state_sha256,
         aliases=tuple(reversed(fiber.aliases)),
         state_support=fiber.state_support,
     )

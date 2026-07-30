@@ -15,6 +15,7 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.factorized_successor_training import (
+    SuccessorTrainingError,
     compile_state_productive_support,
     compile_teacher_successor_fiber,
     factorized_successor_bregman_loss,
@@ -204,6 +205,40 @@ def test_terminal_row_requires_and_accepts_productive_state_support(model):
         abs=2e-6,
     )
     assert torch.isfinite(factorized_successor_bregman_loss(prediction, batch))
+
+
+def test_hot_path_checks_exact_slots_without_quotienting_atom_relabeling(model):
+    source = _state("CO")
+    support = compile_state_productive_support(model, source, time=0.23)
+    permutation = np.asarray([1, 0, *range(2, _SLOTS)])
+    permuted = type(source)(
+        atom_types=source.atom_types[permutation],
+        formal_charges=source.formal_charges[permutation],
+        implicit_h_counts=source.implicit_h_counts[permutation],
+        bonds=source.bonds[np.ix_(permutation, permutation)],
+    )
+    assert canonical_state_key(permuted) == canonical_state_key(source)
+    batch = prepare_factorized_mark_batch(
+        (permuted,),
+        (0.23,),
+        (None,),
+        (None,),
+        (0.0,),
+        use_aromatic_bond_view=True,
+        ring_catalog=model.ring_catalog,
+        compute_ring_grow_support=False,
+        compute_ring_restates=True,
+        compute_cyclic_graft=True,
+        compute_ring_opening=True,
+    )
+
+    with pytest.raises(SuccessorTrainingError, match="exact terminal batch state"):
+        forward_teacher_successor_batch(
+            model,
+            batch,
+            (None,),
+            state_supports=(support,),
+        )
 
 
 def test_compiled_support_is_invariant_to_model_weights_and_time(model):

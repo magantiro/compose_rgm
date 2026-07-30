@@ -2,7 +2,9 @@
 
 Date: 2026-07-30
 
-Status: design complete; production trainer unchanged; no compute launched
+Status: address/cache/dataset bridge implemented and focused-tested; production
+optimizer unchanged; no compute launched; full-corpus cache build blocked on a
+measured storage-backend decision
 
 ## Decision
 
@@ -42,6 +44,29 @@ This preserves:
 
 ## What exists now
 
+### Implementation checkpoint
+
+The first four data-path stages are now implemented:
+
+- `PackedTraceAddress` preserves the exact packed-shard SHA-256, immutable
+  entry index and trace envelope through `PathRecord`;
+- `FactorizedMarkExample` exposes the already-selected record and progress
+  indices without adding an RNG call;
+- `successor_fiber_cache.py` schema v2 binds exact persistent-slot source and
+  target SHA-256 identities and provides an O(1) primary lookup keyed by
+  `(packed_shard_sha256, entry_index, progress_index)`;
+- `sharded_successor_fiber_cache.py` provides a self-hashed, provenance-bound,
+  immutable inventory and lazy bounded JSON LRU for development panels;
+- `factorized_successor_data.py` performs a fail-closed post-draw join and
+  returns aligned `FactorizedSuccessorBatch` objects;
+- `successor_fiber_cache_builder.py` compiles complete addressed development
+  traces for correctness tests.
+
+The canonical-JSON backend is explicitly
+`BOUNDED_DEVELOPMENT_ONLY`. It cannot authorize a full-corpus run. The 63-shard
+build waits for measured JSON/columnar-mmap/SQLite storage results and a frozen
+complete-corpus inventory.
+
 ### Sampling and batching
 
 `FactorizedMarkDataset.__getitem__` in
@@ -60,16 +85,16 @@ resulting `FactorizedMarkBatch` contains tensors, exact states, teacher actions,
 teacher rules, rates and importance weights. It has aligned `subbatch`, `to`
 and `pin_memory` methods.
 
-The current example does **not** retain the selected record index or progress
-index. Once returned, there is no safe way to join a corpus-addressed fiber.
-Re-running the RNG in a wrapper would duplicate the sampling implementation and
-create a drift risk.
+The example now retains `record_index` and `progress_index`. Contract tests
+verify resume stability and that the successor wrapper returns the same
+scientific mark-example fields while making no second sampling call.
 
 ### Packed corpus
 
-The packed corpus stores the required address fields in every trace envelope,
-but `decode_packed_trace` currently drops them. `PathRecord` retains only
-`target_key` and `path`.
+The packed reader now emits an immutable `PackedTraceAddress`; production
+corruption, cycle and MMP loaders retain it in `PathRecord.corpus_address`.
+Successor training rejects raw/replayed `PathRecord` objects whose address is
+`None`.
 
 Read-only inspection of the connected immutable artifacts found:
 
@@ -99,8 +124,10 @@ provenance overlay does carry the exact packed-shard SHA-256.
 
 `successor_fiber_cache.py` now provides deterministic, bounded, fail-closed
 serialization of complete trace-progress records. It stores no model weights,
-rates, logits or probabilities. Its current `record_at` lookup is linear and
-must not be used as-is in a training hot path.
+rates, logits or probabilities. It builds an exact O(1) primary index over
+packed shard SHA, entry index and progress. Canonical molecular keys remain in
+the artifact as scientific quotient identities; hot-path joins use the exact
+persistent-slot digest and therefore do not invoke RDKit.
 
 ## Exact interface changes required
 
@@ -108,7 +135,7 @@ must not be used as-is in a training hot path.
 
 File: `src/compose_v4/data/packed_trace_store.py`
 
-Add a dependency-light dataclass:
+Implemented as a dependency-light dataclass:
 
 ```python
 @dataclass(frozen=True)
@@ -129,7 +156,13 @@ Keep `read_packed_shard` backward compatible by projecting addressed rows back
 to its current `(trace, path)` pairs. Both readers must share one internal
 decoder; no second packed parser is allowed.
 
-The addressed reader must verify:
+The addressed reader verifies the complete envelope and exact packed-shard
+identity. To avoid an RDKit pass over every one of 3.37 million startup states,
+endpoint recanonicalization is performed on the reader's frozen
+`verify_fraction` audit sample; the exact packed-shard SHA binds the stored
+endpoint keys for all other rows.
+
+It verifies:
 
 - all address strings are present;
 - stored path length equals the decoded path;
@@ -185,7 +218,7 @@ example fields byte-identical.
 Add a contract test comparing the complete old/new sampled scientific fields
 for many absolute indices and verifying resume at `start_step * batch_size`.
 
-### 4. Add an O(1), lazy sharded cache index
+### 4. Add an O(1), lazy sharded cache index — bounded implementation complete
 
 New file: `src/compose_v4/data/sharded_successor_fiber_cache.py`
 
@@ -200,27 +233,29 @@ packed_shard_content_sha256
   -> record/progress/alias counts
 ```
 
-`ShardedSuccessorFiberCache.require(address, progress)` must:
+`ShardedSuccessorFiberCache.require(address, progress)` now:
 
 - select the artifact by packed-shard SHA, never by a permissive directory glob;
 - validate the expected cache hash and complete provenance;
 - lazily load a bounded number of cache shards per worker;
-- build an in-memory dictionary keyed by
-  `(layer, partition, trace_id, progress_index)`;
-- verify the returned cache source key against the sampled state;
+- uses the cache's exact dictionary keyed by
+  `(packed_shard_sha256, entry_index, progress_index)`;
+- verifies the returned exact persistent-slot source digest against the sampled
+  state;
 - fail on missing, duplicate or extra trace-progress rows.
 
-The current linear `SuccessorFiberCache.record_at` can either be replaced by a
-validated internal dictionary or wrapped by this indexed store. A linear scan
-over up to 142,482 MMP progress rows per example is not acceptable.
+The inventory additionally binds the complete active/excluded entry census.
+This prevents an internally complete subset of traces from masquerading as a
+complete shard derivative. Raw cache-file SHA-256 and byte count are checked
+before JSON decoding.
 
 Do not key this cache by absolute training-stream index. Absolute-index caches
 duplicate repeated trace/progress draws and become invalid when seed, horizon
 or batch size changes.
 
-### 5. Keep fibers beside, not inside, `FactorizedMarkBatch`
+### 5. Keep fibers beside, not inside, `FactorizedMarkBatch` — implemented
 
-New file: `src/compose_v4/experiments/factorized_successor_data.py`
+File: `src/compose_v4/experiments/factorized_successor_data.py`
 
 Define:
 
@@ -253,7 +288,7 @@ the draw. It performs no sampling.
 
 - nonterminal rate iff a teacher fiber is present;
 - terminal rate iff only state support is present;
-- sampled canonical source key equals cached source key;
+- sampled persistent-slot source digest equals the cached exact-state digest;
 - the cached target equals the next exact trace state;
 - explicit support equals `fiber.state_support`.
 
@@ -367,37 +402,47 @@ same support contract. Cache contents must not depend on learned weights.
 
 ## Unresolved blockers
 
-1. **Address loss:** packed trace IDs are present on disk but discarded by the
-   current loader.
-2. **No whole-corpus byte identity:** the unified short checksum does not bind
-   every packed shard byte.
-3. **Cache hot lookup:** current lookup is linear.
-4. **Support/scoring coupling:** the current compiler traverses a scored law;
-   support invariance to weights/time is expected but not yet formally tested.
-5. **Canonicalizer environment:** current short source hashes do not explicitly
-   bind the RDKit version.
-6. **Semantic cells:** balanced-cell checkpoint selection requires a frozen
+1. **Production storage backend:** deterministic JSON is the correctness oracle,
+   but loading large shards materializes Python object graphs per worker. Measure
+   one representative corruption, cycle and large-MMP shard before choosing a
+   dense columnar mmap backend or SQLite.
+2. **No frozen complete-corpus inventory yet:** the inventory schema now binds
+   each packed shard byte hash, cache byte hash, manifest/overlay identities,
+   active trace census and declared exclusions, but it has not been built for
+   all 63 shards.
+3. **Support/scoring coupling:** the current compiler traverses a scored law.
+   A one-state invariance regression exists; a stratified multi-family gate or
+   support-only enumerator is required before the complete build.
+4. **Semantic cells:** balanced-cell checkpoint selection requires a frozen
    per-example cell sidecar not currently present in `FactorizedMarkBatch`.
-7. **Validation artifact:** the existing 535.4 MiB evaluation batch lacks
+5. **Validation artifact:** the existing 535.4 MiB evaluation batch lacks
    successor fibers and terminal supports.
-8. **Build cost:** the corpus contains 3,370,821 progress states. Measure
+6. **Successor optimizer integration:** the RNG-neutral dataset/collator/batch
+   bridge exists, but the production loop still invokes the mark objective and
+   mark-level checkpoint selector.
+7. **Build cost:** the corpus contains 3,370,821 progress states. Measure
    compilation throughput and exact-state/fiber deduplication on a bounded
    sample before launching a 63-shard CPU build.
 
 ## Implementation and verification order
 
-1. Preserve packed addresses and add address round-trip/uniqueness tests.
-2. Add `record_index`/`progress_index` without changing any sampled field or RNG
-   stream.
-3. Add the lazy O(1) sharded cache inventory/store.
-4. Add successor dataset/collator/batch alignment tests, including multiworker,
-   pinning, subbatching and resume.
-5. Prove support invariance across time/model initialization.
-6. Build a tiny cache from real corruption, cycle-open/close and MMP traces;
+1. ~~Preserve packed addresses and add address round-trip/uniqueness tests.~~
+2. ~~Add `record_index`/`progress_index` without changing any sampled field or
+   RNG stream.~~
+3. ~~Add the lazy O(1) sharded development cache inventory/store.~~
+4. ~~Add successor dataset/collator/batch alignment tests, including
+   multiworker, pinning, subbatching and resume.~~
+5. Prove support invariance across a stratified set of times, initializations
+   and active families.
+6. Build tiny caches from real corruption, cycle-open/close and MMP traces;
    compare every loaded fiber to fresh production compilation.
-7. Add successor metrics and successor-level checkpoint selection.
-8. Run a CPU dry launch with one real batch and zero optimizer steps.
-9. Benchmark a bounded cache compile and one 50-step pilot.
-10. Only after the fail-closed gates pass, authorize 500 and 2,000 steps.
+7. Benchmark representative JSON shards, then freeze the measured production
+   storage backend and complete-corpus inventory.
+8. Add successor metrics and successor-level checkpoint selection to the shared
+   optimizer loop.
+9. Run a CPU dry launch with one real batch and zero optimizer steps.
+10. Freeze numeric sentinel thresholds from development-only panels and run the
+    exactly-50-step gradient/collapse pilot.
+11. Only after the fail-closed gates pass, authorize 500 and 2,000 steps.
 
 No long training or full cache build is authorized by this design.

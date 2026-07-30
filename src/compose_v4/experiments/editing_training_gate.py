@@ -16,6 +16,14 @@ EXPECTED_GATE_IDS = (
     "P500_mixed_pilot",
     "P2000_scientific_pilot",
 )
+EXPECTED_MAXIMUM_OPTIMIZER_STEPS = {
+    "M0_metric_semantics": 0,
+    "S0_support_and_labels": 0,
+    "T1_true_successor_micro_overfit": 500,
+    "P50_gradient_and_collapse_sentinel": 50,
+    "P500_mixed_pilot": 500,
+    "P2000_scientific_pilot": 2000,
+}
 REQUIRED_PRIMARY_METRICS = {
     "production_weighted_canonical_successor_nll",
     "balanced_semantic_cell_canonical_successor_nll",
@@ -87,6 +95,12 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         if not isinstance(maximum_steps, int) or maximum_steps < 0:
             raise EditingTrainingGateError(
                 f"{gate.get('id')} has an invalid optimizer-step ceiling"
+            )
+        expected_maximum = EXPECTED_MAXIMUM_OPTIMIZER_STEPS[gate["id"]]
+        if maximum_steps != expected_maximum:
+            raise EditingTrainingGateError(
+                f"{gate['id']} must have exactly {expected_maximum} optimizer "
+                f"steps, observed {maximum_steps}"
             )
         if not gate.get("requirements"):
             raise EditingTrainingGateError(

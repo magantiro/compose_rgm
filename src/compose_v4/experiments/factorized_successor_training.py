@@ -17,6 +17,9 @@ from torch import Tensor
 from torch.nn import functional as F
 
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.chem.persistent_state_identity import (
+    persistent_slot_state_sha256,
+)
 from compose_v4.experiments.production_successor_kernel import (
     ProductionSuccessorKernelError,
     enumerate_factorized_marked_law,
@@ -58,11 +61,22 @@ class StateProductiveSupport:
     """
 
     source_key: str
+    source_state_sha256: str
     virtual_aliases: tuple[TeacherSuccessorAlias, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.source_key:
             raise ValueError("state-support source key must be nonempty")
+        if (
+            len(self.source_state_sha256) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in self.source_state_sha256
+            )
+        ):
+            raise ValueError(
+                "state-support source_state_sha256 must be a lowercase SHA-256"
+            )
         if len(set(self.virtual_aliases)) != len(self.virtual_aliases):
             raise ValueError("state support contains duplicate virtual coordinates")
 
@@ -73,6 +87,7 @@ class TeacherSuccessorFiber:
 
     source_key: str
     target_key: str
+    target_state_sha256: str
     aliases: tuple[TeacherSuccessorAlias, ...]
     state_support: StateProductiveSupport
 
@@ -81,6 +96,16 @@ class TeacherSuccessorFiber:
             raise ValueError("teacher-successor keys must be nonempty")
         if self.source_key == self.target_key:
             raise ValueError("a teacher molecular jump cannot target the source state")
+        if (
+            len(self.target_state_sha256) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in self.target_state_sha256
+            )
+        ):
+            raise ValueError(
+                "teacher target_state_sha256 must be a lowercase SHA-256"
+            )
         if not self.aliases:
             raise ValueError("a teacher-successor fiber must contain at least one alias")
         if len(set(self.aliases)) != len(self.aliases):
@@ -177,9 +202,11 @@ def compile_teacher_successor_fiber(
     return TeacherSuccessorFiber(
         source_key=source_key,
         target_key=target_key,
+        target_state_sha256=persistent_slot_state_sha256(target),
         aliases=tuple(sorted(aliases)),
         state_support=StateProductiveSupport(
             source_key=source_key,
+            source_state_sha256=persistent_slot_state_sha256(source),
             virtual_aliases=tuple(sorted(virtual_aliases)),
         ),
     )
@@ -224,6 +251,7 @@ def compile_state_productive_support(
             )
     return StateProductiveSupport(
         source_key=source_key,
+        source_state_sha256=persistent_slot_state_sha256(source),
         virtual_aliases=tuple(sorted(virtual_aliases)),
     )
 
@@ -332,10 +360,12 @@ def forward_teacher_successor_batch(
                 raise SuccessorTrainingError(
                     "terminal training row is missing productive state support"
                 )
-            observed_source_key = canonical_state_key(batch.states[batch_index])
-            if observed_source_key != support.source_key:
+            observed_source_digest = persistent_slot_state_sha256(
+                batch.states[batch_index]
+            )
+            if observed_source_digest != support.source_state_sha256:
                 raise SuccessorTrainingError(
-                    "productive state support does not match the terminal batch state"
+                    "productive state support does not match the exact terminal batch state"
                 )
             virtual_aliases = support.virtual_aliases
         else:
@@ -343,10 +373,12 @@ def forward_teacher_successor_batch(
                 raise SuccessorTrainingError(
                     "nonterminal training row is missing its teacher-successor fiber"
                 )
-            observed_source_key = canonical_state_key(batch.states[batch_index])
-            if observed_source_key != fiber.source_key:
+            observed_source_digest = persistent_slot_state_sha256(
+                batch.states[batch_index]
+            )
+            if observed_source_digest != fiber.state_support.source_state_sha256:
                 raise SuccessorTrainingError(
-                    "teacher-successor fiber source does not match the batch state"
+                    "teacher-successor fiber source does not match the exact batch state"
                 )
             explicit_support = (
                 None
