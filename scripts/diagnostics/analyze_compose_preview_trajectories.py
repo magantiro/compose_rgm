@@ -21,7 +21,7 @@ from rdkit.Chem import Draw, rdMolDescriptors
 import torch
 
 from compose_v4.chem.molecular_graph import (
-    NULL_IDX,
+    is_element,
     molecular_graph_to_smiles,
 )
 
@@ -62,7 +62,9 @@ def trajectory_seeds(seed: int, samples: int) -> tuple[int, ...]:
 
 
 def active_atoms(graph) -> int:
-    return int(np.sum(graph.atom_types != NULL_IDX))
+    # is_element, not `!= NULL_IDX`: a SCAR slot is OCCUPIED but is not a real atom, so the null-only
+    # comparison over-counts active atoms on any state carrying a deletion scar.
+    return int(np.sum(is_element(graph.atom_types)))
 
 
 def topology_label(molecule: Chem.Mol) -> str:
