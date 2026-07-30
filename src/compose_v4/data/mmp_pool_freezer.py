@@ -8,9 +8,11 @@ copy the reduced pool into a content-addressed, no-overwrite namespace and publi
 """
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import os
+import stat
 import tempfile
 from collections import Counter
 from dataclasses import dataclass
@@ -25,6 +27,8 @@ COMPILE_SHARD_SCHEMA = "compose.mmp_compile_shard.v2"
 REDUCTION_SCHEMA = "compose.mmp_mining_reduction.v2"
 FREEZER_IDENTITY_SCHEMA = "compose.mmp_pool_freezer_identity.v2"
 FROZEN_NAMESPACE_PREFIX = "mmp_pool_v2_"
+WRITE_ONCE_STORAGE_PREFLIGHT_SCHEMA = "compose.mmp_write_once_storage_preflight.v1"
+WRITE_ONCE_STORAGE_PREFLIGHT_ROOT = "_storage_preflight/mmp_write_once_v1"
 
 _EXECUTION_ONLY_CONFIG_FIELDS = frozenset({
     "corpus_path",
@@ -332,8 +336,96 @@ def _manifest_bytes(manifest: Mapping[str, Any]) -> bytes:
     return json.dumps(dict(manifest), indent=2, sort_keys=True).encode() + b"\n"
 
 
+_HARD_LINK_UNSUPPORTED_ERRNOS = frozenset({
+    errno.EPERM,
+    errno.EXDEV,
+    errno.ENOSYS,
+    errno.EOPNOTSUPP,
+})
+
+
+def _existing_artifact_matches(destination: Path, content: bytes) -> bool:
+    """Compare one existing regular file exactly without a second full-size byte copy."""
+
+    try:
+        metadata = destination.lstat()
+    except FileNotFoundError:
+        return False
+    if not stat.S_ISREG(metadata.st_mode):
+        raise MMPPoolFreezeError(
+            f"immutable artifact path is not a regular file: {destination}"
+        )
+    if metadata.st_size != len(content):
+        return False
+    offset = 0
+    with destination.open("rb") as handle:
+        while block := handle.read(1 << 20):
+            right = offset + len(block)
+            if block != content[offset:right]:
+                return False
+            offset = right
+    return offset == len(content)
+
+
+def _reuse_or_reject_existing(destination: Path, content: bytes) -> bool:
+    if _existing_artifact_matches(destination, content):
+        return False
+    raise MMPPoolFreezeError(
+        f"immutable artifact already exists with different bytes: {destination}"
+    )
+
+
+def _exclusive_create_from_bytes(destination: Path, content: bytes) -> bool:
+    """Modal-compatible fallback when the mounted filesystem forbids hard links.
+
+    ``O_EXCL`` is the remaining no-overwrite primitive exposed by Modal Volume.
+    It atomically reserves the final name, so a competing writer can never
+    replace bytes we published. Unlike the preferred staged hard-link path, a
+    process crash during the write can leave an incomplete final file. Such a
+    file is never accepted or repaired silently: every retry compares exact
+    bytes and fails closed. Live write/fsync/verification errors remove only
+    the file descriptor this process exclusively created.
+    """
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    try:
+        descriptor = os.open(destination, flags, 0o644)
+    except FileExistsError:
+        return _reuse_or_reject_existing(destination, content)
+
+    created = True
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            descriptor = -1
+            handle.write(content)
+            os.fchmod(handle.fileno(), 0o644)
+            handle.flush()
+            os.fsync(handle.fileno())
+        if not _existing_artifact_matches(destination, content):
+            raise MMPPoolFreezeError(
+                f"exclusive immutable publication failed verification: {destination}"
+            )
+        created = False
+        return True
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if created:
+            destination.unlink(missing_ok=True)
+
+
 def write_bytes_if_absent(path: str | Path, content: bytes) -> bool:
-    """Atomically create one immutable file; identical reuse is allowed, overwrite is not."""
+    """Create one immutable file; identical reuse is allowed, overwrite is not.
+
+    A same-directory staged hard link is the preferred atomic publication.
+    Modal Volume currently rejects hard links with ``EPERM``; on filesystems
+    reporting a hard-link capability error, publication falls back to an
+    exclusive final-name create. See ``_exclusive_create_from_bytes`` for the
+    deliberately fail-closed crash tradeoff of that fallback.
+    """
+
+    if not isinstance(content, bytes):
+        raise TypeError("immutable artifact content must be bytes")
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary_name: str | None = None
@@ -347,20 +439,99 @@ def write_bytes_if_absent(path: str | Path, content: bytes) -> bool:
         ) as handle:
             temporary_name = handle.name
             handle.write(content)
+            os.fchmod(handle.fileno(), 0o644)
             handle.flush()
             os.fsync(handle.fileno())
         try:
             os.link(temporary_name, destination)
             return True
         except FileExistsError:
-            if destination.read_bytes() != content:
-                raise MMPPoolFreezeError(
-                    f"immutable artifact already exists with different bytes: {destination}"
-                ) from None
-            return False
+            return _reuse_or_reject_existing(destination, content)
+        except OSError as exc:
+            if exc.errno not in _HARD_LINK_UNSUPPORTED_ERRNOS:
+                raise
+            return _exclusive_create_from_bytes(destination, content)
     finally:
         if temporary_name is not None:
             Path(temporary_name).unlink(missing_ok=True)
+
+
+def run_write_once_storage_preflight(
+    artifact_root: str | Path,
+) -> dict[str, Any]:
+    """Exercise immutable publication in a tiny content-addressed scratch lane.
+
+    The namespace is derived from the exact helper implementation bytes, so a
+    changed primitive cannot inherit an earlier PASS. Repeated runs under the
+    same implementation reuse the same 1-line probe and receipt. No scientific
+    run path is opened or modified.
+    """
+
+    implementation_path = Path(__file__)
+    implementation_sha256 = file_sha256(implementation_path)
+    identity_body = {
+        "schema": WRITE_ONCE_STORAGE_PREFLIGHT_SCHEMA,
+        "implementation_sha256": implementation_sha256,
+    }
+    preflight_identity = canonical_sha256(identity_body)
+    preflight_root = (
+        Path(artifact_root)
+        / WRITE_ONCE_STORAGE_PREFLIGHT_ROOT
+        / preflight_identity[:20]
+    )
+    probe_path = preflight_root / "probe.bin"
+    receipt_path = preflight_root / "PREFLIGHT_PASS.json"
+    probe_content = (
+        canonical_json_bytes({
+            **identity_body,
+            "preflight_identity": preflight_identity,
+            "purpose": "create_identical_reuse_and_collision_refusal",
+        })
+        + b"\n"
+    )
+
+    probe_created = write_bytes_if_absent(probe_path, probe_content)
+    if write_bytes_if_absent(probe_path, probe_content):
+        raise MMPPoolFreezeError(
+            "write-once storage preflight recreated an existing identical probe"
+        )
+    collision_refused = False
+    try:
+        write_bytes_if_absent(probe_path, probe_content + b"different")
+    except MMPPoolFreezeError as exc:
+        if "different bytes" not in str(exc):
+            raise
+        collision_refused = True
+    if not collision_refused:
+        raise MMPPoolFreezeError(
+            "write-once storage preflight did not refuse different bytes"
+        )
+    if not _existing_artifact_matches(probe_path, probe_content):
+        raise MMPPoolFreezeError(
+            "write-once storage preflight probe changed after collision test"
+        )
+
+    receipt_body = {
+        **identity_body,
+        "preflight_identity": preflight_identity,
+        "status": "PASS",
+        "scratch_namespace": str(preflight_root),
+        "probe_sha256": hashlib.sha256(probe_content).hexdigest(),
+        "create_or_exact_reuse": "PASS",
+        "identical_reuse": "PASS",
+        "different_content_refusal": "PASS",
+    }
+    receipt = {
+        **receipt_body,
+        "receipt_sha256": canonical_sha256(receipt_body),
+    }
+    write_bytes_if_absent(receipt_path, _manifest_bytes(receipt))
+    return {
+        **receipt,
+        "probe_created_this_invocation": probe_created,
+        "probe_path": str(probe_path),
+        "receipt_path": str(receipt_path),
+    }
 
 
 @dataclass(frozen=True)
@@ -831,6 +1002,8 @@ __all__ = [
     "MMPPoolFreezeError",
     "POOL_CONTRACT_SCHEMA",
     "REDUCTION_SCHEMA",
+    "WRITE_ONCE_STORAGE_PREFLIGHT_ROOT",
+    "WRITE_ONCE_STORAGE_PREFLIGHT_SCHEMA",
     "build_compile_shard_manifest",
     "build_compiler_identity",
     "canonical_json_bytes",
@@ -845,6 +1018,7 @@ __all__ = [
     "mounted_artifact_path",
     "pair_index_assignment_sha256",
     "partition_independent_mining_config",
+    "run_write_once_storage_preflight",
     "require_artifact_path",
     "validate_compile_inventory",
     "validate_compiler_identity",

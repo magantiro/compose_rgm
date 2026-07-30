@@ -5,10 +5,14 @@ The global grouping over the full GuacaMol TRAIN partition yields hundreds of th
 pairs; compiling them serially in one container would take hours. This app keeps the full pool and
 parallelizes the compile across containers:
 
+  0. storage_preflight (ONE tiny container, V2 only): exercise create, identical reuse, and
+                  different-content refusal with the exact immutable-write primitive on the mounted
+                  artifact volume, in a separate content-addressed scratch namespace.
   1. mine_pairs   (ONE container): scan+split the corpus, map the full TRAIN partition, GLOBAL-group the MMP
                   pairs, characterize corruption; write pairs.jsonl + mine_meta.json to the artifact volume.
-  2. compile_shard (N containers, parallel): each reads a deterministic stride of pairs.jsonl, compiles +
-                  executor-replays them (both directions), writes compiled/shard_XXXX.jsonl.
+  2. compile_shard (N logical tasks, at most 5 containers concurrently on Volume v1): each reads a
+                  deterministic stride of pairs.jsonl, compiles + executor-replays them (both directions),
+                  writes compiled/shard_XXXX.jsonl.
   3. reduce_pool  (ONE container): read every compiled shard, global dedup + cap, write the final pool +
                   summary (census + corruption + provenance + mixture stats). V2 refuses missing,
                   overlapping or stale shards and sorts by the original global pair index before caps.
@@ -61,6 +65,7 @@ guacamol_volume = modal.Volume.from_name("guacamol", create_if_missing=False)
 artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=True)
 _LEGACY_DEFAULT_SUBDIR = "edit_mining_full_broad"
 _V2_RUN_PREFIX = "edit_mining_v2_run_"
+MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
 
 
 def v2_run_subdir(
@@ -102,6 +107,32 @@ def _file_sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+@app.function(
+    image=image,
+    cpu=1.0,
+    timeout=5 * 60,
+    volumes={"/artifacts": artifact_volume},
+)
+def storage_preflight() -> dict:
+    """Fail before corpus scanning if the mounted Volume cannot publish immutable bytes."""
+
+    from compose_v4.data.mmp_pool_freezer import run_write_once_storage_preflight
+
+    artifact_volume.reload()
+    result = run_write_once_storage_preflight("/artifacts")
+    artifact_volume.commit()
+    return {
+        **result,
+        "modal_volume_contract": {
+            "generation": "v1",
+            "max_concurrent_small_commit_writers": (
+                MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
+            ),
+            "logical_compile_shards_are_queued": True,
+        },
+    }
 
 
 @app.function(image=image, cpu=16.0, timeout=3 * 3600,
@@ -199,8 +230,13 @@ def mine_pairs(config_dict: dict, source_commit: str, subdir: str, publish_v2: b
     return result
 
 
-@app.function(image=image, cpu=8.0, timeout=3 * 3600,
-              volumes={"/artifacts": artifact_volume})
+@app.function(
+    image=image,
+    cpu=8.0,
+    timeout=3 * 3600,
+    max_containers=MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
+    volumes={"/artifacts": artifact_volume},
+)
 def compile_shard(
     shard_index: int,
     n_shards: int,
@@ -518,6 +554,26 @@ def main(
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
     config_dict["out_dir"] = f"/artifacts/{subdir}"
+    if publish_v2:
+        print("[0/3] validating immutable writes on the artifact Volume ...")
+        storage = storage_preflight.remote()
+        if storage.get("status") != "PASS":
+            raise SystemExit(f"artifact Volume storage preflight failed: {storage}")
+        volume_contract = storage.get("modal_volume_contract") or {}
+        if (
+            volume_contract.get("generation") != "v1"
+            or volume_contract.get("max_concurrent_small_commit_writers")
+            != MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
+        ):
+            raise SystemExit(
+                f"artifact Volume concurrency contract is absent or stale: {storage}"
+            )
+        print(
+            "      -> PASS "
+            f"(identity {storage['preflight_identity'][:16]}, "
+            f"created={storage['probe_created_this_invocation']}, "
+            f"max concurrent writers={MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS})"
+        )
     print(f"[1/3] mining pairs from {corpus} at commit {commit} ...")
     meta = mine_pairs.remote(config_dict, commit, subdir, publish_v2)
     n_pairs = meta["n_pairs"]

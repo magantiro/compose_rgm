@@ -1,7 +1,10 @@
 """V2 MMP mining must be partition-invariant and freeze only complete, coherent pools."""
 from __future__ import annotations
 
+import errno
 import json
+import os
+import stat
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -13,7 +16,10 @@ sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "modal_apps"))
 
 from mine_edit_traces import MiningConfig, compile_mmp, dedup_and_cap  # noqa: E402
-from mine_edit_traces_app import v2_run_subdir  # noqa: E402
+from mine_edit_traces_app import (  # noqa: E402
+    MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS,
+    v2_run_subdir,
+)
 from pack_mmp_pool_app import build_pack_request, preflight_frozen_input  # noqa: E402
 
 from compose_v4.data.mmp_pool_freezer import (  # noqa: E402
@@ -25,7 +31,9 @@ from compose_v4.data.mmp_pool_freezer import (  # noqa: E402
     file_sha256,
     freeze_reduced_mmp_pool,
     partition_independent_mining_config,
+    run_write_once_storage_preflight,
     validate_compile_inventory,
+    write_bytes_if_absent,
 )
 from compose_v4.experiments.analogue_prior import ANALOGUE_SUPPORT_CONTRACT  # noqa: E402
 
@@ -224,6 +232,121 @@ def test_global_pair_indices_make_pool_bytes_invariant_to_compile_shard_count(tm
         == payload_three["partition_independent_mining_config"]
     )
     assert payload_two["mining_config_sha256"] == payload_three["mining_config_sha256"]
+
+
+def test_write_once_falls_back_when_modal_volume_rejects_hard_links(
+    tmp_path,
+    monkeypatch,
+):
+    destination = tmp_path / "content-addressed" / "artifact.bin"
+    content = b"frozen-content\n"
+
+    def unsupported_hard_link(_source, _destination):
+        raise OSError(errno.EPERM, "Modal Volume does not support hard links")
+
+    monkeypatch.setattr(os, "link", unsupported_hard_link)
+    assert write_bytes_if_absent(destination, content) is True
+    assert destination.read_bytes() == content
+    assert stat.S_IMODE(destination.stat().st_mode) == 0o644
+    assert not list(destination.parent.glob("*.tmp"))
+
+
+def test_modal_fallback_reuses_identical_bytes_and_rejects_collisions(
+    tmp_path,
+    monkeypatch,
+):
+    destination = tmp_path / "artifact.bin"
+    original = b"authoritative bytes"
+
+    def unsupported_hard_link(_source, _destination):
+        raise OSError(errno.EPERM, "hard links unsupported")
+
+    monkeypatch.setattr(os, "link", unsupported_hard_link)
+    destination.write_bytes(original)
+
+    assert write_bytes_if_absent(destination, original) is False
+    with pytest.raises(MMPPoolFreezeError, match="different bytes"):
+        write_bytes_if_absent(destination, b"collision")
+    assert destination.read_bytes() == original
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_write_once_does_not_mask_non_capability_link_failures(
+    tmp_path,
+    monkeypatch,
+):
+    destination = tmp_path / "artifact.bin"
+
+    def io_failure(_source, _destination):
+        raise OSError(errno.EIO, "storage failure")
+
+    monkeypatch.setattr(os, "link", io_failure)
+    with pytest.raises(OSError, match="storage failure"):
+        write_bytes_if_absent(destination, b"content")
+    assert not destination.exists()
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_write_once_rejects_non_regular_preexisting_destination(
+    tmp_path,
+    monkeypatch,
+):
+    destination = tmp_path / "artifact.bin"
+    destination.mkdir()
+
+    def unsupported_hard_link(_source, _destination):
+        raise OSError(errno.EPERM, "hard links unsupported")
+
+    monkeypatch.setattr(os, "link", unsupported_hard_link)
+    with pytest.raises(MMPPoolFreezeError, match="not a regular file"):
+        write_bytes_if_absent(destination, b"content")
+    assert destination.is_dir()
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_write_once_storage_preflight_is_bounded_idempotent_and_isolated(
+    tmp_path,
+    monkeypatch,
+):
+    scientific = tmp_path / "scientific-run"
+    scientific.mkdir()
+    marker = scientific / "do-not-touch"
+    marker.write_bytes(b"owned")
+
+    def unsupported_hard_link(_source, _destination):
+        raise OSError(errno.EPERM, "hard links unsupported")
+
+    monkeypatch.setattr(os, "link", unsupported_hard_link)
+    first = run_write_once_storage_preflight(tmp_path)
+    second = run_write_once_storage_preflight(tmp_path)
+
+    assert first["status"] == second["status"] == "PASS"
+    assert first["preflight_identity"] == second["preflight_identity"]
+    assert first["probe_created_this_invocation"] is True
+    assert second["probe_created_this_invocation"] is False
+    assert marker.read_bytes() == b"owned"
+    scratch = Path(first["scratch_namespace"])
+    assert "edit_mining_v2_run_" not in str(scratch)
+    assert set(path.name for path in scratch.iterdir()) == {
+        "PREFLIGHT_PASS.json",
+        "probe.bin",
+    }
+    receipt = json.loads((scratch / "PREFLIGHT_PASS.json").read_text())
+    assert receipt["receipt_sha256"] == canonical_sha256({
+        key: value for key, value in receipt.items() if key != "receipt_sha256"
+    })
+    assert not list(scratch.glob("*.tmp"))
+
+
+def test_v2_modal_storage_preflight_precedes_expensive_pair_mining():
+    source = (REPO / "modal_apps" / "mine_edit_traces_app.py").read_text()
+    assert source.index("storage_preflight.remote") < source.index("mine_pairs.remote")
+    assert MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS == 5
+    compile_surface = source[
+        source.index("@app.function", source.index("def storage_preflight")) :
+        source.index("def compile_shard")
+    ]
+    assert "max_containers=MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS" in compile_surface
 
 
 def test_local_compiler_preserves_caller_global_pair_index():
