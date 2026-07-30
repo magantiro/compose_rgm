@@ -1,0 +1,11 @@
+test-suite: 1288 passed, 7 warnings in 547.43s (0:09:07)
+
+=== provenance ===
+  commit:               ba85541
+  standardization_hash: a8d574cc91c89cb3
+  operator_registry:    9197401e8dc3a7ae
+  compiler(corruption): 2b22a6c22ffc8e5a
+  compiler(mmp):        d02ddfbc0c59af57
+  corpus:               guacamol_subset_500000_seed0.smiles on volume 'guacamol' (SHA-256 + ring-catalog fingerprint pinned at mining time)
+
+PRELAUNCH GATE: PASS
