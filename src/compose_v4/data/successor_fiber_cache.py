@@ -21,8 +21,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
-import tempfile
 from collections import defaultdict
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
@@ -31,6 +29,10 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
+)
 from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.experiments.factorized_successor_training import (
     StateProductiveSupport,
@@ -1031,30 +1033,13 @@ def write_successor_fiber_cache(
     )
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary_name: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary_name = handle.name
-            handle.write(encoded)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            os.link(temporary_name, destination)
-        except FileExistsError:
-            if destination.read_bytes() != encoded:
-                raise FileExistsError(
-                    "successor-fiber cache already exists with different "
-                    f"content: {destination}"
-                ) from None
-    finally:
-        if temporary_name is not None:
-            Path(temporary_name).unlink(missing_ok=True)
+        write_bytes_if_absent(destination, encoded)
+    except ImmutableArtifactError as error:
+        raise FileExistsError(
+            "successor-fiber cache already exists with different "
+            f"content or cannot be verified: {destination}"
+        ) from error
     return cache
 
 

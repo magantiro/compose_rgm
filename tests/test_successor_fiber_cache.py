@@ -245,6 +245,37 @@ def test_writer_never_overwrites_a_frozen_cache_path(tmp_path, provenance):
     assert path.read_bytes() == original_bytes
 
 
+def test_writer_falls_back_when_volume_rejects_hard_links(
+    tmp_path,
+    provenance,
+    monkeypatch,
+):
+    path = tmp_path / "modal-volume.json"
+
+    def reject_hard_link(*args, **kwargs):
+        raise PermissionError(1, "operation not permitted")
+
+    monkeypatch.setattr("os.link", reject_hard_link)
+    first = write_successor_fiber_cache(
+        path,
+        _one_step_records(),
+        provenance=provenance,
+    )
+
+    assert path.is_file()
+    assert write_successor_fiber_cache(
+        path,
+        _one_step_records(),
+        provenance=provenance,
+    ) == first
+    with pytest.raises(FileExistsError, match="different content"):
+        write_successor_fiber_cache(
+            path,
+            _one_step_records(trace_id="collision"),
+            provenance=provenance,
+        )
+
+
 def test_zero_step_trace_serializes_terminal_support(provenance):
     record = SuccessorFiberCacheRecord(
         address=SuccessorFiberCacheAddress(

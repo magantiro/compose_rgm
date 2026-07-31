@@ -12,9 +12,7 @@ import argparse
 import gzip
 import hashlib
 import json
-import os
 import sys
-import tempfile
 from collections.abc import Mapping
 from dataclasses import asdict
 from pathlib import Path
@@ -28,6 +26,10 @@ if str(SRC) not in sys.path:
 
 from compose_v4.data.active8_trace_inventory import (  # noqa: E402
     load_active8_trace_admission,
+)
+from compose_v4.data.immutable_artifact import (  # noqa: E402
+    ImmutableArtifactError,
+    write_bytes_if_absent,
 )
 from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
     build_exact_cache_provenance,
@@ -50,7 +52,7 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
-    EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V6_CONTRACT_RELATIVE_PATH,
     EditingT1LaunchAuthority,
     EditingT1RuntimeError,
     build_t1_successor_cache_identity,
@@ -95,28 +97,10 @@ def _write_if_absent(path: Path, payload: object) -> None:
         )
         + "\n"
     ).encode("utf-8")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_name: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=path.parent,
-            prefix=f".{path.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary_name = handle.name
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            os.link(temporary_name, path)
-        except FileExistsError:
-            if path.read_bytes() != content:
-                raise FileExistsError(f"immutable T1 output already differs: {path}") from None
-    finally:
-        if temporary_name is not None:
-            Path(temporary_name).unlink(missing_ok=True)
+        write_bytes_if_absent(path, content)
+    except ImmutableArtifactError as error:
+        raise FileExistsError(f"immutable T1 output already differs: {path}") from error
 
 
 def _load_successor_cache_receipt(path: Path) -> T1SuccessorCacheManifestReceipt:
@@ -166,7 +150,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--t1-contract",
         type=Path,
-        default=ROOT / EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
+        default=ROOT / EDITING_T1_V6_CONTRACT_RELATIVE_PATH,
     )
     parser.add_argument(
         "--gate-zero-contract",

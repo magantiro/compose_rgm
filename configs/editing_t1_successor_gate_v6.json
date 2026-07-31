@@ -1,0 +1,92 @@
+{
+  "active8_effective_source_corpus_cache_sha256": "4de860baf1906934ef01a608a366daf81789bedf8985d3ca37f9f30494add3c9",
+  "active8_inventory_manifest_file_sha256": "bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab",
+  "active8_inventory_sha256": "ce1a1b0a43fdfeac4e5771d03a95d456ec8b2df46f207446efd4f8a17ecadd42",
+  "active8_support_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+  "active8_unified_packed_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758",
+  "capacity_census_file_sha256": "60a2cec81f7a2641e33e15730a6ef01ed48173cfdc241268770803fbf998ea1c",
+  "capacity_census_sha256": "d78e16ec963742b2e04c0644a3eba73370ed217ab7ebd496961cf6f3df2871c9",
+  "charge_policy_audit_file_sha256": "db365686581ea4b787fae608fa4bc37478183714399e1d407dfecf8bf3737dd3",
+  "charge_policy_exclusion_payload_sha256": "ad18e751b2423ebfe47e6d2684f0932eec0fbe8008ca28342f5c45d59889fc55",
+  "charge_policy_exclusions_file_sha256": "64eb6e7029827a6c11c39a7e4d4a9c9fdde0572be4d083d380c1ee9212176139",
+  "charge_policy_source_input_inventory_sha256": "679816385f7c85dc3f3f8a51103bd38c29435c495312b5407acce95b6dd94321",
+  "contract_sha256": "fbd811db692f04c65770f4e7dd0902a1fb004e3bfb5cbced98f8254d1f0b3588",
+  "families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "forensics_file_sha256": "f2460f1def0b41e5be5a05bfee01d1d1c295296968c860d8075c344b0f6c7020",
+  "gate_zero_runtime_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+  "implementation_sha256": "57ab3069323f8fa31d47587e0d047c1fa5b2c07a2397627125bf2d7c8d149b86",
+  "optimization": {
+    "learning_rate": 0.001,
+    "report_points": [
+      1,
+      10,
+      50,
+      100,
+      250,
+      500
+    ],
+    "scopes": [
+      "heads_only",
+      "heads_plus_local_adapter",
+      "all"
+    ],
+    "steps": 500,
+    "weight_decay": 0.0
+  },
+  "panel_artifact_sha256": "5f2cd1d7e01fb81916c39ac0f6ed367ef00fe5f2303eb26a76bca0e82f317edf",
+  "panel_capacity_strata_sha256": "f3d8bf367a494cc65f40690e7c76a984bf44d76eec335f31343fe34dfd29d23e",
+  "panel_census_sha256": "9f29a7b658557e2a39761ca4554b1d014ce8c7bc15fd008843367da9083a9212",
+  "panel_kinds": [
+    "unique_state",
+    "global_repeated_state_distribution",
+    "within_family_repeated_state_distribution"
+  ],
+  "panel_selection_sha256": "2d042e96aaa10b8af91608553a2bff43ba9c47698c3480aeeb7f99c086e4e129",
+  "required_aliased_teacher_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "required_high_candidate_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "schema": "compose.editing.t1_successor_runtime_contract",
+  "schema_version": 6,
+  "status": "FROZEN_BOUNDED_CAPACITY_DIAGNOSTIC_NO_TRAINING_AUTHORITY",
+  "thresholds": {
+    "maximum_global_repeated_state_excess_nll_over_empirical_entropy": 0.05,
+    "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+    "minimum_unique_state_teacher_successor_probability": 0.8,
+    "minimum_unique_state_teacher_successor_top1": 0.95
+  },
+  "thresholds_sha256": "bcb3bda0eb10dcae14d96c1840f250afb1b4b69fa5a9bbc949ad1f9ce3ad19f6",
+  "training_authorized": false,
+  "within_family_repeated_families": [
+    "atom_insert",
+    "atom_restate",
+    "bond_reroute",
+    "cycle_attach",
+    "ring_system_restate"
+  ]
+}
