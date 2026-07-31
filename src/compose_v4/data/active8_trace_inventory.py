@@ -36,7 +36,7 @@ from compose_v4.chem.persistent_state_identity import (
 from compose_v4.data.packed_trace_store import (
     AddressedPackedTrace,
     manifest_path_for,
-    read_addressed_packed_shard,
+    read_frozen_source_addressed_packed_shard,
 )
 from compose_v4.data.provenance_overlay import overlay_path_for
 from compose_v4.experiments.factorized_successor_training import (
@@ -142,9 +142,7 @@ class Active8TraceAdmission:
         entry_index = address.entry_index
         trace_id = address.trace_id
         if type(entry_index) is not int or entry_index < 0:
-            raise Active8TraceInventoryError(
-                "packed trace has an invalid active-8 entry index"
-            )
+            raise Active8TraceInventoryError("packed trace has an invalid active-8 entry index")
         try:
             decisions = self.decisions_by_digest[digest]
         except KeyError:
@@ -197,11 +195,7 @@ class Active8TraceAdmission:
     ) -> None:
         """Require exact packed-shard coverage for one corpus partition."""
 
-        expected = {
-            lane
-            for lane in self.shard_digest_by_lane
-            if lane[1] == partition
-        }
+        expected = {lane for lane in self.shard_digest_by_lane if lane[1] == partition}
         actual = set(observed)
         if actual != expected:
             raise Active8TraceInventoryError(
@@ -225,11 +219,7 @@ class Active8SourceShard:
         if not self.manifest_layer or not self.envelope_layer or not self.partition:
             raise ValueError("source shard lane fields must be non-empty")
         relative = Path(self.relative_path)
-        if (
-            not self.relative_path
-            or relative.is_absolute()
-            or ".." in relative.parts
-        ):
+        if not self.relative_path or relative.is_absolute() or ".." in relative.parts:
             raise ValueError("source shard relative_path must be safe and relative")
         object.__setattr__(self, "path", Path(self.path))
 
@@ -303,9 +293,7 @@ def _inventory_decision_path(
     """Resolve a local or content-store decision object without path escape."""
 
     if not isinstance(relative_path, str) or not relative_path:
-        raise Active8TraceInventoryError(
-            "active-8 decision path must be nonempty text"
-        )
+        raise Active8TraceInventoryError("active-8 decision path must be nonempty text")
     pure = PurePosixPath(relative_path)
     if (
         pure.is_absolute()
@@ -313,9 +301,7 @@ def _inventory_decision_path(
         or "\\" in relative_path
         or any(character in relative_path for character in "*?[]")
     ):
-        raise Active8TraceInventoryError(
-            "active-8 decision path is unsafe"
-        )
+        raise Active8TraceInventoryError("active-8 decision path is unsafe")
     manifest_parent = Path(manifest_path).parent.resolve()
     if ".." not in pure.parts:
         trusted_root = manifest_parent
@@ -331,32 +317,22 @@ def _inventory_decision_path(
         # objects/decisions/<prefix>/<sha>.jsonl.gz.
         trusted_root = manifest_parent.parent
     else:
-        raise Active8TraceInventoryError(
-            "active-8 decision path escapes its artifact namespace"
-        )
+        raise Active8TraceInventoryError("active-8 decision path escapes its artifact namespace")
     candidate = (manifest_parent / Path(*pure.parts)).resolve()
     if not candidate.is_relative_to(trusted_root):
-        raise Active8TraceInventoryError(
-            "active-8 decision path escapes its trusted root"
-        )
+        raise Active8TraceInventoryError("active-8 decision path escapes its trusted root")
     return candidate
 
 
 def implementation_identity(*, repo_root: Path | None = None) -> dict[str, object]:
     """Hash the complete code surface defining admission and row identity."""
 
-    root = (
-        Path(repo_root)
-        if repo_root is not None
-        else Path(__file__).resolve().parents[3]
-    )
+    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[3]
     sources: dict[str, str] = {}
     for relative in _IMPLEMENTATION_SOURCES:
         source = root / relative
         if not source.is_file():
-            raise Active8TraceInventoryError(
-                f"active-8 implementation source is absent: {source}"
-            )
+            raise Active8TraceInventoryError(f"active-8 implementation source is absent: {source}")
         sources[relative] = _sha256_file(source)
     return {
         "sources": sources,
@@ -384,22 +360,16 @@ def _persistent_state_identity() -> dict[str, object]:
 
 def _validate_inventory_semantics(payload: Mapping[str, object]) -> None:
     if payload.get("status") != ACTIVE8_TRACE_INVENTORY_STATUS:
-        raise Active8TraceInventoryError(
-            "active-8 inventory has an unauthorized boundary status"
-        )
+        raise Active8TraceInventoryError("active-8 inventory has an unauthorized boundary status")
     if payload.get("training_authorized") is not False:
-        raise Active8TraceInventoryError(
-            "active-8 inventory cannot carry training authority"
-        )
+        raise Active8TraceInventoryError("active-8 inventory cannot carry training authority")
     if payload.get("selection_policy") != _selection_policy():
         raise Active8TraceInventoryError(
-            "active-8 inventory selection policy differs from the "
-            "complete-trace Active8 contract"
+            "active-8 inventory selection policy differs from the complete-trace Active8 contract"
         )
     if payload.get("persistent_state_identity") != _persistent_state_identity():
         raise Active8TraceInventoryError(
-            "active-8 inventory persistent-state identity differs from "
-            "production"
+            "active-8 inventory persistent-state identity differs from production"
         )
     if payload.get("implementation_identity") != implementation_identity():
         raise Active8TraceInventoryError(
@@ -416,20 +386,14 @@ def _validate_inventory_semantics(payload: Mapping[str, object]) -> None:
     )
     if (
         not isinstance(source_identity, Mapping)
-        or set(source_identity)
-        != {*source_fields, "effective_source_corpus_cache_sha256"}
+        or set(source_identity) != {*source_fields, "effective_source_corpus_cache_sha256"}
         or any(not _is_sha256(source_identity.get(field)) for field in source_fields)
     ):
-        raise Active8TraceInventoryError(
-            "active-8 inventory source identity is malformed"
-        )
+        raise Active8TraceInventoryError("active-8 inventory source identity is malformed")
     expected_effective_sha256 = _sha256_bytes(
         {field: source_identity[field] for field in source_fields}
     )
-    if (
-        source_identity.get("effective_source_corpus_cache_sha256")
-        != expected_effective_sha256
-    ):
+    if source_identity.get("effective_source_corpus_cache_sha256") != expected_effective_sha256:
         raise Active8TraceInventoryError(
             "active-8 inventory effective source identity is inconsistent"
         )
@@ -695,14 +659,10 @@ def inventory_record_for_trace(
                 "teacher_family": (
                     None
                     if is_terminal
-                    else canonical_family(
-                        addressed.trace.steps[progress_index].rule_name
-                    )
+                    else canonical_family(addressed.trace.steps[progress_index].rule_name)
                 ),
                 "teacher_action_sha256": (
-                    None
-                    if is_terminal
-                    else evidence[progress_index].action_sha256
+                    None if is_terminal else evidence[progress_index].action_sha256
                 ),
             }
         )
@@ -718,6 +678,8 @@ def _decision_records_for_source(
     source: Active8SourceShard,
     *,
     source_bytes_sha256: str,
+    packed_manifest_sha256: str,
+    packed_overlay_sha256: str | None,
     exact_candidate_checker: ExactCandidateChecker,
     current: Counter,
     current_reasons: Counter[str],
@@ -726,15 +688,15 @@ def _decision_records_for_source(
 ) -> Iterable[dict[str, object]]:
     """Stream one source shard while accumulating its exact decision census."""
 
-    for addressed in read_addressed_packed_shard(
+    for addressed in read_frozen_source_addressed_packed_shard(
         source.path,
+        expected_shard_sha256=source_bytes_sha256,
+        expected_manifest_sha256=packed_manifest_sha256,
+        expected_overlay_sha256=packed_overlay_sha256,
         verify_fraction=0.0,
     ):
         address = addressed.address
-        if (
-            address.layer != source.envelope_layer
-            or address.partition != source.partition
-        ):
+        if address.layer != source.envelope_layer or address.partition != source.partition:
             raise Active8TraceInventoryError(
                 "packed trace envelope disagrees with unified-manifest lane"
             )
@@ -777,9 +739,7 @@ def _atomic_deterministic_gzip_jsonl(
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
-        raise Active8TraceInventoryError(
-            f"refusing to overwrite immutable inventory shard: {path}"
-        )
+        raise Active8TraceInventoryError(f"refusing to overwrite immutable inventory shard: {path}")
     temporary_name: str | None = None
     count = 0
     try:
@@ -823,13 +783,16 @@ def _atomic_json(path: Path, payload: object) -> None:
         raise Active8TraceInventoryError(
             f"refusing to overwrite immutable inventory manifest: {path}"
         )
-    content = json.dumps(
-        payload,
-        indent=2,
-        sort_keys=True,
-        ensure_ascii=False,
-        allow_nan=False,
-    ).encode("utf-8") + b"\n"
+    content = (
+        json.dumps(
+            payload,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        + b"\n"
+    )
     temporary_name: str | None = None
     try:
         with tempfile.NamedTemporaryFile(
@@ -928,9 +891,7 @@ def build_active8_trace_inventory(
         packed_manifest_sha256 = _sha256_file(packed_manifest_path)
         packed_overlay_path = overlay_path_for(source.path)
         packed_overlay_sha256 = (
-            _sha256_file(packed_overlay_path)
-            if packed_overlay_path.is_file()
-            else None
+            _sha256_file(packed_overlay_path) if packed_overlay_path.is_file() else None
         )
         current = Counter(
             traces=0,
@@ -951,6 +912,8 @@ def build_active8_trace_inventory(
             _decision_records_for_source(
                 source,
                 source_bytes_sha256=source_bytes_sha256,
+                packed_manifest_sha256=packed_manifest_sha256,
+                packed_overlay_sha256=packed_overlay_sha256,
                 exact_candidate_checker=exact_candidate_checker,
                 current=current,
                 current_reasons=current_reasons,
@@ -959,14 +922,10 @@ def build_active8_trace_inventory(
             ),
         )
         if written != current["traces"]:
-            raise Active8TraceInventoryError(
-                "derived inventory shard lost trace decisions"
-            )
+            raise Active8TraceInventoryError("derived inventory shard lost trace decisions")
         source_digest = observed_digest[0] or source_bytes_sha256
         if source_digest in seen_source_digests:
-            raise Active8TraceInventoryError(
-                "one physical packed shard is declared more than once"
-            )
+            raise Active8TraceInventoryError("one physical packed shard is declared more than once")
         seen_source_digests.add(source_digest)
         totals["source_shards"] += 1
         totals.update(current)
@@ -1022,9 +981,7 @@ def build_active8_trace_inventory(
             ]
         ),
     }
-    source_identity["effective_source_corpus_cache_sha256"] = _sha256_bytes(
-        source_identity
-    )
+    source_identity["effective_source_corpus_cache_sha256"] = _sha256_bytes(source_identity)
     payload: dict[str, object] = {
         "schema": ACTIVE8_TRACE_INVENTORY_SCHEMA,
         "schema_version": ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION,
@@ -1057,9 +1014,7 @@ def load_active8_trace_inventory(path: Path) -> dict[str, object]:
             f"cannot read active-8 inventory manifest: {source}"
         ) from error
     if not isinstance(payload, dict):
-        raise Active8TraceInventoryError(
-            "active-8 inventory manifest must be a JSON object"
-        )
+        raise Active8TraceInventoryError("active-8 inventory manifest must be a JSON object")
     if payload.get("schema") != ACTIVE8_TRACE_INVENTORY_SCHEMA:
         raise Active8TraceInventoryError("unexpected active-8 inventory schema")
     if payload.get("schema_version") != ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION:
@@ -1096,27 +1051,14 @@ def load_active8_trace_admission(
         )
     manifest = load_active8_trace_inventory(manifest_path)
     inventory_sha256 = manifest["inventory_sha256"]
-    if (
-        expected_inventory_sha256 is not None
-        and inventory_sha256 != expected_inventory_sha256
-    ):
-        raise Active8TraceInventoryError(
-            "active-8 logical inventory SHA-256 mismatch"
-        )
+    if expected_inventory_sha256 is not None and inventory_sha256 != expected_inventory_sha256:
+        raise Active8TraceInventoryError("active-8 logical inventory SHA-256 mismatch")
     source_identity = manifest.get("source_identity")
     if not isinstance(source_identity, Mapping):
-        raise Active8TraceInventoryError(
-            "active-8 inventory lacks its source identity"
-        )
-    effective_source_sha256 = source_identity.get(
-        "effective_source_corpus_cache_sha256"
-    )
-    unified_packed_manifest_sha256 = source_identity.get(
-        "unified_packed_manifest_sha256"
-    )
-    support_contract_sha256 = source_identity.get(
-        "support_contract_sha256"
-    )
+        raise Active8TraceInventoryError("active-8 inventory lacks its source identity")
+    effective_source_sha256 = source_identity.get("effective_source_corpus_cache_sha256")
+    unified_packed_manifest_sha256 = source_identity.get("unified_packed_manifest_sha256")
+    support_contract_sha256 = source_identity.get("support_contract_sha256")
     if (
         not _is_sha256(effective_source_sha256)
         or not _is_sha256(unified_packed_manifest_sha256)
@@ -1127,19 +1069,14 @@ def load_active8_trace_admission(
         )
     if (
         expected_effective_source_corpus_cache_sha256 is not None
-        and effective_source_sha256
-        != expected_effective_source_corpus_cache_sha256
+        and effective_source_sha256 != expected_effective_source_corpus_cache_sha256
     ):
-        raise Active8TraceInventoryError(
-            "active-8 effective source-corpus SHA-256 mismatch"
-        )
+        raise Active8TraceInventoryError("active-8 effective source-corpus SHA-256 mismatch")
     if (
         expected_support_contract_sha256 is not None
         and support_contract_sha256 != expected_support_contract_sha256
     ):
-        raise Active8TraceInventoryError(
-            "active-8 Gate-0 support-contract SHA-256 mismatch"
-        )
+        raise Active8TraceInventoryError("active-8 Gate-0 support-contract SHA-256 mismatch")
 
     decisions_by_digest: dict[str, tuple[tuple[str, bool], ...]] = {}
     shard_digest_by_lane: dict[tuple[str, str, str], str] = {}
@@ -1149,14 +1086,10 @@ def load_active8_trace_admission(
     total_excluded = 0
     shards = manifest.get("shards")
     if not isinstance(shards, list) or not shards:
-        raise Active8TraceInventoryError(
-            "active-8 inventory has no source shards"
-        )
+        raise Active8TraceInventoryError("active-8 inventory has no source shards")
     for raw_shard in shards:
         if not isinstance(raw_shard, Mapping):
-            raise Active8TraceInventoryError(
-                "active-8 shard manifest is not an object"
-            )
+            raise Active8TraceInventoryError("active-8 shard manifest is not an object")
         shard = dict(raw_shard)
         digest = shard.get("packed_shard_content_sha256")
         packed_shard_name = shard.get("packed_shard_name")
@@ -1177,26 +1110,17 @@ def load_active8_trace_admission(
             or not _is_sha256(decision_sha256)
             or not isinstance(counts, Mapping)
         ):
-            raise Active8TraceInventoryError(
-                "active-8 source-shard identity is malformed"
-            )
+            raise Active8TraceInventoryError("active-8 source-shard identity is malformed")
         if digest in decisions_by_digest:
-            raise Active8TraceInventoryError(
-                "active-8 inventory repeats a physical source shard"
-            )
+            raise Active8TraceInventoryError("active-8 inventory repeats a physical source shard")
         lane = (envelope_layer, partition, packed_shard_name)
         if lane in shard_digest_by_lane:
-            raise Active8TraceInventoryError(
-                "active-8 inventory repeats a source-shard lane"
-            )
+            raise Active8TraceInventoryError("active-8 inventory repeats a source-shard lane")
         decision_path = _inventory_decision_path(
             manifest_path,
             decision_name,
         )
-        if (
-            not decision_path.is_file()
-            or _sha256_file(decision_path) != decision_sha256
-        ):
+        if not decision_path.is_file() or _sha256_file(decision_path) != decision_sha256:
             raise Active8TraceInventoryError(
                 f"active-8 decision shard hash mismatch: {decision_path}"
             )
@@ -1215,8 +1139,7 @@ def load_active8_trace_admission(
                 key = record.get("trace_key")
                 if (
                     record.get("schema") != ACTIVE8_TRACE_DECISION_SCHEMA
-                    or record.get("schema_version")
-                    != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
+                    or record.get("schema_version") != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
                     or not isinstance(key, Mapping)
                     or key.get("packed_shard_content_sha256") != digest
                     or key.get("entry_index") != len(decisions)
@@ -1234,11 +1157,7 @@ def load_active8_trace_admission(
                 progress_rows = record.get("progress_rows")
                 if (
                     not isinstance(progress_rows, list)
-                    or (
-                        accepted
-                        and len(progress_rows)
-                        != int(record.get("path_length", -1)) + 1
-                    )
+                    or (accepted and len(progress_rows) != int(record.get("path_length", -1)) + 1)
                     or (not accepted and progress_rows)
                 ):
                     raise Active8TraceInventoryError(
@@ -1254,9 +1173,7 @@ def load_active8_trace_admission(
             )
         if counts.get("accepted_traces") != sum(
             int(accepted) for _, accepted in decisions
-        ) or counts.get("excluded_traces") != sum(
-            int(not accepted) for _, accepted in decisions
-        ):
+        ) or counts.get("excluded_traces") != sum(int(not accepted) for _, accepted in decisions):
             raise Active8TraceInventoryError(
                 "active-8 decision shard disagrees with its admission census"
             )
@@ -1312,9 +1229,7 @@ def iter_inventory_decisions(
             shard["inventory_shard"],
         )
         if not path.is_file() or _sha256_file(path) != shard["inventory_shard_sha256"]:
-            raise Active8TraceInventoryError(
-                f"active-8 decision shard hash mismatch: {path}"
-            )
+            raise Active8TraceInventoryError(f"active-8 decision shard hash mismatch: {path}")
         with gzip.open(path, "rt") as handle:
             for line in handle:
                 line = line.strip()
@@ -1323,12 +1238,9 @@ def iter_inventory_decisions(
                 record = json.loads(line)
                 if (
                     record.get("schema") != ACTIVE8_TRACE_DECISION_SCHEMA
-                    or record.get("schema_version")
-                    != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
+                    or record.get("schema_version") != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
                 ):
-                    raise Active8TraceInventoryError(
-                        "active-8 decision row has another schema"
-                    )
+                    raise Active8TraceInventoryError("active-8 decision row has another schema")
                 total += 1
                 yield record
     if total != manifest["counts"]["traces"]:
@@ -1369,15 +1281,11 @@ def iter_accepted_trace_keys(
                     "accepted trace does not retain every progress row"
                 )
             if not rows[-1]["is_terminal"]:
-                raise Active8TraceInventoryError(
-                    "accepted trace does not retain its terminal row"
-                )
+                raise Active8TraceInventoryError("accepted trace does not retain its terminal row")
             yield key
         elif record["decision"] == "excluded":
             if record["progress_rows"]:
-                raise Active8TraceInventoryError(
-                    "excluded trace leaked progress rows"
-                )
+                raise Active8TraceInventoryError("excluded trace leaked progress rows")
         else:
             raise Active8TraceInventoryError("unknown active-8 trace decision")
 

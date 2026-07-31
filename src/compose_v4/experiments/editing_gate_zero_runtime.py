@@ -49,7 +49,7 @@ from compose_v4.data.packed_trace_store import (
     PACKED_STORE_SCHEMA,
     PACKED_STORE_SCHEMA_VERSION,
     manifest_path_for,
-    read_addressed_packed_shard,
+    read_frozen_source_addressed_packed_shard,
 )
 from compose_v4.data.provenance_overlay import (
     overlay_path_for,
@@ -132,9 +132,7 @@ PRODUCTION_ACTION_TABLE_VOCABULARY = (
     "ring_system_restate",
 )
 PRODUCTION_ACTIVE_FAMILIES = tuple(
-    family
-    for family in MARK_RULE_NAMES
-    if family not in {"ring_system_grow", "ring_system_delete"}
+    family for family in MARK_RULE_NAMES if family not in {"ring_system_grow", "ring_system_delete"}
 )
 GATE_ZERO_ACTIVE8_IDENTITY_FIELDS = (
     "active8_inventory_manifest_file_sha256",
@@ -484,13 +482,10 @@ class GateZeroActive8ValidationSource:
             for progress_index in range(record.path.path_length + 1)
         }
         if set(semantic_cell_ids) != record_keys:
-            raise ValueError(
-                "Active8 validation records and semantic rows are not an exact census"
-            )
+            raise ValueError("Active8 validation records and semantic rows are not an exact census")
         family_counts = dict(self.admitted_teacher_examples_by_family)
-        if (
-            tuple(family_counts) != PRODUCTION_ACTIVE_FAMILIES
-            or any(type(count) is not int or count < 0 for count in family_counts.values())
+        if tuple(family_counts) != PRODUCTION_ACTIVE_FAMILIES or any(
+            type(count) is not int or count < 0 for count in family_counts.values()
         ):
             raise ValueError(
                 "Active8 validation family census must cover the ordered pilot families"
@@ -541,9 +536,7 @@ class GateZeroActive8ValidationSource:
             cell_id for cell_id in self.semantic_cell_ids.values() if cell_id is not None
         }
         return {
-            "active8_inventory_manifest_file_sha256": (
-                self.admission.manifest_file_sha256
-            ),
+            "active8_inventory_manifest_file_sha256": (self.admission.manifest_file_sha256),
             "active8_inventory_sha256": self.admission.inventory_sha256,
             "active8_effective_source_corpus_cache_sha256": (
                 self.admission.effective_source_corpus_cache_sha256
@@ -551,9 +544,7 @@ class GateZeroActive8ValidationSource:
             "active8_unified_packed_manifest_sha256": (
                 self.admission.unified_packed_manifest_sha256
             ),
-            "active8_support_contract_sha256": (
-                self.admission.support_contract_sha256
-            ),
+            "active8_support_contract_sha256": (self.admission.support_contract_sha256),
             "partition": "validation",
             "source_shard_count": len(self.source.bindings),
             "source_trace_count": len(self.source.records),
@@ -564,9 +555,7 @@ class GateZeroActive8ValidationSource:
             "admitted_nonterminal_row_count": self.admitted_nonterminal_row_count,
             "admitted_terminal_row_count": self.admitted_terminal_row_count,
             "admitted_nonempty_semantic_cell_count": len(nonempty_cells),
-            "admitted_teacher_examples_by_family": dict(
-                self.admitted_teacher_examples_by_family
-            ),
+            "admitted_teacher_examples_by_family": dict(self.admitted_teacher_examples_by_family),
         }
 
 
@@ -609,10 +598,8 @@ def _validated_sidecar_external_identities(
     sidecar_contract = contract.sidecar
     manifest = loaded.manifest
     if (
-        manifest["semantic_census_sha256"]
-        != sidecar_contract["semantic_census_sha256"]
-        or manifest["counts"]["nonempty_cells"]
-        != sidecar_contract["nonempty_semantic_cell_count"]
+        manifest["semantic_census_sha256"] != sidecar_contract["semantic_census_sha256"]
+        or manifest["counts"]["nonempty_cells"] != sidecar_contract["nonempty_semantic_cell_count"]
     ):
         raise EditingGateZeroRuntimeError(
             "semantic-sidecar census disagrees with the runtime contract"
@@ -621,16 +608,14 @@ def _validated_sidecar_external_identities(
     missing_families = sorted(set(contract.required_families) - set(teacher_families))
     if missing_families:
         raise EditingGateZeroRuntimeError(
-            "semantic sidecar is missing required Active8 teacher families: "
-            f"{missing_families}"
+            f"semantic sidecar is missing required Active8 teacher families: {missing_families}"
         )
     provenance = manifest["provenance"]
     unified_sha256 = str(provenance["unified_packed_manifest_sha256"])
     representability_sha256 = str(provenance["representability_overlay_sha256"])
     if (
         unified_sha256 != sidecar_contract["unified_packed_manifest_sha256"]
-        or representability_sha256
-        != sidecar_contract["representability_overlay_sha256"]
+        or representability_sha256 != sidecar_contract["representability_overlay_sha256"]
     ):
         raise EditingGateZeroRuntimeError(
             "sidecar external corpus identity disagrees with the runtime contract"
@@ -684,8 +669,8 @@ def load_frozen_validation_source(
             "frozen validation semantic sidecar failed verification"
         ) from error
     manifest = loaded.manifest
-    unified_sha256, representability_sha256 = (
-        _validated_sidecar_external_identities(contract, loaded)
+    unified_sha256, representability_sha256 = _validated_sidecar_external_identities(
+        contract, loaded
     )
     provenance = manifest["provenance"]
     _require_file_sha256(
@@ -729,8 +714,11 @@ def load_frozen_validation_source(
         )
         shard_records: list[PathRecord] = []
         try:
-            addressed_rows = read_addressed_packed_shard(
+            addressed_rows = read_frozen_source_addressed_packed_shard(
                 packed_path,
+                expected_shard_sha256=spec.packed_shard_content_sha256,
+                expected_manifest_sha256=spec.packed_manifest_sha256,
+                expected_overlay_sha256=spec.provenance_overlay_sha256,
                 verify_fraction=0.0,
             )
             for addressed in addressed_rows:
@@ -845,9 +833,7 @@ def bind_active8_validation_source(
 
     admitted_records: list[PathRecord] = []
     admitted_trace_keys: set[tuple[str, int]] = set()
-    family_counts: Counter[str] = Counter(
-        {family: 0 for family in PRODUCTION_ACTIVE_FAMILIES}
-    )
+    family_counts: Counter[str] = Counter({family: 0 for family in PRODUCTION_ACTIVE_FAMILIES})
     try:
         for record in source.records:
             address = record.corpus_address
@@ -886,9 +872,7 @@ def bind_active8_validation_source(
         in admitted_trace_keys
     }
     if not admitted_records:
-        raise EditingGateZeroRuntimeError(
-            "Active8 admission leaves no Gate0 validation traces"
-        )
+        raise EditingGateZeroRuntimeError("Active8 admission leaves no Gate0 validation traces")
     admitted_record_keys = {
         (
             record.corpus_address.packed_shard_content_sha256,
@@ -998,9 +982,7 @@ def _support_signature_payload(
     *,
     max_atoms: int,
 ) -> dict[str, Any]:
-    operator_registry_source_sha256 = _source_set_sha256(
-        _OPERATOR_REGISTRY_SOURCES
-    )
+    operator_registry_source_sha256 = _source_set_sha256(_OPERATOR_REGISTRY_SOURCES)
     canonicalizer_contract_sha256 = _source_set_sha256(_CANONICALIZER_CONTRACT_SOURCES)
     return {
         "schema": "compose.editing.gate_zero_support_signature",
@@ -1374,9 +1356,7 @@ def _evidence_body(
             "support_signature": support_signature,
             "support_signature_sha256": _stable_sha256(support_signature),
             "operator_registry_hash": _source_set_sha256(_OPERATOR_REGISTRY_SOURCES)[:16],
-            "operator_registry_source_sha256": _source_set_sha256(
-                _OPERATOR_REGISTRY_SOURCES
-            ),
+            "operator_registry_source_sha256": _source_set_sha256(_OPERATOR_REGISTRY_SOURCES),
             "canonicalizer_contract_sha256": _source_set_sha256(_CANONICALIZER_CONTRACT_SOURCES),
             "tensorization_implementation_hash": (tensorization_implementation_hash()),
             "fiber_compiler_implementation_hash": (fiber_compiler_implementation_hash()),

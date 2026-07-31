@@ -9,6 +9,7 @@ Uses real molecules (the analogue pool sample) rather than synthetic toys, becau
 have actually bitten this repo -- charge, aromaticity, fused rings, slot-stable deletes -- do not appear
 in small hand-built graphs.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -29,6 +30,7 @@ from compose_v4.data.packed_trace_store import (  # noqa: E402
     build_packed_entry,
     pack_path,
     read_addressed_packed_shard,
+    read_frozen_source_addressed_packed_shard,
     read_packed_shard,
     unpack_path,
     write_packed_shard,
@@ -120,7 +122,9 @@ def test_state_at_matches_exactly_at_every_progress():
             a, b = packed.state_at(progress), replayed.state_at(progress)
             assert np.array_equal(a.atom_types, b.atom_types), f"atom_types differ at {progress}"
             assert np.array_equal(a.bonds, b.bonds), f"bonds differ at {progress}"
-            assert np.array_equal(a.formal_charges, b.formal_charges), f"charges differ at {progress}"
+            assert np.array_equal(a.formal_charges, b.formal_charges), (
+                f"charges differ at {progress}"
+            )
             assert canonical_state_key(a) == canonical_state_key(b)
 
 
@@ -186,8 +190,9 @@ def test_wrong_state_count_is_refused():
 def test_mismatched_endpoint_is_refused():
     """Pairing a store with the wrong trace must fail loudly, not train on a silent mismatch."""
     pairs = _pairs(limit=6)
-    (path_a, _), (path_b, _) = pairs[0], next(
-        (p for p in pairs[1:] if p[0].path_length == pairs[0][0].path_length), (None, None)
+    (path_a, _), (path_b, _) = (
+        pairs[0],
+        next((p for p in pairs[1:] if p[0].path_length == pairs[0][0].path_length), (None, None)),
     )
     if path_b is None:
         pytest.skip("no second trace of equal length in the sample")
@@ -212,8 +217,12 @@ def test_roundtrip_through_a_written_shard(tmp_path):
         entries.append(
             build_packed_entry(
                 encode_trace_record(
-                    trace, n_slots=40, seed=0, trace_id=f"t{len(entries)}",
-                    partition="train", layer="mmp",
+                    trace,
+                    n_slots=40,
+                    seed=0,
+                    trace_id=f"t{len(entries)}",
+                    partition="train",
+                    layer="mmp",
                 ),
                 replayed,
             )
@@ -352,6 +361,60 @@ def test_addressed_reader_reconciles_contiguous_indices_with_manifest_count(tmp_
     assert len(list(read_packed_shard(shard))) == 2
 
 
+def test_frozen_source_reader_migrates_exact_bytes_without_authorizing_stale_overlay(
+    tmp_path,
+):
+    shard, _ = _write_address_fixture(tmp_path, trace_ids=("frozen-source",))
+    manifest_path = shard.with_suffix(".manifest.json")
+    overlay_path = Path(str(shard) + ".provenance.json")
+    overlay_path.write_text(
+        json.dumps(
+            {
+                "schema": "compose.data.provenance_overlay",
+                "schema_version": 1,
+                "upgrade_implementation_hash": "historical-contract",
+            },
+            sort_keys=True,
+        )
+    )
+    shard_sha256 = hashlib.sha256(shard.read_bytes()).hexdigest()
+    manifest_sha256 = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    overlay_sha256 = hashlib.sha256(overlay_path.read_bytes()).hexdigest()
+
+    with pytest.raises(PackedStoreError, match="invalid provenance overlay"):
+        list(read_addressed_packed_shard(shard))
+
+    migrated = list(
+        read_frozen_source_addressed_packed_shard(
+            shard,
+            expected_shard_sha256=shard_sha256,
+            expected_manifest_sha256=manifest_sha256,
+            expected_overlay_sha256=overlay_sha256,
+        )
+    )
+    assert len(migrated) == 1
+    assert migrated[0].address.packed_shard_content_sha256 == shard_sha256
+
+    with pytest.raises(PackedStoreError, match="manifest SHA-256 mismatch"):
+        list(
+            read_frozen_source_addressed_packed_shard(
+                shard,
+                expected_shard_sha256=shard_sha256,
+                expected_manifest_sha256="0" * 64,
+                expected_overlay_sha256=overlay_sha256,
+            )
+        )
+    with pytest.raises(PackedStoreError, match="provenance-overlay SHA-256 mismatch"):
+        list(
+            read_frozen_source_addressed_packed_shard(
+                shard,
+                expected_shard_sha256=shard_sha256,
+                expected_manifest_sha256=manifest_sha256,
+                expected_overlay_sha256="0" * 64,
+            )
+        )
+
+
 def test_provenance_mismatch_is_refused(tmp_path):
     """A store built under different capability flags enumerates different candidates -- refuse it."""
     if not POOL.exists():
@@ -366,8 +429,12 @@ def test_provenance_mismatch_is_refused(tmp_path):
         [
             build_packed_entry(
                 encode_trace_record(
-                    replayed.trace, n_slots=40, seed=0, trace_id="t0",
-                    partition="train", layer="mmp",
+                    replayed.trace,
+                    n_slots=40,
+                    seed=0,
+                    trace_id="t0",
+                    partition="train",
+                    layer="mmp",
                 ),
                 replayed,
             )
@@ -375,7 +442,9 @@ def test_provenance_mismatch_is_refused(tmp_path):
         provenance={"capability_hash": "built_under_this"},
     )
     with pytest.raises(PackedStoreError, match="provenance mismatch on capability_hash"):
-        list(read_packed_shard(shard, expected_provenance={"capability_hash": "trained_under_that"}))
+        list(
+            read_packed_shard(shard, expected_provenance={"capability_hash": "trained_under_that"})
+        )
 
 
 def test_missing_manifest_is_refused(tmp_path):
@@ -426,8 +495,12 @@ def test_stored_contract_mismatch_is_refused_on_load(tmp_path, monkeypatch):
         [
             store.build_packed_entry(
                 encode_trace_record(
-                    replayed.trace, n_slots=40, seed=0, trace_id="t0",
-                    partition="train", layer="mmp",
+                    replayed.trace,
+                    n_slots=40,
+                    seed=0,
+                    trace_id="t0",
+                    partition="train",
+                    layer="mmp",
                 ),
                 replayed,
             )
@@ -454,8 +527,12 @@ def test_sentinel_replay_is_deterministic_and_passes_on_a_good_store(tmp_path):
         entries.append(
             store.build_packed_entry(
                 encode_trace_record(
-                    replayed.trace, n_slots=40, seed=0, trace_id=f"t{i}",
-                    partition="train", layer="mmp",
+                    replayed.trace,
+                    n_slots=40,
+                    seed=0,
+                    trace_id=f"t{i}",
+                    partition="train",
+                    layer="mmp",
                 ),
                 replayed,
             )
@@ -481,7 +558,9 @@ def test_manifest_path_uses_the_repo_convention():
     """
     from compose_v4.data.packed_trace_store import manifest_path_for
 
-    assert manifest_path_for(Path("a/b/shard_0000.jsonl.gz")).name == "shard_0000.jsonl.manifest.json"
+    assert (
+        manifest_path_for(Path("a/b/shard_0000.jsonl.gz")).name == "shard_0000.jsonl.manifest.json"
+    )
     assert manifest_path_for(Path("shard_0007.jsonl.gz")).name == "shard_0007.jsonl.manifest.json"
 
 
@@ -504,15 +583,21 @@ def test_packed_store_manifest_is_discoverable_by_the_same_rule(tmp_path):
         pytest.skip("local analogue pool sample unavailable")
     from compose_v4.rewrite.trace_shard import encode_trace_record
 
-    replayed = TraceProgressCTMC(rewrite_trace_from_record(json.loads(POOL.read_text().splitlines()[0])))
+    replayed = TraceProgressCTMC(
+        rewrite_trace_from_record(json.loads(POOL.read_text().splitlines()[0]))
+    )
     shard = tmp_path / "packed_0000.jsonl.gz"
     store.write_packed_shard(
         shard,
         [
             store.build_packed_entry(
                 encode_trace_record(
-                    replayed.trace, n_slots=40, seed=0, trace_id="t0",
-                    partition="train", layer="mmp",
+                    replayed.trace,
+                    n_slots=40,
+                    seed=0,
+                    trace_id="t0",
+                    partition="train",
+                    layer="mmp",
                 ),
                 replayed,
             )

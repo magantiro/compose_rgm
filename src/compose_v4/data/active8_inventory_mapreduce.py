@@ -43,7 +43,7 @@ from compose_v4.data.active8_trace_inventory import (
 )
 from compose_v4.data.packed_trace_store import (
     manifest_path_for,
-    read_addressed_packed_shard,
+    read_frozen_source_addressed_packed_shard,
 )
 from compose_v4.data.provenance_overlay import overlay_path_for
 
@@ -120,9 +120,7 @@ class Active8MapTask:
             "packed_shard_name": self.packed_shard_name,
             "packed_shard_content_sha256": self.packed_shard_content_sha256,
             "packed_manifest_sha256": self.packed_manifest_sha256,
-            "packed_provenance_overlay_sha256": (
-                self.packed_provenance_overlay_sha256
-            ),
+            "packed_provenance_overlay_sha256": (self.packed_provenance_overlay_sha256),
         }
 
 
@@ -157,18 +155,12 @@ def _sha256_file(path: Path) -> str:
 
 
 def _implementation_identity(*, repo_root: Path | None = None) -> dict[str, object]:
-    root = (
-        Path(repo_root)
-        if repo_root is not None
-        else Path(__file__).resolve().parents[3]
-    )
+    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[3]
     sources: dict[str, str] = {}
     for relative in _MAPREDUCE_IMPLEMENTATION_SOURCES:
         path = root / relative
         if not path.is_file():
-            raise Active8MapReduceError(
-                f"map/reduce implementation source is absent: {path}"
-            )
+            raise Active8MapReduceError(f"map/reduce implementation source is absent: {path}")
         sources[relative] = _sha256_file(path)
     return {
         "sources": sources,
@@ -206,9 +198,7 @@ def plan_active8_mapreduce(
         raise Active8MapReduceError("unified packed manifest is absent")
     decoded = json.loads(source_manifest_path.read_text())
     if _sha256_payload(decoded) != _sha256_payload(source_manifest):
-        raise Active8MapReduceError(
-            "decoded unified manifest differs from the exact source file"
-        )
+        raise Active8MapReduceError("decoded unified manifest differs from the exact source file")
     ordered = tuple(
         sorted(
             shards,
@@ -233,14 +223,10 @@ def plan_active8_mapreduce(
         packed_manifest = manifest_path_for(source)
         packed_overlay = overlay_path_for(source)
         if not source.is_file() or not packed_manifest.is_file():
-            raise Active8MapReduceError(
-                f"packed shard or its manifest is absent: {source}"
-            )
+            raise Active8MapReduceError(f"packed shard or its manifest is absent: {source}")
         physical_digest = _sha256_file(source)
         if physical_digest in seen_physical_digests:
-            raise Active8MapReduceError(
-                "one physical packed source is declared more than once"
-            )
+            raise Active8MapReduceError("one physical packed source is declared more than once")
         seen_physical_digests.add(physical_digest)
         binding = {
             "manifest_layer": shard.manifest_layer,
@@ -251,9 +237,7 @@ def plan_active8_mapreduce(
             "packed_shard_content_sha256": physical_digest,
             "packed_manifest_sha256": _sha256_file(packed_manifest),
             "packed_provenance_overlay_sha256": (
-                _sha256_file(packed_overlay)
-                if packed_overlay.is_file()
-                else None
+                _sha256_file(packed_overlay) if packed_overlay.is_file() else None
             ),
         }
         preliminary_bindings.append(binding)
@@ -266,12 +250,8 @@ def plan_active8_mapreduce(
         "source_manifest_semantic_sha256": _sha256_payload(source_manifest),
         "support_contract_sha256": support_contract_sha256,
         "active8_families": list(ACTIVE8_FAMILIES),
-        "active8_implementation_sha256": active8_identity[
-            "implementation_sha256"
-        ],
-        "mapreduce_implementation_sha256": mapreduce_identity[
-            "implementation_sha256"
-        ],
+        "active8_implementation_sha256": active8_identity["implementation_sha256"],
+        "mapreduce_implementation_sha256": mapreduce_identity["implementation_sha256"],
         "source_bindings": preliminary_bindings,
     }
     run_identity_sha256 = _sha256_payload(run_payload)
@@ -332,9 +312,7 @@ def _publish_bytes_immutable(path: Path, content: bytes) -> bool:
     expected_sha256 = hashlib.sha256(content).hexdigest()
     if path.exists():
         if _sha256_file(path) != expected_sha256 or path.read_bytes() != content:
-            raise Active8MapReduceError(
-                f"immutable artifact collision at {path}"
-            )
+            raise Active8MapReduceError(f"immutable artifact collision at {path}")
         return True
     temporary_name: str | None = None
     try:
@@ -353,9 +331,7 @@ def _publish_bytes_immutable(path: Path, content: bytes) -> bool:
             os.link(temporary_name, path)
         except FileExistsError:
             if _sha256_file(path) != expected_sha256 or path.read_bytes() != content:
-                raise Active8MapReduceError(
-                    f"immutable artifact collision at {path}"
-                )
+                raise Active8MapReduceError(f"immutable artifact collision at {path}")
         return False
     finally:
         if temporary_name is not None:
@@ -377,17 +353,13 @@ def _publish_file_immutable(
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists():
         if _sha256_file(destination) != expected_sha256:
-            raise Active8MapReduceError(
-                f"immutable content-object collision at {destination}"
-            )
+            raise Active8MapReduceError(f"immutable content-object collision at {destination}")
         return True
     try:
         os.link(source, destination)
     except FileExistsError:
         if _sha256_file(destination) != expected_sha256:
-            raise Active8MapReduceError(
-                f"immutable content-object collision at {destination}"
-            )
+            raise Active8MapReduceError(f"immutable content-object collision at {destination}")
         return True
     return False
 
@@ -419,13 +391,8 @@ def _load_receipt(
     if payload.get("receipt_sha256") != _receipt_self_hash(payload):
         raise Active8MapReduceError("map receipt self-hash mismatch")
     object_path = Path(output_root) / str(payload["decision_object"])
-    if (
-        not object_path.is_file()
-        or _sha256_file(object_path) != payload["decision_object_sha256"]
-    ):
-        raise Active8MapReduceError(
-            "map receipt decision object is absent or hash-mismatched"
-        )
+    if not object_path.is_file() or _sha256_file(object_path) != payload["decision_object_sha256"]:
+        raise Active8MapReduceError("map receipt decision object is absent or hash-mismatched")
     return payload
 
 
@@ -453,26 +420,18 @@ def map_active8_source_decisions(
     if (
         not source.is_file()
         or _sha256_file(source) != task.packed_shard_content_sha256
-        or _sha256_file(manifest_path_for(source))
-        != task.packed_manifest_sha256
+        or _sha256_file(manifest_path_for(source)) != task.packed_manifest_sha256
     ):
-        raise Active8MapReduceError(
-            "map source bytes disagree with the frozen task"
-        )
+        raise Active8MapReduceError("map source bytes disagree with the frozen task")
     overlay_path = overlay_path_for(source)
     if task.packed_provenance_overlay_sha256 is None:
         if overlay_path.exists():
-            raise Active8MapReduceError(
-                "an undeclared provenance overlay appeared after planning"
-            )
+            raise Active8MapReduceError("an undeclared provenance overlay appeared after planning")
     elif (
         not overlay_path.is_file()
-        or _sha256_file(overlay_path)
-        != task.packed_provenance_overlay_sha256
+        or _sha256_file(overlay_path) != task.packed_provenance_overlay_sha256
     ):
-        raise Active8MapReduceError(
-            "packed provenance overlay disagrees with the frozen task"
-        )
+        raise Active8MapReduceError("packed provenance overlay disagrees with the frozen task")
 
     counts = Counter(
         traces=0,
@@ -503,14 +462,16 @@ def map_active8_source_decisions(
                 fileobj=raw,
                 mtime=0,
             ) as compressed:
-                for addressed in read_addressed_packed_shard(
+                for addressed in read_frozen_source_addressed_packed_shard(
                     source,
+                    expected_shard_sha256=task.packed_shard_content_sha256,
+                    expected_manifest_sha256=task.packed_manifest_sha256,
+                    expected_overlay_sha256=(task.packed_provenance_overlay_sha256),
                     verify_fraction=0.0,
                 ):
                     address = addressed.address
                     if (
-                        address.packed_shard_content_sha256
-                        != task.packed_shard_content_sha256
+                        address.packed_shard_content_sha256 != task.packed_shard_content_sha256
                         or address.layer != task.envelope_layer
                         or address.partition != task.partition
                     ):
@@ -547,10 +508,7 @@ def map_active8_source_decisions(
         temporary = Path(temporary_name)
         object_sha256 = _sha256_file(temporary)
         object_relative = (
-            Path("objects")
-            / "decisions"
-            / object_sha256[:2]
-            / f"{object_sha256}.jsonl.gz"
+            Path("objects") / "decisions" / object_sha256[:2] / f"{object_sha256}.jsonl.gz"
         )
         object_reused = _publish_file_immutable(
             temporary,
@@ -616,8 +574,7 @@ def _census_decision_object(
             record = json.loads(line)
             if (
                 record.get("schema") != ACTIVE8_TRACE_DECISION_SCHEMA
-                or record.get("schema_version")
-                != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
+                or record.get("schema_version") != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
             ):
                 raise Active8MapReduceError("decision object contains another schema")
             key = record.get("trace_key") or {}
@@ -659,9 +616,7 @@ def _census_decision_object(
                         family_rows[str(family)] += 1
             elif record.get("decision") == "excluded":
                 if record.get("progress_rows") != [] or not record.get("exclusions"):
-                    raise Active8MapReduceError(
-                        "excluded decision leaked rows or lacks a reason"
-                    )
+                    raise Active8MapReduceError("excluded decision leaked rows or lacks a reason")
                 counts["excluded_traces"] += 1
                 for exclusion in record["exclusions"]:
                     exclusions_by_reason[str(exclusion["reason"])] += 1
@@ -700,14 +655,10 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
         plan.get("run_identity_sha256") != _sha256_payload(body)
         or plan.get("active8_families") != list(ACTIVE8_FAMILIES)
         or not isinstance(plan.get("active8_implementation_identity"), Mapping)
-        or plan["active8_implementation_identity"].get(
-            "implementation_sha256"
-        )
+        or plan["active8_implementation_identity"].get("implementation_sha256")
         != plan.get("active8_implementation_sha256")
         or not isinstance(plan.get("mapreduce_implementation_identity"), Mapping)
-        or plan["mapreduce_implementation_identity"].get(
-            "implementation_sha256"
-        )
+        or plan["mapreduce_implementation_identity"].get("implementation_sha256")
         != plan.get("mapreduce_implementation_sha256")
     ):
         raise Active8MapReduceError("active-8 map/reduce plan identity mismatch")
@@ -715,10 +666,7 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
     if (
         len(tasks) != plan.get("expected_source_decisions")
         or [task.source_binding for task in tasks] != plan.get("source_bindings")
-        or any(
-            task.run_identity_sha256 != plan["run_identity_sha256"]
-            for task in tasks
-        )
+        or any(task.run_identity_sha256 != plan["run_identity_sha256"] for task in tasks)
         or any(
             task.task_identity_sha256
             != _sha256_payload(
@@ -768,13 +716,9 @@ def reduce_active8_mapreduce(
     output_root = Path(output_root)
     run_root = _run_root(output_root, str(plan["run_identity_sha256"]))
     receipts_dir = run_root / "receipts"
-    expected_receipt_names = {
-        f"{task.task_identity_sha256}.json" for task in tasks
-    }
+    expected_receipt_names = {f"{task.task_identity_sha256}.json" for task in tasks}
     observed_receipt_names = (
-        {path.name for path in receipts_dir.glob("*.json")}
-        if receipts_dir.is_dir()
-        else set()
+        {path.name for path in receipts_dir.glob("*.json")} if receipts_dir.is_dir() else set()
     )
     missing = sorted(expected_receipt_names - observed_receipt_names)
     unexpected = sorted(observed_receipt_names - expected_receipt_names)
@@ -783,9 +727,7 @@ def reduce_active8_mapreduce(
             f"{len(missing)} expected source decision receipt(s) are absent"
         )
     if unexpected:
-        raise Active8MapReduceError(
-            "run receipt namespace contains unexpected task identities"
-        )
+        raise Active8MapReduceError("run receipt namespace contains unexpected task identities")
 
     totals = Counter(
         source_shards=0,
@@ -818,9 +760,7 @@ def reduce_active8_mapreduce(
                 "accepted_nonterminal_rows_by_family",
             )
         ):
-            raise Active8MapReduceError(
-                "map receipt census disagrees with its decision object"
-            )
+            raise Active8MapReduceError("map receipt census disagrees with its decision object")
         totals["source_shards"] += 1
         totals.update(receipt["counts"])
         exclusions_by_reason.update(receipt["exclusions_by_reason"])
@@ -853,17 +793,11 @@ def reduce_active8_mapreduce(
 
     source_identity = {
         "unified_packed_manifest_sha256": plan["source_manifest_sha256"],
-        "unified_packed_manifest_semantic_sha256": plan[
-            "source_manifest_semantic_sha256"
-        ],
+        "unified_packed_manifest_semantic_sha256": plan["source_manifest_semantic_sha256"],
         "support_contract_sha256": plan["support_contract_sha256"],
-        "physical_shard_binding_sha256": _sha256_payload(
-            plan["source_bindings"]
-        ),
+        "physical_shard_binding_sha256": _sha256_payload(plan["source_bindings"]),
     }
-    source_identity["effective_source_corpus_cache_sha256"] = _sha256_payload(
-        source_identity
-    )
+    source_identity["effective_source_corpus_cache_sha256"] = _sha256_payload(source_identity)
     inventory: dict[str, object] = {
         "schema": ACTIVE8_TRACE_INVENTORY_SCHEMA,
         "schema_version": ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION,
@@ -885,9 +819,7 @@ def reduce_active8_mapreduce(
         "implementation_identity": plan["active8_implementation_identity"],
         "mapreduce_identity": {
             "run_identity_sha256": plan["run_identity_sha256"],
-            "implementation_identity": plan[
-                "mapreduce_implementation_identity"
-            ],
+            "implementation_identity": plan["mapreduce_implementation_identity"],
         },
         "counts": dict(totals),
         "exclusions_by_reason": dict(sorted(exclusions_by_reason.items())),
@@ -908,11 +840,7 @@ def reduce_active8_mapreduce(
         + b"\n"
     )
     inventory_object_sha256 = hashlib.sha256(inventory_bytes).hexdigest()
-    inventory_relative = (
-        Path("objects")
-        / "manifests"
-        / f"{inventory_object_sha256}.json"
-    )
+    inventory_relative = Path("objects") / "manifests" / f"{inventory_object_sha256}.json"
     inventory_reused = _publish_bytes_immutable(
         output_root / inventory_relative,
         inventory_bytes,

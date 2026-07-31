@@ -18,6 +18,7 @@ parallel implementation that could drift. That is deliberate: the equivalence ri
 Measured against replay (per trace): corruption 22.45 -> 0.037 ms, cycle_ops 2.67 -> 0.018 ms,
 mmp 0.091 ms; full train partition ~0.63 min instead of hours, at ~102 B/trace gzipped.
 """
+
 from __future__ import annotations
 
 import gzip
@@ -86,9 +87,7 @@ class PackedTraceAddress:
             or len(digest) != 64
             or any(character not in "0123456789abcdef" for character in digest)
         ):
-            raise ValueError(
-                "packed_shard_content_sha256 must be a lowercase SHA-256 digest"
-            )
+            raise ValueError("packed_shard_content_sha256 must be a lowercase SHA-256 digest")
         if (
             not isinstance(self.packed_shard_name, str)
             or not self.packed_shard_name
@@ -300,9 +299,7 @@ def write_packed_shard(
                 mtime=0,
             ) as compressed:
                 for entry in entries:
-                    compressed.write(
-                        (json.dumps(entry, sort_keys=True) + "\n").encode("utf-8")
-                    )
+                    compressed.write((json.dumps(entry, sort_keys=True) + "\n").encode("utf-8"))
     else:
         with gzip.open(path, "wt") as handle:
             for entry in entries:
@@ -372,18 +369,83 @@ def _packed_shard_address_digest(path: Path, manifest_path: Path) -> str:
         )
     digest = overlay.get("packed_shard_content_sha256")
     if not isinstance(digest, str):
-        raise PackedStoreError(
-            f"packed shard {path} provenance overlay lacks its content SHA-256"
-        )
+        raise PackedStoreError(f"packed shard {path} provenance overlay lacks its content SHA-256")
     return digest
+
+
+def _require_sha256(value: object, *, field: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise PackedStoreError(f"{field} must be a lowercase SHA-256")
+    return value
+
+
+def _frozen_source_address_digest(
+    path: Path,
+    manifest_path: Path,
+    *,
+    expected_shard_sha256: str,
+    expected_manifest_sha256: str,
+    expected_overlay_sha256: str | None,
+) -> str:
+    """Verify a historical packed source as immutable bytes, not current provenance.
+
+    This is the migration/audit boundary for a source whose provenance overlay
+    may have been issued under an older tensorization contract.  It deliberately
+    does not interpret or re-authorize that overlay.  Instead it requires the
+    caller to freeze the exact shard, manifest, and optional overlay bytes, then
+    verifies all three before using the shard digest as a row-address prefix.
+
+    Normal scientific readers continue through :func:`_packed_shard_address_digest`
+    and therefore still reject stale overlays.
+    """
+
+    shard_digest = shard_content_sha256(path)
+    expected_shard = _require_sha256(
+        expected_shard_sha256,
+        field="expected_shard_sha256",
+    )
+    if shard_digest != expected_shard:
+        raise PackedStoreError(
+            f"frozen packed shard SHA-256 mismatch: {shard_digest} != {expected_shard}"
+        )
+    manifest_digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    expected_manifest = _require_sha256(
+        expected_manifest_sha256,
+        field="expected_manifest_sha256",
+    )
+    if manifest_digest != expected_manifest:
+        raise PackedStoreError(
+            f"frozen packed manifest SHA-256 mismatch: {manifest_digest} != {expected_manifest}"
+        )
+
+    overlay_path = overlay_path_for(path)
+    if expected_overlay_sha256 is None:
+        if overlay_path.exists():
+            raise PackedStoreError("frozen source has an undeclared provenance overlay")
+    else:
+        expected_overlay = _require_sha256(
+            expected_overlay_sha256,
+            field="expected_overlay_sha256",
+        )
+        if not overlay_path.is_file():
+            raise PackedStoreError("frozen source provenance overlay is absent")
+        overlay_digest = hashlib.sha256(overlay_path.read_bytes()).hexdigest()
+        if overlay_digest != expected_overlay:
+            raise PackedStoreError(
+                "frozen provenance-overlay SHA-256 mismatch: "
+                f"{overlay_digest} != {expected_overlay}"
+            )
+    return shard_digest
 
 
 def _required_address_string(record: dict, field: str) -> str:
     value = record.get(field)
     if not isinstance(value, str) or not value:
-        raise PackedStoreError(
-            f"packed trace address field {field!r} must be a non-empty string"
-        )
+        raise PackedStoreError(f"packed trace address field {field!r} must be a non-empty string")
     return value
 
 
@@ -443,6 +505,7 @@ def _iter_decoded_packed_shard(
     verify_fraction: float,
     verify_seed: int,
     require_address: bool,
+    frozen_source_binding: tuple[str, str, str | None] | None = None,
 ):
     """Shared decoder used by both public packed-shard readers."""
 
@@ -453,9 +516,20 @@ def _iter_decoded_packed_shard(
         path,
         expected_provenance=expected_provenance,
     )
-    shard_digest = (
-        _packed_shard_address_digest(path, manifest_path) if require_address else None
-    )
+    if frozen_source_binding is not None and not require_address:
+        raise ValueError("a frozen source binding requires addressed decoding")
+    if not require_address:
+        shard_digest = None
+    elif frozen_source_binding is None:
+        shard_digest = _packed_shard_address_digest(path, manifest_path)
+    else:
+        shard_digest = _frozen_source_address_digest(
+            path,
+            manifest_path,
+            expected_shard_sha256=frozen_source_binding[0],
+            expected_manifest_sha256=frozen_source_binding[1],
+            expected_overlay_sha256=frozen_source_binding[2],
+        )
     rng = np.random.default_rng(verify_seed)
     seen_trace_ids: set[str] = set()
     entry_index = 0
@@ -520,6 +594,46 @@ def read_addressed_packed_shard(
         verify_fraction=verify_fraction,
         verify_seed=verify_seed,
         require_address=True,
+        frozen_source_binding=None,
+    ):
+        assert row.address is not None
+        yield AddressedPackedTrace(
+            address=row.address,
+            trace=row.trace,
+            path=row.path,
+        )
+
+
+def read_frozen_source_addressed_packed_shard(
+    path: Path,
+    *,
+    expected_shard_sha256: str,
+    expected_manifest_sha256: str,
+    expected_overlay_sha256: str | None,
+    expected_provenance: dict | None = None,
+    verify_fraction: float = 0.0,
+    verify_seed: int = 0,
+):
+    """Yield addressed rows from an exact historical source for migration/audit.
+
+    Unlike :func:`read_addressed_packed_shard`, this entry point never treats a
+    historical overlay as current scientific-training provenance.  The caller
+    must supply full SHA-256 bindings for every physical source component.  It
+    is intended only for re-auditing immutable legacy states under current
+    support and publishing a fresh derivative with current provenance.
+    """
+
+    for row in _iter_decoded_packed_shard(
+        path,
+        expected_provenance=expected_provenance,
+        verify_fraction=verify_fraction,
+        verify_seed=verify_seed,
+        require_address=True,
+        frozen_source_binding=(
+            expected_shard_sha256,
+            expected_manifest_sha256,
+            expected_overlay_sha256,
+        ),
     ):
         assert row.address is not None
         yield AddressedPackedTrace(
@@ -551,6 +665,7 @@ def read_packed_shard(
         verify_fraction=verify_fraction,
         verify_seed=verify_seed,
         require_address=False,
+        frozen_source_binding=None,
     ):
         yield row.trace, row.path
 

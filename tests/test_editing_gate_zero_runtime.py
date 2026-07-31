@@ -155,9 +155,7 @@ def _active8_admission(
         support_contract_sha256=contract_sha256,
         effective_source_corpus_cache_sha256="c" * 64,
         decisions_by_digest={shard_sha256: decisions},
-        shard_digest_by_lane={
-            ("corruption", "validation", "shard_0000.jsonl.gz"): shard_sha256
-        },
+        shard_digest_by_lane={("corruption", "validation", "shard_0000.jsonl.gz"): shard_sha256},
         shard_metadata_by_digest={shard_sha256: {}},
         counts={
             "source_shards": 1,
@@ -295,10 +293,7 @@ def test_exact_validation_loader_binds_every_fixture_byte(
                 "rows": 2,
                 "nonempty_cells": 1,
                 "teacher_family_rows": {
-                    **{
-                        family: 1
-                        for family in runtime.PRODUCTION_ACTIVE_FAMILIES
-                    },
+                    **{family: 1 for family in runtime.PRODUCTION_ACTIVE_FAMILIES},
                     "ring_system_delete": 1,
                 },
             },
@@ -344,7 +339,7 @@ def test_exact_validation_loader_binds_every_fixture_byte(
     )
     monkeypatch.setattr(
         runtime,
-        "read_addressed_packed_shard",
+        "read_frozen_source_addressed_packed_shard",
         lambda *_args, **_kwargs: iter((addressed,)),
     )
     loaded = runtime.load_frozen_validation_source(
@@ -413,9 +408,7 @@ def test_active8_binding_excludes_the_complete_trace_before_probe_selection() ->
             packed_shard_content_sha256=shard_sha256,
             entry_index=entry_index,
             progress_index=progress_index,
-            semantic_cell_id=(
-                f"cell-{entry_index}" if progress_index == 0 else None
-            ),
+            semantic_cell_id=(f"cell-{entry_index}" if progress_index == 0 else None),
         )
         for entry_index in (0, 1)
         for progress_index in (0, 1)
@@ -468,13 +461,9 @@ def test_checked_in_contract_sidecar_and_active8_identity_integrate() -> None:
         Path("configs/editing_gate_zero_runtime_v2.json")
     )
     loaded = read_semantic_cell_sidecar(
+        Path("diagnostics/coherence/ringcore_v1_validation_semantic_sidecar_2026-07-30.jsonl.gz"),
         Path(
-            "diagnostics/coherence/"
-            "ringcore_v1_validation_semantic_sidecar_2026-07-30.jsonl.gz"
-        ),
-        Path(
-            "diagnostics/coherence/"
-            "ringcore_v1_validation_semantic_sidecar_2026-07-30.manifest.json"
+            "diagnostics/coherence/ringcore_v1_validation_semantic_sidecar_2026-07-30.manifest.json"
         ),
         expected_manifest_sha256=str(contract.sidecar["manifest_sha256"]),
         expected_config_sha256=str(contract.sidecar["config_sha256"]),
@@ -484,9 +473,7 @@ def test_checked_in_contract_sidecar_and_active8_identity_integrate() -> None:
         contract,
         loaded,
     )
-    assert loaded.manifest["counts"]["teacher_family_rows"][
-        "ring_system_delete"
-    ] == 621
+    assert loaded.manifest["counts"]["teacher_family_rows"]["ring_system_delete"] == 621
     runtime._validate_active8_source_identity(
         contract,
         unified_packed_manifest_sha256=unified_sha256,
