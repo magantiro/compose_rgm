@@ -1,0 +1,6 @@
+{
+  "minimum_unique_state_teacher_successor_top1": 0.95,
+  "minimum_unique_state_teacher_successor_probability": 0.8,
+  "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+  "maximum_global_repeated_state_excess_nll_over_empirical_entropy": 0.05
+}
