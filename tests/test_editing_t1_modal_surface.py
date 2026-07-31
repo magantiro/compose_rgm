@@ -3,23 +3,13 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
 pytest.importorskip("modal")
 
 import modal_apps.run_editing_t1_successor_gate as t1_modal
-from modal_apps.run_editing_t1_successor_gate import (
-    FAMILIES,
-    LOCAL_ADAPTER_FAMILIES,
-    SCOPES,
-    build_t1_modal_launch_receipt,
-    load_t1_modal_launch_receipt,
-    _require_clean_serialized_tree,
-    t1_modal_launch_receipt_path,
-    validate_t1_modal_launch_receipt,
-    write_t1_modal_launch_receipt,
-)
 from compose_v4.experiments.editing_t1_panel import (
     EDITING_T1_CAPACITY_CENSUS_SCHEMA,
     EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
@@ -34,6 +24,17 @@ from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
     build_editing_t1_runtime_contract,
     validate_editing_t1_launch_authority,
+)
+from modal_apps.run_editing_t1_successor_gate import (
+    FAMILIES,
+    LOCAL_ADAPTER_FAMILIES,
+    SCOPES,
+    _require_clean_serialized_tree,
+    build_t1_modal_launch_receipt,
+    load_t1_modal_launch_receipt,
+    t1_modal_launch_receipt_path,
+    validate_t1_modal_launch_receipt,
+    write_t1_modal_launch_receipt,
 )
 from modal_apps.run_editing_t1_successor_gate import (
     build_task_matrix as _build_task_matrix,
@@ -496,6 +497,45 @@ def test_t1_modal_surface_requires_physical_active8_path_and_hash():
             families="cycle_attach",
             active8_inventory=ACTIVE8_INVENTORY,
             active8_inventory_file_sha256="not-a-sha",
+        )
+
+
+def test_t1_modal_surface_accepts_inventory_under_symlinked_artifact_root(
+    monkeypatch,
+    tmp_path: Path,
+):
+    physical_root = tmp_path / "physical-artifacts"
+    physical_root.mkdir()
+    mounted_root = tmp_path / "artifacts"
+    mounted_root.symlink_to(physical_root, target_is_directory=True)
+    monkeypatch.setattr(t1_modal, "ARTIFACT_ROOT", mounted_root)
+
+    resolved, digest = t1_modal._resolve_active8_launch_binding(
+        str(mounted_root / "inventory.json"),
+        ACTIVE8_FILE_SHA256,
+    )
+
+    assert resolved == str(physical_root / "inventory.json")
+    assert digest == ACTIVE8_FILE_SHA256
+
+
+def test_t1_modal_surface_rejects_symlink_escape_from_artifact_root(
+    monkeypatch,
+    tmp_path: Path,
+):
+    physical_root = tmp_path / "physical-artifacts"
+    physical_root.mkdir()
+    mounted_root = tmp_path / "artifacts"
+    mounted_root.symlink_to(physical_root, target_is_directory=True)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (physical_root / "escape").symlink_to(outside, target_is_directory=True)
+    monkeypatch.setattr(t1_modal, "ARTIFACT_ROOT", mounted_root)
+
+    with pytest.raises(ValueError, match="mounted artifact volume"):
+        t1_modal._resolve_active8_launch_binding(
+            str(mounted_root / "escape" / "inventory.json"),
+            ACTIVE8_FILE_SHA256,
         )
 
 

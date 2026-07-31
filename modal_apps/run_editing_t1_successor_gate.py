@@ -48,7 +48,12 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
+from compose_v4.experiments.editing_t1_panel import (
+    ACTIVE8_T1_IDENTITY_FIELDS,
+    EditingT1PanelError,
+    within_family_repeated_panel_families,
+)
+from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_LOCAL_ADAPTER_FAMILIES,
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
@@ -59,11 +64,6 @@ from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     require_editing_t1_family_scope_applicable,
     validate_editing_t1_launch_authority,
     validate_t1_cache_shard_receipt,
-)
-from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
-    ACTIVE8_T1_IDENTITY_FIELDS,
-    EditingT1PanelError,
-    within_family_repeated_panel_families,
 )
 
 REMOTE_ROOT = Path("/root/compose")
@@ -286,7 +286,7 @@ def validate_t1_modal_launch_receipt(
         raise ValueError("T1 Modal launch receipt identity, status, or self-hash is invalid")
     run_label = receipt["run_label"]
     if not isinstance(run_label, str):
-        raise ValueError("T1 Modal launch receipt run_label must be a string")
+        raise TypeError("T1 Modal launch receipt run_label must be a string")
     _validate_run_label(run_label)
     if (
         not isinstance(receipt["source_commit"], str)
@@ -580,9 +580,10 @@ def _resolve_active8_launch_binding(
     candidate = Path(active8_inventory)
     if not candidate.is_absolute():
         candidate = ARTIFACT_ROOT / candidate
+    normalized_root = ARTIFACT_ROOT.resolve(strict=False)
     normalized = candidate.resolve(strict=False)
     try:
-        normalized.relative_to(ARTIFACT_ROOT)
+        normalized.relative_to(normalized_root)
     except ValueError:
         raise ValueError(
             "active8_inventory must resolve inside the mounted artifact volume"
@@ -731,15 +732,17 @@ def build_task_matrix(
         raise ValueError(str(error)) from error
     global_requested = "global_repeated_state_distribution" in selected_panel_kinds
     global_selected = GLOBAL_FAMILY_SELECTOR in selected_families
-    if global_requested or global_selected:
-        if selected_panel_kinds != ("global_repeated_state_distribution",) or (
+    if (global_requested or global_selected) and (
+        selected_panel_kinds != ("global_repeated_state_distribution",)
+        or (
             selected_families != (GLOBAL_FAMILY_SELECTOR,)
-        ):
-            raise ValueError(
-                "the primary global repeated-state panel requires exactly "
-                "--families all_families --panel-kinds "
-                "global_repeated_state_distribution"
-            )
+        )
+    ):
+        raise ValueError(
+            "the primary global repeated-state panel requires exactly "
+            "--families all_families --panel-kinds "
+            "global_repeated_state_distribution"
+        )
     if "within_family_repeated_state_distribution" in selected_panel_kinds:
         unsupported = sorted(set(selected_families) - set(repeated_families))
         if unsupported:
