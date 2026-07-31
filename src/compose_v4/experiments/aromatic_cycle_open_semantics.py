@@ -10,13 +10,17 @@ existing artifact:
 2. anchor the selected semantic aromatic edge as a single bond;
 3. apply the current ``BondDelete`` arithmetic to every anchored alias;
 4. require one nonempty canonical molecular-product group; and
-5. select one exact persistent-slot representative deterministically.
+5. select one exact persistent-slot representative deterministically with
+   respect to supplier order.
 
 The proposed law can reject aromatic edges that have no charge- and
 hydrogen-preserving forced-single alias, so it may contract support. The
 prototype cannot authorize Gate 0, T1, P50, corpus rematerialization, or a
 production architecture. Promotion requires a frozen support decision and
 full alternate-Kekule, slot, and multistep successor-law invariance gates.
+The current lexicographic exact-representative choice is not claimed to be
+slot-equivariant in symmetric fused systems. Only the canonical product is
+qualified by this prototype.
 """
 
 from __future__ import annotations

@@ -11,7 +11,7 @@ from compose_v4.chem.molecular_graph import (
     BOND_AROMATIC,
     smiles_to_molecular_graph,
 )
-from compose_v4.chem.state import is_connected_or_null
+from compose_v4.chem.state import is_connected_or_null, pad_molecular_graph
 from compose_v4.experiments.aromatic_cycle_open_semantics import (
     PROTOTYPE_STATUS,
     AromaticCycleOpenAliasOverflow,
@@ -21,6 +21,8 @@ from compose_v4.experiments.aromatic_cycle_open_semantics import (
     rdkit_kekule_supplier,
     resolve_edge_anchored_cycle_open,
 )
+from compose_v4.experiments.cycle_open_kekule_invariance import transport_bond_delete
+from compose_v4.experiments.quotient_invariance import permute_persistent_slots
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.operators import (
     BondDelete,
@@ -223,6 +225,68 @@ def test_supplier_order_does_not_change_aliases_or_product_representative() -> N
     assert forward.admitted and reverse.admitted
     assert forward.canonical_product_keys == reverse.canonical_product_keys
     assert _same_exact_state(forward.successor, reverse.successor)
+
+
+@pytest.mark.parametrize(
+    "smiles",
+    (
+        "Cc1cccc(Cl)c1",
+        "c1ccncc1",
+        "c1ccc2ccccc2c1",
+        "c1cc[nH]c1",
+    ),
+)
+def test_slot_relabeling_transports_admission_and_canonical_product(smiles: str) -> None:
+    source = pad_molecular_graph(smiles_to_molecular_graph(smiles), 16)
+    permutation = (7, 2, 9, 0, 4, 1, 6, 3, 5, 8, 15, 10, 14, 11, 13, 12)
+    inverse = tuple(int(value) for value in np.argsort(np.asarray(permutation)))
+    relabeled = permute_persistent_slots(source, permutation)
+
+    for edge in _aromatic_edges(source):
+        action = BondDelete(*edge)
+        transported_action = transport_bond_delete(
+            action,
+            permutation,
+            n_slots=source.n_atoms,
+        )
+        original = resolve_edge_anchored_cycle_open(source, action)
+        transported = resolve_edge_anchored_cycle_open(relabeled, transported_action)
+        assert transported.admitted is original.admitted
+        assert transported.rejection_code == original.rejection_code
+        if not original.admitted:
+            continue
+        restored = permute_persistent_slots(transported.successor, inverse)
+        assert canonical_state_key(transported.successor) == canonical_state_key(
+            original.successor
+        )
+        assert canonical_state_key(restored) == canonical_state_key(original.successor)
+
+
+def test_slot_lexicographic_representative_is_not_a_general_equivariance_proof() -> None:
+    source = pad_molecular_graph(smiles_to_molecular_graph("c1ccc2ccccc2c1"), 16)
+    permutation = (7, 2, 9, 0, 4, 1, 6, 3, 5, 8, 15, 10, 14, 11, 13, 12)
+    inverse = tuple(int(value) for value in np.argsort(np.asarray(permutation)))
+    relabeled = permute_persistent_slots(source, permutation)
+    exact_mismatch_found = False
+
+    for edge in _aromatic_edges(source):
+        action = BondDelete(*edge)
+        transported_action = transport_bond_delete(
+            action,
+            permutation,
+            n_slots=source.n_atoms,
+        )
+        original = resolve_edge_anchored_cycle_open(source, action)
+        transported = resolve_edge_anchored_cycle_open(relabeled, transported_action)
+        assert original.admitted and transported.admitted
+        restored = permute_persistent_slots(transported.successor, inverse)
+        assert canonical_state_key(restored) == canonical_state_key(original.successor)
+        exact_mismatch_found |= not _same_exact_state(restored, original.successor)
+
+    # This negative result prevents a supplier-order-stable representative from
+    # being misreported as slot-equivariant. Production promotion still needs
+    # a two-step molecular-law gate or a stronger representative rule.
+    assert exact_mismatch_found
 
 
 def test_cap_plus_one_resonance_structure_fails_loudly() -> None:
