@@ -1,0 +1,59 @@
+{
+  "schema": "compose.experiments.atom_restate_neural_orbit_full_corpus_contract",
+  "schema_version": 1,
+  "status": "BLOCKED_MISSING_FROZEN_ACTIVE8_TRAIN_PARENT",
+  "partition_role": "train_only",
+  "authorizes_audit_execution": false,
+  "authorizes_training": false,
+  "selects_support_policy": false,
+  "allows_arbitrary_or_legacy_shards": false,
+  "required_core_revision": "f921443193038be423383074a96f834de72f5123",
+  "orbit_audit_contract": {
+    "file_sha256": "eb0cd83e6bc92fe9f08a9fde5068ad3962413c0083d1cf216bda0ea8c4dd644d",
+    "contract_sha256": "6ebd9d511269fe821b12d5f84c5d0220f30b7f09250fdaf2b2ef60dc20f6be33"
+  },
+  "frozen_active8_parent": null,
+  "observed_validation_only_parent": {
+    "artifact_volume": "compose-v4-artifacts",
+    "inventory_manifest_path": "/artifacts/active8_trace_inventory_legacy3_validation_1ef8941/objects/manifests/bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab.json",
+    "inventory_manifest_file_sha256": "bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab",
+    "inventory_sha256": "ce1a1b0a43fdfeac4e5771d03a95d456ec8b2df46f207446efd4f8a17ecadd42",
+    "effective_source_corpus_cache_sha256": "4de860baf1906934ef01a608a366daf81789bedf8985d3ca37f9f30494add3c9",
+    "support_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+    "unified_packed_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758",
+    "partitions": [
+      "validation"
+    ],
+    "source_shards": 4,
+    "accepted_traces": 31815,
+    "train_shards": 0
+  },
+  "required_resolution": [
+    "Build and freeze whole-trace Active8 admission for the exact train partition without inspecting or changing validation or test decisions.",
+    "Record the train inventory manifest file SHA-256, logical inventory SHA-256, effective source-corpus cache SHA-256, support contract SHA-256, and unified packed manifest SHA-256.",
+    "Replace the null frozen_active8_parent with that exact five-part train identity and prospectively change this status before any full-corpus execution."
+  ],
+  "input_policy": {
+    "selection_unit": "complete_active8_admitted_trace",
+    "required_partition": "train",
+    "require_complete_train_shard_set": true,
+    "require_exact_packed_shard_hash": true,
+    "require_exact_packed_manifest_hash": true,
+    "require_exact_packed_overlay_hash": true,
+    "excluded_trace_emits_rows": false
+  },
+  "output": {
+    "publication": "atomic_directory_rename",
+    "row_evidence": "atom_restate_neural_orbit_rows.jsonl.gz",
+    "summary": "atom_restate_neural_orbit_summary.json",
+    "row_encoding": "deterministic_gzip_jsonl_mtime_0"
+  },
+  "decision_boundary": [
+    "The observed bbf44483 inventory is validation-only and cannot be relabelled or reused as train evidence.",
+    "This diagnostic cannot modify corpus admission or operator support.",
+    "This diagnostic cannot select among the current and hypothetical policy views.",
+    "This diagnostic cannot authorize T1, P50, or any training run.",
+    "Rows from arbitrary, legacy, validation, controller-validation, or test shards are forbidden."
+  ],
+  "contract_sha256": "9115d85d6aa184aeba424b72822d4a427b3a6dcccf796f71fb9c90fa7e855681"
+}
