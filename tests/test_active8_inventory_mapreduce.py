@@ -56,10 +56,7 @@ def _entry(trace_id: str, steps: tuple[RewriteStep, ...]) -> dict:
             "source_key": "CC",
             "target_key": "CC",
             "path_length": len(steps),
-            "steps": [
-                {"action": encode_action(step.rule_name, step.action)}
-                for step in steps
-            ],
+            "steps": [{"action": encode_action(step.rule_name, step.action)} for step in steps],
             "metadata": {},
         },
         "states": [encode_state(state) for _ in range(len(steps) + 1)],
@@ -100,9 +97,7 @@ def _fixture(tmp_path: Path, *, shards: int = 1):
         )
     source_manifest = {"artifact": "fixture-unified", "shards": shards}
     source_manifest_path = tmp_path / "UNIFIED_PACKED_MANIFEST.json"
-    source_manifest_path.write_text(
-        json.dumps(source_manifest, sort_keys=True)
-    )
+    source_manifest_path.write_text(json.dumps(source_manifest, sort_keys=True))
     plan = plan_active8_mapreduce(
         tuple(declared),
         source_manifest_path=source_manifest_path,
@@ -157,9 +152,7 @@ def test_map_is_resumable_and_reduce_publishes_compatible_inventory(
     assert len(accepted_trace_keys(manifest)) == 1
     admission = load_active8_trace_admission(
         manifest,
-        expected_manifest_file_sha256=complete[
-            "inventory_manifest_file_sha256"
-        ],
+        expected_manifest_file_sha256=complete["inventory_manifest_file_sha256"],
         expected_inventory_sha256=complete["inventory_sha256"],
         expected_effective_source_corpus_cache_sha256=complete[
             "effective_source_corpus_cache_sha256"
@@ -185,12 +178,7 @@ def test_reducer_refuses_even_one_missing_expected_source_decision(
     )
     with pytest.raises(Active8MapReduceIncomplete, match="1 expected"):
         reduce_active8_mapreduce(plan, output_root=output)
-    assert not (
-        output
-        / "runs"
-        / plan["run_identity_sha256"]
-        / "COMPLETE.json"
-    ).exists()
+    assert not (output / "runs" / plan["run_identity_sha256"] / "COMPLETE.json").exists()
 
 
 def test_immutable_decision_object_collision_is_rejected(
@@ -223,15 +211,12 @@ def test_immutable_decision_object_collision_is_rejected(
 
 def test_modal_surface_is_bounded_and_orders_map_before_reduce() -> None:
     source = (
-        Path(__file__).resolve().parents[1]
-        / "modal_apps"
-        / "build_active8_trace_inventory_app.py"
+        Path(__file__).resolve().parents[1] / "modal_apps" / "build_active8_trace_inventory_app.py"
     ).read_text()
     assert "_MAX_MAP_CONTAINERS = 16" in source
     assert "max_containers=_MAX_MAP_CONTAINERS" in source
     assert "map_source.starmap" in source
-    assert source.index("map_source.starmap") < source.index(
-        "return reduce_inventory.remote"
-    )
-    assert "driver.spawn" in source
+    assert source.index("map_source.starmap") < source.index("return reduce_inventory.remote")
+    assert "driver.remote" in source
+    assert "driver.spawn" not in source
     assert '"training_launched": False' in source

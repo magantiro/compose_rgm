@@ -35,9 +35,7 @@ image = (
     )
     .env(
         {
-            "PYTHONPATH": os.pathsep.join(
-                (str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))
-            ),
+            "PYTHONPATH": os.pathsep.join((str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))),
             "PYTHONUNBUFFERED": "1",
             "OMP_NUM_THREADS": "1",
         }
@@ -61,11 +59,7 @@ image = (
     )
     .add_local_file(
         ROOT / "modal_apps" / "build_active8_trace_inventory_app.py",
-        str(
-            REMOTE_ROOT
-            / "modal_apps"
-            / "build_active8_trace_inventory_app.py"
-        ),
+        str(REMOTE_ROOT / "modal_apps" / "build_active8_trace_inventory_app.py"),
         copy=True,
     )
 )
@@ -105,9 +99,7 @@ def _imports() -> dict[str, object]:
         "map_active8_source_decisions": map_active8_source_decisions,
         "plan_active8_mapreduce": plan_active8_mapreduce,
         "reduce_active8_mapreduce": reduce_active8_mapreduce,
-        "verified_completed_task_identities": (
-            verified_completed_task_identities
-        ),
+        "verified_completed_task_identities": (verified_completed_task_identities),
         "resolve_unified_manifest_shards": resolve_unified_manifest_shards,
         "build_scratch_ringcore_model": build_scratch_ringcore_model,
         "load_gate_zero_runtime_contract": load_gate_zero_runtime_contract,
@@ -132,9 +124,7 @@ def map_source(
 
     loaded = _imports()
     artifact_volume.reload()
-    contract = loaded["load_gate_zero_runtime_contract"](
-        Path(support_contract_path)
-    )
+    contract = loaded["load_gate_zero_runtime_contract"](Path(support_contract_path))
     model, _ = loaded["build_scratch_ringcore_model"](contract)
     checker = loaded["ProductionExactCandidateChecker"](
         model,
@@ -216,9 +206,7 @@ def driver(
 
     loaded = _imports()
     artifact_volume.reload()
-    contract = loaded["load_gate_zero_runtime_contract"](
-        Path(support_contract_path)
-    )
+    contract = loaded["load_gate_zero_runtime_contract"](Path(support_contract_path))
     source_manifest, declared = loaded["resolve_unified_manifest_shards"](
         Path(unified_manifest_path),
         audit_root=Path(audit_root),
@@ -246,18 +234,14 @@ def driver(
         output_root=Path(output_root),
     )
     missing_tasks = [
-        task
-        for task in plan["tasks"]
-        if task["task_identity_sha256"] not in completed
+        task for task in plan["tasks"] if task["task_identity_sha256"] not in completed
     ]
     print(
         json.dumps(
             {
                 "phase": "active8_map_plan",
                 "run_identity_sha256": plan["run_identity_sha256"],
-                "expected_source_decisions": plan[
-                    "expected_source_decisions"
-                ],
+                "expected_source_decisions": plan["expected_source_decisions"],
                 "missing_source_decisions": len(missing_tasks),
                 "max_map_containers": _MAX_MAP_CONTAINERS,
             },
@@ -291,15 +275,13 @@ def main(
     unified_manifest_path: str = "/artifacts/UNIFIED_PACKED_MANIFEST.json",
     audit_root: str = "/artifacts/edit_packed_v1",
     mmp_root: str = "/artifacts/mmp_packed_v1",
-    support_contract_path: str = (
-        "/root/compose/configs/editing_gate_zero_runtime_v2.json"
-    ),
+    support_contract_path: str = ("/root/compose/configs/editing_gate_zero_runtime_v2.json"),
     output_root: str = "/artifacts/active8_trace_inventory_v1",
     candidate_cache_size: int = 4096,
 ):
     if candidate_cache_size <= 0:
         raise ValueError("candidate_cache_size must be positive")
-    call = driver.spawn(
+    result = driver.remote(
         unified_manifest_path,
         audit_root,
         mmp_root,
@@ -310,12 +292,12 @@ def main(
     print(
         json.dumps(
             {
-                "phase": "active8_inventory_launched",
-                "driver_call_id": call.object_id,
+                "phase": "active8_inventory_complete",
                 "unified_manifest_path": unified_manifest_path,
                 "output_root": output_root,
                 "max_map_containers": _MAX_MAP_CONTAINERS,
                 "training_launched": False,
+                "result": result,
             },
             indent=2,
             sort_keys=True,
