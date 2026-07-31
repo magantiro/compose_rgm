@@ -12,21 +12,27 @@ and task-level evidence throughout.
 \subsection{Evidence, freezing, and attempted-sample accounting}
 \label{app:evidence-freeze}
 
-\paragraph{Evidence classes.}
-Each reported item is classified as a mathematical derivation, a frozen
-implementation fact, a registered protocol, or a measured result.  Result
-artifacts are accepted only when they contain the expected schema, physical
-file hashes, implementation and configuration identities, partition identity,
-seed, and exact checkpoint hash.  A development artifact may validate code but
-cannot fill a final result cell.  Historical measurements are labeled
+\paragraph{Evidence classes and status.}
+Every material empirical or literature claim is classified as
+\emph{measured}, \emph{computed}, \emph{reported}, \emph{inferred}, or
+\emph{proposed}. Mathematical definitions and proved derivations are tracked
+separately as non-empirical claims. Frozen implementation facts and registered
+protocols describe provenance or status; they are not substitutes for an
+evidence class and do not turn a proposed experiment into a measured result.
+Result artifacts are accepted only when they contain the expected schema,
+physical file hashes, implementation and configuration identities, partition
+identity, seed, and exact checkpoint hash. A development artifact may validate
+code but cannot fill a final result cell. Historical measurements are labeled
 diagnostic and do not select the production checkpoint.
 
 \paragraph{Current empirical boundary.}
 The completed scientific editing run used 661,105 admitted training traces,
 ran for 16,000 optimizer steps, and produced all 32 scheduled snapshots. It is
-a valid large-data diagnostic run, not a selected model. Mark-level
-diagnostics found poor cycle opening and collapse of the inherited Graft
-capability; the validation-only canonical-successor leaderboard and forensic
+a valid large-data diagnostic run, not a selected model. Mark-level diagnostics
+were substantially stronger for cycle closing than for cycle opening, which
+remained poor, and the inherited bond-reroute diagnostic, historically called
+Graft, collapsed between initialization and the final checkpoint; the
+validation-only canonical-successor leaderboard and forensic
 audits remain pending. The already inspected test aggregate is barred from
 checkpoint, architecture, recipe, and threshold selection. The run used zero
 de novo mixture weight, so it supplies no unconditional timed-CTMC result.
@@ -70,11 +76,14 @@ successor.
 
 \paragraph{Training target.}
 The editing model is a property-agnostic prior over canonical molecular
-successors.  Source molecule, goal, remaining budget, protected mapping, and
-path-constraint state are controller inputs and are not leaked into the base
-prior.  Each stored trace contains exact persistent-slot states and executable
-actions.  Canonical strings are molecular identity metadata; training never
-reconstructs a slot-addressed state by reparsing a canonical string.
+successors. It conditions on the registered model-progress coordinate $t$,
+which under a fixed horizon may be a deterministic function of the current
+step or remaining budget. The immutable source molecule, goal, protected
+mapping, and path-constraint state are controller inputs and are not supplied
+to the base prior; the value or controller receives remaining budget explicitly.
+Each stored trace contains exact persistent-slot states and executable actions.
+Canonical strings are molecular identity metadata; training never reconstructs
+a slot-addressed state by reparsing a canonical string.
 
 \begin{table}[htbp]
   \centering
@@ -548,15 +557,18 @@ terminal law with the analytic tilted terminal law, verify the support subset
 row by row, and restart the recursion from registered switch states for the
 dynamic-continuation check.
 
-\subsection{E7: same-base Pareto and dynamic control}
+\subsection{E7: same-support Pareto and dynamic control}
 \label{app:e7-protocol}
 
 \paragraph{Controller inputs.}
 The learned value receives remaining budget, current molecule, immutable
-source, goal, and protected/path-constraint context.  The base
-editing prior remains frozen and goal independent.  Every same-base arm uses
-the identical productive successor kernel and differs only in how supported
-successors are scored, resampled, or backed up.
+source, goal, and protected/path-constraint context. The base editing prior
+remains frozen and goal independent. Learned-prior controller arms use the
+identical productive successor kernel and differ only in how its supported
+successors are scored, resampled, or backed up. Uniform canonical rewriting is
+a law-only negative control that shares the executor and canonical support but
+replaces the learned probabilities. NSGA-II uses the same successor interface
+and support as a search arm, not as a controller of the learned kernel.
 
 \paragraph{Pareto archive.}
 All objectives are oriented so larger is better and normalized to $[0,1]$
@@ -715,7 +727,7 @@ and throughput are secondary.
     identical frozen successor kernel &
     particles, resampling, all oracle calls \\
     NSGA-II over COMPOSE successors &
-    same-base Pareto search &
+    same-support Pareto search &
     identical frozen successor support &
     populations, generations, all scored successors and oracle calls \\
     GraphGA, MARS &

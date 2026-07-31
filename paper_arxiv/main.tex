@@ -346,8 +346,12 @@ evaluation.
 \subsection{Canonical pushforward and productive molecular jumps}
 \label{sec:productive-kernel}
 
-Let $c:\X\rightarrow\mathcal Y$ map an executor state to its canonical
-molecular identity, and define the state-dependent event map
+Let $\mathcal Y_{\mathrm{mol}}$ be the set of canonical identities of supported
+non-null molecules, and let
+$\mathcal Y=\{\varnothing\}\sqcup\mathcal Y_{\mathrm{mol}}$ include the
+distinguished null identity. Define $c:\X\rightarrow\mathcal Y$ by
+$c(\varnothing)=\varnothing$ and by canonical molecular identity on non-null
+states, and define the state-dependent event map
 \[
   \pi_x(a)=c(\T(x,a)).
 \]

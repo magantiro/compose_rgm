@@ -5,19 +5,24 @@ submission-shaped paper before all experimental numbers exist. The manuscript
 may be structurally complete while results are pending, but it may not imply
 that a pending experiment succeeded.
 
-## Evidence classes
+## Evidence classes and status
 
-Every substantive sentence belongs to one of four classes:
+Every material empirical or literature claim belongs to one or more of the
+repository evidence classes:
 
-1. **Definition or derivation.** Mathematical content proved directly in the
-   manuscript or fixed by the executable-process definition.
-2. **Frozen implementation fact.** A property of a named, hashed artifact or
-   production interface that has been independently checked.
-3. **Registered protocol.** A metric, comparator, split, budget, or decision
-   rule frozen before the associated result is inspected.
-4. **Pending result.** A checkpoint identity, numerical measurement, empirical
-   comparison, or conclusion that remains visibly marked with
-   `\resultpending{KEY}`.
+1. **Measured.** Directly observed in an experiment or primary source data.
+2. **Computed.** Produced by a versioned, reproducible analysis.
+3. **Reported.** Taken from a verified external primary source.
+4. **Inferred.** An explicitly labeled interpretation of measured, computed, or
+   reported evidence.
+5. **Proposed.** A future experiment, design choice, hypothesis, or untested
+   mechanism.
+
+Mathematical definitions and proved derivations are tracked separately as
+non-empirical claims. A frozen implementation fact or registered protocol is a
+provenance/status qualifier, not an evidence class and not a measured result. A
+pending checkpoint identity, numerical measurement, empirical comparison, or
+conclusion remains visibly marked with `\resultpending{KEY}`.
 
 Historical or superseded measurements may appear only when explicitly labeled
 diagnostic. They never fill a production result placeholder.

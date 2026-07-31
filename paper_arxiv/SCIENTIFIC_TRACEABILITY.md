@@ -3,6 +3,20 @@
 This note records the source and wording boundary for each load-bearing claim in
 the current manuscript. It is an audit aid, not submission prose.
 
+## Evidence taxonomy
+
+Material empirical and literature claims use the repository-wide evidence
+classes **Measured**, **Computed**, **Reported**, **Inferred**, and **Proposed**.
+Definitions and proved derivations are tracked separately as non-empirical
+claims. “Frozen implementation fact” and “registered protocol” record status or
+provenance rather than evidence class. In the ledger below, completed-run
+observations are Measured; reproducible support censuses, graph inventories, and
+implementation audits are Computed; primary-literature statements are Reported;
+interpretations such as a transfer failure mechanism are Inferred; and rebuild,
+training, comparator, or evaluation plans are Proposed. A row may carry more
+than one class, but a Proposed or status-only row cannot fill a measured-result
+placeholder.
+
 `paper_arxiv/` is the preferred live long-form manuscript package. This ledger
 was reconciled on 2026-07-30 with the authoritative handoff, `AGENTS.md`,
 editing-V2 contracts, current comparator registry, and claim ledger. The
@@ -46,7 +60,7 @@ manuscript may silently override current contracts or machine-readable evidence.
 | Editing-V2 training remains unauthorized. | `configs/editing_corpus_v2_contract.json` (`DESIGN_NOT_TRAINING_AUTHORIZED`); `configs/editing_training_v2_gate.json`; current Gate 0/T1/P50 decision contracts. | A runnable trainer, green test, or stale/hash-valid artifact is not authority. Whole-trace admission, Gate 0, T1, P50, P500, and P2000 must pass in order before a long run. |
 | E2 requires two law-only controls plus the learned reference arm. | `configs/comparator_registry_v1.json`; `configs/experiment_registry.yaml` E2. | Compare the learned unguided prior with uniform canonical successors and the state-independent empirical-family law on identical executor support, sources, seeds, and budget. Uniform over marks is not the registered control. |
 | E3 and E4 require registered support ablations. | `configs/comparator_registry_v1.json`; `configs/experiment_registry.yaml` E3-E4. | E3 includes no insertion, no deletion, fixed cardinality, and no `bond_reroute`. E4 includes no cycle operations and no `bond_reroute`. The finite-catalog topology editor is conditional and currently `PROSPECTIVE_UNAVAILABLE`; disabled `ring_system_grow` is not a substitute. |
-| E7 compares controllers and search on one frozen base kernel. | `configs/comparator_registry_v1.json`; `configs/experiment_registry.yaml` E7. | Required same-base arms include unguided, endpoint reranking, greedy, local Boltzmann, static scalarization, MOG-DFM-style, SMC/Feynman--Kac, learned Doob/value, and NSGA-II over COMPOSE successors. MOEA/D and AReUReDi-style arms are conditional. Four dynamic arms and the mechanistic switch controls remain distinct. |
+| E7 separates learned-prior controllers from support-matched law and search controls. | `configs/comparator_registry_v1.json`; `configs/experiment_registry.yaml` E7. | Learned-prior arms share one frozen base kernel. Uniform canonical rewriting shares its executor and canonical support but replaces its probabilities; NSGA-II searches the same successor interface and support. MOEA/D and AReUReDi-style arms are conditional. Four dynamic arms and the mechanistic switch controls remain distinct. |
 | External comparisons are task-level and adapter-gated. | `configs/comparator_registry_v1.json`; `docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md`. | InVirtuoGen, GenMol, GraphGA, MARS, RetMol, and HN-GFN run only under their registered compatibility gates. External methods are not described as support-matched unless they actually share the production successor graph. |
 | The broad-organic support declaration covers the registered lead panel. | `diagnostics/composition/benchmark_lead_scope_coverage.json` schema v2; `docs/CLAIM_LEDGER.md` S11. | The computed census is a support/applicability result, not model quality: broad support admits 800/800 panel leads; neutral broad support admits 557/800; neutral C/N/O/F admits 264/800. |
 | The exact verification graph has 967 states and 14,432 canonical directed edges. | Pasted handoff §§16-17 and the registered `carbon_6_slots` benchmark identity. | These are benchmark-identity facts, not chemical-performance results; the slice is carbon-only and non-representative. |

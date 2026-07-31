@@ -146,9 +146,13 @@ a pooled graph--time representation for the family gate, and family-specific
 node, pair, or reroute scorers. The final width, depth, candidate features,
 initialization, and parameter count are
 \resultpending{EDITING_ARCHITECTURE_CONTRACT}. The property-agnostic base
-network does not receive the immutable source molecule, optimization objective,
-remaining budget, or protected mask. Those variables belong to the value or
-controller, which permits all controllers to share one frozen base kernel.
+network receives the registered model-progress coordinate $t$. Under a fixed
+horizon, the schedule may make $t$ a deterministic function of the current
+step or remaining budget, so the base law is not described as budget
+independent. It receives no separate immutable-source, objective, protected-mask,
+or path-history context. Those control variables, including the remaining
+budget explicitly, belong to the value or controller, which permits the
+learned-prior controller arms to share one frozen base kernel.
 
 \subsection{Endpoint programs and editing corpus}
 \label{sec:editing-corpus}

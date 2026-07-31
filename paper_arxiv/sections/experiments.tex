@@ -14,8 +14,10 @@ outputs are inspected.
 The first large-data scientific editing run completed 16,000 optimizer steps
 over 661,105 admitted training traces and produced all 32 scheduled snapshots.
 It is a diagnostic run, not a selected production model. Its mark-level
-diagnostics showed that cycle closing learned while cycle opening remained
-poor, and that the inherited Graft capability collapsed during training. No
+diagnostics were substantially stronger for cycle closing than for cycle
+opening, which remained poor, and the inherited bond-reroute diagnostic,
+historically called Graft, collapsed between initialization and the final
+checkpoint. No
 snapshot has passed the validation-only canonical-successor leaderboard and
 capability safeguards, so no editing checkpoint is selected. The already
 inspected final-test aggregates are barred from checkpoint selection,
@@ -145,14 +147,18 @@ unreachability, and exact dynamic continuation are audited separately.
 
 \subsection{E7: conditional and dynamic molecular design}
 
-All same-base controllers use one frozen editing prior, executor, source panel,
+The registered E7 comparison fixes the executor, source panel, canonical
 successor support, budgets, objectives, and oracle implementation. The
-registered same-base arms are unguided prior sampling, uniform canonical
-rewriting, endpoint reranking, greedy one-step reward, local Boltzmann
-reweighting, static scalarization, MOG-DFM-style rank-directional guidance,
-SMC/Feynman--Kac control, the learned remaining-budget value, and NSGA-II over
-COMPOSE successors. The comparison therefore isolates the control or search
-law rather than conflating it with a different generator.
+learned-prior controller arms are unguided prior sampling, endpoint reranking,
+greedy one-step reward, local Boltzmann reweighting, static scalarization,
+MOG-DFM-style rank-directional guidance, SMC/Feynman--Kac control, and the
+learned remaining-budget value. Uniform canonical rewriting is instead a
+law-only negative control: it shares the frozen support and task contract but
+replaces the learned transition probabilities. NSGA-II searches over the same
+COMPOSE successor interface and support rather than constituting a controller
+of the learned transition law. These distinctions isolate the changed control,
+search, or transition law without claiming that every row uses identical base
+probabilities.
 
 \paragraph{Pareto protocol.}
 Two-objective tasks provide interpretable front plots; three-objective tasks
