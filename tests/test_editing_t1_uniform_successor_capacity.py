@@ -11,7 +11,6 @@ import modal_apps.run_editing_t1_uniform_successor_capacity as modal_runner
 import scripts.run_editing_t1_uniform_successor_capacity as runner
 from compose_v4.experiments.editing_t1_successor_runtime import EditingT1RuntimeError
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "configs" / "editing_t1_uniform_successor_capacity_v1.json"
 
@@ -102,6 +101,7 @@ def test_uniformization_rejects_repeated_prediction_problem(monkeypatch) -> None
 
 
 def test_modal_selection_is_explicit_and_active8_bounded() -> None:
+    assert modal_runner.REMOTE_PROJECT_ROOT == modal_runner.REMOTE_ROOT
     assert modal_runner._selected_families("", all_families=True) == modal_runner.FAMILIES
     assert modal_runner._selected_families(
         "cycle_attach,bond_reroute",

@@ -17,16 +17,16 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-for import_root in (ROOT, SRC):
+REMOTE_PROJECT_ROOT = Path("/root/compose")
+for import_root in (ROOT, SRC, REMOTE_PROJECT_ROOT, REMOTE_PROJECT_ROOT / "src"):
     if str(import_root) not in sys.path:
         sys.path.insert(0, str(import_root))
 
-from scripts.run_editing_t1_uniform_successor_capacity import (  # noqa: E402
-    load_uniform_capacity_contract,
-    validate_uniform_capacity_result,
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
 )
-
-from modal_apps.run_editing_t1_successor_gate import (  # noqa: E402
+from modal_apps.run_editing_t1_successor_gate import (
     ARTIFACT_ROOT,
     FAMILIES,
     REMOTE_ROOT,
@@ -42,9 +42,9 @@ from modal_apps.run_editing_t1_successor_gate import (  # noqa: E402
     artifact_volume,
     image,
 )
-from compose_v4.data.immutable_artifact import (  # noqa: E402
-    ImmutableArtifactError,
-    write_bytes_if_absent,
+from scripts.run_editing_t1_uniform_successor_capacity import (
+    load_uniform_capacity_contract,
+    validate_uniform_capacity_result,
 )
 
 UNIFORM_CONTRACT_RELATIVE_PATH = "configs/editing_t1_uniform_successor_capacity_v1.json"
@@ -124,7 +124,7 @@ def _cache_paths(
 ) -> tuple[Path, Path]:
     parents = contract["parents"]
     if not isinstance(parents, Mapping):
-        raise RuntimeError("uniform-capacity contract parents are invalid")
+        raise TypeError("uniform-capacity contract parents are invalid")
     parent_runtime_sha256 = str(parents["runtime_contract_sha256"])
     cache_root = T1_SUCCESSOR_CACHE_ROOT / parent_runtime_sha256 / "unique_state" / family
     return cache_root, cache_root / "receipt.json"
@@ -380,7 +380,13 @@ def main(
     cache_tasks = tuple(
         (family, active8_inventory, active8_inventory_file_sha256) for family in selected
     )
-    cache_outcomes = list(validate_uniform_cache_cpu.starmap(cache_tasks, return_exceptions=True))
+    cache_outcomes = list(
+        validate_uniform_cache_cpu.starmap(
+            cache_tasks,
+            return_exceptions=True,
+            wrap_returned_exceptions=False,
+        )
+    )
     cache_bindings: list[Mapping[str, object]] = []
     cache_failures: list[dict[str, str]] = []
     for family, outcome in zip(selected, cache_outcomes, strict=True):
@@ -426,7 +432,13 @@ def main(
     tasks = tuple(
         (run_label, family, active8_inventory, active8_inventory_file_sha256) for family in selected
     )
-    outcomes = list(run_uniform_arm_l4.starmap(tasks, return_exceptions=True))
+    outcomes = list(
+        run_uniform_arm_l4.starmap(
+            tasks,
+            return_exceptions=True,
+            wrap_returned_exceptions=False,
+        )
+    )
     results: list[Mapping[str, object]] = []
     failures: list[dict[str, str]] = []
     for family, outcome in zip(selected, outcomes, strict=True):
