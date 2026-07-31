@@ -28,19 +28,23 @@ controllers:
 - id: unguided_prior
   oracle_uses: none
   requires_checkpoint: true
+- id: uniform_canonical_successor
+  comparison_type: law_only_negative_control
+  oracle_uses: none
+  requires_checkpoint: false
 - id: endpoint_reranking
   oracle_uses: endpoint_only
   requires_checkpoint: true
-- id: greedy_one_step_reward
+- id: greedy_one_step
   oracle_uses: per_successor
   requires_checkpoint: true
 - id: local_boltzmann
   oracle_uses: per_successor
   requires_checkpoint: true
-- id: scalarized_guidance
+- id: static_scalarization
   oracle_uses: per_successor
   requires_checkpoint: true
-- id: mog_dfm_style
+- id: mog_dfm_style_rank_hypercone
   oracle_uses: per_successor
   requires_checkpoint: true
 - id: smc_feynman_kac
@@ -49,10 +53,12 @@ controllers:
 - id: learned_doob_value
   oracle_uses: amortized
   requires_checkpoint: true
-controllers_policy: 'All arms share ONE interface and the same base kernel. Every arm records the full
-  compute_accounting tuple. Successor-level control only: mark-level power/top-k/nucleus/family tilts
-  are NOT refinement-invariant (aggregate mass 0.500 vs 0.200 at beta=2 on a 1-mark vs 4-alias fiber)
-  and are reported as a negative result in E5, never used as a controller.'
+controllers_policy: 'All arms share one canonical-successor interface and operator support. Causal
+  controller arms share the same frozen base kernel; uniform canonical successors is a registered
+  law-only negative control, not a base-kernel controller. Every arm records the full compute-accounting
+  tuple. Successor-level control only: mark-level power/top-k/nucleus/family tilts are not
+  refinement-invariant (aggregate mass 0.500 vs 0.200 at beta=2 on a 1-mark vs 4-alias fiber) and are
+  reported as a negative result in E5, never used as a controller.'
 dag:
 - depends_on: []
   id: E5
@@ -198,18 +204,25 @@ experiments:
       final: configs/tasks/unconditional.final.json
     title: Credible unconditional RingCore generation
   E2:
+    availability_note: Protocol declaration only. The final comparison is not runnable until a frozen
+      editing prior and every required law-only arm are available.
     arms:
-      learned: sample from P_theta(y|x) under the frozen editing kernel
-      uniform_legal: identical executor, identical legal successor set, uniform over CANONICAL MOLECULAR
+      learned_unguided_prior: sample from P_theta(y|x) under the frozen editing kernel
+      state_independent_empirical_family_prior: identical executor and canonical-successor support, with
+        family mass estimated on the training partition only and held fixed across states. This is a
+        required prospective arm, not a claim that an implementation exists.
+      uniform_canonical_successor: identical executor, identical legal successor set, uniform over CANONICAL MOLECULAR
         SUCCESSORS (1/|N(x)|). Uniformity over raw action marks is WRONG here -- it would privilege successors
         with more symmetric encodings, so the baseline must be built at the quotient level.
     checkpoint: editing_prior
     comparison:
-      note: 'learned vs uniform over canonical successors: identical support, different law only'
+      note: 'learned vs uniform over canonical successors and the state-independent empirical-family law:
+        identical support, different law only'
       type: law_only
     dataset: held-out MMP + scaffold source/target pairs (validation partition)
-    failure_criterion: learned arm fails to beat uniform-legal on canonical-successor NLL, or shows no
-      reduction in reversal/cycle rate -- i.e. the model adds no chemistry over legal-move enumeration.
+    failure_criterion: learned arm fails to beat either required state-independent law on the registered
+      primary comparison, or shows no reduction in reversal/cycle rate -- i.e. the model adds no
+      state-dependent chemistry over legal-move enumeration or empirical family frequency.
     maps_to: B
     outputs:
     - results/E2_learned_vs_uniform.json
@@ -238,17 +251,18 @@ experiments:
       final: configs/tasks/transport.final.json
     title: Learned transport versus uniform legal rewriting
   E3:
+    availability_note: Protocol declaration only. These ablations are not runnable until a frozen editing
+      prior and matched support configurations are available.
     baselines:
-    - unguided_editing
-    - insertion_disabled
-    - deletion_disabled
-    - fixed_cardinality_operators
-    - endpoint_reranking
-    - greedy_local_controller
-    - full_learned_controller
+    - full_operator_basis
+    - no_atom_insert
+    - no_atom_delete
+    - fixed_cardinality
+    - no_bond_reroute
     checkpoint: editing_prior
-    failure_criterion: insertion/deletion-disabled arms match the full operator set -- would mean cardinality
-      change is not actually load-bearing.
+    failure_criterion: no-insert, no-delete, or fixed-cardinality matches the full operator basis on the
+      registered cardinality strata, or no-bond-reroute matches it on the attachment-dependent stratum.
+      Either outcome would block the corresponding capability claim.
     maps_to: C
     outputs:
     - results/E3_size_adaptation.json
@@ -287,17 +301,29 @@ experiments:
     ablation_note: Do NOT re-enable the obsolete ring_system_grow macro just to manufacture an ablation.
       Baselines must be runnable, scientifically meaningful alternatives.
     ablations:
-    - ringcore_v1
+    - full_operator_basis
     - no_cycle_operations
-    - finite_catalog_alternative
+    - no_bond_reroute
+    availability_note: Protocol declaration only. The required support ablations are not runnable until a
+      frozen editing prior and matched configurations are available.
     checkpoint: editing_prior
     comparison:
       allowed_support_differences:
       - enable_cycle_ops
+      - enable_cyclic_graft
       note: no_cycle_operations legitimately removes a capability. Every OTHER support field must still
-        match; the finite_catalog_alternative arm must declare its own differences before use.
+        match; no_bond-reroute may differ only in bond_reroute support. A future finite-catalog comparator
+        must declare its own support differences before use.
       type: support_ablation
-    failure_criterion: no-cycle-operations arm matches RingCore-V1 on topology recovery.
+    conditional_comparators:
+    - id: finite_catalog_topology_editor
+      run_gate: Run only if a legitimate finite-catalog topology editor is implemented, runnable on the
+        frozen E4 tasks, and its support and budget differences are declared before outputs are inspected.
+        The disabled ring_system_grow macro is not an eligible substitute.
+      status: PROSPECTIVE_UNAVAILABLE
+    failure_criterion: no-cycle-operations or no-bond-reroute matches the full operator basis on its
+      registered topology stratum. The unavailable catalog comparator is not required unless its run gate
+      passes before evaluation.
     maps_to: D
     outputs:
     - results/E4_topology_adaptation.json
@@ -409,6 +435,8 @@ experiments:
     - small_objective_space_region
     title: Exact enumerable finite-horizon control
   E7:
+    availability_note: Protocol declaration only. No listed controller, search, or dynamic arm is claimed
+      runnable or scientifically authorized by its presence here.
     checkpoint: editing_prior
     comparison:
       external_arms_use: external_baseline
@@ -417,20 +445,26 @@ experiments:
       type: law_only
     controllers:
     - unguided_prior
+    - uniform_canonical_successor
     - endpoint_reranking
-    - greedy_one_step_reward
+    - greedy_one_step
     - local_boltzmann
-    - scalarized_guidance
-    - mog_dfm_style
+    - static_scalarization
+    - mog_dfm_style_rank_hypercone
     - smc_feynman_kac
     - learned_doob_value
+    dynamic_comparators:
+    - restart_replan
+    - myopic_retargeting
+    - warm_start_multiobjective_search
+    - reusable_transport_dynamic_control
     external_baselines:
+    - InVirtuoGen
+    - GenMol
     - GraphGA
     - MARS
     - RetMol
-    - GenMol
-    - GrIDDD
-    - pareto_gflownet
+    - HN_GFN
     external_note: Contextual only. They do NOT replace the same-base comparison, because only the same-base
       table isolates the control law from the generative process.
     failure_criterion: learned control does not beat greedy/reranking at matched oracle budget, or continuation
@@ -438,10 +472,15 @@ experiments:
     flagship_studies:
       dynamic_preference_switching:
         arms:
-        - continuation_from_current_molecule
+        - continue_from_switch_state
         - restart_from_original_source
-        - restart_from_switch_state_separate_sampler
+        - restart_from_switch_state_with_fresh_sampler
         - static_compromise_objective
+        comparators:
+        - restart_replan
+        - myopic_retargeting
+        - warm_start_multiobjective_search
+        - reusable_transport_dynamic_control
         metrics:
         - adaptation_regret
         - retained_gain_on_old_objective
@@ -510,6 +549,17 @@ experiments:
       causal claim.
     secondary_metrics:
     - legacy_primary:feasible_hypervolume_per_oracle_call
+    static_search_comparators:
+    - nsga2_over_compose_successors
+    conditional_same_base:
+    - id: moead_over_compose_successors
+      status: CONDITIONAL_UNIMPLEMENTED
+      run_gate: Run only after a frozen COMPOSE-successor variation interface, matched oracle accounting,
+        and preregistered MOEA/D hyperparameters exist.
+    - id: areuredi_style_annealed_lbmh
+      status: CONDITIONAL_UNIMPLEMENTED
+      run_gate: Run only after the published annealed locally balanced mechanism is faithfully adapted
+        to the frozen COMPOSE successor kernel and its matched-budget contract is preregistered.
     task_artifacts:
       development: configs/tasks/conditional.development.json
       final: configs/tasks/conditional.final.json

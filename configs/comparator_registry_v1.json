@@ -1,8 +1,11 @@
 {
   "schema": "compose.comparator_registry",
-  "schema_version": 1,
-  "registry_id": "compose-editing-and-control-comparators-v1",
+  "schema_version": 2,
+  "registry_id": "compose-editing-and-control-comparators-v2",
+  "supersedes_registry_id": "compose-editing-and-control-comparators-v1",
+  "path_compatibility_note": "The legacy-stable filename is retained so existing readers fail on the explicit schema-version boundary rather than silently selecting a different path.",
   "status": "PREIMPLEMENTATION",
+  "availability_policy": "This registry declares required prospective comparison arms. PREIMPLEMENTATION does not claim that an arm is implemented, runnable, or scientifically authorized.",
   "global_fairness_rules": [
     "Use identical source molecules, objective implementations, feasibility predicates, and final evaluators.",
     "Count every property-oracle evaluation, including rejected candidates, particles, prescreened candidates, and reranked endpoints.",
@@ -51,22 +54,47 @@
       "required": [
         {
           "id": "full_operator_basis",
-          "comparison_type": "reference_arm"
+          "comparison_type": "reference_arm",
+          "experiments": ["E3", "E4"]
+        },
+        {
+          "id": "no_atom_insert",
+          "comparison_type": "support_ablation",
+          "experiments": ["E3"],
+          "allowed_support_differences": ["atom_insert"]
+        },
+        {
+          "id": "no_atom_delete",
+          "comparison_type": "support_ablation",
+          "experiments": ["E3"],
+          "allowed_support_differences": ["atom_delete"]
         },
         {
           "id": "fixed_cardinality",
           "comparison_type": "support_ablation",
+          "experiments": ["E3"],
           "allowed_support_differences": ["atom_insert", "atom_delete"]
         },
         {
           "id": "no_cycle_operations",
           "comparison_type": "support_ablation",
+          "experiments": ["E4"],
           "allowed_support_differences": ["cycle_insert", "cycle_attach"]
         },
         {
           "id": "no_bond_reroute",
           "comparison_type": "support_ablation",
+          "experiments": ["E3", "E4"],
           "allowed_support_differences": ["bond_reroute"]
+        }
+      ],
+      "conditional": [
+        {
+          "id": "finite_catalog_topology_editor",
+          "comparison_type": "support_ablation",
+          "experiments": ["E4"],
+          "status": "PROSPECTIVE_UNAVAILABLE",
+          "run_gate": "Run only if a legitimate finite-catalog topology editor is implemented, runnable on the frozen E4 tasks, and its support and budget differences are declared before outputs are inspected. The disabled ring_system_grow macro is not an eligible substitute."
         }
       ],
       "primary_metrics": [
@@ -98,6 +126,7 @@
       "experiments": ["E7"],
       "required_same_base": [
         "unguided_prior",
+        "uniform_canonical_successor",
         "endpoint_reranking",
         "greedy_one_step",
         "local_boltzmann",
@@ -108,10 +137,24 @@
         "nsga2_over_compose_successors"
       ],
       "conditional_same_base": [
-        "moead_over_compose_successors",
-        "areuredi_style_annealed_lbmh"
+        {
+          "id": "moead_over_compose_successors",
+          "status": "CONDITIONAL_UNIMPLEMENTED",
+          "run_gate": "Run only after a frozen COMPOSE-successor variation interface, matched oracle accounting, and preregistered MOEA/D hyperparameters exist."
+        },
+        {
+          "id": "areuredi_style_annealed_lbmh",
+          "status": "CONDITIONAL_UNIMPLEMENTED",
+          "run_gate": "Run only after the published annealed locally balanced mechanism is faithfully adapted to the frozen COMPOSE successor kernel and its matched-budget contract is preregistered."
+        }
       ],
       "dynamic_arms": [
+        "restart_replan",
+        "myopic_retargeting",
+        "warm_start_multiobjective_search",
+        "reusable_transport_dynamic_control"
+      ],
+      "mechanistic_switch_arms": [
         "continue_from_switch_state",
         "restart_from_original_source",
         "restart_from_switch_state_with_fresh_sampler",
