@@ -121,6 +121,7 @@ _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 _CYCLE_OP_FAMILIES = ("cycle_insert", "cycle_attach")
 _RING_GROW_MACRO_FAMILY = "ring_system_grow"
 _RING_DELETE_MACRO_FAMILY = "ring_system_delete"
+CYCLE_OPEN_SCORER_MODES = ("pair_linear", "exact_bond_contextual_probe")
 
 
 def production_enabled_families(
@@ -157,6 +158,65 @@ def production_enabled_families(
 
 
 StateCacheKey = tuple[bytes, bytes, bytes, bytes]
+
+
+class _ExactBondContextualCycleOpenScorer(nn.Module):
+    """Diagnostic cycle-open scorer with executor-visible molecular context.
+
+    The graph encoder deliberately uses a resonance-invariant bond view. Ring
+    opening, however, executes against the exact stored bond order. This scorer
+    keeps the invariant encoder unchanged while exposing that exact operational
+    attribute only to the cycle-opening decision. The explicit pair-by-global
+    interaction prevents the molecular context from collapsing to a
+    candidate-independent additive bias.
+
+    This is a prospective capacity probe, not a production architecture. Its
+    raw Kekule bond-order input can distinguish alternate representations of
+    one aromatic molecule. Promotion therefore requires a separate
+    alternate-Kekule canonical-successor-law invariance gate.
+    """
+
+    def __init__(self, hidden_dim: int) -> None:
+        super().__init__()
+        self.exact_deleted_bond_order_embedding = nn.Embedding(
+            BOND_CLASSES,
+            hidden_dim,
+        )
+        self.scorer = nn.Sequential(
+            nn.Linear(4 * hidden_dim, 2 * hidden_dim),
+            nn.SiLU(),
+            nn.Linear(2 * hidden_dim, 1),
+        )
+
+    def forward(
+        self,
+        pair: Tensor,
+        global_state: Tensor,
+        exact_deleted_bond_order: Tensor,
+    ) -> Tensor:
+        if pair.ndim != 4:
+            raise ValueError("cycle-open pair features must have rank four")
+        if tuple(global_state.shape) != (pair.shape[0], pair.shape[-1]):
+            raise ValueError("cycle-open global features have the wrong shape")
+        if tuple(exact_deleted_bond_order.shape) != tuple(pair.shape[:3]):
+            raise ValueError("cycle-open exact bond orders have the wrong shape")
+        if exact_deleted_bond_order.dtype != torch.long:
+            raise ValueError("cycle-open exact bond orders must be integer indices")
+
+        expanded_global = global_state[:, None, None, :].expand_as(pair)
+        exact_order = self.exact_deleted_bond_order_embedding(
+            exact_deleted_bond_order
+        )
+        contextual_features = torch.cat(
+            (
+                pair,
+                expanded_global,
+                exact_order,
+                pair * expanded_global,
+            ),
+            dim=-1,
+        )
+        return self.scorer(contextual_features).squeeze(-1)
 
 
 @dataclass(frozen=True)
@@ -1876,6 +1936,7 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_heteroatom_scan: bool = False,
         enable_ring_opening: bool = False,
         enable_cycle_ops: bool = False,
+        cycle_open_scorer_mode: str = "pair_linear",
         enable_ring_grow_macro: bool = True,
         enable_ring_system_delete: bool = True,
         atom_vocabulary: AtomVocabulary | None = None,
@@ -1903,6 +1964,16 @@ class FactorizedTraceletRateModel(nn.Module):
         # ring_system_* macros are an acceleration cache. Off for de-novo B + current B-edit (byte-identical:
         # the cycle heads below are absent), on for the ring-support B-edit fine-tune.
         self.enable_cycle_ops = bool(enable_cycle_ops)
+        if cycle_open_scorer_mode not in CYCLE_OPEN_SCORER_MODES:
+            raise ValueError(
+                "unknown cycle-open scorer mode: "
+                f"{cycle_open_scorer_mode!r}; expected one of {CYCLE_OPEN_SCORER_MODES}"
+            )
+        self.cycle_open_scorer_mode = str(cycle_open_scorer_mode)
+        if not self.enable_cycle_ops and self.cycle_open_scorer_mode != "pair_linear":
+            raise ValueError(
+                "non-legacy cycle-open scorers require enable_cycle_ops=True"
+            )
         # Legacy whole-ring-system GROW macro (adds a full ring in one event; B's de-novo ring-adding path).
         # Default True = byte-identical to B / current B-edit. RING_CORE_V1 sets this False so ring ADDITION
         # is purely COMPOSITIONAL (cycle_close): the grow family is masked dead (all-zero template mask ->
@@ -2245,7 +2316,12 @@ class FactorizedTraceletRateModel(nn.Module):
         # cycle_open: remove a non-bridge cycle edge (per-edge score). Support-complete; template-free.
         if self.enable_cycle_ops:
             self.cycle_close_head = nn.Linear(hidden_dim, 3)
-            self.cycle_open_head = nn.Linear(hidden_dim, 1)
+            if self.cycle_open_scorer_mode == "pair_linear":
+                self.cycle_open_head = nn.Linear(hidden_dim, 1)
+            else:
+                self.cycle_open_head = _ExactBondContextualCycleOpenScorer(
+                    hidden_dim
+                )
 
         self.cycle_query = nn.Linear(hidden_dim, mark_dim)
         self.cycle_key = nn.Embedding(max(len(self.cycle_templates), 1), mark_dim)
@@ -4018,8 +4094,15 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             # cycle_open (slot "cycle_attach" -> executor bond_delete): remove a non-bridge cycle edge (H
             # increases by the removed order, so both atoms' resulting H must stay <= MAX_H_COUNT).
-            attach_logits = self.cycle_open_head(pair).squeeze(-1)
             edge_order = batch.bonds
+            if self.cycle_open_scorer_mode == "pair_linear":
+                attach_logits = self.cycle_open_head(pair).squeeze(-1)
+            else:
+                attach_logits = self.cycle_open_head(
+                    pair,
+                    global_state,
+                    edge_order,
+                )
             attach_mask = (
                 upper
                 & batch.cycle_edge_mask
@@ -4590,11 +4673,12 @@ def factorized_mark_bregman_loss(
 
 
 __all__ = [
+    "CYCLE_OPEN_SCORER_MODES",
+    "MARK_RULE_NAMES",
     "FactorizedMarkBatch",
     "FactorizedMarkEmpiricalPriors",
     "FactorizedMarkPrediction",
     "FactorizedTraceletRateModel",
-    "MARK_RULE_NAMES",
     "SampledRewriteMark",
     "factorized_mark_bregman_loss",
     "prepare_factorized_mark_batch",
