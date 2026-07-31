@@ -34,3 +34,13 @@ def test_local_entrypoint_waits_for_driver_completion() -> None:
         and call.func.attr == "spawn"
         for call in calls
     )
+
+
+def test_driver_applies_an_explicit_partition_filter_before_planning() -> None:
+    source = APP_PATH.read_text()
+    assert "partitions: tuple[str, ...]" in source
+    assert "if shard.partition in partitions" in source
+    assert source.index("if shard.partition in partitions") < source.index(
+        'loaded["plan_active8_mapreduce"]'
+    )
+    assert 'partitions: str = "train,validation,test"' in source

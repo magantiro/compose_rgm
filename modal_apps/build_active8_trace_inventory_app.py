@@ -23,6 +23,7 @@ import modal
 ROOT = Path(__file__).resolve().parent.parent
 REMOTE_ROOT = Path("/root/compose")
 _MAX_MAP_CONTAINERS = 16
+_LEGACY_PARTITIONS = ("train", "validation", "test")
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -201,6 +202,7 @@ def driver(
     support_contract_path: str,
     output_root: str,
     candidate_cache_size: int,
+    partitions: tuple[str, ...],
 ) -> dict[str, object]:
     """Plan once, map only absent tasks, then invoke the strict reducer."""
 
@@ -212,6 +214,15 @@ def driver(
         audit_root=Path(audit_root),
         mmp_root=Path(mmp_root),
     )
+    if (
+        not partitions
+        or len(partitions) != len(set(partitions))
+        or any(partition not in _LEGACY_PARTITIONS for partition in partitions)
+    ):
+        raise ValueError("Active8 partitions must be a unique nonempty legacy-partition subset")
+    declared = tuple(shard for shard in declared if shard.partition in partitions)
+    if not declared:
+        raise RuntimeError("Active8 partition filter selected no packed shards")
     shards = tuple(
         loaded["Active8SourceShard"](
             manifest_layer=shard.manifest_layer,
@@ -244,6 +255,7 @@ def driver(
                 "expected_source_decisions": plan["expected_source_decisions"],
                 "missing_source_decisions": len(missing_tasks),
                 "max_map_containers": _MAX_MAP_CONTAINERS,
+                "partitions": list(partitions),
             },
             sort_keys=True,
         ),
@@ -278,9 +290,21 @@ def main(
     support_contract_path: str = ("/root/compose/configs/editing_gate_zero_runtime_v2.json"),
     output_root: str = "/artifacts/active8_trace_inventory_v1",
     candidate_cache_size: int = 4096,
+    partitions: str = "train,validation,test",
 ):
     if candidate_cache_size <= 0:
         raise ValueError("candidate_cache_size must be positive")
+    selected_partitions = tuple(
+        partition.strip() for partition in partitions.split(",") if partition.strip()
+    )
+    if (
+        not selected_partitions
+        or len(selected_partitions) != len(set(selected_partitions))
+        or any(partition not in _LEGACY_PARTITIONS for partition in selected_partitions)
+    ):
+        raise ValueError(
+            "partitions must be a comma-separated unique nonempty subset of train,validation,test"
+        )
     result = driver.remote(
         unified_manifest_path,
         audit_root,
@@ -288,6 +312,7 @@ def main(
         support_contract_path,
         output_root,
         candidate_cache_size,
+        selected_partitions,
     )
     print(
         json.dumps(
@@ -296,6 +321,7 @@ def main(
                 "unified_manifest_path": unified_manifest_path,
                 "output_root": output_root,
                 "max_map_containers": _MAX_MAP_CONTAINERS,
+                "partitions": list(selected_partitions),
                 "training_launched": False,
                 "result": result,
             },
