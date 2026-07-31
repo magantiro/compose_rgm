@@ -27,6 +27,7 @@ from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
     load_gate_zero_runtime_contract,
 )
 from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
+    EDITING_T1_MAX_CAPACITY_WORKERS,
     build_editing_t1_capacity_census,
     build_editing_t1_panel,
     write_editing_t1_capacity_census,
@@ -38,6 +39,18 @@ from compose_v4.experiments.ringcore_successor_leaderboard import (  # noqa: E40
 from compose_v4.experiments.ringcore_validation_panel import (  # noqa: E402
     validate_validation_panel_artifact,
 )
+
+
+def _capacity_workers(value: str) -> int:
+    try:
+        workers = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("workers must be an integer") from error
+    if not 1 <= workers <= EDITING_T1_MAX_CAPACITY_WORKERS:
+        raise argparse.ArgumentTypeError(
+            f"workers must be between 1 and {EDITING_T1_MAX_CAPACITY_WORKERS}"
+        )
+    return workers
 
 
 def _sha256(path: Path) -> str:
@@ -124,6 +137,15 @@ def _parser() -> argparse.ArgumentParser:
             / "packed_charge_policy_exclusions_v1_2026-07-30.json"
         ),
     )
+    parser.add_argument(
+        "--workers",
+        type=_capacity_workers,
+        default=1,
+        help=(
+            "Local worker processes for independent exact source-state "
+            f"compilations (1-{EDITING_T1_MAX_CAPACITY_WORKERS}; default: 1)."
+        ),
+    )
     parser.add_argument("--capacity-census-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser
@@ -167,6 +189,7 @@ def main() -> int:
         forensics_file_sha256=_sha256(args.forensics),
         active8_admission=active8_admission,
         gate_zero_runtime_contract_sha256=gate_zero_contract.sha256,
+        workers=args.workers,
     )
     write_editing_t1_capacity_census(
         capacity_census,
@@ -189,6 +212,7 @@ def main() -> int:
         "active8_admission": active8_admission,
         "gate_zero_runtime_contract_sha256": gate_zero_contract.sha256,
         "gate_zero_unified_packed_manifest_sha256": (gate_zero_unified_packed_manifest_sha256),
+        "capacity_workers": args.workers,
     }
     panel = build_editing_t1_panel(**kwargs)
     write_editing_t1_panel(panel, args.output)
@@ -198,6 +222,7 @@ def main() -> int:
                 "artifact_sha256": panel["artifact_sha256"],
                 "capacity_census_file_sha256": _sha256(args.capacity_census_output),
                 "capacity_census_sha256": capacity_census["census_sha256"],
+                "capacity_workers": args.workers,
                 "census": panel["census"],
                 "output": str(args.output),
                 "status": panel["status"],

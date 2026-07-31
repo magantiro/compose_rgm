@@ -229,9 +229,7 @@ def _synthetic_t1_launch_authority():
         "registered_high_candidate_families_all_covered": True,
         "registered_aliased_teacher_families_all_covered": True,
         "families_without_observed_within_family_multitarget_repeats": [
-            family
-            for family in RINGCORE_EDITING_FAMILIES
-            if family not in repeated_families
+            family for family in RINGCORE_EDITING_FAMILIES if family not in repeated_families
         ],
     }
     panel_body = {
@@ -632,6 +630,33 @@ def test_active8_t1_panel_is_complete_deterministic_rederivation(
         unique_state_union.update(family_states)
         assert all(len(all_targets[row["source_state_sha256"]]) == 1 for row in selected)
     assert len(unique_state_union) == 512
+
+
+def test_t1_panel_capacity_worker_count_does_not_change_artifact(
+    frozen_inputs,
+    monkeypatch,
+):
+    _forensics, kwargs = frozen_inputs
+    validate_capacity = editing_t1_panel_module.validate_editing_t1_capacity_census
+    observed_workers: list[int] = []
+
+    def recording_validator(*args, workers=1, **validator_kwargs):
+        observed_workers.append(workers)
+        return validate_capacity(*args, workers=workers, **validator_kwargs)
+
+    monkeypatch.setattr(
+        editing_t1_panel_module,
+        "validate_editing_t1_capacity_census",
+        recording_validator,
+    )
+    serial = build_editing_t1_panel(**kwargs)
+    parallel = build_editing_t1_panel(
+        **kwargs,
+        capacity_workers=2,
+    )
+
+    assert parallel == serial
+    assert observed_workers == [1, 2]
 
 
 def test_repeated_panel_is_empirical_and_never_synthesized(frozen_inputs):
@@ -1048,9 +1073,7 @@ def test_direct_t1_cli_defaults_to_one_consistent_v4_authority():
 
 
 def test_t1_v4_contract_freeze_is_atomic_and_cross_validated(tmp_path):
-    authority, capacity_content, optimization, thresholds = (
-        _synthetic_t1_launch_authority()
-    )
+    authority, capacity_content, optimization, thresholds = _synthetic_t1_launch_authority()
     contract_path = tmp_path / "editing_t1_successor_gate_v4.json"
     panel_path = tmp_path / "editing_t1_successor_panel_v4.json"
     capacity_path = tmp_path / "editing_t1_capacity_census_v1.json"
@@ -1077,9 +1100,7 @@ def test_t1_v4_contract_freeze_is_atomic_and_cross_validated(tmp_path):
         expected_active8_inventory_manifest_file_sha256="1" * 64,
     )
     assert observed.contract.sha256 == authority.contract.sha256
-    assert observed.capacity_census_file_sha256 == hashlib.sha256(
-        capacity_content
-    ).hexdigest()
+    assert observed.capacity_census_file_sha256 == hashlib.sha256(capacity_content).hexdigest()
 
     conflicting_optimization = {
         **optimization,
@@ -1100,9 +1121,7 @@ def test_t1_v4_contract_freeze_is_atomic_and_cross_validated(tmp_path):
 
 
 def test_t1_v4_contract_refuses_unfrozen_thresholds_and_identity_drift():
-    authority, _capacity_content, optimization, thresholds = (
-        _synthetic_t1_launch_authority()
-    )
+    authority, _capacity_content, optimization, thresholds = _synthetic_t1_launch_authority()
     unfrozen = {**thresholds, "minimum_unique_state_teacher_successor_top1": None}
     with pytest.raises(EditingT1RuntimeError, match="must be finite"):
         build_editing_t1_runtime_contract(
@@ -1278,9 +1297,15 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
         )
 
 
-def _runtime_fixture():
+def _runtime_fixture(
+    *,
+    smiles: str = "CC1CCCCC1O",
+    shard_digest: str = "1" * 64,
+    shard_name: str = "shard_0000.jsonl.gz",
+    row_sha256: str = "6" * 64,
+):
     records, attempted = build_cycle_op_records(
-        ("CC1CCCCC1O",),
+        (smiles,),
         n_slots=12,
         seed=4,
         max_bonds_per_molecule=1,
@@ -1290,10 +1315,9 @@ def _runtime_fixture():
     path = original.path
     step = path.trace.steps[0]
     family = canonical_family(step.rule_name)
-    shard_digest = "1" * 64
     address = PackedTraceAddress(
         packed_shard_content_sha256=shard_digest,
-        packed_shard_name="shard_0000.jsonl.gz",
+        packed_shard_name=shard_name,
         entry_index=0,
         trace_id="fixture-trace",
         layer="cycle_ops",
@@ -1348,7 +1372,7 @@ def _runtime_fixture():
     )
     row = {
         "row_index": 0,
-        "row_sha256": "6" * 64,
+        "row_sha256": row_sha256,
         "record_key": (f"cycle_ops/validation/{address.packed_shard_name}:0:{address.trace_id}"),
         "partition": "validation",
         "exact_state_ref": {
@@ -1448,6 +1472,122 @@ def test_capacity_census_recomputes_exact_production_support_and_rejects_forgery
         match="production re-enumeration",
     ):
         validate_editing_t1_capacity_census(forged, **kwargs)
+
+
+def test_capacity_census_parallel_compilation_is_byte_identical_and_bounded(
+    monkeypatch,
+):
+    first_source, first_forensics, _panel, _family = _runtime_fixture()
+    second_source, second_forensics, _panel, _family = _runtime_fixture(
+        smiles="CC1CCCC1O",
+        shard_digest="a" * 64,
+        shard_name="shard_0001.jsonl.gz",
+        row_sha256="b" * 64,
+    )
+    second_row = {
+        **second_forensics["rows"][0],
+        "row_index": 1,
+    }
+    source = FrozenValidationSource(
+        records=(*first_source.records, *second_source.records),
+        sidecar=LoadedSemanticCellSidecar(
+            rows=(*first_source.sidecar.rows, *second_source.sidecar.rows),
+            manifest={},
+        ),
+        bindings=(*first_source.bindings, *second_source.bindings),
+        unified_packed_manifest_sha256=(first_source.unified_packed_manifest_sha256),
+        representability_overlay_sha256=(first_source.representability_overlay_sha256),
+    )
+    forensics = {
+        "artifact_sha256": "7" * 64,
+        "rows": [first_forensics["rows"][0], second_row],
+    }
+    monkeypatch.setattr(
+        editing_t1_panel_module,
+        "_validate_forensics_rows",
+        lambda payload, _sidecar: tuple(payload["rows"]),
+    )
+    admission = _active8_admission_for_forensics(
+        forensics,
+        unified_packed_manifest_sha256=(source.unified_packed_manifest_sha256),
+    )
+    torch.manual_seed(7)
+    serial_model = FactorizedTraceletRateModel(
+        build_typed_ring_catalog(()),
+        hidden_dim=12,
+        message_passing_steps=1,
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        enable_ring_system_delete=False,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    )
+    parallel_model = copy.deepcopy(serial_model)
+    kwargs = {
+        "source": source,
+        "forensics": forensics,
+        "forensics_file_sha256": "9" * 64,
+        "active8_admission": admission,
+        "gate_zero_runtime_contract_sha256": admission.support_contract_sha256,
+    }
+
+    serial = build_editing_t1_capacity_census(
+        serial_model,
+        **kwargs,
+        workers=1,
+    )
+    parallel = build_editing_t1_capacity_census(
+        parallel_model,
+        **kwargs,
+        workers=2,
+    )
+
+    assert parallel == serial
+    assert (
+        json.dumps(parallel, indent=2, sort_keys=True, allow_nan=False).encode()
+        == json.dumps(serial, indent=2, sort_keys=True, allow_nan=False).encode()
+    )
+    with pytest.raises(ValueError, match="integer from 1 through 8"):
+        build_editing_t1_capacity_census(
+            parallel_model,
+            **kwargs,
+            workers=9,
+        )
+    unsupported_model = copy.deepcopy(serial_model)
+    unsupported_model.enable_cycle_ops = False
+    with pytest.raises(
+        EditingT1PanelError,
+        match="could not enumerate production successor support",
+    ):
+        build_editing_t1_capacity_census(
+            unsupported_model,
+            **kwargs,
+            workers=2,
+        )
+
+
+def test_t1_panel_builder_cli_has_explicit_bounded_worker_count():
+    from scripts import build_editing_t1_successor_panel as panel_cli
+
+    required = [
+        "--transfer-root",
+        "/tmp/t1-fixture",
+        "--active8-inventory",
+        "/tmp/t1-fixture/ACTIVE8_TRACE_INVENTORY.json",
+        "--active8-inventory-file-sha256",
+        "a" * 64,
+        "--capacity-census-output",
+        "/tmp/t1-fixture/census.json",
+        "--output",
+        "/tmp/t1-fixture/panel.json",
+    ]
+    assert panel_cli._parser().parse_args(required).workers == 1
+    assert panel_cli._parser().parse_args([*required, "--workers", "8"]).workers == 8
+    with pytest.raises(SystemExit):
+        panel_cli._parser().parse_args([*required, "--workers", "0"])
 
 
 def test_t1_runtime_fails_on_gate_zero_active8_identity_mismatch():

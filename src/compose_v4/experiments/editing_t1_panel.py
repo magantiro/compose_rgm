@@ -28,10 +28,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import multiprocessing
 import os
 import tempfile
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Mapping, Sequence
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from types import MappingProxyType
@@ -44,6 +46,7 @@ from compose_v4.data.active8_trace_inventory import (
 from compose_v4.data.successor_fiber_cache import (
     fiber_compiler_implementation_hash,
 )
+from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.experiments.editing_gate_zero_runtime import (
     FrozenValidationSource,
 )
@@ -78,6 +81,7 @@ EDITING_T1_UNIQUE_EXAMPLES_PER_FAMILY = 64
 EDITING_T1_REPEATED_MIN_EXAMPLES = 64
 EDITING_T1_REPEATED_MAX_EXAMPLES = 128
 EDITING_T1_SUPPORT_TIME = 0.5
+EDITING_T1_MAX_CAPACITY_WORKERS = 8
 EDITING_T1_SELECTION_ALGORITHM = (
     "physical_active8_whole_trace_admission_then_forensics_stream_first_globally_"
     "deterministic_unique_exact_state_64_per_family_plus_bounded_complete_global_"
@@ -274,6 +278,33 @@ class _ForensicsTraceAddress:
     packed_shard_content_sha256: str
     entry_index: int
     trace_id: str
+
+
+@dataclass(frozen=True)
+class _CapacityTeacherRequest:
+    row_position: int
+    target_state_sha256: str
+    action_sha256: str
+    teacher_successor_key: str
+
+
+@dataclass(frozen=True)
+class _CapacitySourceRequest:
+    source_state_sha256: str
+    state: MolecularGraph
+    teachers: tuple[_CapacityTeacherRequest, ...]
+
+
+@dataclass(frozen=True)
+class _CapacityRowMetrics:
+    row_position: int
+    raw_legal_mark_count: int
+    canonical_successor_count: int
+    teacher_canonical_successor_alias_count: int
+    teacher_exact_successor_alias_count: int
+
+
+_CAPACITY_WORKER_MODEL: Any | None = None
 
 
 def active8_t1_identity(
@@ -498,6 +529,141 @@ def _record_index(
     return MappingProxyType(index)
 
 
+def _require_capacity_workers(workers: int) -> int:
+    if type(workers) is not int or workers < 1 or workers > EDITING_T1_MAX_CAPACITY_WORKERS:
+        raise ValueError(
+            "T1 capacity census workers must be an integer from "
+            f"1 through {EDITING_T1_MAX_CAPACITY_WORKERS}"
+        )
+    return workers
+
+
+def _compile_capacity_source(
+    request: _CapacitySourceRequest,
+    *,
+    model: Any,
+) -> tuple[_CapacityRowMetrics, ...]:
+    runtime = de_novo_rewrite_system()
+    try:
+        compiled = compile_state_successor_map(
+            model,
+            request.state,
+            time=EDITING_T1_SUPPORT_TIME,
+            system=runtime,
+        )
+    except SuccessorTrainingError as error:
+        raise EditingT1PanelError(
+            "T1 capacity census could not enumerate production successor support"
+        ) from error
+    if compiled.source_state_sha256 != request.source_state_sha256:
+        raise EditingT1PanelError(
+            "T1 capacity census compilation returned another exact source state"
+        )
+    raw_mark_count = sum(len(group.marks) for group in compiled.successor_groups) + len(
+        compiled.virtual_marks
+    )
+    if raw_mark_count <= 0:
+        raise EditingT1PanelError("T1 capacity census encountered empty production support")
+
+    metrics: list[_CapacityRowMetrics] = []
+    for teacher in request.teachers:
+        try:
+            require_exact_successor_action_identity(
+                compiled,
+                target_state_sha256=teacher.target_state_sha256,
+                action_sha256=teacher.action_sha256,
+            )
+        except SuccessorTrainingError as error:
+            raise EditingT1PanelError(
+                "T1 capacity census teacher is absent from exact production support"
+            ) from error
+        teacher_group = next(
+            (
+                group
+                for group in compiled.successor_groups
+                if group.target_key == teacher.teacher_successor_key
+            ),
+            None,
+        )
+        if teacher_group is None:
+            raise EditingT1PanelError("T1 capacity census teacher canonical successor is absent")
+        exact_alias_count = sum(
+            mark.successor_state_sha256 == teacher.target_state_sha256
+            for mark in teacher_group.marks
+        )
+        if exact_alias_count <= 0:
+            raise EditingT1PanelError("T1 capacity census encountered empty production support")
+        metrics.append(
+            _CapacityRowMetrics(
+                row_position=teacher.row_position,
+                raw_legal_mark_count=raw_mark_count,
+                canonical_successor_count=len(compiled.successor_groups),
+                teacher_canonical_successor_alias_count=len(teacher_group.marks),
+                teacher_exact_successor_alias_count=exact_alias_count,
+            )
+        )
+    return tuple(metrics)
+
+
+def _initialize_capacity_worker(model: Any) -> None:
+    global _CAPACITY_WORKER_MODEL
+
+    import torch
+
+    torch.set_num_threads(1)
+    torch.set_num_interop_threads(1)
+    _CAPACITY_WORKER_MODEL = model
+
+
+def _compile_capacity_source_in_worker(
+    request: _CapacitySourceRequest,
+) -> tuple[_CapacityRowMetrics, ...]:
+    if _CAPACITY_WORKER_MODEL is None:
+        raise EditingT1PanelError("T1 capacity worker was not initialized")
+    return _compile_capacity_source(
+        request,
+        model=_CAPACITY_WORKER_MODEL,
+    )
+
+
+def _compile_capacity_sources(
+    requests: Sequence[_CapacitySourceRequest],
+    *,
+    model: Any,
+    workers: int,
+) -> tuple[tuple[_CapacityRowMetrics, ...], ...]:
+    if not requests:
+        return ()
+    if workers == 1:
+        return tuple(_compile_capacity_source(request, model=model) for request in requests)
+
+    results: list[tuple[_CapacityRowMetrics, ...]] = []
+    request_iterator = iter(requests)
+    pending = deque()
+    context = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(
+        max_workers=workers,
+        mp_context=context,
+        initializer=_initialize_capacity_worker,
+        initargs=(model,),
+    ) as executor:
+        for _ in range(min(workers, len(requests))):
+            pending.append(
+                executor.submit(
+                    _compile_capacity_source_in_worker,
+                    next(request_iterator),
+                )
+            )
+        while pending:
+            results.append(pending.popleft().result())
+            try:
+                request = next(request_iterator)
+            except StopIteration:
+                continue
+            pending.append(executor.submit(_compile_capacity_source_in_worker, request))
+    return tuple(results)
+
+
 def build_editing_t1_capacity_census(
     model: Any,
     *,
@@ -506,9 +672,11 @@ def build_editing_t1_capacity_census(
     forensics_file_sha256: str,
     active8_admission: Active8TraceAdmission,
     gate_zero_runtime_contract_sha256: str,
+    workers: int = 1,
 ) -> dict[str, Any]:
     """Recompute exact Active8 successor-support counts from production primitives."""
 
+    workers = _require_capacity_workers(workers)
     for name, value in (
         ("forensics_file_sha256", forensics_file_sha256),
         (
@@ -549,8 +717,9 @@ def build_editing_t1_capacity_census(
     )
     records = _record_index(source)
     runtime = de_novo_rewrite_system()
-    compiled_by_source: dict[str, Any] = {}
-    census_rows: list[dict[str, Any]] = []
+    base_rows: list[dict[str, Any]] = []
+    states_by_source: dict[str, MolecularGraph] = {}
+    teachers_by_source: dict[str, list[_CapacityTeacherRequest]] = {}
     for row in admitted_rows:
         address = _forensics_trace_address(row, active8_admission)
         exact_trace_key = (
@@ -621,49 +790,17 @@ def build_editing_t1_capacity_census(
                 "T1 capacity census teacher does not execute to the exact stored successor"
             )
 
-        compiled = compiled_by_source.get(source_state_sha256)
-        if compiled is None:
-            try:
-                compiled = compile_state_successor_map(
-                    model,
-                    state,
-                    time=EDITING_T1_SUPPORT_TIME,
-                    system=runtime,
-                )
-            except SuccessorTrainingError as error:
-                raise EditingT1PanelError(
-                    "T1 capacity census could not enumerate production successor support"
-                ) from error
-            compiled_by_source[source_state_sha256] = compiled
-        try:
-            require_exact_successor_action_identity(
-                compiled,
+        row_position = len(base_rows)
+        states_by_source.setdefault(source_state_sha256, state)
+        teachers_by_source.setdefault(source_state_sha256, []).append(
+            _CapacityTeacherRequest(
+                row_position=row_position,
                 target_state_sha256=target_state_sha256,
                 action_sha256=action_sha256,
+                teacher_successor_key=str(row["teacher_successor_key"]),
             )
-        except SuccessorTrainingError as error:
-            raise EditingT1PanelError(
-                "T1 capacity census teacher is absent from exact production support"
-            ) from error
-        teacher_group = next(
-            (
-                group
-                for group in compiled.successor_groups
-                if group.target_key == row["teacher_successor_key"]
-            ),
-            None,
         )
-        if teacher_group is None:
-            raise EditingT1PanelError("T1 capacity census teacher canonical successor is absent")
-        exact_alias_count = sum(
-            mark.successor_state_sha256 == target_state_sha256 for mark in teacher_group.marks
-        )
-        raw_mark_count = sum(len(group.marks) for group in compiled.successor_groups) + len(
-            compiled.virtual_marks
-        )
-        if exact_alias_count <= 0 or raw_mark_count <= 0:
-            raise EditingT1PanelError("T1 capacity census encountered empty production support")
-        census_rows.append(
+        base_rows.append(
             {
                 "source_row_index": int(row["row_index"]),
                 "source_row_sha256": str(row["row_sha256"]),
@@ -674,10 +811,45 @@ def build_editing_t1_capacity_census(
                 "teacher_action_sha256": action_sha256,
                 "teacher_successor_key": str(row["teacher_successor_key"]),
                 "teacher_successor_state_sha256": target_state_sha256,
-                "raw_legal_mark_count": raw_mark_count,
-                "canonical_successor_count": len(compiled.successor_groups),
-                "teacher_canonical_successor_alias_count": len(teacher_group.marks),
-                "teacher_exact_successor_alias_count": exact_alias_count,
+            }
+        )
+
+    requests = tuple(
+        _CapacitySourceRequest(
+            source_state_sha256=source_state_sha256,
+            state=state,
+            teachers=tuple(teachers_by_source[source_state_sha256]),
+        )
+        for source_state_sha256, state in states_by_source.items()
+    )
+    metrics_by_row: list[_CapacityRowMetrics | None] = [None] * len(base_rows)
+    for source_metrics in _compile_capacity_sources(
+        requests,
+        model=model,
+        workers=workers,
+    ):
+        for metrics in source_metrics:
+            if metrics_by_row[metrics.row_position] is not None:
+                raise EditingT1PanelError(
+                    "T1 capacity census compilation repeated a source-row result"
+                )
+            metrics_by_row[metrics.row_position] = metrics
+    if any(metrics is None for metrics in metrics_by_row):
+        raise EditingT1PanelError("T1 capacity census compilation omitted a source-row result")
+    census_rows: list[dict[str, Any]] = []
+    for base_row, metrics in zip(base_rows, metrics_by_row, strict=True):
+        assert metrics is not None
+        census_rows.append(
+            {
+                **base_row,
+                "raw_legal_mark_count": metrics.raw_legal_mark_count,
+                "canonical_successor_count": metrics.canonical_successor_count,
+                "teacher_canonical_successor_alias_count": (
+                    metrics.teacher_canonical_successor_alias_count
+                ),
+                "teacher_exact_successor_alias_count": (
+                    metrics.teacher_exact_successor_alias_count
+                ),
             }
         )
 
@@ -826,6 +998,7 @@ def validate_editing_t1_capacity_census(
     forensics_file_sha256: str,
     active8_admission: Active8TraceAdmission,
     gate_zero_runtime_contract_sha256: str,
+    workers: int = 1,
 ) -> Mapping[str, Mapping[str, int | str]]:
     """Recompute the production census and reject self-consistent fabrication."""
 
@@ -844,6 +1017,7 @@ def validate_editing_t1_capacity_census(
         forensics_file_sha256=forensics_file_sha256,
         active8_admission=active8_admission,
         gate_zero_runtime_contract_sha256=(gate_zero_runtime_contract_sha256),
+        workers=workers,
     )
     if dict(census) != expected:
         raise EditingT1PanelError("T1 capacity census disagrees with production re-enumeration")
@@ -1700,6 +1874,7 @@ def build_editing_t1_panel(
     active8_admission: Active8TraceAdmission,
     gate_zero_runtime_contract_sha256: str,
     gate_zero_unified_packed_manifest_sha256: str,
+    capacity_workers: int = 1,
 ) -> dict[str, Any]:
     """Derive the exact T1 panels from validated frozen inputs."""
 
@@ -1764,6 +1939,7 @@ def build_editing_t1_panel(
         forensics_file_sha256=forensics_file_sha256,
         active8_admission=active8_admission,
         gate_zero_runtime_contract_sha256=(gate_zero_runtime_contract_sha256),
+        workers=capacity_workers,
     )
     excluded_trace_ids = validate_charge_policy_exclusions(
         audit=charge_policy_audit,
@@ -2253,6 +2429,7 @@ __all__ = [
     "EDITING_T1_CAPACITY_CENSUS_STATUS",
     "EDITING_T1_GLOBAL_FAMILY_SELECTOR",
     "EDITING_T1_GLOBAL_REPEATED_PANEL_KIND",
+    "EDITING_T1_MAX_CAPACITY_WORKERS",
     "EDITING_T1_OPERATOR_FREEZE_EXCLUDED_FAMILIES",
     "EDITING_T1_PANEL_SCHEMA",
     "EDITING_T1_PANEL_SCHEMA_VERSION",
