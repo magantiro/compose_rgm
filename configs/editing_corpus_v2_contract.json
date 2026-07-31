@@ -1,7 +1,7 @@
 {
   "schema": "compose.editing_corpus_contract",
   "schema_version": 2,
-  "contract_id": "compose-editing-corpus-v2-prebuild",
+  "contract_id": "compose-editing-corpus-v2-prebuild-r2",
   "status": "DESIGN_NOT_TRAINING_AUTHORIZED",
   "scientific_scope": {
     "model": "property-agnostic canonical molecular-successor editing prior",
@@ -141,7 +141,8 @@
       "id": "observed_local_analogue",
       "purpose": "context-matched local substitutions and size changes between observed endpoints",
       "admissible_evidence_profiles": [
-        "observed_pair_compiled_path"
+        "observed_pair_compiled_path",
+        "inferred_relation_compiled_path"
       ],
       "reserved_evidence_profiles": [
         "observed_pair_observed_actions"
@@ -151,7 +152,8 @@
       "id": "operator_aware_real_endpoint",
       "purpose": "compile observed endpoint pairs with direct Active8 operations before delete-rebuild fallback",
       "admissible_evidence_profiles": [
-        "observed_pair_compiled_path"
+        "observed_pair_compiled_path",
+        "inferred_relation_compiled_path"
       ],
       "reserved_evidence_profiles": [
         "observed_pair_observed_actions"

@@ -1,0 +1,69 @@
+{
+  "schema": "compose.editing_v2_candidate_routing_policy",
+  "schema_version": 1,
+  "policy_id": "compose-editing-v2-five-lane-routing-v1",
+  "source_kinds": [
+    "inferred_real_endpoint_pair",
+    "executor_generated_walk_from_real_endpoint"
+  ],
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "attachment_or_topology_families": [
+    "bond_reroute",
+    "cycle_attach",
+    "cycle_insert",
+    "ring_system_restate"
+  ],
+  "rules_in_priority_order": [
+    {
+      "id": "executor_generated_walk",
+      "source_kind": "executor_generated_walk_from_real_endpoint",
+      "lane": "reversible_synthetic_walk",
+      "evidence_profile_id": "executor_generated_walk"
+    },
+    {
+      "id": "direct_attachment_or_topology",
+      "source_kind": "inferred_real_endpoint_pair",
+      "compiler_path_prefix": "direct_",
+      "path_length": 1,
+      "family_intersection": [
+        "bond_reroute",
+        "cycle_attach",
+        "cycle_insert",
+        "ring_system_restate"
+      ],
+      "lane": "linker_positional_topology_analogue",
+      "evidence_profile_id": "inferred_relation_compiled_path"
+    },
+    {
+      "id": "direct_non_topology_active8",
+      "source_kind": "inferred_real_endpoint_pair",
+      "compiler_path_prefix": "direct_",
+      "path_length": 1,
+      "lane": "operator_aware_real_endpoint",
+      "evidence_profile_id": "inferred_relation_compiled_path"
+    },
+    {
+      "id": "short_local_compiled_path",
+      "source_kind": "inferred_real_endpoint_pair",
+      "maximum_path_length": 2,
+      "lane": "observed_local_analogue",
+      "evidence_profile_id": "inferred_relation_compiled_path"
+    },
+    {
+      "id": "real_endpoint_multistep_path",
+      "source_kind": "inferred_real_endpoint_pair",
+      "minimum_path_length": 3,
+      "lane": "real_endpoint_multistep_path",
+      "evidence_profile_id": "inferred_relation_compiled_path"
+    }
+  ]
+}

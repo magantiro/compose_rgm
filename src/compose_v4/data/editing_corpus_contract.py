@@ -168,11 +168,11 @@ _EVIDENCE_PROFILES = {
 }
 _LANE_PROFILE_ASSIGNMENTS = {
     "observed_local_analogue": (
-        ("observed_pair_compiled_path",),
+        ("observed_pair_compiled_path", "inferred_relation_compiled_path"),
         ("observed_pair_observed_actions",),
     ),
     "operator_aware_real_endpoint": (
-        ("observed_pair_compiled_path",),
+        ("observed_pair_compiled_path", "inferred_relation_compiled_path"),
         ("observed_pair_observed_actions",),
     ),
     "linker_positional_topology_analogue": (
