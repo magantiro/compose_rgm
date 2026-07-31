@@ -5,25 +5,39 @@ This draft fixes the result layout and interpretation rules before final
 measurements exist. Red \textsf{XXX} tokens below are filled only from frozen,
 provenance-validated artifacts; they are not estimates.
 
+The completed 16,000-step editing run covered 661,105 admitted training traces
+and produced 32 snapshots, but no snapshot is selected. Cycle opening remained
+poor in mark-level diagnostics and the inherited Graft capability collapsed.
+The inspected final-test aggregate is barred from selection and repair, and the
+run had zero de novo mixture weight. It therefore fills none of the learned
+transport, adaptation, control, or unconditional-generation cells below.
+
 \subsection{The learned law improves executable molecular transport}
 
 \begin{table}[htbp]
   \centering
   \caption{\textbf{Editing-prior capability results.} Every row uses the frozen
   validation-selected editing checkpoint. Uniform transport is uniform over
-  canonical successors, not marks.}
+  canonical successors, not marks. The empirical-family law remains
+  preimplementation until its within-family allocation and smoothing rule are
+  frozen.}
   \label{tab:editing-results}
   \small
   \begin{tabularx}{\linewidth}{@{}lXXXX@{}}
     \toprule
     Method & Successor NLL $\downarrow$ & Target recovery $\uparrow$ &
-    Path overhead $\downarrow$ & Required-family gates \\
+    Path overhead $\downarrow$ & Family gates \\
     \midrule
     Uniform legal &
     \resultpending{E2_NLL_UNIFORM} &
     \resultpending{E2_RECOVERY_UNIFORM} &
     \resultpending{E2_OVERHEAD_UNIFORM} &
     n/a \\
+    State-independent empirical family &
+    \resultpending{E2_NLL_EMPIRICAL_FAMILY} &
+    \resultpending{E2_RECOVERY_EMPIRICAL_FAMILY} &
+    \resultpending{E2_OVERHEAD_EMPIRICAL_FAMILY} &
+    {\scriptsize\texttt{PREIMPLEMENTATION}} \\
     COMPOSE &
     \resultpending{E2_NLL_COMPOSE} &
     \resultpending{E2_RECOVERY_COMPOSE} &
@@ -36,7 +50,7 @@ provenance-validated artifacts; they are not estimates.
 The registered E2 conclusion is
 \resultpending{E2_TRANSPORT_CONCLUSION}. This sentence must distinguish proper
 successor likelihood from top-1 family-choice accuracy and must report any
-semantic slice on which uniform legal rewriting is not improved.
+semantic slice on which either required state-independent law is not improved.
 
 \subsection{One process adapts size and ring topology}
 
@@ -44,7 +58,8 @@ semantic slice on which uniform legal rewriting is not improved.
   \composefigureplaceholder[2.05in]{%
     Figure 2 artwork: learned versus uniform transport; grow/shrink and
     grow-then-switch atom-count traces; cycle close/open and topology-reversal
-    examples; fixed-cardinality and no-cycle ablations.}
+    examples; no-insert, no-delete, fixed-cardinality, no-reroute, and no-cycle
+    ablations.}
   \caption{\textbf{Learned transport and structural adaptation.} Every depicted
   intermediate will be selected by a frozen rule and independently replayed
   through the executor.}
@@ -67,10 +82,22 @@ semantic slice on which uniform legal rewriting is not improved.
     \resultpending{E3_SIZE_SUCCESS_FULL} &
     \resultpending{E3_VALID_PATH_FULL} &
     \resultpending{E3_COST_FULL} \\
+    No atom insertion &
+    \resultpending{E3_SIZE_SUCCESS_NOINSERT} &
+    \resultpending{E3_VALID_PATH_NOINSERT} &
+    \resultpending{E3_COST_NOINSERT} \\
+    No atom deletion &
+    \resultpending{E3_SIZE_SUCCESS_NODELETE} &
+    \resultpending{E3_VALID_PATH_NODELETE} &
+    \resultpending{E3_COST_NODELETE} \\
     Fixed cardinality &
     \resultpending{E3_SIZE_SUCCESS_FIXED} &
     \resultpending{E3_VALID_PATH_FIXED} &
     \resultpending{E3_COST_FIXED} \\
+    No bond reroute, size &
+    \resultpending{E3_SIZE_SUCCESS_NOREROUTE} &
+    \resultpending{E3_VALID_PATH_NOREROUTE} &
+    \resultpending{E3_COST_NOREROUTE} \\
     Full COMPOSE, topology &
     \resultpending{E4_TOPOLOGY_SUCCESS_FULL} &
     \resultpending{E4_VALID_PATH_FULL} &
@@ -79,6 +106,12 @@ semantic slice on which uniform legal rewriting is not improved.
     \resultpending{E4_TOPOLOGY_SUCCESS_NOCYCLE} &
     \resultpending{E4_VALID_PATH_NOCYCLE} &
     \resultpending{E4_COST_NOCYCLE} \\
+    No bond reroute, topology &
+    \resultpending{E4_TOPOLOGY_SUCCESS_NOREROUTE} &
+    \resultpending{E4_VALID_PATH_NOREROUTE} &
+    \resultpending{E4_COST_NOREROUTE} \\
+    Finite-catalog topology editor &
+    \multicolumn{3}{c}{\texttt{PROSPECTIVE\_UNAVAILABLE}} \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -87,6 +120,8 @@ The registered cardinality conclusion is
 \resultpending{E3_CARDINALITY_CONCLUSION}. The registered topology conclusion is
 \resultpending{E4_TOPOLOGY_CONCLUSION}. Failures on fused, spiro, bridged, or
 ring-size strata remain visible rather than being absorbed into one aggregate.
+The finite-catalog row can run only after its preregistered availability gate;
+the disabled \texttt{ring\_system\_grow} macro is ineligible.
 
 \subsection{The quotient is invariant and finite-state control is exact}
 
@@ -124,8 +159,9 @@ ring-size strata remain visible rather than being absorbed into one aggregate.
 
 The final statement of quotient invariance is
 \resultpending{E5_QUOTIENT_CONCLUSION}; it is restricted to
-probability-preserving refinements within one successor fiber and
-successor-level controllers. The exact-control conclusion is
+successor-preserving, aggregate-rate-preserving re-encodings that retain
+productive disposition, together with fiber-constant successor-level
+controllers. The exact-control conclusion is
 \resultpending{E6_EXACT_CONTROL_CONCLUSION}; it is restricted to the enumerated
 verification graph and exact backward values.
 
@@ -156,12 +192,21 @@ verification graph and exact backward values.
     Unguided prior &
     \resultpending{E7_HV_PRIOR} & \resultpending{E7_AUC_PRIOR} &
     \resultpending{E7_FEAS_PRIOR} & \resultpending{E7_CALLS_PRIOR} \\
+    Uniform canonical rewriting &
+    \resultpending{E7_HV_UNIFORM} & \resultpending{E7_AUC_UNIFORM} &
+    \resultpending{E7_FEAS_UNIFORM} & \resultpending{E7_CALLS_UNIFORM} \\
     Endpoint rerank &
     \resultpending{E7_HV_RERANK} & \resultpending{E7_AUC_RERANK} &
     \resultpending{E7_FEAS_RERANK} & \resultpending{E7_CALLS_RERANK} \\
-    Greedy/local &
+    Greedy one-step &
     \resultpending{E7_HV_GREEDY} & \resultpending{E7_AUC_GREEDY} &
     \resultpending{E7_FEAS_GREEDY} & \resultpending{E7_CALLS_GREEDY} \\
+    Local Boltzmann &
+    \resultpending{E7_HV_BOLTZMANN} & \resultpending{E7_AUC_BOLTZMANN} &
+    \resultpending{E7_FEAS_BOLTZMANN} & \resultpending{E7_CALLS_BOLTZMANN} \\
+    Static scalarization &
+    \resultpending{E7_HV_SCALARIZED} & \resultpending{E7_AUC_SCALARIZED} &
+    \resultpending{E7_FEAS_SCALARIZED} & \resultpending{E7_CALLS_SCALARIZED} \\
     MOG-DFM-style &
     \resultpending{E7_HV_MOGDFM} & \resultpending{E7_AUC_MOGDFM} &
     \resultpending{E7_FEAS_MOGDFM} & \resultpending{E7_CALLS_MOGDFM} \\
@@ -171,6 +216,90 @@ verification graph and exact backward values.
     Learned value &
     \resultpending{E7_HV_VALUE} & \resultpending{E7_AUC_VALUE} &
     \resultpending{E7_FEAS_VALUE} & \resultpending{E7_CALLS_VALUE} \\
+    NSGA-II over COMPOSE successors &
+    \resultpending{E7_HV_NSGA2} & \resultpending{E7_AUC_NSGA2} &
+    \resultpending{E7_FEAS_NSGA2} & \resultpending{E7_CALLS_NSGA2} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Dynamic algorithm classes and switch mechanics.} Algorithm
+  classes and mechanistic switch arms answer different questions and remain
+  separate. Every comparison starts from the registered source or realized
+  switch state and uses matched post-switch accounting.}
+  \label{tab:dynamic-arms}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXXX@{}}
+    \toprule
+    Arm & Type & Adaptation regret $\downarrow$ &
+    Post-switch oracle cost $\downarrow$ \\
+    \midrule
+    Restart and replan & algorithm class &
+    \resultpending{E7_DYN_RESTART_REPLAN_REGRET} &
+    \resultpending{E7_DYN_RESTART_REPLAN_COST} \\
+    Myopic retargeting & algorithm class &
+    \resultpending{E7_DYN_MYOPIC_REGRET} &
+    \resultpending{E7_DYN_MYOPIC_COST} \\
+    Warm-start multiobjective search & algorithm class &
+    \resultpending{E7_DYN_WARMSTART_REGRET} &
+    \resultpending{E7_DYN_WARMSTART_COST} \\
+    Reusable-transport dynamic control & algorithm class &
+    \resultpending{E7_DYN_REUSABLE_REGRET} &
+    \resultpending{E7_DYN_REUSABLE_COST} \\
+    Continue from switch state & switch mechanic &
+    \resultpending{E7_SWITCH_CONTINUE_REGRET} &
+    \resultpending{E7_SWITCH_CONTINUE_COST} \\
+    Restart from original source & switch mechanic &
+    \resultpending{E7_SWITCH_RESTART_SOURCE_REGRET} &
+    \resultpending{E7_SWITCH_RESTART_SOURCE_COST} \\
+    Restart from switch state, fresh sampler & switch mechanic &
+    \resultpending{E7_SWITCH_RESTART_STATE_REGRET} &
+    \resultpending{E7_SWITCH_RESTART_STATE_COST} \\
+    Static compromise from step zero & switch mechanic &
+    \resultpending{E7_SWITCH_STATIC_REGRET} &
+    \resultpending{E7_SWITCH_STATIC_COST} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{External optimization context.} External methods do not
+  share COMPOSE support. Each row is populated only after its adapter passes
+  the frozen source, objective, constraint, budget, and standardization gates;
+  otherwise its disposition records the incompatibility.}
+  \label{tab:external-context}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lXXX@{}}
+    \toprule
+    Method & Norm. HV $\uparrow$ & HV-AUC $\uparrow$ & Disposition \\
+    \midrule
+    GraphGA \citep{jensen2019graphga} &
+    \resultpending{E7_EXT_GRAPHGA_HV} &
+    \resultpending{E7_EXT_GRAPHGA_AUC} &
+    \resultpending{E7_EXT_GRAPHGA_DISPOSITION} \\
+    MARS \citep{xie2021mars} &
+    \resultpending{E7_EXT_MARS_HV} &
+    \resultpending{E7_EXT_MARS_AUC} &
+    \resultpending{E7_EXT_MARS_DISPOSITION} \\
+    RetMol \citep{wang2023retmol} &
+    \resultpending{E7_EXT_RETMOL_HV} &
+    \resultpending{E7_EXT_RETMOL_AUC} &
+    \resultpending{E7_EXT_RETMOL_DISPOSITION} \\
+    GenMol \citep{lee2025genmol} &
+    \resultpending{E7_EXT_GENMOL_HV} &
+    \resultpending{E7_EXT_GENMOL_AUC} &
+    \resultpending{E7_EXT_GENMOL_DISPOSITION} \\
+    InVirtuoGen \citep{kaech2026invirtuogen} &
+    \resultpending{E7_EXT_INVIRTUOGEN_HV} &
+    \resultpending{E7_EXT_INVIRTUOGEN_AUC} &
+    \resultpending{E7_EXT_INVIRTUOGEN_DISPOSITION} \\
+    HN-GFN \citep{zhu2023hngfn} &
+    \resultpending{E7_EXT_HNGFN_HV} &
+    \resultpending{E7_EXT_HNGFN_AUC} &
+    \resultpending{E7_EXT_HNGFN_DISPOSITION} \\
     \bottomrule
   \end{tabularx}
 \end{table}

@@ -21,14 +21,30 @@ seed, and exact checkpoint hash.  A development artifact may validate code but
 cannot fill a final result cell.  Historical measurements are labeled
 diagnostic and do not select the production checkpoint.
 
+\paragraph{Current empirical boundary.}
+The completed scientific editing run used 661,105 admitted training traces,
+ran for 16,000 optimizer steps, and produced all 32 scheduled snapshots. It is
+a valid large-data diagnostic run, not a selected model. Mark-level
+diagnostics found poor cycle opening and collapse of the inherited Graft
+capability; the validation-only canonical-successor leaderboard and forensic
+audits remain pending. The already inspected test aggregate is barred from
+checkpoint, architecture, recipe, and threshold selection. The run used zero
+de novo mixture weight, so it supplies no unconditional timed-CTMC result.
+Every learned-result cell in this draft remains pending.
+Earlier exact-Doob scripts, old exactness JSON files, data-starved checkpoints,
+pre-RingCore task selections, and stale figures are excluded from all
+claim-bearing cells. They may identify code paths or motivate preregistered
+tests, but cannot supply results, thresholds, or model selection.
+
 \paragraph{Partition use.}
 Training data fit parameters.  Development panels are used to repair
-factorizations and set pilot thresholds.  Validation data choose checkpoints
-and controller hyperparameters under the frozen rules below.  The final test
-partition is opened once after the checkpoint, tasks, thresholds, and
-comparators are frozen.  Because diagnostics from the completed 16,000-step
-run have already been inspected, a repaired model uses a new sealed final
-holdout.
+factorizations and set pilot thresholds. Validation data choose checkpoints
+under the frozen rules below. A separate controller-validation role chooses
+controller hyperparameters without reopening checkpoint selection. The final
+test partition is opened once after the checkpoint, tasks, thresholds,
+controllers, and comparators are frozen. Because diagnostics from the
+completed 16,000-step run have already been inspected, a repaired model uses a
+new sealed final holdout.
 
 \paragraph{Denominators.}
 Every attempted trajectory remains in the denominator for validity, target
@@ -72,25 +88,24 @@ reconstructs a slot-addressed state by reparsing a canonical string.
     \toprule
     Lane & Purpose & Required evidence & Frozen inventory \\
     \midrule
-    Observed local analogue &
+    \texttt{observed\_local\_analogue} &
     substitutions, bioisosteres, and local size changes &
-    real endpoint; shared-source branches where available &
+    observed endpoints; compiled path and actions &
     \resultpending{APP_CORPUS_LOCAL} \\
-    Operator-aware real endpoint &
+    \texttt{operator\_aware\_real\_endpoint} &
     prefer direct restate, reorder, reroute, birth/death, and cycle programs
     over delete--rebuild fallbacks &
     executable direct path or explicit compiler failure reason &
     \resultpending{APP_CORPUS_OPERATOR_AWARE} \\
-    Linker/positional/topology analogue &
+    \texttt{linker\_positional\_topology\_analogue} &
     attachment relocation, linker changes, and topology changes &
-    real endpoint preferred; certified synthetic supplement allowed &
+    observed endpoints with observed or structurally inferred relationship &
     \resultpending{APP_CORPUS_LINKER_TOPOLOGY} \\
-    Observed series path &
-    short paths, shared prefixes, and alternative routes through observed
-    analogue series &
-    molecule-, scaffold-, series-, and source-group provenance &
-    \resultpending{APP_CORPUS_SERIES} \\
-    Reversible synthetic walk &
+    \texttt{real\_endpoint\_multistep\_path} &
+    short and medium compiled paths between real endpoints &
+    observed or inferred pair relationship; compiler-generated actions &
+    \resultpending{APP_CORPUS_MULTISTEP} \\
+    \texttt{reversible\_synthetic\_walk} &
     rare contexts, inverse/correction coverage, and mixed-family composition &
     production executor, closure, charge policy, and exact replay &
     \resultpending{APP_CORPUS_REVERSIBLE} \\
@@ -99,14 +114,17 @@ reconstructs a slot-addressed state by reparsing a canonical string.
 \end{table}
 
 The lanes are evidence categories rather than automatically equal mixture
-components.  In particular, a forward/reverse encoding of one matched pair is
-not by itself an observed series, a branch group, or a dynamic correction
-example.  Conversely, the local Markov prior need not memorize complete
-Pareto-optimal trajectories: controllers compose local transitions at
-inference.  The final corpus census therefore determines which multi-step
-lanes add measured coverage beyond real local endpoints and reversible
-executor walks; an aspirational field is not allowed to block a bounded pilot
-without a demonstrated capability gap.
+components. Genuine observed-series provenance and observed action sequences
+are unavailable in the current source assets. Each admitted record therefore
+binds six evidence components independently: source endpoint, target endpoint,
+pair relationship, path, intermediates, and action sequence. In particular,
+real endpoints do not make compiler-generated actions or executor-generated
+intermediates observed, and a forward/reverse encoding of one matched pair is
+not an observed series, branch group, or dynamic correction example.
+Conversely, the local Markov prior need not memorize complete Pareto-optimal
+trajectories: controllers compose local transitions at inference. The final
+corpus census determines which multistep lanes add measured coverage beyond
+real local endpoints and reversible executor walks.
 
 \paragraph{Compiler order.}
 For a real endpoint pair, the compiler first searches direct semantic
@@ -118,13 +136,15 @@ target.  Unsupported pairs remain in an audit inventory with a typed failure
 reason.
 
 \paragraph{Splits.}
-Molecule identity, scaffold component, series group, upstream
-document/source group, and transformation signature are group-level split
-keys.  Both endpoints of a pair must belong to the same partition;
-cross-partition pairs are dropped before trace generation.  The frozen
-manifest reports molecule, scaffold, series, and source-group overlaps both
-within each layer and across layers.  Manifest identity is computed from the
-bytes of every packed shard, not only its path and row count.
+Molecule identity, scaffold component, authoritative trace-derived membership,
+physically resolved relationship groups, upstream source group, and
+transformation signature are group-level split keys. Both endpoints of a pair
+must belong to the same partition; cross-partition pairs are dropped before
+trace generation. The current census is diagnostic and does not assign
+partitions or promote relationship labels to hard split edges before their
+physical receipts exist. The later frozen manifest reports overlap under
+every registered key, both within and across lanes. Manifest identity is
+computed from the bytes of every packed shard, not only its path and row count.
 
 \paragraph{Sampling law.}
 Sampling is hierarchical:
@@ -155,26 +175,31 @@ implementation optimization and does not change this hierarchy.
     \toprule
     Layer/lane & Traces & Exact states & Unique sources & Unique scaffolds \\
     \midrule
-    General corruption &
-    \resultpending{APP_CENSUS_CORRUPTION_TRACES} &
-    \resultpending{APP_CENSUS_CORRUPTION_STATES} &
-    \resultpending{APP_CENSUS_CORRUPTION_SOURCES} &
-    \resultpending{APP_CENSUS_CORRUPTION_SCAFFOLDS} \\
-    Cycle operations &
-    \resultpending{APP_CENSUS_CYCLE_TRACES} &
-    \resultpending{APP_CENSUS_CYCLE_STATES} &
-    \resultpending{APP_CENSUS_CYCLE_SOURCES} &
-    \resultpending{APP_CENSUS_CYCLE_SCAFFOLDS} \\
-    Real-endpoint analogues &
-    \resultpending{APP_CENSUS_ANALOGUE_TRACES} &
-    \resultpending{APP_CENSUS_ANALOGUE_STATES} &
-    \resultpending{APP_CENSUS_ANALOGUE_SOURCES} &
-    \resultpending{APP_CENSUS_ANALOGUE_SCAFFOLDS} \\
-    Reversible/mixed-family supplements &
-    \resultpending{APP_CENSUS_SUPPLEMENT_TRACES} &
-    \resultpending{APP_CENSUS_SUPPLEMENT_STATES} &
-    \resultpending{APP_CENSUS_SUPPLEMENT_SOURCES} &
-    \resultpending{APP_CENSUS_SUPPLEMENT_SCAFFOLDS} \\
+    Observed local analogue &
+    \resultpending{APP_CENSUS_LOCAL_TRACES} &
+    \resultpending{APP_CENSUS_LOCAL_STATES} &
+    \resultpending{APP_CENSUS_LOCAL_SOURCES} &
+    \resultpending{APP_CENSUS_LOCAL_SCAFFOLDS} \\
+    Operator-aware real endpoint &
+    \resultpending{APP_CENSUS_OPERATOR_TRACES} &
+    \resultpending{APP_CENSUS_OPERATOR_STATES} &
+    \resultpending{APP_CENSUS_OPERATOR_SOURCES} &
+    \resultpending{APP_CENSUS_OPERATOR_SCAFFOLDS} \\
+    Linker/positional/topology analogue &
+    \resultpending{APP_CENSUS_LINKER_TRACES} &
+    \resultpending{APP_CENSUS_LINKER_STATES} &
+    \resultpending{APP_CENSUS_LINKER_SOURCES} &
+    \resultpending{APP_CENSUS_LINKER_SCAFFOLDS} \\
+    Real-endpoint multistep path &
+    \resultpending{APP_CENSUS_MULTISTEP_TRACES} &
+    \resultpending{APP_CENSUS_MULTISTEP_STATES} &
+    \resultpending{APP_CENSUS_MULTISTEP_SOURCES} &
+    \resultpending{APP_CENSUS_MULTISTEP_SCAFFOLDS} \\
+    Reversible synthetic walk &
+    \resultpending{APP_CENSUS_WALK_TRACES} &
+    \resultpending{APP_CENSUS_WALK_STATES} &
+    \resultpending{APP_CENSUS_WALK_SOURCES} &
+    \resultpending{APP_CENSUS_WALK_SCAFFOLDS} \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -224,6 +249,37 @@ report teacher presence, exact execution, undirected endpoint
 canonicalization, raw mark count, distinct canonical successor count, alias
 multiplicity, and candidate-count-matched random baselines separately for
 closure and opening.
+
+\begin{table}[htbp]
+  \centering
+  \caption{\textbf{Minimum Active8 application conditions.} The production
+  executor applies the complete vocabulary, valence, charge, connectivity, and
+  sanitization checks before commitment.}
+  \label{tab:appendix-operator-conditions}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lYY@{}}
+    \toprule
+    Family & Structural condition & Transaction condition \\
+    \midrule
+    Atom insert & empty slot; null source or one occupied anchor &
+    supported atom/bond state and endpoint valence \\
+    Atom delete & eligible atom; connected remainder or one-atom-to-null &
+    neighbor-H compensation and sanitized successor \\
+    Atom restate & occupied slot; changed successor &
+    joint element--valence--H state supported \\
+    Bond reorder & existing edge &
+    joint order/H update and endpoint valence feasible \\
+    Bond reroute & cut edge is a bridge; pendant fragment; new endpoint outside &
+    atomic cut-plus-attach and feasible endpoint valences \\
+    Cycle close & absent edge between occupied sites &
+    endpoint valence headroom; cycle rank increases \\
+    Cycle open & existing non-bridge cyclic edge &
+    endpoint-H compensation; connected sanitized successor \\
+    Ring-system restate & fixed matched cyclic system &
+    coordinated bond-order transaction changes the state and sanitizes \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \subsection{No-waste training and checkpoint selection}
 \label{app:training-gates}
@@ -293,7 +349,7 @@ identity, and the frozen threshold/stopping policy.  A resume with any
 different scientific field fails closed.
 
 At every registered checkpoint we compute production-weighted and
-family-balanced canonical-successor NLL; per-family NLL, probability, rank,
+balanced-semantic-cell canonical-successor NLL; per-family NLL, probability, rank,
 candidate count, successor count, and alias multiplicity; required-capability
 retention; productive rollout statistics; and, where applicable, hazard
 calibration.  The monitor returns one of three statuses:
@@ -346,22 +402,28 @@ never influence these decisions.
 \paragraph{Checkpoint selection.}
 All registered checkpoints are evaluated on the fixed validation corpus.
 Primary selection minimizes production-weighted canonical-successor NLL;
-balanced-family successor NLL is secondary.  Held-source, scaffold, topology,
+balanced-semantic-cell successor NLL is secondary. Held-source, scaffold, topology,
 charge-support, calibration, and productive-rollout safeguards can veto a
 candidate.  Hazard metrics cannot select the fixed-budget editing checkpoint.
-The complete leaderboard is frozen before the final test is opened.
+Raw Generator-Matching loss, mark or family accuracy, the final optimization
+step, and a trainer-internal selected step cannot select it. The complete
+leaderboard is frozen before the final test is opened.
 
 \subsection{E2--E4: transport and structural adaptation}
 \label{app:e2-e4-protocols}
 
 \paragraph{E2 matched-law comparison.}
-The learned and uniform arms use identical sources, canonical successor sets,
-executor, random seeds, and productive-edit budgets.  The uniform arm assigns
-$1/|\mathcal N(x)|$ to distinct molecular successors, not to marks.  Target
-recovery credits a trajectory when its endpoint canonical identity equals the
-held-out target within the registered budget.  Path overhead compares accepted
+The learned, uniform, and state-independent empirical-family arms use
+identical sources, canonical successor sets, executor, random seeds, and
+productive-edit budgets. The uniform arm assigns $1/|\mathcal N(x)|$ to
+distinct molecular successors, not to marks. The empirical-family arm uses
+one frozen state-independent family law on the same legal support; its
+within-family allocation and support-preserving smoothing must be frozen
+before implementation and before outputs are inspected. Target recovery
+credits a trajectory when its endpoint canonical identity equals the held-out
+target within the registered budget. Path overhead compares accepted
 productive edits with the frozen verified compiler path or, on the exact
-subset, the shortest path.  We separately report immediate reversals, repeated
+subset, the shortest path. We separately report immediate reversals, repeated
 states, longer cycles, net and gross atom/bond displacement, and termination
 due to an empty productive fiber.
 
@@ -369,10 +431,10 @@ due to an empty productive fiber.
 Sources and target atom-count intervals are stratified by initial count,
 requested signed displacement, scaffold, and whether the target is impossible
 under fixed cardinality.  Full \method is compared with no insertion, no
-deletion, and fixed-cardinality support.  Dynamic trials first target a larger
-interval and then switch to a smaller interval at the registered step.  Every
-intermediate count, first hitting time, overshoot, correction count, source
-similarity, and oracle call is retained.
+deletion, fixed-cardinality support, and no \texttt{bond\_reroute}. Dynamic
+trials first target a larger interval and then switch to a smaller interval at
+the registered step. Every intermediate count, first hitting time, overshoot,
+correction count, source similarity, and oracle call is retained.
 
 \paragraph{E4 topology.}
 Tasks include cycle creation, opening, ring-size change, topology
@@ -380,8 +442,12 @@ simplification, fused-system modification, and a create-then-reverse switch.
 Spiro and bridged strata are included only when an independent reachability
 builder finds a legal path under the frozen operator set.  Results are
 stratified by graph cycle-rank delta, ring-size transition, ring-system count,
-and fused/spiro/bridged category.  The no-cycle ablation removes only cycle
-close/open; it does not reintroduce a ring template macro.
+and fused/spiro/bridged category. The no-cycle ablation removes only cycle
+close/open; a separate no-\texttt{bond\_reroute} ablation measures attachment
+dependence. A finite-catalog topology editor remains
+\texttt{PROSPECTIVE\_UNAVAILABLE} and runs only if a legitimate implementation
+passes the frozen task, support, and budget gates. The disabled
+\texttt{ring\_system\_grow} macro is not an eligible substitute.
 
 \begin{table}[htbp]
   \centering
@@ -472,6 +538,14 @@ hypervolume and hypervolume area under the oracle-call curve; IGD+, feasible
 nondominated count, source similarity, structural diversity, and independent
 held-out evaluator performance are secondary.
 
+\paragraph{Dynamic algorithm classes.}
+The registered dynamic comparison distinguishes restart-and-replan, myopic
+retargeting, warm-start multiobjective search, and reusable-transport dynamic
+control. These are algorithm classes, not aliases for the mechanistic switch
+ablation below. Each receives the same realized switch state, post-switch
+objective, remaining edit budget, and post-switch oracle budget whenever its
+interface permits that comparison.
+
 \paragraph{Dynamic switch.}
 At the registered switch step, the new controller starts from the actual
 current molecule and remaining budget.  Comparators continue under the new
@@ -505,7 +579,20 @@ wasted oracle calls.
     Protocol & Success/coverage $\uparrow$ & Regret $\downarrow$ &
     Prefix reuse $\uparrow$ & Oracle cost $\downarrow$ \\
     \midrule
-    Preference switch, learned value &
+    Restart and replan &
+    \resultpending{APP_E7_REPLAN_SUCCESS} &
+    \resultpending{APP_E7_REPLAN_REGRET} & 0 &
+    \resultpending{APP_E7_REPLAN_COST} \\
+    Myopic retargeting &
+    \resultpending{APP_E7_MYOPIC_SUCCESS} &
+    \resultpending{APP_E7_MYOPIC_REGRET} & n/a &
+    \resultpending{APP_E7_MYOPIC_COST} \\
+    Warm-start multiobjective search &
+    \resultpending{APP_E7_WARM_SUCCESS} &
+    \resultpending{APP_E7_WARM_REGRET} &
+    \resultpending{APP_E7_WARM_REUSE} &
+    \resultpending{APP_E7_WARM_COST} \\
+    Reusable transport, learned value &
     \resultpending{APP_E7_SWITCH_SUCCESS} &
     \resultpending{APP_E7_SWITCH_REGRET} & n/a &
     \resultpending{APP_E7_SWITCH_COST} \\
@@ -539,13 +626,20 @@ novo mixture, a separate checkpoint, and the timed marked CTMC.  The source
 distribution includes the null state and the reversible
 $\varnothing\rightleftarrows$ one-atom interface.  Gillespie sampling uses the
 calibrated productive molecular exit hazard; a fixed number of embedded edits
-is not substituted for time.
+is not substituted for time. The declared simulator is exact for its
+piecewise-constant operational-time schedule. If rates are interpreted as
+varying continuously within a time cell, left-boundary freezing is approximate
+and the report includes grid-refinement convergence and endpoint sensitivity.
 
 Every model and baseline generates the registered number of molecules for
 each of five seeds.  FCD uses the same ChemNet implementation and reference
-sample count.  Held-out manifold recall uses frozen ChemNet embeddings and the
-registered $k$-nearest-neighbor coverage construction.  Topology distance is
-the equal-weight aggregate of graph cycle rank, ring-system count, ring-size
+sample count. Invalid or null outputs are not replaced. The report binds the
+ChemNet implementation and environment, generated and reference counts, every
+seed-level value, mean and standard deviation, and a component-level bootstrap
+interval; cross-paper FCD values are contextual when these fields differ.
+Held-out manifold recall uses frozen ChemNet embeddings and the registered
+$k$-nearest-neighbor coverage construction. Topology distance is the
+equal-weight aggregate of graph cycle rank, ring-system count, ring-size
 histogram, fused/spiro/bridged category, and aromatic-ring fraction distances.
 All-step validity, endpoint validity, connectedness, and uniqueness are hard
 gates; novelty, scaffold coverage, memorization, size/property distributions,
@@ -569,8 +663,12 @@ and throughput are secondary.
     test learned transport &
     identical successor support &
     identical seeds, edit budget, executor \\
+    Empirical-family prior &
+    test state dependence beyond corpus-level family frequency &
+    identical successor support &
+    frozen within-family allocation and smoothing \\
     Operator ablations &
-    identify load-bearing birth/death/cycle families &
+    identify load-bearing operator families &
     preregistered support removal &
     otherwise identical prior/training or sampling contract \\
     Unguided, rerank, greedy, Boltzmann &
@@ -585,14 +683,22 @@ and throughput are secondary.
     sequential population control &
     identical frozen successor kernel &
     particles, resampling, all oracle calls \\
+    NSGA-II over COMPOSE successors &
+    same-base Pareto search &
+    identical frozen successor support &
+    populations, generations, all scored successors and oracle calls \\
     GraphGA, MARS &
-    graph-search/valid-editor context &
+    graph-search/editor context &
     external, generally different &
     matched sources, objectives, constraints, budgets \\
-    RetMol, GenMol &
-    retrieval/discrete-generation context &
+    RetMol, GenMol, InVirtuoGen &
+    external generation context &
     external, generally different &
     independently runnable standardized endpoints \\
+    HN-GFN &
+    preference-conditioned Pareto context &
+    external, generally different &
+    compatible multiobjective task and complete oracle accounting \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -602,6 +708,10 @@ source panel, objective, similarity/constraint contract, and oracle budget.
 Published numbers from a different standardization pipeline are contextual and
 never enter paired tests.  One-shot methods receive ``not applicable'' for
 pathwise metrics rather than an assumed zero violation rate.
+A finite-catalog topology comparator is currently
+\texttt{PROSPECTIVE\_UNAVAILABLE}; it is included only after a legitimate
+support-honest implementation passes its registered adapter gate, and the
+disabled whole-ring growth macro is not used as a proxy.
 
 \subsection{Statistics and reporting}
 \label{app:statistics}
@@ -687,3 +797,27 @@ empirically retained accelerator; exact control is restricted to the bounded
 enumerable graph, and molecular-scale value control is approximate.
 \textbf{Regime separation:} editing and timed de novo checkpoints are not
 interchangeable.
+
+\subsection{Failure taxonomy and broader impact}
+
+Trajectory audits distinguish compiler support failures, proposal-mask false
+negatives, executor discrepancies, zero-productive-mass stalls, event-budget
+exhaustion, invalid ring electronics, over-fusion, macrocycle excess, and
+endpoint-distribution mismatch. Examples are selected by registered strata
+rather than visual appeal, and every attempted trajectory retains a typed
+outcome.
+
+The framework can generate graph-valid molecules that are unsafe, toxic, or
+controlled. Distributional fidelity and predicted objective value are not
+evidence of therapeutic utility, stability, synthesizability, or safety.
+Downstream use therefore requires access control, dual-use review, independent
+toxicity and synthesis assessment, and appropriate wet-lab governance. Corpus
+bias and evaluator blind spots remain even when formal graph validity is
+guaranteed.
+
+\subsection{Language-model assistance}
+
+Language models assisted drafting and code development. The authors remain
+responsible for every mathematical statement, citation, implementation claim,
+and empirical value. No generated reference or result is retained without a
+verified primary source or a frozen provenance-bound artifact.

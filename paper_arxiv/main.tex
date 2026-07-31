@@ -39,12 +39,14 @@ every non-null committed state inside a declared space of connected,
 valence-valid molecules. Because different marks can execute to the same
 molecule, we define the molecular transition law as the pushforward of the
 learned mark law through execution and canonical molecular identity. This
-successor kernel is invariant to probability-preserving refinements within a
-successor fiber and is the object on which finite-horizon conditioning, hard
-support constraints, and dynamic retargeting act. Exact control is claimed
-only on bounded enumerable state spaces; learned values approximate it at
-molecular scale. Source-conditioned editing and timed de novo generation
-require separate checkpoints and inference regimes.}
+successor kernel is invariant to successor-preserving re-encodings that
+preserve aggregate successor rates and productive-event disposition, as are
+controllers that are constant within each successor fiber. Finite-horizon
+conditioning, hard support constraints, and dynamic retargeting act on this
+kernel. Exact control is claimed only on bounded enumerable state spaces;
+learned values approximate it at molecular scale. Source-conditioned editing
+and timed de novo generation require separate checkpoints and inference
+regimes. Graph validity does not imply synthetic feasibility.}
 \end{composefrontmatter}
 
 \section{Introduction}
@@ -76,8 +78,8 @@ support of the generative process.
 \paragraph{Generator Matching over executable marks.}
 We formalize this idea as \emph{Rewrite Generator Matching} (\rgm). At state
 $x$, the rewrite system exposes a finite, state-dependent action fiber
-$\A(x)$. A mark $a\in\A(x)$ is a complete executable operation---a rule,
-concrete match or address, and typed payload---and the deterministic executor
+$\A(x)$. A mark $a\in\A(x)$ is a complete executable operation: a rule,
+concrete match or address, and typed payload. The deterministic executor
 $\T(x,a)$ returns its successor. The model factorizes the marked rate as
 \begin{equation}
   \lambda_\theta(a\mid x,t)
@@ -136,16 +138,17 @@ canonical pushforward is
   =
   \sum_{a\in\G_y(x)}p_\theta(a\mid x,t),
 \]
-which may assign mass to canonical self-events. The fixed-budget editing
-kernel conditions this law on a productive, non-self molecular jump; the
-formal normalization appears in Section~\ref{sec:productive-kernel}. This distinction
-is essential. Refining or coarsening marks within one successor fiber, while
-preserving their aggregate mass, leaves the molecular process unchanged. It
-also leaves any controller defined on canonical successors unchanged. A
-mark-level power tilt, top-$k$ rule, nucleus filter, or family-wise bias
-generally lacks that invariance. We therefore control and evaluate the process
-at the molecular-successor level even when the internal model is factorized
-over marks.
+which may assign mass to canonical self-events or other outcomes excluded by
+the registered productive-commit convention. The fixed-budget editing kernel
+conditions this law on a productive molecular jump; the formal normalization
+appears in Section~\ref{sec:productive-kernel}. This distinction is essential.
+Refining or coarsening marks within one successor fiber, while preserving the
+aggregate successor rate and productive-event disposition, leaves the
+molecular process unchanged. It also leaves any controller that is constant
+within canonical-successor fibers unchanged. A mark-level power tilt, top-$k$
+rule, nucleus filter, or family-wise bias generally lacks that invariance. We
+therefore control and evaluate the process at the molecular-successor level
+even when the internal model is factorized over marks.
 
 This transition-level aggregation is closely related to pushforward Generator
 Matching for deterministic images of latent processes
@@ -223,22 +226,36 @@ large-scale control. Our contributions are:
 \paragraph{Relation to prior work.}
 None of atom insertion or deletion, valid molecular editing, graph grammars,
 Generator Matching, variable-dimension generation, Pareto optimization, or
-Doob control is individually new. Discrete diffusion and flow models provide
-general graph-generation mechanisms
-\citep{austin2021d3pm,campbell2022ctdd,vignac2023digress,qin2025defog};
-recent edit-based processes make insertion and deletion first-class
-\citep{havasi2025editflows,ninniri2025griddd}. Molecular grammars define
-structured legal support \citep{kajino2019mhg,guo2022grammar}, while stochastic
-graph rewriting supplies rule applications and CTMC semantics
-\citep{danos2015thermodynamic,behr2021rewriting}. Molecular editors and
-optimization systems already traverse valid molecular neighborhoods
-\citep{xie2021mars,fu2021mimosa,gao2022pmo}. The contribution here is their
+Doob control is individually new. Generator Matching supplies the
+conditional-to-marginal rate regression principle
+\citep{holderrieth2025generator}; pushforward Generator Matching supplies the
+closest generic image-process result \citep{billera2026latent}. Neither chooses
+an executable molecular state space or rewrite language, and we do not claim
+either general theorem as a contribution.
+
+Discrete graph diffusion and flow models provide general node--edge
+generation mechanisms
+\citep{austin2021d3pm,campbell2022ctdd,vignac2023digress,qin2025defog,
+jo2022gdss,jo2023grum}. Jump diffusion is the closest formal precedent for
+trajectories that change dimension \citep{campbell2023jump}; GrIDDD, Edit
+Flows, and Morph make graph or molecular cardinality changes first-class
+\citep{ninniri2025griddd,havasi2025editflows,franke2026morph}. Their presence
+is why our claim is not variable cardinality alone. COMPOSE combines guarded
+birth and death with relabeling, reconnection, and topology-changing events
+whose committed non-null endpoints remain in the declared molecular space.
+
+Molecular grammars and constrained graph processes define structured legal
+support \citep{kajino2019mhg,guo2022grammar,madeira2024construct,
+ruizbotella2026cocograph}; stochastic graph rewriting supplies rule
+applications and continuous-time semantics
+\citep{danos2015thermodynamic,behr2021rewriting}. Valid molecular editors and
+optimizers already traverse molecular neighborhoods
+\citep{xie2021mars,fu2021mimosa,jensen2019graphga,gao2022pmo}, and
+reaction-based GFlowNets traverse executable transformations
+\citep{koziarski2024rgfn,zhu2026spacegfn}. The contribution here is their
 particular formal composition: a Generator-Matched executable rewrite process
 with trans-dimensional molecular semantics, a canonical successor
 pushforward, and successor-level exact and dynamic control.
-Pushforward Generator Matching supplies the closest general result for
-deterministic images of latent processes \citep{billera2026latent}; we do not
-claim that generic theorem as a contribution.
 
 \section{Rewrite Generator Matching}
 \label{sec:rgm}
@@ -343,22 +360,38 @@ For $y\in\mathcal Y$, the raw pushforward of the mark law is
   \label{eq:raw-pushforward}
 \end{equation}
 This is a normalized distribution over canonical outcomes of marked events,
-but it need not be a distribution over \emph{molecular jumps}: marks whose
-canonical outcome is $c(x)$ leave the molecular state unchanged. Define their
-aggregate mass and the remaining productive mass by
+but it need not be a distribution over \emph{committed molecular jumps}.
+Let $\chi_x^+(y)\in\{0,1\}$ be the registered state-only productive-commit
+predicate on a canonical outcome. It is zero for $y=c(x)$ and for any
+implementation-virtual outcome excluded by the declared editing convention.
+The current production state-only kernel treats every non-self canonical
+outcome as productive; writing the predicate explicitly prevents that
+implementation fact from becoming an unstated mathematical assumption.
+Define the productive successor set, its mass, and the complementary virtual
+mass by
 \begin{equation}
-  v_\theta(x,t)
+  \mathcal N^+(x)
   =
-  \bar p_\theta(c(x)\mid x,t),
+  \{y:\exists a\in\A(x),\ \pi_x(a)=y,\ \chi_x^+(y)=1\},
   \qquad
-  z_\theta(x,t)=1-v_\theta(x,t).
+  z_\theta(x,t)
+  =
+  \sum_{y\in\mathcal N^+(x)}
+  \bar p_\theta(y\mid x,t),
+  \qquad
+  v_\theta(x,t)=1-z_\theta(x,t).
   \label{eq:virtual-productive-mass}
 \end{equation}
+The notation allows $\mathcal N^+(x)$ to depend on the declared support and
+commit semantics, although not on an unrecorded previous state. A
+history-dependent rejection rule requires an augmented state or a separate
+wrapper.
 
-The off-diagonal rate of the induced molecular process is
+The off-diagonal rate of the committed molecular process is
 \begin{equation}
-  Q_{\theta,t}(x,y)
+  Q_{\theta,t}^{+}(x,y)
   =
+  \chi_x^+(y)\,
   \Lambda_\theta(x,t)\bar p_\theta(y\mid x,t),
   \qquad y\neq c(x),
   \label{eq:molecular-offdiagonal-rate}
@@ -370,44 +403,103 @@ and its exit hazard is
   \Lambda_\theta(x,t)z_\theta(x,t).
   \label{eq:productive-hazard}
 \end{equation}
-Thus canonical self-events vanish from the state generator even though they
-remain events in the marked representation.
+Thus canonical self-events and any other registered virtual outcomes vanish
+from the committed state generator even though they remain outcomes in the
+raw marked representation.
 
 Source-conditioned editing uses the productive embedded molecular jump
 kernel
 \begin{equation}
   P_{\theta,t}^{\mathrm{edit}}(y\mid x)
   =
-  \frac{\bar p_\theta(y\mid x,t)}
+  \frac{\chi_x^+(y)\bar p_\theta(y\mid x,t)}
        {z_\theta(x,t)},
-  \qquad
-  y\neq c(x),
+  \qquad y\in\mathcal Y,
   \label{eq:productive-editing-kernel}
 \end{equation}
-whenever $z_\theta(x,t)>0$. If $z_\theta(x,t)=0$, the state is terminal under
-this convention. History-dependent rejection, such as suppressing an
-immediate return to the preceding molecule, is not part of this base Markov
-kernel and must be represented by a separate wrapper or an augmented state.
+for $y\in\mathcal N^+(x)$ whenever $z_\theta(x,t)>0$, and it is zero
+otherwise. If $z_\theta(x,t)=0$, the state is terminal under this convention.
+History-dependent rejection, such as suppressing an immediate return to the
+preceding molecule, is not part of this state-only base Markov kernel and must
+be represented by a separate wrapper or an augmented state.
 
 The scientific definition in
 \eqref{eq:raw-pushforward}--\eqref{eq:productive-editing-kernel} is execution
-followed by canonical molecular identity and, for editing, conditioning on a
-productive jump. The production segmented implementation is an efficient
-evaluation of that definition. A separate dictionary implementation that
-enumerates marks, executes them, canonicalizes successors, and sums by key is
-used only as a verification oracle.
+followed by canonical molecular identity, the registered productive
+disposition, and, for editing, conditioning on a productive jump. The
+production segmented implementation is an efficient evaluation of that
+definition. A separate dictionary implementation that enumerates marks,
+executes them, canonicalizes successors, classifies their disposition, and
+sums by key is used only as a verification oracle.
 
 \paragraph{Within-fiber invariance.}
 Suppose an internal mark is refined into several marks that all lie in the
-same successor fiber, and their aggregate probability is preserved. Then
-$\bar p_\theta$, $v_\theta$, $Q_{\theta,t}$, and
-$P_{\theta,t}^{\mathrm{edit}}$ are unchanged. Consequently, any controller
-that depends only on canonical successors is unchanged. This statement does
-not cover a controller that tilts, truncates, or regularizes individual marks:
-such a controller can change when one mark is replaced by several aliases.
-Multi-step representation independence additionally requires consistent
-canonical-state handling after each committed transition; we test that
-separately rather than assuming it from the one-step identity.
+same successor fiber, share the same productive disposition, and preserve
+their aggregate successor rate. Then $\bar p_\theta$, $v_\theta$,
+$Q_{\theta,t}^{+}$, and $P_{\theta,t}^{\mathrm{edit}}$ are unchanged.
+Consequently, any controller that is constant within canonical-successor
+fibers is unchanged. This statement does not cover a controller that tilts,
+truncates, or regularizes individual marks, nor does it make mark-level
+training refinement invariant: either can change when one mark is replaced by
+several aliases. Multi-step representation independence additionally requires
+consistent canonical-state handling after each committed transition; we state
+that quotient-consistency condition in Appendix~\ref{sec:app-compose-assumptions}
+rather than assuming it from the one-step identity.
+
+\subsection{Endpoint programs and the population generator target}
+\label{sec:population-rgm}
+
+An endpoint-conditioned compiler supplies executable supervision rather than a
+decoder used at inference. Let $Z$ denote a sampled source, target, executable
+rewrite program, and progress schedule. Conditioned on $Z$ and its progress
+state, let $r_t^Z(a\mid x)$ be the nonnegative teacher rate of mark $a$.
+Aggregating the teacher by the same executor, canonical identity, and
+productive disposition gives
+\begin{equation}
+  R_t^Z(y\mid x)
+  =
+  \chi_x^+(y)
+  \sum_{a\in\A(x):\,\pi_x(a)=y}
+  r_t^Z(a\mid x).
+  \label{eq:conditional-successor-rate}
+\end{equation}
+The Generator-Matching target is the conditional expectation
+\begin{equation}
+  Q_t^\star(x,y)
+  =
+  \E\!\left[
+    R_t^Z(y\mid X_t)
+    \,\middle|\,
+    X_t=x
+  \right].
+  \label{eq:marginal-successor-rate}
+\end{equation}
+For the Poisson generator
+$\phi(u)=u\log u-u$, the population objective is, up to terms independent of
+the model,
+\begin{equation}
+  \mathcal L_{\mathrm{pop}}(Q)
+  =
+  \E\!\left[
+    \sum_{y\in\mathcal N^+(X_t)}
+    \left\{
+      Q_t(X_t,y)
+      -
+      R_t^Z(y\mid X_t)\log Q_t(X_t,y)
+    \right\}
+  \right].
+  \label{eq:population-successor-gm}
+\end{equation}
+On every occupied state--successor pair, its unrestricted nonnegative-rate
+minimizer is $Q_t^\star$. If a model exactly realizes this marginal generator,
+starts from the program mixture's source marginal, and the finite-horizon
+forward equation is well posed, it has the same time marginals and endpoint
+law as the program mixture. Appendix
+~\ref{sec:app-compose-population-proof} gives the short argument. This is the
+Generator-Matching fitting principle, not a claim that the compiler path is
+optimal or that a finite network reaches the population minimizer. It also
+does not describe the completed selected-mark run, whose objective is stated
+next.
 
 \subsection{Successor-aware objectives for editing}
 \label{sec:successor-objectives}
@@ -479,10 +571,15 @@ De novo generation is a separate lane with its own source distribution,
 training mixture, checkpoint, and hazard validation. It simulates the marked
 process in continuous time, or equivalently the molecular process with
 off-diagonal rates in \eqref{eq:molecular-offdiagonal-rate} and exit hazard in
-\eqref{eq:productive-hazard}, with self-events thinned consistently. The
-framework defines this Gillespie-style regime, but the current editing
-checkpoint is not evidence that its timed semantics or unconditional
-generation quality have been validated.
+\eqref{eq:productive-hazard}, with registered virtual outcomes thinned
+consistently. The
+declared sampler is exact Gillespie simulation for a piecewise-constant
+operational-time schedule. If the network is instead interpreted as varying
+continuously inside a time cell, left-boundary rate freezing is an
+approximation and requires grid-refinement and endpoint-sensitivity checks.
+The framework defines this timed regime, but the current editing checkpoint is
+not evidence that its timed semantics or unconditional generation quality
+have been validated.
 
 \section{Finite-horizon control on molecular successors}
 \label{sec:finite-control}
@@ -492,6 +589,33 @@ and edges already have molecular meaning. This section states the exact
 finite-horizon construction for the editing regime. The result is classical;
 the contribution of \method is the executable molecular process to which it
 can be applied.
+
+\subsection{Support-preserving successor control}
+\label{sec:support-control}
+
+Let $C$ be a predicate on canonical states and let
+$\Psi_t(x,y;\omega)\geq0$ be locally bounded over base-supported transitions
+on the declared finite horizon. A continuous-time controller acts on the
+committed molecular rates by
+\begin{equation}
+  \widetilde Q_t(x,y)
+  =
+  \mathbf 1\{C(y)\}\,
+  Q_{\theta,t}^{+}(x,y)\,
+  \Psi_t(x,y;\omega),
+  \qquad y\neq c(x),
+  \label{eq:successor-control-law}
+\end{equation}
+with the diagonal set to the negative outgoing rate. Thus
+$\operatorname{supp}\widetilde Q_t(x,\cdot)$ is contained in the base
+successor support. If $C\equiv1$ and $\Psi_t$ is positive on every
+base-supported edge, the supports are equal. Starting from a state satisfying
+a state-local prefix-closed predicate $C$, masking violating successors makes
+$C$ hold at every committed state. Appendix
+~\ref{sec:app-compose-support-control-proof} gives the direct proof. This
+closure claim is about the declared molecular graph space, not
+synthesizability or oracle accuracy. A history-dependent constraint still
+requires a killed or augmented state.
 
 \subsection{Budget-indexed Doob transform}
 

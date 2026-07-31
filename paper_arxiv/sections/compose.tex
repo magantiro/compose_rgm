@@ -18,6 +18,13 @@ element predicate contributes a molecular atom. Canonical molecular identity
 is used to merge semantic states, but exact slot-addressed tensors are retained
 for executable replay.
 
+A frozen applicability census over 800 benchmark lead molecules admits
+800/800 under the broad-organic, charge-retaining support and 264/800 under a
+neutral C/N/O/F support; every benchmark lead contains at most 33 heavy atoms.
+These are support-membership counts, not generation, likelihood, or
+optimization results. They establish only that the declared 40-atom
+broad-organic representation does not exclude this particular benchmark panel.
+
 The process models a 2D molecular graph. Stereochemistry, isotope labels,
 radicals, and charge-changing edits are outside the current editing contract.
 Charged molecules may appear, but a retained charged center cannot be created,
@@ -47,12 +54,13 @@ biological activity.
 \subsection{Minimal editing basis}
 \label{sec:operator-basis}
 
-Table~\ref{tab:operators} gives the eight-family basis entering the bounded
-editing gates. Atom birth and death alter cardinality; the other families
+Table~\ref{tab:operators} gives the eight-family \emph{Active8} basis entering
+Gate~0, T1, and P50. It is a development-only support freeze, not final
+production support. Atom birth and death alter cardinality; the other families
 change composition, electronics, connectivity, or topology at fixed
-cardinality. The final checkpoint must declare the identical support or the
-table and every support-sensitive experiment must be revised before results
-are inspected.
+cardinality. The final checkpoint must declare its exact support or the table
+and every support-sensitive experiment must be revised before results are
+inspected.
 
 \begin{table}[t]
   \centering
@@ -107,6 +115,14 @@ can be added as an explicitly costed accelerator only if it preserves or
 explicitly extends the declared reachable set and demonstrates a material
 finite-budget gain.
 
+The cycle namespaces differ across interfaces. Public \emph{cycle close} is
+model family \texttt{cycle\_insert} and executor rule
+\texttt{bond\_insert}; public \emph{cycle open} is model family
+\texttt{cycle\_attach} and executor rule \texttt{bond\_delete}. The inherited
+name \texttt{cycle\_attach} does not mean attaching a ring. Contracts and
+result artifacts bind both names so that a direction cannot be silently
+reversed.
+
 \subsection{Rate network and action factorization}
 
 The network encodes the current persistent-slot graph and progress variable,
@@ -139,42 +155,55 @@ controller, which permits all controllers to share one frozen base kernel.
 
 \paragraph{Program compilation.}
 Training records are executable paths between exact endpoint states. For a real
-endpoint pair, the compiler tests direct semantic explanations---restate,
-reorder, reroute, birth/death, and cycle operations---before accepting a
+endpoint pair, the compiler tests direct semantic explanations, including
+restate, reorder, reroute, birth/death, and cycle operations, before accepting a
 delete-and-rebuild fallback. Every proposed path is replayed through the
 production executor; its committed states, endpoint identity, charge policy,
 operator sequence, aliases, and failure reason are recorded. Exact slot states,
 not reparsed canonical strings, are the source of truth for replay.
 
 \paragraph{Evidence lanes.}
-The corpus contract distinguishes five types of evidence:
+The corpus contract distinguishes five data lanes:
 
 \begin{enumerate}
-  \item observed local analogues for context-matched substitutions and size
-  changes;
-  \item operator-aware compilations of real endpoint pairs;
-  \item linker, positional, attachment, and topology analogues;
-  \item short and medium paths through observed analogue series, including
-  shared-source branches; and
-  \item reversible synthetic legal walks for rare contexts, mixed-family
-  composition, correction, and inverse coverage.
+  \item \texttt{observed\_local\_analogue}, for context-matched local
+  substitutions and size changes between observed endpoints;
+  \item \texttt{operator\_aware\_real\_endpoint}, which compiles observed
+  endpoint pairs with direct Active8 operations before a delete--rebuild
+  fallback;
+  \item \texttt{linker\_positional\_topology\_analogue}, for two-cut linkers,
+  positional isomers, attachment relocation, and topology-changing
+  real-endpoint analogues;
+  \item \texttt{real\_endpoint\_multistep\_path}, for short and medium
+  compiler-generated paths between real endpoints with pair-relationship
+  provenance retained; and
+  \item \texttt{reversible\_synthetic\_walk}, for rare Active8 contexts,
+  mixed-family composition, correction, and inverse coverage.
 \end{enumerate}
 
-Real and synthetic evidence remain separately identifiable. Synthetic paths
-establish executable support coverage; they are not evidence of medicinal
-chemistry frequency. The frozen counts, unique sources and scaffolds, path
-lengths, semantic-cell coverage, and effective training coefficients are
-\resultpending{EDITING_CORPUS_CENSUS}.
+Genuine observed-series provenance and observed action sequences are not
+currently available. A path between real endpoints is therefore not described
+as an observed series or an observed edit trajectory. Each record preserves
+six evidence components separately: source endpoint, target endpoint, pair
+relationship, path, intermediates, and action sequence. Real endpoints do not
+make compiler-generated actions or executor-generated intermediates observed.
+Synthetic paths establish executable support coverage; they are not evidence
+of medicinal chemistry frequency. The frozen counts, unique sources and
+scaffolds, path lengths, semantic-cell coverage, and effective training
+coefficients are \resultpending{EDITING_CORPUS_CENSUS}.
 
 \paragraph{Splits and sampling.}
-Molecule, scaffold, series, document/source group, and transformation signature
-are split before path construction; no pair may cross partitions. Because the
-previous final test aggregate was inspected during diagnosis, the replacement
-model requires a new sealed final holdout. Training samples hierarchically by
-data lane, series/scaffold/source group, semantic capability cell, path, and
-progress state. This prevents long serializations, large analogue series, or
-one common transformation from dominating merely by row count. The final
-mixture and measured effective coefficients are
+The frozen split contract requires molecule, scaffold, authoritative
+trace-membership groups, physically resolved pair-relationship groups, source
+group, and transformation signature to be assigned before path construction;
+no pair may cross partitions. The current census does not itself assign those
+partitions. Because the previous final test aggregate was inspected during
+diagnosis, the replacement model requires a new sealed final holdout. Training
+samples hierarchically by data lane, series/scaffold/source group, semantic
+capability cell, endpoint pair or path, and progress state. This prevents long
+serializations, large relationship groups, or one common transformation from
+dominating merely by row count. The final split artifact, mixture, and measured
+effective coefficients are
 \resultpending{EDITING_SAMPLER_CONTRACT}.
 
 \subsection{Objective selection and no-waste training gates}
@@ -186,6 +215,12 @@ the replacement protocol compares the embedded successor likelihood in
 \eqref{eq:successor-gm-loss}. Selected-mark training is retained as a bounded
 ablation, not silently relabeled. The final objective, hazard weight, and
 initialization are \resultpending{EDITING_OBJECTIVE_CONTRACT}.
+
+The corpus contract remains
+\texttt{DESIGN\_NOT\_TRAINING\_AUTHORIZED}. Authoritative trace-derived
+membership-classifier receipts, physical relationship receipts, and the later
+split-assignment artifact remain external prerequisites. A hash-valid schema
+or a green unit-test suite cannot substitute for those physical inputs.
 
 No long run is authorized directly from aggregate validation loss. A sequence
 of immutable gates tests the intended scientific object:

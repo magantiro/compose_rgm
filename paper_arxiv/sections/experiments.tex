@@ -9,6 +9,25 @@ and E1 evaluates a separate timed de novo checkpoint. Task definitions,
 normalization, budgets, seeds, and decision rules are frozen before final
 outputs are inspected.
 
+\subsection{Current empirical status}
+
+The first large-data scientific editing run completed 16,000 optimizer steps
+over 661,105 admitted training traces and produced all 32 scheduled snapshots.
+It is a diagnostic run, not a selected production model. Its mark-level
+diagnostics showed that cycle closing learned while cycle opening remained
+poor, and that the inherited Graft capability collapsed during training. No
+snapshot has passed the validation-only canonical-successor leaderboard and
+capability safeguards, so no editing checkpoint is selected. The already
+inspected final-test aggregates are barred from checkpoint selection,
+threshold setting, architecture repair, and objective selection; a repaired
+model requires a new sealed final holdout. All learned E2--E4 and E7 result
+cells therefore remain pending.
+
+The completed editing run had zero de novo mixture weight. It does not validate
+a timed molecular process or unconditional generation. E1 requires its own
+broad-organic corpus, nonzero de novo mixture, calibrated hazard, source
+distribution, checkpoint, and evaluation.
+
 \subsection{Shared protocol and accounting}
 
 \paragraph{One molecular evaluator.}
@@ -35,18 +54,21 @@ only its committed molecular states.
 
 \paragraph{Model selection.}
 The editing checkpoint is selected on the validation partition by
-production-weighted canonical-successor NLL, with balanced-family successor NLL
-secondary and held-source, scaffold, topology, calibration, and productive
+production-weighted canonical-successor NLL, with balanced-semantic-cell
+successor NLL secondary and held-source, scaffold, topology, calibration, and productive
 rollout safeguards. Hazard calibration is reported separately and cannot
-select a fixed-budget editing checkpoint. Final test data are used once after
-the checkpoint and all controller hyperparameters are frozen.
+select a fixed-budget editing checkpoint. Controller architecture,
+hyperparameters, calibration, and stopping are selected on a distinct
+controller-validation role after the base checkpoint is frozen. The new sealed
+final test is used once only after both selections and every comparison
+protocol are frozen.
 
 \subsection{E2: learned versus uniform molecular transport}
 
 E2 asks whether Generator Matching learns useful chemistry beyond a hand-built
 legal move graph. The learned arm samples from the frozen
-$P_\theta^{\mathrm{edit}}$. The control arm is uniform over distinct canonical
-molecular successors,
+$P_\theta^{\mathrm{edit}}$. One law-only control is uniform over distinct
+canonical molecular successors,
 \[
   P_{\mathrm{unif}}(y\mid x)
   =
@@ -55,6 +77,14 @@ molecular successors,
 using the identical executor, source, support, and edit budget. Uniformity over
 raw marks is not a valid control because aliases would give some molecules more
 mass.
+
+A second required law-only control is a state-independent empirical-family
+prior. Its family masses are estimated on the training partition and then held
+fixed across molecular states; it uses the identical legal canonical-successor
+support at evaluation. The exact within-family allocation and any
+support-preserving smoothing rule are still pending a frozen implementation
+contract. This arm is therefore \texttt{PREIMPLEMENTATION}, not a completed
+baseline or result.
 
 The primary endpoints are held-out canonical-successor NLL, analogue-target
 recovery at matched budget, and path overhead relative to the registered
@@ -69,9 +99,10 @@ E3 includes growth to a larger atom-count interval, shrinkage to a smaller
 interval, a mid-trajectory switch from growth to shrinkage, held-out count
 bins, and sources whose targets are unreachable under fixed cardinality.
 Insertion-disabled, deletion-disabled, and fully fixed-cardinality support
-ablations isolate which operators are load-bearing. We record every
-intermediate atom count, overshoot, correction, edits to reach the interval,
-source similarity, validity, and connectedness.
+ablations isolate which operators are load-bearing. A no-\texttt{bond\_reroute}
+ablation tests attachment-dependent size tasks without changing any other
+support field. We record every intermediate atom count, overshoot, correction,
+edits to reach the interval, source similarity, validity, and connectedness.
 
 \paragraph{Topology.}
 E4 includes cycle creation, cycle opening, ring-size change, topology
@@ -79,8 +110,13 @@ simplification, fused-system modification, and topology addition followed by
 reversal after an objective switch. Spiro or bridged cases are included only
 when the frozen production support and task builder certify reachability. The
 main ablation disables primitive cycle operations while holding all other
-support fields fixed. The obsolete whole-ring growth macro is not restored
-merely to manufacture a baseline.
+support fields fixed; a separate no-\texttt{bond\_reroute} ablation tests
+attachment-dependent topology changes. A finite-catalog topology editor is
+listed only as \texttt{PROSPECTIVE\_UNAVAILABLE}: it runs only if a legitimate
+implementation passes a frozen task-compatibility gate and discloses its
+support and budget differences before outputs are inspected. The disabled
+\texttt{ring\_system\_grow} macro is not an eligible substitute and is not
+restored merely to manufacture a baseline.
 
 \subsection{E5--E6: quotient and exact-control verification}
 
@@ -111,10 +147,11 @@ unreachability, and exact dynamic continuation are audited separately.
 
 All same-base controllers use one frozen editing prior, executor, source panel,
 successor support, budgets, objectives, and oracle implementation. The
-registered arms are unguided prior sampling, endpoint reranking, greedy
-one-step reward, local Boltzmann reweighting, scalarized guidance,
-MOG-DFM-style rank-directional guidance, SMC/Feynman--Kac control, and the
-learned remaining-budget value. The comparison therefore isolates the control
+registered same-base arms are unguided prior sampling, uniform canonical
+rewriting, endpoint reranking, greedy one-step reward, local Boltzmann
+reweighting, static scalarization, MOG-DFM-style rank-directional guidance,
+SMC/Feynman--Kac control, the learned remaining-budget value, and NSGA-II over
+COMPOSE successors. The comparison therefore isolates the control or search
 law rather than conflating it with a different generator.
 
 \paragraph{Pareto protocol.}
@@ -127,24 +164,32 @@ nondominated count, source similarity, diversity, and performance under an
 independent held-out evaluator are secondary.
 
 \paragraph{Dynamic protocols.}
-Preference switching compares continuation from the current molecule, restart
-from the original source, restart from the switch state with a separate
-sampler, and a static compromise objective. The Pareto fan branches one valid
-prefix toward multiple target regions and measures endpoint spread,
-hypervolume, prefix reuse, and cost relative to independent restarts.
-Pathwise-control tasks enforce scaffold, pharmacophore, atom-count, charge, and
-structural-alert constraints at every committed state, with endpoint-only
-filtering as the matched waste baseline.
+The four registered dynamic algorithm classes are restart-and-replan, myopic
+retargeting, warm-start multiobjective search, and reusable-transport dynamic
+control. The mechanistic preference-switch comparison is separately frozen:
+continue from the realized switch-state molecule, restart from the original
+source, restart from the switch-state molecule with a fresh sampler, and use a
+static compromise objective from step zero. These two taxonomies are reported
+separately rather than treating an algorithm class as a switch-state control.
+The Pareto fan branches one valid prefix toward multiple target regions and
+measures endpoint spread, hypervolume, prefix reuse, and cost relative to
+independent restarts. Pathwise-control tasks enforce scaffold, pharmacophore,
+atom-count, charge, and structural-alert constraints at every committed state,
+with endpoint-only filtering as the matched waste baseline.
 
 \paragraph{External context.}
 GraphGA and MARS are strong graph-search and valid-editor baselines
 \citep{jensen2019graphga,xie2021mars}; RetMol and GenMol provide modern
 retrieval and discrete-diffusion lead-optimization context
-\citep{wang2023retmol,lee2025genmol}. An external row is included only when its
-released artifact supports a compatible source set, objective, constraint,
-budget, and standardization protocol. MOG-DFM is primarily ported as a
-controller over the COMPOSE successor kernel rather than treated as an
-architectural antagonist \citep{chen2025mogdfm}.
+\citep{wang2023retmol,lee2025genmol}. InVirtuoGen and HN-GFN are additional
+fragment-flow and multiobjective GFlowNet comparators
+\citep{kaech2026invirtuogen,zhu2023hngfn}. Their rows are gated: each runs only
+if its released artifact and adapter support a compatible source set,
+objective, constraint, budget, and standardization protocol. An unavailable or
+incompatible adapter is reported explicitly rather than filled with a
+published number from another task. MOG-DFM is primarily ported as a controller
+over the COMPOSE successor kernel rather than treated as an architectural
+antagonist \citep{chen2025mogdfm}.
 
 \subsection{E1: separate timed de novo generation}
 

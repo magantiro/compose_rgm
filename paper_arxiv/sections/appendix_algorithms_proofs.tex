@@ -45,7 +45,8 @@ hazard term.
 \textbf{Require:} state $x$, progress $t$, exact legal fiber $\A(x)$,
 executor $\T$, canonical identity $c$, prediction
 $(\Lambda_\theta,p_\theta)$, teacher row
-$(a^\star,y^\star,r,w)$, and a declared objective mode.
+$(a^\star,y^\star,r,w)$, productive-commit predicate $\chi_x^+$, and a
+declared objective mode.
 \begin{enumerate}[
   leftmargin=2.45em,
   label=\arabic*:,
@@ -59,11 +60,12 @@ $(a^\star,y^\star,r,w)$, and a declared objective mode.
   $\sum_{a\in\A(x)}p_\theta(a\mid x,t)=1$, and compute
   $\Lambda_\theta(x,t)\geq0$.
   \item Execute and canonicalize every mark, then group its probability by
-  $y=c(\T(x,a))$ to obtain $\bar p_\theta$, $v_\theta$, and $z_\theta$
-  using Algorithm~\ref{alg:app-compose-kernel}.
+  $y=c(\T(x,a))$ and apply $\chi_x^+$ to obtain $\bar p_\theta$,
+  $\mathcal N^+(x)$, $v_\theta$, and $z_\theta$ using
+  Algorithm~\ref{alg:app-compose-kernel}.
   \item If $r>0$, require $a^\star\in\A(x)$,
-  $c(\T(x,a^\star))=y^\star\neq c(x)$, and positive model mass on the
-  teacher coordinate required by the selected objective.
+  $c(\T(x,a^\star))=y^\star\in\mathcal N^+(x)$, and positive model mass
+  on the teacher coordinate required by the selected objective.
   \item For \emph{selected-mark GM}, return
   \[
     w\!\left[
@@ -101,7 +103,8 @@ model law.
 \label{alg:app-compose-kernel}
 \textbf{Require:} executor state $x$, time $t$, finite legal fiber $\A(x)$,
 executor $\T$, canonical identity $c$, total marked hazard
-$\Lambda_\theta$, and normalized mark probabilities $p_\theta$.
+$\Lambda_\theta$, normalized mark probabilities $p_\theta$, and the
+registered state-only productive-commit predicate $\chi_x^+$.
 \begin{enumerate}[
   leftmargin=2.45em,
   label=\arabic*:,
@@ -114,19 +117,24 @@ $\Lambda_\theta$, and normalized mark probabilities $p_\theta$.
   \item For every $a\in\A(x)$, execute $x_a\leftarrow\T(x,a)$, set
   $y_a\leftarrow c(x_a)$, and accumulate
   $M[y_a]\leftarrow M[y_a]+p_\theta(a\mid x,t)$.
-  \item Set $\bar p_\theta(y\mid x,t)\leftarrow M[y]$,
-  $v_\theta(x,t)\leftarrow M[c(x)]$, and
-  $z_\theta(x,t)\leftarrow1-v_\theta(x,t)$.
-  \item For every $y\neq c(x)$, set the off-diagonal molecular rate
-  $Q_{\theta,t}(x,y)\leftarrow
-  \Lambda_\theta(x,t)\bar p_\theta(y\mid x,t)$.
+  \item Set $\bar p_\theta(y\mid x,t)\leftarrow M[y]$ and
+  $\mathcal N^+(x)\leftarrow
+  \{c(\T(x,a)):a\in\A(x),\chi_x^+(c(\T(x,a)))=1\}$. Require
+  $\chi_x^+(c(x))=0$.
+  \item Set
+  $z_\theta(x,t)\leftarrow
+  \sum_{y\in\mathcal N^+(x)}M[y]$ and
+  $v_\theta(x,t)\leftarrow1-z_\theta(x,t)$.
+  \item For every canonical outcome $y$, set the off-diagonal committed
+  molecular rate
+  $Q_{\theta,t}^{+}(x,y)\leftarrow
+  \chi_x^+(y)\Lambda_\theta(x,t)\bar p_\theta(y\mid x,t)$.
   \item Set
   $\Lambda_\theta^{\mathrm{prod}}(x,t)\leftarrow
   \Lambda_\theta(x,t)z_\theta(x,t)$.
   \item If $z_\theta(x,t)>0$, return the productive editing row
   $P_{\theta,t}^{\mathrm{edit}}(y\mid x)
-  \leftarrow\bar p_\theta(y\mid x,t)/z_\theta(x,t)$ for
-  $y\neq c(x)$.
+  \leftarrow\chi_x^+(y)\bar p_\theta(y\mid x,t)/z_\theta(x,t)$.
   \item If $z_\theta(x,t)=0$, return \emph{terminal under the productive
   editing convention}; do not fabricate a self-transition.
 \end{enumerate}
@@ -135,7 +143,10 @@ $\Lambda_\theta$, and normalized mark probabilities $p_\theta$.
 Algorithm~\ref{alg:app-compose-kernel} is the scientific dictionary
 definition.  A segmented reduction may compute the same sums more efficiently,
 but it is not a different kernel.  The canonical map includes the distinguished
-null identity; the null state is still not a molecule.
+null identity; the null state is still not a molecule. In the current
+state-only production kernel, $\chi_x^+(y)=\mathbf 1\{y\neq c(x)\}$, but the
+explicit predicate retains the registered boundary between raw outcomes and
+committed jumps.
 
 \subsection{Fixed-budget editing}
 \label{sec:app-compose-fixed-budget}
@@ -267,9 +278,12 @@ it explicitly.
 ]
   \item \textbf{Finite executable fibers.}  For each executor state $x$,
   $\A(x)$ is finite; every enumerated mark executes deterministically to a
-  state in $\X$.
+  state in $\X$. The registered state-only productive predicate
+  $\chi_x^+$ is defined on every canonical outcome, is constant within a
+  canonical-successor fiber, and satisfies $\chi_x^+(c(x))=0$.
   \item \textbf{Finite marked rate.}  The mark law is normalized and
-  $\Lambda_\theta(x,t)<\infty$.
+  $\Lambda_\theta(x,t)<\infty$. For the endpoint-law statement below, the
+  relevant marginal generator is bounded on the declared finite horizon.
   \item \textbf{Quotient consistency.}  Either every committed canonical
   identity $y$ is converted to a fixed exact representative $s(y)$ before
   the next row is evaluated, or for any exact representatives $x,x'$ with
@@ -289,6 +303,11 @@ it explicitly.
   remaining budget, and declared control context, the future base law is
   independent of the earlier trajectory.  History-dependent constraints are
   included by augmenting the state or are outside the theorem.
+  \item \textbf{Executable endpoint-program mixture.} The source--target
+  coupling, compiler, and progress schedule define a well-posed
+  time-inhomogeneous jump process. Every teacher mark is legal and executable,
+  the teacher successor disposition is registered, and the mixture has the
+  declared source and target marginals.
 \end{enumerate}
 
 Assumption~A3 is not implied merely by observing that several marks share a
@@ -297,7 +316,9 @@ call the multi-step canonical quotient Markov.  The one-step pushforward and
 refinement identities below are pointwise without A3; every multi-step
 molecular statement assumes a well-defined quotient kernel under A3.  This
 distinction also prevents persistent-slot aliases with different future rows
-from being silently merged.
+from being silently merged. The productive predicate is part of the row
+identity in A3: representatives cannot disagree about whether an aggregate
+canonical outcome is committed.
 
 \subsection{Pushforward generator and productive hazard}
 \label{sec:app-compose-pushforward-proof}
@@ -314,13 +335,24 @@ $f$ on canonical identities,
   \{f(y)-f(c(x))\}.
   \label{eq:app-compose-pushed-generator}
 \end{equation}
-Hence the molecular off-diagonal rate is
-$Q_{\theta,t}(x,y)=\Lambda_\theta\bar p_\theta(y\mid x,t)$,
+This is the raw canonical pushforward of the marked executor process. After
+the registered productive thinning, the committed molecular generator is
+\begin{equation}
+  \bigl(\mathcal L_{\theta,t}^{+}f\bigr)(c(x))
+  =
+  \sum_y
+  \chi_x^+(y)\Lambda_\theta(x,t)\bar p_\theta(y\mid x,t)
+  \{f(y)-f(c(x))\}.
+  \label{eq:app-compose-committed-generator}
+\end{equation}
+Hence the committed off-diagonal rate is
+$Q_{\theta,t}^{+}(x,y)=
+\chi_x^+(y)\Lambda_\theta\bar p_\theta(y\mid x,t)$,
 its productive exit hazard is
-$\Lambda_\theta^{\mathrm{prod}}=\Lambda_\theta(1-v_\theta)$,
-and, when $z_\theta=1-v_\theta>0$, its embedded productive row is
+$\Lambda_\theta^{\mathrm{prod}}=\Lambda_\theta z_\theta$,
+and, when $z_\theta>0$, its embedded productive row is
 $P_{\theta,t}^{\mathrm{edit}}(y\mid x)=
-\bar p_\theta(y\mid x,t)/z_\theta$.  Under A3 these rows descend to a
+\chi_x^+(y)\bar p_\theta(y\mid x,t)/z_\theta$. Under A3 these rows descend to a
 well-defined Markov process on canonical identities.
 \end{composeappendixproposition}
 
@@ -338,52 +370,103 @@ $f\circ c$ and group marks by $y=c(\T(x,a))$:
   \Lambda_\theta\bar p_\theta(y\mid x,t)
   \{f(y)-f(c(x))\}.
 \end{align}
-The $y=c(x)$ term is zero.  This proves
-Equation~\eqref{eq:app-compose-pushed-generator} and identifies the
-off-diagonal rates.  Summing them gives
+The $y=c(x)$ term is zero, which proves the raw pushforward identity
+in Equation~\eqref{eq:app-compose-pushed-generator}. Applying the declared
+predicate gives Equation~\eqref{eq:app-compose-committed-generator}. Summing
+its off-diagonal rates gives
 \[
-  \sum_{y\neq c(x)}Q_{\theta,t}(x,y)
+  \sum_yQ_{\theta,t}^{+}(x,y)
   =
   \Lambda_\theta
-  \sum_{y\neq c(x)}\bar p_\theta(y\mid x,t)
-  =
-  \Lambda_\theta(1-v_\theta)
+  \sum_y\chi_x^+(y)\bar p_\theta(y\mid x,t)
   =
   \Lambda_\theta z_\theta.
 \]
 Conditioning the next molecular state change on a productive marked event
 divides each off-diagonal rate by this exit hazard, yielding
-$\bar p_\theta(y\mid x,t)/z_\theta$.  If $z_\theta=0$, the marked process may
-still contain canonical self-events, but the canonical molecular state has no
-exit and the productive embedded row is undefined.  Finally,
+$\chi_x^+(y)\bar p_\theta(y\mid x,t)/z_\theta$. If $z_\theta=0$, the raw
+marked process may still contain self or other virtual outcomes, but the
+committed canonical process has no exit and the productive embedded row is
+undefined. Finally,
 Equation~\eqref{eq:app-compose-lumpability}, or evaluation through a fixed
 section $s$, makes each off-diagonal aggregate depend only on the canonical
 source; this is exactly what is needed for the row to descend.
 \hfill$\square$
+
+\subsection{Population Generator-Matching target and endpoint law}
+\label{sec:app-compose-population-proof}
+
+\begin{composeappendixproposition}[Population minimizer and endpoint law]
+\label{prop:app-compose-population}
+Assume A1--A3 and A6. The unrestricted nonnegative-rate minimizer of
+Equation~\eqref{eq:population-successor-gm} satisfies
+$Q_t^\star(x,y)=
+\E[R_t^Z(y\mid X_t)\mid X_t=x]$ on each occupied state--successor pair. If
+the learned committed generator equals $Q_t^\star$ on the occupied support,
+starts from the endpoint-program mixture's source marginal, and the
+finite-horizon forward equation is unique, its time marginals equal those of
+the program mixture and its terminal marginal equals the target marginal.
+\end{composeappendixproposition}
+
+\paragraph{Proof.}
+Condition on $X_t=x$ and fix a productive successor $y$. Writing
+$q=Q_t(x,y)$ and
+$q^\star=\E[R_t^Z(y\mid X_t)\mid X_t=x]$, the model-dependent conditional
+term is
+\[
+  q-q^\star\log q.
+\]
+For $q^\star>0$, it is strictly convex on $q>0$ and has derivative
+$1-q^\star/q$, so its unique minimizer is $q=q^\star$. For
+$q^\star=0$, the term is $q$ and its nonnegative minimizer is $q=0$.
+The population sum separates across occupied $(t,x,y)$ coordinates, proving
+the first statement.
+
+By construction, the endpoint-program mixture has committed marginal
+generator $Q_t^\star$. If the learned process has the same generator and
+initial marginal, both marginal laws solve the same forward equation. Its
+assumed uniqueness makes those laws identical at every time, including the
+declared terminal time. A6 identifies that terminal program-mixture marginal
+with the target marginal.
+\hfill$\square$
+
+This proposition is a population statement. It does not assert that a finite
+network fits $Q_t^\star$, that compiled programs minimize edit cost, or that
+the historical selected-mark loss equals
+Equation~\eqref{eq:population-successor-gm}.
 
 \subsection{Within-fiber refinement invariance}
 \label{sec:app-compose-refinement-proof}
 
 \begin{composeappendixproposition}[Within-fiber invariance]
 \label{prop:app-compose-refinement}
-Consider two internal mark encodings with the same total hazard.  Suppose the
-second refines the first only within canonical successor fibers: there is a
-map $\rho:\A'(x)\to\A(x)$ such that
-$c(\T'(x,a'))=c(\T(x,\rho(a')))$ and
+Suppose a second internal encoding refines the first only within canonical
+successor fibers. There is a map $\rho:\A'(x)\to\A(x)$ such that
 \[
-  \sum_{a':\,\rho(a')=a}p'_\theta(a'\mid x,t)
+c(\T'(x,a'))=c(\T(x,\rho(a'))),
+\qquad
+\chi_x^{+\prime}(c(\T'(x,a')))
+=
+\chi_x^+(c(\T(x,\rho(a')))),
+\]
+and aggregate marked rates are preserved:
+\[
+  \sum_{a':\,\rho(a')=a}\lambda'_\theta(a'\mid x,t)
   =
-  p_\theta(a\mid x,t)
+  \lambda_\theta(a\mid x,t)
   \quad\text{for every }a\in\A(x).
 \]
-Then $\bar p_\theta$, $v_\theta$, $z_\theta$, the molecular off-diagonal
-rates, and the productive editing row are identical.  If A3 holds for both
-encodings, every finite-horizon successor-level value and Doob row is also
-identical.
+Then the total hazard, raw canonical pushforward, productive and virtual
+mass, committed molecular off-diagonal rates, and productive editing row are
+identical. If A3 holds for both encodings, every finite-horizon
+successor-level value and fiber-constant controlled row is also identical.
 \end{composeappendixproposition}
 
 \paragraph{Proof.}
-For any canonical successor $y$,
+Summing the rate-preservation identity over $a$ proves
+$\Lambda'_\theta=\Lambda_\theta$. Therefore dividing it by the common total
+hazard gives the corresponding probability-preservation identity (with the
+terminal zero-hazard case unused). For any canonical successor $y$,
 \begin{align}
   \bar p'_\theta(y\mid x,t)
   &=
@@ -396,11 +479,14 @@ For any canonical successor $y$,
   =
   \bar p_\theta(y\mid x,t).
 \end{align}
-Taking $y=c(x)$ proves equality of $v_\theta$ and hence $z_\theta$.
-Multiplication by the common total hazard proves equality of the
-off-diagonal rates, and productive normalization proves equality of the
-embedded rows whenever $z_\theta>0$.  For finite-horizon control, the base
-rows are therefore equal.  The equality $h'_0=h_0=g$ and induction in
+The productive-disposition identity makes the set and aggregate mass selected
+by $\chi_x^+$ identical; hence $z_\theta$ and
+$v_\theta=1-z_\theta$ agree. Multiplication by the common total hazard proves
+equality of the committed off-diagonal rates, and productive normalization
+proves equality of the embedded rows whenever $z_\theta>0$. For
+finite-horizon control, the base rows are therefore equal. A fiber-constant
+controller assigns one multiplier to the shared successor rather than to its
+aliases. The equality $h'_0=h_0=g$ and induction in
 $h_b=P_bh_{b-1}$ give $h'_b=h_b$ for every $b$, after which the controlled-row
 formula gives $(P'_b)^g=P_b^g$ on every reachable row.
 \hfill$\square$
@@ -441,6 +527,40 @@ unchanged, but the mark-level controller changed.  This proves the power-tilt
 claim.  Mark-level top-$k$, nucleus, and per-family operations likewise fall
 outside Proposition~\ref{prop:app-compose-refinement}; each would require its
 own encoding-dependent conditions.
+\hfill$\square$
+
+The proposition concerns the induced molecular process and fiber-constant
+control, not the training representation. A selected-mark likelihood changes
+when one teacher mark is refined into several aliases unless its teacher mass
+and loss are aggregated at the successor level.
+
+\subsection{Support-preserving control and pathwise invariance}
+\label{sec:app-compose-support-control-proof}
+
+\begin{composeappendixproposition}[Closure under successor control]
+\label{prop:app-compose-support-control}
+Under A1--A2, let $\widetilde Q_t$ be defined by
+Equation~\eqref{eq:successor-control-law} with a locally bounded nonnegative
+controller. Then
+\[
+  \operatorname{supp}\widetilde Q_t(x,\cdot)
+  \subseteq
+  \operatorname{supp}Q_{\theta,t}^{+}(x,\cdot).
+\]
+If $C\equiv1$ and $\Psi_t$ is positive on every base-supported edge, the two
+supports are equal. If $C(x_0)$ holds and $C$ is enforced on each successor,
+then $C$ holds at every committed state almost surely.
+\end{composeappendixproposition}
+
+\paragraph{Proof.}
+Every controlled off-diagonal rate is a base rate multiplied by two
+nonnegative factors. A zero base rate therefore remains zero, proving support
+containment. If both factors are positive on every base-supported edge, no
+positive base rate is removed, proving equality. For the path statement,
+$C(x_0)$ holds by assumption. Conditional on $C(x_j)$, every successor with
+positive controlled rate satisfies the indicator $C(x_{j+1})=1$; induction
+over committed jumps proves the invariant. Local boundedness and A2 keep the
+controlled total rate finite on the declared horizon.
 \hfill$\square$
 
 \subsection{Finite-horizon terminal tilt}
