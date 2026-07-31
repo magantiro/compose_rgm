@@ -49,14 +49,17 @@ _MAP_CPU = 2.0
 _MAP_MEMORY_MB = 8192
 _OMP_NUM_THREADS = 1
 
+AUDIT_RUNTIME_REQUIREMENTS = (
+    "torch==2.4.0",
+    "numpy==1.26.4",
+    "scipy==1.13.1",
+    "networkx==3.3",
+    "rdkit==2024.3.5",
+)
+
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .pip_install(
-        "numpy==1.26.4",
-        "scipy==1.13.1",
-        "networkx==3.3",
-        "rdkit==2024.3.5",
-    )
+    .pip_install(*AUDIT_RUNTIME_REQUIREMENTS)
     .env(
         {
             "PYTHONPATH": os.pathsep.join((str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))),

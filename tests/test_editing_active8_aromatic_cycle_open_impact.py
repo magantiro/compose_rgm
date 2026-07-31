@@ -42,11 +42,18 @@ from compose_v4.rewrite.operators import (
     is_valid_bond_delete,
 )
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
+from modal_apps.audit_editing_active8_aromatic_cycle_open_impact import (
+    AUDIT_RUNTIME_REQUIREMENTS,
+)
 
 
 CONTRACT_PATH = "configs/editing_active8_aromatic_cycle_open_impact_audit_v1.json"
 SHARD_DIGEST = "1" * 64
 IMPLEMENTATION_DIGEST = "2" * 64
+
+
+def test_modal_image_declares_active8_transitive_torch_dependency() -> None:
+    assert "torch==2.4.0" in AUDIT_RUNTIME_REQUIREMENTS
 
 
 class _Admission:
