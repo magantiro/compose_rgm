@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
 import numpy as np
 import pytest
 from rdkit import Chem
@@ -56,6 +58,23 @@ def _same_exact_state(left, right) -> bool:
 
 def _reverse_supplier(molecule: Chem.Mol, maximum: int):
     return tuple(reversed(tuple(rdkit_kekule_supplier(molecule, maximum))))
+
+
+def _unit_semantic_cycle_open_law(state) -> dict[str, float]:
+    counts: Counter[str] = Counter()
+    for left in range(state.n_atoms):
+        for right in range(left + 1, state.n_atoms):
+            resolution = resolve_edge_anchored_cycle_open(
+                state,
+                BondDelete(left, right),
+            )
+            if resolution.admitted:
+                counts[resolution.canonical_product_keys[0]] += 1
+    total = sum(counts.values())
+    return {
+        key: count / total
+        for key, count in sorted(counts.items())
+    } if total else {}
 
 
 def test_benzene_two_phases_have_identical_edge_anchored_products() -> None:
@@ -287,6 +306,36 @@ def test_slot_lexicographic_representative_is_not_a_general_equivariance_proof()
     # being misreported as slot-equivariant. Production promotion still needs
     # a two-step molecular-law gate or a stronger representative rule.
     assert exact_mismatch_found
+
+
+def test_non_equivariant_exact_representatives_match_second_cycle_open_law() -> None:
+    source = pad_molecular_graph(smiles_to_molecular_graph("c1ccc2ccccc2c1"), 16)
+    permutation = (7, 2, 9, 0, 4, 1, 6, 3, 5, 8, 15, 10, 14, 11, 13, 12)
+    inverse = tuple(int(value) for value in np.argsort(np.asarray(permutation)))
+    relabeled = permute_persistent_slots(source, permutation)
+    compared = 0
+
+    for edge in _aromatic_edges(source):
+        action = BondDelete(*edge)
+        transported_action = transport_bond_delete(
+            action,
+            permutation,
+            n_slots=source.n_atoms,
+        )
+        original = resolve_edge_anchored_cycle_open(source, action)
+        transported = resolve_edge_anchored_cycle_open(relabeled, transported_action)
+        assert original.admitted and transported.admitted
+        restored = permute_persistent_slots(transported.successor, inverse)
+        if _same_exact_state(restored, original.successor):
+            continue
+        compared += 1
+        assert _unit_semantic_cycle_open_law(restored) == pytest.approx(
+            _unit_semantic_cycle_open_law(original.successor),
+            abs=1e-12,
+            rel=0.0,
+        )
+
+    assert compared > 0
 
 
 def test_cap_plus_one_resonance_structure_fails_loudly() -> None:
