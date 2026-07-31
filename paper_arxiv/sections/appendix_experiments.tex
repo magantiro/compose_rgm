@@ -126,6 +126,21 @@ trajectories: controllers compose local transitions at inference. The final
 corpus census determines which multistep lanes add measured coverage beyond
 real local endpoints and reversible executor walks.
 
+\paragraph{Candidate ledger and lane routing.}
+Every attempted candidate is retained in a deterministic pre-admission ledger
+with exactly one compiled-trace or typed rejection disposition. For compiled
+candidates, the ledger binds the source and compiler identities, all six
+evidence components, and a hash-addressed lane-routing receipt. The router
+uses a fixed priority order: executor-generated walks; direct
+attachment/topology operations; other direct Active8 operations; non-direct
+paths of at most two actions; and paths of at least three actions. These map,
+respectively, to the reversible-walk, linker/positional/topology,
+operator-aware, local-analogue, and real-endpoint multistep lanes. The router
+accepts only inferred real-endpoint relationships or executor-generated walks
+from real endpoints in its current contract. It cannot turn structural
+similarity into observed pair provenance. Candidate status carries no split,
+corpus-readiness, or training authority.
+
 \paragraph{Compiler order.}
 For a real endpoint pair, the compiler first searches direct semantic
 operations supported by the production factorization.  Only then may it use a
@@ -137,14 +152,30 @@ reason.
 
 \paragraph{Splits.}
 Molecule identity, scaffold component, authoritative trace-derived membership,
-physically resolved relationship groups, upstream source group, and
-transformation signature are group-level split keys. Both endpoints of a pair
-must belong to the same partition; cross-partition pairs are dropped before
-trace generation. The current census is diagnostic and does not assign
-partitions or promote relationship labels to hard split edges before their
-physical receipts exist. The later frozen manifest reports overlap under
-every registered key, both within and across lanes. Manifest identity is
-computed from the bytes of every packed shard, not only its path and row count.
+physically resolved relationship groups, upstream source or document group,
+series, and transformation signature are group-level split keys. The
+candidate census joins every hard-linked candidate into one indivisible
+component and does not promote relationship labels to hard edges before their
+physical receipts exist. The assignment policy then sorts complete components
+by mass and assigns each to one of four roles with a deterministic salted
+tie-break. It targets mass ratios of $85{:}5{:}5{:}5$ for training,
+validation, controller-validation, and final test under the census's declared
+mass unit, weights per-lane balance twice as strongly as aggregate balance,
+and requires nonempty roles plus representation of every observed lane in
+every role. Absolute deviations are capped at 0.02 overall and 0.05 within a
+lane. The admitted source envelope must bind what one mass unit represents;
+the generic assignment code itself does not establish that it is a trace,
+state, transition, or sampled training example.
+
+This assignment remains
+\texttt{PROPOSED\_ASSIGNMENT\_NO\_CORPUS\_AUTHORITY}: physical lane shards,
+whole-trace Active8 admission, and the semantic sampling sidecar remain
+separate blockers. Both endpoints of an admitted pair must resolve to the same
+role. Cross-role and unassigned attempts are forbidden from admitted records
+but retained in the pre-admission ledger with reason codes. The later frozen
+manifest reports overlap under every registered key, both within and across
+lanes. Manifest identity is computed from the bytes of every packed shard, not
+only its path and row count.
 
 \paragraph{Sampling law.}
 Sampling is hierarchical:

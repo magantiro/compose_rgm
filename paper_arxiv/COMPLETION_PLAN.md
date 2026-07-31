@@ -42,6 +42,17 @@ The five corpus lanes are exactly `observed_local_analogue`,
 "observed series path" lane unless genuine observed action/trajectory
 provenance is later acquired and separately contracted.
 
+Candidate routing follows
+`configs/editing_v2_candidate_routing_policy_v1.json`; callers do not choose a
+lane label. The four-role split follows
+`configs/editing_v2_split_assignment_policy_v1.json`, with prospective
+85/5/5/5 targets over the census's declared mass unit for training, validation,
+controller-validation, and final test. The source envelope must define that
+mass unit before the split is interpreted scientifically. The routing and
+split policies do not constitute an admitted corpus or training authority.
+Keep physical shard, whole-trace Active8, and semantic-sampling blockers
+visible until their exact artifacts pass.
+
 ## Manuscript map
 
 | Section | Content | Current state | What remains |

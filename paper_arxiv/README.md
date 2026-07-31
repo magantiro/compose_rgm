@@ -31,6 +31,9 @@ Scientific content must remain synchronized against:
   handoff for current scientific precedence;
 - `AGENTS.md` and current self-hashed contracts for implementation and training
   authorization;
+- `configs/editing_v2_candidate_routing_policy_v1.json` and
+  `configs/editing_v2_split_assignment_policy_v1.json` for the current
+  deterministic five-lane routing and prospective four-role assignment;
 - `docs/CLAIM_LEDGER.md` plus provenance-complete artifacts for evidence status;
 - `configs/comparator_registry_v1.json` for required comparison arms; and
 - `configs/experiment_registry.yaml` for tasks, endpoints, budgets, and outputs.
@@ -94,9 +97,15 @@ Editing-V2 declares five evidence lanes:
 `linker_positional_topology_analogue`, `real_endpoint_multistep_path`, and
 `reversible_synthetic_walk`. Genuine observed-series action provenance is not
 available, so compiler-generated multistep paths are not described as observed
-series. The corpus remains `DESIGN_NOT_TRAINING_AUTHORIZED`; whole-trace
-admission, Gate 0, T1, P50, P500, and P2000 must pass in order before a long
-run. A successor-aware editing trainer is a new protocol, not a retroactive
-reinterpretation of the completed run. Fixed-budget editing and timed de novo
-generation require separate checkpoints and inference contracts, and no
-production de-novo checkpoint currently exists.
+series. A deterministic policy now routes candidate traces into those lanes,
+and a separate policy targets an 85/5/5/5 assignment of indivisible components
+by declared census mass to training, validation, controller-validation, and
+sealed final-test roles.
+Those policies are prospective and non-authorizing: no admitted V2 corpus,
+physical lane shards, or training permission is implied. The corpus remains
+`DESIGN_NOT_TRAINING_AUTHORIZED`; whole-trace admission, Gate 0, T1, P50, P500,
+and P2000 must pass in order before a long run. A successor-aware editing
+trainer is a new protocol, not a retroactive reinterpretation of the completed
+run. Fixed-budget editing and timed de novo generation require separate
+checkpoints and inference contracts, and no production de-novo checkpoint
+currently exists.

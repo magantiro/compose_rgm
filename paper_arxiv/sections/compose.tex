@@ -181,6 +181,19 @@ The corpus contract distinguishes five data lanes:
   mixed-family composition, correction, and inverse coverage.
 \end{enumerate}
 
+Lane assignment is not supplied by a miner or inferred from a convenient
+filename. A frozen deterministic router derives one lane and one evidence
+profile from hash-bound source kind, compiled path class and length, and the
+set of Active8 families used. Executor-generated walks enter the reversible
+synthetic lane. A one-step direct path involving rerouting, cycle change, or
+ring-system restatement enters the linker/positional/topology lane; another
+one-step direct Active8 path enters the operator-aware lane. Non-direct paths
+of at most two actions enter the local-analogue lane, and paths of at least
+three actions enter the real-endpoint multistep lane. Routing never upgrades a
+structurally inferred relationship into an observed relationship, and it
+occurs before split assignment, whole-trace admission, packing, or training
+authorization.
+
 Genuine observed-series provenance and observed action sequences are not
 currently available. A path between real endpoints is therefore not described
 as an observed series or an observed edit trajectory. Each record preserves
@@ -193,17 +206,29 @@ scaffolds, path lengths, semantic-cell coverage, and effective training
 coefficients are \resultpending{EDITING_CORPUS_CENSUS}.
 
 \paragraph{Splits and sampling.}
-The frozen split contract requires molecule, scaffold, authoritative
-trace-membership groups, physically resolved pair-relationship groups, source
-group, and transformation signature to be assigned before path construction;
-no pair may cross partitions. The current census does not itself assign those
-partitions. Because the previous final test aggregate was inspected during
-diagnosis, the replacement model requires a new sealed final holdout. Training
-samples hierarchically by data lane, series/scaffold/source group, semantic
-capability cell, endpoint pair or path, and progress state. This prevents long
+The frozen split contract forms indivisible leakage components from molecular
+identity, scaffold, series, document or source, physically resolved
+relationship groups, and transformation signature. A separately frozen
+assignment policy targets 85\% training, 5\% validation, 5\%
+controller-validation, and 5\% final-test mass under the census's declared mass
+unit while balancing each evidence lane. Complete components, rather than
+individual rows, are assigned to exactly one role. Every role must be
+nonempty, every observed lane must occur in every role, overall absolute ratio
+error may not exceed two percentage points, and per-lane error may not exceed
+five. The current assignment builder emits only a proposed,
+content-addressed assignment and does not authorize corpus admission or
+training. Cross-role and unresolved pairs remain rejected attempts in the
+pre-admission audit ledger. The final source envelope must bind the scientific
+meaning of one mass unit before the split can be interpreted as a distribution
+over traces, states, or training examples.
+
+Because the previous final-test aggregate was inspected during diagnosis, the
+replacement model requires a new sealed final holdout. Training samples
+hierarchically by data lane, series/scaffold/source group, semantic capability
+cell, endpoint pair or path, and progress state. This prevents long
 serializations, large relationship groups, or one common transformation from
-dominating merely by row count. The final split artifact, mixture, and measured
-effective coefficients are
+dominating merely by row count. The final admitted split artifact, mixture,
+and measured effective coefficients are
 \resultpending{EDITING_SAMPLER_CONTRACT}.
 
 \subsection{Objective selection and no-waste training gates}
