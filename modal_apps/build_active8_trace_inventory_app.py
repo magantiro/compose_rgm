@@ -76,8 +76,21 @@ image = (
 app = modal.App("compose-v4-active8-trace-inventory")
 artifact_volume = modal.Volume.from_name(
     "compose-v4-artifacts",
-    create_if_missing=True,
+    create_if_missing=False,
 )
+
+
+def _local_source_revision() -> dict[str, object]:
+    """Bind the serialized Modal image to one clean local Git snapshot."""
+
+    import sys
+
+    sys.path.insert(0, str(ROOT / "src"))
+    from compose_v4.data.active8_inventory_mapreduce import (
+        repository_source_revision,
+    )
+
+    return repository_source_revision(repo_root=ROOT)
 
 
 def _imports() -> dict[str, object]:
@@ -213,6 +226,7 @@ def driver(
     candidate_cache_size: int,
     partitions: tuple[str, ...],
     target_entries_per_range: int,
+    source_revision: dict[str, object],
 ) -> dict[str, object]:
     """Plan once, map only absent tasks, then invoke the strict reducer."""
 
@@ -250,6 +264,7 @@ def driver(
         source_manifest_path=Path(unified_manifest_path),
         source_manifest=source_manifest,
         support_contract_sha256=contract.sha256,
+        source_revision=source_revision,
         repo_root=REMOTE_ROOT,
         target_entries_per_range=target_entries_per_range,
         worker_resources={
@@ -271,6 +286,7 @@ def driver(
             {
                 "phase": "active8_map_plan",
                 "run_identity_sha256": plan["run_identity_sha256"],
+                "source_revision": plan["source_revision"],
                 "expected_source_decisions": plan["expected_source_decisions"],
                 "expected_map_tasks": plan["expected_map_tasks"],
                 "missing_map_tasks": len(missing_tasks),
@@ -330,6 +346,7 @@ def main(
         raise ValueError(
             "partitions must be a comma-separated unique nonempty subset of train,validation,test"
         )
+    source_revision = _local_source_revision()
     result = driver.remote(
         unified_manifest_path,
         audit_root,
@@ -339,6 +356,7 @@ def main(
         candidate_cache_size,
         selected_partitions,
         target_entries_per_range,
+        source_revision,
     )
     print(
         json.dumps(
@@ -346,6 +364,7 @@ def main(
                 "phase": "active8_inventory_complete",
                 "unified_manifest_path": unified_manifest_path,
                 "output_root": output_root,
+                "source_revision": source_revision,
                 "max_map_containers": _MAX_MAP_CONTAINERS,
                 "target_entries_per_range": target_entries_per_range,
                 "worker_resources": {

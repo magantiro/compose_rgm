@@ -16,6 +16,7 @@ rows nor its terminal row.
 
 from __future__ import annotations
 
+import ast
 import gzip
 import hashlib
 import json
@@ -74,13 +75,19 @@ _EXPLICITLY_DISALLOWED_RULES = frozenset(
         "ring_system_grow",
     }
 )
-_IMPLEMENTATION_SOURCES = (
+_IMPLEMENTATION_IDENTITY_SCHEMA = "compose.data.active8_implementation_identity"
+_IMPLEMENTATION_IDENTITY_SCHEMA_VERSION = 2
+_IMPLEMENTATION_SEED_SOURCES = (
     "src/compose_v4/data/active8_trace_inventory.py",
     "src/compose_v4/data/packed_trace_store.py",
     "src/compose_v4/chem/persistent_state_identity.py",
     "src/compose_v4/rewrite/action_codec.py",
     "src/compose_v4/experiments/factorized_successor_training.py",
     "src/compose_v4/experiments/production_successor_kernel.py",
+    # The distributed production builder imports these dynamically. They bind
+    # the exact model capabilities and the physical source-shard resolution.
+    "src/compose_v4/experiments/editing_gate_zero_runtime.py",
+    "src/compose_v4/data/packed_charge_policy_audit.py",
 )
 
 
@@ -327,20 +334,126 @@ def _inventory_decision_path(
     return candidate
 
 
-def implementation_identity(*, repo_root: Path | None = None) -> dict[str, object]:
-    """Hash the complete code surface defining admission and row identity."""
+def _module_name_for_source(relative: str) -> tuple[str, bool]:
+    path = Path(relative)
+    try:
+        package_parts = path.with_suffix("").parts[path.parts.index("src") + 1 :]
+    except ValueError as error:
+        raise Active8TraceInventoryError(
+            f"implementation source is outside the Python source tree: {relative}"
+        ) from error
+    is_package = bool(package_parts and package_parts[-1] == "__init__")
+    if is_package:
+        package_parts = package_parts[:-1]
+    return ".".join(package_parts), is_package
 
-    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[3]
-    sources: dict[str, str] = {}
-    for relative in _IMPLEMENTATION_SOURCES:
+
+def _module_source_paths(root: Path, module_name: str) -> tuple[str, ...]:
+    """Resolve one internal module plus every imported package initializer."""
+
+    if module_name != "compose_v4" and not module_name.startswith("compose_v4."):
+        return ()
+    module_parts = module_name.split(".")
+    resolved: list[str] = []
+    for stop in range(1, len(module_parts)):
+        initializer = Path("src", *module_parts[:stop], "__init__.py")
+        if (root / initializer).is_file():
+            resolved.append(initializer.as_posix())
+    module_file = Path("src", *module_parts).with_suffix(".py")
+    package_file = Path("src", *module_parts, "__init__.py")
+    if (root / module_file).is_file():
+        resolved.append(module_file.as_posix())
+    elif (root / package_file).is_file():
+        resolved.append(package_file.as_posix())
+    return tuple(dict.fromkeys(resolved))
+
+
+def _internal_import_modules(
+    source: Path,
+    *,
+    relative: str,
+) -> tuple[str, ...]:
+    try:
+        tree = ast.parse(source.read_text(), filename=str(source))
+    except (OSError, SyntaxError, UnicodeError) as error:
+        raise Active8TraceInventoryError(
+            f"cannot parse active-8 implementation source: {source}"
+        ) from error
+    current_module, is_package = _module_name_for_source(relative)
+    current_package = current_module.split(".") if is_package else current_module.split(".")[:-1]
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(
+                alias.name
+                for alias in node.names
+                if alias.name == "compose_v4" or alias.name.startswith("compose_v4.")
+            )
+            continue
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        if node.level:
+            parents = node.level - 1
+            if parents > len(current_package):
+                raise Active8TraceInventoryError(
+                    f"relative import escapes compose_v4 in implementation source: {source}"
+                )
+            base_parts = current_package[: len(current_package) - parents]
+            if node.module:
+                base_parts.extend(node.module.split("."))
+            base = ".".join(base_parts)
+        else:
+            base = node.module or ""
+        if base != "compose_v4" and not base.startswith("compose_v4."):
+            continue
+        modules.add(base)
+        modules.update(f"{base}.{alias.name}" for alias in node.names if alias.name != "*")
+    return tuple(sorted(modules))
+
+
+def _implementation_source_closure(root: Path) -> tuple[str, ...]:
+    """Return the complete static internal import closure of Active8 admission.
+
+    Hashing only the top-level evaluator modules is insufficient because legal
+    candidates and executor results are defined in transitive model, rewrite,
+    chemistry, and codec modules. Import statements themselves are hashed, so
+    adding a new dependency invalidates the old identity and includes the new
+    module in the next closure.
+    """
+
+    pending = list(_IMPLEMENTATION_SEED_SOURCES)
+    observed: set[str] = set()
+    while pending:
+        relative = pending.pop()
+        if relative in observed:
+            continue
         source = root / relative
         if not source.is_file():
             raise Active8TraceInventoryError(f"active-8 implementation source is absent: {source}")
-        sources[relative] = _sha256_file(source)
-    return {
-        "sources": sources,
-        "implementation_sha256": _sha256_bytes(sources),
+        observed.add(relative)
+        for module_name in _internal_import_modules(source, relative=relative):
+            for imported in _module_source_paths(root, module_name):
+                if imported not in observed:
+                    pending.append(imported)
+    return tuple(sorted(observed))
+
+
+def implementation_identity(*, repo_root: Path | None = None) -> dict[str, object]:
+    """Hash the transitive code surface defining admission and row identity."""
+
+    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[3]
+    sources = {
+        relative: _sha256_file(root / relative) for relative in _implementation_source_closure(root)
     }
+    identity: dict[str, object] = {
+        "schema": _IMPLEMENTATION_IDENTITY_SCHEMA,
+        "schema_version": _IMPLEMENTATION_IDENTITY_SCHEMA_VERSION,
+        "closure_policy": "static_internal_import_closure_v1",
+        "seed_sources": list(_IMPLEMENTATION_SEED_SOURCES),
+        "sources": sources,
+    }
+    identity["implementation_sha256"] = _sha256_bytes(identity)
+    return identity
 
 
 def _selection_policy() -> dict[str, object]:

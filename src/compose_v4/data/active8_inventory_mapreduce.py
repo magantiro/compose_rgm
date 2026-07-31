@@ -19,6 +19,8 @@ import gzip
 import hashlib
 import json
 import os
+import re
+import subprocess
 import tempfile
 from collections import Counter
 from collections.abc import Iterable, Mapping
@@ -51,11 +53,13 @@ from compose_v4.data.packed_trace_store import (
 from compose_v4.data.provenance_overlay import overlay_path_for
 
 ACTIVE8_MAPREDUCE_PLAN_SCHEMA = "compose.data.active8_inventory_mapreduce_plan"
-ACTIVE8_MAPREDUCE_PLAN_SCHEMA_VERSION = 2
+ACTIVE8_MAPREDUCE_PLAN_SCHEMA_VERSION = 3
 ACTIVE8_MAP_RECEIPT_SCHEMA = "compose.data.active8_inventory_map_receipt"
-ACTIVE8_MAP_RECEIPT_SCHEMA_VERSION = 2
+ACTIVE8_MAP_RECEIPT_SCHEMA_VERSION = 3
 ACTIVE8_MAPREDUCE_COMPLETE_SCHEMA = "compose.data.active8_inventory_mapreduce_complete"
-ACTIVE8_MAPREDUCE_COMPLETE_SCHEMA_VERSION = 2
+ACTIVE8_MAPREDUCE_COMPLETE_SCHEMA_VERSION = 3
+ACTIVE8_SOURCE_REVISION_SCHEMA = "compose.data.active8_source_revision"
+ACTIVE8_SOURCE_REVISION_SCHEMA_VERSION = 1
 
 ENTRY_RANGE_ALGORITHM = "fixed_target_entries_contiguous_v1"
 DEFAULT_TARGET_ENTRIES_PER_RANGE = 500
@@ -87,6 +91,8 @@ class Active8MapTask:
 
     run_identity_sha256: str
     task_identity_sha256: str
+    source_revision: dict[str, object]
+    source_revision_sha256: str
     manifest_layer: str
     envelope_layer: str
     partition: str
@@ -110,6 +116,7 @@ class Active8MapTask:
         for name in (
             "run_identity_sha256",
             "task_identity_sha256",
+            "source_revision_sha256",
             "packed_shard_content_sha256",
             "packed_manifest_sha256",
             "range_policy_sha256",
@@ -150,6 +157,12 @@ class Active8MapTask:
             or _sha256_payload(self.range_policy) != self.range_policy_sha256
         ):
             raise ValueError("map task range policy is malformed")
+        if (
+            not isinstance(self.source_revision, dict)
+            or self.source_revision.get("source_revision_sha256") != self.source_revision_sha256
+            or _source_revision_self_hash(self.source_revision) != self.source_revision_sha256
+        ):
+            raise ValueError("map task source revision is malformed")
         if not all(
             isinstance(value, str) and value
             for value in (
@@ -297,15 +310,167 @@ def _implementation_identity(*, repo_root: Path | None = None) -> dict[str, obje
         if not path.is_file():
             raise Active8MapReduceError(f"map/reduce implementation source is absent: {path}")
         sources[relative] = _sha256_file(path)
-    return {
+    identity: dict[str, object] = {
+        "schema": "compose.data.active8_mapreduce_implementation_identity",
+        "schema_version": 2,
         "sources": sources,
-        "implementation_sha256": _sha256_payload(sources),
     }
+    identity["implementation_sha256"] = _sha256_payload(identity)
+    return identity
+
+
+_GIT_OBJECT_RE = re.compile(r"^[0-9a-f]{40,64}$")
+
+
+def _source_revision_self_hash(payload: Mapping[str, object]) -> str:
+    body = dict(payload)
+    body.pop("source_revision_sha256", None)
+    return _sha256_payload(body)
+
+
+def _source_revision_binding(
+    *,
+    commit: str,
+    tree: str,
+    worktree_clean: bool,
+    active8_identity: Mapping[str, object],
+    mapreduce_identity: Mapping[str, object],
+) -> dict[str, object]:
+    snapshot = {
+        "active8_implementation_sha256": active8_identity.get("implementation_sha256"),
+        "mapreduce_implementation_sha256": mapreduce_identity.get("implementation_sha256"),
+    }
+    payload: dict[str, object] = {
+        "schema": ACTIVE8_SOURCE_REVISION_SCHEMA,
+        "schema_version": ACTIVE8_SOURCE_REVISION_SCHEMA_VERSION,
+        "commit": commit,
+        "tree": tree,
+        "worktree_clean": worktree_clean,
+        **snapshot,
+        "implementation_snapshot_sha256": _sha256_payload(snapshot),
+    }
+    payload["source_revision_sha256"] = _source_revision_self_hash(payload)
+    return payload
+
+
+def _validate_source_revision_binding(
+    source_revision: Mapping[str, object],
+    *,
+    active8_identity: Mapping[str, object],
+    mapreduce_identity: Mapping[str, object],
+) -> dict[str, object]:
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "commit",
+        "tree",
+        "worktree_clean",
+        "active8_implementation_sha256",
+        "mapreduce_implementation_sha256",
+        "implementation_snapshot_sha256",
+        "source_revision_sha256",
+    }
+    if not isinstance(source_revision, Mapping) or set(source_revision) != expected_fields:
+        raise Active8MapReduceError("active-8 source revision binding is malformed")
+    commit = source_revision.get("commit")
+    tree = source_revision.get("tree")
+    if (
+        source_revision.get("schema") != ACTIVE8_SOURCE_REVISION_SCHEMA
+        or source_revision.get("schema_version") != ACTIVE8_SOURCE_REVISION_SCHEMA_VERSION
+        or not isinstance(commit, str)
+        or _GIT_OBJECT_RE.fullmatch(commit) is None
+        or not isinstance(tree, str)
+        or _GIT_OBJECT_RE.fullmatch(tree) is None
+        or source_revision.get("worktree_clean") is not True
+    ):
+        raise Active8MapReduceError(
+            "active-8 map/reduce requires a clean committed source revision"
+        )
+    snapshot = {
+        "active8_implementation_sha256": active8_identity.get("implementation_sha256"),
+        "mapreduce_implementation_sha256": mapreduce_identity.get("implementation_sha256"),
+    }
+    if (
+        source_revision.get("active8_implementation_sha256")
+        != snapshot["active8_implementation_sha256"]
+        or source_revision.get("mapreduce_implementation_sha256")
+        != snapshot["mapreduce_implementation_sha256"]
+        or source_revision.get("implementation_snapshot_sha256") != _sha256_payload(snapshot)
+        or source_revision.get("source_revision_sha256")
+        != _source_revision_self_hash(source_revision)
+    ):
+        raise Active8MapReduceError(
+            "active-8 source revision differs from the live implementation snapshot"
+        )
+    return dict(source_revision)
+
+
+def _git(
+    repository_root: Path,
+    *arguments: str,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ("git", *arguments),
+        cwd=repository_root,
+        check=check,
+        capture_output=True,
+        text=True,
+    )
+
+
+def repository_source_revision(*, repo_root: Path | None = None) -> dict[str, object]:
+    """Bind the live implementation closure to one clean committed Git tree."""
+
+    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[3]
+    active8_identity = active8_implementation_identity(repo_root=root)
+    mapreduce_identity = _implementation_identity(repo_root=root)
+    try:
+        commit = _git(root, "rev-parse", "HEAD").stdout.strip()
+        tree = _git(root, "rev-parse", "HEAD^{tree}").stdout.strip()
+        status = _git(
+            root,
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+        ).stdout
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise Active8MapReduceError(
+            "cannot establish the exact Active8 Git source revision"
+        ) from error
+    if _GIT_OBJECT_RE.fullmatch(commit) is None or _GIT_OBJECT_RE.fullmatch(tree) is None or status:
+        raise Active8MapReduceError(
+            "active-8 map/reduce requires a clean committed source worktree"
+        )
+    tracked_sources = {
+        **dict(active8_identity["sources"]),
+        **dict(mapreduce_identity["sources"]),
+    }
+    try:
+        for relative in sorted(tracked_sources):
+            head_blob = _git(root, "rev-parse", f"HEAD:{relative}").stdout.strip()
+            working_blob = _git(root, "hash-object", "--", relative).stdout.strip()
+            if head_blob != working_blob:
+                raise Active8MapReduceError(
+                    f"implementation source is off the bound Git revision: {relative}"
+                )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise Active8MapReduceError(
+            "an Active8 implementation source is not tracked by the bound Git revision"
+        ) from error
+    return _source_revision_binding(
+        commit=commit,
+        tree=tree,
+        worktree_clean=True,
+        active8_identity=active8_identity,
+        mapreduce_identity=mapreduce_identity,
+    )
 
 
 def _task_identity_payload(
     *,
     run_identity_sha256: str,
+    source_revision_sha256: str,
     source_binding: Mapping[str, object],
     range_binding: Mapping[str, object],
     range_policy_sha256: str,
@@ -315,6 +480,7 @@ def _task_identity_payload(
         "schema": ACTIVE8_MAP_RECEIPT_SCHEMA,
         "schema_version": ACTIVE8_MAP_RECEIPT_SCHEMA_VERSION,
         "run_identity_sha256": run_identity_sha256,
+        "source_revision_sha256": source_revision_sha256,
         "source_binding": dict(source_binding),
         "range_binding": dict(range_binding),
         "range_policy_sha256": range_policy_sha256,
@@ -328,6 +494,7 @@ def plan_active8_mapreduce(
     source_manifest_path: Path,
     source_manifest: Mapping[str, object],
     support_contract_sha256: str,
+    source_revision: Mapping[str, object],
     repo_root: Path | None = None,
     target_entries_per_range: int = DEFAULT_TARGET_ENTRIES_PER_RANGE,
     worker_resources: Mapping[str, object] | None = None,
@@ -361,6 +528,12 @@ def plan_active8_mapreduce(
 
     active8_identity = active8_implementation_identity(repo_root=repo_root)
     mapreduce_identity = _implementation_identity(repo_root=repo_root)
+    validated_source_revision = _validate_source_revision_binding(
+        source_revision,
+        active8_identity=active8_identity,
+        mapreduce_identity=mapreduce_identity,
+    )
+    source_revision_sha256 = str(validated_source_revision["source_revision_sha256"])
     source_manifest_sha256 = _sha256_file(source_manifest_path)
     preliminary_bindings: list[dict[str, object]] = []
     runtime_paths: list[str] = []
@@ -415,6 +588,8 @@ def plan_active8_mapreduce(
         "source_manifest_sha256": source_manifest_sha256,
         "source_manifest_semantic_sha256": _sha256_payload(source_manifest),
         "support_contract_sha256": support_contract_sha256,
+        "source_revision": validated_source_revision,
+        "source_revision_sha256": source_revision_sha256,
         "active8_families": list(ACTIVE8_FAMILIES),
         "active8_implementation_sha256": active8_identity["implementation_sha256"],
         "mapreduce_implementation_sha256": mapreduce_identity["implementation_sha256"],
@@ -437,6 +612,7 @@ def plan_active8_mapreduce(
             task_identity_sha256 = _sha256_payload(
                 _task_identity_payload(
                     run_identity_sha256=run_identity_sha256,
+                    source_revision_sha256=source_revision_sha256,
                     source_binding=binding,
                     range_binding=range_binding,
                     range_policy_sha256=range_policy_sha256,
@@ -447,6 +623,8 @@ def plan_active8_mapreduce(
                 Active8MapTask(
                     run_identity_sha256=run_identity_sha256,
                     task_identity_sha256=task_identity_sha256,
+                    source_revision=validated_source_revision,
+                    source_revision_sha256=source_revision_sha256,
                     source_path=runtime_path,
                     range_policy=range_policy,
                     range_policy_sha256=range_policy_sha256,
@@ -570,6 +748,8 @@ def _load_receipt(
         or payload.get("schema_version") != ACTIVE8_MAP_RECEIPT_SCHEMA_VERSION
         or payload.get("run_identity_sha256") != task.run_identity_sha256
         or payload.get("task_identity_sha256") != task.task_identity_sha256
+        or payload.get("source_revision") != task.source_revision
+        or payload.get("source_revision_sha256") != task.source_revision_sha256
         or payload.get("source_binding") != task.source_binding
         or payload.get("range_binding") != task.range_binding
         or payload.get("range_policy") != task.range_policy
@@ -595,6 +775,11 @@ def map_active8_source_decisions(
     """Map one immutable source-entry range, reusing its receipt on resume."""
 
     task = _task_from_mapping(raw_task)
+    _validate_source_revision_binding(
+        task.source_revision,
+        active8_identity=active8_implementation_identity(),
+        mapreduce_identity=_implementation_identity(),
+    )
     output_root = Path(output_root)
     receipt_path = _receipt_path(output_root, task)
     if receipt_path.exists():
@@ -702,6 +887,8 @@ def map_active8_source_decisions(
             "schema_version": ACTIVE8_MAP_RECEIPT_SCHEMA_VERSION,
             "run_identity_sha256": task.run_identity_sha256,
             "task_identity_sha256": task.task_identity_sha256,
+            "source_revision": task.source_revision,
+            "source_revision_sha256": task.source_revision_sha256,
             "source_binding": task.source_binding,
             "range_binding": task.range_binding,
             "range_policy": task.range_policy,
@@ -869,6 +1056,8 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
             "source_manifest_sha256",
             "source_manifest_semantic_sha256",
             "support_contract_sha256",
+            "source_revision",
+            "source_revision_sha256",
             "active8_families",
             "active8_implementation_sha256",
             "mapreduce_implementation_sha256",
@@ -882,6 +1071,8 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
     }
     range_policy = plan.get("range_policy")
     worker_resources = plan.get("worker_resources")
+    active8_identity = active8_implementation_identity()
+    mapreduce_identity = _implementation_identity()
     try:
         normalized_resources = _normalize_worker_resources(
             worker_resources if isinstance(worker_resources, Mapping) else None
@@ -899,14 +1090,24 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
         or plan.get("range_policy_sha256") != _sha256_payload(range_policy)
         or normalized_resources != worker_resources
         or plan.get("worker_resources_sha256") != _sha256_payload(normalized_resources)
+        or not isinstance(plan.get("source_revision"), Mapping)
+        or plan.get("source_revision_sha256")
+        != plan["source_revision"].get("source_revision_sha256")
         or not isinstance(plan.get("active8_implementation_identity"), Mapping)
         or plan["active8_implementation_identity"].get("implementation_sha256")
         != plan.get("active8_implementation_sha256")
+        or plan["active8_implementation_identity"] != active8_identity
         or not isinstance(plan.get("mapreduce_implementation_identity"), Mapping)
         or plan["mapreduce_implementation_identity"].get("implementation_sha256")
         != plan.get("mapreduce_implementation_sha256")
+        or plan["mapreduce_implementation_identity"] != mapreduce_identity
     ):
         raise Active8MapReduceError("active-8 map/reduce plan identity mismatch")
+    _validate_source_revision_binding(
+        plan["source_revision"],
+        active8_identity=active8_identity,
+        mapreduce_identity=mapreduce_identity,
+    )
     source_bindings = plan.get("source_bindings")
     partitions = plan.get("source_range_partitions")
     if (
@@ -959,6 +1160,8 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
             or task.range_policy_sha256 != plan["range_policy_sha256"]
             or task.worker_resources_sha256 != plan["worker_resources_sha256"]
             or task.worker_resources != plan["worker_resources"]
+            or task.source_revision != plan["source_revision"]
+            or task.source_revision_sha256 != plan["source_revision_sha256"]
             for task, (source_binding, range_binding) in zip(
                 tasks,
                 expected_specs,
@@ -970,6 +1173,7 @@ def _assert_plan_identity(plan: Mapping[str, object]) -> tuple[Active8MapTask, .
             != _sha256_payload(
                 _task_identity_payload(
                     run_identity_sha256=task.run_identity_sha256,
+                    source_revision_sha256=task.source_revision_sha256,
                     source_binding=task.source_binding,
                     range_binding=task.range_binding,
                     range_policy_sha256=task.range_policy_sha256,
@@ -1257,6 +1461,8 @@ def reduce_active8_mapreduce(
         "implementation_identity": plan["active8_implementation_identity"],
         "mapreduce_identity": {
             "run_identity_sha256": plan["run_identity_sha256"],
+            "source_revision": plan["source_revision"],
+            "source_revision_sha256": plan["source_revision_sha256"],
             "implementation_identity": plan["mapreduce_implementation_identity"],
             "range_policy": plan["range_policy"],
             "worker_resources": plan["worker_resources"],
@@ -1292,6 +1498,8 @@ def reduce_active8_mapreduce(
         "status": "COMPLETE",
         "training_authorized": False,
         "run_identity_sha256": plan["run_identity_sha256"],
+        "source_revision": plan["source_revision"],
+        "source_revision_sha256": plan["source_revision_sha256"],
         "expected_source_decisions": len(plan["source_bindings"]),
         "expected_map_tasks": len(tasks),
         "inventory_manifest": inventory_relative.as_posix(),
@@ -1334,5 +1542,6 @@ __all__ = [
     "map_active8_source_decisions",
     "plan_active8_mapreduce",
     "reduce_active8_mapreduce",
+    "repository_source_revision",
     "verified_completed_task_identities",
 ]

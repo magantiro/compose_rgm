@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -19,6 +21,7 @@ from compose_v4.data.active8_trace_inventory import (
     accepted_trace_keys,
     build_active8_trace_inventory,
     inventory_record_for_trace,
+    implementation_identity,
     load_active8_trace_admission,
 )
 from compose_v4.data.packed_trace_store import (
@@ -214,6 +217,36 @@ def test_active8_contract_is_exact_and_ordered() -> None:
         "cycle_attach",
         "ring_system_restate",
     )
+
+
+def test_implementation_identity_covers_transitive_candidate_and_executor_sources(
+    tmp_path: Path,
+) -> None:
+    repository_root = Path(__file__).resolve().parents[1]
+    baseline = implementation_identity(repo_root=repository_root)
+    copied_root = tmp_path / "source-snapshot"
+    for relative in baseline["sources"]:
+        source = repository_root / relative
+        destination = copied_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    assert implementation_identity(repo_root=copied_root) == baseline
+
+    semantic_sources = (
+        "src/compose_v4/model/factorized_tracelet_rate_model.py",
+        "src/compose_v4/rewrite/operators.py",
+        "src/compose_v4/rewrite/kernel.py",
+        "src/compose_v4/rewrite/factorized_fiber.py",
+    )
+    assert set(semantic_sources).issubset(baseline["sources"])
+    for relative in semantic_sources:
+        path = copied_root / relative
+        original = path.read_bytes()
+        path.write_bytes(original + b"\n# active8 lineage mutation probe\n")
+        changed = implementation_identity(repo_root=copied_root)
+        assert changed["implementation_sha256"] != baseline["implementation_sha256"]
+        assert changed["sources"][relative] != baseline["sources"][relative]
+        path.write_bytes(original)
 
 
 def test_disallowed_middle_step_excludes_the_entire_trace() -> None:

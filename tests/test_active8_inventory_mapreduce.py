@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
 
+import compose_v4.data.active8_inventory_mapreduce as mapreduce
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.active8_inventory_mapreduce import (
@@ -21,6 +24,7 @@ from compose_v4.data.active8_trace_inventory import (
     ExactCandidateEvidence,
     accepted_trace_keys,
     load_active8_trace_admission,
+    implementation_identity as active8_implementation_identity,
 )
 from compose_v4.data.packed_trace_store import write_packed_shard
 from compose_v4.experiments.factorized_successor_training import (
@@ -71,6 +75,7 @@ def _fixture(
     entries_per_shard: int = 2,
     target_entries_per_range: int = 500,
     worker_resources: dict[str, object] | None = None,
+    source_revision: dict[str, object] | None = None,
 ):
     declared = []
     for index in range(shards):
@@ -116,10 +121,23 @@ def _fixture(
         source_manifest_path=source_manifest_path,
         source_manifest=source_manifest,
         support_contract_sha256="a" * 64,
+        source_revision=source_revision or _source_revision(),
         target_entries_per_range=target_entries_per_range,
         worker_resources=worker_resources,
     )
     return plan
+
+
+def _source_revision() -> dict[str, object]:
+    active8_identity = active8_implementation_identity()
+    mapreduce_identity = mapreduce._implementation_identity()
+    return mapreduce._source_revision_binding(
+        commit="1" * 40,
+        tree="2" * 40,
+        worktree_clean=True,
+        active8_identity=active8_identity,
+        mapreduce_identity=mapreduce_identity,
+    )
 
 
 def _accept(addressed, step_index):
@@ -258,6 +276,8 @@ def test_plan_partitions_one_source_into_contiguous_immutable_ranges(
     receipt = json.loads(receipt_path.read_text())
     assert receipt["range_policy"] == plan["range_policy"]
     assert receipt["worker_resources"] == plan["worker_resources"]
+    assert receipt["source_revision"] == plan["source_revision"]
+    assert receipt["source_revision_sha256"] == plan["source_revision_sha256"]
 
 
 def test_range_policy_and_worker_resources_change_run_and_task_identity(
@@ -296,6 +316,83 @@ def test_range_policy_and_worker_resources_change_run_and_task_identity(
     )
 
 
+def test_plan_rejects_dirty_and_off_revision_source_bindings(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    active8_identity = active8_implementation_identity()
+    mapreduce_identity = mapreduce._implementation_identity()
+    dirty = mapreduce._source_revision_binding(
+        commit="1" * 40,
+        tree="2" * 40,
+        worktree_clean=False,
+        active8_identity=active8_identity,
+        mapreduce_identity=mapreduce_identity,
+    )
+    with pytest.raises(Active8MapReduceError, match="clean committed source revision"):
+        _fixture(
+            tmp_path / "dirty",
+            source_revision=dirty,
+        )
+
+    valid = _source_revision()
+    off_revision = copy.deepcopy(active8_identity)
+    off_revision["implementation_sha256"] = "0" * 64
+    monkeypatch.setattr(
+        mapreduce,
+        "active8_implementation_identity",
+        lambda *, repo_root=None: off_revision,
+    )
+    with pytest.raises(Active8MapReduceError, match="differs from the live implementation"):
+        _fixture(
+            tmp_path / "off-revision",
+            source_revision=valid,
+        )
+
+
+def test_repository_source_revision_rejects_dirty_or_changed_snapshot(
+    tmp_path: Path,
+) -> None:
+    repository_root = Path(__file__).resolve().parents[1]
+    active8_identity = active8_implementation_identity(repo_root=repository_root)
+    mapreduce_identity = mapreduce._implementation_identity(repo_root=repository_root)
+    copied_root = tmp_path / "git-snapshot"
+    for relative in sorted(set(active8_identity["sources"]) | set(mapreduce_identity["sources"])):
+        source = repository_root / relative
+        destination = copied_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    subprocess.run(("git", "init", "-q"), cwd=copied_root, check=True)
+    subprocess.run(("git", "add", "."), cwd=copied_root, check=True)
+    subprocess.run(
+        (
+            "git",
+            "-c",
+            "user.name=Active8 Test",
+            "-c",
+            "user.email=active8-test@example.invalid",
+            "commit",
+            "-qm",
+            "freeze source snapshot",
+        ),
+        cwd=copied_root,
+        check=True,
+    )
+
+    revision = mapreduce.repository_source_revision(repo_root=copied_root)
+    assert revision["worktree_clean"] is True
+    changed_source = copied_root / "src/compose_v4/rewrite/operators.py"
+    changed_source.write_bytes(changed_source.read_bytes() + b"\n# off-revision probe\n")
+    with pytest.raises(Active8MapReduceError, match="clean committed source worktree"):
+        mapreduce.repository_source_revision(repo_root=copied_root)
+    with pytest.raises(Active8MapReduceError, match="differs from the live implementation"):
+        mapreduce._validate_source_revision_binding(
+            revision,
+            active8_identity=active8_implementation_identity(repo_root=copied_root),
+            mapreduce_identity=mapreduce._implementation_identity(repo_root=copied_root),
+        )
+
+
 def test_ranged_reduce_is_decision_object_equivalent_to_serial(
     tmp_path: Path,
 ) -> None:
@@ -319,6 +416,7 @@ def test_ranged_reduce_is_decision_object_equivalent_to_serial(
         source_manifest_path=source_manifest_path,
         source_manifest=source_manifest,
         support_contract_sha256="a" * 64,
+        source_revision=serial_plan["source_revision"],
         target_entries_per_range=2,
     )
     serial_output = tmp_path / "serial-output"
@@ -364,8 +462,6 @@ def test_reducer_refuses_even_one_missing_expected_source_decision(
 def test_reducer_rejects_overlapping_plan_ranges_and_extra_receipts(
     tmp_path: Path,
 ) -> None:
-    import compose_v4.data.active8_inventory_mapreduce as mapreduce
-
     plan = _fixture(
         tmp_path,
         entries_per_shard=5,
@@ -379,6 +475,8 @@ def test_reducer_rejects_overlapping_plan_ranges_and_extra_receipts(
         "source_manifest_sha256",
         "source_manifest_semantic_sha256",
         "support_contract_sha256",
+        "source_revision",
+        "source_revision_sha256",
         "active8_families",
         "active8_implementation_sha256",
         "mapreduce_implementation_sha256",
@@ -450,6 +548,9 @@ def test_modal_surface_is_bounded_and_orders_map_before_reduce() -> None:
     assert "_MAP_MEMORY_MB = 8192" in source
     assert "_MAP_OMP_NUM_THREADS = 1" in source
     assert "_DEFAULT_TARGET_ENTRIES_PER_RANGE = 500" in source
+    assert "create_if_missing=False" in source
+    assert "source_revision = _local_source_revision()" in source
+    assert "source_revision=source_revision" in source
     assert "max_containers=_MAX_MAP_CONTAINERS" in source
     assert "cpu=_MAP_CPU" in source
     assert "memory=_MAP_MEMORY_MB" in source
