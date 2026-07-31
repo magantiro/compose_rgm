@@ -2,12 +2,11 @@
 % Replace XXX only after the corresponding artifact is frozen and audited.
 \newcommand{\XXX}{\textbf{XXX}}
 
-% De novo sufficiency (ZINC-CNOF). Validity and all-step validity/connectivity are
-% 100% BY CONSTRUCTION (Prop. closure), not empirical estimates. Uniqueness/novelty/
-% descriptor distances/diversity/coverage are filled from the frozen sufficiency run.
-\newcommand{\ComposeValidity}{\textbf{100\%}}
-\newcommand{\ComposeTrajectoryValidity}{\textbf{100\%}}
-\newcommand{\ComposeTrajectoryConnectivity}{\textbf{100\%}}
+% Historical de novo placeholders. The reversible null source means endpoint and all-step
+% non-null rates must be measured; the closure theorem does not authorize 100% empirical cells.
+\newcommand{\ComposeValidity}{\XXX}
+\newcommand{\ComposeTrajectoryValidity}{\XXX}
+\newcommand{\ComposeTrajectoryConnectivity}{\XXX}
 \newcommand{\ComposeUniqueness}{\XXX}
 \newcommand{\ComposeNovelty}{\XXX}
 \newcommand{\ComposeDescriptorW}{\XXX}
@@ -44,31 +43,49 @@
 \newcommand{\NoAliasFCD}{\XXX}
 \newcommand{\NoStratificationFCD}{\XXX}
 
-% Conditional / structural-control evaluation.
-% COMMITTED results (Lineage B base, GuacaMol-trained; CNOF optimization leads). Frozen artifacts.
-\newcommand{\ComposeExactnessLinf}{$1.1\times10^{-16}$}          % E0 Doob h-transform endpoint error
-\newcommand{\ComposeScaffoldSatisfaction}{\textbf{100\%}}         % exact fixed-scaffold satisfaction (enforced)
-\newcommand{\ComposeSubstructureSatisfaction}{\textbf{100\%}}     % required/forbidden substructure satisfaction
-\newcommand{\ComposeScaffoldRetention}{\textbf{100\%}}
-\newcommand{\ComposeBaselineScaffoldEasy}{95.7\%}                 % gen-then-filter usable, scaffold <=8 atoms
-\newcommand{\ComposeBaselineScaffoldHard}{12.0\%}                 % gen-then-filter usable, scaffold >=23 atoms
-\newcommand{\ComposeOracleEfficiency}{\textbf{100\%}}             % oracle calls spent on feasible candidates
-\newcommand{\ComposeBaselineOracleEfficiency}{39.8\%}            % gen-then-filter oracle efficiency
-\newcommand{\ComposeBaselineOracleWastedHard}{88\%}             % wasted budget on hard scaffolds
-\newcommand{\ComposeConstrainedQEDFrom}{0.755}
-\newcommand{\ComposeConstrainedQEDTo}{0.827}
-\newcommand{\ComposeConstrainedQEDGain}{$+0.072$}
-\newcommand{\ComposeConstrainedLeadsImproved}{12/12}
-\newcommand{\ComposeAnytimeCalls}{13}                             % median lead: oracle calls to 90\% of its final gain (constrained; mean 35, skewed by late-jumpers)
-\newcommand{\ComposePropertyGain}{\ComposeConstrainedQEDGain}
-% Legacy macro for the DE-EMPHASISED unconstrained oracle-hungry success rate; kept XXX by design
-% (not a headline; appendix-only with disclosed budget).
+% Superseded Base-B/CNOF control results are quarantined and cannot populate this manuscript.
+\newcommand{\ComposeExactnessLinf}{\XXX}
+\newcommand{\ComposeScaffoldSatisfaction}{\XXX}
+\newcommand{\ComposeSubstructureSatisfaction}{\XXX}
+\newcommand{\ComposeScaffoldRetention}{\XXX}
+\newcommand{\ComposeBaselineScaffoldEasy}{\XXX}
+\newcommand{\ComposeBaselineScaffoldHard}{\XXX}
+\newcommand{\ComposeOracleEfficiency}{\XXX}
+\newcommand{\ComposeBaselineOracleEfficiency}{\XXX}
+\newcommand{\ComposeBaselineOracleWastedHard}{\XXX}
+\newcommand{\ComposeConstrainedQEDFrom}{\XXX}
+\newcommand{\ComposeConstrainedQEDTo}{\XXX}
+\newcommand{\ComposeConstrainedQEDGain}{\XXX}
+\newcommand{\ComposeConstrainedLeadsImproved}{\XXX}
+\newcommand{\ComposeAnytimeCalls}{\XXX}
+\newcommand{\ComposePropertyGain}{\XXX}
 \newcommand{\ComposeConditionalSuccess}{\XXX}
 
 % Reproducibility.
-\newcommand{\ComposeParameters}{6.3M}
+% RETRACTED 2026-07-28: "6.3M" had no source. No script counts parameters, no checkpoint metadata
+% field records one, and no diagnostics/results JSON contains a parameter-count key; both
+% EXPERIMENT_CHECKLISTs still list "Parameter count" as unchecked. The count is also
+% configuration-dependent (cycle heads exist only under enable_cycle_ops; atom heads are 15-wide
+% under ORGANIC_VOCABULARY vs 4-wide under CNOF), so a base-B figure would not be RingCore-V1's.
+\newcommand{\ComposeParameters}{\XXX}
 \newcommand{\ComposeTrainHours}{\XXX}
 \newcommand{\ComposePeakMemory}{\XXX}
+% RETRACTED 2026-07-28: the "~560 oracle calls" figure for the oracle-guided controller had no
+% artifact anywhere in repo history (it traces to prose in docs/CONDITIONAL_RESULTS_AND_SCOPING.md).
+% Committed per-lead means across the unconstrained panels are 458-587; pick and freeze one.
+\newcommand{\ComposeOracleHungryCalls}{\XXX}
+% RETRACTED 2026-07-28: no artifact backs any of the developmental compiler/training figures
+% (99,738 programs; 49,869/50,000 targets; RGM loss 84.09->28.14; "3,000-update checkpoint";
+% 90.2% teacher family accuracy). The 90.2% value exists in
+% results/tree_fcd_transfer_stage1_factorized_v1/metrics.json but for a run with 8,000 steps,
+% train_size 8,000, and loss 34.98->-1.93, i.e. not the run the sentence describes.
+\newcommand{\DevCompiledPrograms}{\XXX}
+\newcommand{\DevCompiledTargets}{\XXX}
+\newcommand{\DevTargetTotal}{\XXX}
+\newcommand{\DevUpdates}{\XXX}
+\newcommand{\DevLossFrom}{\XXX}
+\newcommand{\DevLossTo}{\XXX}
+\newcommand{\DevFamilyAccuracy}{\XXX}
 
 % RingCore-V1 production training schedule (owner-locked 2026-07-28; scheduler_config_hash 0b832985c65de1cc).
 % These are FROZEN (not XXX): AdamW, cosine LR with linear warmup. schedule_steps is the cosine-decay horizon
@@ -81,3 +98,225 @@
 \newcommand{\RingCoreScheduleSteps}{3000}
 \newcommand{\RingCoreMinLRFraction}{0.05}
 \newcommand{\RingCoreSchedule}{cosine with linear warmup}
+\newcommand{\RingCoreTrainingSteps}{3000}
+
+% ============================================================================
+% RGM REFRAME (2026-07-28) --- macros introduced by the RGM-first restructure.
+% Every RESULT macro for the RingCore-V1 production model is \XXX by design: that model is
+% training at the time of writing and none of its results exist yet. Do NOT fill any of them
+% from a preflight artifact --- the bounded-run, schedule-check, continuation, and rollout-panel
+% artifacts are tagged NON_SCIENTIFIC_PREFLIGHT and are excluded from the paper by contract.
+% Blocks that carry REAL values are (a) frozen configuration facts (scope, hashes, schedule),
+% and (b) values read from committed non-preflight artifacts; each is labelled and sourced below.
+% ============================================================================
+
+% --- Production state-space / data contract (FROZEN facts, not results) ---
+\newcommand{\ScopeMaxAtoms}{40}
+\newcommand{\ScopeClasses}{15}
+\newcommand{\ScopeHash}{\texttt{3721d69851110fdd}}
+\newcommand{\ContractFingerprint}{\texttt{3917a0bf4a3de9830722663f}}
+\newcommand{\CapabilityHash}{\texttt{330473e319bfec19}}
+\newcommand{\OperatorRegistryHash}{\texttt{9197401e8dc3a7ae}}
+\newcommand{\RingCatalogHash}{\texttt{639ff6078c32d43c}}
+\newcommand{\TeacherFilterHash}{\texttt{f8137995181eeadc}}
+% Corpus census under the production scope (measured; scaled_edit_data_manifest_40 / SYSTEM_CONTRACT 0).
+\newcommand{\CorpusRetained}{466{,}483}
+\newcommand{\CorpusTotal}{500{,}000}
+\newcommand{\CorpusRetainedPct}{93.3\%}
+% Base-B de novo pretraining subset (CNOF-neutral), SYSTEM_CONTRACT 0.
+\newcommand{\BaseCnofSubset}{50{,}000}
+\newcommand{\BaseCnofEligible}{\XXX}  % unused in prose; two repo sources disagree (225,149 vs 239,867) -- re-measure before use
+% Teacher-representability filter removal rate (measured on 400 held-out broad-organic molecules).
+\newcommand{\TeacherFilterRemoval}{\XXX}
+
+% --- Fig. 2 / Table 1: unconditional (de novo) generative modeling. ALL PENDING. ---
+\newcommand{\DenovoValid}{\XXX}
+\newcommand{\DenovoConnected}{\XXX}
+\newcommand{\DenovoUnique}{\XXX}
+\newcommand{\DenovoNovel}{\XXX}
+\newcommand{\DenovoFCD}{\XXX}
+\newcommand{\DenovoPrecision}{\XXX}
+\newcommand{\DenovoRecall}{\XXX}
+\newcommand{\DenovoCoverage}{\XXX}
+\newcommand{\DenovoScaffoldNovelty}{\XXX}
+\newcommand{\DenovoIntDiv}{\XXX}
+\newcommand{\DenovoSeeds}{\XXX}
+\newcommand{\DenovoSampleCount}{\XXX}
+% Non-memorization.
+\newcommand{\DenovoNearestNeighbour}{\XXX}
+\newcommand{\DenovoDuplicateGrowth}{\XXX}
+\newcommand{\DenovoScaffoldOverlap}{\XXX}
+% Property / size marginals (Wasserstein or TV against the held-out reference).
+\newcommand{\DenovoMWDist}{\XXX}
+\newcommand{\DenovoLogPDist}{\XXX}
+\newcommand{\DenovoTPSADist}{\XXX}
+\newcommand{\DenovoRotBondDist}{\XXX}
+\newcommand{\DenovoChargeDist}{\XXX}
+\newcommand{\DenovoHeavyAtomDist}{\XXX}
+% Ring taxonomy marginals (the base-B ring defect is the reason RingCore exists).
+\newcommand{\DenovoSmallRing}{\XXX}
+\newcommand{\DenovoSmallRingRef}{\XXX}
+\newcommand{\DenovoAromatic}{\XXX}
+\newcommand{\DenovoAromaticRef}{\XXX}
+\newcommand{\DenovoFused}{\XXX}
+\newcommand{\DenovoSpiro}{\XXX}
+\newcommand{\DenovoBridged}{\XXX}
+\newcommand{\DenovoMacrocycle}{\XXX}
+
+% --- Fig. 2f/2g/2h: learned transport vs. uniform legal rewrites; ring support; scaling. ---
+\newcommand{\LearnedPathLength}{\XXX}
+\newcommand{\UniformPathLength}{\XXX}
+\newcommand{\LearnedNetDisplacement}{\XXX}
+\newcommand{\UniformNetDisplacement}{\XXX}
+\newcommand{\LearnedReversalRate}{\XXX}
+\newcommand{\UniformReversalRate}{\XXX}
+\newcommand{\LearnedEndpointFidelity}{\XXX}
+\newcommand{\UniformEndpointFidelity}{\XXX}
+\newcommand{\HeldOutRingTopology}{\XXX}
+\newcommand{\RingCompositionalOnly}{\XXX}
+\newcommand{\RingCatalogOnly}{\XXX}
+\newcommand{\RingCompositionalPlusMacros}{\XXX}
+\newcommand{\CanonicalBranching}{\XXX}
+\newcommand{\ScalingData}{\XXX}
+\newcommand{\ScalingBudget}{\XXX}
+\newcommand{\ScalingModelSize}{\XXX}
+
+% --- Fig. 3: exact finite-horizon control on enumerable molecular spaces. ---
+% \ComposeExactnessLinf (above) is the COMMITTED continuous-time h-transform anchor.
+\newcommand{\ComposeExactnessStates}{\XXX}
+\newcommand{\ExactChainStates}{\XXX}
+\newcommand{\ExactBudget}{\XXX}
+\newcommand{\ExactTiltTV}{\XXX}
+\newcommand{\ExactSwitchTV}{\XXX}
+\newcommand{\ExactEarlyStopTV}{\XXX}
+\newcommand{\ExactRareMotifTV}{\XXX}
+\newcommand{\ExactIntervalTV}{\XXX}
+\newcommand{\ExactMultiConstraintTV}{\XXX}
+\newcommand{\ExactBoltzmannTV}{\XXX}
+\newcommand{\ExactRegionTV}{\XXX}
+\newcommand{\GreedyTV}{\XXX}
+\newcommand{\LocalBoltzmannTV}{\XXX}
+\newcommand{\RerankTV}{\XXX}
+\newcommand{\MogStyleTV}{\XXX}
+\newcommand{\ParticleTV}{\XXX}
+\newcommand{\ExactHParticleFactor}{\XXX}
+\newcommand{\SupportViolations}{\XXX}
+\newcommand{\LearnedValueCalibration}{\XXX}
+\newcommand{\BackwardResidual}{\XXX}
+\newcommand{\RestartCost}{\XXX}
+\newcommand{\ContinuationCost}{\XXX}
+
+% --- Fig. 4 / Tables 2--3: source-conditioned multi-objective optimization. ALL PENDING. ---
+\newcommand{\EditBudget}{\XXX}
+\newcommand{\OracleBudget}{\XXX}
+\newcommand{\ReferencePoint}{\XXX}
+\newcommand{\EditHV}{\XXX}
+\newcommand{\EditHVAUC}{\XXX}
+\newcommand{\EditIGDPlus}{\XXX}
+\newcommand{\EditFeasibleND}{\XXX}
+\newcommand{\EditSourceSimilarity}{\XXX}
+\newcommand{\EditOracleEfficiency}{\XXX}
+\newcommand{\EditPathValidity}{\XXX}
+\newcommand{\AdaptationRegret}{\XXX}
+\newcommand{\SwitchCost}{\XXX}
+\newcommand{\FanBranches}{\XXX}
+\newcommand{\PathwiseFeasibleFraction}{\XXX}
+\newcommand{\TerminalFilterFeasibleFraction}{\XXX}
+\newcommand{\HeldOutOracleGap}{\XXX}
+% Citations still to be verified against primary sources before submission.
+\newcommand{\XXXcite}{\textbf{[CITE-XXX]}}
+
+% ============================================================================
+% COMMITTED, NON-PREFLIGHT ARTIFACTS newly cited by the RGM reframe.
+% Each value below was read out of a committed JSON under diagnostics/ or results/.
+% ============================================================================
+
+% Benchmark-lead scope coverage -- diagnostics/composition/benchmark_lead_scope_coverage.json
+\newcommand{\LeadCoverageBroad}{800/800}
+\newcommand{\LeadCoverageCnof}{33.0\%}
+% Broad corpus census under the production scope -- diagnostics/composition/broad_characterization_40.json
+\newcommand{\MMPPairs}{216{,}183}
+\newcommand{\MMPPoolRecords}{363{,}456}
+\newcommand{\ReplayGate}{10{,}096/10{,}096}
+
+% Conjunctive design specs -- diagnostics/conditional_smc/conjunction_funnel.json
+\newcommand{\ConjunctionLeads}{4}
+\newcommand{\ConjunctionClauses}{7}
+\newcommand{\ConjunctionFullSpec}{8.7\%}
+\newcommand{\ConjunctionDrawsPerHit}{11.4}
+
+% Doob-vs-bootstrap particle convergence on the enumerated slice --
+% diagnostics/exactness/doob_guidance_ground_truth.json (median TV over 12 replicates).
+\newcommand{\ExactHParticles}{1{,}000}
+\newcommand{\ExactHTV}{0.060}
+\newcommand{\BootstrapTV}{0.116}
+
+% Exact reachability / transport audits (results/).
+\newcommand{\ReachabilityExact}{496/496}
+\newcommand{\ReachabilityTargets}{124}
+\newcommand{\RingTransportAudit}{200/200}
+\newcommand{\TeacherFiberCoverage}{903/903}
+
+% Objective-barrier diagnostics on exactly enumerated rewrite graphs -- diagnostics/reachability/.
+\newcommand{\ReachStatesCapFour}{739}
+\newcommand{\ReachEdgesCapFour}{9{,}870}
+\newcommand{\ReachStatesCapFive}{5{,}454}
+\newcommand{\BarrierSuboptTwoObj}{18.6\%}
+\newcommand{\BarrierSuboptThreeObj}{27.4\%}
+\newcommand{\BarrierSuboptWorstTwoObj}{33.7\%}
+\newcommand{\BarrierSuboptCapFive}{23.9\%}
+\newcommand{\BarrierSuboptWorstCapFive}{91.1\%}
+\newcommand{\BarrierLookaheadTwo}{16.0\%}
+\newcommand{\BarrierLookaheadThree}{8.9\%}
+\newcommand{\BarrierInterior}{17.0\%}
+\newcommand{\BarrierBoundary}{18.2\%}
+\newcommand{\BarrierObjectivePairs}{7}
+% The matched-oracle-budget frontier-RECOVERY comparison is deliberately absent: an earlier
+% "detours lose at matched budget" reading was retracted as tuning-dependent. Efficiency of
+% recovery is stated as undecided, never as a result.
+
+% ============================================================================
+% OPERATOR-SYSTEM SUPPORT CHECKS (executor-verified properties of the rewrite system, NOT model
+% results) sourced from diagnostics/production_preflight/. These files carry no
+% NON_SCIENTIFIC_PREFLIGHT tag, unlike the bounded-run and rollout-panel artifacts in the same
+% directory. OWNER DECISION REQUIRED: if preflight-directory artifacts are ruled paper-ineligible
+% in full, set every macro in this block to \XXX -- nothing else in main.tex needs to change.
+% ============================================================================
+\newcommand{\RingTopologyClasses}{14/14}          % ring_topology_capability.json
+\newcommand{\RingRoundTripMolecules}{400}          % ring_compositional_support.json
+\newcommand{\RingRoundTripEdges}{1{,}346}          % ring_compositional_support.json
+\newcommand{\RingPathCostSystems}{800}             % ring_path_cost.json
+\newcommand{\RingRestructureMedian}{3}             % ring_path_cost.json
+\newcommand{\RingRestructureMax}{7}                % ring_path_cost.json
+\newcommand{\RingRestructureOverBudget}{0\%}       % ring_path_cost.json
+\newcommand{\RingIntroductionMedian}{20}           % ring_path_cost.json
+\newcommand{\RingIntroductionOverBudget}{73.5\%}   % ring_path_cost.json
+\newcommand{\RingEditBudget}{16}                   % ring_path_cost.json (production sampler horizon)
+
+
+% ============================================================================
+% DATA-STARVATION RECORD (diagnostics/coherence/program_state.json, 2026-07-28).
+% These are counts of the training CONFIGURATION, not model results, and they are what bars every
+% RingCore checkpoint from scientific status. Reported in app:status.
+% ============================================================================
+\newcommand{\StarvedRecords}{6{,}922}
+\newcommand{\StarvedCorruptionSources}{200}
+\newcommand{\StarvedMMPTraces}{5{,}000}
+\newcommand{\StarvedPasses}{28}
+
+% --- Experiments C (trans-dimensional) and D (topological adaptation): ALL PENDING. ---
+\newcommand{\CardSmallerTarget}{\XXX}
+\newcommand{\CardLargerTarget}{\XXX}
+\newcommand{\CardGrowThenDelete}{\XXX}
+\newcommand{\CardHeldOutBins}{\XXX}
+\newcommand{\CardNoInsert}{\XXX}
+\newcommand{\CardNoDelete}{\XXX}
+\newcommand{\TopoCycleCreate}{\XXX}
+\newcommand{\TopoCycleOpen}{\XXX}
+\newcommand{\TopoRestructure}{\XXX}
+\newcommand{\TopoHeldOut}{\XXX}
+% --- Experiment E (quotient invariance): ALL PENDING. ---
+\newcommand{\QuotientAggregateMatch}{\XXX}
+\newcommand{\QuotientReencodeTV}{\XXX}
+\newcommand{\QuotientControlledTV}{\XXX}
+\newcommand{\QuotientMarkLevelTV}{\XXX}

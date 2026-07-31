@@ -1,25 +1,139 @@
 {
-  "benchmark": "jin_iclr19_qed_test_exact_v1",
-  "smiles_column": "canonical_nonisomeric_smiles",
-  "n_leads": 800,
-  "accepted": {
-    "broad_organic_v1": 800,
-    "broad_organic_neutral_v1": 557,
-    "cnof_neutral": 264
+  "evidence_class": "computed",
+  "provenance": {
+    "code_revision": "ef82e5a7a928bc06248852ffecaa9d217a9f0642",
+    "command": "PYTHONPATH=src python scripts/benchmark_lead_scope_coverage.py",
+    "configuration": {
+      "broad_organic_neutral_scope": {
+        "allowed_elements": [
+          "B",
+          "Br",
+          "C",
+          "Cl",
+          "F",
+          "I",
+          "N",
+          "O",
+          "P",
+          "S"
+        ],
+        "charge_policy": "neutral_only",
+        "disconnected_policy": "reject_multicomponent",
+        "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class",
+        "max_atoms": 40,
+        "scope_hash": "7b0f746f64e2d42d",
+        "scope_name": "broad_organic_neutral_v1",
+        "standardization": "molecular_graph_canonical_smiles",
+        "vocabulary_name": "ORGANIC_VOCABULARY"
+      },
+      "broad_organic_scope": {
+        "allowed_elements": [
+          "B",
+          "Br",
+          "C",
+          "Cl",
+          "F",
+          "I",
+          "N",
+          "O",
+          "P",
+          "S"
+        ],
+        "charge_policy": "retain_representable_charges",
+        "disconnected_policy": "reject_multicomponent",
+        "isotope_stereo_radical_policy": "graph_drops_isotope_stereo; radical_or_bad_valence->unsupported_class",
+        "max_atoms": 40,
+        "scope_hash": "3721d69851110fdd",
+        "scope_name": "broad_organic_v1",
+        "standardization": "molecular_graph_canonical_smiles",
+        "vocabulary_name": "ORGANIC_VOCABULARY"
+      },
+      "cnof_neutral_scope": {
+        "allow_charges": false,
+        "allowed_elements": [
+          "C",
+          "N",
+          "O",
+          "F"
+        ],
+        "connectedness": "connected_or_null_with_nonempty_required",
+        "max_atoms": 48
+      },
+      "smiles_column": "canonical_nonisomeric_smiles"
+    },
+    "determinism": {
+      "hardware_relevance": "none_discrete_deterministic_classification",
+      "seed": null,
+      "seed_derivation": "not_applicable_exact_rowwise_census"
+    },
+    "exclusions": {
+      "broad_organic_neutral_v1": {
+        "charged_not_allowed": 243
+      },
+      "broad_organic_v1": {},
+      "cnof_neutral_rejected_count": 536
+    },
+    "implementation_files": [
+      {
+        "path": "scripts/benchmark_lead_scope_coverage.py",
+        "sha256": "ce4d794f30bd8ae1a2af6d3002d70b31523e5e3e874ea47fd548cac3375aa4aa"
+      },
+      {
+        "path": "src/compose_v4/data/organic_corpus.py",
+        "sha256": "f343c4909faab710646688219169180a2fdfffe27629e1b31d2935c5ea9b9b47"
+      },
+      {
+        "path": "src/compose_v4/chem/molecular_graph.py",
+        "sha256": "d33725fd64b63a1c7cd9095e9828f65ad19db8d729e79183f49c9473ea65c4fc"
+      },
+      {
+        "path": "src/compose_v4/chem/state.py",
+        "sha256": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5"
+      }
+    ],
+    "inputs": [
+      {
+        "path": "configs/benchmarks/jin_iclr19_qed_test_exact_v1.csv",
+        "role": "fixed_benchmark_support_census",
+        "sha256": "cab403bf2f92a5f7f0db19f9b508c8d0db860c89993db355a550f330f41c0983"
+      }
+    ],
+    "sample_count": 800,
+    "software": {
+      "numpy": "2.4.2",
+      "python": "3.14.2",
+      "rdkit": "2025.09.6"
+    },
+    "split_identity": {
+      "benchmark": "jin_iclr19_qed_test_exact_v1",
+      "role": "fixed_external_support_census_not_model_selection"
+    }
   },
-  "accepted_fraction": {
-    "broad_organic_v1": 1.0,
-    "broad_organic_neutral_v1": 0.6963,
-    "cnof_neutral": 0.33
+  "result": {
+    "accepted": {
+      "broad_organic_neutral_v1": 557,
+      "broad_organic_v1": 800,
+      "cnof_neutral": 264
+    },
+    "accepted_fraction": {
+      "broad_organic_neutral_v1": 0.6963,
+      "broad_organic_v1": 1.0,
+      "cnof_neutral": 0.33
+    },
+    "benchmark": "jin_iclr19_qed_test_exact_v1",
+    "broad_recovers_over_cnof": 536,
+    "excluded_features_broad_scope": {},
+    "excluded_features_neutral_scope": {
+      "charged_not_allowed": 243
+    },
+    "leads_with_nonzero_net_charge": 233,
+    "n_leads": 800,
+    "scope_hashes": {
+      "broad_organic_neutral_v1": "7b0f746f64e2d42d",
+      "broad_organic_v1": "3721d69851110fdd"
+    },
+    "smiles_column": "canonical_nonisomeric_smiles"
   },
-  "broad_recovers_over_cnof": 536,
-  "excluded_features_broad_scope": {},
-  "excluded_features_neutral_scope": {
-    "charged_not_allowed": 243
-  },
-  "leads_with_nonzero_net_charge": 233,
-  "scope_hashes": {
-    "broad_organic_v1": "e59fb09801459470",
-    "broad_organic_neutral_v1": "034d3f535bc56314"
-  }
+  "schema": "compose.benchmark_lead_scope_coverage",
+  "schema_version": 2
 }
