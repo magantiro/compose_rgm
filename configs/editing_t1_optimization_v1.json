@@ -4,7 +4,7 @@
   "weight_decay": 0.0,
   "scopes": [
     "heads_only",
-    "heads_plus_pair_projection",
+    "heads_plus_local_adapter",
     "all"
   ],
   "report_points": [
