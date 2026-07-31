@@ -50,6 +50,19 @@ def test_uniform_contract_rejects_post_freeze_mutation(tmp_path: Path) -> None:
         runner.load_uniform_capacity_contract(mutated)
 
 
+def test_json_normalization_matches_immutable_round_trip() -> None:
+    payload = {
+        "tuple_field": ("atom_insert", "cycle_attach"),
+        "nested": {"values": (1, 2)},
+    }
+    normalized = runner._json_normalized(payload)
+    assert normalized == {
+        "nested": {"values": [1, 2]},
+        "tuple_field": ["atom_insert", "cycle_attach"],
+    }
+    assert json.loads(runner._canonical_json_bytes(normalized)) == normalized
+
+
 def test_uniformization_replaces_coefficients_after_unique_successor_checks(monkeypatch) -> None:
     examples = (
         _Example("state-a", 0.5, "target-a", 1e-12),

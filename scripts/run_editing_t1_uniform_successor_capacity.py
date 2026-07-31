@@ -28,27 +28,21 @@ for import_root in (ROOT, SRC):
     if str(import_root) not in sys.path:
         sys.path.insert(0, str(import_root))
 
-from scripts.run_editing_t1_successor_gate import (  # noqa: E402
-    _execution_panel_from_frozen_authority,
-    _load_successor_cache_receipt,
-    _sha256,
-    _write_if_absent,
-)
-from compose_v4.chem.persistent_state_identity import (  # noqa: E402
+from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
 )
-from compose_v4.data.active8_trace_inventory import (  # noqa: E402
+from compose_v4.data.active8_trace_inventory import (
     load_active8_trace_admission,
 )
-from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
+from compose_v4.experiments.editing_gate_zero_runtime import (
     build_scratch_ringcore_model,
     load_frozen_validation_source,
     load_gate_zero_runtime_contract,
 )
-from compose_v4.experiments.editing_p50_gate import (  # noqa: E402
+from compose_v4.experiments.editing_p50_gate import (
     state_dict_semantic_sha256,
 )
-from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
+from compose_v4.experiments.editing_t1_panel import (
     ACTIVE8_T1_IDENTITY_FIELDS,
     EDITING_T1_UNIQUE_PANEL_KIND,
     editing_t1_panel_capacity_strata_sha256,
@@ -56,11 +50,11 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     editing_t1_panel_selection_sha256,
     validate_charge_policy_exclusions,
 )
-from compose_v4.experiments.editing_t1_successor_cache import (  # noqa: E402
+from compose_v4.experiments.editing_t1_successor_cache import (
     load_t1_successor_cache,
     t1_selected_trace_set_sha256,
 )
-from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
+from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
     EDITING_T1_V8_CONTRACT_RELATIVE_PATH,
@@ -71,17 +65,23 @@ from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     resolve_t1_panel_view,
     validate_t1_active8_runtime_binding,
 )
-from compose_v4.experiments.ringcore_successor_leaderboard import (  # noqa: E402
+from compose_v4.experiments.ringcore_successor_leaderboard import (
     load_json_object,
 )
-from compose_v4.experiments.ringcore_validation_panel import (  # noqa: E402
+from compose_v4.experiments.ringcore_validation_panel import (
     validate_validation_panel_artifact,
 )
-from compose_v4.experiments.successor_micro_overfit import (  # noqa: E402
+from compose_v4.experiments.successor_micro_overfit import (
     RINGCORE_EDITING_FAMILIES,
     PreparedSuccessorPanel,
     prepare_cached_successor_panel,
     train_successor_micro_panel,
+)
+from scripts.run_editing_t1_successor_gate import (
+    _execution_panel_from_frozen_authority,
+    _load_successor_cache_receipt,
+    _sha256,
+    _write_if_absent,
 )
 
 UNIFORM_CONTRACT_SCHEMA = "compose.editing.t1_uniform_successor_capacity_contract"
@@ -115,6 +115,12 @@ def _canonical_json_bytes(value: object) -> bytes:
 
 def _stable_sha256(value: object) -> str:
     return hashlib.sha256(_canonical_json_bytes(value)).hexdigest()
+
+
+def _json_normalized(value: object) -> object:
+    """Return the exact JSON data model that immutable publication will read."""
+
+    return json.loads(_canonical_json_bytes(value))
 
 
 def _is_sha256(value: object) -> bool:
@@ -712,7 +718,7 @@ def main() -> int:
     thresholds = evaluation["thresholds"]
     assert isinstance(thresholds, Mapping)
     checks, per_example_floors = _capacity_checks(report, thresholds)
-    result = {
+    raw_result = {
         "schema": UNIFORM_RESULT_SCHEMA,
         "schema_version": UNIFORM_RESULT_VERSION,
         "status": UNIFORM_RESULT_STATUS,
@@ -763,6 +769,8 @@ def main() -> int:
         "final_model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
         "runner_file_sha256": _sha256(Path(__file__)),
     }
+    result = _json_normalized(raw_result)
+    assert isinstance(result, dict)
     sealed = {**result, "result_sha256": _stable_sha256(result)}
     validate_uniform_capacity_result(
         sealed,
