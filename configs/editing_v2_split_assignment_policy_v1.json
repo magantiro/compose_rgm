@@ -1,0 +1,39 @@
+{
+  "schema": "compose.editing_v2_split_assignment_policy",
+  "schema_version": 1,
+  "policy_id": "compose-editing-v2-four-role-balanced-v1",
+  "partition_roles": [
+    "train",
+    "validation",
+    "controller_validation",
+    "final_test"
+  ],
+  "target_mass_ratios": {
+    "denominator": 100,
+    "numerators": {
+      "train": 85,
+      "validation": 5,
+      "controller_validation": 5,
+      "final_test": 5
+    }
+  },
+  "balance_axes": {
+    "overall_mass_units_weight": 1,
+    "per_lane_mass_units_weight": 2
+  },
+  "gates": {
+    "maximum_overall_absolute_ratio_deviation": {
+      "numerator": 2,
+      "denominator": 100
+    },
+    "maximum_per_lane_absolute_ratio_deviation": {
+      "numerator": 5,
+      "denominator": 100
+    },
+    "all_roles_nonempty": true,
+    "all_observed_lanes_present_in_every_role": true
+  },
+  "assignment_algorithm": "largest_component_exact_deficit_greedy_v1",
+  "split_salt": "compose-editing-v2-sealed-four-role-r1",
+  "sealed_final_test_policy": "Final-test membership is frozen by this assignment and must not be inspected for threshold, architecture, recipe, or checkpoint selection."
+}

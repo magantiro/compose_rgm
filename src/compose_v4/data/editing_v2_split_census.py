@@ -1643,6 +1643,18 @@ def build_split_component_census(
             }
         )
         lanes = sorted({str(by_id[member]["data_lane"]) for member in members})
+        candidate_count_by_lane = {
+            lane: sum(str(by_id[member]["data_lane"]) == lane for member in members)
+            for lane in lanes
+        }
+        mass_units_by_lane = {
+            lane: sum(
+                mass_by_candidate[member]
+                for member in members
+                if str(by_id[member]["data_lane"]) == lane
+            )
+            for lane in lanes
+        }
         component_inventory.append(
             {
                 "component_id": component_id,
@@ -1654,6 +1666,8 @@ def build_split_component_census(
                 "partition_scaffold_ids": scaffold_ids,
                 "partition_scaffold_count": len(scaffold_ids),
                 "data_lanes": lanes,
+                "candidate_count_by_lane": candidate_count_by_lane,
+                "mass_units_by_lane": mass_units_by_lane,
                 "cross_lane": len(lanes) > 1,
             }
         )

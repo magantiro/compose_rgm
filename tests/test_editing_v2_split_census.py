@@ -347,6 +347,14 @@ def test_census_keeps_transformations_diagnostic_and_measures_bridge_effect() ->
         "observed_local_analogue",
         "operator_aware_real_endpoint",
     ]
+    assert shared["candidate_count_by_lane"] == {
+        "observed_local_analogue": 1,
+        "operator_aware_real_endpoint": 1,
+    }
+    assert shared["mass_units_by_lane"] == {
+        "observed_local_analogue": 2,
+        "operator_aware_real_endpoint": 3,
+    }
     assert census["cross_lane_overlap"]["components_with_multiple_lanes"] == 1
 
     transformation = next(
