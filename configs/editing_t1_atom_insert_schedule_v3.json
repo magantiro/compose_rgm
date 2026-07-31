@@ -1,0 +1,106 @@
+{
+  "schema": "compose.editing.t1_atom_insert_schedule_contract",
+  "schema_version": 3,
+  "contract_id": "compose-editing-t1-atom-insert-schedule-v3",
+  "status": "FROZEN_PROSPECTIVE_OPTIMIZATION_ONLY_DIAGNOSTIC_NO_TRAINING_AUTHORITY",
+  "training_authorized": false,
+  "bounded_p50_authorized": false,
+  "gate_decision_emitted": false,
+  "scientific_question": "Can the unchanged atom-insert capacity problem satisfy its frozen per-example probability floor when the validated V2 trajectory is replayed exactly to update 495 and refined with a tenfold smaller learning rate?",
+  "claim_boundary": {
+    "v2_result": "The V2 atom-insert result remains a failed diagnostic under its frozen contract.",
+    "v3_role": "V3 is a prospective schedule-only capacity diagnostic and cannot reinterpret V2 or authorize P50.",
+    "architecture_role": "No architecture, support, panel, objective, coefficient, seed, threshold, or hazard change is permitted."
+  },
+  "parents": {
+    "v2_contract_path": "configs/editing_t1_uniform_successor_capacity_v2.json",
+    "v2_contract_file_sha256": "0056d345ace7d30123815f45a93f2a86557b9838d1076c9e829ae43922971617",
+    "v2_contract_sha256": "bd96dc3ac19e37daf0ec249e9470a8e12d6d3f699f9ec392dc9b57313d0ff60a",
+    "v2_result_file_sha256": "8c007c210efc42aced9ae88855f74c453ee583cb20ba2a03855476c36f78e8ac",
+    "v2_result_sha256": "ef165330fcb674f56a49c71ce1e671fa5b3563e228a16b07d0c8e29faeca88c6",
+    "v2_result_relative_path": "_editing_t1_uniform_successor_capacity_v2/editing-t1-uniform-v2-atom-insert-464642c-v1/unique_state.atom_insert.all.json",
+    "runtime_contract_path": "configs/editing_t1_successor_gate_v8.json",
+    "runtime_contract_file_sha256": "48f532b94a8396e8467763ee922e3f89f1d98110a5586a4b61b5fdd5bfc966f5",
+    "runtime_contract_sha256": "7e377fb72037112f0982986fb4ea1c2ceb55ac4abc9df410e2c493715530c13e",
+    "panel_path": "diagnostics/coherence/editing_t1_successor_panel_v4_active8_2026-07-30.json",
+    "panel_file_sha256": "b8ab60013f43da49e29c1d1d68e9ede5321605d8bbcb8d1fdaea4a182480d53d",
+    "panel_artifact_sha256": "5f2cd1d7e01fb81916c39ac0f6ed367ef00fe5f2303eb26a76bca0e82f317edf",
+    "forensics_file_sha256": "f2460f1def0b41e5be5a05bfee01d1d1c295296968c860d8075c344b0f6c7020"
+  },
+  "family": "atom_insert",
+  "panel_policy": {
+    "panel_kind": "unique_state",
+    "examples": 64,
+    "panel_identity_change_from_v2": "none",
+    "teacher_mark_alias_policy": "aggregate_all_aliases_into_one_canonical_successor_probability"
+  },
+  "optimization_law": {
+    "objective": "productive_embedded_canonical_successor_nll",
+    "scope": "all",
+    "optimizer": "AdamW",
+    "optimizer_betas": [0.9, 0.999],
+    "optimizer_epsilon": 1e-8,
+    "retain_optimizer_state_across_phase_boundary": true,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "seed": 20260730,
+    "teacher_rate": 1.0,
+    "importance_coefficient": 1.0,
+    "hazard_included": false,
+    "excluded_parameter_prefixes": ["total_hazard_head."],
+    "require_excluded_parameter_bit_identity": true,
+    "phase_1": {
+      "completed_updates": 495,
+      "learning_rate": 0.001,
+      "required_initial_model_state_sha256": "4d3e48830e0b00fa151042088cbe6f22845dcd6ed87902ccb66029bb10e2b42e",
+      "required_terminal_model_state_sha256": "ee1adcff562783ee950ecd50d62d190c040080fcc9fd5a1abc5c4f76acfd7e7f"
+    },
+    "phase_2": {
+      "maximum_additional_updates": 250,
+      "learning_rate": 0.0001
+    },
+    "maximum_total_updates": 745,
+    "trajectory_evaluation": "every_pre_update_state_plus_terminal_state",
+    "checkpoint_selection": "maximize_minimum_per_example_productive_canonical_successor_probability__tie_lower_mean_canonical_successor_nll__tie_earlier_update",
+    "success_early_stop": "stop_before_next_update_only_if_all_unchanged_v1_threshold_and_gradient_component_checks_pass",
+    "patience_or_plateau_stop": false,
+    "fail_loud_abort_conditions": [
+      "initial_or_phase_boundary_model_hash_mismatch",
+      "nonfinite_loss_or_gradient",
+      "hazard_parameter_drift",
+      "checkpoint_roundtrip_or_resume_identity_failure"
+    ]
+  },
+  "checkpoint_policy": {
+    "required_updates": [495, 545, 595, 645, 695, 745],
+    "also_checkpoint_on_success": true,
+    "also_checkpoint_on_terminal": true,
+    "maximum_rework_updates": 50,
+    "required_state": [
+      "model_state",
+      "optimizer_state",
+      "cpu_rng_state",
+      "cuda_rng_states",
+      "completed_update",
+      "trajectory_and_selection_state",
+      "gradient_exposure_state",
+      "source_panel_contract_and_cache_identities"
+    ],
+    "publication": "immutable_content_verified_checkpoint_plus_json_receipt",
+    "resume_policy": "restore_and_validate_every_state_component_before_next_evaluation"
+  },
+  "evaluation": {
+    "threshold_source": "exact_unchanged_v1_thresholds",
+    "thresholds": {
+      "minimum_unique_state_teacher_successor_top1": 0.95,
+      "minimum_unique_state_teacher_successor_probability": 0.8,
+      "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+      "require_every_example_teacher_successor_top1": true,
+      "minimum_every_example_teacher_successor_probability": 0.8,
+      "minimum_nonzero_gradient_optimizer_steps": 1,
+      "require_every_declared_component_nonzero_gradient": true
+    }
+  },
+  "failure_action": "Preserve the best checkpoint and run the registered atom-insert representation and bottleneck-gradient audit before any architecture change or mixed pilot.",
+  "contract_sha256": "15933e0859afe938a9a079fa69c2623a381f23d1334797cebb0895ea4ed25fd4"
+}
