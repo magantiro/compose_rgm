@@ -110,7 +110,7 @@ def complete_registry(tmp_path: Path) -> RegistryFixture:
             json.dumps(
                 {
                     "data_lane": lane_id,
-                    "evidence_class": lane["evidence_class"],
+                    "evidence_profile_id": lane["admissible_evidence_profiles"][0],
                     "record_id": f"{lane_id}-fixture",
                 },
                 sort_keys=True,
@@ -156,7 +156,8 @@ def complete_registry(tmp_path: Path) -> RegistryFixture:
             "training_authorized": False,
             "editing_corpus_contract": contract_identity,
             "lane_id": lane_id,
-            "evidence_class": lane["evidence_class"],
+            "admissible_evidence_profiles": lane["admissible_evidence_profiles"],
+            "reserved_evidence_profiles": lane["reserved_evidence_profiles"],
             "declared_root": declared_root,
             "partition_roles": list(PARTITION_ROLES),
             "counts": {
@@ -178,7 +179,8 @@ def complete_registry(tmp_path: Path) -> RegistryFixture:
         registry_lanes.append(
             {
                 "lane_id": lane_id,
-                "evidence_class": lane["evidence_class"],
+                "admissible_evidence_profiles": lane["admissible_evidence_profiles"],
+                "reserved_evidence_profiles": lane["reserved_evidence_profiles"],
                 "declared_root": declared_root,
                 "completion_manifest_path": (f"{declared_root}/{LANE_COMPLETION_FILENAME}"),
                 "completion_manifest_sha256": file_sha256(completion_path),
@@ -222,8 +224,13 @@ def test_resolves_exact_five_lane_registry(
     assert [lane.lane_id for lane in resolved.lanes] == [
         lane["id"] for lane in complete_registry.contract["data_lanes"]
     ]
-    assert [lane.evidence_class for lane in resolved.lanes] == [
-        lane["evidence_class"] for lane in complete_registry.contract["data_lanes"]
+    assert [lane.admissible_evidence_profiles for lane in resolved.lanes] == [
+        tuple(lane["admissible_evidence_profiles"])
+        for lane in complete_registry.contract["data_lanes"]
+    ]
+    assert [lane.reserved_evidence_profiles for lane in resolved.lanes] == [
+        tuple(lane["reserved_evidence_profiles"])
+        for lane in complete_registry.contract["data_lanes"]
     ]
     assert resolved.partition_roles == PARTITION_ROLES
     assert all(len(lane.shards) == 1 for lane in resolved.lanes)
@@ -244,7 +251,7 @@ def test_contract_without_partition_roles_fails_closed() -> None:
         editing_v2_partition_roles(contract)
 
 
-def test_schema_v1_requires_exactly_five_contract_lanes() -> None:
+def test_schema_v2_requires_exactly_five_contract_lanes() -> None:
     contract = json.loads(AUTHORITATIVE_CONTRACT.read_text())
     contract["data_lanes"].pop()
 
@@ -271,16 +278,40 @@ def test_rejects_lane_set_disagreement(
         _resolve(complete_registry)
 
 
-def test_rejects_registry_evidence_class_mismatch(
+def test_rejects_registry_evidence_profile_mismatch(
     complete_registry: RegistryFixture,
 ) -> None:
-    complete_registry.registry["lanes"][0]["evidence_class"] = "synthetic"
+    complete_registry.registry["lanes"][0]["admissible_evidence_profiles"] = [
+        "executor_generated_walk"
+    ]
     complete_registry.write_registry()
 
     with pytest.raises(
         EditingV2LaneRegistryError,
-        match="evidence class disagrees",
+        match="evidence-profile set disagrees",
     ):
+        _resolve(complete_registry)
+
+
+def test_rejects_nonlist_registry_evidence_profiles(
+    complete_registry: RegistryFixture,
+) -> None:
+    complete_registry.registry["lanes"][-1]["reserved_evidence_profiles"] = ""
+    complete_registry.write_registry()
+
+    with pytest.raises(EditingV2LaneRegistryError, match="must be a list"):
+        _resolve(complete_registry)
+
+
+def test_rejects_nonlist_completion_evidence_profiles(
+    complete_registry: RegistryFixture,
+) -> None:
+    def mutate(completion: dict[str, Any]) -> None:
+        completion["reserved_evidence_profiles"] = ""
+
+    complete_registry.rewrite_completion(4, mutate)
+
+    with pytest.raises(EditingV2LaneRegistryError, match="must be a list"):
         _resolve(complete_registry)
 
 
@@ -288,7 +319,7 @@ def test_rejects_registry_evidence_class_mismatch(
     ("field", "value"),
     [
         ("schema", "compose.editing_v2_lane_registry.stale"),
-        ("schema_version", 2),
+        ("schema_version", 1),
         ("status", "PARTIAL"),
         ("training_authorized", True),
     ],
@@ -309,7 +340,7 @@ def test_rejects_registry_schema_status_or_authority(
     ("field", "value"),
     [
         ("schema", "compose.editing_v2_lane_completion.stale"),
-        ("schema_version", 2),
+        ("schema_version", 1),
         ("status", "PARTIAL"),
         ("training_authorized", True),
     ],

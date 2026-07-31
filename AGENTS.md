@@ -467,8 +467,13 @@ null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not tr
   endpoints must belong to the same partition; record and drop cross-partition pairs.
 - The editing-V2 corpus contract declares five evidence lanes:
   `observed_local_analogue`, `operator_aware_real_endpoint`,
-  `linker_positional_topology_analogue`, `observed_series_path`, and
-  `reversible_synthetic_walk`. Preserve each lane's real, synthetic, or mixed evidence class.
+  `linker_positional_topology_analogue`, `real_endpoint_multistep_path`, and
+  `reversible_synthetic_walk`. The multistep lane name is deliberate: genuine observed-series provenance
+  is not currently available, so compiled paths between real endpoints must not be labelled as observed
+  series paths.
+- Preserve endpoint, pair-relationship, path, intermediate, and action-sequence evidence as separate
+  component-level fields bound by a versioned evidence profile. Do not collapse them into one scalar
+  `evidence_class`; real endpoints do not make compiler-generated actions or intermediates observed.
 - Preserve the legacy corruption, cycle-operation, and matched-pair inputs as distinguishable provenance
   sources where they contribute records, but do not substitute the legacy three-layer mixture for the
   editing-V2 five-lane capability contract.

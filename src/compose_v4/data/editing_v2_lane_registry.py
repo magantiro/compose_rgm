@@ -27,10 +27,10 @@ from compose_v4.data.editing_corpus_contract import (
 )
 
 LANE_REGISTRY_SCHEMA = "compose.editing_v2_lane_registry"
-LANE_REGISTRY_SCHEMA_VERSION = 1
+LANE_REGISTRY_SCHEMA_VERSION = 2
 LANE_REGISTRY_STATUS = "FROZEN_COMPLETE_NO_TRAINING_AUTHORITY"
 LANE_COMPLETION_SCHEMA = "compose.editing_v2_lane_completion"
-LANE_COMPLETION_SCHEMA_VERSION = 1
+LANE_COMPLETION_SCHEMA_VERSION = 2
 LANE_COMPLETION_STATUS = "COMPLETE_NO_TRAINING_AUTHORITY"
 LANE_COMPLETION_FILENAME = "LANE_COMPLETE.json"
 EXPECTED_LANE_COUNT = 5
@@ -54,7 +54,8 @@ _CONTRACT_IDENTITY_FIELDS = {
 }
 _REGISTRY_LANE_FIELDS = {
     "lane_id",
-    "evidence_class",
+    "admissible_evidence_profiles",
+    "reserved_evidence_profiles",
     "declared_root",
     "completion_manifest_path",
     "completion_manifest_sha256",
@@ -66,7 +67,8 @@ _COMPLETION_FIELDS = {
     "training_authorized",
     "editing_corpus_contract",
     "lane_id",
-    "evidence_class",
+    "admissible_evidence_profiles",
+    "reserved_evidence_profiles",
     "declared_root",
     "partition_roles",
     "counts",
@@ -107,7 +109,8 @@ class EditingV2LaneDefinition:
     """One lane identity read from the authoritative editing-corpus contract."""
 
     lane_id: str
-    evidence_class: str
+    admissible_evidence_profiles: tuple[str, ...]
+    reserved_evidence_profiles: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -130,7 +133,8 @@ class ResolvedEditingV2Lane:
     """One complete lane and all of its physically verified shards."""
 
     lane_id: str
-    evidence_class: str
+    admissible_evidence_profiles: tuple[str, ...]
+    reserved_evidence_profiles: tuple[str, ...]
     declared_root: str
     completion_manifest_path: str
     completion_manifest_file_sha256: str
@@ -225,6 +229,29 @@ def _duplicates(values: Sequence[str]) -> list[str]:
     return sorted(duplicate)
 
 
+def _require_profile_list(
+    value: object,
+    *,
+    field: str,
+    allow_empty: bool,
+) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        raise EditingV2LaneRegistryError(f"{field} must be a list")
+    profiles = tuple(
+        _require_identifier(
+            profile_id,
+            field=f"{field}[{index}]",
+        )
+        for index, profile_id in enumerate(value)
+    )
+    if not allow_empty and not profiles:
+        raise EditingV2LaneRegistryError(f"{field} must be nonempty")
+    duplicate_profiles = _duplicates(profiles)
+    if duplicate_profiles:
+        raise EditingV2LaneRegistryError(f"{field} repeats evidence profiles: {duplicate_profiles}")
+    return profiles
+
+
 def _require_identifier(value: object, *, field: str) -> str:
     identifier = _require_nonempty_text(value, field=field)
     if not identifier[0].islower() or any(
@@ -316,7 +343,7 @@ def _load_json_file(path: Path, *, field: str) -> Mapping[str, Any]:
 def editing_v2_lane_definitions(
     contract: Mapping[str, Any],
 ) -> tuple[EditingV2LaneDefinition, ...]:
-    """Read ordered lane/evidence identities from the authoritative contract."""
+    """Read ordered lane/profile identities from the authoritative contract."""
 
     raw_lanes = contract.get("data_lanes")
     if not isinstance(raw_lanes, list) or not raw_lanes:
@@ -333,14 +360,27 @@ def editing_v2_lane_definitions(
             raw_lane.get("id"),
             field=f"editing-corpus contract data_lanes[{index}].id",
         )
-        evidence_class = _require_identifier(
-            raw_lane.get("evidence_class"),
-            field=(f"editing-corpus contract data_lanes[{index}].evidence_class"),
+        admissible = _require_profile_list(
+            raw_lane.get("admissible_evidence_profiles"),
+            field=(f"editing-corpus contract data_lanes[{index}].admissible_evidence_profiles"),
+            allow_empty=False,
         )
+        reserved = _require_profile_list(
+            raw_lane.get("reserved_evidence_profiles"),
+            field=(f"editing-corpus contract data_lanes[{index}].reserved_evidence_profiles"),
+            allow_empty=True,
+        )
+        duplicate_profiles = _duplicates((*admissible, *reserved))
+        if duplicate_profiles:
+            raise EditingV2LaneRegistryError(
+                f"editing-corpus contract data_lanes[{index}] repeats evidence profiles: "
+                f"{duplicate_profiles}"
+            )
         lanes.append(
             EditingV2LaneDefinition(
                 lane_id=lane_id,
-                evidence_class=evidence_class,
+                admissible_evidence_profiles=admissible,
+                reserved_evidence_profiles=reserved,
             )
         )
     duplicate_lanes = _duplicates([lane.lane_id for lane in lanes])
@@ -350,7 +390,7 @@ def editing_v2_lane_definitions(
         )
     if len(lanes) != EXPECTED_LANE_COUNT:
         raise EditingV2LaneRegistryError(
-            "editing-corpus contract schema version 1 must declare exactly "
+            "editing-corpus contract schema version 2 must declare exactly "
             f"{EXPECTED_LANE_COUNT} evidence lanes"
         )
     return tuple(lanes)
@@ -686,9 +726,20 @@ def _resolve_lane(
         expected=expected_contract_identity,
         field=f"lane {lane_id!r} completion editing_corpus_contract",
     )
+    completion_admissible_profiles = _require_profile_list(
+        completion["admissible_evidence_profiles"],
+        field=f"lane {lane_id!r} completion admissible_evidence_profiles",
+        allow_empty=False,
+    )
+    completion_reserved_profiles = _require_profile_list(
+        completion["reserved_evidence_profiles"],
+        field=f"lane {lane_id!r} completion reserved_evidence_profiles",
+        allow_empty=True,
+    )
     if (
         completion["lane_id"] != lane_id
-        or completion["evidence_class"] != expected_lane.evidence_class
+        or completion_admissible_profiles != expected_lane.admissible_evidence_profiles
+        or completion_reserved_profiles != expected_lane.reserved_evidence_profiles
         or completion["declared_root"] != declared_root
     ):
         raise EditingV2LaneRegistryError(
@@ -730,7 +781,8 @@ def _resolve_lane(
     )
     return ResolvedEditingV2Lane(
         lane_id=lane_id,
-        evidence_class=expected_lane.evidence_class,
+        admissible_evidence_profiles=expected_lane.admissible_evidence_profiles,
+        reserved_evidence_profiles=expected_lane.reserved_evidence_profiles,
         declared_root=declared_root,
         completion_manifest_path=completion_artifact_path,
         completion_manifest_file_sha256=completion_file_sha256,
@@ -828,9 +880,22 @@ def resolve_editing_v2_lane_registry(
     seen_shard_paths: set[str] = set()
     for lane_definition in lane_definitions:
         entry = entries_by_id[lane_definition.lane_id]
-        if entry["evidence_class"] != lane_definition.evidence_class:
+        registry_admissible_profiles = _require_profile_list(
+            entry["admissible_evidence_profiles"],
+            field=(f"registry lane {lane_definition.lane_id!r} admissible_evidence_profiles"),
+            allow_empty=False,
+        )
+        registry_reserved_profiles = _require_profile_list(
+            entry["reserved_evidence_profiles"],
+            field=(f"registry lane {lane_definition.lane_id!r} reserved_evidence_profiles"),
+            allow_empty=True,
+        )
+        if (
+            registry_admissible_profiles != lane_definition.admissible_evidence_profiles
+            or registry_reserved_profiles != lane_definition.reserved_evidence_profiles
+        ):
             raise EditingV2LaneRegistryError(
-                f"registry lane {lane_definition.lane_id!r} evidence class "
+                f"registry lane {lane_definition.lane_id!r} evidence-profile set "
                 "disagrees with the editing-corpus contract"
             )
         resolved_lane = _resolve_lane(
