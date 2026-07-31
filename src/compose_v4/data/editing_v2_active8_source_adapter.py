@@ -10,18 +10,23 @@ validates a separate ``resolved_packed_membership`` receipt which binds:
 
 * the exact candidate materialization, split assignment, and five-lane registry;
 * every new lane/role packed shard, packed manifest, and optional overlay byte;
-* every output entry index to one selected candidate and its original immutable
-  packed address.
+* every output entry index to one selected candidate, its original immutable
+  packed address and row hash, and its rewritten row hash and packed address.
 
 The resolver rejects missing, duplicated, rejected, unassigned, or extra
 candidate addresses.  It also reconciles trace/state/transition counts against
 both the packed manifests and the lane registry.  The returned
 ``Active8SourceShard`` objects are inputs to Active8 admission, not evidence that
 admission passed and never training authority.
+
+Receipt schema version 2 intentionally rejects version 1.  No authoritative
+version-1 membership artifact was published, and version 1 did not bind the
+rewritten output row and address strongly enough for this physical boundary.
 """
 
 from __future__ import annotations
 
+import gzip
 import json
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -54,7 +59,7 @@ from compose_v4.data.packed_trace_store import (
 from compose_v4.data.provenance_overlay import overlay_path_for
 
 RESOLVED_PACKED_MEMBERSHIP_SCHEMA = "compose.editing_v2_resolved_packed_membership"
-RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION = 1
+RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION = 2
 RESOLVED_PACKED_MEMBERSHIP_STATUS = (
     "COMPLETE_PHYSICAL_MEMBERSHIP_ACTIVE8_NOT_RUN_NO_TRAINING_AUTHORITY"
 )
@@ -122,6 +127,9 @@ _MEMBERSHIP_FIELDS = {
     "output_entry_index",
     "candidate_id",
     "original_packed_address",
+    "original_packed_row_sha256",
+    "output_packed_row_sha256",
+    "output_packed_address",
 }
 _ORIGINAL_ADDRESS_FIELDS = {
     "source_asset",
@@ -141,6 +149,20 @@ _PACKED_ADDRESS_FIELDS = {
     "trace_id",
     "layer",
     "cache_partition",
+    "path_length",
+    "address_sha256",
+}
+_OUTPUT_PACKED_ADDRESS_FIELDS = {
+    "packed_shard_file_sha256",
+    "packed_shard_manifest_file_sha256",
+    "packed_provenance_overlay_file_sha256",
+    "packed_shard_name",
+    "entry_index",
+    "trace_id",
+    "layer",
+    "partition",
+    "source_key",
+    "target_key",
     "path_length",
     "address_sha256",
 }
@@ -621,6 +643,86 @@ def _packed_manifest_identity(
     )
 
 
+def _iter_output_rows(
+    path: Path,
+    *,
+    max_row_bytes: int = 16 * 1024 * 1024,
+):
+    if type(max_row_bytes) is not int or max_row_bytes <= 0:
+        raise EditingV2Active8SourceAdapterError("output row byte bound must be positive")
+    with gzip.open(path, "rb") as handle:
+        output_index = 0
+        while True:
+            raw_line = handle.readline(max_row_bytes + 1)
+            if not raw_line:
+                break
+            if len(raw_line) > max_row_bytes or not raw_line.endswith(b"\n"):
+                raise EditingV2Active8SourceAdapterError(
+                    f"packed output row exceeds its byte bound or lacks newline: {path}"
+                )
+            if not raw_line.strip():
+                continue
+            try:
+                row = json.loads(raw_line)
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise EditingV2Active8SourceAdapterError(
+                    f"packed output row {output_index} is invalid JSON: {path}"
+                ) from error
+            if not isinstance(row, Mapping) or set(row) != {"trace", "states"}:
+                raise EditingV2Active8SourceAdapterError(
+                    f"packed output row {output_index} must contain trace and states"
+                )
+            yield output_index, row
+            output_index += 1
+
+
+def _output_packed_address(
+    *,
+    row: Mapping[str, Any],
+    shard: ResolvedEditingV2Shard,
+    manifest_sha256: str,
+    overlay_sha256: str | None,
+    output_entry_index: int,
+) -> dict[str, Any]:
+    trace = row.get("trace")
+    if not isinstance(trace, Mapping):
+        raise EditingV2Active8SourceAdapterError(
+            f"packed output row {output_entry_index} lacks a trace envelope"
+        )
+    body = {
+        "packed_shard_file_sha256": shard.sha256,
+        "packed_shard_manifest_file_sha256": manifest_sha256,
+        "packed_provenance_overlay_file_sha256": overlay_sha256,
+        "packed_shard_name": shard.local_path.name,
+        "entry_index": output_entry_index,
+        "trace_id": _require_text(
+            trace.get("trace_id"),
+            field=f"packed output row {output_entry_index}.trace_id",
+        ),
+        "layer": _require_text(
+            trace.get("layer"),
+            field=f"packed output row {output_entry_index}.layer",
+        ),
+        "partition": _require_text(
+            trace.get("partition"),
+            field=f"packed output row {output_entry_index}.partition",
+        ),
+        "source_key": _require_text(
+            trace.get("source_key"),
+            field=f"packed output row {output_entry_index}.source_key",
+        ),
+        "target_key": _require_text(
+            trace.get("target_key"),
+            field=f"packed output row {output_entry_index}.target_key",
+        ),
+        "path_length": _require_nonnegative_int(
+            trace.get("path_length"),
+            field=f"packed output row {output_entry_index}.path_length",
+        ),
+    }
+    return {**body, "address_sha256": canonical_sha256(body)}
+
+
 def _registry_shards(
     registry: ResolvedEditingV2LaneRegistry,
 ) -> tuple[ResolvedEditingV2Shard, ...]:
@@ -827,7 +929,18 @@ def resolve_editing_v2_active8_sources(
         address_sha256s: list[str] = []
         state_count = 0
         transition_count = 0
+        physical_output_rows = iter(_iter_output_rows(registry_shard.local_path))
         for output_index, raw_membership in enumerate(memberships):
+            try:
+                physical_output_index, output_row = next(physical_output_rows)
+            except StopIteration as error:
+                raise EditingV2Active8SourceAdapterError(
+                    f"physical output row count disagrees for {registry_shard.artifact_path}"
+                ) from error
+            if physical_output_index != output_index:
+                raise EditingV2Active8SourceAdapterError(
+                    f"physical output indices are not contiguous for {registry_shard.artifact_path}"
+                )
             membership = _require_mapping(
                 raw_membership,
                 fields=_MEMBERSHIP_FIELDS,
@@ -867,6 +980,38 @@ def resolve_editing_v2_active8_sources(
                 raise EditingV2Active8SourceAdapterError(
                     f"candidate {candidate_id!r} original packed address disagrees"
                 )
+            _require_sha256(
+                membership["original_packed_row_sha256"],
+                field=f"candidate {candidate_id!r}.original_packed_row_sha256",
+            )
+            output_row_sha256 = canonical_sha256(output_row)
+            if membership["output_packed_row_sha256"] != output_row_sha256:
+                raise EditingV2Active8SourceAdapterError(
+                    f"candidate {candidate_id!r} output packed row SHA-256 disagrees"
+                )
+            declared_output_address = _require_mapping(
+                membership["output_packed_address"],
+                fields=_OUTPUT_PACKED_ADDRESS_FIELDS,
+                field=f"candidate {candidate_id!r}.output_packed_address",
+            )
+            expected_output_address = _output_packed_address(
+                row=output_row,
+                shard=registry_shard,
+                manifest_sha256=manifest_sha256,
+                overlay_sha256=overlay_sha256,
+                output_entry_index=output_index,
+            )
+            if dict(declared_output_address) != expected_output_address:
+                raise EditingV2Active8SourceAdapterError(
+                    f"candidate {candidate_id!r} output packed address disagrees"
+                )
+            if (
+                expected_output_address["layer"] != registry_shard.lane_id
+                or expected_output_address["partition"] != registry_shard.partition
+            ):
+                raise EditingV2Active8SourceAdapterError(
+                    f"candidate {candidate_id!r} output trace envelope disagrees with lane/role"
+                )
             address_sha256 = expected_original["packed_address"]["address_sha256"]
             if address_sha256 in seen_addresses:
                 raise EditingV2Active8SourceAdapterError(
@@ -883,6 +1028,14 @@ def resolve_editing_v2_active8_sources(
             transition_count += _require_nonnegative_int(
                 row["packed_address"]["path_length"],
                 field=f"candidate {candidate_id!r}.packed_address.path_length",
+            )
+        try:
+            next(physical_output_rows)
+        except StopIteration:
+            pass
+        else:
+            raise EditingV2Active8SourceAdapterError(
+                f"physical output row count disagrees for {registry_shard.artifact_path}"
             )
 
         manifest_entries = _require_nonnegative_int(

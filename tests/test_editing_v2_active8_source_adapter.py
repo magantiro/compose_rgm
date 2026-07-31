@@ -273,7 +273,7 @@ def _write_packed_output(
     role: str,
     candidate_id: str,
     with_overlay: bool,
-) -> tuple[dict[str, Any], str, str | None]:
+) -> tuple[dict[str, Any], str, str | None, dict[str, Any]]:
     path.parent.mkdir(parents=True, exist_ok=True)
     entry = {
         "trace": {
@@ -281,6 +281,8 @@ def _write_packed_output(
             "layer": lane,
             "partition": role,
             "path_length": 1,
+            "source_key": f"{candidate_id}-source",
+            "target_key": f"{candidate_id}-target",
         },
         "states": [{"fixture": 0}, {"fixture": 1}],
     }
@@ -314,7 +316,7 @@ def _write_packed_output(
             },
         )
         overlay_sha256 = file_sha256(overlay_path)
-    return manifest, file_sha256(manifest_path), overlay_sha256
+    return manifest, file_sha256(manifest_path), overlay_sha256, entry
 
 
 def _write_lane_registry_and_outputs(
@@ -352,7 +354,7 @@ def _write_lane_registry_and_outputs(
         completed_shards = []
         for shard in provisional_shards:
             local_path = temporary_root / shard["relative_path"]
-            _, manifest_sha, overlay_sha = _write_packed_output(
+            _, manifest_sha, overlay_sha, output_entry = _write_packed_output(
                 local_path,
                 lane=lane,
                 role=shard["partition"],
@@ -371,6 +373,7 @@ def _write_lane_registry_and_outputs(
                     "_manifest_sha256": manifest_sha,
                     "_overlay_sha256": overlay_sha,
                     "_candidate_id": shard["candidate_id"],
+                    "_output_entry": output_entry,
                 }
             )
         inventory_rows = [
@@ -526,6 +529,19 @@ def _write_membership_receipt(
             source = physical[(lane, role)]
             artifact_path = source["artifact_path"]
             overlay_sha = source["_overlay_sha256"]
+            output_address_body = {
+                "packed_shard_file_sha256": source["sha256"],
+                "packed_shard_manifest_file_sha256": source["_manifest_sha256"],
+                "packed_provenance_overlay_file_sha256": overlay_sha,
+                "packed_shard_name": source["local_path"].name,
+                "entry_index": 0,
+                "trace_id": source["_output_entry"]["trace"]["trace_id"],
+                "layer": lane,
+                "partition": role,
+                "source_key": source["_output_entry"]["trace"]["source_key"],
+                "target_key": source["_output_entry"]["trace"]["target_key"],
+                "path_length": 1,
+            }
             shards.append(
                 {
                     "data_lane": lane,
@@ -548,6 +564,14 @@ def _write_membership_receipt(
                             "original_packed_address": {
                                 "source_asset": row["source_asset"],
                                 "packed_address": row["packed_address"],
+                            },
+                            "original_packed_row_sha256": hashlib.sha256(
+                                f"original-row-{row['candidate_id']}".encode()
+                            ).hexdigest(),
+                            "output_packed_row_sha256": canonical_sha256(source["_output_entry"]),
+                            "output_packed_address": {
+                                **output_address_body,
+                                "address_sha256": canonical_sha256(output_address_body),
                             },
                         }
                     ],
@@ -667,7 +691,7 @@ def test_resolves_exact_five_lane_four_role_sources_without_authorizing_active8(
             lambda receipt: receipt["shards"][0]["entry_memberships"].append(
                 copy.deepcopy(receipt["shards"][0]["entry_memberships"][0])
             ),
-            "contiguous|more than once",
+            "contiguous|more than once|row count disagrees",
         ),
         (
             lambda receipt: receipt["shards"][0]["entry_memberships"][0].update(
