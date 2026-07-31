@@ -9,14 +9,21 @@ this coverage census is a prerequisite for the headline experiments.
 
 Run: PYTHONPATH=src python scripts/benchmark_lead_scope_coverage.py
 """
+
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
+import os
+import platform
+import subprocess
+import tempfile
 from collections import Counter
 from pathlib import Path
 
 import numpy as np
+from rdkit import rdBase
 
 from compose_v4.chem.molecular_graph import (
     IDX_TO_ELEMENT,
@@ -34,6 +41,93 @@ from compose_v4.data.organic_corpus import (
 REPO = Path(__file__).resolve().parent.parent
 _JIN = "configs/benchmarks/jin_iclr19_qed_test_exact_v1.csv"
 _SMILES_COL = "canonical_nonisomeric_smiles"  # our representation drops stereo/isotopes
+_OUTPUT = "diagnostics/composition/benchmark_lead_scope_coverage.json"
+_MATERIAL_IMPLEMENTATION_PATHS = (
+    "scripts/benchmark_lead_scope_coverage.py",
+    "src/compose_v4/data/organic_corpus.py",
+    "src/compose_v4/chem/molecular_graph.py",
+    "src/compose_v4/chem/state.py",
+)
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while block := handle.read(1 << 20):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _git_revision_and_material_hashes() -> tuple[str, list[dict[str, str]]]:
+    """Bind the result to a clean revision of every material implementation file."""
+
+    revision = subprocess.run(
+        ["git", "-C", str(REPO), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if len(revision) != 40 or any(character not in "0123456789abcdef" for character in revision):
+        raise RuntimeError("repository revision is not a full lowercase Git commit")
+    dirty = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPO),
+            "status",
+            "--porcelain",
+            "--untracked-files=all",
+            "--",
+            *_MATERIAL_IMPLEMENTATION_PATHS,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    if dirty:
+        raise RuntimeError(
+            f"refusing to publish scope coverage from dirty material implementation files: {dirty}"
+        )
+    identities = [
+        {
+            "path": relative_path,
+            "sha256": _sha256(REPO / relative_path),
+        }
+        for relative_path in _MATERIAL_IMPLEMENTATION_PATHS
+    ]
+    return revision, identities
+
+
+def _write_json_atomically(path: Path, payload: object) -> None:
+    encoded = (
+        json.dumps(
+            payload,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_name = handle.name
+            handle.write(encoded)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_name, path)
+        temporary_name = None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
 
 
 def _cnof_neutral_ok(smi: str, *, max_atoms: int = 48) -> bool:
@@ -90,18 +184,88 @@ def coverage(csv_path: Path) -> dict:
     }
 
 
+def build_artifact(
+    csv_path: Path,
+    *,
+    code_revision: str,
+    implementation_files: list[dict[str, str]],
+) -> dict:
+    """Return the computed census with a complete, deterministic evidence ledger."""
+
+    result = coverage(csv_path)
+    return {
+        "schema": "compose.benchmark_lead_scope_coverage",
+        "schema_version": 2,
+        "evidence_class": "computed",
+        "provenance": {
+            "command": "PYTHONPATH=src python scripts/benchmark_lead_scope_coverage.py",
+            "code_revision": code_revision,
+            "implementation_files": implementation_files,
+            "inputs": [
+                {
+                    "path": csv_path.relative_to(REPO).as_posix(),
+                    "sha256": _sha256(csv_path),
+                    "role": "fixed_benchmark_support_census",
+                }
+            ],
+            "configuration": {
+                "smiles_column": _SMILES_COL,
+                "broad_organic_scope": BROAD_ORGANIC_V1.descriptor(),
+                "broad_organic_neutral_scope": BROAD_ORGANIC_NEUTRAL_V1.descriptor(),
+                "cnof_neutral_scope": {
+                    "allowed_elements": ["C", "N", "O", "F"],
+                    "allow_charges": False,
+                    "connectedness": "connected_or_null_with_nonempty_required",
+                    "max_atoms": 48,
+                },
+            },
+            "determinism": {
+                "seed": None,
+                "seed_derivation": "not_applicable_exact_rowwise_census",
+                "hardware_relevance": "none_discrete_deterministic_classification",
+            },
+            "software": {
+                "python": platform.python_version(),
+                "numpy": np.__version__,
+                "rdkit": rdBase.rdkitVersion,
+            },
+            "sample_count": result["n_leads"],
+            "exclusions": {
+                "broad_organic_v1": result["excluded_features_broad_scope"],
+                "broad_organic_neutral_v1": result["excluded_features_neutral_scope"],
+                "cnof_neutral_rejected_count": (
+                    result["n_leads"] - result["accepted"]["cnof_neutral"]
+                ),
+            },
+            "split_identity": {
+                "benchmark": result["benchmark"],
+                "role": "fixed_external_support_census_not_model_selection",
+            },
+        },
+        "result": result,
+    }
+
+
 def main() -> int:
-    result = coverage(REPO / _JIN)
+    benchmark_path = REPO / _JIN
+    revision, implementation_files = _git_revision_and_material_hashes()
+    artifact = build_artifact(
+        benchmark_path,
+        code_revision=revision,
+        implementation_files=implementation_files,
+    )
+    result = artifact["result"]
     n = result["n_leads"]
     print(f"{result['benchmark']}: {n} leads")
     for scope, count in result["accepted"].items():
         print(f"  {scope:28s}: {count}/{n} = {count / n:.1%}")
     print(f"  broad recovers over CNOF-neutral : {result['broad_recovers_over_cnof']} leads")
     print(f"  charged leads (kept by broad only): {result['leads_with_nonzero_net_charge']}/{n}")
-    print(f"  excluded under broad             : {result['excluded_features_broad_scope'] or 'none'}")
-    out = REPO / "diagnostics/composition/benchmark_lead_scope_coverage.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(result, indent=2) + "\n")
+    print(
+        f"  excluded under broad             : {result['excluded_features_broad_scope'] or 'none'}"
+    )
+    out = REPO / _OUTPUT
+    _write_json_atomically(out, artifact)
     print(f"-> {out.relative_to(REPO)}")
     return 0
 
