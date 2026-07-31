@@ -799,9 +799,11 @@ def validate_editing_t1_launch_authority(
 ) -> EditingT1LaunchAuthority:
     """Cross-check every lightweight V4 authority identity before execution.
 
-    This check is intentionally independent of expensive source replay. The
-    direct worker still performs the full panel and production-census
-    re-derivations before optimization.
+    This check is intentionally independent of expensive source replay. Full
+    production-census re-enumeration is performed when the panel is frozen and
+    verified. A direct worker binds these immutable artifacts to the physical
+    source and recompiles every selected complete-trace fiber before
+    optimization, without replaying every non-selected census row per arm.
     """
 
     runtime_contract = (

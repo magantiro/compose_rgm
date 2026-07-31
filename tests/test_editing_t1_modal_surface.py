@@ -10,6 +10,7 @@ import pytest
 pytest.importorskip("modal")
 
 import modal_apps.run_editing_t1_successor_gate as t1_modal
+import scripts.run_editing_t1_successor_gate as t1_worker
 from compose_v4.experiments.editing_t1_panel import (
     EDITING_T1_CAPACITY_CENSUS_SCHEMA,
     EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
@@ -128,6 +129,8 @@ def _synthetic_launch_authority(
         "training_authorized": False,
         "source": {
             "forensics_file_sha256": "f" * 64,
+            "semantic_sidecar_file_sha256": "7" * 64,
+            "semantic_sidecar_manifest_file_sha256": "8" * 64,
             "charge_policy_audit_file_sha256": "3" * 64,
             "charge_policy_exclusions_file_sha256": "4" * 64,
             "charge_policy_exclusion_payload_sha256": "5" * 64,
@@ -187,6 +190,23 @@ def _synthetic_launch_authority(
 
 
 LAUNCH_AUTHORITY = _synthetic_launch_authority()
+
+
+def test_t1_worker_uses_frozen_authority_without_full_census_replay():
+    panel = t1_worker._execution_panel_from_frozen_authority(
+        LAUNCH_AUTHORITY,
+        semantic_sidecar_file_sha256="7" * 64,
+        semantic_sidecar_manifest_file_sha256="8" * 64,
+    )
+
+    assert panel is LAUNCH_AUTHORITY.panel
+
+    with pytest.raises(SystemExit, match="semantic_sidecar_file_sha256"):
+        t1_worker._execution_panel_from_frozen_authority(
+            LAUNCH_AUTHORITY,
+            semantic_sidecar_file_sha256="9" * 64,
+            semantic_sidecar_manifest_file_sha256="8" * 64,
+        )
 
 
 def _worker_result(

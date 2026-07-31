@@ -15,6 +15,7 @@ import json
 import os
 import sys
 import tempfile
+from collections.abc import Mapping
 from pathlib import Path
 
 import torch
@@ -38,17 +39,17 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
     EditingT1PanelError,
     active8_t1_identity,
-    load_editing_t1_panel,
-    validate_charge_policy_exclusions,
     editing_t1_panel_capacity_strata_sha256,
     editing_t1_panel_census_sha256,
     editing_t1_panel_selection_sha256,
+    validate_charge_policy_exclusions,
     within_family_repeated_panel_families,
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    EditingT1LaunchAuthority,
     EditingT1RuntimeError,
     load_editing_t1_launch_authority,
     load_editing_t1_result,
@@ -106,6 +107,34 @@ def _write_if_absent(path: Path, payload: object) -> None:
     finally:
         if temporary_name is not None:
             Path(temporary_name).unlink(missing_ok=True)
+
+
+def _execution_panel_from_frozen_authority(
+    launch_authority: EditingT1LaunchAuthority,
+    *,
+    semantic_sidecar_file_sha256: str,
+    semantic_sidecar_manifest_file_sha256: str,
+) -> Mapping[str, object]:
+    """Bind the frozen panel to physical sidecars without replaying its census.
+
+    Full production re-enumeration is a one-time panel-freeze invariant.  Each
+    arm recompiles and round-trips the exact selected trace fibers before
+    optimization, so replaying every eligible census row here would add no
+    arm-specific evidence.
+    """
+
+    panel = launch_authority.panel
+    source = panel["source"]
+    for field, observed in (
+        ("semantic_sidecar_file_sha256", semantic_sidecar_file_sha256),
+        (
+            "semantic_sidecar_manifest_file_sha256",
+            semantic_sidecar_manifest_file_sha256,
+        ),
+    ):
+        if source.get(field) != observed:
+            raise SystemExit(f"T1 frozen provenance mismatch for {field}")
+    return panel
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -280,7 +309,6 @@ def main() -> int:
         sidecar_path=args.semantic_sidecar,
         sidecar_manifest_path=args.semantic_sidecar_manifest,
     )
-    census_model, census_parity = build_scratch_ringcore_model(gate_zero_contract)
     charge_policy_audit = load_json_object(args.charge_policy_audit)
     charge_policy_exclusions = load_json_object(args.charge_policy_exclusions)
     capacity_census = dict(launch_authority.capacity_census)
@@ -321,25 +349,10 @@ def main() -> int:
     ):
         if t1_contract.payload[field] != observed:
             raise SystemExit(f"T1 frozen provenance mismatch for {field}")
-    panel = load_editing_t1_panel(
-        args.panel,
-        expected_artifact_sha256=t1_contract.payload["panel_artifact_sha256"],
-        model=census_model,
-        source=source,
-        forensics=forensics,
-        forensics_file_sha256=forensics_file_sha256,
-        sidecar=source.sidecar,
+    panel = _execution_panel_from_frozen_authority(
+        launch_authority,
         semantic_sidecar_file_sha256=_sha256(args.semantic_sidecar),
         semantic_sidecar_manifest_file_sha256=_sha256(args.semantic_sidecar_manifest),
-        charge_policy_audit=charge_policy_audit,
-        charge_policy_audit_file_sha256=charge_policy_audit_file_sha256,
-        charge_policy_exclusions=charge_policy_exclusions,
-        charge_policy_exclusions_file_sha256=(charge_policy_exclusions_file_sha256),
-        capacity_census=capacity_census,
-        capacity_census_file_sha256=capacity_census_file_sha256,
-        active8_admission=active8_admission,
-        gate_zero_runtime_contract_sha256=gate_zero_contract.sha256,
-        gate_zero_unified_packed_manifest_sha256=(source.unified_packed_manifest_sha256),
     )
     if args.panel_kind == EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND:
         try:
@@ -362,7 +375,7 @@ def main() -> int:
     if device.type == "cuda" and not torch.cuda.is_available():
         raise SystemExit("CUDA was requested but is unavailable")
     if args.audit_only:
-        model, parity = census_model, census_parity
+        model, parity = build_scratch_ringcore_model(gate_zero_contract)
         model = model.to(device)
         materialized = materialize_t1_panel(
             model,
