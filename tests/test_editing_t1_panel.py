@@ -69,7 +69,7 @@ from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_RUNTIME_CONTRACT_VERSION,
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
-    EDITING_T1_V6_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
     EditingT1RuntimeContract,
     EditingT1RuntimeError,
     T1CacheShardReceipt,
@@ -1067,7 +1067,7 @@ def test_direct_t1_cli_defaults_to_one_consistent_current_authority():
             "cycle_attach",
         ]
     )
-    assert args.t1_contract == ROOT / EDITING_T1_V6_CONTRACT_RELATIVE_PATH
+    assert args.t1_contract == ROOT / EDITING_T1_V7_CONTRACT_RELATIVE_PATH
     assert args.panel == ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH
     assert args.capacity_census == ROOT / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
 

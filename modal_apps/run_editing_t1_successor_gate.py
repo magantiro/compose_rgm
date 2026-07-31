@@ -32,11 +32,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
 import subprocess
 import sys
-import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from pathlib import Path, PurePosixPath
@@ -48,6 +46,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from compose_v4.data.immutable_artifact import (  # noqa: E402
+    ImmutableArtifactError,
+    write_bytes_if_absent,
+)
 from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     ACTIVE8_T1_IDENTITY_FIELDS,
     EditingT1PanelError,
@@ -57,7 +59,7 @@ from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_LOCAL_ADAPTER_FAMILIES,
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
-    EDITING_T1_V6_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
     EditingT1LaunchAuthority,
     EditingT1RuntimeError,
     load_editing_t1_launch_authority,
@@ -92,7 +94,7 @@ PANEL_KINDS = (
 )
 GPU_CLASSES = ("L4", "A10", "A100")
 GLOBAL_FAMILY_SELECTOR = "all_families"
-T1_CONTRACT_RELATIVE_PATH = EDITING_T1_V6_CONTRACT_RELATIVE_PATH
+T1_CONTRACT_RELATIVE_PATH = EDITING_T1_V7_CONTRACT_RELATIVE_PATH
 T1_PANEL_RELATIVE_PATH = EDITING_T1_V4_PANEL_RELATIVE_PATH
 T1_CAPACITY_CENSUS_RELATIVE_PATH = EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
 SERIALIZED_TREE_PATHS = (
@@ -522,30 +524,12 @@ def write_t1_modal_launch_receipt(
         + "\n"
     ).encode("utf-8")
     destination = Path(path)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary_name: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary_name = handle.name
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            os.link(temporary_name, destination)
-        except FileExistsError:
-            if destination.read_bytes() != content:
-                raise FileExistsError(
-                    f"immutable T1 launch receipt already differs: {destination}"
-                ) from None
-    finally:
-        if temporary_name is not None:
-            Path(temporary_name).unlink(missing_ok=True)
+        write_bytes_if_absent(destination, content)
+    except ImmutableArtifactError as error:
+        raise FileExistsError(
+            f"immutable T1 launch receipt already differs: {destination}"
+        ) from error
 
 
 def load_t1_modal_launch_receipt(path: Path) -> Mapping[str, object]:
@@ -700,30 +684,12 @@ def write_t1_modal_failure_receipt(
         + "\n"
     ).encode("utf-8")
     destination = Path(path)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary_name: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary_name = handle.name
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            os.link(temporary_name, destination)
-        except FileExistsError:
-            if destination.read_bytes() != content:
-                raise FileExistsError(
-                    f"immutable T1 failure receipt already differs: {destination}"
-                ) from None
-    finally:
-        if temporary_name is not None:
-            Path(temporary_name).unlink(missing_ok=True)
+        write_bytes_if_absent(destination, content)
+    except ImmutableArtifactError as error:
+        raise FileExistsError(
+            f"immutable T1 failure receipt already differs: {destination}"
+        ) from error
 
 
 def _require_clean_serialized_tree() -> str:

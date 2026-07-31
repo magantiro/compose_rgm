@@ -102,7 +102,7 @@ from compose_v4.rewrite.kernel import (
 )
 
 EDITING_T1_RUNTIME_CONTRACT_SCHEMA = "compose.editing.t1_successor_runtime_contract"
-EDITING_T1_RUNTIME_CONTRACT_VERSION = 6
+EDITING_T1_RUNTIME_CONTRACT_VERSION = 7
 EDITING_T1_RUNTIME_CONTRACT_STATUS = "FROZEN_BOUNDED_CAPACITY_DIAGNOSTIC_NO_TRAINING_AUTHORITY"
 EDITING_T1_RESULT_SCHEMA = "compose.editing.t1_successor_capacity_result"
 EDITING_T1_RESULT_VERSION = 4
@@ -115,6 +115,9 @@ EDITING_T1_V5_CONTRACT_RELATIVE_PATH = Path(
 )
 EDITING_T1_V6_CONTRACT_RELATIVE_PATH = Path(
     "configs/editing_t1_successor_gate_v6.json"
+)
+EDITING_T1_V7_CONTRACT_RELATIVE_PATH = Path(
+    "configs/editing_t1_successor_gate_v7.json"
 )
 EDITING_T1_V4_PANEL_RELATIVE_PATH = Path(
     "diagnostics/coherence/editing_t1_successor_panel_v4_active8_2026-07-30.json"
@@ -2240,6 +2243,7 @@ __all__ = [
     "EDITING_T1_V4_PANEL_RELATIVE_PATH",
     "EDITING_T1_V5_CONTRACT_RELATIVE_PATH",
     "EDITING_T1_V6_CONTRACT_RELATIVE_PATH",
+    "EDITING_T1_V7_CONTRACT_RELATIVE_PATH",
     "EditingT1LaunchAuthority",
     "EditingT1RuntimeContract",
     "EditingT1RuntimeError",

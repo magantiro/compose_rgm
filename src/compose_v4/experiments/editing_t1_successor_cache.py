@@ -17,8 +17,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import os
-import tempfile
 from collections import OrderedDict, defaultdict
 from collections.abc import Iterable, Mapping
 from dataclasses import asdict, dataclass
@@ -31,6 +29,10 @@ from rdkit import rdBase
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
+)
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
 )
 from compose_v4.data.packed_trace_store import PackedTraceAddress
 from compose_v4.data.successor_fiber_cache import (
@@ -220,31 +222,13 @@ def _write_bytes_if_absent(path: Path, content: bytes) -> None:
     """Atomically publish exact bytes without replacing another artifact."""
 
     destination = Path(path)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary_name: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary_name = handle.name
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            os.link(temporary_name, destination)
-        except FileExistsError:
-            if destination.read_bytes() != content:
-                raise FileExistsError(
-                    "immutable T1 successor-cache artifact already differs: "
-                    f"{destination}"
-                ) from None
-    finally:
-        if temporary_name is not None:
-            Path(temporary_name).unlink(missing_ok=True)
+        write_bytes_if_absent(destination, content)
+    except ImmutableArtifactError as error:
+        raise FileExistsError(
+            "immutable T1 successor-cache artifact already differs: "
+            f"{destination}"
+        ) from error
 
 
 @dataclass(frozen=True)

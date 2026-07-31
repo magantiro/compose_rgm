@@ -52,7 +52,7 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
-    EDITING_T1_V6_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
     EditingT1LaunchAuthority,
     EditingT1RuntimeError,
     build_t1_successor_cache_identity,
@@ -150,7 +150,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--t1-contract",
         type=Path,
-        default=ROOT / EDITING_T1_V6_CONTRACT_RELATIVE_PATH,
+        default=ROOT / EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
     )
     parser.add_argument(
         "--gate-zero-contract",

@@ -366,6 +366,38 @@ def test_build_load_exact_lookup_and_runtime_receipts(
     )
 
 
+def test_build_publishes_leaf_and_manifest_when_hard_links_are_unsupported(
+    tmp_path,
+    monkeypatch,
+    selected_records,
+    provenance,
+    identity,
+    model,
+) -> None:
+    def reject_hard_link(*_args, **_kwargs):
+        raise PermissionError(1, "operation not permitted")
+
+    monkeypatch.setattr("os.link", reject_hard_link)
+    manifest, receipt, _compiled = _build(
+        tmp_path,
+        monkeypatch,
+        selected_records,
+        provenance,
+        identity,
+        model,
+    )
+
+    assert (tmp_path / manifest.entries[0].cache_relative_path).is_file()
+    assert (tmp_path / receipt.manifest_relative_path).is_file()
+    loaded = t1_cache.load_t1_successor_cache(
+        tmp_path,
+        receipt,
+        expected_identity=identity,
+    )
+    assert loaded.manifest == manifest
+    assert loaded.validate_all_leaves()[0].record_count == 4
+
+
 def test_manifest_and_leaf_hashes_fail_closed_without_enumeration_fallback(
     tmp_path,
     monkeypatch,
