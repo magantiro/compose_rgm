@@ -1,0 +1,121 @@
+{
+  "schema": "compose.editing.t1_uniform_successor_capacity_contract",
+  "schema_version": 2,
+  "contract_id": "compose-editing-t1-uniform-successor-capacity-v2",
+  "status": "FROZEN_BOUNDED_DEVELOPMENT_DIAGNOSTIC_NO_TRAINING_AUTHORITY",
+  "training_authorized": false,
+  "bounded_p50_authorized": false,
+  "scientific_question": "Can each family-local scratch model fit every frozen unique-state canonical molecular successor when the optimization trajectory is selected prospectively by its worst-example successor probability rather than by the terminal update?",
+  "post_v1_rationale": {
+    "observation": "V1 exposed terminal sensitivity: aggregate and rank metrics can be strong while one terminal per-example probability remains below the frozen floor. V1 did not record the bottleneck probability at every update, so it cannot establish whether an earlier state was better.",
+    "prospective_change": "V2 records every full-panel pre-update state and the terminal state, then applies one frozen lexicographic bottleneck selection rule. It also excludes the total-hazard head from the optimizer and requires bit identity.",
+    "unchanged_scientific_objects": "The exact 64-row panels, teacher rates, importance coefficients, productive canonical-successor objective, learning rate, maximum update budget, architecture, and every V1 threshold remain unchanged.",
+    "v1_claim_boundary": "V2 does not reinterpret, replace, or repair any V1 result artifact. V1 remains terminal-only evidence under its own frozen contract.",
+    "result_inspection_status": "FROZEN_AFTER_V1_RESULT_INSPECTION_BEFORE_ANY_V2_RESULT"
+  },
+  "parents": {
+    "v1_contract_path": "configs/editing_t1_uniform_successor_capacity_v1.json",
+    "v1_contract_file_sha256": "1e2760b67da8c3ba4c11d541c327df923aec543e420d9c7b631c562e5a71804f",
+    "v1_contract_sha256": "2b1c57325d24698f674c3e4b55d2eba881e2115ce9ab3db9570a740569c7221a",
+    "runtime_contract_path": "configs/editing_t1_successor_gate_v8.json",
+    "runtime_contract_file_sha256": "48f532b94a8396e8467763ee922e3f89f1d98110a5586a4b61b5fdd5bfc966f5",
+    "runtime_contract_sha256": "7e377fb72037112f0982986fb4ea1c2ceb55ac4abc9df410e2c493715530c13e",
+    "panel_path": "diagnostics/coherence/editing_t1_successor_panel_v4_active8_2026-07-30.json",
+    "panel_file_sha256": "b8ab60013f43da49e29c1d1d68e9ede5321605d8bbcb8d1fdaea4a182480d53d",
+    "panel_artifact_sha256": "5f2cd1d7e01fb81916c39ac0f6ed367ef00fe5f2303eb26a76bca0e82f317edf",
+    "forensics_file_sha256": "f2460f1def0b41e5be5a05bfee01d1d1c295296968c860d8075c344b0f6c7020"
+  },
+  "families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "panel_policy": {
+    "panel_kind": "unique_state",
+    "examples_per_family": 64,
+    "required_unique_key": [
+      "exact_persistent_slot_source_state",
+      "support_time",
+      "canonical_teacher_successor"
+    ],
+    "duplicate_exact_source_time_policy": "reject",
+    "teacher_mark_alias_policy": "aggregate_all_aliases_into_one_canonical_successor_probability",
+    "mark_level_capacity_role": "secondary_plumbing_diagnostic_only",
+    "panel_identity_change_from_v1": "none"
+  },
+  "optimization_law": {
+    "objective": "productive_embedded_canonical_successor_nll",
+    "scope": "all",
+    "maximum_full_panel_updates": 500,
+    "optimizer": "AdamW",
+    "schedule": "constant",
+    "seed": 20260730,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "teacher_rate": 1.0,
+    "importance_coefficient": 1.0,
+    "coefficient_unit": "one_equal_coefficient_per_unique_exact_source_time_canonical_successor",
+    "hazard_included": false,
+    "excluded_parameter_prefixes": [
+      "total_hazard_head."
+    ],
+    "require_excluded_parameter_bit_identity": true,
+    "family_frequency_interpretation": "none_capacity_only",
+    "trajectory_evaluation": "every_pre_update_state_from_update_0_through_update_N_minus_1_plus_terminal_state_update_N",
+    "checkpoint_selection": "maximize_minimum_per_example_productive_canonical_successor_probability__tie_lower_mean_canonical_successor_nll__tie_earlier_update",
+    "checkpoint_selection_numerics": "compare_minimum_log_probability_as_the_monotone_nonunderflowing_representation_of_minimum_probability",
+    "early_stop": "stop_before_next_update_only_if_all_frozen_probability_nll_top1_implications_and_gradient_component_gates_pass"
+  },
+  "evaluation": {
+    "primary": [
+      "selected_minimum_per_example_teacher_successor_probability",
+      "selected_unweighted_teacher_successor_top1_recall",
+      "selected_unweighted_teacher_successor_probability",
+      "selected_unweighted_canonical_successor_nll"
+    ],
+    "required_diagnostics": [
+      "full_differentiable_bottleneck_trajectory",
+      "selected_update",
+      "terminal_update",
+      "terminal_vs_selected_metrics",
+      "teacher_successor_top3_recall",
+      "teacher_successor_mrr",
+      "within_teacher_family_successor_nll",
+      "family_choice_nll",
+      "canonical_successor_count",
+      "raw_mark_count",
+      "alias_multiplicity",
+      "original_importance_coefficient_ess",
+      "nonzero_gradient_optimizer_steps",
+      "component_gradient_update_counts",
+      "total_hazard_parameter_bit_identity"
+    ],
+    "threshold_source": "exact_unchanged_v1_thresholds",
+    "thresholds": {
+      "minimum_unique_state_teacher_successor_top1": 0.95,
+      "minimum_unique_state_teacher_successor_probability": 0.8,
+      "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+      "require_every_example_teacher_successor_top1": true,
+      "minimum_every_example_teacher_successor_probability": 0.8,
+      "minimum_nonzero_gradient_optimizer_steps": 1,
+      "require_every_declared_component_nonzero_gradient": true
+    }
+  },
+  "decision_policy": {
+    "formal_gate_decision_emitted": false,
+    "all_family_local_arms_must_pass_before_joint_shared_model_capacity": true,
+    "joint_shared_model_capacity_required_before_p50_recipe_freeze": true,
+    "family_local_arms_alone_are_insufficient_for_p50": true,
+    "v2_result_may_not_retroactively_change_v1": true,
+    "failure_action": "diagnose_factorization_representation_or_optimization_before_any_mixed_pilot",
+    "corpus_rebuild_default": false,
+    "targeted_data_addition_allowed_only_after_unique_state_context_census_proves_a_gap": true
+  },
+  "contract_sha256": "bd96dc3ac19e37daf0ec249e9470a8e12d6d3f699f9ec392dc9b57313d0ff60a"
+}
