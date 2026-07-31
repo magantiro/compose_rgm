@@ -1,0 +1,40 @@
+{
+  "aromatic_edge_predicate": "resonance_invariant_bond_classes(source)[a,b] == BOND_AROMATIC",
+  "contract_sha256": "668a1c8857deb3c557943a035cd7715761470abf4f2ffb6e95c199c7154033de",
+  "excluded_partitions": [
+    "train",
+    "controller_validation",
+    "test"
+  ],
+  "executor_rule": "bond_delete",
+  "map_reduce_policy": {
+    "final_test_excluded": true,
+    "receipt_publication": "immutable_no_overwrite",
+    "reducer_coverage": "exact_planned_task_set",
+    "unit": "one_complete_physical_packed_shard"
+  },
+  "model_family": "cycle_attach",
+  "parent_active8_identity": {
+    "effective_source_corpus_cache_sha256": "4de860baf1906934ef01a608a366daf81789bedf8985d3ca37f9f30494add3c9",
+    "inventory_manifest_path": "/artifacts/active8_trace_inventory_legacy3_validation_1ef8941/objects/manifests/bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab.json",
+    "inventory_manifest_file_sha256": "bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab",
+    "inventory_sha256": "ce1a1b0a43fdfeac4e5771d03a95d456ec8b2df46f207446efd4f8a17ecadd42",
+    "support_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+    "unified_packed_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758"
+  },
+  "partitions": [
+    "validation"
+  ],
+  "resolver": {
+    "aromatic_edge_policy": "enumerate_charge_h_connectivity_preserving_kekule_aliases_then_force_selected_edge_single",
+    "canonical_product_policy": "require_exactly_one_nonempty_canonical_product_group",
+    "exact_representative_policy": "lexicographically_minimum_persistent_slot_state",
+    "maximum_aliases": 256,
+    "overflow_policy": "typed_failure_no_truncation",
+    "prototype_status": "NON_AUTHORIZING_REPRESENTATION_INVARIANT_SEMANTICS_PROTOTYPE"
+  },
+  "schema": "compose.editing.active8_aromatic_cycle_open_impact_contract",
+  "schema_version": 1,
+  "status": "FROZEN_ACTIVE8_AROMATIC_CYCLE_OPEN_IMPACT_AUDIT_NO_TRAINING_AUTHORITY",
+  "training_authorized": false
+}
