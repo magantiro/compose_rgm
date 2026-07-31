@@ -1,0 +1,60 @@
+{
+  "schema": "compose.experiments.atom_restate_neural_orbit_audit_contract",
+  "schema_version": 1,
+  "status": "PROSPECTIVE_DIAGNOSTIC_ONLY_NOT_TRAINING_AUTHORITY",
+  "partition_role": "train_only",
+  "authorizes_training": false,
+  "selects_support_policy": false,
+  "scientific_question": "Quantify parameter-independent atom-restatement successor ceilings caused by the current six-round additive node-information path before choosing any support policy.",
+  "current_behavior": "Generic broad-organic atom restatement is enabled at all real sites, including cyclic sites, subject to the current valence, hydrogen, charge-target, and no-op masks.",
+  "interpretation_boundary": "The declared ORGANIC_RING_ELEMENTS set is not authoritative for generic atom restatement, and the currently wired macro ring head remains narrower. Alternate policies are hypothetical comparison views only.",
+  "message_passing_certificate": {
+    "rounds": 6,
+    "initial_node_label": [
+      "atom_type",
+      "formal_charge",
+      "implicit_h_count",
+      "atom_topology"
+    ],
+    "round_update": [
+      "self_label",
+      "multiset_neighbor_labels",
+      "multiset_incident_neural_edge_classes"
+    ],
+    "neighbor_edge_pairing_preserved": false,
+    "candidate_class_addition": "target_atom_valence_class_index"
+  },
+  "policies": [
+    {
+      "policy_id": "current_generic_broad_restate_all_real_sites",
+      "policy_kind": "current_broad",
+      "hypothetical": false
+    },
+    {
+      "policy_id": "hypothetical_cyclic_targets_restricted_to_declared_organic_ring_elements",
+      "policy_kind": "cyclic_target_declared_organic_ring_element_set",
+      "hypothetical": true
+    },
+    {
+      "policy_id": "hypothetical_acyclic_sites_only",
+      "policy_kind": "acyclic_sites_only",
+      "hypothetical": true
+    }
+  ],
+  "required_row_evidence": [
+    "immutable_train_packed_trace_progress_address",
+    "exact_source_and_stored_successor_state_hashes",
+    "teacher_coordinate",
+    "production_executor_successor_identity",
+    "neural_class_successor_multiplicity",
+    "family_conditional_teacher_probability_ceiling",
+    "marginal_semantic_counts"
+  ],
+  "decision_boundary": [
+    "This audit cannot filter or rewrite corpus rows.",
+    "This audit cannot change generic restatement or ring-head support.",
+    "This audit cannot authorize T1, P50, or a longer training run.",
+    "A support or architecture choice requires a separate prospective decision contract."
+  ],
+  "contract_sha256": "6ebd9d511269fe821b12d5f84c5d0220f30b7f09250fdaf2b2ef60dc20f6be33"
+}
