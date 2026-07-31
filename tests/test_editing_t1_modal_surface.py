@@ -23,7 +23,7 @@ from compose_v4.experiments.editing_t1_panel import (
 from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
-    EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V8_CONTRACT_RELATIVE_PATH,
     build_editing_t1_runtime_contract,
     validate_editing_t1_launch_authority,
 )
@@ -599,7 +599,7 @@ def test_t1_modal_surface_rejects_symlink_escape_from_artifact_root(
 def test_t1_modal_surface_uses_only_current_authority_and_fails_closed(
     monkeypatch,
 ):
-    assert t1_modal.T1_CONTRACT_RELATIVE_PATH == EDITING_T1_V7_CONTRACT_RELATIVE_PATH
+    assert t1_modal.T1_CONTRACT_RELATIVE_PATH == EDITING_T1_V8_CONTRACT_RELATIVE_PATH
     assert t1_modal.T1_PANEL_RELATIVE_PATH == EDITING_T1_V4_PANEL_RELATIVE_PATH
     assert (
         t1_modal.T1_CAPACITY_CENSUS_RELATIVE_PATH
@@ -649,7 +649,7 @@ def test_t1_modal_worker_names_every_current_authority_path_explicitly():
     }
     assert values_by_flag == {
         "--t1-contract": str(
-            t1_modal.REMOTE_ROOT / EDITING_T1_V7_CONTRACT_RELATIVE_PATH
+            t1_modal.REMOTE_ROOT / EDITING_T1_V8_CONTRACT_RELATIVE_PATH
         ),
         "--panel": str(
             t1_modal.REMOTE_ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH

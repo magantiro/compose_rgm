@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import pytest
 import torch
 from rdkit import rdBase
 
+from scripts import run_editing_t1_successor_gate as t1_worker
 from compose_v4.chem.molecular_graph import (
     ELEMENT_TO_IDX,
     smiles_to_molecular_graph,
@@ -396,6 +397,37 @@ def test_build_publishes_leaf_and_manifest_when_hard_links_are_unsupported(
     )
     assert loaded.manifest == manifest
     assert loaded.validate_all_leaves()[0].record_count == 4
+
+
+def test_cpu_cache_completion_payload_uses_the_manifest_trace_sequence(
+    tmp_path,
+    monkeypatch,
+    selected_records,
+    provenance,
+    identity,
+    model,
+) -> None:
+    manifest, receipt, _compiled = _build(
+        tmp_path,
+        monkeypatch,
+        selected_records,
+        provenance,
+        identity,
+        model,
+    )
+
+    payload = t1_worker._successor_cache_completion_payload(
+        family="atom_insert",
+        panel_kind="unique_state",
+        manifest=manifest,
+        receipt=receipt,
+        initialization_parity={"status": "BIT_EXACT"},
+    )
+
+    assert payload["status"] == "T1_SUCCESSOR_CACHE_COMPLETE_NO_OPTIMIZATION"
+    assert payload["selected_trace_count"] == len(manifest.selected_traces) == 2
+    assert payload["cache_receipt"] == asdict(receipt)
+    assert payload["initialization_parity"] == {"status": "BIT_EXACT"}
 
 
 def test_manifest_and_leaf_hashes_fail_closed_without_enumeration_fallback(

@@ -52,7 +52,7 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
-    EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V8_CONTRACT_RELATIVE_PATH,
     EditingT1LaunchAuthority,
     EditingT1RuntimeError,
     build_t1_successor_cache_identity,
@@ -65,6 +65,7 @@ from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     validate_t1_active8_runtime_binding,
 )
 from compose_v4.experiments.editing_t1_successor_cache import (  # noqa: E402
+    T1SuccessorCacheManifest,
     T1SuccessorCacheManifestReceipt,
     build_t1_successor_cache,
     load_t1_successor_cache,
@@ -116,6 +117,28 @@ def _load_successor_cache_receipt(path: Path) -> T1SuccessorCacheManifestReceipt
         raise SystemExit("T1 successor-cache receipt is invalid") from error
 
 
+def _successor_cache_completion_payload(
+    *,
+    family: str,
+    panel_kind: str,
+    manifest: T1SuccessorCacheManifest,
+    receipt: T1SuccessorCacheManifestReceipt,
+    initialization_parity: Mapping[str, object],
+) -> dict[str, object]:
+    """Build the validated CPU cache-completion status payload."""
+
+    return {
+        "status": "T1_SUCCESSOR_CACHE_COMPLETE_NO_OPTIMIZATION",
+        "training_authorized": False,
+        "gate_decision": None,
+        "family": family,
+        "panel_kind": panel_kind,
+        "selected_trace_count": len(manifest.selected_traces),
+        "cache_receipt": asdict(receipt),
+        "initialization_parity": dict(initialization_parity),
+    }
+
+
 def _execution_panel_from_frozen_authority(
     launch_authority: EditingT1LaunchAuthority,
     *,
@@ -150,7 +173,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--t1-contract",
         type=Path,
-        default=ROOT / EDITING_T1_V7_CONTRACT_RELATIVE_PATH,
+        default=ROOT / EDITING_T1_V8_CONTRACT_RELATIVE_PATH,
     )
     parser.add_argument(
         "--gate-zero-contract",
@@ -443,16 +466,13 @@ def main() -> int:
         _write_if_absent(args.output, asdict(receipt))
         print(
             json.dumps(
-                {
-                    "status": "T1_SUCCESSOR_CACHE_COMPLETE_NO_OPTIMIZATION",
-                    "training_authorized": False,
-                    "gate_decision": None,
-                    "family": args.family,
-                    "panel_kind": args.panel_kind,
-                    "selected_trace_count": manifest.selected_trace_count,
-                    "cache_receipt": asdict(receipt),
-                    "initialization_parity": asdict(parity),
-                },
+                _successor_cache_completion_payload(
+                    family=args.family,
+                    panel_kind=args.panel_kind,
+                    manifest=manifest,
+                    receipt=receipt,
+                    initialization_parity=asdict(parity),
+                ),
                 sort_keys=True,
             )
         )
