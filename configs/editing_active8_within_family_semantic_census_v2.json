@@ -1,0 +1,278 @@
+{
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "contract_sha256": "c6854c903b37823077381b76ab9f988f1608ee98d2e67cbfa179cd1f0d89f4e1",
+  "axes": {
+    "added_endpoint_degree_pair": {
+      "declared_domain": null,
+      "description": "Sorted heavy-atom degrees of the two pre-reroute attachment sites.",
+      "value_kind": "open_observed"
+    },
+    "added_endpoint_element_pair": {
+      "declared_domain": null,
+      "description": "Sorted exact element identities of the two added-bond endpoints.",
+      "value_kind": "open_observed"
+    },
+    "affected_atom_count": {
+      "declared_domain": null,
+      "description": "Number of distinct slots touched by a stored ring-system restatement.",
+      "value_kind": "open_observed"
+    },
+    "affected_element_set": {
+      "declared_domain": null,
+      "description": "Sorted set of exact source elements touched by a ring-system restatement.",
+      "value_kind": "open_observed"
+    },
+    "aromatic_transition_presence": {
+      "declared_domain": ["absent", "present"],
+      "description": "Whether any changed bond enters or leaves the aromatic bond class.",
+      "value_kind": "declared_finite"
+    },
+    "attachment_bond_class": {
+      "declared_domain": ["none", "single", "double", "triple"],
+      "description": "Stored root/no-bond or one-neighbor insertion bond class.",
+      "value_kind": "declared_finite"
+    },
+    "attachment_element": {
+      "declared_domain": ["none", "B", "C", "N", "O", "F", "P", "S", "Cl", "Br", "I"],
+      "description": "Exact source element at the optional one-neighbor insertion anchor.",
+      "value_kind": "declared_finite"
+    },
+    "bond_order_transition": {
+      "declared_domain": null,
+      "description": "Stored source-to-action bond-class transition for reorder or reroute.",
+      "value_kind": "open_observed"
+    },
+    "bond_order_transition_multiset": {
+      "declared_domain": null,
+      "description": "Sorted multiset of source-to-action bond-class changes in one ring-system restatement.",
+      "value_kind": "open_observed"
+    },
+    "changed_bond_count": {
+      "declared_domain": null,
+      "description": "Number of stored bond-order changes in one ring-system restatement.",
+      "value_kind": "open_observed"
+    },
+    "changed_edge_cycle_context": {
+      "declared_domain": ["bridge", "nonbridge", "mixed"],
+      "description": "Whether changed source edges are all bridges, all nonbridges, or mixed.",
+      "value_kind": "declared_finite"
+    },
+    "closed_shortest_cycle_size": {
+      "declared_domain": null,
+      "description": "Shortest preclosure path length plus the inserted edge.",
+      "value_kind": "open_observed"
+    },
+    "closure_bond_class": {
+      "declared_domain": ["single", "double", "triple"],
+      "description": "Exact stored bond class inserted by cycle closing.",
+      "value_kind": "declared_finite"
+    },
+    "cut_component_size_pair": {
+      "declared_domain": null,
+      "description": "Sorted real-atom component sizes after removing the rerouted source edge.",
+      "value_kind": "open_observed"
+    },
+    "cyclic_target_support_class": {
+      "declared_domain": ["acyclic", "cyclic_declared_ring_element", "cyclic_nonring_element"],
+      "description": "At acyclic sites, or at cyclic sites whether the atom-restate target belongs to the authoritative ORGANIC_RING_ELEMENTS set; this is a support-consistency diagnostic, not an exclusion rule.",
+      "value_kind": "declared_finite"
+    },
+    "data_lane": {
+      "declared_domain": null,
+      "description": "Immutable packed-row layer label, retained verbatim as row context.",
+      "value_kind": "open_observed"
+    },
+    "deleted_element": {
+      "declared_domain": ["B", "C", "N", "O", "F", "P", "S", "Cl", "Br", "I"],
+      "description": "Exact source element deleted by the stored action.",
+      "value_kind": "declared_finite"
+    },
+    "deleted_formal_charge": {
+      "declared_domain": ["-2", "-1", "0", "1", "2"],
+      "description": "Exact source formal charge at the deleted slot.",
+      "value_kind": "declared_finite"
+    },
+    "deleted_heavy_degree": {
+      "declared_domain": null,
+      "description": "Real-heavy-atom degree of the deleted source slot.",
+      "value_kind": "open_observed"
+    },
+    "deletion_mode": {
+      "declared_domain": ["last_atom", "isolated", "leaf", "multi_neighbor"],
+      "description": "Last-real-atom, isolated, one-neighbor, or multi-neighbor deletion context.",
+      "value_kind": "declared_finite"
+    },
+    "element_transition": {
+      "declared_domain": null,
+      "description": "Exact source-to-action element transition at the restated slot.",
+      "value_kind": "open_observed"
+    },
+    "endpoint_degree_pair": {
+      "declared_domain": null,
+      "description": "Sorted real-heavy-atom degrees of the two source endpoints.",
+      "value_kind": "open_observed"
+    },
+    "endpoint_element_pair": {
+      "declared_domain": null,
+      "description": "Sorted exact source elements of the two endpoints.",
+      "value_kind": "open_observed"
+    },
+    "formal_charge_transition": {
+      "declared_domain": null,
+      "description": "Exact source-to-action formal-charge transition at the restated slot.",
+      "value_kind": "open_observed"
+    },
+    "implicit_h_delta": {
+      "declared_domain": null,
+      "description": "Exact action implicit-H count minus the stored source value.",
+      "value_kind": "open_observed"
+    },
+    "implicit_h_direction": {
+      "declared_domain": ["decrease", "unchanged", "increase"],
+      "description": "Sign of the exact implicit-H change at the restated slot.",
+      "value_kind": "declared_finite"
+    },
+    "incident_bond_signature": {
+      "declared_domain": null,
+      "description": "Sorted multiset of source bond classes incident to the deleted slot.",
+      "value_kind": "open_observed"
+    },
+    "inserted_element": {
+      "declared_domain": ["B", "C", "N", "O", "F", "P", "S", "Cl", "Br", "I"],
+      "description": "Exact element in the stored atom-insertion action.",
+      "value_kind": "declared_finite"
+    },
+    "inserted_formal_charge": {
+      "declared_domain": ["-2", "-1", "0", "1", "2"],
+      "description": "Exact formal charge in the stored atom-insertion action.",
+      "value_kind": "declared_finite"
+    },
+    "insertion_mode": {
+      "declared_domain": ["root", "one_neighbor"],
+      "description": "Current frozen zero-neighbor or exactly-one-neighbor birth factorization.",
+      "value_kind": "declared_finite"
+    },
+    "opened_bond_class": {
+      "declared_domain": ["single", "double", "triple", "aromatic"],
+      "description": "Exact stored source bond class removed by cycle opening.",
+      "value_kind": "declared_finite"
+    },
+    "opened_shortest_cycle_size": {
+      "declared_domain": null,
+      "description": "Shortest remaining endpoint path length plus the opened source edge.",
+      "value_kind": "open_observed"
+    },
+    "preclosure_shortest_path_edges": {
+      "declared_domain": null,
+      "description": "Shortest source path length between cycle-closing endpoints.",
+      "value_kind": "open_observed"
+    },
+    "remaining_shortest_path_edges": {
+      "declared_domain": null,
+      "description": "Shortest endpoint path after excluding the cycle-opening edge.",
+      "value_kind": "open_observed"
+    },
+    "removed_edge_cycle_context": {
+      "declared_domain": ["bridge", "nonbridge"],
+      "description": "Exact bridge status of the source edge removed by rerouting.",
+      "value_kind": "declared_finite"
+    },
+    "removed_endpoint_element_pair": {
+      "declared_domain": null,
+      "description": "Sorted exact source elements of the removed reroute edge.",
+      "value_kind": "open_observed"
+    },
+    "reused_removed_endpoint_count": {
+      "declared_domain": ["0", "1", "2"],
+      "description": "Number of removed-edge endpoint slots reused by the added edge.",
+      "value_kind": "declared_finite"
+    },
+    "site_cycle_context": {
+      "declared_domain": ["acyclic", "cyclic"],
+      "description": "Whether the restated source slot touches at least one nonbridge edge.",
+      "value_kind": "declared_finite"
+    },
+    "site_heavy_degree": {
+      "declared_domain": null,
+      "description": "Real-heavy-atom degree of the restated source slot.",
+      "value_kind": "open_observed"
+    },
+    "source_atom_count": {
+      "declared_domain": null,
+      "description": "Exact real-heavy-atom count in the stored source state.",
+      "value_kind": "open_observed"
+    },
+    "source_cycle_rank": {
+      "declared_domain": null,
+      "description": "Exact graph cycle rank |E|-|V|+c over real atoms in the stored source state.",
+      "value_kind": "open_observed"
+    },
+    "source_edge_cycle_context": {
+      "declared_domain": ["bridge", "nonbridge"],
+      "description": "Exact bridge status of the reordered source edge.",
+      "value_kind": "declared_finite"
+    },
+    "trace_step_role": {
+      "declared_domain": ["only_step", "first", "interior", "last"],
+      "description": "Exact nonterminal progress position within the admitted whole trace.",
+      "value_kind": "declared_finite"
+    }
+  },
+  "evidence_ledger": {
+    "computed": [
+      "independent within-family marginal counts",
+      "exact unique persistent-slot source-state counts by family and axis value",
+      "exact unique persistent-slot successor-state counts by family and axis value",
+      "finite-domain absent values",
+      "threshold-labelled sparse observed values",
+      "graph context from exact persistent-slot adjacency"
+    ],
+    "observed": [
+      "whole-trace Active8 admission",
+      "exact stored persistent-slot source and successor states",
+      "exact stored executable action",
+      "immutable packed-row layer and progress position"
+    ],
+    "proposed": [
+      "finite diagnostic domains",
+      "sparse observed-value threshold",
+      "choice of train-only density census"
+    ]
+  },
+  "limitations": [
+    "Marginal coverage does not establish coverage of any cross-axis combination.",
+    "A sparse or absent label is a density observation under this policy, not a corpus failure.",
+    "An open-observed axis has no enumerated absence claim.",
+    "Candidate and alias counts are optional orthogonal diagnostics and are never crossed with semantic labels.",
+    "Raw duplicate rows are reported separately from exact unique persistent-slot source and successor states.",
+    "No scaffold count is claimed because no authoritative scaffold identity is present on the exact census rows.",
+    "A cyclic_nonring_element atom-restate label diagnoses a mismatch between cyclic-site targets and the declared ring-element set; it does not automatically exclude the row or change production support.",
+    "This artifact does not measure learnability, validation NLL, final-test performance, or prospective utility."
+  ],
+  "parent_active8_identity": {
+    "effective_source_corpus_cache_sha256": "4de860baf1906934ef01a608a366daf81789bedf8985d3ca37f9f30494add3c9",
+    "inventory_manifest_file_sha256": "bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab",
+    "inventory_sha256": "ce1a1b0a43fdfeac4e5771d03a95d456ec8b2df46f207446efd4f8a17ecadd42",
+    "support_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+    "unified_packed_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758"
+  },
+  "parent_t1_successor_gate": {
+    "contract_sha256": "7e377fb72037112f0982986fb4ea1c2ceb55ac4abc9df410e2c493715530c13e",
+    "file_sha256": "48f532b94a8396e8467763ee922e3f89f1d98110a5586a4b61b5fdd5bfc966f5",
+    "path": "configs/editing_t1_successor_gate_v8.json"
+  },
+  "partition": "train",
+  "schema": "compose.experiments.editing_active8_semantic_census_contract",
+  "schema_version": 2,
+  "sparse_observed_value_max_rows": 4,
+  "status": "DIAGNOSTIC_ONLY_NOT_TRAINING_AUTHORITY"
+}
