@@ -73,6 +73,11 @@ from compose_v4.experiments.editing_t1_panel import (
     selected_source_rows,
     within_family_repeated_panel_families,
 )
+from compose_v4.experiments.editing_t1_successor_cache import (
+    T1SuccessorCacheIdentity,
+    T1SuccessorFiberCache,
+    t1_selected_trace_set_sha256,
+)
 from compose_v4.experiments.factorized_successor_training import (
     rewrite_action_codec_sha256,
 )
@@ -97,13 +102,16 @@ from compose_v4.rewrite.kernel import (
 )
 
 EDITING_T1_RUNTIME_CONTRACT_SCHEMA = "compose.editing.t1_successor_runtime_contract"
-EDITING_T1_RUNTIME_CONTRACT_VERSION = 4
+EDITING_T1_RUNTIME_CONTRACT_VERSION = 5
 EDITING_T1_RUNTIME_CONTRACT_STATUS = "FROZEN_BOUNDED_CAPACITY_DIAGNOSTIC_NO_TRAINING_AUTHORITY"
 EDITING_T1_RESULT_SCHEMA = "compose.editing.t1_successor_capacity_result"
 EDITING_T1_RESULT_VERSION = 4
 EDITING_T1_RESULT_STATUS = "CAPACITY_DIAGNOSTIC_COMPLETE_NO_GATE_DECISION"
 EDITING_T1_V4_CONTRACT_RELATIVE_PATH = Path(
     "configs/editing_t1_successor_gate_v4.json"
+)
+EDITING_T1_V5_CONTRACT_RELATIVE_PATH = Path(
+    "configs/editing_t1_successor_gate_v5.json"
 )
 EDITING_T1_V4_PANEL_RELATIVE_PATH = Path(
     "diagnostics/coherence/editing_t1_successor_panel_v4_active8_2026-07-30.json"
@@ -758,7 +766,7 @@ def load_editing_t1_runtime_contract(
 
 @dataclass(frozen=True)
 class EditingT1LaunchAuthority:
-    """Cross-validated V4 artifacts required before constructing a T1 arm."""
+    """Cross-validated current artifacts required before constructing a T1 arm."""
 
     contract: EditingT1RuntimeContract
     panel: Mapping[str, Any]
@@ -797,7 +805,7 @@ def validate_editing_t1_launch_authority(
     capacity_census_file_sha256: str,
     expected_active8_inventory_manifest_file_sha256: str,
 ) -> EditingT1LaunchAuthority:
-    """Cross-check every lightweight V4 authority identity before execution.
+    """Cross-check every lightweight current authority identity before execution.
 
     This check is intentionally independent of expensive source replay. Full
     production-census re-enumeration is performed when the panel is frozen and
@@ -862,7 +870,7 @@ def validate_editing_t1_launch_authority(
     }
     if mismatches:
         raise EditingT1RuntimeError(
-            f"T1 V4 contract disagrees with panel/census authority: {mismatches}"
+            f"T1 contract disagrees with panel/census authority: {mismatches}"
         )
     if (
         source["capacity_census_file_sha256"] != capacity_census_file_sha256
@@ -894,7 +902,7 @@ def validate_editing_t1_launch_authority(
     }
     if census_mismatches:
         raise EditingT1RuntimeError(
-            f"T1 capacity census disagrees with V4 launch authority: {census_mismatches}"
+            f"T1 capacity census disagrees with launch authority: {census_mismatches}"
         )
     if (
         expected_active8_inventory_manifest_file_sha256
@@ -936,7 +944,7 @@ def load_editing_t1_launch_authority(
     capacity_census_path: Path,
     expected_active8_inventory_manifest_file_sha256: str,
 ) -> EditingT1LaunchAuthority:
-    """Load and cross-check the exact serialized V4 launch authority."""
+    """Load and cross-check the exact serialized current launch authority."""
 
     capacity_path = Path(capacity_census_path)
     capacity_census = _load_bounded_json_object(
@@ -967,7 +975,7 @@ def build_editing_t1_runtime_contract(
     optimization: Mapping[str, Any],
     thresholds: Mapping[str, float],
 ) -> EditingT1RuntimeContract:
-    """Build one deterministic V4 contract from already frozen evidence.
+    """Build one deterministic current contract from already frozen evidence.
 
     Numeric thresholds and optimizer settings are inputs. This helper validates
     and binds them but never chooses them from results.
@@ -1063,7 +1071,7 @@ def write_editing_t1_runtime_contract(
     contract: EditingT1RuntimeContract | Mapping[str, Any],
     path: Path,
 ) -> None:
-    """Atomically freeze canonical V4 JSON without overwriting other bytes."""
+    """Atomically freeze canonical contract JSON without overwriting other bytes."""
 
     runtime_contract = (
         contract
@@ -1100,7 +1108,7 @@ def write_editing_t1_runtime_contract(
         except FileExistsError:
             if destination.read_bytes() != content:
                 raise EditingT1RuntimeError(
-                    "immutable T1 V4 runtime contract already exists with different bytes"
+                    "immutable T1 runtime contract already exists with different bytes"
                 ) from None
     finally:
         if temporary_name is not None:
@@ -1162,6 +1170,19 @@ class MaterializedT1Panel:
     examples: tuple[SuccessorSupervisionExample, ...]
     prepared: PreparedSuccessorPanel
     cache_receipts: tuple[T1CacheShardReceipt, ...]
+    source_row_sha256s: tuple[str, ...]
+    unique_progress_address_count: int
+
+
+@dataclass(frozen=True)
+class ResolvedT1PanelView:
+    """Frozen examples, addresses, and complete traces for one T1 panel view."""
+
+    family: str
+    panel_kind: str
+    examples: tuple[SuccessorSupervisionExample, ...]
+    addresses: tuple[SuccessorFiberCacheAddress, ...]
+    selected_records: tuple[Any, ...]
     source_row_sha256s: tuple[str, ...]
     unique_progress_address_count: int
 
@@ -1311,8 +1332,10 @@ def validate_editing_t1_result(
     ):
         if payload[field] != expected:
             raise EditingT1RuntimeError(f"T1 durable result is bound to another {field}")
+    if not isinstance(expected_active8_identity, Mapping):
+        raise EditingT1RuntimeError("expected T1 Active8 identity must be a mapping")
     retained_active8_identity = _validated_active8_identity(
-        expected_active8_identity,
+        dict(expected_active8_identity),
         name="expected T1 Active8 identity",
     )
     observed_active8_identity = {field: payload[field] for field in ACTIVE8_T1_IDENTITY_FIELDS}
@@ -1565,6 +1588,67 @@ def validate_t1_active8_runtime_binding(
     return identity
 
 
+def build_t1_successor_cache_identity(
+    *,
+    contract: EditingT1RuntimeContract,
+    gate_zero_contract: GateZeroRuntimeContract,
+    source: FrozenValidationSource,
+    panel: Mapping[str, Any],
+    model: Any,
+    active8_admission: Active8TraceAdmission,
+    compiler_device: str = "cpu",
+) -> T1SuccessorCacheIdentity:
+    """Bind a temporary T1 cache to the exact canonical compiler context."""
+
+    from rdkit import rdBase
+
+    active8_identity = validate_t1_active8_runtime_binding(
+        contract=contract,
+        gate_zero_contract=gate_zero_contract,
+        source=source,
+        panel=panel,
+        active8_admission=active8_admission,
+    )
+    try:
+        compiler_dtype = str(next(model.parameters()).dtype)
+    except StopIteration as error:
+        raise EditingT1RuntimeError("T1 cache compiler model has no parameters") from error
+    initial_model_state_sha256 = state_dict_semantic_sha256(model.state_dict())
+    return T1SuccessorCacheIdentity(
+        t1_runtime_contract_sha256=contract.sha256,
+        t1_implementation_sha256=str(contract.payload["implementation_sha256"]),
+        gate_zero_runtime_contract_sha256=gate_zero_contract.sha256,
+        panel_artifact_sha256=str(panel["artifact_sha256"]),
+        panel_selection_sha256=editing_t1_panel_selection_sha256(panel),
+        panel_census_sha256=editing_t1_panel_census_sha256(panel),
+        panel_capacity_strata_sha256=(editing_t1_panel_capacity_strata_sha256(panel)),
+        forensics_file_sha256=str(contract.payload["forensics_file_sha256"]),
+        charge_policy_audit_file_sha256=str(
+            contract.payload["charge_policy_audit_file_sha256"]
+        ),
+        charge_policy_exclusions_file_sha256=str(
+            contract.payload["charge_policy_exclusions_file_sha256"]
+        ),
+        charge_policy_exclusion_payload_sha256=str(
+            contract.payload["charge_policy_exclusion_payload_sha256"]
+        ),
+        charge_policy_source_input_inventory_sha256=str(
+            contract.payload["charge_policy_source_input_inventory_sha256"]
+        ),
+        **dict(active8_identity),
+        unified_packed_manifest_sha256=source.unified_packed_manifest_sha256,
+        representability_overlay_sha256=source.representability_overlay_sha256,
+        support_time=EDITING_T1_SUPPORT_TIME,
+        scratch_seed=int(gate_zero_contract.model["seed"]),
+        initial_model_state_sha256=initial_model_state_sha256,
+        compiler_device=compiler_device,
+        compiler_dtype=compiler_dtype,
+        torch_version=str(torch.__version__),
+        cuda_version=(None if torch.version.cuda is None else str(torch.version.cuda)),
+        rdkit_version=str(rdBase.rdkitVersion),
+    )
+
+
 def _require_active8_record(
     record: Any,
     *,
@@ -1716,8 +1800,7 @@ def _resolve_example(
     )
 
 
-def materialize_t1_panel(
-    model: Any,
+def resolve_t1_panel_view(
     *,
     source: FrozenValidationSource,
     panel: Mapping[str, Any],
@@ -1727,18 +1810,14 @@ def materialize_t1_panel(
     max_atoms: int,
     excluded_trace_ids: Mapping[tuple[str, int], str],
     active8_admission: Active8TraceAdmission,
-) -> MaterializedT1Panel:
-    """Resolve, compile, serialize, reload, and tensorize one exact T1 panel."""
+) -> ResolvedT1PanelView:
+    """Resolve one frozen panel view without compiling molecular support."""
 
     if panel_kind == EDITING_T1_GLOBAL_REPEATED_PANEL_KIND:
         if family != EDITING_T1_GLOBAL_FAMILY_SELECTOR:
             raise ValueError("global repeated-state T1 requires family='all_families'")
     elif family not in RINGCORE_EDITING_FAMILIES:
         raise ValueError(f"unknown T1 family {family!r}")
-    if getattr(model, "enable_ring_system_delete", None) is not False:
-        raise EditingT1RuntimeError(
-            "eight-family T1 pilot support must explicitly disable ring_system_delete"
-        )
     try:
         source_rows = selected_source_rows(
             panel,
@@ -1797,70 +1876,137 @@ def materialize_t1_panel(
     if panel_kind == EDITING_T1_UNIQUE_PANEL_KIND and len(addresses) != unique_address_count:
         raise EditingT1RuntimeError("T1 panel repeats an exact packed progress address")
 
-    # The production cache schema deliberately accepts complete trace chains,
-    # never sparse progress rows.  Compile each selected immutable trace once,
-    # retain every progress (including terminal), and later project only the
-    # exact T1 addresses.  A sparse cache that happened to contain the teacher
-    # rows would bypass the cache's trace-completeness invariant.
-    selected_trace_keys = {
-        (address.packed_shard_content_sha256, address.entry_index) for address in addresses
-    }
-    cache_records: list[SuccessorFiberCacheRecord] = []
-    for trace_key in sorted(selected_trace_keys):
-        record = record_by_address[trace_key]
-        try:
-            cache_records.extend(
-                compile_successor_fiber_trace(
-                    model,
-                    record,
-                    time=EDITING_T1_SUPPORT_TIME,
-                )
-            )
-        except SuccessorFiberCacheBuildError as error:
-            raise EditingT1RuntimeError(
-                "T1 complete-trace successor-cache compilation failed"
-            ) from error
-
-    selected_shards = {record.address.packed_shard_content_sha256 for record in cache_records}
-    provenance = build_exact_cache_provenance(
-        model,
-        source,
-        selected_shard_digests=selected_shards,
-        max_atoms=max_atoms,
+    selected_trace_keys = sorted(
+        {
+            (address.packed_shard_content_sha256, address.entry_index)
+            for address in addresses
+        }
     )
-    records_by_shard: dict[str, list[SuccessorFiberCacheRecord]] = defaultdict(list)
-    for record in cache_records:
-        records_by_shard[record.address.packed_shard_content_sha256].append(record)
+    return ResolvedT1PanelView(
+        family=family,
+        panel_kind=panel_kind,
+        examples=examples,
+        addresses=addresses,
+        selected_records=tuple(record_by_address[key] for key in selected_trace_keys),
+        source_row_sha256s=tuple(str(row["row_sha256"]) for row in source_rows),
+        unique_progress_address_count=unique_address_count,
+    )
+
+
+def materialize_t1_panel(
+    model: Any,
+    *,
+    source: FrozenValidationSource,
+    panel: Mapping[str, Any],
+    forensics: Mapping[str, Any],
+    family: str,
+    panel_kind: str,
+    max_atoms: int,
+    excluded_trace_ids: Mapping[tuple[str, int], str],
+    active8_admission: Active8TraceAdmission,
+    successor_cache: T1SuccessorFiberCache | None = None,
+) -> MaterializedT1Panel:
+    """Resolve and tensorize one exact panel from compiled or frozen fibers."""
+
+    if getattr(model, "enable_ring_system_delete", None) is not False:
+        raise EditingT1RuntimeError(
+            "eight-family T1 pilot support must explicitly disable ring_system_delete"
+        )
+    resolved_panel = resolve_t1_panel_view(
+        source=source,
+        panel=panel,
+        forensics=forensics,
+        family=family,
+        panel_kind=panel_kind,
+        max_atoms=max_atoms,
+        excluded_trace_ids=excluded_trace_ids,
+        active8_admission=active8_admission,
+    )
+    examples = resolved_panel.examples
+    addresses = resolved_panel.addresses
+    unique_address_count = resolved_panel.unique_progress_address_count
 
     decoded_by_address: dict[
         SuccessorFiberCacheAddress,
         SuccessorFiberCacheRecord,
     ] = {}
     receipts: list[T1CacheShardReceipt] = []
-    for shard_digest in sorted(records_by_shard):
-        encoded, cache = serialize_successor_fiber_cache(
-            records_by_shard[shard_digest],
-            provenance=provenance[shard_digest],
+    if successor_cache is None:
+        # The production cache schema deliberately accepts complete trace
+        # chains, never sparse progress rows.  This in-memory path remains the
+        # bounded oracle used by tests and the separate CPU cache builder.
+        cache_records: list[SuccessorFiberCacheRecord] = []
+        for record in resolved_panel.selected_records:
+            try:
+                cache_records.extend(
+                    compile_successor_fiber_trace(
+                        model,
+                        record,
+                        time=EDITING_T1_SUPPORT_TIME,
+                    )
+                )
+            except SuccessorFiberCacheBuildError as error:
+                raise EditingT1RuntimeError(
+                    "T1 complete-trace successor-cache compilation failed"
+                ) from error
+
+        selected_shards = {
+            record.address.packed_shard_content_sha256 for record in cache_records
+        }
+        provenance = build_exact_cache_provenance(
+            model,
+            source,
+            selected_shard_digests=selected_shards,
+            max_atoms=max_atoms,
         )
-        decoded = deserialize_successor_fiber_cache(
-            encoded,
-            expected_provenance=provenance[shard_digest],
-            expected_content_sha256=cache.content_sha256,
-        )
-        if decoded != cache:
-            raise EditingT1RuntimeError("T1 cache round trip changed production fibers")
-        receipts.append(
-            T1CacheShardReceipt(
-                packed_shard_content_sha256=shard_digest,
-                cache_content_sha256=cache.content_sha256,
-                encoded_sha256=hashlib.sha256(encoded).hexdigest(),
-                record_count=len(cache.records),
+        records_by_shard: dict[str, list[SuccessorFiberCacheRecord]] = defaultdict(list)
+        for record in cache_records:
+            records_by_shard[record.address.packed_shard_content_sha256].append(record)
+
+        for shard_digest in sorted(records_by_shard):
+            encoded, cache = serialize_successor_fiber_cache(
+                records_by_shard[shard_digest],
+                provenance=provenance[shard_digest],
             )
+            decoded = deserialize_successor_fiber_cache(
+                encoded,
+                expected_provenance=provenance[shard_digest],
+                expected_content_sha256=cache.content_sha256,
+            )
+            if decoded != cache:
+                raise EditingT1RuntimeError("T1 cache round trip changed production fibers")
+            receipts.append(
+                T1CacheShardReceipt(
+                    packed_shard_content_sha256=shard_digest,
+                    cache_content_sha256=cache.content_sha256,
+                    encoded_sha256=hashlib.sha256(encoded).hexdigest(),
+                    record_count=len(cache.records),
+                )
+            )
+            for record in decoded.records:
+                if record.address in decoded_by_address:
+                    raise EditingT1RuntimeError(
+                        "T1 cache repeats a progress address across shards"
+                    )
+                decoded_by_address[record.address] = record
+    else:
+        expected_trace_set_sha256 = t1_selected_trace_set_sha256(
+            resolved_panel.selected_records
         )
-        for record in decoded.records:
-            if record.address in decoded_by_address:
-                raise EditingT1RuntimeError("T1 cache repeats a progress address across shards")
-            decoded_by_address[record.address] = record
+        if (
+            successor_cache.receipt.selected_trace_set_sha256
+            != expected_trace_set_sha256
+        ):
+            raise EditingT1RuntimeError(
+                "T1 successor cache is bound to another exact panel trace set"
+            )
+        for example, address in zip(examples, addresses, strict=True):
+            record = successor_cache.require(address, source_state=example.state)
+            decoded_by_address[address] = record
+        receipts.extend(
+            T1CacheShardReceipt(**asdict(receipt))
+            for receipt in successor_cache.receipts_for(addresses)
+        )
 
     if not set(addresses).issubset(decoded_by_address):
         raise EditingT1RuntimeError("T1 cache does not cover every selected progress address")
@@ -1878,7 +2024,7 @@ def materialize_t1_panel(
         examples=examples,
         prepared=prepared,
         cache_receipts=tuple(receipts),
-        source_row_sha256s=tuple(str(row["row_sha256"]) for row in source_rows),
+        source_row_sha256s=resolved_panel.source_row_sha256s,
         unique_progress_address_count=unique_address_count,
     )
 
@@ -1896,6 +2042,7 @@ def run_editing_t1_arm(
     device: torch.device,
     excluded_trace_ids: Mapping[tuple[str, int], str],
     active8_admission: Active8TraceAdmission,
+    successor_cache: T1SuccessorFiberCache | None = None,
 ) -> dict[str, Any]:
     """Run one family/panel/scope arm from the common exact scratch state."""
 
@@ -1988,6 +2135,7 @@ def run_editing_t1_arm(
         max_atoms=int(gate_zero_contract.model["max_atoms"]),
         excluded_trace_ids=excluded_trace_ids,
         active8_admission=active8_admission,
+        successor_cache=successor_cache,
     )
     optimization = contract.optimization
     training_report = train_successor_micro_panel(
@@ -2087,6 +2235,7 @@ __all__ = [
     "EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH",
     "EDITING_T1_V4_CONTRACT_RELATIVE_PATH",
     "EDITING_T1_V4_PANEL_RELATIVE_PATH",
+    "EDITING_T1_V5_CONTRACT_RELATIVE_PATH",
     "EditingT1LaunchAuthority",
     "EditingT1RuntimeContract",
     "EditingT1RuntimeError",

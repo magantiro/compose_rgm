@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Freeze the result-independent V4 editing T1 runtime contract.
+"""Freeze the result-independent current editing T1 runtime contract.
 
 This command performs no optimization and cannot authorize training. Numeric
 thresholds and optimizer settings must be supplied prospectively as explicit
@@ -31,8 +31,8 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
-    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     EditingT1RuntimeError,
     build_editing_t1_runtime_contract,
     write_editing_t1_runtime_contract,
@@ -105,7 +105,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
+        default=ROOT / EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     )
     return parser
 

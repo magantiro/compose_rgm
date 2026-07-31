@@ -16,6 +16,7 @@ import os
 import sys
 import tempfile
 from collections.abc import Mapping
+from dataclasses import asdict
 from pathlib import Path
 
 import torch
@@ -29,6 +30,7 @@ from compose_v4.data.active8_trace_inventory import (  # noqa: E402
     load_active8_trace_admission,
 )
 from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
+    build_exact_cache_provenance,
     build_scratch_ringcore_model,
     load_frozen_validation_source,
     load_gate_zero_runtime_contract,
@@ -47,16 +49,24 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
-    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     EditingT1LaunchAuthority,
     EditingT1RuntimeError,
+    build_t1_successor_cache_identity,
     load_editing_t1_launch_authority,
     load_editing_t1_result,
     materialize_t1_panel,
+    resolve_t1_panel_view,
     require_editing_t1_family_scope_applicable,
     run_editing_t1_arm,
     validate_t1_active8_runtime_binding,
+)
+from compose_v4.experiments.editing_t1_successor_cache import (  # noqa: E402
+    T1SuccessorCacheManifestReceipt,
+    build_t1_successor_cache,
+    load_t1_successor_cache,
+    t1_selected_trace_set_sha256,
 )
 from compose_v4.experiments.ringcore_successor_leaderboard import (  # noqa: E402
     load_json_object,
@@ -109,6 +119,19 @@ def _write_if_absent(path: Path, payload: object) -> None:
             Path(temporary_name).unlink(missing_ok=True)
 
 
+def _load_successor_cache_receipt(path: Path) -> T1SuccessorCacheManifestReceipt:
+    try:
+        payload = json.loads(Path(path).read_bytes())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise SystemExit(f"T1 successor-cache receipt is unreadable: {path}") from error
+    if not isinstance(payload, dict):
+        raise SystemExit("T1 successor-cache receipt must be an object")
+    try:
+        return T1SuccessorCacheManifestReceipt(**payload)
+    except (TypeError, ValueError) as error:
+        raise SystemExit("T1 successor-cache receipt is invalid") from error
+
+
 def _execution_panel_from_frozen_authority(
     launch_authority: EditingT1LaunchAuthority,
     *,
@@ -143,7 +166,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--t1-contract",
         type=Path,
-        default=ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
+        default=ROOT / EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     )
     parser.add_argument(
         "--gate-zero-contract",
@@ -246,11 +269,26 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--audit-only", action="store_true")
+    parser.add_argument("--successor-cache-root", type=Path)
+    parser.add_argument("--successor-cache-receipt", type=Path)
+    parser.add_argument("--build-successor-cache", action="store_true")
+    parser.add_argument("--validate-successor-cache", action="store_true")
     return parser
 
 
 def main() -> int:
     args = _parser().parse_args()
+    if sum(
+        (
+            bool(args.audit_only),
+            bool(args.build_successor_cache),
+            bool(args.validate_successor_cache),
+        )
+    ) > 1:
+        raise SystemExit(
+            "--audit-only, --build-successor-cache, and "
+            "--validate-successor-cache are mutually exclusive"
+        )
     try:
         require_editing_t1_family_scope_applicable(
             args.family,
@@ -371,9 +409,137 @@ def main() -> int:
         panel=panel,
         active8_admission=active8_admission,
     )
+    if args.build_successor_cache:
+        if args.device != "cpu":
+            raise SystemExit("T1 successor caches must be compiled on canonical CPU/FP32")
+        if args.successor_cache_root is None or args.output is None:
+            raise SystemExit(
+                "T1 cache build requires --successor-cache-root and --output receipt"
+            )
+        if args.successor_cache_receipt is not None:
+            raise SystemExit("T1 cache build cannot consume another cache receipt")
+        model, parity = build_scratch_ringcore_model(gate_zero_contract)
+        cache_identity = build_t1_successor_cache_identity(
+            contract=t1_contract,
+            gate_zero_contract=gate_zero_contract,
+            source=source,
+            panel=panel,
+            model=model,
+            active8_admission=active8_admission,
+            compiler_device="cpu",
+        )
+        resolved_panel = resolve_t1_panel_view(
+            source=source,
+            panel=panel,
+            forensics=forensics,
+            family=args.family,
+            panel_kind=args.panel_kind,
+            max_atoms=int(gate_zero_contract.model["max_atoms"]),
+            excluded_trace_ids=excluded_trace_ids,
+            active8_admission=active8_admission,
+        )
+        selected_shards = {
+            record.corpus_address.packed_shard_content_sha256
+            for record in resolved_panel.selected_records
+            if record.corpus_address is not None
+        }
+        provenance = build_exact_cache_provenance(
+            model,
+            source,
+            selected_shard_digests=selected_shards,
+            max_atoms=int(gate_zero_contract.model["max_atoms"]),
+        )
+        manifest, receipt = build_t1_successor_cache(
+            args.successor_cache_root,
+            model,
+            resolved_panel.selected_records,
+            provenance_by_shard=provenance,
+            identity=cache_identity,
+        )
+        _write_if_absent(args.output, asdict(receipt))
+        print(
+            json.dumps(
+                {
+                    "status": "T1_SUCCESSOR_CACHE_COMPLETE_NO_OPTIMIZATION",
+                    "training_authorized": False,
+                    "gate_decision": None,
+                    "family": args.family,
+                    "panel_kind": args.panel_kind,
+                    "selected_trace_count": manifest.selected_trace_count,
+                    "cache_receipt": asdict(receipt),
+                    "initialization_parity": asdict(parity),
+                },
+                sort_keys=True,
+            )
+        )
+        return 0
+    if args.validate_successor_cache and args.device != "cpu":
+        raise SystemExit(
+            "T1 successor caches must be validated on CPU before GPU dispatch"
+        )
     device = torch.device(args.device)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise SystemExit("CUDA was requested but is unavailable")
+    successor_cache = None
+    if not args.audit_only:
+        if args.successor_cache_root is None or args.successor_cache_receipt is None:
+            raise SystemExit(
+                "T1 optimization requires a frozen --successor-cache-root and "
+                "--successor-cache-receipt"
+            )
+        identity_model, _identity_parity = build_scratch_ringcore_model(
+            gate_zero_contract
+        )
+        expected_cache_identity = build_t1_successor_cache_identity(
+            contract=t1_contract,
+            gate_zero_contract=gate_zero_contract,
+            source=source,
+            panel=panel,
+            model=identity_model,
+            active8_admission=active8_admission,
+            compiler_device="cpu",
+        )
+        resolved_cache_panel = resolve_t1_panel_view(
+            source=source,
+            panel=panel,
+            forensics=forensics,
+            family=args.family,
+            panel_kind=args.panel_kind,
+            max_atoms=int(gate_zero_contract.model["max_atoms"]),
+            excluded_trace_ids=excluded_trace_ids,
+            active8_admission=active8_admission,
+        )
+        cache_receipt = _load_successor_cache_receipt(args.successor_cache_receipt)
+        expected_trace_set_sha256 = t1_selected_trace_set_sha256(
+            resolved_cache_panel.selected_records
+        )
+        if cache_receipt.selected_trace_set_sha256 != expected_trace_set_sha256:
+            raise SystemExit(
+                "T1 successor-cache receipt is bound to another exact panel trace set"
+            )
+        successor_cache = load_t1_successor_cache(
+            args.successor_cache_root,
+            cache_receipt,
+            expected_identity=expected_cache_identity,
+        )
+        if args.validate_successor_cache:
+            leaf_receipts = successor_cache.validate_all_leaves()
+            print(
+                json.dumps(
+                    {
+                        "status": "T1_SUCCESSOR_CACHE_VALIDATED_NO_OPTIMIZATION",
+                        "training_authorized": False,
+                        "gate_decision": None,
+                        "family": args.family,
+                        "panel_kind": args.panel_kind,
+                        "selected_trace_set_sha256": expected_trace_set_sha256,
+                        "validated_leaf_count": len(leaf_receipts),
+                        "cache_receipts": [asdict(receipt) for receipt in leaf_receipts],
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
     if args.audit_only:
         model, parity = build_scratch_ringcore_model(gate_zero_contract)
         model = model.to(device)
@@ -387,6 +553,7 @@ def main() -> int:
             max_atoms=int(gate_zero_contract.model["max_atoms"]),
             excluded_trace_ids=excluded_trace_ids,
             active8_admission=active8_admission,
+            successor_cache=successor_cache,
         )
         result = {
             "status": "T1_PANEL_CACHE_AUDIT_COMPLETE_NO_OPTIMIZATION",
@@ -443,6 +610,7 @@ def main() -> int:
             device=device,
             excluded_trace_ids=excluded_trace_ids,
             active8_admission=active8_admission,
+            successor_cache=successor_cache,
         )
     if args.output is not None:
         _write_if_absent(args.output, result)

@@ -288,6 +288,70 @@ def compile_successor_fiber_trace(
     )
 
 
+def compile_successor_fiber_trace_union(
+    model: FactorizedTraceletRateModel,
+    records: Iterable[PathRecord],
+    *,
+    time: float = 0.5,
+    system: RewriteSystem | None = None,
+) -> tuple[SuccessorFiberCacheRecord, ...]:
+    """Compile a selected union of complete addressed traces state-centrically.
+
+    Unlike :func:`compile_successor_fiber_shard`, this bounded development
+    helper does not claim coverage of every nonexcluded entry in any packed
+    shard.  It does require each selected trace exactly once and always emits
+    every progress row, including the terminal row.  Passing all occurrences to
+    the shared compiler together lets one exact persistent-slot source state be
+    enumerated once even when it appears in several traces or packed shards.
+    """
+
+    materialized = tuple(records)
+    if not materialized:
+        raise SuccessorFiberCacheBuildError(
+            "successor-fiber trace union cannot be empty"
+        )
+    if not 0.0 < float(time) < 1.0:
+        raise ValueError("support compilation time must lie strictly in (0, 1)")
+
+    addressed: list[tuple[tuple[str, int], PathRecord]] = []
+    for record in materialized:
+        address = record.corpus_address
+        if address is None:
+            raise SuccessorFiberCacheBuildError(
+                "successor-fiber trace union contains an unaddressed record"
+            )
+        addressed.append(
+            (
+                (
+                    address.packed_shard_content_sha256,
+                    address.entry_index,
+                ),
+                record,
+            )
+        )
+    exact_keys = tuple(key for key, _ in addressed)
+    if len(exact_keys) != len(set(exact_keys)):
+        raise SuccessorFiberCacheBuildError(
+            "successor-fiber trace union repeats an exact packed entry"
+        )
+
+    occurrences: list[_ProgressOccurrence] = []
+    output_offset = 0
+    for _, record in sorted(addressed, key=lambda item: item[0]):
+        record_occurrences = _record_occurrences(
+            record,
+            output_offset=output_offset,
+        )
+        occurrences.extend(record_occurrences)
+        output_offset += len(record_occurrences)
+    return _compile_occurrences(
+        model,
+        tuple(occurrences),
+        time=float(time),
+        system=system,
+    )
+
+
 def compile_successor_fiber_shard(
     model: FactorizedTraceletRateModel,
     records: Iterable[PathRecord],
@@ -380,4 +444,5 @@ __all__ = [
     "SuccessorFiberCacheBuildError",
     "compile_successor_fiber_shard",
     "compile_successor_fiber_trace",
+    "compile_successor_fiber_trace_union",
 ]

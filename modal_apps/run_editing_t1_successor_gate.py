@@ -48,16 +48,16 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from compose_v4.experiments.editing_t1_panel import (
+from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     ACTIVE8_T1_IDENTITY_FIELDS,
     EditingT1PanelError,
     within_family_repeated_panel_families,
 )
-from compose_v4.experiments.editing_t1_successor_runtime import (
+from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
     EDITING_T1_LOCAL_ADAPTER_FAMILIES,
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
-    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     EditingT1LaunchAuthority,
     EditingT1RuntimeError,
     load_editing_t1_launch_authority,
@@ -65,9 +65,13 @@ from compose_v4.experiments.editing_t1_successor_runtime import (
     validate_editing_t1_launch_authority,
     validate_t1_cache_shard_receipt,
 )
+from compose_v4.experiments.editing_t1_successor_cache import (  # noqa: E402
+    T1SuccessorCacheManifestReceipt,
+)
 
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
+T1_SUCCESSOR_CACHE_ROOT = ARTIFACT_ROOT / "_editing_t1_successor_cache"
 RUN_LABEL = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 FAMILIES = (
     "atom_insert",
@@ -88,7 +92,7 @@ PANEL_KINDS = (
 )
 GPU_CLASSES = ("L4", "A10", "A100")
 GLOBAL_FAMILY_SELECTOR = "all_families"
-T1_CONTRACT_RELATIVE_PATH = EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+T1_CONTRACT_RELATIVE_PATH = EDITING_T1_V5_CONTRACT_RELATIVE_PATH
 T1_PANEL_RELATIVE_PATH = EDITING_T1_V4_PANEL_RELATIVE_PATH
 T1_CAPACITY_CENSUS_RELATIVE_PATH = EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
 SERIALIZED_TREE_PATHS = (
@@ -102,6 +106,10 @@ T1_MODAL_LAUNCH_RECEIPT_SCHEMA = "compose.editing.t1_modal_launch_receipt"
 T1_MODAL_LAUNCH_RECEIPT_VERSION = 1
 T1_MODAL_LAUNCH_RECEIPT_STATUS = "COMPLETE_INDEPENDENT_T1_MODAL_RESULTS"
 T1_MODAL_LAUNCH_RECEIPT_ROOT = ROOT / "results" / "_editing_t1_launch_receipts"
+T1_MODAL_FAILURE_RECEIPT_SCHEMA = "compose.editing.t1_modal_failure_receipt"
+T1_MODAL_FAILURE_RECEIPT_VERSION = 1
+T1_MODAL_FAILURE_RECEIPT_STATUS = "INCOMPLETE_T1_MODAL_INVOCATION"
+T1_MODAL_FAILURE_RECEIPT_ROOT = ROOT / "results" / "_editing_t1_launch_failures"
 _T1_MODAL_LAUNCH_RECEIPT_FIELDS = {
     "schema",
     "schema_version",
@@ -132,6 +140,7 @@ _T1_MODAL_ARM_RECEIPT_FIELDS = {
     "panel_capacity_strata_sha256",
     *ACTIVE8_T1_IDENTITY_FIELDS,
     "cache_receipts",
+    "successor_cache_manifest_receipt",
     "requested_gpu_class",
     "observed_gpu_name",
 }
@@ -369,6 +378,21 @@ def validate_t1_modal_launch_receipt(
         canonical_receipts = _canonical_cache_receipts(arm["cache_receipts"])
         if arm["cache_receipts"] != canonical_receipts:
             raise ValueError("T1 Modal arm cache receipts are not canonically serialized")
+        cache_manifest_receipt = arm["successor_cache_manifest_receipt"]
+        if not isinstance(cache_manifest_receipt, Mapping):
+            raise ValueError("T1 Modal arm successor-cache manifest receipt is invalid")
+        try:
+            canonical_manifest_receipt = asdict(
+                T1SuccessorCacheManifestReceipt(**dict(cache_manifest_receipt))
+            )
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                "T1 Modal arm successor-cache manifest receipt is invalid"
+            ) from error
+        if dict(cache_manifest_receipt) != canonical_manifest_receipt:
+            raise ValueError(
+                "T1 Modal arm successor-cache manifest receipt is noncanonical"
+            )
     return receipt
 
 
@@ -453,6 +477,9 @@ def build_t1_modal_launch_receipt(
                 "panel_capacity_strata_sha256": result.get("panel_capacity_strata_sha256"),
                 **{field: result.get(field) for field in ACTIVE8_T1_IDENTITY_FIELDS},
                 "cache_receipts": result.get("cache_receipts"),
+                "successor_cache_manifest_receipt": result.get(
+                    "successor_cache_manifest_receipt"
+                ),
                 "requested_gpu_class": requested_gpu_class,
                 "observed_gpu_name": result.get("observed_gpu_name"),
             }
@@ -534,6 +561,171 @@ def t1_modal_launch_receipt_path(run_label: str) -> Path:
     return T1_MODAL_LAUNCH_RECEIPT_ROOT / f"{run_label}.json"
 
 
+def _failure_diagnostic(error: BaseException) -> dict[str, str]:
+    """Return bounded operational diagnostics; never treat them as gate evidence."""
+
+    return {
+        "error_type": f"{type(error).__module__}.{type(error).__qualname__}",
+        "error_message": str(error)[-20000:],
+    }
+
+
+def partition_t1_modal_results(
+    tasks: Sequence[Sequence[str]],
+    returned: Sequence[object],
+) -> tuple[
+    tuple[Sequence[str], ...],
+    tuple[Mapping[str, object], ...],
+    tuple[dict[str, object], ...],
+]:
+    """Separate successful arm identities from independently returned failures."""
+
+    if len(tasks) != len(returned):
+        raise ValueError("T1 Modal starmap returned the wrong number of arm outcomes")
+    successful_tasks: list[Sequence[str]] = []
+    successful_results: list[Mapping[str, object]] = []
+    failures: list[dict[str, object]] = []
+    for task, outcome in zip(tasks, returned, strict=True):
+        if len(task) != 6:
+            raise ValueError("T1 Modal task shape is invalid")
+        if isinstance(outcome, BaseException):
+            failures.append(
+                {
+                    "family": task[1],
+                    "panel_kind": task[2],
+                    "scope": task[3],
+                    **_failure_diagnostic(outcome),
+                }
+            )
+        elif isinstance(outcome, Mapping):
+            successful_tasks.append(task)
+            successful_results.append(outcome)
+        else:
+            raise TypeError("T1 Modal arm returned neither a result mapping nor an exception")
+    return (
+        tuple(successful_tasks),
+        tuple(successful_results),
+        tuple(failures),
+    )
+
+
+def build_t1_modal_failure_receipt(
+    *,
+    run_label: str,
+    source_commit: str,
+    requested_gpu_class: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
+    failures: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    """Build a self-hashed operational receipt for failed independent arms."""
+
+    _validate_run_label(run_label)
+    if re.fullmatch(r"[0-9a-f]{40}", source_commit) is None:
+        raise ValueError("T1 source_commit must be a full lowercase Git commit")
+    if requested_gpu_class not in GPU_CLASSES:
+        raise ValueError("unknown T1 requested GPU class")
+    if not failures:
+        raise ValueError("T1 Modal failure receipt requires at least one failed arm")
+    normalized_failures: list[dict[str, object]] = []
+    for failure in failures:
+        expected_fields = {
+            "family",
+            "panel_kind",
+            "scope",
+            "error_type",
+            "error_message",
+        }
+        observed = _require_exact_mapping(
+            failure,
+            expected_fields,
+            name="T1 Modal arm failure",
+        )
+        if (
+            observed["family"] not in (*FAMILIES, GLOBAL_FAMILY_SELECTOR)
+            or observed["panel_kind"] not in PANEL_KINDS
+            or observed["scope"] not in SCOPES
+            or not isinstance(observed["error_type"], str)
+            or not observed["error_type"]
+            or not isinstance(observed["error_message"], str)
+            or len(observed["error_message"]) > 20000
+        ):
+            raise ValueError("T1 Modal arm failure is invalid")
+        normalized_failures.append(dict(observed))
+    body: dict[str, object] = {
+        "schema": T1_MODAL_FAILURE_RECEIPT_SCHEMA,
+        "schema_version": T1_MODAL_FAILURE_RECEIPT_VERSION,
+        "status": T1_MODAL_FAILURE_RECEIPT_STATUS,
+        "training_authorized": False,
+        "gate_decision": None,
+        "run_label": run_label,
+        "source_commit": source_commit,
+        "requested_gpu_class": requested_gpu_class,
+        "active8_inventory": active8_inventory,
+        "active8_inventory_file_sha256": active8_inventory_file_sha256,
+        "failures": normalized_failures,
+    }
+    return {**body, "receipt_sha256": _stable_sha256(body)}
+
+
+def t1_modal_failure_receipt_path(run_label: str) -> Path:
+    _validate_run_label(run_label)
+    return T1_MODAL_FAILURE_RECEIPT_ROOT / f"{run_label}.json"
+
+
+def write_t1_modal_failure_receipt(
+    receipt: Mapping[str, object],
+    path: Path,
+) -> None:
+    """Atomically retain a bounded operational failure receipt."""
+
+    body = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
+    if (
+        receipt.get("schema") != T1_MODAL_FAILURE_RECEIPT_SCHEMA
+        or receipt.get("schema_version") != T1_MODAL_FAILURE_RECEIPT_VERSION
+        or receipt.get("status") != T1_MODAL_FAILURE_RECEIPT_STATUS
+        or receipt.get("training_authorized") is not False
+        or receipt.get("gate_decision") is not None
+        or receipt.get("receipt_sha256") != _stable_sha256(body)
+    ):
+        raise ValueError("T1 Modal failure receipt is invalid")
+    content = (
+        json.dumps(
+            receipt,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_name = handle.name
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(temporary_name, destination)
+        except FileExistsError:
+            if destination.read_bytes() != content:
+                raise FileExistsError(
+                    f"immutable T1 failure receipt already differs: {destination}"
+                ) from None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
+
+
 def _require_clean_serialized_tree() -> str:
     """Return the exact source revision or reject a dirty Modal image input."""
 
@@ -598,9 +790,11 @@ def _editing_t1_worker_command(
     family: str,
     panel_kind: str,
     scope: str,
+    successor_cache_root: Path,
+    successor_cache_receipt: Path,
     output: Path,
 ) -> list[str]:
-    """Name every serialized V4 authority artifact explicitly for the worker."""
+    """Name every serialized current authority artifact explicitly for the worker."""
 
     return [
         sys.executable,
@@ -623,10 +817,98 @@ def _editing_t1_worker_command(
         panel_kind,
         "--scope",
         scope,
+        "--successor-cache-root",
+        str(successor_cache_root),
+        "--successor-cache-receipt",
+        str(successor_cache_receipt),
         "--device",
         "cuda",
         "--output",
         str(output),
+    ]
+
+
+def _editing_t1_cache_worker_command(
+    *,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
+    family: str,
+    panel_kind: str,
+    successor_cache_root: Path,
+    receipt_output: Path,
+) -> list[str]:
+    """Build one run-independent panel cache in canonical CPU/FP32 context."""
+
+    return [
+        sys.executable,
+        str(REMOTE_ROOT / "scripts" / "run_editing_t1_successor_gate.py"),
+        "--transfer-root",
+        str(ARTIFACT_ROOT),
+        "--t1-contract",
+        str(REMOTE_ROOT / T1_CONTRACT_RELATIVE_PATH),
+        "--panel",
+        str(REMOTE_ROOT / T1_PANEL_RELATIVE_PATH),
+        "--capacity-census",
+        str(REMOTE_ROOT / T1_CAPACITY_CENSUS_RELATIVE_PATH),
+        "--active8-inventory",
+        active8_inventory,
+        "--active8-inventory-file-sha256",
+        active8_inventory_file_sha256,
+        "--family",
+        family,
+        "--panel-kind",
+        panel_kind,
+        "--scope",
+        "heads_only",
+        "--device",
+        "cpu",
+        "--successor-cache-root",
+        str(successor_cache_root),
+        "--build-successor-cache",
+        "--output",
+        str(receipt_output),
+    ]
+
+
+def _editing_t1_cache_validation_command(
+    *,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
+    family: str,
+    panel_kind: str,
+    successor_cache_root: Path,
+    receipt_path: Path,
+) -> list[str]:
+    """Validate one exact cache view and every leaf in a CPU-only worker."""
+
+    return [
+        sys.executable,
+        str(REMOTE_ROOT / "scripts" / "run_editing_t1_successor_gate.py"),
+        "--transfer-root",
+        str(ARTIFACT_ROOT),
+        "--t1-contract",
+        str(REMOTE_ROOT / T1_CONTRACT_RELATIVE_PATH),
+        "--panel",
+        str(REMOTE_ROOT / T1_PANEL_RELATIVE_PATH),
+        "--capacity-census",
+        str(REMOTE_ROOT / T1_CAPACITY_CENSUS_RELATIVE_PATH),
+        "--active8-inventory",
+        active8_inventory,
+        "--active8-inventory-file-sha256",
+        active8_inventory_file_sha256,
+        "--family",
+        family,
+        "--panel-kind",
+        panel_kind,
+        "--scope",
+        "heads_only",
+        "--device",
+        "cpu",
+        "--successor-cache-root",
+        str(successor_cache_root),
+        "--successor-cache-receipt",
+        str(receipt_path),
+        "--validate-successor-cache",
     ]
 
 
@@ -805,11 +1087,14 @@ def _run_arm_impl(
     scope: str,
     active8_inventory: str,
     active8_inventory_file_sha256: str,
+    successor_cache_root: str,
+    successor_cache_receipt: str,
     *,
     requested_gpu_class: str,
 ) -> dict[str, object]:
     """Execute one immutable T1 arm inside an already provisioned worker."""
 
+    artifact_volume.reload()
     _validate_run_label(run_label)
     active8_inventory, active8_inventory_file_sha256 = _resolve_active8_launch_binding(
         active8_inventory,
@@ -857,6 +1142,8 @@ def _run_arm_impl(
         family=family,
         panel_kind=panel_kind,
         scope=scope,
+        successor_cache_root=Path(successor_cache_root),
+        successor_cache_receipt=Path(successor_cache_receipt),
         output=output,
     )
     completed = _require_worker_command_success(
@@ -867,6 +1154,9 @@ def _run_arm_impl(
             text=True,
             capture_output=True,
         )
+    )
+    cache_manifest_receipt = _validated_cache_receipt_payload(
+        Path(successor_cache_receipt)
     )
     gpu_name = subprocess.run(
         ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
@@ -939,7 +1229,109 @@ def _run_arm_impl(
         ),
         "active8_support_contract_sha256": (payload["active8_support_contract_sha256"]),
         "cache_receipts": payload["cache_receipts"],
+        "successor_cache_manifest_receipt": dict(cache_manifest_receipt),
         "worker_stdout_tail": completed.stdout[-1000:],
+        "training_authorized": False,
+        "gate_decision": None,
+    }
+
+
+def _validated_cache_receipt_payload(path: Path) -> Mapping[str, object]:
+    try:
+        payload = json.loads(path.read_bytes())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"T1 cache receipt is unreadable: {path}") from error
+    if not isinstance(payload, Mapping):
+        raise RuntimeError("T1 cache receipt must be an object")
+    try:
+        receipt = T1SuccessorCacheManifestReceipt(**dict(payload))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("T1 cache receipt is invalid") from error
+    return asdict(receipt)
+
+
+@app.function(
+    image=image,
+    cpu=2,
+    memory=32768,
+    timeout=7200,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def build_panel_successor_cache(
+    family: str,
+    panel_kind: str,
+    active8_inventory: str,
+    active8_inventory_file_sha256: str,
+) -> dict[str, object]:
+    """Build or reuse one immutable panel cache without provisioning a GPU."""
+
+    artifact_volume.reload()
+    active8_inventory, active8_inventory_file_sha256 = _resolve_active8_launch_binding(
+        active8_inventory,
+        active8_inventory_file_sha256,
+    )
+    try:
+        launch_authority = load_editing_t1_launch_authority(
+            contract_path=REMOTE_ROOT / T1_CONTRACT_RELATIVE_PATH,
+            panel_path=REMOTE_ROOT / T1_PANEL_RELATIVE_PATH,
+            capacity_census_path=(REMOTE_ROOT / T1_CAPACITY_CENSUS_RELATIVE_PATH),
+            expected_active8_inventory_manifest_file_sha256=(
+                active8_inventory_file_sha256
+            ),
+        )
+    except EditingT1RuntimeError as error:
+        raise RuntimeError(str(error)) from error
+    view_root = (
+        T1_SUCCESSOR_CACHE_ROOT
+        / launch_authority.contract.sha256
+        / panel_kind
+        / family
+    )
+    receipt_path = view_root / "receipt.json"
+    cache_hit = receipt_path.is_file()
+    worker_stdout_tail = ""
+    if cache_hit:
+        command = _editing_t1_cache_validation_command(
+            active8_inventory=active8_inventory,
+            active8_inventory_file_sha256=active8_inventory_file_sha256,
+            family=family,
+            panel_kind=panel_kind,
+            successor_cache_root=view_root,
+            receipt_path=receipt_path,
+        )
+    else:
+        command = _editing_t1_cache_worker_command(
+            active8_inventory=active8_inventory,
+            active8_inventory_file_sha256=active8_inventory_file_sha256,
+            family=family,
+            panel_kind=panel_kind,
+            successor_cache_root=view_root,
+            receipt_output=receipt_path,
+        )
+    completed = _require_worker_command_success(
+        subprocess.run(
+            command,
+            cwd=REMOTE_ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+    )
+    worker_stdout_tail = completed.stdout[-1000:]
+    if not cache_hit:
+        artifact_volume.commit()
+    receipt = _validated_cache_receipt_payload(receipt_path)
+    return {
+        "family": family,
+        "panel_kind": panel_kind,
+        "successor_cache_root": str(view_root),
+        "successor_cache_receipt": str(receipt_path),
+        "successor_cache_receipt_file_sha256": hashlib.sha256(
+            receipt_path.read_bytes()
+        ).hexdigest(),
+        "cache_hit": cache_hit,
+        "receipt": dict(receipt),
+        "worker_stdout_tail": worker_stdout_tail,
         "training_authorized": False,
         "gate_decision": None,
     }
@@ -960,6 +1352,8 @@ def run_arm_l4(
     scope: str,
     active8_inventory: str,
     active8_inventory_file_sha256: str,
+    successor_cache_root: str,
+    successor_cache_receipt: str,
 ) -> dict[str, object]:
     return _run_arm_impl(
         run_label,
@@ -968,6 +1362,8 @@ def run_arm_l4(
         scope,
         active8_inventory,
         active8_inventory_file_sha256,
+        successor_cache_root,
+        successor_cache_receipt,
         requested_gpu_class="L4",
     )
 
@@ -987,6 +1383,8 @@ def run_arm_a10(
     scope: str,
     active8_inventory: str,
     active8_inventory_file_sha256: str,
+    successor_cache_root: str,
+    successor_cache_receipt: str,
 ) -> dict[str, object]:
     return _run_arm_impl(
         run_label,
@@ -995,6 +1393,8 @@ def run_arm_a10(
         scope,
         active8_inventory,
         active8_inventory_file_sha256,
+        successor_cache_root,
+        successor_cache_receipt,
         requested_gpu_class="A10",
     )
 
@@ -1014,6 +1414,8 @@ def run_arm_a100(
     scope: str,
     active8_inventory: str,
     active8_inventory_file_sha256: str,
+    successor_cache_root: str,
+    successor_cache_receipt: str,
 ) -> dict[str, object]:
     return _run_arm_impl(
         run_label,
@@ -1022,6 +1424,8 @@ def run_arm_a100(
         scope,
         active8_inventory,
         active8_inventory_file_sha256,
+        successor_cache_root,
+        successor_cache_receipt,
         requested_gpu_class="A100",
     )
 
@@ -1062,26 +1466,118 @@ def main(
         active8_inventory=active8_inventory,
         active8_inventory_file_sha256=active8_inventory_file_sha256,
     )
+    cache_tasks = tuple(
+        (
+            family,
+            panel_kind,
+            task_active8_inventory,
+            task_active8_file_sha256,
+        )
+        for family, panel_kind, task_active8_inventory, task_active8_file_sha256 in sorted(
+            {
+                (task[1], task[2], task[4], task[5])
+                for task in tasks
+            }
+        )
+    )
+    cache_outcomes = list(
+        build_panel_successor_cache.starmap(
+            cache_tasks,
+            return_exceptions=True,
+        )
+    )
+    cache_bindings: dict[tuple[str, str], Mapping[str, object]] = {}
+    cache_failures: list[dict[str, str]] = []
+    for cache_task, outcome in zip(cache_tasks, cache_outcomes, strict=True):
+        family, panel_kind, _, _ = cache_task
+        if isinstance(outcome, BaseException):
+            cache_failures.append(
+                {
+                    "family": family,
+                    "panel_kind": panel_kind,
+                    **_failure_diagnostic(outcome),
+                }
+            )
+            continue
+        if (
+            not isinstance(outcome, Mapping)
+            or outcome.get("family") != family
+            or outcome.get("panel_kind") != panel_kind
+            or not isinstance(outcome.get("successor_cache_root"), str)
+            or not isinstance(outcome.get("successor_cache_receipt"), str)
+        ):
+            raise RuntimeError("T1 CPU cache builder returned an invalid binding")
+        cache_bindings[(family, panel_kind)] = outcome
+    if cache_failures:
+        print(
+            json.dumps(
+                {
+                    "run_label": run_label,
+                    "status": "T1_CPU_CACHE_BUILD_FAILED_NO_GPU_DISPATCH",
+                    "cache_failures": cache_failures,
+                    "training_authorized": False,
+                    "gate_decision": None,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        raise RuntimeError(
+            f"{len(cache_failures)} of {len(cache_tasks)} T1 CPU cache builds failed; "
+            "no GPU arms were dispatched"
+        )
+    execution_tasks = tuple(
+        (
+            *task,
+            str(cache_bindings[(task[1], task[2])]["successor_cache_root"]),
+            str(cache_bindings[(task[1], task[2])]["successor_cache_receipt"]),
+        )
+        for task in tasks
+    )
     runner = _runner_for_gpu(gpu_class)
-    results = list(runner.starmap(tasks))
-    launch_receipt = build_t1_modal_launch_receipt(
-        run_label=run_label,
-        source_commit=source_commit,
-        requested_gpu_class=gpu_class,
-        tasks=tasks,
-        results=results,
+    returned = list(runner.starmap(execution_tasks, return_exceptions=True))
+    successful_tasks, successful_results, failures = partition_t1_modal_results(
+        tasks,
+        returned,
     )
-    launch_receipt_path = t1_modal_launch_receipt_path(run_label)
-    write_t1_modal_launch_receipt(
-        launch_receipt,
-        launch_receipt_path,
-    )
+    launch_receipt: Mapping[str, object] | None = None
+    launch_receipt_path: Path | None = None
+    if successful_results:
+        launch_receipt = build_t1_modal_launch_receipt(
+            run_label=run_label,
+            source_commit=source_commit,
+            requested_gpu_class=gpu_class,
+            tasks=successful_tasks,
+            results=successful_results,
+        )
+        launch_receipt_path = t1_modal_launch_receipt_path(run_label)
+        write_t1_modal_launch_receipt(
+            launch_receipt,
+            launch_receipt_path,
+        )
+    failure_receipt_path: Path | None = None
+    if failures:
+        failure_receipt = build_t1_modal_failure_receipt(
+            run_label=run_label,
+            source_commit=source_commit,
+            requested_gpu_class=gpu_class,
+            active8_inventory=active8_inventory,
+            active8_inventory_file_sha256=active8_inventory_file_sha256,
+            failures=failures,
+        )
+        failure_receipt_path = t1_modal_failure_receipt_path(run_label)
+        write_t1_modal_failure_receipt(
+            failure_receipt,
+            failure_receipt_path,
+        )
     print(
         json.dumps(
             {
                 "run_label": run_label,
                 "source_commit": source_commit,
-                "arm_count": len(results),
+                "requested_arm_count": len(tasks),
+                "successful_arm_count": len(successful_results),
+                "failed_arm_count": len(failures),
                 "gpu_class": gpu_class,
                 "active8_inventory": active8_inventory,
                 "active8_inventory_file_sha256": (active8_inventory_file_sha256),
@@ -1100,9 +1596,18 @@ def main(
                         _,
                     ) in tasks
                 ],
-                "results": results,
-                "launch_receipt": str(launch_receipt_path),
-                "launch_receipt_sha256": launch_receipt["receipt_sha256"],
+                "successor_caches": list(cache_bindings.values()),
+                "results": list(successful_results),
+                "failures": list(failures),
+                "launch_receipt": (
+                    None if launch_receipt_path is None else str(launch_receipt_path)
+                ),
+                "launch_receipt_sha256": (
+                    None if launch_receipt is None else launch_receipt["receipt_sha256"]
+                ),
+                "failure_receipt": (
+                    None if failure_receipt_path is None else str(failure_receipt_path)
+                ),
                 "training_authorized": False,
                 "gate_decision": None,
             },
@@ -1110,3 +1615,8 @@ def main(
             sort_keys=True,
         )
     )
+    if failures:
+        raise RuntimeError(
+            f"{len(failures)} of {len(tasks)} independent T1 arms failed; "
+            f"see {failure_receipt_path}"
+        )

@@ -68,8 +68,8 @@ from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_RESULT_VERSION,
     EDITING_T1_RUNTIME_CONTRACT_VERSION,
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
-    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     EditingT1RuntimeContract,
     EditingT1RuntimeError,
     T1CacheShardReceipt,
@@ -1052,7 +1052,7 @@ def test_direct_t1_cli_rejects_duplicate_local_adapter_arm(
         t1_cli.main()
 
 
-def test_direct_t1_cli_defaults_to_one_consistent_v4_authority():
+def test_direct_t1_cli_defaults_to_one_consistent_current_authority():
     from scripts import run_editing_t1_successor_gate as t1_cli
 
     args = t1_cli._parser().parse_args(
@@ -1067,7 +1067,7 @@ def test_direct_t1_cli_defaults_to_one_consistent_v4_authority():
             "cycle_attach",
         ]
     )
-    assert args.t1_contract == ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+    assert args.t1_contract == ROOT / EDITING_T1_V5_CONTRACT_RELATIVE_PATH
     assert args.panel == ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH
     assert args.capacity_census == ROOT / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
 
@@ -1710,6 +1710,25 @@ def test_runtime_fixture_round_trips_exact_production_cache():
     assert materialized.cache_receipts[0].record_count == (source.records[0].path.path_length + 1)
     assert materialized.prepared.fibers[0].target_key == (materialized.examples[0].target_key)
 
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="another exact panel trace set",
+    ):
+        materialize_t1_panel(
+            model,
+            source=source,
+            panel=panel,
+            forensics=forensics,
+            family=family,
+            panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
+            max_atoms=12,
+            excluded_trace_ids={},
+            active8_admission=active8_admission,
+            successor_cache=SimpleNamespace(
+                receipt=SimpleNamespace(selected_trace_set_sha256="0" * 64)
+            ),
+        )
+
     exact_trace_key = (
         source.records[0].corpus_address.packed_shard_content_sha256,
         source.records[0].corpus_address.entry_index,
@@ -1923,6 +1942,17 @@ def test_t1_durable_result_and_cache_receipts_fail_closed(tmp_path):
     observed = validate_editing_t1_result(result, **expected)
     assert observed["training_authorized"] is False
     assert validate_t1_cache_shard_receipt(receipt.__dict__, expected=receipt) == receipt
+
+    mapping_proxy_expected = {
+        **expected,
+        "expected_active8_identity": MappingProxyType(
+            dict(expected["expected_active8_identity"])
+        ),
+    }
+    assert (
+        validate_editing_t1_result(result, **mapping_proxy_expected)["result_sha256"]
+        == result["result_sha256"]
+    )
 
     result_path = tmp_path / "t1-result.json"
     result_path.write_text(json.dumps(result))

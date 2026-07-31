@@ -25,6 +25,14 @@ CACHE_RECEIPTS = [
         "record_count": 1,
     }
 ]
+CACHE_MANIFEST_RECEIPT = {
+    "manifest_relative_path": "manifests/" + "4" * 64 + ".json",
+    "manifest_sha256": "4" * 64,
+    "manifest_file_sha256": "5" * 64,
+    "manifest_file_bytes": 123,
+    "selected_trace_set_sha256": "6" * 64,
+    "initial_model_state_sha256": "7" * 64,
+}
 
 
 def _contract():
@@ -164,6 +172,9 @@ def _write_invocation(
         "panel_capacity_strata_sha256": contract.payload["panel_capacity_strata_sha256"],
         **{field: contract.payload[field] for field in t1_modal.ACTIVE8_T1_IDENTITY_FIELDS},
         "cache_receipts": copy.deepcopy(CACHE_RECEIPTS),
+        "successor_cache_manifest_receipt": copy.deepcopy(
+            CACHE_MANIFEST_RECEIPT
+        ),
     }
     receipt = t1_modal.build_t1_modal_launch_receipt(
         run_label=run_label,

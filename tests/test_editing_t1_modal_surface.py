@@ -22,8 +22,8 @@ from compose_v4.experiments.editing_t1_panel import (
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
-    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    EDITING_T1_V5_CONTRACT_RELATIVE_PATH,
     build_editing_t1_runtime_contract,
     validate_editing_t1_launch_authority,
 )
@@ -55,6 +55,14 @@ CACHE_RECEIPTS = [
         "record_count": 1,
     }
 ]
+CACHE_MANIFEST_RECEIPT = {
+    "manifest_relative_path": "manifests/" + "4" * 64 + ".json",
+    "manifest_sha256": "4" * 64,
+    "manifest_file_sha256": "5" * 64,
+    "manifest_file_bytes": 123,
+    "selected_trace_set_sha256": "6" * 64,
+    "initial_model_state_sha256": "7" * 64,
+}
 
 
 def _synthetic_launch_authority(
@@ -244,6 +252,9 @@ def _worker_result(
         "active8_unified_packed_manifest_sha256": "d" * 64,
         "active8_support_contract_sha256": "e" * 64,
         "cache_receipts": copy.deepcopy(CACHE_RECEIPTS),
+        "successor_cache_manifest_receipt": copy.deepcopy(
+            CACHE_MANIFEST_RECEIPT
+        ),
     }
 
 
@@ -560,10 +571,10 @@ def test_t1_modal_surface_rejects_symlink_escape_from_artifact_root(
         )
 
 
-def test_t1_modal_surface_uses_only_v4_authority_and_fails_closed(
+def test_t1_modal_surface_uses_only_current_authority_and_fails_closed(
     monkeypatch,
 ):
-    assert t1_modal.T1_CONTRACT_RELATIVE_PATH == EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+    assert t1_modal.T1_CONTRACT_RELATIVE_PATH == EDITING_T1_V5_CONTRACT_RELATIVE_PATH
     assert t1_modal.T1_PANEL_RELATIVE_PATH == EDITING_T1_V4_PANEL_RELATIVE_PATH
     assert (
         t1_modal.T1_CAPACITY_CENSUS_RELATIVE_PATH
@@ -596,13 +607,15 @@ def test_t1_modal_surface_uses_only_v4_authority_and_fails_closed(
         )
 
 
-def test_t1_modal_worker_names_every_v4_authority_path_explicitly():
+def test_t1_modal_worker_names_every_current_authority_path_explicitly():
     command = t1_modal._editing_t1_worker_command(
         active8_inventory=RESOLVED_ACTIVE8_INVENTORY,
         active8_inventory_file_sha256=ACTIVE8_FILE_SHA256,
         family="cycle_attach",
         panel_kind="unique_state",
         scope="heads_only",
+        successor_cache_root=t1_modal.ARTIFACT_ROOT / "cache",
+        successor_cache_receipt=t1_modal.ARTIFACT_ROOT / "cache" / "receipt.json",
         output=t1_modal.ARTIFACT_ROOT / "result.json",
     )
     values_by_flag = {
@@ -611,7 +624,7 @@ def test_t1_modal_worker_names_every_v4_authority_path_explicitly():
     }
     assert values_by_flag == {
         "--t1-contract": str(
-            t1_modal.REMOTE_ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+            t1_modal.REMOTE_ROOT / EDITING_T1_V5_CONTRACT_RELATIVE_PATH
         ),
         "--panel": str(
             t1_modal.REMOTE_ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH
@@ -621,6 +634,38 @@ def test_t1_modal_worker_names_every_v4_authority_path_explicitly():
             / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
         ),
     }
+    assert command[command.index("--successor-cache-root") + 1] == str(
+        t1_modal.ARTIFACT_ROOT / "cache"
+    )
+    assert command[command.index("--successor-cache-receipt") + 1] == str(
+        t1_modal.ARTIFACT_ROOT / "cache" / "receipt.json"
+    )
+
+    validation_command = t1_modal._editing_t1_cache_validation_command(
+        active8_inventory=RESOLVED_ACTIVE8_INVENTORY,
+        active8_inventory_file_sha256=ACTIVE8_FILE_SHA256,
+        family="cycle_attach",
+        panel_kind="unique_state",
+        successor_cache_root=t1_modal.ARTIFACT_ROOT / "cache",
+        receipt_path=t1_modal.ARTIFACT_ROOT / "cache" / "receipt.json",
+    )
+    assert "--validate-successor-cache" in validation_command
+    assert validation_command[validation_command.index("--device") + 1] == "cpu"
+    assert validation_command[
+        validation_command.index("--successor-cache-receipt") + 1
+    ] == str(t1_modal.ARTIFACT_ROOT / "cache" / "receipt.json")
+
+
+def test_t1_modal_cpu_cache_build_precedes_failure_isolated_gpu_dispatch():
+    source = Path(t1_modal.__file__).read_text()
+    main_source = source[source.index("def main(") :]
+
+    assert main_source.index("build_panel_successor_cache.starmap") < main_source.index(
+        "runner.starmap"
+    )
+    assert "T1_CPU_CACHE_BUILD_FAILED_NO_GPU_DISPATCH" in main_source
+    assert "return_exceptions=True" in main_source
+    assert "_editing_t1_cache_validation_command" in source
 
 
 def test_t1_modal_worker_failure_preserves_bounded_inner_diagnostics():
@@ -639,3 +684,70 @@ def test_t1_modal_worker_failure_preserves_bounded_inner_diagnostics():
     assert "o" * 8000 in message
     assert "e" * 8000 in message
     assert "prefix-" not in message
+
+
+def test_t1_modal_surface_isolates_failed_arm_from_successful_sibling():
+    tasks = (
+        (
+            "editing-t1-test-v1",
+            "cycle_attach",
+            "unique_state",
+            "heads_only",
+            RESOLVED_ACTIVE8_INVENTORY,
+            ACTIVE8_FILE_SHA256,
+        ),
+        (
+            "editing-t1-test-v1",
+            "bond_reorder",
+            "unique_state",
+            "heads_only",
+            RESOLVED_ACTIVE8_INVENTORY,
+            ACTIVE8_FILE_SHA256,
+        ),
+    )
+    successful = _worker_result()
+    error = RuntimeError("inner bond diagnostic")
+
+    successful_tasks, successful_results, failures = (
+        t1_modal.partition_t1_modal_results(tasks, (successful, error))
+    )
+
+    assert successful_tasks == (tasks[0],)
+    assert successful_results == (successful,)
+    assert failures == (
+        {
+            "family": "bond_reorder",
+            "panel_kind": "unique_state",
+            "scope": "heads_only",
+            "error_type": "builtins.RuntimeError",
+            "error_message": "inner bond diagnostic",
+        },
+    )
+
+
+def test_t1_modal_surface_atomically_retains_failure_receipt(tmp_path: Path):
+    failure = {
+        "family": "bond_reorder",
+        "panel_kind": "unique_state",
+        "scope": "heads_only",
+        "error_type": "builtins.RuntimeError",
+        "error_message": "visible diagnostic",
+    }
+    receipt = t1_modal.build_t1_modal_failure_receipt(
+        run_label="editing-t1-test-v1",
+        source_commit=SOURCE_COMMIT,
+        requested_gpu_class="L4",
+        active8_inventory=ACTIVE8_INVENTORY,
+        active8_inventory_file_sha256=ACTIVE8_FILE_SHA256,
+        failures=(failure,),
+    )
+    output = tmp_path / "failures" / "editing-t1-test-v1.json"
+
+    t1_modal.write_t1_modal_failure_receipt(receipt, output)
+    observed = json.loads(output.read_text())
+
+    assert observed == receipt
+    assert observed["status"] == "INCOMPLETE_T1_MODAL_INVOCATION"
+    assert observed["training_authorized"] is False
+    assert observed["gate_decision"] is None
+    assert observed["failures"] == [failure]
