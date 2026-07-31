@@ -3,8 +3,9 @@
 The runtime consumes the exact frozen validation source already qualified by
 Gate 0, resolves one immutable family panel, replays its recorded teacher
 actions, compiles and round-trips production successor-cache records, and only
-then performs bounded scratch-model micro-overfit.  Its result is diagnostic:
-there are no frozen numeric thresholds and no path to a GO decision.
+then performs bounded scratch-model micro-overfit. Its result is diagnostic,
+but the runtime contract prospectively freezes the numeric decision thresholds
+and their identity before any result exists.
 """
 
 from __future__ import annotations
@@ -13,6 +14,8 @@ import ast
 import hashlib
 import json
 import math
+import os
+import tempfile
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
@@ -47,15 +50,28 @@ from compose_v4.experiments.editing_p50_gate import (
 from compose_v4.experiments.editing_t1_panel import (
     ACTIVE8_T1_IDENTITY_FIELDS,
     EDITING_T1_DIAGNOSTIC_ONLY_FAMILIES,
+    EDITING_T1_CAPACITY_CENSUS_SCHEMA,
+    EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
+    EDITING_T1_CAPACITY_CENSUS_STATUS,
     EDITING_T1_GLOBAL_FAMILY_SELECTOR,
     EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
+    EDITING_T1_PANEL_SCHEMA,
+    EDITING_T1_PANEL_SCHEMA_VERSION,
+    EDITING_T1_PANEL_STATUS,
+    EDITING_T1_REPEATED_MAX_EXAMPLES,
+    EDITING_T1_REPEATED_MIN_EXAMPLES,
     EDITING_T1_REQUIRED_SCOPES,
     EDITING_T1_SUPPORT_TIME,
+    EDITING_T1_UNIQUE_EXAMPLES_PER_FAMILY,
     EDITING_T1_UNIQUE_PANEL_KIND,
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
     EditingT1PanelError,
     active8_t1_identity,
+    editing_t1_panel_capacity_strata_sha256,
+    editing_t1_panel_census_sha256,
+    editing_t1_panel_selection_sha256,
     selected_source_rows,
+    within_family_repeated_panel_families,
 )
 from compose_v4.experiments.factorized_successor_training import (
     rewrite_action_codec_sha256,
@@ -81,11 +97,20 @@ from compose_v4.rewrite.kernel import (
 )
 
 EDITING_T1_RUNTIME_CONTRACT_SCHEMA = "compose.editing.t1_successor_runtime_contract"
-EDITING_T1_RUNTIME_CONTRACT_VERSION = 3
+EDITING_T1_RUNTIME_CONTRACT_VERSION = 4
 EDITING_T1_RUNTIME_CONTRACT_STATUS = "FROZEN_BOUNDED_CAPACITY_DIAGNOSTIC_NO_TRAINING_AUTHORITY"
 EDITING_T1_RESULT_SCHEMA = "compose.editing.t1_successor_capacity_result"
-EDITING_T1_RESULT_VERSION = 3
+EDITING_T1_RESULT_VERSION = 4
 EDITING_T1_RESULT_STATUS = "CAPACITY_DIAGNOSTIC_COMPLETE_NO_GATE_DECISION"
+EDITING_T1_V4_CONTRACT_RELATIVE_PATH = Path(
+    "configs/editing_t1_successor_gate_v4.json"
+)
+EDITING_T1_V4_PANEL_RELATIVE_PATH = Path(
+    "diagnostics/coherence/editing_t1_successor_panel_v4_active8_2026-07-30.json"
+)
+EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH = Path(
+    "diagnostics/coherence/editing_t1_capacity_census_v1_active8_2026-07-30.json"
+)
 
 _CONTRACT_FIELDS = {
     "schema",
@@ -94,17 +119,26 @@ _CONTRACT_FIELDS = {
     "training_authorized",
     "gate_zero_runtime_contract_sha256",
     "panel_artifact_sha256",
+    "panel_selection_sha256",
+    "panel_census_sha256",
+    "panel_capacity_strata_sha256",
     "forensics_file_sha256",
     "charge_policy_audit_file_sha256",
     "charge_policy_exclusions_file_sha256",
     "charge_policy_exclusion_payload_sha256",
     "charge_policy_source_input_inventory_sha256",
+    "capacity_census_file_sha256",
+    "capacity_census_sha256",
     *ACTIVE8_T1_IDENTITY_FIELDS,
     "implementation_sha256",
     "families",
     "panel_kinds",
+    "required_high_candidate_families",
+    "required_aliased_teacher_families",
+    "within_family_repeated_families",
     "optimization",
     "thresholds",
+    "thresholds_sha256",
     "contract_sha256",
 }
 _OPTIMIZATION_FIELDS = {
@@ -127,9 +161,13 @@ _RESULT_FIELDS = {
     "training_authorized",
     "gate_decision",
     "numeric_thresholds_frozen",
+    "numeric_thresholds_sha256",
     "contract_sha256",
     "gate_zero_runtime_contract_sha256",
     "panel_artifact_sha256",
+    "panel_selection_sha256",
+    "panel_census_sha256",
+    "panel_capacity_strata_sha256",
     "charge_policy_exclusion_payload_sha256",
     "charge_policy_source_input_inventory_sha256",
     *ACTIVE8_T1_IDENTITY_FIELDS,
@@ -154,6 +192,19 @@ _CACHE_RECEIPT_FIELDS = {
     "cache_content_sha256",
     "encoded_sha256",
     "record_count",
+}
+_REQUIRED_RESULT_METRICS = {
+    "canonical_successor_nll",
+    "teacher_successor_probability",
+    "teacher_successor_top1_recall",
+    "teacher_family_probability",
+    "teacher_family_nll",
+    "within_teacher_family_successor_probability",
+    "within_teacher_family_successor_nll",
+    "mean_raw_mark_count",
+    "mean_canonical_successor_count",
+    "mean_alias_multiplicity",
+    "repeated_state_excess_nll_over_empirical_entropy",
 }
 
 
@@ -196,6 +247,7 @@ def require_editing_t1_family_scope_applicable(
 _IMPLEMENTATION_ENTRYPOINT_SOURCES = (
     "modal_apps/run_editing_t1_successor_gate.py",
     "scripts/build_editing_t1_successor_panel.py",
+    "scripts/freeze_editing_t1_successor_contract.py",
     "scripts/run_editing_t1_successor_gate.py",
     "src/compose_v4/experiments/editing_gate_zero_runtime.py",
     "src/compose_v4/experiments/editing_t1_panel.py",
@@ -376,6 +428,186 @@ def _require_exact_fields(
     return value
 
 
+def validate_editing_t1_numeric_thresholds(
+    value: object,
+) -> Mapping[str, float]:
+    """Validate the prospective finite T1 decision thresholds.
+
+    This function validates domains only. It deliberately does not choose any
+    scientific cutoff.
+    """
+
+    if not isinstance(value, Mapping) or set(value) != _THRESHOLD_FIELDS:
+        raise EditingT1RuntimeError("T1 numeric thresholds must be an exact threshold object")
+    thresholds = dict(value)
+    normalized: dict[str, float] = {}
+    for field, raw in thresholds.items():
+        if (
+            not isinstance(raw, (int, float))
+            or isinstance(raw, bool)
+            or not math.isfinite(float(raw))
+        ):
+            raise EditingT1RuntimeError(f"T1 numeric threshold {field} must be finite")
+        normalized[field] = float(raw)
+    for field in (
+        "minimum_unique_state_teacher_successor_top1",
+        "minimum_unique_state_teacher_successor_probability",
+    ):
+        if not 0.0 < normalized[field] <= 1.0:
+            raise EditingT1RuntimeError(f"T1 numeric threshold {field} must be in (0, 1]")
+    for field in (
+        "maximum_unique_state_teacher_successor_nll",
+        "maximum_global_repeated_state_excess_nll_over_empirical_entropy",
+    ):
+        if normalized[field] < 0.0:
+            raise EditingT1RuntimeError(f"T1 numeric threshold {field} must be nonnegative")
+    return MappingProxyType(normalized)
+
+
+def editing_t1_numeric_thresholds_sha256(value: object) -> str:
+    """Return the canonical identity of a validated numeric threshold map."""
+
+    return _stable_sha256(dict(validate_editing_t1_numeric_thresholds(value)))
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        while block := handle.read(1 << 20):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _load_bounded_json_object(
+    path: Path,
+    *,
+    name: str,
+    max_file_bytes: int = 1 << 24,
+) -> dict[str, Any]:
+    source = Path(path)
+    if not source.is_file() or source.stat().st_size > max_file_bytes:
+        raise EditingT1RuntimeError(f"{name} is absent or exceeds its size bound: {source}")
+    try:
+        payload = json.loads(source.read_bytes())
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise EditingT1RuntimeError(f"{name} is invalid JSON: {source}") from error
+    if not isinstance(payload, dict):
+        raise EditingT1RuntimeError(f"{name} must contain one JSON object")
+    return payload
+
+
+def _validate_panel_authority_envelope(
+    panel: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    payload = dict(panel)
+    artifact_sha256 = payload.get("artifact_sha256")
+    body = {key: value for key, value in payload.items() if key != "artifact_sha256"}
+    if (
+        payload.get("schema") != EDITING_T1_PANEL_SCHEMA
+        or payload.get("schema_version") != EDITING_T1_PANEL_SCHEMA_VERSION
+        or payload.get("status") != EDITING_T1_PANEL_STATUS
+        or payload.get("training_authorized") is not False
+        or not _is_sha256(artifact_sha256)
+        or artifact_sha256 != _stable_sha256(body)
+    ):
+        raise EditingT1RuntimeError(
+            "T1 V4 panel schema, status, or self-hash is invalid"
+        )
+    source = payload.get("source")
+    selection = payload.get("selection")
+    census = payload.get("census")
+    thresholds = payload.get("thresholds")
+    if not all(isinstance(item, Mapping) for item in (source, selection, census, thresholds)):
+        raise EditingT1RuntimeError(
+            "T1 V4 panel lacks a source, selection, census, or threshold envelope"
+        )
+    assert isinstance(source, Mapping)
+    assert isinstance(selection, Mapping)
+    assert isinstance(thresholds, Mapping)
+    for field in (
+        "forensics_file_sha256",
+        "charge_policy_audit_file_sha256",
+        "charge_policy_exclusions_file_sha256",
+        "charge_policy_exclusion_payload_sha256",
+        "charge_policy_source_input_inventory_sha256",
+        "capacity_census_file_sha256",
+        "capacity_census_sha256",
+        *ACTIVE8_T1_IDENTITY_FIELDS,
+    ):
+        if not _is_sha256(source.get(field)):
+            raise EditingT1RuntimeError(
+                f"T1 V4 panel source {field} must be a SHA-256"
+            )
+    if set(thresholds) != _THRESHOLD_FIELDS or any(
+        value is not None for value in thresholds.values()
+    ):
+        raise EditingT1RuntimeError(
+            "T1 V4 panel must remain result-independent with null thresholds"
+        )
+    if tuple(selection.get("required_high_candidate_families", ())) != (
+        RINGCORE_EDITING_FAMILIES
+    ):
+        raise EditingT1RuntimeError(
+            "T1 V4 panel does not require high-candidate coverage for all Active8 families"
+        )
+    aliased = selection.get("required_aliased_teacher_families")
+    if (
+        not isinstance(aliased, list)
+        or len(aliased) != len(set(aliased))
+        or tuple(aliased)
+        != tuple(family for family in RINGCORE_EDITING_FAMILIES if family in aliased)
+    ):
+        raise EditingT1RuntimeError(
+            "T1 V4 panel aliased-teacher family availability is malformed"
+        )
+    try:
+        within_family_repeated_panel_families(payload)
+        editing_t1_panel_selection_sha256(payload)
+        editing_t1_panel_census_sha256(payload)
+        editing_t1_panel_capacity_strata_sha256(payload)
+    except EditingT1PanelError as error:
+        raise EditingT1RuntimeError(
+            "T1 V4 panel authority envelope is incomplete"
+        ) from error
+    return MappingProxyType(payload)
+
+
+def _validate_capacity_census_authority_envelope(
+    census: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    payload = dict(census)
+    census_sha256 = payload.get("census_sha256")
+    body = {key: value for key, value in payload.items() if key != "census_sha256"}
+    if (
+        payload.get("schema") != EDITING_T1_CAPACITY_CENSUS_SCHEMA
+        or payload.get("schema_version") != EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION
+        or payload.get("status") != EDITING_T1_CAPACITY_CENSUS_STATUS
+        or payload.get("training_authorized") is not False
+        or not _is_sha256(census_sha256)
+        or census_sha256 != _stable_sha256(body)
+    ):
+        raise EditingT1RuntimeError(
+            "T1 capacity census schema, status, or self-hash is invalid"
+        )
+    for field in (
+        "forensics_file_sha256",
+        "gate_zero_runtime_contract_sha256",
+        "unified_packed_manifest_sha256",
+        "representability_overlay_sha256",
+        *ACTIVE8_T1_IDENTITY_FIELDS,
+    ):
+        if not _is_sha256(payload.get(field)):
+            raise EditingT1RuntimeError(
+                f"T1 capacity census {field} must be a SHA-256"
+            )
+    rows = payload.get("rows")
+    if not isinstance(rows, list) or not rows:
+        raise EditingT1RuntimeError(
+            "T1 capacity census must contain production-recomputed support rows"
+        )
+    return MappingProxyType(payload)
+
+
 @dataclass(frozen=True)
 class EditingT1RuntimeContract:
     """Exact inputs and bounded optimizer settings for T1."""
@@ -402,29 +634,47 @@ class EditingT1RuntimeContract:
         for field in (
             "gate_zero_runtime_contract_sha256",
             "panel_artifact_sha256",
+            "panel_selection_sha256",
+            "panel_census_sha256",
+            "panel_capacity_strata_sha256",
             "forensics_file_sha256",
             "charge_policy_audit_file_sha256",
             "charge_policy_exclusions_file_sha256",
             "charge_policy_exclusion_payload_sha256",
             "charge_policy_source_input_inventory_sha256",
+            "capacity_census_file_sha256",
+            "capacity_census_sha256",
             *ACTIVE8_T1_IDENTITY_FIELDS,
             "implementation_sha256",
         ):
             if not _is_sha256(frozen[field]):
                 raise EditingT1RuntimeError(f"T1 contract {field} must be a SHA-256")
-        if (
-            frozen["active8_support_contract_sha256"]
-            != frozen["gate_zero_runtime_contract_sha256"]
-        ):
-            raise EditingT1RuntimeError(
-                "T1 contract Gate0 and Active8 support identities disagree"
-            )
+        if frozen["active8_support_contract_sha256"] != frozen["gate_zero_runtime_contract_sha256"]:
+            raise EditingT1RuntimeError("T1 contract Gate0 and Active8 support identities disagree")
         if frozen["implementation_sha256"] != (editing_t1_implementation_sha256()):
             raise EditingT1RuntimeError("T1 implementation source hash drifted")
         if tuple(frozen["families"]) != RINGCORE_EDITING_FAMILIES:
             raise EditingT1RuntimeError(
                 "T1 contract must name the ordered eight active pilot families"
             )
+        if tuple(frozen["required_high_candidate_families"]) != (RINGCORE_EDITING_FAMILIES):
+            raise EditingT1RuntimeError(
+                "T1 contract must require high-candidate coverage for all Active8 families"
+            )
+        for field in (
+            "required_aliased_teacher_families",
+            "within_family_repeated_families",
+        ):
+            values = frozen[field]
+            if (
+                not isinstance(values, list)
+                or len(values) != len(set(values))
+                or tuple(values)
+                != tuple(family for family in RINGCORE_EDITING_FAMILIES if family in values)
+            ):
+                raise EditingT1RuntimeError(
+                    f"T1 contract {field} must be an ordered Active8 subset"
+                )
         if tuple(frozen["panel_kinds"]) != (
             EDITING_T1_UNIQUE_PANEL_KIND,
             EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
@@ -458,13 +708,14 @@ class EditingT1RuntimeContract:
             or any(point <= 0 or point > optimization["steps"] for point in points)
         ):
             raise EditingT1RuntimeError("T1 report points must be sorted unique in-range integers")
-        thresholds = _require_exact_fields(
-            frozen["thresholds"],
-            _THRESHOLD_FIELDS,
-            name="T1 thresholds",
-        )
-        if any(value is not None for value in thresholds.values()):
-            raise EditingT1RuntimeError("T1 thresholds must remain explicitly null")
+        thresholds_sha256 = editing_t1_numeric_thresholds_sha256(frozen["thresholds"])
+        if (
+            not _is_sha256(frozen["thresholds_sha256"])
+            or frozen["thresholds_sha256"] != thresholds_sha256
+        ):
+            raise EditingT1RuntimeError(
+                "T1 numeric thresholds are not bound to their canonical hash"
+            )
         object.__setattr__(self, "payload", MappingProxyType(frozen))
 
     @property
@@ -474,6 +725,14 @@ class EditingT1RuntimeContract:
     @property
     def optimization(self) -> Mapping[str, Any]:
         return MappingProxyType(dict(self.payload["optimization"]))
+
+    @property
+    def numeric_thresholds(self) -> Mapping[str, float]:
+        return validate_editing_t1_numeric_thresholds(self.payload["thresholds"])
+
+    @property
+    def numeric_thresholds_sha256(self) -> str:
+        return str(self.payload["thresholds_sha256"])
 
     @property
     def training_authorized(self) -> bool:
@@ -488,14 +747,362 @@ class EditingT1RuntimeContract:
 def load_editing_t1_runtime_contract(
     path: Path,
 ) -> EditingT1RuntimeContract:
-    source = Path(path)
-    if not source.is_file():
-        raise EditingT1RuntimeError(f"T1 runtime contract is absent: {source}")
+    return EditingT1RuntimeContract(
+        _load_bounded_json_object(
+            path,
+            name="T1 runtime contract",
+            max_file_bytes=1 << 20,
+        )
+    )
+
+
+@dataclass(frozen=True)
+class EditingT1LaunchAuthority:
+    """Cross-validated V4 artifacts required before constructing a T1 arm."""
+
+    contract: EditingT1RuntimeContract
+    panel: Mapping[str, Any]
+    capacity_census: Mapping[str, Any]
+    capacity_census_file_sha256: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.contract, EditingT1RuntimeContract):
+            raise TypeError("T1 launch authority requires a validated runtime contract")
+        if not _is_sha256(self.capacity_census_file_sha256):
+            raise EditingT1RuntimeError(
+                "T1 launch authority capacity census file identity must be a SHA-256"
+            )
+        object.__setattr__(self, "panel", MappingProxyType(dict(self.panel)))
+        object.__setattr__(
+            self,
+            "capacity_census",
+            MappingProxyType(dict(self.capacity_census)),
+        )
+
+    @property
+    def active8_identity(self) -> Mapping[str, str]:
+        return MappingProxyType(
+            {
+                field: str(self.contract.payload[field])
+                for field in ACTIVE8_T1_IDENTITY_FIELDS
+            }
+        )
+
+
+def validate_editing_t1_launch_authority(
+    *,
+    contract: EditingT1RuntimeContract | Mapping[str, Any],
+    panel: Mapping[str, Any],
+    capacity_census: Mapping[str, Any],
+    capacity_census_file_sha256: str,
+    expected_active8_inventory_manifest_file_sha256: str,
+) -> EditingT1LaunchAuthority:
+    """Cross-check every lightweight V4 authority identity before execution.
+
+    This check is intentionally independent of expensive source replay. The
+    direct worker still performs the full panel and production-census
+    re-derivations before optimization.
+    """
+
+    runtime_contract = (
+        contract
+        if isinstance(contract, EditingT1RuntimeContract)
+        else EditingT1RuntimeContract(contract)
+    )
+    validated_panel = _validate_panel_authority_envelope(panel)
+    validated_census = _validate_capacity_census_authority_envelope(capacity_census)
+    if not _is_sha256(capacity_census_file_sha256):
+        raise EditingT1RuntimeError(
+            "T1 capacity census physical file identity must be a SHA-256"
+        )
+    if not _is_sha256(expected_active8_inventory_manifest_file_sha256):
+        raise EditingT1RuntimeError(
+            "T1 launch Active8 manifest identity must be a SHA-256"
+        )
+    source = validated_panel["source"]
+    selection = validated_panel["selection"]
+    assert isinstance(source, Mapping)
+    assert isinstance(selection, Mapping)
+
+    expected_contract_bindings = {
+        "panel_artifact_sha256": validated_panel["artifact_sha256"],
+        "panel_selection_sha256": editing_t1_panel_selection_sha256(
+            validated_panel
+        ),
+        "panel_census_sha256": editing_t1_panel_census_sha256(validated_panel),
+        "panel_capacity_strata_sha256": (
+            editing_t1_panel_capacity_strata_sha256(validated_panel)
+        ),
+        "forensics_file_sha256": source["forensics_file_sha256"],
+        "charge_policy_audit_file_sha256": source[
+            "charge_policy_audit_file_sha256"
+        ],
+        "charge_policy_exclusions_file_sha256": source[
+            "charge_policy_exclusions_file_sha256"
+        ],
+        "charge_policy_exclusion_payload_sha256": source[
+            "charge_policy_exclusion_payload_sha256"
+        ],
+        "charge_policy_source_input_inventory_sha256": source[
+            "charge_policy_source_input_inventory_sha256"
+        ],
+        "capacity_census_file_sha256": capacity_census_file_sha256,
+        "capacity_census_sha256": validated_census["census_sha256"],
+        **{field: source[field] for field in ACTIVE8_T1_IDENTITY_FIELDS},
+    }
+    mismatches = {
+        field: {
+            "contract": runtime_contract.payload[field],
+            "authority": expected,
+        }
+        for field, expected in expected_contract_bindings.items()
+        if runtime_contract.payload[field] != expected
+    }
+    if mismatches:
+        raise EditingT1RuntimeError(
+            f"T1 V4 contract disagrees with panel/census authority: {mismatches}"
+        )
+    if (
+        source["capacity_census_file_sha256"] != capacity_census_file_sha256
+        or source["capacity_census_sha256"] != validated_census["census_sha256"]
+    ):
+        raise EditingT1RuntimeError(
+            "T1 V4 panel names another physical or logical capacity census"
+        )
+    census_bindings = {
+        "forensics_file_sha256": source["forensics_file_sha256"],
+        "gate_zero_runtime_contract_sha256": runtime_contract.payload[
+            "gate_zero_runtime_contract_sha256"
+        ],
+        "unified_packed_manifest_sha256": runtime_contract.payload[
+            "active8_unified_packed_manifest_sha256"
+        ],
+        **{
+            field: runtime_contract.payload[field]
+            for field in ACTIVE8_T1_IDENTITY_FIELDS
+        },
+    }
+    census_mismatches = {
+        field: {
+            "census": validated_census[field],
+            "authority": expected,
+        }
+        for field, expected in census_bindings.items()
+        if validated_census[field] != expected
+    }
+    if census_mismatches:
+        raise EditingT1RuntimeError(
+            f"T1 capacity census disagrees with V4 launch authority: {census_mismatches}"
+        )
+    if (
+        expected_active8_inventory_manifest_file_sha256
+        != runtime_contract.payload["active8_inventory_manifest_file_sha256"]
+    ):
+        raise EditingT1RuntimeError(
+            "T1 launch names another physical Active8 inventory manifest"
+        )
+    if list(selection["required_high_candidate_families"]) != list(
+        runtime_contract.payload["required_high_candidate_families"]
+    ):
+        raise EditingT1RuntimeError(
+            "T1 high-candidate family requirements drifted after contract freeze"
+        )
+    if list(selection["required_aliased_teacher_families"]) != list(
+        runtime_contract.payload["required_aliased_teacher_families"]
+    ):
+        raise EditingT1RuntimeError(
+            "T1 aliased-teacher family requirements drifted after contract freeze"
+        )
+    if list(within_family_repeated_panel_families(validated_panel)) != list(
+        runtime_contract.payload["within_family_repeated_families"]
+    ):
+        raise EditingT1RuntimeError(
+            "T1 repeated-state family availability drifted after contract freeze"
+        )
+    return EditingT1LaunchAuthority(
+        contract=runtime_contract,
+        panel=validated_panel,
+        capacity_census=validated_census,
+        capacity_census_file_sha256=capacity_census_file_sha256,
+    )
+
+
+def load_editing_t1_launch_authority(
+    *,
+    contract_path: Path,
+    panel_path: Path,
+    capacity_census_path: Path,
+    expected_active8_inventory_manifest_file_sha256: str,
+) -> EditingT1LaunchAuthority:
+    """Load and cross-check the exact serialized V4 launch authority."""
+
+    capacity_path = Path(capacity_census_path)
+    capacity_census = _load_bounded_json_object(
+        capacity_path,
+        name="T1 capacity census",
+    )
+    return validate_editing_t1_launch_authority(
+        contract=load_editing_t1_runtime_contract(contract_path),
+        panel=_load_bounded_json_object(
+            panel_path,
+            name="T1 V4 panel",
+        ),
+        capacity_census=capacity_census,
+        capacity_census_file_sha256=_file_sha256(capacity_path),
+        expected_active8_inventory_manifest_file_sha256=(
+            expected_active8_inventory_manifest_file_sha256
+        ),
+    )
+
+
+def build_editing_t1_runtime_contract(
+    *,
+    gate_zero_runtime_contract_sha256: str,
+    panel: Mapping[str, Any],
+    capacity_census: Mapping[str, Any],
+    capacity_census_file_sha256: str,
+    active8_identity: Mapping[str, str],
+    optimization: Mapping[str, Any],
+    thresholds: Mapping[str, float],
+) -> EditingT1RuntimeContract:
+    """Build one deterministic V4 contract from already frozen evidence.
+
+    Numeric thresholds and optimizer settings are inputs. This helper validates
+    and binds them but never chooses them from results.
+    """
+
+    if not _is_sha256(gate_zero_runtime_contract_sha256):
+        raise EditingT1RuntimeError(
+            "T1 Gate-0 runtime contract identity must be a SHA-256"
+        )
+    identity = _require_exact_fields(
+        dict(active8_identity),
+        set(ACTIVE8_T1_IDENTITY_FIELDS),
+        name="T1 Active8 identity",
+    )
+    if any(not _is_sha256(identity[field]) for field in ACTIVE8_T1_IDENTITY_FIELDS):
+        raise EditingT1RuntimeError(
+            "T1 Active8 identity contains a non-SHA-256 value"
+        )
+    validated_panel = _validate_panel_authority_envelope(panel)
+    validated_census = _validate_capacity_census_authority_envelope(capacity_census)
+    validated_thresholds = dict(validate_editing_t1_numeric_thresholds(thresholds))
+    source = validated_panel["source"]
+    selection = validated_panel["selection"]
+    assert isinstance(source, Mapping)
+    assert isinstance(selection, Mapping)
+    body: dict[str, Any] = {
+        "schema": EDITING_T1_RUNTIME_CONTRACT_SCHEMA,
+        "schema_version": EDITING_T1_RUNTIME_CONTRACT_VERSION,
+        "status": EDITING_T1_RUNTIME_CONTRACT_STATUS,
+        "training_authorized": False,
+        "gate_zero_runtime_contract_sha256": gate_zero_runtime_contract_sha256,
+        "panel_artifact_sha256": validated_panel["artifact_sha256"],
+        "panel_selection_sha256": editing_t1_panel_selection_sha256(
+            validated_panel
+        ),
+        "panel_census_sha256": editing_t1_panel_census_sha256(validated_panel),
+        "panel_capacity_strata_sha256": (
+            editing_t1_panel_capacity_strata_sha256(validated_panel)
+        ),
+        "forensics_file_sha256": source["forensics_file_sha256"],
+        "charge_policy_audit_file_sha256": source[
+            "charge_policy_audit_file_sha256"
+        ],
+        "charge_policy_exclusions_file_sha256": source[
+            "charge_policy_exclusions_file_sha256"
+        ],
+        "charge_policy_exclusion_payload_sha256": source[
+            "charge_policy_exclusion_payload_sha256"
+        ],
+        "charge_policy_source_input_inventory_sha256": source[
+            "charge_policy_source_input_inventory_sha256"
+        ],
+        "capacity_census_file_sha256": capacity_census_file_sha256,
+        "capacity_census_sha256": validated_census["census_sha256"],
+        **identity,
+        "implementation_sha256": editing_t1_implementation_sha256(),
+        "families": list(RINGCORE_EDITING_FAMILIES),
+        "panel_kinds": [
+            EDITING_T1_UNIQUE_PANEL_KIND,
+            EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
+            EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
+        ],
+        "required_high_candidate_families": list(
+            selection["required_high_candidate_families"]
+        ),
+        "required_aliased_teacher_families": list(
+            selection["required_aliased_teacher_families"]
+        ),
+        "within_family_repeated_families": list(
+            within_family_repeated_panel_families(validated_panel)
+        ),
+        "optimization": dict(optimization),
+        "thresholds": validated_thresholds,
+        "thresholds_sha256": editing_t1_numeric_thresholds_sha256(
+            validated_thresholds
+        ),
+    }
+    contract = EditingT1RuntimeContract(
+        {**body, "contract_sha256": _stable_sha256(body)}
+    )
+    return validate_editing_t1_launch_authority(
+        contract=contract,
+        panel=validated_panel,
+        capacity_census=validated_census,
+        capacity_census_file_sha256=capacity_census_file_sha256,
+        expected_active8_inventory_manifest_file_sha256=identity[
+            "active8_inventory_manifest_file_sha256"
+        ],
+    ).contract
+
+
+def write_editing_t1_runtime_contract(
+    contract: EditingT1RuntimeContract | Mapping[str, Any],
+    path: Path,
+) -> None:
+    """Atomically freeze canonical V4 JSON without overwriting other bytes."""
+
+    runtime_contract = (
+        contract
+        if isinstance(contract, EditingT1RuntimeContract)
+        else EditingT1RuntimeContract(contract)
+    )
+    content = (
+        json.dumps(
+            dict(runtime_contract.payload),
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
     try:
-        payload = json.loads(source.read_bytes())
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise EditingT1RuntimeError("T1 runtime contract is invalid JSON") from error
-    return EditingT1RuntimeContract(payload)
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_name = handle.name
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(temporary_name, destination)
+        except FileExistsError:
+            if destination.read_bytes() != content:
+                raise EditingT1RuntimeError(
+                    "immutable T1 V4 runtime contract already exists with different bytes"
+                ) from None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)
@@ -590,9 +1197,55 @@ def _validated_active8_identity(
     for field in ACTIVE8_T1_IDENTITY_FIELDS:
         if not _is_sha256(payload[field]):
             raise EditingT1RuntimeError(f"{name} {field} must be a SHA-256")
-    return MappingProxyType(
-        {field: str(payload[field]) for field in ACTIVE8_T1_IDENTITY_FIELDS}
-    )
+    return MappingProxyType({field: str(payload[field]) for field in ACTIVE8_T1_IDENTITY_FIELDS})
+
+
+def _validate_result_metrics(
+    value: object,
+    *,
+    name: str,
+    expected_example_count: int,
+) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise EditingT1RuntimeError(f"{name} must be a metric object")
+    missing = _REQUIRED_RESULT_METRICS - set(value)
+    if missing:
+        raise EditingT1RuntimeError(f"{name} lacks required successor metrics: {sorted(missing)}")
+    if value.get("n_examples") != expected_example_count:
+        raise EditingT1RuntimeError(f"{name} example count disagrees with the durable result")
+    normalized: dict[str, float] = {}
+    for field in _REQUIRED_RESULT_METRICS:
+        raw = value[field]
+        if (
+            not isinstance(raw, (int, float))
+            or isinstance(raw, bool)
+            or not math.isfinite(float(raw))
+        ):
+            raise EditingT1RuntimeError(f"{name} metric {field} must be finite")
+        normalized[field] = float(raw)
+    for field in (
+        "teacher_successor_probability",
+        "teacher_successor_top1_recall",
+        "teacher_family_probability",
+        "within_teacher_family_successor_probability",
+    ):
+        if not 0.0 <= normalized[field] <= 1.0:
+            raise EditingT1RuntimeError(f"{name} metric {field} must be in [0, 1]")
+    for field in (
+        "canonical_successor_nll",
+        "teacher_family_nll",
+        "within_teacher_family_successor_nll",
+    ):
+        if normalized[field] < 0.0:
+            raise EditingT1RuntimeError(f"{name} metric {field} must be nonnegative")
+    for field in (
+        "mean_raw_mark_count",
+        "mean_canonical_successor_count",
+        "mean_alias_multiplicity",
+    ):
+        if normalized[field] <= 0.0:
+            raise EditingT1RuntimeError(f"{name} metric {field} must be positive")
+    return MappingProxyType(dict(value))
 
 
 def validate_editing_t1_result(
@@ -600,7 +1253,11 @@ def validate_editing_t1_result(
     *,
     expected_result_sha256: str,
     expected_contract_sha256: str,
+    expected_numeric_thresholds_sha256: str,
     expected_panel_artifact_sha256: str,
+    expected_panel_selection_sha256: str,
+    expected_panel_census_sha256: str,
+    expected_panel_capacity_strata_sha256: str,
     expected_active8_identity: Mapping[str, Any],
     expected_cache_receipts: Sequence[Mapping[str, Any] | T1CacheShardReceipt],
 ) -> Mapping[str, Any]:
@@ -609,7 +1266,17 @@ def validate_editing_t1_result(
     for name, value in (
         ("expected_result_sha256", expected_result_sha256),
         ("expected_contract_sha256", expected_contract_sha256),
+        (
+            "expected_numeric_thresholds_sha256",
+            expected_numeric_thresholds_sha256,
+        ),
         ("expected_panel_artifact_sha256", expected_panel_artifact_sha256),
+        ("expected_panel_selection_sha256", expected_panel_selection_sha256),
+        ("expected_panel_census_sha256", expected_panel_census_sha256),
+        (
+            "expected_panel_capacity_strata_sha256",
+            expected_panel_capacity_strata_sha256,
+        ),
     ):
         if not _is_sha256(value):
             raise ValueError(f"{name} must be a lowercase SHA-256")
@@ -621,7 +1288,7 @@ def validate_editing_t1_result(
         or payload["status"] != EDITING_T1_RESULT_STATUS
         or payload["training_authorized"] is not False
         or payload["gate_decision"] is not None
-        or payload["numeric_thresholds_frozen"] is not False
+        or payload["numeric_thresholds_frozen"] is not True
         or not _is_sha256(payload["result_sha256"])
         or payload["result_sha256"] != _stable_sha256(body)
         or payload["result_sha256"] != expected_result_sha256
@@ -629,23 +1296,29 @@ def validate_editing_t1_result(
         raise EditingT1RuntimeError("T1 durable result identity, status, or self-hash is invalid")
     if payload["contract_sha256"] != expected_contract_sha256:
         raise EditingT1RuntimeError("T1 durable result is bound to another runtime contract")
+    if payload["numeric_thresholds_sha256"] != expected_numeric_thresholds_sha256:
+        raise EditingT1RuntimeError(
+            "T1 durable result is bound to another prospective threshold map"
+        )
     if payload["panel_artifact_sha256"] != expected_panel_artifact_sha256:
         raise EditingT1RuntimeError("T1 durable result is bound to another panel artifact")
+    for field, expected in (
+        ("panel_selection_sha256", expected_panel_selection_sha256),
+        ("panel_census_sha256", expected_panel_census_sha256),
+        ("panel_capacity_strata_sha256", expected_panel_capacity_strata_sha256),
+    ):
+        if payload[field] != expected:
+            raise EditingT1RuntimeError(f"T1 durable result is bound to another {field}")
     retained_active8_identity = _validated_active8_identity(
         expected_active8_identity,
         name="expected T1 Active8 identity",
     )
-    observed_active8_identity = {
-        field: payload[field] for field in ACTIVE8_T1_IDENTITY_FIELDS
-    }
+    observed_active8_identity = {field: payload[field] for field in ACTIVE8_T1_IDENTITY_FIELDS}
     if observed_active8_identity != dict(retained_active8_identity):
         raise EditingT1RuntimeError(
             "T1 durable result is bound to another physical or logical Active8 corpus"
         )
-    if (
-        payload["gate_zero_runtime_contract_sha256"]
-        != payload["active8_support_contract_sha256"]
-    ):
+    if payload["gate_zero_runtime_contract_sha256"] != payload["active8_support_contract_sha256"]:
         raise EditingT1RuntimeError(
             "T1 durable result Gate0 and Active8 support identities disagree"
         )
@@ -673,9 +1346,7 @@ def validate_editing_t1_result(
     if (family == EDITING_T1_GLOBAL_FAMILY_SELECTOR) != (
         panel_kind == EDITING_T1_GLOBAL_REPEATED_PANEL_KIND
     ):
-        raise EditingT1RuntimeError(
-            "T1 durable result global family/panel relationship is invalid"
-        )
+        raise EditingT1RuntimeError("T1 durable result global family/panel relationship is invalid")
     if scope not in EDITING_T1_REQUIRED_SCOPES:
         raise EditingT1RuntimeError("T1 durable result scope is off-contract")
 
@@ -685,12 +1356,21 @@ def validate_editing_t1_result(
     if (
         type(example_count) is not int
         or example_count <= 0
+        or example_count > EDITING_T1_REPEATED_MAX_EXAMPLES
         or type(unique_address_count) is not int
         or not 0 < unique_address_count <= example_count
         or type(repeated_observation_count) is not int
         or repeated_observation_count != example_count - unique_address_count
     ):
         raise EditingT1RuntimeError("T1 durable result example/address counts are invalid")
+    if (
+        panel_kind == EDITING_T1_UNIQUE_PANEL_KIND
+        and example_count != EDITING_T1_UNIQUE_EXAMPLES_PER_FAMILY
+    ) or (
+        panel_kind == EDITING_T1_GLOBAL_REPEATED_PANEL_KIND
+        and example_count < EDITING_T1_REPEATED_MIN_EXAMPLES
+    ):
+        raise EditingT1RuntimeError("T1 durable result violates its panel-kind example-count bound")
     source_row_sha256s = payload["source_row_sha256s"]
     if (
         not isinstance(source_row_sha256s, list)
@@ -735,6 +1415,49 @@ def validate_editing_t1_result(
         or not 0 < training_report["steps"] <= 500
     ):
         raise EditingT1RuntimeError("T1 durable result training report is invalid")
+    observed_families = training_report.get("families")
+    if (
+        not isinstance(observed_families, list)
+        or not observed_families
+        or any(item not in RINGCORE_EDITING_FAMILIES for item in observed_families)
+        or observed_families != sorted(set(observed_families))
+        or (family != EDITING_T1_GLOBAL_FAMILY_SELECTOR and observed_families != [family])
+    ):
+        raise EditingT1RuntimeError(
+            "T1 durable result training-report families are incomplete or off-contract"
+        )
+    _validate_result_metrics(
+        training_report.get("initial"),
+        name="T1 durable result initial metrics",
+        expected_example_count=example_count,
+    )
+    _validate_result_metrics(
+        training_report.get("final"),
+        name="T1 durable result final metrics",
+        expected_example_count=example_count,
+    )
+    component_counts = training_report.get("component_gradient_update_counts")
+    history = training_report.get("history")
+    if (
+        training_report.get("optimizer_steps_with_nonzero_gradient") != training_report["steps"]
+        or training_report.get("required_components_without_gradient") != []
+        or not isinstance(component_counts, Mapping)
+        or not component_counts
+        or any(type(count) is not int or count <= 0 for count in component_counts.values())
+        or not isinstance(history, list)
+        or not history
+        or any(
+            not isinstance(item, Mapping)
+            or not isinstance(item.get("gradient_norm"), (int, float))
+            or isinstance(item.get("gradient_norm"), bool)
+            or not math.isfinite(float(item["gradient_norm"]))
+            or float(item["gradient_norm"]) <= 0.0
+            for item in history
+        )
+    ):
+        raise EditingT1RuntimeError(
+            "T1 durable result lacks complete finite nonzero gradient evidence"
+        )
 
     observed_receipts = _validated_receipt_sequence(
         payload["cache_receipts"],
@@ -757,7 +1480,11 @@ def load_editing_t1_result(
     *,
     expected_result_sha256: str,
     expected_contract_sha256: str,
+    expected_numeric_thresholds_sha256: str,
     expected_panel_artifact_sha256: str,
+    expected_panel_selection_sha256: str,
+    expected_panel_census_sha256: str,
+    expected_panel_capacity_strata_sha256: str,
     expected_active8_identity: Mapping[str, Any],
     expected_cache_receipts: Sequence[Mapping[str, Any] | T1CacheShardReceipt],
     max_file_bytes: int = 1 << 27,
@@ -780,7 +1507,11 @@ def load_editing_t1_result(
         result,
         expected_result_sha256=expected_result_sha256,
         expected_contract_sha256=expected_contract_sha256,
+        expected_numeric_thresholds_sha256=(expected_numeric_thresholds_sha256),
         expected_panel_artifact_sha256=expected_panel_artifact_sha256,
+        expected_panel_selection_sha256=expected_panel_selection_sha256,
+        expected_panel_census_sha256=expected_panel_census_sha256,
+        expected_panel_capacity_strata_sha256=(expected_panel_capacity_strata_sha256),
         expected_active8_identity=expected_active8_identity,
         expected_cache_receipts=expected_cache_receipts,
     )
@@ -820,21 +1551,12 @@ def validate_t1_active8_runtime_binding(
         raise EditingT1RuntimeError("T1 panel lacks its Active8 source identity")
     for field in ACTIVE8_T1_IDENTITY_FIELDS:
         if contract.payload[field] != identity[field]:
-            raise EditingT1RuntimeError(
-                f"T1 contract/Active8 admission mismatch for {field}"
-            )
+            raise EditingT1RuntimeError(f"T1 contract/Active8 admission mismatch for {field}")
         if panel_source.get(field) != identity[field]:
-            raise EditingT1RuntimeError(
-                f"T1 panel/Active8 admission mismatch for {field}"
-            )
+            raise EditingT1RuntimeError(f"T1 panel/Active8 admission mismatch for {field}")
     if active8_admission.support_contract_sha256 != gate_zero_contract.sha256:
-        raise EditingT1RuntimeError(
-            "Gate0 runtime contract and Active8 support contract disagree"
-        )
-    if (
-        active8_admission.unified_packed_manifest_sha256
-        != source.unified_packed_manifest_sha256
-    ):
+        raise EditingT1RuntimeError("Gate0 runtime contract and Active8 support contract disagree")
+    if active8_admission.unified_packed_manifest_sha256 != source.unified_packed_manifest_sha256:
         raise EditingT1RuntimeError(
             "frozen T1 source and Active8 inventory name different unified corpora"
         )
@@ -848,9 +1570,7 @@ def _require_active8_record(
 ) -> None:
     address = record.corpus_address
     if address is None:
-        raise EditingT1RuntimeError(
-            "T1 Active8 guard received an unaddressed packed trace"
-        )
+        raise EditingT1RuntimeError("T1 Active8 guard received an unaddressed packed trace")
     try:
         expected_digest = active8_admission.expected_source_digest(
             packed_shard_name=address.packed_shard_name,
@@ -867,9 +1587,7 @@ def _require_active8_record(
             "T1 packed trace digest disagrees with its Active8 shard binding"
         )
     if not accepted:
-        raise EditingT1RuntimeError(
-            "T1 panel selected a whole-trace Active8-excluded exact trace"
-        )
+        raise EditingT1RuntimeError("T1 panel selected a whole-trace Active8-excluded exact trace")
 
 
 def _preflight_selected_active8_rows(
@@ -891,9 +1609,7 @@ def _preflight_selected_active8_rows(
             panel_kind=panel_kind,
         )
     except EditingT1PanelError as error:
-        raise EditingT1RuntimeError(
-            "requested T1 panel is absent or invalid"
-        ) from error
+        raise EditingT1RuntimeError("requested T1 panel is absent or invalid") from error
     record_by_address = _record_index(source)
     for row in rows:
         state_ref = row["exact_state_ref"]
@@ -1190,6 +1906,24 @@ def run_editing_t1_arm(
         )
     if panel["artifact_sha256"] != contract.payload["panel_artifact_sha256"]:
         raise EditingT1RuntimeError("T1 contract is bound to another panel artifact")
+    panel_identity = {
+        "panel_selection_sha256": editing_t1_panel_selection_sha256(panel),
+        "panel_census_sha256": editing_t1_panel_census_sha256(panel),
+        "panel_capacity_strata_sha256": (editing_t1_panel_capacity_strata_sha256(panel)),
+    }
+    for field, observed in panel_identity.items():
+        if contract.payload[field] != observed:
+            raise EditingT1RuntimeError(f"T1 contract is bound to another panel identity: {field}")
+    if tuple(panel["selection"]["required_high_candidate_families"]) != (RINGCORE_EDITING_FAMILIES):
+        raise EditingT1RuntimeError("T1 panel omits an Active8 high-candidate stratum")
+    if tuple(panel["selection"]["required_aliased_teacher_families"]) != tuple(
+        contract.payload["required_aliased_teacher_families"]
+    ):
+        raise EditingT1RuntimeError("T1 contract and panel disagree on measured alias availability")
+    if within_family_repeated_panel_families(panel) != tuple(
+        contract.payload["within_family_repeated_families"]
+    ):
+        raise EditingT1RuntimeError("T1 contract and panel disagree on repeated-family diagnostics")
     active8_identity = validate_t1_active8_runtime_binding(
         contract=contract,
         gate_zero_contract=gate_zero_contract,
@@ -1270,10 +2004,12 @@ def run_editing_t1_arm(
         "status": EDITING_T1_RESULT_STATUS,
         "training_authorized": False,
         "gate_decision": None,
-        "numeric_thresholds_frozen": False,
+        "numeric_thresholds_frozen": True,
+        "numeric_thresholds_sha256": (contract.numeric_thresholds_sha256),
         "contract_sha256": contract.sha256,
         "gate_zero_runtime_contract_sha256": gate_zero_contract.sha256,
         "panel_artifact_sha256": panel["artifact_sha256"],
+        **panel_identity,
         "charge_policy_exclusion_payload_sha256": contract.payload[
             "charge_policy_exclusion_payload_sha256"
         ],
@@ -1327,7 +2063,11 @@ def run_editing_t1_arm(
         sealed,
         expected_result_sha256=sealed["result_sha256"],
         expected_contract_sha256=contract.sha256,
+        expected_numeric_thresholds_sha256=(contract.numeric_thresholds_sha256),
         expected_panel_artifact_sha256=str(panel["artifact_sha256"]),
+        expected_panel_selection_sha256=panel_identity["panel_selection_sha256"],
+        expected_panel_census_sha256=panel_identity["panel_census_sha256"],
+        expected_panel_capacity_strata_sha256=panel_identity["panel_capacity_strata_sha256"],
         expected_active8_identity=active8_identity,
         expected_cache_receipts=materialized.cache_receipts,
     )
@@ -1342,18 +2082,28 @@ __all__ = [
     "EDITING_T1_RUNTIME_CONTRACT_SCHEMA",
     "EDITING_T1_RUNTIME_CONTRACT_STATUS",
     "EDITING_T1_RUNTIME_CONTRACT_VERSION",
+    "EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH",
+    "EDITING_T1_V4_CONTRACT_RELATIVE_PATH",
+    "EDITING_T1_V4_PANEL_RELATIVE_PATH",
+    "EditingT1LaunchAuthority",
     "EditingT1RuntimeContract",
     "EditingT1RuntimeError",
     "MaterializedT1Panel",
     "T1CacheShardReceipt",
+    "build_editing_t1_runtime_contract",
     "editing_t1_implementation_sha256",
     "editing_t1_implementation_sources",
+    "editing_t1_numeric_thresholds_sha256",
+    "load_editing_t1_launch_authority",
     "load_editing_t1_result",
     "load_editing_t1_runtime_contract",
     "materialize_t1_panel",
     "require_editing_t1_family_scope_applicable",
     "run_editing_t1_arm",
+    "validate_editing_t1_launch_authority",
     "validate_editing_t1_result",
+    "validate_editing_t1_numeric_thresholds",
     "validate_t1_active8_runtime_binding",
     "validate_t1_cache_shard_receipt",
+    "write_editing_t1_runtime_contract",
 ]

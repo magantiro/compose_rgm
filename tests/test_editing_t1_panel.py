@@ -39,37 +39,55 @@ from compose_v4.experiments.editing_gate_zero_runtime import (
     ValidationShardBinding,
 )
 from compose_v4.experiments.editing_t1_panel import (
+    EDITING_T1_CAPACITY_CENSUS_SCHEMA,
+    EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
+    EDITING_T1_CAPACITY_CENSUS_STATUS,
     EDITING_T1_GLOBAL_FAMILY_SELECTOR,
     EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
+    EDITING_T1_PANEL_SCHEMA,
+    EDITING_T1_PANEL_SCHEMA_VERSION,
+    EDITING_T1_PANEL_STATUS,
     EDITING_T1_UNIQUE_PANEL_KIND,
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
     EditingT1PanelError,
     active8_t1_identity,
+    build_editing_t1_capacity_census,
     build_editing_t1_panel,
     filter_active8_forensics_rows,
     load_editing_t1_panel,
     selected_source_rows,
     validate_charge_policy_exclusions,
     validate_editing_t1_panel,
+    validate_editing_t1_capacity_census,
 )
+import compose_v4.experiments.editing_t1_panel as editing_t1_panel_module
 from compose_v4.experiments.editing_t1_successor_runtime import (
     EDITING_T1_LOCAL_ADAPTER_FAMILIES,
     EDITING_T1_RESULT_SCHEMA,
     EDITING_T1_RESULT_STATUS,
     EDITING_T1_RESULT_VERSION,
+    EDITING_T1_RUNTIME_CONTRACT_VERSION,
+    EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
+    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V4_PANEL_RELATIVE_PATH,
     EditingT1RuntimeContract,
     EditingT1RuntimeError,
     T1CacheShardReceipt,
+    build_editing_t1_runtime_contract,
     editing_t1_implementation_sha256,
     editing_t1_implementation_sources,
+    editing_t1_numeric_thresholds_sha256,
+    load_editing_t1_launch_authority,
     load_editing_t1_result,
     load_editing_t1_runtime_contract,
     materialize_t1_panel,
     require_editing_t1_family_scope_applicable,
     run_editing_t1_arm,
     validate_editing_t1_result,
+    validate_editing_t1_launch_authority,
     validate_t1_active8_runtime_binding,
     validate_t1_cache_shard_receipt,
+    write_editing_t1_runtime_contract,
 )
 from compose_v4.experiments.factorized_successor_training import (
     rewrite_action_codec_sha256,
@@ -124,15 +142,199 @@ CHARGE_POLICY_EXCLUSIONS = (
     ROOT / "diagnostics" / "coherence" / "packed_charge_policy_exclusions_v1_2026-07-30.json"
 )
 FROZEN_PANEL = (
-    ROOT
-    / "diagnostics"
-    / "coherence"
-    / "editing_t1_successor_panel_v3_active8_2026-07-30.json"
+    ROOT / "diagnostics" / "coherence" / "editing_t1_successor_panel_v3_active8_2026-07-30.json"
 )
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _stable_sha256(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
+
+
+def _synthetic_t1_launch_authority():
+    active8_identity = {
+        "active8_inventory_manifest_file_sha256": "1" * 64,
+        "active8_inventory_sha256": "2" * 64,
+        "active8_effective_source_corpus_cache_sha256": "3" * 64,
+        "active8_unified_packed_manifest_sha256": "4" * 64,
+        "active8_support_contract_sha256": "5" * 64,
+    }
+    capacity_body = {
+        "schema": EDITING_T1_CAPACITY_CENSUS_SCHEMA,
+        "schema_version": EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
+        "status": EDITING_T1_CAPACITY_CENSUS_STATUS,
+        "training_authorized": False,
+        "forensics_file_sha256": "6" * 64,
+        "forensics_artifact_sha256": "7" * 64,
+        "gate_zero_runtime_contract_sha256": "5" * 64,
+        "unified_packed_manifest_sha256": "4" * 64,
+        "representability_overlay_sha256": "8" * 64,
+        **active8_identity,
+        "rows": [{"source_row_sha256": "9" * 64}],
+    }
+    capacity_census = {
+        **capacity_body,
+        "census_sha256": _stable_sha256(capacity_body),
+    }
+    capacity_content = (
+        json.dumps(
+            capacity_census,
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode()
+    capacity_file_sha256 = hashlib.sha256(capacity_content).hexdigest()
+    repeated_families = {
+        "atom_insert",
+        "atom_restate",
+        "bond_reroute",
+        "cycle_attach",
+        "ring_system_restate",
+    }
+    selection = {
+        "required_high_candidate_families": list(RINGCORE_EDITING_FAMILIES),
+        "required_aliased_teacher_families": [
+            "atom_insert",
+            "bond_reroute",
+            "cycle_attach",
+        ],
+    }
+    panel_census = {
+        "unique_high_candidate_stratum_available_by_family": {
+            family: 1 for family in RINGCORE_EDITING_FAMILIES
+        },
+        "unique_high_candidate_stratum_selected_by_family": {
+            family: 1 for family in RINGCORE_EDITING_FAMILIES
+        },
+        "unique_aliased_teacher_stratum_available_by_family": {
+            family: int(family in selection["required_aliased_teacher_families"])
+            for family in RINGCORE_EDITING_FAMILIES
+        },
+        "unique_aliased_teacher_stratum_selected_by_family": {
+            family: int(family in selection["required_aliased_teacher_families"])
+            for family in RINGCORE_EDITING_FAMILIES
+        },
+        "registered_high_candidate_families_all_covered": True,
+        "registered_aliased_teacher_families_all_covered": True,
+        "families_without_observed_within_family_multitarget_repeats": [
+            family
+            for family in RINGCORE_EDITING_FAMILIES
+            if family not in repeated_families
+        ],
+    }
+    panel_body = {
+        "schema": EDITING_T1_PANEL_SCHEMA,
+        "schema_version": EDITING_T1_PANEL_SCHEMA_VERSION,
+        "status": EDITING_T1_PANEL_STATUS,
+        "training_authorized": False,
+        "source": {
+            "forensics_file_sha256": "6" * 64,
+            "charge_policy_audit_file_sha256": "a" * 64,
+            "charge_policy_exclusions_file_sha256": "b" * 64,
+            "charge_policy_exclusion_payload_sha256": "c" * 64,
+            "charge_policy_source_input_inventory_sha256": "d" * 64,
+            "capacity_census_file_sha256": capacity_file_sha256,
+            "capacity_census_sha256": capacity_census["census_sha256"],
+            **active8_identity,
+        },
+        "selection": selection,
+        "census": panel_census,
+        "thresholds": {
+            "minimum_unique_state_teacher_successor_top1": None,
+            "minimum_unique_state_teacher_successor_probability": None,
+            "maximum_unique_state_teacher_successor_nll": None,
+            "maximum_global_repeated_state_excess_nll_over_empirical_entropy": None,
+        },
+        "within_family_repeated_state_panels": {
+            family: ([{"rows": [{"source_row_index": 0}]}] if family in repeated_families else [])
+            for family in RINGCORE_EDITING_FAMILIES
+        },
+    }
+    panel = {
+        **panel_body,
+        "artifact_sha256": _stable_sha256(panel_body),
+    }
+    optimization = {
+        "steps": 2,
+        "learning_rate": 0.001,
+        "weight_decay": 0.0,
+        "scopes": [
+            "heads_only",
+            "heads_plus_local_adapter",
+            "all",
+        ],
+        "report_points": [1, 2],
+    }
+    thresholds = {
+        "minimum_unique_state_teacher_successor_top1": 0.8,
+        "minimum_unique_state_teacher_successor_probability": 0.6,
+        "maximum_unique_state_teacher_successor_nll": 0.7,
+        "maximum_global_repeated_state_excess_nll_over_empirical_entropy": 0.2,
+    }
+    contract = build_editing_t1_runtime_contract(
+        gate_zero_runtime_contract_sha256="5" * 64,
+        panel=panel,
+        capacity_census=capacity_census,
+        capacity_census_file_sha256=capacity_file_sha256,
+        active8_identity=active8_identity,
+        optimization=optimization,
+        thresholds=thresholds,
+    )
+    authority = validate_editing_t1_launch_authority(
+        contract=contract,
+        panel=panel,
+        capacity_census=capacity_census,
+        capacity_census_file_sha256=capacity_file_sha256,
+        expected_active8_inventory_manifest_file_sha256=(
+            active8_identity["active8_inventory_manifest_file_sha256"]
+        ),
+    )
+    return authority, capacity_content, optimization, thresholds
+
+
+def _capacity_census(
+    forensics: dict,
+    admission: Active8TraceAdmission,
+) -> dict[str, object]:
+    admitted, _excluded_rows, _excluded_traces = filter_active8_forensics_rows(
+        forensics["rows"], admission
+    )
+    rows = []
+    for row in admitted:
+        raw_count = 64 + int(row["row_index"]) % 97
+        rows.append(
+            {
+                "source_row_sha256": row["row_sha256"],
+                "raw_legal_mark_count": raw_count,
+                "canonical_successor_count": raw_count - 7,
+                # Canonical fibers may contain persistent-slot aliases whose
+                # exact successor tensors differ. T1 must cover quotient-level
+                # aliasing rather than requiring duplicate exact tensors.
+                "teacher_exact_successor_alias_count": 1,
+                "teacher_canonical_successor_alias_count": 2,
+            }
+        )
+    body = {
+        "schema": EDITING_T1_CAPACITY_CENSUS_SCHEMA,
+        "schema_version": EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
+        "status": EDITING_T1_CAPACITY_CENSUS_STATUS,
+        "forensics_artifact_sha256": forensics["artifact_sha256"],
+        **active8_t1_identity(admission),
+        "rows": rows,
+    }
+    return {**body, "census_sha256": _stable_sha256(body)}
 
 
 def _active8_admission_for_forensics(
@@ -198,11 +400,7 @@ def _active8_admission_for_record(
         support_contract_sha256=support_contract_sha256,
         effective_source_corpus_cache_sha256="5" * 64,
         decisions_by_digest=MappingProxyType(
-            {
-                address.packed_shard_content_sha256: (
-                    (address.trace_id, accepted),
-                )
-            }
+            {address.packed_shard_content_sha256: ((address.trace_id, accepted),)}
         ),
         shard_digest_by_lane=MappingProxyType(
             {
@@ -220,8 +418,8 @@ def _active8_admission_for_record(
     )
 
 
-@pytest.fixture(scope="module")
-def frozen_inputs():
+@pytest.fixture
+def frozen_inputs(monkeypatch):
     with gzip.open(FORENSICS, "rt") as handle:
         forensics = json.load(handle)
     validate_validation_panel_artifact(
@@ -243,7 +441,22 @@ def frozen_inputs():
         expected_provenance_sha256=manifest["provenance_sha256"],
     )
     unified_packed_manifest_sha256 = manifest["provenance"]["unified_packed_manifest_sha256"]
+    admission = _active8_admission_for_forensics(
+        forensics,
+        unified_packed_manifest_sha256=(unified_packed_manifest_sha256),
+    )
+    capacity_census = _capacity_census(forensics, admission)
+    capacity_index = {
+        row["source_row_sha256"]: MappingProxyType(dict(row)) for row in capacity_census["rows"]
+    }
+    monkeypatch.setattr(
+        editing_t1_panel_module,
+        "validate_editing_t1_capacity_census",
+        lambda *_args, **_kwargs: MappingProxyType(capacity_index),
+    )
     kwargs = {
+        "model": object(),
+        "source": SimpleNamespace(),
         "forensics": forensics,
         "forensics_file_sha256": _sha256(FORENSICS),
         "sidecar": sidecar,
@@ -253,10 +466,10 @@ def frozen_inputs():
         "charge_policy_audit_file_sha256": _sha256(CHARGE_POLICY_AUDIT),
         "charge_policy_exclusions": load_json_object(CHARGE_POLICY_EXCLUSIONS),
         "charge_policy_exclusions_file_sha256": _sha256(CHARGE_POLICY_EXCLUSIONS),
-        "active8_admission": _active8_admission_for_forensics(
-            forensics,
-            unified_packed_manifest_sha256=(unified_packed_manifest_sha256),
-        ),
+        "capacity_census": capacity_census,
+        "capacity_census_file_sha256": "a" * 64,
+        "active8_admission": admission,
+        "gate_zero_runtime_contract_sha256": admission.support_contract_sha256,
         "gate_zero_unified_packed_manifest_sha256": (unified_packed_manifest_sha256),
     }
     return forensics, kwargs
@@ -270,7 +483,10 @@ def test_active8_t1_panel_is_complete_deterministic_rederivation(
     expected = build_editing_t1_panel(**kwargs)
     stale_pre_inventory_panel = json.loads(FROZEN_PANEL.read_text())
     assert stale_pre_inventory_panel != expected
-    with pytest.raises(EditingT1PanelError, match="T1 source fields disagree"):
+    with pytest.raises(
+        EditingT1PanelError,
+        match="schema, status, or self-hash",
+    ):
         validate_editing_t1_panel(
             stale_pre_inventory_panel,
             **kwargs,
@@ -283,61 +499,71 @@ def test_active8_t1_panel_is_complete_deterministic_rederivation(
     assert all(value is None for value in observed["thresholds"].values())
     assert set(observed["census"]["unique_rows_by_family"].values()) == {64}
     assert observed["census"]["unique_rows_total"] == 512
+    assert observed["census"]["registered_high_candidate_families_all_covered"] is True
+    assert observed["census"]["registered_aliased_teacher_families_all_covered"] is True
+    assert all(
+        value >= 1
+        for value in observed["census"]["unique_high_candidate_stratum_selected_by_family"].values()
+    )
+    assert all(
+        value >= 1
+        for value in observed["census"][
+            "unique_aliased_teacher_stratum_selected_by_family"
+        ].values()
+    )
     assert observed["census"]["source_forensics_rows_total"] == 2304
     assert observed["census"]["active8_eligible_forensics_rows_total"] == 2304
     assert observed["census"]["active8_excluded_forensics_rows_total"] == 0
-    assert (
-        observed["census"][
-            "active8_excluded_unique_forensics_trace_addresses"
-        ]
-        == 0
-    )
+    assert observed["census"]["active8_excluded_unique_forensics_trace_addresses"] == 0
     assert observed["census"]["charge_policy_eligible_forensics_rows_total"] == 2292
     assert observed["census"]["charge_policy_excluded_forensics_rows_total"] == 12
     assert observed["census"]["charge_policy_excluded_unique_forensics_trace_addresses"] == 12
     assert observed["census"]["pilot_family_eligible_forensics_rows_total"] == 2036
     assert observed["census"]["operator_freeze_excluded_forensics_rows_total"] == 256
-    assert observed["census"]["global_repeated_multitarget_groups_total"] == 81
-    assert observed["census"]["global_repeated_rows_total"] == 173
-    assert observed["census"]["global_repeated_cross_family_groups_total"] == 60
-    assert observed["census"]["global_repeated_cross_family_rows_total"] == 131
+    assert observed["census"]["global_repeated_available_multitarget_groups_total"] == 81
+    assert observed["census"]["global_repeated_available_rows_total"] == 173
+    assert 64 <= observed["census"]["global_repeated_rows_total"] <= 128
+    assert (
+        observed["census"]["global_repeated_multitarget_groups_total"]
+        <= observed["census"]["global_repeated_available_multitarget_groups_total"]
+    )
+    assert observed["census"]["global_repeated_cross_family_groups_total"] >= 1
+    assert observed["census"]["global_repeated_cross_family_rows_total"] >= 2
     assert observed["census"]["global_repeated_panel_meets_64_example_minimum"] is True
+    assert observed["census"]["global_repeated_panel_meets_128_example_maximum"] is True
     assert observed["census"]["within_family_repeated_multitarget_groups_total"] == 24
     assert observed["census"]["within_family_repeated_rows_total"] == 48
-    assert observed["selection"]["operator_freeze_excluded_families"] == [
-        "ring_system_delete"
-    ]
+    assert (
+        sum(
+            observed["census"][
+                "within_family_repeated_available_multitarget_groups_by_family"
+            ].values()
+        )
+        == 24
+    )
+    assert sum(observed["census"]["within_family_repeated_available_rows_by_family"].values()) == 48
+    assert observed["selection"]["operator_freeze_excluded_families"] == ["ring_system_delete"]
     assert "ring_system_delete" not in observed["selection"]["active_families"]
     assert observed["architecture"]["enable_ring_system_delete"] is False
     assert (
         observed["selection"]["conditional_repeated_state_relationship"]
-        == "every within-family repeated row is an exact conditional subset/view "
-        "of the primary global repeated evidence; these panels deliberately "
-        "reuse observations and must not be treated as statistically independent"
+        == "global and within-family panels are bounded deterministic views of the "
+        "same frozen observation pool; they may overlap but must not be treated "
+        "as statistically independent"
     )
     overlap = observed["census"]["panel_overlap"]
-    assert overlap == {
-        "unique_state_vs_global_repeated": {
-            "shared_source_states": 0,
-            "shared_progress_addresses": 0,
-            "shared_trace_addresses": 7,
-            "shared_source_row_references": 0,
-        },
-        "unique_state_vs_within_family_repeated": {
-            "shared_source_states": 0,
-            "shared_progress_addresses": 0,
-            "shared_trace_addresses": 1,
-            "shared_source_row_references": 0,
-        },
-        "global_repeated_vs_within_family_repeated": {
-            "shared_source_states": 24,
-            "shared_progress_addresses": 48,
-            "shared_trace_addresses": 48,
-            "shared_source_row_references": 48,
-        },
-        "within_family_repeated_is_exact_row_subset_of_global_repeated": True,
-        "statistically_independent_panel_claim": False,
-    }
+    for relationship in (
+        "unique_state_vs_global_repeated",
+        "unique_state_vs_within_family_repeated",
+    ):
+        assert overlap[relationship]["shared_source_states"] == 0
+        assert overlap[relationship]["shared_progress_addresses"] == 0
+        assert overlap[relationship]["shared_source_row_references"] == 0
+    assert (
+        overlap["global_repeated_vs_within_family_repeated"]["shared_source_row_references"]
+        <= observed["census"]["within_family_repeated_rows_total"]
+    )
+    assert overlap["statistically_independent_panel_claim"] is False
     assert (
         observed["source"]["charge_policy_exclusion_payload_sha256"]
         == "ad18e751b2423ebfe47e6d2684f0932eec0fbe8008ca28342f5c45d59889fc55"
@@ -381,10 +607,14 @@ def test_active8_t1_panel_is_complete_deterministic_rederivation(
     active_families = set(observed["selection"]["active_families"])
     for row in forensics["rows"]:
         state_ref = row["exact_state_ref"]
-        if row["teacher_family"] not in active_families or (
-            state_ref["shard_sha256"],
-            state_ref["record_index"],
-        ) in excluded_trace_ids:
+        if (
+            row["teacher_family"] not in active_families
+            or (
+                state_ref["shard_sha256"],
+                state_ref["record_index"],
+            )
+            in excluded_trace_ids
+        ):
             continue
         all_targets.setdefault(row["source_state_sha256"], set()).add(row["teacher_successor_key"])
     unique_state_union: set[str] = set()
@@ -414,7 +644,7 @@ def test_repeated_panel_is_empirical_and_never_synthesized(frozen_inputs):
         family=EDITING_T1_GLOBAL_FAMILY_SELECTOR,
         panel_kind=EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
     )
-    assert len(global_repeated) == 173
+    assert 64 <= len(global_repeated) <= 128
     global_by_source: dict[str, set[str]] = {}
     global_families_by_source: dict[str, set[str]] = {}
     for row in global_repeated:
@@ -425,9 +655,13 @@ def test_repeated_panel_is_empirical_and_never_synthesized(frozen_inputs):
             row["source_state_sha256"],
             set(),
         ).add(row["teacher_family"])
-    assert len(global_by_source) == 81
+    assert len(global_by_source) == panel["census"]["global_repeated_multitarget_groups_total"]
     assert all(len(targets) > 1 for targets in global_by_source.values())
-    assert sum(len(families) > 1 for families in global_families_by_source.values()) == 60
+    assert (
+        sum(len(families) > 1 for families in global_families_by_source.values())
+        == panel["census"]["global_repeated_cross_family_groups_total"]
+    )
+    assert panel["census"]["global_repeated_available_rows_total"] > len(global_repeated)
     with pytest.raises(ValueError, match="requires family='all_families'"):
         selected_source_rows(
             panel,
@@ -516,6 +750,24 @@ def test_t1_panel_rejects_row_reference_and_threshold_tampering(
     ).hexdigest()
     with pytest.raises(EditingT1PanelError, match="must remain"):
         validate_editing_t1_panel(thresholded, **kwargs)
+
+
+def test_t1_panel_derives_alias_strata_without_caller_omission(
+    frozen_inputs,
+):
+    _forensics, kwargs = frozen_inputs
+    panel = build_editing_t1_panel(**kwargs)
+    assert tuple(panel["selection"]["required_high_candidate_families"]) == (
+        RINGCORE_EDITING_FAMILIES
+    )
+    assert tuple(panel["selection"]["required_aliased_teacher_families"]) == (
+        RINGCORE_EDITING_FAMILIES
+    )
+    with pytest.raises(TypeError, match="unexpected keyword"):
+        build_editing_t1_panel(
+            **kwargs,
+            required_aliased_teacher_families=(),
+        )
 
 
 def test_charge_policy_exclusion_index_is_self_hashed_and_exactly_addressed():
@@ -653,9 +905,7 @@ def test_disallowed_middle_action_removes_neighboring_rows_before_t1_selection()
         unified_packed_manifest_sha256="3" * 64,
         support_contract_sha256="4" * 64,
         effective_source_corpus_cache_sha256="5" * 64,
-        decisions_by_digest=MappingProxyType(
-            {"a" * 64: (("middle-disallowed", False),)}
-        ),
+        decisions_by_digest=MappingProxyType({"a" * 64: (("middle-disallowed", False),)}),
         shard_digest_by_lane=MappingProxyType(
             {
                 (
@@ -665,16 +915,12 @@ def test_disallowed_middle_action_removes_neighboring_rows_before_t1_selection()
                 ): "a" * 64
             }
         ),
-        shard_metadata_by_digest=MappingProxyType(
-            {"a" * 64: MappingProxyType({})}
-        ),
+        shard_metadata_by_digest=MappingProxyType({"a" * 64: MappingProxyType({})}),
         counts=MappingProxyType({}),
     )
     neighboring_rows = (
         {
-            "record_key": (
-                "corruption/validation/fixture.jsonl.gz:0:middle-disallowed"
-            ),
+            "record_key": ("corruption/validation/fixture.jsonl.gz:0:middle-disallowed"),
             "partition": "validation",
             "exact_state_ref": {
                 "shard_sha256": "a" * 64,
@@ -684,9 +930,7 @@ def test_disallowed_middle_action_removes_neighboring_rows_before_t1_selection()
             },
         },
         {
-            "record_key": (
-                "corruption/validation/fixture.jsonl.gz:0:middle-disallowed"
-            ),
+            "record_key": ("corruption/validation/fixture.jsonl.gz:0:middle-disallowed"),
             "partition": "validation",
             "exact_state_ref": {
                 "shard_sha256": "a" * 64,
@@ -697,8 +941,8 @@ def test_disallowed_middle_action_removes_neighboring_rows_before_t1_selection()
         },
     )
 
-    accepted_rows, excluded_rows, excluded_traces = (
-        filter_active8_forensics_rows(neighboring_rows, admission)
+    accepted_rows, excluded_rows, excluded_traces = filter_active8_forensics_rows(
+        neighboring_rows, admission
     )
     assert accepted_rows == ()
     assert excluded_rows == 2
@@ -783,6 +1027,125 @@ def test_direct_t1_cli_rejects_duplicate_local_adapter_arm(
         t1_cli.main()
 
 
+def test_direct_t1_cli_defaults_to_one_consistent_v4_authority():
+    from scripts import run_editing_t1_successor_gate as t1_cli
+
+    args = t1_cli._parser().parse_args(
+        [
+            "--transfer-root",
+            "/tmp/t1-fixture",
+            "--active8-inventory",
+            "/tmp/t1-fixture/ACTIVE8_TRACE_INVENTORY.json",
+            "--active8-inventory-file-sha256",
+            "a" * 64,
+            "--family",
+            "cycle_attach",
+        ]
+    )
+    assert args.t1_contract == ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+    assert args.panel == ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH
+    assert args.capacity_census == ROOT / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
+
+
+def test_t1_v4_contract_freeze_is_atomic_and_cross_validated(tmp_path):
+    authority, capacity_content, optimization, thresholds = (
+        _synthetic_t1_launch_authority()
+    )
+    contract_path = tmp_path / "editing_t1_successor_gate_v4.json"
+    panel_path = tmp_path / "editing_t1_successor_panel_v4.json"
+    capacity_path = tmp_path / "editing_t1_capacity_census_v1.json"
+    panel_path.write_text(
+        json.dumps(
+            dict(authority.panel),
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n"
+    )
+    capacity_path.write_bytes(capacity_content)
+
+    write_editing_t1_runtime_contract(authority.contract, contract_path)
+    first_bytes = contract_path.read_bytes()
+    write_editing_t1_runtime_contract(authority.contract, contract_path)
+    assert contract_path.read_bytes() == first_bytes
+
+    observed = load_editing_t1_launch_authority(
+        contract_path=contract_path,
+        panel_path=panel_path,
+        capacity_census_path=capacity_path,
+        expected_active8_inventory_manifest_file_sha256="1" * 64,
+    )
+    assert observed.contract.sha256 == authority.contract.sha256
+    assert observed.capacity_census_file_sha256 == hashlib.sha256(
+        capacity_content
+    ).hexdigest()
+
+    conflicting_optimization = {
+        **optimization,
+        "steps": 3,
+        "report_points": [1, 2, 3],
+    }
+    conflicting = build_editing_t1_runtime_contract(
+        gate_zero_runtime_contract_sha256="5" * 64,
+        panel=authority.panel,
+        capacity_census=authority.capacity_census,
+        capacity_census_file_sha256=authority.capacity_census_file_sha256,
+        active8_identity=authority.active8_identity,
+        optimization=conflicting_optimization,
+        thresholds=thresholds,
+    )
+    with pytest.raises(EditingT1RuntimeError, match="already exists"):
+        write_editing_t1_runtime_contract(conflicting, contract_path)
+
+
+def test_t1_v4_contract_refuses_unfrozen_thresholds_and_identity_drift():
+    authority, _capacity_content, optimization, thresholds = (
+        _synthetic_t1_launch_authority()
+    )
+    unfrozen = {**thresholds, "minimum_unique_state_teacher_successor_top1": None}
+    with pytest.raises(EditingT1RuntimeError, match="must be finite"):
+        build_editing_t1_runtime_contract(
+            gate_zero_runtime_contract_sha256="5" * 64,
+            panel=authority.panel,
+            capacity_census=authority.capacity_census,
+            capacity_census_file_sha256=authority.capacity_census_file_sha256,
+            active8_identity=authority.active8_identity,
+            optimization=optimization,
+            thresholds=unfrozen,
+        )
+    nonfinite = {
+        **thresholds,
+        "minimum_unique_state_teacher_successor_probability": float("nan"),
+    }
+    with pytest.raises(EditingT1RuntimeError, match="must be finite"):
+        build_editing_t1_runtime_contract(
+            gate_zero_runtime_contract_sha256="5" * 64,
+            panel=authority.panel,
+            capacity_census=authority.capacity_census,
+            capacity_census_file_sha256=authority.capacity_census_file_sha256,
+            active8_identity=authority.active8_identity,
+            optimization=optimization,
+            thresholds=nonfinite,
+        )
+    with pytest.raises(EditingT1RuntimeError, match="another physical Active8"):
+        validate_editing_t1_launch_authority(
+            contract=authority.contract,
+            panel=authority.panel,
+            capacity_census=authority.capacity_census,
+            capacity_census_file_sha256=authority.capacity_census_file_sha256,
+            expected_active8_inventory_manifest_file_sha256="f" * 64,
+        )
+    with pytest.raises(EditingT1RuntimeError, match="contract disagrees"):
+        validate_editing_t1_launch_authority(
+            contract=authority.contract,
+            panel=authority.panel,
+            capacity_census=authority.capacity_census,
+            capacity_census_file_sha256="e" * 64,
+            expected_active8_inventory_manifest_file_sha256="1" * 64,
+        )
+
+
 def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
     contract_path = ROOT / "configs" / "editing_t1_successor_gate_v3.json"
     with pytest.raises(EditingT1RuntimeError):
@@ -790,16 +1153,37 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
     payload = json.loads(contract_path.read_text())
     payload.update(
         {
+            "schema_version": EDITING_T1_RUNTIME_CONTRACT_VERSION,
             "active8_inventory_manifest_file_sha256": "1" * 64,
             "active8_inventory_sha256": "2" * 64,
             "active8_effective_source_corpus_cache_sha256": "5" * 64,
             "active8_unified_packed_manifest_sha256": "3" * 64,
-            "active8_support_contract_sha256": payload[
-                "gate_zero_runtime_contract_sha256"
+            "active8_support_contract_sha256": payload["gate_zero_runtime_contract_sha256"],
+            "capacity_census_file_sha256": "6" * 64,
+            "capacity_census_sha256": "7" * 64,
+            "panel_selection_sha256": "8" * 64,
+            "panel_census_sha256": "9" * 64,
+            "panel_capacity_strata_sha256": "a" * 64,
+            "required_high_candidate_families": list(RINGCORE_EDITING_FAMILIES),
+            "required_aliased_teacher_families": [
+                "atom_insert",
+                "bond_reroute",
+                "cycle_attach",
+            ],
+            "within_family_repeated_families": [
+                "bond_reroute",
+                "cycle_attach",
             ],
             "implementation_sha256": editing_t1_implementation_sha256(),
         }
     )
+    payload["thresholds"] = {
+        "minimum_unique_state_teacher_successor_top1": 0.8,
+        "minimum_unique_state_teacher_successor_probability": 0.6,
+        "maximum_unique_state_teacher_successor_nll": 0.7,
+        "maximum_global_repeated_state_excess_nll_over_empirical_entropy": (0.2),
+    }
+    payload["thresholds_sha256"] = editing_t1_numeric_thresholds_sha256(payload["thresholds"])
     payload["optimization"] = {
         **payload["optimization"],
         "scopes": [
@@ -810,11 +1194,7 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
     }
     payload["contract_sha256"] = hashlib.sha256(
         json.dumps(
-            {
-                key: value
-                for key, value in payload.items()
-                if key != "contract_sha256"
-            },
+            {key: value for key, value in payload.items() if key != "contract_sha256"},
             sort_keys=True,
             separators=(",", ":"),
             allow_nan=False,
@@ -822,6 +1202,7 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
     ).hexdigest()
     contract = EditingT1RuntimeContract(payload)
     assert contract.training_authorized is False
+    assert contract.numeric_thresholds_sha256 == payload["thresholds_sha256"]
     assert contract.optimization["steps"] == 500
     assert tuple(contract.optimization["scopes"]) == (
         "heads_only",
@@ -834,10 +1215,24 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
         EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
     )
     assert contract.payload["implementation_sha256"] == editing_t1_implementation_sha256()
+
+    unfrozen = copy.deepcopy(payload)
+    unfrozen["thresholds"]["minimum_unique_state_teacher_successor_top1"] = None
+    unfrozen["thresholds_sha256"] = "0" * 64
+    unfrozen["contract_sha256"] = _stable_sha256(
+        {key: value for key, value in unfrozen.items() if key != "contract_sha256"}
+    )
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="must be finite",
+    ):
+        EditingT1RuntimeContract(unfrozen)
+
     implementation_sources = set(editing_t1_implementation_sources())
     assert {
         "modal_apps/run_editing_t1_successor_gate.py",
         "scripts/build_editing_t1_successor_panel.py",
+        "scripts/freeze_editing_t1_successor_contract.py",
         "scripts/run_editing_t1_successor_gate.py",
         "src/compose_v4/experiments/editing_gate_zero_runtime.py",
         "src/compose_v4/experiments/editing_step_zero_probe.py",
@@ -954,6 +1349,8 @@ def _runtime_fixture():
     row = {
         "row_index": 0,
         "row_sha256": "6" * 64,
+        "record_key": (f"cycle_ops/validation/{address.packed_shard_name}:0:{address.trace_id}"),
+        "partition": "validation",
         "exact_state_ref": {
             "shard_sha256": shard_digest,
             "record_index": 0,
@@ -990,15 +1387,76 @@ def _runtime_fixture():
     return source, {"rows": [row]}, panel, family
 
 
+def test_capacity_census_recomputes_exact_production_support_and_rejects_forgery(
+    monkeypatch,
+):
+    source, forensics, _panel, _family = _runtime_fixture()
+    forensics = {
+        "artifact_sha256": "7" * 64,
+        "rows": forensics["rows"],
+    }
+    monkeypatch.setattr(
+        editing_t1_panel_module,
+        "_validate_forensics_rows",
+        lambda payload, _sidecar: tuple(payload["rows"]),
+    )
+    admission = _active8_admission_for_record(
+        source.records[0],
+        accepted=True,
+        support_contract_sha256="8" * 64,
+        unified_packed_manifest_sha256=(source.unified_packed_manifest_sha256),
+    )
+    torch.manual_seed(7)
+    model = FactorizedTraceletRateModel(
+        build_typed_ring_catalog(()),
+        hidden_dim=12,
+        message_passing_steps=1,
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        enable_ring_system_delete=False,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    )
+    kwargs = {
+        "model": model,
+        "source": source,
+        "forensics": forensics,
+        "forensics_file_sha256": "9" * 64,
+        "active8_admission": admission,
+        "gate_zero_runtime_contract_sha256": "8" * 64,
+    }
+    census = build_editing_t1_capacity_census(**kwargs)
+    row = census["rows"][0]
+    assert row["raw_legal_mark_count"] >= row["canonical_successor_count"] > 0
+    assert (
+        row["teacher_canonical_successor_alias_count"]
+        >= row["teacher_exact_successor_alias_count"]
+        > 0
+    )
+    validate_editing_t1_capacity_census(census, **kwargs)
+
+    forged = copy.deepcopy(census)
+    forged["rows"][0]["raw_legal_mark_count"] += 1
+    forged["census_sha256"] = _stable_sha256(
+        {key: value for key, value in forged.items() if key != "census_sha256"}
+    )
+    with pytest.raises(
+        EditingT1PanelError,
+        match="production re-enumeration",
+    ):
+        validate_editing_t1_capacity_census(forged, **kwargs)
+
+
 def test_t1_runtime_fails_on_gate_zero_active8_identity_mismatch():
     source, _forensics, _panel, _family = _runtime_fixture()
     admission = _active8_admission_for_record(
         source.records[0],
         accepted=True,
         support_contract_sha256="4" * 64,
-        unified_packed_manifest_sha256=(
-            source.unified_packed_manifest_sha256
-        ),
+        unified_packed_manifest_sha256=(source.unified_packed_manifest_sha256),
     )
     identity = dict(active8_t1_identity(admission))
     panel = {"source": dict(identity)}
@@ -1023,6 +1481,54 @@ def test_t1_runtime_fails_on_gate_zero_active8_identity_mismatch():
             source=source,
             panel=panel,
             active8_admission=admission,
+        )
+
+
+def test_run_arm_rejects_panel_census_or_strata_identity_drift_before_training():
+    panel = {
+        "artifact_sha256": "1" * 64,
+        "selection": {
+            "required_high_candidate_families": list(RINGCORE_EDITING_FAMILIES),
+            "required_aliased_teacher_families": [],
+        },
+        "census": {
+            "unique_high_candidate_stratum_available_by_family": {},
+            "unique_high_candidate_stratum_selected_by_family": {},
+            "unique_aliased_teacher_stratum_available_by_family": {},
+            "unique_aliased_teacher_stratum_selected_by_family": {},
+            "registered_high_candidate_families_all_covered": True,
+            "registered_aliased_teacher_families_all_covered": True,
+            "families_without_observed_within_family_multitarget_repeats": [],
+        },
+    }
+    contract = SimpleNamespace(
+        payload={
+            "gate_zero_runtime_contract_sha256": "2" * 64,
+            "panel_artifact_sha256": panel["artifact_sha256"],
+            "panel_selection_sha256": _stable_sha256(panel["selection"]),
+            "panel_census_sha256": _stable_sha256(panel["census"]),
+            "panel_capacity_strata_sha256": "3" * 64,
+        }
+    )
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="panel identity: panel_capacity_strata_sha256",
+    ):
+        run_editing_t1_arm(
+            contract=contract,
+            gate_zero_contract=SimpleNamespace(
+                sha256="2" * 64,
+                model={"enable_ring_system_delete": False},
+            ),
+            source=None,
+            panel=panel,
+            forensics={},
+            family="atom_insert",
+            panel_kind=EDITING_T1_UNIQUE_PANEL_KIND,
+            scope="all",
+            device=torch.device("cpu"),
+            excluded_trace_ids={},
+            active8_admission=None,
         )
 
 
@@ -1166,16 +1672,34 @@ def _durable_result_fixture():
         encoded_sha256="3" * 64,
         record_count=2,
     )
+    metrics = {
+        "n_examples": 64,
+        "canonical_successor_nll": 0.2,
+        "teacher_successor_probability": 0.8,
+        "teacher_successor_top1_recall": 1.0,
+        "teacher_family_probability": 0.9,
+        "teacher_family_nll": 0.1,
+        "within_teacher_family_successor_probability": 0.9,
+        "within_teacher_family_successor_nll": 0.1,
+        "mean_raw_mark_count": 4.0,
+        "mean_canonical_successor_count": 3.0,
+        "mean_alias_multiplicity": 1.0,
+        "repeated_state_excess_nll_over_empirical_entropy": 0.0,
+    }
     body = {
         "schema": EDITING_T1_RESULT_SCHEMA,
         "schema_version": EDITING_T1_RESULT_VERSION,
         "status": EDITING_T1_RESULT_STATUS,
         "training_authorized": False,
         "gate_decision": None,
-        "numeric_thresholds_frozen": False,
+        "numeric_thresholds_frozen": True,
+        "numeric_thresholds_sha256": "0" * 64,
         "contract_sha256": "4" * 64,
         "gate_zero_runtime_contract_sha256": "5" * 64,
         "panel_artifact_sha256": "6" * 64,
+        "panel_selection_sha256": "1" * 64,
+        "panel_census_sha256": "2" * 64,
+        "panel_capacity_strata_sha256": "3" * 64,
         "charge_policy_exclusion_payload_sha256": "7" * 64,
         "charge_policy_source_input_inventory_sha256": "8" * 64,
         "active8_inventory_manifest_file_sha256": "d" * 64,
@@ -1194,10 +1718,10 @@ def _durable_result_fixture():
             "enable_ring_grow_macro": False,
             "enable_cycle_ops": True,
         },
-        "example_count": 1,
-        "unique_progress_address_count": 1,
+        "example_count": 64,
+        "unique_progress_address_count": 64,
         "repeated_progress_observation_count": 0,
-        "source_row_sha256s": ["9" * 64],
+        "source_row_sha256s": [f"{index + 1:064x}" for index in range(64)],
         "scratch_initialization": {
             "regime": "scratch",
             "transfer_plan_sha256": "a" * 64,
@@ -1207,6 +1731,13 @@ def _durable_result_fixture():
         "training_report": {
             "scope": "heads_only",
             "steps": 1,
+            "families": ["atom_insert"],
+            "optimizer_steps_with_nonzero_gradient": 1,
+            "required_components_without_gradient": [],
+            "component_gradient_update_counts": {"family_head": 1},
+            "history": [{"step": 1.0, "loss": 1.0, "gradient_norm": 1.0}],
+            "initial": dict(metrics),
+            "final": dict(metrics),
         },
         "final_model_state_sha256": "c" * 64,
     }
@@ -1229,7 +1760,11 @@ def test_t1_durable_result_and_cache_receipts_fail_closed(tmp_path):
     expected = {
         "expected_result_sha256": result["result_sha256"],
         "expected_contract_sha256": result["contract_sha256"],
+        "expected_numeric_thresholds_sha256": result["numeric_thresholds_sha256"],
         "expected_panel_artifact_sha256": result["panel_artifact_sha256"],
+        "expected_panel_selection_sha256": result["panel_selection_sha256"],
+        "expected_panel_census_sha256": result["panel_census_sha256"],
+        "expected_panel_capacity_strata_sha256": result["panel_capacity_strata_sha256"],
         "expected_active8_identity": {
             "active8_inventory_manifest_file_sha256": (
                 result["active8_inventory_manifest_file_sha256"]
@@ -1241,9 +1776,7 @@ def test_t1_durable_result_and_cache_receipts_fail_closed(tmp_path):
             "active8_unified_packed_manifest_sha256": (
                 result["active8_unified_packed_manifest_sha256"]
             ),
-            "active8_support_contract_sha256": (
-                result["active8_support_contract_sha256"]
-            ),
+            "active8_support_contract_sha256": (result["active8_support_contract_sha256"]),
         },
         "expected_cache_receipts": (receipt,),
     }
@@ -1262,6 +1795,17 @@ def test_t1_durable_result_and_cache_receipts_fail_closed(tmp_path):
             **{
                 **expected,
                 "expected_contract_sha256": "d" * 64,
+            },
+        )
+    with pytest.raises(
+        EditingT1RuntimeError,
+        match="another prospective threshold map",
+    ):
+        validate_editing_t1_result(
+            result,
+            **{
+                **expected,
+                "expected_numeric_thresholds_sha256": "d" * 64,
             },
         )
     with pytest.raises(EditingT1RuntimeError, match="another panel artifact"):

@@ -7,6 +7,9 @@ import argparse
 import json
 from pathlib import Path
 
+from compose_v4.data.active8_trace_inventory import (
+    load_active8_trace_admission,
+)
 from compose_v4.experiments.editing_gate_zero_runtime import (
     freeze_gate_zero_runtime_evidence,
     load_gate_zero_runtime_contract,
@@ -24,16 +27,28 @@ def main() -> None:
         type=Path,
         required=True,
     )
+    parser.add_argument("--active8-inventory", type=Path, required=True)
+    parser.add_argument(
+        "--active8-inventory-file-sha256",
+        required=True,
+        help="Expected SHA-256 of the physical Active8 inventory manifest.",
+    )
     parser.add_argument("--output-cache-directory", type=Path, required=True)
     parser.add_argument("--output-evidence-manifest", type=Path, required=True)
     args = parser.parse_args()
 
     contract = load_gate_zero_runtime_contract(args.contract)
+    active8_admission = load_active8_trace_admission(
+        args.active8_inventory,
+        expected_manifest_file_sha256=args.active8_inventory_file_sha256,
+        expected_support_contract_sha256=contract.sha256,
+    )
     result = run_gate_zero_runtime(
         contract=contract,
         transfer_root=args.transfer_root,
         sidecar_path=args.semantic_sidecar,
         sidecar_manifest_path=args.semantic_sidecar_manifest,
+        active8_admission=active8_admission,
     )
     manifest = freeze_gate_zero_runtime_evidence(
         result,

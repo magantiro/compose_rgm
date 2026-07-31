@@ -15,6 +15,7 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.active8_trace_inventory import Active8TraceAdmission
 from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
 from compose_v4.data.packed_trace_store import (
     AddressedPackedTrace,
@@ -40,6 +41,7 @@ from compose_v4.experiments.editing_step_zero_probe import (
 from compose_v4.experiments.ringcore_semantic_sidecar import (
     LoadedSemanticCellSidecar,
     SemanticSidecarRow,
+    read_semantic_cell_sidecar,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
@@ -112,14 +114,19 @@ def _state(smiles: str, *, slots: int = 6):
     return pad_molecular_graph(smiles_to_molecular_graph(smiles), slots)
 
 
-def _record(*, shard_sha256: str) -> PathRecord:
+def _record(
+    *,
+    shard_sha256: str,
+    entry_index: int = 0,
+    trace_id: str = "fixture-trace",
+) -> PathRecord:
     trace = compile_carbon_tree_to_target(_state("C"), _state("CC"))
     path = TraceProgressCTMC(trace)
     address = PackedTraceAddress(
         packed_shard_content_sha256=shard_sha256,
         packed_shard_name="shard_0000.jsonl.gz",
-        entry_index=0,
-        trace_id="fixture-trace",
+        entry_index=entry_index,
+        trace_id=trace_id,
         layer="corruption",
         partition="validation",
         source_key=canonical_state_key(path.state_at(0)),
@@ -130,6 +137,34 @@ def _record(*, shard_sha256: str) -> PathRecord:
         target_key=address.target_key,
         path=path,
         corpus_address=address,
+    )
+
+
+def _active8_admission(
+    *,
+    contract_sha256: str,
+    unified_sha256: str,
+    shard_sha256: str,
+    decisions: tuple[tuple[str, bool], ...],
+) -> Active8TraceAdmission:
+    return Active8TraceAdmission(
+        manifest_path=Path("fixture-active8.json"),
+        manifest_file_sha256="a" * 64,
+        inventory_sha256="b" * 64,
+        unified_packed_manifest_sha256=unified_sha256,
+        support_contract_sha256=contract_sha256,
+        effective_source_corpus_cache_sha256="c" * 64,
+        decisions_by_digest={shard_sha256: decisions},
+        shard_digest_by_lane={
+            ("corruption", "validation", "shard_0000.jsonl.gz"): shard_sha256
+        },
+        shard_metadata_by_digest={shard_sha256: {}},
+        counts={
+            "source_shards": 1,
+            "traces": len(decisions),
+            "accepted_traces": sum(int(accepted) for _, accepted in decisions),
+            "excluded_traces": sum(int(not accepted) for _, accepted in decisions),
+        },
     )
 
 
@@ -259,7 +294,13 @@ def test_exact_validation_loader_binds_every_fixture_byte(
                 "traces": 1,
                 "rows": 2,
                 "nonempty_cells": 1,
-                "teacher_family_rows": {family: 1 for family in runtime.PRODUCTION_ACTIVE_FAMILIES},
+                "teacher_family_rows": {
+                    **{
+                        family: 1
+                        for family in runtime.PRODUCTION_ACTIVE_FAMILIES
+                    },
+                    "ring_system_delete": 1,
+                },
             },
             "provenance": {
                 "unified_packed_manifest_sha256": unified_sha256,
@@ -316,6 +357,18 @@ def test_exact_validation_loader_binds_every_fixture_byte(
     assert loaded.records == (record,)
     assert len(loaded.sidecar.rows) == 2
     assert loaded.bindings[0].spec.packed_shard_content_sha256 == packed_sha256
+    admitted = runtime.bind_active8_validation_source(
+        loaded,
+        contract=contract,
+        admission=_active8_admission(
+            contract_sha256=contract.sha256,
+            unified_sha256=unified_sha256,
+            shard_sha256=packed_sha256,
+            decisions=(("fixture-trace", True),),
+        ),
+    )
+    assert admitted.records == (record,)
+    assert len(admitted.semantic_cell_ids) == 2
     model = _tiny_model(record)
     cache_provenance = runtime.build_exact_cache_provenance(
         model,
@@ -341,6 +394,120 @@ def test_exact_validation_loader_binds_every_fixture_byte(
             sidecar_path=tmp_path / "sidecar.gz",
             sidecar_manifest_path=tmp_path / "sidecar.manifest.json",
         )
+
+
+def test_active8_binding_excludes_the_complete_trace_before_probe_selection() -> None:
+    shard_sha256 = "7" * 64
+    accepted = _record(
+        shard_sha256=shard_sha256,
+        entry_index=0,
+        trace_id="accepted",
+    )
+    excluded = _record(
+        shard_sha256=shard_sha256,
+        entry_index=1,
+        trace_id="excluded",
+    )
+    rows = tuple(
+        SemanticSidecarRow(
+            packed_shard_content_sha256=shard_sha256,
+            entry_index=entry_index,
+            progress_index=progress_index,
+            semantic_cell_id=(
+                f"cell-{entry_index}" if progress_index == 0 else None
+            ),
+        )
+        for entry_index in (0, 1)
+        for progress_index in (0, 1)
+    )
+    source = runtime.FrozenValidationSource(
+        records=(accepted, excluded),
+        sidecar=LoadedSemanticCellSidecar(rows=rows, manifest={}),
+        bindings=(
+            SimpleNamespace(
+                spec=SimpleNamespace(
+                    packed_shard_content_sha256=shard_sha256,
+                    packed_shard_name="shard_0000.jsonl.gz",
+                    layer="corruption",
+                    partition="validation",
+                    packed_entry_count=2,
+                )
+            ),
+        ),
+        unified_packed_manifest_sha256="5" * 64,
+        representability_overlay_sha256="6" * 64,
+    )
+    contract = runtime.GateZeroRuntimeContract(_contract_payload())
+    admitted = runtime.bind_active8_validation_source(
+        source,
+        contract=contract,
+        admission=_active8_admission(
+            contract_sha256=contract.sha256,
+            unified_sha256=source.unified_packed_manifest_sha256,
+            shard_sha256=shard_sha256,
+            decisions=(("accepted", True), ("excluded", False)),
+        ),
+    )
+
+    assert admitted.records == (accepted,)
+    assert set(admitted.semantic_cell_ids) == {
+        (shard_sha256, 0, 0),
+        (shard_sha256, 0, 1),
+    }
+    evidence = admitted.active8_evidence()
+    assert evidence["source_trace_count"] == 2
+    assert evidence["admitted_trace_count"] == 1
+    assert evidence["excluded_trace_count"] == 1
+    assert evidence["source_progress_row_count"] == 4
+    assert evidence["admitted_progress_row_count"] == 2
+    assert evidence["admitted_terminal_row_count"] == 1
+
+
+def test_checked_in_contract_sidecar_and_active8_identity_integrate() -> None:
+    contract = runtime.load_gate_zero_runtime_contract(
+        Path("configs/editing_gate_zero_runtime_v2.json")
+    )
+    loaded = read_semantic_cell_sidecar(
+        Path(
+            "diagnostics/coherence/"
+            "ringcore_v1_validation_semantic_sidecar_2026-07-30.jsonl.gz"
+        ),
+        Path(
+            "diagnostics/coherence/"
+            "ringcore_v1_validation_semantic_sidecar_2026-07-30.manifest.json"
+        ),
+        expected_manifest_sha256=str(contract.sidecar["manifest_sha256"]),
+        expected_config_sha256=str(contract.sidecar["config_sha256"]),
+        expected_provenance_sha256=str(contract.sidecar["provenance_sha256"]),
+    )
+    unified_sha256, _ = runtime._validated_sidecar_external_identities(
+        contract,
+        loaded,
+    )
+    assert loaded.manifest["counts"]["teacher_family_rows"][
+        "ring_system_delete"
+    ] == 621
+    runtime._validate_active8_source_identity(
+        contract,
+        unified_packed_manifest_sha256=unified_sha256,
+        admission=Active8TraceAdmission(
+            manifest_path=Path("fixture-active8.json"),
+            manifest_file_sha256="a" * 64,
+            inventory_sha256="b" * 64,
+            unified_packed_manifest_sha256=unified_sha256,
+            support_contract_sha256=contract.sha256,
+            effective_source_corpus_cache_sha256="c" * 64,
+            decisions_by_digest={},
+            shard_digest_by_lane={},
+            shard_metadata_by_digest={},
+            counts={
+                "source_shards": 0,
+                "traces": 0,
+                "accepted_traces": 0,
+                "excluded_traces": 0,
+            },
+        ),
+    )
 
 
 def test_probe_audit_batches_retain_every_progress_row() -> None:

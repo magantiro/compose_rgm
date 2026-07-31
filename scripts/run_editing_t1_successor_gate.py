@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Run one exact scratch-model T1 successor-capacity arm.
 
-The output is a development diagnostic with null thresholds and no gate
-decision.  It is not a checkpoint for downstream experiments.
+The output is a development diagnostic bound to prospectively frozen numeric
+thresholds, but it contains no gate decision. It is not a checkpoint for
+downstream experiments.
 """
 
 from __future__ import annotations
@@ -35,14 +36,22 @@ from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
     EDITING_T1_GLOBAL_REPEATED_PANEL_KIND,
     EDITING_T1_UNIQUE_PANEL_KIND,
     EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND,
+    EditingT1PanelError,
     active8_t1_identity,
     load_editing_t1_panel,
     validate_charge_policy_exclusions,
+    editing_t1_panel_capacity_strata_sha256,
+    editing_t1_panel_census_sha256,
+    editing_t1_panel_selection_sha256,
+    within_family_repeated_panel_families,
 )
 from compose_v4.experiments.editing_t1_successor_runtime import (  # noqa: E402
+    EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
+    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V4_PANEL_RELATIVE_PATH,
     EditingT1RuntimeError,
+    load_editing_t1_launch_authority,
     load_editing_t1_result,
-    load_editing_t1_runtime_contract,
     materialize_t1_panel,
     require_editing_t1_family_scope_applicable,
     run_editing_t1_arm,
@@ -105,7 +114,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--t1-contract",
         type=Path,
-        default=ROOT / "configs" / "editing_t1_successor_gate_v3.json",
+        default=ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
     )
     parser.add_argument(
         "--gate-zero-contract",
@@ -121,12 +130,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--panel",
         type=Path,
-        default=(
-            ROOT
-            / "diagnostics"
-            / "coherence"
-            / "editing_t1_successor_panel_v3_active8_2026-07-30.json"
-        ),
+        default=ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH,
     )
     parser.add_argument(
         "--forensics",
@@ -137,6 +141,11 @@ def _parser() -> argparse.ArgumentParser:
             / "coherence"
             / "ringcore_v1_family_forensics_initial_2026-07-30.json.gz"
         ),
+    )
+    parser.add_argument(
+        "--capacity-census",
+        type=Path,
+        default=ROOT / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
     )
     parser.add_argument(
         "--leaderboard-config",
@@ -220,14 +229,22 @@ def main() -> int:
         )
     except EditingT1RuntimeError as error:
         raise SystemExit(str(error)) from error
-    t1_contract = load_editing_t1_runtime_contract(args.t1_contract)
+    try:
+        launch_authority = load_editing_t1_launch_authority(
+            contract_path=args.t1_contract,
+            panel_path=args.panel,
+            capacity_census_path=args.capacity_census,
+            expected_active8_inventory_manifest_file_sha256=(
+                args.active8_inventory_file_sha256
+            ),
+        )
+    except EditingT1RuntimeError as error:
+        raise SystemExit(str(error)) from error
+    t1_contract = launch_authority.contract
     gate_zero_contract = load_gate_zero_runtime_contract(args.gate_zero_contract)
     if gate_zero_contract.sha256 != t1_contract.payload["gate_zero_runtime_contract_sha256"]:
         raise SystemExit("T1/Gate-0 runtime contract hash mismatch")
-    if (
-        gate_zero_contract.sha256
-        != t1_contract.payload["active8_support_contract_sha256"]
-    ):
+    if gate_zero_contract.sha256 != t1_contract.payload["active8_support_contract_sha256"]:
         raise SystemExit("T1 Gate-0/Active8 support-contract hash mismatch")
     if (
         args.active8_inventory_file_sha256
@@ -241,17 +258,11 @@ def main() -> int:
         expected_manifest_file_sha256=(
             t1_contract.payload["active8_inventory_manifest_file_sha256"]
         ),
-        expected_inventory_sha256=(
-            t1_contract.payload["active8_inventory_sha256"]
-        ),
+        expected_inventory_sha256=(t1_contract.payload["active8_inventory_sha256"]),
         expected_effective_source_corpus_cache_sha256=(
-            t1_contract.payload[
-                "active8_effective_source_corpus_cache_sha256"
-            ]
+            t1_contract.payload["active8_effective_source_corpus_cache_sha256"]
         ),
-        expected_support_contract_sha256=(
-            t1_contract.payload["active8_support_contract_sha256"]
-        ),
+        expected_support_contract_sha256=(t1_contract.payload["active8_support_contract_sha256"]),
     )
     with gzip.open(args.forensics, "rt") as handle:
         forensics = json.load(handle)
@@ -269,10 +280,13 @@ def main() -> int:
         sidecar_path=args.semantic_sidecar,
         sidecar_manifest_path=args.semantic_sidecar_manifest,
     )
+    census_model, census_parity = build_scratch_ringcore_model(gate_zero_contract)
     charge_policy_audit = load_json_object(args.charge_policy_audit)
     charge_policy_exclusions = load_json_object(args.charge_policy_exclusions)
+    capacity_census = dict(launch_authority.capacity_census)
     charge_policy_audit_file_sha256 = _sha256(args.charge_policy_audit)
     charge_policy_exclusions_file_sha256 = _sha256(args.charge_policy_exclusions)
+    capacity_census_file_sha256 = _sha256(args.capacity_census)
     excluded_trace_ids = validate_charge_policy_exclusions(
         audit=charge_policy_audit,
         audit_file_sha256=charge_policy_audit_file_sha256,
@@ -296,12 +310,22 @@ def main() -> int:
             "charge_policy_source_input_inventory_sha256",
             charge_policy_exclusions["source_input_inventory_sha256"],
         ),
+        (
+            "capacity_census_file_sha256",
+            capacity_census_file_sha256,
+        ),
+        (
+            "capacity_census_sha256",
+            capacity_census["census_sha256"],
+        ),
     ):
         if t1_contract.payload[field] != observed:
-            raise SystemExit(f"T1 charge-policy provenance mismatch for {field}")
+            raise SystemExit(f"T1 frozen provenance mismatch for {field}")
     panel = load_editing_t1_panel(
         args.panel,
         expected_artifact_sha256=t1_contract.payload["panel_artifact_sha256"],
+        model=census_model,
+        source=source,
         forensics=forensics,
         forensics_file_sha256=forensics_file_sha256,
         sidecar=source.sidecar,
@@ -311,11 +335,22 @@ def main() -> int:
         charge_policy_audit_file_sha256=charge_policy_audit_file_sha256,
         charge_policy_exclusions=charge_policy_exclusions,
         charge_policy_exclusions_file_sha256=(charge_policy_exclusions_file_sha256),
+        capacity_census=capacity_census,
+        capacity_census_file_sha256=capacity_census_file_sha256,
         active8_admission=active8_admission,
-        gate_zero_unified_packed_manifest_sha256=(
-            source.unified_packed_manifest_sha256
-        ),
+        gate_zero_runtime_contract_sha256=gate_zero_contract.sha256,
+        gate_zero_unified_packed_manifest_sha256=(source.unified_packed_manifest_sha256),
     )
+    if args.panel_kind == EDITING_T1_WITHIN_FAMILY_REPEATED_PANEL_KIND:
+        try:
+            available_repeated_families = within_family_repeated_panel_families(panel)
+        except EditingT1PanelError as error:
+            raise SystemExit(str(error)) from error
+        if args.family not in available_repeated_families:
+            raise SystemExit(
+                "no empirical within-family repeated multi-successor panel "
+                f"exists for {args.family}"
+            )
     active8_identity = validate_t1_active8_runtime_binding(
         contract=t1_contract,
         gate_zero_contract=gate_zero_contract,
@@ -327,7 +362,7 @@ def main() -> int:
     if device.type == "cuda" and not torch.cuda.is_available():
         raise SystemExit("CUDA was requested but is unavailable")
     if args.audit_only:
-        model, parity = build_scratch_ringcore_model(gate_zero_contract)
+        model, parity = census_model, census_parity
         model = model.to(device)
         materialized = materialize_t1_panel(
             model,
@@ -345,6 +380,8 @@ def main() -> int:
             "training_authorized": False,
             "gate_decision": None,
             "contract_sha256": t1_contract.sha256,
+            "numeric_thresholds_frozen": True,
+            "numeric_thresholds_sha256": (t1_contract.numeric_thresholds_sha256),
             "panel_artifact_sha256": panel["artifact_sha256"],
             "charge_policy_exclusion_payload_sha256": (charge_policy_exclusions["payload_sha256"]),
             "charge_policy_source_input_inventory_sha256": (
@@ -401,7 +438,13 @@ def main() -> int:
                 args.output,
                 expected_result_sha256=result["result_sha256"],
                 expected_contract_sha256=t1_contract.sha256,
+                expected_numeric_thresholds_sha256=(t1_contract.numeric_thresholds_sha256),
                 expected_panel_artifact_sha256=panel["artifact_sha256"],
+                expected_panel_selection_sha256=(editing_t1_panel_selection_sha256(panel)),
+                expected_panel_census_sha256=(editing_t1_panel_census_sha256(panel)),
+                expected_panel_capacity_strata_sha256=(
+                    editing_t1_panel_capacity_strata_sha256(panel)
+                ),
                 expected_active8_identity=active8_identity,
                 expected_cache_receipts=result["cache_receipts"],
             )

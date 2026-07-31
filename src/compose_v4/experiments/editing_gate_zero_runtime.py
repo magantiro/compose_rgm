@@ -20,6 +20,7 @@ import hashlib
 import json
 import os
 import tempfile
+from collections import Counter
 from collections.abc import Iterable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -40,6 +41,10 @@ from compose_v4.chem.persistent_state_identity import (
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
+from compose_v4.data.active8_trace_inventory import (
+    Active8TraceAdmission,
+    Active8TraceInventoryError,
+)
 from compose_v4.data.packed_trace_store import (
     PACKED_STORE_SCHEMA,
     PACKED_STORE_SCHEMA_VERSION,
@@ -92,6 +97,7 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     MARK_RULE_NAMES,
     FactorizedTraceletRateModel,
 )
+from compose_v4.rewrite.action_codec import ActionCodecError, canonical_family
 from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
@@ -102,7 +108,7 @@ from compose_v4.rewrite.typed_ring_catalog import (
 EDITING_GATE_ZERO_RUNTIME_CONTRACT_SCHEMA = "compose.editing.gate_zero_runtime_contract"
 EDITING_GATE_ZERO_RUNTIME_CONTRACT_VERSION = 2
 EDITING_GATE_ZERO_RUNTIME_EVIDENCE_SCHEMA = "compose.editing.gate_zero_structural_evidence"
-EDITING_GATE_ZERO_RUNTIME_EVIDENCE_VERSION = 1
+EDITING_GATE_ZERO_RUNTIME_EVIDENCE_VERSION = 2
 EDITING_GATE_ZERO_RUNTIME_STATUS = "STRUCTURAL_AUDIT_COMPLETE_NO_TRAINING_DECISION"
 EDITING_GATE_ZERO_RUNTIME_CONTRACT_STATUS = "FROZEN_STRUCTURAL_PROBE_CONTRACT_NO_TRAINING_AUTHORITY"
 PRODUCTION_RINGCORE_CATALOG_FINGERPRINT = "639ff6078c32d43c"
@@ -129,6 +135,26 @@ PRODUCTION_ACTIVE_FAMILIES = tuple(
     family
     for family in MARK_RULE_NAMES
     if family not in {"ring_system_grow", "ring_system_delete"}
+)
+GATE_ZERO_ACTIVE8_IDENTITY_FIELDS = (
+    "active8_inventory_manifest_file_sha256",
+    "active8_inventory_sha256",
+    "active8_effective_source_corpus_cache_sha256",
+    "active8_unified_packed_manifest_sha256",
+    "active8_support_contract_sha256",
+)
+GATE_ZERO_ACTIVE8_CENSUS_FIELDS = (
+    "partition",
+    "source_shard_count",
+    "source_trace_count",
+    "source_progress_row_count",
+    "admitted_trace_count",
+    "excluded_trace_count",
+    "admitted_progress_row_count",
+    "admitted_nonterminal_row_count",
+    "admitted_terminal_row_count",
+    "admitted_nonempty_semantic_cell_count",
+    "admitted_teacher_examples_by_family",
 )
 
 _CONTRACT_FIELDS = {
@@ -429,6 +455,121 @@ class FrozenValidationSource:
         )
 
 
+@dataclass(frozen=True)
+class GateZeroActive8ValidationSource:
+    """Exact whole-trace Active8 view of one frozen validation source."""
+
+    source: FrozenValidationSource
+    admission: Active8TraceAdmission
+    records: tuple[PathRecord, ...]
+    semantic_cell_ids: Mapping[tuple[str, int, int], str | None]
+    admitted_teacher_examples_by_family: Mapping[str, int]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.source, FrozenValidationSource):
+            raise TypeError("Active8 validation view requires a FrozenValidationSource")
+        if not isinstance(self.admission, Active8TraceAdmission):
+            raise TypeError("Active8 validation view requires an Active8TraceAdmission")
+        if not self.records:
+            raise ValueError("Active8 validation view cannot be empty")
+        semantic_cell_ids = dict(self.semantic_cell_ids)
+        record_keys = {
+            (
+                record.corpus_address.packed_shard_content_sha256,
+                record.corpus_address.entry_index,
+                progress_index,
+            )
+            for record in self.records
+            if record.corpus_address is not None
+            for progress_index in range(record.path.path_length + 1)
+        }
+        if set(semantic_cell_ids) != record_keys:
+            raise ValueError(
+                "Active8 validation records and semantic rows are not an exact census"
+            )
+        family_counts = dict(self.admitted_teacher_examples_by_family)
+        if (
+            tuple(family_counts) != PRODUCTION_ACTIVE_FAMILIES
+            or any(type(count) is not int or count < 0 for count in family_counts.values())
+        ):
+            raise ValueError(
+                "Active8 validation family census must cover the ordered pilot families"
+            )
+        object.__setattr__(
+            self,
+            "semantic_cell_ids",
+            MappingProxyType(semantic_cell_ids),
+        )
+        object.__setattr__(
+            self,
+            "admitted_teacher_examples_by_family",
+            MappingProxyType(family_counts),
+        )
+
+    @property
+    def sidecar(self) -> LoadedSemanticCellSidecar:
+        return self.source.sidecar
+
+    @property
+    def bindings(self) -> tuple[ValidationShardBinding, ...]:
+        return self.source.bindings
+
+    @property
+    def binding_by_digest(self) -> Mapping[str, ValidationShardBinding]:
+        return self.source.binding_by_digest
+
+    @property
+    def unified_packed_manifest_sha256(self) -> str:
+        return self.source.unified_packed_manifest_sha256
+
+    @property
+    def representability_overlay_sha256(self) -> str:
+        return self.source.representability_overlay_sha256
+
+    @property
+    def admitted_nonterminal_row_count(self) -> int:
+        return sum(record.path.path_length for record in self.records)
+
+    @property
+    def admitted_terminal_row_count(self) -> int:
+        return len(self.records)
+
+    def active8_evidence(self) -> dict[str, Any]:
+        """Return the exact identity and admitted validation census."""
+
+        nonempty_cells = {
+            cell_id for cell_id in self.semantic_cell_ids.values() if cell_id is not None
+        }
+        return {
+            "active8_inventory_manifest_file_sha256": (
+                self.admission.manifest_file_sha256
+            ),
+            "active8_inventory_sha256": self.admission.inventory_sha256,
+            "active8_effective_source_corpus_cache_sha256": (
+                self.admission.effective_source_corpus_cache_sha256
+            ),
+            "active8_unified_packed_manifest_sha256": (
+                self.admission.unified_packed_manifest_sha256
+            ),
+            "active8_support_contract_sha256": (
+                self.admission.support_contract_sha256
+            ),
+            "partition": "validation",
+            "source_shard_count": len(self.source.bindings),
+            "source_trace_count": len(self.source.records),
+            "source_progress_row_count": len(self.source.sidecar.rows),
+            "admitted_trace_count": len(self.records),
+            "excluded_trace_count": len(self.source.records) - len(self.records),
+            "admitted_progress_row_count": len(self.semantic_cell_ids),
+            "admitted_nonterminal_row_count": self.admitted_nonterminal_row_count,
+            "admitted_terminal_row_count": self.admitted_terminal_row_count,
+            "admitted_nonempty_semantic_cell_count": len(nonempty_cells),
+            "admitted_teacher_examples_by_family": dict(
+                self.admitted_teacher_examples_by_family
+            ),
+        }
+
+
 def _semantic_source_shard(value: object) -> SemanticSidecarSourceShard:
     if not isinstance(value, Mapping):
         raise EditingGateZeroRuntimeError("semantic-sidecar source shard is malformed")
@@ -459,6 +600,64 @@ def _require_file_sha256(path: Path, expected: str, *, name: str) -> None:
         raise EditingGateZeroRuntimeError(f"{name} hash mismatch: {observed} != {expected}")
 
 
+def _validated_sidecar_external_identities(
+    contract: GateZeroRuntimeContract,
+    loaded: LoadedSemanticCellSidecar,
+) -> tuple[str, str]:
+    """Validate the frozen pre-admission sidecar without conflating its support."""
+
+    sidecar_contract = contract.sidecar
+    manifest = loaded.manifest
+    if (
+        manifest["semantic_census_sha256"]
+        != sidecar_contract["semantic_census_sha256"]
+        or manifest["counts"]["nonempty_cells"]
+        != sidecar_contract["nonempty_semantic_cell_count"]
+    ):
+        raise EditingGateZeroRuntimeError(
+            "semantic-sidecar census disagrees with the runtime contract"
+        )
+    teacher_families = manifest["counts"]["teacher_family_rows"]
+    missing_families = sorted(set(contract.required_families) - set(teacher_families))
+    if missing_families:
+        raise EditingGateZeroRuntimeError(
+            "semantic sidecar is missing required Active8 teacher families: "
+            f"{missing_families}"
+        )
+    provenance = manifest["provenance"]
+    unified_sha256 = str(provenance["unified_packed_manifest_sha256"])
+    representability_sha256 = str(provenance["representability_overlay_sha256"])
+    if (
+        unified_sha256 != sidecar_contract["unified_packed_manifest_sha256"]
+        or representability_sha256
+        != sidecar_contract["representability_overlay_sha256"]
+    ):
+        raise EditingGateZeroRuntimeError(
+            "sidecar external corpus identity disagrees with the runtime contract"
+        )
+    return unified_sha256, representability_sha256
+
+
+def _validate_active8_source_identity(
+    contract: GateZeroRuntimeContract,
+    *,
+    unified_packed_manifest_sha256: str,
+    admission: Active8TraceAdmission,
+) -> None:
+    """Bind one verified Active8 inventory to the Gate0 support and corpus."""
+
+    if not isinstance(admission, Active8TraceAdmission):
+        raise TypeError("Gate0 requires a verified Active8TraceAdmission")
+    if admission.support_contract_sha256 != contract.sha256:
+        raise EditingGateZeroRuntimeError(
+            "Active8 inventory and Gate0 name different support contracts"
+        )
+    if admission.unified_packed_manifest_sha256 != unified_packed_manifest_sha256:
+        raise EditingGateZeroRuntimeError(
+            "Active8 inventory and Gate0 name different unified packed corpora"
+        )
+
+
 def load_frozen_validation_source(
     *,
     contract: GateZeroRuntimeContract,
@@ -485,28 +684,10 @@ def load_frozen_validation_source(
             "frozen validation semantic sidecar failed verification"
         ) from error
     manifest = loaded.manifest
-    if (
-        manifest["semantic_census_sha256"] != sidecar_contract["semantic_census_sha256"]
-        or manifest["counts"]["nonempty_cells"] != sidecar_contract["nonempty_semantic_cell_count"]
-    ):
-        raise EditingGateZeroRuntimeError(
-            "semantic-sidecar census disagrees with the runtime contract"
-        )
-    teacher_families = manifest["counts"]["teacher_family_rows"]
-    if tuple(sorted(teacher_families)) != tuple(sorted(contract.required_families)):
-        raise EditingGateZeroRuntimeError(
-            "semantic sidecar does not contain exactly the nine required families"
-        )
+    unified_sha256, representability_sha256 = (
+        _validated_sidecar_external_identities(contract, loaded)
+    )
     provenance = manifest["provenance"]
-    unified_sha256 = str(provenance["unified_packed_manifest_sha256"])
-    representability_sha256 = str(provenance["representability_overlay_sha256"])
-    if (
-        unified_sha256 != sidecar_contract["unified_packed_manifest_sha256"]
-        or representability_sha256 != sidecar_contract["representability_overlay_sha256"]
-    ):
-        raise EditingGateZeroRuntimeError(
-            "sidecar external corpus identity disagrees with the runtime contract"
-        )
     _require_file_sha256(
         root / "UNIFIED_PACKED_MANIFEST.json",
         unified_sha256,
@@ -625,6 +806,111 @@ def load_frozen_validation_source(
         ),
         unified_packed_manifest_sha256=unified_sha256,
         representability_overlay_sha256=representability_sha256,
+    )
+
+
+def bind_active8_validation_source(
+    source: FrozenValidationSource,
+    *,
+    contract: GateZeroRuntimeContract,
+    admission: Active8TraceAdmission,
+) -> GateZeroActive8ValidationSource:
+    """Apply exact whole-trace Active8 admission before Gate0 probe selection."""
+
+    if not isinstance(source, FrozenValidationSource):
+        raise TypeError("Gate0 Active8 binding requires a FrozenValidationSource")
+    _validate_active8_source_identity(
+        contract,
+        unified_packed_manifest_sha256=source.unified_packed_manifest_sha256,
+        admission=admission,
+    )
+    observed_lanes: set[tuple[str, str, str]] = set()
+    try:
+        for binding in source.bindings:
+            spec = binding.spec
+            lane = (spec.layer, spec.partition, spec.packed_shard_name)
+            observed_lanes.add(lane)
+            admission.assert_complete_source_shard(
+                packed_shard_name=spec.packed_shard_name,
+                layer=spec.layer,
+                partition=spec.partition,
+                observed_digest=spec.packed_shard_content_sha256,
+                observed_entries=spec.packed_entry_count,
+            )
+        admission.assert_partition_shards("validation", observed_lanes)
+    except Active8TraceInventoryError as error:
+        raise EditingGateZeroRuntimeError(
+            "Gate0 validation shards disagree with exact Active8 admission"
+        ) from error
+
+    admitted_records: list[PathRecord] = []
+    admitted_trace_keys: set[tuple[str, int]] = set()
+    family_counts: Counter[str] = Counter(
+        {family: 0 for family in PRODUCTION_ACTIVE_FAMILIES}
+    )
+    try:
+        for record in source.records:
+            address = record.corpus_address
+            if address is None:
+                raise EditingGateZeroRuntimeError(
+                    "Gate0 validation record lacks an immutable packed address"
+                )
+            if not admission.is_accepted(address):
+                continue
+            admitted_records.append(record)
+            admitted_trace_keys.add(
+                (
+                    address.packed_shard_content_sha256,
+                    address.entry_index,
+                )
+            )
+            for step in record.path.trace.steps:
+                family = canonical_family(step.rule_name)
+                if family not in family_counts:
+                    raise EditingGateZeroRuntimeError(
+                        "Active8-admitted trace contains a disabled family"
+                    )
+                family_counts[family] += 1
+    except (Active8TraceInventoryError, ActionCodecError) as error:
+        raise EditingGateZeroRuntimeError(
+            "Gate0 could not apply exact whole-trace Active8 admission"
+        ) from error
+
+    admitted_semantic_cell_ids = {
+        row.exact_key: row.semantic_cell_id
+        for row in source.sidecar.rows
+        if (
+            row.packed_shard_content_sha256,
+            row.entry_index,
+        )
+        in admitted_trace_keys
+    }
+    if not admitted_records:
+        raise EditingGateZeroRuntimeError(
+            "Active8 admission leaves no Gate0 validation traces"
+        )
+    admitted_record_keys = {
+        (
+            record.corpus_address.packed_shard_content_sha256,
+            record.corpus_address.entry_index,
+            progress_index,
+        )
+        for record in admitted_records
+        if record.corpus_address is not None
+        for progress_index in range(record.path.path_length + 1)
+    }
+    if set(admitted_semantic_cell_ids) != admitted_record_keys:
+        raise EditingGateZeroRuntimeError(
+            "Active8-admitted validation traces and semantic rows are not an exact census"
+        )
+    return GateZeroActive8ValidationSource(
+        source=source,
+        admission=admission,
+        records=tuple(admitted_records),
+        semantic_cell_ids=admitted_semantic_cell_ids,
+        admitted_teacher_examples_by_family={
+            family: family_counts[family] for family in PRODUCTION_ACTIVE_FAMILIES
+        },
     )
 
 
@@ -760,7 +1046,7 @@ def _support_signature_payload(
 
 def build_exact_cache_provenance(
     model: FactorizedTraceletRateModel,
-    source: FrozenValidationSource,
+    source: FrozenValidationSource | GateZeroActive8ValidationSource,
     *,
     selected_shard_digests: Iterable[str],
     max_atoms: int,
@@ -906,7 +1192,7 @@ class GateZeroRuntimeResult:
     """In-memory result ready for an immutable evidence freeze."""
 
     contract: GateZeroRuntimeContract
-    source: FrozenValidationSource
+    source: GateZeroActive8ValidationSource
     model: FactorizedTraceletRateModel
     initialization_parity: InitializationParityReport
     probe: GateZeroSuccessorProbe
@@ -926,21 +1212,27 @@ def run_gate_zero_runtime(
     transfer_root: Path,
     sidecar_path: Path,
     sidecar_manifest_path: Path,
+    active8_admission: Active8TraceAdmission,
 ) -> GateZeroRuntimeResult:
     """Run the exact bounded structural probe without an optimizer update."""
 
-    source = load_frozen_validation_source(
+    frozen_source = load_frozen_validation_source(
         contract=contract,
         transfer_root=transfer_root,
         sidecar_path=sidecar_path,
         sidecar_manifest_path=sidecar_manifest_path,
     )
-    required_semantic_cells = tuple(
-        sorted({cell for cell in source.sidecar.semantic_cell_ids.values() if cell is not None})
+    source = bind_active8_validation_source(
+        frozen_source,
+        contract=contract,
+        admission=active8_admission,
     )
-    if len(required_semantic_cells) != int(contract.sidecar["nonempty_semantic_cell_count"]):
+    required_semantic_cells = tuple(
+        sorted({cell for cell in source.semantic_cell_ids.values() if cell is not None})
+    )
+    if not required_semantic_cells:
         raise EditingGateZeroRuntimeError(
-            "frozen sidecar does not expose all required semantic cells"
+            "Active8-admitted Gate0 validation source has no semantic cells"
         )
     probe_config = GateZeroSuccessorProbeConfig(
         required_families=contract.required_families,
@@ -948,7 +1240,7 @@ def run_gate_zero_runtime(
     )
     selected_records = select_gate_zero_successor_probe_records(
         source.records,
-        semantic_cell_ids=source.sidecar.semantic_cell_ids,
+        semantic_cell_ids=source.semantic_cell_ids,
         config=probe_config,
     )
     selected_keys = {
@@ -961,7 +1253,7 @@ def run_gate_zero_runtime(
         if record.corpus_address is not None
         for progress_index in range(record.path.path_length + 1)
     }
-    selected_cells = {key: source.sidecar.semantic_cell_ids[key] for key in selected_keys}
+    selected_cells = {key: source.semantic_cell_ids[key] for key in selected_keys}
     model, parity = build_scratch_ringcore_model(contract)
     selected_shards = {
         record.corpus_address.packed_shard_content_sha256
@@ -1060,6 +1352,7 @@ def _evidence_body(
         "training_decision": None,
         "optimizer_steps": 0,
         "runtime_contract_sha256": result.contract.sha256,
+        "active8_admission": result.source.active8_evidence(),
         "source": {
             "semantic_sidecar_manifest_sha256": (sidecar_manifest["manifest_sha256"]),
             "semantic_sidecar_source_sha256": (sidecar_manifest["source_sha256"]),
@@ -1067,7 +1360,7 @@ def _evidence_body(
             "unified_packed_manifest_sha256": (result.source.unified_packed_manifest_sha256),
             "representability_overlay_sha256": (result.source.representability_overlay_sha256),
             "validation_trace_count": len(result.source.records),
-            "validation_progress_row_count": len(result.source.sidecar.rows),
+            "validation_progress_row_count": len(result.source.semantic_cell_ids),
             "validation_shards": [asdict(binding.spec) for binding in result.source.bindings],
         },
         "model": {
@@ -1149,15 +1442,19 @@ __all__ = [
     "EDITING_GATE_ZERO_RUNTIME_EVIDENCE_SCHEMA",
     "EDITING_GATE_ZERO_RUNTIME_EVIDENCE_VERSION",
     "EDITING_GATE_ZERO_RUNTIME_STATUS",
+    "GATE_ZERO_ACTIVE8_CENSUS_FIELDS",
+    "GATE_ZERO_ACTIVE8_IDENTITY_FIELDS",
     "PRODUCTION_ACTIVE_FAMILIES",
     "PRODUCTION_ACTION_TABLE_VOCABULARY",
     "PRODUCTION_RINGCORE_CATALOG_FINGERPRINT",
     "PRODUCTION_RINGCORE_CATALOG_SEEDS",
     "EditingGateZeroRuntimeError",
     "FrozenValidationSource",
+    "GateZeroActive8ValidationSource",
     "GateZeroRuntimeContract",
     "GateZeroRuntimeResult",
     "ValidationShardBinding",
+    "bind_active8_validation_source",
     "build_exact_cache_provenance",
     "build_production_ringcore_catalog",
     "build_scratch_ringcore_model",

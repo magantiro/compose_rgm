@@ -1,13 +1,39 @@
 from __future__ import annotations
 
+import copy
+import hashlib
+import json
+
 import pytest
 
 pytest.importorskip("modal")
 
+import modal_apps.run_editing_t1_successor_gate as t1_modal
 from modal_apps.run_editing_t1_successor_gate import (
     FAMILIES,
     LOCAL_ADAPTER_FAMILIES,
     SCOPES,
+    build_t1_modal_launch_receipt,
+    load_t1_modal_launch_receipt,
+    _require_clean_serialized_tree,
+    t1_modal_launch_receipt_path,
+    validate_t1_modal_launch_receipt,
+    write_t1_modal_launch_receipt,
+)
+from compose_v4.experiments.editing_t1_panel import (
+    EDITING_T1_CAPACITY_CENSUS_SCHEMA,
+    EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
+    EDITING_T1_CAPACITY_CENSUS_STATUS,
+    EDITING_T1_PANEL_SCHEMA,
+    EDITING_T1_PANEL_SCHEMA_VERSION,
+    EDITING_T1_PANEL_STATUS,
+)
+from compose_v4.experiments.editing_t1_successor_runtime import (
+    EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH,
+    EDITING_T1_V4_CONTRACT_RELATIVE_PATH,
+    EDITING_T1_V4_PANEL_RELATIVE_PATH,
+    build_editing_t1_runtime_contract,
+    validate_editing_t1_launch_authority,
 )
 from modal_apps.run_editing_t1_successor_gate import (
     build_task_matrix as _build_task_matrix,
@@ -15,9 +41,210 @@ from modal_apps.run_editing_t1_successor_gate import (
 
 ACTIVE8_INVENTORY = "active8_trace_inventory_v1/ACTIVE8_TRACE_INVENTORY.json"
 ACTIVE8_FILE_SHA256 = "a" * 64
-RESOLVED_ACTIVE8_INVENTORY = (
-    "/artifacts/active8_trace_inventory_v1/ACTIVE8_TRACE_INVENTORY.json"
-)
+RESOLVED_ACTIVE8_INVENTORY = "/artifacts/active8_trace_inventory_v1/ACTIVE8_TRACE_INVENTORY.json"
+SOURCE_COMMIT = "c" * 40
+RESULT_SHA256 = "d" * 64
+CACHE_RECEIPTS = [
+    {
+        "packed_shard_content_sha256": "1" * 64,
+        "cache_content_sha256": "2" * 64,
+        "encoded_sha256": "3" * 64,
+        "record_count": 1,
+    }
+]
+
+
+def _synthetic_launch_authority(
+    *,
+    repeated_families: set[str] | None = None,
+):
+    repeated_families = (
+        {
+            "atom_insert",
+            "atom_restate",
+            "bond_reroute",
+            "cycle_attach",
+            "ring_system_restate",
+        }
+        if repeated_families is None
+        else set(repeated_families)
+    )
+    active8_identity = {
+        "active8_inventory_manifest_file_sha256": ACTIVE8_FILE_SHA256,
+        "active8_inventory_sha256": "b" * 64,
+        "active8_effective_source_corpus_cache_sha256": "c" * 64,
+        "active8_unified_packed_manifest_sha256": "d" * 64,
+        "active8_support_contract_sha256": "e" * 64,
+    }
+    census_body = {
+        "schema": EDITING_T1_CAPACITY_CENSUS_SCHEMA,
+        "schema_version": EDITING_T1_CAPACITY_CENSUS_SCHEMA_VERSION,
+        "status": EDITING_T1_CAPACITY_CENSUS_STATUS,
+        "training_authorized": False,
+        "forensics_file_sha256": "f" * 64,
+        "gate_zero_runtime_contract_sha256": "e" * 64,
+        "unified_packed_manifest_sha256": "d" * 64,
+        "representability_overlay_sha256": "1" * 64,
+        **active8_identity,
+        "rows": [{"source_row_sha256": "2" * 64}],
+    }
+    census = {
+        **census_body,
+        "census_sha256": t1_modal._stable_sha256(census_body),
+    }
+    census_content = (
+        json.dumps(census, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    ).encode()
+    census_file_sha256 = hashlib.sha256(census_content).hexdigest()
+    required_aliases = ["atom_insert", "bond_reroute", "cycle_attach"]
+    selection = {
+        "required_high_candidate_families": list(FAMILIES),
+        "required_aliased_teacher_families": required_aliases,
+    }
+    panel_census = {
+        "unique_high_candidate_stratum_available_by_family": {
+            family: 1 for family in FAMILIES
+        },
+        "unique_high_candidate_stratum_selected_by_family": {
+            family: 1 for family in FAMILIES
+        },
+        "unique_aliased_teacher_stratum_available_by_family": {
+            family: int(family in required_aliases) for family in FAMILIES
+        },
+        "unique_aliased_teacher_stratum_selected_by_family": {
+            family: int(family in required_aliases) for family in FAMILIES
+        },
+        "registered_high_candidate_families_all_covered": True,
+        "registered_aliased_teacher_families_all_covered": True,
+        "families_without_observed_within_family_multitarget_repeats": [
+            family for family in FAMILIES if family not in repeated_families
+        ],
+    }
+    panel_body = {
+        "schema": EDITING_T1_PANEL_SCHEMA,
+        "schema_version": EDITING_T1_PANEL_SCHEMA_VERSION,
+        "status": EDITING_T1_PANEL_STATUS,
+        "training_authorized": False,
+        "source": {
+            "forensics_file_sha256": "f" * 64,
+            "charge_policy_audit_file_sha256": "3" * 64,
+            "charge_policy_exclusions_file_sha256": "4" * 64,
+            "charge_policy_exclusion_payload_sha256": "5" * 64,
+            "charge_policy_source_input_inventory_sha256": "6" * 64,
+            "capacity_census_file_sha256": census_file_sha256,
+            "capacity_census_sha256": census["census_sha256"],
+            **active8_identity,
+        },
+        "selection": selection,
+        "census": panel_census,
+        "thresholds": {
+            "minimum_unique_state_teacher_successor_top1": None,
+            "minimum_unique_state_teacher_successor_probability": None,
+            "maximum_unique_state_teacher_successor_nll": None,
+            "maximum_global_repeated_state_excess_nll_over_empirical_entropy": None,
+        },
+        "within_family_repeated_state_panels": {
+            family: (
+                [{"rows": [{"source_row_index": 0}]}]
+                if family in repeated_families
+                else []
+            )
+            for family in FAMILIES
+        },
+    }
+    panel = {
+        **panel_body,
+        "artifact_sha256": t1_modal._stable_sha256(panel_body),
+    }
+    contract = build_editing_t1_runtime_contract(
+        gate_zero_runtime_contract_sha256="e" * 64,
+        panel=panel,
+        capacity_census=census,
+        capacity_census_file_sha256=census_file_sha256,
+        active8_identity=active8_identity,
+        optimization={
+            "steps": 2,
+            "learning_rate": 0.001,
+            "weight_decay": 0.0,
+            "scopes": ["heads_only", "heads_plus_local_adapter", "all"],
+            "report_points": [1, 2],
+        },
+        thresholds={
+            "minimum_unique_state_teacher_successor_top1": 0.8,
+            "minimum_unique_state_teacher_successor_probability": 0.6,
+            "maximum_unique_state_teacher_successor_nll": 0.7,
+            "maximum_global_repeated_state_excess_nll_over_empirical_entropy": 0.2,
+        },
+    )
+    return validate_editing_t1_launch_authority(
+        contract=contract,
+        panel=panel,
+        capacity_census=census,
+        capacity_census_file_sha256=census_file_sha256,
+        expected_active8_inventory_manifest_file_sha256=ACTIVE8_FILE_SHA256,
+    )
+
+
+LAUNCH_AUTHORITY = _synthetic_launch_authority()
+
+
+def _worker_result(
+    *,
+    run_label: str = "editing-t1-test-v1",
+    family: str = "cycle_attach",
+    panel_kind: str = "unique_state",
+    scope: str = "heads_only",
+    encoded: bytes = b"durable-result\n",
+    observed_gpu_name: str = "NVIDIA L4",
+):
+    return {
+        "run_label": run_label,
+        "family": family,
+        "panel_kind": panel_kind,
+        "scope": scope,
+        "requested_gpu_class": "L4",
+        "observed_gpu_name": observed_gpu_name,
+        "output": (
+            f"/artifacts/_editing_t1_successor/{run_label}/{panel_kind}.{family}.{scope}.json"
+        ),
+        "output_sha256": hashlib.sha256(encoded).hexdigest(),
+        "output_bytes": len(encoded),
+        "result_sha256": RESULT_SHA256,
+        "contract_sha256": "4" * 64,
+        "numeric_thresholds_sha256": "5" * 64,
+        "panel_artifact_sha256": "6" * 64,
+        "panel_selection_sha256": "7" * 64,
+        "panel_census_sha256": "8" * 64,
+        "panel_capacity_strata_sha256": "9" * 64,
+        "active8_inventory_manifest_file_sha256": ACTIVE8_FILE_SHA256,
+        "active8_inventory_sha256": "b" * 64,
+        "active8_effective_source_corpus_cache_sha256": "c" * 64,
+        "active8_unified_packed_manifest_sha256": "d" * 64,
+        "active8_support_contract_sha256": "e" * 64,
+        "cache_receipts": copy.deepcopy(CACHE_RECEIPTS),
+    }
+
+
+def _one_arm_launch_receipt(
+    *,
+    run_label: str = "editing-t1-test-v1",
+    result: dict | None = None,
+):
+    task = (
+        run_label,
+        "cycle_attach",
+        "unique_state",
+        "heads_only",
+        RESOLVED_ACTIVE8_INVENTORY,
+        ACTIVE8_FILE_SHA256,
+    )
+    return build_t1_modal_launch_receipt(
+        run_label=run_label,
+        source_commit=SOURCE_COMMIT,
+        requested_gpu_class="L4",
+        tasks=(task,),
+        results=(_worker_result(run_label=run_label) if result is None else result,),
+    )
 
 
 def build_task_matrix(*args, **kwargs):
@@ -26,7 +253,61 @@ def build_task_matrix(*args, **kwargs):
         "active8_inventory_file_sha256",
         ACTIVE8_FILE_SHA256,
     )
+    kwargs.setdefault("launch_authority", LAUNCH_AUTHORITY)
     return _build_task_matrix(*args, **kwargs)
+
+
+def test_t1_modal_surface_rejects_dirty_serialized_tree(
+    monkeypatch,
+):
+    outputs = iter(("a" * 40, " M src/compose_v4/model.py\n"))
+
+    def fake_run(*_args, **_kwargs):
+        return type("Completed", (), {"stdout": next(outputs)})()
+
+    monkeypatch.setattr(t1_modal.subprocess, "run", fake_run)
+    with pytest.raises(RuntimeError, match="dirty serialized-code tree"):
+        _require_clean_serialized_tree()
+
+
+def test_t1_modal_surface_atomically_retains_independent_launch_receipt(
+    tmp_path,
+):
+    receipt = _one_arm_launch_receipt()
+    output = tmp_path / "receipts" / "editing-t1-test-v1.json"
+
+    write_t1_modal_launch_receipt(receipt, output)
+    observed = load_t1_modal_launch_receipt(output)
+
+    assert observed == receipt
+    assert observed["arms"][0]["output_sha256"] == hashlib.sha256(b"durable-result\n").hexdigest()
+    assert observed["arms"][0]["result_sha256"] == RESULT_SHA256
+    assert observed["arms"][0]["cache_receipts"] == CACHE_RECEIPTS
+    assert observed["arms"][0]["result_relative_path"] == (
+        "editing-t1-test-v1/unique_state.cycle_attach.heads_only.json"
+    )
+    assert t1_modal_launch_receipt_path("editing-t1-test-v1").name == ("editing-t1-test-v1.json")
+
+    conflicting = _one_arm_launch_receipt(
+        result=_worker_result(observed_gpu_name="NVIDIA A10"),
+    )
+    with pytest.raises(FileExistsError, match="already differs"):
+        write_t1_modal_launch_receipt(conflicting, output)
+
+
+def test_t1_modal_surface_rejects_incomplete_or_escaping_launch_receipts():
+    incomplete = _worker_result()
+    incomplete.pop("cache_receipts")
+    with pytest.raises(ValueError, match="cache_receipts"):
+        _one_arm_launch_receipt(result=incomplete)
+
+    receipt = _one_arm_launch_receipt()
+    escaped = copy.deepcopy(receipt)
+    escaped["arms"][0]["result_relative_path"] = "../stolen.json"
+    body = {key: value for key, value in escaped.items() if key != "receipt_sha256"}
+    escaped["receipt_sha256"] = t1_modal._stable_sha256(body)
+    with pytest.raises(ValueError, match="escapes"):
+        validate_t1_modal_launch_receipt(escaped)
 
 
 def test_t1_modal_surface_requires_explicit_family_and_defaults_to_one_arm():
@@ -80,6 +361,29 @@ def test_t1_modal_surface_skips_nonexistent_local_adapter_arms():
         )
 
 
+def test_t1_modal_surface_does_not_hide_required_scope_failures(
+    monkeypatch,
+):
+    original = t1_modal.require_editing_t1_family_scope_applicable
+
+    def fail_required_scope(family: str, scope: str):
+        if family == "atom_insert" and scope == "all":
+            raise t1_modal.EditingT1RuntimeError("required all-scope failure")
+        return original(family, scope)
+
+    monkeypatch.setattr(
+        t1_modal,
+        "require_editing_t1_family_scope_applicable",
+        fail_required_scope,
+    )
+    with pytest.raises(ValueError, match="required all-scope failure"):
+        build_task_matrix(
+            "editing-t1-test-v1",
+            families="atom_insert",
+            all_scopes=True,
+        )
+
+
 def test_t1_modal_surface_all_families_does_not_imply_all_scopes():
     tasks = build_task_matrix(
         "editing-t1-test-v1",
@@ -123,6 +427,36 @@ def test_t1_modal_surface_repeated_panel_is_explicit_and_bounded():
     assert {task[3] for task in tasks} == {"heads_only", "all"}
 
 
+def test_t1_modal_surface_derives_repeated_availability_from_selected_panel():
+    authority = _synthetic_launch_authority(
+        repeated_families={
+            "atom_insert",
+            "atom_delete",
+            "atom_restate",
+            "bond_reroute",
+            "ring_system_restate",
+        }
+    )
+
+    tasks = build_task_matrix(
+        "editing-t1-test-v1",
+        families="atom_delete",
+        panel_kinds="within_family_repeated_state_distribution",
+        launch_authority=authority,
+    )
+    assert tuple(task[1] for task in tasks) == ("atom_delete",)
+    with pytest.raises(
+        ValueError,
+        match="no empirical within-family repeated multi-successor panel",
+    ):
+        build_task_matrix(
+            "editing-t1-test-v1",
+            families="cycle_attach",
+            panel_kinds="within_family_repeated_state_distribution",
+            launch_authority=authority,
+        )
+
+
 def test_t1_modal_surface_global_repeated_law_is_one_explicit_mixed_family_arm():
     tasks = build_task_matrix(
         "editing-t1-test-v1",
@@ -163,3 +497,66 @@ def test_t1_modal_surface_requires_physical_active8_path_and_hash():
             active8_inventory=ACTIVE8_INVENTORY,
             active8_inventory_file_sha256="not-a-sha",
         )
+
+
+def test_t1_modal_surface_uses_only_v4_authority_and_fails_closed(
+    monkeypatch,
+):
+    assert t1_modal.T1_CONTRACT_RELATIVE_PATH == EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+    assert t1_modal.T1_PANEL_RELATIVE_PATH == EDITING_T1_V4_PANEL_RELATIVE_PATH
+    assert (
+        t1_modal.T1_CAPACITY_CENSUS_RELATIVE_PATH
+        == EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
+    )
+
+    def absent_authority(**_kwargs):
+        raise t1_modal.EditingT1RuntimeError("V4 launch authority is absent")
+
+    monkeypatch.setattr(
+        t1_modal,
+        "load_editing_t1_launch_authority",
+        absent_authority,
+    )
+    with pytest.raises(ValueError, match="V4 launch authority is absent"):
+        _build_task_matrix(
+            "editing-t1-test-v1",
+            families="cycle_attach",
+            active8_inventory=ACTIVE8_INVENTORY,
+            active8_inventory_file_sha256=ACTIVE8_FILE_SHA256,
+        )
+
+    with pytest.raises(ValueError, match="another physical Active8"):
+        _build_task_matrix(
+            "editing-t1-test-v1",
+            families="cycle_attach",
+            active8_inventory=ACTIVE8_INVENTORY,
+            active8_inventory_file_sha256="f" * 64,
+            launch_authority=LAUNCH_AUTHORITY,
+        )
+
+
+def test_t1_modal_worker_names_every_v4_authority_path_explicitly():
+    command = t1_modal._editing_t1_worker_command(
+        active8_inventory=RESOLVED_ACTIVE8_INVENTORY,
+        active8_inventory_file_sha256=ACTIVE8_FILE_SHA256,
+        family="cycle_attach",
+        panel_kind="unique_state",
+        scope="heads_only",
+        output=t1_modal.ARTIFACT_ROOT / "result.json",
+    )
+    values_by_flag = {
+        flag: command[command.index(flag) + 1]
+        for flag in ("--t1-contract", "--panel", "--capacity-census")
+    }
+    assert values_by_flag == {
+        "--t1-contract": str(
+            t1_modal.REMOTE_ROOT / EDITING_T1_V4_CONTRACT_RELATIVE_PATH
+        ),
+        "--panel": str(
+            t1_modal.REMOTE_ROOT / EDITING_T1_V4_PANEL_RELATIVE_PATH
+        ),
+        "--capacity-census": str(
+            t1_modal.REMOTE_ROOT
+            / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
+        ),
+    }

@@ -122,9 +122,7 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
     if contract.get("schema_version") != EXPECTED_SCHEMA_VERSION:
         raise EditingTrainingGateError("unexpected editing-training schema version")
     if type(contract.get("bounded_p50_authorized")) is not bool:
-        raise EditingTrainingGateError(
-            "bounded_p50_authorized must be an explicit Boolean"
-        )
+        raise EditingTrainingGateError("bounded_p50_authorized must be an explicit Boolean")
 
     operator_freeze = contract.get("bounded_pilot_operator_freeze")
     expected_operator_freeze_fields = {
@@ -137,10 +135,8 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         not isinstance(operator_freeze, dict)
         or set(operator_freeze) != expected_operator_freeze_fields
         or operator_freeze.get("scope") != BOUNDED_PILOT_SCOPE
-        or tuple(operator_freeze.get("required_families") or ())
-        != REQUIRED_P50_FAMILIES
-        or tuple(operator_freeze.get("disabled_families") or ())
-        != BOUNDED_PILOT_DISABLED_FAMILIES
+        or tuple(operator_freeze.get("required_families") or ()) != REQUIRED_P50_FAMILIES
+        or tuple(operator_freeze.get("disabled_families") or ()) != BOUNDED_PILOT_DISABLED_FAMILIES
         or operator_freeze.get("final_production_support_authorized") is not False
     ):
         raise EditingTrainingGateError(
@@ -154,10 +150,7 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         raise EditingTrainingGateError("development panels must be an object")
     required_slices = tuple(panels.get("required_semantic_slices") or ())
     conditional_slices = tuple(panels.get("conditional_slices") or ())
-    if (
-        "ring_system_restate" not in required_slices
-        or conditional_slices
-    ):
+    if "ring_system_restate" not in required_slices or conditional_slices:
         raise EditingTrainingGateError(
             "ring-system restate must be a required bounded-pilot slice, not "
             "a conditional P50 family"
@@ -167,13 +160,10 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
     primary = [str(name) for name in metric_contract.get("primary") or ()]
     duplicate_primary = _duplicates(primary)
     if duplicate_primary:
-        raise EditingTrainingGateError(
-            f"duplicate primary metrics: {duplicate_primary}"
-        )
+        raise EditingTrainingGateError(f"duplicate primary metrics: {duplicate_primary}")
     if set(primary) != REQUIRED_PRIMARY_METRICS:
         raise EditingTrainingGateError(
-            "primary metrics must be the production-weighted and balanced "
-            "canonical-successor NLLs"
+            "primary metrics must be the production-weighted and balanced canonical-successor NLLs"
         )
     forbidden = set(metric_contract.get("forbidden_as_primary_or_checkpoint_selector") or ())
     missing_forbidden = MISLEADING_LEGACY_METRICS - forbidden
@@ -188,9 +178,7 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
     gates = contract.get("gates") or []
     gate_ids = [str(gate.get("id")) for gate in gates]
     if tuple(gate_ids) != EXPECTED_GATE_IDS:
-        raise EditingTrainingGateError(
-            "gate sequence must be M0, S0, T1, P50, P500, P2000"
-        )
+        raise EditingTrainingGateError("gate sequence must be M0, S0, T1, P50, P500, P2000")
     for gate in gates:
         maximum_steps = gate.get("maximum_optimizer_steps")
         if not isinstance(maximum_steps, int) or maximum_steps < 0:
@@ -204,29 +192,18 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
                 f"steps, observed {maximum_steps}"
             )
         if not gate.get("requirements"):
-            raise EditingTrainingGateError(
-                f"{gate.get('id')} has no requirements"
-            )
-    p50_gate = next(
-        gate
-        for gate in gates
-        if gate["id"] == "P50_gradient_and_collapse_sentinel"
-    )
+            raise EditingTrainingGateError(f"{gate.get('id')} has no requirements")
+    p50_gate = next(gate for gate in gates if gate["id"] == "P50_gradient_and_collapse_sentinel")
     prerequisites = p50_gate.get("prerequisite_evidence")
-    if (
-        not isinstance(prerequisites, dict)
-        or set(prerequisites) != set(P50_PREREQUISITE_EVIDENCE_FIELDS)
+    if not isinstance(prerequisites, dict) or set(prerequisites) != set(
+        P50_PREREQUISITE_EVIDENCE_FIELDS
     ):
         raise EditingTrainingGateError(
             "P50 prerequisite evidence must name the ordered frozen corpus, "
             "Gate0, T1 decision, and recipe identities"
         )
-    support_gate = next(
-        gate for gate in gates if gate["id"] == "S0_support_and_labels"
-    )
-    missing_support_requirements = REQUIRED_S0_REQUIREMENTS - set(
-        support_gate["requirements"]
-    )
+    support_gate = next(gate for gate in gates if gate["id"] == "S0_support_and_labels")
+    missing_support_requirements = REQUIRED_S0_REQUIREMENTS - set(support_gate["requirements"])
     if missing_support_requirements:
         raise EditingTrainingGateError(
             "S0 is missing fail-closed initialization or successor-support "
@@ -235,13 +212,9 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
 
     selection = contract.get("checkpoint_selection") or {}
     if selection.get("partition") != "validation_only":
-        raise EditingTrainingGateError(
-            "checkpoint selection must use validation only"
-        )
+        raise EditingTrainingGateError("checkpoint selection must use validation only")
     if selection.get("test_metrics_forbidden") is not True:
-        raise EditingTrainingGateError(
-            "test metrics must be forbidden for checkpoint selection"
-        )
+        raise EditingTrainingGateError("test metrics must be forbidden for checkpoint selection")
     if selection.get("primary") not in REQUIRED_PRIMARY_METRICS:
         raise EditingTrainingGateError(
             "checkpoint primary is not a registered canonical-successor NLL"
@@ -287,9 +260,7 @@ def full_training_launch_blockers(contract: dict[str, Any]) -> list[str]:
 
 def _p50_gate(contract: dict[str, Any]) -> dict[str, Any]:
     return next(
-        gate
-        for gate in contract["gates"]
-        if gate["id"] == "P50_gradient_and_collapse_sentinel"
+        gate for gate in contract["gates"] if gate["id"] == "P50_gradient_and_collapse_sentinel"
     )
 
 
@@ -300,13 +271,9 @@ def _exact_family_mapping(
     required_families: tuple[str, ...],
 ) -> dict[str, object]:
     if not isinstance(value, dict):
-        raise EditingTrainingGateError(
-            f"P50 threshold {name} must be a per-family object"
-        )
+        raise EditingTrainingGateError(f"P50 threshold {name} must be a per-family object")
     if set(value) != set(required_families):
-        raise EditingTrainingGateError(
-            f"P50 threshold {name} must exactly cover required families"
-        )
+        raise EditingTrainingGateError(f"P50 threshold {name} must exactly cover required families")
     return value
 
 
@@ -319,25 +286,14 @@ def resolve_p50_thresholds(
     """Resolve a non-null P50 contract before a loader or optimizer exists."""
 
     validate_editing_training_gate(contract)
-    if (
-        initialization_regime not in P50_INITIALIZATION_REGIMES
-        or initialization_regime
-        not in set(
-            contract.get("bounded_design_comparison", {})
-            .get("factors", {})
-            .get("initialization", ())
-        )
+    if initialization_regime not in P50_INITIALIZATION_REGIMES or initialization_regime not in set(
+        contract.get("bounded_design_comparison", {}).get("factors", {}).get("initialization", ())
     ):
         raise EditingTrainingGateError(
             f"unregistered P50 initialization regime: {initialization_regime!r}"
         )
-    if (
-        not required_families
-        or len(required_families) != len(set(required_families))
-    ):
-        raise EditingTrainingGateError(
-            "P50 required families must be nonempty and unique"
-        )
+    if not required_families or len(required_families) != len(set(required_families)):
+        raise EditingTrainingGateError("P50 required families must be nonempty and unique")
     thresholds = _p50_gate(contract).get("numeric_thresholds") or {}
     minimum_raw = _exact_family_mapping(
         thresholds.get("minimum_gradient_updates_per_required_slice"),
@@ -353,10 +309,7 @@ def resolve_p50_thresholds(
     maximum: list[tuple[str, float]] = []
     for family in required_families:
         minimum_value = minimum_raw[family]
-        if (
-            type(minimum_value) is not int
-            or not 1 <= minimum_value <= 50
-        ):
+        if type(minimum_value) is not int or not 1 <= minimum_value <= 50:
             raise EditingTrainingGateError(
                 "P50 minimum gradient updates must be integers in [1, 50]"
             )
@@ -368,26 +321,21 @@ def resolve_p50_thresholds(
             or float(maximum_value) < 0.0
         ):
             raise EditingTrainingGateError(
-                "P50 maximum family NLL regressions must be finite and "
-                "nonnegative"
+                "P50 maximum family NLL regressions must be finite and nonnegative"
             )
         minimum.append((family, minimum_value))
         maximum.append((family, float(maximum_value)))
 
     retention = thresholds.get("maximum_inherited_probe_nll_regression")
-    if not isinstance(retention, dict) or set(retention) != set(
-        P50_INITIALIZATION_REGIMES
-    ):
+    if not isinstance(retention, dict) or set(retention) != set(P50_INITIALIZATION_REGIMES):
         raise EditingTrainingGateError(
-            "P50 inherited-retention threshold must exactly cover "
-            "initialization regimes"
+            "P50 inherited-retention threshold must exactly cover initialization regimes"
         )
     selected_retention = retention[initialization_regime]
     if initialization_regime == "scratch":
         if selected_retention != "NOT_APPLICABLE":
             raise EditingTrainingGateError(
-                "scratch P50 must explicitly declare inherited retention "
-                "NOT_APPLICABLE"
+                "scratch P50 must explicitly declare inherited retention NOT_APPLICABLE"
             )
         retention_status = "NOT_APPLICABLE"
         maximum_inherited = None
@@ -399,8 +347,7 @@ def resolve_p50_thresholds(
             or float(selected_retention) < 0.0
         ):
             raise EditingTrainingGateError(
-                "warm-start P50 requires a finite nonnegative inherited-probe "
-                "regression threshold"
+                "warm-start P50 requires a finite nonnegative inherited-probe regression threshold"
             )
         retention_status = "REQUIRED"
         maximum_inherited = float(selected_retention)
@@ -436,10 +383,7 @@ def p50_launch_blockers(
         if (
             not isinstance(prerequisites[field], str)
             or len(prerequisites[field]) != 64
-            or any(
-                character not in "0123456789abcdef"
-                for character in prerequisites[field]
-            )
+            or any(character not in "0123456789abcdef" for character in prerequisites[field])
         )
     )
     try:
@@ -468,9 +412,7 @@ def resolve_p50_prerequisite_evidence(
             or len(value) != 64
             or any(character not in "0123456789abcdef" for character in value)
         ):
-            raise EditingTrainingGateError(
-                f"P50 prerequisite evidence is not frozen: {field}"
-            )
+            raise EditingTrainingGateError(f"P50 prerequisite evidence is not frozen: {field}")
         resolved[field] = value
     return resolved
 
@@ -494,9 +436,7 @@ def verify_p50_prerequisite_artifacts(
     for field in P50_PREREQUISITE_EVIDENCE_FIELDS:
         path = Path(artifact_paths[field])
         if not path.is_file():
-            raise EditingTrainingGateError(
-                f"P50 prerequisite artifact is absent: {path}"
-            )
+            raise EditingTrainingGateError(f"P50 prerequisite artifact is absent: {path}")
         digest = hashlib.sha256()
         with path.open("rb") as handle:
             for chunk in iter(lambda: handle.read(1 << 20), b""):
@@ -530,14 +470,8 @@ def verify_p50_prerequisite_artifacts(
 
     try:
         source_admission = load_active8_trace_admission(
-            Path(
-                artifact_paths[
-                    "frozen_source_corpus_inventory_sha256"
-                ]
-            ),
-            expected_manifest_file_sha256=physical_sha256[
-                "frozen_source_corpus_inventory_sha256"
-            ],
+            Path(artifact_paths["frozen_source_corpus_inventory_sha256"]),
+            expected_manifest_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
         )
         gate_zero = validate_gate_zero_structural_evidence(
             payloads["gate_zero_structural_evidence_sha256"],
@@ -545,26 +479,17 @@ def verify_p50_prerequisite_artifacts(
         )
         t1_decision = validate_t1_p50_decision(
             payloads["t1_successor_gate_decision_sha256"],
+            decision_path=Path(artifact_paths["t1_successor_gate_decision_sha256"]),
             source_admission=source_admission,
-            source_inventory_file_sha256=physical_sha256[
-                "frozen_source_corpus_inventory_sha256"
-            ],
-            gate_zero_evidence_file_sha256=physical_sha256[
-                "gate_zero_structural_evidence_sha256"
-            ],
+            source_inventory_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
+            gate_zero_evidence_file_sha256=physical_sha256["gate_zero_structural_evidence_sha256"],
         )
         recipe = validate_p50_recipe(
             payloads["frozen_p50_recipe_sha256"],
             source_admission=source_admission,
-            source_inventory_file_sha256=physical_sha256[
-                "frozen_source_corpus_inventory_sha256"
-            ],
-            gate_zero_evidence_file_sha256=physical_sha256[
-                "gate_zero_structural_evidence_sha256"
-            ],
-            t1_decision_file_sha256=physical_sha256[
-                "t1_successor_gate_decision_sha256"
-            ],
+            source_inventory_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
+            gate_zero_evidence_file_sha256=physical_sha256["gate_zero_structural_evidence_sha256"],
+            t1_decision_file_sha256=physical_sha256["t1_successor_gate_decision_sha256"],
             expected_launch=expected_launch,
         )
     except (Active8TraceInventoryError, EditingP50PrerequisiteError) as error:
@@ -575,12 +500,19 @@ def verify_p50_prerequisite_artifacts(
     verified = VerifiedP50Prerequisites(
         physical_sha256=physical_sha256,
         source_inventory_sha256=source_admission.inventory_sha256,
-        unified_packed_manifest_sha256=(
-            source_admission.unified_packed_manifest_sha256
-        ),
+        unified_packed_manifest_sha256=(source_admission.unified_packed_manifest_sha256),
         support_contract_sha256=source_admission.support_contract_sha256,
         gate_zero_evidence_sha256=str(gate_zero["evidence_sha256"]),
         t1_decision_sha256=str(t1_decision["decision_sha256"]),
+        t1_pre_result_runtime_contract_file_sha256=str(
+            t1_decision["pre_result_runtime_contract_file_sha256"]
+        ),
+        t1_pre_result_runtime_contract_sha256=str(
+            t1_decision["pre_result_runtime_contract_sha256"]
+        ),
+        t1_numeric_thresholds_sha256=str(t1_decision["numeric_thresholds_sha256"]),
+        t1_arm_results_manifest_file_sha256=str(t1_decision["arm_results_manifest_file_sha256"]),
+        t1_arm_results_manifest_sha256=str(t1_decision["arm_results_manifest_sha256"]),
         recipe_sha256=str(recipe["recipe_sha256"]),
         launch_sha256=str(recipe["launch_sha256"]),
         ordered_address_stream_sha256=str(

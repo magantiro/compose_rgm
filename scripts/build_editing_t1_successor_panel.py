@@ -22,15 +22,15 @@ from compose_v4.data.active8_trace_inventory import (  # noqa: E402
     load_active8_trace_admission,
 )
 from compose_v4.experiments.editing_gate_zero_runtime import (  # noqa: E402
+    build_scratch_ringcore_model,
+    load_frozen_validation_source,
     load_gate_zero_runtime_contract,
 )
 from compose_v4.experiments.editing_t1_panel import (  # noqa: E402
+    build_editing_t1_capacity_census,
     build_editing_t1_panel,
-    validate_editing_t1_panel,
+    write_editing_t1_capacity_census,
     write_editing_t1_panel,
-)
-from compose_v4.experiments.ringcore_semantic_sidecar import (  # noqa: E402
-    read_semantic_cell_sidecar,
 )
 from compose_v4.experiments.ringcore_successor_leaderboard import (  # noqa: E402
     load_json_object,
@@ -55,6 +55,7 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         default=ROOT / "configs" / "editing_gate_zero_runtime_v2.json",
     )
+    parser.add_argument("--transfer-root", type=Path, required=True)
     parser.add_argument("--active8-inventory", type=Path, required=True)
     parser.add_argument(
         "--active8-inventory-file-sha256",
@@ -123,32 +124,25 @@ def _parser() -> argparse.ArgumentParser:
             / "packed_charge_policy_exclusions_v1_2026-07-30.json"
         ),
     )
+    parser.add_argument("--capacity-census-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser
 
 
 def main() -> int:
     args = _parser().parse_args()
-    gate_zero_contract = load_gate_zero_runtime_contract(
-        args.gate_zero_contract
-    )
+    gate_zero_contract = load_gate_zero_runtime_contract(args.gate_zero_contract)
     active8_admission = load_active8_trace_admission(
         args.active8_inventory,
-        expected_manifest_file_sha256=(
-            args.active8_inventory_file_sha256
-        ),
+        expected_manifest_file_sha256=(args.active8_inventory_file_sha256),
         expected_support_contract_sha256=gate_zero_contract.sha256,
     )
     gate_zero_unified_packed_manifest_sha256 = str(
         gate_zero_contract.sidecar["unified_packed_manifest_sha256"]
     )
-    if (
-        active8_admission.unified_packed_manifest_sha256
-        != gate_zero_unified_packed_manifest_sha256
-    ):
+    if active8_admission.unified_packed_manifest_sha256 != gate_zero_unified_packed_manifest_sha256:
         raise SystemExit(
-            "Gate0 validation source and Active8 inventory name different "
-            "unified packed manifests"
+            "Gate0 validation source and Active8 inventory name different unified packed manifests"
         )
     with gzip.open(args.forensics, "rt") as handle:
         forensics = json.load(handle)
@@ -159,36 +153,51 @@ def main() -> int:
         config=config,
         inventory=inventory,
     )
-    sidecar_manifest = load_json_object(args.semantic_sidecar_manifest)
-    sidecar = read_semantic_cell_sidecar(
-        args.semantic_sidecar,
-        args.semantic_sidecar_manifest,
-        expected_manifest_sha256=sidecar_manifest["manifest_sha256"],
-        expected_config_sha256=sidecar_manifest["config_sha256"],
-        expected_provenance_sha256=sidecar_manifest["provenance_sha256"],
+    source = load_frozen_validation_source(
+        contract=gate_zero_contract,
+        transfer_root=args.transfer_root,
+        sidecar_path=args.semantic_sidecar,
+        sidecar_manifest_path=args.semantic_sidecar_manifest,
+    )
+    model, _parity = build_scratch_ringcore_model(gate_zero_contract)
+    capacity_census = build_editing_t1_capacity_census(
+        model,
+        source=source,
+        forensics=forensics,
+        forensics_file_sha256=_sha256(args.forensics),
+        active8_admission=active8_admission,
+        gate_zero_runtime_contract_sha256=gate_zero_contract.sha256,
+    )
+    write_editing_t1_capacity_census(
+        capacity_census,
+        args.capacity_census_output,
     )
     kwargs = {
+        "model": model,
+        "source": source,
         "forensics": forensics,
         "forensics_file_sha256": _sha256(args.forensics),
-        "sidecar": sidecar,
+        "sidecar": source.sidecar,
         "semantic_sidecar_file_sha256": _sha256(args.semantic_sidecar),
         "semantic_sidecar_manifest_file_sha256": _sha256(args.semantic_sidecar_manifest),
         "charge_policy_audit": load_json_object(args.charge_policy_audit),
         "charge_policy_audit_file_sha256": _sha256(args.charge_policy_audit),
         "charge_policy_exclusions": load_json_object(args.charge_policy_exclusions),
         "charge_policy_exclusions_file_sha256": _sha256(args.charge_policy_exclusions),
+        "capacity_census": capacity_census,
+        "capacity_census_file_sha256": _sha256(args.capacity_census_output),
         "active8_admission": active8_admission,
-        "gate_zero_unified_packed_manifest_sha256": (
-            gate_zero_unified_packed_manifest_sha256
-        ),
+        "gate_zero_runtime_contract_sha256": gate_zero_contract.sha256,
+        "gate_zero_unified_packed_manifest_sha256": (gate_zero_unified_packed_manifest_sha256),
     }
     panel = build_editing_t1_panel(**kwargs)
-    validate_editing_t1_panel(panel, **kwargs)
     write_editing_t1_panel(panel, args.output)
     print(
         json.dumps(
             {
                 "artifact_sha256": panel["artifact_sha256"],
+                "capacity_census_file_sha256": _sha256(args.capacity_census_output),
+                "capacity_census_sha256": capacity_census["census_sha256"],
                 "census": panel["census"],
                 "output": str(args.output),
                 "status": panel["status"],

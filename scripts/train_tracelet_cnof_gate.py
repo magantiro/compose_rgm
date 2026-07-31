@@ -385,6 +385,7 @@ def _p50_launch_recipe_projection(
     args,
     *,
     denovo_weight: float,
+    enable_ring_system_delete: bool,
 ) -> dict[str, object]:
     """Project the live launcher onto the exact frozen P50 recipe fields."""
 
@@ -454,6 +455,7 @@ def _p50_launch_recipe_projection(
         "corrupted_prior_mix": bool(args.corrupted_prior_mix),
         "cycle_op_mix": bool(args.cycle_op_mix),
         "disable_ring_grow_macro": bool(args.disable_ring_grow_macro),
+        "enable_ring_system_delete": bool(enable_ring_system_delete),
         "organic_vocabulary": bool(args.organic_vocabulary),
         "evaluation_every": int(args.evaluation_every),
         "evaluation_batch_size": int(args.evaluation_batch_size),
@@ -2393,6 +2395,9 @@ def main() -> None:
                 expected_launch=_p50_launch_recipe_projection(
                     args,
                     denovo_weight=denovo_weight,
+                    enable_ring_system_delete=(
+                        resolved_enable_ring_system_delete
+                    ),
                 ),
             )
         active8_support_contract_sha256 = (
