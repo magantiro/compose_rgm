@@ -190,6 +190,24 @@ def test_map_is_resumable_and_reduce_publishes_compatible_inventory(
     assert resumed["inventory_sha256"] == complete["inventory_sha256"]
 
 
+def test_publication_does_not_require_hard_links(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    plan = _fixture(tmp_path)
+    output = tmp_path / "modal-compatible-output"
+
+    def reject_hard_link(*args, **kwargs):
+        raise PermissionError("Modal Volumes do not support hard links")
+
+    monkeypatch.setattr("os.link", reject_hard_link)
+    _map_all(plan, output)
+    complete = reduce_active8_mapreduce(plan, output_root=output)
+
+    assert complete["status"] == "COMPLETE"
+    assert complete["counts"]["traces"] == 2
+
+
 def test_plan_partitions_one_source_into_contiguous_immutable_ranges(
     tmp_path: Path,
 ) -> None:

@@ -487,7 +487,14 @@ def _receipt_path(output_root: Path, task: Active8MapTask) -> Path:
 
 
 def _publish_bytes_immutable(path: Path, content: bytes) -> bool:
-    """Publish bytes exactly once; existing bytes must be identical."""
+    """Atomically publish bytes; an existing content object must be identical.
+
+    Modal Volumes do not support POSIX hard links. The temporary file is
+    therefore created in the destination directory and atomically renamed.
+    Concurrent writers can only target the same content-addressed path when
+    their bytes have the same SHA-256; the destination is verified after the
+    rename as well as before reuse.
+    """
 
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -509,11 +516,10 @@ def _publish_bytes_immutable(path: Path, content: bytes) -> bool:
             handle.write(content)
             handle.flush()
             os.fsync(handle.fileno())
-        try:
-            os.link(temporary_name, path)
-        except FileExistsError:
-            if _sha256_file(path) != expected_sha256 or path.read_bytes() != content:
-                raise Active8MapReduceError(f"immutable artifact collision at {path}")
+        os.replace(temporary_name, path)
+        temporary_name = None
+        if _sha256_file(path) != expected_sha256 or path.read_bytes() != content:
+            raise Active8MapReduceError(f"immutable artifact collision at {path}")
         return False
     finally:
         if temporary_name is not None:
@@ -526,7 +532,7 @@ def _publish_file_immutable(
     *,
     expected_sha256: str,
 ) -> bool:
-    """Atomically publish one potentially large object without loading it."""
+    """Atomically publish one potentially large content-addressed object."""
 
     source = Path(source)
     destination = Path(destination)
@@ -537,12 +543,9 @@ def _publish_file_immutable(
         if _sha256_file(destination) != expected_sha256:
             raise Active8MapReduceError(f"immutable content-object collision at {destination}")
         return True
-    try:
-        os.link(source, destination)
-    except FileExistsError:
-        if _sha256_file(destination) != expected_sha256:
-            raise Active8MapReduceError(f"immutable content-object collision at {destination}")
-        return True
+    os.replace(source, destination)
+    if _sha256_file(destination) != expected_sha256:
+        raise Active8MapReduceError(f"immutable content-object collision at {destination}")
     return False
 
 
