@@ -10,7 +10,7 @@
   "charge_policy_exclusion_payload_sha256": "ad18e751b2423ebfe47e6d2684f0932eec0fbe8008ca28342f5c45d59889fc55",
   "charge_policy_exclusions_file_sha256": "64eb6e7029827a6c11c39a7e4d4a9c9fdde0572be4d083d380c1ee9212176139",
   "charge_policy_source_input_inventory_sha256": "679816385f7c85dc3f3f8a51103bd38c29435c495312b5407acce95b6dd94321",
-  "contract_sha256": "f10c2a702e90f57fc3c3aea5c5eb84d2736f5d8611d773a83685b4c472676d26",
+  "contract_sha256": "7188b675a74389edd5840dadc5af5e7abc88092b743fcefcb33b84f916491ff0",
   "families": [
     "atom_insert",
     "atom_delete",
@@ -23,7 +23,7 @@
   ],
   "forensics_file_sha256": "f2460f1def0b41e5be5a05bfee01d1d1c295296968c860d8075c344b0f6c7020",
   "gate_zero_runtime_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
-  "implementation_sha256": "35eed5cb2b9da7dead93f6926aaf764563b2f420188999a2771c0a7f8b9e6d24",
+  "implementation_sha256": "e8b95d4e83ee3bbb6d708466b28a38153a491ea125b56d1f00f4175ee6df1cab",
   "optimization": {
     "learning_rate": 0.001,
     "report_points": [

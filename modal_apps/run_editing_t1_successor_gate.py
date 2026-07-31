@@ -630,6 +630,23 @@ def _editing_t1_worker_command(
     ]
 
 
+def _require_worker_command_success(
+    completed: subprocess.CompletedProcess[str],
+) -> subprocess.CompletedProcess[str]:
+    """Expose bounded worker diagnostics instead of hiding captured failures."""
+
+    if completed.returncode != 0:
+        diagnostic = {
+            "returncode": completed.returncode,
+            "stdout_tail": completed.stdout[-8000:],
+            "stderr_tail": completed.stderr[-8000:],
+        }
+        raise RuntimeError(
+            f"T1 inner worker failed: {json.dumps(diagnostic, sort_keys=True)}"
+        )
+    return completed
+
+
 def _resolve_selection(
     raw: str,
     allowed: tuple[str, ...],
@@ -842,12 +859,14 @@ def _run_arm_impl(
         scope=scope,
         output=output,
     )
-    completed = subprocess.run(
-        command,
-        cwd=REMOTE_ROOT,
-        check=True,
-        text=True,
-        capture_output=True,
+    completed = _require_worker_command_success(
+        subprocess.run(
+            command,
+            cwd=REMOTE_ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
     )
     gpu_name = subprocess.run(
         ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],

@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -620,3 +621,21 @@ def test_t1_modal_worker_names_every_v4_authority_path_explicitly():
             / EDITING_T1_V4_CAPACITY_CENSUS_RELATIVE_PATH
         ),
     }
+
+
+def test_t1_modal_worker_failure_preserves_bounded_inner_diagnostics():
+    completed = subprocess.CompletedProcess(
+        args=["python", "worker.py"],
+        returncode=7,
+        stdout="prefix-" + "o" * 9000,
+        stderr="prefix-" + "e" * 9000,
+    )
+
+    with pytest.raises(RuntimeError, match="T1 inner worker failed") as captured:
+        t1_modal._require_worker_command_success(completed)
+
+    message = str(captured.value)
+    assert '"returncode": 7' in message
+    assert "o" * 8000 in message
+    assert "e" * 8000 in message
+    assert "prefix-" not in message
