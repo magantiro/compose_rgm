@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
@@ -63,26 +64,38 @@ def _entry(trace_id: str, steps: tuple[RewriteStep, ...]) -> dict:
     }
 
 
-def _fixture(tmp_path: Path, *, shards: int = 1):
+def _fixture(
+    tmp_path: Path,
+    *,
+    shards: int = 1,
+    entries_per_shard: int = 2,
+    target_entries_per_range: int = 500,
+    worker_resources: dict[str, object] | None = None,
+):
     declared = []
     for index in range(shards):
         shard = tmp_path / "packed" / "train" / f"shard_{index:04d}.jsonl.gz"
+        entries = []
+        for entry_index in range(entries_per_shard):
+            if entry_index % 2 == 0:
+                steps = (RewriteStep("atom_delete", AtomDelete(1)),)
+                verdict = "accepted"
+            else:
+                steps = (
+                    RewriteStep("atom_delete", AtomDelete(1)),
+                    RewriteStep("ring_system_delete", _ring_delete()),
+                    RewriteStep("atom_delete", AtomDelete(0)),
+                )
+                verdict = "excluded"
+            entries.append(
+                _entry(
+                    f"{verdict}-{index}-{entry_index}",
+                    steps,
+                )
+            )
         write_packed_shard(
             shard,
-            [
-                _entry(
-                    f"accepted-{index}",
-                    (RewriteStep("atom_delete", AtomDelete(1)),),
-                ),
-                _entry(
-                    f"excluded-{index}",
-                    (
-                        RewriteStep("atom_delete", AtomDelete(1)),
-                        RewriteStep("ring_system_delete", _ring_delete()),
-                        RewriteStep("atom_delete", AtomDelete(0)),
-                    ),
-                ),
-            ],
+            entries,
             provenance={"capability_hash": "active8-mapreduce-fixture"},
             deterministic_gzip=True,
         )
@@ -103,6 +116,8 @@ def _fixture(tmp_path: Path, *, shards: int = 1):
         source_manifest_path=source_manifest_path,
         source_manifest=source_manifest,
         support_contract_sha256="a" * 64,
+        target_entries_per_range=target_entries_per_range,
+        worker_resources=worker_resources,
     )
     return plan
 
@@ -116,6 +131,15 @@ def _accept(addressed, step_index):
             step.action,
         ),
     )
+
+
+def _map_all(plan: dict[str, object], output: Path) -> None:
+    for task in plan["tasks"]:
+        map_active8_source_decisions(
+            task,
+            exact_candidate_checker=_accept,
+            output_root=output,
+        )
 
 
 def test_map_is_resumable_and_reduce_publishes_compatible_inventory(
@@ -166,6 +190,144 @@ def test_map_is_resumable_and_reduce_publishes_compatible_inventory(
     assert resumed["inventory_sha256"] == complete["inventory_sha256"]
 
 
+def test_plan_partitions_one_source_into_contiguous_immutable_ranges(
+    tmp_path: Path,
+) -> None:
+    plan = _fixture(
+        tmp_path,
+        entries_per_shard=7,
+        target_entries_per_range=3,
+    )
+    assert plan["expected_source_decisions"] == 1
+    assert plan["expected_map_tasks"] == 3
+    assert [(task["entry_start"], task["entry_stop"]) for task in plan["tasks"]] == [
+        (0, 3),
+        (3, 6),
+        (6, 7),
+    ]
+    assert [task["range_index"] for task in plan["tasks"]] == [0, 1, 2]
+    assert {task["range_count"] for task in plan["tasks"]} == {3}
+    assert len({task["task_identity_sha256"] for task in plan["tasks"]}) == 3
+    assert plan["range_policy"] == {
+        "algorithm": "fixed_target_entries_contiguous_v1",
+        "target_entries_per_range": 3,
+    }
+    assert plan["worker_resources"] == {
+        "cpu": 2.0,
+        "memory_mb": 8192,
+        "max_containers": 64,
+        "omp_num_threads": 1,
+    }
+
+    output = tmp_path / "ranged-output"
+    _map_all(plan, output)
+    complete = reduce_active8_mapreduce(plan, output_root=output)
+    assert complete["expected_source_decisions"] == 1
+    assert complete["expected_map_tasks"] == 3
+    assert complete["counts"]["traces"] == 7
+    manifest = json.loads((output / complete["inventory_manifest"]).read_text())
+    assert len(manifest["shards"]) == 1
+    assert manifest["shards"][0]["map_range_count"] == 3
+    assert manifest["shards"][0]["counts"]["accepted_traces"] == 4
+    assert manifest["shards"][0]["counts"]["excluded_traces"] == 3
+    receipt_path = (
+        output
+        / "runs"
+        / plan["run_identity_sha256"]
+        / "receipts"
+        / f"{plan['tasks'][0]['task_identity_sha256']}.json"
+    )
+    receipt = json.loads(receipt_path.read_text())
+    assert receipt["range_policy"] == plan["range_policy"]
+    assert receipt["worker_resources"] == plan["worker_resources"]
+
+
+def test_range_policy_and_worker_resources_change_run_and_task_identity(
+    tmp_path: Path,
+) -> None:
+    baseline = _fixture(
+        tmp_path / "baseline",
+        entries_per_shard=7,
+        target_entries_per_range=3,
+    )
+    capped = _fixture(
+        tmp_path / "capped",
+        entries_per_shard=7,
+        target_entries_per_range=3,
+        worker_resources={
+            "cpu": 2.0,
+            "memory_mb": 8192,
+            "max_containers": 32,
+            "omp_num_threads": 1,
+        },
+    )
+    resized = _fixture(
+        tmp_path / "resized",
+        entries_per_shard=7,
+        target_entries_per_range=2,
+    )
+
+    assert baseline["source_bindings"] == capped["source_bindings"]
+    assert baseline["run_identity_sha256"] != capped["run_identity_sha256"]
+    assert (
+        baseline["tasks"][0]["task_identity_sha256"] != capped["tasks"][0]["task_identity_sha256"]
+    )
+    assert baseline["run_identity_sha256"] != resized["run_identity_sha256"]
+    assert (
+        baseline["tasks"][0]["task_identity_sha256"] != resized["tasks"][0]["task_identity_sha256"]
+    )
+
+
+def test_ranged_reduce_is_decision_object_equivalent_to_serial(
+    tmp_path: Path,
+) -> None:
+    serial_plan = _fixture(
+        tmp_path,
+        entries_per_shard=7,
+        target_entries_per_range=100,
+    )
+    source_task = serial_plan["tasks"][0]
+    source_manifest_path = tmp_path / "UNIFIED_PACKED_MANIFEST.json"
+    source_manifest = json.loads(source_manifest_path.read_text())
+    source = Active8SourceShard(
+        manifest_layer=source_task["manifest_layer"],
+        envelope_layer=source_task["envelope_layer"],
+        partition=source_task["partition"],
+        relative_path=source_task["relative_path"],
+        path=Path(source_task["source_path"]),
+    )
+    ranged_plan = plan_active8_mapreduce(
+        (source,),
+        source_manifest_path=source_manifest_path,
+        source_manifest=source_manifest,
+        support_contract_sha256="a" * 64,
+        target_entries_per_range=2,
+    )
+    serial_output = tmp_path / "serial-output"
+    ranged_output = tmp_path / "ranged-output"
+    _map_all(serial_plan, serial_output)
+    _map_all(ranged_plan, ranged_output)
+    serial_complete = reduce_active8_mapreduce(
+        serial_plan,
+        output_root=serial_output,
+    )
+    ranged_complete = reduce_active8_mapreduce(
+        ranged_plan,
+        output_root=ranged_output,
+    )
+    serial_manifest = json.loads(
+        (serial_output / serial_complete["inventory_manifest"]).read_text()
+    )
+    ranged_manifest = json.loads(
+        (ranged_output / ranged_complete["inventory_manifest"]).read_text()
+    )
+    assert serial_complete["counts"] == ranged_complete["counts"]
+    assert (
+        serial_manifest["shards"][0]["inventory_shard_sha256"]
+        == ranged_manifest["shards"][0]["inventory_shard_sha256"]
+    )
+
+
 def test_reducer_refuses_even_one_missing_expected_source_decision(
     tmp_path: Path,
 ) -> None:
@@ -179,6 +341,57 @@ def test_reducer_refuses_even_one_missing_expected_source_decision(
     with pytest.raises(Active8MapReduceIncomplete, match="1 expected"):
         reduce_active8_mapreduce(plan, output_root=output)
     assert not (output / "runs" / plan["run_identity_sha256"] / "COMPLETE.json").exists()
+
+
+def test_reducer_rejects_overlapping_plan_ranges_and_extra_receipts(
+    tmp_path: Path,
+) -> None:
+    import compose_v4.data.active8_inventory_mapreduce as mapreduce
+
+    plan = _fixture(
+        tmp_path,
+        entries_per_shard=5,
+        target_entries_per_range=2,
+    )
+    overlapped = copy.deepcopy(plan)
+    overlapped["source_range_partitions"][0]["ranges"][1]["entry_start"] = 1
+    identity_fields = (
+        "schema",
+        "schema_version",
+        "source_manifest_sha256",
+        "source_manifest_semantic_sha256",
+        "support_contract_sha256",
+        "active8_families",
+        "active8_implementation_sha256",
+        "mapreduce_implementation_sha256",
+        "source_bindings",
+        "range_policy",
+        "range_policy_sha256",
+        "source_range_partitions",
+        "worker_resources",
+        "worker_resources_sha256",
+    )
+    overlapped["run_identity_sha256"] = mapreduce._sha256_payload(
+        {field: overlapped[field] for field in identity_fields}
+    )
+    with pytest.raises(
+        Active8MapReduceError,
+        match="not deterministic contiguous full coverage",
+    ):
+        reduce_active8_mapreduce(
+            overlapped,
+            output_root=tmp_path / "overlap-output",
+        )
+
+    output = tmp_path / "extra-output"
+    _map_all(plan, output)
+    receipts = output / "runs" / plan["run_identity_sha256"] / "receipts"
+    (receipts / f"{'f' * 64}.json").write_text("{}")
+    with pytest.raises(
+        Active8MapReduceError,
+        match="unexpected task identities",
+    ):
+        reduce_active8_mapreduce(plan, output_root=output)
 
 
 def test_immutable_decision_object_collision_is_rejected(
@@ -213,8 +426,17 @@ def test_modal_surface_is_bounded_and_orders_map_before_reduce() -> None:
     source = (
         Path(__file__).resolve().parents[1] / "modal_apps" / "build_active8_trace_inventory_app.py"
     ).read_text()
-    assert "_MAX_MAP_CONTAINERS = 16" in source
+    assert "_MAX_MAP_CONTAINERS_LIMIT = 64" in source
+    assert '"COMPOSE_ACTIVE8_MAX_MAP_CONTAINERS", "64"' in source
+    assert "_MAP_CPU = 2.0" in source
+    assert "_MAP_MEMORY_MB = 8192" in source
+    assert "_MAP_OMP_NUM_THREADS = 1" in source
+    assert "_DEFAULT_TARGET_ENTRIES_PER_RANGE = 500" in source
     assert "max_containers=_MAX_MAP_CONTAINERS" in source
+    assert "cpu=_MAP_CPU" in source
+    assert "memory=_MAP_MEMORY_MB" in source
+    assert "target_entries_per_range=target_entries_per_range" in source
+    assert '"worker_resources": plan["worker_resources"]' in source
     assert "map_source.starmap" in source
     assert source.index("map_source.starmap") < source.index("return reduce_inventory.remote")
     assert "driver.remote" in source

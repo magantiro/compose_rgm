@@ -415,6 +415,66 @@ def test_frozen_source_reader_migrates_exact_bytes_without_authorizing_stale_ove
         )
 
 
+def test_frozen_source_range_reader_preserves_addresses_and_decodes_only_range(
+    tmp_path,
+    monkeypatch,
+):
+    import compose_v4.data.packed_trace_store as packed_store
+
+    shard, _ = _write_address_fixture(
+        tmp_path,
+        trace_ids=("range-a", "range-b", "range-c", "range-d"),
+    )
+    manifest_path = shard.with_suffix(".manifest.json")
+    shard_sha256 = hashlib.sha256(shard.read_bytes()).hexdigest()
+    manifest_sha256 = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    decoded_trace_ids = []
+    original_decode = packed_store.decode_packed_trace
+
+    def counted_decode(record, states):
+        decoded_trace_ids.append(record["trace_id"])
+        return original_decode(record, states)
+
+    monkeypatch.setattr(packed_store, "decode_packed_trace", counted_decode)
+    ranged = list(
+        read_frozen_source_addressed_packed_shard(
+            shard,
+            expected_shard_sha256=shard_sha256,
+            expected_manifest_sha256=manifest_sha256,
+            expected_overlay_sha256=None,
+            entry_start=1,
+            entry_stop=3,
+        )
+    )
+    assert [row.address.entry_index for row in ranged] == [1, 2]
+    assert [row.address.trace_id for row in ranged] == ["range-b", "range-c"]
+    assert decoded_trace_ids == ["range-b", "range-c"]
+
+
+def test_frozen_source_range_reader_still_reconciles_full_manifest_census(
+    tmp_path,
+):
+    shard, _ = _write_address_fixture(
+        tmp_path,
+        trace_ids=("range-a", "range-b", "range-c"),
+    )
+    manifest_path = shard.with_suffix(".manifest.json")
+    manifest = json.loads(manifest_path.read_text())
+    manifest["entries"] = 4
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True))
+    with pytest.raises(PackedStoreError, match="manifest declares 4 entries"):
+        list(
+            read_frozen_source_addressed_packed_shard(
+                shard,
+                expected_shard_sha256=hashlib.sha256(shard.read_bytes()).hexdigest(),
+                expected_manifest_sha256=hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+                expected_overlay_sha256=None,
+                entry_start=1,
+                entry_stop=2,
+            )
+        )
+
+
 def test_provenance_mismatch_is_refused(tmp_path):
     """A store built under different capability flags enumerates different candidates -- refuse it."""
     if not POOL.exists():

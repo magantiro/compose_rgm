@@ -41,11 +41,14 @@ from compose_v4.data.packed_trace_store import (
 from compose_v4.data.provenance_overlay import overlay_path_for
 from compose_v4.experiments.factorized_successor_training import (
     SuccessorTrainingError,
-    compile_state_successor_map,
-    require_exact_successor_action_identity,
     rewrite_action_codec_sha256,
 )
+from compose_v4.experiments.production_successor_kernel import (
+    FactorizedMarkedLaw,
+    enumerate_factorized_marked_law,
+)
 from compose_v4.rewrite.action_codec import ActionCodecError, canonical_family
+from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.operators import AtomInsert
 
 ACTIVE8_TRACE_INVENTORY_SCHEMA = "compose.data.active8_trace_inventory"
@@ -400,11 +403,19 @@ def _validate_inventory_semantics(payload: Mapping[str, object]) -> None:
 
 
 class ProductionExactCandidateChecker:
-    """Exact, checkpoint-independent support check using the live marked law.
+    """Exact teacher support check using the live production marked law.
 
     Model weights do not define support, but the model's immutable operator
-    capabilities do.  A bounded LRU avoids recompiling frequently repeated
+    capabilities do. A bounded LRU avoids re-enumerating frequently repeated
     exact source states without retaining the entire multi-million-row corpus.
+
+    Active8 asks whether the exact teacher mark is legal and whether executing
+    that mark yields the stored persistent-slot successor. It does not require
+    constructing the complete canonical-successor quotient for every corpus
+    state. Consequently this checker validates the codec identity of every
+    enumerated legal mark, but executes only marks whose complete action digest
+    matches the teacher. Full quotient construction remains a separate Gate-0,
+    cache-building, and evaluator responsibility.
     """
 
     def __init__(
@@ -423,25 +434,24 @@ class ProductionExactCandidateChecker:
         self.cache_size = cache_size
         self.time = float(time)
         self.system = system
-        self._compiled: OrderedDict[str, object] = OrderedDict()
+        self._marked_laws: OrderedDict[str, FactorizedMarkedLaw] = OrderedDict()
 
-    def _compiled_state(self, state: object) -> object:
+    def _marked_law(self, state: object) -> FactorizedMarkedLaw:
         state_sha256 = persistent_slot_state_sha256(state)
-        cached = self._compiled.get(state_sha256)
+        cached = self._marked_laws.get(state_sha256)
         if cached is not None:
-            self._compiled.move_to_end(state_sha256)
+            self._marked_laws.move_to_end(state_sha256)
             return cached
-        compiled = compile_state_successor_map(
+        marked_law = enumerate_factorized_marked_law(
             self.model,
             state,
-            time=self.time,
-            system=self.system,
+            self.time,
         )
-        self._compiled[state_sha256] = compiled
-        self._compiled.move_to_end(state_sha256)
-        while len(self._compiled) > self.cache_size:
-            self._compiled.popitem(last=False)
-        return compiled
+        self._marked_laws[state_sha256] = marked_law
+        self._marked_laws.move_to_end(state_sha256)
+        while len(self._marked_laws) > self.cache_size:
+            self._marked_laws.popitem(last=False)
+        return marked_law
 
     def __call__(
         self,
@@ -455,13 +465,41 @@ class ProductionExactCandidateChecker:
                 step.rule_name,
                 step.action,
             )
-            compiled = self._compiled_state(addressed.path.state_at(step_index))
-            require_exact_successor_action_identity(
-                compiled,
-                target_state_sha256=persistent_slot_state_sha256(
-                    addressed.path.state_at(step_index + 1)
-                ),
-                action_sha256=action_sha256,
+            source = addressed.path.state_at(step_index)
+            target_state_sha256 = persistent_slot_state_sha256(
+                addressed.path.state_at(step_index + 1)
+            )
+            marked_law = self._marked_law(source)
+            matching_marks = []
+            for mark in marked_law.marks:
+                mark_action_sha256 = rewrite_action_codec_sha256(
+                    mark.executor_rule_name,
+                    mark.action,
+                )
+                if mark_action_sha256 == action_sha256:
+                    matching_marks.append(mark)
+            if not matching_marks:
+                raise SuccessorTrainingError(
+                    "teacher action identity is absent from the production marked support"
+                )
+
+            runtime = self.system or de_novo_rewrite_system()
+            for mark in matching_marks:
+                successor = runtime.apply(
+                    source,
+                    mark.executor_rule_name,
+                    mark.action,
+                )
+                if (
+                    canonical_state_key(successor) != marked_law.source_key
+                    and persistent_slot_state_sha256(successor) == target_state_sha256
+                ):
+                    return ExactCandidateEvidence(
+                        supported=True,
+                        action_sha256=action_sha256,
+                    )
+            raise SuccessorTrainingError(
+                "teacher action does not yield the exact productive stored successor"
             )
         except SuccessorTrainingError as error:
             return ExactCandidateEvidence(
@@ -477,10 +515,6 @@ class ProductionExactCandidateChecker:
                 reason="unsupported_teacher_step",
                 detail=type(error).__name__,
             )
-        return ExactCandidateEvidence(
-            supported=True,
-            action_sha256=action_sha256,
-        )
 
 
 def _trace_key(addressed: AddressedPackedTrace) -> dict[str, object]:

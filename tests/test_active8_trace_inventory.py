@@ -15,6 +15,7 @@ from compose_v4.data.active8_trace_inventory import (
     Active8SourceShard,
     Active8TraceInventoryError,
     ExactCandidateEvidence,
+    ProductionExactCandidateChecker,
     accepted_trace_keys,
     build_active8_trace_inventory,
     inventory_record_for_trace,
@@ -31,6 +32,11 @@ from compose_v4.experiments.factorized_successor_training import (
     rewrite_action_codec_sha256,
 )
 from compose_v4.rewrite.action_codec import encode_action
+from compose_v4.experiments.production_successor_kernel import (
+    FactorizedMarkedLaw,
+    ScoredRewriteMark,
+)
+from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.operators import AtomDelete, AtomInsert
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 from compose_v4.rewrite.trace_shard import encode_state
@@ -73,6 +79,128 @@ def _accept_exact_teacher(
             step.action,
         ),
     )
+
+
+def _real_delete_addressed() -> AddressedPackedTrace:
+    source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 8)
+    action = AtomDelete(1)
+    target = de_novo_rewrite_system().apply(source, "atom_delete", action)
+    trace = RewriteTrace(
+        source=source,
+        target=target,
+        steps=(RewriteStep("atom_delete", action),),
+        metadata={"fixture": "active8-production-checker"},
+    )
+    return AddressedPackedTrace(
+        address=PackedTraceAddress(
+            packed_shard_content_sha256="2" * 64,
+            packed_shard_name="checker-fixture.jsonl.gz",
+            entry_index=0,
+            trace_id="checker-trace",
+            layer="corruption",
+            partition="validation",
+            source_key=canonical_state_key(source),
+            target_key=canonical_state_key(target),
+            path_length=1,
+        ),
+        trace=trace,
+        path=PackedTraceProgress(trace, (source, target)),
+    )
+
+
+def _scored_delete(action: AtomDelete, coordinate: int) -> ScoredRewriteMark:
+    return ScoredRewriteMark(
+        family_name="atom_delete",
+        table_name="atom_delete",
+        executor_rule_name="atom_delete",
+        action=action,
+        coordinate=(coordinate,),
+        log_probability=-0.6931471805599453,
+    )
+
+
+def test_production_checker_executes_only_the_exact_teacher_mark(
+    monkeypatch,
+) -> None:
+    addressed = _real_delete_addressed()
+    source = addressed.path.state_at(0)
+    target = addressed.path.state_at(1)
+    marked_law = FactorizedMarkedLaw(
+        source_key=canonical_state_key(source),
+        marks=(
+            _scored_delete(AtomDelete(0), 0),
+            _scored_delete(AtomDelete(1), 1),
+        ),
+        total_hazard=1.0,
+        family_log_probabilities=(0.0,),
+        enabled_families=("atom_delete",),
+    )
+    monkeypatch.setattr(
+        "compose_v4.data.active8_trace_inventory.enumerate_factorized_marked_law",
+        lambda model, state, time: marked_law,
+    )
+
+    class ExactTeacherRuntime:
+        def __init__(self) -> None:
+            self.applied: list[tuple[str, object]] = []
+
+        def apply(self, state, rule_name, action):
+            self.applied.append((rule_name, action))
+            if action != AtomDelete(1):
+                raise AssertionError("an unrelated legal mark was executed")
+            return target
+
+    runtime = ExactTeacherRuntime()
+    evidence = ProductionExactCandidateChecker(
+        object(),
+        cache_size=1,
+        system=runtime,
+    )(addressed, 0)
+
+    assert evidence == ExactCandidateEvidence(
+        supported=True,
+        action_sha256=rewrite_action_codec_sha256(
+            "atom_delete",
+            AtomDelete(1),
+        ),
+    )
+    assert runtime.applied == [("atom_delete", AtomDelete(1))]
+
+
+def test_production_checker_rejects_an_exact_action_with_wrong_slot_output(
+    monkeypatch,
+) -> None:
+    addressed = _real_delete_addressed()
+    source = addressed.path.state_at(0)
+    marked_law = FactorizedMarkedLaw(
+        source_key=canonical_state_key(source),
+        marks=(_scored_delete(AtomDelete(1), 1),),
+        total_hazard=1.0,
+        family_log_probabilities=(0.0,),
+        enabled_families=("atom_delete",),
+    )
+    monkeypatch.setattr(
+        "compose_v4.data.active8_trace_inventory.enumerate_factorized_marked_law",
+        lambda model, state, time: marked_law,
+    )
+
+    class WrongSlotRuntime:
+        @staticmethod
+        def apply(state, rule_name, action):
+            return de_novo_rewrite_system().apply(
+                state,
+                rule_name,
+                AtomDelete(0),
+            )
+
+    evidence = ProductionExactCandidateChecker(
+        object(),
+        cache_size=1,
+        system=WrongSlotRuntime(),
+    )(addressed, 0)
+
+    assert not evidence.supported
+    assert evidence.reason == "teacher_not_in_exact_candidates"
 
 
 def test_active8_contract_is_exact_and_ordered() -> None:
@@ -155,9 +283,7 @@ def test_accepted_trace_retains_every_progress_state_and_terminal() -> None:
     ]
     assert record["progress_rows"][-1]["teacher_family"] is None
     assert record["progress_rows"][-1]["teacher_action_sha256"] is None
-    assert all(
-        len(row["exact_state_sha256"]) == 64 for row in record["progress_rows"]
-    )
+    assert all(len(row["exact_state_sha256"]) == 64 for row in record["progress_rows"])
 
 
 def test_exact_candidate_failure_excludes_trace_without_partial_rows() -> None:
@@ -180,9 +306,7 @@ def test_exact_candidate_failure_excludes_trace_without_partial_rows() -> None:
     )
     assert record["decision"] == "excluded"
     assert record["progress_rows"] == []
-    assert record["exclusions"][0]["reason"] == (
-        "teacher_not_in_exact_candidates"
-    )
+    assert record["exclusions"][0]["reason"] == ("teacher_not_in_exact_candidates")
 
 
 @pytest.mark.parametrize(
@@ -235,9 +359,7 @@ def test_candidate_evidence_cannot_name_another_action() -> None:
     )
     assert record["decision"] == "excluded"
     assert record["progress_rows"] == []
-    assert record["exclusions"][0]["reason"] == (
-        "candidate_evidence_action_identity_mismatch"
-    )
+    assert record["exclusions"][0]["reason"] == ("candidate_evidence_action_identity_mismatch")
 
 
 def _packed_entry(
@@ -253,10 +375,7 @@ def _packed_entry(
             "source_key": "CC",
             "target_key": "CC",
             "path_length": len(steps),
-            "steps": [
-                {"action": encode_action(step.rule_name, step.action)}
-                for step in steps
-            ],
+            "steps": [{"action": encode_action(step.rule_name, step.action)} for step in steps],
             "metadata": {},
         },
         "states": [encode_state(state) for _ in range(len(steps) + 1)],
@@ -297,9 +416,7 @@ def test_immutable_inventory_reader_exposes_only_whole_accepted_traces(
     )
     source_manifest = {"artifact": "fixture-unified", "shards": 1}
     source_manifest_path = tmp_path / "UNIFIED_PACKED_MANIFEST.json"
-    source_manifest_path.write_text(
-        json.dumps(source_manifest, sort_keys=True)
-    )
+    source_manifest_path.write_text(json.dumps(source_manifest, sort_keys=True))
     output = tmp_path / "inventory"
     manifest = build_active8_trace_inventory(
         (
@@ -330,13 +447,11 @@ def test_immutable_inventory_reader_exposes_only_whole_accepted_traces(
     manifest_path = output / "ACTIVE8_TRACE_INVENTORY.json"
     admission = load_active8_trace_admission(
         manifest_path,
-        expected_manifest_file_sha256=hashlib.sha256(
-            manifest_path.read_bytes()
-        ).hexdigest(),
+        expected_manifest_file_sha256=hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         expected_inventory_sha256=manifest["inventory_sha256"],
-        expected_effective_source_corpus_cache_sha256=manifest[
-            "source_identity"
-        ]["effective_source_corpus_cache_sha256"],
+        expected_effective_source_corpus_cache_sha256=manifest["source_identity"][
+            "effective_source_corpus_cache_sha256"
+        ],
     )
     addressed = tuple(read_addressed_packed_shard(shard))
     assert admission.is_accepted(addressed[0].address)
@@ -358,9 +473,7 @@ def test_immutable_inventory_reader_exposes_only_whole_accepted_traces(
     ):
         admission.is_accepted(
             SimpleNamespace(
-                packed_shard_content_sha256=(
-                    addressed[0].address.packed_shard_content_sha256
-                ),
+                packed_shard_content_sha256=(addressed[0].address.packed_shard_content_sha256),
                 entry_index=0,
                 trace_id="substituted-trace",
             )
@@ -375,9 +488,7 @@ def test_immutable_inventory_reader_exposes_only_whole_accepted_traces(
         )
 
     original_manifest = manifest_path.read_bytes()
-    original_decision_shard = (
-        output / manifest["shards"][0]["inventory_shard"]
-    ).read_bytes()
+    original_decision_shard = (output / manifest["shards"][0]["inventory_shard"]).read_bytes()
     with pytest.raises(
         Active8TraceInventoryError,
         match="immutable active-8 inventory already exists",

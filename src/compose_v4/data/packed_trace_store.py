@@ -506,6 +506,7 @@ def _iter_decoded_packed_shard(
     verify_seed: int,
     require_address: bool,
     frozen_source_binding: tuple[str, str, str | None] | None = None,
+    entry_range: tuple[int, int | None] | None = None,
 ):
     """Shared decoder used by both public packed-shard readers."""
 
@@ -516,8 +517,32 @@ def _iter_decoded_packed_shard(
         path,
         expected_provenance=expected_provenance,
     )
+    manifest_entries = manifest.get("entries")
+    if type(manifest_entries) is not int or manifest_entries < 0:
+        raise PackedStoreError(
+            f"packed shard manifest entries must be a nonnegative integer, got {manifest_entries!r}"
+        )
     if frozen_source_binding is not None and not require_address:
         raise ValueError("a frozen source binding requires addressed decoding")
+    if entry_range is not None and not require_address:
+        raise ValueError("an entry range requires addressed decoding")
+    if entry_range is None:
+        entry_start, entry_stop = 0, manifest_entries
+    else:
+        entry_start, requested_stop = entry_range
+        if type(entry_start) is not int or entry_start < 0:
+            raise ValueError("entry_start must be a nonnegative integer")
+        if requested_stop is None:
+            entry_stop = manifest_entries
+        elif type(requested_stop) is not int:
+            raise ValueError("entry_stop must be an integer or None")
+        else:
+            entry_stop = requested_stop
+        if entry_stop < entry_start or entry_stop > manifest_entries:
+            raise PackedStoreError(
+                f"entry range [{entry_start}, {entry_stop}) is outside packed "
+                f"manifest census [0, {manifest_entries})"
+            )
     if not require_address:
         shard_digest = None
     elif frozen_source_binding is None:
@@ -533,15 +558,20 @@ def _iter_decoded_packed_shard(
     rng = np.random.default_rng(verify_seed)
     seen_trace_ids: set[str] = set()
     entry_index = 0
+    decoded_entries = 0
     with gzip.open(path, "rt") as handle:
         for line in handle:
             line = line.strip()
             if not line:
                 continue
+            current_entry_index = entry_index
+            entry_index += 1
+            verify_row = bool(verify_fraction and rng.random() < verify_fraction)
+            if not entry_start <= current_entry_index < entry_stop:
+                continue
             entry = json.loads(line)
             states = [decode_state(payload) for payload in entry["states"]]
             trace = decode_packed_trace(entry["trace"], states)
-            verify_row = bool(verify_fraction and rng.random() < verify_fraction)
             if verify_row:
                 replay_verify(entry["trace"], states)
             packed_path = PackedTraceProgress(trace, states)
@@ -551,7 +581,7 @@ def _iter_decoded_packed_shard(
                 address = _address_for_packed_trace(
                     shard_path=path,
                     shard_digest=shard_digest,
-                    entry_index=entry_index,
+                    entry_index=current_entry_index,
                     record=entry["trace"],
                     trace=trace,
                     path=packed_path,
@@ -563,11 +593,17 @@ def _iter_decoded_packed_shard(
                     )
                 seen_trace_ids.add(address.trace_id)
             yield _DecodedPackedTrace(trace=trace, path=packed_path, address=address)
-            entry_index += 1
-    if require_address and manifest.get("entries") != entry_index:
+            decoded_entries += 1
+    if require_address and manifest_entries != entry_index:
         raise PackedStoreError(
-            f"packed shard manifest declares {manifest.get('entries')!r} entries "
-            f"but addressed reader decoded {entry_index}"
+            f"packed shard manifest declares {manifest_entries} entries "
+            f"but addressed reader counted {entry_index}"
+        )
+    expected_decoded_entries = entry_stop - entry_start
+    if require_address and decoded_entries != expected_decoded_entries:
+        raise PackedStoreError(
+            f"packed entry range [{entry_start}, {entry_stop}) expected "
+            f"{expected_decoded_entries} decoded rows but observed {decoded_entries}"
         )
 
 
@@ -595,6 +631,7 @@ def read_addressed_packed_shard(
         verify_seed=verify_seed,
         require_address=True,
         frozen_source_binding=None,
+        entry_range=None,
     ):
         assert row.address is not None
         yield AddressedPackedTrace(
@@ -613,6 +650,8 @@ def read_frozen_source_addressed_packed_shard(
     expected_provenance: dict | None = None,
     verify_fraction: float = 0.0,
     verify_seed: int = 0,
+    entry_start: int = 0,
+    entry_stop: int | None = None,
 ):
     """Yield addressed rows from an exact historical source for migration/audit.
 
@@ -621,6 +660,12 @@ def read_frozen_source_addressed_packed_shard(
     must supply full SHA-256 bindings for every physical source component.  It
     is intended only for re-auditing immutable legacy states under current
     support and publishing a fresh derivative with current provenance.
+
+    ``entry_start`` and ``entry_stop`` select one half-open range while
+    retaining original physical entry indices. The reader still verifies the
+    complete shard, manifest, and overlay bytes and scans the complete gzip
+    stream to reconcile its nonblank-row count with the manifest. Only rows in
+    the selected range are JSON-decoded into molecular states.
     """
 
     for row in _iter_decoded_packed_shard(
@@ -634,6 +679,7 @@ def read_frozen_source_addressed_packed_shard(
             expected_manifest_sha256,
             expected_overlay_sha256,
         ),
+        entry_range=(entry_start, entry_stop),
     ):
         assert row.address is not None
         yield AddressedPackedTrace(
@@ -666,6 +712,7 @@ def read_packed_shard(
         verify_seed=verify_seed,
         require_address=False,
         frozen_source_binding=None,
+        entry_range=None,
     ):
         yield row.trace, row.path
 

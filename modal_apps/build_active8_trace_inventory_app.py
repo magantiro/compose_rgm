@@ -1,10 +1,11 @@
 """Bounded, resumable Modal map/reduce for the active-8 trace inventory.
 
-Each map invocation owns exactly one unified-manifest-declared packed shard.
-Successful source decisions are immutable content objects with immutable task
-receipts.  Retries reuse verified receipts.  The reducer is invoked only after
-the bounded map completes and itself refuses publication unless every expected
-receipt exists.
+Each map invocation owns one immutable half-open entry range from a
+unified-manifest-declared packed shard. Successful range decisions are
+immutable content objects with immutable task receipts. Retries reuse verified
+receipts. The reducer is invoked only after the bounded map completes, refuses
+gaps, overlaps, or extra receipts, and reconstructs one logical decision stream
+per original physical shard.
 
 This app builds data evidence only.  It has no training function.
 
@@ -22,7 +23,14 @@ import modal
 
 ROOT = Path(__file__).resolve().parent.parent
 REMOTE_ROOT = Path("/root/compose")
-_MAX_MAP_CONTAINERS = 16
+_MAX_MAP_CONTAINERS_LIMIT = 64
+_MAX_MAP_CONTAINERS = int(os.environ.get("COMPOSE_ACTIVE8_MAX_MAP_CONTAINERS", "64"))
+if not 1 <= _MAX_MAP_CONTAINERS <= _MAX_MAP_CONTAINERS_LIMIT:
+    raise ValueError("COMPOSE_ACTIVE8_MAX_MAP_CONTAINERS must lie in [1, 64]")
+_MAP_CPU = 2.0
+_MAP_MEMORY_MB = 8192
+_MAP_OMP_NUM_THREADS = 1
+_DEFAULT_TARGET_ENTRIES_PER_RANGE = 500
 _LEGACY_PARTITIONS = ("train", "validation", "test")
 
 image = (
@@ -38,7 +46,7 @@ image = (
         {
             "PYTHONPATH": os.pathsep.join((str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))),
             "PYTHONUNBUFFERED": "1",
-            "OMP_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": str(_MAP_OMP_NUM_THREADS),
         }
     )
     .add_local_dir(
@@ -109,9 +117,9 @@ def _imports() -> dict[str, object]:
 
 @app.function(
     image=image,
-    cpu=16.0,
-    memory=65536,
-    timeout=12 * 3600,
+    cpu=_MAP_CPU,
+    memory=_MAP_MEMORY_MB,
+    timeout=4 * 3600,
     max_containers=_MAX_MAP_CONTAINERS,
     volumes={"/artifacts": artifact_volume},
 )
@@ -121,7 +129,7 @@ def map_source(
     output_root: str,
     candidate_cache_size: int,
 ) -> dict[str, object]:
-    """Build or verify one deterministic per-source decision object."""
+    """Build or verify one deterministic source-entry-range decision object."""
 
     loaded = _imports()
     artifact_volume.reload()
@@ -142,6 +150,7 @@ def map_source(
             {
                 "phase": "active8_map_source",
                 "task_identity_sha256": result["task_identity_sha256"],
+                "range_binding": result["range_binding"],
                 "counts": result["counts"],
                 "reused": result["reused"],
             },
@@ -203,6 +212,7 @@ def driver(
     output_root: str,
     candidate_cache_size: int,
     partitions: tuple[str, ...],
+    target_entries_per_range: int,
 ) -> dict[str, object]:
     """Plan once, map only absent tasks, then invoke the strict reducer."""
 
@@ -223,6 +233,8 @@ def driver(
     declared = tuple(shard for shard in declared if shard.partition in partitions)
     if not declared:
         raise RuntimeError("Active8 partition filter selected no packed shards")
+    if target_entries_per_range <= 0:
+        raise ValueError("target_entries_per_range must be positive")
     shards = tuple(
         loaded["Active8SourceShard"](
             manifest_layer=shard.manifest_layer,
@@ -239,6 +251,13 @@ def driver(
         source_manifest=source_manifest,
         support_contract_sha256=contract.sha256,
         repo_root=REMOTE_ROOT,
+        target_entries_per_range=target_entries_per_range,
+        worker_resources={
+            "cpu": _MAP_CPU,
+            "memory_mb": _MAP_MEMORY_MB,
+            "max_containers": _MAX_MAP_CONTAINERS,
+            "omp_num_threads": _MAP_OMP_NUM_THREADS,
+        },
     )
     completed = loaded["verified_completed_task_identities"](
         plan,
@@ -253,8 +272,11 @@ def driver(
                 "phase": "active8_map_plan",
                 "run_identity_sha256": plan["run_identity_sha256"],
                 "expected_source_decisions": plan["expected_source_decisions"],
-                "missing_source_decisions": len(missing_tasks),
+                "expected_map_tasks": plan["expected_map_tasks"],
+                "missing_map_tasks": len(missing_tasks),
                 "max_map_containers": _MAX_MAP_CONTAINERS,
+                "target_entries_per_range": target_entries_per_range,
+                "worker_resources": plan["worker_resources"],
                 "partitions": list(partitions),
             },
             sort_keys=True,
@@ -291,9 +313,12 @@ def main(
     output_root: str = "/artifacts/active8_trace_inventory_v1",
     candidate_cache_size: int = 4096,
     partitions: str = "train,validation,test",
+    target_entries_per_range: int = _DEFAULT_TARGET_ENTRIES_PER_RANGE,
 ):
     if candidate_cache_size <= 0:
         raise ValueError("candidate_cache_size must be positive")
+    if target_entries_per_range <= 0:
+        raise ValueError("target_entries_per_range must be positive")
     selected_partitions = tuple(
         partition.strip() for partition in partitions.split(",") if partition.strip()
     )
@@ -313,6 +338,7 @@ def main(
         output_root,
         candidate_cache_size,
         selected_partitions,
+        target_entries_per_range,
     )
     print(
         json.dumps(
@@ -321,6 +347,13 @@ def main(
                 "unified_manifest_path": unified_manifest_path,
                 "output_root": output_root,
                 "max_map_containers": _MAX_MAP_CONTAINERS,
+                "target_entries_per_range": target_entries_per_range,
+                "worker_resources": {
+                    "cpu": _MAP_CPU,
+                    "memory_mb": _MAP_MEMORY_MB,
+                    "max_containers": _MAX_MAP_CONTAINERS,
+                    "omp_num_threads": _MAP_OMP_NUM_THREADS,
+                },
                 "partitions": list(selected_partitions),
                 "training_launched": False,
                 "result": result,
