@@ -61,6 +61,7 @@ SOURCE_REVISION_SCHEMA = "compose.editing_v2_refined_role_lane_source_revision"
 SOURCE_REVISION_SCHEMA_VERSION = 1
 SERIALIZED_SOURCE_FILES = (
     "modal_apps/materialize_editing_v2_refined_role_lane_app.py",
+    "modal_apps/materialize_editing_v2_refined_role_lane_mapreduce_app.py",
     "src/compose_v4/data/editing_corpus_contract.py",
     "src/compose_v4/data/editing_v2_active8_source_adapter.py",
     "src/compose_v4/data/editing_v2_candidate_provenance_bridge.py",
@@ -68,6 +69,7 @@ SERIALIZED_SOURCE_FILES = (
     "src/compose_v4/data/editing_v2_packed_candidate_materializer.py",
     "src/compose_v4/data/editing_v2_refined_role_lane_continuation.py",
     "src/compose_v4/data/editing_v2_role_lane_packed_materializer.py",
+    "src/compose_v4/data/editing_v2_role_lane_mapreduce.py",
     "src/compose_v4/data/editing_v2_split_assignment.py",
     "src/compose_v4/data/editing_v2_split_assignment_refinement.py",
     "src/compose_v4/data/editing_v2_split_census.py",

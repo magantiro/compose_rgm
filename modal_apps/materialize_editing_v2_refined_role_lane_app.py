@@ -27,7 +27,9 @@ LOCAL_SOURCE_ROOT = str(ROOT / "src")
 if LOCAL_SOURCE_ROOT not in sys.path:
     sys.path.insert(0, LOCAL_SOURCE_ROOT)
 
-from compose_v4.data import editing_v2_refined_role_lane_continuation as continuation
+from compose_v4.data import (
+    editing_v2_refined_role_lane_continuation as continuation,
+)
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -55,6 +57,14 @@ image = (
     .add_local_file(
         ROOT / "modal_apps/materialize_editing_v2_refined_role_lane_app.py",
         str(REMOTE_ROOT / "modal_apps/materialize_editing_v2_refined_role_lane_app.py"),
+        copy=True,
+    )
+    .add_local_file(
+        ROOT / "modal_apps/materialize_editing_v2_refined_role_lane_mapreduce_app.py",
+        str(
+            REMOTE_ROOT
+            / "modal_apps/materialize_editing_v2_refined_role_lane_mapreduce_app.py"
+        ),
         copy=True,
     )
 )
