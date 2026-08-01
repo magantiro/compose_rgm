@@ -31,7 +31,6 @@ from compose_v4.data.editing_v2_split_census import (
     validate_split_component_census,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "configs" / "editing_corpus_v2_contract.json"
 EDITING_CORPUS_CONTRACT = load_editing_corpus_contract(CONTRACT_PATH)
@@ -54,6 +53,11 @@ def _identity_definitions() -> dict:
             "definition_id": "fixture-partition-scaffold-v1",
             "implementation_sha256": SHA_B,
             "identity_namespace": "fixture-partition-scaffold",
+        },
+        "source_group": {
+            "definition_id": "fixture-source-group-v1",
+            "implementation_sha256": SHA_C,
+            "identity_namespace": "fixture-source-group",
         },
     }
 
@@ -172,7 +176,9 @@ def _transformation_definition() -> dict:
 def _profile_components(profile_id: str) -> dict[str, str]:
     profile = next(
         profile
-        for profile in EDITING_CORPUS_CONTRACT["evidence_component_contract"]["profiles"]
+        for profile in EDITING_CORPUS_CONTRACT["evidence_component_contract"][
+            "profiles"
+        ]
         if profile["id"] == profile_id
     )
     return dict(profile["components"])
@@ -188,6 +194,11 @@ def _row(
     molecules: tuple[str, ...] | None = None,
     scaffolds: tuple[str, ...] | None = None,
     identity_definitions: dict | None = None,
+    source_group: str | None = None,
+    source_group_source_asset_id: str = "fixture-source-group-asset",
+    source_group_source_asset_sha256: str = SHA_D,
+    source_group_namespace_id: str = "fixture-source-groups",
+    source_group_cross_lane: bool = True,
     shared_prefix: str | None = None,
     alternative_route: str | None = None,
     inverse_pair: str | None = None,
@@ -254,6 +265,14 @@ def _row(
         "mass_units": mass,
         "molecule_ids": list(molecules or (f"mol-{candidate_id}",)),
         "partition_scaffold_ids": list(scaffolds or (f"scaffold-{candidate_id}",)),
+        "source_group_ids": [source_group or f"source-group-{candidate_id}"],
+        "source_group_namespace": _relationship_namespace(
+            "source_group",
+            source_asset_id=source_group_source_asset_id,
+            source_asset_sha256=source_group_source_asset_sha256,
+            namespace_id=source_group_namespace_id,
+            cross_lane=source_group_cross_lane,
+        ),
         "identity_definitions": (
             _identity_definitions()
             if identity_definitions is None
@@ -263,7 +282,9 @@ def _row(
         "alternative_route_group_id": alternative_route,
         "inverse_pair_group_id": inverse_pair,
         "correction_group_id": correction,
-        "constraint_compatible_alternative_route_group_id": (constrained_alternative_route),
+        "constraint_compatible_alternative_route_group_id": (
+            constrained_alternative_route
+        ),
         "relationship_namespaces": relationship_namespaces,
         "document_group_id": document,
         "document_provenance": document_provenance,
@@ -332,16 +353,18 @@ def test_census_keeps_transformations_diagnostic_and_measures_bridge_effect() ->
         "split_assignment.not_performed_by_component_census",
     }.issubset(census["blockers"])
     assert census["hard_component_census"]["component_count"] == 7
-    assert census["identities"]["candidate_source_binding_inventory_sha256"] == canonical_sha256(
-        census["candidate_source_binding_inventory"]
-    )
+    assert census["identities"][
+        "candidate_source_binding_inventory_sha256"
+    ] == canonical_sha256(census["candidate_source_binding_inventory"])
     assert {
         "evidence_class",
         "declared_partition_role",
     }.isdisjoint(census["vertex_inventory"][0])
 
     components = census["hard_component_census"]["components"]
-    shared = next(component for component in components if component["candidate_count"] == 2)
+    shared = next(
+        component for component in components if component["candidate_count"] == 2
+    )
     assert shared["candidate_ids"] == ["a", "b"]
     assert shared["data_lanes"] == [
         "observed_local_analogue",
@@ -432,9 +455,9 @@ def test_noncontract_lane_or_evidence_profile_blocks_structural_pass(
 
 def test_policy_lane_identity_must_match_validated_editing_contract() -> None:
     policy = _policy()
-    policy["lane_contract_identity"]["ordered_lanes"][0]["admissible_evidence_profiles"] = [
-        "executor_generated_walk"
-    ]
+    policy["lane_contract_identity"]["ordered_lanes"][0][
+        "admissible_evidence_profiles"
+    ] = ["executor_generated_walk"]
 
     with pytest.raises(
         EditingV2SplitCensusError,
@@ -451,7 +474,117 @@ def test_identity_definition_mismatch_is_reason_coded_and_blocks() -> None:
     census = _build([bad, _row("a"), _row("b"), _row("c"), _row("d")])
 
     assert census["status"] == "BLOCKED"
-    assert "identity_definitions.contract_mismatch" in census["invalid_rows"][0]["reason_codes"]
+    assert (
+        "identity_definitions.contract_mismatch"
+        in census["invalid_rows"][0]["reason_codes"]
+    )
+
+
+def test_source_group_is_hard_across_data_lanes() -> None:
+    rows = [
+        _row(
+            "a",
+            lane="observed_local_analogue",
+            source_group="shared-source",
+        ),
+        _row(
+            "b",
+            lane="operator_aware_real_endpoint",
+            source_group="shared-source",
+        ),
+        _row("c"),
+        _row("d"),
+    ]
+
+    census = _build(rows)
+
+    components = [
+        component["candidate_ids"]
+        for component in census["hard_component_census"]["components"]
+    ]
+    assert ["a", "b"] in components
+    assert census["hard_component_census"]["component_count"] == 3
+    source_group = next(
+        group
+        for group in census["relationship_inventory"]
+        if group["edge_type"] == "source_group" and group["member_count"] == 2
+    )
+    assert source_group["mode"] == "hard"
+    assert source_group["cross_lane"] is True
+    assert census["relationship_summary"]["source_group"]["mode"] == "hard"
+
+
+def test_equal_source_group_labels_from_distinct_source_assets_do_not_merge() -> None:
+    rows = [
+        _row(
+            "a",
+            source_group="source-7",
+            source_group_source_asset_id="source-asset-a",
+            source_group_source_asset_sha256=SHA_A,
+        ),
+        _row(
+            "b",
+            source_group="source-7",
+            source_group_source_asset_id="source-asset-b",
+            source_group_source_asset_sha256=SHA_B,
+        ),
+        _row("c"),
+        _row("d"),
+    ]
+
+    census = _build(rows)
+
+    assert census["hard_component_census"]["component_count"] == 4
+    assert census["relationship_summary"]["source_group"]["multi_member_groups"] == 0
+
+
+@pytest.mark.parametrize(
+    ("mutate", "reason_code"),
+    [
+        (
+            lambda row: row.__setitem__("source_group_ids", []),
+            "source_group_ids.empty",
+        ),
+        (
+            lambda row: row.__setitem__("source_group_namespace", None),
+            "source_group_namespace.missing",
+        ),
+        (
+            lambda row: row["source_group_namespace"].__setitem__(
+                "cross_lane_sharing_authorized", False
+            ),
+            "source_group_namespace.cross_lane_sharing_required",
+        ),
+    ],
+)
+def test_missing_or_invalid_source_group_binding_is_reason_coded(
+    mutate,
+    reason_code: str,
+) -> None:
+    bad = _row("bad")
+    mutate(bad)
+
+    census = _build([bad, _row("a"), _row("b"), _row("c"), _row("d")])
+
+    assert census["census_structural_complete"] is False
+    assert reason_code in census["invalid_rows"][0]["reason_codes"]
+    assert "bad" not in {
+        vertex["candidate_id"] for vertex in census["vertex_inventory"]
+    }
+
+
+def test_source_group_binding_does_not_synthesize_document_or_series_evidence() -> None:
+    census = _build([_row("a", source_group="source-a"), _row("b")])
+
+    row = next(
+        vertex for vertex in census["vertex_inventory"] if vertex["candidate_id"] == "a"
+    )
+    assert row["document_group_id"] is None
+    assert row["document_provenance"] is None
+    assert row["series_group_id"] is None
+    assert row["series_provenance"] is None
+    assert census["relationship_summary"]["document_group"]["groups"] == 0
+    assert census["relationship_summary"]["series_group"]["groups"] == 0
 
 
 def test_observed_document_and_series_groups_are_hard_and_source_scoped() -> None:
@@ -471,7 +604,8 @@ def test_observed_document_and_series_groups_are_hard_and_source_scoped() -> Non
     census = _build(rows)
 
     components = [
-        component["candidate_ids"] for component in census["hard_component_census"]["components"]
+        component["candidate_ids"]
+        for component in census["hard_component_census"]["components"]
     ]
     assert ["a", "b"] in components
     assert ["c", "d"] in components
@@ -629,7 +763,9 @@ def test_missing_observed_group_provenance_is_reason_coded_and_blocks(
     assert census["input_summary"]["valid_vertices"] == 4
     assert census["input_summary"]["invalid_rows"] == 1
     assert reason_code in census["invalid_rows"][0]["reason_codes"]
-    assert "bad" not in {vertex["candidate_id"] for vertex in census["vertex_inventory"]}
+    assert "bad" not in {
+        vertex["candidate_id"] for vertex in census["vertex_inventory"]
+    }
     validate_split_component_census(census)
 
 
@@ -665,7 +801,10 @@ def test_duplicate_candidate_ids_exclude_every_occurrence() -> None:
 
     assert census["input_summary"]["valid_vertices"] == 2
     assert census["input_summary"]["invalid_rows"] == 2
-    assert all("candidate_id.duplicate" in row["reason_codes"] for row in census["invalid_rows"])
+    assert all(
+        "candidate_id.duplicate" in row["reason_codes"]
+        for row in census["invalid_rows"]
+    )
 
 
 def test_transformation_can_be_hard_only_with_explicit_authorization() -> None:
@@ -691,9 +830,10 @@ def test_transformation_can_be_hard_only_with_explicit_authorization() -> None:
     assert census["relationship_summary"]["transformation_signature"]["mode"] == "hard"
 
 
-def test_mandatory_hard_identity_policy_cannot_be_weakened() -> None:
+@pytest.mark.parametrize("edge_type", ["partition_scaffold", "source_group"])
+def test_mandatory_hard_identity_policy_cannot_be_weakened(edge_type: str) -> None:
     policy = _policy()
-    policy["edge_modes"]["partition_scaffold"] = "diagnostic"
+    policy["edge_modes"][edge_type] = "diagnostic"
 
     with pytest.raises(EditingV2SplitCensusError, match="may not be weakened"):
         _build(_base_rows(), policy=policy)
@@ -727,7 +867,9 @@ def test_validator_rejects_rehashed_authority_or_stale_vertex_tampering() -> Non
     census = _build(_base_rows())
     tampered = deepcopy(census)
     tampered["blockers"] = [
-        blocker for blocker in tampered["blockers"] if not blocker.startswith("external_authority.")
+        blocker
+        for blocker in tampered["blockers"]
+        if not blocker.startswith("external_authority.")
     ]
     body = dict(tampered)
     body.pop("census_sha256")
@@ -754,7 +896,9 @@ def test_thin_cli_writes_a_valid_immutable_census(tmp_path: Path) -> None:
     input_path = tmp_path / "candidates.jsonl"
     output_path = tmp_path / "census.json"
     policy_path = tmp_path / "policy.json"
-    input_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in _base_rows()))
+    input_path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in _base_rows())
+    )
     policy_path.write_text(json.dumps(_policy(), indent=2, sort_keys=True) + "\n")
     environment = dict(os.environ)
     environment["PYTHONPATH"] = "src"

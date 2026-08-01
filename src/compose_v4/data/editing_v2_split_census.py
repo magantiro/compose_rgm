@@ -11,10 +11,11 @@ indivisible component structure that a later, separately frozen split policy
 must respect.  ``census_structural_complete`` describes that bounded
 computation only and carries no corpus-readiness, split, or training authority.
 
-Schema version 3 binds each vertex to an upstream candidate-ledger row and
+Schema version 4 binds each vertex to an upstream candidate-ledger row and
 candidate envelope, validates the lane/profile/six-component evidence envelope,
-and forbids caller-supplied partition claims.  Post-Active8 relationship types
-remain diagnostic until a physical receipt resolver exists.  The builder
+and makes source-group isolation an explicit cross-lane hard relationship.
+Caller-supplied partition claims remain forbidden. Post-Active8 relationship
+types remain diagnostic until a physical receipt resolver exists. The builder
 consumes its source iterable once and never materializes the raw input stream.
 """
 
@@ -36,9 +37,8 @@ from compose_v4.data.editing_corpus_contract import (
     validate_evidence_assignment_envelope,
 )
 
-
 CANDIDATE_ROW_SCHEMA = "compose.editing_v2_split_candidate"
-CANDIDATE_ROW_SCHEMA_VERSION = 3
+CANDIDATE_ROW_SCHEMA_VERSION = 4
 OBSERVED_GROUP_PROVENANCE_SCHEMA = "compose.observed_group_provenance"
 OBSERVED_GROUP_PROVENANCE_SCHEMA_VERSION = 2
 TRANSFORMATION_DEFINITION_SCHEMA = "compose.transformation_signature_definition"
@@ -46,15 +46,15 @@ TRANSFORMATION_DEFINITION_SCHEMA_VERSION = 2
 LANE_CONTRACT_IDENTITY_SCHEMA = "compose.editing_v2_lane_contract_identity"
 LANE_CONTRACT_IDENTITY_SCHEMA_VERSION = 2
 IDENTITY_DEFINITION_CONTRACT_SCHEMA = "compose.editing_v2_identity_definition_contract"
-IDENTITY_DEFINITION_CONTRACT_SCHEMA_VERSION = 1
+IDENTITY_DEFINITION_CONTRACT_SCHEMA_VERSION = 2
 RELATIONSHIP_NAMESPACE_SCHEMA = "compose.editing_v2_relationship_namespace"
 RELATIONSHIP_NAMESPACE_SCHEMA_VERSION = 2
 IMPLEMENTATION_PROVENANCE_SCHEMA = "compose.editing_v2_split_census_provenance"
 IMPLEMENTATION_PROVENANCE_SCHEMA_VERSION = 1
 SPLIT_CENSUS_POLICY_SCHEMA = "compose.editing_v2_split_census_policy"
-SPLIT_CENSUS_POLICY_SCHEMA_VERSION = 3
+SPLIT_CENSUS_POLICY_SCHEMA_VERSION = 4
 SPLIT_CENSUS_SCHEMA = "compose.editing_v2_split_component_census"
-SPLIT_CENSUS_SCHEMA_VERSION = 3
+SPLIT_CENSUS_SCHEMA_VERSION = 4
 
 PARTITION_ROLES = (
     "train",
@@ -66,6 +66,7 @@ PARTITION_ROLES = (
 EDGE_TYPES = (
     "exact_molecule",
     "partition_scaffold",
+    "source_group",
     "document_group",
     "series_group",
     "shared_prefix_branch",
@@ -79,6 +80,7 @@ MANDATORY_HARD_EDGE_TYPES = frozenset(
     {
         "exact_molecule",
         "partition_scaffold",
+        "source_group",
         "document_group",
         "series_group",
     }
@@ -101,13 +103,15 @@ REQUIRED_AUTHORITY_BLOCKERS = (
     "split_assignment.not_performed_by_component_census",
 )
 EDGE_MODES = frozenset({"hard", "diagnostic"})
-IDENTITY_TYPES = ("exact_molecule", "partition_scaffold")
+IDENTITY_TYPES = ("exact_molecule", "partition_scaffold", "source_group")
 SIMPLE_RELATIONSHIP_FIELDS = {
     "shared_prefix_branch": "shared_prefix_branch_group_id",
     "alternative_route": "alternative_route_group_id",
     "inverse_pair": "inverse_pair_group_id",
     "correction": "correction_group_id",
-    "constraint_compatible_alternative_route": ("constraint_compatible_alternative_route_group_id"),
+    "constraint_compatible_alternative_route": (
+        "constraint_compatible_alternative_route_group_id"
+    ),
 }
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -125,6 +129,8 @@ _ROW_FIELDS = frozenset(
         "mass_units",
         "molecule_ids",
         "partition_scaffold_ids",
+        "source_group_ids",
+        "source_group_namespace",
         "identity_definitions",
         "shared_prefix_branch_group_id",
         "alternative_route_group_id",
@@ -191,6 +197,7 @@ _IDENTITY_DEFINITION_CONTRACT_FIELDS = frozenset(
         "schema_version",
         "exact_molecule",
         "partition_scaffold",
+        "source_group",
     }
 )
 _IDENTITY_DEFINITION_FIELDS = frozenset(
@@ -245,7 +252,9 @@ def canonical_json(value: Any) -> str:
             allow_nan=False,
         )
     except (TypeError, ValueError) as exc:
-        raise EditingV2SplitCensusError(f"value is not deterministic JSON: {exc}") from exc
+        raise EditingV2SplitCensusError(
+            f"value is not deterministic JSON: {exc}"
+        ) from exc
 
 
 def canonical_sha256(value: Any) -> str:
@@ -263,7 +272,9 @@ def editing_lane_contract_identity(
     try:
         validate_editing_corpus_contract(contract)
     except EditingCorpusContractError as exc:
-        raise EditingV2SplitCensusError(f"editing-corpus contract is invalid: {exc}") from exc
+        raise EditingV2SplitCensusError(
+            f"editing-corpus contract is invalid: {exc}"
+        ) from exc
     ordered_lanes = [
         {
             "id": str(lane["id"]),
@@ -308,14 +319,17 @@ def default_split_census_policy(
     return {
         "schema": SPLIT_CENSUS_POLICY_SCHEMA,
         "schema_version": SPLIT_CENSUS_POLICY_SCHEMA_VERSION,
-        "policy_id": "compose-editing-v2-split-census-default-v3",
+        "policy_id": "compose-editing-v2-split-census-default-v4",
         "partition_roles": list(PARTITION_ROLES),
-        "lane_contract_identity": editing_lane_contract_identity(editing_corpus_contract),
+        "lane_contract_identity": editing_lane_contract_identity(
+            editing_corpus_contract
+        ),
         "identity_definitions": normalized_identity_definitions,
         "edge_modes": {
             edge_type: (
                 "diagnostic"
-                if edge_type in RECEIPT_GATED_RELATIONSHIP_EDGE_TYPES | {"transformation_signature"}
+                if edge_type
+                in RECEIPT_GATED_RELATIONSHIP_EDGE_TYPES | {"transformation_signature"}
                 else "hard"
             )
             for edge_type in EDGE_TYPES
@@ -356,7 +370,9 @@ def _normalize_policy(
         )
     lane_contract_identity = payload["lane_contract_identity"]
     if not isinstance(lane_contract_identity, Mapping):
-        raise EditingV2SplitCensusError("policy.lane_contract_identity must be an object")
+        raise EditingV2SplitCensusError(
+            "policy.lane_contract_identity must be an object"
+        )
     if dict(lane_contract_identity) != dict(expected_lane_contract_identity):
         raise EditingV2SplitCensusError(
             "policy.lane_contract_identity disagrees with the validated editing-corpus contract"
@@ -400,8 +416,13 @@ def _normalize_policy(
         )
     authorization = payload["transformation_hard_authorized"]
     if not isinstance(authorization, bool):
-        raise EditingV2SplitCensusError("policy.transformation_hard_authorized must be boolean")
-    if normalized_modes["transformation_signature"] == "hard" and authorization is not True:
+        raise EditingV2SplitCensusError(
+            "policy.transformation_hard_authorized must be boolean"
+        )
+    if (
+        normalized_modes["transformation_signature"] == "hard"
+        and authorization is not True
+    ):
         raise EditingV2SplitCensusError(
             "hard transformation signatures require explicit transformation_hard_authorized=true"
         )
@@ -509,7 +530,9 @@ def _normalize_identity_definition_contract_or_raise(
     )
     if normalized is None or errors:
         details = "; ".join(item["detail"] for item in errors)
-        raise EditingV2SplitCensusError(f"{field} is invalid" + (f": {details}" if details else ""))
+        raise EditingV2SplitCensusError(
+            f"{field} is invalid" + (f": {details}" if details else "")
+        )
     return normalized
 
 
@@ -549,7 +572,10 @@ def _normalize_relationship_namespace(
         "source_asset_id",
         "definition_id",
     ):
-        if not isinstance(payload[string_field], str) or not payload[string_field].strip():
+        if (
+            not isinstance(payload[string_field], str)
+            or not payload[string_field].strip()
+        ):
             _error(
                 errors,
                 f"{field}.{string_field}_invalid",
@@ -583,7 +609,9 @@ def _normalize_relationship_namespaces(
     field = "relationship_namespaces"
     if not isinstance(value, Mapping):
         _error(errors, f"{field}.invalid", f"{field} must be an object")
-        return {relationship_type: None for relationship_type in SIMPLE_RELATIONSHIP_FIELDS}
+        return {
+            relationship_type: None for relationship_type in SIMPLE_RELATIONSHIP_FIELDS
+        }
     payload = dict(value)
     expected_fields = set(SIMPLE_RELATIONSHIP_FIELDS)
     if set(payload) != expected_fields:
@@ -625,8 +653,13 @@ def _normalize_file_identity(value: Any, *, field: str) -> dict[str, Any]:
             f"extra={sorted(set(payload) - _FILE_IDENTITY_FIELDS)}"
         )
     _require_string(payload["path"], field=f"{field}.path")
-    if not isinstance(payload["sha256"], str) or _SHA256_RE.fullmatch(payload["sha256"]) is None:
-        raise EditingV2SplitCensusError(f"{field}.sha256 must be a full lowercase SHA-256")
+    if (
+        not isinstance(payload["sha256"], str)
+        or _SHA256_RE.fullmatch(payload["sha256"]) is None
+    ):
+        raise EditingV2SplitCensusError(
+            f"{field}.sha256 must be a full lowercase SHA-256"
+        )
     if (
         isinstance(payload["bytes"], bool)
         or not isinstance(payload["bytes"], int)
@@ -654,7 +687,10 @@ def _normalize_implementation_provenance(value: Any) -> dict[str, Any]:
         raise EditingV2SplitCensusError(f"{field} has an unsupported schema")
 
     code_revision = payload["code_revision"]
-    if not isinstance(code_revision, Mapping) or set(code_revision) != _CODE_REVISION_FIELDS:
+    if (
+        not isinstance(code_revision, Mapping)
+        or set(code_revision) != _CODE_REVISION_FIELDS
+    ):
         raise EditingV2SplitCensusError(
             f"{field}.code_revision must contain commit_sha and dirty exactly"
         )
@@ -669,7 +705,10 @@ def _normalize_implementation_provenance(value: Any) -> dict[str, Any]:
         raise EditingV2SplitCensusError(f"{field}.code_revision.dirty must be boolean")
 
     python_runtime = payload["python_runtime"]
-    if not isinstance(python_runtime, Mapping) or set(python_runtime) != _PYTHON_RUNTIME_FIELDS:
+    if (
+        not isinstance(python_runtime, Mapping)
+        or set(python_runtime) != _PYTHON_RUNTIME_FIELDS
+    ):
         raise EditingV2SplitCensusError(
             f"{field}.python_runtime must contain implementation and version exactly"
         )
@@ -688,7 +727,9 @@ def _normalize_implementation_provenance(value: Any) -> dict[str, Any]:
     ]
     paths = [item["path"] for item in normalized_source_files]
     if len(paths) != len(set(paths)):
-        raise EditingV2SplitCensusError(f"{field}.source_files contains duplicate paths")
+        raise EditingV2SplitCensusError(
+            f"{field}.source_files contains duplicate paths"
+        )
     normalized_source_files.sort(key=lambda item: item["path"])
 
     normalized = {
@@ -847,7 +888,10 @@ def _normalize_transformation_definition(
         or payload["schema_version"] != TRANSFORMATION_DEFINITION_SCHEMA_VERSION
     ):
         _error(errors, f"{field}.schema_mismatch", f"{field} has an unsupported schema")
-    if not isinstance(payload["definition_id"], str) or not payload["definition_id"].strip():
+    if (
+        not isinstance(payload["definition_id"], str)
+        or not payload["definition_id"].strip()
+    ):
         _error(
             errors,
             f"{field}.definition_id_invalid",
@@ -967,7 +1011,9 @@ def _parse_row(
         evidence_profile_id = None
     evidence_components_raw = row.get("evidence_components")
     evidence_components = (
-        dict(evidence_components_raw) if isinstance(evidence_components_raw, Mapping) else None
+        dict(evidence_components_raw)
+        if isinstance(evidence_components_raw, Mapping)
+        else None
     )
     if evidence_components is None:
         _error(
@@ -989,9 +1035,15 @@ def _parse_row(
                 "evidence_assignment.invalid",
                 f"evidence assignment is invalid: {exc}",
             )
-        evidence_components = {key: evidence_components[key] for key in sorted(evidence_components)}
+        evidence_components = {
+            key: evidence_components[key] for key in sorted(evidence_components)
+        }
     mass_units = row.get("mass_units")
-    if isinstance(mass_units, bool) or not isinstance(mass_units, int) or mass_units <= 0:
+    if (
+        isinstance(mass_units, bool)
+        or not isinstance(mass_units, int)
+        or mass_units <= 0
+    ):
         _error(
             errors,
             "mass_units.invalid",
@@ -1011,6 +1063,27 @@ def _parse_row(
         nonempty=True,
         errors=errors,
     )
+    source_group_ids = _string_list(
+        row.get("source_group_ids"),
+        field="source_group_ids",
+        nonempty=True,
+        errors=errors,
+    )
+    source_group_namespace = _normalize_relationship_namespace(
+        row.get("source_group_namespace"),
+        relationship_type="source_group",
+        field="source_group_namespace",
+        errors=errors,
+    )
+    if (
+        source_group_namespace is not None
+        and source_group_namespace.get("cross_lane_sharing_authorized") is not True
+    ):
+        _error(
+            errors,
+            "source_group_namespace.cross_lane_sharing_required",
+            "source_group_namespace must authorize cross-lane sharing",
+        )
     identity_definitions = _normalize_identity_definition_contract(
         row.get("identity_definitions"),
         field="identity_definitions",
@@ -1103,6 +1176,8 @@ def _parse_row(
         "mass_units": mass_units,
         "molecule_ids": molecule_ids,
         "partition_scaffold_ids": scaffold_ids,
+        "source_group_ids": source_group_ids,
+        "source_group_namespace": source_group_namespace,
         "identity_definitions": identity_definitions,
         **group_values,
         "relationship_namespaces": relationship_namespaces,
@@ -1132,17 +1207,30 @@ def _relationship_key(row: Mapping[str, Any], edge_type: str) -> list[dict[str, 
     if edge_type == "partition_scaffold":
         return [
             {
-                "identity_definition": row["identity_definitions"]["partition_scaffold"],
+                "identity_definition": row["identity_definitions"][
+                    "partition_scaffold"
+                ],
                 "partition_scaffold_id": value,
             }
             for value in row["partition_scaffold_ids"]
+        ]
+    if edge_type == "source_group":
+        return [
+            {
+                "identity_definition": row["identity_definitions"]["source_group"],
+                "namespace": row["source_group_namespace"],
+                "source_group_id": value,
+            }
+            for value in row["source_group_ids"]
         ]
     if edge_type in SIMPLE_RELATIONSHIP_FIELDS:
         value = row[SIMPLE_RELATIONSHIP_FIELDS[edge_type]]
         namespace = row["relationship_namespaces"][edge_type]
         if value is None:
             return []
-        lane_scope = None if namespace["cross_lane_sharing_authorized"] else row["data_lane"]
+        lane_scope = (
+            None if namespace["cross_lane_sharing_authorized"] else row["data_lane"]
+        )
         return [
             {
                 "namespace": namespace,
@@ -1261,10 +1349,14 @@ def _component_state(
     mass_by_candidate: Mapping[str, int],
 ) -> dict[str, int]:
     components = union_find.components()
-    masses = [sum(mass_by_candidate[item] for item in members) for members in components]
+    masses = [
+        sum(mass_by_candidate[item] for item in members) for members in components
+    ]
     return {
         "component_count": len(components),
-        "largest_component_candidates": max((len(item) for item in components), default=0),
+        "largest_component_candidates": max(
+            (len(item) for item in components), default=0
+        ),
         "largest_component_mass_units": max(masses, default=0),
     }
 
@@ -1272,7 +1364,9 @@ def _component_state(
 def _attainable_ranges(components: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     component_count = len(components)
     total_mass = sum(int(component["mass_units"]) for component in components)
-    total_candidates = sum(int(component["candidate_count"]) for component in components)
+    total_candidates = sum(
+        int(component["candidate_count"]) for component in components
+    )
     feasible = component_count >= len(PARTITION_ROLES)
     result: dict[str, Any] = {
         "partition_roles": list(PARTITION_ROLES),
@@ -1325,9 +1419,13 @@ def _attainable_ranges(components: Sequence[Mapping[str, Any]]) -> dict[str, Any
     return result
 
 
-def _invalid_entry(parsed: _ParsedRow, errors: Sequence[dict[str, str]]) -> dict[str, Any]:
+def _invalid_entry(
+    parsed: _ParsedRow, errors: Sequence[dict[str, str]]
+) -> dict[str, Any]:
     candidate_id = (
-        parsed.normalized.get("candidate_id") if isinstance(parsed.normalized, Mapping) else None
+        parsed.normalized.get("candidate_id")
+        if isinstance(parsed.normalized, Mapping)
+        else None
     )
     return {
         "source_index": parsed.source_index,
@@ -1335,7 +1433,9 @@ def _invalid_entry(parsed: _ParsedRow, errors: Sequence[dict[str, str]]) -> dict
         "source_row_sha256": parsed.source_row_sha256,
         "reason_codes": sorted({item["code"] for item in errors}),
         "reasons": sorted(errors, key=lambda item: (item["code"], item["detail"])),
-        "raw_row": (parsed.raw_row if parsed.raw_row is not None else parsed.normalized),
+        "raw_row": (
+            parsed.raw_row if parsed.raw_row is not None else parsed.normalized
+        ),
     }
 
 
@@ -1354,7 +1454,9 @@ def build_split_component_census(
         policy,
         expected_lane_contract_identity=lane_contract_identity,
     )
-    normalized_provenance = _normalize_implementation_provenance(implementation_provenance)
+    normalized_provenance = _normalize_implementation_provenance(
+        implementation_provenance
+    )
     parsed_rows: list[_ParsedRow] = []
     source_row_sha256s: list[str] = []
     source_row_count = 0
@@ -1372,7 +1474,8 @@ def build_split_component_census(
     duplicate_counts = Counter(
         parsed.normalized["candidate_id"]
         for parsed in parsed_rows
-        if parsed.normalized is not None and parsed.normalized["candidate_id"] is not None
+        if parsed.normalized is not None
+        and parsed.normalized["candidate_id"] is not None
     )
     invalid_rows: list[dict[str, Any]] = []
     vertices: list[dict[str, Any]] = []
@@ -1448,7 +1551,9 @@ def build_split_component_census(
         }
         for row in vertices
     ]
-    candidate_source_binding_inventory_sha256 = canonical_sha256(candidate_source_binding_inventory)
+    candidate_source_binding_inventory_sha256 = canonical_sha256(
+        candidate_source_binding_inventory
+    )
 
     by_id = {str(row["candidate_id"]): row for row in vertices}
     mass_by_candidate = {
@@ -1553,18 +1658,24 @@ def build_split_component_census(
         successful = 0
         redundant = 0
         for edge in edges_by_type[edge_type]:
-            joined = union_find.union(edge["left_candidate_id"], edge["right_candidate_id"])
+            joined = union_find.union(
+                edge["left_candidate_id"], edge["right_candidate_id"]
+            )
             edge_application[edge["edge_id"]] = joined
             successful += int(joined)
             redundant += int(not joined)
         after = _component_state(union_find, mass_by_candidate=mass_by_candidate)
-        groups = [group for group in relationship_inventory if group["edge_type"] == edge_type]
+        groups = [
+            group for group in relationship_inventory if group["edge_type"] == edge_type
+        ]
         incremental_effects.append(
             {
                 "edge_type": edge_type,
                 "mode": "hard",
                 "relationship_groups": len(groups),
-                "multi_member_groups": sum(group["member_count"] > 1 for group in groups),
+                "multi_member_groups": sum(
+                    group["member_count"] > 1 for group in groups
+                ),
                 "ledger_edges": len(edges_by_type[edge_type]),
                 "groups_bridging_prior_components": groups_bridging,
                 "successful_unions": successful,
@@ -1580,7 +1691,9 @@ def build_split_component_census(
         if normalized_policy["edge_modes"][edge_type] != "diagnostic":
             continue
         hypothetical = union_find.copy()
-        groups = [group for group in relationship_inventory if group["edge_type"] == edge_type]
+        groups = [
+            group for group in relationship_inventory if group["edge_type"] == edge_type
+        ]
         groups_bridging = sum(
             len({union_find.find(member) for member in group["members"]}) > 1
             for group in groups
@@ -1594,7 +1707,9 @@ def build_split_component_census(
             )
             edge_application[edge["edge_id"]] = bridges
             potential_unions += int(
-                hypothetical.union(edge["left_candidate_id"], edge["right_candidate_id"])
+                hypothetical.union(
+                    edge["left_candidate_id"], edge["right_candidate_id"]
+                )
             )
             already_connected += int(not bridges)
         incremental_effects.append(
@@ -1602,7 +1717,9 @@ def build_split_component_census(
                 "edge_type": edge_type,
                 "mode": "diagnostic",
                 "relationship_groups": len(groups),
-                "multi_member_groups": sum(group["member_count"] > 1 for group in groups),
+                "multi_member_groups": sum(
+                    group["member_count"] > 1 for group in groups
+                ),
                 "ledger_edges": len(edges_by_type[edge_type]),
                 "groups_bridging_hard_components": groups_bridging,
                 "potential_component_unions": potential_unions,
@@ -1633,13 +1750,24 @@ def build_split_component_census(
         component_body = {"candidate_ids": members}
         component_id = f"split-component-{canonical_sha256(component_body)}"
         molecule_ids = sorted(
-            {molecule_id for member in members for molecule_id in by_id[member]["molecule_ids"]}
+            {
+                molecule_id
+                for member in members
+                for molecule_id in by_id[member]["molecule_ids"]
+            }
         )
         scaffold_ids = sorted(
             {
                 scaffold_id
                 for member in members
                 for scaffold_id in by_id[member]["partition_scaffold_ids"]
+            }
+        )
+        source_group_ids = sorted(
+            {
+                source_group_id
+                for member in members
+                for source_group_id in by_id[member]["source_group_ids"]
             }
         )
         lanes = sorted({str(by_id[member]["data_lane"]) for member in members})
@@ -1665,6 +1793,8 @@ def build_split_component_census(
                 "molecule_count": len(molecule_ids),
                 "partition_scaffold_ids": scaffold_ids,
                 "partition_scaffold_count": len(scaffold_ids),
+                "source_group_ids": source_group_ids,
+                "source_group_count": len(source_group_ids),
                 "data_lanes": lanes,
                 "candidate_count_by_lane": candidate_count_by_lane,
                 "mass_units_by_lane": mass_units_by_lane,
@@ -1674,8 +1804,12 @@ def build_split_component_census(
     component_inventory.sort(key=lambda component: component["component_id"])
     component_inventory_sha256 = canonical_sha256(component_inventory)
 
-    component_sizes = [int(component["candidate_count"]) for component in component_inventory]
-    component_masses = [int(component["mass_units"]) for component in component_inventory]
+    component_sizes = [
+        int(component["candidate_count"]) for component in component_inventory
+    ]
+    component_masses = [
+        int(component["mass_units"]) for component in component_inventory
+    ]
     hard_component_census = {
         "component_count": len(component_inventory),
         "candidate_size_distribution": _distribution(component_sizes),
@@ -1762,7 +1896,9 @@ def build_split_component_census(
     relationship_summary = {
         edge_type: {
             "mode": normalized_policy["edge_modes"][edge_type],
-            "groups": sum(group["edge_type"] == edge_type for group in relationship_inventory),
+            "groups": sum(
+                group["edge_type"] == edge_type for group in relationship_inventory
+            ),
             "multi_member_groups": sum(
                 group["edge_type"] == edge_type and group["member_count"] > 1
                 for group in relationship_inventory
@@ -1780,7 +1916,9 @@ def build_split_component_census(
         "row_stream_sha256": row_stream_sha256,
         "vertex_inventory_sha256": vertex_inventory_sha256,
         "invalid_rows_sha256": invalid_rows_sha256,
-        "candidate_source_binding_inventory_sha256": (candidate_source_binding_inventory_sha256),
+        "candidate_source_binding_inventory_sha256": (
+            candidate_source_binding_inventory_sha256
+        ),
         "relationship_inventory_sha256": canonical_sha256(relationship_inventory),
         "edge_ledger_sha256": edge_ledger_sha256,
         "component_inventory_sha256": component_inventory_sha256,
@@ -1815,7 +1953,9 @@ def build_split_component_census(
             "source_rows": source_row_count,
             "valid_vertices": len(vertices),
             "invalid_rows": len(invalid_rows),
-            "total_valid_mass_units": sum(int(vertex["mass_units"]) for vertex in vertices),
+            "total_valid_mass_units": sum(
+                int(vertex["mass_units"]) for vertex in vertices
+            ),
             "data_lanes": sorted({str(vertex["data_lane"]) for vertex in vertices}),
             "ordered_contract_data_lanes": [
                 str(lane["id"]) for lane in lane_contract_identity["ordered_lanes"]
@@ -1837,6 +1977,10 @@ def build_split_component_census(
             "document_and_series_requirement": (
                 "A declared document or series group is admitted only with "
                 "source-scoped observed provenance."
+            ),
+            "source_group_requirement": (
+                "Every candidate declares a source-scoped namespace and at least one "
+                "source-group identity. Source-group edges are hard across data lanes."
             ),
             "no_ratio_or_assignment_claim": (
                 "This artifact measures component constraints only. It neither "
@@ -1886,17 +2030,23 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
         ),
         "relationship_inventory_sha256": payload.get("relationship_inventory"),
         "edge_ledger_sha256": payload.get("edge_ledger"),
-        "component_inventory_sha256": payload.get("hard_component_census", {}).get("components"),
+        "component_inventory_sha256": payload.get("hard_component_census", {}).get(
+            "components"
+        ),
     }
     for field, value in checks.items():
         if identities.get(field) != canonical_sha256(value):
-            raise EditingV2SplitCensusError(f"split census {field} does not match its payload")
+            raise EditingV2SplitCensusError(
+                f"split census {field} does not match its payload"
+            )
     lane_identity = payload.get("lane_contract_identity")
     if (
         not isinstance(lane_identity, Mapping)
         or set(lane_identity) != _LANE_CONTRACT_IDENTITY_FIELDS
     ):
-        raise EditingV2SplitCensusError("split census lane-contract identity fields disagree")
+        raise EditingV2SplitCensusError(
+            "split census lane-contract identity fields disagree"
+        )
     lane_identity_body = dict(lane_identity)
     lane_identity_sha256 = lane_identity_body.pop("identity_sha256")
     if lane_identity_sha256 != canonical_sha256(lane_identity_body):
@@ -1905,9 +2055,12 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
         )
     if (
         lane_identity_body.get("schema") != LANE_CONTRACT_IDENTITY_SCHEMA
-        or lane_identity_body.get("schema_version") != LANE_CONTRACT_IDENTITY_SCHEMA_VERSION
+        or lane_identity_body.get("schema_version")
+        != LANE_CONTRACT_IDENTITY_SCHEMA_VERSION
     ):
-        raise EditingV2SplitCensusError("split census lane-contract identity schema is unsupported")
+        raise EditingV2SplitCensusError(
+            "split census lane-contract identity schema is unsupported"
+        )
     normalized_policy = _normalize_policy(
         payload.get("policy"),
         expected_lane_contract_identity=lane_identity,
@@ -1919,19 +2072,25 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
         field="split_census.identity_definitions",
     )
     if normalized_identity_definitions != payload.get("identity_definitions"):
-        raise EditingV2SplitCensusError("split census identity definitions are not canonical")
+        raise EditingV2SplitCensusError(
+            "split census identity definitions are not canonical"
+        )
     normalized_provenance = _normalize_implementation_provenance(
         payload.get("implementation_provenance")
     )
     if normalized_provenance != payload.get("implementation_provenance"):
-        raise EditingV2SplitCensusError("split census implementation provenance is not canonical")
+        raise EditingV2SplitCensusError(
+            "split census implementation provenance is not canonical"
+        )
     if payload.get("policy", {}).get("lane_contract_identity") != payload.get(
         "lane_contract_identity"
     ):
         raise EditingV2SplitCensusError(
             "split census policy lane identity does not match its payload"
         )
-    if payload.get("policy", {}).get("identity_definitions") != payload.get("identity_definitions"):
+    if payload.get("policy", {}).get("identity_definitions") != payload.get(
+        "identity_definitions"
+    ):
         raise EditingV2SplitCensusError(
             "split census policy identity definitions do not match its payload"
         )
@@ -1945,14 +2104,18 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
     }
     for index, vertex in enumerate(vertices):
         if not isinstance(vertex, Mapping) or set(vertex) != expected_vertex_fields:
-            raise EditingV2SplitCensusError(f"split census vertex[{index}] fields disagree")
+            raise EditingV2SplitCensusError(
+                f"split census vertex[{index}] fields disagree"
+            )
         if _SHA256_RE.fullmatch(str(vertex["source_row_sha256"])) is None:
             raise EditingV2SplitCensusError(
                 f"split census vertex[{index}] source-row identity is invalid"
             )
         row_body = {field: vertex[field] for field in _ROW_FIELDS}
         if vertex["row_sha256"] != canonical_sha256(row_body):
-            raise EditingV2SplitCensusError(f"split census vertex[{index}] row hash disagrees")
+            raise EditingV2SplitCensusError(
+                f"split census vertex[{index}] row hash disagrees"
+            )
     expected_candidate_bindings = [
         {
             "candidate_id": row["candidate_id"],
@@ -1967,7 +2130,9 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
         )
 
     if payload.get("status_scope") != "CENSUS_STRUCTURAL_COMPLETION_ONLY":
-        raise EditingV2SplitCensusError("split census status scope is not structural-only")
+        raise EditingV2SplitCensusError(
+            "split census status scope is not structural-only"
+        )
     if payload.get("status") != "BLOCKED":
         raise EditingV2SplitCensusError(
             "split census must remain blocked until external authorities resolve"
@@ -1976,7 +2141,9 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
     if not isinstance(blockers, list) or any(
         blocker not in blockers for blocker in REQUIRED_AUTHORITY_BLOCKERS
     ):
-        raise EditingV2SplitCensusError("split census omits a mandatory external-authority blocker")
+        raise EditingV2SplitCensusError(
+            "split census omits a mandatory external-authority blocker"
+        )
     if payload.get("census_computation_complete") is not True:
         raise EditingV2SplitCensusError(
             "split census must record computation completion explicitly"
@@ -1986,7 +2153,9 @@ def validate_split_component_census(census: Mapping[str, Any]) -> None:
     if payload.get("split_ready") is not False:
         raise EditingV2SplitCensusError("split census may not assert split readiness")
     if payload.get("training_ready") is not False:
-        raise EditingV2SplitCensusError("split census may not assert training readiness")
+        raise EditingV2SplitCensusError(
+            "split census may not assert training readiness"
+        )
     for field in (
         "split_ratios_selected",
         "split_assignment_selected",

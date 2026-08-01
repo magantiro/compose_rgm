@@ -23,13 +23,13 @@ from compose_v4.data.editing_v2_split_census import (
     default_split_census_policy,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "configs" / "editing_corpus_v2_contract.json"
 POLICY_PATH = ROOT / "configs" / "editing_v2_split_assignment_policy_v1.json"
 CONTRACT = load_editing_corpus_contract(CONTRACT_PATH)
 SHA_A = "a" * 64
 SHA_B = "b" * 64
+SHA_C = "c" * 64
 
 
 def _identity_definitions() -> dict:
@@ -45,6 +45,11 @@ def _identity_definitions() -> dict:
             "definition_id": "fixture-scaffold",
             "implementation_sha256": SHA_B,
             "identity_namespace": "fixture-scaffold",
+        },
+        "source_group": {
+            "definition_id": "fixture-source-group",
+            "implementation_sha256": SHA_C,
+            "identity_namespace": "fixture-source-group",
         },
     }
 
@@ -81,6 +86,18 @@ def _row(index: int, lane: str, mass: int) -> dict:
         "mass_units": mass,
         "molecule_ids": [f"molecule-{index:03d}"],
         "partition_scaffold_ids": [f"scaffold-{index:03d}"],
+        "source_group_ids": [f"source-group-{index:03d}"],
+        "source_group_namespace": {
+            "schema": "compose.editing_v2_relationship_namespace",
+            "schema_version": 2,
+            "relationship_type": "source_group",
+            "namespace_id": "fixture-source-groups",
+            "source_asset_id": "fixture-source-asset",
+            "source_asset_sha256": SHA_C,
+            "definition_id": "fixture-source-group-definition",
+            "implementation_sha256": SHA_C,
+            "cross_lane_sharing_authorized": True,
+        },
         "identity_definitions": _identity_definitions(),
         "shared_prefix_branch_group_id": None,
         "alternative_route_group_id": None,
@@ -134,7 +151,9 @@ def _provenance() -> dict:
 
 def _census() -> dict:
     lanes = [row["id"] for row in CONTRACT["data_lanes"]]
-    rows = [_row(index, lanes[index % len(lanes)], 1 + (index % 7)) for index in range(160)]
+    rows = [
+        _row(index, lanes[index % len(lanes)], 1 + (index % 7)) for index in range(160)
+    ]
     return build_split_component_census(
         rows,
         policy=default_split_census_policy(
@@ -161,7 +180,9 @@ def test_assignment_is_deterministic_component_complete_and_sealed() -> None:
     assert len(resolutions) == census["input_summary"]["valid_vertices"]
     assert len({row["candidate_id"] for row in resolutions}) == len(resolutions)
     assert all(
-        row["source_endpoint_role"] == row["target_endpoint_role"] == row["assigned_role"]
+        row["source_endpoint_role"]
+        == row["target_endpoint_role"]
+        == row["assigned_role"]
         for row in resolutions
     )
     assert set(first["role_summaries"]) == {
