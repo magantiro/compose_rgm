@@ -13,7 +13,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from compose_v4.data.editing_v2_role_lane_packed_materializer import (  # noqa: E402
+from compose_v4.data.editing_v2_role_lane_packed_materializer import (
     DEFAULT_MAX_SOURCE_ROW_BYTES,
     OUTPUT_NAMESPACE,
     materialize_editing_v2_role_lane_packed,
@@ -24,6 +24,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--candidate-materialization-dir",
+        type=Path,
+        required=True,
+    )
+    parser.add_argument(
+        "--candidate-provenance-bridge-dir",
+        type=Path,
+        required=True,
+    )
+    parser.add_argument(
+        "--candidate-provenance-registry",
         type=Path,
         required=True,
     )
@@ -48,6 +58,8 @@ def main() -> int:
 
     result = materialize_editing_v2_role_lane_packed(
         candidate_materialization_dir=(args.candidate_materialization_dir),
+        candidate_provenance_bridge_dir=(args.candidate_provenance_bridge_dir),
+        candidate_provenance_registry_path=(args.candidate_provenance_registry),
         split_assignment_path=args.split_assignment,
         editing_corpus_contract_path=args.editing_corpus_contract,
         artifact_root=args.artifact_root,

@@ -6,7 +6,9 @@ import copy
 import gzip
 import hashlib
 import json
+from contextlib import nullcontext
 from pathlib import Path, PurePosixPath
+from unittest.mock import patch
 
 import pytest
 
@@ -110,14 +112,16 @@ def _write_original_source(
         },
     }
     entry = {"trace": trace, "states": [source_state, target_state]}
-    with path.open("wb") as raw:
-        with gzip.GzipFile(
+    with (
+        path.open("wb") as raw,
+        gzip.GzipFile(
             filename="",
             mode="wb",
             fileobj=raw,
             mtime=0,
-        ) as compressed:
-            compressed.write(canonical_json_bytes(entry) + b"\n")
+        ) as compressed,
+    ):
+        compressed.write(canonical_json_bytes(entry) + b"\n")
     manifest = {
         "schema": "compose.data.packed_trace",
         "schema_version": 1,
@@ -227,7 +231,11 @@ def _inputs(root: Path) -> dict:
     split_path, assignment, role_by_candidate = _write_split_assignment(
         root,
         rows,
+        candidate_root=candidate_root,
+        candidate_manifest=candidate_manifest,
     )
+    bridge_root = root / "candidate_provenance_bridge"
+    registry_path = root / "candidate_provenance_registry.json"
     return {
         "artifact_root": artifact_root,
         "rows": rows,
@@ -235,18 +243,42 @@ def _inputs(root: Path) -> dict:
         "candidate_manifest": candidate_manifest,
         "split_path": split_path,
         "assignment": assignment,
+        "source_stream": assignment["source_stream"],
+        "bridge_root": bridge_root,
+        "registry_path": registry_path,
         "role_by_candidate": role_by_candidate,
     }
 
 
-def _materialize(inputs: dict) -> tuple[dict, Path]:
-    result = materialize_editing_v2_role_lane_packed(
-        candidate_materialization_dir=inputs["candidate_root"],
-        split_assignment_path=inputs["split_path"],
-        editing_corpus_contract_path=CORPUS_CONTRACT,
-        artifact_root=inputs["artifact_root"],
-        code_revision="a" * 40,
+def _materialize(
+    inputs: dict,
+    *,
+    bridge_manifest: dict | None = None,
+    patch_bridge_validation: bool = True,
+) -> tuple[dict, Path]:
+    validation = (
+        patch(
+            "compose_v4.data.editing_v2_role_lane_packed_materializer."
+            "validate_candidate_provenance_bridge",
+            return_value=(
+                bridge_manifest
+                if bridge_manifest is not None
+                else {"source_stream": inputs["source_stream"]}
+            ),
+        )
+        if patch_bridge_validation
+        else nullcontext()
     )
+    with validation:
+        result = materialize_editing_v2_role_lane_packed(
+            candidate_materialization_dir=inputs["candidate_root"],
+            candidate_provenance_bridge_dir=inputs["bridge_root"],
+            candidate_provenance_registry_path=inputs["registry_path"],
+            split_assignment_path=inputs["split_path"],
+            editing_corpus_contract_path=CORPUS_CONTRACT,
+            artifact_root=inputs["artifact_root"],
+            code_revision="a" * 40,
+        )
     output_root = inputs["artifact_root"] / PurePosixPath(result["run_artifact_root"]).relative_to(
         "/artifacts"
     )
@@ -268,9 +300,15 @@ def test_materializes_twenty_deterministic_cells_and_adapter_accepts(
     }
     assert result["training_authorized"] is False
     assert result["active8_admission_status"] == "NOT_RUN"
+    assert result["schema_version"] == 2
+    assert result["candidate_provenance_source_stream"] == inputs["source_stream"]
     assert (output_root / ROLE_LANE_MATERIALIZATION_FILENAME).is_file()
     receipt = json.loads((output_root / RESOLVED_MEMBERSHIP_FILENAME).read_text())
-    assert receipt["schema_version"] == RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION == 2
+    assert receipt["schema_version"] == RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION == 3
+    assert (
+        receipt["inputs"]["split_assignment"]["source_stream_sha256"]
+        == inputs["source_stream"]["source_stream_sha256"]
+    )
     resolved = resolve_editing_v2_active8_sources(
         candidate_materialization_dir=inputs["candidate_root"],
         split_assignment_path=inputs["split_path"],
@@ -280,6 +318,7 @@ def test_materializes_twenty_deterministic_cells_and_adapter_accepts(
         membership_receipt_path=(output_root / RESOLVED_MEMBERSHIP_FILENAME),
     )
     assert len(resolved.shards) == 20
+    assert resolved.candidate_provenance_source_stream == inputs["source_stream"]
     assert {(shard.manifest_layer, shard.partition) for shard in resolved.shards} == {
         (lane, role) for lane in LANES for role in PARTITION_ROLES
     }
@@ -365,13 +404,71 @@ def test_source_hash_and_unselected_candidate_fail_closed(
     assignment["candidate_resolution_stream_sha256"] = canonical_sha256(
         assignment["candidate_resolutions"]
     )
+    source_stream = assignment["source_stream"]
+    source_stream["nonempty_jsonl_rows"] = len(assignment["candidate_resolutions"])
+    source_body = {
+        key: value for key, value in source_stream.items() if key != "source_stream_sha256"
+    }
+    source_stream["source_stream_sha256"] = canonical_sha256(source_body)
     assignment = _self_hash(assignment, "assignment_sha256")
     _write_json(inputs["split_path"], assignment)
+    inputs["source_stream"] = source_stream
     with pytest.raises(
         EditingV2RoleLaneMaterializationError,
         match="unselected",
     ):
         _materialize(inputs)
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda stream: stream["candidate_materialization"].update(
+            {"rows_semantic_sha256": "0" * 64}
+        ),
+        lambda stream: stream["provenance_registry"].update({"registry_sha256": "0" * 64}),
+        lambda stream: stream["candidate_audit_ledger"].update({"semantic_sha256": "0" * 64}),
+        lambda stream: stream["split_candidates"].update({"file_sha256": "0" * 64}),
+    ],
+)
+def test_materializer_rejects_stale_bridge_source_identity_before_writing(
+    tmp_path: Path,
+    mutate,
+) -> None:
+    inputs = _inputs(tmp_path)
+    stream = copy.deepcopy(inputs["source_stream"])
+    mutate(stream)
+    body = {key: value for key, value in stream.items() if key != "source_stream_sha256"}
+    stream["source_stream_sha256"] = canonical_sha256(body)
+
+    with pytest.raises(
+        EditingV2RoleLaneMaterializationError,
+        match="stale or mismatched|validation failed",
+    ):
+        _materialize(inputs, bridge_manifest={"source_stream": stream})
+
+    output_parent = inputs["artifact_root"] / "editing_v2" / "role_lane_packed"
+    assert not output_parent.exists()
+
+
+def test_materializer_rejects_missing_or_self_inconsistent_bridge_stream(
+    tmp_path: Path,
+) -> None:
+    inputs = _inputs(tmp_path / "missing")
+    with pytest.raises(
+        EditingV2RoleLaneMaterializationError,
+        match="validation failed",
+    ):
+        _materialize(inputs, patch_bridge_validation=False)
+
+    inputs = _inputs(tmp_path / "self_hash")
+    stream = copy.deepcopy(inputs["source_stream"])
+    stream["source_stream_sha256"] = "0" * 64
+    with pytest.raises(
+        EditingV2RoleLaneMaterializationError,
+        match="validation failed",
+    ):
+        _materialize(inputs, bridge_manifest={"source_stream": stream})
 
 
 def test_adapter_rejects_legacy_membership_v1(tmp_path: Path) -> None:

@@ -21,6 +21,10 @@ from compose_v4.data.editing_v2_active8_source_adapter import (
     EditingV2Active8SourceAdapterError,
     resolve_editing_v2_active8_sources,
 )
+from compose_v4.data.editing_v2_candidate_provenance_bridge import (
+    SOURCE_STREAM_SCHEMA,
+    SOURCE_STREAM_SCHEMA_VERSION,
+)
 from compose_v4.data.editing_v2_lane_registry import (
     LANE_COMPLETION_FILENAME,
     LANE_COMPLETION_SCHEMA,
@@ -212,6 +216,9 @@ def _write_candidate_materialization(
 def _write_split_assignment(
     root: Path,
     rows: list[dict[str, Any]],
+    *,
+    candidate_root: Path,
+    candidate_manifest: dict[str, Any],
 ) -> tuple[Path, dict[str, Any], dict[str, str]]:
     role_by_candidate = {
         row["candidate_id"]: PARTITION_ROLES[row["attempt_index"] % len(PARTITION_ROLES)]
@@ -228,6 +235,35 @@ def _write_split_assignment(
         }
         for candidate_id, role in sorted(role_by_candidate.items())
     ]
+    source_stream_body = {
+        "schema": SOURCE_STREAM_SCHEMA,
+        "schema_version": SOURCE_STREAM_SCHEMA_VERSION,
+        "nonempty_jsonl_rows": len(rows),
+        "candidate_materialization": {
+            "manifest_file_sha256": file_sha256(candidate_root / MATERIALIZATION_FILENAME),
+            "manifest_sha256": candidate_manifest["manifest_sha256"],
+            "rows_file_sha256": candidate_manifest["rows"]["file_sha256"],
+            "rows_semantic_sha256": candidate_manifest["rows"]["semantic_sha256"],
+            "address_stream_sha256": candidate_manifest["rows"]["address_stream_sha256"],
+        },
+        "provenance_registry": {
+            "file_sha256": "a" * 64,
+            "registry_sha256": "b" * 64,
+        },
+        "candidate_audit_ledger": {
+            "file_sha256": "c" * 64,
+            "semantic_sha256": "d" * 64,
+            "rows_sha256": "e" * 64,
+        },
+        "split_candidates": {
+            "file_sha256": "f" * 64,
+            "semantic_sha256": "0" * 64,
+        },
+    }
+    source_stream = {
+        **source_stream_body,
+        "source_stream_sha256": canonical_sha256(source_stream_body),
+    }
     body = {
         "schema": SPLIT_ASSIGNMENT_SCHEMA,
         "schema_version": SPLIT_ASSIGNMENT_VERSION,
@@ -238,6 +274,7 @@ def _write_split_assignment(
         "blockers": ["physical_lane_shards.not_built"],
         "policy": {"fixture": True},
         "policy_sha256": "7" * 64,
+        "source_stream": source_stream,
         "source_census_sha256": "8" * 64,
         "source_component_inventory_sha256": "9" * 64,
         "partition_roles": list(PARTITION_ROLES),
@@ -286,14 +323,16 @@ def _write_packed_output(
         },
         "states": [{"fixture": 0}, {"fixture": 1}],
     }
-    with path.open("wb") as raw:
-        with gzip.GzipFile(
+    with (
+        path.open("wb") as raw,
+        gzip.GzipFile(
             filename="",
             mode="wb",
             fileobj=raw,
             mtime=0,
-        ) as compressed:
-            compressed.write(canonical_json_bytes(entry) + b"\n")
+        ) as compressed,
+    ):
+        compressed.write(canonical_json_bytes(entry) + b"\n")
     manifest = {
         "schema": PACKED_STORE_SCHEMA,
         "schema_version": PACKED_STORE_SCHEMA_VERSION,
@@ -493,6 +532,7 @@ def _receipt_inputs(
             "file_sha256": file_sha256(split_path),
             "assignment_sha256": assignment["assignment_sha256"],
             "candidate_resolution_stream_sha256": assignment["candidate_resolution_stream_sha256"],
+            "source_stream_sha256": assignment["source_stream"]["source_stream_sha256"],
         },
         "lane_registry": {
             "registry_file_sha256": file_sha256(registry_path),
@@ -611,7 +651,12 @@ def _fixture(tmp_path: Path) -> dict[str, Any]:
         tmp_path,
         rows,
     )
-    split_path, assignment, roles = _write_split_assignment(tmp_path, rows)
+    split_path, assignment, roles = _write_split_assignment(
+        tmp_path,
+        rows,
+        candidate_root=candidate_root,
+        candidate_manifest=candidate_manifest,
+    )
     registry_path, artifact_root, physical = _write_lane_registry_and_outputs(tmp_path, rows, roles)
     receipt_path, receipt = _write_membership_receipt(
         tmp_path,
@@ -671,6 +716,11 @@ def test_resolves_exact_five_lane_four_role_sources_without_authorizing_active8(
     assert all(shard.manifest_layer == shard.envelope_layer for shard in resolved.shards)
     assert resolved.source_manifest["active8_admission_status"] == ACTIVE8_ADMISSION_STATUS
     assert resolved.source_manifest["training_authorized"] is False
+    assert resolved.candidate_provenance_source_stream == fixture["assignment"]["source_stream"]
+    assert (
+        resolved.candidate_provenance_source_stream["source_stream_sha256"]
+        == fixture["assignment"]["source_stream"]["source_stream_sha256"]
+    )
     assert any(
         binding.packed_provenance_overlay_file_sha256 is None for binding in resolved.bindings
     )
@@ -778,7 +828,7 @@ def test_candidate_and_split_input_identity_drift_fail_closed(
     _write_json(fixture["split_path"], assignment)
     with pytest.raises(
         EditingV2Active8SourceAdapterError,
-        match="must select every routed candidate",
+        match="candidate provenance source-stream identity disagrees",
     ):
         _resolve(fixture)
 

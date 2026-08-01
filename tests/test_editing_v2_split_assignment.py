@@ -8,6 +8,10 @@ from pathlib import Path
 import pytest
 
 from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
+from compose_v4.data.editing_v2_candidate_provenance_bridge import (
+    SOURCE_STREAM_SCHEMA,
+    SOURCE_STREAM_SCHEMA_VERSION,
+)
 from compose_v4.data.editing_v2_split_assignment import (
     EditingV2SplitAssignmentError,
     build_split_assignment,
@@ -151,9 +155,36 @@ def _provenance() -> dict:
 
 def _census() -> dict:
     lanes = [row["id"] for row in CONTRACT["data_lanes"]]
-    rows = [
-        _row(index, lanes[index % len(lanes)], 1 + (index % 7)) for index in range(160)
-    ]
+    rows = [_row(index, lanes[index % len(lanes)], 1 + (index % 7)) for index in range(160)]
+    source_stream_body = {
+        "schema": SOURCE_STREAM_SCHEMA,
+        "schema_version": SOURCE_STREAM_SCHEMA_VERSION,
+        "nonempty_jsonl_rows": len(rows),
+        "candidate_materialization": {
+            "manifest_file_sha256": "1" * 64,
+            "manifest_sha256": "2" * 64,
+            "rows_file_sha256": "3" * 64,
+            "rows_semantic_sha256": "4" * 64,
+            "address_stream_sha256": "5" * 64,
+        },
+        "provenance_registry": {
+            "file_sha256": "6" * 64,
+            "registry_sha256": "7" * 64,
+        },
+        "candidate_audit_ledger": {
+            "file_sha256": "8" * 64,
+            "semantic_sha256": "9" * 64,
+            "rows_sha256": "a" * 64,
+        },
+        "split_candidates": {
+            "file_sha256": "b" * 64,
+            "semantic_sha256": "c" * 64,
+        },
+    }
+    source_stream = {
+        **source_stream_body,
+        "source_stream_sha256": canonical_sha256(source_stream_body),
+    }
     return build_split_component_census(
         rows,
         policy=default_split_census_policy(
@@ -162,7 +193,7 @@ def _census() -> dict:
         ),
         editing_corpus_contract=CONTRACT,
         implementation_provenance=_provenance(),
-        source_stream={"nonempty_jsonl_rows": len(rows)},
+        source_stream=source_stream,
     )
 
 
@@ -175,14 +206,14 @@ def test_assignment_is_deterministic_component_complete_and_sealed() -> None:
     assert first["training_authorized"] is False
     assert first["split_assignment_selected"] is True
     assert first["split_assignment_authorized"] is False
+    assert first["schema_version"] == 2
+    assert first["source_stream"] == census["source_stream"]
     assert "must not be inspected" in first["sealed_final_test_policy"]
     resolutions = first["candidate_resolutions"]
     assert len(resolutions) == census["input_summary"]["valid_vertices"]
     assert len({row["candidate_id"] for row in resolutions}) == len(resolutions)
     assert all(
-        row["source_endpoint_role"]
-        == row["target_endpoint_role"]
-        == row["assigned_role"]
+        row["source_endpoint_role"] == row["target_endpoint_role"] == row["assigned_role"]
         for row in resolutions
     )
     assert set(first["role_summaries"]) == {
@@ -214,6 +245,36 @@ def test_policy_and_census_tampering_fail_closed() -> None:
     malformed["census_sha256"] = "0" * 64
     with pytest.raises(ValueError, match="census SHA-256|identity"):
         build_split_assignment(malformed, policy=policy)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda stream: stream.pop("provenance_registry"),
+        lambda stream: stream["candidate_materialization"].update(
+            {"rows_file_sha256": "not-a-sha256"}
+        ),
+        lambda stream: stream["provenance_registry"].update({"registry_sha256": "0" * 64}),
+        lambda stream: stream["candidate_audit_ledger"].update({"rows_sha256": "0" * 64}),
+        lambda stream: stream["split_candidates"].update({"semantic_sha256": "0" * 64}),
+        lambda stream: stream.update({"source_stream_sha256": "0" * 64}),
+    ],
+)
+def test_assignment_rejects_missing_or_mismatched_candidate_source_identity(
+    mutation,
+) -> None:
+    census = _census()
+    mutation(census["source_stream"])
+    census_body = {key: value for key, value in census.items() if key != "census_sha256"}
+    census["census_sha256"] = canonical_sha256(census_body)
+    with pytest.raises(
+        EditingV2SplitAssignmentError,
+        match="candidate provenance source-stream",
+    ):
+        build_split_assignment(
+            census,
+            policy=load_split_assignment_policy(POLICY_PATH),
+        )
 
 
 def test_policy_json_is_stable_and_ordered() -> None:

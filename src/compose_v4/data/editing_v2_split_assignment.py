@@ -15,6 +15,10 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from compose_v4.data.editing_v2_candidate_provenance_bridge import (
+    SOURCE_STREAM_SCHEMA,
+    SOURCE_STREAM_SCHEMA_VERSION,
+)
 from compose_v4.data.editing_v2_split_census import (
     PARTITION_ROLES,
     canonical_sha256,
@@ -24,7 +28,7 @@ from compose_v4.data.editing_v2_split_census import (
 SPLIT_ASSIGNMENT_POLICY_SCHEMA = "compose.editing_v2_split_assignment_policy"
 SPLIT_ASSIGNMENT_POLICY_VERSION = 1
 SPLIT_ASSIGNMENT_SCHEMA = "compose.editing_v2_split_assignment"
-SPLIT_ASSIGNMENT_VERSION = 1
+SPLIT_ASSIGNMENT_VERSION = 2
 SPLIT_ASSIGNMENT_STATUS = "PROPOSED_ASSIGNMENT_NO_CORPUS_AUTHORITY"
 ASSIGNMENT_ALGORITHM = "largest_component_exact_deficit_greedy_v1"
 
@@ -40,10 +44,116 @@ _POLICY_FIELDS = {
     "split_salt",
     "sealed_final_test_policy",
 }
+_SOURCE_STREAM_FIELDS = {
+    "schema",
+    "schema_version",
+    "nonempty_jsonl_rows",
+    "candidate_materialization",
+    "provenance_registry",
+    "candidate_audit_ledger",
+    "split_candidates",
+    "source_stream_sha256",
+}
+_CANDIDATE_MATERIALIZATION_FIELDS = {
+    "manifest_file_sha256",
+    "manifest_sha256",
+    "rows_file_sha256",
+    "rows_semantic_sha256",
+    "address_stream_sha256",
+}
+_PROVENANCE_REGISTRY_FIELDS = {"file_sha256", "registry_sha256"}
+_CANDIDATE_AUDIT_LEDGER_FIELDS = {
+    "file_sha256",
+    "semantic_sha256",
+    "rows_sha256",
+}
+_SPLIT_CANDIDATE_FIELDS = {"file_sha256", "semantic_sha256"}
+_SHA256_HEX = frozenset("0123456789abcdef")
 
 
 class EditingV2SplitAssignmentError(ValueError):
     """A four-role assignment cannot be constructed or verified."""
+
+
+def _require_sha256(value: object, *, field: str) -> str:
+    digest = value if isinstance(value, str) else ""
+    if len(digest) != 64 or any(character not in _SHA256_HEX for character in digest):
+        raise EditingV2SplitAssignmentError(f"{field} must be a full lowercase SHA-256")
+    return digest
+
+
+def _require_exact_hash_mapping(
+    value: object,
+    *,
+    fields: set[str],
+    field: str,
+) -> dict[str, str]:
+    if not isinstance(value, Mapping) or set(value) != fields:
+        raise EditingV2SplitAssignmentError(f"{field} fields disagree")
+    return {name: _require_sha256(value[name], field=f"{field}.{name}") for name in sorted(fields)}
+
+
+def validate_candidate_source_stream(
+    source_stream: object,
+    *,
+    expected_candidate_materialization: Mapping[str, Any] | None = None,
+    expected_nonempty_rows: int | None = None,
+) -> dict[str, Any]:
+    """Validate the exact candidate-provenance bridge source identity."""
+
+    if not isinstance(source_stream, Mapping) or set(source_stream) != _SOURCE_STREAM_FIELDS:
+        raise EditingV2SplitAssignmentError(
+            "candidate provenance source-stream fields disagree with schema version 1"
+        )
+    normalized = json.loads(_canonical_json_bytes(source_stream))
+    rows = normalized["nonempty_jsonl_rows"]
+    if (
+        normalized["schema"] != SOURCE_STREAM_SCHEMA
+        or normalized["schema_version"] != SOURCE_STREAM_SCHEMA_VERSION
+        or type(rows) is not int
+        or rows <= 0
+    ):
+        raise EditingV2SplitAssignmentError(
+            "candidate provenance source-stream identity or row count disagrees"
+        )
+    candidate_identity = _require_exact_hash_mapping(
+        normalized["candidate_materialization"],
+        fields=_CANDIDATE_MATERIALIZATION_FIELDS,
+        field="candidate provenance source-stream candidate_materialization",
+    )
+    _require_exact_hash_mapping(
+        normalized["provenance_registry"],
+        fields=_PROVENANCE_REGISTRY_FIELDS,
+        field="candidate provenance source-stream provenance_registry",
+    )
+    _require_exact_hash_mapping(
+        normalized["candidate_audit_ledger"],
+        fields=_CANDIDATE_AUDIT_LEDGER_FIELDS,
+        field="candidate provenance source-stream candidate_audit_ledger",
+    )
+    _require_exact_hash_mapping(
+        normalized["split_candidates"],
+        fields=_SPLIT_CANDIDATE_FIELDS,
+        field="candidate provenance source-stream split_candidates",
+    )
+    supplied_sha256 = _require_sha256(
+        normalized["source_stream_sha256"],
+        field="candidate provenance source-stream source_stream_sha256",
+    )
+    stream_body = {key: value for key, value in normalized.items() if key != "source_stream_sha256"}
+    if supplied_sha256 != canonical_sha256(stream_body):
+        raise EditingV2SplitAssignmentError("candidate provenance source-stream SHA-256 disagrees")
+    if expected_candidate_materialization is not None and candidate_identity != dict(
+        expected_candidate_materialization
+    ):
+        raise EditingV2SplitAssignmentError(
+            "candidate provenance source-stream candidate materialization disagrees"
+        )
+    if expected_nonempty_rows is not None and rows != expected_nonempty_rows:
+        raise EditingV2SplitAssignmentError(
+            "candidate provenance source-stream row count disagrees"
+        )
+    return normalized
 
 
 def _canonical_json_bytes(value: Any) -> bytes:
@@ -168,7 +278,7 @@ def load_split_assignment_policy(path: str | Path) -> dict[str, Any]:
 
 
 def _tie_break(split_salt: str, component_id: str, role: str) -> str:
-    return hashlib.sha256(f"{split_salt}\0{component_id}\0{role}".encode("utf-8")).hexdigest()
+    return hashlib.sha256(f"{split_salt}\0{component_id}\0{role}".encode()).hexdigest()
 
 
 def _component_rows(census: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -296,6 +406,10 @@ def build_split_assignment(
         )
     normalized_policy = validate_split_assignment_policy(policy)
     components = _component_rows(census)
+    source_stream = validate_candidate_source_stream(
+        census.get("source_stream"),
+        expected_nonempty_rows=int(census["input_summary"]["valid_vertices"]),
+    )
     ratios = normalized_policy["target_mass_ratios"]
     denominator = int(ratios["denominator"])
     numerators = {role: int(ratios["numerators"][role]) for role in PARTITION_ROLES}
@@ -465,6 +579,7 @@ def build_split_assignment(
         "blockers": sorted(set(blockers)),
         "policy": normalized_policy,
         "policy_sha256": canonical_sha256(normalized_policy),
+        "source_stream": source_stream,
         "source_census_sha256": census["census_sha256"],
         "source_component_inventory_sha256": census["hard_component_census"][
             "component_inventory_sha256"
@@ -486,13 +601,14 @@ def build_split_assignment(
 
 __all__ = [
     "ASSIGNMENT_ALGORITHM",
-    "EditingV2SplitAssignmentError",
     "SPLIT_ASSIGNMENT_POLICY_SCHEMA",
     "SPLIT_ASSIGNMENT_POLICY_VERSION",
     "SPLIT_ASSIGNMENT_SCHEMA",
     "SPLIT_ASSIGNMENT_STATUS",
     "SPLIT_ASSIGNMENT_VERSION",
+    "EditingV2SplitAssignmentError",
     "build_split_assignment",
     "load_split_assignment_policy",
+    "validate_candidate_source_stream",
     "validate_split_assignment_policy",
 ]

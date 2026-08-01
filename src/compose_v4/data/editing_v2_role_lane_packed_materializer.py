@@ -49,10 +49,15 @@ from compose_v4.data.editing_v2_active8_source_adapter import (
     RESOLVED_PACKED_MEMBERSHIP_SCHEMA,
     RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION,
     RESOLVED_PACKED_MEMBERSHIP_STATUS,
+    EditingV2Active8SourceAdapterError,
     _candidate_input_identity,
     _expected_original_address,
     _split_input_identity,
     _validate_split_assignment,
+)
+from compose_v4.data.editing_v2_candidate_provenance_bridge import (
+    EditingV2CandidateProvenanceBridgeError,
+    validate_candidate_provenance_bridge,
 )
 from compose_v4.data.editing_v2_lane_registry import (
     LANE_COMPLETION_FILENAME,
@@ -72,6 +77,10 @@ from compose_v4.data.editing_v2_packed_candidate_materializer import (
     canonical_sha256,
     validate_packed_candidate_materialization,
 )
+from compose_v4.data.editing_v2_split_assignment import (
+    EditingV2SplitAssignmentError,
+    validate_candidate_source_stream,
+)
 from compose_v4.data.editing_v2_split_census import PARTITION_ROLES
 from compose_v4.data.packed_trace_store import (
     PACKED_STORE_SCHEMA,
@@ -82,7 +91,7 @@ from compose_v4.data.packed_trace_store import (
 from compose_v4.data.provenance_overlay import overlay_path_for
 
 ROLE_LANE_MATERIALIZATION_SCHEMA = "compose.editing_v2_role_lane_packed_materialization"
-ROLE_LANE_MATERIALIZATION_SCHEMA_VERSION = 1
+ROLE_LANE_MATERIALIZATION_SCHEMA_VERSION = 2
 ROLE_LANE_MATERIALIZATION_STATUS = (
     "COMPLETE_PHYSICAL_DERIVATIVE_ACTIVE8_NOT_RUN_NO_TRAINING_AUTHORITY"
 )
@@ -92,7 +101,7 @@ RESOLVED_MEMBERSHIP_FILENAME = "RESOLVED_PACKED_MEMBERSHIP.json"
 OUTPUT_NAMESPACE = "/artifacts/editing_v2/role_lane_packed"
 ENVELOPE_REWRITE_CONTRACT = "only_trace_layer_and_trace_partition_may_change_v1"
 PACKED_SHARD_PROVENANCE_SCHEMA = "compose.editing_v2_role_lane_packed_shard_provenance"
-PACKED_SHARD_PROVENANCE_SCHEMA_VERSION = 1
+PACKED_SHARD_PROVENANCE_SCHEMA_VERSION = 2
 DEFAULT_MAX_SOURCE_ROW_BYTES = 16 * 1024 * 1024
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -725,6 +734,7 @@ def _cell_manifest(
     code_revision: str,
     implementation_sha256: str,
     candidate_identity: Mapping[str, Any],
+    candidate_provenance_source_stream: Mapping[str, Any],
     split_identity: Mapping[str, Any],
 ) -> dict[str, Any]:
     if writer.records <= 0:
@@ -745,6 +755,7 @@ def _cell_manifest(
             "code_revision": code_revision,
             "materializer_implementation_sha256": implementation_sha256,
             "candidate_materialization": dict(candidate_identity),
+            "candidate_provenance_source_stream": dict(candidate_provenance_source_stream),
             "split_assignment": dict(split_identity),
             "data_lane": writer.lane,
             "partition_role": writer.role,
@@ -765,6 +776,7 @@ def _publish_lane_files(
     code_revision: str,
     implementation_sha256: str,
     candidate_identity: Mapping[str, Any],
+    candidate_provenance_source_stream: Mapping[str, Any],
     split_identity: Mapping[str, Any],
     contract_identity: Mapping[str, Any],
 ) -> tuple[list[dict[str, Any]], dict[tuple[str, str], dict[str, Any]]]:
@@ -780,6 +792,7 @@ def _publish_lane_files(
                 code_revision=code_revision,
                 implementation_sha256=implementation_sha256,
                 candidate_identity=candidate_identity,
+                candidate_provenance_source_stream=(candidate_provenance_source_stream),
                 split_identity=split_identity,
             )
             manifest_path = manifest_path_for(writer.provisional_path)
@@ -1052,6 +1065,8 @@ def _write_membership_receipt(
 def materialize_editing_v2_role_lane_packed(
     *,
     candidate_materialization_dir: str | Path,
+    candidate_provenance_bridge_dir: str | Path,
+    candidate_provenance_registry_path: str | Path,
     split_assignment_path: str | Path,
     editing_corpus_contract_path: str | Path,
     artifact_root: str | Path,
@@ -1076,10 +1091,39 @@ def materialize_editing_v2_role_lane_packed(
         candidate_manifest,
     )
     split_path = Path(split_assignment_path)
-    assignment, assigned_roles = _validate_split_assignment(split_path)
-    split_identity = _split_input_identity(split_path, assignment)
+    try:
+        assignment, assigned_roles = _validate_split_assignment(split_path)
+        split_identity = _split_input_identity(split_path, assignment)
+    except EditingV2Active8SourceAdapterError as error:
+        raise EditingV2RoleLaneMaterializationError(
+            "split assignment validation failed before publication"
+        ) from error
     contract_path = Path(editing_corpus_contract_path)
     contract = load_editing_corpus_contract(contract_path)
+    try:
+        bridge = validate_candidate_provenance_bridge(
+            candidate_provenance_bridge_dir,
+            candidate_root=candidate_root,
+            provenance_registry_path=candidate_provenance_registry_path,
+            editing_corpus_contract_path=contract_path,
+        )
+        candidate_provenance_source_stream = validate_candidate_source_stream(
+            bridge.get("source_stream"),
+            expected_candidate_materialization=candidate_identity,
+            expected_nonempty_rows=len(assigned_roles),
+        )
+    except (
+        EditingV2CandidateProvenanceBridgeError,
+        EditingV2SplitAssignmentError,
+        OSError,
+    ) as error:
+        raise EditingV2RoleLaneMaterializationError(
+            "candidate provenance bridge validation failed before publication"
+        ) from error
+    if candidate_provenance_source_stream != assignment["source_stream"]:
+        raise EditingV2RoleLaneMaterializationError(
+            "split assignment candidate provenance source-stream identity is stale or mismatched"
+        )
     contract_identity = editing_corpus_contract_identity(
         contract,
         contract_file_sha256=file_sha256(contract_path),
@@ -1093,6 +1137,7 @@ def materialize_editing_v2_role_lane_packed(
         "code_revision": code_revision,
         "materializer_implementation_sha256": implementation_sha256,
         "candidate_materialization": candidate_identity,
+        "candidate_provenance_source_stream": candidate_provenance_source_stream,
         "split_assignment": split_identity,
         "editing_corpus_contract": contract_identity,
         "lane_order": list(lane_ids),
@@ -1150,6 +1195,7 @@ def materialize_editing_v2_role_lane_packed(
             code_revision=code_revision,
             implementation_sha256=implementation_sha256,
             candidate_identity=candidate_identity,
+            candidate_provenance_source_stream=(candidate_provenance_source_stream),
             split_identity=split_identity,
             contract_identity=contract_identity,
         )
@@ -1270,7 +1316,6 @@ def materialize_editing_v2_role_lane_packed(
 __all__ = [
     "DEFAULT_MAX_SOURCE_ROW_BYTES",
     "ENVELOPE_REWRITE_CONTRACT",
-    "EditingV2RoleLaneMaterializationError",
     "LANE_REGISTRY_FILENAME",
     "OUTPUT_NAMESPACE",
     "RESOLVED_MEMBERSHIP_FILENAME",
@@ -1278,5 +1323,6 @@ __all__ = [
     "ROLE_LANE_MATERIALIZATION_SCHEMA",
     "ROLE_LANE_MATERIALIZATION_SCHEMA_VERSION",
     "ROLE_LANE_MATERIALIZATION_STATUS",
+    "EditingV2RoleLaneMaterializationError",
     "materialize_editing_v2_role_lane_packed",
 ]

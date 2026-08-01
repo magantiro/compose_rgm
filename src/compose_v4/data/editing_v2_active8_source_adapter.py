@@ -19,18 +19,19 @@ both the packed manifests and the lane registry.  The returned
 ``Active8SourceShard`` objects are inputs to Active8 admission, not evidence that
 admission passed and never training authority.
 
-Receipt schema version 2 intentionally rejects version 1.  No authoritative
-version-1 membership artifact was published, and version 1 did not bind the
-rewritten output row and address strongly enough for this physical boundary.
+Receipt schema version 3 intentionally rejects earlier versions. Version 2
+bound rewritten rows and addresses but did not bind the candidate-provenance
+source stream carried by split assignment.
 """
 
 from __future__ import annotations
 
 import gzip
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from compose_v4.data.active8_trace_inventory import Active8SourceShard
 from compose_v4.data.editing_v2_lane_registry import (
@@ -49,6 +50,8 @@ from compose_v4.data.editing_v2_split_assignment import (
     SPLIT_ASSIGNMENT_SCHEMA,
     SPLIT_ASSIGNMENT_STATUS,
     SPLIT_ASSIGNMENT_VERSION,
+    EditingV2SplitAssignmentError,
+    validate_candidate_source_stream,
 )
 from compose_v4.data.editing_v2_split_census import PARTITION_ROLES
 from compose_v4.data.packed_trace_store import (
@@ -59,7 +62,7 @@ from compose_v4.data.packed_trace_store import (
 from compose_v4.data.provenance_overlay import overlay_path_for
 
 RESOLVED_PACKED_MEMBERSHIP_SCHEMA = "compose.editing_v2_resolved_packed_membership"
-RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION = 2
+RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION = 3
 RESOLVED_PACKED_MEMBERSHIP_STATUS = (
     "COMPLETE_PHYSICAL_MEMBERSHIP_ACTIVE8_NOT_RUN_NO_TRAINING_AUTHORITY"
 )
@@ -101,6 +104,7 @@ _SPLIT_INPUT_FIELDS = {
     "file_sha256",
     "assignment_sha256",
     "candidate_resolution_stream_sha256",
+    "source_stream_sha256",
 }
 _LANE_REGISTRY_INPUT_FIELDS = {
     "registry_file_sha256",
@@ -203,6 +207,7 @@ class ResolvedEditingV2Active8Sources:
     membership_receipt_file_sha256: str
     membership_receipt_sha256: str
     candidate_materialization_manifest_sha256: str
+    candidate_provenance_source_stream: Mapping[str, Any]
     split_assignment_sha256: str
     lane_registry_sha256: str
     bindings: tuple[ResolvedActive8SourceBinding, ...]
@@ -437,6 +442,15 @@ def _validate_split_assignment(
         raise EditingV2Active8SourceAdapterError(
             "split candidate resolutions must be sorted by candidate_id"
         )
+    try:
+        validate_candidate_source_stream(
+            assignment.get("source_stream"),
+            expected_nonempty_rows=len(roles),
+        )
+    except EditingV2SplitAssignmentError as error:
+        raise EditingV2Active8SourceAdapterError(
+            "split assignment candidate provenance source-stream identity disagrees"
+        ) from error
     return assignment, roles
 
 
@@ -453,6 +467,10 @@ def _split_input_identity(
         "candidate_resolution_stream_sha256": _require_sha256(
             assignment.get("candidate_resolution_stream_sha256"),
             field="split assignment candidate_resolution_stream_sha256",
+        ),
+        "source_stream_sha256": _require_sha256(
+            assignment.get("source_stream", {}).get("source_stream_sha256"),
+            field="split assignment candidate provenance source_stream_sha256",
         ),
     }
 
@@ -1087,6 +1105,7 @@ def resolve_editing_v2_active8_sources(
         membership_receipt_file_sha256=file_sha256(receipt_path),
         membership_receipt_sha256=receipt_sha256,
         candidate_materialization_manifest_sha256=(candidate_identity["manifest_sha256"]),
+        candidate_provenance_source_stream=dict(assignment["source_stream"]),
         split_assignment_sha256=split_identity["assignment_sha256"],
         lane_registry_sha256=registry_identity["registry_sha256"],
         bindings=tuple(bindings),
@@ -1097,11 +1116,11 @@ def resolve_editing_v2_active8_sources(
 __all__ = [
     "ACTIVE8_ADMISSION_STATUS",
     "CANDIDATE_AUTHORITY",
-    "EditingV2Active8SourceAdapterError",
     "REQUIRED_BLOCKERS",
     "RESOLVED_PACKED_MEMBERSHIP_SCHEMA",
     "RESOLVED_PACKED_MEMBERSHIP_SCHEMA_VERSION",
     "RESOLVED_PACKED_MEMBERSHIP_STATUS",
+    "EditingV2Active8SourceAdapterError",
     "ResolvedActive8SourceBinding",
     "ResolvedEditingV2Active8Sources",
     "resolve_editing_v2_active8_sources",
