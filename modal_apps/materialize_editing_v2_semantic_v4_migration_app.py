@@ -48,6 +48,7 @@ STRUCTURAL_COMPLETION_SCHEMA = "compose.editing_v2_structural_split_completion"
 STRUCTURAL_COMPLETION_SCHEMA_VERSION = 1
 STRUCTURAL_COMPLETION_STATUS = "COMPLETE_PRE_ACTIVE8_NO_TRAINING_AUTHORITY"
 STRUCTURAL_COMPLETION_FILENAME = "SPLIT_PIPELINE_COMPLETE.json"
+REFINED_STRUCTURAL_COMPLETION_SCHEMA = "compose.editing_v2_refined_role_lane_completion"
 
 RUN_REQUEST_FILENAME = "SEMANTIC_V4_MIGRATION_REQUEST.json"
 WRAPPER_COMPLETION_FILENAME = "SEMANTIC_V4_MIGRATION_COMPLETE.json"
@@ -96,7 +97,9 @@ image = (
 )
 
 app = modal.App("compose-v4-editing-v2-semantic-v4-migration")
-artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
+artifact_volume = modal.Volume.from_name(
+    "compose-v4-artifacts", create_if_missing=False
+)
 
 
 def _canonical_bytes(value: object, *, pretty: bool = False) -> bytes:
@@ -194,7 +197,7 @@ def _load_mapping(path: Path, *, field: str) -> dict[str, Any]:
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
         raise RuntimeError(f"cannot load {field}: {path}") from error
     if not isinstance(value, Mapping):
-        raise RuntimeError(f"{field} must be a JSON object")
+        raise TypeError(f"{field} must be a JSON object")
     return dict(value)
 
 
@@ -222,7 +225,9 @@ def _write_immutable_json(path: Path, value: object) -> bool:
             os.fsync(handle.fileno())
         if path.exists():
             if path.read_bytes() != encoded:
-                raise RuntimeError(f"immutable semantic-v4 migration collision at {path}")
+                raise RuntimeError(
+                    f"immutable semantic-v4 migration collision at {path}"
+                )
         else:
             os.replace(temporary_name, path)
             temporary_name = None
@@ -304,6 +309,7 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         sys.path.insert(0, source_root)
     from compose_v4.data import editing_v2_candidate_provenance_bridge as bridge
     from compose_v4.data import editing_v2_packed_candidate_materializer as candidates
+    from compose_v4.data import editing_v2_refined_role_lane_continuation as refined
     from compose_v4.data import editing_v2_role_lane_packed_materializer as role_lane
     from compose_v4.data.editing_v2_active8_source_adapter import (
         resolve_editing_v2_active8_sources,
@@ -311,7 +317,11 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
     from compose_v4.data.editing_v2_split_census import validate_split_component_census
     from compose_v4.data.semantic_trace_migration_mapreduce import (
         COMPLETION_FILENAME as CORE_COMPLETION_FILENAME,
+    )
+    from compose_v4.data.semantic_trace_migration_mapreduce import (
         PLAN_FILENAME as CORE_PLAN_FILENAME,
+    )
+    from compose_v4.data.semantic_trace_migration_mapreduce import (
         completed_semantic_trace_migration_task_ids,
         execute_semantic_trace_migration_task,
         plan_semantic_trace_migration,
@@ -324,6 +334,7 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         "bridge": bridge,
         "candidates": candidates,
         "role_lane": role_lane,
+        "refined": refined,
         "resolve_editing_v2_active8_sources": resolve_editing_v2_active8_sources,
         "validate_split_component_census": validate_split_component_census,
         "CORE_COMPLETION_FILENAME": CORE_COMPLETION_FILENAME,
@@ -348,7 +359,7 @@ def _validate_source_revision(
     loaded: Mapping[str, Any],
 ) -> dict[str, Any]:
     if not isinstance(value, Mapping):
-        raise RuntimeError("semantic-v4 source revision must be an object")
+        raise TypeError("semantic-v4 source revision must be an object")
     revision = dict(value)
     expected_fields = {
         "schema",
@@ -361,7 +372,9 @@ def _validate_source_revision(
         "source_revision_sha256",
     }
     launcher = revision.get("launcher")
-    body = {key: item for key, item in revision.items() if key != "source_revision_sha256"}
+    body = {
+        key: item for key, item in revision.items() if key != "source_revision_sha256"
+    }
     if (
         set(revision) != expected_fields
         or revision.get("schema") != SOURCE_REVISION_SCHEMA
@@ -370,7 +383,8 @@ def _validate_source_revision(
         or not isinstance(launcher, Mapping)
         or set(launcher) != {"relative_path", "file_sha256"}
         or launcher.get("relative_path") != LAUNCHER_SOURCE
-        or launcher.get("file_sha256") != _file_sha256(Path(remote_root) / LAUNCHER_SOURCE)
+        or launcher.get("file_sha256")
+        != _file_sha256(Path(remote_root) / LAUNCHER_SOURCE)
         or revision.get("source_revision_sha256") != _canonical_sha256(body)
     ):
         raise RuntimeError("semantic-v4 serialized source revision disagrees")
@@ -385,13 +399,17 @@ def _validate_source_revision(
     return revision
 
 
-def _require_exact_fields(value: object, *, fields: set[str], field: str) -> dict[str, Any]:
+def _require_exact_fields(
+    value: object, *, fields: set[str], field: str
+) -> dict[str, Any]:
     if not isinstance(value, Mapping) or set(value) != fields:
         raise RuntimeError(f"{field} fields disagree")
     return dict(value)
 
 
-def _validate_self_hash(value: Mapping[str, Any], *, hash_field: str, field: str) -> str:
+def _validate_self_hash(
+    value: Mapping[str, Any], *, hash_field: str, field: str
+) -> str:
     supplied = _require_sha256(value.get(hash_field), field=f"{field}.{hash_field}")
     body = {key: item for key, item in value.items() if key != hash_field}
     if supplied != _canonical_sha256(body):
@@ -406,7 +424,9 @@ def _validate_record_file(
     semantic_field: str,
     field: str,
 ) -> tuple[Path, dict[str, Any]]:
-    path = _artifact_path(record.get("artifact_path", ""), artifact_root=artifact_root, field=field)
+    path = _artifact_path(
+        record.get("artifact_path", ""), artifact_root=artifact_root, field=field
+    )
     if _file_sha256(path) != _require_sha256(
         record.get("file_sha256"), field=f"{field}.file_sha256"
     ):
@@ -435,10 +455,21 @@ def _validate_structural_completion(
         artifact_root=artifact_root,
         field="structural_completion_path",
     )
+    raw_completion = _load_mapping(completion_path, field="structural split completion")
+    if raw_completion.get("schema") == REFINED_STRUCTURAL_COMPLETION_SCHEMA:
+        return loaded["refined"].validate_for_semantic_v4_migration(
+            completion_artifact_path,
+            artifact_root=artifact_root,
+            repo_root=remote_root,
+            max_row_bytes=max_row_bytes,
+            candidates_module=loaded["candidates"],
+            bridge_module=loaded["bridge"],
+            expected_source_shards=EXPECTED_SOURCE_SHARDS,
+        )
     if completion_path.name != STRUCTURAL_COMPLETION_FILENAME:
         raise RuntimeError("structural completion path has the wrong filename")
     completion = _require_exact_fields(
-        _load_mapping(completion_path, field="structural split completion"),
+        raw_completion,
         fields={
             "schema",
             "schema_version",
@@ -475,7 +506,9 @@ def _validate_structural_completion(
         or completion["run_root"]
         != _artifact_address(completion_path.parent, artifact_root=artifact_root)
     ):
-        raise RuntimeError("structural split completion identity or authority disagrees")
+        raise RuntimeError(
+            "structural split completion identity or authority disagrees"
+        )
 
     request = _require_exact_fields(
         completion["request"],
@@ -502,7 +535,9 @@ def _validate_structural_completion(
         },
         field="structural split request",
     )
-    request_body = {key: item for key, item in request.items() if key != "run_identity_sha256"}
+    request_body = {
+        key: item for key, item in request.items() if key != "run_identity_sha256"
+    }
     expected_structural_run_root = (
         f"{request.get('output_prefix')}/{request.get('run_identity_sha256')}"
     )
@@ -583,18 +618,26 @@ def _validate_structural_completion(
             candidate_root / loaded["candidates"].MATERIALIZATION_FILENAME
         ),
         "manifest_sha256": candidate_manifest.get("manifest_sha256"),
-        "rows_file_sha256": candidate_rows.get("file_sha256")
-        if isinstance(candidate_rows, Mapping)
-        else None,
-        "rows_semantic_sha256": candidate_rows.get("semantic_sha256")
-        if isinstance(candidate_rows, Mapping)
-        else None,
-        "address_stream_sha256": candidate_rows.get("address_stream_sha256")
-        if isinstance(candidate_rows, Mapping)
-        else None,
+        "rows_file_sha256": (
+            candidate_rows.get("file_sha256")
+            if isinstance(candidate_rows, Mapping)
+            else None
+        ),
+        "rows_semantic_sha256": (
+            candidate_rows.get("semantic_sha256")
+            if isinstance(candidate_rows, Mapping)
+            else None
+        ),
+        "address_stream_sha256": (
+            candidate_rows.get("address_stream_sha256")
+            if isinstance(candidate_rows, Mapping)
+            else None
+        ),
     }
     if observed_candidate != {key: candidate_record[key] for key in observed_candidate}:
-        raise RuntimeError("structural candidate physical or semantic identity disagrees")
+        raise RuntimeError(
+            "structural candidate physical or semantic identity disagrees"
+        )
 
     bridge_manifest = loaded["bridge"].validate_candidate_provenance_bridge(
         bridge_root,
@@ -651,7 +694,9 @@ def _validate_structural_completion(
         field="structural census",
     )
     loaded["validate_split_component_census"](census)
-    if census.get("census_structural_complete") is not True or census.get("invalid_rows"):
+    if census.get("census_structural_complete") is not True or census.get(
+        "invalid_rows"
+    ):
         raise RuntimeError("structural census is not complete")
 
     assignment_record = _require_exact_fields(
@@ -699,13 +744,19 @@ def _validate_structural_completion(
         field="structural role/lane record",
     )
     role_root = _artifact_path(
-        role_record["artifact_root"], artifact_root=artifact_root, field="role_lane.artifact_root"
+        role_record["artifact_root"],
+        artifact_root=artifact_root,
+        field="role_lane.artifact_root",
     )
-    role_manifest_path = role_root / loaded["role_lane"].ROLE_LANE_MATERIALIZATION_FILENAME
+    role_manifest_path = (
+        role_root / loaded["role_lane"].ROLE_LANE_MATERIALIZATION_FILENAME
+    )
     lane_registry_path = role_root / loaded["role_lane"].LANE_REGISTRY_FILENAME
     membership_path = role_root / loaded["role_lane"].RESOLVED_MEMBERSHIP_FILENAME
     role_manifest = _load_mapping(role_manifest_path, field="role/lane manifest")
-    _validate_self_hash(role_manifest, hash_field="manifest_sha256", field="role/lane manifest")
+    _validate_self_hash(
+        role_manifest, hash_field="manifest_sha256", field="role/lane manifest"
+    )
     if (
         role_record["output_shards"] != EXPECTED_SOURCE_SHARDS
         or role_record["active8_admission_status"] != "NOT_RUN"
@@ -717,7 +768,9 @@ def _validate_structural_completion(
         or _file_sha256(lane_registry_path) != role_record["lane_registry_file_sha256"]
         or _file_sha256(membership_path) != role_record["membership_file_sha256"]
     ):
-        raise RuntimeError("structural role/lane output identity or authority disagrees")
+        raise RuntimeError(
+            "structural role/lane output identity or authority disagrees"
+        )
 
     resolved = loaded["resolve_editing_v2_active8_sources"](
         candidate_materialization_dir=candidate_root,
@@ -730,14 +783,20 @@ def _validate_structural_completion(
     )
     if (
         len(resolved.bindings) != EXPECTED_SOURCE_SHARDS
-        or resolved.membership_receipt_file_sha256 != role_record["membership_file_sha256"]
-        or resolved.membership_receipt_sha256 != role_record["membership_receipt_sha256"]
-        or resolved.candidate_materialization_manifest_sha256 != candidate_record["manifest_sha256"]
-        or resolved.candidate_provenance_source_stream != bridge_manifest["source_stream"]
+        or resolved.membership_receipt_file_sha256
+        != role_record["membership_file_sha256"]
+        or resolved.membership_receipt_sha256
+        != role_record["membership_receipt_sha256"]
+        or resolved.candidate_materialization_manifest_sha256
+        != candidate_record["manifest_sha256"]
+        or resolved.candidate_provenance_source_stream
+        != bridge_manifest["source_stream"]
         or resolved.split_assignment_sha256 != assignment_record["assignment_sha256"]
         or resolved.lane_registry_sha256 != role_record["lane_registry_sha256"]
     ):
-        raise RuntimeError("resolved 20-shard source lineage disagrees with structural completion")
+        raise RuntimeError(
+            "resolved 20-shard source lineage disagrees with structural completion"
+        )
 
     structural_identity = {
         "completion_artifact_path": completion_artifact_path,
@@ -768,7 +827,8 @@ def build_run_request(
     if type(max_row_bytes) is not int or max_row_bytes <= 0:
         raise RuntimeError("max_row_bytes must be a positive integer")
     if set(python_runtime) != {"implementation", "version"} or any(
-        not isinstance(value, str) or not value.strip() for value in python_runtime.values()
+        not isinstance(value, str) or not value.strip()
+        for value in python_runtime.values()
     ):
         raise RuntimeError("Python runtime identity is incomplete")
     _artifact_path(
@@ -777,7 +837,9 @@ def build_run_request(
         field="output_prefix",
     )
     if structural_identity.get("source_shard_count") != EXPECTED_SOURCE_SHARDS:
-        raise RuntimeError("semantic-v4 run requires exactly 20 structural source shards")
+        raise RuntimeError(
+            "semantic-v4 run requires exactly 20 structural source shards"
+        )
     for field, value in structural_identity.items():
         if field.endswith("sha256"):
             _require_sha256(value, field=f"structural_identity.{field}")
@@ -832,7 +894,9 @@ def _core_completion_identity(
         or not completion_path.is_file()
         or _load_mapping(completion_path, field="core completion") != dict(completion)
     ):
-        raise RuntimeError("semantic migration core completion identity or authority disagrees")
+        raise RuntimeError(
+            "semantic migration core completion identity or authority disagrees"
+        )
     plan_path = _artifact_path(
         f"{plan['run_artifact_root']}/{loaded['CORE_PLAN_FILENAME']}",
         artifact_root=artifact_root,
@@ -843,7 +907,9 @@ def _core_completion_identity(
         "plan_file_sha256": _file_sha256(plan_path),
         "plan_sha256": plan["plan_sha256"],
         "run_identity_sha256": plan["run_identity_sha256"],
-        "completion_artifact_path": _artifact_address(completion_path, artifact_root=artifact_root),
+        "completion_artifact_path": _artifact_address(
+            completion_path, artifact_root=artifact_root
+        ),
         "completion_file_sha256": _file_sha256(completion_path),
         "completion_sha256": completion_sha256,
         "task_inventory_sha256": plan["task_inventory_sha256"],
