@@ -1,0 +1,83 @@
+{
+  "evidence_class": "computed",
+  "execution": {
+    "accelerator": null,
+    "cpu": 8.0,
+    "memory_mib": 32768,
+    "modal_app_id": "ap-51zCnUjioD7VkScgrQvhFd",
+    "precision": "not_applicable",
+    "python": "3.11",
+    "source_revision": "720f22672ac66773e0cb7e1fbb8ce0f29491f33f"
+  },
+  "inputs": {
+    "corpus_contract_file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
+    "corpus_contract_sha256": "153ef7316a64d03a89ba739f6423976b1d734695af8569d2e2cdc7a1227eb519",
+    "launcher_source_sha256": "f4d88b1812c8a0d0563e2b21685fa3d7864a7b9ac5a59d2f4e21562206f42112",
+    "materializer_source_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86",
+    "overlay_completion_file_sha256": "af08356c59ed2675f7d27d68b7d5f4e87d3119baf6dacca5c6347c908ee4b1ac",
+    "routing_policy_file_sha256": "12849b1300d632c537545e199c933324123655cf9efd92a6e168408882069312",
+    "routing_policy_sha256": "14c50c14675e3ec3efbb4fb7fa0b6c58866ebdc7693ceaec8e3f0e702af5ce64",
+    "source_binding_registry_file_sha256": "bceff3e79c6986f385cd2b1d0ecc9eeb86ad8b6c5979dd4048d1d55d3d55efe6",
+    "source_manifest_file_sha256": "c8e2bc12a88bf293866f79656d66239031ed7ed9dae86a2115e7d430adfc36d9",
+    "source_manifest_sha256": "3429cd4e8aa73168cd4427a6511cb856587f7d74e2e6e6ca0161ee9c80995193"
+  },
+  "limitations": [
+    "This artifact freezes candidate headers only and grants no training authority.",
+    "Whole-trace Active8 admission, four-role split assignment, Gate 0, and T1 have not run on this derivative.",
+    "Family histograms count actions, while routed and rejected row counts count whole traces; their denominators differ."
+  ],
+  "outputs": {
+    "candidate_headers_file_sha256": "7f4b6d99dd3780e5e96ab9f5687868810234ce6ed06dc77b81659d37a02c41f6",
+    "candidate_headers_semantic_sha256": "c832de8efa269389b32dc86474b518e7053c7a10a8a248bc3d9f8cceb50ea1a9",
+    "candidate_materialization_file_sha256": "4d9f1b62062b79b259e6c43f25beaff6fdb78775cfca9b0e20acd2ab36facbf0",
+    "candidate_materialization_sha256": "753316fb9f7d484df2cf9c16ca25aee1355f98927bb6f95ec8510413f865720e",
+    "completion_file_sha256": "3fd9bce17054b518c98b0194e10d91228a407a9cb3a44912d43e820ef490ac4a",
+    "completion_sha256": "a6dcd0dddbdadf0f7f131d0590383dedaa6a888ff4a671061595fb8a4bf215d9",
+    "remote_candidate_materialization": "/artifacts/editing_v2/packed_candidates/2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13/candidate_materialization/PACKED_CANDIDATE_MATERIALIZATION.json",
+    "remote_completion": "/artifacts/editing_v2/packed_candidates/2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13/CANDIDATE_BUILD_COMPLETE.json",
+    "run_identity_sha256": "2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13"
+  },
+  "schema": "compose.diagnostics.editing_v2_candidate_materialization",
+  "schema_version": 1,
+  "status": "VERIFIED_CONTENT_ADDRESSED_CANDIDATE_MATERIALIZATION_NO_TRAINING_AUTHORITY",
+  "totals": {
+    "family_histogram": {
+      "atom_delete": 964291,
+      "atom_insert": 955675,
+      "atom_restate": 93653,
+      "bond_reorder": 34825,
+      "bond_reroute": 58964,
+      "cycle_attach": 140928,
+      "cycle_insert": 140928,
+      "ring_system_delete": 11776,
+      "ring_system_restate": 24510
+    },
+    "lane_histogram": {
+      "linker_positional_topology_analogue": 25944,
+      "observed_local_analogue": 23693,
+      "operator_aware_real_endpoint": 22817,
+      "real_endpoint_multistep_path": 269363,
+      "reversible_synthetic_walk": 353821
+    },
+    "partition_group_derivation_histogram": {
+      "explicit_partition_isolation_v1": 341817,
+      "legacy_synthetic_origin_scaffold_v1": 364652
+    },
+    "rejected_rows": 10831,
+    "rejection_reason_histogram": {
+      "disabled_family": 11776,
+      "unsupported_multi_neighbor_atom_insert": 3
+    },
+    "routed_rows": 695638,
+    "rows": 706469,
+    "states": 3132019,
+    "transitions": 2425550
+  },
+  "training_authorized": false,
+  "verification": {
+    "candidate_manifest_self_hash_verified": true,
+    "completion_self_hash_verified": true,
+    "independent_manifest_download_and_physical_hash_verified": true,
+    "remote_volume_presence_verified": true
+  }
+}
