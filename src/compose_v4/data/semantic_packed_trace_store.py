@@ -681,6 +681,201 @@ def read_semantic_packed_artifact(
         raise SemanticPackedStoreError("semantic packed family census disagrees")
 
 
+def _validate_semantic_entry_range(
+    *,
+    entry_start: int,
+    entry_stop: int,
+    entries: int,
+) -> tuple[int, int]:
+    if type(entry_start) is not int or type(entry_stop) is not int:
+        raise ValueError("semantic packed entry-range bounds must be integers")
+    if type(entries) is not int or entries < 0:
+        raise ValueError("semantic packed entry census must be a nonnegative integer")
+    if entry_start < 0 or entry_stop < 0 or entry_start > entry_stop:
+        raise ValueError(
+            "semantic packed entry range must be a nonnegative half-open interval"
+        )
+    if entry_stop > entries:
+        raise ValueError(
+            f"semantic packed entry range [{entry_start}, {entry_stop}) is outside "
+            f"the manifest census [0, {entries})"
+        )
+    if entry_start == entry_stop and not (entries == 0 and entry_start == 0):
+        raise ValueError(
+            "an empty semantic packed entry range is valid only for an empty shard"
+        )
+    return entry_start, entry_stop
+
+
+def validate_semantic_packed_entry_ranges(
+    entry_ranges: Iterable[tuple[int, int]],
+    *,
+    entries: int,
+) -> tuple[tuple[int, int], ...]:
+    """Require ordered half-open ranges to partition one exact shard census.
+
+    This is the range-level completeness contract used by planners and
+    reducers.  Individual range readers deliberately do not claim that they
+    observed the complete shard; this function proves that an ordered set of
+    independently readable ranges has neither a gap nor an overlap.
+    """
+
+    if type(entries) is not int or entries < 0:
+        raise ValueError("semantic packed entry census must be a nonnegative integer")
+    try:
+        raw_ranges = tuple(entry_ranges)
+    except TypeError as error:
+        raise ValueError("semantic packed entry ranges must be iterable") from error
+    if not raw_ranges:
+        raise ValueError("semantic packed entry-range partition cannot be empty")
+
+    normalized: list[tuple[int, int]] = []
+    cursor = 0
+    for index, raw_range in enumerate(raw_ranges):
+        if not isinstance(raw_range, (tuple, list)) or len(raw_range) != 2:
+            raise ValueError(
+                f"semantic packed entry range {index} must contain two bounds"
+            )
+        entry_start, entry_stop = _validate_semantic_entry_range(
+            entry_start=raw_range[0],
+            entry_stop=raw_range[1],
+            entries=entries,
+        )
+        if entry_start > cursor:
+            raise ValueError(
+                f"semantic packed entry-range partition has a gap before {entry_start}"
+            )
+        if entry_start < cursor:
+            raise ValueError(
+                f"semantic packed entry-range partition overlaps before {cursor}"
+            )
+        normalized.append((entry_start, entry_stop))
+        cursor = entry_stop
+    if cursor != entries:
+        raise ValueError(
+            "semantic packed entry-range partition does not cover the manifest census: "
+            f"covered [0, {cursor}), expected [0, {entries})"
+        )
+    return tuple(normalized)
+
+
+def read_semantic_packed_artifact_range(
+    artifact_dir: Path,
+    *,
+    expected_shard_sha256: str,
+    expected_manifest_sha256: str,
+    entry_start: int,
+    entry_stop: int,
+    expected_source_binding: Mapping[str, object] | None = None,
+    sentinel_replay_entries: int = DEFAULT_SENTINEL_REPLAY_ENTRIES,
+) -> Iterable[AddressedPackedTrace]:
+    """Yield one validated half-open range with original shard addresses.
+
+    The complete artifact inventory, manifest bytes, shard bytes, completion
+    receipt, process identity, and optional source binding are validated before
+    a range is exposed.  Rows in ``[entry_start, entry_stop)`` retain their
+    original physical entry indices and undergo the same trace-v3 validation
+    as the full reader.  Sentinel replay remains global to the shard: only
+    selected rows whose original index is below ``sentinel_replay_entries``
+    execute chemistry replay.
+
+    Range exhaustion proves exactly the requested row count, not a full-shard
+    semantic census.  Call :func:`validate_semantic_packed_entry_ranges` on the
+    complete planned range set before treating independent results as an exact
+    shard partition.  This reader is a bounded correctness/reference primitive,
+    not the distributed Active8 hot path: repeated ranges over one gzip source
+    would repeatedly hash the artifact and decompress its prefix.  Distributed
+    admission should consume the separately validated semantic Active8 chunk
+    cache instead.
+    """
+
+    if type(sentinel_replay_entries) is not int or sentinel_replay_entries < 0:
+        raise ValueError("sentinel_replay_entries must be a nonnegative integer")
+    root = Path(artifact_dir)
+    shard_path, _, _ = _artifact_files(root)
+    manifest = load_semantic_packed_manifest(
+        root,
+        expected_shard_sha256=expected_shard_sha256,
+        expected_manifest_sha256=expected_manifest_sha256,
+        expected_source_binding=expected_source_binding,
+    )
+    entry_start, entry_stop = _validate_semantic_entry_range(
+        entry_start=entry_start,
+        entry_stop=entry_stop,
+        entries=manifest["entries"],
+    )
+    shard_sha256 = str(manifest["shard_sha256"])
+
+    def rows() -> Iterable[AddressedPackedTrace]:
+        observed_entries = 0
+        seen_trace_ids: set[str] = set()
+        with gzip.open(shard_path, "rb") as handle:
+            for entry_index, raw_line in enumerate(handle):
+                if not raw_line.strip():
+                    raise SemanticPackedStoreError(
+                        f"semantic packed row {entry_index} is blank"
+                    )
+                if entry_index < entry_start:
+                    continue
+                if entry_index >= entry_stop:
+                    break
+                try:
+                    record = json.loads(raw_line)
+                    trace = decode_semantic_trace_record(
+                        record,
+                        validate_replay=entry_index < sentinel_replay_entries,
+                    )
+                    states = tuple(
+                        decode_state(payload) for payload in record["states"]
+                    )
+                except (
+                    json.JSONDecodeError,
+                    KeyError,
+                    TypeError,
+                    SemanticTraceShardError,
+                ) as error:
+                    raise SemanticPackedStoreError(
+                        f"semantic packed row {entry_index} is malformed"
+                    ) from error
+                if (
+                    record["data_lane"] != manifest["data_lane"]
+                    or record["split"] != manifest["split"]
+                ):
+                    raise SemanticPackedStoreError(
+                        f"semantic packed row {entry_index} leaves its declared lane or split"
+                    )
+                trace_id = str(record["trace_id"])
+                if trace_id in seen_trace_ids:
+                    raise SemanticPackedStoreError(
+                        f"duplicate trace_id {trace_id!r} in semantic packed entry range"
+                    )
+                seen_trace_ids.add(trace_id)
+                path = PackedTraceProgress(trace, states)
+                canonical_keys = record["canonical_state_keys"]
+                address = PackedTraceAddress(
+                    packed_shard_content_sha256=shard_sha256,
+                    packed_shard_name=SHARD_FILENAME,
+                    entry_index=entry_index,
+                    trace_id=trace_id,
+                    layer=str(record["data_lane"]),
+                    partition=str(record["split"]),
+                    source_key=str(canonical_keys[0]),
+                    target_key=str(canonical_keys[-1]),
+                    path_length=int(record["path_length"]),
+                )
+                observed_entries += 1
+                yield AddressedPackedTrace(address=address, trace=trace, path=path)
+
+        expected_entries = entry_stop - entry_start
+        if observed_entries != expected_entries:
+            raise SemanticPackedStoreError(
+                f"semantic packed entry range [{entry_start}, {entry_stop}) expected "
+                f"{expected_entries} rows but observed {observed_entries}"
+            )
+
+    return rows()
+
+
 __all__ = [
     "COMPLETION_FILENAME",
     "DEFAULT_SENTINEL_REPLAY_ENTRIES",
@@ -692,6 +887,8 @@ __all__ = [
     "SemanticPackedStoreError",
     "load_semantic_packed_manifest",
     "read_semantic_packed_artifact",
+    "read_semantic_packed_artifact_range",
     "semantic_packed_builder_identity",
+    "validate_semantic_packed_entry_ranges",
     "write_semantic_packed_artifact",
 ]
