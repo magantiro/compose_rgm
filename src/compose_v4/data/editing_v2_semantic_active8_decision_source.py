@@ -177,6 +177,20 @@ class SemanticActive8AcceptedTrace:
 
 
 @dataclass(frozen=True, slots=True)
+class SemanticActive8AcceptedTransition:
+    """One exact nonterminal teacher transition from an admitted trace."""
+
+    decision_source_inventory_sha256: str
+    addressed_trace: AddressedPackedTrace
+    decision_sha256: str
+    decision: SemanticActive8TraceDecision
+    step_index: int
+    action_decision: SemanticActive8ActionDecision
+    source_progress_address: SemanticActive8ProgressAddress
+    successor_progress_address: SemanticActive8ProgressAddress
+
+
+@dataclass(frozen=True, slots=True)
 class SemanticActive8ExcludedTrace:
     """One exact excluded trace, retained separately with its reasons."""
 
@@ -231,7 +245,10 @@ class EditingV2SemanticActive8DecisionIndex:
     migration_rejection_histogram: tuple[tuple[str, int], ...]
     inventory_sha256: str
     _decision_plan_bytes: bytes = field(repr=False, compare=False)
-    _decisions_by_shard: Mapping[str, tuple[tuple[str, bool, str], ...]] = field(
+    _decisions_by_shard: Mapping[
+        str,
+        tuple[tuple[str, bool, str, str], ...],
+    ] = field(
         repr=False,
         compare=False,
     )
@@ -345,11 +362,12 @@ class EditingV2SemanticActive8DecisionIndex:
             for entry_index, entry in enumerate(entries):
                 if (
                     not isinstance(entry, tuple)
-                    or len(entry) != 3
+                    or len(entry) != 4
                     or not isinstance(entry[0], str)
                     or not entry[0]
                     or type(entry[1]) is not bool
                     or not _is_sha256(entry[2])
+                    or not _is_sha256(entry[3])
                 ):
                     raise ValueError(
                         "semantic Active8 decision lookup entry is invalid"
@@ -399,22 +417,37 @@ class EditingV2SemanticActive8DecisionIndex:
         body = _index_identity_body(self)
         return {**body, "inventory_sha256": self.inventory_sha256}
 
-    def is_accepted(self, address: PackedTraceAddress) -> bool:
-        """Return the exact whole-trace decision, rejecting identity drift."""
-
+    def _decision_entry(
+        self,
+        address: PackedTraceAddress,
+    ) -> tuple[bool, str]:
         entries = self._decisions_by_shard.get(address.packed_shard_content_sha256)
         if entries is None or not 0 <= address.entry_index < len(entries):
             raise SemanticActive8DecisionSourceError(
                 "trace address is absent from the semantic Active8 decision index"
             )
-        trace_id, accepted, address_sha256 = entries[address.entry_index]
+        trace_id, accepted, address_sha256, decision_sha256 = entries[
+            address.entry_index
+        ]
         if trace_id != address.trace_id or address_sha256 != _sha(
             _address_payload(address)
         ):
             raise SemanticActive8DecisionSourceError(
                 "trace identity differs at the indexed semantic source address"
             )
+        return accepted, decision_sha256
+
+    def is_accepted(self, address: PackedTraceAddress) -> bool:
+        """Return the exact whole-trace decision, rejecting identity drift."""
+
+        accepted, _ = self._decision_entry(address)
         return accepted
+
+    def decision_sha256_for(self, address: PackedTraceAddress) -> str:
+        """Return the self-hash of the exactly indexed decision receipt."""
+
+        _, decision_sha256 = self._decision_entry(address)
+        return decision_sha256
 
     def exclusions_for(
         self,
@@ -465,6 +498,46 @@ class EditingV2SemanticActive8DecisionIndex:
         for trace in self.iter_accepted_traces():
             yield from trace.progress_addresses
 
+    def iter_accepted_nonterminal_transitions(
+        self,
+    ) -> Iterable[SemanticActive8AcceptedTransition]:
+        """Stream one verified teacher transition per accepted action."""
+
+        for trace in self.iter_accepted_traces():
+            path_length = trace.addressed_trace.address.path_length
+            if (
+                len(trace.addressed_trace.trace.steps) != path_length
+                or len(trace.action_decisions) != path_length
+                or len(trace.progress_addresses) != path_length + 1
+                or self.decision_sha256_for(trace.addressed_trace.address)
+                != trace.decision_sha256
+            ):
+                raise SemanticActive8DecisionSourceError(
+                    "accepted trace cannot produce a complete transition stream"
+                )
+            for step_index, action_decision in enumerate(trace.action_decisions):
+                source = trace.progress_addresses[step_index]
+                successor = trace.progress_addresses[step_index + 1]
+                if (
+                    source.progress_index != step_index
+                    or source.terminal
+                    or successor.progress_index != step_index + 1
+                    or source.trace_key != successor.trace_key
+                ):
+                    raise SemanticActive8DecisionSourceError(
+                        "accepted transition progress identities are inconsistent"
+                    )
+                yield SemanticActive8AcceptedTransition(
+                    decision_source_inventory_sha256=self.inventory_sha256,
+                    addressed_trace=trace.addressed_trace,
+                    decision_sha256=trace.decision_sha256,
+                    decision=trace.decision,
+                    step_index=step_index,
+                    action_decision=action_decision,
+                    source_progress_address=source,
+                    successor_progress_address=successor,
+                )
+
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
     encoded = json.dumps(
@@ -490,7 +563,7 @@ def _is_sha256(value: object) -> bool:
 
 
 def _decision_lookup_sha256(
-    decisions_by_shard: Mapping[str, tuple[tuple[str, bool, str], ...]],
+    decisions_by_shard: Mapping[str, tuple[tuple[str, bool, str, str], ...]],
 ) -> str:
     payload = [
         {
@@ -501,10 +574,14 @@ def _decision_lookup_sha256(
                     "trace_id": trace_id,
                     "accepted": accepted,
                     "address_sha256": address_sha256,
+                    "decision_sha256": decision_sha256,
                 }
-                for entry_index, (trace_id, accepted, address_sha256) in enumerate(
-                    entries
-                )
+                for entry_index, (
+                    trace_id,
+                    accepted,
+                    address_sha256,
+                    decision_sha256,
+                ) in enumerate(entries)
             ],
         }
         for shard_sha, entries in sorted(decisions_by_shard.items())
@@ -1290,7 +1367,7 @@ def resolve_editing_v2_semantic_active8_decision_source(
     accepted_progress_stream = hashlib.sha256()
     excluded_trace_stream = hashlib.sha256()
     decision_stream = hashlib.sha256()
-    decisions_by_shard: dict[str, list[tuple[str, bool, str]]] = {}
+    decisions_by_shard: dict[str, list[tuple[str, bool, str, str]]] = {}
     exclusions_by_key: dict[TraceKey, tuple[SemanticActive8Exclusion, ...]] = {}
     observed = Counter()
     observed_families: Counter[str] = Counter()
@@ -1304,7 +1381,14 @@ def resolve_editing_v2_semantic_active8_decision_source(
             raise SemanticActive8DecisionSourceError(
                 "semantic Active8 index source addresses are not position-complete"
             )
-        shard.append((address.trace_id, accepted, _sha(_address_payload(address))))
+        shard.append(
+            (
+                address.trace_id,
+                accepted,
+                _sha(_address_payload(address)),
+                str(row["decision_sha256"]),
+            )
+        )
         trace_payload = {
             "address": _address_payload(address),
             "decision_sha256": row["decision_sha256"],
@@ -1441,6 +1525,7 @@ __all__ = [
     "MAX_DECISION_SOURCE_CHUNK_ROWS",
     "EditingV2SemanticActive8DecisionIndex",
     "SemanticActive8AcceptedTrace",
+    "SemanticActive8AcceptedTransition",
     "SemanticActive8DecisionSourceError",
     "SemanticActive8ExcludedTrace",
     "SemanticActive8ProgressAddress",

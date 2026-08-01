@@ -16,6 +16,7 @@ from compose_v4.chem.molecular_graph import (
     ORGANIC_VOCABULARY,
     smiles_to_molecular_graph,
 )
+from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data import (
     editing_v2_semantic_active8_decision_mapreduce as decision_mr,
@@ -446,6 +447,10 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     assert len(accepted) == 19
     assert all(index.is_accepted(item.addressed_trace.address) for item in accepted)
     assert all(item.decision.active8_status == "accepted" for item in accepted)
+    assert all(
+        index.decision_sha256_for(item.addressed_trace.address) == item.decision_sha256
+        for item in accepted
+    )
     changed_address = replace(
         accepted[0].addressed_trace.address,
         source_key="substituted-source-key",
@@ -459,6 +464,25 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     assert len(progress) == 38
     assert sum(item.terminal for item in progress) == 19
     assert len({item.key for item in progress}) == len(progress)
+    transitions = tuple(index.iter_accepted_nonterminal_transitions())
+    assert len(transitions) == 19
+    assert all(item.step_index == 0 for item in transitions)
+    assert all(not item.source_progress_address.terminal for item in transitions)
+    assert all(item.successor_progress_address.terminal for item in transitions)
+    assert all(
+        item.source_progress_address.state_sha256
+        == persistent_slot_state_sha256(item.addressed_trace.path.state_at(0))
+        for item in transitions
+    )
+    assert all(
+        item.successor_progress_address.state_sha256
+        == persistent_slot_state_sha256(item.addressed_trace.path.state_at(1))
+        for item in transitions
+    )
+    assert all(
+        item.decision_source_inventory_sha256 == index.inventory_sha256
+        for item in transitions
+    )
     identity = index.identity_payload()
     assert identity["decision_source_implementation_sha256"] == _file_sha(
         Path(source_index.__file__)
@@ -477,11 +501,26 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     decisions = dict(index._decisions_by_shard)
     shard_sha, entries = next(iter(decisions.items()))
     changed_entries = list(entries)
-    trace_id, accepted_status, address_sha = changed_entries[0]
+    trace_id, accepted_status, address_sha, decision_sha = changed_entries[0]
     changed_entries[0] = (
         trace_id,
         accepted_status,
         "0" * 64 if address_sha != "0" * 64 else "1" * 64,
+        decision_sha,
+    )
+    decisions[shard_sha] = tuple(changed_entries)
+    with pytest.raises(ValueError, match="decision lookup hash disagrees"):
+        replace(index, _decisions_by_shard=decisions)
+
+    decisions = dict(index._decisions_by_shard)
+    shard_sha, entries = next(iter(decisions.items()))
+    changed_entries = list(entries)
+    trace_id, accepted_status, address_sha, decision_sha = changed_entries[0]
+    changed_entries[0] = (
+        trace_id,
+        accepted_status,
+        address_sha,
+        "0" * 64 if decision_sha != "0" * 64 else "1" * 64,
     )
     decisions[shard_sha] = tuple(changed_entries)
     with pytest.raises(ValueError, match="decision lookup hash disagrees"):
