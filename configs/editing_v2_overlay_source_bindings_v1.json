@@ -1,0 +1,28 @@
+{
+  "bindings": [
+    {
+      "allowed_layers": [
+        "corruption",
+        "cycle_ops"
+      ],
+      "source_asset_id": "guacamol-subset-500000-seed0",
+      "source_asset_path": "/guacamol/guacamol_subset_500000_seed0.smiles",
+      "source_asset_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+      "source_kind": "executor_generated_walk_from_real_endpoint"
+    },
+    {
+      "allowed_layers": [
+        "mmp_analogue"
+      ],
+      "source_asset_id": "mmp-analogue-pool-v2-252fbfaafe1c1fb3b16f",
+      "source_asset_path": "/artifacts/mmp_pool_frozen_v2/mmp_pool_v2_252fbfaafe1c1fb3b16f/edit_pool_full.jsonl",
+      "source_asset_sha256": "409507ec0de192fe756e851b1ce7b3dcd76f1ddb8b3d981d6d720b457d616f4c",
+      "source_kind": "inferred_real_endpoint_pair"
+    }
+  ],
+  "registry_sha256": "008870e90bbe76ecddf4d26e2ea3f2b0a3a038bf463b17f273b27b8d9e983780",
+  "schema": "compose.editing_v2_overlay_source_bindings",
+  "schema_version": 1,
+  "status": "FROZEN_LAYER_SOURCE_BINDINGS_NO_TRAINING_AUTHORITY",
+  "training_authorized": false
+}

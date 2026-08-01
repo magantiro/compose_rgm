@@ -56,8 +56,16 @@ from compose_v4.data.editing_v2_candidate_router import (
 )
 
 SOURCE_MANIFEST_SCHEMA = "compose.editing_v2_packed_candidate_sources"
-SOURCE_MANIFEST_SCHEMA_VERSION = 1
+SOURCE_MANIFEST_SCHEMA_VERSION = 2
 SOURCE_MANIFEST_STATUS = "FROZEN_PACKED_CACHE_SOURCES_NO_TRAINING_AUTHORITY"
+
+SOURCE_BINDING_REGISTRY_SCHEMA = "compose.editing_v2_overlay_source_bindings"
+SOURCE_BINDING_REGISTRY_SCHEMA_VERSION = 1
+SOURCE_BINDING_REGISTRY_STATUS = "FROZEN_LAYER_SOURCE_BINDINGS_NO_TRAINING_AUTHORITY"
+
+UPSTREAM_OVERLAY_COMPLETION_SCHEMA = "compose.editing_v2_upstream_overlay_completion"
+UPSTREAM_OVERLAY_COMPLETION_SCHEMA_VERSION = 2
+UPSTREAM_OVERLAY_COMPLETION_STATUS = "COMPLETE_IMMUTABLE_BYTE_BINDINGS_NO_TRAINING_AUTHORITY"
 
 CANDIDATE_HEADER_SCHEMA = "compose.editing_v2_packed_candidate_header"
 CANDIDATE_HEADER_SCHEMA_VERSION = 1
@@ -106,6 +114,7 @@ _SOURCE_FIELDS = {
     "allowed_layers",
     "shards",
 }
+_SOURCE_BINDING_FIELDS = _SOURCE_FIELDS - {"shards"}
 _SHARD_FIELDS = {
     "relative_path",
     "file_sha256",
@@ -120,9 +129,77 @@ _SOURCE_MANIFEST_FIELDS = {
     "schema_version",
     "status",
     "training_authorized",
+    "upstream_overlay_completion",
+    "source_binding_registry",
     "sources",
     "manifest_sha256",
 }
+_SOURCE_BINDING_REGISTRY_FIELDS = {
+    "schema",
+    "schema_version",
+    "status",
+    "training_authorized",
+    "bindings",
+    "registry_sha256",
+}
+_OVERLAY_COMPLETION_IDENTITY_FIELDS = {
+    "artifact_path",
+    "file_sha256",
+    "semantic_sha256",
+    "candidate_source_shards",
+    "candidate_source_inventory_sha256",
+}
+_SOURCE_BINDING_REGISTRY_IDENTITY_FIELDS = {
+    "artifact_path",
+    "file_sha256",
+    "semantic_sha256",
+}
+_UPSTREAM_COMPLETION_FIELDS = {
+    "path",
+    "file_sha256",
+    "completion_flag",
+    "inventory_origin",
+    "expected_shards",
+    "shard_inventory_sha256",
+}
+_OVERLAY_COMPLETION_RECEIPT_FIELDS = {
+    "layer",
+    "partition",
+    "shard_path",
+    "shard_file_sha256",
+    "manifest_path",
+    "manifest_file_sha256",
+    "entries",
+    "states",
+    "overlay_path",
+    "overlay_file_sha256",
+    "overlay_fields_sha256",
+    "overlay_semantic_sha256",
+    "overlay_validation_role",
+}
+_OVERLAY_COMPLETION_FIELDS = {
+    "schema",
+    "schema_version",
+    "status",
+    "training_authorized",
+    "commit",
+    "launcher_source_sha256",
+    "packed_root",
+    "mmp_root",
+    "upstream_completions",
+    "fields_for_new_overlays",
+    "sentinel_entries_per_new_overlay",
+    "shards",
+    "completion_sha256",
+}
+_OVERLAY_VALIDATION_ROLES = frozenset(
+    {
+        "current_live_overlay_at_completion",
+        "historical_immutable_byte_receipt",
+    }
+)
+_COMPLETION_LAYERS = frozenset({"corruption", "cycle_ops", "mmp_analogue"})
+_COMPLETION_PARTITIONS = frozenset({"train", "validation", "test"})
 _PACKED_MANIFEST_FIELDS = {
     "schema",
     "schema_version",
@@ -332,6 +409,155 @@ def _resolve_relative(root: Path, relative_path: str, *, field: str) -> Path:
     return candidate
 
 
+def _normalized_source_binding(binding: object, *, index: int) -> dict[str, Any]:
+    payload = _require_exact_fields(
+        binding,
+        _SOURCE_BINDING_FIELDS,
+        field=f"bindings[{index}]",
+    )
+    source_kind = _require_text(
+        payload["source_kind"],
+        field=f"bindings[{index}].source_kind",
+    )
+    if source_kind not in _SOURCE_KINDS:
+        raise EditingV2PackedCandidateMaterializationError(
+            f"bindings[{index}].source_kind is unsupported: {source_kind!r}"
+        )
+    allowed_layers = _require_sorted_unique_text(
+        payload["allowed_layers"],
+        field=f"bindings[{index}].allowed_layers",
+        allowed=_COMPLETION_LAYERS,
+    )
+    expected_layers = (
+        _REAL_ENDPOINT_LAYERS if source_kind == INFERRED_REAL_ENDPOINT_PAIR else _SYNTHETIC_LAYERS
+    )
+    if not set(allowed_layers).issubset(expected_layers):
+        raise EditingV2PackedCandidateMaterializationError(
+            f"bindings[{index}].allowed_layers disagrees with source_kind"
+        )
+    return {
+        "source_asset_id": _require_text(
+            payload["source_asset_id"], field=f"bindings[{index}].source_asset_id"
+        ),
+        "source_asset_path": _require_text(
+            payload["source_asset_path"], field=f"bindings[{index}].source_asset_path"
+        ),
+        "source_asset_sha256": _require_sha256(
+            payload["source_asset_sha256"],
+            field=f"bindings[{index}].source_asset_sha256",
+        ),
+        "source_kind": source_kind,
+        "allowed_layers": list(allowed_layers),
+    }
+
+
+def build_overlay_source_binding_registry(
+    bindings: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Freeze explicit scientific source ownership for every completion layer."""
+
+    if isinstance(bindings, (str, bytes)) or not bindings:
+        raise EditingV2PackedCandidateMaterializationError(
+            "overlay source bindings must be a nonempty sequence"
+        )
+    normalized = [
+        _normalized_source_binding(binding, index=index) for index, binding in enumerate(bindings)
+    ]
+    ordered = sorted(
+        normalized,
+        key=lambda item: (item["source_kind"], item["source_asset_id"]),
+    )
+    if normalized != ordered:
+        raise EditingV2PackedCandidateMaterializationError(
+            "overlay source bindings must be deterministically sorted"
+        )
+    source_ids = [item["source_asset_id"] for item in normalized]
+    if len(source_ids) != len(set(source_ids)):
+        raise EditingV2PackedCandidateMaterializationError(
+            "overlay source bindings repeat a source_asset_id"
+        )
+    owners: dict[str, str] = {}
+    for binding in normalized:
+        for layer in binding["allowed_layers"]:
+            if layer in owners:
+                raise EditingV2PackedCandidateMaterializationError(
+                    f"overlay source layer {layer!r} has multiple source owners"
+                )
+            owners[layer] = binding["source_asset_id"]
+    if set(owners) != _COMPLETION_LAYERS:
+        raise EditingV2PackedCandidateMaterializationError(
+            "overlay source bindings must own corruption, cycle_ops, and mmp_analogue exactly once"
+        )
+    body = {
+        "schema": SOURCE_BINDING_REGISTRY_SCHEMA,
+        "schema_version": SOURCE_BINDING_REGISTRY_SCHEMA_VERSION,
+        "status": SOURCE_BINDING_REGISTRY_STATUS,
+        "training_authorized": False,
+        "bindings": normalized,
+    }
+    return {**body, "registry_sha256": canonical_sha256(body)}
+
+
+def validate_overlay_source_binding_registry(registry: object) -> dict[str, Any]:
+    payload = _require_exact_fields(
+        registry,
+        _SOURCE_BINDING_REGISTRY_FIELDS,
+        field="overlay source binding registry",
+    )
+    rebuilt = build_overlay_source_binding_registry(payload["bindings"])
+    if dict(payload) != rebuilt:
+        raise EditingV2PackedCandidateMaterializationError(
+            "overlay source binding registry identity or self-hash disagrees"
+        )
+    return rebuilt
+
+
+def load_overlay_source_binding_registry(path: str | Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(Path(path).read_bytes())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise EditingV2PackedCandidateMaterializationError(
+            f"cannot load overlay source binding registry {path}"
+        ) from error
+    return validate_overlay_source_binding_registry(payload)
+
+
+def _source_inventory(sources: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(
+        (
+            {
+                "source_asset_id": source["source_asset_id"],
+                **dict(shard),
+            }
+            for source in sources
+            for shard in source["shards"]
+        ),
+        key=lambda item: (item["source_asset_id"], item["relative_path"]),
+    )
+
+
+def _normalized_bound_identity(
+    value: object,
+    *,
+    fields: set[str],
+    field: str,
+) -> dict[str, Any]:
+    payload = _require_exact_fields(value, fields, field=field)
+    artifact_path = _require_text(payload["artifact_path"], field=f"{field}.artifact_path")
+    if Path(artifact_path).name == "" or ".." in PurePosixPath(artifact_path).parts:
+        raise EditingV2PackedCandidateMaterializationError(
+            f"{field}.artifact_path must be a normalized non-escaping path"
+        )
+    normalized = {
+        "artifact_path": artifact_path,
+        "file_sha256": _require_sha256(payload["file_sha256"], field=f"{field}.file_sha256"),
+        "semantic_sha256": _require_sha256(
+            payload["semantic_sha256"], field=f"{field}.semantic_sha256"
+        ),
+    }
+    return normalized
+
+
 def _normalized_source(source: object, *, index: int) -> dict[str, Any]:
     payload = _require_exact_fields(
         source,
@@ -457,6 +683,9 @@ def _normalized_source(source: object, *, index: int) -> dict[str, Any]:
 
 def build_packed_candidate_source_manifest(
     sources: Sequence[Mapping[str, Any]],
+    *,
+    upstream_overlay_completion: Mapping[str, Any],
+    source_binding_registry: Mapping[str, Any],
 ) -> dict[str, Any]:
     """Build a deterministic, self-hashed packed-cache source manifest."""
 
@@ -481,11 +710,43 @@ def build_packed_candidate_source_manifest(
         raise EditingV2PackedCandidateMaterializationError(
             "physical shard relative paths must be unique across sources"
         )
+    completion_identity_base = _normalized_bound_identity(
+        upstream_overlay_completion,
+        fields=_OVERLAY_COMPLETION_IDENTITY_FIELDS,
+        field="upstream_overlay_completion",
+    )
+    candidate_source_shards = _require_positive_int(
+        upstream_overlay_completion["candidate_source_shards"],
+        field="upstream_overlay_completion.candidate_source_shards",
+    )
+    candidate_source_inventory_sha256 = _require_sha256(
+        upstream_overlay_completion["candidate_source_inventory_sha256"],
+        field="upstream_overlay_completion.candidate_source_inventory_sha256",
+    )
+    source_inventory = _source_inventory(normalized)
+    if candidate_source_shards != len(source_inventory) or (
+        candidate_source_inventory_sha256 != canonical_sha256(source_inventory)
+    ):
+        raise EditingV2PackedCandidateMaterializationError(
+            "packed candidate sources do not exactly match the upstream overlay completion inventory"
+        )
+    completion_identity = {
+        **completion_identity_base,
+        "candidate_source_shards": candidate_source_shards,
+        "candidate_source_inventory_sha256": candidate_source_inventory_sha256,
+    }
+    registry_identity = _normalized_bound_identity(
+        source_binding_registry,
+        fields=_SOURCE_BINDING_REGISTRY_IDENTITY_FIELDS,
+        field="source_binding_registry",
+    )
     body = {
         "schema": SOURCE_MANIFEST_SCHEMA,
         "schema_version": SOURCE_MANIFEST_SCHEMA_VERSION,
         "status": SOURCE_MANIFEST_STATUS,
         "training_authorized": False,
+        "upstream_overlay_completion": completion_identity,
+        "source_binding_registry": registry_identity,
         "sources": normalized,
     }
     return {**body, "manifest_sha256": canonical_sha256(body)}
@@ -499,7 +760,11 @@ def validate_packed_candidate_source_manifest(
         _SOURCE_MANIFEST_FIELDS,
         field="packed candidate source manifest",
     )
-    rebuilt = build_packed_candidate_source_manifest(payload["sources"])
+    rebuilt = build_packed_candidate_source_manifest(
+        payload["sources"],
+        upstream_overlay_completion=payload["upstream_overlay_completion"],
+        source_binding_registry=payload["source_binding_registry"],
+    )
     if dict(payload) != rebuilt:
         raise EditingV2PackedCandidateMaterializationError(
             "packed candidate source manifest identity or self-hash disagrees"
@@ -551,6 +816,343 @@ def write_packed_candidate_source_manifest(
     finally:
         if temporary_name is not None:
             Path(temporary_name).unlink(missing_ok=True)
+
+
+def _absolute_normalized_posix_path(value: object, *, field: str) -> PurePosixPath:
+    text = _require_text(value, field=field)
+    path = PurePosixPath(text)
+    if not path.is_absolute() or str(path) != text or ".." in path.parts:
+        raise EditingV2PackedCandidateMaterializationError(
+            f"{field} must be a normalized absolute POSIX path"
+        )
+    return path
+
+
+def _load_overlay_completion(
+    path: str | Path,
+    *,
+    expected_file_sha256: str,
+) -> tuple[dict[str, Any], PurePosixPath, list[dict[str, Any]]]:
+    completion_path = Path(path)
+    expected_file_sha256 = _require_sha256(
+        expected_file_sha256,
+        field="expected overlay completion file SHA-256",
+    )
+    if not completion_path.is_file() or file_sha256(completion_path) != expected_file_sha256:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion is absent or its physical SHA-256 disagrees"
+        )
+    try:
+        raw = json.loads(completion_path.read_bytes())
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion is invalid JSON"
+        ) from error
+    payload = _require_exact_fields(
+        raw,
+        _OVERLAY_COMPLETION_FIELDS,
+        field="upstream overlay completion",
+    )
+    completion_body = {key: value for key, value in payload.items() if key != "completion_sha256"}
+    semantic_sha256 = _require_sha256(
+        payload["completion_sha256"],
+        field="upstream overlay completion.completion_sha256",
+    )
+    if (
+        payload["schema"] != UPSTREAM_OVERLAY_COMPLETION_SCHEMA
+        or payload["schema_version"] != UPSTREAM_OVERLAY_COMPLETION_SCHEMA_VERSION
+        or payload["status"] != UPSTREAM_OVERLAY_COMPLETION_STATUS
+        or payload["training_authorized"] is not False
+        or semantic_sha256 != canonical_sha256(completion_body)
+    ):
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion schema, authority, or self-hash disagrees"
+        )
+    if _COMMIT_RE.fullmatch(str(payload["commit"])) is None:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion.commit must be a full Git SHA"
+        )
+    _require_sha256(
+        payload["launcher_source_sha256"],
+        field="upstream overlay completion.launcher_source_sha256",
+    )
+    packed_root = _absolute_normalized_posix_path(
+        payload["packed_root"], field="upstream overlay completion.packed_root"
+    )
+    mmp_root = _absolute_normalized_posix_path(
+        payload["mmp_root"], field="upstream overlay completion.mmp_root"
+    )
+    common_root_text = os.path.commonpath((str(packed_root), str(mmp_root)))
+    common_root = PurePosixPath(common_root_text)
+    if common_root == PurePosixPath("/") or common_root in {packed_root, mmp_root}:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion roots require one non-root artifact namespace"
+        )
+    upstream = _require_exact_fields(
+        payload["upstream_completions"],
+        {"audit_pack", "mmp_pack"},
+        field="upstream overlay completion.upstream_completions",
+    )
+    normalized_upstream: dict[str, dict[str, Any]] = {}
+    for name in ("audit_pack", "mmp_pack"):
+        identity = _require_exact_fields(
+            upstream[name],
+            _UPSTREAM_COMPLETION_FIELDS,
+            field=f"upstream overlay completion.upstream_completions.{name}",
+        )
+        normalized_upstream[name] = {
+            "path": str(
+                _absolute_normalized_posix_path(
+                    identity["path"],
+                    field=f"upstream overlay completion.upstream_completions.{name}.path",
+                )
+            ),
+            "file_sha256": _require_sha256(
+                identity["file_sha256"],
+                field=f"upstream overlay completion.upstream_completions.{name}.file_sha256",
+            ),
+            "completion_flag": _require_text(
+                identity["completion_flag"],
+                field=f"upstream overlay completion.upstream_completions.{name}.completion_flag",
+            ),
+            "inventory_origin": _require_text(
+                identity["inventory_origin"],
+                field=f"upstream overlay completion.upstream_completions.{name}.inventory_origin",
+            ),
+            "expected_shards": _require_positive_int(
+                identity["expected_shards"],
+                field=f"upstream overlay completion.upstream_completions.{name}.expected_shards",
+            ),
+            "shard_inventory_sha256": _require_sha256(
+                identity["shard_inventory_sha256"],
+                field=(
+                    f"upstream overlay completion.upstream_completions.{name}"
+                    ".shard_inventory_sha256"
+                ),
+            ),
+        }
+    expected_upstream = {
+        "audit_pack": (packed_root / "PACK_COMPLETE.json", "PACK_COMPLETE"),
+        "mmp_pack": (mmp_root / "MMP_PACK_COMPLETE.json", "MMP_PACK_COMPLETE"),
+    }
+    for name, (expected_path, expected_flag) in expected_upstream.items():
+        if (
+            normalized_upstream[name]["path"] != str(expected_path)
+            or normalized_upstream[name]["completion_flag"] != expected_flag
+        ):
+            raise EditingV2PackedCandidateMaterializationError(
+                f"upstream overlay completion.{name} address or completion flag disagrees"
+            )
+    if not isinstance(payload["fields_for_new_overlays"], Mapping):
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion.fields_for_new_overlays must be an object"
+        )
+    _require_positive_int(
+        payload["sentinel_entries_per_new_overlay"],
+        field="upstream overlay completion.sentinel_entries_per_new_overlay",
+    )
+    raw_receipts = payload["shards"]
+    if not isinstance(raw_receipts, list) or not raw_receipts:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion.shards must be nonempty"
+        )
+    normalized_receipts: list[dict[str, Any]] = []
+    candidate_shards: list[dict[str, Any]] = []
+    seen_paths: set[str] = set()
+    for index, raw_receipt in enumerate(raw_receipts):
+        receipt = _require_exact_fields(
+            raw_receipt,
+            _OVERLAY_COMPLETION_RECEIPT_FIELDS,
+            field=f"upstream overlay completion.shards[{index}]",
+        )
+        layer = _require_text(receipt["layer"], field=f"completion shard {index}.layer")
+        partition = _require_text(receipt["partition"], field=f"completion shard {index}.partition")
+        if layer not in _COMPLETION_LAYERS or partition not in _COMPLETION_PARTITIONS:
+            raise EditingV2PackedCandidateMaterializationError(
+                f"upstream overlay completion.shards[{index}] cell is unsupported"
+            )
+        shard_path = _absolute_normalized_posix_path(
+            receipt["shard_path"], field=f"completion shard {index}.shard_path"
+        )
+        shard_name = shard_path.name
+        if not shard_name.endswith(".jsonl.gz"):
+            raise EditingV2PackedCandidateMaterializationError(
+                f"upstream overlay completion.shards[{index}] is not a packed shard"
+            )
+        expected_shard_path = (
+            mmp_root / partition / shard_name
+            if layer == "mmp_analogue"
+            else packed_root / layer / partition / shard_name
+        )
+        manifest_path = _absolute_normalized_posix_path(
+            receipt["manifest_path"], field=f"completion shard {index}.manifest_path"
+        )
+        overlay_path = _absolute_normalized_posix_path(
+            receipt["overlay_path"], field=f"completion shard {index}.overlay_path"
+        )
+        if (
+            shard_path != expected_shard_path
+            or manifest_path != PurePosixPath(str(shard_path)).with_suffix(".manifest.json")
+            or overlay_path != PurePosixPath(f"{shard_path}.provenance.json")
+        ):
+            raise EditingV2PackedCandidateMaterializationError(
+                f"upstream overlay completion.shards[{index}] escapes its exact source cell"
+            )
+        if str(shard_path) in seen_paths:
+            raise EditingV2PackedCandidateMaterializationError(
+                "upstream overlay completion repeats a physical shard"
+            )
+        seen_paths.add(str(shard_path))
+        role = _require_text(
+            receipt["overlay_validation_role"],
+            field=f"completion shard {index}.overlay_validation_role",
+        )
+        if role not in _OVERLAY_VALIDATION_ROLES:
+            raise EditingV2PackedCandidateMaterializationError(
+                f"upstream overlay completion.shards[{index}] validation role is unsupported"
+            )
+        packed_sha256 = _require_sha256(
+            receipt["shard_file_sha256"], field=f"completion shard {index}.shard_file_sha256"
+        )
+        manifest_sha256 = _require_sha256(
+            receipt["manifest_file_sha256"],
+            field=f"completion shard {index}.manifest_file_sha256",
+        )
+        overlay_file_sha256 = _require_sha256(
+            receipt["overlay_file_sha256"],
+            field=f"completion shard {index}.overlay_file_sha256",
+        )
+        _require_sha256(
+            receipt["overlay_fields_sha256"],
+            field=f"completion shard {index}.overlay_fields_sha256",
+        )
+        _require_sha256(
+            receipt["overlay_semantic_sha256"],
+            field=f"completion shard {index}.overlay_semantic_sha256",
+        )
+        entries = _require_positive_int(
+            receipt["entries"], field=f"completion shard {index}.entries"
+        )
+        states = _require_positive_int(receipt["states"], field=f"completion shard {index}.states")
+        normalized_receipts.append(
+            {
+                "layer": layer,
+                "partition": partition,
+                "shard": shard_name,
+                "packed_sha256": packed_sha256,
+                "manifest_sha256": manifest_sha256,
+                "entries": entries,
+                "states": states,
+            }
+        )
+        candidate_shards.append(
+            {
+                "layer": layer,
+                "relative_path": str(shard_path.relative_to(common_root)),
+                "file_sha256": packed_sha256,
+                "manifest_relative_path": str(manifest_path.relative_to(common_root)),
+                "manifest_file_sha256": manifest_sha256,
+                "historical_provenance_overlay_relative_path": str(
+                    overlay_path.relative_to(common_root)
+                ),
+                "historical_provenance_overlay_file_sha256": overlay_file_sha256,
+                "historical_provenance_overlay_role": HISTORICAL_OVERLAY_ROLE,
+            }
+        )
+    expected_total = sum(identity["expected_shards"] for identity in normalized_upstream.values())
+    if len(normalized_receipts) != expected_total:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion shard count disagrees with upstream inventories"
+        )
+    observed_cells = {(item["layer"], item["partition"]) for item in normalized_receipts}
+    expected_cells = {
+        (layer, partition) for layer in _COMPLETION_LAYERS for partition in _COMPLETION_PARTITIONS
+    }
+    if observed_cells != expected_cells:
+        raise EditingV2PackedCandidateMaterializationError(
+            "upstream overlay completion does not cover every required layer/partition cell"
+        )
+    for name, layers in (
+        ("audit_pack", _SYNTHETIC_LAYERS),
+        ("mmp_pack", _REAL_ENDPOINT_LAYERS),
+    ):
+        inventory = sorted(
+            (item for item in normalized_receipts if item["layer"] in layers),
+            key=lambda item: (item["layer"], item["partition"], item["shard"]),
+        )
+        if len(inventory) != normalized_upstream[name]["expected_shards"] or (
+            canonical_sha256(inventory) != normalized_upstream[name]["shard_inventory_sha256"]
+        ):
+            raise EditingV2PackedCandidateMaterializationError(
+                f"upstream overlay completion {name} inventory identity disagrees"
+            )
+    candidate_shards.sort(key=lambda item: item["relative_path"])
+    return dict(payload), common_root, candidate_shards
+
+
+def build_packed_candidate_source_manifest_from_overlay_completion(
+    *,
+    overlay_completion_path: str | Path,
+    expected_overlay_completion_file_sha256: str,
+    source_binding_registry_path: str | Path,
+    expected_source_binding_registry_file_sha256: str,
+) -> dict[str, Any]:
+    """Consume one exact completion and explicit source registry without inference."""
+
+    completion, _, candidate_shards = _load_overlay_completion(
+        overlay_completion_path,
+        expected_file_sha256=expected_overlay_completion_file_sha256,
+    )
+    registry_path = Path(source_binding_registry_path)
+    expected_registry_sha256 = _require_sha256(
+        expected_source_binding_registry_file_sha256,
+        field="expected source binding registry file SHA-256",
+    )
+    if not registry_path.is_file() or file_sha256(registry_path) != expected_registry_sha256:
+        raise EditingV2PackedCandidateMaterializationError(
+            "source binding registry is absent or its physical SHA-256 disagrees"
+        )
+    registry = load_overlay_source_binding_registry(registry_path)
+    owner_by_layer = {
+        layer: binding for binding in registry["bindings"] for layer in binding["allowed_layers"]
+    }
+    shards_by_source: dict[str, list[dict[str, Any]]] = {
+        binding["source_asset_id"]: [] for binding in registry["bindings"]
+    }
+    for candidate_shard in candidate_shards:
+        layer = candidate_shard["layer"]
+        owner = owner_by_layer[layer]
+        shards_by_source[owner["source_asset_id"]].append(
+            {key: value for key, value in candidate_shard.items() if key != "layer"}
+        )
+    sources = [
+        {
+            **binding,
+            "shards": sorted(
+                shards_by_source[binding["source_asset_id"]],
+                key=lambda item: item["relative_path"],
+            ),
+        }
+        for binding in registry["bindings"]
+    ]
+    source_inventory = _source_inventory(sources)
+    completion_identity = {
+        "artifact_path": str(Path(overlay_completion_path)),
+        "file_sha256": file_sha256(Path(overlay_completion_path)),
+        "semantic_sha256": completion["completion_sha256"],
+        "candidate_source_shards": len(source_inventory),
+        "candidate_source_inventory_sha256": canonical_sha256(source_inventory),
+    }
+    registry_identity = {
+        "artifact_path": str(registry_path),
+        "file_sha256": file_sha256(registry_path),
+        "semantic_sha256": registry["registry_sha256"],
+    }
+    return build_packed_candidate_source_manifest(
+        sources,
+        upstream_overlay_completion=completion_identity,
+        source_binding_registry=registry_identity,
+    )
 
 
 def _load_packed_manifest(
@@ -1783,15 +2385,20 @@ __all__ = [
     "HISTORICAL_OVERLAY_ROLE",
     "MATERIALIZATION_FILENAME",
     "MATERIALIZATION_SCHEMA",
+    "SOURCE_BINDING_REGISTRY_SCHEMA",
     "SOURCE_MANIFEST_SCHEMA",
+    "build_overlay_source_binding_registry",
     "build_packed_candidate_source_manifest",
+    "build_packed_candidate_source_manifest_from_overlay_completion",
     "canonical_json_bytes",
     "canonical_sha256",
     "file_sha256",
+    "load_overlay_source_binding_registry",
     "load_packed_candidate_source_manifest",
     "materialize_packed_candidate_headers",
     "validate_historical_provenance_overlay",
     "validate_packed_candidate_materialization",
     "validate_packed_candidate_source_manifest",
+    "validate_overlay_source_binding_registry",
     "write_packed_candidate_source_manifest",
 ]

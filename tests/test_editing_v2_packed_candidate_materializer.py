@@ -18,19 +18,75 @@ from compose_v4.data.editing_v2_packed_candidate_materializer import (
     HISTORICAL_OVERLAY_ROLE,
     MATERIALIZATION_FILENAME,
     EditingV2PackedCandidateMaterializationError,
+    build_overlay_source_binding_registry,
     build_packed_candidate_source_manifest,
+    build_packed_candidate_source_manifest_from_overlay_completion,
+    canonical_sha256,
     canonical_json_bytes,
     file_sha256,
+    load_overlay_source_binding_registry,
     materialize_packed_candidate_headers,
     validate_historical_provenance_overlay,
     validate_packed_candidate_materialization,
     write_packed_candidate_source_manifest,
+)
+from modal_apps.apply_provenance_overlays_app import (
+    FROZEN_MMP_V2_ROOT,
+    build_overlay_completion,
 )
 
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTING_POLICY = ROOT / "configs" / "editing_v2_candidate_routing_policy_v1.json"
 CORPUS_CONTRACT = ROOT / "configs" / "editing_corpus_v2_contract.json"
+SOURCE_BINDINGS = ROOT / "configs" / "editing_v2_overlay_source_bindings_v1.json"
+
+
+def _source_manifest_identities(sources: list[dict]) -> tuple[dict, dict]:
+    inventory = sorted(
+        (
+            {"source_asset_id": source["source_asset_id"], **shard}
+            for source in sources
+            for shard in source["shards"]
+        ),
+        key=lambda item: (item["source_asset_id"], item["relative_path"]),
+    )
+    return (
+        {
+            "artifact_path": "/artifacts/editing_v2/upstream_overlays/fixture.json",
+            "file_sha256": "3" * 64,
+            "semantic_sha256": "4" * 64,
+            "candidate_source_shards": len(inventory),
+            "candidate_source_inventory_sha256": canonical_sha256(inventory),
+        },
+        {
+            "artifact_path": "configs/fixture_source_bindings.json",
+            "file_sha256": "5" * 64,
+            "semantic_sha256": "6" * 64,
+        },
+    )
+
+
+def test_project_source_binding_registry_is_frozen_and_valid() -> None:
+    registry = load_overlay_source_binding_registry(SOURCE_BINDINGS)
+
+    assert registry["registry_sha256"] == (
+        "008870e90bbe76ecddf4d26e2ea3f2b0a3a038bf463b17f273b27b8d9e983780"
+    )
+    assert {layer for binding in registry["bindings"] for layer in binding["allowed_layers"]} == {
+        "corruption",
+        "cycle_ops",
+        "mmp_analogue",
+    }
+
+
+def _build_fixture_source_manifest(sources: list[dict]) -> dict:
+    completion_identity, registry_identity = _source_manifest_identities(sources)
+    return build_packed_candidate_source_manifest(
+        sources,
+        upstream_overlay_completion=completion_identity,
+        source_binding_registry=registry_identity,
+    )
 
 
 def _state(label: int) -> dict:
@@ -261,7 +317,7 @@ def _source_manifest(tmp_path: Path, *, malformed: bool = False) -> Path:
             ],
         },
     ]
-    manifest = build_packed_candidate_source_manifest(sources)
+    manifest = _build_fixture_source_manifest(sources)
     manifest_path = tmp_path / "sources.json"
     write_packed_candidate_source_manifest(manifest_path, manifest)
     return manifest_path
@@ -570,7 +626,15 @@ def test_historical_overlay_must_bind_shard_and_original_manifest(
     overlay[binding_field] = "f" * 64
     overlay_path.write_text(json.dumps(overlay, indent=2, sort_keys=True) + "\n")
     shard_spec["historical_provenance_overlay_file_sha256"] = file_sha256(overlay_path)
-    rebuilt = build_packed_candidate_source_manifest(source_manifest["sources"])
+    refreshed_completion_identity, _ = _source_manifest_identities(source_manifest["sources"])
+    source_manifest["upstream_overlay_completion"]["candidate_source_inventory_sha256"] = (
+        refreshed_completion_identity["candidate_source_inventory_sha256"]
+    )
+    rebuilt = build_packed_candidate_source_manifest(
+        source_manifest["sources"],
+        upstream_overlay_completion=source_manifest["upstream_overlay_completion"],
+        source_binding_registry=source_manifest["source_binding_registry"],
+    )
     write_packed_candidate_source_manifest(source_manifest_path, rebuilt)
     with pytest.raises(
         EditingV2PackedCandidateMaterializationError,
@@ -620,4 +684,187 @@ def test_source_manifest_rejects_duplicate_physical_shard_paths(
         EditingV2PackedCandidateMaterializationError,
         match="physical shard relative paths must be unique",
     ):
-        build_packed_candidate_source_manifest(source_manifest["sources"])
+        build_packed_candidate_source_manifest(
+            source_manifest["sources"],
+            upstream_overlay_completion=source_manifest["upstream_overlay_completion"],
+            source_binding_registry=source_manifest["source_binding_registry"],
+        )
+
+
+def _overlay_consumer_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    packed_root = "/artifacts/edit-packed-v1"
+    receipts = []
+    for index, (layer, partition) in enumerate(
+        (layer, partition)
+        for layer in ("corruption", "cycle_ops", "mmp_analogue")
+        for partition in ("train", "validation", "test")
+    ):
+        root = (
+            Path(FROZEN_MMP_V2_ROOT) / partition
+            if layer == "mmp_analogue"
+            else Path(packed_root) / layer / partition
+        )
+        shard = root / f"shard_{index:04d}.jsonl.gz"
+        receipts.append(
+            {
+                "layer": layer,
+                "partition": partition,
+                "shard_path": str(shard),
+                "shard_file_sha256": hashlib.sha256(f"shard-{index}".encode()).hexdigest(),
+                "manifest_path": str(shard.with_suffix(".manifest.json")),
+                "manifest_file_sha256": hashlib.sha256(f"manifest-{index}".encode()).hexdigest(),
+                "entries": index + 1,
+                "states": index + 2,
+                "overlay_path": f"{shard}.provenance.json",
+                "overlay_file_sha256": hashlib.sha256(f"overlay-{index}".encode()).hexdigest(),
+                "overlay_fields_sha256": hashlib.sha256(f"fields-{index}".encode()).hexdigest(),
+                "overlay_semantic_sha256": hashlib.sha256(f"semantic-{index}".encode()).hexdigest(),
+                "overlay_validation_role": (
+                    "current_live_overlay_at_completion"
+                    if index % 2
+                    else "historical_immutable_byte_receipt"
+                ),
+            }
+        )
+
+    def inventory_sha256(layers: set[str]) -> str:
+        rows = sorted(
+            (
+                {
+                    "layer": receipt["layer"],
+                    "partition": receipt["partition"],
+                    "shard": Path(receipt["shard_path"]).name,
+                    "packed_sha256": receipt["shard_file_sha256"],
+                    "manifest_sha256": receipt["manifest_file_sha256"],
+                    "entries": receipt["entries"],
+                    "states": receipt["states"],
+                }
+                for receipt in receipts
+                if receipt["layer"] in layers
+            ),
+            key=lambda row: (row["layer"], row["partition"], row["shard"]),
+        )
+        return canonical_sha256(rows)
+
+    completion = build_overlay_completion(
+        commit="1" * 40,
+        launcher_source_sha256="2" * 64,
+        packed_root=packed_root,
+        mmp_root=FROZEN_MMP_V2_ROOT,
+        upstream_completions={
+            "audit_pack": {
+                "path": f"{packed_root}/PACK_COMPLETE.json",
+                "file_sha256": "3" * 64,
+                "completion_flag": "PACK_COMPLETE",
+                "inventory_origin": "reconciled_legacy_completion_totals",
+                "expected_shards": 6,
+                "shard_inventory_sha256": inventory_sha256({"corruption", "cycle_ops"}),
+            },
+            "mmp_pack": {
+                "path": f"{FROZEN_MMP_V2_ROOT}/MMP_PACK_COMPLETE.json",
+                "file_sha256": "4" * 64,
+                "completion_flag": "MMP_PACK_COMPLETE",
+                "inventory_origin": "completion_shard_artifacts",
+                "expected_shards": 3,
+                "shard_inventory_sha256": inventory_sha256({"mmp_analogue"}),
+            },
+        },
+        new_overlay_fields={"trace_schema_version": 2},
+        shard_receipts=receipts,
+    )
+    completion_path = tmp_path / "OVERLAY_COMPLETION.json"
+    completion_path.write_text(json.dumps(completion, indent=2, sort_keys=True) + "\n")
+
+    registry = build_overlay_source_binding_registry(
+        [
+            {
+                "source_asset_id": "synthetic-cache-source",
+                "source_asset_path": "/artifacts/source/synthetic.json",
+                "source_asset_sha256": "5" * 64,
+                "source_kind": EXECUTOR_GENERATED_WALK_FROM_REAL_ENDPOINT,
+                "allowed_layers": ["corruption", "cycle_ops"],
+            },
+            {
+                "source_asset_id": "mmp-cache-source",
+                "source_asset_path": "/artifacts/source/mmp.jsonl",
+                "source_asset_sha256": "6" * 64,
+                "source_kind": INFERRED_REAL_ENDPOINT_PAIR,
+                "allowed_layers": ["mmp_analogue"],
+            },
+        ]
+    )
+    registry_path = tmp_path / "SOURCE_BINDINGS.json"
+    registry_path.write_text(json.dumps(registry, indent=2, sort_keys=True) + "\n")
+    return completion_path, registry_path
+
+
+def _consume_overlay_fixture(completion_path: Path, registry_path: Path) -> dict:
+    return build_packed_candidate_source_manifest_from_overlay_completion(
+        overlay_completion_path=completion_path,
+        expected_overlay_completion_file_sha256=file_sha256(completion_path),
+        source_binding_registry_path=registry_path,
+        expected_source_binding_registry_file_sha256=file_sha256(registry_path),
+    )
+
+
+def test_overlay_completion_builds_exact_schema_v2_source_manifest(tmp_path: Path) -> None:
+    completion_path, registry_path = _overlay_consumer_fixture(tmp_path)
+
+    manifest = _consume_overlay_fixture(completion_path, registry_path)
+
+    shards = [shard for source in manifest["sources"] for shard in source["shards"]]
+    assert manifest["schema_version"] == 2
+    assert manifest["upstream_overlay_completion"]["file_sha256"] == file_sha256(completion_path)
+    assert manifest["upstream_overlay_completion"]["candidate_source_shards"] == 9
+    assert len(shards) == 9
+    assert {shard["historical_provenance_overlay_role"] for shard in shards} == {
+        HISTORICAL_OVERLAY_ROLE
+    }
+
+
+@pytest.mark.parametrize("mutation", ["omission", "duplicate", "escape"])
+def test_overlay_completion_rejects_nonexact_or_escaping_inventory(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    completion_path, registry_path = _overlay_consumer_fixture(tmp_path)
+    completion = json.loads(completion_path.read_text())
+    if mutation == "omission":
+        completion["shards"].pop()
+    elif mutation == "duplicate":
+        completion["shards"][-1] = copy.deepcopy(completion["shards"][0])
+    else:
+        completion["shards"][0]["shard_path"] = (
+            "/artifacts/edit-packed-v1/corruption/train/../escape.jsonl.gz"
+        )
+    body = {key: value for key, value in completion.items() if key != "completion_sha256"}
+    completion["completion_sha256"] = canonical_sha256(body)
+    completion_path.write_text(json.dumps(completion, indent=2, sort_keys=True) + "\n")
+
+    with pytest.raises(EditingV2PackedCandidateMaterializationError):
+        _consume_overlay_fixture(completion_path, registry_path)
+
+
+def test_overlay_completion_rejects_physical_or_semantic_identity_drift(tmp_path: Path) -> None:
+    completion_path, registry_path = _overlay_consumer_fixture(tmp_path)
+    expected_file_sha256 = file_sha256(completion_path)
+    completion = json.loads(completion_path.read_text())
+    completion["commit"] = "9" * 40
+    completion_path.write_text(json.dumps(completion, indent=2, sort_keys=True) + "\n")
+
+    with pytest.raises(
+        EditingV2PackedCandidateMaterializationError,
+        match="physical SHA-256 disagrees",
+    ):
+        build_packed_candidate_source_manifest_from_overlay_completion(
+            overlay_completion_path=completion_path,
+            expected_overlay_completion_file_sha256=expected_file_sha256,
+            source_binding_registry_path=registry_path,
+            expected_source_binding_registry_file_sha256=file_sha256(registry_path),
+        )
+
+    with pytest.raises(
+        EditingV2PackedCandidateMaterializationError,
+        match="self-hash disagrees",
+    ):
+        _consume_overlay_fixture(completion_path, registry_path)
