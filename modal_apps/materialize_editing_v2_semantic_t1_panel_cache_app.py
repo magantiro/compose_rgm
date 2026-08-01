@@ -21,6 +21,7 @@ import json
 import platform
 import re
 import subprocess
+import sys
 from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -28,24 +29,40 @@ from typing import Any
 import modal
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+from compose_v4.experiments.editing_v2_semantic_t1_artifact_contracts import (  # noqa: E402
+    NO_DOWNSTREAM_AUTHORITY,
+    PANEL_ARTIFACT_FILENAME,
+    PANEL_COMPLETION_FILENAME,
+    PANEL_COMPLETION_SCHEMA,
+    PANEL_COMPLETION_SCHEMA_VERSION,
+    PANEL_COMPLETION_STATUS,
+    PANEL_RUN_REQUEST_FILENAME,
+    PANEL_RUN_REQUEST_SCHEMA,
+    PANEL_RUN_REQUEST_SCHEMA_VERSION,
+    PANEL_RUN_REQUEST_STATUS,
+)
+
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/materialize_editing_v2_semantic_t1_panel_cache_app.py"
 PANEL_POLICY_SOURCE = "configs/editing_v2_semantic_t1_panel_policy_v1.json"
 OUTPUT_PREFIX = "/artifacts/editing_v2/semantic_t1_panel_cache_inputs"
 
-RUN_REQUEST_FILENAME = "SEMANTIC_T1_PANEL_REQUEST.json"
-PANEL_FILENAME = "SEMANTIC_T1_PANEL_CACHE_INPUTS.json"
-COMPLETION_FILENAME = "SEMANTIC_T1_PANEL_COMPLETE.json"
+RUN_REQUEST_FILENAME = PANEL_RUN_REQUEST_FILENAME
+PANEL_FILENAME = PANEL_ARTIFACT_FILENAME
+COMPLETION_FILENAME = PANEL_COMPLETION_FILENAME
 
 SOURCE_REVISION_SCHEMA = "compose.editing.semantic_t1_modal_source_revision"
 SOURCE_REVISION_SCHEMA_VERSION = 1
-RUN_REQUEST_SCHEMA = "compose.editing.semantic_t1_modal_run_request"
-RUN_REQUEST_SCHEMA_VERSION = 1
-RUN_REQUEST_STATUS = "FROZEN_PANEL_PREPARATION_REQUEST_NO_DOWNSTREAM_AUTHORITY"
-COMPLETION_SCHEMA = "compose.editing.semantic_t1_modal_completion"
-COMPLETION_SCHEMA_VERSION = 1
-COMPLETION_STATUS = "COMPLETE_PANEL_PREPARATION_NO_DOWNSTREAM_AUTHORITY"
+RUN_REQUEST_SCHEMA = PANEL_RUN_REQUEST_SCHEMA
+RUN_REQUEST_SCHEMA_VERSION = PANEL_RUN_REQUEST_SCHEMA_VERSION
+RUN_REQUEST_STATUS = PANEL_RUN_REQUEST_STATUS
+COMPLETION_SCHEMA = PANEL_COMPLETION_SCHEMA
+COMPLETION_SCHEMA_VERSION = PANEL_COMPLETION_SCHEMA_VERSION
+COMPLETION_STATUS = PANEL_COMPLETION_STATUS
 PANEL_POLICY_SCHEMA = "compose.editing_v2.semantic_t1_panel_policy"
 PANEL_POLICY_SCHEMA_VERSION = 1
 PANEL_POLICY_STATUS = "FROZEN_PROSPECTIVE_PANEL_NO_DOWNSTREAM_AUTHORITY"
@@ -57,15 +74,7 @@ PANEL_POLICY_CACHE_HANDOFF = (
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
-_NO_AUTHORITY = {
-    "training_authorized": False,
-    "gate_zero_authorized": False,
-    "t1_authorized": False,
-    "bounded_p50_authorized": False,
-    "long_training_authorized": False,
-    "checkpoint_selection_authorized": False,
-    "final_test_selection_authorized": False,
-}
+_NO_AUTHORITY = NO_DOWNSTREAM_AUTHORITY
 _INPUT_NAMES = (
     "migration_completion",
     "chunk_cache_plan",

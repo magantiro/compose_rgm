@@ -185,20 +185,14 @@ class SuccessorFiberCacheProvenance:
             if (
                 not isinstance(value, str)
                 or len(value) != 64
-                or any(
-                    character not in "0123456789abcdef"
-                    for character in value
-                )
+                or any(character not in "0123456789abcdef" for character in value)
             ):
                 raise ValueError(f"{name} must be a lowercase SHA-256 digest")
         overlay_digest = self.packed_provenance_overlay_sha256
         if overlay_digest is not None and (
             not isinstance(overlay_digest, str)
             or len(overlay_digest) != 64
-            or any(
-                character not in "0123456789abcdef"
-                for character in overlay_digest
-            )
+            or any(character not in "0123456789abcdef" for character in overlay_digest)
         ):
             raise ValueError(
                 "packed_provenance_overlay_sha256 must be null or a lowercase SHA-256"
@@ -227,9 +221,7 @@ class SuccessorFiberCacheAddress:
             or len(digest) != 64
             or any(character not in "0123456789abcdef" for character in digest)
         ):
-            raise ValueError(
-                "packed_shard_content_sha256 must be a lowercase SHA-256"
-            )
+            raise ValueError("packed_shard_content_sha256 must be a lowercase SHA-256")
         if (
             not isinstance(self.packed_shard_name, str)
             or not self.packed_shard_name
@@ -331,11 +323,7 @@ class SuccessorFiberCacheRecord:
 
     @property
     def target_key(self) -> str | None:
-        return (
-            None
-            if self.teacher_fiber is None
-            else self.teacher_fiber.target_key
-        )
+        return None if self.teacher_fiber is None else self.teacher_fiber.target_key
 
     @property
     def source_state_sha256(self) -> str:
@@ -399,9 +387,7 @@ class SuccessorFiberCache:
                 record.address.progress_index,
             )
             if legacy_key in legacy_record_index:
-                raise ValueError(
-                    f"duplicate legacy cache lookup key {legacy_key!r}"
-                )
+                raise ValueError(f"duplicate legacy cache lookup key {legacy_key!r}")
             legacy_record_index[legacy_key] = record
             legacy_trace_index[legacy_key[:3]].append(record)
         object.__setattr__(
@@ -418,10 +404,7 @@ class SuccessorFiberCache:
             self,
             "_legacy_trace_index",
             MappingProxyType(
-                {
-                    key: tuple(records)
-                    for key, records in legacy_trace_index.items()
-                }
+                {key: tuple(records) for key, records in legacy_trace_index.items()}
             ),
         )
 
@@ -439,10 +422,7 @@ class SuccessorFiberCache:
         try:
             return self._legacy_record_index[key]
         except KeyError:
-            raise KeyError(
-                "cache has no unique record for "
-                f"{key!r}"
-            ) from None
+            raise KeyError("cache has no unique record for " f"{key!r}") from None
 
     def records_for_trace(
         self,
@@ -457,9 +437,7 @@ class SuccessorFiberCache:
         try:
             return self._legacy_trace_index[key]
         except KeyError:
-            raise KeyError(
-                f"cache has no trace {key!r}"
-            ) from None
+            raise KeyError(f"cache has no trace {key!r}") from None
 
     def require_packed_address(
         self,
@@ -477,17 +455,13 @@ class SuccessorFiberCache:
         try:
             record = self._exact_record_index[exact_key]
         except KeyError:
-            raise KeyError(
-                f"cache has no exact packed row {exact_key!r}"
-            ) from None
+            raise KeyError(f"cache has no exact packed row {exact_key!r}") from None
         expected = SuccessorFiberCacheAddress.from_packed_trace(
             address,
             progress_index=progress_index,
         )
         if record.address != expected:
-            raise KeyError(
-                "cache record does not match the exact packed trace address"
-            )
+            raise KeyError("cache record does not match the exact packed trace address")
         return record
 
 
@@ -526,10 +500,7 @@ def _content_sha256(payload: dict[str, Any]) -> str:
 def _provenance_payload(
     provenance: SuccessorFiberCacheProvenance,
 ) -> dict[str, Any]:
-    return {
-        name: getattr(provenance, name)
-        for name in _PROVENANCE_FIELDS
-    }
+    return {name: getattr(provenance, name) for name in _PROVENANCE_FIELDS}
 
 
 def _validate_text(value: str, *, name: str, limits: SuccessorFiberCacheLimits) -> None:
@@ -548,17 +519,11 @@ def _validate_alias(
     _validate_text(alias.table_name, name="alias table_name", limits=limits)
     coordinate = alias.coordinate
     if not isinstance(coordinate, tuple) or not coordinate:
-        raise SuccessorFiberCacheError(
-            "alias coordinate must be a nonempty tuple"
-        )
+        raise SuccessorFiberCacheError("alias coordinate must be a nonempty tuple")
     if len(coordinate) > limits.max_coordinate_rank:
         raise SuccessorFiberCacheError("alias coordinate rank exceeds the bound")
     for value in coordinate:
-        if (
-            type(value) is not int
-            or value < 0
-            or value > limits.max_coordinate_value
-        ):
+        if type(value) is not int or value < 0 or value > limits.max_coordinate_value:
             raise SuccessorFiberCacheError(
                 "alias coordinates must be bounded nonnegative integers"
             )
@@ -586,13 +551,23 @@ def _validate_record(
     provenance: SuccessorFiberCacheProvenance,
     limits: SuccessorFiberCacheLimits,
 ) -> int:
+    return _validate_record_for_shard(
+        record,
+        expected_packed_shard_content_sha256=(provenance.packed_shard_content_sha256),
+        limits=limits,
+    )
+
+
+def _validate_record_for_shard(
+    record: SuccessorFiberCacheRecord,
+    *,
+    expected_packed_shard_content_sha256: str,
+    limits: SuccessorFiberCacheLimits,
+) -> int:
     address = record.address
-    if (
-        address.packed_shard_content_sha256
-        != provenance.packed_shard_content_sha256
-    ):
+    if address.packed_shard_content_sha256 != expected_packed_shard_content_sha256:
         raise SuccessorFiberCacheError(
-            "record packed-shard digest disagrees with cache provenance"
+            "record packed-shard digest disagrees with the expected shard"
         )
     for name, value in (
         ("packed_shard_name", address.packed_shard_name),
@@ -656,6 +631,19 @@ def _canonical_records(
     provenance: SuccessorFiberCacheProvenance,
     limits: SuccessorFiberCacheLimits,
 ) -> tuple[SuccessorFiberCacheRecord, ...]:
+    return _canonical_records_for_shard(
+        records,
+        expected_packed_shard_content_sha256=(provenance.packed_shard_content_sha256),
+        limits=limits,
+    )
+
+
+def _canonical_records_for_shard(
+    records: Iterable[SuccessorFiberCacheRecord],
+    *,
+    expected_packed_shard_content_sha256: str,
+    limits: SuccessorFiberCacheLimits,
+) -> tuple[SuccessorFiberCacheRecord, ...]:
     ordered = tuple(sorted(records, key=lambda record: record.address))
     if len(ordered) > limits.max_records:
         raise SuccessorFiberCacheError("record count exceeds the cache bound")
@@ -666,17 +654,15 @@ def _canonical_records(
         )
 
     total_aliases = sum(
-        _validate_record(
+        _validate_record_for_shard(
             record,
-            provenance=provenance,
+            expected_packed_shard_content_sha256=(expected_packed_shard_content_sha256),
             limits=limits,
         )
         for record in ordered
     )
     if total_aliases > limits.max_total_aliases:
-        raise SuccessorFiberCacheError(
-            "total alias count exceeds the cache bound"
-        )
+        raise SuccessorFiberCacheError("total alias count exceeds the cache bound")
 
     grouped: dict[
         tuple[str, str, int, str, str, str, str, str, int],
@@ -700,25 +686,18 @@ def _canonical_records(
         for current, following in pairwise(trace_records):
             if (
                 current.target_key != following.source_key
-                or current.target_state_sha256
-                != following.source_state_sha256
+                or current.target_state_sha256 != following.source_state_sha256
             ):
                 raise SuccessorFiberCacheError(
                     f"trace {trace_key!r} target/source chain breaks between "
                     f"progress {current.address.progress_index} and "
                     f"{following.address.progress_index}"
                 )
-        if (
-            trace_records[0].source_key
-            != trace_records[0].address.trace_source_key
-        ):
+        if trace_records[0].source_key != trace_records[0].address.trace_source_key:
             raise SuccessorFiberCacheError(
                 f"trace {trace_key!r} first state disagrees with its packed source"
             )
-        if (
-            trace_records[-1].source_key
-            != trace_records[-1].address.trace_target_key
-        ):
+        if trace_records[-1].source_key != trace_records[-1].address.trace_target_key:
             raise SuccessorFiberCacheError(
                 f"trace {trace_key!r} terminal state disagrees with its packed target"
             )
@@ -740,6 +719,38 @@ def canonical_successor_fiber_records(
     )
 
 
+def canonical_successor_fiber_records_for_shard(
+    records: Iterable[SuccessorFiberCacheRecord],
+    *,
+    expected_packed_shard_content_sha256: str,
+    limits: SuccessorFiberCacheLimits = DEFAULT_SUCCESSOR_FIBER_CACHE_LIMITS,
+) -> tuple[SuccessorFiberCacheRecord, ...]:
+    """Validate coordinates for a provenance schema owned by another source.
+
+    Semantic Editing-V2 uses the same score-independent coordinate records but
+    owns a different source-provenance schema from the legacy packed-corpus
+    cache.  This helper shares the complete-trace and coordinate validation
+    without pretending that the legacy provenance fields describe that source.
+    """
+
+    if (
+        not isinstance(expected_packed_shard_content_sha256, str)
+        or len(expected_packed_shard_content_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in expected_packed_shard_content_sha256
+        )
+    ):
+        raise ValueError(
+            "expected_packed_shard_content_sha256 must be a lowercase SHA-256"
+        )
+    return _canonical_records_for_shard(
+        records,
+        expected_packed_shard_content_sha256=(expected_packed_shard_content_sha256),
+        limits=limits,
+    )
+
+
 def _alias_payload(alias: TeacherSuccessorAlias) -> dict[str, Any]:
     return {
         "family_name": alias.family_name,
@@ -749,15 +760,9 @@ def _alias_payload(alias: TeacherSuccessorAlias) -> dict[str, Any]:
 
 
 def _record_payload(record: SuccessorFiberCacheRecord) -> dict[str, Any]:
-    aliases = (
-        ()
-        if record.teacher_fiber is None
-        else record.teacher_fiber.aliases
-    )
+    aliases = () if record.teacher_fiber is None else record.teacher_fiber.aliases
     return {
-        "packed_shard_content_sha256": (
-            record.address.packed_shard_content_sha256
-        ),
+        "packed_shard_content_sha256": (record.address.packed_shard_content_sha256),
         "packed_shard_name": record.address.packed_shard_name,
         "entry_index": record.address.entry_index,
         "layer": record.address.layer,
@@ -773,10 +778,19 @@ def _record_payload(record: SuccessorFiberCacheRecord) -> dict[str, Any]:
         "target_state_sha256": record.target_state_sha256,
         "aliases": [_alias_payload(alias) for alias in aliases],
         "virtual_aliases": [
-            _alias_payload(alias)
-            for alias in record.state_support.virtual_aliases
+            _alias_payload(alias) for alias in record.state_support.virtual_aliases
         ],
     }
+
+
+def successor_fiber_cache_record_payload(
+    record: SuccessorFiberCacheRecord,
+) -> dict[str, Any]:
+    """Encode one already validated score-independent coordinate record."""
+
+    if not isinstance(record, SuccessorFiberCacheRecord):
+        raise TypeError("record must be SuccessorFiberCacheRecord")
+    return _record_payload(record)
 
 
 def serialize_successor_fiber_cache(
@@ -850,15 +864,11 @@ def _decode_record(payload: Any) -> SuccessorFiberCacheRecord:
     _require_exact_fields(payload, _RECORD_FIELDS, name="record")
     aliases_payload = payload["aliases"]
     virtual_payload = payload["virtual_aliases"]
-    if not isinstance(aliases_payload, list) or not isinstance(
-        virtual_payload, list
-    ):
+    if not isinstance(aliases_payload, list) or not isinstance(virtual_payload, list):
         raise SuccessorFiberCacheError("record alias fields must be arrays")
     try:
         address = SuccessorFiberCacheAddress(
-            packed_shard_content_sha256=payload[
-                "packed_shard_content_sha256"
-            ],
+            packed_shard_content_sha256=payload["packed_shard_content_sha256"],
             packed_shard_name=payload["packed_shard_name"],
             entry_index=payload["entry_index"],
             layer=payload["layer"],
@@ -908,6 +918,14 @@ def _decode_record(payload: Any) -> SuccessorFiberCacheRecord:
         raise
     except (TypeError, ValueError) as error:
         raise SuccessorFiberCacheError("invalid cache record") from error
+
+
+def successor_fiber_cache_record_from_payload(
+    payload: object,
+) -> SuccessorFiberCacheRecord:
+    """Decode one coordinate record for an independently bound provenance."""
+
+    return _decode_record(payload)
 
 
 def _decode_provenance(payload: Any) -> SuccessorFiberCacheProvenance:
@@ -962,8 +980,7 @@ def deserialize_successor_fiber_cache(
         not isinstance(expected_content_sha256, str)
         or len(expected_content_sha256) != 64
         or any(
-            character not in "0123456789abcdef"
-            for character in expected_content_sha256
+            character not in "0123456789abcdef" for character in expected_content_sha256
         )
     ):
         raise SuccessorFiberCacheError(
@@ -992,9 +1009,7 @@ def deserialize_successor_fiber_cache(
             for name in _PROVENANCE_FIELDS
             if getattr(provenance, name) != getattr(expected_provenance, name)
         }
-        raise SuccessorFiberCacheError(
-            f"cache provenance mismatch: {disagreements}"
-        )
+        raise SuccessorFiberCacheError(f"cache provenance mismatch: {disagreements}")
     records_payload = envelope["records"]
     if not isinstance(records_payload, list):
         raise SuccessorFiberCacheError("cache records must be an array")
