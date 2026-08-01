@@ -8,8 +8,15 @@ the executor remains the single source of truth for transition semantics.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import combinations
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from compose_v4.experiments.aromatic_cycle_open_semantics import (
+        AromaticCycleOpenResolution,
+    )
 
 from compose_v4.chem.molecular_graph import (
     BOND_AROMATIC,
@@ -27,7 +34,6 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.state import is_valid_state
 
-
 MICRO_BOND_CLASSES = (BOND_SINGLE, BOND_DOUBLE, BOND_TRIPLE)
 REAL_ATOM_TYPES = set(range(1, M)) - {SCAR_IDX}
 
@@ -41,6 +47,19 @@ class BondInsert:
 
 @dataclass(frozen=True)
 class BondDelete:
+    a: int
+    b: int
+
+
+@dataclass(frozen=True)
+class CycleOpenEdge:
+    """One semantic undirected cycle edge selected for ring opening.
+
+    This action is deliberately distinct from :class:`BondDelete`. Editing V2
+    may therefore change aromatic ring-opening semantics without silently
+    reinterpreting historical raw bond-deletion records.
+    """
+
     a: int
     b: int
 
@@ -150,6 +169,71 @@ def is_valid_bond_delete(mg: MolecularGraph, op: BondDelete) -> bool:
     if int(mg.implicit_h_counts[op.b]) + delta > MAX_H_COUNT:
         return False
     return is_valid_state(apply_bond_delete(mg, op))
+
+
+def resolve_cycle_open_edge(
+    mg: MolecularGraph,
+    op: CycleOpenEdge,
+) -> AromaticCycleOpenResolution | None:
+    """Resolve the frozen Editing-V2 semantic cycle-opening action.
+
+    The validated component solver currently lives in the historical
+    experimental module whose complete global-oracle evidence promoted this
+    action. The import is local to avoid a rewrite-kernel import cycle. The
+    returned resolution is the single source for validation, execution, and
+    inverse construction.
+    """
+
+    from compose_v4.experiments.aromatic_cycle_open_semantics import (
+        resolve_component_factored_cycle_open,
+    )
+
+    if type(op) is not CycleOpenEdge or not (int(op.a) < int(op.b)):
+        return None
+    return resolve_component_factored_cycle_open(
+        mg,
+        BondDelete(int(op.a), int(op.b)),
+    )
+
+
+def is_valid_cycle_open_edge(mg: MolecularGraph, op: CycleOpenEdge) -> bool:
+    resolution = resolve_cycle_open_edge(mg, op)
+    return bool(resolution is not None and resolution.admitted)
+
+
+def apply_cycle_open_edge(mg: MolecularGraph, op: CycleOpenEdge) -> MolecularGraph:
+    resolution = resolve_cycle_open_edge(mg, op)
+    if resolution is None or not resolution.admitted or resolution.successor is None:
+        raise ValueError(f"invalid semantic cycle_open instance: {op!r}")
+    return resolution.successor
+
+
+def enumerate_cycle_open_edges(mg: MolecularGraph) -> tuple[CycleOpenEdge, ...]:
+    """Enumerate the exact semantic cycle-opening fiber once per endpoint pair."""
+
+    real = tuple(int(v) for v in np.flatnonzero(is_element(mg.atom_types)))
+    return tuple(
+        action
+        for a, b in combinations(real, 2)
+        if int(mg.bonds[a, b]) != 0
+        and is_valid_cycle_open_edge(mg, action := CycleOpenEdge(a, b))
+    )
+
+
+def inverse_cycle_open_edge(
+    mg: MolecularGraph,
+    op: CycleOpenEdge,
+) -> BondInsert:
+    """Return the exact cycle-close mark declared by an admitted resolution."""
+
+    resolution = resolve_cycle_open_edge(mg, op)
+    if (
+        resolution is None
+        or not resolution.admitted
+        or resolution.inverse_bond_order is None
+    ):
+        raise ValueError(f"rejected semantic cycle_open has no inverse: {op!r}")
+    return BondInsert(int(op.a), int(op.b), int(resolution.inverse_bond_order))
 
 
 def apply_bond_reorder(mg: MolecularGraph, op: BondReorder) -> MolecularGraph:

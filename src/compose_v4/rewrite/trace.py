@@ -17,6 +17,7 @@ from compose_v4.rewrite.operators import (
     BondInsert,
     BondReorder,
     BondReroute,
+    inverse_cycle_open_edge,
 )
 from compose_v4.rewrite.tracelets import (
     AtomPayload,
@@ -108,6 +109,11 @@ def inverse_step(source: MolecularGraph, step: RewriteStep) -> RewriteStep:
                 int(action.b),
                 int(source.bonds[action.a, action.b]),
             ),
+        )
+    if step.rule_name == "cycle_open":
+        return RewriteStep(
+            "bond_insert",
+            inverse_cycle_open_edge(source, action),
         )
     if step.rule_name == "bond_reorder":
         return RewriteStep(
@@ -255,9 +261,6 @@ def invert_trace(
     runtime = system or default_rewrite_system()
     step_tuple = tuple(steps)
     _, states = execute_trace(source, step_tuple, system=runtime, return_states=True)
-    inverse = [
-        inverse_step(states[i], step_tuple[i])
-        for i in range(len(step_tuple))
-    ]
+    inverse = [inverse_step(states[i], step_tuple[i]) for i in range(len(step_tuple))]
     inverse.reverse()
     return tuple(inverse)

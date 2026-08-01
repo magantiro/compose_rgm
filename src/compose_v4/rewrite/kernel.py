@@ -10,7 +10,6 @@ from compose_v4.chem.state import is_connected_or_null, is_valid_state
 from compose_v4.rewrite import operators as ops
 from compose_v4.rewrite import tracelets
 
-
 Validator = Callable[[MolecularGraph, Any], bool]
 Executor = Callable[[MolecularGraph, Any], MolecularGraph]
 Constraint = Callable[[MolecularGraph, Any, MolecularGraph], bool]
@@ -48,7 +47,9 @@ class RewriteSystem:
             raise ValueError("a rewrite system needs at least one rule")
         self.constraints = tuple(constraints)
 
-    def apply(self, state: MolecularGraph, rule_name: str, action: Any) -> MolecularGraph:
+    def apply(
+        self, state: MolecularGraph, rule_name: str, action: Any
+    ) -> MolecularGraph:
         try:
             rule = self.rules[rule_name]
         except KeyError as exc:
@@ -65,7 +66,9 @@ class RewriteSystem:
         successor = rule.execute(state, action)
         if not is_valid_state(successor):
             raise InvalidRewrite(f"{rule_name} violated the validity invariant")
-        if not all(constraint(state, action, successor) for constraint in self.constraints):
+        if not all(
+            constraint(state, action, successor) for constraint in self.constraints
+        ):
             raise InvalidRewrite(f"{rule_name} violates a hard condition")
         return successor
 
@@ -104,12 +107,42 @@ def canonical_state_key(state: MolecularGraph) -> str:
 def default_rewrite_system(constraints: Iterable[Constraint] = ()) -> RewriteSystem:
     return RewriteSystem(
         rules=(
-            RewriteRule("atom_insert", ops.AtomInsert, ops.is_valid_atom_insert, ops.apply_atom_insert),
-            RewriteRule("atom_delete", ops.AtomDelete, ops.is_valid_atom_delete, ops.apply_atom_delete),
-            RewriteRule("atom_restate", ops.AtomRestate, ops.is_valid_atom_restate, ops.apply_atom_restate),
-            RewriteRule("bond_insert", ops.BondInsert, ops.is_valid_bond_insert, ops.apply_bond_insert),
-            RewriteRule("bond_delete", ops.BondDelete, ops.is_valid_bond_delete, ops.apply_bond_delete),
-            RewriteRule("bond_reorder", ops.BondReorder, ops.is_valid_bond_reorder, ops.apply_bond_reorder),
+            RewriteRule(
+                "atom_insert",
+                ops.AtomInsert,
+                ops.is_valid_atom_insert,
+                ops.apply_atom_insert,
+            ),
+            RewriteRule(
+                "atom_delete",
+                ops.AtomDelete,
+                ops.is_valid_atom_delete,
+                ops.apply_atom_delete,
+            ),
+            RewriteRule(
+                "atom_restate",
+                ops.AtomRestate,
+                ops.is_valid_atom_restate,
+                ops.apply_atom_restate,
+            ),
+            RewriteRule(
+                "bond_insert",
+                ops.BondInsert,
+                ops.is_valid_bond_insert,
+                ops.apply_bond_insert,
+            ),
+            RewriteRule(
+                "bond_delete",
+                ops.BondDelete,
+                ops.is_valid_bond_delete,
+                ops.apply_bond_delete,
+            ),
+            RewriteRule(
+                "bond_reorder",
+                ops.BondReorder,
+                ops.is_valid_bond_reorder,
+                ops.apply_bond_reorder,
+            ),
             RewriteRule(
                 "bond_reroute",
                 ops.BondReroute,
@@ -192,4 +225,29 @@ def de_novo_rewrite_system(
 
     return default_rewrite_system(
         constraints=(connected_successor_constraint, *tuple(constraints))
+    )
+
+
+def editing_v2_rewrite_system(
+    constraints: Iterable[Constraint] = (),
+) -> RewriteSystem:
+    """Editing-V2 runtime with explicit semantic cycle opening.
+
+    The legacy and de-novo runtimes intentionally retain their historical rule
+    registry. This separate constructor prevents the new action identity from
+    silently expanding an old process or unconditional checkpoint.
+    """
+
+    legacy = default_rewrite_system()
+    return RewriteSystem(
+        rules=(
+            *legacy.rules.values(),
+            RewriteRule(
+                "cycle_open",
+                ops.CycleOpenEdge,
+                ops.is_valid_cycle_open_edge,
+                ops.apply_cycle_open_edge,
+            ),
+        ),
+        constraints=(connected_successor_constraint, *tuple(constraints)),
     )
