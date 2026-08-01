@@ -1,0 +1,125 @@
+{
+  "action_ontology": {
+    "action_type": "CycleOpenEdge",
+    "endpoint_policy": "undirected_endpoints_stored_in_strictly_increasing_persistent_slot_order",
+    "executor_rule": "cycle_open",
+    "legacy_bond_delete_policy": "retained_as_an_internal_micro_rule_but_forbidden_as_an_editing_v2_cycle_open_teacher_or_candidate",
+    "model_family": "cycle_attach",
+    "public_name": "cycle_open",
+    "silent_reinterpretation_of_legacy_bond_delete": false
+  },
+  "admission_and_execution": {
+    "aromatic_edge_identity": "resonance_invariant_bond_classes",
+    "aromatic_resolution": "complete_degree_constrained_assignments_per_resonance_invariant_aromatic_component",
+    "assignment_cap": null,
+    "bridge_edges_admitted": false,
+    "charge_policy": "intersect_executor_admission_with_the_frozen_editing_charge_policy",
+    "nonaromatic_resolution": "current_connected_valid_raw_bond_deletion",
+    "rejection_behavior": "typed_rejection_excluded_from_the_legal_fiber",
+    "selected_aromatic_edge_policy": "require_at_least_one_preserving_assignment_with_the_selected_edge_single",
+    "successor_policy": "require_all_executed_selected_component_representatives_to_have_one_canonical_molecular_product",
+    "validity_policy": "every_committed_successor_is_valid_connected_and_within_declared_support"
+  },
+  "contract_sha256": "34fe06c85ac4888b947a57482090105afb96cf320fcd410956b317234c78f451",
+  "downstream_invalidation": {
+    "affected_whole_traces_must_be_replayed": true,
+    "action_codec_schema_bump_required": true,
+    "active8_inventory_must_be_rebuilt": true,
+    "candidate_and_successor_cache_namespaces_must_be_rebuilt": true,
+    "gate0_and_t1_must_be_rebuilt": true,
+    "historical_packed_records_remain_readable_only_under_their_original_process_identity": true,
+    "p50_authorized_by_this_contract": false,
+    "process_identity_revision_required": true
+  },
+  "exact_representative_policy": {
+    "declared_section": "lexicographically_minimum_fixed_coordinate_successor_within_the_unique_canonical_product_group",
+    "exact_slot_equivariance_claimed": false,
+    "molecular_successor_invariance_required": true,
+    "reason": "a deterministic exact Kekule representative need_not_be_equivariant_under_aromatic_graph_automorphisms",
+    "required_before_training": [
+      "alternate_kekule_one_step_full_active8_molecular_kernel_invariance",
+      "persistent_slot_relabeling_one_step_molecular_kernel_invariance",
+      "bounded_multistep_molecular_law_invariance",
+      "inverse_cycle_close_recovers_the_canonical_source_identity"
+    ]
+  },
+  "implementation_boundary": {
+    "action_and_executor": [
+      "rewrite_action_dataclass",
+      "rewrite_system_rule",
+      "validator_and_deterministic_executor",
+      "inverse_compilation"
+    ],
+    "data_and_provenance": [
+      "action_codec",
+      "trace_serialization",
+      "cycle_operation_compiler",
+      "whole_trace_admission",
+      "packed_candidate_materialization",
+      "successor_fiber_cache",
+      "process_and_implementation_hashes"
+    ],
+    "model_and_evaluation": [
+      "semantic_cycle_open_admission_mask",
+      "family_action_sampling",
+      "teacher_action_scoring",
+      "production_successor_coordinate_decoder",
+      "dictionary_reference_oracle",
+      "charge_and_hard_constraint_filters"
+    ]
+  },
+  "model_contract": {
+    "candidate_coordinate": "one_undirected_endpoint_pair",
+    "family_head": "cycle_open_head",
+    "family_name_unchanged": "cycle_attach",
+    "mask_source": "exact_semantic_executor_admission_not_raw_stored_bond_order_arithmetic",
+    "scorer_input": "resonance_invariant_neural_bond_view",
+    "successor_training_object": "canonical_molecular_successor_probability",
+    "teacher_payload": "CycleOpenEdge_not_BondDelete"
+  },
+  "required_release_gates": [
+    "contract_and_action_codec_round_trip",
+    "semantic_enumerator_equals_executor_admission",
+    "all_legal_cycle_open_actions_execute",
+    "cycle_open_and_cycle_close_canonical_round_trip",
+    "production_segmented_equals_fresh_dictionary_oracle",
+    "alternate_kekule_and_slot_relabel_molecular_kernel_invariance",
+    "bounded_multistep_quotient_law_invariance",
+    "affected_trace_replay_and_exact_successor_match",
+    "new_process_identity_on_every_derived_artifact",
+    "gate0_and_t1_pass_under_the_new_process_identity"
+  ],
+  "schema": "compose.editing.semantic_cycle_open_integration_contract",
+  "schema_version": 1,
+  "scope": {
+    "active_families_unchanged": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ],
+    "editing_only": true,
+    "formal_charge_changes": "out_of_scope",
+    "max_active_atoms": 40,
+    "ring_system_delete_enabled": false,
+    "ring_system_grow_enabled": false,
+    "stereochemistry": "out_of_scope",
+    "unconditional_de_novo_lane_modified": false
+  },
+  "source_evidence": {
+    "complete_global_equivalence_contract_sha256": "33c21817844fa66574ef7286e6b13f2840dfb4f0f83e2b9076a8e1bcc9b43cf2",
+    "complete_global_equivalence_result_file_sha256": "e1643249061b58f16c06a324880859b77ade86a1c7fcbafd611478a729f6fbe6",
+    "complete_global_equivalence_result_sha256": "f68b49f853612b3204b65f7ae47665ad6fedecf79f9a6746f4079badae76b10c",
+    "complete_validation_edge_count": 19311,
+    "complete_validation_source_count": 1707,
+    "mismatch_edge_count": 0,
+    "oracle_overflow_edge_count": 0,
+    "preserved_v1_failed_result_sha256": "6d73288f124d5e0fae3e0725aea37903e7c8453136b4bda79a22422be37e3840"
+  },
+  "status": "DESIGN_FROZEN_IMPLEMENTATION_NOT_TRAINING_AUTHORIZED",
+  "training_authorized": false
+}
