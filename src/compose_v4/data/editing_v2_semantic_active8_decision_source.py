@@ -39,6 +39,7 @@ from compose_v4.data.editing_v2_semantic_active8_admission import (
 from compose_v4.data.editing_v2_semantic_active8_source_adapter import (
     resolve_editing_v2_semantic_active8_sources,
 )
+from compose_v4.data.editing_corpus_contract import REQUIRED_PARTITION_ROLES
 from compose_v4.data.packed_trace_store import AddressedPackedTrace, PackedTraceAddress
 from compose_v4.data.semantic_active8_chunk_cache import (
     SemanticActive8ChunkCacheError,
@@ -540,6 +541,22 @@ class EditingV2SemanticActive8DecisionIndex:
                     )
                 yield resolved
 
+    def iter_accepted_traces_for_partition(
+        self,
+        partition_role: str,
+    ) -> Iterable[SemanticActive8AcceptedTrace]:
+        """Stream admitted traces while opening only the requested partition."""
+
+        for accepted, resolved in self.iter_resolved_traces_for_partition(
+            partition_role
+        ):
+            if accepted:
+                if not isinstance(resolved, SemanticActive8AcceptedTrace):
+                    raise SemanticActive8DecisionSourceError(
+                        "accepted partition trace stream returned an excluded record"
+                    )
+                yield resolved
+
     def iter_excluded_traces(self) -> Iterable[SemanticActive8ExcludedTrace]:
         """Stream exact excluded traces and their reasons separately."""
 
@@ -575,6 +592,21 @@ class EditingV2SemanticActive8DecisionIndex:
         """Stream every exact decision trace once in immutable source order."""
 
         yield from _iter_resolved_traces(self)
+
+    def iter_resolved_traces_for_partition(
+        self,
+        partition_role: str,
+    ) -> Iterable[
+        tuple[bool, SemanticActive8AcceptedTrace | SemanticActive8ExcludedTrace]
+    ]:
+        """Stream one partition without reading exact states from any other role."""
+
+        if partition_role not in REQUIRED_PARTITION_ROLES:
+            raise ValueError(
+                "semantic Active8 partition role must be one of "
+                f"{REQUIRED_PARTITION_ROLES}, got {partition_role!r}"
+            )
+        yield from _iter_resolved_traces(self, partition_role=partition_role)
 
     def accepted_transitions_for(
         self,
@@ -1099,8 +1131,11 @@ def _iter_plan_rows(
     plan: Mapping[str, Any],
     *,
     artifact_root: Path,
+    partition_role: str | None = None,
 ) -> Iterable[tuple[AddressedPackedTrace, Mapping[str, Any], Mapping[str, Any]]]:
     for task in plan["tasks"]:
+        if partition_role is not None and task["partition_role"] != partition_role:
+            continue
         if (
             type(task.get("row_count")) is not int
             or not 0 <= task["row_count"] <= MAX_DECISION_SOURCE_CHUNK_ROWS
@@ -1249,11 +1284,14 @@ def _resolved_trace(
 
 def _iter_resolved_traces(
     index: EditingV2SemanticActive8DecisionIndex,
+    *,
+    partition_role: str | None = None,
 ) -> Iterable[tuple[bool, SemanticActive8AcceptedTrace | SemanticActive8ExcludedTrace]]:
     plan = json.loads(index._decision_plan_bytes)
     for addressed, row, _ in _iter_plan_rows(
         plan,
         artifact_root=index.artifact_root,
+        partition_role=partition_role,
     ):
         accepted, resolved = _resolved_trace(addressed, row)
         if index.is_accepted(addressed.address) is not accepted:

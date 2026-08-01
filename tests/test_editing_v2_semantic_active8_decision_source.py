@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import shutil
+from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 
@@ -13,6 +14,7 @@ import pytest
 import torch
 
 from compose_v4.chem.molecular_graph import (
+    ELEMENT_TO_IDX,
     ORGANIC_VOCABULARY,
     smiles_to_molecular_graph,
 )
@@ -73,10 +75,22 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
 )
 from compose_v4.experiments import editing_v2_semantic_gate_zero as semantic_gate_zero
+from compose_v4.experiments import (
+    editing_v2_semantic_t1_panel_cache as semantic_t1_panel,
+)
 from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
-from compose_v4.rewrite.operators import CycleCloseEdge
+from compose_v4.rewrite.operators import (
+    AtomDelete,
+    AtomInsert,
+    BondReorder,
+    BondReroute,
+    CycleCloseEdge,
+    CycleOpenEdge,
+    SemanticAtomRestate,
+)
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 from compose_v4.rewrite.trace_shard_v3 import encode_semantic_trace_record
+from compose_v4.rewrite.tracelets import BondOrderChange, RingSystemRestate
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 
@@ -98,9 +112,17 @@ def _file_sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _record(trace_id: str, lane: str, role: str) -> dict[str, object]:
-    source = pad_molecular_graph(smiles_to_molecular_graph("CCCCCC"), 16)
-    step = RewriteStep("cycle_close", CycleCloseEdge(0, 5, 1))
+def _state(smiles: str):
+    return pad_molecular_graph(smiles_to_molecular_graph(smiles), 40)
+
+
+def _record_from_step(
+    trace_id: str,
+    lane: str,
+    role: str,
+    source,
+    step: RewriteStep,
+) -> dict[str, object]:
     target = editing_v2_semantic_rewrite_system().apply(
         source,
         step.rule_name,
@@ -118,12 +140,102 @@ def _record(trace_id: str, lane: str, role: str) -> dict[str, object]:
     )
 
 
-def _inventory(root: Path) -> EditingV2SemanticActive8SourceInventory:
+def _record(trace_id: str, lane: str, role: str) -> dict[str, object]:
+    return _record_from_step(
+        trace_id,
+        lane,
+        role,
+        _state("CCCCCC"),
+        RewriteStep("cycle_close", CycleCloseEdge(0, 5, 1)),
+    )
+
+
+def _active8_train_records(lane: str) -> tuple[dict[str, object], ...]:
+    system = editing_v2_semantic_rewrite_system()
+    carbon = _state("C")
+    null = system.apply(carbon, "atom_delete", AtomDelete(0))
+    root_birth = AtomInsert(
+        slot=0,
+        atom_type=int(carbon.atom_types[0]),
+        formal_charge=int(carbon.formal_charges[0]),
+        implicit_h_count=int(carbon.implicit_h_counts[0]),
+        neighbors=(),
+    )
+    nitrogen_class = next(
+        index
+        for index, (element, _valence) in enumerate(ORGANIC_VOCABULARY.classes)
+        if element == ELEMENT_TO_IDX["N"]
+    )
+    graft_source = _state("c1ccccc1CC")
+    saturated_ring = _state("C1CCCCC1")
+    cases = (
+        ("atom_insert", null, RewriteStep("atom_insert", root_birth)),
+        ("atom_delete", _state("CC"), RewriteStep("atom_delete", AtomDelete(1))),
+        (
+            "atom_restate",
+            carbon,
+            RewriteStep(
+                "atom_restate_semantic", SemanticAtomRestate(0, nitrogen_class)
+            ),
+        ),
+        (
+            "bond_reorder",
+            _state("CC"),
+            RewriteStep("bond_reorder", BondReorder(0, 1, 2)),
+        ),
+        (
+            "bond_reroute",
+            graft_source,
+            RewriteStep(
+                "bond_reroute",
+                BondReroute(a=7, b=6, u=7, v=0, new_order=1),
+            ),
+        ),
+        (
+            "cycle_insert",
+            _state("CCCCCC"),
+            RewriteStep("cycle_close", CycleCloseEdge(0, 5, 1)),
+        ),
+        (
+            "cycle_attach",
+            saturated_ring,
+            RewriteStep("cycle_open", CycleOpenEdge(0, 5)),
+        ),
+        (
+            "ring_system_restate",
+            saturated_ring,
+            RewriteStep(
+                "ring_system_restate",
+                RingSystemRestate(
+                    (
+                        BondOrderChange(0, 1, 2),
+                        BondOrderChange(2, 3, 2),
+                        BondOrderChange(4, 5, 2),
+                    )
+                ),
+            ),
+        ),
+    )
+    return tuple(
+        _record_from_step(f"active8-{family}", lane, "train", source, step)
+        for family, source, step in cases
+    )
+
+
+def _inventory(
+    root: Path,
+    *,
+    full_train_active8: bool = False,
+) -> EditingV2SemanticActive8SourceInventory:
     migration = root / "migration" / "SEMANTIC_MIGRATION_COMPLETE.json"
     migration.parent.mkdir(parents=True)
     migration.write_bytes(_canonical({"fixture": "migration"}, newline=True))
     migration_file_sha = _file_sha(migration)
     sources = []
+    total_entries = 0
+    total_states = 0
+    total_actions = 0
+    total_family_histogram: Counter[str] = Counter()
     for index, (lane, role) in enumerate(
         (lane, role)
         for lane in REQUIRED_DATA_LANES
@@ -131,6 +243,12 @@ def _inventory(root: Path) -> EditingV2SemanticActive8SourceInventory:
     ):
         output = root / "sources" / lane / role
         semantic = output / "semantic"
+        records = (
+            _active8_train_records(lane)
+            if full_train_active8 and role == "train" and lane == REQUIRED_DATA_LANES[0]
+            else (_record(f"trace-{index}", lane, role),)
+        )
+        record_count = len(records)
         binding = SemanticActive8SourceBinding(
             source_shard_name="legacy.jsonl.gz",
             source_shard_sha256=hashlib.sha256(f"source-{index}".encode()).hexdigest(),
@@ -139,11 +257,11 @@ def _inventory(root: Path) -> EditingV2SemanticActive8SourceInventory:
             ).hexdigest(),
             source_overlay_sha256=None,
             source_unified_manifest_sha256="d" * 64,
-            source_entry_count=1,
+            source_entry_count=record_count,
         )
         write_semantic_packed_artifact(
             semantic,
-            [_record(f"trace-{index}", lane, role)],
+            records,
             data_lane=lane,
             split=role,
             source_binding=binding.as_mapping(),
@@ -151,8 +269,8 @@ def _inventory(root: Path) -> EditingV2SemanticActive8SourceInventory:
                 "decision_ledger_sha256": hashlib.sha256(
                     f"decision-{index}".encode()
                 ).hexdigest(),
-                "source_count": 1,
-                "admitted_count": 1,
+                "source_count": record_count,
+                "admitted_count": record_count,
                 "rejected_count": 0,
             },
         )
@@ -192,9 +310,21 @@ def _inventory(root: Path) -> EditingV2SemanticActive8SourceInventory:
                 ],
                 source_binding=binding,
                 family_histogram=tuple(manifest["family_histogram"].items()),
-                counts=SemanticActive8CountFlow(1, 1, 1, 0, 1, 2, 1),
+                counts=SemanticActive8CountFlow(
+                    record_count,
+                    record_count,
+                    record_count,
+                    0,
+                    record_count,
+                    record_count * 2,
+                    record_count,
+                ),
             )
         )
+        total_entries += record_count
+        total_states += record_count * 2
+        total_actions += record_count
+        total_family_histogram.update(manifest["family_histogram"])
     return EditingV2SemanticActive8SourceInventory(
         status=SOURCE_INVENTORY_STATUS,
         training_authorized=False,
@@ -218,9 +348,17 @@ def _inventory(root: Path) -> EditingV2SemanticActive8SourceInventory:
         lane_registry_sha256="d" * 64,
         membership_receipt_file_sha256="e" * 64,
         membership_receipt_sha256="f" * 64,
-        family_histogram=(("cycle_insert", 20),),
+        family_histogram=tuple(sorted(total_family_histogram.items())),
         rejection_histogram=(),
-        counts=SemanticActive8CountFlow(20, 20, 20, 0, 20, 40, 20),
+        counts=SemanticActive8CountFlow(
+            total_entries,
+            total_entries,
+            total_entries,
+            0,
+            total_entries,
+            total_states,
+            total_actions,
+        ),
         sources=tuple(sources),
     )
 
@@ -307,11 +445,14 @@ def _runtime_identity(model: FactorizedTraceletRateModel) -> dict[str, object]:
     return {**body, "identity_sha256": _value_sha(body)}
 
 
-@pytest.fixture(scope="module")
-def completed_source(tmp_path_factory: pytest.TempPathFactory):
-    root = tmp_path_factory.mktemp("semantic-active8-source") / "artifacts"
+def _build_completed_source(
+    root: Path,
+    *,
+    full_train_active8: bool,
+    inject_exclusion: bool,
+):
     root.mkdir()
-    inventory = _inventory(root)
+    inventory = _inventory(root, full_train_active8=full_train_active8)
     cache_plan = plan_semantic_active8_chunk_cache(
         inventory,
         source_revision=_revision(),
@@ -391,7 +532,8 @@ def completed_source(tmp_path_factory: pytest.TempPathFactory):
             active8_exclusions=(exclusion,),
         )
 
-    decision_mr.evaluate_semantic_active8_trace = one_exclusion
+    if inject_exclusion:
+        decision_mr.evaluate_semantic_active8_trace = one_exclusion
     try:
         for task in plan["tasks"]:
             decision_mr.execute_semantic_active8_decision_task(
@@ -424,6 +566,24 @@ def completed_source(tmp_path_factory: pytest.TempPathFactory):
         "decision_plan_path": decision_plan_path,
         "decision_completion_path": decision_completion_path,
     }
+
+
+@pytest.fixture(scope="module")
+def completed_source(tmp_path_factory: pytest.TempPathFactory):
+    return _build_completed_source(
+        tmp_path_factory.mktemp("semantic-active8-source") / "artifacts",
+        full_train_active8=False,
+        inject_exclusion=True,
+    )
+
+
+@pytest.fixture(scope="module")
+def completed_active8_source(tmp_path_factory: pytest.TempPathFactory):
+    return _build_completed_source(
+        tmp_path_factory.mktemp("semantic-active8-full-source") / "artifacts",
+        full_train_active8=True,
+        inject_exclusion=False,
+    )
 
 
 def _patch_migration_resolver(monkeypatch, inventory):
@@ -503,6 +663,23 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     assert len(accepted) == 19
     assert all(index.is_accepted(item.addressed_trace.address) for item in accepted)
     assert all(item.decision.active8_status == "accepted" for item in accepted)
+
+    original_loader = decision_mr._load_task_result
+
+    def train_only_loader(plan, task, *, artifact_root):
+        assert task["partition_role"] == "train"
+        return original_loader(plan, task, artifact_root=artifact_root)
+
+    monkeypatch.setattr(decision_mr, "_load_task_result", train_only_loader)
+    train_accepted = tuple(index.iter_accepted_traces_for_partition("train"))
+    assert len(train_accepted) == 4
+    assert all(
+        item.addressed_trace.address.partition == "train" for item in train_accepted
+    )
+    with pytest.raises(ValueError, match="partition role must be one of"):
+        tuple(index.iter_accepted_traces_for_partition("outer_test"))
+    monkeypatch.setattr(decision_mr, "_load_task_result", original_loader)
+
     assert all(
         index.decision_sha256_for(item.addressed_trace.address) == item.decision_sha256
         for item in accepted
@@ -726,6 +903,80 @@ def test_semantic_gate_zero_consumes_real_index_without_held_out_rescue(
     )
     assert decision["structural_result"] == "FAIL"
     assert decision["next_authorized_stage"] is None
+
+
+def test_real_gate_zero_pass_prepares_and_resolves_exact_train_t1_panel(
+    completed_active8_source,
+    monkeypatch,
+) -> None:
+    inventory = completed_active8_source["inventory"]
+    _patch_migration_resolver(monkeypatch, inventory)
+    index = _resolve(completed_active8_source)
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(
+        repo_root=Path.cwd()
+    )
+    output = completed_active8_source["root"] / "gate-zero-t1-integration"
+    artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
+        migration_completion_path=inventory.migration_completion_path,
+        chunk_cache_plan_path=completed_active8_source["cache_plan_path"],
+        chunk_cache_global_completion_path=completed_active8_source[
+            "cache_completion_path"
+        ],
+        decision_plan_path=completed_active8_source["decision_plan_path"],
+        decision_completion_path=completed_active8_source["decision_completion_path"],
+        artifact_root=completed_active8_source["root"],
+        repo_root=Path.cwd(),
+        output_directory=output,
+        contract_path=contract.source,
+    )
+    assert artifacts["evidence"]["structural_result"] == "PASS"
+    runtime = artifacts["evidence"]["model_runtime_identity"]
+    request = semantic_t1_panel.SemanticT1PanelRequest.create(
+        request_id="real_typed_index_integration",
+        source_revision_sha256=runtime["source_revision_sha256"],
+        support_time=0.5,
+        maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+    )
+    panel = semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
+        index,
+        gate_zero_artifacts=artifacts,
+        decision_plan_path=completed_active8_source["decision_plan_path"],
+        request=request,
+        gate_zero_contract=contract,
+        repo_root=Path.cwd(),
+    )
+    assert {entry.model_family for entry in panel.entries} == set(ACTIVE8_FAMILIES)
+    assert panel.first_pass_train_teacher_count == 12
+    assert panel.first_pass_train_teacher_stream_sha256 == (
+        panel.second_pass_train_teacher_stream_sha256
+    )
+    traces = semantic_t1_panel.resolve_semantic_t1_cache_trace_inputs(
+        index,
+        panel,
+        repo_root=Path.cwd(),
+    )
+    assert traces
+    assert all(trace.addressed_trace.address.partition == "train" for trace in traces)
+    assert sum(
+        len(cache_input.panel_entry_sha256s) for cache_input in panel.cache_trace_inputs
+    ) == len(panel.entries)
+
+    mismatched_plan = output / "MISMATCHED_PLAN.json"
+    mismatched = json.loads(completed_active8_source["decision_plan_path"].read_text())
+    mismatched["model_runtime_identity"]["source_revision_sha256"] = "f" * 64
+    mismatched_plan.write_bytes(_canonical(mismatched, newline=True))
+    with pytest.raises(
+        semantic_gate_zero.SemanticGateZeroStructuralError,
+        match="decision plan differs from decision-source index|model runtime",
+    ):
+        semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
+            index,
+            gate_zero_artifacts=artifacts,
+            decision_plan_path=mismatched_plan,
+            request=request,
+            gate_zero_contract=contract,
+            repo_root=Path.cwd(),
+        )
 
 
 def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
