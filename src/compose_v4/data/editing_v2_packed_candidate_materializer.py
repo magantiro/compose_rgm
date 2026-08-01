@@ -746,6 +746,25 @@ def _load_historical_overlay_receipt(
     }
 
 
+def validate_historical_provenance_overlay(
+    path: str | Path,
+    *,
+    expected_file_sha256: str,
+    expected_shard_name: str,
+    expected_packed_shard_sha256: str,
+    expected_original_manifest_sha256: str,
+) -> dict[str, Any]:
+    """Validate an immutable legacy sidecar strictly as a historical byte receipt."""
+
+    return _load_historical_overlay_receipt(
+        Path(path),
+        expected_file_sha256=expected_file_sha256,
+        expected_shard_name=expected_shard_name,
+        expected_packed_shard_sha256=expected_packed_shard_sha256,
+        expected_original_manifest_sha256=expected_original_manifest_sha256,
+    )
+
+
 def _partition_groups(trace: Mapping[str, Any], *, address: str) -> dict[str, Any]:
     metadata = trace.get("metadata")
     isolation = metadata.get("partition_isolation") if isinstance(metadata, Mapping) else None
@@ -1771,6 +1790,7 @@ __all__ = [
     "file_sha256",
     "load_packed_candidate_source_manifest",
     "materialize_packed_candidate_headers",
+    "validate_historical_provenance_overlay",
     "validate_packed_candidate_materialization",
     "validate_packed_candidate_source_manifest",
     "write_packed_candidate_source_manifest",

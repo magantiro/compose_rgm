@@ -44,7 +44,8 @@ def _receipt(
         "overlay_path": f"{shard}.provenance.json",
         "overlay_file_sha256": SHA_C,
         "overlay_fields_sha256": SHA_A,
-        "effective_provenance_sha256": SHA_B,
+        "overlay_semantic_sha256": SHA_B,
+        "overlay_validation_role": "historical_immutable_byte_receipt",
     }
 
 
@@ -153,6 +154,14 @@ def test_completion_rejects_malformed_shard_receipts(mutation, message: str) -> 
     mutation(row)
 
     with pytest.raises(ValueError, match=message):
+        _completion(receipts)
+
+
+def test_completion_rejects_unknown_overlay_validation_role() -> None:
+    receipts = _complete_receipts()
+    receipts[0]["overlay_validation_role"] = "current_enough"
+
+    with pytest.raises(ValueError, match="overlay_validation_role is invalid"):
         _completion(receipts)
 
 

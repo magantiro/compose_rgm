@@ -22,6 +22,7 @@ from compose_v4.data.editing_v2_packed_candidate_materializer import (
     canonical_json_bytes,
     file_sha256,
     materialize_packed_candidate_headers,
+    validate_historical_provenance_overlay,
     validate_packed_candidate_materialization,
     write_packed_candidate_source_manifest,
 )
@@ -516,6 +517,29 @@ def test_historical_overlay_bytes_are_physically_bound(tmp_path: Path) -> None:
             output_dir=tmp_path / "output",
             code_revision="f" * 40,
         )
+
+
+def test_historical_overlay_validator_accepts_old_implementation_identity(
+    tmp_path: Path,
+) -> None:
+    source_manifest_path = _source_manifest(tmp_path)
+    source_manifest = json.loads(source_manifest_path.read_text())
+    shard_spec = source_manifest["sources"][0]["shards"][0]
+    overlay_path = (
+        tmp_path / "artifacts" / shard_spec["historical_provenance_overlay_relative_path"]
+    )
+
+    receipt = validate_historical_provenance_overlay(
+        overlay_path,
+        expected_file_sha256=shard_spec["historical_provenance_overlay_file_sha256"],
+        expected_shard_name=Path(shard_spec["relative_path"]).name,
+        expected_packed_shard_sha256=shard_spec["file_sha256"],
+        expected_original_manifest_sha256=shard_spec["manifest_file_sha256"],
+    )
+
+    assert receipt["recorded_upgrade_implementation_hash"] == "2ba5bc5702f33b8c"
+    assert receipt["live_overlay_semantic_validation_applied"] is False
+    assert receipt["training_provenance_authorized"] is False
 
 
 @pytest.mark.parametrize(

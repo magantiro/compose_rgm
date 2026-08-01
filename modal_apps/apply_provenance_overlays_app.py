@@ -4,10 +4,11 @@ The corruption/cycle packed shards were written by a packer that recorded the sa
 ``codec_implementation_hash`` or the explicit codec/packed schema versions; the MMP shards record all of
 it. That asymmetry is why the corpus satisfies BENCHMARK_CONTRACT but not SCIENTIFIC_TRAINING_CONTRACT.
 
-This writes a SIDECAR per shard rather than repacking. The shards stay byte-identical -- they are already
-certified by replay, and rewriting them purely to add metadata would discard that certification and cost
-hours. Each overlay binds the shard's content hash and its original manifest hash, so it is void the
-moment either changes.
+This preserves an existing valid historical sidecar or writes a missing sidecar rather than repacking.
+The shards stay byte-identical. Rewriting them purely to add metadata would discard their historical
+certification and cost hours. Each overlay binds the shard's content hash and its original manifest hash,
+so it is void the moment either changes. The completion distinguishes historical byte receipts from
+sidecars that also validate under the current implementation.
 
     modal run modal_apps/apply_provenance_overlays_app.py \
       --commit <sha> \
@@ -73,7 +74,7 @@ _SENTINEL_ENTRIES = 4
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 OVERLAY_COMPLETION_SCHEMA = "compose.editing_v2_upstream_overlay_completion"
-OVERLAY_COMPLETION_SCHEMA_VERSION = 1
+OVERLAY_COMPLETION_SCHEMA_VERSION = 2
 OVERLAY_COMPLETION_STATUS = "COMPLETE_IMMUTABLE_BYTE_BINDINGS_NO_TRAINING_AUTHORITY"
 _UPSTREAM_COMPLETION_FIELDS = {
     "path",
@@ -376,7 +377,8 @@ def build_overlay_completion(
         "overlay_path",
         "overlay_file_sha256",
         "overlay_fields_sha256",
-        "effective_provenance_sha256",
+        "overlay_semantic_sha256",
+        "overlay_validation_role",
     }
     normalized_receipts = []
     for index, receipt in enumerate(shard_receipts):
@@ -387,10 +389,15 @@ def build_overlay_completion(
             "manifest_file_sha256",
             "overlay_file_sha256",
             "overlay_fields_sha256",
-            "effective_provenance_sha256",
+            "overlay_semantic_sha256",
         ):
             if _SHA256_RE.fullmatch(str(receipt[field])) is None:
                 raise ValueError(f"shard_receipts[{index}].{field} is invalid")
+        if receipt["overlay_validation_role"] not in {
+            "current_live_overlay_at_completion",
+            "historical_immutable_byte_receipt",
+        }:
+            raise ValueError(f"shard_receipts[{index}].overlay_validation_role is invalid")
         for field in ("entries", "states"):
             if type(receipt[field]) is not int or receipt[field] <= 0:
                 raise ValueError(f"shard_receipts[{index}].{field} must be positive")
@@ -499,9 +506,12 @@ def apply_overlays(
         manifest_path_for,
         sentinel_replay_check,
     )
+    from compose_v4.data.editing_v2_packed_candidate_materializer import (
+        file_sha256,
+        validate_historical_provenance_overlay,
+    )
     from compose_v4.data.provenance_overlay import (
         build_overlay,
-        effective_provenance,
         load_overlay,
         overlay_path_for,
         tensorization_implementation_hash,
@@ -550,43 +560,55 @@ def apply_overlays(
         if existing is not None:
             reused += 1
             overlay = existing
+            validation_role = "current_live_overlay_at_completion"
         else:
             if overlay_path.exists():
-                raise RuntimeError(
-                    f"existing provenance overlay is invalid under the bound implementation: "
-                    f"{overlay_path}"
+                historical = validate_historical_provenance_overlay(
+                    overlay_path,
+                    expected_file_sha256=file_sha256(overlay_path),
+                    expected_shard_name=shard.name,
+                    expected_packed_shard_sha256=source["shard_file_sha256"],
+                    expected_original_manifest_sha256=source["manifest_file_sha256"],
                 )
-            # Certify by REPLAY at overlay time: the overlay asserts provenance, so it must carry
-            # evidence that this exact shard still reproduces its stored states.
-            sentinel = sentinel_replay_check(shard, entries=_SENTINEL_ENTRIES)
-            overlay = build_overlay(
-                shard,
-                manifest_path,
-                fields=fields,
-                packer_commit=commit,
-                certification={
-                    "sentinel_entries_replayed": sentinel["sentinel_entries_replayed"],
-                    "replay_verified": True,
-                    "certified_at_overlay_time": True,
-                },
-            )
-            encoded = json.dumps(overlay, indent=2, sort_keys=True).encode("utf-8") + b"\n"
-            with overlay_path.open("xb") as handle:
-                handle.write(encoded)
-                handle.flush()
-                os.fsync(handle.fileno())
-            written += 1
-        manifest = json.loads(manifest_path.read_bytes())
-        # Historical overlays remain immutable. Record their actual fields and
-        # effective provenance instead of relabelling them as newly generated.
-        effective = effective_provenance(manifest, overlay)
+                overlay = json.loads(overlay_path.read_bytes())
+                if historical["semantic_sha256"] != _canonical_sha256(overlay):
+                    raise RuntimeError(
+                        f"historical overlay semantic identity changed: {overlay_path}"
+                    )
+                reused += 1
+                validation_role = "historical_immutable_byte_receipt"
+            else:
+                # Certify by REPLAY at overlay time: the overlay asserts provenance, so it must carry
+                # evidence that this exact shard still reproduces its stored states.
+                sentinel = sentinel_replay_check(shard, entries=_SENTINEL_ENTRIES)
+                overlay = build_overlay(
+                    shard,
+                    manifest_path,
+                    fields=fields,
+                    packer_commit=commit,
+                    certification={
+                        "sentinel_entries_replayed": sentinel["sentinel_entries_replayed"],
+                        "replay_verified": True,
+                        "certified_at_overlay_time": True,
+                    },
+                )
+                encoded = json.dumps(overlay, indent=2, sort_keys=True).encode("utf-8") + b"\n"
+                with overlay_path.open("xb") as handle:
+                    handle.write(encoded)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                written += 1
+                validation_role = "current_live_overlay_at_completion"
+        # Every sidecar remains an immutable historical receipt for Editing V2;
+        # the role records whether current live validation also succeeded.
         shard_receipts.append(
             {
                 **source,
                 "overlay_path": str(overlay_path),
                 "overlay_file_sha256": _file_sha256(overlay_path),
                 "overlay_fields_sha256": _canonical_sha256(overlay.get("fields") or {}),
-                "effective_provenance_sha256": _canonical_sha256(effective),
+                "overlay_semantic_sha256": _canonical_sha256(overlay),
+                "overlay_validation_role": validation_role,
             }
         )
 
