@@ -425,6 +425,7 @@ def driver(
                     for index in missing
                 ],
                 return_exceptions=True,
+                wrap_returned_exceptions=False,
             )
         )
         failures = [value for value in returned if isinstance(value, BaseException)]

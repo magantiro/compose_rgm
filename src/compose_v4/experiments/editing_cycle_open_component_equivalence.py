@@ -311,7 +311,15 @@ def compare_one_edge(
     factored_semantics = _resolution_semantics(factored)
     oracle_semantics = _resolution_semantics(oracle) if oracle is not None else None
     comparison_complete = oracle is not None
-    semantic_equivalent = comparison_complete and oracle_semantics == factored_semantics
+    field_equivalence = (
+        {
+            field: oracle_semantics[field] == factored_semantics[field]
+            for field in sorted(factored_semantics)
+        }
+        if oracle_semantics is not None
+        else {}
+    )
+    semantic_equivalent = comparison_complete and all(field_equivalence.values())
     if oracle is not None and oracle.prototype_status != PROTOTYPE_STATUS:
         raise CycleOpenComponentEquivalenceError(
             "exhaustive resolver returned an unexpected prototype identity"
@@ -322,12 +330,12 @@ def compare_one_edge(
         "factored_global_alias_cardinality": factored.enumerated_alias_count,
         "factored_global_forced_single_cardinality": factored.forced_single_alias_count,
         "oracle_executed_products": (oracle.executed_product_count if oracle is not None else None),
+        "oracle_execution_matches_factored_global_forced_single_cardinality": (
+            oracle is not None
+            and oracle.executed_product_count == factored.forced_single_alias_count
+        ),
     }
     if oracle is not None and factored.admitted:
-        if oracle.executed_product_count != factored.forced_single_alias_count:
-            raise CycleOpenComponentEquivalenceError(
-                "exhaustive execution count does not match global forced-single cardinality"
-            )
         if factored.executed_product_count > factored.forced_single_alias_count:
             raise CycleOpenComponentEquivalenceError(
                 "component solver executed more products than the represented global fiber"
@@ -337,6 +345,7 @@ def compare_one_edge(
         "edge": list(normalized),
         "comparison_complete": comparison_complete,
         "semantic_equivalent": semantic_equivalent,
+        "field_equivalence": field_equivalence,
         "outcome": (
             "equivalent"
             if semantic_equivalent
@@ -400,7 +409,27 @@ def audit_one_source(
         "exhaustive_executed_product_count_on_complete_edges": sum(
             int(record["work"]["oracle_executed_products"] or 0) for record in edge_records
         ),
+        "oracle_execution_cardinality_mismatch_edge_count": sum(
+            bool(record["comparison_complete"])
+            and not bool(
+                record["work"]["oracle_execution_matches_factored_global_forced_single_cardinality"]
+            )
+            for record in edge_records
+        ),
     }
+    semantic_fields = sorted(
+        {field for record in edge_records for field in record["field_equivalence"]}
+    )
+    counts.update(
+        {
+            f"semantic_field_mismatch__{field}": sum(
+                not bool(record["field_equivalence"].get(field, True))
+                for record in edge_records
+                if record["comparison_complete"]
+            )
+            for field in semantic_fields
+        }
+    )
     reconciliations = {
         "edge_partition": (
             counts["equivalent_edge_count"]
@@ -753,6 +782,17 @@ def reduce_source_records(
         },
         "source_record_sha256s": [
             by_source[digest]["source_record_sha256"] for digest in sorted(by_source)
+        ],
+        "nonpassing_source_records": [
+            {
+                "exact_source_state_sha256": digest,
+                "source_record_sha256": record["source_record_sha256"],
+                "mismatch_edge_count": record["counts"]["mismatch_edge_count"],
+                "oracle_overflow_edge_count": record["counts"]["oracle_overflow_edge_count"],
+            }
+            for digest, record in sorted(by_source.items())
+            if record["counts"]["mismatch_edge_count"] > 0
+            or record["counts"]["oracle_overflow_edge_count"] > 0
         ],
     }
     return {**body, "result_sha256": semantic_sha256(body)}

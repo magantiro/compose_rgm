@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -205,6 +206,7 @@ def test_source_record_covers_every_edge_and_separates_work_counts() -> None:
         < record["counts"]["exhaustive_executed_product_count_on_complete_edges"]
     )
     assert all(edge["semantic_equivalent"] for edge in record["edge_records"])
+    assert all(all(edge["field_equivalence"].values()) for edge in record["edge_records"])
 
 
 def test_source_audit_constructs_the_exhaustive_resonance_set_once(monkeypatch) -> None:
@@ -224,6 +226,39 @@ def test_source_audit_constructs_the_exhaustive_resonance_set_once(monkeypatch) 
     record = audit_one_source(smiles_to_molecular_graph("c1ccccc1Oc2ccccc2"))
     assert record["counts"]["semantic_aromatic_edge_count"] == 12
     assert calls == 1
+
+
+def test_alias_cardinality_disagreement_is_preserved_as_negative_evidence(
+    monkeypatch,
+) -> None:
+    source = smiles_to_molecular_graph("c1ccccc1")
+    edge = equivalence_module._semantic_aromatic_edges(source)[0]
+    resolution = equivalence_module.resolve_component_factored_cycle_open(
+        source,
+        BondDelete(*edge),
+    )
+    monkeypatch.setattr(
+        equivalence_module,
+        "resolve_component_factored_cycle_open",
+        lambda _state, _action: replace(
+            resolution,
+            forced_single_alias_count=resolution.forced_single_alias_count + 1,
+        ),
+    )
+
+    record = equivalence_module.compare_one_edge(
+        source,
+        edge,
+        maximum_oracle_structures=16,
+    )
+    assert record["outcome"] == "mismatch"
+    assert record["semantic_equivalent"] is False
+    assert record["field_equivalence"]["forced_single_alias_count"] is False
+    assert record["field_equivalence"]["successor"] is True
+    assert (
+        record["work"]["oracle_execution_matches_factored_global_forced_single_cardinality"]
+        is False
+    )
 
 
 def test_contract_is_physically_pinned_self_hashed_and_validation_only(tmp_path) -> None:
@@ -292,6 +327,7 @@ def test_oracle_overflow_is_recorded_and_cannot_pass_equivalence() -> None:
     assert {edge["outcome"] for edge in record["edge_records"]} == {ORACLE_OVERFLOW}
     result = reduce_source_records((record,), evidence_identity={"partitions": ["validation"]})
     assert result["equivalence_gate"]["passed"] is False
+    assert len(result["nonpassing_source_records"]) == 1
 
 
 def test_reducer_deduplicates_only_identical_exact_source_records() -> None:
