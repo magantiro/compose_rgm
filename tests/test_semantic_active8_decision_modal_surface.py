@@ -34,7 +34,11 @@ def test_modal_surface_is_cpu_only_restart_safe_and_non_authorizing() -> None:
     source = APP_PATH.read_text()
     tree = ast.parse(source)
     assert "gpu=" not in source
-    assert "MAX_MAP_CONTAINERS = 100" in source
+    assert "MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5" in source
+    assert "MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS" in source
+    launcher = _load_launcher()
+    assert launcher.MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS == 5
+    assert launcher.MAX_MAP_CONTAINERS == 5
     worker_source = ast.get_source_segment(source, _function(tree, "decide_one_chunk"))
     assert worker_source is not None
     assert "_worker_model_and_checker" in worker_source
@@ -43,6 +47,11 @@ def test_modal_surface_is_cpu_only_restart_safe_and_non_authorizing() -> None:
     assert "model_runtime_identity_resolver" in worker_source
     assert "artifact_volume.reload()" in worker_source
     assert "artifact_volume.commit()" in worker_source
+    worker_decorator = ast.get_source_segment(
+        source, _function(tree, "decide_one_chunk").decorator_list[0]
+    )
+    assert worker_decorator is not None
+    assert "max_containers=MAX_MAP_CONTAINERS" in worker_decorator
     cache_source = ast.get_source_segment(
         source, _function(tree, "_worker_model_and_checker")
     )
@@ -59,6 +68,14 @@ def test_modal_surface_is_cpu_only_restart_safe_and_non_authorizing() -> None:
     assert "write_semantic_active8_decision_plan" in driver_source
     assert "decide_one_chunk.starmap" in driver_source
     assert "reduce_decisions.remote" in driver_source
+
+    reducer_source = ast.get_source_segment(source, _function(tree, "reduce_decisions"))
+    assert reducer_source is not None
+    assert reducer_source.index("artifact_volume.reload()") < reducer_source.index(
+        "reduce_semantic_active8_decisions"
+    )
+    assert "os.link(" not in source
+    assert ".link_to(" not in source
 
     main_source = ast.get_source_segment(source, _function(tree, "main"))
     assert main_source is not None

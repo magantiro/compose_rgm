@@ -30,7 +30,8 @@ RUNTIME_CONTRACT_SOURCE = "configs/editing_v2_semantic_active8_decision_runtime_
 SEMANTIC_CONTRACT_SOURCE = "configs/editing_gate_zero_semantic_model_process_v1.json"
 OUTPUT_ARTIFACT_ROOT = "/artifacts/editing_v2/semantic_active8_decisions_v1"
 EXPECTED_SOURCE_TASKS = 20
-MAX_MAP_CONTAINERS = 100
+MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
+MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
 
 SOURCE_REVISION_SCHEMA = "compose.data.semantic_active8_decision_modal_revision"
 SOURCE_REVISION_SCHEMA_VERSION = 1

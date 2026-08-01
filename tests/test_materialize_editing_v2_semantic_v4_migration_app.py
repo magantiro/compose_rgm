@@ -541,7 +541,10 @@ def test_modal_surface_is_cpu_only_new_only_and_maps_durable_missing_tasks() -> 
     assert driver_source is not None
 
     assert "gpu=" not in source
-    assert "MAX_MAP_CONTAINERS = 20" in source
+    assert "MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5" in source
+    assert "MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS" in source
+    assert migration_app.MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS == 5
+    assert migration_app.MAX_MAP_CONTAINERS == 5
     assert "editing_v2_semantic_active8_source_adapter" not in source
     assert "semantic_active8_chunk_cache" not in source
     assert "_validate_structural_completion" in driver_source
@@ -549,6 +552,34 @@ def test_modal_surface_is_cpu_only_new_only_and_maps_durable_missing_tasks() -> 
     assert "migrate_one_shard.starmap" in driver_source
     assert "reduce_complete.remote(plan)" in driver_source
     assert driver_source.count("artifact_volume.commit()") >= 3
+
+    worker = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "migrate_one_shard"
+    )
+    worker_decorator = ast.get_source_segment(source, worker.decorator_list[0])
+    assert worker_decorator is not None
+    assert "max_containers=MAX_MAP_CONTAINERS" in worker_decorator
+    worker_source = ast.get_source_segment(source, worker)
+    assert worker_source is not None
+    assert worker_source.index("artifact_volume.reload()") < worker_source.index(
+        "execute_semantic_trace_migration_task"
+    )
+    assert "artifact_volume.commit()" in worker_source
+
+    reducer = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "reduce_complete"
+    )
+    reducer_source = ast.get_source_segment(source, reducer)
+    assert reducer_source is not None
+    assert reducer_source.index("artifact_volume.reload()") < reducer_source.index(
+        "reduce_semantic_trace_migration"
+    )
+    assert "os.link(" not in source
+    assert ".link_to(" not in source
 
     argument_names = [argument.arg for argument in driver.args.kwonlyargs]
     assert argument_names == [

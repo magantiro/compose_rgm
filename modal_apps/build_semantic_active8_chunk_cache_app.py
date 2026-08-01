@@ -2,10 +2,11 @@
 
 The caller supplies the exact ``SEMANTIC_MIGRATION_COMPLETE.json``.  The driver
 validates that migration once, freezes one cache task per lane/role source,
-fans out at most 20 CPU workers, and invokes a strict reducer.  The reducer
-reloads all 20 cache completions before publishing a content-addressed global
-completion.  This app performs no chemistry decision or Active8 admission and
-grants no Gate 0, T1, P50, training, checkpoint, or final-test authority.
+fans out at most five concurrent Volume-v1 writers, and invokes a strict
+reducer.  The reducer reloads all 20 cache completions before publishing a
+content-addressed global completion.  This app performs no chemistry decision
+or Active8 admission and grants no Gate 0, T1, P50, training, checkpoint, or
+final-test authority.
 """
 
 from __future__ import annotations
@@ -24,7 +25,8 @@ REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/build_semantic_active8_chunk_cache_app.py"
 OUTPUT_ARTIFACT_ROOT = "/artifacts/editing_v2/semantic_active8_chunk_cache_v1"
-MAX_MAP_CONTAINERS = 20
+MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
+MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
 EXPECTED_SOURCE_TASKS = 20
 DEFAULT_TARGET_ROWS_PER_CHUNK = 500
 

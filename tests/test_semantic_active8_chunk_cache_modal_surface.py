@@ -26,10 +26,14 @@ def _load_launcher():
     return module
 
 
-def test_modal_surface_is_cpu_only_and_bounded_to_twenty_sources() -> None:
+def test_modal_surface_is_cpu_only_and_volume_v1_writer_safe() -> None:
     source = APP_PATH.read_text()
     tree = ast.parse(source)
-    assert "MAX_MAP_CONTAINERS = 20" in source
+    assert "MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5" in source
+    assert "MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS" in source
+    launcher = _load_launcher()
+    assert launcher.MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS == 5
+    assert launcher.MAX_MAP_CONTAINERS == 5
     assert "EXPECTED_SOURCE_TASKS = 20" in source
     assert "gpu=" not in source
     worker = _function(tree, "build_one_source_cache")
@@ -39,6 +43,19 @@ def test_modal_surface_is_cpu_only_and_bounded_to_twenty_sources() -> None:
     assert "execute_semantic_active8_chunk_cache_task" in worker_source
     assert "artifact_volume.reload()" in worker_source
     assert "artifact_volume.commit()" in worker_source
+    worker_decorator = ast.get_source_segment(
+        source, _function(tree, "build_one_source_cache").decorator_list[0]
+    )
+    assert worker_decorator is not None
+    assert "max_containers=MAX_MAP_CONTAINERS" in worker_decorator
+
+    reducer_source = ast.get_source_segment(source, _function(tree, "reduce_global_cache"))
+    assert reducer_source is not None
+    assert reducer_source.index("artifact_volume.reload()") < reducer_source.index(
+        "reduce_semantic_active8_chunk_caches"
+    )
+    assert "os.link(" not in source
+    assert ".link_to(" not in source
 
 
 def test_driver_validates_caller_completion_once_then_maps_and_reduces() -> None:

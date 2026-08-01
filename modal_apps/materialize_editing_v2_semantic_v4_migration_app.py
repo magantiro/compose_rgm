@@ -33,7 +33,11 @@ REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 
 OUTPUT_PREFIX = "/artifacts/editing_v2/semantic_v4_migration"
-MAX_MAP_CONTAINERS = 20
+# Keep legacy Volume-v1 commits within Modal's guidance of no more than five
+# concurrent writers. Every map container publishes a durable receipt, so its
+# container cap is a storage-safety limit rather than a compute preference.
+MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
+MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
 EXPECTED_SOURCE_SHARDS = 20
 
 RUN_SCHEMA = "compose.editing_v2_semantic_v4_modal_run"
