@@ -684,6 +684,7 @@ def build_candidate_provenance_registry(
     evidence_identity: Mapping[str, Any],
     identity_definitions: Mapping[str, Any],
     source_assets: Sequence[Mapping[str, Any]],
+    _validated_candidate_materialization: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a complete self-hashed registry from explicit frozen identities.
 
@@ -694,7 +695,11 @@ def build_candidate_provenance_registry(
 
     candidate_path = Path(candidate_root)
     contract_path = Path(editing_corpus_contract_path)
-    materialization = validate_packed_candidate_materialization(candidate_path)
+    materialization = (
+        validate_packed_candidate_materialization(candidate_path)
+        if _validated_candidate_materialization is None
+        else dict(_validated_candidate_materialization)
+    )
     contract = load_editing_corpus_contract(contract_path)
     candidate_identity = _materialization_identity(candidate_path, materialization)
     contract_identity = {
@@ -1109,6 +1114,7 @@ def materialize_candidate_provenance_bridge(
     editing_corpus_contract_path: str | Path,
     output_dir: str | Path,
     max_row_bytes: int = 2 * 1024 * 1024,
+    _validated_candidate_materialization: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Atomically emit a bounded-memory ledger and routed-only split rows."""
 
@@ -1117,9 +1123,13 @@ def materialize_candidate_provenance_bridge(
     candidate_path = Path(candidate_root)
     registry_path = Path(provenance_registry_path)
     contract_path = Path(editing_corpus_contract_path)
-    materialization = validate_packed_candidate_materialization(
-        candidate_path,
-        max_row_bytes=max_row_bytes,
+    materialization = (
+        validate_packed_candidate_materialization(
+            candidate_path,
+            max_row_bytes=max_row_bytes,
+        )
+        if _validated_candidate_materialization is None
+        else dict(_validated_candidate_materialization)
     )
     contract = load_editing_corpus_contract(contract_path)
     candidate_identity = _materialization_identity(candidate_path, materialization)

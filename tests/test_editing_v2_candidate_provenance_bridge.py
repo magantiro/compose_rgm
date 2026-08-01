@@ -33,6 +33,7 @@ from compose_v4.data.editing_v2_packed_candidate_materializer import (
     canonical_json_bytes,
     canonical_sha256,
     file_sha256,
+    validate_packed_candidate_materialization,
 )
 from compose_v4.data.editing_v2_split_census import (
     CANDIDATE_ROW_SCHEMA_VERSION,
@@ -294,7 +295,11 @@ def _source_assets() -> list[dict]:
     ]
 
 
-def _registry(candidate_root: Path) -> dict:
+def _registry(
+    candidate_root: Path,
+    *,
+    validated_materialization: dict | None = None,
+) -> dict:
     return build_candidate_provenance_registry(
         candidate_root=candidate_root,
         editing_corpus_contract_path=CONTRACT_PATH,
@@ -317,6 +322,7 @@ def _registry(candidate_root: Path) -> dict:
         evidence_identity=_evidence_identity(),
         identity_definitions=_identity_definitions(),
         source_assets=_source_assets(),
+        _validated_candidate_materialization=validated_materialization,
     )
 
 
@@ -339,6 +345,34 @@ def _audit_rows(output: Path) -> list[dict]:
         json.loads(line)
         for line in (output / AUDIT_ROWS_FILENAME).read_text(encoding="utf-8").splitlines()
     ]
+
+
+def test_one_validated_candidate_value_can_be_reused_across_the_controlled_build(
+    tmp_path: Path,
+) -> None:
+    candidate_root = _candidate_materialization(tmp_path)
+    validated = validate_packed_candidate_materialization(candidate_root)
+    registry_path = tmp_path / "registry.json"
+    write_candidate_provenance_registry(
+        _registry(candidate_root, validated_materialization=validated),
+        registry_path,
+    )
+    output = tmp_path / "bridge"
+
+    manifest = materialize_candidate_provenance_bridge(
+        candidate_root=candidate_root,
+        provenance_registry_path=registry_path,
+        editing_corpus_contract_path=CONTRACT_PATH,
+        output_dir=output,
+        _validated_candidate_materialization=validated,
+    )
+
+    assert manifest["counts"] == {
+        "attempted": 2,
+        "routed": 1,
+        "rejected": 1,
+        "split_rows": 1,
+    }
 
 
 def test_bridge_preserves_rejections_and_only_routes_unit_mass_split_rows(
