@@ -59,7 +59,10 @@ def validate_parent_admission(
         "support_contract_sha256": admission.support_contract_sha256,
         "unified_packed_manifest_sha256": admission.unified_packed_manifest_sha256,
     }
-    if observed != parent:
+    expected = {
+        key: value for key, value in parent.items() if key != "inventory_implementation_sha256"
+    }
+    if observed != expected:
         raise CycleOpenComponentEquivalenceError(
             f"Active8 admission identity disagrees with the contract: {observed}"
         )

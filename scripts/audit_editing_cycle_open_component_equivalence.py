@@ -114,6 +114,9 @@ def _load_contract_and_admission(contract_path: Path, inventory_path: Path):
             "effective_source_corpus_cache_sha256"
         ],
         expected_support_contract_sha256=parent["support_contract_sha256"],
+        expected_versioned_implementation_sha256_for_read_only_audit=parent[
+            "inventory_implementation_sha256"
+        ],
     )
     validate_parent_admission(contract, admission)
     return contract, admission

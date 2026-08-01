@@ -474,7 +474,11 @@ def _persistent_state_identity() -> dict[str, object]:
     }
 
 
-def _validate_inventory_semantics(payload: Mapping[str, object]) -> None:
+def _validate_inventory_semantics(
+    payload: Mapping[str, object],
+    *,
+    expected_versioned_implementation_sha256_for_read_only_audit: str | None = None,
+) -> None:
     if payload.get("status") != ACTIVE8_TRACE_INVENTORY_STATUS:
         raise Active8TraceInventoryError("active-8 inventory has an unauthorized boundary status")
     if payload.get("training_authorized") is not False:
@@ -487,11 +491,36 @@ def _validate_inventory_semantics(payload: Mapping[str, object]) -> None:
         raise Active8TraceInventoryError(
             "active-8 inventory persistent-state identity differs from production"
         )
-    if payload.get("implementation_identity") != implementation_identity():
-        raise Active8TraceInventoryError(
-            "active-8 inventory implementation identity differs from "
-            "the live admission implementation"
-        )
+    stored_implementation = payload.get("implementation_identity")
+    if expected_versioned_implementation_sha256_for_read_only_audit is None:
+        if stored_implementation != implementation_identity():
+            raise Active8TraceInventoryError(
+                "active-8 inventory implementation identity differs from "
+                "the live admission implementation"
+            )
+    else:
+        expected_implementation = expected_versioned_implementation_sha256_for_read_only_audit
+        if not _is_sha256(expected_implementation):
+            raise Active8TraceInventoryError(
+                "read-only audit expected implementation identity is malformed"
+            )
+        if (
+            not isinstance(stored_implementation, Mapping)
+            or set(stored_implementation) != {"sources", "implementation_sha256"}
+            or not isinstance(stored_implementation.get("sources"), Mapping)
+            or not stored_implementation["sources"]
+            or any(
+                not isinstance(path, str) or not _is_sha256(digest)
+                for path, digest in stored_implementation["sources"].items()
+            )
+            or _sha256_bytes(stored_implementation["sources"])
+            != stored_implementation.get("implementation_sha256")
+            or stored_implementation.get("implementation_sha256") != expected_implementation
+        ):
+            raise Active8TraceInventoryError(
+                "versioned Active8 implementation identity is not the exact "
+                "self-consistent read-only audit input"
+            )
 
     source_identity = payload.get("source_identity")
     source_fields = (
@@ -1150,7 +1179,11 @@ def build_active8_trace_inventory(
     return payload
 
 
-def load_active8_trace_inventory(path: Path) -> dict[str, object]:
+def load_active8_trace_inventory(
+    path: Path,
+    *,
+    expected_versioned_implementation_sha256_for_read_only_audit: str | None = None,
+) -> dict[str, object]:
     """Load and self-verify one immutable inventory manifest."""
 
     source = Path(path)
@@ -1171,7 +1204,12 @@ def load_active8_trace_inventory(path: Path) -> dict[str, object]:
     payload["inventory_sha256"] = expected
     if not _is_sha256(expected) or expected != observed:
         raise Active8TraceInventoryError("active-8 inventory self-hash mismatch")
-    _validate_inventory_semantics(payload)
+    _validate_inventory_semantics(
+        payload,
+        expected_versioned_implementation_sha256_for_read_only_audit=(
+            expected_versioned_implementation_sha256_for_read_only_audit
+        ),
+    )
     return payload
 
 
@@ -1182,8 +1220,17 @@ def load_active8_trace_admission(
     expected_inventory_sha256: str | None = None,
     expected_effective_source_corpus_cache_sha256: str | None = None,
     expected_support_contract_sha256: str | None = None,
+    expected_versioned_implementation_sha256_for_read_only_audit: str | None = None,
 ) -> Active8TraceAdmission:
-    """Load every decision into a verified immutable production admission index."""
+    """Load every decision into a verified immutable admission index.
+
+    By default the stored implementation must equal the live implementation.
+    The explicitly named read-only-audit parameter permits a historical
+    inventory only when its stored source map is self-consistent and its exact
+    implementation SHA-256 is supplied alongside the normal physical,
+    inventory, source, and support-contract hashes. It grants no training
+    authority and must not be used as evidence of live-process admission.
+    """
 
     manifest_path = Path(path)
     manifest_file_sha256 = _sha256_file(manifest_path)
@@ -1196,7 +1243,12 @@ def load_active8_trace_admission(
             f"expected={expected_manifest_file_sha256}, "
             f"observed={manifest_file_sha256}"
         )
-    manifest = load_active8_trace_inventory(manifest_path)
+    manifest = load_active8_trace_inventory(
+        manifest_path,
+        expected_versioned_implementation_sha256_for_read_only_audit=(
+            expected_versioned_implementation_sha256_for_read_only_audit
+        ),
+    )
     inventory_sha256 = manifest["inventory_sha256"]
     if expected_inventory_sha256 is not None and inventory_sha256 != expected_inventory_sha256:
         raise Active8TraceInventoryError("active-8 logical inventory SHA-256 mismatch")

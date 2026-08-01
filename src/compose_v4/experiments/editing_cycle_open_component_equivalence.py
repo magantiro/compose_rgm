@@ -54,7 +54,7 @@ NON_AUTHORIZING_STATUS = (
 ORACLE_OVERFLOW = "exhaustive_oracle_overflow"
 CONTRACT_SCHEMA = "compose.editing.cycle_open_component_equivalence_contract"
 CONTRACT_SCHEMA_VERSION = 1
-PINNED_CONTRACT_FILE_SHA256 = "c6aba8525f421e7357a589aa815324d9cbe503ac22133109134619c2a8d86c59"
+PINNED_CONTRACT_FILE_SHA256 = "857f251f56bb0b3ce49eaf0b22983e177a64a910912bb7d049728cd64000ce87"
 PINNED_IMPACT_RESULT_LOGICAL_SHA256 = (
     "cc1893991b75a4e592d344b592f6f12cf1eef3428781d6b85bddeb4ad75f3cf2"
 )
@@ -78,6 +78,7 @@ _PARENT_FIELDS = {
     "effective_source_corpus_cache_sha256",
     "inventory_manifest_file_sha256",
     "inventory_manifest_path",
+    "inventory_implementation_sha256",
     "inventory_sha256",
     "support_contract_sha256",
     "unified_packed_manifest_sha256",

@@ -8,6 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
+import compose_v4.data.active8_trace_inventory as active8_module
 from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
@@ -44,6 +45,43 @@ from compose_v4.rewrite.operators import AtomDelete, AtomInsert
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 from compose_v4.rewrite.trace_shard import encode_state
 from compose_v4.rewrite.tracelets import RingSystemDelete
+
+
+def test_versioned_read_only_inventory_identity_is_explicit_and_self_consistent() -> None:
+    sources = {"src/legacy.py": "1" * 64}
+    implementation_sha256 = active8_module._sha256_bytes(sources)
+    source_identity = {
+        "unified_packed_manifest_sha256": "2" * 64,
+        "unified_packed_manifest_semantic_sha256": "3" * 64,
+        "support_contract_sha256": "4" * 64,
+        "physical_shard_binding_sha256": "5" * 64,
+    }
+    source_identity["effective_source_corpus_cache_sha256"] = active8_module._sha256_bytes(
+        source_identity
+    )
+    payload = {
+        "status": active8_module.ACTIVE8_TRACE_INVENTORY_STATUS,
+        "training_authorized": False,
+        "selection_policy": active8_module._selection_policy(),
+        "persistent_state_identity": active8_module._persistent_state_identity(),
+        "implementation_identity": {
+            "sources": sources,
+            "implementation_sha256": implementation_sha256,
+        },
+        "source_identity": source_identity,
+    }
+
+    with pytest.raises(Active8TraceInventoryError, match="live admission"):
+        active8_module._validate_inventory_semantics(payload)
+    active8_module._validate_inventory_semantics(
+        payload,
+        expected_versioned_implementation_sha256_for_read_only_audit=(implementation_sha256),
+    )
+    with pytest.raises(Active8TraceInventoryError, match="exact self-consistent"):
+        active8_module._validate_inventory_semantics(
+            payload,
+            expected_versioned_implementation_sha256_for_read_only_audit="6" * 64,
+        )
 
 
 def _addressed(steps: tuple[RewriteStep, ...]) -> AddressedPackedTrace:
