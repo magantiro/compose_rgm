@@ -144,7 +144,9 @@ class _CellWriter:
 def _require_sha256(value: object, *, field: str) -> str:
     digest = value if isinstance(value, str) else ""
     if _SHA256_RE.fullmatch(digest) is None:
-        raise EditingV2RoleLaneMaterializationError(f"{field} must be a full lowercase SHA-256")
+        raise EditingV2RoleLaneMaterializationError(
+            f"{field} must be a full lowercase SHA-256"
+        )
     return digest
 
 
@@ -194,7 +196,9 @@ def _resolve_source(root: Path, relative_path: str) -> Path:
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as handle:
-        handle.write(json.dumps(payload, indent=2, sort_keys=True).encode("utf-8") + b"\n")
+        handle.write(
+            json.dumps(payload, indent=2, sort_keys=True).encode("utf-8") + b"\n"
+        )
         handle.flush()
         os.fsync(handle.fileno())
 
@@ -209,7 +213,9 @@ def _stream_sha256(values: Iterable[Any]) -> str:
 
 def _state_stream_sha256(states: object) -> str:
     if not isinstance(states, list) or not states:
-        raise EditingV2RoleLaneMaterializationError("packed source states must be a nonempty list")
+        raise EditingV2RoleLaneMaterializationError(
+            "packed source states must be a nonempty list"
+        )
     return _stream_sha256(states)
 
 
@@ -301,7 +307,9 @@ def _iter_bounded_gzip_jsonl(
     max_row_bytes: int,
 ):
     if type(max_row_bytes) is not int or max_row_bytes <= 0:
-        raise EditingV2RoleLaneMaterializationError("max_source_row_bytes must be positive")
+        raise EditingV2RoleLaneMaterializationError(
+            "max_source_row_bytes must be positive"
+        )
     entry_index = 0
     with gzip.open(path, "rb") as handle:
         while True:
@@ -361,8 +369,7 @@ def _verify_frozen_source(
 
 def _database(path: Path) -> sqlite3.Connection:
     connection = sqlite3.connect(path)
-    connection.executescript(
-        """
+    connection.executescript("""
         PRAGMA journal_mode = DELETE;
         PRAGMA synchronous = FULL;
         CREATE TABLE selected (
@@ -396,8 +403,7 @@ def _database(path: Path) -> sqlite3.Connection:
             path_length INTEGER NOT NULL,
             PRIMARY KEY(data_lane, assigned_role, output_entry_index)
         );
-        """
-    )
+        """)
     return connection
 
 
@@ -407,13 +413,21 @@ def _index_selected_candidates(
     candidate_root: Path,
     assigned_roles: Mapping[str, str],
     lane_ids: tuple[str, ...],
+    expected_rows_file_sha256: str | None = None,
 ) -> int:
+    if expected_rows_file_sha256 is not None:
+        _require_sha256(
+            expected_rows_file_sha256,
+            field="candidate rows expected physical SHA-256",
+        )
     rows_path = candidate_root / CANDIDATE_ROWS_FILENAME
     selected_candidate_ids = set(assigned_roles)
     observed_selected: set[str] = set()
     routed_count = 0
+    rows_digest = hashlib.sha256()
     with rows_path.open("rb") as handle:
         for raw_line in handle:
+            rows_digest.update(raw_line)
             row = json.loads(raw_line)
             candidate_id = str(row.get("candidate_id"))
             disposition = row.get("disposition")
@@ -498,7 +512,16 @@ def _index_selected_candidates(
                 raise EditingV2RoleLaneMaterializationError(
                     f"duplicate selected candidate or original address: {candidate_id!r}"
                 ) from error
-    if observed_selected != selected_candidate_ids or routed_count != len(selected_candidate_ids):
+    if (
+        expected_rows_file_sha256 is not None
+        and rows_digest.hexdigest() != expected_rows_file_sha256
+    ):
+        raise EditingV2RoleLaneMaterializationError(
+            "candidate rows physical SHA-256 disagrees during indexing"
+        )
+    if observed_selected != selected_candidate_ids or routed_count != len(
+        selected_candidate_ids
+    ):
         raise EditingV2RoleLaneMaterializationError(
             "selected/routed candidate sets are incomplete; "
             f"missing={sorted(selected_candidate_ids - observed_selected)}, "
@@ -553,7 +576,9 @@ def _validate_original_candidate(
     states = entry.get("states")
     address = candidate["packed_address"]
     if not isinstance(trace, Mapping) or not isinstance(states, list):
-        raise EditingV2RoleLaneMaterializationError("original packed row lacks trace/states")
+        raise EditingV2RoleLaneMaterializationError(
+            "original packed row lacks trace/states"
+        )
     for field, expected in (
         ("trace_id", address["trace_id"]),
         ("layer", address["layer"]),
@@ -593,14 +618,12 @@ def _materialize_selected_rows(
     writers: Mapping[tuple[str, str], _CellWriter],
     max_source_row_bytes: int,
 ) -> None:
-    source_groups = connection.execute(
-        """
+    source_groups = connection.execute("""
         SELECT DISTINCT source_relative_path, source_shard_sha256,
                         source_manifest_sha256, source_overlay_sha256
         FROM selected
         ORDER BY source_relative_path, source_shard_sha256
-        """
-    ).fetchall()
+        """).fetchall()
     output_indices = {cell: 0 for cell in writers}
     for (
         relative_path,
@@ -721,7 +744,9 @@ def _materialize_selected_rows(
             )
     connection.commit()
     selected_count = connection.execute("SELECT COUNT(*) FROM selected").fetchone()[0]
-    membership_count = connection.execute("SELECT COUNT(*) FROM memberships").fetchone()[0]
+    membership_count = connection.execute(
+        "SELECT COUNT(*) FROM memberships"
+    ).fetchone()[0]
     if selected_count != membership_count:
         raise EditingV2RoleLaneMaterializationError(
             "physical materialization did not consume every selected candidate"
@@ -750,17 +775,23 @@ def _cell_manifest(
         "provenance": {
             "schema": PACKED_SHARD_PROVENANCE_SCHEMA,
             "schema_version": PACKED_SHARD_PROVENANCE_SCHEMA_VERSION,
-            "status": ("CURRENT_PHYSICAL_DERIVATIVE_ACTIVE8_NOT_RUN_NO_TRAINING_AUTHORITY"),
+            "status": (
+                "CURRENT_PHYSICAL_DERIVATIVE_ACTIVE8_NOT_RUN_NO_TRAINING_AUTHORITY"
+            ),
             "training_authorized": False,
             "code_revision": code_revision,
             "materializer_implementation_sha256": implementation_sha256,
             "candidate_materialization": dict(candidate_identity),
-            "candidate_provenance_source_stream": dict(candidate_provenance_source_stream),
+            "candidate_provenance_source_stream": dict(
+                candidate_provenance_source_stream
+            ),
             "split_assignment": dict(split_identity),
             "data_lane": writer.lane,
             "partition_role": writer.role,
             "envelope_rewrite_contract": ENVELOPE_REWRITE_CONTRACT,
-            "original_address_stream_sha256": (writer.original_address_digest.hexdigest()),
+            "original_address_stream_sha256": (
+                writer.original_address_digest.hexdigest()
+            ),
             "output_row_stream_sha256": writer.output_row_digest.hexdigest(),
             "final_test_selection_use": "forbidden_not_performed",
         },
@@ -853,8 +884,12 @@ def _publish_lane_files(
             "training_authorized": False,
             "editing_corpus_contract": dict(contract_identity),
             "lane_id": lane,
-            "admissible_evidence_profiles": list(lane_definition.admissible_evidence_profiles),
-            "reserved_evidence_profiles": list(lane_definition.reserved_evidence_profiles),
+            "admissible_evidence_profiles": list(
+                lane_definition.admissible_evidence_profiles
+            ),
+            "reserved_evidence_profiles": list(
+                lane_definition.reserved_evidence_profiles
+            ),
             "declared_root": declared_root,
             "partition_roles": list(PARTITION_ROLES),
             "counts": {
@@ -876,10 +911,16 @@ def _publish_lane_files(
         registry_lanes.append(
             {
                 "lane_id": lane,
-                "admissible_evidence_profiles": list(lane_definition.admissible_evidence_profiles),
-                "reserved_evidence_profiles": list(lane_definition.reserved_evidence_profiles),
+                "admissible_evidence_profiles": list(
+                    lane_definition.admissible_evidence_profiles
+                ),
+                "reserved_evidence_profiles": list(
+                    lane_definition.reserved_evidence_profiles
+                ),
                 "declared_root": declared_root,
-                "completion_manifest_path": (f"{declared_root}/{LANE_COMPLETION_FILENAME}"),
+                "completion_manifest_path": (
+                    f"{declared_root}/{LANE_COMPLETION_FILENAME}"
+                ),
                 "completion_manifest_sha256": file_sha256(completion_path),
             }
         )
@@ -947,7 +988,9 @@ def _emit_receipt_body(
             continue
         sink.write(b"[")
         first_shard = True
-        for lane, role in ((lane, role) for lane in lane_order for role in PARTITION_ROLES):
+        for lane, role in (
+            (lane, role) for lane in lane_order for role in PARTITION_ROLES
+        ):
             if not first_shard:
                 sink.write(b",")
             first_shard = False
@@ -1082,7 +1125,9 @@ def materialize_editing_v2_role_lane_packed(
         )
     artifact_root = Path(artifact_root)
     if not artifact_root.is_dir():
-        raise EditingV2RoleLaneMaterializationError(f"artifact root is absent: {artifact_root}")
+        raise EditingV2RoleLaneMaterializationError(
+            f"artifact root is absent: {artifact_root}"
+        )
     output_artifact_prefix = _artifact_prefix(output_artifact_prefix)
     candidate_root = Path(candidate_materialization_dir)
     candidate_manifest = validate_packed_candidate_materialization(candidate_root)
@@ -1150,7 +1195,9 @@ def materialize_editing_v2_role_lane_packed(
     run_artifact_root = f"{output_artifact_prefix}/{run_identity_sha256}"
     target = artifact_root / PurePosixPath(run_artifact_root).relative_to("/artifacts")
     if target.exists():
-        raise EditingV2RoleLaneMaterializationError(f"immutable output already exists: {target}")
+        raise EditingV2RoleLaneMaterializationError(
+            f"immutable output already exists: {target}"
+        )
     target.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(
         tempfile.mkdtemp(
@@ -1241,7 +1288,9 @@ def materialize_editing_v2_role_lane_packed(
                 "lane_registry": {
                     "registry_file_sha256": file_sha256(registry_path),
                     "registry_sha256": registry["registry_sha256"],
-                    "editing_corpus_contract_file_sha256": (contract_identity["file_sha256"]),
+                    "editing_corpus_contract_file_sha256": (
+                        contract_identity["file_sha256"]
+                    ),
                     "editing_corpus_contract_id": contract_identity["contract_id"],
                     "lane_completion_manifest_file_sha256": (completion_file_sha256),
                     "lane_completion_sha256": completion_sha256,
@@ -1260,8 +1309,12 @@ def materialize_editing_v2_role_lane_packed(
         totals = {
             "routed_candidates": routed_count,
             "output_shards": len(published_cells),
-            "output_records": sum(int(cell["records"]) for cell in published_cells.values()),
-            "output_states": sum(int(cell["states"]) for cell in published_cells.values()),
+            "output_records": sum(
+                int(cell["records"]) for cell in published_cells.values()
+            ),
+            "output_states": sum(
+                int(cell["states"]) for cell in published_cells.values()
+            ),
             "output_transitions": sum(
                 int(cell["transitions"]) for cell in published_cells.values()
             ),
@@ -1273,7 +1326,9 @@ def materialize_editing_v2_role_lane_packed(
             "active8_admission_status": ACTIVE8_ADMISSION_STATUS,
             "run_identity_sha256": run_identity_sha256,
             "run_artifact_root": run_artifact_root,
-            "selection_policy": ("mechanical_application_of_frozen_split_no_metric_selection"),
+            "selection_policy": (
+                "mechanical_application_of_frozen_split_no_metric_selection"
+            ),
             "final_test_selection_use": "forbidden_not_performed",
             "lane_registry": {
                 "relative_path": LANE_REGISTRY_FILENAME,

@@ -7,6 +7,8 @@ source validation and envelope-rewrite work.  This module changes only the
 physical execution plan:
 
 * planning freezes one task per immutable source shard;
+* planning may reuse the strict parent split-pipeline validation receipt while
+  still hashing the exact candidate-header bytes it consumes;
 * mapping validates and rewrites that shard once, then publishes an immutable
   content-addressed receipt and per-cell fragments;
 * reduction validates the exact receipt set, restores the reference global
@@ -28,7 +30,7 @@ import shutil
 import sqlite3
 import tempfile
 import time
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from types import SimpleNamespace
@@ -50,6 +52,7 @@ from compose_v4.data.editing_v2_active8_source_adapter import (
     _validate_split_assignment,
 )
 from compose_v4.data.editing_v2_candidate_provenance_bridge import (
+    BRIDGE_MANIFEST_FILENAME,
     EditingV2CandidateProvenanceBridgeError,
     validate_candidate_provenance_bridge,
 )
@@ -86,6 +89,33 @@ TASK_RECEIPT_STATUS = "COMPLETE_ROLE_LANE_SHARD_FRAGMENTS_NO_TRAINING_AUTHORITY"
 CELL_RECEIPT_SCHEMA = "compose.editing_v2_role_lane_cell_receipt"
 CELL_RECEIPT_SCHEMA_VERSION = 1
 CELL_RECEIPT_STATUS = "COMPLETE_ROLE_LANE_CELL_NO_TRAINING_AUTHORITY"
+UPSTREAM_VALIDATION_RECEIPT_SCHEMA = (
+    "compose.editing_v2_role_lane_upstream_validation_receipt"
+)
+UPSTREAM_VALIDATION_RECEIPT_SCHEMA_VERSION = 1
+UPSTREAM_VALIDATION_RECEIPT_STATUS = (
+    "VALIDATED_BY_STRUCTURAL_SPLIT_COMPLETION_NO_TRAINING_AUTHORITY"
+)
+UPSTREAM_SPLIT_PIPELINE_VALIDATOR_PATH = (
+    "modal_apps/materialize_editing_v2_split_pipeline_app.py"
+)
+UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH = (
+    "src/compose_v4/data/editing_v2_candidate_provenance_bridge.py"
+)
+UPSTREAM_VALIDATOR_PATHS = (
+    UPSTREAM_SPLIT_PIPELINE_VALIDATOR_PATH,
+    UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH,
+)
+_UPSTREAM_SOURCE_REVISION_FIELDS = {
+    "schema",
+    "schema_version",
+    "commit",
+    "tree",
+    "worktree_clean",
+    "serialized_source_hashes",
+    "serialized_source_hashes_sha256",
+    "source_revision_sha256",
+}
 
 PLAN_FILENAME = "ROLE_LANE_MAPREDUCE_PLAN.json"
 TASK_INPUT_FILENAME = "selected_candidates.jsonl.gz"
@@ -407,6 +437,301 @@ def _load_candidate_manifest_header(candidate_root: Path) -> dict[str, Any]:
     return manifest
 
 
+def build_upstream_validation_receipt(
+    *,
+    parent_completion_identity: Mapping[str, Any],
+    parent_request: Mapping[str, Any],
+    source_stream: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Bind a prior strict split-pipeline validation for transitive reuse.
+
+    The split pipeline validates the full candidate provenance bridge before it
+    publishes its completion.  A refined continuation strictly reopens that
+    completion before calling this builder.  The receipt lets planning reuse
+    that content-addressed proof instead of rescanning the two unused 2.4-GiB
+    bridge streams.  Planning still hashes the candidate-header bytes it
+    actually consumes during the unchanged streaming index pass.
+    """
+
+    stream = validate_candidate_source_stream(source_stream)
+    candidate = parent_request.get("candidate")
+    bridge = parent_request.get("candidate_provenance_bridge")
+    registry = parent_request.get("candidate_provenance_registry")
+    contract = parent_request.get("editing_corpus_contract")
+    source_revision = parent_request.get("source_revision")
+    if not all(
+        isinstance(value, Mapping)
+        for value in (candidate, bridge, registry, contract, source_revision)
+    ):
+        raise EditingV2RoleLaneMapReduceError(
+            "upstream split request lacks candidate provenance identities"
+        )
+    source_revision = dict(source_revision)
+    revision_body = {
+        key: value
+        for key, value in source_revision.items()
+        if key != "source_revision_sha256"
+    }
+    serialized_hashes = source_revision.get("serialized_source_hashes")
+    if (
+        set(source_revision) != _UPSTREAM_SOURCE_REVISION_FIELDS
+        or source_revision.get("schema")
+        != "compose.editing_v2_structural_split_source_revision"
+        or source_revision.get("schema_version") != 1
+        or source_revision.get("worktree_clean") is not True
+        or not isinstance(source_revision.get("commit"), str)
+        or _COMMIT_RE.fullmatch(source_revision["commit"]) is None
+        or not isinstance(source_revision.get("tree"), str)
+        or _COMMIT_RE.fullmatch(source_revision["tree"]) is None
+        or not isinstance(serialized_hashes, Mapping)
+        or not serialized_hashes
+        or any(
+            not isinstance(path, str)
+            or not isinstance(value, str)
+            or _SHA256_RE.fullmatch(value) is None
+            for path, value in serialized_hashes.items()
+        )
+        or source_revision.get("serialized_source_hashes_sha256")
+        != canonical_sha256(serialized_hashes)
+        or source_revision.get("source_revision_sha256")
+        != canonical_sha256(revision_body)
+    ):
+        raise EditingV2RoleLaneMapReduceError(
+            "upstream structural split source revision identity disagrees"
+        )
+    upstream_validator_implementations: dict[str, str] = {}
+    for path in UPSTREAM_VALIDATOR_PATHS:
+        value = serialized_hashes.get(path)
+        if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
+            raise EditingV2RoleLaneMapReduceError(
+                f"upstream structural split source revision lacks {path}"
+            )
+        upstream_validator_implementations[path] = value
+    if (
+        candidate.get("manifest_sha256")
+        != parent_completion_identity.get("candidate_manifest_sha256")
+        or bridge.get("source_stream_sha256") != stream["source_stream_sha256"]
+        or bridge.get("source_stream_sha256")
+        != parent_completion_identity.get("candidate_source_stream_sha256")
+        or registry.get("file_sha256") != stream["provenance_registry"]["file_sha256"]
+        or registry.get("registry_sha256")
+        != stream["provenance_registry"]["registry_sha256"]
+    ):
+        raise EditingV2RoleLaneMapReduceError(
+            "upstream completion, request, and source-stream identities disagree"
+        )
+    for field, value in (
+        (
+            "parent_completion.file_sha256",
+            parent_completion_identity.get("file_sha256"),
+        ),
+        (
+            "parent_completion.completion_sha256",
+            parent_completion_identity.get("completion_sha256"),
+        ),
+    ):
+        if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
+            raise EditingV2RoleLaneMapReduceError(f"{field} must be a SHA-256")
+    body = {
+        "schema": UPSTREAM_VALIDATION_RECEIPT_SCHEMA,
+        "schema_version": UPSTREAM_VALIDATION_RECEIPT_SCHEMA_VERSION,
+        "status": UPSTREAM_VALIDATION_RECEIPT_STATUS,
+        "training_authorized": False,
+        "gate_zero_authorized": False,
+        "bounded_p50_authorized": False,
+        "parent_completion": dict(parent_completion_identity),
+        "upstream_source_revision": source_revision,
+        "upstream_validator_implementations": upstream_validator_implementations,
+        "candidate": dict(candidate),
+        "candidate_provenance_bridge": dict(bridge),
+        "candidate_provenance_registry": dict(registry),
+        "editing_corpus_contract": dict(contract),
+        "source_stream": stream,
+        "validation_scope": {
+            "upstream_proof": (
+                "parent_structural_split_completion_after_full_bridge_validation"
+            ),
+            "upstream_validator_paths": list(UPSTREAM_VALIDATOR_PATHS),
+            "continuation_reopen": (
+                "current_parent_completion_assignment_and_refinement_validation"
+            ),
+            "planning": "single_pass_physical_candidate_header_hash_and_stream_index",
+            "unused_bridge_stream_rescan": False,
+        },
+    }
+    return _self_hashed(body, "receipt_sha256")
+
+
+def _validate_upstream_validation_receipt(
+    receipt: Mapping[str, Any],
+    *,
+    candidate_materialization_dir: Path,
+    candidate_provenance_bridge_dir: Path,
+    candidate_provenance_registry_path: Path,
+    editing_corpus_contract_path: Path,
+    candidate_identity: Mapping[str, Any],
+    contract_identity: Mapping[str, Any],
+    contract_semantic_sha256: str,
+    assignment_source_stream: Mapping[str, Any],
+    expected_nonempty_rows: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Validate a transitive receipt and every small identity it delegates."""
+
+    normalized = _require_self_hash(
+        receipt,
+        field="receipt_sha256",
+        name="upstream validation receipt",
+    )
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "status",
+        "training_authorized",
+        "gate_zero_authorized",
+        "bounded_p50_authorized",
+        "parent_completion",
+        "upstream_source_revision",
+        "upstream_validator_implementations",
+        "candidate",
+        "candidate_provenance_bridge",
+        "candidate_provenance_registry",
+        "editing_corpus_contract",
+        "source_stream",
+        "validation_scope",
+        "receipt_sha256",
+    }
+    if (
+        set(normalized) != expected_fields
+        or normalized["schema"] != UPSTREAM_VALIDATION_RECEIPT_SCHEMA
+        or normalized["schema_version"] != UPSTREAM_VALIDATION_RECEIPT_SCHEMA_VERSION
+        or normalized["status"] != UPSTREAM_VALIDATION_RECEIPT_STATUS
+        or normalized["training_authorized"] is not False
+        or normalized["gate_zero_authorized"] is not False
+        or normalized["bounded_p50_authorized"] is not False
+        or normalized["validation_scope"]
+        != {
+            "upstream_proof": (
+                "parent_structural_split_completion_after_full_bridge_validation"
+            ),
+            "upstream_validator_paths": list(UPSTREAM_VALIDATOR_PATHS),
+            "continuation_reopen": (
+                "current_parent_completion_assignment_and_refinement_validation"
+            ),
+            "planning": "single_pass_physical_candidate_header_hash_and_stream_index",
+            "unused_bridge_stream_rescan": False,
+        }
+    ):
+        raise EditingV2RoleLaneMapReduceError(
+            "upstream validation receipt identity, authority, or scope disagrees"
+        )
+    stream = validate_candidate_source_stream(
+        normalized["source_stream"],
+        expected_candidate_materialization=candidate_identity,
+        expected_nonempty_rows=expected_nonempty_rows,
+    )
+    candidate = normalized.get("candidate")
+    bridge = normalized.get("candidate_provenance_bridge")
+    registry = normalized.get("candidate_provenance_registry")
+    contract = normalized.get("editing_corpus_contract")
+    parent = normalized.get("parent_completion")
+    source_revision = normalized.get("upstream_source_revision")
+    upstream_implementations = normalized.get("upstream_validator_implementations")
+    if not all(
+        isinstance(value, Mapping)
+        for value in (
+            candidate,
+            bridge,
+            registry,
+            contract,
+            parent,
+            source_revision,
+            upstream_implementations,
+        )
+    ):
+        raise EditingV2RoleLaneMapReduceError(
+            "upstream validation receipt contains malformed identities"
+        )
+    expected_candidate = {
+        "path": str(candidate_materialization_dir),
+        **dict(candidate_identity),
+    }
+    revision_body = {
+        key: value
+        for key, value in source_revision.items()
+        if key != "source_revision_sha256"
+    }
+    serialized_hashes = source_revision.get("serialized_source_hashes")
+    expected_upstream_implementations = (
+        {path: serialized_hashes.get(path) for path in UPSTREAM_VALIDATOR_PATHS}
+        if isinstance(serialized_hashes, Mapping)
+        else {}
+    )
+    if (
+        dict(candidate) != expected_candidate
+        or bridge.get("path") != str(candidate_provenance_bridge_dir)
+        or bridge.get("source_stream_sha256") != stream["source_stream_sha256"]
+        or registry
+        != {
+            "path": str(candidate_provenance_registry_path),
+            **stream["provenance_registry"],
+        }
+        or contract
+        != {
+            "path": str(editing_corpus_contract_path),
+            "file_sha256": contract_identity["file_sha256"],
+            "semantic_sha256": contract_semantic_sha256,
+            "contract_id": contract_identity["contract_id"],
+            "schema": contract_identity["schema"],
+            "schema_version": contract_identity["schema_version"],
+        }
+        or stream != dict(assignment_source_stream)
+        or parent.get("candidate_manifest_sha256")
+        != candidate_identity["manifest_sha256"]
+        or parent.get("candidate_source_stream_sha256")
+        != stream["source_stream_sha256"]
+        or source_revision.get("schema")
+        != "compose.editing_v2_structural_split_source_revision"
+        or source_revision.get("schema_version") != 1
+        or set(source_revision) != _UPSTREAM_SOURCE_REVISION_FIELDS
+        or source_revision.get("worktree_clean") is not True
+        or not isinstance(source_revision.get("commit"), str)
+        or _COMMIT_RE.fullmatch(source_revision["commit"]) is None
+        or not isinstance(source_revision.get("tree"), str)
+        or _COMMIT_RE.fullmatch(source_revision["tree"]) is None
+        or not isinstance(serialized_hashes, Mapping)
+        or not serialized_hashes
+        or any(
+            not isinstance(path, str)
+            or not isinstance(value, str)
+            or _SHA256_RE.fullmatch(value) is None
+            for path, value in serialized_hashes.items()
+        )
+        or source_revision.get("serialized_source_hashes_sha256")
+        != canonical_sha256(serialized_hashes)
+        or source_revision.get("source_revision_sha256")
+        != canonical_sha256(revision_body)
+        or dict(upstream_implementations) != expected_upstream_implementations
+        or any(
+            not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None
+            for value in expected_upstream_implementations.values()
+        )
+    ):
+        raise EditingV2RoleLaneMapReduceError(
+            "upstream validation receipt does not bind the exact planning inputs"
+        )
+    if file_sha256(candidate_provenance_registry_path) != registry["file_sha256"]:
+        raise EditingV2RoleLaneMapReduceError(
+            "candidate provenance registry bytes disagree with transitive receipt"
+        )
+    if file_sha256(
+        candidate_provenance_bridge_dir / BRIDGE_MANIFEST_FILENAME
+    ) != bridge.get("manifest_file_sha256"):
+        raise EditingV2RoleLaneMapReduceError(
+            "candidate provenance bridge manifest bytes disagree with transitive receipt"
+        )
+    return stream, normalized
+
+
 def _prepare_reference_identity(
     *,
     candidate_materialization_dir: Path,
@@ -417,7 +742,8 @@ def _prepare_reference_identity(
     code_revision: str,
     final_output_artifact_prefix: str,
     candidate_manifest: Mapping[str, Any] | None = None,
-) -> tuple[dict[str, Any], dict[str, str], tuple[str, ...], Any]:
+    upstream_validation_receipt: Mapping[str, Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, str], tuple[str, ...], Any, str | None]:
     """Validate the exact reference inputs and reconstruct its run identity."""
 
     if _COMMIT_RE.fullmatch(code_revision) is None:
@@ -449,19 +775,35 @@ def _prepare_reference_identity(
     )
     lane_definitions = editing_v2_lane_definitions(contract)
     lane_ids = tuple(lane.lane_id for lane in lane_definitions)
+    upstream_receipt_sha256: str | None = None
     try:
-        bridge = validate_candidate_provenance_bridge(
-            candidate_provenance_bridge_dir,
-            candidate_root=candidate_materialization_dir,
-            provenance_registry_path=candidate_provenance_registry_path,
-            editing_corpus_contract_path=editing_corpus_contract_path,
-            _validated_candidate_materialization=candidate_manifest,
-        )
-        source_stream = validate_candidate_source_stream(
-            bridge.get("source_stream"),
-            expected_candidate_materialization=candidate_identity,
-            expected_nonempty_rows=len(assigned_roles),
-        )
+        if upstream_validation_receipt is None:
+            bridge = validate_candidate_provenance_bridge(
+                candidate_provenance_bridge_dir,
+                candidate_root=candidate_materialization_dir,
+                provenance_registry_path=candidate_provenance_registry_path,
+                editing_corpus_contract_path=editing_corpus_contract_path,
+                _validated_candidate_materialization=candidate_manifest,
+            )
+            source_stream = validate_candidate_source_stream(
+                bridge.get("source_stream"),
+                expected_candidate_materialization=candidate_identity,
+                expected_nonempty_rows=len(assigned_roles),
+            )
+        else:
+            source_stream, validated_receipt = _validate_upstream_validation_receipt(
+                upstream_validation_receipt,
+                candidate_materialization_dir=candidate_materialization_dir,
+                candidate_provenance_bridge_dir=candidate_provenance_bridge_dir,
+                candidate_provenance_registry_path=candidate_provenance_registry_path,
+                editing_corpus_contract_path=editing_corpus_contract_path,
+                candidate_identity=candidate_identity,
+                contract_identity=contract_identity,
+                contract_semantic_sha256=canonical_sha256(contract),
+                assignment_source_stream=assignment["source_stream"],
+                expected_nonempty_rows=len(assigned_roles),
+            )
+            upstream_receipt_sha256 = validated_receipt["receipt_sha256"]
     except (
         EditingV2CandidateProvenanceBridgeError,
         EditingV2SplitAssignmentError,
@@ -504,6 +846,7 @@ def _prepare_reference_identity(
         assigned_roles,
         lane_ids,
         lane_definitions,
+        upstream_receipt_sha256,
     )
 
 
@@ -641,6 +984,8 @@ def plan_role_lane_mapreduce(
     final_output_artifact_prefix: str = reference.OUTPUT_NAMESPACE,
     execution_artifact_prefix: str = DEFAULT_EXECUTION_ARTIFACT_PREFIX,
     expected_source_shards: int = DEFAULT_EXPECTED_SOURCE_SHARDS,
+    upstream_validation_receipt: Mapping[str, Any] | None = None,
+    progress_callback: Callable[[str, Mapping[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Freeze immutable source-shard tasks without reading packed state payloads."""
 
@@ -658,6 +1003,11 @@ def plan_role_lane_mapreduce(
     split_path = Path(split_assignment_path)
     contract_path = Path(editing_corpus_contract_path)
     candidate_manifest = _load_candidate_manifest_header(candidate_root)
+    if progress_callback is not None:
+        progress_callback(
+            "CANDIDATE_HEADER_VALIDATED",
+            {"candidate_manifest_sha256": candidate_manifest["manifest_sha256"]},
+        )
     descriptor, database_name = tempfile.mkstemp(
         prefix="compose-editing-v2-role-lane-plan-", suffix=".sqlite3"
     )
@@ -665,7 +1015,13 @@ def plan_role_lane_mapreduce(
     connection = reference._database(Path(database_name))
     scratch = Path(tempfile.mkdtemp(prefix="compose-editing-v2-role-lane-plan-"))
     try:
-        reference_identity, assigned_roles, lane_ids, _ = _prepare_reference_identity(
+        (
+            reference_identity,
+            assigned_roles,
+            lane_ids,
+            _,
+            upstream_receipt_sha256,
+        ) = _prepare_reference_identity(
             candidate_materialization_dir=candidate_root,
             candidate_provenance_bridge_dir=Path(candidate_provenance_bridge_dir),
             candidate_provenance_registry_path=Path(candidate_provenance_registry_path),
@@ -674,13 +1030,36 @@ def plan_role_lane_mapreduce(
             code_revision=code_revision,
             final_output_artifact_prefix=final_output_artifact_prefix,
             candidate_manifest=candidate_manifest,
+            upstream_validation_receipt=upstream_validation_receipt,
         )
+        if progress_callback is not None:
+            progress_callback(
+                "SOURCE_IDENTITY_VALIDATED",
+                {
+                    "validation_mode": (
+                        "transitive_upstream_receipt"
+                        if upstream_receipt_sha256 is not None
+                        else "direct_full_bridge_validation"
+                    ),
+                    "upstream_validation_receipt_sha256": upstream_receipt_sha256,
+                },
+            )
+        expected_candidate_rows_sha256 = candidate_manifest["rows"]["file_sha256"]
         routed_count = reference._index_selected_candidates(
             connection,
             candidate_root=candidate_root,
             assigned_roles=assigned_roles,
             lane_ids=lane_ids,
+            expected_rows_file_sha256=expected_candidate_rows_sha256,
         )
+        if progress_callback is not None:
+            progress_callback(
+                "CANDIDATE_ROWS_VERIFIED_AND_INDEXED",
+                {
+                    "candidate_rows_file_sha256": expected_candidate_rows_sha256,
+                    "selected_candidates": routed_count,
+                },
+            )
         source_groups = connection.execute("""
             SELECT DISTINCT source_relative_path, source_shard_sha256,
                             source_manifest_sha256, source_overlay_sha256
@@ -751,6 +1130,14 @@ def plan_role_lane_mapreduce(
                     "_selection_path": selection_path,
                 }
             )
+        if progress_callback is not None:
+            progress_callback(
+                "TASK_INPUTS_BUILT",
+                {
+                    "task_count": len(task_drafts),
+                    "selected_candidates": routed_count,
+                },
+            )
         inventory_for_identity = [
             {key: item for key, item in task.items() if not key.startswith("_")}
             for task in task_drafts
@@ -768,6 +1155,7 @@ def plan_role_lane_mapreduce(
             "task_count": len(task_drafts),
             "expected_source_shards": expected_source_shards,
             "execution_artifact_prefix": execution_artifact_prefix,
+            "upstream_validation_receipt_sha256": upstream_receipt_sha256,
         }
         run_identity_sha256 = canonical_sha256(plan_identity_body)
         run_artifact_root = f"{execution_artifact_prefix}/{run_identity_sha256}"
@@ -813,6 +1201,14 @@ def plan_role_lane_mapreduce(
                 raise EditingV2RoleLaneMapReduceError(
                     "content-addressed plan collides with different content"
                 )
+            if progress_callback is not None:
+                progress_callback(
+                    "PLAN_REUSED",
+                    {
+                        "plan_sha256": existing["plan_sha256"],
+                        "run_artifact_root": existing["run_artifact_root"],
+                    },
+                )
             return existing
         target.parent.mkdir(parents=True, exist_ok=True)
         staging = Path(
@@ -832,11 +1228,20 @@ def plan_role_lane_mapreduce(
             os.replace(staging, target)
         finally:
             shutil.rmtree(staging, ignore_errors=True)
-        return validate_role_lane_mapreduce_plan(
+        published = validate_role_lane_mapreduce_plan(
             target / PLAN_FILENAME,
             artifact_root=artifact_root,
             validate_task_inputs=True,
         )
+        if progress_callback is not None:
+            progress_callback(
+                "PLAN_PUBLISHED",
+                {
+                    "plan_sha256": published["plan_sha256"],
+                    "run_artifact_root": published["run_artifact_root"],
+                },
+            )
+        return published
     finally:
         connection.close()
         Path(database_name).unlink(missing_ok=True)
@@ -2194,8 +2599,15 @@ __all__ = [
     "TASK_RECEIPT_SCHEMA",
     "TASK_RECEIPT_SCHEMA_VERSION",
     "TASK_RECEIPT_STATUS",
+    "UPSTREAM_VALIDATION_RECEIPT_SCHEMA",
+    "UPSTREAM_VALIDATION_RECEIPT_SCHEMA_VERSION",
+    "UPSTREAM_VALIDATION_RECEIPT_STATUS",
+    "UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH",
+    "UPSTREAM_SPLIT_PIPELINE_VALIDATOR_PATH",
+    "UPSTREAM_VALIDATOR_PATHS",
     "EditingV2RoleLaneMapReduceError",
     "EditingV2RoleLaneMapReduceIncomplete",
+    "build_upstream_validation_receipt",
     "map_role_lane_source_shard",
     "plan_role_lane_mapreduce",
     "reduce_role_lane_cell",

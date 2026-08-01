@@ -3,17 +3,20 @@
 The driver publishes the same refined continuation contract and final
 role/lane derivative as the reference materializer.  CPU work is split into
 content-addressed source-shard map tasks and independently reusable lane/role
-cell reductions.  Every worker commits the shared volume in ``finally`` so a
-failure preserves its latest operational progress record.
+cell reductions.  Pre-plan progress and the completed plan pointer are durable,
+and every worker commits the shared volume in ``finally`` so a failure preserves
+its latest operational progress record.
 """
 
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import platform
 import sys
 import tempfile
+from datetime import datetime, timezone
 from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -27,16 +30,19 @@ LOCAL_SOURCE_ROOT = str(ROOT / "src")
 if LOCAL_SOURCE_ROOT not in sys.path:
     sys.path.insert(0, LOCAL_SOURCE_ROOT)
 
-from compose_v4.data import (
+from compose_v4.data import (  # noqa: E402
     editing_v2_refined_role_lane_continuation as continuation,
 )
-from compose_v4.data import editing_v2_role_lane_mapreduce as mapreduce
+from compose_v4.data import editing_v2_role_lane_mapreduce as mapreduce  # noqa: E402
 
 EXPECTED_SOURCE_SHARDS = 62
 # ``compose-v4-artifacts`` predates an explicit Volume-v2 declaration.  Keep
 # concurrent writers/commits within Modal's legacy Volume-v1 guidance.
 MAX_MAP_CONTAINERS = 5
 MAX_CELL_CONTAINERS = 5
+UPSTREAM_VALIDATION_RECEIPT_FILENAME = "ROLE_LANE_UPSTREAM_VALIDATION_RECEIPT.json"
+PREPLAN_PROGRESS_FILENAME = "ROLE_LANE_PREPLAN_PROGRESS.json"
+PLAN_POINTER_FILENAME = "ROLE_LANE_MAPREDUCE_PLAN_POINTER.json"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -93,6 +99,60 @@ def _canonical_bytes(value: object) -> bytes:
         ).encode("utf-8")
         + b"\n"
     )
+
+
+def _canonical_sha256(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _self_hashed(value: Mapping[str, Any], field: str) -> dict[str, Any]:
+    body = {key: item for key, item in value.items() if key != field}
+    return {**body, field: _canonical_sha256(body)}
+
+
+def _write_operational_json(path: Path, value: object) -> None:
+    """Atomically replace one nonauthorizing operational status record."""
+
+    encoded = _canonical_bytes(value)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".staging",
+            delete=False,
+        ) as handle:
+            temporary_name = handle.name
+            handle.write(encoded)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_name, path)
+        temporary_name = None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _write_immutable_json(path: Path, value: object) -> bool:
@@ -156,6 +216,152 @@ def _project_path(value: str, *, field: str) -> Path:
     ):
         raise RuntimeError(f"{field} must be below {REMOTE_ROOT}")
     return REMOTE_ROOT / Path(*pure.relative_to(remote).parts)
+
+
+def _write_preplan_progress(
+    *,
+    run_root: Path,
+    request: Mapping[str, Any],
+    receipt_sha256: str,
+    phase: str,
+    detail: Mapping[str, Any] | None = None,
+) -> None:
+    """Publish the latest durable pre-plan boundary without granting authority."""
+
+    body = {
+        "schema": "compose.editing_v2_role_lane_preplan_progress",
+        "schema_version": 1,
+        "status": phase,
+        "training_authorized": False,
+        "gate_zero_authorized": False,
+        "bounded_p50_authorized": False,
+        "continuation_run_identity_sha256": request["run_identity_sha256"],
+        "source_revision": request["source_revision"],
+        "upstream_validation_receipt_sha256": receipt_sha256,
+        "updated_at": _utc_now(),
+        "detail": dict(detail or {}),
+    }
+    _write_operational_json(
+        run_root / PREPLAN_PROGRESS_FILENAME,
+        _self_hashed(body, "progress_sha256"),
+    )
+
+
+def _build_plan_pointer(
+    *,
+    request: Mapping[str, Any],
+    plan_path: Path,
+    plan: Mapping[str, Any],
+    upstream_validation_receipt_sha256: str,
+) -> dict[str, Any]:
+    body = {
+        "schema": "compose.editing_v2_role_lane_mapreduce_plan_pointer",
+        "schema_version": 1,
+        "status": "COMPLETE_REUSABLE_PLAN_NO_TRAINING_AUTHORITY",
+        "training_authorized": False,
+        "gate_zero_authorized": False,
+        "bounded_p50_authorized": False,
+        "continuation_run_identity_sha256": request["run_identity_sha256"],
+        "code_revision": request["source_revision"]["commit"],
+        "upstream_validation_receipt_sha256": upstream_validation_receipt_sha256,
+        "plan_artifact_path": continuation.artifact_address(
+            plan_path,
+            artifact_root=ARTIFACT_ROOT,
+        ),
+        "plan_file_sha256": _file_sha256(plan_path),
+        "plan_sha256": plan["plan_sha256"],
+        "plan_run_identity_sha256": plan["run_identity_sha256"],
+    }
+    return _self_hashed(body, "pointer_sha256")
+
+
+def _load_reusable_plan(
+    *,
+    pointer_path: Path,
+    request: Mapping[str, Any],
+    upstream_validation_receipt_sha256: str,
+    expected_final_output_prefix: str,
+    expected_candidate_identity: Mapping[str, Any],
+    expected_source_stream: Mapping[str, Any],
+    expected_split_identity: Mapping[str, Any],
+) -> tuple[dict[str, Any], Path] | None:
+    """Strictly reopen a completed plan and all task inputs, or return absent."""
+
+    if not pointer_path.exists():
+        return None
+    try:
+        pointer = json.loads(pointer_path.read_bytes())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError(
+            f"cannot load reusable plan pointer: {pointer_path}"
+        ) from error
+    if not isinstance(pointer, Mapping):
+        raise RuntimeError("reusable plan pointer must be an object")
+    pointer = dict(pointer)
+    supplied = pointer.get("pointer_sha256")
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "status",
+        "training_authorized",
+        "gate_zero_authorized",
+        "bounded_p50_authorized",
+        "continuation_run_identity_sha256",
+        "code_revision",
+        "upstream_validation_receipt_sha256",
+        "plan_artifact_path",
+        "plan_file_sha256",
+        "plan_sha256",
+        "plan_run_identity_sha256",
+        "pointer_sha256",
+    }
+    body = {key: item for key, item in pointer.items() if key != "pointer_sha256"}
+    if (
+        set(pointer) != expected_fields
+        or pointer.get("schema")
+        != "compose.editing_v2_role_lane_mapreduce_plan_pointer"
+        or pointer.get("schema_version") != 1
+        or pointer.get("status") != "COMPLETE_REUSABLE_PLAN_NO_TRAINING_AUTHORITY"
+        or pointer.get("training_authorized") is not False
+        or pointer.get("gate_zero_authorized") is not False
+        or pointer.get("bounded_p50_authorized") is not False
+        or supplied != _canonical_sha256(body)
+        or pointer.get("continuation_run_identity_sha256")
+        != request["run_identity_sha256"]
+        or pointer.get("code_revision") != request["source_revision"]["commit"]
+        or pointer.get("upstream_validation_receipt_sha256")
+        != upstream_validation_receipt_sha256
+    ):
+        raise RuntimeError("reusable plan pointer identity or authority disagrees")
+    plan_path = _artifact_path(
+        str(pointer.get("plan_artifact_path", "")),
+        field="reusable map/reduce plan",
+    )
+    if _file_sha256(plan_path) != pointer.get("plan_file_sha256"):
+        raise RuntimeError("reusable map/reduce plan bytes disagree with pointer")
+    plan = mapreduce.validate_role_lane_mapreduce_plan(
+        plan_path,
+        artifact_root=ARTIFACT_ROOT,
+        validate_task_inputs=True,
+    )
+    reference_body = plan["reference_materialization"]["run_identity_body"]
+    if (
+        plan.get("plan_sha256") != pointer.get("plan_sha256")
+        or plan.get("run_identity_sha256") != pointer.get("plan_run_identity_sha256")
+        or plan.get("code_revision") != request["source_revision"]["commit"]
+        or plan.get("upstream_validation_receipt_sha256")
+        != upstream_validation_receipt_sha256
+        or reference_body.get("output_artifact_prefix") != expected_final_output_prefix
+        or reference_body.get("candidate_materialization")
+        != dict(expected_candidate_identity)
+        or reference_body.get("candidate_provenance_source_stream")
+        != dict(expected_source_stream)
+        or reference_body.get("split_assignment") != dict(expected_split_identity)
+    ):
+        raise RuntimeError(
+            "reusable plan does not bind the current continuation inputs"
+        )
+    return plan, plan_path
 
 
 def _task_progress_summary(plan: Mapping[str, Any]) -> dict[str, int]:
@@ -342,23 +548,134 @@ def driver(
     )
     role_prefix = f"{run_root_address}/{continuation.ROLE_LANE_OUTPUT_DIRECTORY}"
     execution_prefix = f"{run_root_address}/role_lane_mapreduce_execution"
-    plan = mapreduce.plan_role_lane_mapreduce(
-        candidate_materialization_dir=candidate_root,
-        candidate_provenance_bridge_dir=bridge_root,
-        candidate_provenance_registry_path=registry_path,
-        split_assignment_path=assignment_path,
-        editing_corpus_contract_path=contract_path,
-        artifact_root=ARTIFACT_ROOT,
-        code_revision=revision["commit"],
-        final_output_artifact_prefix=role_prefix,
-        execution_artifact_prefix=execution_prefix,
-        expected_source_shards=EXPECTED_SOURCE_SHARDS,
+    upstream_receipt = mapreduce.build_upstream_validation_receipt(
+        parent_completion_identity=continuation.parent_identity(
+            inputs,
+            artifact_root=ARTIFACT_ROOT,
+        ),
+        parent_request=parent_request,
+        source_stream=inputs.parent_assignment["source_stream"],
     )
-    plan_path = _artifact_path(
-        f"{plan['run_artifact_root']}/{mapreduce.PLAN_FILENAME}",
-        field="map/reduce plan",
+    upstream_receipt_path = run_root / UPSTREAM_VALIDATION_RECEIPT_FILENAME
+    if _write_immutable_json(upstream_receipt_path, upstream_receipt):
+        artifact_volume.commit()
+    expected_candidate_identity = {
+        key: value
+        for key, value in parent_request["candidate"].items()
+        if key != "path"
+    }
+    expected_split_identity = {
+        "file_sha256": assignment_record["file_sha256"],
+        "assignment_sha256": inputs.refined_assignment["assignment_sha256"],
+        "candidate_resolution_stream_sha256": inputs.refined_assignment[
+            "candidate_resolution_stream_sha256"
+        ],
+        "source_stream_sha256": inputs.refined_assignment["source_stream"][
+            "source_stream_sha256"
+        ],
+    }
+    pointer_path = run_root / PLAN_POINTER_FILENAME
+    reusable = _load_reusable_plan(
+        pointer_path=pointer_path,
+        request=request,
+        upstream_validation_receipt_sha256=upstream_receipt["receipt_sha256"],
+        expected_final_output_prefix=role_prefix,
+        expected_candidate_identity=expected_candidate_identity,
+        expected_source_stream=inputs.parent_assignment["source_stream"],
+        expected_split_identity=expected_split_identity,
     )
-    artifact_volume.commit()
+    if reusable is None:
+        last_phase = "UPSTREAM_VALIDATION_RECEIPT_PUBLISHED"
+        _write_preplan_progress(
+            run_root=run_root,
+            request=request,
+            receipt_sha256=upstream_receipt["receipt_sha256"],
+            phase=last_phase,
+            detail={"receipt_file_sha256": _file_sha256(upstream_receipt_path)},
+        )
+        artifact_volume.commit()
+
+        def publish_progress(phase: str, detail: Mapping[str, Any]) -> None:
+            nonlocal last_phase
+            last_phase = phase
+            _write_preplan_progress(
+                run_root=run_root,
+                request=request,
+                receipt_sha256=upstream_receipt["receipt_sha256"],
+                phase=phase,
+                detail=detail,
+            )
+            if phase in {"PLAN_PUBLISHED", "PLAN_REUSED"}:
+                published_plan_path = _artifact_path(
+                    f"{detail['run_artifact_root']}/{mapreduce.PLAN_FILENAME}",
+                    field="published map/reduce plan",
+                )
+                published_plan = mapreduce.validate_role_lane_mapreduce_plan(
+                    published_plan_path,
+                    artifact_root=ARTIFACT_ROOT,
+                    validate_task_inputs=False,
+                )
+                published_pointer = _build_plan_pointer(
+                    request=request,
+                    plan_path=published_plan_path,
+                    plan=published_plan,
+                    upstream_validation_receipt_sha256=upstream_receipt[
+                        "receipt_sha256"
+                    ],
+                )
+                _write_immutable_json(pointer_path, published_pointer)
+            artifact_volume.commit()
+
+        try:
+            plan = mapreduce.plan_role_lane_mapreduce(
+                candidate_materialization_dir=candidate_root,
+                candidate_provenance_bridge_dir=bridge_root,
+                candidate_provenance_registry_path=registry_path,
+                split_assignment_path=assignment_path,
+                editing_corpus_contract_path=contract_path,
+                artifact_root=ARTIFACT_ROOT,
+                code_revision=revision["commit"],
+                final_output_artifact_prefix=role_prefix,
+                execution_artifact_prefix=execution_prefix,
+                expected_source_shards=EXPECTED_SOURCE_SHARDS,
+                upstream_validation_receipt=upstream_receipt,
+                progress_callback=publish_progress,
+            )
+        except Exception as error:
+            _write_preplan_progress(
+                run_root=run_root,
+                request=request,
+                receipt_sha256=upstream_receipt["receipt_sha256"],
+                phase="FAILED",
+                detail={
+                    "last_completed_phase": last_phase,
+                    "error_type": type(error).__name__,
+                },
+            )
+            artifact_volume.commit()
+            raise
+        plan_path = _artifact_path(
+            f"{plan['run_artifact_root']}/{mapreduce.PLAN_FILENAME}",
+            field="map/reduce plan",
+        )
+        pointer = _build_plan_pointer(
+            request=request,
+            plan_path=plan_path,
+            plan=plan,
+            upstream_validation_receipt_sha256=upstream_receipt["receipt_sha256"],
+        )
+        if _write_immutable_json(pointer_path, pointer):
+            artifact_volume.commit()
+    else:
+        plan, plan_path = reusable
+        _write_preplan_progress(
+            run_root=run_root,
+            request=request,
+            receipt_sha256=upstream_receipt["receipt_sha256"],
+            phase="PLAN_REUSED_FROM_POINTER",
+            detail={"plan_sha256": plan["plan_sha256"]},
+        )
+        artifact_volume.commit()
     print(
         json.dumps(
             {

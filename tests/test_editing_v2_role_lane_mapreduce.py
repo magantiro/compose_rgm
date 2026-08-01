@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import copy
 from pathlib import Path, PurePosixPath
 from unittest.mock import patch
 
@@ -23,6 +24,9 @@ from compose_v4.data.editing_v2_role_lane_mapreduce import (
     TASK_RECEIPT_FILENAME,
     EditingV2RoleLaneMapReduceError,
     EditingV2RoleLaneMapReduceIncomplete,
+    UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH,
+    UPSTREAM_SPLIT_PIPELINE_VALIDATOR_PATH,
+    build_upstream_validation_receipt,
     map_role_lane_source_shard,
     plan_role_lane_mapreduce,
     reduce_role_lane_cell,
@@ -30,6 +34,7 @@ from compose_v4.data.editing_v2_role_lane_mapreduce import (
     validate_role_lane_mapreduce_plan,
     validate_role_lane_task_receipt,
 )
+from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
 from compose_v4.data.editing_v2_role_lane_packed_materializer import (
     LANE_REGISTRY_FILENAME,
     RESOLVED_MEMBERSHIP_FILENAME,
@@ -57,8 +62,7 @@ def _plan(inputs: dict, *, final_prefix: str) -> tuple[dict, Path]:
         return {"source_stream": inputs["source_stream"]}
 
     with patch(
-        "compose_v4.data.editing_v2_role_lane_mapreduce."
-        "validate_candidate_provenance_bridge",
+        "compose_v4.data.editing_v2_role_lane_mapreduce.validate_candidate_provenance_bridge",
         side_effect=validate_bridge,
     ):
         plan = plan_role_lane_mapreduce(
@@ -201,6 +205,7 @@ def _multi_entry_inputs(root: Path) -> dict:
     assignment["total_mass_units_by_lane"] = {
         lane: sum(row["data_lane"] == lane for row in rows) for lane in LANES
     }
+
     assignment = _self_hash(assignment, "assignment_sha256")
     _write_json(split_path, assignment)
     return {
@@ -216,6 +221,211 @@ def _multi_entry_inputs(root: Path) -> dict:
         "role_by_candidate": role_by_candidate,
         "expected_source_shards": len(groups),
     }
+
+
+def _upstream_receipt(inputs: dict) -> dict:
+    registry_path = inputs["registry_path"]
+    registry_path.write_bytes(b"frozen fixture registry\n")
+    bridge_root = inputs["bridge_root"]
+    bridge_root.mkdir()
+    bridge_manifest_path = bridge_root / "CANDIDATE_PROVENANCE_BRIDGE.json"
+    bridge_manifest_path.write_bytes(b"frozen fixture bridge manifest\n")
+    assignment = inputs["assignment"]
+    source_stream_body = {
+        key: value
+        for key, value in assignment["source_stream"].items()
+        if key != "source_stream_sha256"
+    }
+    source_stream_body["provenance_registry"] = {
+        "file_sha256": file_sha256(registry_path),
+        "registry_sha256": "b" * 64,
+    }
+    source_stream = {
+        **source_stream_body,
+        "source_stream_sha256": canonical_sha256(source_stream_body),
+    }
+    assignment["source_stream"] = source_stream
+    assignment = _self_hash(assignment, "assignment_sha256")
+    _write_json(inputs["split_path"], assignment)
+    inputs["assignment"] = assignment
+    inputs["source_stream"] = source_stream
+    contract = load_editing_corpus_contract(CORPUS_CONTRACT)
+    serialized_source_hashes = {
+        UPSTREAM_SPLIT_PIPELINE_VALIDATOR_PATH: "9" * 64,
+        UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH: "a" * 64,
+    }
+    source_revision_body = {
+        "schema": "compose.editing_v2_structural_split_source_revision",
+        "schema_version": 1,
+        "commit": "9" * 40,
+        "tree": "8" * 40,
+        "worktree_clean": True,
+        "serialized_source_hashes": serialized_source_hashes,
+        "serialized_source_hashes_sha256": canonical_sha256(serialized_source_hashes),
+    }
+    source_revision = {
+        **source_revision_body,
+        "source_revision_sha256": canonical_sha256(source_revision_body),
+    }
+    parent_request = {
+        "source_revision": source_revision,
+        "candidate": {
+            "path": str(inputs["candidate_root"]),
+            **source_stream["candidate_materialization"],
+        },
+        "candidate_provenance_bridge": {
+            "path": str(bridge_root),
+            "manifest_file_sha256": file_sha256(bridge_manifest_path),
+            "manifest_sha256": "2" * 64,
+            "source_stream_sha256": source_stream["source_stream_sha256"],
+            "outputs": {},
+        },
+        "candidate_provenance_registry": {
+            "path": str(registry_path),
+            **source_stream["provenance_registry"],
+        },
+        "editing_corpus_contract": {
+            "path": str(CORPUS_CONTRACT),
+            "file_sha256": file_sha256(CORPUS_CONTRACT),
+            "semantic_sha256": canonical_sha256(contract),
+            "contract_id": contract["contract_id"],
+            "schema": contract["schema"],
+            "schema_version": contract["schema_version"],
+        },
+    }
+    return build_upstream_validation_receipt(
+        parent_completion_identity={
+            "artifact_path": "/artifacts/split/SPLIT_PIPELINE_COMPLETE.json",
+            "file_sha256": "3" * 64,
+            "completion_sha256": "4" * 64,
+            "structural_run_identity_sha256": "5" * 64,
+            "candidate_manifest_sha256": inputs["candidate_manifest"][
+                "manifest_sha256"
+            ],
+            "candidate_source_stream_sha256": source_stream["source_stream_sha256"],
+            "census_sha256": "6" * 64,
+            "parent_assignment_sha256": "7" * 64,
+        },
+        parent_request=parent_request,
+        source_stream=source_stream,
+    )
+
+
+def test_planner_reuses_transitive_validation_but_hashes_consumed_rows(
+    tmp_path: Path,
+) -> None:
+    inputs = _multi_entry_inputs(tmp_path)
+    receipt = _upstream_receipt(inputs)
+    phases: list[str] = []
+
+    with patch(
+        "compose_v4.data.editing_v2_role_lane_mapreduce.validate_candidate_provenance_bridge"
+    ) as full_bridge_validation:
+        plan = plan_role_lane_mapreduce(
+            candidate_materialization_dir=inputs["candidate_root"],
+            candidate_provenance_bridge_dir=inputs["bridge_root"],
+            candidate_provenance_registry_path=inputs["registry_path"],
+            split_assignment_path=inputs["split_path"],
+            editing_corpus_contract_path=CORPUS_CONTRACT,
+            artifact_root=inputs["artifact_root"],
+            code_revision="a" * 40,
+            final_output_artifact_prefix="/artifacts/editing_v2/refined_fixture",
+            execution_artifact_prefix="/artifacts/editing_v2/mapreduce_fixture",
+            expected_source_shards=inputs["expected_source_shards"],
+            upstream_validation_receipt=receipt,
+            progress_callback=lambda phase, _: phases.append(phase),
+        )
+
+    full_bridge_validation.assert_not_called()
+    assert plan["upstream_validation_receipt_sha256"] == receipt["receipt_sha256"]
+    assert phases == [
+        "CANDIDATE_HEADER_VALIDATED",
+        "SOURCE_IDENTITY_VALIDATED",
+        "CANDIDATE_ROWS_VERIFIED_AND_INDEXED",
+        "TASK_INPUTS_BUILT",
+        "PLAN_PUBLISHED",
+    ]
+    with patch(
+        "compose_v4.data.editing_v2_role_lane_mapreduce."
+        "validate_candidate_provenance_bridge",
+        return_value={"source_stream": inputs["source_stream"]},
+    ):
+        direct_plan = plan_role_lane_mapreduce(
+            candidate_materialization_dir=inputs["candidate_root"],
+            candidate_provenance_bridge_dir=inputs["bridge_root"],
+            candidate_provenance_registry_path=inputs["registry_path"],
+            split_assignment_path=inputs["split_path"],
+            editing_corpus_contract_path=CORPUS_CONTRACT,
+            artifact_root=inputs["artifact_root"],
+            code_revision="a" * 40,
+            final_output_artifact_prefix="/artifacts/editing_v2/refined_fixture",
+            execution_artifact_prefix="/artifacts/editing_v2/direct_fixture",
+            expected_source_shards=inputs["expected_source_shards"],
+        )
+    assert plan["reference_materialization"] == direct_plan["reference_materialization"]
+
+    rows_path = inputs["candidate_root"] / "candidate_headers.jsonl"
+    rows_path.write_bytes(rows_path.read_bytes().replace(b"\n", b" \n", 1))
+    with pytest.raises(
+        mapreduce_module.reference.EditingV2RoleLaneMaterializationError,
+        match="candidate rows physical SHA-256 disagrees",
+    ):
+        plan_role_lane_mapreduce(
+            candidate_materialization_dir=inputs["candidate_root"],
+            candidate_provenance_bridge_dir=inputs["bridge_root"],
+            candidate_provenance_registry_path=inputs["registry_path"],
+            split_assignment_path=inputs["split_path"],
+            editing_corpus_contract_path=CORPUS_CONTRACT,
+            artifact_root=inputs["artifact_root"],
+            code_revision="a" * 40,
+            final_output_artifact_prefix="/artifacts/editing_v2/refined_fixture",
+            execution_artifact_prefix="/artifacts/editing_v2/mapreduce_fixture",
+            expected_source_shards=inputs["expected_source_shards"],
+            upstream_validation_receipt=receipt,
+        )
+
+
+@pytest.mark.parametrize("tamper", ["declared_validator", "source_revision"])
+def test_transitive_receipt_rejects_upstream_validator_identity_tampering(
+    tmp_path: Path,
+    tamper: str,
+) -> None:
+    inputs = _multi_entry_inputs(tmp_path)
+    receipt = copy.deepcopy(_upstream_receipt(inputs))
+    if tamper == "declared_validator":
+        receipt["upstream_validator_implementations"][
+            UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH
+        ] = ("0" * 64)
+    else:
+        revision = receipt["upstream_source_revision"]
+        revision["serialized_source_hashes"][
+            UPSTREAM_CANDIDATE_BRIDGE_VALIDATOR_PATH
+        ] = ("0" * 64)
+        revision["serialized_source_hashes_sha256"] = canonical_sha256(
+            revision["serialized_source_hashes"]
+        )
+        revision_body = {
+            key: value
+            for key, value in revision.items()
+            if key != "source_revision_sha256"
+        }
+        revision["source_revision_sha256"] = canonical_sha256(revision_body)
+    receipt = _self_hash(receipt, "receipt_sha256")
+
+    with pytest.raises(
+        EditingV2RoleLaneMapReduceError,
+        match="does not bind the exact planning inputs",
+    ):
+        mapreduce_module._prepare_reference_identity(
+            candidate_materialization_dir=inputs["candidate_root"],
+            candidate_provenance_bridge_dir=inputs["bridge_root"],
+            candidate_provenance_registry_path=inputs["registry_path"],
+            split_assignment_path=inputs["split_path"],
+            editing_corpus_contract_path=CORPUS_CONTRACT,
+            code_revision="a" * 40,
+            final_output_artifact_prefix="/artifacts/editing_v2/refined_fixture",
+            upstream_validation_receipt=receipt,
+        )
 
 
 def _map_all(inputs: dict, plan: dict, plan_path: Path) -> list[dict]:
@@ -452,7 +662,7 @@ def test_plan_reuse_and_task_input_tamper_are_detected(tmp_path: Path) -> None:
         )
 
 
-def test_planning_uses_header_only_manifest_then_unchanged_reference_indexer(
+def test_planning_combines_candidate_row_hashing_with_reference_indexer(
     tmp_path: Path,
 ) -> None:
     inputs = _inputs(tmp_path)
@@ -472,8 +682,7 @@ def test_planning_uses_header_only_manifest_then_unchanged_reference_indexer(
 
     with (
         patch(
-            "compose_v4.data.editing_v2_role_lane_mapreduce."
-            "validate_candidate_provenance_bridge",
+            "compose_v4.data.editing_v2_role_lane_mapreduce.validate_candidate_provenance_bridge",
             side_effect=validate_bridge,
         ),
         patch.object(
@@ -481,6 +690,11 @@ def test_planning_uses_header_only_manifest_then_unchanged_reference_indexer(
             "_index_selected_candidates",
             wraps=mapreduce_module.reference._index_selected_candidates,
         ) as reference_indexer,
+        patch.object(
+            mapreduce_module,
+            "file_sha256",
+            wraps=mapreduce_module.file_sha256,
+        ) as standalone_file_hash,
     ):
         plan = plan_role_lane_mapreduce(
             candidate_materialization_dir=inputs["candidate_root"],
@@ -501,4 +715,13 @@ def test_planning_uses_header_only_manifest_then_unchanged_reference_indexer(
 
     assert bridge_calls == 1
     assert reference_indexer.call_count == 1
+    assert (
+        reference_indexer.call_args.kwargs["expected_rows_file_sha256"]
+        == inputs["candidate_manifest"]["rows"]["file_sha256"]
+    )
+    candidate_rows_path = inputs["candidate_root"] / "candidate_headers.jsonl"
+    assert all(
+        Path(call.args[0]) != candidate_rows_path
+        for call in standalone_file_hash.call_args_list
+    )
     assert plan["selected_candidates"] == len(inputs["rows"])
