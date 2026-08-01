@@ -42,9 +42,7 @@ image = (
     )
     .env(
         {
-            "PYTHONPATH": os.pathsep.join(
-                (str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))
-            ),
+            "PYTHONPATH": os.pathsep.join((str(REMOTE_ROOT / "src"), str(REMOTE_ROOT / "scripts"))),
             "PYTHONUNBUFFERED": "1",
             "OMP_NUM_THREADS": "1",
         }
@@ -64,9 +62,7 @@ image = (
 )
 
 app = modal.App("compose-v4-apply-provenance-overlays")
-artifact_volume = modal.Volume.from_name(
-    "compose-v4-artifacts", create_if_missing=False
-)
+artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
 
 LAYERS = ("corruption", "cycle_ops")
 PARTITIONS = ("train", "validation", "test")
@@ -83,6 +79,7 @@ _UPSTREAM_COMPLETION_FIELDS = {
     "path",
     "file_sha256",
     "completion_flag",
+    "inventory_origin",
     "expected_shards",
     "shard_inventory_sha256",
 }
@@ -144,9 +141,7 @@ def _verified_pack_completion(
     """Reconcile one exact upstream pack receipt against every live shard byte."""
 
     if _SHA256_RE.fullmatch(expected_file_sha256) is None:
-        raise RuntimeError(
-            f"expected SHA-256 for {completion_flag} must be supplied explicitly"
-        )
+        raise RuntimeError(f"expected SHA-256 for {completion_flag} must be supplied explicitly")
     completion_path = root / filename
     if not completion_path.is_file():
         raise RuntimeError(f"required upstream completion is absent: {completion_path}")
@@ -156,23 +151,57 @@ def _verified_pack_completion(
     try:
         completion = json.loads(completion_path.read_bytes())
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise RuntimeError(
-            f"upstream completion is invalid JSON: {completion_path}"
-        ) from error
+        raise RuntimeError(f"upstream completion is invalid JSON: {completion_path}") from error
     if not isinstance(completion, dict) or completion.get(completion_flag) is not True:
         raise RuntimeError(f"{completion_flag} is not true in {completion_path}")
-    rows = completion.get("shard_artifacts")
     expected_shards = completion.get("expected_shards")
-    if (
-        not isinstance(rows, list)
-        or not rows
-        or type(expected_shards) is not int
-        or expected_shards <= 0
-        or len(rows) != expected_shards
-    ):
-        raise RuntimeError(
-            f"{completion_flag} has no exact, reconciled shard inventory"
-        )
+    if type(expected_shards) is not int or expected_shards <= 0:
+        raise RuntimeError(f"{completion_flag}.expected_shards must be positive")
+
+    actual_paths: set[Path] = set()
+    layers = ("mmp_analogue",) if mmp else LAYERS
+    for layer in layers:
+        for partition in PARTITIONS:
+            directory = root / partition if mmp else root / layer / partition
+            if not directory.is_dir():
+                raise RuntimeError(f"required upstream packed directory is absent: {directory}")
+            actual_paths.update(directory.glob("*.jsonl.gz"))
+    if len(actual_paths) != expected_shards:
+        raise RuntimeError(f"live shard count disagrees with {completion_flag}.expected_shards")
+
+    rows = completion.get("shard_artifacts")
+    inventory_origin = "completion_shard_artifacts"
+    if rows is None and not mmp:
+        # The immutable first-generation audit receipt predates per-shard
+        # inventory rows. Reconstruct those identities from the exact live
+        # bytes, then reconcile counts to its frozen replay-certified totals.
+        inventory_origin = "reconciled_legacy_completion_totals"
+        rows = []
+        for shard in sorted(actual_paths):
+            relative = shard.relative_to(root)
+            layer, partition = relative.parts[:2]
+            manifest_path = shard.with_suffix(".manifest.json")
+            if not manifest_path.is_file():
+                raise RuntimeError(f"legacy audit shard lacks its packed manifest: {shard}")
+            try:
+                manifest = json.loads(manifest_path.read_bytes())
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise RuntimeError(
+                    f"legacy audit packed manifest is invalid JSON: {manifest_path}"
+                ) from error
+            rows.append(
+                {
+                    "layer": layer,
+                    "partition": partition,
+                    "shard": shard.name,
+                    "packed_sha256": _file_sha256(shard),
+                    "manifest_sha256": _file_sha256(manifest_path),
+                    "entries": manifest.get("entries"),
+                    "states": manifest.get("states"),
+                }
+            )
+    if not isinstance(rows, list) or not rows or len(rows) != expected_shards:
+        raise RuntimeError(f"{completion_flag} has no exact, reconciled shard inventory")
 
     normalized_inventory: list[dict] = []
     source_rows: list[dict] = []
@@ -190,9 +219,7 @@ def _verified_pack_completion(
         required_fields.add("layer")
     for index, row in enumerate(rows):
         if not isinstance(row, dict) or set(row) != required_fields:
-            raise RuntimeError(
-                f"{completion_flag}.shard_artifacts[{index}] fields disagree"
-            )
+            raise RuntimeError(f"{completion_flag}.shard_artifacts[{index}] fields disagree")
         layer = "mmp_analogue" if mmp else row["layer"]
         partition = row["partition"]
         shard_name = row["shard"]
@@ -203,14 +230,10 @@ def _verified_pack_completion(
             or not shard_name.endswith(".jsonl.gz")
             or Path(shard_name).name != shard_name
         ):
-            raise RuntimeError(
-                f"{completion_flag}.shard_artifacts[{index}] address is invalid"
-            )
+            raise RuntimeError(f"{completion_flag}.shard_artifacts[{index}] address is invalid")
         for field in ("packed_sha256", "manifest_sha256"):
             if _SHA256_RE.fullmatch(str(row[field])) is None:
-                raise RuntimeError(
-                    f"{completion_flag}.shard_artifacts[{index}].{field} is invalid"
-                )
+                raise RuntimeError(f"{completion_flag}.shard_artifacts[{index}].{field} is invalid")
         for field in ("entries", "states"):
             if type(row[field]) is not int or row[field] <= 0:
                 raise RuntimeError(
@@ -220,16 +243,10 @@ def _verified_pack_completion(
         if cell_and_name in seen_cells_and_names:
             raise RuntimeError(f"{completion_flag} repeats a physical shard")
         seen_cells_and_names.add(cell_and_name)
-        shard = (
-            root / partition / shard_name
-            if mmp
-            else root / layer / partition / shard_name
-        )
+        shard = root / partition / shard_name if mmp else root / layer / partition / shard_name
         manifest_path = shard.with_suffix(".manifest.json")
         if not shard.is_file() or not manifest_path.is_file():
-            raise RuntimeError(
-                f"upstream completion references absent shard bytes: {shard}"
-            )
+            raise RuntimeError(f"upstream completion references absent shard bytes: {shard}")
         if (
             _file_sha256(shard) != row["packed_sha256"]
             or _file_sha256(manifest_path) != row["manifest_sha256"]
@@ -260,28 +277,31 @@ def _verified_pack_completion(
             }
         )
 
-    actual_paths: set[Path] = set()
-    layers = ("mmp_analogue",) if mmp else LAYERS
-    for layer in layers:
-        for partition in PARTITIONS:
-            directory = root / partition if mmp else root / layer / partition
-            if not directory.is_dir():
-                raise RuntimeError(
-                    f"required upstream packed directory is absent: {directory}"
-                )
-            actual_paths.update(directory.glob("*.jsonl.gz"))
     if actual_paths != expected_paths:
         raise RuntimeError(f"live shard inventory disagrees with {completion_flag}")
-    normalized_inventory.sort(
-        key=lambda item: (item["layer"], item["partition"], item["shard"])
-    )
-    source_rows.sort(
-        key=lambda item: (item["layer"], item["partition"], item["shard_path"])
-    )
+    normalized_inventory.sort(key=lambda item: (item["layer"], item["partition"], item["shard"]))
+    source_rows.sort(key=lambda item: (item["layer"], item["partition"], item["shard_path"]))
+    entries = sum(item["entries"] for item in normalized_inventory)
+    states = sum(item["states"] for item in normalized_inventory)
+    if mmp:
+        if completion.get("packed_entries") != entries or completion.get("packed_states") != states:
+            raise RuntimeError("MMP pack completion totals disagree with its exact shard inventory")
+    else:
+        entries_by_layer = {
+            layer: sum(item["entries"] for item in normalized_inventory if item["layer"] == layer)
+            for layer in LAYERS
+        }
+        if completion.get("totals") != {"entries": entries, "states": states} or (
+            completion.get("entries_by_layer") != entries_by_layer
+        ):
+            raise RuntimeError(
+                "audit pack completion totals disagree with its exact shard inventory"
+            )
     identity = {
         "path": str(completion_path),
         "file_sha256": observed_file_sha256,
         "completion_flag": completion_flag,
+        "inventory_origin": inventory_origin,
         "expected_shards": expected_shards,
         "shard_inventory_sha256": _canonical_sha256(normalized_inventory),
     }
@@ -314,41 +334,34 @@ def build_overlay_completion(
     normalized_upstream: dict[str, dict] = {}
     for name in ("audit_pack", "mmp_pack"):
         identity = upstream_completions[name]
-        if (
-            not isinstance(identity, dict)
-            or set(identity) != _UPSTREAM_COMPLETION_FIELDS
-        ):
+        if not isinstance(identity, dict) or set(identity) != _UPSTREAM_COMPLETION_FIELDS:
             raise ValueError(f"upstream_completions.{name} fields disagree")
         if _SHA256_RE.fullmatch(str(identity["file_sha256"])) is None or (
             _SHA256_RE.fullmatch(str(identity["shard_inventory_sha256"])) is None
         ):
             raise ValueError(f"upstream_completions.{name} SHA-256 is invalid")
-        if (
-            type(identity["expected_shards"]) is not int
-            or identity["expected_shards"] <= 0
-        ):
-            raise ValueError(
-                f"upstream_completions.{name}.expected_shards must be positive"
-            )
+        if type(identity["expected_shards"]) is not int or identity["expected_shards"] <= 0:
+            raise ValueError(f"upstream_completions.{name}.expected_shards must be positive")
         normalized_upstream[name] = dict(identity)
     expected_completion_addresses = {
         "audit_pack": (
             f"{packed_root}/{AUDIT_PACK_COMPLETION_FILENAME}",
             "PACK_COMPLETE",
+            "reconciled_legacy_completion_totals",
         ),
         "mmp_pack": (
             f"{mmp_root}/{MMP_PACK_COMPLETION_FILENAME}",
             "MMP_PACK_COMPLETE",
+            "completion_shard_artifacts",
         ),
     }
-    for name, (path, flag) in expected_completion_addresses.items():
+    for name, (path, flag, origin) in expected_completion_addresses.items():
         if (
             normalized_upstream[name]["path"] != path
             or normalized_upstream[name]["completion_flag"] != flag
+            or normalized_upstream[name]["inventory_origin"] != origin
         ):
-            raise ValueError(
-                f"upstream_completions.{name} address or completion flag disagrees"
-            )
+            raise ValueError(f"upstream_completions.{name} address or completion flag disagrees")
     if not shard_receipts:
         raise ValueError("overlay completion requires at least one physical shard")
     required_receipt_fields = {
@@ -398,13 +411,10 @@ def build_overlay_completion(
         )
         if (
             shard_path != expected_shard
-            or Path(str(receipt["manifest_path"]))
-            != expected_shard.with_suffix(".manifest.json")
+            or Path(str(receipt["manifest_path"])) != expected_shard.with_suffix(".manifest.json")
             or receipt["overlay_path"] != f"{expected_shard}.provenance.json"
         ):
-            raise ValueError(
-                f"shard_receipts[{index}] path is outside its exact upstream cell"
-            )
+            raise ValueError(f"shard_receipts[{index}] path is outside its exact upstream cell")
         normalized_receipts.append(dict(receipt))
     normalized_receipts.sort(
         key=lambda item: (item["layer"], item["partition"], item["shard_path"])
@@ -412,27 +422,19 @@ def build_overlay_completion(
     shard_paths = [item["shard_path"] for item in normalized_receipts]
     if len(shard_paths) != len(set(shard_paths)):
         raise ValueError("overlay completion contains duplicate physical shards")
-    expected_cells = {
-        (layer, partition) for layer in LAYERS for partition in PARTITIONS
-    }
+    expected_cells = {(layer, partition) for layer in LAYERS for partition in PARTITIONS}
     if mmp_root:
         expected_cells.update(("mmp_analogue", partition) for partition in PARTITIONS)
-    observed_cells = {
-        (item["layer"], item["partition"]) for item in normalized_receipts
-    }
+    observed_cells = {(item["layer"], item["partition"]) for item in normalized_receipts}
     if observed_cells != expected_cells:
-        raise ValueError(
-            "overlay completion does not cover every required layer/partition cell"
-        )
+        raise ValueError("overlay completion does not cover every required layer/partition cell")
     audit_shards = sum(item["layer"] in LAYERS for item in normalized_receipts)
     mmp_shards = sum(item["layer"] == "mmp_analogue" for item in normalized_receipts)
     if (
         audit_shards != normalized_upstream["audit_pack"]["expected_shards"]
         or mmp_shards != normalized_upstream["mmp_pack"]["expected_shards"]
     ):
-        raise ValueError(
-            "overlay shard inventory count disagrees with upstream completions"
-        )
+        raise ValueError("overlay shard inventory count disagrees with upstream completions")
     for name, layers in (
         ("audit_pack", set(LAYERS)),
         ("mmp_pack", {"mmp_analogue"}),
@@ -453,13 +455,8 @@ def build_overlay_completion(
             ),
             key=lambda item: (item["layer"], item["partition"], item["shard"]),
         )
-        if (
-            _canonical_sha256(inventory)
-            != normalized_upstream[name]["shard_inventory_sha256"]
-        ):
-            raise ValueError(
-                f"overlay shard inventory disagrees with upstream_completions.{name}"
-            )
+        if _canonical_sha256(inventory) != normalized_upstream[name]["shard_inventory_sha256"]:
+            raise ValueError(f"overlay shard inventory disagrees with upstream_completions.{name}")
     body = {
         "schema": OVERLAY_COMPLETION_SCHEMA,
         "schema_version": OVERLAY_COMPLETION_SCHEMA_VERSION,
@@ -514,9 +511,7 @@ def apply_overlays(
 
     artifact_volume.reload()
     if mmp_root != FROZEN_MMP_V2_ROOT:
-        raise RuntimeError(
-            "editing-v2 provenance overlays require the frozen MMP V2 root"
-        )
+        raise RuntimeError("editing-v2 provenance overlays require the frozen MMP V2 root")
     root = Path(packed_root)
     mmp_path = Path(mmp_root)
     audit_completion, audit_sources = _verified_pack_completion(
@@ -549,9 +544,7 @@ def apply_overlays(
         shard = Path(source["shard_path"])
         manifest_path = Path(source["manifest_path"])
         if manifest_path_for(shard) != manifest_path:
-            raise RuntimeError(
-                f"upstream manifest path is nonstandard: {manifest_path}"
-            )
+            raise RuntimeError(f"upstream manifest path is nonstandard: {manifest_path}")
         overlay_path = overlay_path_for(shard)
         existing = load_overlay(shard, manifest_path)
         if existing is not None:
@@ -577,9 +570,7 @@ def apply_overlays(
                     "certified_at_overlay_time": True,
                 },
             )
-            encoded = (
-                json.dumps(overlay, indent=2, sort_keys=True).encode("utf-8") + b"\n"
-            )
+            encoded = json.dumps(overlay, indent=2, sort_keys=True).encode("utf-8") + b"\n"
             with overlay_path.open("xb") as handle:
                 handle.write(encoded)
                 handle.flush()
@@ -612,19 +603,14 @@ def apply_overlays(
         shard_receipts=shard_receipts,
     )
     completion_dir = (
-        Path("/artifacts/editing_v2/upstream_overlays")
-        / completion["completion_sha256"]
+        Path("/artifacts/editing_v2/upstream_overlays") / completion["completion_sha256"]
     )
     completion_dir.mkdir(parents=True, exist_ok=True)
     completion_path = completion_dir / "OVERLAY_COMPLETION.json"
-    encoded_completion = (
-        json.dumps(completion, indent=2, sort_keys=True).encode("utf-8") + b"\n"
-    )
+    encoded_completion = json.dumps(completion, indent=2, sort_keys=True).encode("utf-8") + b"\n"
     if completion_path.exists():
         if completion_path.read_bytes() != encoded_completion:
-            raise RuntimeError(
-                "existing overlay completion receipt has different bytes"
-            )
+            raise RuntimeError("existing overlay completion receipt has different bytes")
     else:
         with completion_path.open("xb") as handle:
             handle.write(encoded_completion)
@@ -657,8 +643,7 @@ def main(
     _require_clean_launch(commit)
     if mmp_root != FROZEN_MMP_V2_ROOT:
         raise RuntimeError(
-            "mmp_root must be the frozen Editing V2 MMP corpus root: "
-            f"{FROZEN_MMP_V2_ROOT}"
+            f"mmp_root must be the frozen Editing V2 MMP corpus root: {FROZEN_MMP_V2_ROOT}"
         )
     print(
         json.dumps(

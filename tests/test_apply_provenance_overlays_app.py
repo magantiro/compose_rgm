@@ -86,6 +86,7 @@ def _completion(receipts: list[dict[str, object]]) -> dict:
             "path": f"/artifacts/edit-packed-v1/{AUDIT_PACK_COMPLETION_FILENAME}",
             "file_sha256": SHA_A,
             "completion_flag": "PACK_COMPLETE",
+            "inventory_origin": "reconciled_legacy_completion_totals",
             "expected_shards": 6,
             "shard_inventory_sha256": inventory_sha256({"corruption", "cycle_ops"}),
         },
@@ -93,6 +94,7 @@ def _completion(receipts: list[dict[str, object]]) -> dict:
             "path": f"{FROZEN_MMP_V2_ROOT}/{MMP_PACK_COMPLETION_FILENAME}",
             "file_sha256": SHA_B,
             "completion_flag": "MMP_PACK_COMPLETE",
+            "inventory_origin": "completion_shard_artifacts",
             "expected_shards": 3,
             "shard_inventory_sha256": inventory_sha256({"mmp_analogue"}),
         },
@@ -140,9 +142,7 @@ def test_completion_requires_every_layer_partition_cell() -> None:
         (lambda row: row.update(shard_file_sha256="bad"), "shard_file_sha256"),
         (lambda row: row.pop("overlay_path"), "fields disagree"),
         (
-            lambda row: row.update(
-                shard_path="/artifacts/wrong/train/shard_0000.jsonl.gz"
-            ),
+            lambda row: row.update(shard_path="/artifacts/wrong/train/shard_0000.jsonl.gz"),
             "outside its exact upstream cell",
         ),
     ],
@@ -177,9 +177,7 @@ def _write_pack_fixture(root: Path, *, mmp: bool) -> tuple[Path, list[dict]]:
     rows = []
     layers = ("mmp_analogue",) if mmp else ("corruption", "cycle_ops")
     for index, (layer, partition) in enumerate(
-        (layer, partition)
-        for layer in layers
-        for partition in ("train", "validation", "test")
+        (layer, partition) for layer in layers for partition in ("train", "validation", "test")
     ):
         directory = root / partition if mmp else root / layer / partition
         directory.mkdir(parents=True, exist_ok=True)
@@ -207,6 +205,17 @@ def _write_pack_fixture(root: Path, *, mmp: bool) -> tuple[Path, list[dict]]:
                 flag: True,
                 "expected_shards": len(rows),
                 "shard_artifacts": rows,
+                **(
+                    {"packed_entries": len(rows), "packed_states": 2 * len(rows)}
+                    if mmp
+                    else {
+                        "totals": {"entries": len(rows), "states": 2 * len(rows)},
+                        "entries_by_layer": {
+                            layer: sum(row["layer"] == layer for row in rows)
+                            for layer in ("corruption", "cycle_ops")
+                        },
+                    }
+                ),
             },
             sort_keys=True,
         )
@@ -236,6 +245,47 @@ def test_pack_completion_reconciles_exact_live_inventory(
     assert identity["expected_shards"] == len(rows)
     assert len(sources) == len(rows)
     assert identity["file_sha256"] == _sha256(completion)
+    assert identity["inventory_origin"] == "completion_shard_artifacts"
+
+
+def test_legacy_audit_completion_derives_inventory_and_reconciles_totals(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "audit"
+    completion, rows = _write_pack_fixture(root, mmp=False)
+    payload = json.loads(completion.read_text())
+    del payload["shard_artifacts"]
+    completion.write_text(json.dumps(payload, sort_keys=True) + "\n")
+
+    identity, sources = _verified_pack_completion(
+        root=root,
+        filename=AUDIT_PACK_COMPLETION_FILENAME,
+        completion_flag="PACK_COMPLETE",
+        expected_file_sha256=_sha256(completion),
+        mmp=False,
+    )
+
+    assert identity["inventory_origin"] == "reconciled_legacy_completion_totals"
+    assert identity["expected_shards"] == len(rows)
+    assert len(sources) == len(rows)
+
+
+def test_legacy_audit_completion_rejects_unreconciled_totals(tmp_path: Path) -> None:
+    root = tmp_path / "audit"
+    completion, _ = _write_pack_fixture(root, mmp=False)
+    payload = json.loads(completion.read_text())
+    del payload["shard_artifacts"]
+    payload["totals"]["entries"] += 1
+    completion.write_text(json.dumps(payload, sort_keys=True) + "\n")
+
+    with pytest.raises(RuntimeError, match="totals disagree"):
+        _verified_pack_completion(
+            root=root,
+            filename=AUDIT_PACK_COMPLETION_FILENAME,
+            completion_flag="PACK_COMPLETE",
+            expected_file_sha256=_sha256(completion),
+            mmp=False,
+        )
 
 
 def test_pack_completion_rejects_missing_or_extra_live_shards(tmp_path: Path) -> None:
@@ -244,7 +294,7 @@ def test_pack_completion_rejects_missing_or_extra_live_shards(tmp_path: Path) ->
     expected_sha256 = _sha256(completion)
     first = root / rows[0]["partition"] / rows[0]["shard"]
     first.unlink()
-    with pytest.raises(RuntimeError, match="absent shard bytes"):
+    with pytest.raises(RuntimeError, match="live shard count disagrees"):
         _verified_pack_completion(
             root=root,
             filename=MMP_PACK_COMPLETION_FILENAME,
@@ -257,7 +307,7 @@ def test_pack_completion_rejects_missing_or_extra_live_shards(tmp_path: Path) ->
     completion, _ = _write_pack_fixture(root, mmp=True)
     extra = root / "train" / "unexpected.jsonl.gz"
     extra.write_bytes(b"unexpected")
-    with pytest.raises(RuntimeError, match="live shard inventory disagrees"):
+    with pytest.raises(RuntimeError, match="live shard count disagrees"):
         _verified_pack_completion(
             root=root,
             filename=MMP_PACK_COMPLETION_FILENAME,
