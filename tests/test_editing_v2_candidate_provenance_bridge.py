@@ -11,6 +11,7 @@ import pytest
 from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
 from compose_v4.data.editing_v2_candidate_provenance_bridge import (
     AUDIT_LEDGER_FILENAME,
+    AUDIT_ROWS_FILENAME,
     BRIDGE_MANIFEST_FILENAME,
     SOURCE_STREAM_SCHEMA,
     SPLIT_ROWS_FILENAME,
@@ -170,9 +171,7 @@ def _candidate_materialization(tmp_path: Path) -> Path:
     addresses = hashlib.sha256()
     for row in rows:
         semantic.update(row["row_sha256"].encode("ascii") + b"\n")
-        addresses.update(
-            row["packed_address"]["address_sha256"].encode("ascii") + b"\n"
-        )
+        addresses.update(row["packed_address"]["address_sha256"].encode("ascii") + b"\n")
     totals = {
         "rows": 2,
         "routed_rows": 1,
@@ -306,8 +305,14 @@ def _registry(candidate_root: Path) -> dict:
             "canonicalizer_sha256": SHA_D,
         },
         policy_bindings={
-            "mapping_policy_sha256": SHA_D,
-            "metric_policy_sha256": SHA_E,
+            "mapping_policy_sha256": None,
+            "metric_policy_sha256": None,
+            "unresolved_mapping_policies": [
+                "editing_v2.mapping_policy.resolve_after_semantic_migration"
+            ],
+            "unresolved_metric_policies": [
+                "editing_v2.metric_policy.resolve_after_semantic_migration"
+            ],
         },
         evidence_identity=_evidence_identity(),
         identity_definitions=_identity_definitions(),
@@ -329,6 +334,13 @@ def _materialize(tmp_path: Path) -> tuple[Path, Path, Path, dict]:
     return candidate_root, registry_path, output, manifest
 
 
+def _audit_rows(output: Path) -> list[dict]:
+    return [
+        json.loads(line)
+        for line in (output / AUDIT_ROWS_FILENAME).read_text(encoding="utf-8").splitlines()
+    ]
+
+
 def test_bridge_preserves_rejections_and_only_routes_unit_mass_split_rows(
     tmp_path: Path,
 ) -> None:
@@ -341,35 +353,34 @@ def test_bridge_preserves_rejections_and_only_routes_unit_mass_split_rows(
         "split_rows": 1,
     }
     ledger = json.loads((output / AUDIT_LEDGER_FILENAME).read_bytes())
-    assert [row["disposition"] for row in ledger["rows"]] == [
+    audit_rows = _audit_rows(output)
+    assert [row["disposition"] for row in audit_rows] == [
         "compiled_candidate",
         "rejected_candidate",
     ]
-    assert ledger["rows"][1]["rejection"]["code"] == ("operator.not_in_active8_support")
+    assert audit_rows[1]["rejection"]["code"] == ("operator.not_in_active8_support")
     assert ledger["compiler_identity"] == {
         "implementation_sha256": SHA_A,
         "config_sha256": SHA_B,
         "operator_contract_sha256": SHA_C,
         "canonicalizer_sha256": SHA_D,
     }
-    assert ledger["rows"][0]["policy_bindings"] == {
-        "mapping_policy_sha256": SHA_D,
-        "metric_policy_sha256": SHA_E,
-        "unresolved_mapping_policies": [],
-        "unresolved_metric_policies": [],
+    assert audit_rows[0]["policy_bindings"] == {
+        "mapping_policy_sha256": None,
+        "metric_policy_sha256": None,
+        "unresolved_mapping_policies": [
+            "editing_v2.mapping_policy.resolve_after_semantic_migration"
+        ],
+        "unresolved_metric_policies": ["editing_v2.metric_policy.resolve_after_semantic_migration"],
     }
-    assert ledger["rows"][0]["evidence"]["source_endpoint"]["reference_ids"] == [
-        "source-molecule-0"
-    ]
-    assert ledger["rows"][0]["evidence"]["action_sequence"]["reference_ids"] == [
+    assert audit_rows[0]["evidence"]["source_endpoint"]["reference_ids"] == ["source-molecule-0"]
+    assert audit_rows[0]["evidence"]["action_sequence"]["reference_ids"] == [
         _header(0, routed=True)["operator_summary"]["action_stream_sha256"]
     ]
 
     split_rows = [
         json.loads(line)
-        for line in (output / SPLIT_ROWS_FILENAME)
-        .read_text(encoding="utf-8")
-        .splitlines()
+        for line in (output / SPLIT_ROWS_FILENAME).read_text(encoding="utf-8").splitlines()
     ]
     assert len(split_rows) == 1
     row = split_rows[0]
@@ -382,14 +393,12 @@ def test_bridge_preserves_rejections_and_only_routes_unit_mass_split_rows(
     assert row["document_provenance"] is None
     assert row["series_group_id"] is None
     assert row["series_provenance"] is None
-    assert row["candidate_ledger_row_sha256"] == ledger["rows"][0]["row_sha256"]
+    assert row["candidate_ledger_row_sha256"] == audit_rows[0]["row_sha256"]
     header = _header(0, routed=True)
     assert header["candidate_payload_sha256"] != header["row_sha256"]
     assert row["candidate_envelope_sha256"] == header["candidate_payload_sha256"]
     assert row["metadata"]["candidate_header_row_sha256"] == header["row_sha256"]
-    assert row["metadata"]["partition_group_derivation"] == (
-        "explicit_partition_isolation_v1"
-    )
+    assert row["metadata"]["partition_group_derivation"] == ("explicit_partition_isolation_v1")
 
     validated = validate_candidate_provenance_bridge(
         output,
@@ -405,9 +414,7 @@ def test_source_stream_binds_exact_materialization_ledger_and_split_hashes(
 ) -> None:
     candidate_root, registry_path, output, manifest = _materialize(tmp_path)
     stream = manifest["source_stream"]
-    materialization = json.loads(
-        (candidate_root / MATERIALIZATION_FILENAME).read_bytes()
-    )
+    materialization = json.loads((candidate_root / MATERIALIZATION_FILENAME).read_bytes())
 
     assert stream["schema"] == SOURCE_STREAM_SCHEMA
     assert stream["nonempty_jsonl_rows"] == 1
@@ -422,11 +429,10 @@ def test_source_stream_binds_exact_materialization_ledger_and_split_hashes(
     assert stream["candidate_audit_ledger"] == {
         "file_sha256": file_sha256(output / AUDIT_LEDGER_FILENAME),
         "semantic_sha256": ledger["ledger_sha256"],
+        "rows_file_sha256": file_sha256(output / AUDIT_ROWS_FILENAME),
         "rows_sha256": ledger["rows_sha256"],
     }
-    assert stream["split_candidates"]["file_sha256"] == file_sha256(
-        output / SPLIT_ROWS_FILENAME
-    )
+    assert stream["split_candidates"]["file_sha256"] == file_sha256(output / SPLIT_ROWS_FILENAME)
     assert stream["provenance_registry"]["file_sha256"] == file_sha256(registry_path)
     assert (output / BRIDGE_MANIFEST_FILENAME).is_file()
 
@@ -449,7 +455,12 @@ def test_bridge_is_byte_deterministic(tmp_path: Path) -> None:
         )
         outputs.append(output)
     assert manifests[0] == manifests[1]
-    for name in (AUDIT_LEDGER_FILENAME, SPLIT_ROWS_FILENAME, BRIDGE_MANIFEST_FILENAME):
+    for name in (
+        AUDIT_LEDGER_FILENAME,
+        AUDIT_ROWS_FILENAME,
+        SPLIT_ROWS_FILENAME,
+        BRIDGE_MANIFEST_FILENAME,
+    ):
         assert (outputs[0] / name).read_bytes() == (outputs[1] / name).read_bytes()
 
 
@@ -472,8 +483,14 @@ def test_registry_missing_source_provenance_fails_loudly(tmp_path: Path) -> None
                 "canonicalizer_sha256": SHA_D,
             },
             policy_bindings={
-                "mapping_policy_sha256": SHA_D,
-                "metric_policy_sha256": SHA_E,
+                "mapping_policy_sha256": None,
+                "metric_policy_sha256": None,
+                "unresolved_mapping_policies": [
+                    "editing_v2.mapping_policy.resolve_after_semantic_migration"
+                ],
+                "unresolved_metric_policies": [
+                    "editing_v2.metric_policy.resolve_after_semantic_migration"
+                ],
             },
             evidence_identity=_evidence_identity(),
             identity_definitions=_identity_definitions(),
@@ -488,14 +505,10 @@ def test_missing_evidence_selector_fails_without_partial_publication(
     registry = _registry(candidate_root)
     body = copy.deepcopy(registry)
     del body["registry_sha256"]
-    body["evidence_identity"]["component_reference_fields"]["path"] = [
-        "missing.path_receipt"
-    ]
+    body["evidence_identity"]["component_reference_fields"]["path"] = ["missing.path_receipt"]
     evidence_body = dict(body["evidence_identity"])
     del evidence_body["evidence_identity_sha256"]
-    body["evidence_identity"]["evidence_identity_sha256"] = canonical_sha256(
-        evidence_body
-    )
+    body["evidence_identity"]["evidence_identity_sha256"] = canonical_sha256(evidence_body)
     registry = {**body, "registry_sha256": canonical_sha256(body)}
     registry_path = tmp_path / "registry.json"
     write_candidate_provenance_registry(registry, registry_path)
@@ -518,9 +531,7 @@ def test_emitted_rows_are_direct_v4_census_inputs(tmp_path: Path) -> None:
     _, _, output, manifest = _materialize(tmp_path)
     rows = [
         json.loads(line)
-        for line in (output / SPLIT_ROWS_FILENAME)
-        .read_text(encoding="utf-8")
-        .splitlines()
+        for line in (output / SPLIT_ROWS_FILENAME).read_text(encoding="utf-8").splitlines()
     ]
     contract = load_editing_corpus_contract(CONTRACT_PATH)
     policy = default_split_census_policy(
@@ -561,3 +572,30 @@ def test_emitted_rows_are_direct_v4_census_inputs(tmp_path: Path) -> None:
     assert census["invalid_rows"] == []
     assert census["vertex_inventory"][0]["source_group_ids"] == ["fixture-source-group"]
     assert census["source_stream"] == manifest["source_stream"]
+
+
+def test_bridge_streamed_audit_rows_are_separately_bound_and_fail_closed(
+    tmp_path: Path,
+) -> None:
+    candidate_root, registry_path, output, manifest = _materialize(tmp_path)
+    ledger = json.loads((output / AUDIT_LEDGER_FILENAME).read_bytes())
+
+    assert manifest["schema_version"] == 2
+    assert manifest["source_stream"]["schema_version"] == 2
+    assert ledger["schema_version"] == 4
+    assert "rows" not in ledger
+    assert ledger["rows_artifact"]["relative_path"] == AUDIT_ROWS_FILENAME
+    assert ledger["rows_artifact"]["file_sha256"] == file_sha256(output / AUDIT_ROWS_FILENAME)
+
+    rows_path = output / AUDIT_ROWS_FILENAME
+    rows_path.write_bytes(rows_path.read_bytes()[:-1])
+    with pytest.raises(
+        EditingV2CandidateProvenanceBridgeError,
+        match="candidate_audit_rows physical SHA-256 disagrees",
+    ):
+        validate_candidate_provenance_bridge(
+            output,
+            candidate_root=candidate_root,
+            provenance_registry_path=registry_path,
+            editing_corpus_contract_path=CONTRACT_PATH,
+        )

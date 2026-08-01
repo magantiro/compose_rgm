@@ -11,6 +11,7 @@ import pytest
 from compose_v4.data.editing_candidate_audit_ledger import (
     EVIDENCE_COMPONENTS,
     CandidateAuditAttempt,
+    CandidateAuditLedgerAccumulator,
     CandidateCompilerIdentity,
     CandidateEvidence,
     CandidateEvidenceComponent,
@@ -19,6 +20,7 @@ from compose_v4.data.editing_candidate_audit_ledger import (
     CandidateSourceIdentity,
     build_candidate_audit_ledger,
     candidate_attempt_stream_sha256,
+    canonical_json_bytes,
 )
 from compose_v4.data.editing_corpus_contract import (
     REQUIRED_DATA_LANES,
@@ -79,7 +81,7 @@ def _component(
     )
 
 
-def _candidate_ledger() -> dict:
+def _candidate_attempt() -> CandidateAuditAttempt:
     profile = next(
         profile
         for profile in _contract()["evidence_component_contract"]["profiles"]
@@ -93,7 +95,7 @@ def _candidate_ledger() -> dict:
         )
         for index, component in enumerate(EVIDENCE_COMPONENTS)
     }
-    attempt = CandidateAuditAttempt(
+    return CandidateAuditAttempt(
         attempt_index=0,
         candidate_id="candidate-observed-local-0",
         candidate_payload_sha256="1" * 64,
@@ -112,7 +114,10 @@ def _candidate_ledger() -> dict:
         ),
         accepted_trace_id=TRACE_ID,
     )
-    attempts = (attempt,)
+
+
+def _candidate_ledger() -> dict:
+    attempts = (_candidate_attempt(),)
     return build_candidate_audit_ledger(
         contract=_contract(),
         contract_file_sha256=_contract_file_sha256(),
@@ -130,6 +135,33 @@ def _candidate_ledger() -> dict:
         expected_attempt_count=1,
         expected_attempt_stream_sha256=(candidate_attempt_stream_sha256(attempts)),
     )
+
+
+def _streamed_candidate_ledger(tmp_path: Path) -> tuple[dict, Path]:
+    accumulator = CandidateAuditLedgerAccumulator(
+        contract=_contract(),
+        contract_file_sha256=_contract_file_sha256(),
+        source_identity=CandidateSourceIdentity(
+            manifest_file_sha256=SHA_C,
+            manifest_sha256=SHA_D,
+        ),
+        compiler_identity=CandidateCompilerIdentity(
+            implementation_sha256=SHA_E,
+            config_sha256=SHA_F,
+            operator_contract_sha256=SHA_A,
+            canonicalizer_sha256=SHA_B,
+        ),
+    )
+    row = accumulator.append(_candidate_attempt())
+    rows_path = tmp_path / "candidate_audit_rows.jsonl"
+    rows_path.write_bytes(canonical_json_bytes(row) + b"\n")
+    ledger = accumulator.finalize(
+        rows_relative_path=rows_path.name,
+        rows_file_sha256=hashlib.sha256(rows_path.read_bytes()).hexdigest(),
+        expected_attempt_count=1,
+        expected_attempt_stream_sha256=candidate_attempt_stream_sha256((_candidate_attempt(),)),
+    )
+    return ledger, rows_path
 
 
 def _lane_registry_identity() -> LaneRegistryIdentity:
@@ -300,6 +332,8 @@ def _build(
     active8_identity: Active8SidecarIdentity | None = None,
     admitted_keys: tuple[tuple[str, int, str], ...] | None = None,
     packed_identity: PackedCorpusIdentity | None = None,
+    candidate_ledger: dict | None = None,
+    candidate_ledger_rows_path: Path | None = None,
 ) -> dict:
     selected_address = address or _address()
     keys = admitted_keys or _admitted_keys(selected_address)
@@ -316,8 +350,9 @@ def _build(
         active8_identity=active8_identity or _active8_identity(keys),
         split_assignment_identity=_split_identity(rows),
         active8_admitted_trace_keys=keys,
-        candidate_ledger=_candidate_ledger(),
+        candidate_ledger=candidate_ledger or _candidate_ledger(),
         candidate_ledger_manifest_file_sha256=(CANDIDATE_LEDGER_FILE_SHA256),
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
         progress_rows=rows,
     )
 
@@ -326,6 +361,8 @@ def _validate(
     manifest: dict,
     *,
     expected_rows: tuple[SemanticSamplingProgress, ...] | None = None,
+    candidate_ledger: dict | None = None,
+    candidate_ledger_rows_path: Path | None = None,
 ) -> None:
     rows = expected_rows or (_progress(0), _progress(1))
     validate_semantic_sampling_sidecar(
@@ -337,8 +374,9 @@ def _validate(
         expected_active8_identity=_active8_identity(),
         expected_split_assignment_identity=_split_identity(rows),
         expected_active8_admitted_trace_keys=_admitted_keys(),
-        candidate_ledger=_candidate_ledger(),
+        candidate_ledger=candidate_ledger or _candidate_ledger(),
         expected_candidate_ledger_manifest_file_sha256=(CANDIDATE_LEDGER_FILE_SHA256),
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
     )
 
 
@@ -387,6 +425,30 @@ def test_sidecar_is_deterministic_exactly_addressed_and_metadata_only() -> None:
     }.isdisjoint(_all_keys(first))
     _validate(first)
     _validate(json.loads(json.dumps(first, sort_keys=True)))
+
+
+def test_sidecar_consumes_schema_v3_candidate_rows_without_rehydrating_ledger(
+    tmp_path: Path,
+) -> None:
+    ledger, rows_path = _streamed_candidate_ledger(tmp_path)
+
+    manifest = _build(
+        candidate_ledger=ledger,
+        candidate_ledger_rows_path=rows_path,
+    )
+    assert manifest["candidate_ledger_identity"]["ledger_sha256"] == ledger["ledger_sha256"]
+    assert manifest["candidate_ledger_identity"]["rows_sha256"] == ledger["rows_sha256"]
+    _validate(
+        manifest,
+        candidate_ledger=ledger,
+        candidate_ledger_rows_path=rows_path,
+    )
+
+    with pytest.raises(
+        EditingSemanticSamplingSidecarError,
+        match="requires candidate_ledger_rows_path",
+    ):
+        _build(candidate_ledger=ledger)
 
 
 def test_component_evidence_is_preserved_without_observed_boolean_upgrade() -> None:

@@ -4,13 +4,18 @@ The ledger is upstream of split assignment and packed admitted records.  It
 preserves every attempted candidate, including attempts that cannot be routed,
 compiled, or admitted.  A compiled trace is not an admitted training record.
 
-Schema version 2 removes caller-declared partitions and scalar evidence
+Row and in-memory ledger schema version 3 removes caller-declared partitions and scalar evidence
 classes.  A compiled candidate binds one hash-addressed lane-resolution receipt,
 one admissible evidence profile, and the exact six-component evidence mapping
 declared by the editing-corpus contract.  The validator checks only this
 envelope.  It does not verify lane-routing semantics, chemistry-derived corpus
 membership, or relationship receipts, and the ledger records those limitations
 as explicit launch blockers.
+
+Schema version 4 is the production persistence form. It preserves the exact
+schema-v3 row and ordered-array hash semantics while storing rows in a separate,
+physically and semantically bound JSONL artifact. Its builder and validator are
+streaming; duplicate identities are checked with a temporary on-disk index.
 """
 
 from __future__ import annotations
@@ -18,9 +23,12 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import sqlite3
+import tempfile
 from collections import Counter
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any
 
@@ -31,10 +39,11 @@ from compose_v4.data.editing_corpus_contract import (
 )
 
 CANDIDATE_AUDIT_ROW_SCHEMA = "compose.editing_v2_candidate_audit_row"
-CANDIDATE_AUDIT_ROW_SCHEMA_VERSION = 2
+CANDIDATE_AUDIT_ROW_SCHEMA_VERSION = 3
 CANDIDATE_AUDIT_ROW_STATUS = "CANDIDATE_ATTEMPT_NO_TRAINING_AUTHORITY"
 CANDIDATE_AUDIT_LEDGER_SCHEMA = "compose.editing_v2_candidate_audit_ledger"
-CANDIDATE_AUDIT_LEDGER_SCHEMA_VERSION = 2
+CANDIDATE_AUDIT_LEDGER_SCHEMA_VERSION = 3
+CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION = 4
 CANDIDATE_AUDIT_LEDGER_STATUS = "COMPLETE_NO_TRAINING_AUTHORITY"
 
 EVIDENCE_COMPONENTS = (
@@ -86,6 +95,13 @@ _LEDGER_FIELDS = {
     "rows",
     "rows_sha256",
     "ledger_sha256",
+}
+_LEDGER_ARTIFACT_FIELDS = (_LEDGER_FIELDS - {"rows"}) | {"rows_artifact"}
+_ROWS_ARTIFACT_FIELDS = {
+    "relative_path",
+    "file_sha256",
+    "rows_sha256",
+    "row_count",
 }
 _CONTRACT_IDENTITY_FIELDS = {
     "schema",
@@ -208,6 +224,30 @@ class CandidateAuditAttempt:
     accepted_trace_id: str | None = None
     rejection_code: str | None = None
     rejection_detail: str | None = None
+
+
+class _CanonicalArrayHasher:
+    """Incrementally hash the exact canonical JSON representation of an array."""
+
+    def __init__(self) -> None:
+        self._digest = hashlib.sha256()
+        self._digest.update(b"[")
+        self._count = 0
+
+    def update(self, value: Any) -> None:
+        if self._count:
+            self._digest.update(b",")
+        self._digest.update(canonical_json_bytes(value))
+        self._count += 1
+
+    def hexdigest(self) -> str:
+        digest = self._digest.copy()
+        digest.update(b"]")
+        return digest.hexdigest()
+
+    @property
+    def count(self) -> int:
+        return self._count
 
 
 def canonical_json_bytes(value: Any) -> bytes:
@@ -333,8 +373,17 @@ def _contract_context(
     return identity, lane_ids
 
 
-def _launch_blockers(contract: Mapping[str, Any]) -> list[str]:
+def _launch_blockers(
+    contract: Mapping[str, Any],
+    *,
+    unresolved_mapping_policy: bool = False,
+    unresolved_metric_policy: bool = False,
+) -> list[str]:
     blockers = ["split_assignment.unresolved_at_candidate_stage"]
+    if unresolved_mapping_policy:
+        blockers.append("semantic_mapping_policy.deferred_to_semantic_migration")
+    if unresolved_metric_policy:
+        blockers.append("semantic_metric_policy.deferred_to_semantic_migration")
     blockers.extend(
         f"external_authority.{requirement['id']}:{requirement['status']}"
         for requirement in contract["admitted_record_contract"]["external_authority_requirements"]
@@ -545,9 +594,17 @@ def _policy_bindings(
         raise EditingCandidateAuditLedgerError(
             "missing mapping policy must be recorded as unresolved"
         )
+    if mapping_sha is not None and unresolved_mapping:
+        raise EditingCandidateAuditLedgerError(
+            "mapping policy cannot be both resolved and unresolved"
+        )
     if metric_sha is None and not unresolved_metric:
         raise EditingCandidateAuditLedgerError(
             "missing metric policy must be recorded as unresolved"
+        )
+    if metric_sha is not None and unresolved_metric:
+        raise EditingCandidateAuditLedgerError(
+            "metric policy cannot be both resolved and unresolved"
         )
     return {
         "mapping_policy_sha256": mapping_sha,
@@ -557,15 +614,6 @@ def _policy_bindings(
     }
 
 
-def _policies_resolved(value: Mapping[str, Any]) -> bool:
-    return (
-        value["mapping_policy_sha256"] is not None
-        and value["metric_policy_sha256"] is not None
-        and not value["unresolved_mapping_policies"]
-        and not value["unresolved_metric_policies"]
-    )
-
-
 def candidate_attempt_stream_sha256(
     attempts: Sequence[CandidateAuditAttempt],
 ) -> str:
@@ -573,28 +621,31 @@ def candidate_attempt_stream_sha256(
 
     stream: list[dict[str, Any]] = []
     for expected_index, attempt in enumerate(attempts):
-        if not isinstance(attempt, CandidateAuditAttempt):
-            raise EditingCandidateAuditLedgerError(
-                "attempt stream must contain CandidateAuditAttempt values"
-            )
-        if attempt.attempt_index != expected_index:
-            raise EditingCandidateAuditLedgerError(
-                "candidate attempt indexes must be contiguous from zero"
-            )
-        stream.append(
-            {
-                "attempt_index": expected_index,
-                "candidate_id": _require_text(
-                    attempt.candidate_id,
-                    field="candidate_id",
-                ),
-                "candidate_payload_sha256": _require_sha256(
-                    attempt.candidate_payload_sha256,
-                    field="candidate_payload_sha256",
-                ),
-            }
-        )
+        stream.append(_candidate_attempt_identity(attempt, expected_index=expected_index))
     return canonical_sha256(stream)
+
+
+def _candidate_attempt_identity(
+    attempt: CandidateAuditAttempt,
+    *,
+    expected_index: int,
+) -> dict[str, Any]:
+    if not isinstance(attempt, CandidateAuditAttempt):
+        raise EditingCandidateAuditLedgerError(
+            "attempt stream must contain CandidateAuditAttempt values"
+        )
+    if attempt.attempt_index != expected_index:
+        raise EditingCandidateAuditLedgerError(
+            "candidate attempt indexes must be contiguous from zero"
+        )
+    return {
+        "attempt_index": expected_index,
+        "candidate_id": _require_text(attempt.candidate_id, field="candidate_id"),
+        "candidate_payload_sha256": _require_sha256(
+            attempt.candidate_payload_sha256,
+            field="candidate_payload_sha256",
+        ),
+    }
 
 
 def _build_candidate_row(
@@ -639,10 +690,6 @@ def _build_candidate_row(
             raise EditingCandidateAuditLedgerError(
                 "compiled candidate requires a lane resolution and six-component evidence"
             )
-        if not _policies_resolved(policies):
-            raise EditingCandidateAuditLedgerError(
-                "unresolved mapping or metric policy cannot grant compilation disposition"
-            )
         missing_references = [
             component
             for component, component_payload in evidence.items()
@@ -682,13 +729,6 @@ def _build_candidate_row(
             attempt.rejection_detail,
             field="rejection_detail",
         )
-        unresolved = (
-            policies["unresolved_mapping_policies"] or policies["unresolved_metric_policies"]
-        )
-        if unresolved and not code.startswith("policy."):
-            raise EditingCandidateAuditLedgerError(
-                "unresolved policy rejection must use a policy.* reason code"
-            )
         data_lane = None if resolution is None else resolution["data_lane"]
         evidence_profile_id = None if resolution is None else resolution["evidence_profile_id"]
         disposition = "rejected_candidate"
@@ -852,6 +892,388 @@ def _ledger_counts(
     }
 
 
+class CandidateAuditLedgerAccumulator:
+    """Build a streamed ledger manifest while retaining no candidate rows in memory."""
+
+    def __init__(
+        self,
+        *,
+        contract: Mapping[str, Any],
+        contract_file_sha256: str,
+        source_identity: CandidateSourceIdentity | Mapping[str, Any],
+        compiler_identity: CandidateCompilerIdentity | Mapping[str, Any],
+    ) -> None:
+        contract_identity, lane_ids = _contract_context(
+            contract,
+            contract_file_sha256=contract_file_sha256,
+        )
+        self._contract = contract
+        self._contract_identity = contract_identity
+        self._source_identity = _source_identity(source_identity)
+        self._compiler_identity = _compiler_identity(compiler_identity)
+        self._lane_ids = lane_ids
+        self._attempt_hasher = _CanonicalArrayHasher()
+        self._row_hasher = _CanonicalArrayHasher()
+        self._dispositions: Counter[str] = Counter()
+        self._rejection_codes: Counter[str] = Counter()
+        self._lane_counts: Counter[str] = Counter()
+        self._without_lane_resolution = 0
+        self._unresolved_mapping_policy = False
+        self._unresolved_metric_policy = False
+
+    @property
+    def count(self) -> int:
+        return self._row_hasher.count
+
+    @property
+    def attempt_stream_sha256(self) -> str:
+        return self._attempt_hasher.hexdigest()
+
+    @property
+    def rows_sha256(self) -> str:
+        return self._row_hasher.hexdigest()
+
+    def append(self, attempt: CandidateAuditAttempt) -> dict[str, Any]:
+        expected_index = self.count
+        attempt_identity = _candidate_attempt_identity(
+            attempt,
+            expected_index=expected_index,
+        )
+        row = _build_candidate_row(
+            attempt,
+            contract=self._contract,
+            contract_identity=self._contract_identity,
+            source_identity=self._source_identity,
+            compiler_identity=self._compiler_identity,
+            lane_ids=self._lane_ids,
+        )
+        self._append_validated_row(row, attempt_identity=attempt_identity)
+        return row
+
+    def _append_validated_row(
+        self,
+        row: Mapping[str, Any],
+        *,
+        attempt_identity: Mapping[str, Any] | None = None,
+    ) -> None:
+        if row["attempt_index"] != self.count:
+            raise EditingCandidateAuditLedgerError(
+                "candidate audit rows must be contiguous from zero"
+            )
+        identity = (
+            {
+                "attempt_index": row["attempt_index"],
+                "candidate_id": row["candidate_id"],
+                "candidate_payload_sha256": row["candidate_payload_sha256"],
+            }
+            if attempt_identity is None
+            else dict(attempt_identity)
+        )
+        self._attempt_hasher.update(identity)
+        self._row_hasher.update(row)
+        self._dispositions[str(row["disposition"])] += 1
+        if row["lane_resolution"] is None:
+            self._without_lane_resolution += 1
+        if row["data_lane"] is not None:
+            self._lane_counts[str(row["data_lane"])] += 1
+        if row["rejection"] is not None:
+            self._rejection_codes[str(row["rejection"]["code"])] += 1
+        policies = row["policy_bindings"]
+        self._unresolved_mapping_policy = self._unresolved_mapping_policy or bool(
+            policies["unresolved_mapping_policies"]
+        )
+        self._unresolved_metric_policy = self._unresolved_metric_policy or bool(
+            policies["unresolved_metric_policies"]
+        )
+
+    def _counts(self) -> dict[str, Any]:
+        return {
+            "attempted": self.count,
+            "compiled_candidates": self._dispositions["compiled_candidate"],
+            "rejected_candidates": self._dispositions["rejected_candidate"],
+            "without_lane_resolution": self._without_lane_resolution,
+            "by_lane": {lane: self._lane_counts[lane] for lane in self._lane_ids},
+            "by_rejection_code": {
+                code: self._rejection_codes[code] for code in sorted(self._rejection_codes)
+            },
+        }
+
+    def finalize(
+        self,
+        *,
+        rows_relative_path: str,
+        rows_file_sha256: str,
+        expected_attempt_count: int,
+        expected_attempt_stream_sha256: str | None = None,
+    ) -> dict[str, Any]:
+        expected_count = _require_nonnegative_int(
+            expected_attempt_count,
+            field="expected_attempt_count",
+        )
+        if expected_count <= 0:
+            raise EditingCandidateAuditLedgerError(
+                "candidate ledger must preserve at least one attempted candidate"
+            )
+        if self.count != expected_count:
+            raise EditingCandidateAuditLedgerError(
+                "candidate ledger row count disagrees with the source attempt census"
+            )
+        relative_path = _require_text(
+            rows_relative_path,
+            field="rows_artifact.relative_path",
+        )
+        parsed_path = PurePosixPath(relative_path)
+        if (
+            parsed_path.is_absolute()
+            or ".." in parsed_path.parts
+            or str(parsed_path) != relative_path
+            or parsed_path.name != relative_path
+        ):
+            raise EditingCandidateAuditLedgerError(
+                "rows_artifact.relative_path must be one normalized filename"
+            )
+        observed_stream = self.attempt_stream_sha256
+        expected_stream = (
+            observed_stream
+            if expected_attempt_stream_sha256 is None
+            else _require_sha256(
+                expected_attempt_stream_sha256,
+                field="expected_attempt_stream_sha256",
+            )
+        )
+        if observed_stream != expected_stream:
+            raise EditingCandidateAuditLedgerError(
+                "candidate ledger attempt stream disagrees with the frozen source stream"
+            )
+        rows_sha256 = self.rows_sha256
+        rows_artifact = {
+            "relative_path": relative_path,
+            "file_sha256": _require_sha256(
+                rows_file_sha256,
+                field="rows_artifact.file_sha256",
+            ),
+            "rows_sha256": rows_sha256,
+            "row_count": self.count,
+        }
+        body = {
+            "schema": CANDIDATE_AUDIT_LEDGER_SCHEMA,
+            "schema_version": CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION,
+            "status": CANDIDATE_AUDIT_LEDGER_STATUS,
+            "training_authorized": False,
+            "blockers": _launch_blockers(
+                self._contract,
+                unresolved_mapping_policy=self._unresolved_mapping_policy,
+                unresolved_metric_policy=self._unresolved_metric_policy,
+            ),
+            "contract_identity": self._contract_identity,
+            "source_identity": self._source_identity,
+            "compiler_identity": self._compiler_identity,
+            "lane_ids": list(self._lane_ids),
+            "expected_attempt_count": expected_count,
+            "expected_attempt_stream_sha256": expected_stream,
+            "counts": self._counts(),
+            "rows_artifact": rows_artifact,
+            "rows_sha256": rows_sha256,
+        }
+        return {**body, "ledger_sha256": canonical_sha256(body)}
+
+
+def iter_candidate_audit_rows(
+    rows_path: str | Path,
+    *,
+    max_row_bytes: int = 2 * 1024 * 1024,
+) -> Iterator[tuple[Mapping[str, Any], bytes]]:
+    """Yield bounded JSONL audit rows without retaining the stream."""
+
+    if type(max_row_bytes) is not int or max_row_bytes <= 0:
+        raise EditingCandidateAuditLedgerError("max_row_bytes must be a positive integer")
+    path = Path(rows_path)
+    try:
+        with path.open("rb") as handle:
+            index = 0
+            while True:
+                raw_line = handle.readline(max_row_bytes + 1)
+                if not raw_line:
+                    break
+                if len(raw_line) > max_row_bytes:
+                    raise EditingCandidateAuditLedgerError(
+                        f"candidate audit row[{index}] exceeds max_row_bytes"
+                    )
+                if not raw_line.endswith(b"\n"):
+                    raise EditingCandidateAuditLedgerError(
+                        f"candidate audit row[{index}] lacks a terminating newline"
+                    )
+                try:
+                    row = json.loads(raw_line)
+                except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                    raise EditingCandidateAuditLedgerError(
+                        f"candidate audit row[{index}] is invalid JSON"
+                    ) from error
+                if not isinstance(row, Mapping):
+                    raise EditingCandidateAuditLedgerError(
+                        f"candidate audit row[{index}] must be an object"
+                    )
+                yield row, raw_line
+                index += 1
+    except OSError as error:
+        raise EditingCandidateAuditLedgerError(
+            f"cannot read candidate audit rows: {path}"
+        ) from error
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except OSError as error:
+        raise EditingCandidateAuditLedgerError(
+            f"cannot hash candidate audit rows: {path}"
+        ) from error
+    return digest.hexdigest()
+
+
+def validate_candidate_audit_ledger_artifact(
+    ledger: object,
+    *,
+    rows_path: str | Path,
+    contract: Mapping[str, Any],
+    contract_file_sha256: str,
+    expected_source_identity: CandidateSourceIdentity | Mapping[str, Any],
+    expected_compiler_identity: CandidateCompilerIdentity | Mapping[str, Any],
+    expected_attempt_count: int | None = None,
+    expected_attempt_stream_sha256: str | None = None,
+    max_row_bytes: int = 2 * 1024 * 1024,
+) -> Mapping[str, Any]:
+    """Validate a streamed ledger and its rows with bounded memory."""
+
+    payload = _require_exact_fields(
+        ledger,
+        _LEDGER_ARTIFACT_FIELDS,
+        field="candidate audit ledger artifact",
+    )
+    if (
+        payload["schema"] != CANDIDATE_AUDIT_LEDGER_SCHEMA
+        or payload["schema_version"] != CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION
+        or payload["status"] != CANDIDATE_AUDIT_LEDGER_STATUS
+        or payload["training_authorized"] is not False
+    ):
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger artifact identity or authority is invalid"
+        )
+    rows_artifact = _require_exact_fields(
+        payload["rows_artifact"],
+        _ROWS_ARTIFACT_FIELDS,
+        field="candidate audit ledger artifact rows_artifact",
+    )
+    rows_file = Path(rows_path)
+    if rows_artifact["relative_path"] != rows_file.name:
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger rows path disagrees with its manifest"
+        )
+    if _file_sha256(rows_file) != _require_sha256(
+        rows_artifact["file_sha256"],
+        field="rows_artifact.file_sha256",
+    ):
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger rows physical SHA-256 disagrees"
+        )
+    manifest_count = _require_nonnegative_int(
+        payload["expected_attempt_count"],
+        field="expected_attempt_count",
+    )
+    if expected_attempt_count is not None and manifest_count != _require_nonnegative_int(
+        expected_attempt_count,
+        field="expected_attempt_count",
+    ):
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger expected attempt count disagrees"
+        )
+    manifest_stream = _require_sha256(
+        payload["expected_attempt_stream_sha256"],
+        field="expected_attempt_stream_sha256",
+    )
+    if expected_attempt_stream_sha256 is not None and manifest_stream != _require_sha256(
+        expected_attempt_stream_sha256,
+        field="expected_attempt_stream_sha256",
+    ):
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger expected attempt stream disagrees"
+        )
+    accumulator = CandidateAuditLedgerAccumulator(
+        contract=contract,
+        contract_file_sha256=contract_file_sha256,
+        source_identity=expected_source_identity,
+        compiler_identity=expected_compiler_identity,
+    )
+    with tempfile.TemporaryDirectory(prefix="compose-candidate-ledger-") as temporary:
+        connection = sqlite3.connect(str(Path(temporary) / "uniqueness.sqlite3"))
+        try:
+            connection.execute("PRAGMA journal_mode=OFF")
+            connection.execute("PRAGMA synchronous=OFF")
+            connection.execute("CREATE TABLE candidate_ids (value TEXT PRIMARY KEY)")
+            connection.execute("CREATE TABLE accepted_trace_ids (value TEXT PRIMARY KEY)")
+            connection.execute("CREATE TABLE row_sha256s (value TEXT PRIMARY KEY)")
+            for index, (raw_row, raw_line) in enumerate(
+                iter_candidate_audit_rows(rows_file, max_row_bytes=max_row_bytes)
+            ):
+                normalized = _validate_candidate_row(
+                    raw_row,
+                    expected_index=index,
+                    contract=contract,
+                    contract_identity=accumulator._contract_identity,
+                    source_identity=accumulator._source_identity,
+                    compiler_identity=accumulator._compiler_identity,
+                    lane_ids=accumulator._lane_ids,
+                )
+                if raw_line != canonical_json_bytes(normalized) + b"\n":
+                    raise EditingCandidateAuditLedgerError(
+                        f"candidate audit row[{index}] bytes are not canonical JSONL"
+                    )
+                try:
+                    connection.execute(
+                        "INSERT INTO candidate_ids(value) VALUES (?)",
+                        (normalized["candidate_id"],),
+                    )
+                    connection.execute(
+                        "INSERT INTO row_sha256s(value) VALUES (?)",
+                        (normalized["row_sha256"],),
+                    )
+                    if normalized["accepted_trace_id"] is not None:
+                        connection.execute(
+                            "INSERT INTO accepted_trace_ids(value) VALUES (?)",
+                            (normalized["accepted_trace_id"],),
+                        )
+                except sqlite3.IntegrityError as error:
+                    raise EditingCandidateAuditLedgerError(
+                        "candidate audit ledger repeats a candidate_id, row SHA-256, "
+                        "or compiled trace_id"
+                    ) from error
+                accumulator._append_validated_row(normalized)
+        finally:
+            connection.close()
+    rebuilt_ledger = accumulator.finalize(
+        rows_relative_path=rows_file.name,
+        rows_file_sha256=rows_artifact["file_sha256"],
+        expected_attempt_count=manifest_count,
+        expected_attempt_stream_sha256=manifest_stream,
+    )
+    if rows_artifact["row_count"] != accumulator.count:
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger rows artifact count disagrees"
+        )
+    if rows_artifact["rows_sha256"] != accumulator.rows_sha256:
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger rows artifact semantic SHA-256 disagrees"
+        )
+    if dict(payload) != rebuilt_ledger:
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger artifact provenance, counts, or self-hash disagrees"
+        )
+    return MappingProxyType(dict(payload))
+
+
 def build_candidate_audit_ledger(
     *,
     contract: Mapping[str, Any],
@@ -911,12 +1333,22 @@ def build_candidate_audit_ledger(
     if len(accepted_trace_ids) != len(set(accepted_trace_ids)):
         raise EditingCandidateAuditLedgerError("candidate ledger repeats a compiled trace_id")
     rows_sha256 = canonical_sha256(rows)
+    unresolved_mapping_policy = any(
+        row["policy_bindings"]["unresolved_mapping_policies"] for row in rows
+    )
+    unresolved_metric_policy = any(
+        row["policy_bindings"]["unresolved_metric_policies"] for row in rows
+    )
     body = {
         "schema": CANDIDATE_AUDIT_LEDGER_SCHEMA,
         "schema_version": CANDIDATE_AUDIT_LEDGER_SCHEMA_VERSION,
         "status": CANDIDATE_AUDIT_LEDGER_STATUS,
         "training_authorized": False,
-        "blockers": _launch_blockers(contract),
+        "blockers": _launch_blockers(
+            contract,
+            unresolved_mapping_policy=unresolved_mapping_policy,
+            unresolved_metric_policy=unresolved_metric_policy,
+        ),
         "contract_identity": contract_identity,
         "source_identity": normalized_source,
         "compiler_identity": normalized_compiler,
@@ -981,8 +1413,7 @@ def validate_candidate_audit_ledger(
             "candidate audit ledger identity or authority is invalid"
         )
     if (
-        payload["blockers"] != _launch_blockers(contract)
-        or payload["contract_identity"] != contract_identity
+        payload["contract_identity"] != contract_identity
         or payload["source_identity"] != source_identity
         or payload["compiler_identity"] != compiler_identity
         or tuple(payload["lane_ids"]) != lane_ids
@@ -1009,6 +1440,19 @@ def validate_candidate_audit_ledger(
         )
         for index, row in enumerate(raw_rows)
     ]
+    expected_blockers = _launch_blockers(
+        contract,
+        unresolved_mapping_policy=any(
+            row["policy_bindings"]["unresolved_mapping_policies"] for row in rows
+        ),
+        unresolved_metric_policy=any(
+            row["policy_bindings"]["unresolved_metric_policies"] for row in rows
+        ),
+    )
+    if payload["blockers"] != expected_blockers:
+        raise EditingCandidateAuditLedgerError(
+            "candidate audit ledger provenance or blocker identity disagrees"
+        )
     if len({row["candidate_id"] for row in rows}) != len(rows):
         raise EditingCandidateAuditLedgerError("candidate audit ledger repeats a candidate_id")
     accepted_ids = [
@@ -1043,6 +1487,7 @@ def validate_candidate_audit_ledger(
 
 
 __all__ = [
+    "CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION",
     "CANDIDATE_AUDIT_LEDGER_SCHEMA",
     "CANDIDATE_AUDIT_LEDGER_SCHEMA_VERSION",
     "CANDIDATE_AUDIT_LEDGER_STATUS",
@@ -1051,6 +1496,7 @@ __all__ = [
     "CANDIDATE_AUDIT_ROW_STATUS",
     "EVIDENCE_COMPONENTS",
     "CandidateAuditAttempt",
+    "CandidateAuditLedgerAccumulator",
     "CandidateCompilerIdentity",
     "CandidateEvidence",
     "CandidateEvidenceComponent",
@@ -1062,5 +1508,7 @@ __all__ = [
     "candidate_attempt_stream_sha256",
     "canonical_json_bytes",
     "canonical_sha256",
+    "iter_candidate_audit_rows",
     "validate_candidate_audit_ledger",
+    "validate_candidate_audit_ledger_artifact",
 ]

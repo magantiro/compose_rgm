@@ -123,7 +123,7 @@ def _policy() -> dict:
 def _candidate_source_stream(input_path: Path, *, file_sha256: str | None = None) -> dict:
     stream_body = {
         "schema": "compose.editing_v2_split_candidate_source_stream",
-        "schema_version": 1,
+        "schema_version": 2,
         "nonempty_jsonl_rows": len(_base_rows()),
         "candidate_materialization": {
             "manifest_file_sha256": SHA_A,
@@ -139,6 +139,7 @@ def _candidate_source_stream(input_path: Path, *, file_sha256: str | None = None
         "candidate_audit_ledger": {
             "file_sha256": SHA_C,
             "semantic_sha256": SHA_D,
+            "rows_file_sha256": "e" * 64,
             "rows_sha256": SHA_A,
         },
         "split_candidates": {

@@ -65,6 +65,7 @@ _PROVENANCE_REGISTRY_FIELDS = {"file_sha256", "registry_sha256"}
 _CANDIDATE_AUDIT_LEDGER_FIELDS = {
     "file_sha256",
     "semantic_sha256",
+    "rows_file_sha256",
     "rows_sha256",
 }
 _SPLIT_CANDIDATE_FIELDS = {"file_sha256", "semantic_sha256"}
@@ -103,7 +104,7 @@ def validate_candidate_source_stream(
 
     if not isinstance(source_stream, Mapping) or set(source_stream) != _SOURCE_STREAM_FIELDS:
         raise EditingV2SplitAssignmentError(
-            "candidate provenance source-stream fields disagree with schema version 1"
+            "candidate provenance source-stream fields disagree with the current schema"
         )
     normalized = json.loads(_canonical_json_bytes(source_stream))
     rows = normalized["nonempty_jsonl_rows"]

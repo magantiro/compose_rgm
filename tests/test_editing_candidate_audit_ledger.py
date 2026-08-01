@@ -9,9 +9,11 @@ from pathlib import Path
 import pytest
 
 from compose_v4.data.editing_candidate_audit_ledger import (
+    CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION,
     CANDIDATE_AUDIT_LEDGER_STATUS,
     EVIDENCE_COMPONENTS,
     CandidateAuditAttempt,
+    CandidateAuditLedgerAccumulator,
     CandidateCompilerIdentity,
     CandidateEvidence,
     CandidateEvidenceComponent,
@@ -21,8 +23,10 @@ from compose_v4.data.editing_candidate_audit_ledger import (
     EditingCandidateAuditLedgerError,
     build_candidate_audit_ledger,
     candidate_attempt_stream_sha256,
+    canonical_json_bytes,
     canonical_sha256,
     validate_candidate_audit_ledger,
+    validate_candidate_audit_ledger_artifact,
 )
 from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
 
@@ -170,6 +174,28 @@ def _all_keys(value: object) -> set[str]:
     return set()
 
 
+def _streamed_ledger(
+    tmp_path: Path,
+    attempts: tuple[CandidateAuditAttempt, ...],
+) -> tuple[dict, Path, list[dict]]:
+    accumulator = CandidateAuditLedgerAccumulator(
+        contract=_contract(),
+        contract_file_sha256=_contract_file_sha256(),
+        source_identity=_source_identity(),
+        compiler_identity=_compiler_identity(),
+    )
+    rows = [accumulator.append(attempt) for attempt in attempts]
+    rows_path = tmp_path / "candidate_audit_rows.jsonl"
+    rows_path.write_bytes(b"".join(canonical_json_bytes(row) + b"\n" for row in rows))
+    ledger = accumulator.finalize(
+        rows_relative_path=rows_path.name,
+        rows_file_sha256=hashlib.sha256(rows_path.read_bytes()).hexdigest(),
+        expected_attempt_count=len(attempts),
+        expected_attempt_stream_sha256=candidate_attempt_stream_sha256(attempts),
+    )
+    return ledger, rows_path, rows
+
+
 def test_candidate_ledger_preserves_compiled_and_rejected_attempts() -> None:
     attempts = (_compiled_attempt(), _rejected_attempt())
     first = _ledger(attempts)
@@ -257,7 +283,7 @@ def test_reserved_or_unavailable_profile_never_compiles() -> None:
         _ledger((attempt,))
 
 
-def test_unresolved_policy_or_incomplete_evidence_never_compiles() -> None:
+def test_unresolved_policy_is_preserved_but_incomplete_evidence_never_compiles() -> None:
     unresolved = replace(
         _compiled_attempt(),
         policy_bindings=CandidatePolicyBindings(
@@ -266,11 +292,12 @@ def test_unresolved_policy_or_incomplete_evidence_never_compiles() -> None:
             unresolved_metric_policies=("intermediate_distance_definition",),
         ),
     )
-    with pytest.raises(
-        EditingCandidateAuditLedgerError,
-        match="cannot grant compilation",
-    ):
-        _ledger((unresolved,))
+    ledger = _ledger((unresolved,))
+    assert ledger["rows"][0]["disposition"] == "compiled_candidate"
+    assert ledger["rows"][0]["policy_bindings"]["unresolved_metric_policies"] == [
+        "intermediate_distance_definition"
+    ]
+    assert "semantic_metric_policy.deferred_to_semantic_migration" in ledger["blockers"]
 
     no_evidence = replace(_compiled_attempt(), evidence=None)
     with pytest.raises(
@@ -354,4 +381,75 @@ def test_row_hash_provenance_and_blockers_fail_closed() -> None:
             expected_compiler_identity=_compiler_identity(),
             expected_attempt_count=2,
             expected_attempt_stream_sha256=candidate_attempt_stream_sha256(attempts),
+        )
+
+
+def test_streamed_ledger_preserves_v2_row_and_attempt_hash_semantics(
+    tmp_path: Path,
+) -> None:
+    attempts = (_compiled_attempt(), _rejected_attempt())
+    ledger, rows_path, rows = _streamed_ledger(tmp_path, attempts)
+
+    assert ledger["schema_version"] == CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION == 4
+    assert "rows" not in ledger
+    assert ledger["rows_artifact"] == {
+        "relative_path": rows_path.name,
+        "file_sha256": hashlib.sha256(rows_path.read_bytes()).hexdigest(),
+        "rows_sha256": canonical_sha256(rows),
+        "row_count": 2,
+    }
+    assert ledger["rows_sha256"] == canonical_sha256(rows)
+    assert ledger["expected_attempt_stream_sha256"] == candidate_attempt_stream_sha256(attempts)
+    validated = validate_candidate_audit_ledger_artifact(
+        ledger,
+        rows_path=rows_path,
+        contract=_contract(),
+        contract_file_sha256=_contract_file_sha256(),
+        expected_source_identity=_source_identity(),
+        expected_compiler_identity=_compiler_identity(),
+        expected_attempt_count=2,
+        expected_attempt_stream_sha256=candidate_attempt_stream_sha256(attempts),
+    )
+    assert validated["ledger_sha256"] == ledger["ledger_sha256"]
+
+
+def test_streamed_ledger_uses_disk_backed_duplicate_detection(tmp_path: Path) -> None:
+    first = _compiled_attempt()
+    duplicate = replace(
+        first,
+        attempt_index=1,
+        candidate_payload_sha256="2" * 64,
+        accepted_trace_id="trace-1",
+    )
+    ledger, rows_path, _ = _streamed_ledger(tmp_path, (first, duplicate))
+
+    with pytest.raises(EditingCandidateAuditLedgerError, match="repeats a candidate_id"):
+        validate_candidate_audit_ledger_artifact(
+            ledger,
+            rows_path=rows_path,
+            contract=_contract(),
+            contract_file_sha256=_contract_file_sha256(),
+            expected_source_identity=_source_identity(),
+            expected_compiler_identity=_compiler_identity(),
+            expected_attempt_count=2,
+        )
+
+
+def test_streamed_ledger_rejects_truncated_or_noncanonical_rows(tmp_path: Path) -> None:
+    attempts = (_compiled_attempt(), _rejected_attempt())
+    ledger, rows_path, _ = _streamed_ledger(tmp_path, attempts)
+    rows_path.write_bytes(rows_path.read_bytes()[:-1])
+
+    with pytest.raises(
+        EditingCandidateAuditLedgerError,
+        match="physical SHA-256 disagrees",
+    ):
+        validate_candidate_audit_ledger_artifact(
+            ledger,
+            rows_path=rows_path,
+            contract=_contract(),
+            contract_file_sha256=_contract_file_sha256(),
+            expected_source_identity=_source_identity(),
+            expected_compiler_identity=_compiler_identity(),
+            expected_attempt_count=2,
         )

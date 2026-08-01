@@ -17,15 +17,19 @@ import math
 from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
 from compose_v4.data.editing_candidate_audit_ledger import (
+    CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION,
     CandidateCompilerIdentity,
     CandidateSourceIdentity,
     EditingCandidateAuditLedgerError,
     canonical_sha256,
+    iter_candidate_audit_rows,
     validate_candidate_audit_ledger,
+    validate_candidate_audit_ledger_artifact,
 )
 from compose_v4.data.editing_corpus_contract import (
     ACTIVE8_FAMILIES,
@@ -1175,13 +1179,31 @@ def _ordered_membership_cells(
 
 def _candidate_rows_by_sha(
     candidate_ledger: Mapping[str, Any],
+    *,
+    required_row_sha256s: set[str],
+    candidate_ledger_rows_path: str | Path | None,
 ) -> dict[str, Mapping[str, Any]]:
     result: dict[str, Mapping[str, Any]] = {}
-    for row in candidate_ledger["rows"]:
-        digest = str(row["row_sha256"])
-        if digest in result:
-            raise EditingSemanticSamplingSidecarError("candidate ledger repeats a row SHA-256")
-        result[digest] = row
+    if candidate_ledger.get("schema_version") == CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION:
+        if candidate_ledger_rows_path is None:
+            raise EditingSemanticSamplingSidecarError(
+                "streamed candidate ledger requires candidate_ledger_rows_path"
+            )
+        rows = (row for row, _ in iter_candidate_audit_rows(candidate_ledger_rows_path))
+    else:
+        rows = iter(candidate_ledger["rows"])
+    try:
+        for row in rows:
+            digest = str(row["row_sha256"])
+            if digest not in required_row_sha256s:
+                continue
+            if digest in result:
+                raise EditingSemanticSamplingSidecarError("candidate ledger repeats a row SHA-256")
+            result[digest] = row
+    except EditingCandidateAuditLedgerError as error:
+        raise EditingSemanticSamplingSidecarError(
+            f"candidate ledger rows are invalid: {error}"
+        ) from error
     return result
 
 
@@ -1474,10 +1496,26 @@ def _validated_candidate_ledger(
     *,
     contract: Mapping[str, Any],
     contract_file_sha256: str,
+    candidate_ledger_rows_path: str | Path | None,
 ) -> Mapping[str, Any]:
     try:
         source = CandidateSourceIdentity(**candidate_ledger["source_identity"])
         compiler = CandidateCompilerIdentity(**candidate_ledger["compiler_identity"])
+        if candidate_ledger.get("schema_version") == CANDIDATE_AUDIT_LEDGER_ARTIFACT_SCHEMA_VERSION:
+            if candidate_ledger_rows_path is None:
+                raise EditingSemanticSamplingSidecarError(
+                    "streamed candidate ledger requires candidate_ledger_rows_path"
+                )
+            return validate_candidate_audit_ledger_artifact(
+                candidate_ledger,
+                rows_path=candidate_ledger_rows_path,
+                contract=contract,
+                contract_file_sha256=contract_file_sha256,
+                expected_source_identity=source,
+                expected_compiler_identity=compiler,
+                expected_attempt_count=candidate_ledger["expected_attempt_count"],
+                expected_attempt_stream_sha256=candidate_ledger["expected_attempt_stream_sha256"],
+            )
         return validate_candidate_audit_ledger(
             candidate_ledger,
             contract=contract,
@@ -1487,7 +1525,11 @@ def _validated_candidate_ledger(
             expected_attempt_count=candidate_ledger["expected_attempt_count"],
             expected_attempt_stream_sha256=candidate_ledger["expected_attempt_stream_sha256"],
         )
-    except (KeyError, TypeError, EditingCandidateAuditLedgerError) as error:
+    except (
+        KeyError,
+        TypeError,
+        EditingCandidateAuditLedgerError,
+    ) as error:
         raise EditingSemanticSamplingSidecarError(
             f"candidate ledger is invalid: {error}"
         ) from error
@@ -1527,6 +1569,7 @@ def build_semantic_sampling_sidecar(
     candidate_ledger: Mapping[str, Any],
     candidate_ledger_manifest_file_sha256: str,
     progress_rows: Sequence[SemanticSamplingProgress],
+    candidate_ledger_rows_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Build a deterministic sidecar over the exact post-Active8 trace stream."""
 
@@ -1567,6 +1610,7 @@ def build_semantic_sampling_sidecar(
         candidate_ledger,
         contract=contract,
         contract_file_sha256=contract_file_sha256,
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
     )
     if (
         validated_ledger["source_identity"]["manifest_file_sha256"]
@@ -1581,7 +1625,11 @@ def build_semantic_sampling_sidecar(
         validated_ledger,
         manifest_file_sha256=candidate_ledger_manifest_file_sha256,
     )
-    candidate_rows = _candidate_rows_by_sha(validated_ledger)
+    candidate_rows = _candidate_rows_by_sha(
+        validated_ledger,
+        required_row_sha256s={progress.candidate_ledger_row_sha256 for progress in progress_rows},
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
+    )
     rows = [
         _build_progress_row(
             progress,
@@ -1653,6 +1701,7 @@ def build_semantic_sampling_sidecar(
         expected_active8_admitted_trace_keys=admitted_keys,
         candidate_ledger=validated_ledger,
         expected_candidate_ledger_manifest_file_sha256=(candidate_ledger_manifest_file_sha256),
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
     )
     return manifest
 
@@ -1739,6 +1788,7 @@ def validate_semantic_sampling_sidecar(
     expected_active8_admitted_trace_keys: Sequence[tuple[str, int, str]],
     candidate_ledger: Mapping[str, Any],
     expected_candidate_ledger_manifest_file_sha256: str,
+    candidate_ledger_rows_path: str | Path | None = None,
 ) -> Mapping[str, Any]:
     """Re-derive every sidecar row and validate all parent/content identities."""
 
@@ -1779,6 +1829,7 @@ def validate_semantic_sampling_sidecar(
         candidate_ledger,
         contract=contract,
         contract_file_sha256=contract_file_sha256,
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
     )
     ledger_identity = _candidate_ledger_identity(
         validated_ledger,
@@ -1819,7 +1870,21 @@ def validate_semantic_sampling_sidecar(
     raw_rows = payload["rows"]
     if not isinstance(raw_rows, list) or not raw_rows:
         raise EditingSemanticSamplingSidecarError("semantic/sampling sidecar rows must be nonempty")
-    candidate_rows = _candidate_rows_by_sha(validated_ledger)
+    required_candidate_rows = {
+        row["candidate_ledger_binding"]["candidate_row_sha256"]
+        for row in raw_rows
+        if isinstance(row, Mapping)
+        and isinstance(row.get("candidate_ledger_binding"), Mapping)
+        and isinstance(
+            row["candidate_ledger_binding"].get("candidate_row_sha256"),
+            str,
+        )
+    }
+    candidate_rows = _candidate_rows_by_sha(
+        validated_ledger,
+        required_row_sha256s=required_candidate_rows,
+        candidate_ledger_rows_path=candidate_ledger_rows_path,
+    )
     normalized_rows: list[dict[str, Any]] = []
     typed_progress: list[SemanticSamplingProgress] = []
     for index, raw_row in enumerate(raw_rows):

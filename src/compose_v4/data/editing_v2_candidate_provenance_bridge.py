@@ -20,6 +20,9 @@ The adapter output is a same-parent atomic directory publication.  Its
 ``source_stream`` object is intended to be copied verbatim into the split
 census.  It binds physical and semantic hashes for the candidate
 materialization, frozen registry, formal ledger, and normalized split rows.
+The formal ledger is a compact manifest whose complete candidate-attempt rows
+live in a separately hash-bound JSONL stream, so construction and validation do
+not retain the full candidate corpus in memory.
 None of these artifacts grants split, Active8, Gate-0, or training authority.
 """
 
@@ -37,15 +40,16 @@ from typing import Any
 from compose_v4.data.editing_candidate_audit_ledger import (
     EVIDENCE_COMPONENTS,
     CandidateAuditAttempt,
+    CandidateAuditLedgerAccumulator,
     CandidateCompilerIdentity,
     CandidateEvidence,
     CandidateEvidenceComponent,
     CandidateLaneResolution,
     CandidatePolicyBindings,
     CandidateSourceIdentity,
-    build_candidate_audit_ledger,
-    candidate_attempt_stream_sha256,
-    validate_candidate_audit_ledger,
+    EditingCandidateAuditLedgerError,
+    iter_candidate_audit_rows,
+    validate_candidate_audit_ledger_artifact,
 )
 from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
 from compose_v4.data.editing_v2_packed_candidate_materializer import (
@@ -71,28 +75,40 @@ from compose_v4.data.editing_v2_split_census import (
 )
 
 PROVENANCE_REGISTRY_SCHEMA = "compose.editing_v2_candidate_provenance_registry"
-PROVENANCE_REGISTRY_SCHEMA_VERSION = 1
+PROVENANCE_REGISTRY_SCHEMA_VERSION = 2
 PROVENANCE_REGISTRY_STATUS = "FROZEN_CANDIDATE_PROVENANCE_NO_TRAINING_AUTHORITY"
 
 PROVENANCE_BRIDGE_SCHEMA = "compose.editing_v2_candidate_provenance_bridge"
-PROVENANCE_BRIDGE_SCHEMA_VERSION = 1
+PROVENANCE_BRIDGE_SCHEMA_VERSION = 2
 PROVENANCE_BRIDGE_STATUS = "COMPLETE_CANDIDATE_PROVENANCE_NO_TRAINING_AUTHORITY"
 
 SOURCE_STREAM_SCHEMA = "compose.editing_v2_split_candidate_source_stream"
-SOURCE_STREAM_SCHEMA_VERSION = 1
+SOURCE_STREAM_SCHEMA_VERSION = 2
 
 REGISTRY_FILENAME = "CANDIDATE_PROVENANCE_REGISTRY.json"
 AUDIT_LEDGER_FILENAME = "candidate_audit_ledger.json"
+AUDIT_ROWS_FILENAME = "candidate_audit_rows.jsonl"
 SPLIT_ROWS_FILENAME = "split_candidates.jsonl"
 BRIDGE_MANIFEST_FILENAME = "CANDIDATE_PROVENANCE_BRIDGE.json"
 
-REQUIRED_BLOCKERS = (
+BASE_REQUIRED_BLOCKERS = (
     "split_component_census.not_run",
     "split_assignment.not_run",
     "active8_whole_trace_admission.not_run",
     "gate_zero.not_run",
     "training.not_authorized",
 )
+
+
+def _bridge_blockers(registry: Mapping[str, Any]) -> list[str]:
+    blockers = list(BASE_REQUIRED_BLOCKERS)
+    policies = registry["policy_bindings"]
+    if policies["unresolved_mapping_policies"]:
+        blockers.append("semantic_mapping_policy.deferred_to_semantic_migration")
+    if policies["unresolved_metric_policies"]:
+        blockers.append("semantic_metric_policy.deferred_to_semantic_migration")
+    return blockers
+
 
 _SHA256_HEX = frozenset("0123456789abcdef")
 _REGISTRY_FIELDS = {
@@ -123,7 +139,12 @@ _COMPILER_FIELDS = {
     "operator_contract_sha256",
     "canonicalizer_sha256",
 }
-_POLICY_FIELDS = {"mapping_policy_sha256", "metric_policy_sha256"}
+_POLICY_FIELDS = {
+    "mapping_policy_sha256",
+    "metric_policy_sha256",
+    "unresolved_mapping_policies",
+    "unresolved_metric_policies",
+}
 _EVIDENCE_IDENTITY_FIELDS = {
     "definition_id",
     "implementation_sha256",
@@ -176,6 +197,7 @@ _SOURCE_STREAM_REGISTRY_FIELDS = {"file_sha256", "registry_sha256"}
 _SOURCE_STREAM_LEDGER_FIELDS = {
     "file_sha256",
     "semantic_sha256",
+    "rows_file_sha256",
     "rows_sha256",
 }
 _SOURCE_STREAM_ROWS_FIELDS = {"file_sha256", "semantic_sha256"}
@@ -191,7 +213,11 @@ _BRIDGE_FIELDS = {
     "manifest_sha256",
 }
 _BRIDGE_COUNT_FIELDS = {"attempted", "routed", "rejected", "split_rows"}
-_BRIDGE_OUTPUT_FIELDS = {"candidate_audit_ledger", "split_candidates"}
+_BRIDGE_OUTPUT_FIELDS = {
+    "candidate_audit_ledger",
+    "candidate_audit_rows",
+    "split_candidates",
+}
 _OUTPUT_IDENTITY_FIELDS = {
     "relative_path",
     "file_sha256",
@@ -210,9 +236,7 @@ class EditingV2CandidateProvenanceBridgeError(ValueError):
     """A frozen identity or candidate provenance boundary is incomplete."""
 
 
-def _require_mapping(
-    value: object, *, fields: set[str], field: str
-) -> Mapping[str, Any]:
+def _require_mapping(value: object, *, fields: set[str], field: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise EditingV2CandidateProvenanceBridgeError(f"{field} must be an object")
     actual = set(value)
@@ -227,9 +251,7 @@ def _require_mapping(
 def _require_sha256(value: object, *, field: str) -> str:
     digest = value if isinstance(value, str) else ""
     if len(digest) != 64 or any(character not in _SHA256_HEX for character in digest):
-        raise EditingV2CandidateProvenanceBridgeError(
-            f"{field} must be a full lowercase SHA-256"
-        )
+        raise EditingV2CandidateProvenanceBridgeError(f"{field} must be a full lowercase SHA-256")
     return digest
 
 
@@ -240,17 +262,13 @@ def _require_text(value: object, *, field: str) -> str:
         or value.strip() != value
         or any(ord(character) < 32 for character in value)
     ):
-        raise EditingV2CandidateProvenanceBridgeError(
-            f"{field} must be nonempty normalized text"
-        )
+        raise EditingV2CandidateProvenanceBridgeError(f"{field} must be nonempty normalized text")
     return value
 
 
 def _require_nonnegative_int(value: object, *, field: str) -> int:
     if type(value) is not int or value < 0:
-        raise EditingV2CandidateProvenanceBridgeError(
-            f"{field} must be a nonnegative integer"
-        )
+        raise EditingV2CandidateProvenanceBridgeError(f"{field} must be a nonnegative integer")
     return value
 
 
@@ -261,12 +279,9 @@ def _require_sorted_texts(
     nonempty: bool,
 ) -> tuple[str, ...]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
-        raise EditingV2CandidateProvenanceBridgeError(
-            f"{field} must be a sequence of strings"
-        )
+        raise EditingV2CandidateProvenanceBridgeError(f"{field} must be a sequence of strings")
     values = tuple(
-        _require_text(item, field=f"{field}[{index}]")
-        for index, item in enumerate(value)
+        _require_text(item, field=f"{field}[{index}]") for index, item in enumerate(value)
     )
     if values != tuple(sorted(set(values))):
         raise EditingV2CandidateProvenanceBridgeError(
@@ -281,9 +296,7 @@ def _load_json(path: Path, *, field: str) -> Mapping[str, Any]:
     try:
         value = json.loads(path.read_bytes())
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise EditingV2CandidateProvenanceBridgeError(
-            f"cannot load {field}: {path}"
-        ) from error
+        raise EditingV2CandidateProvenanceBridgeError(f"cannot load {field}: {path}") from error
     if not isinstance(value, Mapping):
         raise EditingV2CandidateProvenanceBridgeError(f"{field} must be an object")
     return value
@@ -349,9 +362,7 @@ def _normalize_identity_definitions(value: object) -> dict[str, Any]:
             ),
             "implementation_sha256": _require_sha256(
                 definition["implementation_sha256"],
-                field=(
-                    f"registry.identity_definitions.{identity_type}.implementation_sha256"
-                ),
+                field=(f"registry.identity_definitions.{identity_type}.implementation_sha256"),
             ),
             "identity_namespace": _require_text(
                 definition["identity_namespace"],
@@ -478,9 +489,7 @@ def _normalize_evidence_identity(value: object) -> dict[str, Any]:
         component: list(
             _require_sorted_texts(
                 raw_component_fields[component],
-                field=(
-                    f"registry.evidence_identity.component_reference_fields.{component}"
-                ),
+                field=(f"registry.evidence_identity.component_reference_fields.{component}"),
                 nonempty=True,
             )
         )
@@ -576,24 +585,41 @@ def _normalize_registry(
         )
     )
     for name in _COMPILER_FIELDS:
-        compiler[name] = _require_sha256(
-            compiler[name], field=f"registry.compiler_identity.{name}"
-        )
-    policies = dict(
+        compiler[name] = _require_sha256(compiler[name], field=f"registry.compiler_identity.{name}")
+    raw_policies = dict(
         _require_mapping(
             payload["policy_bindings"],
             fields=_POLICY_FIELDS,
             field="registry.policy_bindings",
         )
     )
-    for name in _POLICY_FIELDS:
-        policies[name] = _require_sha256(
-            policies[name], field=f"registry.policy_bindings.{name}"
+    policies: dict[str, Any] = {}
+    for policy_type in ("mapping", "metric"):
+        sha_field = f"{policy_type}_policy_sha256"
+        unresolved_field = f"unresolved_{policy_type}_policies"
+        raw_sha = raw_policies[sha_field]
+        policy_sha = (
+            None
+            if raw_sha is None
+            else _require_sha256(
+                raw_sha,
+                field=f"registry.policy_bindings.{sha_field}",
+            )
         )
+        unresolved = _require_sorted_texts(
+            raw_policies[unresolved_field],
+            field=f"registry.policy_bindings.{unresolved_field}",
+            nonempty=False,
+        )
+        if (policy_sha is None) == (not unresolved):
+            raise EditingV2CandidateProvenanceBridgeError(
+                f"registry.policy_bindings.{policy_type} must be exactly one of a "
+                "resolved SHA-256 or explicit unresolved policy names"
+            )
+        policies[sha_field] = policy_sha
+        policies[unresolved_field] = list(unresolved)
     evidence_identity = _normalize_evidence_identity(payload["evidence_identity"])
-    identity_definitions = _normalize_identity_definitions(
-        payload["identity_definitions"]
-    )
+    identity_definitions = _normalize_identity_definitions(payload["identity_definitions"])
     # Reuse the production census validator so the bridge cannot drift from the
     # exact identity-definition contract expected by schema-V4 rows.
     default_split_census_policy(
@@ -641,9 +667,7 @@ def _normalize_registry(
         "identity_definitions": identity_definitions,
         "source_assets": sources,
     }
-    supplied = _require_sha256(
-        payload["registry_sha256"], field="registry.registry_sha256"
-    )
+    supplied = _require_sha256(payload["registry_sha256"], field="registry.registry_sha256")
     if supplied != canonical_sha256(body):
         raise EditingV2CandidateProvenanceBridgeError(
             "candidate provenance registry semantic SHA-256 disagrees"
@@ -680,9 +704,7 @@ def build_candidate_provenance_registry(
     }
     evidence_payload = dict(evidence_identity)
     if "evidence_identity_sha256" not in evidence_payload:
-        evidence_payload["evidence_identity_sha256"] = canonical_sha256(
-            evidence_payload
-        )
+        evidence_payload["evidence_identity_sha256"] = canonical_sha256(evidence_payload)
     body = {
         "schema": PROVENANCE_REGISTRY_SCHEMA,
         "schema_version": PROVENANCE_REGISTRY_SCHEMA_VERSION,
@@ -725,9 +747,7 @@ def write_candidate_provenance_registry(
     )
     try:
         with os.fdopen(descriptor, "wb") as handle:
-            handle.write(
-                json.dumps(registry, indent=2, sort_keys=True).encode("utf-8") + b"\n"
-            )
+            handle.write(json.dumps(registry, indent=2, sort_keys=True).encode("utf-8") + b"\n")
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary_name, target)
@@ -739,9 +759,7 @@ def write_candidate_provenance_registry(
         raise
 
 
-def _lookup_path(
-    row: Mapping[str, Any], selector: str, *, field: str
-) -> tuple[str, ...]:
+def _lookup_path(row: Mapping[str, Any], selector: str, *, field: str) -> tuple[str, ...]:
     value: Any = row
     for component in selector.split("."):
         if not component or not isinstance(value, Mapping) or component not in value:
@@ -768,15 +786,9 @@ def _resolve_references(
     *,
     field: str,
 ) -> tuple[str, ...]:
-    values = {
-        item
-        for selector in selectors
-        for item in _lookup_path(row, selector, field=field)
-    }
+    values = {item for selector in selectors for item in _lookup_path(row, selector, field=field)}
     if not values:
-        raise EditingV2CandidateProvenanceBridgeError(
-            f"{field} resolved no provenance references"
-        )
+        raise EditingV2CandidateProvenanceBridgeError(f"{field} resolved no provenance references")
     return tuple(sorted(values))
 
 
@@ -842,8 +854,7 @@ def _validate_header(
         if (
             resolution.get("data_lane") != row.get("data_lane")
             or resolution.get("evidence_profile_id") != row.get("evidence_profile_id")
-            or resolution.get("resolver_identity_sha256")
-            != materializer_implementation_sha256
+            or resolution.get("resolver_identity_sha256") != materializer_implementation_sha256
             or resolution.get("routing_policy_sha256") != routing_policy_sha256
             or row.get("routing_policy_sha256") != routing_policy_sha256
         ):
@@ -928,9 +939,7 @@ def _evidence_for_header(
         )
         evidence_sha256 = canonical_sha256(
             {
-                "evidence_identity_sha256": evidence_identity[
-                    "evidence_identity_sha256"
-                ],
+                "evidence_identity_sha256": evidence_identity["evidence_identity_sha256"],
                 "candidate_header_row_sha256": row["row_sha256"],
                 "component": component,
                 "kind": kind,
@@ -1027,9 +1036,7 @@ def _split_row(
         "inverse_pair_group_id": None,
         "correction_group_id": None,
         "constraint_compatible_alternative_route_group_id": None,
-        "relationship_namespaces": {
-            relationship: None for relationship in _RELATIONSHIP_TYPES
-        },
+        "relationship_namespaces": {relationship: None for relationship in _RELATIONSHIP_TYPES},
         "document_group_id": None,
         "document_provenance": None,
         "series_group_id": None,
@@ -1054,9 +1061,7 @@ def _split_row(
 
 def _write_json(path: Path, value: Mapping[str, Any]) -> None:
     with path.open("wb") as handle:
-        handle.write(
-            json.dumps(value, indent=2, sort_keys=True).encode("utf-8") + b"\n"
-        )
+        handle.write(json.dumps(value, indent=2, sort_keys=True).encode("utf-8") + b"\n")
         handle.flush()
         os.fsync(handle.fileno())
 
@@ -1068,6 +1073,7 @@ def _source_stream(
     registry_sha256: str,
     ledger_file_sha256: str,
     ledger_sha256: str,
+    ledger_rows_file_sha256: str,
     ledger_rows_sha256: str,
     split_file_sha256: str,
     split_semantic_sha256: str,
@@ -1085,6 +1091,7 @@ def _source_stream(
         "candidate_audit_ledger": {
             "file_sha256": ledger_file_sha256,
             "semantic_sha256": ledger_sha256,
+            "rows_file_sha256": ledger_rows_file_sha256,
             "rows_sha256": ledger_rows_sha256,
         },
         "split_candidates": {
@@ -1103,12 +1110,10 @@ def materialize_candidate_provenance_bridge(
     output_dir: str | Path,
     max_row_bytes: int = 2 * 1024 * 1024,
 ) -> dict[str, Any]:
-    """Atomically emit a complete formal ledger and routed-only split rows."""
+    """Atomically emit a bounded-memory ledger and routed-only split rows."""
 
     if type(max_row_bytes) is not int or max_row_bytes <= 0:
-        raise EditingV2CandidateProvenanceBridgeError(
-            "max_row_bytes must be a positive integer"
-        )
+        raise EditingV2CandidateProvenanceBridgeError("max_row_bytes must be a positive integer")
     candidate_path = Path(candidate_root)
     registry_path = Path(provenance_registry_path)
     contract_path = Path(editing_corpus_contract_path)
@@ -1130,9 +1135,7 @@ def materialize_candidate_provenance_bridge(
         materialization=materialization,
         editing_corpus_contract=contract,
     )
-    source_registry = {
-        source["source_asset_id"]: source for source in registry["source_assets"]
-    }
+    source_registry = {source["source_asset_id"]: source for source in registry["source_assets"]}
     implementation = materialization.get("implementation")
     inputs = materialization.get("inputs")
     if not isinstance(implementation, Mapping) or not isinstance(inputs, Mapping):
@@ -1165,58 +1168,12 @@ def materialize_candidate_provenance_bridge(
     )
     compiler_identity = CandidateCompilerIdentity(**registry["compiler_identity"])
     policies = CandidatePolicyBindings(**registry["policy_bindings"])
-
-    attempts: list[CandidateAuditAttempt] = []
-    header_file_digest = hashlib.sha256()
-    header_semantic_digest = hashlib.sha256()
-    address_stream_digest = hashlib.sha256()
     rows_path = candidate_path / CANDIDATE_ROWS_FILENAME
-    for header, raw_line in _iter_headers(
-        rows_path,
-        registry_sources=source_registry,
-        materializer_implementation_sha256=materializer_sha,
-        routing_policy_sha256=routing_sha,
-        max_row_bytes=max_row_bytes,
-    ):
-        header_file_digest.update(raw_line)
-        header_semantic_digest.update(header["row_sha256"].encode("ascii"))
-        header_semantic_digest.update(b"\n")
-        address_stream_digest.update(
-            header["packed_address"]["address_sha256"].encode("ascii")
-        )
-        address_stream_digest.update(b"\n")
-        attempts.append(
-            _attempt_for_header(
-                header,
-                policies=policies,
-                evidence_identity=registry["evidence_identity"],
-            )
-        )
-    if (
-        header_file_digest.hexdigest() != candidate_identity["rows_file_sha256"]
-        or header_semantic_digest.hexdigest()
-        != candidate_identity["rows_semantic_sha256"]
-        or address_stream_digest.hexdigest()
-        != candidate_identity["address_stream_sha256"]
-    ):
-        raise EditingV2CandidateProvenanceBridgeError(
-            "candidate headers changed after materialization validation"
-        )
     expected_attempts = materialization.get("rows", {}).get("totals", {}).get("rows")
-    if type(expected_attempts) is not int or len(attempts) != expected_attempts:
+    if type(expected_attempts) is not int or expected_attempts <= 0:
         raise EditingV2CandidateProvenanceBridgeError(
-            "candidate header count disagrees with the materialization census"
+            "candidate materialization census has no positive row count"
         )
-    attempt_stream_sha256 = candidate_attempt_stream_sha256(attempts)
-    ledger = build_candidate_audit_ledger(
-        contract=contract,
-        contract_file_sha256=contract_identity["file_sha256"],
-        source_identity=source_identity,
-        compiler_identity=compiler_identity,
-        attempts=attempts,
-        expected_attempt_count=len(attempts),
-        expected_attempt_stream_sha256=attempt_stream_sha256,
-    )
 
     target = Path(output_dir)
     if target.exists():
@@ -1234,25 +1191,45 @@ def materialize_candidate_provenance_bridge(
     published = False
     try:
         ledger_path = staging / AUDIT_LEDGER_FILENAME
+        audit_rows_path = staging / AUDIT_ROWS_FILENAME
         split_path = staging / SPLIT_ROWS_FILENAME
-        _write_json(ledger_path, ledger)
+        accumulator = CandidateAuditLedgerAccumulator(
+            contract=contract,
+            contract_file_sha256=contract_identity["file_sha256"],
+            source_identity=source_identity,
+            compiler_identity=compiler_identity,
+        )
+        header_file_digest = hashlib.sha256()
+        header_semantic_digest = hashlib.sha256()
+        address_stream_digest = hashlib.sha256()
+        audit_file_digest = hashlib.sha256()
         split_file_digest = hashlib.sha256()
         split_semantic_digest = hashlib.sha256()
         split_rows = 0
-        ledger_rows = iter(ledger["rows"])
-        with split_path.open("wb") as split_handle:
-            for header, _ in _iter_headers(
+        with audit_rows_path.open("wb") as audit_handle, split_path.open("wb") as split_handle:
+            for header, raw_header in _iter_headers(
                 rows_path,
                 registry_sources=source_registry,
                 materializer_implementation_sha256=materializer_sha,
                 routing_policy_sha256=routing_sha,
                 max_row_bytes=max_row_bytes,
             ):
-                audit_row = next(ledger_rows)
-                if audit_row["candidate_id"] != header["candidate_id"]:
-                    raise EditingV2CandidateProvenanceBridgeError(
-                        "formal ledger order disagrees with the candidate-header stream"
-                    )
+                header_file_digest.update(raw_header)
+                header_semantic_digest.update(header["row_sha256"].encode("ascii"))
+                header_semantic_digest.update(b"\n")
+                address_stream_digest.update(
+                    header["packed_address"]["address_sha256"].encode("ascii")
+                )
+                address_stream_digest.update(b"\n")
+                attempt = _attempt_for_header(
+                    header,
+                    policies=policies,
+                    evidence_identity=registry["evidence_identity"],
+                )
+                audit_row = accumulator.append(attempt)
+                encoded_audit = canonical_json_bytes(audit_row) + b"\n"
+                audit_handle.write(encoded_audit)
+                audit_file_digest.update(encoded_audit)
                 if audit_row["disposition"] != "compiled_candidate":
                     continue
                 split_row = _split_row(
@@ -1264,37 +1241,52 @@ def materialize_candidate_provenance_bridge(
                 encoded = canonical_json_bytes(split_row) + b"\n"
                 split_handle.write(encoded)
                 split_file_digest.update(encoded)
-                split_semantic_digest.update(
-                    canonical_sha256(split_row).encode("ascii")
-                )
+                split_semantic_digest.update(canonical_sha256(split_row).encode("ascii"))
                 split_semantic_digest.update(b"\n")
                 split_rows += 1
-            try:
-                next(ledger_rows)
-            except StopIteration:
-                pass
-            else:
-                raise EditingV2CandidateProvenanceBridgeError(
-                    "formal ledger contains rows absent from the candidate-header stream"
-                )
+            audit_handle.flush()
+            os.fsync(audit_handle.fileno())
             split_handle.flush()
             os.fsync(split_handle.fileno())
+        if (
+            header_file_digest.hexdigest() != candidate_identity["rows_file_sha256"]
+            or header_semantic_digest.hexdigest() != candidate_identity["rows_semantic_sha256"]
+            or address_stream_digest.hexdigest() != candidate_identity["address_stream_sha256"]
+        ):
+            raise EditingV2CandidateProvenanceBridgeError(
+                "candidate headers changed after materialization validation"
+            )
+        if accumulator.count != expected_attempts:
+            raise EditingV2CandidateProvenanceBridgeError(
+                "candidate header count disagrees with the materialization census"
+            )
         if split_rows == 0:
             raise EditingV2CandidateProvenanceBridgeError(
                 "candidate bridge produced no routed split candidates"
             )
-        ledger_file_sha = file_sha256(ledger_path)
+        audit_rows_file_sha = file_sha256(audit_rows_path)
         split_file_sha = file_sha256(split_path)
-        if split_file_sha != split_file_digest.hexdigest():
+        if (
+            audit_rows_file_sha != audit_file_digest.hexdigest()
+            or split_file_sha != split_file_digest.hexdigest()
+        ):
             raise EditingV2CandidateProvenanceBridgeError(
-                "split-candidate bytes changed during materialization"
+                "candidate bridge bytes changed during materialization"
             )
+        ledger = accumulator.finalize(
+            rows_relative_path=AUDIT_ROWS_FILENAME,
+            rows_file_sha256=audit_rows_file_sha,
+            expected_attempt_count=expected_attempts,
+        )
+        _write_json(ledger_path, ledger)
+        ledger_file_sha = file_sha256(ledger_path)
         stream = _source_stream(
             candidate_identity=candidate_identity,
             registry_file_sha256=file_sha256(registry_path),
             registry_sha256=registry["registry_sha256"],
             ledger_file_sha256=ledger_file_sha,
             ledger_sha256=ledger["ledger_sha256"],
+            ledger_rows_file_sha256=audit_rows_file_sha,
             ledger_rows_sha256=ledger["rows_sha256"],
             split_file_sha256=split_file_sha,
             split_semantic_sha256=split_semantic_digest.hexdigest(),
@@ -1305,6 +1297,11 @@ def materialize_candidate_provenance_bridge(
                 "relative_path": AUDIT_LEDGER_FILENAME,
                 "file_sha256": ledger_file_sha,
                 "semantic_sha256": ledger["ledger_sha256"],
+            },
+            "candidate_audit_rows": {
+                "relative_path": AUDIT_ROWS_FILENAME,
+                "file_sha256": audit_rows_file_sha,
+                "semantic_sha256": ledger["rows_sha256"],
             },
             "split_candidates": {
                 "relative_path": SPLIT_ROWS_FILENAME,
@@ -1317,10 +1314,10 @@ def materialize_candidate_provenance_bridge(
             "schema_version": PROVENANCE_BRIDGE_SCHEMA_VERSION,
             "status": PROVENANCE_BRIDGE_STATUS,
             "training_authorized": False,
-            "blockers": list(REQUIRED_BLOCKERS),
+            "blockers": _bridge_blockers(registry),
             "source_stream": stream,
             "counts": {
-                "attempted": len(attempts),
+                "attempted": accumulator.count,
                 "routed": ledger["counts"]["compiled_candidates"],
                 "rejected": ledger["counts"]["rejected_candidates"],
                 "split_rows": split_rows,
@@ -1329,9 +1326,21 @@ def materialize_candidate_provenance_bridge(
         }
         manifest = {**body, "manifest_sha256": canonical_sha256(body)}
         _write_json(staging / BRIDGE_MANIFEST_FILENAME, manifest)
+        validate_candidate_provenance_bridge(
+            staging,
+            candidate_root=candidate_path,
+            provenance_registry_path=registry_path,
+            editing_corpus_contract_path=contract_path,
+            max_row_bytes=max_row_bytes,
+            _validated_candidate_materialization=materialization,
+        )
         os.replace(staging, target)
         published = True
         return manifest
+    except EditingCandidateAuditLedgerError as error:
+        raise EditingV2CandidateProvenanceBridgeError(
+            f"candidate audit ledger is invalid: {error}"
+        ) from error
     finally:
         if not published:
             shutil.rmtree(staging, ignore_errors=True)
@@ -1343,14 +1352,17 @@ def validate_candidate_provenance_bridge(
     candidate_root: str | Path,
     provenance_registry_path: str | Path,
     editing_corpus_contract_path: str | Path,
+    max_row_bytes: int = 2 * 1024 * 1024,
+    _validated_candidate_materialization: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
     """Reopen a published bridge and validate all physical/semantic bindings."""
 
+    if type(max_row_bytes) is not int or max_row_bytes <= 0:
+        raise EditingV2CandidateProvenanceBridgeError("max_row_bytes must be a positive integer")
+
     root = Path(output_dir)
     manifest = _require_mapping(
-        _load_json(
-            root / BRIDGE_MANIFEST_FILENAME, field="candidate provenance bridge"
-        ),
+        _load_json(root / BRIDGE_MANIFEST_FILENAME, field="candidate provenance bridge"),
         fields=_BRIDGE_FIELDS,
         field="candidate provenance bridge",
     )
@@ -1359,14 +1371,11 @@ def validate_candidate_provenance_bridge(
         or manifest["schema_version"] != PROVENANCE_BRIDGE_SCHEMA_VERSION
         or manifest["status"] != PROVENANCE_BRIDGE_STATUS
         or manifest["training_authorized"] is not False
-        or tuple(manifest["blockers"]) != REQUIRED_BLOCKERS
     ):
         raise EditingV2CandidateProvenanceBridgeError(
             "candidate provenance bridge identity, authority, or blockers disagree"
         )
-    supplied = _require_sha256(
-        manifest["manifest_sha256"], field="bridge.manifest_sha256"
-    )
+    supplied = _require_sha256(manifest["manifest_sha256"], field="bridge.manifest_sha256")
     body = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
     if supplied != canonical_sha256(body):
         raise EditingV2CandidateProvenanceBridgeError(
@@ -1394,11 +1403,11 @@ def validate_candidate_provenance_bridge(
             fields=_OUTPUT_IDENTITY_FIELDS,
             field=f"bridge.outputs.{name}",
         )
-        expected_name = (
-            AUDIT_LEDGER_FILENAME
-            if name == "candidate_audit_ledger"
-            else SPLIT_ROWS_FILENAME
-        )
+        expected_name = {
+            "candidate_audit_ledger": AUDIT_LEDGER_FILENAME,
+            "candidate_audit_rows": AUDIT_ROWS_FILENAME,
+            "split_candidates": SPLIT_ROWS_FILENAME,
+        }[name]
         if output["relative_path"] != expected_name:
             raise EditingV2CandidateProvenanceBridgeError(
                 f"bridge.outputs.{name}.relative_path disagrees"
@@ -1411,7 +1420,14 @@ def validate_candidate_provenance_bridge(
     candidate_path = Path(candidate_root)
     contract_path = Path(editing_corpus_contract_path)
     registry_path = Path(provenance_registry_path)
-    materialization = validate_packed_candidate_materialization(candidate_path)
+    materialization = (
+        validate_packed_candidate_materialization(
+            candidate_path,
+            max_row_bytes=max_row_bytes,
+        )
+        if _validated_candidate_materialization is None
+        else dict(_validated_candidate_materialization)
+    )
     contract = load_editing_corpus_contract(contract_path)
     candidate_identity = _materialization_identity(candidate_path, materialization)
     contract_identity = {
@@ -1426,14 +1442,16 @@ def validate_candidate_provenance_bridge(
         materialization=materialization,
         editing_corpus_contract=contract,
     )
+    if manifest["blockers"] != _bridge_blockers(registry):
+        raise EditingV2CandidateProvenanceBridgeError(
+            "candidate provenance bridge blockers disagree with the frozen registry"
+        )
     stream = _require_mapping(
         manifest["source_stream"],
         fields=_SOURCE_STREAM_FIELDS,
         field="bridge.source_stream",
     )
-    stream_body = {
-        key: value for key, value in stream.items() if key != "source_stream_sha256"
-    }
+    stream_body = {key: value for key, value in stream.items() if key != "source_stream_sha256"}
     if (
         stream["schema"] != SOURCE_STREAM_SCHEMA
         or stream["schema_version"] != SOURCE_STREAM_SCHEMA_VERSION
@@ -1465,101 +1483,161 @@ def validate_candidate_provenance_bridge(
     if stream_ledger != {
         "file_sha256": outputs["candidate_audit_ledger"]["file_sha256"],
         "semantic_sha256": ledger.get("ledger_sha256"),
+        "rows_file_sha256": outputs["candidate_audit_rows"]["file_sha256"],
         "rows_sha256": ledger.get("rows_sha256"),
     }:
         raise EditingV2CandidateProvenanceBridgeError(
             "bridge source-stream formal-ledger identity disagrees"
         )
     source_input = materialization["inputs"]["source_manifest"]
-    attempts = [
-        _attempt_for_header(
-            header,
-            policies=CandidatePolicyBindings(**registry["policy_bindings"]),
-            evidence_identity=registry["evidence_identity"],
-        )
-        for header, _ in _iter_headers(
-            candidate_path / CANDIDATE_ROWS_FILENAME,
-            registry_sources={
-                source["source_asset_id"]: source
-                for source in registry["source_assets"]
-            },
-            materializer_implementation_sha256=materialization["implementation"][
-                "file_sha256"
-            ],
-            routing_policy_sha256=materialization["inputs"]["routing_policy"][
-                "semantic_sha256"
-            ],
-            max_row_bytes=2 * 1024 * 1024,
-        )
-    ]
-    attempt_sha = candidate_attempt_stream_sha256(attempts)
-    validate_candidate_audit_ledger(
-        ledger,
-        contract=contract,
-        contract_file_sha256=contract_identity["file_sha256"],
-        expected_source_identity=CandidateSourceIdentity(
-            manifest_file_sha256=source_input["file_sha256"],
-            manifest_sha256=source_input["manifest_sha256"],
-        ),
-        expected_compiler_identity=CandidateCompilerIdentity(
-            **registry["compiler_identity"]
-        ),
-        expected_attempt_count=len(attempts),
-        expected_attempt_stream_sha256=attempt_sha,
+    source_identity = CandidateSourceIdentity(
+        manifest_file_sha256=source_input["file_sha256"],
+        manifest_sha256=source_input["manifest_sha256"],
     )
+    compiler_identity = CandidateCompilerIdentity(**registry["compiler_identity"])
+    expected_attempts = materialization.get("rows", {}).get("totals", {}).get("rows")
+    if type(expected_attempts) is not int or expected_attempts <= 0:
+        raise EditingV2CandidateProvenanceBridgeError(
+            "candidate materialization census has no positive row count"
+        )
+    try:
+        validate_candidate_audit_ledger_artifact(
+            ledger,
+            rows_path=root / AUDIT_ROWS_FILENAME,
+            contract=contract,
+            contract_file_sha256=contract_identity["file_sha256"],
+            expected_source_identity=source_identity,
+            expected_compiler_identity=compiler_identity,
+            expected_attempt_count=expected_attempts,
+            max_row_bytes=max_row_bytes,
+        )
+    except EditingCandidateAuditLedgerError as error:
+        raise EditingV2CandidateProvenanceBridgeError(
+            f"candidate audit ledger is invalid: {error}"
+        ) from error
+    if outputs["candidate_audit_rows"]["semantic_sha256"] != ledger.get("rows_sha256"):
+        raise EditingV2CandidateProvenanceBridgeError(
+            "bridge audit-row output semantic identity disagrees"
+        )
     split_digest = hashlib.sha256()
     split_count = 0
-    source_registry = {
-        source["source_asset_id"]: source for source in registry["source_assets"]
-    }
-    with (root / SPLIT_ROWS_FILENAME).open("rb") as split_handle:
-        for header, _ in _iter_headers(
-            candidate_path / CANDIDATE_ROWS_FILENAME,
-            registry_sources=source_registry,
-            materializer_implementation_sha256=materialization["implementation"][
-                "file_sha256"
-            ],
-            routing_policy_sha256=materialization["inputs"]["routing_policy"][
-                "semantic_sha256"
-            ],
-            max_row_bytes=2 * 1024 * 1024,
-        ):
-            audit_row = ledger["rows"][header["attempt_index"]]
-            if audit_row["disposition"] != "compiled_candidate":
-                continue
-            raw_line = split_handle.readline(2 * 1024 * 1024 + 1)
-            if not raw_line or len(raw_line) > 2 * 1024 * 1024:
-                raise EditingV2CandidateProvenanceBridgeError(
-                    "split-candidate stream is truncated or exceeds its row bound"
+    candidate_file_digest = hashlib.sha256()
+    candidate_semantic_digest = hashlib.sha256()
+    candidate_address_digest = hashlib.sha256()
+    source_registry = {source["source_asset_id"]: source for source in registry["source_assets"]}
+    policies = CandidatePolicyBindings(**registry["policy_bindings"])
+    expected_ledger = CandidateAuditLedgerAccumulator(
+        contract=contract,
+        contract_file_sha256=contract_identity["file_sha256"],
+        source_identity=source_identity,
+        compiler_identity=compiler_identity,
+    )
+    audit_rows = iter_candidate_audit_rows(
+        root / AUDIT_ROWS_FILENAME,
+        max_row_bytes=max_row_bytes,
+    )
+    try:
+        with (root / SPLIT_ROWS_FILENAME).open("rb") as split_handle:
+            for header, raw_header in _iter_headers(
+                candidate_path / CANDIDATE_ROWS_FILENAME,
+                registry_sources=source_registry,
+                materializer_implementation_sha256=materialization["implementation"]["file_sha256"],
+                routing_policy_sha256=materialization["inputs"]["routing_policy"][
+                    "semantic_sha256"
+                ],
+                max_row_bytes=max_row_bytes,
+            ):
+                candidate_file_digest.update(raw_header)
+                candidate_semantic_digest.update(header["row_sha256"].encode("ascii"))
+                candidate_semantic_digest.update(b"\n")
+                candidate_address_digest.update(
+                    header["packed_address"]["address_sha256"].encode("ascii")
                 )
-            if not raw_line.endswith(b"\n"):
-                raise EditingV2CandidateProvenanceBridgeError(
-                    "split-candidate stream lacks a terminating newline"
+                candidate_address_digest.update(b"\n")
+                expected_audit_row = expected_ledger.append(
+                    _attempt_for_header(
+                        header,
+                        policies=policies,
+                        evidence_identity=registry["evidence_identity"],
+                    )
                 )
+                try:
+                    audit_row, _ = next(audit_rows)
+                except StopIteration as error:
+                    raise EditingV2CandidateProvenanceBridgeError(
+                        "candidate audit-row stream is truncated"
+                    ) from error
+                if dict(audit_row) != expected_audit_row:
+                    raise EditingV2CandidateProvenanceBridgeError(
+                        "formal ledger row disagrees with its exact candidate header"
+                    )
+                if expected_audit_row["disposition"] != "compiled_candidate":
+                    continue
+                raw_line = split_handle.readline(max_row_bytes + 1)
+                if not raw_line or len(raw_line) > max_row_bytes:
+                    raise EditingV2CandidateProvenanceBridgeError(
+                        "split-candidate stream is truncated or exceeds its row bound"
+                    )
+                if not raw_line.endswith(b"\n"):
+                    raise EditingV2CandidateProvenanceBridgeError(
+                        "split-candidate stream lacks a terminating newline"
+                    )
+                try:
+                    row = json.loads(raw_line)
+                except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                    raise EditingV2CandidateProvenanceBridgeError(
+                        f"split candidate {split_count} is invalid JSON"
+                    ) from error
+                expected_row = _split_row(
+                    header,
+                    expected_audit_row,
+                    registry=registry,
+                    source_registry=source_registry,
+                )
+                if (
+                    not isinstance(row, Mapping)
+                    or dict(row) != expected_row
+                    or raw_line != canonical_json_bytes(expected_row) + b"\n"
+                ):
+                    raise EditingV2CandidateProvenanceBridgeError(
+                        f"split candidate {split_count} disagrees with its exact routed "
+                        "header, formal ledger row, or frozen registry"
+                    )
+                split_digest.update(canonical_sha256(row).encode("ascii"))
+                split_digest.update(b"\n")
+                split_count += 1
             try:
-                row = json.loads(raw_line)
-            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                next(audit_rows)
+            except StopIteration:
+                pass
+            else:
                 raise EditingV2CandidateProvenanceBridgeError(
-                    f"split candidate {split_count} is invalid JSON"
-                ) from error
-            expected_row = _split_row(
-                header,
-                audit_row,
-                registry=registry,
-                source_registry=source_registry,
-            )
-            if not isinstance(row, Mapping) or dict(row) != expected_row:
-                raise EditingV2CandidateProvenanceBridgeError(
-                    f"split candidate {split_count} disagrees with its exact routed "
-                    "header, formal ledger row, or frozen registry"
+                    "candidate audit-row stream contains a row without a header"
                 )
-            split_digest.update(canonical_sha256(row).encode("ascii"))
-            split_digest.update(b"\n")
-            split_count += 1
-        if split_handle.read(1):
-            raise EditingV2CandidateProvenanceBridgeError(
-                "split-candidate stream contains a row without a routed header"
-            )
+            if split_handle.read(1):
+                raise EditingV2CandidateProvenanceBridgeError(
+                    "split-candidate stream contains a row without a routed header"
+                )
+    except EditingCandidateAuditLedgerError as error:
+        raise EditingV2CandidateProvenanceBridgeError(
+            f"candidate audit-row stream is invalid: {error}"
+        ) from error
+    if (
+        candidate_file_digest.hexdigest() != candidate_identity["rows_file_sha256"]
+        or candidate_semantic_digest.hexdigest() != candidate_identity["rows_semantic_sha256"]
+        or candidate_address_digest.hexdigest() != candidate_identity["address_stream_sha256"]
+    ):
+        raise EditingV2CandidateProvenanceBridgeError(
+            "candidate header physical or semantic stream disagrees during bridge validation"
+        )
+    if (
+        expected_ledger.count != expected_attempts
+        or expected_ledger.attempt_stream_sha256 != ledger["expected_attempt_stream_sha256"]
+        or expected_ledger.rows_sha256 != ledger["rows_sha256"]
+    ):
+        raise EditingV2CandidateProvenanceBridgeError(
+            "candidate header stream disagrees with the formal ledger identity"
+        )
     stream_rows = _require_mapping(
         stream["split_candidates"],
         fields=_SOURCE_STREAM_ROWS_FIELDS,
@@ -1579,6 +1657,7 @@ def validate_candidate_provenance_bridge(
 
 __all__ = [
     "AUDIT_LEDGER_FILENAME",
+    "AUDIT_ROWS_FILENAME",
     "BRIDGE_MANIFEST_FILENAME",
     "PROVENANCE_BRIDGE_SCHEMA",
     "PROVENANCE_BRIDGE_SCHEMA_VERSION",

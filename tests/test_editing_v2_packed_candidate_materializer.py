@@ -556,7 +556,7 @@ def test_reopen_detects_row_and_manifest_tampering(tmp_path: Path) -> None:
     rows_path.write_bytes(rows_path.read_bytes() + b" \n")
     with pytest.raises(
         EditingV2PackedCandidateMaterializationError,
-        match="physical SHA-256",
+        match="invalid JSON|physical/semantic stream",
     ):
         validate_packed_candidate_materialization(output)
 

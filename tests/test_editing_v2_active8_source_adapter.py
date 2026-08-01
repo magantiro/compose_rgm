@@ -257,6 +257,7 @@ def _write_split_assignment(
         "candidate_audit_ledger": {
             "file_sha256": "c" * 64,
             "semantic_sha256": "d" * 64,
+            "rows_file_sha256": "0" * 64,
             "rows_sha256": "e" * 64,
         },
         "split_candidates": {

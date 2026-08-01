@@ -2387,11 +2387,11 @@ def validate_packed_candidate_materialization(
         not isinstance(rows, Mapping)
         or rows.get("relative_path") != CANDIDATE_ROWS_FILENAME
         or not rows_path.is_file()
-        or file_sha256(rows_path) != rows.get("file_sha256")
     ):
         raise EditingV2PackedCandidateMaterializationError(
-            "candidate row file is absent or its physical SHA-256 disagrees"
+            "candidate row file is absent or its manifest entry is invalid"
         )
+    physical_digest = hashlib.sha256()
     semantic_digest = hashlib.sha256()
     address_digest = hashlib.sha256()
     totals = _empty_totals()
@@ -2405,6 +2405,7 @@ def validate_packed_candidate_materialization(
                 raise EditingV2PackedCandidateMaterializationError(
                     "candidate header exceeds the validation row bound"
                 )
+            physical_digest.update(raw_line)
             try:
                 row = json.loads(raw_line)
             except (UnicodeDecodeError, json.JSONDecodeError) as error:
@@ -2442,12 +2443,13 @@ def validate_packed_candidate_materialization(
             _accumulate_totals(totals, row)
             expected_index += 1
     if (
-        semantic_digest.hexdigest() != rows.get("semantic_sha256")
+        physical_digest.hexdigest() != rows.get("file_sha256")
+        or semantic_digest.hexdigest() != rows.get("semantic_sha256")
         or address_digest.hexdigest() != rows.get("address_stream_sha256")
         or _final_totals(totals) != rows.get("totals")
     ):
         raise EditingV2PackedCandidateMaterializationError(
-            "candidate row semantic stream or aggregate census disagrees"
+            "candidate row physical/semantic stream or aggregate census disagrees"
         )
     return dict(manifest)
 

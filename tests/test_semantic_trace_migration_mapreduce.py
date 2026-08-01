@@ -155,6 +155,7 @@ def _resolved(tmp_path: Path) -> tuple[Path, ResolvedEditingV2Active8Sources]:
         "candidate_audit_ledger": {
             "file_sha256": "8" * 64,
             "semantic_sha256": "9" * 64,
+            "rows_file_sha256": "0" * 64,
             "rows_sha256": "a" * 64,
         },
         "split_candidates": {
