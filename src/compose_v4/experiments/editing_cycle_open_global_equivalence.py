@@ -564,7 +564,14 @@ def _audit_one_source(
     }
     if not all(reconciliations.values()):
         raise CycleOpenGlobalEquivalenceError(
-            f"V2 source comparison denominators disagree: {reconciliations}"
+            "V2 source comparison denominators disagree: "
+            f"source={source_digest}, reconciliations={reconciliations}, "
+            "component_assignment_counts="
+            f"{tuple(len(component.bond_orders) for component in components)}, "
+            "oracle_feasible_assignments="
+            f"{global_result.diagnostics.feasible_assignment_count if global_result else None}, "
+            "oracle_preserving_aliases="
+            f"{global_result.diagnostics.preserving_alias_count if global_result else None}"
         )
     body = {
         "schema": SOURCE_RECORD_SCHEMA,
