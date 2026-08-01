@@ -57,6 +57,25 @@ def test_driver_reloads_child_volume_snapshot_before_final_validation() -> None:
     assert assemble < reload_snapshot < validate
 
 
+def test_artifact_path_preserves_mounted_coordinate_across_resolved_alias(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    physical_root = tmp_path / "physical-volume"
+    physical_root.mkdir()
+    mounted_root = tmp_path / "artifacts"
+    mounted_root.symlink_to(physical_root, target_is_directory=True)
+    monkeypatch.setattr(mapreduce_app, "ARTIFACT_ROOT", mounted_root)
+
+    observed = mapreduce_app._artifact_path(
+        "/artifacts/editing_v2/candidates",
+        field="candidate path",
+    )
+
+    assert observed == mounted_root / "editing_v2/candidates"
+    assert observed.resolve() == physical_root / "editing_v2/candidates"
+
+
 def test_reusable_plan_pointer_reopens_exact_task_inputs_and_rejects_tampering(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

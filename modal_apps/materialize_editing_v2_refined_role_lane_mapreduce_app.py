@@ -198,10 +198,15 @@ def _artifact_path(value: str, *, field: str) -> Path:
         or str(pure) != value
     ):
         raise RuntimeError(f"{field} must be a normalized path below /artifacts")
-    resolved = (ARTIFACT_ROOT / Path(*pure.parts[2:])).resolve()
+    mounted = ARTIFACT_ROOT / Path(*pure.parts[2:])
+    resolved = mounted.resolve()
     if not resolved.is_relative_to(ARTIFACT_ROOT.resolve()):
         raise RuntimeError(f"{field} resolves outside artifact root")
-    return resolved
+    # Keep the stable mounted coordinate for signed artifact identity.  Modal
+    # resolves the volume mount to an internal /__modal/volumes/... path, which
+    # is safe for the containment check above but is not the declared
+    # /artifacts/... address recorded by upstream receipts.
+    return mounted
 
 
 def _project_path(value: str, *, field: str) -> Path:
