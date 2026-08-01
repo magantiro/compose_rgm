@@ -1,0 +1,64 @@
+{
+  "code_revision": {
+    "commit": "2b4f7beaa80cb6585d778cafb41dea5ee48c57fc",
+    "tree_dirty": false
+  },
+  "contract_sha256": "3e471533963bf867ce9e3618da07a98ef24ab78750c91060f1d39f1b2b95d545",
+  "excluded_partitions": [
+    "train",
+    "controller_validation",
+    "test"
+  ],
+  "implementation": {
+    "implementation_sha256": "78cbb7097f41ab526c1ffe0f097570b7d4f61e107fb98e5ae0999bd5edd2a718",
+    "sources": {
+      "scripts/audit_editing_cycle_close_global_equivalence.py": "b70799251c242621a99af507ceb8c12d2f3441b504e3dc2ff85d9711186d1019",
+      "src/compose_v4/chem/aromaticity.py": "12669b174e2e2e0a08ab9e88eb33b2dc2da50c0d69b826242bf578d2c64f1127",
+      "src/compose_v4/chem/molecular_graph.py": "d33725fd64b63a1c7cd9095e9828f65ad19db8d729e79183f49c9473ea65c4fc",
+      "src/compose_v4/chem/persistent_state_identity.py": "4a3d4bdcf206b50c45ed19b010a1f9c86508460e36bdb7b4f24a024add50804b",
+      "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "src/compose_v4/data/packed_trace_store.py": "b83c2c546700973c44c009e0204456480dd891d826122ef5e5d32f9ba1fcf492",
+      "src/compose_v4/experiments/aromatic_cycle_close_semantics.py": "7e4efd639062f40ebe85102d9c3909002c8fd415d8a7e38168f2d8336acd072c",
+      "src/compose_v4/experiments/aromatic_cycle_open_global_oracle.py": "cbb41befd5578a8c920dd794c7399cbfa08b81683e7058cc71300c2823746043",
+      "src/compose_v4/experiments/aromatic_cycle_open_semantics.py": "1cfcfd2fea08ea9d7d622bc7f3f2c67f78e15546edbf874a3b7a779ac031c3a6",
+      "src/compose_v4/experiments/editing_cycle_close_global_equivalence.py": "2c883cc560eae88448d875450f4a4933b55b0bbc16bac2bbeef292263486db1c",
+      "src/compose_v4/rewrite/action_codec.py": "56607896c67e554bb83aa3f4d40f38912d24e6c6941f9a433a2a8a431b8f9230",
+      "src/compose_v4/rewrite/kernel.py": "cff300c76adc4e2238deb4b53938111d46a3fde7a2e08730a61cdaedf5d3b56a",
+      "src/compose_v4/rewrite/operators.py": "cc166287ab620f3a3b073b2f1ce8a2d5d40fe664f4a7a189c75ab15f537d0238"
+    }
+  },
+  "input_file_sha256s": {
+    "completed_cycle_open_receipt_file_sha256": "5d97a069276f099cdb5529a075e131bedca3a78cddb30fc3545d660125b395fd",
+    "completed_cycle_open_result_file_sha256": "e1643249061b58f16c06a324880859b77ade86a1c7fcbafd611478a729f6fbe6",
+    "contract_file_sha256": "4cb0c85de47914c79f32c75994a5c515dec941b3586eb3e5451d79b4803a80d4",
+    "packed_manifest_sha256": "5bfc34ec9b02c9997c5c98dcd22513b1abe82c92ba2bc89c5494aeb19f31d248",
+    "packed_provenance_overlay_sha256": "9c921eba77d2dfe60c92fe109ec792ba4b7fedcfb7b330bd67054a4867c3c5f5",
+    "packed_shard_content_sha256": "6065e5fc80cc37e2ab9208fa5239e890c47d3174277484bc82af8649a5e2134f"
+  },
+  "input_paths": {
+    "contract": "/private/tmp/compose-cycle-close-global-2b4f7be/configs/editing_cycle_close_global_equivalence_v1.json",
+    "packed_shard": "/private/tmp/compose-gate0-validation-4b6d4eb/edit_packed_v1/cycle_ops/validation/shard_0000.jsonl.gz",
+    "source_receipt": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators/diagnostics/coherence/editing_cycle_open_global_equivalence_v2/receipt.08111e3173e0a262f0fe37ad9bf59283a4578571a59e21fad1904a0b0fb0cf5b.json",
+    "source_result": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm_claude_generators/diagnostics/coherence/editing_cycle_open_global_equivalence_v2/result.08111e3173e0a262f0fe37ad9bf59283a4578571a59e21fad1904a0b0fb0cf5b.json"
+  },
+  "maximum_assignments": 4096,
+  "partitions": [
+    "validation"
+  ],
+  "plan_sha256": "b0a7751ac7f8246abf2db8dd6337ee4fc083efa42d1408427de954beda6e3022",
+  "runtime": {
+    "cpu_count": 12,
+    "machine": "arm64",
+    "numpy": "2.4.2",
+    "omp_num_threads": "1",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.2",
+    "rdkit": "2025.09.6",
+    "scipy": "1.17.1"
+  },
+  "schema": "compose.editing.cycle_close_global_equivalence_plan",
+  "schema_version": 1,
+  "seed_policy": "none_complete_deterministic_enumeration",
+  "status": "VALIDATION_ONLY_COMPLETE_GLOBAL_CYCLE_CLOSE_EQUIVALENCE_NO_TRAINING_AUTHORITY",
+  "training_authorized": false
+}
