@@ -1,0 +1,218 @@
+{
+  "action_codec": {
+    "historical_readers": [
+      "RewriteActionCodecV2",
+      "RewriteActionCodecV3"
+    ],
+    "legacy_records_silently_reinterpreted": false,
+    "prospective_writer": "RewriteActionCodecV4",
+    "public_editing_v2_rules": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate_semantic",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_close",
+      "cycle_open",
+      "ring_system_restate"
+    ],
+    "raw_public_rules_forbidden": [
+      "atom_restate",
+      "bond_insert",
+      "bond_delete"
+    ]
+  },
+  "contract_sha256": "f928f6adaf22ba7520dd28839655c93bc523ce77317b32050d3dd1b02bbcf288",
+  "cycle_close": {
+    "action_type": "CycleCloseEdge",
+    "admission": "execute_every_complete_affected_component_kekule_assignment_and_require_one_canonical_product_group",
+    "ambiguous_action_policy": "typed_rejection_excluded_from_the_legal_fiber",
+    "assignment_cap": null,
+    "candidate_coordinate": "strictly_increasing_persistent_slot_endpoint_pair_and_bond_order_in_1_2_3",
+    "executor_rule": "cycle_close",
+    "family": "cycle_insert",
+    "legacy_action": "BondInsert",
+    "legacy_public_in_editing_v2": false,
+    "unaffected_aromatic_components": "preserve_the_exact_source_phase",
+    "unique_product_representative": "deterministic_exact_representative_selected_only_after_unique_canonical_product_is_proved"
+  },
+  "cycle_open": {
+    "action_type": "CycleOpenEdge",
+    "admission": "complete_component_factored_semantic_edge_opening_with_unique_canonical_product",
+    "assignment_cap": null,
+    "candidate_coordinate": "strictly_increasing_persistent_slot_endpoint_pair",
+    "executor_rule": "cycle_open",
+    "family": "cycle_attach",
+    "legacy_action": "BondDelete",
+    "legacy_public_in_editing_v2": false,
+    "unaffected_aromatic_components": "preserve_the_exact_source_phase"
+  },
+  "downstream_invalidation": {
+    "active8_inventory_rebuild_required": true,
+    "affected_whole_trace_replay_required": true,
+    "candidate_and_successor_cache_rebuild_required": true,
+    "checkpoint_resume_across_process_versions": false,
+    "gate0_and_t1_rebuild_required": true,
+    "historical_artifacts_remain_readable_only_under_original_identity": true,
+    "p50_authorized_by_this_contract": false,
+    "source_and_scaffold_splits_changed": false
+  },
+  "implementation_boundary": {
+    "cpu_precomputation": [
+      "semantic_action_admission",
+      "unique_successor_resolution",
+      "canonical_successor_grouping",
+      "ring_restate_semantic_transition_descriptors",
+      "alias_multiplicity"
+    ],
+    "gpu_hot_path_forbidden": [
+      "rdkit_replay",
+      "kekule_alias_enumeration",
+      "executor_replay",
+      "canonicalization"
+    ],
+    "process_identity_must_bind": [
+      "action_codec",
+      "trace_schema",
+      "runtime_rule_registry",
+      "semantic_action_resolvers",
+      "model_action_masks",
+      "ring_restate_scorer_mode",
+      "production_successor_kernel",
+      "dictionary_reference_oracle",
+      "canonicalizer",
+      "charge_policy"
+    ],
+    "production_module_policy": "semantic_resolvers_live_in_rewrite_or_domain_code_and_audits_compare_them_to_independent_oracles"
+  },
+  "model_contract": {
+    "action_semantics_modes": {
+      "editing_v2": "semantic_editing_v2_v1",
+      "legacy": "legacy_raw_actions_v1"
+    },
+    "batch_and_model_process_identity_must_match": true,
+    "checkpoint_missing_process_identity": "legacy_only_never_editing_v2",
+    "family_names_unchanged": true,
+    "hazard_training": "separate_from_productive_embedded_jump_successor_learning",
+    "neural_bond_view": "resonance_invariant",
+    "training_object": "canonical_productive_molecular_successor_probability"
+  },
+  "required_release_gates": {
+    "atom_restate": [
+      "component_resolver_matches_independent_complete_global_oracle",
+      "ambiguous_sulfur_counterexample_rejected_from_every_source_phase",
+      "positive_common_aromatic_substitutions_remain_admitted",
+      "train_and_development_teacher_coverage_and_semantic_cell_floors_pass",
+      "forward_and_reverse_admission_reported_separately",
+      "no_raw_atom_restate_in_editing_v2_artifacts"
+    ],
+    "cycle_operations": [
+      "component_resolvers_match_independent_complete_global_oracles",
+      "semantic_close_open_bidirectional_closure_audited_on_the_frozen_source_set",
+      "ambiguous_cycle_close_coordinates_are_recorded_as_support_exclusions",
+      "no_raw_bond_insert_or_bond_delete_in_editing_v2_artifacts"
+    ],
+    "end_to_end": [
+      "collator_direct_and_multiworker_process_identity_equivalence",
+      "production_segmented_equals_fresh_dictionary_oracle",
+      "full_active8_one_step_alternate_kekule_and_slot_relabel_molecular_law_invariance",
+      "bounded_two_and_three_step_molecular_path_law_invariance",
+      "migrated_whole_traces_replay_to_exact_persisted_successors",
+      "checkpoint_save_load_and_resume_mismatch_tests",
+      "gate0_and_t1_pass_under_the_new_process_identity"
+    ],
+    "ring_system_restate": [
+      "canonical_support_and_alias_multiplicity_invariance",
+      "semantic_transition_descriptor_invariance",
+      "aggregate_successor_probability_invariance_across_kekule_phases_and_slot_relabelings",
+      "within_fiber_alias_refinement_does_not_change_successor_mass",
+      "every_semantic_scorer_parameter_receives_gradient_in_t1"
+    ]
+  },
+  "ring_system_restate": {
+    "action_type": "RingSystemRestate",
+    "executor_change_authorized": false,
+    "family": "ring_system_restate",
+    "legacy_scorer_mode": "legacy_changed_kekule_edges_v1",
+    "semantic_descriptor": "complete_resonance_invariant_source_to_successor_edge_class_changes_over_the_affected_ring_component",
+    "semantic_scorer_mode": "semantic_successor_group_v1",
+    "successor_group_policy": "score_one_canonical_successor_group_then_assign_each_raw_alias_group_score_minus_log_alias_multiplicity"
+  },
+  "schema": "compose.editing.semantic_process_contract",
+  "schema_version": 1,
+  "scope": {
+    "active_families": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ],
+    "editing_only": true,
+    "formal_charge_changes": "out_of_scope",
+    "max_active_atoms": 40,
+    "ring_system_delete_enabled": false,
+    "ring_system_grow_enabled": false,
+    "stereochemistry": "out_of_scope",
+    "unconditional_de_novo_lane_modified": false
+  },
+  "semantic_atom_restate": {
+    "action_type": "SemanticAtomRestate",
+    "admission": "retain_target_compatible_complete_source_component_kekule_aliases_and_require_exactly_one_canonical_product_group",
+    "ambiguous_or_empty_product_policy": "typed_rejection_excluded_from_the_legal_fiber",
+    "assignment_cap": null,
+    "candidate_coordinate": "persistent_slot_and_broad_organic_target_element_valence_class_index",
+    "charge_policy": "formal_charge_zero_and_frozen_charge_preservation",
+    "executor_rule": "atom_restate_semantic",
+    "family": "atom_restate",
+    "legacy_action": "AtomRestate",
+    "legacy_public_in_editing_v2": false,
+    "nonaromatic_policy": "same_molecular_successor_as_legacy_restate_when_the_target_valence_class_is_valid",
+    "target_hydrogen_policy": "derive_from_target_valence_class_and_each_compatible_exact_bond_assignment_not_from_one_arbitrary_source_phase",
+    "unaffected_aromatic_components": "preserve_the_exact_source_phase"
+  },
+  "source_evidence": {
+    "atom_restate_development_diagnostic": {
+      "authoritative_corpus_evidence": false,
+      "fixture": "Cc1cccc(Cl)c1",
+      "raw_candidates": 66,
+      "unique_product_candidates": 38,
+      "ambiguous_candidates": 28,
+      "status": "bounded_development_observation_requires_frozen_train_and_development_census"
+    },
+    "cycle_close_global_equivalence": {
+      "admitted_count": 240902,
+      "ambiguous_rejection_count": 1356,
+      "candidate_count": 242258,
+      "mismatch_count": 0,
+      "oracle_overflow_source_count": 0,
+      "result_file_sha256": "097dbace821293f23563ea407209582b1a76ed54d813f280b91469cbcca3e12a",
+      "result_sha256": "0cd4f3f99cf2654dc53098add0be40c8a36b6f81f04cdb1822b235f680cb1ad7",
+      "unique_validation_sources": 1707
+    },
+    "cycle_open_global_equivalence": {
+      "edge_count": 19311,
+      "mismatch_count": 0,
+      "oracle_overflow_edge_count": 0,
+      "result_file_sha256": "e1643249061b58f16c06a324880859b77ade86a1c7fcbafd611478a729f6fbe6",
+      "result_sha256": "f68b49f853612b3204b65f7ae47665ad6fedecf79f9a6746f4079badae76b10c",
+      "unique_validation_sources": 1707
+    },
+    "ring_system_restate_development_diagnostic": {
+      "alias_count_mismatch_count": 0,
+      "alternate_kekule_comparisons": 18,
+      "authoritative_corpus_evidence": false,
+      "maximum_successor_mass_residual": 0.000343,
+      "support_mismatch_count": 0,
+      "status": "bounded_development_observation_requires_full_active8_gate"
+    }
+  },
+  "status": "DESIGN_FROZEN_IMPLEMENTATION_AND_EVIDENCE_GATES_NOT_TRAINING_AUTHORIZED",
+  "supersedes_for_editing_v2": [
+    "configs/editing_semantic_cycle_open_integration_v1.json"
+  ],
+  "training_authorized": false
+}
