@@ -1,0 +1,88 @@
+{
+  "schema": "compose.editing_v2.semantic_p50_recipe_policy",
+  "schema_version": 1,
+  "policy_id": "compose-editing-v2-semantic-p50-stage-a-v1",
+  "status": "FROZEN_PROSPECTIVE_RECIPE_NO_TRAINING_AUTHORITY",
+  "training_authorized": false,
+  "bounded_p50_authorized": false,
+  "p500_authorized": false,
+  "long_training_authorized": false,
+  "checkpoint_selection_authorized": false,
+  "final_test_selection_authorized": false,
+  "scientific_scope": "scratch_active8_stage_a_capability_pilot_not_production_law_calibration",
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "optimization": {
+    "initialization": "scratch_from_t1_bound_initial_model_state",
+    "optimizer_steps": 50,
+    "batch_size": 64,
+    "scheduled_nonterminal_examples": 3200,
+    "optimizer": "adamw",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "scheduler": "constant",
+    "gradient_clip_norm": 10.0,
+    "seed": 31,
+    "dtype": "float32",
+    "mixed_precision": false,
+    "deterministic_algorithms_required": true,
+    "resume": false
+  },
+  "objective": {
+    "name": "balanced_semantic_cell_productive_identity",
+    "unit": "productive_embedded_canonical_successor",
+    "hazard_included": false,
+    "hazard_weight": 0.0,
+    "terminal_rows": "excluded",
+    "importance_correction": "none",
+    "path_position_coefficient": 1.0
+  },
+  "sampling": {
+    "policy_id": "stage_a_equal_semantic_cell_capability_exception_v1",
+    "semantic_cell_probability": "equal_round_robin",
+    "within_cell_probability": "deterministic_uniform_cycle",
+    "lane_probability": "not_a_sampling_level_preserved_as_audit_dimension",
+    "source_group_probability": "explicit_stage_a_exception_not_used",
+    "source_group_id_in_stream": null,
+    "production_hierarchy_claim_authorized": false,
+    "rationale": "P50 tests load-bearing capability acquisition; production-law calibration remains a later separately frozen stage"
+  },
+  "time_derivation": {
+    "algorithm": "sha256_counter_open_unit_interval_53bit_v1",
+    "seed": 31,
+    "support": "strict_open_unit_interval",
+    "serialized_value": "python_float_hex_v1"
+  },
+  "cache": {
+    "coverage_mode": "complete_trace_closure_of_planned_address_union",
+    "source_population": "full_admitted_semantic_active8_corpus",
+    "closure_only_rows_schedulable": false,
+    "terminal_rows_schedulable": false
+  },
+  "thresholds": {
+    "gradient_opportunity_fraction": 0.8,
+    "gradient_floor_rule": "max_1_ceil_fraction_times_planned_optimizer_step_opportunities",
+    "zero_planned_family_or_cell_opportunities_allowed": false,
+    "maximum_family_final_minus_baseline_successor_nll_nats": 0.25,
+    "maximum_cell_final_minus_baseline_successor_nll_nats": 0.25,
+    "baseline_partition_role": "validation",
+    "baseline_definition": "exact_pre_update_scratch_evaluation_on_the_frozen_validation_stream",
+    "baseline_values_inspected_when_thresholds_frozen": false
+  },
+  "required_physical_binding_purposes": [
+    "stream_union_successor_cache",
+    "validation_baseline",
+    "trainer_runtime",
+    "execution_environment",
+    "launch_projection"
+  ],
+  "policy_sha256": "a9260021adbe96d20d84857c6ab00d5d82625f1e777c3c0f5d88fb68c59c2563"
+}
