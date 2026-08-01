@@ -54,6 +54,10 @@ from compose_v4.rewrite.ring_system_fiber import (
     clear_semantic_ring_state_caches,
     warm_ring_system_candidate_indices,
 )
+from compose_v4.rewrite.action_codec_v4 import (
+    ActionCodecV4Error,
+    canonical_family as editing_v2_canonical_family,
+)
 from compose_v4.rewrite.tracelets import RingSystemGrow
 from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
@@ -85,6 +89,17 @@ class FactorizedMarkExample:
             return None
         selected = set(self.ring_grow_support_indices)
         return tuple(index in selected for index in range(self.ring_grow_support_width))
+
+
+def _teacher_rule_is_supported(rule_name: str) -> bool:
+    """Accept legacy model families and the frozen Action V4 executor surface."""
+
+    if rule_name in MARK_RULE_TO_INDEX or rule_name in _CYCLE_OP_EXECUTOR_TO_FAMILY:
+        return True
+    try:
+        return editing_v2_canonical_family(rule_name) in MARK_RULE_TO_INDEX
+    except ActionCodecV4Error:
+        return False
 
 
 class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
@@ -238,10 +253,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             # cycle ops record EXECUTOR names (bond_insert/bond_delete) that the model scores under the
             # cycle_insert/cycle_attach slots; accept them (the rule_name stays the executor name, which
             # _teacher_action_score dispatches on). Everything else must be a dense family.
-            if (
-                step.rule_name not in MARK_RULE_TO_INDEX
-                and step.rule_name not in _CYCLE_OP_EXECUTOR_TO_FAMILY
-            ):
+            if not _teacher_rule_is_supported(step.rule_name):
                 raise ValueError(
                     f"compiled teacher uses unsupported dense family: {step.rule_name}"
                 )

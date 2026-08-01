@@ -17,9 +17,11 @@ from compose_v4.experiments.cycle_open_kekule_invariance import (
 )
 from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
+    FactorizedMarkDataset,
     FactorizedMarkExample,
     _concatenate_factorized_mark_batches,
 )
+from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_successor_training import (
     compile_state_successor_map,
 )
@@ -43,7 +45,10 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
     prepare_factorized_mark_batch,
 )
-from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
+from compose_v4.rewrite.kernel import (
+    canonical_state_key,
+    editing_v2_semantic_rewrite_system,
+)
 from compose_v4.rewrite.operators import (
     BondDelete,
     CycleCloseEdge,
@@ -54,6 +59,8 @@ from compose_v4.rewrite.operators import (
     enumerate_semantic_atom_restates,
 )
 from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
+from compose_v4.rewrite.progress import TraceProgressCTMC
+from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 _SLOTS = 16
@@ -119,6 +126,64 @@ def _batch(model, state, *, action=None, rule_name=None):
         cycle_close_action_semantics=capabilities.cycle_close_action_semantics,
         cycle_open_action_semantics=capabilities.cycle_open_action_semantics,
     )
+
+
+def test_semantic_atom_restate_teacher_reaches_the_dataset_collator_path(
+    semantic_model,
+    monkeypatch,
+) -> None:
+    """Action V4 executor names must survive the actual sampled training path."""
+
+    source = _state("CO")
+    action = enumerate_semantic_atom_restates(source)[0]
+    runtime = editing_v2_semantic_rewrite_system()
+    target = runtime.apply(source, "atom_restate_semantic", action)
+    trace = RewriteTrace(
+        source=source,
+        target=target,
+        steps=(RewriteStep("atom_restate_semantic", action),),
+        metadata={},
+    )
+    record = PathRecord(
+        target_key=canonical_state_key(target),
+        path=TraceProgressCTMC(trace, system=runtime),
+    )
+    import compose_v4.experiments.factorized_mark_conditional as conditional
+
+    monkeypatch.setattr(
+        conditional,
+        "_sample_tracelet_progress",
+        lambda *_args, **_kwargs: (0, 1.0),
+    )
+    dataset = FactorizedMarkDataset(
+        (record,),
+        start_index=0,
+        length=1,
+        seed=0,
+        late_time_fraction=0.0,
+        operational_horizon=1.0,
+        progress_stratification_fraction=0.0,
+        ring_catalog=semantic_model.ring_catalog,
+    )
+    example = dataset[0]
+    assert example.teacher_rule_name == "atom_restate_semantic"
+    capabilities = semantic_model.operator_capabilities
+    batch = FactorizedMarkCollator(
+        True,
+        semantic_model.ring_catalog,
+        compute_ring_grow_support=capabilities.compute_ring_grow_support,
+        compute_ring_restates=capabilities.compute_ring_restates,
+        compute_cyclic_graft=capabilities.compute_cyclic_graft,
+        compute_ring_opening=capabilities.compute_ring_opening,
+        compute_ring_system_delete=capabilities.compute_ring_system_delete,
+        editing_process_semantics=capabilities.editing_process_semantics,
+        atom_restate_action_semantics=capabilities.atom_restate_action_semantics,
+        ring_restate_scorer_mode=capabilities.ring_restate_scorer_mode,
+        cycle_close_action_semantics=capabilities.cycle_close_action_semantics,
+        cycle_open_action_semantics=capabilities.cycle_open_action_semantics,
+    )([example])
+    prediction = semantic_model.forward_mark_batch(batch)
+    assert bool(torch.isfinite(prediction.selected_mark_log_probability).all())
 
 
 def test_semantic_mode_is_explicit_and_rejects_representation_dependent_scorer(
