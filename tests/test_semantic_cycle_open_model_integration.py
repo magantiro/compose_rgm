@@ -20,6 +20,7 @@ from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkDataset,
     FactorizedMarkExample,
     _concatenate_factorized_mark_batches,
+    factorized_mark_metrics,
 )
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_successor_training import (
@@ -184,6 +185,13 @@ def test_semantic_atom_restate_teacher_reaches_the_dataset_collator_path(
     )([example])
     prediction = semantic_model.forward_mark_batch(batch)
     assert bool(torch.isfinite(prediction.selected_mark_log_probability).all())
+    metrics = factorized_mark_metrics(
+        semantic_model,
+        batch,
+        use_bf16=False,
+    )
+    assert metrics["teacher_examples_atom_restate"] == 1.0
+    assert np.isfinite(metrics["mean_teacher_mark_probability_atom_restate"])
 
 
 def test_semantic_mode_is_explicit_and_rejects_representation_dependent_scorer(

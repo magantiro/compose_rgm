@@ -121,14 +121,16 @@ MARK_RULE_NAMES = (
     "ring_system_restate",
 )
 MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
-# Compositional ring ops apply via the executor's bond_insert/bond_delete rules but are SELECTED by the model
-# on the repurposed slots 5/6 (cycle_insert/cycle_attach) when enable_cycle_ops. This maps a teacher/sampled
-# executor rule name back to its selecting family for the family-index lookup.
+# Executor aliases whose persisted rule names differ from the selecting model
+# family.  The historical constant name is retained because downstream
+# diagnostics import it, but Action V4 semantic atom restatement must pass
+# through the same canonical family lookup as semantic cycle actions.
 _CYCLE_OP_EXECUTOR_TO_FAMILY = {
     "bond_insert": "cycle_insert",
     "bond_delete": "cycle_attach",
     "cycle_close": "cycle_insert",
     "cycle_open": "cycle_attach",
+    "atom_restate_semantic": "atom_restate",
 }
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 # Families gated by a capability flag; everything else in MARK_RULE_NAMES is always production-enabled.
