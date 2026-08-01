@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import json
-import os
-import subprocess
-import sys
 from collections.abc import Iterable
 from copy import deepcopy
 from pathlib import Path
 
 import pytest
 
+from scripts import build_editing_v2_split_census as split_census_cli
 from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
 from compose_v4.data.editing_v2_split_census import (
     CANDIDATE_ROW_SCHEMA,
@@ -122,6 +120,38 @@ def _policy() -> dict:
     )
 
 
+def _candidate_source_stream(input_path: Path, *, file_sha256: str | None = None) -> dict:
+    stream_body = {
+        "schema": "compose.editing_v2_split_candidate_source_stream",
+        "schema_version": 1,
+        "nonempty_jsonl_rows": len(_base_rows()),
+        "candidate_materialization": {
+            "manifest_file_sha256": SHA_A,
+            "manifest_sha256": SHA_B,
+            "rows_file_sha256": SHA_C,
+            "rows_semantic_sha256": SHA_D,
+            "address_stream_sha256": SHA_A,
+        },
+        "provenance_registry": {
+            "file_sha256": SHA_B,
+            "registry_sha256": SHA_C,
+        },
+        "candidate_audit_ledger": {
+            "file_sha256": SHA_C,
+            "semantic_sha256": SHA_D,
+            "rows_sha256": SHA_A,
+        },
+        "split_candidates": {
+            "file_sha256": file_sha256 or split_census_cli._file_sha256(input_path),
+            "semantic_sha256": SHA_B,
+        },
+    }
+    return {
+        **stream_body,
+        "source_stream_sha256": canonical_sha256(stream_body),
+    }
+
+
 def _build(
     rows: Iterable[dict],
     *,
@@ -176,9 +206,7 @@ def _transformation_definition() -> dict:
 def _profile_components(profile_id: str) -> dict[str, str]:
     profile = next(
         profile
-        for profile in EDITING_CORPUS_CONTRACT["evidence_component_contract"][
-            "profiles"
-        ]
+        for profile in EDITING_CORPUS_CONTRACT["evidence_component_contract"]["profiles"]
         if profile["id"] == profile_id
     )
     return dict(profile["components"])
@@ -282,9 +310,7 @@ def _row(
         "alternative_route_group_id": alternative_route,
         "inverse_pair_group_id": inverse_pair,
         "correction_group_id": correction,
-        "constraint_compatible_alternative_route_group_id": (
-            constrained_alternative_route
-        ),
+        "constraint_compatible_alternative_route_group_id": (constrained_alternative_route),
         "relationship_namespaces": relationship_namespaces,
         "document_group_id": document,
         "document_provenance": document_provenance,
@@ -353,18 +379,16 @@ def test_census_keeps_transformations_diagnostic_and_measures_bridge_effect() ->
         "split_assignment.not_performed_by_component_census",
     }.issubset(census["blockers"])
     assert census["hard_component_census"]["component_count"] == 7
-    assert census["identities"][
-        "candidate_source_binding_inventory_sha256"
-    ] == canonical_sha256(census["candidate_source_binding_inventory"])
+    assert census["identities"]["candidate_source_binding_inventory_sha256"] == canonical_sha256(
+        census["candidate_source_binding_inventory"]
+    )
     assert {
         "evidence_class",
         "declared_partition_role",
     }.isdisjoint(census["vertex_inventory"][0])
 
     components = census["hard_component_census"]["components"]
-    shared = next(
-        component for component in components if component["candidate_count"] == 2
-    )
+    shared = next(component for component in components if component["candidate_count"] == 2)
     assert shared["candidate_ids"] == ["a", "b"]
     assert shared["data_lanes"] == [
         "observed_local_analogue",
@@ -455,9 +479,9 @@ def test_noncontract_lane_or_evidence_profile_blocks_structural_pass(
 
 def test_policy_lane_identity_must_match_validated_editing_contract() -> None:
     policy = _policy()
-    policy["lane_contract_identity"]["ordered_lanes"][0][
-        "admissible_evidence_profiles"
-    ] = ["executor_generated_walk"]
+    policy["lane_contract_identity"]["ordered_lanes"][0]["admissible_evidence_profiles"] = [
+        "executor_generated_walk"
+    ]
 
     with pytest.raises(
         EditingV2SplitCensusError,
@@ -474,10 +498,7 @@ def test_identity_definition_mismatch_is_reason_coded_and_blocks() -> None:
     census = _build([bad, _row("a"), _row("b"), _row("c"), _row("d")])
 
     assert census["status"] == "BLOCKED"
-    assert (
-        "identity_definitions.contract_mismatch"
-        in census["invalid_rows"][0]["reason_codes"]
-    )
+    assert "identity_definitions.contract_mismatch" in census["invalid_rows"][0]["reason_codes"]
 
 
 def test_source_group_is_hard_across_data_lanes() -> None:
@@ -499,8 +520,7 @@ def test_source_group_is_hard_across_data_lanes() -> None:
     census = _build(rows)
 
     components = [
-        component["candidate_ids"]
-        for component in census["hard_component_census"]["components"]
+        component["candidate_ids"] for component in census["hard_component_census"]["components"]
     ]
     assert ["a", "b"] in components
     assert census["hard_component_census"]["component_count"] == 3
@@ -568,17 +588,13 @@ def test_missing_or_invalid_source_group_binding_is_reason_coded(
 
     assert census["census_structural_complete"] is False
     assert reason_code in census["invalid_rows"][0]["reason_codes"]
-    assert "bad" not in {
-        vertex["candidate_id"] for vertex in census["vertex_inventory"]
-    }
+    assert "bad" not in {vertex["candidate_id"] for vertex in census["vertex_inventory"]}
 
 
 def test_source_group_binding_does_not_synthesize_document_or_series_evidence() -> None:
     census = _build([_row("a", source_group="source-a"), _row("b")])
 
-    row = next(
-        vertex for vertex in census["vertex_inventory"] if vertex["candidate_id"] == "a"
-    )
+    row = next(vertex for vertex in census["vertex_inventory"] if vertex["candidate_id"] == "a")
     assert row["document_group_id"] is None
     assert row["document_provenance"] is None
     assert row["series_group_id"] is None
@@ -604,8 +620,7 @@ def test_observed_document_and_series_groups_are_hard_and_source_scoped() -> Non
     census = _build(rows)
 
     components = [
-        component["candidate_ids"]
-        for component in census["hard_component_census"]["components"]
+        component["candidate_ids"] for component in census["hard_component_census"]["components"]
     ]
     assert ["a", "b"] in components
     assert ["c", "d"] in components
@@ -763,9 +778,7 @@ def test_missing_observed_group_provenance_is_reason_coded_and_blocks(
     assert census["input_summary"]["valid_vertices"] == 4
     assert census["input_summary"]["invalid_rows"] == 1
     assert reason_code in census["invalid_rows"][0]["reason_codes"]
-    assert "bad" not in {
-        vertex["candidate_id"] for vertex in census["vertex_inventory"]
-    }
+    assert "bad" not in {vertex["candidate_id"] for vertex in census["vertex_inventory"]}
     validate_split_component_census(census)
 
 
@@ -801,10 +814,7 @@ def test_duplicate_candidate_ids_exclude_every_occurrence() -> None:
 
     assert census["input_summary"]["valid_vertices"] == 2
     assert census["input_summary"]["invalid_rows"] == 2
-    assert all(
-        "candidate_id.duplicate" in row["reason_codes"]
-        for row in census["invalid_rows"]
-    )
+    assert all("candidate_id.duplicate" in row["reason_codes"] for row in census["invalid_rows"])
 
 
 def test_transformation_can_be_hard_only_with_explicit_authorization() -> None:
@@ -867,9 +877,7 @@ def test_validator_rejects_rehashed_authority_or_stale_vertex_tampering() -> Non
     census = _build(_base_rows())
     tampered = deepcopy(census)
     tampered["blockers"] = [
-        blocker
-        for blocker in tampered["blockers"]
-        if not blocker.startswith("external_authority.")
+        blocker for blocker in tampered["blockers"] if not blocker.startswith("external_authority.")
     ]
     body = dict(tampered)
     body.pop("census_sha256")
@@ -892,61 +900,114 @@ def test_validator_rejects_rehashed_authority_or_stale_vertex_tampering() -> Non
         validate_split_component_census(tampered)
 
 
-def test_thin_cli_writes_a_valid_immutable_census(tmp_path: Path) -> None:
+def test_thin_cli_writes_a_valid_immutable_bridge_bound_census(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     input_path = tmp_path / "candidates.jsonl"
     output_path = tmp_path / "census.json"
     policy_path = tmp_path / "policy.json"
-    input_path.write_text(
-        "".join(json.dumps(row, sort_keys=True) + "\n" for row in _base_rows())
-    )
+    input_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in _base_rows()))
     policy_path.write_text(json.dumps(_policy(), indent=2, sort_keys=True) + "\n")
-    environment = dict(os.environ)
-    environment["PYTHONPATH"] = "src"
+    source_stream = _candidate_source_stream(input_path)
+    monkeypatch.setattr(
+        split_census_cli,
+        "validate_candidate_provenance_bridge",
+        lambda *args, **kwargs: {"source_stream": source_stream},
+    )
     command = [
-        sys.executable,
-        "scripts/build_editing_v2_split_census.py",
         "--input-jsonl",
         str(input_path),
         "--output-json",
         str(output_path),
+        "--candidate-materialization-dir",
+        str(tmp_path / "candidate_materialization"),
+        "--candidate-provenance-bridge-dir",
+        str(tmp_path / "candidate_bridge"),
+        "--candidate-provenance-registry",
+        str(tmp_path / "candidate_registry.json"),
         "--policy-json",
         str(policy_path),
         "--editing-corpus-contract",
         str(CONTRACT_PATH),
     ]
 
-    first = subprocess.run(
-        command,
-        cwd=Path(__file__).resolve().parents[1],
-        env=environment,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert first.returncode == 2, first.stderr
+    first = split_census_cli.main(command)
+    assert first == 2
     census = json.loads(output_path.read_text())
     validate_split_component_census(census)
     assert census["status_scope"] == "CENSUS_STRUCTURAL_COMPLETION_ONLY"
     assert census["authority"]["split"] == "NO_SPLIT_AUTHORITY"
     assert census["authority"]["training"] == "NO_TRAINING_AUTHORITY"
     assert census["census_structural_complete"] is True
-    assert census["source_stream"]["nonempty_jsonl_rows"] == len(_base_rows())
+    assert census["source_stream"] == source_stream
     provenance = census["implementation_provenance"]
     assert len(provenance["code_revision"]["commit_sha"]) >= 40
     assert isinstance(provenance["code_revision"]["dirty"], bool)
     assert provenance["python_runtime"]["version"]
     assert provenance["policy_file"]["sha256"]
     assert provenance["editing_corpus_contract_file"]["sha256"]
-    assert len(provenance["source_files"]) == 3
+    assert len(provenance["source_files"]) == 5
     first_bytes = output_path.read_bytes()
 
-    second = subprocess.run(
-        command,
-        cwd=Path(__file__).resolve().parents[1],
-        env=environment,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert second.returncode == 2, second.stderr
+    second = split_census_cli.main(command)
+    assert second == 2
     assert output_path.read_bytes() == first_bytes
+
+
+def test_thin_cli_rejects_split_input_not_bound_by_bridge(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    input_path = tmp_path / "candidates.jsonl"
+    input_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in _base_rows()))
+    source_stream = _candidate_source_stream(input_path, file_sha256="0" * 64)
+    monkeypatch.setattr(
+        split_census_cli,
+        "validate_candidate_provenance_bridge",
+        lambda *args, **kwargs: {"source_stream": source_stream},
+    )
+
+    with pytest.raises(
+        EditingV2SplitCensusError,
+        match="physical SHA-256 disagrees",
+    ):
+        split_census_cli._validated_candidate_source_stream(
+            input_jsonl=input_path,
+            candidate_materialization_dir=tmp_path / "candidate_materialization",
+            candidate_provenance_bridge_dir=tmp_path / "candidate_bridge",
+            candidate_provenance_registry=tmp_path / "candidate_registry.json",
+            editing_corpus_contract_path=CONTRACT_PATH,
+        )
+
+
+def test_thin_cli_rejects_legacy_generic_source_stream(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    input_path = tmp_path / "candidates.jsonl"
+    input_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in _base_rows()))
+    monkeypatch.setattr(
+        split_census_cli,
+        "validate_candidate_provenance_bridge",
+        lambda *args, **kwargs: {
+            "source_stream": {
+                "path": str(input_path),
+                "sha256": split_census_cli._file_sha256(input_path),
+                "bytes": input_path.stat().st_size,
+                "nonempty_jsonl_rows": len(_base_rows()),
+            }
+        },
+    )
+
+    with pytest.raises(
+        EditingV2SplitCensusError,
+        match="candidate provenance bridge validation failed",
+    ):
+        split_census_cli._validated_candidate_source_stream(
+            input_jsonl=input_path,
+            candidate_materialization_dir=tmp_path / "candidate_materialization",
+            candidate_provenance_bridge_dir=tmp_path / "candidate_bridge",
+            candidate_provenance_registry=tmp_path / "candidate_registry.json",
+            editing_corpus_contract_path=CONTRACT_PATH,
+        )

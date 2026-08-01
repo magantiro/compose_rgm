@@ -12,10 +12,23 @@ import subprocess
 import tempfile
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Sequence
 
 from compose_v4.data import editing_corpus_contract as editing_corpus_contract_module
+from compose_v4.data import (
+    editing_v2_candidate_provenance_bridge as candidate_provenance_bridge_module,
+)
+from compose_v4.data import editing_v2_split_assignment as split_assignment_module
 from compose_v4.data import editing_v2_split_census as split_census_module
 from compose_v4.data.editing_corpus_contract import load_editing_corpus_contract
+from compose_v4.data.editing_v2_candidate_provenance_bridge import (
+    EditingV2CandidateProvenanceBridgeError,
+    validate_candidate_provenance_bridge,
+)
+from compose_v4.data.editing_v2_split_assignment import (
+    EditingV2SplitAssignmentError,
+    validate_candidate_source_stream,
+)
 from compose_v4.data.editing_v2_split_census import (
     EditingV2SplitCensusError,
     IMPLEMENTATION_PROVENANCE_SCHEMA,
@@ -45,11 +58,6 @@ def _iter_jsonl(path: Path) -> Iterator[object]:
                 raise EditingV2SplitCensusError(
                     f"{path} line {line_number} is not valid JSON: {exc}"
                 ) from exc
-
-
-def _count_nonempty_lines(path: Path) -> int:
-    with path.open() as handle:
-        return sum(bool(line.strip()) for line in handle)
 
 
 def _file_identity(path: Path, *, repository_root: Path) -> dict[str, object]:
@@ -88,6 +96,8 @@ def _implementation_provenance(
         Path(__file__),
         Path(split_census_module.__file__),
         Path(editing_corpus_contract_module.__file__),
+        Path(candidate_provenance_bridge_module.__file__),
+        Path(split_assignment_module.__file__),
     )
     return {
         "schema": IMPLEMENTATION_PROVENANCE_SCHEMA,
@@ -149,10 +159,62 @@ def _publish(path: Path, content: bytes) -> None:
             Path(temporary_name).unlink(missing_ok=True)
 
 
-def main() -> int:
+def _validated_candidate_source_stream(
+    *,
+    input_jsonl: Path,
+    candidate_materialization_dir: Path,
+    candidate_provenance_bridge_dir: Path,
+    candidate_provenance_registry: Path,
+    editing_corpus_contract_path: Path,
+) -> dict[str, object]:
+    try:
+        bridge = validate_candidate_provenance_bridge(
+            candidate_provenance_bridge_dir,
+            candidate_root=candidate_materialization_dir,
+            provenance_registry_path=candidate_provenance_registry,
+            editing_corpus_contract_path=editing_corpus_contract_path,
+        )
+        source_stream = validate_candidate_source_stream(bridge.get("source_stream"))
+    except (
+        EditingV2CandidateProvenanceBridgeError,
+        EditingV2SplitAssignmentError,
+        OSError,
+    ) as error:
+        raise EditingV2SplitCensusError(
+            "candidate provenance bridge validation failed before census construction"
+        ) from error
+    expected_file_sha256 = source_stream["split_candidates"]["file_sha256"]
+    actual_file_sha256 = _file_sha256(input_jsonl)
+    if actual_file_sha256 != expected_file_sha256:
+        raise EditingV2SplitCensusError(
+            "input JSONL physical SHA-256 disagrees with the validated candidate "
+            "provenance source stream"
+        )
+    return source_stream
+
+
+def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input-jsonl", type=Path, required=True)
     parser.add_argument("--output-json", type=Path, required=True)
+    parser.add_argument(
+        "--candidate-materialization-dir",
+        type=Path,
+        required=True,
+        help="validated packed candidate materialization bound by the provenance bridge",
+    )
+    parser.add_argument(
+        "--candidate-provenance-bridge-dir",
+        type=Path,
+        required=True,
+        help="published candidate-provenance bridge containing the exact source stream",
+    )
+    parser.add_argument(
+        "--candidate-provenance-registry",
+        type=Path,
+        required=True,
+        help="frozen provenance registry bound by the candidate-provenance bridge",
+    )
     parser.add_argument(
         "--policy-json",
         type=Path,
@@ -165,12 +227,18 @@ def main() -> int:
         required=True,
         help="validated editing-corpus contract defining the ordered lane contract",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     repository_root = Path(__file__).resolve().parents[1]
-    nonempty_jsonl_rows = _count_nonempty_lines(args.input_jsonl)
     policy = json.loads(args.policy_json.read_text())
     editing_corpus_contract = load_editing_corpus_contract(args.editing_corpus_contract)
+    source_stream = _validated_candidate_source_stream(
+        input_jsonl=args.input_jsonl,
+        candidate_materialization_dir=args.candidate_materialization_dir,
+        candidate_provenance_bridge_dir=args.candidate_provenance_bridge_dir,
+        candidate_provenance_registry=args.candidate_provenance_registry,
+        editing_corpus_contract_path=args.editing_corpus_contract,
+    )
     census = build_split_component_census(
         _iter_jsonl(args.input_jsonl),
         policy=policy,
@@ -180,13 +248,10 @@ def main() -> int:
             policy_path=args.policy_json,
             editing_corpus_contract_path=args.editing_corpus_contract,
         ),
-        source_stream={
-            "path": str(args.input_jsonl),
-            "sha256": _file_sha256(args.input_jsonl),
-            "bytes": args.input_jsonl.stat().st_size,
-            "nonempty_jsonl_rows": nonempty_jsonl_rows,
-        },
+        source_stream=source_stream,
     )
+    if _file_sha256(args.input_jsonl) != source_stream["split_candidates"]["file_sha256"]:
+        raise EditingV2SplitCensusError("input JSONL changed during split-census construction")
     content = (json.dumps(census, indent=2, sort_keys=True) + "\n").encode()
     _publish(args.output_json, content)
     print(
