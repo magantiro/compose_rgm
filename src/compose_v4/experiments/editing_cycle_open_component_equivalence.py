@@ -31,6 +31,8 @@ from compose_v4.experiments.aromatic_cycle_open_semantics import (
     PROTOTYPE_STATUS,
     AromaticCycleOpenAliasOverflow,
     AromaticCycleOpenResolution,
+    KekuleAliasEnumeration,
+    enumerate_charge_h_preserving_kekule_aliases,
     enumerate_component_factored_kekule_assignments,
     resolve_component_factored_cycle_open,
     resolve_edge_anchored_cycle_open,
@@ -273,6 +275,8 @@ def compare_one_edge(
     edge: tuple[int, int],
     *,
     maximum_oracle_structures: int,
+    exhaustive_enumeration: KekuleAliasEnumeration | None = None,
+    oracle_already_overflowed: bool = False,
 ) -> dict[str, Any]:
     """Compare one semantic edge without treating implied work as executed."""
 
@@ -285,15 +289,23 @@ def compare_one_edge(
             "component resolver returned an unexpected prototype identity"
         )
 
-    oracle: AromaticCycleOpenResolution | None
-    try:
-        oracle = resolve_edge_anchored_cycle_open(
-            state,
-            BondDelete(*normalized),
-            maximum_aliases=maximum_oracle_structures,
+    if oracle_already_overflowed and exhaustive_enumeration is not None:
+        raise ValueError(
+            "an exhaustive enumeration and an overflow declaration are mutually exclusive"
         )
-    except AromaticCycleOpenAliasOverflow:
+    oracle: AromaticCycleOpenResolution | None
+    if oracle_already_overflowed:
         oracle = None
+    else:
+        try:
+            oracle = resolve_edge_anchored_cycle_open(
+                state,
+                BondDelete(*normalized),
+                maximum_aliases=maximum_oracle_structures,
+                enumeration=exhaustive_enumeration,
+            )
+        except AromaticCycleOpenAliasOverflow:
+            oracle = None
 
     factored_semantics = _resolution_semantics(factored)
     oracle_semantics = _resolution_semantics(oracle) if oracle is not None else None
@@ -350,11 +362,23 @@ def audit_one_source(
     components = enumerate_component_factored_kekule_assignments(state)
     aromatic_edges = _semantic_aromatic_edges(state)
     bridge_edges = _bridge_edges(state)
+    exhaustive_enumeration: KekuleAliasEnumeration | None = None
+    oracle_overflowed = False
+    if aromatic_edges:
+        try:
+            exhaustive_enumeration = enumerate_charge_h_preserving_kekule_aliases(
+                state,
+                maximum_aliases=maximum_oracle_structures,
+            )
+        except AromaticCycleOpenAliasOverflow:
+            oracle_overflowed = True
     edge_records = tuple(
         compare_one_edge(
             state,
             edge,
             maximum_oracle_structures=maximum_oracle_structures,
+            exhaustive_enumeration=exhaustive_enumeration,
+            oracle_already_overflowed=oracle_overflowed,
         )
         for edge in aromatic_edges
     )
@@ -552,7 +576,7 @@ def audit_one_addressed_shard(
     return {**body, "receipt_sha256": semantic_sha256(body)}
 
 
-def _validate_receipt(
+def validate_shard_receipt(
     value: Mapping[str, Any],
     *,
     expected_plan_sha256: str,
@@ -607,7 +631,7 @@ def reduce_shard_receipts(
         task_index = int(task["task_index"])
         if task_index not in task_by_index or task_index in receipt_by_index:
             raise CycleOpenComponentEquivalenceError("receipt task is unplanned or duplicated")
-        receipt_by_index[task_index] = _validate_receipt(
+        receipt_by_index[task_index] = validate_shard_receipt(
             value,
             expected_plan_sha256=plan_sha256,
             expected_implementation_sha256=implementation_sha256,
@@ -754,4 +778,5 @@ __all__ = [
     "reduce_source_records",
     "reduce_shard_receipts",
     "semantic_sha256",
+    "validate_shard_receipt",
 ]

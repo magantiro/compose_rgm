@@ -229,6 +229,23 @@ def test_low_global_oracle_cap_does_not_censor_component_resolution() -> None:
     assert _same_exact_state(factored.successor, complete_oracle.successor)
 
 
+def test_exhaustive_resolver_rejects_an_enumeration_from_another_source() -> None:
+    benzene = smiles_to_molecular_graph("c1ccccc1")
+    pyridine = smiles_to_molecular_graph("c1ccncc1")
+    enumeration = enumerate_charge_h_preserving_kekule_aliases(
+        benzene,
+        maximum_aliases=16,
+    )
+    edge = _aromatic_edges(pyridine)[0]
+    with pytest.raises(ValueError, match="another semantic source"):
+        resolve_edge_anchored_cycle_open(
+            pyridine,
+            BondDelete(*edge),
+            maximum_aliases=16,
+            enumeration=enumeration,
+        )
+
+
 def test_every_alternate_kekule_phase_preserves_factored_oracle_equivalence() -> None:
     source = smiles_to_molecular_graph("c1ccc2ccccc2c1Oc3ccncc3")
     aliases = enumerate_charge_h_preserving_kekule_aliases(

@@ -554,8 +554,14 @@ def resolve_edge_anchored_cycle_open(
     *,
     maximum_aliases: int = 256,
     supplier_factory: ResonanceSupplierFactory = rdkit_kekule_supplier,
+    enumeration: KekuleAliasEnumeration | None = None,
 ) -> AromaticCycleOpenResolution:
-    """Resolve one cycle-edge deletion under the prototype semantic law."""
+    """Resolve one cycle-edge deletion under the prototype semantic law.
+
+    A caller auditing several edges of the same exact source may provide one
+    previously completed enumeration. Its canonical source identity and full
+    resonance-invariant aromatic edge set are revalidated before reuse.
+    """
 
     edge = _normalize_edge(action)
     if not is_valid_state(state) or not is_connected_or_null(state):
@@ -628,11 +634,23 @@ def resolve_edge_anchored_cycle_open(
             inverse_bond_order=int(state.bonds[edge]),
         )
 
-    enumeration = enumerate_charge_h_preserving_kekule_aliases(
-        state,
-        maximum_aliases=maximum_aliases,
-        supplier_factory=supplier_factory,
+    perceived_aromatic_edges = tuple(
+        (left, right)
+        for left in range(state.n_atoms)
+        for right in range(left + 1, state.n_atoms)
+        if int(perceived[left, right]) == BOND_AROMATIC
     )
+    if enumeration is None:
+        enumeration = enumerate_charge_h_preserving_kekule_aliases(
+            state,
+            maximum_aliases=maximum_aliases,
+            supplier_factory=supplier_factory,
+        )
+    elif (
+        enumeration.source_key != source_key
+        or enumeration.aromatic_edges != perceived_aromatic_edges
+    ):
+        raise ValueError("precomputed Kekule enumeration belongs to another semantic source")
     if not enumeration.aliases:
         return _rejected(
             code=AromaticCycleOpenRejectionCode.NO_PRESERVING_KEKULE_ALIAS,

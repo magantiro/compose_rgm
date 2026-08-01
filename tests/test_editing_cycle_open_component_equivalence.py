@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
+import compose_v4.experiments.editing_cycle_open_component_equivalence as equivalence_module
 from compose_v4.chem.aromaticity import resonance_invariant_bond_classes
 from compose_v4.chem.molecular_graph import BOND_AROMATIC, BOND_SINGLE, smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
@@ -26,9 +28,17 @@ from compose_v4.experiments.editing_cycle_open_component_equivalence import (
     reduce_source_records,
     semantic_sha256,
 )
+from compose_v4.experiments.editing_cycle_open_component_equivalence_runtime import (
+    build_plan,
+    validate_plan,
+)
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.operators import BondDelete, apply_bond_delete, is_valid_bond_delete
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
+from modal_apps.audit_editing_cycle_open_component_equivalence import (
+    AUDIT_RUNTIME_REQUIREMENTS,
+    DEFAULT_OUTPUT_ROOT,
+)
 
 
 SHARD_DIGEST = "1" * 64
@@ -61,6 +71,68 @@ class _Admission:
         assert observed_digest == SHARD_DIGEST
         assert observed_entries == self.expected_entries
         self.completed = True
+
+
+class _PlanningAdmission:
+    def __init__(self, contract: dict) -> None:
+        parent = contract["parent_active8_identity"]
+        self.manifest_path = Path(parent["inventory_manifest_path"])
+        self.manifest_file_sha256 = parent["inventory_manifest_file_sha256"]
+        self.inventory_sha256 = parent["inventory_sha256"]
+        self.effective_source_corpus_cache_sha256 = parent["effective_source_corpus_cache_sha256"]
+        self.support_contract_sha256 = parent["support_contract_sha256"]
+        self.unified_packed_manifest_sha256 = parent["unified_packed_manifest_sha256"]
+        self._digest_by_name = {
+            "positive.jsonl.gz": "4" * 64,
+            "zero.jsonl.gz": "5" * 64,
+        }
+        self.shard_metadata_by_digest = {
+            self._digest_by_name["positive.jsonl.gz"]: self._metadata(cycle_attach=3),
+            self._digest_by_name["zero.jsonl.gz"]: self._metadata(cycle_attach=0),
+        }
+        self.partition_checked = False
+
+    @staticmethod
+    def _metadata(*, cycle_attach: int) -> dict:
+        return {
+            "partition": "validation",
+            "counts": {
+                "traces": 4,
+                "accepted_traces": 3,
+                "excluded_traces": 1,
+                "accepted_nonterminal_rows": 3,
+                "accepted_terminal_rows": 3,
+            },
+            "accepted_nonterminal_rows_by_family": {
+                "atom_insert": 3 - cycle_attach,
+                "cycle_attach": cycle_attach,
+            },
+            "packed_manifest_sha256": "6" * 64,
+            "packed_provenance_overlay_sha256": "7" * 64,
+        }
+
+    def expected_source_digest(self, *, packed_shard_name: str, layer: str, partition: str) -> str:
+        assert layer == "cycle_ops"
+        assert partition == "validation"
+        return self._digest_by_name[packed_shard_name]
+
+    def assert_partition_shards(self, partition: str, rows) -> None:
+        assert partition == "validation"
+        assert {name for _layer, _partition, name in rows} == set(self._digest_by_name)
+        self.partition_checked = True
+
+
+def _declared_shards() -> tuple[SimpleNamespace, ...]:
+    return tuple(
+        SimpleNamespace(
+            manifest_layer="cycle_ops",
+            envelope_layer="cycle_ops",
+            partition="validation",
+            relative_path=f"validation/{name}",
+            path=Path("/artifacts") / name,
+        )
+        for name in ("positive.jsonl.gz", "zero.jsonl.gz")
+    )
 
 
 def _addressed(smiles: str, *, entry_index: int) -> AddressedPackedTrace:
@@ -135,6 +207,25 @@ def test_source_record_covers_every_edge_and_separates_work_counts() -> None:
     assert all(edge["semantic_equivalent"] for edge in record["edge_records"])
 
 
+def test_source_audit_constructs_the_exhaustive_resonance_set_once(monkeypatch) -> None:
+    calls = 0
+    original = equivalence_module.enumerate_charge_h_preserving_kekule_aliases
+
+    def counted(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(
+        equivalence_module,
+        "enumerate_charge_h_preserving_kekule_aliases",
+        counted,
+    )
+    record = audit_one_source(smiles_to_molecular_graph("c1ccccc1Oc2ccccc2"))
+    assert record["counts"]["semantic_aromatic_edge_count"] == 12
+    assert calls == 1
+
+
 def test_contract_is_physically_pinned_self_hashed_and_validation_only(tmp_path) -> None:
     contract = load_contract(CONTRACT_PATH)
     assert contract["partitions"] == ["validation"]
@@ -146,6 +237,49 @@ def test_contract_is_physically_pinned_self_hashed_and_validation_only(tmp_path)
     changed.write_text(Path(CONTRACT_PATH).read_text().replace("4096", "8192"))
     with pytest.raises(CycleOpenComponentEquivalenceError, match="physical bytes"):
         load_contract(changed)
+
+
+def test_modal_runner_has_required_decoder_dependencies_and_scoped_output() -> None:
+    assert "torch==2.4.0" in AUDIT_RUNTIME_REQUIREMENTS
+    assert str(DEFAULT_OUTPUT_ROOT).startswith(
+        "/artifacts/_frozen_corpus_audits/cycle_open_component_equivalence_v1"
+    )
+
+
+def test_plan_skips_only_proven_zero_support_shards_and_reconciles_census() -> None:
+    contract = load_contract(CONTRACT_PATH)
+    admission = _PlanningAdmission(contract)
+    plan = build_plan(
+        contract,
+        admission,
+        _declared_shards(),
+        unified_manifest_file_sha256=contract["parent_active8_identity"][
+            "unified_packed_manifest_sha256"
+        ],
+        inputs={"fixture": "immutable"},
+        code_revision={"commit": "fixture", "tree_dirty": False},
+        implementation={"implementation_sha256": "8" * 64},
+    )
+
+    assert admission.partition_checked
+    assert plan["task_count"] == 1
+    assert plan["tasks"][0]["packed_shard_name"] == "positive.jsonl.gz"
+    assert plan["tasks"][0]["expected_cycle_attach_teacher_rows"] == 3
+    assert len(plan["zero_cycle_attach_support_shards"]) == 1
+    assert (
+        validate_plan(
+            plan,
+            expected_contract_sha256=contract["contract_sha256"],
+        )
+        == plan
+    )
+
+    tampered = copy.deepcopy(plan)
+    tampered["zero_cycle_attach_support_shards"] = []
+    body = {key: value for key, value in tampered.items() if key != "plan_sha256"}
+    tampered["plan_sha256"] = semantic_sha256(body)
+    with pytest.raises(CycleOpenComponentEquivalenceError, match="reconcile"):
+        validate_plan(tampered, expected_contract_sha256=contract["contract_sha256"])
 
 
 def test_oracle_overflow_is_recorded_and_cannot_pass_equivalence() -> None:
