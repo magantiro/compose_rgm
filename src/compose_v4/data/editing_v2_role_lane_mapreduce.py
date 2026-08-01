@@ -1223,7 +1223,11 @@ def plan_role_lane_mapreduce(
                 task_id = draft["task_identity_sha256"]
                 destination = staging / "task_inputs" / task_id / TASK_INPUT_FILENAME
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                os.replace(draft["_selection_path"], destination)
+                _copy_verified_bytes(
+                    draft["_selection_path"],
+                    destination,
+                    expected_sha256=draft["selection_file_sha256"],
+                )
             _write_json(staging / PLAN_FILENAME, plan)
             os.replace(staging, target)
         finally:

@@ -385,6 +385,34 @@ def test_planner_reuses_transitive_validation_but_hashes_consumed_rows(
         )
 
 
+def test_planner_copies_task_inputs_across_filesystem_boundary(
+    tmp_path: Path,
+) -> None:
+    inputs = _multi_entry_inputs(tmp_path)
+    original_replace = mapreduce_module.os.replace
+
+    def reject_cross_device_selection_move(source: object, destination: object) -> None:
+        if Path(source).name == mapreduce_module.TASK_INPUT_FILENAME:
+            raise OSError(18, "Invalid cross-device link")
+        original_replace(source, destination)
+
+    with patch.object(
+        mapreduce_module.os,
+        "replace",
+        side_effect=reject_cross_device_selection_move,
+    ):
+        plan, _ = _plan(
+            inputs,
+            final_prefix="/artifacts/editing_v2/cross_device_fixture",
+        )
+
+    for task in plan["tasks"]:
+        selection_path = inputs["artifact_root"] / PurePosixPath(
+            task["selection_artifact_path"]
+        ).relative_to("/artifacts")
+        assert file_sha256(selection_path) == task["selection_file_sha256"]
+
+
 @pytest.mark.parametrize("tamper", ["declared_validator", "source_revision"])
 def test_transitive_receipt_rejects_upstream_validator_identity_tampering(
     tmp_path: Path,
