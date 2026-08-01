@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +71,7 @@ def _contract_self_hash(contract: dict[str, Any]) -> str:
     )
 
 
+@lru_cache(maxsize=1)
 def editing_v2_process_identity() -> dict[str, object]:
     """Return a full-SHA identity whose change invalidates semantic artifacts."""
 

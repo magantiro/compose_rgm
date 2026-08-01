@@ -32,9 +32,8 @@ def test_raw_bond_insert_migrates_to_semantic_cycle_close_and_exact_v3() -> None
     assert result.admitted
     assert result.rejection is None
     assert result.trace is not None
-    assert result.trace.steps == (
-        RewriteStep("cycle_close", CycleCloseEdge(0, 5, 1)),
-    )
+    assert result.trace.steps == (RewriteStep("cycle_close", CycleCloseEdge(0, 5, 1)),)
+    assert result.trace.metadata == {"legacy": True}
 
     record, rejection = migrate_and_encode_semantic_trace(
         trace,
@@ -48,6 +47,10 @@ def test_raw_bond_insert_migrates_to_semantic_cycle_close_and_exact_v3() -> None
     assert record is not None
     decoded = decode_semantic_trace_record(record)
     assert decoded.steps == result.trace.steps
+    assert record["lineage"]["semantic_migration"] == (
+        "historical_to_semantic_editing_v2_v1"
+    )
+    assert decoded.metadata == {"legacy": True}
 
 
 def test_multi_neighbor_birth_rejects_the_complete_trace() -> None:
@@ -99,3 +102,41 @@ def test_disabled_middle_rule_rejects_without_partial_output() -> None:
         == SemanticTraceMigrationRejectionCode.DISABLED_OR_UNKNOWN_RULE
     )
     assert result.rejection.step_index == 1
+
+
+def test_persisted_intermediate_is_authoritative_over_fresh_legacy_replay() -> None:
+    source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 4)
+    carbon = AtomInsert(
+        slot=2,
+        atom_type=2,
+        formal_charge=0,
+        implicit_h_count=3,
+        neighbors=((1, 1),),
+    )
+    nitrogen = AtomInsert(
+        slot=2,
+        atom_type=3,
+        formal_charge=0,
+        implicit_h_count=2,
+        neighbors=((1, 1),),
+    )
+    persisted_successor = de_novo_rewrite_system().apply(
+        source,
+        "atom_insert",
+        nitrogen,
+    )
+    trace = RewriteTrace(
+        source,
+        persisted_successor,
+        (RewriteStep("atom_insert", carbon),),
+        {"frozen": True},
+    )
+    result = migrate_legacy_trace_to_editing_v2(
+        trace,
+        legacy_states=(source, persisted_successor),
+    )
+    assert not result.admitted
+    assert result.rejection is not None
+    assert result.rejection.code == (
+        SemanticTraceMigrationRejectionCode.PERSISTED_LEGACY_SUCCESSOR_MISMATCH
+    )

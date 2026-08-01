@@ -27,6 +27,27 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 TRACE_SCHEMA = "compose.rewrite.trace"
 TRACE_SCHEMA_VERSION = 3
 MAX_ACTIVE_ATOMS = 40
+_TRACE_RECORD_FIELDS = {
+    "schema",
+    "schema_version",
+    "process_semantics",
+    "process_contract_sha256",
+    "process_identity_sha256",
+    "action_codec_schema_version",
+    "action_codec_implementation_hash",
+    "trace_id",
+    "data_lane",
+    "split",
+    "source_address",
+    "lineage",
+    "path_length",
+    "states",
+    "canonical_state_keys",
+    "steps",
+    "family_histogram",
+    "metadata",
+    "record_sha256",
+}
 
 
 class SemanticTraceShardError(ValueError):
@@ -95,9 +116,7 @@ def encode_semantic_trace_record(
     """Replay and persist every exact Active8 intermediate under one identity."""
 
     if not trace_id or not data_lane or not split:
-        raise SemanticTraceShardError(
-            "trace_id, data_lane, and split must be nonempty"
-        )
+        raise SemanticTraceShardError("trace_id, data_lane, and split must be nonempty")
     identity = editing_v2_process_identity()
     runtime = editing_v2_semantic_rewrite_system()
     state = trace.source
@@ -159,12 +178,17 @@ def decode_semantic_trace_record(
     ``validate_replay=False`` is reserved for a physically hashed semantic
     packed artifact whose build already performed exact replay.  It still
     validates the record self-hash, full process identity, exact state wire
-    form, canonical keys, and every V4 action.  Ordinary callers should retain
-    the default and re-execute every step.
+    form, stored key consistency, and every V4 action, but avoids both executor
+    and RDKit calls.  Ordinary callers should retain the default and re-execute
+    every step.
     """
 
     if not isinstance(record, dict):
         raise SemanticTraceShardError("semantic trace record must be an object")
+    if set(record) != _TRACE_RECORD_FIELDS:
+        raise SemanticTraceShardError(
+            "semantic trace top-level fields disagree with the trace-v3 schema"
+        )
     if record.get("schema") != TRACE_SCHEMA:
         raise SemanticTraceShardError("unknown semantic trace schema")
     if record.get("schema_version") != TRACE_SCHEMA_VERSION:
@@ -200,6 +224,10 @@ def decode_semantic_trace_record(
         raise SemanticTraceShardError("semantic trace states and steps must be arrays")
     if not isinstance(keys_payload, list):
         raise SemanticTraceShardError("semantic trace canonical keys must be an array")
+    if not all(isinstance(key, str) and key for key in keys_payload):
+        raise SemanticTraceShardError(
+            "semantic trace canonical keys must be nonempty strings"
+        )
     if len(states_payload) != len(steps_payload) + 1:
         raise SemanticTraceShardError(
             "semantic trace requires one exact state per progress point"
@@ -214,15 +242,24 @@ def decode_semantic_trace_record(
             raise SemanticTraceShardError(
                 f"semantic trace {field} must be a nonempty string"
             )
+    for field in ("source_address", "lineage", "metadata"):
+        if not isinstance(record.get(field), dict):
+            raise SemanticTraceShardError(f"semantic trace {field} must be an object")
+    if not record["source_address"]:
+        raise SemanticTraceShardError("semantic trace source_address must be nonempty")
     states = tuple(
         _decode_exact_state(payload, path=f"states[{index}]")
         for index, payload in enumerate(states_payload)
     )
-    if [canonical_state_key(state) for state in states] != keys_payload:
+    if (
+        validate_replay
+        and [canonical_state_key(state) for state in states] != keys_payload
+    ):
         raise SemanticTraceShardError("semantic trace canonical state keys disagree")
 
     runtime = editing_v2_semantic_rewrite_system() if validate_replay else None
     steps: list[RewriteStep] = []
+    families: Counter[str] = Counter()
     for index, entry in enumerate(steps_payload):
         if not isinstance(entry, dict) or set(entry) != {
             "action",
@@ -252,6 +289,9 @@ def decode_semantic_trace_record(
                     f"step {index}: replay differs from the exact persisted successor"
                 )
         steps.append(RewriteStep(rule, action))
+        families[str(entry["action"]["model_family"])] += 1
+    if record["family_histogram"] != dict(sorted(families.items())):
+        raise SemanticTraceShardError("semantic trace family histogram disagrees")
     return RewriteTrace(
         source=states[0],
         target=states[-1],

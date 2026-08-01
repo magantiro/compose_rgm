@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
+
+import numpy as np
 
 from compose_v4.chem.molecular_graph import (
     BOND_CLASS_TO_H_CHANGE,
@@ -31,6 +33,8 @@ from compose_v4.rewrite.trace_shard_v3 import encode_semantic_trace_record
 
 class SemanticTraceMigrationRejectionCode(str, Enum):
     LEGACY_REPLAY_FAILED = "legacy_replay_failed"
+    PERSISTED_STATE_SEQUENCE_INVALID = "persisted_state_sequence_invalid"
+    PERSISTED_LEGACY_SUCCESSOR_MISMATCH = "persisted_legacy_successor_mismatch"
     DISABLED_OR_UNKNOWN_RULE = "disabled_or_unknown_rule"
     TARGET_ATOM_CLASS_UNREPRESENTABLE = "target_atom_class_unrepresentable"
     SEMANTIC_ACTION_REJECTED = "semantic_action_rejected"
@@ -84,6 +88,13 @@ def _target_class_index(state: MolecularGraph, vertex: int) -> int | None:
     )
 
 
+def _exact_state_equal(left: MolecularGraph, right: MolecularGraph) -> bool:
+    return all(
+        np.array_equal(getattr(left, field), getattr(right, field))
+        for field in ("atom_types", "formal_charges", "implicit_h_counts", "bonds")
+    )
+
+
 def _translate_step(
     step: RewriteStep,
     *,
@@ -133,12 +144,30 @@ def _translate_step(
 def migrate_legacy_trace_to_editing_v2(
     trace: RewriteTrace,
     *,
+    legacy_states: Sequence[MolecularGraph] | None = None,
     legacy_system: RewriteSystem | None = None,
 ) -> SemanticTraceMigrationResult:
-    """Translate and replay a complete trace, rejecting it atomically on failure."""
+    """Translate a trace using frozen exact intermediates as authority.
+
+    Re-execution through the current legacy runtime remains an audit.  When
+    ``legacy_states`` is supplied by an immutable packed source, a freshly
+    replayed state can never replace its persisted successor.
+    """
 
     old_runtime = legacy_system or de_novo_rewrite_system()
     semantic_runtime = editing_v2_semantic_rewrite_system()
+    persisted_states = tuple(legacy_states) if legacy_states is not None else None
+    if persisted_states is not None and (
+        len(persisted_states) != len(trace.steps) + 1
+        or not _exact_state_equal(persisted_states[0], trace.source)
+        or not _exact_state_equal(persisted_states[-1], trace.target)
+    ):
+        return _reject(
+            SemanticTraceMigrationRejectionCode.PERSISTED_STATE_SEQUENCE_INVALID,
+            step_index=None,
+            legacy_rule_name=None,
+            detail="persisted states do not exactly bind the trace endpoints and path length",
+        )
     legacy_state = trace.source
     semantic_state = trace.source
     migrated_steps: list[RewriteStep] = []
@@ -157,7 +186,21 @@ def migrate_legacy_trace_to_editing_v2(
                 legacy_rule_name=step.rule_name,
                 detail=str(error),
             )
-        translated = _translate_step(step, legacy_successor=legacy_successor)
+        persisted_successor = (
+            persisted_states[index + 1]
+            if persisted_states is not None
+            else legacy_successor
+        )
+        if canonical_state_key(legacy_successor) != canonical_state_key(
+            persisted_successor
+        ):
+            return _reject(
+                SemanticTraceMigrationRejectionCode.PERSISTED_LEGACY_SUCCESSOR_MISMATCH,
+                step_index=index,
+                legacy_rule_name=step.rule_name,
+                detail="current legacy replay disagrees with the frozen successor identity",
+            )
+        translated = _translate_step(step, legacy_successor=persisted_successor)
         if translated is None:
             code = (
                 SemanticTraceMigrationRejectionCode.TARGET_ATOM_CLASS_UNREPRESENTABLE
@@ -184,7 +227,7 @@ def migrate_legacy_trace_to_editing_v2(
                 detail=str(error),
             )
         if canonical_state_key(semantic_successor) != canonical_state_key(
-            legacy_successor
+            persisted_successor
         ):
             return _reject(
                 SemanticTraceMigrationRejectionCode.CANONICAL_SUCCESSOR_MISMATCH,
@@ -192,11 +235,11 @@ def migrate_legacy_trace_to_editing_v2(
                 legacy_rule_name=step.rule_name,
                 detail=(
                     f"semantic={canonical_state_key(semantic_successor)!r}, "
-                    f"legacy={canonical_state_key(legacy_successor)!r}"
+                    f"persisted={canonical_state_key(persisted_successor)!r}"
                 ),
             )
         migrated_steps.append(translated)
-        legacy_state = legacy_successor
+        legacy_state = persisted_successor
         semantic_state = semantic_successor
 
     if canonical_state_key(legacy_state) != canonical_state_key(trace.target):
@@ -217,10 +260,7 @@ def migrate_legacy_trace_to_editing_v2(
         source=trace.source,
         target=semantic_state,
         steps=tuple(migrated_steps),
-        metadata={
-            **dict(trace.metadata),
-            "semantic_migration": "historical_to_semantic_editing_v2_v1",
-        },
+        metadata=dict(trace.metadata),
     )
     return SemanticTraceMigrationResult(
         admitted=True,
@@ -237,12 +277,14 @@ def migrate_and_encode_semantic_trace(
     split: str,
     source_address: Mapping[str, object],
     lineage: Mapping[str, object],
+    legacy_states: Sequence[MolecularGraph] | None = None,
     legacy_system: RewriteSystem | None = None,
 ) -> tuple[dict[str, object] | None, SemanticTraceMigrationRejection | None]:
     """Return one trace-v3 record or one stable whole-trace rejection."""
 
     result = migrate_legacy_trace_to_editing_v2(
         trace,
+        legacy_states=legacy_states,
         legacy_system=legacy_system,
     )
     if not result.admitted or result.trace is None:
@@ -254,7 +296,10 @@ def migrate_and_encode_semantic_trace(
             data_lane=data_lane,
             split=split,
             source_address=source_address,
-            lineage=lineage,
+            lineage={
+                **dict(lineage),
+                "semantic_migration": "historical_to_semantic_editing_v2_v1",
+            },
         ),
         None,
     )
