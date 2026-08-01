@@ -34,6 +34,11 @@ from compose_v4.experiments.training_support_cache import (
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
+    LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    LEGACY_EDITING_PROCESS_SEMANTICS,
+    LEGACY_RING_RESTATE_SCORER_MODE,
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
     ChemistryStateFeatures,
@@ -122,7 +127,9 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         if not 0.0 <= progress_stratification_fraction <= 1.0:
             raise ValueError("progress stratification must lie in [0, 1]")
         if support_cache_limit <= 0 or support_cache_reset_interval <= 0:
-            raise ValueError("support cache limits and reset intervals must be positive")
+            raise ValueError(
+                "support cache limits and reset intervals must be positive"
+            )
         if training_support_cache is not None and ring_catalog is None:
             raise ValueError("training support cache requires a ring catalog")
         if require_cached_support and training_support_cache is None:
@@ -167,9 +174,12 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         self.ring_family_mass_mode = str(ring_family_mass_mode)
         # Optional hierarchical record sampler (layer -> curriculum bin -> example). None -> uniform draw
         # over records, byte-identical to the de-novo path. Must expose a stateless ``draw(rng) -> int``.
-        if record_index_sampler is not None and len(getattr(record_index_sampler, "tags", records)) \
-                != len(records):
-            raise ValueError("record_index_sampler tags must align 1:1 with the training records")
+        if record_index_sampler is not None and len(
+            getattr(record_index_sampler, "tags", records)
+        ) != len(records):
+            raise ValueError(
+                "record_index_sampler tags must align 1:1 with the training records"
+            )
         self.record_index_sampler = record_index_sampler
         self._ring_support_model: FactorizedTraceletRateModel | None = None
         self._ring_support_examples_since_reset = 0
@@ -177,7 +187,8 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
     def _ring_chemistry_model(self) -> FactorizedTraceletRateModel:
         if (
             self._ring_support_model is not None
-            and self._ring_support_examples_since_reset >= self.support_cache_reset_interval
+            and self._ring_support_examples_since_reset
+            >= self.support_cache_reset_interval
         ):
             self._ring_support_model.clear_ring_candidate_caches()
             clear_semantic_ring_state_caches()
@@ -247,16 +258,18 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         if self.target_property_conditions is not None:
             raw_values = self.target_property_conditions.get(record.target_key)
             if raw_values is None:
-                raise KeyError(f"missing target property condition: {record.target_key}")
+                raise KeyError(
+                    f"missing target property condition: {record.target_key}"
+                )
             property_condition_values = tuple(float(value) for value in raw_values)
             if not np.isfinite(property_condition_values).all():
-                raise ValueError("target property condition contains a non-finite value")
+                raise ValueError(
+                    "target property condition contains a non-finite value"
+                )
             dropout_rng = np.random.default_rng(
                 np.random.SeedSequence((self.seed, absolute_index, 0xC0D17))
             )
-            observed = bool(
-                dropout_rng.random() >= self.condition_dropout_probability
-            )
+            observed = bool(dropout_rng.random() >= self.condition_dropout_probability)
             property_condition_mask = (observed,) * len(property_condition_values)
         ring_grow_support_mask = None
         ring_grow_support_indices = None
@@ -281,15 +294,17 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                 ring_grow_support_width = int(cached_support.width)
                 ring_grow_support_is_exact = bool(cached_support.support_is_exact)
                 ring_grow_enablement_is_exact = bool(cached_support.enablement_is_exact)
-                ring_teacher_semantic_certificate = cached_support.teacher_semantic_certificate
+                ring_teacher_semantic_certificate = (
+                    cached_support.teacher_semantic_certificate
+                )
             else:
                 chemistry_model = self._ring_chemistry_model()
                 if teacher_rule_name == "ring_system_grow":
                     ring_grow_support_mask = chemistry_model._ring_grow_support(state)
                     ring_grow_support_is_exact = True
                 else:
-                    ring_grow_support_mask = chemistry_model._ring_grow_enablement_certificate(
-                        state
+                    ring_grow_support_mask = (
+                        chemistry_model._ring_grow_enablement_certificate(state)
                     )
                 ring_grow_enablement_is_exact = True
                 ring_grow_support_indices = tuple(
@@ -340,9 +355,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             ring_grow_support_width=ring_grow_support_width,
             ring_grow_support_is_exact=ring_grow_support_is_exact,
             ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
-            ring_topology_local_support_log_mass=(
-                ring_topology_local_support_log_mass
-            ),
+            ring_topology_local_support_log_mass=(ring_topology_local_support_log_mass),
             ring_teacher_semantic_certificate=ring_teacher_semantic_certificate,
             record_index=record_index,
             progress_index=int(progress),
@@ -359,8 +372,24 @@ class FactorizedMarkCollator:
     compute_cyclic_graft: bool = False
     compute_ring_opening: bool = False
     compute_ring_system_delete: bool = True
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
     _chemistry_feature_cache: OrderedDict[
-        tuple[int, bool, bool, bool, bool, tuple[bytes, bytes, bytes, bytes]],
+        tuple[
+            int,
+            bool,
+            bool,
+            bool,
+            bool,
+            str,
+            str,
+            str,
+            str,
+            tuple[bytes, bytes, bytes, bytes],
+        ],
         ChemistryStateFeatures,
     ] = field(default_factory=OrderedDict, init=False, repr=False, compare=False)
 
@@ -372,7 +401,9 @@ class FactorizedMarkCollator:
         if any(value is None for value in topology_masses) and not all(
             value is None for value in topology_masses
         ):
-            raise ValueError("factorized examples mix topology masses and missing values")
+            raise ValueError(
+                "factorized examples mix topology masses and missing values"
+            )
         has_precomputed_ring_support = bool(support_rows) and all(
             row is not None for row in support_rows
         )
@@ -387,7 +418,9 @@ class FactorizedMarkCollator:
             values is not None or mask is not None
             for values, mask in zip(condition_values, condition_masks)
         ):
-            raise ValueError("property-conditioned examples are only partially populated")
+            raise ValueError(
+                "property-conditioned examples are only partially populated"
+            )
         batch = prepare_factorized_mark_batch(
             tuple(example.state for example in examples),
             tuple(example.time for example in examples),
@@ -405,6 +438,11 @@ class FactorizedMarkCollator:
             compute_cyclic_graft=self.compute_cyclic_graft,
             compute_ring_opening=self.compute_ring_opening,
             compute_ring_system_delete=self.compute_ring_system_delete,
+            editing_process_semantics=self.editing_process_semantics,
+            atom_restate_action_semantics=self.atom_restate_action_semantics,
+            ring_restate_scorer_mode=self.ring_restate_scorer_mode,
+            cycle_close_action_semantics=self.cycle_close_action_semantics,
+            cycle_open_action_semantics=self.cycle_open_action_semantics,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
                 if has_conditions
@@ -419,7 +457,9 @@ class FactorizedMarkCollator:
         if has_precomputed_ring_support:
             widths = {example.ring_grow_support_width for example in examples}
             if len(widths) != 1:
-                raise ValueError("precomputed ring support rows have inconsistent widths")
+                raise ValueError(
+                    "precomputed ring support rows have inconsistent widths"
+                )
             batch = replace(
                 batch,
                 ring_grow_support_mask=None,
@@ -432,7 +472,9 @@ class FactorizedMarkCollator:
                     dtype=torch.bool,
                 ),
                 ring_grow_enablement_is_exact=torch.tensor(
-                    tuple(example.ring_grow_enablement_is_exact for example in examples),
+                    tuple(
+                        example.ring_grow_enablement_is_exact for example in examples
+                    ),
                     dtype=torch.bool,
                 ),
             )
@@ -481,6 +523,11 @@ def factorized_mark_loader(
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
     compute_ring_system_delete: bool = True,
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS,
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
     record_index_sampler: object | None = None,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
@@ -530,6 +577,11 @@ def factorized_mark_loader(
             compute_cyclic_graft=compute_cyclic_graft,
             compute_ring_opening=compute_ring_opening,
             compute_ring_system_delete=compute_ring_system_delete,
+            editing_process_semantics=editing_process_semantics,
+            atom_restate_action_semantics=atom_restate_action_semantics,
+            ring_restate_scorer_mode=ring_restate_scorer_mode,
+            cycle_close_action_semantics=cycle_close_action_semantics,
+            cycle_open_action_semantics=cycle_open_action_semantics,
         ),
         pin_memory=pin_memory,
         drop_last=True,
@@ -541,7 +593,8 @@ def factorized_mark_loader(
 class TeacherOutsideCandidatesError(ValueError):
     """A batch was built whose teacher mark is outside the model's exact dynamic candidate set -- raised
     immediately after batch construction (before scoring) with the molecule, teacher, and candidate context,
-    so the representability failure is reported precisely instead of surfacing as a cryptic loss-time crash."""
+    so the representability failure is reported precisely instead of surfacing as a cryptic loss-time crash.
+    """
 
 
 def assert_teachers_in_exact_candidates(batch: FactorizedMarkBatch) -> None:
@@ -549,10 +602,13 @@ def assert_teachers_in_exact_candidates(batch: FactorizedMarkBatch) -> None:
     (ring_system_restate, ring_system_delete) must be present in that list for its example -- otherwise the
     editing enumeration for the batch did not match the teacher support (e.g. a batch builder omitted a
     capability flag). Per-coordinate families (atom_*, bond_reorder, cycle_close/open) are validated by their
-    masks at scoring; graft (bond_reroute) by its successor-group mask. Raises with rich context on mismatch."""
+    masks at scoring; graft (bond_reroute) by its successor-group mask. Raises with rich context on mismatch.
+    """
     restate_cands = batch.ring_restate_actions
     delete_cands = batch.ring_delete_actions
-    for i, (rule_name, action) in enumerate(zip(batch.teacher_rule_names, batch.teacher_actions)):
+    for i, (rule_name, action) in enumerate(
+        zip(batch.teacher_rule_names, batch.teacher_actions)
+    ):
         if rule_name is None or action is None:
             continue
         candidates = None
@@ -598,6 +654,11 @@ def sample_factorized_mark_batch(
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
     compute_ring_system_delete: bool = True,
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS,
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
 ) -> FactorizedMarkBatch:
     if workers < 0:
         raise ValueError("evaluation workers must be non-negative")
@@ -611,6 +672,11 @@ def sample_factorized_mark_batch(
         compute_cyclic_graft = capabilities.compute_cyclic_graft
         compute_ring_opening = capabilities.compute_ring_opening
         compute_ring_system_delete = capabilities.compute_ring_system_delete
+        editing_process_semantics = capabilities.editing_process_semantics
+        atom_restate_action_semantics = capabilities.atom_restate_action_semantics
+        ring_restate_scorer_mode = capabilities.ring_restate_scorer_mode
+        cycle_close_action_semantics = capabilities.cycle_close_action_semantics
+        cycle_open_action_semantics = capabilities.cycle_open_action_semantics
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
     dataset = FactorizedMarkDataset(
@@ -639,6 +705,11 @@ def sample_factorized_mark_batch(
         compute_cyclic_graft=compute_cyclic_graft,
         compute_ring_opening=compute_ring_opening,
         compute_ring_system_delete=compute_ring_system_delete,
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_action_semantics=cycle_open_action_semantics,
     )
     if workers == 0:
         batch = collator([dataset[index] for index in range(batch_size)])
@@ -723,6 +794,41 @@ def _concatenate_factorized_mark_batches(
     def tensors(name: str) -> Tensor:
         return torch.cat([getattr(batch, name) for batch in batches], dim=0)
 
+    def optional_tensors(name: str) -> Tensor | None:
+        values = tuple(getattr(batch, name) for batch in batches)
+        if all(value is None for value in values):
+            return None
+        if any(value is None for value in values):
+            raise ValueError(f"factorized batches mix present and absent {name}")
+        return torch.cat([value for value in values if value is not None], dim=0)
+
+    def optional_rows(name: str) -> tuple[Any, ...] | None:
+        values = tuple(getattr(batch, name) for batch in batches)
+        if all(value is None for value in values):
+            return None
+        if any(value is None for value in values):
+            raise ValueError(f"factorized batches mix present and absent {name}")
+        return tuple(row for value in values if value is not None for row in value)
+
+    process_semantics = {batch.editing_process_semantics for batch in batches}
+    restate_semantics = {batch.atom_restate_action_semantics for batch in batches}
+    ring_restate_scorers = {batch.ring_restate_scorer_mode for batch in batches}
+    close_semantics = {batch.cycle_close_action_semantics for batch in batches}
+    open_semantics = {batch.cycle_open_action_semantics for batch in batches}
+    if (
+        len(process_semantics) != 1
+        or len(restate_semantics) != 1
+        or len(ring_restate_scorers) != 1
+        or len(close_semantics) != 1
+        or len(open_semantics) != 1
+    ):
+        raise ValueError("factorized batches mix semantic action process identities")
+    editing_process_semantics = process_semantics.pop()
+    atom_restate_action_semantics = restate_semantics.pop()
+    ring_restate_scorer_mode = ring_restate_scorers.pop()
+    cycle_close_action_semantics = close_semantics.pop()
+    cycle_open_action_semantics = open_semantics.pop()
+
     support_masks = tuple(batch.ring_grow_support_mask for batch in batches)
     support_sparse = tuple(batch.ring_grow_support_sparse for batch in batches)
     if all(mask is not None for mask in support_masks):
@@ -764,10 +870,16 @@ def _concatenate_factorized_mark_batches(
     )
     property_values = tuple(batch.property_condition_values for batch in batches)
     property_masks = tuple(batch.property_condition_mask for batch in batches)
-    if all(values is None and mask is None for values, mask in zip(property_values, property_masks)):
+    if all(
+        values is None and mask is None
+        for values, mask in zip(property_values, property_masks)
+    ):
         concatenated_property_values = None
         concatenated_property_masks = None
-    elif all(values is not None and mask is not None for values, mask in zip(property_values, property_masks)):
+    elif all(
+        values is not None and mask is not None
+        for values, mask in zip(property_values, property_masks)
+    ):
         concatenated_property_values = torch.cat(
             [values for values in property_values if values is not None], dim=0
         )
@@ -806,24 +918,47 @@ def _concatenate_factorized_mark_batches(
         graft_mask=tensors("graft_mask"),
         graft_remove_neighbors=tensors("graft_remove_neighbors"),
         graft_successor_groups=tensors("graft_successor_groups"),
-        teacher_actions=tuple(action for batch in batches for action in batch.teacher_actions),
-        teacher_rule_names=tuple(name for batch in batches for name in batch.teacher_rule_names),
+        teacher_actions=tuple(
+            action for batch in batches for action in batch.teacher_actions
+        ),
+        teacher_rule_names=tuple(
+            name for batch in batches for name in batch.teacher_rule_names
+        ),
         teacher_rates=tensors("teacher_rates"),
         importance_weights=tensors("importance_weights"),
         ring_restate_actions=tuple(
             actions for batch in batches for actions in batch.ring_restate_actions
         ),
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        ring_restate_successor_group_ids=optional_rows(
+            "ring_restate_successor_group_ids"
+        ),
+        ring_restate_successor_group_descriptors=optional_rows(
+            "ring_restate_successor_group_descriptors"
+        ),
+        ring_restate_successor_group_multiplicities=optional_rows(
+            "ring_restate_successor_group_multiplicities"
+        ),
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_admission_mask=optional_tensors("atom_restate_admission_mask"),
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        cycle_close_admission_mask=optional_tensors("cycle_close_admission_mask"),
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_admission_mask=optional_tensors("cycle_open_admission_mask"),
+        cycle_open_action_semantics=cycle_open_action_semantics,
         ring_grow_support_mask=ring_grow_support_mask,
         ring_grow_support_sparse=ring_grow_support_sparse,
         ring_delete_actions=ring_delete_actions,
         ring_grow_support_is_exact=torch.cat(
             [
-                batch.ring_grow_support_is_exact
-                if isinstance(batch.ring_grow_support_is_exact, Tensor)
-                else torch.full(
-                    (batch.batch_size,),
-                    bool(batch.ring_grow_support_is_exact),
-                    dtype=torch.bool,
+                (
+                    batch.ring_grow_support_is_exact
+                    if isinstance(batch.ring_grow_support_is_exact, Tensor)
+                    else torch.full(
+                        (batch.batch_size,),
+                        bool(batch.ring_grow_support_is_exact),
+                        dtype=torch.bool,
+                    )
                 )
                 for batch in batches
             ],
@@ -831,12 +966,14 @@ def _concatenate_factorized_mark_batches(
         ),
         ring_grow_enablement_is_exact=torch.cat(
             [
-                batch.ring_grow_enablement_is_exact
-                if isinstance(batch.ring_grow_enablement_is_exact, Tensor)
-                else torch.full(
-                    (batch.batch_size,),
-                    bool(batch.ring_grow_enablement_is_exact),
-                    dtype=torch.bool,
+                (
+                    batch.ring_grow_enablement_is_exact
+                    if isinstance(batch.ring_grow_enablement_is_exact, Tensor)
+                    else torch.full(
+                        (batch.batch_size,),
+                        bool(batch.ring_grow_enablement_is_exact),
+                        dtype=torch.bool,
+                    )
                 )
                 for batch in batches
             ],
@@ -848,7 +985,8 @@ def _concatenate_factorized_mark_batches(
             for batch in batches
             for certificate in (
                 batch.ring_teacher_semantic_certificates
-                if getattr(batch, "ring_teacher_semantic_certificates", None) is not None
+                if getattr(batch, "ring_teacher_semantic_certificates", None)
+                is not None
                 else (None,) * batch.batch_size
             )
         ),
@@ -911,9 +1049,11 @@ def factorized_mark_metrics(
             loss = factorized_mark_bregman_loss(prediction, device_batch)
         teacher_family = torch.tensor(
             [
-                MARK_RULE_TO_INDEX[_CYCLE_OP_EXECUTOR_TO_FAMILY.get(name, name)]
-                if name is not None
-                else -1
+                (
+                    MARK_RULE_TO_INDEX[_CYCLE_OP_EXECUTOR_TO_FAMILY.get(name, name)]
+                    if name is not None
+                    else -1
+                )
                 for name in device_batch.teacher_rule_names
             ],
             dtype=torch.long,
@@ -938,10 +1078,14 @@ def factorized_mark_metrics(
             teacher_probability_sum += float(
                 prediction.selected_mark_log_probability[nonterminal].exp().sum()
             )
-            teacher_family_probability = prediction.family_log_probabilities.gather(
-                1,
-                teacher_family.clamp_min(0).unsqueeze(1),
-            ).squeeze(1).exp()
+            teacher_family_probability = (
+                prediction.family_log_probabilities.gather(
+                    1,
+                    teacher_family.clamp_min(0).unsqueeze(1),
+                )
+                .squeeze(1)
+                .exp()
+            )
             teacher_family_probability_sum += float(
                 teacher_family_probability[nonterminal].sum()
             )
@@ -956,10 +1100,9 @@ def factorized_mark_metrics(
                 ).sum()
             )
             family_top3_hits_sum += int(
-                (
-                    family_top3[nonterminal]
-                    == teacher_family[nonterminal].unsqueeze(1)
-                ).any(dim=1).sum()
+                (family_top3[nonterminal] == teacher_family[nonterminal].unsqueeze(1))
+                .any(dim=1)
+                .sum()
             )
             predicted_family = prediction.family_log_probabilities.argmax(dim=-1)
             teacher_mark_probability = prediction.selected_mark_log_probability.exp()
@@ -1004,11 +1147,15 @@ def factorized_mark_metrics(
         "family_choice_top3_recall": family_choice_top3_recall,
         "mean_teacher_mark_probability": mean_teacher_full_mark_probability,
         "mean_teacher_family_probability": (
-            teacher_family_probability_sum / nonterminal_count if nonterminal_count else 0.0
+            teacher_family_probability_sum / nonterminal_count
+            if nonterminal_count
+            else 0.0
         ),
         "family_accuracy": family_choice_accuracy,
         "family_top3_accuracy": family_choice_top3_recall,
-        "mean_terminal_hazard": (terminal_hazard_sum / terminal_count if terminal_count else 0.0),
+        "mean_terminal_hazard": (
+            terminal_hazard_sum / terminal_count if terminal_count else 0.0
+        ),
         "mean_predicted_hazard": predicted_hazard_sum / batch.batch_size,
         "mean_teacher_hazard": teacher_hazard_sum / batch.batch_size,
         "mean_absolute_hazard_error": hazard_absolute_error_sum / batch.batch_size,
@@ -1040,9 +1187,7 @@ def factorized_mark_metrics(
         else 0.0
     )
     metrics["balanced_family_choice_accuracy"] = balanced_family_choice_accuracy
-    metrics["balanced_family_choice_top3_recall"] = (
-        balanced_family_choice_top3_recall
-    )
+    metrics["balanced_family_choice_top3_recall"] = balanced_family_choice_top3_recall
     # Backward-compatible aliases.  These are family-choice diagnostics, not
     # full-mark accuracy and not canonical-successor accuracy.
     metrics["balanced_family_accuracy"] = balanced_family_choice_accuracy
@@ -1056,18 +1201,14 @@ def factorized_mark_metrics(
         )
         metrics[f"teacher_examples_{family_name}"] = float(count)
         metrics[f"family_choice_recall_{family_name}"] = family_choice_recall
-        metrics[f"family_choice_top3_recall_{family_name}"] = (
-            family_choice_top3_recall
-        )
+        metrics[f"family_choice_top3_recall_{family_name}"] = family_choice_top3_recall
         metrics[f"family_accuracy_{family_name}"] = family_choice_recall
         metrics[f"family_top3_accuracy_{family_name}"] = family_choice_top3_recall
         metrics[f"mean_teacher_family_probability_{family_name}"] = (
             family_teacher_probability_sums[family_index] / count if count else 0.0
         )
         metrics[f"mean_teacher_mark_probability_{family_name}"] = (
-            family_teacher_mark_probability_sums[family_index] / count
-            if count
-            else 0.0
+            family_teacher_mark_probability_sums[family_index] / count if count else 0.0
         )
     return metrics
 
@@ -1130,7 +1271,9 @@ def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
     steady = {k: v[keep] for k, v in bench.items()}
     count = len(steady["total"])
     if count == 0:
-        raise RuntimeError("benchmark produced no steady-state steps; lower benchmark_warmup")
+        raise RuntimeError(
+            "benchmark produced no steady-state steps; lower benchmark_warmup"
+        )
 
     def stat(key):
         values = steady[key]
@@ -1141,7 +1284,10 @@ def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
             "total": sum(values),
         }
 
-    phases = {k: stat(k) for k in ("data_wait", "transfer", "forward", "backward", "optimizer", "total")}
+    phases = {
+        k: stat(k)
+        for k in ("data_wait", "transfer", "forward", "backward", "optimizer", "total")
+    }
     seconds_per_step = phases["total"]["mean"]
     report = {
         "artifact": "a100_throughput_benchmark",
@@ -1155,11 +1301,16 @@ def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
             for k in ("data_wait", "transfer", "forward", "backward", "optimizer")
         },
         "throughput": {
-            "examples_per_second": statistics.fmean(steady["examples"]) / seconds_per_step,
-            "candidate_actions_per_second": statistics.fmean(steady["candidates"]) / seconds_per_step,
-            "successor_groups_per_second": statistics.fmean(steady["successor_groups"]) / seconds_per_step,
+            "examples_per_second": statistics.fmean(steady["examples"])
+            / seconds_per_step,
+            "candidate_actions_per_second": statistics.fmean(steady["candidates"])
+            / seconds_per_step,
+            "successor_groups_per_second": statistics.fmean(steady["successor_groups"])
+            / seconds_per_step,
             "mean_candidates_per_batch": statistics.fmean(steady["candidates"]),
-            "mean_successor_groups_per_batch": statistics.fmean(steady["successor_groups"]),
+            "mean_successor_groups_per_batch": statistics.fmean(
+                steady["successor_groups"]
+            ),
         },
         "precision": {"bf16_autocast": bool(use_bf16), "device": str(model.device)},
         "last_loss": last_loss,
@@ -1175,9 +1326,23 @@ def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
         }
     if output:
         Path(output).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({"phase": "benchmark_complete", **{
-        k: report[k] for k in ("seconds_per_step", "steady_state_steps", "projected_runtime_hours")
-    }}, sort_keys=True), flush=True)
+    print(
+        json.dumps(
+            {
+                "phase": "benchmark_complete",
+                **{
+                    k: report[k]
+                    for k in (
+                        "seconds_per_step",
+                        "steady_state_steps",
+                        "projected_runtime_hours",
+                    )
+                },
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
     return report
 
 
@@ -1280,7 +1445,10 @@ def train_factorized_mark_model(
                 microbatch_size=evaluation_batch_size,
             )
             if initial_validation_metrics is None
-            else {str(key): float(value) for key, value in initial_validation_metrics.items()}
+            else {
+                str(key): float(value)
+                for key, value in initial_validation_metrics.items()
+            }
         )
         if objective.selection_metric not in best_metrics:
             raise ValueError(
@@ -1291,9 +1459,7 @@ def train_factorized_mark_model(
         best_state = _clone_model_state(model)
         history: list[dict[str, float]] = []
         evaluations_without_improvement = 0
-        early_stopping_reference_loss = float(
-            best_metrics[objective.selection_metric]
-        )
+        early_stopping_reference_loss = float(best_metrics[objective.selection_metric])
     else:
         required = {
             "completed_steps",
@@ -1309,7 +1475,9 @@ def train_factorized_mark_model(
         if missing:
             raise ValueError(f"factorized recovery state is missing: {missing}")
         if resume_state["optimizer_kind"] != "adamw_decoupled_v1":
-            raise ValueError("factorized recovery checkpoint uses an incompatible optimizer")
+            raise ValueError(
+                "factorized recovery checkpoint uses an incompatible optimizer"
+            )
         recorded_objective = resume_state.get(
             "training_objective_name",
             DEFAULT_MARK_TRAINING_OBJECTIVE.name,
@@ -1348,7 +1516,9 @@ def train_factorized_mark_model(
             {str(key): float(value) for key, value in row.items()}
             for row in resume_state["history"]  # type: ignore[union-attr]
         ]
-        evaluations_without_improvement = int(resume_state["evaluations_without_improvement"])
+        evaluations_without_improvement = int(
+            resume_state["evaluations_without_improvement"]
+        )
         early_stopping_reference_loss = float(
             resume_state.get(
                 "early_stopping_reference_loss",
@@ -1394,6 +1564,11 @@ def train_factorized_mark_model(
             compute_cyclic_graft=model.enable_cyclic_graft,
             compute_ring_opening=model.enable_ring_opening,
             compute_ring_system_delete=model.enable_ring_system_delete,
+            editing_process_semantics=model.editing_process_semantics,
+            atom_restate_action_semantics=model.atom_restate_action_semantics,
+            ring_restate_scorer_mode=model.ring_restate_scorer_mode,
+            cycle_close_action_semantics=model.cycle_close_action_semantics,
+            cycle_open_action_semantics=model.cycle_open_action_semantics,
             record_index_sampler=record_index_sampler,
         )
         if training_loader_factory is None
@@ -1407,8 +1582,16 @@ def train_factorized_mark_model(
     # Benchmark accumulators. Steady state EXCLUDES the warmup window so kernel autotuning, the first
     # shard open and cache population do not contaminate the per-step estimate.
     _bench: dict[str, list] = {
-        "step": [], "data_wait": [], "transfer": [], "forward": [], "backward": [],
-        "optimizer": [], "total": [], "candidates": [], "successor_groups": [], "examples": [],
+        "step": [],
+        "data_wait": [],
+        "transfer": [],
+        "forward": [],
+        "backward": [],
+        "optimizer": [],
+        "total": [],
+        "candidates": [],
+        "successor_groups": [],
+        "examples": [],
     }
     data_wait_history: list[float] = []
     resolved_evaluation_interval = (
@@ -1485,16 +1668,24 @@ def train_factorized_mark_model(
             if objective is DEFAULT_MARK_TRAINING_OBJECTIVE:
                 result["train_gm_loss"] = result["train_objective_loss"]
                 result["validation_gm_loss"] = validation_selection_value
-                result["validation_loss_finite"] = result[
-                    "validation_selection_finite"
-                ]
+                result["validation_loss_finite"] = result["validation_selection_finite"]
             if dry_launch_output:
-                Path(dry_launch_output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-            print(json.dumps({"phase": "dry_launch_first_batch",
-                              "training_objective": objective.name,
-                              "train_objective_loss": result["train_objective_loss"],
-                              "validation_selection_value": validation_selection_value,
-                              "zero_mixture_ok": ok}, sort_keys=True), flush=True)
+                Path(dry_launch_output).write_text(
+                    json.dumps(result, indent=2, sort_keys=True) + "\n"
+                )
+            print(
+                json.dumps(
+                    {
+                        "phase": "dry_launch_first_batch",
+                        "training_objective": objective.name,
+                        "train_objective_loss": result["train_objective_loss"],
+                        "validation_selection_value": validation_selection_value,
+                        "zero_mixture_ok": ok,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
             return result
         if profile_timing:
             _synchronize(model.device)
@@ -1519,9 +1710,18 @@ def train_factorized_mark_model(
             _synchronize(model.device)
         optimized_at = perf_counter()
         if benchmark_steps and completed_steps == 1:
-            print(json.dumps({"phase": "OPTIMIZER_STEP_1", "step": completed_steps,
-                              "device": str(model.device), "bf16": bool(use_bf16)},
-                             sort_keys=True), flush=True)
+            print(
+                json.dumps(
+                    {
+                        "phase": "OPTIMIZER_STEP_1",
+                        "step": completed_steps,
+                        "device": str(model.device),
+                        "bf16": bool(use_bf16),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
         if benchmark_steps:
             # Count LEGAL candidates, not padded tensor elements. The first version used
             # graft_successor_groups.numel(), which is the dense [B, n_slots, n_slots] size -- a
@@ -1529,7 +1729,12 @@ def train_factorized_mark_model(
             # "candidate actions/second" was tensor elements per second and meant nothing.
             benchmark_batch = objective.mark_batch(batch)
             _n_cand = 0
-            for _mask_name in ("atom_delete_mask", "cycle_edge_mask", "cyclic_pair_mask", "graft_mask"):
+            for _mask_name in (
+                "atom_delete_mask",
+                "cycle_edge_mask",
+                "cyclic_pair_mask",
+                "graft_mask",
+            ):
                 _mask = getattr(benchmark_batch, _mask_name, None)
                 if _mask is not None:
                     _n_cand += int(_mask.sum().item())
@@ -1552,12 +1757,14 @@ def train_factorized_mark_model(
             _bench["total"].append(optimized_at - started)
             _bench["candidates"].append(_n_cand)
             _bench["successor_groups"].append(_n_groups)
-            _bench["examples"].append(
-                int(benchmark_batch.atom_types.shape[0])
-            )
+            _bench["examples"].append(int(benchmark_batch.atom_types.shape[0]))
             if completed_steps >= benchmark_steps:
                 return _finalize_benchmark(
-                    _bench, benchmark_warmup, benchmark_output, model, use_bf16,
+                    _bench,
+                    benchmark_warmup,
+                    benchmark_output,
+                    model,
+                    use_bf16,
                     float(loss.detach().cpu()),
                 )
         data_wait = loaded_at - started
@@ -1583,12 +1790,10 @@ def train_factorized_mark_model(
             metrics["step"] = float(completed_steps)
             metrics["train_batch_loss"] = float(loss.detach())
             metrics["learning_rate"] = float(current_learning_rate)
-            current_validation_loss = float(
-                metrics[objective.selection_metric]
+            current_validation_loss = float(metrics[objective.selection_metric])
+            improved = (
+                current_validation_loss < best_metrics[objective.selection_metric]
             )
-            improved = current_validation_loss < best_metrics[
-                objective.selection_metric
-            ]
             if improved:
                 best_metrics = {
                     key: value
@@ -1607,8 +1812,12 @@ def train_factorized_mark_model(
             elif completed_steps >= max(warmup_steps, 1):
                 evaluations_without_improvement += 1
             metrics["materially_improved"] = float(materially_improved)
-            metrics["early_stopping_reference_loss"] = float(early_stopping_reference_loss)
-            metrics["evaluations_without_improvement"] = float(evaluations_without_improvement)
+            metrics["early_stopping_reference_loss"] = float(
+                early_stopping_reference_loss
+            )
+            metrics["evaluations_without_improvement"] = float(
+                evaluations_without_improvement
+            )
             should_early_stop = (
                 early_stopping_patience > 0
                 and evaluations_without_improvement >= early_stopping_patience
@@ -1623,8 +1832,12 @@ def train_factorized_mark_model(
                     "timing/profile_synchronized": float(profile_timing),
                     "timing/data_wait_seconds": data_wait,
                     "timing/cumulative_data_wait_seconds": cumulative_data_wait,
-                    "timing/mean_data_wait_seconds": (cumulative_data_wait / observed_updates),
-                    "timing/p95_data_wait_seconds": float(np.percentile(data_wait_history, 95)),
+                    "timing/mean_data_wait_seconds": (
+                        cumulative_data_wait / observed_updates
+                    ),
+                    "timing/p95_data_wait_seconds": float(
+                        np.percentile(data_wait_history, 95)
+                    ),
                     "timing/max_data_wait_seconds": maximum_data_wait,
                 }
                 if profile_timing:
@@ -1637,10 +1850,13 @@ def train_factorized_mark_model(
                             "timing/optimizer_seconds": optimized_at - backward_at,
                             "timing/update_seconds": update_time,
                             "timing/data_wait_fraction": (
-                                cumulative_data_wait / max(cumulative_update_time, 1e-12)
+                                cumulative_data_wait
+                                / max(cumulative_update_time, 1e-12)
                             ),
                             "timing/updates_per_second": observed_updates / elapsed,
-                            "timing/examples_per_second": (observed_updates * batch_size / elapsed),
+                            "timing/examples_per_second": (
+                                observed_updates * batch_size / elapsed
+                            ),
                         }
                     )
                 progress_callback(
@@ -1700,18 +1916,26 @@ def factorized_adamw_parameter_groups(
     no_decay_ids: set[int] = set()
     for module in model.modules():
         if isinstance(module, (nn.Embedding, nn.LayerNorm)):
-            no_decay_ids.update(id(parameter) for parameter in module.parameters(recurse=False))
+            no_decay_ids.update(
+                id(parameter) for parameter in module.parameters(recurse=False)
+            )
 
     decay: list[nn.Parameter] = []
     no_decay: list[nn.Parameter] = []
     for name, parameter in model.named_parameters():
         if not parameter.requires_grad:
             continue
-        excluded = id(parameter) in no_decay_ids or parameter.ndim < 2 or name.endswith(".bias")
+        excluded = (
+            id(parameter) in no_decay_ids
+            or parameter.ndim < 2
+            or name.endswith(".bias")
+        )
         (no_decay if excluded else decay).append(parameter)
 
     assigned = {id(parameter) for parameter in (*decay, *no_decay)}
-    expected = {id(parameter) for parameter in model.parameters() if parameter.requires_grad}
+    expected = {
+        id(parameter) for parameter in model.parameters() if parameter.requires_grad
+    }
     if assigned != expected or len(decay) + len(no_decay) != len(expected):
         raise RuntimeError("optimizer parameter partition is incomplete or duplicated")
     return [
@@ -1732,9 +1956,7 @@ _CHEMISTRY_MARK_PARAMETER_PREFIXES = (
     "ring_system_adjacent_category_pair",
 )
 
-_RING_TOPOLOGY_PARAMETER_PREFIXES = (
-    "ring_topology_group_head.",
-)
+_RING_TOPOLOGY_PARAMETER_PREFIXES = ("ring_topology_group_head.",)
 
 
 def configure_factorized_trainable_parameters(
@@ -1857,7 +2079,9 @@ def _factorized_recovery_state(
             if torch.cuda.is_available()
             else None
         ),
-        "best_state_dict": {name: value.detach().clone() for name, value in best_state.items()},
+        "best_state_dict": {
+            name: value.detach().clone() for name, value in best_state.items()
+        },
         "best_metrics": copy.deepcopy(best_metrics),
         "history": copy.deepcopy(history),
         "evaluations_without_improvement": int(evaluations_without_improvement),

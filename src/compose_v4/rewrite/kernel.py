@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterable
 
 from compose_v4.chem.molecular_graph import MolecularGraph, molecular_graph_to_smiles
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
+from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.rewrite import operators as ops
 from compose_v4.rewrite import tracelets
 
@@ -218,6 +219,16 @@ def connected_successor_constraint(
     return is_connected_or_null(successor)
 
 
+def editing_charge_policy_constraint(
+    source: MolecularGraph,
+    _action: Any,
+    successor: MolecularGraph,
+) -> bool:
+    """Enforce the frozen charge-preserving Editing-V2 transition policy."""
+
+    return charge_policy_preserved(source, successor)
+
+
 def de_novo_rewrite_system(
     constraints: Iterable[Constraint] = (),
 ) -> RewriteSystem:
@@ -243,6 +254,12 @@ def editing_v2_rewrite_system(
         rules=(
             *legacy.rules.values(),
             RewriteRule(
+                "cycle_close",
+                ops.CycleCloseEdge,
+                ops.is_valid_cycle_close_edge,
+                ops.apply_cycle_close_edge,
+            ),
+            RewriteRule(
                 "cycle_open",
                 ops.CycleOpenEdge,
                 ops.is_valid_cycle_open_edge,
@@ -250,4 +267,115 @@ def editing_v2_rewrite_system(
             ),
         ),
         constraints=(connected_successor_constraint, *tuple(constraints)),
+    )
+
+
+def editing_v2_semantic_cycle_rewrite_system(
+    constraints: Iterable[Constraint] = (),
+) -> RewriteSystem:
+    """Editing-V2 runtime whose public cycle actions are fully semantic.
+
+    The V1 constructor above is retained for the already frozen semantic-open
+    evidence. This V2 process excludes raw bond insertion and deletion from
+    its rule registry so callers cannot accidentally mix the legacy micro
+    ontology with ``cycle_close`` and ``cycle_open``.
+    """
+
+    legacy = default_rewrite_system()
+    retained = tuple(
+        rule
+        for name, rule in legacy.rules.items()
+        if name not in {"bond_insert", "bond_delete"}
+    )
+    return RewriteSystem(
+        rules=(
+            *retained,
+            RewriteRule(
+                "cycle_close",
+                ops.CycleCloseEdge,
+                ops.is_valid_cycle_close_edge,
+                ops.apply_cycle_close_edge,
+            ),
+            RewriteRule(
+                "cycle_open",
+                ops.CycleOpenEdge,
+                ops.is_valid_cycle_open_edge,
+                ops.apply_cycle_open_edge,
+            ),
+        ),
+        constraints=(
+            connected_successor_constraint,
+            editing_charge_policy_constraint,
+            *tuple(constraints),
+        ),
+    )
+
+
+def editing_v2_semantic_rewrite_system(
+    constraints: Iterable[Constraint] = (),
+) -> RewriteSystem:
+    """Complete frozen Active8 Editing-V2 public runtime.
+
+    Historical raw atom restatement and bond insertion/deletion remain
+    available through their original runtimes. This process is an exact
+    allowlist, not a filtered legacy registry, so disabled macros and internal
+    tracelet rules cannot silently enter the declared Editing-V2 support.
+    """
+
+    return RewriteSystem(
+        rules=(
+            RewriteRule(
+                "atom_insert",
+                ops.AtomInsert,
+                ops.is_valid_atom_insert,
+                ops.apply_atom_insert,
+            ),
+            RewriteRule(
+                "atom_delete",
+                ops.AtomDelete,
+                ops.is_valid_atom_delete,
+                ops.apply_atom_delete,
+            ),
+            RewriteRule(
+                "atom_restate_semantic",
+                ops.SemanticAtomRestate,
+                ops.is_valid_semantic_atom_restate,
+                ops.apply_semantic_atom_restate,
+            ),
+            RewriteRule(
+                "bond_reorder",
+                ops.BondReorder,
+                ops.is_valid_bond_reorder,
+                ops.apply_bond_reorder,
+            ),
+            RewriteRule(
+                "bond_reroute",
+                ops.BondReroute,
+                ops.is_valid_bond_reroute,
+                ops.apply_bond_reroute,
+            ),
+            RewriteRule(
+                "cycle_close",
+                ops.CycleCloseEdge,
+                ops.is_valid_cycle_close_edge,
+                ops.apply_cycle_close_edge,
+            ),
+            RewriteRule(
+                "cycle_open",
+                ops.CycleOpenEdge,
+                ops.is_valid_cycle_open_edge,
+                ops.apply_cycle_open_edge,
+            ),
+            RewriteRule(
+                "ring_system_restate",
+                tracelets.RingSystemRestate,
+                tracelets.is_valid_ring_system_restate,
+                tracelets.apply_ring_system_restate,
+            ),
+        ),
+        constraints=(
+            connected_successor_constraint,
+            editing_charge_policy_constraint,
+            *tuple(constraints),
+        ),
     )

@@ -14,8 +14,16 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from compose_v4.experiments.aromatic_cycle_open_semantics import (
-        AromaticCycleOpenResolution,
+    from compose_v4.rewrite.semantic_cycle_close import (
+        SemanticCycleCloseContext,
+        SemanticCycleCloseResolution,
+    )
+    from compose_v4.rewrite.semantic_cycle_open import (
+        SemanticCycleOpenResolution,
+    )
+    from compose_v4.rewrite.semantic_atom_restate import (
+        SemanticAtomRestateContext,
+        SemanticAtomRestateResolution,
     )
 
 from compose_v4.chem.molecular_graph import (
@@ -65,6 +73,20 @@ class CycleOpenEdge:
 
 
 @dataclass(frozen=True)
+class CycleCloseEdge:
+    """One semantic undirected endpoint pair and order for cycle closing.
+
+    The action is distinct from :class:`BondInsert` so Editing V2 can reject
+    closures whose molecular product depends on the stored Kekule phase while
+    preserving the historical raw bond-insertion executor unchanged.
+    """
+
+    a: int
+    b: int
+    order: int
+
+
+@dataclass(frozen=True)
 class BondReorder:
     a: int
     b: int
@@ -107,6 +129,14 @@ class AtomRestate:
     atom_type: int
     formal_charge: int
     implicit_h_count: int
+
+
+@dataclass(frozen=True)
+class SemanticAtomRestate:
+    """Editing-V2 atom restatement by persistent slot and valence class."""
+
+    v: int
+    target_class_index: int
 
 
 def _real_atom(mg: MolecularGraph, v: int) -> bool:
@@ -174,23 +204,20 @@ def is_valid_bond_delete(mg: MolecularGraph, op: BondDelete) -> bool:
 def resolve_cycle_open_edge(
     mg: MolecularGraph,
     op: CycleOpenEdge,
-) -> AromaticCycleOpenResolution | None:
+) -> SemanticCycleOpenResolution | None:
     """Resolve the frozen Editing-V2 semantic cycle-opening action.
 
-    The validated component solver currently lives in the historical
-    experimental module whose complete global-oracle evidence promoted this
-    action. The import is local to avoid a rewrite-kernel import cycle. The
-    returned resolution is the single source for validation, execution, and
-    inverse construction.
+    The returned production resolution is the single source for validation,
+    execution, enumeration, and inverse construction.
     """
 
-    from compose_v4.experiments.aromatic_cycle_open_semantics import (
-        resolve_component_factored_cycle_open,
+    from compose_v4.rewrite.semantic_cycle_open import (
+        resolve_semantic_cycle_open,
     )
 
     if type(op) is not CycleOpenEdge or not (int(op.a) < int(op.b)):
         return None
-    return resolve_component_factored_cycle_open(
+    return resolve_semantic_cycle_open(
         mg,
         BondDelete(int(op.a), int(op.b)),
     )
@@ -234,6 +261,80 @@ def inverse_cycle_open_edge(
     ):
         raise ValueError(f"rejected semantic cycle_open has no inverse: {op!r}")
     return BondInsert(int(op.a), int(op.b), int(resolution.inverse_bond_order))
+
+
+def resolve_cycle_close_edge(
+    mg: MolecularGraph,
+    op: CycleCloseEdge,
+    *,
+    context: SemanticCycleCloseContext | None = None,
+) -> SemanticCycleCloseResolution | None:
+    """Resolve the Editing-V2 semantic cycle-closing action."""
+
+    from compose_v4.rewrite.semantic_cycle_close import (
+        resolve_semantic_cycle_close,
+    )
+
+    if (
+        type(op) is not CycleCloseEdge
+        or not (int(op.a) < int(op.b))
+        or int(op.order) not in MICRO_BOND_CLASSES
+    ):
+        return None
+    return resolve_semantic_cycle_close(
+        mg,
+        BondInsert(int(op.a), int(op.b), int(op.order)),
+        context=context,
+    )
+
+
+def is_valid_cycle_close_edge(mg: MolecularGraph, op: CycleCloseEdge) -> bool:
+    resolution = resolve_cycle_close_edge(mg, op)
+    return bool(resolution is not None and resolution.admitted)
+
+
+def apply_cycle_close_edge(mg: MolecularGraph, op: CycleCloseEdge) -> MolecularGraph:
+    resolution = resolve_cycle_close_edge(mg, op)
+    if resolution is None or not resolution.admitted or resolution.successor is None:
+        raise ValueError(f"invalid semantic cycle_close instance: {op!r}")
+    return resolution.successor
+
+
+def enumerate_cycle_close_edges(mg: MolecularGraph) -> tuple[CycleCloseEdge, ...]:
+    """Enumerate the complete admitted semantic cycle-closing fiber."""
+
+    from compose_v4.rewrite.semantic_cycle_close import (
+        prepare_semantic_cycle_close_context,
+    )
+
+    context = prepare_semantic_cycle_close_context(mg)
+    real = tuple(int(v) for v in np.flatnonzero(is_element(mg.atom_types)))
+    return tuple(
+        action
+        for a, b in combinations(real, 2)
+        for order in MICRO_BOND_CLASSES
+        if (
+            resolution := resolve_cycle_close_edge(
+                mg,
+                action := CycleCloseEdge(a, b, order),
+                context=context,
+            )
+        )
+        is not None
+        and resolution.admitted
+    )
+
+
+def inverse_cycle_close_edge(
+    mg: MolecularGraph,
+    op: CycleCloseEdge,
+) -> CycleOpenEdge:
+    """Return the semantic ring-opening mark for an admitted closure."""
+
+    resolution = resolve_cycle_close_edge(mg, op)
+    if resolution is None or not resolution.admitted:
+        raise ValueError(f"rejected semantic cycle_close has no inverse: {op!r}")
+    return CycleOpenEdge(int(op.a), int(op.b))
 
 
 def apply_bond_reorder(mg: MolecularGraph, op: BondReorder) -> MolecularGraph:
@@ -427,3 +528,76 @@ def is_valid_atom_restate(mg: MolecularGraph, op: AtomRestate) -> bool:
     if not 0 <= int(op.implicit_h_count) <= MAX_H_COUNT:
         return False
     return is_valid_state(apply_atom_restate(mg, op))
+
+
+def resolve_semantic_atom_restate_action(
+    mg: MolecularGraph,
+    op: SemanticAtomRestate,
+    *,
+    context: SemanticAtomRestateContext | None = None,
+) -> SemanticAtomRestateResolution | None:
+    """Resolve the frozen Editing-V2 semantic atom-restatement action."""
+
+    from compose_v4.rewrite.semantic_atom_restate import (
+        resolve_semantic_atom_restate,
+    )
+
+    if type(op) is not SemanticAtomRestate:
+        return None
+    return resolve_semantic_atom_restate(
+        mg,
+        vertex=int(op.v),
+        target_class_index=int(op.target_class_index),
+        context=context,
+    )
+
+
+def is_valid_semantic_atom_restate(
+    mg: MolecularGraph,
+    op: SemanticAtomRestate,
+) -> bool:
+    resolution = resolve_semantic_atom_restate_action(mg, op)
+    return bool(resolution is not None and resolution.admitted)
+
+
+def apply_semantic_atom_restate(
+    mg: MolecularGraph,
+    op: SemanticAtomRestate,
+) -> MolecularGraph:
+    resolution = resolve_semantic_atom_restate_action(mg, op)
+    if resolution is None or not resolution.admitted or resolution.successor is None:
+        raise ValueError(f"invalid atom_restate_semantic instance: {op!r}")
+    return resolution.successor
+
+
+def enumerate_semantic_atom_restates(
+    mg: MolecularGraph,
+) -> tuple[SemanticAtomRestate, ...]:
+    """Enumerate every admitted productive semantic atom-restatement mark."""
+
+    from compose_v4.rewrite.semantic_atom_restate import (
+        prepare_semantic_atom_restate_context,
+    )
+
+    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
+    from compose_v4.rewrite.kernel import canonical_state_key
+
+    context = prepare_semantic_atom_restate_context(mg)
+    source_key = context.source_key
+    actions: list[SemanticAtomRestate] = []
+    for vertex in np.flatnonzero(is_element(mg.atom_types)):
+        for target_class_index in range(len(ORGANIC_VOCABULARY)):
+            action = SemanticAtomRestate(int(vertex), target_class_index)
+            resolution = resolve_semantic_atom_restate_action(
+                mg,
+                action,
+                context=context,
+            )
+            if (
+                resolution is not None
+                and resolution.admitted
+                and resolution.successor is not None
+                and canonical_state_key(resolution.successor) != source_key
+            ):
+                actions.append(action)
+    return tuple(actions)

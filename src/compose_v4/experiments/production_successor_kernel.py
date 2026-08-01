@@ -22,6 +22,7 @@ factorized electronic decoder, not merely its template head.  This module
 therefore fails closed if that macro is enabled instead of silently scoring an
 incomplete fiber.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
@@ -43,9 +44,15 @@ from compose_v4.experiments.successor_kernel import (
 from compose_v4.model.factorized_tracelet_rate_model import (
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
+    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+    SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+    SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+    SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+    SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     _masked_family_logits,
+    molecular_state_cache_key,
     prepare_factorized_mark_batch,
 )
 from compose_v4.model.segmented_successor import segmented_successor_logprobs
@@ -53,6 +60,8 @@ from compose_v4.rewrite.kernel import (
     RewriteSystem,
     canonical_state_key,
     de_novo_rewrite_system,
+    editing_v2_rewrite_system,
+    editing_v2_semantic_rewrite_system,
 )
 from compose_v4.rewrite.operators import (
     AtomDelete,
@@ -62,6 +71,9 @@ from compose_v4.rewrite.operators import (
     BondInsert,
     BondReorder,
     BondReroute,
+    CycleCloseEdge,
+    CycleOpenEdge,
+    SemanticAtomRestate,
 )
 
 
@@ -160,17 +172,26 @@ def _one_state_batch(
             compute_cyclic_graft=capabilities.compute_cyclic_graft,
             compute_ring_opening=capabilities.compute_ring_opening,
             compute_ring_system_delete=capabilities.compute_ring_system_delete,
+            editing_process_semantics=capabilities.editing_process_semantics,
+            atom_restate_action_semantics=capabilities.atom_restate_action_semantics,
+            ring_restate_scorer_mode=capabilities.ring_restate_scorer_mode,
+            cycle_close_action_semantics=capabilities.cycle_close_action_semantics,
+            cycle_open_action_semantics=capabilities.cycle_open_action_semantics,
         )
     if prepared_batch.batch_size != 1:
         raise ProductionSuccessorKernelError(
             f"a one-state kernel row received batch_size={prepared_batch.batch_size}"
         )
     if prepared_batch.states[0] is not state:
-        expected = canonical_state_key(state)
-        observed = canonical_state_key(prepared_batch.states[0])
-        if observed != expected:
+        expected_exact = molecular_state_cache_key(state)
+        observed_exact = molecular_state_cache_key(prepared_batch.states[0])
+        if observed_exact != expected_exact:
+            expected = canonical_state_key(state)
+            observed = canonical_state_key(prepared_batch.states[0])
             raise ProductionSuccessorKernelError(
-                f"prepared batch state {observed!r} does not match requested state {expected!r}"
+                "prepared batch exact persistent-slot state does not match the "
+                f"requested state (canonical requested={expected!r}, "
+                f"prepared={observed!r})"
             )
     return replace(
         prepared_batch,
@@ -191,8 +212,31 @@ def _default_kernel_identity(
         ("enable_ring_opening", capabilities.compute_ring_opening),
         ("enable_cycle_ops", model.enable_cycle_ops),
         ("enable_ring_system_delete", capabilities.compute_ring_system_delete),
+        (
+            "semantic_editing_v2_process",
+            model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+        ),
+        (
+            "semantic_atom_restate",
+            model.atom_restate_action_semantics
+            == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+        ),
+        (
+            "semantic_ring_restate_scorer",
+            model.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE,
+        ),
+        (
+            "semantic_cycle_close",
+            model.cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+        ),
+        (
+            "semantic_cycle_open",
+            model.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+        ),
     )
-    if model.enable_cycle_ops:
+    if model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+        ringcore_configuration = "editing_v2_semantic_actions_v1"
+    elif model.enable_cycle_ops:
         ringcore_configuration = "ringcore_v1_compositional_cycle_ops"
     elif model.enable_ring_grow_macro:
         ringcore_configuration = "legacy_ring_grow_macro"
@@ -212,6 +256,14 @@ def _default_kernel_identity(
     )
 
 
+def _default_rewrite_system(model: FactorizedTraceletRateModel) -> RewriteSystem:
+    if model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+        return editing_v2_semantic_rewrite_system()
+    if model.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS:
+        return editing_v2_rewrite_system()
+    return de_novo_rewrite_system()
+
+
 def _coordinate_action(
     model: FactorizedTraceletRateModel,
     state: MolecularGraph,
@@ -225,7 +277,9 @@ def _coordinate_action(
 
     if table_name == "grow_root":
         if not null_slots:
-            raise ProductionSuccessorKernelError("root insertion has no persistent null slot")
+            raise ProductionSuccessorKernelError(
+                "root insertion has no persistent null slot"
+            )
         (atom_index,) = coordinate
         atom_type = int(model.atom_vocabulary.element_of(atom_index))
         return "atom_insert", AtomInsert(
@@ -237,7 +291,9 @@ def _coordinate_action(
         )
     if table_name == "grow_connected":
         if not null_slots:
-            raise ProductionSuccessorKernelError("connected insertion has no persistent null slot")
+            raise ProductionSuccessorKernelError(
+                "connected insertion has no persistent null slot"
+            )
         neighbor, order_index, atom_index = coordinate
         order = order_index + 1
         atom_type = int(model.atom_vocabulary.element_of(atom_index))
@@ -253,10 +309,17 @@ def _coordinate_action(
         return "atom_delete", AtomDelete(vertex)
     if table_name == "atom_restate":
         vertex, atom_index = coordinate
+        if (
+            model.atom_restate_action_semantics
+            == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+        ):
+            return "atom_restate_semantic", SemanticAtomRestate(
+                vertex,
+                atom_index,
+            )
         atom_type = int(model.atom_vocabulary.element_of(atom_index))
         bond_valence = sum(
-            _bond_valence_deltas()[int(order)]
-            for order in state.bonds[vertex]
+            _bond_valence_deltas()[int(order)] for order in state.bonds[vertex]
         )
         # Production currently stores formal charge but does not design it; all
         # vocabulary rows therefore use charge zero in this head.
@@ -288,6 +351,8 @@ def _coordinate_action(
                 "RingCore production scoring requires compositional cycle operations"
             )
         a, b, order_index = coordinate
+        if model.cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS:
+            return "cycle_close", CycleCloseEdge(a, b, order_index + 1)
         return "bond_insert", BondInsert(a, b, order_index + 1)
     if table_name == "cycle_attach":
         if not model.enable_cycle_ops:
@@ -295,6 +360,8 @@ def _coordinate_action(
                 "RingCore production scoring requires compositional cycle operations"
             )
         a, b = coordinate
+        if model.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS:
+            return "cycle_open", CycleOpenEdge(a, b)
         return "bond_delete", BondDelete(a, b)
     if table_name == "ring_system_delete":
         (action_index,) = coordinate
@@ -459,7 +526,7 @@ def canonical_successor_result(
         time,
         prepared_batch=prepared_batch,
     )
-    runtime = system or de_novo_rewrite_system()
+    runtime = system or _default_rewrite_system(model)
     source_key = marked_law.source_key
     successor_states: dict[str, MolecularGraph] = {}
     successor_marks: dict[str, list[ScoredRewriteMark]] = {}
@@ -524,11 +591,7 @@ def canonical_successor_result(
         dtype=torch.long,
     )
     candidate_to_successor = torch.tensor(
-        [
-            key_to_group[key]
-            for key in ordered_keys
-            for _ in successor_marks[key]
-        ],
+        [key_to_group[key] for key in ordered_keys for _ in successor_marks[key]],
         dtype=torch.long,
     )
     successor_log_probability = segmented_successor_logprobs(
@@ -548,9 +611,7 @@ def canonical_successor_result(
         for index, key in enumerate(ordered_keys)
     )
     virtual_mass = float(sum(mark.probability for mark in virtual_marks))
-    raw_productive_mass = float(
-        sum(mark.probability for mark in productive_marks)
-    )
+    raw_productive_mass = float(sum(mark.probability for mark in productive_marks))
     batch = SuccessorBatch(
         source_key=source_key,
         successors=successors,
@@ -564,9 +625,7 @@ def canonical_successor_result(
         canonical_successor_count=len(successors),
         raw_productive_mass=raw_productive_mass,
         virtual_self_mass=virtual_mass,
-        alias_multiplicities=tuple(
-            len(successor_marks[key]) for key in ordered_keys
-        ),
+        alias_multiplicities=tuple(len(successor_marks[key]) for key in ordered_keys),
         marks_by_family=marks_by_family,
         productive_marks_by_family=productive_by_family,
     )
@@ -592,7 +651,7 @@ class FactorizedCanonicalSuccessorKernel:
         self.model = model
         self.time = float(time)
         self._identity = identity or _default_kernel_identity(model)
-        self.system = system or de_novo_rewrite_system()
+        self.system = system or _default_rewrite_system(model)
 
     def successors(self, state: MolecularGraph) -> SuccessorBatch:
         return canonical_successor_result(

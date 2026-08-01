@@ -28,19 +28,18 @@ from compose_v4.experiments.production_successor_kernel import (
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
     MARK_RULE_TO_INDEX,
+    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     _masked_family_logits,
 )
-from compose_v4.rewrite.action_codec import (
-    ActionCodecError,
-    canonical_json,
-    encode_action,
-)
+from compose_v4.rewrite import action_codec as action_codec_v2
+from compose_v4.rewrite import action_codec_v4
 from compose_v4.rewrite.kernel import (
     RewriteSystem,
     canonical_state_key,
     de_novo_rewrite_system,
+    editing_v2_semantic_rewrite_system,
 )
 
 
@@ -73,12 +72,9 @@ class StateProductiveSupport:
     def __post_init__(self) -> None:
         if not self.source_key:
             raise ValueError("state-support source key must be nonempty")
-        if (
-            len(self.source_state_sha256) != 64
-            or any(
-                character not in "0123456789abcdef"
-                for character in self.source_state_sha256
-            )
+        if len(self.source_state_sha256) != 64 or any(
+            character not in "0123456789abcdef"
+            for character in self.source_state_sha256
         ):
             raise ValueError(
                 "state-support source_state_sha256 must be a lowercase SHA-256"
@@ -102,18 +98,15 @@ class TeacherSuccessorFiber:
             raise ValueError("teacher-successor keys must be nonempty")
         if self.source_key == self.target_key:
             raise ValueError("a teacher molecular jump cannot target the source state")
-        if (
-            len(self.target_state_sha256) != 64
-            or any(
-                character not in "0123456789abcdef"
-                for character in self.target_state_sha256
-            )
+        if len(self.target_state_sha256) != 64 or any(
+            character not in "0123456789abcdef"
+            for character in self.target_state_sha256
         ):
-            raise ValueError(
-                "teacher target_state_sha256 must be a lowercase SHA-256"
-            )
+            raise ValueError("teacher target_state_sha256 must be a lowercase SHA-256")
         if not self.aliases:
-            raise ValueError("a teacher-successor fiber must contain at least one alias")
+            raise ValueError(
+                "a teacher-successor fiber must contain at least one alias"
+            )
         if len(set(self.aliases)) != len(self.aliases):
             raise ValueError("a teacher-successor fiber contains duplicate coordinates")
         if self.state_support.source_key != self.source_key:
@@ -133,9 +126,8 @@ class CompiledSuccessorMark:
     def __post_init__(self) -> None:
         for name in ("successor_state_sha256", "action_sha256"):
             digest = getattr(self, name)
-            if (
-                len(digest) != 64
-                or any(character not in "0123456789abcdef" for character in digest)
+            if len(digest) != 64 or any(
+                character not in "0123456789abcdef" for character in digest
             ):
                 raise ValueError(f"{name} must be a lowercase SHA-256")
 
@@ -161,9 +153,7 @@ class CanonicalSuccessorAliasGroup:
                 "canonical successor alias group must retain an enumerated mark"
             )
         if tuple(sorted(set(self.marks))) != self.marks:
-            raise ValueError(
-                "canonical successor marks must be sorted and unique"
-            )
+            raise ValueError("canonical successor marks must be sorted and unique")
         aliases = tuple(mark.alias for mark in self.marks)
         if len(set(aliases)) != len(aliases):
             raise ValueError(
@@ -172,9 +162,7 @@ class CanonicalSuccessorAliasGroup:
 
     @property
     def successor_state_sha256s(self) -> tuple[str, ...]:
-        return tuple(
-            sorted({mark.successor_state_sha256 for mark in self.marks})
-        )
+        return tuple(sorted({mark.successor_state_sha256 for mark in self.marks}))
 
     @property
     def aliases(self) -> tuple[TeacherSuccessorAlias, ...]:
@@ -218,9 +206,7 @@ class CompiledStateSuccessorMap:
                 "compiled productive successor groups contain a canonical self-event"
             )
         productive_marks = [
-            mark
-            for group in self.successor_groups
-            for mark in group.marks
+            mark for group in self.successor_groups for mark in group.marks
         ]
         all_aliases = [mark.alias for mark in productive_marks]
         if len(all_aliases) != len(set(all_aliases)):
@@ -239,9 +225,7 @@ class CompiledStateSuccessorMap:
                 "compiled virtual mark identities disagree with state support"
             )
         if set(all_aliases) & set(virtual_aliases):
-            raise ValueError(
-                "one legal mark coordinate is both productive and virtual"
-            )
+            raise ValueError("one legal mark coordinate is both productive and virtual")
         all_exact_digests = [
             digest
             for group in self.successor_groups
@@ -296,16 +280,32 @@ def _alias(
 def rewrite_action_codec_sha256(
     executor_rule_name: str,
     action: object,
+    *,
+    schema_version: int = action_codec_v2.SCHEMA_VERSION,
 ) -> str:
-    """Full SHA-256 of one canonical RewriteActionCodecV2 JSON payload."""
+    """Full SHA-256 of one explicitly selected canonical action payload."""
 
-    try:
-        encoded = encode_action(executor_rule_name, action)
-    except ActionCodecError as error:
+    if schema_version == action_codec_v2.SCHEMA_VERSION:
+        codec = action_codec_v2
+        error_type = action_codec_v2.ActionCodecError
+    elif schema_version == action_codec_v4.SCHEMA_VERSION:
+        codec = action_codec_v4
+        error_type = action_codec_v4.ActionCodecV4Error
+    else:
         raise SuccessorTrainingError(
-            "rewrite action cannot be represented by RewriteActionCodecV2"
+            f"unsupported rewrite action codec schema_version={schema_version}"
+        )
+    try:
+        encoded = codec.encode_action(executor_rule_name, action)
+    except error_type as error:
+        raise SuccessorTrainingError(
+            "rewrite action cannot be represented by the selected action codec"
         ) from error
-    return hashlib.sha256(canonical_json(encoded).encode("utf-8")).hexdigest()
+    return hashlib.sha256(codec.canonical_json(encoded).encode("utf-8")).hexdigest()
+
+
+def _uses_semantic_editing_process(model: FactorizedTraceletRateModel) -> bool:
+    return model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS
 
 
 def compile_state_successor_map(
@@ -317,7 +317,17 @@ def compile_state_successor_map(
 ) -> CompiledStateSuccessorMap:
     """Execute and group every legal mark once for one exact source state."""
 
-    runtime = system or de_novo_rewrite_system()
+    semantic_editing_process = _uses_semantic_editing_process(model)
+    runtime = system or (
+        editing_v2_semantic_rewrite_system()
+        if semantic_editing_process
+        else de_novo_rewrite_system()
+    )
+    action_codec_version = (
+        action_codec_v4.SCHEMA_VERSION
+        if semantic_editing_process
+        else action_codec_v2.SCHEMA_VERSION
+    )
     try:
         marked_law = enumerate_factorized_marked_law(model, source, float(time))
     except ProductionSuccessorKernelError as error:
@@ -351,6 +361,7 @@ def compile_state_successor_map(
             action_sha256=rewrite_action_codec_sha256(
                 mark.executor_rule_name,
                 mark.action,
+                schema_version=action_codec_version,
             ),
         )
         if successor_key == source_key:
@@ -361,9 +372,7 @@ def compile_state_successor_map(
     state_support = StateProductiveSupport(
         source_key=source_key,
         source_state_sha256=persistent_slot_state_sha256(source),
-        virtual_aliases=tuple(
-            sorted(mark.alias for mark in virtual_marks)
-        ),
+        virtual_aliases=tuple(sorted(mark.alias for mark in virtual_marks)),
     )
     return CompiledStateSuccessorMap(
         state_support=state_support,
@@ -532,8 +541,7 @@ def forward_teacher_successor_batch(
     if state_supports is not None and len(state_supports) != batch.batch_size:
         raise ValueError("state productive supports must align with the batch")
     nonterminal_flags = tuple(
-        float(value) > 0.0
-        for value in batch.teacher_rates.detach().cpu()
+        float(value) > 0.0 for value in batch.teacher_rates.detach().cpu()
     )
     if batch.atom_types.device != model.device:
         batch = batch.to(model.device)
@@ -600,11 +608,7 @@ def forward_teacher_successor_batch(
                 raise SuccessorTrainingError(
                     "terminal training row carries a teacher-successor fiber"
                 )
-            support = (
-                None
-                if state_supports is None
-                else state_supports[batch_index]
-            )
+            support = None if state_supports is None else state_supports[batch_index]
             if support is None:
                 raise SuccessorTrainingError(
                     "terminal training row is missing productive state support"
@@ -630,14 +634,9 @@ def forward_teacher_successor_batch(
                     "teacher-successor fiber source does not match the exact batch state"
                 )
             explicit_support = (
-                None
-                if state_supports is None
-                else state_supports[batch_index]
+                None if state_supports is None else state_supports[batch_index]
             )
-            if (
-                explicit_support is not None
-                and explicit_support != fiber.state_support
-            ):
+            if explicit_support is not None and explicit_support != fiber.state_support:
                 raise SuccessorTrainingError(
                     "explicit productive support disagrees with the teacher fiber"
                 )
@@ -658,9 +657,7 @@ def forward_teacher_successor_batch(
             if not virtual_log_probabilities
             else torch.logsumexp(torch.stack(virtual_log_probabilities), dim=0)
         )
-        productive_log_probability[batch_index] = _log1mexp(
-            virtual_log_probability
-        )
+        productive_log_probability[batch_index] = _log1mexp(virtual_log_probability)
 
         if not is_nonterminal:
             continue
@@ -778,10 +775,13 @@ def factorized_successor_identity_loss(
         raise SuccessorTrainingError(
             "successor-identity loss has zero nonterminal importance weight"
         )
-    return -(
-        prediction.selected_productive_successor_log_probability[nonterminal]
-        * selected_weights
-    ).sum() / denominator
+    return (
+        -(
+            prediction.selected_productive_successor_log_probability[nonterminal]
+            * selected_weights
+        ).sum()
+        / denominator
+    )
 
 
 def factorized_hazard_bregman_loss(

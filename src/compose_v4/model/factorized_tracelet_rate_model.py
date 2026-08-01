@@ -38,6 +38,7 @@ from compose_v4.chem.molecular_graph import (
     MAX_H_COUNT,
     MolecularGraph,
     NULL_IDX,
+    ORGANIC_VOCABULARY,
     SCAR_IDX,
     is_element,
 )
@@ -51,6 +52,12 @@ from compose_v4.rewrite.operators import (
     BondInsert,
     BondReorder,
     BondReroute,
+    CycleCloseEdge,
+    CycleOpenEdge,
+    SemanticAtomRestate,
+    enumerate_cycle_close_edges,
+    enumerate_cycle_open_edges,
+    enumerate_semantic_atom_restates,
 )
 from compose_v4.rewrite.ring_system_fiber import (
     build_semantic_ring_system_decoder,
@@ -91,13 +98,15 @@ from compose_v4.rewrite.kernel import (
     canonical_state_key,
     de_novo_rewrite_system,
 )
+from compose_v4.rewrite.ring_restate_semantics import (
+    enumerate_ring_restate_semantic_groups,
+)
 from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
 from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
     attach_template,
     cycle_template,
 )
-
 
 MARK_RULE_NAMES = (
     "atom_insert",
@@ -115,13 +124,48 @@ MARK_RULE_TO_INDEX = {name: index for index, name in enumerate(MARK_RULE_NAMES)}
 # Compositional ring ops apply via the executor's bond_insert/bond_delete rules but are SELECTED by the model
 # on the repurposed slots 5/6 (cycle_insert/cycle_attach) when enable_cycle_ops. This maps a teacher/sampled
 # executor rule name back to its selecting family for the family-index lookup.
-_CYCLE_OP_EXECUTOR_TO_FAMILY = {"bond_insert": "cycle_insert", "bond_delete": "cycle_attach"}
+_CYCLE_OP_EXECUTOR_TO_FAMILY = {
+    "bond_insert": "cycle_insert",
+    "bond_delete": "cycle_attach",
+    "cycle_close": "cycle_insert",
+    "cycle_open": "cycle_attach",
+}
 _ORDER_TO_INDEX = {1: 0, 2: 1, 3: 2}
 # Families gated by a capability flag; everything else in MARK_RULE_NAMES is always production-enabled.
 _CYCLE_OP_FAMILIES = ("cycle_insert", "cycle_attach")
 _RING_GROW_MACRO_FAMILY = "ring_system_grow"
 _RING_DELETE_MACRO_FAMILY = "ring_system_delete"
 CYCLE_OPEN_SCORER_MODES = ("pair_linear", "exact_bond_contextual_probe")
+LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS = "legacy_raw_bond_insert_v1"
+SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS = "semantic_cycle_close_v1"
+CYCLE_CLOSE_ACTION_SEMANTICS = (
+    LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+)
+LEGACY_CYCLE_OPEN_ACTION_SEMANTICS = "legacy_raw_bond_delete_v1"
+SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS = "semantic_cycle_open_v1"
+CYCLE_OPEN_ACTION_SEMANTICS = (
+    LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+)
+LEGACY_ATOM_RESTATE_ACTION_SEMANTICS = "legacy_raw_atom_restate_v1"
+SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS = "semantic_atom_restate_v1"
+ATOM_RESTATE_ACTION_SEMANTICS = (
+    LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+)
+LEGACY_RING_RESTATE_SCORER_MODE = "legacy_changed_kekule_edges_v1"
+SEMANTIC_RING_RESTATE_SCORER_MODE = "semantic_successor_group_v1"
+RING_RESTATE_SCORER_MODES = (
+    LEGACY_RING_RESTATE_SCORER_MODE,
+    SEMANTIC_RING_RESTATE_SCORER_MODE,
+)
+LEGACY_EDITING_PROCESS_SEMANTICS = "legacy_raw_actions_v1"
+SEMANTIC_EDITING_V2_PROCESS_SEMANTICS = "semantic_editing_v2_v1"
+EDITING_PROCESS_SEMANTICS = (
+    LEGACY_EDITING_PROCESS_SEMANTICS,
+    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+)
 
 
 def production_enabled_families(
@@ -204,9 +248,7 @@ class _ExactBondContextualCycleOpenScorer(nn.Module):
             raise ValueError("cycle-open exact bond orders must be integer indices")
 
         expanded_global = global_state[:, None, None, :].expand_as(pair)
-        exact_order = self.exact_deleted_bond_order_embedding(
-            exact_deleted_bond_order
-        )
+        exact_order = self.exact_deleted_bond_order_embedding(exact_deleted_bond_order)
         contextual_features = torch.cat(
             (
                 pair,
@@ -276,12 +318,8 @@ class FactorizedMarkEmpiricalPriors:
             "connected_atom_order_log_probabilities": [
                 list(row) for row in self.connected_atom_order_log_probabilities
             ],
-            "atom_restate_log_probabilities": list(
-                self.atom_restate_log_probabilities
-            ),
-            "bond_reorder_log_probabilities": list(
-                self.bond_reorder_log_probabilities
-            ),
+            "atom_restate_log_probabilities": list(self.atom_restate_log_probabilities),
+            "bond_reorder_log_probabilities": list(self.bond_reorder_log_probabilities),
             "ring_electronic_log_probabilities": list(
                 self.ring_electronic_log_probabilities
             ),
@@ -311,15 +349,10 @@ class FactorizedMarkEmpiricalPriors:
         return cls(
             root_atom_log_probabilities=vector("root_atom_log_probabilities"),
             connected_atom_order_log_probabilities=tuple(
-                tuple(float(value) for value in row)
-                for row in raw_connected
+                tuple(float(value) for value in row) for row in raw_connected
             ),
-            atom_restate_log_probabilities=vector(
-                "atom_restate_log_probabilities"
-            ),
-            bond_reorder_log_probabilities=vector(
-                "bond_reorder_log_probabilities"
-            ),
+            atom_restate_log_probabilities=vector("atom_restate_log_probabilities"),
+            bond_reorder_log_probabilities=vector("bond_reorder_log_probabilities"),
             ring_electronic_log_probabilities=vector(
                 "ring_electronic_log_probabilities"
             ),
@@ -327,12 +360,8 @@ class FactorizedMarkEmpiricalPriors:
             connected_atom_observations=int(
                 payload.get("connected_atom_observations", 0)
             ),
-            atom_restate_observations=int(
-                payload.get("atom_restate_observations", 0)
-            ),
-            bond_reorder_observations=int(
-                payload.get("bond_reorder_observations", 0)
-            ),
+            atom_restate_observations=int(payload.get("atom_restate_observations", 0)),
+            bond_reorder_observations=int(payload.get("bond_reorder_observations", 0)),
             ring_electronic_observations=int(
                 payload.get("ring_electronic_observations", 0)
             ),
@@ -347,9 +376,7 @@ def _ring_topology_group_key(template: Any) -> tuple[str, tuple[int, ...]]:
     graph.add_edges_from(
         (int(left), int(right)) for left, right, _ in template.target_bonds
     )
-    cycle_sizes = tuple(
-        sorted(len(cycle) for cycle in nx.minimum_cycle_basis(graph))
-    )
+    cycle_sizes = tuple(sorted(len(cycle) for cycle in nx.minimum_cycle_basis(graph)))
     return str(template.topology_class), cycle_sizes
 
 
@@ -372,7 +399,10 @@ class ChemistryStateFeatures:
     closure_topology: np.ndarray
     ring_system_topology: np.ndarray
     atom_delete_mask: np.ndarray
+    atom_restate_admission_mask: np.ndarray | None
     cycle_edge_mask: np.ndarray
+    cycle_close_admission_mask: np.ndarray | None
+    cycle_open_admission_mask: np.ndarray | None
     cyclic_pair_mask: np.ndarray
     graft_mask: np.ndarray
     graft_remove_neighbors: np.ndarray
@@ -421,6 +451,66 @@ class OperatorCapabilities:
     compute_cyclic_graft: bool = False
     compute_ring_opening: bool = False
     compute_ring_system_delete: bool = True
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
+
+    def __post_init__(self) -> None:
+        if self.editing_process_semantics not in EDITING_PROCESS_SEMANTICS:
+            raise ValueError(
+                "unknown editing process semantics: "
+                f"{self.editing_process_semantics!r}; expected one of "
+                f"{EDITING_PROCESS_SEMANTICS}"
+            )
+        if self.atom_restate_action_semantics not in ATOM_RESTATE_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown atom-restatement action semantics: "
+                f"{self.atom_restate_action_semantics!r}; expected one of "
+                f"{ATOM_RESTATE_ACTION_SEMANTICS}"
+            )
+        if self.ring_restate_scorer_mode not in RING_RESTATE_SCORER_MODES:
+            raise ValueError(
+                "unknown ring-restatement scorer mode: "
+                f"{self.ring_restate_scorer_mode!r}; expected one of "
+                f"{RING_RESTATE_SCORER_MODES}"
+            )
+        if (
+            self.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+            and not self.compute_ring_restates
+        ):
+            raise ValueError(
+                "semantic ring-restatement scoring requires ring restates enabled"
+            )
+        if self.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+            expected = (
+                self.compute_ring_restates,
+                not self.compute_ring_system_delete,
+                self.atom_restate_action_semantics
+                == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+                self.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE,
+                self.cycle_close_action_semantics
+                == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+                self.cycle_open_action_semantics
+                == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+            )
+            if not all(expected):
+                raise ValueError(
+                    "semantic Editing-V2 process requires complete Active8 semantic modes"
+                )
+        if self.cycle_close_action_semantics not in CYCLE_CLOSE_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown cycle-close action semantics: "
+                f"{self.cycle_close_action_semantics!r}; expected one of "
+                f"{CYCLE_CLOSE_ACTION_SEMANTICS}"
+            )
+        if self.cycle_open_action_semantics not in CYCLE_OPEN_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown cycle-open action semantics: "
+                f"{self.cycle_open_action_semantics!r}; expected one of "
+                f"{CYCLE_OPEN_ACTION_SEMANTICS}"
+            )
 
     @classmethod
     def de_novo(cls) -> OperatorCapabilities:
@@ -439,6 +529,23 @@ class OperatorCapabilities:
         # suffix, so existing caches/checkpoints retain their exact identity.
         if not self.compute_ring_system_delete:
             payload += ":ring_system_delete=0"
+        if self.editing_process_semantics != LEGACY_EDITING_PROCESS_SEMANTICS:
+            payload += f":editing_process_semantics={self.editing_process_semantics}"
+        if self.atom_restate_action_semantics != LEGACY_ATOM_RESTATE_ACTION_SEMANTICS:
+            payload += (
+                ":atom_restate_action_semantics="
+                f"{self.atom_restate_action_semantics}"
+            )
+        if self.ring_restate_scorer_mode != LEGACY_RING_RESTATE_SCORER_MODE:
+            payload += f":ring_restate_scorer_mode={self.ring_restate_scorer_mode}"
+        if self.cycle_close_action_semantics != LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS:
+            payload += (
+                f":cycle_close_action_semantics={self.cycle_close_action_semantics}"
+            )
+        if self.cycle_open_action_semantics != LEGACY_CYCLE_OPEN_ACTION_SEMANTICS:
+            payload += (
+                f":cycle_open_action_semantics={self.cycle_open_action_semantics}"
+            )
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
@@ -578,15 +685,30 @@ class FactorizedMarkBatch:
     teacher_rates: Tensor
     importance_weights: Tensor
     ring_restate_actions: tuple[tuple[RingSystemRestate, ...], ...]
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
+    ring_restate_successor_group_ids: tuple[tuple[int, ...], ...] | None = None
+    ring_restate_successor_group_descriptors: (
+        tuple[tuple[tuple[tuple[int, int, int, int], ...], ...], ...] | None
+    ) = None
+    ring_restate_successor_group_multiplicities: tuple[tuple[int, ...], ...] | None = (
+        None
+    )
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS
+    atom_restate_admission_mask: Tensor | None = None
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
+    cycle_close_admission_mask: Tensor | None = None
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
+    cycle_open_admission_mask: Tensor | None = None
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
     ring_grow_support_mask: Tensor | None = None
     ring_grow_support_sparse: SparseBinaryRows | None = None
     ring_delete_actions: tuple[tuple[RingSystemDelete, ...], ...] | None = None
     ring_grow_support_is_exact: Tensor | bool = False
     ring_grow_enablement_is_exact: Tensor | bool = False
     ring_topology_local_support_log_mass: Tensor | None = None
-    ring_teacher_semantic_certificates: tuple[
-        RingTeacherSemanticCertificate | None, ...
-    ] | None = None
+    ring_teacher_semantic_certificates: (
+        tuple[RingTeacherSemanticCertificate | None, ...] | None
+    ) = None
     property_condition_values: Tensor | None = None
     property_condition_mask: Tensor | None = None
 
@@ -598,7 +720,9 @@ class FactorizedMarkBatch:
     def n_slots(self) -> int:
         return int(self.atom_types.shape[1])
 
-    def dense_ring_grow_support(self, *, device: torch.device | None = None) -> Tensor | None:
+    def dense_ring_grow_support(
+        self, *, device: torch.device | None = None
+    ) -> Tensor | None:
         if self.ring_grow_support_mask is not None:
             return (
                 self.ring_grow_support_mask
@@ -647,6 +771,41 @@ class FactorizedMarkBatch:
             teacher_rates=tensor_slice(self.teacher_rates),
             importance_weights=tensor_slice(self.importance_weights),
             ring_restate_actions=self.ring_restate_actions[start:stop],
+            ring_restate_scorer_mode=self.ring_restate_scorer_mode,
+            ring_restate_successor_group_ids=(
+                None
+                if self.ring_restate_successor_group_ids is None
+                else self.ring_restate_successor_group_ids[start:stop]
+            ),
+            ring_restate_successor_group_descriptors=(
+                None
+                if self.ring_restate_successor_group_descriptors is None
+                else self.ring_restate_successor_group_descriptors[start:stop]
+            ),
+            ring_restate_successor_group_multiplicities=(
+                None
+                if self.ring_restate_successor_group_multiplicities is None
+                else self.ring_restate_successor_group_multiplicities[start:stop]
+            ),
+            editing_process_semantics=self.editing_process_semantics,
+            atom_restate_admission_mask=(
+                None
+                if self.atom_restate_admission_mask is None
+                else tensor_slice(self.atom_restate_admission_mask)
+            ),
+            atom_restate_action_semantics=self.atom_restate_action_semantics,
+            cycle_close_admission_mask=(
+                None
+                if self.cycle_close_admission_mask is None
+                else tensor_slice(self.cycle_close_admission_mask)
+            ),
+            cycle_close_action_semantics=self.cycle_close_action_semantics,
+            cycle_open_admission_mask=(
+                None
+                if self.cycle_open_admission_mask is None
+                else tensor_slice(self.cycle_open_admission_mask)
+            ),
+            cycle_open_action_semantics=self.cycle_open_action_semantics,
             ring_grow_support_mask=(
                 None
                 if self.ring_grow_support_mask is None
@@ -688,7 +847,9 @@ class FactorizedMarkBatch:
             ),
         )
 
-    def to(self, device: torch.device, *, non_blocking: bool = False) -> "FactorizedMarkBatch":
+    def to(
+        self, device: torch.device, *, non_blocking: bool = False
+    ) -> "FactorizedMarkBatch":
         def move(value: Tensor) -> Tensor:
             return value.to(device=device, non_blocking=non_blocking)
 
@@ -714,8 +875,37 @@ class FactorizedMarkBatch:
             teacher_rates=move(self.teacher_rates),
             importance_weights=move(self.importance_weights),
             ring_restate_actions=self.ring_restate_actions,
+            ring_restate_scorer_mode=self.ring_restate_scorer_mode,
+            ring_restate_successor_group_ids=self.ring_restate_successor_group_ids,
+            ring_restate_successor_group_descriptors=(
+                self.ring_restate_successor_group_descriptors
+            ),
+            ring_restate_successor_group_multiplicities=(
+                self.ring_restate_successor_group_multiplicities
+            ),
+            editing_process_semantics=self.editing_process_semantics,
+            atom_restate_admission_mask=(
+                None
+                if self.atom_restate_admission_mask is None
+                else move(self.atom_restate_admission_mask)
+            ),
+            atom_restate_action_semantics=self.atom_restate_action_semantics,
+            cycle_close_admission_mask=(
+                None
+                if self.cycle_close_admission_mask is None
+                else move(self.cycle_close_admission_mask)
+            ),
+            cycle_close_action_semantics=self.cycle_close_action_semantics,
+            cycle_open_admission_mask=(
+                None
+                if self.cycle_open_admission_mask is None
+                else move(self.cycle_open_admission_mask)
+            ),
+            cycle_open_action_semantics=self.cycle_open_action_semantics,
             ring_grow_support_mask=(
-                None if self.ring_grow_support_mask is None else move(self.ring_grow_support_mask)
+                None
+                if self.ring_grow_support_mask is None
+                else move(self.ring_grow_support_mask)
             ),
             # CSR support stays on CPU and is materialized directly on the
             # destination device only when the model builds its action table.
@@ -772,8 +962,37 @@ class FactorizedMarkBatch:
             teacher_rates=pin(self.teacher_rates),
             importance_weights=pin(self.importance_weights),
             ring_restate_actions=self.ring_restate_actions,
+            ring_restate_scorer_mode=self.ring_restate_scorer_mode,
+            ring_restate_successor_group_ids=self.ring_restate_successor_group_ids,
+            ring_restate_successor_group_descriptors=(
+                self.ring_restate_successor_group_descriptors
+            ),
+            ring_restate_successor_group_multiplicities=(
+                self.ring_restate_successor_group_multiplicities
+            ),
+            editing_process_semantics=self.editing_process_semantics,
+            atom_restate_admission_mask=(
+                None
+                if self.atom_restate_admission_mask is None
+                else pin(self.atom_restate_admission_mask)
+            ),
+            atom_restate_action_semantics=self.atom_restate_action_semantics,
+            cycle_close_admission_mask=(
+                None
+                if self.cycle_close_admission_mask is None
+                else pin(self.cycle_close_admission_mask)
+            ),
+            cycle_close_action_semantics=self.cycle_close_action_semantics,
+            cycle_open_admission_mask=(
+                None
+                if self.cycle_open_admission_mask is None
+                else pin(self.cycle_open_admission_mask)
+            ),
+            cycle_open_action_semantics=self.cycle_open_action_semantics,
             ring_grow_support_mask=(
-                None if self.ring_grow_support_mask is None else pin(self.ring_grow_support_mask)
+                None
+                if self.ring_grow_support_mask is None
+                else pin(self.ring_grow_support_mask)
             ),
             ring_grow_support_sparse=(
                 None
@@ -855,8 +1074,10 @@ def _legacy_prequotient_graft_tables(
         for b in real[offset + 1 :]
         if int(state.bonds[a, b]) != 0
     )
-    if not real or not nx.is_tree(graph) or any(
-        int(state.bonds[a, b]) != 1 for a, b in graph.edges()
+    if (
+        not real
+        or not nx.is_tree(graph)
+        or any(int(state.bonds[a, b]) != 1 for a, b in graph.edges())
     ):
         return mask, removed_neighbors
 
@@ -890,8 +1111,13 @@ def _masked_family_logits(
     the scores of all executable canonical rewrite matches.
     """
 
-    if raw_family_logits.shape != action_log_z.shape or enabled.shape != action_log_z.shape:
-        raise ValueError("family logits, partitions, and support must have equal shapes")
+    if (
+        raw_family_logits.shape != action_log_z.shape
+        or enabled.shape != action_log_z.shape
+    ):
+        raise ValueError(
+            "family logits, partitions, and support must have equal shapes"
+        )
     if rate_factorization == "superposed":
         raw_family_logits = raw_family_logits + torch.where(
             enabled,
@@ -966,18 +1192,10 @@ def _apply_charge_policy_to_action_masks(
         & charge_zero[:, :, None, None]
     )
 
-    charged_neighbor = (
-        (batch.bonds != 0) & charged.unsqueeze(1)
-    ).any(dim=-1)
-    result["atom_delete"] = (
-        result["atom_delete"] & charge_zero & ~charged_neighbor
-    )
-    result["atom_restate"] = (
-        result["atom_restate"] & charge_zero.unsqueeze(-1)
-    )
-    result["bond_reorder"] = (
-        result["bond_reorder"] & charge_zero_pair.unsqueeze(-1)
-    )
+    charged_neighbor = ((batch.bonds != 0) & charged.unsqueeze(1)).any(dim=-1)
+    result["atom_delete"] = result["atom_delete"] & charge_zero & ~charged_neighbor
+    result["atom_restate"] = result["atom_restate"] & charge_zero.unsqueeze(-1)
+    result["bond_reorder"] = result["bond_reorder"] & charge_zero_pair.unsqueeze(-1)
 
     removed = batch.graft_remove_neighbors
     valid_removed = removed >= 0
@@ -988,22 +1206,17 @@ def _apply_charge_policy_to_action_masks(
         index=removed_lookup,
     ).reshape_as(removed)
     result["bond_reroute"] = (
-        result["bond_reroute"]
-        & charge_zero_pair
-        & valid_removed
-        & ~removed_charged
+        result["bond_reroute"] & charge_zero_pair & valid_removed & ~removed_charged
     )
 
     if result["cycle_insert"].ndim == 4:
         # Production RingCore: nonbonded endpoint pair x bond order.
-        result["cycle_insert"] = (
-            result["cycle_insert"] & charge_zero_pair.unsqueeze(-1)
-        )
+        result["cycle_insert"] = result["cycle_insert"] & charge_zero_pair.unsqueeze(-1)
     else:
         # Historical root-cycle templates are outside the production process.
         # A charged source cannot be a legal root source, so fail them closed.
-        result["cycle_insert"] = (
-            result["cycle_insert"] & ~charged.any(dim=1).unsqueeze(-1)
+        result["cycle_insert"] = result["cycle_insert"] & ~charged.any(dim=1).unsqueeze(
+            -1
         )
     if tuple(result["cycle_attach"].shape) == tuple(charge_zero_pair.shape):
         # Production RingCore: deletable cycle-edge endpoint pair.
@@ -1011,9 +1224,7 @@ def _apply_charge_policy_to_action_masks(
     else:
         # Historical cycle-attachment templates are indexed by anchor x
         # template, and only the existing anchor is mutated.
-        result["cycle_attach"] = (
-            result["cycle_attach"] & charge_zero.unsqueeze(-1)
-        )
+        result["cycle_attach"] = result["cycle_attach"] & charge_zero.unsqueeze(-1)
     return result
 
 
@@ -1098,16 +1309,35 @@ def prepare_factorized_mark_batch(
     *,
     use_aromatic_bond_view: bool = True,
     ring_catalog: TypedRingCatalog | None = None,
-    chemistry_feature_cache: MutableMapping[
-        tuple[int, bool, bool, bool, bool, StateCacheKey], ChemistryStateFeatures
-    ]
-    | None = None,
+    chemistry_feature_cache: (
+        MutableMapping[
+            tuple[
+                int,
+                bool,
+                bool,
+                bool,
+                bool,
+                str,
+                str,
+                str,
+                str,
+                StateCacheKey,
+            ],
+            ChemistryStateFeatures,
+        ]
+        | None
+    ) = None,
     chemistry_feature_cache_limit: int = 2048,
     compute_ring_grow_support: bool = True,
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
     compute_ring_opening: bool = False,
     compute_ring_system_delete: bool = True,
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS,
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
     property_condition_values: tuple[tuple[float, ...], ...] | None = None,
     property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
 ) -> FactorizedMarkBatch:
@@ -1132,15 +1362,154 @@ def prepare_factorized_mark_batch(
         raise ValueError("importance weights have the wrong length")
     if chemistry_feature_cache_limit <= 0:
         raise ValueError("chemistry feature cache limit must be positive")
+    if editing_process_semantics not in EDITING_PROCESS_SEMANTICS:
+        raise ValueError(
+            "unknown editing process semantics: "
+            f"{editing_process_semantics!r}; expected one of "
+            f"{EDITING_PROCESS_SEMANTICS}"
+        )
+    if atom_restate_action_semantics not in ATOM_RESTATE_ACTION_SEMANTICS:
+        raise ValueError(
+            "unknown atom-restatement action semantics: "
+            f"{atom_restate_action_semantics!r}; expected one of "
+            f"{ATOM_RESTATE_ACTION_SEMANTICS}"
+        )
+    if ring_restate_scorer_mode not in RING_RESTATE_SCORER_MODES:
+        raise ValueError(
+            "unknown ring-restatement scorer mode: "
+            f"{ring_restate_scorer_mode!r}; expected one of "
+            f"{RING_RESTATE_SCORER_MODES}"
+        )
+    if (
+        ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+        and not compute_ring_restates
+    ):
+        raise ValueError(
+            "semantic ring-restatement scoring requires compute_ring_restates=True"
+        )
+    if cycle_close_action_semantics not in CYCLE_CLOSE_ACTION_SEMANTICS:
+        raise ValueError(
+            "unknown cycle-close action semantics: "
+            f"{cycle_close_action_semantics!r}; expected one of "
+            f"{CYCLE_CLOSE_ACTION_SEMANTICS}"
+        )
+    if cycle_open_action_semantics not in CYCLE_OPEN_ACTION_SEMANTICS:
+        raise ValueError(
+            "unknown cycle-open action semantics: "
+            f"{cycle_open_action_semantics!r}; expected one of "
+            f"{CYCLE_OPEN_ACTION_SEMANTICS}"
+        )
+    if editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+        if not (
+            compute_ring_restates
+            and not compute_ring_system_delete
+            and atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+            and ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+            and cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+            and cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+        ):
+            raise ValueError(
+                "semantic Editing-V2 batch requires complete Active8 semantic modes"
+            )
+    if not use_aromatic_bond_view and (
+        atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+        or cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+        or cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+    ):
+        raise ValueError(
+            "semantic Editing-V2 actions require the resonance-invariant neural bond view"
+        )
+    for rule_name, action in zip(teacher_rule_names, teacher_actions, strict=True):
+        if atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS:
+            if rule_name == "atom_restate" or isinstance(action, AtomRestate):
+                raise ValueError(
+                    "Editing V2 semantic atom-restatement batches reject raw "
+                    "AtomRestate teachers"
+                )
+            if (
+                rule_name == "atom_restate_semantic"
+                and type(action) is not SemanticAtomRestate
+            ):
+                raise ValueError(
+                    "atom_restate_semantic teachers require SemanticAtomRestate payloads"
+                )
+            if isinstance(action, SemanticAtomRestate):
+                if rule_name != "atom_restate_semantic":
+                    raise ValueError(
+                        "SemanticAtomRestate teachers require "
+                        "rule_name='atom_restate_semantic'"
+                    )
+                if not (
+                    0 <= int(action.v) < n_slots
+                    and 0 <= int(action.target_class_index) < len(ORGANIC_VOCABULARY)
+                ):
+                    raise ValueError(
+                        "SemanticAtomRestate teacher coordinate violates the action contract"
+                    )
+        elif rule_name == "atom_restate_semantic" or isinstance(
+            action,
+            SemanticAtomRestate,
+        ):
+            raise ValueError(
+                "historical atom-restatement batches reject SemanticAtomRestate teachers"
+            )
+        if cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS:
+            if rule_name == "bond_insert" or isinstance(action, BondInsert):
+                raise ValueError(
+                    "Editing V2 semantic cycle-close batches reject raw BondInsert teachers"
+                )
+            if rule_name == "cycle_close" and type(action) is not CycleCloseEdge:
+                raise ValueError("cycle_close teachers require CycleCloseEdge payloads")
+            if isinstance(action, CycleCloseEdge):
+                if rule_name != "cycle_close":
+                    raise ValueError(
+                        "CycleCloseEdge teachers require rule_name='cycle_close'"
+                    )
+                if not (
+                    0 <= int(action.a) < int(action.b) < n_slots
+                    and int(action.order) in {1, 2, 3}
+                ):
+                    raise ValueError(
+                        "CycleCloseEdge teacher endpoints/order violate the action contract"
+                    )
+        elif rule_name == "cycle_close" or isinstance(action, CycleCloseEdge):
+            raise ValueError(
+                "historical cycle-close batches reject semantic CycleCloseEdge teachers"
+            )
+        if cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS:
+            if rule_name == "bond_delete" or isinstance(action, BondDelete):
+                raise ValueError(
+                    "Editing V2 semantic cycle-open batches reject raw BondDelete teachers"
+                )
+            if rule_name == "cycle_open" and type(action) is not CycleOpenEdge:
+                raise ValueError("cycle_open teachers require CycleOpenEdge payloads")
+            if isinstance(action, CycleOpenEdge):
+                if rule_name != "cycle_open":
+                    raise ValueError(
+                        "CycleOpenEdge teachers require rule_name='cycle_open'"
+                    )
+                if not 0 <= int(action.a) < int(action.b) < n_slots:
+                    raise ValueError(
+                        "CycleOpenEdge teacher endpoints violate the action contract"
+                    )
+        elif rule_name == "cycle_open" or isinstance(action, CycleOpenEdge):
+            raise ValueError(
+                "historical cycle-open batches reject semantic CycleOpenEdge teachers"
+            )
     if (property_condition_values is None) != (property_condition_mask is None):
         raise ValueError("property condition values and mask must be provided together")
     if property_condition_values is not None:
-        if len(property_condition_values) != count or len(property_condition_mask) != count:
+        if (
+            len(property_condition_values) != count
+            or len(property_condition_mask) != count
+        ):
             raise ValueError("property condition rows do not align with the batch")
         widths = {len(row) for row in property_condition_values}
         mask_widths = {len(row) for row in property_condition_mask}
         if len(widths) != 1 or widths != mask_widths or next(iter(widths)) <= 0:
-            raise ValueError("property condition rows must have one positive shared width")
+            raise ValueError(
+                "property condition rows must have one positive shared width"
+            )
         values_array = np.asarray(property_condition_values, dtype=np.float32)
         mask_array = np.asarray(property_condition_mask, dtype=np.bool_)
         if not np.isfinite(values_array[mask_array]).all():
@@ -1154,13 +1523,19 @@ def prepare_factorized_mark_batch(
     closure_topology = []
     ring_system_topology = []
     delete_masks = []
+    atom_restate_admission_masks = []
     cycle_edge_masks = []
+    cycle_close_admission_masks = []
+    cycle_open_admission_masks = []
     cyclic_pair_masks = []
     graft_masks = []
     graft_remove_neighbors = []
     graft_successor_groups = []
     neural_bonds = []
     restate_actions = []
+    ring_restate_group_ids = []
+    ring_restate_group_descriptors = []
+    ring_restate_group_multiplicities = []
     ring_grow_support_masks = []
     ring_delete_actions = []
     ring_system_templates = (
@@ -1188,6 +1563,10 @@ def prepare_factorized_mark_batch(
             bool(compute_cyclic_graft),
             bool(compute_ring_opening),
             bool(compute_ring_system_delete),
+            str(editing_process_semantics),
+            str(atom_restate_action_semantics),
+            str(cycle_close_action_semantics),
+            str(cycle_open_action_semantics),
             molecular_state_cache_key(state),
         )
         features = (
@@ -1206,6 +1585,22 @@ def prepare_factorized_mark_batch(
                 graft_successor_group,
             ) = _graph_application_masks(
                 state, atom_topo, compute_cyclic_graft=compute_cyclic_graft
+            )
+            cycle_close_admission_mask = (
+                _semantic_cycle_close_admission_mask(state)
+                if cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+                else None
+            )
+            atom_restate_admission_mask = (
+                _semantic_atom_restate_admission_mask(state)
+                if atom_restate_action_semantics
+                == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+                else None
+            )
+            cycle_open_admission_mask = (
+                _semantic_cycle_open_admission_mask(state)
+                if cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+                else None
             )
             ring_delete_candidates: tuple[Any, ...] | None
             if ring_catalog is None:
@@ -1236,7 +1631,10 @@ def prepare_factorized_mark_batch(
                 closure_topology=closure_topo,
                 ring_system_topology=ring_system_topo,
                 atom_delete_mask=delete_mask,
+                atom_restate_admission_mask=atom_restate_admission_mask,
                 cycle_edge_mask=cycle_edge_mask,
+                cycle_close_admission_mask=cycle_close_admission_mask,
+                cycle_open_admission_mask=cycle_open_admission_mask,
                 cyclic_pair_mask=cyclic_pair_mask,
                 graft_mask=graft_mask,
                 graft_remove_neighbors=graft_remove_neighbor,
@@ -1261,7 +1659,13 @@ def prepare_factorized_mark_batch(
         closure_topology.append(features.closure_topology)
         ring_system_topology.append(features.ring_system_topology)
         delete_masks.append(features.atom_delete_mask)
+        if features.atom_restate_admission_mask is not None:
+            atom_restate_admission_masks.append(features.atom_restate_admission_mask)
         cycle_edge_masks.append(features.cycle_edge_mask)
+        if features.cycle_close_admission_mask is not None:
+            cycle_close_admission_masks.append(features.cycle_close_admission_mask)
+        if features.cycle_open_admission_mask is not None:
+            cycle_open_admission_masks.append(features.cycle_open_admission_mask)
         cyclic_pair_masks.append(features.cyclic_pair_mask)
         graft_masks.append(features.graft_mask)
         graft_remove_neighbors.append(features.graft_remove_neighbors)
@@ -1276,18 +1680,30 @@ def prepare_factorized_mark_batch(
                 raise RuntimeError(
                     "ring-system-restate filtering lacks a production executor"
                 )
-            raw_restate_actions = enumerate_ring_system_restate_actions(
-                state,
-                system=macro_system,
-            )
-            restate_actions.append(
-                _charge_preserving_macro_actions(
+            if ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE:
+                semantic_groups = enumerate_ring_restate_semantic_groups(
                     state,
-                    "ring_system_restate",
-                    tuple(raw_restate_actions),
                     system=macro_system,
                 )
-            )
+                restate_actions.append(semantic_groups.actions)
+                ring_restate_group_ids.append(semantic_groups.successor_group_ids)
+                ring_restate_group_descriptors.append(semantic_groups.group_descriptors)
+                ring_restate_group_multiplicities.append(
+                    semantic_groups.group_multiplicities
+                )
+            else:
+                raw_restate_actions = enumerate_ring_system_restate_actions(
+                    state,
+                    system=macro_system,
+                )
+                restate_actions.append(
+                    _charge_preserving_macro_actions(
+                        state,
+                        "ring_system_restate",
+                        tuple(raw_restate_actions),
+                        system=macro_system,
+                    )
+                )
         else:
             restate_actions.append(())
         if ring_catalog is not None and ring_system_templates is not None:
@@ -1308,7 +1724,9 @@ def prepare_factorized_mark_batch(
 
     return FactorizedMarkBatch(
         states=states,
-        atom_types=torch.from_numpy(np.stack([state.atom_types for state in states])).long(),
+        atom_types=torch.from_numpy(
+            np.stack([state.atom_types for state in states])
+        ).long(),
         formal_charges=torch.from_numpy(
             np.stack([state.formal_charges for state in states])
         ).long(),
@@ -1325,19 +1743,60 @@ def prepare_factorized_mark_batch(
         cycle_edge_mask=torch.from_numpy(np.stack(cycle_edge_masks)).bool(),
         cyclic_pair_mask=torch.from_numpy(np.stack(cyclic_pair_masks)).bool(),
         graft_mask=torch.from_numpy(np.stack(graft_masks)).bool(),
-        graft_remove_neighbors=torch.from_numpy(np.stack(graft_remove_neighbors)).long(),
-        graft_successor_groups=torch.from_numpy(np.stack(graft_successor_groups)).long(),
+        graft_remove_neighbors=torch.from_numpy(
+            np.stack(graft_remove_neighbors)
+        ).long(),
+        graft_successor_groups=torch.from_numpy(
+            np.stack(graft_successor_groups)
+        ).long(),
         teacher_actions=teacher_actions,
         teacher_rule_names=teacher_rule_names,
         teacher_rates=torch.tensor(teacher_rates, dtype=torch.float32),
         importance_weights=torch.tensor(weights, dtype=torch.float32),
         ring_restate_actions=tuple(restate_actions),
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        ring_restate_successor_group_ids=(
+            tuple(ring_restate_group_ids)
+            if ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+            else None
+        ),
+        ring_restate_successor_group_descriptors=(
+            tuple(ring_restate_group_descriptors)
+            if ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+            else None
+        ),
+        ring_restate_successor_group_multiplicities=(
+            tuple(ring_restate_group_multiplicities)
+            if ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+            else None
+        ),
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_admission_mask=(
+            None
+            if atom_restate_action_semantics == LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
+            else torch.from_numpy(np.stack(atom_restate_admission_masks)).bool()
+        ),
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        cycle_close_admission_mask=(
+            None
+            if cycle_close_action_semantics == LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
+            else torch.from_numpy(np.stack(cycle_close_admission_masks)).bool()
+        ),
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_admission_mask=(
+            None
+            if cycle_open_action_semantics == LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
+            else torch.from_numpy(np.stack(cycle_open_admission_masks)).bool()
+        ),
+        cycle_open_action_semantics=cycle_open_action_semantics,
         ring_grow_support_mask=(
             None
             if ring_catalog is None or not compute_ring_grow_support
             else torch.from_numpy(np.stack(ring_grow_support_masks)).bool()
         ),
-        ring_delete_actions=(None if ring_catalog is None else tuple(ring_delete_actions)),
+        ring_delete_actions=(
+            None if ring_catalog is None else tuple(ring_delete_actions)
+        ),
         property_condition_values=(
             None if values_array is None else torch.from_numpy(values_array)
         ),
@@ -1424,7 +1883,9 @@ def _graph_application_masks(
     graft_remove_neighbor = np.full((n_slots, n_slots), -1, dtype=np.int64)
     graft_successor_group = np.full((n_slots, n_slots), -1, dtype=np.int64)
     all_single_tree = bool(
-        real and nx.is_tree(graph) and all(int(state.bonds[a, b]) == 1 for a, b in graph.edges())
+        real
+        and nx.is_tree(graph)
+        and all(int(state.bonds[a, b]) == 1 for a, b in graph.edges())
     )
     if all_single_tree:
         tree_adjacency = {
@@ -1497,9 +1958,9 @@ def _graph_application_masks(
         if use_orbit_pruning:
             if canonicalizer is None:
                 raise RuntimeError("Graft orbit pruning lacks a canonicalizer")
-            orbit_groups: OrderedDict[
-                tuple[Any, ...], list[tuple[int, int, int]]
-            ] = OrderedDict()
+            orbit_groups: OrderedDict[tuple[Any, ...], list[tuple[int, int, int]]] = (
+                OrderedDict()
+            )
             for candidate in candidates:
                 moved, target, _ = candidate
                 orbit_groups.setdefault(
@@ -1587,6 +2048,42 @@ def _graph_application_masks(
     )
 
 
+def _semantic_cycle_open_admission_mask(state: MolecularGraph) -> np.ndarray:
+    """Return exact Editing-V2 cycle-open admission by endpoint pair.
+
+    The semantic executor, rather than stored Kekule bond arithmetic, is the
+    authority. Chemistry-state caching in ``prepare_factorized_mark_batch``
+    ensures this complete source-level mask is constructed once per exact
+    state and process identity.
+    """
+
+    mask = np.zeros((state.n_atoms, state.n_atoms), dtype=np.bool_)
+    for action in enumerate_cycle_open_edges(state):
+        mask[int(action.a), int(action.b)] = True
+    return mask
+
+
+def _semantic_atom_restate_admission_mask(state: MolecularGraph) -> np.ndarray:
+    """Return exact Editing-V2 atom-restatement admission by slot and class."""
+
+    mask = np.zeros(
+        (state.n_atoms, len(ORGANIC_VOCABULARY)),
+        dtype=np.bool_,
+    )
+    for action in enumerate_semantic_atom_restates(state):
+        mask[int(action.v), int(action.target_class_index)] = True
+    return mask
+
+
+def _semantic_cycle_close_admission_mask(state: MolecularGraph) -> np.ndarray:
+    """Return exact Editing-V2 cycle-close admission by pair and order."""
+
+    mask = np.zeros((state.n_atoms, state.n_atoms, 3), dtype=np.bool_)
+    for action in enumerate_cycle_close_edges(state):
+        mask[int(action.a), int(action.b), int(action.order) - 1] = True
+    return mask
+
+
 def _canonical_colored_tree_key_from_adjacency(
     adjacency: dict[int, set[int]],
     atom_types: np.ndarray,
@@ -1605,7 +2102,9 @@ def _canonical_colored_tree_key_from_adjacency(
 
     if not adjacency:
         raise ValueError("colored-tree canonicalization requires a non-empty tree")
-    if sum(len(neighbors) for neighbors in adjacency.values()) != 2 * (len(adjacency) - 1):
+    if sum(len(neighbors) for neighbors in adjacency.values()) != 2 * (
+        len(adjacency) - 1
+    ):
         raise ValueError("colored-tree canonicalization requires tree adjacency")
 
     remaining = set(adjacency)
@@ -1734,9 +2233,7 @@ class _IncrementalColoredTreeCanonicalizer:
 
     def _intern_descriptor(self, descriptor: tuple[Any, ...]) -> int:
         atom_type, charge, hydrogens, children = descriptor
-        child_ids = tuple(
-            sorted(self._intern_descriptor(child) for child in children)
-        )
+        child_ids = tuple(sorted(self._intern_descriptor(child) for child in children))
         compact = (int(atom_type), int(charge), int(hydrogens), child_ids)
         identifier = self.codebook.get(compact)
         if identifier is None:
@@ -1756,7 +2253,9 @@ class _IncrementalColoredTreeCanonicalizer:
         self,
         descriptors: tuple[tuple[Any, ...], ...],
     ) -> tuple[int, ...]:
-        identifiers = tuple(sorted(self._intern_descriptor(item) for item in descriptors))
+        identifiers = tuple(
+            sorted(self._intern_descriptor(item) for item in descriptors)
+        )
         if len(identifiers) == 1:
             return 1, identifiers[0]
         if len(identifiers) == 2:
@@ -1778,10 +2277,7 @@ class _IncrementalColoredTreeCanonicalizer:
     def vertex_orbit_count(self) -> int:
         """Return the exact number of color-preserving vertex orbits."""
 
-        rooted_ids = [
-            self._base_identifier(vertex, -1)
-            for vertex in self.adjacency
-        ]
+        rooted_ids = [self._base_identifier(vertex, -1) for vertex in self.adjacency]
         return len(set(rooted_ids))
 
     def _path(self, source: int, target: int) -> tuple[int, ...]:
@@ -1937,6 +2433,11 @@ class FactorizedTraceletRateModel(nn.Module):
         enable_ring_opening: bool = False,
         enable_cycle_ops: bool = False,
         cycle_open_scorer_mode: str = "pair_linear",
+        editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS,
+        atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+        ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
+        cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+        cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
         enable_ring_grow_macro: bool = True,
         enable_ring_system_delete: bool = True,
         atom_vocabulary: AtomVocabulary | None = None,
@@ -1944,7 +2445,9 @@ class FactorizedTraceletRateModel(nn.Module):
     ) -> None:
         super().__init__()
         if hidden_dim <= 0 or message_passing_steps <= 0 or mark_dim <= 0:
-            raise ValueError("model dimensions and message-passing steps must be positive")
+            raise ValueError(
+                "model dimensions and message-passing steps must be positive"
+            )
         if ring_candidate_cache_limit <= 0:
             raise ValueError("ring candidate cache limit must be positive")
         if property_condition_dim < 0:
@@ -1964,6 +2467,80 @@ class FactorizedTraceletRateModel(nn.Module):
         # ring_system_* macros are an acceleration cache. Off for de-novo B + current B-edit (byte-identical:
         # the cycle heads below are absent), on for the ring-support B-edit fine-tune.
         self.enable_cycle_ops = bool(enable_cycle_ops)
+        if editing_process_semantics not in EDITING_PROCESS_SEMANTICS:
+            raise ValueError(
+                "unknown editing process semantics: "
+                f"{editing_process_semantics!r}; expected one of "
+                f"{EDITING_PROCESS_SEMANTICS}"
+            )
+        self.editing_process_semantics = str(editing_process_semantics)
+        if atom_restate_action_semantics not in ATOM_RESTATE_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown atom-restatement action semantics: "
+                f"{atom_restate_action_semantics!r}; expected one of "
+                f"{ATOM_RESTATE_ACTION_SEMANTICS}"
+            )
+        self.atom_restate_action_semantics = str(atom_restate_action_semantics)
+        if (
+            self.atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+            and not self.enable_heteroatom_scan
+        ):
+            raise ValueError(
+                "semantic atom restatement requires enable_heteroatom_scan=True"
+            )
+        if ring_restate_scorer_mode not in RING_RESTATE_SCORER_MODES:
+            raise ValueError(
+                "unknown ring-restatement scorer mode: "
+                f"{ring_restate_scorer_mode!r}; expected one of "
+                f"{RING_RESTATE_SCORER_MODES}"
+            )
+        self.ring_restate_scorer_mode = str(ring_restate_scorer_mode)
+        if (
+            self.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+            and not self.enable_ring_restates
+        ):
+            raise ValueError(
+                "semantic ring-restatement scoring requires enable_ring_restates=True"
+            )
+        if cycle_close_action_semantics not in CYCLE_CLOSE_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown cycle-close action semantics: "
+                f"{cycle_close_action_semantics!r}; expected one of "
+                f"{CYCLE_CLOSE_ACTION_SEMANTICS}"
+            )
+        self.cycle_close_action_semantics = str(cycle_close_action_semantics)
+        if (
+            self.cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+            and not self.enable_cycle_ops
+        ):
+            raise ValueError(
+                "semantic cycle-close actions require enable_cycle_ops=True"
+            )
+        if cycle_open_action_semantics not in CYCLE_OPEN_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown cycle-open action semantics: "
+                f"{cycle_open_action_semantics!r}; expected one of "
+                f"{CYCLE_OPEN_ACTION_SEMANTICS}"
+            )
+        self.cycle_open_action_semantics = str(cycle_open_action_semantics)
+        if (
+            self.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+            and not self.enable_cycle_ops
+        ):
+            raise ValueError(
+                "semantic cycle-open actions require enable_cycle_ops=True"
+            )
+        semantic_close = (
+            self.cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+        )
+        semantic_open = (
+            self.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+        )
+        if semantic_close != semantic_open:
+            raise ValueError(
+                "Editing-V2 model cycle-close and cycle-open action semantics "
+                "must both be semantic or both be legacy"
+            )
         if cycle_open_scorer_mode not in CYCLE_OPEN_SCORER_MODES:
             raise ValueError(
                 "unknown cycle-open scorer mode: "
@@ -1973,6 +2550,14 @@ class FactorizedTraceletRateModel(nn.Module):
         if not self.enable_cycle_ops and self.cycle_open_scorer_mode != "pair_linear":
             raise ValueError(
                 "non-legacy cycle-open scorers require enable_cycle_ops=True"
+            )
+        if (
+            self.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+            and self.cycle_open_scorer_mode != "pair_linear"
+        ):
+            raise ValueError(
+                "semantic cycle opening requires the resonance-invariant pair_linear scorer; "
+                "the exact-bond contextual probe reads stored Kekule order"
             )
         # Legacy whole-ring-system GROW macro (adds a full ring in one event; B's de-novo ring-adding path).
         # Default True = byte-identical to B / current B-edit. RING_CORE_V1 sets this False so ring ADDITION
@@ -1997,11 +2582,37 @@ class FactorizedTraceletRateModel(nn.Module):
                 "ops replace the legacy ring_system_grow macro (RingCore-V1). Pass "
                 "enable_ring_grow_macro=False when enabling cycle ops (launch: --disable-ring-grow-macro)."
             )
+        if self.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+            if not (
+                self.enable_cycle_ops
+                and not self.enable_ring_grow_macro
+                and not self.enable_ring_system_delete
+                and self.enable_ring_restates
+                and self.enable_heteroatom_scan
+                and self.atom_restate_action_semantics
+                == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+                and self.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+                and semantic_close
+                and semantic_open
+            ):
+                raise ValueError(
+                    "semantic Editing-V2 process requires the complete Active8 "
+                    "operator and scorer configuration"
+                )
         # Atom-type prediction vocabulary shared by the heads, candidate masks, sampling, and teacher-
         # scoring, so head width and the fiber it is scored against never drift. Default CNOF_VOCABULARY
         # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
         # classes) covers the drug-like subset with every valence-state its own class (sink-free restate).
-        self.atom_vocabulary = atom_vocabulary if atom_vocabulary is not None else CNOF_VOCABULARY
+        self.atom_vocabulary = (
+            atom_vocabulary if atom_vocabulary is not None else CNOF_VOCABULARY
+        )
+        if (
+            self.atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+            and tuple(self.atom_vocabulary.classes) != tuple(ORGANIC_VOCABULARY.classes)
+        ):
+            raise ValueError(
+                "semantic atom restatement requires the frozen broad-organic vocabulary"
+            )
         # Ring-atom element vocabulary (element x role); CNOF by default (byte-identical), +S/P for the
         # organic model so ring_system_grow can build heteroaromatic rings (thiophene, thiazole, phosphole).
         self.ring_atom_elements = (
@@ -2009,7 +2620,9 @@ class FactorizedTraceletRateModel(nn.Module):
             if ring_atom_elements is not None
             else CNOF_RING_ELEMENTS
         )
-        self._ring_element_to_index = {int(e): i for i, e in enumerate(self.ring_atom_elements)}
+        self._ring_element_to_index = {
+            int(e): i for i, e in enumerate(self.ring_atom_elements)
+        }
         if tuple(self.ring_atom_elements) != tuple(CNOF_RING_ELEMENTS):
             # The organic ring head is wired, but the ring-GENERATION electronic model (Huckel pi-electron
             # decoder + cached category masks) is still CNOF -- de-novo heteroaromatic BUILDING is a
@@ -2097,14 +2710,17 @@ class FactorizedTraceletRateModel(nn.Module):
         self.cycle_templates = tuple(ring_catalog.cycle_templates)
         self.attach_templates = tuple(ring_catalog.attach_templates)
         self.ring_system_templates = structured_ring_system_templates(ring_catalog)
-        self.ring_system_template_aliases = structured_ring_system_template_aliases(ring_catalog)
+        self.ring_system_template_aliases = structured_ring_system_template_aliases(
+            ring_catalog
+        )
         if len(self.ring_system_template_aliases) != len(self.ring_system_templates):
             raise RuntimeError("ring-system alias groups do not align with templates")
         self.ring_system_electronic_witness_aliases = (
             structured_ring_system_electronic_aliases(ring_catalog)
             if (
                 self.ring_electronic_mode == "catalog_exact"
-                or int(getattr(ring_catalog, "ring_system_electronic_alias_version", 0)) >= 1
+                or int(getattr(ring_catalog, "ring_system_electronic_alias_version", 0))
+                >= 1
             )
             else None
         )
@@ -2113,18 +2729,21 @@ class FactorizedTraceletRateModel(nn.Module):
             if self.ring_electronic_mode == "catalog_exact"
             else None
         )
-        if (
-            self.ring_system_electronic_witness_aliases is not None
-            and len(self.ring_system_electronic_witness_aliases)
-            != len(self.ring_system_templates)
-        ):
-            raise RuntimeError("ring electronic witness aliases do not align with templates")
+        if self.ring_system_electronic_witness_aliases is not None and len(
+            self.ring_system_electronic_witness_aliases
+        ) != len(self.ring_system_templates):
+            raise RuntimeError(
+                "ring electronic witness aliases do not align with templates"
+            )
         raw_ring_counts = tuple(
-            int(count) for count in getattr(ring_catalog, "ring_system_template_counts", ())
+            int(count)
+            for count in getattr(ring_catalog, "ring_system_template_counts", ())
         )
         if len(raw_ring_counts) != len(ring_catalog.ring_system_templates):
             raw_ring_counts = tuple(1 for _ in ring_catalog.ring_system_templates)
-        count_by_template = dict(zip(ring_catalog.ring_system_templates, raw_ring_counts))
+        count_by_template = dict(
+            zip(ring_catalog.ring_system_templates, raw_ring_counts)
+        )
         semantic_ring_counts = torch.tensor(
             tuple(
                 1.0 + sum(count_by_template[alias] for alias in aliases)
@@ -2159,9 +2778,7 @@ class FactorizedTraceletRateModel(nn.Module):
         topology_group_counts = (
             torch.stack(
                 tuple(
-                    semantic_ring_counts[
-                        torch.tensor(members, dtype=torch.long)
-                    ].sum()
+                    semantic_ring_counts[torch.tensor(members, dtype=torch.long)].sum()
                     for members in self.ring_topology_group_members
                 )
             )
@@ -2183,7 +2800,9 @@ class FactorizedTraceletRateModel(nn.Module):
             persistent=False,
         )
 
-        if empirical_mark_priors is not None and len(self.atom_vocabulary) != len(CNOF_VOCABULARY):
+        if empirical_mark_priors is not None and len(self.atom_vocabulary) != len(
+            CNOF_VOCABULARY
+        ):
             # Empirical mark priors are CNOF-shaped (validated against len(CNOF_ATOM_TYPES)); they would
             # silently shape-mismatch the wider organic heads. The organic model uses zero priors.
             raise NotImplementedError(
@@ -2319,9 +2938,7 @@ class FactorizedTraceletRateModel(nn.Module):
             if self.cycle_open_scorer_mode == "pair_linear":
                 self.cycle_open_head = nn.Linear(hidden_dim, 1)
             else:
-                self.cycle_open_head = _ExactBondContextualCycleOpenScorer(
-                    hidden_dim
-                )
+                self.cycle_open_head = _ExactBondContextualCycleOpenScorer(hidden_dim)
 
         self.cycle_query = nn.Linear(hidden_dim, mark_dim)
         self.cycle_key = nn.Embedding(max(len(self.cycle_templates), 1), mark_dim)
@@ -2375,7 +2992,13 @@ class FactorizedTraceletRateModel(nn.Module):
             nn.SiLU(),
             nn.Linear(2 * hidden_dim, 1),
         )
-        self.restate_order_embedding = nn.Embedding(4, hidden_dim)
+        if self.ring_restate_scorer_mode == LEGACY_RING_RESTATE_SCORER_MODE:
+            self.restate_order_embedding = nn.Embedding(4, hidden_dim)
+        else:
+            self.restate_transition_embedding = nn.Embedding(
+                BOND_CLASSES * BOND_CLASSES,
+                hidden_dim,
+            )
         self.ring_restate_head = nn.Sequential(
             nn.Linear(2 * hidden_dim, hidden_dim),
             nn.SiLU(),
@@ -2423,6 +3046,11 @@ class FactorizedTraceletRateModel(nn.Module):
             compute_cyclic_graft=self.enable_cyclic_graft,
             compute_ring_opening=self.enable_ring_opening,
             compute_ring_system_delete=self.enable_ring_system_delete,
+            editing_process_semantics=self.editing_process_semantics,
+            atom_restate_action_semantics=self.atom_restate_action_semantics,
+            ring_restate_scorer_mode=self.ring_restate_scorer_mode,
+            cycle_close_action_semantics=self.cycle_close_action_semantics,
+            cycle_open_action_semantics=self.cycle_open_action_semantics,
         )
 
     def clear_ring_candidate_caches(self) -> None:
@@ -2475,8 +3103,7 @@ class FactorizedTraceletRateModel(nn.Module):
                     np.asarray(
                         tuple(
                             log_prior
-                            for log_prior, enabled
-                            in zip(
+                            for log_prior, enabled in zip(
                                 self._ring_topology_group_log_prior_cpu,
                                 enabled_groups,
                             )
@@ -2566,9 +3193,14 @@ class FactorizedTraceletRateModel(nn.Module):
                 # the same logical union as the former witness-first order,
                 # but avoids enumerating hundreds of redundant RDKit-validated
                 # aliases on ordinary rows.
-                if unresolved and self.ring_system_electronic_witness_aliases is not None:
+                if (
+                    unresolved
+                    and self.ring_system_electronic_witness_aliases is not None
+                ):
                     for template_index in unresolved:
-                        if witness_support[template_index] and self._ring_witness_candidates(
+                        if witness_support[
+                            template_index
+                        ] and self._ring_witness_candidates(
                             state,
                             template_index,
                         ):
@@ -2679,7 +3311,9 @@ class FactorizedTraceletRateModel(nn.Module):
                     if self.ring_system_electronic_witness_aliases is not None
                     else ()
                 ):
-                    if witness_support[template_index] and self._ring_witness_candidates(
+                    if witness_support[
+                        template_index
+                    ] and self._ring_witness_candidates(
                         state,
                         template_index,
                     ):
@@ -2690,7 +3324,10 @@ class FactorizedTraceletRateModel(nn.Module):
                 # The certificate exhausted every coarse-supported template,
                 # so the complete support is known to be empty as well.
                 self._ring_grow_support_cache[key] = cached
-                if len(self._ring_grow_support_cache) > self._ring_candidate_cache_limit:
+                if (
+                    len(self._ring_grow_support_cache)
+                    > self._ring_candidate_cache_limit
+                ):
                     self._ring_grow_support_cache.popitem(last=False)
         self._ring_grow_enablement_certificate_cache[key] = cached
         if (
@@ -2719,7 +3356,9 @@ class FactorizedTraceletRateModel(nn.Module):
             }
             grouped: dict[tuple, list[RingSystemPlacement]] = {}
             for placement in placements:
-                grouped.setdefault(ring_system_placement_key(placement), []).append(placement)
+                grouped.setdefault(ring_system_placement_key(placement), []).append(
+                    placement
+                )
             cached = tuple(
                 (
                     min(
@@ -2757,7 +3396,10 @@ class FactorizedTraceletRateModel(nn.Module):
         if cached is None:
             cached = build_semantic_ring_system_decoder(state, placement)
             self._ring_semantic_decoder_cache[key] = cached
-            if len(self._ring_semantic_decoder_cache) > self._ring_candidate_cache_limit:
+            if (
+                len(self._ring_semantic_decoder_cache)
+                > self._ring_candidate_cache_limit
+            ):
                 self._ring_semantic_decoder_cache.popitem(last=False)
         else:
             self._ring_semantic_decoder_cache.move_to_end(key)
@@ -2795,7 +3437,10 @@ class FactorizedTraceletRateModel(nn.Module):
                 stop_after_first=self.ring_electronic_mode != "catalog_exact",
             )
             self._ring_paired_candidate_cache[key] = cached
-            if len(self._ring_paired_candidate_cache) > self._ring_candidate_cache_limit:
+            if (
+                len(self._ring_paired_candidate_cache)
+                > self._ring_candidate_cache_limit
+            ):
                 self._ring_paired_candidate_cache.popitem(last=False)
         else:
             self._ring_paired_candidate_cache.move_to_end(key)
@@ -2833,7 +3478,10 @@ class FactorizedTraceletRateModel(nn.Module):
                 system=de_novo_rewrite_system(),
             )
             self._ring_delete_candidate_cache[key] = cached
-            if len(self._ring_delete_candidate_cache) > self._ring_candidate_cache_limit:
+            if (
+                len(self._ring_delete_candidate_cache)
+                > self._ring_candidate_cache_limit
+            ):
                 self._ring_delete_candidate_cache.popitem(last=False)
         else:
             self._ring_delete_candidate_cache.move_to_end(key)
@@ -2880,6 +3528,7 @@ class FactorizedTraceletRateModel(nn.Module):
         elif not require_exact_support:
             mask = precomputed_support
         else:
+
             def row_flags(value: Tensor | bool, name: str) -> Tensor:
                 if isinstance(value, Tensor):
                     if tuple(value.shape) != (batch.batch_size,):
@@ -2930,8 +3579,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 :, : len(self.ring_topology_group_keys)
             ]
             topology_group_logits = (
-                topology_group_logits
-                + self.ring_topology_group_log_prior.unsqueeze(0)
+                topology_group_logits + self.ring_topology_group_log_prior.unsqueeze(0)
             )
             logits = _hierarchical_ring_template_logits(
                 logits,
@@ -2957,7 +3605,9 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             member_state = node.index_select(0, member_index).mean(dim=0)
             pair_state = torch.stack(
-                tuple(pair[int(bond.a), int(bond.b)] for bond in placement.bond_insertions)
+                tuple(
+                    pair[int(bond.a), int(bond.b)] for bond in placement.bond_insertions
+                )
             ).mean(dim=0)
             aromatic = {
                 frozenset((int(a), int(b))) for a, b in placement.aromatic_edges
@@ -2977,7 +3627,9 @@ class FactorizedTraceletRateModel(nn.Module):
                 if frozenset((int(change.a), int(change.b))) not in aromatic
             )
             content_state = torch.stack(content_pieces).mean(dim=0)
-            rows[index] = torch.cat((member_state, pair_state, content_state, global_state))
+            rows[index] = torch.cat(
+                (member_state, pair_state, content_state, global_state)
+            )
         return self.ring_system_grow_head(rows).squeeze(-1)
 
     def _ring_atom_logits(
@@ -3070,10 +3722,13 @@ class FactorizedTraceletRateModel(nn.Module):
             if not bool(mask.any()) or not 0 <= int(category) < mask.numel():
                 return score, score.new_tensor(False, dtype=torch.bool)
             legal = legal & mask[int(category)]
-            score = score + torch.log_softmax(
-                contextual_logits.masked_fill(~mask, float("-inf")),
-                dim=-1,
-            )[int(category)]
+            score = (
+                score
+                + torch.log_softmax(
+                    contextual_logits.masked_fill(~mask, float("-inf")),
+                    dim=-1,
+                )[int(category)]
+            )
             prefix = (*prefix, int(category))
         return score, legal
 
@@ -3131,9 +3786,7 @@ class FactorizedTraceletRateModel(nn.Module):
         for previous_position, previous_category in enumerate(prefix):
             previous_category = int(previous_category)
             residual = residual + global_pair[previous_category]
-            previous_slot = int(
-                decoder.placement.system_atoms[previous_position]
-            )
+            previous_slot = int(decoder.placement.system_atoms[previous_position])
             if frozenset((previous_slot, target_slot)) in internal_edges:
                 residual = residual + adjacent_pair[previous_category]
         return base + residual
@@ -3174,14 +3827,18 @@ class FactorizedTraceletRateModel(nn.Module):
                 masks = None
                 if supported and ring_system_placement_key(placement) == teacher_key:
                     try:
-                        categories = semantic_ring_categories_for_action(decoder, action)
+                        categories = semantic_ring_categories_for_action(
+                            decoder, action
+                        )
                     except (KeyError, ValueError):
                         categories = None
                     if categories is not None:
                         prefix: tuple[int, ...] = ()
                         rows = []
                         for category in categories:
-                            rows.append(semantic_ring_next_category_mask(decoder, prefix))
+                            rows.append(
+                                semantic_ring_next_category_mask(decoder, prefix)
+                            )
                             prefix = (*prefix, int(category))
                         masks = tuple(rows)
                 placement_certificates.append(
@@ -3227,8 +3884,7 @@ class FactorizedTraceletRateModel(nn.Module):
             pair,
         )
         decoders = tuple(
-            self._ring_semantic_decoder(state, placement)
-            for placement in placements
+            self._ring_semantic_decoder(state, placement) for placement in placements
         )
         semantic_tables = tuple(
             (
@@ -3248,7 +3904,9 @@ class FactorizedTraceletRateModel(nn.Module):
         else:
             if len(certificate.placements) != len(placements):
                 raise RuntimeError("ring teacher certificate placement count changed")
-            observed_keys = tuple(ring_system_placement_key(item) for item in placements)
+            observed_keys = tuple(
+                ring_system_placement_key(item) for item in placements
+            )
             expected_keys = tuple(item.placement_key for item in certificate.placements)
             if observed_keys != expected_keys:
                 raise RuntimeError("ring teacher certificate placement order changed")
@@ -3275,7 +3933,9 @@ class FactorizedTraceletRateModel(nn.Module):
         candidates = self._ring_paired_candidates(state, template_index)
         if not candidates:
             return candidates, node.new_empty((0,))
-        placements = tuple(dict.fromkeys(candidate.placement for candidate in candidates))
+        placements = tuple(
+            dict.fromkeys(candidate.placement for candidate in candidates)
+        )
         placement_to_index = {
             placement: index for index, placement in enumerate(placements)
         }
@@ -3301,7 +3961,10 @@ class FactorizedTraceletRateModel(nn.Module):
             placement_index = placement_to_index[candidate.placement]
             label_logits, label_mask = atom_tables[placement_index]
             selected = torch.tensor(
-                tuple(self._ring_element_to_index[int(atom_type)] for atom_type in candidate.atom_types),
+                tuple(
+                    self._ring_element_to_index[int(atom_type)]
+                    for atom_type in candidate.atom_types
+                ),
                 dtype=torch.long,
                 device=self.device,
             )
@@ -3378,7 +4041,9 @@ class FactorizedTraceletRateModel(nn.Module):
                     dtype=torch.long,
                     device=self.device,
                 )
-                member_state = node[batch_index].index_select(0, member_index).mean(dim=0)
+                member_state = (
+                    node[batch_index].index_select(0, member_index).mean(dim=0)
+                )
                 cycle_bonds = action.bond_deletions
                 pair_pieces = tuple(
                     pair[batch_index, int(bond.a), int(bond.b)] for bond in cycle_bonds
@@ -3395,7 +4060,8 @@ class FactorizedTraceletRateModel(nn.Module):
                     self.bond_embedding.weight[int(bond.order)] for bond in cycle_bonds
                 )
                 content_pieces.extend(
-                    self.bond_embedding.weight[int(change.new_order)] for change in reorders
+                    self.bond_embedding.weight[int(change.new_order)]
+                    for change in reorders
                 )
                 content_state = (
                     torch.stack(content_pieces).mean(dim=0)
@@ -3413,11 +4079,15 @@ class FactorizedTraceletRateModel(nn.Module):
                 mask[batch_index, action_index] = True
         return self.ring_system_delete_head(rows).squeeze(-1), mask
 
-    def forward_mark_batch(self, batch: FactorizedMarkBatch) -> FactorizedMarkPrediction:
+    def forward_mark_batch(
+        self, batch: FactorizedMarkBatch
+    ) -> FactorizedMarkPrediction:
         if batch.atom_types.device != self.device:
             batch = batch.to(self.device)
         node, global_state, pair = self._encode_batch(batch)
-        masks, logits, action_log_z = self._action_tables(batch, node, global_state, pair)
+        masks, logits, action_log_z = self._action_tables(
+            batch, node, global_state, pair
+        )
         enabled = torch.isfinite(action_log_z)
         has_legal_mark = enabled.any(dim=-1)
         family_logits = _masked_family_logits(
@@ -3481,9 +4151,10 @@ class FactorizedTraceletRateModel(nn.Module):
         if property_values is not None:
             if self.property_condition_dim == 0:
                 raise ValueError("unconditional model cannot accept property targets")
-            if len(property_values) != self.property_condition_dim or len(
-                property_mask
-            ) != self.property_condition_dim:
+            if (
+                len(property_values) != self.property_condition_dim
+                or len(property_mask) != self.property_condition_dim
+            ):
                 raise ValueError("property target has the wrong dimension")
             values = torch.tensor((property_values,), dtype=torch.float32)
             mask = torch.tensor((property_mask,), dtype=torch.bool)
@@ -3507,6 +4178,11 @@ class FactorizedTraceletRateModel(nn.Module):
                 compute_cyclic_graft=self.enable_cyclic_graft,
                 compute_ring_opening=self.enable_ring_opening,
                 compute_ring_system_delete=self.enable_ring_system_delete,
+                editing_process_semantics=self.editing_process_semantics,
+                atom_restate_action_semantics=self.atom_restate_action_semantics,
+                ring_restate_scorer_mode=self.ring_restate_scorer_mode,
+                cycle_close_action_semantics=self.cycle_close_action_semantics,
+                cycle_open_action_semantics=self.cycle_open_action_semantics,
             )
             self._sampling_state_cache[cache_key] = cached_batch
             if len(self._sampling_state_cache) > self._sampling_state_cache_limit:
@@ -3532,9 +4208,7 @@ class FactorizedTraceletRateModel(nn.Module):
             getattr(self, "virtualize_legacy_self_grafts", False)
         )
         if legacy_virtual_grafts:
-            raw_mask_array, raw_removed_array = _legacy_prequotient_graft_tables(
-                state
-            )
+            raw_mask_array, raw_removed_array = _legacy_prequotient_graft_tables(state)
             raw_mask = torch.from_numpy(raw_mask_array).to(self.device)
             raw_removed = torch.from_numpy(raw_removed_array).to(self.device)
             masks = dict(masks)
@@ -3545,12 +4219,10 @@ class FactorizedTraceletRateModel(nn.Module):
             )
             masks = _apply_charge_policy_to_action_masks(batch, masks)
             action_log_z = action_log_z.clone()
-            action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = (
-                _masked_logsumexp(
-                    logits["bond_reroute"][0].unsqueeze(0),
-                    masks["bond_reroute"],
-                )[0]
-            )
+            action_log_z[0, MARK_RULE_TO_INDEX["bond_reroute"]] = _masked_logsumexp(
+                logits["bond_reroute"][0].unsqueeze(0),
+                masks["bond_reroute"],
+            )[0]
         enabled = torch.isfinite(action_log_z[0]).clone()
         disabled_rule_names = frozenset(
             str(name) for name in getattr(self, "disabled_sampling_rule_names", ())
@@ -3566,7 +4238,9 @@ class FactorizedTraceletRateModel(nn.Module):
                 enabled,
                 rate_factorization=self.rate_factorization,
             )
-            family_probabilities = torch.softmax(family_logits, dim=-1).float().cpu().numpy()
+            family_probabilities = (
+                torch.softmax(family_logits, dim=-1).float().cpu().numpy()
+            )
             family_index = int(rng.choice(len(MARK_RULE_NAMES), p=family_probabilities))
             rule_name = MARK_RULE_NAMES[family_index]
             action = self._sample_action_from_family(
@@ -3593,13 +4267,17 @@ class FactorizedTraceletRateModel(nn.Module):
                         "<VIRTUAL_GRAFT>",
                         None,
                     )
-            # cycle ops: the model family is slot 5/6 (cycle_insert/cycle_attach), but the executor rule is
-            # keyed on the action type -> apply via bond_insert/bond_delete.
+            # Cycle operations retain their historical model-family slots but
+            # carry process-versioned executor actions.
             applied_rule = rule_name
             if isinstance(action, BondInsert):
                 applied_rule = "bond_insert"
             elif isinstance(action, BondDelete):
                 applied_rule = "bond_delete"
+            elif isinstance(action, CycleCloseEdge):
+                applied_rule = "cycle_close"
+            elif isinstance(action, CycleOpenEdge):
+                applied_rule = "cycle_open"
             return SampledRewriteMark(hazard, applied_rule, action)
         return SampledRewriteMark(0.0, "<TERMINAL>", None)
 
@@ -3658,6 +4336,11 @@ class FactorizedTraceletRateModel(nn.Module):
                 masks["atom_restate"][0],
                 rng,
             )
+            if (
+                self.atom_restate_action_semantics
+                == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+            ):
+                return SemanticAtomRestate(vertex, atom_index)
             atom_type = int(self.atom_vocabulary.element_of(atom_index))
             bond_valence = sum(
                 int(BOND_CLASS_TO_H_CHANGE[int(order)]) for order in state.bonds[vertex]
@@ -3689,10 +4372,15 @@ class FactorizedTraceletRateModel(nn.Module):
                 v=target,
             )
         if rule_name == "cycle_insert":
-            if self.enable_cycle_ops:  # cycle_close: sample (a, b, order) -> BondInsert
+            if self.enable_cycle_ops:
                 a, b, order_index = _sample_masked_coordinate(
                     logits["cycle_insert"][0], masks["cycle_insert"][0], rng
                 )
+                if (
+                    self.cycle_close_action_semantics
+                    == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+                ):
+                    return CycleCloseEdge(a, b, order_index + 1)
                 return BondInsert(a, b, order_index + 1)
             (template_index,) = _sample_masked_coordinate(
                 logits["cycle_insert"][0],
@@ -3702,10 +4390,15 @@ class FactorizedTraceletRateModel(nn.Module):
             template = self.cycle_templates[template_index]
             return template.instantiate(null_slots[: template.span])
         if rule_name == "cycle_attach":
-            if self.enable_cycle_ops:  # cycle_open: sample (a, b) -> BondDelete
+            if self.enable_cycle_ops:
                 a, b = _sample_masked_coordinate(
                     logits["cycle_attach"][0], masks["cycle_attach"][0], rng
                 )
+                if (
+                    self.cycle_open_action_semantics
+                    == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+                ):
+                    return CycleOpenEdge(a, b)
                 return BondDelete(a, b)
             anchor, template_index = _sample_masked_coordinate(
                 logits["cycle_attach"][0],
@@ -3758,7 +4451,9 @@ class FactorizedTraceletRateModel(nn.Module):
                     )
                 )
                 if not candidates:
-                    raise RuntimeError("exact ring support advertised an empty candidate table")
+                    raise RuntimeError(
+                        "exact ring support advertised an empty candidate table"
+                    )
                 (candidate_index,) = _sample_masked_coordinate(
                     candidate_log_probabilities,
                     torch.ones_like(
@@ -3783,7 +4478,9 @@ class FactorizedTraceletRateModel(nn.Module):
                 )
             )
             if not bool(placement_mask.any()):
-                raise RuntimeError("semantic ring support advertised an empty placement table")
+                raise RuntimeError(
+                    "semantic ring support advertised an empty placement table"
+                )
             (placement_index,) = _sample_masked_coordinate(
                 placement_logits,
                 placement_mask,
@@ -3870,11 +4567,16 @@ class FactorizedTraceletRateModel(nn.Module):
             if not bool(torch.isfinite(values[mask]).all()):
                 raise ValueError("observed property conditions must be finite")
             condition_input = torch.cat(
-                (torch.where(mask, values, torch.zeros_like(values)), mask.to(values.dtype)),
+                (
+                    torch.where(mask, values, torch.zeros_like(values)),
+                    mask.to(values.dtype),
+                ),
                 dim=-1,
             )
             assert self.property_condition_encoder is not None
-            context_state = time_state + self.property_condition_encoder(condition_input)
+            context_state = time_state + self.property_condition_encoder(
+                condition_input
+            )
         else:
             if (
                 batch.property_condition_values is not None
@@ -3953,6 +4655,36 @@ class FactorizedTraceletRateModel(nn.Module):
         *,
         require_exact_ring_support: bool = True,
     ) -> tuple[dict[str, Tensor], dict[str, Tensor], Tensor]:
+        if batch.editing_process_semantics != self.editing_process_semantics:
+            raise ValueError(
+                "factorized batch/model editing process semantics disagree: "
+                f"batch={batch.editing_process_semantics!r}, "
+                f"model={self.editing_process_semantics!r}"
+            )
+        if batch.atom_restate_action_semantics != self.atom_restate_action_semantics:
+            raise ValueError(
+                "factorized batch/model atom-restatement semantics disagree: "
+                f"batch={batch.atom_restate_action_semantics!r}, "
+                f"model={self.atom_restate_action_semantics!r}"
+            )
+        if batch.ring_restate_scorer_mode != self.ring_restate_scorer_mode:
+            raise ValueError(
+                "factorized batch/model ring-restatement scorer modes disagree: "
+                f"batch={batch.ring_restate_scorer_mode!r}, "
+                f"model={self.ring_restate_scorer_mode!r}"
+            )
+        if batch.cycle_close_action_semantics != self.cycle_close_action_semantics:
+            raise ValueError(
+                "factorized batch/model cycle-close semantics disagree: "
+                f"batch={batch.cycle_close_action_semantics!r}, "
+                f"model={self.cycle_close_action_semantics!r}"
+            )
+        if batch.cycle_open_action_semantics != self.cycle_open_action_semantics:
+            raise ValueError(
+                "factorized batch/model cycle-open semantics disagree: "
+                f"batch={batch.cycle_open_action_semantics!r}, "
+                f"model={self.cycle_open_action_semantics!r}"
+            )
         batch_size, n_slots = batch.atom_types.shape
         real = (batch.atom_types != NULL_IDX) & (batch.atom_types != SCAR_IDX)
         n_real = real.sum(dim=1)
@@ -3964,24 +4696,19 @@ class FactorizedTraceletRateModel(nn.Module):
         masks: dict[str, Tensor] = {}
         logits: dict[str, Tensor] = {}
 
-        root_grow_logits = (
-            self.grow_root_head(global_state)
-            + self.root_atom_log_prior.unsqueeze(0)
-        )
+        root_grow_logits = self.grow_root_head(
+            global_state
+        ) + self.root_atom_log_prior.unsqueeze(0)
         # A valence class is not automatically a legal isolated atom.  The
         # persistent graph representation caps implicit H at MAX_H_COUNT, so
         # hypervalent neutral classes such as S(VI), P(V) and I(V) cannot be
         # instantiated from the null state with zero heavy-atom bonds.  Keep
         # them available for connected insertion/restatement when the heavy
         # bond sum brings the implied H count into range.
-        root_atom_mask = (
-            (self.cnof_valences >= 0)
-            & (self.cnof_valences <= MAX_H_COUNT)
-        )
-        root_grow_mask = (
-            ((n_real == 0) & (n_null > 0)).unsqueeze(-1)
-            & root_atom_mask.unsqueeze(0)
-        )
+        root_atom_mask = (self.cnof_valences >= 0) & (self.cnof_valences <= MAX_H_COUNT)
+        root_grow_mask = ((n_real == 0) & (n_null > 0)).unsqueeze(
+            -1
+        ) & root_atom_mask.unsqueeze(0)
         grow_query = self.grow_query(node)
         grow_option = self.grow_option.weight.reshape(
             3,
@@ -4015,36 +4742,57 @@ class FactorizedTraceletRateModel(nn.Module):
         masks["atom_delete"] = delete_mask
         logits["atom_delete"] = delete_logits
 
-        restate_logits = (
-            self.restate_head(node)
-            + self.atom_restate_log_prior.unsqueeze(0).unsqueeze(0)
-        )
+        restate_logits = self.restate_head(
+            node
+        ) + self.atom_restate_log_prior.unsqueeze(0).unsqueeze(0)
         bond_valence = torch.zeros_like(hydrogens)
         for order, delta in enumerate(BOND_CLASS_TO_H_CHANGE):
             if order == 0:
                 continue
-            bond_valence = bond_valence + (batch.bonds == order).sum(dim=-1) * int(delta)
+            bond_valence = bond_valence + (batch.bonds == order).sum(dim=-1) * int(
+                delta
+            )
         restate_h = self.cnof_valences.view(1, 1, -1) - bond_valence.unsqueeze(-1)
         # Peripheral by default; the editing model ungates ring atoms so heteroatom scanning
         # (e.g. pyridine<->benzene) is a scoreable restate. The valence + no-op checks below still gate it.
-        restate_site = real if self.enable_heteroatom_scan else (real & (batch.atom_topology == 0))
+        restate_site = (
+            real if self.enable_heteroatom_scan else (real & (batch.atom_topology == 0))
+        )
         restate_mask = (
             restate_site.unsqueeze(-1)
             & (restate_h >= 0)
             & (restate_h <= MAX_H_COUNT)
             & (
-                (batch.atom_types.unsqueeze(-1) != torch.tensor(self.atom_vocabulary.element_index, device=device))
+                (
+                    batch.atom_types.unsqueeze(-1)
+                    != torch.tensor(self.atom_vocabulary.element_index, device=device)
+                )
                 | (batch.implicit_h_counts.unsqueeze(-1) != restate_h)
                 | (batch.formal_charges.unsqueeze(-1) != 0)
             )
         )
+        if self.atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS:
+            if batch.atom_restate_admission_mask is None:
+                raise ValueError(
+                    "semantic atom-restatement batch lacks exact admission mask"
+                )
+            if tuple(batch.atom_restate_admission_mask.shape) != tuple(
+                restate_mask.shape
+            ):
+                raise ValueError(
+                    "semantic atom-restatement admission mask has the wrong shape"
+                )
+            restate_mask = restate_mask & batch.atom_restate_admission_mask
+        elif batch.atom_restate_admission_mask is not None:
+            raise ValueError(
+                "legacy atom-restatement batch unexpectedly carries semantic admission"
+            )
         masks["atom_restate"] = restate_mask
         logits["atom_restate"] = restate_logits
 
-        reorder_logits = (
-            self.reorder_head(pair)
-            + self.bond_reorder_log_prior.unsqueeze(0).unsqueeze(0).unsqueeze(0)
-        )
+        reorder_logits = self.reorder_head(
+            pair
+        ) + self.bond_reorder_log_prior.unsqueeze(0).unsqueeze(0).unsqueeze(0)
         old_order = batch.bonds.unsqueeze(-1)
         new_order = order_values.view(1, 1, 1, 3)
         delta = new_order - old_order
@@ -4092,8 +4840,31 @@ class FactorizedTraceletRateModel(nn.Module):
                 & (hydrogens.unsqueeze(2).unsqueeze(-1) >= order_col)
                 & (hydrogens.unsqueeze(1).unsqueeze(-1) >= order_col)
             )
-            # cycle_open (slot "cycle_attach" -> executor bond_delete): remove a non-bridge cycle edge (H
-            # increases by the removed order, so both atoms' resulting H must stay <= MAX_H_COUNT).
+            if (
+                self.cycle_close_action_semantics
+                == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+            ):
+                if batch.cycle_close_admission_mask is None:
+                    raise ValueError(
+                        "semantic cycle-close model requires exact admission masks"
+                    )
+                if tuple(batch.cycle_close_admission_mask.shape) != (
+                    batch_size,
+                    n_slots,
+                    n_slots,
+                    3,
+                ):
+                    raise ValueError(
+                        "semantic cycle-close admission mask has wrong shape"
+                    )
+                cycle_mask = (
+                    upper.view(1, n_slots, n_slots, 1)
+                    & batch.cycle_close_admission_mask
+                )
+            # cycle_open occupies the historical cycle_attach family slot. The
+            # legacy mode uses raw stored-order deletion arithmetic. Editing
+            # V2 instead consumes the exact semantic-executor admission mask
+            # computed once per source state during collation.
             edge_order = batch.bonds
             if self.cycle_open_scorer_mode == "pair_linear":
                 attach_logits = self.cycle_open_head(pair).squeeze(-1)
@@ -4103,12 +4874,27 @@ class FactorizedTraceletRateModel(nn.Module):
                     global_state,
                     edge_order,
                 )
-            attach_mask = (
-                upper
-                & batch.cycle_edge_mask
-                & ((hydrogens.unsqueeze(2) + edge_order) <= MAX_H_COUNT)
-                & ((hydrogens.unsqueeze(1) + edge_order) <= MAX_H_COUNT)
-            )
+            if self.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS:
+                if batch.cycle_open_admission_mask is None:
+                    raise ValueError(
+                        "semantic cycle-open model requires exact admission masks"
+                    )
+                if tuple(batch.cycle_open_admission_mask.shape) != (
+                    batch_size,
+                    n_slots,
+                    n_slots,
+                ):
+                    raise ValueError(
+                        "semantic cycle-open admission mask has wrong shape"
+                    )
+                attach_mask = upper & batch.cycle_open_admission_mask
+            else:
+                attach_mask = (
+                    upper
+                    & batch.cycle_edge_mask
+                    & ((hydrogens.unsqueeze(2) + edge_order) <= MAX_H_COUNT)
+                    & ((hydrogens.unsqueeze(1) + edge_order) <= MAX_H_COUNT)
+                )
         else:
             cycle_logits = _template_logits(
                 self.cycle_query(global_state),
@@ -4231,26 +5017,101 @@ class FactorizedTraceletRateModel(nn.Module):
     ) -> tuple[Tensor, Tensor]:
         maximum = max((len(items) for items in batch.ring_restate_actions), default=0)
         width = max(maximum, 1)
-        rows = pair.new_zeros((batch.batch_size, width, self.hidden_dim))
-        mask = torch.zeros(
+        action_mask = torch.zeros(
             (batch.batch_size, width),
             dtype=torch.bool,
             device=self.device,
         )
-        for batch_index, actions in enumerate(batch.ring_restate_actions):
-            for action_index, action in enumerate(actions):
-                pieces = []
-                for change in action.changes:
-                    pieces.append(
-                        pair[batch_index, int(change.a), int(change.b)]
-                        + self.restate_order_embedding.weight[int(change.new_order)]
+        if self.ring_restate_scorer_mode == LEGACY_RING_RESTATE_SCORER_MODE:
+            rows = pair.new_zeros((batch.batch_size, width, self.hidden_dim))
+            for batch_index, actions in enumerate(batch.ring_restate_actions):
+                for action_index, action in enumerate(actions):
+                    pieces = []
+                    for change in action.changes:
+                        pieces.append(
+                            pair[batch_index, int(change.a), int(change.b)]
+                            + self.restate_order_embedding.weight[int(change.new_order)]
+                        )
+                    rows[batch_index, action_index] = torch.stack(pieces).mean(dim=0)
+                    action_mask[batch_index, action_index] = True
+            logits = self.ring_restate_head(
+                torch.cat(
+                    (rows, global_state.unsqueeze(1).expand(-1, width, -1)),
+                    dim=-1,
+                )
+            ).squeeze(-1)
+            return logits, action_mask
+
+        group_ids = batch.ring_restate_successor_group_ids
+        descriptors = batch.ring_restate_successor_group_descriptors
+        multiplicities = batch.ring_restate_successor_group_multiplicities
+        if group_ids is None or descriptors is None or multiplicities is None:
+            raise ValueError(
+                "semantic ring-restatement batch lacks successor-group metadata"
+            )
+        if not (
+            len(group_ids)
+            == len(descriptors)
+            == len(multiplicities)
+            == batch.batch_size
+        ):
+            raise ValueError(
+                "semantic ring-restatement metadata does not align with the batch"
+            )
+        group_width = max(max((len(items) for items in descriptors), default=0), 1)
+        group_rows = pair.new_zeros((batch.batch_size, group_width, self.hidden_dim))
+        group_mask = torch.zeros(
+            (batch.batch_size, group_width),
+            dtype=torch.bool,
+            device=self.device,
+        )
+        for batch_index, row_descriptors in enumerate(descriptors):
+            if len(row_descriptors) != len(multiplicities[batch_index]):
+                raise ValueError(
+                    "ring-restatement descriptors and multiplicities differ"
+                )
+            for group_index, descriptor in enumerate(row_descriptors):
+                if not descriptor:
+                    raise ValueError(
+                        "semantic ring-restatement descriptor must be nonempty"
                     )
-                rows[batch_index, action_index] = torch.stack(pieces).mean(dim=0)
-                mask[batch_index, action_index] = True
-        logits = self.ring_restate_head(
-            torch.cat((rows, global_state.unsqueeze(1).expand(-1, width, -1)), dim=-1)
+                pieces = tuple(
+                    pair[batch_index, int(left), int(right)]
+                    + self.restate_transition_embedding.weight[
+                        int(source_class) * BOND_CLASSES + int(target_class)
+                    ]
+                    for left, right, source_class, target_class in descriptor
+                )
+                group_rows[batch_index, group_index] = torch.stack(pieces).mean(dim=0)
+                group_mask[batch_index, group_index] = True
+        group_logits = self.ring_restate_head(
+            torch.cat(
+                (
+                    group_rows,
+                    global_state.unsqueeze(1).expand(-1, group_width, -1),
+                ),
+                dim=-1,
+            )
         ).squeeze(-1)
-        return logits, mask
+        action_logits = pair.new_zeros((batch.batch_size, width))
+        for batch_index, row_group_ids in enumerate(group_ids):
+            if len(row_group_ids) != len(batch.ring_restate_actions[batch_index]):
+                raise ValueError(
+                    "ring-restatement actions and successor-group IDs differ"
+                )
+            for action_index, group_index in enumerate(row_group_ids):
+                if not 0 <= int(group_index) < len(multiplicities[batch_index]):
+                    raise ValueError("ring-restatement group ID is out of range")
+                multiplicity = int(multiplicities[batch_index][group_index])
+                if multiplicity <= 0:
+                    raise ValueError(
+                        "ring-restatement group multiplicity must be positive"
+                    )
+                action_logits[batch_index, action_index] = group_logits[
+                    batch_index, group_index
+                ] - float(np.log(multiplicity))
+                action_mask[batch_index, action_index] = True
+        return action_logits, action_mask
 
     def _selected_mark_log_probability(
         self,
@@ -4272,7 +5133,43 @@ class FactorizedTraceletRateModel(nn.Module):
                 continue
             if action is None:
                 raise RuntimeError("nonterminal teacher is missing its rewrite mark")
+            if (
+                self.atom_restate_action_semantics
+                == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+                and (rule_name == "atom_restate" or isinstance(action, AtomRestate))
+            ):
+                raise ValueError(
+                    "Editing V2 semantic atom-restatement model rejects raw "
+                    "AtomRestate teachers"
+                )
+            if (
+                self.atom_restate_action_semantics
+                == LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
+                and (
+                    rule_name == "atom_restate_semantic"
+                    or isinstance(action, SemanticAtomRestate)
+                )
+            ):
+                raise ValueError(
+                    "historical atom-restatement model rejects SemanticAtomRestate teachers"
+                )
+            if (
+                self.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+                and (rule_name == "bond_delete" or isinstance(action, BondDelete))
+            ):
+                raise ValueError(
+                    "Editing V2 semantic cycle-open model rejects raw BondDelete teachers"
+                )
+            if (
+                self.cycle_open_action_semantics == LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
+                and (rule_name == "cycle_open" or isinstance(action, CycleOpenEdge))
+            ):
+                raise ValueError(
+                    "historical cycle-open model rejects semantic CycleOpenEdge teachers"
+                )
             family_name = rule_name
+            if rule_name == "atom_restate_semantic":
+                family_name = "atom_restate"
             if self.enable_cycle_ops and rule_name in _CYCLE_OP_EXECUTOR_TO_FAMILY:
                 family_name = _CYCLE_OP_EXECUTOR_TO_FAMILY[rule_name]
             if family_name not in MARK_RULE_TO_INDEX:
@@ -4336,13 +5233,27 @@ class FactorizedTraceletRateModel(nn.Module):
         if isinstance(action, AtomDelete):
             key = (batch_index, int(action.v))
             return logits["atom_delete"][key], masks["atom_delete"][key]
+        if isinstance(action, SemanticAtomRestate):
+            if rule_name != "atom_restate_semantic":
+                raise ValueError(
+                    "SemanticAtomRestate teacher requires "
+                    "rule_name='atom_restate_semantic'"
+                )
+            key = (
+                batch_index,
+                int(action.v),
+                int(action.target_class_index),
+            )
+            return logits["atom_restate"][key], masks["atom_restate"][key]
         if isinstance(action, AtomRestate):
             bond_valence = sum(
                 int(BOND_CLASS_TO_H_CHANGE[int(o)])
                 for o in batch.bonds[batch_index, int(action.v)]
             )
             atom_index = self.atom_vocabulary.class_index(
-                int(action.atom_type), bond_valence, int(action.implicit_h_count),
+                int(action.atom_type),
+                bond_valence,
+                int(action.implicit_h_count),
                 formal_charge=int(action.formal_charge),
             )
             key = (batch_index, int(action.v), atom_index)
@@ -4359,10 +5270,25 @@ class FactorizedTraceletRateModel(nn.Module):
             order_index = _ORDER_TO_INDEX[int(action.order)]
             key = (batch_index, a, b, order_index)
             return logits["cycle_insert"][key], masks["cycle_insert"][key]
+        if isinstance(action, CycleCloseEdge):
+            if rule_name != "cycle_close":
+                raise ValueError(
+                    "CycleCloseEdge teacher requires rule_name='cycle_close'"
+                )
+            order_index = _ORDER_TO_INDEX[int(action.order)]
+            key = (batch_index, int(action.a), int(action.b), order_index)
+            return logits["cycle_insert"][key], masks["cycle_insert"][key]
         if isinstance(action, BondDelete):
             # cycle_open teacher: scored against slot 6 (holds cycle_open when enable_cycle_ops). Per-edge.
             a, b = sorted((int(action.a), int(action.b)))
             key = (batch_index, a, b)
+            return logits["cycle_attach"][key], masks["cycle_attach"][key]
+        if isinstance(action, CycleOpenEdge):
+            if rule_name != "cycle_open":
+                raise ValueError(
+                    "CycleOpenEdge teacher requires rule_name='cycle_open'"
+                )
+            key = (batch_index, int(action.a), int(action.b))
             return logits["cycle_attach"][key], masks["cycle_attach"][key]
         if isinstance(action, BondReroute):
             moved = int(action.u)
@@ -4454,7 +5380,8 @@ class FactorizedTraceletRateModel(nn.Module):
                     matching = tuple(
                         index
                         for index, candidate in enumerate(candidates)
-                        if ring_system_grow_electronic_key(candidate.action) == teacher_key
+                        if ring_system_grow_electronic_key(candidate.action)
+                        == teacher_key
                     )
                     if not matching:
                         continue
@@ -4536,9 +5463,7 @@ class FactorizedTraceletRateModel(nn.Module):
                         next_category_masks = None
                     else:
                         categories = placement_certificate.categories
-                        next_category_masks = (
-                            placement_certificate.next_category_masks
-                        )
+                        next_category_masks = placement_certificate.next_category_masks
                         if categories is None or next_category_masks is None:
                             continue
                     label_score, labels_legal = (
@@ -4552,7 +5477,9 @@ class FactorizedTraceletRateModel(nn.Module):
                     if not bool(labels_legal):
                         continue
                     match_scores.append(
-                        placement_logits[placement_index] - placement_log_z + label_score
+                        placement_logits[placement_index]
+                        - placement_log_z
+                        + label_score
                     )
                 if match_scores:
                     action_scores.append(
@@ -4562,9 +5489,9 @@ class FactorizedTraceletRateModel(nn.Module):
             if not action_scores:
                 zero = logits["ring_system_grow"][batch_index].sum() * 0.0
                 return zero, zero.new_tensor(False, dtype=torch.bool)
-            return torch.logsumexp(torch.stack(action_scores), dim=0), action_scores[0].new_tensor(
-                True, dtype=torch.bool
-            )
+            return torch.logsumexp(torch.stack(action_scores), dim=0), action_scores[
+                0
+            ].new_tensor(True, dtype=torch.bool)
         if isinstance(action, RingSystemDelete):
             candidates = (
                 self._ring_delete_candidates(batch.states[batch_index])
@@ -4588,8 +5515,41 @@ class FactorizedTraceletRateModel(nn.Module):
                     "teacher ring restate is outside exact dynamic candidates"
                 ) from exc
             key = (batch_index, action_index)
+            if self.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE:
+                group_ids = batch.ring_restate_successor_group_ids
+                if group_ids is None:
+                    raise ValueError(
+                        "semantic ring-restatement teacher lacks successor groups"
+                    )
+                teacher_group = int(group_ids[batch_index][action_index])
+                aliases = tuple(
+                    index
+                    for index, group_index in enumerate(group_ids[batch_index])
+                    if int(group_index) == teacher_group
+                )
+                if not aliases:
+                    raise RuntimeError(
+                        "semantic ring-restatement teacher group is empty"
+                    )
+                alias_indices = torch.tensor(
+                    aliases,
+                    dtype=torch.long,
+                    device=self.device,
+                )
+                alias_logits = logits["ring_system_restate"][batch_index].index_select(
+                    0,
+                    alias_indices,
+                )
+                alias_legal = masks["ring_system_restate"][batch_index].index_select(
+                    0,
+                    alias_indices,
+                )
+                return torch.logsumexp(alias_logits, dim=0), alias_legal.all()
             return logits["ring_system_restate"][key], masks["ring_system_restate"][key]
-        raise TypeError(f"unsupported factorized teacher action: {type(action).__name__}")
+        raise TypeError(
+            f"unsupported factorized teacher action: {type(action).__name__}"
+        )
+
 
 def _template_logits(query: Tensor, keys: Tensor) -> Tensor:
     if keys.shape[0] == 0:
@@ -4663,7 +5623,9 @@ def factorized_mark_bregman_loss(
     weights = batch.importance_weights.to(prediction.total_hazard.device)
     log_hazard = torch.log(prediction.total_hazard.clamp_min(1e-12))
     nonterminal = teacher_rates > 0
-    teacher_term = teacher_rates * (log_hazard + prediction.selected_mark_log_probability)
+    teacher_term = teacher_rates * (
+        log_hazard + prediction.selected_mark_log_probability
+    )
     per_example = prediction.total_hazard - torch.where(
         nonterminal,
         teacher_term,
@@ -4673,13 +5635,25 @@ def factorized_mark_bregman_loss(
 
 
 __all__ = [
+    "ATOM_RESTATE_ACTION_SEMANTICS",
+    "EDITING_PROCESS_SEMANTICS",
+    "CYCLE_OPEN_ACTION_SEMANTICS",
     "CYCLE_OPEN_SCORER_MODES",
+    "LEGACY_ATOM_RESTATE_ACTION_SEMANTICS",
+    "LEGACY_CYCLE_OPEN_ACTION_SEMANTICS",
+    "LEGACY_EDITING_PROCESS_SEMANTICS",
+    "LEGACY_RING_RESTATE_SCORER_MODE",
     "MARK_RULE_NAMES",
+    "RING_RESTATE_SCORER_MODES",
+    "SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS",
+    "SEMANTIC_EDITING_V2_PROCESS_SEMANTICS",
+    "SEMANTIC_RING_RESTATE_SCORER_MODE",
     "FactorizedMarkBatch",
     "FactorizedMarkEmpiricalPriors",
     "FactorizedMarkPrediction",
     "FactorizedTraceletRateModel",
     "SampledRewriteMark",
+    "SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS",
     "factorized_mark_bregman_loss",
     "prepare_factorized_mark_batch",
 ]

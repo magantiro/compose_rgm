@@ -50,7 +50,6 @@ from compose_v4.rewrite.typed_ring_catalog import (
     oriented_ear_templates,
 )
 
-
 TRACELET_RULE_FAMILIES = (
     *MICRO_RULE_FAMILIES,
     "cycle_insert",
@@ -111,8 +110,7 @@ def enumerate_tracelet_cnof_fiber(
         else TRACELET_RULE_FAMILIES
     )
     by_family: dict[str, list[MarkedTransition]] = {
-        family: list(micro_by_family.get(family, ()))
-        for family in rule_families
+        family: list(micro_by_family.get(family, ())) for family in rule_families
     }
     real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
     null = tuple(int(v) for v in np.flatnonzero(state.atom_types == NULL_IDX))
@@ -129,9 +127,7 @@ def enumerate_tracelet_cnof_fiber(
     elif not real:
         for length in range(3, len(null) + 1):
             action = CycleInsert(
-                atoms=tuple(
-                    AtomPayload(slot, carbon, 0, 2) for slot in null[:length]
-                ),
+                atoms=tuple(AtomPayload(slot, carbon, 0, 2) for slot in null[:length]),
                 bond_orders=(1,) * length,
             )
             _append_generic_cycle(by_family, state, action)
@@ -150,10 +146,13 @@ def enumerate_tracelet_cnof_fiber(
                 )
                 _append_generic_ear(by_family, state, action)
         for a, b in combinations(real, 2):
-            if min(
-                int(state.implicit_h_counts[a]),
-                int(state.implicit_h_counts[b]),
-            ) < 1:
+            if (
+                min(
+                    int(state.implicit_h_counts[a]),
+                    int(state.implicit_h_counts[b]),
+                )
+                < 1
+            ):
                 continue
             for span in range(1, len(null) + 1):
                 action = RingEarInsert(
@@ -191,13 +190,11 @@ def _block_scoped_micro_fiber(
     graph = nx.Graph()
     graph.add_nodes_from(real)
     graph.add_edges_from(
-        (a, b)
-        for a, b in combinations(real, 2)
-        if int(state.bonds[a, b]) != 0
+        (a, b) for a, b in combinations(real, 2) if int(state.bonds[a, b]) != 0
     )
-    cycle_edges = {
-        frozenset((int(a), int(b))) for a, b in graph.edges()
-    } - {frozenset((int(a), int(b))) for a, b in nx.bridges(graph)}
+    cycle_edges = {frozenset((int(a), int(b))) for a, b in graph.edges()} - {
+        frozenset((int(a), int(b))) for a, b in nx.bridges(graph)
+    }
     ring_atoms = {v for edge in cycle_edges for v in edge}
 
     def permitted(transition: MarkedTransition) -> bool:
@@ -322,9 +319,7 @@ def _append_typed_catalog_actions(
                 # ring grammar.
                 anchors = closure_pairs if oriented.span == 0 else cyclic_pairs
                 for a, b in sorted(anchors):
-                    left_required = int(
-                        BOND_CLASS_TO_H_CHANGE[oriented.bond_orders[0]]
-                    )
+                    left_required = int(BOND_CLASS_TO_H_CHANGE[oriented.bond_orders[0]])
                     right_required = int(
                         BOND_CLASS_TO_H_CHANGE[oriented.bond_orders[-1]]
                     )
@@ -345,9 +340,7 @@ def _cyclic_blocks(state: MolecularGraph) -> tuple[frozenset[int], ...]:
     graph = nx.Graph()
     graph.add_nodes_from(real)
     graph.add_edges_from(
-        (a, b)
-        for a, b in combinations(real, 2)
-        if int(state.bonds[a, b]) != 0
+        (a, b) for a, b in combinations(real, 2) if int(state.bonds[a, b]) != 0
     )
     blocks = []
     for vertices in nx.biconnected_components(graph):
@@ -364,9 +357,7 @@ def _ring_system_restate_candidates(
     graph = nx.Graph()
     graph.add_nodes_from(real)
     graph.add_edges_from(
-        (a, b)
-        for a, b in combinations(real, 2)
-        if int(state.bonds[a, b]) != 0
+        (a, b) for a, b in combinations(real, 2) if int(state.bonds[a, b]) != 0
     )
     bridges = {frozenset((a, b)) for a, b in nx.bridges(graph)}
     ring_graph = graph.copy()
@@ -554,13 +545,33 @@ def enumerate_ring_system_restate_actions(
     successor is the same molecule). This wires the ``ring_system_restate`` family at inference so the
     model can flip ring saturation in either direction; B ships aromatize-only
     (``enumerate_aromatic_restate_actions``). Same candidate space + validator; states are Kekule, so
-    de-aromatization is a validity-checked double->single lowering that adds implicit H."""
+    de-aromatization is a validity-checked double->single lowering that adds implicit H.
+    """
 
     return tuple(
         action
         for action, _ in _validated_restates(
             state, system=system, keep=lambda before, after: after != before
         )
+    )
+
+
+def enumerate_ring_system_restate_transitions(
+    state: MolecularGraph,
+    *,
+    system: RewriteSystem | None = None,
+) -> tuple[tuple[RingSystemRestate, MolecularGraph], ...]:
+    """Return each executable bidirectional restatement with its exact successor.
+
+    The public action-only enumerator above remains unchanged. Editing-V2 CPU
+    collation uses this transition-bearing form so semantic successor groups,
+    charge filtering, and descriptors reuse the validator's one executor pass.
+    """
+
+    return _validated_restates(
+        state,
+        system=system,
+        keep=lambda before, after: after != before,
     )
 
 
@@ -592,7 +603,9 @@ def _validated_aromatic_restates(
     system: RewriteSystem | None,
 ) -> tuple[tuple[RingSystemRestate, MolecularGraph], ...]:
     # Aromatizing only (saturated -> aromatic): the training closure fiber's application condition.
-    return _validated_restates(state, system=system, keep=lambda before, after: after > before)
+    return _validated_restates(
+        state, system=system, keep=lambda before, after: after > before
+    )
 
 
 def _append_generic_cycle(
