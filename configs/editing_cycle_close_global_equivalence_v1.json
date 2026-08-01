@@ -1,0 +1,55 @@
+{
+  "candidate_scope": "all_undirected_nonbonded_endpoint_pair_and_order_coordinates_admitted_by_raw_bond_insert_on_at_least_one_complete_global_preserving_alias",
+  "comparison_policy": {
+    "component_resolver": "complete_assignments_only_for_resonance_invariant_aromatic_components_touching_either_endpoint_with_unrelated_components_fixed_lexicographically",
+    "equivalence_fields": [
+      "admission",
+      "typed_rejection_class",
+      "source_identity",
+      "endpoint_pair_and_order",
+      "canonical_product_identity",
+      "fixed_coordinate_exact_successor_identity"
+    ],
+    "semantic_admission": "all_executed_affected_component_assignments_must_be_valid_and_have_exactly_one_canonical_molecular_product",
+    "work_policy": "record_actual_affected_component_executions_separately_from_complete_global_alias_cardinality"
+  },
+  "contract_sha256": "c5bae17b14beec64c324aec63e697145a1a01f1177f6ff8c3a89a6dfd3029b8b",
+  "equivalence_gate": "zero_mismatches_zero_oracle_overflows_complete_declared_candidate_coverage",
+  "exact_validation_input": {
+    "completed_cycle_open_receipt_file_sha256": "5d97a069bd5c78bf2d00896c706b0965065677bbc8cc632a65401cb11b895fd",
+    "completed_cycle_open_receipt_sha256": "66c365ffcfc44aa081b7e047bdc3a18e48b5449231bffd53fcff21e28d21f891",
+    "completed_cycle_open_result_file_sha256": "e1643249061b58f16c06a324880859b77ade86a1c7fcbafd611478a729f6fbe6",
+    "completed_cycle_open_result_sha256": "f68b49f853612b3204b65f7ae47665ad6fedecf79f9a6746f4079badae76b10c",
+    "expected_unique_exact_sources": 1707,
+    "packed_manifest_sha256": "5bfc34ec9b02c9997c5c98dcd22513b1abe82c92ba2bc89c5494aeb19f31d248",
+    "packed_provenance_overlay_sha256": "9c921eba77d2dfe60c92fe109ec792ba4b7fedcfb7b330bd67054a4867c3c5f5",
+    "packed_shard_content_sha256": "6065e5fc80cc37e2ab9208fa5239e890c47d3174277484bc82af8649a5e2134f"
+  },
+  "excluded_partitions": [
+    "train",
+    "controller_validation",
+    "test"
+  ],
+  "oracle_policy": {
+    "assignment_domain": "all_slot_labeled_binary_single_double_assignments_with_exact_source_double_incidence",
+    "identity": "NON_AUTHORIZING_COMPLETE_GLOBAL_KEKULE_MILP_ORACLE",
+    "maximum_assignments": 4096,
+    "overflow_policy": "typed_incomplete_comparison_blocks_gate",
+    "product_policy": "apply_raw_bond_insert_to_every_complete_global_preserving_alias_for_each_declared_candidate"
+  },
+  "partitions": [
+    "validation"
+  ],
+  "runtime_policy": {
+    "numpy": "2.4.2",
+    "omp_num_threads": "1",
+    "python": "3.14.2",
+    "rdkit": "2025.09.6",
+    "scipy": "1.17.1"
+  },
+  "schema": "compose.editing.cycle_close_global_equivalence_contract",
+  "schema_version": 1,
+  "source_scope": "all_1707_distinct_exact_validation_sources_in_the_completed_cycle_open_v2_receipt",
+  "status": "VALIDATION_ONLY_COMPLETE_GLOBAL_CYCLE_CLOSE_EQUIVALENCE_NO_TRAINING_AUTHORITY",
+  "training_authorized": false
+}

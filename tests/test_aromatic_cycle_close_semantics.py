@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from compose_v4.chem.molecular_graph import is_element, smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.aromatic_cycle_close_semantics import (
     PROTOTYPE_STATUS,
     AromaticCycleCloseRejectionCode,
+    prepare_component_factored_cycle_close_context,
     resolve_component_factored_cycle_close,
 )
 from compose_v4.experiments.cycle_open_kekule_invariance import (
@@ -118,3 +120,29 @@ def test_admitted_close_has_semantic_open_inverse_at_molecular_level() -> None:
         CycleOpenEdge(action.a, action.b),
     )
     assert canonical_state_key(restored) == canonical_state_key(source)
+
+
+def test_source_context_is_reusable_and_exact_state_bound() -> None:
+    source = _state("Cc1cccc(Cl)c1")
+    context = prepare_component_factored_cycle_close_context(source)
+    action = BondInsert(0, 3, 1)
+    direct = resolve_component_factored_cycle_close(source, action)
+    cached = resolve_component_factored_cycle_close(
+        source,
+        action,
+        context=context,
+    )
+    assert direct.admitted == cached.admitted
+    assert direct.rejection_code == cached.rejection_code
+    assert direct.canonical_product_keys == cached.canonical_product_keys
+    assert direct.successor is not None and cached.successor is not None
+    assert canonical_state_key(direct.successor) == canonical_state_key(
+        cached.successor
+    )
+    alternate = build_alternate_kekule_pair(source).alternate
+    with pytest.raises(ValueError, match="another exact source"):
+        resolve_component_factored_cycle_close(
+            alternate,
+            action,
+            context=context,
+        )

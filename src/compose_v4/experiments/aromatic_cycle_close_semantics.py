@@ -66,6 +66,36 @@ class AromaticCycleCloseResolution:
     successor: MolecularGraph | None
 
 
+@dataclass(frozen=True)
+class AromaticCycleCloseContext:
+    """Reusable complete component evidence for one exact source state."""
+
+    exact_source_identity: tuple
+    source_key: str
+    components: tuple[AromaticComponentAssignments, ...]
+
+
+def _exact_state_identity(state: MolecularGraph) -> tuple:
+    return (
+        tuple(int(value) for value in state.atom_types),
+        tuple(int(value) for value in state.formal_charges),
+        tuple(int(value) for value in state.implicit_h_counts),
+        tuple(int(value) for value in state.bonds.reshape(-1)),
+    )
+
+
+def prepare_component_factored_cycle_close_context(
+    state: MolecularGraph,
+) -> AromaticCycleCloseContext:
+    if not is_valid_state(state) or not is_connected_or_null(state):
+        raise ValueError("cycle-close context requires a valid connected source")
+    return AromaticCycleCloseContext(
+        exact_source_identity=_exact_state_identity(state),
+        source_key=canonical_state_key(state),
+        components=enumerate_component_factored_kekule_assignments(state),
+    )
+
+
 def _rejected(
     action: BondInsert,
     code: AromaticCycleCloseRejectionCode,
@@ -107,6 +137,8 @@ def _affected_component_indices(
 def resolve_component_factored_cycle_close(
     state: MolecularGraph,
     action: BondInsert,
+    *,
+    context: AromaticCycleCloseContext | None = None,
 ) -> AromaticCycleCloseResolution:
     """Resolve one proposed cycle closure across all affected Kekule phases."""
 
@@ -138,7 +170,14 @@ def resolve_component_factored_cycle_close(
             source_key=source_key,
         )
 
-    components = enumerate_component_factored_kekule_assignments(state)
+    if context is None:
+        context = prepare_component_factored_cycle_close_context(state)
+    elif (
+        context.exact_source_identity != _exact_state_identity(state)
+        or context.source_key != source_key
+    ):
+        raise ValueError("cycle-close context belongs to another exact source state")
+    components = context.components
     if any(not component.bond_orders for component in components):
         return _rejected(
             normalized,
@@ -241,7 +280,9 @@ def resolve_component_factored_cycle_close(
 
 __all__ = [
     "PROTOTYPE_STATUS",
+    "AromaticCycleCloseContext",
     "AromaticCycleCloseRejectionCode",
     "AromaticCycleCloseResolution",
+    "prepare_component_factored_cycle_close_context",
     "resolve_component_factored_cycle_close",
 ]
