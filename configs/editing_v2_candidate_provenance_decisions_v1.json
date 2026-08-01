@@ -1,0 +1,174 @@
+{
+  "candidate_artifact": {
+    "build_commit": "720f22672ac66773e0cb7e1fbb8ce0f29491f33f",
+    "candidate_materialization": {
+      "address_stream_sha256": "66297fd08b214e83acca236ce58a814216dc55bcc3966a105b9254bfaf7e78be",
+      "manifest_file_sha256": "4d9f1b62062b79b259e6c43f25beaff6fdb78775cfca9b0e20acd2ab36facbf0",
+      "manifest_sha256": "753316fb9f7d484df2cf9c16ca25aee1355f98927bb6f95ec8510413f865720e",
+      "path": "/artifacts/editing_v2/packed_candidates/2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13/candidate_materialization/PACKED_CANDIDATE_MATERIALIZATION.json",
+      "rows_file_sha256": "7f4b6d99dd3780e5e96ab9f5687868810234ce6ed06dc77b81659d37a02c41f6",
+      "rows_semantic_sha256": "c832de8efa269389b32dc86474b518e7053c7a10a8a248bc3d9f8cceb50ea1a9"
+    },
+    "completion": {
+      "file_sha256": "3fd9bce17054b518c98b0194e10d91228a407a9cb3a44912d43e820ef490ac4a",
+      "path": "/artifacts/editing_v2/packed_candidates/2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13/CANDIDATE_BUILD_COMPLETE.json",
+      "semantic_sha256": "a6dcd0dddbdadf0f7f131d0590383dedaa6a888ff4a671061595fb8a4bf215d9"
+    },
+    "editing_corpus_contract": {
+      "file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
+      "path": "configs/editing_corpus_v2_contract.json",
+      "semantic_sha256": "153ef7316a64d03a89ba739f6423976b1d734695af8569d2e2cdc7a1227eb519"
+    },
+    "routing_policy": {
+      "file_sha256": "12849b1300d632c537545e199c933324123655cf9efd92a6e168408882069312",
+      "path": "configs/editing_v2_candidate_routing_policy_v1.json",
+      "semantic_sha256": "14c50c14675e3ec3efbb4fb7fa0b6c58866ebdc7693ceaec8e3f0e702af5ce64"
+    },
+    "run_identity_sha256": "2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13",
+    "run_root": "/artifacts/editing_v2/packed_candidates/2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13",
+    "source_binding_registry": {
+      "file_sha256": "bceff3e79c6986f385cd2b1d0ecc9eeb86ad8b6c5979dd4048d1d55d3d55efe6",
+      "path": "configs/editing_v2_overlay_source_bindings_v1.json",
+      "semantic_sha256": "008870e90bbe76ecddf4d26e2ea3f2b0a3a038bf463b17f273b27b8d9e983780"
+    },
+    "source_manifest": {
+      "file_sha256": "c8e2bc12a88bf293866f79656d66239031ed7ed9dae86a2115e7d430adfc36d9",
+      "path": "/artifacts/editing_v2/packed_candidates/2f29883dafe6b2b7fd812c34a1a99d8c89270ce729387d37abc1111193f56c13/PACKED_CANDIDATE_SOURCES.json",
+      "semantic_sha256": "3429cd4e8aa73168cd4427a6511cb856587f7d74e2e6e6ca0161ee9c80995193"
+    },
+    "upstream_overlay_completion": {
+      "file_sha256": "af08356c59ed2675f7d27d68b7d5f4e87d3119baf6dacca5c6347c908ee4b1ac",
+      "path": "/artifacts/editing_v2/upstream_overlays/6e45abf087087a8ec9db10ddcbf986d3ee5002d15868ec84f849f226834c6c53/OVERLAY_COMPLETION.json",
+      "semantic_sha256": "6e45abf087087a8ec9db10ddcbf986d3ee5002d15868ec84f849f226834c6c53"
+    },
+    "volume_name": "compose-v4-artifacts"
+  },
+  "candidate_stage_pass_through": {
+    "decoded_value_semantics": "exact_decoded_string_equality",
+    "definition_id": "candidate_stage_persisted_key_pass_through_v1",
+    "executor_replay_performed": false,
+    "identity_fields": [
+      "endpoint_identity.source_key",
+      "endpoint_identity.target_key",
+      "groups.scaffold_ids",
+      "groups.source_group_ids"
+    ],
+    "identity_sha256": "5bb8173facaa076339413f14c11d7457dd824b6e289ae964b23ce6dea855e433",
+    "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86",
+    "parsing_performed": false,
+    "rdkit_invoked": false,
+    "semantic_normalization_performed": false,
+    "source_of_truth": "persisted_candidate_header_identity_fields"
+  },
+  "compiler_identity": {
+    "canonicalizer_sha256": "5bb8173facaa076339413f14c11d7457dd824b6e289ae964b23ce6dea855e433",
+    "config_sha256": "14c50c14675e3ec3efbb4fb7fa0b6c58866ebdc7693ceaec8e3f0e702af5ce64",
+    "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86",
+    "operator_contract_sha256": "153ef7316a64d03a89ba739f6423976b1d734695af8569d2e2cdc7a1227eb519"
+  },
+  "decision_id": "compose-editing-v2-candidate-provenance-decisions-v1",
+  "decision_sha256": "8e3640402299de00b1834399e1893ef6a101ebeb98ec20ca0f5a3f3716f568ec",
+  "evidence_identity": {
+    "component_reference_fields": {
+      "action_sequence": [
+        "operator_summary.action_stream_sha256"
+      ],
+      "intermediates": [
+        "exact_states.encoded_state_stream_sha256"
+      ],
+      "pair_relationship": [
+        "endpoint_identity.source_key",
+        "endpoint_identity.target_key"
+      ],
+      "path": [
+        "packed_address.trace_id",
+        "trace_envelope_sha256"
+      ],
+      "source_endpoint": [
+        "endpoint_identity.source_key"
+      ],
+      "target_endpoint": [
+        "endpoint_identity.target_key"
+      ]
+    },
+    "definition_id": "compose-editing-v2-packed-header-evidence-references-v1",
+    "evidence_identity_sha256": "8d68cf5861a41a42e3c9e1ae615ab496de51f39c87a4bca4fde10f153633520d",
+    "implementation_sha256": "15f9c1ea8bac1a221227961c37c24d18fcaeaf60b435cac2b6a1497f34510b3e",
+    "source_record_id_fields": [
+      "packed_address.address_sha256",
+      "packed_address.trace_id",
+      "source_asset.source_asset_id"
+    ]
+  },
+  "identity_definitions": {
+    "exact_molecule": {
+      "definition_id": "candidate_stage_persisted_canonical_key_equality_v1",
+      "identity_namespace": "compose.editing_v2.persisted_trace_molecular_key.v1",
+      "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86"
+    },
+    "partition_scaffold": {
+      "definition_id": "persisted_murcko_carbonized_wl3_partition_scaffold_v2",
+      "identity_namespace": "compose.scaffold.murcko-carbonized-wl3.v2",
+      "implementation_sha256": "9eb97923e8ec065bb382e5178416fbcade2d69e7a2e91d36517397e98fa1bc30"
+    },
+    "schema": "compose.editing_v2_identity_definition_contract",
+    "schema_version": 2,
+    "source_group": {
+      "definition_id": "candidate_stage_source_origin_group_v1",
+      "identity_namespace": "compose.editing_v2.source_origin_group.v1",
+      "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86"
+    }
+  },
+  "policy_bindings": {
+    "mapping_policy_sha256": null,
+    "metric_policy_sha256": null,
+    "unresolved_mapping_policies": [
+      "editing_v2.mapping_policy.resolve_after_semantic_migration"
+    ],
+    "unresolved_metric_policies": [
+      "editing_v2.metric_policy.resolve_after_semantic_migration"
+    ]
+  },
+  "schema": "compose.editing_v2_candidate_provenance_decisions",
+  "schema_version": 1,
+  "source_assets": [
+    {
+      "access_basis": "project-controlled Modal volume asset; upstream acquisition or license receipt is not recorded in this repository; this records private project access and does not grant redistribution rights",
+      "source_asset_id": "guacamol-subset-500000-seed0",
+      "source_asset_path": "/guacamol/guacamol_subset_500000_seed0.smiles",
+      "source_asset_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+      "source_group_namespace": {
+        "cross_lane_sharing_authorized": true,
+        "definition_id": "legacy_synthetic_origin_endpoint_key_v1",
+        "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86",
+        "namespace_id": "compose.editing_v2.guacamol_subset_500000_seed0.source_group.v1",
+        "relationship_type": "source_group",
+        "schema": "compose.editing_v2_relationship_namespace",
+        "schema_version": 2,
+        "source_asset_id": "guacamol-subset-500000-seed0",
+        "source_asset_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+      },
+      "source_version": "guacamol_subset_500000_seed0@sha256:70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+    },
+    {
+      "access_basis": "project-produced private derivative of the content-addressed GuacaMol asset on compose-v4-artifacts; inherits the source access limitation and is not a redistribution grant",
+      "source_asset_id": "mmp-analogue-pool-v2-252fbfaafe1c1fb3b16f",
+      "source_asset_path": "/artifacts/mmp_pool_frozen_v2/mmp_pool_v2_252fbfaafe1c1fb3b16f/edit_pool_full.jsonl",
+      "source_asset_sha256": "409507ec0de192fe756e851b1ce7b3dcd76f1ddb8b3d981d6d720b457d616f4c",
+      "source_group_namespace": {
+        "cross_lane_sharing_authorized": true,
+        "definition_id": "mmp_explicit_source_endpoint_key_v1",
+        "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86",
+        "namespace_id": "compose.editing_v2.mmp_pool_252fbfaafe1c1fb3b16f.source_group.v1",
+        "relationship_type": "source_group",
+        "schema": "compose.editing_v2_relationship_namespace",
+        "schema_version": 2,
+        "source_asset_id": "mmp-analogue-pool-v2-252fbfaafe1c1fb3b16f",
+        "source_asset_sha256": "409507ec0de192fe756e851b1ce7b3dcd76f1ddb8b3d981d6d720b457d616f4c"
+      },
+      "source_version": "compose.mmp_analogue_pool.v2@freeze_identity:252fbfaafe1c1fb3b16f6945483ebe5accfe8a43f5436d69c5fbbd84eb34534f"
+    }
+  ],
+  "status": "FROZEN_CANDIDATE_PROVENANCE_DECISIONS_NO_TRAINING_AUTHORITY",
+  "training_authorized": false
+}
