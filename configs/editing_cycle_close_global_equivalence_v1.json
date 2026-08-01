@@ -13,10 +13,10 @@
     "semantic_admission": "all_executed_affected_component_assignments_must_be_valid_and_have_exactly_one_canonical_molecular_product",
     "work_policy": "record_actual_affected_component_executions_separately_from_complete_global_alias_cardinality"
   },
-  "contract_sha256": "c5bae17b14beec64c324aec63e697145a1a01f1177f6ff8c3a89a6dfd3029b8b",
+  "contract_sha256": "3e471533963bf867ce9e3618da07a98ef24ab78750c91060f1d39f1b2b95d545",
   "equivalence_gate": "zero_mismatches_zero_oracle_overflows_complete_declared_candidate_coverage",
   "exact_validation_input": {
-    "completed_cycle_open_receipt_file_sha256": "5d97a069bd5c78bf2d00896c706b0965065677bbc8cc632a65401cb11b895fd",
+    "completed_cycle_open_receipt_file_sha256": "5d97a069276f099cdb5529a075e131bedca3a78cddb30fc3545d660125b395fd",
     "completed_cycle_open_receipt_sha256": "66c365ffcfc44aa081b7e047bdc3a18e48b5449231bffd53fcff21e28d21f891",
     "completed_cycle_open_result_file_sha256": "e1643249061b58f16c06a324880859b77ade86a1c7fcbafd611478a729f6fbe6",
     "completed_cycle_open_result_sha256": "f68b49f853612b3204b65f7ae47665ad6fedecf79f9a6746f4079badae76b10c",

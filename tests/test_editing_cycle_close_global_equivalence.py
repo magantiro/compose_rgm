@@ -24,7 +24,7 @@ def _state(smiles: str):
 def test_contract_is_self_hashed_validation_only_and_physically_pinned() -> None:
     contract = load_contract(CONTRACT)
     assert contract["contract_sha256"] == (
-        "c5bae17b14beec64c324aec63e697145a1a01f1177f6ff8c3a89a6dfd3029b8b"
+        "3e471533963bf867ce9e3618da07a98ef24ab78750c91060f1d39f1b2b95d545"
     )
     assert contract["training_authorized"] is False
     assert contract["partitions"] == ["validation"]
