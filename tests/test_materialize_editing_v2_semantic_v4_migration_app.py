@@ -12,8 +12,17 @@ from unittest.mock import patch
 import pytest
 
 from modal_apps import materialize_editing_v2_semantic_v4_migration_app as migration_app
+from compose_v4.data import semantic_trace_migration_mapreduce as migration_core
 
 SHA = "a" * 64
+
+
+def test_image_mounts_every_semantic_migration_source_directory() -> None:
+    mounted = set(migration_app.IMAGE_SOURCE_DIRECTORIES)
+    assert mounted == {"src", "configs", "modal_apps"}
+    for relative in migration_core._SOURCE_FILES:
+        assert Path(relative).parts[0] in mounted
+        assert (migration_app.ROOT / relative).is_file()
 
 
 def _write_json(path: Path, value: object) -> None:

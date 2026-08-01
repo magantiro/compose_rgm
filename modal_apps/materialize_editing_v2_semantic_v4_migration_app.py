@@ -57,6 +57,7 @@ REFINED_STRUCTURAL_COMPLETION_SCHEMA = "compose.editing_v2_refined_role_lane_com
 RUN_REQUEST_FILENAME = "SEMANTIC_V4_MIGRATION_REQUEST.json"
 WRAPPER_COMPLETION_FILENAME = "SEMANTIC_V4_MIGRATION_COMPLETE.json"
 LAUNCHER_SOURCE = "modal_apps/materialize_editing_v2_semantic_v4_migration_app.py"
+IMAGE_SOURCE_DIRECTORIES = ("src", "configs", "modal_apps")
 
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -86,19 +87,14 @@ image = (
             "OMP_NUM_THREADS": "1",
         }
     )
-    .add_local_dir(
-        ROOT / "src",
-        str(REMOTE_ROOT / "src"),
+)
+for source_directory in IMAGE_SOURCE_DIRECTORIES:
+    image = image.add_local_dir(
+        ROOT / source_directory,
+        str(REMOTE_ROOT / source_directory),
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
-    .add_local_dir(ROOT / "configs", str(REMOTE_ROOT / "configs"), copy=True)
-    .add_local_file(
-        ROOT / LAUNCHER_SOURCE,
-        str(REMOTE_ROOT / LAUNCHER_SOURCE),
-        copy=True,
-    )
-)
 
 app = modal.App("compose-v4-editing-v2-semantic-v4-migration")
 artifact_volume = modal.Volume.from_name(
