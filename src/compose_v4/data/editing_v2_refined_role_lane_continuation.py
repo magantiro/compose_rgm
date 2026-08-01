@@ -44,6 +44,8 @@ PARENT_COMPLETION_SCHEMA = "compose.editing_v2_structural_split_completion"
 PARENT_COMPLETION_SCHEMA_VERSION = 1
 PARENT_BLOCKED_STATUS = "BLOCKED_SPLIT_GATES_NO_TRAINING_AUTHORITY"
 PARENT_COMPLETION_FILENAME = "SPLIT_PIPELINE_COMPLETE.json"
+PARENT_CENSUS_FILENAME = "EDITING_V2_SPLIT_CENSUS_V4.json"
+PARENT_ASSIGNMENT_FILENAME = "EDITING_V2_SPLIT_ASSIGNMENT.json"
 
 CONTINUATION_REQUEST_SCHEMA = "compose.editing_v2_refined_role_lane_request"
 CONTINUATION_REQUEST_SCHEMA_VERSION = 1
@@ -414,6 +416,49 @@ def _record_file(
     return path, payload
 
 
+def _normalize_parent_output_record(
+    record: Mapping[str, Any],
+    *,
+    parent_completion_path: Path,
+    artifact_root: Path,
+    expected_filename: str,
+    field: str,
+) -> dict[str, Any]:
+    """Resolve one exact parent output across canonical and legacy Modal paths.
+
+    The original structural job self-hashed Modal's internal mounted path into
+    its completion receipt.  That path is not portable across containers.  We
+    accept only its exact ``/__modal/volumes/vo-*/<canonical suffix>`` form and
+    resolve it to the canonical sibling of the already verified completion.
+    """
+
+    expected_path = parent_completion_path.parent / expected_filename
+    expected_address = artifact_address(expected_path, artifact_root=artifact_root)
+    raw = record.get("artifact_path")
+    if raw == expected_address:
+        return dict(record)
+    if not isinstance(raw, str):
+        raise EditingV2RefinedRoleLaneContinuationError(
+            f"{field}.artifact_path must be a string"
+        )
+    recorded = PurePosixPath(raw)
+    suffix = PurePosixPath(expected_address).relative_to("/artifacts")
+    prefix = recorded.parts[:4]
+    if (
+        not recorded.is_absolute()
+        or ".." in recorded.parts
+        or str(recorded) != raw
+        or len(recorded.parts) != len(suffix.parts) + 4
+        or prefix[:3] != ("/", "__modal", "volumes")
+        or not prefix[3].startswith("vo-")
+        or tuple(recorded.parts[4:]) != tuple(suffix.parts)
+    ):
+        raise EditingV2RefinedRoleLaneContinuationError(
+            f"{field}.artifact_path is neither canonical nor the exact legacy Modal form"
+        )
+    return {**dict(record), "artifact_path": expected_address}
+
+
 def load_validated_refinement_inputs(
     *,
     parent_completion_artifact_path: str,
@@ -484,8 +529,15 @@ def load_validated_refinement_inputs(
     census_record = _require_mapping(
         parent["census"], fields=_CENSUS_RECORD_FIELDS, field="parent census record"
     )
-    _, census = _record_file(
+    census_resolution_record = _normalize_parent_output_record(
         census_record,
+        parent_completion_path=parent_path,
+        artifact_root=root,
+        expected_filename=PARENT_CENSUS_FILENAME,
+        field="parent census",
+    )
+    _, census = _record_file(
+        census_resolution_record,
         artifact_root=root,
         semantic_field="census_sha256",
         field="parent census",
@@ -507,8 +559,15 @@ def load_validated_refinement_inputs(
         fields=_ASSIGNMENT_RECORD_FIELDS,
         field="parent assignment record",
     )
-    assignment_path, assignment = _record_file(
+    assignment_resolution_record = _normalize_parent_output_record(
         assignment_record,
+        parent_completion_path=parent_path,
+        artifact_root=root,
+        expected_filename=PARENT_ASSIGNMENT_FILENAME,
+        field="parent assignment",
+    )
+    assignment_path, assignment = _record_file(
+        assignment_resolution_record,
         artifact_root=root,
         semantic_field="assignment_sha256",
         field="parent assignment",

@@ -176,6 +176,70 @@ def _fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     return artifact_root, parent_address, refinement_address, refined_assignment
 
 
+def _parent_completion_path(artifact_root: Path, address: str) -> Path:
+    return artifact_root / Path(*PurePosixPath(address).relative_to("/artifacts").parts)
+
+
+def _legacy_modal_path(address: str) -> str:
+    suffix = PurePosixPath(address).relative_to("/artifacts")
+    return str(PurePosixPath("/__modal/volumes/vo-fixture") / suffix)
+
+
+def test_exact_legacy_modal_parent_paths_resolve_to_canonical_siblings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    artifact_root, parent_address, refinement_address, refined_assignment = _fixture(
+        tmp_path, monkeypatch
+    )
+    parent_path = _parent_completion_path(artifact_root, parent_address)
+    parent = json.loads(parent_path.read_text())
+    parent["census"]["artifact_path"] = _legacy_modal_path(
+        parent["census"]["artifact_path"]
+    )
+    parent["assignment"]["artifact_path"] = _legacy_modal_path(
+        parent["assignment"]["artifact_path"]
+    )
+    parent["completion_sha256"] = canonical_sha256(
+        {key: value for key, value in parent.items() if key != "completion_sha256"}
+    )
+    _write(parent_path, parent)
+
+    inputs = continuation.load_validated_refinement_inputs(
+        parent_completion_artifact_path=parent_address,
+        refinement_artifact_path=refinement_address,
+        artifact_root=artifact_root,
+    )
+    assert inputs.refined_assignment == refined_assignment
+    assert inputs.parent_assignment_path.parent == parent_path.parent
+
+
+def test_legacy_modal_parent_path_with_wrong_suffix_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    artifact_root, parent_address, refinement_address, _ = _fixture(
+        tmp_path, monkeypatch
+    )
+    parent_path = _parent_completion_path(artifact_root, parent_address)
+    parent = json.loads(parent_path.read_text())
+    parent["census"][
+        "artifact_path"
+    ] = "/__modal/volumes/vo-fixture/wrong/EDITING_V2_SPLIT_CENSUS_V4.json"
+    parent["completion_sha256"] = canonical_sha256(
+        {key: value for key, value in parent.items() if key != "completion_sha256"}
+    )
+    _write(parent_path, parent)
+
+    with pytest.raises(
+        continuation.EditingV2RefinedRoleLaneContinuationError,
+        match="exact legacy Modal form",
+    ):
+        continuation.load_validated_refinement_inputs(
+            parent_completion_artifact_path=parent_address,
+            refinement_artifact_path=refinement_address,
+            artifact_root=artifact_root,
+        )
+
+
 def test_blocked_parent_and_refinement_reopen_with_no_authority(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
