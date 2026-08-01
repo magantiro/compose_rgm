@@ -921,6 +921,40 @@ def _load_task_result(
     return receipt, rows
 
 
+def completed_semantic_active8_decision_task_ids(
+    plan: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+) -> frozenset[str]:
+    """Return only fully verified durable task results, rejecting extras."""
+
+    value = _validate_plan(plan)
+    task_parent = _run_root(value, artifact_root=artifact_root) / "tasks"
+    expected = {task["task_identity_sha256"] for task in value["tasks"]}
+    observed = (
+        {path.name for path in task_parent.iterdir()} if task_parent.is_dir() else set()
+    )
+    extras = observed - expected
+    if extras:
+        raise SemanticActive8DecisionMapReduceError(
+            f"decision task directory has unexpected objects: {sorted(extras)}"
+        )
+    completed: set[str] = set()
+    for task in value["tasks"]:
+        root = _task_root(value, task, artifact_root=artifact_root)
+        receipt_exists = (root / RECEIPT_FILENAME).exists()
+        decisions_exist = (root / DECISION_FILENAME).exists()
+        if not receipt_exists and not decisions_exist:
+            continue
+        if receipt_exists is not decisions_exist:
+            raise SemanticActive8DecisionMapReduceError(
+                f"decision task {task['task_identity_sha256']} is partial"
+            )
+        _load_task_result(value, task, artifact_root=artifact_root)
+        completed.add(task["task_identity_sha256"])
+    return frozenset(completed)
+
+
 def reduce_semantic_active8_decisions(
     plan: Mapping[str, Any],
     *,
@@ -1155,6 +1189,7 @@ __all__ = [
     "RECEIPT_FILENAME",
     "SemanticActive8DecisionIncomplete",
     "SemanticActive8DecisionMapReduceError",
+    "completed_semantic_active8_decision_task_ids",
     "execute_semantic_active8_decision_task",
     "plan_semantic_active8_decisions",
     "reduce_semantic_active8_decisions",

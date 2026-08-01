@@ -24,6 +24,7 @@ from compose_v4.data.editing_v2_semantic_active8_admission import (
 from compose_v4.data.editing_v2_semantic_active8_decision_mapreduce import (
     SemanticActive8DecisionIncomplete,
     SemanticActive8DecisionMapReduceError,
+    completed_semantic_active8_decision_task_ids,
     execute_semantic_active8_decision_task,
     plan_semantic_active8_decisions,
     reduce_semantic_active8_decisions,
@@ -290,6 +291,9 @@ def test_exact_chunk_tasks_reduce_to_non_authorizing_twenty_source_census(
     completion = reduce_semantic_active8_decisions(
         plan, inventory=inventory, artifact_root=root
     )
+    assert completed_semantic_active8_decision_task_ids(
+        plan, artifact_root=root
+    ) == frozenset(task["task_identity_sha256"] for task in plan["tasks"])
     assert completion["active8_counts"]["traces"] == 20
     assert completion["active8_counts"]["actions"] == 20
     assert completion["active8_counts"]["accepted_traces"] == 20

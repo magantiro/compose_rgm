@@ -1,0 +1,36 @@
+{
+  "schema": "compose.editing.semantic_active8_decision_runtime_contract",
+  "schema_version": 1,
+  "contract_id": "editing_v2_semantic_active8_decision_runtime_v1",
+  "status": "FROZEN_CPU_DECISION_RUNTIME_NO_DOWNSTREAM_AUTHORITY",
+  "training_authorized": false,
+  "gate_zero_authorized": false,
+  "t1_authorized": false,
+  "bounded_p50_authorized": false,
+  "semantic_model_process_contract": {
+    "path": "configs/editing_gate_zero_semantic_model_process_v1.json",
+    "file_sha256": "3c3233e2a00e0e039b3ef8b804c7caf7c454dd59660b98555ce2f22da4c4f6a4",
+    "contract_sha256": "f7601a6e6d209ca497415390deadc0a85df939c794c586834b1e531047fbf276"
+  },
+  "model": {
+    "initialization_seed": 20260730,
+    "max_atoms": 40,
+    "hidden_dim": 256,
+    "message_passing_steps": 6,
+    "mark_dim": 32,
+    "dtype": "torch.float32",
+    "atom_vocabulary_class_count": 15,
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "candidate_time": 0.5,
+    "candidate_cache_size": 4096
+  },
+  "software": {
+    "python": "3.11",
+    "torch": "2.4.0",
+    "numpy": "1.26.4",
+    "scipy": "1.13.1",
+    "networkx": "3.3",
+    "rdkit": "2024.3.5"
+  },
+  "runtime_contract_sha256": "58c931bba3b9cc819fd405746beebaab4da63f00da73c4214cb3c9180f10f6b6"
+}
