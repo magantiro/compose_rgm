@@ -268,14 +268,19 @@ def materialize_candidates(
     if candidate_root.exists():
         candidate = materializer.validate_packed_candidate_materialization(candidate_root)
     else:
-        candidate = materializer.materialize_packed_candidate_headers(
-            source_manifest_path=source_manifest_path,
-            artifact_root=ARTIFACT_ROOT,
-            routing_policy_path=routing_path,
-            editing_corpus_contract_path=contract_path,
-            output_dir=candidate_root,
-            code_revision=commit,
-        )
+        try:
+            candidate = materializer.materialize_packed_candidate_headers(
+                source_manifest_path=source_manifest_path,
+                artifact_root=ARTIFACT_ROOT,
+                routing_policy_path=routing_path,
+                editing_corpus_contract_path=contract_path,
+                output_dir=candidate_root,
+                code_revision=commit,
+            )
+        except materializer.EditingV2PackedCandidateMaterializationError as error:
+            # Modal clients do not necessarily import the serialized project
+            # exception class. Preserve the exact domain error as portable text.
+            raise RuntimeError(f"candidate materialization failed: {error}") from error
     if (
         candidate["inputs"]["source_manifest"]
         != {

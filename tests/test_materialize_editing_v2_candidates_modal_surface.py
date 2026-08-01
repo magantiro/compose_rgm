@@ -67,3 +67,4 @@ def test_modal_job_builds_manifest_from_completion_without_arbitrary_manifest_in
     assert "expected_overlay_completion_file_sha256" in source
     assert "--source-manifest" not in source
     assert 'training_authorized": False' in source
+    assert "candidate materialization failed:" in source

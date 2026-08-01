@@ -68,11 +68,11 @@ UPSTREAM_OVERLAY_COMPLETION_SCHEMA_VERSION = 2
 UPSTREAM_OVERLAY_COMPLETION_STATUS = "COMPLETE_IMMUTABLE_BYTE_BINDINGS_NO_TRAINING_AUTHORITY"
 
 CANDIDATE_HEADER_SCHEMA = "compose.editing_v2_packed_candidate_header"
-CANDIDATE_HEADER_SCHEMA_VERSION = 1
+CANDIDATE_HEADER_SCHEMA_VERSION = 2
 CANDIDATE_HEADER_STATUS = "CANDIDATE_HEADER_NO_SPLIT_OR_TRAINING_AUTHORITY"
 
 MATERIALIZATION_SCHEMA = "compose.editing_v2_packed_candidate_materialization"
-MATERIALIZATION_SCHEMA_VERSION = 1
+MATERIALIZATION_SCHEMA_VERSION = 2
 MATERIALIZATION_STATUS = "COMPLETE_CANDIDATE_HEADERS_NO_TRAINING_AUTHORITY"
 DERIVATIVE_PROVENANCE_STATUS = "FRESH_EDITING_V2_DERIVATIVE_PROVENANCE"
 
@@ -87,6 +87,14 @@ ACTION_SCHEMA = "compose.rewrite.action"
 ACTION_SCHEMA_VERSION = 2
 PARTITION_ISOLATION_SCHEMA = "compose.data.partition_isolation"
 PARTITION_ISOLATION_SCHEMA_VERSION = 1
+EXPLICIT_PARTITION_GROUP_DERIVATION = "explicit_partition_isolation_v1"
+LEGACY_SYNTHETIC_PARTITION_GROUP_DERIVATION = "legacy_synthetic_origin_scaffold_v1"
+PARTITION_GROUP_DERIVATIONS = frozenset(
+    {
+        EXPLICIT_PARTITION_GROUP_DERIVATION,
+        LEGACY_SYNTHETIC_PARTITION_GROUP_DERIVATION,
+    }
+)
 
 CANDIDATE_ROWS_FILENAME = "candidate_headers.jsonl"
 MATERIALIZATION_FILENAME = "PACKED_CANDIDATE_MATERIALIZATION.json"
@@ -1012,7 +1020,8 @@ def _load_overlay_completion(
                 f"upstream overlay completion.shards[{index}] validation role is unsupported"
             )
         packed_sha256 = _require_sha256(
-            receipt["shard_file_sha256"], field=f"completion shard {index}.shard_file_sha256"
+            receipt["shard_file_sha256"],
+            field=f"completion shard {index}.shard_file_sha256",
         )
         manifest_sha256 = _require_sha256(
             receipt["manifest_file_sha256"],
@@ -1367,9 +1376,42 @@ def validate_historical_provenance_overlay(
     )
 
 
-def _partition_groups(trace: Mapping[str, Any], *, address: str) -> dict[str, Any]:
+def _partition_groups(
+    trace: Mapping[str, Any],
+    *,
+    address: str,
+) -> tuple[dict[str, Any], str]:
     metadata = trace.get("metadata")
-    isolation = metadata.get("partition_isolation") if isinstance(metadata, Mapping) else None
+    if not isinstance(metadata, Mapping):
+        raise EditingV2PackedCandidateMaterializationError(f"{address}.metadata must be an object")
+    isolation = metadata.get("partition_isolation")
+    if isolation is None:
+        layer = _require_text(trace.get("layer"), field=f"{address}.layer")
+        if layer not in _SYNTHETIC_LAYERS:
+            raise EditingV2PackedCandidateMaterializationError(
+                f"{address}.metadata.partition_isolation is required for layer {layer!r}"
+            )
+        source_key = _require_text(trace.get("source_key"), field=f"{address}.source_key")
+        target_key = _require_text(trace.get("target_key"), field=f"{address}.target_key")
+        source_scaffold = _require_text(
+            trace.get("source_scaffold"), field=f"{address}.source_scaffold"
+        )
+        origin_smiles = _require_text(
+            metadata.get("origin_smiles"),
+            field=f"{address}.metadata.origin_smiles",
+        )
+        if origin_smiles not in {source_key, target_key}:
+            raise EditingV2PackedCandidateMaterializationError(
+                f"{address}.metadata.origin_smiles must identify one trace endpoint"
+            )
+        return (
+            {
+                "molecule_ids": sorted({source_key, target_key}),
+                "scaffold_ids": [source_scaffold],
+                "source_group_ids": [origin_smiles],
+            },
+            LEGACY_SYNTHETIC_PARTITION_GROUP_DERIVATION,
+        )
     payload = _require_exact_fields(
         isolation,
         _PARTITION_ISOLATION_FIELDS,
@@ -1394,11 +1436,14 @@ def _partition_groups(trace: Mapping[str, Any], *, address: str) -> dict[str, An
         payload["source_group_id"],
         field=f"{address}.partition_isolation.source_group_id",
     )
-    return {
-        "molecule_ids": list(molecule_ids),
-        "scaffold_ids": list(scaffold_ids),
-        "source_group_ids": [source_group_id],
-    }
+    return (
+        {
+            "molecule_ids": list(molecule_ids),
+            "scaffold_ids": list(scaffold_ids),
+            "source_group_ids": [source_group_id],
+        },
+        EXPLICIT_PARTITION_GROUP_DERIVATION,
+    )
 
 
 def _validate_encoded_state(
@@ -1781,7 +1826,10 @@ def _candidate_header(
         address=address_label,
         path_length=path_length,
     )
-    groups = _partition_groups(trace, address=address_label)
+    groups, partition_group_derivation = _partition_groups(
+        trace,
+        address=address_label,
+    )
     address_body = {
         "source_asset_sha256": source["source_asset_sha256"],
         "packed_shard_file_sha256": shard_summary["file_sha256"],
@@ -1902,6 +1950,7 @@ def _candidate_header(
             "target_key": target_key,
         },
         "groups": groups,
+        "partition_group_derivation": partition_group_derivation,
         "compiler_path_class": compiler_path_class,
         "data_lane": data_lane,
         "lane_resolution": lane_resolution,
@@ -1977,6 +2026,7 @@ def _empty_totals() -> dict[str, Any]:
         "rejected_family_histogram": Counter(),
         "lane_histogram": Counter(),
         "rejection_reason_histogram": Counter(),
+        "partition_group_derivation_histogram": Counter(),
     }
 
 
@@ -1990,6 +2040,12 @@ def _accumulate_totals(totals: dict[str, Any], row: Mapping[str, Any]) -> None:
     totals["atom_count_delta_sum"] += int(operator["atom_count_delta"])
     totals["graph_cycle_rank_delta_sum"] += int(operator["graph_cycle_rank_delta"])
     totals["family_histogram"].update(operator["family_histogram"])
+    derivation = row.get("partition_group_derivation")
+    if derivation not in PARTITION_GROUP_DERIVATIONS:
+        raise EditingV2PackedCandidateMaterializationError(
+            "candidate header has an unsupported partition-group derivation"
+        )
+    totals["partition_group_derivation_histogram"][derivation] += 1
     if row["disposition"] == "routed_candidate":
         totals["routed_rows"] += 1
         totals["routed_family_histogram"].update(operator["family_histogram"])
@@ -2015,6 +2071,9 @@ def _final_totals(totals: Mapping[str, Any]) -> dict[str, Any]:
         "rejected_family_histogram": _counter_payload(totals["rejected_family_histogram"]),
         "lane_histogram": _counter_payload(totals["lane_histogram"]),
         "rejection_reason_histogram": _counter_payload(totals["rejection_reason_histogram"]),
+        "partition_group_derivation_histogram": _counter_payload(
+            totals["partition_group_derivation_histogram"]
+        ),
     }
 
 
@@ -2205,6 +2264,22 @@ def materialize_packed_candidate_headers(
                 ),
                 "historical_cache_sidecar_role": HISTORICAL_OVERLAY_ROLE,
                 "historical_sidecar_fields_used_as_current_training_provenance": False,
+                "partition_group_derivation_contract": {
+                    EXPLICIT_PARTITION_GROUP_DERIVATION: {
+                        "input_fields": ["metadata.partition_isolation"],
+                        "allowed_layers": sorted(_COMPLETION_LAYERS),
+                    },
+                    LEGACY_SYNTHETIC_PARTITION_GROUP_DERIVATION: {
+                        "input_fields": [
+                            "source_key",
+                            "target_key",
+                            "source_scaffold",
+                            "metadata.origin_smiles",
+                        ],
+                        "allowed_layers": sorted(_SYNTHETIC_LAYERS),
+                        "origin_must_identify_trace_endpoint": True,
+                    },
+                },
             },
             "implementation": {
                 "relative_path": (
@@ -2385,6 +2460,7 @@ __all__ = [
     "HISTORICAL_OVERLAY_ROLE",
     "MATERIALIZATION_FILENAME",
     "MATERIALIZATION_SCHEMA",
+    "PARTITION_GROUP_DERIVATIONS",
     "SOURCE_BINDING_REGISTRY_SCHEMA",
     "SOURCE_MANIFEST_SCHEMA",
     "build_overlay_source_binding_registry",

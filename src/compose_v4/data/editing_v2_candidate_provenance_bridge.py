@@ -54,6 +54,7 @@ from compose_v4.data.editing_v2_packed_candidate_materializer import (
     CANDIDATE_HEADER_STATUS,
     CANDIDATE_ROWS_FILENAME,
     MATERIALIZATION_FILENAME,
+    PARTITION_GROUP_DERIVATIONS,
     canonical_json_bytes,
     canonical_sha256,
     file_sha256,
@@ -809,6 +810,10 @@ def _validate_header(
         raise EditingV2CandidateProvenanceBridgeError(
             f"candidate header {expected_index} self-hash disagrees"
         )
+    if row.get("partition_group_derivation") not in PARTITION_GROUP_DERIVATIONS:
+        raise EditingV2CandidateProvenanceBridgeError(
+            f"candidate header {expected_index} has an unsupported partition-group derivation"
+        )
     source = row.get("source_asset")
     if not isinstance(source, Mapping):
         raise EditingV2CandidateProvenanceBridgeError(
@@ -1042,6 +1047,7 @@ def _split_row(
             "candidate_payload_sha256": header["candidate_payload_sha256"],
             "candidate_audit_ledger_row_sha256": ledger_row["row_sha256"],
             "provenance_registry_sha256": registry["registry_sha256"],
+            "partition_group_derivation": header["partition_group_derivation"],
         },
     }
 

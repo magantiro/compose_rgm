@@ -134,6 +134,7 @@ def _candidate_row(index: int, lane: str) -> dict[str, Any]:
             "scaffold_ids": [f"scaffold-{index}"],
             "source_group_ids": [f"group-{index}"],
         },
+        "partition_group_derivation": "explicit_partition_isolation_v1",
         "compiler_path_class": "fixture",
         "data_lane": lane,
         "lane_resolution": {"fixture": True},
@@ -202,6 +203,9 @@ def _write_candidate_materialization(
                 "rejected_family_histogram": {},
                 "lane_histogram": lane_histogram,
                 "rejection_reason_histogram": {},
+                "partition_group_derivation_histogram": {
+                    "explicit_partition_isolation_v1": len(rows)
+                },
             },
         },
     }

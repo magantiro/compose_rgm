@@ -132,6 +132,7 @@ def _header(index: int, *, routed: bool) -> dict:
             "scaffold_ids": ["fixture-scaffold"],
             "source_group_ids": ["fixture-source-group"],
         },
+        "partition_group_derivation": "explicit_partition_isolation_v1",
         "compiler_path_class": "direct_atom_restate",
         "data_lane": lane,
         "lane_resolution": resolution,
@@ -185,6 +186,7 @@ def _candidate_materialization(tmp_path: Path) -> Path:
         "rejected_family_histogram": {"ring_system_grow": 1},
         "lane_histogram": {"operator_aware_real_endpoint": 1},
         "rejection_reason_histogram": {"disabled_family": 1},
+        "partition_group_derivation_histogram": {"explicit_partition_isolation_v1": 2},
     }
     body = {
         "schema": MATERIALIZATION_SCHEMA,
@@ -385,6 +387,9 @@ def test_bridge_preserves_rejections_and_only_routes_unit_mass_split_rows(
     assert header["candidate_payload_sha256"] != header["row_sha256"]
     assert row["candidate_envelope_sha256"] == header["candidate_payload_sha256"]
     assert row["metadata"]["candidate_header_row_sha256"] == header["row_sha256"]
+    assert row["metadata"]["partition_group_derivation"] == (
+        "explicit_partition_isolation_v1"
+    )
 
     validated = validate_candidate_provenance_bridge(
         output,

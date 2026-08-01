@@ -18,6 +18,7 @@ from compose_v4.data.editing_v2_packed_candidate_materializer import (
     HISTORICAL_OVERLAY_ROLE,
     MATERIALIZATION_FILENAME,
     EditingV2PackedCandidateMaterializationError,
+    _partition_groups,
     build_overlay_source_binding_registry,
     build_packed_candidate_source_manifest,
     build_packed_candidate_source_manifest_from_overlay_completion,
@@ -123,6 +124,7 @@ def _entry(
     compiler_path_class: str | None,
     atom_delta: int = 0,
     cycle_delta: int = 0,
+    legacy_partition_groups: bool = False,
 ) -> dict:
     source = _state(1)
     target = _state(2)
@@ -137,12 +139,16 @@ def _entry(
     }
     if compiler_path_class is not None:
         metadata["compiler_path_class"] = compiler_path_class
+    if legacy_partition_groups:
+        metadata.pop("partition_isolation")
+        metadata["origin_smiles"] = f"{trace_id}-source-key"
     trace = {
         "schema": "compose.rewrite.trace",
         "schema_version": 2,
         "source_state": source,
         "source_key": f"{trace_id}-source-key",
         "target_key": f"{trace_id}-target-key",
+        "source_scaffold": f"{source_group}-scaffold",
         "n_slots": 3,
         "steps": [
             {
@@ -235,6 +241,7 @@ def _source_manifest(tmp_path: Path, *, malformed: bool = False) -> Path:
             source_group="synthetic-a",
             compiler_path_class=None,
             cycle_delta=-1,
+            legacy_partition_groups=True,
         ),
         _entry(
             trace_id="disabled-ring-delete",
@@ -244,6 +251,7 @@ def _source_manifest(tmp_path: Path, *, malformed: bool = False) -> Path:
             source_group="synthetic-b",
             compiler_path_class=None,
             atom_delta=-1,
+            legacy_partition_groups=True,
         ),
     ]
     if malformed:
@@ -380,6 +388,12 @@ def test_streams_packed_headers_routes_active8_and_preserves_disabled_attempt(
     assert cycle["operator_summary"]["family_histogram"] == {"cycle_attach": 1}
     assert cycle["operator_summary"]["executor_histogram"] == {"bond_delete": 1}
     assert cycle["operator_summary"]["graph_cycle_rank_delta"] == -1
+    assert cycle["partition_group_derivation"] == ("legacy_synthetic_origin_scaffold_v1")
+    assert cycle["groups"] == {
+        "molecule_ids": ["cycle-open-source-key", "cycle-open-target-key"],
+        "scaffold_ids": ["synthetic-a-scaffold"],
+        "source_group_ids": ["cycle-open-source-key"],
+    }
     assert cycle["exact_states"]["state_count"] == 2
     assert len(cycle["exact_states"]["encoded_state_stream_sha256"]) == 64
 
@@ -400,6 +414,7 @@ def test_streams_packed_headers_routes_active8_and_preserves_disabled_attempt(
     assert reroute["data_lane"] == "linker_positional_topology_analogue"
     assert reroute["compiler_path_class"] == "direct_bond_reroute"
     assert reroute["evidence_profile_id"] == "inferred_relation_compiled_path"
+    assert reroute["partition_group_derivation"] == "explicit_partition_isolation_v1"
     assert reroute["groups"] == {
         "molecule_ids": ["mmp-a-source", "mmp-a-target"],
         "scaffold_ids": ["mmp-a-scaffold"],
@@ -413,6 +428,10 @@ def test_streams_packed_headers_routes_active8_and_preserves_disabled_attempt(
     assert totals["states"] == 6
     assert totals["transitions"] == 3
     assert totals["rejection_reason_histogram"] == {"disabled_family": 1}
+    assert totals["partition_group_derivation_histogram"] == {
+        "explicit_partition_isolation_v1": 1,
+        "legacy_synthetic_origin_scaffold_v1": 2,
+    }
     assert built["implementation"]["uses_rdkit_or_executor_replay"] is False
     assert built["implementation"]["uses_live_packed_overlay_semantic_validation"] is False
     assert (
@@ -421,6 +440,11 @@ def test_streams_packed_headers_routes_active8_and_preserves_disabled_attempt(
         ]
         is False
     )
+    legacy_derivation = built["provenance_boundary"]["partition_group_derivation_contract"][
+        "legacy_synthetic_origin_scaffold_v1"
+    ]
+    assert legacy_derivation["allowed_layers"] == ["corruption", "cycle_ops"]
+    assert legacy_derivation["origin_must_identify_trace_endpoint"] is True
     overlay_receipt = built["sources"][0]["shards"][0]["historical_provenance_overlay"]
     assert overlay_receipt["role"] == HISTORICAL_OVERLAY_ROLE
     assert overlay_receipt["training_provenance_authorized"] is False
@@ -441,6 +465,46 @@ def test_materializer_has_no_live_packed_loader_or_overlay_import() -> None:
     assert "read_addressed_packed_shard(" not in source
     assert "from compose_v4.data.packed_trace_store" not in source
     assert "from compose_v4.data.provenance_overlay" not in source
+
+
+def test_legacy_partition_group_derivation_is_limited_to_synthetic_layers() -> None:
+    entry = _entry(
+        trace_id="legacy-cycle",
+        layer="cycle_ops",
+        executor_rule="bond_delete",
+        family="cycle_attach",
+        source_group="legacy-group",
+        compiler_path_class=None,
+        legacy_partition_groups=True,
+    )
+    groups, derivation = _partition_groups(entry["trace"], address="fixture")
+    assert derivation == "legacy_synthetic_origin_scaffold_v1"
+    assert groups["source_group_ids"] == ["legacy-cycle-source-key"]
+
+    entry["trace"]["layer"] = "mmp_analogue"
+    with pytest.raises(
+        EditingV2PackedCandidateMaterializationError,
+        match="partition_isolation is required",
+    ):
+        _partition_groups(entry["trace"], address="fixture")
+
+
+def test_legacy_partition_group_derivation_rejects_unbound_origin() -> None:
+    entry = _entry(
+        trace_id="legacy-cycle",
+        layer="cycle_ops",
+        executor_rule="bond_delete",
+        family="cycle_attach",
+        source_group="legacy-group",
+        compiler_path_class=None,
+        legacy_partition_groups=True,
+    )
+    entry["trace"]["metadata"]["origin_smiles"] = "unrelated-molecule"
+    with pytest.raises(
+        EditingV2PackedCandidateMaterializationError,
+        match="must identify one trace endpoint",
+    ):
+        _partition_groups(entry["trace"], address="fixture")
 
 
 def test_materialization_is_byte_deterministic(tmp_path: Path) -> None:
@@ -807,7 +871,9 @@ def _consume_overlay_fixture(completion_path: Path, registry_path: Path) -> dict
     )
 
 
-def test_overlay_completion_builds_exact_schema_v2_source_manifest(tmp_path: Path) -> None:
+def test_overlay_completion_builds_exact_schema_v2_source_manifest(
+    tmp_path: Path,
+) -> None:
     completion_path, registry_path = _overlay_consumer_fixture(tmp_path)
 
     manifest = _consume_overlay_fixture(completion_path, registry_path)
@@ -845,7 +911,9 @@ def test_overlay_completion_rejects_nonexact_or_escaping_inventory(
         _consume_overlay_fixture(completion_path, registry_path)
 
 
-def test_overlay_completion_rejects_physical_or_semantic_identity_drift(tmp_path: Path) -> None:
+def test_overlay_completion_rejects_physical_or_semantic_identity_drift(
+    tmp_path: Path,
+) -> None:
     completion_path, registry_path = _overlay_consumer_fixture(tmp_path)
     expected_file_sha256 = file_sha256(completion_path)
     completion = json.loads(completion_path.read_text())
