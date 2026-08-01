@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import copy
+import errno
+import json
 from pathlib import Path
 from unittest.mock import patch
 
@@ -257,3 +259,19 @@ def test_immutable_publish_reuses_exact_bytes_and_rejects_collision(
     path.write_bytes(b"{}\n")
     with pytest.raises(RuntimeError, match="collision"):
         refine_app._write_immutable_json(path, value)
+
+
+def test_immutable_publish_falls_back_when_modal_rejects_hard_links(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "artifact.json"
+    value = {"schema": "modal-fixture", "training_authorized": False}
+
+    with patch(
+        "compose_v4.data.immutable_artifact.os.link",
+        side_effect=OSError(errno.EPERM, "Modal Volume rejects hard links"),
+    ):
+        assert refine_app._write_immutable_json(path, value) is True
+        assert refine_app._write_immutable_json(path, value) is False
+
+    assert json.loads(path.read_bytes()) == value

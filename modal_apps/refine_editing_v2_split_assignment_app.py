@@ -14,11 +14,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import platform
 import re
 import subprocess
-import tempfile
 from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -59,6 +57,7 @@ _SERIALIZED_SOURCE_FILES = (
     "src/compose_v4/data/editing_v2_split_assignment_refinement.py",
     "src/compose_v4/data/editing_v2_split_assignment.py",
     "src/compose_v4/data/editing_v2_split_census.py",
+    "src/compose_v4/data/immutable_artifact.py",
 )
 _PARENT_COMPLETION_FIELDS = {
     "schema",
@@ -238,42 +237,17 @@ def _load_mapping(path: Path, *, field: str) -> dict[str, Any]:
 
 
 def _write_immutable_json(path: Path, value: object) -> bool:
-    """Atomically write canonical bytes once, or prove exact reuse."""
+    """Publish canonical bytes once with the shared Modal-compatible primitive."""
 
-    encoded = _canonical_bytes(value, pretty=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        if path.read_bytes() != encoded:
-            raise RuntimeError(f"immutable split-refinement collision at {path}")
-        return False
-    temporary_name: str | None = None
+    from compose_v4.data.immutable_artifact import (
+        ImmutableArtifactError,
+        write_bytes_if_absent,
+    )
+
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=path.parent,
-            prefix=f".{path.name}.",
-            suffix=".staging",
-            delete=False,
-        ) as handle:
-            temporary_name = handle.name
-            handle.write(encoded)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            # A same-filesystem hard link publishes the fully fsynced temporary
-            # file with create-only semantics. Unlike ``os.replace``, it cannot
-            # overwrite an artifact won by a concurrent writer.
-            os.link(temporary_name, path)
-        except FileExistsError:
-            if path.read_bytes() != encoded:
-                raise RuntimeError(f"immutable split-refinement collision at {path}")
-            return False
-        Path(temporary_name).unlink()
-        temporary_name = None
-        return True
-    finally:
-        if temporary_name is not None:
-            Path(temporary_name).unlink(missing_ok=True)
+        return write_bytes_if_absent(path, _canonical_bytes(value, pretty=True))
+    except ImmutableArtifactError as error:
+        raise RuntimeError(f"immutable split-refinement collision at {path}") from error
 
 
 def _git(root: Path, *arguments: str) -> str:
