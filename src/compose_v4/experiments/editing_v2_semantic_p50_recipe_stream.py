@@ -47,14 +47,9 @@ from compose_v4.experiments.editing_v2_semantic_t1_decision import (
 )
 
 PREPARED_SCHEMA = "compose.editing_v2.semantic_p50_prepared_recipe"
-AUTHORIZED_SCHEMA = "compose.editing_v2.semantic_p50_authorizing_recipe"
-BINDING_SCHEMA = "compose.editing_v2.semantic_p50_physical_binding"
-BOUND_PAYLOAD_SCHEMA = "compose.editing_v2.semantic_p50_bound_payload"
 SCHEMA_VERSION = 1
 
 PREPARED_STATUS = "PREPARED_EXACT_STREAM_PENDING_PHYSICAL_BINDINGS_NO_AUTHORITY"
-AUTHORIZED_STATUS = "FROZEN_BOUNDED_P50_AUTHORIZED"
-BINDING_STATUS = "COMPLETE_FROZEN_NO_TRAINING_AUTHORITY"
 
 OPTIMIZER_STEPS = 50
 BATCH_SIZE = 64
@@ -845,281 +840,31 @@ def write_semantic_p50_prepared_recipe(path: Path, payload: Mapping[str, Any]) -
     _write_canonical(Path(path), payload)
 
 
-def _load_binding(path: Path, *, prepared: Mapping[str, Any]) -> dict[str, Any]:
-    selected = Path(path).resolve()
-    try:
-        raw = selected.read_bytes()
-        payload = json.loads(raw)
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise SemanticP50RecipeStreamError(
-            f"semantic P50 physical binding is unreadable: {selected}"
-        ) from error
-    if raw != _canonical_bytes(payload, newline=True) or not isinstance(payload, dict):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 physical binding must be canonical newline-terminated JSON"
-        )
-    body = dict(payload)
-    supplied = body.pop("binding_sha256", None)
-    exact_fields = {
-        "schema",
-        "schema_version",
-        "status",
-        *_NO_AUTHORITY,
-        "purpose",
-        "prepared_recipe_sha256",
-        "source_inventory_sha256",
-        "ordered_address_stream_sha256",
-        "ordered_training_stream_sha256",
-        "requested_address_union_sha256",
-        "complete_trace_closure_inventory_sha256",
-        "physical_payload_relative_path",
-        "physical_payload_file_sha256",
-        "details",
-        "binding_sha256",
-    }
-    relative = payload.get("physical_payload_relative_path")
-    purpose = payload.get("purpose")
-    physical = None
-    if isinstance(relative, str) and relative and Path(relative).name == relative:
-        physical = selected.parent / relative
-    if (
-        set(payload) != exact_fields
-        or payload.get("schema") != BINDING_SCHEMA
-        or payload.get("schema_version") != SCHEMA_VERSION
-        or payload.get("status") != BINDING_STATUS
-        or any(payload.get(key) is not value for key, value in _NO_AUTHORITY.items())
-        or purpose not in REQUIRED_BINDING_PURPOSES
-        or supplied != _sha(body)
-        or payload.get("prepared_recipe_sha256") != prepared.get("prepared_recipe_sha256")
-        or payload.get("source_inventory_sha256")
-        != prepared["prerequisites"]["source_inventory_sha256"]
-        or payload.get("ordered_address_stream_sha256")
-        != prepared.get("ordered_address_stream_sha256")
-        or payload.get("ordered_training_stream_sha256")
-        != prepared.get("ordered_training_stream_sha256")
-        or payload.get("requested_address_union_sha256")
-        != prepared.get("requested_address_union_sha256")
-        or payload.get("complete_trace_closure_inventory_sha256")
-        != prepared.get("complete_trace_closure_inventory_sha256")
-        or physical is None
-        or not physical.is_file()
-        or _file_sha(physical) != payload.get("physical_payload_file_sha256")
-        or not isinstance(payload.get("details"), Mapping)
-    ):
-        raise SemanticP50RecipeStreamError(
-            f"semantic P50 {purpose!r} physical binding is incomplete or mismatched"
-        )
-    try:
-        physical_raw = physical.read_bytes()
-        physical_payload = json.loads(physical_raw)
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise SemanticP50RecipeStreamError(
-            f"semantic P50 {purpose!r} bound payload is unreadable"
-        ) from error
-    if not isinstance(physical_payload, dict):
-        raise SemanticP50RecipeStreamError(
-            f"semantic P50 {purpose!r} bound payload is not an object"
-        )
-    physical_body = dict(physical_payload)
-    physical_supplied = physical_body.pop("payload_sha256", None)
-    physical_fields = {
-        "schema",
-        "schema_version",
-        "status",
-        *_NO_AUTHORITY,
-        "purpose",
-        "prepared_recipe_sha256",
-        "details",
-        "payload_sha256",
-    }
-    if (
-        physical_raw != _canonical_bytes(physical_payload, newline=True)
-        or set(physical_payload) != physical_fields
-        or physical_payload.get("schema") != BOUND_PAYLOAD_SCHEMA
-        or physical_payload.get("schema_version") != SCHEMA_VERSION
-        or physical_payload.get("status") != BINDING_STATUS
-        or any(physical_payload.get(key) is not value for key, value in _NO_AUTHORITY.items())
-        or physical_payload.get("purpose") != purpose
-        or physical_payload.get("prepared_recipe_sha256") != prepared.get("prepared_recipe_sha256")
-        or physical_payload.get("details") != payload.get("details")
-        or physical_supplied != _sha(physical_body)
-    ):
-        raise SemanticP50RecipeStreamError(
-            f"semantic P50 {purpose!r} bound payload semantics disagree"
-        )
-    return payload
-
-
 def authorize_semantic_p50_recipe(
     *,
     prepared: Mapping[str, Any],
     binding_paths: Sequence[Path],
 ) -> dict[str, Any]:
-    """Promote only a self-hashed prepared stream with all physical bindings."""
+    """Refuse promotion until every bound domain artifact has a strict reopener.
 
-    prepared_body = dict(prepared)
-    prepared_sha = prepared_body.pop("prepared_recipe_sha256", None)
-    if (
-        prepared.get("schema") != PREPARED_SCHEMA
-        or prepared.get("schema_version") != SCHEMA_VERSION
-        or prepared.get("status") != PREPARED_STATUS
-        or prepared_sha != _sha(prepared_body)
-        or any(prepared.get(key) is not value for key, value in _NO_AUTHORITY.items())
-        or prepared.get("unresolved_physical_bindings") != list(REQUIRED_BINDING_PURPOSES)
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 authorizer received an invalid prepared recipe"
-        )
-    bindings = [_load_binding(Path(path), prepared=prepared) for path in binding_paths]
-    by_purpose = {str(binding["purpose"]): binding for binding in bindings}
-    if len(bindings) != len(by_purpose) or tuple(sorted(by_purpose)) != tuple(
-        sorted(REQUIRED_BINDING_PURPOSES)
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 authorization requires exactly one binding per purpose"
-        )
+    A generic self-hashed receipt is not evidence that a successor cache covers
+    the exact address union, that a baseline was evaluated on the sealed
+    validation role, or that a runtime and launch projection implement the
+    frozen recipe. Promotion therefore remains unavailable until those five
+    purpose-specific validators exist and this function invokes them on their
+    physical artifacts.
+    """
 
-    baseline_details = by_purpose["validation_baseline"]["details"]
-    family_values = baseline_details.get("baseline_successor_nll_by_family")
-    cell_values = baseline_details.get("baseline_successor_nll_by_semantic_cell")
-    cell_entry_counts = baseline_details.get("entry_count_by_semantic_cell")
-    required_cells = tuple(prepared["declared_nonempty_semantic_cells"])
-    if (
-        baseline_details.get("partition_role") != "validation"
-        or baseline_details.get("scratch_initial_model_state_sha256")
-        != prepared["prerequisites"]["scratch_initial_model_state_sha256"]
-        or not isinstance(family_values, Mapping)
-        or tuple(sorted(family_values)) != tuple(sorted(ACTIVE8_FAMILIES))
-        or not isinstance(cell_values, Mapping)
-        or tuple(sorted(cell_values)) != tuple(sorted(required_cells))
-        or not isinstance(cell_entry_counts, Mapping)
-        or tuple(sorted(cell_entry_counts)) != tuple(sorted(required_cells))
-        or any(type(value) is not int or value <= 0 for value in cell_entry_counts.values())
-        or type(baseline_details.get("evaluated_entry_count")) is not int
-        or baseline_details["evaluated_entry_count"] != sum(cell_entry_counts.values())
-        or any(
-            not isinstance(value, (int, float))
-            or not math.isfinite(float(value))
-            or float(value) < 0.0
-            for value in (*family_values.values(), *cell_values.values())
-        )
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 validation baseline is absent or incomplete"
-        )
-    _require_sha(
-        baseline_details.get("validation_candidate_inventory_sha256"),
-        field="validation_baseline.details.validation_candidate_inventory_sha256",
+    raise SemanticP50RecipeStreamError(
+        "semantic P50 authorization is not implemented: prepared recipes remain "
+        "non-authorizing until domain-specific physical reopeners validate the "
+        "successor cache, validation baseline, trainer runtime, execution "
+        "environment, and launch projection"
     )
-    _require_sha(
-        baseline_details.get("validation_stream_sha256"),
-        field="validation_baseline.details.validation_stream_sha256",
-    )
-    validation_contract = prepared["validation_contract"]
-    if (
-        baseline_details.get("maximum_family_nll_regression_nats")
-        != validation_contract["maximum_family_final_minus_baseline_successor_nll_nats"]
-        or baseline_details.get("maximum_cell_nll_regression_nats")
-        != validation_contract["maximum_cell_final_minus_baseline_successor_nll_nats"]
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 validation baseline thresholds differ from the prospective freeze"
-        )
-    cache_details = by_purpose["stream_union_successor_cache"]["details"]
-    if (
-        cache_details.get("coverage_mode") != "complete_trace_closure_of_planned_address_union"
-        or cache_details.get("closure_only_rows_schedulable") is not False
-        or cache_details.get("terminal_rows_schedulable") is not False
-        or cache_details.get("requested_unique_nonterminal_address_count")
-        != prepared["cache_contract"]["requested_unique_nonterminal_address_count"]
-        or cache_details.get("closure_record_count")
-        != prepared["cache_contract"]["closure_record_count"]
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 successor cache does not prove safe complete-trace closure"
-        )
-    for field in (
-        "cache_file_sha256",
-        "cache_content_sha256",
-        "coverage_receipt_sha256",
-    ):
-        _require_sha(cache_details.get(field), field=f"cache.details.{field}")
-    runtime_details = by_purpose["trainer_runtime"]["details"]
-    if (
-        runtime_details.get("scratch_initial_model_state_sha256")
-        != prepared["prerequisites"]["scratch_initial_model_state_sha256"]
-        or runtime_details.get("model_runtime_identity_sha256")
-        != prepared["prerequisites"]["model_runtime_identity_sha256"]
-        or runtime_details.get("objective_name") != "balanced_semantic_cell_productive_identity"
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 trainer runtime differs from the frozen scratch identity"
-        )
-    _require_sha(
-        runtime_details.get("implementation_sha256"),
-        field="trainer_runtime.details.implementation_sha256",
-    )
-    execution_details = by_purpose["execution_environment"]["details"]
-    if (
-        execution_details.get("deterministic_algorithms_required") is not True
-        or execution_details.get("mixed_precision") is not False
-        or execution_details.get("dtype") != "float32"
-        or type(execution_details.get("worker_count")) is not int
-        or execution_details["worker_count"] < 0
-        or execution_details.get("ordered_indexed_loading") is not True
-        or execution_details.get("seed") != SEED
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 execution environment violates deterministic numerics"
-        )
-    launch_details = by_purpose["launch_projection"]["details"]
-    if (
-        launch_details.get("optimizer_steps") != OPTIMIZER_STEPS
-        or launch_details.get("batch_size") != BATCH_SIZE
-        or launch_details.get("resume") is not False
-        or launch_details.get("ordered_training_stream_sha256")
-        != prepared["ordered_training_stream_sha256"]
-    ):
-        raise SemanticP50RecipeStreamError(
-            "semantic P50 launch projection differs from the frozen recipe"
-        )
-
-    body = {
-        "schema": AUTHORIZED_SCHEMA,
-        "schema_version": SCHEMA_VERSION,
-        "status": AUTHORIZED_STATUS,
-        "training_authorized": True,
-        "bounded_p50_authorized": True,
-        "p500_authorized": False,
-        "long_training_authorized": False,
-        "checkpoint_selection_authorized": False,
-        "final_test_selection_authorized": False,
-        "prepared_recipe_sha256": prepared["prepared_recipe_sha256"],
-        "source_inventory_sha256": prepared["prerequisites"]["source_inventory_sha256"],
-        "ordered_address_stream_sha256": prepared["ordered_address_stream_sha256"],
-        "ordered_training_stream_sha256": prepared["ordered_training_stream_sha256"],
-        "requested_address_union_sha256": prepared["requested_address_union_sha256"],
-        "complete_trace_closure_inventory_sha256": prepared[
-            "complete_trace_closure_inventory_sha256"
-        ],
-        "physical_bindings": [
-            {
-                "purpose": purpose,
-                "binding_sha256": by_purpose[purpose]["binding_sha256"],
-                "physical_payload_file_sha256": by_purpose[purpose]["physical_payload_file_sha256"],
-            }
-            for purpose in REQUIRED_BINDING_PURPOSES
-        ],
-    }
-    return {**body, "authorization_sha256": _sha(body)}
 
 
 __all__ = [
-    "AUTHORIZED_SCHEMA",
     "BATCH_SIZE",
-    "BINDING_SCHEMA",
-    "BINDING_STATUS",
-    "BOUND_PAYLOAD_SCHEMA",
     "MAXIMUM_CELL_NLL_REGRESSION_NATS",
     "MAXIMUM_FAMILY_NLL_REGRESSION_NATS",
     "OPTIMIZER_STEPS",
