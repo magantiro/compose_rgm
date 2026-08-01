@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/build_semantic_active8_chunk_cache_app.py"
+IMAGE_SOURCE_DIRECTORIES = ("src", "modal_apps")
 OUTPUT_ARTIFACT_ROOT = "/artifacts/editing_v2/semantic_active8_chunk_cache_v1"
 MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
 MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
@@ -49,18 +50,14 @@ image = (
             "OMP_NUM_THREADS": "1",
         }
     )
-    .add_local_dir(
-        ROOT / "src",
-        str(REMOTE_ROOT / "src"),
+)
+for source_directory in IMAGE_SOURCE_DIRECTORIES:
+    image = image.add_local_dir(
+        ROOT / source_directory,
+        str(REMOTE_ROOT / source_directory),
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
-    .add_local_file(
-        ROOT / LAUNCHER_SOURCE,
-        str(REMOTE_ROOT / LAUNCHER_SOURCE),
-        copy=True,
-    )
-)
 
 app = modal.App("compose-v4-semantic-active8-chunk-cache")
 artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)

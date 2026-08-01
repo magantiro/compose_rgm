@@ -28,6 +28,7 @@ ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/run_semantic_active8_decisions_app.py"
 RUNTIME_CONTRACT_SOURCE = "configs/editing_v2_semantic_active8_decision_runtime_v1.json"
 SEMANTIC_CONTRACT_SOURCE = "configs/editing_gate_zero_semantic_model_process_v1.json"
+IMAGE_SOURCE_DIRECTORIES = ("src", "configs", "modal_apps")
 OUTPUT_ARTIFACT_ROOT = "/artifacts/editing_v2/semantic_active8_decisions_v1"
 EXPECTED_SOURCE_TASKS = 20
 MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
@@ -55,28 +56,14 @@ image = (
             "OMP_NUM_THREADS": "4",
         }
     )
-    .add_local_dir(
-        ROOT / "src",
-        str(REMOTE_ROOT / "src"),
+)
+for source_directory in IMAGE_SOURCE_DIRECTORIES:
+    image = image.add_local_dir(
+        ROOT / source_directory,
+        str(REMOTE_ROOT / source_directory),
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
-    .add_local_file(
-        ROOT / LAUNCHER_SOURCE,
-        str(REMOTE_ROOT / LAUNCHER_SOURCE),
-        copy=True,
-    )
-    .add_local_file(
-        ROOT / RUNTIME_CONTRACT_SOURCE,
-        str(REMOTE_ROOT / RUNTIME_CONTRACT_SOURCE),
-        copy=True,
-    )
-    .add_local_file(
-        ROOT / SEMANTIC_CONTRACT_SOURCE,
-        str(REMOTE_ROOT / SEMANTIC_CONTRACT_SOURCE),
-        copy=True,
-    )
-)
 
 app = modal.App("compose-v4-semantic-active8-decisions")
 artifact_volume = modal.Volume.from_name(
@@ -158,6 +145,13 @@ def _mounted_artifact_path(value: str, *, field: str) -> Path:
     if not result.is_relative_to(ARTIFACT_ROOT.resolve()):
         raise RuntimeError(f"{field} resolves outside /artifacts")
     return result
+
+
+def _artifact_address(path: Path) -> str:
+    """Return one stable lexical /artifacts address for a mounted path."""
+
+    relative = Path(path).resolve().relative_to(ARTIFACT_ROOT.resolve())
+    return str(PurePosixPath("/artifacts") / PurePosixPath(relative.as_posix()))
 
 
 def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
@@ -660,10 +654,11 @@ def driver(
         if task["task_identity_sha256"] not in completed
     ]
     if missing:
+        plan_artifact_path = _artifact_address(plan_path)
         results = list(
             decide_one_chunk.starmap(
                 [
-                    (str(plan_path), task_identity, source_revision)
+                    (plan_artifact_path, task_identity, source_revision)
                     for task_identity in missing
                 ]
             )

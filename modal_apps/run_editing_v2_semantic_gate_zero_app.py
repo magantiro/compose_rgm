@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/run_editing_v2_semantic_gate_zero_app.py"
+IMAGE_SOURCE_DIRECTORIES = ("src", "configs", "modal_apps")
 OUTPUT_PREFIX = "/artifacts/editing_v2/semantic_gate_zero_structural"
 REQUEST_FILENAME = "GATE_ZERO_REQUEST.json"
 
@@ -67,19 +68,14 @@ image = (
             "OMP_NUM_THREADS": "8",
         }
     )
-    .add_local_dir(
-        ROOT / "src",
-        str(REMOTE_ROOT / "src"),
+)
+for source_directory in IMAGE_SOURCE_DIRECTORIES:
+    image = image.add_local_dir(
+        ROOT / source_directory,
+        str(REMOTE_ROOT / source_directory),
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
-    .add_local_dir(ROOT / "configs", str(REMOTE_ROOT / "configs"), copy=True)
-    .add_local_file(
-        ROOT / LAUNCHER_SOURCE,
-        str(REMOTE_ROOT / LAUNCHER_SOURCE),
-        copy=True,
-    )
-)
 
 app = modal.App("compose-v4-editing-v2-semantic-gate-zero")
 artifact_volume = modal.Volume.from_name(
