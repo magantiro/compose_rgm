@@ -208,11 +208,52 @@ impossibility.
 
 The audit excludes train, controller-validation, and test, rebuilds no corpus,
 and authorizes no training. The remaining production decision is therefore
-narrow: eliminate the whole-molecule enumeration overflow without silently
-truncating support, then freeze explicit semantic `CycleOpenEdge` admission
-and rejection behavior. The high source-level coverage supports the
-compositional cycle-open operator; it does not support reverting to a finite
-whole-ring-growth catalog.
+narrow: freeze explicit semantic `CycleOpenEdge` admission and rejection
+behavior, then integrate it without silently reinterpreting historical
+`BondDelete` records. The high source-level coverage supports the compositional
+cycle-open operator; it does not support reverting to a finite whole-ring-growth
+catalog.
+
+The original V1 component-equivalence gate remains a failed result. Its RDKit
+whole-molecule resonance supplier reported 24 mismatched edges on two sources
+because it did not enumerate all independent combinations of slot-labeled
+conjugated groups. That failure was preserved rather than relabeled. A
+prospective V2 contract replaced the incomplete supplier with one global
+mixed-integer feasibility problem over all semantic aromatic edges, followed
+by exact integer-incidence, molecular-validity, connectedness, and canonical
+source-identity checks.
+
+The clean-revision V2 validation audit passed:
+
+```text
+source_commit:
+  321a5b70e2fba3e3f30e1dc71d3f9a3645db6e53
+
+result_relative_path:
+  diagnostics/coherence/editing_cycle_open_global_equivalence_v2/
+  result.08111e3173e0a262f0fe37ad9bf59283a4578571a59e21fad1904a0b0fb0cf5b.json
+
+result_file_sha256:
+  e1643249061b58f16c06a324880859b77ade86a1c7fcbafd611478a729f6fbe6
+
+result_logical_sha256:
+  f68b49f853612b3204b65f7ae47665ad6fedecf79f9a6746f4079badae76b10c
+```
+
+It reproduced the exact self-hashed V1 source ledger and compared all 19,311
+declared semantic aromatic edges across 1,707 exact persistent-slot validation
+sources. All 19,311 comparisons were complete and equivalent, with zero
+mismatches and zero oracle overflows. The audit included 1,427 sources with at
+least one semantic aromatic edge and 280 zero-edge sources, for which the
+empty assignment product correctly contains one identity assignment. The
+largest completed preserving alias fiber contained 32 states.
+
+This result validates the component-factored resolver against a structurally
+independent complete global oracle on the declared fixed-coordinate validation
+slice. It does not authorize training or production integration. In
+particular, it does not establish persistent-slot relabeling equivariance,
+multistep quotient-law invariance, or compatibility of a new action identity
+with historical packed traces. Those remain prospective integration gates.
 
 The current preferred integration boundary is prospective, not frozen: add an
 explicit semantic edge action and executor rule such as
@@ -222,9 +263,8 @@ being silently reinterpreted and avoids changing unrelated exact compilers.
 
 ## Required sequence before P50
 
-1. Remove the whole-molecule alias-overflow boundary from the semantic
-   aromatic-opening design, then freeze explicit admission and rejection
-   semantics.
+1. Freeze explicit semantic `CycleOpenEdge` admission and rejection semantics
+   using the V2-complete component resolver and its declared overflow policy.
 2. Map every executor, enumerator, mask, inverse, compiler, cache, and packed
    derivative affected by the semantic change.
 3. Implement the semantic action, executor, legal fiber, inverse, and complete
