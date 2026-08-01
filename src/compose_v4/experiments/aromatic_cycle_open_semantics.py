@@ -406,6 +406,16 @@ def _state_with_component_orders(
     )
 
 
+def instantiate_component_factored_kekule_alias(
+    state: MolecularGraph,
+    components: tuple[AromaticComponentAssignments, ...],
+    selections: tuple[tuple[int, ...], ...],
+) -> MolecularGraph:
+    """Build one exact alias from a complete component assignment tuple."""
+
+    return _state_with_component_orders(state, components, selections)
+
+
 def _degree_constrained_component_orders(
     state: MolecularGraph,
     edges: tuple[tuple[int, int], ...],
@@ -999,6 +1009,7 @@ __all__ = [
     "KekuleAliasEnumeration",
     "enumerate_charge_h_preserving_kekule_aliases",
     "enumerate_component_factored_kekule_assignments",
+    "instantiate_component_factored_kekule_alias",
     "inverse_mark_for_resolution",
     "rdkit_kekule_supplier",
     "resolve_component_factored_cycle_open",
