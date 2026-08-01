@@ -1,0 +1,148 @@
+{
+  "schema": "compose.editing_v2.semantic_p50_preimplementation_contract",
+  "schema_version": 1,
+  "contract_id": "compose-editing-v2-semantic-p50-preimplementation-v1",
+  "status": "PREIMPLEMENTATION_RECIPE_AND_STREAM_NOT_FROZEN_NO_AUTHORITY",
+  "training_authorized": false,
+  "bounded_p50_authorized": false,
+  "p500_authorized": false,
+  "long_training_authorized": false,
+  "checkpoint_selection_authorized": false,
+  "final_test_selection_authorized": false,
+  "purpose": "fail_closed_boundary_until_one_semantic_v2_p50_recipe_and_exact_stream_are_prospectively_frozen",
+  "proposal_status": "PROPOSED_STAGE_A_CAPABILITY_P50_PENDING_STREAM_AND_RUNTIME_NO_AUTHORITY",
+  "proposed_recipe_values": {
+    "scientific_scope": "stage_a_capability_pilot_not_production_law_calibration",
+    "initialization_regime": "scratch",
+    "optimizer_steps": 50,
+    "batch_size": 64,
+    "scheduled_nonterminal_examples": 3200,
+    "resume": false,
+    "optimizer": {
+      "kind": "adamw",
+      "learning_rate": 0.001,
+      "weight_decay": 0.0,
+      "scheduler_family": "constant",
+      "gradient_clip_norm": 10.0
+    },
+    "seed": 31,
+    "numerics": {
+      "dtype": "float32",
+      "mixed_precision": false,
+      "deterministic_algorithms_required": true
+    },
+    "objective": {
+      "name": "balanced_semantic_cell_productive_identity",
+      "unit": "productive_embedded_canonical_successor",
+      "hazard_included": false,
+      "hazard_weight": 0.0,
+      "terminal_rows": "excluded",
+      "importance_correction": "none",
+      "path_position_coefficient": 1.0
+    },
+    "sampling": {
+      "cell_order": "equal_round_robin_over_declared_nonempty_semantic_cells",
+      "within_cell": "deterministic_uniform_cycle",
+      "ordered_address_count": 3200
+    },
+    "cache_coverage_mode": "complete_trace_closure_of_planned_address_union",
+    "source_population": "full_admitted_semantic_active8_corpus",
+    "threshold_proposals": {
+      "maximum_family_final_minus_baseline_successor_nll_nats": 0.25,
+      "family_gradient_floor_rule": "max_1_ceil_0.8_times_planned_optimizer_step_opportunities",
+      "zero_planned_family_opportunities_allowed": false,
+      "scratch_retention_threshold": null
+    }
+  },
+  "known_proposal_blockers": [
+    "semantic_gate_zero_pass_and_semantic_t1_go_not_yet_materialized",
+    "legacy_loader_and_recipe_verifier_do_not_support_stage_a_semantic_stream",
+    "exact_row_time_derivation_and_full_training_stream_not_frozen",
+    "exact_scratch_model_runtime_and_initial_state_not_frozen",
+    "constant_schedule_projection_and_execution_determinism_not_fully_frozen",
+    "lane_and_source_group_policy_not_frozen",
+    "validation_baseline_and_per_semantic_cell_nll_ceiling_not_frozen",
+    "semantic_cell_gradient_attribution_not_implemented",
+    "complete_trace_closure_cache_and_exact_coverage_receipt_not_materialized",
+    "new_authorizing_semantic_p50_schema_and_runtime_adapter_not_implemented"
+  ],
+  "source_contract": {
+    "schema": "compose.data.editing_v2_semantic_active8_decision_source_index",
+    "schema_version": 1,
+    "status": "VERIFIED_ACTIVE8_DECISION_SOURCE_NO_DOWNSTREAM_AUTHORITY",
+    "must_equal_gate_zero_decision_source_identity": true,
+    "full_physical_reresolution_required_for_authority": true,
+    "required_lineage": [
+      "semantic_migration_completion",
+      "semantic_chunk_cache_plan_and_global_completion",
+      "semantic_active8_decision_plan_and_completion",
+      "semantic_active8_decision_inventory",
+      "semantic_gate_zero_evidence",
+      "semantic_t1_capacity_decision"
+    ]
+  },
+  "fixed_p50_invariants": {
+    "optimizer_steps": 50,
+    "resume": false,
+    "objective_unit": "productive_embedded_canonical_successor",
+    "hazard_included": false,
+    "required_families": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ],
+    "disabled_families": [
+      "ring_system_delete",
+      "ring_system_grow"
+    ]
+  },
+  "unfrozen_recipe_values": {
+    "initialization_regime": null,
+    "optimizer_and_schedule": null,
+    "semantic_source_reopen_contract": null,
+    "semantic_trainer_runtime_contract": null,
+    "semantic_lane_and_cell_sampling_weights": null,
+    "effective_teacher_coefficients": null,
+    "path_position_coefficients": null,
+    "exact_stream_union_successor_cache_and_batch_contract": null,
+    "minimum_gradient_updates_per_required_family": null,
+    "minimum_gradient_updates_per_required_semantic_cell": null,
+    "maximum_required_family_successor_nll_regression": null,
+    "maximum_required_semantic_cell_successor_nll_regression": null,
+    "initialization_specific_retention_threshold": null
+  },
+  "unfrozen_stream_values": {
+    "address_stream_derivation_contract_sha256": null,
+    "ordered_address_stream_sha256": null,
+    "ordered_training_stream_sha256": null
+  },
+  "required_frozen_recipe_bindings": [
+    "editing_training_gate_contract_file_sha256",
+    "semantic_source_inventory_file_sha256",
+    "semantic_source_inventory_sha256",
+    "semantic_source_process_identity_sha256",
+    "semantic_source_model_runtime_identity_sha256",
+    "semantic_source_active8_policy_sha256",
+    "semantic_source_operator_capability_fingerprint",
+    "semantic_source_decision_source_implementation_sha256",
+    "semantic_gate_zero_evidence_file_sha256",
+    "semantic_gate_zero_evidence_sha256",
+    "semantic_t1_decision_file_sha256",
+    "semantic_t1_decision_sha256",
+    "semantic_t1_selected_model_state_sha256",
+    "p50_stream_union_successor_cache_file_sha256",
+    "p50_stream_union_successor_cache_sha256",
+    "semantic_trainer_runtime_implementation_sha256",
+    "sampling_and_exposure_contract_sha256",
+    "execution_environment_contract_sha256",
+    "exact_launch_projection_sha256",
+    "exact_planned_address_and_training_stream_sha256"
+  ],
+  "required_next_action": "prospectively_freeze_nonnull_p50_thresholds_recipe_sampler_and_exact_stream_then_implement_a_new_authorizing_schema_version",
+  "contract_sha256": "f3ec91d1995061c0057e10ca6cc3d11470c6538e494bbe87a3e1c505d0243340"
+}

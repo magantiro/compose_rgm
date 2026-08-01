@@ -57,9 +57,7 @@ def test_gate_sequence_cannot_skip_short_pilots() -> None:
 def test_p50_is_exactly_fifty_optimizer_steps() -> None:
     contract = load_editing_training_gate(CONTRACT_PATH)
     p50 = next(
-        gate
-        for gate in contract["gates"]
-        if gate["id"] == "P50_gradient_and_collapse_sentinel"
+        gate for gate in contract["gates"] if gate["id"] == "P50_gradient_and_collapse_sentinel"
     )
     assert p50["maximum_optimizer_steps"] == 50
 
@@ -76,16 +74,13 @@ def test_bounded_pilot_requires_exact_active_eight_without_production_promotion(
     assert tuple(freeze["required_families"]) == RINGCORE_EDITING_FAMILIES
     assert tuple(freeze["disabled_families"]) == BOUNDED_PILOT_DISABLED_FAMILIES
     assert freeze["final_production_support_authorized"] is False
-    assert "ring_system_restate" in contract["development_panels"][
-        "required_semantic_slices"
-    ]
+    assert "ring_system_restate" in contract["development_panels"]["required_semantic_slices"]
     assert contract["development_panels"]["conditional_slices"] == []
-    assert contract["development_panels"][
-        "unique_state_deterministic_panels_required_before_p50"
-    ] is True
-    empirical = contract["development_panels"][
-        "repeated_state_empirical_law_panel"
-    ]
+    assert (
+        contract["development_panels"]["unique_state_deterministic_panels_required_before_p50"]
+        is True
+    )
+    empirical = contract["development_panels"]["repeated_state_empirical_law_panel"]
     assert empirical["bounded_p50_capacity_prerequisite"] is False
     assert empirical["raw_record_multiplicity_is_observation_count"] is False
     assert empirical["mark_alias_multiplicity_is_observation_count"] is False
@@ -100,19 +95,13 @@ def test_bounded_pilot_requires_exact_active_eight_without_production_promotion(
                 "ring_system_delete"
             )
         else:
-            broken["bounded_pilot_operator_freeze"][
-                "final_production_support_authorized"
-            ] = True
+            broken["bounded_pilot_operator_freeze"]["final_production_support_authorized"] = True
         with pytest.raises(EditingTrainingGateError, match="operator freeze"):
             validate_editing_training_gate(broken)
 
     conditional = copy.deepcopy(contract)
-    conditional["development_panels"]["required_semantic_slices"].remove(
-        "ring_system_restate"
-    )
-    conditional["development_panels"]["conditional_slices"] = [
-        "ring_system_restate"
-    ]
+    conditional["development_panels"]["required_semantic_slices"].remove("ring_system_restate")
+    conditional["development_panels"]["conditional_slices"] = ["ring_system_restate"]
     with pytest.raises(EditingTrainingGateError, match="required bounded-pilot"):
         validate_editing_training_gate(conditional)
 
@@ -133,18 +122,12 @@ def test_repeated_state_counts_cannot_be_fabricated_for_t1() -> None:
         "mark_alias_multiplicity_is_observation_count",
     ):
         broken = copy.deepcopy(contract)
-        broken["development_panels"]["repeated_state_empirical_law_panel"][
-            field
-        ] = True
+        broken["development_panels"]["repeated_state_empirical_law_panel"][field] = True
         with pytest.raises(EditingTrainingGateError, match="observation receipts"):
             validate_editing_training_gate(broken)
 
     broken = copy.deepcopy(contract)
-    t1 = next(
-        gate
-        for gate in broken["gates"]
-        if gate["id"] == "T1_true_successor_micro_overfit"
-    )
+    t1 = next(gate for gate in broken["gates"] if gate["id"] == "T1_true_successor_micro_overfit")
     t1["requirements"][1] = "repeated_state_panels_fit_raw_duplicate_frequency"
     with pytest.raises(EditingTrainingGateError, match="separate unique-state"):
         validate_editing_training_gate(broken)
@@ -152,11 +135,7 @@ def test_repeated_state_counts_cannot_be_fabricated_for_t1() -> None:
 
 def test_t1_unique_state_thresholds_are_frozen_before_results() -> None:
     contract = load_editing_training_gate(CONTRACT_PATH)
-    t1 = next(
-        gate
-        for gate in contract["gates"]
-        if gate["id"] == "T1_true_successor_micro_overfit"
-    )
+    t1 = next(gate for gate in contract["gates"] if gate["id"] == "T1_true_successor_micro_overfit")
     assert t1["numeric_thresholds"] == {
         "minimum_unique_state_teacher_successor_top1": 0.95,
         "minimum_unique_state_teacher_successor_probability": 0.8,
@@ -213,9 +192,7 @@ def test_unfrozen_p50_thresholds_refuse_before_loader_construction() -> None:
 
 
 def test_frozen_numeric_thresholds_cannot_bypass_missing_p50_prerequisites() -> None:
-    contract = _freeze_p50_thresholds(
-        load_editing_training_gate(CONTRACT_PATH)
-    )
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
     blockers = p50_launch_blockers(
         contract,
         initialization_regime="scratch",
@@ -223,9 +200,9 @@ def test_frozen_numeric_thresholds_cannot_bypass_missing_p50_prerequisites() -> 
     assert len(blockers) == len(P50_PREREQUISITE_EVIDENCE_FIELDS) + 2
     assert any("bounded_p50_authorized is not true" in item for item in blockers)
     assert any("status is not FROZEN_BOUNDED_P50_AUTHORIZED" in item for item in blockers)
-    assert sum(
-        "prerequisite evidence is not frozen" in item for item in blockers
-    ) == len(P50_PREREQUISITE_EVIDENCE_FIELDS)
+    assert sum("prerequisite evidence is not frozen" in item for item in blockers) == len(
+        P50_PREREQUISITE_EVIDENCE_FIELDS
+    )
 
     for index, field in enumerate(P50_PREREQUISITE_EVIDENCE_FIELDS, start=1):
         contract["gates"][3]["prerequisite_evidence"][field] = str(index) * 64
@@ -248,17 +225,15 @@ def test_frozen_numeric_thresholds_cannot_bypass_missing_p50_prerequisites() -> 
 def test_hash_matching_arbitrary_json_cannot_authorize_p50(
     tmp_path,
 ) -> None:
-    contract = _freeze_p50_thresholds(
-        load_editing_training_gate(CONTRACT_PATH)
-    )
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
     paths = {}
     for index, field in enumerate(P50_PREREQUISITE_EVIDENCE_FIELDS):
         path = tmp_path / f"prerequisite-{index}.json"
         path.write_text(f'{{"field": "{field}"}}\n')
         paths[field] = path
-        contract["gates"][3]["prerequisite_evidence"][field] = (
-            hashlib.sha256(path.read_bytes()).hexdigest()
-        )
+        contract["gates"][3]["prerequisite_evidence"][field] = hashlib.sha256(
+            path.read_bytes()
+        ).hexdigest()
 
     contract["status"] = "FROZEN_BOUNDED_P50_AUTHORIZED"
     contract["bounded_p50_authorized"] = True
@@ -285,18 +260,14 @@ def test_hash_matching_arbitrary_json_cannot_authorize_p50(
 
 
 def test_p50_thresholds_exactly_cover_families_and_retention_regime() -> None:
-    contract = _freeze_p50_thresholds(
-        load_editing_training_gate(CONTRACT_PATH)
-    )
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
     scratch = resolve_p50_thresholds(
         contract,
         initialization_regime="scratch",
     )
     assert scratch.inherited_retention_status == "NOT_APPLICABLE"
     assert scratch.maximum_inherited_probe_nll_regression is None
-    assert set(scratch.minimum_gradient_update_map) == set(
-        REQUIRED_P50_FAMILIES
-    )
+    assert set(scratch.minimum_gradient_update_map) == set(REQUIRED_P50_FAMILIES)
 
     warm = resolve_p50_thresholds(
         contract,
@@ -306,9 +277,9 @@ def test_p50_thresholds_exactly_cover_families_and_retention_regime() -> None:
     assert warm.maximum_inherited_probe_nll_regression == 0.2
 
     missing = copy.deepcopy(contract)
-    del missing["gates"][3]["numeric_thresholds"][
-        "minimum_gradient_updates_per_required_slice"
-    ]["cycle_attach"]
+    del missing["gates"][3]["numeric_thresholds"]["minimum_gradient_updates_per_required_slice"][
+        "cycle_attach"
+    ]
     with pytest.raises(
         EditingTrainingGateError,
         match="exactly cover required families",
@@ -320,12 +291,10 @@ def test_p50_thresholds_exactly_cover_families_and_retention_regime() -> None:
 
 
 def test_scratch_and_warm_start_retention_cannot_masquerade() -> None:
-    contract = _freeze_p50_thresholds(
-        load_editing_training_gate(CONTRACT_PATH)
-    )
-    contract["gates"][3]["numeric_thresholds"][
-        "maximum_inherited_probe_nll_regression"
-    ]["scratch"] = 0.0
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
+    contract["gates"][3]["numeric_thresholds"]["maximum_inherited_probe_nll_regression"][
+        "scratch"
+    ] = 0.0
     with pytest.raises(
         EditingTrainingGateError,
         match="NOT_APPLICABLE",
@@ -335,12 +304,10 @@ def test_scratch_and_warm_start_retention_cannot_masquerade() -> None:
             initialization_regime="scratch",
         )
 
-    contract = _freeze_p50_thresholds(
-        load_editing_training_gate(CONTRACT_PATH)
-    )
-    contract["gates"][3]["numeric_thresholds"][
-        "maximum_inherited_probe_nll_regression"
-    ]["compatible_warm_start"] = "NOT_APPLICABLE"
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
+    contract["gates"][3]["numeric_thresholds"]["maximum_inherited_probe_nll_regression"][
+        "compatible_warm_start"
+    ] = "NOT_APPLICABLE"
     with pytest.raises(
         EditingTrainingGateError,
         match="warm-start",
@@ -352,16 +319,105 @@ def test_scratch_and_warm_start_retention_cannot_masquerade() -> None:
 
 
 def test_full_launch_finds_nested_unfrozen_thresholds() -> None:
-    contract = _freeze_p50_thresholds(
-        load_editing_training_gate(CONTRACT_PATH)
-    )
-    contract["gates"][3]["numeric_thresholds"][
-        "minimum_gradient_updates_per_required_slice"
-    ]["bond_reroute"] = None
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
+    contract["gates"][3]["numeric_thresholds"]["minimum_gradient_updates_per_required_slice"][
+        "bond_reroute"
+    ] = None
     blockers = full_training_launch_blockers(contract)
     assert any(
-        blocker.endswith(
-            "minimum_gradient_updates_per_required_slice.bond_reroute"
-        )
+        blocker.endswith("minimum_gradient_updates_per_required_slice.bond_reroute")
         for blocker in blockers
     )
+
+
+def test_p50_verifier_routes_only_through_semantic_lineage_then_blocks_recipe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    contract = _freeze_p50_thresholds(load_editing_training_gate(CONTRACT_PATH))
+    paths = {}
+    for index, field in enumerate(P50_PREREQUISITE_EVIDENCE_FIELDS):
+        path = tmp_path / f"{index}.json"
+        if field == "frozen_p50_recipe_sha256":
+            path.write_bytes(
+                (ROOT / "configs/editing_v2_semantic_p50_preimplementation_v1.json").read_bytes()
+            )
+        else:
+            path.write_text("{}\n")
+        paths[field] = path
+        contract["gates"][3]["prerequisite_evidence"][field] = hashlib.sha256(
+            path.read_bytes()
+        ).hexdigest()
+    contract["status"] = "FROZEN_BOUNDED_P50_AUTHORIZED"
+    contract["bounded_p50_authorized"] = True
+
+    legacy_calls = []
+
+    def legacy_bomb(*args, **kwargs):
+        legacy_calls.append((args, kwargs))
+        raise AssertionError("legacy P50 validator must not be called")
+
+    monkeypatch.setattr(
+        "compose_v4.data.active8_trace_inventory.load_active8_trace_admission",
+        legacy_bomb,
+    )
+    monkeypatch.setattr(
+        "compose_v4.experiments.editing_p50_prerequisites.validate_p50_recipe",
+        legacy_bomb,
+    )
+    gate_zero = {
+        "evidence_sha256": "4" * 64,
+        "decision_source_inventory_sha256": "2" * 64,
+    }
+    monkeypatch.setattr(
+        "compose_v4.experiments.editing_v2_semantic_t1_decision.validate_semantic_gate_zero_evidence_receipt",
+        lambda *args, **kwargs: gate_zero,
+    )
+    source_calls = []
+
+    def source_validator(*args, **kwargs):
+        source_calls.append((args, kwargs))
+        assert kwargs["gate_zero_evidence"] is gate_zero
+        return {"inventory_sha256": "2" * 64}
+
+    monkeypatch.setattr(
+        "compose_v4.experiments.editing_v2_semantic_p50_preimplementation.validate_semantic_p50_source_inventory",
+        source_validator,
+    )
+    semantic_calls = []
+
+    def semantic_validator(*args, **kwargs):
+        semantic_calls.append((args, kwargs))
+        return {
+            "decision_sha256": "9" * 64,
+            "capacity_policy_file_sha256": "a" * 64,
+            "capacity_policy_sha256": "b" * 64,
+            "completion_file_sha256": "c" * 64,
+            "completion_sha256": "d" * 64,
+            "result_file_sha256": "e" * 64,
+            "result_sha256": "f" * 64,
+            "cache_completion_file_sha256": "0" * 64,
+            "cache_completion_sha256": "1" * 64,
+            "decision_source_inventory_sha256": "2" * 64,
+            "initial_model_state_sha256": "3" * 64,
+            "selected_model_state_sha256": "4" * 64,
+        }
+
+    monkeypatch.setattr(
+        "compose_v4.experiments.editing_v2_semantic_t1_decision.validate_semantic_t1_capacity_decision",
+        semantic_validator,
+    )
+
+    monkeypatch.setattr(
+        "compose_v4.experiments.editing_p50_prerequisites.validate_t1_p50_decision",
+        legacy_bomb,
+    )
+    with pytest.raises(EditingTrainingGateError, match="semantic P50 recipe is not frozen"):
+        verify_p50_prerequisite_artifacts(
+            contract,
+            paths,
+            expected_launch={},
+        )
+    assert len(semantic_calls) == 1
+    assert semantic_calls[0][1]["require_p50_go"] is True
+    assert len(source_calls) == 1
+    assert legacy_calls == []

@@ -62,9 +62,7 @@ BOUNDED_PILOT_DISABLED_FAMILIES = (
     "ring_system_grow",
 )
 BOUNDED_PILOT_SCOPE = "gate0_t1_p50_development_only"
-REPEATED_EMPIRICAL_LAW_STATUS = (
-    "CONDITIONAL_ON_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS"
-)
+REPEATED_EMPIRICAL_LAW_STATUS = "CONDITIONAL_ON_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS"
 REQUIRED_T1_CAPACITY_REQUIREMENTS = {
     "every_required_slice_has_finite_nonzero_gradients",
     "unique_state_panels_memorize_canonical_successor",
@@ -78,9 +76,7 @@ EXPECTED_T1_CAPACITY_THRESHOLDS = {
     "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
 }
 EXPECTED_T1_CAPACITY_POLICY = {
-    "semantic_t1_capacity_policy": (
-        "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
-    ),
+    "semantic_t1_capacity_policy": ("configs/editing_v2_semantic_t1_capacity_policy_v1.json"),
     "semantic_t1_capacity_policy_file_sha256": (
         "1f0cde3b3cfc942e90a715b61431526e8d99e26c27885022b71402d1bb353a62"
     ),
@@ -191,8 +187,7 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         )
     empirical = panels.get("repeated_state_empirical_law_panel")
     if (
-        panels.get("unique_state_deterministic_panels_required_before_p50")
-        is not True
+        panels.get("unique_state_deterministic_panels_required_before_p50") is not True
         or not isinstance(empirical, dict)
         or set(empirical)
         != {
@@ -266,9 +261,7 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
             "S0 is missing fail-closed initialization or successor-support "
             f"requirements: {sorted(missing_support_requirements)!r}"
         )
-    t1_gate = next(
-        gate for gate in gates if gate["id"] == "T1_true_successor_micro_overfit"
-    )
+    t1_gate = next(gate for gate in gates if gate["id"] == "T1_true_successor_micro_overfit")
     if set(t1_gate["requirements"]) != REQUIRED_T1_CAPACITY_REQUIREMENTS:
         raise EditingTrainingGateError(
             "T1 requirements must separate unique-state capacity from conditional "
@@ -526,73 +519,56 @@ def verify_p50_prerequisite_artifacts(
                 f"P50 prerequisite is not readable JSON: {path}"
             ) from error
 
-    from compose_v4.data.active8_trace_inventory import (
-        Active8TraceInventoryError,
-        load_active8_trace_admission,
+    from compose_v4.experiments.editing_v2_semantic_p50_preimplementation import (
+        SemanticP50PreimplementationError,
+        assert_semantic_p50_recipe_frozen,
+        validate_semantic_p50_source_inventory,
     )
-    from compose_v4.experiments.editing_p50_prerequisites import (
-        EditingP50PrerequisiteError,
-        VerifiedP50Prerequisites,
-        validate_gate_zero_structural_evidence,
-        validate_p50_recipe,
-        validate_t1_p50_decision,
+    from compose_v4.experiments.editing_v2_semantic_t1_decision import (
+        SemanticT1DecisionError,
+        validate_semantic_gate_zero_evidence_receipt,
+        validate_semantic_t1_capacity_decision,
     )
 
     try:
-        source_admission = load_active8_trace_admission(
-            Path(artifact_paths["frozen_source_corpus_inventory_sha256"]),
-            expected_manifest_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
+        gate_zero = validate_semantic_gate_zero_evidence_receipt(
+            Path(artifact_paths["gate_zero_structural_evidence_sha256"]),
+            expected_file_sha256=physical_sha256["gate_zero_structural_evidence_sha256"],
         )
-        gate_zero = validate_gate_zero_structural_evidence(
-            payloads["gate_zero_structural_evidence_sha256"],
-            source_admission=source_admission,
+        validate_semantic_p50_source_inventory(
+            payloads["frozen_source_corpus_inventory_sha256"],
+            source_path=Path(artifact_paths["frozen_source_corpus_inventory_sha256"]),
+            gate_zero_evidence=gate_zero,
+            expected_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
         )
-        t1_decision = validate_t1_p50_decision(
+        t1_decision = validate_semantic_t1_capacity_decision(
             payloads["t1_successor_gate_decision_sha256"],
             decision_path=Path(artifact_paths["t1_successor_gate_decision_sha256"]),
-            source_admission=source_admission,
-            source_inventory_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
-            gate_zero_evidence_file_sha256=physical_sha256["gate_zero_structural_evidence_sha256"],
+            repo_root=Path(__file__).resolve().parents[3],
+            expected_gate_zero_evidence_file_sha256=physical_sha256[
+                "gate_zero_structural_evidence_sha256"
+            ],
+            require_p50_go=True,
         )
-        recipe = validate_p50_recipe(
-            payloads["frozen_p50_recipe_sha256"],
-            source_admission=source_admission,
-            source_inventory_file_sha256=physical_sha256["frozen_source_corpus_inventory_sha256"],
-            gate_zero_evidence_file_sha256=physical_sha256["gate_zero_structural_evidence_sha256"],
-            t1_decision_file_sha256=physical_sha256["t1_successor_gate_decision_sha256"],
-            expected_launch=expected_launch,
-        )
-    except (Active8TraceInventoryError, EditingP50PrerequisiteError) as error:
+        if (
+            t1_decision["decision_source_inventory_sha256"]
+            != gate_zero["decision_source_inventory_sha256"]
+        ):
+            raise SemanticP50PreimplementationError(
+                "semantic T1 and Gate0 name different decision-source inventories"
+            )
+        assert_semantic_p50_recipe_frozen(payloads["frozen_p50_recipe_sha256"])
+    except (
+        SemanticP50PreimplementationError,
+        SemanticT1DecisionError,
+    ) as error:
         raise EditingTrainingGateError(
             f"P50 prerequisite semantic validation failed: {error}"
         ) from error
-
-    verified = VerifiedP50Prerequisites(
-        physical_sha256=physical_sha256,
-        source_inventory_sha256=source_admission.inventory_sha256,
-        unified_packed_manifest_sha256=(source_admission.unified_packed_manifest_sha256),
-        support_contract_sha256=source_admission.support_contract_sha256,
-        gate_zero_evidence_sha256=str(gate_zero["evidence_sha256"]),
-        t1_decision_sha256=str(t1_decision["decision_sha256"]),
-        t1_pre_result_runtime_contract_file_sha256=str(
-            t1_decision["pre_result_runtime_contract_file_sha256"]
-        ),
-        t1_pre_result_runtime_contract_sha256=str(
-            t1_decision["pre_result_runtime_contract_sha256"]
-        ),
-        t1_numeric_thresholds_sha256=str(t1_decision["numeric_thresholds_sha256"]),
-        t1_arm_results_manifest_file_sha256=str(t1_decision["arm_results_manifest_file_sha256"]),
-        t1_arm_results_manifest_sha256=str(t1_decision["arm_results_manifest_sha256"]),
-        recipe_sha256=str(recipe["recipe_sha256"]),
-        launch_sha256=str(recipe["launch_sha256"]),
-        ordered_address_stream_sha256=str(
-            recipe["planned_stream"]["ordered_address_stream_sha256"]
-        ),
-        ordered_training_stream_sha256=str(
-            recipe["planned_stream"]["ordered_training_stream_sha256"]
-        ),
+    raise EditingTrainingGateError(
+        "semantic P50 verifier reached an impossible authorizing state; "
+        "a new frozen semantic-P50 recipe schema and verifier are required"
     )
-    return verified.checkpoint_metadata()
 
 
 def assert_p50_launch_authorized(
