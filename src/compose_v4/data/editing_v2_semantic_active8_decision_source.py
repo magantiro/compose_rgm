@@ -449,6 +449,67 @@ class EditingV2SemanticActive8DecisionIndex:
         _, decision_sha256 = self._decision_entry(address)
         return decision_sha256
 
+    def validate_accepted_transition(
+        self,
+        transition: SemanticActive8AcceptedTransition,
+    ) -> None:
+        """Revalidate a transition against the indexed receipt and exact states."""
+
+        if not isinstance(transition, SemanticActive8AcceptedTransition):
+            raise TypeError(
+                "semantic Active8 transition must use the verified typed schema"
+            )
+        addressed = transition.addressed_trace
+        address = addressed.address
+        path_length = address.path_length
+        if (
+            transition.decision_source_inventory_sha256 != self.inventory_sha256
+            or not self.is_accepted(address)
+            or self.decision_sha256_for(address) != transition.decision_sha256
+            or decision_mr._decision_row(addressed, transition.decision).get(
+                "decision_sha256"
+            )
+            != transition.decision_sha256
+            or transition.decision.active8_status != "accepted"
+            or transition.decision.emits_progress_rows is not True
+            or transition.decision.active8_exclusions
+            or len(transition.decision.action_decisions) != path_length
+            or not 0 <= transition.step_index < path_length
+            or transition.action_decision
+            != transition.decision.action_decisions[transition.step_index]
+        ):
+            raise SemanticActive8DecisionSourceError(
+                "accepted transition differs from its indexed decision receipt"
+            )
+        source = transition.source_progress_address
+        successor = transition.successor_progress_address
+        expected_source_sha256 = persistent_slot_state_sha256(
+            addressed.path.state_at(transition.step_index)
+        )
+        expected_successor_sha256 = persistent_slot_state_sha256(
+            addressed.path.state_at(transition.step_index + 1)
+        )
+        expected_trace_key = _trace_key(address)
+        if (
+            source.trace_key != expected_trace_key
+            or successor.trace_key != expected_trace_key
+            or source.packed_shard_name != address.packed_shard_name
+            or successor.packed_shard_name != address.packed_shard_name
+            or source.data_lane != address.layer
+            or successor.data_lane != address.layer
+            or source.partition_role != address.partition
+            or successor.partition_role != address.partition
+            or source.progress_index != transition.step_index
+            or source.terminal
+            or source.state_sha256 != expected_source_sha256
+            or successor.progress_index != transition.step_index + 1
+            or successor.terminal is not (transition.step_index + 1 == path_length)
+            or successor.state_sha256 != expected_successor_sha256
+        ):
+            raise SemanticActive8DecisionSourceError(
+                "accepted transition differs from its exact progress states"
+            )
+
     def exclusions_for(
         self,
         address: PackedTraceAddress,
@@ -527,7 +588,7 @@ class EditingV2SemanticActive8DecisionIndex:
                     raise SemanticActive8DecisionSourceError(
                         "accepted transition progress identities are inconsistent"
                     )
-                yield SemanticActive8AcceptedTransition(
+                transition = SemanticActive8AcceptedTransition(
                     decision_source_inventory_sha256=self.inventory_sha256,
                     addressed_trace=trace.addressed_trace,
                     decision_sha256=trace.decision_sha256,
@@ -537,6 +598,8 @@ class EditingV2SemanticActive8DecisionIndex:
                     source_progress_address=source,
                     successor_progress_address=successor,
                 )
+                self.validate_accepted_transition(transition)
+                yield transition
 
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:

@@ -22,7 +22,7 @@
     "corpus_contract": "configs/editing_corpus_v2_contract.json",
     "corpus_contract_file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
     "classifier_implementation_file": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
-    "classifier_implementation_sha256": "e408d5154488ed69c801df1b9c392d856a85c14ac79c00921c4a6df18254b333",
+    "classifier_implementation_sha256": "91c9194048984869ec3ab307bdac0055a190b6f3b07c0cddc1a572170517def1",
     "action_codec_schema_version": 4,
     "active_families": [
       "atom_insert",
@@ -156,5 +156,5 @@
     "process_identity_drift": "error",
     "registry_tamper": "error"
   },
-  "registry_sha256": "49777e24dc04a6ae340f399e0645af963afd3c2443fff01673265b2c342474b4"
+  "registry_sha256": "2d409893f495f50e20ee4c26f11d41f57525a98b20e5eac925b7abda78c207dc"
 }

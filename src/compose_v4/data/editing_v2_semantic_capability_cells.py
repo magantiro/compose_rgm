@@ -56,6 +56,11 @@ from compose_v4.data.editing_v2_semantic_active8_admission import (
     build_semantic_active8_admission_policy,
     classify_semantic_action,
 )
+from compose_v4.data.editing_v2_semantic_active8_decision_source import (
+    EditingV2SemanticActive8DecisionIndex,
+    SemanticActive8AcceptedTransition,
+    SemanticActive8DecisionSourceError,
+)
 from compose_v4.data.packed_trace_store import AddressedPackedTrace
 from compose_v4.rewrite import action_codec_v4
 from compose_v4.rewrite.editing_v2_process_identity import (
@@ -84,6 +89,11 @@ REGISTRY_RELATIVE_PATH = "configs/editing_v2_semantic_capability_cells_v1.json"
 ASSIGNMENT_SCHEMA = "compose.editing_v2.semantic_capability_cell_assignment"
 ASSIGNMENT_SCHEMA_VERSION = 1
 ASSIGNMENT_STATUS = "CLASSIFIED_NO_GATE_OR_TRAINING_AUTHORITY"
+STRUCTURAL_ASSIGNMENT_SCHEMA = (
+    "compose.editing_v2.semantic_structural_capability_assignment"
+)
+STRUCTURAL_ASSIGNMENT_SCHEMA_VERSION = 1
+STRUCTURAL_ASSIGNMENT_STATUS = "VERIFIED_STRUCTURAL_NO_GATE_OR_TRAINING_AUTHORITY"
 
 _TOP_LEVEL_FIELDS = {
     "schema",
@@ -338,6 +348,110 @@ class SemanticCapabilityCellAssignment:
             "raw_mark_count_stratum": self.raw_mark_count_stratum,
             "canonical_successor_count": self.canonical_successor_count,
             "canonical_successor_count_stratum": self.canonical_successor_count_stratum,
+            "successor_alias_multiplicity": self.successor_alias_multiplicity,
+            "successor_alias_multiplicity_stratum": (
+                self.successor_alias_multiplicity_stratum
+            ),
+            "matching_mark_count": self.matching_mark_count,
+            "atom_element_transition": [
+                list(item) for item in self.atom_element_transition
+            ],
+            "minimum_edited_cycle_length": self.minimum_edited_cycle_length,
+            "source_edge_aromatic": self.source_edge_aromatic,
+            "successor_edge_aromatic": self.successor_edge_aromatic,
+            "registry_sha256": self.registry_sha256,
+            "process_identity_sha256": self.process_identity_sha256,
+            "corpus_contract_file_sha256": self.corpus_contract_file_sha256,
+            "classifier_implementation_sha256": self.classifier_implementation_sha256,
+            "active8_policy_sha256": self.active8_policy_sha256,
+            "assignment_sha256": self.assignment_sha256,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class SemanticStructuralCapabilityAssignment:
+    """Narrow Gate-0/T1 projection over one verified accepted transition."""
+
+    decision_source_inventory_sha256: str
+    decision_sha256: str
+    trace_address_sha256: str
+    source_progress_address_sha256: str
+    successor_progress_address_sha256: str
+    trace_id: str
+    progress_index: int
+    packed_shard_content_sha256: str
+    packed_shard_name: str
+    packed_entry_index: int
+    action_sha256: str
+    source_state_sha256: str
+    target_state_sha256: str
+    source_canonical_key: str
+    successor_canonical_key: str
+    model_family: str
+    family_context: str
+    capability_cell_id: str
+    data_lane: str
+    partition_role: str
+    raw_mark_count: int
+    raw_mark_count_stratum: str
+    canonical_successor_count: int
+    canonical_successor_count_stratum: str
+    successor_alias_multiplicity: int
+    successor_alias_multiplicity_stratum: str
+    matching_mark_count: int
+    atom_element_transition: tuple[tuple[str, str], ...]
+    minimum_edited_cycle_length: int | None
+    source_edge_aromatic: bool | None
+    successor_edge_aromatic: bool | None
+    registry_sha256: str
+    process_identity_sha256: str
+    corpus_contract_file_sha256: str
+    classifier_implementation_sha256: str
+    active8_policy_sha256: str
+    assignment_sha256: str
+
+    def as_payload(self) -> dict[str, object]:
+        """Return the exact, non-authorizing structural evidence row."""
+
+        return {
+            "schema": STRUCTURAL_ASSIGNMENT_SCHEMA,
+            "schema_version": STRUCTURAL_ASSIGNMENT_SCHEMA_VERSION,
+            "status": STRUCTURAL_ASSIGNMENT_STATUS,
+            "training_authorized": False,
+            "gate_zero_authorized": False,
+            "t1_authorized": False,
+            "bounded_p50_authorized": False,
+            "long_training_authorized": False,
+            "checkpoint_selection_authorized": False,
+            "final_test_selection_authorized": False,
+            "decision_source_inventory_sha256": (self.decision_source_inventory_sha256),
+            "decision_sha256": self.decision_sha256,
+            "trace_address_sha256": self.trace_address_sha256,
+            "source_progress_address_sha256": (self.source_progress_address_sha256),
+            "successor_progress_address_sha256": (
+                self.successor_progress_address_sha256
+            ),
+            "trace_id": self.trace_id,
+            "progress_index": self.progress_index,
+            "packed_shard_content_sha256": self.packed_shard_content_sha256,
+            "packed_shard_name": self.packed_shard_name,
+            "packed_entry_index": self.packed_entry_index,
+            "action_sha256": self.action_sha256,
+            "source_state_sha256": self.source_state_sha256,
+            "target_state_sha256": self.target_state_sha256,
+            "source_canonical_key": self.source_canonical_key,
+            "successor_canonical_key": self.successor_canonical_key,
+            "model_family": self.model_family,
+            "family_context": self.family_context,
+            "capability_cell_id": self.capability_cell_id,
+            "data_lane": self.data_lane,
+            "partition_role": self.partition_role,
+            "raw_mark_count": self.raw_mark_count,
+            "raw_mark_count_stratum": self.raw_mark_count_stratum,
+            "canonical_successor_count": self.canonical_successor_count,
+            "canonical_successor_count_stratum": (
+                self.canonical_successor_count_stratum
+            ),
             "successor_alias_multiplicity": self.successor_alias_multiplicity,
             "successor_alias_multiplicity_stratum": (
                 self.successor_alias_multiplicity_stratum
@@ -1427,6 +1541,217 @@ def _validate_exact_evidence(
     return evidence
 
 
+def classify_verified_structural_transition(
+    decision_index: EditingV2SemanticActive8DecisionIndex,
+    transition: SemanticActive8AcceptedTransition,
+    *,
+    registry: SemanticCapabilityCellRegistry | None = None,
+) -> SemanticStructuralCapabilityAssignment:
+    """Classify exact structural evidence without requiring sampling semantics."""
+
+    if not isinstance(decision_index, EditingV2SemanticActive8DecisionIndex):
+        raise TypeError(
+            "structural capability classification requires the verified decision index"
+        )
+    if not isinstance(transition, SemanticActive8AcceptedTransition):
+        raise TypeError(
+            "structural capability classification requires a verified transition"
+        )
+    selected = registry or load_semantic_capability_cell_registry()
+    if not isinstance(selected, SemanticCapabilityCellRegistry):
+        raise TypeError("registry must be a SemanticCapabilityCellRegistry")
+    try:
+        decision_index.validate_accepted_transition(transition)
+    except SemanticActive8DecisionSourceError as error:
+        raise SemanticCapabilityCellError(
+            "structural transition failed decision-source revalidation"
+        ) from error
+    if (
+        transition.decision_source_inventory_sha256 != decision_index.inventory_sha256
+        or decision_index.process_identity_sha256 != selected.process_identity_sha256
+    ):
+        raise SemanticCapabilityCellError(
+            "structural transition process or source identity has drifted"
+        )
+
+    addressed = transition.addressed_trace
+    address = addressed.address
+    index = transition.step_index
+    step = addressed.trace.steps[index]
+    source = addressed.path.state_at(index)
+    successor = addressed.path.state_at(index + 1)
+    policy = build_semantic_active8_admission_policy()
+    current_classification = classify_semantic_action(
+        step,
+        step_index=index,
+        policy=policy,
+    )
+    action_decision = transition.action_decision
+    if (
+        transition.decision.trace_id != address.trace_id
+        or transition.decision.policy_sha256 != policy.policy_sha256
+        or transition.decision.semantic_migration_status != "admitted"
+        or transition.decision.semantic_migration_rejection is not None
+        or action_decision.classification != current_classification
+        or not current_classification.policy_eligible
+        or current_classification.model_family not in ACTIVE8_FAMILIES
+    ):
+        raise SemanticCapabilityCellError(
+            "structural teacher is not current accepted Action-V4 evidence"
+        )
+    evidence = _validate_exact_evidence(
+        action_decision.candidate_evidence,
+        action_sha256=current_classification.action_sha256,
+        source=source,
+        successor=successor,
+    )
+    family, context = classify_action_family_context(source, successor, step)
+    if family != current_classification.model_family:
+        raise SemanticCapabilityCellError(
+            "structural family-context classifier disagrees with Action V4"
+        )
+    if context not in selected.contexts_by_family.get(family, ()):
+        raise SemanticCapabilityCellError(
+            "structural family context is absent from the bound registry"
+        )
+
+    trace_address_payload = {
+        "packed_shard_content_sha256": address.packed_shard_content_sha256,
+        "packed_shard_name": address.packed_shard_name,
+        "entry_index": address.entry_index,
+        "trace_id": address.trace_id,
+        "layer": address.layer,
+        "partition": address.partition,
+        "source_key": address.source_key,
+        "target_key": address.target_key,
+        "path_length": address.path_length,
+    }
+    trace_address_sha256 = _canonical_sha256(trace_address_payload)
+    source_progress_sha256 = _canonical_sha256(
+        transition.source_progress_address.as_payload()
+    )
+    successor_progress_sha256 = _canonical_sha256(
+        transition.successor_progress_address.as_payload()
+    )
+    raw_stratum = _stratum(
+        evidence.raw_mark_count,
+        selected.raw_mark_bins,
+        field="raw_mark_count",
+    )
+    successor_stratum = _stratum(
+        evidence.canonical_successor_count,
+        selected.canonical_successor_bins,
+        field="canonical_successor_count",
+    )
+    alias_stratum = _stratum(
+        evidence.successor_alias_count,
+        selected.successor_alias_bins,
+        field="successor_alias_count",
+    )
+    (
+        atom_element_transition,
+        minimum_edited_cycle_length,
+        source_edge_aromatic,
+        successor_edge_aromatic,
+    ) = _action_audit_axes(source, successor, step, family=family)
+    capability_cell_id = f"{selected.namespace}:{family}:{context}"
+    body = {
+        "schema": STRUCTURAL_ASSIGNMENT_SCHEMA,
+        "schema_version": STRUCTURAL_ASSIGNMENT_SCHEMA_VERSION,
+        "status": STRUCTURAL_ASSIGNMENT_STATUS,
+        "training_authorized": False,
+        "gate_zero_authorized": False,
+        "t1_authorized": False,
+        "bounded_p50_authorized": False,
+        "long_training_authorized": False,
+        "checkpoint_selection_authorized": False,
+        "final_test_selection_authorized": False,
+        "decision_source_inventory_sha256": decision_index.inventory_sha256,
+        "decision_sha256": transition.decision_sha256,
+        "trace_address_sha256": trace_address_sha256,
+        "source_progress_address_sha256": source_progress_sha256,
+        "successor_progress_address_sha256": successor_progress_sha256,
+        "trace_id": address.trace_id,
+        "progress_index": index,
+        "packed_shard_content_sha256": address.packed_shard_content_sha256,
+        "packed_shard_name": address.packed_shard_name,
+        "packed_entry_index": address.entry_index,
+        "action_sha256": current_classification.action_sha256,
+        "source_state_sha256": evidence.source_state_sha256,
+        "target_state_sha256": evidence.target_state_sha256,
+        "source_canonical_key": canonical_state_key(source),
+        "successor_canonical_key": evidence.canonical_successor_key,
+        "model_family": family,
+        "family_context": context,
+        "capability_cell_id": capability_cell_id,
+        "data_lane": address.layer,
+        "partition_role": address.partition,
+        "raw_mark_count": evidence.raw_mark_count,
+        "raw_mark_count_stratum": raw_stratum,
+        "canonical_successor_count": evidence.canonical_successor_count,
+        "canonical_successor_count_stratum": successor_stratum,
+        "successor_alias_multiplicity": evidence.successor_alias_count,
+        "successor_alias_multiplicity_stratum": alias_stratum,
+        "matching_mark_count": evidence.matching_mark_count,
+        "atom_element_transition": [list(item) for item in atom_element_transition],
+        "minimum_edited_cycle_length": minimum_edited_cycle_length,
+        "source_edge_aromatic": source_edge_aromatic,
+        "successor_edge_aromatic": successor_edge_aromatic,
+        "registry_sha256": selected.registry_sha256,
+        "process_identity_sha256": selected.process_identity_sha256,
+        "corpus_contract_file_sha256": selected.corpus_contract_file_sha256,
+        "classifier_implementation_sha256": selected.classifier_implementation_sha256,
+        "active8_policy_sha256": policy.policy_sha256,
+    }
+    assignment = SemanticStructuralCapabilityAssignment(
+        decision_source_inventory_sha256=decision_index.inventory_sha256,
+        decision_sha256=transition.decision_sha256,
+        trace_address_sha256=trace_address_sha256,
+        source_progress_address_sha256=source_progress_sha256,
+        successor_progress_address_sha256=successor_progress_sha256,
+        trace_id=address.trace_id,
+        progress_index=index,
+        packed_shard_content_sha256=address.packed_shard_content_sha256,
+        packed_shard_name=address.packed_shard_name,
+        packed_entry_index=address.entry_index,
+        action_sha256=current_classification.action_sha256,
+        source_state_sha256=evidence.source_state_sha256,
+        target_state_sha256=evidence.target_state_sha256,
+        source_canonical_key=canonical_state_key(source),
+        successor_canonical_key=evidence.canonical_successor_key,
+        model_family=family,
+        family_context=context,
+        capability_cell_id=capability_cell_id,
+        data_lane=address.layer,
+        partition_role=address.partition,
+        raw_mark_count=evidence.raw_mark_count,
+        raw_mark_count_stratum=raw_stratum,
+        canonical_successor_count=evidence.canonical_successor_count,
+        canonical_successor_count_stratum=successor_stratum,
+        successor_alias_multiplicity=evidence.successor_alias_count,
+        successor_alias_multiplicity_stratum=alias_stratum,
+        matching_mark_count=evidence.matching_mark_count,
+        atom_element_transition=atom_element_transition,
+        minimum_edited_cycle_length=minimum_edited_cycle_length,
+        source_edge_aromatic=source_edge_aromatic,
+        successor_edge_aromatic=successor_edge_aromatic,
+        registry_sha256=selected.registry_sha256,
+        process_identity_sha256=selected.process_identity_sha256,
+        corpus_contract_file_sha256=selected.corpus_contract_file_sha256,
+        classifier_implementation_sha256=selected.classifier_implementation_sha256,
+        active8_policy_sha256=policy.policy_sha256,
+        assignment_sha256=_canonical_sha256(body),
+    )
+    payload = assignment.as_payload()
+    if assignment.assignment_sha256 != _canonical_sha256(
+        {key: value for key, value in payload.items() if key != "assignment_sha256"}
+    ):
+        raise SemanticCapabilityCellError(
+            "structural capability assignment self-hash disagrees"
+        )
+    return assignment
+
+
 def classify_accepted_semantic_progress(
     addressed: AddressedPackedTrace,
     progress: SemanticSamplingProgress,
@@ -1811,12 +2136,17 @@ __all__ = [
     "REGISTRY_SCHEMA",
     "REGISTRY_SCHEMA_VERSION",
     "REGISTRY_STATUS",
+    "STRUCTURAL_ASSIGNMENT_SCHEMA",
+    "STRUCTURAL_ASSIGNMENT_SCHEMA_VERSION",
+    "STRUCTURAL_ASSIGNMENT_STATUS",
     "CountBin",
     "SemanticCapabilityCellAssignment",
     "SemanticCapabilityCellError",
     "SemanticCapabilityCellRegistry",
+    "SemanticStructuralCapabilityAssignment",
     "classify_accepted_semantic_progress",
     "classify_action_family_context",
+    "classify_verified_structural_transition",
     "load_semantic_capability_cell_registry",
     "validate_semantic_capability_cell_registry",
 ]

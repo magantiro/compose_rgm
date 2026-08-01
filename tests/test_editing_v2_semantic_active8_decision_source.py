@@ -40,6 +40,11 @@ from compose_v4.data.editing_v2_semantic_active8_source_adapter import (
     SemanticActive8Source,
     SemanticActive8SourceBinding,
 )
+from compose_v4.data.editing_v2_semantic_capability_cells import (
+    SemanticCapabilityCellError,
+    classify_verified_structural_transition,
+    load_semantic_capability_cell_registry,
+)
 from compose_v4.data.semantic_active8_chunk_cache import (
     semantic_active8_chunk_cache_builder_identity,
 )
@@ -483,6 +488,81 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
         item.decision_source_inventory_sha256 == index.inventory_sha256
         for item in transitions
     )
+    assignments = tuple(
+        classify_verified_structural_transition(index, item) for item in transitions
+    )
+    assert len(assignments) == sum(len(item.action_decisions) for item in accepted)
+    assert len(assignments) == (
+        index.count_map["progress_rows"] - index.count_map["accepted_traces"]
+    )
+    assert all(item.matching_mark_count == 1 for item in assignments)
+    assert all(item.progress_index == 0 for item in assignments)
+    assert len({item.assignment_sha256 for item in assignments}) == len(assignments)
+    structural_payload = assignments[0].as_payload()
+    assert structural_payload["training_authorized"] is False
+    assert structural_payload["gate_zero_authorized"] is False
+    assert structural_payload["t1_authorized"] is False
+    assert structural_payload["bounded_p50_authorized"] is False
+    assert structural_payload["long_training_authorized"] is False
+    assert structural_payload["checkpoint_selection_authorized"] is False
+    assert structural_payload["final_test_selection_authorized"] is False
+    assert "sampling_coefficients" not in structural_payload
+    assert "mappings" not in structural_payload
+    assert "relationship_group_ids" not in structural_payload
+    wrong_process_registry = replace(
+        load_semantic_capability_cell_registry(),
+        process_identity_sha256="0" * 64,
+    )
+    with pytest.raises(
+        SemanticCapabilityCellError,
+        match="process or source identity",
+    ):
+        classify_verified_structural_transition(
+            index,
+            transitions[0],
+            registry=wrong_process_registry,
+        )
+    for transition in transitions:
+        index.validate_accepted_transition(transition)
+    first_transition = transitions[0]
+    forged_evidence = replace(
+        first_transition.action_decision.candidate_evidence,
+        raw_mark_count=(
+            first_transition.action_decision.candidate_evidence.raw_mark_count + 1
+        ),
+    )
+    forged_action_decision = replace(
+        first_transition.action_decision,
+        candidate_evidence=forged_evidence,
+    )
+    forged_decision = replace(
+        first_transition.decision,
+        action_decisions=(forged_action_decision,),
+    )
+    with pytest.raises(
+        source_index.SemanticActive8DecisionSourceError,
+        match="indexed decision receipt",
+    ):
+        index.validate_accepted_transition(
+            replace(
+                first_transition,
+                decision=forged_decision,
+                action_decision=forged_action_decision,
+            )
+        )
+    with pytest.raises(
+        source_index.SemanticActive8DecisionSourceError,
+        match="exact progress states",
+    ):
+        index.validate_accepted_transition(
+            replace(
+                first_transition,
+                source_progress_address=replace(
+                    first_transition.source_progress_address,
+                    terminal=True,
+                ),
+            )
+        )
     identity = index.identity_payload()
     assert identity["decision_source_implementation_sha256"] == _file_sha(
         Path(source_index.__file__)
