@@ -1,0 +1,46 @@
+{
+  "comparison_policy": {
+    "component_resolver": "complete_degree_constrained_assignments_per_resonance_invariant_aromatic_component",
+    "equivalence_fields": [
+      "admission",
+      "typed_rejection",
+      "source_identity",
+      "selected_edge",
+      "semantic_aromatic_class",
+      "global_alias_cardinality",
+      "global_forced_single_cardinality",
+      "canonical_product_identity",
+      "exact_successor_identity",
+      "inverse_bond_order"
+    ],
+    "exhaustive_oracle": "rdkit_kekule_all_charge_h_connectivity_preserving_aliases",
+    "maximum_oracle_structures": 4096,
+    "oracle_overflow_policy": "typed_incomplete_comparison_blocks_gate",
+    "work_policy": "record_actual_executions_separately_from_implied_global_cardinality"
+  },
+  "contract_sha256": "312275da62ce772cf2c1a911e6494e4366c10741376aae7018cf21229863a1bb",
+  "edge_scope": "all_resonance_invariant_aromatic_edges_in_each_declared_source",
+  "equivalence_gate": "zero_mismatches_zero_oracle_overflows_complete_declared_edge_coverage",
+  "excluded_partitions": [
+    "train",
+    "controller_validation",
+    "test"
+  ],
+  "parent_active8_identity": {
+    "effective_source_corpus_cache_sha256": "4de860baf1906934ef01a608a366daf81789bedf8985d3ca37f9f30494add3c9",
+    "inventory_manifest_file_sha256": "bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab",
+    "inventory_manifest_path": "/artifacts/active8_trace_inventory_legacy3_validation_1ef8941/objects/manifests/bbf44483c4d14bfd6c4bde7cbd2dc4fc708c46a14acff5eadb0b6f82902832ab.json",
+    "inventory_sha256": "ce1a1b0a43fdfeac4e5771d03a95d456ec8b2df46f207446efd4f8a17ecadd42",
+    "support_contract_sha256": "f3d09c84657518f5868c424ab93716d5d4b6f49da9d03abc6613c9edcff5d6d5",
+    "unified_packed_manifest_sha256": "ed874884ba1406f8fa794faecd607ba8599b613f87f06475b3e5936e69866758"
+  },
+  "partitions": [
+    "validation"
+  ],
+  "prerequisite_impact_result_logical_sha256": "cc1893991b75a4e592d344b592f6f12cf1eef3428781d6b85bddeb4ad75f3cf2",
+  "schema": "compose.editing.cycle_open_component_equivalence_contract",
+  "schema_version": 1,
+  "source_scope": "all_distinct_exact_source_states_of_accepted_cycle_attach_teacher_rows",
+  "status": "VALIDATION_ONLY_COMPONENT_FACTORED_CYCLE_OPEN_EQUIVALENCE_NO_TRAINING_AUTHORITY",
+  "training_authorized": false
+}
