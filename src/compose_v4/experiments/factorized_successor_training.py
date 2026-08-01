@@ -82,12 +82,9 @@ class StateProductiveSupport:
         if not self.source_key:
             raise ValueError("state-support source key must be nonempty")
         if len(self.source_state_sha256) != 64 or any(
-            character not in "0123456789abcdef"
-            for character in self.source_state_sha256
+            character not in "0123456789abcdef" for character in self.source_state_sha256
         ):
-            raise ValueError(
-                "state-support source_state_sha256 must be a lowercase SHA-256"
-            )
+            raise ValueError("state-support source_state_sha256 must be a lowercase SHA-256")
         if len(set(self.virtual_aliases)) != len(self.virtual_aliases):
             raise ValueError("state support contains duplicate virtual coordinates")
 
@@ -108,14 +105,11 @@ class TeacherSuccessorFiber:
         if self.source_key == self.target_key:
             raise ValueError("a teacher molecular jump cannot target the source state")
         if len(self.target_state_sha256) != 64 or any(
-            character not in "0123456789abcdef"
-            for character in self.target_state_sha256
+            character not in "0123456789abcdef" for character in self.target_state_sha256
         ):
             raise ValueError("teacher target_state_sha256 must be a lowercase SHA-256")
         if not self.aliases:
-            raise ValueError(
-                "a teacher-successor fiber must contain at least one alias"
-            )
+            raise ValueError("a teacher-successor fiber must contain at least one alias")
         if len(set(self.aliases)) != len(self.aliases):
             raise ValueError("a teacher-successor fiber contains duplicate coordinates")
         if self.state_support.source_key != self.source_key:
@@ -158,16 +152,12 @@ class CanonicalSuccessorAliasGroup:
         if not self.target_key:
             raise ValueError("canonical successor alias-group key must be nonempty")
         if not self.marks:
-            raise ValueError(
-                "canonical successor alias group must retain an enumerated mark"
-            )
+            raise ValueError("canonical successor alias group must retain an enumerated mark")
         if tuple(sorted(set(self.marks))) != self.marks:
             raise ValueError("canonical successor marks must be sorted and unique")
         aliases = tuple(mark.alias for mark in self.marks)
         if len(set(aliases)) != len(aliases):
-            raise ValueError(
-                "canonical successor group repeats a factorized mark coordinate"
-            )
+            raise ValueError("canonical successor group repeats a factorized mark coordinate")
 
     @property
     def successor_state_sha256s(self) -> tuple[str, ...]:
@@ -207,43 +197,27 @@ class CompiledStateSuccessorMap:
     def __post_init__(self) -> None:
         target_keys = tuple(group.target_key for group in self.successor_groups)
         if target_keys != tuple(sorted(set(target_keys))):
-            raise ValueError(
-                "compiled successor groups must have sorted unique target keys"
-            )
+            raise ValueError("compiled successor groups must have sorted unique target keys")
         if self.state_support.source_key in target_keys:
-            raise ValueError(
-                "compiled productive successor groups contain a canonical self-event"
-            )
-        productive_marks = [
-            mark for group in self.successor_groups for mark in group.marks
-        ]
+            raise ValueError("compiled productive successor groups contain a canonical self-event")
+        productive_marks = [mark for group in self.successor_groups for mark in group.marks]
         all_aliases = [mark.alias for mark in productive_marks]
         if len(all_aliases) != len(set(all_aliases)):
-            raise ValueError(
-                "one legal mark coordinate appears in multiple successor groups"
-            )
+            raise ValueError("one legal mark coordinate appears in multiple successor groups")
         if tuple(sorted(set(self.virtual_marks))) != self.virtual_marks:
             raise ValueError("compiled virtual marks must be sorted and unique")
         virtual_aliases = tuple(sorted(mark.alias for mark in self.virtual_marks))
         if len(set(virtual_aliases)) != len(virtual_aliases):
-            raise ValueError(
-                "compiled virtual marks repeat a factorized mark coordinate"
-            )
+            raise ValueError("compiled virtual marks repeat a factorized mark coordinate")
         if virtual_aliases != tuple(sorted(self.state_support.virtual_aliases)):
-            raise ValueError(
-                "compiled virtual mark identities disagree with state support"
-            )
+            raise ValueError("compiled virtual mark identities disagree with state support")
         if set(all_aliases) & set(virtual_aliases):
             raise ValueError("one legal mark coordinate is both productive and virtual")
         all_exact_digests = [
-            digest
-            for group in self.successor_groups
-            for digest in group.successor_state_sha256s
+            digest for group in self.successor_groups for digest in group.successor_state_sha256s
         ]
         if len(all_exact_digests) != len(set(all_exact_digests)):
-            raise ValueError(
-                "one exact successor state appears in multiple canonical groups"
-            )
+            raise ValueError("one exact successor state appears in multiple canonical groups")
 
     @property
     def source_key(self) -> str:
@@ -271,6 +245,35 @@ class FactorizedSuccessorPrediction:
     @property
     def selected_successor_rate(self) -> Tensor:
         return self.total_hazard * self.selected_successor_log_probability.exp()
+
+
+@dataclass(frozen=True)
+class FactorizedSuccessorPartitionPrediction:
+    """Differentiable probabilities for complete precompiled successor rows.
+
+    ``successor_log_probabilities[i]`` follows ``successor_groups[i]`` exactly
+    and is conditioned on taking a productive molecular jump.  The static
+    groups contain coordinates only; no cached model score enters this path.
+    """
+
+    successor_keys: tuple[tuple[str, ...], ...]
+    successor_log_probabilities: tuple[Tensor, ...]
+    productive_log_probability: Tensor
+    family_log_probabilities: Tensor
+    enabled_families: Tensor
+
+    def __post_init__(self) -> None:
+        if len(self.successor_keys) != len(self.successor_log_probabilities):
+            raise ValueError("successor partition rows are not aligned")
+        for keys, values in zip(
+            self.successor_keys,
+            self.successor_log_probabilities,
+            strict=True,
+        ):
+            if tuple(sorted(set(keys))) != keys or values.ndim != 1:
+                raise ValueError("successor partition row is not canonical")
+            if len(keys) != int(values.numel()):
+                raise ValueError("successor partition keys and values disagree")
 
 
 def _alias(
@@ -356,9 +359,7 @@ def resolve_successor_process_runtime(
         else de_novo_rewrite_system()
     )
     selected_system = expected_system if system is None else system
-    if _rewrite_system_signature(selected_system) != _rewrite_system_signature(
-        expected_system
-    ):
+    if _rewrite_system_signature(selected_system) != _rewrite_system_signature(expected_system):
         raise SuccessorTrainingError(
             "explicit successor executor disagrees with model process semantics"
         )
@@ -584,6 +585,191 @@ def _log1mexp(log_probability: Tensor) -> Tensor:
     )
 
 
+def _factorized_action_probability_tables(
+    model: FactorizedTraceletRateModel,
+    batch: FactorizedMarkBatch,
+) -> tuple[
+    FactorizedMarkBatch,
+    Tensor,
+    dict[str, Tensor],
+    dict[str, Tensor],
+    Tensor,
+    Tensor,
+    Tensor,
+]:
+    """Compute the one shared differentiable marked-law table representation."""
+
+    if batch.atom_types.device != model.device:
+        batch = batch.to(model.device)
+    node, global_state, pair = model._encode_batch(batch)
+    masks, logits, action_log_z = model._action_tables(
+        batch,
+        node,
+        global_state,
+        pair,
+    )
+    enabled = torch.isfinite(action_log_z)
+    family_logits = _masked_family_logits(
+        model._family_base_logits(batch, global_state),
+        action_log_z,
+        enabled,
+        rate_factorization=model.rate_factorization,
+    )
+    family_log_probability = torch.log_softmax(family_logits, dim=-1)
+    return (
+        batch,
+        global_state,
+        masks,
+        logits,
+        action_log_z,
+        enabled,
+        family_log_probability,
+    )
+
+
+def _compiled_alias_log_probability(
+    *,
+    batch_index: int,
+    alias: TeacherSuccessorAlias,
+    masks: dict[str, Tensor],
+    logits: dict[str, Tensor],
+    action_log_z: Tensor,
+    family_log_probability: Tensor,
+) -> tuple[Tensor, Tensor]:
+    family_index = MARK_RULE_TO_INDEX.get(alias.family_name)
+    if family_index is None:
+        raise SuccessorTrainingError(
+            f"compiled successor references unknown family {alias.family_name!r}"
+        )
+    table_logits = logits.get(alias.table_name)
+    table_mask = masks.get(alias.table_name)
+    if table_logits is None or table_mask is None:
+        raise SuccessorTrainingError(
+            f"compiled successor references unknown table {alias.table_name!r}"
+        )
+    key = (batch_index, *alias.coordinate)
+    try:
+        legal = table_mask[key]
+        raw_logit = table_logits[key]
+    except IndexError as error:
+        raise SuccessorTrainingError(
+            "compiled successor coordinate lies outside the current action table"
+        ) from error
+    return (
+        family_log_probability[batch_index, family_index]
+        + raw_logit
+        - action_log_z[batch_index, family_index],
+        legal,
+    )
+
+
+def forward_compiled_successor_partitions(
+    model: FactorizedTraceletRateModel,
+    batch: FactorizedMarkBatch,
+    partitions: tuple[CompiledStateSuccessorMap, ...],
+    *,
+    normalization_atol: float = 2e-5,
+) -> FactorizedSuccessorPartitionPrediction:
+    """Score complete static successor partitions without replaying chemistry.
+
+    This is the full-partition counterpart to
+    :func:`forward_teacher_successor_batch`.  It shares the production action
+    tables, validates every cached coordinate against the current masks and
+    proves that productive groups plus virtual aliases exhaust unit mark mass.
+    """
+
+    if len(partitions) != batch.batch_size:
+        raise ValueError("successor partitions must align with the batch")
+    if not 0.0 < float(normalization_atol) < 1.0:
+        raise ValueError("normalization_atol must lie in (0, 1)")
+    (
+        batch,
+        global_state,
+        masks,
+        logits,
+        action_log_z,
+        enabled,
+        family_log_probability,
+    ) = _factorized_action_probability_tables(model, batch)
+    productive_log_probability = global_state.new_empty(batch.batch_size)
+    successor_keys: list[tuple[str, ...]] = []
+    successor_rows: list[Tensor] = []
+
+    for batch_index, partition in enumerate(partitions):
+        observed_source_digest = persistent_slot_state_sha256(batch.states[batch_index])
+        if observed_source_digest != partition.source_state_sha256:
+            raise SuccessorTrainingError(
+                "compiled successor partition does not match the exact batch state"
+            )
+        virtual_values: list[Tensor] = []
+        virtual_legalities: list[Tensor] = []
+        for alias in partition.state_support.virtual_aliases:
+            value, legal = _compiled_alias_log_probability(
+                batch_index=batch_index,
+                alias=alias,
+                masks=masks,
+                logits=logits,
+                action_log_z=action_log_z,
+                family_log_probability=family_log_probability,
+            )
+            virtual_values.append(value)
+            virtual_legalities.append(legal)
+        if virtual_legalities and not bool(torch.stack(virtual_legalities).all()):
+            raise SuccessorTrainingError("compiled virtual successor coordinate is no longer legal")
+        virtual_log_probability = (
+            global_state.new_tensor(float("-inf"))
+            if not virtual_values
+            else torch.logsumexp(torch.stack(virtual_values), dim=0)
+        )
+        productive_log_probability[batch_index] = _log1mexp(virtual_log_probability)
+
+        group_values: list[Tensor] = []
+        for group in partition.successor_groups:
+            alias_values: list[Tensor] = []
+            alias_legalities: list[Tensor] = []
+            for alias in group.aliases:
+                value, legal = _compiled_alias_log_probability(
+                    batch_index=batch_index,
+                    alias=alias,
+                    masks=masks,
+                    logits=logits,
+                    action_log_z=action_log_z,
+                    family_log_probability=family_log_probability,
+                )
+                alias_values.append(value)
+                alias_legalities.append(legal)
+            if not bool(torch.stack(alias_legalities).all()):
+                raise SuccessorTrainingError(
+                    "compiled productive successor coordinate is no longer legal"
+                )
+            group_values.append(torch.logsumexp(torch.stack(alias_values), dim=0))
+        if not group_values:
+            raise SuccessorTrainingError("compiled state has no productive molecular successor")
+        raw_group_values = torch.stack(group_values)
+        observed_productive = torch.logsumexp(raw_group_values, dim=0)
+        if not bool(
+            torch.isclose(
+                observed_productive.detach(),
+                productive_log_probability[batch_index].detach(),
+                rtol=0.0,
+                atol=float(normalization_atol),
+            )
+        ):
+            raise SuccessorTrainingError(
+                "compiled productive and virtual coordinates do not exhaust mark mass"
+            )
+        successor_keys.append(tuple(group.target_key for group in partition.successor_groups))
+        successor_rows.append(raw_group_values - productive_log_probability[batch_index])
+
+    return FactorizedSuccessorPartitionPrediction(
+        successor_keys=tuple(successor_keys),
+        successor_log_probabilities=tuple(successor_rows),
+        productive_log_probability=productive_log_probability,
+        family_log_probabilities=family_log_probability,
+        enabled_families=enabled,
+    )
+
+
 def forward_teacher_successor_batch(
     model: FactorizedTraceletRateModel,
     batch: FactorizedMarkBatch,
@@ -597,65 +783,35 @@ def forward_teacher_successor_batch(
         raise ValueError("teacher-successor fibers must align with the batch")
     if state_supports is not None and len(state_supports) != batch.batch_size:
         raise ValueError("state productive supports must align with the batch")
-    nonterminal_flags = tuple(
-        float(value) > 0.0 for value in batch.teacher_rates.detach().cpu()
-    )
-    if batch.atom_types.device != model.device:
-        batch = batch.to(model.device)
-
-    node, global_state, pair = model._encode_batch(batch)
-    masks, logits, action_log_z = model._action_tables(
+    nonterminal_flags = tuple(float(value) > 0.0 for value in batch.teacher_rates.detach().cpu())
+    (
         batch,
-        node,
         global_state,
-        pair,
-    )
-    enabled = torch.isfinite(action_log_z)
-    has_legal_mark = enabled.any(dim=-1)
-    family_logits = _masked_family_logits(
-        model._family_base_logits(batch, global_state),
+        masks,
+        logits,
         action_log_z,
         enabled,
-        rate_factorization=model.rate_factorization,
-    )
-    family_log_probability = torch.log_softmax(family_logits, dim=-1)
+        family_log_probability,
+    ) = _factorized_action_probability_tables(model, batch)
+    has_legal_mark = enabled.any(dim=-1)
 
     selected = global_state.new_zeros(batch.batch_size)
     selected_productive = global_state.new_zeros(batch.batch_size)
     productive_log_probability = global_state.new_zeros(batch.batch_size)
     teacher_family_log_probability = global_state.new_zeros(batch.batch_size)
-    selected_within_teacher_family_log_probability = global_state.new_zeros(
-        batch.batch_size
-    )
+    selected_within_teacher_family_log_probability = global_state.new_zeros(batch.batch_size)
 
     def alias_log_probability(
         batch_index: int,
         alias: TeacherSuccessorAlias,
     ) -> tuple[Tensor, Tensor]:
-        family_index = MARK_RULE_TO_INDEX.get(alias.family_name)
-        if family_index is None:
-            raise SuccessorTrainingError(
-                f"teacher fiber references unknown family {alias.family_name!r}"
-            )
-        table_logits = logits.get(alias.table_name)
-        table_mask = masks.get(alias.table_name)
-        if table_logits is None or table_mask is None:
-            raise SuccessorTrainingError(
-                f"teacher fiber references unknown table {alias.table_name!r}"
-            )
-        key = (batch_index, *alias.coordinate)
-        try:
-            legal = table_mask[key]
-            raw_logit = table_logits[key]
-        except IndexError as error:
-            raise SuccessorTrainingError(
-                "teacher fiber coordinate lies outside the current action table"
-            ) from error
-        return (
-            family_log_probability[batch_index, family_index]
-            + raw_logit
-            - action_log_z[batch_index, family_index],
-            legal,
+        return _compiled_alias_log_probability(
+            batch_index=batch_index,
+            alias=alias,
+            masks=masks,
+            logits=logits,
+            action_log_z=action_log_z,
+            family_log_probability=family_log_probability,
         )
 
     for batch_index, fiber in enumerate(fibers):
@@ -670,9 +826,7 @@ def forward_teacher_successor_batch(
                 raise SuccessorTrainingError(
                     "terminal training row is missing productive state support"
                 )
-            observed_source_digest = persistent_slot_state_sha256(
-                batch.states[batch_index]
-            )
+            observed_source_digest = persistent_slot_state_sha256(batch.states[batch_index])
             if observed_source_digest != support.source_state_sha256:
                 raise SuccessorTrainingError(
                     "productive state support does not match the exact terminal batch state"
@@ -683,16 +837,12 @@ def forward_teacher_successor_batch(
                 raise SuccessorTrainingError(
                     "nonterminal training row is missing its teacher-successor fiber"
                 )
-            observed_source_digest = persistent_slot_state_sha256(
-                batch.states[batch_index]
-            )
+            observed_source_digest = persistent_slot_state_sha256(batch.states[batch_index])
             if observed_source_digest != fiber.state_support.source_state_sha256:
                 raise SuccessorTrainingError(
                     "teacher-successor fiber source does not match the exact batch state"
                 )
-            explicit_support = (
-                None if state_supports is None else state_supports[batch_index]
-            )
+            explicit_support = None if state_supports is None else state_supports[batch_index]
             if explicit_support is not None and explicit_support != fiber.state_support:
                 raise SuccessorTrainingError(
                     "explicit productive support disagrees with the teacher fiber"
@@ -803,9 +953,7 @@ def factorized_successor_bregman_loss(
     weights = batch.importance_weights.to(prediction.total_hazard.device)
     log_hazard = torch.log(prediction.total_hazard.clamp_min(1e-12))
     nonterminal = teacher_rates > 0
-    teacher_term = teacher_rates * (
-        log_hazard + prediction.selected_successor_log_probability
-    )
+    teacher_term = teacher_rates * (log_hazard + prediction.selected_successor_log_probability)
     per_example = prediction.productive_hazard - torch.where(
         nonterminal,
         teacher_term,
@@ -823,9 +971,7 @@ def factorized_successor_identity_loss(
     weights = batch.importance_weights.to(prediction.total_hazard.device)
     nonterminal = batch.teacher_rates.to(prediction.total_hazard.device) > 0
     if not bool(nonterminal.any()):
-        raise SuccessorTrainingError(
-            "successor-identity loss requires at least one molecular jump"
-        )
+        raise SuccessorTrainingError("successor-identity loss requires at least one molecular jump")
     selected_weights = weights[nonterminal]
     denominator = selected_weights.sum()
     if not bool(denominator > 0):
@@ -834,8 +980,7 @@ def factorized_successor_identity_loss(
         )
     return (
         -(
-            prediction.selected_productive_successor_log_probability[nonterminal]
-            * selected_weights
+            prediction.selected_productive_successor_log_probability[nonterminal] * selected_weights
         ).sum()
         / denominator
     )
@@ -863,6 +1008,7 @@ __all__ = [
     "CompiledStateSuccessorMap",
     "CompiledSuccessorMark",
     "FactorizedSuccessorPrediction",
+    "FactorizedSuccessorPartitionPrediction",
     "StateProductiveSupport",
     "SuccessorProcessRuntime",
     "SuccessorTrainingError",
@@ -874,6 +1020,7 @@ __all__ = [
     "factorized_hazard_bregman_loss",
     "factorized_successor_bregman_loss",
     "factorized_successor_identity_loss",
+    "forward_compiled_successor_partitions",
     "forward_teacher_successor_batch",
     "require_exact_successor_action_identity",
     "resolve_successor_process_runtime",
