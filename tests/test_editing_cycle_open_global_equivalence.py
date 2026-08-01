@@ -30,9 +30,9 @@ from compose_v4.experiments.editing_cycle_open_component_equivalence import (
 from compose_v4.experiments.editing_cycle_open_global_equivalence import (
     CycleOpenGlobalEquivalenceError,
     _audit_one_source,
+    assignment_product_cardinality,
     atomic_write_if_absent,
     load_contract,
-    prod_or_zero,
     validate_v1_receipt,
     validate_v1_result,
 )
@@ -167,6 +167,21 @@ def test_atomic_publication_reuses_identical_bytes_and_rejects_change(tmp_path) 
         atomic_write_if_absent(destination, b"second\n")
 
 
-def test_empty_component_product_is_not_an_alias_fiber() -> None:
-    assert prod_or_zero(()) == 0
-    assert prod_or_zero((2, 3, 2)) == 12
+def test_empty_component_product_contains_the_identity_assignment() -> None:
+    assert assignment_product_cardinality(()) == 1
+    assert assignment_product_cardinality((2, 3, 2)) == 12
+
+
+def test_source_without_semantic_aromatic_edges_reconciles_without_vacuous_evidence() -> (
+    None
+):
+    record = _audit_one_source(
+        smiles_to_molecular_graph("CCC"), maximum_assignments=4096
+    )
+    assert record["counts"]["semantic_aromatic_edge_count"] == 0
+    assert record["counts"]["complete_edge_comparison_count"] == 0
+    assert (
+        record["oracle_diagnostics"]["preserving_alias_count_on_completed_sources"] == 1
+    )
+    assert record["nonpassing_edge_records"] == []
+    assert all(record["reconciliations"].values())

@@ -556,7 +556,7 @@ def _audit_one_source(
             or (
                 global_result is not None
                 and global_result.diagnostics.preserving_alias_count
-                == prod_or_zero(
+                == assignment_product_cardinality(
                     tuple(len(component.bond_orders) for component in components)
                 )
             )
@@ -632,9 +632,9 @@ def _audit_one_source(
     return {**body, "source_record_sha256": semantic_sha256(body)}
 
 
-def prod_or_zero(values: tuple[int, ...]) -> int:
-    if not values:
-        return 0
+def assignment_product_cardinality(values: tuple[int, ...]) -> int:
+    """Return the Cartesian-product size, including one empty assignment."""
+
     result = 1
     for value in values:
         result *= value
@@ -852,7 +852,7 @@ __all__ = [
     "load_contract",
     "load_json",
     "pretty_json_bytes",
-    "prod_or_zero",
+    "assignment_product_cardinality",
     "runtime_identity",
     "validate_v1_receipt",
     "validate_v1_result",
