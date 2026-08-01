@@ -45,6 +45,7 @@ def _record():
     return encode_semantic_trace_record(
         trace,
         trace_id="fixture-1",
+        data_lane="reversible_synthetic_walk",
         split="development",
         source_address={"shard": "fixture", "row": 0},
         lineage={"kind": "programmatic_fixture"},

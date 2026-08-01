@@ -175,6 +175,10 @@ class PackedTraceProgress(TraceProgressCTMC):
             np.array_equal(endpoint.atom_types, target.atom_types)
             and np.array_equal(endpoint.bonds, target.bonds)
             and np.array_equal(endpoint.formal_charges, target.formal_charges)
+            and np.array_equal(
+                endpoint.implicit_h_counts,
+                target.implicit_h_counts,
+            )
         ):
             raise PackedStoreError("packed endpoint state does not equal the trace target")
 
@@ -291,15 +295,14 @@ def write_packed_shard(
         # different bytes for the same logical shard.  V2 immutable derivatives
         # opt into a stable header while legacy callers retain their historical
         # behavior.
-        with path.open("wb") as raw_handle:
-            with gzip.GzipFile(
-                filename="",
-                mode="wb",
-                fileobj=raw_handle,
-                mtime=0,
-            ) as compressed:
-                for entry in entries:
-                    compressed.write((json.dumps(entry, sort_keys=True) + "\n").encode("utf-8"))
+        with path.open("wb") as raw_handle, gzip.GzipFile(
+            filename="",
+            mode="wb",
+            fileobj=raw_handle,
+            mtime=0,
+        ) as compressed:
+            for entry in entries:
+                compressed.write((json.dumps(entry, sort_keys=True) + "\n").encode("utf-8"))
     else:
         with gzip.open(path, "wt") as handle:
             for entry in entries:

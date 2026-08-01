@@ -9,8 +9,10 @@ from typing import Any
 
 from compose_v4.rewrite.action_codec_v4 import (
     ACTIVE8_EXECUTOR_RULES,
-    SCHEMA_VERSION as ACTION_CODEC_SCHEMA_VERSION,
     codec_implementation_hash,
+)
+from compose_v4.rewrite.action_codec_v4 import (
+    SCHEMA_VERSION as ACTION_CODEC_SCHEMA_VERSION,
 )
 
 PROCESS_IDENTITY_SCHEMA = "compose.editing.semantic_process_identity"

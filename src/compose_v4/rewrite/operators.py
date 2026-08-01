@@ -14,16 +14,16 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
+    from compose_v4.rewrite.semantic_atom_restate import (
+        SemanticAtomRestateContext,
+        SemanticAtomRestateResolution,
+    )
     from compose_v4.rewrite.semantic_cycle_close import (
         SemanticCycleCloseContext,
         SemanticCycleCloseResolution,
     )
     from compose_v4.rewrite.semantic_cycle_open import (
         SemanticCycleOpenResolution,
-    )
-    from compose_v4.rewrite.semantic_atom_restate import (
-        SemanticAtomRestateContext,
-        SemanticAtomRestateResolution,
     )
 
 from compose_v4.chem.molecular_graph import (
@@ -33,11 +33,11 @@ from compose_v4.chem.molecular_graph import (
     BOND_SINGLE,
     BOND_TRIPLE,
     FORMAL_CHARGES,
-    M,
     MAX_H_COUNT,
-    MolecularGraph,
     NULL_IDX,
     SCAR_IDX,
+    M,
+    MolecularGraph,
     is_element,
 )
 from compose_v4.chem.state import is_valid_state
@@ -481,6 +481,12 @@ def is_valid_atom_insert(mg: MolecularGraph, op: AtomInsert) -> bool:
     return is_valid_state(apply_atom_insert(mg, op))
 
 
+def is_valid_editing_v2_atom_insert(mg: MolecularGraph, op: AtomInsert) -> bool:
+    """Editing-V2 birth supports only root or one-neighbor insertion."""
+
+    return len(tuple(op.neighbors)) <= 1 and is_valid_atom_insert(mg, op)
+
+
 def apply_atom_delete(mg: MolecularGraph, op: AtomDelete) -> MolecularGraph:
     atom_types = mg.atom_types.copy()
     formal_charges = mg.formal_charges.copy()
@@ -575,12 +581,11 @@ def enumerate_semantic_atom_restates(
 ) -> tuple[SemanticAtomRestate, ...]:
     """Enumerate every admitted productive semantic atom-restatement mark."""
 
+    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
+    from compose_v4.rewrite.kernel import canonical_state_key
     from compose_v4.rewrite.semantic_atom_restate import (
         prepare_semantic_atom_restate_context,
     )
-
-    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
-    from compose_v4.rewrite.kernel import canonical_state_key
 
     context = prepare_semantic_atom_restate_context(mg)
     source_key = context.source_key

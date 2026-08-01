@@ -13,8 +13,8 @@ import json
 from dataclasses import is_dataclass
 from typing import Any
 
-from compose_v4.rewrite import action_codec_v3 as v3
 from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
+from compose_v4.rewrite import action_codec_v3 as v3
 from compose_v4.rewrite.operators import CycleCloseEdge, SemanticAtomRestate
 
 SCHEMA = v3.SCHEMA
@@ -128,6 +128,10 @@ def encode_action(executor_rule: str, action: Any) -> dict[str, object]:
         return _encode_semantic_atom_restate(action)
     if executor_rule == SEMANTIC_CYCLE_CLOSE_RULE:
         return _encode_cycle_close(action)
+    if executor_rule == "atom_insert" and len(tuple(action.neighbors)) > 1:
+        raise ActionCodecV4Error(
+            "Editing-V2 atom insertion supports at most one existing neighbor"
+        )
     try:
         record = v3.encode_action(executor_rule, action)
     except v3.ActionCodecV3Error as error:
@@ -254,9 +258,14 @@ def decode_action(record: object) -> tuple[str, Any]:
         return _decode_cycle_close(value)
     translated = {**value, "schema_version": v3.SCHEMA_VERSION}
     try:
-        return v3.decode_action(translated)
+        decoded = v3.decode_action(translated)
     except v3.ActionCodecV3Error as error:
         raise ActionCodecV4Error(str(error)) from error
+    if executor_rule == "atom_insert" and len(tuple(decoded[1].neighbors)) > 1:
+        raise ActionCodecV4Error(
+            "Editing-V2 atom insertion supports at most one existing neighbor"
+        )
+    return decoded
 
 
 def canonical_json(record: dict[str, object]) -> str:

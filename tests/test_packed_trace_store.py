@@ -24,7 +24,7 @@ import pytest
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
-from compose_v4.data.packed_trace_store import (  # noqa: E402
+from compose_v4.data.packed_trace_store import (
     PackedStoreError,
     PackedTraceProgress,
     build_packed_entry,
@@ -35,9 +35,10 @@ from compose_v4.data.packed_trace_store import (  # noqa: E402
     unpack_path,
     write_packed_shard,
 )
-from compose_v4.experiments.analogue_prior import rewrite_trace_from_record  # noqa: E402
-from compose_v4.rewrite.kernel import canonical_state_key  # noqa: E402
-from compose_v4.rewrite.progress import TraceProgressCTMC  # noqa: E402
+from compose_v4.experiments.analogue_prior import rewrite_trace_from_record
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.progress import TraceProgressCTMC
+from compose_v4.rewrite.trace import RewriteTrace
 
 _FIXTURE = Path(__file__).resolve().parent / "fixtures/analogue_trace_pool_sample.jsonl"
 _FULL = Path(__file__).resolve().parent.parent / "diagnostics/composition/analogue_trace_pool.jsonl"
@@ -56,7 +57,7 @@ def _pairs(limit=25):
             continue
         try:
             trace = rewrite_trace_from_record(json.loads(line))
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S112
             continue
         replayed = TraceProgressCTMC(trace)
         out.append((replayed, unpack_path(trace, pack_path(replayed))))
@@ -85,7 +86,7 @@ def _write_address_fixture(
             continue
         try:
             trace = rewrite_trace_from_record(json.loads(line))
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S112
             continue
         replayed = TraceProgressCTMC(trace)
         entries.append(
@@ -200,6 +201,26 @@ def test_mismatched_endpoint_is_refused():
         unpack_path(path_a.trace, pack_path(path_b))
 
 
+def test_endpoint_implicit_h_mismatch_is_refused() -> None:
+    replayed, _ = _pairs(limit=1)[0]
+    target = replayed.trace.target
+    mismatched_target = type(target)(
+        atom_types=target.atom_types.copy(),
+        formal_charges=target.formal_charges.copy(),
+        implicit_h_counts=target.implicit_h_counts.copy(),
+        bonds=target.bonds.copy(),
+    )
+    mismatched_target.implicit_h_counts[0] += 1
+    trace = RewriteTrace(
+        source=replayed.trace.source,
+        target=mismatched_target,
+        steps=replayed.trace.steps,
+        metadata=replayed.trace.metadata,
+    )
+    with pytest.raises(PackedStoreError, match="endpoint state does not equal"):
+        PackedTraceProgress(trace, replayed.states)
+
+
 def test_roundtrip_through_a_written_shard(tmp_path):
     if not POOL.exists():
         pytest.skip("local analogue pool sample unavailable")
@@ -210,7 +231,7 @@ def test_roundtrip_through_a_written_shard(tmp_path):
     for record in records:
         try:
             trace = rewrite_trace_from_record(record)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S112
             continue
         replayed = TraceProgressCTMC(trace)
         expected.append(replayed)

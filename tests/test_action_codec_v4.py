@@ -4,16 +4,18 @@ from __future__ import annotations
 
 import pytest
 
+from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.rewrite import action_codec as v2
 from compose_v4.rewrite import action_codec_v3 as v3
 from compose_v4.rewrite import action_codec_v4 as v4
 from compose_v4.rewrite.kernel import (
     InvalidRewrite,
     canonical_state_key,
-    editing_v2_semantic_rewrite_system,
     editing_v2_semantic_cycle_rewrite_system,
+    editing_v2_semantic_rewrite_system,
 )
 from compose_v4.rewrite.operators import (
+    AtomInsert,
     AtomRestate,
     BondDelete,
     BondInsert,
@@ -21,9 +23,8 @@ from compose_v4.rewrite.operators import (
     CycleOpenEdge,
     SemanticAtomRestate,
 )
-from compose_v4.rewrite.trace import RewriteStep, execute_trace
 from compose_v4.rewrite.semantic_trace import invert_semantic_trace
-from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+from compose_v4.rewrite.trace import RewriteStep, execute_trace
 
 
 def test_cycle_close_round_trip_preserves_action_and_ontology() -> None:
@@ -108,6 +109,21 @@ def test_v4_codec_and_semantic_runtime_are_exact_active8_allowlists() -> None:
             v4.canonical_family(disabled)
         with pytest.raises(InvalidRewrite, match="unknown rewrite rule"):
             editing_v2_semantic_rewrite_system().apply(source, disabled, object())
+
+
+def test_v4_rejects_multi_neighbor_birth_from_codec_and_runtime() -> None:
+    source = smiles_to_molecular_graph("CC")
+    action = AtomInsert(
+        slot=2,
+        atom_type=2,
+        formal_charge=0,
+        implicit_h_count=2,
+        neighbors=((0, 1), (1, 1)),
+    )
+    with pytest.raises(v4.ActionCodecV4Error, match="at most one"):
+        v4.encode_action("atom_insert", action)
+    with pytest.raises(InvalidRewrite, match="invalid atom_insert"):
+        editing_v2_semantic_rewrite_system().apply(source, "atom_insert", action)
 
 
 @pytest.mark.parametrize(

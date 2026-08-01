@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable
+from typing import Any
 
 from compose_v4.chem.molecular_graph import MolecularGraph, molecular_graph_to_smiles
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
@@ -327,7 +328,7 @@ def editing_v2_semantic_rewrite_system(
             RewriteRule(
                 "atom_insert",
                 ops.AtomInsert,
-                ops.is_valid_atom_insert,
+                ops.is_valid_editing_v2_atom_insert,
                 ops.apply_atom_insert,
             ),
             RewriteRule(
