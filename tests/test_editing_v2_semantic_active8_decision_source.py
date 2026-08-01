@@ -23,6 +23,7 @@ from compose_v4.data import (
 )
 from compose_v4.data import editing_v2_semantic_active8_decision_source as source_index
 from compose_v4.data.editing_corpus_contract import (
+    ACTIVE8_FAMILIES,
     REQUIRED_DATA_LANES,
     REQUIRED_PARTITION_ROLES,
 )
@@ -71,6 +72,7 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedTraceletRateModel,
 )
+from compose_v4.experiments import editing_v2_semantic_gate_zero as semantic_gate_zero
 from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.operators import CycleCloseEdge
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
@@ -240,8 +242,8 @@ def _model() -> FactorizedTraceletRateModel:
     torch.manual_seed(19)
     return FactorizedTraceletRateModel(
         build_typed_ring_catalog(()),
-        hidden_dim=8,
-        message_passing_steps=1,
+        hidden_dim=256,
+        message_passing_steps=6,
         enable_ring_restates=True,
         enable_cyclic_graft=True,
         enable_heteroatom_scan=True,
@@ -258,11 +260,49 @@ def _model() -> FactorizedTraceletRateModel:
     ).eval()
 
 
-def _runtime_identity(_model: FactorizedTraceletRateModel) -> dict[str, object]:
+def _runtime_identity(model: FactorizedTraceletRateModel) -> dict[str, object]:
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract()
+    root = Path(__file__).resolve().parents[1]
+    decision_runtime = json.loads(
+        (root / contract.payload["parents"]["decision_runtime"]["path"]).read_text()
+    )
+    semantic_model = json.loads(
+        (
+            root / contract.payload["parents"]["semantic_model_process"]["path"]
+        ).read_text()
+    )
+    parameter_digest = hashlib.sha256()
+    for name, tensor in sorted(model.state_dict().items()):
+        array = tensor.detach().cpu().contiguous().numpy()
+        parameter_digest.update(name.encode("utf-8"))
+        parameter_digest.update(str(array.dtype).encode("ascii"))
+        parameter_digest.update(str(tuple(array.shape)).encode("ascii"))
+        parameter_digest.update(array.tobytes())
+    required = contract.payload["required_architecture"]
     body = {
-        "schema": "fixture.model_runtime",
+        "schema": "compose.data.semantic_active8_exact_model_runtime",
         "schema_version": 1,
-        "fixture": "semantic-active8-source",
+        "runtime_contract_sha256": decision_runtime["runtime_contract_sha256"],
+        "semantic_model_process_contract_sha256": semantic_model["contract_sha256"],
+        "semantic_model_identity": semantic_model["model_identity"],
+        "process_identity_sha256": semantic_model["process_identity_sha256"],
+        "architecture": {
+            "max_atoms": required["max_atoms"],
+            "hidden_dim": required["hidden_dim"],
+            "message_passing_steps": required["message_passing_steps"],
+            "mark_dim": required["mark_dim"],
+            "dtype": required["dtype"],
+            "parameter_dtypes": [required["dtype"]],
+            "atom_vocabulary_class_count": required["atom_vocabulary_class_count"],
+            "catalog_fingerprint": required["catalog_fingerprint"],
+            "operator_capability_fingerprint": semantic_model["model_identity"][
+                "operator_capability_fingerprint"
+            ],
+        },
+        "initialization_seed": required["initialization_seed"],
+        "initial_model_state_sha256": parameter_digest.hexdigest(),
+        "software": decision_runtime["software"],
+        "source_revision_sha256": _value_sha({"fixture": "semantic-active8-source"}),
     }
     return {**body, "identity_sha256": _value_sha(body)}
 
@@ -642,6 +682,50 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
 
     with pytest.raises(ValueError, match="cached decision plan"):
         replace(index, _decision_plan_bytes=b'{"tampered":true}\n')
+
+
+def test_semantic_gate_zero_consumes_real_index_without_held_out_rescue(
+    completed_source,
+    monkeypatch,
+) -> None:
+    inventory = completed_source["inventory"]
+    _patch_migration_resolver(monkeypatch, inventory)
+    index = _resolve(completed_source)
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(
+        repo_root=Path.cwd()
+    )
+    evidence = semantic_gate_zero.build_semantic_gate_zero_structural_evidence(
+        index,
+        decision_plan_path=completed_source["decision_plan_path"],
+        contract=contract,
+        repo_root=Path.cwd(),
+    )
+    assert evidence["structural_result"] == "FAIL"
+    assert evidence["counts"]["accepted_traces"] == 19
+    assert evidence["counts"]["excluded_traces"] == 1
+    assert evidence["counts"]["decision_eligible_accepted_traces"] == 4
+    assert evidence["counts"]["decision_eligible_actions"] == 4
+    assert evidence["counts"]["structural_assignments"] == 4
+    assert evidence["decision_eligible_teacher_counts_by_family"]["cycle_insert"] == 4
+    assert all(
+        evidence["decision_eligible_teacher_counts_by_family"][family] == 0
+        for family in ACTIVE8_FAMILIES
+        if family != "cycle_insert"
+    )
+    assert set(evidence["sealed_nondecision_role_inventory_sha256"]) == {
+        "controller_validation",
+        "final_test",
+        "validation",
+    }
+    decision = semantic_gate_zero.structural_decision_from_evidence(
+        evidence,
+        index=index,
+        contract=contract,
+        decision_plan_path=completed_source["decision_plan_path"],
+        repo_root=Path.cwd(),
+    )
+    assert decision["structural_result"] == "FAIL"
+    assert decision["next_authorized_stage"] is None
 
 
 def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
