@@ -47,6 +47,15 @@ class SuccessorTrainingError(RuntimeError):
     """A teacher fiber or differentiable score is inconsistent with production."""
 
 
+@dataclass(frozen=True)
+class SuccessorProcessRuntime:
+    """Executor and action-codec coordinates selected by model semantics."""
+
+    system: RewriteSystem
+    action_codec_schema_version: int
+    editing_process_semantics: str
+
+
 @dataclass(frozen=True, order=True)
 class TeacherSuccessorAlias:
     """One factorized table coordinate in a teacher-successor fiber."""
@@ -137,9 +146,9 @@ class CanonicalSuccessorAliasGroup:
     """Static enumerated marks for one canonical molecular successor.
 
     Each entry associates the factorized table coordinate, full canonical
-    RewriteActionCodecV2 JSON SHA-256, and exact persistent-slot executor
-    output.  The group carries no model score, probability, rate, weight, or
-    time value and is discarded after cache-row projection.
+    model-selected action-codec JSON SHA-256, and exact persistent-slot
+    executor output.  The group carries no model score, probability, rate,
+    weight, or time value and is discarded after cache-row projection.
     """
 
     target_key: str
@@ -308,6 +317,62 @@ def _uses_semantic_editing_process(model: FactorizedTraceletRateModel) -> bool:
     return model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS
 
 
+def _rewrite_system_signature(system: RewriteSystem) -> tuple[object, ...]:
+    """Return an in-process exact signature for a rewrite-system instance."""
+
+    if not isinstance(system, RewriteSystem):
+        raise TypeError("successor compilation system must be RewriteSystem")
+    rules = tuple(
+        (
+            name,
+            rule.action_type,
+            rule.validate,
+            rule.execute,
+        )
+        for name, rule in sorted(system.rules.items())
+    )
+    return rules, tuple(system.constraints)
+
+
+def resolve_successor_process_runtime(
+    model: FactorizedTraceletRateModel,
+    *,
+    system: RewriteSystem | None = None,
+) -> SuccessorProcessRuntime:
+    """Select executor and codec only from the model's process semantics.
+
+    An explicit system is accepted solely when its complete rule and constraint
+    signature equals the system implied by the model.  This keeps test oracles
+    injectable without permitting a semantic Editing-V2 model to be compiled
+    through the legacy de-novo executor.
+    """
+
+    if not isinstance(model, FactorizedTraceletRateModel):
+        raise TypeError("successor compilation requires FactorizedTraceletRateModel")
+    semantic_editing_process = _uses_semantic_editing_process(model)
+    expected_system = (
+        editing_v2_semantic_rewrite_system()
+        if semantic_editing_process
+        else de_novo_rewrite_system()
+    )
+    selected_system = expected_system if system is None else system
+    if _rewrite_system_signature(selected_system) != _rewrite_system_signature(
+        expected_system
+    ):
+        raise SuccessorTrainingError(
+            "explicit successor executor disagrees with model process semantics"
+        )
+    return SuccessorProcessRuntime(
+        system=selected_system,
+        action_codec_schema_version=(
+            action_codec_v4.SCHEMA_VERSION
+            if semantic_editing_process
+            else action_codec_v2.SCHEMA_VERSION
+        ),
+        editing_process_semantics=model.editing_process_semantics,
+    )
+
+
 def compile_state_successor_map(
     model: FactorizedTraceletRateModel,
     source: MolecularGraph,
@@ -317,17 +382,9 @@ def compile_state_successor_map(
 ) -> CompiledStateSuccessorMap:
     """Execute and group every legal mark once for one exact source state."""
 
-    semantic_editing_process = _uses_semantic_editing_process(model)
-    runtime = system or (
-        editing_v2_semantic_rewrite_system()
-        if semantic_editing_process
-        else de_novo_rewrite_system()
-    )
-    action_codec_version = (
-        action_codec_v4.SCHEMA_VERSION
-        if semantic_editing_process
-        else action_codec_v2.SCHEMA_VERSION
-    )
+    process = resolve_successor_process_runtime(model, system=system)
+    runtime = process.system
+    action_codec_version = process.action_codec_schema_version
     try:
         marked_law = enumerate_factorized_marked_law(model, source, float(time))
     except ProductionSuccessorKernelError as error:
@@ -807,6 +864,7 @@ __all__ = [
     "CompiledSuccessorMark",
     "FactorizedSuccessorPrediction",
     "StateProductiveSupport",
+    "SuccessorProcessRuntime",
     "SuccessorTrainingError",
     "TeacherSuccessorAlias",
     "TeacherSuccessorFiber",
@@ -818,6 +876,7 @@ __all__ = [
     "factorized_successor_identity_loss",
     "forward_teacher_successor_batch",
     "require_exact_successor_action_identity",
+    "resolve_successor_process_runtime",
     "rewrite_action_codec_sha256",
     "teacher_successor_fiber_from_compiled_state",
     "teacher_successor_fiber_from_exact_digest",

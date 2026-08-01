@@ -24,13 +24,14 @@ from compose_v4.experiments.factorized_successor_training import (
     SuccessorTrainingError,
     compile_state_successor_map,
     require_exact_successor_action_identity,
+    resolve_successor_process_runtime,
     rewrite_action_codec_sha256,
     teacher_successor_fiber_from_exact_digest,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
 )
-from compose_v4.rewrite.kernel import RewriteSystem, de_novo_rewrite_system
+from compose_v4.rewrite.kernel import RewriteSystem
 from compose_v4.rewrite.trace import RewriteStep
 
 
@@ -77,8 +78,7 @@ def _record_occurrences(
         )
 
     states = tuple(
-        path.state_at(progress_index)
-        for progress_index in range(path.path_length + 1)
+        path.state_at(progress_index) for progress_index in range(path.path_length + 1)
     )
     digests = tuple(persistent_slot_state_sha256(state) for state in states)
     if persistent_slot_state_sha256(path.trace.source) != digests[0]:
@@ -109,13 +109,9 @@ def _record_occurrences(
                 address,
                 progress_index=progress_index,
             ),
-            packed_source_key=(
-                address.source_key if progress_index == 0 else None
-            ),
+            packed_source_key=(address.source_key if progress_index == 0 else None),
             packed_target_key=(
-                address.target_key
-                if progress_index == path.path_length
-                else None
+                address.target_key if progress_index == path.path_length else None
             ),
         )
         for progress_index, source in enumerate(states)
@@ -131,12 +127,11 @@ def _compile_occurrences(
 ) -> tuple[SuccessorFiberCacheRecord, ...]:
     """Compile each exact source once and discard its complete map after use."""
 
-    runtime = system or de_novo_rewrite_system()
+    process = resolve_successor_process_runtime(model, system=system)
+    runtime = process.system
     grouped: dict[str, list[_ProgressOccurrence]] = {}
     for occurrence in occurrences:
-        grouped.setdefault(occurrence.source_state_sha256, []).append(
-            occurrence
-        )
+        grouped.setdefault(occurrence.source_state_sha256, []).append(occurrence)
 
     rows: list[SuccessorFiberCacheRecord | None] = [None] * len(occurrences)
     for source_digest, state_occurrences in grouped.items():
@@ -224,6 +219,7 @@ def _compile_occurrences(
                     teacher_action_sha256 = rewrite_action_codec_sha256(
                         occurrence.teacher_step.rule_name,
                         occurrence.teacher_step.action,
+                        schema_version=process.action_codec_schema_version,
                     )
                 except SuccessorTrainingError as error:
                     raise SuccessorFiberCacheBuildError(
@@ -365,21 +361,14 @@ def compile_successor_fiber_shard(
 
     materialized = tuple(records)
     if not materialized:
-        raise SuccessorFiberCacheBuildError(
-            "successor-fiber shard cannot be empty"
-        )
-    if (
-        type(expected_packed_entry_count) is not int
-        or expected_packed_entry_count <= 0
-    ):
+        raise SuccessorFiberCacheBuildError("successor-fiber shard cannot be empty")
+    if type(expected_packed_entry_count) is not int or expected_packed_entry_count <= 0:
         raise ValueError("expected_packed_entry_count must be positive")
     if (
         not isinstance(excluded_entry_indices, tuple)
-        or excluded_entry_indices
-        != tuple(sorted(set(excluded_entry_indices)))
+        or excluded_entry_indices != tuple(sorted(set(excluded_entry_indices)))
         or any(
-            type(index) is not int
-            or not 0 <= index < expected_packed_entry_count
+            type(index) is not int or not 0 <= index < expected_packed_entry_count
             for index in excluded_entry_indices
         )
     ):

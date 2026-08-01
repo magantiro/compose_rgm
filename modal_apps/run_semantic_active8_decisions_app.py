@@ -165,7 +165,6 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
     source_root = str(Path(remote_root) / "src")
     if source_root not in sys.path:
         sys.path.insert(0, source_root)
-    from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
     from compose_v4.data.editing_v2_semantic_active8_admission import (
         ProductionSemanticExactCandidateChecker,
     )
@@ -182,23 +181,20 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
     from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
         reduce_semantic_active8_chunk_caches,
     )
-    from compose_v4.experiments.editing_gate_zero_runtime import (
-        build_production_ringcore_catalog,
-    )
     from compose_v4.experiments.editing_gate_zero_semantic_contract import (
         load_gate_zero_semantic_contract,
     )
     from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
-    from compose_v4.model.factorized_tracelet_rate_model import (
-        FactorizedTraceletRateModel,
+    from compose_v4.experiments.editing_v2_semantic_runtime import (
+        SemanticScratchModelConfig,
+        build_semantic_scratch_runtime,
     )
     from compose_v4.rewrite.typed_ring_catalog import ring_catalog_fingerprint
 
     return {
-        "ORGANIC_VOCABULARY": ORGANIC_VOCABULARY,
         "ProductionSemanticExactCandidateChecker": ProductionSemanticExactCandidateChecker,
-        "FactorizedTraceletRateModel": FactorizedTraceletRateModel,
-        "build_production_ringcore_catalog": build_production_ringcore_catalog,
+        "SemanticScratchModelConfig": SemanticScratchModelConfig,
+        "build_semantic_scratch_runtime": build_semantic_scratch_runtime,
         "ring_catalog_fingerprint": ring_catalog_fingerprint,
         "load_gate_zero_semantic_contract": load_gate_zero_semantic_contract,
         "state_dict_semantic_sha256": state_dict_semantic_sha256,
@@ -426,34 +422,20 @@ def build_exact_semantic_model(
     import torch
 
     config = runtime["model"]
-    identity = semantic.payload["model_identity"]
-    torch.manual_seed(int(config["initialization_seed"]))
-    catalog = loaded["build_production_ringcore_catalog"](
-        max_atoms=int(config["max_atoms"])
-    )
-    model = (
-        loaded["FactorizedTraceletRateModel"](
-            catalog,
+    scratch = loaded["build_semantic_scratch_runtime"](
+        loaded["SemanticScratchModelConfig"](
+            initialization_seed=int(config["initialization_seed"]),
+            max_atoms=int(config["max_atoms"]),
             hidden_dim=int(config["hidden_dim"]),
             message_passing_steps=int(config["message_passing_steps"]),
             mark_dim=int(config["mark_dim"]),
-            enable_ring_restates=True,
-            enable_cyclic_graft=True,
-            enable_heteroatom_scan=True,
-            enable_ring_opening=True,
-            enable_cycle_ops=True,
-            editing_process_semantics=identity["editing_process_semantics"],
-            atom_restate_action_semantics=identity["atom_restate_action_semantics"],
-            ring_restate_scorer_mode=identity["ring_restate_scorer_mode"],
-            cycle_close_action_semantics=identity["cycle_close_action_semantics"],
-            cycle_open_action_semantics=identity["cycle_open_action_semantics"],
-            enable_ring_grow_macro=False,
-            enable_ring_system_delete=False,
-            atom_vocabulary=loaded["ORGANIC_VOCABULARY"],
-        )
-        .to(dtype=torch.float32)
-        .eval()
+            dtype=str(config["dtype"]),
+            atom_vocabulary_class_count=int(config["atom_vocabulary_class_count"]),
+            catalog_fingerprint=str(config["catalog_fingerprint"]),
+        ),
+        semantic,
     )
+    model = scratch.model
     with torch.inference_mode():
         runtime_identity = _model_runtime_identity(
             model,
@@ -461,6 +443,20 @@ def build_exact_semantic_model(
             semantic=semantic,
             source_revision=source_revision,
             loaded=loaded,
+        )
+    if (
+        runtime_identity["initial_model_state_sha256"]
+        != scratch.initial_model_state_sha256
+        or runtime_identity["architecture"] != scratch.architecture.as_payload()
+        or runtime_identity["semantic_model_identity"]
+        != scratch.semantic_model_identity
+        or runtime_identity["semantic_model_process_contract_sha256"]
+        != scratch.semantic_model_process_contract_sha256
+        or runtime_identity["process_identity_sha256"]
+        != scratch.process_identity_sha256
+    ):
+        raise RuntimeError(
+            "shared semantic scratch runtime differs from decision runtime identity"
         )
     return model, runtime_identity
 

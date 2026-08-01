@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 import torch
@@ -12,6 +14,8 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.packed_trace_store import PackedTraceAddress
+from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.cycle_open_kekule_invariance import (
     build_alternate_kekule_pair,
 )
@@ -22,23 +26,34 @@ from compose_v4.experiments.factorized_mark_conditional import (
     _concatenate_factorized_mark_batches,
     factorized_mark_metrics,
 )
-from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_successor_training import (
+    SuccessorTrainingError,
     compile_state_successor_map,
+    factorized_successor_identity_loss,
+    forward_teacher_successor_batch,
+    resolve_successor_process_runtime,
 )
 from compose_v4.experiments.production_successor_kernel import (
     canonical_successor_result,
 )
+from compose_v4.experiments.quotient_invariance import permute_persistent_slots
 from compose_v4.experiments.reference_successor_kernel import (
     compare_against_reference,
     reference_successor_batch,
 )
-from compose_v4.experiments.quotient_invariance import permute_persistent_slots
+from compose_v4.experiments.successor_fiber_cache_builder import (
+    compile_successor_fiber_trace_union,
+)
+from compose_v4.experiments.successor_micro_overfit import (
+    SuccessorSupervisionExample,
+    prepare_cached_successor_panel,
+)
 from compose_v4.model.factorized_tracelet_rate_model import (
-    LEGACY_RING_RESTATE_SCORER_MODE,
-    SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
     LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    LEGACY_EDITING_PROCESS_SEMANTICS,
+    LEGACY_RING_RESTATE_SCORER_MODE,
+    SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
     SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
@@ -47,7 +62,9 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     prepare_factorized_mark_batch,
 )
 from compose_v4.rewrite.kernel import (
+    RewriteSystem,
     canonical_state_key,
+    de_novo_rewrite_system,
     editing_v2_semantic_rewrite_system,
 )
 from compose_v4.rewrite.operators import (
@@ -59,9 +76,9 @@ from compose_v4.rewrite.operators import (
     enumerate_cycle_open_edges,
     enumerate_semantic_atom_restates,
 )
-from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 from compose_v4.rewrite.progress import TraceProgressCTMC
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 _SLOTS = 16
@@ -544,4 +561,226 @@ def test_alternate_kekule_sources_have_same_semantic_molecular_kernel(
         original_probabilities,
         alternate_probabilities,
         tolerance=2e-7,
+    )
+
+
+def _addressed_semantic_record(
+    *,
+    entry_index: int,
+    source_smiles: str,
+    rule_name: str,
+    action,
+) -> PathRecord:
+    runtime = editing_v2_semantic_rewrite_system()
+    source = _state(source_smiles)
+    target = runtime.apply(source, rule_name, action)
+    trace = RewriteTrace(
+        source=source,
+        target=target,
+        steps=(RewriteStep(rule_name, action),),
+        metadata={},
+    )
+    address = PackedTraceAddress(
+        packed_shard_content_sha256="a" * 64,
+        packed_shard_name="validation_semantic_0000.jsonl.gz",
+        entry_index=entry_index,
+        trace_id=f"semantic-trace-{entry_index}",
+        layer="operator_aware_real_endpoint",
+        partition="validation",
+        source_key=canonical_state_key(source),
+        target_key=canonical_state_key(target),
+        path_length=1,
+    )
+    return PathRecord(
+        target_key=address.target_key,
+        path=TraceProgressCTMC(trace, system=runtime),
+        corpus_address=address,
+    )
+
+
+def _semantic_cache_records() -> tuple[PathRecord, ...]:
+    atom_restate_source = _state("CO")
+    cycle_close_source = _state("CCCC")
+    cycle_open_source = _state("C1CCCCC1")
+    return (
+        _addressed_semantic_record(
+            entry_index=0,
+            source_smiles="CO",
+            rule_name="atom_restate_semantic",
+            action=enumerate_semantic_atom_restates(atom_restate_source)[0],
+        ),
+        _addressed_semantic_record(
+            entry_index=1,
+            source_smiles="CCCC",
+            rule_name="cycle_close",
+            action=enumerate_cycle_close_edges(cycle_close_source)[0],
+        ),
+        _addressed_semantic_record(
+            entry_index=2,
+            source_smiles="C1CCCCC1",
+            rule_name="cycle_open",
+            action=enumerate_cycle_open_edges(cycle_open_source)[0],
+        ),
+    )
+
+
+def test_trace_union_cache_uses_semantic_executor_and_action_v4(
+    semantic_model,
+    monkeypatch,
+) -> None:
+    import compose_v4.experiments.successor_fiber_cache_builder as cache_builder
+
+    observed_schema_versions: list[int | None] = []
+    original_hash = cache_builder.rewrite_action_codec_sha256
+
+    def record_schema_version(rule_name, action, *, schema_version=None):
+        observed_schema_versions.append(schema_version)
+        return original_hash(
+            rule_name,
+            action,
+            schema_version=schema_version,
+        )
+
+    monkeypatch.setattr(
+        cache_builder,
+        "rewrite_action_codec_sha256",
+        record_schema_version,
+    )
+    records = _semantic_cache_records()
+    compiled = compile_successor_fiber_trace_union(semantic_model, records)
+    nonterminal = tuple(row for row in compiled if not row.address.is_terminal)
+
+    assert observed_schema_versions == [4, 4, 4]
+    assert len(compiled) == 6
+    assert len(nonterminal) == 3
+    expected_families = ("atom_restate", "cycle_insert", "cycle_attach")
+    for row, expected_family in zip(nonterminal, expected_families, strict=True):
+        assert row.teacher_fiber is not None
+        assert expected_family in {
+            alias.family_name for alias in row.teacher_fiber.aliases
+        }
+
+
+def test_semantic_successor_compiler_rejects_legacy_executor(
+    semantic_model,
+) -> None:
+    semantic_runtime = resolve_successor_process_runtime(
+        semantic_model,
+        system=editing_v2_semantic_rewrite_system(),
+    )
+    assert semantic_runtime.action_codec_schema_version == 4
+    with pytest.raises(
+        SuccessorTrainingError,
+        match="executor disagrees with model process semantics",
+    ):
+        resolve_successor_process_runtime(
+            semantic_model,
+            system=de_novo_rewrite_system(),
+        )
+
+
+def test_cached_panel_forwards_semantic_modes_and_rejects_legacy_batch(
+    semantic_model,
+) -> None:
+    records = _semantic_cache_records()
+    cache = compile_successor_fiber_trace_union(semantic_model, records)
+    fibers = tuple(row.teacher_fiber for row in cache if not row.address.is_terminal)
+    assert all(fiber is not None for fiber in fibers)
+    family_by_rule = {
+        "atom_restate_semantic": "atom_restate",
+        "cycle_close": "cycle_insert",
+        "cycle_open": "cycle_attach",
+    }
+    examples = tuple(
+        SuccessorSupervisionExample(
+            family_name=family_by_rule[record.path.trace.steps[0].rule_name],
+            state=record.path.state_at(0),
+            target=record.path.state_at(1),
+            teacher_rule_name=record.path.trace.steps[0].rule_name,
+            teacher_action=record.path.trace.steps[0].action,
+        )
+        for record in records
+    )
+    panel = prepare_cached_successor_panel(
+        semantic_model,
+        examples,
+        tuple(fiber for fiber in fibers if fiber is not None),
+    )
+    capabilities = semantic_model.operator_capabilities
+    assert (
+        panel.batch.editing_process_semantics == capabilities.editing_process_semantics
+    )
+    assert (
+        panel.batch.atom_restate_action_semantics
+        == capabilities.atom_restate_action_semantics
+    )
+    assert panel.batch.ring_restate_scorer_mode == capabilities.ring_restate_scorer_mode
+    assert (
+        panel.batch.cycle_close_action_semantics
+        == capabilities.cycle_close_action_semantics
+    )
+    assert (
+        panel.batch.cycle_open_action_semantics
+        == capabilities.cycle_open_action_semantics
+    )
+
+    legacy_batch = replace(
+        panel.batch,
+        editing_process_semantics=LEGACY_EDITING_PROCESS_SEMANTICS,
+    )
+    with pytest.raises(
+        ValueError, match="batch/model editing process semantics disagree"
+    ):
+        semantic_model.forward_mark_batch(legacy_batch)
+
+
+def test_cached_coordinate_training_does_not_execute_chemistry(
+    semantic_model,
+    monkeypatch,
+) -> None:
+    records = _semantic_cache_records()
+    cache = compile_successor_fiber_trace_union(semantic_model, records)
+    fibers = tuple(
+        row.teacher_fiber
+        for row in cache
+        if not row.address.is_terminal and row.teacher_fiber is not None
+    )
+    family_by_rule = {
+        "atom_restate_semantic": "atom_restate",
+        "cycle_close": "cycle_insert",
+        "cycle_open": "cycle_attach",
+    }
+    examples = tuple(
+        SuccessorSupervisionExample(
+            family_name=family_by_rule[record.path.trace.steps[0].rule_name],
+            state=record.path.state_at(0),
+            target=record.path.state_at(1),
+            teacher_rule_name=record.path.trace.steps[0].rule_name,
+            teacher_action=record.path.trace.steps[0].action,
+        )
+        for record in records
+    )
+    panel = prepare_cached_successor_panel(semantic_model, examples, fibers)
+
+    def forbid_executor(*_args, **_kwargs):
+        raise AssertionError("GPU coordinate scoring called the chemistry executor")
+
+    monkeypatch.setattr(RewriteSystem, "apply", forbid_executor)
+    semantic_model.zero_grad(set_to_none=True)
+    prediction = forward_teacher_successor_batch(
+        semantic_model,
+        panel.batch.to(semantic_model.device),
+        panel.fibers,
+    )
+    loss = factorized_successor_identity_loss(
+        prediction,
+        panel.batch.to(semantic_model.device),
+    )
+    loss.backward()
+    assert bool(torch.isfinite(loss))
+    assert any(
+        parameter.grad is not None
+        and bool(torch.isfinite(parameter.grad).all())
+        and bool(torch.count_nonzero(parameter.grad))
+        for parameter in semantic_model.parameters()
     )
