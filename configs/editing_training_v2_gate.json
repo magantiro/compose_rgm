@@ -26,7 +26,10 @@
   "dependencies": {
     "corpus_contract": "configs/editing_corpus_v2_contract.json",
     "accuracy_architecture_audit": "docs/RINGCORE_V1_ACCURACY_AND_ARCHITECTURE_AUDIT_2026-07-30.md",
-    "checkpoint_inventory": "diagnostics/coherence/ringcore_v1_scientific_a7546e2_frozen_inventory.json"
+    "checkpoint_inventory": "diagnostics/coherence/ringcore_v1_scientific_a7546e2_frozen_inventory.json",
+    "semantic_t1_capacity_policy": "configs/editing_v2_semantic_t1_capacity_policy_v1.json",
+    "semantic_t1_capacity_policy_file_sha256": "1f0cde3b3cfc942e90a715b61431526e8d99e26c27885022b71402d1bb353a62",
+    "semantic_t1_capacity_policy_sha256": "f300a5b4b93f4157976f5031d59c5b55f6a8dd47749d4aff8f289ea915e14402"
   },
   "metric_contract": {
     "primary": [
@@ -87,8 +90,14 @@
       "path_length",
       "data_lane"
     ],
-    "unique_state_deterministic_panels_required": true,
-    "repeated_state_distribution_panels_required": true
+    "unique_state_deterministic_panels_required_before_p50": true,
+    "repeated_state_empirical_law_panel": {
+      "status": "CONDITIONAL_ON_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS",
+      "bounded_p50_capacity_prerequisite": false,
+      "raw_record_multiplicity_is_observation_count": false,
+      "mark_alias_multiplicity_is_observation_count": false,
+      "required_for_empirical_law_claims": true
+    }
   },
   "gates": [
     {
@@ -129,15 +138,14 @@
       "requirements": [
         "every_required_slice_has_finite_nonzero_gradients",
         "unique_state_panels_memorize_canonical_successor",
-        "repeated_state_panels_fit_empirical_successor_distribution",
+        "repeated_state_empirical_law_fit_requires_verified_observation_receipts",
         "family_mass_and_within_family_successor_metrics_both_reported",
         "high_candidate_and_aliased_states_included"
       ],
       "numeric_thresholds": {
-        "minimum_unique_state_teacher_successor_top1": null,
-        "minimum_unique_state_teacher_successor_probability": null,
-        "maximum_unique_state_teacher_successor_nll": null,
-        "maximum_repeated_state_excess_nll_over_empirical_entropy": null
+        "minimum_unique_state_teacher_successor_top1": 0.95,
+        "minimum_unique_state_teacher_successor_probability": 0.8,
+        "maximum_unique_state_teacher_successor_nll": 0.22314355131420976
       }
     },
     {

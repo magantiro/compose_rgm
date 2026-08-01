@@ -80,6 +80,16 @@ def test_bounded_pilot_requires_exact_active_eight_without_production_promotion(
         "required_semantic_slices"
     ]
     assert contract["development_panels"]["conditional_slices"] == []
+    assert contract["development_panels"][
+        "unique_state_deterministic_panels_required_before_p50"
+    ] is True
+    empirical = contract["development_panels"][
+        "repeated_state_empirical_law_panel"
+    ]
+    assert empirical["bounded_p50_capacity_prerequisite"] is False
+    assert empirical["raw_record_multiplicity_is_observation_count"] is False
+    assert empirical["mark_alias_multiplicity_is_observation_count"] is False
+    assert empirical["required_for_empirical_law_claims"] is True
 
     for mutation in ("missing_restate", "enable_delete", "promote_production"):
         broken = copy.deepcopy(contract)
@@ -112,6 +122,57 @@ def test_test_partition_cannot_select_checkpoint() -> None:
     broken = copy.deepcopy(contract)
     broken["checkpoint_selection"]["partition"] = "test"
     with pytest.raises(EditingTrainingGateError, match="validation only"):
+        validate_editing_training_gate(broken)
+
+
+def test_repeated_state_counts_cannot_be_fabricated_for_t1() -> None:
+    contract = load_editing_training_gate(CONTRACT_PATH)
+    for field in (
+        "bounded_p50_capacity_prerequisite",
+        "raw_record_multiplicity_is_observation_count",
+        "mark_alias_multiplicity_is_observation_count",
+    ):
+        broken = copy.deepcopy(contract)
+        broken["development_panels"]["repeated_state_empirical_law_panel"][
+            field
+        ] = True
+        with pytest.raises(EditingTrainingGateError, match="observation receipts"):
+            validate_editing_training_gate(broken)
+
+    broken = copy.deepcopy(contract)
+    t1 = next(
+        gate
+        for gate in broken["gates"]
+        if gate["id"] == "T1_true_successor_micro_overfit"
+    )
+    t1["requirements"][1] = "repeated_state_panels_fit_raw_duplicate_frequency"
+    with pytest.raises(EditingTrainingGateError, match="separate unique-state"):
+        validate_editing_training_gate(broken)
+
+
+def test_t1_unique_state_thresholds_are_frozen_before_results() -> None:
+    contract = load_editing_training_gate(CONTRACT_PATH)
+    t1 = next(
+        gate
+        for gate in contract["gates"]
+        if gate["id"] == "T1_true_successor_micro_overfit"
+    )
+    assert t1["numeric_thresholds"] == {
+        "minimum_unique_state_teacher_successor_top1": 0.95,
+        "minimum_unique_state_teacher_successor_probability": 0.8,
+        "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+    }
+
+    broken = copy.deepcopy(contract)
+    broken["gates"][2]["numeric_thresholds"][
+        "minimum_unique_state_teacher_successor_probability"
+    ] = None
+    with pytest.raises(EditingTrainingGateError, match="thresholds must be frozen"):
+        validate_editing_training_gate(broken)
+
+    broken = copy.deepcopy(contract)
+    broken["dependencies"]["semantic_t1_capacity_policy_sha256"] = "0" * 64
+    with pytest.raises(EditingTrainingGateError, match="exact prospective"):
         validate_editing_training_gate(broken)
 
 

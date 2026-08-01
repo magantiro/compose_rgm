@@ -62,6 +62,32 @@ BOUNDED_PILOT_DISABLED_FAMILIES = (
     "ring_system_grow",
 )
 BOUNDED_PILOT_SCOPE = "gate0_t1_p50_development_only"
+REPEATED_EMPIRICAL_LAW_STATUS = (
+    "CONDITIONAL_ON_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS"
+)
+REQUIRED_T1_CAPACITY_REQUIREMENTS = {
+    "every_required_slice_has_finite_nonzero_gradients",
+    "unique_state_panels_memorize_canonical_successor",
+    "repeated_state_empirical_law_fit_requires_verified_observation_receipts",
+    "family_mass_and_within_family_successor_metrics_both_reported",
+    "high_candidate_and_aliased_states_included",
+}
+EXPECTED_T1_CAPACITY_THRESHOLDS = {
+    "minimum_unique_state_teacher_successor_top1": 0.95,
+    "minimum_unique_state_teacher_successor_probability": 0.8,
+    "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+}
+EXPECTED_T1_CAPACITY_POLICY = {
+    "semantic_t1_capacity_policy": (
+        "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
+    ),
+    "semantic_t1_capacity_policy_file_sha256": (
+        "1f0cde3b3cfc942e90a715b61431526e8d99e26c27885022b71402d1bb353a62"
+    ),
+    "semantic_t1_capacity_policy_sha256": (
+        "f300a5b4b93f4157976f5031d59c5b55f6a8dd47749d4aff8f289ea915e14402"
+    ),
+}
 P50_PREREQUISITE_EVIDENCE_FIELDS = (
     "frozen_source_corpus_inventory_sha256",
     "gate_zero_structural_evidence_sha256",
@@ -123,6 +149,14 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         raise EditingTrainingGateError("unexpected editing-training schema version")
     if type(contract.get("bounded_p50_authorized")) is not bool:
         raise EditingTrainingGateError("bounded_p50_authorized must be an explicit Boolean")
+    dependencies = contract.get("dependencies")
+    if not isinstance(dependencies, dict) or any(
+        dependencies.get(field) != expected
+        for field, expected in EXPECTED_T1_CAPACITY_POLICY.items()
+    ):
+        raise EditingTrainingGateError(
+            "editing training gate must bind the exact prospective semantic T1 policy"
+        )
 
     operator_freeze = contract.get("bounded_pilot_operator_freeze")
     expected_operator_freeze_fields = {
@@ -154,6 +188,29 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         raise EditingTrainingGateError(
             "ring-system restate must be a required bounded-pilot slice, not "
             "a conditional P50 family"
+        )
+    empirical = panels.get("repeated_state_empirical_law_panel")
+    if (
+        panels.get("unique_state_deterministic_panels_required_before_p50")
+        is not True
+        or not isinstance(empirical, dict)
+        or set(empirical)
+        != {
+            "status",
+            "bounded_p50_capacity_prerequisite",
+            "raw_record_multiplicity_is_observation_count",
+            "mark_alias_multiplicity_is_observation_count",
+            "required_for_empirical_law_claims",
+        }
+        or empirical.get("status") != REPEATED_EMPIRICAL_LAW_STATUS
+        or empirical.get("bounded_p50_capacity_prerequisite") is not False
+        or empirical.get("raw_record_multiplicity_is_observation_count") is not False
+        or empirical.get("mark_alias_multiplicity_is_observation_count") is not False
+        or empirical.get("required_for_empirical_law_claims") is not True
+    ):
+        raise EditingTrainingGateError(
+            "pre-P50 capacity must use unique-state targets and repeated-state "
+            "empirical laws must require verified observation receipts"
         )
 
     metric_contract = contract.get("metric_contract") or {}
@@ -208,6 +265,19 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         raise EditingTrainingGateError(
             "S0 is missing fail-closed initialization or successor-support "
             f"requirements: {sorted(missing_support_requirements)!r}"
+        )
+    t1_gate = next(
+        gate for gate in gates if gate["id"] == "T1_true_successor_micro_overfit"
+    )
+    if set(t1_gate["requirements"]) != REQUIRED_T1_CAPACITY_REQUIREMENTS:
+        raise EditingTrainingGateError(
+            "T1 requirements must separate unique-state capacity from conditional "
+            "repeated-state empirical-law fitting"
+        )
+    if t1_gate.get("numeric_thresholds") != EXPECTED_T1_CAPACITY_THRESHOLDS:
+        raise EditingTrainingGateError(
+            "T1 unique-state thresholds must be frozen while the conditional "
+            "repeated-state threshold remains unavailable"
         )
 
     selection = contract.get("checkpoint_selection") or {}

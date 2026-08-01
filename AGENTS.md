@@ -497,6 +497,11 @@ null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not tr
   initialization parity where applicable, and corpus or support provenance.
 - T1 must measure canonical-successor capacity for every load-bearing family on bounded development
   panels. A family that cannot overfit its small successor-level panel blocks a larger run.
+- The pre-P50 capacity gate uses the prospectively frozen unique-state, single-target canonical-successor
+  panel. Repeated-state empirical-law fitting is a separate conditional calibration gate. It may be run
+  only when every counted transition has an authoritative independent-observation multiplicity receipt.
+  Raw record duplication and mark-alias multiplicity are not empirical transition counts. Absence of such
+  receipts blocks empirical-law claims, but does not turn fabricated frequencies into a P50 capacity gate.
 - A scratch model is allowed. Warm-starting is not a scientific requirement. If used, inherited
   capabilities require explicit retention probes, replay or distillation where justified, and drift gates.
 - Monitor family-resolved canonical-successor NLL, teacher-successor probability and rank, raw mark count,

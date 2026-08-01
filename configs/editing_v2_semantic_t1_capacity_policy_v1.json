@@ -1,0 +1,91 @@
+{
+  "bounded_p50_authorized": false,
+  "checkpoint_selection_authorized": false,
+  "empirical_repeated_state_gate": {
+    "bounded_p50_capacity_prerequisite": false,
+    "empirical_law_claims_authorized": false,
+    "mark_alias_multiplicity_is_observation_count": false,
+    "raw_record_multiplicity_is_observation_count": false,
+    "required_receipt_kind": "independent_empirical_transition_v1",
+    "status": "BLOCKED_PENDING_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS"
+  },
+  "final_test_selection_authorized": false,
+  "hazard_included": false,
+  "long_training_authorized": false,
+  "objective_unit": "exact_source_frozen_time_canonical_successor",
+  "optimization": {
+    "accelerator_class": "gpu",
+    "address_stream": "sha256_counter_stream_bound_to_policy_and_panel_identity",
+    "batch_size": 64,
+    "checkpoint_selection": "maximize_minimum_entry_teacher_successor_probability__tie_lower_mean_nll__tie_earlier_step",
+    "deterministic_algorithms_required": true,
+    "dtype": "float32",
+    "early_stop_rule": "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_evaluated_state",
+    "failure_diagnostic_scope_order": [
+      "heads_only",
+      "heads_plus_local_adapter_if_distinct",
+      "all"
+    ],
+    "failure_diagnostics_only_for_failing_families": true,
+    "gradient_clip_norm": 10.0,
+    "learning_rate": 0.001,
+    "maximum_optimizer_steps": 500,
+    "mixed_precision": false,
+    "model_initialization": "scratch",
+    "optimizer": "adamw",
+    "parameter_scope": "all_trainable_active8_parameters",
+    "report_points": [
+      1,
+      10,
+      50,
+      100,
+      250,
+      500
+    ],
+    "scheduler": "constant",
+    "seed": 31,
+    "trajectory_evaluation": "every_pre_update_state_and_terminal_state",
+    "weight_decay": 0.0
+  },
+  "panel_kind": "unique_state_single_target_canonical_successor_capacity",
+  "panel_policy_sha256": "089f3df2fa7f307f4623dd3d709547088a23f1b83264f73a57ee0b47d1a00279",
+  "policy_id": "compose-editing-v2-semantic-t1-unique-capacity-v1",
+  "policy_sha256": "f300a5b4b93f4157976f5031d59c5b55f6a8dd47749d4aff8f289ea915e14402",
+  "required_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "sampling_law": {
+    "importance_correction": "none",
+    "order": [
+      "model_family",
+      "semantic_capability_cell",
+      "unique_panel_entry"
+    ],
+    "probability_within_each_level": "uniform_over_nonempty_children",
+    "target_coefficient": 1.0
+  },
+  "schema": "compose.editing_v2.semantic_t1_capacity_policy",
+  "schema_version": 1,
+  "status": "FROZEN_PROSPECTIVE_UNIQUE_STATE_CAPACITY_NO_DOWNSTREAM_AUTHORITY",
+  "support_time_hex": "0x1.0000000000000p-1",
+  "thresholds": {
+    "maximum_nonempty_cell_teacher_successor_nll": 0.22314355131420976,
+    "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
+    "minimum_every_unique_entry_teacher_successor_probability": 0.8,
+    "minimum_nonempty_cell_teacher_successor_probability": 0.8,
+    "minimum_nonempty_cell_teacher_successor_top1": 0.95,
+    "minimum_unique_state_teacher_successor_probability": 0.8,
+    "minimum_unique_state_teacher_successor_top1": 0.95,
+    "require_every_unique_entry_teacher_successor_top1": true,
+    "require_finite_nonzero_action_route_gradient_each_family": true,
+    "require_finite_nonzero_family_gate_gradient_each_family": true
+  },
+  "training_authorized": false
+}
