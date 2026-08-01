@@ -8,11 +8,11 @@ from pathlib import Path
 import pytest
 
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
-from compose_v4.data.editing_v2_semantic_capability_cells import (
-    load_semantic_capability_cell_registry,
-)
 from compose_v4.data.editing_v2_semantic_active8_admission import (
     build_semantic_active8_admission_policy,
+)
+from compose_v4.data.editing_v2_semantic_capability_cells import (
+    load_semantic_capability_cell_registry,
 )
 from compose_v4.data.immutable_artifact import ImmutableArtifactError
 from compose_v4.experiments.editing_v2_semantic_t1_panel_cache import (
@@ -20,11 +20,15 @@ from compose_v4.experiments.editing_v2_semantic_t1_panel_cache import (
     GPU_CACHE_POLICY,
     PANEL_SCHEMA,
     PANEL_STATUS,
+    REPEATED_PANEL_KIND,
+    UNIQUE_PANEL_KIND,
+    SemanticT1EmpiricalMultiplicityReceipt,
     SemanticT1GateZeroBinding,
     SemanticT1PanelError,
     SemanticT1PanelRequest,
     SemanticT1TeacherOccurrence,
     build_semantic_t1_panel_from_occurrence_factory,
+    build_semantic_t1_repeated_panel_from_occurrence_factory,
     deserialize_semantic_t1_panel,
     read_semantic_t1_panel,
     serialize_semantic_t1_panel,
@@ -242,6 +246,199 @@ def test_train_panel_collapses_aliases_and_is_order_deterministic() -> None:
         for entry in forward.entries
         if entry.panel_entry_sha256 in cache_input.panel_entry_sha256s
     )
+    assert forward.request.as_payload()["panel_kind"] == UNIQUE_PANEL_KIND
+    assert forward.identity_body()["objective"]["panel_kind"] == UNIQUE_PANEL_KIND
+    assert forward.single_target_source_state_count == 9
+    assert forward.repeated_source_state_count == 0
+    assert len(forward.single_target_source_inventory_sha256) == 64
+    assert len(forward.repeated_source_inventory_sha256) == 64
+
+
+def test_unique_capacity_panel_excludes_multi_target_exact_sources() -> None:
+    source_identity = _digest("multi-target-capacity-source")
+    rows = list(_corpus(source_identity))
+    rows.append(
+        _occurrence(
+            "atom_insert",
+            "atom_insert_distinct_target",
+            source_identity=source_identity,
+            source_tag="atom_insert_shared_source",
+            successor_tag="a_second_canonical_target",
+        )
+    )
+
+    artifact = _build(tuple(rows), request=_request())
+
+    assert all(
+        entry.source_canonical_key != "source:atom_insert_shared_source"
+        for entry in artifact.entries
+    )
+    assert len(
+        {
+            (entry.source_state_sha256, entry.support_time_hex)
+            for entry in artifact.entries
+        }
+    ) == len(artifact.entries)
+    assert {entry.model_family for entry in artifact.entries} == set(ACTIVE8_FAMILIES)
+    assert artifact.single_target_source_state_count == 8
+    assert artifact.repeated_source_state_count == 1
+
+
+def test_repeated_panel_uses_proven_empirical_units_not_raw_rows() -> None:
+    source_identity = _digest("repeated-empirical-source")
+    rows = (
+        _occurrence(
+            "atom_insert",
+            "target_a_encoding_1",
+            source_identity=source_identity,
+            source_tag="shared_repeated_source",
+            successor_tag="target_a",
+        ),
+        _occurrence(
+            "atom_insert",
+            "target_a_encoding_2",
+            source_identity=source_identity,
+            source_tag="shared_repeated_source",
+            successor_tag="target_a",
+        ),
+        _occurrence(
+            "atom_insert",
+            "target_b_observation_1",
+            source_identity=source_identity,
+            source_tag="shared_repeated_source",
+            successor_tag="target_b",
+        ),
+        _occurrence(
+            "atom_insert",
+            "target_b_observation_2",
+            source_identity=source_identity,
+            source_tag="shared_repeated_source",
+            successor_tag="target_b",
+        ),
+    )
+    observation_units = (
+        _digest("observed-pair-a"),
+        _digest("observed-pair-a"),
+        _digest("observed-pair-b1"),
+        _digest("observed-pair-b2"),
+    )
+    receipts = {
+        occurrence.occurrence_sha256: SemanticT1EmpiricalMultiplicityReceipt.create(
+            occurrence,
+            observation_unit_sha256=observation_unit,
+            provenance_artifact_sha256=_digest("empirical-provenance"),
+        )
+        for occurrence, observation_unit in zip(
+            rows,
+            observation_units,
+            strict=True,
+        )
+    }
+    selection = build_semantic_t1_repeated_panel_from_occurrence_factory(
+        lambda: iter(rows),
+        request=_request(),
+        gate_zero_binding=_binding(source_identity),
+        decision_source_identity={
+            "inventory_sha256": source_identity,
+            "status": "VERIFIED_ACTIVE8_DECISION_SOURCE_NO_DOWNSTREAM_AUTHORITY",
+            "process_identity_sha256": _REGISTRY.process_identity_sha256,
+            "policy_sha256": _ACTIVE8_POLICY.policy_sha256,
+        },
+        registry=_REGISTRY,
+        empirical_receipts=receipts,
+        empirical_provenance_artifact_sha256=_digest("empirical-provenance"),
+        maximum_source_states=1,
+    )
+
+    assert selection.identity_body()["panel_kind"] == REPEATED_PANEL_KIND
+    assert len(selection.groups) == 1
+    group = selection.groups[0]
+    assert group.raw_teacher_occurrence_count == 4
+    assert group.independent_observation_count == 3
+    probabilities = {
+        target.successor_canonical_key: (
+            target.probability_numerator,
+            target.probability_denominator,
+        )
+        for target in group.targets
+    }
+    assert probabilities == {
+        "successor:target_a": (1, 3),
+        "successor:target_b": (2, 3),
+    }
+
+
+def test_repeated_panel_fails_without_complete_multiplicity_provenance() -> None:
+    source_identity = _digest("missing-repeated-provenance")
+    rows = (
+        _occurrence(
+            "cycle_attach",
+            "open_target_a",
+            source_identity=source_identity,
+            source_tag="shared_ring_source",
+            successor_tag="opened_a",
+        ),
+        _occurrence(
+            "cycle_attach",
+            "open_target_b",
+            source_identity=source_identity,
+            source_tag="shared_ring_source",
+            successor_tag="opened_b",
+        ),
+    )
+    receipt = SemanticT1EmpiricalMultiplicityReceipt.create(
+        rows[0],
+        observation_unit_sha256=_digest("only-one-provenance-unit"),
+        provenance_artifact_sha256=_digest("partial-provenance"),
+    )
+    with pytest.raises(
+        SemanticT1PanelError,
+        match="empirical multiplicity provenance is incomplete",
+    ):
+        build_semantic_t1_repeated_panel_from_occurrence_factory(
+            lambda: iter(rows),
+            request=_request(),
+            gate_zero_binding=_binding(source_identity),
+            decision_source_identity={
+                "inventory_sha256": source_identity,
+                "status": "VERIFIED_ACTIVE8_DECISION_SOURCE_NO_DOWNSTREAM_AUTHORITY",
+                "process_identity_sha256": _REGISTRY.process_identity_sha256,
+                "policy_sha256": _ACTIVE8_POLICY.policy_sha256,
+            },
+            registry=_REGISTRY,
+            empirical_receipts={rows[0].occurrence_sha256: receipt},
+            empirical_provenance_artifact_sha256=_digest("partial-provenance"),
+            maximum_source_states=1,
+        )
+
+    shared_unit = _digest("conflicting-observation-unit")
+    complete_but_conflicting = {
+        occurrence.occurrence_sha256: SemanticT1EmpiricalMultiplicityReceipt.create(
+            occurrence,
+            observation_unit_sha256=shared_unit,
+            provenance_artifact_sha256=_digest("conflicting-provenance"),
+        )
+        for occurrence in rows
+    }
+    with pytest.raises(
+        SemanticT1PanelError,
+        match="observation unit maps to multiple canonical successors",
+    ):
+        build_semantic_t1_repeated_panel_from_occurrence_factory(
+            lambda: iter(rows),
+            request=_request(),
+            gate_zero_binding=_binding(source_identity),
+            decision_source_identity={
+                "inventory_sha256": source_identity,
+                "status": "VERIFIED_ACTIVE8_DECISION_SOURCE_NO_DOWNSTREAM_AUTHORITY",
+                "process_identity_sha256": _REGISTRY.process_identity_sha256,
+                "policy_sha256": _ACTIVE8_POLICY.policy_sha256,
+            },
+            registry=_REGISTRY,
+            empirical_receipts=complete_but_conflicting,
+            empirical_provenance_artifact_sha256=_digest("conflicting-provenance"),
+            maximum_source_states=1,
+        )
 
 
 def test_panel_covers_every_observed_difficulty_stratum_before_repetition() -> None:
@@ -439,6 +636,10 @@ def test_artifact_is_canonical_nonauthorizing_and_immutable(tmp_path: Path) -> N
     assert payload["objective"]["hazard_included"] is False
     assert payload["cache_handoff"]["kind"] == CACHE_HANDOFF
     assert payload["cache_handoff"]["gpu_policy"] == GPU_CACHE_POLICY
+    assert payload["counts"]["single_target_source_state_count"] == 9
+    assert payload["counts"]["repeated_source_state_count"] == 0
+    assert len(payload["counts"]["single_target_source_inventory_sha256"]) == 64
+    assert len(payload["counts"]["repeated_source_inventory_sha256"]) == 64
     body = dict(payload)
     supplied = body.pop("artifact_sha256")
     assert (

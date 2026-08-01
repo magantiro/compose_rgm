@@ -66,6 +66,10 @@ from compose_v4.data.semantic_packed_trace_store import (
     SHARD_FILENAME,
     write_semantic_packed_artifact,
 )
+from compose_v4.experiments import editing_v2_semantic_gate_zero as semantic_gate_zero
+from compose_v4.experiments import (
+    editing_v2_semantic_t1_panel_cache as semantic_t1_panel,
+)
 from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
@@ -73,10 +77,6 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedTraceletRateModel,
-)
-from compose_v4.experiments import editing_v2_semantic_gate_zero as semantic_gate_zero
-from compose_v4.experiments import (
-    editing_v2_semantic_t1_panel_cache as semantic_t1_panel,
 )
 from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.operators import (
@@ -150,7 +150,11 @@ def _record(trace_id: str, lane: str, role: str) -> dict[str, object]:
     )
 
 
-def _active8_train_records(lane: str) -> tuple[dict[str, object], ...]:
+def _active8_train_records(
+    lane: str,
+    *,
+    distinct_exact_sources: bool = False,
+) -> tuple[dict[str, object], ...]:
     system = editing_v2_semantic_rewrite_system()
     carbon = _state("C")
     null = system.apply(carbon, "atom_delete", AtomDelete(0))
@@ -168,9 +172,17 @@ def _active8_train_records(lane: str) -> tuple[dict[str, object], ...]:
     )
     graft_source = _state("c1ccccc1CC")
     saturated_ring = _state("C1CCCCC1")
+    atom_delete_source = _state("CCC") if distinct_exact_sources else _state("CC")
+    atom_delete_slot = 2 if distinct_exact_sources else 1
+    cycle_open_source = _state("C1CCCC1") if distinct_exact_sources else saturated_ring
+    cycle_open_last_slot = 4 if distinct_exact_sources else 5
     cases = (
         ("atom_insert", null, RewriteStep("atom_insert", root_birth)),
-        ("atom_delete", _state("CC"), RewriteStep("atom_delete", AtomDelete(1))),
+        (
+            "atom_delete",
+            atom_delete_source,
+            RewriteStep("atom_delete", AtomDelete(atom_delete_slot)),
+        ),
         (
             "atom_restate",
             carbon,
@@ -198,8 +210,8 @@ def _active8_train_records(lane: str) -> tuple[dict[str, object], ...]:
         ),
         (
             "cycle_attach",
-            saturated_ring,
-            RewriteStep("cycle_open", CycleOpenEdge(0, 5)),
+            cycle_open_source,
+            RewriteStep("cycle_open", CycleOpenEdge(0, cycle_open_last_slot)),
         ),
         (
             "ring_system_restate",
@@ -226,6 +238,7 @@ def _inventory(
     root: Path,
     *,
     full_train_active8: bool = False,
+    distinct_exact_train_sources: bool = False,
 ) -> EditingV2SemanticActive8SourceInventory:
     migration = root / "migration" / "SEMANTIC_MIGRATION_COMPLETE.json"
     migration.parent.mkdir(parents=True)
@@ -244,7 +257,10 @@ def _inventory(
         output = root / "sources" / lane / role
         semantic = output / "semantic"
         records = (
-            _active8_train_records(lane)
+            _active8_train_records(
+                lane,
+                distinct_exact_sources=distinct_exact_train_sources,
+            )
             if full_train_active8 and role == "train" and lane == REQUIRED_DATA_LANES[0]
             else (_record(f"trace-{index}", lane, role),)
         )
@@ -450,9 +466,14 @@ def _build_completed_source(
     *,
     full_train_active8: bool,
     inject_exclusion: bool,
+    distinct_exact_train_sources: bool = False,
 ):
     root.mkdir()
-    inventory = _inventory(root, full_train_active8=full_train_active8)
+    inventory = _inventory(
+        root,
+        full_train_active8=full_train_active8,
+        distinct_exact_train_sources=distinct_exact_train_sources,
+    )
     cache_plan = plan_semantic_active8_chunk_cache(
         inventory,
         source_revision=_revision(),
@@ -583,6 +604,18 @@ def completed_active8_source(tmp_path_factory: pytest.TempPathFactory):
         tmp_path_factory.mktemp("semantic-active8-full-source") / "artifacts",
         full_train_active8=True,
         inject_exclusion=False,
+    )
+
+
+@pytest.fixture(scope="module")
+def completed_single_target_active8_source(
+    tmp_path_factory: pytest.TempPathFactory,
+):
+    return _build_completed_source(
+        tmp_path_factory.mktemp("semantic-active8-single-target-source") / "artifacts",
+        full_train_active8=True,
+        inject_exclusion=False,
+        distinct_exact_train_sources=True,
     )
 
 
@@ -905,7 +938,7 @@ def test_semantic_gate_zero_consumes_real_index_without_held_out_rescue(
     assert decision["next_authorized_stage"] is None
 
 
-def test_real_gate_zero_pass_prepares_and_resolves_exact_train_t1_panel(
+def test_real_gate_zero_pass_rejects_fixture_without_single_target_active8_coverage(
     completed_active8_source,
     monkeypatch,
 ) -> None:
@@ -937,29 +970,18 @@ def test_real_gate_zero_pass_prepares_and_resolves_exact_train_t1_panel(
         support_time=0.5,
         maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
     )
-    panel = semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
-        index,
-        gate_zero_artifacts=artifacts,
-        decision_plan_path=completed_active8_source["decision_plan_path"],
-        request=request,
-        gate_zero_contract=contract,
-        repo_root=Path.cwd(),
-    )
-    assert {entry.model_family for entry in panel.entries} == set(ACTIVE8_FAMILIES)
-    assert panel.first_pass_train_teacher_count == 12
-    assert panel.first_pass_train_teacher_stream_sha256 == (
-        panel.second_pass_train_teacher_stream_sha256
-    )
-    traces = semantic_t1_panel.resolve_semantic_t1_cache_trace_inputs(
-        index,
-        panel,
-        repo_root=Path.cwd(),
-    )
-    assert traces
-    assert all(trace.addressed_trace.address.partition == "train" for trace in traces)
-    assert sum(
-        len(cache_input.panel_entry_sha256s) for cache_input in panel.cache_trace_inputs
-    ) == len(panel.entries)
+    with pytest.raises(
+        semantic_t1_panel.SemanticT1PanelError,
+        match="no train stratum",
+    ):
+        semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
+            index,
+            gate_zero_artifacts=artifacts,
+            decision_plan_path=completed_active8_source["decision_plan_path"],
+            request=request,
+            gate_zero_contract=contract,
+            repo_root=Path.cwd(),
+        )
 
     mismatched_plan = output / "MISMATCHED_PLAN.json"
     mismatched = json.loads(completed_active8_source["decision_plan_path"].read_text())
@@ -977,6 +999,81 @@ def test_real_gate_zero_pass_prepares_and_resolves_exact_train_t1_panel(
             gate_zero_contract=contract,
             repo_root=Path.cwd(),
         )
+
+
+def test_real_gate_zero_pass_prepares_unique_panel_and_resolves_cache_traces(
+    completed_single_target_active8_source,
+    monkeypatch,
+) -> None:
+    completed = completed_single_target_active8_source
+    inventory = completed["inventory"]
+    _patch_migration_resolver(monkeypatch, inventory)
+    index = _resolve(completed)
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(
+        repo_root=Path.cwd()
+    )
+    artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
+        migration_completion_path=inventory.migration_completion_path,
+        chunk_cache_plan_path=completed["cache_plan_path"],
+        chunk_cache_global_completion_path=completed["cache_completion_path"],
+        decision_plan_path=completed["decision_plan_path"],
+        decision_completion_path=completed["decision_completion_path"],
+        artifact_root=completed["root"],
+        repo_root=Path.cwd(),
+        output_directory=completed["root"] / "gate-zero-t1-single-target-integration",
+        contract_path=contract.source,
+    )
+    assert artifacts["evidence"]["structural_result"] == "PASS"
+
+    runtime = artifacts["evidence"]["model_runtime_identity"]
+    request = semantic_t1_panel.SemanticT1PanelRequest.create(
+        request_id="real_single_target_typed_index_integration",
+        source_revision_sha256=runtime["source_revision_sha256"],
+        support_time=0.5,
+        maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+    )
+    panel = semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
+        index,
+        gate_zero_artifacts=artifacts,
+        decision_plan_path=completed["decision_plan_path"],
+        request=request,
+        gate_zero_contract=contract,
+        repo_root=Path.cwd(),
+    )
+
+    assert {entry.model_family for entry in panel.entries} == set(ACTIVE8_FAMILIES)
+    assert panel.single_target_source_state_count == len(ACTIVE8_FAMILIES)
+    assert panel.repeated_source_state_count == 0
+    assert {
+        panel_entry_sha256
+        for cache_input in panel.cache_trace_inputs
+        for panel_entry_sha256 in cache_input.panel_entry_sha256s
+    } == {entry.panel_entry_sha256 for entry in panel.entries}
+
+    resolved = semantic_t1_panel.resolve_semantic_t1_cache_trace_inputs(
+        index,
+        panel,
+        repo_root=Path.cwd(),
+    )
+    expected_trace_keys = {
+        (
+            cache_input.packed_shard_content_sha256,
+            cache_input.packed_entry_index,
+            cache_input.trace_id,
+        )
+        for cache_input in panel.cache_trace_inputs
+    }
+    observed_trace_keys = {
+        (
+            trace.addressed_trace.address.packed_shard_content_sha256,
+            trace.addressed_trace.address.entry_index,
+            trace.addressed_trace.address.trace_id,
+        )
+        for trace in resolved
+    }
+    assert observed_trace_keys == expected_trace_keys
+    assert len(resolved) == len(panel.cache_trace_inputs)
+    assert all(index.is_accepted(trace.addressed_trace.address) for trace in resolved)
 
 
 def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
