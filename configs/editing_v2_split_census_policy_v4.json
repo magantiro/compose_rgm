@@ -1,0 +1,99 @@
+{
+  "edge_modes": {
+    "alternative_route": "diagnostic",
+    "constraint_compatible_alternative_route": "diagnostic",
+    "correction": "diagnostic",
+    "document_group": "hard",
+    "exact_molecule": "hard",
+    "inverse_pair": "diagnostic",
+    "partition_scaffold": "hard",
+    "series_group": "hard",
+    "shared_prefix_branch": "diagnostic",
+    "source_group": "hard",
+    "transformation_signature": "diagnostic"
+  },
+  "identity_definitions": {
+    "exact_molecule": {
+      "definition_id": "candidate_stage_persisted_canonical_key_equality_v1",
+      "identity_namespace": "compose.editing_v2.persisted_trace_molecular_key.v1",
+      "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86"
+    },
+    "partition_scaffold": {
+      "definition_id": "persisted_murcko_carbonized_wl3_partition_scaffold_v2",
+      "identity_namespace": "compose.scaffold.murcko-carbonized-wl3.v2",
+      "implementation_sha256": "9eb97923e8ec065bb382e5178416fbcade2d69e7a2e91d36517397e98fa1bc30"
+    },
+    "schema": "compose.editing_v2_identity_definition_contract",
+    "schema_version": 2,
+    "source_group": {
+      "definition_id": "candidate_stage_source_origin_group_v1",
+      "identity_namespace": "compose.editing_v2.source_origin_group.v1",
+      "implementation_sha256": "bf332f1c43c438fea7a0e1b4cfed18d186312459905abbdb4ebd052f29a9cc86"
+    }
+  },
+  "lane_contract_identity": {
+    "editing_corpus_contract_id": "compose-editing-corpus-v2-prebuild-r2",
+    "editing_corpus_contract_sha256": "153ef7316a64d03a89ba739f6423976b1d734695af8569d2e2cdc7a1227eb519",
+    "identity_sha256": "b86b06e68765032e6886e3e95c46255e1d418549f578a24df85e251752dfcf2d",
+    "ordered_lanes": [
+      {
+        "admissible_evidence_profiles": [
+          "observed_pair_compiled_path",
+          "inferred_relation_compiled_path"
+        ],
+        "id": "observed_local_analogue",
+        "reserved_evidence_profiles": [
+          "observed_pair_observed_actions"
+        ]
+      },
+      {
+        "admissible_evidence_profiles": [
+          "observed_pair_compiled_path",
+          "inferred_relation_compiled_path"
+        ],
+        "id": "operator_aware_real_endpoint",
+        "reserved_evidence_profiles": [
+          "observed_pair_observed_actions"
+        ]
+      },
+      {
+        "admissible_evidence_profiles": [
+          "observed_pair_compiled_path",
+          "inferred_relation_compiled_path"
+        ],
+        "id": "linker_positional_topology_analogue",
+        "reserved_evidence_profiles": []
+      },
+      {
+        "admissible_evidence_profiles": [
+          "observed_pair_compiled_path",
+          "inferred_relation_compiled_path"
+        ],
+        "id": "real_endpoint_multistep_path",
+        "reserved_evidence_profiles": [
+          "observed_pair_observed_actions",
+          "genuine_observed_series_compiled_path"
+        ]
+      },
+      {
+        "admissible_evidence_profiles": [
+          "executor_generated_walk"
+        ],
+        "id": "reversible_synthetic_walk",
+        "reserved_evidence_profiles": []
+      }
+    ],
+    "schema": "compose.editing_v2_lane_contract_identity",
+    "schema_version": 2
+  },
+  "partition_roles": [
+    "train",
+    "validation",
+    "controller_validation",
+    "final_test"
+  ],
+  "policy_id": "compose-editing-v2-split-census-default-v4",
+  "schema": "compose.editing_v2_split_census_policy",
+  "schema_version": 4,
+  "transformation_hard_authorized": false
+}
