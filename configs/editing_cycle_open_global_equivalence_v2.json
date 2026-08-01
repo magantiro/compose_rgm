@@ -1,0 +1,73 @@
+{
+  "comparison_policy": {
+    "component_resolver": "complete_degree_constrained_assignments_per_resonance_invariant_aromatic_component",
+    "equivalence_fields": [
+      "admission",
+      "typed_rejection",
+      "source_identity",
+      "selected_edge",
+      "semantic_aromatic_class",
+      "global_alias_cardinality",
+      "global_forced_single_cardinality",
+      "canonical_product_identity",
+      "fixed_coordinate_exact_successor_identity",
+      "inverse_bond_order"
+    ],
+    "exact_representative_policy": "lexicographically_minimum_persistent_slot_state_within_the_unique_canonical_product_group",
+    "work_policy": "record_actual_executions_separately_from_implied_global_cardinality"
+  },
+  "contract_sha256": "33c21817844fa66574ef7286e6b13f2840dfb4f0f83e2b9076a8e1bcc9b43cf2",
+  "edge_scope": "all_resonance_invariant_aromatic_edges_in_each_declared_source",
+  "equivalence_gate": "zero_mismatches_zero_oracle_overflows_complete_declared_edge_coverage",
+  "exact_validation_input": {
+    "packed_manifest_sha256": "5bfc34ec9b02c9997c5c98dcd22513b1abe82c92ba2bc89c5494aeb19f31d248",
+    "packed_provenance_overlay_sha256": "9c921eba77d2dfe60c92fe109ec792ba4b7fedcfb7b330bd67054a4867c3c5f5",
+    "packed_shard_content_sha256": "6065e5fc80cc37e2ab9208fa5239e890c47d3174277484bc82af8649a5e2134f"
+  },
+  "excluded_partitions": [
+    "train",
+    "controller_validation",
+    "test"
+  ],
+  "oracle_policy": {
+    "assignment_domain": "all_slot_labeled_binary_single_double_assignments_with_exact_source_double_incidence",
+    "identity": "NON_AUTHORIZING_COMPLETE_GLOBAL_KEKULE_MILP_ORACLE",
+    "maximum_assignments": 4096,
+    "overflow_policy": "typed_incomplete_comparison_blocks_gate",
+    "postsolve_checks": [
+      "binary_closeness",
+      "exact_integer_incidence",
+      "production_state_validity",
+      "connectedness",
+      "canonical_source_identity"
+    ],
+    "solver": "scipy.optimize.milp_global_problem_with_iterative_no_good_constraints"
+  },
+  "partitions": [
+    "validation"
+  ],
+  "runtime_policy": {
+    "numpy": "2.4.2",
+    "omp_num_threads": "1",
+    "python": "3.14.2",
+    "rdkit": "2025.09.6",
+    "scipy": "1.17.1"
+  },
+  "schema": "compose.editing.cycle_open_global_equivalence_contract",
+  "schema_version": 2,
+  "source_scope": "all_distinct_exact_source_states_in_the_self_hashed_v1_admitted_cycle_attach_source_ledger",
+  "status": "VALIDATION_ONLY_COMPLETE_GLOBAL_CYCLE_OPEN_EQUIVALENCE_NO_TRAINING_AUTHORITY",
+  "training_authorized": false,
+  "v1_negative_evidence": {
+    "failure_interpretation": "rdkit_whole_molecule_supplier_omits_independent_slot_labeled_conjugated_group_combinations",
+    "implementation_sha256": "c4380f946a038157107fcde148fb52207efde46d8a2b7f0ed31fd1a841f531a4",
+    "mismatch_edge_count": 24,
+    "nonpassing_source_count": 2,
+    "plan_sha256": "58ea8f68aed550f64f510554fd5efc34c149d3960a27b181ab23e812cf595a0a",
+    "receipt_file_sha256": "c9beb3b9c01b32f8972e02ab7818da4c7ba6d02e7535de0f742cf2b01051ce2f",
+    "receipt_sha256": "959ee095e2273fdc818dd1070f69dfe0b586aab372d76c1cd0c26eacf39a2f0e",
+    "result_file_sha256": "98d208d8ae0da16c44ce2d932a8bd7d39cb41570b27735c538c90ca8efd1f869",
+    "result_sha256": "6d73288f124d5e0fae3e0725aea37903e7c8453136b4bda79a22422be37e3840",
+    "semantic_aromatic_edge_count": 19311
+  }
+}
