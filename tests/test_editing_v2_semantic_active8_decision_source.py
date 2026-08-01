@@ -437,6 +437,17 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     assert index.identity_payload()["t1_authorized"] is False
     assert index.identity_payload()["bounded_p50_authorized"] is False
 
+    resolved = tuple(index.iter_resolved_traces())
+    assert len(resolved) == 20
+    assert sum(accepted for accepted, _ in resolved) == 19
+    projected = tuple(
+        transition
+        for accepted_status, trace in resolved
+        if accepted_status
+        for transition in index.accepted_transitions_for(trace)
+    )
+    assert len(projected) == 19
+
     excluded = tuple(index.iter_excluded_traces())
     assert len(excluded) == 1
     assert excluded[0].addressed_trace.address.trace_id == "trace-0"
@@ -471,6 +482,21 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     assert len({item.key for item in progress}) == len(progress)
     transitions = tuple(index.iter_accepted_nonterminal_transitions())
     assert len(transitions) == 19
+    assert tuple(
+        (
+            item.addressed_trace.address.trace_id,
+            item.step_index,
+            item.decision_sha256,
+        )
+        for item in projected
+    ) == tuple(
+        (
+            item.addressed_trace.address.trace_id,
+            item.step_index,
+            item.decision_sha256,
+        )
+        for item in transitions
+    )
     assert all(item.step_index == 0 for item in transitions)
     assert all(not item.source_progress_address.terminal for item in transitions)
     assert all(item.successor_progress_address.terminal for item in transitions)

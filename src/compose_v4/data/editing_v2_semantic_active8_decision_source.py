@@ -532,7 +532,7 @@ class EditingV2SemanticActive8DecisionIndex:
     def iter_accepted_traces(self) -> Iterable[SemanticActive8AcceptedTrace]:
         """Stream exact admitted traces without SMILES reconstruction."""
 
-        for accepted, resolved in _iter_resolved_traces(self):
+        for accepted, resolved in self.iter_resolved_traces():
             if accepted:
                 if not isinstance(resolved, SemanticActive8AcceptedTrace):
                     raise SemanticActive8DecisionSourceError(
@@ -543,7 +543,7 @@ class EditingV2SemanticActive8DecisionIndex:
     def iter_excluded_traces(self) -> Iterable[SemanticActive8ExcludedTrace]:
         """Stream exact excluded traces and their reasons separately."""
 
-        for accepted, resolved in _iter_resolved_traces(self):
+        for accepted, resolved in self.iter_resolved_traces():
             if not accepted:
                 if not isinstance(resolved, SemanticActive8ExcludedTrace):
                     raise SemanticActive8DecisionSourceError(
@@ -565,41 +565,60 @@ class EditingV2SemanticActive8DecisionIndex:
         """Stream one verified teacher transition per accepted action."""
 
         for trace in self.iter_accepted_traces():
-            path_length = trace.addressed_trace.address.path_length
+            yield from self.accepted_transitions_for(trace)
+
+    def iter_resolved_traces(
+        self,
+    ) -> Iterable[
+        tuple[bool, SemanticActive8AcceptedTrace | SemanticActive8ExcludedTrace]
+    ]:
+        """Stream every exact decision trace once in immutable source order."""
+
+        yield from _iter_resolved_traces(self)
+
+    def accepted_transitions_for(
+        self,
+        trace: SemanticActive8AcceptedTrace,
+    ) -> Iterable[SemanticActive8AcceptedTransition]:
+        """Project one already resolved admitted trace to verified transitions."""
+
+        if not isinstance(trace, SemanticActive8AcceptedTrace):
+            raise TypeError("accepted transition projection requires an admitted trace")
+        path_length = trace.addressed_trace.address.path_length
+        if (
+            len(trace.addressed_trace.trace.steps) != path_length
+            or len(trace.action_decisions) != path_length
+            or len(trace.progress_addresses) != path_length + 1
+            or self.decision_sha256_for(trace.addressed_trace.address)
+            != trace.decision_sha256
+        ):
+            raise SemanticActive8DecisionSourceError(
+                "accepted trace cannot produce a complete transition stream"
+            )
+        for step_index, action_decision in enumerate(trace.action_decisions):
+            source = trace.progress_addresses[step_index]
+            successor = trace.progress_addresses[step_index + 1]
             if (
-                len(trace.addressed_trace.trace.steps) != path_length
-                or len(trace.action_decisions) != path_length
-                or len(trace.progress_addresses) != path_length + 1
-                or self.decision_sha256_for(trace.addressed_trace.address)
-                != trace.decision_sha256
+                source.progress_index != step_index
+                or source.terminal
+                or successor.progress_index != step_index + 1
+                or source.trace_key != successor.trace_key
             ):
                 raise SemanticActive8DecisionSourceError(
-                    "accepted trace cannot produce a complete transition stream"
+                    "accepted transition progress identities are inconsistent"
                 )
-            for step_index, action_decision in enumerate(trace.action_decisions):
-                source = trace.progress_addresses[step_index]
-                successor = trace.progress_addresses[step_index + 1]
-                if (
-                    source.progress_index != step_index
-                    or source.terminal
-                    or successor.progress_index != step_index + 1
-                    or source.trace_key != successor.trace_key
-                ):
-                    raise SemanticActive8DecisionSourceError(
-                        "accepted transition progress identities are inconsistent"
-                    )
-                transition = SemanticActive8AcceptedTransition(
-                    decision_source_inventory_sha256=self.inventory_sha256,
-                    addressed_trace=trace.addressed_trace,
-                    decision_sha256=trace.decision_sha256,
-                    decision=trace.decision,
-                    step_index=step_index,
-                    action_decision=action_decision,
-                    source_progress_address=source,
-                    successor_progress_address=successor,
-                )
-                self.validate_accepted_transition(transition)
-                yield transition
+            transition = SemanticActive8AcceptedTransition(
+                decision_source_inventory_sha256=self.inventory_sha256,
+                addressed_trace=trace.addressed_trace,
+                decision_sha256=trace.decision_sha256,
+                decision=trace.decision,
+                step_index=step_index,
+                action_decision=action_decision,
+                source_progress_address=source,
+                successor_progress_address=successor,
+            )
+            self.validate_accepted_transition(transition)
+            yield transition
 
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
