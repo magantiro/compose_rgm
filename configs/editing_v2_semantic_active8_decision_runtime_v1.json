@@ -9,8 +9,8 @@
   "bounded_p50_authorized": false,
   "semantic_model_process_contract": {
     "path": "configs/editing_gate_zero_semantic_model_process_v1.json",
-    "file_sha256": "58090737ca01e04422be59bfd4d287508da85be3efb76392a1fb8815890cb8b3",
-    "contract_sha256": "df1bd6a4dca1a67832d6d5dd330d428da5b192ba23ff5ad81d93b403d176ec99"
+    "file_sha256": "baca4a0dc5234a1786fdc512b7564dbac89f2372617cb62ccf8bf84614e0f8e3",
+    "contract_sha256": "38ee41994d274ede4bee9b1db47da8f4738e1fb74d0b3da90157896d6cfb1215"
   },
   "model": {
     "initialization_seed": 20260730,
@@ -32,5 +32,5 @@
     "networkx": "3.3",
     "rdkit": "2024.3.5"
   },
-  "runtime_contract_sha256": "313eeb55c0d6addf3958c8128e29b9c2ac82d24c95f3a100fefcb6886bc9424e"
+  "runtime_contract_sha256": "2ec604a5498c880ae9fb9b5518e0b649cda20470dd0001e016ca5a21cf15087e"
 }

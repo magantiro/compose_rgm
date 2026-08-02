@@ -79,6 +79,31 @@ def _successor_keys(state: MolecularGraph) -> frozenset[str]:
     )
 
 
+def test_contract_atom_delete_modes_equal_the_model_constants() -> None:
+    """The contract's mode literals must equal the model's constants.
+
+    ``editing_v2_process_identity`` cannot import them: the model module
+    reaches this one through ``process_v2_atom_delete`` and ``trace_shard_v3``,
+    so a module-level import would close a cycle. The two therefore carry the
+    same strings independently, and only an assertion keeps them from drifting.
+    """
+
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
+        PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+        PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+    )
+    from compose_v4.rewrite.editing_v2_process_identity import (
+        PROCESS_V2_SEMANTICS,
+        build_editing_process_v2_contract,
+    )
+
+    modes = build_editing_process_v2_contract()["atom_delete"]["action_semantics_modes"]
+    assert modes["legacy"] == LEGACY_ATOM_DELETE_ACTION_SEMANTICS
+    assert modes["process_v2"] == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+    assert PROCESS_V2_SEMANTICS == PROCESS_V2_EDITING_PROCESS_SEMANTICS
+
+
 def test_admission_mask_is_slot_relabel_equivariant() -> None:
     generator = np.random.default_rng(20260802)
     compared = 0

@@ -575,9 +575,20 @@ def test_cross_family_alias_fails_closed_instead_of_double_counting() -> None:
             successor_tag="atom_insert_shared_target",
         )
     )
+    # The invariant is that a cross-family alias FAILS CLOSED rather than being
+    # double counted.  Which of the two cross-family guards fires first depends
+    # on the per-family selection, and that selection is seeded by
+    # ``cell_role_policy_sha256`` by design (see
+    # ``SemanticT1PanelRequest.selection_seed_sha256``).  Asserting one guard's
+    # message therefore pinned an internal path, not the invariant: measured at
+    # commit bc05c6e, 12 of 12 legitimate cell-role policy-hash values flip
+    # which guard fires.  Require the hard failure and accept either guard.
     with pytest.raises(
         SemanticT1PanelError,
-        match="inconsistent family or fiber evidence",
+        match=(
+            "inconsistent family or fiber evidence"
+            "|selected in multiple families"
+        ),
     ):
         _build(tuple(rows), request=_request())
 
