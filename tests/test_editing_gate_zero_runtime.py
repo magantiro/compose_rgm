@@ -373,7 +373,7 @@ def test_exact_validation_loader_binds_every_fixture_byte(
     )[packed_sha256]
     assert cache_provenance.packed_manifest_sha256 == packed_manifest_sha256
     assert cache_provenance.packed_provenance_overlay_sha256 == packed_overlay_sha256
-    assert cache_provenance.operator_registry_hash == "9197401e8dc3a7ae"
+    assert cache_provenance.operator_registry_hash == "d752a07e13c4de73"
     assert (
         cache_provenance.fiber_compiler_implementation_hash == fiber_compiler_implementation_hash()
     )

@@ -690,7 +690,14 @@ class FactorizedMarkBatch:
     ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
     ring_restate_successor_group_ids: tuple[tuple[int, ...], ...] | None = None
     ring_restate_successor_group_descriptors: (
-        tuple[tuple[tuple[tuple[int, int, int, int], ...], ...], ...] | None
+        tuple[
+            tuple[
+                tuple[tuple[tuple[int, int, int, int], ...], ...],
+                ...,
+            ],
+            ...,
+        ]
+        | None
     ) = None
     ring_restate_successor_group_multiplicities: tuple[tuple[int, ...], ...] | None = (
         None
@@ -5072,19 +5079,31 @@ class FactorizedTraceletRateModel(nn.Module):
                 raise ValueError(
                     "ring-restatement descriptors and multiplicities differ"
                 )
-            for group_index, descriptor in enumerate(row_descriptors):
-                if not descriptor:
+            for group_index, descriptor_variants in enumerate(row_descriptors):
+                if not descriptor_variants:
                     raise ValueError(
-                        "semantic ring-restatement descriptor must be nonempty"
+                        "semantic ring-restatement descriptor variants must be nonempty"
                     )
-                pieces = tuple(
-                    pair[batch_index, int(left), int(right)]
-                    + self.restate_transition_embedding.weight[
-                        int(source_class) * BOND_CLASSES + int(target_class)
-                    ]
-                    for left, right, source_class, target_class in descriptor
-                )
-                group_rows[batch_index, group_index] = torch.stack(pieces).mean(dim=0)
+                variant_rows = []
+                for descriptor in descriptor_variants:
+                    if not descriptor:
+                        raise ValueError(
+                            "semantic ring-restatement descriptor must be nonempty"
+                        )
+                    pieces = tuple(
+                        pair[batch_index, int(left), int(right)]
+                        + self.restate_transition_embedding.weight[
+                            int(source_class) * BOND_CLASSES + int(target_class)
+                        ]
+                        for left, right, source_class, target_class in descriptor
+                    )
+                    variant_rows.append(torch.stack(pieces).mean(dim=0))
+                # Pool unique semantic site variants, rather than raw action
+                # aliases, so representation refinement cannot change the
+                # canonical-successor score.
+                group_rows[batch_index, group_index] = torch.stack(
+                    variant_rows
+                ).mean(dim=0)
                 group_mask[batch_index, group_index] = True
         group_logits = self.ring_restate_head(
             torch.cat(

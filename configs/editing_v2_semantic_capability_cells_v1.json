@@ -18,7 +18,7 @@
   },
   "bindings": {
     "semantic_process_contract": "configs/editing_v2_semantic_process_v1.json",
-    "semantic_process_identity_sha256": "8adce799cd4a71f9e24d58941a27c5518963e9d6e30fffc3beda8ca65c23d8b4",
+    "semantic_process_identity_sha256": "6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7",
     "corpus_contract": "configs/editing_corpus_v2_contract.json",
     "corpus_contract_file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
     "classifier_implementation_file": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
@@ -156,5 +156,5 @@
     "process_identity_drift": "error",
     "registry_tamper": "error"
   },
-  "registry_sha256": "2d409893f495f50e20ee4c26f11d41f57525a98b20e5eac925b7abda78c207dc"
+  "registry_sha256": "5ca11004fb1f20e8ad1fd1e1bc796738cbae350bbd2a2b1051368397b652c9eb"
 }

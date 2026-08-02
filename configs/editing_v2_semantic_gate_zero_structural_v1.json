@@ -13,13 +13,13 @@
   "parents": {
     "decision_runtime": {
       "path": "configs/editing_v2_semantic_active8_decision_runtime_v1.json",
-      "file_sha256": "5ce0e79a3dbff9421c9d4d9654f2130a72ed8ef3df490088583f51617321b1e6",
-      "semantic_sha256": "58c931bba3b9cc819fd405746beebaab4da63f00da73c4214cb3c9180f10f6b6"
+      "file_sha256": "7447fa0d4629c2c19a32737e7f769a9e976d685f0eacc4a5d7abe7e7aa3ca744",
+      "semantic_sha256": "313eeb55c0d6addf3958c8128e29b9c2ac82d24c95f3a100fefcb6886bc9424e"
     },
     "semantic_model_process": {
       "path": "configs/editing_gate_zero_semantic_model_process_v1.json",
-      "file_sha256": "3c3233e2a00e0e039b3ef8b804c7caf7c454dd59660b98555ce2f22da4c4f6a4",
-      "semantic_sha256": "f7601a6e6d209ca497415390deadc0a85df939c794c586834b1e531047fbf276"
+      "file_sha256": "58090737ca01e04422be59bfd4d287508da85be3efb76392a1fb8815890cb8b3",
+      "semantic_sha256": "df1bd6a4dca1a67832d6d5dd330d428da5b192ba23ff5ad81d93b403d176ec99"
     },
     "semantic_process": {
       "path": "configs/editing_v2_semantic_process_v1.json",
@@ -28,8 +28,8 @@
     },
     "capability_cell_registry": {
       "path": "configs/editing_v2_semantic_capability_cells_v1.json",
-      "file_sha256": "64e074d1c2c5f1ae12fcb4c8cdf80da427e372f02eaed909687b7d181bcf9e9c",
-      "semantic_sha256": "2d409893f495f50e20ee4c26f11d41f57525a98b20e5eac925b7abda78c207dc"
+      "file_sha256": "21d1ef2efea9a7b0c8777908e3198969a76162386faac9922051898397d00147",
+      "semantic_sha256": "5ca11004fb1f20e8ad1fd1e1bc796738cbae350bbd2a2b1051368397b652c9eb"
     }
   },
   "required_architecture": {
@@ -78,5 +78,5 @@
     "pass_grants_final_test_selection_authority": false,
     "failure_policy": "publish_fail_closed_negative_evidence"
   },
-  "contract_sha256": "5875cf1ab5d8fb2d77b9e6983c7a3ac770ead8ddf69d86e287d756dd6cdcd16f"
+  "contract_sha256": "ed64c981cf65fa33d788ac8ee2ac749c5b20b5fb452823211d90c9a6f150bcaf"
 }

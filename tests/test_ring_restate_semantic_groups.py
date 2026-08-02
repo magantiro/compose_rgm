@@ -18,10 +18,11 @@ def test_cyclohexane_aliases_share_one_six_edge_aromatization_descriptor() -> No
     assert groups.successor_keys == ("c1ccccc1",)
     assert groups.successor_group_ids == (0, 0)
     assert groups.group_multiplicities == (2,)
-    assert len(groups.group_descriptors[0]) == 6
+    assert len(groups.group_descriptors[0]) == 1
+    assert len(groups.group_descriptors[0][0]) == 6
     assert {
         (source_class, target_class)
-        for _, _, source_class, target_class in groups.group_descriptors[0]
+        for _, _, source_class, target_class in groups.group_descriptors[0][0]
     } == {(1, 4)}
 
 
@@ -34,7 +35,10 @@ def test_two_ring_fixture_keeps_distinct_semantic_successor_groups() -> None:
     assert groups.successor_group_ids == (0, 1)
     assert groups.group_multiplicities == (1, 1)
     assert len(groups.successor_keys) == 2
-    assert all(len(descriptor) == 6 for descriptor in groups.group_descriptors)
+    assert all(len(variants) == 1 for variants in groups.group_descriptors)
+    assert all(
+        len(variants[0]) == 6 for variants in groups.group_descriptors
+    )
     assert groups.group_descriptors[0] != groups.group_descriptors[1]
 
 
@@ -46,8 +50,40 @@ def test_dearomatization_descriptor_is_complete_not_raw_change_subset() -> None:
     assert len(groups.actions) == 1
     assert groups.successor_keys == ("C1CCCCC1",)
     assert len(groups.actions[0].changes) == 3
-    assert len(groups.group_descriptors[0]) == 6
+    assert len(groups.group_descriptors[0]) == 1
+    assert len(groups.group_descriptors[0][0]) == 6
     assert {
         (source_class, target_class)
-        for _, _, source_class, target_class in groups.group_descriptors[0]
+        for _, _, source_class, target_class in groups.group_descriptors[0][0]
     } == {(4, 1)}
+
+
+def test_symmetry_equivalent_ring_sites_pool_as_one_successor_group() -> None:
+    groups = enumerate_ring_restate_semantic_groups(
+        smiles_to_molecular_graph("c1ccccc1-c1ccccc1"),
+        system=de_novo_rewrite_system(),
+    )
+    assert len(groups.actions) == 2
+    assert len(groups.successor_keys) == 1
+    assert groups.successor_group_ids == (0, 0)
+    assert groups.group_multiplicities == (2,)
+    assert len(groups.group_descriptors[0]) == 2
+    assert all(len(descriptor) == 6 for descriptor in groups.group_descriptors[0])
+    assert {
+        (source_class, target_class)
+        for descriptor in groups.group_descriptors[0]
+        for _, _, source_class, target_class in descriptor
+    } == {(4, 1)}
+
+
+def test_kekule_aliases_do_not_duplicate_symmetry_site_descriptors() -> None:
+    groups = enumerate_ring_restate_semantic_groups(
+        smiles_to_molecular_graph("C1CCCCC1-C1CCCCC1"),
+        system=de_novo_rewrite_system(),
+    )
+    assert len(groups.actions) == 4
+    assert len(groups.successor_keys) == 1
+    assert groups.successor_group_ids == (0, 0, 0, 0)
+    assert groups.group_multiplicities == (4,)
+    assert len(groups.group_descriptors[0]) == 2
+    assert all(len(descriptor) == 6 for descriptor in groups.group_descriptors[0])

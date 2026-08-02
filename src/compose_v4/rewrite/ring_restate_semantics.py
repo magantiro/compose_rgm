@@ -16,6 +16,8 @@ from compose_v4.rewrite.tracelet_fiber import (
 from compose_v4.rewrite.tracelets import RingSystemRestate
 
 RingRestateEdgeTransition = tuple[int, int, int, int]
+RingRestateTransitionDescriptor = tuple[RingRestateEdgeTransition, ...]
+RingRestateSuccessorDescriptor = tuple[RingRestateTransitionDescriptor, ...]
 
 
 @dataclass(frozen=True)
@@ -25,7 +27,13 @@ class RingRestateSemanticGroups:
     actions: tuple[RingSystemRestate, ...]
     successor_group_ids: tuple[int, ...]
     successor_keys: tuple[str, ...]
-    group_descriptors: tuple[tuple[RingRestateEdgeTransition, ...], ...]
+    # One canonical molecular successor may be reachable by restating distinct
+    # symmetry-equivalent ring sites.  Each inner tuple is the deterministic
+    # set of unique slot-addressed transition descriptors for that successor.
+    # Keeping the variants separate lets the scorer pool over semantic sites
+    # without allowing raw Kekule/action alias multiplicity to change its
+    # representation.
+    group_descriptors: tuple[RingRestateSuccessorDescriptor, ...]
     group_multiplicities: tuple[int, ...]
 
     def __post_init__(self) -> None:
@@ -42,8 +50,18 @@ class RingRestateSemanticGroups:
             or max(self.successor_group_ids) >= len(self.successor_keys)
         ):
             raise ValueError("ring-restatement group ID lies outside metadata")
-        if any(not descriptor for descriptor in self.group_descriptors):
+        if any(
+            not variants or any(not descriptor for descriptor in variants)
+            for variants in self.group_descriptors
+        ):
             raise ValueError("ring-restatement semantic descriptors must be nonempty")
+        if any(
+            variants != tuple(sorted(set(variants)))
+            for variants in self.group_descriptors
+        ):
+            raise ValueError(
+                "ring-restatement semantic descriptor variants must be unique and sorted"
+            )
         observed = tuple(
             self.successor_group_ids.count(index)
             for index in range(len(self.successor_keys))
@@ -90,7 +108,7 @@ def enumerate_ring_restate_semantic_groups(
     """Execute once, charge-filter, canonical-group, and describe restatements."""
 
     retained: list[
-        tuple[RingSystemRestate, str, tuple[RingRestateEdgeTransition, ...]]
+        tuple[RingSystemRestate, str, RingRestateTransitionDescriptor]
     ] = []
     for action, successor in enumerate_ring_system_restate_transitions(
         state,
@@ -107,7 +125,7 @@ def enumerate_ring_restate_semantic_groups(
 
     successor_keys = tuple(sorted({key for _, key, _ in retained}))
     group_index = {key: index for index, key in enumerate(successor_keys)}
-    descriptors_by_group: list[set[tuple[RingRestateEdgeTransition, ...]]] = [
+    descriptors_by_group: list[set[RingRestateTransitionDescriptor]] = [
         set() for _ in successor_keys
     ]
     group_ids: list[int] = []
@@ -115,13 +133,8 @@ def enumerate_ring_restate_semantic_groups(
         index = group_index[key]
         group_ids.append(index)
         descriptors_by_group[index].add(descriptor)
-    if any(len(descriptors) != 1 for descriptors in descriptors_by_group):
-        raise ValueError(
-            "raw aliases within one canonical ring-restatement successor "
-            "have divergent semantic descriptors"
-        )
     group_descriptors = tuple(
-        next(iter(descriptors)) for descriptors in descriptors_by_group
+        tuple(sorted(descriptors)) for descriptors in descriptors_by_group
     )
     group_ids_tuple = tuple(group_ids)
     multiplicities = tuple(
@@ -138,6 +151,8 @@ def enumerate_ring_restate_semantic_groups(
 
 __all__ = [
     "RingRestateEdgeTransition",
+    "RingRestateSuccessorDescriptor",
+    "RingRestateTransitionDescriptor",
     "RingRestateSemanticGroups",
     "enumerate_ring_restate_semantic_groups",
     "ring_restate_semantic_transition_descriptor",

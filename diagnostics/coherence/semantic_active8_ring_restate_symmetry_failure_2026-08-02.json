@@ -1,0 +1,48 @@
+{
+  "active8_app_id": "ap-yCvMJXDFvR021kaODO2l6g",
+  "active8_plan_file_sha256": "9db7f9efaf28c28bbbb92b9f2946013a9d7e1e50fdaa8ff1103cc628a2dce9ad",
+  "active8_plan_sha256": "24cfce35714585cacf5922d2c99e9801614c8aa28854849c3045f11e584369a7",
+  "active8_run_identity_sha256": "5dba607eb731047b19560de670e81d96022951c86fb5478a3de4d2f81bb2fd67",
+  "authority": {
+    "bounded_p50_authorized": false,
+    "checkpoint_selection_authorized": false,
+    "final_test_selection_authorized": false,
+    "gate_zero_authorized": false,
+    "long_training_authorized": false,
+    "t1_authorized": false,
+    "training_authorized": false
+  },
+  "completion_artifact_published": false,
+  "durable_decision_task_count": 0,
+  "evidence": {
+    "local_reproduction": {
+      "canonical_successor_count": 1,
+      "raw_action_count": 2,
+      "source_smiles": "c1ccccc1-c1ccccc1",
+      "unique_slot_descriptor_count": 2
+    },
+    "remote_observation": {
+      "error": "raw aliases within one canonical ring-restatement successor have divergent semantic descriptors",
+      "failed_function": "enumerate_ring_restate_semantic_groups",
+      "observed_at_utc": "2026-08-02T09:45:26Z",
+      "wrapped_error": "production semantic successor enumeration failed"
+    }
+  },
+  "failed_source_commit": "2499d815de0c239834f578901d28f72a6cbe29c4",
+  "interpretation": "Canonical molecular grouping was correct, but the implementation incorrectly required raw persistent-slot transition descriptors to be identical inside a symmetry-equivalent successor fiber.",
+  "planned_resolution": "Represent each canonical ring-restatement successor by a deterministic set of unique slot-addressed descriptor variants, pool each variant once, and retain raw action multiplicity only for mark-mass allocation.",
+  "resolution_status": "IMPLEMENTED_AND_FOCUSED_TESTED_PENDING_COMMITTED_RERUN",
+  "schema": "compose.diagnostics.semantic_active8_ring_restate_symmetry_failure",
+  "schema_version": 1,
+  "self_sha256": "ebde4b427b549dfe2d4f7553e51f74d0f0a86877d02ef8234913e599e9b555e8",
+  "status": "NEGATIVE_ACTIVE8_EXECUTION_FINDING_NO_DOWNSTREAM_AUTHORITY",
+  "task_count": 1302,
+  "verification": {
+    "focused_pass_count": 32,
+    "focused_test_files": [
+      "tests/test_editing_v2_semantic_active8_admission.py",
+      "tests/test_ring_restate_semantic_groups.py",
+      "tests/test_semantic_cycle_open_model_integration.py"
+    ]
+  }
+}

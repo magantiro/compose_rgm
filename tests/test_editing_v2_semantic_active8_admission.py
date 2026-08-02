@@ -52,6 +52,9 @@ from compose_v4.rewrite.operators import (
     SemanticAtomRestate,
 )
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
+from compose_v4.rewrite.tracelet_fiber import (
+    enumerate_ring_system_restate_transitions,
+)
 from compose_v4.rewrite.tracelets import BondOrderChange, RingSystemRestate
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
@@ -257,6 +260,36 @@ def test_production_checker_admits_exact_semantic_teacher_and_quotient() -> None
     assert evidence.matching_mark_count == 1
     assert evidence.successor_alias_count >= 1
     assert evidence.raw_mark_count > evidence.canonical_successor_count > 0
+    assert evidence.canonical_successor_key == canonical_state_key(target)
+
+
+def test_production_checker_admits_symmetric_ring_restate_alias() -> None:
+    model = _model()
+    source = _state("c1ccccc1-c1ccccc1")
+    runtime = editing_v2_semantic_rewrite_system()
+    action, target = enumerate_ring_system_restate_transitions(
+        source,
+        system=runtime,
+    )[0]
+    addressed = _addressed(
+        (RewriteStep("ring_system_restate", action),),
+        (source, target),
+        trace_id="symmetric-ring-restate",
+    )
+    checker = ProductionSemanticExactCandidateChecker(model, cache_size=2)
+
+    decision = evaluate_semantic_active8_trace(
+        addressed,
+        exact_candidate_checker=checker,
+        policy=checker.policy,
+    )
+    evidence = decision.action_decisions[0].candidate_evidence
+    assert decision.active8_status == "accepted"
+    assert decision.emits_progress_rows is True
+    assert not decision.active8_exclusions
+    assert evidence is not None and evidence.supported
+    assert evidence.matching_mark_count == 1
+    assert evidence.successor_alias_count == 2
     assert evidence.canonical_successor_key == canonical_state_key(target)
 
 

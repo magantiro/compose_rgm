@@ -376,6 +376,58 @@ def test_semantic_ring_restate_teacher_is_scored_at_successor_group_level(
     assert sum(float(gradient.abs().sum()) for gradient in head_gradients) > 0.0
 
 
+def test_semantic_ring_restate_scorer_pools_symmetric_site_variants(
+    semantic_model,
+) -> None:
+    source = _state("c1ccccc1-c1ccccc1")
+    candidates = _batch(semantic_model, source)
+    assert len(candidates.ring_restate_actions[0]) == 2
+    assert candidates.ring_restate_successor_group_ids == ((0, 0),)
+    assert candidates.ring_restate_successor_group_multiplicities == ((2,),)
+    descriptors = candidates.ring_restate_successor_group_descriptors
+    assert descriptors is not None
+    assert len(descriptors[0][0]) == 2
+    teacher = candidates.ring_restate_actions[0][0]
+    prediction = semantic_model.forward_mark_batch(
+        _batch(
+            semantic_model,
+            source,
+            action=teacher,
+            rule_name="ring_system_restate",
+        )
+    )
+    assert torch.isfinite(prediction.selected_mark_log_probability).all()
+    assert torch.allclose(
+        prediction.selected_mark_log_probability,
+        prediction.family_log_probabilities[:, 9],
+        atol=1e-6,
+        rtol=1e-6,
+    )
+
+
+def test_symmetric_ring_restate_kernel_is_slot_relabel_invariant(
+    semantic_model,
+) -> None:
+    source = _state("c1ccccc1-c1ccccc1")
+    relabeled = permute_persistent_slots(
+        source,
+        (7, 2, 9, 0, 4, 1, 6, 3, 5, 8, 15, 10, 14, 11, 13, 12),
+    )
+    original = canonical_successor_result(semantic_model, source, 0.37).batch
+    permuted = canonical_successor_result(semantic_model, relabeled, 0.37).batch
+    original_probabilities = {
+        successor.key: successor.probability for successor in original.successors
+    }
+    permuted_probabilities = {
+        successor.key: successor.probability for successor in permuted.successors
+    }
+    assert not compare_against_reference(
+        original_probabilities,
+        permuted_probabilities,
+        tolerance=2e-7,
+    )
+
+
 def test_legacy_ring_restate_scorer_preserves_the_historical_state_dict(
     ring_catalog,
 ) -> None:
