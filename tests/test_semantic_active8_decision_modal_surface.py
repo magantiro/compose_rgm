@@ -176,7 +176,9 @@ def test_runtime_contract_is_exact_semantic_parent_and_self_hashed() -> None:
 
 def test_image_copy_inventory_matches_the_hashed_source_inventory() -> None:
     launcher = _load_launcher()
-    expected = {launcher.LAUNCHER_SOURCE}
+    source = APP_PATH.read_text()
+    tree = ast.parse(source)
+    expected = {launcher.LAUNCHER_SOURCE, launcher.MIGRATION_LAUNCHER_SOURCE}
     for source_directory in launcher.IMAGE_SOURCE_DIRECTORIES:
         expected.update(
             path.relative_to(ROOT).as_posix()
@@ -185,6 +187,17 @@ def test_image_copy_inventory_matches_the_hashed_source_inventory() -> None:
         )
     assert launcher.IMAGE_SOURCE_DIRECTORIES == ("src", "configs")
     assert set(launcher._serialized_source_paths(ROOT)) == expected
+    assert (ROOT / launcher.MIGRATION_LAUNCHER_SOURCE).is_file()
+    mounted_files = {
+        ast.get_source_segment(source, node.args[0])
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "add_local_file"
+        and node.args
+    }
+    assert "ROOT / LAUNCHER_SOURCE" in mounted_files
+    assert "ROOT / MIGRATION_LAUNCHER_SOURCE" in mounted_files
 
 
 def test_source_revision_rejects_dirty_or_wrong_commit_and_hashes_all_inputs(

@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/run_semantic_active8_decisions_app.py"
+MIGRATION_LAUNCHER_SOURCE = "modal_apps/materialize_editing_v2_semantic_corpus_app.py"
 RUNTIME_CONTRACT_SOURCE = "configs/editing_v2_semantic_active8_decision_runtime_v1.json"
 SEMANTIC_CONTRACT_SOURCE = "configs/editing_gate_zero_semantic_model_process_v1.json"
 IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
@@ -69,6 +70,11 @@ image = image.add_local_file(
     str(REMOTE_ROOT / LAUNCHER_SOURCE),
     copy=True,
 )
+image = image.add_local_file(
+    ROOT / MIGRATION_LAUNCHER_SOURCE,
+    str(REMOTE_ROOT / MIGRATION_LAUNCHER_SOURCE),
+    copy=True,
+)
 
 app = modal.App("compose-v4-semantic-active8-decisions")
 artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
@@ -99,7 +105,7 @@ def _file_sha256(path: Path) -> str:
 
 
 def _serialized_source_paths(root: Path) -> tuple[str, ...]:
-    paths = [LAUNCHER_SOURCE]
+    paths = [LAUNCHER_SOURCE, MIGRATION_LAUNCHER_SOURCE]
     for source_directory in IMAGE_SOURCE_DIRECTORIES:
         paths.extend(
             path.relative_to(root).as_posix()
