@@ -452,3 +452,53 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **The prelaunch gate needs `ruff` on PATH, which a fresh `git worktree` does not have** (ruff lives in the
   main tree's `.venv/bin`, and the gate shells out to a bare `ruff`). A launch worktree therefore needs
   `PATH="<main-repo>/.venv/bin:$PATH"`, or the gate dies with `FileNotFoundError: 'ruff'` AFTER the tests.
+
+## 2026-08-02
+- **A content-addressed identity move has a transitive blast radius; re-pinning "the configs that
+  pin it" is not the same as re-pinning the chain.** Process V2 edits
+  `factorized_tracelet_rate_model.py`, which `editing_v2_process_identity()` hashes, so the V1
+  process identity moved (`6b98ee21…` -> `9874a69a…`). Two configs pin that value directly, but they
+  are themselves content-addressed by others: cells registry -> cell-role policy -> {gate-0
+  structural, T1 panel policy} -> T1 capacity policy -> {P50 recipe policy, T1 decision, training
+  gate}. The full set is **nine artifacts plus four source constants**. Re-pinning only the first
+  layer left 41 tests failing. **Method that works: sweep for every hash value your edits obsoleted**
+  (old physical hash of each changed file, plus every 64-hex literal present in its old text and
+  absent from its new text) and grep the whole tree until the sweep returns nothing; iterate, because
+  fixing one layer changes the next layer's input. Re-pin only hash pointers, and assert
+  programmatically that no policy, threshold, count, or cell definition moved.
+- **A stale binding that VALIDATES is worse than one that raises, and both existed here.** The P50
+  chain compares its pinned cell-role hash against `load_semantic_development_cell_roles()` (live) and
+  failed loudly. The T1 chain (`editing_v2_semantic_t1_capacity_policy.py:112`) compares the config
+  against a **source constant**, so config and constant were both stale, agreed with each other, and
+  the policy loaded clean while binding a cell-role policy that no longer existed. Prefer live-loader
+  comparison over a source constant for any cross-artifact binding; a constant-vs-constant check is
+  self-consistent by construction.
+- **Precedent is checkable: `git log -p` the artifact before deciding whether re-pinning is
+  maintenance or gate-relaxation.** `d5d3016` (an analogous process change) re-pinned exactly the
+  gate-0 model/process contract, capability-cell registry, Active8 decision runtime, gate-0 structural
+  contract, and the `FROZEN_CONTRACT_SHA256` source constant, and did NOT touch P50. That settled a
+  decision I had gone back and forth on twice. Re-pinning a non-authorizing binding contract is not a
+  Gate-0 run: measured evidence produced under the superseded identity stays invalid either way.
+- **Mutation-test the suite, not just the code.** Three production mutations survived the entire
+  focused suite: bypassing `is_valid_atom_delete`, bypassing the declared-support check, and zeroing
+  the V1 dense delete mask. The first two survived because no fixture reaches them on drug-like
+  chemistry (over 3,617 candidate slots those codes fired 0 times); the third because both sides of
+  the comparison were built from `_graph_application_masks`, so the expectation moved with the
+  observation. **A comparison whose expectation is recomputed from the code under test cannot fail.**
+  Reachable witnesses: `C1CC[SH4]CC1` slot 2 or 4 (valid source, connected + canonicalizable +
+  in-support successor `CCCC[SH5]`, executor is the only refusal) and a 42-membered carbocycle
+  (successor 41 atoms > `MAX_ACTIVE_ATOMS`).
+- **Micro-benchmark vs path, again (cf. the 630x -> 2x -> 98x entry).** The V2 delete mask is ~12x the
+  isolated `_graph_application_masks` call, but only **+0.29% to +0.35%** of the real
+  `prepare_factorized_mark_batch` path, which is dominated by `_semantic_cycle_close_admission_mask`
+  (54.8%) and `_semantic_atom_restate_admission_mask` (36.7%). A measured 2.52x optimization of the
+  new mask was therefore **not** applied: profiling said it buys 0.2% of a batch. Separately measured
+  and worth fixing someday: `enumerate_ring_restate_semantic_groups` sits outside the
+  `if features is None:` branch, so it recomputes on every cache hit (86 ms/state, 13x the entire V2
+  mask).
+- **Non-articulation already implies successor connectivity.** `is_valid_atom_delete` is not a
+  connectivity predicate (it returns True for cut-vertex deletions), which is true and load-bearing,
+  but it does not make the explicit successor-connectivity check independent: removing a non-cut
+  vertex from a connected graph leaves it connected. Measured over 3,617 candidates, only aromaticity,
+  articulation, and the charge policy (7.6%) ever rejected anything. Corrected the claim rather than
+  the code; the check stays as defence in depth.

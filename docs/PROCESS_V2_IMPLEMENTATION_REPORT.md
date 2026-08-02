@@ -1,6 +1,6 @@
 # COMPOSE Process V2 connected-nonleaf atom deletion: implementation report
 
-Branch `codex/editing-v2-process-v2-atom-delete`, base `bc05c6e`, head `c506d70`.
+Branch `codex/editing-v2-process-v2-atom-delete`, base `bc05c6e`, head `85169b1`.
 Implementation handoff: `docs/HANDOFF_PROCESS_V2_CONNECTED_NONLEAF_DELETE.md`.
 Prospective decision: `docs/EDITING_PROCESS_V2_DECISION.md`.
 Frozen contract: `configs/editing_v2_semantic_process_v2.json`.
@@ -57,9 +57,13 @@ frozen charge policy is preserved; and the successor is within the declared
 broad-organic, at-most-40-active-atom support and is canonicalizable.
 
 **The executor is the legality authority.** No weaker approximate valence test was
-introduced. Note that `is_valid_atom_delete` is deliberately *not* a connectivity
-predicate: it returns `True` for articulation-point deletions, so the articulation
-and connectivity conditions are independently load-bearing.
+introduced. `is_valid_atom_delete` is deliberately *not* a connectivity predicate
+(it returns `True` for articulation-point deletions), so connectivity cannot be
+delegated to it. Condition 3 supplies connectivity instead, since removing a
+non-cut vertex from a connected graph leaves it connected, and condition 5 is
+therefore implied rather than independent. An earlier draft of this report and of
+the module docstring claimed the two were independently load-bearing; the
+adversarial review disproved it and both have been corrected.
 
 **Aromatic exclusion is load-bearing, with a measured reason.** Deleting one
 Kekule-encoded slot of a perceived aromatic system yields a representation-sensitive
@@ -88,43 +92,57 @@ cell rather than inventing a new one.
 
 ## 3. Exact files changed
 
-All paths relative to the repository root. 23 files, +7,212 / -140.
+All paths relative to the repository root. **34 files, +8,065 / -227.**
 
-### New (9)
+### New (12)
 
 | Path | Lines | Role |
 |---|---|---|
-| `src/compose_v4/rewrite/process_v2_atom_delete.py` | 323 | Phase 2 scientific core: resolver, enumerator, slot mask, 11 reason codes |
-| `src/compose_v4/data/editing_process_v2_rebind.py` | 2133 | Phase 4 restart-safe, content-addressed, proof-bound V1-to-V2 rebind |
-| `configs/editing_v2_semantic_process_v2.json` | 331 | Phase 1 self-hashed Process V2 semantic contract |
-| `docs/EDITING_PROCESS_V2_DECISION.md` | 201 | Prospective decision record |
+| `src/compose_v4/data/editing_process_v2_rebind.py` | 2144 | Phase 4 restart-safe, content-addressed, proof-bound V1-to-V2 rebind |
+| `tests/test_editing_process_v2_rebind.py` | 962 | Rebind battery (25 tests) |
 | `tests/test_process_v2_atom_delete_mask.py` | 920 | Model and batch mask battery |
-| `tests/test_editing_process_v2_rebind.py` | 962 | Rebind battery |
 | `tests/test_editing_process_v2_identity.py` | 618 | Identity, contract, masquerade battery |
 | `tests/test_process_v2_atom_delete.py` | 404 | Resolver and executor-parity battery |
+| `docs/PROCESS_V2_IMPLEMENTATION_REPORT.md` | 395 | This report |
+| `src/compose_v4/rewrite/process_v2_atom_delete.py` | 334 | Phase 2 scientific core: resolver, enumerator, slot mask, 11 reason codes |
+| `configs/editing_v2_semantic_process_v2.json` | 331 | Phase 1 self-hashed Process V2 semantic contract |
+| `docs/EDITING_PROCESS_V2_DECISION.md` | 219 | Prospective decision record |
 | `tests/test_process_v2_atom_delete_invariance.py` | 191 | Quotient invariance and cross-module assertions |
+| `tests/test_process_v2_atom_delete_teacher.py` | 189 | Teacher scores finite and backpropagates; V1 negative control |
+| `tests/test_process_v2_atom_delete_gates.py` | 140 | Reachable witnesses for the three gates no test could fail on |
 
-### Modified (14)
+### Modified (22)
 
-Source (8):
-`src/compose_v4/rewrite/editing_v2_process_identity.py` (+605, coexisting V1/V2
-identities), `src/compose_v4/model/factorized_tracelet_rate_model.py` (+222, mask,
-capability, batch plumbing), `src/compose_v4/data/semantic_packed_trace_store.py`
-(+129, pinned-identity readers), `src/compose_v4/rewrite/trace_shard_v3.py` (+41,
-pinned-identity decode), `src/compose_v4/experiments/factorized_mark_conditional.py`
-(+15, collation), `src/compose_v4/experiments/production_successor_kernel.py` (+14,
-runtime selection and provenance),
-`src/compose_v4/experiments/factorized_successor_training.py` (+4, predicate),
-`src/compose_v4/experiments/editing_v2_semantic_gate_zero.py` (+2, source-pinned
-frozen contract hash).
+**Source, behaviour (8):**
 
-Configs, hash pointers only (5): `editing_gate_zero_semantic_model_process_v1.json`,
+| Path | Diff | Change |
+|---|---|---|
+| `src/compose_v4/rewrite/editing_v2_process_identity.py` | +587/-18 | Coexisting V1 and V2 identities, frozen-identity validation, V2 contract builder |
+| `src/compose_v4/model/factorized_tracelet_rate_model.py` | +213/-9 | Disjoint-union mask, capability and batch plumbing, semantic-version predicate |
+| `src/compose_v4/data/semantic_packed_trace_store.py` | +123/-8 | Pinned-identity readers |
+| `src/compose_v4/rewrite/trace_shard_v3.py` | +33/-8 | Pinned-identity record decode |
+| `src/compose_v4/experiments/factorized_mark_conditional.py` | +15/-0 | Collation threading |
+| `src/compose_v4/experiments/production_successor_kernel.py` | +11/-3 | Runtime selection and provenance by semantic version |
+| `src/compose_v4/experiments/factorized_successor_training.py` | +2/-2 | Semantic-version predicate |
+| `src/compose_v4/experiments/editing_v2_semantic_t1_decision.py` | +2/-2 | Re-pinned capacity-policy physical and semantic hashes |
+
+**Source, hash constants only (3):** `editing_v2_semantic_gate_zero.py` (+1/-1),
+`editing_v2_semantic_t1_capacity_policy.py` (+2/-2), `editing_training_gate.py` (+1/-1).
+
+**Configs, hash pointers only (9):** `editing_gate_zero_semantic_model_process_v1.json`,
 `editing_v2_semantic_capability_cells_v1.json`,
 `editing_v2_semantic_development_cell_roles_v1.json`,
 `editing_v2_semantic_active8_decision_runtime_v1.json`,
-`editing_v2_semantic_gate_zero_structural_v1.json`.
+`editing_v2_semantic_gate_zero_structural_v1.json`,
+`editing_v2_semantic_t1_panel_policy_v1.json`,
+`editing_v2_semantic_t1_capacity_policy_v1.json`,
+`editing_v2_semantic_p50_recipe_policy_v1.json`, `editing_training_v2_gate.json`.
+The larger line counts on the capability-cell registry (+119/-75) and P50 recipe
+policy (+64/-64) are key-sort only; every semantically changed field is a hash.
 
-Test (1): `tests/test_editing_v2_semantic_t1_panel_cache.py` (+13, see section 7).
+**Tests (2):** `tests/test_editing_v2_semantic_t1_panel_cache.py` (+12/-1, an
+over-specified fail-closed assertion, section 7) and
+`tests/test_materialize_editing_v2_semantic_t1_panel_cache_app.py` (+1/-1, fixture hash).
 
 ## 4. Commits
 
@@ -138,6 +156,7 @@ Test (1): `tests/test_editing_v2_semantic_t1_panel_cache.py` (+13, see section 7
 | `e8bc288` | editing-v2: read superseded-identity payloads under a pinned identity |
 | `067d8da` | editing-v2: rebind the v1 gate chain to the moved process identity |
 | `c506d70` | experiments: select the rewrite runtime by semantic process version |
+| `85169b1` | editing-v2: complete the identity re-pin and close three untestable gates |
 
 ## 5. Identities
 
@@ -148,9 +167,9 @@ Naming: `editing_v2` is the source-conditioned editing **lane**; the trailing `_
 
 | Object | SHA-256 |
 |---|---|
-| Process V2 identity (`semantic_editing_v2_v2`) | `05a6cb0e285ff2bb5cc30f66786ca6948d6835e8f4cfd4ecfd738cc6f652e477` |
-| V2 contract, semantic self-hash | `bfbaf9dfb700f90ae6ed863139a6fe552aa4d36b355cb3334cd7e2df4ae282f1` |
-| V2 contract, physical file hash | `042f5d3c759e2adf4ce487afa2e856e2bbbf3a5c941f81ed47e26a23d1a1e584` |
+| Process V2 identity (`semantic_editing_v2_v2`) | `9fde14b59fc6bfb7be7aaf83564658a9a6758f479d9fd94c134206e84873319b` |
+| V2 contract, semantic self-hash | `30369f36373b1163114b9a8bf6849f3fbed4627b6070e4478c4a5efb6c3c6261` |
+| V2 contract, physical file hash | `6111edce5fd7ab6214ae069804c48e6c1e902ac969463a7b279b834d16780cc9` |
 
 ### Moved (the declared invalidation)
 
@@ -218,17 +237,20 @@ git diff --check
 | Revision | Result |
 |---|---|
 | base `bc05c6e` | **21 failed, 2480 passed, 1 skipped**, 0 errors (908.76 s) |
-| head `c506d70` | **48 failed, 2542 passed, 2 skipped, 14 errors** (898.56 s) |
+| head `85169b1` | **21 failed, 2588 passed, 2 skipped**, 0 errors (947.46 s) |
 
-Delta attribution, by node-ID set difference: 21 base failures still failing, **0
-base failures newly fixed**, +27 failures and +14 errors, **all confined to the P50
-lane** (`test_editing_v2_semantic_p50_validation_baseline.py` 14 errors,
-`p50_successor_cache.py` 11, `p50_runner.py` 11, `p50_recipe_stream.py` 5) with a
-single root cause: `semantic P50 recipe policy identity or supported projection
-disagrees`, from `configs/editing_v2_semantic_p50_recipe_policy_v1.json` pinning the
-moved identity chain. This is the declared downstream invalidation of a stage this
-task is explicitly forbidden to authorize; repairing it requires P50-lane authority
-and re-derived prerequisites, so it is reported rather than re-pinned.
+Attributed by node-ID set difference: **0 new failures, 0 new errors, 0 base
+failures fixed**. The failing set at head is exactly the failing set at base, and
+the branch adds 108 passing tests. The independent adversarial reviewer ran both
+suites separately and reproduced the base counts exactly, which is why these are
+reported as measurements rather than single observations.
+
+An intermediate head (`c506d70`) did show 48 failed / 14 errors, all in the P50
+and T1 chains from one root cause: the identity re-pin had stopped at the Gate-0
+chain while the cell-role policy hash is content-addressed further downstream.
+That is recorded rather than hidden, because it is the finding that produced the
+`85169b1` fix and because it demonstrates the failure mode the re-pin discipline
+exists to prevent.
 
 ### The 21 pre-existing failures
 
@@ -393,3 +415,111 @@ None of the handoff's stop conditions triggered.
 | Exact transition replay differs for a payload claimed compatible | Not triggered. The rebind refuses to publish on any mismatch. |
 | Rebind requires changing split or provenance identity | Not triggered. Source, split, lane, provenance carried through unchanged. |
 | A requested action would authorize or launch a scientific job | Not triggered. Nothing was launched. |
+
+## 11. Independent review: performance and adversarial
+
+Two reviewers worked from the same frozen interface but with no write access to
+the implementation, so neither could quietly repair what it found.
+
+### Performance and decision equivalence
+
+Panel: **894 states at 40 production slots**, identity
+`c1c1b424387f5b7b4e2941f4016e6db853388a84951ab83fe7f0bc0c9efb2b03` (800 Jin-QED
+leads plus 94 hand-built saturated, bridged, spiro, heterocyclic and charged
+supplements, because the Jin panel is aromatic-heavy and Process V2 only ever
+admits non-aromatic slots).
+
+- **Decision equivalence: 894 states x 40 slots = 35,760 decisions, 0
+  disagreements in either direction**, against an oracle built only from the
+  primitives, with its own graph construction and its own support re-derivation.
+- New mask cost **4.94 ms/state mean** (7.11 with candidates, 0.58 without).
+  RDKit work is **linear in the number of screened slots and independent of
+  heavy-atom count**: `sanitizations = 1 + D + 4S + A`, exact on 894/894 states.
+- On the real `prepare_factorized_mark_batch` path the addition is **+0.29% to
+  +0.34%** of the existing cold per-state cost (about 1,760-1,790 ms/state), and
+  **+0.351%** re-measured on the integrated head. The existing cost is dominated
+  by `_semantic_cycle_close_admission_mask` (54.8%) and
+  `_semantic_atom_restate_admission_mask` (36.7%); the new mask is 0.26% of it.
+  The ratio is cache-invariant because the V2 mask rides the same
+  `molecular_state_cache_key`.
+- Newly admitted candidates per molecule: median 3, mean 3.13, max 16; **33.2%
+  of molecules gain none**. Slots: V2 adds 2,796 of 19,019 real slots (14.70%),
+  V1 admits 3,401 (17.88%), **overlap 0 on every state**.
+- Optimization ladder measured, none applied: hoisting the per-candidate
+  recomputation of state-level work plus reusing the collator's existing graph
+  and perception gives **2.52x** with no condition, no condition order and no
+  executor call changed. It is not applied here because profiling shows the cost
+  is already 0.3% of the path, and the smallest complete change is preferred.
+  One proposal that would reorder an executor call was measured (0.012 ms/state,
+  nothing) and **rejected**.
+
+### A measured chemical finding, with its control
+
+**2 of 2,796 newly admitted deletions (0.072%) produce a successor whose
+perceived aromatic ring count drops from 2 to 1.** Both are the same chemistry, a
+protonated quinoid `C=c2ccccc2=[NH+]`: the deleted atom has no incident perceived
+aromatic bond, so frozen condition 2 is correctly satisfied, but it carries a
+stored double bond into the quinoid ring and removing it collapses the
+cross-conjugation that sustained RDKit's perception. Successors are valid,
+connected, charge-preserving and canonicalizable. Charge-altering: 0.
+Disconnected: 0.
+
+The control is what makes this interpretable. On the same panel the **unchanged
+V1 leaf rule** admits 3,401 deletions of which **61 (1.79%) are
+aromatic-system-altering and 140 (4.12%) violate the charge policy**. The
+property is therefore inherited from the preserved V1 rule at roughly 25x the
+rate, and the Process-V2 expansion is strictly cleaner on both axes. This is an
+owner decision about whether condition 2 should be widened to exclude atoms
+double-bonded into a perceived aromatic system, not an implementation defect, and
+it is **not** the handoff's representation-sensitivity hazard: that hazard is
+Kekule-alias dependence of the successor, and alias invariance was verified over
+965 component-factored aliases and 3,200 random re-serializations with 0
+mismatches.
+
+### Adversarial review
+
+The reviewer independently reproduced both suite results exactly (base 21 failed
+/ 2480 passed / 1 skipped; head 48 failed / 2542 passed / 2 skipped / 14 errors
+at `c506d70`), which is why those counts are reported as measurements rather than
+single observations. It confirmed byte-identity of the state dict, capability
+fingerprint, all 11 mask tensors and all 11 logit tensors versus base under V1
+semantics; 0 mask/oracle disagreements over 800 leads, 889 hard states (padded,
+permuted, chained-delete, SCAR-injected) and a 55-molecule aromatic edge panel;
+disjointness on every state; correct carriage of the new batch fields through
+`subbatch`, `.to()` and concatenation; no bare excepts or silent degradation in
+the rebind; and no unrelated operator touched.
+
+It also found real defects, all of which are fixed in `85169b1` except where
+noted:
+
+1. **The identity re-pin was incomplete** (blocker). Four further artifacts and
+   four source constants still pinned the superseded cell-role policy hash.
+   Fixed, and verified by sweeping every hash value these edits obsoleted until
+   the sweep reported none.
+2. **The T1 chain failed silently** where the P50 chain failed loudly, because
+   `editing_v2_semantic_t1_capacity_policy.py` compares the config against a
+   *source constant* rather than the live loader, so both were stale and agreed
+   with each other. Re-pinned. The structural weakness remains and is recorded in
+   section 9: the next hash move will again be silently stale there.
+3. **Three production mutations survived the whole suite** (bypassing the
+   executor check, bypassing the declared-support check, zeroing the V1 dense
+   mask). Fixed with reachable witnesses in
+   `tests/test_process_v2_atom_delete_gates.py`; each mutation is now caught by
+   exactly one test.
+4. **Nothing tested that a connected-nonleaf delete can be learned.** Fixed in
+   `tests/test_process_v2_atom_delete_teacher.py`, with the Process-V1 negative
+   control.
+5. **Three claims outran their evidence** and were corrected in place:
+   conditions 3 and 5 are not independent, a self-consistent pinned identity does
+   not prove provenance, and the rebind oracle is a second derivation rather than
+   a second design.
+6. **`mismatches_by_code` is a constant, not a measurement** (section 9).
+
+Findings assessed and deliberately not acted on: the Kekule-alias invariance test
+is underpowered relative to its name (8 of 10 panel molecules have no aromatic
+component and skip), though it does fail under the aromatic mutation and the
+independent sweep supplies the missing power; the two pinned-identity readers now
+derive the expected process-semantics label differently, which fails closed but
+is inconsistent; and Process V2 newly admits deletions adjacent to a SCAR, which
+writes hydrogen onto the SCAR through unchanged executor behaviour. The SCAR
+itself is never admitted, so the handoff's stated requirement holds.
