@@ -20,9 +20,12 @@ PANEL_KIND = "unique_state_single_target_canonical_successor_capacity"
 OBJECTIVE_UNIT = "exact_source_frozen_time_canonical_successor"
 EMPIRICAL_STATUS = "BLOCKED_PENDING_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS"
 EMPIRICAL_RECEIPT_KIND = "independent_empirical_transition_v1"
-EXPECTED_PANEL_POLICY_SHA256 = (
-    "089f3df2fa7f307f4623dd3d709547088a23f1b83264f73a57ee0b47d1a00279"
+EXPECTED_PANEL_POLICY_SHA256 = "5ff3f5ee289833190ffc0b16472c6d280470139495a1081c7d582b47f7c64ac6"
+EXPECTED_CELL_ROLE_POLICY_SHA256 = (
+    "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44"
 )
+EXPECTED_PANEL_MINIMUM = 64
+EXPECTED_PANEL_MAXIMUM = 128
 EXPECTED_REPORT_POINTS = (1, 10, 50, 100, 250, 500)
 EXPECTED_SAMPLING_ORDER = (
     "model_family",
@@ -59,9 +62,7 @@ def _sha256(value: object) -> str:
     return hashlib.sha256(_canonical_bytes(value)).hexdigest()
 
 
-def _exact_mapping(
-    value: object, expected: set[str], *, field: str
-) -> Mapping[str, Any]:
+def _exact_mapping(value: object, expected: set[str], *, field: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping) or set(value) != expected:
         raise SemanticT1CapacityPolicyError(f"{field} has missing or unknown fields")
     return value
@@ -89,6 +90,8 @@ def validate_semantic_t1_capacity_policy(
         "objective_unit",
         "support_time_hex",
         "required_families",
+        "cell_role_policy_sha256",
+        "panel_cardinality",
         "sampling_law",
         "optimization",
         "thresholds",
@@ -106,6 +109,7 @@ def validate_semantic_t1_capacity_policy(
         or policy["objective_unit"] != OBJECTIVE_UNIT
         or policy["support_time_hex"] != float(0.5).hex()
         or policy["panel_policy_sha256"] != EXPECTED_PANEL_POLICY_SHA256
+        or policy["cell_role_policy_sha256"] != EXPECTED_CELL_ROLE_POLICY_SHA256
         or tuple(policy["required_families"]) != RINGCORE_EDITING_FAMILIES
         or any(
             policy[field] is not False
@@ -121,6 +125,20 @@ def validate_semantic_t1_capacity_policy(
     ):
         raise SemanticT1CapacityPolicyError(
             "semantic T1 capacity identity, scope, or authority disagrees"
+        )
+    cardinality = _exact_mapping(
+        policy["panel_cardinality"],
+        {"minimum_entries_by_family", "maximum_entries_by_family"},
+        field="panel_cardinality",
+    )
+    expected_minimums = {family: EXPECTED_PANEL_MINIMUM for family in RINGCORE_EDITING_FAMILIES}
+    expected_maximums = {family: EXPECTED_PANEL_MAXIMUM for family in RINGCORE_EDITING_FAMILIES}
+    if (
+        cardinality["minimum_entries_by_family"] != expected_minimums
+        or cardinality["maximum_entries_by_family"] != expected_maximums
+    ):
+        raise SemanticT1CapacityPolicyError(
+            "semantic T1 panel cardinality must freeze 64 to 128 entries per family"
         )
 
     sampling = _exact_mapping(
@@ -139,9 +157,7 @@ def validate_semantic_t1_capacity_policy(
         or sampling["target_coefficient"] != 1.0
         or sampling["importance_correction"] != "none"
     ):
-        raise SemanticT1CapacityPolicyError(
-            "semantic T1 capacity sampling law disagrees"
-        )
+        raise SemanticT1CapacityPolicyError("semantic T1 capacity sampling law disagrees")
 
     optimization = _exact_mapping(
         policy["optimization"],
@@ -193,14 +209,11 @@ def validate_semantic_t1_capacity_policy(
         or tuple(optimization["failure_diagnostic_scope_order"])
         != EXPECTED_FAILURE_DIAGNOSTIC_SCOPE_ORDER
         or optimization["failure_diagnostics_only_for_failing_families"] is not True
-        or optimization["trajectory_evaluation"]
-        != "every_pre_update_state_and_terminal_state"
+        or optimization["trajectory_evaluation"] != "every_pre_update_state_and_terminal_state"
         or optimization["early_stop_rule"]
         != "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_evaluated_state"
     ):
-        raise SemanticT1CapacityPolicyError(
-            "semantic T1 capacity optimization policy disagrees"
-        )
+        raise SemanticT1CapacityPolicyError("semantic T1 capacity optimization policy disagrees")
 
     thresholds = _exact_mapping(
         policy["thresholds"],
@@ -229,17 +242,13 @@ def validate_semantic_t1_capacity_policy(
             abs_tol=1e-15,
         )
         or thresholds["require_every_unique_entry_teacher_successor_top1"] is not True
-        or thresholds["minimum_every_unique_entry_teacher_successor_probability"]
-        != probability
+        or thresholds["minimum_every_unique_entry_teacher_successor_probability"] != probability
         or thresholds["minimum_nonempty_cell_teacher_successor_top1"] != 0.95
-        or thresholds["minimum_nonempty_cell_teacher_successor_probability"]
-        != probability
+        or thresholds["minimum_nonempty_cell_teacher_successor_probability"] != probability
         or thresholds["maximum_nonempty_cell_teacher_successor_nll"]
         != thresholds["maximum_unique_state_teacher_successor_nll"]
-        or thresholds["require_finite_nonzero_family_gate_gradient_each_family"]
-        is not True
-        or thresholds["require_finite_nonzero_action_route_gradient_each_family"]
-        is not True
+        or thresholds["require_finite_nonzero_family_gate_gradient_each_family"] is not True
+        or thresholds["require_finite_nonzero_action_route_gradient_each_family"] is not True
     ):
         raise SemanticT1CapacityPolicyError("semantic T1 capacity thresholds disagree")
 
@@ -268,9 +277,7 @@ def validate_semantic_t1_capacity_policy(
             )
         )
     ):
-        raise SemanticT1CapacityPolicyError(
-            "semantic T1 empirical-law boundary disagrees"
-        )
+        raise SemanticT1CapacityPolicyError("semantic T1 empirical-law boundary disagrees")
     return policy
 
 

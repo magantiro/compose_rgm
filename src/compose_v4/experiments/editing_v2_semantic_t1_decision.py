@@ -34,6 +34,9 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
     SemanticT1CapacityPolicyError,
     load_semantic_t1_capacity_policy,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
     NO_AUTHORITY as PREPARED_INPUT_NO_AUTHORITY,
 )
@@ -60,8 +63,8 @@ from compose_v4.experiments.successor_micro_overfit import (
 )
 
 CAPACITY_POLICY_RELATIVE_PATH = "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
-CAPACITY_POLICY_FILE_SHA256 = "1f0cde3b3cfc942e90a715b61431526e8d99e26c27885022b71402d1bb353a62"
-CAPACITY_POLICY_SHA256 = "f300a5b4b93f4157976f5031d59c5b55f6a8dd47749d4aff8f289ea915e14402"
+CAPACITY_POLICY_FILE_SHA256 = "9bb8fce6ee1d3b0110cc19f16affe6b6fc17f873e84a834315ef964838e65862"
+CAPACITY_POLICY_SHA256 = "2186dbd9436f39b3caffafd421710f0c82de14b7da9e4c5ab94a252525a46d1e"
 
 RESULT_FILENAME = "SEMANTIC_T1_CAPACITY_RESULT.json"
 COMPLETION_FILENAME = "SEMANTIC_T1_CAPACITY_COMPLETE.json"
@@ -93,6 +96,7 @@ _GATE_ZERO_NO_AUTHORITY = {
 _RESULT_PROVENANCE_FIELDS = {
     "capacity_policy_file_sha256",
     "capacity_policy_sha256",
+    "cell_role_policy_sha256",
     "cache_completion_file_sha256",
     "cache_completion_sha256",
     "cache_manifest_file_sha256",
@@ -138,6 +142,8 @@ _RUNNER_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/factorized_mark_conditional.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
     "configs/editing_v2_semantic_t1_capacity_policy_v1.json",
+    "configs/editing_v2_semantic_development_cell_roles_v1.json",
+    "src/compose_v4/experiments/editing_v2_semantic_development_cell_roles.py",
 )
 _RUN_INTEGRITY_FIELDS = {
     "optimizer_steps_completed",
@@ -443,9 +449,14 @@ def _derived_aggregates(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     by_cell: dict[tuple[str, str], list[Mapping[str, Any]]] = defaultdict(list)
     by_family: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    roles = load_semantic_development_cell_roles()
     for entry in entries:
         family = str(entry["family"])
         cell = str(entry["semantic_cell_id"])
+        if roles.role_for(cell) != "required_editing":
+            raise SemanticT1DecisionError(
+                f"semantic T1 entry is outside the required editing role: {cell}"
+            )
         by_cell[(family, cell)].append(entry)
         by_family[family].append(entry)
     missing_families = [family for family in RINGCORE_EDITING_FAMILIES if not by_family[family]]
@@ -890,6 +901,7 @@ def _expected_provenance(
     return {
         "capacity_policy_file_sha256": CAPACITY_POLICY_FILE_SHA256,
         "capacity_policy_sha256": policy["policy_sha256"],
+        "cell_role_policy_sha256": policy["cell_role_policy_sha256"],
         "cache_completion_file_sha256": cache_file_sha256,
         "cache_completion_sha256": cache["completion_sha256"],
         "cache_manifest_file_sha256": cache["manifest_file_sha256"],
@@ -1050,6 +1062,7 @@ def build_semantic_t1_capacity_completion(
         **_NO_AUTHORITY,
         "capacity_policy_file_sha256": CAPACITY_POLICY_FILE_SHA256,
         "capacity_policy_sha256": policy["policy_sha256"],
+        "cell_role_policy_sha256": policy["cell_role_policy_sha256"],
         "result_relative_path": relative(result_path, field="result_path"),
         "result_file_sha256": hashlib.sha256(result_raw).hexdigest(),
         "result_sha256": result["result_sha256"],
@@ -1110,6 +1123,7 @@ def validate_semantic_t1_capacity_completion(
         *_NO_AUTHORITY,
         "capacity_policy_file_sha256",
         "capacity_policy_sha256",
+        "cell_role_policy_sha256",
         "result_relative_path",
         "result_file_sha256",
         "result_sha256",
@@ -1245,7 +1259,12 @@ def _decision_failures(result: Mapping[str, Any], policy: Mapping[str, Any]) -> 
         )
 
     for family in result["family_metrics"]:
+        cardinality = policy["panel_cardinality"]
+        minimum = cardinality["minimum_entries_by_family"][family["family"]]
+        maximum = cardinality["maximum_entries_by_family"][family["family"]]
         checks = {
+            "entry_count_minimum": family["entry_count"] >= minimum,
+            "entry_count_maximum": family["entry_count"] <= maximum,
             "top1": family["teacher_successor_top1"]
             >= thresholds["minimum_unique_state_teacher_successor_top1"],
             "probability": family["teacher_successor_probability"]
@@ -1308,6 +1327,7 @@ def build_semantic_t1_capacity_decision(
         "final_test_selection_authorized": False,
         "capacity_policy_file_sha256": CAPACITY_POLICY_FILE_SHA256,
         "capacity_policy_sha256": policy["policy_sha256"],
+        "cell_role_policy_sha256": policy["cell_role_policy_sha256"],
         "completion_relative_path": Path(completion_path).name,
         "completion_file_sha256": hashlib.sha256(completion_raw).hexdigest(),
         "completion_sha256": completion["completion_sha256"],
@@ -1369,6 +1389,7 @@ def validate_semantic_t1_capacity_decision(
         "final_test_selection_authorized",
         "capacity_policy_file_sha256",
         "capacity_policy_sha256",
+        "cell_role_policy_sha256",
         "completion_relative_path",
         "completion_file_sha256",
         "completion_sha256",

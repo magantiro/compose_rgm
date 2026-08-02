@@ -67,9 +67,6 @@ from compose_v4.data.semantic_packed_trace_store import (
     write_semantic_packed_artifact,
 )
 from compose_v4.experiments import editing_v2_semantic_gate_zero as semantic_gate_zero
-from compose_v4.experiments import (
-    editing_v2_semantic_t1_panel_cache as semantic_t1_panel,
-)
 from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
@@ -905,13 +902,13 @@ def test_semantic_gate_zero_consumes_real_index_without_held_out_rescue(
     assert decision["next_authorized_stage"] is None
 
 
-def test_real_gate_zero_pass_rejects_fixture_without_single_target_active8_coverage(
+def test_real_gate_zero_fails_fixture_without_all_required_editing_cells(
     completed_active8_source,
     monkeypatch,
 ) -> None:
     inventory = completed_active8_source["inventory"]
     _patch_migration_resolver(monkeypatch, inventory)
-    index = _resolve(completed_active8_source)
+    _resolve(completed_active8_source)
     contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(repo_root=Path.cwd())
     output = completed_active8_source["root"] / "gate-zero-t1-integration"
     artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
@@ -925,53 +922,24 @@ def test_real_gate_zero_pass_rejects_fixture_without_single_target_active8_cover
         output_directory=output,
         contract_path=contract.source,
     )
-    assert artifacts["evidence"]["structural_result"] == "PASS"
-    runtime = artifacts["evidence"]["model_runtime_identity"]
-    request = semantic_t1_panel.SemanticT1PanelRequest.create(
-        request_id="real_typed_index_integration",
-        source_revision_sha256=runtime["execution_source_revision_sha256"],
-        support_time=0.5,
-        maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+    assert artifacts["evidence"]["structural_result"] == "FAIL"
+    assert artifacts["evidence"]["empty_required_editing_cell_ids"]
+    assert (
+        artifacts["evidence"]["checks"][
+            "all_required_editing_cells_have_decision_eligible_teachers"
+        ]
+        is False
     )
-    with pytest.raises(
-        semantic_t1_panel.SemanticT1PanelError,
-        match="no train stratum",
-    ):
-        semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
-            index,
-            gate_zero_artifacts=artifacts,
-            decision_plan_path=completed_active8_source["decision_plan_path"],
-            request=request,
-            gate_zero_contract=contract,
-            repo_root=Path.cwd(),
-        )
-
-    mismatched_plan = output / "MISMATCHED_PLAN.json"
-    mismatched = json.loads(completed_active8_source["decision_plan_path"].read_text())
-    mismatched["model_runtime_identity"]["execution_source_revision_sha256"] = "f" * 64
-    mismatched_plan.write_bytes(_canonical(mismatched, newline=True))
-    with pytest.raises(
-        semantic_gate_zero.SemanticGateZeroStructuralError,
-        match="decision plan differs from decision-source index|model runtime",
-    ):
-        semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
-            index,
-            gate_zero_artifacts=artifacts,
-            decision_plan_path=mismatched_plan,
-            request=request,
-            gate_zero_contract=contract,
-            repo_root=Path.cwd(),
-        )
 
 
-def test_real_gate_zero_pass_prepares_unique_panel_and_resolves_cache_traces(
+def test_real_gate_zero_fails_single_target_fixture_with_only_one_cell_per_family(
     completed_single_target_active8_source,
     monkeypatch,
 ) -> None:
     completed = completed_single_target_active8_source
     inventory = completed["inventory"]
     _patch_migration_resolver(monkeypatch, inventory)
-    index = _resolve(completed)
+    _resolve(completed)
     contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(repo_root=Path.cwd())
     artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
         migration_completion_path=inventory.migration_completion_path,
@@ -984,57 +952,8 @@ def test_real_gate_zero_pass_prepares_unique_panel_and_resolves_cache_traces(
         output_directory=completed["root"] / "gate-zero-t1-single-target-integration",
         contract_path=contract.source,
     )
-    assert artifacts["evidence"]["structural_result"] == "PASS"
-
-    runtime = artifacts["evidence"]["model_runtime_identity"]
-    request = semantic_t1_panel.SemanticT1PanelRequest.create(
-        request_id="real_single_target_typed_index_integration",
-        source_revision_sha256=runtime["execution_source_revision_sha256"],
-        support_time=0.5,
-        maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
-    )
-    panel = semantic_t1_panel.prepare_editing_v2_semantic_t1_panel(
-        index,
-        gate_zero_artifacts=artifacts,
-        decision_plan_path=completed["decision_plan_path"],
-        request=request,
-        gate_zero_contract=contract,
-        repo_root=Path.cwd(),
-    )
-
-    assert {entry.model_family for entry in panel.entries} == set(ACTIVE8_FAMILIES)
-    assert panel.single_target_source_state_count == len(ACTIVE8_FAMILIES)
-    assert panel.repeated_source_state_count == 0
-    assert {
-        panel_entry_sha256
-        for cache_input in panel.cache_trace_inputs
-        for panel_entry_sha256 in cache_input.panel_entry_sha256s
-    } == {entry.panel_entry_sha256 for entry in panel.entries}
-
-    resolved = semantic_t1_panel.resolve_semantic_t1_cache_trace_inputs(
-        index,
-        panel,
-        repo_root=Path.cwd(),
-    )
-    expected_trace_keys = {
-        (
-            cache_input.packed_shard_content_sha256,
-            cache_input.packed_entry_index,
-            cache_input.trace_id,
-        )
-        for cache_input in panel.cache_trace_inputs
-    }
-    observed_trace_keys = {
-        (
-            trace.addressed_trace.address.packed_shard_content_sha256,
-            trace.addressed_trace.address.entry_index,
-            trace.addressed_trace.address.trace_id,
-        )
-        for trace in resolved
-    }
-    assert observed_trace_keys == expected_trace_keys
-    assert len(resolved) == len(panel.cache_trace_inputs)
-    assert all(index.is_accepted(trace.addressed_trace.address) for trace in resolved)
+    assert artifacts["evidence"]["structural_result"] == "FAIL"
+    assert artifacts["evidence"]["empty_required_editing_cell_ids"]
 
 
 def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(

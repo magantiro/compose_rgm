@@ -59,6 +59,16 @@ from compose_v4.experiments.successor_micro_overfit import (
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT_BYTES = b"semantic-t1-selected-checkpoint-fixture"
+_CONTEXT = {
+    "atom_insert": "one_neighbor_birth",
+    "atom_delete": "leaf_death",
+    "atom_restate": "element_identity_change",
+    "bond_reorder": "bond_order_increase",
+    "bond_reroute": "single_atom_pendant_acyclic_source",
+    "cycle_insert": "close_to_monocyclic_ring_system",
+    "cycle_attach": "open_from_monocyclic_ring_system",
+    "ring_system_restate": "aromatization",
+}
 
 
 def _bytes(value: object) -> bytes:
@@ -98,7 +108,7 @@ def _gate_zero(initial_model: str, inventory: str) -> dict[str, object]:
     return {**body, "evidence_sha256": _sha(body)}
 
 
-def _cache(initial_model: str, inventory: str, *, entries: int = 8) -> dict[str, object]:
+def _cache(initial_model: str, inventory: str, *, entries: int = 512) -> dict[str, object]:
     body = {
         "schema": CACHE_COMPLETION_SCHEMA,
         "schema_version": CACHE_COMPLETION_SCHEMA_VERSION,
@@ -164,18 +174,21 @@ def _environment() -> dict[str, object]:
     )
 
 
-def _entries(probability: float = 0.9) -> list[dict[str, object]]:
+def _entries(probability: float = 0.9, *, entries_per_family: int = 64) -> list[dict[str, object]]:
     return [
         {
-            "panel_entry_sha256": format(index + 1, "064x"),
+            "panel_entry_sha256": format(
+                family_index * entries_per_family + entry_index + 1, "064x"
+            ),
             "family": family,
-            "semantic_cell_id": f"{family}:base",
+            "semantic_cell_id": f"editing_v2_active8_v1:{family}:{_CONTEXT[family]}",
             "teacher_successor_probability": probability,
             "canonical_successor_nll": -math.log(probability),
             "teacher_successor_rank": 1,
             "teacher_successor_top1": True,
         }
-        for index, family in enumerate(RINGCORE_EDITING_FAMILIES)
+        for family_index, family in enumerate(RINGCORE_EDITING_FAMILIES)
+        for entry_index in range(entries_per_family)
     ]
 
 
@@ -226,8 +239,9 @@ def _result(
     probability: float = 0.9,
     resumed: bool = False,
     zero_gradient_family: str | None = None,
+    entries_per_family: int = 64,
 ) -> dict[str, object]:
-    entries = _entries(probability)
+    entries = _entries(probability, entries_per_family=entries_per_family)
     selected_nll = -math.log(probability)
     return build_semantic_t1_capacity_result(
         provenance=provenance,
@@ -258,6 +272,7 @@ def _physical_chain(
     probability: float = 0.9,
     resumed: bool = False,
     zero_gradient_family: str | None = None,
+    entries_per_family: int = 64,
 ) -> tuple[Path, dict[str, object]]:
     monkeypatch.setattr(
         "compose_v4.experiments.editing_v2_semantic_t1_decision.validate_semantic_t1_prepared_inputs",
@@ -268,7 +283,11 @@ def _physical_chain(
     initial_model = "e" * 64
     inventory = "f" * 64
     gate_zero = _gate_zero(initial_model, inventory)
-    cache = _cache(initial_model, inventory)
+    cache = _cache(
+        initial_model,
+        inventory,
+        entries=len(RINGCORE_EDITING_FAMILIES) * entries_per_family,
+    )
     gate_zero_path = run / "GATE_ZERO_EVIDENCE.json"
     cache_path = run / "SEMANTIC_T1_SUCCESSOR_CACHE_COMPLETE.json"
     prepared_path = run / "SEMANTIC_T1_PREPARED_INPUTS.json"
@@ -290,6 +309,7 @@ def _physical_chain(
         probability=probability,
         resumed=resumed,
         zero_gradient_family=zero_gradient_family,
+        entries_per_family=entries_per_family,
     )
     result_path = run / RESULT_FILENAME
     _write(result_path, result)
@@ -362,12 +382,34 @@ def test_threshold_resume_and_gradient_defects_are_durable_no_go(
         )
 
 
+def test_sixty_three_entries_per_family_is_durable_no_go(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    decision_path, decision = _physical_chain(
+        tmp_path,
+        monkeypatch,
+        entries_per_family=63,
+    )
+    observed = validate_semantic_t1_capacity_decision(
+        decision,
+        decision_path=decision_path,
+        repo_root=ROOT,
+    )
+    assert observed["status"] == DECISION_NO_GO_STATUS
+    assert observed["bounded_p50_authorized"] is False
+    assert all(
+        f"family:{family}:entry_count_minimum" in observed["failed_checks"]
+        for family in RINGCORE_EDITING_FAMILIES
+    )
+
+
 def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
     provenance = {
         name: "1" * 64
         for name in (
             "capacity_policy_file_sha256",
             "capacity_policy_sha256",
+            "cell_role_policy_sha256",
             "cache_completion_file_sha256",
             "cache_completion_sha256",
             "cache_manifest_file_sha256",
@@ -388,7 +430,7 @@ def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
             "runner_source_revision_sha256",
         )
     }
-    provenance["panel_entry_binding_count"] = 8
+    provenance["panel_entry_binding_count"] = 512
     provenance["execution_environment"] = _environment()
     result = _result(provenance)
     broken = copy.deepcopy(result)

@@ -25,6 +25,9 @@ from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     SemanticP50Prerequisites,
     compile_semantic_p50_prepared_recipe,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_p50_runner import (
     SemanticP50RunnerError,
     SemanticP50RuntimeInputs,
@@ -409,16 +412,18 @@ def _runtime_inputs() -> SemanticP50RuntimeInputs:
         scratch_initial_model_state_sha256=scratch.initial_model_state_sha256,
         capability_registry_sha256=shas["registry"],
         classifier_implementation_sha256=shas["classifier"],
+        cell_role_policy_sha256=load_semantic_development_cell_roles().policy_sha256,
     )
+    required_cells = load_semantic_development_cell_roles().required_cell_ids
     train_candidates = tuple(
         SemanticP50Candidate(
             address=_address(family_index=index, partition="train"),
-            family=family,
-            semantic_cell_id=f"cell:{family}:required",
+            family=cell.rsplit(":", 2)[1],
+            semantic_cell_id=cell,
             data_lane="reversible_synthetic_walk",
-            assignment_sha256=_digest(f"assignment:train:{family}"),
+            assignment_sha256=_digest(f"assignment:train:{cell}"),
         )
-        for index, family in enumerate(ACTIVE8_FAMILIES)
+        for index, cell in enumerate(required_cells)
     )
     prepared = compile_semantic_p50_prepared_recipe(
         SemanticP50CandidateInventory(prerequisites, train_candidates)
@@ -428,7 +433,8 @@ def _runtime_inputs() -> SemanticP50RuntimeInputs:
     validation_records: list[SuccessorFiberCacheRecord] = []
     states: dict[str, _State] = {}
     validation_candidates: list[dict] = []
-    for index, family in enumerate(ACTIVE8_FAMILIES):
+    for index, cell in enumerate(required_cells):
+        family = cell.rsplit(":", 2)[1]
         train_record, train_state = _record(train_candidates[index].address, family)
         validation_address = _address(family_index=index, partition="validation")
         validation_record, validation_state = _record(validation_address, family)
@@ -439,9 +445,9 @@ def _runtime_inputs() -> SemanticP50RuntimeInputs:
         candidate_body = {
             "address": vars(validation_address),
             "family": family,
-            "semantic_cell_id": f"cell:{family}:required",
+            "semantic_cell_id": cell,
             "data_lane": "reversible_synthetic_walk",
-            "assignment_sha256": _digest(f"assignment:validation:{family}"),
+            "assignment_sha256": _digest(f"assignment:validation:{cell}"),
         }
         validation_candidates.append({**candidate_body, "candidate_sha256": _sha(candidate_body)})
     validation_body = {"candidate_rows": validation_candidates}
@@ -506,8 +512,9 @@ def test_exact_runner_executes_50_updates_and_returns_reducible_nlls(
     assert artifacts.result["completed_optimizer_steps"] == 50
     assert artifacts.result["scheduled_example_count"] == 3200
     assert len(artifacts.result["trajectory"]) == 50
-    assert len(artifacts.scratch_validation_evaluations) == len(ACTIVE8_FAMILIES)
-    assert len(artifacts.final_validation_evaluations) == len(ACTIVE8_FAMILIES)
+    required_count = len(load_semantic_development_cell_roles().required_cell_ids)
+    assert len(artifacts.scratch_validation_evaluations) == required_count
+    assert len(artifacts.final_validation_evaluations) == required_count
     assert all(
         item.canonical_successor_nll_nats >= 0.0
         for item in artifacts.scratch_validation_evaluations
@@ -698,11 +705,12 @@ def test_runner_evaluates_but_does_not_gate_extra_validation_cells(
         )
     )
 
-    assert len(artifacts.final_validation_evaluations) == len(ACTIVE8_FAMILIES) + 1
+    required_count = len(load_semantic_development_cell_roles().required_cell_ids)
+    assert len(artifacts.final_validation_evaluations) == required_count + 1
     assert artifacts.result["validation_cell_coverage"][
         "extra_observed_semantic_cells_not_gated"
     ] == [f"extra:{family}:observed_only"]
-    assert len(artifacts.result["semantic_cell_validation_nll_checks"]) == len(ACTIVE8_FAMILIES)
+    assert len(artifacts.result["semantic_cell_validation_nll_checks"]) == required_count
 
 
 def test_checkpoint_rejects_tensor_tampering(monkeypatch: pytest.MonkeyPatch) -> None:

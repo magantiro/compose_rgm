@@ -42,12 +42,14 @@ def _inputs() -> dict[str, dict[str, str]]:
 def _panel_request() -> dict[str, object]:
     return {
         "schema": "compose.editing_v2.semantic_t1_panel_request",
-        "schema_version": 2,
+        "schema_version": 3,
         "status": "BOUNDED_REQUEST_NO_T1_OR_TRAINING_AUTHORITY",
         **t1_app._NO_AUTHORITY,
         "request_id": "fixture",
         "source_revision_sha256": "b" * 64,
         "support_time_hex": "0x1.0000000000000p-1",
+        "cell_role_policy_sha256": "e" * 64,
+        "minimum_entries_by_family": {"fixture": 1},
         "maximum_entries_by_family": {"fixture": 1},
         "selection_rule": "fixture",
         "selection_seed_sha256": "c" * 64,
@@ -67,6 +69,19 @@ def _policy() -> dict[str, object]:
         **t1_app._NO_AUTHORITY,
         "request_id": "editing-v2-semantic-t1-capacity-v1",
         "support_time_hex": "0x1.0000000000000p-1",
+        "cell_role_policy_sha256": (
+            "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44"
+        ),
+        "minimum_entries_by_family": {
+            "atom_delete": 64,
+            "atom_insert": 64,
+            "atom_restate": 64,
+            "bond_reorder": 64,
+            "bond_reroute": 64,
+            "cycle_attach": 64,
+            "cycle_insert": 64,
+            "ring_system_restate": 64,
+        },
         "maximum_entries_by_family": {
             "atom_delete": 128,
             "atom_insert": 128,
@@ -163,6 +178,16 @@ def test_committed_panel_policy_is_self_hashed_and_excludes_later_policy(
 
     invalid = _policy()
     invalid["optimizer_policy_included"] = True
+    body = {key: value for key, value in invalid.items() if key != "policy_sha256"}
+    invalid["policy_sha256"] = t1_app._sha256(body)
+    policy_path.write_text(json.dumps(invalid))
+    with pytest.raises(RuntimeError, match="identity disagrees"):
+        t1_app._load_panel_policy(root=tmp_path)
+
+    invalid = _policy()
+    invalid["minimum_entries_by_family"]["atom_insert"] = 63
+    body = {key: value for key, value in invalid.items() if key != "policy_sha256"}
+    invalid["policy_sha256"] = t1_app._sha256(body)
     policy_path.write_text(json.dumps(invalid))
     with pytest.raises(RuntimeError, match="identity disagrees"):
         t1_app._load_panel_policy(root=tmp_path)
@@ -181,9 +206,7 @@ def test_repository_policy_exists_and_freezes_unique_and_repeated_roles() -> Non
 def test_local_source_revision_requires_the_exact_clean_commit() -> None:
     with (
         patch.object(t1_app, "_git", side_effect=["1" * 40, "2" * 40, ""]),
-        patch.object(
-            t1_app, "_serialized_source_hashes", return_value={"source.py": SHA}
-        ),
+        patch.object(t1_app, "_serialized_source_hashes", return_value={"source.py": SHA}),
     ):
         revision = t1_app.local_source_revision(
             expected_commit="1" * 40, repo_root=Path("/fixture")
@@ -198,9 +221,7 @@ def test_local_source_revision_requires_the_exact_clean_commit() -> None:
         ),
         pytest.raises(RuntimeError, match="clean committed"),
     ):
-        t1_app.local_source_revision(
-            expected_commit="1" * 40, repo_root=Path("/fixture")
-        )
+        t1_app.local_source_revision(expected_commit="1" * 40, repo_root=Path("/fixture"))
 
 
 def test_gate_zero_inputs_must_be_exact_siblings(tmp_path: Path) -> None:
@@ -294,12 +315,8 @@ def test_modal_surface_is_cpu_only_and_has_no_runtime_policy_arguments() -> None
     assert "build_semantic_t1_repeated_panel_from_occurrence_factory" not in source
     remote_source = ast.get_source_segment(source, remote)
     assert remote_source is not None
-    assert remote_source.index("artifact_volume.reload()") < remote_source.index(
-        "_driver_impl("
-    )
-    assert remote_source.rindex("artifact_volume.commit()") < remote_source.rindex(
-        "return result"
-    )
+    assert remote_source.index("artifact_volume.reload()") < remote_source.index("_driver_impl(")
+    assert remote_source.rindex("artifact_volume.commit()") < remote_source.rindex("return result")
     assert "stage_commit=artifact_volume.commit" in source
     assert source.count("stage_commit()") == 3
     assert 'loaded["write_bytes_if_absent"]' in source

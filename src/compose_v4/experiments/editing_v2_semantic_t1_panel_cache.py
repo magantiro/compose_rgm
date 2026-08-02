@@ -57,6 +57,9 @@ from compose_v4.data.immutable_artifact import write_bytes_if_absent
 from compose_v4.experiments.editing_v2_semantic_gate_zero import (
     _EVIDENCE_FIELDS as GATE_ZERO_EVIDENCE_FIELDS,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_gate_zero import (
     DECISION_SCHEMA as GATE_ZERO_DECISION_SCHEMA,
 )
@@ -82,10 +85,10 @@ from compose_v4.experiments.editing_v2_semantic_gate_zero import (
 )
 
 PANEL_SCHEMA = "compose.editing_v2.semantic_t1_panel_cache_inputs"
-PANEL_SCHEMA_VERSION = 3
+PANEL_SCHEMA_VERSION = 4
 PANEL_STATUS = "PREPARED_NO_T1_OR_TRAINING_AUTHORITY"
 REQUEST_SCHEMA = "compose.editing_v2.semantic_t1_panel_request"
-REQUEST_SCHEMA_VERSION = 2
+REQUEST_SCHEMA_VERSION = 3
 REQUEST_STATUS = "BOUNDED_REQUEST_NO_T1_OR_TRAINING_AUTHORITY"
 SELECTION_RULE = "single_target_stable_hash_stratum_round_robin_v2"
 UNIQUE_OBJECTIVE_UNIT = "exact_source_frozen_time_canonical_successor"
@@ -109,6 +112,7 @@ _IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/editing_v2_semantic_t1_panel_cache.py",
     "src/compose_v4/data/editing_v2_semantic_active8_decision_source.py",
     "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
+    "src/compose_v4/experiments/editing_v2_semantic_development_cell_roles.py",
     "src/compose_v4/experiments/successor_fiber_cache_builder.py",
     "src/compose_v4/experiments/factorized_successor_training.py",
 )
@@ -211,6 +215,8 @@ class SemanticT1PanelRequest:
     request_id: str
     source_revision_sha256: str
     support_time_hex: str
+    cell_role_policy_sha256: str
+    minimum_entries_by_family: tuple[tuple[str, int], ...]
     maximum_entries_by_family: tuple[tuple[str, int], ...]
     request_sha256: str = ""
 
@@ -228,13 +234,23 @@ class SemanticT1PanelRequest:
             raise ValueError("support_time_hex must be a hexadecimal float") from error
         if support_time.hex() != self.support_time_hex or not 0.0 < support_time < 1.0:
             raise ValueError("semantic T1 support time must be canonical and in (0, 1)")
+        _require_sha(self.cell_role_policy_sha256, field_name="cell_role_policy_sha256")
+        minimums = self.minimum_entries_by_family
         limits = self.maximum_entries_by_family
         if (
-            tuple(sorted(limits)) != limits
+            tuple(sorted(minimums)) != minimums
+            or tuple(family for family, _ in minimums) != tuple(sorted(ACTIVE8_FAMILIES))
+            or any(type(minimum) is not int or minimum <= 0 for _, minimum in minimums)
+            or tuple(sorted(limits)) != limits
             or tuple(family for family, _ in limits) != tuple(sorted(ACTIVE8_FAMILIES))
             or any(type(limit) is not int or limit <= 0 for _, limit in limits)
         ):
-            raise ValueError("maximum_entries_by_family must name every Active8 family once")
+            raise ValueError(
+                "minimum_entries_by_family and maximum_entries_by_family must name "
+                "every Active8 family once"
+            )
+        if any(dict(minimums)[family] > dict(limits)[family] for family in ACTIVE8_FAMILIES):
+            raise ValueError("minimum_entries_by_family cannot exceed the family maximum")
         expected = _sha(self.identity_body())
         if self.request_sha256:
             if self.request_sha256 != expected:
@@ -249,7 +265,9 @@ class SemanticT1PanelRequest:
         request_id: str,
         source_revision_sha256: str,
         support_time: float,
+        minimum_entries_by_family: Mapping[str, int],
         maximum_entries_by_family: Mapping[str, int],
+        cell_role_policy_sha256: str | None = None,
     ) -> SemanticT1PanelRequest:
         if type(support_time) is not float:
             raise TypeError("semantic T1 support_time must be an explicit float")
@@ -257,6 +275,12 @@ class SemanticT1PanelRequest:
             request_id=request_id,
             source_revision_sha256=source_revision_sha256,
             support_time_hex=support_time.hex(),
+            cell_role_policy_sha256=(
+                cell_role_policy_sha256
+                if cell_role_policy_sha256 is not None
+                else load_semantic_development_cell_roles().policy_sha256
+            ),
+            minimum_entries_by_family=tuple(sorted(minimum_entries_by_family.items())),
             maximum_entries_by_family=tuple(sorted(maximum_entries_by_family.items())),
         )
 
@@ -269,6 +293,10 @@ class SemanticT1PanelRequest:
         return dict(self.maximum_entries_by_family)
 
     @property
+    def minimum_by_family(self) -> dict[str, int]:
+        return dict(self.minimum_entries_by_family)
+
+    @property
     def selection_seed_sha256(self) -> str:
         """Bind selection to scientific inputs, excluding the descriptive ID."""
 
@@ -277,6 +305,10 @@ class SemanticT1PanelRequest:
                 "selection_rule": SELECTION_RULE,
                 "source_revision_sha256": self.source_revision_sha256,
                 "support_time_hex": self.support_time_hex,
+                "cell_role_policy_sha256": self.cell_role_policy_sha256,
+                "minimum_entries_by_family": {
+                    family: minimum for family, minimum in self.minimum_entries_by_family
+                },
                 "maximum_entries_by_family": {
                     family: limit for family, limit in self.maximum_entries_by_family
                 },
@@ -292,6 +324,10 @@ class SemanticT1PanelRequest:
             "request_id": self.request_id,
             "source_revision_sha256": self.source_revision_sha256,
             "support_time_hex": self.support_time_hex,
+            "cell_role_policy_sha256": self.cell_role_policy_sha256,
+            "minimum_entries_by_family": {
+                family: minimum for family, minimum in self.minimum_entries_by_family
+            },
             "maximum_entries_by_family": {
                 family: limit for family, limit in self.maximum_entries_by_family
             },
@@ -1240,10 +1276,12 @@ class SemanticT1PanelArtifact:
             raise ValueError("semantic T1 coverage receipts disagree with the panel")
         family_counts = Counter(entry.model_family for entry in self.entries)
         if set(family_counts) != set(ACTIVE8_FAMILIES) or any(
-            family_counts[family] > self.request.limit_by_family[family]
+            not self.request.minimum_by_family[family]
+            <= family_counts[family]
+            <= self.request.limit_by_family[family]
             for family in ACTIVE8_FAMILIES
         ):
-            raise ValueError("semantic T1 panel family coverage or bound disagrees")
+            raise ValueError("semantic T1 panel family coverage or cardinality bound disagrees")
         expected = _sha(self.identity_body())
         if self.artifact_sha256:
             if self.artifact_sha256 != expected:
@@ -1474,6 +1512,12 @@ def _selected_group_ids(
             if not added:
                 break
             depth += 1
+        minimum = request.minimum_by_family[family]
+        if len(family_selected) < minimum:
+            raise SemanticT1PanelError(
+                f"semantic T1 source has {len(family_selected)} eligible unique-state "
+                f"entries for {family}, below the frozen minimum {minimum}"
+            )
         selected.extend(family_selected)
     if len(selected) != len(set(selected)):
         raise SemanticT1PanelError(
@@ -1600,6 +1644,11 @@ def build_semantic_t1_panel_from_occurrence_factory(
         raise SemanticT1PanelError(
             "semantic T1 request source revision differs from Gate-0 initialization"
         )
+    cell_roles = load_semantic_development_cell_roles(repo_root=repo_root, registry=registry)
+    if request.cell_role_policy_sha256 != cell_roles.policy_sha256:
+        raise SemanticT1PanelError(
+            "semantic T1 request differs from the frozen development cell-role policy"
+        )
 
     def verified_occurrence_factory() -> Iterable[SemanticT1TeacherOccurrence]:
         for occurrence in occurrence_factory():
@@ -1622,7 +1671,9 @@ def build_semantic_t1_panel_from_occurrence_factory(
                 raise SemanticT1PanelError(
                     "semantic T1 occurrence capability-registry identity drifted"
                 )
-            yield occurrence
+            role = cell_roles.role_for(occurrence.capability_cell_id)
+            if role == "required_editing":
+                yield occurrence
 
     (
         unique_source_state_sha256s,
@@ -2442,14 +2493,17 @@ def deserialize_semantic_t1_panel(
     request_payload = payload.get("request")
     if not isinstance(request_payload, dict):
         raise SemanticT1PanelError("semantic T1 request is absent")
+    minimums = request_payload.get("minimum_entries_by_family")
     limits = request_payload.get("maximum_entries_by_family")
-    if not isinstance(limits, dict):
-        raise SemanticT1PanelError("semantic T1 family limits are invalid")
+    if not isinstance(minimums, dict) or not isinstance(limits, dict):
+        raise SemanticT1PanelError("semantic T1 family cardinality bounds are invalid")
     try:
         request = SemanticT1PanelRequest(
             request_id=request_payload["request_id"],
             source_revision_sha256=request_payload["source_revision_sha256"],
             support_time_hex=request_payload["support_time_hex"],
+            cell_role_policy_sha256=request_payload["cell_role_policy_sha256"],
+            minimum_entries_by_family=tuple(sorted(minimums.items())),
             maximum_entries_by_family=tuple(sorted(limits.items())),
             request_sha256=request_payload["request_sha256"],
         )

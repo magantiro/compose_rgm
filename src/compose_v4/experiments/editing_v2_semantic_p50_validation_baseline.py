@@ -44,11 +44,15 @@ from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
 from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     PREPARED_SCHEMA,
     PREPARED_STATUS,
+    SCHEMA_VERSION as PREPARED_SCHEMA_VERSION,
     load_semantic_p50_recipe_policy,
     semantic_p50_time_hex,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_source_inventory import (
     VerifiedSemanticP50SourceInventory,
+)
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_successor_cache import (
     SemanticP50SuccessorCache,
@@ -782,19 +786,23 @@ def _prepared_binding(
     assert isinstance(recipe, Mapping)
     policy, policy_file_sha256 = load_semantic_p50_recipe_policy(recipe_policy_path)
     required_cells = tuple(validation.get("required_nonempty_semantic_cells", ()))
+    cell_roles = load_semantic_development_cell_roles()
     if (
         prepared.get("schema") != PREPARED_SCHEMA
-        or prepared.get("schema_version") != SCHEMA_VERSION
+        or prepared.get("schema_version") != PREPARED_SCHEMA_VERSION
         or prepared.get("status") != PREPARED_STATUS
         or supplied != _sha(body)
         or not _authority_is_false(prepared)
         or prepared.get("recipe_policy_file_sha256") != policy_file_sha256
         or prepared.get("recipe_policy_sha256") != policy["policy_sha256"]
+        or prepared.get("cell_role_policy_sha256") != cell_roles.policy_sha256
+        or policy.get("cell_role_policy_sha256") != cell_roles.policy_sha256
         or tuple(prepared.get("required_families", ())) != ACTIVE8_FAMILIES
         or validation.get("partition_role") != VALIDATION_PARTITION_ROLE
         or tuple(validation.get("required_families", ())) != ACTIVE8_FAMILIES
         or not required_cells
         or tuple(sorted(set(required_cells))) != required_cells
+        or set(required_cells) != cell_roles.required_cell_set
         or recipe.get("initialization") != "scratch_from_t1_bound_initial_model_state"
         or recipe.get("t1_selected_checkpoint_used_for_initialization") is not False
     ):

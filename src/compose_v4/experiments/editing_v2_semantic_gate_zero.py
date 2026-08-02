@@ -31,14 +31,17 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
     classify_verified_structural_transition,
     load_semantic_capability_cell_registry,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 
 CONTRACT_RELATIVE_PATH = "configs/editing_v2_semantic_gate_zero_structural_v1.json"
 CONTRACT_SCHEMA = "compose.editing.semantic_gate_zero_structural_contract"
 CONTRACT_SCHEMA_VERSION = 1
 CONTRACT_STATUS = "FROZEN_STRUCTURAL_EVIDENCE_CONTRACT_NO_DOWNSTREAM_AUTHORITY"
-FROZEN_CONTRACT_SHA256 = "ed64c981cf65fa33d788ac8ee2ac749c5b20b5fb452823211d90c9a6f150bcaf"
+FROZEN_CONTRACT_SHA256 = "ad4181c88aa1dde9aba05f7e950dbf2a241aa1c19499a42ca462b0960321dbf5"
 EVIDENCE_SCHEMA = "compose.editing.semantic_gate_zero_structural_evidence"
-EVIDENCE_SCHEMA_VERSION = 2
+EVIDENCE_SCHEMA_VERSION = 3
 EVIDENCE_STATUS = "STRUCTURAL_EVIDENCE_COMPLETE_NO_DOWNSTREAM_AUTHORITY"
 DECISION_SCHEMA = "compose.editing.semantic_gate_zero_structural_decision"
 DECISION_SCHEMA_VERSION = 1
@@ -80,6 +83,7 @@ _PARENT_NAMES = {
     "semantic_model_process",
     "semantic_process",
     "capability_cell_registry",
+    "development_cell_roles",
 }
 _MODEL_RUNTIME_FIELDS = {
     "schema",
@@ -123,6 +127,7 @@ _EVIDENCE_FIELDS = {
     "model_runtime_identity",
     "active8_policy",
     "capability_registry",
+    "development_cell_roles",
     "active8_families",
     "checks",
     "counts",
@@ -137,6 +142,9 @@ _EVIDENCE_FIELDS = {
     "excluded_trace_reasons",
     "capability_cell_counts",
     "empty_capability_cell_ids",
+    "empty_required_editing_cell_ids",
+    "empty_conditional_editing_cell_ids",
+    "empty_separate_lane_cell_ids",
     "accepted_trace_stream_sha256",
     "structural_assignment_inventory_sha256",
     "evidence_sha256",
@@ -155,12 +163,19 @@ _COUNT_FIELDS = {
     "terminal_assignments",
     "registered_capability_cells",
     "observed_capability_cells",
+    "required_editing_cells",
+    "observed_required_editing_cells",
+    "conditional_editing_cells",
+    "observed_conditional_editing_cells",
+    "separate_lane_cells",
+    "observed_separate_lane_cells",
 }
 _CHECK_FIELDS = {
     "decision_source_identity_bound",
     "semantic_runtime_identity_bound",
     "active8_policy_identity_bound",
     "capability_registry_identity_bound",
+    "development_cell_role_policy_bound",
     "decision_eligible_roles_bound",
     "sealed_nondecision_roles_not_disclosed",
     "accepted_trace_census_matches",
@@ -175,6 +190,9 @@ _CHECK_FIELDS = {
     "complete_action_family_census_matches",
     "complete_exclusion_reason_census_matches",
     "all_active8_families_have_decision_eligible_teachers",
+    "all_required_editing_cells_have_decision_eligible_teachers",
+    "conditional_editing_cells_valid_when_present",
+    "separate_lane_cells_excluded_from_editing_authority",
     "classification_failure_count_is_zero",
     "every_decision_eligible_teacher_matches_exactly_one_action_v4_mark",
     "every_decision_eligible_teacher_has_exact_candidate_support",
@@ -216,8 +234,8 @@ _EXPECTED_STRUCTURAL_CHECKS = {
     "require_one_assignment_per_accepted_action": True,
     "require_zero_terminal_assignments": True,
     "capability_context_policy": (
-        "classify_every_decision_eligible_teacher_report_all_registered_empty_"
-        "contexts_no_context_minimum"
+        "classify_every_decision_eligible_teacher_require_frozen_required_editing_"
+        "cells_report_conditional_and_separate_lane_contexts"
     ),
     "excluded_trace_policy": ("preserve_and_report_never_reclassify_as_teacher_coverage"),
     "classification_failure_policy": ("publish_bounded_typed_negative_receipts_and_fail"),
@@ -225,7 +243,9 @@ _EXPECTED_STRUCTURAL_CHECKS = {
     "legacy_action_v2_evidence": "forbidden",
 }
 _EXPECTED_DECISION_POLICY = {
-    "pass_meaning": ("structural_evidence_complete_for_all_active8_families_in_train_only"),
+    "pass_meaning": (
+        "structural_evidence_complete_for_all_active8_families_and_required_editing_cells_in_train_only"
+    ),
     "pass_grants_gate_zero_authority": False,
     "pass_grants_t1_authority": False,
     "pass_grants_p50_authority": False,
@@ -333,6 +353,7 @@ def load_semantic_gate_zero_structural_contract(
         "semantic_model_process": "contract_sha256",
         "semantic_process": "contract_sha256",
         "capability_cell_registry": "registry_sha256",
+        "development_cell_roles": "policy_sha256",
     }
     for name in sorted(_PARENT_NAMES):
         parent = parents[name]
@@ -493,6 +514,16 @@ def build_semantic_gate_zero_structural_evidence(
         or tuple(registry.contexts_by_family) != tuple(ACTIVE8_FAMILIES)
     ):
         raise SemanticGateZeroStructuralError("capability registry differs from semantic source")
+    role_parent = selected.payload["parents"]["development_cell_roles"]
+    cell_roles = load_semantic_development_cell_roles(
+        root / role_parent["path"],
+        repo_root=root,
+        registry=registry,
+    )
+    if cell_roles.policy_sha256 != role_parent["semantic_sha256"]:
+        raise SemanticGateZeroStructuralError(
+            "development cell-role policy differs from the structural contract"
+        )
 
     cell_rows: dict[str, dict[str, Any]] = {}
     cell_sets: dict[str, dict[str, set[str]]] = {}
@@ -692,11 +723,27 @@ def build_semantic_gate_zero_structural_evidence(
     count_map = index.count_map
     total_family_counts = Counter(global_family_counts)
     total_family_counts.update(excluded_family_counts)
+    required_empty = tuple(
+        cell_id
+        for cell_id in cell_roles.required_cell_ids
+        if cell_rows[cell_id]["teacher_count"] == 0
+    )
+    conditional_empty = tuple(
+        cell_id
+        for cell_id in cell_roles.conditional_cell_ids
+        if cell_rows[cell_id]["teacher_count"] == 0
+    )
+    separate_lane_empty = tuple(
+        cell_id
+        for cell_id in cell_roles.separate_lane_cell_ids
+        if cell_rows[cell_id]["teacher_count"] == 0
+    )
     checks = {
         "decision_source_identity_bound": True,
         "semantic_runtime_identity_bound": True,
         "active8_policy_identity_bound": True,
         "capability_registry_identity_bound": True,
+        "development_cell_role_policy_bound": True,
         "decision_eligible_roles_bound": decision_roles == ("train",),
         "sealed_nondecision_roles_not_disclosed": all(
             role not in decision_roles for role in sealed_roles
@@ -727,6 +774,12 @@ def build_semantic_gate_zero_structural_evidence(
         "all_active8_families_have_decision_eligible_teachers": all(
             family_counts[family] > 0 for family in ACTIVE8_FAMILIES
         ),
+        "all_required_editing_cells_have_decision_eligible_teachers": not required_empty,
+        "conditional_editing_cells_valid_when_present": all(
+            cell_rows[cell_id]["matching_candidate_mark_sum"] == cell_rows[cell_id]["teacher_count"]
+            for cell_id in cell_roles.conditional_cell_ids
+        ),
+        "separate_lane_cells_excluded_from_editing_authority": True,
         "classification_failure_count_is_zero": classification_failure_count == 0,
         "every_decision_eligible_teacher_matches_exactly_one_action_v4_mark": all(
             row["matching_candidate_mark_sum"] == row["teacher_count"] for row in cell_rows.values()
@@ -771,6 +824,13 @@ def build_semantic_gate_zero_structural_evidence(
                 family: list(contexts) for family, contexts in registry.family_contexts
             },
         },
+        "development_cell_roles": {
+            "policy_id": cell_roles.policy_id,
+            "policy_sha256": cell_roles.policy_sha256,
+            "required_cell_ids": list(cell_roles.required_cell_ids),
+            "conditional_cell_ids": list(cell_roles.conditional_cell_ids),
+            "separate_lane_cell_ids": list(cell_roles.separate_lane_cell_ids),
+        },
         "active8_families": list(ACTIVE8_FAMILIES),
         "checks": checks,
         "counts": {
@@ -788,6 +848,20 @@ def build_semantic_gate_zero_structural_evidence(
             "registered_capability_cells": len(cell_rows),
             "observed_capability_cells": sum(
                 row["teacher_count"] > 0 for row in cell_rows.values()
+            ),
+            "required_editing_cells": len(cell_roles.required_cell_ids),
+            "observed_required_editing_cells": sum(
+                cell_rows[cell_id]["teacher_count"] > 0 for cell_id in cell_roles.required_cell_ids
+            ),
+            "conditional_editing_cells": len(cell_roles.conditional_cell_ids),
+            "observed_conditional_editing_cells": sum(
+                cell_rows[cell_id]["teacher_count"] > 0
+                for cell_id in cell_roles.conditional_cell_ids
+            ),
+            "separate_lane_cells": len(cell_roles.separate_lane_cell_ids),
+            "observed_separate_lane_cells": sum(
+                cell_rows[cell_id]["teacher_count"] > 0
+                for cell_id in cell_roles.separate_lane_cell_ids
             ),
         },
         "decision_eligible_partition_roles": list(decision_roles),
@@ -809,6 +883,9 @@ def build_semantic_gate_zero_structural_evidence(
         "empty_capability_cell_ids": [
             key for key in sorted(cell_rows) if cell_rows[key]["teacher_count"] == 0
         ],
+        "empty_required_editing_cell_ids": list(required_empty),
+        "empty_conditional_editing_cell_ids": list(conditional_empty),
+        "empty_separate_lane_cell_ids": list(separate_lane_empty),
         "accepted_trace_stream_sha256": accepted_trace_stream.hexdigest(),
         "structural_assignment_inventory_sha256": (accepted_assignment_stream.hexdigest()),
     }

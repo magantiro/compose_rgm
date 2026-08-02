@@ -1,6 +1,6 @@
 {
   "schema": "compose.editing_v2.semantic_p50_recipe_policy",
-  "schema_version": 1,
+  "schema_version": 2,
   "policy_id": "compose-editing-v2-semantic-p50-stage-a-v1",
   "status": "FROZEN_PROSPECTIVE_RECIPE_NO_TRAINING_AUTHORITY",
   "training_authorized": false,
@@ -20,6 +20,7 @@
     "cycle_attach",
     "ring_system_restate"
   ],
+  "cell_role_policy_sha256": "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44",
   "optimization": {
     "initialization": "scratch_from_t1_bound_initial_model_state",
     "optimizer_steps": 50,
@@ -88,5 +89,5 @@
     "execution_environment",
     "launch_projection"
   ],
-  "policy_sha256": "a81d4f35c9f6122f73e15adcbae97f5305bec072cf12d396fc2da946aa481b99"
+  "policy_sha256": "20c3661fb5c754f392b4a54198226cc9bf51b132999b439532f4727ecb025b75"
 }

@@ -11,7 +11,6 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
@@ -27,6 +26,9 @@ from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     SemanticP50Prerequisites,
     compile_semantic_p50_prepared_recipe,
     write_semantic_p50_prepared_recipe,
+)
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_source_inventory import (
     SemanticP50SourceInventoryBinding,
@@ -85,6 +87,7 @@ def _prerequisites(*, run: str = "a") -> SemanticP50Prerequisites:
     ).hexdigest()[:16]
     values["capability_registry_sha256"] = registry.registry_sha256
     values["classifier_implementation_sha256"] = registry.classifier_implementation_sha256
+    values["cell_role_policy_sha256"] = load_semantic_development_cell_roles().policy_sha256
     values["scratch_initial_model_state_sha256"] = FAKE_SCRATCH_STATE_SHA256
     return SemanticP50Prerequisites(**values)
 
@@ -107,15 +110,16 @@ def _candidate_address(index: int) -> SuccessorFiberCacheAddress:
 
 
 def _prepared(*, run: str = "a") -> dict[str, object]:
+    roles = load_semantic_development_cell_roles()
     candidates = tuple(
         SemanticP50Candidate(
             address=_candidate_address(index),
-            family=family,
-            semantic_cell_id=f"editing_v2_active8_v1:{family}:fixture_context",
+            family=cell.rsplit(":", 2)[1],
+            semantic_cell_id=cell,
             data_lane="reversible_synthetic_walk",
-            assignment_sha256=hashlib.sha256(f"{run}:assignment:{family}".encode()).hexdigest(),
+            assignment_sha256=hashlib.sha256(f"{run}:assignment:{cell}".encode()).hexdigest(),
         )
-        for index, family in enumerate(ACTIVE8_FAMILIES)
+        for index, cell in enumerate(roles.required_cell_ids)
     )
     inventory = SemanticP50CandidateInventory(
         prerequisites=_prerequisites(run=run),
@@ -155,8 +159,9 @@ def _verified_validation_source(prepared: dict[str, object], monkeypatch):
     traces: list[object] = []
     assignments: dict[int, object] = {}
     required_cells = prepared["validation_contract"]["required_nonempty_semantic_cells"]
-    assert len(required_cells) == len(ACTIVE8_FAMILIES)
-    for index, (family, cell) in enumerate(zip(ACTIVE8_FAMILIES, required_cells, strict=True)):
+    assert len(required_cells) == len(load_semantic_development_cell_roles().required_cell_ids)
+    for index, cell in enumerate(required_cells):
+        family = cell.rsplit(":", 2)[1]
         address = PackedTraceAddress(
             packed_shard_content_sha256=hashlib.sha256(
                 f"validation-shard-{index}".encode()
@@ -552,10 +557,11 @@ def test_complete_cache_opens_exact_train_and_validation_unions(
     )
 
     assert len(loaded.train_requested_records) == len(prepared["requested_address_union"])
-    assert len(loaded.validation_requested_records) == len(ACTIVE8_FAMILIES)
-    assert len(loaded.requested_records) == 2 * len(ACTIVE8_FAMILIES)
+    required_count = len(load_semantic_development_cell_roles().required_cell_ids)
+    assert len(loaded.validation_requested_records) == required_count
+    assert len(loaded.requested_records) == 2 * required_count
     assert len(loaded.records) == (
-        len(prepared["complete_trace_closure_inventory"]) + 2 * len(ACTIVE8_FAMILIES)
+        len(prepared["complete_trace_closure_inventory"]) + 2 * required_count
     )
     assert all(record.teacher_fiber is not None for record in loaded.requested_records)
     assert sum(record.address.is_terminal for record in loaded.records) == len(plan["tasks"])
@@ -578,6 +584,20 @@ def test_prepared_recipe_rejects_terminal_or_closure_only_scheduling() -> None:
     with pytest.raises(
         cache.SemanticP50SuccessorCacheError,
         match="closure scheduling flags",
+    ):
+        cache.validate_semantic_p50_prepared_recipe(prepared)
+
+
+def test_prepared_recipe_rejects_a_rehashed_missing_required_cell() -> None:
+    prepared = copy.deepcopy(_prepared())
+    prepared["declared_nonempty_semantic_cells"].pop()
+    body = dict(prepared)
+    body.pop("prepared_recipe_sha256")
+    prepared["prepared_recipe_sha256"] = _sha(body)
+
+    with pytest.raises(
+        cache.SemanticP50SuccessorCacheError,
+        match="development cell-role projection",
     ):
         cache.validate_semantic_p50_prepared_recipe(prepared)
 

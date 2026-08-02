@@ -75,13 +75,14 @@ EXPECTED_T1_CAPACITY_THRESHOLDS = {
     "minimum_unique_state_teacher_successor_probability": 0.8,
     "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
 }
+EXPECTED_T1_EXAMPLES_PER_SLICE = {"minimum": 64, "maximum": 128}
 EXPECTED_T1_CAPACITY_POLICY = {
     "semantic_t1_capacity_policy": ("configs/editing_v2_semantic_t1_capacity_policy_v1.json"),
     "semantic_t1_capacity_policy_file_sha256": (
-        "1f0cde3b3cfc942e90a715b61431526e8d99e26c27885022b71402d1bb353a62"
+        "9bb8fce6ee1d3b0110cc19f16affe6b6fc17f873e84a834315ef964838e65862"
     ),
     "semantic_t1_capacity_policy_sha256": (
-        "f300a5b4b93f4157976f5031d59c5b55f6a8dd47749d4aff8f289ea915e14402"
+        "2186dbd9436f39b3caffafd421710f0c82de14b7da9e4c5ab94a252525a46d1e"
     ),
 }
 P50_PREREQUISITE_EVIDENCE_FIELDS = (
@@ -266,6 +267,11 @@ def validate_editing_training_gate(contract: dict[str, Any]) -> None:
         raise EditingTrainingGateError(
             "T1 requirements must separate unique-state capacity from conditional "
             "repeated-state empirical-law fitting"
+        )
+    if t1_gate.get("examples_per_slice") != EXPECTED_T1_EXAMPLES_PER_SLICE:
+        raise EditingTrainingGateError(
+            "T1 examples_per_slice must freeze exactly 64 to 128 unique-state "
+            "canonical-successor entries per required family"
         )
     if t1_gate.get("numeric_thresholds") != EXPECTED_T1_CAPACITY_THRESHOLDS:
         raise EditingTrainingGateError(

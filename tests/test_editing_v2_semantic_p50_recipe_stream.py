@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
 from compose_v4.data.successor_fiber_cache import SuccessorFiberCacheAddress
 from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     SCHEDULED_EXAMPLES,
@@ -18,6 +17,9 @@ from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     compile_semantic_p50_prepared_recipe,
     load_semantic_p50_recipe_policy,
     semantic_p50_time_hex,
+)
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
 )
 
 
@@ -43,6 +45,7 @@ def _prerequisites() -> SemanticP50Prerequisites:
         if field != "operator_capability_fingerprint"
     }
     values["operator_capability_fingerprint"] = "0123456789abcdef"
+    values["cell_role_policy_sha256"] = load_semantic_development_cell_roles().policy_sha256
     return SemanticP50Prerequisites(**values)
 
 
@@ -62,15 +65,16 @@ def _address(family_index: int, *, progress_index: int = 0) -> SuccessorFiberCac
 
 
 def _inventory() -> SemanticP50CandidateInventory:
+    required = load_semantic_development_cell_roles().required_cell_ids
     candidates = tuple(
         SemanticP50Candidate(
             address=_address(index),
-            family=family,
-            semantic_cell_id=f"editing_v2_active8_v1:{family}:fixture_context",
+            family=cell_id.rsplit(":", 2)[1],
+            semantic_cell_id=cell_id,
             data_lane="reversible_synthetic_walk",
-            assignment_sha256=hashlib.sha256(f"assignment-{family}".encode()).hexdigest(),
+            assignment_sha256=hashlib.sha256(f"assignment-{cell_id}".encode()).hexdigest(),
         )
-        for index, family in enumerate(ACTIVE8_FAMILIES)
+        for index, cell_id in enumerate(required)
     )
     return SemanticP50CandidateInventory(
         prerequisites=_prerequisites(),
@@ -91,12 +95,13 @@ def test_exact_stream_is_deterministic_balanced_and_closure_safe() -> None:
     assert first == compile_semantic_p50_prepared_recipe(reversed_inventory)
     assert len(first["ordered_stream_rows"]) == SCHEDULED_EXAMPLES
     assert all(0.0 < float.fromhex(row["time_hex"]) < 1.0 for row in first["ordered_stream_rows"])
-    assert {row["scheduled_draw_count"] for row in first["planned_family_exposure"]} == {400}
-    assert set(first["minimum_nonzero_gradient_updates_by_family"].values()) == {40}
-    assert set(first["minimum_nonzero_gradient_updates_by_semantic_cell"].values()) == {40}
+    assert sum(row["scheduled_draw_count"] for row in first["planned_family_exposure"]) == 3200
+    assert all(first["minimum_nonzero_gradient_updates_by_family"].values())
+    assert all(first["minimum_nonzero_gradient_updates_by_semantic_cell"].values())
     closure = first["complete_trace_closure_inventory"]
-    assert len(closure) == len(ACTIVE8_FAMILIES) * 3
-    assert sum(row["terminal"] for row in closure) == len(ACTIVE8_FAMILIES)
+    required_count = len(load_semantic_development_cell_roles().required_cell_ids)
+    assert len(closure) == required_count * 3
+    assert sum(row["terminal"] for row in closure) == required_count
     assert all(not row["schedulable"] for row in closure if row["closure_only"])
     assert all(not row["schedulable"] for row in closure if row["terminal"])
     assert first["cache_contract"]["closure_only_rows_schedulable"] is False
@@ -114,17 +119,48 @@ def test_exact_stream_is_deterministic_balanced_and_closure_safe() -> None:
     assert first["bounded_p50_authorized"] is False
 
 
-def test_stream_fails_closed_when_an_active_family_has_no_opportunity() -> None:
+def test_stream_requires_every_frozen_required_cell() -> None:
     inventory = _inventory()
     missing = SemanticP50CandidateInventory(
         prerequisites=inventory.prerequisites,
-        candidates=inventory.candidates[:-1],
+        candidates=inventory.candidates[1:],
     )
     with pytest.raises(
         SemanticP50RecipeStreamError,
-        match="zero planned optimization exposure",
+        match="exact frozen required editing cells",
     ):
         compile_semantic_p50_prepared_recipe(missing)
+
+
+def test_conditional_and_separate_lane_cells_are_audited_but_never_scheduled() -> None:
+    inventory = _inventory()
+    roles = load_semantic_development_cell_roles()
+    nonrequired = roles.conditional_cell_ids + roles.separate_lane_cell_ids
+    additions = tuple(
+        SemanticP50Candidate(
+            address=_address(len(inventory.candidates) + index),
+            family=cell_id.rsplit(":", 2)[1],
+            semantic_cell_id=cell_id,
+            data_lane="reversible_synthetic_walk",
+            assignment_sha256=hashlib.sha256(f"assignment-{cell_id}".encode()).hexdigest(),
+        )
+        for index, cell_id in enumerate(nonrequired)
+    )
+    mixed = SemanticP50CandidateInventory(
+        prerequisites=inventory.prerequisites,
+        candidates=inventory.candidates + additions,
+    )
+
+    prepared = compile_semantic_p50_prepared_recipe(mixed)
+
+    required = set(roles.required_cell_ids)
+    scheduled = {row["semantic_cell_id"] for row in prepared["ordered_stream_rows"]}
+    assert set(prepared["declared_nonempty_semantic_cells"]) == required
+    assert set(prepared["validation_contract"]["required_nonempty_semantic_cells"]) == required
+    assert scheduled == required
+    assert prepared["required_editing_candidate_count"] == len(required)
+    assert prepared["conditional_editing_candidate_count"] == len(roles.conditional_cell_ids)
+    assert prepared["separate_lane_candidate_count"] == len(roles.separate_lane_cell_ids)
 
 
 def test_time_derivation_rejects_invalid_stream_indices() -> None:

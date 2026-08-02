@@ -70,6 +70,16 @@ PANEL_POLICY_STATUS = "FROZEN_PROSPECTIVE_PANEL_NO_DOWNSTREAM_AUTHORITY"
 PANEL_POLICY_PANEL_KIND = "unique_state_single_target_canonical_successor_capacity"
 PANEL_POLICY_OBJECTIVE_UNIT = "exact_source_frozen_time_canonical_successor"
 PANEL_POLICY_CACHE_HANDOFF = "complete_train_trace_union_for_cpu_successor_fiber_cache_v1"
+PANEL_POLICY_ACTIVE8_FAMILIES = (
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate",
+)
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -280,14 +290,17 @@ def _validate_panel_request_payload(
     if not isinstance(value, Mapping):
         raise TypeError("semantic T1 panel request must be an object")
     payload = dict(value)
+    minimums = payload.get("minimum_entries_by_family")
     limits = payload.get("maximum_entries_by_family")
-    if not isinstance(limits, Mapping):
-        raise TypeError("maximum_entries_by_family must be an object")
+    if not isinstance(minimums, Mapping) or not isinstance(limits, Mapping):
+        raise TypeError("semantic T1 family cardinality bounds must be objects")
     try:
         request = request_type(
             request_id=payload.get("request_id"),
             source_revision_sha256=payload.get("source_revision_sha256"),
             support_time_hex=payload.get("support_time_hex"),
+            cell_role_policy_sha256=payload.get("cell_role_policy_sha256"),
+            minimum_entries_by_family=tuple(sorted(minimums.items())),
             maximum_entries_by_family=tuple(sorted(limits.items())),
             request_sha256=payload.get("request_sha256", ""),
         )
@@ -315,6 +328,8 @@ def _load_panel_policy(*, root: Path) -> dict[str, Any]:
         *_NO_AUTHORITY,
         "request_id",
         "support_time_hex",
+        "cell_role_policy_sha256",
+        "minimum_entries_by_family",
         "maximum_entries_by_family",
         "panel_kind",
         "objective_unit",
@@ -330,6 +345,8 @@ def _load_panel_policy(*, root: Path) -> dict[str, Any]:
     }
     body = dict(payload)
     supplied_sha256 = body.pop("policy_sha256", None)
+    expected_minimums = {family: 64 for family in PANEL_POLICY_ACTIVE8_FAMILIES}
+    expected_maximums = {family: 128 for family in PANEL_POLICY_ACTIVE8_FAMILIES}
     if (
         set(payload) != expected_fields
         or payload.get("schema") != PANEL_POLICY_SCHEMA
@@ -339,6 +356,8 @@ def _load_panel_policy(*, root: Path) -> dict[str, Any]:
         or payload.get("panel_kind") != PANEL_POLICY_PANEL_KIND
         or payload.get("objective_unit") != PANEL_POLICY_OBJECTIVE_UNIT
         or payload.get("cache_handoff") != PANEL_POLICY_CACHE_HANDOFF
+        or payload.get("minimum_entries_by_family") != expected_minimums
+        or payload.get("maximum_entries_by_family") != expected_maximums
         or payload.get("repeated_state_panel_included") is not False
         or payload.get("empirical_multiplicity_receipts_included") is not False
         or payload.get("successor_fiber_cache_compiled") is not False
@@ -639,6 +658,8 @@ def _driver_impl(
         request_id=policy.get("request_id"),
         source_revision_sha256=expected_model_source,
         support_time=support_time,
+        cell_role_policy_sha256=policy.get("cell_role_policy_sha256"),
+        minimum_entries_by_family=dict(policy.get("minimum_entries_by_family", {})),
         maximum_entries_by_family=dict(policy.get("maximum_entries_by_family", {})),
     )
     panel_implementation_sha256 = t1_panel.semantic_t1_panel_implementation_sha256(

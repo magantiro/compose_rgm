@@ -30,6 +30,11 @@
       "path": "configs/editing_v2_semantic_capability_cells_v1.json",
       "file_sha256": "21d1ef2efea9a7b0c8777908e3198969a76162386faac9922051898397d00147",
       "semantic_sha256": "5ca11004fb1f20e8ad1fd1e1bc796738cbae350bbd2a2b1051368397b652c9eb"
+    },
+    "development_cell_roles": {
+      "path": "configs/editing_v2_semantic_development_cell_roles_v1.json",
+      "file_sha256": "2f43703bdf246cdc8693658dccb28af282f49760b35e01a1b41589aa9e371752",
+      "semantic_sha256": "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44"
     }
   },
   "required_architecture": {
@@ -61,14 +66,14 @@
     "require_positive_successor_alias_count": true,
     "require_one_assignment_per_accepted_action": true,
     "require_zero_terminal_assignments": true,
-    "capability_context_policy": "classify_every_decision_eligible_teacher_report_all_registered_empty_contexts_no_context_minimum",
+    "capability_context_policy": "classify_every_decision_eligible_teacher_require_frozen_required_editing_cells_report_conditional_and_separate_lane_contexts",
     "excluded_trace_policy": "preserve_and_report_never_reclassify_as_teacher_coverage",
     "classification_failure_policy": "publish_bounded_typed_negative_receipts_and_fail",
     "classification_failure_receipt_limit": 100,
     "legacy_action_v2_evidence": "forbidden"
   },
   "decision_policy": {
-    "pass_meaning": "structural_evidence_complete_for_all_active8_families_in_train_only",
+    "pass_meaning": "structural_evidence_complete_for_all_active8_families_and_required_editing_cells_in_train_only",
     "pass_grants_gate_zero_authority": false,
     "pass_grants_t1_authority": false,
     "pass_grants_p50_authority": false,
@@ -78,5 +83,5 @@
     "pass_grants_final_test_selection_authority": false,
     "failure_policy": "publish_fail_closed_negative_evidence"
   },
-  "contract_sha256": "ed64c981cf65fa33d788ac8ee2ac749c5b20b5fb452823211d90c9a6f150bcaf"
+  "contract_sha256": "ad4181c88aa1dde9aba05f7e950dbf2a241aa1c19499a42ca462b0960321dbf5"
 }

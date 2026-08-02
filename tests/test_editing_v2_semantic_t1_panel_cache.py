@@ -62,8 +62,22 @@ def _request(*, atom_insert_limit: int = 2) -> SemanticT1PanelRequest:
         request_id="editing_v2_semantic_t1_test",
         source_revision_sha256=_digest("source-revision"),
         support_time=0.5,
+        minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
         maximum_entries_by_family=limits,
     )
+
+
+def test_panel_fails_when_any_family_is_below_its_request_minimum() -> None:
+    source_identity = _digest("below-minimum")
+    request = SemanticT1PanelRequest.create(
+        request_id="minimum_two",
+        source_revision_sha256=_digest("source-revision"),
+        support_time=0.5,
+        minimum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+        maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+    )
+    with pytest.raises(SemanticT1PanelError, match="below the frozen minimum"):
+        _build(_corpus(source_identity), request=request)
 
 
 def _binding(source_identity: str) -> SemanticT1GateZeroBinding:
@@ -141,8 +155,7 @@ def _occurrence(
 
 def _corpus(source_identity: str) -> tuple[SemanticT1TeacherOccurrence, ...]:
     rows = [
-        _occurrence(family, family, source_identity=source_identity)
-        for family in ACTIVE8_FAMILIES
+        _occurrence(family, family, source_identity=source_identity) for family in ACTIVE8_FAMILIES
     ]
     # A second atom-insert difficulty stratum must be represented.
     rows.append(
@@ -274,10 +287,7 @@ def test_unique_capacity_panel_excludes_multi_target_exact_sources() -> None:
         for entry in artifact.entries
     )
     assert len(
-        {
-            (entry.source_state_sha256, entry.support_time_hex)
-            for entry in artifact.entries
-        }
+        {(entry.source_state_sha256, entry.support_time_hex) for entry in artifact.entries}
     ) == len(artifact.entries)
     assert {entry.model_family for entry in artifact.entries} == set(ACTIVE8_FAMILIES)
     assert artifact.single_target_source_state_count == 8
@@ -451,13 +461,8 @@ def test_panel_covers_every_observed_difficulty_stratum_before_repetition() -> N
         if receipt.stratum.model_family == "atom_insert"
     ]
     assert len(atom_insert_receipts) == 2
-    assert all(
-        receipt.selected_candidate_count == 1 for receipt in atom_insert_receipts
-    )
-    assert (
-        sum(receipt.train_teacher_occurrence_count for receipt in atom_insert_receipts)
-        == 3
-    )
+    assert all(receipt.selected_candidate_count == 1 for receipt in atom_insert_receipts)
+    assert sum(receipt.train_teacher_occurrence_count for receipt in atom_insert_receipts) == 3
 
     with pytest.raises(SemanticT1PanelError, match="cannot cover all observed strata"):
         _build(
@@ -476,13 +481,12 @@ def test_request_label_does_not_reroll_selection_and_revision_is_bound() -> None
             request_id="descriptive_label_only",
             source_revision_sha256=_digest("source-revision"),
             support_time=0.5,
+            minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
             maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
         ),
     )
     assert first.request.request_sha256 != relabeled.request.request_sha256
-    assert (
-        first.request.selection_seed_sha256 == relabeled.request.selection_seed_sha256
-    )
+    assert first.request.selection_seed_sha256 == relabeled.request.selection_seed_sha256
     assert first.entries == relabeled.entries
 
     with pytest.raises(SemanticT1PanelError, match="source revision differs"):
@@ -492,6 +496,7 @@ def test_request_label_does_not_reroll_selection_and_revision_is_bound() -> None
                 request_id="wrong_revision",
                 source_revision_sha256=_digest("another-revision"),
                 support_time=0.5,
+                minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
                 maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
             ),
         )
@@ -530,6 +535,7 @@ def test_occurrence_rejects_heldout_role_and_request_requires_all_families() -> 
             request_id="missing_family",
             source_revision_sha256=_digest("source-revision"),
             support_time=0.5,
+            minimum_entries_by_family={"atom_insert": 1},
             maximum_entries_by_family={"atom_insert": 2},
         )
 
@@ -576,8 +582,7 @@ def test_panel_rejects_same_count_drift_outside_selected_groups() -> None:
     rows = list(rows)
     reference = _build(tuple(rows), request=_request())
     selected_units = {
-        (entry.source_state_sha256, entry.successor_canonical_key)
-        for entry in reference.entries
+        (entry.source_state_sha256, entry.successor_canonical_key) for entry in reference.entries
     }
     unselected_index = next(
         index
@@ -594,9 +599,7 @@ def test_panel_rejects_same_count_drift_outside_selected_groups() -> None:
         "same_unselected_group_new_mark",
         source_identity=source_identity,
         source_tag=rows[unselected_index].source_canonical_key.removeprefix("source:"),
-        successor_tag=rows[unselected_index].successor_canonical_key.removeprefix(
-            "successor:"
-        ),
+        successor_tag=rows[unselected_index].successor_canonical_key.removeprefix("successor:"),
         action_tag="changed_unselected_action",
     )
     calls = 0
@@ -690,6 +693,7 @@ def test_artifact_is_canonical_nonauthorizing_and_immutable(tmp_path: Path) -> N
             request_id="another_request",
             source_revision_sha256=_digest("source-revision"),
             support_time=0.5,
+            minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
             maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
         ),
     )

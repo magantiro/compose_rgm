@@ -8,6 +8,17 @@
   "gate_zero_authorized": false,
   "hazard_included": false,
   "long_training_authorized": false,
+  "cell_role_policy_sha256": "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44",
+  "minimum_entries_by_family": {
+    "atom_delete": 64,
+    "atom_insert": 64,
+    "atom_restate": 64,
+    "bond_reorder": 64,
+    "bond_reroute": 64,
+    "cycle_attach": 64,
+    "cycle_insert": 64,
+    "ring_system_restate": 64
+  },
   "maximum_entries_by_family": {
     "atom_delete": 128,
     "atom_insert": 128,
@@ -22,7 +33,7 @@
   "optimizer_policy_included": false,
   "p50_policy_included": false,
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-  "policy_sha256": "089f3df2fa7f307f4623dd3d709547088a23f1b83264f73a57ee0b47d1a00279",
+  "policy_sha256": "5ff3f5ee289833190ffc0b16472c6d280470139495a1081c7d582b47f7c64ac6",
   "repeated_state_panel_included": false,
   "request_id": "editing-v2-semantic-t1-capacity-v1",
   "schema": "compose.editing_v2.semantic_t1_panel_policy",

@@ -52,6 +52,9 @@ from compose_v4.experiments.editing_v2_semantic_t1_decision import (
     validate_semantic_gate_zero_evidence_receipt,
     validate_semantic_t1_capacity_decision,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_p50_source_inventory import (
     SemanticP50SourceInventoryBinding,
     VerifiedSemanticP50SourceInventory,
@@ -337,9 +340,13 @@ _PREPARED_FIELDS = {
     "scientific_scope",
     "recipe_policy_file_sha256",
     "recipe_policy_sha256",
+    "cell_role_policy_sha256",
     "prerequisites",
     "candidate_inventory_sha256",
     "candidate_count",
+    "required_editing_candidate_count",
+    "conditional_editing_candidate_count",
+    "separate_lane_candidate_count",
     "required_families",
     "declared_nonempty_semantic_cells",
     "recipe",
@@ -392,6 +399,26 @@ def validate_semantic_p50_prepared_recipe(value: Mapping[str, Any]) -> dict[str,
         ) from error
     if prerequisites.as_payload() != prepared["prerequisites"]:
         raise SemanticP50SuccessorCacheError("prepared semantic P50 prerequisite fields disagree")
+    roles = load_semantic_development_cell_roles()
+    declared_cells = tuple(prepared.get("declared_nonempty_semantic_cells", ()))
+    candidate_role_counts = (
+        prepared.get("required_editing_candidate_count"),
+        prepared.get("conditional_editing_candidate_count"),
+        prepared.get("separate_lane_candidate_count"),
+    )
+    if (
+        prepared.get("cell_role_policy_sha256") != roles.policy_sha256
+        or prerequisites.cell_role_policy_sha256 != roles.policy_sha256
+        or not declared_cells
+        or tuple(sorted(set(declared_cells))) != declared_cells
+        or set(declared_cells) != roles.required_cell_set
+        or any(type(count) is not int or count < 0 for count in candidate_role_counts)
+        or sum(candidate_role_counts) != prepared.get("candidate_count")
+        or candidate_role_counts[0] <= 0
+    ):
+        raise SemanticP50SuccessorCacheError(
+            "prepared semantic P50 development cell-role projection disagrees"
+        )
 
     requested_payloads = prepared.get("requested_address_union")
     closure_rows = prepared.get("complete_trace_closure_inventory")

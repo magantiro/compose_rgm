@@ -1,6 +1,7 @@
 {
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
+  "cell_role_policy_sha256": "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44",
   "empirical_repeated_state_gate": {
     "bounded_p50_capacity_prerequisite": false,
     "empirical_law_claims_authorized": false,
@@ -48,9 +49,31 @@
     "weight_decay": 0.0
   },
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-  "panel_policy_sha256": "089f3df2fa7f307f4623dd3d709547088a23f1b83264f73a57ee0b47d1a00279",
+  "panel_cardinality": {
+    "maximum_entries_by_family": {
+      "atom_delete": 128,
+      "atom_insert": 128,
+      "atom_restate": 128,
+      "bond_reorder": 128,
+      "bond_reroute": 128,
+      "cycle_attach": 128,
+      "cycle_insert": 128,
+      "ring_system_restate": 128
+    },
+    "minimum_entries_by_family": {
+      "atom_delete": 64,
+      "atom_insert": 64,
+      "atom_restate": 64,
+      "bond_reorder": 64,
+      "bond_reroute": 64,
+      "cycle_attach": 64,
+      "cycle_insert": 64,
+      "ring_system_restate": 64
+    }
+  },
+  "panel_policy_sha256": "5ff3f5ee289833190ffc0b16472c6d280470139495a1081c7d582b47f7c64ac6",
   "policy_id": "compose-editing-v2-semantic-t1-unique-capacity-v1",
-  "policy_sha256": "f300a5b4b93f4157976f5031d59c5b55f6a8dd47749d4aff8f289ea915e14402",
+  "policy_sha256": "2186dbd9436f39b3caffafd421710f0c82de14b7da9e4c5ab94a252525a46d1e",
   "required_families": [
     "atom_insert",
     "atom_delete",

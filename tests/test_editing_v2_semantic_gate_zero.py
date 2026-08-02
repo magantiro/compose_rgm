@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import Counter
 from dataclasses import dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -19,6 +20,9 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
 from compose_v4.experiments import editing_v2_semantic_gate_zero as gate_zero
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -78,6 +82,7 @@ def _runtime_identity(contract) -> dict[str, object]:
 @dataclass(frozen=True)
 class _FakeTransition:
     family: str
+    assignment_key: str
     step_index: int = 0
 
     @property
@@ -93,35 +98,37 @@ def _assignment(
     family: str,
     entry_index: int,
     *,
+    context: str | None = None,
     partition_role: str = "train",
 ):
     registry = load_semantic_capability_cell_registry()
-    context = registry.contexts_by_family[family][0]
+    selected_context = context or registry.contexts_by_family[family][0]
+    tag = f"{family}:{selected_context}"
     policy = build_semantic_active8_admission_policy()
-    digest = hashlib.sha256(f"{family}-{entry_index}".encode()).hexdigest()
+    digest = hashlib.sha256(f"{tag}-{entry_index}".encode()).hexdigest()
     provisional = SemanticStructuralCapabilityAssignment(
         decision_source_inventory_sha256="c" * 64,
-        decision_sha256=hashlib.sha256(f"decision-{family}".encode()).hexdigest(),
-        trace_address_sha256=hashlib.sha256(f"address-{family}".encode()).hexdigest(),
+        decision_sha256=hashlib.sha256(f"decision-{tag}".encode()).hexdigest(),
+        trace_address_sha256=hashlib.sha256(f"address-{tag}".encode()).hexdigest(),
         source_progress_address_sha256=hashlib.sha256(
-            f"source-progress-{family}".encode()
+            f"source-progress-{tag}".encode()
         ).hexdigest(),
         successor_progress_address_sha256=hashlib.sha256(
-            f"successor-progress-{family}".encode()
+            f"successor-progress-{tag}".encode()
         ).hexdigest(),
-        trace_id=f"trace-{family}",
+        trace_id=f"trace-{tag}",
         progress_index=0,
-        packed_shard_content_sha256=hashlib.sha256(f"shard-{family}".encode()).hexdigest(),
+        packed_shard_content_sha256=hashlib.sha256(f"shard-{tag}".encode()).hexdigest(),
         packed_shard_name="semantic.jsonl.gz",
         packed_entry_index=entry_index,
-        action_sha256=hashlib.sha256(f"action-{family}".encode()).hexdigest(),
+        action_sha256=hashlib.sha256(f"action-{tag}".encode()).hexdigest(),
         source_state_sha256=digest,
-        target_state_sha256=hashlib.sha256(f"target-{family}".encode()).hexdigest(),
-        source_canonical_key=f"source-{family}",
-        successor_canonical_key=f"successor-{family}",
+        target_state_sha256=hashlib.sha256(f"target-{tag}".encode()).hexdigest(),
+        source_canonical_key=f"source-{tag}",
+        successor_canonical_key=f"successor-{tag}",
         model_family=family,
-        family_context=context,
-        capability_cell_id=f"{registry.namespace}:{family}:{context}",
+        family_context=selected_context,
+        capability_cell_id=f"{registry.namespace}:{family}:{selected_context}",
         data_lane="reversible_synthetic_walk",
         partition_role=partition_role,
         raw_mark_count=20,
@@ -174,14 +181,16 @@ class _FakeIndex:
 
     @property
     def action_family_histogram(self):
-        return tuple((family, 1) for family in self.assignments)
+        counts = Counter(item.model_family for item in self.assignments.values())
+        return tuple(sorted(counts.items()))
 
     @property
     def active8_exclusion_reason_histogram(self):
         return ()
 
     def iter_resolved_traces(self):
-        for family, assignment in self.assignments.items():
+        for assignment_key, assignment in self.assignments.items():
+            family = assignment.model_family
             address = SimpleNamespace(
                 packed_shard_content_sha256=assignment.packed_shard_content_sha256,
                 packed_shard_name=assignment.packed_shard_name,
@@ -208,7 +217,12 @@ class _FakeIndex:
 
     def accepted_transitions_for(self, resolved):
         family = resolved.action_decisions[0].classification.model_family
-        yield _FakeTransition(family)
+        assignment_key = next(
+            key
+            for key, assignment in self.assignments.items()
+            if assignment.decision_sha256 == resolved.decision_sha256
+        )
+        yield _FakeTransition(family, assignment_key)
 
     def identity_payload(self):
         return {
@@ -249,14 +263,23 @@ def _fixture_index_and_plan(
     path.write_bytes(raw)
     policy = build_semantic_active8_admission_policy()
     selected_partitions = partition_by_family or {}
-    assignments = {
-        family: _assignment(
+    registry = load_semantic_capability_cell_registry()
+    roles = load_semantic_development_cell_roles(registry=registry)
+    selected_families = set(families)
+    required_cells = [
+        cell_id
+        for cell_id in roles.required_cell_ids
+        if cell_id.rsplit(":", 2)[1] in selected_families
+    ]
+    assignments = {}
+    for index, cell_id in enumerate(required_cells):
+        _, family, context = cell_id.rsplit(":", 2)
+        assignments[cell_id] = _assignment(
             family,
             index,
+            context=context,
             partition_role=selected_partitions.get(family, "train"),
         )
-        for index, family in enumerate(families)
-    }
     index = _FakeIndex(
         assignments=assignments,
         decision_plan_file_sha256=hashlib.sha256(raw).hexdigest(),
@@ -272,7 +295,7 @@ def _fixture_index_and_plan(
 def _patch_structural_projection(monkeypatch, index: _FakeIndex) -> None:
     def classify(observed_index, transition, *, registry):
         assert observed_index is index
-        assignment = index.assignments[transition.family]
+        assignment = index.assignments[transition.assignment_key]
         assert assignment.registry_sha256 == registry.registry_sha256
         return assignment
 
@@ -303,15 +326,19 @@ def test_structural_pass_counts_verified_assignments_without_authorizing(
         repo_root=ROOT,
     )
     assert evidence["structural_result"] == "PASS"
-    assert evidence["counts"]["accepted_actions"] == 8
-    assert evidence["counts"]["structural_assignments"] == 8
+    assert evidence["counts"]["accepted_actions"] == 17
+    assert evidence["counts"]["structural_assignments"] == 17
     assert evidence["counts"]["terminal_assignments"] == 0
-    assert evidence["counts"]["accepted_progress_rows"] == 16
+    assert evidence["counts"]["accepted_progress_rows"] == 34
     assert evidence["checks"]["one_structural_assignment_per_decision_eligible_action"]
     assert evidence["checks"]["every_decision_eligible_teacher_matches_exactly_one_action_v4_mark"]
-    assert evidence["decision_eligible_teacher_counts_by_family"] == {
-        family: 1 for family in ACTIVE8_FAMILIES
-    }
+    assert evidence["counts"]["required_editing_cells"] == 17
+    assert evidence["counts"]["observed_required_editing_cells"] == 17
+    assert evidence["empty_required_editing_cell_ids"] == []
+    assert all(
+        evidence["decision_eligible_teacher_counts_by_family"][family] > 0
+        for family in ACTIVE8_FAMILIES
+    )
     assert all(evidence[field] is False for field in gate_zero._AUTHORITY)
     decision = gate_zero.structural_decision_from_evidence(
         evidence,
@@ -403,7 +430,7 @@ def test_classification_failure_is_published_as_bounded_negative_evidence(
         assert observed_index is index
         if transition.family == ACTIVE8_FAMILIES[0]:
             raise gate_zero.SemanticCapabilityCellError("unsupported fixture teacher")
-        return index.assignments[transition.family]
+        return index.assignments[transition.assignment_key]
 
     monkeypatch.setattr(gate_zero, "classify_verified_structural_transition", classify)
     evidence = gate_zero.build_semantic_gate_zero_structural_evidence(

@@ -45,9 +45,12 @@ from compose_v4.experiments.editing_v2_semantic_t1_decision import (
     validate_semantic_gate_zero_evidence_receipt,
     validate_semantic_t1_capacity_decision,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 
 PREPARED_SCHEMA = "compose.editing_v2.semantic_p50_prepared_recipe"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 PREPARED_STATUS = "PREPARED_EXACT_STREAM_PENDING_PHYSICAL_BINDINGS_NO_AUTHORITY"
 
@@ -90,6 +93,7 @@ _POLICY_FIELDS = {
     *_NO_AUTHORITY,
     "scientific_scope",
     "active_families",
+    "cell_role_policy_sha256",
     "optimization",
     "objective",
     "sampling",
@@ -310,6 +314,8 @@ def load_semantic_p50_recipe_policy(
         or supplied != _sha(body)
         or any(policy.get(key) is not value for key, value in _NO_AUTHORITY.items())
         or tuple(policy.get("active_families", ())) != ACTIVE8_FAMILIES
+        or policy.get("cell_role_policy_sha256")
+        != load_semantic_development_cell_roles().policy_sha256
         or dict(optimization) != _EXPECTED_OPTIMIZATION
         or dict(objective) != _EXPECTED_OBJECTIVE
         or dict(sampling) != _EXPECTED_SAMPLING
@@ -383,6 +389,7 @@ class SemanticP50Prerequisites:
     scratch_initial_model_state_sha256: str
     capability_registry_sha256: str
     classifier_implementation_sha256: str
+    cell_role_policy_sha256: str
 
     def __post_init__(self) -> None:
         for name in self.__dataclass_fields__:
@@ -478,6 +485,8 @@ def validate_semantic_p50_prerequisite_relationships(
         t1_decision.get("gate_zero_evidence_file_sha256") == gate_zero_file_sha256,
         tuple(t1_decision.get("required_families", ())) == ACTIVE8_FAMILIES,
         t1_decision.get("initial_model_state_sha256") == runtime.get("initial_model_state_sha256"),
+        gate_zero.get("development_cell_roles", {}).get("policy_sha256")
+        == t1_decision.get("cell_role_policy_sha256"),
     )
     if not all(required_relationships):
         raise SemanticP50RecipeStreamError(
@@ -515,6 +524,10 @@ def validate_semantic_p50_prerequisite_relationships(
         ),
         capability_registry_sha256=registry.registry_sha256,
         classifier_implementation_sha256=registry.classifier_implementation_sha256,
+        cell_role_policy_sha256=_require_sha(
+            t1_decision.get("cell_role_policy_sha256"),
+            field="cell_role_policy_sha256",
+        ),
     )
 
 
@@ -674,12 +687,34 @@ def compile_semantic_p50_prepared_recipe(
     if not isinstance(inventory, SemanticP50CandidateInventory):
         raise TypeError("semantic P50 compiler requires a candidate inventory")
     policy, policy_file_sha256 = load_semantic_p50_recipe_policy(policy_path)
+    cell_roles = load_semantic_development_cell_roles()
+    if (
+        policy["cell_role_policy_sha256"] != cell_roles.policy_sha256
+        or inventory.prerequisites.cell_role_policy_sha256 != cell_roles.policy_sha256
+    ):
+        raise SemanticP50RecipeStreamError(
+            "semantic P50 prerequisites differ from the frozen development cell roles"
+        )
     by_cell: dict[str, list[SuccessorFiberCacheAddress]] = defaultdict(list)
+    candidate_counts_by_role: Counter[str] = Counter()
     candidate_by_address: dict[SuccessorFiberCacheAddress, SemanticP50Candidate] = {}
     for candidate in inventory.candidates:
+        role = cell_roles.role_for(candidate.semantic_cell_id)
+        candidate_counts_by_role[role] += 1
+        if role != "required_editing":
+            continue
         by_cell[candidate.semantic_cell_id].append(candidate.address)
         candidate_by_address[candidate.address] = candidate
     cells = tuple(sorted(by_cell))
+    required_cells = cell_roles.required_cell_set
+    observed_cells = frozenset(cells)
+    if observed_cells != required_cells:
+        missing = sorted(required_cells - observed_cells)
+        unexpected = sorted(observed_cells - required_cells)
+        raise SemanticP50RecipeStreamError(
+            "semantic P50 inventory does not contain the exact frozen required editing cells; "
+            f"missing={missing}, unexpected={unexpected}"
+        )
     scheduler = StageASemanticCellScheduler(
         declared_cells=cells,
         examples_by_cell=by_cell,
@@ -820,9 +855,13 @@ def compile_semantic_p50_prepared_recipe(
         "scientific_scope": "scratch_active8_stage_a_capability_pilot",
         "recipe_policy_file_sha256": policy_file_sha256,
         "recipe_policy_sha256": policy["policy_sha256"],
+        "cell_role_policy_sha256": cell_roles.policy_sha256,
         "prerequisites": inventory.prerequisites.as_payload(),
         "candidate_inventory_sha256": inventory.candidate_inventory_sha256,
         "candidate_count": len(inventory.candidates),
+        "required_editing_candidate_count": candidate_counts_by_role["required_editing"],
+        "conditional_editing_candidate_count": candidate_counts_by_role["conditional_editing"],
+        "separate_lane_candidate_count": candidate_counts_by_role["separate_lane_null_de_novo"],
         "required_families": list(ACTIVE8_FAMILIES),
         "declared_nonempty_semantic_cells": list(cells),
         "recipe": {

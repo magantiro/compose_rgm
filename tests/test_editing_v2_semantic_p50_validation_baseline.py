@@ -33,6 +33,9 @@ from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     compile_semantic_p50_prepared_recipe,
     write_semantic_p50_prepared_recipe,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_p50_source_inventory import (
     SemanticP50SourceInventoryBinding,
     VerifiedSemanticP50SourceInventory,
@@ -130,10 +133,9 @@ def evidence(tmp_path: Path, monkeypatch):
     target_key = canonical_state_key(target_state)
     transitions = []
     assignments: dict[int, object] = {}
-    cells: list[str] = []
-    for index, family in enumerate(ACTIVE8_FAMILIES):
-        cell = f"editing_v2_active8_v1:{family}:fixture_context"
-        cells.append(cell)
+    roles = load_semantic_development_cell_roles()
+    for index, cell in enumerate(roles.required_cell_ids):
+        family = cell.rsplit(":", 2)[1]
         address = PackedTraceAddress(
             packed_shard_content_sha256=_digest(f"validation-shard-{index}"),
             packed_shard_name=f"validation-{index}.jsonl.gz",
@@ -157,7 +159,7 @@ def evidence(tmp_path: Path, monkeypatch):
             model_family=family,
             capability_cell_id=cell,
             data_lane="reversible_synthetic_walk",
-            assignment_sha256=_digest(f"assignment-{family}"),
+            assignment_sha256=_digest(f"assignment-{cell}"),
         )
 
     def classify(_index, transition, *, registry):
@@ -225,6 +227,7 @@ def evidence(tmp_path: Path, monkeypatch):
             "scratch_initial_model_state_sha256": initial_sha,
             "capability_registry_sha256": registry.registry_sha256,
             "classifier_implementation_sha256": (registry.classifier_implementation_sha256),
+            "cell_role_policy_sha256": roles.policy_sha256,
         }
     )
     prerequisites = SemanticP50Prerequisites(**values)
@@ -242,12 +245,12 @@ def evidence(tmp_path: Path, monkeypatch):
                 progress_index=0,
                 path_length=1,
             ),
-            family=family,
-            semantic_cell_id=cells[index],
+            family=cell.rsplit(":", 2)[1],
+            semantic_cell_id=cell,
             data_lane="reversible_synthetic_walk",
-            assignment_sha256=_digest(f"train-assignment-{family}"),
+            assignment_sha256=_digest(f"train-assignment-{cell}"),
         )
-        for index, family in enumerate(ACTIVE8_FAMILIES)
+        for index, cell in enumerate(roles.required_cell_ids)
     )
     prepared = compile_semantic_p50_prepared_recipe(
         SemanticP50CandidateInventory(prerequisites=prerequisites, candidates=train)
@@ -452,7 +455,7 @@ def _open_baseline(evidence, completion_path):
 
 def test_inventory_is_exact_source_projection_and_nonauthorizing(evidence) -> None:
     verified = evidence.inventory
-    assert len(verified.candidates) == len(ACTIVE8_FAMILIES)
+    assert len(verified.candidates) == len(load_semantic_development_cell_roles().required_cell_ids)
     assert {item.family for item in verified.candidates} == set(ACTIVE8_FAMILIES)
     assert all(item.address.partition == "validation" for item in verified.candidates)
     assert verified.completion["bounded_p50_authorized"] is False
@@ -579,7 +582,9 @@ def test_inventory_rejects_source_outside_artifact_root(evidence, tmp_path: Path
 def test_baseline_recomputes_metrics_from_per_address_receipts(evidence) -> None:
     completion = _baseline(evidence)
     verified = _open_baseline(evidence, completion)
-    assert verified.result["example_count"] == len(ACTIVE8_FAMILIES)
+    assert verified.result["example_count"] == len(
+        load_semantic_development_cell_roles().required_cell_ids
+    )
     first_family = ACTIVE8_FAMILIES[0]
     expected = next(
         item.canonical_successor_nll_nats

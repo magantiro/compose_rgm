@@ -155,6 +155,15 @@ def test_t1_unique_state_thresholds_are_frozen_before_results() -> None:
         validate_editing_training_gate(broken)
 
 
+@pytest.mark.parametrize("minimum", [1, 63, 65, 129])
+def test_t1_examples_per_slice_minimum_cannot_drift(minimum: int) -> None:
+    contract = load_editing_training_gate(CONTRACT_PATH)
+    broken = copy.deepcopy(contract)
+    broken["gates"][2]["examples_per_slice"]["minimum"] = minimum
+    with pytest.raises(EditingTrainingGateError, match="64 to 128"):
+        validate_editing_training_gate(broken)
+
+
 def _freeze_p50_thresholds(contract):
     frozen = copy.deepcopy(contract)
     thresholds = frozen["gates"][3]["numeric_thresholds"]
