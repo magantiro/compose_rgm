@@ -43,51 +43,76 @@
   "atom_delete": {
     "action_semantics_modes": {
       "legacy": "legacy_acyclic_atom_delete_v1",
-      "process_v2": "process_v2_connected_nonleaf_atom_delete_v1"
+      "process_v2": "process_v2_uniform_gated_atom_delete_v2"
     },
     "action_type": "AtomDelete",
-    "aromatic_connected_nonleaf_policy": {
-      "admitted": false,
-      "perception": "resonance_invariant_bond_classes",
-      "reason": "deleting_one_kekule_encoded_slot_of_a_perceived_aromatic_system_yields_a_representation_sensitive_open_chain_successor",
-      "requires_separate_future_semantic_decision_and_resolver": true
-    },
-    "connected_nonleaf_expansion": {
-      "admission_conditions": [
-        "real_element_under_the_authoritative_element_predicate",
-        "non_aromatic_under_the_frozen_production_representation",
-        "not_a_graph_articulation_point_of_the_real_atom_graph",
-        "unchanged_production_atom_delete_executor_accepts_the_operation",
-        "exact_persistent_slot_successor_is_connected",
-        "frozen_charge_policy_is_preserved_by_the_transition",
-        "successor_is_within_the_declared_support_and_is_canonicalizable"
-      ],
-      "disjointness_argument": "in_a_connected_real_atom_graph_an_acyclic_vertex_of_real_atom_degree_at_least_two_is_always_a_cut_vertex_so_the_unchanged_v1_dense_mask_admits_no_slot_of_real_atom_degree_at_least_two",
-      "enumerator": "enumerate_process_v2_connected_nonleaf_atom_deletes",
-      "mask": "process_v2_connected_nonleaf_atom_delete_mask",
-      "minimum_real_atom_degree": 2,
-      "minimum_real_atom_degree_constant": "CONNECTED_NONLEAF_MINIMUM_DEGREE",
+    "admission_authority": {
+      "candidate_sources_are_diagnostic_labels_only": true,
+      "decides": "every_process_v2_atom_delete_candidate",
+      "enumerator": "enumerate_process_v2_atom_deletes",
+      "implementation_binding": "the_resolver_enumerator_mask_and_reason_codes_declared_here_are_asserted_against_the_live_module_by_scripts/verify_process_v2_hash_chain.py",
+      "is_a_disjoint_union_of_two_admission_rules": false,
+      "mask": "process_v2_atom_delete_mask",
+      "mask_is_the_complete_effective_mask_not_an_extension": true,
       "module": "src/compose_v4/rewrite/process_v2_atom_delete.py",
       "rejection_codes_in_evaluation_order": [
         "invalid_source",
         "invalid_slot",
         "not_a_real_element",
-        "outside_connected_nonleaf_expansion",
         "aromatic_atom",
         "articulation_point",
+        "scar_incident",
         "executor_rejected",
         "successor_disconnected",
         "charge_policy_violated",
         "successor_outside_declared_support",
         "successor_not_canonicalizable"
       ],
-      "resolver": "resolve_process_v2_connected_nonleaf_atom_delete"
+      "resolver": "resolve_process_v2_atom_delete",
+      "single_authority_over_all_candidates": true
     },
+    "aromatic_connected_nonleaf_policy": {
+      "admitted": false,
+      "perception": "resonance_invariant_bond_classes",
+      "reason": "deleting_one_kekule_encoded_slot_of_a_perceived_aromatic_system_yields_a_representation_sensitive_open_chain_successor",
+      "requires_separate_future_semantic_decision_and_resolver": true
+    },
+    "candidate_sources": {
+      "connected_nonleaf": {
+        "definition": "real_slot_whose_real_atom_degree_is_at_least_the_minimum_degree",
+        "diagnostic_label_only": true,
+        "introduced_by_process_v2": true,
+        "minimum_real_atom_degree": 2,
+        "minimum_real_atom_degree_constant": "CONNECTED_NONLEAF_MINIMUM_DEGREE",
+        "selects_additional_gates": true
+      },
+      "inherited_root_singleton_leaf": {
+        "definition": "real_slot_whose_real_atom_degree_is_at_most_one",
+        "diagnostic_label_only": true,
+        "introduced_by_process_v2": false,
+        "maximum_real_atom_degree": 1,
+        "selects_additional_gates": false
+      }
+    },
+    "common_exact_gates_in_order": [
+      "real_element_under_the_authoritative_element_predicate",
+      "unchanged_production_atom_delete_executor_accepts_the_operation",
+      "exact_persistent_slot_successor_is_connected_or_null",
+      "authoritative_charge_policy_is_preserved_by_the_transition",
+      "successor_is_within_the_declared_broad_organic_bounded_size_support",
+      "successor_is_canonicalizable"
+    ],
+    "common_gates_apply_to_every_candidate_source": true,
+    "connected_nonleaf_only_gates_in_order": [
+      "non_aromatic_under_the_frozen_production_representation",
+      "not_a_graph_articulation_point_of_the_real_atom_graph",
+      "not_incident_to_any_scar_slot"
+    ],
     "effective_mask_rule": {
-      "definition": "process_v2_effective_atom_delete_mask_equals_the_unchanged_v1_dense_mask_union_the_connected_nonleaf_mask",
-      "operands_are_disjoint": true,
-      "union_is_a_disjoint_union": true,
-      "v1_dense_mask_changed": false
+      "batch_mask_equals_the_admission_authority_array": true,
+      "definition": "the_process_v2_effective_atom_delete_mask_equals_process_v2_atom_delete_mask_exactly",
+      "model_forward_asserts_equality_not_subset": true,
+      "v1_dense_mask_is_the_effective_process_v2_mask": false
     },
     "executor_rule": "atom_delete",
     "executor_validity_is_a_connectivity_predicate": false,
@@ -97,28 +122,50 @@
       "change_persistent_slot_identity_or_canonicalization",
       "change_formal_charge_policy",
       "admit_aromatic_connected_nonleaf_deletion",
+      "admit_scar_incident_connected_nonleaf_deletion",
       "add_multi_neighbour_atom_insertion",
       "enable_ring_system_delete_or_ring_system_grow",
       "change_any_other_active8_operator_semantics",
       "relabel_v1_artifacts_as_v2"
     ],
-    "legality_authority": "the_unchanged_production_atom_delete_executor_is_the_legality_authority_and_no_weaker_approximate_valence_test_may_be_substituted_for_it",
-    "one_step_inverse_closure_claimed": false,
-    "preserved_v1_admission": {
-      "charge_policy_applied_to_preserved_v1_candidates": false,
+    "inherited_capability": {
+      "admission_set_preserved_bit_for_bit": false,
+      "capability_remains_reachable": true,
       "covers": [
         "root",
         "singleton",
         "leaf"
       ],
-      "dense_mask_rule": "real_slot_with_atom_topology_zero_and_not_an_articulation_point_and_no_neighbour_implicit_hydrogen_exceeding_max_h_count",
-      "maximum_admitted_real_atom_degree": 1,
-      "redecided_by_process_v2": false,
-      "uniform_charge_application_would_remove_preserved_v1_candidates": true
+      "exempt_from_the_authoritative_charge_policy": false,
+      "meaning": "preserving_the_capability_means_root_singleton_and_leaf_deletion_stays_reachable_it_does_not_mean_preserving_an_unfiltered_admission_set",
+      "superseded_v1_dense_mask_rule": "real_slot_with_atom_topology_zero_and_not_an_articulation_point_and_no_neighbour_implicit_hydrogen_exceeding_max_h_count"
+    },
+    "legality_authority": "the_unchanged_production_atom_delete_executor_is_the_legality_authority_and_no_weaker_approximate_valence_test_may_be_substituted_for_it",
+    "one_step_inverse_closure_claimed": false,
+    "scar_incidence_policy": {
+      "admitted": false,
+      "applies_to_candidate_sources": [
+        "connected_nonleaf"
+      ],
+      "connected_nonleaf_only_reason": "a_scar_adjacent_leaf_deletion_was_already_reachable_under_v1_so_excluding_it_would_withdraw_an_inherited_capability_the_recorded_decision_does_not_withdraw_while_a_scar_adjacent_ring_deletion_is_newly_introduced_by_process_v2",
+      "constant": "compose_v4.chem.molecular_graph.SCAR_IDX",
+      "definition": "any_neighbour_slot_whose_atom_type_is_the_scar_marker",
+      "reason": "apply_atom_delete_writes_implicit_hydrogen_onto_the_scar_neighbour_which_is_unsettled",
+      "requires_separate_future_scar_semantic_decision": true
+    },
+    "superseded_reading": {
+      "contract_revision": "process_v2_disjoint_union_preserving_v1_admission",
+      "defect": "it_read_preserve_existing_root_singleton_and_leaf_behaviour_as_preserve_the_admission_set_bit_for_bit_and_therefore_exempted_inherited_candidates_from_the_authoritative_charge_policy_preserving_a_legacy_defect",
+      "removed_action_semantics_mode": "process_v2_connected_nonleaf_atom_delete_v1",
+      "removed_action_semantics_mode_defect": "the_name_falsely_implied_that_inherited_candidates_were_unfiltered",
+      "removed_action_semantics_mode_may_be_aliased": false,
+      "removed_rejection_codes": [
+        "outside_connected_nonleaf_expansion"
+      ]
     }
   },
   "atom_delete_mask_implementation": {
-    "connected_nonleaf_resolver_module": "src/compose_v4/rewrite/process_v2_atom_delete.py",
+    "admission_authority_module": "src/compose_v4/rewrite/process_v2_atom_delete.py",
     "dense_mask_module": "src/compose_v4/model/factorized_tracelet_rate_model.py",
     "dense_mask_symbol": "_graph_application_masks",
     "mask_properties": [
@@ -153,15 +200,18 @@
     }
   },
   "charge_policy": {
-    "applied_to": "connected_nonleaf_expansion_candidates_only",
+    "applied_to": "every_process_v2_atom_delete_candidate",
+    "authoritative": true,
     "changed_by_process_v2": false,
     "constant": "compose_v4.data.charge_policy.CHARGE_POLICY_VERSION",
+    "exempt_candidate_sources": [],
     "formal_charge_changes": "out_of_scope",
-    "not_applied_to_preserved_v1_candidates_reason": "uniform_application_would_remove_preserved_v1_leaf_candidates_and_silently_change_admission_behaviour_the_decision_declares_unchanged",
+    "is_a_common_exact_gate": true,
     "predicate": "charge_policy_preserved",
     "version": "exact_charged_center_preservation_v1"
   },
-  "contract_sha256": "30369f36373b1163114b9a8bf6849f3fbed4627b6070e4478c4a5efb6c3c6261",
+  "contract_revision": "process_v2_uniform_gated_admission_authority",
+  "contract_sha256": "fcfae81ca29f3cd71b04e35d35a39d073859d6649207044bacdaf622f7d9be1a",
   "downstream_invalidation": {
     "active8_inventory_rebuild_required": true,
     "affected_whole_trace_replay_required": true,
@@ -195,6 +245,32 @@
       "cycle_attach",
       "ring_system_restate"
     ]
+  },
+  "lineage": {
+    "current_process_v2_identity_source": "editing_process_v2_identity()['process_identity_sha256'] recomputed from live source; this contract never pins its own identity value",
+    "rejected_pre_run_candidate_identity": {
+      "atom_delete_action_semantics": "process_v2_connected_nonleaf_atom_delete_v1",
+      "contract_revision": "process_v2_disjoint_union_preserving_v1_admission",
+      "downstream_artifacts_produced": [],
+      "is_the_current_process_v2_identity": false,
+      "process_identity_sha256": "9fde14b59fc6bfb7be7aaf83564658a9a6758f479d9fd94c134206e84873319b",
+      "process_semantics": "semantic_editing_v2_v2",
+      "produced_downstream_artifacts": false,
+      "rejected_before_any_downstream_run": true,
+      "rejection_reason": "it_exempted_inherited_root_singleton_and_leaf_candidates_from_the_authoritative_charge_policy",
+      "status": "REJECTED_PRE_RUN_CANDIDATE_IDENTITY",
+      "was_a_superseded_production_identity": false
+    },
+    "superseded_v1_payload_identity": {
+      "contract_relative_path": "configs/editing_v2_semantic_process_v1.json",
+      "immutable_v1_payloads_were_built_under_it": true,
+      "is_the_current_process_v2_identity": false,
+      "process_identity_sha256": "6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7",
+      "process_semantics": "semantic_editing_v2_v1",
+      "readable_only_under_the_v1_identity_schema": true,
+      "status": "SUPERSEDED_V1_PROCESS_IDENTITY",
+      "was_a_superseded_production_identity": true
+    }
   },
   "model_contract": {
     "action_semantics_modes": {
@@ -245,6 +321,7 @@
   "process_semantics": "semantic_editing_v2_v2",
   "schema": "compose.editing.semantic_process_contract",
   "schema_version": 2,
+  "schema_version_names": "the_semantic_process_version_not_the_body_shape",
   "scope": {
     "active_families": [
       "atom_insert",
@@ -265,43 +342,20 @@
     "unconditional_de_novo_lane_modified": false
   },
   "source_evidence": {
-    "connected_nonleaf_disjointness_development_panel": {
+    "inherited_candidate_charge_violation_observation": {
       "authoritative_corpus_evidence": false,
-      "maximum_v1_admitted_real_atom_degree": 1,
-      "panel_smiles": [
-        "C",
-        "C1CC2CCC1CC2",
-        "C1CCC(CC1)N",
-        "C1CCCCC1",
-        "C1CCOCC1",
-        "CC(=O)Oc1ccccc1C(=O)O",
-        "CC1CCCCC1",
-        "CCCC",
-        "CCO",
-        "C[N+](C)(C)CC(=O)[O-]",
-        "Cc1ccccc1",
-        "O=C1NC(O)C2CCCCC12",
-        "c1ccc2ccccc2c1",
-        "c1ccccc1"
-      ],
-      "status": "bounded_development_observation_requires_the_registered_process_v2_candidate_mask_gate",
-      "v1_and_connected_nonleaf_overlap_count": 0
-    },
-    "uniform_charge_policy_counterexample": {
-      "authoritative_corpus_evidence": false,
-      "charge_policy_preserving_v1_admitted_slots": [
-        6
-      ],
-      "conclusion": "applying_the_charge_policy_uniformly_would_remove_four_of_the_five_preserved_v1_leaf_candidates_of_this_source",
-      "connected_nonleaf_admitted_slots": [],
-      "source_smiles": "C[N+](C)(C)CC(=O)[O-]",
-      "v1_admitted_slots": [
-        0,
-        2,
-        3,
-        6,
-        7
-      ]
+      "conclusion": "the_authoritative_charge_policy_is_the_whole_gap_between_the_superseded_inherited_admission_set_and_the_corrected_one_on_this_bounded_panel",
+      "denominator_inherited_candidates": 3319,
+      "denominator_source_molecules": 800,
+      "evidence_class": "bounded_measured_observation_not_a_corpus_result",
+      "excluded_by_the_common_connectivity_gate_beyond_the_charge_gate": 0,
+      "excluded_by_the_common_executor_gate_beyond_the_charge_gate": 0,
+      "inherited_candidates_violating_the_authoritative_charge_policy": 125,
+      "measured_on": "800_jin_qed_leads",
+      "source_molecules_with_at_least_one_violation": 105,
+      "status": "bounded_measured_motivation_for_the_correction_it_authorizes_nothing_and_is_not_corpus_evidence",
+      "superseded_rule_admitted_the_violating_candidates": true,
+      "violating_fraction_percent_rounded_to_two_places": "3.77"
     }
   },
   "status": "DESIGN_FROZEN_PROCESS_V2_SUPPORT_DECISION_NOT_TRAINING_OR_EXPERIMENT_AUTHORIZED",
