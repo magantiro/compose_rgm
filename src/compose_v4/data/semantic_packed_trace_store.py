@@ -39,6 +39,21 @@ The pinned path is therefore not a weakened gate:
 A reader that pins an identity is asserting compatibility with historical
 bytes.  It is the caller's obligation, not this module's, to re-prove every
 chemical claim the artifact carries.
+
+Recoverable row reads
+---------------------
+
+:func:`read_semantic_packed_artifact_range` raises on the first unreadable row,
+which is the right behaviour for a consumer that needs every row.  A proof
+scan instead has to *account* for an unreadable row: it must name the exact
+physical entry, attach a reason code, and refuse to publish, rather than die
+with an untyped exception.  :func:`read_semantic_packed_artifact_range_rows`
+exposes the same validated read with an explicit ``recover_row_errors`` switch
+that turns a per-row decode failure into a :class:`SemanticPackedRowRead`
+carrying its exact reason.  Artifact-level failures (inventory, manifest,
+hashes, completion receipt, identity, range bounds, blank rows, row census)
+are never recoverable and still raise.  The default is ``False``, which is
+byte-for-byte today's behaviour.
 """
 
 from __future__ import annotations
@@ -50,7 +65,8 @@ import os
 import shutil
 import tempfile
 from collections import Counter
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -127,6 +143,22 @@ _COMPLETION_FIELDS = {
 
 class SemanticPackedStoreError(RuntimeError):
     """A semantic packed artifact is incomplete, stale, or inconsistent."""
+
+
+@dataclass(frozen=True)
+class SemanticPackedRowRead:
+    """One physical shard row: either decoded, or reason-carrying, never both.
+
+    ``record`` is the exact persisted JSON object when the line parsed at all,
+    so a caller can still address a malformed row by its own provenance.
+    ``addressed`` is populated only when the complete row validation passed,
+    and ``error`` is populated only when it did not.
+    """
+
+    entry_index: int
+    record: dict[str, Any] | None
+    addressed: AddressedPackedTrace | None
+    error: str | None
 
 
 def _canonical_json_bytes(value: object, *, newline: bool = False) -> bytes:
@@ -865,6 +897,160 @@ def validate_semantic_packed_entry_ranges(
     return tuple(normalized)
 
 
+def read_semantic_packed_artifact_range_rows(
+    artifact_dir: Path,
+    *,
+    expected_shard_sha256: str,
+    expected_manifest_sha256: str,
+    entry_start: int,
+    entry_stop: int,
+    expected_source_binding: Mapping[str, object] | None = None,
+    expected_process_identity: Mapping[str, object] | None = None,
+    expected_builder_identity: Mapping[str, object] | None = None,
+    sentinel_replay_entries: int = DEFAULT_SENTINEL_REPLAY_ENTRIES,
+    recover_row_errors: bool = False,
+) -> Iterator[SemanticPackedRowRead]:
+    """Yield one validated half-open range as addressable row reads.
+
+    This is the single implementation behind
+    :func:`read_semantic_packed_artifact_range`; see that function for the
+    range and validation contract.  ``recover_row_errors=False`` reproduces it
+    exactly, raising :class:`SemanticPackedStoreError` on the first unreadable
+    row.  ``recover_row_errors=True`` instead yields a
+    :class:`SemanticPackedRowRead` whose ``error`` names the exact failure, so
+    a proof scan can account for every physical entry it read.  Only per-row
+    decode, lane/split and duplicate-identity failures are recoverable; every
+    artifact-level failure still raises.
+    """
+
+    if type(sentinel_replay_entries) is not int or sentinel_replay_entries < 0:
+        raise ValueError("sentinel_replay_entries must be a nonnegative integer")
+    if type(recover_row_errors) is not bool:
+        raise ValueError("recover_row_errors must be a boolean")
+    root = Path(artifact_dir)
+    shard_path, _, _ = _artifact_files(root)
+    manifest = load_semantic_packed_manifest(
+        root,
+        expected_shard_sha256=expected_shard_sha256,
+        expected_manifest_sha256=expected_manifest_sha256,
+        expected_source_binding=expected_source_binding,
+        expected_process_identity=expected_process_identity,
+        expected_builder_identity=expected_builder_identity,
+    )
+    entry_start, entry_stop = _validate_semantic_entry_range(
+        entry_start=entry_start,
+        entry_stop=entry_stop,
+        entries=manifest["entries"],
+    )
+    shard_sha256 = str(manifest["shard_sha256"])
+
+    def rows() -> Iterator[SemanticPackedRowRead]:
+        observed_entries = 0
+        seen_trace_ids: set[str] = set()
+        with gzip.open(shard_path, "rb") as handle:
+            for entry_index, raw_line in enumerate(handle):
+                if not raw_line.strip():
+                    raise SemanticPackedStoreError(
+                        f"semantic packed row {entry_index} is blank"
+                    )
+                if entry_index < entry_start:
+                    continue
+                if entry_index >= entry_stop:
+                    break
+                observed_entries += 1
+                record: object = None
+                try:
+                    record = json.loads(raw_line)
+                    trace = decode_semantic_trace_record(
+                        record,
+                        validate_replay=entry_index < sentinel_replay_entries,
+                        expected_process_identity=expected_process_identity,
+                    )
+                    states = tuple(
+                        decode_state(payload) for payload in record["states"]
+                    )
+                except (
+                    json.JSONDecodeError,
+                    KeyError,
+                    TypeError,
+                    SemanticTraceShardError,
+                ) as error:
+                    if not recover_row_errors:
+                        raise SemanticPackedStoreError(
+                            f"semantic packed row {entry_index} is malformed"
+                        ) from error
+                    yield SemanticPackedRowRead(
+                        entry_index=entry_index,
+                        record=record if isinstance(record, dict) else None,
+                        addressed=None,
+                        error=f"semantic packed row {entry_index} is malformed: {error}",
+                    )
+                    continue
+                if (
+                    record["data_lane"] != manifest["data_lane"]
+                    or record["split"] != manifest["split"]
+                ):
+                    detail = (
+                        f"semantic packed row {entry_index} leaves its declared lane or split"
+                    )
+                    if not recover_row_errors:
+                        raise SemanticPackedStoreError(detail)
+                    yield SemanticPackedRowRead(
+                        entry_index=entry_index,
+                        record=dict(record),
+                        addressed=None,
+                        error=detail,
+                    )
+                    continue
+                trace_id = str(record["trace_id"])
+                if trace_id in seen_trace_ids:
+                    detail = (
+                        f"duplicate trace_id {trace_id!r} in semantic packed entry range"
+                    )
+                    if not recover_row_errors:
+                        raise SemanticPackedStoreError(detail)
+                    yield SemanticPackedRowRead(
+                        entry_index=entry_index,
+                        record=dict(record),
+                        addressed=None,
+                        error=detail,
+                    )
+                    continue
+                seen_trace_ids.add(trace_id)
+                path = PackedTraceProgress(trace, states)
+                canonical_keys = record["canonical_state_keys"]
+                address = PackedTraceAddress(
+                    packed_shard_content_sha256=shard_sha256,
+                    packed_shard_name=SHARD_FILENAME,
+                    entry_index=entry_index,
+                    trace_id=trace_id,
+                    layer=str(record["data_lane"]),
+                    partition=str(record["split"]),
+                    source_key=str(canonical_keys[0]),
+                    target_key=str(canonical_keys[-1]),
+                    path_length=int(record["path_length"]),
+                )
+                yield SemanticPackedRowRead(
+                    entry_index=entry_index,
+                    record=dict(record),
+                    addressed=AddressedPackedTrace(
+                        address=address,
+                        trace=trace,
+                        path=path,
+                    ),
+                    error=None,
+                )
+
+        expected_entries = entry_stop - entry_start
+        if observed_entries != expected_entries:
+            raise SemanticPackedStoreError(
+                f"semantic packed entry range [{entry_start}, {entry_stop}) expected "
+                f"{expected_entries} rows but observed {observed_entries}"
+            )
+
+    return rows()
+
+
 def read_semantic_packed_artifact_range(
     artifact_dir: Path,
     *,
@@ -901,94 +1087,28 @@ def read_semantic_packed_artifact_range(
     live-identity behaviour.
     """
 
-    if type(sentinel_replay_entries) is not int or sentinel_replay_entries < 0:
-        raise ValueError("sentinel_replay_entries must be a nonnegative integer")
-    root = Path(artifact_dir)
-    shard_path, _, _ = _artifact_files(root)
-    manifest = load_semantic_packed_manifest(
-        root,
+    reads = read_semantic_packed_artifact_range_rows(
+        artifact_dir,
         expected_shard_sha256=expected_shard_sha256,
         expected_manifest_sha256=expected_manifest_sha256,
+        entry_start=entry_start,
+        entry_stop=entry_stop,
         expected_source_binding=expected_source_binding,
         expected_process_identity=expected_process_identity,
         expected_builder_identity=expected_builder_identity,
+        sentinel_replay_entries=sentinel_replay_entries,
+        recover_row_errors=False,
     )
-    entry_start, entry_stop = _validate_semantic_entry_range(
-        entry_start=entry_start,
-        entry_stop=entry_stop,
-        entries=manifest["entries"],
-    )
-    shard_sha256 = str(manifest["shard_sha256"])
 
-    def rows() -> Iterable[AddressedPackedTrace]:
-        observed_entries = 0
-        seen_trace_ids: set[str] = set()
-        with gzip.open(shard_path, "rb") as handle:
-            for entry_index, raw_line in enumerate(handle):
-                if not raw_line.strip():
-                    raise SemanticPackedStoreError(
-                        f"semantic packed row {entry_index} is blank"
-                    )
-                if entry_index < entry_start:
-                    continue
-                if entry_index >= entry_stop:
-                    break
-                try:
-                    record = json.loads(raw_line)
-                    trace = decode_semantic_trace_record(
-                        record,
-                        validate_replay=entry_index < sentinel_replay_entries,
-                        expected_process_identity=expected_process_identity,
-                    )
-                    states = tuple(
-                        decode_state(payload) for payload in record["states"]
-                    )
-                except (
-                    json.JSONDecodeError,
-                    KeyError,
-                    TypeError,
-                    SemanticTraceShardError,
-                ) as error:
-                    raise SemanticPackedStoreError(
-                        f"semantic packed row {entry_index} is malformed"
-                    ) from error
-                if (
-                    record["data_lane"] != manifest["data_lane"]
-                    or record["split"] != manifest["split"]
-                ):
-                    raise SemanticPackedStoreError(
-                        f"semantic packed row {entry_index} leaves its declared lane or split"
-                    )
-                trace_id = str(record["trace_id"])
-                if trace_id in seen_trace_ids:
-                    raise SemanticPackedStoreError(
-                        f"duplicate trace_id {trace_id!r} in semantic packed entry range"
-                    )
-                seen_trace_ids.add(trace_id)
-                path = PackedTraceProgress(trace, states)
-                canonical_keys = record["canonical_state_keys"]
-                address = PackedTraceAddress(
-                    packed_shard_content_sha256=shard_sha256,
-                    packed_shard_name=SHARD_FILENAME,
-                    entry_index=entry_index,
-                    trace_id=trace_id,
-                    layer=str(record["data_lane"]),
-                    partition=str(record["split"]),
-                    source_key=str(canonical_keys[0]),
-                    target_key=str(canonical_keys[-1]),
-                    path_length=int(record["path_length"]),
+    def addressed_rows() -> Iterable[AddressedPackedTrace]:
+        for read in reads:
+            if read.addressed is None:
+                raise SemanticPackedStoreError(
+                    f"semantic packed row {read.entry_index} is malformed"
                 )
-                observed_entries += 1
-                yield AddressedPackedTrace(address=address, trace=trace, path=path)
+            yield read.addressed
 
-        expected_entries = entry_stop - entry_start
-        if observed_entries != expected_entries:
-            raise SemanticPackedStoreError(
-                f"semantic packed entry range [{entry_start}, {entry_stop}) expected "
-                f"{expected_entries} rows but observed {observed_entries}"
-            )
-
-    return rows()
+    return addressed_rows()
 
 
 __all__ = [
@@ -999,10 +1119,12 @@ __all__ = [
     "STORE_SCHEMA",
     "STORE_SCHEMA_VERSION",
     "STORE_STATUS",
+    "SemanticPackedRowRead",
     "SemanticPackedStoreError",
     "load_semantic_packed_manifest",
     "read_semantic_packed_artifact",
     "read_semantic_packed_artifact_range",
+    "read_semantic_packed_artifact_range_rows",
     "semantic_packed_builder_identity",
     "validate_semantic_packed_entry_ranges",
     "write_semantic_packed_artifact",
