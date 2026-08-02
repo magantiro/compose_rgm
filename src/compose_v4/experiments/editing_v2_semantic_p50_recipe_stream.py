@@ -594,7 +594,15 @@ def build_semantic_p50_candidate_inventory(
     )
 
 
-def _explicit_time_hex(*, stream_index: int, address: SuccessorFiberCacheAddress) -> str:
+def semantic_p50_time_hex(
+    *, stream_index: int, address: SuccessorFiberCacheAddress
+) -> str:
+    """Derive the frozen deterministic P50 time coordinate for one row."""
+
+    if type(stream_index) is not int or stream_index < 0:
+        raise SemanticP50RecipeStreamError(
+            "semantic P50 time stream_index must be a nonnegative integer"
+        )
     digest = hashlib.sha256(
         _canonical_bytes(
             {
@@ -685,7 +693,7 @@ def compile_semantic_p50_prepared_recipe(
             "semantic_cell_id": candidate.semantic_cell_id,
             "data_lane": candidate.data_lane,
             "source_group_id": None,
-            "time_hex": _explicit_time_hex(
+            "time_hex": semantic_p50_time_hex(
                 stream_index=example.stream_index, address=example.address
             ),
             "identity_coefficient": 1.0,
@@ -882,6 +890,7 @@ __all__ = [
     "build_semantic_p50_candidate_inventory",
     "compile_semantic_p50_prepared_recipe",
     "load_semantic_p50_recipe_policy",
+    "semantic_p50_time_hex",
     "validate_semantic_p50_prerequisite_relationships",
     "write_semantic_p50_prepared_recipe",
 ]

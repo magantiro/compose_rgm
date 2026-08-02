@@ -17,6 +17,7 @@ from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     authorize_semantic_p50_recipe,
     compile_semantic_p50_prepared_recipe,
     load_semantic_p50_recipe_policy,
+    semantic_p50_time_hex,
 )
 
 
@@ -116,6 +117,14 @@ def test_stream_fails_closed_when_an_active_family_has_no_opportunity() -> None:
         match="zero planned optimization exposure",
     ):
         compile_semantic_p50_prepared_recipe(missing)
+
+
+def test_time_derivation_rejects_invalid_stream_indices() -> None:
+    address = _address(0)
+    with pytest.raises(SemanticP50RecipeStreamError, match="nonnegative integer"):
+        semantic_p50_time_hex(stream_index=-1, address=address)
+    with pytest.raises(SemanticP50RecipeStreamError, match="nonnegative integer"):
+        semantic_p50_time_hex(stream_index=True, address=address)
 
 
 def test_policy_rejects_a_self_hashed_null_threshold(tmp_path: Path) -> None:
