@@ -17,12 +17,33 @@ What a task proves, per V1 record
    :func:`editing_v2_semantic_rewrite_system`;
 4. every replayed successor equals the persisted exact persistent-slot state on
    all four arrays, and its canonical key equals the persisted key;
-5. the production Process-V2 atom-delete candidate mask agrees, at *every*
+5. the *complete effective* Process-V2 atom-delete mask agrees, at every
    progress state, with the bounded independent legality oracle implemented
    below;
 6. source address, lane, split, lineage and evidence-profile identities are
    carried through byte-for-byte; nothing is re-partitioned and no split is
    re-derived.
+
+Two outcomes that must never be conflated
+-----------------------------------------
+
+An **integrity mismatch** says the payload is not what it claims to be: a row
+is unreadable, a schema, self-hash, pinned identity or provenance field
+disagrees, an action does not round-trip, the unchanged executor rejects a
+persisted teacher, a replayed successor array or canonical key differs, or the
+production mask disagrees with the independent oracle.  Nothing about the
+payload can then be trusted, so the whole task aborts and **publishes
+nothing**; every finding is returned, reason-coded and addressed, on
+:class:`ProcessV2RebindMismatch`.
+
+An **unsupported teacher** says the payload is exactly what it claims to be and
+the *prospectively frozen* Process-V2 fiber does not contain one of its teacher
+actions.  That is an expected support exclusion, not a defect, and the measured
+correction round found it is reachable on real chemistry: applying the
+authoritative charge policy uniformly excludes inherited leaf deletions that
+the V1 dense rule admitted.  Such a trace is **rejected whole**, its exact
+identity and reason code are recorded, and the scan continues.  No trace is
+ever admitted in part: a rejected trace contributes zero rows.
 
 Why a pinned identity is required
 ---------------------------------
@@ -35,14 +56,22 @@ pinned object is validated for internal self-consistency and then every
 chemical fact is re-proven from the bytes.  Naming an identity is not trusting
 it.
 
-Refusal semantics
------------------
+What the published censuses mean
+--------------------------------
 
-This is a proof, not a migration.  There is no per-record admission ledger and
-no partial trace admission: a single mismatch or unsupported teacher fails the
-whole task, nothing is published, and every finding is reported with an
-explicit reason code.  Neither a complete task nor a complete reduction grants
-Gate 0, T1, P50, checkpoint-selection or training authority.
+``rejected_traces_by_code``, ``unsupported_teacher_steps_by_code``,
+``rejected_traces`` and every count are **measured** over the exact rows the
+task read, and the reducer sums them.  A published artifact carries no
+integrity-mismatch histogram, because publishing on an integrity mismatch is
+forbidden: such a field could only ever be empty, and an always-empty field
+published beside real measurements reads as evidence when it is a constant.
+The integrity histogram is a measurement of the refusal, so it lives on the
+raised :class:`ProcessV2RebindMismatch` and in
+:meth:`ProcessV2RebindMismatch.as_report`, which is never written into the
+artifact namespace.
+
+Neither a complete task nor a complete reduction grants Gate 0, T1, P50,
+checkpoint-selection or training authority.
 """
 
 from __future__ import annotations
@@ -56,7 +85,7 @@ import shutil
 import subprocess
 import tempfile
 from collections import Counter
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path, PurePosixPath
@@ -73,14 +102,15 @@ from compose_v4.chem.molecular_graph import (
     ORGANIC_VOCABULARY,
     MolecularGraph,
     is_element,
+    is_scar,
 )
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
 from compose_v4.data.charge_policy import charge_policy_preserved
+from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
 from compose_v4.data.semantic_packed_trace_store import (
-    SHARD_FILENAME,
     SemanticPackedStoreError,
     load_semantic_packed_manifest,
-    read_semantic_packed_artifact_range,
+    read_semantic_packed_artifact_range_rows,
     validate_semantic_packed_entry_ranges,
 )
 from compose_v4.data.semantic_trace_migration_materializer import (
@@ -101,13 +131,11 @@ from compose_v4.rewrite.kernel import (
     canonical_state_key,
     editing_v2_semantic_rewrite_system,
 )
+from compose_v4.rewrite import process_v2_atom_delete as process_v2_atom_delete_module
 from compose_v4.rewrite.operators import (
     AtomDelete,
     apply_atom_delete,
     is_valid_atom_delete,
-)
-from compose_v4.rewrite.process_v2_atom_delete import (
-    process_v2_connected_nonleaf_atom_delete_mask,
 )
 from compose_v4.rewrite.trace_shard_v3 import (
     MAX_ACTIVE_ATOMS,
@@ -117,23 +145,33 @@ from compose_v4.rewrite.trace_shard_v3 import (
 
 # ---- Frozen artifact identity ------------------------------------------------
 
+# Schema version 2 records one intentional, incompatible change: a task now
+# separates integrity mismatches from support exclusions, so it publishes a
+# measured rejection census and an exact rejected-trace inventory instead of
+# two structurally empty mismatch fields.  Version 1 artifacts are not readable
+# as version 2 and are not relabelled.
 PLAN_SCHEMA = "compose.data.editing_process_v2_rebind_plan"
-PLAN_SCHEMA_VERSION = 1
+PLAN_SCHEMA_VERSION = 2
 PLAN_STATUS = "FROZEN_COMPLETE_NO_TRAINING_AUTHORITY"
 SOURCE_REVISION_SCHEMA = "compose.data.editing_process_v2_rebind_source_revision"
-SOURCE_REVISION_SCHEMA_VERSION = 1
+SOURCE_REVISION_SCHEMA_VERSION = 2
 V1_PAYLOAD_BINDING_SCHEMA = "compose.data.editing_process_v2_rebind_v1_payload_binding"
-V1_PAYLOAD_BINDING_SCHEMA_VERSION = 1
+V1_PAYLOAD_BINDING_SCHEMA_VERSION = 2
 PROOF_SCHEMA = "compose.data.editing_process_v2_rebind_proof"
-PROOF_SCHEMA_VERSION = 1
+PROOF_SCHEMA_VERSION = 2
+REJECTION_SCHEMA = "compose.data.editing_process_v2_rebind_rejection"
+REJECTION_SCHEMA_VERSION = 2
 MANIFEST_SCHEMA = "compose.data.editing_process_v2_rebind_manifest"
-MANIFEST_SCHEMA_VERSION = 1
+MANIFEST_SCHEMA_VERSION = 2
 RECEIPT_SCHEMA = "compose.data.editing_process_v2_rebind_receipt"
-RECEIPT_SCHEMA_VERSION = 1
+RECEIPT_SCHEMA_VERSION = 2
 TASK_STATUS = "PROVEN_V1_COMPATIBLE_NO_TRAINING_AUTHORITY"
 COMPLETION_SCHEMA = "compose.data.editing_process_v2_rebind_completion"
-COMPLETION_SCHEMA_VERSION = 1
+COMPLETION_SCHEMA_VERSION = 2
 COMPLETION_STATUS = "COMPLETE_V1_COMPATIBILITY_PROOF_NO_TRAINING_AUTHORITY"
+REFUSAL_SCHEMA = "compose.data.editing_process_v2_rebind_refusal"
+REFUSAL_SCHEMA_VERSION = 2
+REFUSAL_STATUS = "INTEGRITY_MISMATCH_NOTHING_PUBLISHED"
 
 PLAN_FILENAME = "PROCESS_V2_REBIND_PLAN.json"
 COMPLETION_FILENAME = "PROCESS_V2_REBIND_COMPLETE.json"
@@ -145,10 +183,18 @@ TASK_DIRNAME = "tasks"
 DEFAULT_OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_rebind"
 DEFAULT_ENTRIES_PER_TASK = 64
 
-# A real slot of real-atom degree at most one stays under the preserved V1
-# atom-delete rule.  This module never re-decides those slots; it re-derives the
-# connected-nonleaf expansion independently of the production authority.
+# Structural candidate sources are diagnostic labels only.  One admission
+# authority decides every ``atom_delete`` candidate; the two labels exist so a
+# census can say *which* structural population an admission or an exclusion came
+# from, never so that one population escapes a gate.
 INDEPENDENT_CONNECTED_NONLEAF_MINIMUM_DEGREE = 2
+INHERITED_CANDIDATE_SOURCE = "inherited_root_singleton_leaf"
+CONNECTED_NONLEAF_CANDIDATE_SOURCE = "connected_nonleaf"
+CANDIDATE_SOURCES = (INHERITED_CANDIDATE_SOURCE, CONNECTED_NONLEAF_CANDIDATE_SOURCE)
+
+# The complete effective Process-V2 atom-delete mask, resolved by name at call
+# time so an absent authority names itself instead of failing at import.
+PROCESS_V2_ATOM_DELETE_MASK_SYMBOL = "process_v2_atom_delete_mask"
 
 _HEX_RE = re.compile(r"^[0-9a-f]+$")
 _SOURCE_FILES = (
@@ -156,6 +202,7 @@ _SOURCE_FILES = (
     "src/compose_v4/chem/molecular_graph.py",
     "src/compose_v4/chem/state.py",
     "src/compose_v4/data/charge_policy.py",
+    "src/compose_v4/data/editing_corpus_contract.py",
     "src/compose_v4/data/editing_process_v2_rebind.py",
     "src/compose_v4/data/semantic_packed_trace_store.py",
     "src/compose_v4/data/semantic_trace_migration_materializer.py",
@@ -242,14 +289,17 @@ _MANIFEST_FIELDS = {
     "entry_start",
     "entry_stop",
     "v1_entries",
-    "proved_entries",
-    "proved_states",
-    "proved_transitions",
+    "source_entries",
+    "admitted_entries",
+    "rejected_entries",
+    "admitted_states",
+    "admitted_transitions",
     "family_histogram",
     "teacher_census",
     "process_v2_atom_delete_census",
-    "mismatches_by_code",
-    "unsupported_teachers_by_code",
+    "rejected_traces_by_code",
+    "unsupported_teacher_steps_by_code",
+    "rejected_traces",
     "v1_record_inventory_sha256",
     "proof_stream_sha256",
     "pinned_process_identity_sha256",
@@ -283,8 +333,8 @@ _RECEIPT_FIELDS = {
     "manifest_physical_sha256",
     "manifest_sha256",
     "counts",
-    "mismatches_by_code",
-    "unsupported_teachers_by_code",
+    "rejected_traces_by_code",
+    "unsupported_teacher_steps_by_code",
     "receipt_sha256",
 }
 _PROOF_FIELDS = {
@@ -301,14 +351,35 @@ _PROOF_FIELDS = {
     "canonical_state_keys",
     "family_histogram",
     "replayed_transitions",
-    "preserved_v1_atom_delete_teachers",
-    "connected_nonleaf_atom_delete_teachers",
+    "atom_delete_teachers_by_candidate_source",
     "process_v2_atom_delete_candidates",
     "proof_sha256",
 }
+_REJECTION_FIELDS = {
+    "schema",
+    "schema_version",
+    "entry_index",
+    "trace_id",
+    "data_lane",
+    "split",
+    "v1_record_sha256",
+    "path_length",
+    "step_index",
+    "exclusion_code",
+    "detail",
+    "unsupported_teacher_steps",
+    "rejection_sha256",
+}
+_COUNT_FIELDS = (
+    "source_entries",
+    "admitted_entries",
+    "rejected_entries",
+    "admitted_states",
+    "admitted_transitions",
+)
 _TEACHER_CENSUS_FIELDS = (
-    "preserved_v1_atom_delete_teachers",
-    "connected_nonleaf_atom_delete_teachers",
+    "atom_delete_teachers",
+    *(f"atom_delete_teachers_{source}" for source in CANDIDATE_SOURCES),
     "teacher_transitions",
 )
 _MASK_CENSUS_FIELDS = (
@@ -318,8 +389,12 @@ _MASK_CENSUS_FIELDS = (
 )
 
 
-class ProcessV2RebindReasonCode(str, Enum):
-    """Every way one V1 record can fail its Process-V2 compatibility proof."""
+class ProcessV2RebindIntegrityCode(str, Enum):
+    """Every way one V1 record can prove not to be what it claims to be.
+
+    Any of these aborts the whole task and publishes nothing.  None of them is
+    a statement about the *support* of the frozen Process-V2 fiber.
+    """
 
     V1_RECORD_UNREADABLE = "v1_record_unreadable"
     V1_RECORD_SCHEMA_DISAGREES = "v1_record_schema_disagrees"
@@ -327,21 +402,34 @@ class ProcessV2RebindReasonCode(str, Enum):
     V1_PROCESS_IDENTITY_DISAGREES = "v1_process_identity_disagrees"
     V1_PROVENANCE_DISAGREES = "v1_provenance_disagrees"
     ACTION_CODEC_ROUNDTRIP_DISAGREES = "action_codec_roundtrip_disagrees"
-    UNSUPPORTED_TEACHER_ACTION = "unsupported_teacher_action"
     EXECUTOR_REPLAY_FAILED = "executor_replay_failed"
     SUCCESSOR_ARRAY_DISAGREES = "successor_array_disagrees"
     CANONICAL_KEY_DISAGREES = "canonical_key_disagrees"
     PROCESS_V2_MASK_DISAGREES = "process_v2_mask_disagrees"
 
 
+class ProcessV2RebindExclusionCode(str, Enum):
+    """Every way an intact V1 record can fall outside the frozen V2 support.
+
+    Any of these rejects exactly one trace, records its identity, and lets the
+    scan continue.  None of them says the payload is corrupt.
+    """
+
+    ATOM_DELETE_OUTSIDE_PROCESS_V2_MASK = "atom_delete_outside_process_v2_mask"
+    TEACHER_RULE_OUTSIDE_FROZEN_SUPPORT = "teacher_rule_outside_frozen_support"
+    TEACHER_FAMILY_OUTSIDE_FROZEN_SUPPORT = "teacher_family_outside_frozen_support"
+
+
 @dataclass(frozen=True)
 class ProcessV2RebindFinding:
-    """One reason-coded refusal, addressed to its exact record and step."""
+    """One reason-coded integrity refusal, addressed to its record and step."""
 
     entry_index: int
     step_index: int | None
-    code: ProcessV2RebindReasonCode
+    code: ProcessV2RebindIntegrityCode
     detail: str
+    trace_id: str | None = None
+    v1_record_sha256: str | None = None
 
     def as_payload(self) -> dict[str, object]:
         return {
@@ -349,7 +437,47 @@ class ProcessV2RebindFinding:
             "step_index": self.step_index,
             "code": self.code.value,
             "detail": self.detail,
+            "trace_id": self.trace_id,
+            "v1_record_sha256": self.v1_record_sha256,
         }
+
+
+@dataclass(frozen=True)
+class ProcessV2RebindRejection:
+    """One whole trace excluded by the prospectively frozen Process-V2 fiber.
+
+    ``step_index`` addresses the first unsupported teacher in trace order and
+    ``unsupported_teacher_steps`` counts every unsupported step in the trace,
+    so a census can report both the trace and the step denominator.
+    """
+
+    entry_index: int
+    trace_id: str
+    data_lane: str
+    split: str
+    v1_record_sha256: str
+    path_length: int
+    step_index: int
+    code: ProcessV2RebindExclusionCode
+    detail: str
+    unsupported_teacher_steps: int
+
+    def as_payload(self) -> dict[str, Any]:
+        body: dict[str, Any] = {
+            "schema": REJECTION_SCHEMA,
+            "schema_version": REJECTION_SCHEMA_VERSION,
+            "entry_index": self.entry_index,
+            "trace_id": self.trace_id,
+            "data_lane": self.data_lane,
+            "split": self.split,
+            "v1_record_sha256": self.v1_record_sha256,
+            "path_length": self.path_length,
+            "step_index": self.step_index,
+            "exclusion_code": self.code.value,
+            "detail": self.detail,
+            "unsupported_teacher_steps": self.unsupported_teacher_steps,
+        }
+        return {**body, "rejection_sha256": _canonical_sha256(body)}
 
 
 class ProcessV2RebindError(RuntimeError):
@@ -357,11 +485,19 @@ class ProcessV2RebindError(RuntimeError):
 
 
 class ProcessV2RebindMismatch(ProcessV2RebindError):
-    """A V1 record failed its proof, so the whole task refuses to publish."""
+    """A V1 record is not what it claims, so the task publishes nothing.
+
+    ``mismatches_by_code`` is a measurement of this refusal, not a constant: it
+    counts the findings actually raised.  It is deliberately not written into
+    the artifact namespace, because publishing anything at all on an integrity
+    mismatch is forbidden.
+    """
 
     def __init__(self, findings: Sequence[ProcessV2RebindFinding]) -> None:
         self.findings = tuple(findings)
-        codes = sorted({finding.code.value for finding in self.findings})
+        counter: Counter[str] = Counter(finding.code.value for finding in self.findings)
+        self.mismatches_by_code: dict[str, int] = dict(sorted(counter.items()))
+        codes = sorted(self.mismatches_by_code)
         first = self.findings[0] if self.findings else None
         location = (
             f"entry {first.entry_index} step {first.step_index}" if first else "no entry"
@@ -370,6 +506,21 @@ class ProcessV2RebindMismatch(ProcessV2RebindError):
             f"Process-V2 rebind refuses to publish {len(self.findings)} finding(s) "
             f"{codes} (first at {location}: {first.detail if first else ''})"
         )
+
+    def as_report(self) -> dict[str, Any]:
+        """Return the complete, deterministic, unpublished refusal report."""
+
+        body: dict[str, Any] = {
+            "schema": REFUSAL_SCHEMA,
+            "schema_version": REFUSAL_SCHEMA_VERSION,
+            "status": REFUSAL_STATUS,
+            "training_authorized": False,
+            "published": False,
+            "mismatch_count": len(self.findings),
+            "mismatches_by_code": dict(self.mismatches_by_code),
+            "findings": [finding.as_payload() for finding in self.findings],
+        }
+        return {**body, "refusal_sha256": _canonical_sha256(body)}
 
 
 class ProcessV2RebindIncomplete(ProcessV2RebindError):
@@ -444,6 +595,22 @@ def _mounted_artifact_path(artifact_path: str, *, artifact_root: Path, field: st
     except ValueError as error:
         raise ProcessV2RebindError(f"{field} resolves outside the artifact root") from error
     return resolved
+
+
+def mounted_process_v2_artifact_path(
+    artifact_path: str,
+    *,
+    artifact_root: Path,
+    field: str,
+) -> Path:
+    """Resolve one ``/artifacts`` path under a mounted root, refusing escapes.
+
+    Published so a consumer of these artifacts resolves them through the same
+    normalization and containment check the writer used, instead of rebuilding
+    a second, possibly weaker one.
+    """
+
+    return _mounted_artifact_path(artifact_path, artifact_root=artifact_root, field=field)
 
 
 def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
@@ -578,22 +745,41 @@ def _independent_within_declared_support(state: MolecularGraph) -> bool:
     return True
 
 
-def independent_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int, ...]:
-    """Bounded independent oracle for the Process-V2 connected-nonleaf fiber.
+def _independent_scar_incident(state: MolecularGraph, slot: int) -> bool:
+    """True when any bonded neighbour of ``slot`` occupies a SCAR site."""
 
-    This is a deliberately separate derivation of the same declared semantics,
-    built directly from the executor validator, the executor, the connectivity
-    predicate, the charge policy, resonance-invariant aromatic perception and
-    graph articulation points.  It never calls
+    return bool(np.any((state.bonds[slot] != BOND_NULL) & is_scar(state.atom_types)))
+
+
+def independent_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int, ...]:
+    """Bounded independent oracle for the *complete* Process-V2 delete fiber.
+
+    This derives every ``atom_delete`` candidate, inherited and newly
+    introduced alike, from one uniform admission rule.  Six gates apply to both
+    structural candidate sources: real element under the authoritative
+    predicate, the unchanged executor validator, successor connectivity, the
+    authoritative charge policy, declared broad-organic at-most-40-active-atom
+    support, and successor canonicalizability.  Three further gates apply only
+    to a connected-nonleaf candidate, meaning a real slot of real-atom degree at
+    least two: non-aromatic under resonance-invariant perception, not a graph
+    articulation point, and not incident to a SCAR.  A degree-at-most-one slot
+    is never exempt from the six common gates; the structural source is a
+    diagnostic label, not an exemption.
+
+    The gates are conjunctive, so the admitted set does not depend on the order
+    in which they are evaluated.  This oracle deliberately evaluates them in its
+    own order and builds its own real-atom graph, and it never imports or calls
     :mod:`compose_v4.rewrite.process_v2_atom_delete`.
 
     Claim boundary: this is a second *derivation*, not a second *design*.  It
-    shares the production resolver's primitives and condition order, so
-    agreement catches a coding error, a plumbing error, or drift between the
-    two, and mutation testing confirms it does.  It cannot catch a shared
-    misreading of the declared semantics, because both encode the same reading.
-    It is a bounded test/proof oracle and is not a production successor-kernel
-    implementation.
+    shares the executor, the charge policy, aromatic perception, the
+    canonicalizer and the declared vocabulary, because those are the
+    authorities and duplicating them would be the very approximation the
+    handoff forbids.  Agreement therefore catches a coding error, a plumbing
+    error, a mask-composition error or drift between the two implementations.
+    It cannot catch a shared misreading of the declared semantics, because both
+    encode the same reading.  It is a bounded proof and test oracle and is not
+    a production successor-kernel implementation.
     """
 
     if not is_valid_state(state) or not is_connected_or_null(state):
@@ -606,9 +792,14 @@ def independent_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int
     aromatic_slot = np.any(resonance_invariant_bond_classes(state) == BOND_AROMATIC, axis=1)
     admitted: list[int] = []
     for slot in (int(value) for value in real):
-        if int(graph.degree[slot]) < INDEPENDENT_CONNECTED_NONLEAF_MINIMUM_DEGREE:
-            continue
-        if bool(aromatic_slot[slot]) or slot in cut_vertices:
+        connected_nonleaf = (
+            int(graph.degree[slot]) >= INDEPENDENT_CONNECTED_NONLEAF_MINIMUM_DEGREE
+        )
+        if connected_nonleaf and (
+            bool(aromatic_slot[slot])
+            or slot in cut_vertices
+            or _independent_scar_incident(state, slot)
+        ):
             continue
         action = AtomDelete(slot)
         if not is_valid_atom_delete(state, action):
@@ -628,18 +819,58 @@ def independent_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int
     return tuple(admitted)
 
 
-def _authority_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int, ...]:
-    mask = process_v2_connected_nonleaf_atom_delete_mask(state)
+def process_v2_atom_delete_mask_authority():
+    """Return the complete effective mask authority or name the missing symbol.
+
+    The authority is resolved by name at call time rather than imported at
+    module load, so a worktree whose Process-V2 module has not yet published
+    the complete effective mask fails with an exact, actionable message instead
+    of an import error, and never silently validates a narrower mask.
+    """
+
+    symbol = getattr(
+        process_v2_atom_delete_module,
+        PROCESS_V2_ATOM_DELETE_MASK_SYMBOL,
+        None,
+    )
+    if symbol is None:
+        raise ProcessV2RebindError(
+            "the Process-V2 rebind requires compose_v4.rewrite.process_v2_atom_delete."
+            f"{PROCESS_V2_ATOM_DELETE_MASK_SYMBOL}, the complete effective atom-delete "
+            "mask authority, which is absent"
+        )
+    return symbol
+
+
+def authority_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int, ...]:
+    """Return the production effective Process-V2 delete slots for one state."""
+
+    mask = np.asarray(process_v2_atom_delete_mask_authority()(state))
+    if mask.dtype != np.bool_ or mask.shape != (state.n_atoms,):
+        raise ProcessV2RebindError(
+            "the Process-V2 atom-delete mask authority must return a boolean mask of "
+            f"shape ({state.n_atoms},), got dtype {mask.dtype} shape {mask.shape}"
+        )
     return tuple(int(slot) for slot in np.flatnonzero(mask))
 
 
-def _real_atom_degree(state: MolecularGraph, slot: int) -> int:
-    """Real-atom degree of one slot, or ``-1`` when the slot is not an element."""
+def independent_process_v2_atom_delete_candidate_source(
+    state: MolecularGraph,
+    slot: int,
+) -> str:
+    """Label one slot's structural candidate source, for diagnostics only."""
 
     if not 0 <= slot < state.n_atoms or not bool(is_element(state.atom_types[slot])):
-        return -1
+        raise ProcessV2RebindError(
+            f"slot {slot} is not a real atom, so it has no candidate source"
+        )
     real = np.flatnonzero(is_element(state.atom_types))
-    return int(np.count_nonzero(state.bonds[slot, real] != BOND_NULL))
+    degree = int(np.count_nonzero(state.bonds[slot, real] != BOND_NULL))
+    return (
+        CONNECTED_NONLEAF_CANDIDATE_SOURCE
+        if degree >= INDEPENDENT_CONNECTED_NONLEAF_MINIMUM_DEGREE
+        else INHERITED_CANDIDATE_SOURCE
+    )
 
 
 # ---- Source revision ----------------------------------------------------------
@@ -1216,61 +1447,107 @@ def load_process_v2_rebind_plan(path: Path, *, repo_root: Path) -> dict[str, Any
 # ---- Proof --------------------------------------------------------------------
 
 
-def _iter_raw_semantic_rows(
-    shard_path: Path,
-    *,
-    entry_start: int,
-    entry_stop: int,
-) -> Iterator[tuple[int, dict[str, Any]]]:
-    """Yield the exact persisted record for each row of one half-open range.
+def _teacher_support_exclusion(
+    action_record: Mapping[str, Any],
+) -> tuple[ProcessV2RebindExclusionCode, str] | None:
+    """Reject a teacher whose rule or family is outside the frozen support.
 
-    The addressed reader is the validation authority for these bytes; this pass
-    exists only to recover the provenance and canonical-key fields the address
-    does not carry, and every field it returns is cross-checked against the
-    validated address before it is used.
+    The frozen support is read from its registries rather than retyped:
+    :data:`compose_v4.rewrite.action_codec_v4.ACTIVE8_EXECUTOR_RULES` for the
+    executor surface and
+    :data:`compose_v4.data.editing_corpus_contract.ACTIVE8_FAMILIES` for the
+    development families.  This runs before the codec decode so an unsupported
+    rule is reported as the support exclusion it is, not as a codec defect.
     """
 
-    with gzip.open(shard_path, "rb") as handle:
-        for entry_index, raw_line in enumerate(handle):
-            if entry_index < entry_start:
-                continue
-            if entry_index >= entry_stop:
-                break
-            try:
-                record = json.loads(raw_line)
-            except json.JSONDecodeError as error:
-                raise ProcessV2RebindError(
-                    f"semantic packed row {entry_index} is not JSON"
-                ) from error
-            if not isinstance(record, dict):
-                raise ProcessV2RebindError(f"semantic packed row {entry_index} is not an object")
-            yield entry_index, record
+    executor_rule = action_record.get("executor_rule")
+    model_family = action_record.get("model_family")
+    if executor_rule not in action_codec_v4.ACTIVE8_EXECUTOR_RULES:
+        return (
+            ProcessV2RebindExclusionCode.TEACHER_RULE_OUTSIDE_FROZEN_SUPPORT,
+            f"executor rule {executor_rule!r} is outside the frozen Active8 surface",
+        )
+    if model_family not in ACTIVE8_FAMILIES:
+        return (
+            ProcessV2RebindExclusionCode.TEACHER_FAMILY_OUTSIDE_FROZEN_SUPPORT,
+            f"model family {model_family!r} is outside the frozen Active8 families",
+        )
+    return None
 
 
 def _prove_record(
     *,
     entry_index: int,
-    record: Mapping[str, Any],
-    addressed,
+    record: Mapping[str, Any] | None,
+    addressed: Any,
+    read_error: str | None,
     task: Mapping[str, Any],
     pinned_process_identity: Mapping[str, Any],
-    runtime,
+    runtime: Any,
     counts: Counter[str],
     families: Counter[str],
-) -> tuple[dict[str, Any] | None, list[ProcessV2RebindFinding]]:
-    """Re-prove every chemical claim of one V1 record. Never admits partially."""
+    unsupported_steps: Counter[str],
+) -> tuple[
+    dict[str, Any] | None,
+    ProcessV2RebindRejection | None,
+    list[ProcessV2RebindFinding],
+]:
+    """Re-prove one V1 record, then decide admission. Never admits partially.
+
+    Returns ``(proof, rejection, findings)``.  At most one of ``proof`` and
+    ``rejection`` is ever populated.  ``findings`` is nonempty only for an
+    integrity mismatch, which the caller turns into a task-wide refusal.
+
+    Integrity wins over support, and it is decided over the *whole* record: a
+    step whose teacher falls outside the frozen fiber is still codec-checked,
+    replayed and compared, so a corrupt payload can never hide behind an
+    unsupported teacher.  The only step whose integrity cannot be established
+    is one whose executor rule the frozen codec cannot decode at all.
+    """
 
     findings: list[ProcessV2RebindFinding] = []
+    exclusions: list[tuple[int, ProcessV2RebindExclusionCode, str]] = []
+    trace_id: str | None = None
+    record_sha256: str | None = None
 
-    def reject(code: ProcessV2RebindReasonCode, detail: str, step: int | None = None) -> None:
-        findings.append(ProcessV2RebindFinding(entry_index, step, code, detail))
+    def reject(
+        code: ProcessV2RebindIntegrityCode,
+        detail: str,
+        step: int | None = None,
+    ) -> None:
+        findings.append(
+            ProcessV2RebindFinding(
+                entry_index=entry_index,
+                step_index=step,
+                code=code,
+                detail=detail,
+                trace_id=trace_id,
+                v1_record_sha256=record_sha256,
+            )
+        )
+
+    def exclude(step: int, code: ProcessV2RebindExclusionCode, detail: str) -> None:
+        exclusions.append((step, code, detail))
+        unsupported_steps[code.value] += 1
+
+    if read_error is not None or record is None or addressed is None:
+        reject(
+            ProcessV2RebindIntegrityCode.V1_RECORD_UNREADABLE,
+            read_error or "the persisted V1 row could not be read",
+        )
+        return None, None, findings
+
+    if isinstance(record.get("record_sha256"), str):
+        record_sha256 = str(record["record_sha256"])
+    if isinstance(record.get("trace_id"), str):
+        trace_id = str(record["trace_id"])
 
     if record.get("record_sha256") != _self_hash(record, field="record_sha256"):
         reject(
-            ProcessV2RebindReasonCode.V1_RECORD_SELF_HASH_DISAGREES,
+            ProcessV2RebindIntegrityCode.V1_RECORD_SELF_HASH_DISAGREES,
             "persisted record self-hash does not match its contents",
         )
-        return None, findings
+        return None, None, findings
     if (
         record.get("schema") != TRACE_SCHEMA
         or record.get("schema_version") != TRACE_SCHEMA_VERSION
@@ -1279,10 +1556,10 @@ def _prove_record(
         != action_codec_v4.codec_implementation_hash()
     ):
         reject(
-            ProcessV2RebindReasonCode.V1_RECORD_SCHEMA_DISAGREES,
+            ProcessV2RebindIntegrityCode.V1_RECORD_SCHEMA_DISAGREES,
             "persisted trace schema or action-codec identity disagrees",
         )
-        return None, findings
+        return None, None, findings
     if (
         record.get("process_semantics") != PROCESS_SEMANTICS
         or record.get("process_identity_sha256")
@@ -1290,10 +1567,10 @@ def _prove_record(
         or record.get("process_contract_sha256") != pinned_process_identity["contract_sha256"]
     ):
         reject(
-            ProcessV2RebindReasonCode.V1_PROCESS_IDENTITY_DISAGREES,
+            ProcessV2RebindIntegrityCode.V1_PROCESS_IDENTITY_DISAGREES,
             "persisted record does not carry the pinned V1 process identity",
         )
-        return None, findings
+        return None, None, findings
 
     address = addressed.address
     states = tuple(addressed.path.states)
@@ -1311,6 +1588,7 @@ def _prove_record(
         or not isinstance(source_address, dict)
         or not source_address
         or not isinstance(lineage, dict)
+        or not isinstance(record.get("family_histogram"), dict)
         or not isinstance(keys, list)
         or not isinstance(steps, list)
         or len(keys) != len(states)
@@ -1319,28 +1597,48 @@ def _prove_record(
         or keys[-1] != address.target_key
     ):
         reject(
-            ProcessV2RebindReasonCode.V1_PROVENANCE_DISAGREES,
+            ProcessV2RebindIntegrityCode.V1_PROVENANCE_DISAGREES,
             "persisted provenance disagrees with the validated shard address",
         )
-        return None, findings
+        return None, None, findings
 
     try:
         if canonical_state_key(states[0]) != keys[0]:
             reject(
-                ProcessV2RebindReasonCode.CANONICAL_KEY_DISAGREES,
+                ProcessV2RebindIntegrityCode.CANONICAL_KEY_DISAGREES,
                 "recomputed source canonical key differs from the persisted key",
                 0,
             )
     except InvalidRewrite as error:
         reject(
-            ProcessV2RebindReasonCode.CANONICAL_KEY_DISAGREES,
+            ProcessV2RebindIntegrityCode.CANONICAL_KEY_DISAGREES,
             f"source state is not canonicalizable: {error}",
             0,
         )
 
+    # The complete effective Process-V2 atom-delete mask, at every progress
+    # state, against the independent oracle.  This runs before the teacher loop
+    # so a support decision consults the exact array the model would score, and
+    # only after that array has been proven to agree with a second derivation.
+    candidates: list[list[int]] = []
+    for state_index, state in enumerate(states):
+        authority = authority_process_v2_atom_delete_slots(state)
+        oracle = independent_process_v2_atom_delete_slots(state)
+        if authority != oracle:
+            reject(
+                ProcessV2RebindIntegrityCode.PROCESS_V2_MASK_DISAGREES,
+                f"production effective mask {list(authority)} disagrees with the "
+                f"independent oracle {list(oracle)}",
+                state_index,
+            )
+        candidates.append(list(authority))
+        counts["mask_states_evaluated"] += 1
+        counts["mask_candidate_slots"] += len(authority)
+        if authority:
+            counts["mask_states_with_candidates"] += 1
+
     replayed = 0
-    preserved_v1_deletes = 0
-    connected_nonleaf_deletes = 0
+    atom_delete_teachers: Counter[str] = Counter()
     for step_index, entry in enumerate(steps):
         if not isinstance(entry, dict) or set(entry) != {
             "action",
@@ -1348,25 +1646,41 @@ def _prove_record(
             "successor_key",
         }:
             reject(
-                ProcessV2RebindReasonCode.V1_RECORD_SCHEMA_DISAGREES,
+                ProcessV2RebindIntegrityCode.V1_RECORD_SCHEMA_DISAGREES,
                 "persisted step fields disagree",
                 step_index,
             )
             continue
         action_record = entry["action"]
+        if not isinstance(action_record, dict) or not all(
+            isinstance(action_record.get(field), str)
+            for field in ("executor_rule", "model_family")
+        ):
+            # A missing or non-string rule or family is a schema defect, not a
+            # statement about support, so it must not be miscoded as one.
+            reject(
+                ProcessV2RebindIntegrityCode.V1_RECORD_SCHEMA_DISAGREES,
+                "persisted step action does not name an executor rule and model family",
+                step_index,
+            )
+            continue
+        unsupported = _teacher_support_exclusion(action_record)
+        if unsupported is not None:
+            exclude(step_index, unsupported[0], unsupported[1])
+            continue
         try:
             rule, action = action_codec_v4.decode_action(action_record)
             reencoded = action_codec_v4.encode_action(rule, action)
         except ValueError as error:
             reject(
-                ProcessV2RebindReasonCode.ACTION_CODEC_ROUNDTRIP_DISAGREES,
+                ProcessV2RebindIntegrityCode.ACTION_CODEC_ROUNDTRIP_DISAGREES,
                 f"persisted action does not decode under ActionCodecV4: {error}",
                 step_index,
             )
             continue
         if reencoded != action_record:
             reject(
-                ProcessV2RebindReasonCode.ACTION_CODEC_ROUNDTRIP_DISAGREES,
+                ProcessV2RebindIntegrityCode.ACTION_CODEC_ROUNDTRIP_DISAGREES,
                 "re-encoded action differs from the persisted action record",
                 step_index,
             )
@@ -1376,32 +1690,41 @@ def _prove_record(
             or entry["successor_key"] != keys[step_index + 1]
         ):
             reject(
-                ProcessV2RebindReasonCode.CANONICAL_KEY_DISAGREES,
+                ProcessV2RebindIntegrityCode.CANONICAL_KEY_DISAGREES,
                 "persisted step keys disagree with the persisted state keys",
                 step_index,
             )
             continue
         if rule == "atom_delete":
-            degree = _real_atom_degree(states[step_index], int(action.v))
-            if degree >= INDEPENDENT_CONNECTED_NONLEAF_MINIMUM_DEGREE:
-                connected_nonleaf_deletes += 1
-                if int(action.v) not in independent_process_v2_atom_delete_slots(
-                    states[step_index]
-                ):
-                    reject(
-                        ProcessV2RebindReasonCode.UNSUPPORTED_TEACHER_ACTION,
-                        f"connected-nonleaf atom_delete at slot {int(action.v)} is outside "
-                        "the Process-V2 fiber",
-                        step_index,
-                    )
-                    continue
+            slot = int(action.v)
+            state = states[step_index]
+            if not 0 <= slot < state.n_atoms or not bool(is_element(state.atom_types[slot])):
+                reject(
+                    ProcessV2RebindIntegrityCode.V1_PROVENANCE_DISAGREES,
+                    f"persisted atom_delete teacher targets slot {slot}, which is not "
+                    "a real atom of its persisted source state",
+                    step_index,
+                )
+                continue
+            source_label = independent_process_v2_atom_delete_candidate_source(state, slot)
+            if slot not in candidates[step_index]:
+                # Record the exclusion but keep verifying: an integrity defect
+                # must never be maskable behind an unsupported teacher, so this
+                # step is still replayed and compared below.
+                exclude(
+                    step_index,
+                    ProcessV2RebindExclusionCode.ATOM_DELETE_OUTSIDE_PROCESS_V2_MASK,
+                    f"atom_delete teacher at slot {slot} ({source_label}) is outside the "
+                    "effective Process-V2 mask "
+                    f"{candidates[step_index]}",
+                )
             else:
-                preserved_v1_deletes += 1
+                atom_delete_teachers[source_label] += 1
         try:
             successor = runtime.apply(states[step_index], rule, action)
         except ValueError as error:
             reject(
-                ProcessV2RebindReasonCode.EXECUTOR_REPLAY_FAILED,
+                ProcessV2RebindIntegrityCode.EXECUTOR_REPLAY_FAILED,
                 f"unchanged executor rejected the persisted teacher: {error}",
                 step_index,
             )
@@ -1411,7 +1734,7 @@ def _prove_record(
             for field in ("atom_types", "formal_charges", "implicit_h_counts", "bonds")
         ):
             reject(
-                ProcessV2RebindReasonCode.SUCCESSOR_ARRAY_DISAGREES,
+                ProcessV2RebindIntegrityCode.SUCCESSOR_ARRAY_DISAGREES,
                 "replayed successor differs from the persisted persistent-slot state",
                 step_index,
             )
@@ -1420,45 +1743,51 @@ def _prove_record(
             successor_key = canonical_state_key(successor)
         except InvalidRewrite as error:
             reject(
-                ProcessV2RebindReasonCode.CANONICAL_KEY_DISAGREES,
+                ProcessV2RebindIntegrityCode.CANONICAL_KEY_DISAGREES,
                 f"replayed successor is not canonicalizable: {error}",
                 step_index,
             )
             continue
         if successor_key != keys[step_index + 1]:
             reject(
-                ProcessV2RebindReasonCode.CANONICAL_KEY_DISAGREES,
+                ProcessV2RebindIntegrityCode.CANONICAL_KEY_DISAGREES,
                 "replayed successor canonical key differs from the persisted key",
                 step_index,
             )
             continue
         replayed += 1
-        families[str(action_record["model_family"])] += 1
-
-    candidates: list[list[int]] = []
-    for state_index, state in enumerate(states):
-        authority = _authority_process_v2_atom_delete_slots(state)
-        oracle = independent_process_v2_atom_delete_slots(state)
-        if authority != oracle:
-            reject(
-                ProcessV2RebindReasonCode.PROCESS_V2_MASK_DISAGREES,
-                f"production mask {list(authority)} disagrees with the independent "
-                f"oracle {list(oracle)}",
-                state_index,
-            )
-        candidates.append(list(oracle))
-        counts["mask_states_evaluated"] += 1
-        counts["mask_candidate_slots"] += len(oracle)
-        if oracle:
-            counts["mask_states_with_candidates"] += 1
 
     if findings:
-        return None, findings
-    counts["entries"] += 1
-    counts["states"] += len(states)
-    counts["transitions"] += replayed
-    counts["preserved_v1_atom_delete_teachers"] += preserved_v1_deletes
-    counts["connected_nonleaf_atom_delete_teachers"] += connected_nonleaf_deletes
+        return None, None, findings
+    if exclusions:
+        # Whole-trace exclusion: no proof row, no partial credit, and every
+        # per-transition counter this record would have contributed is dropped.
+        step_index, code, detail = exclusions[0]
+        counts["rejected_entries"] += 1
+        return (
+            None,
+            ProcessV2RebindRejection(
+                entry_index=entry_index,
+                trace_id=str(record["trace_id"]),
+                data_lane=str(record["data_lane"]),
+                split=str(record["split"]),
+                v1_record_sha256=str(record["record_sha256"]),
+                path_length=int(record["path_length"]),
+                step_index=step_index,
+                code=code,
+                detail=detail,
+                unsupported_teacher_steps=len(exclusions),
+            ),
+            findings,
+        )
+
+    counts["admitted_entries"] += 1
+    counts["admitted_states"] += len(states)
+    counts["admitted_transitions"] += replayed
+    for source_label in CANDIDATE_SOURCES:
+        counts[f"atom_delete_teachers_{source_label}"] += atom_delete_teachers[source_label]
+    for admitted_step in steps:
+        families[str(admitted_step["action"]["model_family"])] += 1
     proof_body: dict[str, Any] = {
         "schema": PROOF_SCHEMA,
         "schema_version": PROOF_SCHEMA_VERSION,
@@ -1473,11 +1802,13 @@ def _prove_record(
         "canonical_state_keys": [str(key) for key in keys],
         "family_histogram": dict(record["family_histogram"]),
         "replayed_transitions": replayed,
-        "preserved_v1_atom_delete_teachers": preserved_v1_deletes,
-        "connected_nonleaf_atom_delete_teachers": connected_nonleaf_deletes,
+        "atom_delete_teachers_by_candidate_source": {
+            source_label: int(atom_delete_teachers[source_label])
+            for source_label in CANDIDATE_SOURCES
+        },
         "process_v2_atom_delete_candidates": candidates,
     }
-    return {**proof_body, "proof_sha256": _canonical_sha256(proof_body)}, findings
+    return {**proof_body, "proof_sha256": _canonical_sha256(proof_body)}, None, findings
 
 
 def _prove_entry_range(
@@ -1486,14 +1817,32 @@ def _prove_entry_range(
     v1_task_dir: Path,
     pinned_process_identity: Mapping[str, Any],
     pinned_builder_identity: Mapping[str, Any],
-) -> tuple[list[dict[str, Any]], Counter[str], Counter[str]]:
-    """Prove one half-open entry range or raise with every reason-coded finding."""
+) -> tuple[
+    list[dict[str, Any]],
+    list[ProcessV2RebindRejection],
+    Counter[str],
+    Counter[str],
+    Counter[str],
+]:
+    """Prove one half-open entry range, accounting for every record it read.
+
+    Raises :class:`ProcessV2RebindMismatch` on any integrity finding, so the
+    caller publishes nothing.  A support exclusion is not a mismatch: it
+    returns as a rejection and the range still completes.
+    """
 
     semantic_dir = v1_task_dir / SEMANTIC_ARTIFACT_DIRNAME
     entry_start = int(task["entry_start"])
     entry_stop = int(task["entry_stop"])
+    proofs: list[dict[str, Any]] = []
+    rejections: list[ProcessV2RebindRejection] = []
+    findings: list[ProcessV2RebindFinding] = []
+    counts: Counter[str] = Counter()
+    families: Counter[str] = Counter()
+    unsupported_steps: Counter[str] = Counter()
+    observed_indices: list[int] = []
     try:
-        addressed_rows = read_semantic_packed_artifact_range(
+        rows = read_semantic_packed_artifact_range_rows(
             semantic_dir,
             expected_shard_sha256=task["v1_semantic_shard_sha256"],
             expected_manifest_sha256=task["v1_semantic_manifest_sha256"],
@@ -1505,35 +1854,31 @@ def _prove_entry_range(
             # The rebind replays every transition itself, which strictly
             # dominates the reader's first-N sentinel replay.
             sentinel_replay_entries=0,
-        )
-        raw_rows = _iter_raw_semantic_rows(
-            semantic_dir / SHARD_FILENAME,
-            entry_start=entry_start,
-            entry_stop=entry_stop,
+            # An unreadable row is this module's V1_RECORD_UNREADABLE finding,
+            # addressed to its exact physical entry, not an untyped crash.
+            recover_row_errors=True,
         )
         runtime = editing_v2_semantic_rewrite_system()
-        proofs: list[dict[str, Any]] = []
-        findings: list[ProcessV2RebindFinding] = []
-        counts: Counter[str] = Counter()
-        families: Counter[str] = Counter()
-        for addressed, (entry_index, record) in zip(addressed_rows, raw_rows, strict=True):
-            if addressed.address.entry_index != entry_index:
-                raise ProcessV2RebindError(
-                    "validated and raw semantic rows disagree on their physical entry index"
-                )
-            proof, row_findings = _prove_record(
-                entry_index=entry_index,
-                record=record,
-                addressed=addressed,
+        for row in rows:
+            observed_indices.append(row.entry_index)
+            counts["source_entries"] += 1
+            proof, rejection, row_findings = _prove_record(
+                entry_index=row.entry_index,
+                record=row.record,
+                addressed=row.addressed,
+                read_error=row.error,
                 task=task,
                 pinned_process_identity=pinned_process_identity,
                 runtime=runtime,
                 counts=counts,
                 families=families,
+                unsupported_steps=unsupported_steps,
             )
             findings.extend(row_findings)
             if proof is not None:
                 proofs.append(proof)
+            if rejection is not None:
+                rejections.append(rejection)
     except SemanticPackedStoreError as error:
         raise ProcessV2RebindError(
             f"the V1 semantic entry range [{entry_start}, {entry_stop}) is unreadable "
@@ -1541,12 +1886,17 @@ def _prove_entry_range(
         ) from error
     if findings:
         raise ProcessV2RebindMismatch(findings)
-    if len(proofs) != entry_stop - entry_start:
+    if observed_indices != list(range(entry_start, entry_stop)):
         raise ProcessV2RebindError(
-            f"the V1 semantic entry range [{entry_start}, {entry_stop}) proved "
-            f"{len(proofs)} records"
+            f"the V1 semantic entry range [{entry_start}, {entry_stop}) did not read "
+            "its exact physical entry indices"
         )
-    return proofs, counts, families
+    if len(proofs) + len(rejections) != entry_stop - entry_start:
+        raise ProcessV2RebindError(
+            f"the V1 semantic entry range [{entry_start}, {entry_stop}) accounts for "
+            f"{len(proofs)} admitted and {len(rejections)} rejected records"
+        )
+    return proofs, rejections, counts, families, unsupported_steps
 
 
 def _write_proof_ledger(path: Path, proofs: Sequence[Mapping[str, Any]]) -> tuple[str, str]:
@@ -1583,6 +1933,63 @@ def _task_by_identity(plan: Mapping[str, Any], task_identity_sha256: str) -> dic
     return dict(matches[0])
 
 
+def _validate_reason_histogram(
+    value: object,
+    *,
+    allowed: set[str],
+    field: str,
+) -> dict[str, int]:
+    """Require a measured reason histogram over immutable reason codes only."""
+
+    if not isinstance(value, dict):
+        raise ProcessV2RebindError(f"{field} must be an object")
+    for key, count in value.items():
+        if key not in allowed:
+            raise ProcessV2RebindError(f"{field} names an unknown reason code {key!r}")
+        if type(count) is not int or count <= 0:
+            raise ProcessV2RebindError(f"{field}[{key}] must be a positive integer")
+    if list(value) != sorted(value):
+        raise ProcessV2RebindError(f"{field} must be sorted by reason code")
+    return {str(key): int(count) for key, count in value.items()}
+
+
+def _validate_rejected_trace_inventory(value: object) -> list[dict[str, Any]]:
+    """Require an exact, ascending, reason-coded rejected-trace inventory."""
+
+    if not isinstance(value, list):
+        raise ProcessV2RebindError("manifest.rejected_traces must be a list")
+    allowed = {code.value for code in ProcessV2RebindExclusionCode}
+    rows: list[dict[str, Any]] = []
+    previous = -1
+    for index, row in enumerate(value):
+        if not isinstance(row, dict) or set(row) != _REJECTION_FIELDS:
+            raise ProcessV2RebindError(f"manifest.rejected_traces[{index}] fields disagree")
+        if (
+            row["schema"] != REJECTION_SCHEMA
+            or row["schema_version"] != REJECTION_SCHEMA_VERSION
+            or row["rejection_sha256"] != _self_hash(row, field="rejection_sha256")
+            or row["exclusion_code"] not in allowed
+            or type(row["entry_index"]) is not int
+            or type(row["step_index"]) is not int
+            or type(row["unsupported_teacher_steps"]) is not int
+            or row["unsupported_teacher_steps"] <= 0
+            or not isinstance(row["trace_id"], str)
+            or not row["trace_id"]
+        ):
+            raise ProcessV2RebindError(f"manifest.rejected_traces[{index}] disagrees")
+        _require_sha256(
+            row["v1_record_sha256"],
+            field=f"manifest.rejected_traces[{index}].v1_record_sha256",
+        )
+        if int(row["entry_index"]) <= previous:
+            raise ProcessV2RebindError(
+                "manifest.rejected_traces must be ascending and unique by entry index"
+            )
+        previous = int(row["entry_index"])
+        rows.append(dict(row))
+    return rows
+
+
 def validate_process_v2_rebind_task_result(
     output_dir: Path,
     *,
@@ -1617,8 +2024,6 @@ def validate_process_v2_rebind_task_result(
         raise ProcessV2RebindError("Process-V2 rebind receipt process identity is stale")
     validate_pinned_process_identity(receipt["pinned_process_identity"])
     validate_pinned_builder_identity(receipt["pinned_builder_identity"])
-    if receipt["mismatches_by_code"] or receipt["unsupported_teachers_by_code"]:
-        raise ProcessV2RebindError("a published Process-V2 rebind proof cannot record a mismatch")
 
     manifest_path = output / MANIFEST_FILENAME
     manifest = _load_json_object(manifest_path, label="Process-V2 rebind manifest")
@@ -1637,13 +2042,25 @@ def validate_process_v2_rebind_task_result(
         or set(manifest["process_v2_atom_delete_census"]) != set(_MASK_CENSUS_FIELDS)
     ):
         raise ProcessV2RebindError("Process-V2 rebind manifest does not bind its receipt")
+    _validate_reason_histogram(
+        manifest["rejected_traces_by_code"],
+        allowed={code.value for code in ProcessV2RebindExclusionCode},
+        field="manifest.rejected_traces_by_code",
+    )
+    _validate_reason_histogram(
+        manifest["unsupported_teacher_steps_by_code"],
+        allowed={code.value for code in ProcessV2RebindExclusionCode},
+        field="manifest.unsupported_teacher_steps_by_code",
+    )
+    rejected = _validate_rejected_trace_inventory(manifest["rejected_traces"])
 
     proof_path = output / PROOF_FILENAME
     if _file_sha256(proof_path) != receipt["proof_ledger_sha256"]:
         raise ProcessV2RebindError("Process-V2 rebind proof-ledger SHA-256 disagrees")
     stream = hashlib.sha256()
-    observed_indices: list[int] = []
-    record_inventory: list[str] = []
+    admitted_indices: list[int] = []
+    inventory: list[list[Any]] = []
+    states = 0
     transitions = 0
     with gzip.open(proof_path, "rb") as handle:
         for row_index, raw_line in enumerate(handle):
@@ -1661,25 +2078,44 @@ def validate_process_v2_rebind_task_result(
                 or proof["proof_sha256"] != _self_hash(proof, field="proof_sha256")
                 or proof["schema"] != PROOF_SCHEMA
                 or proof["schema_version"] != PROOF_SCHEMA_VERSION
+                or set(proof["atom_delete_teachers_by_candidate_source"]) != set(CANDIDATE_SOURCES)
             ):
                 raise ProcessV2RebindError(f"rebind proof row {row_index} disagrees")
-            observed_indices.append(int(proof["entry_index"]))
-            record_inventory.append(str(proof["v1_record_sha256"]))
+            admitted_indices.append(int(proof["entry_index"]))
+            inventory.append([int(proof["entry_index"]), str(proof["v1_record_sha256"])])
+            states += len(proof["canonical_state_keys"])
             transitions += int(proof["replayed_transitions"])
     if stream.hexdigest() != receipt["proof_stream_sha256"]:
         raise ProcessV2RebindError("Process-V2 rebind proof stream SHA-256 disagrees")
-    if observed_indices != list(range(int(receipt["entry_start"]), int(receipt["entry_stop"]))):
-        raise ProcessV2RebindError("Process-V2 rebind proof entry indices are not the exact range")
+    inventory.extend(
+        [int(row["entry_index"]), str(row["v1_record_sha256"])] for row in rejected
+    )
+    inventory.sort()
+    covered = [entry_index for entry_index, _ in inventory]
+    exact_range = list(range(int(receipt["entry_start"]), int(receipt["entry_stop"])))
+    if admitted_indices != sorted(admitted_indices) or covered != exact_range:
+        raise ProcessV2RebindError(
+            "Process-V2 rebind admitted and rejected records do not cover the exact range"
+        )
     if (
-        manifest["proved_entries"] != len(observed_indices)
-        or manifest["proved_transitions"] != transitions
-        or manifest["v1_record_inventory_sha256"] != _canonical_sha256(record_inventory)
+        manifest["source_entries"] != len(exact_range)
+        or manifest["admitted_entries"] != len(admitted_indices)
+        or manifest["rejected_entries"] != len(rejected)
+        or manifest["admitted_states"] != states
+        or manifest["admitted_transitions"] != transitions
+        or manifest["v1_record_inventory_sha256"] != _canonical_sha256(inventory)
         or manifest["proof_stream_sha256"] != receipt["proof_stream_sha256"]
+        or manifest["rejected_traces_by_code"] != receipt["rejected_traces_by_code"]
+        or manifest["unsupported_teacher_steps_by_code"]
+        != receipt["unsupported_teacher_steps_by_code"]
+        or sum(manifest["rejected_traces_by_code"].values()) != len(rejected)
         or receipt["counts"]
         != {
-            "entries": manifest["proved_entries"],
-            "states": manifest["proved_states"],
-            "transitions": manifest["proved_transitions"],
+            "source_entries": manifest["source_entries"],
+            "admitted_entries": manifest["admitted_entries"],
+            "rejected_entries": manifest["rejected_entries"],
+            "admitted_states": manifest["admitted_states"],
+            "admitted_transitions": manifest["admitted_transitions"],
         }
     ):
         raise ProcessV2RebindError("Process-V2 rebind proof census disagrees with its manifest")
@@ -1756,11 +2192,22 @@ def execute_process_v2_rebind_task(
             "reused": True,
         }
 
-    proofs, counts, families = _prove_entry_range(
+    proofs, rejections, counts, families, unsupported_steps = _prove_entry_range(
         task,
         v1_task_dir=v1_task_dir,
         pinned_process_identity=pinned_process_identity,
         pinned_builder_identity=pinned_builder_identity,
+    )
+    rejected_rows = [rejection.as_payload() for rejection in rejections]
+    rejected_traces_by_code = dict(
+        sorted(Counter(rejection.code.value for rejection in rejections).items())
+    )
+    unsupported_teacher_steps_by_code = dict(sorted(unsupported_steps.items()))
+    record_inventory = sorted(
+        [
+            *([int(proof["entry_index"]), str(proof["v1_record_sha256"])] for proof in proofs),
+            *([int(row["entry_index"]), str(row["v1_record_sha256"])] for row in rejected_rows),
+        ]
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(
@@ -1783,32 +2230,35 @@ def execute_process_v2_rebind_task(
             "entry_start": task["entry_start"],
             "entry_stop": task["entry_stop"],
             "v1_entries": task["v1_entries"],
-            "proved_entries": counts["entries"],
-            "proved_states": counts["states"],
-            "proved_transitions": counts["transitions"],
+            "source_entries": counts["source_entries"],
+            "admitted_entries": counts["admitted_entries"],
+            "rejected_entries": counts["rejected_entries"],
+            "admitted_states": counts["admitted_states"],
+            "admitted_transitions": counts["admitted_transitions"],
             "family_histogram": dict(sorted(families.items())),
             "teacher_census": {
-                "preserved_v1_atom_delete_teachers": counts["preserved_v1_atom_delete_teachers"],
-                "connected_nonleaf_atom_delete_teachers": counts[
-                    "connected_nonleaf_atom_delete_teachers"
-                ],
-                "teacher_transitions": counts["transitions"],
+                "atom_delete_teachers": sum(
+                    counts[f"atom_delete_teachers_{source}"] for source in CANDIDATE_SOURCES
+                ),
+                **{
+                    f"atom_delete_teachers_{source}": counts[f"atom_delete_teachers_{source}"]
+                    for source in CANDIDATE_SOURCES
+                },
+                "teacher_transitions": counts["admitted_transitions"],
             },
             "process_v2_atom_delete_census": {
                 "states_evaluated": counts["mask_states_evaluated"],
                 "states_with_candidates": counts["mask_states_with_candidates"],
                 "candidate_slots": counts["mask_candidate_slots"],
             },
-            # Always empty by construction, never a measurement: any finding
-            # raises ProcessV2RebindMismatch before a receipt is built, so a
-            # published artifact is one where nothing was found, not one where
-            # zero was counted. The fields exist so a reader of a receipt sees
-            # the census shape explicitly rather than inferring it from absence.
-            "mismatches_by_code": {},
-            "unsupported_teachers_by_code": {},
-            "v1_record_inventory_sha256": _canonical_sha256(
-                [proof["v1_record_sha256"] for proof in proofs]
-            ),
+            # Measured over the exact rows this range read.  An integrity
+            # mismatch never reaches this point, so no mismatch histogram is
+            # published; it is a measurement of a refusal and is carried on
+            # ProcessV2RebindMismatch instead.
+            "rejected_traces_by_code": rejected_traces_by_code,
+            "unsupported_teacher_steps_by_code": unsupported_teacher_steps_by_code,
+            "rejected_traces": rejected_rows,
+            "v1_record_inventory_sha256": _canonical_sha256(record_inventory),
             "proof_stream_sha256": proof_stream_sha256,
             "pinned_process_identity_sha256": pinned_process_identity["process_identity_sha256"],
             "pinned_builder_identity_sha256": pinned_builder_identity["identity_sha256"],
@@ -1843,13 +2293,9 @@ def execute_process_v2_rebind_task(
             "proof_stream_sha256": proof_stream_sha256,
             "manifest_physical_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
             "manifest_sha256": manifest["manifest_sha256"],
-            "counts": {
-                "entries": counts["entries"],
-                "states": counts["states"],
-                "transitions": counts["transitions"],
-            },
-            "mismatches_by_code": {},
-            "unsupported_teachers_by_code": {},
+            "counts": {field: counts[field] for field in _COUNT_FIELDS},
+            "rejected_traces_by_code": rejected_traces_by_code,
+            "unsupported_teacher_steps_by_code": unsupported_teacher_steps_by_code,
         }
         receipt = {**receipt_body, "receipt_sha256": _canonical_sha256(receipt_body)}
         published = _publish_task(
@@ -1970,7 +2416,15 @@ def reduce_process_v2_rebind(
     artifact_root: Path,
     repo_root: Path,
 ) -> dict[str, Any]:
-    """Publish completion only after an exact, mismatch-free range reduction."""
+    """Publish completion after an exact reduction that accounts for every record.
+
+    Every planned range must have published a complete result, and a range that
+    hit an integrity mismatch never publishes, so a missing range is the only
+    way an integrity failure can reach this point and it raises
+    :class:`ProcessV2RebindIncomplete`.  Support exclusions are expected: the
+    completion carries their summed, measured census and requires
+    admitted plus rejected to equal the exact source census of the payload.
+    """
 
     validated = validate_process_v2_rebind_plan(plan, repo_root=repo_root)
     run_root = _mounted_artifact_path(
@@ -2003,8 +2457,11 @@ def reduce_process_v2_rebind(
     results: list[dict[str, Any]] = []
     totals: Counter[str] = Counter()
     family_totals: Counter[str] = Counter()
-    mismatch_totals: Counter[str] = Counter()
-    unsupported_totals: Counter[str] = Counter()
+    teacher_totals: Counter[str] = Counter()
+    mask_totals: Counter[str] = Counter()
+    rejected_trace_totals: Counter[str] = Counter()
+    unsupported_step_totals: Counter[str] = Counter()
+    rejected_trace_inventory: list[dict[str, Any]] = []
     for task in validated["tasks"]:
         receipt = _validate_task_result_against_plan(
             validated,
@@ -2015,11 +2472,15 @@ def reduce_process_v2_rebind(
             (int(receipt["entry_start"]), int(receipt["entry_stop"]))
         )
         _counter_sum(totals, receipt["counts"], field="task receipt counts")
-        _counter_sum(mismatch_totals, receipt["mismatches_by_code"], field="mismatches_by_code")
         _counter_sum(
-            unsupported_totals,
-            receipt["unsupported_teachers_by_code"],
-            field="unsupported_teachers_by_code",
+            rejected_trace_totals,
+            receipt["rejected_traces_by_code"],
+            field="rejected_traces_by_code",
+        )
+        _counter_sum(
+            unsupported_step_totals,
+            receipt["unsupported_teacher_steps_by_code"],
+            field="unsupported_teacher_steps_by_code",
         )
         manifest = _load_json_object(
             _mounted_artifact_path(
@@ -2031,6 +2492,27 @@ def reduce_process_v2_rebind(
             label="Process-V2 rebind manifest",
         )
         _counter_sum(family_totals, manifest["family_histogram"], field="family_histogram")
+        _counter_sum(teacher_totals, manifest["teacher_census"], field="teacher_census")
+        _counter_sum(
+            mask_totals,
+            manifest["process_v2_atom_delete_census"],
+            field="process_v2_atom_delete_census",
+        )
+        rejected_trace_inventory.extend(
+            {
+                "task_identity_sha256": task["task_identity_sha256"],
+                "v1_task_identity_sha256": task["v1_task_identity_sha256"],
+                "data_lane": str(row["data_lane"]),
+                "split": str(row["split"]),
+                "entry_index": int(row["entry_index"]),
+                "trace_id": str(row["trace_id"]),
+                "v1_record_sha256": str(row["v1_record_sha256"]),
+                "step_index": int(row["step_index"]),
+                "exclusion_code": str(row["exclusion_code"]),
+                "unsupported_teacher_steps": int(row["unsupported_teacher_steps"]),
+            }
+            for row in manifest["rejected_traces"]
+        )
         results.append(
             {
                 "task_identity_sha256": task["task_identity_sha256"],
@@ -2048,13 +2530,19 @@ def reduce_process_v2_rebind(
         )
     for identity, ranges in observed_ranges.items():
         validate_process_v2_rebind_task_ranges(ranges, entries=v1_entries[identity])
-    if mismatch_totals or unsupported_totals:
-        raise ProcessV2RebindError(
-            "the Process-V2 rebind reduction cannot publish a completion with findings"
-        )
-    if totals["entries"] != int(validated["expected_entry_count"]):
+    if totals["source_entries"] != int(validated["expected_entry_count"]):
         raise ProcessV2RebindError(
             "the Process-V2 rebind reduction does not account for every V1 record"
+        )
+    if totals["admitted_entries"] + totals["rejected_entries"] != totals["source_entries"]:
+        raise ProcessV2RebindError(
+            "the Process-V2 rebind reduction admits and rejects an inconsistent census"
+        )
+    if sum(rejected_trace_totals.values()) != totals["rejected_entries"] or len(
+        rejected_trace_inventory
+    ) != int(totals["rejected_entries"]):
+        raise ProcessV2RebindError(
+            "the Process-V2 rebind rejection census does not name every rejected trace"
         )
     body: dict[str, Any] = {
         "schema": COMPLETION_SCHEMA,
@@ -2076,10 +2564,17 @@ def reduce_process_v2_rebind(
         "task_count": len(results),
         "result_inventory": results,
         "result_inventory_sha256": _canonical_sha256(results),
-        "counts": {key: totals[key] for key in ("entries", "states", "transitions")},
+        "counts": {field: totals[field] for field in _COUNT_FIELDS},
         "family_histogram": dict(sorted(family_totals.items())),
-        "mismatches_by_code": {},
-        "unsupported_teachers_by_code": {},
+        "teacher_census": {
+            field: teacher_totals[field] for field in sorted(_TEACHER_CENSUS_FIELDS)
+        },
+        "process_v2_atom_delete_census": {
+            field: mask_totals[field] for field in sorted(_MASK_CENSUS_FIELDS)
+        },
+        "rejected_traces_by_code": dict(sorted(rejected_trace_totals.items())),
+        "unsupported_teacher_steps_by_code": dict(sorted(unsupported_step_totals.items())),
+        "rejected_trace_inventory_sha256": _canonical_sha256(rejected_trace_inventory),
     }
     completion = {**body, "completion_sha256": _canonical_sha256(body)}
     run_root.mkdir(parents=True, exist_ok=True)
@@ -2092,13 +2587,16 @@ def reduce_process_v2_rebind(
 
 
 __all__ = [
+    "CANDIDATE_SOURCES",
     "COMPLETION_FILENAME",
     "COMPLETION_SCHEMA",
     "COMPLETION_SCHEMA_VERSION",
     "COMPLETION_STATUS",
+    "CONNECTED_NONLEAF_CANDIDATE_SOURCE",
     "DEFAULT_ENTRIES_PER_TASK",
     "DEFAULT_OUTPUT_ARTIFACT_PREFIX",
     "INDEPENDENT_CONNECTED_NONLEAF_MINIMUM_DEGREE",
+    "INHERITED_CANDIDATE_SOURCE",
     "MANIFEST_FILENAME",
     "MANIFEST_SCHEMA",
     "MANIFEST_SCHEMA_VERSION",
@@ -2106,12 +2604,18 @@ __all__ = [
     "PLAN_SCHEMA",
     "PLAN_SCHEMA_VERSION",
     "PLAN_STATUS",
+    "PROCESS_V2_ATOM_DELETE_MASK_SYMBOL",
     "PROOF_FILENAME",
     "PROOF_SCHEMA",
     "PROOF_SCHEMA_VERSION",
     "RECEIPT_FILENAME",
     "RECEIPT_SCHEMA",
     "RECEIPT_SCHEMA_VERSION",
+    "REFUSAL_SCHEMA",
+    "REFUSAL_SCHEMA_VERSION",
+    "REFUSAL_STATUS",
+    "REJECTION_SCHEMA",
+    "REJECTION_SCHEMA_VERSION",
     "SOURCE_REVISION_SCHEMA",
     "SOURCE_REVISION_SCHEMA_VERSION",
     "TASK_DIRNAME",
@@ -2119,17 +2623,23 @@ __all__ = [
     "V1_PAYLOAD_BINDING_SCHEMA",
     "V1_PAYLOAD_BINDING_SCHEMA_VERSION",
     "ProcessV2RebindError",
+    "ProcessV2RebindExclusionCode",
     "ProcessV2RebindFinding",
     "ProcessV2RebindIncomplete",
+    "ProcessV2RebindIntegrityCode",
     "ProcessV2RebindMismatch",
-    "ProcessV2RebindReasonCode",
+    "ProcessV2RebindRejection",
+    "authority_process_v2_atom_delete_slots",
     "bind_v1_semantic_payload",
     "build_process_v2_rebind_source_revision",
     "completed_process_v2_rebind_task_ids",
     "editing_process_v2_identity",
     "execute_process_v2_rebind_task",
+    "independent_process_v2_atom_delete_candidate_source",
     "independent_process_v2_atom_delete_slots",
     "load_process_v2_rebind_plan",
+    "mounted_process_v2_artifact_path",
+    "process_v2_atom_delete_mask_authority",
     "plan_process_v2_rebind",
     "reduce_process_v2_rebind",
     "repository_process_v2_rebind_source_revision",
