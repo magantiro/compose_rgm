@@ -690,8 +690,13 @@ def test_a_pinned_identity_that_does_not_match_the_payload_is_rejected(
 ) -> None:
     payload = _build_v1_payload(tmp_path / "artifacts")
     process_identity, builder_identity = _pinned_identities()
+    # Mutate a field the identity schema does NOT definitionally bind, so the
+    # object stays structurally valid and is rejected for the reason under test
+    # (it is not the payload's identity) rather than for being malformed.
+    # Rewriting a bound field such as ``contract_relative_path`` is a different
+    # failure, covered by ``test_a_relabelled_v1_identity_cannot_masquerade``.
     other = dict(process_identity)
-    other["contract_relative_path"] = PROCESS_V2_CONTRACT_RELATIVE_PATH
+    other["contract_sha256"] = "0" * 64
     other["process_identity_sha256"] = _self_hash(other, "process_identity_sha256")
     with pytest.raises(ProcessV2RebindError, match="pinned process identity"):
         bind_v1_semantic_payload(
@@ -709,6 +714,33 @@ def test_a_pinned_identity_that_does_not_match_the_payload_is_rejected(
             artifact_root=payload.artifact_root,
             pinned_process_identity=process_identity,
             pinned_builder_identity=wrong_builder,
+        )
+
+
+def test_a_relabelled_v1_identity_cannot_masquerade(tmp_path: Path) -> None:
+    """A V1 identity relabelled to V2 and re-self-hashed is still refused.
+
+    Re-hashing makes the object internally consistent, so self-consistency
+    alone cannot catch it.  The identity schema binds its own schema version,
+    process semantics, and contract path, which is what closes the gap.
+    """
+
+    payload = _build_v1_payload(tmp_path / "artifacts")
+    process_identity, builder_identity = _pinned_identities()
+    relabelled = dict(process_identity)
+    relabelled["schema"] = "compose.editing.semantic_process_v2_identity"
+    relabelled["process_semantics"] = "semantic_editing_v2_v2"
+    relabelled["contract_relative_path"] = PROCESS_V2_CONTRACT_RELATIVE_PATH
+    relabelled["process_identity_sha256"] = _self_hash(
+        relabelled,
+        "process_identity_sha256",
+    )
+    with pytest.raises(ProcessV2RebindError):
+        bind_v1_semantic_payload(
+            payload_root_artifact_path=PAYLOAD_ARTIFACT_PATH,
+            artifact_root=payload.artifact_root,
+            pinned_process_identity=relabelled,
+            pinned_builder_identity=builder_identity,
         )
 
 

@@ -128,7 +128,7 @@
       "independent_of_canonical_smiles_atom_order"
     ],
     "source_sha256": {
-      "src/compose_v4/model/factorized_tracelet_rate_model.py": "b8f6203f764bb1120f095dec3f5ce86323c6b24a36218fba013ccfb1fa61120a",
+      "src/compose_v4/model/factorized_tracelet_rate_model.py": "a0f125a5ea6a7d40f24a46c7ad50361ee77950851b368965d5ef07d97bbebbd4",
       "src/compose_v4/rewrite/process_v2_atom_delete.py": "0d5baed5d9c866a1d04d2b1f0573d17e509dd719798b58c52199f8ef6dcad454"
     }
   },
@@ -161,7 +161,7 @@
     "predicate": "charge_policy_preserved",
     "version": "exact_charged_center_preservation_v1"
   },
-  "contract_sha256": "702711e58d68117f762deadbe47bd1a7550f19e7fc990daf8720277b345d6ebe",
+  "contract_sha256": "05f6e9ea3b9c45941abeb51d5de038258d5105bf9c7c67e19137b9ce96f79bb8",
   "downstream_invalidation": {
     "active8_inventory_rebuild_required": true,
     "affected_whole_trace_replay_required": true,

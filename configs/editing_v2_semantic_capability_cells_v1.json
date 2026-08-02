@@ -1,28 +1,5 @@
 {
-  "schema": "compose.editing_v2.semantic_capability_cell_registry",
-  "schema_version": 1,
-  "registry_id": "editing_v2_active8_semantic_capability_cells_v1",
-  "status": "DESIGN_NOT_TRAINING_AUTHORIZED",
-  "training_authorized": false,
-  "gate_zero_authorized": false,
-  "t1_authorized": false,
-  "bounded_p50_authorized": false,
-  "scope": {
-    "row_unit": "accepted_nonterminal_progress_row_with_exact_action_v4_teacher",
-    "generated_object": "canonical_molecular_successor",
-    "objective_lane": "productive_embedded_jump_chain",
-    "terminal_rows": "outside_capability_cell_registry_hazard_is_separate",
-    "maximum_active_atoms": 40,
-    "stereochemistry": "out_of_scope",
-    "formal_charge_changes": "out_of_scope_charge_preserving_only"
-  },
   "bindings": {
-    "semantic_process_contract": "configs/editing_v2_semantic_process_v1.json",
-    "semantic_process_identity_sha256": "6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7",
-    "corpus_contract": "configs/editing_corpus_v2_contract.json",
-    "corpus_contract_file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
-    "classifier_implementation_file": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
-    "classifier_implementation_sha256": "91c9194048984869ec3ab307bdac0055a190b6f3b07c0cddc1a572170517def1",
     "action_codec_schema_version": 4,
     "active_families": [
       "atom_insert",
@@ -34,6 +11,10 @@
       "cycle_attach",
       "ring_system_restate"
     ],
+    "classifier_implementation_file": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
+    "classifier_implementation_sha256": "91c9194048984869ec3ab307bdac0055a190b6f3b07c0cddc1a572170517def1",
+    "corpus_contract": "configs/editing_corpus_v2_contract.json",
+    "corpus_contract_file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
     "data_lanes": [
       "observed_local_analogue",
       "operator_aware_real_endpoint",
@@ -46,14 +27,18 @@
       "validation",
       "controller_validation",
       "final_test"
-    ]
+    ],
+    "semantic_process_contract": "configs/editing_v2_semantic_process_v1.json",
+    "semantic_process_identity_sha256": "e17a8cbe8ac8b8c86209f190ea6c9c6be24d24d4b5865a320fd15b2f56fe4a29"
   },
+  "bounded_p50_authorized": false,
   "cell_identity_policy": {
-    "namespace": "editing_v2_active8_v1",
     "balancing_dimensions": [
       "model_family",
       "family_specific_context"
     ],
+    "namespace": "editing_v2_active8_v1",
+    "rationale": "keep_the_balancing_registry_compact_and_retain_provenance_and_difficulty_for_stratified_audits_without_a_cartesian_product",
     "separate_nonbalancing_dimensions": [
       "data_lane",
       "partition_role",
@@ -74,18 +59,100 @@
       "minimum_edited_cycle_length",
       "source_edge_aromatic",
       "successor_edge_aromatic"
-    ],
-    "rationale": "keep_the_balancing_registry_compact_and_retain_provenance_and_difficulty_for_stratified_audits_without_a_cartesian_product"
+    ]
+  },
+  "exact_evidence_strata": {
+    "canonical_successor_count": {
+      "bins": [
+        {
+          "id": "successors_001_004",
+          "maximum": 4,
+          "minimum": 1
+        },
+        {
+          "id": "successors_005_016",
+          "maximum": 16,
+          "minimum": 5
+        },
+        {
+          "id": "successors_017_064",
+          "maximum": 64,
+          "minimum": 17
+        },
+        {
+          "id": "successors_065_plus",
+          "maximum": null,
+          "minimum": 65
+        }
+      ],
+      "scope": "all_productive_canonical_molecular_successors_at_the_exact_source"
+    },
+    "policy": "prospective_non_data_derived_logarithmic_engineering_bins_not_balancing_dimensions",
+    "raw_mark_count": {
+      "bins": [
+        {
+          "id": "marks_001_004",
+          "maximum": 4,
+          "minimum": 1
+        },
+        {
+          "id": "marks_005_016",
+          "maximum": 16,
+          "minimum": 5
+        },
+        {
+          "id": "marks_017_064",
+          "maximum": 64,
+          "minimum": 17
+        },
+        {
+          "id": "marks_065_plus",
+          "maximum": null,
+          "minimum": 65
+        }
+      ],
+      "scope": "all_productive_action_v4_marks_emitted_at_the_exact_source"
+    },
+    "successor_alias_multiplicity": {
+      "bins": [
+        {
+          "id": "aliases_001",
+          "maximum": 1,
+          "minimum": 1
+        },
+        {
+          "id": "aliases_002_004",
+          "maximum": 4,
+          "minimum": 2
+        },
+        {
+          "id": "aliases_005_plus",
+          "maximum": null,
+          "minimum": 5
+        }
+      ],
+      "scope": "all_action_v4_marks_in_the_teacher_canonical_successor_fiber"
+    }
+  },
+  "fail_closed_policy": {
+    "lane_or_partition_mismatch": "error",
+    "missing_exact_candidate_evidence": "error",
+    "process_identity_drift": "error",
+    "registry_tamper": "error",
+    "terminal_progress_row": "error",
+    "unknown_family": "error",
+    "unknown_family_context": "error",
+    "unsupported_teacher": "error"
   },
   "family_contexts": {
-    "atom_insert": [
-      "root_birth",
-      "one_neighbor_birth"
-    ],
     "atom_delete": [
       "singleton_to_null_death",
       "leaf_death",
       "connected_nonleaf_death"
+    ],
+    "atom_insert": [
+      "root_birth",
+      "one_neighbor_birth"
     ],
     "atom_restate": [
       "element_identity_change",
@@ -101,15 +168,15 @@
       "single_atom_pendant_cyclic_source",
       "multi_atom_pendant_cyclic_source"
     ],
-    "cycle_insert": [
-      "close_to_monocyclic_ring_system",
-      "close_to_articulated_polycyclic_ring_system",
-      "close_to_nonarticulated_polycyclic_ring_system"
-    ],
     "cycle_attach": [
       "open_from_monocyclic_ring_system",
       "open_from_articulated_polycyclic_ring_system",
       "open_from_nonarticulated_polycyclic_ring_system"
+    ],
+    "cycle_insert": [
+      "close_to_monocyclic_ring_system",
+      "close_to_articulated_polycyclic_ring_system",
+      "close_to_nonarticulated_polycyclic_ring_system"
     ],
     "ring_system_restate": [
       "aromatization",
@@ -117,44 +184,21 @@
       "coordinated_ring_bond_state_change"
     ]
   },
-  "exact_evidence_strata": {
-    "policy": "prospective_non_data_derived_logarithmic_engineering_bins_not_balancing_dimensions",
-    "raw_mark_count": {
-      "scope": "all_productive_action_v4_marks_emitted_at_the_exact_source",
-      "bins": [
-        {"id": "marks_001_004", "minimum": 1, "maximum": 4},
-        {"id": "marks_005_016", "minimum": 5, "maximum": 16},
-        {"id": "marks_017_064", "minimum": 17, "maximum": 64},
-        {"id": "marks_065_plus", "minimum": 65, "maximum": null}
-      ]
-    },
-    "canonical_successor_count": {
-      "scope": "all_productive_canonical_molecular_successors_at_the_exact_source",
-      "bins": [
-        {"id": "successors_001_004", "minimum": 1, "maximum": 4},
-        {"id": "successors_005_016", "minimum": 5, "maximum": 16},
-        {"id": "successors_017_064", "minimum": 17, "maximum": 64},
-        {"id": "successors_065_plus", "minimum": 65, "maximum": null}
-      ]
-    },
-    "successor_alias_multiplicity": {
-      "scope": "all_action_v4_marks_in_the_teacher_canonical_successor_fiber",
-      "bins": [
-        {"id": "aliases_001", "minimum": 1, "maximum": 1},
-        {"id": "aliases_002_004", "minimum": 2, "maximum": 4},
-        {"id": "aliases_005_plus", "minimum": 5, "maximum": null}
-      ]
-    }
+  "gate_zero_authorized": false,
+  "registry_id": "editing_v2_active8_semantic_capability_cells_v1",
+  "registry_sha256": "6a29db895e946ccaca5298759b8246cbfbfa7b5f9d8305d14d2a44aaade6e510",
+  "schema": "compose.editing_v2.semantic_capability_cell_registry",
+  "schema_version": 1,
+  "scope": {
+    "formal_charge_changes": "out_of_scope_charge_preserving_only",
+    "generated_object": "canonical_molecular_successor",
+    "maximum_active_atoms": 40,
+    "objective_lane": "productive_embedded_jump_chain",
+    "row_unit": "accepted_nonterminal_progress_row_with_exact_action_v4_teacher",
+    "stereochemistry": "out_of_scope",
+    "terminal_rows": "outside_capability_cell_registry_hazard_is_separate"
   },
-  "fail_closed_policy": {
-    "unknown_family": "error",
-    "unknown_family_context": "error",
-    "missing_exact_candidate_evidence": "error",
-    "unsupported_teacher": "error",
-    "terminal_progress_row": "error",
-    "lane_or_partition_mismatch": "error",
-    "process_identity_drift": "error",
-    "registry_tamper": "error"
-  },
-  "registry_sha256": "5ca11004fb1f20e8ad1fd1e1bc796738cbae350bbd2a2b1051368397b652c9eb"
+  "status": "DESIGN_NOT_TRAINING_AUTHORIZED",
+  "t1_authorized": false,
+  "training_authorized": false
 }

@@ -736,6 +736,7 @@ def read_semantic_packed_artifact(
                 trace = decode_semantic_trace_record(
                     record,
                     validate_replay=entry_index < sentinel_replay_entries,
+                    expected_process_identity=expected_process_identity,
                 )
                 states = tuple(decode_state(payload) for payload in record["states"])
             except (
@@ -935,6 +936,7 @@ def read_semantic_packed_artifact_range(
                     trace = decode_semantic_trace_record(
                         record,
                         validate_replay=entry_index < sentinel_replay_entries,
+                        expected_process_identity=expected_process_identity,
                     )
                     states = tuple(
                         decode_state(payload) for payload in record["states"]

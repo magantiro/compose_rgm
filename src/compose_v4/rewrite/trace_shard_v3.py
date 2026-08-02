@@ -16,6 +16,7 @@ from compose_v4.rewrite.editing_v2_process_identity import (
     PROCESS_SEMANTICS,
     editing_v2_process_identity,
     require_editing_v2_process_identity,
+    validate_frozen_process_identity,
 )
 from compose_v4.rewrite.kernel import (
     canonical_state_key,
@@ -172,6 +173,7 @@ def decode_semantic_trace_record(
     record: object,
     *,
     validate_replay: bool = True,
+    expected_process_identity: Mapping[str, object] | None = None,
 ) -> RewriteTrace:
     """Validate one exact semantic trace, optionally replaying its transitions.
 
@@ -181,6 +183,17 @@ def decode_semantic_trace_record(
     form, stored key consistency, and every V4 action, but avoids both executor
     and RDKit calls.  Ordinary callers should retain the default and re-execute
     every step.
+
+    ``expected_process_identity`` defaults to ``None``, which requires the
+    record's process identity to be the LIVE one and is byte-identical to the
+    historical behavior.  Supplying a complete historical identity object
+    instead requires the record to match exactly that pinned identity.  This is
+    the only honest way to read an IMMUTABLE payload whose process identity has
+    been superseded: the caller must name the superseded identity explicitly,
+    and the pinned object is itself validated for self-consistency.  It proves
+    provenance, never currency, so a caller that needs the current process must
+    keep the default.  It mirrors the identical contract on the semantic packed
+    store's readers, which is where it is threaded from.
     """
 
     if not isinstance(record, dict):
@@ -193,20 +206,32 @@ def decode_semantic_trace_record(
         raise SemanticTraceShardError("unknown semantic trace schema")
     if record.get("schema_version") != TRACE_SCHEMA_VERSION:
         raise SemanticTraceShardError("unknown semantic trace schema version")
-    if record.get("process_semantics") != PROCESS_SEMANTICS:
-        raise SemanticTraceShardError("semantic trace process label disagrees")
     supplied_hash = record.get("record_sha256")
     if not isinstance(supplied_hash, str) or supplied_hash != _record_self_hash(record):
         raise SemanticTraceShardError("semantic trace record self-hash disagrees")
     process_sha256 = record.get("process_identity_sha256")
     if not isinstance(process_sha256, str):
         raise SemanticTraceShardError("semantic trace lacks a process identity")
-    try:
-        identity = require_editing_v2_process_identity(process_sha256)
-    except ValueError as error:
-        raise SemanticTraceShardError(
-            "semantic trace process identity disagrees"
-        ) from error
+    if expected_process_identity is None:
+        try:
+            identity = require_editing_v2_process_identity(process_sha256)
+        except ValueError as error:
+            raise SemanticTraceShardError(
+                "semantic trace process identity disagrees"
+            ) from error
+    else:
+        try:
+            identity = validate_frozen_process_identity(expected_process_identity)
+        except ValueError as error:
+            raise SemanticTraceShardError(
+                "pinned semantic trace process identity is not self-consistent"
+            ) from error
+        if process_sha256 != identity["process_identity_sha256"]:
+            raise SemanticTraceShardError(
+                "semantic trace process identity disagrees with the pinned identity"
+            )
+    if record.get("process_semantics") != identity["process_semantics"]:
+        raise SemanticTraceShardError("semantic trace process label disagrees")
     if record.get("process_contract_sha256") != identity["contract_sha256"]:
         raise SemanticTraceShardError("semantic trace process contract disagrees")
     if record.get("action_codec_schema_version") != action_codec_v4.SCHEMA_VERSION:
