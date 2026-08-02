@@ -98,6 +98,9 @@ from compose_v4.rewrite.kernel import (
     canonical_state_key,
     de_novo_rewrite_system,
 )
+from compose_v4.rewrite.process_v2_atom_delete import (
+    process_v2_connected_nonleaf_atom_delete_mask,
+)
 from compose_v4.rewrite.ring_restate_semantics import (
     enumerate_ring_restate_semantic_groups,
 )
@@ -163,10 +166,26 @@ RING_RESTATE_SCORER_MODES = (
     SEMANTIC_RING_RESTATE_SCORER_MODE,
 )
 LEGACY_EDITING_PROCESS_SEMANTICS = "legacy_raw_actions_v1"
+# ``editing_v2`` names the source-conditioned editing LANE; the trailing ``_v1``
+# / ``_v2`` is the SEMANTIC PROCESS VERSION of that lane.  Process V2 differs
+# from Process V1 only by the expanded ``atom_delete`` marked fiber below.
 SEMANTIC_EDITING_V2_PROCESS_SEMANTICS = "semantic_editing_v2_v1"
+PROCESS_V2_EDITING_PROCESS_SEMANTICS = "semantic_editing_v2_v2"
 EDITING_PROCESS_SEMANTICS = (
     LEGACY_EDITING_PROCESS_SEMANTICS,
     SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+)
+# Atom-delete candidate modes.  ``legacy`` is the historical dense rule, which
+# admits a real slot only when it lies on no cycle and is not a cut vertex --
+# in a connected real-atom graph that is exactly real-atom degree at most one.
+# Process V2 keeps that rule bit-for-bit and adds the DISJOINT connected-nonleaf
+# expansion resolved by :mod:`compose_v4.rewrite.process_v2_atom_delete`.
+LEGACY_ATOM_DELETE_ACTION_SEMANTICS = "legacy_acyclic_atom_delete_v1"
+PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS = "process_v2_connected_nonleaf_atom_delete_v1"
+ATOM_DELETE_ACTION_SEMANTICS = (
+    LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
+    PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
 )
 
 
@@ -401,6 +420,7 @@ class ChemistryStateFeatures:
     closure_topology: np.ndarray
     ring_system_topology: np.ndarray
     atom_delete_mask: np.ndarray
+    atom_delete_admission_mask: np.ndarray | None
     atom_restate_admission_mask: np.ndarray | None
     cycle_edge_mask: np.ndarray
     cycle_close_admission_mask: np.ndarray | None
@@ -458,6 +478,7 @@ class OperatorCapabilities:
     ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
     cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
     cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS
 
     def __post_init__(self) -> None:
         if self.editing_process_semantics not in EDITING_PROCESS_SEMANTICS:
@@ -485,7 +506,16 @@ class OperatorCapabilities:
             raise ValueError(
                 "semantic ring-restatement scoring requires ring restates enabled"
             )
-        if self.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+        if self.atom_delete_action_semantics not in ATOM_DELETE_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown atom-delete action semantics: "
+                f"{self.atom_delete_action_semantics!r}; expected one of "
+                f"{ATOM_DELETE_ACTION_SEMANTICS}"
+            )
+        if self.editing_process_semantics in (
+            SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+            PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        ):
             expected = (
                 self.compute_ring_restates,
                 not self.compute_ring_system_delete,
@@ -501,6 +531,21 @@ class OperatorCapabilities:
                 raise ValueError(
                     "semantic Editing-V2 process requires complete Active8 semantic modes"
                 )
+        # The atom-delete mode and the semantic process version are bound one to
+        # one, so a mixed V1/V2 capability object can never be constructed.
+        if self.editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS:
+            if self.atom_delete_action_semantics != (
+                PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+            ):
+                raise ValueError(
+                    "the Process-V2 editing process requires "
+                    f"{PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS!r} atom-delete semantics"
+                )
+        elif self.atom_delete_action_semantics != LEGACY_ATOM_DELETE_ACTION_SEMANTICS:
+            raise ValueError(
+                f"{self.atom_delete_action_semantics!r} atom-delete semantics require "
+                f"the {PROCESS_V2_EDITING_PROCESS_SEMANTICS!r} editing process"
+            )
         if self.cycle_close_action_semantics not in CYCLE_CLOSE_ACTION_SEMANTICS:
             raise ValueError(
                 "unknown cycle-close action semantics: "
@@ -547,6 +592,10 @@ class OperatorCapabilities:
         if self.cycle_open_action_semantics != LEGACY_CYCLE_OPEN_ACTION_SEMANTICS:
             payload += (
                 f":cycle_open_action_semantics={self.cycle_open_action_semantics}"
+            )
+        if self.atom_delete_action_semantics != LEGACY_ATOM_DELETE_ACTION_SEMANTICS:
+            payload += (
+                f":atom_delete_action_semantics={self.atom_delete_action_semantics}"
             )
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
@@ -703,6 +752,10 @@ class FactorizedMarkBatch:
         None
     )
     editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS
+    # The DISJOINT Process-V2 connected-nonleaf expansion only; it is always a
+    # subset of ``atom_delete_mask``, which carries the V1 union.
+    atom_delete_admission_mask: Tensor | None = None
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS
     atom_restate_admission_mask: Tensor | None = None
     atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
     cycle_close_admission_mask: Tensor | None = None
@@ -797,6 +850,12 @@ class FactorizedMarkBatch:
                 else self.ring_restate_successor_group_multiplicities[start:stop]
             ),
             editing_process_semantics=self.editing_process_semantics,
+            atom_delete_admission_mask=(
+                None
+                if self.atom_delete_admission_mask is None
+                else tensor_slice(self.atom_delete_admission_mask)
+            ),
+            atom_delete_action_semantics=self.atom_delete_action_semantics,
             atom_restate_admission_mask=(
                 None
                 if self.atom_restate_admission_mask is None
@@ -893,6 +952,12 @@ class FactorizedMarkBatch:
                 self.ring_restate_successor_group_multiplicities
             ),
             editing_process_semantics=self.editing_process_semantics,
+            atom_delete_admission_mask=(
+                None
+                if self.atom_delete_admission_mask is None
+                else move(self.atom_delete_admission_mask)
+            ),
+            atom_delete_action_semantics=self.atom_delete_action_semantics,
             atom_restate_admission_mask=(
                 None
                 if self.atom_restate_admission_mask is None
@@ -980,6 +1045,12 @@ class FactorizedMarkBatch:
                 self.ring_restate_successor_group_multiplicities
             ),
             editing_process_semantics=self.editing_process_semantics,
+            atom_delete_admission_mask=(
+                None
+                if self.atom_delete_admission_mask is None
+                else pin(self.atom_delete_admission_mask)
+            ),
+            atom_delete_action_semantics=self.atom_delete_action_semantics,
             atom_restate_admission_mask=(
                 None
                 if self.atom_restate_admission_mask is None
@@ -1330,6 +1401,7 @@ def prepare_factorized_mark_batch(
                 str,
                 str,
                 str,
+                str,
                 StateCacheKey,
             ],
             ChemistryStateFeatures,
@@ -1347,6 +1419,7 @@ def prepare_factorized_mark_batch(
     ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
     cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
     cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     property_condition_values: tuple[tuple[float, ...], ...] | None = None,
     property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
 ) -> FactorizedMarkBatch:
@@ -1408,18 +1481,42 @@ def prepare_factorized_mark_batch(
             f"{cycle_open_action_semantics!r}; expected one of "
             f"{CYCLE_OPEN_ACTION_SEMANTICS}"
         )
+    if atom_delete_action_semantics not in ATOM_DELETE_ACTION_SEMANTICS:
+        raise ValueError(
+            "unknown atom-delete action semantics: "
+            f"{atom_delete_action_semantics!r}; expected one of "
+            f"{ATOM_DELETE_ACTION_SEMANTICS}"
+        )
+    complete_active8_semantic_modes = (
+        compute_ring_restates
+        and not compute_ring_system_delete
+        and atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
+        and ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
+        and cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
+        and cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
+    )
     if editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
-        if not (
-            compute_ring_restates
-            and not compute_ring_system_delete
-            and atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
-            and ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE
-            and cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
-            and cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS
-        ):
+        if not complete_active8_semantic_modes:
             raise ValueError(
                 "semantic Editing-V2 batch requires complete Active8 semantic modes"
             )
+    # A builder that does not thread the atom-delete mode keeps the legacy
+    # default, so a Process-V2 batch request fails here instead of silently
+    # collating a V1 delete mask under a V2 process identity.
+    if editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS:
+        if not (
+            complete_active8_semantic_modes
+            and atom_delete_action_semantics == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+        ):
+            raise ValueError(
+                "Process-V2 Editing-V2 batch requires complete Active8 semantic modes "
+                f"and {PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS!r} atom-delete semantics"
+            )
+    elif atom_delete_action_semantics != LEGACY_ATOM_DELETE_ACTION_SEMANTICS:
+        raise ValueError(
+            f"{atom_delete_action_semantics!r} atom-delete semantics require the "
+            f"{PROCESS_V2_EDITING_PROCESS_SEMANTICS!r} editing process"
+        )
     if not use_aromatic_bond_view and (
         atom_restate_action_semantics == SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS
         or cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
@@ -1532,6 +1629,7 @@ def prepare_factorized_mark_batch(
     closure_topology = []
     ring_system_topology = []
     delete_masks = []
+    atom_delete_admission_masks = []
     atom_restate_admission_masks = []
     cycle_edge_masks = []
     cycle_close_admission_masks = []
@@ -1576,6 +1674,7 @@ def prepare_factorized_mark_batch(
             str(atom_restate_action_semantics),
             str(cycle_close_action_semantics),
             str(cycle_open_action_semantics),
+            str(atom_delete_action_semantics),
             molecular_state_cache_key(state),
         )
         features = (
@@ -1595,6 +1694,20 @@ def prepare_factorized_mark_batch(
             ) = _graph_application_masks(
                 state, atom_topo, compute_cyclic_graft=compute_cyclic_graft
             )
+            # Process V2 is strictly ADDITIVE: the V1 dense rule above is left
+            # untouched and the disjoint connected-nonleaf expansion is unioned
+            # onto it.  Applying the V2 conditions to the degree<=1 slots the V1
+            # rule owns would silently DROP preserved leaf candidates (a neutral
+            # leaf bonded to a charged centre is V1-admitted but violates the
+            # charge policy), so the two rules stay separate by construction.
+            atom_delete_admission_mask = (
+                process_v2_connected_nonleaf_atom_delete_mask(state)
+                if atom_delete_action_semantics
+                == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+                else None
+            )
+            if atom_delete_admission_mask is not None:
+                delete_mask = delete_mask | atom_delete_admission_mask
             cycle_close_admission_mask = (
                 _semantic_cycle_close_admission_mask(state)
                 if cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
@@ -1640,6 +1753,7 @@ def prepare_factorized_mark_batch(
                 closure_topology=closure_topo,
                 ring_system_topology=ring_system_topo,
                 atom_delete_mask=delete_mask,
+                atom_delete_admission_mask=atom_delete_admission_mask,
                 atom_restate_admission_mask=atom_restate_admission_mask,
                 cycle_edge_mask=cycle_edge_mask,
                 cycle_close_admission_mask=cycle_close_admission_mask,
@@ -1668,6 +1782,8 @@ def prepare_factorized_mark_batch(
         closure_topology.append(features.closure_topology)
         ring_system_topology.append(features.ring_system_topology)
         delete_masks.append(features.atom_delete_mask)
+        if features.atom_delete_admission_mask is not None:
+            atom_delete_admission_masks.append(features.atom_delete_admission_mask)
         if features.atom_restate_admission_mask is not None:
             atom_restate_admission_masks.append(features.atom_restate_admission_mask)
         cycle_edge_masks.append(features.cycle_edge_mask)
@@ -1780,6 +1896,12 @@ def prepare_factorized_mark_batch(
             else None
         ),
         editing_process_semantics=editing_process_semantics,
+        atom_delete_admission_mask=(
+            None
+            if atom_delete_action_semantics == LEGACY_ATOM_DELETE_ACTION_SEMANTICS
+            else torch.from_numpy(np.stack(atom_delete_admission_masks)).bool()
+        ),
+        atom_delete_action_semantics=atom_delete_action_semantics,
         atom_restate_admission_mask=(
             None
             if atom_restate_action_semantics == LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
@@ -2447,6 +2569,7 @@ class FactorizedTraceletRateModel(nn.Module):
         ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
         cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
         cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+        atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
         enable_ring_grow_macro: bool = True,
         enable_ring_system_delete: bool = True,
         atom_vocabulary: AtomVocabulary | None = None,
@@ -2555,6 +2678,16 @@ class FactorizedTraceletRateModel(nn.Module):
                 "unknown cycle-open scorer mode: "
                 f"{cycle_open_scorer_mode!r}; expected one of {CYCLE_OPEN_SCORER_MODES}"
             )
+        if atom_delete_action_semantics not in ATOM_DELETE_ACTION_SEMANTICS:
+            raise ValueError(
+                "unknown atom-delete action semantics: "
+                f"{atom_delete_action_semantics!r}; expected one of "
+                f"{ATOM_DELETE_ACTION_SEMANTICS}"
+            )
+        # Process V2 expands only the ``atom_delete`` marked fiber; the delete
+        # head is a per-slot scorer, so the expansion is a mask change and every
+        # parameter shape (hence a strict warm start) is preserved.
+        self.atom_delete_action_semantics = str(atom_delete_action_semantics)
         self.cycle_open_scorer_mode = str(cycle_open_scorer_mode)
         if not self.enable_cycle_ops and self.cycle_open_scorer_mode != "pair_linear":
             raise ValueError(
@@ -2591,7 +2724,10 @@ class FactorizedTraceletRateModel(nn.Module):
                 "ops replace the legacy ring_system_grow macro (RingCore-V1). Pass "
                 "enable_ring_grow_macro=False when enabling cycle ops (launch: --disable-ring-grow-macro)."
             )
-        if self.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+        if self.editing_process_semantics in (
+            SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+            PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        ):
             if not (
                 self.enable_cycle_ops
                 and not self.enable_ring_grow_macro
@@ -2608,6 +2744,21 @@ class FactorizedTraceletRateModel(nn.Module):
                     "semantic Editing-V2 process requires the complete Active8 "
                     "operator and scorer configuration"
                 )
+        # One-to-one binding between the semantic process version and the
+        # atom-delete candidate mode, so a model can never mix V1 and V2.
+        if self.editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS:
+            if self.atom_delete_action_semantics != (
+                PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+            ):
+                raise ValueError(
+                    "the Process-V2 editing process requires "
+                    f"{PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS!r} atom-delete semantics"
+                )
+        elif self.atom_delete_action_semantics != LEGACY_ATOM_DELETE_ACTION_SEMANTICS:
+            raise ValueError(
+                f"{self.atom_delete_action_semantics!r} atom-delete semantics require "
+                f"the {PROCESS_V2_EDITING_PROCESS_SEMANTICS!r} editing process"
+            )
         # Atom-type prediction vocabulary shared by the heads, candidate masks, sampling, and teacher-
         # scoring, so head width and the fiber it is scored against never drift. Default CNOF_VOCABULARY
         # (4 classes) is byte-identical to the historical model; ORGANIC_VOCABULARY (15 (element, valence)
@@ -3060,6 +3211,7 @@ class FactorizedTraceletRateModel(nn.Module):
             ring_restate_scorer_mode=self.ring_restate_scorer_mode,
             cycle_close_action_semantics=self.cycle_close_action_semantics,
             cycle_open_action_semantics=self.cycle_open_action_semantics,
+            atom_delete_action_semantics=self.atom_delete_action_semantics,
         )
 
     def clear_ring_candidate_caches(self) -> None:
@@ -4192,6 +4344,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 ring_restate_scorer_mode=self.ring_restate_scorer_mode,
                 cycle_close_action_semantics=self.cycle_close_action_semantics,
                 cycle_open_action_semantics=self.cycle_open_action_semantics,
+                atom_delete_action_semantics=self.atom_delete_action_semantics,
             )
             self._sampling_state_cache[cache_key] = cached_batch
             if len(self._sampling_state_cache) > self._sampling_state_cache_limit:
@@ -4694,6 +4847,12 @@ class FactorizedTraceletRateModel(nn.Module):
                 f"batch={batch.cycle_open_action_semantics!r}, "
                 f"model={self.cycle_open_action_semantics!r}"
             )
+        if batch.atom_delete_action_semantics != self.atom_delete_action_semantics:
+            raise ValueError(
+                "factorized batch/model atom-delete semantics disagree: "
+                f"batch={batch.atom_delete_action_semantics!r}, "
+                f"model={self.atom_delete_action_semantics!r}"
+            )
         batch_size, n_slots = batch.atom_types.shape
         real = (batch.atom_types != NULL_IDX) & (batch.atom_types != SCAR_IDX)
         n_real = real.sum(dim=1)
@@ -4748,6 +4907,28 @@ class FactorizedTraceletRateModel(nn.Module):
 
         delete_logits = self.delete_head(node).squeeze(-1)
         delete_mask = batch.atom_delete_mask
+        if self.atom_delete_action_semantics == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS:
+            if batch.atom_delete_admission_mask is None:
+                raise ValueError(
+                    "Process-V2 atom-delete batch lacks the exact connected-nonleaf "
+                    "admission mask"
+                )
+            if tuple(batch.atom_delete_admission_mask.shape) != tuple(delete_mask.shape):
+                raise ValueError(
+                    "Process-V2 atom-delete admission mask has the wrong shape"
+                )
+            # The batch mask is the V1 union, so the expansion must already be
+            # contained in it; a batch carrying a wider admission was collated
+            # against a different delete rule.
+            if bool((batch.atom_delete_admission_mask & ~delete_mask).any()):
+                raise ValueError(
+                    "Process-V2 atom-delete admission mask is not contained in the "
+                    "batch atom-delete mask"
+                )
+        elif batch.atom_delete_admission_mask is not None:
+            raise ValueError(
+                "legacy atom-delete batch unexpectedly carries a Process-V2 admission"
+            )
         masks["atom_delete"] = delete_mask
         logits["atom_delete"] = delete_logits
 
@@ -5656,15 +5837,19 @@ def factorized_mark_bregman_loss(
 
 
 __all__ = [
+    "ATOM_DELETE_ACTION_SEMANTICS",
     "ATOM_RESTATE_ACTION_SEMANTICS",
     "EDITING_PROCESS_SEMANTICS",
     "CYCLE_OPEN_ACTION_SEMANTICS",
     "CYCLE_OPEN_SCORER_MODES",
+    "LEGACY_ATOM_DELETE_ACTION_SEMANTICS",
     "LEGACY_ATOM_RESTATE_ACTION_SEMANTICS",
     "LEGACY_CYCLE_OPEN_ACTION_SEMANTICS",
     "LEGACY_EDITING_PROCESS_SEMANTICS",
     "LEGACY_RING_RESTATE_SCORER_MODE",
     "MARK_RULE_NAMES",
+    "PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS",
+    "PROCESS_V2_EDITING_PROCESS_SEMANTICS",
     "RING_RESTATE_SCORER_MODES",
     "SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS",
     "SEMANTIC_EDITING_V2_PROCESS_SEMANTICS",

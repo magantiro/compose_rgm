@@ -34,6 +34,7 @@ from compose_v4.experiments.training_support_cache import (
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
+    LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
     LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
     LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
@@ -389,6 +390,7 @@ class FactorizedMarkCollator:
     ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
     cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
     cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS
     _chemistry_feature_cache: OrderedDict[
         tuple[
             int,
@@ -396,6 +398,7 @@ class FactorizedMarkCollator:
             bool,
             bool,
             bool,
+            str,
             str,
             str,
             str,
@@ -455,6 +458,7 @@ class FactorizedMarkCollator:
             ring_restate_scorer_mode=self.ring_restate_scorer_mode,
             cycle_close_action_semantics=self.cycle_close_action_semantics,
             cycle_open_action_semantics=self.cycle_open_action_semantics,
+            atom_delete_action_semantics=self.atom_delete_action_semantics,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
                 if has_conditions
@@ -540,6 +544,7 @@ def factorized_mark_loader(
     ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
     cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
     cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     record_index_sampler: object | None = None,
 ) -> DataLoader[FactorizedMarkBatch]:
     if not 0 <= start_step <= steps:
@@ -594,6 +599,7 @@ def factorized_mark_loader(
             ring_restate_scorer_mode=ring_restate_scorer_mode,
             cycle_close_action_semantics=cycle_close_action_semantics,
             cycle_open_action_semantics=cycle_open_action_semantics,
+            atom_delete_action_semantics=atom_delete_action_semantics,
         ),
         pin_memory=pin_memory,
         drop_last=True,
@@ -671,6 +677,7 @@ def sample_factorized_mark_batch(
     ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
     cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
     cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
 ) -> FactorizedMarkBatch:
     if workers < 0:
         raise ValueError("evaluation workers must be non-negative")
@@ -689,6 +696,7 @@ def sample_factorized_mark_batch(
         ring_restate_scorer_mode = capabilities.ring_restate_scorer_mode
         cycle_close_action_semantics = capabilities.cycle_close_action_semantics
         cycle_open_action_semantics = capabilities.cycle_open_action_semantics
+        atom_delete_action_semantics = capabilities.atom_delete_action_semantics
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
     dataset = FactorizedMarkDataset(
@@ -722,6 +730,7 @@ def sample_factorized_mark_batch(
         ring_restate_scorer_mode=ring_restate_scorer_mode,
         cycle_close_action_semantics=cycle_close_action_semantics,
         cycle_open_action_semantics=cycle_open_action_semantics,
+        atom_delete_action_semantics=atom_delete_action_semantics,
     )
     if workers == 0:
         batch = collator([dataset[index] for index in range(batch_size)])
@@ -827,12 +836,14 @@ def _concatenate_factorized_mark_batches(
     ring_restate_scorers = {batch.ring_restate_scorer_mode for batch in batches}
     close_semantics = {batch.cycle_close_action_semantics for batch in batches}
     open_semantics = {batch.cycle_open_action_semantics for batch in batches}
+    delete_semantics = {batch.atom_delete_action_semantics for batch in batches}
     if (
         len(process_semantics) != 1
         or len(restate_semantics) != 1
         or len(ring_restate_scorers) != 1
         or len(close_semantics) != 1
         or len(open_semantics) != 1
+        or len(delete_semantics) != 1
     ):
         raise ValueError("factorized batches mix semantic action process identities")
     editing_process_semantics = process_semantics.pop()
@@ -840,6 +851,7 @@ def _concatenate_factorized_mark_batches(
     ring_restate_scorer_mode = ring_restate_scorers.pop()
     cycle_close_action_semantics = close_semantics.pop()
     cycle_open_action_semantics = open_semantics.pop()
+    atom_delete_action_semantics = delete_semantics.pop()
 
     support_masks = tuple(batch.ring_grow_support_mask for batch in batches)
     support_sparse = tuple(batch.ring_grow_support_sparse for batch in batches)
@@ -952,6 +964,8 @@ def _concatenate_factorized_mark_batches(
             "ring_restate_successor_group_multiplicities"
         ),
         editing_process_semantics=editing_process_semantics,
+        atom_delete_admission_mask=optional_tensors("atom_delete_admission_mask"),
+        atom_delete_action_semantics=atom_delete_action_semantics,
         atom_restate_admission_mask=optional_tensors("atom_restate_admission_mask"),
         atom_restate_action_semantics=atom_restate_action_semantics,
         cycle_close_admission_mask=optional_tensors("cycle_close_admission_mask"),
@@ -1581,6 +1595,7 @@ def train_factorized_mark_model(
             ring_restate_scorer_mode=model.ring_restate_scorer_mode,
             cycle_close_action_semantics=model.cycle_close_action_semantics,
             cycle_open_action_semantics=model.cycle_open_action_semantics,
+            atom_delete_action_semantics=model.atom_delete_action_semantics,
             record_index_sampler=record_index_sampler,
         )
         if training_loader_factory is None
