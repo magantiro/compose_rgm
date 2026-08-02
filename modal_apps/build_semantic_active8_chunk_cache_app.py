@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/build_semantic_active8_chunk_cache_app.py"
+SEMANTIC_PROCESS_CONTRACT_SOURCE = "configs/editing_v2_semantic_process_v1.json"
 IMAGE_SOURCE_DIRECTORIES = ("src", "modal_apps")
 OUTPUT_ARTIFACT_ROOT = "/artifacts/editing_v2/semantic_active8_chunk_cache_v1"
 MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
@@ -58,9 +59,16 @@ for source_directory in IMAGE_SOURCE_DIRECTORIES:
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
+image = image.add_local_file(
+    ROOT / SEMANTIC_PROCESS_CONTRACT_SOURCE,
+    str(REMOTE_ROOT / SEMANTIC_PROCESS_CONTRACT_SOURCE),
+    copy=True,
+)
 
 app = modal.App("compose-v4-semantic-active8-chunk-cache")
-artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
+artifact_volume = modal.Volume.from_name(
+    "compose-v4-artifacts", create_if_missing=False
+)
 
 
 def _canonical_bytes(value: object) -> bytes:
@@ -86,10 +94,10 @@ def _file_sha256(path: Path) -> str:
 
 
 def _serialized_source_paths(root: Path) -> tuple[str, ...]:
-    """Return every Python source serialized into the Modal image."""
+    """Return every source and frozen config dependency serialized into the image."""
 
     source_root = Path(root) / "src" / "compose_v4"
-    paths = [LAUNCHER_SOURCE]
+    paths = [LAUNCHER_SOURCE, SEMANTIC_PROCESS_CONTRACT_SOURCE]
     paths.extend(
         path.relative_to(root).as_posix()
         for path in sorted(source_root.rglob("*.py"))
@@ -170,10 +178,14 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         "completed_semantic_active8_chunk_cache_task_ids": (
             completed_semantic_active8_chunk_cache_task_ids
         ),
-        "execute_semantic_active8_chunk_cache_task": (execute_semantic_active8_chunk_cache_task),
+        "execute_semantic_active8_chunk_cache_task": (
+            execute_semantic_active8_chunk_cache_task
+        ),
         "plan_semantic_active8_chunk_cache": plan_semantic_active8_chunk_cache,
         "reduce_semantic_active8_chunk_caches": reduce_semantic_active8_chunk_caches,
-        "write_semantic_active8_chunk_cache_plan": (write_semantic_active8_chunk_cache_plan),
+        "write_semantic_active8_chunk_cache_plan": (
+            write_semantic_active8_chunk_cache_plan
+        ),
     }
 
 
@@ -184,7 +196,10 @@ def local_source_revision(
 ) -> dict[str, Any]:
     """Require one exact clean commit/tree and hash every serialized source."""
 
-    if not isinstance(expected_commit, str) or _COMMIT_RE.fullmatch(expected_commit) is None:
+    if (
+        not isinstance(expected_commit, str)
+        or _COMMIT_RE.fullmatch(expected_commit) is None
+    ):
         raise RuntimeError("expected_commit must be a full lowercase Git commit")
     root = Path(repo_root)
     commit = _git(root, "rev-parse", "HEAD")
@@ -196,7 +211,8 @@ def local_source_revision(
         )
     loaded = _imports(root)
     sources = {
-        relative: _file_sha256(root / relative) for relative in _serialized_source_paths(root)
+        relative: _file_sha256(root / relative)
+        for relative in _serialized_source_paths(root)
     }
     body: dict[str, Any] = {
         "schema": SOURCE_REVISION_SCHEMA,
@@ -205,7 +221,9 @@ def local_source_revision(
         "tree": tree,
         "worktree_clean": True,
         "serialized_sources": sources,
-        "chunk_builder_identity": loaded["semantic_active8_chunk_cache_builder_identity"](),
+        "chunk_builder_identity": loaded[
+            "semantic_active8_chunk_cache_builder_identity"
+        ](),
     }
     return {**body, "source_revision_sha256": _sha256(body)}
 
@@ -232,7 +250,9 @@ def _validate_remote_source_revision(
         raise RuntimeError("semantic chunk-cache serialized source inventory disagrees")
     for relative, expected_sha256 in sources.items():
         if _file_sha256(Path(remote_root) / relative) != expected_sha256:
-            raise RuntimeError(f"serialized semantic chunk-cache source differs: {relative}")
+            raise RuntimeError(
+                f"serialized semantic chunk-cache source differs: {relative}"
+            )
 
 
 @app.function(

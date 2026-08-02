@@ -14,12 +14,16 @@ APP_PATH = ROOT / "modal_apps" / "build_semantic_active8_chunk_cache_app.py"
 
 def _function(tree: ast.Module, name: str) -> ast.FunctionDef:
     return next(
-        node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == name
     )
 
 
 def _load_launcher():
-    spec = importlib.util.spec_from_file_location("semantic_chunk_cache_launcher", APP_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "semantic_chunk_cache_launcher", APP_PATH
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -49,13 +53,27 @@ def test_modal_surface_is_cpu_only_and_volume_v1_writer_safe() -> None:
     assert worker_decorator is not None
     assert "max_containers=MAX_MAP_CONTAINERS" in worker_decorator
 
-    reducer_source = ast.get_source_segment(source, _function(tree, "reduce_global_cache"))
+    reducer_source = ast.get_source_segment(
+        source, _function(tree, "reduce_global_cache")
+    )
     assert reducer_source is not None
     assert reducer_source.index("artifact_volume.reload()") < reducer_source.index(
         "reduce_semantic_active8_chunk_caches"
     )
     assert "os.link(" not in source
     assert ".link_to(" not in source
+
+
+def test_image_and_source_revision_bind_frozen_semantic_process_contract() -> None:
+    source = APP_PATH.read_text()
+    launcher = _load_launcher()
+    contract = "configs/editing_v2_semantic_process_v1.json"
+
+    assert launcher.SEMANTIC_PROCESS_CONTRACT_SOURCE == contract
+    assert "image = image.add_local_file(" in source
+    assert "ROOT / SEMANTIC_PROCESS_CONTRACT_SOURCE" in source
+    assert "REMOTE_ROOT / SEMANTIC_PROCESS_CONTRACT_SOURCE" in source
+    assert contract in launcher._serialized_source_paths(ROOT)
 
 
 def test_driver_validates_caller_completion_once_then_maps_and_reduces() -> None:
@@ -118,10 +136,15 @@ def test_source_revision_requires_exact_clean_commit_and_hashes_serialized_tree(
     assert revision["commit"] == "a" * 40
     assert revision["tree"] == "b" * 40
     assert revision["worktree_clean"] is True
-    assert set(revision["serialized_sources"]) == set(launcher._serialized_source_paths(ROOT))
+    assert set(revision["serialized_sources"]) == set(
+        launcher._serialized_source_paths(ROOT)
+    )
     assert (
         "src/compose_v4/data/semantic_active8_chunk_cache_mapreduce.py"
         in revision["serialized_sources"]
+    )
+    assert (
+        "configs/editing_v2_semantic_process_v1.json" in revision["serialized_sources"]
     )
     launcher._validate_remote_source_revision(
         revision,
