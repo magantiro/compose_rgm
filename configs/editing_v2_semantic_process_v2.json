@@ -1,0 +1,331 @@
+{
+  "action_codec": {
+    "historical_readers": [
+      "RewriteActionCodecV2",
+      "RewriteActionCodecV3"
+    ],
+    "legacy_records_silently_reinterpreted": false,
+    "prospective_writer": "RewriteActionCodecV4",
+    "public_editing_v2_rules": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate_semantic",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_close",
+      "cycle_open",
+      "ring_system_restate"
+    ],
+    "raw_public_rules_forbidden": [
+      "atom_restate",
+      "bond_insert",
+      "bond_delete"
+    ]
+  },
+  "action_codec_identity": {
+    "active_executor_rules": [
+      "atom_delete",
+      "atom_insert",
+      "atom_restate_semantic",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_close",
+      "cycle_open",
+      "ring_system_restate"
+    ],
+    "changed_by_process_v2": false,
+    "implementation_hash": "fbd57cfdd1553424",
+    "schema_version": 4,
+    "source_sha256": {
+      "src/compose_v4/rewrite/action_codec_v4.py": "98ff2fe40a11f41519ad3138297a2015097a29ab667a74d3ff509769ef27a9d5"
+    }
+  },
+  "atom_delete": {
+    "action_semantics_modes": {
+      "legacy": "legacy_acyclic_atom_delete_v1",
+      "process_v2": "process_v2_connected_nonleaf_atom_delete_v1"
+    },
+    "action_type": "AtomDelete",
+    "aromatic_connected_nonleaf_policy": {
+      "admitted": false,
+      "perception": "resonance_invariant_bond_classes",
+      "reason": "deleting_one_kekule_encoded_slot_of_a_perceived_aromatic_system_yields_a_representation_sensitive_open_chain_successor",
+      "requires_separate_future_semantic_decision_and_resolver": true
+    },
+    "connected_nonleaf_expansion": {
+      "admission_conditions": [
+        "real_element_under_the_authoritative_element_predicate",
+        "non_aromatic_under_the_frozen_production_representation",
+        "not_a_graph_articulation_point_of_the_real_atom_graph",
+        "unchanged_production_atom_delete_executor_accepts_the_operation",
+        "exact_persistent_slot_successor_is_connected",
+        "frozen_charge_policy_is_preserved_by_the_transition",
+        "successor_is_within_the_declared_support_and_is_canonicalizable"
+      ],
+      "disjointness_argument": "in_a_connected_real_atom_graph_an_acyclic_vertex_of_real_atom_degree_at_least_two_is_always_a_cut_vertex_so_the_unchanged_v1_dense_mask_admits_no_slot_of_real_atom_degree_at_least_two",
+      "enumerator": "enumerate_process_v2_connected_nonleaf_atom_deletes",
+      "mask": "process_v2_connected_nonleaf_atom_delete_mask",
+      "minimum_real_atom_degree": 2,
+      "minimum_real_atom_degree_constant": "CONNECTED_NONLEAF_MINIMUM_DEGREE",
+      "module": "src/compose_v4/rewrite/process_v2_atom_delete.py",
+      "rejection_codes_in_evaluation_order": [
+        "invalid_source",
+        "invalid_slot",
+        "not_a_real_element",
+        "outside_connected_nonleaf_expansion",
+        "aromatic_atom",
+        "articulation_point",
+        "executor_rejected",
+        "successor_disconnected",
+        "charge_policy_violated",
+        "successor_outside_declared_support",
+        "successor_not_canonicalizable"
+      ],
+      "resolver": "resolve_process_v2_connected_nonleaf_atom_delete"
+    },
+    "effective_mask_rule": {
+      "definition": "process_v2_effective_atom_delete_mask_equals_the_unchanged_v1_dense_mask_union_the_connected_nonleaf_mask",
+      "operands_are_disjoint": true,
+      "union_is_a_disjoint_union": true,
+      "v1_dense_mask_changed": false
+    },
+    "executor_rule": "atom_delete",
+    "executor_validity_is_a_connectivity_predicate": false,
+    "family": "atom_delete",
+    "frozen_non_goals": [
+      "change_atom_delete_executor_semantics",
+      "change_persistent_slot_identity_or_canonicalization",
+      "change_formal_charge_policy",
+      "admit_aromatic_connected_nonleaf_deletion",
+      "add_multi_neighbour_atom_insertion",
+      "enable_ring_system_delete_or_ring_system_grow",
+      "change_any_other_active8_operator_semantics",
+      "relabel_v1_artifacts_as_v2"
+    ],
+    "legality_authority": "the_unchanged_production_atom_delete_executor_is_the_legality_authority_and_no_weaker_approximate_valence_test_may_be_substituted_for_it",
+    "one_step_inverse_closure_claimed": false,
+    "preserved_v1_admission": {
+      "charge_policy_applied_to_preserved_v1_candidates": false,
+      "covers": [
+        "root",
+        "singleton",
+        "leaf"
+      ],
+      "dense_mask_rule": "real_slot_with_atom_topology_zero_and_not_an_articulation_point_and_no_neighbour_implicit_hydrogen_exceeding_max_h_count",
+      "maximum_admitted_real_atom_degree": 1,
+      "redecided_by_process_v2": false,
+      "uniform_charge_application_would_remove_preserved_v1_candidates": true
+    }
+  },
+  "atom_delete_mask_implementation": {
+    "connected_nonleaf_resolver_module": "src/compose_v4/rewrite/process_v2_atom_delete.py",
+    "dense_mask_module": "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "dense_mask_symbol": "_graph_application_masks",
+    "mask_properties": [
+      "boolean",
+      "deterministic",
+      "persistent_slot_addressed",
+      "independent_of_canonical_smiles_atom_order"
+    ],
+    "source_sha256": {
+      "src/compose_v4/model/factorized_tracelet_rate_model.py": "b8f6203f764bb1120f095dec3f5ce86323c6b24a36218fba013ccfb1fa61120a",
+      "src/compose_v4/rewrite/process_v2_atom_delete.py": "0d5baed5d9c866a1d04d2b1f0573d17e509dd719798b58c52199f8ef6dcad454"
+    }
+  },
+  "authority": {
+    "active8_materialization_authorized": false,
+    "de_novo_run_authorized": false,
+    "experiment_authorized": false,
+    "gate0_authorized": false,
+    "long_editing_run_authorized": false,
+    "modal_launch_authorized": false,
+    "p50_authorized": false,
+    "t1_authorized": false,
+    "training_authorized": false
+  },
+  "canonicalizer": {
+    "changed_by_process_v2": false,
+    "function": "canonical_state_key",
+    "module": "src/compose_v4/rewrite/kernel.py",
+    "smiles_reconstruction_of_exact_states_forbidden": true,
+    "source_sha256": {
+      "src/compose_v4/rewrite/kernel.py": "4066addeead48375fd0a8ec76eb52470376ec7ddb35c528f5a07df4828b3bce6"
+    }
+  },
+  "charge_policy": {
+    "applied_to": "connected_nonleaf_expansion_candidates_only",
+    "changed_by_process_v2": false,
+    "constant": "compose_v4.data.charge_policy.CHARGE_POLICY_VERSION",
+    "formal_charge_changes": "out_of_scope",
+    "not_applied_to_preserved_v1_candidates_reason": "uniform_application_would_remove_preserved_v1_leaf_candidates_and_silently_change_admission_behaviour_the_decision_declares_unchanged",
+    "predicate": "charge_policy_preserved",
+    "version": "exact_charged_center_preservation_v1"
+  },
+  "contract_sha256": "702711e58d68117f762deadbe47bd1a7550f19e7fc990daf8720277b345d6ebe",
+  "downstream_invalidation": {
+    "active8_inventory_rebuild_required": true,
+    "affected_whole_trace_replay_required": true,
+    "candidate_and_successor_cache_rebuild_required": true,
+    "checkpoint_resume_across_process_versions": false,
+    "gate0_and_t1_rebuild_required": true,
+    "historical_artifacts_remain_readable_only_under_original_identity": true,
+    "p50_authorized_by_this_contract": false,
+    "source_and_scaffold_splits_changed": false,
+    "superseded_v1_process_identity_sha256": "6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7",
+    "superseded_v1_process_semantics": "semantic_editing_v2_v1",
+    "v1_artifacts_relabelled_as_v2": false,
+    "v1_process_contract_edited_in_place": false
+  },
+  "inherited_v1_process": {
+    "contract_physical_sha256": "43cb26e1ba33b27a0149a8142895ef9988853b458c0ace9bc9191f7b460dedbb",
+    "contract_relative_path": "configs/editing_v2_semantic_process_v1.json",
+    "contract_sha256": "f928f6adaf22ba7520dd28839655c93bc523ce77317b32050d3dd1b02bbcf288",
+    "inherited_blocks": [
+      "action_codec",
+      "model_contract",
+      "scope"
+    ],
+    "process_semantics": "semantic_editing_v2_v1",
+    "unchanged_operator_semantics": [
+      "atom_insert",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ]
+  },
+  "model_contract": {
+    "action_semantics_modes": {
+      "editing_v2": "semantic_editing_v2_v2",
+      "legacy": "legacy_raw_actions_v1"
+    },
+    "batch_and_model_process_identity_must_match": true,
+    "checkpoint_missing_process_identity": "legacy_only_never_editing_v2",
+    "family_names_unchanged": true,
+    "hazard_training": "separate_from_productive_embedded_jump_successor_learning",
+    "neural_bond_view": "resonance_invariant",
+    "training_object": "canonical_productive_molecular_successor_probability"
+  },
+  "persistent_slot": {
+    "changed_by_process_v2": false,
+    "delete_nulls_the_slot_without_compacting_the_state": true,
+    "max_active_atoms": 40,
+    "max_active_atoms_constant": "compose_v4.rewrite.trace_shard_v3.MAX_ACTIVE_ATOMS",
+    "representation": "the_padded_persistent_slot_tensor_is_a_coordinate_representation_not_the_semantic_dimension"
+  },
+  "process_identity": {
+    "identity_schema": "compose.editing.semantic_process_v2_identity",
+    "identity_schema_version": 1,
+    "implementation_source_relative_paths": [
+      "src/compose_v4/chem/molecular_graph.py",
+      "src/compose_v4/data/charge_policy.py",
+      "src/compose_v4/experiments/factorized_mark_conditional.py",
+      "src/compose_v4/experiments/production_successor_kernel.py",
+      "src/compose_v4/experiments/reference_successor_kernel.py",
+      "src/compose_v4/model/factorized_tracelet_rate_model.py",
+      "src/compose_v4/rewrite/action_codec_v4.py",
+      "src/compose_v4/rewrite/aromatic_kekule.py",
+      "src/compose_v4/rewrite/editing_v2_process_identity.py",
+      "src/compose_v4/rewrite/kernel.py",
+      "src/compose_v4/rewrite/operators.py",
+      "src/compose_v4/rewrite/process_v2_atom_delete.py",
+      "src/compose_v4/rewrite/ring_restate_semantics.py",
+      "src/compose_v4/rewrite/semantic_atom_restate.py",
+      "src/compose_v4/rewrite/semantic_cycle_close.py",
+      "src/compose_v4/rewrite/semantic_cycle_open.py",
+      "src/compose_v4/rewrite/semantic_trace.py",
+      "src/compose_v4/rewrite/trace_shard_v3.py",
+      "src/compose_v4/rewrite/tracelet_fiber.py"
+    ],
+    "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
+    "provider": "editing_process_v2_identity"
+  },
+  "process_semantics": "semantic_editing_v2_v2",
+  "schema": "compose.editing.semantic_process_contract",
+  "schema_version": 2,
+  "scope": {
+    "active_families": [
+      "atom_insert",
+      "atom_delete",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ],
+    "editing_only": true,
+    "formal_charge_changes": "out_of_scope",
+    "max_active_atoms": 40,
+    "ring_system_delete_enabled": false,
+    "ring_system_grow_enabled": false,
+    "stereochemistry": "out_of_scope",
+    "unconditional_de_novo_lane_modified": false
+  },
+  "source_evidence": {
+    "connected_nonleaf_disjointness_development_panel": {
+      "authoritative_corpus_evidence": false,
+      "maximum_v1_admitted_real_atom_degree": 1,
+      "panel_smiles": [
+        "C",
+        "C1CC2CCC1CC2",
+        "C1CCC(CC1)N",
+        "C1CCCCC1",
+        "C1CCOCC1",
+        "CC(=O)Oc1ccccc1C(=O)O",
+        "CC1CCCCC1",
+        "CCCC",
+        "CCO",
+        "C[N+](C)(C)CC(=O)[O-]",
+        "Cc1ccccc1",
+        "O=C1NC(O)C2CCCCC12",
+        "c1ccc2ccccc2c1",
+        "c1ccccc1"
+      ],
+      "status": "bounded_development_observation_requires_the_registered_process_v2_candidate_mask_gate",
+      "v1_and_connected_nonleaf_overlap_count": 0
+    },
+    "uniform_charge_policy_counterexample": {
+      "authoritative_corpus_evidence": false,
+      "charge_policy_preserving_v1_admitted_slots": [
+        6
+      ],
+      "conclusion": "applying_the_charge_policy_uniformly_would_remove_four_of_the_five_preserved_v1_leaf_candidates_of_this_source",
+      "connected_nonleaf_admitted_slots": [],
+      "source_smiles": "C[N+](C)(C)CC(=O)[O-]",
+      "v1_admitted_slots": [
+        0,
+        2,
+        3,
+        6,
+        7
+      ]
+    }
+  },
+  "status": "DESIGN_FROZEN_PROCESS_V2_SUPPORT_DECISION_NOT_TRAINING_OR_EXPERIMENT_AUTHORIZED",
+  "supersedes_for_editing_v2": [
+    "configs/editing_v2_semantic_process_v1.json"
+  ],
+  "training_authorized": false,
+  "unchanged_executor": {
+    "apply_function": "apply_atom_delete",
+    "changed_by_process_v2": false,
+    "executor_rule": "atom_delete",
+    "module": "src/compose_v4/rewrite/operators.py",
+    "source_sha256": {
+      "src/compose_v4/rewrite/kernel.py": "4066addeead48375fd0a8ec76eb52470376ec7ddb35c528f5a07df4828b3bce6",
+      "src/compose_v4/rewrite/operators.py": "b723788494a98cb0a7373101862f871254fd0b933cdcc408dc4caa0a53226019"
+    },
+    "validity_function": "is_valid_atom_delete",
+    "validity_function_is_a_connectivity_predicate": false
+  },
+  "vocabulary": {
+    "changed_by_process_v2": false,
+    "class_count": 15,
+    "legacy_cnof_vocabulary_is_production": false,
+    "module": "src/compose_v4/chem/molecular_graph.py",
+    "name": "ORGANIC_VOCABULARY"
+  }
+}
