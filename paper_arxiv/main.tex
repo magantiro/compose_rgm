@@ -32,8 +32,9 @@ molecules. We introduce \emph{Rewrite Generator Matching} (RGM), a framework
 that instead learns a time-inhomogeneous marked jump process over the
 state-dependent fiber of legal executable rewrites. A total hazard sets the
 instantaneous event rate, and a conditional mark law selects which rewrite
-fires. We instantiate RGM as COMPOSE, a compositional molecular process over
-stochastic executable rewrites. COMPOSE operates on disjoint cardinality
+fires. We instantiate RGM as COMPOSE, a \textbf{CO}mpositional
+\textbf{M}olecular \textbf{P}rocess \textbf{O}ver \textbf{S}tochastic
+\textbf{E}xecutable rewrites. COMPOSE operates on disjoint cardinality
 strata, including a distinguished null source that is not a molecule. Its
 marks create, delete, restate, reconnect, and cyclize molecular structure,
 while the executor keeps every non-null committed state inside a declared
@@ -100,10 +101,7 @@ stochastic rewrite process, not an unconstrained prediction followed by
 repair.
 
 \paragraph{A genuinely trans-dimensional molecular process.}
-We call the molecular instantiation \method: a
-\textbf{CO}mpositional \textbf{M}olecular \textbf{P}rocess
-\textbf{O}ver \textbf{S}tochastic \textbf{E}xecutable rewrites. It instantiates
-\rgm on the disjoint union
+The molecular instantiation, \method, operates on the disjoint union
 \[
   \X=\bigsqcup_{n=0}^{N}\X_n,
   \qquad
