@@ -28,16 +28,16 @@ ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/run_semantic_active8_decisions_app.py"
 RUNTIME_CONTRACT_SOURCE = "configs/editing_v2_semantic_active8_decision_runtime_v1.json"
 SEMANTIC_CONTRACT_SOURCE = "configs/editing_gate_zero_semantic_model_process_v1.json"
-IMAGE_SOURCE_DIRECTORIES = ("src", "configs", "modal_apps")
+IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 OUTPUT_ARTIFACT_ROOT = "/artifacts/editing_v2/semantic_active8_decisions_v1"
 EXPECTED_SOURCE_TASKS = 20
 MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS = 5
 MAX_MAP_CONTAINERS = MODAL_VOLUME_V1_MAX_CONCURRENT_WRITERS
 
 SOURCE_REVISION_SCHEMA = "compose.data.semantic_active8_decision_modal_revision"
-SOURCE_REVISION_SCHEMA_VERSION = 1
+SOURCE_REVISION_SCHEMA_VERSION = 2
 MODEL_RUNTIME_SCHEMA = "compose.data.semantic_active8_exact_model_runtime"
-MODEL_RUNTIME_SCHEMA_VERSION = 1
+MODEL_RUNTIME_SCHEMA_VERSION = 2
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 image = (
@@ -64,14 +64,15 @@ for source_directory in IMAGE_SOURCE_DIRECTORIES:
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
+image = image.add_local_file(
+    ROOT / LAUNCHER_SOURCE,
+    str(REMOTE_ROOT / LAUNCHER_SOURCE),
+    copy=True,
+)
 
 app = modal.App("compose-v4-semantic-active8-decisions")
-artifact_volume = modal.Volume.from_name(
-    "compose-v4-artifacts", create_if_missing=False
-)
-_WORKER_MODEL_CACHE: dict[str, tuple[Any, dict[str, Any], dict[str, Any], Any, Any]] = (
-    {}
-)
+artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
+_WORKER_MODEL_CACHE: dict[str, tuple[Any, dict[str, Any], dict[str, Any], Any, Any]] = {}
 
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
@@ -98,13 +99,15 @@ def _file_sha256(path: Path) -> str:
 
 
 def _serialized_source_paths(root: Path) -> tuple[str, ...]:
-    source_root = Path(root) / "src" / "compose_v4"
-    paths = [LAUNCHER_SOURCE, RUNTIME_CONTRACT_SOURCE, SEMANTIC_CONTRACT_SOURCE]
-    paths.extend(
-        path.relative_to(root).as_posix()
-        for path in sorted(source_root.rglob("*.py"))
-        if path.is_file()
-    )
+    paths = [LAUNCHER_SOURCE]
+    for source_directory in IMAGE_SOURCE_DIRECTORIES:
+        paths.extend(
+            path.relative_to(root).as_posix()
+            for path in sorted((Path(root) / source_directory).rglob("*"))
+            if path.is_file() and path.suffix != ".pyc" and "__pycache__" not in path.parts
+        )
+    if len(paths) != len(set(paths)):
+        raise RuntimeError("semantic Active8 serialized source inventory repeats a path")
     return tuple(paths)
 
 
@@ -180,6 +183,10 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         load_gate_zero_semantic_contract,
     )
     from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
+    from compose_v4.experiments.editing_v2_execution_source_revision import (
+        build_execution_source_revision,
+        validate_execution_source_revision,
+    )
     from compose_v4.experiments.editing_v2_semantic_runtime import (
         SemanticScratchModelConfig,
         build_semantic_scratch_runtime,
@@ -193,6 +200,8 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         "ring_catalog_fingerprint": ring_catalog_fingerprint,
         "load_gate_zero_semantic_contract": load_gate_zero_semantic_contract,
         "state_dict_semantic_sha256": state_dict_semantic_sha256,
+        "build_execution_source_revision": build_execution_source_revision,
+        "validate_execution_source_revision": validate_execution_source_revision,
         "resolve_editing_v2_semantic_active8_sources": (
             resolve_editing_v2_semantic_active8_sources
         ),
@@ -207,9 +216,7 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
     }
 
 
-def _load_json_exact(
-    path: Path, *, field: str, require_canonical: bool = True
-) -> dict[str, Any]:
+def _load_json_exact(path: Path, *, field: str, require_canonical: bool = True) -> dict[str, Any]:
     try:
         raw = Path(path).read_bytes()
         value = json.loads(raw)
@@ -222,22 +229,14 @@ def _load_json_exact(
     return value
 
 
-def _load_runtime_contract(
-    *, root: Path, loaded: dict[str, Any]
-) -> tuple[dict[str, Any], Any]:
+def _load_runtime_contract(*, root: Path, loaded: dict[str, Any]) -> tuple[dict[str, Any], Any]:
     path = Path(root) / RUNTIME_CONTRACT_SOURCE
-    runtime = _load_json_exact(
-        path, field="decision runtime contract", require_canonical=False
-    )
-    body = {
-        key: item for key, item in runtime.items() if key != "runtime_contract_sha256"
-    }
+    runtime = _load_json_exact(path, field="decision runtime contract", require_canonical=False)
+    body = {key: item for key, item in runtime.items() if key != "runtime_contract_sha256"}
     if (
-        runtime.get("schema")
-        != "compose.editing.semantic_active8_decision_runtime_contract"
+        runtime.get("schema") != "compose.editing.semantic_active8_decision_runtime_contract"
         or runtime.get("schema_version") != 1
-        or runtime.get("status")
-        != "FROZEN_CPU_DECISION_RUNTIME_NO_DOWNSTREAM_AUTHORITY"
+        or runtime.get("status") != "FROZEN_CPU_DECISION_RUNTIME_NO_DOWNSTREAM_AUTHORITY"
         or runtime.get("training_authorized") is not False
         or runtime.get("gate_zero_authorized") is not False
         or runtime.get("t1_authorized") is not False
@@ -281,36 +280,35 @@ def _software_identity(runtime: dict[str, Any]) -> dict[str, str]:
     return observed
 
 
-def local_source_revision(
-    *, expected_commit: str, repo_root: Path = ROOT
-) -> dict[str, Any]:
+def local_source_revision(*, expected_commit: str, repo_root: Path = ROOT) -> dict[str, Any]:
     """Require the exact clean commit/tree and hash every serialized input."""
 
-    if (
-        not isinstance(expected_commit, str)
-        or _COMMIT_RE.fullmatch(expected_commit) is None
-    ):
+    if not isinstance(expected_commit, str) or _COMMIT_RE.fullmatch(expected_commit) is None:
         raise RuntimeError("expected_commit must be a full lowercase Git commit")
     root = Path(repo_root)
     commit = _git(root, "rev-parse", "HEAD")
     tree = _git(root, "rev-parse", "HEAD^{tree}")
     dirty = _git(root, "status", "--porcelain=v1", "--untracked-files=all")
     if commit != expected_commit or dirty:
-        raise RuntimeError(
-            "semantic Active8 launch requires the exact clean committed worktree"
-        )
+        raise RuntimeError("semantic Active8 launch requires the exact clean committed worktree")
     loaded = _imports(root)
     runtime, semantic = _load_runtime_contract(root=root, loaded=loaded)
     sources = {
-        relative: _file_sha256(root / relative)
-        for relative in _serialized_source_paths(root)
+        relative: _file_sha256(root / relative) for relative in _serialized_source_paths(root)
     }
+    tracked = set(_git(root, "ls-files").splitlines())
+    if not sources or not set(sources).issubset(tracked):
+        raise RuntimeError("every semantic Active8 serialized source/config must be Git-tracked")
     body: dict[str, Any] = {
         "schema": SOURCE_REVISION_SCHEMA,
         "schema_version": SOURCE_REVISION_SCHEMA_VERSION,
         "commit": commit,
         "tree": tree,
         "worktree_clean": True,
+        "execution_source_revision": loaded["build_execution_source_revision"](
+            commit=commit,
+            tree=tree,
+        ),
         "serialized_sources": sources,
         "runtime_contract_sha256": runtime["runtime_contract_sha256"],
         "semantic_model_process_contract_sha256": semantic.sha256,
@@ -323,11 +321,32 @@ def _validate_remote_source_revision(
 ) -> tuple[dict[str, Any], Any]:
     body = {key: item for key, item in value.items() if key != "source_revision_sha256"}
     runtime, semantic = _load_runtime_contract(root=remote_root, loaded=loaded)
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "commit",
+        "tree",
+        "worktree_clean",
+        "execution_source_revision",
+        "serialized_sources",
+        "runtime_contract_sha256",
+        "semantic_model_process_contract_sha256",
+        "source_revision_sha256",
+    }
+    try:
+        execution_revision = loaded["validate_execution_source_revision"](
+            value.get("execution_source_revision")
+        )
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("semantic Active8 execution-source revision disagrees") from error
     if (
-        value.get("schema") != SOURCE_REVISION_SCHEMA
+        set(value) != expected_fields
+        or value.get("schema") != SOURCE_REVISION_SCHEMA
         or value.get("schema_version") != SOURCE_REVISION_SCHEMA_VERSION
         or value.get("worktree_clean") is not True
         or value.get("source_revision_sha256") != _sha256(body)
+        or execution_revision.get("commit") != value.get("commit")
+        or execution_revision.get("tree") != value.get("tree")
         or value.get("runtime_contract_sha256") != runtime["runtime_contract_sha256"]
         or value.get("semantic_model_process_contract_sha256") != semantic.sha256
     ):
@@ -338,9 +357,7 @@ def _validate_remote_source_revision(
         raise RuntimeError("semantic Active8 serialized source inventory disagrees")
     for relative, digest in sources.items():
         if _file_sha256(Path(remote_root) / relative) != digest:
-            raise RuntimeError(
-                f"serialized semantic Active8 source differs: {relative}"
-            )
+            raise RuntimeError(f"serialized semantic Active8 source differs: {relative}")
     return runtime, semantic
 
 
@@ -381,14 +398,8 @@ def _model_runtime_identity(
             "operator_capability_fingerprint"
         ],
     }
-    if (
-        architecture != expected_architecture
-        or model.training
-        or torch.is_grad_enabled()
-    ):
-        raise RuntimeError(
-            "live semantic Active8 model architecture or inference mode disagrees"
-        )
+    if architecture != expected_architecture or model.training or torch.is_grad_enabled():
+        raise RuntimeError("live semantic Active8 model architecture or inference mode disagrees")
     body: dict[str, Any] = {
         "schema": MODEL_RUNTIME_SCHEMA,
         "schema_version": MODEL_RUNTIME_SCHEMA_VERSION,
@@ -400,7 +411,10 @@ def _model_runtime_identity(
         "initialization_seed": model_config["initialization_seed"],
         "initial_model_state_sha256": loaded["state_dict_semantic_sha256"](state),
         "software": _software_identity(runtime),
-        "source_revision_sha256": source_revision["source_revision_sha256"],
+        "producer_source_revision_sha256": source_revision["source_revision_sha256"],
+        "execution_source_revision_sha256": source_revision["execution_source_revision"][
+            "source_revision_sha256"
+        ],
     }
     return {**body, "identity_sha256": _sha256(body)}
 
@@ -440,19 +454,14 @@ def build_exact_semantic_model(
             loaded=loaded,
         )
     if (
-        runtime_identity["initial_model_state_sha256"]
-        != scratch.initial_model_state_sha256
+        runtime_identity["initial_model_state_sha256"] != scratch.initial_model_state_sha256
         or runtime_identity["architecture"] != scratch.architecture.as_payload()
-        or runtime_identity["semantic_model_identity"]
-        != scratch.semantic_model_identity
+        or runtime_identity["semantic_model_identity"] != scratch.semantic_model_identity
         or runtime_identity["semantic_model_process_contract_sha256"]
         != scratch.semantic_model_process_contract_sha256
-        or runtime_identity["process_identity_sha256"]
-        != scratch.process_identity_sha256
+        or runtime_identity["process_identity_sha256"] != scratch.process_identity_sha256
     ):
-        raise RuntimeError(
-            "shared semantic scratch runtime differs from decision runtime identity"
-        )
+        raise RuntimeError("shared semantic scratch runtime differs from decision runtime identity")
     return model, runtime_identity
 
 
@@ -492,13 +501,9 @@ def _load_verified_chunk_inputs(
     reduced = loaded["reduce_semantic_active8_chunk_caches"](
         cache_plan, artifact_root=ARTIFACT_ROOT
     )
-    expected_pointer = {
-        key: value for key, value in reduced.items() if key != "completion"
-    }
+    expected_pointer = {key: value for key, value in reduced.items() if key != "completion"}
     if caller_pointer != expected_pointer:
-        raise RuntimeError(
-            "caller chunk-cache GLOBAL_COMPLETE differs from strict reduction"
-        )
+        raise RuntimeError("caller chunk-cache GLOBAL_COMPLETE differs from strict reduction")
     return cache_plan
 
 
@@ -544,10 +549,7 @@ def decide_one_chunk(
                 loaded=loaded,
             ),
         )
-    if (
-        runtime_identity["identity_sha256"]
-        != plan["model_runtime_identity"]["identity_sha256"]
-    ):
+    if runtime_identity["identity_sha256"] != plan["model_runtime_identity"]["identity_sha256"]:
         raise RuntimeError("worker model identity differs from decision plan")
     artifact_volume.commit()
     return {
@@ -641,9 +643,7 @@ def driver(
         ),
         artifact_root=ARTIFACT_ROOT,
     )
-    plan_path = loaded["write_semantic_active8_decision_plan"](
-        plan, artifact_root=ARTIFACT_ROOT
-    )
+    plan_path = loaded["write_semantic_active8_decision_plan"](plan, artifact_root=ARTIFACT_ROOT)
     artifact_volume.commit()
     completed = loaded["completed_semantic_active8_decision_task_ids"](
         plan, artifact_root=ARTIFACT_ROOT
@@ -657,10 +657,7 @@ def driver(
         plan_artifact_path = _artifact_address(plan_path)
         results = list(
             decide_one_chunk.starmap(
-                [
-                    (plan_artifact_path, task_identity, source_revision)
-                    for task_identity in missing
-                ]
+                [(plan_artifact_path, task_identity, source_revision) for task_identity in missing]
             )
         )
         if len(results) != len(missing):
@@ -701,9 +698,7 @@ def main(
             {
                 "semantic_migration_completion": semantic_migration_completion,
                 "semantic_chunk_cache_plan": semantic_chunk_cache_plan,
-                "semantic_chunk_cache_global_completion": (
-                    semantic_chunk_cache_global_completion
-                ),
+                "semantic_chunk_cache_global_completion": (semantic_chunk_cache_global_completion),
                 "output_artifact_root": output_artifact_root,
                 "source_revision": source_revision,
                 "max_map_containers": MAX_MAP_CONTAINERS,

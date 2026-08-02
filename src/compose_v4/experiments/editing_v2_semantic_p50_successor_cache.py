@@ -70,7 +70,7 @@ PLAN_SCHEMA = "compose.editing_v2.semantic_p50_successor_cache_plan"
 LEAF_SCHEMA = "compose.editing_v2.semantic_p50_successor_cache_leaf"
 MANIFEST_SCHEMA = "compose.editing_v2.semantic_p50_successor_cache_manifest"
 COMPLETION_SCHEMA = "compose.editing_v2.semantic_p50_successor_cache_completion"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 PLAN_STATUS = "FROZEN_EXACT_STREAM_UNION_CACHE_PLAN_NO_AUTHORITY"
 LEAF_STATUS = "COMPLETE_EXACT_TRACE_CLOSURE_COORDINATES_NO_AUTHORITY"
@@ -1078,6 +1078,7 @@ def build_semantic_p50_successor_cache_plan(
     prepared_recipe_path: Path,
     verified_source: VerifiedSemanticP50SourceInventory,
     source_revision_sha256: str,
+    execution_source_revision_sha256: str,
     artifact_root: Path,
     repo_root: Path,
     registry: SemanticCapabilityCellRegistry | None = None,
@@ -1087,6 +1088,10 @@ def build_semantic_p50_successor_cache_plan(
 
     source_revision_sha256 = _require_sha(
         source_revision_sha256, field_name="source_revision_sha256"
+    )
+    execution_source_revision_sha256 = _require_sha(
+        execution_source_revision_sha256,
+        field_name="execution_source_revision_sha256",
     )
     root = Path(artifact_root).resolve()
     prepared_path = Path(prepared_recipe_path).resolve()
@@ -1114,6 +1119,7 @@ def build_semantic_p50_successor_cache_plan(
     )
     base_identity = {
         "source_revision_sha256": source_revision_sha256,
+        "execution_source_revision_sha256": execution_source_revision_sha256,
         "implementation_sha256": implementation_sha,
         "policy": policy,
         "prepared_recipe_binding": prepared_binding,
@@ -1236,6 +1242,7 @@ _PLAN_FIELDS = {
     "status",
     *NO_DOWNSTREAM_AUTHORITY,
     "source_revision_sha256",
+    "execution_source_revision_sha256",
     "implementation_sha256",
     "policy",
     "prepared_recipe_binding",
@@ -1280,6 +1287,10 @@ def validate_semantic_p50_successor_cache_plan(
         )
     _require_no_authority(plan, field_name="semantic P50 successor-cache plan")
     _require_sha(plan.get("source_revision_sha256"), field_name="source_revision_sha256")
+    _require_sha(
+        plan.get("execution_source_revision_sha256"),
+        field_name="execution_source_revision_sha256",
+    )
     current_implementation = semantic_p50_successor_cache_implementation_sha256(repo_root=repo_root)
     if (
         plan.get("implementation_sha256") != current_implementation
@@ -1290,6 +1301,7 @@ def validate_semantic_p50_successor_cache_plan(
         )
     base_identity = {
         "source_revision_sha256": plan["source_revision_sha256"],
+        "execution_source_revision_sha256": plan["execution_source_revision_sha256"],
         "implementation_sha256": plan["implementation_sha256"],
         "policy": plan["policy"],
         "prepared_recipe_binding": plan["prepared_recipe_binding"],
@@ -1528,6 +1540,7 @@ def _validate_compiler_runtime(value: object, *, plan: Mapping[str, Any]) -> dic
         "rdkit_version",
         "implementation_sha256",
         "source_revision_sha256",
+        "execution_source_revision_sha256",
         "runtime_sha256",
     }
     if not isinstance(value, Mapping) or set(value) != expected_fields:
@@ -1540,6 +1553,8 @@ def _validate_compiler_runtime(value: object, *, plan: Mapping[str, Any]) -> dic
         or runtime.get("dtype") != "torch.float32"
         or runtime.get("implementation_sha256") != plan["implementation_sha256"]
         or runtime.get("source_revision_sha256") != plan["source_revision_sha256"]
+        or runtime.get("execution_source_revision_sha256")
+        != plan["execution_source_revision_sha256"]
         or supplied_sha != _sha(body)
         or any(
             not isinstance(runtime.get(name), str) or not runtime[name]
@@ -1638,7 +1653,9 @@ _LEAF_FIELDS = {
 }
 
 
-def validate_semantic_p50_successor_cache_leaf(value: Mapping[str, Any]) -> dict[str, Any]:
+def validate_semantic_p50_successor_cache_leaf(
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
     """Validate one leaf independently before binding it to a plan task."""
 
     leaf = dict(value)
@@ -1873,6 +1890,7 @@ def build_semantic_p50_successor_cache_manifest(
         "run_identity_sha256": validated_plan["run_identity_sha256"],
         "build_identity_sha256": validated_plan["build_identity_sha256"],
         "source_revision_sha256": validated_plan["source_revision_sha256"],
+        "execution_source_revision_sha256": validated_plan["execution_source_revision_sha256"],
         "implementation_sha256": validated_plan["implementation_sha256"],
         "policy_sha256": validated_plan["policy"]["policy_sha256"],
         "prepared_recipe_binding": validated_plan["prepared_recipe_binding"],
@@ -1915,6 +1933,7 @@ _MANIFEST_FIELDS = {
     "run_identity_sha256",
     "build_identity_sha256",
     "source_revision_sha256",
+    "execution_source_revision_sha256",
     "implementation_sha256",
     "policy_sha256",
     "prepared_recipe_binding",
@@ -1959,6 +1978,8 @@ def validate_semantic_p50_successor_cache_manifest(
         or manifest.get("run_identity_sha256") != plan["run_identity_sha256"]
         or manifest.get("build_identity_sha256") != plan["build_identity_sha256"]
         or manifest.get("source_revision_sha256") != plan["source_revision_sha256"]
+        or manifest.get("execution_source_revision_sha256")
+        != plan["execution_source_revision_sha256"]
         or manifest.get("implementation_sha256") != plan["implementation_sha256"]
         or manifest.get("policy_sha256") != plan["policy"]["policy_sha256"]
         or manifest.get("prepared_recipe_binding") != plan["prepared_recipe_binding"]
@@ -2092,6 +2113,7 @@ def build_semantic_p50_successor_cache_completion(
         "run_identity_sha256": plan["run_identity_sha256"],
         "build_identity_sha256": plan["build_identity_sha256"],
         "source_revision_sha256": plan["source_revision_sha256"],
+        "execution_source_revision_sha256": plan["execution_source_revision_sha256"],
         "implementation_sha256": plan["implementation_sha256"],
         "prepared_recipe_sha256": plan["prepared_recipe_binding"]["prepared_recipe_sha256"],
         "validation_contract_sha256": plan["validation_contract"]["validation_contract_sha256"],
@@ -2143,6 +2165,7 @@ _COMPLETION_FIELDS = {
     "run_identity_sha256",
     "build_identity_sha256",
     "source_revision_sha256",
+    "execution_source_revision_sha256",
     "implementation_sha256",
     "prepared_recipe_sha256",
     "validation_contract_sha256",
@@ -2180,7 +2203,9 @@ _COMPLETION_FIELDS = {
 }
 
 
-def validate_semantic_p50_successor_cache_completion(value: Mapping[str, Any]) -> dict[str, Any]:
+def validate_semantic_p50_successor_cache_completion(
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
     """Validate the exact no-authority cache completion receipt."""
 
     completion = dict(value)

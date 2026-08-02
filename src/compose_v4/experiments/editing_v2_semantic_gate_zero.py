@@ -36,9 +36,7 @@ CONTRACT_RELATIVE_PATH = "configs/editing_v2_semantic_gate_zero_structural_v1.js
 CONTRACT_SCHEMA = "compose.editing.semantic_gate_zero_structural_contract"
 CONTRACT_SCHEMA_VERSION = 1
 CONTRACT_STATUS = "FROZEN_STRUCTURAL_EVIDENCE_CONTRACT_NO_DOWNSTREAM_AUTHORITY"
-FROZEN_CONTRACT_SHA256 = (
-    "5875cf1ab5d8fb2d77b9e6983c7a3ac770ead8ddf69d86e287d756dd6cdcd16f"
-)
+FROZEN_CONTRACT_SHA256 = "5875cf1ab5d8fb2d77b9e6983c7a3ac770ead8ddf69d86e287d756dd6cdcd16f"
 EVIDENCE_SCHEMA = "compose.editing.semantic_gate_zero_structural_evidence"
 EVIDENCE_SCHEMA_VERSION = 2
 EVIDENCE_STATUS = "STRUCTURAL_EVIDENCE_COMPLETE_NO_DOWNSTREAM_AUTHORITY"
@@ -94,7 +92,8 @@ _MODEL_RUNTIME_FIELDS = {
     "initialization_seed",
     "initial_model_state_sha256",
     "software",
-    "source_revision_sha256",
+    "producer_source_revision_sha256",
+    "execution_source_revision_sha256",
     "identity_sha256",
 }
 _ARCHITECTURE_FIELDS = {
@@ -220,19 +219,13 @@ _EXPECTED_STRUCTURAL_CHECKS = {
         "classify_every_decision_eligible_teacher_report_all_registered_empty_"
         "contexts_no_context_minimum"
     ),
-    "excluded_trace_policy": (
-        "preserve_and_report_never_reclassify_as_teacher_coverage"
-    ),
-    "classification_failure_policy": (
-        "publish_bounded_typed_negative_receipts_and_fail"
-    ),
+    "excluded_trace_policy": ("preserve_and_report_never_reclassify_as_teacher_coverage"),
+    "classification_failure_policy": ("publish_bounded_typed_negative_receipts_and_fail"),
     "classification_failure_receipt_limit": 100,
     "legacy_action_v2_evidence": "forbidden",
 }
 _EXPECTED_DECISION_POLICY = {
-    "pass_meaning": (
-        "structural_evidence_complete_for_all_active8_families_in_train_only"
-    ),
+    "pass_meaning": ("structural_evidence_complete_for_all_active8_families_in_train_only"),
     "pass_grants_gate_zero_authority": False,
     "pass_grants_t1_authority": False,
     "pass_grants_p50_authority": False,
@@ -301,9 +294,7 @@ def _load_json(path: Path, *, field: str) -> tuple[dict[str, Any], bytes]:
         raw = Path(path).read_bytes()
         value = json.loads(raw)
     except (OSError, json.JSONDecodeError) as error:
-        raise SemanticGateZeroStructuralError(
-            f"{field} is absent or invalid: {path}"
-        ) from error
+        raise SemanticGateZeroStructuralError(f"{field} is absent or invalid: {path}") from error
     if not isinstance(value, dict):
         raise SemanticGateZeroStructuralError(f"{field} must be an object")
     return value, raw
@@ -327,9 +318,7 @@ def load_semantic_gate_zero_structural_contract(
         or payload["schema_version"] != CONTRACT_SCHEMA_VERSION
         or payload["contract_id"] != "editing_v2_semantic_gate_zero_structural_v1"
         or payload["status"] != CONTRACT_STATUS
-        or any(
-            payload.get(field) is not expected for field, expected in _AUTHORITY.items()
-        )
+        or any(payload.get(field) is not expected for field, expected in _AUTHORITY.items())
         or payload["contract_sha256"] != _sha(body)
         or payload["contract_sha256"] != FROZEN_CONTRACT_SHA256
     ):
@@ -350,18 +339,11 @@ def load_semantic_gate_zero_structural_contract(
         if not isinstance(parent, dict) or set(parent) != _PARENT_FIELDS:
             raise SemanticGateZeroStructuralError(f"parent {name} fields disagree")
         parent_path = (root / str(parent["path"])).resolve()
-        if (
-            not parent_path.is_relative_to(root)
-            or _file_sha(parent_path) != parent["file_sha256"]
-        ):
-            raise SemanticGateZeroStructuralError(
-                f"parent {name} physical bytes disagree"
-            )
+        if not parent_path.is_relative_to(root) or _file_sha(parent_path) != parent["file_sha256"]:
+            raise SemanticGateZeroStructuralError(f"parent {name} physical bytes disagree")
         parent_payload, _ = _load_json(parent_path, field=f"parent {name}")
         if parent_payload.get(semantic_field[name]) != parent["semantic_sha256"]:
-            raise SemanticGateZeroStructuralError(
-                f"parent {name} semantic identity disagrees"
-            )
+            raise SemanticGateZeroStructuralError(f"parent {name} semantic identity disagrees")
     checks = payload.get("structural_checks")
     if checks != _EXPECTED_STRUCTURAL_CHECKS:
         raise SemanticGateZeroStructuralError("structural check policy disagrees")
@@ -398,9 +380,7 @@ def _load_decision_plan(
         or plan.get("plan_sha256") != index.decision_plan_sha256
         or plan.get("run_identity_sha256") != index.decision_run_identity_sha256
     ):
-        raise SemanticGateZeroStructuralError(
-            "decision plan differs from decision-source index"
-        )
+        raise SemanticGateZeroStructuralError("decision plan differs from decision-source index")
     return plan
 
 
@@ -417,19 +397,13 @@ def _validate_model_runtime(
     body = {key: item for key, item in runtime.items() if key != "identity_sha256"}
     if (
         runtime.get("schema") != "compose.data.semantic_active8_exact_model_runtime"
-        or runtime.get("schema_version") != 1
+        or runtime.get("schema_version") != 2
         or runtime.get("identity_sha256") != _sha(body)
         or runtime.get("identity_sha256") != index.model_runtime_identity_sha256
     ):
-        raise SemanticGateZeroStructuralError(
-            "decision model runtime identity disagrees"
-        )
-    decision_runtime = _load_bound_parent(
-        contract, "decision_runtime", repo_root=repo_root
-    )
-    semantic_model = _load_bound_parent(
-        contract, "semantic_model_process", repo_root=repo_root
-    )
+        raise SemanticGateZeroStructuralError("decision model runtime identity disagrees")
+    decision_runtime = _load_bound_parent(contract, "decision_runtime", repo_root=repo_root)
+    semantic_model = _load_bound_parent(contract, "semantic_model_process", repo_root=repo_root)
     architecture = runtime.get("architecture")
     required = contract.payload["required_architecture"]
     expected_architecture = {
@@ -449,10 +423,8 @@ def _validate_model_runtime(
         not isinstance(architecture, dict)
         or set(architecture) != _ARCHITECTURE_FIELDS
         or architecture != expected_architecture
-        or runtime["runtime_contract_sha256"]
-        != decision_runtime["runtime_contract_sha256"]
-        or runtime["semantic_model_process_contract_sha256"]
-        != semantic_model["contract_sha256"]
+        or runtime["runtime_contract_sha256"] != decision_runtime["runtime_contract_sha256"]
+        or runtime["semantic_model_process_contract_sha256"] != semantic_model["contract_sha256"]
         or runtime["semantic_model_identity"] != semantic_model["model_identity"]
         or runtime["process_identity_sha256"] != index.process_identity_sha256
         or runtime["initialization_seed"] != required["initialization_seed"]
@@ -461,10 +433,15 @@ def _validate_model_runtime(
         raise SemanticGateZeroStructuralError(
             "decision runtime differs from exact semantic architecture/process"
         )
+    _require_sha(runtime["initial_model_state_sha256"], field="initial_model_state_sha256")
     _require_sha(
-        runtime["initial_model_state_sha256"], field="initial_model_state_sha256"
+        runtime["producer_source_revision_sha256"],
+        field="producer_source_revision_sha256",
     )
-    _require_sha(runtime["source_revision_sha256"], field="source_revision_sha256")
+    _require_sha(
+        runtime["execution_source_revision_sha256"],
+        field="execution_source_revision_sha256",
+    )
     return runtime
 
 
@@ -506,12 +483,8 @@ def build_semantic_gate_zero_structural_evidence(
         policy.policy_sha256 != index.policy_sha256
         or policy.process_identity_sha256 != index.process_identity_sha256
     ):
-        raise SemanticGateZeroStructuralError(
-            "live Active8 policy differs from decision source"
-        )
-    registry_path = (
-        root / selected.payload["parents"]["capability_cell_registry"]["path"]
-    )
+        raise SemanticGateZeroStructuralError("live Active8 policy differs from decision source")
+    registry_path = root / selected.payload["parents"]["capability_cell_registry"]["path"]
     registry = load_semantic_capability_cell_registry(registry_path)
     if (
         registry.registry_sha256
@@ -519,9 +492,7 @@ def build_semantic_gate_zero_structural_evidence(
         or registry.process_identity_sha256 != index.process_identity_sha256
         or tuple(registry.contexts_by_family) != tuple(ACTIVE8_FAMILIES)
     ):
-        raise SemanticGateZeroStructuralError(
-            "capability registry differs from semantic source"
-        )
+        raise SemanticGateZeroStructuralError("capability registry differs from semantic source")
 
     cell_rows: dict[str, dict[str, Any]] = {}
     cell_sets: dict[str, dict[str, set[str]]] = {}
@@ -537,9 +508,7 @@ def build_semantic_gate_zero_structural_evidence(
         selected.payload["structural_checks"]["sealed_nondecision_partition_roles"]
     )
     if decision_roles != ("train",) or set(decision_roles).intersection(sealed_roles):
-        raise SemanticGateZeroStructuralError(
-            "decision-eligible partition policy disagrees"
-        )
+        raise SemanticGateZeroStructuralError("decision-eligible partition policy disagrees")
     allowed_roles = set(decision_roles) | set(sealed_roles)
 
     family_counts: Counter[str] = Counter()
@@ -605,16 +574,12 @@ def build_semantic_gate_zero_structural_evidence(
             address.trace_id,
         )
         if trace_key in accepted_trace_keys:
-            raise SemanticGateZeroStructuralError(
-                "accepted trace stream contains a duplicate"
-            )
+            raise SemanticGateZeroStructuralError("accepted trace stream contains a duplicate")
         accepted_trace_keys.add(trace_key)
         accepted_trace_count += 1
         accepted_action_count += len(resolved.action_decisions)
         accepted_progress_count += len(resolved.progress_addresses)
-        terminal_progress_count += sum(
-            item.terminal for item in resolved.progress_addresses
-        )
+        terminal_progress_count += sum(item.terminal for item in resolved.progress_addresses)
         global_family_counts.update(
             item.classification.model_family
             for item in resolved.action_decisions
@@ -689,9 +654,7 @@ def build_semantic_gate_zero_structural_evidence(
             sets = cell_sets[cell_id]
             row["teacher_count"] += 1
             row["raw_candidate_mark_sum"] += assignment.raw_mark_count
-            row[
-                "canonical_candidate_successor_sum"
-            ] += assignment.canonical_successor_count
+            row["canonical_candidate_successor_sum"] += assignment.canonical_successor_count
             row["matching_candidate_mark_sum"] += assignment.matching_mark_count
             row["successor_alias_sum"] += assignment.successor_alias_multiplicity
             for field, stratum in (
@@ -738,21 +701,17 @@ def build_semantic_gate_zero_structural_evidence(
         "sealed_nondecision_roles_not_disclosed": all(
             role not in decision_roles for role in sealed_roles
         ),
-        "accepted_trace_census_matches": accepted_trace_count
-        == count_map["accepted_traces"],
-        "excluded_trace_census_matches": excluded_trace_count
-        == count_map["excluded_traces"],
+        "accepted_trace_census_matches": accepted_trace_count == count_map["accepted_traces"],
+        "excluded_trace_census_matches": excluded_trace_count == count_map["excluded_traces"],
         "one_structural_assignment_per_decision_eligible_action": (
-            len(accepted_assignment_sha256s) + classification_failure_count
-            == decision_action_count
+            len(accepted_assignment_sha256s) + classification_failure_count == decision_action_count
         ),
         "accepted_progress_census_matches": accepted_progress_count
         == count_map["progress_rows"]
         == accepted_action_count + accepted_trace_count,
         "decision_eligible_progress_census_matches": decision_progress_count
         == decision_action_count + decision_trace_count,
-        "terminal_progress_census_matches": terminal_progress_count
-        == accepted_trace_count,
+        "terminal_progress_census_matches": terminal_progress_count == accepted_trace_count,
         "terminal_assignment_count_is_zero": terminal_assignment_count == 0,
         "structural_assignment_identities_are_unique": (
             len(accepted_assignment_sha256s)
@@ -761,21 +720,16 @@ def build_semantic_gate_zero_structural_evidence(
         ),
         "complete_action_census_matches": accepted_action_count + excluded_action_count
         == count_map["actions"],
-        "complete_action_family_census_matches": dict(
-            sorted(total_family_counts.items())
-        )
+        "complete_action_family_census_matches": dict(sorted(total_family_counts.items()))
         == dict(index.action_family_histogram),
-        "complete_exclusion_reason_census_matches": dict(
-            sorted(exclusion_reasons.items())
-        )
+        "complete_exclusion_reason_census_matches": dict(sorted(exclusion_reasons.items()))
         == dict(index.active8_exclusion_reason_histogram),
         "all_active8_families_have_decision_eligible_teachers": all(
             family_counts[family] > 0 for family in ACTIVE8_FAMILIES
         ),
         "classification_failure_count_is_zero": classification_failure_count == 0,
         "every_decision_eligible_teacher_matches_exactly_one_action_v4_mark": all(
-            row["matching_candidate_mark_sum"] == row["teacher_count"]
-            for row in cell_rows.values()
+            row["matching_candidate_mark_sum"] == row["teacher_count"] for row in cell_rows.values()
         ),
         "every_decision_eligible_teacher_has_exact_candidate_support": True,
         "legacy_action_v2_evidence_used": False,
@@ -844,9 +798,7 @@ def build_semantic_gate_zero_structural_evidence(
         "excluded_action_counts_by_family": {
             family: excluded_family_counts[family] for family in ACTIVE8_FAMILIES
         },
-        "decision_eligible_teacher_counts_by_lane": dict(
-            sorted(decision_lane_counts.items())
-        ),
+        "decision_eligible_teacher_counts_by_lane": dict(sorted(decision_lane_counts.items())),
         "sealed_nondecision_role_inventory_sha256": {
             role: sealed_streams[role].hexdigest() for role in sealed_roles
         },
@@ -858,9 +810,7 @@ def build_semantic_gate_zero_structural_evidence(
             key for key in sorted(cell_rows) if cell_rows[key]["teacher_count"] == 0
         ],
         "accepted_trace_stream_sha256": accepted_trace_stream.hexdigest(),
-        "structural_assignment_inventory_sha256": (
-            accepted_assignment_stream.hexdigest()
-        ),
+        "structural_assignment_inventory_sha256": (accepted_assignment_stream.hexdigest()),
     }
     return {**evidence_body, "evidence_sha256": _sha(evidence_body)}
 
@@ -892,10 +842,7 @@ def _validate_structural_evidence(
         or evidence.get("schema_version") != EVIDENCE_SCHEMA_VERSION
         or evidence.get("status") != EVIDENCE_STATUS
         or supplied != _sha(body)
-        or any(
-            evidence.get(field) is not expected
-            for field, expected in _AUTHORITY.items()
-        )
+        or any(evidence.get(field) is not expected for field, expected in _AUTHORITY.items())
         or not isinstance(evidence.get("counts"), Mapping)
         or set(evidence["counts"]) != _COUNT_FIELDS
         or not isinstance(evidence.get("checks"), Mapping)
@@ -951,9 +898,7 @@ def _structural_decision_from_verified_evidence(
         "structural_result": evidence["structural_result"],
         "evidence_sha256": supplied,
         "contract_sha256": evidence["contract_sha256"],
-        "decision_source_inventory_sha256": evidence[
-            "decision_source_inventory_sha256"
-        ],
+        "decision_source_inventory_sha256": evidence["decision_source_inventory_sha256"],
         "next_authorized_stage": None,
         "required_next_action": (
             "record_separate_human_or_registered_gate_zero_authorization"
@@ -1046,25 +991,16 @@ def load_semantic_gate_zero_structural_artifacts(
     }
     if (
         set(completion) != expected_completion_fields
-        or completion.get("schema")
-        != "compose.editing.semantic_gate_zero_structural_completion"
+        or completion.get("schema") != "compose.editing.semantic_gate_zero_structural_completion"
         or completion.get("schema_version") != 1
-        or completion.get("status")
-        != "COMPLETE_STRUCTURAL_ARTIFACTS_NO_DOWNSTREAM_AUTHORITY"
-        or any(
-            completion.get(field) is not expected
-            for field, expected in _AUTHORITY.items()
-        )
+        or completion.get("status") != "COMPLETE_STRUCTURAL_ARTIFACTS_NO_DOWNSTREAM_AUTHORITY"
+        or any(completion.get(field) is not expected for field, expected in _AUTHORITY.items())
         or supplied_completion_sha256 != _sha(completion_body)
         or completion.get("contract_sha256") != contract.sha256
-        or completion.get("evidence_file_sha256")
-        != hashlib.sha256(evidence_bytes).hexdigest()
-        or completion.get("decision_file_sha256")
-        != hashlib.sha256(decision_bytes).hexdigest()
+        or completion.get("evidence_file_sha256") != hashlib.sha256(evidence_bytes).hexdigest()
+        or completion.get("decision_file_sha256") != hashlib.sha256(decision_bytes).hexdigest()
     ):
-        raise SemanticGateZeroStructuralError(
-            "persisted structural completion identity disagrees"
-        )
+        raise SemanticGateZeroStructuralError("persisted structural completion identity disagrees")
     _validate_structural_evidence(
         evidence,
         index=index,
@@ -1112,9 +1048,7 @@ def run_semantic_gate_zero_structural_evidence(
         artifact_root=artifact_root,
         repo_root=repo_root,
     )
-    contract = load_semantic_gate_zero_structural_contract(
-        contract_path, repo_root=repo_root
-    )
+    contract = load_semantic_gate_zero_structural_contract(contract_path, repo_root=repo_root)
     evidence = build_semantic_gate_zero_structural_evidence(
         index,
         decision_plan_path=decision_plan_path,
@@ -1125,9 +1059,7 @@ def run_semantic_gate_zero_structural_evidence(
     output = Path(output_directory).resolve()
     artifact = Path(artifact_root).resolve()
     if not output.is_relative_to(artifact):
-        raise SemanticGateZeroStructuralError(
-            "output_directory lies outside artifact_root"
-        )
+        raise SemanticGateZeroStructuralError("output_directory lies outside artifact_root")
     evidence_bytes = _canonical_bytes(evidence, newline=True)
     decision_bytes = _canonical_bytes(decision, newline=True)
     _publish(output / EVIDENCE_FILENAME, evidence_bytes)

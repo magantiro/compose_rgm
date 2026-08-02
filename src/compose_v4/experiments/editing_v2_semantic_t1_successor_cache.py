@@ -157,10 +157,7 @@ def _require_sha(value: object, *, field_name: str) -> str:
 
 
 def _require_nonauthorizing(value: Mapping[str, Any], *, field_name: str) -> None:
-    if any(
-        value.get(name) is not expected
-        for name, expected in NO_DOWNSTREAM_AUTHORITY.items()
-    ):
+    if any(value.get(name) is not expected for name, expected in NO_DOWNSTREAM_AUTHORITY.items()):
         raise SemanticT1SuccessorCacheError(
             f"{field_name} crosses the downstream authority boundary"
         )
@@ -186,9 +183,7 @@ def _load_canonical_object(
             f"{field_name} is absent or invalid: {source}"
         ) from error
     if not isinstance(value, dict) or raw != _canonical_bytes(value, newline=True):
-        raise SemanticT1SuccessorCacheError(
-            f"{field_name} is not a canonical JSON object"
-        )
+        raise SemanticT1SuccessorCacheError(f"{field_name} is not a canonical JSON object")
     return value, raw
 
 
@@ -224,9 +219,7 @@ def _load_pretty_object(
         + b"\n"
     )
     if not isinstance(value, dict) or raw != expected:
-        raise SemanticT1SuccessorCacheError(
-            f"{field_name} is not the frozen indented JSON object"
-        )
+        raise SemanticT1SuccessorCacheError(f"{field_name} is not the frozen indented JSON object")
     return value, raw
 
 
@@ -237,9 +230,7 @@ def _artifact_path(
     field_name: str,
 ) -> Path:
     if not isinstance(value, str):
-        raise SemanticT1SuccessorCacheError(
-            f"{field_name} must be a normalized /artifacts path"
-        )
+        raise SemanticT1SuccessorCacheError(f"{field_name} must be a normalized /artifacts path")
     pure = PurePosixPath(value)
     if (
         not pure.is_absolute()
@@ -250,15 +241,11 @@ def _artifact_path(
         or str(pure) != value
         or value.endswith("/")
     ):
-        raise SemanticT1SuccessorCacheError(
-            f"{field_name} must be a normalized /artifacts path"
-        )
+        raise SemanticT1SuccessorCacheError(f"{field_name} must be a normalized /artifacts path")
     root = Path(artifact_root).resolve()
     resolved = (root / Path(*pure.parts[2:])).resolve()
     if not resolved.is_relative_to(root):
-        raise SemanticT1SuccessorCacheError(
-            f"{field_name} resolves outside artifact_root"
-        )
+        raise SemanticT1SuccessorCacheError(f"{field_name} resolves outside artifact_root")
     return resolved
 
 
@@ -321,9 +308,7 @@ def load_verified_semantic_t1_panel_bundle(
         )
     root = Path(artifact_root).resolve()
     if not completion_source.is_relative_to(root):
-        raise SemanticT1SuccessorCacheError(
-            "panel completion resolves outside artifact_root"
-        )
+        raise SemanticT1SuccessorCacheError("panel completion resolves outside artifact_root")
     completion, completion_bytes = _load_canonical_object(
         completion_source,
         field_name="semantic T1 panel completion",
@@ -428,20 +413,15 @@ def load_verified_semantic_t1_panel_bundle(
         or request.get("status") != PANEL_RUN_REQUEST_STATUS
         or supplied_run_sha256 != _sha(request_body)
         or completion.get("run_identity_sha256") != supplied_run_sha256
-        or completion.get("request_file_sha256")
-        != hashlib.sha256(request_bytes).hexdigest()
+        or completion.get("request_file_sha256") != hashlib.sha256(request_bytes).hexdigest()
         or request.get("training_launched") is not False
         or request.get("successor_cache_compiled") is not False
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 panel request identity disagrees"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 panel request identity disagrees")
     _require_nonauthorizing(request, field_name="semantic T1 panel request")
     panel_bytes = panel_path.read_bytes()
     panel_file_sha256 = hashlib.sha256(panel_bytes).hexdigest()
-    current_panel_implementation = semantic_t1_panel_implementation_sha256(
-        repo_root=repo_root
-    )
+    current_panel_implementation = semantic_t1_panel_implementation_sha256(repo_root=repo_root)
     if (
         panel_file_sha256 != completion.get("panel_file_sha256")
         or len(panel_bytes) != completion.get("panel_file_bytes")
@@ -462,8 +442,7 @@ def load_verified_semantic_t1_panel_bundle(
         ) from error
     if (
         request.get("panel_request") != panel.request.as_payload()
-        or request.get("panel_implementation_sha256")
-        != panel.panel_implementation_sha256
+        or request.get("panel_implementation_sha256") != panel.panel_implementation_sha256
         or completion.get("decision_source_inventory_sha256")
         != panel.gate_zero_binding.decision_source_inventory_sha256
         or completion.get("gate_zero_completion_sha256")
@@ -527,8 +506,7 @@ def load_semantic_t1_successor_cache_policy(*, repo_root: Path) -> dict[str, Any
     if (
         payload.get("schema") != "compose.editing_v2.semantic_t1_successor_cache_policy"
         or payload.get("schema_version") != 1
-        or payload.get("status")
-        != "FROZEN_CPU_COORDINATE_CACHE_NO_DOWNSTREAM_AUTHORITY"
+        or payload.get("status") != "FROZEN_CPU_COORDINATE_CACHE_NO_DOWNSTREAM_AUTHORITY"
         or payload.get("compile_device_role") != "cpu_once"
         or payload.get("compiler_device") != "cpu"
         or payload.get("compiler_dtype") != "torch.float32"
@@ -538,9 +516,7 @@ def load_semantic_t1_successor_cache_policy(*, repo_root: Path) -> dict[str, Any
         or payload.get("repeated_state_panel_included") is not False
         or supplied_sha256 != _sha(body)
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache policy identity disagrees"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache policy identity disagrees")
     for name in (
         "maximum_leaf_count",
         "maximum_selected_trace_count",
@@ -549,9 +525,7 @@ def load_semantic_t1_successor_cache_policy(*, repo_root: Path) -> dict[str, Any
         "maximum_concurrent_volume_writers",
     ):
         if type(payload.get(name)) is not int or payload[name] <= 0:
-            raise SemanticT1SuccessorCacheError(
-                f"semantic T1 cache policy {name} must be positive"
-            )
+            raise SemanticT1SuccessorCacheError(f"semantic T1 cache policy {name} must be positive")
     return payload
 
 
@@ -569,7 +543,7 @@ def _validate_model_runtime_identity(
         or supplied_sha256 != panel.gate_zero_binding.model_runtime_identity_sha256
         or runtime.get("initial_model_state_sha256")
         != panel.gate_zero_binding.initial_model_state_sha256
-        or runtime.get("source_revision_sha256")
+        or runtime.get("execution_source_revision_sha256")
         != panel.gate_zero_binding.model_source_revision_sha256
         or runtime.get("process_identity_sha256") != panel.process_identity_sha256
         or not isinstance(architecture, Mapping)
@@ -630,12 +604,8 @@ def _panel_binding(bundle: VerifiedSemanticT1PanelBundle) -> dict[str, Any]:
         "panel_request_sha256": panel.request.request_sha256,
         "support_time_hex": panel.request.support_time_hex,
         "panel_entry_sha256s": [entry.panel_entry_sha256 for entry in panel.entries],
-        "panel_entry_inventory_sha256": panel.identity_body()[
-            "panel_entry_inventory_sha256"
-        ],
-        "cache_input_inventory_sha256": panel.identity_body()[
-            "cache_input_inventory_sha256"
-        ],
+        "panel_entry_inventory_sha256": panel.identity_body()["panel_entry_inventory_sha256"],
+        "cache_input_inventory_sha256": panel.identity_body()["cache_input_inventory_sha256"],
         "decision_source_inventory_sha256": (
             panel.gate_zero_binding.decision_source_inventory_sha256
         ),
@@ -649,9 +619,7 @@ def _unique_train_sources_by_digest(
 ) -> tuple[tuple[Any, ...], dict[str, Any]]:
     """Require one bound train source for every semantic shard digest."""
 
-    train_sources = tuple(
-        source for source in sources if source.partition_role == "train"
-    )
+    train_sources = tuple(source for source in sources if source.partition_role == "train")
     sources_by_digest: dict[str, Any] = {}
     for source in train_sources:
         if source.semantic_shard_sha256 in sources_by_digest:
@@ -684,9 +652,7 @@ def build_semantic_t1_successor_cache_plan(
     panel = bundle.panel
     runtime = _validate_model_runtime_identity(model_runtime_identity, panel=panel)
     policy = load_semantic_t1_successor_cache_policy(repo_root=repo_root)
-    implementation_sha256 = semantic_t1_successor_cache_implementation_sha256(
-        repo_root=repo_root
-    )
+    implementation_sha256 = semantic_t1_successor_cache_implementation_sha256(repo_root=repo_root)
     semantic_contract = dict(semantic_model_process_contract)
     if (
         set(semantic_contract) != {"path", "file_sha256", "contract_sha256"}
@@ -694,9 +660,7 @@ def build_semantic_t1_successor_cache_plan(
         != runtime.get("semantic_model_process_contract_sha256")
         or not _is_sha(semantic_contract.get("file_sha256"))
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic model/process contract differs from Gate 0"
-        )
+        raise SemanticT1SuccessorCacheError("semantic model/process contract differs from Gate 0")
     if source_inventory.process_identity_sha256 != panel.process_identity_sha256:
         raise SemanticT1SuccessorCacheError(
             "semantic source inventory differs from the panel process"
@@ -710,9 +674,7 @@ def build_semantic_t1_successor_cache_plan(
         raise SemanticT1SuccessorCacheError(
             "semantic source inventory differs from the panel migration input"
         )
-    train_sources, sources_by_digest = _unique_train_sources_by_digest(
-        source_inventory.sources
-    )
+    train_sources, sources_by_digest = _unique_train_sources_by_digest(source_inventory.sources)
     selected_digests = tuple(
         sorted({item.packed_shard_content_sha256 for item in panel.cache_trace_inputs})
     )
@@ -743,9 +705,7 @@ def build_semantic_t1_successor_cache_plan(
         field_name="cache output_prefix",
     )
     panel_binding = _panel_binding(bundle)
-    codec_schema_versions = {
-        source.action_codec_schema_version for source in train_sources
-    }
+    codec_schema_versions = {source.action_codec_schema_version for source in train_sources}
     codec_implementation_hashes = {
         source.action_codec_implementation_hash for source in train_sources
     }
@@ -754,9 +714,7 @@ def build_semantic_t1_successor_cache_plan(
             "semantic train sources do not share one ActionCodec identity"
         )
     source_identity = {
-        "migration_completion_file_sha256": (
-            source_inventory.migration_completion_file_sha256
-        ),
+        "migration_completion_file_sha256": (source_inventory.migration_completion_file_sha256),
         "migration_completion_sha256": source_inventory.migration_completion_sha256,
         "migration_plan_sha256": source_inventory.migration_plan_sha256,
         "source_inventory_sha256": source_inventory.source_inventory_sha256,
@@ -797,12 +755,8 @@ def build_semantic_t1_successor_cache_plan(
             "cache_trace_inputs": inputs,
             "cache_input_inventory_sha256": _sha(inputs),
             "selected_trace_count": len(inputs),
-            "complete_progress_record_count": sum(
-                int(item["path_length"]) + 1 for item in inputs
-            ),
-            "selected_panel_entry_count": sum(
-                len(item["panel_entry_sha256s"]) for item in inputs
-            ),
+            "complete_progress_record_count": sum(int(item["path_length"]) + 1 for item in inputs),
+            "selected_panel_entry_count": sum(len(item["panel_entry_sha256s"]) for item in inputs),
         }
         task_identity_sha256 = _sha(
             {
@@ -885,9 +839,7 @@ def validate_semantic_t1_successor_cache_plan(
         )
     _require_nonauthorizing(plan, field_name="semantic T1 successor-cache plan")
     current_policy = load_semantic_t1_successor_cache_policy(repo_root=repo_root)
-    current_implementation = semantic_t1_successor_cache_implementation_sha256(
-        repo_root=repo_root
-    )
+    current_implementation = semantic_t1_successor_cache_implementation_sha256(repo_root=repo_root)
     if (
         plan.get("policy") != current_policy
         or plan.get("implementation_sha256") != current_implementation
@@ -906,9 +858,7 @@ def validate_semantic_t1_successor_cache_plan(
         or plan.get("task_inventory_sha256") != _sha(tasks)
         or not 0 < len(tasks) <= current_policy["maximum_leaf_count"]
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 successor-cache task inventory disagrees"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 successor-cache task inventory disagrees")
     base_identity = {
         "source_revision": plan["source_revision"],
         "policy": plan["policy"],
@@ -920,9 +870,7 @@ def validate_semantic_t1_successor_cache_plan(
         "output_prefix": plan["output_prefix"],
     }
     if plan.get("build_identity_sha256") != _sha(base_identity):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 successor-cache build identity disagrees"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 successor-cache build identity disagrees")
     panel_binding = plan.get("panel_binding")
     expected_panel_binding_fields = {
         "completion_artifact_path",
@@ -945,9 +893,7 @@ def validate_semantic_t1_successor_cache_plan(
         "process_identity_sha256",
         "gate_zero_binding",
     }
-    if not isinstance(panel_binding, dict) or set(panel_binding) != (
-        expected_panel_binding_fields
-    ):
+    if not isinstance(panel_binding, dict) or set(panel_binding) != (expected_panel_binding_fields):
         raise SemanticT1SuccessorCacheError(
             "semantic T1 successor-cache panel binding fields disagree"
         )
@@ -976,8 +922,7 @@ def validate_semantic_t1_successor_cache_plan(
         or not panel_entry_sha256s
         or len(set(panel_entry_sha256s)) != len(panel_entry_sha256s)
         or any(not _is_sha(item) for item in panel_entry_sha256s)
-        or panel_binding.get("panel_entry_inventory_sha256")
-        != _sha(panel_entry_sha256s)
+        or panel_binding.get("panel_entry_inventory_sha256") != _sha(panel_entry_sha256s)
         or support_time.hex() != panel_binding.get("support_time_hex")
         or type(panel_binding.get("panel_file_bytes")) is not int
         or panel_binding["panel_file_bytes"] <= 0
@@ -1026,10 +971,9 @@ def validate_semantic_t1_successor_cache_plan(
         != gate_zero_binding["model_runtime_identity_sha256"]
         or model_runtime.get("initial_model_state_sha256")
         != gate_zero_binding["initial_model_state_sha256"]
-        or model_runtime.get("source_revision_sha256")
+        or model_runtime.get("execution_source_revision_sha256")
         != gate_zero_binding["model_source_revision_sha256"]
-        or model_runtime.get("process_identity_sha256")
-        != panel_binding["process_identity_sha256"]
+        or model_runtime.get("process_identity_sha256") != panel_binding["process_identity_sha256"]
         or semantic_contract.get("contract_sha256")
         != model_runtime.get("semantic_model_process_contract_sha256")
     ):
@@ -1082,8 +1026,7 @@ def validate_semantic_t1_successor_cache_plan(
         != model_runtime.get("process_identity_sha256")
         or source_inventory.get("process_identity_sha256")
         != plan["panel_binding"].get("process_identity_sha256")
-        or source_inventory.get("action_codec_schema_version")
-        != ACTION_CODEC_V4_SCHEMA_VERSION
+        or source_inventory.get("action_codec_schema_version") != ACTION_CODEC_V4_SCHEMA_VERSION
         or not isinstance(source_inventory.get("action_codec_implementation_hash"), str)
         or len(source_inventory["action_codec_implementation_hash"]) != 16
         or any(
@@ -1130,9 +1073,7 @@ def validate_semantic_t1_successor_cache_plan(
     for task_index, task in enumerate(tasks):
         if not isinstance(task, dict):
             raise SemanticT1SuccessorCacheError("cache task must be an object")
-        task_body = {
-            key: item for key, item in task.items() if key != "task_identity_sha256"
-        }
+        task_body = {key: item for key, item in task.items() if key != "task_identity_sha256"}
         source = task.get("semantic_source")
         inputs = task.get("cache_trace_inputs")
         if (
@@ -1142,8 +1083,7 @@ def validate_semantic_t1_successor_cache_plan(
             or source.get("partition_role") != "train"
             or source.get("data_lane") not in REQUIRED_DATA_LANES
             or source.get("data_lane") in observed_data_lanes
-            or source.get("process_identity_sha256")
-            != source_inventory["process_identity_sha256"]
+            or source.get("process_identity_sha256") != source_inventory["process_identity_sha256"]
             or source.get("action_codec_schema_version")
             != source_inventory["action_codec_schema_version"]
             or source.get("action_codec_implementation_hash")
@@ -1209,14 +1149,10 @@ def validate_semantic_t1_successor_cache_plan(
         typed_inputs: list[SemanticT1CacheTraceInput] = []
         for item in inputs:
             if not isinstance(item, dict):
-                raise SemanticT1SuccessorCacheError(
-                    "cache trace input must be an object"
-                )
+                raise SemanticT1SuccessorCacheError("cache trace input must be an object")
             values = dict(item)
             if values.pop("partition_role", None) != "train":
-                raise SemanticT1SuccessorCacheError(
-                    "cache trace input must be train-only"
-                )
+                raise SemanticT1SuccessorCacheError("cache trace input must be train-only")
             for field_name in ("selected_progress_indices", "panel_entry_sha256s"):
                 if not isinstance(values.get(field_name), list):
                     raise SemanticT1SuccessorCacheError(
@@ -1249,9 +1185,7 @@ def validate_semantic_t1_successor_cache_plan(
             or task.get("selected_panel_entry_count") != selected_progress
             or not typed_inputs
         ):
-            raise SemanticT1SuccessorCacheError(
-                "semantic T1 successor-cache task census disagrees"
-            )
+            raise SemanticT1SuccessorCacheError("semantic T1 successor-cache task census disagrees")
         observed_traces += len(typed_inputs)
         observed_progress += complete_progress
         observed_entries += selected_progress
@@ -1280,9 +1214,7 @@ def validate_semantic_t1_successor_cache_plan(
         field_name="cache plan output_prefix",
     ).parent
     if expected_run_root != expected_prefix / plan["build_identity_sha256"]:
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 successor-cache run path disagrees"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 successor-cache run path disagrees")
     return plan
 
 
@@ -1310,9 +1242,7 @@ def _model_matches_plan(
     )
 
     if not isinstance(model, FactorizedTraceletRateModel):
-        raise TypeError(
-            "semantic T1 cache compiler requires FactorizedTraceletRateModel"
-        )
+        raise TypeError("semantic T1 cache compiler requires FactorizedTraceletRateModel")
     runtime = plan["model_runtime_identity"]
     architecture = runtime["architecture"]
     state = model.state_dict()
@@ -1367,9 +1297,7 @@ def compile_semantic_t1_successor_cache_leaf(
         None,
     )
     if task is None:
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache task is absent from the plan"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache task is absent from the plan")
     if (
         not isinstance(panel, SemanticT1PanelArtifact)
         or panel.artifact_sha256 != validated["panel_binding"]["panel_artifact_sha256"]
@@ -1403,9 +1331,7 @@ def compile_semantic_t1_successor_cache_leaf(
     expected_inputs = [
         SemanticT1CacheTraceInput(
             **{
-                **{
-                    key: value for key, value in item.items() if key != "partition_role"
-                },
+                **{key: value for key, value in item.items() if key != "partition_role"},
                 "selected_progress_indices": tuple(item["selected_progress_indices"]),
                 "panel_entry_sha256s": tuple(item["panel_entry_sha256s"]),
             }
@@ -1466,9 +1392,7 @@ def compile_semantic_t1_successor_cache_leaf(
         )
         ordered = canonical_successor_fiber_records_for_shard(
             compiled,
-            expected_packed_shard_content_sha256=task["semantic_source"][
-                "semantic_shard_sha256"
-            ],
+            expected_packed_shard_content_sha256=task["semantic_source"]["semantic_shard_sha256"],
             limits=DEFAULT_SUCCESSOR_FIBER_CACHE_LIMITS,
         )
     except (
@@ -1517,8 +1441,7 @@ def compile_semantic_t1_successor_cache_leaf(
             if (
                 cache_record.teacher_fiber is None
                 or cache_record.source_state_sha256 != entry.source_state_sha256
-                or cache_record.target_state_sha256
-                != entry.representative_target_state_sha256
+                or cache_record.target_state_sha256 != entry.representative_target_state_sha256
                 or cache_record.target_key != entry.successor_canonical_key
                 or entry.progress_index != progress_index
             ):
@@ -1620,9 +1543,7 @@ def validate_semantic_t1_successor_cache_leaf(
         or leaf.get("model_scores_or_probabilities_stored") is not False
         or leaf.get("hazard_coordinates_included") is not False
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf schema or self-hash disagrees"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf schema or self-hash disagrees")
     _require_nonauthorizing(leaf, field_name="semantic T1 cache leaf")
     records_payload = leaf.get("records")
     bindings = leaf.get("panel_entry_bindings")
@@ -1636,13 +1557,9 @@ def validate_semantic_t1_successor_cache_leaf(
         or leaf.get("panel_entry_binding_inventory_sha256") != _sha(bindings)
         or not isinstance(source, dict)
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf inventories disagree"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf inventories disagree")
     try:
-        records = tuple(
-            successor_fiber_cache_record_from_payload(item) for item in records_payload
-        )
+        records = tuple(successor_fiber_cache_record_from_payload(item) for item in records_payload)
         ordered = canonical_successor_fiber_records_for_shard(
             records,
             expected_packed_shard_content_sha256=source["semantic_shard_sha256"],
@@ -1653,30 +1570,19 @@ def validate_semantic_t1_successor_cache_leaf(
             "semantic T1 cache leaf coordinate records are invalid"
         ) from error
     if records != ordered:
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf records are not canonical"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf records are not canonical")
     if any(
-        record.address.partition != "train"
-        or record.address.layer != source.get("data_lane")
+        record.address.partition != "train" or record.address.layer != source.get("data_lane")
         for record in records
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf contains a wrong role or lane"
-        )
-    record_keys = {
-        _sha(_record_address_payload(record.address)): record for record in records
-    }
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf contains a wrong role or lane")
+    record_keys = {_sha(_record_address_payload(record.address)): record for record in records}
     if len(record_keys) != len(records):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf repeats a progress address"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf repeats a progress address")
     panel_ids: set[str] = set()
     for binding in bindings:
         if not isinstance(binding, dict):
-            raise SemanticT1SuccessorCacheError(
-                "semantic T1 cache binding must be an object"
-            )
+            raise SemanticT1SuccessorCacheError("semantic T1 cache binding must be an object")
         binding_body = dict(binding)
         binding_sha256 = binding_body.pop("binding_sha256", None)
         address_sha256 = binding.get("cache_address_sha256")
@@ -1698,9 +1604,7 @@ def validate_semantic_t1_successor_cache_leaf(
             or binding.get("target_state_sha256") != record.target_state_sha256
             or binding.get("successor_canonical_key") != record.target_key
         ):
-            raise SemanticT1SuccessorCacheError(
-                "semantic T1 cache panel-entry binding disagrees"
-            )
+            raise SemanticT1SuccessorCacheError("semantic T1 cache panel-entry binding disagrees")
         panel_ids.add(str(panel_id))
     if [item["panel_entry_sha256"] for item in bindings] != sorted(panel_ids):
         raise SemanticT1SuccessorCacheError(
@@ -1726,9 +1630,7 @@ def _expected_task_address_contract(
         )
         for progress_index in range(cache_input["path_length"] + 1):
             address = {
-                "packed_shard_content_sha256": cache_input[
-                    "packed_shard_content_sha256"
-                ],
+                "packed_shard_content_sha256": cache_input["packed_shard_content_sha256"],
                 "packed_shard_name": cache_input["packed_shard_name"],
                 "entry_index": cache_input["packed_entry_index"],
                 "layer": cache_input["data_lane"],
@@ -1755,9 +1657,7 @@ def _expected_task_address_contract(
     return expected_records, expected_panel_entries
 
 
-def _task_for_leaf(
-    plan: Mapping[str, Any], leaf: Mapping[str, Any]
-) -> Mapping[str, Any]:
+def _task_for_leaf(plan: Mapping[str, Any], leaf: Mapping[str, Any]) -> Mapping[str, Any]:
     task = next(
         (
             item
@@ -1767,21 +1667,17 @@ def _task_for_leaf(
         None,
     )
     if task is None:
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf has no task in the frozen plan"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf has no task in the frozen plan")
     runtime = leaf.get("compiler_runtime")
     if (
         leaf.get("run_identity_sha256") != plan["run_identity_sha256"]
         or leaf.get("build_identity_sha256") != plan["build_identity_sha256"]
-        or leaf.get("panel_artifact_sha256")
-        != plan["panel_binding"]["panel_artifact_sha256"]
+        or leaf.get("panel_artifact_sha256") != plan["panel_binding"]["panel_artifact_sha256"]
         or leaf.get("decision_source_inventory_sha256")
         != plan["panel_binding"]["decision_source_inventory_sha256"]
         or leaf.get("semantic_source") != task["semantic_source"]
         or leaf.get("cache_trace_inputs") != task["cache_trace_inputs"]
-        or leaf.get("cache_input_inventory_sha256")
-        != task["cache_input_inventory_sha256"]
+        or leaf.get("cache_input_inventory_sha256") != task["cache_input_inventory_sha256"]
         or leaf.get("record_count") != task["complete_progress_record_count"]
         or leaf.get("panel_entry_binding_count") != task["selected_panel_entry_count"]
         or leaf.get("support_time_hex") != plan["panel_binding"]["support_time_hex"]
@@ -1807,32 +1703,20 @@ def _task_for_leaf(
         or not runtime["rdkit_version"]
         or (
             runtime.get("cuda_version") is not None
-            and (
-                not isinstance(runtime["cuda_version"], str)
-                or not runtime["cuda_version"]
-            )
+            and (not isinstance(runtime["cuda_version"], str) or not runtime["cuda_version"])
         )
     ):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache leaf differs from its frozen task"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache leaf differs from its frozen task")
     expected_records, expected_panel_entries = _expected_task_address_contract(task)
     observed_records = {
-        _sha(_record_address_payload(record.address)): _record_address_payload(
-            record.address
-        )
-        for record in (
-            successor_fiber_cache_record_from_payload(item) for item in leaf["records"]
-        )
+        _sha(_record_address_payload(record.address)): _record_address_payload(record.address)
+        for record in (successor_fiber_cache_record_from_payload(item) for item in leaf["records"])
     }
     observed_panel_entries = {
         binding["panel_entry_sha256"]: binding["cache_address"]
         for binding in leaf["panel_entry_bindings"]
     }
-    if (
-        observed_records != expected_records
-        or observed_panel_entries != expected_panel_entries
-    ):
+    if observed_records != expected_records or observed_panel_entries != expected_panel_entries:
         raise SemanticT1SuccessorCacheError(
             "semantic T1 cache leaf address union differs from its exact "
             "complete-trace and selected-progress contract"
@@ -1931,9 +1815,7 @@ def build_semantic_t1_successor_cache_manifest(
             "record_count": leaf["record_count"],
             "record_inventory_sha256": leaf["record_inventory_sha256"],
             "panel_entry_binding_count": leaf["panel_entry_binding_count"],
-            "panel_entry_binding_inventory_sha256": leaf[
-                "panel_entry_binding_inventory_sha256"
-            ],
+            "panel_entry_binding_inventory_sha256": leaf["panel_entry_binding_inventory_sha256"],
         }
         leaves.append(leaf_spec)
         all_panel_bindings.extend(leaf["panel_entry_bindings"])
@@ -1977,9 +1859,7 @@ def build_semantic_t1_successor_cache_manifest(
         "selected_trace_count": validated["selected_trace_count"],
         "record_count": record_count,
         "panel_entry_binding_count": len(all_panel_bindings),
-        "panel_entry_inventory_sha256": validated["panel_binding"][
-            "panel_entry_inventory_sha256"
-        ],
+        "panel_entry_inventory_sha256": validated["panel_binding"]["panel_entry_inventory_sha256"],
         "panel_entry_binding_inventory_sha256": _sha(all_panel_bindings),
         "model_scores_or_probabilities_stored": False,
         "hazard_coordinates_included": False,
@@ -2049,16 +1929,14 @@ def validate_semantic_t1_successor_cache_manifest(
         or manifest.get("model_runtime_identity") != plan["model_runtime_identity"]
         or manifest.get("semantic_model_process_contract")
         != plan["semantic_model_process_contract"]
-        or manifest.get("semantic_source_inventory")
-        != plan["semantic_source_inventory"]
+        or manifest.get("semantic_source_inventory") != plan["semantic_source_inventory"]
         or not isinstance(leaves, list)
         or manifest.get("leaf_count") != len(leaves)
         or manifest.get("leaf_inventory_sha256") != _sha(leaves)
         or manifest.get("leaf_count") != plan["task_count"]
         or manifest.get("selected_trace_count") != plan["selected_trace_count"]
         or manifest.get("record_count") != plan["complete_progress_record_count"]
-        or manifest.get("panel_entry_binding_count")
-        != plan["selected_panel_entry_count"]
+        or manifest.get("panel_entry_binding_count") != plan["selected_panel_entry_count"]
         or manifest.get("panel_entry_inventory_sha256")
         != plan["panel_binding"]["panel_entry_inventory_sha256"]
         or manifest.get("model_scores_or_probabilities_stored") is not False
@@ -2091,19 +1969,14 @@ def validate_semantic_t1_successor_cache_manifest(
     }
     for task, leaf in zip(plan["tasks"], leaves, strict=True):
         leaf_address = leaf.get("leaf_artifact_path")
-        expected_suffix = PurePosixPath(
-            "tasks", task["task_identity_sha256"], CACHE_LEAF_FILENAME
-        )
+        expected_suffix = PurePosixPath("tasks", task["task_identity_sha256"], CACHE_LEAF_FILENAME)
         if (
             set(leaf) != expected_leaf_fields
-            or leaf.get("semantic_shard_sha256")
-            != task["semantic_source"]["semantic_shard_sha256"]
+            or leaf.get("semantic_shard_sha256") != task["semantic_source"]["semantic_shard_sha256"]
             or leaf.get("data_lane") != task["semantic_source"]["data_lane"]
-            or leaf.get("cache_input_inventory_sha256")
-            != task["cache_input_inventory_sha256"]
+            or leaf.get("cache_input_inventory_sha256") != task["cache_input_inventory_sha256"]
             or leaf.get("record_count") != task["complete_progress_record_count"]
-            or leaf.get("panel_entry_binding_count")
-            != task["selected_panel_entry_count"]
+            or leaf.get("panel_entry_binding_count") != task["selected_panel_entry_count"]
             or not isinstance(leaf_address, str)
             or not PurePosixPath(leaf_address).is_absolute()
             or PurePosixPath(leaf_address).parts[-3:] != expected_suffix.parts
@@ -2126,14 +1999,10 @@ def validate_semantic_t1_successor_cache_manifest(
     return manifest
 
 
-def write_semantic_t1_successor_cache_artifact(
-    path: Path, value: Mapping[str, Any]
-) -> bool:
+def write_semantic_t1_successor_cache_artifact(path: Path, value: Mapping[str, Any]) -> bool:
     """Immutably publish a canonical plan, manifest, or completion object."""
 
-    return write_bytes_if_absent(
-        Path(path), _canonical_bytes(dict(value), newline=True)
-    )
+    return write_bytes_if_absent(Path(path), _canonical_bytes(dict(value), newline=True))
 
 
 def build_semantic_t1_successor_cache_completion(
@@ -2169,9 +2038,7 @@ def build_semantic_t1_successor_cache_completion(
     if plan_bytes != _canonical_bytes(
         dict(plan), newline=True
     ) or manifest_bytes != _canonical_bytes(dict(validated_manifest), newline=True):
-        raise SemanticT1SuccessorCacheError(
-            "semantic T1 cache completion input bytes disagree"
-        )
+        raise SemanticT1SuccessorCacheError("semantic T1 cache completion input bytes disagree")
     body = {
         "schema": CACHE_COMPLETION_SCHEMA,
         "schema_version": CACHE_COMPLETION_SCHEMA_VERSION,
@@ -2185,9 +2052,7 @@ def build_semantic_t1_successor_cache_completion(
         "decision_source_inventory_sha256": plan["panel_binding"][
             "decision_source_inventory_sha256"
         ],
-        "initial_model_state_sha256": plan["model_runtime_identity"][
-            "initial_model_state_sha256"
-        ],
+        "initial_model_state_sha256": plan["model_runtime_identity"]["initial_model_state_sha256"],
         "plan_artifact_path": _artifact_address(
             plan_source,
             artifact_root=artifact_root,
@@ -2286,16 +2151,10 @@ class SemanticT1SuccessorCache:
     completion: Mapping[str, Any]
     manifest: Mapping[str, Any]
     records: tuple[SuccessorFiberCacheRecord, ...]
-    records_by_address_sha256: Mapping[str, SuccessorFiberCacheRecord] = field(
-        repr=False
-    )
-    records_by_panel_entry_sha256: Mapping[str, SuccessorFiberCacheRecord] = field(
-        repr=False
-    )
+    records_by_address_sha256: Mapping[str, SuccessorFiberCacheRecord] = field(repr=False)
+    records_by_panel_entry_sha256: Mapping[str, SuccessorFiberCacheRecord] = field(repr=False)
 
-    def record_for_panel_entry_sha256(
-        self, panel_entry_sha256: str
-    ) -> SuccessorFiberCacheRecord:
+    def record_for_panel_entry_sha256(self, panel_entry_sha256: str) -> SuccessorFiberCacheRecord:
         try:
             return self.records_by_panel_entry_sha256[panel_entry_sha256]
         except KeyError as error:
@@ -2378,13 +2237,11 @@ def open_semantic_t1_successor_cache(
         plan=validated_plan,
     )
     if (
-        hashlib.sha256(plan_bytes).hexdigest()
-        != validated_completion["plan_file_sha256"]
+        hashlib.sha256(plan_bytes).hexdigest() != validated_completion["plan_file_sha256"]
         or validated_plan["plan_sha256"] != validated_completion["plan_sha256"]
         or hashlib.sha256(manifest_bytes).hexdigest()
         != validated_completion["manifest_file_sha256"]
-        or validated_manifest["manifest_sha256"]
-        != validated_completion["manifest_sha256"]
+        or validated_manifest["manifest_sha256"] != validated_completion["manifest_sha256"]
         or validated_manifest["leaf_count"] != validated_completion["leaf_count"]
         or validated_manifest["record_count"] != validated_completion["record_count"]
         or validated_manifest["panel_entry_binding_count"]
@@ -2398,9 +2255,7 @@ def open_semantic_t1_successor_cache(
     records_by_address: dict[str, SuccessorFiberCacheRecord] = {}
     records_by_panel: dict[str, SuccessorFiberCacheRecord] = {}
     binding_payloads: list[dict[str, Any]] = []
-    for task, leaf_spec in zip(
-        validated_plan["tasks"], validated_manifest["leaves"], strict=True
-    ):
+    for task, leaf_spec in zip(validated_plan["tasks"], validated_manifest["leaves"], strict=True):
         leaf_path = _artifact_path(
             leaf_spec["leaf_artifact_path"],
             artifact_root=artifact_root,
@@ -2425,17 +2280,13 @@ def open_semantic_t1_successor_cache(
             hashlib.sha256(leaf_bytes).hexdigest() != leaf_spec["leaf_file_sha256"]
             or len(leaf_bytes) != leaf_spec["leaf_file_bytes"]
             or validated_leaf["leaf_sha256"] != leaf_spec["leaf_sha256"]
-            or validated_leaf["record_inventory_sha256"]
-            != leaf_spec["record_inventory_sha256"]
+            or validated_leaf["record_inventory_sha256"] != leaf_spec["record_inventory_sha256"]
             or validated_leaf["panel_entry_binding_inventory_sha256"]
             != leaf_spec["panel_entry_binding_inventory_sha256"]
         ):
-            raise SemanticT1SuccessorCacheError(
-                "semantic T1 cache leaf differs from the manifest"
-            )
+            raise SemanticT1SuccessorCacheError("semantic T1 cache leaf differs from the manifest")
         leaf_records = tuple(
-            successor_fiber_cache_record_from_payload(item)
-            for item in validated_leaf["records"]
+            successor_fiber_cache_record_from_payload(item) for item in validated_leaf["records"]
         )
         for record in leaf_records:
             address_sha256 = _sha(_record_address_payload(record.address))
@@ -2450,17 +2301,14 @@ def open_semantic_t1_successor_cache(
                 raise SemanticT1SuccessorCacheError(
                     "semantic T1 cache repeats a panel entry across leaves"
                 )
-            records_by_panel[panel_id] = records_by_address[
-                binding["cache_address_sha256"]
-            ]
+            records_by_panel[panel_id] = records_by_address[binding["cache_address_sha256"]]
         all_records.extend(leaf_records)
         binding_payloads.extend(validated_leaf["panel_entry_bindings"])
     binding_payloads.sort(key=lambda item: item["panel_entry_sha256"])
     if (
         len(all_records) != validated_manifest["record_count"]
         or len(records_by_panel) != validated_manifest["panel_entry_binding_count"]
-        or _sha(binding_payloads)
-        != validated_manifest["panel_entry_binding_inventory_sha256"]
+        or _sha(binding_payloads) != validated_manifest["panel_entry_binding_inventory_sha256"]
     ):
         raise SemanticT1SuccessorCacheError(
             "semantic T1 cache loaded census differs from the manifest"

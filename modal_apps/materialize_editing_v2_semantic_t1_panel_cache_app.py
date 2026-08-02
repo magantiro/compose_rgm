@@ -69,9 +69,7 @@ PANEL_POLICY_SCHEMA_VERSION = 1
 PANEL_POLICY_STATUS = "FROZEN_PROSPECTIVE_PANEL_NO_DOWNSTREAM_AUTHORITY"
 PANEL_POLICY_PANEL_KIND = "unique_state_single_target_canonical_successor_capacity"
 PANEL_POLICY_OBJECTIVE_UNIT = "exact_source_frozen_time_canonical_successor"
-PANEL_POLICY_CACHE_HANDOFF = (
-    "complete_train_trace_union_for_cpu_successor_fiber_cache_v1"
-)
+PANEL_POLICY_CACHE_HANDOFF = "complete_train_trace_union_for_cpu_successor_fiber_cache_v1"
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -113,9 +111,7 @@ for source_directory in IMAGE_SOURCE_DIRECTORIES:
     )
 
 app = modal.App("compose-v4-editing-v2-semantic-t1-panel-cache")
-artifact_volume = modal.Volume.from_name(
-    "compose-v4-artifacts", create_if_missing=False
-)
+artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
 
 
 def _canonical_bytes(value: object, *, pretty: bool = False) -> bytes:
@@ -219,15 +215,10 @@ def _serialized_source_paths(root: Path) -> tuple[str, ...]:
 
 
 def _serialized_source_hashes(root: Path) -> dict[str, str]:
-    return {
-        relative: _file_sha256(root / relative)
-        for relative in _serialized_source_paths(root)
-    }
+    return {relative: _file_sha256(root / relative) for relative in _serialized_source_paths(root)}
 
 
-def local_source_revision(
-    *, expected_commit: str, repo_root: Path = ROOT
-) -> dict[str, Any]:
+def local_source_revision(*, expected_commit: str, repo_root: Path = ROOT) -> dict[str, Any]:
     """Bind the exact clean tree and all code/config bytes in the image."""
 
     _require_commit(expected_commit, field="expected_commit")
@@ -264,9 +255,7 @@ def _validate_source_revision(value: object, *, remote_root: Path) -> dict[str, 
         "serialized_source_hashes_sha256",
         "source_revision_sha256",
     }
-    body = {
-        key: item for key, item in revision.items() if key != "source_revision_sha256"
-    }
+    body = {key: item for key, item in revision.items() if key != "source_revision_sha256"}
     hashes = _serialized_source_hashes(remote_root)
     if (
         set(revision) != expected_fields
@@ -346,10 +335,7 @@ def _load_panel_policy(*, root: Path) -> dict[str, Any]:
         or payload.get("schema") != PANEL_POLICY_SCHEMA
         or payload.get("schema_version") != PANEL_POLICY_SCHEMA_VERSION
         or payload.get("status") != PANEL_POLICY_STATUS
-        or any(
-            payload.get(field) is not expected
-            for field, expected in _NO_AUTHORITY.items()
-        )
+        or any(payload.get(field) is not expected for field, expected in _NO_AUTHORITY.items())
         or payload.get("panel_kind") != PANEL_POLICY_PANEL_KIND
         or payload.get("objective_unit") != PANEL_POLICY_OBJECTIVE_UNIT
         or payload.get("cache_handoff") != PANEL_POLICY_CACHE_HANDOFF
@@ -392,15 +378,10 @@ def build_run_request(
         _artifact_path(artifact_path, artifact_root=ARTIFACT_ROOT, field=name)
         normalized_inputs[name] = {
             "artifact_path": artifact_path,
-            "file_sha256": _require_sha256(
-                record["file_sha256"], field=f"{name}.file_sha256"
-            ),
+            "file_sha256": _require_sha256(record["file_sha256"], field=f"{name}.file_sha256"),
         }
     request_payload = dict(panel_request)
-    if any(
-        request_payload.get(field) is not expected
-        for field, expected in _NO_AUTHORITY.items()
-    ):
+    if any(request_payload.get(field) is not expected for field, expected in _NO_AUTHORITY.items()):
         raise ValueError("semantic T1 panel request grants forbidden authority")
     _artifact_path(
         f"{output_prefix}/placeholder",
@@ -424,9 +405,7 @@ def build_run_request(
             "file_sha256": _require_sha256(
                 panel_policy_file_sha256, field="panel_policy_file_sha256"
             ),
-            "policy_sha256": _require_sha256(
-                panel_policy_sha256, field="panel_policy_sha256"
-            ),
+            "policy_sha256": _require_sha256(panel_policy_sha256, field="panel_policy_sha256"),
         },
         "panel_implementation_sha256": _require_sha256(
             panel_implementation_sha256, field="panel_implementation_sha256"
@@ -452,9 +431,7 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
     from compose_v4.experiments import editing_v2_semantic_t1_panel_cache as t1_panel
 
     return {
-        "resolve_decision_source": (
-            resolve_editing_v2_semantic_active8_decision_source
-        ),
+        "resolve_decision_source": (resolve_editing_v2_semantic_active8_decision_source),
         "write_bytes_if_absent": write_bytes_if_absent,
         "gate_zero": gate_zero,
         "t1_panel": t1_panel,
@@ -482,9 +459,7 @@ def _require_gate_zero_siblings(
     }
     parents = {path.parent.resolve() for path in expected}
     if len(parents) != 1 or any(path.name != name for path, name in expected.items()):
-        raise RuntimeError(
-            "semantic T1 Gate-0 inputs must be the exact three sibling artifacts"
-        )
+        raise RuntimeError("semantic T1 Gate-0 inputs must be the exact three sibling artifacts")
     return next(iter(parents))
 
 
@@ -505,18 +480,12 @@ def _completion_body(
         "status": COMPLETION_STATUS,
         **_NO_AUTHORITY,
         "run_identity_sha256": run_request["run_identity_sha256"],
-        "source_revision_sha256": run_request["source_revision"][
-            "source_revision_sha256"
-        ],
+        "source_revision_sha256": run_request["source_revision"]["source_revision_sha256"],
         "input_inventory_sha256": _sha256(run_request["inputs"]),
         "panel_policy": run_request["panel_policy"],
-        "request_artifact_path": _artifact_address(
-            request_path, artifact_root=artifact_root
-        ),
+        "request_artifact_path": _artifact_address(request_path, artifact_root=artifact_root),
         "request_file_sha256": _file_sha256(request_path),
-        "panel_artifact_path": _artifact_address(
-            panel_path, artifact_root=artifact_root
-        ),
+        "panel_artifact_path": _artifact_address(panel_path, artifact_root=artifact_root),
         "panel_artifact_sha256": panel.artifact_sha256,
         "panel_file_sha256": panel_file_sha256,
         "panel_file_bytes": panel_file_bytes,
@@ -649,7 +618,7 @@ def _driver_impl(
     if not isinstance(evidence_runtime, Mapping):
         raise TypeError("semantic T1 Gate-0 model runtime identity is absent")
     expected_model_source = _require_sha256(
-        evidence_runtime.get("source_revision_sha256"),
+        evidence_runtime.get("execution_source_revision_sha256"),
         field="Gate-0 model source revision",
     )
     policy = _load_panel_policy(root=remote_root)
@@ -658,9 +627,7 @@ def _driver_impl(
         or policy.get("objective_unit") != t1_panel.UNIQUE_OBJECTIVE_UNIT
         or policy.get("cache_handoff") != t1_panel.CACHE_HANDOFF
     ):
-        raise RuntimeError(
-            "semantic T1 panel policy differs from current panel semantics"
-        )
+        raise RuntimeError("semantic T1 panel policy differs from current panel semantics")
     support_time_hex = policy.get("support_time_hex")
     try:
         support_time = float.fromhex(support_time_hex)
@@ -705,9 +672,7 @@ def _driver_impl(
     panel_path = output_directory / PANEL_FILENAME
     completion_path = output_directory / COMPLETION_FILENAME
     if (
-        loaded["write_bytes_if_absent"](
-            request_path, _canonical_bytes(run_request, pretty=True)
-        )
+        loaded["write_bytes_if_absent"](request_path, _canonical_bytes(run_request, pretty=True))
         and stage_commit is not None
     ):
         stage_commit()
@@ -772,28 +737,18 @@ def _driver_impl(
         "completion_sha256": _sha256(completion_body),
     }
     if (
-        loaded["write_bytes_if_absent"](
-            completion_path, _canonical_bytes(completion) + b"\n"
-        )
+        loaded["write_bytes_if_absent"](completion_path, _canonical_bytes(completion) + b"\n")
         and stage_commit is not None
     ):
         stage_commit()
-    persisted_completion = _load_canonical_object(
-        completion_path, field="semantic T1 completion"
-    )
+    persisted_completion = _load_canonical_object(completion_path, field="semantic T1 completion")
     _validate_completion(persisted_completion, expected_body=completion_body)
     return {
         "run_root": _artifact_address(output_directory, artifact_root=artifact_root),
         "run_identity_sha256": run_request["run_identity_sha256"],
-        "request_artifact_path": _artifact_address(
-            request_path, artifact_root=artifact_root
-        ),
-        "panel_artifact_path": _artifact_address(
-            panel_path, artifact_root=artifact_root
-        ),
-        "completion_artifact_path": _artifact_address(
-            completion_path, artifact_root=artifact_root
-        ),
+        "request_artifact_path": _artifact_address(request_path, artifact_root=artifact_root),
+        "panel_artifact_path": _artifact_address(panel_path, artifact_root=artifact_root),
+        "completion_artifact_path": _artifact_address(completion_path, artifact_root=artifact_root),
         "panel_artifact_sha256": panel.artifact_sha256,
         "panel_file_sha256": panel_file_sha256,
         "completion_sha256": completion["completion_sha256"],

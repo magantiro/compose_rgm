@@ -41,7 +41,12 @@ from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
 )
 from compose_v4.experiments.editing_v2_semantic_p50_runner import (
     SemanticP50RuntimeInputs,
-    evaluate_semantic_p50_scratch_validation,
+)
+from compose_v4.experiments.editing_v2_execution_source_revision import (
+    EXECUTION_SOURCE_REVISION_SCHEMA,
+    EditingV2ExecutionSourceRevisionError,
+    build_execution_source_revision,
+    validate_execution_source_revision,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_source_inventory import (
     SEMANTIC_P50_SOURCE_INVENTORY_FILENAME,
@@ -86,7 +91,7 @@ LAUNCH_SCHEMA = "compose.editing_v2.semantic_p50_launch_projection"
 LAUNCH_SCHEMA_VERSION = 2
 LAUNCH_STATUS = "FROZEN_P50_LAUNCH_PROJECTION_NO_TRAINING_AUTHORITY"
 LAUNCH_FILENAME = "SEMANTIC_P50_LAUNCH_PROJECTION.json"
-SOURCE_REVISION_SCHEMA = "compose.editing_v2.semantic_p50_clean_source_revision"
+SOURCE_REVISION_SCHEMA = EXECUTION_SOURCE_REVISION_SCHEMA
 ARGV_SCHEMA = "compose.editing_v2.semantic_p50_exact_argv_v1"
 RESERVATION_FILENAME = "SEMANTIC_P50_OUTPUT_RESERVED.json"
 PERMIT_SCHEMA = "compose.editing_v2.semantic_p50_execution_permit"
@@ -167,7 +172,6 @@ TRAINING_CONTRACT = {
 }
 
 _SHA_RE = re.compile(r"^[0-9a-f]{64}$")
-_GIT_RE = re.compile(r"^[0-9a-f]{40}$")
 _IMAGE_RE = re.compile(r"^.+@sha256:([0-9a-f]{64})$")
 _UTC_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 _MAX_JSON_BYTES = 256 << 20
@@ -182,7 +186,8 @@ _MODEL_RUNTIME_FIELDS = {
     "initialization_seed",
     "initial_model_state_sha256",
     "software",
-    "source_revision_sha256",
+    "producer_source_revision_sha256",
+    "execution_source_revision_sha256",
     "identity_sha256",
 }
 _HARDWARE_FIELDS = {
@@ -564,7 +569,7 @@ def open_semantic_p50_execution_prerequisites(
         expected_source_revision_sha256,
         field="expected_source_revision_sha256",
     )
-    if cache.completion.get("source_revision_sha256") != source_revision_sha:
+    if cache.completion.get("execution_source_revision_sha256") != source_revision_sha:
         raise SemanticP50ExecutionContractError(
             "successor cache names another clean source revision"
         )
@@ -607,7 +612,6 @@ def open_semantic_p50_execution_prerequisites(
             successor_cache=cache,
         ),
     )
-    evaluate_semantic_p50_scratch_validation(runtime_inputs)
     bindings = (
         _binding_from_opened(
             paths.source_inventory_path,
@@ -693,44 +697,25 @@ def observe_clean_source_revision(repo_root: Path) -> dict[str, Any]:
     commit = _git(root, "rev-parse", "HEAD")
     tree = _git(root, "rev-parse", "HEAD^{tree}")
     status = _git(root, "status", "--porcelain=v1", "--untracked-files=all")
-    if _GIT_RE.fullmatch(commit) is None or _GIT_RE.fullmatch(tree) is None or status:
+    if status:
         raise SemanticP50ExecutionContractError(
             "P50 launch requires an exact clean committed source tree"
         )
-    body = {
-        "schema": SOURCE_REVISION_SCHEMA,
-        "schema_version": 1,
-        "commit": commit,
-        "tree": tree,
-        "worktree_clean": True,
-    }
-    return {**body, "source_revision_sha256": _sha(body)}
+    try:
+        return build_execution_source_revision(commit=commit, tree=tree)
+    except EditingV2ExecutionSourceRevisionError as error:
+        raise SemanticP50ExecutionContractError(
+            "P50 Git commit or tree identity is malformed"
+        ) from error
 
 
 def _validate_source_revision_attestation(value: object) -> dict[str, Any]:
-    fields = {
-        "schema",
-        "schema_version",
-        "commit",
-        "tree",
-        "worktree_clean",
-        "source_revision_sha256",
-    }
-    if not isinstance(value, Mapping) or set(value) != fields:
-        raise SemanticP50ExecutionContractError("source revision attestation fields disagree")
-    revision = dict(value)
-    body = dict(revision)
-    supplied = body.pop("source_revision_sha256")
-    if (
-        revision.get("schema") != SOURCE_REVISION_SCHEMA
-        or revision.get("schema_version") != 1
-        or _GIT_RE.fullmatch(str(revision.get("commit"))) is None
-        or _GIT_RE.fullmatch(str(revision.get("tree"))) is None
-        or revision.get("worktree_clean") is not True
-        or supplied != _sha(body)
-    ):
-        raise SemanticP50ExecutionContractError("source revision attestation identity disagrees")
-    return revision
+    try:
+        return validate_execution_source_revision(value)
+    except EditingV2ExecutionSourceRevisionError as error:
+        raise SemanticP50ExecutionContractError(
+            "source revision attestation identity disagrees"
+        ) from error
 
 
 def _source_revision_for_validation(
@@ -787,7 +772,7 @@ def _validate_model_runtime_identity(
         supplied != _sha(body)
         or supplied != source_binding.model_runtime_identity_sha256
         or runtime.get("schema") != "compose.data.semantic_active8_exact_model_runtime"
-        or runtime.get("schema_version") != 1
+        or runtime.get("schema_version") != 2
         or runtime.get("process_identity_sha256") != scratch_runtime.process_identity_sha256
         or runtime.get("process_identity_sha256") != source_binding.process_identity_sha256
         or runtime.get("semantic_model_process_contract_sha256")
@@ -798,7 +783,9 @@ def _validate_model_runtime_identity(
         or runtime.get("initial_model_state_sha256") != scratch_runtime.initial_model_state_sha256
         or runtime.get("initial_model_state_sha256")
         != state_dict_semantic_sha256(scratch_runtime.model.state_dict())
-        or runtime.get("source_revision_sha256") != source_revision_sha256
+        or runtime.get("execution_source_revision_sha256") != source_revision_sha256
+        or not isinstance(runtime.get("producer_source_revision_sha256"), str)
+        or _SHA_RE.fullmatch(runtime["producer_source_revision_sha256"]) is None
         or scratch_runtime.architecture.operator_capability_fingerprint
         != source_binding.operator_capability_fingerprint
         or not isinstance(runtime.get("software"), Mapping)
@@ -821,15 +808,23 @@ def build_semantic_p50_runtime_contract(
     prerequisite_paths: SemanticP50ExecutionPrerequisitePaths,
     expected_source_binding: SemanticP50SourceInventoryBinding,
     trainer_source_path: Path,
+    expected_source_revision: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    revision = observe_clean_source_revision(prerequisite_paths.repo_root)
+    revision = _source_revision_for_validation(
+        prerequisite_paths.repo_root,
+        expected_source_revision=expected_source_revision,
+    )
     prerequisites = open_semantic_p50_execution_prerequisites(
         prerequisite_paths,
         scratch_runtime=scratch_runtime,
         expected_source_binding=expected_source_binding,
         expected_source_revision_sha256=revision["source_revision_sha256"],
     )
-    trainer = _trainer_identity(trainer_source_path, repo_root=prerequisite_paths.repo_root)
+    trainer = _trainer_identity(
+        trainer_source_path,
+        repo_root=prerequisite_paths.repo_root,
+        require_git_tracking=expected_source_revision is None,
+    )
     body = {
         "schema": RUNTIME_SCHEMA,
         "schema_version": RUNTIME_SCHEMA_VERSION,
@@ -857,6 +852,7 @@ def build_semantic_p50_runtime_contract(
         prerequisite_paths=prerequisite_paths,
         expected_source_binding=expected_source_binding,
         trainer_source_path=trainer_source_path,
+        expected_source_revision=expected_source_revision,
     )
 
 
@@ -1022,6 +1018,7 @@ def build_semantic_p50_environment_contract(
     image_definition_path: Path,
     expected_hardware: Mapping[str, Any],
     expected_software: Mapping[str, Any],
+    expected_source_revision: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     runtime = open_semantic_p50_runtime_contract(
         runtime_contract_path,
@@ -1029,6 +1026,7 @@ def build_semantic_p50_environment_contract(
         prerequisite_paths=prerequisite_paths,
         expected_source_binding=expected_source_binding,
         trainer_source_path=trainer_source_path,
+        expected_source_revision=expected_source_revision,
     )
     _validate_expected_environment(expected_hardware, expected_software)
     body = {
@@ -1048,6 +1046,7 @@ def build_semantic_p50_environment_contract(
             image_reference,
             image_definition_path,
             repo_root=prerequisite_paths.repo_root,
+            require_git_tracking=expected_source_revision is None,
         ),
         "hardware": dict(expected_hardware),
         "software": dict(expected_software),
@@ -1062,6 +1061,7 @@ def build_semantic_p50_environment_contract(
         expected_source_binding=expected_source_binding,
         trainer_source_path=trainer_source_path,
         image_definition_path=image_definition_path,
+        expected_source_revision=expected_source_revision,
     )
 
 
@@ -1261,6 +1261,7 @@ def build_semantic_p50_launch_projection(
     trainer_source_path: Path,
     image_definition_path: Path,
     output_prefix_relative: str,
+    expected_source_revision: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     runtime, environment, bindings = _opened_launch_inputs(
         runtime_contract_path=runtime_contract_path,
@@ -1270,8 +1271,12 @@ def build_semantic_p50_launch_projection(
         expected_source_binding=expected_source_binding,
         trainer_source_path=trainer_source_path,
         image_definition_path=image_definition_path,
+        expected_source_revision=expected_source_revision,
     )
-    revision = observe_clean_source_revision(prerequisite_paths.repo_root)
+    revision = _source_revision_for_validation(
+        prerequisite_paths.repo_root,
+        expected_source_revision=expected_source_revision,
+    )
     if runtime["source_revision"] != revision:
         raise SemanticP50ExecutionContractError("launch source changed after runtime freeze")
     prefix = _validate_output_prefix(output_prefix_relative)
@@ -1343,6 +1348,7 @@ def build_semantic_p50_launch_projection(
         expected_source_binding=expected_source_binding,
         trainer_source_path=trainer_source_path,
         image_definition_path=image_definition_path,
+        expected_source_revision=expected_source_revision,
     )
 
 
@@ -1800,6 +1806,12 @@ def _physical_observed_environment() -> dict[str, Any]:
     }
 
 
+def observe_semantic_p50_physical_environment() -> dict[str, Any]:
+    """Observe the live prospective P50 container without granting authority."""
+
+    return _physical_observed_environment()
+
+
 def build_semantic_p50_observed_environment_receipt(
     *,
     launch_projection_path: Path,
@@ -1813,7 +1825,7 @@ def build_semantic_p50_observed_environment_receipt(
         field="semantic P50 environment contract",
         filename=ENVIRONMENT_FILENAME,
     )
-    observed = _physical_observed_environment()
+    observed = observe_semantic_p50_physical_environment()
     if (
         observed["image_content_sha256"] != environment["image"]["content_sha256"]
         or observed["hardware"] != environment["hardware"]
@@ -1896,6 +1908,7 @@ def open_semantic_p50_observed_environment_receipt(
         expected_source_binding=physical_kwargs["expected_source_binding"],
         trainer_source_path=physical_kwargs["trainer_source_path"],
         image_definition_path=physical_kwargs["image_definition_path"],
+        expected_source_revision=physical_kwargs.get("expected_source_revision"),
     )
     if (
         receipt.get("schema") != ENVIRONMENT_RECEIPT_SCHEMA
@@ -1915,7 +1928,7 @@ def open_semantic_p50_observed_environment_receipt(
     ):
         raise SemanticP50ExecutionContractError("observed environment physical binding disagrees")
     if reobserve:
-        observed = _physical_observed_environment()
+        observed = observe_semantic_p50_physical_environment()
         if (
             observed["image_content_sha256"] != receipt["observed_image_content_sha256"]
             or observed["hardware"] != receipt["observed_hardware"]
@@ -2039,6 +2052,7 @@ __all__ = [
     "canonical_semantic_p50_contract_bytes",
     "materialize_semantic_p50_execution_permit",
     "observe_clean_source_revision",
+    "observe_semantic_p50_physical_environment",
     "open_semantic_p50_environment_contract",
     "open_semantic_p50_execution_permit",
     "open_semantic_p50_execution_prerequisites",

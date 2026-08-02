@@ -44,6 +44,7 @@ from compose_v4.experiments.factorized_successor_training import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_REVISION = hashlib.sha256(b"p50-cache-source-revision").hexdigest()
+EXECUTION_SOURCE_REVISION = hashlib.sha256(b"p50-cache-execution-source-revision").hexdigest()
 
 
 class _FakeScratchModel:
@@ -376,6 +377,7 @@ def _runtime(plan: dict[str, object]) -> dict[str, object]:
         "rdkit_version": "fixture-rdkit",
         "implementation_sha256": plan["implementation_sha256"],
         "source_revision_sha256": plan["source_revision_sha256"],
+        "execution_source_revision_sha256": plan["execution_source_revision_sha256"],
     }
     return {**body, "runtime_sha256": _sha(body)}
 
@@ -402,6 +404,7 @@ def _build_plan(
         prepared_recipe_path=prepared_path,
         verified_source=source,
         source_revision_sha256=SOURCE_REVISION,
+        execution_source_revision_sha256=EXECUTION_SOURCE_REVISION,
         artifact_root=artifact_root,
         repo_root=REPO_ROOT,
         registry=registry,

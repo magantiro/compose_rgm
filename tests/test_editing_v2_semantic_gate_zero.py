@@ -43,14 +43,12 @@ def _runtime_identity(contract) -> dict[str, object]:
         (ROOT / contract.payload["parents"]["decision_runtime"]["path"]).read_text()
     )
     semantic = json.loads(
-        (
-            ROOT / contract.payload["parents"]["semantic_model_process"]["path"]
-        ).read_text()
+        (ROOT / contract.payload["parents"]["semantic_model_process"]["path"]).read_text()
     )
     required = contract.payload["required_architecture"]
     body = {
         "schema": "compose.data.semantic_active8_exact_model_runtime",
-        "schema_version": 1,
+        "schema_version": 2,
         "runtime_contract_sha256": decision_runtime["runtime_contract_sha256"],
         "semantic_model_process_contract_sha256": semantic["contract_sha256"],
         "semantic_model_identity": semantic["model_identity"],
@@ -71,7 +69,8 @@ def _runtime_identity(contract) -> dict[str, object]:
         "initialization_seed": required["initialization_seed"],
         "initial_model_state_sha256": "a" * 64,
         "software": decision_runtime["software"],
-        "source_revision_sha256": "b" * 64,
+        "producer_source_revision_sha256": "b" * 64,
+        "execution_source_revision_sha256": "c" * 64,
     }
     return {**body, "identity_sha256": _sha(body)}
 
@@ -112,9 +111,7 @@ def _assignment(
         ).hexdigest(),
         trace_id=f"trace-{family}",
         progress_index=0,
-        packed_shard_content_sha256=hashlib.sha256(
-            f"shard-{family}".encode()
-        ).hexdigest(),
+        packed_shard_content_sha256=hashlib.sha256(f"shard-{family}".encode()).hexdigest(),
         packed_shard_name="semantic.jsonl.gz",
         packed_entry_index=entry_index,
         action_sha256=hashlib.sha256(f"action-{family}".encode()).hexdigest(),
@@ -200,9 +197,7 @@ class _FakeIndex:
                 addressed_trace=SimpleNamespace(address=address),
                 decision_sha256=assignment.decision_sha256,
                 action_decisions=(
-                    SimpleNamespace(
-                        classification=SimpleNamespace(model_family=family)
-                    ),
+                    SimpleNamespace(classification=SimpleNamespace(model_family=family)),
                 ),
                 progress_addresses=(
                     SimpleNamespace(terminal=False),
@@ -313,9 +308,7 @@ def test_structural_pass_counts_verified_assignments_without_authorizing(
     assert evidence["counts"]["terminal_assignments"] == 0
     assert evidence["counts"]["accepted_progress_rows"] == 16
     assert evidence["checks"]["one_structural_assignment_per_decision_eligible_action"]
-    assert evidence["checks"][
-        "every_decision_eligible_teacher_matches_exactly_one_action_v4_mark"
-    ]
+    assert evidence["checks"]["every_decision_eligible_teacher_matches_exactly_one_action_v4_mark"]
     assert evidence["decision_eligible_teacher_counts_by_family"] == {
         family: 1 for family in ACTIVE8_FAMILIES
     }
@@ -397,10 +390,7 @@ def test_final_test_teacher_cannot_satisfy_train_family_coverage(
     assert evidence["structural_result"] == "FAIL"
     assert evidence["decision_eligible_teacher_counts_by_family"][held_out_family] == 0
     assert "partition_counts" not in evidence["capability_cell_counts"][0]
-    assert (
-        evidence["checks"]["all_active8_families_have_decision_eligible_teachers"]
-        is False
-    )
+    assert evidence["checks"]["all_active8_families_have_decision_eligible_teachers"] is False
 
 
 def test_classification_failure_is_published_as_bounded_negative_evidence(
@@ -447,9 +437,7 @@ def test_tampered_runtime_and_counts_fail_closed(
     raw = _canonical(plan, newline=True)
     plan_path.write_bytes(raw)
     index.decision_plan_file_sha256 = hashlib.sha256(raw).hexdigest()
-    index.model_runtime_identity_sha256 = plan["model_runtime_identity"][
-        "identity_sha256"
-    ]
+    index.model_runtime_identity_sha256 = plan["model_runtime_identity"]["identity_sha256"]
     with pytest.raises(
         gate_zero.SemanticGateZeroStructuralError,
         match="architecture/process",

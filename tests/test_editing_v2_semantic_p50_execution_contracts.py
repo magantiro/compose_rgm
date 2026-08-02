@@ -167,7 +167,7 @@ def physical_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
     runtime_body = {
         "schema": "compose.data.semantic_active8_exact_model_runtime",
-        "schema_version": 1,
+        "schema_version": 2,
         "runtime_contract_sha256": _digest("model-runtime-contract"),
         "semantic_model_process_contract_sha256": process_contract_sha,
         "semantic_model_identity": scratch.semantic_model_identity,
@@ -176,7 +176,8 @@ def physical_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "initialization_seed": scratch.config.initialization_seed,
         "initial_model_state_sha256": scratch.initial_model_state_sha256,
         "software": {"torch": str(torch.__version__)},
-        "source_revision_sha256": source_revision["source_revision_sha256"],
+        "producer_source_revision_sha256": _digest("active8-producer-source"),
+        "execution_source_revision_sha256": source_revision["source_revision_sha256"],
     }
     model_runtime = {**runtime_body, "identity_sha256": _sha(runtime_body)}
 
@@ -261,6 +262,7 @@ def physical_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         status="COMPLETE_NO_AUTHORITY",
         semantic_field="completion_sha256",
         source_revision_sha256=source_revision["source_revision_sha256"],
+        execution_source_revision_sha256=source_revision["source_revision_sha256"],
     )
     cache_path = _write(
         artifact_root / "cache" / "semantic_p50_successor_cache_completion.json",
@@ -332,7 +334,6 @@ def physical_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "prepared": 0,
         "cache": 0,
         "baseline": 0,
-        "scratch_evaluation": 0,
     }
     source = SimpleNamespace(
         binding=source_binding,
@@ -427,13 +428,6 @@ def physical_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         lambda **kwargs: SimpleNamespace(**kwargs),
     )
 
-    def evaluate_scratch(runtime_inputs):
-        calls["scratch_evaluation"] += 1
-        assert runtime_inputs.scratch_runtime is scratch
-        assert runtime_inputs.validation_baseline.result is baseline_result
-        return ()
-
-    monkeypatch.setattr(contracts, "evaluate_semantic_p50_scratch_validation", evaluate_scratch)
     return SimpleNamespace(
         artifact_root=artifact_root,
         repo=repo,
@@ -781,6 +775,60 @@ def test_remote_reopen_uses_bound_revision_and_exact_bytes_without_git(
             launch_projection_path=projection_path,
             **remote_kwargs,
         )
+
+
+def test_remote_builders_use_bound_revision_and_physical_bytes_without_git(
+    physical_fixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    revision = physical_fixture.source_revision
+
+    def forbid_git(*args, **kwargs):
+        raise AssertionError("remote contract construction must not invoke Git")
+
+    monkeypatch.setattr(contracts, "_git", forbid_git)
+    runtime = contracts.build_semantic_p50_runtime_contract(
+        scratch_runtime=physical_fixture.scratch,
+        model_runtime_identity=physical_fixture.model_runtime,
+        prerequisite_paths=physical_fixture.paths,
+        expected_source_binding=physical_fixture.source_binding,
+        trainer_source_path=physical_fixture.trainer,
+        expected_source_revision=revision,
+    )
+    runtime_path = _write(
+        physical_fixture.artifact_root / "remote-contracts" / contracts.RUNTIME_FILENAME,
+        runtime,
+    )
+    environment = contracts.build_semantic_p50_environment_contract(
+        runtime_contract_path=runtime_path,
+        scratch_runtime=physical_fixture.scratch,
+        prerequisite_paths=physical_fixture.paths,
+        expected_source_binding=physical_fixture.source_binding,
+        trainer_source_path=physical_fixture.trainer,
+        image_reference=f"registry.invalid/compose@sha256:{_digest('remote-image')}",
+        image_definition_path=physical_fixture.image_definition,
+        expected_hardware=_hardware(),
+        expected_software=_software(),
+        expected_source_revision=revision,
+    )
+    environment_path = _write(
+        physical_fixture.artifact_root / "remote-contracts" / contracts.ENVIRONMENT_FILENAME,
+        environment,
+    )
+    projection = contracts.build_semantic_p50_launch_projection(
+        runtime_contract_path=runtime_path,
+        environment_contract_path=environment_path,
+        scratch_runtime=physical_fixture.scratch,
+        prerequisite_paths=physical_fixture.paths,
+        expected_source_binding=physical_fixture.source_binding,
+        trainer_source_path=physical_fixture.trainer,
+        image_definition_path=physical_fixture.image_definition,
+        output_prefix_relative="editing_v2/semantic_p50",
+        expected_source_revision=revision,
+    )
+
+    assert runtime["source_revision"] == revision
+    assert environment["source_revision_sha256"] == revision["source_revision_sha256"]
+    assert projection["source_revision"] == revision
 
 
 def test_source_tree_and_image_definition_are_observed_not_asserted(

@@ -184,11 +184,7 @@ def _load_registry(
 ) -> SemanticCapabilityCellRegistry:
     if registry is not None:
         return registry
-    path = (
-        None
-        if repo_root is None
-        else Path(repo_root).resolve() / REGISTRY_RELATIVE_PATH
-    )
+    path = None if repo_root is None else Path(repo_root).resolve() / REGISTRY_RELATIVE_PATH
     return load_semantic_capability_cell_registry(path)
 
 
@@ -200,9 +196,7 @@ def semantic_t1_panel_implementation_sha256(*, repo_root: Path | None = None) ->
     for relative in _IMPLEMENTATION_SOURCES:
         path = root / relative
         if not path.is_file():
-            raise SemanticT1PanelError(
-                f"semantic T1 implementation source is absent: {relative}"
-            )
+            raise SemanticT1PanelError(f"semantic T1 implementation source is absent: {relative}")
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
         digest.update(path.read_bytes())
@@ -240,9 +234,7 @@ class SemanticT1PanelRequest:
             or tuple(family for family, _ in limits) != tuple(sorted(ACTIVE8_FAMILIES))
             or any(type(limit) is not int or limit <= 0 for _, limit in limits)
         ):
-            raise ValueError(
-                "maximum_entries_by_family must name every Active8 family once"
-            )
+            raise ValueError("maximum_entries_by_family must name every Active8 family once")
         expected = _sha(self.identity_body())
         if self.request_sha256:
             if self.request_sha256 != expected:
@@ -336,10 +328,7 @@ class SemanticT1GateZeroBinding:
             _require_sha(getattr(self, field_name), field_name=field_name)
 
     def as_payload(self) -> dict[str, str]:
-        return {
-            field_name: getattr(self, field_name)
-            for field_name in self.__dataclass_fields__
-        }
+        return {field_name: getattr(self, field_name) for field_name in self.__dataclass_fields__}
 
 
 def bind_verified_semantic_gate_zero_pass(
@@ -360,9 +349,7 @@ def bind_verified_semantic_gate_zero_pass(
     if not isinstance(decision_index, EditingV2SemanticActive8DecisionIndex):
         raise TypeError("semantic T1 requires the verified Active8 decision index")
     root = Path(repo_root or _repository_root()).resolve()
-    selected_contract = contract or load_semantic_gate_zero_structural_contract(
-        repo_root=root
-    )
+    selected_contract = contract or load_semantic_gate_zero_structural_contract(repo_root=root)
     if set(artifacts) != {"evidence", "decision", "completion"}:
         raise SemanticT1PanelError("Gate-0 artifact bundle fields disagree")
     evidence = artifacts["evidence"]
@@ -380,11 +367,9 @@ def bind_verified_semantic_gate_zero_pass(
         or decision.get("schema") != GATE_ZERO_DECISION_SCHEMA
         or decision.get("schema_version") != GATE_ZERO_DECISION_SCHEMA_VERSION
         or decision.get("status") != GATE_ZERO_DECISION_STATUS
-        or completion.get("schema")
-        != "compose.editing.semantic_gate_zero_structural_completion"
+        or completion.get("schema") != "compose.editing.semantic_gate_zero_structural_completion"
         or completion.get("schema_version") != 1
-        or completion.get("status")
-        != "COMPLETE_STRUCTURAL_ARTIFACTS_NO_DOWNSTREAM_AUTHORITY"
+        or completion.get("status") != "COMPLETE_STRUCTURAL_ARTIFACTS_NO_DOWNSTREAM_AUTHORITY"
         or evidence.get("structural_result") != "PASS"
         or decision.get("structural_result") != "PASS"
         or completion.get("structural_result") != "PASS"
@@ -424,39 +409,31 @@ def bind_verified_semantic_gate_zero_pass(
         evidence_sha256 != _sha(evidence_body)
         or decision_sha256 != _sha(decision_body)
         or completion_sha256 != _sha(completion_body)
-        or evidence.get("decision_source_inventory_sha256")
-        != decision_index.inventory_sha256
-        or decision.get("decision_source_inventory_sha256")
-        != decision_index.inventory_sha256
+        or evidence.get("decision_source_inventory_sha256") != decision_index.inventory_sha256
+        or decision.get("decision_source_inventory_sha256") != decision_index.inventory_sha256
         or decision.get("evidence_sha256") != evidence_sha256
         or completion.get("evidence_sha256") != evidence_sha256
         or completion.get("decision_sha256") != decision_sha256
         or completion.get("contract_sha256") != evidence.get("contract_sha256")
         or decision.get("contract_sha256") != evidence.get("contract_sha256")
-        or completion.get("evidence_file_sha256")
-        != hashlib.sha256(evidence_bytes).hexdigest()
-        or completion.get("decision_file_sha256")
-        != hashlib.sha256(decision_bytes).hexdigest()
+        or completion.get("evidence_file_sha256") != hashlib.sha256(evidence_bytes).hexdigest()
+        or completion.get("decision_file_sha256") != hashlib.sha256(decision_bytes).hexdigest()
     ):
         raise SemanticT1PanelError("Gate-0 artifact lineage or self-hash disagrees")
     return SemanticT1GateZeroBinding(
-        contract_sha256=_require_sha(
-            evidence.get("contract_sha256"), field_name="contract_sha256"
-        ),
+        contract_sha256=_require_sha(evidence.get("contract_sha256"), field_name="contract_sha256"),
         evidence_sha256=_require_sha(evidence_sha256, field_name="evidence_sha256"),
         evidence_file_sha256=hashlib.sha256(evidence_bytes).hexdigest(),
         decision_sha256=_require_sha(decision_sha256, field_name="decision_sha256"),
         decision_file_sha256=hashlib.sha256(decision_bytes).hexdigest(),
-        completion_sha256=_require_sha(
-            completion_sha256, field_name="completion_sha256"
-        ),
+        completion_sha256=_require_sha(completion_sha256, field_name="completion_sha256"),
         decision_source_inventory_sha256=decision_index.inventory_sha256,
         model_runtime_identity_sha256=_require_sha(
             runtime.get("identity_sha256"),
             field_name="model_runtime_identity_sha256",
         ),
         model_source_revision_sha256=_require_sha(
-            runtime.get("source_revision_sha256"),
+            runtime.get("execution_source_revision_sha256"),
             field_name="model_source_revision_sha256",
         ),
         initial_model_state_sha256=_require_sha(
@@ -531,9 +508,7 @@ class SemanticT1TeacherOccurrence:
             raise ValueError("semantic T1 occurrences must be train-only")
         if self.model_family not in ACTIVE8_FAMILIES:
             raise ValueError("semantic T1 occurrence is outside Active8")
-        if not self.capability_cell_id.endswith(
-            f":{self.model_family}:{self.family_context}"
-        ):
+        if not self.capability_cell_id.endswith(f":{self.model_family}:{self.family_context}"):
             raise ValueError("semantic T1 capability-cell identity disagrees")
         for field_name in (
             "packed_entry_index",
@@ -581,15 +556,11 @@ class SemanticT1TeacherOccurrence:
         if assignment.partition_role != "train" or address.partition != "train":
             raise SemanticT1PanelError("held-out transition reached T1 preparation")
         return cls(
-            decision_source_inventory_sha256=(
-                assignment.decision_source_inventory_sha256
-            ),
+            decision_source_inventory_sha256=(assignment.decision_source_inventory_sha256),
             decision_sha256=assignment.decision_sha256,
             trace_address_sha256=assignment.trace_address_sha256,
             source_progress_address_sha256=(assignment.source_progress_address_sha256),
-            successor_progress_address_sha256=(
-                assignment.successor_progress_address_sha256
-            ),
+            successor_progress_address_sha256=(assignment.successor_progress_address_sha256),
             trace_id=assignment.trace_id,
             packed_shard_content_sha256=assignment.packed_shard_content_sha256,
             packed_shard_name=assignment.packed_shard_name,
@@ -611,20 +582,14 @@ class SemanticT1TeacherOccurrence:
             raw_mark_count=assignment.raw_mark_count,
             raw_mark_count_stratum=assignment.raw_mark_count_stratum,
             canonical_successor_count=assignment.canonical_successor_count,
-            canonical_successor_count_stratum=(
-                assignment.canonical_successor_count_stratum
-            ),
+            canonical_successor_count_stratum=(assignment.canonical_successor_count_stratum),
             successor_alias_multiplicity=assignment.successor_alias_multiplicity,
-            successor_alias_multiplicity_stratum=(
-                assignment.successor_alias_multiplicity_stratum
-            ),
+            successor_alias_multiplicity_stratum=(assignment.successor_alias_multiplicity_stratum),
             matching_mark_count=assignment.matching_mark_count,
             registry_sha256=assignment.registry_sha256,
             process_identity_sha256=assignment.process_identity_sha256,
             corpus_contract_file_sha256=assignment.corpus_contract_file_sha256,
-            classifier_implementation_sha256=(
-                assignment.classifier_implementation_sha256
-            ),
+            classifier_implementation_sha256=(assignment.classifier_implementation_sha256),
             active8_policy_sha256=assignment.active8_policy_sha256,
             assignment_sha256=assignment.assignment_sha256,
         )
@@ -676,15 +641,11 @@ class SemanticT1CoverageStratum:
             raise ValueError("semantic T1 coverage stratum lacks a semantic cell")
 
     @classmethod
-    def from_occurrence(
-        cls, occurrence: SemanticT1TeacherOccurrence
-    ) -> SemanticT1CoverageStratum:
+    def from_occurrence(cls, occurrence: SemanticT1TeacherOccurrence) -> SemanticT1CoverageStratum:
         return cls(
             model_family=occurrence.model_family,
             capability_cell_id=occurrence.capability_cell_id,
-            canonical_successor_count_stratum=(
-                occurrence.canonical_successor_count_stratum
-            ),
+            canonical_successor_count_stratum=(occurrence.canonical_successor_count_stratum),
         )
 
     @property
@@ -692,10 +653,7 @@ class SemanticT1CoverageStratum:
         return _sha(self.as_payload())
 
     def as_payload(self) -> dict[str, str]:
-        return {
-            field_name: getattr(self, field_name)
-            for field_name in self.__dataclass_fields__
-        }
+        return {field_name: getattr(self, field_name) for field_name in self.__dataclass_fields__}
 
 
 def _group_identity(
@@ -728,9 +686,7 @@ class _CandidateAggregate:
         *,
         request: SemanticT1PanelRequest,
     ) -> _CandidateAggregate:
-        group_sha256 = _sha(
-            _group_identity(occurrence, support_time_hex=request.support_time_hex)
-        )
+        group_sha256 = _sha(_group_identity(occurrence, support_time_hex=request.support_time_hex))
         selected = cls(
             group_sha256=group_sha256,
             selection_rank_sha256=_sha(
@@ -869,12 +825,8 @@ class SemanticT1PanelEntry:
             "progress_index": occurrence.progress_index,
             "trace_address_sha256": occurrence.trace_address_sha256,
             "decision_sha256": occurrence.decision_sha256,
-            "source_progress_address_sha256": (
-                occurrence.source_progress_address_sha256
-            ),
-            "successor_progress_address_sha256": (
-                occurrence.successor_progress_address_sha256
-            ),
+            "source_progress_address_sha256": (occurrence.source_progress_address_sha256),
+            "successor_progress_address_sha256": (occurrence.successor_progress_address_sha256),
             "objective_coefficient": 1,
             "teacher_occurrence_count": aggregate.occurrence_count,
             "teacher_action_occurrence_counts": [list(item) for item in action_counts],
@@ -882,9 +834,7 @@ class SemanticT1PanelEntry:
             "data_lane_occurrence_counts": [list(item) for item in lane_counts],
             "raw_mark_count": occurrence.raw_mark_count,
             "canonical_successor_count": occurrence.canonical_successor_count,
-            "production_successor_alias_multiplicity": (
-                occurrence.successor_alias_multiplicity
-            ),
+            "production_successor_alias_multiplicity": (occurrence.successor_alias_multiplicity),
             "teacher_action_identity_count": len(action_counts),
         }
         # The caller fills the one frozen time before sealing the entry.
@@ -953,33 +903,26 @@ class SemanticT1PanelEntry:
             if (
                 tuple(sorted(counts)) != counts
                 or len(dict(counts)) != len(counts)
-                or any(
-                    not key or type(count) is not int or count <= 0
-                    for key, count in counts
-                )
+                or any(not key or type(count) is not int or count <= 0 for key, count in counts)
             ):
                 raise ValueError("semantic T1 occurrence counts are invalid")
             if sum(count for _, count in counts) != self.teacher_occurrence_count:
                 raise ValueError("semantic T1 occurrence count totals disagree")
         if (
-            self.teacher_action_identity_count
-            != len(self.teacher_action_occurrence_counts)
+            self.teacher_action_identity_count != len(self.teacher_action_occurrence_counts)
             or self.teacher_occurrence_count < 1
             or self.production_successor_alias_multiplicity < 1
-            or self.teacher_action_identity_count
-            > self.production_successor_alias_multiplicity
+            or self.teacher_action_identity_count > self.production_successor_alias_multiplicity
             or self.progress_index >= self.path_length
             or self.model_family not in ACTIVE8_FAMILIES
             or not self.representative_data_lane
             or not self.trace_source_key
             or not self.trace_target_key
             or self.source_canonical_key == self.successor_canonical_key
-            or self.representative_action_sha256
-            not in dict(self.teacher_action_occurrence_counts)
+            or self.representative_action_sha256 not in dict(self.teacher_action_occurrence_counts)
             or self.representative_target_state_sha256
             not in dict(self.target_state_occurrence_counts)
-            or self.representative_data_lane
-            not in dict(self.data_lane_occurrence_counts)
+            or self.representative_data_lane not in dict(self.data_lane_occurrence_counts)
         ):
             raise ValueError("semantic T1 panel entry multiplicity is inconsistent")
         if self.support_time_hex:
@@ -1077,8 +1020,7 @@ class SemanticT1CacheTraceInput:
             or self.packed_entry_index < 0
             or type(self.path_length) is not int
             or self.path_length < 1
-            or tuple(sorted(set(self.selected_progress_indices)))
-            != self.selected_progress_indices
+            or tuple(sorted(set(self.selected_progress_indices))) != self.selected_progress_indices
             or any(
                 type(index) is not int or not 0 <= index < self.path_length
                 for index in self.selected_progress_indices
@@ -1129,10 +1071,7 @@ class SemanticT1CoverageReceipt:
             "retained_candidate_count",
             "selected_candidate_count",
         ):
-            if (
-                type(getattr(self, field_name)) is not int
-                or getattr(self, field_name) < 0
-            ):
+            if type(getattr(self, field_name)) is not int or getattr(self, field_name) < 0:
                 raise ValueError("semantic T1 coverage counts must be nonnegative")
         if (
             self.train_teacher_occurrence_count < 1
@@ -1192,10 +1131,8 @@ class SemanticT1PanelArtifact:
         if (
             self.gate_zero_binding.decision_source_inventory_sha256
             != dict(self.decision_source_identity).get("inventory_sha256")
-            or tuple(sorted(self.decision_source_identity))
-            != self.decision_source_identity
-            or len(dict(self.decision_source_identity))
-            != len(self.decision_source_identity)
+            or tuple(sorted(self.decision_source_identity)) != self.decision_source_identity
+            or len(dict(self.decision_source_identity)) != len(self.decision_source_identity)
         ):
             raise ValueError("semantic T1 decision-source identity disagrees")
         if (
@@ -1209,8 +1146,7 @@ class SemanticT1PanelArtifact:
         if (
             type(self.first_pass_train_teacher_count) is not int
             or self.first_pass_train_teacher_count <= 0
-            or self.first_pass_train_teacher_count
-            != self.second_pass_train_teacher_count
+            or self.first_pass_train_teacher_count != self.second_pass_train_teacher_count
             or self.first_pass_train_teacher_stream_sha256
             != self.second_pass_train_teacher_stream_sha256
         ):
@@ -1239,13 +1175,10 @@ class SemanticT1PanelArtifact:
         if len(unique_units) != len(self.entries):
             raise ValueError("semantic T1 panel repeats a molecular objective unit")
         unique_sources = {
-            (entry.source_state_sha256, entry.support_time_hex)
-            for entry in self.entries
+            (entry.source_state_sha256, entry.support_time_hex) for entry in self.entries
         }
         if len(unique_sources) != len(self.entries):
-            raise ValueError(
-                "unique-state capacity panel repeats one exact source and time"
-            )
+            raise ValueError("unique-state capacity panel repeats one exact source and time")
         if any(
             entry.support_time_hex != self.request.support_time_hex
             or entry.selection_rank_sha256
@@ -1291,9 +1224,7 @@ class SemanticT1PanelArtifact:
             )
         )
         if cached_entries != tuple(sorted(entry_ids)):
-            raise ValueError(
-                "semantic T1 cache inputs do not cover each panel entry once"
-            )
+            raise ValueError("semantic T1 cache inputs do not cover each panel entry once")
         if (
             tuple(sorted(self.coverage_receipts, key=lambda item: item.stratum))
             != self.coverage_receipts
@@ -1304,8 +1235,7 @@ class SemanticT1PanelArtifact:
             raise ValueError("semantic T1 coverage receipt strata are not unique")
         selected_by_stratum = Counter(entry.coverage_stratum for entry in self.entries)
         if {
-            receipt.stratum: receipt.selected_candidate_count
-            for receipt in self.coverage_receipts
+            receipt.stratum: receipt.selected_candidate_count for receipt in self.coverage_receipts
         } != dict(selected_by_stratum):
             raise ValueError("semantic T1 coverage receipts disagree with the panel")
         family_counts = Counter(entry.model_family for entry in self.entries)
@@ -1377,16 +1307,12 @@ class SemanticT1PanelArtifact:
                 "panel_entry_count": len(self.entries),
                 "cache_trace_count": len(self.cache_trace_inputs),
                 "coverage_stratum_count": len(self.coverage_receipts),
-                "single_target_source_state_count": (
-                    self.single_target_source_state_count
-                ),
+                "single_target_source_state_count": (self.single_target_source_state_count),
                 "single_target_source_inventory_sha256": (
                     self.single_target_source_inventory_sha256
                 ),
                 "repeated_source_state_count": self.repeated_source_state_count,
-                "repeated_source_inventory_sha256": (
-                    self.repeated_source_inventory_sha256
-                ),
+                "repeated_source_inventory_sha256": (self.repeated_source_inventory_sha256),
                 "panel_entries_by_family": {
                     family: family_counts[family] for family in sorted(ACTIVE8_FAMILIES)
                 },
@@ -1397,9 +1323,7 @@ class SemanticT1PanelArtifact:
                 "ordered_source_stream_required": True,
             },
             "entries": [entry.as_payload() for entry in self.entries],
-            "cache_trace_inputs": [
-                item.as_payload() for item in self.cache_trace_inputs
-            ],
+            "cache_trace_inputs": [item.as_payload() for item in self.cache_trace_inputs],
             "coverage_receipts": [item.as_payload() for item in self.coverage_receipts],
         }
 
@@ -1427,10 +1351,7 @@ def _source_target_census_pass(
     for occurrence in occurrence_factory():
         if not isinstance(occurrence, SemanticT1TeacherOccurrence):
             raise TypeError("semantic T1 occurrence factory returned another type")
-        if (
-            occurrence.decision_source_inventory_sha256
-            != expected_decision_source_sha256
-        ):
+        if occurrence.decision_source_inventory_sha256 != expected_decision_source_sha256:
             raise SemanticT1PanelError("semantic T1 occurrence source identity drifted")
         total += 1
         stream.update(occurrence.occurrence_sha256.encode("ascii"))
@@ -1443,20 +1364,14 @@ def _source_target_census_pass(
             raise SemanticT1PanelError(
                 "one exact semantic T1 source has inconsistent canonical identity"
             )
-        targets_by_source[occurrence.source_state_sha256].add(
-            occurrence.successor_canonical_key
-        )
+        targets_by_source[occurrence.source_state_sha256].add(occurrence.successor_canonical_key)
     if total <= 0:
         raise SemanticT1PanelError("semantic T1 source yielded no train teachers")
     unique = frozenset(
-        source_sha256
-        for source_sha256, targets in targets_by_source.items()
-        if len(targets) == 1
+        source_sha256 for source_sha256, targets in targets_by_source.items() if len(targets) == 1
     )
     repeated = frozenset(
-        source_sha256
-        for source_sha256, targets in targets_by_source.items()
-        if len(targets) > 1
+        source_sha256 for source_sha256, targets in targets_by_source.items() if len(targets) > 1
     )
     if unique & repeated or len(unique) + len(repeated) != len(targets_by_source):
         raise SemanticT1PanelError("semantic T1 source-target census is incomplete")
@@ -1475,9 +1390,7 @@ def _reservoir_pass(
     int,
     str,
 ]:
-    buckets: dict[SemanticT1CoverageStratum, dict[str, _CandidateAggregate]] = (
-        defaultdict(dict)
-    )
+    buckets: dict[SemanticT1CoverageStratum, dict[str, _CandidateAggregate]] = defaultdict(dict)
     occurrence_counts: Counter[SemanticT1CoverageStratum] = Counter()
     total = 0
     stream = hashlib.sha256()
@@ -1485,10 +1398,7 @@ def _reservoir_pass(
     for occurrence in occurrence_factory():
         if not isinstance(occurrence, SemanticT1TeacherOccurrence):
             raise TypeError("semantic T1 occurrence factory returned another type")
-        if (
-            occurrence.decision_source_inventory_sha256
-            != expected_decision_source_sha256
-        ):
+        if occurrence.decision_source_inventory_sha256 != expected_decision_source_sha256:
             raise SemanticT1PanelError("semantic T1 occurrence source identity drifted")
         total += 1
         stream.update(occurrence.occurrence_sha256.encode("ascii"))
@@ -1498,9 +1408,7 @@ def _reservoir_pass(
         stratum = SemanticT1CoverageStratum.from_occurrence(occurrence)
         occurrence_counts[stratum] += 1
         bucket = buckets[stratum]
-        group_sha256 = _sha(
-            _group_identity(occurrence, support_time_hex=request.support_time_hex)
-        )
+        group_sha256 = _sha(_group_identity(occurrence, support_time_hex=request.support_time_hex))
         retained = bucket.get(group_sha256)
         if retained is not None:
             retained.add(occurrence, request=request)
@@ -1532,13 +1440,9 @@ def _selected_group_ids(
 ) -> tuple[str, ...]:
     selected: list[str] = []
     for family in sorted(ACTIVE8_FAMILIES):
-        strata = tuple(
-            sorted(stratum for stratum in buckets if stratum.model_family == family)
-        )
+        strata = tuple(sorted(stratum for stratum in buckets if stratum.model_family == family))
         if not strata:
-            raise SemanticT1PanelError(
-                f"semantic T1 source has no train stratum for {family}"
-            )
+            raise SemanticT1PanelError(f"semantic T1 source has no train stratum for {family}")
         limit = request.limit_by_family[family]
         if limit < len(strata):
             raise SemanticT1PanelError(
@@ -1592,24 +1496,17 @@ def _exact_selected_pass(
     for occurrence in occurrence_factory():
         if not isinstance(occurrence, SemanticT1TeacherOccurrence):
             raise TypeError("semantic T1 occurrence factory returned another type")
-        if (
-            occurrence.decision_source_inventory_sha256
-            != expected_decision_source_sha256
-        ):
+        if occurrence.decision_source_inventory_sha256 != expected_decision_source_sha256:
             raise SemanticT1PanelError("semantic T1 occurrence source identity drifted")
         total += 1
         stream.update(occurrence.occurrence_sha256.encode("ascii"))
         stream.update(b"\n")
-        group_sha256 = _sha(
-            _group_identity(occurrence, support_time_hex=request.support_time_hex)
-        )
+        group_sha256 = _sha(_group_identity(occurrence, support_time_hex=request.support_time_hex))
         if group_sha256 not in selected_set:
             continue
         aggregate = aggregates.get(group_sha256)
         if aggregate is None:
-            aggregates[group_sha256] = _CandidateAggregate.create(
-                occurrence, request=request
-            )
+            aggregates[group_sha256] = _CandidateAggregate.create(occurrence, request=request)
         else:
             aggregate.add(occurrence, request=request)
     if set(aggregates) != selected_set:
@@ -1645,9 +1542,7 @@ def _cache_trace_inputs(
     for key, selected in sorted(grouped.items()):
         by_progress: dict[int, str] = {}
         for entry in selected:
-            previous = by_progress.setdefault(
-                entry.progress_index, entry.panel_entry_sha256
-            )
+            previous = by_progress.setdefault(entry.progress_index, entry.panel_entry_sha256)
             if previous != entry.panel_entry_sha256:
                 raise SemanticT1PanelError(
                     "one trace progress maps to multiple selected molecular targets"
@@ -1665,12 +1560,8 @@ def _cache_trace_inputs(
                 path_length=key[7],
                 trace_address_sha256=key[8],
                 decision_sha256=key[9],
-                selected_progress_indices=tuple(
-                    progress for progress, _ in progress_and_entries
-                ),
-                panel_entry_sha256s=tuple(
-                    panel_entry for _, panel_entry in progress_and_entries
-                ),
+                selected_progress_indices=tuple(progress for progress, _ in progress_and_entries),
+                panel_entry_sha256s=tuple(panel_entry for _, panel_entry in progress_and_entries),
             )
         )
     return tuple(rows)
@@ -1703,12 +1594,8 @@ def build_semantic_t1_panel_from_occurrence_factory(
     source_identity = dict(decision_source_identity)
     if source_identity.get("inventory_sha256") != (
         gate_zero_binding.decision_source_inventory_sha256
-    ) or source_identity.get("process_identity_sha256") != (
-        registry.process_identity_sha256
-    ):
-        raise SemanticT1PanelError(
-            "semantic T1 decision-source identity differs from Gate 0"
-        )
+    ) or source_identity.get("process_identity_sha256") != (registry.process_identity_sha256):
+        raise SemanticT1PanelError("semantic T1 decision-source identity differs from Gate 0")
     if request.source_revision_sha256 != gate_zero_binding.model_source_revision_sha256:
         raise SemanticT1PanelError(
             "semantic T1 request source revision differs from Gate-0 initialization"
@@ -1718,20 +1605,19 @@ def build_semantic_t1_panel_from_occurrence_factory(
         for occurrence in occurrence_factory():
             if not isinstance(occurrence, SemanticT1TeacherOccurrence):
                 raise TypeError("semantic T1 occurrence factory returned another type")
-            expected_cell = f"{registry.namespace}:{occurrence.model_family}:{occurrence.family_context}"
+            expected_cell = (
+                f"{registry.namespace}:{occurrence.model_family}:{occurrence.family_context}"
+            )
             if (
                 occurrence.family_context
                 not in registry.contexts_by_family.get(occurrence.model_family, ())
                 or occurrence.capability_cell_id != expected_cell
                 or occurrence.registry_sha256 != registry.registry_sha256
-                or occurrence.process_identity_sha256
-                != registry.process_identity_sha256
-                or occurrence.corpus_contract_file_sha256
-                != registry.corpus_contract_file_sha256
+                or occurrence.process_identity_sha256 != registry.process_identity_sha256
+                or occurrence.corpus_contract_file_sha256 != registry.corpus_contract_file_sha256
                 or occurrence.classifier_implementation_sha256
                 != registry.classifier_implementation_sha256
-                or occurrence.active8_policy_sha256
-                != source_identity.get("policy_sha256")
+                or occurrence.active8_policy_sha256 != source_identity.get("policy_sha256")
             ):
                 raise SemanticT1PanelError(
                     "semantic T1 occurrence capability-registry identity drifted"
@@ -1745,9 +1631,7 @@ def build_semantic_t1_panel_from_occurrence_factory(
         census_stream_sha256,
     ) = _source_target_census_pass(
         verified_occurrence_factory,
-        expected_decision_source_sha256=(
-            gate_zero_binding.decision_source_inventory_sha256
-        ),
+        expected_decision_source_sha256=(gate_zero_binding.decision_source_inventory_sha256),
     )
     if not unique_source_state_sha256s:
         raise SemanticT1PanelError(
@@ -1756,9 +1640,7 @@ def build_semantic_t1_panel_from_occurrence_factory(
     buckets, occurrence_counts, first_total, first_stream_sha256 = _reservoir_pass(
         verified_occurrence_factory,
         request=request,
-        expected_decision_source_sha256=(
-            gate_zero_binding.decision_source_inventory_sha256
-        ),
+        expected_decision_source_sha256=(gate_zero_binding.decision_source_inventory_sha256),
         eligible_source_state_sha256s=unique_source_state_sha256s,
     )
     selected_ids = _selected_group_ids(buckets, request=request)
@@ -1766,9 +1648,7 @@ def build_semantic_t1_panel_from_occurrence_factory(
         verified_occurrence_factory,
         request=request,
         selected_group_ids=selected_ids,
-        expected_decision_source_sha256=(
-            gate_zero_binding.decision_source_inventory_sha256
-        ),
+        expected_decision_source_sha256=(gate_zero_binding.decision_source_inventory_sha256),
     )
     if (
         census_total != first_total
@@ -1782,18 +1662,16 @@ def build_semantic_t1_panel_from_occurrence_factory(
     entries = tuple(
         sorted(
             (
-                SemanticT1PanelEntry.from_aggregate(
-                    exact[group_sha256]
-                ).with_support_time(request.support_time_hex)
+                SemanticT1PanelEntry.from_aggregate(exact[group_sha256]).with_support_time(
+                    request.support_time_hex
+                )
                 for group_sha256 in selected_ids
             ),
             key=lambda item: (item.model_family, item.panel_entry_sha256),
         )
     )
     selected_counts = Counter(entry.coverage_stratum for entry in entries)
-    if any(
-        entry.source_state_sha256 in repeated_source_state_sha256s for entry in entries
-    ):
+    if any(entry.source_state_sha256 in repeated_source_state_sha256s for entry in entries):
         raise SemanticT1PanelError(
             "repeated-state source leaked into the unique-state capacity panel"
         )
@@ -1814,9 +1692,7 @@ def build_semantic_t1_panel_from_occurrence_factory(
         process_identity_sha256=registry.process_identity_sha256,
         corpus_contract_file_sha256=registry.corpus_contract_file_sha256,
         classifier_implementation_sha256=registry.classifier_implementation_sha256,
-        panel_implementation_sha256=semantic_t1_panel_implementation_sha256(
-            repo_root=repo_root
-        ),
+        panel_implementation_sha256=semantic_t1_panel_implementation_sha256(repo_root=repo_root),
         entries=entries,
         cache_trace_inputs=_cache_trace_inputs(entries),
         coverage_receipts=coverage,
@@ -1875,10 +1751,7 @@ class SemanticT1EmpiricalMultiplicityReceipt:
             "source_state_sha256",
         ):
             _require_sha(getattr(self, field_name), field_name=field_name)
-        if (
-            self.evidence_kind != EMPIRICAL_OBSERVATION_KIND
-            or not self.successor_canonical_key
-        ):
+        if self.evidence_kind != EMPIRICAL_OBSERVATION_KIND or not self.successor_canonical_key:
             raise ValueError("semantic T1 empirical receipt kind or target is invalid")
         expected = _sha(self.identity_body())
         if self.receipt_sha256:
@@ -1901,9 +1774,7 @@ class SemanticT1EmpiricalMultiplicityReceipt:
             occurrence_sha256=occurrence.occurrence_sha256,
             observation_unit_sha256=observation_unit_sha256,
             provenance_artifact_sha256=provenance_artifact_sha256,
-            decision_source_inventory_sha256=(
-                occurrence.decision_source_inventory_sha256
-            ),
+            decision_source_inventory_sha256=(occurrence.decision_source_inventory_sha256),
             process_identity_sha256=occurrence.process_identity_sha256,
             active8_policy_sha256=occurrence.active8_policy_sha256,
             registry_sha256=occurrence.registry_sha256,
@@ -1922,8 +1793,7 @@ class SemanticT1EmpiricalMultiplicityReceipt:
         return (
             isinstance(occurrence, SemanticT1TeacherOccurrence)
             and self.occurrence_sha256 == occurrence.occurrence_sha256
-            and self.decision_source_inventory_sha256
-            == occurrence.decision_source_inventory_sha256
+            and self.decision_source_inventory_sha256 == occurrence.decision_source_inventory_sha256
             and self.process_identity_sha256 == occurrence.process_identity_sha256
             and self.active8_policy_sha256 == occurrence.active8_policy_sha256
             and self.registry_sha256 == occurrence.registry_sha256
@@ -2011,19 +1881,15 @@ class SemanticT1RepeatedStateGroup:
             unit for target in self.targets for unit in target.observation_unit_sha256s
         )
         occurrences = tuple(
-            occurrence
-            for target in self.targets
-            for occurrence in target.occurrence_sha256s
+            occurrence for target in self.targets for occurrence in target.occurrence_sha256s
         )
         if (
             not self.source_canonical_key
             or support_time.hex() != self.support_time_hex
             or not 0.0 < support_time < 1.0
             or len(self.targets) < 2
-            or tuple(sorted(self.targets, key=lambda item: item.target_sha256))
-            != self.targets
-            or len({target.successor_canonical_key for target in self.targets})
-            != len(self.targets)
+            or tuple(sorted(self.targets, key=lambda item: item.target_sha256)) != self.targets
+            or len({target.successor_canonical_key for target in self.targets}) != len(self.targets)
             or len(set(observation_units)) != len(observation_units)
             or len(set(occurrences)) != len(occurrences)
             or self.raw_teacher_occurrence_count != len(occurrences)
@@ -2108,10 +1974,8 @@ class SemanticT1RepeatedPanelSelection:
                 )
             )
             != self.groups
-            or len({group.source_state_sha256 for group in self.groups})
-            != len(self.groups)
-            or tuple(sorted(self.decision_source_identity))
-            != self.decision_source_identity
+            or len({group.source_state_sha256 for group in self.groups}) != len(self.groups)
+            or tuple(sorted(self.decision_source_identity)) != self.decision_source_identity
             or self.gate_zero_binding.decision_source_inventory_sha256
             != dict(self.decision_source_identity).get("inventory_sha256")
             or self.process_identity_sha256
@@ -2143,17 +2007,11 @@ class SemanticT1RepeatedPanelSelection:
             "classifier_implementation_sha256": (self.classifier_implementation_sha256),
             "active8_policy_sha256": self.active8_policy_sha256,
             "maximum_source_states": self.maximum_source_states,
-            "available_repeated_source_state_count": (
-                self.available_repeated_source_state_count
-            ),
+            "available_repeated_source_state_count": (self.available_repeated_source_state_count),
             "source_teacher_occurrence_count": self.source_teacher_occurrence_count,
             "source_teacher_stream_sha256": self.source_teacher_stream_sha256,
-            "empirical_provenance_artifact_sha256": (
-                self.empirical_provenance_artifact_sha256
-            ),
-            "empirical_receipt_inventory_sha256": (
-                self.empirical_receipt_inventory_sha256
-            ),
+            "empirical_provenance_artifact_sha256": (self.empirical_provenance_artifact_sha256),
+            "empirical_receipt_inventory_sha256": (self.empirical_receipt_inventory_sha256),
             "groups": [group.as_payload() for group in self.groups],
         }
 
@@ -2183,15 +2041,11 @@ def build_semantic_t1_repeated_panel_from_occurrence_factory(
     if (
         source_identity.get("inventory_sha256")
         != gate_zero_binding.decision_source_inventory_sha256
-        or source_identity.get("process_identity_sha256")
-        != registry.process_identity_sha256
+        or source_identity.get("process_identity_sha256") != registry.process_identity_sha256
         or source_identity.get("policy_sha256") is None
-        or request.source_revision_sha256
-        != gate_zero_binding.model_source_revision_sha256
+        or request.source_revision_sha256 != gate_zero_binding.model_source_revision_sha256
     ):
-        raise SemanticT1PanelError(
-            "semantic T1 repeated-panel identities differ from Gate 0"
-        )
+        raise SemanticT1PanelError("semantic T1 repeated-panel identities differ from Gate 0")
 
     grouped: dict[
         str,
@@ -2205,30 +2059,23 @@ def build_semantic_t1_repeated_panel_from_occurrence_factory(
         if not isinstance(occurrence, SemanticT1TeacherOccurrence):
             raise TypeError("semantic T1 occurrence factory returned another type")
         expected_cell = (
-            f"{registry.namespace}:{occurrence.model_family}:"
-            f"{occurrence.family_context}"
+            f"{registry.namespace}:{occurrence.model_family}:{occurrence.family_context}"
         )
         if (
-            occurrence.decision_source_inventory_sha256
-            != source_identity.get("inventory_sha256")
+            occurrence.decision_source_inventory_sha256 != source_identity.get("inventory_sha256")
             or occurrence.family_context
             not in registry.contexts_by_family.get(occurrence.model_family, ())
             or occurrence.capability_cell_id != expected_cell
             or occurrence.registry_sha256 != registry.registry_sha256
             or occurrence.process_identity_sha256 != registry.process_identity_sha256
-            or occurrence.corpus_contract_file_sha256
-            != registry.corpus_contract_file_sha256
+            or occurrence.corpus_contract_file_sha256 != registry.corpus_contract_file_sha256
             or occurrence.classifier_implementation_sha256
             != registry.classifier_implementation_sha256
             or occurrence.active8_policy_sha256 != source_identity.get("policy_sha256")
         ):
-            raise SemanticT1PanelError(
-                "semantic T1 repeated occurrence identity drifted"
-            )
+            raise SemanticT1PanelError("semantic T1 repeated occurrence identity drifted")
         if occurrence.occurrence_sha256 in occurrence_by_sha256:
-            raise SemanticT1PanelError(
-                "semantic T1 source repeats one exact occurrence identity"
-            )
+            raise SemanticT1PanelError("semantic T1 source repeats one exact occurrence identity")
         occurrence_by_sha256[occurrence.occurrence_sha256] = occurrence
         total += 1
         stream.update(occurrence.occurrence_sha256.encode("ascii"))
@@ -2241,15 +2088,13 @@ def build_semantic_t1_repeated_panel_from_occurrence_factory(
             raise SemanticT1PanelError(
                 "one repeated exact source has inconsistent canonical identity"
             )
-        grouped[occurrence.source_state_sha256][
-            occurrence.successor_canonical_key
-        ].append(occurrence)
+        grouped[occurrence.source_state_sha256][occurrence.successor_canonical_key].append(
+            occurrence
+        )
     if total <= 0:
         raise SemanticT1PanelError("semantic T1 source yielded no train teachers")
     repeated = {
-        source_sha256: targets
-        for source_sha256, targets in grouped.items()
-        if len(targets) > 1
+        source_sha256: targets for source_sha256, targets in grouped.items() if len(targets) > 1
     }
     if not repeated:
         raise SemanticT1PanelError(
@@ -2274,9 +2119,7 @@ def build_semantic_t1_repeated_panel_from_occurrence_factory(
     for source_sha256, targets in repeated.items():
         observation_target: dict[str, str] = {}
         target_rows: list[SemanticT1RepeatedTarget] = []
-        prepared: list[
-            tuple[str, tuple[str, ...], tuple[SemanticT1TeacherOccurrence, ...]]
-        ] = []
+        prepared: list[tuple[str, tuple[str, ...], tuple[SemanticT1TeacherOccurrence, ...]]] = []
         for target_key, occurrences in sorted(targets.items()):
             units: set[str] = set()
             for occurrence in occurrences:
@@ -2321,12 +2164,7 @@ def build_semantic_t1_repeated_panel_from_occurrence_factory(
                         sorted({occurrence.action_sha256 for occurrence in occurrences})
                     ),
                     target_state_sha256s=tuple(
-                        sorted(
-                            {
-                                occurrence.target_state_sha256
-                                for occurrence in occurrences
-                            }
-                        )
+                        sorted({occurrence.target_state_sha256 for occurrence in occurrences})
                     ),
                     probability_numerator=len(units),
                     probability_denominator=denominator,
@@ -2443,16 +2281,13 @@ def resolve_semantic_t1_cache_trace_inputs(
         decision_index.identity_payload() != dict(artifact.decision_source_identity)
         or artifact.registry_sha256 != selected_registry.registry_sha256
         or artifact.process_identity_sha256 != selected_registry.process_identity_sha256
-        or artifact.corpus_contract_file_sha256
-        != selected_registry.corpus_contract_file_sha256
+        or artifact.corpus_contract_file_sha256 != selected_registry.corpus_contract_file_sha256
         or artifact.classifier_implementation_sha256
         != selected_registry.classifier_implementation_sha256
         or artifact.panel_implementation_sha256
         != semantic_t1_panel_implementation_sha256(repo_root=repo_root)
     ):
-        raise SemanticT1PanelError(
-            "semantic T1 cache resolution upstream identity drifted"
-        )
+        raise SemanticT1PanelError("semantic T1 cache resolution upstream identity drifted")
     entry_by_id = {entry.panel_entry_sha256: entry for entry in artifact.entries}
     wanted = {
         (
@@ -2511,22 +2346,19 @@ def resolve_semantic_t1_cache_trace_inputs(
                 assignment.trace_address_sha256 != cache_input.trace_address_sha256
                 or assignment.decision_sha256 != cache_input.decision_sha256
                 or assignment.progress_index != entry.progress_index
-                or assignment.source_progress_address_sha256
-                != entry.source_progress_address_sha256
+                or assignment.source_progress_address_sha256 != entry.source_progress_address_sha256
                 or assignment.successor_progress_address_sha256
                 != entry.successor_progress_address_sha256
                 or assignment.action_sha256 != entry.representative_action_sha256
                 or assignment.source_state_sha256 != entry.source_state_sha256
-                or assignment.target_state_sha256
-                != entry.representative_target_state_sha256
+                or assignment.target_state_sha256 != entry.representative_target_state_sha256
                 or assignment.source_canonical_key != entry.source_canonical_key
                 or assignment.successor_canonical_key != entry.successor_canonical_key
                 or assignment.model_family != entry.model_family
                 or assignment.family_context != entry.family_context
                 or assignment.capability_cell_id != entry.capability_cell_id
                 or assignment.raw_mark_count != entry.raw_mark_count
-                or assignment.canonical_successor_count
-                != entry.canonical_successor_count
+                or assignment.canonical_successor_count != entry.canonical_successor_count
                 or assignment.successor_alias_multiplicity
                 != entry.production_successor_alias_multiplicity
             ):
@@ -2553,9 +2385,7 @@ def serialize_semantic_t1_panel(artifact: SemanticT1PanelArtifact) -> bytes:
     return _canonical_bytes(artifact.as_payload(), newline=True)
 
 
-def _parse_count_pairs(
-    value: object, *, field_name: str
-) -> tuple[tuple[str, int], ...]:
+def _parse_count_pairs(value: object, *, field_name: str) -> tuple[tuple[str, int], ...]:
     if not isinstance(value, list):
         raise SemanticT1PanelError(f"{field_name} must be a list")
     rows: list[tuple[str, int]] = []
@@ -2598,17 +2428,14 @@ def deserialize_semantic_t1_panel(
         payload = json.loads(content)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise SemanticT1PanelError("semantic T1 artifact is not valid JSON") from error
-    if not isinstance(payload, dict) or content != _canonical_bytes(
-        payload, newline=True
-    ):
+    if not isinstance(payload, dict) or content != _canonical_bytes(payload, newline=True):
         raise SemanticT1PanelError("semantic T1 artifact is not canonical JSON")
     if (
         payload.get("schema") != PANEL_SCHEMA
         or payload.get("schema_version") != PANEL_SCHEMA_VERSION
         or payload.get("status") != PANEL_STATUS
         or any(
-            payload.get(field_name) is not expected
-            for field_name, expected in _AUTHORITY.items()
+            payload.get(field_name) is not expected for field_name, expected in _AUTHORITY.items()
         )
     ):
         raise SemanticT1PanelError("semantic T1 schema or authority disagrees")
@@ -2664,26 +2491,20 @@ def deserialize_semantic_t1_panel(
         try:
             entries.append(SemanticT1PanelEntry(**values))
         except (TypeError, ValueError, SemanticT1PanelError) as error:
-            raise SemanticT1PanelError(
-                f"semantic T1 entry {index} is invalid"
-            ) from error
+            raise SemanticT1PanelError(f"semantic T1 entry {index} is invalid") from error
 
     cache_payloads = payload.get("cache_trace_inputs")
     if not isinstance(cache_payloads, list):
         raise SemanticT1PanelError("semantic T1 cache inputs must be a list")
     cache_inputs: list[SemanticT1CacheTraceInput] = []
-    cache_fields = set(SemanticT1CacheTraceInput.__dataclass_fields__) | {
-        "partition_role"
-    }
+    cache_fields = set(SemanticT1CacheTraceInput.__dataclass_fields__) | {"partition_role"}
     for index, item in enumerate(cache_payloads):
         if (
             not isinstance(item, dict)
             or set(item) != cache_fields
             or item.get("partition_role") != "train"
         ):
-            raise SemanticT1PanelError(
-                f"semantic T1 cache input {index} fields or role disagree"
-            )
+            raise SemanticT1PanelError(f"semantic T1 cache input {index} fields or role disagree")
         values = {key: value for key, value in item.items() if key != "partition_role"}
         for field_name in ("selected_progress_indices", "panel_entry_sha256s"):
             if not isinstance(values[field_name], list):
@@ -2694,9 +2515,7 @@ def deserialize_semantic_t1_panel(
         try:
             cache_inputs.append(SemanticT1CacheTraceInput(**values))
         except (TypeError, ValueError, SemanticT1PanelError) as error:
-            raise SemanticT1PanelError(
-                f"semantic T1 cache input {index} is invalid"
-            ) from error
+            raise SemanticT1PanelError(f"semantic T1 cache input {index} is invalid") from error
 
     coverage_payloads = payload.get("coverage_receipts")
     if not isinstance(coverage_payloads, list):
@@ -2711,12 +2530,8 @@ def deserialize_semantic_t1_panel(
     }
     for index, item in enumerate(coverage_payloads):
         if not isinstance(item, dict) or set(item) != expected_coverage_fields:
-            raise SemanticT1PanelError(
-                f"semantic T1 coverage receipt {index} fields disagree"
-            )
-        stratum = _parse_stratum(
-            item["stratum"], field_name=f"coverage_receipts[{index}].stratum"
-        )
+            raise SemanticT1PanelError(f"semantic T1 coverage receipt {index} fields disagree")
+        stratum = _parse_stratum(item["stratum"], field_name=f"coverage_receipts[{index}].stratum")
         if item["stratum_sha256"] != stratum.stratum_sha256:
             raise SemanticT1PanelError(
                 f"semantic T1 coverage receipt {index} stratum hash disagrees"
@@ -2725,9 +2540,7 @@ def deserialize_semantic_t1_panel(
             coverage.append(
                 SemanticT1CoverageReceipt(
                     stratum=stratum,
-                    train_teacher_occurrence_count=item[
-                        "train_teacher_occurrence_count"
-                    ],
+                    train_teacher_occurrence_count=item["train_teacher_occurrence_count"],
                     retained_candidate_count=item["retained_candidate_count"],
                     selected_candidate_count=item["selected_candidate_count"],
                 )
@@ -2761,27 +2574,19 @@ def deserialize_semantic_t1_panel(
             registry_sha256=payload["registry_sha256"],
             process_identity_sha256=payload["process_identity_sha256"],
             corpus_contract_file_sha256=payload["corpus_contract_file_sha256"],
-            classifier_implementation_sha256=payload[
-                "classifier_implementation_sha256"
-            ],
+            classifier_implementation_sha256=payload["classifier_implementation_sha256"],
             panel_implementation_sha256=payload["panel_implementation_sha256"],
             entries=tuple(entries),
             cache_trace_inputs=tuple(cache_inputs),
             coverage_receipts=tuple(coverage),
             single_target_source_state_count=counts["single_target_source_state_count"],
-            single_target_source_inventory_sha256=counts[
-                "single_target_source_inventory_sha256"
-            ],
+            single_target_source_inventory_sha256=counts["single_target_source_inventory_sha256"],
             repeated_source_state_count=counts["repeated_source_state_count"],
             repeated_source_inventory_sha256=counts["repeated_source_inventory_sha256"],
             first_pass_train_teacher_count=counts["first_pass_train_teacher_count"],
             second_pass_train_teacher_count=counts["second_pass_train_teacher_count"],
-            first_pass_train_teacher_stream_sha256=source_passes[
-                "first_pass_stream_sha256"
-            ],
-            second_pass_train_teacher_stream_sha256=source_passes[
-                "second_pass_stream_sha256"
-            ],
+            first_pass_train_teacher_stream_sha256=source_passes["first_pass_stream_sha256"],
+            second_pass_train_teacher_stream_sha256=source_passes["second_pass_stream_sha256"],
             artifact_sha256=payload["artifact_sha256"],
         )
     except (KeyError, TypeError, ValueError, SemanticT1PanelError) as error:
@@ -2790,10 +2595,8 @@ def deserialize_semantic_t1_panel(
         raise SemanticT1PanelError(
             "semantic T1 artifact contains unknown or recomputed-field drift"
         )
-    if (
-        expected_artifact_sha256 is not None
-        and artifact.artifact_sha256
-        != _require_sha(expected_artifact_sha256, field_name="expected_artifact_sha256")
+    if expected_artifact_sha256 is not None and artifact.artifact_sha256 != _require_sha(
+        expected_artifact_sha256, field_name="expected_artifact_sha256"
     ):
         raise SemanticT1PanelError("semantic T1 expected artifact hash disagrees")
     if (
@@ -2822,9 +2625,7 @@ def read_semantic_t1_panel(
     try:
         content = source.read_bytes()
     except OSError as error:
-        raise SemanticT1PanelError(
-            f"semantic T1 panel artifact is absent: {source}"
-        ) from error
+        raise SemanticT1PanelError(f"semantic T1 panel artifact is absent: {source}") from error
     if type(expected_file_bytes) is not int or expected_file_bytes <= 0:
         raise ValueError("expected_file_bytes must be a positive integer")
     if len(content) != expected_file_bytes:

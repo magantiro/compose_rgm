@@ -14,16 +14,12 @@ APP_PATH = ROOT / "modal_apps" / "run_semantic_active8_decisions_app.py"
 
 def _function(tree: ast.Module, name: str) -> ast.FunctionDef:
     return next(
-        node
-        for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == name
+        node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name
     )
 
 
 def _load_launcher():
-    spec = importlib.util.spec_from_file_location(
-        "semantic_active8_decision_launcher", APP_PATH
-    )
+    spec = importlib.util.spec_from_file_location("semantic_active8_decision_launcher", APP_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -52,9 +48,7 @@ def test_modal_surface_is_cpu_only_restart_safe_and_non_authorizing() -> None:
     )
     assert worker_decorator is not None
     assert "max_containers=MAX_MAP_CONTAINERS" in worker_decorator
-    cache_source = ast.get_source_segment(
-        source, _function(tree, "_worker_model_and_checker")
-    )
+    cache_source = ast.get_source_segment(source, _function(tree, "_worker_model_and_checker"))
     assert cache_source is not None
     assert "ProductionSemanticExactCandidateChecker" in cache_source
     assert "build_exact_semantic_model" in cache_source
@@ -108,12 +102,23 @@ def test_runtime_contract_is_exact_semantic_parent_and_self_hashed() -> None:
         "candidate_time": 0.5,
         "candidate_cache_size": 4096,
     }
-    assert (
-        runtime["semantic_model_process_contract"]["contract_sha256"] == semantic.sha256
+    assert runtime["semantic_model_process_contract"]["contract_sha256"] == semantic.sha256
+    assert runtime["semantic_model_process_contract"]["file_sha256"] == launcher._file_sha256(
+        ROOT / launcher.SEMANTIC_CONTRACT_SOURCE
     )
-    assert runtime["semantic_model_process_contract"][
-        "file_sha256"
-    ] == launcher._file_sha256(ROOT / launcher.SEMANTIC_CONTRACT_SOURCE)
+
+
+def test_image_copy_inventory_matches_the_hashed_source_inventory() -> None:
+    launcher = _load_launcher()
+    expected = {launcher.LAUNCHER_SOURCE}
+    for source_directory in launcher.IMAGE_SOURCE_DIRECTORIES:
+        expected.update(
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / source_directory).rglob("*")
+            if path.is_file() and path.suffix != ".pyc" and "__pycache__" not in path.parts
+        )
+    assert launcher.IMAGE_SOURCE_DIRECTORIES == ("src", "configs")
+    assert set(launcher._serialized_source_paths(ROOT)) == expected
 
 
 def test_source_revision_rejects_dirty_or_wrong_commit_and_hashes_all_inputs(
@@ -128,14 +133,16 @@ def test_source_revision_rejects_dirty_or_wrong_commit_and_hashes_all_inputs(
             return "b" * 40
         if arguments == ("status", "--porcelain=v1", "--untracked-files=all"):
             return ""
+        if arguments == ("ls-files",):
+            return "\n".join(launcher._serialized_source_paths(ROOT))
         raise AssertionError(arguments)
 
     monkeypatch.setattr(launcher, "_git", clean_git)
     revision = launcher.local_source_revision(expected_commit="a" * 40, repo_root=ROOT)
     assert revision["worktree_clean"] is True
-    assert set(revision["serialized_sources"]) == set(
-        launcher._serialized_source_paths(ROOT)
-    )
+    assert revision["execution_source_revision"]["commit"] == "a" * 40
+    assert revision["execution_source_revision"]["tree"] == "b" * 40
+    assert set(revision["serialized_sources"]) == set(launcher._serialized_source_paths(ROOT))
     assert launcher.RUNTIME_CONTRACT_SOURCE in revision["serialized_sources"]
     assert launcher.SEMANTIC_CONTRACT_SOURCE in revision["serialized_sources"]
     assert (
@@ -165,23 +172,17 @@ def test_exact_live_model_identity_binds_semantic_capabilities_seed_and_state(
     launcher = _load_launcher()
     loaded = launcher._imports(ROOT)
     runtime, semantic = launcher._load_runtime_contract(root=ROOT, loaded=loaded)
-    revision_body = {
-        "schema": launcher.SOURCE_REVISION_SCHEMA,
-        "schema_version": launcher.SOURCE_REVISION_SCHEMA_VERSION,
-        "commit": "a" * 40,
-        "tree": "b" * 40,
-        "worktree_clean": True,
-        "serialized_sources": {
-            relative: launcher._file_sha256(ROOT / relative)
-            for relative in launcher._serialized_source_paths(ROOT)
-        },
-        "runtime_contract_sha256": runtime["runtime_contract_sha256"],
-        "semantic_model_process_contract_sha256": semantic.sha256,
-    }
-    revision = {
-        **revision_body,
-        "source_revision_sha256": launcher._sha256(revision_body),
-    }
+
+    def clean_git(_root, *arguments):
+        return {
+            ("rev-parse", "HEAD"): "a" * 40,
+            ("rev-parse", "HEAD^{tree}"): "b" * 40,
+            ("status", "--porcelain=v1", "--untracked-files=all"): "",
+            ("ls-files",): "\n".join(launcher._serialized_source_paths(ROOT)),
+        }[arguments]
+
+    monkeypatch.setattr(launcher, "_git", clean_git)
+    revision = launcher.local_source_revision(expected_commit="a" * 40, repo_root=ROOT)
     monkeypatch.setattr(launcher, "_software_identity", lambda value: value["software"])
     model_a, identity_a = launcher.build_exact_semantic_model(
         runtime=runtime,
@@ -203,4 +204,9 @@ def test_exact_live_model_identity_binds_semantic_capabilities_seed_and_state(
         == semantic.payload["model_identity"]["operator_capability_fingerprint"]
     )
     assert identity_a["architecture"]["dtype"] == "torch.float32"
+    assert identity_a["producer_source_revision_sha256"] == revision["source_revision_sha256"]
+    assert (
+        identity_a["execution_source_revision_sha256"]
+        == revision["execution_source_revision"]["source_revision_sha256"]
+    )
     assert model_a is not model_b

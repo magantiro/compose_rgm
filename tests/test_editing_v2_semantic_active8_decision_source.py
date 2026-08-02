@@ -133,9 +133,7 @@ def _record_from_step(
         trace_id=trace_id,
         data_lane=lane,
         split=role,
-        source_address={
-            "source_address_sha256": hashlib.sha256(trace_id.encode()).hexdigest()
-        },
+        source_address={"source_address_sha256": hashlib.sha256(trace_id.encode()).hexdigest()},
         lineage={"semantic_migration": "fixture"},
     )
 
@@ -186,9 +184,7 @@ def _active8_train_records(
         (
             "atom_restate",
             carbon,
-            RewriteStep(
-                "atom_restate_semantic", SemanticAtomRestate(0, nitrogen_class)
-            ),
+            RewriteStep("atom_restate_semantic", SemanticAtomRestate(0, nitrogen_class)),
         ),
         (
             "bond_reorder",
@@ -250,9 +246,7 @@ def _inventory(
     total_actions = 0
     total_family_histogram: Counter[str] = Counter()
     for index, (lane, role) in enumerate(
-        (lane, role)
-        for lane in REQUIRED_DATA_LANES
-        for role in REQUIRED_PARTITION_ROLES
+        (lane, role) for lane in REQUIRED_DATA_LANES for role in REQUIRED_PARTITION_ROLES
     ):
         output = root / "sources" / lane / role
         semantic = output / "semantic"
@@ -268,9 +262,7 @@ def _inventory(
         binding = SemanticActive8SourceBinding(
             source_shard_name="legacy.jsonl.gz",
             source_shard_sha256=hashlib.sha256(f"source-{index}".encode()).hexdigest(),
-            source_manifest_sha256=hashlib.sha256(
-                f"manifest-{index}".encode()
-            ).hexdigest(),
+            source_manifest_sha256=hashlib.sha256(f"manifest-{index}".encode()).hexdigest(),
             source_overlay_sha256=None,
             source_unified_manifest_sha256="d" * 64,
             source_entry_count=record_count,
@@ -282,9 +274,7 @@ def _inventory(
             split=role,
             source_binding=binding.as_mapping(),
             decision_binding={
-                "decision_ledger_sha256": hashlib.sha256(
-                    f"decision-{index}".encode()
-                ).hexdigest(),
+                "decision_ledger_sha256": hashlib.sha256(f"decision-{index}".encode()).hexdigest(),
                 "source_count": record_count,
                 "admitted_count": record_count,
                 "rejected_count": 0,
@@ -299,9 +289,7 @@ def _inventory(
             SemanticActive8Source(
                 data_lane=lane,
                 partition_role=role,
-                task_identity_sha256=hashlib.sha256(
-                    f"task-{index}".encode()
-                ).hexdigest(),
+                task_identity_sha256=hashlib.sha256(f"task-{index}".encode()).hexdigest(),
                 task_output_artifact_path=f"/artifacts/sources/{lane}/{role}",
                 task_output_directory=output,
                 task_receipt_path=receipt,
@@ -314,16 +302,12 @@ def _inventory(
                 semantic_manifest_file_sha256=_file_sha(semantic / MANIFEST_FILENAME),
                 semantic_manifest_sha256=manifest["manifest_sha256"],
                 semantic_completion_path=semantic / SEMANTIC_COMPLETION_FILENAME,
-                semantic_completion_file_sha256=_file_sha(
-                    semantic / SEMANTIC_COMPLETION_FILENAME
-                ),
+                semantic_completion_file_sha256=_file_sha(semantic / SEMANTIC_COMPLETION_FILENAME),
                 semantic_completion_sha256=completion["completion_sha256"],
                 semantic_record_stream_sha256=manifest["record_stream_sha256"],
                 process_identity_sha256=manifest["process_identity_sha256"],
                 action_codec_schema_version=manifest["action_codec_schema_version"],
-                action_codec_implementation_hash=manifest[
-                    "action_codec_implementation_hash"
-                ],
+                action_codec_implementation_hash=manifest["action_codec_implementation_hash"],
                 source_binding=binding,
                 family_histogram=tuple(manifest["family_histogram"].items()),
                 counts=SemanticActive8CountFlow(
@@ -421,9 +405,7 @@ def _runtime_identity(model: FactorizedTraceletRateModel) -> dict[str, object]:
         (root / contract.payload["parents"]["decision_runtime"]["path"]).read_text()
     )
     semantic_model = json.loads(
-        (
-            root / contract.payload["parents"]["semantic_model_process"]["path"]
-        ).read_text()
+        (root / contract.payload["parents"]["semantic_model_process"]["path"]).read_text()
     )
     parameter_digest = hashlib.sha256()
     for name, tensor in sorted(model.state_dict().items()):
@@ -435,7 +417,7 @@ def _runtime_identity(model: FactorizedTraceletRateModel) -> dict[str, object]:
     required = contract.payload["required_architecture"]
     body = {
         "schema": "compose.data.semantic_active8_exact_model_runtime",
-        "schema_version": 1,
+        "schema_version": 2,
         "runtime_contract_sha256": decision_runtime["runtime_contract_sha256"],
         "semantic_model_process_contract_sha256": semantic_model["contract_sha256"],
         "semantic_model_identity": semantic_model["model_identity"],
@@ -456,7 +438,12 @@ def _runtime_identity(model: FactorizedTraceletRateModel) -> dict[str, object]:
         "initialization_seed": required["initialization_seed"],
         "initial_model_state_sha256": parameter_digest.hexdigest(),
         "software": decision_runtime["software"],
-        "source_revision_sha256": _value_sha({"fixture": "semantic-active8-source"}),
+        "producer_source_revision_sha256": _value_sha(
+            {"fixture": "semantic-active8-producer-source"}
+        ),
+        "execution_source_revision_sha256": _value_sha(
+            {"fixture": "semantic-active8-execution-source"}
+        ),
     }
     return {**body, "identity_sha256": _value_sha(body)}
 
@@ -573,11 +560,7 @@ def _build_completed_source(
         artifact_root=root,
     )
     decision_completion_path = (
-        root
-        / "decisions"
-        / "runs"
-        / plan["run_identity_sha256"]
-        / decision_mr.COMPLETION_FILENAME
+        root / "decisions" / "runs" / plan["run_identity_sha256"] / decision_mr.COMPLETION_FILENAME
     )
     return {
         "root": root,
@@ -622,10 +605,7 @@ def completed_single_target_active8_source(
 def _patch_migration_resolver(monkeypatch, inventory):
     def resolve(path, *, artifact_root, repo_root):
         assert Path(path).resolve() == inventory.migration_completion_path.resolve()
-        assert (
-            Path(artifact_root).resolve()
-            == inventory.migration_completion_path.parents[1]
-        )
+        assert Path(artifact_root).resolve() == inventory.migration_completion_path.parents[1]
         assert Path(repo_root).is_dir()
         return inventory
 
@@ -641,12 +621,10 @@ def _resolve(completed, *, root=None, inventory=None):
     inventory = completed["inventory"] if inventory is None else inventory
     return source_index.resolve_editing_v2_semantic_active8_decision_source(
         migration_completion_path=inventory.migration_completion_path,
-        chunk_cache_plan_path=root
-        / completed["cache_plan_path"].relative_to(completed["root"]),
+        chunk_cache_plan_path=root / completed["cache_plan_path"].relative_to(completed["root"]),
         chunk_cache_global_completion_path=root
         / completed["cache_completion_path"].relative_to(completed["root"]),
-        decision_plan_path=root
-        / completed["decision_plan_path"].relative_to(completed["root"]),
+        decision_plan_path=root / completed["decision_plan_path"].relative_to(completed["root"]),
         decision_completion_path=root
         / completed["decision_completion_path"].relative_to(completed["root"]),
         artifact_root=root,
@@ -706,9 +684,7 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     monkeypatch.setattr(decision_mr, "_load_task_result", train_only_loader)
     train_accepted = tuple(index.iter_accepted_traces_for_partition("train"))
     assert len(train_accepted) == 4
-    assert all(
-        item.addressed_trace.address.partition == "train" for item in train_accepted
-    )
+    assert all(item.addressed_trace.address.partition == "train" for item in train_accepted)
     with pytest.raises(ValueError, match="partition role must be one of"):
         tuple(index.iter_accepted_traces_for_partition("outer_test"))
     monkeypatch.setattr(decision_mr, "_load_task_result", original_loader)
@@ -761,8 +737,7 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
         for item in transitions
     )
     assert all(
-        item.decision_source_inventory_sha256 == index.inventory_sha256
-        for item in transitions
+        item.decision_source_inventory_sha256 == index.inventory_sha256 for item in transitions
     )
     assignments = tuple(
         classify_verified_structural_transition(index, item) for item in transitions
@@ -803,9 +778,7 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     first_transition = transitions[0]
     forged_evidence = replace(
         first_transition.action_decision.candidate_evidence,
-        raw_mark_count=(
-            first_transition.action_decision.candidate_evidence.raw_mark_count + 1
-        ),
+        raw_mark_count=(first_transition.action_decision.candidate_evidence.raw_mark_count + 1),
     )
     forged_action_decision = replace(
         first_transition.action_decision,
@@ -843,14 +816,8 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
     assert identity["decision_source_implementation_sha256"] == _file_sha(
         Path(source_index.__file__)
     )
-    assert (
-        identity["decision_lookup_inventory_sha256"]
-        == index.decision_lookup_inventory_sha256
-    )
-    assert (
-        identity["exclusion_lookup_inventory_sha256"]
-        == index.exclusion_lookup_inventory_sha256
-    )
+    assert identity["decision_lookup_inventory_sha256"] == index.decision_lookup_inventory_sha256
+    assert identity["exclusion_lookup_inventory_sha256"] == index.exclusion_lookup_inventory_sha256
     with pytest.raises(ValueError, match="self-hash disagrees"):
         replace(index, inventory_sha256="f" * 64)
 
@@ -884,9 +851,7 @@ def test_index_streams_exact_accepted_progress_and_preserves_exclusions(
 
     exclusions = dict(index._exclusions_by_key)
     exclusion_key, exclusion_values = next(iter(exclusions.items()))
-    exclusions[exclusion_key] = (
-        replace(exclusion_values[0], reason="tampered_exclusion_reason"),
-    )
+    exclusions[exclusion_key] = (replace(exclusion_values[0], reason="tampered_exclusion_reason"),)
     with pytest.raises(ValueError, match="exclusion lookup hash disagrees"):
         replace(index, _exclusions_by_key=exclusions)
 
@@ -901,9 +866,7 @@ def test_semantic_gate_zero_consumes_real_index_without_held_out_rescue(
     inventory = completed_source["inventory"]
     _patch_migration_resolver(monkeypatch, inventory)
     index = _resolve(completed_source)
-    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(
-        repo_root=Path.cwd()
-    )
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(repo_root=Path.cwd())
     evidence = semantic_gate_zero.build_semantic_gate_zero_structural_evidence(
         index,
         decision_plan_path=completed_source["decision_plan_path"],
@@ -945,16 +908,12 @@ def test_real_gate_zero_pass_rejects_fixture_without_single_target_active8_cover
     inventory = completed_active8_source["inventory"]
     _patch_migration_resolver(monkeypatch, inventory)
     index = _resolve(completed_active8_source)
-    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(
-        repo_root=Path.cwd()
-    )
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(repo_root=Path.cwd())
     output = completed_active8_source["root"] / "gate-zero-t1-integration"
     artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
         migration_completion_path=inventory.migration_completion_path,
         chunk_cache_plan_path=completed_active8_source["cache_plan_path"],
-        chunk_cache_global_completion_path=completed_active8_source[
-            "cache_completion_path"
-        ],
+        chunk_cache_global_completion_path=completed_active8_source["cache_completion_path"],
         decision_plan_path=completed_active8_source["decision_plan_path"],
         decision_completion_path=completed_active8_source["decision_completion_path"],
         artifact_root=completed_active8_source["root"],
@@ -966,7 +925,7 @@ def test_real_gate_zero_pass_rejects_fixture_without_single_target_active8_cover
     runtime = artifacts["evidence"]["model_runtime_identity"]
     request = semantic_t1_panel.SemanticT1PanelRequest.create(
         request_id="real_typed_index_integration",
-        source_revision_sha256=runtime["source_revision_sha256"],
+        source_revision_sha256=runtime["execution_source_revision_sha256"],
         support_time=0.5,
         maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
     )
@@ -985,7 +944,7 @@ def test_real_gate_zero_pass_rejects_fixture_without_single_target_active8_cover
 
     mismatched_plan = output / "MISMATCHED_PLAN.json"
     mismatched = json.loads(completed_active8_source["decision_plan_path"].read_text())
-    mismatched["model_runtime_identity"]["source_revision_sha256"] = "f" * 64
+    mismatched["model_runtime_identity"]["execution_source_revision_sha256"] = "f" * 64
     mismatched_plan.write_bytes(_canonical(mismatched, newline=True))
     with pytest.raises(
         semantic_gate_zero.SemanticGateZeroStructuralError,
@@ -1009,9 +968,7 @@ def test_real_gate_zero_pass_prepares_unique_panel_and_resolves_cache_traces(
     inventory = completed["inventory"]
     _patch_migration_resolver(monkeypatch, inventory)
     index = _resolve(completed)
-    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(
-        repo_root=Path.cwd()
-    )
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(repo_root=Path.cwd())
     artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
         migration_completion_path=inventory.migration_completion_path,
         chunk_cache_plan_path=completed["cache_plan_path"],
@@ -1028,7 +985,7 @@ def test_real_gate_zero_pass_prepares_unique_panel_and_resolves_cache_traces(
     runtime = artifacts["evidence"]["model_runtime_identity"]
     request = semantic_t1_panel.SemanticT1PanelRequest.create(
         request_id="real_single_target_typed_index_integration",
-        source_revision_sha256=runtime["source_revision_sha256"],
+        source_revision_sha256=runtime["execution_source_revision_sha256"],
         support_time=0.5,
         maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
     )
@@ -1093,15 +1050,11 @@ def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
     )
 
     wrong_successor = copy.deepcopy(original)
-    wrong_successor["actions"][0]["candidate_evidence"][
-        "canonical_successor_key"
-    ] = "definitely-not-the-exact-successor"
+    wrong_successor["actions"][0]["candidate_evidence"]["canonical_successor_key"] = (
+        "definitely-not-the-exact-successor"
+    )
     wrong_successor["decision_sha256"] = source_index._sha(
-        {
-            key: value
-            for key, value in wrong_successor.items()
-            if key != "decision_sha256"
-        }
+        {key: value for key, value in wrong_successor.items() if key != "decision_sha256"}
     )
     with pytest.raises(
         source_index.SemanticActive8DecisionSourceError,
@@ -1114,11 +1067,7 @@ def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
     evidence["raw_mark_count"] = 0
     evidence["canonical_successor_count"] = 999
     impossible_counts["decision_sha256"] = source_index._sha(
-        {
-            key: value
-            for key, value in impossible_counts.items()
-            if key != "decision_sha256"
-        }
+        {key: value for key, value in impossible_counts.items() if key != "decision_sha256"}
     )
     with pytest.raises(
         source_index.SemanticActive8DecisionSourceError,
@@ -1218,11 +1167,8 @@ def test_index_rejects_tampered_decision_bytes(
     copied = tmp_path / "artifacts"
     shutil.copytree(completed_source["root"], copied)
     original_inventory = completed_source["inventory"]
-    copied_migration = (
-        copied
-        / original_inventory.migration_completion_path.relative_to(
-            completed_source["root"]
-        )
+    copied_migration = copied / original_inventory.migration_completion_path.relative_to(
+        completed_source["root"]
     )
     inventory = replace(
         original_inventory,
@@ -1231,10 +1177,7 @@ def test_index_rejects_tampered_decision_bytes(
     _patch_migration_resolver(monkeypatch, inventory)
     decision_plan = json.loads(
         (
-            copied
-            / completed_source["decision_plan_path"].relative_to(
-                completed_source["root"]
-            )
+            copied / completed_source["decision_plan_path"].relative_to(completed_source["root"])
         ).read_text()
     )
     first = decision_plan["tasks"][0]
@@ -1265,11 +1208,8 @@ def test_missing_chunk_completion_object_is_not_repaired(
     copied = tmp_path / "artifacts"
     shutil.copytree(completed_source["root"], copied)
     original_inventory = completed_source["inventory"]
-    copied_migration = (
-        copied
-        / original_inventory.migration_completion_path.relative_to(
-            completed_source["root"]
-        )
+    copied_migration = copied / original_inventory.migration_completion_path.relative_to(
+        completed_source["root"]
     )
     inventory = replace(
         original_inventory,

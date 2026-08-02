@@ -39,6 +39,7 @@ from compose_v4.experiments.editing_v2_semantic_p50_successor_cache import (
     COMPLETION_STATUS,
     MANIFEST_SCHEMA,
     MANIFEST_STATUS,
+    SCHEMA_VERSION as SUCCESSOR_CACHE_SCHEMA_VERSION,
     SemanticP50SuccessorCache,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_validation_baseline import (
@@ -248,7 +249,7 @@ def _completion(*, prepared: dict, manifest: dict, train_count: int, validation_
     prerequisite = prepared["prerequisites"]
     body = {
         "schema": COMPLETION_SCHEMA,
-        "schema_version": 1,
+        "schema_version": SUCCESSOR_CACHE_SCHEMA_VERSION,
         "status": COMPLETION_STATUS,
         "training_authorized": False,
         "bounded_p50_authorized": False,
@@ -259,6 +260,7 @@ def _completion(*, prepared: dict, manifest: dict, train_count: int, validation_
         "run_identity_sha256": _digest("cache-run"),
         "build_identity_sha256": _digest("cache-build"),
         "source_revision_sha256": _digest("revision"),
+        "execution_source_revision_sha256": _digest("execution-revision"),
         "implementation_sha256": _digest("cache-code"),
         "prepared_recipe_sha256": prepared["prepared_recipe_sha256"],
         "validation_contract_sha256": manifest["validation_contract"]["validation_contract_sha256"],
