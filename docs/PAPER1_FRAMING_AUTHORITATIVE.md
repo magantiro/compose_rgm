@@ -46,6 +46,12 @@ throughout, preserves framework-first positioning, and carries the three things 
 rewrites · trans-dimensional molecular generation · control. The tagline is a **tagline
 only** and must never appear as the title.
 
+**Naming hierarchy:** Rewrite Generator Matching (RGM) is the general framework. COMPOSE is the
+molecular instantiation and expands once, at first use, as **CO**mpositional **M**olecular **P**rocess
+**O**ver **S**tochastic **E**xecutable rewrites. Elsewhere, use COMPOSE as the system name without
+re-expanding it. Do not call COMPOSE the generic framework, and do not change the settled title to force
+the expansion into the title.
+
 ---
 
 ## 2. Three contributions (in this order)

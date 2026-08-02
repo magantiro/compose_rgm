@@ -30,14 +30,15 @@ corruption on an ambient representation. Such transitions need not be
 executable chemical edits, and intermediate states need not be complete
 molecules. We introduce \emph{Rewrite Generator Matching} (RGM), a framework
 that instead learns a time-inhomogeneous marked jump process over the
-state-dependent fiber of legal executable rewrites. A total hazard determines
-when an event occurs and a conditional mark law determines which rewrite
-fires. We instantiate RGM as COMPOSE on disjoint cardinality strata, including
-a distinguished null source that is not a molecule. Its marks create, delete,
-restate, reconnect, and cyclize molecular structure, while the executor keeps
-every non-null committed state inside a declared space of connected,
-valence-valid molecules. Because different marks can execute to the same
-molecule, we define the molecular transition law as the pushforward of the
+state-dependent fiber of legal executable rewrites. A total hazard sets the
+instantaneous event rate, and a conditional mark law selects which rewrite
+fires. We instantiate RGM as COMPOSE, a compositional molecular process over
+stochastic executable rewrites. COMPOSE operates on disjoint cardinality
+strata, including a distinguished null source that is not a molecule. Its
+marks create, delete, restate, reconnect, and cyclize molecular structure,
+while the executor keeps every non-null committed state inside a declared
+space of connected, valence-valid molecules. Because different marks can
+execute to the same molecule, we define the molecular transition law as the pushforward of the
 learned mark law through execution and canonical molecular identity. This
 successor kernel is invariant to successor-preserving re-encodings that
 preserve aggregate successor rates and productive-event disposition, as are
@@ -99,7 +100,10 @@ stochastic rewrite process, not an unconstrained prediction followed by
 repair.
 
 \paragraph{A genuinely trans-dimensional molecular process.}
-\method instantiates \rgm on the disjoint union
+We call the molecular instantiation \method: a
+\textbf{CO}mpositional \textbf{M}olecular \textbf{P}rocess
+\textbf{O}ver \textbf{S}tochastic \textbf{E}xecutable rewrites. It instantiates
+\rgm on the disjoint union
 \[
   \X=\bigsqcup_{n=0}^{N}\X_n,
   \qquad
