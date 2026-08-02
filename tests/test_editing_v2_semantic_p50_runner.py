@@ -19,14 +19,14 @@ from compose_v4.data.successor_fiber_cache import (
     successor_fiber_cache_record_payload,
 )
 from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_p50_recipe_stream import (
     SemanticP50Candidate,
     SemanticP50CandidateInventory,
     SemanticP50Prerequisites,
     compile_semantic_p50_prepared_recipe,
-)
-from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
-    load_semantic_development_cell_roles,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_runner import (
     SemanticP50RunnerError,
@@ -42,8 +42,10 @@ from compose_v4.experiments.editing_v2_semantic_p50_successor_cache import (
     COMPLETION_STATUS,
     MANIFEST_SCHEMA,
     MANIFEST_STATUS,
-    SCHEMA_VERSION as SUCCESSOR_CACHE_SCHEMA_VERSION,
     SemanticP50SuccessorCache,
+)
+from compose_v4.experiments.editing_v2_semantic_p50_successor_cache import (
+    SCHEMA_VERSION as SUCCESSOR_CACHE_SCHEMA_VERSION,
 )
 from compose_v4.experiments.editing_v2_semantic_p50_validation_baseline import (
     SemanticP50ValidationBinding,
@@ -691,6 +693,27 @@ def test_runner_evaluates_but_does_not_gate_extra_validation_cells(
         records_by_address_sha256=MappingProxyType(by_address),
     )
 
+    required_count = len(load_semantic_development_cell_roles().required_cell_ids)
+    scoring = runner_module.forward_teacher_successor_batch
+    call_count = 0
+
+    def regress_only_extra_final(model, batch, fibers):
+        nonlocal call_count
+        call_count += 1
+        prediction = scoring(model, batch, fibers)
+        if call_count != 52:
+            return prediction
+        log_probability = prediction.selected_productive_successor_log_probability.clone()
+        assert len(batch.states) == required_count + 1
+        log_probability[-1] -= 10.0
+        return _Prediction(log_probability, prediction.total_hazard)
+
+    monkeypatch.setattr(
+        runner_module,
+        "forward_teacher_successor_batch",
+        regress_only_extra_final,
+    )
+
     artifacts = run_semantic_p50(
         SemanticP50RuntimeInputs(
             prepared_recipe=inputs.prepared_recipe,
@@ -705,12 +728,25 @@ def test_runner_evaluates_but_does_not_gate_extra_validation_cells(
         )
     )
 
-    required_count = len(load_semantic_development_cell_roles().required_cell_ids)
     assert len(artifacts.final_validation_evaluations) == required_count + 1
     assert artifacts.result["validation_cell_coverage"][
         "extra_observed_semantic_cells_not_gated"
     ] == [f"extra:{family}:observed_only"]
     assert len(artifacts.result["semantic_cell_validation_nll_checks"]) == required_count
+    family_check = next(
+        row for row in artifacts.result["family_validation_nll_checks"] if row["family"] == family
+    )
+    expected_required_family_count = sum(
+        cell.rsplit(":", 2)[1] == family
+        for cell in load_semantic_development_cell_roles().required_cell_ids
+    )
+    assert family_check["example_count"] == expected_required_family_count
+    extra_scratch = artifacts.scratch_validation_evaluations[-1]
+    extra_final = artifacts.final_validation_evaluations[-1]
+    assert extra_scratch.semantic_cell_id == f"extra:{family}:observed_only"
+    assert extra_final.canonical_successor_nll_nats > (
+        extra_scratch.canonical_successor_nll_nats + 9.0
+    )
 
 
 def test_checkpoint_rejects_tensor_tampering(monkeypatch: pytest.MonkeyPatch) -> None:

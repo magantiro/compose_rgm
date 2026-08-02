@@ -1006,6 +1006,10 @@ def _validation_nll_checks(
             )
 
     validation_contract = prepared["validation_contract"]
+    required_cells = tuple(validation_contract["required_nonempty_semantic_cells"])
+    required_cell_set = frozenset(required_cells)
+    gated_scratch = tuple(item for item in scratch if item.semantic_cell_id in required_cell_set)
+    gated_final = tuple(item for item in final if item.semantic_cell_id in required_cell_set)
     family_ceiling = float(
         validation_contract["maximum_family_final_minus_baseline_successor_nll_nats"]
     )
@@ -1024,12 +1028,12 @@ def _validation_nll_checks(
         for identity in identities:
             before_values = [
                 item.canonical_successor_nll_nats
-                for item in scratch
+                for item in gated_scratch
                 if getattr(item, field) == identity
             ]
             after_values = [
                 item.canonical_successor_nll_nats
-                for item in final
+                for item in gated_final
                 if getattr(item, field) == identity
             ]
             if not before_values or len(before_values) != len(after_values):
@@ -1069,7 +1073,7 @@ def _validation_nll_checks(
         ),
     )
     cell_rows = rows_for(
-        identities=tuple(prepared["validation_contract"]["required_nonempty_semantic_cells"]),
+        identities=required_cells,
         field="semantic_cell_id",
         ceiling=cell_ceiling,
         non_increase_ceiling=float(
@@ -1769,7 +1773,9 @@ def run_semantic_p50(inputs: SemanticP50RuntimeInputs) -> SemanticP50RunArtifact
                     evidence["optimizer_step_opportunity_count"],
                 ) != expected[identity] or evidence[
                     "finite_nonzero_gradient_update_count"
-                ] < evidence["minimum_required_finite_nonzero_gradient_update_count"]:
+                ] < evidence[
+                    "minimum_required_finite_nonzero_gradient_update_count"
+                ]:
                     raise SemanticP50RunnerError(
                         f"P50 exposure or gradient floor failed for {identity}"
                     )
