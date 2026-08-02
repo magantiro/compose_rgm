@@ -129,7 +129,7 @@
     ],
     "source_sha256": {
       "src/compose_v4/model/factorized_tracelet_rate_model.py": "d8ee3fdbf7b24a017180166d2131324d5cbc94e521394474bc3567f8ac2cdc55",
-      "src/compose_v4/rewrite/process_v2_atom_delete.py": "0d5baed5d9c866a1d04d2b1f0573d17e509dd719798b58c52199f8ef6dcad454"
+      "src/compose_v4/rewrite/process_v2_atom_delete.py": "1db7411690777d27cac5a4b99fb9aab7d13cc81ca3c83131472cf406a26a81f4"
     }
   },
   "authority": {
@@ -161,7 +161,7 @@
     "predicate": "charge_policy_preserved",
     "version": "exact_charged_center_preservation_v1"
   },
-  "contract_sha256": "bfbaf9dfb700f90ae6ed863139a6fe552aa4d36b355cb3334cd7e2df4ae282f1",
+  "contract_sha256": "30369f36373b1163114b9a8bf6849f3fbed4627b6070e4478c4a5efb6c3c6261",
   "downstream_invalidation": {
     "active8_inventory_rebuild_required": true,
     "affected_whole_trace_replay_required": true,

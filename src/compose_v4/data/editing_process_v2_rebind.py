@@ -585,9 +585,15 @@ def independent_process_v2_atom_delete_slots(state: MolecularGraph) -> tuple[int
     built directly from the executor validator, the executor, the connectivity
     predicate, the charge policy, resonance-invariant aromatic perception and
     graph articulation points.  It never calls
-    :mod:`compose_v4.rewrite.process_v2_atom_delete`, so agreement between the
-    two is evidence rather than a tautology.  It is a bounded test/proof oracle
-    and is not a production successor-kernel implementation.
+    :mod:`compose_v4.rewrite.process_v2_atom_delete`.
+
+    Claim boundary: this is a second *derivation*, not a second *design*.  It
+    shares the production resolver's primitives and condition order, so
+    agreement catches a coding error, a plumbing error, or drift between the
+    two, and mutation testing confirms it does.  It cannot catch a shared
+    misreading of the declared semantics, because both encode the same reading.
+    It is a bounded test/proof oracle and is not a production successor-kernel
+    implementation.
     """
 
     if not is_valid_state(state) or not is_connected_or_null(state):
@@ -1793,6 +1799,11 @@ def execute_process_v2_rebind_task(
                 "states_with_candidates": counts["mask_states_with_candidates"],
                 "candidate_slots": counts["mask_candidate_slots"],
             },
+            # Always empty by construction, never a measurement: any finding
+            # raises ProcessV2RebindMismatch before a receipt is built, so a
+            # published artifact is one where nothing was found, not one where
+            # zero was counted. The fields exist so a reader of a receipt sees
+            # the census shape explicitly rather than inferring it from absence.
             "mismatches_by_code": {},
             "unsupported_teachers_by_code": {},
             "v1_record_inventory_sha256": _canonical_sha256(

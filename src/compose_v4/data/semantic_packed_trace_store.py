@@ -25,9 +25,11 @@ The pinned path is therefore not a weakened gate:
 
 * the caller must *name* the superseded identity explicitly, so the artifact it
   is willing to read is recorded in its own provenance rather than inferred;
-* the pinned object is itself validated for internal self-consistency by
-  :func:`validate_frozen_process_identity`, so a fabricated or edited identity
-  is rejected before it is compared to anything;
+* the pinned object is validated for internal self-consistency by
+  :func:`validate_frozen_process_identity`.  That check proves the object is
+  well formed under a declared identity schema; it does **not** prove the
+  object was ever produced by this repository, because anyone can recompute a
+  self-hash.  What actually closes the gap is the next requirement;
 * the manifest must still match that identity exactly, together with its
   contract hash, process-semantics label, schema, physical hashes, completion
   receipt, censuses, and source binding, all unchanged;

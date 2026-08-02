@@ -97,17 +97,20 @@ Stable values, which do not move with implementation edits:
 | V1 contract semantic self-hash | `f928f6adaf22ba7520dd28839655c93bc523ce77317b32050d3dd1b02bbcf288` |
 | V1 contract physical hash | `43cb26e1ba33b27a0149a8142895ef9988853b458c0ace9bc9191f7b460dedbb` |
 
-Commit-local values recorded at Phase 1, before the Phase 2 candidate-mask implementation lands:
+Values as of the integrated branch head, after every bound implementation source was final:
 
 | value | SHA-256 |
 | --- | --- |
-| V2 contract semantic self-hash | `702711e58d68117f762deadbe47bd1a7550f19e7fc990daf8720277b345d6ebe` |
-| V2 contract physical hash | `950ab083f82691d6d83f78e23e19b9a074b8756ef2bd52cb4c347e2172e891be` |
-| V2 process identity | `eefc5ff80a553f6a6d12cba3c3e56e9864d99a4b7e9c2e798b0160baf17f35ef` |
-| V1 process identity at this revision | `c80e3cc20d51be2922db19bebe30c78f303bbf7683009b3f21754bab59bafcc5` |
+| V2 contract semantic self-hash | `30369f36373b1163114b9a8bf6849f3fbed4627b6070e4478c4a5efb6c3c6261` |
+| V2 contract physical hash | `6111edce5fd7ab6214ae069804c48e6c1e902ac969463a7b279b834d16780cc9` |
+| V2 process identity | `9fde14b59fc6bfb7be7aaf83564658a9a6758f479d9fd94c134206e84873319b` |
+| V1 process identity, superseded | `6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7` |
+| V1 process identity, current | `9874a69a01902dd1c4a0353c14cb9db0c657887b3e497800867629d82f1bf63e` |
 
 The authoritative current values are always the committed contract's `contract_sha256` and
-`editing_process_v2_identity()["process_identity_sha256"]`, not this table.
+`editing_process_v2_identity()["process_identity_sha256"]`, not this table. Any table of hashes in
+prose goes stale the moment a bound source changes; treat this one as a record of the integrated
+head, not as an oracle.
 
 ### The V1 identity value moves; its definition does not
 
@@ -119,9 +122,23 @@ identity value. That is the declared downstream-invalidation mechanism, not a de
 `process_semantics = "semantic_editing_v2_v1"`, same contract path, same eighteen-file implementation
 boundary, same body field set and derivation.
 
-Two committed V1-lane binding configs pin the superseded V1 identity value and must be re-pinned when
-it moves: `configs/editing_gate_zero_semantic_model_process_v1.json` and
-`configs/editing_v2_semantic_capability_cells_v1.json`.
+The re-pin blast radius is larger than the two configs that pin the identity value directly, because
+those configs are themselves content-addressed by others. Measured at integration, the complete
+transitive set is nine artifacts, re-pinned in dependency order:
+`configs/editing_gate_zero_semantic_model_process_v1.json`,
+`configs/editing_v2_semantic_capability_cells_v1.json`,
+`configs/editing_v2_semantic_development_cell_roles_v1.json`,
+`configs/editing_v2_semantic_active8_decision_runtime_v1.json`,
+`configs/editing_v2_semantic_gate_zero_structural_v1.json`,
+`configs/editing_v2_semantic_t1_panel_policy_v1.json`,
+`configs/editing_v2_semantic_t1_capacity_policy_v1.json`,
+`configs/editing_v2_semantic_p50_recipe_policy_v1.json`, and
+`configs/editing_training_v2_gate.json`, plus four source constants in
+`src/compose_v4/experiments/editing_v2_semantic_gate_zero.py`,
+`src/compose_v4/experiments/editing_v2_semantic_t1_capacity_policy.py`, and
+`src/compose_v4/experiments/editing_v2_semantic_t1_decision.py`. Stopping partway leaves the chain
+internally inconsistent, and one link (the T1 capacity policy) compares against a source constant
+rather than the live loader, so a partial re-pin there is silently stale rather than loud.
 
 ### Two identities coexist without ambiguity
 
@@ -197,5 +214,6 @@ self-hash.
   resolver.
 - Heteroatom and higher-degree deletion changes ring topology, so the reachability consequences for
   E3 size adaptation and E4 topology adaptation are stated as motivation, not as measured results.
-- Re-pinning the two V1-lane binding configs to the moved V1 identity value is a human-owned step,
-  and no downstream gate may be re-run before it is done.
+- Re-pinning the V1-lane binding chain to the moved V1 identity value only restores hash agreement.
+  It regenerates no measured evidence: any Gate-0 or T1 result produced under the superseded identity
+  stays invalid until its lane is authorized and re-run.

@@ -28,7 +28,7 @@
     "accuracy_architecture_audit": "docs/RINGCORE_V1_ACCURACY_AND_ARCHITECTURE_AUDIT_2026-07-30.md",
     "checkpoint_inventory": "diagnostics/coherence/ringcore_v1_scientific_a7546e2_frozen_inventory.json",
     "semantic_t1_capacity_policy": "configs/editing_v2_semantic_t1_capacity_policy_v1.json",
-    "semantic_t1_capacity_policy_file_sha256": "9bb8fce6ee1d3b0110cc19f16affe6b6fc17f873e84a834315ef964838e65862",
+    "semantic_t1_capacity_policy_file_sha256": "f46298e778f7e2969783fd34fc1e7b53f6da25519d0343f5f8bd02c27265f2f6",
     "semantic_t1_capacity_policy_sha256": "2186dbd9436f39b3caffafd421710f0c82de14b7da9e4c5ab94a252525a46d1e"
   },
   "metric_contract": {

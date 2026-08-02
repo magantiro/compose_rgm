@@ -31,9 +31,20 @@ An additional candidate is admitted only when every declared condition holds:
 
 The executor is the legality authority.  This module never re-derives a
 weaker approximate valence test: ``is_valid_atom_delete`` and
-``apply_atom_delete`` are imported unchanged.  Note that executor validity is
-deliberately *not* a connectivity predicate, so conditions 3 and 5 are
-independently load-bearing.
+``apply_atom_delete`` are imported unchanged.
+
+On which conditions actually bind, measured rather than asserted.  Executor
+validity is deliberately *not* a connectivity predicate, so it cannot be relied
+on for connectivity; but condition 3 already supplies it, because removing a
+non-cut vertex from a connected graph leaves it connected.  Condition 5 is
+therefore implied by condition 3 and is kept as defence in depth, not as an
+independent gate.  Over 3,617 candidate slots across 1,592 states, the gates
+that ever rejected an otherwise-admissible candidate were aromaticity,
+articulation, and the charge policy (7.6%); successor connectivity, executor
+validity, declared support, and canonicalizability rejected nothing.  The last
+three are nonetheless reachable on constructed states and are pinned in
+``tests/test_process_v2_atom_delete_gates.py``, so none of them is a check no
+test can fail.
 """
 
 from __future__ import annotations

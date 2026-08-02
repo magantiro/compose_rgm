@@ -1,6 +1,7 @@
 {
   "bounded_p50_authorized": false,
   "cache_handoff": "complete_train_trace_union_for_cpu_successor_fiber_cache_v1",
+  "cell_role_policy_sha256": "a26c7084b2cf6f23a7690f5dc5f76f992056b205c0dc189405643a22a90b603c",
   "checkpoint_selection_authorized": false,
   "empirical_multiplicity_receipts_included": false,
   "final_test_selection_authorized": false,
@@ -8,17 +9,6 @@
   "gate_zero_authorized": false,
   "hazard_included": false,
   "long_training_authorized": false,
-  "cell_role_policy_sha256": "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44",
-  "minimum_entries_by_family": {
-    "atom_delete": 64,
-    "atom_insert": 64,
-    "atom_restate": 64,
-    "bond_reorder": 64,
-    "bond_reroute": 64,
-    "cycle_attach": 64,
-    "cycle_insert": 64,
-    "ring_system_restate": 64
-  },
   "maximum_entries_by_family": {
     "atom_delete": 128,
     "atom_insert": 128,
@@ -29,11 +19,21 @@
     "cycle_insert": 128,
     "ring_system_restate": 128
   },
+  "minimum_entries_by_family": {
+    "atom_delete": 64,
+    "atom_insert": 64,
+    "atom_restate": 64,
+    "bond_reorder": 64,
+    "bond_reroute": 64,
+    "cycle_attach": 64,
+    "cycle_insert": 64,
+    "ring_system_restate": 64
+  },
   "objective_unit": "exact_source_frozen_time_canonical_successor",
   "optimizer_policy_included": false,
   "p50_policy_included": false,
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-  "policy_sha256": "5ff3f5ee289833190ffc0b16472c6d280470139495a1081c7d582b47f7c64ac6",
+  "policy_sha256": "ac7e6753f27493c9f221d4ff41525c9606910edb387b73baca59879b873ee770",
   "repeated_state_panel_included": false,
   "request_id": "editing-v2-semantic-t1-capacity-v1",
   "schema": "compose.editing_v2.semantic_t1_panel_policy",

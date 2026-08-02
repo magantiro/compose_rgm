@@ -1,7 +1,7 @@
 {
   "bounded_p50_authorized": false,
+  "cell_role_policy_sha256": "a26c7084b2cf6f23a7690f5dc5f76f992056b205c0dc189405643a22a90b603c",
   "checkpoint_selection_authorized": false,
-  "cell_role_policy_sha256": "d65781105ed6c1a006e77c5814050608f83d0add6629eb3cc847a0d6554ebc44",
   "empirical_repeated_state_gate": {
     "bounded_p50_capacity_prerequisite": false,
     "empirical_law_claims_authorized": false,
@@ -48,7 +48,6 @@
     "trajectory_evaluation": "every_pre_update_state_and_terminal_state",
     "weight_decay": 0.0
   },
-  "panel_kind": "unique_state_single_target_canonical_successor_capacity",
   "panel_cardinality": {
     "maximum_entries_by_family": {
       "atom_delete": 128,
@@ -71,9 +70,10 @@
       "ring_system_restate": 64
     }
   },
-  "panel_policy_sha256": "5ff3f5ee289833190ffc0b16472c6d280470139495a1081c7d582b47f7c64ac6",
+  "panel_kind": "unique_state_single_target_canonical_successor_capacity",
+  "panel_policy_sha256": "ac7e6753f27493c9f221d4ff41525c9606910edb387b73baca59879b873ee770",
   "policy_id": "compose-editing-v2-semantic-t1-unique-capacity-v1",
-  "policy_sha256": "2186dbd9436f39b3caffafd421710f0c82de14b7da9e4c5ab94a252525a46d1e",
+  "policy_sha256": "2bb8e951fd7f01326c9883ced6c2a2da41ecf2b9e19d27539dcc8ac7b2e577c8",
   "required_families": [
     "atom_insert",
     "atom_delete",
