@@ -24,11 +24,15 @@ def test_downstream_images_mount_semantic_migration_provenance_closure(
 ) -> None:
     """Every migration validator source must exist in each downstream image."""
 
-    mounted = set(launcher.IMAGE_SOURCE_DIRECTORIES)
-    assert "src" in mounted
-    assert "modal_apps" in mounted
+    mounted_directories = set(launcher.IMAGE_SOURCE_DIRECTORIES)
+    mounted_files = set(getattr(launcher, "IMAGE_SOURCE_FILES", ()))
+    mounted_files.add(getattr(launcher, "MIGRATION_LAUNCHER_SOURCE", ""))
+    assert "src" in mounted_directories
     for relative in migration_core._SOURCE_FILES:
-        assert Path(relative).parts[0] in mounted
+        assert (
+            Path(relative).parts[0] in mounted_directories
+            or relative in mounted_files
+        )
         assert (launcher.ROOT / relative).is_file()
 
 

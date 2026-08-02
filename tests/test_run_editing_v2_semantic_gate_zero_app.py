@@ -104,6 +104,22 @@ def test_local_source_revision_requires_exact_clean_commit() -> None:
         )
 
 
+def test_image_mounts_exactly_the_attested_source_inventory() -> None:
+    paths = set(gate_app._serialized_source_paths(gate_app.ROOT))
+    assert gate_app.IMAGE_SOURCE_DIRECTORIES == ("src", "configs")
+    assert set(gate_app.IMAGE_SOURCE_FILES).issubset(paths)
+    source = Path(gate_app.__file__).read_text()
+    tree = ast.parse(source)
+    mounted_files = {
+        ast.unparse(call.args[0])
+        for call in ast.walk(tree)
+        if isinstance(call, ast.Call)
+        and isinstance(call.func, ast.Attribute)
+        and call.func.attr == "add_local_file"
+    }
+    assert "ROOT / source_file" in mounted_files
+
+
 def test_modal_surface_is_cpu_only_and_never_launches_training() -> None:
     source = Path(gate_app.__file__).read_text()
     tree = ast.parse(source)

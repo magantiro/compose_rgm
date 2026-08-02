@@ -23,7 +23,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/run_editing_v2_semantic_gate_zero_app.py"
-IMAGE_SOURCE_DIRECTORIES = ("src", "configs", "modal_apps")
+MIGRATION_LAUNCHER_SOURCE = "modal_apps/materialize_editing_v2_semantic_corpus_app.py"
+IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
+IMAGE_SOURCE_FILES = (LAUNCHER_SOURCE, MIGRATION_LAUNCHER_SOURCE)
 OUTPUT_PREFIX = "/artifacts/editing_v2/semantic_gate_zero_structural"
 REQUEST_FILENAME = "GATE_ZERO_REQUEST.json"
 
@@ -75,6 +77,12 @@ for source_directory in IMAGE_SOURCE_DIRECTORIES:
         str(REMOTE_ROOT / source_directory),
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
+    )
+for source_file in IMAGE_SOURCE_FILES:
+    image = image.add_local_file(
+        ROOT / source_file,
+        str(REMOTE_ROOT / source_file),
+        copy=True,
     )
 
 app = modal.App("compose-v4-editing-v2-semantic-gate-zero")
@@ -169,7 +177,7 @@ def _git(root: Path, *arguments: str) -> str:
 
 
 def _serialized_source_paths(root: Path) -> tuple[str, ...]:
-    paths = [LAUNCHER_SOURCE]
+    paths = list(IMAGE_SOURCE_FILES)
     paths.extend(
         path.relative_to(root).as_posix()
         for path in sorted((root / "src" / "compose_v4").rglob("*.py"))
