@@ -21,6 +21,9 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_gate_zero import (
     EVIDENCE_SCHEMA as GATE_ZERO_EVIDENCE_SCHEMA,
 )
@@ -34,8 +37,9 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
     SemanticT1CapacityPolicyError,
     load_semantic_t1_capacity_policy,
 )
-from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
-    load_semantic_development_cell_roles,
+from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
+    SemanticT1SelectedCheckpointError,
+    validate_semantic_t1_selected_checkpoint,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
     NO_AUTHORITY as PREPARED_INPUT_NO_AUTHORITY,
@@ -71,13 +75,13 @@ COMPLETION_FILENAME = "SEMANTIC_T1_CAPACITY_COMPLETE.json"
 DECISION_FILENAME = "SEMANTIC_T1_CAPACITY_DECISION.json"
 
 RESULT_SCHEMA = "compose.editing_v2.semantic_t1_capacity_result"
-RESULT_SCHEMA_VERSION = 1
+RESULT_SCHEMA_VERSION = 2
 RESULT_STATUS = "COMPLETE_UNIQUE_STATE_CAPACITY_RESULT_NO_DOWNSTREAM_AUTHORITY"
 COMPLETION_SCHEMA = "compose.editing_v2.semantic_t1_capacity_completion"
-COMPLETION_SCHEMA_VERSION = 1
+COMPLETION_SCHEMA_VERSION = 2
 COMPLETION_STATUS = "COMPLETE_SEMANTIC_T1_ARTIFACTS_NO_DOWNSTREAM_AUTHORITY"
 DECISION_SCHEMA = "compose.editing_v2.semantic_t1_capacity_decision"
-DECISION_SCHEMA_VERSION = 1
+DECISION_SCHEMA_VERSION = 2
 DECISION_GO_STATUS = "GO_BOUNDED_P50_SEMANTIC_T1_CAPACITY"
 DECISION_NO_GO_STATUS = "NO_GO_BOUNDED_P50_SEMANTIC_T1_CAPACITY"
 
@@ -106,6 +110,8 @@ _RESULT_PROVENANCE_FIELDS = {
     "cache_source_revision_sha256",
     "panel_completion_sha256",
     "panel_artifact_sha256",
+    "panel_entry_inventory_sha256",
+    "panel_entry_metadata_sha256",
     "decision_source_inventory_sha256",
     "gate_zero_evidence_file_sha256",
     "gate_zero_evidence_sha256",
@@ -136,6 +142,7 @@ _EXECUTION_ENVIRONMENT_FIELDS = {
 }
 _RUNNER_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/editing_v2_semantic_t1_capacity_runner.py",
+    "src/compose_v4/experiments/editing_v2_semantic_t1_checkpoint.py",
     "src/compose_v4/experiments/editing_v2_semantic_t1_decision.py",
     "src/compose_v4/experiments/editing_v2_semantic_t1_prepared_inputs.py",
     "src/compose_v4/experiments/factorized_successor_training.py",
@@ -444,6 +451,49 @@ def _metric_summary(entries: Sequence[Mapping[str, Any]]) -> dict[str, float]:
     }
 
 
+def _panel_entry_metadata(
+    entries: object,
+    *,
+    family_field: str,
+    cell_field: str,
+    field: str,
+) -> list[dict[str, str]]:
+    """Return the canonical entry-to-family/cell projection for lineage checks."""
+
+    if not isinstance(entries, list) or not entries:
+        raise SemanticT1DecisionError(f"{field} must contain panel entries")
+    projected: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for raw in entries:
+        if not isinstance(raw, Mapping):
+            raise SemanticT1DecisionError(f"{field} entry must be an object")
+        panel_id = _require_sha(
+            raw.get("panel_entry_sha256"),
+            field=f"{field}.panel_entry_sha256",
+        )
+        family = raw.get(family_field)
+        cell = raw.get(cell_field)
+        if (
+            panel_id in seen
+            or not isinstance(family, str)
+            or not family
+            or not isinstance(cell, str)
+            or not cell
+        ):
+            raise SemanticT1DecisionError(
+                f"{field} entry identity, family, or semantic cell is invalid"
+            )
+        seen.add(panel_id)
+        projected.append(
+            {
+                "panel_entry_sha256": panel_id,
+                "family": family,
+                "semantic_cell_id": cell,
+            }
+        )
+    return sorted(projected, key=lambda item: item["panel_entry_sha256"])
+
+
 def _derived_aggregates(
     entries: Sequence[Mapping[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -459,6 +509,14 @@ def _derived_aggregates(
             )
         by_cell[(family, cell)].append(entry)
         by_family[family].append(entry)
+    observed_cells = {cell for _family, cell in by_cell}
+    missing_cells = sorted(roles.required_cell_set - observed_cells)
+    unexpected_cells = sorted(observed_cells - roles.required_cell_set)
+    if missing_cells or unexpected_cells:
+        raise SemanticT1DecisionError(
+            "semantic T1 entries must exactly cover all frozen required editing cells; "
+            f"missing={missing_cells}, unexpected={unexpected_cells}"
+        )
     missing_families = [family for family in RINGCORE_EDITING_FAMILIES if not by_family[family]]
     if missing_families:
         raise SemanticT1DecisionError(
@@ -714,6 +772,18 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
         ),
     ):
         raise SemanticT1DecisionError("semantic T1 entry metrics are not canonical")
+    entry_metadata = _panel_entry_metadata(
+        entries,
+        family_field="family",
+        cell_field="semantic_cell_id",
+        field="result.entry_metrics",
+    )
+    if provenance["panel_entry_inventory_sha256"] != _sha(
+        sorted(item["panel_entry_sha256"] for item in entry_metadata)
+    ) or provenance["panel_entry_metadata_sha256"] != _sha(entry_metadata):
+        raise SemanticT1DecisionError(
+            "semantic T1 result entry inventory or metadata differs from bound provenance"
+        )
     selected_trajectory = normalized_trajectory[selected_step]
     selected_minimum = min(float(entry["teacher_successor_probability"]) for entry in entries)
     selected_mean_nll = _mean([float(entry["canonical_successor_nll"]) for entry in entries])
@@ -898,6 +968,12 @@ def _expected_provenance(
     runner_source_revision_sha256: str,
     execution_environment: Mapping[str, Any],
 ) -> dict[str, Any]:
+    prepared_entry_metadata = _panel_entry_metadata(
+        prepared_input.get("entries"),
+        family_field="model_family",
+        cell_field="capability_cell_id",
+        field="prepared_input.entries",
+    )
     return {
         "capacity_policy_file_sha256": CAPACITY_POLICY_FILE_SHA256,
         "capacity_policy_sha256": policy["policy_sha256"],
@@ -911,6 +987,8 @@ def _expected_provenance(
         "cache_source_revision_sha256": cache["source_revision_sha256"],
         "panel_completion_sha256": cache["panel_completion_sha256"],
         "panel_artifact_sha256": cache["panel_artifact_sha256"],
+        "panel_entry_inventory_sha256": prepared_input["panel_entry_inventory_sha256"],
+        "panel_entry_metadata_sha256": _sha(prepared_entry_metadata),
         "decision_source_inventory_sha256": cache["decision_source_inventory_sha256"],
         "gate_zero_evidence_file_sha256": gate_zero_file_sha256,
         "gate_zero_evidence_sha256": gate_zero["evidence_sha256"],
@@ -1016,6 +1094,23 @@ def build_semantic_t1_capacity_completion(
         cache=cache,
         repo_root=repo_root,
     )
+    prepared_entry_metadata = _panel_entry_metadata(
+        prepared_input.get("entries"),
+        family_field="model_family",
+        cell_field="capability_cell_id",
+        field="prepared_input.entries",
+    )
+    result_entry_metadata = _panel_entry_metadata(
+        result.get("entry_metrics"),
+        family_field="family",
+        cell_field="semantic_cell_id",
+        field="result.entry_metrics",
+    )
+    if result_entry_metadata != prepared_entry_metadata:
+        raise SemanticT1DecisionError(
+            "semantic T1 result entries differ from the exact prepared-panel "
+            "entry IDs, families, or semantic cells"
+        )
     environment = _validate_execution_environment(
         result["provenance"]["execution_environment"],
         policy=policy,
@@ -1046,14 +1141,32 @@ def build_semantic_t1_capacity_completion(
             raise SemanticT1DecisionError(f"{field} must be inside artifact_directory")
         return resolved.relative_to(root).as_posix()
 
-    selected_checkpoint_file_sha256 = _file_sha(selected_checkpoint_path)
-    if (
-        selected_checkpoint_file_sha256
-        != result["run_integrity"]["selected_checkpoint_file_sha256"]
-    ):
-        raise SemanticT1DecisionError(
-            "selected semantic T1 checkpoint physical hash disagrees with result"
+    selected_checkpoint_file_sha256 = result["run_integrity"]["selected_checkpoint_file_sha256"]
+    try:
+        selected_checkpoint = validate_semantic_t1_selected_checkpoint(
+            selected_checkpoint_path,
+            expected_file_sha256=selected_checkpoint_file_sha256,
+            expected_selected_step=result["run_integrity"]["selected_step"],
+            expected_model_state_sha256=result["run_integrity"]["selected_model_state_sha256"],
+            expected_stream_sha256=result["run_integrity"]["address_stream_sha256"],
+            expected_identity_fields={
+                "capacity_policy_sha256": policy["policy_sha256"],
+                "optimization_policy": policy["optimization"],
+                "prepared_input_artifact_sha256": prepared_input["artifact_sha256"],
+                "cache_completion_sha256": cache["completion_sha256"],
+                "cache_manifest_sha256": cache["manifest_sha256"],
+                "initial_model_state_sha256": cache["initial_model_state_sha256"],
+                "runner_implementation_sha256": runner_implementation_sha256,
+                "runner_source_revision_sha256": runner_source_revision_sha256,
+                "execution_environment": environment,
+                "execution_environment_sha256": environment["environment_sha256"],
+            },
         )
+    except SemanticT1SelectedCheckpointError as error:
+        raise SemanticT1DecisionError(
+            f"selected semantic T1 checkpoint is invalid: {error}"
+        ) from error
+    selected_checkpoint_identity_sha256 = _sha(selected_checkpoint["identity"])
 
     body: dict[str, Any] = {
         "schema": COMPLETION_SCHEMA,
@@ -1083,6 +1196,8 @@ def build_semantic_t1_capacity_completion(
         "prepared_input_file_sha256": prepared_input_file_sha256,
         "prepared_input_artifact_sha256": prepared_input["artifact_sha256"],
         "prepared_input_implementation_sha256": prepared_input["implementation_sha256"],
+        "panel_entry_inventory_sha256": prepared_input["panel_entry_inventory_sha256"],
+        "panel_entry_metadata_sha256": _sha(prepared_entry_metadata),
         "cache_source_revision_sha256": cache["source_revision_sha256"],
         "runner_implementation_sha256": runner_implementation_sha256,
         "runner_source_revision_sha256": runner_source_revision_sha256,
@@ -1094,6 +1209,7 @@ def build_semantic_t1_capacity_completion(
             field="selected_checkpoint_path",
         ),
         "selected_checkpoint_file_sha256": selected_checkpoint_file_sha256,
+        "selected_checkpoint_identity_sha256": selected_checkpoint_identity_sha256,
         "selected_model_state_sha256": result["run_integrity"]["selected_model_state_sha256"],
     }
     return {**body, "completion_sha256": _sha(body)}
@@ -1137,6 +1253,8 @@ def validate_semantic_t1_capacity_completion(
         "prepared_input_file_sha256",
         "prepared_input_artifact_sha256",
         "prepared_input_implementation_sha256",
+        "panel_entry_inventory_sha256",
+        "panel_entry_metadata_sha256",
         "cache_source_revision_sha256",
         "runner_implementation_sha256",
         "runner_source_revision_sha256",
@@ -1145,6 +1263,7 @@ def validate_semantic_t1_capacity_completion(
         "initial_model_state_sha256",
         "selected_checkpoint_relative_path",
         "selected_checkpoint_file_sha256",
+        "selected_checkpoint_identity_sha256",
         "selected_model_state_sha256",
         "completion_sha256",
     }
@@ -1244,6 +1363,17 @@ def _decision_failures(result: Mapping[str, Any], policy: Mapping[str, Any]) -> 
         f"run_integrity:{name}" for name, passed in integrity_checks.items() if not passed
     )
 
+    roles = load_semantic_development_cell_roles()
+    observed_cells = {str(row["semantic_cell_id"]) for row in result["cell_metrics"]}
+    failures.extend(
+        f"required_cell:missing:{cell_id}"
+        for cell_id in sorted(roles.required_cell_set - observed_cells)
+    )
+    failures.extend(
+        f"required_cell:unexpected:{cell_id}"
+        for cell_id in sorted(observed_cells - roles.required_cell_set)
+    )
+
     for gradient in result["gradient_evidence"]:
         family = gradient["family"]
         checks = {
@@ -1340,6 +1470,8 @@ def build_semantic_t1_capacity_decision(
         "prepared_input_file_sha256": completion["prepared_input_file_sha256"],
         "prepared_input_artifact_sha256": completion["prepared_input_artifact_sha256"],
         "prepared_input_implementation_sha256": completion["prepared_input_implementation_sha256"],
+        "panel_entry_inventory_sha256": completion["panel_entry_inventory_sha256"],
+        "panel_entry_metadata_sha256": completion["panel_entry_metadata_sha256"],
         "cache_source_revision_sha256": completion["cache_source_revision_sha256"],
         "runner_implementation_sha256": completion["runner_implementation_sha256"],
         "runner_source_revision_sha256": completion["runner_source_revision_sha256"],
@@ -1347,6 +1479,7 @@ def build_semantic_t1_capacity_decision(
         "decision_source_inventory_sha256": completion["decision_source_inventory_sha256"],
         "initial_model_state_sha256": completion["initial_model_state_sha256"],
         "selected_checkpoint_file_sha256": completion["selected_checkpoint_file_sha256"],
+        "selected_checkpoint_identity_sha256": completion["selected_checkpoint_identity_sha256"],
         "selected_model_state_sha256": completion["selected_model_state_sha256"],
         "required_families": list(RINGCORE_EDITING_FAMILIES),
         "family_count": len(result["family_metrics"]),
@@ -1402,6 +1535,8 @@ def validate_semantic_t1_capacity_decision(
         "prepared_input_file_sha256",
         "prepared_input_artifact_sha256",
         "prepared_input_implementation_sha256",
+        "panel_entry_inventory_sha256",
+        "panel_entry_metadata_sha256",
         "cache_source_revision_sha256",
         "runner_implementation_sha256",
         "runner_source_revision_sha256",
@@ -1409,6 +1544,7 @@ def validate_semantic_t1_capacity_decision(
         "decision_source_inventory_sha256",
         "initial_model_state_sha256",
         "selected_checkpoint_file_sha256",
+        "selected_checkpoint_identity_sha256",
         "selected_model_state_sha256",
         "required_families",
         "family_count",
@@ -1431,6 +1567,8 @@ def validate_semantic_t1_capacity_decision(
         or decision["checkpoint_selection_authorized"] is not False
         or decision["final_test_selection_authorized"] is not False
         or tuple(decision["required_families"]) != RINGCORE_EDITING_FAMILIES
+        or decision["nonempty_cell_count"]
+        != len(load_semantic_development_cell_roles().required_cell_ids)
         or decision["repeated_state_empirical_law_required_for_p50"] is not False
         or decision["repeated_state_empirical_law_evaluated"] is not False
     ):

@@ -4,12 +4,18 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import io
 import json
 import math
 from pathlib import Path
 
 import pytest
+import torch
 
+from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_gate_zero import (
     EVIDENCE_SCHEMA,
     EVIDENCE_SCHEMA_VERSION,
@@ -20,6 +26,17 @@ from compose_v4.experiments.editing_v2_semantic_t1_artifact_contracts import (
     CACHE_COMPLETION_SCHEMA_VERSION,
     CACHE_COMPLETION_STATUS,
     NO_DOWNSTREAM_AUTHORITY,
+)
+from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
+    load_semantic_t1_capacity_policy,
+)
+from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
+    CHECKPOINT_SCHEMA,
+    CHECKPOINT_SCHEMA_VERSION,
+    CHECKPOINT_STATUS,
+)
+from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
+    NO_AUTHORITY as CHECKPOINT_NO_AUTHORITY,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_decision import (
     CAPACITY_POLICY_SHA256,
@@ -58,17 +75,8 @@ from compose_v4.experiments.successor_micro_overfit import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT_BYTES = b"semantic-t1-selected-checkpoint-fixture"
-_CONTEXT = {
-    "atom_insert": "one_neighbor_birth",
-    "atom_delete": "leaf_death",
-    "atom_restate": "element_identity_change",
-    "bond_reorder": "bond_order_increase",
-    "bond_reroute": "single_atom_pendant_acyclic_source",
-    "cycle_insert": "close_to_monocyclic_ring_system",
-    "cycle_attach": "open_from_monocyclic_ring_system",
-    "ring_system_restate": "aromatization",
-}
+CHECKPOINT_MODEL_STATE = {"fixture.weight": torch.tensor([1.0], dtype=torch.float32)}
+CHECKPOINT_MODEL_STATE_SHA256 = state_dict_semantic_sha256(CHECKPOINT_MODEL_STATE)
 
 
 def _bytes(value: object) -> bytes:
@@ -91,6 +99,74 @@ def _sha(value: object) -> str:
 def _write(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(_bytes(value))
+
+
+def _selected_checkpoint_bytes(provenance: dict[str, object]) -> bytes:
+    policy = load_semantic_t1_capacity_policy(
+        ROOT / "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
+    )
+    optimization = policy["optimization"]
+    optimizer_configuration = {
+        "class": "fixture.Optimizer",
+        "defaults": {},
+        "parameter_groups": [],
+    }
+    environment = provenance["execution_environment"]
+    identity = {
+        "capacity_policy_sha256": policy["policy_sha256"],
+        "optimization_policy": optimization,
+        "optimization_policy_sha256": _sha(optimization),
+        "prepared_input_artifact_sha256": provenance["prepared_input_artifact_sha256"],
+        "cache_completion_sha256": provenance["cache_completion_sha256"],
+        "cache_manifest_sha256": provenance["cache_manifest_sha256"],
+        "initial_model_state_sha256": provenance["initial_model_state_sha256"],
+        "runner_implementation_sha256": provenance["runner_implementation_sha256"],
+        "runner_source_revision_sha256": provenance["runner_source_revision_sha256"],
+        "execution_environment": environment,
+        "execution_environment_sha256": environment["environment_sha256"],
+        "model_device": "cuda:0",
+        "model_device_type": "cuda",
+        "model_device_index": 0,
+        "model_dtype": "torch.float32",
+        "deterministic_algorithms_enabled": True,
+        "optimizer_configuration": optimizer_configuration,
+        "optimizer_configuration_sha256": _sha(optimizer_configuration),
+    }
+    payload = {
+        "schema": CHECKPOINT_SCHEMA,
+        "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "status": CHECKPOINT_STATUS,
+        **CHECKPOINT_NO_AUTHORITY,
+        "identity": identity,
+        "selected_step": 1,
+        "model_state": CHECKPOINT_MODEL_STATE,
+        "model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
+        "stream_sha256": "a" * 64,
+        "torch_version": str(torch.__version__),
+    }
+    output = io.BytesIO()
+    torch.save(payload, output)
+    return output.getvalue()
+
+
+def _entry_lineage_hashes(
+    entries: list[dict[str, object]],
+) -> tuple[str, str]:
+    metadata = sorted(
+        (
+            {
+                "panel_entry_sha256": entry["panel_entry_sha256"],
+                "family": entry["family"],
+                "semantic_cell_id": entry["semantic_cell_id"],
+            }
+            for entry in entries
+        ),
+        key=lambda item: item["panel_entry_sha256"],
+    )
+    return (
+        _sha(sorted(item["panel_entry_sha256"] for item in metadata)),
+        _sha(metadata),
+    )
 
 
 def _gate_zero(initial_model: str, inventory: str) -> dict[str, object]:
@@ -138,7 +214,20 @@ def _cache(initial_model: str, inventory: str, *, entries: int = 512) -> dict[st
     return {**body, "completion_sha256": _sha(body)}
 
 
-def _prepared(cache: dict[str, object]) -> dict[str, object]:
+def _prepared(
+    cache: dict[str, object],
+    entry_metrics: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
+    result_entries = _entries() if entry_metrics is None else entry_metrics
+    entries = [
+        {
+            "panel_entry_sha256": entry["panel_entry_sha256"],
+            "model_family": entry["family"],
+            "capability_cell_id": entry["semantic_cell_id"],
+        }
+        for entry in result_entries
+    ]
+    panel_entry_inventory_sha256, _ = _entry_lineage_hashes(result_entries)
     body = {
         "schema": PREPARED_SCHEMA,
         "schema_version": PREPARED_SCHEMA_VERSION,
@@ -148,10 +237,12 @@ def _prepared(cache: dict[str, object]) -> dict[str, object]:
         "cache_completion_sha256": cache["completion_sha256"],
         "cache_manifest_sha256": cache["manifest_sha256"],
         "panel_artifact_sha256": cache["panel_artifact_sha256"],
+        "panel_entry_inventory_sha256": panel_entry_inventory_sha256,
         "decision_source_inventory_sha256": cache["decision_source_inventory_sha256"],
         "initial_model_state_sha256": cache["initial_model_state_sha256"],
         "cache_source_revision_sha256": cache["source_revision_sha256"],
         "implementation_sha256": semantic_t1_prepared_input_implementation_sha256(repo_root=ROOT),
+        "entries": entries,
     }
     return {**body, "artifact_sha256": _sha(body)}
 
@@ -175,13 +266,18 @@ def _environment() -> dict[str, object]:
 
 
 def _entries(probability: float = 0.9, *, entries_per_family: int = 64) -> list[dict[str, object]]:
-    return [
+    required_cells = load_semantic_development_cell_roles().required_cell_ids
+    cells_by_family = {
+        family: tuple(cell for cell in required_cells if cell.rsplit(":", 2)[1] == family)
+        for family in RINGCORE_EDITING_FAMILIES
+    }
+    entries = [
         {
             "panel_entry_sha256": format(
                 family_index * entries_per_family + entry_index + 1, "064x"
             ),
             "family": family,
-            "semantic_cell_id": f"editing_v2_active8_v1:{family}:{_CONTEXT[family]}",
+            "semantic_cell_id": cells_by_family[family][entry_index % len(cells_by_family[family])],
             "teacher_successor_probability": probability,
             "canonical_successor_nll": -math.log(probability),
             "teacher_successor_rank": 1,
@@ -190,6 +286,14 @@ def _entries(probability: float = 0.9, *, entries_per_family: int = 64) -> list[
         for family_index, family in enumerate(RINGCORE_EDITING_FAMILIES)
         for entry_index in range(entries_per_family)
     ]
+    return sorted(
+        entries,
+        key=lambda item: (
+            RINGCORE_EDITING_FAMILIES.index(item["family"]),
+            item["semantic_cell_id"],
+            item["panel_entry_sha256"],
+        ),
+    )
 
 
 def _gradients(*, zero_family: str | None = None) -> list[dict[str, object]]:
@@ -207,7 +311,11 @@ def _gradients(*, zero_family: str | None = None) -> list[dict[str, object]]:
     ]
 
 
-def _integrity(*, resumed: bool = False) -> dict[str, object]:
+def _integrity(
+    *,
+    resumed: bool = False,
+    selected_checkpoint_file_sha256: str | None = None,
+) -> dict[str, object]:
     return {
         "optimizer_steps_completed": 1,
         "evaluation_steps": [0, 1],
@@ -227,8 +335,10 @@ def _integrity(*, resumed: bool = False) -> dict[str, object]:
         "mixed_precision": False,
         "hazard_included": False,
         "address_stream_sha256": "a" * 64,
-        "selected_model_state_sha256": "b" * 64,
-        "selected_checkpoint_file_sha256": hashlib.sha256(CHECKPOINT_BYTES).hexdigest(),
+        "selected_model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
+        "selected_checkpoint_file_sha256": (
+            "b" * 64 if selected_checkpoint_file_sha256 is None else selected_checkpoint_file_sha256
+        ),
         "optimizer_state_sha256": "c" * 64,
     }
 
@@ -240,12 +350,19 @@ def _result(
     resumed: bool = False,
     zero_gradient_family: str | None = None,
     entries_per_family: int = 64,
+    entries: list[dict[str, object]] | None = None,
+    selected_checkpoint_file_sha256: str | None = None,
 ) -> dict[str, object]:
-    entries = _entries(probability, entries_per_family=entries_per_family)
+    entries = (
+        _entries(probability, entries_per_family=entries_per_family) if entries is None else entries
+    )
     selected_nll = -math.log(probability)
     return build_semantic_t1_capacity_result(
         provenance=provenance,
-        run_integrity=_integrity(resumed=resumed),
+        run_integrity=_integrity(
+            resumed=resumed,
+            selected_checkpoint_file_sha256=selected_checkpoint_file_sha256,
+        ),
         evaluation_trajectory=[
             {
                 "step": 0,
@@ -257,7 +374,7 @@ def _result(
                 "step": 1,
                 "minimum_entry_teacher_successor_probability": probability,
                 "mean_entry_canonical_successor_nll": selected_nll,
-                "model_state_sha256": "b" * 64,
+                "model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
             },
         ],
         entry_metrics=entries,
@@ -294,8 +411,8 @@ def _physical_chain(
     selected_checkpoint_path = run / "SEMANTIC_T1_SELECTED_CHECKPOINT.pt"
     _write(gate_zero_path, gate_zero)
     _write(cache_path, cache)
-    _write(prepared_path, _prepared(cache))
-    selected_checkpoint_path.write_bytes(CHECKPOINT_BYTES)
+    entries = _entries(probability, entries_per_family=entries_per_family)
+    _write(prepared_path, _prepared(cache, entries))
     provenance = build_semantic_t1_result_provenance(
         cache_completion_path=cache_path,
         gate_zero_evidence_path=gate_zero_path,
@@ -304,12 +421,16 @@ def _physical_chain(
         execution_environment=_environment(),
         repo_root=ROOT,
     )
+    selected_checkpoint_bytes = _selected_checkpoint_bytes(provenance)
+    selected_checkpoint_path.write_bytes(selected_checkpoint_bytes)
     result = _result(
         provenance,
         probability=probability,
         resumed=resumed,
         zero_gradient_family=zero_gradient_family,
         entries_per_family=entries_per_family,
+        entries=entries,
+        selected_checkpoint_file_sha256=hashlib.sha256(selected_checkpoint_bytes).hexdigest(),
     )
     result_path = run / RESULT_FILENAME
     _write(result_path, result)
@@ -347,6 +468,7 @@ def test_exact_semantic_unique_state_chain_authorizes_only_p50(
     assert observed["status"] == DECISION_GO_STATUS
     assert observed["bounded_p50_authorized"] is True
     assert observed["long_training_authorized"] is False
+    assert observed["nonempty_cell_count"] == 17
     assert observed["repeated_state_empirical_law_required_for_p50"] is False
 
 
@@ -403,6 +525,102 @@ def test_sixty_three_entries_per_family_is_durable_no_go(
     )
 
 
+def test_rehashed_result_missing_a_required_cell_cannot_reach_decision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    decision_path, _decision = _physical_chain(tmp_path, monkeypatch)
+    result_path = decision_path.parent / RESULT_FILENAME
+    result = json.loads(result_path.read_bytes())
+    roles = load_semantic_development_cell_roles()
+    victim = next(
+        cell for cell in roles.required_cell_ids if cell.endswith(":connected_nonleaf_death")
+    )
+    replacement = next(cell for cell in roles.required_cell_ids if cell.endswith(":leaf_death"))
+    for entry in result["entry_metrics"]:
+        if entry["semantic_cell_id"] == victim:
+            entry["semantic_cell_id"] = replacement
+    result["entry_metrics"] = sorted(
+        result["entry_metrics"],
+        key=lambda item: (
+            RINGCORE_EDITING_FAMILIES.index(item["family"]),
+            item["semantic_cell_id"],
+            item["panel_entry_sha256"],
+        ),
+    )
+    victim_metric = next(row for row in result["cell_metrics"] if row["semantic_cell_id"] == victim)
+    replacement_metric = next(
+        row for row in result["cell_metrics"] if row["semantic_cell_id"] == replacement
+    )
+    replacement_metric["entry_count"] += victim_metric["entry_count"]
+    result["cell_metrics"] = [
+        row for row in result["cell_metrics"] if row["semantic_cell_id"] != victim
+    ]
+    body = {key: value for key, value in result.items() if key != "result_sha256"}
+    result["result_sha256"] = _sha(body)
+    _write(result_path, result)
+
+    with pytest.raises(
+        SemanticT1DecisionError,
+        match="entry inventory or metadata|exactly cover all frozen required",
+    ):
+        build_semantic_t1_capacity_decision(
+            completion_path=decision_path.parent / COMPLETION_FILENAME,
+            repo_root=ROOT,
+        )
+
+
+@pytest.mark.parametrize("mutation", ["missing", "foreign", "relabeled"])
+def test_rehashed_result_cannot_change_exact_prepared_entry_projection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutation: str,
+) -> None:
+    decision_path, _decision = _physical_chain(tmp_path, monkeypatch)
+    result_path = decision_path.parent / RESULT_FILENAME
+    original = json.loads(result_path.read_bytes())
+    entries = copy.deepcopy(original["entry_metrics"])
+    if mutation == "missing":
+        entries.pop(0)
+    elif mutation == "foreign":
+        entries[0]["panel_entry_sha256"] = "f" * 64
+    else:
+        target = next(entry for entry in entries if entry["family"] == "atom_delete")
+        family = target["family"]
+        replacement = next(
+            cell
+            for cell in load_semantic_development_cell_roles().required_cell_ids
+            if cell.rsplit(":", 2)[1] == family and cell != target["semantic_cell_id"]
+        )
+        target["semantic_cell_id"] = replacement
+    entries.sort(
+        key=lambda item: (
+            RINGCORE_EDITING_FAMILIES.index(item["family"]),
+            item["semantic_cell_id"],
+            item["panel_entry_sha256"],
+        )
+    )
+    provenance = copy.deepcopy(original["provenance"])
+    provenance["panel_entry_binding_count"] = len(entries)
+    (
+        provenance["panel_entry_inventory_sha256"],
+        provenance["panel_entry_metadata_sha256"],
+    ) = _entry_lineage_hashes(entries)
+    mutated = build_semantic_t1_capacity_result(
+        provenance=provenance,
+        run_integrity=original["run_integrity"],
+        evaluation_trajectory=original["evaluation_trajectory"],
+        entry_metrics=entries,
+        gradient_evidence=original["gradient_evidence"],
+    )
+    _write(result_path, mutated)
+
+    with pytest.raises(SemanticT1DecisionError, match="exact prepared-panel"):
+        build_semantic_t1_capacity_decision(
+            completion_path=decision_path.parent / COMPLETION_FILENAME,
+            repo_root=ROOT,
+        )
+
+
 def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
     provenance = {
         name: "1" * 64
@@ -419,6 +637,8 @@ def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
             "cache_source_revision_sha256",
             "panel_completion_sha256",
             "panel_artifact_sha256",
+            "panel_entry_inventory_sha256",
+            "panel_entry_metadata_sha256",
             "decision_source_inventory_sha256",
             "gate_zero_evidence_file_sha256",
             "gate_zero_evidence_sha256",
@@ -430,9 +650,14 @@ def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
             "runner_source_revision_sha256",
         )
     }
+    entries = _entries()
+    (
+        provenance["panel_entry_inventory_sha256"],
+        provenance["panel_entry_metadata_sha256"],
+    ) = _entry_lineage_hashes(entries)
     provenance["panel_entry_binding_count"] = 512
     provenance["execution_environment"] = _environment()
-    result = _result(provenance)
+    result = _result(provenance, entries=entries)
     broken = copy.deepcopy(result)
     broken["family_metrics"][0]["teacher_successor_probability"] = 1.0
     body = {key: value for key, value in broken.items() if key != "result_sha256"}
@@ -460,7 +685,7 @@ def test_tampered_physical_result_invalidates_decision(
     ("relative_path", "failure_fragment"),
     [
         ("SEMANTIC_T1_PREPARED_INPUTS.json", "not readable JSON"),
-        ("SEMANTIC_T1_SELECTED_CHECKPOINT.pt", "physical hash"),
+        ("SEMANTIC_T1_SELECTED_CHECKPOINT.pt", "physical SHA-256"),
     ],
 )
 def test_tampered_prepared_input_or_checkpoint_invalidates_decision(
@@ -478,6 +703,53 @@ def test_tampered_prepared_input_or_checkpoint_invalidates_decision(
             decision_path=decision_path,
             repo_root=ROOT,
             require_p50_go=True,
+        )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "failure_fragment"),
+    [
+        ("selected_step", "step, stream, or runtime"),
+        ("model_state", "model-state identity"),
+        ("identity", "differs from reopened provenance"),
+    ],
+)
+def test_selected_checkpoint_semantics_are_bound_to_result_and_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutation: str,
+    failure_fragment: str,
+) -> None:
+    decision_path, _decision = _physical_chain(tmp_path, monkeypatch)
+    run = decision_path.parent
+    checkpoint_path = run / "SEMANTIC_T1_SELECTED_CHECKPOINT.pt"
+    payload = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    if mutation == "selected_step":
+        payload["selected_step"] = 2
+    elif mutation == "model_state":
+        payload["model_state"] = {"fixture.weight": torch.tensor([2.0])}
+    else:
+        payload["identity"]["capacity_policy_sha256"] = "f" * 64
+    torch.save(payload, checkpoint_path)
+
+    result_path = run / RESULT_FILENAME
+    result = json.loads(result_path.read_bytes())
+    result["run_integrity"]["selected_checkpoint_file_sha256"] = hashlib.sha256(
+        checkpoint_path.read_bytes()
+    ).hexdigest()
+    body = {key: value for key, value in result.items() if key != "result_sha256"}
+    result["result_sha256"] = _sha(body)
+    _write(result_path, result)
+
+    with pytest.raises(SemanticT1DecisionError, match=failure_fragment):
+        build_semantic_t1_capacity_completion(
+            artifact_directory=run,
+            result_path=result_path,
+            cache_completion_path=run / "SEMANTIC_T1_SUCCESSOR_CACHE_COMPLETE.json",
+            gate_zero_evidence_path=run / "GATE_ZERO_EVIDENCE.json",
+            prepared_input_path=run / "SEMANTIC_T1_PREPARED_INPUTS.json",
+            selected_checkpoint_path=checkpoint_path,
+            repo_root=ROOT,
         )
 
 

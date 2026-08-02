@@ -54,11 +54,11 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
 from compose_v4.data.immutable_artifact import write_bytes_if_absent
-from compose_v4.experiments.editing_v2_semantic_gate_zero import (
-    _EVIDENCE_FIELDS as GATE_ZERO_EVIDENCE_FIELDS,
-)
 from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
     load_semantic_development_cell_roles,
+)
+from compose_v4.experiments.editing_v2_semantic_gate_zero import (
+    _EVIDENCE_FIELDS as GATE_ZERO_EVIDENCE_FIELDS,
 )
 from compose_v4.experiments.editing_v2_semantic_gate_zero import (
     DECISION_SCHEMA as GATE_ZERO_DECISION_SCHEMA,
@@ -1215,6 +1215,15 @@ class SemanticT1PanelArtifact:
         }
         if len(unique_sources) != len(self.entries):
             raise ValueError("unique-state capacity panel repeats one exact source and time")
+        cell_roles = load_semantic_development_cell_roles()
+        observed_cells = {entry.capability_cell_id for entry in self.entries}
+        missing_cells = sorted(cell_roles.required_cell_set - observed_cells)
+        unexpected_cells = sorted(observed_cells - cell_roles.required_cell_set)
+        if missing_cells or unexpected_cells:
+            raise ValueError(
+                "semantic T1 panel must exactly cover the frozen required editing cells; "
+                f"missing={missing_cells}, unexpected={unexpected_cells}"
+            )
         if any(
             entry.support_time_hex != self.request.support_time_hex
             or entry.selection_rank_sha256
@@ -1721,6 +1730,14 @@ def build_semantic_t1_panel_from_occurrence_factory(
             key=lambda item: (item.model_family, item.panel_entry_sha256),
         )
     )
+    observed_cells = {entry.capability_cell_id for entry in entries}
+    missing_cells = sorted(cell_roles.required_cell_set - observed_cells)
+    unexpected_cells = sorted(observed_cells - cell_roles.required_cell_set)
+    if missing_cells or unexpected_cells:
+        raise SemanticT1PanelError(
+            "semantic T1 panel selection must exactly cover the frozen required editing cells; "
+            f"missing={missing_cells}, unexpected={unexpected_cells}"
+        )
     selected_counts = Counter(entry.coverage_stratum for entry in entries)
     if any(entry.source_state_sha256 in repeated_source_state_sha256s for entry in entries):
         raise SemanticT1PanelError(

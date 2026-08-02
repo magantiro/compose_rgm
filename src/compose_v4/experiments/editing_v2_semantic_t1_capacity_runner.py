@@ -29,8 +29,16 @@ from torch import Tensor
 
 from compose_v4.data.immutable_artifact import write_bytes_if_absent
 from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
     load_semantic_t1_capacity_policy,
+)
+from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
+    CHECKPOINT_SCHEMA,
+    CHECKPOINT_SCHEMA_VERSION,
+    CHECKPOINT_STATUS,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_decision import (
     RESULT_FILENAME,
@@ -61,9 +69,6 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
 )
 
-CHECKPOINT_SCHEMA = "compose.editing_v2.semantic_t1_capacity_checkpoint"
-CHECKPOINT_SCHEMA_VERSION = 3
-CHECKPOINT_STATUS = "RECOVERABLE_T1_CAPACITY_STATE_NO_DOWNSTREAM_AUTHORITY"
 SELECTED_CHECKPOINT_FILENAME = "SEMANTIC_T1_SELECTED_CHECKPOINT.pt"
 FAILURE_DIAGNOSTICS_FILENAME = "SEMANTIC_T1_FAILURE_DIAGNOSTICS.json"
 FAILURE_DIAGNOSTICS_STATUS = (
@@ -309,6 +314,17 @@ class SemanticT1RuntimeInputs:
         ):
             raise SemanticT1CapacityRunnerError(
                 "prepared inputs, successor cache, and capacity policy disagree"
+            )
+        cell_roles = load_semantic_development_cell_roles()
+        observed_cells = {
+            str(entry["capability_cell_id"]) for entry in self.prepared.artifact["entries"]
+        }
+        missing_cells = sorted(cell_roles.required_cell_set - observed_cells)
+        unexpected_cells = sorted(observed_cells - cell_roles.required_cell_set)
+        if missing_cells or unexpected_cells:
+            raise SemanticT1CapacityRunnerError(
+                "semantic T1 runner requires the exact frozen required editing cells; "
+                f"missing={missing_cells}, unexpected={unexpected_cells}"
             )
 
     @property
@@ -1469,8 +1485,8 @@ def load_capacity_policy_for_runner(path: Path) -> dict[str, Any]:
 
 
 __all__ = [
-    "RESULT_FILENAME",
     "FAILURE_DIAGNOSTICS_FILENAME",
+    "RESULT_FILENAME",
     "SELECTED_CHECKPOINT_FILENAME",
     "SemanticT1CapacityRunnerError",
     "SemanticT1RuntimeInputs",

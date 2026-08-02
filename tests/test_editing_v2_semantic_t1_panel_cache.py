@@ -15,6 +15,9 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
 from compose_v4.data.immutable_artifact import ImmutableArtifactError
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_t1_panel_cache import (
     CACHE_HANDOFF,
     GPU_CACHE_POLICY,
@@ -37,6 +40,7 @@ from compose_v4.experiments.editing_v2_semantic_t1_panel_cache import (
 
 _REGISTRY = load_semantic_capability_cell_registry()
 _ACTIVE8_POLICY = build_semantic_active8_admission_policy()
+_CELL_ROLES = load_semantic_development_cell_roles()
 
 
 def _digest(label: str) -> str:
@@ -53,10 +57,18 @@ _CONTEXT = {
     "cycle_attach": "open_from_monocyclic_ring_system",
     "ring_system_restate": "aromatization",
 }
+_REQUIRED_CONTEXTS = {
+    family: tuple(
+        cell.rsplit(":", 2)[-1]
+        for cell in _CELL_ROLES.required_cell_ids
+        if cell.rsplit(":", 2)[1] == family
+    )
+    for family in ACTIVE8_FAMILIES
+}
 
 
 def _request(*, atom_insert_limit: int = 2) -> SemanticT1PanelRequest:
-    limits = {family: 2 for family in ACTIVE8_FAMILIES}
+    limits = {family: max(2, len(_REQUIRED_CONTEXTS[family])) for family in ACTIVE8_FAMILIES}
     limits["atom_insert"] = atom_insert_limit
     return SemanticT1PanelRequest.create(
         request_id="editing_v2_semantic_t1_test",
@@ -73,11 +85,45 @@ def test_panel_fails_when_any_family_is_below_its_request_minimum() -> None:
         request_id="minimum_two",
         source_revision_sha256=_digest("source-revision"),
         support_time=0.5,
-        minimum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
-        maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+        minimum_entries_by_family={
+            family: (3 if family == "atom_insert" else 1) for family in ACTIVE8_FAMILIES
+        },
+        maximum_entries_by_family={
+            family: max(3, len(_REQUIRED_CONTEXTS[family])) for family in ACTIVE8_FAMILIES
+        },
     )
     with pytest.raises(SemanticT1PanelError, match="below the frozen minimum"):
         _build(_corpus(source_identity), request=request)
+
+
+def test_panel_rejects_missing_required_cell_with_sixty_four_entries_per_family() -> None:
+    source_identity = _digest("missing-required-cell-at-family-minimum")
+    rows = []
+    for family in ACTIVE8_FAMILIES:
+        contexts = tuple(
+            context
+            for context in _REQUIRED_CONTEXTS[family]
+            if not (family == "atom_delete" and context == "connected_nonleaf_death")
+        )
+        for index in range(64):
+            context = contexts[index % len(contexts)]
+            rows.append(
+                _occurrence(
+                    family,
+                    f"minimum:{family}:{context}:{index}",
+                    source_identity=source_identity,
+                    context=context,
+                )
+            )
+    request = SemanticT1PanelRequest.create(
+        request_id="missing_required_cell_at_family_minimum",
+        source_revision_sha256=_digest("source-revision"),
+        support_time=0.5,
+        minimum_entries_by_family={family: 64 for family in ACTIVE8_FAMILIES},
+        maximum_entries_by_family={family: 64 for family in ACTIVE8_FAMILIES},
+    )
+    with pytest.raises(SemanticT1PanelError, match="exactly cover the frozen required"):
+        _build(tuple(rows), request=request)
 
 
 def _binding(source_identity: str) -> SemanticT1GateZeroBinding:
@@ -107,8 +153,9 @@ def _occurrence(
     canonical_successor_stratum: str = "successor_small",
     alias_count: int = 1,
     partition_role: str = "train",
+    context: str | None = None,
 ) -> SemanticT1TeacherOccurrence:
-    context = _CONTEXT[family]
+    context = _CONTEXT[family] if context is None else context
     source_key_tag = source_tag or tag
     successor_key_tag = successor_tag or tag
     return SemanticT1TeacherOccurrence(
@@ -155,7 +202,14 @@ def _occurrence(
 
 def _corpus(source_identity: str) -> tuple[SemanticT1TeacherOccurrence, ...]:
     rows = [
-        _occurrence(family, family, source_identity=source_identity) for family in ACTIVE8_FAMILIES
+        _occurrence(
+            family,
+            f"{family}:{context}",
+            source_identity=source_identity,
+            context=context,
+        )
+        for family in ACTIVE8_FAMILIES
+        for context in _REQUIRED_CONTEXTS[family]
     ]
     # A second atom-insert difficulty stratum must be represented.
     rows.append(
@@ -169,7 +223,10 @@ def _corpus(source_identity: str) -> tuple[SemanticT1TeacherOccurrence, ...]:
     )
     # Two distinct teacher marks and exact slot targets in one canonical
     # successor fiber collapse to one unit-weight molecular target.
-    rows[0] = _occurrence(
+    atom_insert_index = next(
+        index for index, row in enumerate(rows) if row.model_family == "atom_insert"
+    )
+    rows[atom_insert_index] = _occurrence(
         "atom_insert",
         "atom_insert_alias_a",
         source_identity=source_identity,
@@ -230,7 +287,7 @@ def test_train_panel_collapses_aliases_and_is_order_deterministic() -> None:
         forward.first_pass_train_teacher_stream_sha256
         != reverse.first_pass_train_teacher_stream_sha256
     )
-    assert len(forward.entries) == len(ACTIVE8_FAMILIES) + 1
+    assert len(forward.entries) == len(_CELL_ROLES.required_cell_ids) + 1
     assert {entry.model_family for entry in forward.entries} == set(ACTIVE8_FAMILIES)
     assert all(entry.objective_coefficient == 1 for entry in forward.entries)
     collapsed = next(
@@ -261,7 +318,7 @@ def test_train_panel_collapses_aliases_and_is_order_deterministic() -> None:
     )
     assert forward.request.as_payload()["panel_kind"] == UNIQUE_PANEL_KIND
     assert forward.identity_body()["objective"]["panel_kind"] == UNIQUE_PANEL_KIND
-    assert forward.single_target_source_state_count == 9
+    assert forward.single_target_source_state_count == len(_CELL_ROLES.required_cell_ids) + 1
     assert forward.repeated_source_state_count == 0
     assert len(forward.single_target_source_inventory_sha256) == 64
     assert len(forward.repeated_source_inventory_sha256) == 64
@@ -290,7 +347,7 @@ def test_unique_capacity_panel_excludes_multi_target_exact_sources() -> None:
         {(entry.source_state_sha256, entry.support_time_hex) for entry in artifact.entries}
     ) == len(artifact.entries)
     assert {entry.model_family for entry in artifact.entries} == set(ACTIVE8_FAMILIES)
-    assert artifact.single_target_source_state_count == 8
+    assert artifact.single_target_source_state_count == len(_CELL_ROLES.required_cell_ids)
     assert artifact.repeated_source_state_count == 1
 
 
@@ -482,7 +539,9 @@ def test_request_label_does_not_reroll_selection_and_revision_is_bound() -> None
             source_revision_sha256=_digest("source-revision"),
             support_time=0.5,
             minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
-            maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+            maximum_entries_by_family={
+                family: max(2, len(_REQUIRED_CONTEXTS[family])) for family in ACTIVE8_FAMILIES
+            },
         ),
     )
     assert first.request.request_sha256 != relabeled.request.request_sha256
@@ -497,7 +556,9 @@ def test_request_label_does_not_reroll_selection_and_revision_is_bound() -> None
                 source_revision_sha256=_digest("another-revision"),
                 support_time=0.5,
                 minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
-                maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+                maximum_entries_by_family={
+                    family: max(2, len(_REQUIRED_CONTEXTS[family])) for family in ACTIVE8_FAMILIES
+                },
             ),
         )
 
@@ -516,7 +577,7 @@ def test_cross_family_alias_fails_closed_instead_of_double_counting() -> None:
     )
     with pytest.raises(
         SemanticT1PanelError,
-        match="molecular objective unit was selected in multiple families",
+        match="inconsistent family or fiber evidence",
     ):
         _build(tuple(rows), request=_request())
 
@@ -639,7 +700,9 @@ def test_artifact_is_canonical_nonauthorizing_and_immutable(tmp_path: Path) -> N
     assert payload["objective"]["hazard_included"] is False
     assert payload["cache_handoff"]["kind"] == CACHE_HANDOFF
     assert payload["cache_handoff"]["gpu_policy"] == GPU_CACHE_POLICY
-    assert payload["counts"]["single_target_source_state_count"] == 9
+    assert payload["counts"]["single_target_source_state_count"] == (
+        len(_CELL_ROLES.required_cell_ids) + 1
+    )
     assert payload["counts"]["repeated_source_state_count"] == 0
     assert len(payload["counts"]["single_target_source_inventory_sha256"]) == 64
     assert len(payload["counts"]["repeated_source_inventory_sha256"]) == 64
@@ -694,7 +757,9 @@ def test_artifact_is_canonical_nonauthorizing_and_immutable(tmp_path: Path) -> N
             source_revision_sha256=_digest("source-revision"),
             support_time=0.5,
             minimum_entries_by_family={family: 1 for family in ACTIVE8_FAMILIES},
-            maximum_entries_by_family={family: 2 for family in ACTIVE8_FAMILIES},
+            maximum_entries_by_family={
+                family: max(2, len(_REQUIRED_CONTEXTS[family])) for family in ACTIVE8_FAMILIES
+            },
         ),
     )
     with pytest.raises(ImmutableArtifactError, match="different bytes"):
