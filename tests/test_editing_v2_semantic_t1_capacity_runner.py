@@ -23,6 +23,9 @@ from compose_v4.data.successor_fiber_cache import (
     SuccessorFiberCacheAddress,
     SuccessorFiberCacheRecord,
 )
+from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
+    load_semantic_development_cell_roles,
+)
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
     load_semantic_t1_capacity_policy,
 )
@@ -479,15 +482,16 @@ def test_hierarchical_stream_is_deterministic_and_bound_to_policy(
 
     policy = load_semantic_t1_capacity_policy(POLICY_PATH)
     entries = []
+    required_cells = load_semantic_development_cell_roles().required_cell_ids
     for family in policy["required_families"]:
-        for cell_index in range(2):
+        family_cells = tuple(cell for cell in required_cells if cell.rsplit(":", 2)[1] == family)
+        for index in range(64):
+            cell_id = family_cells[index % len(family_cells)]
             entries.append(
                 {
-                    "panel_entry_sha256": hashlib.sha256(
-                        f"{family}:{cell_index}".encode()
-                    ).hexdigest(),
+                    "panel_entry_sha256": hashlib.sha256(f"{cell_id}:{index}".encode()).hexdigest(),
                     "model_family": family,
-                    "capability_cell_id": f"cell:{family}:{cell_index}",
+                    "capability_cell_id": cell_id,
                 }
             )
     prepared = LoadedSemanticT1PreparedInputs(
@@ -530,7 +534,33 @@ def test_hierarchical_stream_is_deterministic_and_bound_to_policy(
     assert semantic_t1_address_stream(runtime, draw_count=512) == (
         semantic_t1_address_stream(runtime, draw_count=512)
     )
-    assert len(set(semantic_t1_address_stream(runtime, draw_count=512))) == 16
+    assert len(set(semantic_t1_address_stream(runtime, draw_count=512))) > 16
+
+    missing = next(cell for cell in required_cells if cell.endswith(":connected_nonleaf_death"))
+    replacement = next(cell for cell in required_cells if cell.endswith(":leaf_death"))
+    missing_cell_entries = [
+        {
+            **entry,
+            "capability_cell_id": (
+                replacement
+                if entry["capability_cell_id"] == missing
+                else entry["capability_cell_id"]
+            ),
+        }
+        for entry in entries
+    ]
+    bad_prepared = LoadedSemanticT1PreparedInputs(
+        artifact=MappingProxyType({**dict(prepared.artifact), "entries": missing_cell_entries}),
+        states_by_panel_entry_sha256=MappingProxyType({}),
+        partitions_by_panel_entry_sha256=MappingProxyType({}),
+    )
+    with pytest.raises(SemanticT1CapacityRunnerError, match="exact frozen required"):
+        SemanticT1RuntimeInputs(
+            bad_prepared,
+            SimpleNamespace(artifact_sha256="9" * 64),
+            cache,
+            policy,
+        )
 
 
 def test_metric_checks_apply_family_cell_entry_and_gradient_floors() -> None:

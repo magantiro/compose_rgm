@@ -45,6 +45,7 @@ from compose_v4.data.editing_v2_semantic_active8_source_adapter import (
 )
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     SemanticCapabilityCellError,
+    classify_action_family_context,
     classify_verified_structural_transition,
     load_semantic_capability_cell_registry,
 )
@@ -75,7 +76,8 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedTraceletRateModel,
 )
-from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
+from compose_v4.rewrite.factorized_fiber import enumerate_pendant_graft_actions
+from compose_v4.rewrite.kernel import canonical_state_key, editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.operators import (
     AtomDelete,
     AtomInsert,
@@ -84,9 +86,11 @@ from compose_v4.rewrite.operators import (
     CycleCloseEdge,
     CycleOpenEdge,
     SemanticAtomRestate,
+    enumerate_cycle_open_edges,
 )
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 from compose_v4.rewrite.trace_shard_v3 import encode_semantic_trace_record
+from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
 from compose_v4.rewrite.tracelets import BondOrderChange, RingSystemRestate
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
@@ -227,10 +231,224 @@ def _active8_train_records(
     )
 
 
+def _required_cell_train_records(lane: str) -> tuple[dict[str, object], ...]:
+    """Real executable one-step traces covering the frozen 17 editing cells."""
+
+    system = editing_v2_semantic_rewrite_system()
+
+    def graft(smiles: str, context: str):
+        source = _state(smiles)
+        source_key = canonical_state_key(source)
+        return source, next(
+            action
+            for action in enumerate_pendant_graft_actions(source)
+            if (
+                canonical_state_key(system.apply(source, "bond_reroute", action)) != source_key
+                and classify_action_family_context(
+                    source,
+                    system.apply(source, "bond_reroute", action),
+                    RewriteStep("bond_reroute", action),
+                )[1]
+                == context
+            )
+        )
+
+    def opening(smiles: str, context: str):
+        source = _state(smiles)
+        action = next(
+            action
+            for action in enumerate_cycle_open_edges(source)
+            if classify_action_family_context(
+                source,
+                system.apply(source, "cycle_open", action),
+                RewriteStep("cycle_open", action),
+            )[1]
+            == context
+        )
+        return source, action, system.apply(source, "cycle_open", action)
+
+    def restate(smiles: str, context: str):
+        source = _state(smiles)
+        return source, next(
+            action
+            for action in enumerate_ring_system_restate_actions(source, system=system)
+            if classify_action_family_context(
+                source,
+                system.apply(source, "ring_system_restate", action),
+                RewriteStep("ring_system_restate", action),
+            )[1]
+            == context
+        )
+
+    connected_target = _state("NC")
+    connected_insert = AtomInsert(
+        slot=1,
+        atom_type=int(connected_target.atom_types[1]),
+        formal_charge=int(connected_target.formal_charges[1]),
+        implicit_h_count=int(connected_target.implicit_h_counts[1]),
+        neighbors=((0, 1),),
+    )
+    nitrogen_class = next(
+        index
+        for index, (element, _valence) in enumerate(ORGANIC_VOCABULARY.classes)
+        if element == ELEMENT_TO_IDX["N"]
+    )
+    sulfur_valence_four_class = next(
+        index
+        for index, (element, valence) in enumerate(ORGANIC_VOCABULARY.classes)
+        if element == ELEMENT_TO_IDX["S"] and valence == 4
+    )
+    mono_ring, mono_open, mono_chain = opening("C1CCCCC1", "open_from_monocyclic_ring_system")
+    poly_ring, poly_open, poly_chain = opening(
+        "C1CCC2CCCCC2C1", "open_from_nonarticulated_polycyclic_ring_system"
+    )
+    mono_close = CycleCloseEdge(
+        mono_open.a,
+        mono_open.b,
+        int(mono_ring.bonds[mono_open.a, mono_open.b]),
+    )
+    poly_close = CycleCloseEdge(
+        poly_open.a,
+        poly_open.b,
+        int(poly_ring.bonds[poly_open.a, poly_open.b]),
+    )
+    # Asymmetric substituents are deliberate: the production marked law
+    # removes molecular self-transitions after canonicalization, so symmetric
+    # alkane or alkylbenzene reroutes are not productive teachers.
+    single_acyclic, single_acyclic_action = graft("CCCO", "single_atom_pendant_acyclic_source")
+    multi_acyclic, multi_acyclic_action = graft("CCCO", "multi_atom_pendant_acyclic_source")
+    single_cyclic, single_cyclic_action = graft("c1ccccc1CO", "single_atom_pendant_cyclic_source")
+    multi_cyclic, multi_cyclic_action = graft("c1ccccc1CCO", "multi_atom_pendant_cyclic_source")
+    arom_source, arom_action = restate("CC1CCCCC1", "aromatization")
+    dearom_source, dearom_action = restate("Cc1ccccc1", "dearomatization")
+    cases = (
+        (
+            "atom_insert",
+            "one_neighbor_birth",
+            _state("N"),
+            RewriteStep("atom_insert", connected_insert),
+        ),
+        (
+            "atom_delete",
+            "leaf_death",
+            _state("CCC"),
+            RewriteStep("atom_delete", AtomDelete(2)),
+        ),
+        (
+            "atom_delete",
+            "connected_nonleaf_death",
+            _state("C1CCCC1"),
+            RewriteStep("atom_delete", AtomDelete(0)),
+        ),
+        (
+            "atom_restate",
+            "element_identity_change",
+            _state("C"),
+            RewriteStep("atom_restate_semantic", SemanticAtomRestate(0, nitrogen_class)),
+        ),
+        (
+            "atom_restate",
+            "valence_state_change",
+            _state("S"),
+            RewriteStep(
+                "atom_restate_semantic",
+                SemanticAtomRestate(0, sulfur_valence_four_class),
+            ),
+        ),
+        (
+            "bond_reorder",
+            "bond_order_increase",
+            _state("CC"),
+            RewriteStep("bond_reorder", BondReorder(0, 1, 2)),
+        ),
+        (
+            "bond_reorder",
+            "bond_order_decrease",
+            _state("C=C"),
+            RewriteStep("bond_reorder", BondReorder(0, 1, 1)),
+        ),
+        (
+            "bond_reroute",
+            "single_atom_pendant_acyclic_source",
+            single_acyclic,
+            RewriteStep("bond_reroute", single_acyclic_action),
+        ),
+        (
+            "bond_reroute",
+            "multi_atom_pendant_acyclic_source",
+            multi_acyclic,
+            RewriteStep("bond_reroute", multi_acyclic_action),
+        ),
+        (
+            "bond_reroute",
+            "single_atom_pendant_cyclic_source",
+            single_cyclic,
+            RewriteStep("bond_reroute", single_cyclic_action),
+        ),
+        (
+            "bond_reroute",
+            "multi_atom_pendant_cyclic_source",
+            multi_cyclic,
+            RewriteStep("bond_reroute", multi_cyclic_action),
+        ),
+        (
+            "cycle_insert",
+            "close_to_monocyclic_ring_system",
+            mono_chain,
+            RewriteStep("cycle_close", mono_close),
+        ),
+        (
+            "cycle_insert",
+            "close_to_nonarticulated_polycyclic_ring_system",
+            poly_chain,
+            RewriteStep("cycle_close", poly_close),
+        ),
+        (
+            "cycle_attach",
+            "open_from_monocyclic_ring_system",
+            mono_ring,
+            RewriteStep("cycle_open", mono_open),
+        ),
+        (
+            "cycle_attach",
+            "open_from_nonarticulated_polycyclic_ring_system",
+            poly_ring,
+            RewriteStep("cycle_open", poly_open),
+        ),
+        (
+            "ring_system_restate",
+            "aromatization",
+            arom_source,
+            RewriteStep("ring_system_restate", arom_action),
+        ),
+        (
+            "ring_system_restate",
+            "dearomatization",
+            dearom_source,
+            RewriteStep("ring_system_restate", dearom_action),
+        ),
+    )
+    records = []
+    for family, context, source, step in cases:
+        target = system.apply(source, step.rule_name, step.action)
+        assert classify_action_family_context(source, target, step) == (family, context)
+        records.append(
+            _record_from_step(
+                f"required-{family}-{context}",
+                lane,
+                "train",
+                source,
+                step,
+            )
+        )
+    return tuple(records)
+
+
 def _inventory(
     root: Path,
     *,
     full_train_active8: bool = False,
+    full_required_train_cells: bool = False,
     distinct_exact_train_sources: bool = False,
 ) -> EditingV2SemanticActive8SourceInventory:
     migration = root / "migration" / "SEMANTIC_MIGRATION_COMPLETE.json"
@@ -248,12 +466,16 @@ def _inventory(
         output = root / "sources" / lane / role
         semantic = output / "semantic"
         records = (
-            _active8_train_records(
-                lane,
-                distinct_exact_sources=distinct_exact_train_sources,
+            _required_cell_train_records(lane)
+            if full_required_train_cells and role == "train" and lane == REQUIRED_DATA_LANES[0]
+            else (
+                _active8_train_records(
+                    lane,
+                    distinct_exact_sources=distinct_exact_train_sources,
+                )
+                if full_train_active8 and role == "train" and lane == REQUIRED_DATA_LANES[0]
+                else (_record(f"trace-{index}", lane, role),)
             )
-            if full_train_active8 and role == "train" and lane == REQUIRED_DATA_LANES[0]
-            else (_record(f"trace-{index}", lane, role),)
         )
         record_count = len(records)
         binding = SemanticActive8SourceBinding(
@@ -451,12 +673,14 @@ def _build_completed_source(
     full_train_active8: bool,
     inject_exclusion: bool,
     distinct_exact_train_sources: bool = False,
+    full_required_train_cells: bool = False,
 ):
     root.mkdir()
     inventory = _inventory(
         root,
         full_train_active8=full_train_active8,
         distinct_exact_train_sources=distinct_exact_train_sources,
+        full_required_train_cells=full_required_train_cells,
     )
     cache_plan = plan_semantic_active8_chunk_cache(
         inventory,
@@ -600,6 +824,18 @@ def completed_single_target_active8_source(
         full_train_active8=True,
         inject_exclusion=False,
         distinct_exact_train_sources=True,
+    )
+
+
+@pytest.fixture(scope="module")
+def completed_required_cell_active8_source(
+    tmp_path_factory: pytest.TempPathFactory,
+):
+    return _build_completed_source(
+        tmp_path_factory.mktemp("semantic-active8-required-cells") / "artifacts",
+        full_train_active8=False,
+        full_required_train_cells=True,
+        inject_exclusion=False,
     )
 
 
@@ -956,6 +1192,38 @@ def test_real_gate_zero_fails_single_target_fixture_with_only_one_cell_per_famil
     assert artifacts["evidence"]["empty_required_editing_cell_ids"]
 
 
+def test_real_required_cell_source_exposes_only_v1_nonleaf_delete_support_blocker(
+    completed_required_cell_active8_source,
+    monkeypatch,
+) -> None:
+    completed = completed_required_cell_active8_source
+    inventory = completed["inventory"]
+    _patch_migration_resolver(monkeypatch, inventory)
+    _resolve(completed)
+    contract = semantic_gate_zero.load_semantic_gate_zero_structural_contract(repo_root=Path.cwd())
+    artifacts = semantic_gate_zero.run_semantic_gate_zero_structural_evidence(
+        migration_completion_path=inventory.migration_completion_path,
+        chunk_cache_plan_path=completed["cache_plan_path"],
+        chunk_cache_global_completion_path=completed["cache_completion_path"],
+        decision_plan_path=completed["decision_plan_path"],
+        decision_completion_path=completed["decision_completion_path"],
+        artifact_root=completed["root"],
+        repo_root=Path.cwd(),
+        output_directory=completed["root"] / "gate-zero-required-cell-integration",
+        contract_path=contract.source,
+    )
+    blocked_cell = "editing_v2_active8_v1:atom_delete:connected_nonleaf_death"
+    assert artifacts["evidence"]["structural_result"] == "FAIL"
+    assert artifacts["evidence"]["empty_required_editing_cell_ids"] == [blocked_cell]
+    assert artifacts["evidence"]["counts"]["observed_required_editing_cells"] == 16
+    assert artifacts["evidence"]["excluded_action_counts_by_family"] == {
+        family: int(family == "atom_delete") for family in ACTIVE8_FAMILIES
+    }
+    assert artifacts["evidence"]["excluded_trace_reasons"] == {
+        "teacher_action_absent_from_production_marked_law": 1
+    }
+
+
 def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
     completed_source,
     monkeypatch,
@@ -973,9 +1241,9 @@ def test_candidate_evidence_rejects_wrong_successor_and_impossible_counts(
     )
 
     wrong_successor = copy.deepcopy(original)
-    wrong_successor["actions"][0]["candidate_evidence"]["canonical_successor_key"] = (
-        "definitely-not-the-exact-successor"
-    )
+    wrong_successor["actions"][0]["candidate_evidence"][
+        "canonical_successor_key"
+    ] = "definitely-not-the-exact-successor"
     wrong_successor["decision_sha256"] = source_index._sha(
         {key: value for key, value in wrong_successor.items() if key != "decision_sha256"}
     )
