@@ -334,3 +334,75 @@ def test_reducer_refuses_missing_task_and_worker_refuses_runtime_substitution(
             exact_candidate_checker=checker,
             model_runtime_identity_resolver=wrong_runtime,
         )
+
+
+@pytest.mark.parametrize("missing_name", ["RECEIPT.json", "decisions.jsonl.gz"])
+def test_worker_recovers_exact_partial_task_publication(
+    planned, missing_name: str
+) -> None:
+    root, _, plan = planned
+    task = plan["tasks"][0]
+    model = _model()
+    checker = ProductionSemanticExactCandidateChecker(model, cache_size=32)
+    original = execute_semantic_active8_decision_task(
+        plan,
+        task["task_identity_sha256"],
+        artifact_root=root,
+        model=model,
+        exact_candidate_checker=checker,
+        model_runtime_identity_resolver=_runtime_identity,
+    )
+    task_root = (
+        root
+        / "decisions"
+        / "runs"
+        / plan["run_identity_sha256"]
+        / "tasks"
+        / task["task_identity_sha256"]
+    )
+    (task_root / missing_name).unlink()
+
+    assert task[
+        "task_identity_sha256"
+    ] not in completed_semantic_active8_decision_task_ids(plan, artifact_root=root)
+    recovered = execute_semantic_active8_decision_task(
+        plan,
+        task["task_identity_sha256"],
+        artifact_root=root,
+        model=model,
+        exact_candidate_checker=checker,
+        model_runtime_identity_resolver=_runtime_identity,
+    )
+
+    assert recovered == original
+    assert task["task_identity_sha256"] in completed_semantic_active8_decision_task_ids(
+        plan, artifact_root=root
+    )
+
+
+def test_abandoned_private_temporary_does_not_poison_completed_task(planned) -> None:
+    root, _, plan = planned
+    task = plan["tasks"][0]
+    model = _model()
+    checker = ProductionSemanticExactCandidateChecker(model, cache_size=32)
+    execute_semantic_active8_decision_task(
+        plan,
+        task["task_identity_sha256"],
+        artifact_root=root,
+        model=model,
+        exact_candidate_checker=checker,
+        model_runtime_identity_resolver=_runtime_identity,
+    )
+    task_root = (
+        root
+        / "decisions"
+        / "runs"
+        / plan["run_identity_sha256"]
+        / "tasks"
+        / task["task_identity_sha256"]
+    )
+    (task_root / ".RECEIPT.json.abandoned.tmp").write_bytes(b"partial")
+
+    assert task["task_identity_sha256"] in completed_semantic_active8_decision_task_ids(
+        plan, artifact_root=root
+    )

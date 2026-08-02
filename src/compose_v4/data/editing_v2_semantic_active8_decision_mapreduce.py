@@ -274,6 +274,19 @@ def _publish(path: Path, content: bytes) -> bool:
     return False
 
 
+def _is_private_task_temporary(path: Path) -> bool:
+    """Recognize only private files left by this module's atomic publisher."""
+
+    return (
+        path.is_file()
+        and not path.is_symlink()
+        and any(
+            path.name.startswith(f".{filename}.") and path.name.endswith(".tmp")
+            for filename in (DECISION_FILENAME, RECEIPT_FILENAME)
+        )
+    )
+
+
 def _model_runtime_identity(value: Mapping[str, object]) -> dict[str, Any]:
     identity = dict(value)
     supplied = _require_sha(
@@ -769,7 +782,7 @@ def execute_semantic_active8_decision_task(
     if task_root.exists():
         receipt_path = task_root / RECEIPT_FILENAME
         decision_path = task_root / DECISION_FILENAME
-        if receipt_path.exists() or decision_path.exists():
+        if receipt_path.exists() and decision_path.exists():
             receipt, _ = _load_task_result(value, task, artifact_root=artifact_root)
             return receipt
     rows = tuple(
@@ -856,10 +869,10 @@ def _load_task_result(
         raise SemanticActive8DecisionIncomplete(
             f"decision task {task['task_identity_sha256']} is absent"
         )
-    if {path.name for path in root.iterdir()} != {
-        RECEIPT_FILENAME,
-        DECISION_FILENAME,
-    }:
+    published_names = {
+        path.name for path in root.iterdir() if not _is_private_task_temporary(path)
+    }
+    if published_names != {RECEIPT_FILENAME, DECISION_FILENAME}:
         raise SemanticActive8DecisionMapReduceError(
             "decision task directory contains unexpected objects"
         )
@@ -947,9 +960,11 @@ def completed_semantic_active8_decision_task_ids(
         if not receipt_exists and not decisions_exist:
             continue
         if receipt_exists is not decisions_exist:
-            raise SemanticActive8DecisionMapReduceError(
-                f"decision task {task['task_identity_sha256']} is partial"
-            )
+            # A worker can die between the two immutable publications.  Neither
+            # file alone is authoritative, so reschedule the task.  The worker
+            # deterministically recomputes both payloads and collision-checks
+            # whichever file survived before publishing the missing file.
+            continue
         _load_task_result(value, task, artifact_root=artifact_root)
         completed.add(task["task_identity_sha256"])
     return frozenset(completed)
