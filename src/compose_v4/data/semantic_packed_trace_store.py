@@ -4,6 +4,39 @@ Historical packed shards are immutable inputs.  They are migrated offline into
 this separate artifact; the production reader never translates a legacy action
 at load time.  Publication is an atomic directory rename, and the completion
 receipt is part of the required artifact boundary.
+
+Reading a *superseded* artifact
+-------------------------------
+
+``load_semantic_packed_manifest`` and the two readers accept optional
+``expected_process_identity`` and ``expected_builder_identity`` objects.  When
+both are omitted (the default) every validation is exactly what it is today and
+the artifact must match the *live* semantic-process identity.
+
+Supplying a pinned identity is required when the live implementation identity
+has been superseded, which happens by design whenever the semantic process is
+versioned: ``editing_v2_process_identity()`` hashes its implementation sources,
+so an already published artifact can never match the live value again.  The
+alternative behaviours are worse: silently accepting any identity would erase
+the binding, and refusing outright would make an immutable historical artifact
+permanently unreadable, which is the same as deleting scientific data.
+
+The pinned path is therefore not a weakened gate:
+
+* the caller must *name* the superseded identity explicitly, so the artifact it
+  is willing to read is recorded in its own provenance rather than inferred;
+* the pinned object is itself validated for internal self-consistency by
+  :func:`validate_frozen_process_identity`, so a fabricated or edited identity
+  is rejected before it is compared to anything;
+* the manifest must still match that identity exactly, together with its
+  contract hash, process-semantics label, schema, physical hashes, completion
+  receipt, censuses, and source binding, all unchanged;
+* ``expected_builder_identity`` only *adds* an exact-match requirement to a
+  field that is otherwise checked for self-consistency alone.
+
+A reader that pins an identity is asserting compatibility with historical
+bytes.  It is the caller's obligation, not this module's, to re-prove every
+chemical claim the artifact carries.
 """
 
 from __future__ import annotations
@@ -27,6 +60,7 @@ from compose_v4.data.packed_trace_store import (
     sampler_contract,
 )
 from compose_v4.rewrite import action_codec_v4
+from compose_v4.rewrite import editing_v2_process_identity as process_identity_module
 from compose_v4.rewrite.editing_v2_process_identity import (
     PROCESS_SEMANTICS,
     editing_v2_process_identity,
@@ -124,6 +158,42 @@ def _required_sha256(value: object, *, field: str) -> str:
     ):
         raise SemanticPackedStoreError(f"{field} must be a lowercase SHA-256")
     return value
+
+
+def _frozen_process_identity_validator():
+    """Return the frozen-identity validator or name the exact missing symbol."""
+
+    validator = getattr(
+        process_identity_module,
+        "validate_frozen_process_identity",
+        None,
+    )
+    if validator is None:
+        raise SemanticPackedStoreError(
+            "reading a semantic packed artifact under a pinned historical "
+            "identity requires compose_v4.rewrite.editing_v2_process_identity."
+            "validate_frozen_process_identity, which is absent"
+        )
+    return validator
+
+
+def _validate_pinned_process_identity(value: object) -> dict[str, Any]:
+    """Accept only a self-consistent, explicitly named historical identity."""
+
+    if not isinstance(value, Mapping):
+        raise SemanticPackedStoreError("expected_process_identity must be an object")
+    validate = _frozen_process_identity_validator()
+    try:
+        validated = validate(dict(value))
+    except ValueError as error:
+        raise SemanticPackedStoreError(
+            "pinned semantic process identity is not internally self-consistent"
+        ) from error
+    if not isinstance(validated, Mapping):
+        raise SemanticPackedStoreError(
+            "pinned semantic process identity validation did not return an object"
+        )
+    return dict(validated)
 
 
 def _validate_source_binding(value: object) -> dict[str, object]:
@@ -260,8 +330,16 @@ def load_semantic_packed_manifest(
     expected_shard_sha256: str,
     expected_manifest_sha256: str,
     expected_source_binding: Mapping[str, object] | None = None,
+    expected_process_identity: Mapping[str, object] | None = None,
+    expected_builder_identity: Mapping[str, object] | None = None,
 ) -> dict[str, Any]:
-    """Validate the complete physical artifact and return its manifest."""
+    """Validate the complete physical artifact and return its manifest.
+
+    ``expected_process_identity`` and ``expected_builder_identity`` default to
+    ``None``, which keeps the live-identity requirement and every other check
+    exactly as it is today.  See the module docstring for why a pinned
+    superseded identity is the only honest way to read historical bytes.
+    """
 
     root = Path(artifact_dir)
     shard_path, manifest_path, completion_path = _artifact_files(root)
@@ -336,12 +414,19 @@ def load_semantic_packed_manifest(
         manifest.get("process_identity_sha256"),
         field="process_identity_sha256",
     )
-    try:
-        process_identity = require_editing_v2_process_identity(process_sha256)
-    except ValueError as error:
-        raise SemanticPackedStoreError(
-            "semantic packed artifact process identity is stale"
-        ) from error
+    if expected_process_identity is None:
+        try:
+            process_identity = require_editing_v2_process_identity(process_sha256)
+        except ValueError as error:
+            raise SemanticPackedStoreError(
+                "semantic packed artifact process identity is stale"
+            ) from error
+    else:
+        process_identity = _validate_pinned_process_identity(expected_process_identity)
+        if process_identity.get("process_identity_sha256") != process_sha256:
+            raise SemanticPackedStoreError(
+                "semantic packed artifact pinned process identity disagrees"
+            )
     if manifest.get("process_contract_sha256") != process_identity["contract_sha256"]:
         raise SemanticPackedStoreError("semantic packed process contract disagrees")
     if manifest.get("process_semantics") != PROCESS_SEMANTICS:
@@ -378,6 +463,15 @@ def load_semantic_packed_manifest(
         {key: value for key, value in builder.items() if key != "identity_sha256"}
     ):
         raise SemanticPackedStoreError("semantic packed builder identity disagrees")
+    if expected_builder_identity is not None:
+        if not isinstance(expected_builder_identity, Mapping):
+            raise SemanticPackedStoreError(
+                "expected_builder_identity must be an object"
+            )
+        if builder != dict(expected_builder_identity):
+            raise SemanticPackedStoreError(
+                "semantic packed pinned builder identity disagrees"
+            )
     source_binding = _validate_source_binding(manifest.get("source_binding"))
     decision_binding = _validate_decision_binding(manifest.get("decision_binding"))
     if source_binding["source_entry_count"] != decision_binding["source_count"]:
@@ -604,9 +698,16 @@ def read_semantic_packed_artifact(
     expected_shard_sha256: str,
     expected_manifest_sha256: str,
     expected_source_binding: Mapping[str, object] | None = None,
+    expected_process_identity: Mapping[str, object] | None = None,
+    expected_builder_identity: Mapping[str, object] | None = None,
     sentinel_replay_entries: int = DEFAULT_SENTINEL_REPLAY_ENTRIES,
 ) -> Iterable[AddressedPackedTrace]:
-    """Yield exact addressed paths with deterministic first-N replay."""
+    """Yield exact addressed paths with deterministic first-N replay.
+
+    The optional pinned identities are forwarded unchanged to
+    :func:`load_semantic_packed_manifest`; omitting them keeps today's exact
+    live-identity behaviour.
+    """
 
     if type(sentinel_replay_entries) is not int or sentinel_replay_entries < 0:
         raise ValueError("sentinel_replay_entries must be a nonnegative integer")
@@ -617,6 +718,8 @@ def read_semantic_packed_artifact(
         expected_shard_sha256=expected_shard_sha256,
         expected_manifest_sha256=expected_manifest_sha256,
         expected_source_binding=expected_source_binding,
+        expected_process_identity=expected_process_identity,
+        expected_builder_identity=expected_builder_identity,
     )
     shard_sha256 = str(manifest["shard_sha256"])
     seen_trace_ids: set[str] = set()
@@ -767,6 +870,8 @@ def read_semantic_packed_artifact_range(
     entry_start: int,
     entry_stop: int,
     expected_source_binding: Mapping[str, object] | None = None,
+    expected_process_identity: Mapping[str, object] | None = None,
+    expected_builder_identity: Mapping[str, object] | None = None,
     sentinel_replay_entries: int = DEFAULT_SENTINEL_REPLAY_ENTRIES,
 ) -> Iterable[AddressedPackedTrace]:
     """Yield one validated half-open range with original shard addresses.
@@ -787,6 +892,10 @@ def read_semantic_packed_artifact_range(
     would repeatedly hash the artifact and decompress its prefix.  Distributed
     admission should consume the separately validated semantic Active8 chunk
     cache instead.
+
+    The optional pinned identities are forwarded unchanged to
+    :func:`load_semantic_packed_manifest`; omitting them keeps today's exact
+    live-identity behaviour.
     """
 
     if type(sentinel_replay_entries) is not int or sentinel_replay_entries < 0:
@@ -798,6 +907,8 @@ def read_semantic_packed_artifact_range(
         expected_shard_sha256=expected_shard_sha256,
         expected_manifest_sha256=expected_manifest_sha256,
         expected_source_binding=expected_source_binding,
+        expected_process_identity=expected_process_identity,
+        expected_builder_identity=expected_builder_identity,
     )
     entry_start, entry_stop = _validate_semantic_entry_range(
         entry_start=entry_start,
