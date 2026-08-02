@@ -103,6 +103,14 @@ def test_exact_stream_is_deterministic_balanced_and_closure_safe() -> None:
     assert (
         first["validation_contract"]["maximum_cell_final_minus_baseline_successor_nll_nats"] == 0.25
     )
+    assert (
+        first["validation_contract"]["maximum_family_final_minus_baseline_for_p50_nonincrease_nats"]
+        == 1e-7
+    )
+    assert (
+        first["validation_contract"]["maximum_cell_final_minus_baseline_for_p50_nonincrease_nats"]
+        == 1e-7
+    )
     assert first["bounded_p50_authorized"] is False
 
 
@@ -153,7 +161,7 @@ def test_authority_rejects_in_memory_recipe_and_generic_binding_paths(
 
     with pytest.raises(
         SemanticP50RecipeStreamError,
-        match="authorization is not implemented",
+        match="generic binding paths are forbidden",
     ):
         authorize_semantic_p50_recipe(
             prepared=prepared,

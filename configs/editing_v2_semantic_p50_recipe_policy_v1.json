@@ -73,6 +73,10 @@
     "zero_planned_family_or_cell_opportunities_allowed": false,
     "maximum_family_final_minus_baseline_successor_nll_nats": 0.25,
     "maximum_cell_final_minus_baseline_successor_nll_nats": 0.25,
+    "maximum_family_final_minus_baseline_for_p50_nonincrease_nats": 1e-7,
+    "maximum_cell_final_minus_baseline_for_p50_nonincrease_nats": 1e-7,
+    "p50_nonincrease_numerical_equivalence_rationale": "one_e_minus_seven_nats_allows_only_float32_reduction_equivalence_not_regression",
+    "catastrophic_regression_sentinel_rationale": "plus_0_25_nats_is_a_separate_abort_sentinel_and_not_a_learning_criterion",
     "baseline_partition_role": "validation",
     "baseline_definition": "exact_pre_update_scratch_evaluation_on_the_frozen_validation_stream",
     "baseline_values_inspected_when_thresholds_frozen": false
@@ -84,5 +88,5 @@
     "execution_environment",
     "launch_projection"
   ],
-  "policy_sha256": "a9260021adbe96d20d84857c6ab00d5d82625f1e777c3c0f5d88fb68c59c2563"
+  "policy_sha256": "a81d4f35c9f6122f73e15adcbae97f5305bec072cf12d396fc2da946aa481b99"
 }

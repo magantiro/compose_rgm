@@ -58,6 +58,8 @@ SEED = 31
 GRADIENT_OPPORTUNITY_FRACTION = 0.8
 MAXIMUM_FAMILY_NLL_REGRESSION_NATS = 0.25
 MAXIMUM_CELL_NLL_REGRESSION_NATS = 0.25
+MAXIMUM_FAMILY_P50_NONINCREASE_NATS = 1e-7
+MAXIMUM_CELL_P50_NONINCREASE_NATS = 1e-7
 TIME_ALGORITHM = "sha256_counter_open_unit_interval_53bit_v1"
 SAMPLING_POLICY = "stage_a_equal_semantic_cell_capability_exception_v1"
 POLICY_RELATIVE_PATH = "configs/editing_v2_semantic_p50_recipe_policy_v1.json"
@@ -150,6 +152,18 @@ _EXPECTED_THRESHOLDS = {
     "zero_planned_family_or_cell_opportunities_allowed": False,
     "maximum_family_final_minus_baseline_successor_nll_nats": (MAXIMUM_FAMILY_NLL_REGRESSION_NATS),
     "maximum_cell_final_minus_baseline_successor_nll_nats": (MAXIMUM_CELL_NLL_REGRESSION_NATS),
+    "maximum_family_final_minus_baseline_for_p50_nonincrease_nats": (
+        MAXIMUM_FAMILY_P50_NONINCREASE_NATS
+    ),
+    "maximum_cell_final_minus_baseline_for_p50_nonincrease_nats": (
+        MAXIMUM_CELL_P50_NONINCREASE_NATS
+    ),
+    "p50_nonincrease_numerical_equivalence_rationale": (
+        "one_e_minus_seven_nats_allows_only_float32_reduction_equivalence_not_regression"
+    ),
+    "catastrophic_regression_sentinel_rationale": (
+        "plus_0_25_nats_is_a_separate_abort_sentinel_and_not_a_learning_criterion"
+    ),
     "baseline_partition_role": "validation",
     "baseline_definition": "exact_pre_update_scratch_evaluation_on_the_frozen_validation_stream",
     "baseline_values_inspected_when_thresholds_frozen": False,
@@ -594,9 +608,7 @@ def build_semantic_p50_candidate_inventory(
     )
 
 
-def semantic_p50_time_hex(
-    *, stream_index: int, address: SuccessorFiberCacheAddress
-) -> str:
+def semantic_p50_time_hex(*, stream_index: int, address: SuccessorFiberCacheAddress) -> str:
     """Derive the frozen deterministic P50 time coordinate for one row."""
 
     if type(stream_index) is not int or stream_index < 0:
@@ -784,6 +796,18 @@ def compile_semantic_p50_prepared_recipe(
         "maximum_cell_final_minus_baseline_successor_nll_nats": (
             thresholds["maximum_cell_final_minus_baseline_successor_nll_nats"]
         ),
+        "maximum_family_final_minus_baseline_for_p50_nonincrease_nats": (
+            thresholds["maximum_family_final_minus_baseline_for_p50_nonincrease_nats"]
+        ),
+        "maximum_cell_final_minus_baseline_for_p50_nonincrease_nats": (
+            thresholds["maximum_cell_final_minus_baseline_for_p50_nonincrease_nats"]
+        ),
+        "p50_nonincrease_numerical_equivalence_rationale": thresholds[
+            "p50_nonincrease_numerical_equivalence_rationale"
+        ],
+        "catastrophic_regression_sentinel_rationale": thresholds[
+            "catastrophic_regression_sentinel_rationale"
+        ],
         "baseline_values_inspected_when_thresholds_frozen": thresholds[
             "baseline_values_inspected_when_thresholds_frozen"
         ],
@@ -851,23 +875,55 @@ def write_semantic_p50_prepared_recipe(path: Path, payload: Mapping[str, Any]) -
 def authorize_semantic_p50_recipe(
     *,
     prepared: Mapping[str, Any],
-    binding_paths: Sequence[Path],
-) -> dict[str, Any]:
-    """Refuse promotion until every bound domain artifact has a strict reopener.
+    binding_paths: Sequence[Path] = (),
+    **physical_kwargs: Any,
+) -> Any:
+    """Materialize and strictly reopen the one-shot P50-only execution permit."""
 
-    A generic self-hashed receipt is not evidence that a successor cache covers
-    the exact address union, that a baseline was evaluated on the sealed
-    validation role, or that a runtime and launch projection implement the
-    frozen recipe. Promotion therefore remains unavailable until those five
-    purpose-specific validators exist and this function invokes them on their
-    physical artifacts.
-    """
+    if binding_paths:
+        raise SemanticP50RecipeStreamError(
+            "generic binding paths are forbidden; authorization requires the five "
+            "purpose-specific physical reopeners"
+        )
+    required = {
+        "launch_projection_path",
+        "runtime_contract_path",
+        "environment_contract_path",
+        "scratch_runtime",
+        "prerequisite_paths",
+        "expected_source_binding",
+        "trainer_source_path",
+        "image_definition_path",
+    }
+    modes = {"output_root", "permit_path"}
+    optional = {"expected_source_revision"}
+    selected_modes = modes.intersection(physical_kwargs)
+    if (
+        len(selected_modes) != 1
+        or set(physical_kwargs).difference(modes | optional) != required
+        or len(optional.intersection(physical_kwargs)) > 1
+    ):
+        raise SemanticP50RecipeStreamError(
+            "authorization requires the exact physical permit arguments"
+        )
+    from compose_v4.experiments.editing_v2_semantic_p50_execution_contracts import (
+        materialize_semantic_p50_execution_permit,
+        open_semantic_p50_execution_permit,
+    )
 
-    raise SemanticP50RecipeStreamError(
-        "semantic P50 authorization is not implemented: prepared recipes remain "
-        "non-authorizing until domain-specific physical reopeners validate the "
-        "successor cache, validation baseline, trainer runtime, execution "
-        "environment, and launch projection"
+    if "output_root" in physical_kwargs:
+        output_root = physical_kwargs.pop("output_root")
+        permit_path = materialize_semantic_p50_execution_permit(
+            output_root=output_root,
+            prepared=prepared,
+            **physical_kwargs,
+        )
+    else:
+        permit_path = physical_kwargs.pop("permit_path")
+    return open_semantic_p50_execution_permit(
+        permit_path,
+        prepared=prepared,
+        **physical_kwargs,
     )
 
 
