@@ -33,6 +33,9 @@ from torch import nn
 from torch.nn import functional as F
 
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.experiments.factorized_mark_conditional import (
+    operator_capability_batch_kwargs,
+)
 from compose_v4.model.factorized_tracelet_rate_model import (
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
@@ -335,8 +338,12 @@ def _factorized_rate_table(
             # Propagate the checkpoint's editing-operator capabilities into the legal-mark
             # enumeration so the quotient table scores the SAME family support the model was
             # trained on.  Omitting these silently falls back to the de-novo B vocabulary
-            # (ring restate / clean ring opening never enumerated).
-            compute_ring_restates=model.enable_ring_restates,
+            # (ring restate / clean ring opening never enumerated).  This batch is stored in the
+            # MODEL's own ``_sampling_state_cache`` under the model's own key, so it must be built
+            # with the model's complete capability object -- the hand-listed subset used here
+            # previously disagreed with the model's internal builder on every semantics coordinate,
+            # and made a Process-V2 model unconstructible through this path.
+            #
             # Cyclic graft is already quotiented by the general canonical successor key (self-grafts
             # dropped at enumeration, aliases grouped by canonical successor) -- exactly the measure
             # training normalizes graft over.  The student path (legacy=False) normalizes over the
@@ -344,9 +351,7 @@ def _factorized_rate_table(
             # suffices here.  NOTE: the legacy=True path (build_calibrated_pancake_quotient_target)
             # normalizes over the tree-gated raw mask, which is empty on cyclic leads -> it silently
             # drops cyclic graft mass; that distillation-teacher path is not the B-edit sampling path.
-            compute_cyclic_graft=model.enable_cyclic_graft,
-            compute_ring_opening=model.enable_ring_opening,
-            compute_ring_system_delete=model.enable_ring_system_delete,
+            **operator_capability_batch_kwargs(model.operator_capabilities),
         )
         model._sampling_state_cache[state_cache_key] = cached_batch
         while len(model._sampling_state_cache) > model._sampling_state_cache_limit:
@@ -462,12 +467,9 @@ def _build_analytic_pancake_quotient_context(
             # See _factorized_rate_table: the analytic sampler must enumerate the checkpoint's
             # editing vocabulary, not the de-novo default, or a B-edit checkpoint samples the
             # wrong process (its wide organic heads load but their families stay masked-off).
-            compute_ring_restates=teacher.enable_ring_restates,
             # Cyclic graft: enumerate it; the raw-partition fallback below makes the quotient
             # partition the graft partition (survival == 1) on cyclic leads, matching training.
-            compute_cyclic_graft=teacher.enable_cyclic_graft,
-            compute_ring_opening=teacher.enable_ring_opening,
-            compute_ring_system_delete=teacher.enable_ring_system_delete,
+            **operator_capability_batch_kwargs(teacher.operator_capabilities),
         )
         teacher._sampling_state_cache[state_cache_key] = cached_batch
         while len(teacher._sampling_state_cache) > teacher._sampling_state_cache_limit:

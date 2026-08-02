@@ -29,13 +29,46 @@ from compose_v4.experiments.editing_gate_zero_semantic_contract import (
 )
 from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
 from compose_v4.model.factorized_tracelet_rate_model import (
+    ATOM_DELETE_ACTION_SEMANTICS,
+    LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     FactorizedTraceletRateModel,
 )
-from compose_v4.rewrite.typed_ring_catalog import ring_catalog_fingerprint
+from compose_v4.rewrite.typed_ring_catalog import (
+    TypedRingCatalog,
+    ring_catalog_fingerprint,
+)
+
+ATOM_DELETE_ACTION_SEMANTICS_FIELD = "atom_delete_action_semantics"
 
 
 class SemanticScratchRuntimeError(RuntimeError):
     """The requested scratch runtime differs from the frozen semantic model."""
+
+
+def model_identity_atom_delete_action_semantics(
+    model_identity: Mapping[str, Any],
+) -> str:
+    """Return the atom-delete mode a persisted ``model_identity`` reconstructs with.
+
+    An ABSENT key means the historical legacy mode, so a checkpoint or contract
+    written before Process V2 reconstructs byte-identically -- absence is the only
+    reading that keeps historical artifacts loadable.  A PRESENT key must name a
+    declared mode: a stale or unknown string raises here rather than silently
+    degrading to legacy, which would reconstruct a differently supported model
+    under the persisted identity's name.
+    """
+
+    if not isinstance(model_identity, Mapping):
+        raise TypeError("model identity must be a mapping")
+    if ATOM_DELETE_ACTION_SEMANTICS_FIELD not in model_identity:
+        return LEGACY_ATOM_DELETE_ACTION_SEMANTICS
+    value = model_identity[ATOM_DELETE_ACTION_SEMANTICS_FIELD]
+    if value not in ATOM_DELETE_ACTION_SEMANTICS:
+        raise SemanticScratchRuntimeError(
+            "persisted model identity names an unknown atom-delete action semantics: "
+            f"{value!r}; expected one of {ATOM_DELETE_ACTION_SEMANTICS}"
+        )
+    return str(value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,12 +171,20 @@ def _semantic_identity(
     )
 
 
-def _require_model_identity(
+def semantic_runtime_model_identity(
     model: FactorizedTraceletRateModel,
-    expected: Mapping[str, Any],
-) -> None:
+) -> dict[str, Any]:
+    """Return the model identity a constructed semantic model persists as.
+
+    This is the WRITE side of the same contract
+    :func:`model_identity_atom_delete_action_semantics` reads.  The atom-delete
+    key is emitted only when the model is not on the legacy mode, so a Process-V1
+    model persists exactly the field set it always did and a Process-V2 model
+    persists the mode its expanded delete fiber is defined by.
+    """
+
     capabilities = model.operator_capabilities
-    observed = {
+    identity: dict[str, Any] = {
         "mark_dim": model.mark_dim,
         "operator_capability_fingerprint": capabilities.fingerprint(),
         "compute_ring_grow_support": capabilities.compute_ring_grow_support,
@@ -160,18 +201,98 @@ def _require_model_identity(
         "cycle_open_action_semantics": capabilities.cycle_open_action_semantics,
         "cycle_open_scorer_mode": model.cycle_open_scorer_mode,
     }
-    if observed != dict(expected):
+    if capabilities.atom_delete_action_semantics != LEGACY_ATOM_DELETE_ACTION_SEMANTICS:
+        identity[ATOM_DELETE_ACTION_SEMANTICS_FIELD] = (
+            capabilities.atom_delete_action_semantics
+        )
+    return identity
+
+
+def _require_model_identity(
+    model: FactorizedTraceletRateModel,
+    expected: Mapping[str, Any],
+) -> None:
+    observed = semantic_runtime_model_identity(model)
+    # The atom-delete mode is compared on BOTH sides under the absent-means-legacy reading, so a
+    # historical identity that never carried the key still matches a legacy-delete model exactly, and a
+    # Process-V2 identity can never be satisfied by a legacy-delete model.
+    expected_identity = dict(expected)
+    expected_identity[ATOM_DELETE_ACTION_SEMANTICS_FIELD] = (
+        model_identity_atom_delete_action_semantics(expected_identity)
+    )
+    observed[ATOM_DELETE_ACTION_SEMANTICS_FIELD] = (
+        model.operator_capabilities.atom_delete_action_semantics
+    )
+    if observed != expected_identity:
         mismatches = {
             field: {
-                "expected": expected.get(field),
+                "expected": expected_identity.get(field),
                 "observed": observed.get(field),
             }
-            for field in sorted(set(expected) | set(observed))
-            if expected.get(field) != observed.get(field)
+            for field in sorted(set(expected_identity) | set(observed))
+            if expected_identity.get(field) != observed.get(field)
         }
         raise SemanticScratchRuntimeError(
             f"constructed model differs from semantic identity: {mismatches}"
         )
+
+
+def build_model_from_semantic_model_identity(
+    model_identity: Mapping[str, Any],
+    *,
+    catalog: TypedRingCatalog,
+    hidden_dim: int,
+    message_passing_steps: int,
+    mark_dim: int,
+    initialization_seed: int,
+) -> FactorizedTraceletRateModel:
+    """Reconstruct the exact semantic model one persisted identity describes.
+
+    One reconstruction path, shared by the production scratch runtime and by any
+    caller that has to reload a persisted identity, so a save/load round trip
+    cannot drift from the runtime it is supposed to reproduce.
+    """
+
+    # Isolate deterministic initialization from the caller's RNG stream.  This
+    # produces the same CPU state as manual_seed while keeping orchestration and
+    # later sampling streams independent of model construction.
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(initialization_seed)
+        model = FactorizedTraceletRateModel(
+            catalog,
+            hidden_dim=hidden_dim,
+            message_passing_steps=message_passing_steps,
+            mark_dim=mark_dim,
+            enable_ring_restates=bool(model_identity["compute_ring_restates"]),
+            enable_cyclic_graft=bool(model_identity["compute_cyclic_graft"]),
+            enable_heteroatom_scan=True,
+            enable_ring_opening=bool(model_identity["compute_ring_opening"]),
+            enable_cycle_ops=bool(model_identity["enable_cycle_ops"]),
+            cycle_open_scorer_mode=str(model_identity["cycle_open_scorer_mode"]),
+            editing_process_semantics=str(model_identity["editing_process_semantics"]),
+            atom_restate_action_semantics=str(
+                model_identity["atom_restate_action_semantics"]
+            ),
+            ring_restate_scorer_mode=str(model_identity["ring_restate_scorer_mode"]),
+            cycle_close_action_semantics=str(
+                model_identity["cycle_close_action_semantics"]
+            ),
+            cycle_open_action_semantics=str(
+                model_identity["cycle_open_action_semantics"]
+            ),
+            # Restored from the persisted identity; absent means the legacy mode, so a semantic
+            # identity written before Process V2 reconstructs exactly the model it always did.
+            atom_delete_action_semantics=(
+                model_identity_atom_delete_action_semantics(model_identity)
+            ),
+            enable_ring_grow_macro=bool(model_identity["compute_ring_grow_support"]),
+            enable_ring_system_delete=bool(
+                model_identity["compute_ring_system_delete"]
+            ),
+            atom_vocabulary=ORGANIC_VOCABULARY,
+        ).to(dtype=torch.float32)
+    model.eval()
+    return model
 
 
 def build_semantic_scratch_runtime(
@@ -200,40 +321,14 @@ def build_semantic_scratch_runtime(
             "scratch RingCore catalog differs from the requested architecture"
         )
 
-    # Isolate deterministic initialization from the caller's RNG stream.  This
-    # produces the same CPU state as manual_seed while keeping orchestration and
-    # later sampling streams independent of model construction.
-    with torch.random.fork_rng(devices=[]):
-        torch.manual_seed(config.initialization_seed)
-        model = FactorizedTraceletRateModel(
-            catalog,
-            hidden_dim=config.hidden_dim,
-            message_passing_steps=config.message_passing_steps,
-            mark_dim=config.mark_dim,
-            enable_ring_restates=bool(model_identity["compute_ring_restates"]),
-            enable_cyclic_graft=bool(model_identity["compute_cyclic_graft"]),
-            enable_heteroatom_scan=True,
-            enable_ring_opening=bool(model_identity["compute_ring_opening"]),
-            enable_cycle_ops=bool(model_identity["enable_cycle_ops"]),
-            cycle_open_scorer_mode=str(model_identity["cycle_open_scorer_mode"]),
-            editing_process_semantics=str(model_identity["editing_process_semantics"]),
-            atom_restate_action_semantics=str(
-                model_identity["atom_restate_action_semantics"]
-            ),
-            ring_restate_scorer_mode=str(model_identity["ring_restate_scorer_mode"]),
-            cycle_close_action_semantics=str(
-                model_identity["cycle_close_action_semantics"]
-            ),
-            cycle_open_action_semantics=str(
-                model_identity["cycle_open_action_semantics"]
-            ),
-            enable_ring_grow_macro=bool(model_identity["compute_ring_grow_support"]),
-            enable_ring_system_delete=bool(
-                model_identity["compute_ring_system_delete"]
-            ),
-            atom_vocabulary=ORGANIC_VOCABULARY,
-        ).to(dtype=torch.float32)
-    model.eval()
+    model = build_model_from_semantic_model_identity(
+        model_identity,
+        catalog=catalog,
+        hidden_dim=config.hidden_dim,
+        message_passing_steps=config.message_passing_steps,
+        mark_dim=config.mark_dim,
+        initialization_seed=config.initialization_seed,
+    )
     _require_model_identity(model, model_identity)
 
     state = model.state_dict()
@@ -279,9 +374,13 @@ def build_semantic_scratch_runtime(
 
 
 __all__ = [
+    "ATOM_DELETE_ACTION_SEMANTICS_FIELD",
     "SemanticScratchArchitecture",
     "SemanticScratchModelConfig",
     "SemanticScratchRuntime",
     "SemanticScratchRuntimeError",
+    "build_model_from_semantic_model_identity",
     "build_semantic_scratch_runtime",
+    "model_identity_atom_delete_action_semantics",
+    "semantic_runtime_model_identity",
 ]

@@ -670,20 +670,12 @@ def _run_root(request: Mapping[str, Any], *, artifact_root: Path, output_prefix:
 
 
 def _collator(model: Any, *, loaded: Mapping[str, Any]) -> Any:
-    capabilities = model.operator_capabilities
-    return loaded["FactorizedMarkCollator"](
+    # Build from the immutable capability object rather than a keyword list: the list dropped the
+    # atom-delete mode, so a Process-V2 model could not be evaluated through this app at all.
+    return loaded["FactorizedMarkCollator"].from_capabilities(
+        model.operator_capabilities,
         use_aromatic_bond_view=True,
         ring_catalog=model.ring_catalog,
-        compute_ring_grow_support=capabilities.compute_ring_grow_support,
-        compute_ring_restates=capabilities.compute_ring_restates,
-        compute_cyclic_graft=capabilities.compute_cyclic_graft,
-        compute_ring_opening=capabilities.compute_ring_opening,
-        compute_ring_system_delete=capabilities.compute_ring_system_delete,
-        editing_process_semantics=capabilities.editing_process_semantics,
-        atom_restate_action_semantics=capabilities.atom_restate_action_semantics,
-        ring_restate_scorer_mode=capabilities.ring_restate_scorer_mode,
-        cycle_close_action_semantics=capabilities.cycle_close_action_semantics,
-        cycle_open_action_semantics=capabilities.cycle_open_action_semantics,
     )
 
 

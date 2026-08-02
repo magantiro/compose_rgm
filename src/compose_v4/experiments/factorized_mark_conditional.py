@@ -7,7 +7,9 @@ import json
 from collections import OrderedDict
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import nullcontext
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
+from dataclasses import fields as dataclass_fields
+from dataclasses import replace
 from math import cos, exp, pi
 from pathlib import Path
 from time import perf_counter
@@ -375,6 +377,63 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         )
 
 
+# Every enumeration/semantics coordinate an ``OperatorCapabilities`` object carries, DERIVED from the
+# dataclass rather than retyped.  ``prepare_factorized_mark_batch`` and ``FactorizedMarkCollator`` take
+# exactly these keyword names, which is what makes the derivation safe.
+_OPERATOR_CAPABILITY_FIELDS: tuple[str, ...] = tuple(
+    capability.name for capability in dataclass_fields(OperatorCapabilities)
+)
+
+
+def operator_capability_batch_kwargs(
+    capabilities: OperatorCapabilities,
+) -> dict[str, Any]:
+    """Return every batch-builder keyword implied by one immutable capability object.
+
+    A batch builder that hand-copies capability fields silently drops the ones added later: that is
+    exactly how ``atom_delete_action_semantics`` was omitted by eight builders, which made a Process-V2
+    model unconstructible through any of them.  Deriving the keywords from
+    :class:`OperatorCapabilities` removes the hand-copy step, so a capability added later flows through
+    every call site at once, and a builder that cannot accept it raises ``TypeError`` instead of quietly
+    building a differently supported batch.
+    """
+
+    if not isinstance(capabilities, OperatorCapabilities):
+        raise TypeError(
+            "batch-builder capability keywords require an OperatorCapabilities object; "
+            f"got {type(capabilities).__name__}"
+        )
+    return {name: getattr(capabilities, name) for name in _OPERATOR_CAPABILITY_FIELDS}
+
+
+def _require_complete_capability_keywords(keywords: Mapping[str, Any]) -> None:
+    """Fail loudly when a hand-listed capability keyword set is no longer complete."""
+
+    observed = set(keywords)
+    expected = set(_OPERATOR_CAPABILITY_FIELDS)
+    if observed != expected:
+        raise ValueError(
+            "batch-builder capability keywords are incomplete; "
+            f"missing={sorted(expected - observed)}, unexpected={sorted(observed - expected)}"
+        )
+
+
+def _resolve_capability_kwargs(
+    capabilities: OperatorCapabilities | None,
+    **individual: Any,
+) -> dict[str, Any]:
+    """Prefer the immutable capability object; otherwise require a complete keyword set.
+
+    The individual keywords remain for de-novo callers that never hold a model, but they are checked
+    against the dataclass so a capability added later cannot silently fall back to its legacy default.
+    """
+
+    if capabilities is not None:
+        return operator_capability_batch_kwargs(capabilities)
+    _require_complete_capability_keywords(individual)
+    return dict(individual)
+
+
 @dataclass(frozen=True)
 class FactorizedMarkCollator:
     use_aromatic_bond_view: bool
@@ -408,6 +467,29 @@ class FactorizedMarkCollator:
         ChemistryStateFeatures,
     ] = field(default_factory=OrderedDict, init=False, repr=False, compare=False)
 
+    @classmethod
+    def from_capabilities(
+        cls,
+        capabilities: OperatorCapabilities,
+        *,
+        use_aromatic_bond_view: bool,
+        ring_catalog: TypedRingCatalog | None = None,
+        chemistry_feature_cache_limit: int = 2048,
+    ) -> FactorizedMarkCollator:
+        """Build a collator from one immutable capability object, dropping nothing.
+
+        Prefer this over listing capability keywords at a call site: the listed form is what silently
+        omitted the atom-delete mode (and, at several call sites, every Active8 semantic mode) from
+        evaluation, Gate-0, trainer, T1, and P50 batches.
+        """
+
+        return cls(
+            use_aromatic_bond_view,
+            ring_catalog,
+            chemistry_feature_cache_limit=chemistry_feature_cache_limit,
+            **operator_capability_batch_kwargs(capabilities),
+        )
+
     def __call__(self, examples: list[FactorizedMarkExample]) -> FactorizedMarkBatch:
         support_rows = tuple(example.ring_grow_support_indices for example in examples)
         topology_masses = tuple(
@@ -436,6 +518,18 @@ class FactorizedMarkCollator:
             raise ValueError(
                 "property-conditioned examples are only partially populated"
             )
+        # Read the capability coordinates off this collator by the SAME derived field list the model
+        # exposes, so a capability the collator forgot to declare raises here instead of silently
+        # collating under its legacy default.
+        capability_kwargs = {
+            name: getattr(self, name) for name in _OPERATOR_CAPABILITY_FIELDS
+        }
+        _require_complete_capability_keywords(capability_kwargs)
+        # Exact precomputed ring-grow support supersedes recomputation for this batch only.
+        capability_kwargs["compute_ring_grow_support"] = (
+            capability_kwargs["compute_ring_grow_support"]
+            and not has_precomputed_ring_support
+        )
         batch = prepare_factorized_mark_batch(
             tuple(example.state for example in examples),
             tuple(example.time for example in examples),
@@ -447,18 +541,7 @@ class FactorizedMarkCollator:
             ring_catalog=self.ring_catalog,
             chemistry_feature_cache=self._chemistry_feature_cache,
             chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
-            compute_ring_grow_support=self.compute_ring_grow_support
-            and not has_precomputed_ring_support,
-            compute_ring_restates=self.compute_ring_restates,
-            compute_cyclic_graft=self.compute_cyclic_graft,
-            compute_ring_opening=self.compute_ring_opening,
-            compute_ring_system_delete=self.compute_ring_system_delete,
-            editing_process_semantics=self.editing_process_semantics,
-            atom_restate_action_semantics=self.atom_restate_action_semantics,
-            ring_restate_scorer_mode=self.ring_restate_scorer_mode,
-            cycle_close_action_semantics=self.cycle_close_action_semantics,
-            cycle_open_action_semantics=self.cycle_open_action_semantics,
-            atom_delete_action_semantics=self.atom_delete_action_semantics,
+            **capability_kwargs,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
                 if has_conditions
@@ -534,6 +617,7 @@ def factorized_mark_loader(
     target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
     condition_dropout_probability: float = 0.0,
     ring_family_mass_mode: str = "boolean",
+    capabilities: OperatorCapabilities | None = None,
     compute_ring_grow_support: bool = True,
     compute_ring_restates: bool = False,
     compute_cyclic_graft: bool = False,
@@ -551,6 +635,20 @@ def factorized_mark_loader(
         raise ValueError("start step lies outside the training horizon")
     if prefetch_factor <= 0:
         raise ValueError("prefetch factor must be positive")
+    capability_kwargs = _resolve_capability_kwargs(
+        capabilities,
+        compute_ring_grow_support=compute_ring_grow_support,
+        compute_ring_restates=compute_ring_restates,
+        compute_cyclic_graft=compute_cyclic_graft,
+        compute_ring_opening=compute_ring_opening,
+        compute_ring_system_delete=compute_ring_system_delete,
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_action_semantics=cycle_open_action_semantics,
+        atom_delete_action_semantics=atom_delete_action_semantics,
+    )
     remaining_steps = steps - start_step
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
@@ -589,17 +687,7 @@ def factorized_mark_loader(
         collate_fn=FactorizedMarkCollator(
             use_aromatic_bond_view,
             ring_catalog,
-            compute_ring_grow_support=compute_ring_grow_support,
-            compute_ring_restates=compute_ring_restates,
-            compute_cyclic_graft=compute_cyclic_graft,
-            compute_ring_opening=compute_ring_opening,
-            compute_ring_system_delete=compute_ring_system_delete,
-            editing_process_semantics=editing_process_semantics,
-            atom_restate_action_semantics=atom_restate_action_semantics,
-            ring_restate_scorer_mode=ring_restate_scorer_mode,
-            cycle_close_action_semantics=cycle_close_action_semantics,
-            cycle_open_action_semantics=cycle_open_action_semantics,
-            atom_delete_action_semantics=atom_delete_action_semantics,
+            **capability_kwargs,
         ),
         pin_memory=pin_memory,
         drop_last=True,
@@ -684,19 +772,22 @@ def sample_factorized_mark_batch(
     # Prefer the immutable capability object (model.operator_capabilities) -- it is the single source of the
     # editing-family enumeration, so the eval/validation/test batch enumerates the SAME families as training
     # and a teacher is never silently excluded from the exact candidates. The individual flags remain for
-    # de-novo callers but the object overrides them when supplied.
-    if capabilities is not None:
-        compute_ring_grow_support = capabilities.compute_ring_grow_support
-        compute_ring_restates = capabilities.compute_ring_restates
-        compute_cyclic_graft = capabilities.compute_cyclic_graft
-        compute_ring_opening = capabilities.compute_ring_opening
-        compute_ring_system_delete = capabilities.compute_ring_system_delete
-        editing_process_semantics = capabilities.editing_process_semantics
-        atom_restate_action_semantics = capabilities.atom_restate_action_semantics
-        ring_restate_scorer_mode = capabilities.ring_restate_scorer_mode
-        cycle_close_action_semantics = capabilities.cycle_close_action_semantics
-        cycle_open_action_semantics = capabilities.cycle_open_action_semantics
-        atom_delete_action_semantics = capabilities.atom_delete_action_semantics
+    # de-novo callers but the object overrides them when supplied.  The expansion is DERIVED from the
+    # dataclass: a hand-copied field list is what dropped the atom-delete mode from eight builders.
+    capability_kwargs = _resolve_capability_kwargs(
+        capabilities,
+        compute_ring_grow_support=compute_ring_grow_support,
+        compute_ring_restates=compute_ring_restates,
+        compute_cyclic_graft=compute_cyclic_graft,
+        compute_ring_opening=compute_ring_opening,
+        compute_ring_system_delete=compute_ring_system_delete,
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_action_semantics=cycle_open_action_semantics,
+        atom_delete_action_semantics=atom_delete_action_semantics,
+    )
     if ring_catalog is not None:
         warm_ring_system_candidate_indices(ring_catalog)
     dataset = FactorizedMarkDataset(
@@ -720,17 +811,7 @@ def sample_factorized_mark_batch(
     collator = FactorizedMarkCollator(
         use_aromatic_bond_view,
         ring_catalog,
-        compute_ring_grow_support=compute_ring_grow_support,
-        compute_ring_restates=compute_ring_restates,
-        compute_cyclic_graft=compute_cyclic_graft,
-        compute_ring_opening=compute_ring_opening,
-        compute_ring_system_delete=compute_ring_system_delete,
-        editing_process_semantics=editing_process_semantics,
-        atom_restate_action_semantics=atom_restate_action_semantics,
-        ring_restate_scorer_mode=ring_restate_scorer_mode,
-        cycle_close_action_semantics=cycle_close_action_semantics,
-        cycle_open_action_semantics=cycle_open_action_semantics,
-        atom_delete_action_semantics=atom_delete_action_semantics,
+        **capability_kwargs,
     )
     if workers == 0:
         batch = collator([dataset[index] for index in range(batch_size)])
@@ -1585,17 +1666,7 @@ def train_factorized_mark_model(
             target_property_conditions=target_property_conditions,
             condition_dropout_probability=condition_dropout_probability,
             ring_family_mass_mode=model.ring_family_mass_mode,
-            compute_ring_grow_support=model.enable_ring_grow_macro,
-            compute_ring_restates=model.enable_ring_restates,
-            compute_cyclic_graft=model.enable_cyclic_graft,
-            compute_ring_opening=model.enable_ring_opening,
-            compute_ring_system_delete=model.enable_ring_system_delete,
-            editing_process_semantics=model.editing_process_semantics,
-            atom_restate_action_semantics=model.atom_restate_action_semantics,
-            ring_restate_scorer_mode=model.ring_restate_scorer_mode,
-            cycle_close_action_semantics=model.cycle_close_action_semantics,
-            cycle_open_action_semantics=model.cycle_open_action_semantics,
-            atom_delete_action_semantics=model.atom_delete_action_semantics,
+            capabilities=model.operator_capabilities,
             record_index_sampler=record_index_sampler,
         )
         if training_loader_factory is None
