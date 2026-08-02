@@ -7,12 +7,22 @@ VERSION.
 * **V1** -- ``semantic_editing_v2_v1``, contract
   ``configs/editing_v2_semantic_process_v1.json``.  Its dense ``atom_delete``
   mask excludes every cyclic atom before executor validation, so it admits only
-  root, singleton, and leaf slots.
+  root, singleton, and leaf slots, and it applies no charge gate to them.
 * **V2** -- ``semantic_editing_v2_v2``, contract
-  ``configs/editing_v2_semantic_process_v2.json``.  It preserves the V1 root,
-  singleton, and leaf rule bit-for-bit and additionally admits executor-verified,
-  charge-preserving, non-aromatic, non-articulation connected-nonleaf deletions
-  resolved by :mod:`compose_v4.rewrite.process_v2_atom_delete`.
+  ``configs/editing_v2_semantic_process_v2.json``.  **One** admission authority
+  in :mod:`compose_v4.rewrite.process_v2_atom_delete` decides *every*
+  ``atom_delete`` candidate.  Root, singleton, and leaf deletion stays reachable
+  as a capability, but only through the same exact gates every other candidate
+  passes; connected-nonleaf candidates additionally carry the frozen aromatic,
+  articulation, and SCAR-incidence exclusions.
+
+The correction round matters for lineage.  An earlier candidate Process-V2
+reading preserved the inherited root/singleton/leaf admission *set* bit-for-bit
+and therefore exempted it from the authoritative charge policy, preserving a
+legacy defect.  That candidate contract and the identity it computed to
+(:data:`REJECTED_PROCESS_V2_CANDIDATE_IDENTITY_SHA256`) were rejected before any
+downstream run, so they are recorded as a rejected pre-run candidate, never as a
+superseded production identity.
 
 Both identities are computed by one private helper, so their field set and
 derivation cannot drift apart.  They are distinguished by ``schema`` and by
@@ -24,6 +34,10 @@ contract path, implementation-source list, body key set -- is unchanged by the
 V2 addition.  The V1 identity *value* does move whenever a listed implementation
 source changes, which is the declared downstream-invalidation mechanism recorded
 in the V2 contract, not a defect.
+
+``scripts/verify_process_v2_hash_chain.py`` is the read-only tool that walks the
+complete transitive re-pin chain and reports every disagreement between a pinned
+pointer and the live value it addresses.
 """
 
 from __future__ import annotations
@@ -79,17 +93,75 @@ PROCESS_V2_CONTRACT_SCHEMA_VERSION = 2
 PROCESS_V2_CONTRACT_STATUS = (
     "DESIGN_FROZEN_PROCESS_V2_SUPPORT_DECISION_NOT_TRAINING_OR_EXPERIMENT_AUTHORIZED"
 )
-# Measured on the branch base, before any Process-V2 edit.  The two committed
-# V1-lane binding configs pin this value; V2 records it as the identity it
-# supersedes so a historical V1 artifact stays readable under V1 only.
+# Measured on the branch base, before any Process-V2 edit.  This is the V1
+# identity the IMMUTABLE V1 migration payloads were built under, so a historical
+# V1 artifact stays readable under V1 only.  It is a genuine superseded
+# production identity, unlike the rejected candidate below.
 SUPERSEDED_V1_PROCESS_IDENTITY_SHA256 = (
     "6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7"
 )
+# The Process-V2 identity computed by the FIRST, REJECTED candidate reading, in
+# which inherited root/singleton/leaf candidates were exempted from the
+# authoritative charge policy.  It was rejected before any downstream run and
+# produced no downstream artifact: no payload, receipt, cache, checkpoint,
+# Gate-0, T1, or P50 object was ever built under it.  It is recorded so the
+# value can never be mistaken for a current or superseded production identity.
+REJECTED_PROCESS_V2_CANDIDATE_IDENTITY_SHA256 = (
+    "9fde14b59fc6bfb7be7aaf83564658a9a6758f479d9fd94c134206e84873319b"
+)
 # The model-side atom-delete action-semantics modes.  The production constants
-# live in ``compose_v4.model.factorized_tracelet_rate_model``; the contract binds
-# their exact values so a mode string can never be introduced unbound.
+# live in ``compose_v4.model.factorized_tracelet_rate_model``; that module cannot
+# be imported here (it imports the Process-V2 resolver, which imports this
+# module through ``trace_shard_v3``), so the values are restated and
+# ``scripts/verify_process_v2_hash_chain.py`` asserts them against the model
+# source.  The contract binds the exact values so a mode string can never be
+# introduced unbound.
 LEGACY_ATOM_DELETE_ACTION_SEMANTICS = "legacy_acyclic_atom_delete_v1"
-PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS = "process_v2_connected_nonleaf_atom_delete_v1"
+PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS = "process_v2_uniform_gated_atom_delete_v2"
+# The candidate mode name the rejected reading used.  It falsely implied that
+# inherited candidates were unfiltered, so it is recorded only as a removed
+# name; nothing may alias it.
+REJECTED_PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS = "process_v2_connected_nonleaf_atom_delete_v1"
+# The corrected contract restructures the ``atom_delete`` body from a disjoint
+# union of two admission rules into one admission authority.  ``schema_version``
+# names the SEMANTIC PROCESS version (V1 -> 1, V2 -> 2), not the body shape, so
+# the body revision is recorded separately rather than by bumping it.
+PROCESS_V2_CONTRACT_REVISION = "process_v2_uniform_gated_admission_authority"
+REJECTED_PROCESS_V2_CONTRACT_REVISION = "process_v2_disjoint_union_preserving_v1_admission"
+
+# The frozen public API of the admission authority.  These names are contract
+# values: the contract binds them, and
+# ``scripts/verify_process_v2_hash_chain.py`` asserts each one is defined in the
+# resolver module.
+PROCESS_V2_ATOM_DELETE_RESOLVER = "resolve_process_v2_atom_delete"
+PROCESS_V2_ATOM_DELETE_ENUMERATOR = "enumerate_process_v2_atom_deletes"
+PROCESS_V2_ATOM_DELETE_MASK = "process_v2_atom_delete_mask"
+# The two structural candidate sources.  They are DIAGNOSTIC LABELS: they select
+# which additional gates apply, and they never constitute two admission rules.
+PROCESS_V2_INHERITED_CANDIDATE_SOURCE = "inherited_root_singleton_leaf"
+PROCESS_V2_CONNECTED_NONLEAF_CANDIDATE_SOURCE = "connected_nonleaf"
+# The complete reason-code list, frozen by the correction decision.  The live
+# ``ProcessV2AtomDeleteRejectionCode`` enum is not imported here: the builder
+# must stay deterministic while the resolver is being edited, so the contract is
+# the authority and ``scripts/verify_process_v2_hash_chain.py`` asserts the enum
+# against it.
+PROCESS_V2_ATOM_DELETE_REJECTION_CODES = (
+    "invalid_source",
+    "invalid_slot",
+    "not_a_real_element",
+    "aromatic_atom",
+    "articulation_point",
+    "scar_incident",
+    "executor_rejected",
+    "successor_disconnected",
+    "charge_policy_violated",
+    "successor_outside_declared_support",
+    "successor_not_canonicalizable",
+)
+# Removed by the correction: the superseded reading needed a code for "this slot
+# is not in the connected-nonleaf expansion", which only exists when the
+# expansion is a separate admission rule.
+REJECTED_PROCESS_V2_ATOM_DELETE_REJECTION_CODES = ("outside_connected_nonleaf_expansion",)
 
 _PROCESS_V2_CONTRACT_RELATIVE_PATH = "configs/editing_v2_semantic_process_v2.json"
 _PROCESS_V2_ATOM_DELETE_RELATIVE_PATH = "src/compose_v4/rewrite/process_v2_atom_delete.py"
@@ -363,12 +435,20 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
 
     Every settled value is read from its authority rather than retyped: the
     Active8 rule set and codec identity from :mod:`action_codec_v4`, the
-    unchanged codec/scope/model blocks from the V1 contract file, the expansion
-    constant and rejection codes from
+    unchanged codec/scope/model blocks from the V1 contract file, the
+    connected-nonleaf degree constant from
     :mod:`compose_v4.rewrite.process_v2_atom_delete`, the size bound from
     :mod:`compose_v4.rewrite.trace_shard_v3`, the vocabulary width from
     :mod:`compose_v4.chem.molecular_graph`, and the charge-policy version from
     :mod:`compose_v4.data.charge_policy`.
+
+    Three groups of settled values are contract-owned rather than imported: the
+    atom-delete mode strings, the resolver/enumerator/mask names, and the
+    reason-code list.  Importing them would make the contract track whatever the
+    resolver currently says, which is the wrong direction for a frozen decision
+    and non-deterministic while the resolver is being edited.
+    ``scripts/verify_process_v2_hash_chain.py`` asserts each of them against the
+    live implementation, so the binding is enforced without inverting it.
 
     The returned mapping includes ``contract_sha256``, its own semantic
     self-hash over every other field, so the result can be serialized directly.
@@ -380,10 +460,7 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
     # import graph exactly as it was.
     from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
     from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
-    from compose_v4.rewrite.process_v2_atom_delete import (
-        CONNECTED_NONLEAF_MINIMUM_DEGREE,
-        ProcessV2AtomDeleteRejectionCode,
-    )
+    from compose_v4.rewrite.process_v2_atom_delete import CONNECTED_NONLEAF_MINIMUM_DEGREE
     from compose_v4.rewrite.trace_shard_v3 import MAX_ACTIVE_ATOMS
 
     _, v1_contract, v1_contract_sha256 = _read_frozen_contract(_CONTRACT_RELATIVE_PATH)
@@ -420,6 +497,25 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
                 "legacy": LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
                 "process_v2": PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
             },
+            "admission_authority": {
+                "candidate_sources_are_diagnostic_labels_only": True,
+                "decides": "every_process_v2_atom_delete_candidate",
+                "enumerator": PROCESS_V2_ATOM_DELETE_ENUMERATOR,
+                "implementation_binding": (
+                    "the_resolver_enumerator_mask_and_reason_codes_declared_here_are_"
+                    "asserted_against_the_live_module_by_"
+                    "scripts/verify_process_v2_hash_chain.py"
+                ),
+                "is_a_disjoint_union_of_two_admission_rules": False,
+                "mask": PROCESS_V2_ATOM_DELETE_MASK,
+                "mask_is_the_complete_effective_mask_not_an_extension": True,
+                "module": _PROCESS_V2_ATOM_DELETE_RELATIVE_PATH,
+                "rejection_codes_in_evaluation_order": list(
+                    PROCESS_V2_ATOM_DELETE_REJECTION_CODES
+                ),
+                "resolver": PROCESS_V2_ATOM_DELETE_RESOLVER,
+                "single_authority_over_all_candidates": True,
+            },
             "aromatic_connected_nonleaf_policy": {
                 "admitted": False,
                 "perception": "resonance_invariant_bond_classes",
@@ -429,39 +525,47 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
                 ),
                 "requires_separate_future_semantic_decision_and_resolver": True,
             },
-            "connected_nonleaf_expansion": {
-                "admission_conditions": [
-                    "real_element_under_the_authoritative_element_predicate",
-                    "non_aromatic_under_the_frozen_production_representation",
-                    "not_a_graph_articulation_point_of_the_real_atom_graph",
-                    "unchanged_production_atom_delete_executor_accepts_the_operation",
-                    "exact_persistent_slot_successor_is_connected",
-                    "frozen_charge_policy_is_preserved_by_the_transition",
-                    "successor_is_within_the_declared_support_and_is_canonicalizable",
-                ],
-                "disjointness_argument": (
-                    "in_a_connected_real_atom_graph_an_acyclic_vertex_of_real_atom_degree_"
-                    "at_least_two_is_always_a_cut_vertex_so_the_unchanged_v1_dense_mask_"
-                    "admits_no_slot_of_real_atom_degree_at_least_two"
-                ),
-                "enumerator": "enumerate_process_v2_connected_nonleaf_atom_deletes",
-                "mask": "process_v2_connected_nonleaf_atom_delete_mask",
-                "minimum_real_atom_degree": int(CONNECTED_NONLEAF_MINIMUM_DEGREE),
-                "minimum_real_atom_degree_constant": "CONNECTED_NONLEAF_MINIMUM_DEGREE",
-                "module": _PROCESS_V2_ATOM_DELETE_RELATIVE_PATH,
-                "rejection_codes_in_evaluation_order": [
-                    code.value for code in ProcessV2AtomDeleteRejectionCode
-                ],
-                "resolver": "resolve_process_v2_connected_nonleaf_atom_delete",
+            "candidate_sources": {
+                PROCESS_V2_CONNECTED_NONLEAF_CANDIDATE_SOURCE: {
+                    "definition": (
+                        "real_slot_whose_real_atom_degree_is_at_least_the_minimum_degree"
+                    ),
+                    "diagnostic_label_only": True,
+                    "introduced_by_process_v2": True,
+                    "minimum_real_atom_degree": int(CONNECTED_NONLEAF_MINIMUM_DEGREE),
+                    "minimum_real_atom_degree_constant": "CONNECTED_NONLEAF_MINIMUM_DEGREE",
+                    "selects_additional_gates": True,
+                },
+                PROCESS_V2_INHERITED_CANDIDATE_SOURCE: {
+                    "definition": "real_slot_whose_real_atom_degree_is_at_most_one",
+                    "diagnostic_label_only": True,
+                    "introduced_by_process_v2": False,
+                    "maximum_real_atom_degree": int(CONNECTED_NONLEAF_MINIMUM_DEGREE) - 1,
+                    "selects_additional_gates": False,
+                },
             },
+            "common_exact_gates_in_order": [
+                "real_element_under_the_authoritative_element_predicate",
+                "unchanged_production_atom_delete_executor_accepts_the_operation",
+                "exact_persistent_slot_successor_is_connected_or_null",
+                "authoritative_charge_policy_is_preserved_by_the_transition",
+                "successor_is_within_the_declared_broad_organic_bounded_size_support",
+                "successor_is_canonicalizable",
+            ],
+            "common_gates_apply_to_every_candidate_source": True,
+            "connected_nonleaf_only_gates_in_order": [
+                "non_aromatic_under_the_frozen_production_representation",
+                "not_a_graph_articulation_point_of_the_real_atom_graph",
+                "not_incident_to_any_scar_slot",
+            ],
             "effective_mask_rule": {
+                "batch_mask_equals_the_admission_authority_array": True,
                 "definition": (
-                    "process_v2_effective_atom_delete_mask_equals_the_unchanged_v1_dense_"
-                    "mask_union_the_connected_nonleaf_mask"
+                    "the_process_v2_effective_atom_delete_mask_equals_"
+                    "process_v2_atom_delete_mask_exactly"
                 ),
-                "operands_are_disjoint": True,
-                "union_is_a_disjoint_union": True,
-                "v1_dense_mask_changed": False,
+                "model_forward_asserts_equality_not_subset": True,
+                "v1_dense_mask_is_the_effective_process_v2_mask": False,
             },
             "executor_rule": "atom_delete",
             "executor_validity_is_a_connectivity_predicate": False,
@@ -471,30 +575,73 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
                 "change_persistent_slot_identity_or_canonicalization",
                 "change_formal_charge_policy",
                 "admit_aromatic_connected_nonleaf_deletion",
+                "admit_scar_incident_connected_nonleaf_deletion",
                 "add_multi_neighbour_atom_insertion",
                 "enable_ring_system_delete_or_ring_system_grow",
                 "change_any_other_active8_operator_semantics",
                 "relabel_v1_artifacts_as_v2",
             ],
+            "inherited_capability": {
+                "admission_set_preserved_bit_for_bit": False,
+                "capability_remains_reachable": True,
+                "covers": ["root", "singleton", "leaf"],
+                "exempt_from_the_authoritative_charge_policy": False,
+                "meaning": (
+                    "preserving_the_capability_means_root_singleton_and_leaf_deletion_"
+                    "stays_reachable_it_does_not_mean_preserving_an_unfiltered_"
+                    "admission_set"
+                ),
+                "superseded_v1_dense_mask_rule": (
+                    "real_slot_with_atom_topology_zero_and_not_an_articulation_point_and_"
+                    "no_neighbour_implicit_hydrogen_exceeding_max_h_count"
+                ),
+            },
             "legality_authority": (
                 "the_unchanged_production_atom_delete_executor_is_the_legality_authority_"
                 "and_no_weaker_approximate_valence_test_may_be_substituted_for_it"
             ),
             "one_step_inverse_closure_claimed": False,
-            "preserved_v1_admission": {
-                "charge_policy_applied_to_preserved_v1_candidates": False,
-                "covers": ["root", "singleton", "leaf"],
-                "dense_mask_rule": (
-                    "real_slot_with_atom_topology_zero_and_not_an_articulation_point_and_"
-                    "no_neighbour_implicit_hydrogen_exceeding_max_h_count"
+            "scar_incidence_policy": {
+                "admitted": False,
+                "applies_to_candidate_sources": [
+                    PROCESS_V2_CONNECTED_NONLEAF_CANDIDATE_SOURCE
+                ],
+                "constant": "compose_v4.chem.molecular_graph.SCAR_IDX",
+                "connected_nonleaf_only_reason": (
+                    "a_scar_adjacent_leaf_deletion_was_already_reachable_under_v1_so_"
+                    "excluding_it_would_withdraw_an_inherited_capability_the_recorded_"
+                    "decision_does_not_withdraw_while_a_scar_adjacent_ring_deletion_is_"
+                    "newly_introduced_by_process_v2"
                 ),
-                "maximum_admitted_real_atom_degree": int(CONNECTED_NONLEAF_MINIMUM_DEGREE) - 1,
-                "redecided_by_process_v2": False,
-                "uniform_charge_application_would_remove_preserved_v1_candidates": True,
+                "definition": "any_neighbour_slot_whose_atom_type_is_the_scar_marker",
+                "reason": (
+                    "apply_atom_delete_writes_implicit_hydrogen_onto_the_scar_neighbour_"
+                    "which_is_unsettled"
+                ),
+                "requires_separate_future_scar_semantic_decision": True,
+            },
+            "superseded_reading": {
+                "contract_revision": REJECTED_PROCESS_V2_CONTRACT_REVISION,
+                "defect": (
+                    "it_read_preserve_existing_root_singleton_and_leaf_behaviour_as_"
+                    "preserve_the_admission_set_bit_for_bit_and_therefore_exempted_"
+                    "inherited_candidates_from_the_authoritative_charge_policy_"
+                    "preserving_a_legacy_defect"
+                ),
+                "removed_action_semantics_mode": (
+                    REJECTED_PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+                ),
+                "removed_action_semantics_mode_defect": (
+                    "the_name_falsely_implied_that_inherited_candidates_were_unfiltered"
+                ),
+                "removed_action_semantics_mode_may_be_aliased": False,
+                "removed_rejection_codes": list(
+                    REJECTED_PROCESS_V2_ATOM_DELETE_REJECTION_CODES
+                ),
             },
         },
         "atom_delete_mask_implementation": {
-            "connected_nonleaf_resolver_module": _PROCESS_V2_ATOM_DELETE_RELATIVE_PATH,
+            "admission_authority_module": _PROCESS_V2_ATOM_DELETE_RELATIVE_PATH,
             "dense_mask_module": "src/compose_v4/model/factorized_tracelet_rate_model.py",
             "dense_mask_symbol": "_graph_application_masks",
             "mask_properties": [
@@ -525,15 +672,15 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
                 ("src/compose_v4/rewrite/kernel.py",)
             ),
         },
+        "contract_revision": PROCESS_V2_CONTRACT_REVISION,
         "charge_policy": {
-            "applied_to": "connected_nonleaf_expansion_candidates_only",
+            "applied_to": "every_process_v2_atom_delete_candidate",
+            "authoritative": True,
             "changed_by_process_v2": False,
             "constant": "compose_v4.data.charge_policy.CHARGE_POLICY_VERSION",
+            "exempt_candidate_sources": [],
             "formal_charge_changes": "out_of_scope",
-            "not_applied_to_preserved_v1_candidates_reason": (
-                "uniform_application_would_remove_preserved_v1_leaf_candidates_and_"
-                "silently_change_admission_behaviour_the_decision_declares_unchanged"
-            ),
+            "is_a_common_exact_gate": True,
             "predicate": "charge_policy_preserved",
             "version": str(CHARGE_POLICY_VERSION),
         },
@@ -567,6 +714,40 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
                 "ring_system_restate",
             ],
         },
+        "lineage": {
+            "current_process_v2_identity_source": (
+                "editing_process_v2_identity()['process_identity_sha256'] recomputed "
+                "from live source; this contract never pins its own identity value"
+            ),
+            "rejected_pre_run_candidate_identity": {
+                "atom_delete_action_semantics": (
+                    REJECTED_PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+                ),
+                "contract_revision": REJECTED_PROCESS_V2_CONTRACT_REVISION,
+                "downstream_artifacts_produced": [],
+                "is_the_current_process_v2_identity": False,
+                "process_identity_sha256": REJECTED_PROCESS_V2_CANDIDATE_IDENTITY_SHA256,
+                "process_semantics": PROCESS_V2_SEMANTICS,
+                "produced_downstream_artifacts": False,
+                "rejected_before_any_downstream_run": True,
+                "rejection_reason": (
+                    "it_exempted_inherited_root_singleton_and_leaf_candidates_from_the_"
+                    "authoritative_charge_policy"
+                ),
+                "status": "REJECTED_PRE_RUN_CANDIDATE_IDENTITY",
+                "was_a_superseded_production_identity": False,
+            },
+            "superseded_v1_payload_identity": {
+                "contract_relative_path": _CONTRACT_RELATIVE_PATH,
+                "immutable_v1_payloads_were_built_under_it": True,
+                "is_the_current_process_v2_identity": False,
+                "process_identity_sha256": SUPERSEDED_V1_PROCESS_IDENTITY_SHA256,
+                "process_semantics": PROCESS_SEMANTICS,
+                "readable_only_under_the_v1_identity_schema": True,
+                "status": "SUPERSEDED_V1_PROCESS_IDENTITY",
+                "was_a_superseded_production_identity": True,
+            },
+        },
         "model_contract": model_contract,
         "persistent_slot": {
             "changed_by_process_v2": False,
@@ -590,43 +771,30 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
         "process_semantics": PROCESS_V2_SEMANTICS,
         "schema": PROCESS_V2_CONTRACT_SCHEMA,
         "schema_version": PROCESS_V2_CONTRACT_SCHEMA_VERSION,
+        "schema_version_names": "the_semantic_process_version_not_the_body_shape",
         "scope": scope,
         "source_evidence": {
-            "connected_nonleaf_disjointness_development_panel": {
+            "inherited_candidate_charge_violation_observation": {
                 "authoritative_corpus_evidence": False,
-                "maximum_v1_admitted_real_atom_degree": 1,
-                "panel_smiles": [
-                    "C",
-                    "C1CC2CCC1CC2",
-                    "C1CCC(CC1)N",
-                    "C1CCCCC1",
-                    "C1CCOCC1",
-                    "CC(=O)Oc1ccccc1C(=O)O",
-                    "CC1CCCCC1",
-                    "CCCC",
-                    "CCO",
-                    "C[N+](C)(C)CC(=O)[O-]",
-                    "Cc1ccccc1",
-                    "O=C1NC(O)C2CCCCC12",
-                    "c1ccc2ccccc2c1",
-                    "c1ccccc1",
-                ],
-                "status": (
-                    "bounded_development_observation_requires_the_registered_"
-                    "process_v2_candidate_mask_gate"
-                ),
-                "v1_and_connected_nonleaf_overlap_count": 0,
-            },
-            "uniform_charge_policy_counterexample": {
-                "authoritative_corpus_evidence": False,
-                "charge_policy_preserving_v1_admitted_slots": [6],
                 "conclusion": (
-                    "applying_the_charge_policy_uniformly_would_remove_four_of_the_five_"
-                    "preserved_v1_leaf_candidates_of_this_source"
+                    "the_authoritative_charge_policy_is_the_whole_gap_between_the_"
+                    "superseded_inherited_admission_set_and_the_corrected_one_on_this_"
+                    "bounded_panel"
                 ),
-                "connected_nonleaf_admitted_slots": [],
-                "source_smiles": "C[N+](C)(C)CC(=O)[O-]",
-                "v1_admitted_slots": [0, 2, 3, 6, 7],
+                "denominator_inherited_candidates": 3319,
+                "denominator_source_molecules": 800,
+                "evidence_class": "bounded_measured_observation_not_a_corpus_result",
+                "excluded_by_the_common_connectivity_gate_beyond_the_charge_gate": 0,
+                "excluded_by_the_common_executor_gate_beyond_the_charge_gate": 0,
+                "inherited_candidates_violating_the_authoritative_charge_policy": 125,
+                "measured_on": "800_jin_qed_leads",
+                "source_molecules_with_at_least_one_violation": 105,
+                "status": (
+                    "bounded_measured_motivation_for_the_correction_it_authorizes_"
+                    "nothing_and_is_not_corpus_evidence"
+                ),
+                "superseded_rule_admitted_the_violating_candidates": True,
+                "violating_fraction_percent_rounded_to_two_places": "3.77",
             },
         },
         "status": PROCESS_V2_CONTRACT_STATUS,
@@ -692,12 +860,23 @@ __all__ = [
     "PROCESS_IDENTITY_SCHEMA_VERSION",
     "PROCESS_SEMANTICS",
     "PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS",
+    "PROCESS_V2_ATOM_DELETE_ENUMERATOR",
+    "PROCESS_V2_ATOM_DELETE_MASK",
+    "PROCESS_V2_ATOM_DELETE_REJECTION_CODES",
+    "PROCESS_V2_ATOM_DELETE_RESOLVER",
+    "PROCESS_V2_CONNECTED_NONLEAF_CANDIDATE_SOURCE",
+    "PROCESS_V2_CONTRACT_REVISION",
     "PROCESS_V2_CONTRACT_SCHEMA",
     "PROCESS_V2_CONTRACT_SCHEMA_VERSION",
     "PROCESS_V2_CONTRACT_STATUS",
     "PROCESS_V2_IDENTITY_SCHEMA",
     "PROCESS_V2_IDENTITY_SCHEMA_VERSION",
+    "PROCESS_V2_INHERITED_CANDIDATE_SOURCE",
     "PROCESS_V2_SEMANTICS",
+    "REJECTED_PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS",
+    "REJECTED_PROCESS_V2_ATOM_DELETE_REJECTION_CODES",
+    "REJECTED_PROCESS_V2_CANDIDATE_IDENTITY_SHA256",
+    "REJECTED_PROCESS_V2_CONTRACT_REVISION",
     "SUPERSEDED_V1_PROCESS_IDENTITY_SHA256",
     "EditingV2ProcessIdentityError",
     "build_editing_process_v2_contract",
