@@ -523,15 +523,10 @@ def _mark_collator(
     *,
     use_aromatic_bond_view: bool,
 ) -> FactorizedMarkCollator:
-    capabilities = model.operator_capabilities
-    return FactorizedMarkCollator(
+    return FactorizedMarkCollator.from_capabilities(
+        model.operator_capabilities,
         use_aromatic_bond_view=use_aromatic_bond_view,
         ring_catalog=model.ring_catalog,
-        compute_ring_grow_support=(capabilities.compute_ring_grow_support),
-        compute_ring_restates=capabilities.compute_ring_restates,
-        compute_cyclic_graft=capabilities.compute_cyclic_graft,
-        compute_ring_opening=capabilities.compute_ring_opening,
-        compute_ring_system_delete=capabilities.compute_ring_system_delete,
     )
 
 

@@ -29,6 +29,7 @@ from compose_v4.chem.persistent_state_identity import (
 )
 from compose_v4.experiments.factorized_mark_conditional import (
     assert_teachers_in_exact_candidates,
+    operator_capability_batch_kwargs,
 )
 from compose_v4.experiments.factorized_successor_training import (
     TeacherSuccessorFiber,
@@ -249,7 +250,6 @@ def prepare_cached_successor_panel(
     }
     if len(slot_counts) != 1:
         raise ValueError("successor panel mixes persistent-slot capacities")
-    capabilities = model.operator_capabilities
     batch = prepare_factorized_mark_batch(
         tuple(row.state for row in rows),
         tuple(float(row.time) for row in rows),
@@ -259,16 +259,7 @@ def prepare_cached_successor_panel(
         tuple(float(row.importance_weight) for row in rows),
         use_aromatic_bond_view=True,
         ring_catalog=model.ring_catalog,
-        compute_ring_grow_support=capabilities.compute_ring_grow_support,
-        compute_ring_restates=capabilities.compute_ring_restates,
-        compute_cyclic_graft=capabilities.compute_cyclic_graft,
-        compute_ring_opening=capabilities.compute_ring_opening,
-        compute_ring_system_delete=capabilities.compute_ring_system_delete,
-        editing_process_semantics=capabilities.editing_process_semantics,
-        atom_restate_action_semantics=(capabilities.atom_restate_action_semantics),
-        ring_restate_scorer_mode=capabilities.ring_restate_scorer_mode,
-        cycle_close_action_semantics=capabilities.cycle_close_action_semantics,
-        cycle_open_action_semantics=capabilities.cycle_open_action_semantics,
+        **operator_capability_batch_kwargs(model.operator_capabilities),
     )
     assert_teachers_in_exact_candidates(batch)
 

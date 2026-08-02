@@ -34,6 +34,9 @@ import torch
 
 from compose_v4.chem.molecular_graph import NULL_IDX, MolecularGraph
 from compose_v4.data.charge_policy import CHARGE_POLICY_VERSION
+from compose_v4.experiments.factorized_mark_conditional import (
+    operator_capability_batch_kwargs,
+)
 from compose_v4.experiments.successor_kernel import (
     CanonicalSuccessor,
     KernelIdentity,
@@ -160,7 +163,6 @@ def _one_state_batch(
     prepared_batch: FactorizedMarkBatch | None,
 ) -> FactorizedMarkBatch:
     if prepared_batch is None:
-        capabilities = model.operator_capabilities
         prepared_batch = prepare_factorized_mark_batch(
             (state,),
             (float(time),),
@@ -169,16 +171,7 @@ def _one_state_batch(
             (0.0,),
             use_aromatic_bond_view=True,
             ring_catalog=model.ring_catalog,
-            compute_ring_grow_support=capabilities.compute_ring_grow_support,
-            compute_ring_restates=capabilities.compute_ring_restates,
-            compute_cyclic_graft=capabilities.compute_cyclic_graft,
-            compute_ring_opening=capabilities.compute_ring_opening,
-            compute_ring_system_delete=capabilities.compute_ring_system_delete,
-            editing_process_semantics=capabilities.editing_process_semantics,
-            atom_restate_action_semantics=capabilities.atom_restate_action_semantics,
-            ring_restate_scorer_mode=capabilities.ring_restate_scorer_mode,
-            cycle_close_action_semantics=capabilities.cycle_close_action_semantics,
-            cycle_open_action_semantics=capabilities.cycle_open_action_semantics,
+            **operator_capability_batch_kwargs(model.operator_capabilities),
         )
     if prepared_batch.batch_size != 1:
         raise ProductionSuccessorKernelError(
@@ -199,6 +192,15 @@ def _one_state_batch(
         prepared_batch,
         times=torch.tensor((float(time),), dtype=prepared_batch.times.dtype),
     ).to(model.device)
+
+
+# One frozen kernel-configuration label per declared semantic process version.  Keyed by the version
+# string rather than resolved by an if/elif chain so the mapping can be checked for completeness against
+# ``SEMANTIC_EDITING_V2_PROCESS_VERSIONS`` instead of silently ending in an unrelated branch.
+_SEMANTIC_PROCESS_CONFIGURATION_LABELS: dict[str, str] = {
+    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS: "editing_v2_semantic_actions_v1",
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS: "editing_v2_semantic_actions_v2",
+}
 
 
 def _default_kernel_identity(
@@ -237,11 +239,19 @@ def _default_kernel_identity(
         ),
     )
     # Each semantic process version gets its own label: conflating them would let
-    # a Process-V2 kernel identity read as a Process-V1 one.
-    if model.editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS:
-        ringcore_configuration = "editing_v2_semantic_actions_v2"
-    elif model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
-        ringcore_configuration = "editing_v2_semantic_actions_v1"
+    # a Process-V2 kernel identity read as a Process-V1 one.  The membership test comes FIRST and the
+    # label is looked up, so a semantic version added without a label raises here rather than falling
+    # through to the RingCore branch and mislabelling a semantic kernel as a de-novo one.
+    if is_semantic_editing_v2_process(model.editing_process_semantics):
+        try:
+            ringcore_configuration = _SEMANTIC_PROCESS_CONFIGURATION_LABELS[
+                model.editing_process_semantics
+            ]
+        except KeyError as error:
+            raise ProductionSuccessorKernelError(
+                "semantic editing process "
+                f"{model.editing_process_semantics!r} has no kernel configuration label"
+            ) from error
     elif model.enable_cycle_ops:
         ringcore_configuration = "ringcore_v1_compositional_cycle_ops"
     elif model.enable_ring_grow_macro:
