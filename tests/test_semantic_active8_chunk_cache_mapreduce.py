@@ -33,6 +33,7 @@ from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
     execute_semantic_active8_chunk_cache_task,
     plan_semantic_active8_chunk_cache,
     reduce_semantic_active8_chunk_caches,
+    reduce_semantic_active8_chunk_caches_with_witness,
     write_semantic_active8_chunk_cache_plan,
 )
 from compose_v4.data.semantic_packed_trace_store import (
@@ -281,6 +282,24 @@ def test_reducer_refuses_partial_sources_then_reloads_exact_twenty(planned) -> N
         / GLOBAL_COMPLETION_FILENAME
     )
     assert pointer.is_file()
+
+    witness = reduce_semantic_active8_chunk_caches_with_witness(
+        plan,
+        artifact_root=artifact_root,
+    )
+    assert witness.reduction == complete
+    assert len(witness.validated_caches) == 20
+    assert tuple(
+        (
+            cache["source_identity"]["data_lane"],
+            cache["source_identity"]["split"],
+        )
+        for cache in witness.validated_caches
+    ) == tuple(
+        (lane, role)
+        for lane in REQUIRED_DATA_LANES
+        for role in REQUIRED_PARTITION_ROLES
+    )
 
     restarted_receipt = execute_semantic_active8_chunk_cache_task(
         plan,

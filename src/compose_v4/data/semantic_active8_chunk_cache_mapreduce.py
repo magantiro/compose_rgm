@@ -14,6 +14,7 @@ import os
 import tempfile
 from collections import Counter
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -109,6 +110,14 @@ class SemanticActive8ChunkCacheMapReduceError(RuntimeError):
 
 class SemanticActive8ChunkCacheIncomplete(SemanticActive8ChunkCacheMapReduceError):
     """At least one of the exact 20 source caches is absent."""
+
+
+@dataclass(frozen=True, slots=True)
+class SemanticActive8ChunkCacheReductionWitness:
+    """One strict reduction plus the exact cache objects it validated in memory."""
+
+    reduction: dict[str, Any]
+    validated_caches: tuple[dict[str, Any], ...]
 
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
@@ -748,11 +757,11 @@ def completed_semantic_active8_chunk_cache_task_ids(
     return frozenset(completed)
 
 
-def reduce_semantic_active8_chunk_caches(
+def _reduce_semantic_active8_chunk_caches_with_witness(
     plan: Mapping[str, Any],
     *,
     artifact_root: Path,
-) -> dict[str, Any]:
+) -> SemanticActive8ChunkCacheReductionWitness:
     """Reload exactly 20 caches and publish one content-addressed completion."""
 
     value = _validate_plan(plan)
@@ -778,6 +787,7 @@ def reduce_semantic_active8_chunk_caches(
             f"{EXPECTED_TASK_COUNT - len(missing)}/{EXPECTED_TASK_COUNT} complete sources"
         )
     cache_inventory: list[dict[str, object]] = []
+    validated_caches: list[dict[str, Any]] = []
     totals: Counter[str] = Counter()
     family_totals: Counter[str] = Counter()
     for task in value["tasks"]:
@@ -789,6 +799,7 @@ def reduce_semantic_active8_chunk_caches(
             receipt,
             artifact_root=artifact_root,
         )
+        validated_caches.append(cache)
         source_identity = cache["source_identity"]
         totals["semantic_entries"] += source_identity["entries"]
         totals["semantic_states"] += source_identity["states"]
@@ -863,10 +874,40 @@ def reduce_semantic_active8_chunk_caches(
         _run_root(value, artifact_root=artifact_root) / GLOBAL_COMPLETION_FILENAME,
         _canonical_bytes(pointer, newline=True),
     )
-    return {
+    reduction = {
         **pointer,
         "completion": completion,
     }
+    return SemanticActive8ChunkCacheReductionWitness(
+        reduction=reduction,
+        validated_caches=tuple(validated_caches),
+    )
+
+
+def reduce_semantic_active8_chunk_caches(
+    plan: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+) -> dict[str, Any]:
+    """Reload exactly 20 caches and publish the unchanged public reduction."""
+
+    return _reduce_semantic_active8_chunk_caches_with_witness(
+        plan,
+        artifact_root=artifact_root,
+    ).reduction
+
+
+def reduce_semantic_active8_chunk_caches_with_witness(
+    plan: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+) -> SemanticActive8ChunkCacheReductionWitness:
+    """Strictly reduce once while retaining verified cache metadata in memory."""
+
+    return _reduce_semantic_active8_chunk_caches_with_witness(
+        plan,
+        artifact_root=artifact_root,
+    )
 
 
 __all__ = [
@@ -880,9 +921,11 @@ __all__ = [
     "PLAN_STATUS",
     "SemanticActive8ChunkCacheIncomplete",
     "SemanticActive8ChunkCacheMapReduceError",
+    "SemanticActive8ChunkCacheReductionWitness",
     "completed_semantic_active8_chunk_cache_task_ids",
     "execute_semantic_active8_chunk_cache_task",
     "plan_semantic_active8_chunk_cache",
     "reduce_semantic_active8_chunk_caches",
+    "reduce_semantic_active8_chunk_caches_with_witness",
     "write_semantic_active8_chunk_cache_plan",
 ]

@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 import torch
+
+from compose_v4.data import semantic_active8_chunk_cache as chunk_cache_core
+from compose_v4.data import semantic_active8_chunk_cache_mapreduce as chunk_cache_mr
 
 from compose_v4.chem.molecular_graph import (
     ORGANIC_VOCABULARY,
@@ -44,6 +49,7 @@ from compose_v4.data.semantic_active8_chunk_cache import (
 from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
     execute_semantic_active8_chunk_cache_task,
     plan_semantic_active8_chunk_cache,
+    reduce_semantic_active8_chunk_caches_with_witness,
     write_semantic_active8_chunk_cache_plan,
 )
 from compose_v4.data.semantic_packed_trace_store import (
@@ -262,21 +268,102 @@ def planned(tmp_path: Path):
         execute_semantic_active8_chunk_cache_task(
             cache_plan, task["task_identity_sha256"], artifact_root=root
         )
+    cache_witness = reduce_semantic_active8_chunk_caches_with_witness(
+        cache_plan,
+        artifact_root=root,
+    )
     plan = plan_semantic_active8_decisions(
         inventory,
         chunk_cache_plan=cache_plan,
+        chunk_cache_witness=cache_witness,
         model_runtime_identity=_runtime_identity(_model()),
         output_artifact_root="/artifacts/decisions",
         artifact_root=root,
     )
     write_semantic_active8_decision_plan(plan, artifact_root=root)
-    return root, inventory, plan
+    return root, inventory, cache_plan, cache_witness, plan
+
+
+def test_planner_consumes_one_strict_witness_without_reducing_or_scanning_again(
+    planned,
+    monkeypatch,
+) -> None:
+    root, inventory, cache_plan, cache_witness, expected = planned
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("planner repeated a full chunk-cache validation")
+
+    monkeypatch.setattr(
+        chunk_cache_mr, "reduce_semantic_active8_chunk_caches", unexpected
+    )
+    monkeypatch.setattr(
+        chunk_cache_core, "load_semantic_active8_chunk_cache", unexpected
+    )
+    observed = plan_semantic_active8_decisions(
+        inventory,
+        chunk_cache_plan=cache_plan,
+        chunk_cache_witness=cache_witness,
+        model_runtime_identity=_runtime_identity(_model()),
+        output_artifact_root="/artifacts/decisions",
+        artifact_root=root,
+    )
+    assert observed == expected
+
+
+def test_planner_rejects_missing_tampered_or_misordered_witness(planned) -> None:
+    root, inventory, cache_plan, cache_witness, _ = planned
+    common = {
+        "chunk_cache_plan": cache_plan,
+        "model_runtime_identity": _runtime_identity(_model()),
+        "output_artifact_root": "/artifacts/decisions",
+        "artifact_root": root,
+    }
+    with pytest.raises(
+        SemanticActive8DecisionMapReduceError,
+        match="requires a strict chunk-cache reduction witness",
+    ):
+        plan_semantic_active8_decisions(
+            inventory,
+            chunk_cache_witness=None,  # type: ignore[arg-type]
+            **common,
+        )
+
+    tampered_caches = deepcopy(cache_witness.validated_caches)
+    tampered_caches[0]["chunk_inventory"][0]["row_count"] += 1
+    tampered = replace(cache_witness, validated_caches=tuple(tampered_caches))
+    with pytest.raises(
+        SemanticActive8DecisionMapReduceError,
+        match="witness cache 0 disagrees",
+    ):
+        plan_semantic_active8_decisions(
+            inventory,
+            chunk_cache_witness=tampered,
+            **common,
+        )
+
+    misordered = replace(
+        cache_witness,
+        validated_caches=(
+            cache_witness.validated_caches[1],
+            cache_witness.validated_caches[0],
+            *cache_witness.validated_caches[2:],
+        ),
+    )
+    with pytest.raises(
+        SemanticActive8DecisionMapReduceError,
+        match="witness cache 0 disagrees",
+    ):
+        plan_semantic_active8_decisions(
+            inventory,
+            chunk_cache_witness=misordered,
+            **common,
+        )
 
 
 def test_exact_chunk_tasks_reduce_to_non_authorizing_twenty_source_census(
     planned,
 ) -> None:
-    root, inventory, plan = planned
+    root, inventory, _, _, plan = planned
     model = _model()
     checker = ProductionSemanticExactCandidateChecker(model, cache_size=32)
     for task in plan["tasks"]:
@@ -311,7 +398,7 @@ def test_exact_chunk_tasks_reduce_to_non_authorizing_twenty_source_census(
 def test_reducer_refuses_missing_task_and_worker_refuses_runtime_substitution(
     planned,
 ) -> None:
-    root, inventory, plan = planned
+    root, inventory, _, _, plan = planned
     with pytest.raises(SemanticActive8DecisionIncomplete, match="is absent"):
         reduce_semantic_active8_decisions(plan, inventory=inventory, artifact_root=root)
     model = _model()
@@ -340,7 +427,7 @@ def test_reducer_refuses_missing_task_and_worker_refuses_runtime_substitution(
 def test_worker_recovers_exact_partial_task_publication(
     planned, missing_name: str
 ) -> None:
-    root, _, plan = planned
+    root, _, _, _, plan = planned
     task = plan["tasks"][0]
     model = _model()
     checker = ProductionSemanticExactCandidateChecker(model, cache_size=32)
@@ -381,7 +468,7 @@ def test_worker_recovers_exact_partial_task_publication(
 
 
 def test_abandoned_private_temporary_does_not_poison_completed_task(planned) -> None:
-    root, _, plan = planned
+    root, _, _, _, plan = planned
     task = plan["tasks"][0]
     model = _model()
     checker = ProductionSemanticExactCandidateChecker(model, cache_size=32)

@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
+
+from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
+    SemanticActive8ChunkCacheReductionWitness,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_PATH = ROOT / "modal_apps" / "run_semantic_active8_decisions_app.py"
@@ -58,6 +63,7 @@ def test_modal_surface_is_cpu_only_restart_safe_and_non_authorizing() -> None:
     assert "semantic_migration_completion" in driver_source
     assert "semantic_chunk_cache_plan" in driver_source
     assert "semantic_chunk_cache_global_completion" in driver_source
+    assert "chunk_cache_witness=cache_witness" in driver_source
     assert "completed_semantic_active8_decision_task_ids" in driver_source
     assert "write_semantic_active8_decision_plan" in driver_source
     assert "decide_one_chunk.starmap" in driver_source
@@ -80,6 +86,66 @@ def test_modal_surface_is_cpu_only_restart_safe_and_non_authorizing() -> None:
     assert '"gate_zero_authorized": False' in main_source
     assert '"t1_authorized": False' in main_source
     assert '"bounded_p50_authorized": False' in main_source
+
+
+def test_chunk_inputs_reduce_once_and_preserve_exact_caller_pointer(
+    tmp_path: Path,
+) -> None:
+    launcher = _load_launcher()
+    cache_plan = {"schema": "fixture.cache-plan", "tasks": []}
+    pointer = {
+        "schema": "fixture.cache-pointer",
+        "completion_sha256": "a" * 64,
+    }
+    witness = SemanticActive8ChunkCacheReductionWitness(
+        reduction={**pointer, "completion": {"schema": "fixture.completion"}},
+        validated_caches=(),
+    )
+    plan_path = tmp_path / "PLAN.json"
+    pointer_path = tmp_path / "GLOBAL_COMPLETE.json"
+    plan_path.write_text(
+        json.dumps(cache_plan, sort_keys=True, separators=(",", ":")) + "\n"
+    )
+    pointer_path.write_text(
+        json.dumps(pointer, sort_keys=True, separators=(",", ":")) + "\n"
+    )
+    calls = 0
+
+    def reduce_once(observed_plan, *, artifact_root):
+        nonlocal calls
+        calls += 1
+        assert observed_plan == cache_plan
+        assert artifact_root == launcher.ARTIFACT_ROOT
+        return witness
+
+    loaded = {"reduce_semantic_active8_chunk_caches_with_witness": reduce_once}
+    observed_plan, observed_witness = launcher._load_verified_chunk_inputs(
+        plan_path=plan_path,
+        global_completion_path=pointer_path,
+        loaded=loaded,
+    )
+    assert observed_plan == cache_plan
+    assert observed_witness is witness
+    assert calls == 1
+
+    pointer_path.write_text(
+        json.dumps(
+            {**pointer, "completion_sha256": "b" * 64},
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    )
+    with pytest.raises(
+        RuntimeError,
+        match="caller chunk-cache GLOBAL_COMPLETE differs from strict reduction",
+    ):
+        launcher._load_verified_chunk_inputs(
+            plan_path=plan_path,
+            global_completion_path=pointer_path,
+            loaded=loaded,
+        )
+    assert calls == 2
 
 
 def test_runtime_contract_is_exact_semantic_parent_and_self_hashed() -> None:

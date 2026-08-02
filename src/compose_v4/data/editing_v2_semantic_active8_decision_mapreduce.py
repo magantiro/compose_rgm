@@ -40,11 +40,16 @@ from compose_v4.data.editing_v2_semantic_active8_source_adapter import (
     EditingV2SemanticActive8SourceInventory,
 )
 from compose_v4.data.semantic_active8_chunk_cache import (
-    load_semantic_active8_chunk_cache,
+    CACHE_SCHEMA,
+    CACHE_SCHEMA_VERSION,
+    CACHE_STATUS,
     read_semantic_active8_chunk,
 )
 from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
-    reduce_semantic_active8_chunk_caches,
+    GLOBAL_COMPLETION_SCHEMA,
+    GLOBAL_COMPLETION_SCHEMA_VERSION,
+    GLOBAL_COMPLETION_STATUS,
+    SemanticActive8ChunkCacheReductionWitness,
 )
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
 
@@ -143,6 +148,73 @@ _PLAN_FIELDS = {
     "run_identity_sha256",
     "task_count",
     "plan_sha256",
+}
+_CHUNK_REDUCTION_FIELDS = {
+    "schema",
+    "schema_version",
+    "global_completion_object_path",
+    "global_completion_file_sha256",
+    "global_completion_sha256",
+    "pointer_sha256",
+    "completion",
+}
+_CHUNK_COMPLETION_AUTHORITY_FIELDS = {
+    "training_authorized",
+    "active8_admission_authorized",
+    "gate_zero_authorized",
+    "t1_authorized",
+    "bounded_p50_authorized",
+    "long_training_authorized",
+    "checkpoint_selection_authorized",
+    "final_test_selection_authorized",
+}
+_CHUNK_COMPLETION_FIELDS = {
+    "schema",
+    "schema_version",
+    "status",
+    *_CHUNK_COMPLETION_AUTHORITY_FIELDS,
+    "run_identity_sha256",
+    "plan_sha256",
+    "source_revision_sha256",
+    "migration_identity",
+    "migration_identity_sha256",
+    "policy",
+    "chunk_builder_identity",
+    "source_task_count",
+    "cache_inventory",
+    "cache_inventory_sha256",
+    "counts",
+    "family_histogram",
+    "completion_sha256",
+}
+_CHUNK_CACHE_FIELDS = {
+    "schema",
+    "schema_version",
+    "status",
+    "training_authorized",
+    "active8_decisions_run",
+    "source_identity",
+    "chunk_policy",
+    "builder_identity",
+    "run_identity_sha256",
+    "chunk_count",
+    "chunk_inventory",
+    "chunk_inventory_sha256",
+    "observed_source_census",
+    "completion_sha256",
+}
+_CHUNK_CACHE_SUMMARY_FIELDS = {
+    "task_identity_sha256",
+    "data_lane",
+    "partition_role",
+    "semantic_shard_sha256",
+    "semantic_manifest_file_sha256",
+    "cache_run_identity_sha256",
+    "cache_completion_sha256",
+    "cache_source_identity_sha256",
+    "chunk_count",
+    "chunk_inventory_sha256",
+    "source_receipt_sha256",
 }
 
 
@@ -375,10 +447,184 @@ def _run_root(plan: Mapping[str, Any], *, artifact_root: Path) -> Path:
     )
 
 
+def _validated_chunk_cache_witness(
+    witness: SemanticActive8ChunkCacheReductionWitness,
+    *,
+    chunk_cache_plan: Mapping[str, Any],
+    source_identity: Mapping[str, object],
+) -> tuple[dict[str, Any], tuple[dict[str, Any], ...]]:
+    """Validate one in-memory strict-reduction witness without rereading rows."""
+
+    if not isinstance(witness, SemanticActive8ChunkCacheReductionWitness):
+        raise SemanticActive8DecisionMapReduceError(
+            "planning requires a strict chunk-cache reduction witness"
+        )
+    reduction = witness.reduction
+    caches = witness.validated_caches
+    if not isinstance(reduction, dict) or set(reduction) != _CHUNK_REDUCTION_FIELDS:
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction witness fields disagree"
+        )
+    if not isinstance(caches, tuple) or len(caches) != len(
+        chunk_cache_plan.get("tasks", ())
+    ):
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction witness cache count disagrees"
+        )
+    completion = reduction.get("completion")
+    if not isinstance(completion, dict) or set(completion) != _CHUNK_COMPLETION_FIELDS:
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction completion fields disagree"
+        )
+    completion_body = {
+        key: item for key, item in completion.items() if key != "completion_sha256"
+    }
+    if (
+        completion.get("schema") != GLOBAL_COMPLETION_SCHEMA
+        or completion.get("schema_version") != GLOBAL_COMPLETION_SCHEMA_VERSION
+        or completion.get("status") != GLOBAL_COMPLETION_STATUS
+        or any(
+            completion.get(field) is not False
+            for field in _CHUNK_COMPLETION_AUTHORITY_FIELDS
+        )
+        or completion.get("completion_sha256") != _sha(completion_body)
+        or completion.get("run_identity_sha256")
+        != chunk_cache_plan.get("run_identity_sha256")
+        or completion.get("plan_sha256") != chunk_cache_plan.get("plan_sha256")
+        or completion.get("source_revision_sha256")
+        != chunk_cache_plan.get("source_revision_sha256")
+        or completion.get("migration_identity") != source_identity
+        or completion.get("migration_identity_sha256") != _sha(source_identity)
+        or completion.get("source_task_count") != len(caches)
+    ):
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction completion identity disagrees"
+        )
+    cache_inventory = completion.get("cache_inventory")
+    if (
+        not isinstance(cache_inventory, list)
+        or len(cache_inventory) != len(caches)
+        or completion.get("cache_inventory_sha256") != _sha(cache_inventory)
+    ):
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction inventory disagrees"
+        )
+    pointer = {key: item for key, item in reduction.items() if key != "completion"}
+    pointer_body = {
+        key: item for key, item in pointer.items() if key != "pointer_sha256"
+    }
+    if (
+        pointer.get("schema")
+        != "compose.data.semantic_active8_chunk_cache_global_pointer"
+        or pointer.get("schema_version") != 1
+        or pointer.get("pointer_sha256") != _sha(pointer_body)
+        or pointer.get("global_completion_sha256") != completion["completion_sha256"]
+        or pointer.get("global_completion_file_sha256")
+        != hashlib.sha256(_canonical_bytes(completion, newline=True)).hexdigest()
+    ):
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction pointer identity disagrees"
+        )
+    _relative_object_path(
+        pointer.get("global_completion_object_path"),
+        field="chunk_cache_reduction.global_completion_object_path",
+    )
+
+    expected_cells = tuple(
+        (lane, role)
+        for lane in REQUIRED_DATA_LANES
+        for role in REQUIRED_PARTITION_ROLES
+    )
+    observed_cells: list[tuple[str, str]] = []
+    for index, (summary, cache, task) in enumerate(
+        zip(cache_inventory, caches, chunk_cache_plan["tasks"], strict=True)
+    ):
+        if (
+            not isinstance(summary, dict)
+            or set(summary) != _CHUNK_CACHE_SUMMARY_FIELDS
+            or not isinstance(cache, dict)
+        ):
+            raise SemanticActive8DecisionMapReduceError(
+                "chunk-cache reduction witness entries must be exact objects"
+            )
+        if set(cache) != _CHUNK_CACHE_FIELDS:
+            raise SemanticActive8DecisionMapReduceError(
+                "chunk-cache reduction witness cache fields disagree"
+            )
+        cache_body = {
+            key: item for key, item in cache.items() if key != "completion_sha256"
+        }
+        source = cache.get("source_identity")
+        inventory = cache.get("chunk_inventory")
+        source_body = (
+            {
+                key: item
+                for key, item in source.items()
+                if key != "source_identity_sha256"
+            }
+            if isinstance(source, dict)
+            else {}
+        )
+        cell = (summary.get("data_lane"), summary.get("partition_role"))
+        observed_cells.append(cell)
+        if (
+            not isinstance(source, dict)
+            or not isinstance(inventory, list)
+            or cache.get("schema") != CACHE_SCHEMA
+            or cache.get("schema_version") != CACHE_SCHEMA_VERSION
+            or cache.get("status") != CACHE_STATUS
+            or cache.get("training_authorized") is not False
+            or cache.get("active8_decisions_run") is not False
+            or cache.get("completion_sha256") != _sha(cache_body)
+            or cache.get("chunk_count") != len(inventory)
+            or cache.get("chunk_inventory_sha256") != _sha(inventory)
+            or cache.get("builder_identity")
+            != chunk_cache_plan.get("source_revision", {}).get("chunk_builder_identity")
+            or cache.get("chunk_policy", {}).get("target_rows_per_chunk")
+            != chunk_cache_plan.get("policy", {}).get("target_rows_per_chunk")
+            or source.get("source_identity_sha256") != _sha(source_body)
+            or summary.get("task_identity_sha256") != task.get("task_identity_sha256")
+            or cell != (task.get("data_lane"), task.get("partition_role"))
+            or summary.get("semantic_shard_sha256") != task.get("semantic_shard_sha256")
+            or summary.get("semantic_manifest_file_sha256")
+            != task.get("semantic_manifest_file_sha256")
+            or summary.get("cache_run_identity_sha256")
+            != cache.get("run_identity_sha256")
+            or summary.get("cache_completion_sha256") != cache.get("completion_sha256")
+            or summary.get("cache_source_identity_sha256")
+            != source.get("source_identity_sha256")
+            or summary.get("chunk_count") != cache.get("chunk_count")
+            or summary.get("chunk_inventory_sha256")
+            != cache.get("chunk_inventory_sha256")
+            or source.get("semantic_shard_sha256") != task.get("semantic_shard_sha256")
+            or source.get("semantic_manifest_physical_sha256")
+            != task.get("semantic_manifest_file_sha256")
+            or source.get("semantic_manifest_sha256")
+            != task.get("semantic_manifest_sha256")
+            or source.get("record_stream_sha256")
+            != task.get("semantic_record_stream_sha256")
+            or source.get("process_identity_sha256")
+            != task.get("process_identity_sha256")
+            or source.get("entries") != task.get("counts", {}).get("semantic_entries")
+            or source.get("states") != task.get("counts", {}).get("semantic_states")
+            or source.get("actions") != task.get("counts", {}).get("semantic_actions")
+            or source.get("family_histogram") != task.get("family_histogram")
+        ):
+            raise SemanticActive8DecisionMapReduceError(
+                f"chunk-cache reduction witness cache {index} disagrees"
+            )
+    if tuple(observed_cells) != expected_cells:
+        raise SemanticActive8DecisionMapReduceError(
+            "chunk-cache reduction witness cache order disagrees"
+        )
+    return completion, caches
+
+
 def plan_semantic_active8_decisions(
     inventory: EditingV2SemanticActive8SourceInventory,
     *,
     chunk_cache_plan: Mapping[str, Any],
+    chunk_cache_witness: SemanticActive8ChunkCacheReductionWitness,
     model_runtime_identity: Mapping[str, object],
     output_artifact_root: str,
     artifact_root: Path,
@@ -394,14 +640,11 @@ def plan_semantic_active8_decisions(
     output_artifact_root = _artifact_path(
         output_artifact_root, field="output_artifact_root"
     )
-    cache_reduction = reduce_semantic_active8_chunk_caches(
-        chunk_cache_plan, artifact_root=artifact_root
+    cache_completion, validated_caches = _validated_chunk_cache_witness(
+        chunk_cache_witness,
+        chunk_cache_plan=chunk_cache_plan,
+        source_identity=source_identity,
     )
-    cache_completion = cache_reduction["completion"]
-    if cache_completion["migration_identity"] != source_identity:
-        raise SemanticActive8DecisionMapReduceError(
-            "verified chunk-cache inventory differs from the exact source inventory"
-        )
     source_by_cell = {
         (source.data_lane, source.partition_role): source
         for source in inventory.sources
@@ -412,16 +655,12 @@ def plan_semantic_active8_decisions(
     }
     cache_root = str(PurePosixPath(chunk_cache_plan["output_artifact_root"]) / "cache")
     tasks: list[dict[str, object]] = []
-    for cache_source in cache_completion["cache_inventory"]:
+    for cache_source, cache in zip(
+        cache_completion["cache_inventory"], validated_caches, strict=True
+    ):
         cell = (cache_source["data_lane"], cache_source["partition_role"])
         source = source_by_cell[cell]
         cache_task = cache_task_by_cell[cell]
-        cache = load_semantic_active8_chunk_cache(
-            _mounted(cache_root, artifact_root=artifact_root, field="cache_root"),
-            run_identity_sha256=cache_source["cache_run_identity_sha256"],
-            expected_source_shard_sha256=source.semantic_shard_sha256,
-            expected_source_manifest_sha256=source.semantic_manifest_file_sha256,
-        )
         for chunk in cache["chunk_inventory"]:
             body: dict[str, object] = {
                 "task_index": len(tasks),

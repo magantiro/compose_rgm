@@ -55,7 +55,7 @@ from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
     GLOBAL_COMPLETION_FILENAME,
     execute_semantic_active8_chunk_cache_task,
     plan_semantic_active8_chunk_cache,
-    reduce_semantic_active8_chunk_caches,
+    reduce_semantic_active8_chunk_caches_with_witness,
     write_semantic_active8_chunk_cache_plan,
 )
 from compose_v4.data.semantic_packed_trace_store import (
@@ -477,7 +477,10 @@ def _build_completed_source(
             task["task_identity_sha256"],
             artifact_root=root,
         )
-    reduce_semantic_active8_chunk_caches(cache_plan, artifact_root=root)
+    cache_witness = reduce_semantic_active8_chunk_caches_with_witness(
+        cache_plan,
+        artifact_root=root,
+    )
     cache_completion_path = (
         root
         / "cache"
@@ -489,6 +492,7 @@ def _build_completed_source(
     plan = decision_mr.plan_semantic_active8_decisions(
         inventory,
         chunk_cache_plan=cache_plan,
+        chunk_cache_witness=cache_witness,
         model_runtime_identity=_runtime_identity(model),
         output_artifact_root="/artifacts/decisions",
         artifact_root=root,

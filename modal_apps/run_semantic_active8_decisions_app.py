@@ -177,7 +177,7 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         resolve_editing_v2_semantic_active8_sources,
     )
     from compose_v4.data.semantic_active8_chunk_cache_mapreduce import (
-        reduce_semantic_active8_chunk_caches,
+        reduce_semantic_active8_chunk_caches_with_witness,
     )
     from compose_v4.experiments.editing_gate_zero_semantic_contract import (
         load_gate_zero_semantic_contract,
@@ -205,7 +205,9 @@ def _imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
         "resolve_editing_v2_semantic_active8_sources": (
             resolve_editing_v2_semantic_active8_sources
         ),
-        "reduce_semantic_active8_chunk_caches": reduce_semantic_active8_chunk_caches,
+        "reduce_semantic_active8_chunk_caches_with_witness": (
+            reduce_semantic_active8_chunk_caches_with_witness
+        ),
         "completed_semantic_active8_decision_task_ids": (
             completed_semantic_active8_decision_task_ids
         ),
@@ -493,18 +495,23 @@ def _worker_model_and_checker(
 
 def _load_verified_chunk_inputs(
     *, plan_path: Path, global_completion_path: Path, loaded: dict[str, Any]
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], Any]:
     cache_plan = _load_json_exact(plan_path, field="semantic chunk-cache plan")
     caller_pointer = _load_json_exact(
         global_completion_path, field="semantic chunk-cache global completion"
     )
-    reduced = loaded["reduce_semantic_active8_chunk_caches"](
+    witness = loaded["reduce_semantic_active8_chunk_caches_with_witness"](
         cache_plan, artifact_root=ARTIFACT_ROOT
     )
-    expected_pointer = {key: value for key, value in reduced.items() if key != "completion"}
+    reduced = witness.reduction
+    expected_pointer = {
+        key: value for key, value in reduced.items() if key != "completion"
+    }
     if caller_pointer != expected_pointer:
-        raise RuntimeError("caller chunk-cache GLOBAL_COMPLETE differs from strict reduction")
-    return cache_plan
+        raise RuntimeError(
+            "caller chunk-cache GLOBAL_COMPLETE differs from strict reduction"
+        )
+    return cache_plan, witness
 
 
 @app.function(
@@ -617,7 +624,7 @@ def driver(
     )
     if len(inventory.sources) != EXPECTED_SOURCE_TASKS:
         raise RuntimeError("semantic migration did not resolve exactly twenty sources")
-    cache_plan = _load_verified_chunk_inputs(
+    cache_plan, cache_witness = _load_verified_chunk_inputs(
         plan_path=_mounted_artifact_path(
             semantic_chunk_cache_plan, field="semantic_chunk_cache_plan"
         ),
@@ -637,6 +644,7 @@ def driver(
     plan = loaded["plan_semantic_active8_decisions"](
         inventory,
         chunk_cache_plan=cache_plan,
+        chunk_cache_witness=cache_witness,
         model_runtime_identity=runtime_identity,
         output_artifact_root=_require_artifact_path(
             output_artifact_root, field="output_artifact_root"
