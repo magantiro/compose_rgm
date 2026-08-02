@@ -21,6 +21,10 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
+)
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
@@ -83,7 +87,9 @@ ENVIRONMENT_SCHEMA = "compose.editing_v2.semantic_p50_environment_contract"
 ENVIRONMENT_SCHEMA_VERSION = 2
 ENVIRONMENT_STATUS = "FROZEN_P50_ENVIRONMENT_COORDINATES_NO_TRAINING_AUTHORITY"
 ENVIRONMENT_FILENAME = "SEMANTIC_P50_ENVIRONMENT_CONTRACT.json"
-ENVIRONMENT_RECEIPT_SCHEMA = "compose.editing_v2.semantic_p50_observed_environment_receipt"
+ENVIRONMENT_RECEIPT_SCHEMA = (
+    "compose.editing_v2.semantic_p50_observed_environment_receipt"
+)
 ENVIRONMENT_RECEIPT_SCHEMA_VERSION = 2
 ENVIRONMENT_RECEIPT_STATUS = "OBSERVED_P50_ENVIRONMENT_NO_TRAINING_AUTHORITY"
 ENVIRONMENT_RECEIPT_FILENAME = "SEMANTIC_P50_OBSERVED_ENVIRONMENT.json"
@@ -241,7 +247,9 @@ def _file_sha(path: Path) -> str:
             while block := handle.read(1 << 20):
                 digest.update(block)
     except OSError as error:
-        raise SemanticP50ExecutionContractError(f"cannot hash physical artifact: {path}") from error
+        raise SemanticP50ExecutionContractError(
+            f"cannot hash physical artifact: {path}"
+        ) from error
     return digest.hexdigest()
 
 
@@ -258,26 +266,41 @@ def _require_text(value: object, *, field: str) -> str:
         or value.strip() != value
         or any(ord(character) < 32 for character in value)
     ):
-        raise SemanticP50ExecutionContractError(f"{field} must be normalized nonempty text")
+        raise SemanticP50ExecutionContractError(
+            f"{field} must be normalized nonempty text"
+        )
     return value
 
 
 def _require_nonauthorizing(value: Mapping[str, Any], *, field: str) -> None:
     if any(value.get(name) is not expected for name, expected in NO_AUTHORITY.items()):
-        raise SemanticP50ExecutionContractError(f"{field} crosses its authority boundary")
+        raise SemanticP50ExecutionContractError(
+            f"{field} crosses its authority boundary"
+        )
 
 
 def _require_inside(path: Path, *, root: Path, field: str) -> Path:
-    resolved_root = Path(root).resolve()
-    resolved = Path(path).resolve()
-    if not resolved.is_relative_to(resolved_root):
-        raise SemanticP50ExecutionContractError(f"{field} resolves outside its physical root")
-    return resolved
+    lexical_root = Path(root).absolute()
+    lexical = Path(path).absolute()
+    resolved_root = lexical_root.resolve()
+    resolved = lexical.resolve()
+    if (
+        resolved_root != lexical_root
+        or resolved != lexical
+        or not lexical.is_relative_to(lexical_root)
+        or not resolved.is_relative_to(resolved_root)
+    ):
+        raise SemanticP50ExecutionContractError(
+            f"{field} resolves outside its physical root or through a symbolic link"
+        )
+    return lexical
 
 
 def _relative(path: Path, *, root: Path, field: str) -> str:
     return (
-        _require_inside(path, root=root, field=field).relative_to(Path(root).resolve()).as_posix()
+        _require_inside(path, root=root, field=field)
+        .relative_to(Path(root).resolve())
+        .as_posix()
     )
 
 
@@ -288,7 +311,9 @@ def _load_canonical(
     if filename is not None and source.name != filename:
         raise SemanticP50ExecutionContractError(f"{field} must name {filename}")
     if not source.is_file() or not 0 < source.stat().st_size <= _MAX_JSON_BYTES:
-        raise SemanticP50ExecutionContractError(f"{field} is absent or outside its byte bound")
+        raise SemanticP50ExecutionContractError(
+            f"{field} is absent or outside its byte bound"
+        )
     try:
         raw = source.read_bytes()
         payload = json.loads(raw)
@@ -302,23 +327,14 @@ def _load_canonical(
 
 
 def _publish_once(path: Path, payload: Mapping[str, Any]) -> Path:
-    destination = Path(path).resolve()
-    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination = Path(path).absolute()
     content = _canonical_bytes(dict(payload), newline=True)
     try:
-        descriptor = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:
-        if destination.is_file() and destination.read_bytes() == content:
-            return destination
-        raise SemanticP50ExecutionContractError(f"immutable artifact collision: {destination}")
-    try:
-        with os.fdopen(descriptor, "wb") as handle:
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-    except BaseException:
-        destination.unlink(missing_ok=True)
-        raise
+        write_bytes_if_absent(destination, content)
+    except ImmutableArtifactError as error:
+        raise SemanticP50ExecutionContractError(
+            f"immutable artifact collision: {destination}"
+        ) from error
     return destination
 
 
@@ -339,15 +355,23 @@ class SemanticP50PhysicalArtifactBinding:
 
     def __post_init__(self) -> None:
         _require_text(self.role, field="binding.role")
-        path = PurePosixPath(_require_text(self.relative_path, field="binding.relative_path"))
+        path = PurePosixPath(
+            _require_text(self.relative_path, field="binding.relative_path")
+        )
         if path.is_absolute() or ".." in path.parts or path.name != self.filename:
-            raise SemanticP50ExecutionContractError("binding relative path is not normalized")
+            raise SemanticP50ExecutionContractError(
+                "binding relative path is not normalized"
+            )
         _require_sha(self.file_sha256, field="binding.file_sha256")
         _require_sha(self.semantic_sha256, field="binding.semantic_sha256")
         if type(self.file_bytes) is not int or self.file_bytes <= 0:
-            raise SemanticP50ExecutionContractError("binding.file_bytes must be positive")
+            raise SemanticP50ExecutionContractError(
+                "binding.file_bytes must be positive"
+            )
         if type(self.schema_version) is not int or self.schema_version <= 0:
-            raise SemanticP50ExecutionContractError("binding.schema_version must be positive")
+            raise SemanticP50ExecutionContractError(
+                "binding.schema_version must be positive"
+            )
         for field in ("filename", "schema", "status", "semantic_sha256_field"):
             _require_text(getattr(self, field), field=f"binding.{field}")
 
@@ -413,7 +437,9 @@ def _binding_from_opened(
     source = _require_inside(path, root=artifact_root, field=role)
     physical, raw = _load_canonical(source, field=role, filename=expected_filename)
     if physical != dict(payload):
-        raise SemanticP50ExecutionContractError(f"{role} changed after its purpose-specific opener")
+        raise SemanticP50ExecutionContractError(
+            f"{role} changed after its purpose-specific opener"
+        )
     semantic_sha = _require_sha(
         payload.get(semantic_sha256_field), field=f"{role}.{semantic_sha256_field}"
     )
@@ -442,9 +468,12 @@ def bind_canonical_semantic_p50_artifact(
     )
 
 
-def _exact_requested_source_states(*, source: object, successor_cache: object) -> dict[str, Any]:
+def _exact_requested_source_states(
+    *, source: object, successor_cache: object
+) -> dict[str, Any]:
     requested = {
-        _sha(asdict(record.address)): record for record in successor_cache.requested_records
+        _sha(asdict(record.address)): record
+        for record in successor_cache.requested_records
     }
     if len(requested) != len(successor_cache.requested_records):
         raise SemanticP50ExecutionContractError(
@@ -490,7 +519,9 @@ def open_semantic_p50_execution_prerequisites(
     if not isinstance(paths, SemanticP50ExecutionPrerequisitePaths):
         raise TypeError("paths must be SemanticP50ExecutionPrerequisitePaths")
     if not isinstance(expected_source_binding, SemanticP50SourceInventoryBinding):
-        raise TypeError("expected_source_binding must be SemanticP50SourceInventoryBinding")
+        raise TypeError(
+            "expected_source_binding must be SemanticP50SourceInventoryBinding"
+        )
     root = Path(paths.artifact_root).resolve()
     for field in paths.__dataclass_fields__:
         if field not in {"artifact_root", "repo_root"}:
@@ -534,7 +565,9 @@ def open_semantic_p50_execution_prerequisites(
     )
     prepared, _ = load_semantic_p50_prepared_recipe(paths.prepared_recipe_path)
     try:
-        prepared_prerequisites = SemanticP50Prerequisites(**dict(prepared["prerequisites"]))
+        prepared_prerequisites = SemanticP50Prerequisites(
+            **dict(prepared["prerequisites"])
+        )
     except (KeyError, TypeError, ValueError) as error:
         raise SemanticP50ExecutionContractError(
             "prepared P50 prerequisite fields disagree"
@@ -576,7 +609,9 @@ def open_semantic_p50_execution_prerequisites(
     baseline = open_semantic_p50_validation_baseline_from_paths(
         paths.validation_baseline_completion_path,
         inventory_completion_path=paths.validation_inventory_completion_path,
-        evaluation_environment_receipt_path=(paths.validation_evaluation_environment_receipt_path),
+        evaluation_environment_receipt_path=(
+            paths.validation_evaluation_environment_receipt_path
+        ),
         prepared_recipe_path=paths.prepared_recipe_path,
         source=source,
         scratch_runtime=scratch_runtime,
@@ -595,7 +630,8 @@ def open_semantic_p50_execution_prerequisites(
         != expected_source_binding.source_inventory_sha256
         or baseline_binding.get("prepared_recipe_file_sha256")
         != _file_sha(paths.prepared_recipe_path)
-        or baseline_binding.get("prepared_recipe_sha256") != prepared.get("prepared_recipe_sha256")
+        or baseline_binding.get("prepared_recipe_sha256")
+        != prepared.get("prepared_recipe_sha256")
         or baseline_binding.get("scratch_initial_model_state_sha256")
         != relationships.scratch_initial_model_state_sha256
     ):
@@ -764,7 +800,9 @@ def _validate_model_runtime_identity(
     source_revision_sha256: str,
 ) -> dict[str, Any]:
     if not isinstance(value, Mapping) or set(value) != _MODEL_RUNTIME_FIELDS:
-        raise SemanticP50ExecutionContractError("model runtime identity fields disagree")
+        raise SemanticP50ExecutionContractError(
+            "model runtime identity fields disagree"
+        )
     runtime = dict(value)
     body = dict(runtime)
     supplied = body.pop("identity_sha256")
@@ -773,14 +811,19 @@ def _validate_model_runtime_identity(
         or supplied != source_binding.model_runtime_identity_sha256
         or runtime.get("schema") != "compose.data.semantic_active8_exact_model_runtime"
         or runtime.get("schema_version") != 2
-        or runtime.get("process_identity_sha256") != scratch_runtime.process_identity_sha256
-        or runtime.get("process_identity_sha256") != source_binding.process_identity_sha256
+        or runtime.get("process_identity_sha256")
+        != scratch_runtime.process_identity_sha256
+        or runtime.get("process_identity_sha256")
+        != source_binding.process_identity_sha256
         or runtime.get("semantic_model_process_contract_sha256")
         != scratch_runtime.semantic_model_process_contract_sha256
-        or runtime.get("semantic_model_identity") != scratch_runtime.semantic_model_identity
+        or runtime.get("semantic_model_identity")
+        != scratch_runtime.semantic_model_identity
         or runtime.get("architecture") != scratch_runtime.architecture.as_payload()
-        or runtime.get("initialization_seed") != scratch_runtime.config.initialization_seed
-        or runtime.get("initial_model_state_sha256") != scratch_runtime.initial_model_state_sha256
+        or runtime.get("initialization_seed")
+        != scratch_runtime.config.initialization_seed
+        or runtime.get("initial_model_state_sha256")
+        != scratch_runtime.initial_model_state_sha256
         or runtime.get("initial_model_state_sha256")
         != state_dict_semantic_sha256(scratch_runtime.model.state_dict())
         or runtime.get("execution_source_revision_sha256") != source_revision_sha256
@@ -919,7 +962,8 @@ def validate_semantic_p50_runtime_contract(
         or contract.get("schema_version") != RUNTIME_SCHEMA_VERSION
         or contract.get("status") != RUNTIME_STATUS
         or supplied != _sha(body)
-        or contract.get("source_inventory_binding") != expected_source_binding.as_payload()
+        or contract.get("source_inventory_binding")
+        != expected_source_binding.as_payload()
         or contract.get("trainer_source")
         != _trainer_identity(
             trainer_source_path,
@@ -927,8 +971,10 @@ def validate_semantic_p50_runtime_contract(
             require_git_tracking=expected_source_revision is None,
         )
         or contract.get("initialization_regime") != "scratch"
-        or contract.get("initial_model_state_sha256") != scratch_runtime.initial_model_state_sha256
-        or contract.get("process_identity_sha256") != scratch_runtime.process_identity_sha256
+        or contract.get("initial_model_state_sha256")
+        != scratch_runtime.initial_model_state_sha256
+        or contract.get("process_identity_sha256")
+        != scratch_runtime.process_identity_sha256
         or contract.get("semantic_model_process_contract_sha256")
         != scratch_runtime.semantic_model_process_contract_sha256
         or contract.get("operator_capability_fingerprint")
@@ -939,7 +985,8 @@ def validate_semantic_p50_runtime_contract(
         or contract.get("training") != TRAINING_CONTRACT
         or tuple(contract.get("execution_order", ())) != EXECUTION_ORDER
         or contract.get("physical_inputs") != expected_inputs
-        or runtime.get("identity_sha256") != expected_source_binding.model_runtime_identity_sha256
+        or runtime.get("identity_sha256")
+        != expected_source_binding.model_runtime_identity_sha256
     ):
         raise SemanticP50ExecutionContractError(
             "semantic P50 runtime, scratch state, or purpose-specific physical lineage disagrees"
@@ -989,8 +1036,12 @@ def _image_identity(
 ) -> dict[str, str]:
     match = _IMAGE_RE.fullmatch(_require_text(reference, field="image_reference"))
     if match is None:
-        raise SemanticP50ExecutionContractError("image reference must be pinned by sha256 digest")
-    source = _require_inside(definition_path, root=repo_root, field="image_definition_path")
+        raise SemanticP50ExecutionContractError(
+            "image reference must be pinned by sha256 digest"
+        )
+    source = _require_inside(
+        definition_path, root=repo_root, field="image_definition_path"
+    )
     relative = source.relative_to(Path(repo_root).resolve()).as_posix()
     if not source.is_file() or (
         require_git_tracking
@@ -1093,7 +1144,9 @@ def validate_semantic_p50_environment_contract(
         "contract_sha256",
     }
     if not isinstance(value, Mapping) or set(value) != fields:
-        raise SemanticP50ExecutionContractError("P50 environment contract fields disagree")
+        raise SemanticP50ExecutionContractError(
+            "P50 environment contract fields disagree"
+        )
     contract = dict(value)
     body = dict(contract)
     supplied = body.pop("contract_sha256")
@@ -1127,7 +1180,8 @@ def validate_semantic_p50_environment_contract(
             root=prerequisite_paths.artifact_root,
             field="runtime_contract_path",
         )
-        or contract.get("runtime_contract_file_sha256") != _file_sha(runtime_contract_path)
+        or contract.get("runtime_contract_file_sha256")
+        != _file_sha(runtime_contract_path)
         or contract.get("runtime_contract_sha256") != runtime["contract_sha256"]
         or contract.get("source_revision_sha256")
         != runtime["source_revision"]["source_revision_sha256"]
@@ -1141,7 +1195,9 @@ def validate_semantic_p50_environment_contract(
     return contract
 
 
-def open_semantic_p50_environment_contract(path: Path, **validation_kwargs: Any) -> dict[str, Any]:
+def open_semantic_p50_environment_contract(
+    path: Path, **validation_kwargs: Any
+) -> dict[str, Any]:
     payload, _ = _load_canonical(
         path, field="semantic P50 environment contract", filename=ENVIRONMENT_FILENAME
     )
@@ -1189,7 +1245,9 @@ def _validate_output_prefix(value: object) -> str:
     text = _require_text(value, field="output_prefix_relative")
     path = PurePosixPath(text)
     if path.is_absolute() or ".." in path.parts or path.as_posix() != text:
-        raise SemanticP50ExecutionContractError("output prefix must be a normalized relative path")
+        raise SemanticP50ExecutionContractError(
+            "output prefix must be a normalized relative path"
+        )
     return text.rstrip("/")
 
 
@@ -1203,7 +1261,9 @@ def _opened_launch_inputs(
     trainer_source_path: Path,
     image_definition_path: Path,
     expected_source_revision: Mapping[str, Any] | None = None,
-) -> tuple[dict[str, Any], dict[str, Any], tuple[SemanticP50PhysicalArtifactBinding, ...]]:
+) -> tuple[
+    dict[str, Any], dict[str, Any], tuple[SemanticP50PhysicalArtifactBinding, ...]
+]:
     runtime = open_semantic_p50_runtime_contract(
         runtime_contract_path,
         scratch_runtime=scratch_runtime,
@@ -1226,7 +1286,9 @@ def _opened_launch_inputs(
         prerequisite_paths,
         scratch_runtime=scratch_runtime,
         expected_source_binding=expected_source_binding,
-        expected_source_revision_sha256=runtime["source_revision"]["source_revision_sha256"],
+        expected_source_revision_sha256=runtime["source_revision"][
+            "source_revision_sha256"
+        ],
     )
     root = prerequisite_paths.artifact_root
     runtime_binding = _binding_from_opened(
@@ -1278,7 +1340,9 @@ def build_semantic_p50_launch_projection(
         expected_source_revision=expected_source_revision,
     )
     if runtime["source_revision"] != revision:
-        raise SemanticP50ExecutionContractError("launch source changed after runtime freeze")
+        raise SemanticP50ExecutionContractError(
+            "launch source changed after runtime freeze"
+        )
     prefix = _validate_output_prefix(output_prefix_relative)
     artifact_rows = [item.as_payload() for item in bindings]
     identity = {
@@ -1330,7 +1394,9 @@ def build_semantic_p50_launch_projection(
         "runtime_contract_sha256": runtime["contract_sha256"],
         "environment_contract_sha256": environment["contract_sha256"],
         "physical_artifacts": artifact_rows,
-        "physical_artifact_inventory_sha256": identity["physical_artifact_inventory_sha256"],
+        "physical_artifact_inventory_sha256": identity[
+            "physical_artifact_inventory_sha256"
+        ],
         "execution_order": list(EXECUTION_ORDER),
         "optimizer_steps": 50,
         "batch_size": 64,
@@ -1439,7 +1505,8 @@ def validate_semantic_p50_launch_projection(
         or projection.get("argv") != expected_argv
         or projection.get("argv_sha256") != _sha(expected_argv)
         or projection.get("runtime_contract_sha256") != runtime["contract_sha256"]
-        or projection.get("environment_contract_sha256") != environment["contract_sha256"]
+        or projection.get("environment_contract_sha256")
+        != environment["contract_sha256"]
         or projection.get("physical_artifacts") != artifact_rows
         or projection.get("physical_artifact_inventory_sha256") != _sha(artifact_rows)
         or tuple(projection.get("execution_order", ())) != EXECUTION_ORDER
@@ -1455,7 +1522,9 @@ def validate_semantic_p50_launch_projection(
     return projection
 
 
-def open_semantic_p50_launch_projection(path: Path, **physical_kwargs: Any) -> dict[str, Any]:
+def open_semantic_p50_launch_projection(
+    path: Path, **physical_kwargs: Any
+) -> dict[str, Any]:
     payload, _ = _load_canonical(
         path, field="semantic P50 launch projection", filename=LAUNCH_FILENAME
     )
@@ -1473,7 +1542,9 @@ def _semantic_p50_training_gate_refinement(
     gate_path = Path(repo_root).resolve() / "configs/editing_training_v2_gate.json"
     base = load_editing_training_gate(gate_path)
     p50_gate = next(
-        gate for gate in base["gates"] if gate["id"] == "P50_gradient_and_collapse_sentinel"
+        gate
+        for gate in base["gates"]
+        if gate["id"] == "P50_gradient_and_collapse_sentinel"
     )
     thresholds = p50_gate["numeric_thresholds"]
     evidence = p50_gate["prerequisite_evidence"]
@@ -1494,8 +1565,12 @@ def _semantic_p50_training_gate_refinement(
     source_identity = prerequisites.source.index.identity_payload()
     prerequisite_evidence = {
         "frozen_source_corpus_inventory_sha256": source_identity["inventory_sha256"],
-        "gate_zero_structural_evidence_sha256": prerequisites.gate_zero["evidence_sha256"],
-        "t1_successor_gate_decision_sha256": prerequisites.t1_decision["decision_sha256"],
+        "gate_zero_structural_evidence_sha256": prerequisites.gate_zero[
+            "evidence_sha256"
+        ],
+        "t1_successor_gate_decision_sha256": prerequisites.t1_decision[
+            "decision_sha256"
+        ],
         "frozen_p50_recipe_sha256": prepared["prepared_recipe_sha256"],
     }
     numeric_thresholds = {
@@ -1515,7 +1590,9 @@ def _semantic_p50_training_gate_refinement(
     resolved["status"] = "FROZEN_BOUNDED_P50_AUTHORIZED"
     resolved["bounded_p50_authorized"] = True
     resolved_p50 = next(
-        gate for gate in resolved["gates"] if gate["id"] == "P50_gradient_and_collapse_sentinel"
+        gate
+        for gate in resolved["gates"]
+        if gate["id"] == "P50_gradient_and_collapse_sentinel"
     )
     resolved_p50["prerequisite_evidence"] = prerequisite_evidence
     resolved_p50["numeric_thresholds"] = numeric_thresholds
@@ -1546,7 +1623,9 @@ def _semantic_p50_training_gate_refinement(
         "numeric_thresholds": numeric_thresholds,
         "resolved_thresholds": {
             "minimum_gradient_updates": dict(exact_thresholds.minimum_gradient_updates),
-            "maximum_family_nll_regression": dict(exact_thresholds.maximum_family_nll_regression),
+            "maximum_family_nll_regression": dict(
+                exact_thresholds.maximum_family_nll_regression
+            ),
             "inherited_retention_status": exact_thresholds.inherited_retention_status,
             "maximum_inherited_probe_nll_regression": (
                 exact_thresholds.maximum_inherited_probe_nll_regression
@@ -1609,7 +1688,9 @@ def _expected_semantic_p50_execution_permit(
         prerequisite_paths,
         scratch_runtime=scratch_runtime,
         expected_source_binding=expected_source_binding,
-        expected_source_revision_sha256=projection["source_revision"]["source_revision_sha256"],
+        expected_source_revision_sha256=projection["source_revision"][
+            "source_revision_sha256"
+        ],
     )
     t1 = prerequisites.t1_decision
     if (
@@ -1617,7 +1698,8 @@ def _expected_semantic_p50_execution_permit(
         or t1.get("p500_authorized") is not False
         or t1.get("checkpoint_selection_authorized") is not False
         or t1.get("final_test_selection_authorized") is not False
-        or t1.get("decision_sha256") != physical_prepared["prerequisites"]["t1_decision_sha256"]
+        or t1.get("decision_sha256")
+        != physical_prepared["prerequisites"]["t1_decision_sha256"]
         or physical_prepared.get("bounded_p50_authorized") is not False
         or tuple(physical_prepared.get("unresolved_physical_bindings", ()))
         != REQUIRED_BINDING_PURPOSES
@@ -1709,12 +1791,16 @@ def _expected_semantic_p50_execution_permit(
         "launch_projection_sha256": projection["projection_sha256"],
         "run_identity_sha256": projection["run_identity_sha256"],
         "output_relative_path": projection["output_relative_path"],
-        "source_revision_sha256": projection["source_revision"]["source_revision_sha256"],
+        "source_revision_sha256": projection["source_revision"][
+            "source_revision_sha256"
+        ],
     }
     return body, prerequisites, projection
 
 
-def materialize_semantic_p50_execution_permit(*, output_root: Path, **physical_kwargs: Any) -> Path:
+def materialize_semantic_p50_execution_permit(
+    *, output_root: Path, **physical_kwargs: Any
+) -> Path:
     """Publish a content-addressed, P50-only permit after all strict reopeners pass."""
 
     body, _, _ = _expected_semantic_p50_execution_permit(**physical_kwargs)
@@ -1741,14 +1827,19 @@ def open_semantic_p50_execution_permit(
     )
     body = dict(permit)
     supplied = body.pop("permit_sha256", None)
-    expected, prerequisites, projection = _expected_semantic_p50_execution_permit(**physical_kwargs)
+    expected, prerequisites, projection = _expected_semantic_p50_execution_permit(
+        **physical_kwargs
+    )
     if (
         permit != {**expected, "permit_sha256": _sha(expected)}
         or supplied != _sha(body)
         or physical_path.parent.name != supplied
-        or any(permit.get(name) is not value for name, value in P50_ONLY_AUTHORITY.items())
+        or any(
+            permit.get(name) is not value for name, value in P50_ONLY_AUTHORITY.items()
+        )
         or permit.get("unresolved_physical_bindings") != []
-        or tuple(permit.get("resolved_physical_binding_purposes", ())) != REQUIRED_BINDING_PURPOSES
+        or tuple(permit.get("resolved_physical_binding_purposes", ()))
+        != REQUIRED_BINDING_PURPOSES
     ):
         raise SemanticP50ExecutionContractError(
             "semantic P50 execution permit identity or authority disagrees"
@@ -1777,15 +1868,21 @@ def _physical_observed_environment() -> dict[str, Any]:
     memory_mb = 0
     if hasattr(os, "sysconf"):
         try:
-            memory_mb = int(os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // (1 << 20))
+            memory_mb = int(
+                os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // (1 << 20)
+            )
         except (OSError, ValueError):
             memory_mb = 0
     hardware = {
         "accelerator_class": "gpu",
-        "modal_gpu_type": _require_text(os.environ.get("MODAL_GPU_TYPE"), field="MODAL_GPU_TYPE"),
+        "modal_gpu_type": _require_text(
+            os.environ.get("MODAL_GPU_TYPE"), field="MODAL_GPU_TYPE"
+        ),
         "device_type": "cuda",
         "device_name": torch.cuda.get_device_name(0),
-        "device_capability": ".".join(str(item) for item in torch.cuda.get_device_capability(0)),
+        "device_capability": ".".join(
+            str(item) for item in torch.cuda.get_device_capability(0)
+        ),
         "cuda_device_count": 1,
         "cpu_count": os.cpu_count() or 0,
         "memory_mb": memory_mb,
@@ -1818,7 +1915,9 @@ def build_semantic_p50_observed_environment_receipt(
     observed_at_utc: str,
     **physical_kwargs: Any,
 ) -> dict[str, Any]:
-    projection = open_semantic_p50_launch_projection(launch_projection_path, **physical_kwargs)
+    projection = open_semantic_p50_launch_projection(
+        launch_projection_path, **physical_kwargs
+    )
     environment_path = physical_kwargs["environment_contract_path"]
     environment, environment_raw = _load_canonical(
         environment_path,
@@ -1834,8 +1933,13 @@ def build_semantic_p50_observed_environment_receipt(
         raise SemanticP50ExecutionContractError(
             "observed container differs from prospective environment"
         )
-    if not isinstance(observed_at_utc, str) or _UTC_RE.fullmatch(observed_at_utc) is None:
-        raise SemanticP50ExecutionContractError("observed_at_utc must be second-resolution UTC")
+    if (
+        not isinstance(observed_at_utc, str)
+        or _UTC_RE.fullmatch(observed_at_utc) is None
+    ):
+        raise SemanticP50ExecutionContractError(
+            "observed_at_utc must be second-resolution UTC"
+        )
     _, launch_raw = _load_canonical(
         launch_projection_path,
         field="semantic P50 launch projection",
@@ -1894,11 +1998,15 @@ def open_semantic_p50_observed_environment_receipt(
         "receipt_sha256",
     }
     if set(receipt) != fields:
-        raise SemanticP50ExecutionContractError("observed environment receipt fields disagree")
+        raise SemanticP50ExecutionContractError(
+            "observed environment receipt fields disagree"
+        )
     body = dict(receipt)
     supplied = body.pop("receipt_sha256")
     _require_nonauthorizing(receipt, field="observed environment receipt")
-    projection = open_semantic_p50_launch_projection(launch_projection_path, **physical_kwargs)
+    projection = open_semantic_p50_launch_projection(
+        launch_projection_path, **physical_kwargs
+    )
     environment_path = physical_kwargs["environment_contract_path"]
     environment = open_semantic_p50_environment_contract(
         environment_path,
@@ -1915,18 +2023,23 @@ def open_semantic_p50_observed_environment_receipt(
         or receipt.get("schema_version") != ENVIRONMENT_RECEIPT_SCHEMA_VERSION
         or receipt.get("status") != ENVIRONMENT_RECEIPT_STATUS
         or supplied != _sha(body)
-        or receipt.get("environment_contract_file_sha256") != _file_sha(environment_path)
+        or receipt.get("environment_contract_file_sha256")
+        != _file_sha(environment_path)
         or receipt.get("environment_contract_sha256") != environment["contract_sha256"]
-        or receipt.get("launch_projection_file_sha256") != _file_sha(launch_projection_path)
+        or receipt.get("launch_projection_file_sha256")
+        != _file_sha(launch_projection_path)
         or receipt.get("launch_projection_sha256") != projection["projection_sha256"]
         or not isinstance(receipt.get("observed_at_utc"), str)
         or _UTC_RE.fullmatch(receipt["observed_at_utc"]) is None
-        or receipt.get("observed_image_content_sha256") != environment["image"]["content_sha256"]
+        or receipt.get("observed_image_content_sha256")
+        != environment["image"]["content_sha256"]
         or receipt.get("observed_hardware") != environment["hardware"]
         or receipt.get("observed_software") != environment["software"]
         or tuple(receipt.get("completed_preflight_checks", ())) != EXECUTION_ORDER[:6]
     ):
-        raise SemanticP50ExecutionContractError("observed environment physical binding disagrees")
+        raise SemanticP50ExecutionContractError(
+            "observed environment physical binding disagrees"
+        )
     if reobserve:
         observed = observe_semantic_p50_physical_environment()
         if (
@@ -1950,7 +2063,9 @@ def require_semantic_p50_output_available(
 ) -> Path:
     """Validate physical launch state and atomically reserve its no-resume output."""
 
-    projection = open_semantic_p50_launch_projection(launch_projection_path, **physical_kwargs)
+    projection = open_semantic_p50_launch_projection(
+        launch_projection_path, **physical_kwargs
+    )
     prepared, _ = load_semantic_p50_prepared_recipe(
         physical_kwargs["prerequisite_paths"].prepared_recipe_path
     )
@@ -1961,7 +2076,9 @@ def require_semantic_p50_output_available(
         **physical_kwargs,
     )
     if permit.launch_projection != projection:
-        raise SemanticP50ExecutionContractError("execution permit names another launch projection")
+        raise SemanticP50ExecutionContractError(
+            "execution permit names another launch projection"
+        )
     receipt = open_semantic_p50_observed_environment_receipt(
         environment_receipt_path,
         launch_projection_path=launch_projection_path,

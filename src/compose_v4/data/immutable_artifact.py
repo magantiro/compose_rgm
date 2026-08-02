@@ -23,11 +23,32 @@ _HARD_LINK_UNSUPPORTED_ERRNOS = frozenset(
 )
 
 
+def _require_no_symlink_components(destination: Path) -> None:
+    current = destination
+    while True:
+        try:
+            metadata = current.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            if stat.S_ISLNK(metadata.st_mode):
+                raise ImmutableArtifactError(
+                    f"immutable artifact path contains a symbolic link: {current}"
+                )
+        if current.parent == current:
+            return
+        current = current.parent
+
+
 def _existing_artifact_matches(destination: Path, content: bytes) -> bool:
     try:
         metadata = destination.lstat()
     except FileNotFoundError:
         return False
+    if stat.S_ISLNK(metadata.st_mode):
+        raise ImmutableArtifactError(
+            f"immutable artifact path contains a symbolic link: {destination}"
+        )
     if not stat.S_ISREG(metadata.st_mode):
         raise ImmutableArtifactError(
             f"immutable artifact path is not a regular file: {destination}"
@@ -101,8 +122,10 @@ def write_bytes_if_absent(path: str | Path, content: bytes) -> bool:
 
     if not isinstance(content, bytes):
         raise TypeError("immutable artifact content must be bytes")
-    destination = Path(path)
+    destination = Path(os.path.abspath(path))
+    _require_no_symlink_components(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
+    _require_no_symlink_components(destination)
     temporary_name: str | None = None
     try:
         with tempfile.NamedTemporaryFile(
