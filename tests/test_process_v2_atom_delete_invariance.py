@@ -79,6 +79,39 @@ def _successor_keys(state: MolecularGraph) -> frozenset[str]:
     )
 
 
+def test_semantic_process_predicate_covers_every_semantic_version() -> None:
+    """Runtime selection must not silently fall through on a new process version.
+
+    ``_default_rewrite_system`` and the kernel-identity provenance flag once
+    compared the process semantics for equality with version one. Under Process
+    V2 that returns the wrong rewrite system and records
+    ``semantic_editing_v2_process=False`` with no error at all, which is a
+    silent wrong-runtime selection rather than a loud refusal.
+    """
+
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        EDITING_PROCESS_SEMANTICS,
+        LEGACY_EDITING_PROCESS_SEMANTICS,
+        PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+        SEMANTIC_EDITING_V2_PROCESS_VERSIONS,
+        is_semantic_editing_v2_process,
+    )
+
+    assert set(EDITING_PROCESS_SEMANTICS) == {
+        LEGACY_EDITING_PROCESS_SEMANTICS,
+        *SEMANTIC_EDITING_V2_PROCESS_VERSIONS,
+    }
+    assert is_semantic_editing_v2_process(SEMANTIC_EDITING_V2_PROCESS_SEMANTICS)
+    assert is_semantic_editing_v2_process(PROCESS_V2_EDITING_PROCESS_SEMANTICS)
+    assert not is_semantic_editing_v2_process(LEGACY_EDITING_PROCESS_SEMANTICS)
+    # Every semantic version must be covered, so adding one without updating the
+    # predicate fails here rather than silently selecting a legacy runtime.
+    for semantics in EDITING_PROCESS_SEMANTICS:
+        if semantics != LEGACY_EDITING_PROCESS_SEMANTICS:
+            assert is_semantic_editing_v2_process(semantics), semantics
+
+
 def test_contract_atom_delete_modes_equal_the_model_constants() -> None:
     """The contract's mode literals must equal the model's constants.
 

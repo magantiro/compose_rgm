@@ -176,6 +176,23 @@ EDITING_PROCESS_SEMANTICS = (
     SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     PROCESS_V2_EDITING_PROCESS_SEMANTICS,
 )
+# Every semantic version of the editing lane, newest last.  Both share the
+# frozen Active8 executor rule set and the semantic action modes, so runtime
+# selection and provenance must ask "is this a semantic editing process", not
+# "is this exactly version one".  An equality test against
+# ``SEMANTIC_EDITING_V2_PROCESS_SEMANTICS`` silently selects the wrong rewrite
+# system under Process V2 instead of failing, which is why this predicate is
+# the single authority.
+SEMANTIC_EDITING_V2_PROCESS_VERSIONS = (
+    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+)
+
+
+def is_semantic_editing_v2_process(editing_process_semantics: str) -> bool:
+    """Return whether these process semantics are a semantic editing version."""
+
+    return editing_process_semantics in SEMANTIC_EDITING_V2_PROCESS_VERSIONS
 # Atom-delete candidate modes.  ``legacy`` is the historical dense rule, which
 # admits a real slot only when it lies on no cycle and is not a cut vertex --
 # in a connected real-atom graph that is exactly real-atom degree at most one.
@@ -5853,6 +5870,8 @@ __all__ = [
     "RING_RESTATE_SCORER_MODES",
     "SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS",
     "SEMANTIC_EDITING_V2_PROCESS_SEMANTICS",
+    "SEMANTIC_EDITING_V2_PROCESS_VERSIONS",
+    "is_semantic_editing_v2_process",
     "SEMANTIC_RING_RESTATE_SCORER_MODE",
     "FactorizedMarkBatch",
     "FactorizedMarkEmpiricalPriors",

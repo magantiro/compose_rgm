@@ -44,6 +44,7 @@ from compose_v4.experiments.successor_kernel import (
 from compose_v4.model.factorized_tracelet_rate_model import (
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
     SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
@@ -52,6 +53,7 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     _masked_family_logits,
+    is_semantic_editing_v2_process,
     molecular_state_cache_key,
     prepare_factorized_mark_batch,
 )
@@ -214,7 +216,7 @@ def _default_kernel_identity(
         ("enable_ring_system_delete", capabilities.compute_ring_system_delete),
         (
             "semantic_editing_v2_process",
-            model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+            is_semantic_editing_v2_process(model.editing_process_semantics),
         ),
         (
             "semantic_atom_restate",
@@ -234,7 +236,11 @@ def _default_kernel_identity(
             model.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
         ),
     )
-    if model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+    # Each semantic process version gets its own label: conflating them would let
+    # a Process-V2 kernel identity read as a Process-V1 one.
+    if model.editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS:
+        ringcore_configuration = "editing_v2_semantic_actions_v2"
+    elif model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
         ringcore_configuration = "editing_v2_semantic_actions_v1"
     elif model.enable_cycle_ops:
         ringcore_configuration = "ringcore_v1_compositional_cycle_ops"
@@ -257,7 +263,9 @@ def _default_kernel_identity(
 
 
 def _default_rewrite_system(model: FactorizedTraceletRateModel) -> RewriteSystem:
-    if model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS:
+    # Every semantic process version shares the frozen Active8 executor rule set.
+    # An equality test here would silently return the wrong runtime for Process V2.
+    if is_semantic_editing_v2_process(model.editing_process_semantics):
         return editing_v2_semantic_rewrite_system()
     if model.cycle_open_action_semantics == SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS:
         return editing_v2_rewrite_system()

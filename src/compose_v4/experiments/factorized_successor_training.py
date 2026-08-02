@@ -28,10 +28,10 @@ from compose_v4.experiments.production_successor_kernel import (
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
     MARK_RULE_TO_INDEX,
-    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
     _masked_family_logits,
+    is_semantic_editing_v2_process,
 )
 from compose_v4.rewrite import action_codec as action_codec_v2
 from compose_v4.rewrite import action_codec_v4
@@ -317,7 +317,7 @@ def rewrite_action_codec_sha256(
 
 
 def _uses_semantic_editing_process(model: FactorizedTraceletRateModel) -> bool:
-    return model.editing_process_semantics == SEMANTIC_EDITING_V2_PROCESS_SEMANTICS
+    return is_semantic_editing_v2_process(model.editing_process_semantics)
 
 
 def _rewrite_system_signature(system: RewriteSystem) -> tuple[object, ...]:
