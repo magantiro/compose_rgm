@@ -12,13 +12,16 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
-import tempfile
+import stat
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
+)
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
 from compose_v4.data.editing_v2_semantic_active8_decision_source import (
     INDEX_ENCODING,
@@ -108,7 +111,11 @@ def _require_inside(path: Path, *, root: Path, field: str) -> Path:
 
 def _load_canonical(path: Path, *, field: str) -> tuple[dict[str, Any], bytes]:
     source = Path(path)
-    if not source.is_file():
+    try:
+        metadata = source.lstat()
+    except FileNotFoundError:
+        metadata = None
+    if metadata is None or not stat.S_ISREG(metadata.st_mode):
         raise SemanticP50SourceInventoryError(f"{field} is absent: {source}")
     try:
         raw = source.read_bytes()
@@ -284,30 +291,12 @@ def publish_semantic_p50_source_inventory(
     output = Path(output_directory).resolve()
     output.mkdir(parents=True, exist_ok=True)
     target = output / SEMANTIC_P50_SOURCE_INVENTORY_FILENAME
-    if target.exists():
-        if not target.is_file() or target.read_bytes() != content:
-            raise SemanticP50SourceInventoryError(
-                f"immutable semantic P50 source-inventory collision at {target}"
-            )
-        return PublishedSemanticP50SourceInventory(target, binding)
-    temporary: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=output,
-            prefix=f".{target.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary = handle.name
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, target)
-        temporary = None
-    finally:
-        if temporary is not None:
-            Path(temporary).unlink(missing_ok=True)
+        write_bytes_if_absent(target, content)
+    except ImmutableArtifactError as error:
+        raise SemanticP50SourceInventoryError(
+            f"immutable semantic P50 source-inventory collision at {target}"
+        ) from error
     return PublishedSemanticP50SourceInventory(target, binding)
 
 

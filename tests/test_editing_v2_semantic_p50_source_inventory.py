@@ -109,6 +109,31 @@ def test_publication_refuses_an_existing_different_artifact(
         )
 
 
+def test_publication_refuses_a_same_bytes_symlink(
+    completed_semantic_source,
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    index = _patch_and_resolve(completed_semantic_source, monkeypatch)
+    legitimate = publish_semantic_p50_source_inventory(
+        index,
+        decision_plan_path=completed_semantic_source["decision_plan_path"],
+        output_directory=tmp_path / "legitimate",
+    )
+    hostile = tmp_path / "hostile"
+    hostile.mkdir()
+    (hostile / SEMANTIC_P50_SOURCE_INVENTORY_FILENAME).symlink_to(legitimate.path)
+    with pytest.raises(
+        SemanticP50SourceInventoryError,
+        match="immutable semantic P50 source-inventory collision",
+    ):
+        publish_semantic_p50_source_inventory(
+            index,
+            decision_plan_path=completed_semantic_source["decision_plan_path"],
+            output_directory=hostile,
+        )
+
+
 def test_loader_rejects_wrong_operator_identity_after_full_reresolution(
     completed_semantic_source,
     monkeypatch,
