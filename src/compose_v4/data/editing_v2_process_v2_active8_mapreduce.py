@@ -382,12 +382,6 @@ def _require_int(value: object, *, field: str) -> int:
     return value
 
 
-def _require_text(value: object, *, field: str) -> str:
-    if not isinstance(value, str) or not value or value.strip() != value:
-        raise ProcessV2Active8MapReduceError(f"{field} must be normalized nonempty text")
-    return value
-
-
 def _mounted(value: object, *, artifact_root: Path, field: str) -> Path:
     try:
         return mount_process_v2_artifact_path(
