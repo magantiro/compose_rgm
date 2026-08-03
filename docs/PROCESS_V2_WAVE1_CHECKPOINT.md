@@ -1,7 +1,7 @@
 # Process-V2 Wave 1: Review Checkpoint 1
 
 **Branch** `codex/editing-v2-process-v2-runnable-chain` · **base** `3f3258e` ·
-**head** `5861194` · **worktree** `/private/tmp/compose-process-v2-runnable-chain`
+**last code commit** `e0fe7f3` · **worktree** `/private/tmp/compose-process-v2-runnable-chain`
 
 Wave 1 of the runnable-chain specification: Sections 3 and 4, plus the Section 9
 protocol fixtures and an adversarial pass. **Stopped here as instructed.** Wave 2
@@ -32,8 +32,9 @@ pytest 9.1.1, ruff 0.15.22, macOS 26.5.2 arm64. Guards
 base 3f3258e : 16 failed, 2729 passed, 1 skipped,             0 collection errors
 head e0fe7f3 : 16 failed, 2980 passed, 1 skipped, 1 xfailed,  0 collection errors
 
-The suite was measured at `e0fe7f3`, the last code commit. The branch head is
-later only by documentation commits, which touch no code.
+Measured at `e0fe7f3`, the last commit that touches code. The branch head is
+later only by documentation commits. This document deliberately does not name the
+head commit: writing that value into the document changes it.
 
 regressions (only on head) : NONE
 fixed (only on base)       : none
