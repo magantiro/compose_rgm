@@ -1,525 +1,501 @@
-# COMPOSE Process V2 connected-nonleaf atom deletion: implementation report
+# COMPOSE Process V2 atom deletion: implementation report
 
-Branch `codex/editing-v2-process-v2-atom-delete`, base `bc05c6e`, head `85169b1`.
-Implementation handoff: `docs/HANDOFF_PROCESS_V2_CONNECTED_NONLEAF_DELETE.md`.
-Prospective decision: `docs/EDITING_PROCESS_V2_DECISION.md`.
-Frozen contract: `configs/editing_v2_semantic_process_v2.json`.
+**Branch** `codex/editing-v2-process-v2-atom-delete` · **base** `bc05c6e` ·
+**head** `761bfe1` plus the round-two integration repair described in §4 ·
+**worktree** `/private/tmp/compose-process-v2-atom-delete`
 
-This report is evidence for independent review. It grants no authority. No Modal
-job, Active8 materialization, Gate 0, T1, P50, rebind proof scan, or training run
-was launched at any point.
+Handoff: `docs/HANDOFF_PROCESS_V2_CONNECTED_NONLEAF_DELETE.md` ·
+Decision: `docs/EDITING_PROCESS_V2_DECISION.md` ·
+Contracts: `configs/editing_v2_semantic_process_v2.json`,
+`configs/editing_gate_zero_semantic_model_process_v2.json`
 
-## 1. What was approved, and what was deliberately not done
+This report **supersedes the round-one version of this file in full**. Round one
+was rejected on independent review. §1 states exactly what was wrong. Every
+number below was re-measured after the correction; none is carried over.
 
-The recorded prospective decision expands the learned marked fiber to
-executor-verified, charge-preserving, non-aromatic, non-articulation
-connected-nonleaf atom deletions, invalidating V1 downstream artifacts.
+This report grants no authority. No Modal job, V2 proof scan, Active8
+materialization, Gate 0, T1, P50, or training run was launched at any point in
+either round.
 
-Implemented: the semantic-process implementation, its prospective decision
-artifact, compatibility and rebinding proof infrastructure, tests, documentation.
+## How to read the evidence here
 
-Not done, by instruction: Active8 materialization, Gate 0, T1, P50, later pilots,
-long editing runs, de novo runs, and execution of the rebind proof scan. The
-executor, aromatic semantics, charge policy, canonicalization, persistent-slot
-semantics, the other seven Active8 operators, multi-neighbour insertion,
-`ring_system_delete`, and `ring_system_grow` are untouched.
+Three categories are kept apart, because conflating them is how the round-one
+report overclaimed:
 
-## 2. The scientific decision and the fact it rests on
+* **Measured** — a command was run in this worktree and its output is quoted or
+  summarized. Every count, hash, and pass/fail figure below is measured unless
+  marked otherwise.
+* **Bounded observation** — measured, but only over a stated finite panel (800
+  Jin-QED leads; a 19-molecule charged panel; an 18-molecule batch panel). It
+  says nothing about states outside that panel.
+* **Proposed downstream behaviour** — what a future run *would* do. Nothing in
+  this category has been observed, because no downstream run exists.
 
-`atom_delete` keeps its V1 rule for root, singleton, and leaf slots bit-for-bit
-and *additionally* admits connected-nonleaf candidates. The two sets are disjoint,
-so the effective mask is a disjoint union:
+## 1. What was rejected, and what is approved now
+
+### The rejected round-one reading
+
+Round one read "preserve the existing root, singleton, and leaf capabilities" as
+preserving the legacy *admission set*, and implemented Process V2 as a disjoint
+union:
 
 ```
-V2 atom_delete mask = (unchanged V1 dense mask) UNION (connected-nonleaf admission)
+V2_admitted = V1_dense_mask | connected_nonleaf_admitted
 ```
 
-**The load-bearing structural fact**, derived and then measured rather than
-assumed: the V1 dense mask admits a real slot only when it lies on no cycle and is
-not a cut vertex. In a connected real-atom graph an acyclic vertex of degree at
-least two is always a cut vertex, so **V1 admits only real-atom degree at most
-one**. Measured on an 18-molecule panel: zero V1 admissions of degree >= 2.
-`tests/test_process_v2_atom_delete.py` pins the disjointness rather than assuming it.
+The round-one report stated this explicitly — "`atom_delete` keeps its V1 rule
+for root, singleton, and leaf slots bit-for-bit… the two sets are disjoint". That
+exempted every inherited candidate from the authoritative charge policy and
+thereby **preserved a legacy defect**. The counterexample was already measured
+and had been used to *justify* the exemption rather than to refute it; that is
+the failure mode worth recording, not just its symptom.
 
-**Why the disjoint-union form is necessary, not stylistic.** Applying the seven V2
-conditions uniformly would *remove* existing V1 leaf candidates. Measured
-counterexample: for `C[N+](C)(C)CC(=O)[O-]`, deleting the neutral leaf methyl at
-slot 0 is V1-admitted, but the successor violates the charge policy because the
-charged N+ centre's bond row and implicit hydrogens change. Uniform application
-would silently change preserved leaf behaviour and break the handoff requirement.
+The defect is concrete. For `C[N+](C)(C)CC(=O)[O-]` the legacy dense rule admits
+slots `[0, 2, 3, 6, 7]`, and the production runtime **refuses four of those
+five** with `InvalidRewrite`. The learned mask was assigning probability to
+transitions the executor cannot perform.
 
-The seven admission conditions for the additional set, in evaluation order, live in
-`src/compose_v4/rewrite/process_v2_atom_delete.py`: real element under the
-authoritative predicate; real-atom degree >= 2; non-aromatic under
-`resonance_invariant_bond_classes`; not an articulation point; the unchanged
-production executor accepts; the exact persistent-slot successor is connected; the
-frozen charge policy is preserved; and the successor is within the declared
-broad-organic, at-most-40-active-atom support and is canonicalizable.
+### The approved correction (verbatim)
 
-**The executor is the legality authority.** No weaker approximate valence test was
-introduced. `is_valid_atom_delete` is deliberately *not* a connectivity predicate
-(it returns `True` for articulation-point deletions), so connectivity cannot be
-delegated to it. Condition 3 supplies connectivity instead, since removing a
-non-cut vertex from a connected graph leaves it connected, and condition 5 is
-therefore implied rather than independent. An earlier draft of this report and of
-the module docstring claimed the two were independently load-bearing; the
-adversarial review disproved it and both have been corrected.
+> Apply the authoritative charge policy to every Process V2 atom-delete
+> candidate, including inherited root, singleton, and leaf candidates. Preserve
+> the general root/singleton/leaf capabilities only when the unchanged executor,
+> connectivity, charge, support, and canonicalization predicates all pass.
+> Exclude newly introduced connected-nonleaf candidates incident to a SCAR
+> pending a separate SCAR semantic decision. This invalidates the current
+> candidate Process V2 contract and identity before any downstream run.
 
-**Aromatic exclusion is load-bearing, with a measured reason.** Deleting one
-Kekule-encoded slot of a perceived aromatic system yields a representation-sensitive
-open-chain successor: benzene gives `C=CC=CC`, and toluene gives different products
-depending on which Kekule slot is deleted (`C=CC=CCC` versus `C=C(C)C=CC`). Aromatic
-connected-nonleaf deletion therefore remains excluded pending a separate semantic
-decision and resolver.
+### What that changed
 
-Verified reference behaviour (used as fixtures):
+**One admission authority**, `src/compose_v4/rewrite/process_v2_atom_delete.py`,
+decides every candidate. The two candidate sources survive **only as diagnostic
+labels** selecting which *additional* gates apply; neither exempts a slot from a
+common gate.
 
-| source | admitted connected-nonleaf slots |
-|---|---|
-| `C1CCCCC1` | 0-5, successor `CCCCC` |
-| `C1CCOCC1` | 0-5, heteroatom preserved |
-| `c1ccccc1`, `Cc1ccccc1`, `c1ccc2ccccc2c1` | none (aromatic) |
-| `CC1CCCCC1` | 2,3,4,5,6 (slot 1 is an articulation point) |
-| `C1CC2CCC1CC2` | 0-7 (bridged bicyclic) |
-| `O=C1NC(O)C2CCCCC12` | 2,5,6,7,8,9,10 (fused) |
-| `CCO`, `C` | none (leaf/root stay under the V1 rule) |
-| `C[N+](C)(C)CC(=O)[O-]` | none (every degree>=2 slot is an articulation point) |
-
-Corroboration the design did not rely on: the frozen development cell-role policy
-already declares `editing_v2_active8_v1:atom_delete:connected_nonleaf_death` a
-**required** capability cell. Process V2 fills a declared-but-previously-unreachable
-cell rather than inventing a new one.
-
-## 3. Exact files changed
-
-All paths relative to the repository root. **34 files, +8,065 / -227.**
-
-### New (12)
-
-| Path | Lines | Role |
+| Gate | Applies to | Predicate |
 |---|---|---|
-| `src/compose_v4/data/editing_process_v2_rebind.py` | 2144 | Phase 4 restart-safe, content-addressed, proof-bound V1-to-V2 rebind |
-| `tests/test_editing_process_v2_rebind.py` | 962 | Rebind battery (25 tests) |
-| `tests/test_process_v2_atom_delete_mask.py` | 920 | Model and batch mask battery |
-| `tests/test_editing_process_v2_identity.py` | 618 | Identity, contract, masquerade battery |
-| `tests/test_process_v2_atom_delete.py` | 404 | Resolver and executor-parity battery |
-| `docs/PROCESS_V2_IMPLEMENTATION_REPORT.md` | 395 | This report |
-| `src/compose_v4/rewrite/process_v2_atom_delete.py` | 334 | Phase 2 scientific core: resolver, enumerator, slot mask, 11 reason codes |
-| `configs/editing_v2_semantic_process_v2.json` | 331 | Phase 1 self-hashed Process V2 semantic contract |
-| `docs/EDITING_PROCESS_V2_DECISION.md` | 219 | Prospective decision record |
-| `tests/test_process_v2_atom_delete_invariance.py` | 191 | Quotient invariance and cross-module assertions |
-| `tests/test_process_v2_atom_delete_teacher.py` | 189 | Teacher scores finite and backpropagates; V1 negative control |
-| `tests/test_process_v2_atom_delete_gates.py` | 140 | Reachable witnesses for the three gates no test could fail on |
+| 1 | both sources | slot is a real element (`is_element`) |
+| 2 | both sources | unchanged executor `is_valid_atom_delete` |
+| 3 | both sources | successor connected or null |
+| 4 | both sources | authoritative charge policy preserved |
+| 5 | both sources | successor within declared support (≤ `MAX_ACTIVE_ATOMS`) |
+| 6 | both sources | successor canonicalizable |
+| 7 | connected-nonleaf only | non-aromatic |
+| 8 | connected-nonleaf only | not an articulation point |
+| 9 | connected-nonleaf only | not SCAR-incident |
 
-### Modified (22)
+The forward guard now asserts **equality** between the scored delete mask and the
+admission mask, not containment. Containment would accept a mask unioned with the
+legacy dense rule — precisely the exemption this version removes — so it could
+not have detected the defect it exists to guard. §6 records the case where that
+choice paid for itself.
 
-**Source, behaviour (8):**
+The mode string moved from `process_v2_connected_nonleaf_atom_delete_v1` to
+`process_v2_uniform_gated_atom_delete_v2`; the old name falsely implied inherited
+candidates were unfiltered and is recorded as removed.
 
-| Path | Diff | Change |
-|---|---|---|
-| `src/compose_v4/rewrite/editing_v2_process_identity.py` | +587/-18 | Coexisting V1 and V2 identities, frozen-identity validation, V2 contract builder |
-| `src/compose_v4/model/factorized_tracelet_rate_model.py` | +213/-9 | Disjoint-union mask, capability and batch plumbing, semantic-version predicate |
-| `src/compose_v4/data/semantic_packed_trace_store.py` | +123/-8 | Pinned-identity readers |
-| `src/compose_v4/rewrite/trace_shard_v3.py` | +33/-8 | Pinned-identity record decode |
-| `src/compose_v4/experiments/factorized_mark_conditional.py` | +15/-0 | Collation threading |
-| `src/compose_v4/experiments/production_successor_kernel.py` | +11/-3 | Runtime selection and provenance by semantic version |
-| `src/compose_v4/experiments/factorized_successor_training.py` | +2/-2 | Semantic-version predicate |
-| `src/compose_v4/experiments/editing_v2_semantic_t1_decision.py` | +2/-2 | Re-pinned capacity-policy physical and semantic hashes |
+### Measured breadth of the correction
 
-**Source, hash constants only (3):** `editing_v2_semantic_gate_zero.py` (+1/-1),
-`editing_v2_semantic_t1_capacity_policy.py` (+2/-2), `editing_training_gate.py` (+1/-1).
+Bounded observation, 800 Jin-QED leads at 40 production slots:
 
-**Configs, hash pointers only (9):** `editing_gate_zero_semantic_model_process_v1.json`,
-`editing_v2_semantic_capability_cells_v1.json`,
-`editing_v2_semantic_development_cell_roles_v1.json`,
-`editing_v2_semantic_active8_decision_runtime_v1.json`,
-`editing_v2_semantic_gate_zero_structural_v1.json`,
-`editing_v2_semantic_t1_panel_policy_v1.json`,
-`editing_v2_semantic_t1_capacity_policy_v1.json`,
-`editing_v2_semantic_p50_recipe_policy_v1.json`, `editing_training_v2_gate.json`.
-The larger line counts on the capability-cell registry (+119/-75) and P50 recipe
-policy (+64/-64) are key-sort only; every semantically changed field is a hash.
-
-**Tests (2):** `tests/test_editing_v2_semantic_t1_panel_cache.py` (+12/-1, an
-over-specified fail-closed assertion, section 7) and
-`tests/test_materialize_editing_v2_semantic_t1_panel_cache_app.py` (+1/-1, fixture hash).
-
-## 4. Commits
-
-| Commit | Subject |
-|---|---|
-| `42756ce` | rewrite: resolve process v2 connected-nonleaf atom deletion |
-| `37f607c` | editing-v2: freeze prospective process v2 support decision |
-| `9464076` | tests: pin process v2 delete-fiber representation invariance |
-| `60e5d9a` | model: admit process v2 connected-nonleaf atom deletes |
-| `655717f` | data: prove v1 payload compatibility under process v2 |
-| `e8bc288` | editing-v2: read superseded-identity payloads under a pinned identity |
-| `067d8da` | editing-v2: rebind the v1 gate chain to the moved process identity |
-| `c506d70` | experiments: select the rewrite runtime by semantic process version |
-| `85169b1` | editing-v2: complete the identity re-pin and close three untestable gates |
-
-## 5. Identities
-
-Naming: `editing_v2` is the source-conditioned editing **lane**; the trailing `_v1`
-/ `_v2` is the **semantic process version** of that lane.
-
-### New
-
-| Object | SHA-256 |
-|---|---|
-| Process V2 identity (`semantic_editing_v2_v2`) | `9fde14b59fc6bfb7be7aaf83564658a9a6758f479d9fd94c134206e84873319b` |
-| V2 contract, semantic self-hash | `30369f36373b1163114b9a8bf6849f3fbed4627b6070e4478c4a5efb6c3c6261` |
-| V2 contract, physical file hash | `6111edce5fd7ab6214ae069804c48e6c1e902ac969463a7b279b834d16780cc9` |
-
-### Moved (the declared invalidation)
-
-| Object | Was | Now |
-|---|---|---|
-| V1 process identity | `6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7` | `9874a69a01902dd1c4a0353c14cb9db0c657887b3e497800867629d82f1bf63e` |
-| Gate-0 model/process contract | `df1bd6a4…d176ec99` | `cd940093c629802b5f29847dee5fa3cf0c2408c31f9e1f31345870a6bf1ec082` |
-| Capability-cell registry | `5ca11004…b652c9eb` | `54379adfa479e4f6de17c13f2a85a135ae753360ec0106a183a92c88e722fb7f` |
-| Development cell-role policy | `d65781105ed6…54ebc44` | `a26c7084b2cf6f23a7690f5dc5f76f992056b205c0dc189405643a22a90b603c` |
-| Active8 CPU decision runtime | `313eeb55…6bc9424e` | `ccb8094202ecc51065b7e8c52a8cc4a8a85ac4c62ce50674b883fcdd09fe9256` |
-| Gate-0 structural contract (and its source-pinned constant) | `ad4181c8…0321dbf5` | `52385445c096db737367df196e6b56c01bea515992601e636f0fa25dc63ef759` |
-
-### Unchanged, by design
-
-The V1 semantic process contract `configs/editing_v2_semantic_process_v1.json` is
-untouched: semantic `f928f6adaf22ba7520dd28839655c93bc523ce77317b32050d3dd1b02bbcf288`,
-physical `43cb26e1ba33b27a0149a8142895ef9988853b458c0ace9bc9191f7b460dedbb`. The V1
-identity *definition* (schema, schema version, semantics string, contract path,
-implementation-source list, body field set) is unchanged; only its computed value
-moved, because implementation sources it binds legitimately changed. That movement
-is the invalidation mechanism the contract records, not a defect.
-
-### Why the V1 identity had to move
-
-`editing_v2_process_identity()` hashes implementation sources including
-`factorized_tracelet_rate_model.py`, which Phase 2 necessarily changes. Preventing
-the movement would require editing the V1 identity definition, which the handoff
-forbids. The handoff resolves the tension by requiring explicit V1 downstream
-invalidation in the V2 contract, and the approval sentence ends "invalidating V1
-downstream artifacts".
-
-### Scope of the re-pin, and its precedent
-
-The five re-pinned configs plus the one source constant are **exactly** the set that
-the analogous prior process change `d5d3016` re-pinned, plus
-`editing_v2_semantic_development_cell_roles_v1.json`, which was created later
-(`1a31984`) and sits in the same Gate-0 binding chain. `d5d3016` did **not** touch
-the P50 lane, and neither did this work.
-
-Only hash pointers and self-hashes moved. Asserted programmatically at re-pin time:
-no cell definition, role assignment, count, threshold, decision policy, required
-architecture, or structural check changed, and the Gate-0 `model_identity` block is
-byte-identical. Every re-pinned artifact still binds the **V1** semantic process
-contract path; none was relabelled as V2.
-
-**Re-pinning a non-authorizing binding contract is not a Gate-0 run.** Any *measured*
-Gate-0 or T1 evidence produced under `6b98ee21…` remains invalid and must be
-regenerated when that lane is authorized.
-
-## 6. Verification
-
-Toolchain: this worktree carries no `.venv`, so the repository-pinned main-tree
-environment is used, which is the established worktree practice.
-
-```bash
-export KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1
-VP=/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/.venv/bin/python
-$VP -m pytest tests/ -q
-$VP -m ruff check <touched files>
-git diff --check
+```
+inherited root/singleton/leaf candidates : 3319
+  admitted                               : 3194
+  charge_policy_violated                 :  125   (3.77%, across 105 of 800 molecules)
+V1-admitted-but-V2-rejected, by code     : {charge_policy_violated: 125}
+connected_nonleaf candidates             : {successor_disconnected: 7290,
+                                            aromatic_atom: 5076,
+                                            ADMITTED: 2321,
+                                            charge_policy_violated: 243}
 ```
 
-### Full suite, actually run, exact counts
+On that panel the executor, connectivity, declared-support and canonicalizability
+predicates excluded **zero** further inherited candidates — the charge policy was
+the whole gap. These figures were reproduced independently by the adversarial
+reviewer and matched exactly.
 
-| Revision | Result |
+**Process V2 is neither a superset nor a subset of the legacy rule.** Over the
+frozen literal fixture it loses 6 slots and gains 37.
+
+## 2. Identities
+
+### Current
+
+| Artifact | Value |
 |---|---|
-| base `bc05c6e` | **21 failed, 2480 passed, 1 skipped**, 0 errors (908.76 s) |
-| head `85169b1` | **21 failed, 2588 passed, 2 skipped**, 0 errors (947.46 s) |
+| V1 process identity | `6c4721f0dd37132aae657e7aa5f1bfc01cef270662f228171c4587eb7dd48491` |
+| V2 process identity | `0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd` |
+| V1 semantic process contract | `f928f6adaf22ba7520dd28839655c93bc523ce77317b32050d3dd1b02bbcf288` (frozen, unchanged from base) |
+| V2 semantic process contract | `5e317e65cfbff0a8c8770765d1248925d0e068f4e2dd7f8a4cf474b85955ee1e` |
+| V1 Gate-0 model/process contract | `db4e5cc5d2bb5efee97bcde767edaf85f41e238252def5b21832b6bbe398a3ed` |
+| V2 Gate-0 model/process contract | `971a124a3d790e6d5435be5651d9d3f324ea7407cfd0e82944290ffaad138d3a` |
+| V1 operator capability fingerprint | `d246bc88d8440d31` |
+| V2 operator capability fingerprint | `d79ffe8ef65f3fb3` |
 
-Attributed by node-ID set difference: **0 new failures, 0 new errors, 0 base
-failures fixed**. The failing set at head is exactly the failing set at base, and
-the branch adds 108 passing tests. The independent adversarial reviewer ran both
-suites separately and reproduced the base counts exactly, which is why these are
-reported as measurements rather than single observations.
+### Rejected and superseded — **not** current
 
-An intermediate head (`c506d70`) did show 48 failed / 14 errors, all in the P50
-and T1 chains from one root cause: the identity re-pin had stopped at the Gate-0
-chain while the cell-role policy hash is content-addressed further downstream.
-That is recorded rather than hidden, because it is the finding that produced the
-`85169b1` fix and because it demonstrates the failure mode the re-pin discipline
-exists to prevent.
-
-### The 21 pre-existing failures
-
-Verified identical at the pristine base commit by re-running exactly those files
-there. All are stale frozen-artifact and identity drift in the RingCore-V1 and E6
-lanes: operator-registry hash drift (`d752a07e…` vs frozen `9197401e…`),
-panel-sampler protocol-freeze drift, A2.2b artifact provenance drift, RingCore
-catalog fingerprint drift, plus two RDKit-version aromatic-oracle failures. None
-touches `atom_delete`, the executor, or the semantic process.
-
-One deserves flagging: `test_reference_successor_kernel.py::test_no_production_module_imports_the_oracle`
-**text-greps** `src/`, `scripts/`, `modal_apps/` for the string
-`reference_successor_kernel` and flags `editing_v2_process_identity.py`, which merely
-lists that path as a hash-binding string literal and does not import it. A
-pre-existing false positive on a file this work edits; it neither worsened nor
-changed shape.
-
-### Focused suites, exact counts
-
-| Command | Result |
+| Value | Status |
 |---|---|
-| `pytest tests/test_process_v2_atom_delete.py tests/test_process_v2_atom_delete_mask.py -q` | 40 passed, 1 skipped |
-| `pytest tests/test_editing_process_v2_rebind.py -q` | 25 passed |
-| `pytest tests/test_editing_process_v2_identity.py -q` | 34 passed |
-| `pytest tests/test_process_v2_atom_delete_invariance.py -q` | 4 passed |
-| Gate-0 chain (7 files, after re-pin) | 80 passed |
-| Combined Process-V2 + identity + rebind + gate chain (9 files) | 126 passed |
-| `ruff check` on all 12 touched Python files | All checks passed |
+| `9fde14b59fc6bfb7be7aaf83564658a9a6758f479d9fd94c134206e84873319b` | **REJECTED** round-one candidate V2 identity. It produced **no** downstream artifact: no payload, receipt, cache, checkpoint, Gate-0, T1, or P50 object was ever built under it. Recorded so it can never be mistaken for a current or superseded production identity. |
+| `process_v2_connected_nonleaf_atom_delete_v1` | **REJECTED** round-one mode name. Recorded as a removed name only; nothing may alias it. |
+| `6b98ee21ef8b853deda9fa56a2963178208ecc893a397fb4aa412629fc2414d7` | **SUPERSEDED** V1 identity, measured at base `bc05c6e`. Historical V1 migration payloads were built under it and remain readable under V1 via a pinned identity. |
+
+The V1 identity moved because this work edits sources the V1 identity hashes
+(`factorized_tracelet_rate_model.py`, `factorized_mark_conditional.py`,
+`editing_v2_process_identity.py`). That is the invalidation mechanism working,
+not a change to V1 semantics — §5 gives byte-level evidence that V1 *behaviour*
+is unchanged.
+
+## 3. The P50 chain — one statement, not two
+
+The round-one report contained contradictory statements about whether the P50
+chain was in scope. It is, and the resolution is:
+
+**The P50 chain artifacts were re-pinned. Re-pinning them is not a Gate-0 run and
+confers no authority.** They are re-pinned because they transitively
+content-address the V1 process identity, which moved. Every P50-chain edit is a
+hash-pointer substitution, verified as such in §5.
+
+Precedent was checked rather than assumed: `git log -p` on `d5d3016`, an
+analogous earlier process change, re-pinned the Gate-0 model/process contract,
+the capability-cell registry, the Active8 decision runtime, the Gate-0 structural
+contract, and the `FROZEN_CONTRACT_SHA256` source constant. Round one read that
+as excluding P50. **That reading was wrong**: the P50 recipe policy
+content-addresses the cell-role policy, so it moves whenever the cell-role policy
+moves. It is included here.
+
+Measured evidence produced under a superseded identity stays invalid either way,
+which is why re-pinning cannot launder it into authority.
+
+## 4. Complete file inventory
+
+**52 files, +14,677 / −591** relative to `bc05c6e` (committed plus working tree).
+
+Commits on the branch, oldest first: `42756ce`, `37f607c`, `9464076`, `60e5d9a`,
+`655717f`, `e8bc288`, `067d8da`, `c506d70`, `85169b1`, `5368c46` (round one);
+`4c6e4e2`, `3fb5e53`, `1bc1dfd`, `761bfe1` (round-two worker patches). The
+round-two integration repair described in §6 is uncommitted at the time of
+writing and will land as additive commits on this same branch; no history was
+rewritten and nothing from round one was discarded.
+
+### New — 18
+
+| Path | Role |
+|---|---|
+| `src/compose_v4/rewrite/process_v2_atom_delete.py` | **the single admission authority** |
+| `src/compose_v4/data/editing_process_v2_rebind.py` | V1→V2 corpus rebind; integrity vs support separated |
+| `src/compose_v4/data/editing_process_v2_admitted_source.py` | fail-closed admitted-source adapter |
+| `scripts/verify_process_v2_hash_chain.py` | read-only transitive re-pin verifier |
+| `configs/editing_v2_semantic_process_v2.json` | V2 semantic process contract |
+| `configs/editing_gate_zero_semantic_model_process_v2.json` | V2 Gate-0 model/process contract |
+| `docs/EDITING_PROCESS_V2_DECISION.md` | the frozen prospective decision |
+| `docs/PROCESS_V2_IMPLEMENTATION_REPORT.md` | this report |
+| `tests/test_process_v2_atom_delete.py` | resolver behaviour |
+| `tests/test_process_v2_atom_delete_gates.py` | per-gate witnesses, frozen literal fixtures |
+| `tests/test_process_v2_atom_delete_mask.py` | independent-oracle mask comparison |
+| `tests/test_process_v2_atom_delete_teacher.py` | teacher scorability, both directions |
+| `tests/test_process_v2_atom_delete_invariance.py` | representation invariance |
+| `tests/test_process_v2_runtime_checkpoint.py` | runtime/checkpoint threading |
+| `tests/test_editing_process_v2_identity.py` | identity and contract |
+| `tests/test_editing_process_v2_rebind.py` | rebind, incl. sharding equivalence |
+| `tests/test_editing_process_v2_admitted_source.py` | adapter |
+| `tests/test_verify_process_v2_hash_chain.py` | the verifier's own blind spots |
+
+### Modified — 34
+
+**Model / rewrite / data (5):** `model/factorized_tracelet_rate_model.py` (mask,
+mode, capability, equality guard) · `rewrite/editing_v2_process_identity.py`
+(coexisting V1/V2 identities) · `rewrite/trace_shard_v3.py` ·
+`data/semantic_packed_trace_store.py` · `data/editing_corpus_contract.py`
+
+**Experiments (15):** `editing_gate_zero_semantic_contract.py` (V2 Gate-0
+variant) · `editing_v2_scientific_identity.py` · `editing_v2_semantic_runtime.py` ·
+`factorized_mark_conditional.py` (capability keywords derived from
+`dataclasses.fields`) · `editing_v2_semantic_t1_capacity_runner.py` (**defect 1
+fix**) · `production_successor_kernel.py` ·
+`canonical_successor_distillation.py` · `editing_successor_trainer.py` ·
+`factorized_successor_training.py` · `successor_micro_overfit.py` ·
+`editing_gate_zero_runtime.py` · `editing_training_gate.py` *(pin only)* ·
+`editing_v2_semantic_gate_zero.py` *(pin only)* ·
+`editing_v2_semantic_t1_capacity_policy.py` *(pin only)* ·
+`editing_v2_semantic_t1_decision.py` *(pin only)*
+
+**Scripts / apps (2):** `scripts/evaluate_tracelet_rollouts.py` (fail-closed
+guard) · `modal_apps/materialize_editing_v2_semantic_p50_validation_baseline_app.py`
+
+**Configs — hash pointers only (9):**
+`editing_gate_zero_semantic_model_process_v1.json` · `editing_training_v2_gate.json` ·
+`editing_v2_semantic_active8_decision_runtime_v1.json` ·
+`editing_v2_semantic_capability_cells_v1.json` ·
+`editing_v2_semantic_development_cell_roles_v1.json` ·
+`editing_v2_semantic_gate_zero_structural_v1.json` ·
+`editing_v2_semantic_p50_recipe_policy_v1.json` ·
+`editing_v2_semantic_t1_capacity_policy_v1.json` ·
+`editing_v2_semantic_t1_panel_policy_v1.json`
+
+**Tests (4):** `test_editing_v2_semantic_t1_capacity_runner.py` ·
+`test_materialize_editing_v2_semantic_t1_panel_cache_app.py` ·
+`test_editing_v2_semantic_t1_panel_cache.py` · `test_teacher_in_candidates.py`
+
+**Context (1):** `.claude/context/learnings.md` — **+50/−0 in round one, +40/−0 in
+round two, purely additive.** This is not an unrelated change: the entries record
+this round's durable lessons, including an explicit correction to the round-one
+entry's own re-pin method, which is the method that produced defect 3 in §6.
+`.claude/` is treated as code by this repository's stated convention, so the
+entry ships with the change that makes it true.
+
+## 5. Verification
+
+Environment for every run:
+`KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src`.
+
+### Builder and checkpoint paths can construct Process V2
+
+This was the blocking requirement. Round two found that
+`editing_gate_zero_semantic_contract.py` called `semantic_model_identity()`
+unconditionally, so **no Gate-0-shaped path could build a Process-V2 model at
+all** — while every focused test still passed. Fixed by adding the V2 contract
+variant, then verified *by construction* through the real
+`build_semantic_scratch_runtime`:
+
+```
+V1: semantic_editing_v2_v1  legacy_acyclic_atom_delete_v1            fp d246bc88d8440d31
+V2: semantic_editing_v2_v2  process_v2_uniform_gated_atom_delete_v2  fp d79ffe8ef65f3fb3
+```
+
+One constant was neutralized to do this: `build_production_ringcore_catalog`
+reconstructs `82fd910cafe2eeb7` against a frozen `639ff6078c32d43c` on this
+machine. That drift is **pre-existing and environmental** — reproduced identically
+on base `bc05c6e`, whose catalog inputs this branch never touches. It is stated
+rather than hidden, and it is not allowed to stand in for a real failure.
+
+### Test counts
+
+| Run | Result |
+|---|---|
+| Focused Process-V2 set (17 files) | **267 passed, 1 failed, 1 skipped** |
+| The single failure | `test_full_partition_scorer_covers_exact_semantic_editing_v2_active8` — the pre-existing catalog drift, **identical failure verified on base `bc05c6e`** |
+| Full suite, base `bc05c6e` | 14 failed, 2279 passed, 1 skipped, 15 errors |
+| Full suite, head | see §5.1 |
+
+The 15 collection errors are a missing PyYAML in this venv, identical on base and
+head.
+
+### Equivalence and invariance
+
+| Check | Result |
+|---|---|
+| Legacy V1 batch vs base | **43/43 shared fields byte-identical** over an 18-molecule panel; the 2 head-only fields take inert legacy values (`legacy_acyclic_atom_delete_v1`, `None`) |
+| Other seven Active8 operators | `git diff bc05c6e..HEAD` **empty** for `kernel.py`, `operators.py`, `factorized_fiber.py`, `tracelet_fiber.py`, `fiber.py`, `ring_system_fiber.py`, `aromaticity.py`, `state.py`, `molecular_graph.py`, `charge_policy.py`, `source_corruption.py`, `configs/editing_v2_semantic_process_v1.json` |
+| Base-vs-head model export | **401 shared arrays, 0 differences** across 3 model configurations × 8 drug-like leads — every `state_dict` tensor, every batch field, every forward output, and the capability fingerprint |
+| With V2 enabled | only `atom_delete` moves; **10/10** other action tables identical; all logits identical |
+| Direct vs multiworker | proof rows **identical row-for-row**; aggregate census totals identical; exactly 8 provenance fields differ, pinned as an absolute literal set |
+| Deterministic regeneration | 3/3 contracts: `rebuild == rebuild == committed` |
+| Config re-pin | every difference a 64-hex → 64-hex pointer; **zero** policy, threshold, count or cell-definition changes |
+| Representation invariance | 200 leads × 3 randomized non-canonical SMILES: **600 comparisons, 0 mismatches** |
+| Charge, adversarial panel | 19 hand-built states (charged leaf; charged singleton `[NH4+]`; neutral adjacent to a charged centre; nitro; N-oxide; zwitterionic glycine; the carboxylate protonation trap `CC(=O)[O-]`; charged aromatic): **0 mask/runtime disagreements in either direction** |
+| Mixed V1/V2 | every mixed combination raises with a distinct message; the feature cache key includes the delete mode, so a V1 and a V2 collator cannot share a cached mask; **no silent combination found** |
+| Hash chain | `status: AGREES`, **0 stale literals** (138 agree, 7 lineage) |
+| Pinned Ruff 0.15.22 | 36/36 touched files clean; whole repo **64 = 64** vs base, **none** from a touched file |
 | `git diff --check` | clean |
 
-The skip is `FactorizedMarkBatch.pin_memory`: torch routes pinned memory to `mps:0`
-on this Mac. Repository-wide `ruff check src/ tests/` reports 5 pre-existing `E402`
-errors in `tests/test_packed_trace_store.py`, identical at the base commit, in a file
-this work does not touch.
+### Mutation testing
 
-### Independent orchestrator verification, not delegated
+17 mutations were applied to shadow copies of the source tree and the focused
+suites re-run against each. **15 were killed.** The two that reproduce the
+round-one defect matter most:
 
-1. **Legacy fingerprint stability.** All **392** pre-existing `OperatorCapabilities`
-   configurations produce byte-identical fingerprints at base and head; **0** changed.
-   The frozen values `d246bc88d8440d31` (semantic V1), `e787c852410c6b63` (legacy
-   RingCore), and `40510175845988f1` (de-novo default) are unchanged.
-2. **Legacy batch byte-identity.** All **14** legacy-semantics batch tensors
-   (topologies, all masks, graft tables, neural bonds, atom state) are byte-identical
-   between base and head over a 22-molecule panel.
-3. **Mask versus independent oracle through the real batch builder.** Over 28
-   molecules including charged, fused, bridged, spiro, S/Cl-bearing and mixed
-   aromatic/saturated systems: **0** mask mismatches, V1 always a subset of V2, the
-   V1 and additional sets always disjoint. 17 of 28 molecules gain at least one new
-   candidate; 90 new candidates in total.
-4. **Representation invariance.** Slot-relabel equivariance: 0 mismatches over 60
-   random relabelings. Kekule-alias invariance of the canonical successor set: 0
-   mismatches. Both are pinned in `tests/test_process_v2_atom_delete_invariance.py`.
-
-### Performance, path-level
-
-Measured on the real `prepare_factorized_mark_batch` path over drug-like leads, per
-the repository's own lesson that micro-benchmarks mislead about paths:
-
-| Batch size | Existing cold path | V2 mask added | Added share |
-|---|---|---|---|
-| 32 | ~1,735-1,792 ms/state | 4.49-5.72 ms/state | **+0.26% to +0.32%** |
-| 128 | ~1,728-1,790 ms/state | 5.74-6.16 ms/state | **+0.33% to +0.34%** |
-| 256 | ~1,778 ms/state | 5.28 ms/state | **+0.30%** |
-
-Stated at a different denominator, the V2 expansion costs about 12x the isolated V1
-`_graph_application_masks` call (0.479 ms/state versus 5.763 ms/state on 100 leads,
-mean 23.2 heavy atoms), yielding 2.95 additional admissions per state. Both numbers
-are correct at their stated scope; the path-level figure is the operationally
-relevant one, and results are cached per exact state in `ChemistryStateFeatures`.
-
-## 7. Defects found and fixed beyond the three implementation scopes
-
-1. **V1 payloads became unreadable, blocking the rebind end to end.**
-   `decode_semantic_trace_record` required the *live* process identity, so a V1
-   semantic packed row failed to decode the moment Process V2 moved that identity.
-   The compatibility proof must read the immutable V1 payload. Fixed by giving the
-   decoder the same optional pinned-identity contract the packed store's readers
-   carry, threaded from both readers. Default `None` keeps the live requirement and
-   is byte-identical for every existing caller; a pinned identity proves provenance,
-   never currency.
-
-2. **Silent wrong-runtime selection under Process V2.** `_default_rewrite_system`,
-   the kernel-identity provenance flag, the ringcore configuration label, and the
-   successor-training predicate compared process semantics by *equality* with version
-   one. Under V2 those evaluate False, so the evaluator would silently return
-   `editing_v2_rewrite_system()` instead of the semantic runtime and record
-   `semantic_editing_v2_process=False`: a wrong runtime and false provenance with no
-   error raised. Fixed with a single authority, `is_semantic_editing_v2_process`,
-   plus a distinct `editing_v2_semantic_actions_v2` configuration label so a
-   Process-V2 kernel identity cannot read as a Process-V1 one. A regression test
-   fails if a future process version is added without updating the predicate.
-
-3. **An over-specified fail-closed assertion, pre-existing.**
-   `test_cross_family_alias_fails_closed_instead_of_double_counting` asserted *which*
-   of two cross-family guards fires, but the per-family selection is seeded by
-   `cell_role_policy_sha256` by design. Measured at the base commit with Process V2
-   entirely absent: **12 of 12** legitimate policy-hash values flip which guard
-   fires. The invariant, failing closed rather than double counting, still holds
-   under both guards. The assertion now requires the hard failure and accepts either
-   guard, with the measurement recorded inline. This is a removal of an
-   over-specification, not a relaxation of a scientific gate.
-
-## 8. Cross-worker disagreement, and how it was resolved
-
-The identity worker implemented `validate_frozen_process_identity` more strictly
-than the frozen interface spec required: beyond the exact field set and recomputed
-self-hash, it checks that `schema_version`, `process_semantics`, and
-`contract_relative_path` are the triple the declared schema is definitionally bound
-to. The rebind worker's test had assumed the looser contract and constructed a
-"different" identity by rewriting a schema-bound field.
-
-Resolved in favour of the stricter implementation: it closes a real masquerade
-vector, since re-hashing alone makes a relabelled object internally consistent. The
-rebind test was changed to mutate a field the schema does not bind, so it tests the
-intended rejection reason, and a dedicated
-`test_a_relabelled_v1_identity_cannot_masquerade` was added for the schema-bound
-case. No worker's implementation was weakened.
-
-## 9. Unresolved risks and open decisions
-
-1. **P50 lane invalidated.** 27 failures and 14 errors, one root cause,
-   `configs/editing_v2_semantic_p50_recipe_policy_v1.json`. Regenerating it requires
-   P50-lane authority and re-derived prerequisites. Deliberately not repaired here.
-2. **Measured Gate-0 and T1 evidence produced under `6b98ee21…` is invalid.**
-   Re-pinning binding contracts did not and cannot regenerate it.
-3. **Checkpoint persistence of `atom_delete_action_semantics` has no owner.** Neither
-   `editing_v2_semantic_runtime.py` nor `editing_v2_scientific_identity.py` was
-   extended, the latter by instruction. A V2 checkpoint reconstructed through the
-   existing loader fails loudly at the model constructor rather than silently, but
-   the V2 scientific-identity binding remains future work.
-4. **Batch builders that pass capabilities field by field** raise loudly under a V2
-   model rather than silently building a V1 mask:
-   `successor_micro_overfit.py:253`, `production_successor_kernel.py:162`,
-   `editing_v2_semantic_t1_capacity_runner.py:388`,
-   `materialize_editing_v2_semantic_p50_validation_baseline_app.py:686`, plus
-   `editing_gate_zero_runtime.py:1156`, `editing_successor_trainer.py:527`,
-   `canonical_successor_distillation.py:328,455`, `ring_macro_enumerability.py:468`.
-   Each needs the flag threaded when its lane is authorized for V2.
-5. **Four rejection codes never fire on real chemistry.** Over all 800 Jin-QED leads
-   (9,189 slot decisions), only `aromatic_atom` (3,766), `articulation_point`
-   (2,441), `outside_connected_nonleaf_expansion` (1,652) and
-   `charge_policy_violated` (121) fire, with 1,209 admitted. `EXECUTOR_REJECTED`,
-   `SUCCESSOR_DISCONNECTED`, `SUCCESSOR_OUTSIDE_SUPPORT` and
-   `SUCCESSOR_NOT_CANONICALIZABLE` never fired: deletion preserves each surviving
-   neighbour's class valence, so they are defence in depth. Reported as a negative
-   result rather than dressed up with a fabricated fixture.
-6. **Environment gap, out of scope.** `PyYAML` is imported by
-   `compose_v4.experiments.registry` but is not declared in `pyproject.toml` and is
-   absent from the pinned venv; 15 test files fail collection without a shim. Not
-   fixed here as unrelated cleanup.
-
-## 10. Stop conditions
-
-None of the handoff's stop conditions triggered.
-
-| Condition | Assessment |
+| Mutation | Result |
 |---|---|
-| Executor legality not representable in the batch mask | Not triggered. Represented exactly as CPU-derived admission, cached per exact state. |
-| Aromaticity or charge behaviour ambiguous | Not triggered. Aromaticity is the frozen resonance-invariant perception; charge uses the unchanged policy. |
-| A supposedly unchanged operator changes on a frozen fixture | Not triggered. 392/392 fingerprints and 14/14 legacy tensors byte-identical. |
-| V1 and V2 identities cannot coexist unambiguously | Not triggered. Distinct schema strings and semantics; masquerade rejected and tested. |
-| Exact transition replay differs for a payload claimed compatible | Not triggered. The rebind refuses to publish on any mismatch. |
-| Rebind requires changing split or provenance identity | Not triggered. Source, split, lane, provenance carried through unchanged. |
-| A requested action would authorize or launch a scientific job | Not triggered. Nothing was launched. |
+| Charge gate exempts the INHERITED source (**the round-one defect**) | KILLED — 13 failed |
+| Collator re-unions the V1 dense mask (**the round-one shape**) | KILLED — 6 failed |
+| Charge gate removed entirely | KILLED — 13 failed |
+| V2 mask zeroed | KILLED — 20 failed, 2 errors |
+| Candidate source always `inherited` | KILLED — 17 failed |
+| SCAR gate removed / widened to both sources | KILLED — 3 failed / 1 failed |
+| Aromatic gate removed | KILLED — 6 failed |
+| Real-element, executor, connectivity, support, `MAX_ACTIVE_ATOMS`, invalid-source, forward equality guard | each KILLED |
+| **Gate 6 (canonicalizability) downgraded to a swallow** | **SURVIVED** |
+| **Gate 8 (articulation) removed** | **SURVIVED** |
 
-## 11. Independent review: performance and adversarial
+Both survivals are reported rather than papered over, and both are now documented
+in the module docstring as gates no test can currently fail on:
 
-Two reviewers worked from the same frozen interface but with no write access to
-the implementation, so neither could quietly repair what it found.
+* **Gate 8** is unreachable by construction: removing a cut vertex from a
+  connected graph always disconnects it, so gate 3 fires first. Verified on every
+  one of 7,290+ such slots. The `articulation_point` diagnostic is still
+  populated, so the exclusion stays observable.
+* **Gate 6** is unreachable behind gate 2: `is_valid_atom_delete` requires the
+  same `molecular_graph_to_smiles` round-trip that `canonical_state_key` would
+  fail on. Round one's docstring **claimed a test witness for it that does not
+  exist**. That claim is retracted; the docstring now states it is untested.
 
-### Performance and decision equivalence
+A methodological control matters here. Appending a no-op comment to
+`process_v2_atom_delete.py` fails 4 tests, because that file is content-hashed by
+the process identity. Those 4 are *content-hash* tests, not semantic ones — so a
+mutation whose only failures are those 4 is a **survival**, not a kill. Without
+that control the two survivals above would have been misread as kills.
 
-Panel: **894 states at 40 production slots**, identity
-`c1c1b424387f5b7b4e2941f4016e6db853388a84951ab83fe7f0bc0c9efb2b03` (800 Jin-QED
-leads plus 94 hand-built saturated, bridged, spiro, heterocyclic and charged
-supplements, because the Jin panel is aromatic-heavy and Process V2 only ever
-admits non-aromatic slots).
+### 5.1 Full-suite base/head comparison
 
-- **Decision equivalence: 894 states x 40 slots = 35,760 decisions, 0
-  disagreements in either direction**, against an oracle built only from the
-  primitives, with its own graph construction and its own support re-derivation.
-- New mask cost **4.94 ms/state mean** (7.11 with candidates, 0.58 without).
-  RDKit work is **linear in the number of screened slots and independent of
-  heavy-atom count**: `sanitizations = 1 + D + 4S + A`, exact on 894/894 states.
-- On the real `prepare_factorized_mark_batch` path the addition is **+0.29% to
-  +0.34%** of the existing cold per-state cost (about 1,760-1,790 ms/state), and
-  **+0.351%** re-measured on the integrated head. The existing cost is dominated
-  by `_semantic_cycle_close_admission_mask` (54.8%) and
-  `_semantic_atom_restate_admission_mask` (36.7%); the new mask is 0.26% of it.
-  The ratio is cache-invariant because the V2 mask rides the same
-  `molecular_state_cache_key`.
-- Newly admitted candidates per molecule: median 3, mean 3.13, max 16; **33.2%
-  of molecules gain none**. Slots: V2 adds 2,796 of 19,019 real slots (14.70%),
-  V1 admits 3,401 (17.88%), **overlap 0 on every state**.
-- Optimization ladder measured, none applied: hoisting the per-candidate
-  recomputation of state-level work plus reusing the collator's existing graph
-  and perception gives **2.52x** with no condition, no condition order and no
-  executor call changed. It is not applied here because profiling shows the cost
-  is already 0.3% of the path, and the smallest complete change is preferred.
-  One proposal that would reorder an executor call was measured (0.012 ms/state,
-  nothing) and **rejected**.
+Same invocation on both sides:
+`python -m pytest tests/ -q --continue-on-collection-errors`.
 
-### A measured chemical finding, with its control
+```
+base bc05c6e : 14 failed, 2279 passed, 1 skipped, 15 errors in 862.92s
+head         : 14 failed, 2470 passed, 2 skipped, 15 errors in 879.11s
+```
 
-**2 of 2,796 newly admitted deletions (0.072%) produce a successor whose
-perceived aromatic ring count drops from 2 to 1.** Both are the same chemistry, a
-protonated quinoid `C=c2ccccc2=[NH+]`: the deleted atom has no incident perceived
-aromatic bond, so frozen condition 2 is correctly satisfied, but it carries a
-stored double bond into the quinoid ring and removing it collapses the
-cross-conjugation that sustained RDKit's perception. Successors are valid,
-connected, charge-preserving and canonicalizable. Charge-altering: 0.
-Disconnected: 0.
+The comparison is over failure **sets**, not counts, because equal counts can
+hide an equal-sized swap:
 
-The control is what makes this interpretable. On the same panel the **unchanged
-V1 leaf rule** admits 3,401 deletions of which **61 (1.79%) are
-aromatic-system-altering and 140 (4.12%) violate the charge policy**. The
-property is therefore inherited from the preserved V1 rule at roughly 25x the
-rate, and the Process-V2 expansion is strictly cleaner on both axes. This is an
-owner decision about whether condition 2 should be widened to exclude atoms
-double-bonded into a perceived aromatic system, not an implementation defect, and
-it is **not** the handoff's representation-sensitivity hazard: that hazard is
-Kekule-alias dependence of the successor, and alias invariance was verified over
-965 component-factored aliases and 3,200 random re-serializations with 0
-mismatches.
+```
+failures only on head (regressions) : none
+failures only on base (fixed here)  : none
+collection errors base vs head      : IDENTICAL
+```
 
-### Adversarial review
+The two failure sets are the same 14 tests, in
+`test_ringcore_validation_panel_builder.py` (6),
+`test_ring_core_identity_gate.py` (2),
+`test_aromatic_cycle_open_global_oracle.py` (2), and one each in
+`test_semantic_active8_decision_modal_surface.py`,
+`test_ring_core_zero_mixture.py`, `test_reference_successor_kernel.py`, and
+`test_editing_v2_semantic_t1_capacity_runner.py`. The last is the RingCore
+catalog drift described above. **+191 tests pass** on head, which is the new
+Process-V2 coverage.
 
-The reviewer independently reproduced both suite results exactly (base 21 failed
-/ 2480 passed / 1 skipped; head 48 failed / 2542 passed / 2 skipped / 14 errors
-at `c506d70`), which is why those counts are reported as measurements rather than
-single observations. It confirmed byte-identity of the state dict, capability
-fingerprint, all 11 mask tensors and all 11 logit tensors versus base under V1
-semantics; 0 mask/oracle disagreements over 800 leads, 889 hard states (padded,
-permuted, chained-delete, SCAR-injected) and a 55-molecule aromatic edge panel;
-disjointness on every state; correct carriage of the new batch fields through
-`subbatch`, `.to()` and concatenation; no bare excepts or silent degradation in
-the rebind; and no unrelated operator touched.
+This is the *second* full-suite run. The first showed **16 regressions**, all in
+`tests/test_editing_v2_semantic_t1_decision.py`. They were real, were traced to a
+stale pin left by my own re-pin driver, and were fixed (§6, defects 3–5). That
+sequence is the evidence for the claim in §6 that a green chain verifier is not
+sufficient on its own.
 
-It also found real defects, all of which are fixed in `85169b1` except where
-noted:
+## 6. Defects found and fixed in round two
 
-1. **The identity re-pin was incomplete** (blocker). Four further artifacts and
-   four source constants still pinned the superseded cell-role policy hash.
-   Fixed, and verified by sweeping every hash value these edits obsoleted until
-   the sweep reported none.
-2. **The T1 chain failed silently** where the P50 chain failed loudly, because
-   `editing_v2_semantic_t1_capacity_policy.py` compares the config against a
-   *source constant* rather than the live loader, so both were stale and agreed
-   with each other. Re-pinned. The structural weakness remains and is recorded in
-   section 9: the next hash move will again be silently stale there.
-3. **Three production mutations survived the whole suite** (bypassing the
-   executor check, bypassing the declared-support check, zeroing the V1 dense
-   mask). Fixed with reachable witnesses in
-   `tests/test_process_v2_atom_delete_gates.py`; each mutation is now caught by
-   exactly one test.
-4. **Nothing tested that a connected-nonleaf delete can be learned.** Fixed in
-   `tests/test_process_v2_atom_delete_teacher.py`, with the Process-V1 negative
-   control.
-5. **Three claims outran their evidence** and were corrected in place:
-   conditions 3 and 5 are not independent, a self-consistent pinned identity does
-   not prove provenance, and the rebind oracle is a second derivation rather than
-   a second design.
-6. **`mismatches_by_code` is a constant, not a measurement** (section 9).
+Ordered by severity. Every one was found by a check, not by inspection.
 
-Findings assessed and deliberately not acted on: the Kekule-alias invariance test
-is underpowered relative to its name (8 of 10 panel molecules have no aromatic
-component and skip), though it does fail under the aromatic mutation and the
-independent sweep supplies the missing power; the two pinned-identity readers now
-derive the expected process-semantics label differently, which fails closed but
-is inconsistent; and Process V2 newly admits deletions adjacent to a SCAR, which
-writes hydrogen onto the SCAR through unchanged executor behaviour. The SCAR
-itself is never admitted, so the handoff's stated requirement holds.
+1. **The Process-V2 T1 capacity path could not run at all.** *(found by
+   adversarial review; confirmed independently before acting)*
+   `_index_factorized_batch` re-indexes `atom_delete_mask` and three sibling
+   admission masks but never `atom_delete_admission_mask`, so
+   `dataclasses.replace` carried the full-batch tensor through:
+   `index [2,0] → delete (2,40), admission (3,40)`. The forward **equality**
+   guard caught it, so it failed *closed* rather than scoring selected rows
+   against another row's fiber — the design choice of equality over containment
+   paid for itself here. Two reasons it survived, both mine: the existing
+   selected-vs-direct test compared a **hand-enumerated field list** (now derived
+   from `dataclasses.fields`, so a future field is covered the day it is added),
+   and its model fixture is V1, where the field is `None` and both sides compare
+   vacuously (a V2 fixture and test were added). Mutation-proven: reverting the
+   one-line fix yields `assert 3 == 2`.
+
+2. **No builder could construct Process V2** (§5). A whole class of paths was
+   structurally V1-only while every focused test passed.
+
+3. **A stale pin that validated silently, introduced by my own round-one
+   re-pin.** At base `bc05c6e` the T1 capacity policy config and both its
+   consumers agreed at `2186dbd9…`; round-one commit `85169b1` moved the config
+   to `2bb8e951…` and left both consumers behind, because that sweep skipped
+   files already touched in the same pass. It failed 19 tests. Corrected rule:
+   never exclude an already-touched file; exclude only the self-occurrence.
+
+4. **Three ways an automated re-pin corrupts an artifact**, each caught by the
+   focused suites *after* the chain verifier reported `AGREES`:
+   (a) `process_identity_sha256` is a top-level `*_sha256` field that is **not** a
+   self-hash, so recomputing "every `*_sha256`" destroys the pin — identify the
+   self-hash field on the pre-mutation payload, where the equation still holds;
+   (b) `*file_sha256` means the target's **physical** hash and `*semantic_sha256`
+   its **self**-hash, so a role fallback wrote the self-hash into `file_sha256`,
+   which every loader checking both rejects;
+   (c) a value produced and superseded **inside one run** was never committed, so
+   `git show` cannot see it and the pin holding it addresses nothing.
+   The lesson: **chain-verifies-green is necessary but not sufficient.**
+
+5. **Two blind spots in the chain verifier itself**, both of which had let a real
+   stale pin read as green. It scanned only JSON for pointer edges, so pins
+   written as Python dict constants (`EXPECTED_T1_CAPACITY_POLICY`) and as sibling
+   module constants (`CAPACITY_POLICY_RELATIVE_PATH` +
+   `CAPACITY_POLICY_{FILE_,}SHA256`) were invisible; and it derived chain
+   membership from value matching, so an artifact whose pin resolved to
+   **nothing** — the worst case, not a benign one — fell out of the chain and had
+   its finding downgraded from failure to warning. Both closed, with
+   `tests/test_verify_process_v2_hash_chain.py` carrying a built-in negative
+   control that calls `_chain_report` with and without the edges and asserts
+   opposite outcomes.
+
+6. **Silent coercion in the admission authority.** `int(action.v)` ran before the
+   type check, so `AtomDelete(1.9)` and `AtomDelete(True)` were truncated to slot
+   1 and **admitted**. Now refused with `slot = -1`, so the report cannot be
+   mistaken for a decision about slot 1. `np.int64` still works, because
+   `np.flatnonzero` produces it throughout this codebase and rejecting it would
+   be a different defect.
+
+7. **A false integrity contract.** `_prove_record`'s docstring promised that a
+   step whose teacher falls outside the frozen fiber is still codec-checked,
+   replayed and compared. That held for `TEACHER_RULE_OUTSIDE_FROZEN_SUPPORT` but
+   **not** for `TEACHER_FAMILY_OUTSIDE_FROZEN_SUPPORT`, whose executor rule the
+   codec *can* decode — so a corrupt payload could hide behind an unsupported
+   family. The code now matches the contract, following the pattern the
+   `atom_delete` branch already used.
+
+8. **A constant-vs-constant check.** `semantic_packed_trace_store.py` compared the
+   manifest's process label against a hardcoded V1 module constant while accepting
+   a V2 pinned identity, so the label was never cross-checked against the
+   identity. Now compared against the resolved identity, matching its sibling
+   `trace_shard_v3.py`.
+
+9. **A silently-wrong checkpoint load path.** `evaluate_tracelet_rollouts.py`
+   threads no semantic mode keywords, and semantic V1 and Process V2 have
+   **identical parameter shapes**, so a V2 checkpoint would load cleanly and
+   sample the V1 fiber without a word. A fail-closed guard now refuses. Teaching
+   that evaluator the semantic processes is deliberately left as a separate
+   change.
+
+## 7. Reported findings I am rejecting
+
+* **`__all__` violates the repository convention.** It does not, in this file's
+  neighbourhood: **19 of 33** modules in `src/compose_v4/rewrite/` define
+  `__all__`, and the stated rule "match the existing style of the file you are
+  editing" governs. Recorded rather than silently ignored.
+
+## 8. Open risks and things deliberately not done
+
+* **Gates 6 and 8 are untested** (§5). Documented, not hidden. Constructing a
+  witness for either requires changing a predicate the decision freezes.
+* **SCAR-incident connected-nonleaf deletion is excluded**, pending a separate
+  SCAR semantic decision. SCAR-adjacent *leaf* deletion stays admitted, because
+  the decision withdraws no inherited capability. Verified: 0 inherited-source V2
+  admissions fall outside the V1 dense mask over 813 states, and the same holds
+  structurally, since a real-degree-≤1 slot is never an articulation point.
+* **Aromatic connected-nonleaf deletion is excluded**, pending a separate
+  semantic decision and resolver.
+* **`test_sharding_the_work_cannot_change_the_published_artifact` is
+  concurrency-sensitive**: it reads the live repository through `repo_root=ROOT`,
+  so it can fail if the worktree changes underneath it. It passes in isolation and
+  with its own file. This is a property of that file's existing fixture design
+  rather than something the new test introduces, but a failure from it during a
+  concurrent edit is not by itself evidence of a defect.
+* **The rebind's published address is schedule-dependent by design** —
+  `entries_per_task` is part of the run identity, so a 20-container run and a
+  1-container run publish to different run roots. The *data* is schedule-invariant
+  (§5), which is the property that matters; the addressing is a deliberate
+  provenance choice, now pinned by a test so a *newly* schedule-dependent field
+  fails rather than passing quietly.
+* **The RingCore catalog drift** (§5) means several Gate-0-shaped tests cannot run
+  in this environment at all. They fail identically on base.
+* **Executing the rebind proof scan, Active8 materialization, Gate 0, T1, P50 and
+  training remain not done, by instruction.**
+
+## 9. Stop conditions honoured
+
+* No Modal job, V2 proof scan, Active8, Gate 0, T1, P50, or training was launched.
+* The executor, aromatic semantics, charge policy, canonicalization,
+  persistent-slot semantics, multi-neighbour insertion, `ring_system_delete`,
+  `ring_system_grow`, and the other seven Active8 operators are unmodified —
+  verified by empty diffs and a 401-array export comparison (§5).
+* V1 identities and artifacts are preserved;
+  `configs/editing_v2_semantic_process_v1.json` is byte-identical to base.
+* No new chemistry semantics were improvised.
+* History was not rewritten; round two is additive repair on the same branch.
+* No commit message mentions any AI assistant.

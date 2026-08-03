@@ -502,3 +502,54 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   vertex from a connected graph leaves it connected. Measured over 3,617 candidates, only aromaticity,
   articulation, and the charge policy (7.6%) ever rejected anything. Corrected the claim rather than
   the code; the check stays as defence in depth.
+
+## 2026-08-02 (Process-V2 correction round; supersedes parts of the entry above)
+- **"Preserve the existing capability" is not "preserve the existing admission SET".** The first
+  Process-V2 reading kept root/singleton/leaf deletions admitted exactly as the legacy dense rule had
+  them, i.e. exempt from the authoritative charge policy, and expressed V2 as the union
+  `V1_dense | connected_nonleaf`. That preserves a legacy DEFECT: for `C[N+](C)(C)CC(=O)[O-]` the
+  legacy mask admits slots `[0,2,3,6,7]` and the production runtime refuses **4 of those 5** with
+  `InvalidRewrite`, so the model was learning a rate for transitions the executor cannot perform.
+  Measured breadth: 125 / 3,319 candidate slots (3.77%) across 105 / 800 leads. The correction is ONE
+  admission authority with uniform gates for both candidate sources; the two sources survive only as
+  diagnostic labels selecting which ADDITIONAL gates apply. Reviewer's framing, worth keeping: the
+  evidence was already in hand and had been used to JUSTIFY the exemption rather than to refute it.
+- **A union is the wrong shape for an expansion whose base is untrusted.** The give-away is that the
+  forward guard could only assert a SUBSET relation between the scored mask and the admission mask. It
+  now asserts EQUALITY, which is what "the learnable fiber is exactly the admitted fiber" means, and
+  the teacher test asserts both directions: an admitted deletion scores finite, and a charge-violating
+  inherited deletion scores `-inf` under V2.
+- **The round-one re-pin method recorded above is WRONG and produced a silent stale pin.** "Sweep the
+  obsoleted values and grep the tree" skipped files already touched in the same pass, which left
+  `configs/editing_training_v2_gate.json` and `editing_training_gate.py` pinning a dead T1 capacity
+  policy hash. It VALIDATED (constant vs constant) and only failed 19 tests later. Replacement that
+  works: a fixed-point driver over the verifier's OWN structural pin discovery, iterated until a round
+  writes nothing. Never exclude an already-touched file; exclude only the self-occurrence.
+- **Three ways an automated re-pin corrupts an artifact, all found by tests the chain verifier passed.**
+  (1) `process_identity_sha256` is a top-level `*_sha256` field that is NOT a self-hash, so
+  recomputing "every `*_sha256`" destroys the pin -- identify the self-hash field on the PRE-mutation
+  payload, where the equation still holds. (2) `*file_sha256` means the target's PHYSICAL bytes hash
+  and `*semantic_sha256` means its SELF-hash; falling back to whichever role exists writes the
+  self-hash into `file_sha256` and every loader that checks both rejects it. (3) A value produced and
+  superseded inside one run was never committed, so `git show` cannot see it and the pin that held it
+  addresses nothing. **Chain-verifies-green is necessary, not sufficient: run the focused suites.**
+- **Do not re-serialize a config to re-pin it.** 16 of 66 configs here are stored in canonical
+  single-line form; a pretty re-dump rewrites every byte and moves their physical hashes for nothing.
+  Substitute `"<key>": "<value>"` textually, allowing the parenthesised continuation ruff's 100-column
+  limit forces on a 64-character literal in Python.
+- **A pin does not stop being a pin because it is written in Python, and an unresolvable pin is the
+  WORST case, not a benign one.** The chain verifier scanned only JSON for pointer edges, so a
+  module-level dict constant of the same path-plus-sibling-hash shape was invisible; and it derived
+  chain membership from values matching a live or base index, so an artifact whose pin matched
+  NOTHING fell out of the chain and had its finding downgraded from failure to warning. Both are now
+  closed (`_python_pointer_edges`, plus edge-derived membership) with
+  `tests/test_verify_process_v2_hash_chain.py` carrying a built-in negative control.
+- **A builder that cannot construct the new process is an incomplete implementation, not a detail.**
+  `editing_gate_zero_semantic_contract.py` called `semantic_model_identity()` unconditionally, so no
+  Gate-0-shaped path could build a Process-V2 model at all, while every focused test still passed.
+  Verified by construction, not by inspection: `build_semantic_scratch_runtime` builds V1 at
+  capability fingerprint `d246bc88d8440d31` and V2 at `d79ffe8ef65f3fb3`.
+- **`build_production_ringcore_catalog` drifts on this Mac** (`82fd910cafe2eeb7` vs the frozen
+  `639ff6078c32d43c`), on the branch AND on its base with the catalog inputs untouched -- an
+  environment fact, not a code defect. Neutralize that ONE constant when proving a builder path, and
+  say so; do not let it stand in for a real failure or hide one.
