@@ -13,6 +13,18 @@ contract's own bins -- so no expectation here is a transcription that could
 silently drift.  And every derived value has a paired negative case in which the
 fixture deliberately disagrees with the policy, because a check whose input is
 built to satisfy it cannot fail on its own.
+
+The transitions are GENUINE, and this module supplies no transition view.  Every
+test drives the production adapter ``_structural_view``: the stand-in publishes
+exactly ``ACCEPTED_TRANSITION_FIELDS`` -- real persistent-slot states, a real
+ActionV4 record, the raw counts -- and Gate 0 derives the capability cell, the
+family context, the strata and the assignment identity from them.  The
+transitions come from :mod:`process_v2_genuine_transitions`, which discovers
+them by enumerating the production legal-event fibers, executing them through
+the production Active8 runtime and bucketing each result under the cell the
+production classifier puts it in.  An earlier version of this module fabricated
+``capability_cell_id`` and three strata directly and substituted an identity
+view, so the suite passed while the adapter it exists to feed was never run.
 """
 
 from __future__ import annotations
@@ -20,13 +32,18 @@ from __future__ import annotations
 import ast
 import json
 import shutil
+import sys
 from collections.abc import Iterator, Mapping
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
+from compose_v4.data.editing_v2_process_v2_active8_decision_index import (
+    ACCEPTED_TRANSITION_FIELDS,
+)
 from compose_v4.data.editing_v2_process_v2_active8_interfaces import (
     ACTIVE8_CENSUS_FIELDS,
     ACTIVE8_EXCLUDED,
@@ -40,11 +57,21 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     require_authority_false,
     require_no_granted_authority,
 )
+from compose_v4.data.editing_v2_semantic_capability_cells import (
+    SemanticCapabilityCellError,
+)
 from compose_v4.experiments import editing_v2_process_v2_gate_zero as gate_zero
 from compose_v4.rewrite.action_codec_v4 import ACTIVE8_EXECUTOR_RULES, canonical_family
 from compose_v4.rewrite.editing_v2_process_identity import editing_process_v2_identity
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT / "tests") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "tests"))
+
+from process_v2_genuine_transitions import (  # noqa: E402
+    discover_genuine_transitions,
+    genuine_transition,
+)
 
 #: family -> the one executor rule that aliases to it, read from the frozen codec.
 _EXECUTOR_FOR_FAMILY = {canonical_family(rule): rule for rule in ACTIVE8_EXECUTOR_RULES}
@@ -72,7 +99,7 @@ class StandInIndex:
         transitions: Mapping[ProcessV2TraceKey, list[dict[str, Any]]],
         *,
         process_identity_sha256: str | None = None,
-        refuse: frozenset[str] = frozenset(),
+        refuse: frozenset[tuple[str, int]] = frozenset(),
     ) -> None:
         self._rows = list(rows)
         self._transitions = {key: list(value) for key, value in transitions.items()}
@@ -115,7 +142,22 @@ class StandInIndex:
         yield from self._transitions.get(trace_key, ())
 
     def validate_accepted_transition(self, transition: Mapping[str, Any]) -> None:
-        if transition["assignment_sha256"] in self._refuse:
+        """Refuse anything that is not the raw row this index publishes.
+
+        The exact field-set comparison is the production index's own first
+        check.  Keeping it here is what makes this stand-in able to catch a
+        caller that hands the index a TRANSFORMED view and asks whether it
+        published it: a view renames fields, drops some and adds others, so it
+        never matches, and every transition would be refused.
+        """
+
+        if not isinstance(transition, Mapping) or set(transition) != set(
+            ACCEPTED_TRANSITION_FIELDS
+        ):
+            raise ValueError(
+                "a Process-V2 Active8 transition must carry exactly its declared fields"
+            )
+        if (transition["trace_id"], transition["step_index"]) in self._refuse:
             raise ValueError("this transition is not what the index published")
 
 
@@ -125,19 +167,6 @@ class StandInIndex:
 @pytest.fixture(scope="module", name="contract")
 def _contract() -> gate_zero.FrozenProcessV2GateZeroContract:
     return gate_zero.load_process_v2_gate_zero_contract(repo_root=REPO_ROOT)
-
-
-def _already_a_view(transition, **_kwargs):
-    """The stand-in publishes structural views, so the adapter is the identity.
-
-    Deliberate and narrow: the real adapter needs exact persistent-slot states
-    and a real ActionV4 record, which a synthetic cell-by-cell fixture cannot
-    fabricate without rebuilding the chain it exists to avoid. These tests drive
-    the DECISION logic; the adapter is proven by the end-to-end chain, and by
-    the guard below that the production default is the real one.
-    """
-
-    return transition
 
 
 def test_the_default_transition_view_is_the_real_adapter() -> None:
@@ -151,53 +180,98 @@ def test_the_default_transition_view_is_the_real_adapter() -> None:
     assert default is gate_zero._structural_view
 
 
-def _transition(
+@pytest.mark.parametrize(
+    "module_name",
+    ["test_process_v2_gate_zero", "test_process_v2_stage_modal_surfaces"],
+)
+def test_no_process_v2_gate_zero_test_substitutes_the_transition_view(
+    module_name: str,
+) -> None:
+    """The guard above is only worth having if no suite bypasses the adapter.
+
+    Read off the two suites' own source: no call site may pass ``view=``.
+    Without this a future fixture could reintroduce an identity view and every
+    assertion in either module would stop proving the production adapter runs.
+    """
+
+    path = REPO_ROOT / "tests" / f"{module_name}.py"
+    tree = ast.parse(path.read_text(), filename=str(path))
+    substitutions = [
+        keyword
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        for keyword in node.keywords
+        if keyword.arg == "view"
+    ]
+    assert not substitutions
+
+
+def _raw_transition(
     contract: gate_zero.FrozenProcessV2GateZeroContract,
     cell_id: str,
     *,
+    task_sha256: str,
+    trace_id: str,
+    entry_index: int = 7,
     progress_index: int = 0,
+    path_length: int = 1,
+    partition_role: str = "train",
     **overrides: Any,
 ) -> dict[str, Any]:
-    _namespace, family, context = cell_id.split(":")
-    raw, successors, aliases = 4, 2, 1
+    """The RAW row the index publishes for one genuine teacher transition.
+
+    Exactly ``ACCEPTED_TRANSITION_FIELDS``: nothing here is classified, because
+    nothing the index publishes is.  ``successor_is_terminal`` follows the trace
+    geometry the index computes it from -- ``step_index + 1 == path_length`` --
+    so a one-step trace publishes a final action, which is the shape production
+    emits and the shape Gate 0 must not call a terminal ASSIGNMENT.
+    """
+
+    genuine = genuine_transition(cell_id)
     transition = {
-        "assignment_sha256": _sha(f"{cell_id}|{progress_index}"),
-        "action_sha256": _sha(f"action|{cell_id}|{progress_index}"),
-        "canonical_successor_count": successors,
-        "canonical_successor_count_stratum": gate_zero.stratum_for(
-            successors, contract.strata_bins["canonical_successor_count"]
-        ),
-        "capability_cell_id": cell_id,
+        "v1_task_identity_sha256": task_sha256,
+        "entry_index": entry_index,
+        "trace_id": trace_id,
+        "index_identity_sha256": _sha("stand-in-index-identity"),
+        "task_identity_sha256": _sha(f"active8-task|{task_sha256}"),
         "data_lane": contract.data_lanes[0],
-        "executor_rule": _EXECUTOR_FOR_FAMILY[family],
-        "family_context": context,
-        "matching_mark_count": 1,
-        "model_family": family,
-        "partition_role": "train",
-        "progress_index": progress_index,
-        "raw_mark_count": raw,
-        "raw_mark_count_stratum": gate_zero.stratum_for(
-            raw, contract.strata_bins["raw_mark_count"]
-        ),
-        "source_state_sha256": _sha(f"source|{cell_id}"),
-        "successor_alias_multiplicity": aliases,
-        "successor_alias_multiplicity_stratum": gate_zero.stratum_for(
-            aliases, contract.strata_bins["successor_alias_multiplicity"]
-        ),
-        "target_state_sha256": _sha(f"target|{cell_id}"),
-        "terminal": False,
+        "split": partition_role,
+        "step_index": progress_index,
+        "executor_rule": genuine.executor_rule,
+        "model_family": genuine.model_family,
+        "action_sha256": genuine.action_sha256,
+        "action_record": dict(genuine.action_record),
+        "source_progress_index": progress_index,
+        "successor_progress_index": progress_index + 1,
+        "source_state_sha256": genuine.source_state_sha256,
+        "successor_state_sha256": genuine.successor_state_sha256,
+        "successor_is_terminal": progress_index + 1 == path_length,
+        "canonical_successor_key": genuine.canonical_successor_key,
+        "raw_mark_count": genuine.raw_mark_count,
+        "canonical_successor_count": genuine.canonical_successor_count,
+        "matching_mark_count": genuine.matching_mark_count,
+        "exact_successor_mark_count": genuine.exact_successor_mark_count,
+        "successor_alias_count": genuine.successor_alias_count,
+        "source_state": genuine.source_state,
+        "successor_state": genuine.successor_state,
     }
     transition.update(overrides)
     return transition
 
 
 def _row(
-    seed: str, *, role: str, category: str | None = None, transitions: int = 0
+    seed: str,
+    *,
+    role: str,
+    category: str | None = None,
+    transitions: int = 0,
+    task_sha256: str | None = None,
+    trace_id: str | None = None,
 ) -> dict[str, Any]:
     return {
-        "v1_task_identity_sha256": _sha(f"task|{seed}"),
+        "v1_task_identity_sha256": task_sha256 or _sha(f"task|{seed}"),
         "entry_index": 7,
-        "trace_id": f"trace-{seed}",
+        "trace_id": trace_id or f"trace-{seed}",
         "partition_role": role,
         "rejection_category": category,
         "decision_sha256": _sha(f"decision|{seed}"),
@@ -211,9 +285,14 @@ def _complete_fixture(
     omit_cells: frozenset[str] = frozenset(),
     sealed_seeds: tuple[str, ...] | None = None,
     override: Mapping[str, Mapping[str, Any]] | None = None,
-    refuse: frozenset[str] = frozenset(),
+    refuse: frozenset[tuple[str, int]] = frozenset(),
 ) -> StandInIndex:
-    """One train trace per registered capability cell, plus sealed and rejected rows."""
+    """One genuine one-step train trace per registered capability cell.
+
+    Plus the sealed nondecision roles and one row per rejection category.  Each
+    trace carries the transition discovery actually found for that cell, so a
+    cell is present here only because real chemistry reaches it.
+    """
 
     rows: list[dict[str, Any]] = []
     transitions: dict[ProcessV2TraceKey, list[dict[str, Any]]] = {}
@@ -224,7 +303,14 @@ def _complete_fixture(
         rows.append(row)
         key = (row["v1_task_identity_sha256"], row["entry_index"], row["trace_id"])
         transitions[key] = [
-            _transition(contract, cell_id, **dict((override or {}).get(cell_id, {})))
+            _raw_transition(
+                contract,
+                cell_id,
+                task_sha256=row["v1_task_identity_sha256"],
+                trace_id=row["trace_id"],
+                entry_index=row["entry_index"],
+                **dict((override or {}).get(cell_id, {})),
+            )
         ]
     seeds = sealed_seeds if sealed_seeds is not None else contract.sealed_roles
     for seed, role in zip(seeds, contract.sealed_roles, strict=True):
@@ -234,6 +320,121 @@ def _complete_fixture(
     return StandInIndex(rows, transitions, refuse=refuse)
 
 
+# ---- The fixture is genuine and production-shaped ----
+
+
+def test_discovery_reaches_every_registered_capability_cell(contract) -> None:
+    """The fixture's coverage is measured, never declared.
+
+    Discovery buckets executed transitions under the cell the PRODUCTION
+    classifier returns, so this is the statement that real Editing-V2 chemistry
+    reaches every registered cell from small seeds.  If a cell became
+    unreachable the count drops and this test names it, instead of the fixture
+    keeping the label by fabricating one.
+    """
+
+    discovered = discover_genuine_transitions()
+    expected = {cell_id.split(":", 1)[1] for cell_id in contract.registered_cell_ids}
+    assert set(discovered) == expected
+    assert len(expected) == 22
+    required = {cell_id.split(":", 1)[1] for cell_id in contract.required_cell_ids}
+    assert required <= set(discovered)
+    assert len(required) == 17
+    # Every discovered transition really is the family it is filed under.
+    assert all(item.cell == cell for cell, item in discovered.items())
+    assert {item.model_family for item in discovered.values()} == set(ACTIVE8_FAMILIES)
+    assert {item.executor_rule for item in discovered.values()} == set(
+        ACTIVE8_EXECUTOR_RULES
+    )
+    assert {
+        _EXECUTOR_FOR_FAMILY[item.model_family] for item in discovered.values()
+    } == set(ACTIVE8_EXECUTOR_RULES)
+
+
+def test_the_stand_in_publishes_exactly_the_raw_transition_schema(contract) -> None:
+    """Gate 0 must be fed the shape the concrete index publishes, and no other.
+
+    ``ACCEPTED_TRANSITION_FIELDS`` is read from the production index module, so
+    a field added or renamed there fails here rather than silently leaving this
+    fixture describing a shape nothing emits.
+    """
+
+    index = _complete_fixture(contract)
+    published = [
+        transition
+        for transitions in index._transitions.values()
+        for transition in transitions
+    ]
+    assert len(published) == 22
+    for transition in published:
+        assert set(transition) == set(ACCEPTED_TRANSITION_FIELDS)
+        # None of the classified vocabulary Gate 0 derives may be present.
+        assert not {
+            "capability_cell_id",
+            "family_context",
+            "assignment_sha256",
+            "raw_mark_count_stratum",
+            "canonical_successor_count_stratum",
+            "successor_alias_multiplicity_stratum",
+        } & set(transition)
+
+
+def test_two_v1_tasks_may_share_a_trace_id_and_resolve_independently(contract) -> None:
+    """The join key is the whole trace key, not the trace id.
+
+    A ``trace_id`` is unique inside its V1 task, not across tasks, so two tasks
+    can carry the same one.  Gate 0 asks by ``(v1_task_identity_sha256,
+    entry_index, trace_id)``; if any part were dropped the two rows would
+    collide and one task's teacher would be counted against the other's.
+    """
+
+    shared = "trace-shared-by-two-v1-tasks"
+    left_cell = f"{contract.namespace}:atom_delete:connected_nonleaf_death"
+    right_cell = f"{contract.namespace}:cycle_insert:close_to_monocyclic_ring_system"
+    rows: list[dict[str, Any]] = []
+    transitions: dict[ProcessV2TraceKey, list[dict[str, Any]]] = {}
+    for index_of_task, cell_id in enumerate((left_cell, right_cell)):
+        task_sha256 = _sha(f"v1-task-{index_of_task}")
+        row = _row(
+            f"shared-{index_of_task}",
+            role="train",
+            transitions=1,
+            task_sha256=task_sha256,
+            trace_id=shared,
+        )
+        rows.append(row)
+        key = (row["v1_task_identity_sha256"], row["entry_index"], row["trace_id"])
+        transitions[key] = [
+            _raw_transition(
+                contract, cell_id, task_sha256=task_sha256, trace_id=shared
+            )
+        ]
+    for role in contract.sealed_roles:
+        rows.append(_row(role, role=role, transitions=0))
+    index = StandInIndex(rows, transitions)
+
+    # The two rows genuinely share a trace id and differ only in the V1 task.
+    keys = [
+        (row["v1_task_identity_sha256"], row["entry_index"], row["trace_id"])
+        for row in rows[:2]
+    ]
+    assert len({key[2] for key in keys}) == 1 and len({key[1] for key in keys}) == 1
+    assert len(set(keys)) == 2
+
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    assert index.requested_keys == keys
+    rows_by_cell = {row["capability_cell_id"]: row for row in evidence["capability_cell_counts"]}
+    assert rows_by_cell[left_cell]["teacher_count"] == 1
+    assert rows_by_cell[right_cell]["teacher_count"] == 1
+    assert evidence["counts"]["structural_assignments"] == 2
+    assert evidence["classification_failure_count"] == 0
+    # Two distinct assignments: a collapsed key would have produced one, or the
+    # same teacher twice.
+    assert rows_by_cell[left_cell]["unique_action_count"] == 1
+    assert rows_by_cell[right_cell]["unique_action_count"] == 1
+    assert evidence["counts"]["unique_decision_eligible_target_states"] == 2
+
+
 # ---- Acceptance 11: eight families, every required cell ----
 
 
@@ -241,7 +442,7 @@ def test_gate_zero_sees_all_eight_families_and_every_required_cell(contract) -> 
     """Including ``atom_delete:connected_nonleaf_death``, the Process-V2 addition."""
 
     index = _complete_fixture(contract)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
     assert evidence["active8_families"] == list(ACTIVE8_FAMILIES)
     families = evidence["decision_eligible_teacher_counts_by_family"]
@@ -258,6 +459,21 @@ def test_gate_zero_sees_all_eight_families_and_every_required_cell(contract) -> 
     assert evidence["empty_required_editing_cell_ids"] == []
     assert evidence["counts"]["observed_required_editing_cells"] == 17
     assert evidence["counts"]["registered_capability_cells"] == 22
+
+    # Gate 0 must have ASSIGNED every eligible transition, not merely reached a
+    # verdict.  Without this a gate that refuses every transition -- which is
+    # exactly what handing the index a transformed view produced -- publishes a
+    # decision while assigning nothing, and every count above still holds.
+    counts = evidence["counts"]
+    assert counts["decision_eligible_transitions"] == 22
+    assert counts["structural_assignments"] == counts["decision_eligible_transitions"]
+    assert evidence["classification_failure_count"] == 0
+    assert evidence["classification_failure_receipts"] == []
+    assert counts["observed_capability_cells"] == 22
+    assert sum(row["teacher_count"] for row in evidence["capability_cell_counts"]) == 22
+    # The assignments are distinct objects, not one transition counted 22 times.
+    assert counts["unique_decision_eligible_target_states"] == 22
+
     assert evidence["structural_result"] == "PASS"
 
 
@@ -266,7 +482,7 @@ def test_an_empty_connected_nonleaf_death_cell_fails_the_gate(contract) -> None:
 
     connected_nonleaf = f"{contract.namespace}:atom_delete:connected_nonleaf_death"
     index = _complete_fixture(contract, omit_cells=frozenset({connected_nonleaf}))
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
     assert evidence["empty_required_editing_cell_ids"] == [connected_nonleaf]
     assert (
@@ -285,7 +501,7 @@ def test_a_missing_family_fails_even_when_every_other_cell_is_present(contract) 
         cell for cell in contract.registered_cell_ids if ":ring_system_restate:" in cell
     )
     index = _complete_fixture(contract, omit_cells=dropped)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
     assert evidence["decision_eligible_teacher_counts_by_family"]["ring_system_restate"] == 0
     assert evidence["decision_eligible_teacher_counts_by_executor_rule"][
@@ -306,8 +522,8 @@ def test_sealed_roles_cannot_move_a_gate_zero_threshold_or_result(contract) -> N
     for extra, role in enumerate(contract.sealed_roles):
         rich._rows.append(_row(f"extra-{extra}", role=role, transitions=0))
 
-    left = gate_zero.build_process_v2_gate_zero_evidence(lean, view=_already_a_view, contract=contract)
-    right = gate_zero.build_process_v2_gate_zero_evidence(rich, view=_already_a_view, contract=contract)
+    left = gate_zero.build_process_v2_gate_zero_evidence(lean, contract=contract)
+    right = gate_zero.build_process_v2_gate_zero_evidence(rich, contract=contract)
 
     assert left["structural_result"] == right["structural_result"] == "PASS"
     assert left["checks"] == right["checks"]
@@ -342,7 +558,7 @@ def test_gate_zero_never_opens_a_sealed_trace(contract) -> None:
     """The mechanism behind the test above, asserted directly on the index."""
 
     index = _complete_fixture(contract)
-    gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
     sealed_ids = {_sha(f"task|{role}") for role in contract.sealed_roles}
     assert len(sealed_ids) == len(contract.sealed_roles)
@@ -355,7 +571,7 @@ def test_a_trace_in_an_undeclared_partition_role_is_refused(contract) -> None:
     index = _complete_fixture(contract)
     index._rows.append(_row("rogue", role="pretraining", transitions=0))
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="undeclared role"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
 
 # ---- Acceptance 13: PASS and FAIL are both nonauthorizing ----
@@ -374,7 +590,6 @@ def test_both_results_publish_completely_nonauthorizing_artifacts(
     output = tmp_path / "run"
     published = gate_zero.run_process_v2_gate_zero(
         index,
-        view=_already_a_view,
         repo_root=REPO_ROOT,
         artifact_root=tmp_path,
         output_directory=output,
@@ -401,7 +616,7 @@ def test_both_results_publish_completely_nonauthorizing_artifacts(
         assert (output / filename).is_file()
 
     reloaded = gate_zero.load_process_v2_gate_zero_artifacts(
-        output_directory=output, index=index, contract=contract, view=_already_a_view
+        output_directory=output, index=index, contract=contract
     )
     assert reloaded["evidence"] == published["evidence"]
 
@@ -422,7 +637,7 @@ def test_an_index_whose_identity_grants_authority_is_refused(contract) -> None:
     complete = _complete_fixture(contract)
     index = _Granting(complete._rows, complete._transitions)
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="grants authority"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
 
 def test_a_granted_authority_field_anywhere_in_the_evidence_is_refused() -> None:
@@ -438,7 +653,6 @@ def test_a_tampered_published_artifact_is_refused(contract, tmp_path: Path) -> N
     output = tmp_path / "run"
     gate_zero.run_process_v2_gate_zero(
         index,
-        view=_already_a_view,
         repo_root=REPO_ROOT,
         artifact_root=tmp_path,
         output_directory=output,
@@ -450,7 +664,6 @@ def test_a_tampered_published_artifact_is_refused(contract, tmp_path: Path) -> N
     target.write_bytes(gate_zero._bytes(payload, newline=True))
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="differs from the recomputed"):
         gate_zero.load_process_v2_gate_zero_artifacts(
-            view=_already_a_view,
             output_directory=output, index=index, contract=contract
         )
 
@@ -462,7 +675,6 @@ def test_the_output_directory_must_lie_inside_the_artifact_root(
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="outside artifact_root"):
         gate_zero.run_process_v2_gate_zero(
             index,
-            view=_already_a_view,
             repo_root=REPO_ROOT,
             artifact_root=tmp_path / "inside",
             output_directory=tmp_path / "elsewhere",
@@ -473,28 +685,49 @@ def test_the_output_directory_must_lie_inside_the_artifact_root(
 # ---- Per-teacher structural requirements ----
 
 
+_DEFECTIVE_CELL_ID = "atom_insert:one_neighbor_birth"
+
+
+def _raw_defect(name: str) -> dict[str, Any]:
+    """A raw count override that breaks exactly one frozen requirement.
+
+    Derived from the genuine transition rather than written as a literal: the
+    aggregation invariant is ``aliases <= raw``, and the discovered fibers are
+    large enough that any fixed alias literal would still satisfy it.
+    """
+
+    genuine = genuine_transition(_DEFECTIVE_CELL_ID)
+    if name == "matches_exactly_one_action_v4_mark":
+        # Two matching marks, with room in the alias fiber for both, so the
+        # aggregation invariant stays satisfied and one requirement fails.
+        return {"matching_mark_count": 2, "successor_alias_count": 2}
+    if name == "has_exact_successor_alias_aggregation":
+        return {"successor_alias_count": genuine.raw_mark_count + 1}
+    raise AssertionError(f"no raw defect is declared for {name!r}")
+
+
 @pytest.mark.parametrize(
-    ("overrides", "requirement"),
-    [
-        ({"raw_mark_count": 0, "raw_mark_count_stratum": None}, "has_positive_raw_mark_count"),
-        (
-            {"canonical_successor_count": 0, "canonical_successor_count_stratum": None},
-            "has_positive_canonical_successor_count",
-        ),
-        ({"matching_mark_count": 2}, "matches_exactly_one_action_v4_mark"),
-        ({"successor_alias_multiplicity": 9}, "has_exact_successor_alias_aggregation"),
-        ({"raw_mark_count_stratum": "marks_065_plus"}, "declares_the_frozen_evidence_strata"),
-        ({"executor_rule": "cycle_open"}, "declares_the_frozen_executor_family_alias"),
-    ],
+    "requirement",
+    ["matches_exactly_one_action_v4_mark", "has_exact_successor_alias_aggregation"],
 )
 def test_a_teacher_violating_a_frozen_requirement_fails_the_gate(
-    contract, overrides: dict[str, Any], requirement: str
+    contract, requirement: str
 ) -> None:
-    """Each frozen per-teacher requirement, proven by a teacher that breaks it."""
+    """The frozen per-teacher requirements a RAW defect can still reach.
 
-    cell_id = f"{contract.namespace}:atom_insert:one_neighbor_birth"
-    index = _complete_fixture(contract, override={cell_id: overrides})
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    Four of the six cannot be reached this way any more, and that is a property
+    of the adapter rather than a gap here: ``_structural_view`` DERIVES the three
+    strata and refuses a raw row whose counts have no stratum or whose executor
+    rule disagrees with its ActionV4 record, so those defects are refused before
+    a teacher exists.  Both halves are proven -- the refusals in
+    ``test_the_adapter_refuses_a_raw_transition_it_cannot_view`` and the
+    requirement predicate itself in
+    ``test_every_frozen_requirement_is_detected_on_a_real_view``.
+    """
+
+    cell_id = f"{contract.namespace}:{_DEFECTIVE_CELL_ID}"
+    index = _complete_fixture(contract, override={cell_id: _raw_defect(requirement)})
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
     assert evidence["teacher_requirement_failure_counts"][requirement] == 1
     assert evidence["checks"][f"every_decision_eligible_teacher_{requirement}"] is False
@@ -510,13 +743,73 @@ def test_a_teacher_violating_a_frozen_requirement_fails_the_gate(
     # from the census and the defect is visible as a defect rather than a gap.
     rows = {row["capability_cell_id"]: row for row in evidence["capability_cell_counts"]}
     assert rows[cell_id]["teacher_count"] == 1
+    # And the defect is the ONLY one: an override that broke a second requirement
+    # would make the assertion above pass for the wrong reason.
+    assert sum(evidence["teacher_requirement_failure_counts"].values()) == 1
+
+
+@pytest.mark.parametrize(
+    ("overrides", "error", "match"),
+    [
+        ({"raw_mark_count": 0}, SemanticCapabilityCellError, "positive integer"),
+        ({"canonical_successor_count": 0}, SemanticCapabilityCellError, "positive integer"),
+        ({"executor_rule": "cycle_open"}, gate_zero.ProcessV2GateZeroError, "decodes to"),
+    ],
+)
+def test_the_adapter_refuses_a_raw_transition_it_cannot_view(
+    contract, overrides: dict[str, Any], error: type[Exception], match: str
+) -> None:
+    """A raw row the adapter cannot derive a view from is refused, not counted.
+
+    This is strictly stronger than the FAIL the per-teacher requirement would
+    have recorded, and it is where these three defects now land.
+    """
+
+    cell_id = f"{contract.namespace}:{_DEFECTIVE_CELL_ID}"
+    index = _complete_fixture(contract, override={cell_id: overrides})
+    with pytest.raises(error, match=match):
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+
+
+@pytest.mark.parametrize("requirement", gate_zero.TEACHER_REQUIREMENTS)
+def test_every_frozen_requirement_is_detected_on_a_real_view(
+    contract, requirement: str
+) -> None:
+    """Each requirement predicate, on a view the production adapter built.
+
+    The base view is genuine and satisfies every requirement -- asserted, since
+    a predicate tested only on an already-broken input proves nothing -- and
+    exactly one field is then moved off what the adapter derived.
+    """
+
+    raw = _raw_transition(
+        contract,
+        f"{contract.namespace}:{_DEFECTIVE_CELL_ID}",
+        task_sha256=_sha("requirement-task"),
+        trace_id="requirement-trace",
+    )
+    view = dict(gate_zero._structural_view(raw, contract=contract))
+    assert gate_zero._teacher_failures(view, contract=contract) == ()
+
+    broken = {
+        "has_positive_raw_mark_count": {"raw_mark_count": 0},
+        "has_positive_canonical_successor_count": {"canonical_successor_count": 0},
+        "matches_exactly_one_action_v4_mark": {"matching_mark_count": 2},
+        "has_exact_successor_alias_aggregation": {
+            "successor_alias_multiplicity": view["raw_mark_count"] + 1
+        },
+        "declares_the_frozen_evidence_strata": {"raw_mark_count_stratum": "marks_065_plus"},
+        "declares_the_frozen_executor_family_alias": {"executor_rule": "cycle_open"},
+    }[requirement]
+    failures = gate_zero._teacher_failures({**view, **broken}, contract=contract)
+    assert requirement in failures
 
 
 def test_every_frozen_requirement_has_a_published_check(contract) -> None:
     """Without this a requirement could be declared and never evaluated."""
 
     index = _complete_fixture(contract)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
     for requirement in gate_zero.TEACHER_REQUIREMENTS:
         assert f"every_decision_eligible_teacher_{requirement}" in evidence["checks"]
     assert set(evidence["teacher_requirement_failure_counts"]) == set(
@@ -525,17 +818,25 @@ def test_every_frozen_requirement_has_a_published_check(contract) -> None:
 
 
 def test_a_transition_the_index_refuses_becomes_a_typed_receipt(contract) -> None:
+    """Refused by the RAW identity, because the raw row is what the index owns.
+
+    The receipt therefore carries the raw row's own vocabulary and no capability
+    cell: the refusal happens before anything classifies the transition, which
+    is the ordering that keeps a refusal attributable to the index.
+    """
+
     cell_id = f"{contract.namespace}:bond_reroute:single_atom_pendant_acyclic_source"
-    refused = _sha(f"{cell_id}|0")
-    index = _complete_fixture(contract, refuse=frozenset({refused}))
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    index = _complete_fixture(contract, refuse=frozenset({(f"trace-{cell_id}", 0)}))
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
     assert evidence["classification_failure_count"] == 1
     assert evidence["checks"]["classification_failure_count_is_zero"] is False
     assert evidence["structural_result"] == "FAIL"
     receipt = evidence["classification_failure_receipts"][0]
     assert receipt["failure_type"] == "index_refused_its_own_transition"
-    assert receipt["capability_cell_id"] == cell_id
+    assert receipt["model_family"] == "bond_reroute"
+    assert receipt["capability_cell_id"] is None
+    assert receipt["trace_id"] == f"trace-{cell_id}"
     # Refused transitions stay in the transition census and out of the assignments.
     counts = evidence["counts"]
     assert counts["structural_assignments"] + counts["classification_failures"] == (
@@ -543,25 +844,78 @@ def test_a_transition_the_index_refuses_becomes_a_typed_receipt(contract) -> Non
     )
 
 
+def test_handing_the_index_a_transformed_view_would_refuse_every_transition(
+    contract,
+) -> None:
+    """The negative control for the ordering the test above depends on.
+
+    The production index's first check is an exact field-set comparison against
+    the raw schema.  A derived view never matches it, so asking the index about
+    the view rather than the row refuses everything -- a gate that publishes a
+    decision while assigning nothing.  Driven here on the real adapter's output.
+    """
+
+    raw = _raw_transition(
+        contract,
+        f"{contract.namespace}:{_DEFECTIVE_CELL_ID}",
+        task_sha256=_sha("ordering-task"),
+        trace_id="ordering-trace",
+    )
+    index = StandInIndex([], {})
+    index.validate_accepted_transition(raw)
+    view = gate_zero._structural_view(raw, contract=contract)
+    assert set(view) != set(ACCEPTED_TRANSITION_FIELDS)
+    with pytest.raises(ValueError, match="exactly its declared fields"):
+        index.validate_accepted_transition(view)
+
+
 def test_a_cell_outside_the_frozen_registry_becomes_a_typed_receipt(contract) -> None:
-    cell_id = f"{contract.namespace}:atom_insert:one_neighbor_birth"
-    index = _complete_fixture(
-        contract, override={cell_id: {"capability_cell_id": "not:a:cell"}}
+    """A cell the CLASSIFIER produces and the REGISTRY does not declare.
+
+    The cell id is derived, so a fabricated one cannot reach this branch any
+    more.  What reaches it is the disagreement the receipt exists for: a
+    contract whose registry has lost a context the production classifier still
+    returns, here ``atom_insert:one_neighbor_birth`` withdrawn from the
+    registry while the fixture keeps supplying a genuine birth for it.
+    """
+
+    cell_id = f"{contract.namespace}:{_DEFECTIVE_CELL_ID}"
+    _family, dropped_context = _DEFECTIVE_CELL_ID.split(":")
+
+    def without(ids: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(item for item in ids if item != cell_id)
+
+    narrowed = replace(
+        contract,
+        family_contexts=tuple(
+            (family, tuple(item for item in contexts if item != dropped_context))
+            for family, contexts in contract.family_contexts
+        ),
+        registered_cell_ids=without(contract.registered_cell_ids),
+        required_cell_ids=without(contract.required_cell_ids),
+        conditional_cell_ids=without(contract.conditional_cell_ids),
+        separate_lane_cell_ids=without(contract.separate_lane_cell_ids),
     )
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    assert cell_id in contract.registered_cell_ids
+    assert cell_id not in narrowed.registered_cell_ids
+    index = _complete_fixture(contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=narrowed)
     assert evidence["classification_failure_count"] == 1
-    assert evidence["classification_failure_receipts"][0]["failure_type"] == (
-        "capability_cell_outside_the_frozen_registry"
-    )
+    receipt = evidence["classification_failure_receipts"][0]
+    assert receipt["failure_type"] == "capability_cell_outside_the_frozen_registry"
+    assert receipt["capability_cell_id"] == cell_id
     assert evidence["structural_result"] == "FAIL"
 
 
 def test_receipts_are_bounded_by_the_frozen_limit(contract) -> None:
     """The contract's limit is honoured while the COUNT stays complete."""
 
-    override = {cell: {"matching_mark_count": 3} for cell in contract.registered_cell_ids}
+    override = {
+        cell: {"matching_mark_count": 3, "successor_alias_count": 3}
+        for cell in contract.registered_cell_ids
+    }
     index = _complete_fixture(contract, override=override)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
     assert evidence["teacher_requirement_failure_counts"][
         "matches_exactly_one_action_v4_mark"
     ] == 22
@@ -575,14 +929,14 @@ def test_a_declared_transition_count_that_disagrees_is_refused(contract) -> None
     index = _complete_fixture(contract)
     index._rows[0]["accepted_transition_count"] = 2
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="declares 2 accepted"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
 
 def test_a_repeated_trace_key_is_refused(contract) -> None:
     index = _complete_fixture(contract)
     index._rows.append(dict(index._rows[0]))
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="repeats the key"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
 
 def test_a_rejected_trace_declaring_transitions_is_refused(contract) -> None:
@@ -591,14 +945,14 @@ def test_a_rejected_trace_declaring_transitions_is_refused(contract) -> None:
         if row["rejection_category"] == UPSTREAM_REJECTED:
             row["accepted_transition_count"] = 1
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="absence of"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
 
 
 def test_the_two_rejection_categories_stay_separate_in_the_census(contract) -> None:
     """An unevaluated trace and a rejected one are different facts."""
 
     index = _complete_fixture(contract)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
     assert evidence["counts"]["upstream_rejected_traces"] == 1
     assert evidence["counts"]["active8_excluded_traces"] == 1
     assert evidence["rejected_traces_by_code"] == {UPSTREAM_REJECTED: 1, ACTIVE8_EXCLUDED: 1}
@@ -615,19 +969,42 @@ def test_a_census_that_does_not_reconcile_fails_rather_than_raises(contract) -> 
 
     complete = _complete_fixture(contract)
     index = _Skewed(complete._rows, complete._transitions)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
     assert evidence["checks"]["active8_census_identity_reconciles"] is False
     assert evidence["checks"]["resolved_trace_census_matches"] is False
     assert evidence["structural_result"] == "FAIL"
 
 
-def test_a_terminal_transition_is_counted_and_fails_the_gate(contract) -> None:
-    cell_id = f"{contract.namespace}:atom_restate:element_identity_change"
-    index = _complete_fixture(contract, override={cell_id: {"terminal": True}})
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
-    assert evidence["counts"]["terminal_assignments"] == 1
-    assert evidence["checks"]["terminal_assignment_count_is_zero"] is False
-    assert evidence["structural_result"] == "FAIL"
+def test_a_final_action_is_not_a_terminal_assignment(contract) -> None:
+    """``terminal`` describes the teacher's SOURCE progress row, not its successor.
+
+    Every trace in the fixture is one genuine step, so every published
+    transition is its trace's FINAL action and carries
+    ``successor_is_terminal=True`` -- exactly what the index computes from
+    ``step_index + 1 == path_length``.  A terminal progress row is one no action
+    leaves, and an accepted teacher is an action, so no accepted transition can
+    be a terminal assignment.  Reading the successor flag instead makes the
+    frozen ``terminal_assignment_count_is_zero`` check unsatisfiable for every
+    complete trace, which is a gate that can never pass on real data.
+    """
+
+    index = _complete_fixture(contract)
+    published = [
+        transition
+        for transitions in index._transitions.values()
+        for transition in transitions
+    ]
+    assert published and all(item["successor_is_terminal"] is True for item in published)
+
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    assert evidence["counts"]["terminal_assignments"] == 0
+    assert evidence["checks"]["terminal_assignment_count_is_zero"] is True
+
+    # And on the adapter directly, so the assertion above cannot pass because the
+    # transition was skipped rather than because it was assigned nonterminal.
+    view = gate_zero._structural_view(published[0], contract=contract)
+    assert view["terminal"] is False
+    assert view["progress_index"] == published[0]["source_progress_index"]
 
 
 def test_an_index_process_identity_that_is_not_the_live_v2_one_fails(contract) -> None:
@@ -635,7 +1012,7 @@ def test_an_index_process_identity_that_is_not_the_live_v2_one_fails(contract) -
     index = StandInIndex(
         complete._rows, complete._transitions, process_identity_sha256="0" * 64
     )
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
     assert evidence["checks"]["process_identity_matches_live_process_v2"] is False
     assert evidence["structural_result"] == "FAIL"
 

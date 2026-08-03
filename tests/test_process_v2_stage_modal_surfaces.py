@@ -488,12 +488,29 @@ def _contract():
 def test_an_interrupted_run_reuses_its_verified_artifacts(
     tmp_path: Path, monkeypatch, contract
 ) -> None:
-    """Reuse is a revalidation, never a file-exists check."""
+    """Reuse is a revalidation, never a file-exists check.
+
+    Also the surface's positive path: the genuine per-cell fixture is driven
+    through the real Gate-0 driver and must reach PASS having actually assigned
+    every eligible transition.  A run that refuses them all still publishes a
+    report and still reuses it on the second call, so the reuse assertions below
+    only mean something once the published evidence is checked.
+    """
 
     index = gate_zero_fixture._complete_fixture(contract)
     first = _drive_gate_zero(tmp_path, monkeypatch, contract=contract, index=index)
     assert first["reused_existing_run"] is False
     assert first["structural_result"] == "PASS"
+
+    run_root = tmp_path / Path(first["run_artifact_root"]).relative_to("/artifacts")
+    evidence = json.loads((run_root / "STRUCTURAL_EVIDENCE.json").read_text())
+    counts = evidence["counts"]
+    assert counts["decision_eligible_transitions"] > 0
+    assert counts["structural_assignments"] == counts["decision_eligible_transitions"]
+    assert counts["classification_failures"] == 0
+    assert counts["observed_capability_cells"] > 0
+    assert counts["observed_required_editing_cells"] == counts["required_editing_cells"]
+    assert evidence["empty_required_editing_cell_ids"] == []
 
     second = _drive_gate_zero(tmp_path, monkeypatch, contract=contract, index=index)
     assert second["reused_existing_run"] is True
