@@ -17,7 +17,9 @@ from compose_v4.chem.molecular_graph import (
     ELEMENT_TO_IDX,
     MolecularGraph,
 )
+from compose_v4.data.editing_v2_process_v2_schema import require_no_granted_authority
 from compose_v4.experiments.editing_active8_semantic_census_v2 import (
+    SEMANTIC_CENSUS_SCHEMA_VERSION,
     Active8SemanticCensusError,
     OrthogonalCandidateAliasMetrics,
     build_semantic_census,
@@ -294,12 +296,19 @@ def test_aggregation_keeps_alias_metrics_orthogonal_and_absence_nondecisional() 
     assert report["scope"]["cartesian_joint_cells_constructed"] is False
     assert report["scope"]["scaffold_count_claimed"] is False
     assert report["counts"]["unique_scaffolds"] is None
+    assert report["schema_version"] == SEMANTIC_CENSUS_SCHEMA_VERSION == 3
     assert report["decisions"] == {
         "corpus_failure": None,
         "model_learnability": None,
         "training_authorized": False,
-        "p50_authorized": False,
+        "bounded_p50_authorized": False,
     }
+    # The retired spelling is gone from the whole report, not only from the block
+    # that carried it, and the frozen guard now reaches this artifact.
+    assert "p50_authorized" not in semantic_census_bytes(report).decode().replace(
+        "bounded_p50_authorized", ""
+    )
+    require_no_granted_authority(report, label="the semantic census report")
     assert semantic_census_bytes(report).decode().count('"model_learnability"') == 1
 
 
