@@ -11,6 +11,8 @@ a second builder whose drift from the first is invisible.
 
 from __future__ import annotations
 
+import gzip
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -21,6 +23,7 @@ import pytest
 
 from compose_v4.data.editing_v2_process_v2_active8_decision_index import (
     ACCEPTED_TRANSITION_FIELDS,
+    DECISION_ELIGIBLE_PARTITION_ROLES,
     RESOLVED_TRACE_FIELDS,
     ProcessV2Active8DecisionIndex,
     ProcessV2Active8DecisionIndexError,
@@ -87,6 +90,25 @@ def _resolved(tmp_path_factory: pytest.TempPathFactory):
         repo_root=ROOT,
     )
     return chain, plan, completion, run_root, index
+
+
+def _accepted(index, *, decision_eligible: bool = True) -> list[Mapping[str, Any]]:
+    """Accepted resolved rows, by default only the ones this index will decode.
+
+    The index decodes molecular states for ``DECISION_ELIGIBLE_PARTITION_ROLES``
+    only, so a test that wants transitions has to ask for a trace in one of them;
+    asking for a held-out trace is itself a refusal, and is asserted separately.
+    """
+
+    return [
+        row
+        for row in index.iter_resolved_traces()
+        if row["rejection_category"] is None
+        and (
+            (row["partition_role"] in DECISION_ELIGIBLE_PARTITION_ROLES)
+            is decision_eligible
+        )
+    ]
 
 
 # ---- Acceptance test 10 -------------------------------------------------------
@@ -397,7 +419,7 @@ def test_an_accepted_trace_yields_exact_states_and_action_identities(resolved) -
     """
 
     _chain, _plan, _completion, _run_root, index = resolved
-    accepted = [row for row in index.iter_resolved_traces() if row["rejection_category"] is None]
+    accepted = _accepted(index)
     assert accepted
     seen = 0
     for row in accepted[:4]:
@@ -466,20 +488,36 @@ def test_the_bulk_stream_decodes_each_cached_chunk_exactly_once(
     real = module.read_process_v2_chunk_target
     calls: list[str] = []
 
+    opened_roles: list[str] = []
+
     def counting(source_output, **kwargs):
         calls.append(str(kwargs["target"].chunk_filename))
+        opened_roles.append(str(kwargs["target"].split))
         return real(source_output, **kwargs)
 
     monkeypatch.setattr(module, "read_process_v2_chunk_target", counting)
 
     _chain, plan, _completion, _run_root, index = resolved
     transitions = list(index.iter_accepted_transitions())
-    accepted = [row for row in index.iter_resolved_traces() if row["rejection_category"] is None]
+    accepted = _accepted(index)
+    held_out = _accepted(index, decision_eligible=False)
+    assert accepted and held_out, "both sides of the role filter must be populated"
     assert len(transitions) == sum(row["path_length"] for row in accepted)
-    # One decode per task that holds at least one accepted trace, and no more.
+    # One decode per DECISION-ELIGIBLE task that holds an accepted trace, and no
+    # more.  A held-out task's chunk is never opened at all, which is what makes
+    # the seal a property of what was never read.
     tasks_with_accepted = {row["task_identity_sha256"] for row in accepted}
     assert len(calls) == len(tasks_with_accepted)
     assert len(calls) == len(set(calls)) or len(set(calls)) <= len(plan["tasks"])
+    # No held-out chunk was opened AT ALL, which is what makes the seal a
+    # property of what was never read rather than of what was never counted.
+    assert set(opened_roles) <= set(DECISION_ELIGIBLE_PARTITION_ROLES)
+    assert {row["partition_role"] for row in accepted} <= set(
+        DECISION_ELIGIBLE_PARTITION_ROLES
+    )
+    assert {row["partition_role"] for row in held_out} - set(
+        DECISION_ELIGIBLE_PARTITION_ROLES
+    )
 
     # And the bulk stream agrees with the point lookup, transition for
     # transition, so the fast path is not a second implementation.
@@ -538,7 +576,7 @@ def test_one_trace_id_in_two_v1_tasks_resolves_to_two_different_traces(
     """
 
     _chain, _plan, _completion, _run_root, index = resolved
-    accepted = [row for row in index.iter_resolved_traces() if row["rejection_category"] is None]
+    accepted = _accepted(index)
     by_task: dict[str, dict[str, Any]] = {}
     for row in accepted:
         by_task.setdefault(row["v1_task_identity_sha256"], row)
@@ -581,7 +619,7 @@ def test_validate_accepted_transition_refuses_a_tampered_transition(resolved) ->
     """Gate 0 revalidates rather than trusting what it was handed."""
 
     _chain, _plan, _completion, _run_root, index = resolved
-    row = next(row for row in index.iter_resolved_traces() if row["rejection_category"] is None)
+    row = _accepted(index)[0]
     key = tuple(row[field] for field in TRACE_KEY_FIELDS)
     transition = dict(next(iter(index.accepted_transitions_for(key))))
     index.validate_accepted_transition(transition)
@@ -659,3 +697,442 @@ def test_the_index_is_json_serializable_as_provenance(resolved) -> None:
     encoded = json.loads(canonical_bytes(dict(index.identity())).decode())
     assert encoded["schema"].endswith("active8_decision_index")
     assert encoded["status"].endswith("NO_DOWNSTREAM_AUTHORITY")
+
+
+# ---- Resealed mutations: the evidence has to be refused on its content --------
+#
+# A self-hash proves an artifact was not edited after it was sealed.  It proves
+# nothing about whether the artifact was TRUE when it was sealed, and content
+# hashes are not signatures, so an unresealed mutation being refused is not
+# evidence of anything: it only shows the hash moved.  Every mutation below is
+# RESEALED -- the decision row's self-hash, the receipt's two decision-byte
+# hashes and its own self-hash, and the completion's inventory hash and self-hash
+# are all recomputed, so the artifact is internally consistent by every hash it
+# carries -- and each must STILL be refused, on what it says rather than on what
+# it hashes to.
+
+
+def _reseal_run(
+    chain,
+    run_root: Path,
+    plan: Mapping[str, Any],
+    completion: Mapping[str, Any],
+    *,
+    task_identity: str,
+    rows: list[dict[str, Any]] | None = None,
+    count_delta: Mapping[str, int] | None = None,
+    inventory_edit=None,
+) -> None:
+    """Republish one task and the completion with every self-hash recomputed.
+
+    Deliberately a FULL reseal.  Rows get a fresh ``decision_sha256``, the
+    receipt gets fresh ``decision_file_sha256``/``decision_stream_sha256`` over
+    the rebuilt deterministic gzip and a fresh ``receipt_sha256``, and the
+    completion gets a fresh ``result_inventory_sha256`` and ``completion_sha256``
+    -- so nothing below is caught by a hash that failed to move.
+    """
+
+    from compose_v4.data.editing_v2_process_v2_active8_mapreduce import (
+        DECISION_FILENAME,
+        RECEIPT_FILENAME,
+        _deterministic_gzip,
+    )
+
+    task = next(
+        item for item in plan["tasks"] if item["task_identity_sha256"] == task_identity
+    )
+    output = chain_fixture.mounted(chain, task["output_artifact_path"])
+    receipt = json.loads((output / RECEIPT_FILENAME).read_bytes())
+    if rows is not None:
+        sealed = []
+        for row in rows:
+            body = {k: v for k, v in row.items() if k != "decision_sha256"}
+            sealed.append({**body, "decision_sha256": canonical_sha256(body)})
+        raw = b"".join(canonical_bytes(row) + b"\n" for row in sealed)
+        payload = _deterministic_gzip(raw)
+        (output / DECISION_FILENAME).write_bytes(payload)
+        receipt = {
+            **receipt,
+            "decision_file_sha256": hashlib.sha256(payload).hexdigest(),
+            "decision_stream_sha256": hashlib.sha256(raw).hexdigest(),
+        }
+    if count_delta:
+        receipt = {
+            **receipt,
+            "counts": {
+                field: int(value) + int(count_delta.get(field, 0))
+                for field, value in receipt["counts"].items()
+            },
+        }
+    body = {k: v for k, v in receipt.items() if k != "receipt_sha256"}
+    receipt = {**body, "receipt_sha256": canonical_sha256(body)}
+    (output / RECEIPT_FILENAME).write_bytes(canonical_bytes(receipt) + b"\n")
+
+    inventory = []
+    for item in completion["result_inventory"]:
+        if item["task_identity_sha256"] != task_identity:
+            inventory.append(dict(item))
+            continue
+        updated = {
+            **item,
+            "receipt_sha256": receipt["receipt_sha256"],
+            "decision_file_sha256": receipt["decision_file_sha256"],
+            "counts": dict(receipt["counts"]),
+        }
+        inventory.append(inventory_edit(updated) if inventory_edit else updated)
+    counts = {
+        field: int(value) + int((count_delta or {}).get(field, 0))
+        for field, value in completion["active8_counts"].items()
+    }
+    body = {
+        **{k: v for k, v in completion.items() if k != "completion_sha256"},
+        "result_inventory": inventory,
+        "result_inventory_sha256": canonical_sha256(inventory),
+        "active8_counts": counts,
+    }
+    sealed_completion = {**body, "completion_sha256": canonical_sha256(body)}
+    (run_root / COMPLETION_FILENAME).write_bytes(
+        canonical_bytes(sealed_completion) + b"\n"
+    )
+
+
+def _snapshot(chain, run_root: Path, plan: Mapping[str, Any]) -> dict[Path, bytes]:
+    from compose_v4.data.editing_v2_process_v2_active8_mapreduce import (
+        DECISION_FILENAME,
+        RECEIPT_FILENAME,
+    )
+
+    files = {run_root / COMPLETION_FILENAME: (run_root / COMPLETION_FILENAME).read_bytes()}
+    for task in plan["tasks"]:
+        output = chain_fixture.mounted(chain, task["output_artifact_path"])
+        for name in (DECISION_FILENAME, RECEIPT_FILENAME):
+            files[output / name] = (output / name).read_bytes()
+    return files
+
+
+def _restore(files: Mapping[Path, bytes]) -> None:
+    for path, payload in files.items():
+        path.write_bytes(payload)
+
+
+def _decision_rows(chain, task: Mapping[str, Any]) -> list[dict[str, Any]]:
+    from compose_v4.data.editing_v2_process_v2_active8_mapreduce import DECISION_FILENAME
+
+    output = chain_fixture.mounted(chain, task["output_artifact_path"])
+    raw = gzip.decompress((output / DECISION_FILENAME).read_bytes())
+    return [json.loads(line) for line in raw.splitlines()]
+
+
+def _accepted_target(chain, plan: Mapping[str, Any]):
+    """A real accepted, decision-eligible row and the task that published it."""
+
+    for task in plan["tasks"]:
+        if str(task["split"]) not in DECISION_ELIGIBLE_PARTITION_ROLES:
+            continue
+        rows = _decision_rows(chain, task)
+        for index, row in enumerate(rows):
+            if row["category"] is None and row["actions"]:
+                return task, rows, index
+    raise AssertionError("the fixture published no accepted decision-eligible trace")
+
+
+def _resolve(chain, run_root: Path):
+    return resolve_process_v2_active8_decision_index(
+        plan_path=run_root / PLAN_FILENAME,
+        completion_path=run_root / COMPLETION_FILENAME,
+        artifact_root=chain.artifact_root,
+        repo_root=ROOT,
+    )
+
+
+def _drain(index) -> None:
+    """Force every accepted transition, which is where per-step checks live."""
+
+    for _row, transitions in index.iter_accepted_trace_transitions():
+        assert transitions
+
+
+#: A dynamic reason whose declared arithmetic an ACCEPTED row's own counts
+#: already satisfy (it needs a positive exact-mark and alias count), so a
+#: mutation using it is refused for the contradiction with acceptance rather
+#: than for a count that gives it away.
+_CONSISTENT_REASON = "teacher_successor_is_virtual_self_transition"
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected"),
+    [
+        (
+            {"supported": False, "exclusion_reason": _CONSISTENT_REASON},
+            "cannot carry unsupported evidence",
+        ),
+        (
+            {"exclusion_reason": _CONSISTENT_REASON},
+            "supported candidate evidence is incomplete",
+        ),
+    ],
+)
+def test_a_resealed_accepted_row_whose_evidence_refuses_its_action(
+    resolved, mutation: Mapping[str, Any], expected: str
+) -> None:
+    """Acceptance and support are the same claim; a row cannot make both.
+
+    Nothing reconstructs ``ProcessV2CandidateEvidence`` when a row is read, so
+    its ``__post_init__`` guard never runs over a published artifact and both of
+    these were previously inert.  The first case is a self-consistent piece of
+    UNSUPPORTED evidence sitting on an ACCEPTED trace; the second is supported
+    evidence that also names a reason to exclude, which is the same contradiction
+    written the other way round.
+    """
+
+    chain, plan, completion, run_root, _index = resolved
+    task, rows, index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        mutated = [dict(row) for row in rows]
+        actions = [dict(action) for action in mutated[index_of]["actions"]]
+        evidence = {**actions[0]["candidate_evidence"], **mutation}
+        actions[0] = {**actions[0], "candidate_evidence": evidence}
+        mutated[index_of] = {**mutated[index_of], "actions": actions}
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            rows=mutated,
+        )
+        with pytest.raises(Exception, match=expected):
+            _drain(_resolve(chain, run_root))
+    finally:
+        _restore(saved)
+
+
+def test_a_resealed_canonical_successor_key_is_refused(resolved) -> None:
+    """The key is a function of the successor state, so it is recomputed.
+
+    The successor state is in hand -- it came out of the cache chunk -- so the
+    production canonicalizer answers this without enumerating anything, which is
+    why the read path can still refuse it with no model.
+    """
+
+    chain, plan, completion, run_root, _index = resolved
+    task, rows, index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        mutated = [dict(row) for row in rows]
+        actions = [dict(action) for action in mutated[index_of]["actions"]]
+        evidence = dict(actions[0]["candidate_evidence"])
+        evidence["canonical_successor_key"] = "TAMPERED-NOT-A-MOLECULE"
+        actions[0] = {**actions[0], "candidate_evidence": evidence}
+        mutated[index_of] = {**mutated[index_of], "actions": actions}
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            rows=mutated,
+        )
+        with pytest.raises(
+            ProcessV2Active8DecisionIndexError, match="does not canonicalize"
+        ):
+            _drain(_resolve(chain, run_root))
+    finally:
+        _restore(saved)
+
+
+@pytest.mark.parametrize(
+    "count_field",
+    [
+        "raw_mark_count",
+        "canonical_successor_count",
+        "matching_mark_count",
+        "exact_successor_mark_count",
+        "successor_alias_count",
+    ],
+)
+def test_a_resealed_candidate_count_is_refused(resolved, count_field: str) -> None:
+    """Every one of the five, moved in the evidence and correctly resealed.
+
+    The refusal is the row's own aggregate: ``candidate_totals`` is recomputed
+    from the per-action evidence it summarises rather than read, so evidence and
+    total can no longer disagree quietly.  An aggregate that agrees with itself
+    proves nothing.
+    """
+
+    chain, plan, completion, run_root, _index = resolved
+    task, rows, index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        mutated = [dict(row) for row in rows]
+        actions = [dict(action) for action in mutated[index_of]["actions"]]
+        evidence = dict(actions[0]["candidate_evidence"])
+        evidence[count_field] = int(evidence[count_field]) + 1000
+        actions[0] = {**actions[0], "candidate_evidence": evidence}
+        mutated[index_of] = {**mutated[index_of], "actions": actions}
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            rows=mutated,
+        )
+        with pytest.raises(Exception, match="derived census disagrees|arithmetic"):
+            _drain(_resolve(chain, run_root))
+    finally:
+        _restore(saved)
+
+
+def test_a_resealed_row_aggregate_is_refused(resolved) -> None:
+    """The other direction: the stored total moved and the evidence did not."""
+
+    chain, plan, completion, run_root, _index = resolved
+    task, rows, index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        mutated = [dict(row) for row in rows]
+        totals = dict(mutated[index_of]["candidate_totals"])
+        totals["raw_candidate_marks"] = int(totals["raw_candidate_marks"]) + 1000
+        mutated[index_of] = {**mutated[index_of], "candidate_totals": totals}
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            rows=mutated,
+            count_delta={"raw_candidate_marks": 1000},
+        )
+        with pytest.raises(Exception, match="derived census disagrees"):
+            _drain(_resolve(chain, run_root))
+    finally:
+        _restore(saved)
+
+
+def test_a_resealed_stale_receipt_identity_in_the_inventory_is_refused(
+    resolved,
+) -> None:
+    """The completion names a receipt; following the pointer is the check.
+
+    A stale identity is one that was VALID for some execution of this task, so it
+    is not distinguishable from a fresh one by shape -- only by comparing it with
+    the receipt the task actually holds now.
+    """
+
+    chain, plan, completion, run_root, _index = resolved
+    task, _rows, _index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        other = next(
+            item
+            for item in completion["result_inventory"]
+            if item["task_identity_sha256"] != task["task_identity_sha256"]
+        )
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            inventory_edit=lambda row: {
+                **row,
+                "receipt_sha256": other["receipt_sha256"],
+            },
+        )
+        with pytest.raises(
+            ProcessV2Active8DecisionIndexError, match="does not match the receipts"
+        ):
+            _resolve(chain, run_root)
+    finally:
+        _restore(saved)
+
+
+def test_a_resealed_stale_decision_file_identity_in_the_inventory_is_refused(
+    resolved,
+) -> None:
+    """Same for the decision bytes the completion binds each task to."""
+
+    chain, plan, completion, run_root, _index = resolved
+    task, _rows, _index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        other = next(
+            item
+            for item in completion["result_inventory"]
+            if item["task_identity_sha256"] != task["task_identity_sha256"]
+        )
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            inventory_edit=lambda row: {
+                **row,
+                "decision_file_sha256": other["decision_file_sha256"],
+            },
+        )
+        with pytest.raises(
+            ProcessV2Active8DecisionIndexError, match="does not match the receipts"
+        ):
+            _resolve(chain, run_root)
+    finally:
+        _restore(saved)
+
+
+def test_a_fully_propagated_candidate_count_is_the_stated_residual(resolved) -> None:
+    """The one vector the read path CANNOT refuse, pinned rather than hidden.
+
+    A per-action count moved inside its arithmetic bounds and propagated through
+    the row total, the receipt and the completion is internally consistent
+    everywhere, and distinguishing it from the truth requires re-enumerating the
+    fiber -- which the read path is forbidden to do, precisely so Gate 0 can fan
+    out with no model.  This test asserts the residual EXISTS so that a future
+    change which closes it fails here and gets noticed, and so that the boundary
+    is a recorded property rather than an assumption.
+    """
+
+    chain, plan, completion, run_root, _index = resolved
+    task, rows, index_of = _accepted_target(chain, plan)
+    saved = _snapshot(chain, run_root, plan)
+    try:
+        mutated = [dict(row) for row in rows]
+        actions = [dict(action) for action in mutated[index_of]["actions"]]
+        evidence = dict(actions[0]["candidate_evidence"])
+        moved = int(evidence["raw_mark_count"]) + 1000
+        evidence["raw_mark_count"] = moved
+        actions[0] = {**actions[0], "candidate_evidence": evidence}
+        totals = dict(mutated[index_of]["candidate_totals"])
+        totals["raw_candidate_marks"] = int(totals["raw_candidate_marks"]) + 1000
+        mutated[index_of] = {
+            **mutated[index_of],
+            "actions": actions,
+            "candidate_totals": totals,
+        }
+        _reseal_run(
+            chain,
+            run_root,
+            plan,
+            completion,
+            task_identity=str(task["task_identity_sha256"]),
+            rows=mutated,
+            count_delta={"raw_candidate_marks": 1000},
+        )
+        index = _resolve(chain, run_root)
+        _drain(index)
+        assert index.counts()["raw_candidate_marks"] == (
+            int(completion["active8_counts"]["raw_candidate_marks"]) + 1000
+        )
+        observed = {
+            transition["raw_mark_count"]
+            for transition in index.iter_accepted_transitions()
+        }
+        assert moved in observed, (
+            "the residual is that a consistently propagated count survives; if this "
+            "fails the read path has gained a way to refuse it and the note above "
+            "must be rewritten"
+        )
+    finally:
+        _restore(saved)
