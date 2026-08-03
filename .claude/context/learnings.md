@@ -553,3 +553,35 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `639ff6078c32d43c`), on the branch AND on its base with the catalog inputs untouched -- an
   environment fact, not a code defect. Neutralize that ONE constant when proving a builder path, and
   say so; do not let it stand in for a real failure or hide one.
+
+## 2026-08-03
+- **A file-inventory constant can be tautologically "verified" the same way a mask can.** The
+  2026-08-02 lesson ("a comparison whose expectation is recomputed from the code under test cannot
+  fail") recurred one level up, on the LIST of files rather than on a computed value.
+  `CACHE_IMPLEMENTATION_FILES` names the modules hashed into `cache_implementation_sha256`, and its
+  guard asserted `set(revision["implementation_files"]) == set(CACHE_IMPLEMENTATION_FILES)` -- but
+  `build_cache_implementation_revision` produces that keyset FROM the constant, so the two sides move
+  together. Proof of how empty it was: deleting `editing_v2_process_v2_chunk_cache.py` from its OWN
+  file list left all 217 tests green. **Measured escape:** two trees differing only in
+  `rewrite/progress.py`, reading the same committed cache, produced the identical
+  `cache_implementation_sha256` and DIFFERENT decoded rows. The list covered what the cache *stores*,
+  never what it *reads*, while the docstring claimed "stores, reads or validates".
+- **Derive a closure by EXECUTION, not by reading imports.** The fix unions three sources: every
+  `compose_v4` module whose code runs under `sys.settrace` during a real decode; every module defining
+  a type (MRO included) reachable in the decoded object graph; and every module defining a payload
+  class the frozen codec surface can construct (`action_codec_v4.supported_executor_rules()` ->
+  ontology -> `type.__module__`), which is what catches a family the fixture traces never exercise.
+  A hand-written list was wrong in BOTH directions: it named `action_codec_v2.py` (does not exist --
+  `action_codec.py` IS v2) and `provenance_overlay.py` (imported by `packed_trace_store` only for the
+  raw addressed-shard readers the chunk cache never calls), and it MISSED `molecular_graph`, `state`,
+  `operators`, `tracelets` and `editing_v2_process_identity`. 9 -> 18 modules.
+- **The test that replaces a tautology must not read the constant at all.** The new guard loops over
+  the DERIVED closure, edits each module on a tree copy, and requires `cache_implementation_sha256` to
+  move. A module the revision does not hash cannot have that property, and shortening the constant
+  fails the loop -- because the loop never consults it.
+- **Parallelism is free during implementation and is NOT free during measurement.** A full suite run
+  concurrently with two agent suites took 25:33 against 17:27 and manufactured a phantom regression in
+  a test with a 1.0 s timeout; the same code on an unloaded machine ran 19:23 with the failure gone.
+  Distinguish it from a real regression by import closure, not by re-running: the failing test's
+  33-module closure had ZERO overlap with the files the branch changed, which is structural proof.
+  This is the LOAD half of the hazard whose WRITE half is the 2026-08-02 P50 working-tree race.
