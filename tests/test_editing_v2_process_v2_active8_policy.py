@@ -264,6 +264,27 @@ def test_the_policy_binds_the_v2_process_identity_and_the_declared_eight(
         for rule in action_codec_v4.ACTIVE8_EXECUTOR_RULES
     }
 
+    # The two vocabularies are the same length and are NOT the same tuple, which
+    # is the confusion this program keeps hitting. Named exactly, so a future
+    # reader who reaches for the wrong constant fails here rather than shipping
+    # a policy whose `active_families` are executor rules.
+    assert PROCESS_V2_ACTIVE8_EXECUTOR_RULES != PROCESS_V2_ACTIVE8_FAMILIES
+    differences = {
+        rule: family
+        for rule, family in policy.executor_rule_to_family
+        if rule != family
+    }
+    assert differences == {
+        "cycle_close": "cycle_insert",
+        "cycle_open": "cycle_attach",
+        "atom_restate_semantic": "atom_restate",
+    }
+    assert set(PROCESS_V2_ACTIVE8_FAMILIES) - set(PROCESS_V2_ACTIVE8_EXECUTOR_RULES) == {
+        "cycle_insert",
+        "cycle_attach",
+        "atom_restate",
+    }
+
     # The runtime the decisions are made against is the same process.
     assert runtime.scratch.process_identity_sha256 == live_v2
     assert (
