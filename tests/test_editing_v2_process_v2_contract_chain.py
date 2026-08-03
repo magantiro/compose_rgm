@@ -573,3 +573,44 @@ def test_p50_recipe_policy_blocks_are_identical_to_v1() -> None:
         "p500_authorized",
     ):
         assert v2[field] == v1[field], field
+
+
+# ---- The Gate-0 consumption boundary ----
+
+
+def test_gate_zero_cannot_yet_consume_the_process_v2_structural_contract() -> None:
+    """The V2 Gate-0 contract exists and validates; no runner consumes it yet.
+
+    This is a boundary, not a defect, and it is pinned so it cannot be mistaken
+    for working wiring. `load_semantic_gate_zero_structural_contract` hard-binds
+    `contract_id == "editing_v2_semantic_gate_zero_structural_v1"` and
+    `FROZEN_CONTRACT_SHA256`, and enforces an exact V1 field set, so it refuses
+    the V2 contract by construction.
+
+    Running Gate 0 under Process V2 therefore needs a V2 runner that consumes
+    this contract. Teaching the V1 loader to accept a structurally different V2
+    body would entangle the two chains, which is precisely what keeping them
+    distinct is for. If someone later adds that runner, this test should be
+    replaced by one that exercises it -- not deleted.
+    """
+
+    from pathlib import Path
+
+    from compose_v4.experiments.editing_v2_semantic_gate_zero import (
+        SemanticGateZeroStructuralError,
+        load_semantic_gate_zero_structural_contract,
+    )
+
+    root = Path(__file__).resolve().parents[1]
+    relative = "configs/editing_v2_process_v2_gate_zero_structural.json"
+
+    # It is a real, self-consistent contract under its own authority.
+    loaded = load_process_v2_chain_artifact(relative, repo_root=root)
+    assert len(loaded["contract_sha256"]) == 64
+
+    # And the V1 Gate-0 loader refuses it.
+    with pytest.raises(SemanticGateZeroStructuralError):
+        load_semantic_gate_zero_structural_contract(root / relative, repo_root=root)
+
+    # While the V1 contract still loads unchanged through that same loader.
+    assert load_semantic_gate_zero_structural_contract(repo_root=root) is not None

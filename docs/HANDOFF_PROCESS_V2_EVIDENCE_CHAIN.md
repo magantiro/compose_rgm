@@ -15,7 +15,20 @@ authority fields explicitly false.
 The approved plan named seven downstream stages. Two are wired here:
 
 * the Process-V2 admitted source joined to the Active8 lane/role inventory, and
-* the Gate-0 contract binding.
+* the Gate-0 contract binding — **contract only, see below**.
+
+**Gate 0 is not runnable under Process V2, and that boundary is tested rather
+than implied.** The V2 structural contract exists, self-hashes, and validates
+under the V2 chain module. No runner consumes it:
+`load_semantic_gate_zero_structural_contract` hard-binds
+`contract_id == "editing_v2_semantic_gate_zero_structural_v1"` and
+`FROZEN_CONTRACT_SHA256`, and enforces an exact V1 field set, so it refuses the
+V2 contract by construction. Teaching that loader to accept a structurally
+different V2 body would entangle the two chains, which is exactly what keeping
+them distinct is for; running Gate 0 under Process V2 needs a V2 runner. The
+boundary is pinned by
+`test_gate_zero_cannot_yet_consume_the_process_v2_structural_contract`, which
+also asserts the V1 contract still loads unchanged through that same loader.
 
 Five are **not** wired: candidate/successor caches, T1 panel and capacity, P50
 recipe and prelaunch. The reason is not time. Those five sit *behind* Gate 0 in
