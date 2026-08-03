@@ -61,7 +61,6 @@ if str(_ROOT / "scripts") not in sys.path:
 
 from verify_process_v2_chain import (  # noqa: E402
     AGREES,
-    DEFERRED,
     DISAGREES,
     FAIL,
     INCONCLUSIVE,
@@ -302,7 +301,21 @@ def test_a_misspelled_parent_path_fails() -> None:
 
 
 def test_a_remote_artifact_pointer_is_deferred_not_reported_missing() -> None:
-    """A volume path is verified by its stage loader, never by the local filesystem."""
+    """A volume path is verified by its stage loader, never by the local filesystem.
+
+    That is the claim, and it is unchanged. Two later rules moved what the RUN says
+    around it, so the assertions below name the claim directly instead of resting on
+    a whole-run ``AGREES`` that used to imply it:
+
+    * an unresolved deferral is now ``UNVERIFIED`` rather than silently agreeing --
+      "a stage loader owns it" says who checks it, not that anyone did. See
+      ``tests/test_verify_process_v2_chain_edge_hardening.py`` for the receipt that
+      resolves one;
+    * a root is now validated by its owning deterministic validator, which refuses
+      any injected body, including this one.
+
+    What must never happen is a volume path being reported as a missing local file.
+    """
 
     remote = "/editing_v2/semantic_v4_migration/fixture/SEMANTIC_MIGRATION_COMPLETE.json"
 
@@ -321,10 +334,11 @@ def test_a_remote_artifact_pointer_is_deferred_not_reported_missing() -> None:
     with _graph_copy() as root:
         _reseal(root, P50_RECIPE_POLICY, inject)
         report = verify_process_v2_chain(repo_root=root)
-    assert report["status"] == AGREES, report["findings"]
-    assert _categories(report, FAIL) == []
-    assert "remote_artifact_deferred_to_stage_loader" in _categories(report, DEFERRED)
+    assert "missing_repository_target" not in _categories(report)
+    assert "pointer_target_escapes_the_checkout" not in _categories(report)
     assert [edge["result"] for edge in _edges_to(report, remote)] == ["deferred"]
+    assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
+    assert report["status"] != AGREES
 
 
 # ---- (3) semantic hashes are checked under the declared algorithm ----
@@ -496,7 +510,15 @@ def test_an_undeclared_path_string_is_not_treated_as_an_edge() -> None:
         _reseal(root, P50_RECIPE_POLICY, add_prose)
         after = verify_process_v2_chain(repo_root=root)
     assert len(after["edges"]) == before
-    assert after["status"] == AGREES, after["findings"]
+    assert not [edge for edge in after["edges"] if edge["location"].endswith(".scientific_scope")]
+    # The prose edit is refused, but as a BODY edit by the artifact's own owning
+    # validator -- not as an edge. Before roots were validated this run reported
+    # ``AGREES``, which is the same result for a very different reason: nothing had
+    # looked at the leaf's body at all.
+    assert [finding["category"] for finding in after["findings"]] == [
+        "root_artifact_refused_by_its_validator"
+    ]
+    assert after["findings"][0]["location"] == P50_RECIPE_POLICY
 
 
 def test_a_pointer_hidden_deeper_in_the_body_is_still_discovered() -> None:
