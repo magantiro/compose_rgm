@@ -1,21 +1,29 @@
-"""The join between the Process-V2 overlay and the V1 lane/role inventory.
+"""The join between the Process-V2 overlay and the committed chunk cache.
 
 The two halves each have their own authority and their own tests. What is new,
-and therefore what is tested here, is the JOIN: that the overlay and the
-inventory describe the same payload, that the per-task census reconciles, and
-that the two process identities stay distinguishable.
+and therefore what is tested here, is the JOIN: that the overlay and the cached
+rows describe the same payload, that the per-task census reconciles, and that
+the two process identities stay distinguishable.
 
 The failure this guards is specific and silent. An admitted overlay proved
-against one migration, paired with a different migration's packed shards, yields
-a corpus whose chemistry and whose admission decisions came from different runs.
+against one migration, paired with a different migration's cached rows, yields a
+corpus whose chemistry and whose admission decisions came from different runs.
 Every count would reconcile run-wide, because the reduction only ever sees its
 own overlay; only a cross-check against the shard identities catches it.
 
-The two resolvers are substituted here rather than driven end to end. That is
-deliberate: driving them needs a full V1 migration payload, which
-`tests/test_process_v2_rebind_end_to_end.py` covers, and it would test the
-resolvers rather than the join. Substituting them isolates the code this module
-actually adds.
+Two kinds of test live here, and the split is deliberate.
+
+* The **refusal** tests substitute both halves -- the admitted-source resolver
+  and this module's own cache opener. Each half has its own end-to-end tests, and
+  substituting them isolates the guard under test rather than re-testing the
+  resolvers.
+* The **identity** tests drive a real committed chain: a real twenty-cell V1
+  migration payload, a real committed chunk cache over it, and a real cache-fed
+  rebind whose decisions the production executor proved. The identity's whole
+  claim is about the values its embedded descriptor and its rows carry, and a
+  stand-in descriptor cannot make that claim wrong.
+
+``tests/test_process_v2_source_stream.py`` owns the streaming join itself.
 """
 
 from __future__ import annotations
@@ -47,14 +55,15 @@ from compose_v4.data.editing_v2_process_v2_schema import (
 
 _ROOT = Path(__file__).resolve().parents[1]
 
-# The V1 payload fixture builders are not importable as a package; pytest already
-# puts ``tests`` on ``sys.path`` under the default prepend import mode.
+# The fixture builders are not importable as a package; pytest already puts
+# ``tests`` on ``sys.path`` under the default prepend import mode.
 if str(_ROOT / "tests") not in sys.path:
     sys.path.insert(0, str(_ROOT / "tests"))
 
-import test_editing_process_v2_admitted_source as adapter_fixture  # noqa: E402
+import test_process_v2_chunk_fed_rebind as chunk_fed  # noqa: E402
 
-_effective_mask_authority = adapter_fixture._effective_mask_authority
+_effective_mask_authority = chunk_fed._effective_mask_authority
+_register_extra_fixture_traces = chunk_fed._register_extra_fixture_traces
 
 # The SUPERSEDED V1 payload identity. Named for its lineage: the chain
 # verifier refuses a historical value carried under a live-sounding name,
@@ -71,19 +80,32 @@ _TASKS = (
 # ---- Stand-ins for the two authorities ----
 
 
-class _Source:
-    def __init__(self, task: str, shard: str, lane: str, split: str) -> None:
-        self.task_identity_sha256 = task
-        self.semantic_shard_sha256 = shard
-        self.semantic_manifest_sha256 = "3" * 64
-        self.data_lane = lane
-        self.partition_role = split
+def _manifest(task: str, shard: str, lane: str, split: str, entries: int = 4) -> dict[str, Any]:
+    return {
+        "v1_task_identity_sha256": task,
+        "task_identity_sha256": "7" * 64,
+        "semantic_shard_sha256": shard,
+        "semantic_manifest_sha256": "3" * 64,
+        "data_lane": lane,
+        "split": split,
+        "entries": entries,
+    }
 
 
-class _V1Inventory:
-    def __init__(self, sources) -> None:
-        self.sources = tuple(sources)
-        self.migration_completion_sha256 = "4" * 64
+class _Generation:
+    """One committed chunk-cache generation, as the resolver reads it."""
+
+    def __init__(self, manifests) -> None:
+        self.source_manifests = tuple(manifests)
+        self.source_artifact_paths = tuple(
+            f"/artifacts/cache/sources/{index}" for index in range(len(self.source_manifests))
+        )
+        self.completion = {
+            "completion_sha256": "a" * 64,
+            "cache_semantic_identity_sha256": "b" * 64,
+            "cache_physical_identity_sha256": "c" * 64,
+            "cache_semantic_identity": {"migration_completion_sha256": "4" * 64},
+        }
 
 
 class _Admitted:
@@ -116,21 +138,26 @@ def _plan(tasks=_TASKS) -> dict[str, Any]:
     }
 
 
-def _install(monkeypatch, *, admitted, inventory) -> None:
+def _install(monkeypatch, *, admitted, generation) -> None:
+    """Substitute the admitted-source authority and this module's cache opener.
+
+    Both are exercised for real elsewhere: the overlay by the admitted source's
+    own end-to-end tests, the cache opener by
+    ``tests/test_process_v2_source_stream.py``. Substituting them here leaves
+    only the join.
+    """
+
     monkeypatch.setattr(
         joiner, "resolve_process_v2_admitted_source", lambda *a, **k: admitted
     )
     monkeypatch.setattr(
-        joiner, "resolve_editing_v2_semantic_active8_sources", lambda *a, **k: inventory
+        joiner, "_open_bound_cache_generation", lambda *a, **k: generation
     )
 
 
 def _resolve(plan):
     return resolve_process_v2_active8_source_inventory(
-        plan,
-        v1_migration_completion_path=Path("/artifacts/x/COMPLETE.json"),
-        artifact_root=Path("/artifacts"),
-        repo_root=Path("/repo"),
+        plan, artifact_root=Path("/artifacts"), repo_root=Path("/repo")
     )
 
 
@@ -153,9 +180,10 @@ def _admitted_for(tasks=_TASKS, *, admitted_each=3, rejected_each=1, plan=None):
     return _Admitted(results=results, counts=counts, plan=plan or _plan(tasks))
 
 
-def _inventory_for(tasks=_TASKS):
-    return _V1Inventory(
-        _Source(task["task"], task["shard"], task["lane"], task["split"]) for task in tasks
+def _generation_for(tasks=_TASKS, *, entries=4):
+    return _Generation(
+        _manifest(task["task"], task["shard"], task["lane"], task["split"], entries)
+        for task in tasks
     )
 
 
@@ -163,7 +191,7 @@ def _inventory_for(tasks=_TASKS):
 
 
 def test_the_join_reconciles_and_keeps_both_identities_separate(monkeypatch) -> None:
-    _install(monkeypatch, admitted=_admitted_for(), inventory=_inventory_for())
+    _install(monkeypatch, admitted=_admitted_for(), generation=_generation_for())
     resolved = _resolve(_plan())
 
     assert resolved.v1_payload_process_identity_sha256 == _SUPERSEDED_V1_IDENTITY
@@ -187,7 +215,7 @@ def test_the_join_reconciles_and_keeps_both_identities_separate(monkeypatch) -> 
 
 
 def test_the_source_identity_grants_nothing(monkeypatch) -> None:
-    _install(monkeypatch, admitted=_admitted_for(), inventory=_inventory_for())
+    _install(monkeypatch, admitted=_admitted_for(), generation=_generation_for())
     identity = _resolve(_plan()).identity()
     for flag in (
         "training_authorized",
@@ -202,14 +230,14 @@ def test_the_source_identity_grants_nothing(monkeypatch) -> None:
 
 
 def test_a_different_task_set_is_refused(monkeypatch) -> None:
-    """An overlay proved against one migration, paired with another's shards."""
+    """An overlay proved against one migration, paired with another's rows."""
 
     other = (
         {"task": "c" * 64, "shard": "1" * 64, "lane": "observed_local_analogue", "split": "train"},
         _TASKS[1],
     )
-    _install(monkeypatch, admitted=_admitted_for(), inventory=_inventory_for(other))
-    with pytest.raises(ProcessV2Active8SourceError, match="different\n?\\s*task sets|different task sets"):
+    _install(monkeypatch, admitted=_admitted_for(), generation=_generation_for(other))
+    with pytest.raises(ProcessV2Active8SourceError, match="different\n?\\s*task sets"):
         _resolve(_plan())
 
 
@@ -220,7 +248,7 @@ def test_a_different_semantic_shard_for_the_same_task_is_refused(monkeypatch) ->
         {**_TASKS[0], "shard": "9" * 64},
         _TASKS[1],
     )
-    _install(monkeypatch, admitted=_admitted_for(), inventory=_inventory_for(drifted))
+    _install(monkeypatch, admitted=_admitted_for(), generation=_generation_for(drifted))
     with pytest.raises(ProcessV2Active8SourceError, match="different semantic shard"):
         _resolve(_plan())
 
@@ -230,8 +258,23 @@ def test_a_lane_or_split_disagreement_is_refused(monkeypatch) -> None:
         {**_TASKS[0], "split": "validation"},
         _TASKS[1],
     )
-    _install(monkeypatch, admitted=_admitted_for(), inventory=_inventory_for(relabelled))
+    _install(monkeypatch, admitted=_admitted_for(), generation=_generation_for(relabelled))
     with pytest.raises(ProcessV2Active8SourceError, match="lane or split disagrees"):
+        _resolve(_plan())
+
+
+def test_a_cache_holding_a_different_row_count_than_the_binding_is_refused(
+    monkeypatch,
+) -> None:
+    """A cache of the same shard truncated or extended is not that shard.
+
+    Every identity still agrees -- same task, same shard digest, same lane and
+    role -- so only the row census can say no, and it must, because the join
+    addresses rows by a global entry index the two sides would disagree about.
+    """
+
+    _install(monkeypatch, admitted=_admitted_for(), generation=_generation_for(entries=3))
+    with pytest.raises(ProcessV2Active8SourceError, match="binds 4 V1 entries"):
         _resolve(_plan())
 
 
@@ -239,7 +282,7 @@ def test_a_per_task_census_that_does_not_reconcile_is_refused(monkeypatch) -> No
     """Run-wide totals can reconcile while a single task does not."""
 
     admitted = _admitted_for(admitted_each=2, rejected_each=1)  # 3 != v1_entries 4
-    _install(monkeypatch, admitted=admitted, inventory=_inventory_for())
+    _install(monkeypatch, admitted=admitted, generation=_generation_for())
     with pytest.raises(ProcessV2Active8SourceError, match="admits 2 and rejects 1 of 4"):
         _resolve(_plan())
 
@@ -249,44 +292,41 @@ def test_the_joined_total_must_account_for_every_source_entry(monkeypatch) -> No
 
     admitted = _admitted_for()
     admitted.counts = {**admitted.counts, "source_entries": 99}
-    _install(monkeypatch, admitted=admitted, inventory=_inventory_for())
-    with pytest.raises(ProcessV2Active8SourceError, match="does not account for every source entry"):
+    _install(monkeypatch, admitted=admitted, generation=_generation_for())
+    with pytest.raises(
+        ProcessV2Active8SourceError, match="does not account for every source entry"
+    ):
         _resolve(_plan())
 
 
-# ---- Schema 2: the published identity, checked by its owning validator ----
+# ---- Schema 3: the published identity, checked by its owning validator ----
 #
-# The tests above substitute both resolvers, which isolates the join.  The tests
-# below drive a REAL admitted source through the identity builder, because the
-# identity's whole new claim is about the values the embedded descriptor carries,
-# and a stand-in descriptor cannot make that claim wrong.
+# The tests above substitute both authorities, which isolates the join.  The
+# tests below drive a REAL committed chain through the identity builder, because
+# the identity's whole claim is about the values the embedded descriptor and the
+# rows carry, and a stand-in descriptor cannot make that claim wrong.
 
 
 @pytest.fixture(scope="module")
-def real_join(tmp_path_factory: pytest.TempPathFactory):
-    """One real published overlay, joined to a V1 inventory naming its own tasks."""
+def real_identity(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any]:
+    """One real committed chain, resolved once and published as an identity."""
 
-    root = tmp_path_factory.mktemp("active8_source_payload")
-    fixture = adapter_fixture._build_and_prove(
-        root / "artifacts", adapter_fixture._TASKS_WITH_EXCLUSION
+    root = tmp_path_factory.mktemp("active8_source_chain")
+    payload, _binding, cache_plan, _completion = chunk_fed._cached_payload(root)
+    rebind_plan = chunk_fed._cache_fed_plan(payload, cache_plan)
+    chunk_fed._execute_and_reduce(payload, rebind_plan)
+    inventory = resolve_process_v2_active8_source_inventory(
+        rebind_plan, artifact_root=payload.artifact_root, repo_root=_ROOT
     )
-    admitted = adapter_fixture._resolve(fixture)
-    inventory = _V1Inventory(
-        _Source(
-            str(task["v1_task_identity_sha256"]),
-            str(task["v1_semantic_shard_sha256"]),
-            str(task["data_lane"]),
-            str(task["split"]),
-        )
-        for task in fixture.plan["v1_payload_binding"]["v1_tasks"]
-    )
-    return fixture.plan, admitted, inventory
+    return {
+        "identity": inventory.identity(),
+        "admitted_identity": inventory.admitted_source.identity(),
+    }
 
 
-def _resolve_real(monkeypatch, real_join):
-    plan, admitted, inventory = real_join
-    _install(monkeypatch, admitted=admitted, inventory=inventory)
-    return _resolve(plan)
+@pytest.fixture
+def identity(real_identity) -> dict[str, Any]:
+    return real_identity["identity"]
 
 
 def _reseal(payload: dict[str, Any]) -> dict[str, Any]:
@@ -299,10 +339,9 @@ def _reseal(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def test_a_real_source_identity_validates_and_passes_the_recursive_authority_guard(
-    monkeypatch, real_join
+    identity, real_identity
 ) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
-    assert identity["schema_version"] == SOURCE_SCHEMA_VERSION == 2
+    assert identity["schema_version"] == SOURCE_SCHEMA_VERSION == 3
     assert set(identity) == set(ACTIVE8_SOURCE_IDENTITY_FIELDS)
     # The shared vocabulary-free guard, over the whole nested object.
     require_no_granted_authority(identity, label="the joined identity")
@@ -310,25 +349,19 @@ def test_a_real_source_identity_validates_and_passes_the_recursive_authority_gua
         validate_process_v2_active8_source_identity(identity, repo_root=_ROOT) == identity
     )
     # And the embedded descriptor is the real one, verbatim.
-    _plan_, admitted, _inventory = real_join
-    assert identity["admitted_source_identity"] == admitted.identity()
+    assert identity["admitted_source_identity"] == real_identity["admitted_identity"]
 
 
-def test_the_real_identity_publishes_all_seven_authority_fields(
-    monkeypatch, real_join
-) -> None:
+def test_the_real_identity_publishes_all_seven_authority_fields(identity) -> None:
     """Version 1 published four, so three could not be read as false at all."""
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     for name in AUTHORITY_FIELDS:
         assert identity[name] is False, name
         assert identity["admitted_source_identity"][name] is False, name
     assert len([key for key in identity if key.endswith("_authorized")]) == 7
 
 
-def test_the_real_identity_is_sorted_at_every_depth(monkeypatch, real_join) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
-
+def test_the_real_identity_is_sorted_at_every_depth(identity) -> None:
     def _mappings(node: object):
         if isinstance(node, dict):
             yield node
@@ -345,11 +378,9 @@ def test_the_real_identity_is_sorted_at_every_depth(monkeypatch, real_join) -> N
 
 
 def test_a_grant_nested_in_the_embedded_descriptor_or_a_source_row_is_refused(
-    monkeypatch, real_join
+    identity,
 ) -> None:
     """Both nesting shapes: a mapping, and a mapping inside a list."""
-
-    identity = _resolve_real(monkeypatch, real_join).identity()
 
     nested_mapping = _reseal(
         {
@@ -377,7 +408,7 @@ def test_a_grant_nested_in_the_embedded_descriptor_or_a_source_row_is_refused(
         require_no_granted_authority(nested_in_list, label="the joined identity")
 
 
-def test_a_grant_under_an_unregistered_name_is_refused(monkeypatch, real_join) -> None:
+def test_a_grant_under_an_unregistered_name_is_refused(identity) -> None:
     """The vocabulary-aware guard cannot see a name nobody has registered.
 
     ``require_authority_false`` judges the seven names it knows; only the
@@ -386,7 +417,6 @@ def test_a_grant_under_an_unregistered_name_is_refused(monkeypatch, real_join) -
     is a failure rather than a silent narrowing.
     """
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     assert "p500_authorized" not in AUTHORITY_FIELDS
 
     granted = _reseal({**identity, "p500_authorized": True})
@@ -406,10 +436,9 @@ def test_a_grant_under_an_unregistered_name_is_refused(monkeypatch, real_join) -
     assert "sources[0].lane_launch_authorized" in str(raised.value)
 
 
-def test_a_relabelled_status_is_refused(monkeypatch, real_join) -> None:
+def test_a_relabelled_status_is_refused(identity) -> None:
     """A well-formed string that is not the frozen one is another artifact."""
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     relabelled = _reseal({**identity, "status": "PROCESS_V2_ACTIVE8_SOURCE_RESOLVED"})
     with pytest.raises(
         ProcessV2Active8SourceIdentityError, match="declares status"
@@ -418,7 +447,7 @@ def test_a_relabelled_status_is_refused(monkeypatch, real_join) -> None:
     assert SOURCE_STATUS in str(raised.value)
 
 
-def test_a_source_row_carrying_an_extra_field_is_refused(monkeypatch, real_join) -> None:
+def test_a_source_row_carrying_an_extra_field_is_refused(identity) -> None:
     """A row is an exact shape, not a minimum one.
 
     Every declared field of the row still validates and every total still
@@ -427,7 +456,6 @@ def test_a_source_row_carrying_an_extra_field_is_refused(monkeypatch, real_join)
     nothing.
     """
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     rows = [dict(row) for row in identity["sources"]]
     rows[0] = dict(sorted({**rows[0], "measured_entry_count": 4}.items()))
     with pytest.raises(
@@ -439,12 +467,9 @@ def test_a_source_row_carrying_an_extra_field_is_refused(monkeypatch, real_join)
     assert "measured_entry_count" in str(raised.value).split("unexpected=")[1]
 
 
-def test_a_row_with_an_empty_or_non_string_lane_or_role_is_refused(
-    monkeypatch, real_join
-) -> None:
+def test_a_row_with_an_empty_or_non_string_lane_or_role_is_refused(identity) -> None:
     """The lane and the role are what a row is FOR; nothing else inspects them."""
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     for key, value in (("data_lane", ""), ("partition_role", 3), ("data_lane", None)):
         rows = [dict(row) for row in identity["sources"]]
         rows[0] = dict(sorted({**rows[0], key: value}.items()))
@@ -456,9 +481,7 @@ def test_a_row_with_an_empty_or_non_string_lane_or_role_is_refused(
             )
 
 
-def test_the_embedded_descriptor_is_checked_by_its_own_owner(
-    monkeypatch, real_join
-) -> None:
+def test_the_embedded_descriptor_is_checked_by_its_own_owner(identity) -> None:
     """Delegation is the property, so the descriptor must be broken ONLY internally.
 
     Every joint statement below still holds -- same Process-V2 identity, same V1
@@ -467,7 +490,6 @@ def test_the_embedded_descriptor_is_checked_by_its_own_owner(
     validator does.
     """
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     descriptor = {
         key: value
         for key, value in sorted(identity["admitted_source_identity"].items())
@@ -494,23 +516,19 @@ def test_the_embedded_descriptor_is_checked_by_its_own_owner(
         validate_process_v2_active8_source_identity(broken, repo_root=_ROOT)
 
 
-def test_a_descriptor_from_another_run_is_refused(monkeypatch, real_join) -> None:
+def test_a_descriptor_from_another_run_is_refused(identity) -> None:
     """Every per-half check passes; only the joint statement is false."""
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
-    for top_level, nested, message in (
-        ("process_v2_identity_sha256", None, "was resolved under"),
-        ("v1_payload_process_identity_sha256", None, "but its embedded"),
+    for top_level, message in (
+        ("process_v2_identity_sha256", "was resolved under"),
+        ("v1_payload_process_identity_sha256", "but its embedded"),
     ):
         broken = _reseal({**identity, top_level: "8" * 64})
-        assert nested is None
         with pytest.raises(ProcessV2Active8SourceIdentityError, match=message):
             validate_process_v2_active8_source_identity(broken, repo_root=_ROOT)
 
 
-def test_collapsing_the_two_identities_into_one_value_is_refused(
-    monkeypatch, real_join
-) -> None:
+def test_collapsing_the_two_identities_into_one_value_is_refused(identity) -> None:
     """Collapsed CONSISTENTLY, so the per-half comparison agrees and passes.
 
     Collapsing only the top-level name is caught by the descriptor comparison, so
@@ -519,7 +537,6 @@ def test_collapsing_the_two_identities_into_one_value_is_refused(
     would produce.
     """
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     live_v2 = identity["process_v2_identity_sha256"]
     descriptor = {
         key: value
@@ -542,14 +559,13 @@ def test_collapsing_the_two_identities_into_one_value_is_refused(
             "v1_payload_process_identity_sha256": live_v2,
         }
     )
-    with pytest.raises(ProcessV2Active8SourceIdentityError, match="under both identity names"):
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="under both identity names"
+    ):
         validate_process_v2_active8_source_identity(collapsed, repo_root=_ROOT)
 
 
-def test_a_census_the_embedded_descriptor_does_not_carry_is_refused(
-    monkeypatch, real_join
-) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
+def test_a_census_the_embedded_descriptor_does_not_carry_is_refused(identity) -> None:
     counts = dict(sorted({**identity["counts"], "admitted_states": 999}.items()))
     with pytest.raises(ProcessV2Active8SourceIdentityError, match="does not carry"):
         validate_process_v2_active8_source_identity(
@@ -561,12 +577,9 @@ def test_a_census_the_embedded_descriptor_does_not_carry_is_refused(
         )
 
 
-def test_per_source_rows_must_reconcile_against_the_global_census(
-    monkeypatch, real_join
-) -> None:
+def test_per_source_rows_must_reconcile_against_the_global_census(identity) -> None:
     """A run-wide census can reconcile while its rows do not."""
 
-    identity = _resolve_real(monkeypatch, real_join).identity()
     rows = [dict(row) for row in identity["sources"]]
     # Relabel one rejection as an admission. The row still reconciles against its
     # own v1_entry_count, every count stays non-negative, and the global
@@ -581,16 +594,15 @@ def test_per_source_rows_must_reconcile_against_the_global_census(
         rows[target]["v1_entry_count"]
     )
     assert sum(row["v1_entry_count"] for row in rows) == identity["counts"]["source_entries"]
-    with pytest.raises(ProcessV2Active8SourceIdentityError, match="admitted_entry_count totals"):
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="admitted_entry_count totals"
+    ):
         validate_process_v2_active8_source_identity(
             _reseal({**identity, "sources": rows}), repo_root=_ROOT
         )
 
 
-def test_a_row_that_does_not_reconcile_internally_is_refused(
-    monkeypatch, real_join
-) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
+def test_a_row_that_does_not_reconcile_internally_is_refused(identity) -> None:
     rows = [dict(row) for row in identity["sources"]]
     rows[0]["v1_entry_count"] += 1
     with pytest.raises(ProcessV2Active8SourceIdentityError, match="admits .* and rejects"):
@@ -599,10 +611,7 @@ def test_a_row_that_does_not_reconcile_internally_is_refused(
         )
 
 
-def test_duplicate_or_unordered_source_rows_are_refused(
-    monkeypatch, real_join
-) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
+def test_duplicate_or_unordered_source_rows_are_refused(identity) -> None:
     rows = [dict(row) for row in identity["sources"]]
     assert len(rows) >= 2, "the fixture must have more than one lane/role"
 
@@ -615,19 +624,17 @@ def test_duplicate_or_unordered_source_rows_are_refused(
         validate_process_v2_active8_source_identity(unordered, repo_root=_ROOT)
 
 
-def test_schema_version_one_is_refused_as_an_incompatibility(
-    monkeypatch, real_join
-) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
-    with pytest.raises(ProcessV2Active8SourceIdentityError, match="incompatible with 2"):
-        validate_process_v2_active8_source_identity(
-            _reseal({**identity, "schema_version": 1}), repo_root=_ROOT
-        )
+def test_an_earlier_schema_version_is_refused_as_an_incompatibility(identity) -> None:
+    for version in (1, 2):
+        with pytest.raises(
+            ProcessV2Active8SourceIdentityError, match="incompatible with 3"
+        ):
+            validate_process_v2_active8_source_identity(
+                _reseal({**identity, "schema_version": version}), repo_root=_ROOT
+            )
 
 
-def test_a_missing_extra_or_coerced_field_is_refused(monkeypatch, real_join) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
-
+def test_a_missing_extra_or_coerced_field_is_refused(identity) -> None:
     missing = _reseal(
         {k: v for k, v in identity.items() if k != "v1_migration_completion_sha256"}
     )
@@ -638,9 +645,7 @@ def test_a_missing_extra_or_coerced_field_is_refused(monkeypatch, real_join) -> 
     with pytest.raises(ProcessV2Active8SourceIdentityError, match="unexpected"):
         validate_process_v2_active8_source_identity(extra, repo_root=_ROOT)
 
-    uppercase = _reseal(
-        {**identity, "v1_migration_completion_sha256": "A" * 64}
-    )
+    uppercase = _reseal({**identity, "v1_migration_completion_sha256": "A" * 64})
     with pytest.raises(ProcessV2Active8SourceIdentityError, match="lowercase hex"):
         validate_process_v2_active8_source_identity(uppercase, repo_root=_ROOT)
 
@@ -652,10 +657,29 @@ def test_a_missing_extra_or_coerced_field_is_refused(monkeypatch, real_join) -> 
         )
 
 
-def test_an_unsorted_identity_is_refused_even_though_it_self_hashes(
-    monkeypatch, real_join
-) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
+def test_a_missing_cache_generation_digest_is_refused(identity) -> None:
+    """The three digests are what say WHICH committed generation was reopened.
+
+    Without them the identity would describe a corpus without naming the
+    artifact its rows came from, and the stream and the identity could reopen
+    different generations without anything noticing.
+    """
+
+    for field in (
+        "cache_completion_sha256",
+        "cache_physical_identity_sha256",
+        "cache_semantic_identity_sha256",
+    ):
+        assert len(identity[field]) == 64
+        dropped = _reseal({k: v for k, v in identity.items() if k != field})
+        with pytest.raises(ProcessV2Active8SourceIdentityError, match=field):
+            validate_process_v2_active8_source_identity(dropped, repo_root=_ROOT)
+        blanked = _reseal({**identity, field: "not-a-digest"})
+        with pytest.raises(ProcessV2Active8SourceIdentityError, match="lowercase hex"):
+            validate_process_v2_active8_source_identity(blanked, repo_root=_ROOT)
+
+
+def test_an_unsorted_identity_is_refused_even_though_it_self_hashes(identity) -> None:
     shuffled = dict(reversed(list(identity.items())))
     assert shuffled == identity
     assert shuffled[SOURCE_SELF_HASH_FIELD] == canonical_sha256(
@@ -665,8 +689,7 @@ def test_an_unsorted_identity_is_refused_even_though_it_self_hashes(
         validate_process_v2_active8_source_identity(shuffled, repo_root=_ROOT)
 
 
-def test_a_disagreeing_self_hash_is_refused(monkeypatch, real_join) -> None:
-    identity = _resolve_real(monkeypatch, real_join).identity()
+def test_a_disagreeing_self_hash_is_refused(identity) -> None:
     with pytest.raises(ProcessV2Active8SourceIdentityError, match="self-hash"):
         validate_process_v2_active8_source_identity(
             {**identity, SOURCE_SELF_HASH_FIELD: "2" * 64}, repo_root=_ROOT
@@ -676,8 +699,8 @@ def test_a_disagreeing_self_hash_is_refused(monkeypatch, real_join) -> None:
 def test_the_taxonomy_version_in_the_cell_namespace_is_not_renamed() -> None:
     """`editing_v2_active8_v1` is a taxonomy version, not a schema version.
 
-    Bumping the Active8 SOURCE schema to 2 must not drag the cell namespace with
-    it: the two are different kinds of version and only look alike.
+    Bumping the Active8 SOURCE schema must not drag the cell namespace with it:
+    the two are different kinds of version and only look alike.
     """
 
     registry = (_ROOT / "configs/editing_v2_process_v2_capability_cells.json").read_text()

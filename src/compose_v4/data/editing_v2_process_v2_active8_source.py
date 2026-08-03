@@ -1,59 +1,84 @@
-"""The join between the Process-V2 rebind and Active8 materialization.
+"""The cache-fed Process-V2 Active8 source: a streaming join, not a corpus.
 
-Active8 consumes a lane/role inventory of exact semantic packed artifacts.  The
-Process-V2 rebind does not rewrite those artifacts: it publishes an **overlay**
-of per-entry admission decisions over the same immutable V1 payload.  So the
-Process-V2 Active8 source is a join, not a new corpus, and this module is the one
-place that performs it.
+Active8 consumes a lane/role inventory of exact semantic rows.  The Process-V2
+rebind does not rewrite those rows: it publishes an **overlay** of per-entry
+admission decisions over the same immutable V1 payload, and the chunk cache
+publishes those rows verbatim in a committed, content-addressed generation.  So
+the Process-V2 Active8 source is a join over two artifacts that already exist,
+and this module is the one place that performs it.
 
-Two identities are carried side by side and never merged:
+Three inputs, joined by one key
+-------------------------------
+
+* the **committed chunk-cache generation** the rebind plan binds, which holds
+  every source row byte for byte;
+* the **committed rebind task decisions** -- one proof row or one reason-coded
+  rejection row per entry;
+* the **admitted-source identity**, which is the descriptor the decision run
+  published about itself.
+
+The key is :data:`JOIN_KEY_FIELDS` -- the V1 task identity plus the GLOBAL entry
+index -- and never chunk position.  Chunk position is an artifact of the chunk
+size, which is a partitioning choice: two caches of the same corpus at different
+chunk sizes hold the same rows at different offsets, so a positional join would
+pair a decision with the wrong trace the moment the chunk size moved.
+
+No V1 payload read, on any path
+-------------------------------
+
+The V1 packed shards are bound once, by hash, at *plan* time.  After that the
+corpus is the cache: this module opens the committed cache generation the plan
+names, streams its verified chunks, and never opens ``traces.jsonl.gz``.  There
+is no raw-shard fallback -- an oracle-geometry plan carries no cache binding and
+:func:`require_production_source_geometry` refuses it, so the fallback is absent
+by construction rather than by discipline.  The consequence that matters
+operationally: deleting the V1 payload after the cache is published does not
+break this path.
+
+That is also why the historical V1 loader is gone.  It revalidates the *live*
+V1 process identity, so it refuses the exact historical payload by construction;
+routing the pinned payload through it would have failed only against the real
+artifact, at the point where a remote stage was already running.
+
+Two identities, deliberately never merged
+-----------------------------------------
 
 * the **V1 payload identity** the chemistry was built under, which is superseded
-  and stays superseded; and
-* the **live Process-V2 identity** the admission decision was made under.
+  and stays superseded, carried as *payload* provenance; and
+* the **live Process-V2 identity** the admission decision was made under,
+  carried as *decision* provenance.
 
 A consumer that wants one of them must say which.  Collapsing them into a single
 ``process_identity_sha256`` is exactly how a V1 artifact would come to be read as
-a V2 one, so the inventory exposes both under distinct names and refuses when the
-V1 inventory and the admitted source disagree about which payload they describe.
+a V2 one, so both the inventory and its published identity expose them under
+distinct names and the validator refuses one value carried under both.
 
-What this module deliberately does NOT do:
+Two rejection categories, also never merged
+-------------------------------------------
 
-* it does not re-derive admission.  ``resolve_process_v2_admitted_source`` is the
-  authority, and this module calls it;
-* it does not re-read the packed shards.  ``resolve_editing_v2_semantic_active8_sources``
-  is the authority for the V1 lane/role inventory, and this module calls it;
-* it authorizes nothing.  Every authority flag it publishes is false, and a
-  complete Process-V2 source is not permission to materialize Active8, to run
-  Gate 0, or to train.
+An entry the rebind refused is :data:`UPSTREAM_REJECTED`.  It is yielded, so the
+census can account for it, and it carries no decoded chemistry at all: the
+stream hands out ``addressed``/``v1_record`` only for admitted entries, so an
+upstream-rejected trace cannot be candidate-evaluated by a consumer that forgot
+to check the category.  Active8's own exclusions are a different category and
+belong to the Active8 stage, not here.
 
-Schema version 2: the interface, not the decision
--------------------------------------------------
+Schema version 3: the source of the inventory moved
+---------------------------------------------------
 
-Version 2 changes what this module PUBLISHES and how a consumer checks it.  It
-changes nothing about how the join is decided: the same two authorities are
-called, the same cross-checks refuse the same inputs, and no admission or census
-is re-derived here.
+Version 2 built its lane/role rows from the live V1 migration loader and
+published a ``task_identity_sha256`` that was that loader's task identity.
+Version 3 builds the same rows from the committed cache generation, names the
+key ``v1_task_identity_sha256`` after the frozen join key, and publishes the
+three cache-generation digests that say which committed generation the stream
+and the identity both reopened.  Neither version is a subset of the other, so a
+consumer must import :data:`SOURCE_SCHEMA_VERSION` rather than assume a shape.
 
-* the embedded admitted-source descriptor is the version-3 one, validated
-  through its owning validator rather than trusted;
-* all seven frozen authority fields are published, from
-  :func:`authority_false_block`.  Version 1 published four, so the three it
-  omitted could not be read as false by a consumer that required them;
-* every mapping is sorted at every depth, matching the descriptor it embeds, so
-  the identity survives canonical re-serialization byte for byte;
-* :func:`validate_process_v2_active8_source_identity` is the owning validator.
-  Version 1 had none, so the join's guarantees held at resolution time and
-  evaporated the moment the identity was written to a file: a consumer reading
-  that file back had nothing to check it against.
-
-What the validator adds over the resolver's own checks is the joint statement
-the two halves make TOGETHER.  The resolver proves each half internally
-consistent; the identity claims that the top-level Process-V2 identity, V1
-payload identity, census and rejection census are the SAME values the embedded
-descriptor carries.  Nothing checked that, and a descriptor swapped for another
-run's would satisfy every per-half check while the identity above it described a
-different corpus.
+What this module still does NOT do: it does not re-derive admission
+(``resolve_process_v2_admitted_source`` is the authority, and this module calls
+it), it does not re-decide anything, and it authorizes nothing.  Every authority
+flag it publishes is false, and a complete Process-V2 source is not permission to
+materialize Active8, to run Gate 0, or to train.
 """
 
 from __future__ import annotations
@@ -62,15 +87,42 @@ import hashlib
 import json
 import re
 from collections import Counter
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
 from compose_v4.data.editing_process_v2_admitted_source import (
+    ProcessV2AdmissionOverlay,
     ProcessV2AdmittedSource,
     ProcessV2AdmittedSourceIdentityError,
+    ProcessV2V1PayloadIdentity,
     resolve_process_v2_admitted_source,
     validate_process_v2_admitted_source_identity,
+)
+from compose_v4.data.editing_process_v2_admitted_source import (
+    _decisions_for as _recorded_decisions_for,
+)
+from compose_v4.data.editing_process_v2_admitted_source import (
+    _overlay_index as _recorded_decision_index,
+)
+from compose_v4.data.editing_process_v2_rebind import (
+    ProcessV2RebindError,
+    require_production_source_geometry,
+    validate_process_v2_rebind_cache_binding,
+)
+from compose_v4.data.editing_v2_process_v2_active8_interfaces import (
+    JOIN_KEY_FIELDS,
+    UPSTREAM_REJECTED,
+)
+from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+    ProcessV2ChunkCacheError,
+    ProcessV2ChunkCacheGeneration,
+    chunk_targets_for_source,
+    load_committed_process_v2_chunk_cache_completion,
+    mount_process_v2_artifact_path,
+    open_process_v2_chunk_cache,
+    read_process_v2_chunk_target,
 )
 from compose_v4.data.editing_v2_process_v2_schema import (
     AUTHORITY_FIELDS,
@@ -80,19 +132,17 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     require_no_granted_authority,
     verify_self_hash,
 )
-from compose_v4.data.editing_v2_semantic_active8_source_adapter import (
-    EditingV2SemanticActive8SourceInventory,
-    resolve_editing_v2_semantic_active8_sources,
-)
+from compose_v4.data.packed_trace_store import AddressedPackedTrace
 
 # ---- Frozen identity ----
 
 SOURCE_SCHEMA = "compose.data.editing_v2_process_v2_active8_source"
-# Version 2 embeds the admitted-source version-3 descriptor, publishes the
-# complete seven-field authority vocabulary instead of four, sorts at every
-# depth, and is checkable by an owning validator. Version 1 had none of these, so
-# the versions are incompatible rather than additive.
-SOURCE_SCHEMA_VERSION = 2
+# Version 3 takes the lane/role inventory from the committed chunk-cache
+# generation instead of the live V1 migration loader, keys each row by
+# `v1_task_identity_sha256` (the frozen join key) instead of a loader-local task
+# identity, and publishes the three cache-generation digests. Version 2 carried
+# none of these, so the versions are incompatible rather than additive.
+SOURCE_SCHEMA_VERSION = 3
 SOURCE_STATUS = "VERIFIED_PROCESS_V2_ACTIVE8_SOURCE_NO_DOWNSTREAM_AUTHORITY"
 SOURCE_SELF_HASH_FIELD = "process_v2_active8_source_sha256"
 
@@ -107,13 +157,14 @@ _COUNT_FIELDS = (
 #: The exact field set of one per-lane/role source row.
 ACTIVE8_SOURCE_ROW_FIELDS: tuple[str, ...] = (
     "admitted_entry_count",
+    "cache_source_task_identity_sha256",
     "data_lane",
     "partition_role",
     "rejected_entry_count",
     "semantic_manifest_sha256",
     "semantic_shard_sha256",
-    "task_identity_sha256",
     "v1_entry_count",
+    "v1_task_identity_sha256",
 )
 
 #: The exact field set of the inventory identity, sorted.
@@ -125,6 +176,9 @@ ACTIVE8_SOURCE_IDENTITY_FIELDS: tuple[str, ...] = tuple(
             "status",
             *AUTHORITY_FIELDS,
             "admitted_source_identity",
+            "cache_completion_sha256",
+            "cache_physical_identity_sha256",
+            "cache_semantic_identity_sha256",
             "counts",
             "process_v2_identity_sha256",
             "rejected_traces_by_code",
@@ -175,11 +229,13 @@ def _sorted_deep(value: Any) -> Any:
 
 @dataclass(frozen=True)
 class ProcessV2Active8Source:
-    """One lane/role artifact with its Process-V2 admitted census."""
+    """One lane/role cached source with its Process-V2 admitted census."""
 
     data_lane: str
     partition_role: str
-    task_identity_sha256: str
+    v1_task_identity_sha256: str
+    cache_source_task_identity_sha256: str
+    cache_source_artifact_path: str
     semantic_shard_sha256: str
     semantic_manifest_sha256: str
     v1_entry_count: int
@@ -187,10 +243,19 @@ class ProcessV2Active8Source:
     rejected_entry_count: int
 
     def as_payload(self) -> dict[str, Any]:
+        """The published row. The cache source PATH is deliberately absent.
+
+        A path is where a generation happens to be mounted; the generation's own
+        digests, published once at the top level, are what identify it. Naming
+        the mount point per row would put twenty copies of an address into an
+        identity that is supposed to be relocation-invariant.
+        """
+
         return {
             "data_lane": self.data_lane,
             "partition_role": self.partition_role,
-            "task_identity_sha256": self.task_identity_sha256,
+            "v1_task_identity_sha256": self.v1_task_identity_sha256,
+            "cache_source_task_identity_sha256": self.cache_source_task_identity_sha256,
             "semantic_shard_sha256": self.semantic_shard_sha256,
             "semantic_manifest_sha256": self.semantic_manifest_sha256,
             "v1_entry_count": self.v1_entry_count,
@@ -200,11 +265,64 @@ class ProcessV2Active8Source:
 
 
 @dataclass(frozen=True)
-class ProcessV2Active8SourceInventory:
-    """The joined inventory. It grants nothing."""
+class ProcessV2SourceEntry:
+    """One V1 entry joined to the decision the rebind recorded for it.
 
-    v1_inventory: EditingV2SemanticActive8SourceInventory
+    The two provenances stay apart and stay named: ``v1_identity`` is the
+    superseded V1 payload identity of the chemistry, ``v2_admission`` is the live
+    Process-V2 identity of the decision.
+
+    An upstream-rejected entry carries its category and its reason-coded
+    rejection row and **no decoded chemistry at all**.  That is structural, not a
+    convention: a consumer cannot candidate-evaluate a trace it was never handed,
+    so "present in the census, never evaluated" cannot be violated by forgetting
+    to check a flag.
+    """
+
+    v1_identity: ProcessV2V1PayloadIdentity
+    rejection_category: str | None
+    v2_admission: ProcessV2AdmissionOverlay | None
+    rejection: Mapping[str, Any] | None
+    v1_record: Mapping[str, Any] | None
+    addressed: AddressedPackedTrace | None
+
+    def __post_init__(self) -> None:
+        evaluable = (self.v2_admission, self.v1_record, self.addressed)
+        if self.rejection_category is None:
+            if self.rejection is not None or any(item is None for item in evaluable):
+                raise ProcessV2Active8SourceError(
+                    "an admitted source entry must carry its decoded record, its addressed "
+                    "trace and its V2 admission overlay, and no rejection"
+                )
+        else:
+            if self.rejection is None or any(item is not None for item in evaluable):
+                raise ProcessV2Active8SourceError(
+                    f"a {self.rejection_category} source entry must carry its rejection row "
+                    "and nothing a candidate evaluator could consume"
+                )
+
+    @property
+    def admitted(self) -> bool:
+        return self.rejection_category is None
+
+    @property
+    def join_key(self) -> tuple[str, int]:
+        """The frozen :data:`JOIN_KEY_FIELDS` key, in the frozen order."""
+
+        return (
+            self.v1_identity.v1_task_identity_sha256,
+            self.v1_identity.entry_index,
+        )
+
+
+@dataclass(frozen=True)
+class ProcessV2Active8SourceInventory:
+    """The joined inventory and its stream. It grants nothing."""
+
     admitted_source: ProcessV2AdmittedSource
+    cache_generation: ProcessV2ChunkCacheGeneration
+    artifact_root: Path
+    repo_root: Path
     sources: tuple[ProcessV2Active8Source, ...]
     counts: Mapping[str, int]
     rejected_traces_by_code: Mapping[str, int]
@@ -222,6 +340,33 @@ class ProcessV2Active8SourceInventory:
             self.admitted_source.plan["process_v2_identity"]["process_identity_sha256"]
         )
 
+    @property
+    def v1_migration_completion_sha256(self) -> str:
+        """The historical V1 migration the cached rows came from.
+
+        Read off the committed cache generation's semantic identity, which
+        recorded it when the rows were cached, so the payload provenance survives
+        the payload itself.
+        """
+
+        return str(
+            self.cache_generation.completion["cache_semantic_identity"][
+                "migration_completion_sha256"
+            ]
+        )
+
+    @property
+    def cache_completion_sha256(self) -> str:
+        return str(self.cache_generation.completion["completion_sha256"])
+
+    @property
+    def cache_semantic_identity_sha256(self) -> str:
+        return str(self.cache_generation.completion["cache_semantic_identity_sha256"])
+
+    @property
+    def cache_physical_identity_sha256(self) -> str:
+        return str(self.cache_generation.completion["cache_physical_identity_sha256"])
+
     def identity(self) -> dict[str, Any]:
         """The descriptor a downstream materializer must record verbatim.
 
@@ -237,13 +382,14 @@ class ProcessV2Active8SourceInventory:
                 "schema_version": SOURCE_SCHEMA_VERSION,
                 "status": SOURCE_STATUS,
                 **authority_false_block(),
-                "v1_migration_completion_sha256": (
-                    self.v1_inventory.migration_completion_sha256
-                ),
+                "v1_migration_completion_sha256": self.v1_migration_completion_sha256,
                 "v1_payload_process_identity_sha256": (
                     self.v1_payload_process_identity_sha256
                 ),
                 "process_v2_identity_sha256": self.process_v2_identity_sha256,
+                "cache_completion_sha256": self.cache_completion_sha256,
+                "cache_semantic_identity_sha256": self.cache_semantic_identity_sha256,
+                "cache_physical_identity_sha256": self.cache_physical_identity_sha256,
                 "admitted_source_identity": self.admitted_source.identity(),
                 "counts": {field: int(self.counts[field]) for field in _COUNT_FIELDS},
                 "rejected_traces_by_code": dict(self.rejected_traces_by_code),
@@ -252,63 +398,366 @@ class ProcessV2Active8SourceInventory:
         )
         return _sorted_deep({**body, SOURCE_SELF_HASH_FIELD: _canonical_sha256(body)})
 
+    # ---- The production stream ----
+
+    def iter_source_entries(self) -> Iterator[ProcessV2SourceEntry]:
+        """Stream every source entry, in ``(v1_task_identity, entry_index)`` order.
+
+        The rows come from the same committed cache generation
+        :meth:`identity` names, and the decisions from the same committed rebind
+        run the embedded admitted-source descriptor names, so the stream and the
+        identity cannot describe different generations.
+
+        Nothing is re-decided here.  Each row is paired with the decision already
+        recorded for its join key, and the pairing is proven: the decision's
+        ``v1_record_sha256`` must be the cached record's own self-hash, which the
+        decoder verified, so agreement on that one digest is agreement on every
+        field of the record rather than on a sample of them.
+
+        Fail-closed throughout.  A row the overlay did not decide, a decision for
+        a row the cache does not hold, a lane or split disagreement, and a
+        truncated stream are all refusals; there is no partial mode, because a
+        stream that yielded what it could match would silently redefine the
+        corpus.
+        """
+
+        plan = self.admitted_source.plan
+        pinned_process_identity = plan["pinned_process_identity"]
+        v1_tasks = {
+            str(task["v1_task_identity_sha256"]): task
+            for task in plan["v1_payload_binding"]["v1_tasks"]
+        }
+        recorded = _recorded_decision_index(plan, artifact_root=self.artifact_root)
+        manifests = self._manifests_by_v1_task()
+        observed: Counter[str] = Counter()
+        for source in self.sources:
+            identity = source.v1_task_identity_sha256
+            artifact_path, manifest = manifests[identity]
+            output = self._mounted(artifact_path)
+            decisions = _recorded_decisions_for(recorded, identity)
+            pending = next(decisions, None)
+            for target in chunk_targets_for_source(
+                manifest, source_artifact_path=artifact_path
+            ):
+                try:
+                    rows = read_process_v2_chunk_target(
+                        output,
+                        target=target,
+                        expected_process_identity=pinned_process_identity,
+                        sentinel_replay_entries=0,
+                        # A cached row that will not decode is an integrity
+                        # failure of an artifact the cache already certified, not
+                        # a per-row reason code to carry downstream.
+                        recover_row_errors=False,
+                        repo_root=self.repo_root,
+                    )
+                    for row in rows:
+                        # Defence in depth, and known to be unreachable while its
+                        # two neighbours hold: the admitted source proves the
+                        # overlay decides every entry of every V1 task
+                        # contiguously, and resolution requires each cached
+                        # source's row count to equal the payload binding's. Kept
+                        # so that weakening either one surfaces here instead of
+                        # silently streaming a subset.
+                        if pending is None or pending[0] != row.entry_index:
+                            raise ProcessV2Active8SourceError(
+                                "the committed rebind recorded no decision at "
+                                f"{JOIN_KEY_FIELDS} = ({identity}, {row.entry_index})"
+                            )
+                        entry_index, decision = pending
+                        pending = next(decisions, None)
+                        observed["source_entries"] += 1
+                        observed[
+                            "admitted_entries" if decision.admitted else "rejected_entries"
+                        ] += 1
+                        yield self._joined_entry(
+                            v1_task=v1_tasks[identity],
+                            source=source,
+                            entry_index=entry_index,
+                            decision=decision,
+                            row=row,
+                        )
+                except ProcessV2ChunkCacheError as error:
+                    raise ProcessV2Active8SourceError(
+                        f"the committed cache chunk {target.chunk_filename} of source "
+                        f"{identity} is unreadable: {error}"
+                    ) from error
+            if pending is not None:
+                raise ProcessV2Active8SourceError(
+                    f"the committed rebind decided entry {pending[0]} of V1 task "
+                    f"{identity}, which the committed cache does not hold"
+                )
+        for field in ("source_entries", "admitted_entries", "rejected_entries"):
+            if observed[field] != int(self.counts[field]):
+                raise ProcessV2Active8SourceError(
+                    f"the source stream yielded {observed[field]} {field} and the resolved "
+                    f"census declares {self.counts[field]}"
+                )
+
+    def _mounted(self, artifact_path: str) -> Path:
+        try:
+            return mount_process_v2_artifact_path(
+                artifact_path,
+                artifact_root=self.artifact_root,
+                field="cache source artifact path",
+            )
+        except ProcessV2ChunkCacheError as error:
+            raise ProcessV2Active8SourceError(str(error)) from error
+
+    def _manifests_by_v1_task(self) -> dict[str, tuple[str, Mapping[str, Any]]]:
+        return {
+            str(manifest["v1_task_identity_sha256"]): (path, manifest)
+            for path, manifest in zip(
+                self.cache_generation.source_artifact_paths,
+                self.cache_generation.source_manifests,
+                strict=True,
+            )
+        }
+
+    def _joined_entry(
+        self,
+        *,
+        v1_task: Mapping[str, Any],
+        source: ProcessV2Active8Source,
+        entry_index: int,
+        decision: Any,
+        row: Any,
+    ) -> ProcessV2SourceEntry:
+        """Pair one cached row with its recorded decision, or refuse."""
+
+        plan = self.admitted_source.plan
+        record = row.record
+        overlay = decision.proof if decision.admitted else decision.rejection
+        if overlay is None:
+            raise ProcessV2Active8SourceError(
+                "a recorded Process-V2 decision is neither an admission nor a rejection at "
+                f"{JOIN_KEY_FIELDS} = ({source.v1_task_identity_sha256}, {entry_index})"
+            )
+        disagreements = [
+            field
+            for field, decided, cached in (
+                ("trace_id", overlay["trace_id"], record.get("trace_id")),
+                # The record's own self-hash, verified by the decoder: equality
+                # here is equality of the whole record, not of a sample of it.
+                ("v1_record_sha256", overlay["v1_record_sha256"], record.get("record_sha256")),
+                ("data_lane", overlay["data_lane"], source.data_lane),
+                ("split", overlay["split"], source.partition_role),
+            )
+            if decided != cached
+        ]
+        if disagreements:
+            # Also defence in depth today: a cache of another payload names a
+            # different `semantic_shard_sha256`, which resolution refuses, and a
+            # chunk read from the wrong source is refused by the cache reader,
+            # which binds every target to its own on-disk manifest. What this
+            # states, and they do not, is that the row and the decision are the
+            # SAME record rather than merely the same position.
+            raise ProcessV2Active8SourceError(
+                "the committed cache row and the committed rebind decision disagree on "
+                f"{sorted(disagreements)} at {JOIN_KEY_FIELDS} = "
+                f"({source.v1_task_identity_sha256}, {entry_index})"
+            )
+        v1_identity = ProcessV2V1PayloadIdentity(
+            data_lane=str(record["data_lane"]),
+            split=str(record["split"]),
+            trace_id=str(record["trace_id"]),
+            entry_index=int(entry_index),
+            path_length=int(record["path_length"]),
+            record_sha256=str(record["record_sha256"]),
+            process_semantics=str(record["process_semantics"]),
+            process_identity_sha256=str(record["process_identity_sha256"]),
+            process_contract_sha256=str(record["process_contract_sha256"]),
+            trace_schema=str(record["schema"]),
+            trace_schema_version=int(record["schema_version"]),
+            v1_task_identity_sha256=str(v1_task["v1_task_identity_sha256"]),
+            v1_task_artifact_path=str(v1_task["v1_task_artifact_path"]),
+        )
+        if not decision.admitted:
+            return ProcessV2SourceEntry(
+                v1_identity=v1_identity,
+                rejection_category=UPSTREAM_REJECTED,
+                v2_admission=None,
+                rejection=dict(overlay),
+                v1_record=None,
+                addressed=None,
+            )
+        return ProcessV2SourceEntry(
+            v1_identity=v1_identity,
+            rejection_category=None,
+            v2_admission=ProcessV2AdmissionOverlay(
+                admitted=True,
+                run_identity_sha256=str(plan["run_identity_sha256"]),
+                task_identity_sha256=str(decision.task_identity_sha256),
+                process_v2_identity_sha256=self.process_v2_identity_sha256,
+                proof_sha256=str(overlay["proof_sha256"]),
+                replayed_transitions=int(overlay["replayed_transitions"]),
+                atom_delete_teachers_by_candidate_source=dict(
+                    overlay["atom_delete_teachers_by_candidate_source"]
+                ),
+                process_v2_atom_delete_candidates=[
+                    list(slots) for slots in overlay["process_v2_atom_delete_candidates"]
+                ],
+            ),
+            rejection=None,
+            v1_record=record,
+            addressed=row.addressed,
+        )
+
 
 # ---- Resolution ----
+
+
+def _open_bound_cache_generation(
+    plan: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+    repo_root: Path,
+    verify_chunk_bytes: bool,
+) -> ProcessV2ChunkCacheGeneration:
+    """Reopen the exact committed cache generation the plan binds.
+
+    The generation is named by the plan rather than by the caller, so a source
+    cannot be pointed at a different generation than the one the decisions were
+    made against.  Every digest the binding froze is re-required against the
+    completion that is actually on disk, which is what makes "the same committed
+    generation" a checked statement instead of an assumption.
+    """
+
+    try:
+        require_production_source_geometry(plan, label="the Process-V2 rebind plan")
+        binding = validate_process_v2_rebind_cache_binding(plan["cache_binding"])
+    except ProcessV2RebindError as error:
+        raise ProcessV2Active8SourceError(
+            f"the Process-V2 rebind plan does not bind a committed chunk cache: {error}"
+        ) from error
+    try:
+        completion = load_committed_process_v2_chunk_cache_completion(
+            str(binding["cache_run_artifact_root"]),
+            artifact_root=Path(artifact_root),
+            repo_root=Path(repo_root),
+        )
+        disagreements = [
+            field
+            for field, bound, observed in (
+                (
+                    "cache_completion_sha256",
+                    binding["cache_completion_sha256"],
+                    completion["completion_sha256"],
+                ),
+                (
+                    "cache_semantic_identity_sha256",
+                    binding["cache_semantic_identity_sha256"],
+                    completion["cache_semantic_identity_sha256"],
+                ),
+                (
+                    "cache_planned_semantic_identity_sha256",
+                    binding["cache_planned_semantic_identity_sha256"],
+                    completion["planned_semantic_identity_sha256"],
+                ),
+                (
+                    "cache_physical_identity_sha256",
+                    binding["cache_physical_identity_sha256"],
+                    completion["cache_physical_identity_sha256"],
+                ),
+                (
+                    "cache_source_inventory_sha256",
+                    binding["cache_source_inventory_sha256"],
+                    completion["source_inventory_sha256"],
+                ),
+                ("records_per_chunk", int(binding["records_per_chunk"]),
+                 int(completion["records_per_chunk"])),
+                ("source_count", int(binding["source_count"]), int(completion["source_count"])),
+                ("entries", int(binding["entries"]), int(completion["entries"])),
+                ("chunk_count", int(binding["chunk_count"]), int(completion["chunk_count"])),
+            )
+            if bound != observed
+        ]
+        if disagreements:
+            raise ProcessV2Active8SourceError(
+                "the committed chunk-cache generation on disk is not the one the rebind plan "
+                f"bound; it disagrees on {sorted(disagreements)}"
+            )
+        return open_process_v2_chunk_cache(
+            completion,
+            artifact_root=Path(artifact_root),
+            repo_root=Path(repo_root),
+            verify_chunk_bytes=verify_chunk_bytes,
+        )
+    except ProcessV2ChunkCacheError as error:
+        raise ProcessV2Active8SourceError(
+            f"the committed Process-V2 chunk cache cannot be opened: {error}"
+        ) from error
 
 
 def resolve_process_v2_active8_source_inventory(
     plan: Mapping[str, Any],
     *,
-    v1_migration_completion_path: Path,
     artifact_root: Path,
     repo_root: Path,
+    verify_chunk_bytes: bool = True,
 ) -> ProcessV2Active8SourceInventory:
-    """Join the V1 lane/role inventory to the Process-V2 admission overlay.
+    """Join the committed cache generation to the Process-V2 admission overlay.
 
     Both halves are resolved by their own authority and then cross-checked. The
     check that matters is that they describe the SAME payload: an admitted
     overlay proved against one migration silently paired with a different
-    migration's shards would produce a corpus whose chemistry and whose
+    migration's cached rows would produce a corpus whose chemistry and whose
     admission decisions came from different runs.
+
+    ``verify_chunk_bytes`` is the chunk cache's own whole-generation guarantee and
+    defaults to on.  Turning it off checks every manifest and every declared
+    identity but not the chunk payloads; the stream hashes each chunk it reads
+    anyway, so the difference is exactly the chunks nobody reads -- and the
+    identity is published whether or not anybody streams.
     """
 
     admitted = resolve_process_v2_admitted_source(
         plan, artifact_root=Path(artifact_root), repo_root=Path(repo_root)
     )
-    v1_inventory = resolve_editing_v2_semantic_active8_sources(
-        Path(v1_migration_completion_path),
-        artifact_root=Path(artifact_root),
-        repo_root=Path(repo_root),
+    generation = _open_bound_cache_generation(
+        admitted.plan,
+        artifact_root=artifact_root,
+        repo_root=repo_root,
+        verify_chunk_bytes=verify_chunk_bytes,
     )
 
-    # The overlay names its V1 tasks; the inventory names the same tasks. If the
-    # two task sets differ, they are not the same payload.
-    binding = plan["v1_payload_binding"]
+    # The overlay names its V1 tasks; the cache names the same tasks. If the two
+    # task sets differ, they are not the same payload.
+    binding = admitted.plan["v1_payload_binding"]
     overlay_tasks = {
         str(task["v1_task_identity_sha256"]): task for task in binding["v1_tasks"]
     }
-    inventory_tasks = {
-        str(source.task_identity_sha256): source for source in v1_inventory.sources
-    }
-    if set(overlay_tasks) != set(inventory_tasks):
+    cached_tasks: dict[str, tuple[str, Mapping[str, Any]]] = {}
+    for path, manifest in zip(
+        generation.source_artifact_paths, generation.source_manifests, strict=True
+    ):
+        cached_tasks[str(manifest["v1_task_identity_sha256"])] = (path, manifest)
+    if set(overlay_tasks) != set(cached_tasks):
         raise ProcessV2Active8SourceError(
-            "the Process-V2 overlay and the V1 migration inventory name different "
-            f"task sets: overlay-only={sorted(set(overlay_tasks) - set(inventory_tasks))} "
-            f"inventory-only={sorted(set(inventory_tasks) - set(overlay_tasks))}"
+            "the Process-V2 overlay and the committed chunk cache name different "
+            f"task sets: overlay-only={sorted(set(overlay_tasks) - set(cached_tasks))} "
+            f"cache-only={sorted(set(cached_tasks) - set(overlay_tasks))}"
         )
     for task_id, overlay_task in overlay_tasks.items():
-        source = inventory_tasks[task_id]
-        if str(overlay_task["v1_semantic_shard_sha256"]) != source.semantic_shard_sha256:
+        _path, manifest = cached_tasks[task_id]
+        if str(overlay_task["v1_semantic_shard_sha256"]) != str(
+            manifest["semantic_shard_sha256"]
+        ):
             raise ProcessV2Active8SourceError(
                 f"task {task_id} names a different semantic shard in the overlay than "
-                "in the V1 migration inventory"
+                "in the committed chunk cache"
             )
-        if str(overlay_task["data_lane"]) != source.data_lane or str(
+        if str(overlay_task["data_lane"]) != str(manifest["data_lane"]) or str(
             overlay_task["split"]
-        ) != source.partition_role:
+        ) != str(manifest["split"]):
             raise ProcessV2Active8SourceError(
                 f"task {task_id} lane or split disagrees between the overlay and the "
-                "V1 migration inventory"
+                "committed chunk cache"
+            )
+        if int(overlay_task["v1_entries"]) != int(manifest["entries"]):
+            raise ProcessV2Active8SourceError(
+                f"task {task_id} binds {overlay_task['v1_entries']} V1 entries and the "
+                f"committed chunk cache holds {manifest['entries']}"
             )
 
     # Per-task admitted census, taken from the published task results rather
@@ -322,18 +771,22 @@ def resolve_process_v2_active8_source_inventory(
 
     sources = tuple(
         ProcessV2Active8Source(
-            data_lane=source.data_lane,
-            partition_role=source.partition_role,
-            task_identity_sha256=source.task_identity_sha256,
-            semantic_shard_sha256=source.semantic_shard_sha256,
-            semantic_manifest_sha256=source.semantic_manifest_sha256,
-            v1_entry_count=int(overlay_tasks[source.task_identity_sha256]["v1_entries"]),
-            admitted_entry_count=int(admitted_by_task[source.task_identity_sha256]),
-            rejected_entry_count=int(rejected_by_task[source.task_identity_sha256]),
+            data_lane=str(cached_tasks[task_id][1]["data_lane"]),
+            partition_role=str(cached_tasks[task_id][1]["split"]),
+            v1_task_identity_sha256=task_id,
+            cache_source_task_identity_sha256=str(
+                cached_tasks[task_id][1]["task_identity_sha256"]
+            ),
+            cache_source_artifact_path=str(cached_tasks[task_id][0]),
+            semantic_shard_sha256=str(cached_tasks[task_id][1]["semantic_shard_sha256"]),
+            semantic_manifest_sha256=str(cached_tasks[task_id][1]["semantic_manifest_sha256"]),
+            v1_entry_count=int(overlay_tasks[task_id]["v1_entries"]),
+            admitted_entry_count=int(admitted_by_task[task_id]),
+            rejected_entry_count=int(rejected_by_task[task_id]),
         )
-        for source in sorted(
-            v1_inventory.sources, key=lambda item: item.task_identity_sha256
-        )
+        # Sorted by the first frozen join-key field, so the published rows and
+        # the stream are in one order rather than two.
+        for task_id in sorted(cached_tasks)
     )
 
     # Source == admitted + rejected, per task and in total. The library already
@@ -344,7 +797,7 @@ def resolve_process_v2_active8_source_inventory(
             source.v1_entry_count
         ):
             raise ProcessV2Active8SourceError(
-                f"task {source.task_identity_sha256} admits "
+                f"task {source.v1_task_identity_sha256} admits "
                 f"{source.admitted_entry_count} and rejects "
                 f"{source.rejected_entry_count} of {source.v1_entry_count} entries"
             )
@@ -355,8 +808,10 @@ def resolve_process_v2_active8_source_inventory(
         )
 
     return ProcessV2Active8SourceInventory(
-        v1_inventory=v1_inventory,
         admitted_source=admitted,
+        cache_generation=generation,
+        artifact_root=Path(artifact_root),
+        repo_root=Path(repo_root),
         sources=sources,
         counts=counts,
         rejected_traces_by_code=dict(admitted.rejected_traces_by_code),
@@ -457,10 +912,10 @@ def validate_process_v2_active8_source_identity(
     if version != SOURCE_SCHEMA_VERSION:
         _identity_fail(
             f"{label} declares schema_version {version}, which is incompatible with "
-            f"{SOURCE_SCHEMA_VERSION}. Version 1 published four authority fields rather "
-            "than seven, embedded an admitted-source descriptor of a schema that has "
-            "since been refused, and declared no sort order, so it cannot be read as a "
-            "subset of this one"
+            f"{SOURCE_SCHEMA_VERSION}. Earlier versions took their lane/role rows from the "
+            "live V1 migration loader, keyed each row by that loader's task identity, and "
+            "named no committed cache generation, so they cannot be read as a subset of "
+            "this one"
         )
 
     # Authority first, and at every depth: the embedded descriptor and the source
@@ -477,6 +932,9 @@ def validate_process_v2_active8_source_identity(
     if payload.get("status") != SOURCE_STATUS:
         _identity_fail(f"{label} declares status {payload.get('status')!r}, not {SOURCE_STATUS!r}")
     for key in (
+        "cache_completion_sha256",
+        "cache_physical_identity_sha256",
+        "cache_semantic_identity_sha256",
         "process_v2_identity_sha256",
         "v1_migration_completion_sha256",
         "v1_payload_process_identity_sha256",
@@ -547,21 +1005,22 @@ def validate_process_v2_active8_source_identity(
         entry = _sorted_mapping(row, label=where)
         _exact_fields(entry, ACTIVE8_SOURCE_ROW_FIELDS, label=where)
         for key in (
+            "cache_source_task_identity_sha256",
             "semantic_manifest_sha256",
             "semantic_shard_sha256",
-            "task_identity_sha256",
+            "v1_task_identity_sha256",
         ):
             _exact_sha256(entry, key, label=where)
         for key in ("data_lane", "partition_role"):
             if type(entry[key]) is not str or not entry[key]:
                 _identity_fail(f"{where}.{key} is not a non-empty string")
-        task = str(entry["task_identity_sha256"])
+        task = str(entry["v1_task_identity_sha256"])
         if task in seen:
             _identity_fail(f"{where} repeats task {task}; one task is one row")
         seen.add(task)
         if task < previous:
             _identity_fail(
-                f"{where} is out of order; rows are sorted by task identity so the "
+                f"{where} is out of order; rows are sorted by V1 task identity so the "
                 "inventory is byte-stable across runs"
             )
         previous = task
@@ -609,6 +1068,7 @@ __all__ = [
     "ProcessV2Active8SourceError",
     "ProcessV2Active8SourceIdentityError",
     "ProcessV2Active8SourceInventory",
+    "ProcessV2SourceEntry",
     "resolve_process_v2_active8_source_inventory",
     "validate_process_v2_active8_source_identity",
 ]

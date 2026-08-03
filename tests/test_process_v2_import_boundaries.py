@@ -19,8 +19,11 @@ the boundary held.
    the same boundary stated over the Process-V2 module set specifically.
 
 2. **No Process-V2 module imports a V1 loader that revalidates V1 schema or live
-   identity.**  This boundary currently FAILS, deliberately and visibly: see the
-   expected-failure test at the bottom.
+   identity.**  This boundary now HOLDS: the Process-V2 Active8 source takes its
+   lane/role inventory from the committed chunk cache instead of the live V1
+   migration loader, so the historical payload is never routed through a loader
+   that would refuse it.  The test at the bottom carried a strict expected
+   failure until that landed; it is an ordinary gate now.
 
 3. **The frozen schema module stays a leaf.**  It is the module every Process-V2
    layer imports, so an edge out of it is an edge every layer acquires.
@@ -35,8 +38,6 @@ import ast
 import inspect
 import sys
 from pathlib import Path
-
-import pytest
 
 from compose_v4.data.editing_v2_semantic_active8_source_adapter import (
     resolve_editing_v2_semantic_active8_sources,
@@ -274,20 +275,6 @@ def test_the_declared_v1_loader_really_does_revalidate_the_live_v1_identity() ->
     assert 'live_process_identity["process_identity_sha256"]' in source
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "runnable-chain specification Section 5, known real defect: "
-        "src/compose_v4/data/editing_v2_process_v2_active8_source.py imports the V1 loader "
-        "resolve_editing_v2_semantic_active8_sources, which revalidates the LIVE V1 process "
-        "identity and therefore rejects the exact historical payload by construction. The "
-        "module is a provenance-and-census join that does not compute Process-V2 candidate "
-        "decisions and is to be replaced by a distinct Process-V2 Active8 stage in Wave 2. "
-        "The boundary is recorded now and becomes a real gate the moment that replacement "
-        "lands: strict xfail turns the fix into a reported failure, which is the signal to "
-        "delete this marker."
-    ),
-)
 def test_no_process_v2_module_imports_a_v1_loader_that_revalidates_live_v1_identity() -> None:
     """Without this the boundary is invisible until a real payload is refused.
 
@@ -295,6 +282,12 @@ def test_no_process_v2_module_imports_a_v1_loader_that_revalidates_live_v1_ident
     live-V1 loader passes every unit test whose resolvers are monkeypatched, and
     fails only against the real artifact, at the point where a remote stage is
     already running.
+
+    This carried a strict expected failure while
+    ``editing_v2_process_v2_active8_source`` took its lane/role inventory from
+    ``resolve_editing_v2_semantic_active8_sources``.  It takes it from the
+    committed chunk-cache generation now, so the boundary holds and this is an
+    ordinary gate.
     """
 
     offenders: list[str] = []
