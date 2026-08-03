@@ -60,6 +60,13 @@ from pathlib import Path
 from typing import Any
 
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
+from compose_v4.data.editing_v2_semantic_capability_cells import (
+    CountBin,
+    _stratum,
+    classify_action_family_context,
+)
+from compose_v4.rewrite.action_codec_v4 import decode_action
+from compose_v4.rewrite.semantic_trace import RewriteStep
 from compose_v4.data.editing_v2_process_v2_active8_interfaces import (
     ACTIVE8_CENSUS_FIELDS,
     REJECTION_CATEGORIES,
@@ -232,6 +239,97 @@ def _load_json(path: Path, *, field: str) -> tuple[dict[str, Any], bytes]:
     if not isinstance(value, dict):
         raise ProcessV2GateZeroError(f"{field} must be an object")
     return value, raw
+
+
+def _count_bins(declared: tuple[tuple[str, int, int | None], ...]) -> tuple[CountBin, ...]:
+    """The contract stores strata as plain tuples; `_stratum` wants CountBins.
+
+    Named apart from `_bins`, which parses a stratum declaration out of the raw
+    contract body. Two functions, two directions, and a shared name would have
+    made whichever was defined second silently win.
+    """
+
+    return tuple(CountBin(id=item[0], minimum=item[1], maximum=item[2]) for item in declared)
+
+
+def _structural_view(
+    transition: Mapping[str, Any], *, contract: FrozenProcessV2GateZeroContract
+) -> dict[str, Any]:
+    """Derive Gate 0's structural view of one published transition.
+
+    The index publishes RAW evidence -- the exact persistent-slot states, the
+    ActionV4 record, and the raw counts -- and deliberately does not classify.
+    That split is the handoff's: the Active8 stage preserves counts, and Gate 0
+    evaluates every required semantic cell and publishes the strata.  This
+    function is that evaluation, and it is the only place it happens.
+
+    It was not always here.  Gate 0 was first written to CONSUME a classified
+    transition, so it required `capability_cell_id`, `family_context` and three
+    strata that no index publishes.  Both suites passed and the chain did not
+    join, because a seam that names a protocol but not the row and the transition
+    crossing it has not named them.
+
+    Nothing is recomputed that the index already decided: the family comes from
+    the codec's own alias, the counts are carried through, and the exact states
+    are the cached arrays rather than anything re-derived.
+    """
+
+    rule = str(transition["executor_rule"])
+    decoded_rule, action = decode_action(transition["action_record"])
+    if decoded_rule != rule:
+        raise ProcessV2GateZeroError(
+            f"a transition declares executor rule {rule!r} but its ActionV4 record "
+            f"decodes to {decoded_rule!r}"
+        )
+    family, context = classify_action_family_context(
+        transition["source_state"],
+        transition["successor_state"],
+        RewriteStep(rule_name=decoded_rule, action=action),
+    )
+    if family != str(transition["model_family"]):
+        raise ProcessV2GateZeroError(
+            f"a transition declares model family {transition['model_family']!r} but its "
+            f"action classifies as {family!r}"
+        )
+    view = {
+        key: transition[key]
+        for key in (
+            "v1_task_identity_sha256",
+            "entry_index",
+            "trace_id",
+            "action_sha256",
+            "data_lane",
+            "executor_rule",
+            "model_family",
+            "source_state_sha256",
+            "raw_mark_count",
+            "canonical_successor_count",
+            "matching_mark_count",
+        )
+    }
+    view["partition_role"] = str(transition["split"])
+    view["progress_index"] = int(transition["source_progress_index"])
+    view["target_state_sha256"] = str(transition["successor_state_sha256"])
+    view["terminal"] = bool(transition["successor_is_terminal"])
+    view["successor_alias_multiplicity"] = int(transition["successor_alias_count"])
+    view["family_context"] = context
+    view["capability_cell_id"] = f"{contract.namespace}:{family}:{context}"
+    for source_field, stratum_field, _evidence_key in _STRATUM_FIELDS:
+        # The contract keys its bins by the SOURCE field; `_STRATUM_FIELDS`'s
+        # third element names the evidence block the counts are published under,
+        # which is a different vocabulary.
+        view[stratum_field] = _stratum(
+            int(view[source_field]),
+            _count_bins(contract.strata_bins[source_field]),
+            field=source_field,
+        )
+    # The assignment identity: what this transition structurally IS, and nothing
+    # about when or by which run it was observed. Two runs over the same corpus
+    # must agree on it, and two different transitions must not collide.
+    view["assignment_sha256"] = canonical_sha256(
+        {key: view[key] for key in sorted(view) if key != "assignment_sha256"}
+    )
+    return view
 
 
 def _empty_cell_row(cell_id: str, family: str, context: str) -> dict[str, Any]:
@@ -682,7 +780,8 @@ def build_process_v2_gate_zero_evidence(
         decision_traces += 1
         declared_transition_total += declared
         observed = 0
-        for transition in index.accepted_transitions_for(key):
+        for published in index.accepted_transitions_for(key):
+            transition = _structural_view(published, contract=contract)
             observed += 1
             decision_transitions += 1
             missing = [field for field in TRANSITION_FIELDS if field not in transition]
