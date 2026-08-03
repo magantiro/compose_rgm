@@ -14,6 +14,11 @@ So this scores real connected-nonleaf `atom_delete` teachers end to end and
 requires a finite log-probability, a finite Bregman loss, and finite gradients.
 The Process-V1 model is scored on the same teachers as the negative control: it
 must be `-inf`/`+inf`, which is precisely the support gap Process V2 closes.
+
+The last test is the other direction, and is what this correction round adds: a
+deletion the uniform charge gate refuses must not be learnable under Process V2
+either, so the fiber the model can learn is exactly the fiber the authority
+admits.
 """
 
 from __future__ import annotations
@@ -25,10 +30,12 @@ import torch
 from compose_v4.chem.molecular_graph import (
     ORGANIC_VOCABULARY,
     MolecularGraph,
+    is_element,
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.model.factorized_tracelet_rate_model import (
     LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
@@ -42,12 +49,8 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     factorized_mark_bregman_loss,
     prepare_factorized_mark_batch,
 )
-from compose_v4.rewrite.operators import AtomDelete, is_valid_atom_delete
-from compose_v4.rewrite.process_v2_atom_delete import (
-    process_v2_connected_nonleaf_atom_delete_mask,
-)
-from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
-from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
+from compose_v4.rewrite.operators import AtomDelete, apply_atom_delete, is_valid_atom_delete
+from compose_v4.rewrite.process_v2_atom_delete import process_v2_atom_delete_mask
 
 _SLOTS = 24
 _PANEL = (
@@ -66,16 +69,11 @@ def _state(smiles: str) -> MolecularGraph:
     return pad_molecular_graph(smiles_to_molecular_graph(smiles), _SLOTS)
 
 
-@pytest.fixture(scope="module")
-def ring_catalog():
-    target = _state("c1ccccc1")
-    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
-        np.random.default_rng(1), n_slots=_SLOTS
+def _real_degree(state: MolecularGraph, slot: int) -> int:
+    real = np.flatnonzero(is_element(state.atom_types))
+    return sum(
+        1 for other in real if int(other) != slot and int(state.bonds[slot, other]) != 0
     )
-    trace = compile_carbon_tree_to_target(
-        source, target, use_bond_reroute=True, align_source=True
-    )
-    return build_typed_ring_catalog((trace,))
 
 
 def _build_model(ring_catalog, *, process: str, delete_mode: str):
@@ -100,16 +98,40 @@ def _build_model(ring_catalog, *, process: str, delete_mode: str):
 
 
 @pytest.fixture(scope="module")
+def ring_catalog():
+    from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
+    from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
+
+    target = _state("c1ccccc1")
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(1), n_slots=_SLOTS
+    )
+    trace = compile_carbon_tree_to_target(
+        source, target, use_bond_reroute=True, align_source=True
+    )
+    return build_typed_ring_catalog((trace,))
+
+
+@pytest.fixture(scope="module")
 def connected_nonleaf_teachers():
-    """One executor-valid connected-nonleaf deletion per panel molecule."""
+    """One admitted CONNECTED-NONLEAF deletion per panel molecule.
+
+    The effective Process-V2 mask also admits leaves, and a leaf teacher is
+    supported under the legacy rule too, so it would make the negative control
+    vacuous. Only real-atom degree at least two is collected here.
+    """
 
     rows = []
     for smiles in _PANEL:
         state = _state(smiles)
-        admitted = np.flatnonzero(process_v2_connected_nonleaf_atom_delete_mask(state))
-        if not admitted.size:
+        admitted = [
+            int(slot)
+            for slot in np.flatnonzero(process_v2_atom_delete_mask(state))
+            if _real_degree(state, int(slot)) >= 2
+        ]
+        if not admitted:
             continue
-        action = AtomDelete(int(admitted[0]))
+        action = AtomDelete(admitted[0])
         assert is_valid_atom_delete(state, action)
         rows.append((state, action))
     assert len(rows) >= 6, "panel must supply several connected-nonleaf teachers"
@@ -160,9 +182,7 @@ def test_connected_nonleaf_teacher_scores_finite_and_backpropagates(
     model.zero_grad(set_to_none=True)
     loss.backward()
     gradients = [
-        parameter.grad
-        for parameter in model.parameters()
-        if parameter.grad is not None
+        parameter.grad for parameter in model.parameters() if parameter.grad is not None
     ]
     assert gradients, "the teacher produced no gradient at all"
     assert all(torch.isfinite(gradient).all() for gradient in gradients)
@@ -187,3 +207,43 @@ def test_the_same_teachers_are_unsupported_under_process_v1(
 
     assert not torch.isfinite(outputs.selected_mark_log_probability).any()
     assert not torch.isfinite(factorized_mark_bregman_loss(outputs, batch))
+
+
+def test_a_charge_violating_inherited_teacher_is_unsupported_under_process_v2(
+    ring_catalog,
+) -> None:
+    """The learnable fiber must be exactly the admitted fiber.
+
+    Deleting slot 0 of ``C[N+](C)(C)CC(=O)[O-]``, a neutral methyl leaf on the
+    quaternary ammonium, is legal for the executor and connected, and the legacy
+    dense rule admits it. The uniform charge gate refuses it, so under Process V2
+    it must be outside the candidate mask and score ``-inf``. This is the
+    round-one defect expressed at the objective: a rate was learnable for a
+    transition the authoritative charge policy forbids.
+    """
+
+    state = _state("C[N+](C)(C)CC(=O)[O-]")
+    action = AtomDelete(0)
+    assert is_valid_atom_delete(state, action) is True
+    assert charge_policy_preserved(state, apply_atom_delete(state, action)) is False
+    assert bool(process_v2_atom_delete_mask(state)[0]) is False
+
+    model = _build_model(
+        ring_catalog,
+        process=PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        delete_mode=PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+    )
+    batch = _teacher_batch(model, ((state, action),))
+    assert bool(batch.atom_delete_mask[0, 0]) is False
+    outputs = model.forward_mark_batch(batch)
+    assert not torch.isfinite(outputs.selected_mark_log_probability).any()
+    assert not torch.isfinite(factorized_mark_bregman_loss(outputs, batch))
+
+    # The admitted carbonyl-oxygen leaf of the SAME molecule stays learnable, so
+    # the refusal is the charge policy and not a withdrawn leaf capability.
+    admitted = AtomDelete(6)
+    assert bool(process_v2_atom_delete_mask(state)[6]) is True
+    admitted_batch = _teacher_batch(model, ((state, admitted),))
+    admitted_outputs = model.forward_mark_batch(admitted_batch)
+    assert torch.isfinite(admitted_outputs.selected_mark_log_probability).all()
+    assert torch.isfinite(factorized_mark_bregman_loss(admitted_outputs, admitted_batch))

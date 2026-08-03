@@ -1,10 +1,18 @@
 """The learned ``atom_delete`` candidate mask under Process V2.
 
-The effective Process-V2 mask is the DISJOINT UNION of the unchanged V1 dense
-rule and the Process-V2 connected-nonleaf expansion.  These tests pin that the
-legacy branch is byte-identical, that the expansion agrees with an independently
-invoked production executor in both directions, that the other seven Active8
-tables do not move, and that a mixed V1/V2 batch or capability fails loudly.
+Under Process V2 the batch's ``atom_delete_mask`` **equals**
+``process_v2_atom_delete_mask``.  It is not a union with the legacy dense rule,
+and it is neither a superset nor a subset of that rule: it adds the
+connected-nonleaf fiber and removes every inherited candidate that fails a
+common gate.
+
+These tests pin that equality end to end, that the legacy branch is
+byte-identical, that the mask agrees with an independently derived legality
+oracle in both directions, that the other seven Active8 tables do not move, and
+that a mixed V1/V2 batch or capability fails loudly.  The forward guard is
+checked for EQUALITY rather than containment, because a containment check
+accepts exactly the union this round removes and therefore could not detect the
+defect it exists to guard.
 """
 
 from __future__ import annotations
@@ -66,6 +74,7 @@ from compose_v4.rewrite.operators import (
     enumerate_semantic_atom_restates,
     is_valid_atom_delete,
 )
+from compose_v4.rewrite.process_v2_atom_delete import process_v2_atom_delete_mask
 from compose_v4.rewrite.progress import TraceProgressCTMC
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
@@ -104,6 +113,9 @@ _PANEL = (
     "CCO",
     "C",
 )
+
+# Charged panel members, where the legacy rule and Process V2 disagree.
+_CHARGED = ("C1CC[NH2+]CC1", "C[N+](C)(C)CC(=O)[O-]", "[O-]C(=O)C1CCCCC1")
 
 
 def _state(smiles: str) -> MolecularGraph:
@@ -241,8 +253,8 @@ def _real_atom_graph(state: MolecularGraph) -> nx.Graph:
     return graph
 
 
-def _oracle_connected_nonleaf_admission(state: MolecularGraph) -> np.ndarray:
-    """Independent bounded oracle for the additional deletion fiber.
+def _oracle_admission(state: MolecularGraph) -> np.ndarray:
+    """Independent bounded oracle for the complete Process-V2 deletion fiber.
 
     Built directly from the production executor predicates, the frozen
     resonance-invariant aromatic view, graph connectivity and the charge policy.
@@ -253,14 +265,9 @@ def _oracle_connected_nonleaf_admission(state: MolecularGraph) -> np.ndarray:
     graph = _real_atom_graph(state)
     articulation = set(nx.articulation_points(graph))
     perceived = resonance_invariant_bond_classes(state)
+    scar = state.atom_types == SCAR_IDX
     for slot in np.flatnonzero(is_element(state.atom_types)):
         slot = int(slot)
-        if int(graph.degree[slot]) < _CONNECTED_NONLEAF_MINIMUM_DEGREE:
-            continue
-        if bool((perceived[slot] == BOND_AROMATIC).any()):
-            continue
-        if slot in articulation:
-            continue
         action = AtomDelete(slot)
         if not is_valid_atom_delete(state, action):
             continue
@@ -269,6 +276,13 @@ def _oracle_connected_nonleaf_admission(state: MolecularGraph) -> np.ndarray:
             continue
         if not charge_policy_preserved(state, successor):
             continue
+        if int(graph.degree[slot]) >= _CONNECTED_NONLEAF_MINIMUM_DEGREE:
+            if bool((perceived[slot] == BOND_AROMATIC).any()):
+                continue
+            if slot in articulation:
+                continue
+            if bool(((state.bonds[slot] != 0) & scar).any()):
+                continue
         admitted[slot] = True
     return admitted
 
@@ -389,89 +403,89 @@ def test_legacy_batch_mask_is_the_unchanged_v1_dense_mask(semantic_v1_model) -> 
         )
 
 
-def test_process_v2_mask_is_the_disjoint_union_with_the_expansion(
+def test_process_v2_batch_mask_equals_the_admission_authority(process_v2_model) -> None:
+    """The core contract of this round: equality, not a union."""
+
+    for smiles in _PANEL:
+        state = _state(smiles)
+        batch = _batch(process_v2_model, (state,))
+        authority = process_v2_atom_delete_mask(state)
+
+        assert batch.atom_delete_admission_mask is not None
+        assert batch.atom_delete_admission_mask.dtype == torch.bool
+        assert np.array_equal(batch.atom_delete_mask[0].numpy(), authority), smiles
+        assert torch.equal(
+            batch.atom_delete_mask,
+            batch.atom_delete_admission_mask,
+        ), smiles
+
+
+def test_process_v2_mask_is_neither_a_superset_nor_a_subset_of_the_legacy_rule(
     semantic_v1_model,
     process_v2_model,
 ) -> None:
-    additions = 0
+    """The defect, at the batch level.
+
+    A union with the legacy rule would leave ``removed`` empty on every state.
+    The charged fixtures make it non-empty, and every removed slot is one the
+    charge policy refuses.
+    """
+
+    added_total = 0
+    removed_total = 0
+    removed_sources: list[str] = []
     for smiles in _PANEL:
         state = _state(smiles)
         legacy = _batch(semantic_v1_model, (state,)).atom_delete_mask[0].numpy()
-        batch = _batch(process_v2_model, (state,))
-        admission = batch.atom_delete_admission_mask[0].numpy()
-        effective = batch.atom_delete_mask[0].numpy()
+        effective = _batch(process_v2_model, (state,)).atom_delete_mask[0].numpy()
 
-        assert batch.atom_delete_admission_mask.dtype == torch.bool
-        assert not bool((legacy & admission).any()), smiles
-        assert np.array_equal(effective, legacy | admission), smiles
-        assert np.array_equal(effective & admission, admission), smiles
-        additions += int(admission.sum())
+        added = effective & ~legacy
+        removed = legacy & ~effective
+        added_total += int(added.sum())
+        removed_total += int(removed.sum())
+        if bool(removed.any()):
+            removed_sources.append(smiles)
 
         graph = _real_atom_graph(state)
-        low_degree = np.zeros(state.n_atoms, dtype=np.bool_)
-        for slot in graph.nodes:
-            if int(graph.degree[slot]) < _CONNECTED_NONLEAF_MINIMUM_DEGREE:
-                low_degree[int(slot)] = True
-        null_or_scar = ~is_element(state.atom_types)
-        preserved = low_degree | null_or_scar
-        assert np.array_equal(effective & preserved, legacy & preserved), smiles
-        assert not bool(admission[preserved].any()), smiles
-    assert additions > 0
-
-
-def test_model_mask_exposes_the_reference_connected_nonleaf_slots(
-    semantic_v1_model,
-    process_v2_model,
-) -> None:
-    """The exposed additional slots, read through the batch the model scores."""
-
-    reference = (
-        ("C1CCCCC1", (0, 1, 2, 3, 4, 5)),
-        ("C1CCOCC1", (0, 1, 2, 3, 4, 5)),
-        ("C1CCSCC1", (0, 1, 2, 3, 4, 5)),
-        ("c1ccccc1", ()),
-        ("Cc1ccccc1", ()),
-        ("c1ccc2ccccc2c1", ()),
-        ("CC1CCCCC1", (2, 3, 4, 5, 6)),
-        ("C1CC2CCC1CC2", (0, 1, 2, 3, 4, 5, 6, 7)),
-        ("O=C1NC(O)C2CCCCC12", (2, 5, 6, 7, 8, 9, 10)),
-        ("CCO", ()),
-        ("C", ()),
-        ("C[N+](C)(C)CC(=O)[O-]", ()),
-    )
-    for smiles, expected in reference:
-        state = _state(smiles)
-        batch = _batch(process_v2_model, (state,))
-        admission = batch.atom_delete_admission_mask[0].numpy()
-        assert tuple(int(slot) for slot in np.flatnonzero(admission)) == expected, smiles
-        legacy = _batch(semantic_v1_model, (state,)).atom_delete_mask[0].numpy()
-        effective = batch.atom_delete_mask[0].numpy()
-        assert tuple(int(slot) for slot in np.flatnonzero(effective & ~legacy)) == (
-            expected
-        ), smiles
+        for slot in np.flatnonzero(added):
+            # Everything newly reached is connected-nonleaf.
+            assert int(graph.degree[int(slot)]) >= _CONNECTED_NONLEAF_MINIMUM_DEGREE
+        for slot in np.flatnonzero(removed):
+            # Everything withdrawn is withdrawn by the charge policy alone.
+            action = AtomDelete(int(slot))
+            assert is_valid_atom_delete(state, action) is True, (smiles, int(slot))
+            successor = apply_atom_delete(state, action)
+            assert is_connected_or_null(successor) is True
+            assert charge_policy_preserved(state, successor) is False, (smiles, slot)
+    assert added_total > 0
+    # Four methyl/oxide slots of the zwitterion and the carboxylate oxide.  The
+    # piperidinium contributes none because the legacy rule never reached its
+    # ring atoms in the first place.
+    assert removed_total == 5, removed_total
+    assert removed_sources == ["C[N+](C)(C)CC(=O)[O-]", "[O-]C(=O)C1CCCCC1"]
+    assert set(removed_sources) <= set(_CHARGED)
 
 
 def test_model_mask_never_admits_a_scar_or_null_slot(process_v2_model) -> None:
     base = _state("C1CCCCC1")
     atom_types = base.atom_types.copy()
+    bonds = base.bonds.copy()
+    hydrogens = base.implicit_h_counts.copy()
     atom_types[7] = SCAR_IDX
-    scarred = MolecularGraph(
-        atom_types,
-        base.formal_charges.copy(),
-        base.implicit_h_counts.copy(),
-        base.bonds.copy(),
-    )
+    bonds[7, 0] = bonds[0, 7] = 1
+    hydrogens[0] -= 1
+    scarred = MolecularGraph(atom_types, base.formal_charges.copy(), hydrogens, bonds)
+
     batch = _batch(process_v2_model, (scarred,))
     effective = batch.atom_delete_mask[0].numpy()
-    admission = batch.atom_delete_admission_mask[0].numpy()
     non_element = ~is_element(scarred.atom_types)
     assert not bool(effective[non_element].any())
-    assert not bool(admission[non_element].any())
-    assert tuple(int(slot) for slot in np.flatnonzero(admission)) == (0, 1, 2, 3, 4, 5)
+    # Slot 0 is SCAR-incident and connected-nonleaf, so it is deferred.
+    assert tuple(int(slot) for slot in np.flatnonzero(effective)) == (1, 2, 3, 4, 5)
 
 
-def test_v1_admits_only_degree_at_most_one_slots(semantic_v1_model) -> None:
-    """The structural fact that makes the union disjoint by construction."""
+def test_legacy_rule_admits_only_degree_at_most_one_slots(semantic_v1_model) -> None:
+    """The structural fact that makes the newly reached fiber disjoint from it."""
 
     for smiles in _PANEL:
         state = _state(smiles)
@@ -485,7 +499,6 @@ def test_v1_admits_only_degree_at_most_one_slots(semantic_v1_model) -> None:
 
 
 def test_model_mask_agrees_with_an_independent_executor_oracle(
-    semantic_v1_model,
     process_v2_model,
 ) -> None:
     assert len(_PANEL) >= 12
@@ -493,9 +506,8 @@ def test_model_mask_agrees_with_an_independent_executor_oracle(
     admitted_total = 0
     for smiles in _PANEL:
         state = _state(smiles)
-        legacy = _batch(semantic_v1_model, (state,)).atom_delete_mask[0].numpy()
         effective = _batch(process_v2_model, (state,)).atom_delete_mask[0].numpy()
-        oracle = _oracle_connected_nonleaf_admission(state) | legacy
+        oracle = _oracle_admission(state)
         admitted_total += int(effective.sum())
         for slot in range(state.n_atoms):
             if bool(effective[slot]) != bool(oracle[slot]):
@@ -507,18 +519,14 @@ def test_model_mask_agrees_with_an_independent_executor_oracle(
 
 
 def test_every_admitted_delete_executes_to_the_exact_successor(
-    semantic_v1_model,
     process_v2_model,
 ) -> None:
     checked = 0
     for smiles in _PANEL:
         state = _state(smiles)
-        legacy = _batch(semantic_v1_model, (state,)).atom_delete_mask[0].numpy()
         batch = _batch(process_v2_model, (state,))
-        admission = batch.atom_delete_admission_mask[0].numpy()
-        for slot in np.flatnonzero(admission):
+        for slot in np.flatnonzero(batch.atom_delete_mask[0].numpy()):
             slot = int(slot)
-            assert not bool(legacy[slot])
             action = AtomDelete(slot)
             assert is_valid_atom_delete(state, action) is True
             successor = apply_atom_delete(state, action)
@@ -544,33 +552,32 @@ def test_every_admitted_delete_executes_to_the_exact_successor(
     assert checked > 0
 
 
-def test_scored_mask_keeps_every_admission_after_the_charge_policy(
+def test_the_vectorized_charge_policy_removes_nothing_under_process_v2(
     semantic_v1_model,
     process_v2_model,
 ) -> None:
-    """``_action_tables`` intersects with the vectorized charge policy.
+    """The candidate fiber and the scored fiber must be the same set.
 
-    The expansion is already resolved against the exact ``charge_policy_preserved``
-    predicate, so the vectorized fast path must not drop any admitted slot; the
-    preserved V1 leaves keep their historical charge-policy behaviour.
+    ``_action_tables`` intersects primitive support with a vectorized form of the
+    charge policy.  Under Process V2 the exact CPU authority has already applied
+    that policy, so the intersection must be a no-op and the scored mask must
+    equal the batch mask.  Under the legacy rule it still bites, which is what
+    made the round-one batch mask disagree with the mask the model scored.
     """
 
-    charged = 0
+    legacy_dropped = 0
     for smiles in _PANEL:
         state = _state(smiles)
-        legacy_scored = _tables(
-            semantic_v1_model,
-            _batch(semantic_v1_model, (state,)),
-        )[0]["atom_delete"]
-        batch = _batch(process_v2_model, (state,))
-        v2_scored = _tables(process_v2_model, batch)[0]["atom_delete"]
-        assert torch.equal(
-            v2_scored,
-            legacy_scored | batch.atom_delete_admission_mask,
-        ), smiles
-        if bool((state.formal_charges != 0).any()):
-            charged += 1
-    assert charged >= 3
+        v2_batch = _batch(process_v2_model, (state,))
+        v2_scored = _tables(process_v2_model, v2_batch)[0]["atom_delete"]
+        assert torch.equal(v2_scored, v2_batch.atom_delete_mask), smiles
+
+        legacy_batch = _batch(semantic_v1_model, (state,))
+        legacy_scored = _tables(semantic_v1_model, legacy_batch)[0]["atom_delete"]
+        legacy_dropped += int(
+            (legacy_batch.atom_delete_mask & ~legacy_scored).sum()
+        )
+    assert legacy_dropped == 5, legacy_dropped
 
 
 # ---- Other Active8 tables ----
@@ -598,7 +605,7 @@ def test_other_active8_masks_and_logits_are_unchanged(
             assert torch.equal(legacy_masks[name], v2_masks[name]), (smiles, name)
         # Every head, including the per-slot delete head, is untouched; only
         # the delete MASK moves.  The family normalizer legitimately shifts
-        # because the atom_delete support grew, so it is not compared here.
+        # because the atom_delete support changed, so it is not compared here.
         for name in legacy_logits:
             assert torch.equal(legacy_logits[name], v2_logits[name]), (smiles, name)
 
@@ -638,29 +645,49 @@ def test_legacy_model_rejects_a_process_v2_batch(
         _tables(semantic_v1_model, forged)
 
 
-def test_process_v2_model_requires_a_contained_admission_mask(
+def test_forward_requires_equality_not_containment(
     semantic_v1_model,
     process_v2_model,
 ) -> None:
-    state = _state("C1CCCCC1")
-    v2_batch = _batch(process_v2_model, (state,))
+    """The guard that would have caught the round-one union.
 
-    with pytest.raises(ValueError, match="lacks the exact connected-nonleaf"):
+    Round one asserted that the admission mask was CONTAINED in the batch mask.
+    A batch whose delete mask is ``legacy | admission`` satisfies containment
+    while offering candidates the authority refuses, so that check could not
+    detect the defect it existed to guard.  Equality rejects it.
+    """
+
+    state = _state("C[N+](C)(C)CC(=O)[O-]")
+    v2_batch = _batch(process_v2_model, (state,))
+    legacy_mask = _batch(semantic_v1_model, (state,)).atom_delete_mask
+    union = legacy_mask | v2_batch.atom_delete_admission_mask
+    assert not torch.equal(union, v2_batch.atom_delete_mask)
+    assert bool((v2_batch.atom_delete_admission_mask & ~union).sum() == 0)
+
+    with pytest.raises(ValueError, match="does not equal the batch atom-delete mask"):
+        _tables(process_v2_model, replace(v2_batch, atom_delete_mask=union))
+
+    # A strictly narrower batch mask is rejected in the same way.
+    narrowed = v2_batch.atom_delete_mask.clone()
+    narrowed[0, 6] = False
+    with pytest.raises(ValueError, match="does not equal the batch atom-delete mask"):
+        _tables(process_v2_model, replace(v2_batch, atom_delete_mask=narrowed))
+
+    with pytest.raises(ValueError, match="lacks the exact uniform-gated"):
         _tables(process_v2_model, replace(v2_batch, atom_delete_admission_mask=None))
 
-    legacy_mask = _batch(semantic_v1_model, (state,)).atom_delete_mask
-    with pytest.raises(ValueError, match="not contained in the batch atom-delete mask"):
-        _tables(process_v2_model, replace(v2_batch, atom_delete_mask=legacy_mask))
-
-    wide = v2_batch.atom_delete_admission_mask[:, :-1]
+    wrong_shape = v2_batch.atom_delete_admission_mask[:, :-1]
     with pytest.raises(ValueError, match="wrong shape"):
-        _tables(process_v2_model, replace(v2_batch, atom_delete_admission_mask=wide))
+        _tables(
+            process_v2_model,
+            replace(v2_batch, atom_delete_admission_mask=wrong_shape),
+        )
 
 
 def test_prepare_batch_fails_loudly_without_the_threaded_delete_mode(
     process_v2_model,
 ) -> None:
-    """A builder that forgets the flag must raise, not collate a V1 mask."""
+    """A builder that forgets the flag must raise, not collate a legacy mask."""
 
     capabilities = process_v2_model.operator_capabilities
     with pytest.raises(ValueError, match="Process-V2 Editing-V2 batch requires"):
@@ -748,6 +775,11 @@ def test_batch_reconstruction_preserves_the_admission_mask(process_v2_model) -> 
             reconstructed.atom_delete_mask,
             batch.atom_delete_mask[1:3],
         )
+        # The equality contract must survive every reconstruction.
+        assert torch.equal(
+            reconstructed.atom_delete_mask,
+            reconstructed.atom_delete_admission_mask,
+        )
 
     moved = batch.to(torch.device("cpu"))
     assert torch.equal(
@@ -784,7 +816,9 @@ def test_direct_and_multiworker_collation_produce_identical_masks(
             teacher_rate=0.0,
             importance_weight=1.0,
         )
-        for index, smiles in enumerate(("C1CCCCC1", "CC1CCCCC1", "c1ccccc1", "CCO"))
+        for index, smiles in enumerate(
+            ("C1CCCCC1", "CC1CCCCC1", "c1ccccc1", "C[N+](C)(C)CC(=O)[O-]")
+        )
     ]
     direct = _collator(process_v2_model)(examples)
     # Each DataLoader worker owns its own collator and chemistry cache; the
@@ -801,9 +835,12 @@ def test_direct_and_multiworker_collation_produce_identical_masks(
         merged.atom_delete_admission_mask,
         direct.atom_delete_admission_mask,
     )
+    assert torch.equal(merged.atom_delete_mask, merged.atom_delete_admission_mask)
     assert torch.equal(
         direct.atom_delete_mask,
-        _batch(process_v2_model, tuple(example.state for example in examples)).atom_delete_mask,
+        _batch(
+            process_v2_model, tuple(example.state for example in examples)
+        ).atom_delete_mask,
     )
 
 
@@ -850,15 +887,14 @@ def test_sample_factorized_mark_batch_threads_the_capability(
         PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
     )
     assert evaluated.atom_delete_admission_mask is not None
-    assert evaluated.atom_delete_admission_mask.shape == evaluated.atom_delete_mask.shape
-    assert not bool(
-        (evaluated.atom_delete_admission_mask & ~evaluated.atom_delete_mask).any()
+    assert torch.equal(
+        evaluated.atom_delete_admission_mask,
+        evaluated.atom_delete_mask,
     )
     for row, state in enumerate(evaluated.states):
-        expected = _oracle_connected_nonleaf_admission(state)
         assert np.array_equal(
-            evaluated.atom_delete_admission_mask[row].numpy(),
-            expected,
+            evaluated.atom_delete_mask[row].numpy(),
+            _oracle_admission(state),
         )
     # The model must be able to score the batch its own capability produced.
     _tables(process_v2_model, evaluated)
