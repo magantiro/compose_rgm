@@ -343,7 +343,6 @@ def _bound_run(tmp_path: Path):
 def _plan(binding, *, records_per_chunk: int = 4):
     return plan_process_v2_chunk_cache(
         binding,
-        source_revision=v1_fixture._source_revision(),
         output_artifact_prefix="/artifacts/chunk_cache_fixture",
         records_per_chunk=records_per_chunk,
     )

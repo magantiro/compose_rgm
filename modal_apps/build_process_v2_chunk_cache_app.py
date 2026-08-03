@@ -5,11 +5,23 @@ docstring.
 
 **Planning never needs Git.**  The image carries source files but no ``.git``,
 so a remote driver that shells out to ``git rev-parse`` cannot plan at all.  The
-clean source revision is therefore computed and verified *locally*, serialized
+clean image revision is therefore computed and verified *locally*, serialized
 into the call, and revalidated remotely against the image's own files.  This is
 the established semantic-v4 launcher pattern
 (``materialize_editing_v2_semantic_v4_migration_app.local_source_revision``),
 not a new one.
+
+**The image revision is execution provenance and nothing else.**  It hashes the
+launcher, the plan driver and every file under ``src`` and ``configs``, so it
+moves whenever anything anywhere in the tree moves.  It used to be handed
+straight to the library as the plan's scientific ``source_revision``, where it
+was hashed into ``cache_physical_identity_sha256`` -- which meant editing any
+file under ``src`` or ``configs`` relocated every cached byte.  The scientific
+revision is now the library's own **narrow** ``cache_implementation_revision``,
+computed by the library from the modules that actually decide what the cache
+holds.  Both are validated in every remote body, and they are cross-checked: the
+narrow revision's files must appear in the image inventory with identical
+digests, so a caller cannot pair one tree's code with another tree's revision.
 
 **The container bound is real.**  A decorator ``max_containers`` is a ceiling,
 not a schedule, and a single ``starmap`` of every task submits every task at
@@ -50,6 +62,7 @@ if str(ROOT / "src") not in sys.path:  # pragma: no cover - import-time path set
     sys.path.insert(0, str(ROOT / "src"))
 
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (  # noqa: E402
+    CACHE_IMPLEMENTATION_FILES,
     DEFAULT_CACHE_MAP_CONTAINERS,
     PLATFORM_MAX_MAP_CONTAINERS,
     plan_submission_waves,
@@ -81,8 +94,11 @@ MAP_TIMEOUT_SECONDS = 4 * 3600
 REDUCE_TIMEOUT_SECONDS = 2 * 3600
 DRIVER_TIMEOUT_SECONDS = 12 * 3600
 
-SOURCE_REVISION_SCHEMA = "compose.data.process_v2_chunk_cache_modal_source_revision"
-SOURCE_REVISION_SCHEMA_VERSION = 1
+# The *image* revision: execution-environment provenance, deliberately absent
+# from every scientific identity. The narrow, artifact-addressing revision is
+# `compose_v4.data.editing_v2_process_v2_chunk_cache.build_cache_implementation_revision`.
+IMAGE_REVISION_SCHEMA = "compose.data.process_v2_chunk_cache_modal_image_revision"
+IMAGE_REVISION_SCHEMA_VERSION = 2
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 image = (
@@ -173,11 +189,13 @@ def _git(root: Path, *arguments: str) -> str:
         ) from error
 
 
-def local_source_revision(*, expected_commit: str, repo_root: Path = ROOT) -> dict[str, Any]:
-    """Compute and verify the clean source revision locally, once.
+def local_image_revision(*, expected_commit: str, repo_root: Path = ROOT) -> dict[str, Any]:
+    """Compute and verify the clean image revision locally, once.
 
     The image has no ``.git``, and the ``debian_slim`` base has no ``git``
     binary either, so this cannot run remotely and must not be attempted there.
+    This is execution-environment provenance: it proves the container runs the
+    tree the launcher committed, and it addresses no artifact.
     """
 
     if not isinstance(expected_commit, str) or _COMMIT_RE.fullmatch(expected_commit) is None:
@@ -195,36 +213,36 @@ def local_source_revision(*, expected_commit: str, repo_root: Path = ROOT) -> di
     if not sources or not set(sources).issubset(tracked):
         raise RuntimeError("every serialized chunk-cache source must be Git-tracked")
     body = {
-        "schema": SOURCE_REVISION_SCHEMA,
-        "schema_version": SOURCE_REVISION_SCHEMA_VERSION,
+        "schema": IMAGE_REVISION_SCHEMA,
+        "schema_version": IMAGE_REVISION_SCHEMA_VERSION,
         "commit": commit,
         "tree": tree,
         "worktree_clean": True,
         "serialized_sources": sources,
     }
-    return {**body, "source_revision_sha256": _sha256(body)}
+    return {**body, "image_revision_sha256": _sha256(body)}
 
 
-def validate_remote_source_revision(
+def validate_remote_image_revision(
     value: dict[str, Any], *, remote_root: Path = REMOTE_ROOT
 ) -> dict[str, Any]:
-    """Revalidate the supplied revision against the image, without Git.
+    """Revalidate the supplied image revision against the image, without Git.
 
     Every serialized file is rehashed from the image, so a revision that names
     a different tree than the one actually baked in cannot pass.
     """
 
     if not isinstance(value, dict):
-        raise RuntimeError("the chunk-cache source revision must be an object")
-    body = {key: item for key, item in value.items() if key != "source_revision_sha256"}
+        raise RuntimeError("the chunk-cache image revision must be an object")
+    body = {key: item for key, item in value.items() if key != "image_revision_sha256"}
     if (
-        value.get("schema") != SOURCE_REVISION_SCHEMA
-        or value.get("schema_version") != SOURCE_REVISION_SCHEMA_VERSION
+        value.get("schema") != IMAGE_REVISION_SCHEMA
+        or value.get("schema_version") != IMAGE_REVISION_SCHEMA_VERSION
         or value.get("worktree_clean") is not True
         or _COMMIT_RE.fullmatch(str(value.get("commit", ""))) is None
-        or value.get("source_revision_sha256") != _sha256(body)
+        or value.get("image_revision_sha256") != _sha256(body)
     ):
-        raise RuntimeError("the chunk-cache source revision is malformed or self-inconsistent")
+        raise RuntimeError("the chunk-cache image revision is malformed or self-inconsistent")
     sources = value.get("serialized_sources")
     expected = set(serialized_source_paths(Path(remote_root)))
     if not isinstance(sources, dict) or set(sources) != expected:
@@ -237,6 +255,49 @@ def validate_remote_source_revision(
         if _file_sha256(Path(remote_root) / relative) != digest:
             raise RuntimeError(f"a serialized chunk-cache source differs in the image: {relative}")
     return value
+
+
+def validate_remote_source_revision(
+    cache_implementation_revision: dict[str, Any],
+    image_revision: dict[str, Any],
+    *,
+    remote_root: Path = REMOTE_ROOT,
+) -> dict[str, Any]:
+    """Revalidate both revisions and cross-check them. Calls no Git.
+
+    The *narrow* revision is the one that addresses the artifact, and the
+    library owns it: ``validate_cache_implementation_revision`` recomputes it
+    from the modules that are actually present and refuses anything else, so a
+    caller-supplied value is a claim rather than an authority.
+
+    The cross-check is by digest, not by commit.  Every behaviour-affecting
+    module the narrow revision names must appear in the image inventory with the
+    identical hash, so pairing one tree's code with another tree's revision
+    object fails on the exact file that differs.
+    """
+
+    if str(remote_root) not in sys.path:
+        sys.path.insert(0, str(remote_root))
+    from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+        validate_cache_implementation_revision,
+    )
+
+    validate_remote_image_revision(image_revision, remote_root=remote_root)
+    revision = validate_cache_implementation_revision(
+        cache_implementation_revision, repo_root=Path(remote_root)
+    )
+    serialized = image_revision.get("serialized_sources") or {}
+    disagreeing = [
+        relative
+        for relative in CACHE_IMPLEMENTATION_FILES
+        if serialized.get(relative) != revision["implementation_files"][relative]
+    ]
+    if disagreeing:
+        raise RuntimeError(
+            "the chunk-cache implementation revision and the image revision describe "
+            f"different files: {sorted(disagreeing)}"
+        )
+    return revision
 
 
 def authority_envelope() -> dict[str, bool]:
@@ -259,7 +320,10 @@ def authority_envelope() -> dict[str, bool]:
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def build_one_source_cache(
-    plan: dict[str, Any], task_identity_sha256: str, source_revision: dict[str, Any]
+    plan: dict[str, Any],
+    task_identity_sha256: str,
+    cache_implementation_revision: dict[str, Any],
+    image_revision: dict[str, Any],
 ) -> dict[str, Any]:
     """One source shard, one fused pass, one atomic publication."""
 
@@ -269,13 +333,16 @@ def build_one_source_cache(
         write_chunk_cache_refusal_report,
     )
 
-    validate_remote_source_revision(source_revision)
+    validate_remote_source_revision(cache_implementation_revision, image_revision)
     # This worker reads a shard another container wrote; the volume snapshot it
     # booted with may predate it.
     artifact_volume.reload()
     try:
         result = execute_process_v2_chunk_cache_task(
-            plan, task_identity_sha256, artifact_root=ARTIFACT_ROOT
+            plan,
+            task_identity_sha256,
+            artifact_root=ARTIFACT_ROOT,
+            repo_root=REMOTE_ROOT,
         )
     except ProcessV2ChunkCacheError as error:
         # Nothing was published under the run namespace; the report goes to a
@@ -301,15 +368,21 @@ def build_one_source_cache(
     max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def reduce_chunk_cache(plan: dict[str, Any], source_revision: dict[str, Any]) -> dict[str, Any]:
+def reduce_chunk_cache(
+    plan: dict[str, Any],
+    cache_implementation_revision: dict[str, Any],
+    image_revision: dict[str, Any],
+) -> dict[str, Any]:
     """Only the serialized reducer may declare the cache complete."""
 
     from compose_v4.data.editing_v2_process_v2_chunk_cache import reduce_process_v2_chunk_cache
 
-    validate_remote_source_revision(source_revision)
+    validate_remote_source_revision(cache_implementation_revision, image_revision)
     # Reduction reads twenty source caches written by twenty other containers.
     artifact_volume.reload()
-    completion = reduce_process_v2_chunk_cache(plan, artifact_root=ARTIFACT_ROOT)
+    completion = reduce_process_v2_chunk_cache(
+        plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
+    )
     artifact_volume.commit()
     return completion
 
@@ -325,15 +398,16 @@ def reduce_chunk_cache(plan: dict[str, Any], source_revision: dict[str, Any]) ->
 def driver(
     *,
     semantic_migration_completion: str,
-    source_revision: dict[str, Any],
+    cache_implementation_revision: dict[str, Any],
+    image_revision: dict[str, Any],
     output_artifact_prefix: str,
     records_per_chunk: int,
     max_map_containers: int,
 ) -> dict[str, Any]:
     """Bind the exact completion, plan, resume, map in waves, then reduce.
 
-    No Git call appears anywhere in this body or anything it calls: the source
-    revision arrives already computed and is revalidated against the image.
+    No Git call appears anywhere in this body or anything it calls: both
+    revisions arrive already computed and are revalidated against the image.
     """
 
     _add_remote_paths()
@@ -349,7 +423,7 @@ def driver(
     )
     from plan_process_v2_rebind import read_pinned_identities
 
-    validate_remote_source_revision(source_revision)
+    revision = validate_remote_source_revision(cache_implementation_revision, image_revision)
     bound = validate_map_container_bound(max_map_containers)
     # Before reading anything the caller named on the volume.
     artifact_volume.reload()
@@ -376,17 +450,22 @@ def driver(
     )
     plan = plan_process_v2_chunk_cache(
         binding,
-        source_revision=source_revision,
+        repo_root=REMOTE_ROOT,
+        cache_implementation_revision=revision,
         output_artifact_prefix=output_artifact_prefix,
         records_per_chunk=records_per_chunk,
     )
-    write_process_v2_chunk_cache_plan(plan, artifact_root=ARTIFACT_ROOT)
+    write_process_v2_chunk_cache_plan(
+        plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
+    )
     artifact_volume.commit()
 
     # Before scanning reusable work: a previous run's outputs live in a snapshot
     # this container did not necessarily boot with.
     artifact_volume.reload()
-    complete = completed_process_v2_chunk_cache_task_ids(plan, artifact_root=ARTIFACT_ROOT)
+    complete = completed_process_v2_chunk_cache_task_ids(
+        plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
+    )
     missing = [
         str(task["task_identity_sha256"])
         for task in plan["tasks"]
@@ -412,18 +491,22 @@ def driver(
             missing,
             max_map_containers=bound,
             submit=lambda wave: build_one_source_cache.starmap(
-                [(plan, task_id, source_revision) for task_id in wave]
+                [(plan, task_id, revision, image_revision) for task_id in wave]
             ),
             set_autoscaler=build_one_source_cache.update_autoscaler,
         )
 
-    completion = reduce_chunk_cache.remote(plan, source_revision)
+    completion = reduce_chunk_cache.remote(plan, revision, image_revision)
     # After the reducer returns and before resolving completion: the completion
     # document was written by that other container.
     artifact_volume.reload()
     return {
         "phase": "process_v2_chunk_cache_complete",
         "run_artifact_root": plan["run_artifact_root"],
+        "cache_implementation_sha256": completion["cache_implementation_sha256"],
+        # Execution-environment provenance, reported and never hashed into the
+        # artifact address.
+        "image_revision_sha256": image_revision["image_revision_sha256"],
         "cache_semantic_identity_sha256": completion["cache_semantic_identity_sha256"],
         "cache_physical_identity_sha256": completion["cache_physical_identity_sha256"],
         "completion_sha256": completion["completion_sha256"],
@@ -475,17 +558,24 @@ def main(
     records_per_chunk: int = 0,
     max_map_containers: int = DEFAULT_CACHE_MAP_CONTAINERS,
 ) -> None:
-    from compose_v4.data.editing_v2_process_v2_chunk_cache import DEFAULT_RECORDS_PER_CHUNK
+    from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+        DEFAULT_RECORDS_PER_CHUNK,
+        build_cache_implementation_revision,
+    )
     from compose_v4.data.editing_v2_process_v2_completion_binder import (
         PRODUCTION_COMPLETION_ARTIFACT_PATH,
     )
 
     bound = validate_map_container_bound(int(max_map_containers))
     completion_path = semantic_migration_completion or PRODUCTION_COMPLETION_ARTIFACT_PATH
-    source_revision = local_source_revision(expected_commit=expected_commit)
+    # Computed here, where `.git` exists. The remote side revalidates both
+    # against the image and never runs Git.
+    image_revision = local_image_revision(expected_commit=expected_commit)
+    cache_implementation_revision = build_cache_implementation_revision(repo_root=ROOT)
     report = driver.remote(
         semantic_migration_completion=completion_path,
-        source_revision=source_revision,
+        cache_implementation_revision=cache_implementation_revision,
+        image_revision=image_revision,
         output_artifact_prefix=output_artifact_prefix,
         records_per_chunk=int(records_per_chunk) or DEFAULT_RECORDS_PER_CHUNK,
         max_map_containers=bound,
