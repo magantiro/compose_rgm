@@ -11,7 +11,8 @@ fields explicitly false.
 |---|---|
 | branch | `codex/editing-v2-process-v2-wave2a-compatible-chain` |
 | base | `dbfe1e19c314cb55d9516b0657397e52d9f7c902` |
-| head | *(filled at delivery)* |
+| last code commit | `422221d` (this report is the commit after it; a report that
+names its own sha invalidates itself on amend) |
 | integration worktree | `/private/tmp/compose-process-v2-wave2a-compatible-chain` |
 
 Implementation ran as four owned workstreams in isolated worktrees, integrated
@@ -32,7 +33,7 @@ the live tree, so an editor write landing mid-run creates a real stale-plan
 refusal. Snapshot worktrees make the gate independent of what the agents are
 doing.
 
-## 1b. Commit inventory (31)
+## 1b. Commit inventory (36 code commits, plus this report)
 
 | sha | subject |
 |---|---|
@@ -68,7 +69,10 @@ doing.
 | `98b045b` | verify_process_v2_chain: enforce the normal-form rule it documents |
 | `9750775` | verify_process_v2_chain: defer the authority scan to its owning module |
 
-The last eight are adversarial-review fixes; see §8b.
+Five further commits followed the inventory above, after the second adversarial
+pass: two of Agent B's later commits that the first integration missed, the
+cache-fed run test, the decode-path closure fix (§10), and the learnings entry.
+The review fixes are described in §8b and §10.
 
 ## 2. Environment
 
