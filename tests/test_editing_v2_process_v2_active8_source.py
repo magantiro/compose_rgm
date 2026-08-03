@@ -612,5 +612,3 @@ def test_the_taxonomy_version_in_the_cell_namespace_is_not_renamed() -> None:
 def test_a_non_object_identity_is_refused() -> None:
     with pytest.raises(ProcessV2Active8SourceIdentityError, match="must be an object"):
         validate_process_v2_active8_source_identity([], repo_root=_ROOT)
-
-
