@@ -55,6 +55,37 @@ from verify_process_v2_chain import (  # noqa: E402
 _EDGE_KEY = "process_identity"
 _REGISTRY_PIN = ("shared_policy_registry", "registry_identity_sha256")
 
+#: The residue of the committed graph, measured: every hash literal that no
+#: pointer, no identity edge, no self-hash and no deterministic rebuild covers.
+#: All of it sits inside the two frozen parents, which are pinned by their
+#: children's physical AND semantic hashes -- so their bytes cannot drift -- but a
+#: hash INSIDE one of them addresses a third artifact that can move without moving
+#: the parent, and this verifier does not resolve those.
+_MEASURED_UNCHECKED_PINS: list[tuple[str, str]] = [
+    (
+        "configs/editing_gate_zero_semantic_model_process_v2.json",
+        ".process_identity_sha256",
+    ),
+    *(
+        ("configs/editing_v2_semantic_process_v2.json", location)
+        for location in (
+            ".action_codec_identity.source_sha256.src/compose_v4/rewrite/action_codec_v4.py",
+            ".atom_delete_mask_implementation.source_sha256."
+            "src/compose_v4/model/factorized_tracelet_rate_model.py",
+            ".atom_delete_mask_implementation.source_sha256."
+            "src/compose_v4/rewrite/process_v2_atom_delete.py",
+            ".canonicalizer.source_sha256.src/compose_v4/rewrite/kernel.py",
+            ".downstream_invalidation.superseded_v1_process_identity_sha256",
+            ".inherited_v1_process.contract_physical_sha256",
+            ".inherited_v1_process.contract_sha256",
+            ".lineage.rejected_pre_run_candidate_identity.process_identity_sha256",
+            ".lineage.superseded_v1_payload_identity.process_identity_sha256",
+            ".unchanged_executor.source_sha256.src/compose_v4/rewrite/kernel.py",
+            ".unchanged_executor.source_sha256.src/compose_v4/rewrite/operators.py",
+        )
+    ),
+]
+
 
 # ---- Helpers ----
 
@@ -407,6 +438,12 @@ def test_the_unchecked_pins_of_the_frozen_parents_are_listed_by_name() -> None:
         payload = json.loads((_ROOT / pin["artifact"]).read_bytes())
         assert pin["sha256"] in json.dumps(payload), pin
         assert len(pin["sha256"]) == 64
+    # The SIZE of the residue is the number that matters, and nothing pinned it:
+    # a run that started leaving another pin unchecked would report it here and
+    # still pass every assertion above. The inventory is measured, so growing it
+    # is a deliberate edit to this list, not a silent one.
+    assert [(pin["artifact"], pin["location"]) for pin in pins] == _MEASURED_UNCHECKED_PINS
+    assert len(pins) == 12
 
 
 def test_a_root_whose_rebuild_was_refused_is_not_counted_as_covering_its_pins() -> None:
