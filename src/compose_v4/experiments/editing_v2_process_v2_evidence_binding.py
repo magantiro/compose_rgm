@@ -25,49 +25,64 @@ WHAT A BINDING PINS
 -------------------
 * the immutable prospective contract: path, physical hash, semantic hash, and
   which field carries that self-hash;
-* ``ADMITTED_SOURCE_SCHEMA`` and ``ADMITTED_SOURCE_SCHEMA_VERSION`` imported from
-  the owning adapter, never restated -- a hand-copied schema literal in the
-  contract module had already drifted from the adapter's own constant, and a
-  consumer matching the adapter would not have matched;
-* the admitted-source completion, run, semantic-evidence, physical-inventory,
-  adapter-implementation and process identities, with a census that reconciles;
+* the admitted-source identity descriptor, **embedded verbatim** and validated
+  through its owning validator;
 * every other measured prerequisite the stage consumes, as a declared typed
   pointer carrying its kind, provider, target schema and hash algorithm.
+
+VERSION 2 DELETES A FABRICATED PROJECTION
+-----------------------------------------
+Version 1 did not embed the descriptor.  It projected six named fields out of it
+and required all six, and **three of those six names have never existed**:
+``physical_inventory_sha256``, ``process_identity_sha256`` and
+``semantic_evidence_sha256`` are emitted by no version of the adapter.  A binding
+built from a real ``ProcessV2AdmittedSource.identity()`` was therefore
+unbuildable, and the defect survived every one of the module's tests because
+``build_resolved_evidence_binding`` had no production caller and every test drove
+it through a hand-written fixture that invented exactly those three names.  A
+fixture shaped to the code rather than to the artifact cannot fail.
+
+The three names are not translated to anything.  There is no migration path from
+version 1, because a converter would have to fabricate three values rather than
+rename them, so version 1 is refused explicitly rather than upgraded.
+
+Embedding the descriptor verbatim, rather than projecting a subset of it, is what
+makes the divergence impossible to reintroduce: there is no list of field names
+here to drift from the adapter's, and the shape is checked by the adapter's own
+``validate_process_v2_admitted_source_identity`` rather than by a second opinion
+about it.
 
 WHAT IT NEVER CARRIES
 ---------------------
 Authority.  Every field in the frozen authority vocabulary is present and false,
-checked by ``require_authority_false`` at build and again at validate.  A
-resolved evidence binding proves identity and provenance; it never permits
-training, a Gate-0 run, a T1 run, or a bounded P50 launch.  Only a stage decision
-or permit may grant authority, and only when its own frozen policy says so.
+checked by ``require_authority_false`` and by the vocabulary-free
+``require_no_granted_authority`` at build and again at validate, both of which
+walk the whole payload -- so the embedded descriptor's authority block is checked
+at its own depth rather than trusted.  A resolved evidence binding proves
+identity and provenance; it never permits training, a Gate-0 run, a T1 run, or a
+bounded P50 launch.  Only a stage decision or permit may grant authority, and
+only when its own frozen policy says so.
 
-THE ADAPTER'S AUTHORITY BLOCK IS NOT INGESTED
----------------------------------------------
-``ProcessV2AdmittedSource.identity()`` carries its own authority fields under a
-vocabulary that spells the bounded-P50 field differently from the frozen one.
-That spelling is NOT translated here and NOT copied into a binding: renaming it
-at its source would move the scientific Process-V2 identity, which is an owner
-decision, and translating it here would quietly create a second authority
-vocabulary in a third place.
-
-A binding therefore carries exactly one authority block, its own, in the frozen
-spelling, every field false.  What it takes from the adapter's descriptor is the
-measured identities and the census.  A descriptor that GRANTS anything is still
-refused, by a spelling-agnostic guard: any ``*_authorized`` field that is not
-exactly ``False`` is a refusal, whatever it is called.
+Since admitted-source schema 3 there is ONE authority vocabulary: the descriptor
+carries the same seven frozen fields the binding does, so nothing is translated
+and nothing is dropped.
 
 INVARIANTS MAINTAINED (and tested)
 ----------------------------------
-* build -> serialize -> validate -> load round-trips, and rebuilding the same
-  inputs is byte-identical;
-* the cited prospective contract must exist and must still hash to its pinned
-  physical and semantic values; a repository target that is absent is a failure,
-  never a silently dropped edge;
-* a granted authority field anywhere in the binding or in the supplied descriptor,
-  a census that does not reconcile, a non-integer or negative count, a drifted
-  adapter schema, and a malformed typed pointer each raise with a message naming
-  that defect;
+* build -> serialize -> validate -> load round-trips against a REAL resolved
+  admitted source, and rebuilding the same inputs is byte-identical;
+* the cited prospective contract must exist, must still hash to its pinned
+  physical and semantic values, and must declare that it is cited by this
+  binding schema at this version; a repository target that is absent is a
+  failure, never a silently dropped edge;
+* the binding and the embedded descriptor self-hash independently, so tampering
+  with the descriptor is caught even when the binding is resealed around it;
+* the Process-V2 identity the descriptor was resolved under must equal the one
+  the cited contract binds -- otherwise a binding would join evidence from one
+  process to a policy frozen for another;
+* a granted authority field at any depth, a census that does not reconcile, a
+  coerced count, a drifted adapter schema, and a malformed typed pointer each
+  raise with a message naming that defect;
 * a remote-artifact prerequisite is never checked against the local filesystem.
 """
 
@@ -81,10 +96,13 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-# Imported from the owning adapter, never restated.
+# The owning adapter validates its own descriptor. Nothing about its shape --
+# not its schema string, not its version, not its field list -- is restated here,
+# because every restatement is a copy that can drift, and the one this replaces
+# had drifted to three field names that never existed.
 from compose_v4.data.editing_process_v2_admitted_source import (
-    ADMITTED_SOURCE_SCHEMA,
-    ADMITTED_SOURCE_SCHEMA_VERSION,
+    ProcessV2AdmittedSourceIdentityError,
+    validate_process_v2_admitted_source_identity,
 )
 from compose_v4.data.editing_v2_process_v2_schema import (
     RESOLVED_EVIDENCE_BINDING_SCHEMA,
@@ -96,7 +114,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     authority_false_block,
     canonical_sha256,
     require_authority_false,
-    require_census_reconciles,
+    require_no_granted_authority,
     self_hashed,
     typed_pointer,
     validate_typed_pointer,
@@ -105,6 +123,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (
 from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     GATE_ZERO_STRUCTURAL,
     P50_RECIPE_POLICY,
+    PROCESS_IDENTITY_PIN_FIELD,
     SELF_HASH_FIELD,
     T1_CAPACITY_POLICY,
     T1_PANEL_POLICY,
@@ -136,28 +155,6 @@ EVIDENCE_BINDING_STAGES: Mapping[str, str] = {
 #: the same field name on both would have to know which artifact it held.
 BINDING_SELF_HASH_FIELD = "evidence_binding_sha256"
 
-#: The measured identities of the admitted source, all required.  Naming them
-#: explicitly is what stops a binding from pinning whichever subset a particular
-#: run happened to produce.
-ADMITTED_SOURCE_IDENTITY_FIELDS: tuple[str, ...] = (
-    "adapter_implementation_sha256",
-    "completion_sha256",
-    "physical_inventory_sha256",
-    "process_identity_sha256",
-    "run_identity_sha256",
-    "semantic_evidence_sha256",
-)
-
-_HEX64_LENGTH = 64
-
-#: The census fields a binding requires and re-checks.
-_CENSUS_FIELDS: tuple[str, ...] = (
-    "admitted_entries",
-    "rejected_entries",
-    "source_entries",
-)
-
-
 # ---- Helpers ----
 
 
@@ -169,54 +166,10 @@ def _sha256_bytes(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _require_count(value: object, *, label: str) -> int:
-    """A count must be an exact non-negative int.
-
-    ``bool`` is excluded explicitly: it is a subclass of ``int``, so ``True``
-    would otherwise be accepted as the count ``1``.
-    """
-
-    if isinstance(value, bool) or not isinstance(value, int):
-        _fail(f"{label} must be an integer count, got {value!r}")
-    assert isinstance(value, int)  # narrowed by the guard above
-    if value < 0:
-        _fail(f"{label} must not be negative, got {value!r}")
-    return value
-
-
-def _require_no_granted_authority(payload: Mapping[str, Any], *, label: str) -> None:
-    """Refuse any granted authority field, whatever it is spelled.
-
-    Deliberately spelling-agnostic. The adapter's descriptor uses a different
-    vocabulary from the frozen one, and reconciling the two is an owner decision
-    because the retired spelling lives inside a file whose bytes are hashed into
-    the scientific Process-V2 identity. Refusing a grant needs no such decision:
-    a field named ``*_authorized`` that is not exactly ``False`` is a refusal.
-    """
-
-    granted = sorted(
-        field
-        for field, value in payload.items()
-        if field.endswith("_authorized") and value is not False
-    )
-    if granted:
-        _fail(
-            f"{label} grants authority {granted}; a resolved evidence binding proves "
-            "identity only and never permits training or launch"
-        )
-
-
-def _require_hex64(value: object, *, label: str) -> str:
-    if not isinstance(value, str) or len(value) != _HEX64_LENGTH:
-        _fail(f"{label} must be a 64-character SHA-256, got {value!r}")
-    assert isinstance(value, str)  # narrowed by the guard above
-    if any(character not in "0123456789abcdef" for character in value):
-        _fail(f"{label} must be lowercase hexadecimal, got {value!r}")
-    return value
-
-
-def _contract_pointers(contract_name: str, *, repo_root: Path) -> dict[str, Any]:
-    """Pin the cited prospective contract by path, physical, and semantic hash."""
+def _read_prospective_contract(
+    contract_name: str, *, repo_root: Path
+) -> tuple[bytes, dict[str, Any]]:
+    """Read and minimally shape-check the cited contract. Read once, used twice."""
 
     path = Path(repo_root) / contract_name
     try:
@@ -226,12 +179,24 @@ def _contract_pointers(contract_name: str, *, repo_root: Path) -> dict[str, Any]
             f"the prospective contract {contract_name} is not readable at {repo_root}; "
             "a resolved evidence binding may only cite a contract that exists"
         ) from error
-    payload = json.loads(raw)
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise ProcessV2EvidenceBindingError(
+            f"the prospective contract {contract_name} is not valid JSON"
+        ) from error
     if not isinstance(payload, dict) or SELF_HASH_FIELD not in payload:
         _fail(
             f"the prospective contract {contract_name} declares no {SELF_HASH_FIELD!r}, "
             "so its semantic identity cannot be pinned"
         )
+    return raw, payload
+
+
+def _contract_pointers(contract_name: str, *, repo_root: Path) -> dict[str, Any]:
+    """Pin the cited prospective contract by path, physical, and semantic hash."""
+
+    raw, payload = _read_prospective_contract(contract_name, repo_root=repo_root)
     return {
         "physical": typed_pointer(
             kind=PointerKind.REPOSITORY_CONFIG,
@@ -254,69 +219,83 @@ def _contract_pointers(contract_name: str, *, repo_root: Path) -> dict[str, Any]
     }
 
 
-def _census_block(counts: Mapping[str, Any]) -> dict[str, int]:
-    """Validate and normalise the census, then re-check it through the frozen rule."""
+def _admitted_source_block(
+    admitted_source: Mapping[str, Any], *, repo_root: Path
+) -> dict[str, Any]:
+    """Validate the descriptor through its OWNING validator and embed it verbatim.
 
-    missing = [field for field in _CENSUS_FIELDS if field not in counts]
-    if missing:
-        _fail(f"admitted_source.counts omits {sorted(missing)}")
-    validated = {
-        str(field): _require_count(value, label=f"admitted_source.counts.{field}")
-        for field, value in sorted(counts.items())
-    }
+    Nothing is projected, renamed, subset or normalised.  Version 1 projected six
+    names out of the descriptor, three of which the adapter has never emitted, and
+    the mismatch was invisible because no production caller existed and the tests
+    supplied a fixture carrying those three names.  A binding that embeds the
+    artifact has no field list of its own to drift.
+    """
+
     try:
-        require_census_reconciles(validated, label="admitted_source.counts")
-    except ProcessV2SchemaError as error:
-        raise ProcessV2EvidenceBindingError(str(error)) from error
-    return validated
+        return validate_process_v2_admitted_source_identity(
+            admitted_source, repo_root=Path(repo_root)
+        )
+    except ProcessV2AdmittedSourceIdentityError as error:
+        raise ProcessV2EvidenceBindingError(
+            f"the admitted-source identity is not one this binding can pin: {error}"
+        ) from error
 
 
-def _admitted_source_block(admitted_source: Mapping[str, Any]) -> dict[str, Any]:
-    missing = [
-        field for field in ADMITTED_SOURCE_IDENTITY_FIELDS if field not in admitted_source
-    ]
-    if missing:
+def _check_contract_declarations(
+    contract_name: str,
+    *,
+    repo_root: Path,
+    admitted_source: Mapping[str, Any],
+) -> None:
+    """Prove the cited contract expects THIS binding and binds THIS process.
+
+    Two joins that would otherwise be assumed:
+
+    * a contract states which schema, at which version, is allowed to cite it with
+      measured evidence.  A version-1 binding citing a contract that expects
+      version 2 is a stale consumer, and the contract is the side that says so.
+    * a contract binds a process identity.  Evidence resolved under a different
+      Process-V2 identity joined to a policy frozen for this one is exactly the
+      cross-process read the whole chain exists to prevent, and neither side
+      catches it alone: the descriptor only knows it matches the LIVE identity,
+      and the contract only knows what it pinned.
+    """
+
+    _, payload = _read_prospective_contract(contract_name, repo_root=repo_root)
+    declaration = payload.get("resolved_evidence_binding")
+    if not isinstance(declaration, Mapping):
         _fail(
-            f"the admitted-source identity omits {sorted(missing)}; a resolved evidence "
-            f"binding pins exactly {list(ADMITTED_SOURCE_IDENTITY_FIELDS)}"
+            f"the prospective contract {contract_name} declares no "
+            "resolved_evidence_binding block, so it does not state which schema may "
+            "cite it with measured evidence"
         )
-    identities = {
-        field: _require_hex64(admitted_source[field], label=f"admitted_source.{field}")
-        for field in ADMITTED_SOURCE_IDENTITY_FIELDS
-    }
-    # The descriptor's own authority block is checked but never copied: a binding
-    # carries exactly one authority block, its own, in the frozen spelling.
-    _require_no_granted_authority(
-        admitted_source, label="the admitted-source identity"
-    )
-    counts = admitted_source.get("counts")
-    if not isinstance(counts, Mapping):
-        _fail("the admitted-source identity carries no counts census")
-    assert isinstance(counts, Mapping)  # narrowed by the guard above
-    census = _census_block(counts)
-    rejected = admitted_source.get("rejected_traces_by_code")
-    if not isinstance(rejected, Mapping):
-        _fail("the admitted-source identity carries no reason-coded rejection census")
-    assert isinstance(rejected, Mapping)  # narrowed by the guard above
-    by_code = {
-        str(code): _require_count(
-            value, label=f"admitted_source.rejected_traces_by_code.{code}"
-        )
-        for code, value in sorted(rejected.items())
-    }
-    rejected_total = sum(by_code.values())
-    if rejected_total != census["rejected_entries"]:
+    assert isinstance(declaration, Mapping)  # narrowed by the guard above
+    if declaration.get("cited_by_schema") != RESOLVED_EVIDENCE_BINDING_SCHEMA:
         _fail(
-            f"the reason-coded rejection census sums to {rejected_total}, which "
-            f"disagrees with rejected_entries={census['rejected_entries']}"
+            f"{contract_name} expects to be cited by "
+            f"{declaration.get('cited_by_schema')!r}, not "
+            f"{RESOLVED_EVIDENCE_BINDING_SCHEMA!r}"
         )
-    return {
-        **identities,
-        "counts": census,
-        "rejected_traces_by_code": by_code,
-        "schema": ADMITTED_SOURCE_SCHEMA,
-        "schema_version": int(ADMITTED_SOURCE_SCHEMA_VERSION),
-    }
+    if declaration.get("cited_by_schema_version") != RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION:
+        _fail(
+            f"{contract_name} expects resolved-evidence-binding schema version "
+            f"{declaration.get('cited_by_schema_version')!r}, but this binding is "
+            f"version {RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION}; regenerate the "
+            "prospective contract chain rather than resealing the binding"
+        )
+
+    process_identity = payload.get("process_identity")
+    if not isinstance(process_identity, Mapping):
+        _fail(f"the prospective contract {contract_name} declares no process_identity")
+    assert isinstance(process_identity, Mapping)  # narrowed by the guard above
+    declared = process_identity.get(PROCESS_IDENTITY_PIN_FIELD)
+    resolved_under = admitted_source.get("process_v2_identity_sha256")
+    if declared != resolved_under:
+        _fail(
+            f"the admitted source was resolved under Process-V2 identity "
+            f"{resolved_under!r}, but {contract_name} binds {declared!r}; a binding may "
+            "not join evidence from one process to a policy frozen for another"
+        )
 
 
 def _measured_prerequisites_block(
@@ -347,18 +326,18 @@ def build_resolved_evidence_binding(
 
     Args:
         stage: one of :data:`EVIDENCE_BINDING_STAGES`.
-        admitted_source: the adapter's ``identity()`` descriptor. Its measured
-            identities and census are pinned; its own authority block is checked
-            for a grant but is never copied into the binding.
+        admitted_source: the adapter's ``identity()`` descriptor, embedded
+            verbatim after validating it through its owning validator.
         measured_prerequisites: ``role -> typed pointer`` for every other
             measured input the stage consumes.
-        repo_root: the checkout whose prospective contract is cited.
+        repo_root: the checkout whose prospective contract is cited, and against
+            which the descriptor's live implementation hash is checked.
 
     Raises:
         ProcessV2EvidenceBindingError: on an unknown stage, an unreadable or
-            unsealed contract, an incomplete admitted-source identity, a census
-            that does not reconcile, a malformed pointer, or any granted
-            authority.
+            unsealed contract, a descriptor that is not a valid admitted-source
+            identity, a contract that expects a different binding version or
+            binds a different process, or any granted authority.
     """
 
     if stage not in EVIDENCE_BINDING_STAGES:
@@ -367,8 +346,12 @@ def build_resolved_evidence_binding(
             f"{sorted(EVIDENCE_BINDING_STAGES)}"
         )
     contract_name = EVIDENCE_BINDING_STAGES[stage]
+    source = _admitted_source_block(admitted_source, repo_root=repo_root)
+    _check_contract_declarations(
+        contract_name, repo_root=repo_root, admitted_source=source
+    )
     body: dict[str, Any] = {
-        "admitted_source": _admitted_source_block(admitted_source),
+        "admitted_source": source,
         "measured_prerequisites": _measured_prerequisites_block(measured_prerequisites),
         "prospective_contract": _contract_pointers(contract_name, repo_root=repo_root),
         "schema": RESOLVED_EVIDENCE_BINDING_SCHEMA,
@@ -377,8 +360,23 @@ def build_resolved_evidence_binding(
         "status": RESOLVED_EVIDENCE_BINDING_STATUS,
         **authority_false_block(),
     }
-    require_authority_false(body, label=f"the {stage} resolved evidence binding")
+    _check_authority(body, label=f"the {stage} resolved evidence binding")
     return self_hashed(body, field=BINDING_SELF_HASH_FIELD)
+
+
+def _check_authority(payload: Mapping[str, Any], *, label: str) -> None:
+    """Both guards, over the WHOLE payload including the embedded descriptor.
+
+    They are complementary rather than redundant: one knows the vocabulary and
+    refuses a retired spelling or a missing field, the other knows no vocabulary
+    and refuses a grant under a name nobody has registered.
+    """
+
+    try:
+        require_no_granted_authority(payload, label=label)
+        require_authority_false(payload, label=label)
+    except ProcessV2SchemaError as error:
+        raise ProcessV2EvidenceBindingError(str(error)) from error
 
 
 def serialize_resolved_evidence_binding(payload: Mapping[str, Any]) -> bytes:
@@ -414,7 +412,12 @@ def validate_resolved_evidence_binding(
     if payload.get("schema_version") != RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION:
         _fail(
             f"schema_version is {payload.get('schema_version')!r}, not "
-            f"{RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION}"
+            f"{RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION}; version 1 required three "
+            "admitted-source fields the adapter has never emitted "
+            "(physical_inventory_sha256, process_identity_sha256, "
+            "semantic_evidence_sha256), so there is no migration path from it and a "
+            "converter would have to fabricate those three values rather than rename "
+            "them"
         )
     if payload.get("status") != RESOLVED_EVIDENCE_BINDING_STATUS:
         _fail(f"status is {payload.get('status')!r}, not {RESOLVED_EVIDENCE_BINDING_STATUS!r}")
@@ -423,10 +426,7 @@ def validate_resolved_evidence_binding(
         _fail(f"stage is {stage!r}, not one of {sorted(EVIDENCE_BINDING_STAGES)}")
     assert isinstance(stage, str)  # narrowed by the guard above
 
-    try:
-        require_authority_false(payload, label=f"the {stage} resolved evidence binding")
-    except ProcessV2SchemaError as error:
-        raise ProcessV2EvidenceBindingError(str(error)) from error
+    _check_authority(payload, label=f"the {stage} resolved evidence binding")
 
     contract_name = EVIDENCE_BINDING_STAGES[stage]
     block = payload.get("prospective_contract")
@@ -464,31 +464,14 @@ def validate_resolved_evidence_binding(
             f"not {live['self_hash_field']!r}"
         )
 
-    source = payload.get("admitted_source")
-    if not isinstance(source, Mapping):
-        _fail("admitted_source is missing or is not an object")
-    assert isinstance(source, Mapping)  # narrowed by the guard above
-    if source.get("schema") != ADMITTED_SOURCE_SCHEMA:
-        _fail(
-            f"admitted_source.schema is {source.get('schema')!r}, but the owning "
-            f"adapter declares {ADMITTED_SOURCE_SCHEMA!r}"
-        )
-    if source.get("schema_version") != ADMITTED_SOURCE_SCHEMA_VERSION:
-        _fail(
-            f"admitted_source.schema_version is {source.get('schema_version')!r}, but "
-            f"the owning adapter declares {ADMITTED_SOURCE_SCHEMA_VERSION}"
-        )
-    missing = [
-        field for field in ADMITTED_SOURCE_IDENTITY_FIELDS if field not in source
-    ]
-    if missing:
-        _fail(f"admitted_source omits {sorted(missing)}")
-    _require_no_granted_authority(source, label="admitted_source")
-    counts = source.get("counts")
-    if not isinstance(counts, Mapping):
-        _fail("admitted_source.counts is missing or is not an object")
-    assert isinstance(counts, Mapping)  # narrowed by the guard above
-    _census_block(counts)
+    # The embedded descriptor is validated through its owning validator, which
+    # verifies its OWN self-hash. That independence is the property: resealing the
+    # binding around a tampered descriptor does not make the descriptor valid, and
+    # tampering with the descriptor without resealing the binding fails twice.
+    source = _admitted_source_block(payload.get("admitted_source"), repo_root=repo_root)
+    _check_contract_declarations(
+        contract_name, repo_root=repo_root, admitted_source=source
+    )
 
     prerequisites = payload.get("measured_prerequisites")
     if not isinstance(prerequisites, Mapping):
@@ -587,7 +570,6 @@ def load_resolved_evidence_binding(path: Path, *, repo_root: Path) -> dict[str, 
 
 
 __all__ = [
-    "ADMITTED_SOURCE_IDENTITY_FIELDS",
     "BINDING_SELF_HASH_FIELD",
     "EVIDENCE_BINDING_STAGES",
     "ProcessV2EvidenceBindingError",
