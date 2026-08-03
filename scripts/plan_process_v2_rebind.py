@@ -7,6 +7,15 @@ script freezes the plan that names that work.  It runs locally, writes at most
 the plan document, and grants nothing: no Modal job, no Active8 materialization,
 no Gate 0, no T1, no P50, and no training.
 
+Two geometries, and only one of them is production.  ``--cache-run-artifact-root``
+freezes one proof task per verified chunk of a committed Process-V2 chunk cache;
+the payload root is *derived* from the pinned exact completion and the exact
+completion is bound, so a plan cannot silently cover nineteen of twenty lane/role
+cells.  ``--v1-payload-root`` freezes the bounded raw-oracle geometry, which
+reads ranges of the packed shards so the cache path can be proven equal to a
+second independent read; every artifact it produces says so and
+``require_production_source_geometry`` refuses all of them.
+
 Three things it does that a caller must not improvise:
 
 **The pinned identities are read from the payload, not computed live.**  The
@@ -42,7 +51,8 @@ Usage::
 
     .venv/bin/python scripts/plan_process_v2_rebind.py \
         --artifact-root /artifacts \
-        --v1-payload-root /artifacts/editing_v2/semantic_v4_migration/<run>/payload \
+        --cache-run-artifact-root \
+            /artifacts/editing_v2/process_v2_chunk_cache/<cache physical identity> \
         --dry-run
 """
 
@@ -64,6 +74,7 @@ from compose_v4.data.editing_process_v2_rebind import (  # noqa: E402
     DEFAULT_OUTPUT_ARTIFACT_PREFIX,
     PLAN_FILENAME,
     ProcessV2RebindError,
+    bind_process_v2_chunk_cache_generation,
     bind_v1_semantic_payload,
     mounted_process_v2_artifact_path,
     plan_process_v2_rebind,
@@ -72,6 +83,12 @@ from compose_v4.data.editing_process_v2_rebind import (  # noqa: E402
     validate_pinned_process_identity,
     validate_process_v2_rebind_source_revision,
     write_process_v2_rebind_plan,
+)
+from compose_v4.data.editing_v2_process_v2_completion_binder import (  # noqa: E402
+    PRODUCTION_COMPLETION_EXPECTATION,
+    ProcessV2CompletionBindingError,
+    ProcessV2CompletionExpectation,
+    bind_exact_semantic_migration_completion,
 )
 from compose_v4.data.semantic_trace_migration_materializer import (  # noqa: E402
     RECEIPT_FILENAME as V1_RECEIPT_FILENAME,
@@ -195,11 +212,91 @@ def build_plan(
     )
 
 
+def build_cache_fed_plan(
+    *,
+    artifact_root: Path,
+    cache_run_artifact_root: str,
+    semantic_migration_completion: str | None = None,
+    expectation: ProcessV2CompletionExpectation = PRODUCTION_COMPLETION_EXPECTATION,
+    output_artifact_prefix: str = DEFAULT_OUTPUT_ARTIFACT_PREFIX,
+    source_revision: Mapping[str, Any] | None = None,
+    repo_root: Path = REPO_ROOT,
+    verify_chunk_bytes: bool = True,
+) -> dict[str, Any]:
+    """Freeze the **production** plan: one proof task per verified cache chunk.
+
+    Three things a caller cannot improvise here, and why:
+
+    **The payload root is derived, never supplied.**  It is the parent of the
+    declared exact completion path, and the completion is bound rather than
+    discovered, so the plan cannot silently cover nineteen of twenty lane/role
+    cells.  The old launcher took the payload root as a bare positional with no
+    default, no declared expectation and no equality check.
+
+    **The corpus is the cache, not the shards.**  Every task addresses one
+    verified chunk of one committed cache generation.  No task opens a packed
+    shard; the only raw-packed-shard reader left in the library is the bounded
+    oracle, and nothing on this path calls it.
+
+    **The shard size is the cache's.**  ``entries_per_task`` is the cache's
+    ``records_per_chunk``, because the chunk boundary *is* the task boundary.
+    """
+
+    completion_path = semantic_migration_completion or expectation.completion_artifact_path
+    payload_root_artifact_path = str(PurePosixPath(completion_path).parent)
+    payload_root = mounted_process_v2_artifact_path(
+        payload_root_artifact_path,
+        artifact_root=artifact_root,
+        field="derived payload_root_artifact_path",
+    )
+    process_identity, builder_identity = read_pinned_identities(
+        payload_root,
+        expected_process_identity_sha256=expectation.process_identity_sha256,
+    )
+    try:
+        exact = bind_exact_semantic_migration_completion(
+            completion_artifact_path=completion_path,
+            artifact_root=artifact_root,
+            pinned_process_identity=process_identity,
+            pinned_builder_identity=builder_identity,
+            expectation=expectation,
+        )
+    except ProcessV2CompletionBindingError as error:
+        raise PlanDriverError(str(error)) from error
+    cache_binding = bind_process_v2_chunk_cache_generation(
+        cache_run_artifact_root,
+        artifact_root=artifact_root,
+        repo_root=repo_root,
+        verify_chunk_bytes=verify_chunk_bytes,
+    )
+    if int(cache_binding.binding["entries"]) != int(exact.rebind_source_entries):
+        raise PlanDriverError(
+            f"the bound cache holds {cache_binding.binding['entries']} records and the exact "
+            f"completion declares {exact.rebind_source_entries} admitted; the cache is not a "
+            "cache of this payload"
+        )
+    revision = resolve_source_revision(source_revision, repo_root=repo_root)
+    return plan_process_v2_rebind(
+        exact.v1_payload_binding,
+        source_revision=revision,
+        repo_root=repo_root,
+        pinned_process_identity=process_identity,
+        pinned_builder_identity=builder_identity,
+        cache_binding=cache_binding,
+        output_artifact_prefix=output_artifact_prefix,
+        entries_per_task=cache_binding.records_per_chunk,
+    )
+
+
 def plan_envelope(plan: dict[str, Any], *, written: str | None) -> dict[str, Any]:
     """The deterministic report. Every authority field is explicitly false."""
 
+    cache_binding = plan.get("cache_binding") or {}
     return {
         "phase": "process_v2_rebind_plan",
+        "source_geometry": plan["source_geometry"],
+        "cache_completion_sha256": cache_binding.get("cache_completion_sha256"),
+        "cache_physical_identity_sha256": cache_binding.get("cache_physical_identity_sha256"),
         "run_identity_sha256": plan["run_identity_sha256"],
         "run_artifact_root": plan["run_artifact_root"],
         "plan_sha256": plan["plan_sha256"],
@@ -225,7 +322,24 @@ def plan_envelope(plan: dict[str, Any], *, written: str | None) -> dict[str, Any
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifact-root", type=Path, required=True)
-    parser.add_argument("--v1-payload-root", required=True)
+    parser.add_argument(
+        "--cache-run-artifact-root",
+        default=None,
+        help=(
+            "the committed Process-V2 chunk-cache run root. Supplying it selects the "
+            "production geometry: one proof task per verified cache chunk, and the "
+            "payload root derived from the pinned exact completion rather than supplied."
+        ),
+    )
+    parser.add_argument(
+        "--v1-payload-root",
+        default=None,
+        help=(
+            "bounded raw-oracle geometry only. Reads ranges of the packed shards through "
+            "the named oracle; the artifacts it produces are refused by "
+            "require_production_source_geometry and authorize nothing."
+        ),
+    )
     parser.add_argument(
         "--expected-v1-process-identity",
         default=SUPERSEDED_V1_PROCESS_IDENTITY_SHA256,
@@ -237,8 +351,9 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         type=int,
         default=DEFAULT_ENTRIES_PER_TASK,
         help=(
-            "records per range task. Folded into the run identity, so it names "
-            "the run; it is a data decision, never a worker-count decision."
+            "oracle geometry only. Records per range task, folded into the run identity, "
+            "so it names the run; it is a data decision, never a worker-count decision. "
+            "Under the production geometry it is the cache's own chunk size."
         ),
     )
     parser.add_argument(
@@ -251,14 +366,34 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
-    try:
-        plan = build_plan(
-            artifact_root=args.artifact_root,
-            v1_payload_root_artifact_path=args.v1_payload_root,
-            expected_process_identity_sha256=args.expected_v1_process_identity,
-            output_artifact_prefix=args.output_artifact_prefix,
-            entries_per_task=args.entries_per_task,
+    if bool(args.cache_run_artifact_root) == bool(args.v1_payload_root):
+        print(
+            json.dumps(
+                {
+                    "phase": "process_v2_rebind_plan_refused",
+                    "error": (
+                        "name exactly one source: --cache-run-artifact-root for the "
+                        "production geometry, or --v1-payload-root for the bounded oracle"
+                    ),
+                }
+            )
         )
+        return 1
+    try:
+        if args.cache_run_artifact_root:
+            plan = build_cache_fed_plan(
+                artifact_root=args.artifact_root,
+                cache_run_artifact_root=args.cache_run_artifact_root,
+                output_artifact_prefix=args.output_artifact_prefix,
+            )
+        else:
+            plan = build_plan(
+                artifact_root=args.artifact_root,
+                v1_payload_root_artifact_path=args.v1_payload_root,
+                expected_process_identity_sha256=args.expected_v1_process_identity,
+                output_artifact_prefix=args.output_artifact_prefix,
+                entries_per_task=args.entries_per_task,
+            )
     except (PlanDriverError, ProcessV2RebindError) as error:
         print(json.dumps({"phase": "process_v2_rebind_plan_refused", "error": str(error)}))
         return 1

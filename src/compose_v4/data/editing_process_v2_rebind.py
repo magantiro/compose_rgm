@@ -108,11 +108,21 @@ from compose_v4.chem.state import is_connected_or_null, is_valid_state
 from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+    SOURCE_DIRNAME as CHUNK_CACHE_SOURCE_DIRNAME,
+)
+from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     ProcessV2ArtifactPathError,
+    ProcessV2ChunkCacheError,
+    ProcessV2ChunkTarget,
+    chunk_object_filename,
+    load_committed_process_v2_chunk_cache_completion,
     mount_process_v2_artifact_path,
+    open_process_v2_chunk_cache,
+    read_process_v2_chunk_target,
     require_process_v2_artifact_path,
 )
 from compose_v4.data.semantic_packed_trace_store import (
+    SemanticPackedRowRead,
     SemanticPackedStoreError,
     load_semantic_packed_manifest,
     read_semantic_packed_artifact_range_rows,
@@ -155,8 +165,13 @@ from compose_v4.rewrite.trace_shard_v3 import (
 # measured rejection census and an exact rejected-trace inventory instead of
 # two structurally empty mismatch fields.  Version 1 artifacts are not readable
 # as version 2 and are not relabelled.
+#
+# Version 3 records a second: a task names the *source geometry* it read, and
+# the production geometry is a verified chunk of the Process-V2 chunk cache
+# rather than a range of the raw packed shard.  A version-2 artifact does not
+# say which it was, which is precisely the ambiguity this removes.
 PLAN_SCHEMA = "compose.data.editing_process_v2_rebind_plan"
-PLAN_SCHEMA_VERSION = 2
+PLAN_SCHEMA_VERSION = 3
 PLAN_STATUS = "FROZEN_COMPLETE_NO_TRAINING_AUTHORITY"
 SOURCE_REVISION_SCHEMA = "compose.data.editing_process_v2_rebind_source_revision"
 SOURCE_REVISION_SCHEMA_VERSION = 2
@@ -187,6 +202,30 @@ TASK_DIRNAME = "tasks"
 
 DEFAULT_OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_rebind"
 DEFAULT_ENTRIES_PER_TASK = 64
+
+# ---- Source geometry ----------------------------------------------------------
+#
+# Where a proof task's rows come from.  This is a property of the artifact, not
+# of the code that happened to run, so it is published and validated rather than
+# inferred from which function was called.
+#
+# `cache_chunk` is the production geometry: one task reads exactly one verified
+# chunk of a committed Process-V2 chunk cache and never opens a packed shard.
+#
+# `v1_entry_range` is the **bounded raw oracle** geometry: one task reads a range
+# of the immutable packed shard through
+# `read_v1_records_through_the_bounded_raw_oracle`.  It exists so the cache path
+# can be proven equal to a second, independent read of the same bytes.  It is not
+# production: `require_production_source_geometry` refuses any artifact carrying
+# it, so an oracle run cannot become the authority for anything downstream.
+
+SOURCE_GEOMETRY_CACHE_CHUNK = "process_v2_chunk_cache_chunk"
+SOURCE_GEOMETRY_V1_ENTRY_RANGE = "v1_packed_shard_entry_range_bounded_oracle"
+SOURCE_GEOMETRIES = (SOURCE_GEOMETRY_CACHE_CHUNK, SOURCE_GEOMETRY_V1_ENTRY_RANGE)
+PRODUCTION_SOURCE_GEOMETRY = SOURCE_GEOMETRY_CACHE_CHUNK
+
+CACHE_BINDING_SCHEMA = "compose.data.editing_process_v2_rebind_chunk_cache_binding"
+CACHE_BINDING_SCHEMA_VERSION = 1
 
 # Structural candidate sources are diagnostic labels only.  One admission
 # authority decides every ``atom_delete`` candidate; the two labels exist so a
@@ -260,11 +299,53 @@ _TASK_FIELDS = _V1_TASK_BINDING_FIELDS | {
     "task_identity_sha256",
     "output_artifact_path",
 }
+# The ten keys `ProcessV2ChunkTarget.as_payload()` emits.  Mirrored rather than
+# retyped: the plan builder writes that payload straight in, and
+# `test_process_v2_cache_fed_rebind` fails if the two drift apart.
+_CACHE_TASK_ADDRESS_FIELDS = {
+    "cache_source_artifact_path",
+    "cache_source_task_identity_sha256",
+    "cache_source_manifest_sha256",
+    "cache_semantic_identity_sha256",
+    "cache_physical_identity_sha256",
+    "chunk_index",
+    "chunk_filename",
+    "chunk_file_sha256",
+    "chunk_uncompressed_sha256",
+    "chunk_row_count",
+}
+_ORACLE_TASK_ADDRESS_FIELDS = {
+    "v1_semantic_artifact_path",
+    "v1_semantic_shard_sha256",
+    "entry_start",
+    "entry_stop",
+}
+_TASK_FIELDS_BY_GEOMETRY = {
+    SOURCE_GEOMETRY_CACHE_CHUNK: _TASK_FIELDS | _CACHE_TASK_ADDRESS_FIELDS,
+    SOURCE_GEOMETRY_V1_ENTRY_RANGE: _TASK_FIELDS,
+}
+_CACHE_BINDING_FIELDS = {
+    "schema",
+    "schema_version",
+    "cache_completion_sha256",
+    "cache_implementation_sha256",
+    "cache_semantic_identity_sha256",
+    "cache_planned_semantic_identity_sha256",
+    "cache_physical_identity_sha256",
+    "cache_run_artifact_root",
+    "cache_source_inventory_sha256",
+    "records_per_chunk",
+    "source_count",
+    "entries",
+    "chunk_count",
+    "binding_sha256",
+}
 _PLAN_FIELDS = {
     "schema",
     "schema_version",
     "status",
     "training_authorized",
+    "source_geometry",
     "implementation_revision",
     "source_revision",
     "pinned_process_identity",
@@ -282,11 +363,17 @@ _PLAN_FIELDS = {
     "task_inventory_sha256",
     "plan_sha256",
 }
+_PLAN_FIELDS_BY_GEOMETRY = {
+    SOURCE_GEOMETRY_CACHE_CHUNK: _PLAN_FIELDS | {"cache_binding"},
+    SOURCE_GEOMETRY_V1_ENTRY_RANGE: _PLAN_FIELDS,
+}
 _MANIFEST_FIELDS = {
     "schema",
     "schema_version",
     "status",
     "training_authorized",
+    "source_geometry",
+    "task_source_binding",
     "v1_task_identity_sha256",
     "v1_task_artifact_path",
     "data_lane",
@@ -317,6 +404,8 @@ _RECEIPT_FIELDS = {
     "schema_version",
     "status",
     "training_authorized",
+    "source_geometry",
+    "task_source_binding",
     "implementation_revision",
     "run_identity_sha256",
     "task_identity_sha256",
@@ -1198,6 +1287,147 @@ def validate_v1_semantic_payload_binding(
     return binding
 
 
+# ---- Chunk-cache source binding ------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ProcessV2RebindCacheBinding:
+    """One committed chunk-cache generation, bound as the rebind's source."""
+
+    binding: Mapping[str, Any]
+    targets: tuple[ProcessV2ChunkTarget, ...]
+
+    @property
+    def binding_sha256(self) -> str:
+        return str(self.binding["binding_sha256"])
+
+    @property
+    def records_per_chunk(self) -> int:
+        return int(self.binding["records_per_chunk"])
+
+
+def bind_process_v2_chunk_cache_generation(
+    cache_run_artifact_root: str,
+    *,
+    artifact_root: Path,
+    repo_root: Path | None = None,
+    verify_chunk_bytes: bool = True,
+) -> ProcessV2RebindCacheBinding:
+    """Require the exact committed cache completion and enumerate its chunks.
+
+    The completion is the committed marker: an interrupted cache generation has
+    none, so it is refused here rather than half-consumed.  Opening the
+    generation validates every source manifest and, by default, every published
+    chunk's bytes -- whole-generation validation happens once, at this boundary,
+    and never again inside a worker.
+    """
+
+    try:
+        completion = load_committed_process_v2_chunk_cache_completion(
+            cache_run_artifact_root, artifact_root=artifact_root, repo_root=repo_root
+        )
+        generation = open_process_v2_chunk_cache(
+            completion,
+            artifact_root=artifact_root,
+            repo_root=repo_root,
+            verify_chunk_bytes=verify_chunk_bytes,
+        )
+    except ProcessV2ChunkCacheError as error:
+        raise ProcessV2RebindError(
+            f"the Process-V2 chunk cache at {cache_run_artifact_root} cannot be bound: {error}"
+        ) from error
+    body: dict[str, Any] = {
+        "schema": CACHE_BINDING_SCHEMA,
+        "schema_version": CACHE_BINDING_SCHEMA_VERSION,
+        "cache_completion_sha256": str(completion["completion_sha256"]),
+        "cache_implementation_sha256": str(completion["cache_implementation_sha256"]),
+        # Two semantic identities, and both are needed. The *measured* one is
+        # what twenty independent fused passes produced and the reducer sealed.
+        # The *planned* one is what each worker could know when it wrote its
+        # manifest, so it is the value a chunk target -- and therefore a proof
+        # task -- actually carries. Binding only the measured one would refuse
+        # every correct task.
+        "cache_semantic_identity_sha256": str(completion["cache_semantic_identity_sha256"]),
+        "cache_planned_semantic_identity_sha256": str(
+            completion["planned_semantic_identity_sha256"]
+        ),
+        "cache_physical_identity_sha256": str(completion["cache_physical_identity_sha256"]),
+        "cache_run_artifact_root": str(completion["run_artifact_root"]),
+        "cache_source_inventory_sha256": str(completion["source_inventory_sha256"]),
+        "records_per_chunk": int(completion["records_per_chunk"]),
+        "source_count": int(completion["source_count"]),
+        "entries": int(completion["entries"]),
+        "chunk_count": int(completion["chunk_count"]),
+    }
+    binding = {**body, "binding_sha256": _canonical_sha256(body)}
+    return ProcessV2RebindCacheBinding(binding=binding, targets=generation.targets())
+
+
+def validate_process_v2_rebind_cache_binding(value: object) -> dict[str, Any]:
+    """Validate the recorded cache binding without reopening the cache."""
+
+    if not isinstance(value, Mapping):
+        raise ProcessV2RebindError("the rebind chunk-cache binding must be an object")
+    binding = dict(value)
+    if set(binding) != _CACHE_BINDING_FIELDS:
+        raise ProcessV2RebindError("rebind chunk-cache binding fields disagree")
+    for field in (
+        "cache_completion_sha256",
+        "cache_implementation_sha256",
+        "cache_semantic_identity_sha256",
+        "cache_planned_semantic_identity_sha256",
+        "cache_physical_identity_sha256",
+        "cache_source_inventory_sha256",
+        "binding_sha256",
+    ):
+        _require_sha256(binding[field], field=f"cache_binding.{field}")
+    _require_artifact_path(
+        binding["cache_run_artifact_root"], field="cache_binding.cache_run_artifact_root"
+    )
+    for field in ("records_per_chunk", "source_count", "entries", "chunk_count"):
+        if type(binding[field]) is not int or binding[field] < 0:
+            raise ProcessV2RebindError(f"cache_binding.{field} must be a nonnegative integer")
+    if (
+        binding["schema"] != CACHE_BINDING_SCHEMA
+        or binding["schema_version"] != CACHE_BINDING_SCHEMA_VERSION
+        or binding["binding_sha256"] != _self_hash(binding, field="binding_sha256")
+        or not str(binding["cache_run_artifact_root"]).endswith(
+            f"/{binding['cache_physical_identity_sha256']}"
+        )
+    ):
+        raise ProcessV2RebindError("the rebind chunk-cache binding identity disagrees")
+    return binding
+
+
+def require_source_geometry(value: object, *, label: str) -> str:
+    if value not in SOURCE_GEOMETRIES:
+        raise ProcessV2RebindError(
+            f"{label} names source geometry {value!r}; expected one of {SOURCE_GEOMETRIES}"
+        )
+    return str(value)
+
+
+def require_production_source_geometry(document: Mapping[str, Any], *, label: str) -> str:
+    """Refuse any rebind artifact that was not read from the chunk cache.
+
+    The bounded raw oracle exists to prove the cache path correct, not to
+    produce evidence.  A consumer that would treat an oracle-geometry artifact
+    as authoritative calls this and is refused, which is what "the oracle cannot
+    publish an authoritative artifact" means concretely.
+    """
+
+    if not isinstance(document, Mapping):
+        raise ProcessV2RebindError(f"{label} must be an object")
+    geometry = require_source_geometry(document.get("source_geometry"), label=label)
+    if geometry != PRODUCTION_SOURCE_GEOMETRY:
+        raise ProcessV2RebindError(
+            f"{label} was produced under the bounded raw-oracle geometry {geometry!r}; "
+            f"only {PRODUCTION_SOURCE_GEOMETRY!r} is a production Process-V2 source, and an "
+            "oracle run is a correctness comparison rather than evidence"
+        )
+    return geometry
+
+
 # ---- Plan ---------------------------------------------------------------------
 
 
@@ -1231,6 +1461,68 @@ def validate_process_v2_rebind_task_ranges(
         raise ProcessV2RebindError(str(error)) from error
 
 
+def _cache_chunk_tasks(
+    binding: Mapping[str, Any],
+    cache_binding: ProcessV2RebindCacheBinding,
+) -> list[dict[str, Any]]:
+    """One task body per verified cache chunk, joined to its V1 task binding.
+
+    The join is required to be a bijection.  A cache built from a different
+    payload, or a payload with a task the cache never covered, is refused here
+    rather than producing a plan that silently proves a subset.
+    """
+
+    v1_tasks = {str(task["v1_task_identity_sha256"]): dict(task) for task in binding["v1_tasks"]}
+    covered: dict[str, int] = {identity: 0 for identity in v1_tasks}
+    bodies: list[dict[str, Any]] = []
+    for target in cache_binding.targets:
+        v1_task = v1_tasks.get(target.v1_task_identity_sha256)
+        if v1_task is None:
+            raise ProcessV2RebindError(
+                "the chunk cache names a V1 task the payload binding does not: "
+                f"{target.v1_task_identity_sha256}"
+            )
+        disagreements = [
+            field
+            for field, declared, observed in (
+                ("data_lane", target.data_lane, v1_task["data_lane"]),
+                ("split", target.split, v1_task["split"]),
+                (
+                    "semantic_shard_sha256",
+                    target.semantic_shard_sha256,
+                    v1_task["v1_semantic_shard_sha256"],
+                ),
+            )
+            if declared != observed
+        ]
+        if disagreements:
+            raise ProcessV2RebindError(
+                f"cached source {target.cache_source_task_identity_sha256} disagrees with its "
+                f"V1 payload task on {sorted(disagreements)}"
+            )
+        covered[target.v1_task_identity_sha256] += target.row_count
+        bodies.append(
+            {
+                **v1_task,
+                "entry_start": target.entry_start,
+                "entry_stop": target.entry_stop,
+                **target.as_payload(),
+            }
+        )
+    uncovered = sorted(identity for identity, rows in covered.items() if rows == 0)
+    if uncovered and any(int(v1_tasks[identity]["v1_entries"]) for identity in uncovered):
+        raise ProcessV2RebindError(
+            f"the chunk cache covers no chunk of V1 tasks {uncovered}"
+        )
+    for identity, rows in covered.items():
+        if rows != int(v1_tasks[identity]["v1_entries"]):
+            raise ProcessV2RebindError(
+                f"the chunk cache holds {rows} rows for V1 task {identity}, which declares "
+                f"{v1_tasks[identity]['v1_entries']}"
+            )
+    return bodies
+
+
 def plan_process_v2_rebind(
     v1_payload_binding: Mapping[str, Any],
     *,
@@ -1238,10 +1530,22 @@ def plan_process_v2_rebind(
     repo_root: Path,
     pinned_process_identity: Mapping[str, object],
     pinned_builder_identity: Mapping[str, object],
+    cache_binding: ProcessV2RebindCacheBinding | None = None,
     output_artifact_prefix: str = DEFAULT_OUTPUT_ARTIFACT_PREFIX,
     entries_per_task: int = DEFAULT_ENTRIES_PER_TASK,
 ) -> dict[str, Any]:
-    """Build a deterministic, content-addressed entry-range task manifest."""
+    """Build a deterministic, content-addressed proof-task manifest.
+
+    With ``cache_binding`` the geometry is one task per verified cache chunk,
+    which is the production path.  Without it the geometry is a raw entry range
+    read through the bounded oracle, and every artifact says so.
+
+    ``entries_per_task`` is a data decision in both geometries, and under the
+    cache geometry it is *derived*: it must equal the cache's own
+    ``records_per_chunk``, because the chunk boundary is the task boundary and a
+    caller choosing a different number would be describing a sharding that does
+    not exist.
+    """
 
     if type(entries_per_task) is not int or entries_per_task <= 0:
         raise ProcessV2RebindError("entries_per_task must be a positive integer")
@@ -1255,45 +1559,61 @@ def plan_process_v2_rebind(
     builder_identity = validate_pinned_builder_identity(pinned_builder_identity)
     process_v2_identity = editing_process_v2_identity()
     prefix = _require_artifact_path(output_artifact_prefix, field="output_artifact_prefix")
-    run_identity_body = {
+    geometry = (
+        SOURCE_GEOMETRY_CACHE_CHUNK
+        if cache_binding is not None
+        else SOURCE_GEOMETRY_V1_ENTRY_RANGE
+    )
+    run_identity_body: dict[str, Any] = {
         "schema": PLAN_SCHEMA,
         "schema_version": PLAN_SCHEMA_VERSION,
+        "source_geometry": geometry,
         "source_revision_sha256": revision["source_revision_sha256"],
         "v1_payload_binding_sha256": binding["binding_sha256"],
         "process_v2_identity_sha256": process_v2_identity["process_identity_sha256"],
         "output_artifact_prefix": prefix,
         "entries_per_task": entries_per_task,
     }
+    if cache_binding is not None:
+        validate_process_v2_rebind_cache_binding(cache_binding.binding)
+        if entries_per_task != cache_binding.records_per_chunk:
+            raise ProcessV2RebindError(
+                f"entries_per_task {entries_per_task} is not the cache's chunk size "
+                f"{cache_binding.records_per_chunk}; the chunk boundary is the task boundary"
+            )
+        run_identity_body["cache_binding_sha256"] = cache_binding.binding_sha256
     run_identity_sha256 = _canonical_sha256(run_identity_body)
     run_artifact_root = f"{prefix}/{run_identity_sha256}"
+    if cache_binding is not None:
+        task_bodies = _cache_chunk_tasks(binding, cache_binding)
+    else:
+        task_bodies = [
+            {**dict(v1_task), "entry_start": entry_start, "entry_stop": entry_stop}
+            for v1_task in binding["v1_tasks"]
+            for entry_start, entry_stop in _entry_ranges(
+                int(v1_task["v1_entries"]), entries_per_task=entries_per_task
+            )
+        ]
     tasks: list[dict[str, Any]] = []
-    for v1_task in binding["v1_tasks"]:
-        for entry_start, entry_stop in _entry_ranges(
-            int(v1_task["v1_entries"]),
-            entries_per_task=entries_per_task,
-        ):
-            task_body = {
-                **dict(v1_task),
-                "entry_start": entry_start,
-                "entry_stop": entry_stop,
+    for task_body in task_bodies:
+        task_identity_sha256 = _canonical_sha256(
+            {"run_identity_sha256": run_identity_sha256, "task": task_body}
+        )
+        tasks.append(
+            {
+                **task_body,
+                "task_identity_sha256": task_identity_sha256,
+                "output_artifact_path": (
+                    f"{run_artifact_root}/{TASK_DIRNAME}/{task_identity_sha256}"
+                ),
             }
-            task_identity_sha256 = _canonical_sha256(
-                {"run_identity_sha256": run_identity_sha256, "task": task_body}
-            )
-            tasks.append(
-                {
-                    **task_body,
-                    "task_identity_sha256": task_identity_sha256,
-                    "output_artifact_path": (
-                        f"{run_artifact_root}/{TASK_DIRNAME}/{task_identity_sha256}"
-                    ),
-                }
-            )
+        )
     body: dict[str, Any] = {
         "schema": PLAN_SCHEMA,
         "schema_version": PLAN_SCHEMA_VERSION,
         "status": PLAN_STATUS,
         "training_authorized": False,
+        "source_geometry": geometry,
         "implementation_revision": revision["commit"],
         "source_revision": revision,
         "pinned_process_identity": process_identity,
@@ -1310,9 +1630,74 @@ def plan_process_v2_rebind(
         "tasks": tasks,
         "task_inventory_sha256": _canonical_sha256(tasks),
     }
+    if cache_binding is not None:
+        body["cache_binding"] = dict(cache_binding.binding)
     plan = {**body, "plan_sha256": _canonical_sha256(body)}
     validate_process_v2_rebind_plan(plan, repo_root=repo_root)
     return plan
+
+
+def _validate_cache_task_address(
+    task: Mapping[str, Any],
+    *,
+    index: int,
+    cache_binding: Mapping[str, Any],
+    chunk_addresses: set[tuple[str, int]],
+) -> None:
+    """Require one task to name one distinct chunk of the bound cache."""
+
+    source_path = _require_artifact_path(
+        task["cache_source_artifact_path"], field=f"rebind task {index} cache source path"
+    )
+    for field in (
+        "cache_source_task_identity_sha256",
+        "cache_source_manifest_sha256",
+        "cache_semantic_identity_sha256",
+        "cache_physical_identity_sha256",
+        "chunk_file_sha256",
+        "chunk_uncompressed_sha256",
+    ):
+        _require_sha256(task[field], field=f"rebind task {index} {field}")
+    chunk_index = task["chunk_index"]
+    row_count = task["chunk_row_count"]
+    if type(chunk_index) is not int or chunk_index < 0:
+        raise ProcessV2RebindError(f"rebind task {index} chunk_index must be nonnegative")
+    if type(row_count) is not int or row_count != int(task["entry_stop"]) - int(
+        task["entry_start"]
+    ):
+        raise ProcessV2RebindError(
+            f"rebind task {index} chunk row count is not its entry range"
+        )
+    expected_root = str(cache_binding["cache_run_artifact_root"])
+    expected_path = (
+        f"{expected_root}/{CHUNK_CACHE_SOURCE_DIRNAME}/"
+        f"{task['cache_source_task_identity_sha256']}"
+    )
+    if source_path != expected_path:
+        raise ProcessV2RebindError(
+            f"rebind task {index} names a cache source outside the bound generation"
+        )
+    if (
+        task["cache_physical_identity_sha256"] != cache_binding["cache_physical_identity_sha256"]
+        # A chunk manifest can only carry the *planned* semantic identity; the
+        # measured one is the reducer's, and it is bound one field over.
+        or task["cache_semantic_identity_sha256"]
+        != cache_binding["cache_planned_semantic_identity_sha256"]
+    ):
+        raise ProcessV2RebindError(
+            f"rebind task {index} names a chunk of another cache generation"
+        )
+    if task["chunk_filename"] != chunk_object_filename(chunk_index):
+        raise ProcessV2RebindError(f"rebind task {index} chunk filename disagrees")
+    address = (str(task["cache_source_task_identity_sha256"]), chunk_index)
+    if address in chunk_addresses:
+        raise ProcessV2RebindError("the rebind plan reads one cache chunk twice")
+    chunk_addresses.add(address)
+    # The cache's own record of which packed shard it came from is deliberately
+    # not re-derived here: the plan validator reads no artifact. It is proven at
+    # bind time by `_cache_chunk_tasks` and again at read time, where
+    # `read_process_v2_chunk_target` requires the source manifest's
+    # `semantic_shard_sha256` to equal the V1 binding's.
 
 
 def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[str, Any]:
@@ -1321,8 +1706,14 @@ def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[s
     if not isinstance(value, Mapping):
         raise ProcessV2RebindError("the rebind plan must be an object")
     plan = dict(value)
-    if set(plan) != _PLAN_FIELDS:
+    geometry = require_source_geometry(plan.get("source_geometry"), label="the rebind plan")
+    if set(plan) != _PLAN_FIELDS_BY_GEOMETRY[geometry]:
         raise ProcessV2RebindError("rebind plan fields disagree")
+    cache_binding = (
+        validate_process_v2_rebind_cache_binding(plan["cache_binding"])
+        if geometry == SOURCE_GEOMETRY_CACHE_CHUNK
+        else None
+    )
     revision = validate_process_v2_rebind_source_revision(
         plan["source_revision"],
         repo_root=repo_root,
@@ -1342,17 +1733,23 @@ def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[s
     entries_per_task = plan.get("entries_per_task")
     if type(entries_per_task) is not int or entries_per_task <= 0:
         raise ProcessV2RebindError("entries_per_task must be a positive integer")
-    run_identity_sha256 = _canonical_sha256(
-        {
-            "schema": PLAN_SCHEMA,
-            "schema_version": PLAN_SCHEMA_VERSION,
-            "source_revision_sha256": revision["source_revision_sha256"],
-            "v1_payload_binding_sha256": binding["binding_sha256"],
-            "process_v2_identity_sha256": process_v2_identity["process_identity_sha256"],
-            "output_artifact_prefix": prefix,
-            "entries_per_task": entries_per_task,
-        }
-    )
+    run_identity_body: dict[str, Any] = {
+        "schema": PLAN_SCHEMA,
+        "schema_version": PLAN_SCHEMA_VERSION,
+        "source_geometry": geometry,
+        "source_revision_sha256": revision["source_revision_sha256"],
+        "v1_payload_binding_sha256": binding["binding_sha256"],
+        "process_v2_identity_sha256": process_v2_identity["process_identity_sha256"],
+        "output_artifact_prefix": prefix,
+        "entries_per_task": entries_per_task,
+    }
+    if cache_binding is not None:
+        if entries_per_task != int(cache_binding["records_per_chunk"]):
+            raise ProcessV2RebindError(
+                "the rebind plan's entries_per_task is not the bound cache's chunk size"
+            )
+        run_identity_body["cache_binding_sha256"] = cache_binding["binding_sha256"]
+    run_identity_sha256 = _canonical_sha256(run_identity_body)
     run_artifact_root = f"{prefix}/{run_identity_sha256}"
     tasks = plan.get("tasks")
     if not isinstance(tasks, list) or not tasks:
@@ -1360,8 +1757,12 @@ def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[s
     v1_tasks = {task["v1_task_identity_sha256"]: task for task in binding["v1_tasks"]}
     observed: dict[str, list[tuple[int, int]]] = {identity: [] for identity in v1_tasks}
     task_ids: set[str] = set()
+    address_fields = (
+        _CACHE_TASK_ADDRESS_FIELDS if cache_binding is not None else frozenset()
+    )
+    chunk_addresses: set[tuple[str, int]] = set()
     for index, task in enumerate(tasks):
-        if not isinstance(task, Mapping) or set(task) != _TASK_FIELDS:
+        if not isinstance(task, Mapping) or set(task) != _TASK_FIELDS_BY_GEOMETRY[geometry]:
             raise ProcessV2RebindError(f"rebind task {index} fields disagree")
         task = dict(task)
         identity = task["v1_task_identity_sha256"]
@@ -1374,7 +1775,17 @@ def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[s
         if type(entry_start) is not int or type(entry_stop) is not int:
             raise ProcessV2RebindError(f"rebind task {index} entry bounds must be integers")
         observed[identity].append((entry_start, entry_stop))
-        task_body = {key: task[key] for key in _V1_TASK_BINDING_FIELDS | {"entry_start", "entry_stop"}}
+        if cache_binding is not None:
+            _validate_cache_task_address(
+                task,
+                index=index,
+                cache_binding=cache_binding,
+                chunk_addresses=chunk_addresses,
+            )
+        task_body = {
+            key: task[key]
+            for key in _V1_TASK_BINDING_FIELDS | {"entry_start", "entry_stop"} | address_fields
+        }
         task_id = _canonical_sha256(
             {"run_identity_sha256": run_identity_sha256, "task": task_body}
         )
@@ -1390,6 +1801,11 @@ def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[s
         validate_process_v2_rebind_task_ranges(
             ranges,
             entries=int(v1_tasks[identity]["v1_entries"]),
+        )
+    if cache_binding is not None and len(tasks) != int(cache_binding["chunk_count"]):
+        raise ProcessV2RebindError(
+            f"the rebind plan names {len(tasks)} tasks and the bound cache holds "
+            f"{cache_binding['chunk_count']} chunks; one task per chunk is the geometry"
         )
     if (
         plan["schema"] != PLAN_SCHEMA
@@ -1820,12 +2236,111 @@ def _prove_record(
     return {**proof_body, "proof_sha256": _canonical_sha256(proof_body)}, None, findings
 
 
-def _prove_entry_range(
+def read_v1_records_through_the_bounded_raw_oracle(
     task: Mapping[str, Any],
     *,
     v1_task_dir: Path,
     pinned_process_identity: Mapping[str, Any],
     pinned_builder_identity: Mapping[str, Any],
+) -> Iterable[SemanticPackedRowRead]:
+    """The **bounded raw oracle**: the only raw-packed-shard read in this module.
+
+    Named, and named as an oracle, on purpose.  It exists so the production
+    chunk-cache path can be proven equal to a second independent read of the
+    same immutable bytes, and it is bounded to one declared half-open entry
+    range.  It is not a fallback: nothing under
+    :data:`PRODUCTION_SOURCE_GEOMETRY` reaches it, and
+    :func:`require_production_source_geometry` refuses any artifact produced
+    through it, so an oracle read cannot become evidence for anything.
+
+    Reading through it is deliberately expensive -- the range reader hashes the
+    whole compressed shard and decompresses from byte zero for every range --
+    which is the cost the chunk cache exists to remove.
+    """
+
+    return read_semantic_packed_artifact_range_rows(
+        Path(v1_task_dir) / SEMANTIC_ARTIFACT_DIRNAME,
+        expected_shard_sha256=task["v1_semantic_shard_sha256"],
+        expected_manifest_sha256=task["v1_semantic_manifest_sha256"],
+        expected_source_binding=task["v1_source_binding"],
+        expected_process_identity=pinned_process_identity,
+        expected_builder_identity=pinned_builder_identity,
+        entry_start=int(task["entry_start"]),
+        entry_stop=int(task["entry_stop"]),
+        # The rebind replays every transition itself, which strictly dominates
+        # the reader's first-N sentinel replay.
+        sentinel_replay_entries=0,
+        # An unreadable row is this module's V1_RECORD_UNREADABLE finding,
+        # addressed to its exact physical entry, not an untyped crash.
+        recover_row_errors=True,
+    )
+
+
+def chunk_target_for_task(
+    task: Mapping[str, Any], *, pinned_process_identity_sha256: str
+) -> ProcessV2ChunkTarget:
+    """Rebuild the exact chunk target one cache-geometry task binds."""
+
+    return ProcessV2ChunkTarget(
+        source_artifact_path=str(task["cache_source_artifact_path"]),
+        cache_source_task_identity_sha256=str(task["cache_source_task_identity_sha256"]),
+        cache_source_manifest_sha256=str(task["cache_source_manifest_sha256"]),
+        cache_semantic_identity_sha256=str(task["cache_semantic_identity_sha256"]),
+        cache_physical_identity_sha256=str(task["cache_physical_identity_sha256"]),
+        v1_task_identity_sha256=str(task["v1_task_identity_sha256"]),
+        data_lane=str(task["data_lane"]),
+        split=str(task["split"]),
+        semantic_shard_sha256=str(task["v1_semantic_shard_sha256"]),
+        pinned_process_identity_sha256=str(pinned_process_identity_sha256),
+        chunk_index=int(task["chunk_index"]),
+        chunk_filename=str(task["chunk_filename"]),
+        chunk_file_sha256=str(task["chunk_file_sha256"]),
+        chunk_uncompressed_sha256=str(task["chunk_uncompressed_sha256"]),
+        entry_start=int(task["entry_start"]),
+        entry_stop=int(task["entry_stop"]),
+        row_count=int(task["chunk_row_count"]),
+    )
+
+
+def _read_cache_chunk_rows(
+    task: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+    pinned_process_identity: Mapping[str, Any],
+    repo_root: Path | None,
+) -> Iterable[SemanticPackedRowRead]:
+    """The production read: exactly one verified chunk, no packed shard."""
+
+    target = chunk_target_for_task(
+        task,
+        pinned_process_identity_sha256=str(
+            pinned_process_identity["process_identity_sha256"]
+        ),
+    )
+    source_output = _mounted_artifact_path(
+        target.source_artifact_path,
+        artifact_root=artifact_root,
+        field="task.cache_source_artifact_path",
+    )
+    return read_process_v2_chunk_target(
+        source_output,
+        target=target,
+        expected_process_identity=pinned_process_identity,
+        sentinel_replay_entries=0,
+        recover_row_errors=True,
+        repo_root=repo_root,
+    )
+
+
+def _prove_entry_range(
+    task: Mapping[str, Any],
+    *,
+    v1_task_dir: Path | None = None,
+    pinned_process_identity: Mapping[str, Any],
+    pinned_builder_identity: Mapping[str, Any],
+    source_geometry: str = SOURCE_GEOMETRY_V1_ENTRY_RANGE,
+    artifact_root: Path | None = None,
+    repo_root: Path | None = None,
 ) -> tuple[
     list[dict[str, Any]],
     list[ProcessV2RebindRejection],
@@ -1835,12 +2350,17 @@ def _prove_entry_range(
 ]:
     """Prove one half-open entry range, accounting for every record it read.
 
+    The geometry decides only *where the rows come from*.  Everything after the
+    read -- the per-record proof, the integrity/support split, the censuses and
+    the accounting -- is one code path, which is what makes the two geometries
+    comparable rather than merely similar.
+
     Raises :class:`ProcessV2RebindMismatch` on any integrity finding, so the
     caller publishes nothing.  A support exclusion is not a mismatch: it
     returns as a rejection and the range still completes.
     """
 
-    semantic_dir = v1_task_dir / SEMANTIC_ARTIFACT_DIRNAME
+    require_source_geometry(source_geometry, label="the rebind task")
     entry_start = int(task["entry_start"])
     entry_stop = int(task["entry_stop"])
     proofs: list[dict[str, Any]] = []
@@ -1851,22 +2371,28 @@ def _prove_entry_range(
     unsupported_steps: Counter[str] = Counter()
     observed_indices: list[int] = []
     try:
-        rows = read_semantic_packed_artifact_range_rows(
-            semantic_dir,
-            expected_shard_sha256=task["v1_semantic_shard_sha256"],
-            expected_manifest_sha256=task["v1_semantic_manifest_sha256"],
-            expected_source_binding=task["v1_source_binding"],
-            expected_process_identity=pinned_process_identity,
-            expected_builder_identity=pinned_builder_identity,
-            entry_start=entry_start,
-            entry_stop=entry_stop,
-            # The rebind replays every transition itself, which strictly
-            # dominates the reader's first-N sentinel replay.
-            sentinel_replay_entries=0,
-            # An unreadable row is this module's V1_RECORD_UNREADABLE finding,
-            # addressed to its exact physical entry, not an untyped crash.
-            recover_row_errors=True,
-        )
+        if source_geometry == SOURCE_GEOMETRY_CACHE_CHUNK:
+            if artifact_root is None:
+                raise ProcessV2RebindError(
+                    "the chunk-cache geometry needs the mounted artifact root"
+                )
+            rows: Iterable[SemanticPackedRowRead] = _read_cache_chunk_rows(
+                task,
+                artifact_root=artifact_root,
+                pinned_process_identity=pinned_process_identity,
+                repo_root=repo_root,
+            )
+        else:
+            if v1_task_dir is None:
+                raise ProcessV2RebindError(
+                    "the bounded raw-oracle geometry needs the V1 task payload directory"
+                )
+            rows = read_v1_records_through_the_bounded_raw_oracle(
+                task,
+                v1_task_dir=v1_task_dir,
+                pinned_process_identity=pinned_process_identity,
+                pinned_builder_identity=pinned_builder_identity,
+            )
         runtime = editing_v2_semantic_rewrite_system()
         for row in rows:
             observed_indices.append(row.entry_index)
@@ -1892,6 +2418,11 @@ def _prove_entry_range(
         raise ProcessV2RebindError(
             f"the V1 semantic entry range [{entry_start}, {entry_stop}) is unreadable "
             f"under the pinned identities: {error}"
+        ) from error
+    except ProcessV2ChunkCacheError as error:
+        raise ProcessV2RebindError(
+            f"the Process-V2 cache chunk for entry range [{entry_start}, {entry_stop}) is "
+            f"unreadable: {error}"
         ) from error
     if findings:
         raise ProcessV2RebindMismatch(findings)
@@ -1930,6 +2461,56 @@ def _write_proof_ledger(path: Path, proofs: Sequence[Mapping[str, Any]]) -> tupl
 
 
 # ---- Task execution -----------------------------------------------------------
+
+
+def task_source_binding_for(
+    task: Mapping[str, Any], *, source_geometry: str
+) -> dict[str, Any]:
+    """Exactly where one task's rows came from, in the geometry's own terms.
+
+    Published on both the manifest and the receipt so a reviewer reads the
+    address rather than inferring it from the run root.  Both geometries name a
+    real, verifiable address; neither publishes a structurally empty block whose
+    presence would read as evidence.
+    """
+
+    require_source_geometry(source_geometry, label="the rebind task")
+    if source_geometry == SOURCE_GEOMETRY_CACHE_CHUNK:
+        return {field: task[field] for field in sorted(_CACHE_TASK_ADDRESS_FIELDS)}
+    return {
+        "v1_semantic_artifact_path": (
+            f"{task['v1_task_artifact_path']}/{SEMANTIC_ARTIFACT_DIRNAME}"
+        ),
+        "v1_semantic_shard_sha256": task["v1_semantic_shard_sha256"],
+        "entry_start": int(task["entry_start"]),
+        "entry_stop": int(task["entry_stop"]),
+    }
+
+
+def reduction_order(tasks: Sequence[Mapping[str, Any]]) -> tuple[dict[str, Any], ...]:
+    """Order proof tasks by ``(data_lane, split, entry_start)``, and prove it total.
+
+    Stated rather than assumed.  Plan order is deterministic, but it is keyed by
+    the V1 task's *content hash*, so it is deterministic in an order nobody can
+    read; and it would silently change if the planner ever enumerated its
+    sources differently.  The reduction therefore sorts by the key the artifact
+    is actually addressed by, and refuses a duplicate key rather than breaking
+    the tie silently.
+    """
+
+    ordered = sorted(
+        (dict(task) for task in tasks),
+        key=lambda task: (str(task["data_lane"]), str(task["split"]), int(task["entry_start"])),
+    )
+    keys = [
+        (task["data_lane"], task["split"], int(task["entry_start"])) for task in ordered
+    ]
+    if len(set(keys)) != len(keys):
+        raise ProcessV2RebindError(
+            "the rebind reduction order is ambiguous: two tasks share one "
+            "(data_lane, split, entry_start) address"
+        )
+    return tuple(ordered)
 
 
 def _task_by_identity(plan: Mapping[str, Any], task_identity_sha256: str) -> dict[str, Any]:
@@ -2040,11 +2621,23 @@ def validate_process_v2_rebind_task_result(
         raise ProcessV2RebindError("Process-V2 rebind manifest fields disagree")
     if manifest["manifest_sha256"] != _self_hash(manifest, field="manifest_sha256"):
         raise ProcessV2RebindError("Process-V2 rebind manifest self-hash disagrees")
+    geometry = require_source_geometry(
+        receipt.get("source_geometry"), label="the Process-V2 rebind receipt"
+    )
+    expected_address_fields = (
+        _CACHE_TASK_ADDRESS_FIELDS
+        if geometry == SOURCE_GEOMETRY_CACHE_CHUNK
+        else _ORACLE_TASK_ADDRESS_FIELDS
+    )
     if (
         manifest["manifest_sha256"] != receipt["manifest_sha256"]
         or _file_sha256(manifest_path) != receipt["manifest_physical_sha256"]
         or manifest["status"] != TASK_STATUS
         or manifest["training_authorized"] is not False
+        or manifest["source_geometry"] != geometry
+        or manifest["task_source_binding"] != receipt["task_source_binding"]
+        or not isinstance(receipt["task_source_binding"], dict)
+        or set(receipt["task_source_binding"]) != expected_address_fields
         or manifest["process_v2_identity_sha256"]
         != receipt["process_v2_identity"]["process_identity_sha256"]
         or set(manifest["teacher_census"]) != set(_TEACHER_CENSUS_FIELDS)
@@ -2163,12 +2756,17 @@ def execute_process_v2_rebind_task(
 
     validated = validate_process_v2_rebind_plan(plan, repo_root=repo_root)
     task = _task_by_identity(validated, task_identity_sha256)
+    geometry = str(validated["source_geometry"])
     pinned_process_identity = validated["pinned_process_identity"]
     pinned_builder_identity = validated["pinned_builder_identity"]
-    v1_task_dir = _mounted_artifact_path(
-        task["v1_task_artifact_path"],
-        artifact_root=artifact_root,
-        field="task.v1_task_artifact_path",
+    v1_task_dir = (
+        None
+        if geometry == SOURCE_GEOMETRY_CACHE_CHUNK
+        else _mounted_artifact_path(
+            task["v1_task_artifact_path"],
+            artifact_root=artifact_root,
+            field="task.v1_task_artifact_path",
+        )
     )
     output = _mounted_artifact_path(
         task["output_artifact_path"],
@@ -2206,7 +2804,11 @@ def execute_process_v2_rebind_task(
         v1_task_dir=v1_task_dir,
         pinned_process_identity=pinned_process_identity,
         pinned_builder_identity=pinned_builder_identity,
+        source_geometry=geometry,
+        artifact_root=artifact_root,
+        repo_root=repo_root,
     )
+    task_source_binding = task_source_binding_for(task, source_geometry=geometry)
     rejected_rows = [rejection.as_payload() for rejection in rejections]
     rejected_traces_by_code = dict(
         sorted(Counter(rejection.code.value for rejection in rejections).items())
@@ -2232,6 +2834,8 @@ def execute_process_v2_rebind_task(
             "schema_version": MANIFEST_SCHEMA_VERSION,
             "status": TASK_STATUS,
             "training_authorized": False,
+            "source_geometry": geometry,
+            "task_source_binding": task_source_binding,
             "v1_task_identity_sha256": task["v1_task_identity_sha256"],
             "v1_task_artifact_path": task["v1_task_artifact_path"],
             "data_lane": task["data_lane"],
@@ -2282,6 +2886,8 @@ def execute_process_v2_rebind_task(
             "schema_version": RECEIPT_SCHEMA_VERSION,
             "status": TASK_STATUS,
             "training_authorized": False,
+            "source_geometry": geometry,
+            "task_source_binding": task_source_binding,
             "implementation_revision": validated["implementation_revision"],
             "run_identity_sha256": validated["run_identity_sha256"],
             "task_identity_sha256": task_identity_sha256,
@@ -2471,7 +3077,9 @@ def reduce_process_v2_rebind(
     rejected_trace_totals: Counter[str] = Counter()
     unsupported_step_totals: Counter[str] = Counter()
     rejected_trace_inventory: list[dict[str, Any]] = []
-    for task in validated["tasks"]:
+    # Explicitly ordered by (data_lane, split, entry_start): the reduction must
+    # not depend on plan order, worker completion order or concurrency.
+    for task in reduction_order(validated["tasks"]):
         receipt = _validate_task_result_against_plan(
             validated,
             task,
@@ -2559,6 +3167,7 @@ def reduce_process_v2_rebind(
         "status": COMPLETION_STATUS,
         "training_authorized": False,
         "gate_zero_run": False,
+        "source_geometry": validated["source_geometry"],
         "run_identity_sha256": validated["run_identity_sha256"],
         "plan_sha256": validated["plan_sha256"],
         "plan_file_sha256": hashlib.sha256(expected_plan_bytes).hexdigest(),
@@ -2585,6 +3194,8 @@ def reduce_process_v2_rebind(
         "unsupported_teacher_steps_by_code": dict(sorted(unsupported_step_totals.items())),
         "rejected_trace_inventory_sha256": _canonical_sha256(rejected_trace_inventory),
     }
+    if validated["source_geometry"] == SOURCE_GEOMETRY_CACHE_CHUNK:
+        body["cache_binding"] = dict(validated["cache_binding"])
     completion = {**body, "completion_sha256": _canonical_sha256(body)}
     run_root.mkdir(parents=True, exist_ok=True)
     _publish_json_atomically(
@@ -2596,6 +3207,8 @@ def reduce_process_v2_rebind(
 
 
 __all__ = [
+    "CACHE_BINDING_SCHEMA",
+    "CACHE_BINDING_SCHEMA_VERSION",
     "CANDIDATE_SOURCES",
     "COMPLETION_FILENAME",
     "COMPLETION_SCHEMA",
@@ -2615,6 +3228,7 @@ __all__ = [
     "PLAN_STATUS",
     "PROCESS_V2_ATOM_DELETE_MASK_SYMBOL",
     "PROOF_FILENAME",
+    "PRODUCTION_SOURCE_GEOMETRY",
     "PROOF_SCHEMA",
     "PROOF_SCHEMA_VERSION",
     "RECEIPT_FILENAME",
@@ -2625,12 +3239,16 @@ __all__ = [
     "REFUSAL_STATUS",
     "REJECTION_SCHEMA",
     "REJECTION_SCHEMA_VERSION",
+    "SOURCE_GEOMETRIES",
+    "SOURCE_GEOMETRY_CACHE_CHUNK",
+    "SOURCE_GEOMETRY_V1_ENTRY_RANGE",
     "SOURCE_REVISION_SCHEMA",
     "SOURCE_REVISION_SCHEMA_VERSION",
     "TASK_DIRNAME",
     "TASK_STATUS",
     "V1_PAYLOAD_BINDING_SCHEMA",
     "V1_PAYLOAD_BINDING_SCHEMA_VERSION",
+    "ProcessV2RebindCacheBinding",
     "ProcessV2RebindError",
     "ProcessV2RebindExclusionCode",
     "ProcessV2RebindFinding",
@@ -2639,8 +3257,10 @@ __all__ = [
     "ProcessV2RebindMismatch",
     "ProcessV2RebindRejection",
     "authority_process_v2_atom_delete_slots",
+    "bind_process_v2_chunk_cache_generation",
     "bind_v1_semantic_payload",
     "build_process_v2_rebind_source_revision",
+    "chunk_target_for_task",
     "completed_process_v2_rebind_task_ids",
     "editing_process_v2_identity",
     "execute_process_v2_rebind_task",
@@ -2650,10 +3270,16 @@ __all__ = [
     "mounted_process_v2_artifact_path",
     "process_v2_atom_delete_mask_authority",
     "plan_process_v2_rebind",
+    "read_v1_records_through_the_bounded_raw_oracle",
     "reduce_process_v2_rebind",
+    "reduction_order",
     "repository_process_v2_rebind_source_revision",
+    "require_production_source_geometry",
+    "require_source_geometry",
+    "task_source_binding_for",
     "validate_pinned_builder_identity",
     "validate_pinned_process_identity",
+    "validate_process_v2_rebind_cache_binding",
     "validate_process_v2_rebind_plan",
     "validate_process_v2_rebind_source_revision",
     "validate_process_v2_rebind_task_ranges",
