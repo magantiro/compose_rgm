@@ -136,6 +136,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     authority_false_block,
     canonical_sha256,
     require_authority_false,
+    require_no_granted_authority,
     self_hashed,
     typed_pointer,
     validate_typed_pointer,
@@ -183,19 +184,27 @@ CAPABILITY_CELL_CLASSIFIER = "src/compose_v4/data/editing_v2_semantic_capability
 #: The single self-hash field name every chain artifact carries.
 SELF_HASH_FIELD = "contract_sha256"
 
-#: The schema version that made the dependency graph explicit and removed the
-#: unfillable measured-evidence slot.  Version 1 is preserved as design lineage;
-#: it is not overwritten and resealed.
-CHAIN_SCHEMA_VERSION = 2
+#: Version 1 mirrored the V1 policy and carried an unfillable measured-evidence
+#: slot.  Version 2 made the dependency graph explicit and removed that slot.
+#: Version 3 declares resolved-evidence-binding schema 2 -- the binding now embeds
+#: the admitted-source descriptor verbatim instead of projecting a field list that
+#: named three hashes the adapter never emitted -- and carries the whole design
+#: lineage rather than only the immediately preceding generation.  No generation
+#: is overwritten or resealed; each is preserved as lineage.
+CHAIN_SCHEMA_VERSION = 3
 
 #: The named successor generation, following this repository's ``contract_revision``
 #: convention (see ``configs/editing_v2_semantic_process_v2.json``).
-CHAIN_CONTRACT_REVISION = "process_v2_explicit_dependency_graph"
+CHAIN_CONTRACT_REVISION = "process_v2_binding_v2_and_cumulative_design_lineage"
 
-#: The revision the version-1 bodies were sealed under.
+#: The revision the version-1 bodies were sealed under.  Kept as a named constant
+#: because it is the oldest generation and several tests address it by name.
 SUPERSEDED_CHAIN_CONTRACT_REVISION = (
     "process_v2_mirrored_chain_with_unfillable_admitted_source_slot"
 )
+
+#: The revision the version-2 bodies were sealed under.
+SUPERSEDED_CHAIN_CONTRACT_REVISION_V2 = "process_v2_explicit_dependency_graph"
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
@@ -335,39 +344,151 @@ DEPENDENCY_EDGES_ADDED_IN_SCHEMA_VERSION_2: Mapping[str, tuple[str, ...]] = {
     ),
 }
 
-#: The version-1 self-hash and physical hash of each artifact, preserved as
-#: superseded design lineage rather than discarded.  These are the values sealed
-#: at ``3f3258e``; they carry no currency claim and must never equal a live value.
-_SUPERSEDED_HASHES: dict[str, dict[str, str]] = {
-    ACTIVE8_DECISION_RUNTIME: {
-        "contract_sha256": "45f3de02da92991802c4cc192d00ceac47291e5ac3d177d19630799808df1f8d",
-        "file_sha256": "93151f51dac9962237e9d98fa9b0d790602a948ec65b60da209222be9ae016c5",
-    },
-    CAPABILITY_CELLS: {
-        "contract_sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
-        "file_sha256": "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592",
-    },
-    DEVELOPMENT_CELL_ROLES: {
-        "contract_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221",
-        "file_sha256": "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017",
-    },
-    GATE_ZERO_STRUCTURAL: {
-        "contract_sha256": "c2b469fb3f91f712f8fa9bc6fb8d1ca761fb648ee712c4fc11614c9d33e3bb25",
-        "file_sha256": "386e37012807da508f6b060a37e7f8f2b97b561d7e8e4c95f58ed51584dac4e8",
-    },
-    T1_PANEL_POLICY: {
-        "contract_sha256": "d181ab3946439e374d9844cb6d1c864f925b6a6dfa7197eacf2e04576ef3b184",
-        "file_sha256": "67aef9d024b762c980833c5b5aaf327e8cfb22be85b3aa241a9983fe058199aa",
-    },
-    T1_CAPACITY_POLICY: {
-        "contract_sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
-        "file_sha256": "3465b0378894ba4ebe2545942eafbf5d2391bf6dc9620c9e4cb9e4648f1b700f",
-    },
-    P50_RECIPE_POLICY: {
-        "contract_sha256": "1a6de7e76bed2aa2a3c52ec5b68fb78a1484a924d2c6f17a712384a27b47bef8",
-        "file_sha256": "97024a28e161763f2f7e123e8e85eb6ff28a9ac8f5eda71343696bc976bcd716",
-    },
-}
+#: Every superseded generation of each artifact, oldest first, preserved as
+#: design lineage rather than discarded.  A generation is appended, never
+#: replaced: version 2 recorded only version 1, so republishing under version 3
+#: would have dropped version 1 entirely and left the chain unable to say what it
+#: had been before its immediately preceding shape.
+#:
+#: The version-1 values are those sealed at ``3f3258e``.  The version-2 values are
+#: those sealed at ``b39420c`` and inherited byte-for-byte at this base, captured
+#: from the committed configs before the version-3 rebuild replaced them.
+#:
+#: None of these carries a currency claim and none may equal a live value.
+_SUPERSEDED_GENERATIONS: tuple[tuple[int, str, dict[str, dict[str, str]]], ...] = (
+    (
+        1,
+        SUPERSEDED_CHAIN_CONTRACT_REVISION,
+        {
+            ACTIVE8_DECISION_RUNTIME: {
+                "contract_sha256": (
+                    "45f3de02da92991802c4cc192d00ceac47291e5ac3d177d19630799808df1f8d"
+                ),
+                "file_sha256": (
+                    "93151f51dac9962237e9d98fa9b0d790602a948ec65b60da209222be9ae016c5"
+                ),
+            },
+            CAPABILITY_CELLS: {
+                "contract_sha256": (
+                    "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99"
+                ),
+                "file_sha256": (
+                    "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592"
+                ),
+            },
+            DEVELOPMENT_CELL_ROLES: {
+                "contract_sha256": (
+                    "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221"
+                ),
+                "file_sha256": (
+                    "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017"
+                ),
+            },
+            GATE_ZERO_STRUCTURAL: {
+                "contract_sha256": (
+                    "c2b469fb3f91f712f8fa9bc6fb8d1ca761fb648ee712c4fc11614c9d33e3bb25"
+                ),
+                "file_sha256": (
+                    "386e37012807da508f6b060a37e7f8f2b97b561d7e8e4c95f58ed51584dac4e8"
+                ),
+            },
+            T1_PANEL_POLICY: {
+                "contract_sha256": (
+                    "d181ab3946439e374d9844cb6d1c864f925b6a6dfa7197eacf2e04576ef3b184"
+                ),
+                "file_sha256": (
+                    "67aef9d024b762c980833c5b5aaf327e8cfb22be85b3aa241a9983fe058199aa"
+                ),
+            },
+            T1_CAPACITY_POLICY: {
+                "contract_sha256": (
+                    "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6"
+                ),
+                "file_sha256": (
+                    "3465b0378894ba4ebe2545942eafbf5d2391bf6dc9620c9e4cb9e4648f1b700f"
+                ),
+            },
+            P50_RECIPE_POLICY: {
+                "contract_sha256": (
+                    "1a6de7e76bed2aa2a3c52ec5b68fb78a1484a924d2c6f17a712384a27b47bef8"
+                ),
+                "file_sha256": (
+                    "97024a28e161763f2f7e123e8e85eb6ff28a9ac8f5eda71343696bc976bcd716"
+                ),
+            },
+        },
+    ),
+    (
+        2,
+        SUPERSEDED_CHAIN_CONTRACT_REVISION_V2,
+        {
+            ACTIVE8_DECISION_RUNTIME: {
+                "contract_sha256": (
+                    "8b829cb311837205ca786dc15fe797bd4fd7926e30467f43a539150d37bbe656"
+                ),
+                "file_sha256": (
+                    "673f733a8b3e9619794e5a408e0500f42e74e8e8e18e4ffe711023302736c891"
+                ),
+            },
+            CAPABILITY_CELLS: {
+                "contract_sha256": (
+                    "b9ef14f32d83eaaae9c4ee3ac90121056b97a551199c8b96cbee6fd614d44068"
+                ),
+                "file_sha256": (
+                    "42793cea4483e1ad9ebbd2e95315623dab2237b8f6354372c7a607c2409d8772"
+                ),
+            },
+            DEVELOPMENT_CELL_ROLES: {
+                "contract_sha256": (
+                    "4c8f9d5ca412b0ed8a39fe940bf534e2f3ee18d883a07b2a3cf704985e34b900"
+                ),
+                "file_sha256": (
+                    "507ae7eefe80a1c5502571610fcd4689c21831929b26b23898bd19040b14d03a"
+                ),
+            },
+            GATE_ZERO_STRUCTURAL: {
+                "contract_sha256": (
+                    "06ac042507427ae622c5c8dc22f4ab47687800aa08e466a3c5f999557e364380"
+                ),
+                "file_sha256": (
+                    "d6b8fa91ec2ec821d5b6010b6d57e46ae392579f95fb778b55b8547414607d8d"
+                ),
+            },
+            T1_PANEL_POLICY: {
+                "contract_sha256": (
+                    "8cc3c39d47e55cc55df68900cbcc7c4f6a1beec1d9c02f0299a4aa14cafcb12b"
+                ),
+                "file_sha256": (
+                    "9c5f2540686994a2d86e4d62a47a37b2986fbac1234bc89f08d01177a6f749e7"
+                ),
+            },
+            T1_CAPACITY_POLICY: {
+                "contract_sha256": (
+                    "17569116220ab424d5dbd4d9b3607b97f7156f16e1cfb9e08e9debf7e2f5b919"
+                ),
+                "file_sha256": (
+                    "157820865031bde57e4e796fa7d07070d11f3e54c3979f166f455abe9c572ef1"
+                ),
+            },
+            P50_RECIPE_POLICY: {
+                "contract_sha256": (
+                    "b27e28a087e1c333882e6f97b5737a9fd2713acfee071045dabc808d1cbd4408"
+                ),
+                "file_sha256": (
+                    "4355d360baba35927fe20dbedc898e08db5b6211a5e302fa4a7f33b238ff620d"
+                ),
+            },
+        },
+    ),
+)
+
+#: The exact field set of one lineage generation entry.
+LINEAGE_GENERATION_FIELDS: tuple[str, ...] = (
+    "contract_revision",
+    "physical",
+    "schema_version",
+    "semantic",
+)
 
 
 # ---- Canonical hashing ----
@@ -547,31 +668,39 @@ def _process_identity_block() -> dict[str, Any]:
     }
 
 
-def _superseded_lineage_block(name: str) -> dict[str, Any]:
-    """Preserve the version-1 hashes as lineage, with no currency claim."""
+def _superseded_lineage_block(name: str) -> list[dict[str, Any]]:
+    """Preserve EVERY superseded generation as lineage, oldest first.
 
-    superseded = _SUPERSEDED_HASHES[name]
-    return {
-        "contract_revision": SUPERSEDED_CHAIN_CONTRACT_REVISION,
-        "physical": typed_pointer(
-            kind=PointerKind.LINEAGE_REFERENCE,
-            provider=_CHAIN_PROVIDER,
-            target=name,
-            target_schema=_ENVELOPE[name]["schema"],
-            identity_role=IdentityRole.PHYSICAL,
-            sha256=superseded["file_sha256"],
-        ),
-        "schema_version": 1,
-        "semantic": typed_pointer(
-            kind=PointerKind.LINEAGE_REFERENCE,
-            provider=_CHAIN_PROVIDER,
-            target=name,
-            target_schema=_ENVELOPE[name]["schema"],
-            identity_role=IdentityRole.SEMANTIC,
-            hash_algorithm=SELF_HASH_FIELD_ALGORITHM,
-            sha256=superseded["contract_sha256"],
-        ),
-    }
+    A list rather than one block, because version 2 recorded only version 1: had
+    version 3 kept that shape it would have dropped version 1 to record version 2,
+    and a chain that can only name its immediately preceding shape cannot answer
+    what a hash from two generations ago addressed.
+    """
+
+    return [
+        {
+            "contract_revision": revision,
+            "physical": typed_pointer(
+                kind=PointerKind.LINEAGE_REFERENCE,
+                provider=_CHAIN_PROVIDER,
+                target=name,
+                target_schema=_ENVELOPE[name]["schema"],
+                identity_role=IdentityRole.PHYSICAL,
+                sha256=hashes[name]["file_sha256"],
+            ),
+            "schema_version": schema_version,
+            "semantic": typed_pointer(
+                kind=PointerKind.LINEAGE_REFERENCE,
+                provider=_CHAIN_PROVIDER,
+                target=name,
+                target_schema=_ENVELOPE[name]["schema"],
+                identity_role=IdentityRole.SEMANTIC,
+                hash_algorithm=SELF_HASH_FIELD_ALGORITHM,
+                sha256=hashes[name]["contract_sha256"],
+            ),
+        }
+        for schema_version, revision, hashes in _SUPERSEDED_GENERATIONS
+    ]
 
 
 def _resolved_evidence_binding_declaration() -> dict[str, Any]:
@@ -843,7 +972,17 @@ def _first_difference(observed: object, expected: object, path: str = "") -> str
 
 
 def _check_authority(name: str, payload: Mapping[str, Any]) -> None:
+    """Both guards, over the whole body.
+
+    A prospective contract is a non-granting artifact, so the vocabulary-free
+    guard applies to it: the P50 recipe body carries ``p500_authorized`` as a
+    policy field, which is outside ``AUTHORITY_FIELDS`` and therefore invisible to
+    the vocabulary-aware guard, and a contract that shipped it granted would
+    otherwise pass.
+    """
+
     try:
+        require_no_granted_authority(payload, label=name)
         require_authority_false(payload, label=name)
     except ProcessV2SchemaError as error:
         _fail(name, str(error))
@@ -956,33 +1095,107 @@ def _check_parents(
 
 
 def _check_superseded_lineage(name: str, payload: Mapping[str, Any]) -> None:
-    """A lineage value must be historical: equal to a live value it is a lie."""
+    """Every generation must be historical, distinct, and in order.
+
+    "Historical" is the whole claim a lineage reference makes, so each of the
+    three ways it can be false is checked separately: a value equal to a live one
+    is not superseded, a repeated value is not a second generation, and an
+    out-of-order or duplicated version cannot be read as a sequence.
+    """
 
     block = payload.get("superseded_design_lineage")
-    if not isinstance(block, Mapping):
-        _fail(name, "superseded_design_lineage is missing or is not an object")
-    assert isinstance(block, Mapping)  # narrowed by the guard above
-    for slot in ("physical", "semantic"):
-        try:
-            pointer = validate_typed_pointer(
-                block.get(slot), label=f"{name} superseded_design_lineage.{slot}"
-            )
-        except ProcessV2SchemaError as error:
-            _fail(name, str(error))
-        if pointer["kind"] != PointerKind.LINEAGE_REFERENCE:
-            _fail(
-                name,
-                f"superseded_design_lineage.{slot} declares kind {pointer['kind']!r}; "
-                f"a superseded value must be a {PointerKind.LINEAGE_REFERENCE!r} and "
-                "must carry no currency claim",
-            )
-    live_semantic = payload.get(SELF_HASH_FIELD)
-    if block["semantic"]["sha256"] == live_semantic:
+    if not isinstance(block, list):
         _fail(
             name,
-            "superseded_design_lineage.semantic equals the live contract_sha256, so it "
-            "is not superseded",
+            "superseded_design_lineage is missing or is not a list; it records every "
+            "superseded generation, oldest first, rather than only the last one",
         )
+    assert isinstance(block, list)  # narrowed by the guard above
+    if len(block) != len(_SUPERSEDED_GENERATIONS):
+        _fail(
+            name,
+            f"superseded_design_lineage records {len(block)} generations, not the "
+            f"{len(_SUPERSEDED_GENERATIONS)} this chain has superseded; a generation is "
+            "appended, never replaced",
+        )
+    live_semantic = payload.get(SELF_HASH_FIELD)
+    # There is deliberately no matching "physical equals the live file hash"
+    # check. It cannot be written down: the lineage pointer is part of the body
+    # that IS the file, so setting it to the live physical hash changes the live
+    # physical hash, and any validator recomputing the expectation from the
+    # payload it is checking compares the mutation against itself. A guard whose
+    # expectation moves with the observation cannot fail, and one no test can
+    # exercise honestly is worse than none. The reachable half of the same claim
+    # is the semantic check below; a lineage value aimed at a DIFFERENT artifact
+    # is refused by the target check instead.
+    seen_hashes: dict[str, str] = {}
+    seen_revisions: set[str] = set()
+    previous_version = 0
+    for index, entry in enumerate(block):
+        where = f"superseded_design_lineage[{index}]"
+        if not isinstance(entry, Mapping) or set(entry) != set(LINEAGE_GENERATION_FIELDS):
+            _fail(name, f"{where} must carry exactly {sorted(LINEAGE_GENERATION_FIELDS)}")
+        assert isinstance(entry, Mapping)  # narrowed by the guard above
+        version = entry["schema_version"]
+        if type(version) is not int:
+            _fail(name, f"{where}.schema_version is not an exact int")
+        if version <= previous_version:
+            _fail(
+                name,
+                f"{where}.schema_version is {version}, which does not follow "
+                f"{previous_version}; lineage is recorded oldest first and a repeated "
+                "version is a duplicated generation rather than a second one",
+            )
+        if version >= CHAIN_SCHEMA_VERSION:
+            _fail(
+                name,
+                f"{where}.schema_version is {version}, which is not older than the live "
+                f"schema version {CHAIN_SCHEMA_VERSION}",
+            )
+        previous_version = version
+        revision = entry["contract_revision"]
+        if revision == CHAIN_CONTRACT_REVISION:
+            _fail(
+                name,
+                f"{where}.contract_revision is the live revision {revision!r}, so it is "
+                "not superseded",
+            )
+        if revision in seen_revisions:
+            _fail(name, f"{where}.contract_revision {revision!r} is already recorded")
+        seen_revisions.add(str(revision))
+        for slot in ("physical", "semantic"):
+            try:
+                pointer = validate_typed_pointer(entry.get(slot), label=f"{name} {where}.{slot}")
+            except ProcessV2SchemaError as error:
+                _fail(name, str(error))
+            if pointer["kind"] != PointerKind.LINEAGE_REFERENCE:
+                _fail(
+                    name,
+                    f"{where}.{slot} declares kind {pointer['kind']!r}; a superseded "
+                    f"value must be a {PointerKind.LINEAGE_REFERENCE!r} and must carry "
+                    "no currency claim",
+                )
+            if pointer["target"] != name:
+                _fail(
+                    name,
+                    f"{where}.{slot} targets {pointer['target']!r}; an artifact records "
+                    "its OWN superseded hashes, not another artifact's",
+                )
+            digest = pointer["sha256"]
+            if digest in seen_hashes:
+                _fail(
+                    name,
+                    f"{where}.{slot} repeats {digest}, already recorded at "
+                    f"{seen_hashes[digest]}; two generations that hash alike are one "
+                    "generation written twice",
+                )
+            seen_hashes[digest] = f"{where}.{slot}"
+        if entry["semantic"]["sha256"] == live_semantic:
+            _fail(
+                name,
+                f"{where}.semantic equals the live {SELF_HASH_FIELD}, so it is not "
+                "superseded",
+            )
 
 
 def _check_registry(name: str, payload: Mapping[str, Any], repo_root: Path) -> None:
@@ -1396,6 +1609,7 @@ __all__ = [
     "GATE_ZERO_STRUCTURAL",
     "GENERATION_SELF_HASH_FIELD",
     "GENERATION_STATUS",
+    "LINEAGE_GENERATION_FIELDS",
     "P50_RECIPE_POLICY",
     "PROCESS_IDENTITY_EDGE_FIELDS",
     "PROCESS_IDENTITY_PIN_FIELD",
@@ -1407,6 +1621,7 @@ __all__ = [
     "SEMANTIC_PROCESS_V2",
     "STATUS_SUFFIX",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION",
+    "SUPERSEDED_CHAIN_CONTRACT_REVISION_V2",
     "T1_CAPACITY_POLICY",
     "T1_PANEL_POLICY",
     "WHOLE_CANONICAL_BODY_ALGORITHM",

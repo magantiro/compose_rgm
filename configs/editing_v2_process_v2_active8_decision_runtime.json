@@ -12,8 +12,8 @@
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_active8_decision_runtime",
-  "contract_revision": "process_v2_explicit_dependency_graph",
-  "contract_sha256": "8b829cb311837205ca786dc15fe797bd4fd7926e30467f43a539150d37bbe656",
+  "contract_revision": "process_v2_binding_v2_and_cumulative_design_lineage",
+  "contract_sha256": "fc0bc10625b9d80464f2e4098fa6085aa17c91878dba52bc24339d04e4a43766",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -62,11 +62,11 @@
   },
   "resolved_evidence_binding": {
     "cited_by_schema": "compose.editing_v2.process_v2.resolved_evidence_binding",
-    "cited_by_schema_version": 1,
+    "cited_by_schema_version": 2,
     "measured_evidence_in_this_contract": false
   },
   "schema": "compose.editing_v2.process_v2_active8_decision_runtime",
-  "schema_version": 2,
+  "schema_version": 3,
   "shared_policy_registry": {
     "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
     "schema": "compose.editing_v2.shared_policy_registry",
@@ -81,28 +81,52 @@
     "torch": "2.4.0"
   },
   "status": "FROZEN_PROCESS_V2_CPU_DECISION_RUNTIME_NO_DOWNSTREAM_AUTHORITY",
-  "superseded_design_lineage": {
-    "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
-    "physical": {
-      "hash_algorithm": null,
-      "identity_role": "physical_sha256",
-      "kind": "lineage_reference",
-      "provider": "editing_v2_process_v2_contract_chain",
-      "sha256": "93151f51dac9962237e9d98fa9b0d790602a948ec65b60da209222be9ae016c5",
-      "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
-      "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+  "superseded_design_lineage": [
+    {
+      "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "93151f51dac9962237e9d98fa9b0d790602a948ec65b60da209222be9ae016c5",
+        "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+        "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+      },
+      "schema_version": 1,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "45f3de02da92991802c4cc192d00ceac47291e5ac3d177d19630799808df1f8d",
+        "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+        "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+      }
     },
-    "schema_version": 1,
-    "semantic": {
-      "hash_algorithm": "self_hash_field_v1",
-      "identity_role": "semantic_sha256",
-      "kind": "lineage_reference",
-      "provider": "editing_v2_process_v2_contract_chain",
-      "sha256": "45f3de02da92991802c4cc192d00ceac47291e5ac3d177d19630799808df1f8d",
-      "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
-      "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+    {
+      "contract_revision": "process_v2_explicit_dependency_graph",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "673f733a8b3e9619794e5a408e0500f42e74e8e8e18e4ffe711023302736c891",
+        "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+        "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+      },
+      "schema_version": 2,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "8b829cb311837205ca786dc15fe797bd4fd7926e30467f43a539150d37bbe656",
+        "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+        "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+      }
     }
-  },
+  ],
   "t1_authorized": false,
   "training_authorized": false
 }
