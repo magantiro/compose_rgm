@@ -1,5 +1,12 @@
 # Current model contract
 
+> [!CAUTION]
+> Historical model contract, retained for provenance. Despite the filename,
+> this describes an earlier unconditional whole-ring system. It is not the
+> current Active8 source-conditioned Editing-V2 model or execution contract.
+> Start with [`START_HERE_EDITING_V2.md`](START_HERE_EDITING_V2.md) and
+> `AGENTS.md`. Current self-hashed contracts remain authoritative over prose.
+
 This file distinguishes concepts that were previously all called a "prior."
 
 ## Source distribution

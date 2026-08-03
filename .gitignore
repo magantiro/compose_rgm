@@ -3,6 +3,7 @@
 *.swp
 *.swo
 *~
+~$*
 
 # Python environments and caches
 .venv*/
@@ -30,6 +31,13 @@ results/**/rollouts.pt
 !.env.example
 
 # LaTeX build intermediates (source, bibliography, PDFs, and release ZIPs remain tracked)
+paper_*/**/*.aux
+paper_*/**/*.blg
+paper_*/**/*.fdb_latexmk
+paper_*/**/*.fls
+paper_*/**/*.log
+paper_*/**/*.out
+paper_*/**/*.synctex.gz
 paper_iclr_stochastic_rewriting/*.aux
 paper_iclr_stochastic_rewriting/*.blg
 paper_iclr_stochastic_rewriting/*.log

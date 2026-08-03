@@ -1,5 +1,12 @@
 # COMPOSE RGM handoff
 
+> [!CAUTION]
+> Historical handoff, retained for provenance. This document describes the
+> 2026-07-19 unconditional whole-ring implementation and is not the current
+> Editing-V2 execution contract. Do not use its operator, training, launch, or
+> evidence instructions for current work. Start with
+> [`START_HERE_EDITING_V2.md`](START_HERE_EDITING_V2.md) and `AGENTS.md`.
+
 This repository is the lossless working handoff for COMPOSE: Rewrite Generator
 Matching for validity-closed molecular generation. It contains the executable
 model, tests, experiment recipes, paper draft, research plans, and the exact
