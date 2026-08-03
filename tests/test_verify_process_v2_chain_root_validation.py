@@ -129,10 +129,14 @@ def test_a_body_edit_no_pointer_addresses_is_caught_only_by_the_owning_validator
     """
 
     live = json.loads((_ROOT / P50_RECIPE_POLICY).read_bytes())
-    scope = next(key for key, value in live.items() if key == "scientific_scope")
+    edited = sorted(
+        key
+        for key, value in live.items()
+        if isinstance(value, str) and key != SELF_HASH_FIELD
+    )[0]
 
     def edit(payload: dict[str, Any]) -> None:
-        payload[scope] = f"{payload[scope]} (an edit no other artifact addresses)"
+        payload[edited] = f"{payload[edited]} (an edit no other artifact addresses)"
 
     owned, control = _both_arms(P50_RECIPE_POLICY, edit)
 
