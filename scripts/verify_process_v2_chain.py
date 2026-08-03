@@ -494,6 +494,15 @@ def normalized_repository_path(repo_root: Path, target: str) -> Path | None:
       pointers that no longer compare equal and one of them silently stops
       satisfying the edge it was written for.
 
+    The second rule is enforced GENERALLY, against the target string, not against
+    a list of known bad spellings.  ``pathlib`` folds ``.``, ``//`` and a trailing
+    ``/`` away before any component scan can see them, so a ``..``-only check
+    accepted ``configs/./x.json``, ``configs//x.json``, ``./configs/x.json`` and
+    ``configs/x.json/`` -- four more spellings of one file, each of which the walk
+    enqueues and re-checks under a second graph name.  A target is therefore
+    required to be in normal form ALREADY: it must be exactly what ``pathlib``
+    would fold it to.  ``..`` survives that folding, so it keeps its own check.
+
     Normalization is decided before any read, so a correct digest is no defence.
     """
 
@@ -501,6 +510,8 @@ def normalized_repository_path(repo_root: Path, target: str) -> Path | None:
         return None
     candidate = Path(target)
     if any(part == ".." for part in candidate.parts):
+        return None
+    if candidate.as_posix() != target:
         return None
     root = repo_root.resolve()
     joined = root / candidate
@@ -725,9 +736,11 @@ def _check_repository_pointer(
             f"declares the repository target {pointer['target']!r}, which is not a "
             "normalized path inside this checkout. An absolute target, or a '..' "
             "component or symlink leaving the tree, makes a pin address a file the "
-            "checkout does not govern while still hashing and agreeing; a '..' that "
-            "resolves back inside makes a second spelling of one file, which no "
-            "longer compares equal to the target the edge declares",
+            "checkout does not govern while still hashing and agreeing; a target "
+            "that is merely spelled differently -- '..' resolving back inside, a "
+            "'.' component, a doubled or trailing slash -- makes a second spelling "
+            "of one file, which no longer compares equal to the target the edge "
+            "declares",
         )
         return "escapes_checkout"
     if not target_path.is_file():

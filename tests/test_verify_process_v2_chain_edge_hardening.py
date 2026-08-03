@@ -64,6 +64,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(_ROOT / "scripts"))
 
+import verify_process_v2_chain as _verifier  # noqa: E402
 from test_verify_process_v2_chain import _graph_copy, _reseal  # noqa: E402
 from verify_process_v2_chain import (  # noqa: E402
     AGREES,
@@ -78,6 +79,7 @@ from verify_process_v2_chain import (  # noqa: E402
     STAGE_RECEIPT_STATUS,
     UNVERIFIED,
     _NEAR_MISS_KEY_EDITS,
+    _providing_module,
     live_identity_nodes,
     normalized_repository_path,
     verify_process_v2_chain,
@@ -351,6 +353,69 @@ def test_the_declared_module_is_the_one_the_live_provider_is_defined_in() -> Non
     assert v2.module == declared
 
 
+def test_the_module_is_derived_from_the_provider_rather_than_transcribed() -> None:
+    """The claim above is about ONE provider, and both live providers share a file.
+
+    So a ``_providing_module`` that returned a hard-coded literal satisfied it, and
+    satisfied every other module assertion in this suite, while being exactly the
+    stale binding its docstring says it exists to prevent. This drives the
+    production function over providers defined in three different files and asserts
+    a property no literal can satisfy: the path it returns must be a file that
+    actually defines that provider, and three providers in three files must yield
+    three paths.
+    """
+
+    providers = (editing_process_v2_identity, typed_pointer, write_process_v2_chain)
+    derived = [_providing_module(provider) for provider in providers]
+    assert len(set(derived)) == len(providers), derived
+    for provider, module in zip(providers, derived):
+        assert (_ROOT / module).is_file(), module
+        source = (_ROOT / module).read_text(encoding="utf-8")
+        assert f"def {provider.__name__}(" in source, (provider.__name__, module)
+
+
+#: A schema version that is neither the live one nor the literal a transcription
+#: would most plausibly be frozen at.
+_A_SCHEMA_VERSION_NOTHING_ELSE_DECLARES = 97
+
+
+def _a_provider_defined_in_this_test_file() -> dict[str, Any]:
+    """A stand-in identity: the live V2 payload at an unusual schema version."""
+
+    return {
+        **editing_process_v2_identity(),
+        "schema_version": _A_SCHEMA_VERSION_NOTHING_ELSE_DECLARES,
+    }
+
+
+def test_the_schema_version_and_module_of_a_node_are_read_from_its_provider(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Both naming fields, proven by moving the thing they are supposed to follow.
+
+    The live V2 identity declares schema version 1, so a transcription frozen at
+    ``1`` agrees with every value this checkout can produce, and the existing
+    "wrong version resolves to no node" test uses ``live + 1`` and therefore cannot
+    see it. Substituting a provider that declares a different version -- and lives
+    in a different file -- makes both fields observable: a transcribed version stays
+    1 and a transcribed module keeps naming the identity module.
+    """
+
+    live = int(editing_process_v2_identity()["schema_version"])
+    assert _A_SCHEMA_VERSION_NOTHING_ELSE_DECLARES not in (live, 1)
+    monkeypatch.setattr(
+        _verifier, "editing_process_v2_identity", _a_provider_defined_in_this_test_file
+    )
+
+    node = next(
+        candidate
+        for candidate in _verifier.live_identity_nodes()
+        if candidate.provider == _a_provider_defined_in_this_test_file.__name__
+    )
+    assert node.identity_schema_version == _A_SCHEMA_VERSION_NOTHING_ELSE_DECLARES
+    assert node.module == Path(__file__).resolve().relative_to(_ROOT).as_posix()
+
+
 def test_an_identity_edge_naming_the_wrong_module_resolves_to_no_node() -> None:
     """Everything else agrees: provider, schema, semantics and the live digest."""
 
@@ -485,6 +550,143 @@ def test_a_symlink_that_stays_inside_the_checkout_is_accepted() -> None:
     assert normalized_repository_path(_ROOT, "../escape") is None
     assert normalized_repository_path(_ROOT, "/etc/hosts") is None
     assert normalized_repository_path(_ROOT, "") is None
+
+
+# ---- (3b) normalization is a GENERAL rule, not a rule about ``..`` ----
+
+#: An existing, agreeing pointer at a governed non-JSON file.  Respelling ITS
+#: target is the sharpest available mutation: the digest still agrees, the target
+#: still resolves to the same bytes, and the declared ``target_schema`` is still
+#: ``None``, so the spelling is the only thing that changed.
+_UNSCHEMED_POINTER: dict[str, Any] = json.loads((_ROOT / CAPABILITY_CELLS).read_bytes())[
+    "parents"
+][_CELLS_UNSCHEMED_ROLE]["physical"]
+_GOVERNED_FILE: str = _UNSCHEMED_POINTER["target"]
+
+#: Five spellings of ``_GOVERNED_FILE``.  ``pathlib`` folds the last four away
+#: before any component scan sees them, which is why a ``..``-only rule accepted
+#: them; ``..`` survives folding, which is why it was the only one caught.
+_SECOND_SPELLINGS: tuple[str, ...] = (
+    f"src/../{_GOVERNED_FILE}",
+    f"./{_GOVERNED_FILE}",
+    _GOVERNED_FILE.replace("data/", "data/./"),
+    _GOVERNED_FILE.replace("data/", "data//"),
+    f"{_GOVERNED_FILE}/",
+)
+
+
+def test_the_second_spellings_all_name_the_one_governed_file() -> None:
+    """Without this the parametrization below could be attacking nothing."""
+
+    assert (_ROOT / _GOVERNED_FILE).is_file()
+    for spelling in _SECOND_SPELLINGS:
+        assert spelling != _GOVERNED_FILE
+        assert (_ROOT / spelling).resolve() == (_ROOT / _GOVERNED_FILE).resolve(), spelling
+        assert (_ROOT / spelling).is_file(), spelling
+    assert len(set(_SECOND_SPELLINGS)) == len(_SECOND_SPELLINGS)
+
+
+@pytest.mark.parametrize("spelling", _SECOND_SPELLINGS)
+def test_normalization_is_enforced_against_every_second_spelling(spelling: str) -> None:
+    assert normalized_repository_path(_ROOT, spelling) is None, spelling
+
+
+def test_the_normal_spelling_of_that_pointer_agrees() -> None:
+    """The control arm: the injected pointer is sound until it is respelled."""
+
+    with _graph_copy() as root:
+        _inject_into_the_frozen_parent(
+            root, dict(_UNSCHEMED_POINTER), "a_governed_file_by_its_normal_name"
+        )
+        report = verify_process_v2_chain(repo_root=root)
+    assert report["status"] == AGREES, report["findings"]
+    assert {edge["result"] for edge in _edges_to(report, _GOVERNED_FILE)} == {"agrees"}
+
+
+@pytest.mark.parametrize("spelling", _SECOND_SPELLINGS)
+def test_a_second_spelling_of_a_governed_target_is_refused_and_never_traversed(
+    spelling: str,
+) -> None:
+    """A target is an IDENTITY, so one file may have exactly one declared spelling.
+
+    Everything a hash can see still agrees here -- same bytes, same digest, same
+    ``target_schema`` -- so nothing but the normalization rule can object. What is
+    wrong is that the chain compares declared targets by string: a second spelling
+    is a pointer that no longer compares equal to the edge it was written for, and
+    the walk keys its queue on the raw string, so the file is read and re-checked
+    under a second graph name.
+    """
+
+    with _graph_copy() as root:
+        _inject_into_the_frozen_parent(
+            root, dict(_UNSCHEMED_POINTER, target=spelling), "a_second_spelling"
+        )
+        report = verify_process_v2_chain(repo_root=root)
+    assert report["status"] == DISAGREES
+    named = _findings(report, "pointer_target_escapes_the_checkout")
+    assert named, report["findings"]
+    assert [edge["result"] for edge in _edges_to(report, spelling)] == ["escapes_checkout"]
+    assert spelling not in report["artifacts"], (
+        "a second spelling must not be traversed as a second graph artifact"
+    )
+
+
+def test_an_absolute_target_that_lands_INSIDE_the_checkout_is_still_refused() -> None:
+    """The absolute-path rule, isolated from the containment rule that hides it.
+
+    Every other escape test uses an absolute path OUTSIDE the tree, which the
+    containment check refuses on its own -- so deleting the absolute-path rule
+    changed nothing and the suite stayed green. An absolute path naming a file the
+    checkout does govern resolves inside, hashes correctly and agrees, and it is
+    still a second spelling of a target that must be declared checkout-relative.
+    """
+
+    with _graph_copy() as root:
+        absolute = str(root / _GOVERNED_FILE)
+        assert Path(absolute).is_file()
+        _inject_into_the_frozen_parent(
+            root, dict(_UNSCHEMED_POINTER, target=absolute), "an_absolute_spelling"
+        )
+        report = verify_process_v2_chain(repo_root=root)
+        assert normalized_repository_path(root, absolute) is None
+    assert report["status"] == DISAGREES
+    assert _findings(report, "pointer_target_escapes_the_checkout"), report["findings"]
+    assert [edge["result"] for edge in _edges_to(report, absolute)] == ["escapes_checkout"]
+    assert absolute not in report["artifacts"]
+
+
+@pytest.mark.parametrize(
+    "target",
+    ["../outside.json", "/etc/hosts", f"src/../{_GOVERNED_FILE}"],
+    ids=["parent", "absolute_system", "second_spelling"],
+)
+def test_a_lineage_pointer_may_not_escape_the_checkout_either(target: str) -> None:
+    """Lineage has its own containment check, and had no test that reached it.
+
+    Every escape test used a ``repository_config`` pointer, so the check inside
+    ``_check_lineage_pointer`` could be replaced by a bare join and the suite
+    stayed green: the escaping target was simply read from wherever it landed,
+    disagreed with the pinned value, and was reported as ordinary history.
+    """
+
+    pointer = typed_pointer(
+        kind=PointerKind.LINEAGE_REFERENCE,
+        provider="frozen_repository_artifact",
+        target=target,
+        target_schema=None,
+        identity_role=IdentityRole.PHYSICAL,
+        sha256="a" * 64,
+    )
+    with _graph_copy() as root:
+        _inject_into_the_frozen_parent(root, pointer, "a_superseded_thing")
+        report = verify_process_v2_chain(repo_root=root)
+    assert report["status"] == DISAGREES
+    named = _findings(report, "pointer_target_escapes_the_checkout")
+    assert named, report["findings"]
+    assert [finding["location"] for finding in named] == [
+        f"{EDITING_CORPUS_V2_CONTRACT}:.a_superseded_thing"
+    ]
+    assert [edge["result"] for edge in _edges_to(report, target)] == ["escapes_checkout"]
 
 
 # ---- (4) the declared target schema must be the target's own schema ----
@@ -816,6 +1018,22 @@ def test_a_receipt_read_from_outside_the_checkout_resolves_nothing() -> None:
     assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
     assert [row["result"] for row in report["stage_receipts"]] == ["refused"]
     assert [row["resolved"] for row in report["stage_receipts"]] == [0]
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    ["diagnostics/./stage_receipt.json", "./diagnostics/stage_receipt.json"],
+    ids=["dot_component", "leading_dot"],
+)
+def test_a_receipt_named_by_a_second_spelling_resolves_nothing(spelling: str) -> None:
+    """The same containment rule, so the same normalization rule."""
+
+    with _graph_copy() as root:
+        _inject_into_the_frozen_parent(root, _remote_pointer(), "a_remote_prerequisite")
+        _stage_receipt(root, "diagnostics/stage_receipt.json", [_the_resolving_entry()])
+        report = verify_process_v2_chain(repo_root=root, stage_receipts=(spelling,))
+    assert report["status"] == DISAGREES
+    assert "stage_receipt_path_escapes_the_checkout" in _categories(report, FAIL)
 
 
 def test_an_external_asset_outside_the_checkout_is_undecided_until_a_receipt_resolves_it() -> None:
