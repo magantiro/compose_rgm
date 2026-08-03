@@ -155,14 +155,27 @@ def test_the_owning_oracle_gate_exists_and_covers_the_process_v2_directories() -
     narrowing it fails here rather than silently removing the enforcement the
     Process-V2 modules inherit.
 
-    The gate is deliberately not invoked.  It fails at this commit on a false
-    positive (see this module's docstring), and importing a pre-existing failure
+    The gate is deliberately not invoked: importing another module's failure
     into this file would report a defect that is not this boundary's.
     """
 
     gate = oracle_boundary.test_no_production_module_imports_the_oracle
+    assert callable(gate)
+
+    # Which oracle the gate guards, read from where the gate DECLARES it rather
+    # than from the text of its body.  The earlier version of this assertion
+    # searched the function source for the literal "reference_successor_kernel",
+    # and broke the moment the gate was rewritten from substring matching to
+    # real import-edge analysis -- a test that verified another test by
+    # substring matching, undone by that test giving up substring matching.
+    assert oracle_boundary._ORACLE_MODULE.endswith("reference_successor_kernel")
+    assert oracle_boundary._ORACLE_PATH.name == "reference_successor_kernel.py"
+
+    # The scanned roots are still read from the body, because the gate spells
+    # them as a literal tuple there and declares no constant for them. That is
+    # the same fragility, narrowed to the one property with nowhere else to read
+    # it from: if the gate ever declares its roots, read them from there instead.
     gate_source = inspect.getsource(gate)
-    assert "reference_successor_kernel" in gate_source
 
     # The gate names its scanned roots in its own body; a narrowing that dropped
     # a directory a Process-V2 module lives in would leave that module
