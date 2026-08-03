@@ -340,9 +340,12 @@ def measure_chunk_size(artifact_root: Path, source: dict[str, Any], *, chunk_siz
 
     tracemalloc.start()
     durations: list[float] = []
+    cpu_durations: list[float] = []
+    load_before = os.getloadavg()
     started = time.perf_counter()
     for task in plan["tasks"]:
         task_started = time.perf_counter()
+        cpu_started = _process_cpu_seconds()
         execute_process_v2_rebind_task(
             plan,
             task["task_identity_sha256"],
@@ -350,29 +353,52 @@ def measure_chunk_size(artifact_root: Path, source: dict[str, Any], *, chunk_siz
             repo_root=REPO_ROOT,
         )
         durations.append(time.perf_counter() - task_started)
+        # CPU time as well as wall time. A laptop shared with other work makes
+        # wall time a measurement of the machine; CPU time is a measurement of
+        # the code, and the selection criteria care about the code.
+        cpu_durations.append(_process_cpu_seconds() - cpu_started)
     total_seconds = time.perf_counter() - started
+    load_after = os.getloadavg()
     python_peak_bytes = tracemalloc.get_traced_memory()[1]
     tracemalloc.stop()
     completion = reduce_process_v2_rebind(
         plan, artifact_root=artifact_root, repo_root=REPO_ROOT
     )
     ordered = sorted(durations)
+    ordered_cpu = sorted(cpu_durations)
+
+    def _quantile(values: list[float], fraction: float) -> float:
+        return values[min(len(values) - 1, int(fraction * len(values)))]
+
+    entries = int(completion["counts"]["source_entries"])
     return {
         "records_per_chunk": chunk_size,
         "task_count": len(durations),
-        "entries": int(completion["counts"]["source_entries"]),
+        "entries": entries,
         "cache_build_seconds": round(cache_seconds, 4),
         "cache_chunk_count": int(cache_completion["chunk_count"]),
         "rebind_total_seconds": round(total_seconds, 4),
-        "records_per_second": round(int(completion["counts"]["source_entries"]) / total_seconds, 1),
+        "rebind_total_cpu_seconds": round(sum(cpu_durations), 4),
+        "records_per_second": round(entries / total_seconds, 2),
+        "records_per_cpu_second": round(entries / max(sum(cpu_durations), 1e-9), 2),
         "task_seconds_p50": round(median(ordered), 4),
-        "task_seconds_p99": round(ordered[min(len(ordered) - 1, int(0.99 * len(ordered)))], 4),
+        "task_seconds_p99": round(_quantile(ordered, 0.99), 4),
         "task_seconds_max": round(ordered[-1], 4),
         "task_seconds_min": round(ordered[0], 4),
+        "task_cpu_seconds_p50": round(median(ordered_cpu), 4),
+        "task_cpu_seconds_p99": round(_quantile(ordered_cpu, 0.99), 4),
+        "task_cpu_seconds_max": round(ordered_cpu[-1], 4),
         "quantile_sample_count": len(ordered),
         "python_peak_traced_mb": round(python_peak_bytes / 1e6, 2),
         "process_peak_rss_mb": round(_peak_rss_bytes() / 1e6, 2),
+        "system_load_average_before": [round(value, 2) for value in load_before],
+        "system_load_average_after": [round(value, 2) for value in load_after],
     }
+
+
+def _process_cpu_seconds() -> float:
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    return float(usage.ru_utime) + float(usage.ru_stime)
 
 
 def _peak_rss_bytes() -> float:
@@ -419,6 +445,9 @@ def select_chunk_size(
     verdicts = []
     for measurement in sorted(measurements, key=lambda row: -int(row["records_per_chunk"])):
         memory_ok = float(measurement["process_peak_rss_mb"]) <= memory_budget_mb
+        # Judged on wall time, which is what a container timeout measures, but
+        # the CPU time is carried beside it: on a shared machine the wall
+        # figure is partly a measurement of the machine.
         time_ok = float(measurement["task_seconds_p99"]) <= time_budget_seconds
         verdicts.append(
             {
@@ -429,7 +458,11 @@ def select_chunk_size(
                     memory_mb / max(float(measurement["process_peak_rss_mb"]), 1e-9), 2
                 ),
                 "task_seconds_p99": measurement["task_seconds_p99"],
+                "task_cpu_seconds_p99": measurement["task_cpu_seconds_p99"],
                 "time_budget_seconds": time_budget_seconds,
+                "time_headroom_factor": round(
+                    timeout_seconds / max(float(measurement["task_seconds_p99"]), 1e-9), 2
+                ),
                 "meets_memory_criterion": memory_ok,
                 "meets_time_criterion": time_ok,
                 "selected": bool(memory_ok and time_ok),
@@ -552,6 +585,11 @@ def main(argv: list[str] | None = None) -> int:
             "inter-chunk variance from heterogeneous production molecules",
             "the p99 at the largest chunk size is estimated from few samples; see "
             "quantile_sample_count",
+            "an idle machine: this ran on a shared laptop, so wall time is partly a "
+            "measurement of the machine. system_load_average_before/after record what "
+            "else was running, and task_cpu_seconds_* is the contention-robust figure",
+            "a production-realistic compression ratio: the corpus repeats one trace, so "
+            "compressed_bytes is far smaller than a shard of distinct molecules would be",
         ],
     }
     text = json.dumps(report, indent=2, sort_keys=True)
