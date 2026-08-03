@@ -100,6 +100,13 @@ from compose_v4.data.editing_process_v2_admitted_source import (
     resolve_process_v2_admitted_source,
     validate_process_v2_admitted_source_identity,
 )
+# The admitted source is the single authority on "what decision was recorded for
+# entry i of V1 task t", and it reads one range result at a time so the corpus is
+# never resident. Importing its two streaming helpers is deliberate and is the
+# smaller of two evils: the alternative is a second reader of the same published
+# rebind artifacts, which is a second authority over the decisions this module
+# exists to report faithfully. Renamed on import so the call sites read as what
+# they are rather than as local helpers.
 from compose_v4.data.editing_process_v2_admitted_source import (
     _decisions_for as _recorded_decisions_for,
 )
