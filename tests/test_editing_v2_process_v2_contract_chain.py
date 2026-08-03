@@ -549,15 +549,18 @@ def test_a_lineage_hash_equal_to_the_live_self_hash_is_rejected() -> None:
         validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
 
 
-def test_no_lineage_physical_hash_check_is_claimed_because_it_is_unfalsifiable() -> None:
-    """A negative result, pinned so it is not "fixed" back in.
+def test_the_self_referential_lineage_physical_check_is_unfalsifiable() -> None:
+    """A negative result about ONE formulation, pinned so it is not written.
 
-    A "lineage physical equals the live file hash" guard reads as the obvious
-    companion to the semantic one, and it was written and then removed. It cannot
-    be exercised: the pointer is part of the body that IS the file, so writing the
-    live physical hash into it changes the live physical hash, and a validator
-    recomputing the expectation from the payload under test compares the mutation
-    against itself. What actually refuses a physical lie is the target check.
+    Expectation = ``sha256(serialize(the payload under test))`` cannot be
+    exercised: the pointer is part of the body that IS the file, so writing that
+    value into it moves the value, and a validator recomputing its expectation
+    from the payload it is checking compares the mutation against itself.
+
+    This says nothing about the ON-DISK formulation, which takes its expectation
+    from bytes the mutation does not touch, is falsifiable, and IS checked -- see
+    the two tests below. The earlier version of this test claimed the general
+    negative and therefore discouraged writing the guard that works.
     """
 
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
@@ -569,11 +572,89 @@ def test_no_lineage_physical_hash_check_is_claimed_because_it_is_unfalsifiable()
         serialize_process_v2_chain_artifact(payload)
     ).hexdigest()
     assert live_physical_after != live_physical_before, (
-        "the fixed point is unreachable, which is why no such guard is claimed"
+        "the self-referential fixed point is unreachable, which is why that "
+        "formulation is not the one implemented"
     )
-    # It still fails, on the deterministic rebuild, which is the honest reason.
-    with pytest.raises(ProcessV2ChainError, match="differs from the deterministic rebuild"):
+    # The on-disk formulation still refuses this payload, because before the
+    # mutation the built artifact IS the committed one.
+    with pytest.raises(ProcessV2ChainError, match="but that is the live physical hash"):
         validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_lineage_value_that_is_the_live_on_disk_value_is_rejected() -> None:
+    """The falsifiable half: the expectation comes from bytes on disk.
+
+    The mutation does not move the committed file, so the comparison is between
+    two independent things -- which is exactly what the self-referential
+    formulation above cannot arrange. The sibling verifier makes the same check
+    over committed bytes (``verify_process_v2_chain._check_lineage_pointer`` ->
+    ``lineage_value_is_live``); this one runs inside the validator, so a payload
+    that is never written to disk is still refused.
+    """
+
+    committed = (_ROOT / CAPABILITY_CELLS).read_bytes()
+    on_disk_before = hashlib.sha256(committed).hexdigest()
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"][0]["physical"]["sha256"] = on_disk_before
+    assert (
+        hashlib.sha256((_ROOT / CAPABILITY_CELLS).read_bytes()).hexdigest()
+        == on_disk_before
+    ), "the expectation must not move when the payload under test is mutated"
+    with pytest.raises(ProcessV2ChainError, match="records .* as superseded") as raised:
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+    assert "live physical hash of " + CAPABILITY_CELLS in str(raised.value)
+    # The physical hash is a value NOTHING inside the payload carries, which is
+    # what the semantic half cannot say: an artifact's own `contract_sha256` is in
+    # its body, so that case belongs to the self-hash comparison below.
+    assert on_disk_before not in json.dumps(
+        build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    )
+
+
+def test_a_lineage_entry_carrying_another_artifacts_live_hash_is_rejected() -> None:
+    """The target is right, so the target check cannot see this one.
+
+    An artifact recording ANOTHER chain member's current hash as its own
+    superseded value is a currency claim about a live artifact, dressed as
+    lineage. Only a comparison against every live chain value catches it.
+    """
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    other_live = hashlib.sha256((_ROOT / GATE_ZERO_STRUCTURAL).read_bytes()).hexdigest()
+    entry = payload["superseded_design_lineage"][0]
+    entry["physical"]["sha256"] = other_live
+    assert entry["physical"]["target"] == CAPABILITY_CELLS, (
+        "the target is correct, which is what makes the target check blind here"
+    )
+    with pytest.raises(ProcessV2ChainError, match="live physical hash of") as raised:
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+    assert GATE_ZERO_STRUCTURAL in str(raised.value)
+
+    # The semantic role, where the value is another artifact's self-hash. The
+    # payload's own `contract_sha256` is a different value, so the comparison
+    # against it says nothing here.
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    other_semantic = _load(GATE_ZERO_STRUCTURAL)[SELF_HASH_FIELD]
+    assert other_semantic != payload[SELF_HASH_FIELD]
+    payload["superseded_design_lineage"][0]["semantic"]["sha256"] = other_semantic
+    with pytest.raises(ProcessV2ChainError, match="live semantic hash of") as raised:
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+    assert GATE_ZERO_STRUCTURAL in str(raised.value)
+
+
+def test_no_committed_lineage_value_is_live_anywhere_in_the_chain() -> None:
+    """The guard must not fire on the seven, in either role or any pairing."""
+
+    live: dict[str, str] = {}
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        raw = (_ROOT / name).read_bytes()
+        live[hashlib.sha256(raw).hexdigest()] = f"{name} physical"
+        live[json.loads(raw)[SELF_HASH_FIELD]] = f"{name} semantic"
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        for index, entry in enumerate(_load(name)["superseded_design_lineage"]):
+            for slot in ("physical", "semantic"):
+                digest = entry[slot]["sha256"]
+                assert digest not in live, (name, index, slot, live.get(digest))
 
 
 def test_a_duplicated_lineage_generation_is_rejected() -> None:
@@ -620,6 +701,91 @@ def test_a_lineage_entry_targeting_another_artifact_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["superseded_design_lineage"][0]["semantic"]["target"] = GATE_ZERO_STRUCTURAL
     with pytest.raises(ProcessV2ChainError, match="records its OWN superseded hashes"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_lineage_generation_at_or_above_the_live_schema_version_is_rejected() -> None:
+    """The other half of the ordering rule, and the one no test exercised.
+
+    ``test_the_lineage_is_ordered_oldest_first_and_precedes_the_live_version``
+    reads the committed configs and asserts what the builder produced, so it
+    cannot fail whatever the validator does; only a mutated payload reaches the
+    check. A generation numbered at the live version is not superseded -- it is
+    the current one, recorded as its own ancestor.
+    """
+
+    for version in (CHAIN_SCHEMA_VERSION, CHAIN_SCHEMA_VERSION + 1):
+        payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+        payload["superseded_design_lineage"][-1]["schema_version"] = version
+        with pytest.raises(ProcessV2ChainError, match="not older than the live") as raised:
+            validate_process_v2_chain_artifact(
+                payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+            )
+        assert str(CHAIN_SCHEMA_VERSION) in str(raised.value)
+
+
+def test_a_repeated_lineage_contract_revision_is_rejected() -> None:
+    """Distinct hashes, one name: two generations that claim to be one revision.
+
+    The duplicate-HASH check cannot see it, because both entries keep their own
+    physical and semantic values.
+    """
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    lineage = payload["superseded_design_lineage"]
+    lineage[1]["contract_revision"] = lineage[0]["contract_revision"]
+    assert lineage[1]["physical"]["sha256"] != lineage[0]["physical"]["sha256"]
+    with pytest.raises(ProcessV2ChainError, match="is already recorded"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_lineage_entry_with_an_extra_or_missing_field_is_rejected() -> None:
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"][0]["superseded_at_revision"] = "3f3258e"
+    with pytest.raises(ProcessV2ChainError, match="must carry exactly"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    del payload["superseded_design_lineage"][0]["contract_revision"]
+    with pytest.raises(ProcessV2ChainError, match="must carry exactly"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_coerced_lineage_schema_version_is_rejected() -> None:
+    """Type-checked, not coerced: ``"1"`` and ``1.0`` are not generation 1.
+
+    ``True`` is excluded explicitly for the reason every count in this chain
+    excludes it -- it is an ``int`` subclass, and the version of a generation is
+    never a flag.
+    """
+
+    for version in ("1", 1.0, True):
+        payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+        payload["superseded_design_lineage"][0]["schema_version"] = version
+        with pytest.raises(ProcessV2ChainError, match="is not an exact int"):
+            validate_process_v2_chain_artifact(
+                payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+            )
+
+
+def test_a_single_lineage_block_where_a_list_is_required_is_rejected() -> None:
+    """The superseded SHAPE: version 2 carried one block, not a list of them.
+
+    A mapping is not a degenerate one-element list. Read as a sequence it yields
+    its KEYS, so a validator that accepted it would iterate strings and report a
+    field-set defect instead of the shape defect that is actually there.
+    """
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    lineage = payload["superseded_design_lineage"]
+    payload["superseded_design_lineage"] = {
+        "physical": lineage[-1]["physical"],
+        "semantic": lineage[-1]["semantic"],
+    }
+    assert len(payload["superseded_design_lineage"]) == len(lineage), (
+        "the same length, so a length check alone would pass it"
+    )
+    with pytest.raises(ProcessV2ChainError, match="is missing or is not a list"):
         validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
 
 
