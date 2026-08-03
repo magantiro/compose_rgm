@@ -43,6 +43,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -358,6 +359,97 @@ def _pointer_edges(root: Path, relative_path: str, payload: object) -> tuple[Poi
                         value=pin,
                     )
                 )
+    return tuple(edges)
+
+
+def _python_pointer_edges(root: Path, relative_path: str, text: str) -> tuple[PointerEdge, ...]:
+    """Discover the same pin shape inside module-level Python dict constants.
+
+    A pin does not stop being a pin because it is written in Python.
+    ``EXPECTED_T1_CAPACITY_POLICY`` in ``editing_training_gate.py`` is exactly
+    the prefixed-sibling shape :func:`_pointer_edges` already understands -- a
+    path plus ``<name>_file_sha256`` and ``<name>_sha256`` -- and it went stale
+    while this verifier reported agreement, because only JSON was scanned for
+    edges.  Every literal-evaluable module-level dict is fed through the same
+    rule so that gap cannot reopen for a differently-named constant.
+    """
+
+    try:
+        module = ast.parse(text)
+    except SyntaxError:
+        return ()
+    edges: list[PointerEdge] = []
+    constants: dict[str, str] = {}
+    for node in module.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        names = [t.id for t in node.targets if isinstance(t, ast.Name)]
+        if not names:
+            continue
+        try:
+            payload = ast.literal_eval(node.value)
+        except (ValueError, SyntaxError):
+            continue
+        if isinstance(payload, str):
+            constants[names[0]] = payload
+            continue
+        if not isinstance(payload, dict):
+            continue
+        for edge in _pointer_edges(root, relative_path, payload):
+            edges.append(
+                PointerEdge(
+                    source=relative_path,
+                    location=f"{names[0]}{edge.location}",
+                    target=edge.target,
+                    value=edge.value,
+                )
+            )
+    edges.extend(_python_constant_pointer_edges(root, relative_path, constants))
+    return tuple(edges)
+
+
+# A constant naming a file drops these suffixes to give the family stem that its
+# sibling hash constants share: `CAPACITY_POLICY_RELATIVE_PATH` pins
+# `CAPACITY_POLICY_FILE_SHA256` and `CAPACITY_POLICY_SHA256`.
+_PATH_CONSTANT_SUFFIXES = ("_RELATIVE_PATH", "_PATH", "_FILENAME", "_FILE")
+
+
+def _python_constant_pointer_edges(
+    root: Path, relative_path: str, constants: dict[str, str]
+) -> tuple[PointerEdge, ...]:
+    """The same pin shape again, spelled as sibling module-level constants.
+
+    `editing_v2_semantic_t1_decision.py` pins its capacity policy this way and
+    went stale exactly as the dict-shaped pin did, so recognising only the dict
+    form would have closed one door and left the next one open.  The stem must
+    be non-empty and cover at least two underscore-separated tokens, so an
+    unrelated `PATH` constant cannot capture every hash in the module.
+    """
+
+    edges: list[PointerEdge] = []
+    for name, value in constants.items():
+        if "/" not in value or value.startswith("/") or not (root / value).is_file():
+            continue
+        stem = name
+        for suffix in _PATH_CONSTANT_SUFFIXES:
+            if stem.endswith(suffix):
+                stem = stem[: -len(suffix)]
+                break
+        if not stem or stem.count("_") < 1:
+            continue
+        for sibling, pin in constants.items():
+            if sibling == name or not IS_HEX64.match(pin):
+                continue
+            if "SHA256" not in sibling.upper() or not sibling.startswith(stem):
+                continue
+            edges.append(
+                PointerEdge(
+                    source=relative_path,
+                    location=sibling,
+                    target=value,
+                    value=pin,
+                )
+            )
     return tuple(edges)
 
 
@@ -924,7 +1016,7 @@ def _check_frozen_names(root: Path) -> list[Finding]:
                     artifact=PROCESS_V2_RESOLVER_RELATIVE_PATH,
                 )
             )
-    declared = list(authority["rejection_codes_in_evaluation_order"])
+    declared = list(authority["rejection_codes"])
     implemented = re.findall(
         r"^\s{4}[A-Z][A-Z0-9_]*\s*=\s*[\"'](?P<value>[a-z0-9_]+)[\"']",
         _enum_body(resolver_source, "ProcessV2AtomDeleteRejectionCode"),
@@ -1001,12 +1093,20 @@ def _chain_report(
     live: ValueIndex,
     base: ValueIndex,
     seeds: tuple[str, ...],
+    edges: tuple[PointerEdge, ...] = (),
 ) -> list[dict[str, Any]]:
     """Order the artifacts that pin a chain member, parents before children.
 
     Membership follows BASE values as well as live ones: an artifact whose pin is
     stale no longer matches any live value, and dropping it from the chain would
     hide exactly the artifacts that still need re-pinning.
+
+    It also follows discovered POINTER EDGES, which name their target
+    explicitly.  Value-matching alone loses an artifact whose pin resolves to
+    NOTHING -- neither a live nor a base value -- and that is precisely the worst
+    case, not a benign one: `editing_training_gate.py` held a value produced and
+    superseded inside a single re-pin pass, so it matched nothing, fell out of
+    the chain, and its genuine staleness was reported only as a warning.
     """
 
     pins: dict[str, set[str]] = {}
@@ -1016,6 +1116,9 @@ def _chain_report(
             if artifact == literal.relative_path:
                 continue
             pins.setdefault(literal.relative_path, set()).add(artifact)
+    for edge in edges:
+        if edge.target != edge.source:
+            pins.setdefault(edge.source, set()).add(edge.target)
     for pin in identity_pins:
         pins.setdefault(pin.relative_path, set()).update(IDENTITY_ARTIFACTS)
 
@@ -1129,7 +1232,9 @@ def main(argv: list[str] | None = None) -> int:
             literals.extend(_scan_json_literals(relative_path, payload))
             edges.extend(_pointer_edges(root, relative_path, payload))
         else:
-            literals.extend(_scan_python_literals(relative_path, raw.decode(errors="replace")))
+            text = raw.decode(errors="replace")
+            literals.extend(_scan_python_literals(relative_path, text))
+            edges.extend(_python_pointer_edges(root, relative_path, text))
 
     doc_literals: list[Literal] = []
     for path in doc_paths:
@@ -1182,6 +1287,7 @@ def main(argv: list[str] | None = None) -> int:
         live,
         base,
         seeds=(V1_CONTRACT_RELATIVE_PATH, V2_CONTRACT_RELATIVE_PATH, *IDENTITY_ARTIFACTS),
+        edges=tuple(edges),
     )
     members = frozenset(row["artifact"] for row in chain)
     findings = [finding.scoped(members) for finding in findings]
