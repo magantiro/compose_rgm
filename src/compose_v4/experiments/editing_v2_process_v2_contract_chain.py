@@ -1317,6 +1317,20 @@ def load_process_v2_chain_artifact(
 # ---- Dependency graph ----
 
 
+def process_v2_superseded_generations() -> tuple[tuple[int, str], ...]:
+    """Every superseded generation as ``(schema version, contract revision)``.
+
+    Public so a consumer counting lineage pointers -- the chain verifier's test
+    does -- can express "two per generation per artifact" rather than a literal
+    that silently becomes wrong the next time a generation is appended.
+    """
+
+    return tuple(
+        (schema_version, revision)
+        for schema_version, revision, _hashes in _SUPERSEDED_GENERATIONS
+    )
+
+
 def process_v2_dependency_edges() -> dict[str, dict[str, str]]:
     """The declared graph, as ``artifact -> {edge role: target}``."""
 
@@ -1637,6 +1651,7 @@ __all__ = [
     "process_v2_chain_self_hash",
     "process_v2_dependency_edges",
     "process_v2_generation_id",
+    "process_v2_superseded_generations",
     "process_v2_transitive_dependencies",
     "publish_process_v2_chain",
     "read_committed_generation",
