@@ -12,8 +12,8 @@
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_t1_capacity_policy",
-  "contract_revision": "process_v2_explicit_dependency_graph",
-  "contract_sha256": "17569116220ab424d5dbd4d9b3607b97f7156f16e1cfb9e08e9debf7e2f5b919",
+  "contract_revision": "process_v2_binding_v2_and_cumulative_design_lineage",
+  "contract_sha256": "913b9bd86deebce726b3e2e866cf54fff664847faa25c351528bd0fb70e29625",
   "empirical_repeated_state_gate": {
     "bounded_p50_capacity_prerequisite": false,
     "empirical_law_claims_authorized": false,
@@ -91,7 +91,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "507ae7eefe80a1c5502571610fcd4689c21831929b26b23898bd19040b14d03a",
+        "sha256": "344175f30a3c0ae13cb5d491ac0729b76c7ecfb6f4b82ccb15d3a41c8c900cd8",
         "target": "configs/editing_v2_process_v2_development_cell_roles.json",
         "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
       },
@@ -100,7 +100,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "4c8f9d5ca412b0ed8a39fe940bf534e2f3ee18d883a07b2a3cf704985e34b900",
+        "sha256": "a88086e6762bd55aa1a888752d7cb6dc87615055693e94c374d2e99c45ee8977",
         "target": "configs/editing_v2_process_v2_development_cell_roles.json",
         "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
       }
@@ -111,7 +111,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "d6b8fa91ec2ec821d5b6010b6d57e46ae392579f95fb778b55b8547414607d8d",
+        "sha256": "c14fd34b649a7581e93fcec317d8905a066017bb1817ae058c0148941be76658",
         "target": "configs/editing_v2_process_v2_gate_zero_structural.json",
         "target_schema": "compose.editing_v2.process_v2_gate_zero_structural"
       },
@@ -120,7 +120,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "06ac042507427ae622c5c8dc22f4ab47687800aa08e466a3c5f999557e364380",
+        "sha256": "b7d663ebd30d31051a5f01e08db15817b49f86f7a2ba0d7c4e7a3efc631fc042",
         "target": "configs/editing_v2_process_v2_gate_zero_structural.json",
         "target_schema": "compose.editing_v2.process_v2_gate_zero_structural"
       }
@@ -131,7 +131,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "9c5f2540686994a2d86e4d62a47a37b2986fbac1234bc89f08d01177a6f749e7",
+        "sha256": "7f81ce3313ccca8c1b2e9fa5c4ebd9039c17655f72c199a24a7df424c0dc5d64",
         "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
         "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
       },
@@ -140,7 +140,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "8cc3c39d47e55cc55df68900cbcc7c4f6a1beec1d9c02f0299a4aa14cafcb12b",
+        "sha256": "f6a305f2f652e3f411a8b0b8188203942c83e2fa279e56ef8b57c5febe47ba78",
         "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
         "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
       }
@@ -166,7 +166,7 @@
   ],
   "resolved_evidence_binding": {
     "cited_by_schema": "compose.editing_v2.process_v2.resolved_evidence_binding",
-    "cited_by_schema_version": 1,
+    "cited_by_schema_version": 2,
     "measured_evidence_in_this_contract": false
   },
   "sampling_law": {
@@ -180,35 +180,59 @@
     "target_coefficient": 1.0
   },
   "schema": "compose.editing_v2.process_v2_t1_capacity_policy",
-  "schema_version": 2,
+  "schema_version": 3,
   "shared_policy_registry": {
     "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
     "schema": "compose.editing_v2.shared_policy_registry",
     "schema_version": 1
   },
   "status": "FROZEN_PROCESS_V2_T1_CAPACITY_POLICY_NO_DOWNSTREAM_AUTHORITY",
-  "superseded_design_lineage": {
-    "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
-    "physical": {
-      "hash_algorithm": null,
-      "identity_role": "physical_sha256",
-      "kind": "lineage_reference",
-      "provider": "editing_v2_process_v2_contract_chain",
-      "sha256": "3465b0378894ba4ebe2545942eafbf5d2391bf6dc9620c9e4cb9e4648f1b700f",
-      "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
-      "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+  "superseded_design_lineage": [
+    {
+      "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "3465b0378894ba4ebe2545942eafbf5d2391bf6dc9620c9e4cb9e4648f1b700f",
+        "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+      },
+      "schema_version": 1,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
+        "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+      }
     },
-    "schema_version": 1,
-    "semantic": {
-      "hash_algorithm": "self_hash_field_v1",
-      "identity_role": "semantic_sha256",
-      "kind": "lineage_reference",
-      "provider": "editing_v2_process_v2_contract_chain",
-      "sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
-      "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
-      "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+    {
+      "contract_revision": "process_v2_explicit_dependency_graph",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "157820865031bde57e4e796fa7d07070d11f3e54c3979f166f455abe9c572ef1",
+        "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+      },
+      "schema_version": 2,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "17569116220ab424d5dbd4d9b3607b97f7156f16e1cfb9e08e9debf7e2f5b919",
+        "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+      }
     }
-  },
+  ],
   "support_time_hex": "0x1.0000000000000p-1",
   "t1_authorized": false,
   "thresholds": {

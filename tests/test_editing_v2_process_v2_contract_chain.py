@@ -67,6 +67,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     SELF_HASH_FIELD,
     SELF_HASH_FIELD_ALGORITHM,
     SUPERSEDED_CHAIN_CONTRACT_REVISION,
+    SUPERSEDED_CHAIN_CONTRACT_REVISION_V2,
     T1_CAPACITY_POLICY,
     T1_PANEL_POLICY,
     WHOLE_CANONICAL_BODY_ALGORITHM,
@@ -101,6 +102,18 @@ _FROZEN_V1_BASE_REVISION = "d5cfcaf"
 
 # The revision that sealed contract-chain schema version 1.
 _SUPERSEDED_CHAIN_REVISION = "3f3258e"
+
+# The revision that sealed contract-chain schema version 2.  Its bytes were
+# inherited unchanged at this branch's base, so `git show` at either address
+# yields the same seven artifacts.
+_SUPERSEDED_CHAIN_REVISION_V2 = "b39420c"
+
+# Every superseded generation, oldest first, as (schema version, revision that
+# sealed it, its named `contract_revision`).
+_SUPERSEDED_GENERATION_SOURCES: tuple[tuple[int, str, str], ...] = (
+    (1, _SUPERSEDED_CHAIN_REVISION, SUPERSEDED_CHAIN_CONTRACT_REVISION),
+    (2, _SUPERSEDED_CHAIN_REVISION_V2, SUPERSEDED_CHAIN_CONTRACT_REVISION_V2),
+)
 
 # The four frozen non-chain files the chain binds.  None of them is V1-named.
 _EXTERNAL_PARENTS: tuple[str, ...] = (
@@ -463,7 +476,7 @@ def test_the_added_edges_are_present_and_were_absent_in_schema_version_one() -> 
 def test_declaring_a_dependency_edge_required_a_new_schema_version() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         payload = _load(name)
-        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 2
+        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 3
         assert payload["contract_revision"] == CHAIN_CONTRACT_REVISION
 
 
@@ -481,33 +494,132 @@ def test_a_missing_dependency_edge_is_rejected() -> None:
 # ---- (f) superseded design lineage ----
 
 
-def test_every_artifact_preserves_its_version_one_hashes_as_lineage() -> None:
-    if not _revision_available(_SUPERSEDED_CHAIN_REVISION):
-        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION} is not reachable from this checkout")
+def test_every_artifact_preserves_every_superseded_generation_as_lineage() -> None:
+    """Both generations, recovered from git rather than restated here.
+
+    Version 2 recorded only version 1.  Had version 3 kept that shape it would
+    have dropped version 1 in order to record version 2, so the chain could no
+    longer say what a hash from two generations ago addressed.
+    """
+
+    unreachable = [
+        revision
+        for _version, revision, _named in _SUPERSEDED_GENERATION_SOURCES
+        if not _revision_available(revision)
+    ]
+    if unreachable:
+        pytest.skip(f"{unreachable} not reachable from this checkout")
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
-        raw = _git_show(_SUPERSEDED_CHAIN_REVISION, name)
-        assert raw is not None, name
         lineage = _load(name)["superseded_design_lineage"]
-        assert lineage["schema_version"] == 1
-        assert lineage["contract_revision"] == SUPERSEDED_CHAIN_CONTRACT_REVISION
-        assert lineage["physical"]["sha256"] == hashlib.sha256(raw).hexdigest(), name
-        assert lineage["semantic"]["sha256"] == json.loads(raw)[SELF_HASH_FIELD], name
-        for slot in ("physical", "semantic"):
-            assert lineage[slot]["kind"] == PointerKind.LINEAGE_REFERENCE
-            assert lineage[slot]["target"] == name
+        assert isinstance(lineage, list)
+        assert len(lineage) == len(_SUPERSEDED_GENERATION_SOURCES), name
+        for entry, (version, revision, named) in zip(
+            lineage, _SUPERSEDED_GENERATION_SOURCES, strict=True
+        ):
+            raw = _git_show(revision, name)
+            assert raw is not None, (name, revision)
+            assert entry["schema_version"] == version, name
+            assert entry["contract_revision"] == named, name
+            assert entry["physical"]["sha256"] == hashlib.sha256(raw).hexdigest(), name
+            assert entry["semantic"]["sha256"] == json.loads(raw)[SELF_HASH_FIELD], name
+            for slot in ("physical", "semantic"):
+                assert entry[slot]["kind"] == PointerKind.LINEAGE_REFERENCE
+                assert entry[slot]["target"] == name
+
+
+def test_the_lineage_is_ordered_oldest_first_and_precedes_the_live_version() -> None:
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        versions = [entry["schema_version"] for entry in _load(name)["superseded_design_lineage"]]
+        assert versions == sorted(versions), name
+        assert len(set(versions)) == len(versions), name
+        assert max(versions) < CHAIN_SCHEMA_VERSION, name
 
 
 def test_a_lineage_pointer_that_is_not_a_lineage_kind_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
-    payload["superseded_design_lineage"]["semantic"]["kind"] = PointerKind.REPOSITORY_CONFIG
+    payload["superseded_design_lineage"][0]["semantic"]["kind"] = PointerKind.REPOSITORY_CONFIG
     with pytest.raises(ProcessV2ChainError, match="must carry no currency claim"):
         validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
 
 
 def test_a_lineage_hash_equal_to_the_live_self_hash_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
-    payload["superseded_design_lineage"]["semantic"]["sha256"] = payload[SELF_HASH_FIELD]
+    payload["superseded_design_lineage"][-1]["semantic"]["sha256"] = payload[SELF_HASH_FIELD]
     with pytest.raises(ProcessV2ChainError, match="so it is not superseded"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_no_lineage_physical_hash_check_is_claimed_because_it_is_unfalsifiable() -> None:
+    """A negative result, pinned so it is not "fixed" back in.
+
+    A "lineage physical equals the live file hash" guard reads as the obvious
+    companion to the semantic one, and it was written and then removed. It cannot
+    be exercised: the pointer is part of the body that IS the file, so writing the
+    live physical hash into it changes the live physical hash, and a validator
+    recomputing the expectation from the payload under test compares the mutation
+    against itself. What actually refuses a physical lie is the target check.
+    """
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    live_physical_before = hashlib.sha256(
+        serialize_process_v2_chain_artifact(payload)
+    ).hexdigest()
+    payload["superseded_design_lineage"][0]["physical"]["sha256"] = live_physical_before
+    live_physical_after = hashlib.sha256(
+        serialize_process_v2_chain_artifact(payload)
+    ).hexdigest()
+    assert live_physical_after != live_physical_before, (
+        "the fixed point is unreachable, which is why no such guard is claimed"
+    )
+    # It still fails, on the deterministic rebuild, which is the honest reason.
+    with pytest.raises(ProcessV2ChainError, match="differs from the deterministic rebuild"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_duplicated_lineage_generation_is_rejected() -> None:
+    """Two generations that hash alike are one generation written twice."""
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    lineage = payload["superseded_design_lineage"]
+    lineage[1]["physical"]["sha256"] = lineage[0]["physical"]["sha256"]
+    with pytest.raises(ProcessV2ChainError, match="already recorded at"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_an_out_of_order_or_repeated_lineage_version_is_rejected() -> None:
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"] = list(
+        reversed(payload["superseded_design_lineage"])
+    )
+    with pytest.raises(ProcessV2ChainError, match="does not follow"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"][1]["schema_version"] = 1
+    with pytest.raises(ProcessV2ChainError, match="does not follow"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_lineage_entry_naming_the_live_revision_is_rejected() -> None:
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"][-1]["contract_revision"] = CHAIN_CONTRACT_REVISION
+    with pytest.raises(ProcessV2ChainError, match="is the live revision"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_dropped_lineage_generation_is_rejected() -> None:
+    """The specific regression: republishing while keeping only the last shape."""
+
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"] = payload["superseded_design_lineage"][-1:]
+    with pytest.raises(ProcessV2ChainError, match="records 1 generations"):
+        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+
+
+def test_a_lineage_entry_targeting_another_artifact_is_rejected() -> None:
+    payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
+    payload["superseded_design_lineage"][0]["semantic"]["target"] = GATE_ZERO_STRUCTURAL
+    with pytest.raises(ProcessV2ChainError, match="records its OWN superseded hashes"):
         validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
 
 
@@ -984,33 +1096,108 @@ def test_p50_recipe_policy_blocks_are_identical_to_v1() -> None:
         assert v2[field] == v1[field], field
 
 
-def test_no_policy_value_moved_between_schema_version_one_and_two() -> None:
-    """The version bump added edges and removed a dead slot. Nothing else."""
+_ENVELOPE_FIELDS = {
+    "admitted_source",
+    "contract_revision",
+    "parents",
+    "resolved_evidence_binding",
+    "schema_version",
+    "shared_policy_registry",
+    "superseded_design_lineage",
+    SELF_HASH_FIELD,
+}
+
+
+def test_no_policy_value_moved_across_any_schema_version() -> None:
+    """Every version bump moved the envelope only. No mirrored policy value.
+
+    Checked against BOTH superseded generations rather than only the oldest: a
+    value that moved at version 2 and moved back at version 3 would agree with
+    version 1 and still have been unstable, and a value that moved only at
+    version 3 is invisible in a version-1 comparison whose field set already
+    differs.
+    """
+
+    for _version, revision, _named in _SUPERSEDED_GENERATION_SOURCES:
+        if not _revision_available(revision):
+            pytest.skip(f"{revision} is not reachable from this checkout")
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        current = _load(name)
+        for version, revision, _named in _SUPERSEDED_GENERATION_SOURCES:
+            superseded = json.loads(_git_show(revision, name) or b"{}")
+            assert superseded["schema_version"] == version, (name, revision)
+            for field in sorted(set(current) & set(superseded) - _ENVELOPE_FIELDS):
+                assert current[field] == superseded[field], f"{name}.{field}@{revision}"
+
+
+def test_the_field_set_changed_only_where_a_version_bump_says_it_did() -> None:
+    """Version 1 -> 2 removed the dead slot and added three envelope fields.
+    Version 2 -> 3 changed no field at all: only their values moved."""
 
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION):
         pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION} is not reachable from this checkout")
-    envelope = {
-        "admitted_source",
-        "contract_revision",
-        "parents",
-        "resolved_evidence_binding",
-        "schema_version",
-        "shared_policy_registry",
-        "superseded_design_lineage",
-        SELF_HASH_FIELD,
-    }
+    if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V2):
+        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout")
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
-        superseded = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION, name) or b"{}")
         current = _load(name)
-        assert set(superseded) - set(current) == {"admitted_source"}, name
-        assert set(current) - set(superseded) == {
+        version_one = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION, name) or b"{}")
+        version_two = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V2, name) or b"{}")
+        assert set(version_one) - set(current) == {"admitted_source"}, name
+        assert set(current) - set(version_one) == {
             "contract_revision",
             "resolved_evidence_binding",
             "shared_policy_registry",
             "superseded_design_lineage",
         }, name
-        for field in sorted(set(current) & set(superseded) - envelope):
-            assert current[field] == superseded[field], f"{name}.{field}"
+        assert set(current) == set(version_two), name
+
+
+def test_version_three_changed_exactly_the_binding_version_and_the_lineage() -> None:
+    """The substantive delta, stated so a reviewer need not diff two generations."""
+
+    if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V2):
+        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout")
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        current = _load(name)
+        previous = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V2, name) or b"{}")
+        moved = {
+            field
+            for field in set(current) | set(previous)
+            if current.get(field) != previous.get(field)
+        }
+        # `parents` moves for any artifact with a chain-member parent, because a
+        # child pins its parent's FINAL bytes and every chain member was
+        # regenerated. It is checked below rather than excluded.
+        assert moved <= {
+            "contract_revision",
+            "parents",
+            "resolved_evidence_binding",
+            "schema_version",
+            "superseded_design_lineage",
+            SELF_HASH_FIELD,
+        }, (name, sorted(moved))
+        assert moved >= {
+            "contract_revision",
+            "resolved_evidence_binding",
+            "schema_version",
+            "superseded_design_lineage",
+            SELF_HASH_FIELD,
+        }, (name, sorted(moved))
+        assert previous["resolved_evidence_binding"]["cited_by_schema_version"] == 1
+        assert current["resolved_evidence_binding"]["cited_by_schema_version"] == 2
+
+        # The GRAPH did not move: same roles, same targets. Only the pinned hash
+        # of a regenerated chain-member parent may differ, and an external parent
+        # must be pinned identically because none of them was touched.
+        assert set(current["parents"]) == set(previous["parents"]), name
+        for role, edge in sorted(current["parents"].items()):
+            was = previous["parents"][role]
+            for slot in sorted(edge):
+                assert edge[slot]["target"] == was[slot]["target"], f"{name}:{role}"
+                if edge[slot]["target"] in PROCESS_V2_CHAIN_ARTIFACTS:
+                    assert edge[slot]["sha256"] != was[slot]["sha256"], f"{name}:{role}"
+                else:
+                    assert edge[slot] == was[slot], f"{name}:{role}.{slot}"
 
 
 # ---- The Gate-0 consumption boundary ----

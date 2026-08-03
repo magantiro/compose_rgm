@@ -57,8 +57,8 @@
   },
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_capability_cells",
-  "contract_revision": "process_v2_explicit_dependency_graph",
-  "contract_sha256": "b9ef14f32d83eaaae9c4ee3ac90121056b97a551199c8b96cbee6fd614d44068",
+  "contract_revision": "process_v2_binding_v2_and_cumulative_design_lineage",
+  "contract_sha256": "3891411db00387edebcc4d0770a4f5e4624535c1d58fa51e562dfe0441c12962",
   "exact_evidence_strata": {
     "canonical_successor_count": {
       "bins": [
@@ -228,11 +228,11 @@
   },
   "resolved_evidence_binding": {
     "cited_by_schema": "compose.editing_v2.process_v2.resolved_evidence_binding",
-    "cited_by_schema_version": 1,
+    "cited_by_schema_version": 2,
     "measured_evidence_in_this_contract": false
   },
   "schema": "compose.editing_v2.process_v2_capability_cells",
-  "schema_version": 2,
+  "schema_version": 3,
   "scope": {
     "formal_charge_changes": "out_of_scope_charge_preserving_only",
     "generated_object": "canonical_molecular_successor",
@@ -248,28 +248,52 @@
     "schema_version": 1
   },
   "status": "FROZEN_PROCESS_V2_SEMANTIC_CAPABILITY_CELLS_NO_DOWNSTREAM_AUTHORITY",
-  "superseded_design_lineage": {
-    "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
-    "physical": {
-      "hash_algorithm": null,
-      "identity_role": "physical_sha256",
-      "kind": "lineage_reference",
-      "provider": "editing_v2_process_v2_contract_chain",
-      "sha256": "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592",
-      "target": "configs/editing_v2_process_v2_capability_cells.json",
-      "target_schema": "compose.editing_v2.process_v2_capability_cells"
+  "superseded_design_lineage": [
+    {
+      "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592",
+        "target": "configs/editing_v2_process_v2_capability_cells.json",
+        "target_schema": "compose.editing_v2.process_v2_capability_cells"
+      },
+      "schema_version": 1,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
+        "target": "configs/editing_v2_process_v2_capability_cells.json",
+        "target_schema": "compose.editing_v2.process_v2_capability_cells"
+      }
     },
-    "schema_version": 1,
-    "semantic": {
-      "hash_algorithm": "self_hash_field_v1",
-      "identity_role": "semantic_sha256",
-      "kind": "lineage_reference",
-      "provider": "editing_v2_process_v2_contract_chain",
-      "sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
-      "target": "configs/editing_v2_process_v2_capability_cells.json",
-      "target_schema": "compose.editing_v2.process_v2_capability_cells"
+    {
+      "contract_revision": "process_v2_explicit_dependency_graph",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "42793cea4483e1ad9ebbd2e95315623dab2237b8f6354372c7a607c2409d8772",
+        "target": "configs/editing_v2_process_v2_capability_cells.json",
+        "target_schema": "compose.editing_v2.process_v2_capability_cells"
+      },
+      "schema_version": 2,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "b9ef14f32d83eaaae9c4ee3ac90121056b97a551199c8b96cbee6fd614d44068",
+        "target": "configs/editing_v2_process_v2_capability_cells.json",
+        "target_schema": "compose.editing_v2.process_v2_capability_cells"
+      }
     }
-  },
+  ],
   "t1_authorized": false,
   "training_authorized": false
 }
