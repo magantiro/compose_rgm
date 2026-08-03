@@ -29,6 +29,7 @@ Acceptance tests 7, 8 and 9 live here.  Tests 3, 4 and 5 are in
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import random
 import shutil
@@ -582,7 +583,9 @@ def test_a_missing_task_publishes_no_completion(chain: Chain) -> None:
 def test_an_extra_task_object_publishes_no_completion(chain: Chain) -> None:
     """Acceptance 9, extra. Without this an unplanned result could be counted."""
 
-    plan, _completion = run_active8(chain, prefix="/artifacts/active8_extra")
+    plan = active8_plan(chain, prefix="/artifacts/active8_extra")
+    write_process_v2_active8_plan(plan, artifact_root=chain.artifact_root, repo_root=ROOT)
+    execute_active8(chain, plan)
     task_root = mounted(chain, plan["run_artifact_root"]) / TASK_DIRNAME
     first = plan["tasks"][0]["task_identity_sha256"]
     shutil.copytree(task_root / first, task_root / ("f" * 64))
@@ -590,10 +593,22 @@ def test_an_extra_task_object_publishes_no_completion(chain: Chain) -> None:
         completed_process_v2_active8_task_ids(
             plan, artifact_root=chain.artifact_root, repo_root=ROOT
         )
+    with pytest.raises(ProcessV2Active8MapReduceError, match="unexpected objects"):
+        reduce_process_v2_active8_decisions(
+            plan, artifact_root=chain.artifact_root, repo_root=ROOT
+        )
+    assert not (mounted(chain, plan["run_artifact_root"]) / COMPLETION_FILENAME).exists()
 
 
 def test_a_duplicated_decision_row_publishes_no_completion(chain: Chain) -> None:
-    """Acceptance 9, duplicate. Without this one entry could be decided twice."""
+    """Acceptance 9, duplicate. Without this one entry could be decided twice.
+
+    The receipt is RESEALED around the tampered shard, so its physical and
+    stream hashes agree with the bytes on disk and the only thing left wrong is
+    that one entry index now appears twice.  Without the reseal the refusal
+    would come from the byte hash and this test would prove nothing about
+    duplication.
+    """
 
     plan = active8_plan(chain, prefix="/artifacts/active8_duplicate")
     write_process_v2_active8_plan(plan, artifact_root=chain.artifact_root, repo_root=ROOT)
@@ -601,8 +616,16 @@ def test_a_duplicated_decision_row_publishes_no_completion(chain: Chain) -> None
     output = mounted(chain, plan["tasks"][0]["output_artifact_path"])
     raw = gzip.decompress((output / DECISION_FILENAME).read_bytes())
     duplicated = raw + raw.splitlines(keepends=True)[0]
-    (output / DECISION_FILENAME).write_bytes(_gzip(duplicated))
-    with pytest.raises(ProcessV2Active8MapReduceError):
+    tampered = _gzip(duplicated)
+    (output / DECISION_FILENAME).write_bytes(tampered)
+    receipt = json.loads((output / RECEIPT_FILENAME).read_bytes())
+    body = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
+    body["decision_file_sha256"] = hashlib.sha256(tampered).hexdigest()
+    body["decision_stream_sha256"] = hashlib.sha256(duplicated).hexdigest()
+    (output / RECEIPT_FILENAME).write_bytes(
+        canonical_bytes({**body, "receipt_sha256": canonical_sha256(body)}) + b"\n"
+    )
+    with pytest.raises(ProcessV2Active8MapReduceError, match="exact task-address coverage"):
         reduce_process_v2_active8_decisions(
             plan, artifact_root=chain.artifact_root, repo_root=ROOT
         )
@@ -876,6 +899,36 @@ def _read_completion(chain: Chain) -> dict[str, Any]:
     return json.loads(
         (chain.payload.payload_root / MIGRATION_COMPLETION_FILENAME).read_bytes()
     )
+
+
+def test_the_census_guard_refuses_a_census_that_does_not_reconcile() -> None:
+    """Defence in depth, proven to refuse rather than to be a no-op.
+
+    Recorded honestly: real decision rows cannot violate this, because the row
+    census is derived one category at a time from the rows themselves. The guard
+    is therefore unreachable on a validated path, which is exactly why it needs a
+    direct test -- an unreachable guard that has been quietly deleted looks the
+    same as one that holds.
+    """
+
+    from compose_v4.data.editing_v2_process_v2_active8_mapreduce import (
+        _require_active8_census,
+    )
+
+    balanced = {field: 0 for field in COUNT_FIELDS}
+    balanced["source_entries"] = 3
+    balanced["active8_accepted_entries"] = 2
+    balanced["upstream_rejected_entries"] = 1
+    _require_active8_census(balanced, label="balanced fixture")
+
+    unbalanced = {**balanced, "active8_excluded_entries": 1}
+    with pytest.raises(ProcessV2Active8MapReduceError, match="does not reconcile"):
+        _require_active8_census(unbalanced, label="unbalanced fixture")
+
+    with pytest.raises(ProcessV2Active8MapReduceError, match="nonnegative integer"):
+        _require_active8_census(
+            {**balanced, "active8_accepted_entries": "2"}, label="coerced fixture"
+        )
 
 
 def test_the_active8_plan_and_completion_grant_nothing(chain: Chain) -> None:
