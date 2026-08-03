@@ -115,13 +115,16 @@ def test_an_omitted_top_level_authority_field_is_refused() -> None:
         require_authority_false(block, label="probe")
 
 
-def test_an_unregistered_authority_spelling_is_refused_by_the_vocabulary_free_guard() -> None:
+def test_an_out_of_vocabulary_authority_spelling_is_refused_by_the_free_guard() -> None:
     """The gap `require_authority_false` cannot close, by construction.
 
-    It judges only the names it knows, so a grant under a name nobody has
-    registered is invisible to it. `p500_authorized` is not a hypothetical: it
-    exists in this repository today, in a Process-V2 chain config and in several
-    Modal apps, in neither `AUTHORITY_FIELDS` nor `RETIRED_AUTHORITY_FIELDS`.
+    It judges only the names it knows. `AUTHORITY_FIELDS` is the vocabulary of
+    artifacts that must never grant, and it is deliberately not the only
+    authority vocabulary here: `p500_authorized` is a real stage field, declared
+    in the `p50_recipe_body` projection of the Process-V2 policy registry and
+    enforced by the P50 execution contract, and it is correctly absent from
+    `AUTHORITY_FIELDS`. Correctly absent is still invisible, so an artifact that
+    must not grant needs a guard that reads no vocabulary at all.
     """
 
     payload = {**authority_false_block(), "p500_authorized": True}

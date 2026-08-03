@@ -177,12 +177,21 @@ def require_no_granted_authority(payload: Mapping[str, Any], *, label: str) -> N
 
     * `require_authority_false` knows the vocabulary.  It refuses a retired
       spelling and requires all seven fields to be present, but it can only
-      judge the names it knows -- a field outside the vocabulary is invisible to
-      it.  `p500_authorized`, which exists in this repository today, is exactly
-      such a field.
+      judge the names it knows.  `AUTHORITY_FIELDS` is the vocabulary of
+      artifacts that must never grant; it is deliberately not the repository's
+      only authority vocabulary.  `p500_authorized`, for one, is a stage field
+      declared in the `p50_recipe_body` projection of the Process-V2 policy
+      registry and enforced by the P50 execution contract, and it is correctly
+      absent here.
     * this guard knows no vocabulary at all.  Any key ending `_authorized` whose
-      value is not exactly `False` is a refusal, so a grant under a name nobody
-      has registered yet is still caught.
+      value is not exactly `False` is a refusal, so a grant reaches a consumer
+      that must not honour it even under a name this module has never heard of.
+
+    USE IT ONLY ON AN ARTIFACT THAT MUST NOT GRANT: a prospective contract, a
+    resolved evidence binding, an identity descriptor.  A stage decision or
+    permit legitimately sets a field true -- a T1 decision grants
+    `bounded_p50_authorized` -- so pointing this guard at one would refuse the
+    artifact for doing its job.
 
     Depth matters for the same reason it does there: a descriptor is embedded
     verbatim inside a binding and inside the Active8 source identity, so the
