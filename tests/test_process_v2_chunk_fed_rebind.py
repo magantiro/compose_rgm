@@ -23,6 +23,7 @@ restart reuses only exact valid receipts.
 
 from __future__ import annotations
 
+import ast
 import gzip
 import json
 import random
@@ -49,6 +50,7 @@ from compose_v4.data.editing_process_v2_rebind import (
     plan_process_v2_rebind,
     reduce_process_v2_rebind,
     require_production_source_geometry,
+    validate_process_v2_rebind_plan,
     write_process_v2_rebind_plan,
 )
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
@@ -369,6 +371,65 @@ def test_no_task_of_the_production_geometry_opens_a_packed_shard(
     assert SEMANTIC_SHARD_FILENAME in opened
 
 
+def test_the_raw_range_reader_is_called_from_the_oracle_and_nowhere_else() -> None:
+    """A call-graph boundary, which no behavioural test can observe.
+
+    A module that reads the raw shard from a second place still computes the
+    right answer until the day someone routes production through it. The scan
+    is over the shipped source, so it holds at every commit, including one
+    written by someone who has not read this file.
+    """
+
+    module = Path(_REPO_ROOT / "src/compose_v4/data/editing_process_v2_rebind.py")
+    source = module.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    callers = sorted(
+        node.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and any(
+            isinstance(call.func, ast.Name)
+            and call.func.id == "read_semantic_packed_artifact_range_rows"
+            for call in ast.walk(node)
+            if isinstance(call, ast.Call)
+        )
+    )
+    assert callers == ["read_v1_records_through_the_bounded_raw_oracle"]
+
+    # And the oracle is not reachable from the production geometry: it is
+    # selected only in the ``else`` of the branch that tests for it.
+    prove = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_prove_entry_range"
+    )
+    geometry_branch = next(
+        node
+        for node in ast.walk(prove)
+        if isinstance(node, ast.If)
+        and isinstance(node.test, ast.Compare)
+        and isinstance(node.test.left, ast.Name)
+        and node.test.left.id == "source_geometry"
+        and any(
+            isinstance(comparator, ast.Name)
+            and comparator.id == "SOURCE_GEOMETRY_CACHE_CHUNK"
+            for comparator in node.test.comparators
+        )
+    )
+
+    def _names(nodes) -> set[str]:
+        return {
+            call.func.id
+            for statement in nodes
+            for call in ast.walk(statement)
+            if isinstance(call, ast.Call) and isinstance(call.func, ast.Name)
+        }
+
+    assert "read_v1_records_through_the_bounded_raw_oracle" not in _names(geometry_branch.body)
+    assert "_read_cache_chunk_rows" in _names(geometry_branch.body)
+    assert "read_v1_records_through_the_bounded_raw_oracle" in _names(geometry_branch.orelse)
+
+
 def test_an_oracle_artifact_is_refused_as_production_evidence(tmp_path: Path) -> None:
     payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
     cached_plan = _cache_fed_plan(payload, cache_plan)
@@ -391,6 +452,222 @@ def test_an_oracle_artifact_is_refused_as_production_evidence(tmp_path: Path) ->
 
 
 # ---- Acceptance test 14: schedule cannot change the artifact ------------------
+
+
+# ---- Plan-level guards, exercised through resealed plans ---------------------
+
+
+def _reseal_plan(plan: dict[str, Any], tasks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Rebuild a plan around mutated tasks, re-addressing each one.
+
+    The task identity and output path are re-derived from the plan's own
+    declared run identity, so the forged plan is internally consistent at every
+    level it declares and only the guard under test can refuse it.
+    """
+
+    run_identity = str(plan["run_identity_sha256"])
+    run_root = str(plan["run_artifact_root"])
+    address_fields = {"entry_start", "entry_stop"} | set(
+        key for key in tasks[0] if key.startswith(("cache_", "chunk_"))
+    )
+    rebuilt: list[dict[str, Any]] = []
+    for task in tasks:
+        body = {
+            key: value
+            for key, value in task.items()
+            if key not in {"task_identity_sha256", "output_artifact_path"}
+        }
+        identity = canonical_sha256({"run_identity_sha256": run_identity, "task": body})
+        rebuilt.append(
+            {
+                **body,
+                "task_identity_sha256": identity,
+                "output_artifact_path": f"{run_root}/{TASK_DIRNAME}/{identity}",
+            }
+        )
+    assert address_fields
+    body = {
+        **{key: value for key, value in plan.items() if key != "plan_sha256"},
+        "tasks": rebuilt,
+        "expected_task_count": len(rebuilt),
+        "task_inventory_sha256": canonical_sha256(rebuilt),
+    }
+    return {**body, "plan_sha256": canonical_sha256(body)}
+
+
+def test_a_task_naming_another_cache_generation_is_refused(tmp_path: Path) -> None:
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+    plan = _cache_fed_plan(payload, cache_plan)
+    tasks = [dict(task) for task in plan["tasks"]]
+    tasks[0]["cache_physical_identity_sha256"] = "0" * 64
+    with pytest.raises(ProcessV2RebindError, match="chunk of another cache generation"):
+        validate_process_v2_rebind_plan(
+            _reseal_plan(plan, tasks), repo_root=ROOT
+        )
+
+
+def test_a_plan_that_reads_one_cache_chunk_twice_is_refused(tmp_path: Path) -> None:
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+    plan = _cache_fed_plan(payload, cache_plan)
+    tasks = [dict(task) for task in plan["tasks"]]
+    donor, victim = tasks[0], next(
+        task
+        for task in tasks[1:]
+        if int(task["chunk_row_count"]) == int(tasks[0]["chunk_row_count"])
+        and task["cache_source_task_identity_sha256"]
+        != tasks[0]["cache_source_task_identity_sha256"]
+    )
+    # The victim keeps its own entry range, so the shard partitions still cover
+    # exactly; only the cache address repeats.
+    for field in (
+        "cache_source_artifact_path",
+        "cache_source_task_identity_sha256",
+        "cache_source_manifest_sha256",
+        "chunk_index",
+        "chunk_filename",
+        "chunk_file_sha256",
+        "chunk_uncompressed_sha256",
+    ):
+        victim[field] = donor[field]
+    with pytest.raises(ProcessV2RebindError, match="reads one cache chunk twice"):
+        validate_process_v2_rebind_plan(
+            _reseal_plan(plan, tasks), repo_root=ROOT
+        )
+
+
+def _plan_against_a_resealed_binding(payload, cache_plan, mutate):
+    """Plan the cache against a resealed V1 binding, so only the join can refuse.
+
+    ``validate_v1_semantic_payload_binding`` re-derives the binding's own census
+    and self-hash but reads no payload, so a resealed binding is accepted and
+    the cache-to-payload join is the next thing that can say no. That is exactly
+    the shape of a cache built against one payload and planned against another.
+    """
+
+    cache_binding = bind_process_v2_chunk_cache_generation(
+        str(cache_plan["run_artifact_root"]),
+        artifact_root=payload.artifact_root,
+        repo_root=ROOT,
+    )
+    process_identity, builder_identity = v1_fixture._pinned_identities()
+    binding = v1_fixture.bind_v1_semantic_payload(
+        payload_root_artifact_path=v1_fixture.PAYLOAD_ARTIFACT_PATH,
+        artifact_root=payload.artifact_root,
+        pinned_process_identity=process_identity,
+        pinned_builder_identity=builder_identity,
+    )
+    v1_tasks = [dict(task) for task in binding["v1_tasks"]]
+    mutate(v1_tasks)
+    body = {
+        **{key: value for key, value in binding.items() if key != "binding_sha256"},
+        "v1_tasks": v1_tasks,
+        "v1_tasks_sha256": canonical_sha256(v1_tasks),
+        "v1_entry_count": sum(int(task["v1_entries"]) for task in v1_tasks),
+    }
+    return plan_process_v2_rebind(
+        {**body, "binding_sha256": canonical_sha256(body)},
+        source_revision=v1_fixture._source_revision(),
+        repo_root=ROOT,
+        pinned_process_identity=process_identity,
+        pinned_builder_identity=builder_identity,
+        cache_binding=cache_binding,
+        output_artifact_prefix="/artifacts/chunk_fed_rebind",
+        entries_per_task=RECORDS_PER_CHUNK,
+    )
+
+
+def test_a_cache_that_does_not_cover_every_v1_row_is_refused(tmp_path: Path) -> None:
+    """The join is a bijection over rows, not merely over task identities."""
+
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+
+    def claim_one_more_record(v1_tasks: list[dict[str, Any]]) -> None:
+        v1_tasks[0]["v1_entries"] = int(v1_tasks[0]["v1_entries"]) + 1
+
+    with pytest.raises(ProcessV2RebindError, match="which declares"):
+        _plan_against_a_resealed_binding(payload, cache_plan, claim_one_more_record)
+
+
+def test_a_task_size_other_than_the_cache_chunk_size_is_refused(tmp_path: Path) -> None:
+    """The chunk boundary is the task boundary, so the size is not a free dial."""
+
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+    cache_binding = bind_process_v2_chunk_cache_generation(
+        str(cache_plan["run_artifact_root"]),
+        artifact_root=payload.artifact_root,
+        repo_root=ROOT,
+    )
+    process_identity, builder_identity = v1_fixture._pinned_identities()
+    binding = v1_fixture.bind_v1_semantic_payload(
+        payload_root_artifact_path=v1_fixture.PAYLOAD_ARTIFACT_PATH,
+        artifact_root=payload.artifact_root,
+        pinned_process_identity=process_identity,
+        pinned_builder_identity=builder_identity,
+    )
+    with pytest.raises(ProcessV2RebindError, match="not the cache's chunk size"):
+        plan_process_v2_rebind(
+            binding,
+            source_revision=v1_fixture._source_revision(),
+            repo_root=ROOT,
+            pinned_process_identity=process_identity,
+            pinned_builder_identity=builder_identity,
+            cache_binding=cache_binding,
+            output_artifact_prefix="/artifacts/chunk_fed_rebind",
+            entries_per_task=RECORDS_PER_CHUNK + 1,
+        )
+
+
+def test_a_published_result_that_relabels_its_geometry_is_refused(tmp_path: Path) -> None:
+    """The published manifest and receipt must agree on where the rows came from."""
+
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+    plan = _cache_fed_plan(payload, cache_plan)
+    _execute_and_reduce(payload, plan)
+    output = _task_output(payload, plan["tasks"][2])
+
+    manifest_path = output / MANIFEST_FILENAME
+    original = manifest_path.read_bytes()
+    manifest = json.loads(original)
+    manifest["source_geometry"] = SOURCE_GEOMETRY_V1_ENTRY_RANGE
+    body = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
+    manifest_path.write_bytes(
+        canonical_bytes({**body, "manifest_sha256": canonical_sha256(body)}) + b"\n"
+    )
+    with pytest.raises(ProcessV2RebindError, match="does not bind its receipt"):
+        completed_process_v2_rebind_task_ids(
+            plan, artifact_root=payload.artifact_root, repo_root=ROOT
+        )
+    manifest_path.write_bytes(original)
+
+    manifest = json.loads(original)
+    manifest["task_source_binding"] = {
+        **manifest["task_source_binding"],
+        "chunk_index": 999,
+    }
+    body = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
+    manifest_path.write_bytes(
+        canonical_bytes({**body, "manifest_sha256": canonical_sha256(body)}) + b"\n"
+    )
+    with pytest.raises(ProcessV2RebindError, match="does not bind its receipt"):
+        completed_process_v2_rebind_task_ids(
+            plan, artifact_root=payload.artifact_root, repo_root=ROOT
+        )
+    manifest_path.write_bytes(original)
+    assert completed_process_v2_rebind_task_ids(
+        plan, artifact_root=payload.artifact_root, repo_root=ROOT
+    )
+
+
+def test_a_cache_of_another_shard_for_the_same_task_is_refused(tmp_path: Path) -> None:
+    """Same V1 task identity, different packed shard: still not this payload."""
+
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+
+    def relabel_the_shard(v1_tasks: list[dict[str, Any]]) -> None:
+        v1_tasks[0]["v1_semantic_shard_sha256"] = "0" * 64
+
+    with pytest.raises(ProcessV2RebindError, match="semantic_shard_sha256"):
+        _plan_against_a_resealed_binding(payload, cache_plan, relabel_the_shard)
 
 
 @pytest.mark.parametrize("max_map_containers", [1, 20, 40])

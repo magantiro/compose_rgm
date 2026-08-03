@@ -1802,6 +1802,12 @@ def validate_process_v2_rebind_plan(value: object, *, repo_root: Path) -> dict[s
             ranges,
             entries=int(v1_tasks[identity]["v1_entries"]),
         )
+    # Defence in depth, and known to be unreachable while its two neighbours
+    # hold: a dropped task leaves a gap in the shard's range partition, an extra
+    # task either repeats a chunk address or splits a chunk's range, and each of
+    # those is refused above. Kept so that weakening either neighbour surfaces
+    # here instead of silently proving a subset. Recorded rather than removed,
+    # and reported as a surviving mutation rather than presented as covered.
     if cache_binding is not None and len(tasks) != int(cache_binding["chunk_count"]):
         raise ProcessV2RebindError(
             f"the rebind plan names {len(tasks)} tasks and the bound cache holds "

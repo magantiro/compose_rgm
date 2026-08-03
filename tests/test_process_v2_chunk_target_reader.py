@@ -25,6 +25,8 @@ reconstruction cannot reproduce the persisted slot layout.
 from __future__ import annotations
 
 import gzip
+import hashlib
+import io
 import json
 import sys
 from pathlib import Path
@@ -37,6 +39,7 @@ from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     ProcessV2ChunkCacheError,
     ProcessV2ChunkTarget,
     execute_process_v2_chunk_cache_task,
+    iter_process_v2_chunk_target_rows,
     open_process_v2_chunk_cache,
     plan_process_v2_chunk_cache,
     read_process_v2_chunk_target,
@@ -44,6 +47,7 @@ from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     validate_process_v2_chunk_cache_source,
     write_process_v2_chunk_cache_plan,
 )
+from compose_v4.data.editing_v2_process_v2_schema import canonical_bytes, canonical_sha256
 from compose_v4.data.semantic_packed_trace_store import (
     read_semantic_packed_artifact_range_rows,
 )
@@ -135,6 +139,16 @@ class _OpenRecorder:
     @property
     def names(self) -> set[str]:
         return {path.name for path in self.paths}
+
+
+def _deterministic_gzip(rows) -> bytes:
+    """The cache's own chunk encoding, so a rewritten chunk is still a chunk."""
+
+    output = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=output, mtime=0) as handle:
+        for row in rows:
+            handle.write(row)
+    return output.getvalue()
 
 
 def _row_projection(row) -> dict[str, Any]:
@@ -293,6 +307,78 @@ def test_a_target_naming_another_chunks_hash_is_refused(tmp_path: Path) -> None:
     )
     with pytest.raises(ProcessV2ChunkCacheError, match="not the one the target binds"):
         list(read_process_v2_chunk_target(source_dir, target=foreign))
+
+
+def test_a_chunk_whose_decompressed_stream_is_not_its_declared_one_is_refused(
+    tmp_path: Path,
+) -> None:
+    """The uncompressed digest is a separate proof from the physical one.
+
+    Found by mutation: bypassing it left every focused suite green, because the
+    only tampering the suite performed changed the compressed bytes and so was
+    caught one check earlier. The reachable witness is a manifest resealed with
+    a wrong ``uncompressed_sha256`` over an untouched chunk file -- a publisher
+    that computed the record-stream digest wrongly, or a gzip that decompresses
+    to something other than what was hashed at build time.
+    """
+
+    payload, _plan, generation = _built_cache(tmp_path)
+    target = generation.targets()[0]
+    source_dir = _mounted(payload, target.source_artifact_path)
+
+    manifest = json.loads((source_dir / MANIFEST_FILENAME).read_bytes())
+    manifest["chunks"][target.chunk_index]["uncompressed_sha256"] = "0" * 64
+    manifest["chunk_inventory_sha256"] = canonical_sha256(
+        [dict(chunk) for chunk in manifest["chunks"]]
+    )
+    body = {key: item for key, item in manifest.items() if key != "manifest_sha256"}
+    resealed = {**body, "manifest_sha256": canonical_sha256(body)}
+    (source_dir / MANIFEST_FILENAME).write_bytes(canonical_bytes(resealed) + b"\n")
+
+    # The target is rebuilt from the resealed manifest, so the binding agrees
+    # and only the stream digest can refuse the read.
+    retargeted = ProcessV2ChunkTarget(
+        **{
+            **target.__dict__,
+            "cache_source_manifest_sha256": resealed["manifest_sha256"],
+            "chunk_uncompressed_sha256": "0" * 64,
+        }
+    )
+    assert (source_dir / target.chunk_filename).exists()
+    with pytest.raises(ProcessV2ChunkCacheError, match="record bytes disagree"):
+        list(read_process_v2_chunk_target(source_dir, target=retargeted))
+
+
+def test_a_target_chunk_missing_rows_is_refused_by_its_row_count(tmp_path: Path) -> None:
+    payload, _plan, generation = _built_cache(tmp_path)
+    target = generation.targets()[0]
+    source_dir = _mounted(payload, target.source_artifact_path)
+
+    rows = list(iter_process_v2_chunk_target_rows(source_dir, target=target))
+    assert len(rows) == target.row_count >= 2
+    truncated = _deterministic_gzip(row[1] for row in rows[:-1])
+    chunk_path = source_dir / target.chunk_filename
+    chunk_path.write_bytes(truncated)
+
+    manifest = json.loads((source_dir / MANIFEST_FILENAME).read_bytes())
+    chunk = manifest["chunks"][target.chunk_index]
+    chunk["chunk_file_sha256"] = hashlib.sha256(truncated).hexdigest()
+    manifest["chunk_inventory_sha256"] = canonical_sha256(
+        [dict(entry) for entry in manifest["chunks"]]
+    )
+    body = {key: item for key, item in manifest.items() if key != "manifest_sha256"}
+    resealed = {**body, "manifest_sha256": canonical_sha256(body)}
+    (source_dir / MANIFEST_FILENAME).write_bytes(canonical_bytes(resealed) + b"\n")
+
+    retargeted = ProcessV2ChunkTarget(
+        **{
+            **target.__dict__,
+            "cache_source_manifest_sha256": resealed["manifest_sha256"],
+            "chunk_file_sha256": chunk["chunk_file_sha256"],
+        }
+    )
+    with pytest.raises(ProcessV2ChunkCacheError, match="rows, its manifest declares"):
+        list(read_process_v2_chunk_target(source_dir, target=retargeted))
 
 
 def test_a_tampered_target_chunk_is_refused_by_its_own_hash(tmp_path: Path) -> None:

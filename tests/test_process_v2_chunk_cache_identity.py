@@ -269,6 +269,29 @@ def test_a_resealed_chunk_inventory_fails_its_inventory_hash(tmp_path: Path) -> 
         validate_process_v2_chunk_cache_manifest(resealed)
 
 
+def test_a_resealed_entry_census_fails_its_chunk_cover(tmp_path: Path) -> None:
+    """``entries`` is re-derived from the address space the chunks cover.
+
+    Found by mutation: bypassing this check left every focused suite green, so
+    a manifest could declare a census its own chunks do not add up to -- which
+    is exactly how a cache silently reduces a corpus.
+    """
+
+    payload, plan, _completion = _built_cache(tmp_path)
+    source_dir = _run_root(payload, plan) / SOURCE_DIRNAME / plan["tasks"][0][
+        "task_identity_sha256"
+    ]
+
+    def inflate(manifest: dict[str, Any]) -> None:
+        manifest["entries"] = int(manifest["entries"]) + 1
+
+    resealed = _rewrite_manifest(source_dir, inflate)
+    with pytest.raises(ProcessV2ChunkCacheError, match="does not cover its entries"):
+        validate_process_v2_chunk_cache_manifest(resealed)
+    with pytest.raises(ProcessV2ChunkCacheError, match="does not cover its entries"):
+        validate_process_v2_chunk_cache_source(source_dir)
+
+
 def test_a_resealed_chunk_partition_fails_the_chunking_rule(tmp_path: Path) -> None:
     """A contiguous address space is not enough; the chunk size is a rule."""
 
