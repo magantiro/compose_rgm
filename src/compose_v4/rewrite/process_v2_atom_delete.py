@@ -81,12 +81,21 @@ to rediscover:
   diagnostic field are retained: the field is populated for every real slot
   independently of which gate fired, so an articulation exclusion is still
   observable, and the gate remains correct if connectivity semantics ever move.
-* ``EXECUTOR_REJECTED``, ``SUCCESSOR_OUTSIDE_SUPPORT`` and
-  ``SUCCESSOR_NOT_CANONICALIZABLE`` never fire on the Jin-QED lead panel, because
-  deleting an atom preserves each surviving neighbour's class valence.  They are
-  defence in depth, and each has a reachable constructed witness in
-  ``tests/test_process_v2_atom_delete_gates.py`` so that none of them is a gate
-  no test can fail on.
+* ``EXECUTOR_REJECTED`` and ``SUCCESSOR_OUTSIDE_SUPPORT`` never fire on the
+  Jin-QED lead panel, because deleting an atom preserves each surviving
+  neighbour's class valence.  They are defence in depth, and each has a
+  reachable constructed witness in ``tests/test_process_v2_atom_delete_gates.py``
+  (``C1CC[SH4]CC1`` and a 42-membered carbocycle) so that neither is a gate no
+  test can fail on.
+* ``SUCCESSOR_NOT_CANONICALIZABLE`` is **unreachable behind gate 2**, and has no
+  witness.  Gate 2's :func:`is_valid_atom_delete` calls ``is_valid_state`` ->
+  ``is_rdkit_valid``, which is true only when ``molecular_graph_to_smiles``
+  returns a string; gate 6's :func:`canonical_state_key` raises only when that
+  same call returns ``None``, and returns ``"<NULL>"`` for the empty successor.
+  So a successor that reached gate 6 always has a canonical key.  The gate is
+  retained for the same reason as ``ARTICULATION_POINT`` -- it stays correct if
+  either predicate is ever reparameterised -- but this file does not claim it is
+  tested, because no test can currently fail on it.
 
 Diagnostic fields (``real_degree``, ``candidate_source``,
 ``semantic_aromatic_atom``, ``articulation_point``, ``scar_incident``) describe
@@ -97,6 +106,7 @@ admission, so ``admitted`` is equivalent to ``successor is not None``.
 
 from __future__ import annotations
 
+import numbers
 from dataclasses import dataclass
 from enum import Enum
 
@@ -366,6 +376,26 @@ def resolve_process_v2_atom_delete(
     charge, support, and canonicalization predicates as connected-nonleaf slots.
     """
 
+    # The action type is settled BEFORE its payload is read.  `int(action.v)`
+    # coerces, so a float or bool slot used to be silently truncated to a
+    # neighbouring integer and then admitted, and this function is the single
+    # admission authority: it must decide the action it was given, not a
+    # coerced neighbour of it.  `numbers.Integral` rather than `int` because a
+    # slot legitimately arrives as `np.int64` from `np.flatnonzero`; `bool` is
+    # excluded explicitly, since it IS integral and `AtomDelete(True)` is a
+    # caller error rather than a request to delete slot 1.
+    if (
+        type(action) is not AtomDelete
+        or isinstance(action.v, bool)
+        or not isinstance(action.v, numbers.Integral)
+    ):
+        return _resolved(
+            ProcessV2AtomDeleteRejectionCode.INVALID_SOURCE
+            if not is_valid_state(state) or not is_connected_or_null(state)
+            else ProcessV2AtomDeleteRejectionCode.INVALID_SLOT,
+            slot=-1,
+            context=None,
+        )
     slot = int(action.v)
     if not is_valid_state(state) or not is_connected_or_null(state):
         return _resolved(
@@ -374,7 +404,7 @@ def resolve_process_v2_atom_delete(
             context=None,
         )
     context = _state_context(state)
-    if type(action) is not AtomDelete or not 0 <= slot < state.n_atoms:
+    if not 0 <= slot < state.n_atoms:
         # The slot cannot index the state-level diagnostic arrays, so only the
         # source key is reportable.
         return _resolved(

@@ -175,6 +175,42 @@ def test_process_v2_mask_matches_a_frozen_literal_expectation() -> None:
     assert gained == 37, gained
 
 
+def test_a_malformed_action_payload_is_refused_rather_than_coerced() -> None:
+    """The authority must decide the action it was given, not a coerced one.
+
+    ``int(action.v)`` used to run before the type check, so ``AtomDelete(1.9)``
+    and ``AtomDelete(True)`` were truncated to slot 1 and ADMITTED. A caller
+    that then executed their own object would hit the executor with a payload
+    the authority never actually approved.
+
+    ``np.int64`` must keep working: slots arrive that way from
+    ``np.flatnonzero`` throughout this codebase, so rejecting every non-``int``
+    would be a different defect.
+    """
+
+    state = _state("C1CCCCC1", 12)
+
+    assert resolve_process_v2_atom_delete(state, AtomDelete(1)).admitted
+    assert resolve_process_v2_atom_delete(state, AtomDelete(np.int64(1))).admitted
+
+    class _AtomDeleteSubclass(AtomDelete):
+        pass
+
+    for action in (
+        AtomDelete(1.9),
+        AtomDelete(1.0),
+        AtomDelete(True),
+        _AtomDeleteSubclass(1),
+    ):
+        resolution = resolve_process_v2_atom_delete(state, action)
+        assert not resolution.admitted, action
+        assert resolution.rejection_code is ProcessV2AtomDeleteRejectionCode.INVALID_SLOT
+        # -1 records that no slot was ever resolved, so the report cannot be
+        # mistaken for a decision about slot 1.
+        assert resolution.slot == -1, action
+        assert resolution.successor is None
+
+
 def test_the_retracted_round_one_mode_string_does_not_survive() -> None:
     """The old mode name falsely implies inherited candidates are unfiltered.
 
