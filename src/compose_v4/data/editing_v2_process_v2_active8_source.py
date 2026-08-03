@@ -63,6 +63,12 @@ upstream-rejected trace cannot be candidate-evaluated by a consumer that forgot
 to check the category.  Active8's own exclusions are a different category and
 belong to the Active8 stage, not here.
 
+Against :data:`ACTIVE8_CENSUS_IDENTITY`, this source supplies the left side and
+one of the three terms on the right: ``source_entries`` is ``source_entries``,
+``rejected_entries`` is ``upstream_rejected_entries``, and ``admitted_entries``
+is the candidate pool the Active8 stage partitions into its accepted and
+excluded counts.
+
 Schema version 3: the source of the inventory moved
 ---------------------------------------------------
 
