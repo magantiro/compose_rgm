@@ -250,6 +250,78 @@ critical path.
     one row. That all-or-nothing property is what makes the list derivable rather
     than merely checkable.
 
+## The classifier extraction: easy move, and a re-pin machinery that is unsound
+
+Workstream `w2c/classifier` (commit `65f8c5d`) completed the extraction and
+deliberately did NOT land the re-pin. The registry now refuses loudly --
+`semantic capability registry bindings have drifted` -- rather than carrying a
+partial, silently stale pin.
+
+**The extraction is easy and safe.** A byte-exact move: all 13,937 moved
+characters appear verbatim in the leaf and are gone from the original, whose
+remaining 68,912 characters are byte-identical to base. All 12 names satisfy
+`cells.X is leaf.X`, and a leaf-raised error is catchable through the original
+module's class object. Differential over real chemistry -- 100 Jin QED leads plus
+a 20-molecule edge panel, **33,365 recorded calls**, all 8 families, all 22
+contexts, 23 distinct refusal messages -- **identical value for value and
+exception for exception**, against a baseline first proven deterministic across
+two runs.
+
+**The re-pin is the expensive part, and it is worse than the two-lineage count
+suggested: 19 discoverable artifacts across 4 layers, plus 1 the closure
+structurally cannot see.** The prior precedent in `learnings.md` records nine
+artifacts plus four source constants (13); this is 20, spanning both lineages and
+reaching into the training gate.
+
+### Three findings that outlive this branch
+
+**A. The two lineages are not independent.** One source edit hits both at layer 1:
+the V1 registry moves because it pins the classifier's file hash, and
+`configs/editing_v2_process_v2_capability_cells.json` moves independently because
+the chain declares the classifier module as a parent edge. They then RE-CONVERGE,
+because `FROZEN_POLICY_SOURCES["capability_cells"]` pins the V1 registry's file
+hash *and* self-hash -- so **the Process-V2 chain depends on the V1 artifact it is
+meant to supersede.**
+
+**B. A pin no discovery mechanism can see.** All seven chain artifacts embed
+`shared_policy_registry.registry_identity_sha256`, one COMPUTED value that moves
+whenever `FROZEN_POLICY_SOURCES` moves. It is not any file's hash, so it is absent
+from the value index, and `editing_v2_process_v2_active8_decision_runtime.json`
+never appears in the closure even though it must be rebuilt. Six of seven chain
+artifacts are discoverable; the seventh only by knowing the builder.
+
+**C. The structural pointer scanner misses the ORIGINATING pin entirely.**
+`verify_process_v2_hash_chain._pointer_edges` requires `sibling.startswith(key)`,
+and here `key = "classifier_implementation_file"` while
+`sibling = "classifier_implementation_sha256"` --
+`"classifier_implementation_sha256".startswith("classifier_implementation_file")`
+is **False**. Structural discovery seeded at the classifier module returns **0**
+consumers; seeded at the V1 registry it returns **2 of 19**.
+
+**The fixed-point driver over structural pin discovery that `learnings.md`
+prescribes would have found essentially none of this cascade.** The value-based
+sweep is the one that works here, and it carries the blind spot in finding B.
+**Neither method alone is sound. A correct re-pin needs both, plus the builder's
+knowledge.** That supersedes the 2026-08-02 guidance, which named only the
+structural method.
+
+### A binding-shape decision the re-pin cannot avoid
+
+After the move, the V1 registry's `classifier_implementation_sha256` would pin a
+file that no longer contains the classifier. `_BINDING_FIELDS` is an exact field
+set and `classifier_implementation_file` is compared against a hard-coded path, so
+the pin cannot be widened to cover the leaf without a **registry schema change**.
+Whoever finishes this must decide: accept a pin covering only the re-export shim,
+or change the binding shape.
+
+### 14. The actionable conclusion
+
+**The cost is in the binding topology, not the code.** Extract a leaf-shaped
+classifier BEFORE anything pins the module by file hash, and the same move costs
+one file and zero re-pins. Leave it pinned by physical hash from a frozen V1
+artifact that a shared policy registry re-pins by both physical and self-hash, and
+**every future edit to it, however trivial, pays this 20-artifact, 4-layer toll.**
+
 ## State at this checkpoint
 
 Focused: `tests/test_process_v2_end_to_end_gate_zero.py` **19 passed**.
@@ -274,7 +346,7 @@ Both scientific identities are unchanged: V1
 
 ## Not completed here
 
-The classifier extraction and its binding cascade were in flight when this branch
-was retired; findings are on `w2c/classifier`. The Active8 evidence work completed
+The classifier extraction completed and is summarised above, on `w2c/classifier`;
+its re-pin cascade was deliberately NOT landed. The Active8 evidence work completed
 and is summarised above, on `w2c/evidence`. The bounded re-enumeration sentinel
 was not written.
