@@ -548,13 +548,11 @@ def _teacher_failures(
     # those marks, and the matching mark lies inside the teacher's own fiber.
     if not 1 <= aliases <= raw or successors > raw or matching > aliases:
         failed.append("has_exact_successor_alias_aggregation")
-    if any(
-        stratum_for(_require_count(transition[count_field], field=count_field), bins)
-        != transition[stratum_field]
-        for count_field, stratum_field, _row_field in _STRATUM_FIELDS
-        for bins in (contract.strata_bins[count_field],)
-    ):
-        failed.append("declares_the_frozen_evidence_strata")
+    for count_field, stratum_field, _row_field in _STRATUM_FIELDS:
+        observed = _require_count(transition[count_field], field=count_field)
+        if stratum_for(observed, contract.strata_bins[count_field]) != transition[stratum_field]:
+            failed.append("declares_the_frozen_evidence_strata")
+            break
     try:
         aliased = canonical_family(str(transition["executor_rule"]))
     except ActionCodecV4Error:
@@ -808,10 +806,14 @@ def build_process_v2_gate_zero_evidence(
         ):
             cell_row[field] = dict(sorted(cell_row[field].items()))
 
+    # One call: four separate calls could interleave four different answers, and
+    # a census reconciled across inconsistent snapshots reconciles nothing.
+    published_counts = dict(index.counts())
     census = {
-        field: _require_count(index.counts().get(field), field=f"index census {field}")
+        field: _require_count(published_counts.get(field), field=f"index census {field}")
         for field in ACTIVE8_CENSUS_FIELDS
     }
+    live_process_identity = str(editing_process_v2_identity()["process_identity_sha256"])
     empty = {
         role: tuple(
             cell_id for cell_id in ids if cell_rows[cell_id]["teacher_count"] == 0
@@ -829,8 +831,7 @@ def build_process_v2_gate_zero_evidence(
         "decision_runtime_identity_bound": True,
         "semantic_model_process_identity_bound": True,
         "process_identity_matches_live_process_v2": (
-            index.process_identity_sha256
-            == str(editing_process_v2_identity()["process_identity_sha256"])
+            index.process_identity_sha256 == live_process_identity
         ),
         "decision_eligible_roles_bound": contract.decision_roles == ("train",),
         "sealed_nondecision_roles_not_disclosed": all(
