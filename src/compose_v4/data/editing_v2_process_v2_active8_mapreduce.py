@@ -25,6 +25,22 @@ WHAT A TASK PROVES, PER ENTRY
 5. the four candidate counts -- raw marks, canonical successors, matching marks
    and successor aliases -- survive to the published row unaggregated.
 
+A SELF-HASH IS NOT EVIDENCE
+--------------------------
+Every published object here is self-hashed, and a self-hash proves only that the
+object was not edited after it was sealed -- never that it was true when it was
+sealed.  Content hashes are not signatures and no amount of extra hashing would
+make them into one; the threat worth defending against is evidence that was
+corrupted, stale, incorrectly produced or incorrectly sealed, and the only
+answer to that is re-derivation.  So no aggregate here is read: every row's five
+candidate totals, its action-family histogram, its exclusion list and its
+exclusion-reason histogram are RE-DERIVED from that row's own per-action
+evidence, and the stored values are then required to equal the derivation.  An
+ACCEPTED row whose evidence says ``supported == false``, or carries an exclusion
+reason, is a contradiction and is refused by name.  The semantic re-derivation of
+the evidence itself -- through the one bound production candidate evaluator --
+belongs to the decision index, which is where a model exists.
+
 THE CENSUS IS THE SEAM'S, EXACTLY
 ---------------------------------
 ``source_entries == upstream_rejected_entries + active8_accepted_entries +
@@ -59,7 +75,9 @@ import shutil
 import tempfile
 from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import fields as dataclass_fields
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
@@ -95,9 +113,20 @@ from compose_v4.data.editing_v2_process_v2_active8_interfaces import (
     UPSTREAM_REJECTED,
 )
 from compose_v4.data.editing_v2_process_v2_active8_policy import (
+    DYNAMIC_EXCLUSION_REASONS,
+    DYNAMIC_EXCLUSION_STAGE,
+    REASON_MARK_ABSENT,
+    REASON_MARK_NOT_EXACT,
+    REASON_SUCCESSOR_ABSENT,
+    REASON_SUCCESSOR_VIRTUAL,
+    STATIC_EXCLUSION_REASONS,
+    STATIC_EXCLUSION_STAGE,
+    ProcessV2Active8Exclusion,
     ProcessV2Active8Policy,
     ProcessV2Active8PolicyError,
     ProcessV2Active8TraceDecision,
+    ProcessV2ActionClassification,
+    ProcessV2CandidateEvidence,
     ProcessV2ProductionCandidateChecker,
     build_process_v2_active8_policy,
     evaluate_process_v2_active8_trace,
@@ -189,6 +218,67 @@ COUNT_FIELDS: tuple[str, ...] = (
     "successor_alias_multiplicity",
 )
 _CANDIDATE_TOTAL_FIELDS: tuple[str, ...] = COUNT_FIELDS[-5:]
+
+#: Which per-action evidence count each row total sums.  ONE mapping, used both
+#: to build a row and to re-derive it on read, so an aggregate and the evidence
+#: it summarises cannot come to mean different things.
+CANDIDATE_TOTAL_SOURCE: Mapping[str, str] = MappingProxyType(
+    {
+        "raw_candidate_marks": "raw_mark_count",
+        "canonical_candidate_successors": "canonical_successor_count",
+        "matching_candidate_marks": "matching_mark_count",
+        "exact_successor_candidate_marks": "exact_successor_mark_count",
+        "successor_alias_multiplicity": "successor_alias_count",
+    }
+)
+
+#: Read off the frozen dataclasses rather than restated, so a field added to the
+#: evidence, the classification or an exclusion cannot be published unvalidated.
+_EVIDENCE_FIELDS = frozenset(
+    field.name for field in dataclass_fields(ProcessV2CandidateEvidence)
+)
+_EVIDENCE_COUNT_FIELDS: tuple[str, ...] = tuple(CANDIDATE_TOTAL_SOURCE.values())
+_ACTION_FIELDS = frozenset(
+    {
+        *(field.name for field in dataclass_fields(ProcessV2ActionClassification)),
+        "candidate_evidence",
+    }
+)
+_EXCLUSION_FIELDS = frozenset(
+    field.name for field in dataclass_fields(ProcessV2Active8Exclusion)
+)
+
+#: What each dynamic exclusion reason implies about the counts published beside
+#: it, read straight off the production checker's own if/elif ladder.  A reason
+#: and its arithmetic disagreeing means one of the two was rewritten.
+_REASON_ARITHMETIC: Mapping[str, Mapping[str, tuple[str, int]]] = MappingProxyType(
+    {
+        REASON_MARK_ABSENT: MappingProxyType({"matching_mark_count": ("==", 0)}),
+        REASON_MARK_NOT_EXACT: MappingProxyType(
+            {"matching_mark_count": (">", 0), "exact_successor_mark_count": ("==", 0)}
+        ),
+        REASON_SUCCESSOR_ABSENT: MappingProxyType(
+            {"exact_successor_mark_count": (">", 0), "successor_alias_count": ("==", 0)}
+        ),
+        REASON_SUCCESSOR_VIRTUAL: MappingProxyType(
+            {"exact_successor_mark_count": (">", 0), "successor_alias_count": (">", 0)}
+        ),
+    }
+)
+
+#: One inventory row per completed task, as the completion publishes it.
+RESULT_INVENTORY_FIELDS: tuple[str, ...] = (
+    "task_identity_sha256",
+    "v1_task_identity_sha256",
+    "data_lane",
+    "split",
+    "entry_start",
+    "entry_stop",
+    "output_artifact_path",
+    "receipt_sha256",
+    "decision_file_sha256",
+    "counts",
+)
 
 _ADDRESS_FIELDS: tuple[str, ...] = (
     "packed_shard_content_sha256",
@@ -1190,6 +1280,221 @@ def _address_payload(address: Any) -> dict[str, Any]:
     }
 
 
+def _derived_candidate_totals(actions: Sequence[Mapping[str, Any]]) -> Counter[str]:
+    """Sum one row's five candidate totals out of its own per-action evidence.
+
+    The single definition of what those totals MEAN.  Called once to build a row
+    and again to re-derive it on read, so a stored aggregate is never the thing
+    a census is computed from.
+    """
+
+    totals: Counter[str] = Counter()
+    for item in actions:
+        evidence = item["candidate_evidence"]
+        if evidence is None:
+            continue
+        for total, source in CANDIDATE_TOTAL_SOURCE.items():
+            totals[total] += int(evidence[source])
+    return totals
+
+
+def _require_candidate_evidence(
+    evidence: object, *, label: str, action_sha256: object
+) -> Mapping[str, Any]:
+    """Refuse evidence that is not shaped like, or not arithmetic like, evidence.
+
+    Nothing reconstructs :class:`ProcessV2CandidateEvidence` on read, so its
+    ``__post_init__`` guard never runs over a published row; this is that guard,
+    stated over the payload, plus the bounds the production checker's own
+    construction makes unconditional.  It is a shape and arithmetic gate only --
+    whether the counts are TRUE is settled by the decision index, which
+    re-derives them through the bound production evaluator.
+    """
+
+    if not isinstance(evidence, dict) or set(evidence) != _EVIDENCE_FIELDS:
+        raise ProcessV2Active8MapReduceError(
+            f"{label} candidate evidence must carry exactly its declared fields"
+        )
+    supported = evidence["supported"]
+    if type(supported) is not bool:
+        raise ProcessV2Active8MapReduceError(
+            f"{label} candidate evidence support must be a bool"
+        )
+    for field in ("action_sha256", "source_state_sha256", "target_state_sha256"):
+        _require_sha256(evidence[field], field=f"{label} candidate evidence {field}")
+    if evidence["action_sha256"] != action_sha256:
+        raise ProcessV2Active8MapReduceError(
+            f"{label} candidate evidence names another action than its classification"
+        )
+    key = evidence["canonical_successor_key"]
+    if not isinstance(key, str) or not key:
+        raise ProcessV2Active8MapReduceError(
+            f"{label} candidate evidence canonical successor key is empty"
+        )
+    counts = {
+        field: _require_int(
+            evidence[field], field=f"{label} candidate evidence {field}"
+        )
+        for field in _EVIDENCE_COUNT_FIELDS
+    }
+    raw = counts["raw_mark_count"]
+    if (
+        counts["matching_mark_count"] > raw
+        or counts["exact_successor_mark_count"] > counts["matching_mark_count"]
+        or counts["canonical_successor_count"] > raw
+        or counts["successor_alias_count"] > raw
+    ):
+        raise ProcessV2Active8MapReduceError(
+            f"{label} candidate evidence counts are not arithmetically possible"
+        )
+    reason = evidence["exclusion_reason"]
+    if supported:
+        if reason is not None or min(
+            counts["canonical_successor_count"],
+            counts["matching_mark_count"],
+            counts["exact_successor_mark_count"],
+            counts["successor_alias_count"],
+        ) < 1:
+            raise ProcessV2Active8MapReduceError(
+                f"{label} supported candidate evidence is incomplete"
+            )
+        # An exact-successor mark is by construction one of the marks aliasing to
+        # that canonical successor, so it cannot outnumber them.
+        if counts["exact_successor_mark_count"] > counts["successor_alias_count"]:
+            raise ProcessV2Active8MapReduceError(
+                f"{label} candidate evidence claims more exact marks than aliases"
+            )
+        return evidence
+    if reason not in DYNAMIC_EXCLUSION_REASONS:
+        raise ProcessV2Active8MapReduceError(
+            f"{label} unsupported candidate evidence needs a declared dynamic reason"
+        )
+    for field, (relation, bound) in _REASON_ARITHMETIC[str(reason)].items():
+        observed = counts[field]
+        if (relation == "==" and observed != bound) or (
+            relation == ">" and observed <= bound
+        ):
+            raise ProcessV2Active8MapReduceError(
+                f"{label} candidate evidence reason {reason!r} disagrees with its own counts"
+            )
+    return evidence
+
+
+def _derived_row_evidence(row: Mapping[str, Any], *, label: str) -> dict[str, Any]:
+    """Re-derive everything a decision row says about its own actions.
+
+    Returns the candidate totals, the action-family histogram, the exclusion
+    list and the exclusion-reason histogram that this row's actions IMPLY.  The
+    caller compares them with what the row stored; nothing downstream reads the
+    stored aggregates.
+    """
+
+    actions = row["actions"]
+    if not isinstance(actions, list):
+        raise ProcessV2Active8MapReduceError(f"{label} actions are not a list")
+    families: Counter[str] = Counter()
+    evidenced: set[bool] = set()
+    static: list[dict[str, Any]] = []
+    dynamic: list[dict[str, Any]] = []
+    for step_index, action in enumerate(actions):
+        if not isinstance(action, dict) or set(action) != _ACTION_FIELDS:
+            raise ProcessV2Active8MapReduceError(
+                f"{label} action {step_index} must carry exactly its declared fields"
+            )
+        if action["step_index"] != step_index or not action["executor_rule"]:
+            raise ProcessV2Active8MapReduceError(
+                f"{label} action {step_index} is not addressed to its own step"
+            )
+        eligible = action["policy_eligible"]
+        if type(eligible) is not bool:
+            raise ProcessV2Active8MapReduceError(
+                f"{label} action {step_index} eligibility must be a bool"
+            )
+        if eligible:
+            if (
+                action["model_family"] is None
+                or action["exclusion_reason"] is not None
+                or not isinstance(action["action_sha256"], str)
+            ):
+                raise ProcessV2Active8MapReduceError(
+                    f"{label} action {step_index} is eligible with incomplete evidence"
+                )
+            _require_sha256(
+                action["action_sha256"], field=f"{label} action {step_index} action_sha256"
+            )
+        else:
+            if (
+                action["exclusion_reason"] not in STATIC_EXCLUSION_REASONS
+                or action["action_sha256"] is not None
+            ):
+                raise ProcessV2Active8MapReduceError(
+                    f"{label} action {step_index} is excluded with inconsistent evidence"
+                )
+            static.append(
+                {
+                    "stage": STATIC_EXCLUSION_STAGE,
+                    "step_index": step_index,
+                    "executor_rule": action["executor_rule"],
+                    "model_family": action["model_family"],
+                    "reason": action["exclusion_reason"],
+                }
+            )
+        if action["model_family"] is not None:
+            families[str(action["model_family"])] += 1
+        evidence = action["candidate_evidence"]
+        evidenced.add(evidence is not None)
+        if evidence is None:
+            continue
+        if not eligible:
+            raise ProcessV2Active8MapReduceError(
+                f"{label} action {step_index} was statically excluded yet carries evidence"
+            )
+        _require_candidate_evidence(
+            evidence,
+            label=f"{label} action {step_index}",
+            action_sha256=action["action_sha256"],
+        )
+        if not evidence["supported"]:
+            dynamic.append(
+                {
+                    "stage": DYNAMIC_EXCLUSION_STAGE,
+                    "step_index": step_index,
+                    "executor_rule": action["executor_rule"],
+                    "model_family": action["model_family"],
+                    "reason": evidence["exclusion_reason"],
+                }
+            )
+    if len(evidenced) > 1:
+        # A statically excluded action short-circuits the model for the WHOLE
+        # trace, so evidence is present for every action or for none.  A mixture
+        # means the row was assembled from two different evaluations.
+        raise ProcessV2Active8MapReduceError(
+            f"{label} carries candidate evidence for only some of its actions"
+        )
+    if row["category"] is None:
+        for step_index, action in enumerate(actions):
+            evidence = action["candidate_evidence"]
+            if evidence is None:
+                raise ProcessV2Active8MapReduceError(
+                    f"{label} was accepted with no candidate evidence at step {step_index}"
+                )
+            if evidence["supported"] is not True or evidence["exclusion_reason"] is not None:
+                raise ProcessV2Active8MapReduceError(
+                    f"{label} was accepted while its evidence at step {step_index} refuses "
+                    "the action; an accepted trace cannot carry unsupported evidence or a "
+                    "populated exclusion reason"
+                )
+    exclusions = static if static else dynamic
+    totals = _derived_candidate_totals(actions)
+    reasons: Counter[str] = Counter(str(item["reason"]) for item in exclusions)
+    return {
+        "candidate_totals": {field: totals[field] for field in _CANDIDATE_TOTAL_FIELDS},
+        "action_family_histogram": dict(sorted(families.items())),
+        "active8_exclusions": exclusions,
+        "active8_exclusion_reason_histogram": dict(sorted(reasons.items())),
+    }
+
+
 def _decision_row(
     *,
     task: Mapping[str, Any],
@@ -1206,18 +1511,7 @@ def _decision_row(
     reasons: Counter[str] = Counter(
         item.reason for item in decision.active8_exclusions
     )
-    totals: Counter[str] = Counter()
-    for item in actions:
-        evidence = item["candidate_evidence"]
-        if evidence is None:
-            continue
-        totals["raw_candidate_marks"] += int(evidence["raw_mark_count"])
-        totals["canonical_candidate_successors"] += int(evidence["canonical_successor_count"])
-        totals["matching_candidate_marks"] += int(evidence["matching_mark_count"])
-        totals["exact_successor_candidate_marks"] += int(
-            evidence["exact_successor_mark_count"]
-        )
-        totals["successor_alias_multiplicity"] += int(evidence["successor_alias_count"])
+    totals = _derived_candidate_totals(actions)
     progress = (
         [
             {
@@ -1255,7 +1549,12 @@ def _decision_row(
 
 
 def _row_counts(row: Mapping[str, Any]) -> Counter[str]:
-    """The census one decision row contributes, derived from the row itself."""
+    """The census one decision row contributes, derived from its own actions.
+
+    The five candidate totals come from :func:`_derived_candidate_totals`, never
+    from ``row["candidate_totals"]``: a run-level census summed out of a stored
+    aggregate would agree with that aggregate whatever the evidence said.
+    """
 
     counts: Counter[str] = Counter()
     counts["source_entries"] += 1
@@ -1276,7 +1575,7 @@ def _row_counts(row: Mapping[str, Any]) -> Counter[str]:
     if category != UPSTREAM_REJECTED:
         counts["evaluated_actions"] += len(row["actions"])
     counts["progress_rows"] += len(row["progress_rows"])
-    counts.update(row["candidate_totals"])
+    counts.update(_derived_candidate_totals(row["actions"]))
     return counts
 
 
@@ -1619,6 +1918,14 @@ def read_process_v2_active8_decision_rows(
             raise ProcessV2Active8MapReduceError(
                 f"Process-V2 Active8 decision row {index} crosses its own admission boundary"
             )
+        label = f"Process-V2 Active8 decision row {index}"
+        derived = _derived_row_evidence(row, label=label)
+        stored = {field: row[field] for field in derived}
+        if stored != derived:
+            disagree = sorted(field for field in derived if stored[field] != derived[field])
+            raise ProcessV2Active8MapReduceError(
+                f"{label} derived census disagrees with its own action evidence: {disagree}"
+            )
         rows.append(row)
     observed = [int(row["entry_index"]) for row in rows]
     if observed != list(range(int(task["entry_start"]), int(task["entry_stop"]))):
@@ -1663,6 +1970,32 @@ def structural_census(counts: Mapping[str, int]) -> dict[str, int]:
         "admitted_entries": int(counts["active8_accepted_entries"]),
         "rejected_entries": int(counts["upstream_rejected_entries"])
         + int(counts["active8_excluded_entries"]),
+    }
+
+
+def result_inventory_row(
+    task: Mapping[str, Any], receipt: Mapping[str, Any]
+) -> dict[str, Any]:
+    """One completion inventory row, built from a plan task and its LIVE receipt.
+
+    The one definition, used by the reducer to publish the inventory and by the
+    decision index to re-derive it from the receipts still on the volume.  A
+    published inventory row that names a receipt or a decision file the task no
+    longer holds is therefore a refusal rather than a stale pointer nobody
+    followed.
+    """
+
+    return {
+        "task_identity_sha256": task["task_identity_sha256"],
+        "v1_task_identity_sha256": task["v1_task_identity_sha256"],
+        "data_lane": task["data_lane"],
+        "split": task["split"],
+        "entry_start": task["entry_start"],
+        "entry_stop": task["entry_stop"],
+        "output_artifact_path": task["output_artifact_path"],
+        "receipt_sha256": receipt["receipt_sha256"],
+        "decision_file_sha256": receipt["decision_file_sha256"],
+        "counts": dict(receipt["counts"]),
     }
 
 
@@ -1759,20 +2092,7 @@ def reduce_process_v2_active8_decisions(
         families.update(receipt["action_family_histogram"])
         reasons.update(receipt["active8_exclusion_reason_histogram"])
         upstream_reasons.update(receipt["upstream_rejection_reason_histogram"])
-        results.append(
-            {
-                "task_identity_sha256": task["task_identity_sha256"],
-                "v1_task_identity_sha256": task["v1_task_identity_sha256"],
-                "data_lane": task["data_lane"],
-                "split": task["split"],
-                "entry_start": task["entry_start"],
-                "entry_stop": task["entry_stop"],
-                "output_artifact_path": task["output_artifact_path"],
-                "receipt_sha256": receipt["receipt_sha256"],
-                "decision_file_sha256": receipt["decision_file_sha256"],
-                "counts": dict(receipt["counts"]),
-            }
-        )
+        results.append(result_inventory_row(task, receipt))
     counts = {field: int(totals[field]) for field in COUNT_FIELDS}
     _require_active8_census(counts, label="the Process-V2 Active8 run")
     if counts["source_entries"] != int(validated["expected_entry_count"]):
@@ -1884,6 +2204,7 @@ __all__ = [
     "COMPLETION_SCHEMA",
     "COMPLETION_SCHEMA_VERSION",
     "COMPLETION_STATUS",
+    "CANDIDATE_TOTAL_SOURCE",
     "COUNT_FIELDS",
     "DECISION_FILENAME",
     "DECISION_SCHEMA",
@@ -1898,6 +2219,7 @@ __all__ = [
     "PLAN_SCHEMA",
     "PLAN_SCHEMA_VERSION",
     "PLAN_STATUS",
+    "RESULT_INVENTORY_FIELDS",
     "RECEIPT_FILENAME",
     "RECEIPT_SCHEMA",
     "RECEIPT_SCHEMA_VERSION",
@@ -1916,6 +2238,7 @@ __all__ = [
     "read_upstream_rebind_decisions",
     "reduce_process_v2_active8_decisions",
     "reduction_order",
+    "result_inventory_row",
     "run_process_v2_active8_map",
     "structural_census",
     "validate_model_runtime_identity",
