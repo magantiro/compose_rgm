@@ -1094,13 +1094,46 @@ def _check_parents(
                 )
 
 
-def _check_superseded_lineage(name: str, payload: Mapping[str, Any]) -> None:
+def _live_chain_values(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, str]:
+    """``sha256 -> where that value is live now``, over every chain artifact.
+
+    Read from the sealed overlay when this generation has already sealed the
+    artifact, otherwise from disk.  An artifact that is absent contributes
+    nothing: a lineage reference may outlive its target, which is what historical
+    means.  Only bytes OUTSIDE the payload under test are read, which is what
+    makes the comparison falsifiable -- see :func:`_check_superseded_lineage`.
+    """
+
+    live: dict[str, str] = {}
+    for artifact in PROCESS_V2_CHAIN_ARTIFACTS:
+        if artifact in sealed:
+            raw = sealed[artifact]
+        else:
+            try:
+                raw = (Path(repo_root) / artifact).read_bytes()
+            except OSError:
+                continue
+        live.setdefault(_sha256_bytes(raw), f"physical hash of {artifact}")
+        try:
+            semantic = semantic_sha256_of(artifact, raw)
+        except ProcessV2ChainError:
+            continue
+        live.setdefault(semantic, f"semantic hash of {artifact}")
+    return live
+
+
+def _check_superseded_lineage(
+    name: str,
+    payload: Mapping[str, Any],
+    repo_root: Path,
+    sealed: Mapping[str, bytes],
+) -> None:
     """Every generation must be historical, distinct, and in order.
 
     "Historical" is the whole claim a lineage reference makes, so each of the
-    three ways it can be false is checked separately: a value equal to a live one
-    is not superseded, a repeated value is not a second generation, and an
-    out-of-order or duplicated version cannot be read as a sequence.
+    ways it can be false is checked separately: a value equal to a live one is not
+    superseded, a repeated value is not a second generation, and an out-of-order
+    or duplicated version cannot be read as a sequence.
     """
 
     block = payload.get("superseded_design_lineage")
@@ -1119,15 +1152,29 @@ def _check_superseded_lineage(name: str, payload: Mapping[str, Any]) -> None:
             "appended, never replaced",
         )
     live_semantic = payload.get(SELF_HASH_FIELD)
-    # There is deliberately no matching "physical equals the live file hash"
-    # check. It cannot be written down: the lineage pointer is part of the body
-    # that IS the file, so setting it to the live physical hash changes the live
-    # physical hash, and any validator recomputing the expectation from the
-    # payload it is checking compares the mutation against itself. A guard whose
-    # expectation moves with the observation cannot fail, and one no test can
-    # exercise honestly is worse than none. The reachable half of the same claim
-    # is the semantic check below; a lineage value aimed at a DIFFERENT artifact
-    # is refused by the target check instead.
+    # Two formulations of "this value is still live" exist, and only one of them
+    # can be written down.
+    #
+    # The SELF-REFERENTIAL one -- expectation = sha256(serialize(the payload under
+    # test)) -- is unfalsifiable: the lineage pointer is part of the body that IS
+    # the file, so writing the live physical hash into it moves the live physical
+    # hash, and a validator recomputing its expectation from the payload it is
+    # checking compares the mutation against itself. That guard is not claimed
+    # here, and `test_the_self_referential_lineage_physical_check_is_unfalsifiable`
+    # pins the fixed point as unreachable.
+    #
+    # The ON-DISK one is falsifiable and IS checked, below: the expectation comes
+    # from bytes outside the payload, which do not move when the payload is
+    # mutated. It is the same check the sibling verifier already makes over
+    # committed bytes (`verify_process_v2_chain._check_lineage_pointer` ->
+    # `lineage_value_is_live`), and it additionally catches a lineage pin for one
+    # artifact carrying ANOTHER chain artifact's live hash, which the `target`
+    # check cannot see because the target is correct.
+    #
+    # The same caveat applies to `live_semantic` below, which compares against a
+    # constant embedded in the body: it is reachable only by hand-mutating a
+    # sealed payload, and it is kept as the diagnostic naming that specific lie.
+    live_values = _live_chain_values(Path(repo_root), sealed)
     seen_hashes: dict[str, str] = {}
     seen_revisions: set[str] = set()
     previous_version = 0
@@ -1196,6 +1243,15 @@ def _check_superseded_lineage(name: str, payload: Mapping[str, Any]) -> None:
                 f"{where}.semantic equals the live {SELF_HASH_FIELD}, so it is not "
                 "superseded",
             )
+        for slot in ("physical", "semantic"):
+            digest = entry[slot]["sha256"]
+            where_live = live_values.get(digest)
+            if where_live is not None:
+                _fail(
+                    name,
+                    f"{where}.{slot} records {digest} as superseded, but that is the "
+                    f"live {where_live}",
+                )
 
 
 def _check_registry(name: str, payload: Mapping[str, Any], repo_root: Path) -> None:
@@ -1264,7 +1320,7 @@ def validate_process_v2_chain_artifact(
     _check_active8(name, payload)
     _check_process_identity(name, payload)
     _check_parents(name, payload, repo_root, overlay)
-    _check_superseded_lineage(name, payload)
+    _check_superseded_lineage(name, payload, repo_root, overlay)
     _check_registry(name, payload, repo_root)
 
     difference = _first_difference(
