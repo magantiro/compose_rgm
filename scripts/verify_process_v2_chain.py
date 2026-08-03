@@ -132,6 +132,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (  # noqa: E402
     ProcessV2SchemaError,
     canonical_sha256,
     require_authority_false,
+    require_no_granted_authority,
     validate_typed_pointer,
     verify_self_hash,
 )
@@ -218,7 +219,6 @@ set of accepted ones, for the same reason the schema and version are: two spelli
 of one disposition mean a reader grepping for one silently misses the other.
 """
 
-_AUTHORITY_FIELD_SUFFIX = "_authorized"
 """How an authority grant is recognised without a vocabulary.
 
 :func:`require_authority_false` is vocabulary-BOUND -- it refuses the seven known
@@ -591,24 +591,6 @@ def _receipt_index(
     return index
 
 
-def _granted_authority_fields(payload: object) -> list[str]:
-    """Every field at any depth that grants authority, whatever it is spelled.
-
-    Deliberately vocabulary-free: the check is the SUFFIX, so a field this
-    repository's authority vocabulary does not list -- ``p500_authorized`` is the
-    one it actually has -- cannot slip past by not being on a list.  Depth matters
-    for the same reason it does in :func:`require_authority_false`: every authority
-    block in this repository is nested, so a top-level scan looks in the one place
-    authority does not live.
-    """
-
-    return sorted(
-        location
-        for location, node in _walk(payload)
-        if location.rsplit(".", 1)[-1].endswith(_AUTHORITY_FIELD_SUFFIX) and node is not False
-    )
-
-
 def _stage_receipt_defect(payload: object) -> str | None:
     """Why this receipt may not resolve anything, or ``None`` when it may."""
 
@@ -638,12 +620,18 @@ def _stage_receipt_defect(payload: object) -> str | None:
         require_authority_false(payload, label="the stage receipt")
     except ProcessV2SchemaError as error:
         return str(error)
-    granted = _granted_authority_fields(payload)
-    if granted:
+    try:
+        # The vocabulary-free guard, from its owning module rather than a second
+        # copy here. The vocabulary-aware check above cannot see a field the
+        # authority vocabulary does not list, and `p500_authorized` is one this
+        # repository actually has. Two implementations of one rule is the exact
+        # defect this chain exists to refuse, so this defers rather than repeats.
+        require_no_granted_authority(payload, label="the stage receipt")
+    except ProcessV2SchemaError as error:
         return (
-            f"grants authority at {granted}; a stage receipt records that a stage "
-            "verified some bytes and is the only thing that turns an undecided edge "
-            "into agreement, so it never permits anything itself"
+            f"{error}; a stage receipt records that a stage verified some bytes and "
+            "is the only thing that turns an undecided edge into agreement, so it "
+            "never permits anything itself"
         )
     entries = payload["resolved"]
     if not isinstance(entries, list):
