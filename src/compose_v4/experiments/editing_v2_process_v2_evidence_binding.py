@@ -67,6 +67,23 @@ Since admitted-source schema 3 there is ONE authority vocabulary: the descriptor
 carries the same seven frozen fields the binding does, so nothing is translated
 and nothing is dropped.
 
+A CORRECTION TO WHAT THIS DOCSTRING USED TO SAY
+-----------------------------------------------
+It previously stated that renaming the adapter's bounded-P50 field "would move
+the scientific Process-V2 identity", and refused to translate the spelling on
+that basis.  **That was measured and is false.**  The V2 identity hashes exactly
+nineteen implementation files -- the eighteen V1 files plus
+``process_v2_atom_delete.py`` -- together with the process contract and the action
+codec.  ``editing_process_v2_admitted_source.py`` is not among them, so renaming
+its authority field leaves both scientific identities exactly where they were.
+What it does move is ``adapter_implementation_sha256``, which hashes the
+adapter's own bytes and is supposed to move when the adapter changes.
+
+The frozen field at ``editing_v2_process_identity.py`` and in
+``configs/editing_v2_semantic_process_v2.json`` is a different matter and does
+stay: those bytes ARE hashed into the identity.  The distinction the old claim
+collapsed is between the frozen contract and the adapters around it.
+
 INVARIANTS MAINTAINED (and tested)
 ----------------------------------
 * build -> serialize -> validate -> load round-trips against a REAL resolved
