@@ -99,7 +99,7 @@ from compose_v4.rewrite.kernel import (
     de_novo_rewrite_system,
 )
 from compose_v4.rewrite.process_v2_atom_delete import (
-    process_v2_connected_nonleaf_atom_delete_mask,
+    process_v2_atom_delete_mask,
 )
 from compose_v4.rewrite.ring_restate_semantics import (
     enumerate_ring_restate_semantic_groups,
@@ -168,7 +168,7 @@ RING_RESTATE_SCORER_MODES = (
 LEGACY_EDITING_PROCESS_SEMANTICS = "legacy_raw_actions_v1"
 # ``editing_v2`` names the source-conditioned editing LANE; the trailing ``_v1``
 # / ``_v2`` is the SEMANTIC PROCESS VERSION of that lane.  Process V2 differs
-# from Process V1 only by the expanded ``atom_delete`` marked fiber below.
+# from Process V1 only by the uniformly gated ``atom_delete`` marked fiber below.
 SEMANTIC_EDITING_V2_PROCESS_SEMANTICS = "semantic_editing_v2_v1"
 PROCESS_V2_EDITING_PROCESS_SEMANTICS = "semantic_editing_v2_v2"
 EDITING_PROCESS_SEMANTICS = (
@@ -195,11 +195,13 @@ def is_semantic_editing_v2_process(editing_process_semantics: str) -> bool:
     return editing_process_semantics in SEMANTIC_EDITING_V2_PROCESS_VERSIONS
 # Atom-delete candidate modes.  ``legacy`` is the historical dense rule, which
 # admits a real slot only when it lies on no cycle and is not a cut vertex --
-# in a connected real-atom graph that is exactly real-atom degree at most one.
-# Process V2 keeps that rule bit-for-bit and adds the DISJOINT connected-nonleaf
-# expansion resolved by :mod:`compose_v4.rewrite.process_v2_atom_delete`.
+# in a connected real-atom graph that is exactly real-atom degree at most one --
+# and which exempts those slots from the authoritative charge policy.  Process
+# V2 replaces that rule outright: :mod:`compose_v4.rewrite.process_v2_atom_delete`
+# gates EVERY candidate uniformly, so the V2 mask is neither a superset nor a
+# subset of the legacy one.
 LEGACY_ATOM_DELETE_ACTION_SEMANTICS = "legacy_acyclic_atom_delete_v1"
-PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS = "process_v2_connected_nonleaf_atom_delete_v1"
+PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS = "process_v2_uniform_gated_atom_delete_v2"
 ATOM_DELETE_ACTION_SEMANTICS = (
     LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
@@ -769,8 +771,10 @@ class FactorizedMarkBatch:
         None
     )
     editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS
-    # The DISJOINT Process-V2 connected-nonleaf expansion only; it is always a
-    # subset of ``atom_delete_mask``, which carries the V1 union.
+    # The exact CPU-derived Process-V2 admission authority.  It EQUALS
+    # ``atom_delete_mask`` under Process V2 and is ``None`` under legacy, so the
+    # batch records the decision it was collated from and the forward can refuse
+    # a batch whose candidate mask no longer matches that decision.
     atom_delete_admission_mask: Tensor | None = None
     atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS
     atom_restate_admission_mask: Tensor | None = None
@@ -1711,20 +1715,23 @@ def prepare_factorized_mark_batch(
             ) = _graph_application_masks(
                 state, atom_topo, compute_cyclic_graft=compute_cyclic_graft
             )
-            # Process V2 is strictly ADDITIVE: the V1 dense rule above is left
-            # untouched and the disjoint connected-nonleaf expansion is unioned
-            # onto it.  Applying the V2 conditions to the degree<=1 slots the V1
-            # rule owns would silently DROP preserved leaf candidates (a neutral
-            # leaf bonded to a charged centre is V1-admitted but violates the
-            # charge policy), so the two rules stay separate by construction.
+            # Process V2 REPLACES the V1 dense rule rather than extending it.
+            # One authority gates every candidate, so an inherited
+            # root/singleton/leaf slot whose deletion changes a protected
+            # charged centre is excluded exactly like a connected-nonleaf one.
+            # Unioning the V1 mask back in would restore the legacy exemption
+            # this process version exists to remove.
             atom_delete_admission_mask = (
-                process_v2_connected_nonleaf_atom_delete_mask(state)
+                process_v2_atom_delete_mask(state)
                 if atom_delete_action_semantics
                 == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
                 else None
             )
             if atom_delete_admission_mask is not None:
-                delete_mask = delete_mask | atom_delete_admission_mask
+                # Copied, not aliased: the two cached fields must stay separate
+                # buffers so the batch carries the decision it was built from
+                # as an independent array the forward guard can compare.
+                delete_mask = atom_delete_admission_mask.copy()
             cycle_close_admission_mask = (
                 _semantic_cycle_close_admission_mask(state)
                 if cycle_close_action_semantics == SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS
@@ -2701,8 +2708,8 @@ class FactorizedTraceletRateModel(nn.Module):
                 f"{atom_delete_action_semantics!r}; expected one of "
                 f"{ATOM_DELETE_ACTION_SEMANTICS}"
             )
-        # Process V2 expands only the ``atom_delete`` marked fiber; the delete
-        # head is a per-slot scorer, so the expansion is a mask change and every
+        # Process V2 redecides only the ``atom_delete`` marked fiber; the delete
+        # head is a per-slot scorer, so the new rule is a mask change and every
         # parameter shape (hence a strict warm start) is preserved.
         self.atom_delete_action_semantics = str(atom_delete_action_semantics)
         self.cycle_open_scorer_mode = str(cycle_open_scorer_mode)
@@ -4927,20 +4934,23 @@ class FactorizedTraceletRateModel(nn.Module):
         if self.atom_delete_action_semantics == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS:
             if batch.atom_delete_admission_mask is None:
                 raise ValueError(
-                    "Process-V2 atom-delete batch lacks the exact connected-nonleaf "
+                    "Process-V2 atom-delete batch lacks the exact uniform-gated "
                     "admission mask"
                 )
             if tuple(batch.atom_delete_admission_mask.shape) != tuple(delete_mask.shape):
                 raise ValueError(
                     "Process-V2 atom-delete admission mask has the wrong shape"
                 )
-            # The batch mask is the V1 union, so the expansion must already be
-            # contained in it; a batch carrying a wider admission was collated
-            # against a different delete rule.
-            if bool((batch.atom_delete_admission_mask & ~delete_mask).any()):
+            # EQUALITY, not containment.  The admission mask IS the effective
+            # candidate fiber under Process V2, so any difference means the
+            # batch was collated against a different delete rule.  A containment
+            # check would accept a mask that was unioned with the legacy dense
+            # rule, which is precisely the exemption this process version
+            # removes, so it could not detect the defect it exists to guard.
+            if not torch.equal(batch.atom_delete_admission_mask, delete_mask):
                 raise ValueError(
-                    "Process-V2 atom-delete admission mask is not contained in the "
-                    "batch atom-delete mask"
+                    "Process-V2 atom-delete admission mask does not equal the batch "
+                    "atom-delete mask"
                 )
         elif batch.atom_delete_admission_mask is not None:
             raise ValueError(

@@ -1,19 +1,19 @@
-"""Representation invariance of the Process-V2 connected-nonleaf deletion fiber.
+"""Representation invariance of the effective Process-V2 deletion fiber.
 
 Two properties are load-bearing for the successor-level quotient and are pinned
 here rather than argued:
 
 * **Slot-relabel equivariance.** The persistent-slot tensor is a coordinate
   representation, not the semantic dimension. Relabelling the occupied slots of
-  one molecule must permute the admission mask by exactly the same permutation.
+  one molecule must permute the effective mask by exactly the same permutation.
 * **Kekule-alias invariance of the successor fiber.** Executable states are
   Kekule encodings. Two aliases of one molecule must expose the same set of
   canonical molecular successors, even though their exact successor arrays
   differ.
 
 Neither property holds automatically: the mask is built from an RDKit
-perception pass, a networkx articulation computation, and executor replay
-against exact stored bond orders.
+perception pass, a networkx articulation computation, an exact charge-policy
+comparison and executor replay against exact stored bond orders.
 """
 
 from __future__ import annotations
@@ -34,9 +34,7 @@ from compose_v4.rewrite.aromatic_kekule import (
 )
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.operators import AtomDelete, apply_atom_delete
-from compose_v4.rewrite.process_v2_atom_delete import (
-    process_v2_connected_nonleaf_atom_delete_mask,
-)
+from compose_v4.rewrite.process_v2_atom_delete import process_v2_atom_delete_mask
 
 _PANEL = (
     "C1CCCCC1",
@@ -49,6 +47,25 @@ _PANEL = (
     "OC1CCC(N)CC1",
     "N#CC1CCCCC1",
     "CC(=O)Oc1ccccc1C(=O)O",
+    # Charged states, where the uniform charge gate decides slots that the
+    # legacy rule exempted; invariance must hold there too.
+    "C1CC[NH2+]CC1",
+    "C[N+](C)(C)CC(=O)[O-]",
+    "[O-]C(=O)C1CCCCC1",
+    # Aromatic systems, so the Kekule-alias check is powered rather than
+    # skipping most of the panel: a saturated molecule has no alias to vary.
+    # The round-one panel supplied only two aromatic sources.
+    "c1ccccc1",
+    "Cc1ccccc1",
+    "c1ccc2ccccc2c1",
+    "c1ccncc1",
+    "c1ccc(C2CCCCC2)cc1",
+    "Cc1ccc(O)cc1",
+    "c1ccc2[nH]ccc2c1",
+    "Clc1ccc(N)cc1",
+    "c1ccc(-c2ccccc2)cc1",
+    "Cc1ccc(C[NH3+])cc1",
+    "O=C(O)c1ccccc1O",
 )
 
 
@@ -72,7 +89,7 @@ def _relabelled(state: MolecularGraph, permutation: dict[int, int]) -> Molecular
 
 
 def _successor_keys(state: MolecularGraph) -> frozenset[str]:
-    mask = process_v2_connected_nonleaf_atom_delete_mask(state)
+    mask = process_v2_atom_delete_mask(state)
     return frozenset(
         canonical_state_key(apply_atom_delete(state, AtomDelete(int(slot))))
         for slot in np.flatnonzero(mask)
@@ -112,18 +129,18 @@ def test_semantic_process_predicate_covers_every_semantic_version() -> None:
             assert is_semantic_editing_v2_process(semantics), semantics
 
 
-def test_contract_atom_delete_modes_equal_the_model_constants() -> None:
-    """The contract's mode literals must equal the model's constants.
+def test_contract_binds_the_settled_process_v2_identifiers() -> None:
+    """The settled half of the model/contract seam.
 
-    ``editing_v2_process_identity`` cannot import them: the model module
-    reaches this one through ``process_v2_atom_delete`` and ``trace_shard_v3``,
+    ``editing_v2_process_identity`` cannot import the model constants: the model
+    module reaches it through ``process_v2_atom_delete`` and ``trace_shard_v3``,
     so a module-level import would close a cycle. The two therefore carry the
     same strings independently, and only an assertion keeps them from drifting.
+    Neither identifier below moved in this round.
     """
 
     from compose_v4.model.factorized_tracelet_rate_model import (
         LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
-        PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
         PROCESS_V2_EDITING_PROCESS_SEMANTICS,
     )
     from compose_v4.rewrite.editing_v2_process_identity import (
@@ -133,16 +150,35 @@ def test_contract_atom_delete_modes_equal_the_model_constants() -> None:
 
     modes = build_editing_process_v2_contract()["atom_delete"]["action_semantics_modes"]
     assert modes["legacy"] == LEGACY_ATOM_DELETE_ACTION_SEMANTICS
-    assert modes["process_v2"] == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
     assert PROCESS_V2_SEMANTICS == PROCESS_V2_EDITING_PROCESS_SEMANTICS
 
 
-def test_admission_mask_is_slot_relabel_equivariant() -> None:
+def test_contract_atom_delete_mode_literal_tracks_the_model_constant() -> None:
+    """The moved half of the same seam.
+
+    The Process-V2 atom-delete mode was renamed this round because the old name
+    (``..._connected_nonleaf_..._v1``) falsely implied inherited candidates were
+    unfiltered. The identity module carries that literal independently and must
+    be re-pinned to the new value; until it is, this assertion is the signal.
+    """
+
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+    )
+    from compose_v4.rewrite.editing_v2_process_identity import (
+        build_editing_process_v2_contract,
+    )
+
+    modes = build_editing_process_v2_contract()["atom_delete"]["action_semantics_modes"]
+    assert modes["process_v2"] == PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+
+
+def test_effective_mask_is_slot_relabel_equivariant() -> None:
     generator = np.random.default_rng(20260802)
     compared = 0
     for smiles in _PANEL:
         state = _state(smiles)
-        expected_mask = process_v2_connected_nonleaf_atom_delete_mask(state)
+        expected_mask = process_v2_atom_delete_mask(state)
         occupied = [int(slot) for slot in np.flatnonzero(is_element(state.atom_types))]
         for _ in range(6):
             targets = generator.choice(
@@ -156,7 +192,7 @@ def test_admission_mask_is_slot_relabel_equivariant() -> None:
             permuted_expectation = np.zeros_like(expected_mask)
             for old, new in permutation.items():
                 permuted_expectation[new] = expected_mask[old]
-            observed = process_v2_connected_nonleaf_atom_delete_mask(relabelled)
+            observed = process_v2_atom_delete_mask(relabelled)
             assert np.array_equal(observed, permuted_expectation), smiles
             compared += 1
     assert compared == 6 * len(_PANEL)
@@ -164,11 +200,13 @@ def test_admission_mask_is_slot_relabel_equivariant() -> None:
 
 def test_successor_fiber_is_invariant_across_kekule_aliases() -> None:
     compared = 0
+    aromatic_sources = 0
     for smiles in _PANEL:
         state = _state(smiles)
         components = enumerate_component_factored_kekule_assignments(state)
         if not components:
             continue
+        aromatic_sources += 1
         source_key = canonical_state_key(state)
         expected: frozenset[str] | None = None
         for selection in itertools.islice(
@@ -188,4 +226,5 @@ def test_successor_fiber_is_invariant_across_kekule_aliases() -> None:
             else:
                 assert observed == expected, smiles
             compared += 1
-    assert compared > 0
+    assert aromatic_sources >= 12, aromatic_sources
+    assert compared >= 24, compared
