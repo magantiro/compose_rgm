@@ -60,6 +60,18 @@ a caller-supplied revision is provenance at most and never authority.  It
 deliberately carries no Git commit: a commit that does not touch a behaviour-
 affecting module must not relocate the artifact.
 
+"Reads" is load-bearing and was once only aspirational.  The list named the
+modules that *write* a chunk and stopped there, so two trees differing only in
+``rewrite/progress.py`` read the same committed cache, published the identical
+narrow revision, both validated clean, and handed their callers different
+decoded rows.  The list now covers the whole decode closure -- the modules that
+run while a cached line becomes a ``SemanticPackedRowRead``, the modules that
+define that row's constituent types, and the modules defining the payload
+classes the frozen V4 persistence surface can construct.  ``codec_implementation
+_hash()`` does not substitute for any of this: it hashes a *declared surface*,
+so a codec whose declared rules are unchanged but whose decoding differs leaves
+it fixed.
+
 The launcher's *broad* image revision -- every file under ``src`` and ``configs``
 plus the launcher and the plan driver -- is execution-environment provenance.  It
 proves a container is running the tree it claims, and it is deliberately absent
@@ -150,20 +162,43 @@ CACHE_IMPLEMENTATION_REVISION_SCHEMA_VERSION = 1
 
 # The narrow revision: exactly the modules whose *contents* decide what this
 # cache stores, how it is addressed, how it is validated and how it decodes.
+#
+# The read half of that sentence is not a hand-list.  It is the *decode closure*
+# of :func:`read_process_v2_chunk_target` -- the modules that actually execute
+# while a cached line becomes a ``SemanticPackedRowRead``, the modules that
+# define the types that row is built from, and the modules that define the
+# payload classes the frozen V4 persistence surface can construct.
+# ``tests/test_process_v2_chunk_cache_identity.py`` re-derives that closure by
+# running the real decode under an execution tracer and requires this tuple to
+# cover it, and proves per module that editing it moves
+# ``cache_implementation_sha256``.  Neither check reads this tuple to build its
+# expectation, so shortening the tuple fails them.
+#
 # `editing_process_v2_rebind.py` is deliberately absent -- the rebind consumes
 # the cache and cannot change what the cache holds, so including it would
 # relocate every cached byte for an unrelated edit, which is the conflation this
-# revision exists to remove.
+# revision exists to remove.  `provenance_overlay.py` is absent for the same
+# reason and by measurement: `packed_trace_store` imports it only for the raw
+# addressed-shard readers, which this cache never calls.
 CACHE_IMPLEMENTATION_FILES: tuple[str, ...] = (
+    "src/compose_v4/chem/molecular_graph.py",
+    "src/compose_v4/chem/state.py",
     "src/compose_v4/data/editing_v2_process_v2_chunk_cache.py",
     "src/compose_v4/data/editing_v2_process_v2_completion_binder.py",
     "src/compose_v4/data/editing_v2_process_v2_schema.py",
     "src/compose_v4/data/packed_trace_store.py",
     "src/compose_v4/data/semantic_packed_trace_store.py",
     "src/compose_v4/data/semantic_trace_migration_materializer.py",
+    "src/compose_v4/rewrite/action_codec.py",
+    "src/compose_v4/rewrite/action_codec_v3.py",
     "src/compose_v4/rewrite/action_codec_v4.py",
+    "src/compose_v4/rewrite/editing_v2_process_identity.py",
+    "src/compose_v4/rewrite/operators.py",
+    "src/compose_v4/rewrite/progress.py",
+    "src/compose_v4/rewrite/trace.py",
     "src/compose_v4/rewrite/trace_shard.py",
     "src/compose_v4/rewrite/trace_shard_v3.py",
+    "src/compose_v4/rewrite/tracelets.py",
 )
 # `.../src/compose_v4/data/<this file>` -> the repository root. The Modal image
 # lays the tree out identically under `/root/compose`, so a container resolves
