@@ -48,9 +48,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any, Mapping, Protocol, runtime_checkable
 
 # ---- Schema identity ----
+
+_SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 SCHEMA_NAMESPACE = "compose.editing_v2.process_v2"
 
@@ -115,27 +118,49 @@ def authority_false_block() -> dict[str, bool]:
     return dict.fromkeys(AUTHORITY_FIELDS, False)
 
 
-def require_authority_false(payload: Mapping[str, Any], *, label: str) -> None:
-    """Refuse anything that grants, omits, or misspells an authority field."""
+def _walk(node: object, path: str = "") -> Any:
+    """Yield every `(path, key, value)` mapping entry at any depth."""
 
-    for retired, replacement in RETIRED_AUTHORITY_FIELDS.items():
-        if retired in payload:
+    if isinstance(node, Mapping):
+        for key, value in node.items():
+            yield path, key, value
+            yield from _walk(value, f"{path}.{key}")
+    elif isinstance(node, (list, tuple)):
+        for index, value in enumerate(node):
+            yield from _walk(value, f"{path}[{index}]")
+
+
+def require_authority_false(payload: Mapping[str, Any], *, label: str) -> None:
+    """Refuse anything that grants, omits, or misspells an authority field.
+
+    Checked at EVERY depth, not just the top level.  Every authority block in
+    this repository is nested -- `build_editing_process_v2_contract()` puts one
+    under `.authority`, the census module under `.decisions` -- so a top-level
+    scan cannot see the place authority actually lives, and the one function
+    whose job is to refuse a granted field would pass a nested grant.
+
+    Required top-level fields are still required at the top level: a nested
+    block does not satisfy the artifact's own declaration.
+    """
+
+    for observed_path, key, value in _walk(payload):
+        location = f"{observed_path}.{key}" if observed_path else key
+        if key in RETIRED_AUTHORITY_FIELDS:
             raise ProcessV2SchemaError(
-                f"{label} uses the retired authority field {retired!r}; it was "
-                f"renamed to {replacement!r}. Two spellings for one concept mean a "
-                "consumer grepping one silently misses the other, so this is an "
-                "incompatibility rather than an accepted alias."
+                f"{label} uses the retired authority field {key!r} at {location!r}; it "
+                f"was renamed to {RETIRED_AUTHORITY_FIELDS[key]!r}. Two spellings for "
+                "one concept mean a consumer grepping one silently misses the other, "
+                "so this is an incompatibility rather than an accepted alias."
+            )
+        if key in AUTHORITY_FIELDS and value is not False:
+            raise ProcessV2SchemaError(
+                f"{label} grants authority at {location!r}; a prospective contract and "
+                "a resolved evidence binding both prove identity only and never permit "
+                "training or launch"
             )
     missing = [field for field in AUTHORITY_FIELDS if field not in payload]
     if missing:
         raise ProcessV2SchemaError(f"{label} omits authority fields {sorted(missing)}")
-    granted = [field for field in AUTHORITY_FIELDS if payload[field] is not False]
-    if granted:
-        raise ProcessV2SchemaError(
-            f"{label} grants authority {sorted(granted)}; a prospective contract and "
-            "a resolved evidence binding both prove identity only and never permit "
-            "training or launch"
-        )
 
 
 # ---- Identity roles and typed pointers ----
@@ -224,15 +249,40 @@ def typed_pointer(
         raise ProcessV2SchemaError(
             f"unknown identity role {identity_role!r}; expected {IDENTITY_ROLES}"
         )
-    if identity_role == IdentityRole.SEMANTIC and hash_algorithm not in (
-        SEMANTIC_HASH_ALGORITHMS
+    # `kind` x `identity_role` coherence. Without it the three roles the module
+    # docstring calls load-bearing stay constructible in nonsensical
+    # combinations: a process identity, which addresses no file, could be
+    # pinned to a config path under a semantic algorithm.
+    if identity_role == IdentityRole.PROCESS_IDENTITY and kind != (
+        PointerKind.LINEAGE_REFERENCE
     ):
         raise ProcessV2SchemaError(
-            "a semantic pointer must declare its hash algorithm; expected one of "
-            f"{SEMANTIC_HASH_ALGORITHMS}"
+            "a process-identity pin addresses no file, so it is not a "
+            f"{kind!r} pointer; record it as an identity pin, or as a "
+            f"{PointerKind.LINEAGE_REFERENCE!r} when it is deliberately historical"
         )
-    if not isinstance(sha256, str) or len(sha256) != 64:
-        raise ProcessV2SchemaError(f"pointer to {target!r} carries a malformed SHA-256")
+    if identity_role == IdentityRole.SEMANTIC:
+        if kind not in (PointerKind.REPOSITORY_CONFIG, PointerKind.REMOTE_ARTIFACT):
+            raise ProcessV2SchemaError(
+                f"a {kind!r} pointer has no declared self-hash to address; only a "
+                "repository config or a remote artifact carries a semantic hash"
+            )
+        if hash_algorithm not in SEMANTIC_HASH_ALGORITHMS:
+            raise ProcessV2SchemaError(
+                "a semantic pointer must declare its hash algorithm; expected one of "
+                f"{SEMANTIC_HASH_ALGORITHMS}"
+            )
+    elif hash_algorithm is not None:
+        raise ProcessV2SchemaError(
+            f"a {identity_role!r} pointer must not declare a semantic hash algorithm; "
+            f"{hash_algorithm!r} would not be applied and would misdescribe the pin"
+        )
+    if not isinstance(sha256, str) or _SHA256_RE.fullmatch(sha256) is None:
+        raise ProcessV2SchemaError(
+            f"pointer to {target!r} carries a malformed SHA-256; it must be exactly "
+            "64 lowercase hex characters, because an uppercase variant of the same "
+            "digest hashes to a different pointer and breaks byte stability"
+        )
     return {
         "kind": kind,
         "provider": provider,
@@ -247,13 +297,26 @@ def typed_pointer(
 def validate_typed_pointer(value: object, *, label: str) -> dict[str, Any]:
     if not isinstance(value, Mapping) or set(value) != _POINTER_FIELDS:
         raise ProcessV2SchemaError(f"{label} is not a typed pointer")
+    # Type-checked, never `str()`-coerced: an object whose `__str__` returns 64
+    # characters would be accepted here while failing `typed_pointer` itself,
+    # so coercion would make the validator weaker than the builder.
+    for field in ("kind", "provider", "target", "identity_role", "sha256"):
+        if not isinstance(value[field], str):
+            raise ProcessV2SchemaError(
+                f"{label} field {field!r} is {type(value[field]).__name__}, not str"
+            )
+    for field in ("target_schema", "hash_algorithm"):
+        if value[field] is not None and not isinstance(value[field], str):
+            raise ProcessV2SchemaError(
+                f"{label} field {field!r} is {type(value[field]).__name__}, not str or None"
+            )
     return typed_pointer(
-        kind=str(value["kind"]),
-        provider=str(value["provider"]),
-        target=str(value["target"]),
+        kind=value["kind"],
+        provider=value["provider"],
+        target=value["target"],
         target_schema=value["target_schema"],
-        identity_role=str(value["identity_role"]),
-        sha256=str(value["sha256"]),
+        identity_role=value["identity_role"],
+        sha256=value["sha256"],
         hash_algorithm=value["hash_algorithm"],
     )
 
@@ -283,6 +346,9 @@ def self_hashed(body: Mapping[str, Any], *, field: str) -> dict[str, Any]:
 
 def verify_self_hash(payload: Mapping[str, Any], *, field: str, label: str) -> None:
     declared = payload.get(field)
+    if not isinstance(declared, str) or _SHA256_RE.fullmatch(declared) is None:
+        # An object with a permissive `__eq__` would otherwise verify any body.
+        raise ProcessV2SchemaError(f"{label} self-hash {field!r} is not a SHA-256 string")
     body = {key: item for key, item in payload.items() if key != field}
     if declared != canonical_sha256(body):
         raise ProcessV2SchemaError(f"{label} self-hash {field!r} disagrees with its body")
@@ -320,23 +386,49 @@ class StructuralDecisionIndex(Protocol):
         """The deterministic descriptor a consumer records as provenance."""
 
 
-def require_census_reconciles(counts: Mapping[str, int], *, label: str) -> None:
-    """`source == admitted + rejected`, checked wherever a census is carried."""
+CENSUS_FIELDS: tuple[str, ...] = (
+    "source_entries",
+    "admitted_entries",
+    "rejected_entries",
+)
 
-    missing = [
-        field
-        for field in ("source_entries", "admitted_entries", "rejected_entries")
-        if field not in counts
-    ]
+
+def require_census_reconciles(counts: Mapping[str, int], *, label: str) -> None:
+    """`source == admitted + rejected`, with exact non-negative integer counts.
+
+    The counts are type-checked rather than coerced.  `int()` accepts a string,
+    a float, a bool and a bytes object, so `{"admitted": "646779"}` and
+    `{"source": 3.9}` both reconciled while meaning something else entirely; and
+    a negative `rejected_entries` reconciling against an inflated
+    `admitted_entries` is precisely the silent support inflation this census
+    exists to stop.  `bool` is excluded explicitly because it is an `int`
+    subclass and `True + True == 2` is never a census.
+    """
+
+    missing = [field for field in CENSUS_FIELDS if field not in counts]
     if missing:
         raise ProcessV2SchemaError(f"{label} census omits {sorted(missing)}")
-    source = int(counts["source_entries"])
-    admitted = int(counts["admitted_entries"])
-    rejected = int(counts["rejected_entries"])
-    if admitted + rejected != source:
+    resolved: dict[str, int] = {}
+    for field in CENSUS_FIELDS:
+        value = counts[field]
+        if type(value) is not int:
+            raise ProcessV2SchemaError(
+                f"{label} census field {field!r} is {type(value).__name__}, not an "
+                "exact int; a coerced count is not a count"
+            )
+        if value < 0:
+            raise ProcessV2SchemaError(
+                f"{label} census field {field!r} is negative ({value}); a negative "
+                "count can reconcile an inflated total and hide lost support"
+            )
+        resolved[field] = value
+    if resolved["admitted_entries"] + resolved["rejected_entries"] != (
+        resolved["source_entries"]
+    ):
         raise ProcessV2SchemaError(
-            f"{label} census does not reconcile: {admitted} admitted + {rejected} "
-            f"rejected != {source} source"
+            f"{label} census does not reconcile: {resolved['admitted_entries']} "
+            f"admitted + {resolved['rejected_entries']} rejected != "
+            f"{resolved['source_entries']} source"
         )
 
 
@@ -368,6 +460,7 @@ __all__ = [
     "ProcessV2SchemaError",
     "StructuralDecisionIndex",
     "authority_false_block",
+    "CENSUS_FIELDS",
     "canonical_bytes",
     "canonical_sha256",
     "require_authority_false",
