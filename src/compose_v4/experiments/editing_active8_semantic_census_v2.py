@@ -48,7 +48,12 @@ from compose_v4.rewrite.operators import (
 from compose_v4.rewrite.tracelets import RingSystemRestate
 
 SEMANTIC_CENSUS_SCHEMA = "compose.experiments.editing_active8_semantic_census"
-SEMANTIC_CENSUS_SCHEMA_VERSION = 2
+# Version 3 renames the report's bounded-P50 decision field to the one frozen
+# spelling, `bounded_p50_authorized`. Both spellings named one concept and a
+# consumer grepping either silently missed the other, so this is an
+# incompatibility rather than an alias: a version-2 report keeps the old name and
+# stays readable as the version-2 artifact it is, and is not rewritten in place.
+SEMANTIC_CENSUS_SCHEMA_VERSION = 3
 SEMANTIC_CENSUS_STATUS = "DIAGNOSTIC_ONLY_NOT_TRAINING_AUTHORITY"
 SEMANTIC_CONTRACT_SCHEMA = "compose.experiments.editing_active8_semantic_census_contract"
 SEMANTIC_CONTRACT_SCHEMA_VERSION = 2
@@ -1032,7 +1037,11 @@ def build_semantic_census(
                 "corpus_failure": None,
                 "model_learnability": None,
                 "training_authorized": False,
-                "p50_authorized": False,
+                # The one frozen spelling. This report is a diagnostic and grants
+                # nothing, so the field exists to say so; under the retired name
+                # it said so where a consumer checking the frozen vocabulary was
+                # not looking.
+                "bounded_p50_authorized": False,
             },
             "limitations": list(contract["limitations"]),
         }

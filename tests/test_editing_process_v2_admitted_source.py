@@ -15,6 +15,7 @@ claim boundary that creates.
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 from collections.abc import Mapping
@@ -763,3 +764,113 @@ def test_an_unreadable_v1_payload_refuses(tmp_path: Path) -> None:
     shard.write_bytes(b"not a gzip shard")
     with pytest.raises(ProcessV2AdmittedSourceError, match="unreadable under its pinned"):
         list(source.iter_records())
+
+
+# ---- The retired spelling stays inside the frozen boundary ---------------------
+
+
+#: The only places the retired bounded-P50 spelling may appear as a real key.
+#: Everything else is a producer, and a producer emitting it puts a second name
+#: for one concept back into circulation.
+_RETIRED_P50_ALLOWED: dict[str, str] = {
+    "src/compose_v4/rewrite/editing_v2_process_identity.py": (
+        "the frozen process-contract builder; its bytes are hashed into the "
+        "scientific Process-V2 identity, so renaming the field here moves that "
+        "identity and is an owner decision rather than a migration"
+    ),
+    "configs/editing_v2_semantic_process_v2.json": (
+        "the serialization of that same frozen contract, hashed alongside it"
+    ),
+    "src/compose_v4/data/editing_v2_process_v2_schema.py": (
+        "RETIRED_AUTHORITY_FIELDS names the spelling in order to REFUSE it; a "
+        "refusal table is the opposite of a producer"
+    ),
+}
+
+_RETIRED_P50 = "p50_authorized"
+
+
+def _emitted_keys(path: Path) -> set[str]:
+    """Field names a file actually emits, ignoring prose.
+
+    A byte scan cannot tell a dict key from a sentence describing one, and this
+    guard has to survive the modules whose docstrings explain why the spelling was
+    retired. So keys are read structurally: a mapping key, a keyword argument, an
+    attribute, or a bound name.
+    """
+
+    if path.suffix == ".json":
+        found: set[str] = set()
+
+        def walk(node: object) -> None:
+            if isinstance(node, dict):
+                found.update(node)
+                for value in node.values():
+                    walk(value)
+            elif isinstance(node, list):
+                for value in node:
+                    walk(value)
+
+        walk(json.loads(path.read_text()))
+        return found
+    try:
+        tree = ast.parse(path.read_text())
+    except SyntaxError:
+        return set()
+    keys: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict):
+            keys.update(
+                key.value
+                for key in node.keys
+                if isinstance(key, ast.Constant) and isinstance(key.value, str)
+            )
+        elif isinstance(node, ast.keyword) and node.arg:
+            keys.add(node.arg)
+        elif isinstance(node, ast.Attribute):
+            keys.add(node.attr)
+        elif isinstance(node, ast.Name):
+            keys.add(node.id)
+    return keys
+
+
+def test_no_artifact_producer_emits_the_retired_p50_spelling() -> None:
+    """One spelling outside the frozen boundary, enforced rather than intended."""
+
+    offenders: dict[str, str] = {}
+    for area in ("src", "scripts", "modal_apps", "configs", "recipes"):
+        base = ROOT / area
+        if not base.is_dir():
+            continue
+        for path in sorted(base.rglob("*")):
+            if not path.is_file() or path.suffix not in {".py", ".json"}:
+                continue
+            relative = str(path.relative_to(ROOT))
+            if relative in _RETIRED_P50_ALLOWED:
+                continue
+            if _RETIRED_P50 in _emitted_keys(path):
+                offenders[relative] = "emits the retired bounded-P50 spelling"
+    assert offenders == {}, offenders
+
+    # The allowlist is not aspirational: each entry must still contain it, so a
+    # stale exemption is a failure rather than dead weight.
+    for relative, reason in sorted(_RETIRED_P50_ALLOWED.items()):
+        assert _RETIRED_P50 in _emitted_keys(ROOT / relative), (relative, reason)
+
+
+def test_the_producer_guard_actually_detects_a_new_producer(tmp_path: Path) -> None:
+    """Mutation control: without this the scan could match nothing and pass."""
+
+    offender = tmp_path / "producer.py"
+    offender.write_text('PAYLOAD = {"p50_authorized": False}\n')
+    assert _RETIRED_P50 in _emitted_keys(offender)
+
+    prose = tmp_path / "prose.py"
+    prose.write_text('"""Explains why p50_authorized was retired."""\n')
+    assert _RETIRED_P50 not in _emitted_keys(prose), (
+        "a sentence about the field is not an emission of it"
+    )
+
+    config = tmp_path / "artifact.json"
+    config.write_text('{"decisions": {"p50_authorized": false}}\n')
+    assert _RETIRED_P50 in _emitted_keys(config), "nested JSON keys must be reached"
