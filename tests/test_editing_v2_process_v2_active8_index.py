@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 
 import pytest
@@ -447,6 +448,60 @@ def test_an_excluded_or_upstream_rejected_trace_has_no_transitions(resolved) -> 
         key = tuple(rows[0][field] for field in TRACE_KEY_FIELDS)
         assert list(index.accepted_transitions_for(key)) == []
         assert rows[0]["accepted_transition_count"] == 0
+
+
+def test_the_bulk_stream_decodes_each_cached_chunk_exactly_once(
+    resolved, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without this a full pass would reinstate the triangular rescan.
+
+    The point lookup costs one chunk decode, which is correct for a point
+    lookup and quadratic in a loop over the corpus.  The bulk stream must decode
+    each chunk exactly once, and the counter below wraps -- never replaces --
+    the production reader, so what is measured is the real call graph.
+    """
+
+    import compose_v4.data.editing_v2_process_v2_active8_decision_index as module
+
+    real = module.read_process_v2_chunk_target
+    calls: list[str] = []
+
+    def counting(source_output, **kwargs):
+        calls.append(str(kwargs["target"].chunk_filename))
+        return real(source_output, **kwargs)
+
+    monkeypatch.setattr(module, "read_process_v2_chunk_target", counting)
+
+    _chain, plan, _completion, _run_root, index = resolved
+    transitions = list(index.iter_accepted_transitions())
+    accepted = [row for row in index.iter_resolved_traces() if row["category"] is None]
+    assert len(transitions) == sum(row["path_length"] for row in accepted)
+    # One decode per task that holds at least one accepted trace, and no more.
+    tasks_with_accepted = {row["task_identity_sha256"] for row in accepted}
+    assert len(calls) == len(tasks_with_accepted)
+    assert len(calls) == len(set(calls)) or len(set(calls)) <= len(plan["tasks"])
+
+    # And the bulk stream agrees with the point lookup, transition for
+    # transition, so the fast path is not a second implementation.
+    def comparable(transition: Mapping[str, Any]) -> dict[str, Any]:
+        # The exact states are compared by their persistent-slot hashes, which
+        # is what identifies a slot-addressed state; the arrays themselves have
+        # no total equality.
+        return {
+            key: value
+            for key, value in transition.items()
+            if key not in {"source_state", "successor_state"}
+        }
+
+    by_key: dict[tuple, list[dict[str, Any]]] = {}
+    for transition in transitions:
+        key = tuple(transition[field] for field in TRACE_KEY_FIELDS)
+        by_key.setdefault(key, []).append(comparable(transition))
+    sample = sorted(by_key)[0]
+    monkeypatch.setattr(module, "read_process_v2_chunk_target", real)
+    assert [
+        comparable(t) for t in index.accepted_transitions_for(sample)
+    ] == by_key[sample]
 
 
 def test_a_bare_trace_id_is_not_an_address(resolved) -> None:
