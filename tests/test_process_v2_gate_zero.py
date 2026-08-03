@@ -381,6 +381,25 @@ def test_both_results_publish_completely_nonauthorizing_artifacts(
     assert reloaded["evidence"] == published["evidence"]
 
 
+def test_an_index_whose_identity_grants_authority_is_refused(contract) -> None:
+    """The one path by which a grant can reach the evidence: the index descriptor.
+
+    ``decision_index_identity`` is the only block Gate 0 copies verbatim from an
+    object it does not own, so the depth-first authority guard on the finished
+    evidence is load-bearing rather than decorative. Removing that guard leaves
+    this the only failing test.
+    """
+
+    class _Granting(StandInIndex):
+        def identity(self) -> Mapping[str, Any]:
+            return {"schema": "test.stand_in_index", "grants": {"t1_authorized": True}}
+
+    complete = _complete_fixture(contract)
+    index = _Granting(complete._rows, complete._transitions)
+    with pytest.raises(gate_zero.ProcessV2GateZeroError, match="grants authority"):
+        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+
+
 def test_a_granted_authority_field_anywhere_in_the_evidence_is_refused() -> None:
     """The guard is applied at every depth, so a nested grant is refused too."""
 
