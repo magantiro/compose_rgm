@@ -123,6 +123,7 @@ from compose_v4.data.editing_v2_process_v2_active8_interfaces import (
     UPSTREAM_REJECTED,
 )
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+    ProcessV2ArtifactPathError,
     ProcessV2ChunkCacheError,
     ProcessV2ChunkCacheGeneration,
     chunk_targets_for_source,
@@ -502,13 +503,16 @@ class ProcessV2Active8SourceInventory:
                 )
 
     def _mounted(self, artifact_path: str) -> Path:
+        # `ProcessV2ArtifactPathError` is not a `ProcessV2ChunkCacheError`, so it
+        # has to be named: catching the wrong type here would let a path refusal
+        # escape untyped from a stream whose whole contract is fail-closed.
         try:
             return mount_process_v2_artifact_path(
                 artifact_path,
                 artifact_root=self.artifact_root,
                 field="cache source artifact path",
             )
-        except ProcessV2ChunkCacheError as error:
+        except ProcessV2ArtifactPathError as error:
             raise ProcessV2Active8SourceError(str(error)) from error
 
     def _manifests_by_v1_task(self) -> dict[str, tuple[str, Mapping[str, Any]]]:
