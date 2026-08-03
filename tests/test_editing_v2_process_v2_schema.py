@@ -149,6 +149,16 @@ def test_the_vocabulary_free_guard_refuses_a_grant_nested_in_a_mapping_or_a_list
     with pytest.raises(ProcessV2SchemaError, match="grants authority"):
         require_no_granted_authority(in_list, label="probe")
 
+    # A tuple, not only a list. These guards run on in-memory payloads at build
+    # time, before anything is serialized, and a tuple is what a builder that
+    # froze its collections naturally produces. An adversarial review found the
+    # tuple branch of the walk had no test, so dropping it survived.
+    in_tuple = {**authority_false_block(), "stages": ({"ok": 1}, {"t1_authorized": True})}
+    with pytest.raises(ProcessV2SchemaError, match="grants authority"):
+        require_no_granted_authority(in_tuple, label="probe")
+    with pytest.raises(ProcessV2SchemaError, match="grants authority"):
+        require_authority_false(in_tuple, label="probe")
+
 
 def test_the_vocabulary_free_guard_accepts_a_wholly_false_payload() -> None:
     """It refuses grants only. It must not also require a vocabulary."""
