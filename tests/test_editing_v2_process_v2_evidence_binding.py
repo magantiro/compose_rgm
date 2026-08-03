@@ -71,6 +71,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
 from compose_v4.experiments.editing_v2_process_v2_evidence_binding import (
     BINDING_SELF_HASH_FIELD,
     EVIDENCE_BINDING_STAGES,
+    RESOLVED_EVIDENCE_BINDING_FIELDS,
     ProcessV2EvidenceBindingError,
     build_resolved_evidence_binding,
     load_resolved_evidence_binding,
@@ -364,6 +365,119 @@ def test_the_schema_envelope_is_the_frozen_one(real_identity: dict[str, Any]) ->
     assert BINDING_SELF_HASH_FIELD != SELF_HASH_FIELD, (
         "a binding must not reuse a contract's self-hash field name"
     )
+
+
+def test_a_smuggled_measured_evidence_block_is_refused(
+    real_identity: dict[str, Any],
+) -> None:
+    """Failure mode 1, arriving through the binding rather than the contract.
+
+    A binding is the artifact that carries measured provenance downstream, so an
+    unknown block sealed into one is carried by every consumer that reads it. The
+    validator had no exact-field-set check at all -- both sibling validators do --
+    so this resealed exactly, validated clean, and reloaded from disk unchanged.
+    """
+
+    binding = _build(real_identity)
+    body = {key: value for key, value in binding.items() if key != BINDING_SELF_HASH_FIELD}
+    body["measured_later_evidence"] = {
+        "checkpoint_sha256": "9" * 64,
+        "selected_step": 16000,
+    }
+    smuggled = {**body, BINDING_SELF_HASH_FIELD: canonical_sha256(body)}
+    # It is sealed correctly, so no other guard has anything to say about it.
+    assert smuggled[BINDING_SELF_HASH_FIELD] == resolved_evidence_binding_self_hash(smuggled)
+    with pytest.raises(ProcessV2EvidenceBindingError, match="field set differs") as raised:
+        validate_resolved_evidence_binding(smuggled, repo_root=_ROOT)
+    assert "measured_later_evidence" in str(raised.value).split("unexpected=")[1]
+
+    # And it does not survive a round trip through the publisher either.
+    with tempfile.TemporaryDirectory() as raw:
+        path = write_resolved_evidence_binding(smuggled, path=Path(raw) / "binding.json")
+        with pytest.raises(ProcessV2EvidenceBindingError, match="field set differs"):
+            load_resolved_evidence_binding(path, repo_root=_ROOT)
+
+
+def test_the_declared_field_set_is_exactly_what_the_builder_emits(
+    real_identity: dict[str, Any],
+) -> None:
+    """The constant may not drift from the builder, in either direction."""
+
+    binding = _build(real_identity)
+    assert set(binding) == set(RESOLVED_EVIDENCE_BINDING_FIELDS)
+    assert list(RESOLVED_EVIDENCE_BINDING_FIELDS) == sorted(RESOLVED_EVIDENCE_BINDING_FIELDS)
+    assert set(AUTHORITY_FIELDS) < set(RESOLVED_EVIDENCE_BINDING_FIELDS)
+    assert BINDING_SELF_HASH_FIELD in RESOLVED_EVIDENCE_BINDING_FIELDS
+
+
+def test_the_prospective_contract_block_carries_exactly_three_fields(
+    real_identity: dict[str, Any],
+) -> None:
+    """The nested key set, which the top-level field set cannot see."""
+
+    binding = _build(real_identity)
+    body = {key: value for key, value in binding.items() if key != BINDING_SELF_HASH_FIELD}
+    body["prospective_contract"] = {
+        **body["prospective_contract"],
+        "measured_at_launch_sha256": "7" * 64,
+    }
+    resealed = {**body, BINDING_SELF_HASH_FIELD: canonical_sha256(body)}
+    with pytest.raises(ProcessV2EvidenceBindingError, match="must carry exactly"):
+        validate_resolved_evidence_binding(resealed, repo_root=_ROOT)
+
+
+def test_a_binding_that_declares_another_status_is_refused(
+    real_identity: dict[str, Any],
+) -> None:
+    """A binding that says it is something else is not this artifact."""
+
+    binding = _build(real_identity)
+    body = {key: value for key, value in binding.items() if key != BINDING_SELF_HASH_FIELD}
+    body["status"] = "MEASURED_EVIDENCE_AUTHORIZES_THE_BOUNDED_P50_LAUNCH"
+    relabelled = {**body, BINDING_SELF_HASH_FIELD: canonical_sha256(body)}
+    with pytest.raises(ProcessV2EvidenceBindingError, match="status is") as raised:
+        validate_resolved_evidence_binding(relabelled, repo_root=_ROOT)
+    assert RESOLVED_EVIDENCE_BINDING_STATUS in str(raised.value)
+
+
+def test_a_contract_expecting_another_binding_schema_is_refused(
+    real_identity: dict[str, Any],
+) -> None:
+    """The version is checked; so is the schema NAME, which is the other half."""
+
+    with _repo_copy() as root:
+        target = root / GATE_ZERO_STRUCTURAL
+        payload = json.loads(target.read_bytes())
+        payload["resolved_evidence_binding"]["cited_by_schema"] = (
+            "compose.editing_v2.process_v2.measured_evidence_binding"
+        )
+        target.write_bytes((json.dumps(payload, indent=2, sort_keys=True) + "\n").encode())
+        with pytest.raises(ProcessV2EvidenceBindingError, match="expects to be cited by"):
+            _build(real_identity, "gate_zero", repo_root=root)
+
+
+def test_a_binding_naming_another_self_hash_field_for_its_contract_is_refused(
+    real_identity: dict[str, Any],
+) -> None:
+    """Resealed, so only the pinned self-hash field name can refuse it.
+
+    Which field carries a contract's self-hash is what a consumer needs in order
+    to check that contract at all; a binding that names the wrong one sends every
+    reader to a field that does not exist.
+    """
+
+    binding = _build(real_identity)
+    body = {key: value for key, value in binding.items() if key != BINDING_SELF_HASH_FIELD}
+    body["prospective_contract"] = {
+        **body["prospective_contract"],
+        "self_hash_field": "evidence_binding_sha256",
+    }
+    resealed = {**body, BINDING_SELF_HASH_FIELD: canonical_sha256(body)}
+    assert resealed[BINDING_SELF_HASH_FIELD] == resolved_evidence_binding_self_hash(resealed)
+    with pytest.raises(
+        ProcessV2EvidenceBindingError, match="prospective_contract.self_hash_field"
+    ):
+        validate_resolved_evidence_binding(resealed, repo_root=_ROOT)
 
 
 def test_schema_version_one_is_refused_with_its_reason(
