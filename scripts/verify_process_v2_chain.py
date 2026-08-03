@@ -54,8 +54,19 @@ report states the gap rather than implying coverage.
 ``external_asset`` that resolves outside the checkout, is not verifiable here; the
 run used to print ``AGREES`` anyway.  An unresolved deferral is now ``UNVERIFIED``
 and blocks agreement.  A **versioned stage receipt** (``--stage-receipt``) is the
-only thing that resolves one, and a receipt is itself schema-checked, self-hash
-checked and refused if it grants authority.
+only thing that resolves one.  It is therefore the only permit-shaped object here
+and is held to that standard: read only from a normalized path inside the checkout,
+schema- and version-checked, self-hash checked, required to declare the one
+disposition under which it resolves anything, refused if any field spelled
+``*_authorized`` at any depth is not ``False``, and required to attribute every
+resolution to its own declared stage.
+
+*A validator is evidence, so it may be withheld but never substituted.*  The
+``validators`` seam exists for control-arm measurements -- ``validators={}``
+degrades a run to the edge graph that existed before roots were proven -- but it
+accepted any callable, so a mapping of no-ops made a tampered governed root report
+``AGREES`` and absorbed its unchecked pins.  Only the validator this module
+registered for that exact artifact is ever invoked; anything else is ``UNVERIFIED``.
 
 WHAT IT CHECKS
 --------------
@@ -195,6 +206,33 @@ STAGE_RECEIPT_ENTRY_FIELDS = frozenset({"kind", "target", "sha256", "verified_by
 STAGE_RECEIPT_REQUIRED_FIELDS = frozenset(
     {"schema", "schema_version", "stage", "status", "resolved", STAGE_RECEIPT_SELF_HASH_FIELD}
 )
+
+STAGE_RECEIPT_STATUS = "STAGE_RECEIPT_PROVENANCE_ONLY_NO_DOWNSTREAM_AUTHORITY"
+"""The one disposition under which a receipt resolves anything.
+
+``status`` was a required field whose VALUE was never read, so a receipt saying
+``STAGE_RECEIPT_REFUSED_NOTHING_VERIFIED`` resolved its entries exactly as one
+saying it had verified them.  A field that is required and never compared is worse
+than an absent one: it reads as a check.  One spelling is required rather than a
+set of accepted ones, for the same reason the schema and version are: two spellings
+of one disposition mean a reader grepping for one silently misses the other.
+"""
+
+_AUTHORITY_FIELD_SUFFIX = "_authorized"
+"""How an authority grant is recognised without a vocabulary.
+
+:func:`require_authority_false` is vocabulary-BOUND -- it refuses the seven known
+fields and the retired spellings, and requires all seven to be present -- which is
+exactly right for an artifact that must carry the block.  It cannot see a field
+outside that vocabulary, and this repository has one: ``p500_authorized``.  A stage
+receipt is a NON-granting artifact, so the guard it needs is the vocabulary-free
+one: any field spelled ``*_authorized`` that is not exactly ``False`` is a grant.
+
+Defined here rather than imported because the shared schema module exposes only the
+vocabulary-bound guard; the one vocabulary-free implementation in this repository
+(``editing_v2_process_v2_evidence_binding``) is module-private, raises that module's
+error type, and scans only the top level, so a nested grant would pass it.
+"""
 
 
 # ---- Identity nodes ----
@@ -485,8 +523,15 @@ def _receipt_index(
 
     A receipt is the ONLY thing that resolves a deferred edge, so it is held to the
     same standard as the artifacts it resolves: a declared schema and version, a
-    verified self-hash, and every authority field false.  A receipt that fails any
-    of those resolves nothing at all rather than resolving what it happens to name.
+    verified self-hash, a disposition that says it verified something, and no
+    granted authority under any spelling.  A receipt that fails any of those
+    resolves nothing at all rather than resolving what it happens to name.
+
+    Its PATH is held to the same containment rule as a pointer target, and for the
+    same reason.  ``repo_root / relative_path`` lets an absolute operand win
+    outright, so a receipt named by absolute path was read from anywhere on the
+    filesystem and its resolutions were accepted -- an ungoverned file deciding
+    which deferred edges the checkout agrees about.
     """
 
     index: dict[tuple[str, str], set[str]] = {}
@@ -535,6 +580,24 @@ def _receipt_index(
     return index
 
 
+def _granted_authority_fields(payload: object) -> list[str]:
+    """Every field at any depth that grants authority, whatever it is spelled.
+
+    Deliberately vocabulary-free: the check is the SUFFIX, so a field this
+    repository's authority vocabulary does not list -- ``p500_authorized`` is the
+    one it actually has -- cannot slip past by not being on a list.  Depth matters
+    for the same reason it does in :func:`require_authority_false`: every authority
+    block in this repository is nested, so a top-level scan looks in the one place
+    authority does not live.
+    """
+
+    return sorted(
+        location
+        for location, node in _walk(payload)
+        if location.rsplit(".", 1)[-1].endswith(_AUTHORITY_FIELD_SUFFIX) and node is not False
+    )
+
+
 def _stage_receipt_defect(payload: object) -> str | None:
     """Why this receipt may not resolve anything, or ``None`` when it may."""
 
@@ -551,11 +614,26 @@ def _stage_receipt_defect(payload: object) -> str | None:
             f"{STAGE_RECEIPT_SCHEMA_VERSION}; an unversioned or differently versioned "
             "receipt cannot be read under this contract"
         )
+    if payload["status"] != STAGE_RECEIPT_STATUS:
+        return (
+            f"declares status {payload['status']!r}, not {STAGE_RECEIPT_STATUS!r}; a "
+            "receipt that does not state that disposition resolves nothing, whatever "
+            "its entries say"
+        )
+    if not isinstance(payload["stage"], str) or not payload["stage"]:
+        return "stage must be a non-empty string naming the stage that verified these"
     try:
         verify_self_hash(payload, field=STAGE_RECEIPT_SELF_HASH_FIELD, label="the stage receipt")
         require_authority_false(payload, label="the stage receipt")
     except ProcessV2SchemaError as error:
         return str(error)
+    granted = _granted_authority_fields(payload)
+    if granted:
+        return (
+            f"grants authority at {granted}; a stage receipt records that a stage "
+            "verified some bytes and is the only thing that turns an undecided edge "
+            "into agreement, so it never permits anything itself"
+        )
     entries = payload["resolved"]
     if not isinstance(entries, list):
         return "resolved must be a list of resolution entries"
@@ -567,6 +645,20 @@ def _stage_receipt_defect(payload: object) -> str | None:
         for name in ("kind", "target", "verified_by"):
             if not isinstance(entry[name], str) or not entry[name]:
                 return f"resolved[{index}] field {name!r} must be a non-empty string"
+        # `verified_by` used to be free text nothing ever compared -- "nobody at
+        # all" was accepted. There is no registry of stage loaders here to decide
+        # it against, and inventing one would be inventing policy, so it is bound
+        # to the receipt's own `stage` instead: one receipt carries one stage's
+        # evidence, and an entry attributed to someone else belongs in that
+        # someone's receipt. Both fields are now compared against something, which
+        # is what the alternative -- deleting them -- would also achieve, without
+        # losing the attribution a permit-shaped artifact should carry.
+        if entry["verified_by"] != payload["stage"]:
+            return (
+                f"resolved[{index}] is attributed to {entry['verified_by']!r} but this "
+                f"receipt is the {payload['stage']!r} receipt; one receipt carries one "
+                "stage's evidence"
+            )
     return None
 
 
