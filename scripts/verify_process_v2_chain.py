@@ -282,12 +282,42 @@ def live_identity_nodes() -> tuple[IdentityNode, ...]:
 
 RootValidator = Callable[[Path], None]
 
+_VALIDATOR_REGISTRATION = object()
+"""The stamp only :func:`_chain_artifact_validator` applies.
+
+Module-private and compared by identity, so it cannot be reproduced by naming it.
+A caller that genuinely wants to forge one has to reach into this module and say
+so, which is the difference between a hole and a deliberate act.
+"""
+
+_VALIDATOR_ARTIFACT_ATTRIBUTE = "chain_artifact"
+_VALIDATOR_REGISTRATION_ATTRIBUTE = "registration"
+
 
 def _chain_artifact_validator(name: str) -> RootValidator:
     def validate(repo_root: Path) -> None:
         load_process_v2_chain_artifact(name, repo_root=repo_root)
 
+    # Stamped with the artifact it owns AND with the registration identity, so a
+    # substituted callable cannot present itself as either.
+    setattr(validate, _VALIDATOR_ARTIFACT_ATTRIBUTE, name)
+    setattr(validate, _VALIDATOR_REGISTRATION_ATTRIBUTE, _VALIDATOR_REGISTRATION)
     return validate
+
+
+def _is_registered_validator(name: str, validator: RootValidator) -> bool:
+    """Whether ``validator`` is the registry's own validator FOR ``name``.
+
+    Both halves are load-bearing.  The registration identity refuses a substituted
+    callable outright; the artifact name refuses a registered validator that has
+    been moved onto a different root, which would prove the wrong artifact while
+    reporting the right one.
+    """
+
+    return (
+        getattr(validator, _VALIDATOR_REGISTRATION_ATTRIBUTE, None) is _VALIDATOR_REGISTRATION
+        and getattr(validator, _VALIDATOR_ARTIFACT_ATTRIBUTE, None) == name
+    )
 
 
 def owning_root_validators() -> dict[str, RootValidator]:
@@ -462,8 +492,21 @@ def _receipt_index(
     index: dict[tuple[str, str], set[str]] = {}
     for relative_path in paths:
         row: dict[str, Any] = {"path": relative_path, "resolved": 0, "result": "refused"}
+        receipt_path = normalized_repository_path(repo_root, relative_path)
+        if receipt_path is None:
+            report.add(
+                FAIL,
+                "stage_receipt_path_escapes_the_checkout",
+                relative_path,
+                "is not a normalized path inside this checkout. A stage receipt is "
+                "the only thing that turns an undecided edge into agreement, so one "
+                "read from outside the tree would let an ungoverned file decide what "
+                "this checkout agrees about",
+            )
+            report.stage_receipts.append(row)
+            continue
         try:
-            raw = (repo_root / relative_path).read_bytes()
+            raw = receipt_path.read_bytes()
         except OSError as error:
             report.add(FAIL, "unreadable_stage_receipt", relative_path, str(error))
             report.stage_receipts.append(row)
@@ -1133,6 +1176,12 @@ def _validate_roots(
     field set, canonical bytes, self-hash, declared pointer inventory and
     deterministic rebuild in one step.
 
+    ``validators`` may only WITHHOLD: an entry that is not the validator this
+    module registered for that exact artifact is refused unrun.  A validator that
+    a caller supplies is a validator whose verdict the caller wrote, and a no-op
+    one is indistinguishable from a proof, so the mapping is a selection of which
+    owned roots to prove rather than a substitution of what proves them.
+
     Returns the roots whose bodies were proven by a deterministic rebuild.
     """
 
@@ -1151,6 +1200,35 @@ def _validate_roots(
                 "validator owns it, so its schema, exact field set, canonical bytes, "
                 "self-hash, pointer inventory and deterministic rebuild are undecided. "
                 "An unowned root is not a sound root",
+            )
+            continue
+        if not _is_registered_validator(name, validator):
+            # A validator is EVIDENCE, so it may only be withheld, never
+            # substituted. Withholding one (`validators={}`, or a subset) is the
+            # control arm this parameter exists for and leaves the run strictly
+            # weaker; supplying a callable of one's own would let the caller decide
+            # the outcome, which is the one thing a verifier must not delegate.
+            report.roots.append(
+                {
+                    "artifact": name,
+                    "validator": _validator_name(validator),
+                    "result": "substituted_validator",
+                    "detail": (
+                        "is not the registered validator for this artifact, so it was "
+                        "not run"
+                    ),
+                }
+            )
+            report.add(
+                UNVERIFIED,
+                "root_validator_not_registered",
+                name,
+                "was offered a validator this module did not register for it, so it "
+                "was NOT invoked and this root is undecided. A substituted validator "
+                "returns whatever its author chooses -- including nothing at all, "
+                "which is indistinguishable from a proof -- so it could only ever "
+                "manufacture agreement. Withholding a validator is supported and "
+                "makes a run weaker; replacing one is not",
             )
             continue
         if not identified.get(name, False):
