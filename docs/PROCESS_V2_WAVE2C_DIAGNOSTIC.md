@@ -177,6 +177,79 @@ decision-shard parse is 16 rows per call, not 2048.
    chunks and yields 60 transitions, **45 of them held-out**. Consuming it as-is
    weakens "never opened" to "never counted".
 
+## Evidence integrity: what a derivation-based fix reached, and its honest residual
+
+Workstream `w2c/evidence` (commits `9a6bedb`, `868f5fc`, `06250d5`) rebuilt the
+integrity checks as **derivation comparisons, not additional hashes**. Every
+mutation test performs a FULL reseal -- row `decision_sha256`, receipt
+`decision_file_sha256` + `decision_stream_sha256` + `receipt_sha256` over a
+rebuilt deterministic gzip, completion `result_inventory_sha256` +
+`completion_sha256` -- so no refusal below comes from a hash that failed to move.
+
+| audited vector | now | mechanism |
+|---|---|---|
+| `supported` false on an accepted row | REFUSED | accepted-row contradiction in the derived evidence |
+| `exclusion_reason` populated | REFUSED | the payload guard restated over the payload |
+| `canonical_successor_key` tampered | REFUSED | `canonical_state_key(successor)` re-derived on the cached state, and the DERIVED value is what is published |
+| each of the five candidate counts | REFUSED | `candidate_totals` recomputed from the per-action evidence it summarises |
+| stale receipt / decision-file identity | REFUSED | inventory rebuilt from plan task + LIVE receipt |
+
+### The residual, pinned rather than hidden
+
+**A per-action candidate count moved WITHIN its arithmetic bounds and propagated
+consistently through `candidate_totals`, the receipt counts, the inventory row
+and `active8_counts` is still accepted end to end.** Measured: `raw_mark_count`
+279 -> 1279 reaches `index.counts()["raw_candidate_marks"]` and flows out of
+`iter_accepted_transitions`.
+
+Distinguishing it from the truth requires **re-enumerating the fiber**, which the
+read path is now deliberately forbidden to do. It is pinned as an asserting test
+(`test_a_fully_propagated_candidate_count_is_the_stated_residual`) so a future
+change that closes it fails loudly rather than silently.
+
+Bounds that DO catch implausible moves: `matching <= raw`, `exact <= matching`,
+`canonical <= raw`, `alias <= raw`, and for accepted transitions `matching == 1`,
+`exact == 1`, `alias >= 1`, `exact <= alias`.
+
+**What the rebuild owes because of this: a bounded sentinel that re-enumerates a
+sample and compares.** That converts the residual from undetectable to sampled.
+It was not written here.
+
+### Why deriving inside the Active8 map task is the right split
+
+Three reasons from inside the code, not from preference. The map task already
+holds the model and is already enumerating, so deriving there is free while
+deriving on read is a second full enumeration of the corpus. The read path has no
+legitimate way to obtain the model except reconstructing it from the plan -- built
+and working, but a whole model construction per consumer, which cannot survive a
+40-way fan-out. And `ProcessV2ProductionCandidateChecker.__call__` calls
+`system.apply` per matching mark, which would put the executor on Gate 0's
+critical path.
+
+### Six more structural lessons for the rebuild
+
+8. **Do not publish an aggregate that is not re-derivable from what is stored
+   beside it.** Every aggregate here was derivable and simply was not derived.
+   The one value that is NOT derivable from the artifact -- the per-action
+   candidate count -- is exactly where the residual lives.
+9. **A dataclass `__post_init__` is not a validator for a persisted payload.**
+   `ProcessV2CandidateEvidence` carried a good guard; nothing reconstructed the
+   dataclass on read, so it never ran and `supported` / `exclusion_reason` were
+   inert on disk.
+10. **`_publish_task_atomically` validates by reading back its own bytes**, so a
+    check added to the reader automatically runs at write time. That is a good
+    property; make it explicit rather than incidental.
+11. **A validator whose signature forces a lookup is a scaling trap.**
+    `accepted_transitions_for` called `validate_accepted_transition` per
+    transition, re-running a full shard gunzip and a full chunk decode -- three
+    full decodes per transition.
+12. **`chunk_filename` is not unique per task.** Address a chunk by task identity.
+13. **The exclusion list is fully recomputable** because
+    `evaluate_process_v2_active8_trace` short-circuits: either every action
+    carries evidence or none does, so static and dynamic exclusions never mix in
+    one row. That all-or-nothing property is what makes the list derivable rather
+    than merely checkable.
+
 ## State at this checkpoint
 
 Focused: `tests/test_process_v2_end_to_end_gate_zero.py` **19 passed**.
@@ -201,6 +274,7 @@ Both scientific identities are unchanged: V1
 
 ## Not completed here
 
-The classifier extraction and its binding cascade, and the Active8 write-time
-evidence derivation, were both in flight when this branch was retired. Their
-findings are in the workstream branches `w2c/classifier` and `w2c/evidence`.
+The classifier extraction and its binding cascade were in flight when this branch
+was retired; findings are on `w2c/classifier`. The Active8 evidence work completed
+and is summarised above, on `w2c/evidence`. The bounded re-enumeration sentinel
+was not written.
