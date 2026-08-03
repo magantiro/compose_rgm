@@ -495,6 +495,51 @@ def test_an_unsorted_mapping_is_refused_even_though_it_self_hashes(
         validate_process_v2_admitted_source_identity(shuffled, repo_root=ROOT)
 
 
+def test_a_relabelled_status_is_refused(tmp_path: Path) -> None:
+    """A well-formed string that is not the frozen one.
+
+    The type of ``status`` is checked elsewhere; what is checked here is the
+    VALUE, and a descriptor announcing some other status is not this artifact.
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    relabelled = _reseal({**identity, "status": "V2_ADMISSION_OVERLAY_RESOLVED"})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="declares status"
+    ) as raised:
+        validate_process_v2_admitted_source_identity(relabelled, repo_root=ROOT)
+    assert ADMITTED_SOURCE_STATUS in str(raised.value)
+
+
+def test_a_non_string_key_is_refused_even_when_it_spells_a_real_field(
+    tmp_path: Path,
+) -> None:
+    """The exact-type rule that the count checks state for values, for keys.
+
+    A ``str`` subclass is the one shape that reaches this guard: it hashes and
+    compares equal to the name it spells, so the field set matches, the sort order
+    is unchanged, ``json.dumps`` writes the same bytes and the self-hash still
+    verifies. A plain non-string key never gets this far -- the authority walk
+    calls ``endswith`` on every key first.
+    """
+
+    class _StrKey(str):
+        pass
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    odd = {(_StrKey(key) if key == "status" else key): value for key, value in identity.items()}
+    assert odd == identity, "equal as mappings, which is why nothing else sees it"
+    assert set(odd) == set(identity)
+    assert list(odd) == sorted(odd)
+    assert odd["admitted_source_sha256"] == _self_hash(odd, "admitted_source_sha256"), (
+        "the canonical hash cannot see the key's type either"
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="non-string key"):
+        validate_process_v2_admitted_source_identity(odd, repo_root=ROOT)
+
+
 def test_a_granted_authority_field_is_refused_at_any_depth(tmp_path: Path) -> None:
     """Including inside a mapping nested in a list, which no field-set check sees."""
 
@@ -531,6 +576,44 @@ def test_a_granted_authority_field_is_refused_at_any_depth(tmp_path: Path) -> No
     with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="authority") as raised:
         validate_process_v2_admitted_source_identity(nested_in_list, repo_root=ROOT)
     assert "[0].t1_authorized" in str(raised.value)
+
+
+def test_a_grant_under_an_unregistered_name_is_refused(tmp_path: Path) -> None:
+    """The vocabulary-aware guard cannot see a name nobody has registered.
+
+    ``require_authority_false`` judges the seven names it knows and would pass
+    this; only the vocabulary-free walk refuses it. The two are complementary, and
+    dropping either leaves a hole the other does not cover -- so each is asserted
+    by the message it produces, not merely by "something raised".
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    assert "p500_authorized" not in AUTHORITY_FIELDS
+
+    granted = _reseal({**identity, "p500_authorized": True})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="grants authority"
+    ) as raised:
+        validate_process_v2_admitted_source_identity(granted, repo_root=ROOT)
+    assert "p500_authorized" in str(raised.value)
+
+    # Nested, and inside a list, where an exact-field-set check reports only an
+    # unexpected key rather than a grant.
+    nested = _reseal(
+        {
+            **identity,
+            "physical_execution_identity": {
+                **identity["physical_execution_identity"],
+                "range_task_inventory": [{"long_training_permitted_authorized": True}],
+            },
+        }
+    )
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="grants authority"
+    ) as raised:
+        validate_process_v2_admitted_source_identity(nested, repo_root=ROOT)
+    assert "[0].long_training_permitted_authorized" in str(raised.value)
 
 
 def test_the_retired_bounded_p50_spelling_is_refused(tmp_path: Path) -> None:
@@ -584,6 +667,115 @@ def test_the_census_and_its_evidence_must_both_reconcile(tmp_path: Path) -> None
         validate_process_v2_admitted_source_identity(inflated, repo_root=ROOT)
 
 
+def test_a_negative_count_is_refused_even_when_every_identity_reconciles(
+    tmp_path: Path,
+) -> None:
+    """The silent support inflation the negative-count refusal exists to stop.
+
+    Every other census guard is satisfied here: ``admitted + rejected == source``,
+    ``transitions + admitted == states``, the reason census sums to
+    ``rejected_entries``, and the ledger publishes the same numbers. The
+    descriptor nonetheless claims FOUR admitted entries out of three, financed by
+    a rejection count of minus one. Only the refusal of a negative count can say
+    so.
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+    code = next(iter(identity["rejected_traces_by_code"]))
+    counts = {
+        "source_entries": 3,
+        "admitted_entries": 4,
+        "rejected_entries": -1,
+        "admitted_states": 7,
+        "admitted_transitions": 3,
+    }
+    assert counts["admitted_entries"] + counts["rejected_entries"] == counts["source_entries"]
+    assert counts["admitted_transitions"] + counts["admitted_entries"] == (
+        counts["admitted_states"]
+    )
+    assert counts["admitted_entries"] > int(identity["counts"]["admitted_entries"]), (
+        "the point of the mutation is that it inflates the admitted support"
+    )
+    ledger = {
+        key: value
+        for key, value in identity["rejection_ledger"].items()
+        if key != "rejection_ledger_sha256"
+    }
+    ledger["rejected_entries"] = -1
+    ledger["rejected_traces_by_code"] = {code: -1}
+    ledger["rejection_ledger_sha256"] = _self_hash(ledger, "rejection_ledger_sha256")
+    inflated = _reseal(
+        {
+            **identity,
+            "counts": dict(sorted(counts.items())),
+            "rejected_traces_by_code": {code: -1},
+            "rejection_ledger": dict(sorted(ledger.items())),
+        }
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="negative") as raised:
+        validate_process_v2_admitted_source_identity(inflated, repo_root=ROOT)
+    assert "hide lost support" in str(raised.value)
+
+
+def test_the_ledger_and_the_descriptor_must_agree_on_the_rejected_count(
+    tmp_path: Path,
+) -> None:
+    """Two publications of one decision set, so they must publish the same count.
+
+    The ledger is internally consistent -- its reason census sums to its own
+    ``rejected_entries`` -- and the descriptor's census is untouched, so every
+    per-block check passes and only the comparison between them can catch it.
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+    assert int(identity["counts"]["rejected_entries"]) == 1
+    code = next(iter(identity["rejected_traces_by_code"]))
+    ledger = {
+        key: value
+        for key, value in identity["rejection_ledger"].items()
+        if key != "rejection_ledger_sha256"
+    }
+    ledger["rejected_entries"] = 2
+    ledger["rejected_traces_by_code"] = {code: 2}
+    ledger["rejection_ledger_sha256"] = _self_hash(ledger, "rejection_ledger_sha256")
+    broken = _reseal({**identity, "rejection_ledger": dict(sorted(ledger.items()))})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="but the census records 1"
+    ):
+        validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+
+def test_each_nested_body_verifies_its_own_self_hash(tmp_path: Path) -> None:
+    """Resealing the descriptor around a tampered body does not seal the body.
+
+    Each nested body carries its own self-hash, and the field mutated in each is
+    one nothing else compares: it is checked for SHA-256 syntax and then only by
+    the body's own hash. Without that verification the tampering is invisible.
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+    for block, key in (
+        ("physical_execution_identity", "range_task_inventory_sha256"),
+        ("rejection_ledger", "rejection_stream_sha256"),
+    ):
+        nested = dict(identity[block])
+        assert nested[key] != "d" * 64
+        nested[key] = "d" * 64
+        # The nested body is NOT resealed; the descriptor around it IS, so the
+        # top-level self-hash agrees and cannot be what refuses.
+        broken = _reseal({**identity, block: dict(sorted(nested.items()))})
+        assert broken["admitted_source_sha256"] == _self_hash(
+            broken, "admitted_source_sha256"
+        )
+        with pytest.raises(
+            ProcessV2AdmittedSourceIdentityError, match=f"{block} self-hash"
+        ):
+            validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+
 def test_a_rejection_census_that_does_not_sum_is_refused(tmp_path: Path) -> None:
     fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
     identity = _resolve(fixture).identity()
@@ -614,6 +806,14 @@ def test_the_nested_bodies_validate_through_their_own_schemas(tmp_path: Path) ->
     for block, key, value, message in (
         ("physical_execution_identity", "schema_version", 2, "schema_version"),
         ("physical_execution_identity", "range_task_count", "3", "not an exact int"),
+        # The nested schema NAME, not only its version: a body announcing another
+        # schema is another body, and the version check cannot see that.
+        (
+            "physical_execution_identity",
+            "schema",
+            "compose.data.editing_process_v2_rejection_ledger",
+            "physical_execution_identity.schema is",
+        ),
         ("rejection_ledger", "sort_order", "entry_index_only", "sort_order"),
         ("rejection_ledger", "schema", "compose.other", "schema"),
     ):

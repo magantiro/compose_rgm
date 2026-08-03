@@ -377,6 +377,85 @@ def test_a_grant_nested_in_the_embedded_descriptor_or_a_source_row_is_refused(
         require_no_granted_authority(nested_in_list, label="the joined identity")
 
 
+def test_a_grant_under_an_unregistered_name_is_refused(monkeypatch, real_join) -> None:
+    """The vocabulary-aware guard cannot see a name nobody has registered.
+
+    ``require_authority_false`` judges the seven names it knows; only the
+    vocabulary-free walk refuses a grant spelled some other way. Both run here,
+    and each is asserted by the message it produces so that dropping either one
+    is a failure rather than a silent narrowing.
+    """
+
+    identity = _resolve_real(monkeypatch, real_join).identity()
+    assert "p500_authorized" not in AUTHORITY_FIELDS
+
+    granted = _reseal({**identity, "p500_authorized": True})
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="grants authority"
+    ) as raised:
+        validate_process_v2_active8_source_identity(granted, repo_root=_ROOT)
+    assert "p500_authorized" in str(raised.value)
+
+    rows = [dict(row) for row in identity["sources"]]
+    rows[0] = dict(sorted({**rows[0], "lane_launch_authorized": True}.items()))
+    nested = _reseal({**identity, "sources": rows})
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="grants authority"
+    ) as raised:
+        validate_process_v2_active8_source_identity(nested, repo_root=_ROOT)
+    assert "sources[0].lane_launch_authorized" in str(raised.value)
+
+
+def test_a_relabelled_status_is_refused(monkeypatch, real_join) -> None:
+    """A well-formed string that is not the frozen one is another artifact."""
+
+    identity = _resolve_real(monkeypatch, real_join).identity()
+    relabelled = _reseal({**identity, "status": "PROCESS_V2_ACTIVE8_SOURCE_RESOLVED"})
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="declares status"
+    ) as raised:
+        validate_process_v2_active8_source_identity(relabelled, repo_root=_ROOT)
+    assert SOURCE_STATUS in str(raised.value)
+
+
+def test_a_source_row_carrying_an_extra_field_is_refused(monkeypatch, real_join) -> None:
+    """A row is an exact shape, not a minimum one.
+
+    Every declared field of the row still validates and every total still
+    reconciles, so the extra field is invisible to all of it: a row is where a
+    consumer would smuggle a per-task measurement into an identity that grants
+    nothing.
+    """
+
+    identity = _resolve_real(monkeypatch, real_join).identity()
+    rows = [dict(row) for row in identity["sources"]]
+    rows[0] = dict(sorted({**rows[0], "measured_entry_count": 4}.items()))
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="sources\\[0\\] field set differs"
+    ) as raised:
+        validate_process_v2_active8_source_identity(
+            _reseal({**identity, "sources": rows}), repo_root=_ROOT
+        )
+    assert "measured_entry_count" in str(raised.value).split("unexpected=")[1]
+
+
+def test_a_row_with_an_empty_or_non_string_lane_or_role_is_refused(
+    monkeypatch, real_join
+) -> None:
+    """The lane and the role are what a row is FOR; nothing else inspects them."""
+
+    identity = _resolve_real(monkeypatch, real_join).identity()
+    for key, value in (("data_lane", ""), ("partition_role", 3), ("data_lane", None)):
+        rows = [dict(row) for row in identity["sources"]]
+        rows[0] = dict(sorted({**rows[0], key: value}.items()))
+        with pytest.raises(
+            ProcessV2Active8SourceIdentityError, match=f"sources\\[0\\].{key} is not a"
+        ):
+            validate_process_v2_active8_source_identity(
+                _reseal({**identity, "sources": rows}), repo_root=_ROOT
+            )
+
+
 def test_the_embedded_descriptor_is_checked_by_its_own_owner(
     monkeypatch, real_join
 ) -> None:
