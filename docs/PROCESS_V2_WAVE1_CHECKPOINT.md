@@ -224,6 +224,20 @@ collection errors hiding ~211 tests, invented four failures that pass here, and
 reported a RingCore catalog "drift" that does not exist under the compliant
 interpreter.
 
+### Provenance caveat on Workstream B
+
+Workstream B's files were integrated from its worktree while it was still
+running, and **its own report was never received**. Everything attributed to B in
+§5 was therefore verified by me directly rather than taken on its account: its 80
+tests pass under the compliant interpreter, ruff is clean, and its central claim
+is genuinely tested rather than asserted --
+`test_one_source_shard_is_opened_once_and_read_exactly_once` counts real
+`gzip.open` calls through a monkeypatched counter, and a contrasting test proves
+a range reader does re-hash and re-decompress. What is missing is B's own
+narrative: its confirmation of each defect, its microbenchmark numbers, and any
+caveat it would have raised. A reviewer should read B's diff without the benefit
+of an author's summary.
+
 ## 8. Local microbenchmarks — NOT production evidence
 
 Synthetic fixtures, local CPU, tiny payloads. They inform initial resource
@@ -235,6 +249,9 @@ contract build            13.4 ms
 contract publish          42.4 ms
 generation validation     26.9 ms
 ```
+
+These are Workstream A's measurements. No cache or rebind throughput figure is
+reported, because B's report was not received (above) and I did not re-measure.
 
 ## 9. The three riskiest areas for review
 
