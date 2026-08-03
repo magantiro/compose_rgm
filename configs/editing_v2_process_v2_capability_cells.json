@@ -12,7 +12,7 @@
   "admitted_source": {
     "completion_sha256": null,
     "run_identity_sha256": null,
-    "schema": "compose.data.process_v2_admitted_source"
+    "schema": "compose.data.editing_process_v2_admitted_source"
   },
   "bindings": {
     "action_codec_schema_version": 4,
@@ -62,7 +62,7 @@
   },
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_capability_cells",
-  "contract_sha256": "9e44689b4b57c1ea9cc68e7a73bdc855ce3e1b744747e40c9036ebed491a815b",
+  "contract_sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
   "exact_evidence_strata": {
     "canonical_successor_count": {
       "bins": [

@@ -12,12 +12,12 @@
   "admitted_source": {
     "completion_sha256": null,
     "run_identity_sha256": null,
-    "schema": "compose.data.process_v2_admitted_source"
+    "schema": "compose.data.editing_process_v2_admitted_source"
   },
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_active8_decision_runtime",
-  "contract_sha256": "48be271f149caa029c4299bbf61a99571e601e47f5ed2191823357214e1ad08b",
+  "contract_sha256": "45f3de02da92991802c4cc192d00ceac47291e5ac3d177d19630799808df1f8d",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,

@@ -12,7 +12,7 @@
   "admitted_source": {
     "completion_sha256": null,
     "run_identity_sha256": null,
-    "schema": "compose.data.process_v2_admitted_source"
+    "schema": "compose.data.editing_process_v2_admitted_source"
   },
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
@@ -30,15 +30,15 @@
     "validate_when_present": true
   },
   "contract_id": "editing_v2_process_v2_development_cell_roles",
-  "contract_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc",
+  "contract_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
   "parents": {
     "capability_cell_registry": {
-      "file_sha256": "8448e8d8cffebee3b146d9774f413fb37ee83ce8e4050541b26c45c4fa20fb89",
+      "file_sha256": "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592",
       "path": "configs/editing_v2_process_v2_capability_cells.json",
-      "semantic_sha256": "9e44689b4b57c1ea9cc68e7a73bdc855ce3e1b744747e40c9036ebed491a815b"
+      "semantic_sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99"
     }
   },
   "partition_policy": {

@@ -261,15 +261,26 @@ and the charge boundary itself has its own dedicated test.
    to diff and cannot tell that only the task address changed. The per-task
    manifests carry the rows; the completion, which is the document a reviewer
    reads, does not.
-4. **`p50_authorized` versus `bounded_p50_authorized`.** The admitted-source
+4. **The V1 T1 and P50 policies contribute zero checked pointer edges.**
+   `editing_v2_semantic_t1_panel_policy_v1.json`,
+   `..._t1_capacity_policy_v1.json` and `..._p50_recipe_policy_v1.json` bind
+   their parents by bare hash with no adjacent `path` sibling, so the chain
+   verifier discovers no edge for them and `_check_pointer_edges` never runs.
+   They still appear in the chain report, which resolves by value ownership,
+   which makes them look checked. A stale pin there is caught only by the
+   base-revision sweep, and degrades to a silent "unclassified" when no base is
+   available. `capability_cells_v1`'s classifier-source pin is invisible for a
+   related reason. The V2 counterparts contribute 2, 4 and 2 checked edges.
+
+5. **`p50_authorized` versus `bounded_p50_authorized`.** The admitted-source
    adapter spells its P50 flag one way and the plan driver envelope the other.
    Both are false, so nothing is wrong today, but a consumer grepping one
    spelling will miss the other.
-5. **`entries_per_task` is part of the run address**, so a re-shard republishes to
+6. **`entries_per_task` is part of the run address**, so a re-shard republishes to
    a different run root. This is deliberate provenance, but it means the shard
    size must be chosen once, deliberately, and recorded.
-6. **The throughput projection below is a floor, not a prediction** (§10).
-7. **Pre-existing and unrelated to this work:** the venv lacks PyYAML, which
+7. **The throughput projection below is a floor, not a prediction** (§10).
+8. **Pre-existing and unrelated to this work:** the venv lacks PyYAML, which
    produces 15 collection errors on both sides of the comparison, and
    `build_production_ringcore_catalog` reconstructs a fingerprint that differs
    from the frozen constant, which fails several Gate-0-shaped tests identically

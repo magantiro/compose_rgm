@@ -12,12 +12,12 @@
   "admitted_source": {
     "completion_sha256": null,
     "run_identity_sha256": null,
-    "schema": "compose.data.process_v2_admitted_source"
+    "schema": "compose.data.editing_process_v2_admitted_source"
   },
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_t1_capacity_policy",
-  "contract_sha256": "b26b3043c2d58139374966c356b7c19f10802b1fd679bd060aa0253e2c1252ed",
+  "contract_sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
   "empirical_repeated_state_gate": {
     "bounded_p50_capacity_prerequisite": false,
     "empirical_law_claims_authorized": false,
@@ -90,14 +90,14 @@
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
   "parents": {
     "development_cell_roles": {
-      "file_sha256": "4bcc3f2825f4684594e91ccd8e5159f44ea62b9d284d25383ef59173d761ecb1",
+      "file_sha256": "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017",
       "path": "configs/editing_v2_process_v2_development_cell_roles.json",
-      "semantic_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc"
+      "semantic_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221"
     },
     "t1_panel_policy": {
-      "file_sha256": "ce12643870a45f24dc8ef71a84178d72a961ee278813657ca4fced988fcc46ea",
+      "file_sha256": "67aef9d024b762c980833c5b5aaf327e8cfb22be85b3aa241a9983fe058199aa",
       "path": "configs/editing_v2_process_v2_t1_panel_policy.json",
-      "semantic_sha256": "5ab909a499cb16123cafae6e055ca293b694c9d826c6aaf71d6fa38dfbdf7a9c"
+      "semantic_sha256": "d181ab3946439e374d9844cb6d1c864f925b6a6dfa7197eacf2e04576ef3b184"
     }
   },
   "process_identity": {

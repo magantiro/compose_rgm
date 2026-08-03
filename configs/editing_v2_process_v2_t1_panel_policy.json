@@ -12,13 +12,13 @@
   "admitted_source": {
     "completion_sha256": null,
     "run_identity_sha256": null,
-    "schema": "compose.data.process_v2_admitted_source"
+    "schema": "compose.data.editing_process_v2_admitted_source"
   },
   "bounded_p50_authorized": false,
   "cache_handoff": "complete_train_trace_union_for_cpu_successor_fiber_cache_v1",
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_t1_panel_policy",
-  "contract_sha256": "5ab909a499cb16123cafae6e055ca293b694c9d826c6aaf71d6fa38dfbdf7a9c",
+  "contract_sha256": "d181ab3946439e374d9844cb6d1c864f925b6a6dfa7197eacf2e04576ef3b184",
   "empirical_multiplicity_receipts_included": false,
   "final_test_selection_authorized": false,
   "gate_thresholds_included": false,
@@ -51,9 +51,9 @@
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
   "parents": {
     "development_cell_roles": {
-      "file_sha256": "4bcc3f2825f4684594e91ccd8e5159f44ea62b9d284d25383ef59173d761ecb1",
+      "file_sha256": "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017",
       "path": "configs/editing_v2_process_v2_development_cell_roles.json",
-      "semantic_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc"
+      "semantic_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221"
     }
   },
   "process_identity": {

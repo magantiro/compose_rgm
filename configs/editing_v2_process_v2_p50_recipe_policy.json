@@ -12,7 +12,7 @@
   "admitted_source": {
     "completion_sha256": null,
     "run_identity_sha256": null,
-    "schema": "compose.data.process_v2_admitted_source"
+    "schema": "compose.data.editing_process_v2_admitted_source"
   },
   "bounded_p50_authorized": false,
   "cache": {
@@ -23,7 +23,7 @@
   },
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_p50_recipe_policy",
-  "contract_sha256": "35f3e08ee1b7221054413e7eb08b5cd6b46ed9a60455f2bf77c55398758d44a4",
+  "contract_sha256": "1a6de7e76bed2aa2a3c52ec5b68fb78a1484a924d2c6f17a712384a27b47bef8",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -55,9 +55,9 @@
   "p500_authorized": false,
   "parents": {
     "development_cell_roles": {
-      "file_sha256": "4bcc3f2825f4684594e91ccd8e5159f44ea62b9d284d25383ef59173d761ecb1",
+      "file_sha256": "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017",
       "path": "configs/editing_v2_process_v2_development_cell_roles.json",
-      "semantic_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc"
+      "semantic_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221"
     }
   },
   "process_identity": {

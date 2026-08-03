@@ -272,10 +272,24 @@ def test_every_artifact_binds_the_live_process_v2_identity() -> None:
 
 
 def test_every_artifact_declares_an_admitted_source_slot() -> None:
+    """The slot must name the schema the ADAPTER actually declares.
+
+    This originally asserted a hand-copied literal, and the literal was wrong:
+    the seven contracts bound `compose.data.process_v2_admitted_source` while
+    the adapter declares `compose.data.editing_process_v2_admitted_source`, so a
+    consumer matching the adapter's own constant would not have matched. A test
+    that restates a constant cannot catch that; comparing against the imported
+    constant can, and cannot drift from it.
+    """
+
+    from compose_v4.data.editing_process_v2_admitted_source import (
+        ADMITTED_SOURCE_SCHEMA,
+    )
+
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         block = _load(name)["admitted_source"]
         assert block == {
-            "schema": "compose.data.process_v2_admitted_source",
+            "schema": ADMITTED_SOURCE_SCHEMA,
             "completion_sha256": None,
             "run_identity_sha256": None,
         }

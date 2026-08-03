@@ -138,7 +138,13 @@ AUTHORITY_FIELDS: tuple[str, ...] = (
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
-ADMITTED_SOURCE_SCHEMA = "compose.data.process_v2_admitted_source"
+# Imported from the adapter, never restated. A hand-copied schema string is
+# how these seven contracts came to bind a schema that does not exist: the
+# adapter declares "compose.data.editing_process_v2_admitted_source", and a
+# consumer matching the adapter's own constant would not have matched.
+from compose_v4.data.editing_process_v2_admitted_source import (  # noqa: E402
+    ADMITTED_SOURCE_SCHEMA,
+)
 ADMITTED_SOURCE_FIELDS: tuple[str, ...] = (
     "schema",
     "completion_sha256",
