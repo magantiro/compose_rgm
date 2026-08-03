@@ -13,13 +13,13 @@
   "parents": {
     "decision_runtime": {
       "path": "configs/editing_v2_semantic_active8_decision_runtime_v1.json",
-      "file_sha256": "e668087b6b6720e46408d14c07304aec101e7ef94aad4b3f4518a2f047157223",
-      "semantic_sha256": "ccb8094202ecc51065b7e8c52a8cc4a8a85ac4c62ce50674b883fcdd09fe9256"
+      "file_sha256": "53c066be4ce76c1ecafc381b4f03cc10b64b1f3436903b64c98a18cb7d3c4a77",
+      "semantic_sha256": "2938305358271ad957c85342126f20474175fc289faca19cef6a6e0138c4cea1"
     },
     "semantic_model_process": {
       "path": "configs/editing_gate_zero_semantic_model_process_v1.json",
-      "file_sha256": "0e2f8fc9f685cbf477254c06f9375bf837e130a80035a479a9dfabc91dcac672",
-      "semantic_sha256": "cd940093c629802b5f29847dee5fa3cf0c2408c31f9e1f31345870a6bf1ec082"
+      "file_sha256": "bf58a3324abfbd5d5f5492d10e8b0ce393d3a74762b59d2967d6062dd1fd4708",
+      "semantic_sha256": "db4e5cc5d2bb5efee97bcde767edaf85f41e238252def5b21832b6bbe398a3ed"
     },
     "semantic_process": {
       "path": "configs/editing_v2_semantic_process_v1.json",
@@ -28,13 +28,13 @@
     },
     "capability_cell_registry": {
       "path": "configs/editing_v2_semantic_capability_cells_v1.json",
-      "file_sha256": "d9f708fa00a4ae48b3eecb06e4bcfd7acae5bcbc0e93f04344897bf26fe08f1d",
-      "semantic_sha256": "54379adfa479e4f6de17c13f2a85a135ae753360ec0106a183a92c88e722fb7f"
+      "file_sha256": "3fbf1cb4bc51bb4390132edaf679cf9d018d4f96d13cc4979923b27f485db2fa",
+      "semantic_sha256": "adcbc06d89a2df0baa2869ee5fcb96d738b594841dc1b056c3de827e3c6d18cb"
     },
     "development_cell_roles": {
       "path": "configs/editing_v2_semantic_development_cell_roles_v1.json",
-      "file_sha256": "f363a5837ab611c68a07d52e5d66db042362c77b9792b746017665bee606b58b",
-      "semantic_sha256": "a26c7084b2cf6f23a7690f5dc5f76f992056b205c0dc189405643a22a90b603c"
+      "file_sha256": "ff33396afb9779cf733b92f7ff103ed23384c1b17e05b392e0f27da9fda79496",
+      "semantic_sha256": "47cbcc02a5b71119426e4c2babb2b9ac06fcb493d9d349bd9a7443ed43449e80"
     }
   },
   "required_architecture": {
@@ -83,5 +83,5 @@
     "pass_grants_final_test_selection_authority": false,
     "failure_policy": "publish_fail_closed_negative_evidence"
   },
-  "contract_sha256": "52385445c096db737367df196e6b56c01bea515992601e636f0fa25dc63ef759"
+  "contract_sha256": "907bf98939f10a0442d72ff0f868366124e49e9b2d8fcf898da9da382c6f9751"
 }

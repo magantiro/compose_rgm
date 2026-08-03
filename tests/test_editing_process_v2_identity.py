@@ -342,7 +342,7 @@ def test_v2_contract_gates_only_connected_nonleaf_on_aromaticity_articulation_an
 
 def test_v2_contract_reason_codes_cover_scar_and_drop_the_expansion_code() -> None:
     authority = _contract()["atom_delete"]["admission_authority"]
-    codes = authority["rejection_codes_in_evaluation_order"]
+    codes = authority["rejection_codes"]
 
     assert codes == list(PROCESS_V2_ATOM_DELETE_REJECTION_CODES)
     assert "scar_incident" in codes

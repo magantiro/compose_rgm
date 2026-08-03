@@ -55,7 +55,7 @@
       "mask": "process_v2_atom_delete_mask",
       "mask_is_the_complete_effective_mask_not_an_extension": true,
       "module": "src/compose_v4/rewrite/process_v2_atom_delete.py",
-      "rejection_codes_in_evaluation_order": [
+      "rejection_codes": [
         "invalid_source",
         "invalid_slot",
         "not_a_real_element",
@@ -175,8 +175,8 @@
       "independent_of_canonical_smiles_atom_order"
     ],
     "source_sha256": {
-      "src/compose_v4/model/factorized_tracelet_rate_model.py": "d8ee3fdbf7b24a017180166d2131324d5cbc94e521394474bc3567f8ac2cdc55",
-      "src/compose_v4/rewrite/process_v2_atom_delete.py": "1db7411690777d27cac5a4b99fb9aab7d13cc81ca3c83131472cf406a26a81f4"
+      "src/compose_v4/model/factorized_tracelet_rate_model.py": "3b47e1ff03577e77075952bcfdecc8101c73efc452b4a45f7e89af48c849a1ec",
+      "src/compose_v4/rewrite/process_v2_atom_delete.py": "19cf312a5ffb64ee846a5609b5433398d27f538627fe665b732406865a80ced8"
     }
   },
   "authority": {
@@ -211,7 +211,7 @@
     "version": "exact_charged_center_preservation_v1"
   },
   "contract_revision": "process_v2_uniform_gated_admission_authority",
-  "contract_sha256": "fcfae81ca29f3cd71b04e35d35a39d073859d6649207044bacdaf622f7d9be1a",
+  "contract_sha256": "5e317e65cfbff0a8c8770765d1248925d0e068f4e2dd7f8a4cf474b85955ee1e",
   "downstream_invalidation": {
     "active8_inventory_rebuild_required": true,
     "affected_whole_trace_replay_required": true,

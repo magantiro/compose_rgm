@@ -145,6 +145,13 @@ PROCESS_V2_CONNECTED_NONLEAF_CANDIDATE_SOURCE = "connected_nonleaf"
 # must stay deterministic while the resolver is being edited, so the contract is
 # the authority and ``scripts/verify_process_v2_hash_chain.py`` asserts the enum
 # against it.
+# Declaration order, NOT evaluation order.  The gates are conjunctive, so the
+# order changes only which code is reported for a slot that fails more than
+# one gate, never whether it is admitted.  Two measured consequences of the
+# frozen evaluation order are recorded in the resolver's docstring: an
+# articulation exclusion reports ``successor_disconnected`` because
+# connectivity is evaluated first, and three codes are defence in depth that
+# never fire on the lead panel.
 PROCESS_V2_ATOM_DELETE_REJECTION_CODES = (
     "invalid_source",
     "invalid_slot",
@@ -510,7 +517,7 @@ def build_editing_process_v2_contract() -> dict[str, Any]:
                 "mask": PROCESS_V2_ATOM_DELETE_MASK,
                 "mask_is_the_complete_effective_mask_not_an_extension": True,
                 "module": _PROCESS_V2_ATOM_DELETE_RELATIVE_PATH,
-                "rejection_codes_in_evaluation_order": list(
+                "rejection_codes": list(
                     PROCESS_V2_ATOM_DELETE_REJECTION_CODES
                 ),
                 "resolver": PROCESS_V2_ATOM_DELETE_RESOLVER,
