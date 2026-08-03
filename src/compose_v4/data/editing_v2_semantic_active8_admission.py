@@ -30,6 +30,7 @@ from compose_v4.experiments.production_successor_kernel import (
     canonical_successor_result,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
     SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
@@ -41,6 +42,7 @@ from compose_v4.rewrite import action_codec_v4
 from compose_v4.rewrite.action_codec_v4 import ActionCodecV4Error
 from compose_v4.rewrite.editing_v2_process_identity import (
     EditingV2ProcessIdentityError,
+    editing_process_v2_identity,
     editing_v2_process_identity,
 )
 from compose_v4.rewrite.kernel import (
@@ -84,25 +86,49 @@ _POLICY_FIELDS = {
     "implementation_file_sha256",
     "policy_sha256",
 }
-_REQUIRED_MODEL_MODES = (
-    ("compute_ring_grow_support", False),
-    ("compute_ring_restates", True),
-    ("compute_cyclic_graft", True),
-    ("compute_ring_opening", True),
-    ("compute_ring_system_delete", False),
-    ("editing_process_semantics", SEMANTIC_EDITING_V2_PROCESS_SEMANTICS),
-    (
-        "atom_restate_action_semantics",
-        SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
-    ),
-    ("ring_restate_scorer_mode", SEMANTIC_RING_RESTATE_SCORER_MODE),
-    ("cycle_close_action_semantics", SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS),
-    ("cycle_open_action_semantics", SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS),
-    ("enable_cycle_ops", True),
-    ("enable_ring_grow_macro", False),
-    ("enable_ring_system_delete", False),
-    ("use_aromatic_bond_view", True),
-)
+
+
+def _required_model_modes(*, process_v2: bool) -> tuple[tuple[str, object], ...]:
+    """The exact model modes one semantic process version's evaluator requires.
+
+    The two semantic process versions share the lane and every Active8 operator
+    mode; they differ in exactly the pair the model binds one to one, the
+    editing process semantics and the atom-delete action semantics.  Naming that
+    pair as a function of the version is what lets a Process-V2 evaluator exist
+    at all: the model refuses to construct a mixed V1/V2 capability object, so a
+    policy that pins the V1 process string can never validate a V2 model, and
+    the Process-V2 Active8 stage would have no candidate evaluator.
+
+    ``process_v2=False`` reproduces the V1 mode list value for value.
+    """
+
+    return (
+        ("compute_ring_grow_support", False),
+        ("compute_ring_restates", True),
+        ("compute_cyclic_graft", True),
+        ("compute_ring_opening", True),
+        ("compute_ring_system_delete", False),
+        (
+            "editing_process_semantics",
+            PROCESS_V2_EDITING_PROCESS_SEMANTICS
+            if process_v2
+            else SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
+        ),
+        (
+            "atom_restate_action_semantics",
+            SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+        ),
+        ("ring_restate_scorer_mode", SEMANTIC_RING_RESTATE_SCORER_MODE),
+        ("cycle_close_action_semantics", SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS),
+        ("cycle_open_action_semantics", SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS),
+        ("enable_cycle_ops", True),
+        ("enable_ring_grow_macro", False),
+        ("enable_ring_system_delete", False),
+        ("use_aromatic_bond_view", True),
+    )
+
+
+_REQUIRED_MODEL_MODES = _required_model_modes(process_v2=False)
 _CANDIDATE_EVALUATOR = (
     "compose_v4.experiments.production_successor_kernel.canonical_successor_result"
 )
@@ -406,12 +432,25 @@ def _action_sha256(rule_name: str, action: Any) -> tuple[str, str]:
     return _canonical_sha256(record), family
 
 
-@lru_cache(maxsize=1)
-def build_semantic_active8_admission_policy() -> SemanticActive8AdmissionPolicy:
-    """Build the current self-identifying policy without a hardcoded run hash."""
+@lru_cache(maxsize=2)
+def build_semantic_active8_admission_policy(
+    *, process_v2: bool = False
+) -> SemanticActive8AdmissionPolicy:
+    """Build the current self-identifying policy without a hardcoded run hash.
 
+    ``process_v2`` selects which semantic process version the policy describes.
+    It defaults to the V1 process, so every existing caller keeps the V1 policy
+    it always had; the Process-V2 Active8 stage asks for the V2 one, which binds
+    the V2 process identity and the V2 model modes.  The two are distinguished
+    by ``process_identity_sha256`` and by ``required_model_modes``, never by the
+    policy hash alone.
+    """
+
+    required_model_modes = _required_model_modes(process_v2=bool(process_v2))
     try:
-        process_identity = editing_v2_process_identity()
+        process_identity = (
+            editing_process_v2_identity() if process_v2 else editing_v2_process_identity()
+        )
     except EditingV2ProcessIdentityError as error:
         raise SemanticActive8AdmissionError(
             "cannot establish the Editing-V2 process identity"
@@ -437,7 +476,7 @@ def build_semantic_active8_admission_policy() -> SemanticActive8AdmissionPolicy:
         "process_identity_sha256": process_identity["process_identity_sha256"],
         "action_codec_schema_version": action_codec_v4.SCHEMA_VERSION,
         "action_codec_implementation_hash": action_codec_v4.codec_implementation_hash(),
-        "required_model_modes": [list(item) for item in _REQUIRED_MODEL_MODES],
+        "required_model_modes": [list(item) for item in required_model_modes],
         "candidate_evaluator": _CANDIDATE_EVALUATOR,
         "implementation_file_sha256": _file_sha256(Path(__file__)),
     }
@@ -460,7 +499,7 @@ def build_semantic_active8_admission_policy() -> SemanticActive8AdmissionPolicy:
         process_identity_sha256=str(process_identity["process_identity_sha256"]),
         action_codec_schema_version=action_codec_v4.SCHEMA_VERSION,
         action_codec_implementation_hash=action_codec_v4.codec_implementation_hash(),
-        required_model_modes=_REQUIRED_MODEL_MODES,
+        required_model_modes=required_model_modes,
         candidate_evaluator=_CANDIDATE_EVALUATOR,
         implementation_file_sha256=str(body["implementation_file_sha256"]),
         policy_sha256=_canonical_sha256(body),
@@ -478,7 +517,15 @@ def validate_semantic_active8_admission_policy(
     if set(payload) != _POLICY_FIELDS:
         raise SemanticActive8AdmissionError("semantic Active8 policy fields disagree")
     body = {key: value for key, value in payload.items() if key != "policy_sha256"}
-    current = build_semantic_active8_admission_policy()
+    # Rebuild the variant the policy DECLARES itself to be, from its own mode
+    # list, then require equality.  Comparing against one fixed variant would
+    # reject the other version's policy as "stale" when it is simply the other
+    # version -- and the two are distinguished by their declared modes and
+    # process identity, never by the policy hash alone.
+    current = build_semantic_active8_admission_policy(
+        process_v2=dict(policy.required_model_modes).get("editing_process_semantics")
+        == PROCESS_V2_EDITING_PROCESS_SEMANTICS
+    )
     if (
         policy != current
         or not _is_sha256(policy.policy_sha256)
