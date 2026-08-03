@@ -58,7 +58,13 @@ _SHA256_RE = re.compile(r"[0-9a-f]{64}")
 SCHEMA_NAMESPACE = "compose.editing_v2.process_v2"
 
 RESOLVED_EVIDENCE_BINDING_SCHEMA = f"{SCHEMA_NAMESPACE}.resolved_evidence_binding"
-RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION = 1
+# Version 2 embeds the validated admitted-source v3 identity verbatim. Version 1
+# declared three fields -- `physical_inventory_sha256`, `process_identity_sha256`
+# and `semantic_evidence_sha256` -- that the owning adapter has never emitted, so
+# a real descriptor could not build a binding at all and only a synthetic fixture
+# could. There is no migration path from 1: the two shapes share no admitted-
+# source projection, and a converter would have to invent the three values.
+RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION = 2
 RESOLVED_EVIDENCE_BINDING_STATUS = (
     "RESOLVED_EVIDENCE_BINDING_PROVENANCE_ONLY_NO_DOWNSTREAM_AUTHORITY"
 )
