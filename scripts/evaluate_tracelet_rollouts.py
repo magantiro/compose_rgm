@@ -36,6 +36,7 @@ from compose_v4.experiments.p50_completion import (
     validate_p50_completion_member,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    LEGACY_EDITING_PROCESS_SEMANTICS,
     FactorizedMarkEmpiricalPriors,
     FactorizedTraceletRateModel,
     MARK_RULE_NAMES,
@@ -196,6 +197,21 @@ def load_factorized_rollout_checkpoint(
         if empirical_prior_payload is None
         else FactorizedMarkEmpiricalPriors.from_dict(empirical_prior_payload)
     )
+    # This reconstruction predates the semantic Editing-V2 process versions and
+    # threads none of their mode keywords, so it always builds the legacy
+    # atom-delete fiber.  Semantic V1 and Process V2 have IDENTICAL parameter
+    # shapes, so a Process-V2 checkpoint would load cleanly here and then sample
+    # the V1 fiber without a word -- a silently wrong rollout rather than a
+    # failure.  Refuse instead; teaching this evaluator the semantic processes is
+    # a separate change.
+    declared_process = payload.get("editing_process_semantics")
+    if declared_process not in (None, "", LEGACY_EDITING_PROCESS_SEMANTICS):
+        raise ValueError(
+            f"checkpoint declares editing process {declared_process!r}, which this "
+            "rollout evaluator cannot reconstruct; it builds the legacy atom-delete "
+            "fiber only, and the parameter shapes are identical, so loading would "
+            "silently sample a different process"
+        )
     # B-edit checkpoints carry the wider organic heads + editing families; reconstruct them from the
     # metadata (absent on de-novo B -> CNOF vocab + editing families off, byte-identical to before).
     corrupted_prior_mix = _historical_optional_bool(
