@@ -27,7 +27,7 @@ THE DATA STRUCTURE
         census.  Read for EVERY role, so the census and the sealed-role hashes
         stay complete.
 
-    <active8_run_root>/tasks/<task_identity_sha256>/transitions.jsonl.gz
+    <active8_run_root>/tasks/<task_identity_sha256>/ACTIVE8_TRANSITIONS.jsonl.gz
         The decision shard: one JSON object per accepted transition, each
         holding exactly ``ACCEPTED_TRANSITION_FIELDS``.  Read only for a
         decision-eligible, nonempty shard.  A sealed role's shard is never
@@ -36,9 +36,10 @@ THE DATA STRUCTURE
     <gate_zero_root>/DECISION.json
         The one artifact this stage publishes.
 
-The filenames mirror ``editing_v2_semantic_active8_decision_mapreduce``, this
-repository's established shape.  The pipeline seam
-(``editing_v2_process_v2_pipeline_schema``) names the FIELDS.
+The pipeline seam (``editing_v2_process_v2_pipeline_schema``) names the FIELDS,
+not the filenames; the three names above are taken from the Active8 map stage,
+which owns the write.  ``<active8_run_root>`` is that stage's
+``<output_artifact_prefix>/<run_identity_sha256>``.
 
 INVARIANTS MAINTAINED (and tested)
 ----------------------------------
@@ -107,9 +108,15 @@ class ProcessV2GateZeroIncomplete(ProcessV2GateZeroError):
 
 # ---- Layout ------------------------------------------------------------------
 
+#: The producer's layout.  The seam names FIELDS, not filenames, so these three
+#: are read off the Active8 map stage
+#: (``editing_v2_process_v2_active8_plan.TASK_DIRNAME`` and
+#: ``editing_v2_process_v2_active8_map.{RECEIPT,TRANSITIONS}_FILENAME``), which
+#: owns the write.  Active8 also publishes ``ACTIVE8_ROWS.jsonl.gz``, one row per
+#: RESOLVED trace; Gate 0 aggregates accepted TRANSITIONS and never opens it.
 ACTIVE8_TASKS_DIRNAME = "tasks"
 ACTIVE8_TASK_RESULT_FILENAME = "RECEIPT.json"
-ACTIVE8_DECISION_SHARD_FILENAME = "transitions.jsonl.gz"
+ACTIVE8_DECISION_SHARD_FILENAME = "ACTIVE8_TRANSITIONS.jsonl.gz"
 
 GATE_ZERO_DECISION_FILENAME = "DECISION.json"
 
