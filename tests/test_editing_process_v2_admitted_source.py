@@ -452,6 +452,33 @@ def test_a_missing_extra_or_renamed_field_is_refused(tmp_path: Path) -> None:
         validate_process_v2_admitted_source_identity(_reseal(renamed), repo_root=ROOT)
 
 
+def test_an_ambiguous_second_self_hash_is_refused(tmp_path: Path) -> None:
+    """A descriptor must have exactly one field that answers "what is this".
+
+    A second field satisfying the self-hash equation makes a semantic pin
+    ambiguous: a consumer addressing the descriptor by "its self-hash" would have
+    two answers and no rule for choosing. The exact-field-set check is what
+    refuses it, which is the point -- an exact shape has no room for a second
+    candidate, so ambiguity cannot arise rather than being detected afterwards.
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    body = {k: v for k, v in identity.items() if k != "admitted_source_sha256"}
+    ambiguous = dict(
+        sorted(
+            {
+                **body,
+                "admitted_source_sha256": _canonical_sha256(body),
+                # A second field carrying the identical digest under another name.
+                "descriptor_sha256": _canonical_sha256(body),
+            }.items()
+        )
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="unexpected"):
+        validate_process_v2_admitted_source_identity(ambiguous, repo_root=ROOT)
+
+
 def test_an_unsorted_mapping_is_refused_even_though_it_self_hashes(
     tmp_path: Path,
 ) -> None:
