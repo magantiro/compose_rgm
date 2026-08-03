@@ -59,6 +59,7 @@ from compose_v4.data.editing_v2_process_v2_active8_interfaces import (
     ACTIVE8_EXCLUDED,
     JOIN_KEY_FIELDS,
     REJECTION_CATEGORIES,
+    RESOLVED_TRACE_ROW_FIELDS,
     TRACE_KEY_FIELDS,
     UPSTREAM_REJECTED,
     ProcessV2TraceKey,
@@ -105,19 +106,18 @@ INDEX_SCHEMA = "compose.data.editing_v2_process_v2_active8_decision_index"
 INDEX_SCHEMA_VERSION = 1
 INDEX_STATUS = "VERIFIED_PROCESS_V2_ACTIVE8_INDEX_NO_DOWNSTREAM_AUTHORITY"
 
-#: Every field a resolved-trace row carries.  A consumer reads this rather than
-#: guessing, and the row always exposes the whole trace key.
+#: The published row: exactly the seam's frozen minimum, plus this index's own
+#: provenance.  Built FROM `RESOLVED_TRACE_ROW_FIELDS` rather than alongside it,
+#: so the two cannot drift -- which they did once, when this module spelled the
+#: partition role `split` and the rejection category `category` while Gate 0
+#: required the seam's names.  Both suites passed and the chain did not join.
 RESOLVED_TRACE_FIELDS: tuple[str, ...] = (
-    *TRACE_KEY_FIELDS,
+    *RESOLVED_TRACE_ROW_FIELDS,
     "data_lane",
-    "split",
     "task_identity_sha256",
-    "category",
     "active8_status",
     "upstream_rejection_code",
     "path_length",
-    "accepted_transition_count",
-    "decision_sha256",
 )
 
 #: Every field one accepted transition carries.
@@ -605,9 +605,9 @@ def _resolved_row(task: Mapping[str, Any], row: Mapping[str, Any]) -> dict[str, 
         "entry_index": int(row["entry_index"]),
         "trace_id": str(row["trace_id"]),
         "data_lane": str(row["data_lane"]),
-        "split": str(row["split"]),
+        "partition_role": str(row["split"]),
         "task_identity_sha256": str(task["task_identity_sha256"]),
-        "category": row["category"],
+        "rejection_category": row["category"],
         "active8_status": str(row["active8_status"]),
         "upstream_rejection_code": row["upstream_rejection_code"],
         "path_length": int(row["address"]["path_length"]),

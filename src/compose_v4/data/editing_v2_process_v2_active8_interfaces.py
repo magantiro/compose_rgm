@@ -93,6 +93,32 @@ TRACE_KEY_FIELDS: tuple[str, ...] = (
 #: ``(v1_task_identity_sha256, entry_index, trace_id)``, in that order.
 ProcessV2TraceKey = tuple[str, int, str]
 
+#: The minimum every row from :meth:`ProcessV2Active8Index.iter_resolved_traces`
+#: carries.  A LOWER BOUND: an index may publish richer provenance, and a
+#: consumer must not require that it does not.
+#:
+#: Freezing the row, and not only the key, is a correction.  The first version of
+#: this seam froze the key and the rejection categories and left the row itself
+#: unstated, so the producer named these two fields ``split`` and ``category``
+#: while the consumer required ``partition_role`` and ``rejection_category``.
+#: Both suites passed; the chain did not join.  A seam that names a concept but
+#: not the field carrying it has not named it.
+#:
+#: The spellings are the policy layer's, deliberately.  ``split`` is the data
+#: path's name for the same value, correct in the chunk cache and the rebind
+#: where a shard genuinely is a split; this row is a policy artifact that a gate
+#: reads to decide which traces are eligible, and ``partition_role`` is what that
+#: vocabulary is called (`REQUIRED_PARTITION_ROLES`).  ``rejection_category``
+#: matches :data:`REJECTION_CATEGORIES` rather than shortening to ``category``,
+#: which says nothing on its own.
+RESOLVED_TRACE_ROW_FIELDS: tuple[str, ...] = (
+    *TRACE_KEY_FIELDS,
+    "partition_role",
+    "rejection_category",
+    "decision_sha256",
+    "accepted_transition_count",
+)
+
 
 # ---- What Gate 0 may assume ----
 
@@ -149,6 +175,7 @@ __all__ = [
     "ProcessV2Active8Index",
     "ProcessV2TraceKey",
     "REJECTION_CATEGORIES",
+    "RESOLVED_TRACE_ROW_FIELDS",
     "TRACE_KEY_FIELDS",
     "UPSTREAM_REJECTED",
 ]

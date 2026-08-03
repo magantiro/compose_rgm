@@ -381,7 +381,7 @@ def test_every_resolved_row_exposes_the_whole_trace_key_and_its_category(
     for row in rows:
         assert set(row) == set(RESOLVED_TRACE_FIELDS)
         assert set(TRACE_KEY_FIELDS) <= set(row)
-        assert row["category"] in (None, UPSTREAM_REJECTED, ACTIVE8_EXCLUDED)
+        assert row["rejection_category"] in (None, UPSTREAM_REJECTED, ACTIVE8_EXCLUDED)
     # Deterministic order: a second stream is the same sequence.
     assert [dict(row) for row in index.iter_resolved_traces()] == [
         dict(row) for row in rows
@@ -397,7 +397,7 @@ def test_an_accepted_trace_yields_exact_states_and_action_identities(resolved) -
     """
 
     _chain, _plan, _completion, _run_root, index = resolved
-    accepted = [row for row in index.iter_resolved_traces() if row["category"] is None]
+    accepted = [row for row in index.iter_resolved_traces() if row["rejection_category"] is None]
     assert accepted
     seen = 0
     for row in accepted[:4]:
@@ -443,7 +443,7 @@ def test_an_excluded_or_upstream_rejected_trace_has_no_transitions(resolved) -> 
 
     _chain, _plan, _completion, _run_root, index = resolved
     for category in (UPSTREAM_REJECTED, ACTIVE8_EXCLUDED):
-        rows = [row for row in index.iter_resolved_traces() if row["category"] == category]
+        rows = [row for row in index.iter_resolved_traces() if row["rejection_category"] == category]
         assert rows, category
         key = tuple(rows[0][field] for field in TRACE_KEY_FIELDS)
         assert list(index.accepted_transitions_for(key)) == []
@@ -474,7 +474,7 @@ def test_the_bulk_stream_decodes_each_cached_chunk_exactly_once(
 
     _chain, plan, _completion, _run_root, index = resolved
     transitions = list(index.iter_accepted_transitions())
-    accepted = [row for row in index.iter_resolved_traces() if row["category"] is None]
+    accepted = [row for row in index.iter_resolved_traces() if row["rejection_category"] is None]
     assert len(transitions) == sum(row["path_length"] for row in accepted)
     # One decode per task that holds at least one accepted trace, and no more.
     tasks_with_accepted = {row["task_identity_sha256"] for row in accepted}
@@ -538,7 +538,7 @@ def test_one_trace_id_in_two_v1_tasks_resolves_to_two_different_traces(
     """
 
     _chain, _plan, _completion, _run_root, index = resolved
-    accepted = [row for row in index.iter_resolved_traces() if row["category"] is None]
+    accepted = [row for row in index.iter_resolved_traces() if row["rejection_category"] is None]
     by_task: dict[str, dict[str, Any]] = {}
     for row in accepted:
         by_task.setdefault(row["v1_task_identity_sha256"], row)
@@ -581,7 +581,7 @@ def test_validate_accepted_transition_refuses_a_tampered_transition(resolved) ->
     """Gate 0 revalidates rather than trusting what it was handed."""
 
     _chain, _plan, _completion, _run_root, index = resolved
-    row = next(row for row in index.iter_resolved_traces() if row["category"] is None)
+    row = next(row for row in index.iter_resolved_traces() if row["rejection_category"] is None)
     key = tuple(row[field] for field in TRACE_KEY_FIELDS)
     transition = dict(next(iter(index.accepted_transitions_for(key))))
     index.validate_accepted_transition(transition)
