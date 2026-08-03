@@ -739,6 +739,26 @@ def test_a_granted_authority_flag_is_rejected() -> None:
             )
 
 
+def test_a_grant_under_a_name_outside_the_vocabulary_is_rejected() -> None:
+    """The P50 recipe body carries `p500_authorized`, which AUTHORITY_FIELDS omits.
+
+    The vocabulary-aware guard can only judge names it knows, so without the
+    vocabulary-free one a contract shipping this field granted would validate.
+    Its absence from the vocabulary is correct: it belongs to stage decisions and
+    permits, where a true value is legitimate. In a prospective contract it is a
+    policy field and must be false.
+    """
+
+    payload = build_process_v2_chain_artifact(P50_RECIPE_POLICY, repo_root=_ROOT)
+    assert payload["p500_authorized"] is False
+    assert "p500_authorized" not in AUTHORITY_FIELDS
+    payload["p500_authorized"] = True
+    with pytest.raises(ProcessV2ChainError, match="grants authority"):
+        validate_process_v2_chain_artifact(
+            payload, name=P50_RECIPE_POLICY, repo_root=_ROOT
+        )
+
+
 def test_the_retired_authority_spelling_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(P50_RECIPE_POLICY, repo_root=_ROOT)
     payload["p50_authorized"] = False

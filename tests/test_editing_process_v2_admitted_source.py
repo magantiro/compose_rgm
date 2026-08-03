@@ -603,6 +603,36 @@ def test_the_nested_bodies_validate_through_their_own_schemas(tmp_path: Path) ->
             validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
 
 
+def test_the_ledger_and_the_descriptor_must_agree_on_the_reason_census(
+    tmp_path: Path,
+) -> None:
+    """Two publications of one decision set, so they must publish the same set.
+
+    Both censuses sum to the same `rejected_entries` and both name real exclusion
+    codes, so every per-block check passes; only the comparison between them can
+    catch a ledger describing different reasons from the descriptor above it.
+    """
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+    original = dict(identity["rejected_traces_by_code"])
+    assert original == {"atom_delete_outside_process_v2_mask": 1}
+    relabelled = {"teacher_rule_outside_frozen_support": 1}
+
+    ledger = {
+        key: value
+        for key, value in identity["rejection_ledger"].items()
+        if key != "rejection_ledger_sha256"
+    }
+    ledger["rejected_traces_by_code"] = relabelled
+    ledger["rejection_ledger_sha256"] = _self_hash(ledger, "rejection_ledger_sha256")
+    broken = _reseal({**identity, "rejection_ledger": dict(sorted(ledger.items()))})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="disagrees with the descriptor"
+    ):
+        validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+
 def test_a_replay_address_for_another_run_is_refused(tmp_path: Path) -> None:
     """Every other field checks out; only the nested run identity moved."""
 

@@ -384,16 +384,21 @@ def _sorted_mapping(value: object, *, label: str) -> Mapping[str, Any]:
 def _exact_fields(
     payload: Mapping[str, Any], expected: tuple[str, ...], *, label: str
 ) -> None:
-    observed = tuple(payload)
-    if set(observed) != set(expected):
-        missing = sorted(set(expected) - set(observed))
-        unexpected = sorted(set(observed) - set(expected))
+    """The exact field set. Order has one authority, :func:`_sorted_mapping`.
+
+    Every caller sorts-checks the same object first, so a second order comparison
+    here could never fire; an unreachable guard reads as defence in depth and is
+    not.
+    """
+
+    observed = set(payload)
+    if observed != set(expected):
+        missing = sorted(set(expected) - observed)
+        unexpected = sorted(observed - set(expected))
         _identity_fail(
             f"{label} field set differs from the declared shape; missing={missing} "
             f"unexpected={unexpected}"
         )
-    if observed != expected:
-        _identity_fail(f"{label} keys are not in sorted order")
 
 
 def _exact_sha256(payload: Mapping[str, Any], key: str, *, label: str) -> str:

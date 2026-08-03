@@ -377,6 +377,44 @@ def test_a_grant_nested_in_the_embedded_descriptor_or_a_source_row_is_refused(
         require_no_granted_authority(nested_in_list, label="the joined identity")
 
 
+def test_the_embedded_descriptor_is_checked_by_its_own_owner(
+    monkeypatch, real_join
+) -> None:
+    """Delegation is the property, so the descriptor must be broken ONLY internally.
+
+    Every joint statement below still holds -- same Process-V2 identity, same V1
+    payload identity, same census, same rejection census -- so nothing in this
+    module's own checks can see the defect. Only calling the admitted source's
+    validator does.
+    """
+
+    identity = _resolve_real(monkeypatch, real_join).identity()
+    descriptor = {
+        key: value
+        for key, value in sorted(identity["admitted_source_identity"].items())
+        if key != "admitted_source_sha256"
+    }
+    descriptor["adapter_implementation_sha256"] = "c" * 64
+    descriptor = dict(
+        sorted(
+            {**descriptor, "admitted_source_sha256": canonical_sha256(descriptor)}.items()
+        )
+    )
+    broken = _reseal({**identity, "admitted_source_identity": descriptor})
+
+    # The joint statements are untouched, which is what makes this a delegation test.
+    assert descriptor["process_v2_identity_sha256"] == broken["process_v2_identity_sha256"]
+    assert descriptor["pinned_process_identity_sha256"] == (
+        broken["v1_payload_process_identity_sha256"]
+    )
+    assert dict(descriptor["counts"]) == dict(broken["counts"])
+
+    with pytest.raises(
+        ProcessV2Active8SourceIdentityError, match="embeds an admitted-source identity"
+    ):
+        validate_process_v2_active8_source_identity(broken, repo_root=_ROOT)
+
+
 def test_a_descriptor_from_another_run_is_refused(monkeypatch, real_join) -> None:
     """Every per-half check passes; only the joint statement is false."""
 
