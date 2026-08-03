@@ -45,11 +45,47 @@ another -- and a constant-versus-constant check is self-consistent by
 construction, which is how a stale binding comes to validate.  What is pinned
 here is the ``contract_id``, a name that does not move when a policy is
 reprojected.
+
+WHAT THE HASH BINDINGS DEFEND AGAINST, AND WHAT THEY DO NOT
+------------------------------------------------------------
+Content hashes are not signatures.  Nothing here defends against a writer who
+can replace every artifact and every trusted root together -- given that, the
+whole chain can be made self-consistent at any value.  What the bindings do
+defend against is the failure mode that actually occurs: evidence that is
+corrupted, stale, produced by a superseded implementation, or sealed under an
+identity other than the one it is being read under.  Every claim in this module
+should be read at that strength and no higher.
+
+``terminal`` MEANS THE SOURCE PROGRESS STATE
+---------------------------------------------
+The frozen teacher unit is an ``accepted_nonterminal_action_v4_transition``, and
+the progress vocabulary is the Active8 stage's: a progress position is terminal
+iff it is the last one on the path (``editing_v2_process_v2_active8_mapreduce``
+publishes ``"terminal": index == address.path_length``).  A transition is taught
+FROM its source position, so ``terminal`` describes that source and is false for
+every accepted action -- including the last action of a trace, whose SUCCESSOR
+is terminal.  The index publishes ``successor_is_terminal`` for the successor;
+reading it as the assignment's ``terminal`` conflates the two and made the final
+action of every accepted trace look like a teacher taught from a terminal state.
+
+WHAT DERIVES THE STRATA, AND WHAT IS PROVEN ABOUT THE BINS
+----------------------------------------------------------
+The index preserves counts and does not classify; Gate 0 derives each evidence
+stratum from those counts exactly ONCE, in :func:`_structural_view`.  A stratum
+is therefore trustworthy because its INPUT is verified upstream, not because it
+was compared afterwards against a value derived the same way -- that comparison
+is what the per-teacher stratum requirement used to be, and it could not fail.
+The property that is genuinely checkable without any transition is the bin
+declaration itself, so :func:`strata_bin_defects` proves at load time that each
+frozen stratum's bins tile ``[1, inf)`` exactly once, and the per-teacher
+requirement now validates a SUPPLIED view's declared stratum against the frozen
+bin it names rather than recomputing it.
 """
 
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import os
 import tempfile
@@ -61,8 +97,6 @@ from typing import Any
 
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
 from compose_v4.data.editing_v2_semantic_capability_cells import (
-    CountBin,
-    _stratum,
     classify_action_family_context,
 )
 from compose_v4.rewrite.action_codec_v4 import decode_action
@@ -163,10 +197,19 @@ TEACHER_REQUIREMENTS: tuple[str, ...] = (
     "has_positive_raw_mark_count",
     "has_positive_canonical_successor_count",
     "matches_exactly_one_action_v4_mark",
+    "has_exact_successor_support",
     "has_exact_successor_alias_aggregation",
     "declares_the_frozen_evidence_strata",
     "declares_the_frozen_executor_family_alias",
 )
+
+#: The index's exact-successor evidence, read by ``has_exact_successor_support``.
+#: Deliberately NOT in :data:`TRANSITION_FIELDS`: that tuple is the hard field
+#: requirement on every view, and the decision-logic suite supplies stand-in
+#: views that predate this field.  The production adapter always carries it --
+#: :func:`_structural_view` requires it of the published transition -- so the
+#: requirement is live on the path that decides anything.
+SUPPORT_EVIDENCE_FIELD = "exact_successor_mark_count"
 
 _STRATUM_FIELDS: tuple[tuple[str, str, str], ...] = (
     ("raw_mark_count", "raw_mark_count_stratum", "raw_mark_strata"),
@@ -241,15 +284,53 @@ def _load_json(path: Path, *, field: str) -> tuple[dict[str, Any], bytes]:
     return value, raw
 
 
-def _count_bins(declared: tuple[tuple[str, int, int | None], ...]) -> tuple[CountBin, ...]:
-    """The contract stores strata as plain tuples; `_stratum` wants CountBins.
+#: The smallest count any frozen evidence stratum may describe.  A stratum
+#: describes a POSITIVE count -- a teacher with no raw marks, no canonical
+#: successors or no successor aliases is unsupported, which is a per-teacher
+#: requirement failure rather than a stratum.
+MINIMUM_STRATIFIED_COUNT = 1
 
-    Named apart from `_bins`, which parses a stratum declaration out of the raw
-    contract body. Two functions, two directions, and a shared name would have
-    made whichever was defined second silently win.
+
+def strata_bin_defects(bins: tuple[tuple[str, int, int | None], ...]) -> tuple[str, ...]:
+    """Every way one frozen stratum's bins fail to tile ``[1, inf)`` exactly once.
+
+    This is the part of the stratum story that is a real property, checkable
+    against nothing but the contract: completeness and disjointness of the bin
+    set.  ``_stratum`` in the capability-cell module raises when a value resolves
+    to other than one bin, which discovers the same defect one row at a time and
+    only for the counts a corpus happens to contain; proving it here makes it a
+    property of the declaration, so the derivation in :func:`_structural_view`
+    can be a single total lookup.
+
+    Returns the defects rather than raising so a caller can report all of them.
     """
 
-    return tuple(CountBin(id=item[0], minimum=item[1], maximum=item[2]) for item in declared)
+    defects: list[str] = []
+    if not bins:
+        return ("declares no bins",)
+    identifiers = [item[0] for item in bins]
+    if len(set(identifiers)) != len(identifiers):
+        defects.append("repeats a stratum id")
+    ordered = sorted(bins, key=lambda item: item[1])
+    if ordered[0][1] != MINIMUM_STRATIFIED_COUNT:
+        defects.append(f"does not start at {MINIMUM_STRATIFIED_COUNT}")
+    for position, (identifier, minimum, maximum) in enumerate(ordered):
+        last = position == len(ordered) - 1
+        if maximum is None:
+            if not last:
+                defects.append(f"{identifier!r} is unbounded above but is not the last bin")
+        elif maximum < minimum:
+            defects.append(f"{identifier!r} is empty")
+        elif last:
+            defects.append(f"{identifier!r} is the last bin but leaves counts above it unbinned")
+        if not last:
+            following = ordered[position + 1]
+            if maximum is not None and following[1] != maximum + 1:
+                defects.append(
+                    f"{identifier!r} and {following[0]!r} do not meet: a count between them "
+                    "falls in no bin, or in both"
+                )
+    return tuple(defects)
 
 
 def _structural_view(
@@ -305,23 +386,37 @@ def _structural_view(
             "raw_mark_count",
             "canonical_successor_count",
             "matching_mark_count",
+            SUPPORT_EVIDENCE_FIELD,
         )
     }
     view["partition_role"] = str(transition["split"])
     view["progress_index"] = int(transition["source_progress_index"])
     view["target_state_sha256"] = str(transition["successor_state_sha256"])
-    view["terminal"] = bool(transition["successor_is_terminal"])
+    # `terminal` is the SOURCE progress position, not the successor. A published
+    # transition exists exactly because its source has an outgoing step, so no
+    # accepted action is ever taught from a terminal position -- including the
+    # last action of a trace, for which `successor_is_terminal` is true and is
+    # deliberately not read here. Reading it made every accepted trace's final
+    # action look like a terminal-source teacher.
+    view["terminal"] = False
     view["successor_alias_multiplicity"] = int(transition["successor_alias_count"])
     view["family_context"] = context
     view["capability_cell_id"] = f"{contract.namespace}:{family}:{context}"
     for source_field, stratum_field, _evidence_key in _STRATUM_FIELDS:
+        # The ONE derivation of each evidence stratum, and Gate 0 is its author:
+        # the index preserves counts and does not classify. It is a single total
+        # lookup rather than the raising `_stratum`, because `strata_bin_defects`
+        # has already proven at load time that the frozen bins tile [1, inf)
+        # exactly once -- so "resolves to exactly one bin" is a property of the
+        # declaration rather than something rediscovered per row. A count outside
+        # every bin yields None here and fails a per-teacher requirement, instead
+        # of raising out of the gate.
+        #
         # The contract keys its bins by the SOURCE field; `_STRATUM_FIELDS`'s
         # third element names the evidence block the counts are published under,
         # which is a different vocabulary.
-        view[stratum_field] = _stratum(
-            int(view[source_field]),
-            _count_bins(contract.strata_bins[source_field]),
-            field=source_field,
+        view[stratum_field] = stratum_for(
+            int(view[source_field]), contract.strata_bins[source_field]
         )
     # The assignment identity: what this transition structurally IS, and nothing
     # about when or by which run it was observed. Two runs over the same corpus
@@ -463,6 +558,12 @@ def _bins(value: object, *, field: str) -> tuple[tuple[str, int, int | None], ..
         )
     if not parsed:
         raise ProcessV2GateZeroError(f"frozen evidence stratum {field!r} declares no bins")
+    defects = strata_bin_defects(tuple(parsed))
+    if defects:
+        raise ProcessV2GateZeroError(
+            f"frozen evidence stratum {field!r} does not tile the count range exactly once: "
+            + "; ".join(defects)
+        )
     return tuple(parsed)
 
 
@@ -621,6 +722,78 @@ def _trace_key(row: Mapping[str, Any]) -> ProcessV2TraceKey:
     return (task, entry, trace_id)
 
 
+#: The keyword the bulk transition stream must accept, and the whole reason Gate 0
+#: probes a signature rather than trusting a method name.
+ROLE_FILTER_PARAMETER = "partition_roles"
+
+_BULK_STREAM_REQUIREMENT = (
+    "iter_accepted_transitions(*, partition_roles: Collection[str]) -> "
+    "Iterator[Mapping[str, Any]], which selects tasks by their partition role "
+    "BEFORE reading a cache chunk, streams each selected chunk exactly once, and "
+    "validates each transition against the task, row and trace it already holds"
+)
+
+
+def _require_role_filtered_bulk_transitions(index: object) -> Callable[..., Any]:
+    """The bulk seam, probed by SIGNATURE rather than by name.
+
+    Gate 0 must never open the cache chunk of a sealed partition role, and a bulk
+    stream that cannot be restricted before it opens one can only be filtered
+    afterwards -- by which point the held-out molecular states have already been
+    decoded.  "Never counted" is not "never opened", and the frozen contract says
+    the second.
+
+    A name-only check would pass for an unfiltered stream and then fail at the
+    call with a bare ``TypeError``, so the keyword is required explicitly: a
+    capability check that cannot distinguish the capability is not one.
+    """
+
+    stream = getattr(index, "iter_accepted_transitions", None)
+    if not callable(stream):
+        raise ProcessV2GateZeroError(
+            "the decision index publishes no bulk accepted-transition stream. Gate 0 "
+            "requires " + _BULK_STREAM_REQUIREMENT
+        )
+    try:
+        parameters = inspect.signature(stream).parameters
+    except (TypeError, ValueError) as error:  # pragma: no cover - exotic callables
+        raise ProcessV2GateZeroError(
+            "the decision index's accepted-transition stream has no inspectable "
+            "signature, so its role filter cannot be established. Gate 0 requires "
+            + _BULK_STREAM_REQUIREMENT
+        ) from error
+    parameter = parameters.get(ROLE_FILTER_PARAMETER)
+    if parameter is None or parameter.kind is not inspect.Parameter.KEYWORD_ONLY:
+        raise ProcessV2GateZeroError(
+            "the decision index's accepted-transition stream takes no keyword-only "
+            f"{ROLE_FILTER_PARAMETER!r}, so it cannot be restricted before it opens a "
+            "cache chunk, and Gate 0 will not decode a sealed partition role in order "
+            "to discard it afterwards. Gate 0 requires " + _BULK_STREAM_REQUIREMENT
+        )
+    return stream
+
+
+def _transition_trace_key(transition: Mapping[str, Any]) -> ProcessV2TraceKey:
+    """The trace a streamed transition belongs to, from the transition itself.
+
+    The bulk stream is not addressed per trace, so the join back to the resolved
+    row is by the transition's own whole key -- never by stream position, and
+    never by a bare ``trace_id``, which is unique only within one V1 task.
+    """
+
+    missing = [field for field in TRACE_KEY_FIELDS if field not in transition]
+    if missing:
+        raise ProcessV2GateZeroError(
+            f"a streamed accepted transition omits its trace key {sorted(missing)}"
+        )
+    task = _require_sha(transition["v1_task_identity_sha256"], field="v1_task_identity_sha256")
+    entry = _require_count(transition["entry_index"], field="entry_index")
+    trace_id = transition["trace_id"]
+    if not isinstance(trace_id, str) or not trace_id:
+        raise ProcessV2GateZeroError("a streamed accepted transition carries an empty trace_id")
+    return (task, entry, trace_id)
+
+
 def _teacher_failures(
     transition: Mapping[str, Any], *, contract: FrozenProcessV2GateZeroContract
 ) -> tuple[str, ...]:
@@ -641,14 +814,46 @@ def _teacher_failures(
         failed.append("has_positive_canonical_successor_count")
     if matching != 1:
         failed.append("matches_exactly_one_action_v4_mark")
+    # `require_every_teacher_supported`. The frozen support predicate lives in
+    # `ProcessV2CandidateEvidence.__post_init__`: supported means no exclusion
+    # reason AND positive matching, exact-successor, alias and canonical-
+    # successor counts. Four of those five are count-expressible and are decided
+    # here. The `supported` boolean and its exclusion reason do NOT cross the
+    # seam -- an accepted transition carries neither -- so a row whose boolean
+    # was flipped without moving a count is invisible to Gate 0 and must be
+    # refused upstream; this enforces the part the published evidence supports
+    # rather than claiming the whole predicate.
+    exact = transition.get(SUPPORT_EVIDENCE_FIELD)
+    supported = successors >= 1 and matching >= 1 and aliases >= 1
+    if exact is not None:
+        # The distinctive arm: a matching mark that actually produces the
+        # teacher's exact successor state. Nothing else Gate 0 reads implies it.
+        exact_marks = _require_count(exact, field=SUPPORT_EVIDENCE_FIELD)
+        supported = supported and 1 <= exact_marks <= matching
+    if not supported:
+        failed.append("has_exact_successor_support")
     # Alias aggregation: the teacher's canonical successor fiber is a non-empty
     # subset of the raw marks, the canonical successors are an aggregation of
     # those marks, and the matching mark lies inside the teacher's own fiber.
     if not 1 <= aliases <= raw or successors > raw or matching > aliases:
         failed.append("has_exact_successor_alias_aggregation")
     for count_field, stratum_field, _row_field in _STRATUM_FIELDS:
+        # A BOUNDARY check on the supplied view, not corroboration of the count:
+        # the declared stratum must NAME a frozen bin of this field and that
+        # bin's declared range must contain the count. It is not `stratum_for`
+        # recomputed and compared -- that expectation came from the same input as
+        # its observation and could not fail. For the production adapter, which
+        # derives the stratum itself, this is satisfied by construction; the real
+        # property of the bins is proven once, at load, by `strata_bin_defects`.
         observed = _require_count(transition[count_field], field=count_field)
-        if stratum_for(observed, contract.strata_bins[count_field]) != transition[stratum_field]:
+        declared = transition[stratum_field]
+        named = {
+            identifier: (minimum, maximum)
+            for identifier, minimum, maximum in contract.strata_bins[count_field]
+        }.get(declared if isinstance(declared, str) else "")
+        if named is None or not (
+            observed >= named[0] and (named[1] is None or observed <= named[1])
+        ):
             failed.append("declares_the_frozen_evidence_strata")
             break
     try:
@@ -687,11 +892,37 @@ def build_process_v2_gate_zero_evidence(
     contract: FrozenProcessV2GateZeroContract,
     view: Callable[..., Mapping[str, Any]] = _structural_view,
 ) -> dict[str, Any]:
-    """Stream the index once, classify train-role teachers, seal the rest.
+    """Read every resolved trace, decode only decision-eligible chunks, seal the rest.
 
-    One pass, bounded memory in the transition dimension: the only per-row state
-    retained is the per-cell aggregate and the unique-identity sets the contract
-    requires Gate 0 to publish.
+    TWO STREAMS, NOT A LOOKUP PER TRACE
+    -----------------------------------
+    Resolved decision metadata is read for EVERY partition role, because the
+    census and the sealed-role inventories must be complete.  Molecular state is
+    decoded for the decision-eligible roles ONLY, and the restriction is handed
+    to the index BEFORE it opens a cache chunk, so a sealed role's states are
+    never decoded rather than decoded and discarded.
+
+    What this replaced was a per-trace ``accepted_transitions_for`` lookup, whose
+    own docstring says a loop over it "would decode one chunk per trace and
+    reinstate exactly the triangular rescan the chunk cache exists to remove".
+    Measured on the real chain it cost ``T + 2*sum(L)`` chunk decodes for ``T``
+    decision-eligible traces of length ``L``: one for the lookup, one for the
+    index's internal validation and one for Gate 0's own re-validation, because
+    ``validate_accepted_transition`` is ITSELF a point lookup.  Gate 0 therefore
+    does not call it from the bulk path -- doing so reinstates the cost the bulk
+    path exists to remove.  Validation is not skipped; it moves inside the
+    stream, where the task, row and trace are already in hand.
+
+    Gate 0 consumes that evidence and does not re-derive it.  It classifies each
+    teacher's action into its capability cell and derives the evidence strata --
+    the handoff the contract assigns it -- and never re-enumerates a successor
+    fiber, which is the Active8 stage's to own and to have verified.
+
+    Memory is bounded in the TRANSITION dimension: the only per-row state kept is
+    the per-cell aggregate, the unique-identity sets the contract requires Gate 0
+    to publish, and one binding per decision-eligible TRACE for the join back to
+    its resolved row -- the same order as the duplicate-key set that was already
+    retained, and independent of trace length.
 
     ``view`` is the adapter from a PUBLISHED transition to the structural view
     this function decides over, and it defaults to the real one.  It is a
@@ -709,6 +940,7 @@ def build_process_v2_gate_zero_evidence(
             "the supplied decision index does not satisfy ProcessV2Active8Index; Gate 0 "
             "consumes the frozen protocol and never a concrete decision source"
         )
+    bulk_transitions = _require_role_filtered_bulk_transitions(index)
     decision_roles = set(contract.decision_roles)
     sealed_roles = contract.sealed_roles
     allowed_roles = decision_roles | set(sealed_roles)
@@ -746,6 +978,12 @@ def build_process_v2_gate_zero_evidence(
     decision_transitions = 0
     terminal_assignments = 0
     declared_transition_total = 0
+    #: One binding per decision-eligible ACCEPTED trace: what the resolved row
+    #: declared, so a streamed transition can be joined back to it without a
+    #: second lookup.  Bounded by the number of eligible traces, not by their
+    #: length and not by the corpus -- sealed and rejected traces never enter it.
+    eligible: dict[ProcessV2TraceKey, tuple[str, int, str]] = {}
+    observed_transitions: Counter[ProcessV2TraceKey] = Counter()
 
     for row in index.iter_resolved_traces():
         resolved_traces += 1
@@ -783,129 +1021,126 @@ def build_process_v2_gate_zero_evidence(
         )
         accepted_trace_stream.update(stamp)
         if role not in decision_roles:
-            # Sealed: hashed, never opened.  `accepted_transitions_for` is not
-            # called, so no held-out transition can reach a count or a threshold.
+            # Sealed: hashed from decision METADATA, and its molecular state is
+            # never decoded.  The role filter below is handed to the index before
+            # it opens a cache chunk, so this is "never opened", not "opened and
+            # then not counted" -- the two differ exactly when it matters.
             sealed_streams[role].update(stamp)
             continue
 
         decision_traces += 1
         declared_transition_total += declared
-        observed = 0
-        for published in index.accepted_transitions_for(key):
-            observed += 1
-            decision_transitions += 1
-            # The index owns the RAW schema, so the raw row is what it may be
-            # asked about, and it is asked BEFORE anything transforms it.
-            # Validating the derived view here would hand the index an object it
-            # never published and cannot judge: the view renames fields, drops
-            # some and adds others, so a pass would mean nothing and a failure
-            # would be attributed to the index rather than to this module.
-            try:
-                index.validate_accepted_transition(published)
-            except Exception as error:  # noqa: BLE001 - the index owns its refusal type
-                classification_failures += 1
-                if len(receipts) < contract.failure_receipt_limit:
-                    receipts.append(
-                        _receipt(
-                            key=key,
-                            decision_sha256=decision_sha256,
-                            transition=published,
-                            failure_type="index_refused_its_own_transition",
-                            reason=str(error),
-                        )
-                    )
-                continue
-            transition = view(published, contract=contract)
-            missing = [field for field in TRANSITION_FIELDS if field not in transition]
-            if missing:
-                raise ProcessV2GateZeroError(f"an accepted transition view omits {sorted(missing)}")
-            if transition["partition_role"] != role:
-                raise ProcessV2GateZeroError(
-                    "an accepted transition declares a partition role its trace does not"
-                )
-            if transition["terminal"] is True:
-                terminal_assignments += 1
-            progress_index = _require_count(transition["progress_index"], field="progress_index")
-            assignment_sha256 = _require_sha(
-                transition["assignment_sha256"], field="assignment_sha256"
-            )
-            transition_key = (*key, progress_index)
-            if transition_key in transition_keys or assignment_sha256 in assignment_ids:
-                raise ProcessV2GateZeroError(
-                    "the accepted transition stream contains a duplicate structural assignment"
-                )
-            cell_id = transition["capability_cell_id"]
-            row_for_cell = cell_rows.get(cell_id)
-            if row_for_cell is None:
-                classification_failures += 1
-                if len(receipts) < contract.failure_receipt_limit:
-                    receipts.append(
-                        _receipt(
-                            key=key,
-                            decision_sha256=decision_sha256,
-                            transition=transition,
-                            failure_type="capability_cell_outside_the_frozen_registry",
-                            reason=f"{cell_id!r} is not a registered Process-V2 capability cell",
-                        )
-                    )
-                continue
-            if transition["data_lane"] not in contract.data_lanes:
-                raise ProcessV2GateZeroError(
-                    "an accepted transition declares the undeclared lane "
-                    f"{transition['data_lane']!r}"
-                )
-            transition_keys.add(transition_key)
-            assignment_ids.add(assignment_sha256)
-            assignment_stream.update(
-                _bytes(
-                    {
-                        "trace_key": list(key),
-                        "progress_index": progress_index,
-                        "assignment_sha256": assignment_sha256,
-                    },
-                    newline=True,
-                )
-            )
-            for failure in _teacher_failures(transition, contract=contract):
-                requirement_failures[failure] += 1
-                if len(receipts) < contract.failure_receipt_limit:
-                    receipts.append(
-                        _receipt(
-                            key=key,
-                            decision_sha256=decision_sha256,
-                            transition=transition,
-                            failure_type=f"teacher_{failure}",
-                            reason=f"the teacher violates the frozen requirement {failure!r}",
-                        )
-                    )
-            sets = cell_sets[cell_id]
-            row_for_cell["teacher_count"] += 1
-            row_for_cell["raw_candidate_mark_sum"] += transition["raw_mark_count"]
-            row_for_cell["canonical_candidate_successor_sum"] += (
-                transition["canonical_successor_count"]
-            )
-            row_for_cell["matching_candidate_mark_sum"] += transition["matching_mark_count"]
-            row_for_cell["successor_alias_sum"] += transition["successor_alias_multiplicity"]
-            for _count_field, stratum_field, row_field in _STRATUM_FIELDS:
-                stratum = str(transition[stratum_field])
-                row_for_cell[row_field][stratum] = row_for_cell[row_field].get(stratum, 0) + 1
-            lane = str(transition["data_lane"])
-            executor_rule = str(transition["executor_rule"])
-            row_for_cell["lane_counts"][lane] = row_for_cell["lane_counts"].get(lane, 0) + 1
-            row_for_cell["executor_rule_counts"][executor_rule] = (
-                row_for_cell["executor_rule_counts"].get(executor_rule, 0) + 1
-            )
-            sets["sources"].add(str(transition["source_state_sha256"]))
-            sets["targets"].add(str(transition["target_state_sha256"]))
-            sets["actions"].add(str(transition["action_sha256"]))
-            unique_sources.add(str(transition["source_state_sha256"]))
-            unique_targets.add(str(transition["target_state_sha256"]))
-            family_counts[str(transition["model_family"])] += 1
-            executor_counts[executor_rule] += 1
-            lane_counts[lane] += 1
-        if observed != declared:
+        eligible[key] = (decision_sha256, declared, role)
+
+    for published in bulk_transitions(partition_roles=tuple(contract.decision_roles)):
+        key = _transition_trace_key(published)
+        binding = eligible.get(key)
+        if binding is None:
+            # The role filter is asserted against the data, not assumed from the
+            # argument: a stream that yielded a sealed or rejected trace's
+            # transition would already have decoded a held-out state.
             raise ProcessV2GateZeroError(
-                f"trace {key!r} declares {declared} accepted transitions and yielded {observed}"
+                f"the role-filtered transition stream yielded trace {key!r}, which is not a "
+                "decision-eligible accepted trace"
+            )
+        decision_sha256, _declared, role = binding
+        observed_transitions[key] += 1
+        decision_transitions += 1
+        transition = view(published, contract=contract)
+        missing = [field for field in TRANSITION_FIELDS if field not in transition]
+        if missing:
+            raise ProcessV2GateZeroError(f"an accepted transition view omits {sorted(missing)}")
+        if transition["partition_role"] != role:
+            raise ProcessV2GateZeroError(
+                "an accepted transition declares a partition role its trace does not"
+            )
+        if transition["partition_role"] not in decision_roles:
+            raise ProcessV2GateZeroError(
+                "an accepted transition of a sealed partition role reached the decision path"
+            )
+        if transition["terminal"] is True:
+            terminal_assignments += 1
+        progress_index = _require_count(transition["progress_index"], field="progress_index")
+        assignment_sha256 = _require_sha(transition["assignment_sha256"], field="assignment_sha256")
+        transition_key = (*key, progress_index)
+        if transition_key in transition_keys or assignment_sha256 in assignment_ids:
+            raise ProcessV2GateZeroError(
+                "the accepted transition stream contains a duplicate structural assignment"
+            )
+        cell_id = transition["capability_cell_id"]
+        row_for_cell = cell_rows.get(cell_id)
+        if row_for_cell is None:
+            classification_failures += 1
+            if len(receipts) < contract.failure_receipt_limit:
+                receipts.append(
+                    _receipt(
+                        key=key,
+                        decision_sha256=decision_sha256,
+                        transition=transition,
+                        failure_type="capability_cell_outside_the_frozen_registry",
+                        reason=f"{cell_id!r} is not a registered Process-V2 capability cell",
+                    )
+                )
+            continue
+        if transition["data_lane"] not in contract.data_lanes:
+            raise ProcessV2GateZeroError(
+                f"an accepted transition declares the undeclared lane {transition['data_lane']!r}"
+            )
+        transition_keys.add(transition_key)
+        assignment_ids.add(assignment_sha256)
+        assignment_stream.update(
+            _bytes(
+                {
+                    "trace_key": list(key),
+                    "progress_index": progress_index,
+                    "assignment_sha256": assignment_sha256,
+                },
+                newline=True,
+            )
+        )
+        for failure in _teacher_failures(transition, contract=contract):
+            requirement_failures[failure] += 1
+            if len(receipts) < contract.failure_receipt_limit:
+                receipts.append(
+                    _receipt(
+                        key=key,
+                        decision_sha256=decision_sha256,
+                        transition=transition,
+                        failure_type=f"teacher_{failure}",
+                        reason=f"the teacher violates the frozen requirement {failure!r}",
+                    )
+                )
+        sets = cell_sets[cell_id]
+        row_for_cell["teacher_count"] += 1
+        row_for_cell["raw_candidate_mark_sum"] += transition["raw_mark_count"]
+        row_for_cell["canonical_candidate_successor_sum"] += transition[
+            "canonical_successor_count"
+        ]
+        row_for_cell["matching_candidate_mark_sum"] += transition["matching_mark_count"]
+        row_for_cell["successor_alias_sum"] += transition["successor_alias_multiplicity"]
+        for _count_field, stratum_field, row_field in _STRATUM_FIELDS:
+            stratum = str(transition[stratum_field])
+            row_for_cell[row_field][stratum] = row_for_cell[row_field].get(stratum, 0) + 1
+        lane = str(transition["data_lane"])
+        executor_rule = str(transition["executor_rule"])
+        row_for_cell["lane_counts"][lane] = row_for_cell["lane_counts"].get(lane, 0) + 1
+        row_for_cell["executor_rule_counts"][executor_rule] = (
+            row_for_cell["executor_rule_counts"].get(executor_rule, 0) + 1
+        )
+        sets["sources"].add(str(transition["source_state_sha256"]))
+        sets["targets"].add(str(transition["target_state_sha256"]))
+        sets["actions"].add(str(transition["action_sha256"]))
+        unique_sources.add(str(transition["source_state_sha256"]))
+        unique_targets.add(str(transition["target_state_sha256"]))
+        family_counts[str(transition["model_family"])] += 1
+        executor_counts[executor_rule] += 1
+        lane_counts[lane] += 1
+
+    for key, (_decision_sha256, declared, _role) in eligible.items():
+        if observed_transitions[key] != declared:
+            raise ProcessV2GateZeroError(
+                f"trace {key!r} declares {declared} accepted transitions and the stream "
+                f"yielded {observed_transitions[key]}"
             )
 
     for cell_id, cell_row in cell_rows.items():
@@ -1048,6 +1283,21 @@ def build_process_v2_gate_zero_evidence(
         "semantic_process_contract_sha256": str(contract.semantic_process["contract_sha256"]),
         "active8_families": list(ACTIVE8_FAMILIES),
         "active8_executor_rules": list(ACTIVE8_EXECUTOR_RULES),
+        # Published so a reader can rebuild every stratum from the counts rather
+        # than take Gate 0's word for them. Gate 0 is the sole author of the
+        # strata -- the index preserves counts and does not classify -- so the
+        # per-teacher stratum requirement is a check on a SUPPLIED view and not
+        # independent corroboration of a production assignment; the property that
+        # is genuinely proven is that these bins tile the count range once, which
+        # `strata_bin_defects` establishes at contract load.
+        "evidence_strata_authority": "gate_zero_derives_each_stratum_once_from_index_verified_counts",
+        "frozen_evidence_strata": {
+            field: [
+                {"id": identifier, "minimum": minimum, "maximum": maximum}
+                for identifier, minimum, maximum in contract.strata_bins[field]
+            ]
+            for field, _stratum_field, _row_field in _STRATUM_FIELDS
+        },
         "checks": checks,
         "counts": {
             "resolved_traces": resolved_traces,
@@ -1286,6 +1536,9 @@ __all__ = [
     "CONTRACT_RELATIVE_PATH",
     "DECISION_FILENAME",
     "EVIDENCE_FILENAME",
+    "MINIMUM_STRATIFIED_COUNT",
+    "ROLE_FILTER_PARAMETER",
+    "SUPPORT_EVIDENCE_FIELD",
     "TEACHER_REQUIREMENTS",
     "TRACE_ROW_FIELDS",
     "TRANSITION_FIELDS",
@@ -1296,5 +1549,6 @@ __all__ = [
     "load_process_v2_gate_zero_contract",
     "process_v2_gate_zero_decision",
     "run_process_v2_gate_zero",
+    "strata_bin_defects",
     "stratum_for",
 ]
