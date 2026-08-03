@@ -92,6 +92,10 @@ INVARIANTS MAINTAINED (and tested)
   physical and semantic values, and must declare that it is cited by this
   binding schema at this version; a repository target that is absent is a
   failure, never a silently dropped edge;
+* the field set is exactly the declared one, so a block a run "also measured"
+  cannot be sealed into the artifact whose whole job is to carry measured
+  provenance downstream -- failure mode 1 above, arriving through the binding
+  rather than through the frozen contract;
 * the binding and the embedded descriptor self-hash independently, so tampering
   with the descriptor is caught even when the binding is resealed around it;
 * the Process-V2 identity the descriptor was resolved under must equal the one
@@ -122,6 +126,7 @@ from compose_v4.data.editing_process_v2_admitted_source import (
     validate_process_v2_admitted_source_identity,
 )
 from compose_v4.data.editing_v2_process_v2_schema import (
+    AUTHORITY_FIELDS,
     RESOLVED_EVIDENCE_BINDING_SCHEMA,
     RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION,
     RESOLVED_EVIDENCE_BINDING_STATUS,
@@ -172,11 +177,55 @@ EVIDENCE_BINDING_STAGES: Mapping[str, str] = {
 #: the same field name on both would have to know which artifact it held.
 BINDING_SELF_HASH_FIELD = "evidence_binding_sha256"
 
+#: The exact field set :func:`build_resolved_evidence_binding` emits, and the
+#: complete set a valid binding may carry.  Declared next to the builder that
+#: produces it so the two cannot drift.
+RESOLVED_EVIDENCE_BINDING_FIELDS: tuple[str, ...] = tuple(
+    sorted(
+        (
+            "admitted_source",
+            "measured_prerequisites",
+            "prospective_contract",
+            "schema",
+            "schema_version",
+            "stage",
+            "status",
+            *AUTHORITY_FIELDS,
+            BINDING_SELF_HASH_FIELD,
+        )
+    )
+)
+
 # ---- Helpers ----
 
 
 def _fail(detail: str) -> None:
     raise ProcessV2EvidenceBindingError(detail)
+
+
+def _require_exact_fields(payload: Mapping[str, Any], *, label: str) -> None:
+    """The exact field set, and only that.
+
+    A binding is the artifact that carries measured provenance downstream, so an
+    unknown field sealed into one is carried by every consumer that reads it -- the
+    module docstring's failure mode 1, arriving through the artifact built to
+    prevent it rather than through the frozen contract.  Both sibling validators
+    (``_require_exact_fields`` in the admitted-source adapter, ``_exact_fields`` in
+    the Active8 source) check this; this one did not, so
+    ``binding + {"measured_later_evidence": ...}``, resealed, validated clean.
+
+    Key ORDER is deliberately not checked here: unlike the two descriptors, a
+    binding is not embedded verbatim in another artifact, and its serializer sorts.
+    """
+
+    observed = set(payload)
+    if observed != set(RESOLVED_EVIDENCE_BINDING_FIELDS):
+        missing = sorted(set(RESOLVED_EVIDENCE_BINDING_FIELDS) - observed)
+        unexpected = sorted(observed - set(RESOLVED_EVIDENCE_BINDING_FIELDS))
+        _fail(
+            f"{label} field set differs from the declared shape; missing={missing} "
+            f"unexpected={unexpected}"
+        )
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -519,6 +568,12 @@ def validate_resolved_evidence_binding(
                         f"{pointer['sha256']}, but the live physical hash is {observed}"
                     )
 
+    # Last, so that every block whose own validator names a missing field
+    # specifically keeps that diagnostic; what this adds is the field NO other
+    # check looks at, which is exactly the shape a smuggled measured-evidence
+    # block has.
+    _require_exact_fields(payload, label=f"the {stage} resolved evidence binding")
+
     try:
         verify_self_hash(
             payload,
@@ -589,6 +644,7 @@ def load_resolved_evidence_binding(path: Path, *, repo_root: Path) -> dict[str, 
 __all__ = [
     "BINDING_SELF_HASH_FIELD",
     "EVIDENCE_BINDING_STAGES",
+    "RESOLVED_EVIDENCE_BINDING_FIELDS",
     "ProcessV2EvidenceBindingError",
     "build_resolved_evidence_binding",
     "load_resolved_evidence_binding",
