@@ -53,8 +53,9 @@ verified, but the later *execution* wiring is future work.
 | `2e74582` | experiments: add the distinct process v2 downstream contract chain |
 | `818f527` | docs: hand off the process v2 evidence chain |
 | `44dddd1` | tests: pin the gate zero consumption boundary for process v2 |
-| `d6f27f2` | docs: record the process v2 evidence chain verification results |
+| `ba681f0` | docs: record the process v2 evidence chain verification results |
 | `0e25bc0` | experiments: bind the admitted-source schema the adapter actually declares |
+| `d4c265d` | docs: complete the commit inventory and scope the suite measurement |
 
 ## 2. Identities
 
