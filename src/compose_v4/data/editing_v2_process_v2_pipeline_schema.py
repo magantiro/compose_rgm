@@ -202,6 +202,43 @@ ACTIVE8_CENSUS_FIELDS: tuple[str, ...] = (
     "active8_excluded_entries",
 )
 
+# ---- The Active8 task receipt: metadata a gate reads without opening rows ----
+
+#: Published per task BESIDE the transition rows, never inside them.  The split
+#: is load-bearing: Gate 0 reads every role's receipt to build the complete
+#: census and the sealed-role digests, and only constructs a transitions path
+#: inside the eligible-role loop.  Put the rows in the receipt and reading the
+#: census opens held-out molecular content, so "never opened" degrades to
+#: "never counted".
+#:
+#: `partition_role`, NOT `split`.  A receipt is exactly the artifact a gate
+#: reads to decide eligibility, so it carries the policy vocabulary
+#: (`REQUIRED_PARTITION_ROLES`).  `split` is the data path's name for the same
+#: value and stays correct in the cache and the rebind.  This field was left
+#: unnamed in the first version of this module and the producer and consumer
+#: each picked a spelling -- the exact failure the docstring above describes,
+#: reproduced one layer down, which is why receipt fields are now named too.
+ACTIVE8_RECEIPT_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    "task_identity_sha256",
+    "partition_role",
+    "data_lane",
+    "source_chunk_identity_sha256",
+    *ACTIVE8_CENSUS_FIELDS,
+    "transition_count",
+    "decision_shard_sha256",
+    "receipt_sha256",
+)
+
+#: Layout. The seam names fields; without naming these it does not name where
+#: they live, and two agents chose two layouts.
+ACTIVE8_TASKS_DIRNAME = "tasks"
+ACTIVE8_RECEIPT_FILENAME = "RECEIPT.json"
+ACTIVE8_DECISION_SHARD_FILENAME = "transitions.jsonl.gz"
+GATE_ZERO_DECISION_FILENAME = "DECISION.json"
+
 # ---- The release sentinel ----
 
 #: Below this many unique accepted (source_state_sha256, action_sha256) pairs,
@@ -246,6 +283,11 @@ SENTINEL_RESULT_FIELDS: tuple[str, ...] = (
 SENTINEL_BLOCKS_COMPLETION = True
 
 __all__ = [
+    "GATE_ZERO_DECISION_FILENAME",
+    "ACTIVE8_TASKS_DIRNAME",
+    "ACTIVE8_RECEIPT_FILENAME",
+    "ACTIVE8_RECEIPT_FIELDS",
+    "ACTIVE8_DECISION_SHARD_FILENAME",
     "ACCEPTED_EVIDENCE_INVARIANTS",
     "ACCEPTED_TRANSITION_FIELDS",
     "ACTION_KEY_FIELDS",
