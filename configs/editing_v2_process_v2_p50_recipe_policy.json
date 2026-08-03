@@ -1,0 +1,114 @@
+{
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "admitted_source": {
+    "completion_sha256": null,
+    "run_identity_sha256": null,
+    "schema": "compose.data.process_v2_admitted_source"
+  },
+  "bounded_p50_authorized": false,
+  "cache": {
+    "closure_only_rows_schedulable": false,
+    "coverage_mode": "complete_trace_closure_of_planned_address_union",
+    "source_population": "full_admitted_semantic_active8_corpus",
+    "terminal_rows_schedulable": false
+  },
+  "checkpoint_selection_authorized": false,
+  "contract_id": "editing_v2_process_v2_p50_recipe_policy",
+  "contract_sha256": "35f3e08ee1b7221054413e7eb08b5cd6b46ed9a60455f2bf77c55398758d44a4",
+  "final_test_selection_authorized": false,
+  "gate_zero_authorized": false,
+  "long_training_authorized": false,
+  "objective": {
+    "hazard_included": false,
+    "hazard_weight": 0.0,
+    "importance_correction": "none",
+    "name": "balanced_semantic_cell_productive_identity",
+    "path_position_coefficient": 1.0,
+    "terminal_rows": "excluded",
+    "unit": "productive_embedded_canonical_successor"
+  },
+  "optimization": {
+    "batch_size": 64,
+    "deterministic_algorithms_required": true,
+    "dtype": "float32",
+    "gradient_clip_norm": 10.0,
+    "initialization": "scratch_from_t1_bound_initial_model_state",
+    "learning_rate": 0.001,
+    "mixed_precision": false,
+    "optimizer": "adamw",
+    "optimizer_steps": 50,
+    "resume": false,
+    "scheduled_nonterminal_examples": 3200,
+    "scheduler": "constant",
+    "seed": 31,
+    "weight_decay": 0.0
+  },
+  "p500_authorized": false,
+  "parents": {
+    "development_cell_roles": {
+      "file_sha256": "4bcc3f2825f4684594e91ccd8e5159f44ea62b9d284d25383ef59173d761ecb1",
+      "path": "configs/editing_v2_process_v2_development_cell_roles.json",
+      "semantic_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc"
+    }
+  },
+  "process_identity": {
+    "identity_schema": "compose.editing.semantic_process_v2_identity",
+    "identity_schema_version": 1,
+    "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
+    "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+    "process_semantics": "semantic_editing_v2_v2",
+    "provider": "editing_process_v2_identity"
+  },
+  "required_physical_binding_purposes": [
+    "stream_union_successor_cache",
+    "validation_baseline",
+    "trainer_runtime",
+    "execution_environment",
+    "launch_projection"
+  ],
+  "sampling": {
+    "lane_probability": "not_a_sampling_level_preserved_as_audit_dimension",
+    "policy_id": "stage_a_equal_semantic_cell_capability_exception_v1",
+    "production_hierarchy_claim_authorized": false,
+    "rationale": "P50 tests load-bearing capability acquisition; production-law calibration remains a later separately frozen stage",
+    "semantic_cell_probability": "equal_round_robin",
+    "source_group_id_in_stream": null,
+    "source_group_probability": "explicit_stage_a_exception_not_used",
+    "within_cell_probability": "deterministic_uniform_cycle"
+  },
+  "schema": "compose.editing_v2.process_v2_p50_recipe_policy",
+  "schema_version": 1,
+  "scientific_scope": "scratch_active8_stage_a_capability_pilot_not_production_law_calibration",
+  "status": "FROZEN_PROCESS_V2_P50_RECIPE_POLICY_NO_DOWNSTREAM_AUTHORITY",
+  "t1_authorized": false,
+  "thresholds": {
+    "baseline_definition": "exact_pre_update_scratch_evaluation_on_the_frozen_validation_stream",
+    "baseline_partition_role": "validation",
+    "baseline_values_inspected_when_thresholds_frozen": false,
+    "catastrophic_regression_sentinel_rationale": "plus_0_25_nats_is_a_separate_abort_sentinel_and_not_a_learning_criterion",
+    "gradient_floor_rule": "max_1_ceil_fraction_times_planned_optimizer_step_opportunities",
+    "gradient_opportunity_fraction": 0.8,
+    "maximum_cell_final_minus_baseline_for_p50_nonincrease_nats": 1e-07,
+    "maximum_cell_final_minus_baseline_successor_nll_nats": 0.25,
+    "maximum_family_final_minus_baseline_for_p50_nonincrease_nats": 1e-07,
+    "maximum_family_final_minus_baseline_successor_nll_nats": 0.25,
+    "p50_nonincrease_numerical_equivalence_rationale": "one_e_minus_seven_nats_allows_only_float32_reduction_equivalence_not_regression",
+    "zero_planned_family_or_cell_opportunities_allowed": false
+  },
+  "time_derivation": {
+    "algorithm": "sha256_counter_open_unit_interval_53bit_v1",
+    "seed": 31,
+    "serialized_value": "python_float_hex_v1",
+    "support": "strict_open_unit_interval"
+  },
+  "training_authorized": false
+}

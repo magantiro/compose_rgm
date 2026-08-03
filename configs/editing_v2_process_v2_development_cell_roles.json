@@ -1,0 +1,96 @@
+{
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "admitted_source": {
+    "completion_sha256": null,
+    "run_identity_sha256": null,
+    "schema": "compose.data.process_v2_admitted_source"
+  },
+  "bounded_p50_authorized": false,
+  "checkpoint_selection_authorized": false,
+  "conditional_cell_ids": [
+    "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system",
+    "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system",
+    "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change"
+  ],
+  "conditional_policy": {
+    "gate_zero_nonempty_required": false,
+    "included_in_balanced_editing_p50": false,
+    "included_in_unique_state_editing_t1": false,
+    "reported_as_audit_context": true,
+    "scientific_role": "conditional_source_conditioned_editing",
+    "validate_when_present": true
+  },
+  "contract_id": "editing_v2_process_v2_development_cell_roles",
+  "contract_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc",
+  "final_test_selection_authorized": false,
+  "gate_zero_authorized": false,
+  "long_training_authorized": false,
+  "parents": {
+    "capability_cell_registry": {
+      "file_sha256": "8448e8d8cffebee3b146d9774f413fb37ee83ce8e4050541b26c45c4fa20fb89",
+      "path": "configs/editing_v2_process_v2_capability_cells.json",
+      "semantic_sha256": "9e44689b4b57c1ea9cc68e7a73bdc855ce3e1b744747e40c9036ebed491a815b"
+    }
+  },
+  "partition_policy": {
+    "conditional_cell_count": 3,
+    "registered_cells_must_be_classified_exactly_once": true,
+    "required_cell_count": 17,
+    "role_assignment_frozen_before_gate_zero_outputs": true,
+    "separate_lane_cell_count": 2
+  },
+  "process_identity": {
+    "identity_schema": "compose.editing.semantic_process_v2_identity",
+    "identity_schema_version": 1,
+    "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
+    "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+    "process_semantics": "semantic_editing_v2_v2",
+    "provider": "editing_process_v2_identity"
+  },
+  "required_cell_ids": [
+    "editing_v2_active8_v1:atom_insert:one_neighbor_birth",
+    "editing_v2_active8_v1:atom_delete:leaf_death",
+    "editing_v2_active8_v1:atom_delete:connected_nonleaf_death",
+    "editing_v2_active8_v1:atom_restate:element_identity_change",
+    "editing_v2_active8_v1:atom_restate:valence_state_change",
+    "editing_v2_active8_v1:bond_reorder:bond_order_increase",
+    "editing_v2_active8_v1:bond_reorder:bond_order_decrease",
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source",
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source",
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source",
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source",
+    "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system",
+    "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system",
+    "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system",
+    "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system",
+    "editing_v2_active8_v1:ring_system_restate:aromatization",
+    "editing_v2_active8_v1:ring_system_restate:dearomatization"
+  ],
+  "schema": "compose.editing_v2.process_v2_development_cell_roles",
+  "schema_version": 1,
+  "scope": "source_conditioned_editing_gate0_t1_p50",
+  "separate_lane_cell_ids": [
+    "editing_v2_active8_v1:atom_insert:root_birth",
+    "editing_v2_active8_v1:atom_delete:singleton_to_null_death"
+  ],
+  "separate_lane_policy": {
+    "editing_v2_authority": false,
+    "gate_zero_nonempty_required": false,
+    "included_in_balanced_editing_p50": false,
+    "included_in_unique_state_editing_t1": false,
+    "reported_as_audit_context": true,
+    "scientific_role": "separate_timed_de_novo_null_boundary"
+  },
+  "status": "FROZEN_PROCESS_V2_DEVELOPMENT_CELL_ROLES_NO_DOWNSTREAM_AUTHORITY",
+  "t1_authorized": false,
+  "training_authorized": false
+}

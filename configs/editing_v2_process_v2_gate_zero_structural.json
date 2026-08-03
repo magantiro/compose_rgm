@@ -1,0 +1,110 @@
+{
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "admitted_source": {
+    "completion_sha256": null,
+    "run_identity_sha256": null,
+    "schema": "compose.data.process_v2_admitted_source"
+  },
+  "bounded_p50_authorized": false,
+  "checkpoint_selection_authorized": false,
+  "contract_id": "editing_v2_process_v2_gate_zero_structural",
+  "contract_sha256": "920de49f09f829119031e42efd09ec4b816075815886ef541407a011a381654a",
+  "decision_policy": {
+    "failure_policy": "publish_fail_closed_negative_evidence",
+    "pass_grants_checkpoint_selection_authority": false,
+    "pass_grants_final_test_selection_authority": false,
+    "pass_grants_gate_zero_authority": false,
+    "pass_grants_long_training_authority": false,
+    "pass_grants_p50_authority": false,
+    "pass_grants_t1_authority": false,
+    "pass_grants_training_authority": false,
+    "pass_meaning": "structural_evidence_complete_for_all_active8_families_and_required_editing_cells_in_train_only"
+  },
+  "final_test_selection_authorized": false,
+  "gate_zero_authorized": false,
+  "long_training_authorized": false,
+  "parents": {
+    "capability_cell_registry": {
+      "file_sha256": "8448e8d8cffebee3b146d9774f413fb37ee83ce8e4050541b26c45c4fa20fb89",
+      "path": "configs/editing_v2_process_v2_capability_cells.json",
+      "semantic_sha256": "9e44689b4b57c1ea9cc68e7a73bdc855ce3e1b744747e40c9036ebed491a815b"
+    },
+    "decision_runtime": {
+      "file_sha256": "291ac82c9d8fb86c1619ae0f9b13535ef14c6a57f2d48c4f9ab22ab04219f322",
+      "path": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+      "semantic_sha256": "48be271f149caa029c4299bbf61a99571e601e47f5ed2191823357214e1ad08b"
+    },
+    "development_cell_roles": {
+      "file_sha256": "4bcc3f2825f4684594e91ccd8e5159f44ea62b9d284d25383ef59173d761ecb1",
+      "path": "configs/editing_v2_process_v2_development_cell_roles.json",
+      "semantic_sha256": "f5d9898f29651c9bf5d51568cab009e6122d72688aff7cbbcf6ba68861a172bc"
+    },
+    "semantic_model_process": {
+      "file_sha256": "d343a328cbb4205c6bcc8a5e982f7eb92c80b644075e018bb74a6616a0d209c6",
+      "path": "configs/editing_gate_zero_semantic_model_process_v2.json",
+      "semantic_sha256": "971a124a3d790e6d5435be5651d9d3f324ea7407cfd0e82944290ffaad138d3a"
+    },
+    "semantic_process": {
+      "file_sha256": "b5fa06d7b2987905a0352d73c1ce6aba881373503074f32862f32180e4a7a0a4",
+      "path": "configs/editing_v2_semantic_process_v2.json",
+      "semantic_sha256": "5e317e65cfbff0a8c8770765d1248925d0e068f4e2dd7f8a4cf474b85955ee1e"
+    }
+  },
+  "process_identity": {
+    "identity_schema": "compose.editing.semantic_process_v2_identity",
+    "identity_schema_version": 1,
+    "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
+    "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+    "process_semantics": "semantic_editing_v2_v2",
+    "provider": "editing_process_v2_identity"
+  },
+  "required_architecture": {
+    "atom_vocabulary_class_count": 15,
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "dtype": "torch.float32",
+    "hidden_dim": 256,
+    "initialization_seed": 20260730,
+    "mark_dim": 32,
+    "max_atoms": 40,
+    "message_passing_steps": 6
+  },
+  "schema": "compose.editing_v2.process_v2_gate_zero_structural",
+  "schema_version": 1,
+  "status": "FROZEN_PROCESS_V2_GATE_ZERO_STRUCTURAL_NO_DOWNSTREAM_AUTHORITY",
+  "structural_checks": {
+    "capability_context_policy": "classify_every_decision_eligible_teacher_require_frozen_required_editing_cells_report_conditional_and_separate_lane_contexts",
+    "classification_failure_policy": "publish_bounded_typed_negative_receipts_and_fail",
+    "classification_failure_receipt_limit": 100,
+    "decision_eligible_partition_roles": [
+      "train"
+    ],
+    "excluded_trace_policy": "preserve_and_report_never_reclassify_as_teacher_coverage",
+    "legacy_action_v2_evidence": "forbidden",
+    "require_every_active8_family": true,
+    "require_every_teacher_supported": true,
+    "require_exactly_one_matching_mark": true,
+    "require_one_assignment_per_accepted_action": true,
+    "require_positive_canonical_successor_count": true,
+    "require_positive_raw_mark_count": true,
+    "require_positive_successor_alias_count": true,
+    "require_zero_terminal_assignments": true,
+    "sealed_nondecision_partition_roles": [
+      "controller_validation",
+      "final_test",
+      "validation"
+    ],
+    "teacher_unit": "accepted_nonterminal_action_v4_transition",
+    "trace_selection": "accepted_whole_traces_only"
+  },
+  "t1_authorized": false,
+  "training_authorized": false
+}

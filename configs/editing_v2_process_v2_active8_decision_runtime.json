@@ -1,0 +1,65 @@
+{
+  "active_families": [
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate"
+  ],
+  "admitted_source": {
+    "completion_sha256": null,
+    "run_identity_sha256": null,
+    "schema": "compose.data.process_v2_admitted_source"
+  },
+  "bounded_p50_authorized": false,
+  "checkpoint_selection_authorized": false,
+  "contract_id": "editing_v2_process_v2_active8_decision_runtime",
+  "contract_sha256": "48be271f149caa029c4299bbf61a99571e601e47f5ed2191823357214e1ad08b",
+  "final_test_selection_authorized": false,
+  "gate_zero_authorized": false,
+  "long_training_authorized": false,
+  "model": {
+    "atom_vocabulary_class_count": 15,
+    "candidate_cache_size": 4096,
+    "candidate_time": 0.5,
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "dtype": "torch.float32",
+    "hidden_dim": 256,
+    "initialization_seed": 20260730,
+    "mark_dim": 32,
+    "max_atoms": 40,
+    "message_passing_steps": 6,
+    "operator_capability_fingerprint": "d79ffe8ef65f3fb3"
+  },
+  "parents": {
+    "semantic_model_process": {
+      "file_sha256": "d343a328cbb4205c6bcc8a5e982f7eb92c80b644075e018bb74a6616a0d209c6",
+      "path": "configs/editing_gate_zero_semantic_model_process_v2.json",
+      "semantic_sha256": "971a124a3d790e6d5435be5651d9d3f324ea7407cfd0e82944290ffaad138d3a"
+    }
+  },
+  "process_identity": {
+    "identity_schema": "compose.editing.semantic_process_v2_identity",
+    "identity_schema_version": 1,
+    "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
+    "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+    "process_semantics": "semantic_editing_v2_v2",
+    "provider": "editing_process_v2_identity"
+  },
+  "schema": "compose.editing_v2.process_v2_active8_decision_runtime",
+  "schema_version": 1,
+  "software": {
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "python": "3.11",
+    "rdkit": "2024.3.5",
+    "scipy": "1.13.1",
+    "torch": "2.4.0"
+  },
+  "status": "FROZEN_PROCESS_V2_CPU_DECISION_RUNTIME_NO_DOWNSTREAM_AUTHORITY",
+  "t1_authorized": false,
+  "training_authorized": false
+}
