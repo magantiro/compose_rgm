@@ -47,6 +47,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     T1_PANEL_POLICY,
     WHOLE_CANONICAL_BODY_ALGORITHM,
     process_v2_chain_self_hash,
+    process_v2_superseded_generations,
 )
 from compose_v4.rewrite.editing_v2_process_identity import (
     editing_process_v2_identity,
@@ -439,7 +440,7 @@ def test_a_lineage_value_equal_to_the_live_value_fails() -> None:
         ]
 
         def lie(payload: dict[str, Any]) -> None:
-            lineage = payload["superseded_design_lineage"]["semantic"]
+            lineage = payload["superseded_design_lineage"][-1]["semantic"]
             lineage["target"] = DEVELOPMENT_CELL_ROLES
             lineage["sha256"] = live_roles
 
@@ -452,7 +453,13 @@ def test_a_lineage_value_equal_to_the_live_value_fails() -> None:
 def test_lineage_pointers_are_historical_in_the_committed_graph() -> None:
     report = verify_process_v2_chain(repo_root=_ROOT)
     lineage = [edge for edge in report["edges"] if edge["kind"] == PointerKind.LINEAGE_REFERENCE]
-    assert len(lineage) == 2 * len(PROCESS_V2_CHAIN_ARTIFACTS)
+    # Two roles (physical, semantic) per superseded generation per artifact. The
+    # generation count is read from the chain rather than written down, so
+    # accumulating a third generation does not silently leave this asserting the
+    # old total -- which is the failure mode a literal here would have.
+    assert len(lineage) == 2 * len(process_v2_superseded_generations()) * len(
+        PROCESS_V2_CHAIN_ARTIFACTS
+    )
     assert {edge["result"] for edge in lineage} == {"historical"}
 
 

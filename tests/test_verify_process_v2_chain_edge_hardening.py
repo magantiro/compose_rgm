@@ -540,8 +540,12 @@ def test_a_lineage_pointer_target_schema_is_deliberately_not_compared() -> None:
     """
 
     def relabel(payload: dict[str, Any]) -> None:
-        for slot in ("physical", "semantic"):
-            payload["superseded_design_lineage"][slot]["target_schema"] = "compose.old.name"
+        # Every superseded generation, not just the newest: the exemption has to
+        # hold for the whole lineage, and relabelling only one would still pass
+        # if a later generation were being compared.
+        for generation in payload["superseded_design_lineage"]:
+            for slot in ("physical", "semantic"):
+                generation[slot]["target_schema"] = "compose.old.name"
 
     report = _report_after(T1_PANEL_POLICY, relabel)
     assert "target_schema_disagrees" not in _categories(report)
