@@ -7,16 +7,16 @@ refuses, and by then the layers above it have been built on the assumption that
 the boundary held.
 
 1. **The reference successor kernel stays a test oracle.**  Enforcement already
-   exists in ``tests/test_reference_successor_kernel.py``, which owns the strict
-   rule that no production module may so much as *mention* the oracle.  That gate
-   is not duplicated and not weakened here.  Recorded finding: it fails at this
-   commit, on a false positive, because it is a substring scan and
-   ``src/compose_v4/rewrite/editing_v2_process_identity.py`` names the oracle's
-   *path* in the content-addressed file list whose hashes define the V1 process
-   identity.  That is a hashed path literal, not an edge.  What this module adds
-   is the typed version of the same boundary: an import-graph check that no
-   production module, and in particular no Process-V2 module, actually imports
-   the oracle.  Repairing the substring gate belongs to the module that owns it.
+   exists in ``tests/test_reference_successor_kernel.py``, which owns that rule.
+   That gate is not duplicated and not weakened here; this module asserts that it
+   still exists and still covers every directory a Process-V2 module lives in.
+   Historical note, because the docstring is otherwise misleading to a reader of
+   the git log: the owning gate used to be a substring scan and used to fail on a
+   false positive, because ``src/compose_v4/rewrite/editing_v2_process_identity
+   .py`` names the oracle's *path* in the content-addressed file list whose hashes
+   define the V1 process identity, which is a hashed path literal rather than an
+   edge.  It is an import-edge scan now and is green.  What this module adds is
+   the same boundary stated over the Process-V2 module set specifically.
 
 2. **No Process-V2 module imports a V1 loader that revalidates V1 schema or live
    identity.**  This boundary currently FAILS, deliberately and visibly: see the
@@ -149,20 +149,26 @@ def test_the_process_v2_module_set_is_discovered_and_is_not_empty() -> None:
 def test_the_owning_oracle_gate_exists_and_covers_the_process_v2_directories() -> None:
     """Without this the Process-V2 chain relies on a gate it never checks exists.
 
-    ``tests/test_reference_successor_kernel.py`` owns the strict text rule and is
-    not duplicated here.  What is asserted is that it still exists and still
-    scans every directory a Process-V2 module lives in, so deleting, renaming or
-    narrowing it fails here rather than silently removing the enforcement the
-    Process-V2 modules inherit.
+    ``tests/test_reference_successor_kernel.py`` owns the rule and is not
+    duplicated here.  What is asserted is that it still exists, still targets the
+    oracle, and still scans every directory a Process-V2 module lives in, so
+    deleting, renaming or narrowing it fails here rather than silently removing
+    the enforcement the Process-V2 modules inherit.
 
-    The gate is deliberately not invoked.  It fails at this commit on a false
-    positive (see this module's docstring), and importing a pre-existing failure
-    into this file would report a defect that is not this boundary's.
+    The gate is deliberately not invoked.  Asserting over its *source* is what
+    makes this a statement about the enforcement rather than a second run of it,
+    and it is why the assertions below name the gate's own scanner and target
+    rather than a substring that moved when the gate became an edge scan.
     """
 
     gate = oracle_boundary.test_no_production_module_imports_the_oracle
     gate_source = inspect.getsource(gate)
-    assert "reference_successor_kernel" in gate_source
+    # The gate delegates to its module's typed edge scanner, and that scanner's
+    # target is the oracle file itself.
+    assert "_oracle_import_edges(" in gate_source
+    assert str(oracle_boundary._ORACLE_PATH).endswith(
+        "experiments/reference_successor_kernel.py"
+    )
 
     # The gate names its scanned roots in its own body; a narrowing that dropped
     # a directory a Process-V2 module lives in would leave that module
@@ -176,18 +182,17 @@ def test_the_owning_oracle_gate_exists_and_covers_the_process_v2_directories() -
 
 
 def test_no_production_module_has_an_import_edge_to_the_reference_oracle() -> None:
-    """Without this the only enforcement of a real boundary is a substring scan.
+    """Without this the boundary rests on one module's scanner and nothing else.
 
     The rule that matters is that no reported number can come from the test
-    oracle, and that is a property of the import graph.  A substring scan is
-    both too strict, as this commit demonstrates, and too weak, because it
-    cannot tell an ``import`` from a string.  This check is typed: it parses
-    every production module and looks for an actual edge.
+    oracle, and that is a property of the import graph.  This check is typed and
+    independent: it parses every production module here rather than calling the
+    owning gate, so a defect in one scanner cannot hide the boundary in both.
 
-    It is also the record of the current false positive.  The one production
-    file that mentions the oracle mentions it exactly once, as a path in the
-    hashed implementation-file list that defines the V1 process identity, and
-    has no edge.  If that mention ever becomes a real import, this fails.
+    It also records the one textual mention.  The single production file that
+    mentions the oracle mentions it exactly once, as a path in the hashed
+    implementation-file list that defines the V1 process identity, and has no
+    edge.  If that mention ever becomes a real import, this fails.
     """
 
     oracle_module = "compose_v4.experiments.reference_successor_kernel"
@@ -216,11 +221,11 @@ def test_no_production_module_has_an_import_edge_to_the_reference_oracle() -> No
         "the reference aggregator is a test oracle; a production import edge would let a "
         f"reported number come from it: {sorted(edges_found)}"
     )
-    # Measured: the one textual mention, and the reason the owning substring gate
-    # is red at this commit while the real boundary holds.
+    # Measured: the one textual mention, which is a hashed path literal rather
+    # than an edge and is why a substring rule was the wrong instrument here.
     assert mentions == {"src/compose_v4/rewrite/editing_v2_process_identity.py": 1}, (
         "the set of production files that textually mention the test oracle has moved; "
-        "recheck whether tests/test_reference_successor_kernel.py is now green and whether "
+        "recheck whether tests/test_reference_successor_kernel.py still agrees and whether "
         f"this module's reason for not invoking it still holds. Observed: {mentions}"
     )
 
