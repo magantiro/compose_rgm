@@ -131,23 +131,34 @@ def _trap(name):
     return _raise
 
 
+installed = []
 for _name in {list(_LAUNCH_CALLS)!r}:
     for _target in (modal.Function, modal.App):
         if hasattr(_target, _name):
             try:
                 setattr(_target, _name, _trap(_name))
             except (AttributeError, TypeError):
-                pass
+                continue
+            if getattr(_target, _name).__name__ == "_raise":
+                installed.append(_target.__name__ + "." + _name)
+
+# Without this the trap could silently fail to install and the import below
+# would prove nothing at all.
+assert installed, "no Modal launch surface could be trapped"
 
 from modal_apps import {path.stem}  # noqa: F401
 
-print("IMPORTED_WITHOUT_LAUNCH", len(fired))
+print("IMPORTED_WITHOUT_LAUNCH", len(fired), len(installed))
 """
     result = subprocess.run(
         [sys.executable, "-c", program], capture_output=True, text=True, timeout=300
     )
     assert result.returncode == 0, result.stderr
-    assert "IMPORTED_WITHOUT_LAUNCH 0" in result.stdout
+    fired, installed = (
+        result.stdout.split("IMPORTED_WITHOUT_LAUNCH ", 1)[1].split()[:2]
+    )
+    assert fired == "0"
+    assert int(installed) >= len(_LAUNCH_CALLS)
 
 
 def test_the_description_entrypoints_execute_nothing(capsys) -> None:
