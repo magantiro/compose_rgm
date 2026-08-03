@@ -953,6 +953,20 @@ def validate_process_v2_active8_plan(
         raise ProcessV2Active8MapReduceError(
             "the Process-V2 Active8 plan does not cover the exact cached entry census"
         )
+    # The two upstream stages must describe the same corpus. The task join is
+    # already a bijection over entry RANGES, which implies equal totals only if
+    # both sides were built from the same payload; stating the census equality
+    # separately catches a binding assembled from two different runs whose
+    # ranges happen to line up.
+    if (
+        entries != int(plan["cache_binding"]["entries"])
+        or entries != int(plan["rebind_binding"]["rebind_source_entries"])
+    ):
+        raise ProcessV2Active8MapReduceError(
+            f"the Process-V2 Active8 plan covers {entries} entries, the bound cache holds "
+            f"{plan['cache_binding']['entries']} and the bound rebind decided "
+            f"{plan['rebind_binding']['rebind_source_entries']}"
+        )
     if plan["task_inventory_sha256"] != _sha(list(tasks)):
         raise ProcessV2Active8MapReduceError(
             "the Process-V2 Active8 plan task inventory hash disagrees"
@@ -1770,10 +1784,20 @@ def reduce_process_v2_active8_decisions(
             "the Process-V2 Active8 reduction join keys do not cover the exact census"
         )
     upstream_total = int(validated["rebind_binding"]["rebind_rejected_entries"])
+    admitted_total = int(validated["rebind_binding"]["rebind_admitted_entries"])
+    evaluated = counts["active8_accepted_entries"] + counts["active8_excluded_entries"]
     if counts["upstream_rejected_entries"] != upstream_total:
         raise ProcessV2Active8MapReduceError(
             f"the Process-V2 Active8 run carried {counts['upstream_rejected_entries']} upstream "
             f"rejections, the bound rebind published {upstream_total}"
+        )
+    # The complement, stated separately: every entry the rebind admitted is
+    # exactly the set Active8 evaluated. Checking only the rejected side would
+    # let an evaluated entry vanish while the rejected count still agreed.
+    if evaluated != admitted_total or counts["evaluated_entries"] != admitted_total:
+        raise ProcessV2Active8MapReduceError(
+            f"the Process-V2 Active8 run evaluated {evaluated} entries, the bound rebind "
+            f"admitted {admitted_total}"
         )
     completion_body: dict[str, Any] = {
         "schema": COMPLETION_SCHEMA,
