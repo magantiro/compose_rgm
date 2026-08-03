@@ -236,6 +236,14 @@ ACTIVE8_RECEIPT_FIELDS: tuple[str, ...] = (
 #: they live, and two agents chose two layouts.
 ACTIVE8_TASKS_DIRNAME = "tasks"
 ACTIVE8_RECEIPT_FILENAME = "RECEIPT.json"
+#: The per-trace census rows (`ACTIVE8_ROW_FIELDS`).  A published artifact by
+#: this seam's own definition, so it gets a name here rather than being invented
+#: by whichever stage writes it first.  Gate 0 never opens it: it builds the
+#: census from receipt metadata and aggregates transitions, so rows exist for
+#: audit and for stages downstream of this pipeline.
+ACTIVE8_ROW_SHARD_FILENAME = "rows.jsonl.gz"
+
+#: The accepted transitions (`ACCEPTED_TRANSITION_FIELDS`).
 ACTIVE8_DECISION_SHARD_FILENAME = "transitions.jsonl.gz"
 GATE_ZERO_DECISION_FILENAME = "DECISION.json"
 
@@ -283,6 +291,7 @@ SENTINEL_RESULT_FIELDS: tuple[str, ...] = (
 SENTINEL_BLOCKS_COMPLETION = True
 
 __all__ = [
+    "ACTIVE8_ROW_SHARD_FILENAME",
     "GATE_ZERO_DECISION_FILENAME",
     "ACTIVE8_TASKS_DIRNAME",
     "ACTIVE8_RECEIPT_FILENAME",
