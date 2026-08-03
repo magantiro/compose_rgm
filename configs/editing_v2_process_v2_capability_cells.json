@@ -9,11 +9,6 @@
     "cycle_attach",
     "ring_system_restate"
   ],
-  "admitted_source": {
-    "completion_sha256": null,
-    "run_identity_sha256": null,
-    "schema": "compose.data.editing_process_v2_admitted_source"
-  },
   "bindings": {
     "action_codec_schema_version": 4,
     "data_lanes": [
@@ -62,7 +57,8 @@
   },
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_capability_cells",
-  "contract_sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
+  "contract_revision": "process_v2_explicit_dependency_graph",
+  "contract_sha256": "b9ef14f32d83eaaae9c4ee3ac90121056b97a551199c8b96cbee6fd614d44068",
   "exact_evidence_strata": {
     "canonical_successor_count": {
       "bins": [
@@ -191,14 +187,35 @@
   "long_training_authorized": false,
   "parents": {
     "classifier_implementation": {
-      "file_sha256": "91c9194048984869ec3ab307bdac0055a190b6f3b07c0cddc1a572170517def1",
-      "path": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
-      "semantic_sha256": "91c9194048984869ec3ab307bdac0055a190b6f3b07c0cddc1a572170517def1"
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "repository_config",
+        "provider": "repository_source_file",
+        "sha256": "91c9194048984869ec3ab307bdac0055a190b6f3b07c0cddc1a572170517def1",
+        "target": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
+        "target_schema": null
+      }
     },
     "editing_corpus_contract": {
-      "file_sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
-      "path": "configs/editing_corpus_v2_contract.json",
-      "semantic_sha256": "153ef7316a64d03a89ba739f6423976b1d734695af8569d2e2cdc7a1227eb519"
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "repository_config",
+        "provider": "frozen_repository_artifact",
+        "sha256": "3e5dcb66904f90f813e78088b930efc1f745cb222d2e2b0f3e3d61890fcc73d1",
+        "target": "configs/editing_corpus_v2_contract.json",
+        "target_schema": "compose.editing_corpus_contract"
+      },
+      "semantic": {
+        "hash_algorithm": "whole_canonical_body_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "repository_config",
+        "provider": "frozen_repository_artifact",
+        "sha256": "153ef7316a64d03a89ba739f6423976b1d734695af8569d2e2cdc7a1227eb519",
+        "target": "configs/editing_corpus_v2_contract.json",
+        "target_schema": "compose.editing_corpus_contract"
+      }
     }
   },
   "process_identity": {
@@ -209,8 +226,13 @@
     "process_semantics": "semantic_editing_v2_v2",
     "provider": "editing_process_v2_identity"
   },
+  "resolved_evidence_binding": {
+    "cited_by_schema": "compose.editing_v2.process_v2.resolved_evidence_binding",
+    "cited_by_schema_version": 1,
+    "measured_evidence_in_this_contract": false
+  },
   "schema": "compose.editing_v2.process_v2_capability_cells",
-  "schema_version": 1,
+  "schema_version": 2,
   "scope": {
     "formal_charge_changes": "out_of_scope_charge_preserving_only",
     "generated_object": "canonical_molecular_successor",
@@ -220,7 +242,34 @@
     "stereochemistry": "out_of_scope",
     "terminal_rows": "outside_capability_cell_registry_hazard_is_separate"
   },
+  "shared_policy_registry": {
+    "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
+    "schema": "compose.editing_v2.shared_policy_registry",
+    "schema_version": 1
+  },
   "status": "FROZEN_PROCESS_V2_SEMANTIC_CAPABILITY_CELLS_NO_DOWNSTREAM_AUTHORITY",
+  "superseded_design_lineage": {
+    "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
+    "physical": {
+      "hash_algorithm": null,
+      "identity_role": "physical_sha256",
+      "kind": "lineage_reference",
+      "provider": "editing_v2_process_v2_contract_chain",
+      "sha256": "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592",
+      "target": "configs/editing_v2_process_v2_capability_cells.json",
+      "target_schema": "compose.editing_v2.process_v2_capability_cells"
+    },
+    "schema_version": 1,
+    "semantic": {
+      "hash_algorithm": "self_hash_field_v1",
+      "identity_role": "semantic_sha256",
+      "kind": "lineage_reference",
+      "provider": "editing_v2_process_v2_contract_chain",
+      "sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
+      "target": "configs/editing_v2_process_v2_capability_cells.json",
+      "target_schema": "compose.editing_v2.process_v2_capability_cells"
+    }
+  },
   "t1_authorized": false,
   "training_authorized": false
 }

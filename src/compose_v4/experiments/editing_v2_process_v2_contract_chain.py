@@ -1,4 +1,4 @@
-"""Deterministic builder and validator for the Process-V2 downstream contract chain.
+"""Deterministic builder, validator and transactional publisher for the Process-V2 chain.
 
 WHAT THIS IS
 ------------
@@ -7,7 +7,7 @@ process identity (``configs/editing_v2_semantic_*_v1.json``).  Process-V2 change
 ``atom_delete`` admission, which moved ``editing_process_v2_identity()``, so every
 one of those artifacts describes a process that is no longer the live one.  Because
 the V1 artifacts are frozen and must never be relabelled, the Process-V2 chain is a
-SEPARATE set of seven configs that MIRRORS the V1 structure while binding the live
+SEPARATE set of seven configs that MIRRORS the V1 policy while binding the live
 Process-V2 identity:
 
 ===  ==================================================================  ==========
@@ -24,65 +24,123 @@ Process-V2 identity:
 
 MIRROR, NOT REDESIGN
 --------------------
-Every policy value -- cell definitions, family contexts, data lanes, partition roles,
-the ``editing_v2_active8_v1`` cell namespace, the 17 required / 3 conditional / 2
-separate-lane cell counts, the panel cardinalities, every threshold, the optimizer
-and sampling laws -- is copied verbatim from its V1 counterpart and is asserted
-identical by ``tests/test_editing_v2_process_v2_contract_chain.py``.  The ONLY
-differences are the identity, the pin shape, and the authority envelope:
+No policy value moves.  Cell definitions, family contexts, data lanes, partition
+roles, the ``editing_v2_active8_v1`` cell namespace, the 17 required / 3
+conditional / 2 separate-lane counts, panel cardinalities, every threshold, the
+optimizer and sampling laws are **projected** from the frozen V1 contracts through
+``compose_v4.data.editing_v2_process_v2_policy_registry`` rather than transcribed
+here.  The registry pins each frozen source by physical hash and self-hash, so a
+projection cannot drift and an edited frozen source makes the build refuse.  This
+replaces roughly five hundred lines of hand-copied policy; the projection was
+proved byte-identical to every constant it replaced before those constants were
+deleted.
 
-* each artifact binds ``editing_process_v2_identity()`` (V2), never the V1 identity;
-* each artifact binds the Active8 operator order from ``ACTIVE8_FAMILIES``;
-* every parent pointer is the Gate-0 canonical triple
-  ``{"path", "file_sha256", "semantic_sha256"}``, replacing V1's several
-  inconsistent pin spellings;
-* every artifact carries exactly one self-hash field, ``contract_sha256``;
-* every artifact carries all seven authority flags, every one ``false``.
+THE DEPENDENCY GRAPH IS EXPLICIT
+--------------------------------
+Tuple order is not a dependency edge.  Every edge is a **declared typed pointer**
+carrying its kind, provider, target schema, identity role and hash algorithm, so a
+verifier discovers it structurally instead of guessing that a string which happens
+to name an existing file is an edge.  A declared pointer whose target is deleted or
+misspelled cannot vanish from the graph, which is what made the previous verifier's
+missing-target diagnostic unreachable.
+
+Schema version 2 adds the edges Gate 0 -> T1 panel -> T1 capacity -> P50 that
+version 1 left implicit:
+
+* the T1 panel policy binds the Process-V2 Gate-0 structural contract and the
+  frozen corpus contract that states its source requirements;
+* the T1 capacity policy binds the T1 panel policy and Gate 0;
+* the P50 recipe policy binds T1 capacity, T1 panel, Gate 0, and every other exact
+  policy it consumes: the cell roles it round-robins over, the capability-cell
+  registry that defines those cells, the decision runtime it binds as trainer
+  runtime, and the corpus contract naming its source population.
+
+No earlier artifact points at a later one.  Measured Gate-0, T1 and P50 decisions
+bind these immutable policies from their own side.
+
+MEASURED EVIDENCE LIVES ELSEWHERE
+---------------------------------
+Version 1 carried an ``admitted_source`` block with null hashes, advertised as
+later fillable.  It was not: the builder always emits null, the validator rebuilds
+the null body and requires equality, so a correctly resealed body with measured
+hashes fails.  Confirmed against this code before the slot was removed.  Measured
+provenance now lives in ``editing_v2_process_v2_evidence_binding``, a separate
+versioned artifact that cites a contract and pins what a run measured.  Each
+contract only *declares* which schema will cite it, which is a constant and never a
+hash, so the contract stays deterministic and never addresses a later result.
 
 SEMANTIC HASH RULE
 ------------------
-``semantic_sha256`` is the target's OWN self-hash -- the unique top-level
-``*_sha256`` field that equals the canonical hash of the rest of the object.  A JSON
-target that declares no such field is pinned by the canonical hash of its whole body
-(this is what ``configs/editing_corpus_v2_contract.json`` needs, and it matches the
-existing pin in ``configs/editing_v2_candidate_provenance_decisions_v1.json``).  A
-non-JSON target has no separable semantic body, so its semantic hash is its physical
-hash.
+A pointer states its own algorithm rather than leaving it to convention.
+``self_hash_field_v1`` means the target declares a unique ``*_sha256`` field equal
+to the canonical hash of its body minus that field.  ``whole_canonical_body_v1``
+means the target declares no such field, so its whole canonical body is hashed
+(this is what ``configs/editing_corpus_v2_contract.json`` needs).  A non-JSON target
+has no separable semantic body and is therefore pinned by physical hash only,
+rather than by a "semantic" hash that is secretly the physical one.
 
 WHAT THIS DOES NOT AUTHORIZE
 ----------------------------
 Nothing.  These are prospective binding contracts, not evidence and not permission.
-Every artifact sets ``training_authorized``, ``gate_zero_authorized``,
-``t1_authorized``, ``bounded_p50_authorized``, ``long_training_authorized``,
-``checkpoint_selection_authorized`` and ``final_test_selection_authorized`` to
-``false``, and every ``status`` ends in ``_NO_DOWNSTREAM_AUTHORITY``.  Building or
-validating this chain does not run Gate 0, T1 or P50, does not authorize a Modal
-launch or any training, and does not revalidate evidence produced under a superseded
-identity -- such evidence stays invalid regardless.  ``admitted_source`` is present
-on every artifact with null members so that a later rebind run can only FILL it,
-never introduce a field the chain never declared.
+Every artifact carries the complete frozen authority vocabulary, every field
+``false``, and every ``status`` ends in ``_NO_DOWNSTREAM_AUTHORITY``.  Building,
+validating or publishing this chain does not run Gate 0, T1 or P50, does not
+authorize a Modal launch or any training, and does not revalidate evidence produced
+under a superseded identity: such evidence stays invalid regardless.
 
 INVARIANTS MAINTAINED (and tested)
 ----------------------------------
 * build -> serialize -> validate -> load round-trips for all seven artifacts;
-* ``write_process_v2_chain`` is byte-stable across repeated runs and writes
-  parents-first, recomputing each child after its parent is sealed;
-* every parent pin resolves to the target's live physical and semantic hashes;
+* the whole chain is built parents-first through an in-memory overlay and is
+  byte-stable across repeated runs;
+* publication is transactional: artifacts are written under one content-addressed
+  generation directory, the complete graph is validated there, and the
+  ``COMMITTED.json`` marker is written last.  A reader ignores any generation
+  without a valid marker, so an interruption cannot expose a partial generation;
+* every declared pointer resolves to the target's live physical or semantic hash;
 * a V1 identity pin, a ``_v1`` parent path, a changed Active8 order, a non-``False``
-  authority flag, a disagreeing self-hash, and a changed field set each raise
-  :class:`ProcessV2ChainError` with a message naming that specific defect.
+  authority flag, a disagreeing self-hash, a changed field set, and a missing
+  dependency edge each raise :class:`ProcessV2ChainError` with a message naming
+  that specific defect.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import shutil
+import tempfile
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
+from compose_v4.data.editing_v2_process_v2_policy_registry import (
+    PolicyRegistryError,
+    policy_registry_identity,
+    project_shared_policy,
+    project_shared_policy_body,
+)
+from compose_v4.data.editing_v2_process_v2_schema import (
+    AUTHORITY_FIELDS,
+    GENERATION_COMMITTED_MARKER,
+    GENERATION_COMMITTED_SCHEMA,
+    GENERATION_COMMITTED_SCHEMA_VERSION,
+    RESOLVED_EVIDENCE_BINDING_SCHEMA,
+    RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION,
+    IdentityRole,
+    PointerKind,
+    ProcessV2SchemaError,
+    authority_false_block,
+    canonical_sha256,
+    require_authority_false,
+    self_hashed,
+    typed_pointer,
+    validate_typed_pointer,
+    verify_self_hash,
+)
 from compose_v4.rewrite.editing_v2_process_identity import (
     editing_process_v2_identity,
     editing_v2_process_identity,
@@ -116,7 +174,7 @@ PROCESS_V2_CHAIN_ARTIFACTS: tuple[str, ...] = (
     P50_RECIPE_POLICY,
 )
 
-# Frozen external parents.  Neither is a V1-named artifact.
+# Frozen external parents.  None is a V1-named artifact.
 GATE_ZERO_MODEL_PROCESS_V2 = "configs/editing_gate_zero_semantic_model_process_v2.json"
 SEMANTIC_PROCESS_V2 = "configs/editing_v2_semantic_process_v2.json"
 EDITING_CORPUS_V2_CONTRACT = "configs/editing_corpus_v2_contract.json"
@@ -125,544 +183,48 @@ CAPABILITY_CELL_CLASSIFIER = "src/compose_v4/data/editing_v2_semantic_capability
 #: The single self-hash field name every chain artifact carries.
 SELF_HASH_FIELD = "contract_sha256"
 
-#: The exact authority flags every chain artifact must carry, every one ``False``.
-AUTHORITY_FIELDS: tuple[str, ...] = (
-    "training_authorized",
-    "gate_zero_authorized",
-    "t1_authorized",
-    "bounded_p50_authorized",
-    "long_training_authorized",
-    "checkpoint_selection_authorized",
-    "final_test_selection_authorized",
+#: The schema version that made the dependency graph explicit and removed the
+#: unfillable measured-evidence slot.  Version 1 is preserved as design lineage;
+#: it is not overwritten and resealed.
+CHAIN_SCHEMA_VERSION = 2
+
+#: The named successor generation, following this repository's ``contract_revision``
+#: convention (see ``configs/editing_v2_semantic_process_v2.json``).
+CHAIN_CONTRACT_REVISION = "process_v2_explicit_dependency_graph"
+
+#: The revision the version-1 bodies were sealed under.
+SUPERSEDED_CHAIN_CONTRACT_REVISION = (
+    "process_v2_mirrored_chain_with_unfillable_admitted_source_slot"
 )
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
-# Imported from the adapter, never restated. A hand-copied schema string is
-# how these seven contracts came to bind a schema that does not exist: the
-# adapter declares "compose.data.editing_process_v2_admitted_source", and a
-# consumer matching the adapter's own constant would not have matched.
-from compose_v4.data.editing_process_v2_admitted_source import (  # noqa: E402
-    ADMITTED_SOURCE_SCHEMA,
-)
-ADMITTED_SOURCE_FIELDS: tuple[str, ...] = (
-    "schema",
-    "completion_sha256",
-    "run_identity_sha256",
-)
-
 PROCESS_IDENTITY_PIN_FIELD = "process_identity_sha256"
 PROCESS_V2_IDENTITY_PROVIDER = "editing_process_v2_identity"
+PROCESS_V2_IDENTITY_SCHEMA = "compose.editing.semantic_process_v2_identity"
 PROCESS_IDENTITY_MODULE = "src/compose_v4/rewrite/editing_v2_process_identity.py"
+
+#: The exact field set a declared process-identity edge carries.  A verifier
+#: resolves it CONTEXTUALLY -- from provider, identity schema, process semantics
+#: and value together -- to exactly one identity node, instead of accepting either
+#: live identity and reporting the pin as addressing both.
+PROCESS_IDENTITY_EDGE_FIELDS: tuple[str, ...] = (
+    "identity_schema",
+    "identity_schema_version",
+    "module",
+    PROCESS_IDENTITY_PIN_FIELD,
+    "process_semantics",
+    "provider",
+)
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _V1_STEM = re.compile(r"_v1(?:$|_)")
 
-# ---- Policy values mirrored verbatim from the frozen V1 chain ----
-#
-# These are COPIES, never re-derivations.  ``tests/test_editing_v2_process_v2_
-# contract_chain.py`` reads the V1 configs and asserts each block below is equal to
-# its V1 counterpart, so a silent redesign here fails the suite.
+# ---- Semantic hash algorithms ----
 
-_V1_RUNTIME_MODEL: dict[str, Any] = {
-    "atom_vocabulary_class_count": 15,
-    "candidate_cache_size": 4096,
-    "candidate_time": 0.5,
-    "catalog_fingerprint": "639ff6078c32d43c",
-    "dtype": "torch.float32",
-    "hidden_dim": 256,
-    "initialization_seed": 20260730,
-    "mark_dim": 32,
-    "max_atoms": 40,
-    "message_passing_steps": 6,
-}
+SELF_HASH_FIELD_ALGORITHM = "self_hash_field_v1"
+WHOLE_CANONICAL_BODY_ALGORITHM = "whole_canonical_body_v1"
 
-_V1_RUNTIME_SOFTWARE: dict[str, Any] = {
-    "networkx": "3.3",
-    "numpy": "1.26.4",
-    "python": "3.11",
-    "rdkit": "2024.3.5",
-    "scipy": "1.13.1",
-    "torch": "2.4.0",
-}
-
-_V1_CELL_SCOPE: dict[str, Any] = {
-    "formal_charge_changes": "out_of_scope_charge_preserving_only",
-    "generated_object": "canonical_molecular_successor",
-    "maximum_active_atoms": 40,
-    "objective_lane": "productive_embedded_jump_chain",
-    "row_unit": "accepted_nonterminal_progress_row_with_exact_action_v4_teacher",
-    "stereochemistry": "out_of_scope",
-    "terminal_rows": "outside_capability_cell_registry_hazard_is_separate",
-}
-
-_V1_CELL_IDENTITY_POLICY: dict[str, Any] = {
-    "balancing_dimensions": ["model_family", "family_specific_context"],
-    "namespace": "editing_v2_active8_v1",
-    "rationale": (
-        "keep_the_balancing_registry_compact_and_retain_provenance_and_difficulty"
-        "_for_stratified_audits_without_a_cartesian_product"
-    ),
-    "separate_nonbalancing_dimensions": [
-        "data_lane",
-        "partition_role",
-        "record_membership_cells",
-        "endpoint_evidence_roles",
-        "path_evidence_roles",
-        "raw_mark_count_stratum",
-        "canonical_successor_count_stratum",
-        "successor_alias_multiplicity_stratum",
-        "matching_mark_count",
-        "semantic_groups",
-        "endpoint_descriptor",
-        "path_descriptor",
-        "relationship_group_ids",
-        "mappings",
-        "sampling_coefficients",
-        "atom_element_transition",
-        "minimum_edited_cycle_length",
-        "source_edge_aromatic",
-        "successor_edge_aromatic",
-    ],
-}
-
-_V1_FAMILY_CONTEXTS: dict[str, Any] = {
-    "atom_delete": [
-        "singleton_to_null_death",
-        "leaf_death",
-        "connected_nonleaf_death",
-    ],
-    "atom_insert": ["root_birth", "one_neighbor_birth"],
-    "atom_restate": ["element_identity_change", "valence_state_change"],
-    "bond_reorder": ["bond_order_increase", "bond_order_decrease"],
-    "bond_reroute": [
-        "single_atom_pendant_acyclic_source",
-        "multi_atom_pendant_acyclic_source",
-        "single_atom_pendant_cyclic_source",
-        "multi_atom_pendant_cyclic_source",
-    ],
-    "cycle_attach": [
-        "open_from_monocyclic_ring_system",
-        "open_from_articulated_polycyclic_ring_system",
-        "open_from_nonarticulated_polycyclic_ring_system",
-    ],
-    "cycle_insert": [
-        "close_to_monocyclic_ring_system",
-        "close_to_articulated_polycyclic_ring_system",
-        "close_to_nonarticulated_polycyclic_ring_system",
-    ],
-    "ring_system_restate": [
-        "aromatization",
-        "dearomatization",
-        "coordinated_ring_bond_state_change",
-    ],
-}
-
-_V1_EXACT_EVIDENCE_STRATA: dict[str, Any] = {
-    "canonical_successor_count": {
-        "bins": [
-            {"id": "successors_001_004", "maximum": 4, "minimum": 1},
-            {"id": "successors_005_016", "maximum": 16, "minimum": 5},
-            {"id": "successors_017_064", "maximum": 64, "minimum": 17},
-            {"id": "successors_065_plus", "maximum": None, "minimum": 65},
-        ],
-        "scope": "all_productive_canonical_molecular_successors_at_the_exact_source",
-    },
-    "policy": (
-        "prospective_non_data_derived_logarithmic_engineering_bins"
-        "_not_balancing_dimensions"
-    ),
-    "raw_mark_count": {
-        "bins": [
-            {"id": "marks_001_004", "maximum": 4, "minimum": 1},
-            {"id": "marks_005_016", "maximum": 16, "minimum": 5},
-            {"id": "marks_017_064", "maximum": 64, "minimum": 17},
-            {"id": "marks_065_plus", "maximum": None, "minimum": 65},
-        ],
-        "scope": "all_productive_action_v4_marks_emitted_at_the_exact_source",
-    },
-    "successor_alias_multiplicity": {
-        "bins": [
-            {"id": "aliases_001", "maximum": 1, "minimum": 1},
-            {"id": "aliases_002_004", "maximum": 4, "minimum": 2},
-            {"id": "aliases_005_plus", "maximum": None, "minimum": 5},
-        ],
-        "scope": "all_action_v4_marks_in_the_teacher_canonical_successor_fiber",
-    },
-}
-
-_V1_FAIL_CLOSED_POLICY: dict[str, Any] = {
-    "lane_or_partition_mismatch": "error",
-    "missing_exact_candidate_evidence": "error",
-    "process_identity_drift": "error",
-    "registry_tamper": "error",
-    "terminal_progress_row": "error",
-    "unknown_family": "error",
-    "unknown_family_context": "error",
-    "unsupported_teacher": "error",
-}
-
-_V1_DATA_LANES: list[str] = [
-    "observed_local_analogue",
-    "operator_aware_real_endpoint",
-    "linker_positional_topology_analogue",
-    "real_endpoint_multistep_path",
-    "reversible_synthetic_walk",
-]
-
-_V1_PARTITION_ROLES: list[str] = [
-    "train",
-    "validation",
-    "controller_validation",
-    "final_test",
-]
-
-_V1_ACTION_CODEC_SCHEMA_VERSION = 4
-
-_V1_REQUIRED_CELL_IDS: list[str] = [
-    "editing_v2_active8_v1:atom_insert:one_neighbor_birth",
-    "editing_v2_active8_v1:atom_delete:leaf_death",
-    "editing_v2_active8_v1:atom_delete:connected_nonleaf_death",
-    "editing_v2_active8_v1:atom_restate:element_identity_change",
-    "editing_v2_active8_v1:atom_restate:valence_state_change",
-    "editing_v2_active8_v1:bond_reorder:bond_order_increase",
-    "editing_v2_active8_v1:bond_reorder:bond_order_decrease",
-    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source",
-    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source",
-    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source",
-    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source",
-    "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system",
-    "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system",
-    "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system",
-    "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system",
-    "editing_v2_active8_v1:ring_system_restate:aromatization",
-    "editing_v2_active8_v1:ring_system_restate:dearomatization",
-]
-
-_V1_CONDITIONAL_CELL_IDS: list[str] = [
-    "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system",
-    "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system",
-    "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change",
-]
-
-_V1_SEPARATE_LANE_CELL_IDS: list[str] = [
-    "editing_v2_active8_v1:atom_insert:root_birth",
-    "editing_v2_active8_v1:atom_delete:singleton_to_null_death",
-]
-
-_V1_CONDITIONAL_POLICY: dict[str, Any] = {
-    "gate_zero_nonempty_required": False,
-    "included_in_balanced_editing_p50": False,
-    "included_in_unique_state_editing_t1": False,
-    "reported_as_audit_context": True,
-    "scientific_role": "conditional_source_conditioned_editing",
-    "validate_when_present": True,
-}
-
-_V1_SEPARATE_LANE_POLICY: dict[str, Any] = {
-    "editing_v2_authority": False,
-    "gate_zero_nonempty_required": False,
-    "included_in_balanced_editing_p50": False,
-    "included_in_unique_state_editing_t1": False,
-    "reported_as_audit_context": True,
-    "scientific_role": "separate_timed_de_novo_null_boundary",
-}
-
-_V1_PARTITION_POLICY: dict[str, Any] = {
-    "conditional_cell_count": 3,
-    "registered_cells_must_be_classified_exactly_once": True,
-    "required_cell_count": 17,
-    "role_assignment_frozen_before_gate_zero_outputs": True,
-    "separate_lane_cell_count": 2,
-}
-
-_V1_CELL_ROLE_SCOPE = "source_conditioned_editing_gate0_t1_p50"
-
-_V1_REQUIRED_ARCHITECTURE: dict[str, Any] = {
-    "atom_vocabulary_class_count": 15,
-    "catalog_fingerprint": "639ff6078c32d43c",
-    "dtype": "torch.float32",
-    "hidden_dim": 256,
-    "initialization_seed": 20260730,
-    "mark_dim": 32,
-    "max_atoms": 40,
-    "message_passing_steps": 6,
-}
-
-_V1_STRUCTURAL_CHECKS: dict[str, Any] = {
-    "capability_context_policy": (
-        "classify_every_decision_eligible_teacher_require_frozen_required_editing"
-        "_cells_report_conditional_and_separate_lane_contexts"
-    ),
-    "classification_failure_policy": "publish_bounded_typed_negative_receipts_and_fail",
-    "classification_failure_receipt_limit": 100,
-    "decision_eligible_partition_roles": ["train"],
-    "excluded_trace_policy": "preserve_and_report_never_reclassify_as_teacher_coverage",
-    "legacy_action_v2_evidence": "forbidden",
-    "require_every_active8_family": True,
-    "require_every_teacher_supported": True,
-    "require_exactly_one_matching_mark": True,
-    "require_one_assignment_per_accepted_action": True,
-    "require_positive_canonical_successor_count": True,
-    "require_positive_raw_mark_count": True,
-    "require_positive_successor_alias_count": True,
-    "require_zero_terminal_assignments": True,
-    "sealed_nondecision_partition_roles": [
-        "controller_validation",
-        "final_test",
-        "validation",
-    ],
-    "teacher_unit": "accepted_nonterminal_action_v4_transition",
-    "trace_selection": "accepted_whole_traces_only",
-}
-
-_V1_DECISION_POLICY: dict[str, Any] = {
-    "failure_policy": "publish_fail_closed_negative_evidence",
-    "pass_grants_checkpoint_selection_authority": False,
-    "pass_grants_final_test_selection_authority": False,
-    "pass_grants_gate_zero_authority": False,
-    "pass_grants_long_training_authority": False,
-    "pass_grants_p50_authority": False,
-    "pass_grants_t1_authority": False,
-    "pass_grants_training_authority": False,
-    "pass_meaning": (
-        "structural_evidence_complete_for_all_active8_families_and_required_editing"
-        "_cells_in_train_only"
-    ),
-}
-
-_V1_PANEL_BODY: dict[str, Any] = {
-    "cache_handoff": "complete_train_trace_union_for_cpu_successor_fiber_cache_v1",
-    "empirical_multiplicity_receipts_included": False,
-    "gate_thresholds_included": False,
-    "hazard_included": False,
-    "maximum_entries_by_family": {
-        "atom_delete": 128,
-        "atom_insert": 128,
-        "atom_restate": 128,
-        "bond_reorder": 128,
-        "bond_reroute": 128,
-        "cycle_attach": 128,
-        "cycle_insert": 128,
-        "ring_system_restate": 128,
-    },
-    "minimum_entries_by_family": {
-        "atom_delete": 64,
-        "atom_insert": 64,
-        "atom_restate": 64,
-        "bond_reorder": 64,
-        "bond_reroute": 64,
-        "cycle_attach": 64,
-        "cycle_insert": 64,
-        "ring_system_restate": 64,
-    },
-    "objective_unit": "exact_source_frozen_time_canonical_successor",
-    "optimizer_policy_included": False,
-    "p50_policy_included": False,
-    "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-    "repeated_state_panel_included": False,
-    "successor_fiber_cache_compiled": False,
-    "support_time_hex": "0x1.0000000000000p-1",
-}
-
-_V1_CAPACITY_BODY: dict[str, Any] = {
-    "empirical_repeated_state_gate": {
-        "bounded_p50_capacity_prerequisite": False,
-        "empirical_law_claims_authorized": False,
-        "mark_alias_multiplicity_is_observation_count": False,
-        "raw_record_multiplicity_is_observation_count": False,
-        "required_receipt_kind": "independent_empirical_transition_v1",
-        "status": "BLOCKED_PENDING_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS",
-    },
-    "hazard_included": False,
-    "objective_unit": "exact_source_frozen_time_canonical_successor",
-    "optimization": {
-        "accelerator_class": "gpu",
-        "address_stream": "sha256_counter_stream_bound_to_policy_and_panel_identity",
-        "batch_size": 64,
-        "checkpoint_selection": (
-            "maximize_minimum_entry_teacher_successor_probability__tie_lower_mean_nll"
-            "__tie_earlier_step"
-        ),
-        "deterministic_algorithms_required": True,
-        "dtype": "float32",
-        "early_stop_rule": (
-            "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one"
-            "_evaluated_state"
-        ),
-        "failure_diagnostic_scope_order": [
-            "heads_only",
-            "heads_plus_local_adapter_if_distinct",
-            "all",
-        ],
-        "failure_diagnostics_only_for_failing_families": True,
-        "gradient_clip_norm": 10.0,
-        "learning_rate": 0.001,
-        "maximum_optimizer_steps": 500,
-        "mixed_precision": False,
-        "model_initialization": "scratch",
-        "optimizer": "adamw",
-        "parameter_scope": "all_trainable_active8_parameters",
-        "report_points": [1, 10, 50, 100, 250, 500],
-        "scheduler": "constant",
-        "seed": 31,
-        "trajectory_evaluation": "every_pre_update_state_and_terminal_state",
-        "weight_decay": 0.0,
-    },
-    "panel_cardinality": {
-        "maximum_entries_by_family": {
-            "atom_delete": 128,
-            "atom_insert": 128,
-            "atom_restate": 128,
-            "bond_reorder": 128,
-            "bond_reroute": 128,
-            "cycle_attach": 128,
-            "cycle_insert": 128,
-            "ring_system_restate": 128,
-        },
-        "minimum_entries_by_family": {
-            "atom_delete": 64,
-            "atom_insert": 64,
-            "atom_restate": 64,
-            "bond_reorder": 64,
-            "bond_reroute": 64,
-            "cycle_attach": 64,
-            "cycle_insert": 64,
-            "ring_system_restate": 64,
-        },
-    },
-    "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-    "required_families": [
-        "atom_insert",
-        "atom_delete",
-        "atom_restate",
-        "bond_reorder",
-        "bond_reroute",
-        "cycle_insert",
-        "cycle_attach",
-        "ring_system_restate",
-    ],
-    "sampling_law": {
-        "importance_correction": "none",
-        "order": [
-            "model_family",
-            "semantic_capability_cell",
-            "unique_panel_entry",
-        ],
-        "probability_within_each_level": "uniform_over_nonempty_children",
-        "target_coefficient": 1.0,
-    },
-    "support_time_hex": "0x1.0000000000000p-1",
-    "thresholds": {
-        "maximum_nonempty_cell_teacher_successor_nll": 0.22314355131420976,
-        "maximum_unique_state_teacher_successor_nll": 0.22314355131420976,
-        "minimum_every_unique_entry_teacher_successor_probability": 0.8,
-        "minimum_nonempty_cell_teacher_successor_probability": 0.8,
-        "minimum_nonempty_cell_teacher_successor_top1": 0.95,
-        "minimum_unique_state_teacher_successor_probability": 0.8,
-        "minimum_unique_state_teacher_successor_top1": 0.95,
-        "require_every_unique_entry_teacher_successor_top1": True,
-        "require_finite_nonzero_action_route_gradient_each_family": True,
-        "require_finite_nonzero_family_gate_gradient_each_family": True,
-    },
-}
-
-_V1_P50_BODY: dict[str, Any] = {
-    "active_families": [
-        "atom_insert",
-        "atom_delete",
-        "atom_restate",
-        "bond_reorder",
-        "bond_reroute",
-        "cycle_insert",
-        "cycle_attach",
-        "ring_system_restate",
-    ],
-    "cache": {
-        "closure_only_rows_schedulable": False,
-        "coverage_mode": "complete_trace_closure_of_planned_address_union",
-        "source_population": "full_admitted_semantic_active8_corpus",
-        "terminal_rows_schedulable": False,
-    },
-    "objective": {
-        "hazard_included": False,
-        "hazard_weight": 0.0,
-        "importance_correction": "none",
-        "name": "balanced_semantic_cell_productive_identity",
-        "path_position_coefficient": 1.0,
-        "terminal_rows": "excluded",
-        "unit": "productive_embedded_canonical_successor",
-    },
-    "optimization": {
-        "batch_size": 64,
-        "deterministic_algorithms_required": True,
-        "dtype": "float32",
-        "gradient_clip_norm": 10.0,
-        "initialization": "scratch_from_t1_bound_initial_model_state",
-        "learning_rate": 0.001,
-        "mixed_precision": False,
-        "optimizer": "adamw",
-        "optimizer_steps": 50,
-        "resume": False,
-        "scheduled_nonterminal_examples": 3200,
-        "scheduler": "constant",
-        "seed": 31,
-        "weight_decay": 0.0,
-    },
-    "p500_authorized": False,
-    "required_physical_binding_purposes": [
-        "stream_union_successor_cache",
-        "validation_baseline",
-        "trainer_runtime",
-        "execution_environment",
-        "launch_projection",
-    ],
-    "sampling": {
-        "lane_probability": "not_a_sampling_level_preserved_as_audit_dimension",
-        "policy_id": "stage_a_equal_semantic_cell_capability_exception_v1",
-        "production_hierarchy_claim_authorized": False,
-        "rationale": (
-            "P50 tests load-bearing capability acquisition; production-law "
-            "calibration remains a later separately frozen stage"
-        ),
-        "semantic_cell_probability": "equal_round_robin",
-        "source_group_id_in_stream": None,
-        "source_group_probability": "explicit_stage_a_exception_not_used",
-        "within_cell_probability": "deterministic_uniform_cycle",
-    },
-    "scientific_scope": (
-        "scratch_active8_stage_a_capability_pilot_not_production_law_calibration"
-    ),
-    "thresholds": {
-        "baseline_definition": (
-            "exact_pre_update_scratch_evaluation_on_the_frozen_validation_stream"
-        ),
-        "baseline_partition_role": "validation",
-        "baseline_values_inspected_when_thresholds_frozen": False,
-        "catastrophic_regression_sentinel_rationale": (
-            "plus_0_25_nats_is_a_separate_abort_sentinel_and_not_a_learning_criterion"
-        ),
-        "gradient_floor_rule": (
-            "max_1_ceil_fraction_times_planned_optimizer_step_opportunities"
-        ),
-        "gradient_opportunity_fraction": 0.8,
-        "maximum_cell_final_minus_baseline_for_p50_nonincrease_nats": 1e-07,
-        "maximum_cell_final_minus_baseline_successor_nll_nats": 0.25,
-        "maximum_family_final_minus_baseline_for_p50_nonincrease_nats": 1e-07,
-        "maximum_family_final_minus_baseline_successor_nll_nats": 0.25,
-        "p50_nonincrease_numerical_equivalence_rationale": (
-            "one_e_minus_seven_nats_allows_only_float32_reduction_equivalence"
-            "_not_regression"
-        ),
-        "zero_planned_family_or_cell_opportunities_allowed": False,
-    },
-    "time_derivation": {
-        "algorithm": "sha256_counter_open_unit_interval_53bit_v1",
-        "seed": 31,
-        "serialized_value": "python_float_hex_v1",
-        "support": "strict_open_unit_interval",
-    },
-}
 
 # ---- Per-artifact envelope metadata ----
 
@@ -704,7 +266,21 @@ _ENVELOPE: dict[str, dict[str, str]] = {
     },
 }
 
-#: ``artifact -> {parent role: parent relative path}``.  No value is a V1 config.
+#: ``target -> the producer of that target's bytes``.  Declared, because "who
+#: computed this value" is not recoverable from a path.
+_PROVIDERS: dict[str, str] = {
+    GATE_ZERO_MODEL_PROCESS_V2: "frozen_repository_artifact",
+    SEMANTIC_PROCESS_V2: "editing_process_v2_contract",
+    EDITING_CORPUS_V2_CONTRACT: "frozen_repository_artifact",
+    CAPABILITY_CELL_CLASSIFIER: "repository_source_file",
+}
+_CHAIN_PROVIDER = "editing_v2_process_v2_contract_chain"
+
+#: ``artifact -> {edge role: target relative path}``.  No value is a V1 config.
+#:
+#: Schema version 2 added the T1 and P50 edges marked below.  Version 1 encoded
+#: only the cell-role edge for each of the three policies, which left the
+#: Gate 0 -> T1 -> P50 order to display convention rather than to the graph.
 _PARENTS: dict[str, dict[str, str]] = {
     ACTIVE8_DECISION_RUNTIME: {
         "semantic_model_process": GATE_ZERO_MODEL_PROCESS_V2,
@@ -725,27 +301,76 @@ _PARENTS: dict[str, dict[str, str]] = {
     },
     T1_PANEL_POLICY: {
         "development_cell_roles": DEVELOPMENT_CELL_ROLES,
+        "gate_zero_structural": GATE_ZERO_STRUCTURAL,  # added in schema version 2
+        "source_requirements": EDITING_CORPUS_V2_CONTRACT,  # added in schema version 2
     },
     T1_CAPACITY_POLICY: {
         "development_cell_roles": DEVELOPMENT_CELL_ROLES,
+        "gate_zero_structural": GATE_ZERO_STRUCTURAL,  # added in schema version 2
         "t1_panel_policy": T1_PANEL_POLICY,
     },
     P50_RECIPE_POLICY: {
+        "capability_cell_registry": CAPABILITY_CELLS,  # added in schema version 2
+        "decision_runtime": ACTIVE8_DECISION_RUNTIME,  # added in schema version 2
         "development_cell_roles": DEVELOPMENT_CELL_ROLES,
+        "gate_zero_structural": GATE_ZERO_STRUCTURAL,  # added in schema version 2
+        "source_requirements": EDITING_CORPUS_V2_CONTRACT,  # added in schema version 2
+        "t1_capacity_policy": T1_CAPACITY_POLICY,  # added in schema version 2
+        "t1_panel_policy": T1_PANEL_POLICY,  # added in schema version 2
     },
 }
 
+#: The edges schema version 2 introduced, kept explicit so a reviewer can see the
+#: delta without diffing two generations of JSON.
+DEPENDENCY_EDGES_ADDED_IN_SCHEMA_VERSION_2: Mapping[str, tuple[str, ...]] = {
+    T1_PANEL_POLICY: ("gate_zero_structural", "source_requirements"),
+    T1_CAPACITY_POLICY: ("gate_zero_structural",),
+    P50_RECIPE_POLICY: (
+        "capability_cell_registry",
+        "decision_runtime",
+        "gate_zero_structural",
+        "source_requirements",
+        "t1_capacity_policy",
+        "t1_panel_policy",
+    ),
+}
+
+#: The version-1 self-hash and physical hash of each artifact, preserved as
+#: superseded design lineage rather than discarded.  These are the values sealed
+#: at ``3f3258e``; they carry no currency claim and must never equal a live value.
+_SUPERSEDED_HASHES: dict[str, dict[str, str]] = {
+    ACTIVE8_DECISION_RUNTIME: {
+        "contract_sha256": "45f3de02da92991802c4cc192d00ceac47291e5ac3d177d19630799808df1f8d",
+        "file_sha256": "93151f51dac9962237e9d98fa9b0d790602a948ec65b60da209222be9ae016c5",
+    },
+    CAPABILITY_CELLS: {
+        "contract_sha256": "d37105d41599a129f527f152ea0d3789c624addd76cbb538a285308a11ce6d99",
+        "file_sha256": "10d399f65362db588ace32b03c8b8930a641a044c1b6504f389f8109a0f1a592",
+    },
+    DEVELOPMENT_CELL_ROLES: {
+        "contract_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221",
+        "file_sha256": "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017",
+    },
+    GATE_ZERO_STRUCTURAL: {
+        "contract_sha256": "c2b469fb3f91f712f8fa9bc6fb8d1ca761fb648ee712c4fc11614c9d33e3bb25",
+        "file_sha256": "386e37012807da508f6b060a37e7f8f2b97b561d7e8e4c95f58ed51584dac4e8",
+    },
+    T1_PANEL_POLICY: {
+        "contract_sha256": "d181ab3946439e374d9844cb6d1c864f925b6a6dfa7197eacf2e04576ef3b184",
+        "file_sha256": "67aef9d024b762c980833c5b5aaf327e8cfb22be85b3aa241a9983fe058199aa",
+    },
+    T1_CAPACITY_POLICY: {
+        "contract_sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
+        "file_sha256": "3465b0378894ba4ebe2545942eafbf5d2391bf6dc9620c9e4cb9e4648f1b700f",
+    },
+    P50_RECIPE_POLICY: {
+        "contract_sha256": "1a6de7e76bed2aa2a3c52ec5b68fb78a1484a924d2c6f17a712384a27b47bef8",
+        "file_sha256": "97024a28e161763f2f7e123e8e85eb6ff28a9ac8f5eda71343696bc976bcd716",
+    },
+}
+
+
 # ---- Canonical hashing ----
-
-
-def _canonical_bytes(value: object) -> bytes:
-    return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    ).encode()
-
-
-def _canonical_sha256(value: object) -> str:
-    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -756,22 +381,22 @@ def process_v2_chain_self_hash(payload: Mapping[str, Any]) -> str:
     """Return the canonical SHA-256 of ``payload`` MINUS its ``contract_sha256``.
 
     This is the one self-hash equation the whole chain uses, and it is the same
-    equation ``scripts/verify_process_v2_hash_chain.py`` uses to DISCOVER a
-    self-hash field, so a chain artifact self-identifies to that verifier without
-    the verifier knowing this module exists.
+    equation the generic verifier uses to DISCOVER a self-hash field, so a chain
+    artifact self-identifies to that verifier without the verifier knowing this
+    module exists.
     """
 
-    return _canonical_sha256(
+    return canonical_sha256(
         {key: value for key, value in payload.items() if key != SELF_HASH_FIELD}
     )
 
 
-def _declared_self_hash(payload: Mapping[str, Any]) -> str | None:
+def declared_self_hash(payload: Mapping[str, Any], *, label: str) -> str | None:
     """Return the target's own self-hash, found by the equation, not by name.
 
     Raises:
         ProcessV2ChainError: if more than one top-level field satisfies it, which
-            would make ``semantic_sha256`` ambiguous.
+            would make a semantic pin ambiguous.
     """
 
     found = [
@@ -780,66 +405,136 @@ def _declared_self_hash(payload: Mapping[str, Any]) -> str | None:
         if key.endswith("_sha256")
         and isinstance(value, str)
         and _HEX64.match(value)
-        and value
-        == _canonical_sha256({k: v for k, v in payload.items() if k != key})
+        and value == canonical_sha256({k: v for k, v in payload.items() if k != key})
     ]
     if len(found) > 1:
         raise ProcessV2ChainError(
-            f"target declares {len(found)} self-hash fields {sorted(found)}; "
-            "semantic_sha256 would be ambiguous"
+            f"{label} declares {len(found)} self-hash fields {sorted(found)}; a "
+            "semantic pin would be ambiguous"
         )
     return payload[found[0]] if found else None
 
 
-# ---- Pin construction ----
+def semantic_pointer_algorithm(relative_path: str, raw: bytes) -> str | None:
+    """Which canonical-body rule a semantic pin on this target is computed under.
 
-
-def _read_parent_bytes(repo_root: Path, relative_path: str) -> bytes:
-    path = repo_root / relative_path
-    try:
-        return path.read_bytes()
-    except OSError as error:
-        raise ProcessV2ChainError(
-            f"parent {relative_path} is not readable; build the chain "
-            "parents-first with write_process_v2_chain()"
-        ) from error
-
-
-def _semantic_sha256(relative_path: str, raw: bytes) -> str:
-    """The semantic hash of a pin target under the rule stated in the module docstring."""
+    ``None`` means the target has no separable semantic body, so it must be pinned
+    physically rather than by a "semantic" hash that is secretly the physical one.
+    """
 
     if not relative_path.endswith(".json"):
-        return _sha256_bytes(raw)
+        return None
+    payload = _json_object(relative_path, raw)
+    if declared_self_hash(payload, label=relative_path) is not None:
+        return SELF_HASH_FIELD_ALGORITHM
+    return WHOLE_CANONICAL_BODY_ALGORITHM
+
+
+def semantic_sha256_of(relative_path: str, raw: bytes) -> str:
+    """The semantic hash of a pin target under its declared algorithm.
+
+    Raises:
+        ProcessV2ChainError: if the target has no separable semantic body.
+    """
+
+    algorithm = semantic_pointer_algorithm(relative_path, raw)
+    if algorithm is None:
+        raise ProcessV2ChainError(
+            f"{relative_path} is not JSON, so it has no separable semantic body and "
+            "must be pinned by its physical hash"
+        )
+    payload = _json_object(relative_path, raw)
+    if algorithm == SELF_HASH_FIELD_ALGORITHM:
+        declared = declared_self_hash(payload, label=relative_path)
+        assert declared is not None  # narrowed by the algorithm above
+        return declared
+    return canonical_sha256(payload)
+
+
+def _json_object(relative_path: str, raw: bytes) -> dict[str, Any]:
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError as error:
-        raise ProcessV2ChainError(f"parent {relative_path} is not valid JSON") from error
+        raise ProcessV2ChainError(f"{relative_path} is not valid JSON") from error
     if not isinstance(payload, dict):
-        raise ProcessV2ChainError(f"parent {relative_path} is not a JSON object")
-    declared = _declared_self_hash(payload)
-    return declared if declared is not None else _canonical_sha256(payload)
+        raise ProcessV2ChainError(f"{relative_path} is not a JSON object")
+    return payload
 
 
-def _pin(repo_root: Path, relative_path: str) -> dict[str, str]:
-    """Build the Gate-0 canonical triple for one pin target."""
+# ---- Pointer construction ----
 
-    raw = _read_parent_bytes(repo_root, relative_path)
-    return {
-        "file_sha256": _sha256_bytes(raw),
-        "path": relative_path,
-        "semantic_sha256": _semantic_sha256(relative_path, raw),
+
+def _read_target_bytes(
+    repo_root: Path, relative_path: str, sealed: Mapping[str, bytes]
+) -> bytes:
+    """Read a pin target, preferring bytes already sealed in this generation.
+
+    A child pins its parent's FINAL bytes.  During a generation the parent may not
+    be on disk yet, so the in-memory overlay is authoritative; outside one, disk
+    is.  Neither means the parent may be skipped.
+    """
+
+    if relative_path in sealed:
+        return sealed[relative_path]
+    try:
+        return (Path(repo_root) / relative_path).read_bytes()
+    except OSError as error:
+        raise ProcessV2ChainError(
+            f"parent {relative_path} is not readable; build the chain parents-first "
+            "with build_process_v2_chain()"
+        ) from error
+
+
+def _edge(repo_root: Path, relative_path: str, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+    """Build one declared edge: a physical pointer, plus a semantic one when defined."""
+
+    raw = _read_target_bytes(repo_root, relative_path, sealed)
+    provider = _PROVIDERS.get(relative_path, _CHAIN_PROVIDER)
+    target_schema: str | None = None
+    if relative_path.endswith(".json"):
+        target_schema = _json_object(relative_path, raw).get("schema")
+        if target_schema is not None:
+            target_schema = str(target_schema)
+    edge: dict[str, Any] = {
+        "physical": typed_pointer(
+            kind=PointerKind.REPOSITORY_CONFIG,
+            provider=provider,
+            target=relative_path,
+            target_schema=target_schema,
+            identity_role=IdentityRole.PHYSICAL,
+            sha256=_sha256_bytes(raw),
+        )
     }
+    algorithm = semantic_pointer_algorithm(relative_path, raw)
+    if algorithm is not None:
+        edge["semantic"] = typed_pointer(
+            kind=PointerKind.REPOSITORY_CONFIG,
+            provider=provider,
+            target=relative_path,
+            target_schema=target_schema,
+            identity_role=IdentityRole.SEMANTIC,
+            hash_algorithm=algorithm,
+            sha256=semantic_sha256_of(relative_path, raw),
+        )
+    return edge
 
 
-def _parents_block(repo_root: Path, name: str) -> dict[str, dict[str, str]]:
+def _parents_block(
+    repo_root: Path, name: str, sealed: Mapping[str, bytes]
+) -> dict[str, dict[str, Any]]:
     return {
-        role: _pin(repo_root, relative_path)
+        role: _edge(repo_root, relative_path, sealed)
         for role, relative_path in sorted(_PARENTS[name].items())
     }
 
 
 def _process_identity_block() -> dict[str, Any]:
-    """Bind the LIVE Process-V2 identity; never a stored or V1 value."""
+    """Bind the LIVE Process-V2 identity; never a stored or V1 value.
+
+    Provider, identity schema and process semantics are declared alongside the
+    value so a verifier resolves this to exactly one identity node rather than
+    accepting whichever of the two live identities happens to match.
+    """
 
     identity = editing_process_v2_identity()
     return {
@@ -852,24 +547,59 @@ def _process_identity_block() -> dict[str, Any]:
     }
 
 
-def _admitted_source_block() -> dict[str, Any]:
-    """The rebind-run binding slot: always present, null until a run fills it."""
+def _superseded_lineage_block(name: str) -> dict[str, Any]:
+    """Preserve the version-1 hashes as lineage, with no currency claim."""
 
+    superseded = _SUPERSEDED_HASHES[name]
     return {
-        "completion_sha256": None,
-        "run_identity_sha256": None,
-        "schema": ADMITTED_SOURCE_SCHEMA,
+        "contract_revision": SUPERSEDED_CHAIN_CONTRACT_REVISION,
+        "physical": typed_pointer(
+            kind=PointerKind.LINEAGE_REFERENCE,
+            provider=_CHAIN_PROVIDER,
+            target=name,
+            target_schema=_ENVELOPE[name]["schema"],
+            identity_role=IdentityRole.PHYSICAL,
+            sha256=superseded["file_sha256"],
+        ),
+        "schema_version": 1,
+        "semantic": typed_pointer(
+            kind=PointerKind.LINEAGE_REFERENCE,
+            provider=_CHAIN_PROVIDER,
+            target=name,
+            target_schema=_ENVELOPE[name]["schema"],
+            identity_role=IdentityRole.SEMANTIC,
+            hash_algorithm=SELF_HASH_FIELD_ALGORITHM,
+            sha256=superseded["contract_sha256"],
+        ),
     }
 
 
-def _operator_capability_fingerprint(repo_root: Path) -> str:
+def _resolved_evidence_binding_declaration() -> dict[str, Any]:
+    """Name the schema that will cite this contract with measured evidence.
+
+    A constant, never a hash: a prospective contract must not address a later
+    measured result, and the version-1 attempt to leave a fillable hash slot here
+    was structurally impossible.
+    """
+
+    return {
+        "cited_by_schema": RESOLVED_EVIDENCE_BINDING_SCHEMA,
+        "cited_by_schema_version": RESOLVED_EVIDENCE_BINDING_SCHEMA_VERSION,
+        "measured_evidence_in_this_contract": False,
+    }
+
+
+def _operator_capability_fingerprint(repo_root: Path, sealed: Mapping[str, bytes]) -> str:
     """Read the V2 operator capability expectation from the pinned Gate-0 contract.
 
     Reading it from the parent rather than restating it means the runtime's
     expectation cannot silently disagree with the contract this artifact pins.
     """
 
-    payload = json.loads(_read_parent_bytes(repo_root, GATE_ZERO_MODEL_PROCESS_V2))
+    payload = _json_object(
+        GATE_ZERO_MODEL_PROCESS_V2,
+        _read_target_bytes(repo_root, GATE_ZERO_MODEL_PROCESS_V2, sealed),
+    )
     fingerprint = payload.get("model_identity", {}).get("operator_capability_fingerprint")
     if not isinstance(fingerprint, str) or not fingerprint:
         raise ProcessV2ChainError(
@@ -882,81 +612,132 @@ def _operator_capability_fingerprint(repo_root: Path) -> str:
 # ---- Builders ----
 
 
-def _envelope(repo_root: Path, name: str) -> dict[str, Any]:
+def _project(block: str, repo_root: Path) -> Any:
+    try:
+        return project_shared_policy(block, repo_root=repo_root)
+    except PolicyRegistryError as error:
+        raise ProcessV2ChainError(
+            f"the shared policy block {block!r} could not be projected: {error}"
+        ) from error
+
+
+def _project_body(body: str, repo_root: Path) -> dict[str, Any]:
+    try:
+        return project_shared_policy_body(body, repo_root=repo_root)
+    except PolicyRegistryError as error:
+        raise ProcessV2ChainError(
+            f"the shared policy body {body!r} could not be projected: {error}"
+        ) from error
+
+
+def _registry_pin(repo_root: Path) -> dict[str, Any]:
+    """Pin the registry by its own identity hash rather than copying its body.
+
+    Copying the descriptor into all seven artifacts would reintroduce, at a
+    smaller scale, exactly the duplication this registry exists to remove. The
+    hash is enough: it moves if any frozen source or the allowlist moves, and the
+    full descriptor is obtainable from the registry itself.
+    """
+
+    try:
+        identity = policy_registry_identity(repo_root=repo_root)
+    except PolicyRegistryError as error:
+        raise ProcessV2ChainError(
+            f"the shared policy registry refuses to identify itself: {error}"
+        ) from error
+    return {
+        "registry_identity_sha256": str(identity["registry_identity_sha256"]),
+        "schema": str(identity["schema"]),
+        "schema_version": int(identity["schema_version"]),
+    }
+
+
+def _envelope(repo_root: Path, name: str, sealed: Mapping[str, bytes]) -> dict[str, Any]:
     meta = _ENVELOPE[name]
     payload: dict[str, Any] = {
         "active_families": list(ACTIVE8_FAMILIES),
-        "admitted_source": _admitted_source_block(),
         "contract_id": meta["contract_id"],
-        "parents": _parents_block(repo_root, name),
+        "contract_revision": CHAIN_CONTRACT_REVISION,
+        "parents": _parents_block(repo_root, name, sealed),
         "process_identity": _process_identity_block(),
+        "resolved_evidence_binding": _resolved_evidence_binding_declaration(),
         "schema": meta["schema"],
-        "schema_version": 1,
+        "schema_version": CHAIN_SCHEMA_VERSION,
+        "shared_policy_registry": _registry_pin(repo_root),
         "status": meta["status"],
+        "superseded_design_lineage": _superseded_lineage_block(name),
     }
-    payload.update({field: False for field in AUTHORITY_FIELDS})
+    payload.update(authority_false_block())
     return payload
 
 
-def _build_decision_runtime(repo_root: Path) -> dict[str, Any]:
-    model = dict(_V1_RUNTIME_MODEL)
-    model["operator_capability_fingerprint"] = _operator_capability_fingerprint(repo_root)
-    payload = _envelope(repo_root, ACTIVE8_DECISION_RUNTIME)
+def _build_decision_runtime(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+    model = dict(_project("runtime_model", repo_root))
+    model["operator_capability_fingerprint"] = _operator_capability_fingerprint(
+        repo_root, sealed
+    )
+    payload = _envelope(repo_root, ACTIVE8_DECISION_RUNTIME, sealed)
     payload["model"] = model
-    payload["software"] = json.loads(json.dumps(_V1_RUNTIME_SOFTWARE))
+    payload["software"] = _project("runtime_software", repo_root)
     return payload
 
 
-def _build_capability_cells(repo_root: Path) -> dict[str, Any]:
-    payload = _envelope(repo_root, CAPABILITY_CELLS)
+def _build_capability_cells(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+    payload = _envelope(repo_root, CAPABILITY_CELLS, sealed)
     payload["bindings"] = {
-        "action_codec_schema_version": _V1_ACTION_CODEC_SCHEMA_VERSION,
-        "data_lanes": list(_V1_DATA_LANES),
-        "partition_roles": list(_V1_PARTITION_ROLES),
+        "action_codec_schema_version": _project("action_codec_schema_version", repo_root),
+        "data_lanes": _project("data_lanes", repo_root),
+        "partition_roles": _project("partition_roles", repo_root),
     }
-    payload["cell_identity_policy"] = json.loads(json.dumps(_V1_CELL_IDENTITY_POLICY))
-    payload["exact_evidence_strata"] = json.loads(json.dumps(_V1_EXACT_EVIDENCE_STRATA))
-    payload["fail_closed_policy"] = json.loads(json.dumps(_V1_FAIL_CLOSED_POLICY))
-    payload["family_contexts"] = json.loads(json.dumps(_V1_FAMILY_CONTEXTS))
-    payload["scope"] = json.loads(json.dumps(_V1_CELL_SCOPE))
+    payload["cell_identity_policy"] = _project("cell_identity_policy", repo_root)
+    payload["exact_evidence_strata"] = _project("exact_evidence_strata", repo_root)
+    payload["fail_closed_policy"] = _project("fail_closed_policy", repo_root)
+    payload["family_contexts"] = _project("family_contexts", repo_root)
+    payload["scope"] = _project("cell_scope", repo_root)
     return payload
 
 
-def _build_development_cell_roles(repo_root: Path) -> dict[str, Any]:
-    payload = _envelope(repo_root, DEVELOPMENT_CELL_ROLES)
-    payload["conditional_cell_ids"] = list(_V1_CONDITIONAL_CELL_IDS)
-    payload["conditional_policy"] = json.loads(json.dumps(_V1_CONDITIONAL_POLICY))
-    payload["partition_policy"] = json.loads(json.dumps(_V1_PARTITION_POLICY))
-    payload["required_cell_ids"] = list(_V1_REQUIRED_CELL_IDS)
-    payload["scope"] = _V1_CELL_ROLE_SCOPE
-    payload["separate_lane_cell_ids"] = list(_V1_SEPARATE_LANE_CELL_IDS)
-    payload["separate_lane_policy"] = json.loads(json.dumps(_V1_SEPARATE_LANE_POLICY))
+def _build_development_cell_roles(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
+    payload = _envelope(repo_root, DEVELOPMENT_CELL_ROLES, sealed)
+    payload["conditional_cell_ids"] = _project("conditional_cell_ids", repo_root)
+    payload["conditional_policy"] = _project("conditional_policy", repo_root)
+    payload["partition_policy"] = _project("cell_role_partition_policy", repo_root)
+    payload["required_cell_ids"] = _project("required_cell_ids", repo_root)
+    payload["scope"] = _project("cell_role_scope", repo_root)
+    payload["separate_lane_cell_ids"] = _project("separate_lane_cell_ids", repo_root)
+    payload["separate_lane_policy"] = _project("separate_lane_policy", repo_root)
     return payload
 
 
-def _build_gate_zero_structural(repo_root: Path) -> dict[str, Any]:
-    payload = _envelope(repo_root, GATE_ZERO_STRUCTURAL)
-    payload["decision_policy"] = json.loads(json.dumps(_V1_DECISION_POLICY))
-    payload["required_architecture"] = json.loads(json.dumps(_V1_REQUIRED_ARCHITECTURE))
-    payload["structural_checks"] = json.loads(json.dumps(_V1_STRUCTURAL_CHECKS))
+def _build_gate_zero_structural(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
+    payload = _envelope(repo_root, GATE_ZERO_STRUCTURAL, sealed)
+    payload["decision_policy"] = _project("gate_zero_decision_policy", repo_root)
+    payload["required_architecture"] = _project("required_architecture", repo_root)
+    payload["structural_checks"] = _project("structural_checks", repo_root)
     return payload
 
 
-def _build_t1_panel_policy(repo_root: Path) -> dict[str, Any]:
-    payload = _envelope(repo_root, T1_PANEL_POLICY)
-    payload.update(json.loads(json.dumps(_V1_PANEL_BODY)))
+def _build_t1_panel_policy(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+    payload = _envelope(repo_root, T1_PANEL_POLICY, sealed)
+    payload.update(_project_body("t1_panel_body", repo_root))
     return payload
 
 
-def _build_t1_capacity_policy(repo_root: Path) -> dict[str, Any]:
-    payload = _envelope(repo_root, T1_CAPACITY_POLICY)
-    payload.update(json.loads(json.dumps(_V1_CAPACITY_BODY)))
+def _build_t1_capacity_policy(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
+    payload = _envelope(repo_root, T1_CAPACITY_POLICY, sealed)
+    payload.update(_project_body("t1_capacity_body", repo_root))
     return payload
 
 
-def _build_p50_recipe_policy(repo_root: Path) -> dict[str, Any]:
-    payload = _envelope(repo_root, P50_RECIPE_POLICY)
-    payload.update(json.loads(json.dumps(_V1_P50_BODY)))
+def _build_p50_recipe_policy(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+    payload = _envelope(repo_root, P50_RECIPE_POLICY, sealed)
+    payload.update(_project_body("p50_recipe_body", repo_root))
     return payload
 
 
@@ -980,20 +761,40 @@ def _require_known(name: str) -> str:
     return name
 
 
-def build_process_v2_chain_artifact(name: str, *, repo_root: Path) -> dict[str, Any]:
+def build_process_v2_chain_artifact(
+    name: str, *, repo_root: Path, sealed: Mapping[str, bytes] | None = None
+) -> dict[str, Any]:
     """Build one chain artifact, sealed with its ``contract_sha256``.
 
-    The artifact's parents must already exist on disk: a child pins its parent's
-    FINAL bytes, so building a child before its parent is sealed is an error rather
-    than a stale pin.
+    Args:
+        name: one of :data:`PROCESS_V2_CHAIN_ARTIFACTS`.
+        repo_root: the checkout holding the frozen external parents.
+        sealed: bytes of chain members already sealed in this generation. A
+            parent absent from both the overlay and disk is an error rather than
+            a stale pin.
 
     Raises:
-        ProcessV2ChainError: on an unknown name or an unreadable/ambiguous parent.
+        ProcessV2ChainError: on an unknown name, an unreadable or ambiguous
+            parent, or a frozen policy source that moved.
     """
 
-    payload = _BUILDERS[_require_known(name)](Path(repo_root))
-    payload[SELF_HASH_FIELD] = process_v2_chain_self_hash(payload)
-    return payload
+    payload = _BUILDERS[_require_known(name)](Path(repo_root), dict(sealed or {}))
+    return self_hashed(payload, field=SELF_HASH_FIELD)
+
+
+def build_process_v2_chain(repo_root: Path) -> dict[str, bytes]:
+    """Build all seven artifacts parents-first, in memory, and return their bytes.
+
+    Pure: it writes nothing. Each child sees its parent's FINAL sealed bytes
+    through the overlay, so the graph is consistent before anything is published.
+    """
+
+    repo_root = Path(repo_root)
+    sealed: dict[str, bytes] = {}
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        payload = build_process_v2_chain_artifact(name, repo_root=repo_root, sealed=sealed)
+        sealed[name] = serialize_process_v2_chain_artifact(payload)
+    return sealed
 
 
 def serialize_process_v2_chain_artifact(payload: Mapping[str, Any]) -> bytes:
@@ -1042,15 +843,10 @@ def _first_difference(observed: object, expected: object, path: str = "") -> str
 
 
 def _check_authority(name: str, payload: Mapping[str, Any]) -> None:
-    for field in AUTHORITY_FIELDS:
-        if field not in payload:
-            _fail(name, f"authority flag {field!r} is missing")
-        if payload[field] is not False:
-            _fail(
-                name,
-                f"authority flag {field!r} is {payload[field]!r}, not exactly False; "
-                "no Process-V2 chain artifact may grant downstream authority",
-            )
+    try:
+        require_authority_false(payload, label=name)
+    except ProcessV2SchemaError as error:
+        _fail(name, str(error))
 
 
 def _check_active8(name: str, payload: Mapping[str, Any]) -> None:
@@ -1064,10 +860,31 @@ def _check_active8(name: str, payload: Mapping[str, Any]) -> None:
 
 
 def _check_process_identity(name: str, payload: Mapping[str, Any]) -> None:
+    """Resolve the declared identity edge to exactly one node, then compare.
+
+    The declared provider, identity schema and process semantics select the node.
+    A pin that carries the V1 VALUE under the V2 DECLARATION is therefore reported
+    as binding V1, not silently accepted because it matched some live identity.
+    """
+
     block = payload.get("process_identity")
-    if not isinstance(block, Mapping) or PROCESS_IDENTITY_PIN_FIELD not in block:
-        _fail(name, "process_identity block is missing its process_identity_sha256 pin")
+    if not isinstance(block, Mapping) or set(block) != set(PROCESS_IDENTITY_EDGE_FIELDS):
+        _fail(
+            name,
+            "process_identity must carry exactly "
+            f"{sorted(PROCESS_IDENTITY_EDGE_FIELDS)}",
+        )
     assert isinstance(block, Mapping)  # narrowed by the guard above
+    if (
+        block["provider"] != PROCESS_V2_IDENTITY_PROVIDER
+        or block["identity_schema"] != PROCESS_V2_IDENTITY_SCHEMA
+    ):
+        _fail(
+            name,
+            f"process_identity declares provider {block['provider']!r} and schema "
+            f"{block['identity_schema']!r}; the Process-V2 chain resolves only "
+            f"{PROCESS_V2_IDENTITY_PROVIDER!r} / {PROCESS_V2_IDENTITY_SCHEMA!r}",
+        )
     pinned = block[PROCESS_IDENTITY_PIN_FIELD]
     live_v2 = str(editing_process_v2_identity()[PROCESS_IDENTITY_PIN_FIELD])
     if pinned == live_v2:
@@ -1087,80 +904,104 @@ def _check_process_identity(name: str, payload: Mapping[str, Any]) -> None:
     )
 
 
-def _check_parents(name: str, payload: Mapping[str, Any], repo_root: Path) -> None:
+def _check_parents(
+    name: str, payload: Mapping[str, Any], repo_root: Path, sealed: Mapping[str, bytes]
+) -> None:
     block = payload.get("parents")
     expected_roles = set(_PARENTS[name])
     if not isinstance(block, Mapping):
         _fail(name, "parents block is missing or is not an object")
     assert isinstance(block, Mapping)  # narrowed by the guard above
     if set(block) != expected_roles:
+        missing = sorted(expected_roles - set(block))
+        unexpected = sorted(set(block) - expected_roles)
         _fail(
             name,
-            f"parent roles {sorted(block)} differ from {sorted(expected_roles)}",
+            f"declared dependency edges differ from the chain graph; missing="
+            f"{missing} unexpected={unexpected}",
         )
     for role in sorted(expected_roles):
-        pin = block[role]
-        if not isinstance(pin, Mapping) or set(pin) != {
-            "path",
-            "file_sha256",
-            "semantic_sha256",
-        }:
+        edge = block[role]
+        live = _edge(repo_root, _PARENTS[name][role], sealed)
+        if not isinstance(edge, Mapping) or set(edge) != set(live):
             _fail(
                 name,
-                f"parent {role!r} is not the canonical triple "
-                "{path, file_sha256, semantic_sha256}",
+                f"edge {role!r} declares {sorted(edge) if isinstance(edge, Mapping) else edge!r}, "
+                f"not the {sorted(live)} its target supports",
             )
-        assert isinstance(pin, Mapping)  # narrowed by the guard above
-        path = pin["path"]
-        if not isinstance(path, str):
-            _fail(name, f"parent {role!r} path is not a string")
-        if _V1_STEM.search(Path(str(path)).stem):
-            _fail(
-                name,
-                f"parent {role!r} points at the V1 artifact {path!r}; the Process-V2 "
-                "chain must never bind a _v1 config",
-            )
-        if path != _PARENTS[name][role]:
-            _fail(
-                name,
-                f"parent {role!r} points at {path!r}, not {_PARENTS[name][role]!r}",
-            )
-        live = _pin(repo_root, _PARENTS[name][role])
-        for field in ("file_sha256", "semantic_sha256"):
-            if pin[field] != live[field]:
+        assert isinstance(edge, Mapping)  # narrowed by the guard above
+        for slot in sorted(live):
+            try:
+                pointer = validate_typed_pointer(edge[slot], label=f"{name} edge {role}.{slot}")
+            except ProcessV2SchemaError as error:
+                _fail(name, str(error))
+            target = pointer["target"]
+            if _V1_STEM.search(Path(str(target)).stem):
                 _fail(
                     name,
-                    f"parent {role!r} pins {path} {field} at {pin[field]!r}, "
-                    f"but the live value is {live[field]!r}",
+                    f"edge {role!r} points at the V1 artifact {target!r}; the "
+                    "Process-V2 chain must never bind a _v1 config",
+                )
+            if target != _PARENTS[name][role]:
+                _fail(
+                    name,
+                    f"edge {role!r} points at {target!r}, not {_PARENTS[name][role]!r}",
+                )
+            if pointer != live[slot]:
+                _fail(
+                    name,
+                    f"edge {role!r} pins {target} {slot} at {pointer['sha256']!r}, "
+                    f"but the live value is {live[slot]['sha256']!r}",
                 )
 
 
-def _check_admitted_source(name: str, payload: Mapping[str, Any]) -> None:
-    block = payload.get("admitted_source")
-    if not isinstance(block, Mapping) or set(block) != set(ADMITTED_SOURCE_FIELDS):
-        _fail(
-            name,
-            "admitted_source must carry exactly "
-            f"{sorted(ADMITTED_SOURCE_FIELDS)}; a later run may fill it, never "
-            "extend it",
-        )
+def _check_superseded_lineage(name: str, payload: Mapping[str, Any]) -> None:
+    """A lineage value must be historical: equal to a live value it is a lie."""
+
+    block = payload.get("superseded_design_lineage")
+    if not isinstance(block, Mapping):
+        _fail(name, "superseded_design_lineage is missing or is not an object")
     assert isinstance(block, Mapping)  # narrowed by the guard above
-    if block["schema"] != ADMITTED_SOURCE_SCHEMA:
-        _fail(name, f"admitted_source.schema must be {ADMITTED_SOURCE_SCHEMA!r}")
-    for field in ("completion_sha256", "run_identity_sha256"):
-        value = block[field]
-        if value is None:
-            continue
-        if not isinstance(value, str) or not _HEX64.match(value):
+    for slot in ("physical", "semantic"):
+        try:
+            pointer = validate_typed_pointer(
+                block.get(slot), label=f"{name} superseded_design_lineage.{slot}"
+            )
+        except ProcessV2SchemaError as error:
+            _fail(name, str(error))
+        if pointer["kind"] != PointerKind.LINEAGE_REFERENCE:
             _fail(
                 name,
-                f"admitted_source.{field} must be null or a 64-hex sha256, "
-                f"got {value!r}",
+                f"superseded_design_lineage.{slot} declares kind {pointer['kind']!r}; "
+                f"a superseded value must be a {PointerKind.LINEAGE_REFERENCE!r} and "
+                "must carry no currency claim",
             )
+    live_semantic = payload.get(SELF_HASH_FIELD)
+    if block["semantic"]["sha256"] == live_semantic:
+        _fail(
+            name,
+            "superseded_design_lineage.semantic equals the live contract_sha256, so it "
+            "is not superseded",
+        )
+
+
+def _check_registry(name: str, payload: Mapping[str, Any], repo_root: Path) -> None:
+    observed = payload.get("shared_policy_registry")
+    expected = _registry_pin(repo_root)
+    if observed != expected:
+        _fail(
+            name,
+            f"shared_policy_registry pins {observed!r}, but the live registry identity "
+            f"is {expected!r}; a frozen policy source moved or the allowlist changed",
+        )
 
 
 def validate_process_v2_chain_artifact(
-    value: object, *, name: str, repo_root: Path
+    value: object,
+    *,
+    name: str,
+    repo_root: Path,
+    sealed: Mapping[str, bytes] | None = None,
 ) -> dict[str, Any]:
     """Validate one chain artifact against the live chain and return it.
 
@@ -1174,12 +1015,13 @@ def validate_process_v2_chain_artifact(
 
     _require_known(name)
     repo_root = Path(repo_root)
+    overlay = dict(sealed or {})
     if not isinstance(value, Mapping):
         _fail(name, f"artifact must be a JSON object, got {type(value).__name__}")
     assert isinstance(value, Mapping)  # narrowed by the guard above
     payload: dict[str, Any] = dict(value)
 
-    expected = build_process_v2_chain_artifact(name, repo_root=repo_root)
+    expected = build_process_v2_chain_artifact(name, repo_root=repo_root, sealed=overlay)
     if set(payload) != set(expected):
         missing = sorted(set(expected) - set(payload))
         unexpected = sorted(set(payload) - set(expected))
@@ -1192,11 +1034,25 @@ def validate_process_v2_chain_artifact(
     status = payload.get("status")
     if not isinstance(status, str) or not status.endswith(STATUS_SUFFIX):
         _fail(name, f"status {status!r} must end in {STATUS_SUFFIX!r}")
+    if payload.get("schema_version") != CHAIN_SCHEMA_VERSION:
+        _fail(
+            name,
+            f"schema_version is {payload.get('schema_version')!r}, not "
+            f"{CHAIN_SCHEMA_VERSION}; adding dependency edges required a new version "
+            "rather than resealing version 1 in place",
+        )
+    if payload.get("contract_revision") != CHAIN_CONTRACT_REVISION:
+        _fail(
+            name,
+            f"contract_revision is {payload.get('contract_revision')!r}, not "
+            f"{CHAIN_CONTRACT_REVISION!r}",
+        )
     _check_authority(name, payload)
     _check_active8(name, payload)
     _check_process_identity(name, payload)
-    _check_parents(name, payload, repo_root)
-    _check_admitted_source(name, payload)
+    _check_parents(name, payload, repo_root, overlay)
+    _check_superseded_lineage(name, payload)
+    _check_registry(name, payload, repo_root)
 
     difference = _first_difference(
         {k: v for k, v in payload.items() if k != SELF_HASH_FIELD},
@@ -1206,20 +1062,24 @@ def validate_process_v2_chain_artifact(
         _fail(
             name,
             f"body differs from the deterministic rebuild at {difference.lstrip('.')}; "
-            "mirrored V1 policy values are frozen",
+            "mirrored policy values are frozen",
         )
 
-    if payload.get(SELF_HASH_FIELD) != process_v2_chain_self_hash(payload):
+    try:
+        verify_self_hash(payload, field=SELF_HASH_FIELD, label=name)
+    except ProcessV2SchemaError as error:
         _fail(
             name,
             f"{SELF_HASH_FIELD} is {payload.get(SELF_HASH_FIELD)!r}, which disagrees "
             f"with the canonical hash of its own body "
-            f"{process_v2_chain_self_hash(payload)!r}",
+            f"{process_v2_chain_self_hash(payload)!r} ({error})",
         )
     return payload
 
 
-def load_process_v2_chain_artifact(name: str, *, repo_root: Path) -> dict[str, Any]:
+def load_process_v2_chain_artifact(
+    name: str, *, repo_root: Path, sealed: Mapping[str, bytes] | None = None
+) -> dict[str, Any]:
     """Read one committed chain artifact from disk and validate it.
 
     Raises:
@@ -1236,26 +1096,339 @@ def load_process_v2_chain_artifact(name: str, *, repo_root: Path) -> dict[str, A
         payload = json.loads(raw)
     except json.JSONDecodeError as error:
         raise ProcessV2ChainError(f"{name}: chain artifact is not valid JSON") from error
-    return validate_process_v2_chain_artifact(payload, name=name, repo_root=repo_root)
+    return validate_process_v2_chain_artifact(
+        payload, name=name, repo_root=repo_root, sealed=sealed
+    )
 
 
-# ---- Whole-chain build ----
+# ---- Dependency graph ----
 
 
-def write_process_v2_chain(repo_root: Path) -> dict[str, str]:
-    """Build and write all seven artifacts parents-first; return ``name -> self-hash``.
+def process_v2_dependency_edges() -> dict[str, dict[str, str]]:
+    """The declared graph, as ``artifact -> {edge role: target}``."""
 
-    Each child is built only after its parent has been written, so every pin
-    addresses the parent's FINAL bytes.  Rebuilding over an already-written chain
-    reproduces identical bytes.
+    return {name: dict(edges) for name, edges in _PARENTS.items()}
+
+
+def process_v2_transitive_dependencies(name: str) -> set[str]:
+    """Every target reachable from ``name`` by declared edges.
+
+    Raises:
+        ProcessV2ChainError: on an unknown name or a cycle. A prospective contract
+            chain that contained a cycle could not be built parents-first at all.
+    """
+
+    _require_known(name)
+    reached: set[str] = set()
+    stack = [(name, (name,))]
+    while stack:
+        current, path = stack.pop()
+        for target in _PARENTS.get(current, {}).values():
+            if target in path:
+                raise ProcessV2ChainError(
+                    f"the declared dependency graph contains a cycle: "
+                    f"{' -> '.join((*path, target))}"
+                )
+            reached.add(target)
+            if target in _PARENTS:
+                stack.append((target, (*path, target)))
+    return reached
+
+
+# ---- Transactional publication ----
+
+GENERATION_SELF_HASH_FIELD = "committed_sha256"
+GENERATION_STATUS = "PROCESS_V2_CHAIN_GENERATION_COMMITTED" + STATUS_SUFFIX
+
+
+def process_v2_generation_id(sealed: Mapping[str, bytes]) -> str:
+    """Content-address one generation by the physical hashes of all seven artifacts."""
+
+    missing = [name for name in PROCESS_V2_CHAIN_ARTIFACTS if name not in sealed]
+    if missing:
+        raise ProcessV2ChainError(
+            f"a generation must contain all seven artifacts; missing {missing}"
+        )
+    return canonical_sha256(
+        {name: _sha256_bytes(sealed[name]) for name in PROCESS_V2_CHAIN_ARTIFACTS}
+    )
+
+
+def stage_process_v2_chain_generation(repo_root: Path, *, generations_root: Path) -> Path:
+    """Write and validate one complete generation WITHOUT its committed marker.
+
+    This is deliberately a separate step from :func:`commit_process_v2_chain_generation`.
+    Calling it alone is exactly the state an interrupted publisher leaves behind, so
+    an interruption test needs no injected failure hook: it stages, does not commit,
+    and asserts that every reader refuses the directory.
+
+    Returns:
+        The generation directory.
+
+    Raises:
+        ProcessV2ChainError: if any artifact fails validation inside the generation.
     """
 
     repo_root = Path(repo_root)
-    sealed: dict[str, str] = {}
+    sealed = build_process_v2_chain(repo_root)
+    generation = Path(generations_root) / process_v2_generation_id(sealed)
+    generation.mkdir(parents=True, exist_ok=True)
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
-        payload = build_process_v2_chain_artifact(name, repo_root=repo_root)
+        path = generation / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(sealed[name])
+    # Validate the COMPLETE graph inside the generation, before anything is
+    # visible to a reader. External parents still come from the repository; chain
+    # members come from the generation's own bytes.
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        payload = json.loads((generation / name).read_bytes())
+        validate_process_v2_chain_artifact(
+            payload, name=name, repo_root=repo_root, sealed=sealed
+        )
+    return generation
+
+
+def commit_process_v2_chain_generation(generation: Path) -> Path:
+    """Publish the committed marker LAST, making the generation readable.
+
+    A Modal volume commit is a visibility boundary, not a multi-file atomic
+    transaction, so the marker is what makes a generation exist for a reader.
+
+    Raises:
+        ProcessV2ChainError: if an artifact is absent from the generation.
+    """
+
+    generation = Path(generation)
+    artifacts: dict[str, dict[str, str]] = {}
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        path = generation / name
+        try:
+            raw = path.read_bytes()
+        except OSError as error:
+            raise ProcessV2ChainError(
+                f"the generation at {generation} is incomplete: {name} is absent"
+            ) from error
+        artifacts[name] = {
+            "contract_sha256": str(json.loads(raw)[SELF_HASH_FIELD]),
+            "file_sha256": _sha256_bytes(raw),
+        }
+    sealed = {name: (generation / name).read_bytes() for name in PROCESS_V2_CHAIN_ARTIFACTS}
+    body: dict[str, Any] = {
+        "artifacts": artifacts,
+        "generation_id": process_v2_generation_id(sealed),
+        "schema": GENERATION_COMMITTED_SCHEMA,
+        "schema_version": GENERATION_COMMITTED_SCHEMA_VERSION,
+        "status": GENERATION_STATUS,
+        **authority_false_block(),
+    }
+    require_authority_false(body, label=f"the generation marker at {generation}")
+    marker = self_hashed(body, field=GENERATION_SELF_HASH_FIELD)
+    text = json.dumps(marker, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    path = generation / GENERATION_COMMITTED_MARKER
+    handle, staged = tempfile.mkstemp(dir=str(generation), suffix=".partial")
+    try:
+        with os.fdopen(handle, "wb") as stream:
+            stream.write(text.encode())
+        os.replace(staged, path)
+    except BaseException:
+        Path(staged).unlink(missing_ok=True)
+        raise
+    return path
+
+
+def publish_process_v2_chain(repo_root: Path, *, generations_root: Path) -> Path:
+    """Stage a complete validated generation, then commit it. Returns its directory."""
+
+    generation = stage_process_v2_chain_generation(
+        repo_root, generations_root=generations_root
+    )
+    commit_process_v2_chain_generation(generation)
+    return generation
+
+
+def read_committed_generation(generation: Path) -> dict[str, bytes]:
+    """Return the artifacts of a COMMITTED generation.
+
+    Raises:
+        ProcessV2ChainError: if the marker is absent, malformed, self-inconsistent,
+            grants authority, or disagrees with the artifacts on disk. A generation
+            without a valid marker does not exist for a reader; it is never read as
+            a partial one.
+    """
+
+    generation = Path(generation)
+    marker_path = generation / GENERATION_COMMITTED_MARKER
+    if not marker_path.is_file():
+        raise ProcessV2ChainError(
+            f"the generation at {generation} carries no {GENERATION_COMMITTED_MARKER}, "
+            "so it is not committed and must be ignored rather than read as partial"
+        )
+    try:
+        marker = json.loads(marker_path.read_bytes())
+    except json.JSONDecodeError as error:
+        raise ProcessV2ChainError(
+            f"the {GENERATION_COMMITTED_MARKER} at {generation} is not valid JSON"
+        ) from error
+    if not isinstance(marker, dict):
+        raise ProcessV2ChainError(
+            f"the {GENERATION_COMMITTED_MARKER} at {generation} is not a JSON object"
+        )
+    if (
+        marker.get("schema") != GENERATION_COMMITTED_SCHEMA
+        or marker.get("schema_version") != GENERATION_COMMITTED_SCHEMA_VERSION
+    ):
+        raise ProcessV2ChainError(
+            f"the {GENERATION_COMMITTED_MARKER} at {generation} declares "
+            f"{marker.get('schema')!r} v{marker.get('schema_version')!r}, not "
+            f"{GENERATION_COMMITTED_SCHEMA!r} v{GENERATION_COMMITTED_SCHEMA_VERSION}"
+        )
+    try:
+        verify_self_hash(
+            marker, field=GENERATION_SELF_HASH_FIELD, label=f"the marker at {generation}"
+        )
+        require_authority_false(marker, label=f"the marker at {generation}")
+    except ProcessV2SchemaError as error:
+        raise ProcessV2ChainError(str(error)) from error
+    declared = marker.get("artifacts")
+    if not isinstance(declared, dict) or set(declared) != set(PROCESS_V2_CHAIN_ARTIFACTS):
+        described = sorted(declared) if isinstance(declared, dict) else declared
+        raise ProcessV2ChainError(
+            f"the marker at {generation} declares {described!r}, not the seven chain "
+            "artifacts"
+        )
+    sealed: dict[str, bytes] = {}
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        path = generation / name
+        try:
+            raw = path.read_bytes()
+        except OSError as error:
+            raise ProcessV2ChainError(
+                f"the committed generation at {generation} is missing {name}"
+            ) from error
+        if _sha256_bytes(raw) != declared[name]["file_sha256"]:
+            raise ProcessV2ChainError(
+                f"{name} in the committed generation at {generation} does not match "
+                "the physical hash its marker declares"
+            )
+        sealed[name] = raw
+    if process_v2_generation_id(sealed) != marker.get("generation_id"):
+        raise ProcessV2ChainError(
+            f"the marker at {generation} declares generation_id "
+            f"{marker.get('generation_id')!r}, which the artifacts do not reproduce"
+        )
+    return sealed
+
+
+def committed_generations(generations_root: Path) -> list[Path]:
+    """Every committed generation under ``generations_root``, ignoring the rest.
+
+    A staged-but-uncommitted directory is not listed. That is the whole point of
+    the marker: a reader never has to decide whether a partial directory is
+    trustworthy, because it never sees one.
+    """
+
+    root = Path(generations_root)
+    if not root.is_dir():
+        return []
+    found: list[Path] = []
+    for child in sorted(root.iterdir()):
+        if not child.is_dir():
+            continue
+        try:
+            read_committed_generation(child)
+        except ProcessV2ChainError:
+            continue
+        found.append(child)
+    return found
+
+
+def materialize_committed_generation(generation: Path, *, repo_root: Path) -> dict[str, str]:
+    """Copy a COMMITTED generation into ``repo_root``; return ``name -> self-hash``.
+
+    Refuses an uncommitted generation, so an interruption cannot reach the
+    repository's canonical paths.
+    """
+
+    sealed = read_committed_generation(generation)
+    repo_root = Path(repo_root)
+    published: dict[str, str] = {}
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
         path = repo_root / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(serialize_process_v2_chain_artifact(payload))
-        sealed[name] = str(payload[SELF_HASH_FIELD])
-    return sealed
+        path.write_bytes(sealed[name])
+        published[name] = str(json.loads(sealed[name])[SELF_HASH_FIELD])
+    return published
+
+
+def write_process_v2_chain(repo_root: Path) -> dict[str, str]:
+    """Regenerate the committed chain in ``repo_root``; return ``name -> self-hash``.
+
+    Transactional: the seven artifacts are written and the complete graph is
+    validated inside a temporary content-addressed generation, the committed marker
+    is published last, and only then is the generation materialized at the
+    repository's canonical paths. A failure anywhere before the marker leaves
+    ``configs/`` untouched. Rebuilding over an already-written chain reproduces
+    identical bytes.
+    """
+
+    repo_root = Path(repo_root)
+    with tempfile.TemporaryDirectory() as staging:
+        generation = publish_process_v2_chain(repo_root, generations_root=Path(staging))
+        return materialize_committed_generation(generation, repo_root=repo_root)
+
+
+def clear_generations(generations_root: Path) -> None:
+    """Remove every generation under ``generations_root``. For fixtures only."""
+
+    shutil.rmtree(Path(generations_root), ignore_errors=True)
+
+
+__all__ = [
+    "ACTIVE8_DECISION_RUNTIME",
+    "AUTHORITY_FIELDS",
+    "CAPABILITY_CELLS",
+    "CHAIN_CONTRACT_REVISION",
+    "CHAIN_SCHEMA_VERSION",
+    "DEPENDENCY_EDGES_ADDED_IN_SCHEMA_VERSION_2",
+    "DEVELOPMENT_CELL_ROLES",
+    "EDITING_CORPUS_V2_CONTRACT",
+    "GATE_ZERO_MODEL_PROCESS_V2",
+    "GATE_ZERO_STRUCTURAL",
+    "GENERATION_SELF_HASH_FIELD",
+    "GENERATION_STATUS",
+    "P50_RECIPE_POLICY",
+    "PROCESS_IDENTITY_EDGE_FIELDS",
+    "PROCESS_IDENTITY_PIN_FIELD",
+    "PROCESS_V2_CHAIN_ARTIFACTS",
+    "PROCESS_V2_IDENTITY_PROVIDER",
+    "PROCESS_V2_IDENTITY_SCHEMA",
+    "SELF_HASH_FIELD",
+    "SELF_HASH_FIELD_ALGORITHM",
+    "SEMANTIC_PROCESS_V2",
+    "STATUS_SUFFIX",
+    "SUPERSEDED_CHAIN_CONTRACT_REVISION",
+    "T1_CAPACITY_POLICY",
+    "T1_PANEL_POLICY",
+    "WHOLE_CANONICAL_BODY_ALGORITHM",
+    "ProcessV2ChainError",
+    "build_process_v2_chain",
+    "build_process_v2_chain_artifact",
+    "clear_generations",
+    "commit_process_v2_chain_generation",
+    "committed_generations",
+    "declared_self_hash",
+    "load_process_v2_chain_artifact",
+    "materialize_committed_generation",
+    "process_v2_chain_self_hash",
+    "process_v2_dependency_edges",
+    "process_v2_generation_id",
+    "process_v2_transitive_dependencies",
+    "publish_process_v2_chain",
+    "read_committed_generation",
+    "semantic_pointer_algorithm",
+    "semantic_sha256_of",
+    "serialize_process_v2_chain_artifact",
+    "stage_process_v2_chain_generation",
+    "validate_process_v2_chain_artifact",
+    "write_process_v2_chain",
+]

@@ -221,9 +221,14 @@ SEMANTIC_HASH_ALGORITHMS: tuple[str, ...] = (
     body is used""",
 )[::2]
 
-_POINTER_FIELDS = frozenset(
+POINTER_FIELDS = frozenset(
     {"kind", "provider", "target", "target_schema", "identity_role", "hash_algorithm", "sha256"}
 )
+# A node carrying exactly this key set IS a declared pointer. A consumer that
+# cannot validate one must FAIL rather than skip it: silently dropping a
+# malformed pointer is the same defect as dropping a missing target, and it
+# reintroduces the unreachable diagnostic that typed pointers exist to prevent.
+_POINTER_FIELDS = POINTER_FIELDS
 
 
 def typed_pointer(
@@ -262,10 +267,15 @@ def typed_pointer(
             f"{PointerKind.LINEAGE_REFERENCE!r} when it is deliberately historical"
         )
     if identity_role == IdentityRole.SEMANTIC:
-        if kind not in (PointerKind.REPOSITORY_CONFIG, PointerKind.REMOTE_ARTIFACT):
+        # A LINEAGE_REFERENCE carries a semantic hash legitimately, and it is the
+        # most natural lineage pin there is: recording a superseded contract's
+        # own self-hash is exactly what preserving superseded design lineage
+        # means. Only an EXTERNAL_ASSET is excluded, because an asset outside
+        # this repository declares no self-hash and is pinned by its bytes.
+        if kind == PointerKind.EXTERNAL_ASSET:
             raise ProcessV2SchemaError(
-                f"a {kind!r} pointer has no declared self-hash to address; only a "
-                "repository config or a remote artifact carries a semantic hash"
+                "an external asset declares no self-hash to address; pin it by its "
+                f"bytes with the {IdentityRole.PHYSICAL!r} role"
             )
         if hash_algorithm not in SEMANTIC_HASH_ALGORITHMS:
             raise ProcessV2SchemaError(
@@ -446,6 +456,7 @@ __all__ = [
     "GENERATION_COMMITTED_SCHEMA",
     "GENERATION_COMMITTED_SCHEMA_VERSION",
     "IDENTITY_ROLES",
+    "POINTER_FIELDS",
     "POINTER_KINDS",
     "REJECTION_LEDGER_SCHEMA",
     "REJECTION_LEDGER_SCHEMA_VERSION",

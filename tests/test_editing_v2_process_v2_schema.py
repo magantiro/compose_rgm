@@ -232,9 +232,22 @@ def test_a_non_semantic_pointer_must_not_declare_an_algorithm() -> None:
         )
 
 
-def test_a_lineage_only_target_has_no_self_hash_to_address() -> None:
-    with pytest.raises(ProcessV2SchemaError, match="no declared self-hash"):
-        _semantic_pointer(kind=PointerKind.LINEAGE_REFERENCE)
+def test_a_lineage_reference_may_carry_a_semantic_hash() -> None:
+    """Recording a superseded contract's own self-hash IS lineage.
+
+    An earlier version of this rule forbade it, which broke the single thing
+    the specification requires lineage for: preserving the superseded design
+    contract hashes. Only an external asset is excluded, because it declares no
+    self-hash and is pinned by its bytes.
+    """
+
+    pointer = _semantic_pointer(kind=PointerKind.LINEAGE_REFERENCE)
+    assert validate_typed_pointer(pointer, label="p") == pointer
+
+
+def test_an_external_asset_has_no_self_hash_to_address() -> None:
+    with pytest.raises(ProcessV2SchemaError, match="declares no self-hash"):
+        _semantic_pointer(kind=PointerKind.EXTERNAL_ASSET)
 
 
 def test_validate_type_checks_rather_than_coercing() -> None:

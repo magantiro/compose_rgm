@@ -9,15 +9,11 @@
     "cycle_attach",
     "ring_system_restate"
   ],
-  "admitted_source": {
-    "completion_sha256": null,
-    "run_identity_sha256": null,
-    "schema": "compose.data.editing_process_v2_admitted_source"
-  },
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_t1_capacity_policy",
-  "contract_sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
+  "contract_revision": "process_v2_explicit_dependency_graph",
+  "contract_sha256": "17569116220ab424d5dbd4d9b3607b97f7156f16e1cfb9e08e9debf7e2f5b919",
   "empirical_repeated_state_gate": {
     "bounded_p50_capacity_prerequisite": false,
     "empirical_law_claims_authorized": false,
@@ -90,14 +86,64 @@
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
   "parents": {
     "development_cell_roles": {
-      "file_sha256": "4d9ee72310e6ab191bf12e15b65f9d8b650931c4858f491e277c184d62f9b017",
-      "path": "configs/editing_v2_process_v2_development_cell_roles.json",
-      "semantic_sha256": "55348f85c6694dac362528d378162e02d48cef464348c2b0d8c0d0e5381f1221"
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "repository_config",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "507ae7eefe80a1c5502571610fcd4689c21831929b26b23898bd19040b14d03a",
+        "target": "configs/editing_v2_process_v2_development_cell_roles.json",
+        "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
+      },
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "repository_config",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "4c8f9d5ca412b0ed8a39fe940bf534e2f3ee18d883a07b2a3cf704985e34b900",
+        "target": "configs/editing_v2_process_v2_development_cell_roles.json",
+        "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
+      }
+    },
+    "gate_zero_structural": {
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "repository_config",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "d6b8fa91ec2ec821d5b6010b6d57e46ae392579f95fb778b55b8547414607d8d",
+        "target": "configs/editing_v2_process_v2_gate_zero_structural.json",
+        "target_schema": "compose.editing_v2.process_v2_gate_zero_structural"
+      },
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "repository_config",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "06ac042507427ae622c5c8dc22f4ab47687800aa08e466a3c5f999557e364380",
+        "target": "configs/editing_v2_process_v2_gate_zero_structural.json",
+        "target_schema": "compose.editing_v2.process_v2_gate_zero_structural"
+      }
     },
     "t1_panel_policy": {
-      "file_sha256": "67aef9d024b762c980833c5b5aaf327e8cfb22be85b3aa241a9983fe058199aa",
-      "path": "configs/editing_v2_process_v2_t1_panel_policy.json",
-      "semantic_sha256": "d181ab3946439e374d9844cb6d1c864f925b6a6dfa7197eacf2e04576ef3b184"
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "repository_config",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "9c5f2540686994a2d86e4d62a47a37b2986fbac1234bc89f08d01177a6f749e7",
+        "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
+      },
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "repository_config",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "8cc3c39d47e55cc55df68900cbcc7c4f6a1beec1d9c02f0299a4aa14cafcb12b",
+        "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
+      }
     }
   },
   "process_identity": {
@@ -118,6 +164,11 @@
     "cycle_attach",
     "ring_system_restate"
   ],
+  "resolved_evidence_binding": {
+    "cited_by_schema": "compose.editing_v2.process_v2.resolved_evidence_binding",
+    "cited_by_schema_version": 1,
+    "measured_evidence_in_this_contract": false
+  },
   "sampling_law": {
     "importance_correction": "none",
     "order": [
@@ -129,8 +180,35 @@
     "target_coefficient": 1.0
   },
   "schema": "compose.editing_v2.process_v2_t1_capacity_policy",
-  "schema_version": 1,
+  "schema_version": 2,
+  "shared_policy_registry": {
+    "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
+    "schema": "compose.editing_v2.shared_policy_registry",
+    "schema_version": 1
+  },
   "status": "FROZEN_PROCESS_V2_T1_CAPACITY_POLICY_NO_DOWNSTREAM_AUTHORITY",
+  "superseded_design_lineage": {
+    "contract_revision": "process_v2_mirrored_chain_with_unfillable_admitted_source_slot",
+    "physical": {
+      "hash_algorithm": null,
+      "identity_role": "physical_sha256",
+      "kind": "lineage_reference",
+      "provider": "editing_v2_process_v2_contract_chain",
+      "sha256": "3465b0378894ba4ebe2545942eafbf5d2391bf6dc9620c9e4cb9e4648f1b700f",
+      "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
+      "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+    },
+    "schema_version": 1,
+    "semantic": {
+      "hash_algorithm": "self_hash_field_v1",
+      "identity_role": "semantic_sha256",
+      "kind": "lineage_reference",
+      "provider": "editing_v2_process_v2_contract_chain",
+      "sha256": "7fa4862d844034d2cea6c998edc78883fdfceda497c6c39df26779149907bcf6",
+      "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
+      "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
+    }
+  },
   "support_time_hex": "0x1.0000000000000p-1",
   "t1_authorized": false,
   "thresholds": {
