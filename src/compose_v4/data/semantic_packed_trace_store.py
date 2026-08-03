@@ -463,7 +463,13 @@ def load_semantic_packed_manifest(
             )
     if manifest.get("process_contract_sha256") != process_identity["contract_sha256"]:
         raise SemanticPackedStoreError("semantic packed process contract disagrees")
-    if manifest.get("process_semantics") != PROCESS_SEMANTICS:
+    # Against the resolved IDENTITY, not the module constant.  The pinned
+    # identity may legitimately be Process V2, and comparing its label to a
+    # hardcoded V1 constant is a constant-vs-constant check: it agrees with
+    # itself by construction and never cross-checks the label against the
+    # identity the artifact was actually pinned to.  `trace_shard_v3` already
+    # compares against `identity["process_semantics"]`; this is the same rule.
+    if manifest.get("process_semantics") != process_identity["process_semantics"]:
         raise SemanticPackedStoreError("semantic packed process semantics disagree")
     if completion.get("process_identity_sha256") != process_sha256:
         raise SemanticPackedStoreError(

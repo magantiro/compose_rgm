@@ -1667,7 +1667,19 @@ def _prove_record(
         unsupported = _teacher_support_exclusion(action_record)
         if unsupported is not None:
             exclude(step_index, unsupported[0], unsupported[1])
-            continue
+            if (
+                unsupported[0]
+                is ProcessV2RebindExclusionCode.TEACHER_RULE_OUTSIDE_FROZEN_SUPPORT
+            ):
+                # Only THIS exclusion makes integrity unverifiable: the frozen
+                # codec cannot decode the rule at all, so there is nothing to
+                # round-trip or replay.  A family-level exclusion names an
+                # executor rule the codec does decode, so it keeps verifying --
+                # the same rule the atom_delete branch below already follows.
+                # Skipping it here let a corrupt payload hide behind an
+                # unsupported family, which is exactly what this function's
+                # contract says cannot happen.
+                continue
         try:
             rule, action = action_codec_v4.decode_action(action_record)
             reencoded = action_codec_v4.encode_action(rule, action)
