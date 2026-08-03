@@ -32,6 +32,44 @@ production chunk reader from the cached record's own arrays, and the ActionV4
 record its teacher action encodes to.  No state is reconstructed from a canonical
 SMILES key, and no action identity is re-derived from anything but the codec.
 
+WHERE THE CHEMISTRY IS DERIVED, AND WHY NOT HERE
+------------------------------------------------
+Candidate enumeration belongs to the Active8 MAP TASK, which holds the model and
+the production checker and is already enumerating: it derives the evidence, and
+the row it publishes is bound to its receipt by exact decision bytes.  This index
+does NOT reconstruct a model and does NOT rerun the production candidate checker
+-- that is a prohibition, not a performance preference, because Gate 0 fans this
+index out over up to forty chunk-parallel map tasks and none of them may carry a
+model.  Independent re-enumeration lives in bounded tests and sentinels.
+
+What the read side owes is therefore verification of the BINDING plus everything
+derivable without enumeration, and it takes all of it:
+
+* the action identity and family, from the frozen codec applied to the CACHED
+  step -- never read off the row;
+* both exact persistent-slot state hashes, from the cached path;
+* ``canonical_successor_key``, from the production canonicalizer applied to the
+  cached successor state.  That is one canonicalization of a state already in
+  hand, not an enumeration, and it is the same function the policy used;
+* the structural contradictions: an accepted trace whose evidence says
+  ``supported == false`` or carries an exclusion reason, and evidence whose
+  counts are not the positive alias geometry an accepted transition has;
+* the completion inventory, against the receipts the tasks still hold.
+
+What is published is the DERIVED value in every case above, so a consumer
+downstream reads a recomputed identity rather than a reported one.
+
+THE COUNTS ARE THE RESIDUAL, AND IT IS STATED
+---------------------------------------------
+The five per-action candidate counts cannot be re-derived without enumerating,
+so on this path they are checked structurally: every row-level total is
+recomputed from the per-action evidence it summarises, the arithmetic bounds are
+required, and an accepted transition must match exactly one teacher mark with a
+positive alias geometry.  A count moved WITHIN those bounds and propagated
+consistently through the row total, the receipt and the completion is not
+detectable here; it is detectable only by re-enumeration, which is what the map
+task does at write time and what the bounded sentinel does in tests.
+
 WHAT IT REFUSES
 ---------------
 A V1 decision plan, a V1 process identity, a V1 admission policy and a V1
@@ -48,7 +86,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -77,6 +115,7 @@ from compose_v4.data.editing_v2_process_v2_active8_mapreduce import (
     completed_process_v2_active8_task_ids,
     read_process_v2_active8_decision_rows,
     reduction_order,
+    result_inventory_row,
     structural_census,
     validate_process_v2_active8_plan,
     validate_process_v2_active8_task_result,
@@ -101,6 +140,8 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     require_census_reconciles,
 )
 from compose_v4.rewrite import action_codec_v4
+from compose_v4.rewrite.action_codec_v4 import ActionCodecV4Error
+from compose_v4.rewrite.kernel import canonical_state_key
 
 INDEX_SCHEMA = "compose.data.editing_v2_process_v2_active8_decision_index"
 INDEX_SCHEMA_VERSION = 1
@@ -148,6 +189,17 @@ ACCEPTED_TRANSITION_FIELDS: tuple[str, ...] = (
 )
 
 _STATE_FIELDS: tuple[str, ...] = ("source_state", "successor_state")
+
+#: The ONLY partition roles whose molecular states this index will decode.
+#:
+#: Held-out sealing is a property of what was never READ, not of what was never
+#: counted.  Resolved-trace METADATA -- the census, the categories, the decision
+#: hashes -- stays available for every role, because a census that omitted the
+#: held-out partitions would not reconcile; but no cache chunk of a held-out role
+#: is ever opened, so no validation, controller-validation or final-test molecule
+#: enters this process.  Bound to ``("train",)``, which is the same bound the
+#: Gate-0 contract asserts on its own decision-eligible roles.
+DECISION_ELIGIBLE_PARTITION_ROLES: tuple[str, ...] = ("train",)
 
 
 class ProcessV2Active8DecisionIndexError(RuntimeError):
@@ -208,6 +260,7 @@ class ProcessV2Active8DecisionIndex:
         upstream_reason_histogram: Mapping[str, int],
         action_family_histogram: Mapping[str, int],
         trace_lookup: Mapping[ProcessV2TraceKey, tuple[str, str | None, str, int]],
+        result_inventory: Sequence[Mapping[str, Any]],
         index_identity_sha256: str,
     ) -> None:
         self._plan = dict(plan)
@@ -228,6 +281,12 @@ class ProcessV2Active8DecisionIndex:
             {str(task["task_identity_sha256"]): dict(task) for task in self._plan["tasks"]}
         )
         self._index_identity_sha256 = index_identity_sha256
+        self._result_inventory = MappingProxyType(
+            {
+                str(item["task_identity_sha256"]): MappingProxyType(dict(item))
+                for item in result_inventory
+            }
+        )
 
     # ---- Authority: false by construction ----
 
@@ -362,41 +421,101 @@ class ProcessV2Active8DecisionIndex:
 
         Empty for an excluded or upstream-rejected trace: absence of transitions
         is the answer, not an error.  The exact slot-addressed states come from
-        the cached record's own arrays through the production chunk reader.
+        the cached record's own arrays through the production chunk reader, and
+        every transition is produced by the one shared in-memory validator, which
+        re-derives its whole candidate-evidence payload.
 
         This is a POINT lookup and it costs one chunk decode, because a chunk is
         the smallest thing the cache addresses.  A consumer that wants every
-        accepted transition must use :meth:`iter_accepted_transitions`, which
-        decodes each chunk exactly once: calling this in a loop over the corpus
-        would decode one chunk per trace and reinstate exactly the triangular
-        rescan the chunk cache exists to remove.
+        accepted transition must use :meth:`iter_accepted_trace_transitions`,
+        which decodes each SELECTED chunk exactly once: calling this in a loop
+        over the corpus would decode one chunk per trace and reinstate exactly
+        the triangular rescan the chunk cache exists to remove.
         """
 
         task, row = self._row_for(trace_key)
         if row["category"] is not None:
             return
+        self._require_decision_eligible(str(row["split"]))
         addressed = self._addressed_trace(task, int(row["entry_index"]), str(row["trace_id"]))
-        for transition in _transitions(
-            task=task,
-            row=row,
-            addressed=addressed,
-            index_identity_sha256=self._index_identity_sha256,
+        for transition in self._validated_transitions(
+            task=task, row=row, addressed=addressed
         ):
-            self.validate_accepted_transition(transition)
             yield MappingProxyType(transition)
 
-    def iter_accepted_transitions(self) -> Iterator[Mapping[str, Any]]:
-        """Every accepted transition of the whole run, in reduction order.
+    def result_inventory(self) -> Mapping[str, Mapping[str, Any]]:
+        """The reconciled completion inventory, addressed by task identity.
 
-        One pass: each task's decision shard and each cached chunk are decoded
-        exactly once, and the decoded rows are joined in lockstep by ascending
-        entry index.  Transitions are validated as they are produced, but against
-        the trace already in hand rather than by re-reading it, so the linear
-        cost stays linear.
+        Every row here was required at resolution to equal the row rebuilt from
+        that task's LIVE receipt, so a parallel consumer that owns one task can
+        check the receipt it opens against this one row instead of re-reading the
+        run.  Published as the fan-out primitive for exactly that reason.
         """
 
+        return self._result_inventory
+
+    def decision_eligible_task_identities(
+        self, *, partition_roles: Sequence[str] | None = None
+    ) -> tuple[str, ...]:
+        """The task identities a role-filtered pass would open, in reduction order.
+
+        The unit a chunk-parallel consumer should shard on: one task is one cache
+        chunk, so a map task that takes one identity from here decodes exactly one
+        chunk and no held-out chunk is in the list at all.
+        """
+
+        roles = self._selected_roles(partition_roles)
+        return tuple(
+            str(task["task_identity_sha256"])
+            for task in reduction_order(self._plan["tasks"])
+            if str(self._tasks[str(task["task_identity_sha256"])]["split"]) in roles
+        )
+
+    def iter_accepted_trace_transitions(
+        self,
+        *,
+        partition_roles: Sequence[str] | None = None,
+        task_identity_sha256: str | None = None,
+    ) -> Iterator[tuple[Mapping[str, Any], tuple[Mapping[str, Any], ...]]]:
+        """Every decision-eligible accepted trace with its validated transitions.
+
+        The bulk execution path, and the only one a whole-corpus consumer should
+        use.  Three properties it has and the point lookup does not:
+
+        * it is ROLE FILTERED BEFORE ANY CHUNK IS OPENED.  A task whose partition
+          role is not selected is skipped at the task level, so no held-out
+          molecular state is decoded -- held-out data stays sealed because it was
+          never read, not because it was read and then not counted;
+        * each selected chunk and each selected decision shard is streamed
+          exactly once, and the two are joined in memory by ascending entry
+          index;
+        * every transition is validated by the same shared in-memory validator
+          the point API uses, against the task, row and trace already in hand.
+          The bulk path never calls :meth:`validate_accepted_transition`, whose
+          own lookup would reinstate the per-transition rescan.
+
+        ``task_identity_sha256`` narrows the pass to ONE task, which is one cache
+        chunk: the shard unit for a chunk-parallel consumer.  A map task that
+        passes its own identity opens its own chunk and nothing else, and
+        validates it from that chunk's receipt plus this index's reconciled
+        completion inventory -- no global pass per container.
+        """
+
+        roles = self._selected_roles(partition_roles)
+        if task_identity_sha256 is not None and task_identity_sha256 not in self._tasks:
+            raise ProcessV2Active8DecisionIndexError(
+                f"the task {task_identity_sha256!r} is not one this run planned"
+            )
         for task in reduction_order(self._plan["tasks"]):
             bound = self._tasks[str(task["task_identity_sha256"])]
+            if task_identity_sha256 is not None and (
+                str(bound["task_identity_sha256"]) != task_identity_sha256
+            ):
+                continue
+            if str(bound["split"]) not in roles:
+                if task_identity_sha256 is not None:
+                    self._require_decision_eligible(str(bound["split"]))
+                continue
             output = self._task_root(bound)
             validate_process_v2_active8_task_result(output, plan=self._plan, task=bound)
             raw = gzip.decompress((output / DECISION_FILENAME).read_bytes())
@@ -419,19 +538,39 @@ class ProcessV2Active8DecisionIndex:
                     raise ProcessV2Active8DecisionIndexError(
                         f"the cached row at entry {read.entry_index} is not the indexed trace"
                     )
-                for transition in _transitions(
-                    task=bound,
-                    row=row,
-                    addressed=read.addressed,
-                    index_identity_sha256=self._index_identity_sha256,
-                ):
-                    yield MappingProxyType(transition)
+                transitions = tuple(
+                    MappingProxyType(transition)
+                    for transition in self._validated_transitions(
+                        task=bound, row=row, addressed=read.addressed
+                    )
+                )
+                yield MappingProxyType(_resolved_row(bound, row)), transitions
+
+    def iter_accepted_transitions(
+        self,
+        *,
+        partition_roles: Sequence[str] | None = None,
+        task_identity_sha256: str | None = None,
+    ) -> Iterator[Mapping[str, Any]]:
+        """Every decision-eligible accepted transition, in reduction order.
+
+        The flat projection of :meth:`iter_accepted_trace_transitions`; it holds
+        every one of that method's properties, including the role filter.
+        """
+
+        for _row, transitions in self.iter_accepted_trace_transitions(
+            partition_roles=partition_roles, task_identity_sha256=task_identity_sha256
+        ):
+            yield from transitions
 
     def validate_accepted_transition(self, transition: Mapping[str, Any]) -> None:
         """Raise unless this is exactly what the index published.
 
-        Re-derived from the artifacts rather than compared against a cached copy:
-        an expectation recomputed from the object under test cannot fail.
+        The POINT form: it performs its own lookup and then calls the shared
+        in-memory validator.  A whole-corpus consumer must not call this in a
+        loop -- the lookup, not the validation, is what makes it expensive, and
+        :meth:`iter_accepted_trace_transitions` validates just as completely with
+        the row and trace already in hand.
         """
 
         if not isinstance(transition, Mapping) or set(transition) != set(
@@ -454,19 +593,67 @@ class ProcessV2Active8DecisionIndex:
             raise ProcessV2Active8DecisionIndexError(
                 "a trace that was not accepted has no accepted transitions"
             )
+        self._require_decision_eligible(str(row["split"]))
         addressed = self._addressed_trace(task, int(row["entry_index"]), str(row["trace_id"]))
-        expected = _transitions(
+        self._require_published_transition(
+            transition,
+            published=self._validated_transitions(task=task, row=row, addressed=addressed),
+        )
+
+    # ---- Internals ----
+
+    def _selected_roles(self, partition_roles: Sequence[str] | None) -> frozenset[str]:
+        eligible = frozenset(DECISION_ELIGIBLE_PARTITION_ROLES)
+        if partition_roles is None:
+            return eligible
+        roles = frozenset(str(role) for role in partition_roles)
+        if not roles or not roles <= eligible:
+            raise ProcessV2Active8DecisionIndexError(
+                "this index decodes molecular states only for the decision-eligible "
+                f"partition roles {list(DECISION_ELIGIBLE_PARTITION_ROLES)}; "
+                f"{sorted(roles - eligible)} is held out and must stay unread"
+            )
+        return roles
+
+    def _require_decision_eligible(self, partition_role: str) -> None:
+        if partition_role not in DECISION_ELIGIBLE_PARTITION_ROLES:
+            raise ProcessV2Active8DecisionIndexError(
+                f"the partition role {partition_role!r} is held out; its molecular states "
+                "are sealed and this index will not decode them"
+            )
+
+    def _validated_transitions(
+        self,
+        *,
+        task: Mapping[str, Any],
+        row: Mapping[str, Any],
+        addressed: Any,
+    ) -> list[dict[str, Any]]:
+        """The ONE in-memory validator, over objects the caller already holds.
+
+        Both the point API and the bulk API produce transitions through here and
+        nowhere else, so there is exactly one definition of what an accepted
+        transition is and of what has to be re-derived before one is published.
+        No model is constructed: everything derivable without enumeration is
+        derived, and the enumeration itself was done by the map task.
+        """
+
+        return _transitions(
             task=task,
             row=row,
             addressed=addressed,
             index_identity_sha256=self._index_identity_sha256,
         )
+
+    def _require_published_transition(
+        self, transition: Mapping[str, Any], *, published: Sequence[Mapping[str, Any]]
+    ) -> None:
         step_index = transition["step_index"]
-        if type(step_index) is not int or not 0 <= step_index < len(expected):
+        if type(step_index) is not int or not 0 <= step_index < len(published):
             raise ProcessV2Active8DecisionIndexError(
                 "the transition step index lies outside its trace"
             )
-        candidate = expected[step_index]
+        candidate = published[step_index]
         # The exact states are compared by their persistent-slot hashes, which is
         # what identifies a slot-addressed state; the arrays themselves are then
         # required to be the very objects the reader produced.
@@ -488,8 +675,6 @@ class ProcessV2Active8DecisionIndex:
                 raise ProcessV2Active8DecisionIndexError(
                     f"the transition {field} is not the exact persistent-slot state"
                 )
-
-    # ---- Internals ----
 
     def _task_root(self, task: Mapping[str, Any]) -> Path:
         return _mounted(
@@ -618,6 +803,41 @@ def _resolved_row(task: Mapping[str, Any], row: Mapping[str, Any]) -> dict[str, 
     }
 
 
+def _require_accepted_evidence(payload: Mapping[str, Any], *, step_index: int) -> None:
+    """What evidence must SAY for its transition to be an accepted one.
+
+    Structural, so it holds on the read path where no model exists.  The
+    contradiction cases are the load-bearing ones: an accepted trace whose own
+    evidence refuses the action, and counts that are not the positive alias
+    geometry an admitted teacher necessarily has.
+    """
+
+    if payload["supported"] is not True or payload["exclusion_reason"] is not None:
+        raise ProcessV2Active8DecisionIndexError(
+            f"the evidence at step {step_index} does not support the teacher action, so "
+            "this transition is not an accepted one; an accepted trace cannot carry "
+            "unsupported evidence or a populated exclusion reason"
+        )
+    if payload["matching_mark_count"] != 1:
+        raise ProcessV2Active8DecisionIndexError(
+            f"the teacher action at step {step_index} matches "
+            f"{payload['matching_mark_count']} marks of the production marked law; an "
+            "accepted transition matches exactly one"
+        )
+    if (
+        payload["exact_successor_mark_count"] != 1
+        or payload["successor_alias_count"] < 1
+        or payload["canonical_successor_count"] < 1
+        or payload["canonical_successor_count"] > payload["raw_mark_count"]
+        or payload["successor_alias_count"] > payload["raw_mark_count"]
+        or payload["exact_successor_mark_count"] > payload["successor_alias_count"]
+    ):
+        raise ProcessV2Active8DecisionIndexError(
+            f"the candidate counts at step {step_index} are not the positive, consistent "
+            "alias geometry an accepted transition requires"
+        )
+
+
 def _transitions(
     *,
     task: Mapping[str, Any],
@@ -625,7 +845,16 @@ def _transitions(
     addressed: Any,
     index_identity_sha256: str,
 ) -> list[dict[str, Any]]:
-    """Project one accepted decision row onto its exact teacher transitions."""
+    """Project one accepted decision row onto its exact teacher transitions.
+
+    Every identity here is RE-DERIVED and the derived value is what is published:
+    the action identity and family from the frozen codec applied to the CACHED
+    step, both exact states from the cached path, and the canonical successor key
+    from the production canonicalizer applied to the cached successor state.  The
+    stored evidence is then required to agree with each.  No model is
+    constructed and nothing is enumerated -- the enumeration was the map task's
+    job and its result is bound to the receipt by exact decision bytes.
+    """
 
     path_length = int(row["address"]["path_length"])
     if (
@@ -638,14 +867,26 @@ def _transitions(
         )
     transitions: list[dict[str, Any]] = []
     for step_index, action in enumerate(row["actions"]):
-        evidence = action["candidate_evidence"]
-        if evidence is None:
+        stored = action["candidate_evidence"]
+        if not isinstance(stored, Mapping):
             raise ProcessV2Active8DecisionIndexError(
                 "an accepted transition carries no production candidate evidence"
             )
         step = addressed.trace.steps[step_index]
-        record = action_codec_v4.encode_action(str(step.rule_name), step.action)
-        if canonical_sha256(record) != action["action_sha256"]:
+        executor_rule = str(step.rule_name)
+        try:
+            record = action_codec_v4.encode_action(executor_rule, step.action)
+            model_family = action_codec_v4.canonical_family(executor_rule)
+        except ActionCodecV4Error as error:
+            raise ProcessV2Active8DecisionIndexError(
+                "the cached teacher action is outside ActionCodecV4"
+            ) from error
+        action_sha256 = canonical_sha256(record)
+        if (
+            action_sha256 != action["action_sha256"]
+            or executor_rule != action["executor_rule"]
+            or model_family != action["model_family"]
+        ):
             raise ProcessV2Active8DecisionIndexError(
                 "the cached teacher action does not encode to its published identity"
             )
@@ -654,12 +895,24 @@ def _transitions(
         source_sha256 = persistent_slot_state_sha256(source)
         successor_sha256 = persistent_slot_state_sha256(successor)
         if (
-            source_sha256 != evidence["source_state_sha256"]
-            or successor_sha256 != evidence["target_state_sha256"]
+            source_sha256 != stored["source_state_sha256"]
+            or successor_sha256 != stored["target_state_sha256"]
         ):
             raise ProcessV2Active8DecisionIndexError(
                 "the cached exact states differ from the published candidate evidence"
             )
+        # The canonical successor key is a pure function of the successor STATE,
+        # which is in hand, so it is re-derived rather than read: one
+        # canonicalization through the production canonicalizer the policy itself
+        # used, not an enumeration and not a second evaluator.
+        canonical_key = canonical_state_key(successor)
+        if canonical_key != stored["canonical_successor_key"]:
+            raise ProcessV2Active8DecisionIndexError(
+                "the cached successor does not canonicalize to the published candidate "
+                f"evidence key at step {step_index}"
+            )
+        payload = dict(stored)
+        _require_accepted_evidence(payload, step_index=step_index)
         transitions.append(
             {
                 "v1_task_identity_sha256": str(row["v1_task_identity_sha256"]),
@@ -670,21 +923,21 @@ def _transitions(
                 "data_lane": str(row["data_lane"]),
                 "split": str(row["split"]),
                 "step_index": step_index,
-                "executor_rule": str(action["executor_rule"]),
-                "model_family": action["model_family"],
-                "action_sha256": str(action["action_sha256"]),
+                "executor_rule": executor_rule,
+                "model_family": model_family,
+                "action_sha256": action_sha256,
                 "action_record": dict(record),
                 "source_progress_index": step_index,
                 "successor_progress_index": step_index + 1,
                 "source_state_sha256": source_sha256,
                 "successor_state_sha256": successor_sha256,
                 "successor_is_terminal": step_index + 1 == path_length,
-                "canonical_successor_key": str(evidence["canonical_successor_key"]),
-                "raw_mark_count": int(evidence["raw_mark_count"]),
-                "canonical_successor_count": int(evidence["canonical_successor_count"]),
-                "matching_mark_count": int(evidence["matching_mark_count"]),
-                "exact_successor_mark_count": int(evidence["exact_successor_mark_count"]),
-                "successor_alias_count": int(evidence["successor_alias_count"]),
+                "canonical_successor_key": canonical_key,
+                "raw_mark_count": int(payload["raw_mark_count"]),
+                "canonical_successor_count": int(payload["canonical_successor_count"]),
+                "matching_mark_count": int(payload["matching_mark_count"]),
+                "exact_successor_mark_count": int(payload["exact_successor_mark_count"]),
+                "successor_alias_count": int(payload["successor_alias_count"]),
                 "source_state": source,
                 "successor_state": successor,
             }
@@ -846,6 +1099,7 @@ def resolve_process_v2_active8_decision_index(
     reasons: dict[str, int] = {}
     upstream_reasons: dict[str, int] = {}
     lookup: dict[ProcessV2TraceKey, tuple[str, str | None, str, int]] = {}
+    inventory: list[dict[str, Any]] = []
     tasks_by_id = {str(task["task_identity_sha256"]): dict(task) for task in plan["tasks"]}
     for task in reduction_order(plan["tasks"]):
         bound = tasks_by_id[str(task["task_identity_sha256"])]
@@ -855,6 +1109,7 @@ def resolve_process_v2_active8_decision_index(
             field="task.output_artifact_path",
         )
         receipt = validate_process_v2_active8_task_result(output, plan=plan, task=bound)
+        inventory.append(result_inventory_row(bound, receipt))
         raw = gzip.decompress((output / DECISION_FILENAME).read_bytes())
         for row in read_process_v2_active8_decision_rows(raw, task=bound, plan=plan):
             key = (
@@ -888,9 +1143,60 @@ def resolve_process_v2_active8_decision_index(
         for field in COUNT_FIELDS:
             counts[field] += int(receipt["counts"][field])
 
-    if counts != completion["active8_counts"]:
+    # ---- The completion inventory, against the receipts still on the volume ----
+    #
+    # A completion is a pointer document: it names one receipt and one decision
+    # file per task and reports their counts.  Resolving without following those
+    # pointers would let a stale inventory -- a receipt identity or a decision
+    # file hash from a superseded execution of the same task -- survive under a
+    # correctly resealed completion, and a chunk-parallel consumer that trusts one
+    # inventory row instead of re-reading the run would then trust it.  So each
+    # row is rebuilt from the plan task plus the LIVE receipt and required to be
+    # equal, in reduction order.
+    published_inventory = completion.get("result_inventory")
+    if (
+        not isinstance(published_inventory, list)
+        or completion.get("result_inventory_sha256") != canonical_sha256(published_inventory)
+        or completion.get("task_count") != len(inventory)
+    ):
+        raise ProcessV2Active8DecisionIndexError(
+            "the Process-V2 Active8 completion does not seal its own result inventory"
+        )
+    if published_inventory != inventory:
+        disagree = sorted(
+            {
+                str(row.get("task_identity_sha256"))
+                for row in published_inventory
+                if row not in inventory
+            }
+            | {
+                str(row["task_identity_sha256"])
+                for row in inventory
+                if row not in published_inventory
+            }
+        )
+        raise ProcessV2Active8DecisionIndexError(
+            "the published Process-V2 Active8 result inventory does not match the receipts "
+            f"the tasks actually hold: {disagree}"
+        )
+    inventory_counts = {
+        field: sum(int(row["counts"][field]) for row in inventory) for field in COUNT_FIELDS
+    }
+    if inventory_counts != counts or counts != completion["active8_counts"]:
         raise ProcessV2Active8DecisionIndexError(
             "the reopened Process-V2 Active8 census differs from the published completion"
+        )
+    if completion.get("structural_counts") != structural_census(counts):
+        raise ProcessV2Active8DecisionIndexError(
+            "the published Process-V2 Active8 structural census does not project its counts"
+        )
+    if (
+        completion.get("cache_binding") != plan["cache_binding"]
+        or completion.get("rebind_binding") != plan["rebind_binding"]
+        or completion.get("admitted_source_sha256") != plan["admitted_source_sha256"]
+    ):
+        raise ProcessV2Active8DecisionIndexError(
+            "the Process-V2 Active8 completion binds different upstream sources than its plan"
         )
     if (
         dict(sorted(families.items())) != completion["active8_action_family_histogram"]
@@ -959,12 +1265,14 @@ def resolve_process_v2_active8_decision_index(
         upstream_reason_histogram=dict(sorted(upstream_reasons.items())),
         action_family_histogram=dict(sorted(families.items())),
         trace_lookup=lookup,
+        result_inventory=inventory,
         index_identity_sha256=str(identity["index_identity_sha256"]),
     )
 
 
 __all__ = [
     "ACCEPTED_TRANSITION_FIELDS",
+    "DECISION_ELIGIBLE_PARTITION_ROLES",
     "INDEX_SCHEMA",
     "INDEX_SCHEMA_VERSION",
     "INDEX_STATUS",
