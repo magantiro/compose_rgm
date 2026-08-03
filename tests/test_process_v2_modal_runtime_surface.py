@@ -69,6 +69,7 @@ for _extra in (str(_REPO_ROOT / "tests"), str(_REPO_ROOT / "scripts")):
 
 import plan_process_v2_rebind as plan_driver  # noqa: E402
 import test_editing_process_v2_rebind as v1_fixture  # noqa: E402
+import test_process_v2_chunk_cache_identity as cache_identity  # noqa: E402
 
 REBIND_APP = _REPO_ROOT / "modal_apps" / "run_process_v2_rebind_app.py"
 CACHE_APP = _REPO_ROOT / "modal_apps" / "build_process_v2_chunk_cache_app.py"
@@ -260,17 +261,31 @@ def test_each_remote_body_revalidates_the_supplied_revision() -> None:
 
 def test_the_cache_app_separates_the_narrow_and_broad_revisions(
     image_surface: Path,
+    tmp_path: Path,
 ) -> None:
     """The artifact-addressing revision is the library's, not the image's.
 
     The image revision hashes every file under ``src`` and ``configs``, so
     passing it in as the scientific ``source_revision`` -- which the app used to
     do -- relocated every cached byte whenever anything anywhere moved.
+
+    The narrow revision a container computes is checked against the closure
+    derived by running the real decode, not against
+    ``CACHE_IMPLEMENTATION_FILES``.  Comparing the revision's keys to the
+    constant it is built from -- which is what stood here -- is satisfied by
+    construction and stayed green while the list covered only the modules that
+    *write* a chunk.
     """
 
     cache = _load(CACHE_APP)
     narrow = build_cache_implementation_revision(repo_root=image_surface)
-    assert set(narrow["implementation_files"]) == set(CACHE_IMPLEMENTATION_FILES)
+    uncovered = sorted(
+        set(cache_identity.decode_closure(tmp_path)) - set(narrow["implementation_files"])
+    )
+    assert not uncovered, (
+        "a container's narrow revision misses modules its own decode runs "
+        f"through: {uncovered}"
+    )
     assert "commit" not in narrow and "serialized_sources" not in narrow
 
     sources = {
