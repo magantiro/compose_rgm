@@ -54,7 +54,7 @@ import json
 import os
 import tempfile
 from collections import Counter
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -685,12 +685,23 @@ def build_process_v2_gate_zero_evidence(
     index: ProcessV2Active8Index,
     *,
     contract: FrozenProcessV2GateZeroContract,
+    view: Callable[..., Mapping[str, Any]] = _structural_view,
 ) -> dict[str, Any]:
     """Stream the index once, classify train-role teachers, seal the rest.
 
     One pass, bounded memory in the transition dimension: the only per-row state
     retained is the per-cell aggregate and the unique-identity sets the contract
     requires Gate 0 to publish.
+
+    ``view`` is the adapter from a PUBLISHED transition to the structural view
+    this function decides over, and it defaults to the real one.  It is a
+    parameter because the two are separately testable: the adapter needs exact
+    molecular states and a real ActionV4 record, so a fixture that wants to
+    drive the DECISION logic over controlled inputs supplies views directly
+    rather than fabricating chemistry that happens to classify where it wants.
+    A test that substitutes it is testing the gate, not the boundary; the
+    boundary is proven by the end-to-end chain, and a guard asserts this default
+    is the real adapter so substitution cannot become the normal path.
     """
 
     if not isinstance(index, ProcessV2Active8Index):
@@ -781,7 +792,7 @@ def build_process_v2_gate_zero_evidence(
         declared_transition_total += declared
         observed = 0
         for published in index.accepted_transitions_for(key):
-            transition = _structural_view(published, contract=contract)
+            transition = view(published, contract=contract)
             observed += 1
             decision_transitions += 1
             missing = [field for field in TRANSITION_FIELDS if field not in transition]
@@ -1189,6 +1200,7 @@ def run_process_v2_gate_zero(
     artifact_root: Path,
     output_directory: Path,
     contract: FrozenProcessV2GateZeroContract | None = None,
+    view: Callable[..., Mapping[str, Any]] = _structural_view,
 ) -> dict[str, Any]:
     """Build, decide and publish Process-V2 Gate-0 structural artifacts.
 
@@ -1197,7 +1209,7 @@ def run_process_v2_gate_zero(
     """
 
     selected = contract or load_process_v2_gate_zero_contract(repo_root=Path(repo_root))
-    evidence = build_process_v2_gate_zero_evidence(index, contract=selected)
+    evidence = build_process_v2_gate_zero_evidence(index, contract=selected, view=view)
     decision = process_v2_gate_zero_decision(evidence)
     output = Path(output_directory).resolve()
     artifact = Path(artifact_root).resolve()

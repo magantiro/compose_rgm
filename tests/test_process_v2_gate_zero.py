@@ -127,6 +127,30 @@ def _contract() -> gate_zero.FrozenProcessV2GateZeroContract:
     return gate_zero.load_process_v2_gate_zero_contract(repo_root=REPO_ROOT)
 
 
+def _already_a_view(transition, **_kwargs):
+    """The stand-in publishes structural views, so the adapter is the identity.
+
+    Deliberate and narrow: the real adapter needs exact persistent-slot states
+    and a real ActionV4 record, which a synthetic cell-by-cell fixture cannot
+    fabricate without rebuilding the chain it exists to avoid. These tests drive
+    the DECISION logic; the adapter is proven by the end-to-end chain, and by
+    the guard below that the production default is the real one.
+    """
+
+    return transition
+
+
+def test_the_default_transition_view_is_the_real_adapter() -> None:
+    """Without this, substituting the view could quietly become the normal path."""
+
+    import inspect
+
+    default = inspect.signature(gate_zero.build_process_v2_gate_zero_evidence).parameters[
+        "view"
+    ].default
+    assert default is gate_zero._structural_view
+
+
 def _transition(
     contract: gate_zero.FrozenProcessV2GateZeroContract,
     cell_id: str,
@@ -217,7 +241,7 @@ def test_gate_zero_sees_all_eight_families_and_every_required_cell(contract) -> 
     """Including ``atom_delete:connected_nonleaf_death``, the Process-V2 addition."""
 
     index = _complete_fixture(contract)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
     assert evidence["active8_families"] == list(ACTIVE8_FAMILIES)
     families = evidence["decision_eligible_teacher_counts_by_family"]
@@ -242,7 +266,7 @@ def test_an_empty_connected_nonleaf_death_cell_fails_the_gate(contract) -> None:
 
     connected_nonleaf = f"{contract.namespace}:atom_delete:connected_nonleaf_death"
     index = _complete_fixture(contract, omit_cells=frozenset({connected_nonleaf}))
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
     assert evidence["empty_required_editing_cell_ids"] == [connected_nonleaf]
     assert (
@@ -261,7 +285,7 @@ def test_a_missing_family_fails_even_when_every_other_cell_is_present(contract) 
         cell for cell in contract.registered_cell_ids if ":ring_system_restate:" in cell
     )
     index = _complete_fixture(contract, omit_cells=dropped)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
     assert evidence["decision_eligible_teacher_counts_by_family"]["ring_system_restate"] == 0
     assert evidence["decision_eligible_teacher_counts_by_executor_rule"][
@@ -282,8 +306,8 @@ def test_sealed_roles_cannot_move_a_gate_zero_threshold_or_result(contract) -> N
     for extra, role in enumerate(contract.sealed_roles):
         rich._rows.append(_row(f"extra-{extra}", role=role, transitions=0))
 
-    left = gate_zero.build_process_v2_gate_zero_evidence(lean, contract=contract)
-    right = gate_zero.build_process_v2_gate_zero_evidence(rich, contract=contract)
+    left = gate_zero.build_process_v2_gate_zero_evidence(lean, view=_already_a_view, contract=contract)
+    right = gate_zero.build_process_v2_gate_zero_evidence(rich, view=_already_a_view, contract=contract)
 
     assert left["structural_result"] == right["structural_result"] == "PASS"
     assert left["checks"] == right["checks"]
@@ -318,7 +342,7 @@ def test_gate_zero_never_opens_a_sealed_trace(contract) -> None:
     """The mechanism behind the test above, asserted directly on the index."""
 
     index = _complete_fixture(contract)
-    gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
     sealed_ids = {_sha(f"task|{role}") for role in contract.sealed_roles}
     assert len(sealed_ids) == len(contract.sealed_roles)
@@ -331,7 +355,7 @@ def test_a_trace_in_an_undeclared_partition_role_is_refused(contract) -> None:
     index = _complete_fixture(contract)
     index._rows.append(_row("rogue", role="pretraining", transitions=0))
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="undeclared role"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
 
 # ---- Acceptance 13: PASS and FAIL are both nonauthorizing ----
@@ -350,6 +374,7 @@ def test_both_results_publish_completely_nonauthorizing_artifacts(
     output = tmp_path / "run"
     published = gate_zero.run_process_v2_gate_zero(
         index,
+        view=_already_a_view,
         repo_root=REPO_ROOT,
         artifact_root=tmp_path,
         output_directory=output,
@@ -376,7 +401,7 @@ def test_both_results_publish_completely_nonauthorizing_artifacts(
         assert (output / filename).is_file()
 
     reloaded = gate_zero.load_process_v2_gate_zero_artifacts(
-        output_directory=output, index=index, contract=contract
+        output_directory=output, index=index, contract=contract, view=_already_a_view
     )
     assert reloaded["evidence"] == published["evidence"]
 
@@ -397,7 +422,7 @@ def test_an_index_whose_identity_grants_authority_is_refused(contract) -> None:
     complete = _complete_fixture(contract)
     index = _Granting(complete._rows, complete._transitions)
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="grants authority"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
 
 def test_a_granted_authority_field_anywhere_in_the_evidence_is_refused() -> None:
@@ -413,6 +438,7 @@ def test_a_tampered_published_artifact_is_refused(contract, tmp_path: Path) -> N
     output = tmp_path / "run"
     gate_zero.run_process_v2_gate_zero(
         index,
+        view=_already_a_view,
         repo_root=REPO_ROOT,
         artifact_root=tmp_path,
         output_directory=output,
@@ -424,6 +450,7 @@ def test_a_tampered_published_artifact_is_refused(contract, tmp_path: Path) -> N
     target.write_bytes(gate_zero._bytes(payload, newline=True))
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="differs from the recomputed"):
         gate_zero.load_process_v2_gate_zero_artifacts(
+            view=_already_a_view,
             output_directory=output, index=index, contract=contract
         )
 
@@ -435,6 +462,7 @@ def test_the_output_directory_must_lie_inside_the_artifact_root(
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="outside artifact_root"):
         gate_zero.run_process_v2_gate_zero(
             index,
+            view=_already_a_view,
             repo_root=REPO_ROOT,
             artifact_root=tmp_path / "inside",
             output_directory=tmp_path / "elsewhere",
@@ -466,7 +494,7 @@ def test_a_teacher_violating_a_frozen_requirement_fails_the_gate(
 
     cell_id = f"{contract.namespace}:atom_insert:one_neighbor_birth"
     index = _complete_fixture(contract, override={cell_id: overrides})
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
     assert evidence["teacher_requirement_failure_counts"][requirement] == 1
     assert evidence["checks"][f"every_decision_eligible_teacher_{requirement}"] is False
@@ -488,7 +516,7 @@ def test_every_frozen_requirement_has_a_published_check(contract) -> None:
     """Without this a requirement could be declared and never evaluated."""
 
     index = _complete_fixture(contract)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     for requirement in gate_zero.TEACHER_REQUIREMENTS:
         assert f"every_decision_eligible_teacher_{requirement}" in evidence["checks"]
     assert set(evidence["teacher_requirement_failure_counts"]) == set(
@@ -500,7 +528,7 @@ def test_a_transition_the_index_refuses_becomes_a_typed_receipt(contract) -> Non
     cell_id = f"{contract.namespace}:bond_reroute:single_atom_pendant_acyclic_source"
     refused = _sha(f"{cell_id}|0")
     index = _complete_fixture(contract, refuse=frozenset({refused}))
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
     assert evidence["classification_failure_count"] == 1
     assert evidence["checks"]["classification_failure_count_is_zero"] is False
@@ -520,7 +548,7 @@ def test_a_cell_outside_the_frozen_registry_becomes_a_typed_receipt(contract) ->
     index = _complete_fixture(
         contract, override={cell_id: {"capability_cell_id": "not:a:cell"}}
     )
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     assert evidence["classification_failure_count"] == 1
     assert evidence["classification_failure_receipts"][0]["failure_type"] == (
         "capability_cell_outside_the_frozen_registry"
@@ -533,7 +561,7 @@ def test_receipts_are_bounded_by_the_frozen_limit(contract) -> None:
 
     override = {cell: {"matching_mark_count": 3} for cell in contract.registered_cell_ids}
     index = _complete_fixture(contract, override=override)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     assert evidence["teacher_requirement_failure_counts"][
         "matches_exactly_one_action_v4_mark"
     ] == 22
@@ -547,14 +575,14 @@ def test_a_declared_transition_count_that_disagrees_is_refused(contract) -> None
     index = _complete_fixture(contract)
     index._rows[0]["accepted_transition_count"] = 2
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="declares 2 accepted"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
 
 def test_a_repeated_trace_key_is_refused(contract) -> None:
     index = _complete_fixture(contract)
     index._rows.append(dict(index._rows[0]))
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="repeats the key"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
 
 def test_a_rejected_trace_declaring_transitions_is_refused(contract) -> None:
@@ -563,14 +591,14 @@ def test_a_rejected_trace_declaring_transitions_is_refused(contract) -> None:
         if row["rejection_category"] == UPSTREAM_REJECTED:
             row["accepted_transition_count"] = 1
     with pytest.raises(gate_zero.ProcessV2GateZeroError, match="absence of"):
-        gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+        gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
 
 
 def test_the_two_rejection_categories_stay_separate_in_the_census(contract) -> None:
     """An unevaluated trace and a rejected one are different facts."""
 
     index = _complete_fixture(contract)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     assert evidence["counts"]["upstream_rejected_traces"] == 1
     assert evidence["counts"]["active8_excluded_traces"] == 1
     assert evidence["rejected_traces_by_code"] == {UPSTREAM_REJECTED: 1, ACTIVE8_EXCLUDED: 1}
@@ -587,7 +615,7 @@ def test_a_census_that_does_not_reconcile_fails_rather_than_raises(contract) -> 
 
     complete = _complete_fixture(contract)
     index = _Skewed(complete._rows, complete._transitions)
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     assert evidence["checks"]["active8_census_identity_reconciles"] is False
     assert evidence["checks"]["resolved_trace_census_matches"] is False
     assert evidence["structural_result"] == "FAIL"
@@ -596,7 +624,7 @@ def test_a_census_that_does_not_reconcile_fails_rather_than_raises(contract) -> 
 def test_a_terminal_transition_is_counted_and_fails_the_gate(contract) -> None:
     cell_id = f"{contract.namespace}:atom_restate:element_identity_change"
     index = _complete_fixture(contract, override={cell_id: {"terminal": True}})
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     assert evidence["counts"]["terminal_assignments"] == 1
     assert evidence["checks"]["terminal_assignment_count_is_zero"] is False
     assert evidence["structural_result"] == "FAIL"
@@ -607,7 +635,7 @@ def test_an_index_process_identity_that_is_not_the_live_v2_one_fails(contract) -
     index = StandInIndex(
         complete._rows, complete._transitions, process_identity_sha256="0" * 64
     )
-    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, contract=contract)
+    evidence = gate_zero.build_process_v2_gate_zero_evidence(index, view=_already_a_view, contract=contract)
     assert evidence["checks"]["process_identity_matches_live_process_v2"] is False
     assert evidence["structural_result"] == "FAIL"
 
