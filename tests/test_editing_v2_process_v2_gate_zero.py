@@ -20,10 +20,6 @@ from pathlib import Path
 import pytest
 
 from compose_v4.data.editing_v2_process_v2_gate_zero import (
-    ACTIVE8_DECISION_SHARD_FILENAME,
-    ACTIVE8_TASK_RESULT_FILENAME,
-    ACTIVE8_TASKS_DIRNAME,
-    GATE_ZERO_DECISION_FILENAME,
     GateZeroContracts,
     ProcessV2GateZeroError,
     ProcessV2GateZeroIncomplete,
@@ -44,9 +40,14 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
 from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
     ACCEPTED_TRANSITION_FIELDS,
     ACTIVE8_CENSUS_FIELDS,
+    ACTIVE8_DECISION_SHARD_FILENAME,
+    ACTIVE8_RECEIPT_FIELDS,
+    ACTIVE8_RECEIPT_FILENAME,
     ACTIVE8_TASK_SCHEMA,
     ACTIVE8_TASK_SCHEMA_VERSION,
+    ACTIVE8_TASKS_DIRNAME,
     CANDIDATE_EVIDENCE_FIELDS,
+    GATE_ZERO_DECISION_FILENAME,
     GATE_ZERO_DECISION_SCHEMA,
     PIPELINE_STATUS_NO_AUTHORITY,
 )
@@ -160,6 +161,7 @@ def _write_shard(
     upstream_rejected: int = 3,
     excluded: int = 2,
     mutate=None,
+    receipt_mutate=None,
     accepted_entries: int | None = None,
     write_shard_object: bool = True,
 ) -> str:
@@ -199,24 +201,39 @@ def _write_shard(
         "active8_excluded_entries": excluded,
     }
     assert set(census) == set(ACTIVE8_CENSUS_FIELDS)
-    receipt = {
+    directory = run_root / ACTIVE8_TASKS_DIRNAME / task_identity
+    directory.mkdir(parents=True, exist_ok=True)
+    payload = b"".join(_canonical(row) + b"\n" for row in rows)
+    shard_bytes = gzip.compress(payload, mtime=0)
+    if write_shard_object:
+        (directory / ACTIVE8_DECISION_SHARD_FILENAME).write_bytes(shard_bytes)
+    # The census fields are TOP-LEVEL, not nested under a `census` key.
+    body = {
         "schema": ACTIVE8_TASK_SCHEMA,
         "schema_version": ACTIVE8_TASK_SCHEMA_VERSION,
         "status": PIPELINE_STATUS_NO_AUTHORITY,
         "task_identity_sha256": task_identity,
         "partition_role": partition_role,
         "data_lane": data_lane,
-        "census": census,
+        "source_chunk_identity_sha256": _identity(f"chunk:{label}"),
+        **census,
+        "transition_count": len(rows),
+        "decision_shard_sha256": hashlib.sha256(shard_bytes).hexdigest(),
     }
-    directory = run_root / ACTIVE8_TASKS_DIRNAME / task_identity
-    directory.mkdir(parents=True, exist_ok=True)
-    (directory / ACTIVE8_TASK_RESULT_FILENAME).write_bytes(_canonical(receipt) + b"\n")
-    if write_shard_object:
-        payload = b"".join(_canonical(row) + b"\n" for row in rows)
-        (directory / ACTIVE8_DECISION_SHARD_FILENAME).write_bytes(
-            gzip.compress(payload, mtime=0)
-        )
+    receipt = {**body, "receipt_sha256": _digest(body)}
+    assert set(receipt) == set(ACTIVE8_RECEIPT_FIELDS)
+    if receipt_mutate is not None:
+        receipt = receipt_mutate(receipt)
+    (directory / ACTIVE8_RECEIPT_FILENAME).write_bytes(_canonical(receipt) + b"\n")
     return task_identity
+
+
+def _reseal(receipt: dict[str, object], **changes: object) -> dict[str, object]:
+    """Apply changes and re-seal, so the self-hash is not what fails."""
+
+    body = {k: v for k, v in receipt.items() if k != "receipt_sha256"}
+    body.update(changes)
+    return {**body, "receipt_sha256": _digest(body)}
 
 
 def _contracts() -> GateZeroContracts:
@@ -768,7 +785,7 @@ def test_gate_zero_opens_zero_molecular_chunks_and_zero_sealed_shards(
     sealed_metadata_opens = [
         path
         for path in observed
-        if path.endswith(ACTIVE8_TASK_RESULT_FILENAME)
+        if path.endswith(ACTIVE8_RECEIPT_FILENAME)
         and any(identity in path for identity in sealed_identities)
     ]
     assert len(sealed_metadata_opens) == len(sealed_identities) == 3
@@ -862,6 +879,78 @@ def test_absent_structural_axes_fail_the_gate(tmp_path: Path) -> None:
     assert decision["decision"] == "FAIL"
     assert decision["violation_counts"]["missing_audit_axes"] == 3
     assert decision["checks"]["audit_axes_present"] is False
+
+
+# ---- The receipt binds to the seam, not to a local copy ----------------------
+
+
+def test_a_receipt_spelling_split_instead_of_partition_role_raises(tmp_path: Path) -> None:
+    """The adjudicated case, locked in.
+
+    The receipt is exactly the artifact this gate reads to decide eligibility, so
+    it carries the policy vocabulary: `partition_role`, not `split`.  `split`
+    stays correct in the cache and the rebind.  Accepting it here silently would
+    make the seam's field-naming rule advisory.
+    """
+
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    _write_shard(
+        active8,
+        label="train-0",
+        partition_role="train",
+        cells=list(contracts.required_cell_ids),
+        receipt_mutate=lambda receipt: _reseal(
+            {k: v for k, v in receipt.items() if k != "partition_role"},
+            split="train",
+        ),
+    )
+    with pytest.raises(ProcessV2GateZeroError, match="ACTIVE8_RECEIPT_FIELDS"):
+        run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
+    assert not (tmp_path / "gate0" / GATE_ZERO_DECISION_FILENAME).exists()
+
+
+def test_a_receipt_whose_self_hash_disagrees_raises(tmp_path: Path) -> None:
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    _write_shard(
+        active8,
+        label="train-0",
+        partition_role="train",
+        cells=list(contracts.required_cell_ids),
+        receipt_mutate=lambda receipt: {**receipt, "active8_excluded_entries": 99},
+    )
+    with pytest.raises(ProcessV2GateZeroError, match="receipt_sha256"):
+        run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
+
+
+def test_shard_bytes_are_authenticated_against_the_receipt(tmp_path: Path) -> None:
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    identity = _write_shard(
+        active8,
+        label="train-0",
+        partition_role="train",
+        cells=list(contracts.required_cell_ids),
+        receipt_mutate=lambda receipt: _reseal(receipt, decision_shard_sha256=_identity("other")),
+    )
+    assert identity
+    with pytest.raises(ProcessV2GateZeroError, match="decision_shard_sha256"):
+        run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
+
+
+def test_a_shard_shorter_than_its_declared_transition_count_raises(tmp_path: Path) -> None:
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    _write_shard(
+        active8,
+        label="train-0",
+        partition_role="train",
+        cells=list(contracts.required_cell_ids),
+        receipt_mutate=lambda receipt: _reseal(receipt, transition_count=999),
+    )
+    with pytest.raises(ProcessV2GateZeroError, match="its receipt declares"):
+        run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
 
 
 # ---- Contract cross-validation, with reachable witnesses ---------------------

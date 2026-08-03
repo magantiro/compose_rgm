@@ -27,7 +27,7 @@ THE DATA STRUCTURE
         census.  Read for EVERY role, so the census and the sealed-role hashes
         stay complete.
 
-    <active8_run_root>/tasks/<task_identity_sha256>/ACTIVE8_TRANSITIONS.jsonl.gz
+    <active8_run_root>/tasks/<task_identity_sha256>/transitions.jsonl.gz
         The decision shard: one JSON object per accepted transition, each
         holding exactly ``ACCEPTED_TRANSITION_FIELDS``.  Read only for a
         decision-eligible, nonempty shard.  A sealed role's shard is never
@@ -36,9 +36,11 @@ THE DATA STRUCTURE
     <gate_zero_root>/DECISION.json
         The one artifact this stage publishes.
 
-The pipeline seam (``editing_v2_process_v2_pipeline_schema``) names the FIELDS,
-not the filenames; the three names above are taken from the Active8 map stage,
-which owns the write.  ``<active8_run_root>`` is that stage's
+Every name above -- the directory, both filenames, and the receipt's own field
+set -- is IMPORTED from the pipeline seam, never redeclared here.  The seam
+names the fields AND the layout precisely because two modules independently
+declaring the same filename is the same divergence as two modules independently
+spelling the same field.  ``<active8_run_root>`` is the Active8 map stage's
 ``<output_artifact_prefix>/<run_identity_sha256>``.
 
 INVARIANTS MAINTAINED (and tested)
@@ -80,12 +82,23 @@ from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
     ACCEPTED_TRANSITION_FIELDS,
     ACTION_KEY_FIELDS,
     ACTIVE8_CENSUS_FIELDS,
+    ACTIVE8_DECISION_SHARD_FILENAME,
+    ACTIVE8_RECEIPT_FIELDS,
+    ACTIVE8_RECEIPT_FILENAME,
     ACTIVE8_TASK_SCHEMA,
     ACTIVE8_TASK_SCHEMA_VERSION,
+    ACTIVE8_TASKS_DIRNAME,
     CANDIDATE_EVIDENCE_FIELDS,
+    GATE_ZERO_DECISION_FILENAME,
     GATE_ZERO_DECISION_SCHEMA,
     GATE_ZERO_DECISION_SCHEMA_VERSION,
     PIPELINE_STATUS_NO_AUTHORITY,
+)
+from compose_v4.data.editing_v2_process_v2_schema import (
+    ProcessV2SchemaError,
+    canonical_bytes,
+    canonical_sha256,
+    verify_self_hash,
 )
 from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     CAPABILITY_CELLS,
@@ -107,18 +120,6 @@ class ProcessV2GateZeroIncomplete(ProcessV2GateZeroError):
 
 
 # ---- Layout ------------------------------------------------------------------
-
-#: The producer's layout.  The seam names FIELDS, not filenames, so these three
-#: are read off the Active8 map stage
-#: (``editing_v2_process_v2_active8_plan.TASK_DIRNAME`` and
-#: ``editing_v2_process_v2_active8_map.{RECEIPT,TRANSITIONS}_FILENAME``), which
-#: owns the write.  Active8 also publishes ``ACTIVE8_ROWS.jsonl.gz``, one row per
-#: RESOLVED trace; Gate 0 aggregates accepted TRANSITIONS and never opens it.
-ACTIVE8_TASKS_DIRNAME = "tasks"
-ACTIVE8_TASK_RESULT_FILENAME = "RECEIPT.json"
-ACTIVE8_DECISION_SHARD_FILENAME = "ACTIVE8_TRANSITIONS.jsonl.gz"
-
-GATE_ZERO_DECISION_FILENAME = "DECISION.json"
 
 #: Emitted, all False, in a PASS and in a FAIL alike.
 _AUTHORITY: Mapping[str, bool] = {
@@ -164,19 +165,10 @@ _VIOLATION_CATEGORIES: tuple[str, ...] = (
 # ---- Deterministic serialization ---------------------------------------------
 
 
-def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
-    payload = json.dumps(
-        value,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        allow_nan=False,
-    ).encode("utf-8")
-    return payload + (b"\n" if newline else b"")
+def _canonical_line(value: object) -> bytes:
+    """One newline-framed record.  Framing only; the hash is over the body."""
 
-
-def _sha(value: object) -> str:
-    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+    return canonical_bytes(value) + b"\n"
 
 
 def _require_sha(value: object, *, field: str) -> str:
@@ -255,7 +247,7 @@ class GateZeroContracts:
 
     @property
     def binding_sha256(self) -> str:
-        return _sha(
+        return canonical_sha256(
             {
                 "contract_sha256": self.contract_sha256,
                 "process_identity_sha256": self.process_identity_sha256,
@@ -497,6 +489,17 @@ def _read_active8_task_metadata(
         raise ProcessV2GateZeroError(f"active8 task result is not JSON: {path}") from error
     if not isinstance(payload, Mapping):
         raise ProcessV2GateZeroError(f"active8 task result is not an object: {path}")
+    if set(payload) != set(ACTIVE8_RECEIPT_FIELDS):
+        missing = sorted(set(ACTIVE8_RECEIPT_FIELDS) - set(payload))
+        extra = sorted(set(payload) - set(ACTIVE8_RECEIPT_FIELDS))
+        raise ProcessV2GateZeroError(
+            f"{path}: receipt must carry exactly ACTIVE8_RECEIPT_FIELDS "
+            f"(missing {missing}, unexpected {extra})"
+        )
+    try:
+        verify_self_hash(payload, field="receipt_sha256", label=f"{path}: the Active8 receipt")
+    except ProcessV2SchemaError as error:
+        raise ProcessV2GateZeroError(str(error)) from error
     if payload.get("schema") != ACTIVE8_TASK_SCHEMA:
         raise ProcessV2GateZeroError(
             f"{path}: schema is {payload.get('schema')!r}, expected {ACTIVE8_TASK_SCHEMA!r}"
@@ -512,15 +515,10 @@ def _read_active8_task_metadata(
     lane = _require_str(payload.get("data_lane"), field="data_lane")
     if lane not in contracts.data_lanes:
         raise ProcessV2GateZeroError(f"{path}: data_lane {lane!r} is not a bound lane")
-    census_payload = payload.get("census")
-    if not isinstance(census_payload, Mapping) or set(census_payload) != set(
-        ACTIVE8_CENSUS_FIELDS
-    ):
-        raise ProcessV2GateZeroError(
-            f"{path}: census must carry exactly {sorted(ACTIVE8_CENSUS_FIELDS)}"
-        )
+    # The census fields are TOP-LEVEL receipt fields, spliced into
+    # ACTIVE8_RECEIPT_FIELDS; they are not nested under a `census` key.
     census = {
-        field: _require_nonnegative_int(census_payload[field], field=f"census.{field}")
+        field: _require_nonnegative_int(payload[field], field=field)
         for field in ACTIVE8_CENSUS_FIELDS
     }
     if census["source_entries"] != (
@@ -534,6 +532,17 @@ def _read_active8_task_metadata(
         "partition_role": role,
         "data_lane": lane,
         "census": census,
+        "source_chunk_identity_sha256": _require_sha(
+            payload["source_chunk_identity_sha256"], field="source_chunk_identity_sha256"
+        ),
+        # Carried so the reduction can authenticate the shard it opens and
+        # cross-check its length, both WITHOUT opening anything here.
+        "transition_count": _require_nonnegative_int(
+            payload["transition_count"], field="transition_count"
+        ),
+        "decision_shard_sha256": _require_sha(
+            payload["decision_shard_sha256"], field="decision_shard_sha256"
+        ),
     }
     return metadata, hashlib.sha256(raw).hexdigest()
 
@@ -563,7 +572,7 @@ def read_active8_decision_index(
     for identity in identities:
         _require_sha(identity, field="active8 task directory name")
         metadata, metadata_sha = _read_active8_task_metadata(
-            parent / identity / ACTIVE8_TASK_RESULT_FILENAME,
+            parent / identity / ACTIVE8_RECEIPT_FILENAME,
             task_identity_sha256=identity,
             contracts=contracts,
         )
@@ -598,7 +607,7 @@ def read_active8_decision_index(
         role: {
             "shards": len(witness),
             "metadata_resolved": len(witness),
-            "metadata_digest_sha256": _sha(sorted(witness)),
+            "metadata_digest_sha256": canonical_sha256(sorted(witness)),
         }
         for role, witness in sorted(sealed_witness.items())
     }
@@ -617,7 +626,7 @@ def read_active8_decision_index(
         eligible_task_identities=tuple(sorted(eligible)),
         role_census=role_census,
         sealed_role_metadata=sealed_role_metadata,
-        index_sha256=_sha(body),
+        index_sha256=canonical_sha256(body),
     )
 
 
@@ -664,10 +673,10 @@ def _validated_row(row: Mapping[str, Any], *, where: str) -> dict[str, Any]:
         raise ProcessV2GateZeroError(
             f"{where}: candidate_evidence must carry exactly {sorted(CANDIDATE_EVIDENCE_FIELDS)}"
         )
-    body = {key: value for key, value in row.items() if key != "assignment_sha256"}
-    declared = _require_sha(row["assignment_sha256"], field="assignment_sha256")
-    if declared != _sha(body):
-        raise ProcessV2GateZeroError(f"{where}: assignment_sha256 does not authenticate the row")
+    try:
+        verify_self_hash(row, field="assignment_sha256", label=f"{where}: accepted transition")
+    except ProcessV2SchemaError as error:
+        raise ProcessV2GateZeroError(str(error)) from error
     return dict(row)
 
 
@@ -868,6 +877,15 @@ def reduce_gate_zero(
         path = parent / identity / ACTIVE8_DECISION_SHARD_FILENAME
         opened_by_role[str(shard["partition_role"])] += 1
         rows, digest = _read_decision_shard(path)
+        if digest != shard["decision_shard_sha256"]:
+            raise ProcessV2GateZeroError(
+                f"{path}: shard bytes do not match the decision_shard_sha256 its receipt declares"
+            )
+        if len(rows) != shard["transition_count"]:
+            raise ProcessV2GateZeroError(
+                f"{path}: holds {len(rows)} transitions, its receipt declares "
+                f"{shard['transition_count']}"
+            )
         if not rows:
             raise ProcessV2GateZeroError(f"{path}: a nonempty shard holds no transitions")
         traces_before = len(aggregate.traces)
@@ -943,7 +961,7 @@ def reduce_gate_zero(
             "order": "ascending_task_identity_sha256",
             "combiner": "key_sorted_counter_addition",
             "shards": len(eligible),
-            "digest_sha256": _sha(aggregate.shard_digests),
+            "digest_sha256": canonical_sha256(aggregate.shard_digests),
         },
         "accounting": {
             "resolved_shards": len(index.shards),
@@ -983,10 +1001,10 @@ def reduce_gate_zero(
         "checks": dict(sorted(checks.items())),
         "negative_receipts": aggregate.receipts,
     }
-    decision = {**body, "decision_sha256": _sha(body)}
+    decision = {**body, "decision_sha256": canonical_sha256(body)}
     _publish(
         Path(gate_zero_root) / GATE_ZERO_DECISION_FILENAME,
-        _canonical_bytes(decision, newline=True),
+        _canonical_line(decision),
     )
     return decision
 
