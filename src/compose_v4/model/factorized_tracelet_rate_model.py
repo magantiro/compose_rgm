@@ -4947,6 +4947,14 @@ class FactorizedTraceletRateModel(nn.Module):
             # check would accept a mask that was unioned with the legacy dense
             # rule, which is precisely the exemption this process version
             # removes, so it could not detect the defect it exists to guard.
+            #
+            # For a batch straight out of `prepare_factorized_mark_batch` this
+            # is a tautology: that collator sets `delete_mask` to a copy of the
+            # admission mask, so the two agree by construction.  The check earns
+            # its keep on a batch REBUILT downstream -- it is what caught
+            # `_index_factorized_batch` re-indexing the delete mask while
+            # carrying the admission mask through unsliced, which would
+            # otherwise have scored selected rows against another row's fiber.
             if not torch.equal(batch.atom_delete_admission_mask, delete_mask):
                 raise ValueError(
                     "Process-V2 atom-delete admission mask does not equal the batch "
