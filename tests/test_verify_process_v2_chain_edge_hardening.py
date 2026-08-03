@@ -71,9 +71,11 @@ from verify_process_v2_chain import (  # noqa: E402
     DISAGREES,
     FAIL,
     INCONCLUSIVE,
+    STAGE_RECEIPT_ENTRY_FIELDS,
     STAGE_RECEIPT_SCHEMA,
     STAGE_RECEIPT_SCHEMA_VERSION,
     STAGE_RECEIPT_SELF_HASH_FIELD,
+    STAGE_RECEIPT_STATUS,
     UNVERIFIED,
     _NEAR_MISS_KEY_EDITS,
     live_identity_nodes,
@@ -83,6 +85,10 @@ from verify_process_v2_chain import (  # noqa: E402
 
 _EDGE_KEY = "process_identity"
 _REMOTE = "/editing_v2/semantic_v4_migration/fixture/SEMANTIC_MIGRATION_COMPLETE.json"
+
+#: The stage whose receipt the fixtures below write.  A resolution entry is
+#: attributed to the stage that carries it, so the two are one value here.
+_STAGE = "semantic_v4_migration"
 
 
 def _a_parent_role(
@@ -151,35 +157,55 @@ def _pointer_of(payload: dict[str, Any], role: str, slot: str) -> dict[str, Any]
     return payload["parents"][role][slot]
 
 
+def _resolution(
+    kind: str, target: str, sha256: str, *, verified_by: str = _STAGE
+) -> dict[str, str]:
+    """One resolution entry, attributed by default to the stage that carries it."""
+
+    return {"kind": kind, "target": target, "sha256": sha256, "verified_by": verified_by}
+
+
 def _stage_receipt(
     root: Path,
     name: str,
-    entries: list[dict[str, str]],
+    entries: list[dict[str, Any]],
     *,
     schema: str = STAGE_RECEIPT_SCHEMA,
     schema_version: int = STAGE_RECEIPT_SCHEMA_VERSION,
+    stage: str = _STAGE,
+    status: str = STAGE_RECEIPT_STATUS,
     authority: dict[str, bool] | None = None,
+    extra: dict[str, Any] | None = None,
+    omit: tuple[str, ...] = (),
     corrupt_self_hash: bool = False,
+    outside: Path | None = None,
 ) -> str:
-    """Write one stage receipt, sealed through the production self-hash rule."""
+    """Write one stage receipt, sealed through the production self-hash rule.
+
+    ``outside`` writes it beyond the checkout and returns its ABSOLUTE path, which
+    is the shape a containment rule has to refuse.
+    """
 
     body: dict[str, Any] = {
         "resolved": entries,
         "schema": schema,
         "schema_version": schema_version,
-        "stage": "semantic_v4_migration",
-        "status": "STAGE_RECEIPT_PROVENANCE_ONLY_NO_DOWNSTREAM_AUTHORITY",
+        "stage": stage,
+        "status": status,
         **(authority if authority is not None else authority_false_block()),
+        **(extra or {}),
     }
+    for dropped in omit:
+        body.pop(dropped, None)
     payload = self_hashed(body, field=STAGE_RECEIPT_SELF_HASH_FIELD)
     if corrupt_self_hash:
         payload[STAGE_RECEIPT_SELF_HASH_FIELD] = "0" * 64
-    path = root / name
+    path = (outside / name) if outside is not None else (root / name)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(
         (json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode()
     )
-    return name
+    return str(path) if outside is not None else name
 
 
 def _inject_into_the_frozen_parent(root: Path, pointer: dict[str, Any], key: str) -> None:
@@ -576,22 +602,21 @@ def test_an_unresolved_remote_pointer_is_inconclusive_not_agreeing() -> None:
     assert [edge["result"] for edge in _edges_to(report, _REMOTE)] == ["deferred"]
 
 
-def test_a_versioned_stage_receipt_resolves_a_remote_pointer() -> None:
+def _resolving(entry: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
+    """Verify the injected remote pointer with one receipt carrying ``entry``."""
+
     with _graph_copy() as root:
         _inject_into_the_frozen_parent(root, _remote_pointer(), "a_remote_prerequisite")
-        receipt = _stage_receipt(
-            root,
-            "diagnostics/stage_receipt.json",
-            [
-                {
-                    "kind": PointerKind.REMOTE_ARTIFACT,
-                    "target": _REMOTE,
-                    "sha256": "c" * 64,
-                    "verified_by": "semantic_migration_stage_loader",
-                }
-            ],
-        )
-        report = verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
+        receipt = _stage_receipt(root, "diagnostics/stage_receipt.json", [entry], **kwargs)
+        return verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
+
+
+def _the_resolving_entry(sha256: str = "c" * 64, **kwargs: Any) -> dict[str, Any]:
+    return _resolution(PointerKind.REMOTE_ARTIFACT, _REMOTE, sha256, **kwargs)
+
+
+def test_a_versioned_stage_receipt_resolves_a_remote_pointer() -> None:
+    report = _resolving(_the_resolving_entry())
     assert report["status"] == AGREES, report["findings"]
     assert _categories(report, DEFERRED) == ["remote_artifact_resolved_by_stage_receipt"]
     assert [edge["result"] for edge in _edges_to(report, _REMOTE)] == ["resolved_by_stage_receipt"]
@@ -599,21 +624,34 @@ def test_a_versioned_stage_receipt_resolves_a_remote_pointer() -> None:
 
 
 def test_a_receipt_naming_a_different_digest_resolves_nothing() -> None:
-    with _graph_copy() as root:
-        _inject_into_the_frozen_parent(root, _remote_pointer(), "a_remote_prerequisite")
-        receipt = _stage_receipt(
-            root,
-            "diagnostics/stage_receipt.json",
-            [
-                {
-                    "kind": PointerKind.REMOTE_ARTIFACT,
-                    "target": _REMOTE,
-                    "sha256": "d" * 64,
-                    "verified_by": "semantic_migration_stage_loader",
-                }
-            ],
-        )
-        report = verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
+    report = _resolving(_the_resolving_entry(sha256="d" * 64))
+    assert report["status"] == INCONCLUSIVE
+    assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
+
+
+def test_a_receipt_naming_a_different_target_resolves_nothing() -> None:
+    """The other half of the resolution key, which had no test at all.
+
+    A receipt resolves a pointer only when kind, TARGET and digest all match. The
+    digest half was covered and the target half was not, so a resolution index
+    keyed on kind and digest alone -- one receipt resolving every pointer that
+    happens to share a hash -- passed the suite.
+    """
+
+    report = _resolving(
+        _resolution(PointerKind.REMOTE_ARTIFACT, f"{_REMOTE}.other", "c" * 64)
+    )
+    assert report["status"] == INCONCLUSIVE
+    assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
+    assert [row["result"] for row in report["stage_receipts"]] == ["accepted"], (
+        "the receipt itself is sound; it simply resolves something else"
+    )
+
+
+def test_a_receipt_naming_a_different_kind_resolves_nothing() -> None:
+    """And the third: an external-asset resolution does not resolve a remote pin."""
+
+    report = _resolving(_resolution(PointerKind.EXTERNAL_ASSET, _REMOTE, "c" * 64))
     assert report["status"] == INCONCLUSIVE
     assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
 
@@ -625,38 +663,159 @@ def test_a_receipt_naming_a_different_digest_resolves_nothing() -> None:
         {"schema_version": STAGE_RECEIPT_SCHEMA_VERSION + 1},
         {"schema": "compose.some.other.receipt"},
         {"authority": {**authority_false_block(), "bounded_p50_authorized": True}},
+        {"authority": {**authority_false_block(), "training_authorized": True}},
+        {"extra": {"p500_authorized": True}},
+        {"extra": {"resolved_by": {"nested_grant_authorized": True}}},
+        {"status": "STAGE_RECEIPT_REFUSED_NOTHING_VERIFIED"},
+        {"status": ""},
+        {"stage": ""},
+        {"stage": 7},
+        {"omit": ("status",)},
+        {"omit": ("stage",)},
+        {"omit": ("resolved",)},
+        {"omit": ("schema_version",)},
     ],
-    ids=["broken_self_hash", "wrong_version", "wrong_schema", "grants_authority"],
+    ids=[
+        "broken_self_hash",
+        "wrong_version",
+        "wrong_schema",
+        "grants_bounded_p50",
+        "grants_training",
+        "grants_an_authority_outside_the_vocabulary",
+        "grants_authority_nested",
+        "refused_status",
+        "blank_status",
+        "blank_stage",
+        "non_string_stage",
+        "omits_status",
+        "omits_stage",
+        "omits_resolved",
+        "omits_schema_version",
+    ],
 )
 def test_a_receipt_that_is_not_itself_sound_resolves_nothing(kwargs: dict[str, Any]) -> None:
     """A receipt is the only thing that can turn a deferral into agreement.
 
     So it is held to the standard of what it resolves: a declared schema and
-    version, a verified self-hash, and every authority field false. An unversioned
-    or authority-granting receipt that still resolved would be a launch permit
-    written by the thing it permits.
+    version, a verified self-hash, the one disposition under which it resolves
+    anything, its full required field set, and no granted authority under ANY
+    spelling. An unversioned or authority-granting receipt that still resolved
+    would be a launch permit written by the thing it permits.
+
+    ``p500_authorized`` is the out-of-vocabulary case that made the difference:
+    ``require_authority_false`` is bound to the seven known field names, so the
+    one authority spelling this repository has outside them was accepted, and a
+    ``status`` saying the receipt had verified nothing was accepted too, because
+    the field was required and never read.
     """
 
-    with _graph_copy() as root:
-        _inject_into_the_frozen_parent(root, _remote_pointer(), "a_remote_prerequisite")
-        receipt = _stage_receipt(
-            root,
-            "diagnostics/stage_receipt.json",
-            [
-                {
-                    "kind": PointerKind.REMOTE_ARTIFACT,
-                    "target": _REMOTE,
-                    "sha256": "c" * 64,
-                    "verified_by": "semantic_migration_stage_loader",
-                }
-            ],
-            **kwargs,
-        )
-        report = verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
+    report = _resolving(_the_resolving_entry(), **kwargs)
     assert report["status"] == DISAGREES
     assert "malformed_stage_receipt" in _categories(report, FAIL)
     assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
     assert [row["result"] for row in report["stage_receipts"]] == ["refused"]
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        _resolution(PointerKind.REMOTE_ARTIFACT, _REMOTE, "c" * 64, verified_by="nobody at all"),
+        _resolution(PointerKind.REMOTE_ARTIFACT, _REMOTE, "c" * 64, verified_by=""),
+        _resolution(PointerKind.REMOTE_ARTIFACT, _REMOTE, "C" * 64),
+        _resolution(PointerKind.REMOTE_ARTIFACT, _REMOTE, "c" * 63),
+        _resolution(PointerKind.REMOTE_ARTIFACT, _REMOTE, "not a digest at all"),
+        {**_the_resolving_entry(), "note": "a field beyond the entry set"},
+        {k: v for k, v in _the_resolving_entry().items() if k != "target"},
+        {"kind": PointerKind.REMOTE_ARTIFACT, "target": _REMOTE},
+    ],
+    ids=[
+        "attributed_to_nobody",
+        "attributed_to_nothing",
+        "uppercase_digest",
+        "short_digest",
+        "unparseable_digest",
+        "extra_field",
+        "missing_target",
+        "half_an_entry",
+    ],
+)
+def test_a_receipt_entry_that_is_not_itself_sound_resolves_nothing(
+    entry: dict[str, Any],
+) -> None:
+    """An entry carries exactly the compared fields, and every one is compared.
+
+    ``verified_by`` was the odd one out: required, non-empty, and never compared
+    to anything, so ``"nobody at all"`` resolved a deferred edge. There is no
+    registry of stage loaders here to decide it against, so it is bound to the
+    receipt's own ``stage`` -- one receipt carries one stage's evidence -- which
+    makes every declared field of an entry a field that must agree with something.
+    """
+
+    report = _resolving(entry)
+    assert report["status"] == DISAGREES
+    assert "malformed_stage_receipt" in _categories(report, FAIL)
+    assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
+    assert [row["result"] for row in report["stage_receipts"]] == ["refused"]
+
+
+def test_the_entry_field_set_is_exactly_the_fields_that_are_compared() -> None:
+    """No field of a resolution entry may be recorded without being decided.
+
+    ``kind``, ``target`` and ``sha256`` are compared to the pointer;
+    ``verified_by`` is compared to the receipt's stage. A field added here without
+    a comparison would be the same "required, recorded, never read" shape that let
+    a refused receipt resolve edges.
+    """
+
+    assert set(STAGE_RECEIPT_ENTRY_FIELDS) == {"kind", "target", "sha256", "verified_by"}
+
+
+def test_a_non_list_resolved_block_resolves_nothing() -> None:
+    """``resolved`` is iterated, so a mapping would silently yield its KEYS.
+
+    The diagnostic is asserted, not just the refusal. Without the list check a
+    mapping still gets refused -- by the per-entry rule, complaining that its first
+    KEY is not an entry -- so a run that reported the wrong defect, and one that
+    raised ``TypeError`` on an integer, both looked like a pass.
+    """
+
+    for resolved in ({"kind": "remote_artifact"}, "a string", 7, None):
+        with _graph_copy() as root:
+            _inject_into_the_frozen_parent(root, _remote_pointer(), "a_remote_prerequisite")
+            receipt = _stage_receipt(root, "diagnostics/stage_receipt.json", resolved)  # type: ignore[arg-type]
+            report = verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
+        assert report["status"] == DISAGREES, resolved
+        named = _findings(report, "malformed_stage_receipt")
+        assert named, (resolved, report["findings"])
+        assert "must be a list" in named[0]["detail"], (resolved, named[0]["detail"])
+        assert [row["result"] for row in report["stage_receipts"]] == ["refused"]
+
+
+def test_a_receipt_read_from_outside_the_checkout_resolves_nothing() -> None:
+    """The receipt PATH is a repository path, held to the containment rule.
+
+    ``repo_root / relative_path`` lets an absolute operand win outright, so a
+    receipt named by absolute path was read from anywhere on the filesystem and
+    accepted -- an ungoverned file deciding which deferred edges this checkout
+    agrees about, which is the strongest thing a receipt can do.
+    """
+
+    with tempfile.TemporaryDirectory() as elsewhere:
+        with _graph_copy() as root:
+            _inject_into_the_frozen_parent(root, _remote_pointer(), "a_remote_prerequisite")
+            receipt = _stage_receipt(
+                root,
+                "smuggled_receipt.json",
+                [_the_resolving_entry()],
+                outside=Path(elsewhere),
+            )
+            assert Path(receipt).is_absolute() and Path(receipt).is_file()
+            report = verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
+    assert report["status"] == DISAGREES
+    assert "stage_receipt_path_escapes_the_checkout" in _categories(report, FAIL)
+    assert "remote_artifact_unresolved_by_any_stage_receipt" in _categories(report, UNVERIFIED)
+    assert [row["result"] for row in report["stage_receipts"]] == ["refused"]
+    assert [row["resolved"] for row in report["stage_receipts"]] == [0]
 
 
 def test_an_external_asset_outside_the_checkout_is_undecided_until_a_receipt_resolves_it() -> None:
@@ -676,13 +835,11 @@ def test_an_external_asset_outside_the_checkout_is_undecided_until_a_receipt_res
             root,
             "diagnostics/asset_receipt.json",
             [
-                {
-                    "kind": PointerKind.EXTERNAL_ASSET,
-                    "target": asset,
-                    "sha256": "e" * 64,
-                    "verified_by": "corpus_ingest_stage",
-                }
+                _resolution(
+                    PointerKind.EXTERNAL_ASSET, asset, "e" * 64, verified_by="corpus_ingest"
+                )
             ],
+            stage="corpus_ingest",
         )
         with_receipt = verify_process_v2_chain(repo_root=root, stage_receipts=(receipt,))
     assert without["status"] == INCONCLUSIVE
