@@ -110,6 +110,39 @@ $VENV scripts/plan_process_v2_rebind.py \
     --dry-run
 ```
 
+## 4b. Test results
+
+Whole suite, same invocation on both sides:
+
+```
+base b790024 : 14 failed, 2470 passed, 2 skipped, 15 errors in 895.79s
+head         : 14 failed, 2518 passed, 2 skipped, 15 errors in 925.33s
+```
+
+Compared as failure **sets**, not counts, because equal counts can hide an
+equal-sized swap:
+
+```
+failures only on head (regressions) : none
+failures only on base (fixed here)  : none
+collection errors base vs head      : IDENTICAL
+```
+
+**+48 tests passing, zero regressions.** The 14 shared failures and the 15
+collection errors are pre-existing on base: the errors are a missing PyYAML in
+this venv, and the failures are dominated by the RingCore catalog fingerprint
+drift, which fails identically on both sides.
+
+Focused suites: 32 (V2 contract chain) + 50 (rebind and end-to-end) + 7 (Active8
+join) + 51 (Phase-0 mask and runtime/checkpoint, under **both** torch 2.13.0 and
+torch 2.11.0).
+
+Other gates: chain verifier `AGREES` with 178 literals agreeing and **0 stale**;
+ruff clean on all 10 touched Python files and 64 errors on base equals 64 on head
+with none from a touched file; `git diff --check` clean; the seven V2 contracts
+regenerate deterministically and byte-match what is committed; **0 V1 configs
+modified**, in the commits and in the working tree.
+
 ## 5. Phase 0: two verification portability defects
 
 **Neither defect reproduced.** Tried both interpreters, with and without the
