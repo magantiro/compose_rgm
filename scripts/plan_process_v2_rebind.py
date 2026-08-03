@@ -28,6 +28,16 @@ count is chosen at map time and is deliberately not an input here.
 **The repository must be clean and committed.**  `source_revision` hashes the
 implementation boundary, so a dirty tree cannot produce a plan.
 
+**Git runs where `.git` exists, which is never inside the image.**  The Modal
+image carries source files but no `.git` metadata, and its `debian_slim` base
+carries no `git` binary either, so computing the revision remotely raises
+`cannot establish the rebind Git identity: git rev-parse HEAD` and planning
+cannot run at all.  `build_plan` therefore accepts an already-computed
+`source_revision`: the launcher computes and verifies it locally, passes it in,
+and the remote side revalidates it against the image's own files through the
+Git-free `validate_process_v2_rebind_source_revision`.  Omitting it keeps the
+local behaviour, where `.git` really is present.
+
 Usage::
 
     .venv/bin/python scripts/plan_process_v2_rebind.py \
@@ -41,6 +51,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -59,6 +70,7 @@ from compose_v4.data.editing_process_v2_rebind import (  # noqa: E402
     repository_process_v2_rebind_source_revision,
     validate_pinned_builder_identity,
     validate_pinned_process_identity,
+    validate_process_v2_rebind_source_revision,
     write_process_v2_rebind_plan,
 )
 from compose_v4.data.semantic_trace_migration_materializer import (  # noqa: E402
@@ -126,6 +138,24 @@ def read_pinned_identities(
     return process_identity, builder_identity
 
 
+def resolve_source_revision(
+    source_revision: Mapping[str, Any] | None,
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Validate a supplied revision, or compute one from a local Git checkout.
+
+    ``validate_process_v2_rebind_source_revision`` rehashes every serialized
+    implementation file against ``repo_root`` and checks the self-hash, so a
+    supplied revision is bound to the code that is actually present.  It calls
+    no Git, which is what makes it usable inside the image.
+    """
+
+    if source_revision is not None:
+        return validate_process_v2_rebind_source_revision(source_revision, repo_root=repo_root)
+    return repository_process_v2_rebind_source_revision(repo_root=repo_root)
+
+
 def build_plan(
     *,
     artifact_root: Path,
@@ -133,6 +163,8 @@ def build_plan(
     expected_process_identity_sha256: str,
     output_artifact_prefix: str,
     entries_per_task: int,
+    source_revision: Mapping[str, Any] | None = None,
+    repo_root: Path = REPO_ROOT,
 ) -> dict[str, Any]:
     """Freeze the content-addressed plan. Writes nothing."""
 
@@ -145,7 +177,7 @@ def build_plan(
         payload_root,
         expected_process_identity_sha256=expected_process_identity_sha256,
     )
-    source_revision = repository_process_v2_rebind_source_revision(repo_root=REPO_ROOT)
+    revision = resolve_source_revision(source_revision, repo_root=repo_root)
     binding = bind_v1_semantic_payload(
         payload_root_artifact_path=v1_payload_root_artifact_path,
         artifact_root=artifact_root,
@@ -154,8 +186,8 @@ def build_plan(
     )
     return plan_process_v2_rebind(
         binding,
-        source_revision=source_revision,
-        repo_root=REPO_ROOT,
+        source_revision=revision,
+        repo_root=repo_root,
         pinned_process_identity=process_identity,
         pinned_builder_identity=builder_identity,
         output_artifact_prefix=output_artifact_prefix,

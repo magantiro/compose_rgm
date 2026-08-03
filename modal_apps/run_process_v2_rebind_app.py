@@ -24,6 +24,26 @@ time.  It is deliberately not an input to the plan: `entries_per_task` is folded
 into `run_identity_sha256`, so letting fleet size pick it would address a
 different run for the same data.
 
+Three defects this module used to carry, and what replaced them:
+
+**Planning could not run remotely.**  The driver called `build_plan`, which
+called `repository_process_v2_rebind_source_revision`, which shells out to
+`git rev-parse HEAD` in `/root/compose`.  The image has source files but no
+`.git`, and `debian_slim` has no `git` binary, so that raised before any work
+began.  The revision is now computed and verified *locally*, passed in, and
+revalidated remotely against the image's own files, then cross-checked against
+the image revision.  No Git call exists in any remote body.
+
+**`--max-map-containers` was cosmetic.**  The value was validated and printed
+while the decorator capped at 20 and one `starmap` submitted every task at once.
+The bound is now real: `run_bounded_map` submits deterministic sequential waves
+of at most the requested size and lowers the function's own ceiling through
+`Function.update_autoscaler`, which is the surface Modal 1.3.5 exposes.
+
+**Volume visibility was implicit.**  A Modal volume is a snapshot. `reload()`
+now happens before the driver scans reusable tasks, at the top of every worker
+and the reducer, and in the driver after the reducer returns.
+
 This app launches nothing by importing it.  Run it explicitly, from a clean
 committed worktree, with `--detach`.
 """
@@ -34,12 +54,24 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 import modal
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:  # pragma: no cover - import-time path setup
+    sys.path.insert(0, str(ROOT / "src"))
+
+from compose_v4.data.editing_v2_process_v2_chunk_cache import (  # noqa: E402
+    DEFAULT_CHUNK_MAP_CONTAINERS,
+    PLATFORM_MAX_MAP_CONTAINERS,
+    plan_submission_waves,
+    run_bounded_map,
+    validate_map_container_bound,
+)
+
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
 LAUNCHER_SOURCE = "modal_apps/run_process_v2_rebind_app.py"
@@ -47,14 +79,16 @@ PLAN_DRIVER_SOURCE = "scripts/plan_process_v2_rebind.py"
 IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 
 OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_rebind"
-# The owner's fleet bound. Each range task publishes its own immutable directory
-# by rename, so tasks never contend for one destination; this bounds concurrent
-# volume writers, which is the real constraint. The repository's cache and pack
-# apps use 5 for Volume v1 small-commit writers, and its per-task-receipt
-# inventory app uses 64. 20 sits between them by instruction and is overridable.
-MAX_MAP_CONTAINERS = 20
-MAP_CPU = 4.0
-MAP_MEMORY_MB = 16384
+# The fleet bound is `PLATFORM_MAX_MAP_CONTAINERS`, imported from the shared
+# Process-V2 module so the ceiling has one home. Each range task publishes its
+# own immutable directory by rename, so tasks never contend for one destination;
+# the bound exists to limit concurrent volume writers. The decorator sets the
+# platform ceiling; `run_bounded_map` sets the per-run one.
+DEFAULT_MAX_MAP_CONTAINERS = DEFAULT_CHUNK_MAP_CONTAINERS
+# One range task is a sequential replay-and-hash loop with no BLAS in it, so the
+# previous request of four CPUs paid for parallelism the code cannot use.
+MAP_CPU = 2.0
+MAP_MEMORY_MB = 8192
 MAP_TIMEOUT_SECONDS = 8 * 3600
 REDUCE_TIMEOUT_SECONDS = 8 * 3600
 DRIVER_TIMEOUT_SECONDS = 24 * 3600
@@ -76,7 +110,7 @@ image = (
         {
             "PYTHONPATH": str(REMOTE_ROOT / "src"),
             "PYTHONUNBUFFERED": "1",
-            "OMP_NUM_THREADS": "4",
+            "OMP_NUM_THREADS": "1",
         }
     )
 )
@@ -198,6 +232,45 @@ def _validate_remote_image_revision(
             raise RuntimeError(f"serialized Process-V2 rebind source differs: {relative}")
 
 
+def validate_remote_source_revision(
+    source_revision: dict[str, Any],
+    image_revision: dict[str, Any],
+    *,
+    remote_root: Path = REMOTE_ROOT,
+) -> dict[str, Any]:
+    """Revalidate the supplied scientific source revision, without Git.
+
+    Two separate identities meet here and both are required.  The *image*
+    revision pins every serialized file this launcher shipped; the *source*
+    revision is the library's own boundary, which the plan carries and which
+    every task and the reducer revalidate.  They are cross-checked so a caller
+    cannot pair one commit's code with another commit's revision object.
+
+    ``validate_process_v2_rebind_source_revision`` rehashes the implementation
+    files against the image and calls no Git, which is precisely why it can run
+    where ``.git`` does not exist.
+    """
+
+    if str(remote_root) not in sys.path:
+        sys.path.insert(0, str(remote_root))
+    from compose_v4.data.editing_process_v2_rebind import (
+        validate_process_v2_rebind_source_revision,
+    )
+
+    revision = validate_process_v2_rebind_source_revision(
+        source_revision, repo_root=Path(remote_root)
+    )
+    if (
+        revision["commit"] != image_revision.get("commit")
+        or revision["tree"] != image_revision.get("tree")
+    ):
+        raise RuntimeError(
+            "the supplied Process-V2 source revision and the image revision name "
+            f"different trees: {revision['commit']} vs {image_revision.get('commit')}"
+        )
+    return revision
+
+
 def _authority_envelope() -> dict[str, bool]:
     """Proving a corpus authorizes nothing downstream. Stated, never implied."""
 
@@ -218,17 +291,23 @@ def _authority_envelope() -> dict[str, bool]:
     cpu=MAP_CPU,
     memory=MAP_MEMORY_MB,
     timeout=MAP_TIMEOUT_SECONDS,
-    max_containers=MAX_MAP_CONTAINERS,
+    max_containers=PLATFORM_MAX_MAP_CONTAINERS,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def prove_one_range(
-    plan: dict[str, Any], task_identity_sha256: str, image_revision: dict[str, Any]
+    plan: dict[str, Any],
+    task_identity_sha256: str,
+    image_revision: dict[str, Any],
+    source_revision: dict[str, Any],
 ) -> dict[str, Any]:
     """One independent range task: prove it, or publish nothing."""
 
     from compose_v4.data.editing_process_v2_rebind import execute_process_v2_rebind_task
 
     _validate_remote_image_revision(image_revision)
+    validate_remote_source_revision(source_revision, image_revision)
+    # This worker reads the V1 payload and the plan another container wrote.
+    artifact_volume.reload()
     result = execute_process_v2_rebind_task(
         plan,
         task_identity_sha256,
@@ -244,14 +323,20 @@ def prove_one_range(
     cpu=MAP_CPU,
     memory=MAP_MEMORY_MB,
     timeout=REDUCE_TIMEOUT_SECONDS,
+    max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def reduce_rebind(plan: dict[str, Any], image_revision: dict[str, Any]) -> dict[str, Any]:
-    """Only the reducer may declare the run complete."""
+def reduce_rebind(
+    plan: dict[str, Any], image_revision: dict[str, Any], source_revision: dict[str, Any]
+) -> dict[str, Any]:
+    """Only the serialized reducer may declare the run complete."""
 
     from compose_v4.data.editing_process_v2_rebind import reduce_process_v2_rebind
 
     _validate_remote_image_revision(image_revision)
+    validate_remote_source_revision(source_revision, image_revision)
+    # Reduction reads every range result, each written by another container.
+    artifact_volume.reload()
     completion = reduce_process_v2_rebind(
         plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
     )
@@ -264,6 +349,7 @@ def reduce_rebind(plan: dict[str, Any], image_revision: dict[str, Any]) -> dict[
     cpu=2.0,
     memory=8192,
     timeout=DRIVER_TIMEOUT_SECONDS,
+    max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def driver(
@@ -274,10 +360,14 @@ def driver(
     entries_per_task: int,
     max_map_containers: int,
     image_revision: dict[str, Any],
+    source_revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """Plan, publish, resume, map the missing ranges, then reduce."""
+    """Plan, publish, resume, map the missing ranges in waves, then reduce.
 
-    import sys
+    No Git call appears in this body or in anything it calls: ``build_plan``
+    receives the already-verified ``source_revision`` and validates it against
+    the image's own files.
+    """
 
     if str(REMOTE_ROOT) not in sys.path:
         sys.path.insert(0, str(REMOTE_ROOT))
@@ -294,6 +384,10 @@ def driver(
     from plan_process_v2_rebind import build_plan, plan_envelope
 
     _validate_remote_image_revision(image_revision)
+    revision = validate_remote_source_revision(source_revision, image_revision)
+    bound = validate_map_container_bound(max_map_containers)
+    # Before reading the V1 payload the caller named.
+    artifact_volume.reload()
 
     # The plan driver is imported, not reimplemented: the pinned-identity
     # discovery and the refusal to plan against an unexpected historical
@@ -304,10 +398,15 @@ def driver(
         expected_process_identity_sha256=expected_v1_process_identity,
         output_artifact_prefix=output_artifact_prefix,
         entries_per_task=entries_per_task,
+        source_revision=revision,
+        repo_root=REMOTE_ROOT,
     )
     write_process_v2_rebind_plan(plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT)
     artifact_volume.commit()
 
+    # Before scanning reusable tasks: a previous run's results live in a volume
+    # snapshot this container did not necessarily boot with.
+    artifact_volume.reload()
     completed = completed_process_v2_rebind_task_ids(
         plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
     )
@@ -316,6 +415,7 @@ def driver(
         for task in plan["tasks"]
         if str(task["task_identity_sha256"]) not in completed
     ]
+    waves = plan_submission_waves(missing, bound) if missing else ()
     print(
         json.dumps(
             {
@@ -323,22 +423,27 @@ def driver(
                 "expected_task_count": int(plan["expected_task_count"]),
                 "already_complete": len(completed),
                 "missing_tasks": len(missing),
-                "max_map_containers": int(max_map_containers),
+                "max_map_containers": bound,
+                "submission_waves": len(waves),
             }
         ),
         flush=True,
     )
 
     if missing:
-        results = list(
-            prove_one_range.starmap(
-                [(plan, task_id, image_revision) for task_id in missing]
-            )
+        run_bounded_map(
+            missing,
+            max_map_containers=bound,
+            submit=lambda wave: prove_one_range.starmap(
+                [(plan, task_id, image_revision, source_revision) for task_id in wave]
+            ),
+            set_autoscaler=prove_one_range.update_autoscaler,
         )
-        if len(results) != len(missing):
-            raise RuntimeError("Process-V2 rebind map lost or repeated a range task")
 
-    completion = reduce_rebind.remote(plan, image_revision)
+    completion = reduce_rebind.remote(plan, image_revision, source_revision)
+    # After the reducer returns and before resolving completion: the completion
+    # document was written by that other container.
+    artifact_volume.reload()
 
     # Resolving the admitted source here proves the downstream adapter can read
     # what was just published, before anything else is asked to consume it.
@@ -354,6 +459,8 @@ def driver(
         "counts": completion["counts"],
         "rejected_traces_by_code": completion["rejected_traces_by_code"],
         "admitted_source_identity": admitted.identity(),
+        "max_map_containers": bound,
+        "submission_waves": len(waves),
         **_authority_envelope(),
     }
 
@@ -365,32 +472,33 @@ def main(
     expected_v1_process_identity: str = "",
     output_artifact_prefix: str = OUTPUT_ARTIFACT_PREFIX,
     entries_per_task: int = 0,
-    max_map_containers: int = MAX_MAP_CONTAINERS,
+    max_map_containers: int = DEFAULT_MAX_MAP_CONTAINERS,
 ) -> None:
-    import sys
-
-    if str(ROOT / "src") not in sys.path:
-        sys.path.insert(0, str(ROOT / "src"))
-    from compose_v4.data.editing_process_v2_rebind import DEFAULT_ENTRIES_PER_TASK
+    from compose_v4.data.editing_process_v2_rebind import (
+        DEFAULT_ENTRIES_PER_TASK,
+        repository_process_v2_rebind_source_revision,
+    )
     from compose_v4.rewrite.editing_v2_process_identity import (
         SUPERSEDED_V1_PROCESS_IDENTITY_SHA256,
     )
 
-    if not 1 <= int(max_map_containers) <= MAX_MAP_CONTAINERS:
-        raise RuntimeError(
-            f"max_map_containers must lie in [1, {MAX_MAP_CONTAINERS}]; the map fan-out "
-            "bounds concurrent volume writers"
-        )
+    bound = validate_map_container_bound(int(max_map_containers))
     resolved_identity = expected_v1_process_identity or SUPERSEDED_V1_PROCESS_IDENTITY_SHA256
     resolved_entries = int(entries_per_task) or DEFAULT_ENTRIES_PER_TASK
 
     image_revision = local_image_revision(expected_commit=expected_commit)
+    # Computed here, where `.git` exists. The remote side revalidates it against
+    # the image and never runs Git.
+    source_revision = repository_process_v2_rebind_source_revision(repo_root=ROOT)
+    if source_revision["commit"] != image_revision["commit"]:
+        raise RuntimeError("the local source and image revisions name different commits")
     report = driver.remote(
         v1_payload_root=v1_payload_root,
         expected_v1_process_identity=resolved_identity,
         output_artifact_prefix=output_artifact_prefix,
         entries_per_task=resolved_entries,
-        max_map_containers=int(max_map_containers),
+        max_map_containers=bound,
         image_revision=image_revision,
+        source_revision=source_revision,
     )
     print(json.dumps(report, indent=2, sort_keys=True))
