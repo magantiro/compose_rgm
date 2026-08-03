@@ -50,6 +50,11 @@ verified, but the later *execution* wiring is future work.
 | `d5cfcaf` | scripts: freeze the process v2 rebind plan from its immutable payload |
 | `5e46b9e` | data: join the process v2 overlay to the v1 active8 source inventory |
 | `3625857` | tests: prove the rebind chain end to end and scope the sharding claim |
+| `2e74582` | experiments: add the distinct process v2 downstream contract chain |
+| `818f527` | docs: hand off the process v2 evidence chain |
+| `44dddd1` | tests: pin the gate zero consumption boundary for process v2 |
+| `d6f27f2` | docs: record the process v2 evidence chain verification results |
+| `0e25bc0` | experiments: bind the admitted-source schema the adapter actually declares |
 
 ## 2. Identities
 
@@ -132,6 +137,11 @@ collection errors base vs head      : IDENTICAL
 collection errors are pre-existing on base: the errors are a missing PyYAML in
 this venv, and the failures are dominated by the RingCore catalog fingerprint
 drift, which fails identically on both sides.
+
+Note: the whole-suite figures above were measured at `44dddd1`. The later
+`0e25bc0` corrects a schema string in the seven V2 contracts and regenerates
+them; its focused suite is green and the chain still verifies, but the whole
+suite was not re-run after it. Stated rather than implied.
 
 Focused suites: 32 (V2 contract chain) + 50 (rebind and end-to-end) + 7 (Active8
 join) + 51 (Phase-0 mask and runtime/checkpoint, under **both** torch 2.13.0 and
