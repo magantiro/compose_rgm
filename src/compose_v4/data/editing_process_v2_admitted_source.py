@@ -1205,30 +1205,34 @@ def _exact_count(payload: Mapping[str, Any], key: str, *, label: str) -> int:
 def _require_exact_fields(
     payload: Mapping[str, Any], expected: tuple[str, ...], *, label: str
 ) -> None:
-    """Exact field set AND sorted key order, both required.
+    """The exact field set, and only that.
 
-    Order is checked because the descriptor is emitted sorted at every depth, and
-    that is what lets a consumer embed it verbatim and re-serialize it without
-    changing it.  A reordered mapping still self-hashes -- the canonical hash
-    sorts -- so nothing else would catch it.
+    Sorted key order is NOT re-checked here even though ``expected`` is sorted:
+    every caller runs :func:`_require_sorted_mapping` on the same object first, so
+    a second order comparison could never fire. Two guards where one is
+    unreachable read as defence in depth and are not -- the unreachable one can be
+    deleted without any test noticing, which is exactly what a mutation run shows.
+    Order has one authority: :func:`_require_sorted_mapping`.
     """
 
-    observed = tuple(payload)
-    if set(observed) != set(expected):
-        missing = sorted(set(expected) - set(observed))
-        unexpected = sorted(set(observed) - set(expected))
+    observed = set(payload)
+    if observed != set(expected):
+        missing = sorted(set(expected) - observed)
+        unexpected = sorted(observed - set(expected))
         _identity_fail(
             f"{label} field set differs from the declared shape; missing={missing} "
             f"unexpected={unexpected}"
         )
-    if observed != expected:
-        _identity_fail(
-            f"{label} keys are not in sorted order; a Process-V2 identity descriptor is "
-            "sorted at every depth so that embedding it verbatim is byte-stable"
-        )
 
 
 def _require_sorted_mapping(value: object, *, label: str) -> Mapping[str, Any]:
+    """The one authority on key order, at every depth.
+
+    The descriptor is emitted sorted so that a consumer can embed it verbatim and
+    re-serialize it under ``sort_keys=True`` unchanged. A reordered mapping still
+    self-hashes -- the canonical hash sorts -- so nothing else would catch it.
+    """
+
     if not isinstance(value, Mapping):
         _identity_fail(f"{label} is {type(value).__name__}, not an object")
     assert isinstance(value, Mapping)  # narrowed by the guard above
