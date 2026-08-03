@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import ast
 import gzip
+import hashlib
 import json
 import random
 import sys
@@ -618,41 +619,58 @@ def test_a_task_size_other_than_the_cache_chunk_size_is_refused(tmp_path: Path) 
 
 
 def test_a_published_result_that_relabels_its_geometry_is_refused(tmp_path: Path) -> None:
-    """The published manifest and receipt must agree on where the rows came from."""
+    """The published manifest and receipt must agree on where the rows came from.
+
+    Both documents are resealed, and the receipt is re-pointed at the mutated
+    manifest, so the self-hash and physical-hash bindings all agree and the
+    geometry comparison is the only thing left that can refuse. Resealing only
+    the manifest tripped the manifest-binds-its-receipt check instead, which is
+    a different guard -- the mutation survived that version of this test.
+    """
 
     payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
     plan = _cache_fed_plan(payload, cache_plan)
     _execute_and_reduce(payload, plan)
     output = _task_output(payload, plan["tasks"][2])
+    manifest_path, receipt_path = output / MANIFEST_FILENAME, output / RECEIPT_FILENAME
+    original_manifest = manifest_path.read_bytes()
+    original_receipt = receipt_path.read_bytes()
 
-    manifest_path = output / MANIFEST_FILENAME
-    original = manifest_path.read_bytes()
-    manifest = json.loads(original)
-    manifest["source_geometry"] = SOURCE_GEOMETRY_V1_ENTRY_RANGE
-    body = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
-    manifest_path.write_bytes(
-        canonical_bytes({**body, "manifest_sha256": canonical_sha256(body)}) + b"\n"
-    )
-    with pytest.raises(ProcessV2RebindError, match="does not bind its receipt"):
-        completed_process_v2_rebind_task_ids(
-            plan, artifact_root=payload.artifact_root, repo_root=ROOT
-        )
-    manifest_path.write_bytes(original)
+    def _republish(mutate) -> None:
+        manifest = json.loads(original_manifest)
+        mutate(manifest)
+        body = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
+        manifest = {**body, "manifest_sha256": canonical_sha256(body)}
+        manifest_bytes = canonical_bytes(manifest) + b"\n"
+        manifest_path.write_bytes(manifest_bytes)
 
-    manifest = json.loads(original)
-    manifest["task_source_binding"] = {
-        **manifest["task_source_binding"],
-        "chunk_index": 999,
-    }
-    body = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
-    manifest_path.write_bytes(
-        canonical_bytes({**body, "manifest_sha256": canonical_sha256(body)}) + b"\n"
-    )
-    with pytest.raises(ProcessV2RebindError, match="does not bind its receipt"):
-        completed_process_v2_rebind_task_ids(
-            plan, artifact_root=payload.artifact_root, repo_root=ROOT
+        receipt = json.loads(original_receipt)
+        receipt["manifest_sha256"] = manifest["manifest_sha256"]
+        receipt["manifest_physical_sha256"] = hashlib.sha256(manifest_bytes).hexdigest()
+        receipt_body = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
+        receipt_path.write_bytes(
+            canonical_bytes({**receipt_body, "receipt_sha256": canonical_sha256(receipt_body)})
+            + b"\n"
         )
-    manifest_path.write_bytes(original)
+
+    def _relabel_geometry(manifest: dict[str, Any]) -> None:
+        manifest["source_geometry"] = SOURCE_GEOMETRY_V1_ENTRY_RANGE
+
+    def _relabel_source_binding(manifest: dict[str, Any]) -> None:
+        manifest["task_source_binding"] = {
+            **manifest["task_source_binding"],
+            "chunk_index": 999,
+        }
+
+    for mutate in (_relabel_geometry, _relabel_source_binding):
+        _republish(mutate)
+        with pytest.raises(ProcessV2RebindError, match="does not bind its receipt"):
+            completed_process_v2_rebind_task_ids(
+                plan, artifact_root=payload.artifact_root, repo_root=ROOT
+            )
+
+    manifest_path.write_bytes(original_manifest)
+    receipt_path.write_bytes(original_receipt)
     assert completed_process_v2_rebind_task_ids(
         plan, artifact_root=payload.artifact_root, repo_root=ROOT
     )
