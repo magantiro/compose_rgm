@@ -33,6 +33,10 @@ by chunk position.  Chunk position is an artifact of the chunk size, which is a
 partitioning choice; two caches of the same corpus at different chunk sizes hold
 the same rows at different positions.  A positional join would silently pair a
 decision with the wrong trace whenever the chunk size moved.
+
+Addressing ONE trace needs one field more: :data:`TRACE_KEY_FIELDS` adds
+``trace_id``, because a trace id is unique within a V1 task and nothing
+guarantees it across tasks.
 """
 
 from __future__ import annotations
@@ -74,6 +78,21 @@ REJECTION_CATEGORIES: tuple[str, ...] = (UPSTREAM_REJECTED, ACTIVE8_EXCLUDED)
 #: consumer building a key tuple cannot transpose them.
 JOIN_KEY_FIELDS: tuple[str, ...] = ("v1_task_identity_sha256", "entry_index")
 
+#: The authoritative address of ONE resolved trace: the join key plus the trace
+#: id.  A bare ``trace_id`` is NOT an address -- it is unique within a V1 task
+#: and nothing guarantees it across tasks, so two tasks may legitimately carry
+#: the same id for different traces.  Keying transitions by the bare id would
+#: silently merge them, and the merge would look like a trace that simply had
+#: more transitions than it does.
+TRACE_KEY_FIELDS: tuple[str, ...] = (
+    "v1_task_identity_sha256",
+    "entry_index",
+    "trace_id",
+)
+
+#: ``(v1_task_identity_sha256, entry_index, trace_id)``, in that order.
+ProcessV2TraceKey = tuple[str, int, str]
+
 
 # ---- What Gate 0 may assume ----
 
@@ -93,12 +112,22 @@ class ProcessV2Active8Index(StructuralDecisionIndex, Protocol):
     def iter_resolved_traces(self) -> Iterator[Mapping[str, Any]]:
         """Every resolved trace, in a deterministic order.
 
+        Every row exposes all of :data:`TRACE_KEY_FIELDS`, so a consumer can
+        address a trace without reconstructing its key from somewhere else.
+
         Includes upstream-rejected traces, which carry their category and are
         present for the census but must never be candidate-evaluated.
         """
 
-    def accepted_transitions_for(self, trace_id: str) -> Iterator[Mapping[str, Any]]:
+    def accepted_transitions_for(
+        self, trace_key: ProcessV2TraceKey
+    ) -> Iterator[Mapping[str, Any]]:
         """The accepted transitions of one trace, in trace order.
+
+        Addressed by the full :data:`ProcessV2TraceKey`, never by a bare
+        ``trace_id``: the id is unique within a V1 task and nothing guarantees
+        it across tasks, so a bare-id lookup can merge two different traces into
+        one answer that looks merely longer than it should be.
 
         Empty for a trace that was excluded or upstream-rejected -- absence of
         transitions is not an error, it is the answer.
@@ -118,6 +147,8 @@ __all__ = [
     "ACTIVE8_EXCLUDED",
     "JOIN_KEY_FIELDS",
     "ProcessV2Active8Index",
+    "ProcessV2TraceKey",
     "REJECTION_CATEGORIES",
+    "TRACE_KEY_FIELDS",
     "UPSTREAM_REJECTED",
 ]
