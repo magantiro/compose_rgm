@@ -29,6 +29,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     canonical_sha256,
     require_authority_false,
     require_census_reconciles,
+    require_no_granted_authority,
     self_hashed,
     typed_pointer,
     validate_typed_pointer,
@@ -112,6 +113,59 @@ def test_an_omitted_top_level_authority_field_is_refused() -> None:
     del block["t1_authorized"]
     with pytest.raises(ProcessV2SchemaError, match="omits authority fields"):
         require_authority_false(block, label="probe")
+
+
+def test_an_unregistered_authority_spelling_is_refused_by_the_vocabulary_free_guard() -> None:
+    """The gap `require_authority_false` cannot close, by construction.
+
+    It judges only the names it knows, so a grant under a name nobody has
+    registered is invisible to it. `p500_authorized` is not a hypothetical: it
+    exists in this repository today, in a Process-V2 chain config and in several
+    Modal apps, in neither `AUTHORITY_FIELDS` nor `RETIRED_AUTHORITY_FIELDS`.
+    """
+
+    payload = {**authority_false_block(), "p500_authorized": True}
+    require_authority_false(payload, label="probe")  # blind to it, as designed
+    with pytest.raises(ProcessV2SchemaError, match="grants authority"):
+        require_no_granted_authority(payload, label="probe")
+
+
+def test_the_vocabulary_free_guard_refuses_a_grant_nested_in_a_mapping_or_a_list() -> None:
+    """The flat predecessor of this guard passed both of these.
+
+    A descriptor is embedded verbatim inside a binding and inside the Active8
+    source identity, so a grant a consumer must not honour is nested by
+    construction rather than by accident.
+    """
+
+    nested = {**authority_false_block(), "admitted_source": {"t1_authorized": True}}
+    with pytest.raises(ProcessV2SchemaError, match=r"\.admitted_source\.t1_authorized"):
+        require_no_granted_authority(nested, label="probe")
+
+    in_list = {**authority_false_block(), "stages": [{"ok": 1}, {"gate_zero_authorized": 1}]}
+    with pytest.raises(ProcessV2SchemaError, match="grants authority"):
+        require_no_granted_authority(in_list, label="probe")
+
+
+def test_the_vocabulary_free_guard_accepts_a_wholly_false_payload() -> None:
+    """It refuses grants only. It must not also require a vocabulary."""
+
+    require_no_granted_authority(
+        {**authority_false_block(), "nested": {"p500_authorized": False}}, label="probe"
+    )
+    require_no_granted_authority({"unrelated": "value"}, label="probe")
+
+
+@pytest.mark.parametrize("truthy", [True, 1, "false", [], {}, 0.0, None])
+def test_the_vocabulary_free_guard_accepts_only_the_exact_false_singleton(truthy) -> None:
+    """`is not False`, so an empty list and `None` are grants, not denials.
+
+    A field spelled like authority whose value is not exactly `False` has not
+    denied anything, whatever it evaluates to.
+    """
+
+    with pytest.raises(ProcessV2SchemaError, match="grants authority"):
+        require_no_granted_authority({"future_stage_authorized": truthy}, label="probe")
 
 
 # ---- Census: exact counts, never coerced ----
