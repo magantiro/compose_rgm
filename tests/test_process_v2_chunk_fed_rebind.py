@@ -28,6 +28,7 @@ import gzip
 import hashlib
 import json
 import random
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -429,6 +430,38 @@ def test_the_raw_range_reader_is_called_from_the_oracle_and_nowhere_else() -> No
     assert "read_v1_records_through_the_bounded_raw_oracle" not in _names(geometry_branch.body)
     assert "_read_cache_chunk_rows" in _names(geometry_branch.body)
     assert "read_v1_records_through_the_bounded_raw_oracle" in _names(geometry_branch.orelse)
+
+
+def test_the_whole_run_completes_with_the_v1_payload_deleted(tmp_path: Path) -> None:
+    """The strongest statement of "no raw fallback": the shards need not exist.
+
+    The V1 payload is bound at *plan* time, by hash, which is where its
+    receipts, decision ledgers and shard identities are proven. After that the
+    corpus is the cache: every proof task, the reduction and the completion are
+    produced here with the entire payload removed from the artifact root. A
+    surviving raw read would not merely be slow, it would be impossible.
+    """
+
+    payload, _binding, cache_plan, _cache_completion = _cached_payload(tmp_path)
+    plan = _cache_fed_plan(payload, cache_plan)
+    write_process_v2_rebind_plan(plan, artifact_root=payload.artifact_root, repo_root=ROOT)
+
+    reference = _execute_and_reduce(payload, _cache_fed_plan(payload, cache_plan))
+    shutil.rmtree(payload.payload_root)
+    assert not payload.payload_root.exists()
+
+    for task in plan["tasks"]:
+        execute_process_v2_rebind_task(
+            plan,
+            task["task_identity_sha256"],
+            artifact_root=payload.artifact_root,
+            repo_root=ROOT,
+        )
+    completion = reduce_process_v2_rebind(
+        plan, artifact_root=payload.artifact_root, repo_root=ROOT
+    )
+    assert canonical_bytes(completion) == canonical_bytes(reference)
+    assert completion["counts"]["source_entries"] == 60
 
 
 def test_an_oracle_artifact_is_refused_as_production_evidence(tmp_path: Path) -> None:
