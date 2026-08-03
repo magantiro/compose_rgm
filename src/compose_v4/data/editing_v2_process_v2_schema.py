@@ -163,6 +163,42 @@ def require_authority_false(payload: Mapping[str, Any], *, label: str) -> None:
         raise ProcessV2SchemaError(f"{label} omits authority fields {sorted(missing)}")
 
 
+def require_no_granted_authority(payload: Mapping[str, Any], *, label: str) -> None:
+    """Refuse any granted authority field, at any depth, whatever it is spelled.
+
+    Complementary to `require_authority_false`, not a subset of it, and both are
+    needed:
+
+    * `require_authority_false` knows the vocabulary.  It refuses a retired
+      spelling and requires all seven fields to be present, but it can only
+      judge the names it knows -- a field outside the vocabulary is invisible to
+      it.  `p500_authorized`, which exists in this repository today, is exactly
+      such a field.
+    * this guard knows no vocabulary at all.  Any key ending `_authorized` whose
+      value is not exactly `False` is a refusal, so a grant under a name nobody
+      has registered yet is still caught.
+
+    Depth matters for the same reason it does there: a descriptor is embedded
+    verbatim inside a binding and inside the Active8 source identity, so the
+    grant a consumer must not honour is nested by construction.  The flat
+    version of this guard that this replaces inspected only top-level keys, and
+    a grant one level down passed it.
+    """
+
+    granted = sorted(
+        {
+            f"{observed_path}.{key}" if observed_path else key
+            for observed_path, key, value in _walk(payload)
+            if key.endswith("_authorized") and value is not False
+        }
+    )
+    if granted:
+        raise ProcessV2SchemaError(
+            f"{label} grants authority at {granted}; a Process-V2 identity descriptor "
+            "proves provenance only and never permits training or launch"
+        )
+
+
 # ---- Identity roles and typed pointers ----
 
 
@@ -476,6 +512,7 @@ __all__ = [
     "canonical_sha256",
     "require_authority_false",
     "require_census_reconciles",
+    "require_no_granted_authority",
     "self_hashed",
     "typed_pointer",
     "validate_typed_pointer",
