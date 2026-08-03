@@ -709,6 +709,51 @@ def test_a_mismatched_receipt_publishes_no_completion(chain: Chain) -> None:
     assert not (mounted(chain, plan["run_artifact_root"]) / COMPLETION_FILENAME).exists()
 
 
+def test_a_run_that_evaluates_fewer_entries_than_the_rebind_admitted_is_refused(
+    chain: Chain,
+) -> None:
+    """Without this a whole category could go missing and still reconcile.
+
+    The bound rebind census is moved by one admitted entry and RESEALED, so the
+    completion is internally consistent and the plan validates: the only thing
+    left wrong is that the Active8 run evaluated one fewer entry than the rebind
+    admitted. Checking only the upstream-rejected side would miss this, because
+    that side still agrees exactly.
+    """
+
+    body = {
+        key: value
+        for key, value in chain.rebind_completion.items()
+        if key != "completion_sha256"
+    }
+    body["counts"] = {
+        **body["counts"],
+        "admitted_entries": int(body["counts"]["admitted_entries"]) + 1,
+        "rejected_entries": int(body["counts"]["rejected_entries"]) - 1,
+    }
+    resealed = {**body, "completion_sha256": canonical_sha256(body)}
+    plan = plan_process_v2_active8_decisions(
+        cache_run_artifact_root=str(chain.cache_plan["run_artifact_root"]),
+        rebind_plan=chain.rebind_plan,
+        rebind_completion=resealed,
+        admitted_source_identity={
+            **chain.admitted_source_identity,
+            "completion_sha256": resealed["completion_sha256"],
+        },
+        model_runtime_identity=chain.runtime.identity,
+        artifact_root=chain.artifact_root,
+        repo_root=ROOT,
+        output_artifact_prefix="/artifacts/active8_shifted_census",
+    )
+    write_process_v2_active8_plan(plan, artifact_root=chain.artifact_root, repo_root=ROOT)
+    execute_active8(chain, plan)
+    with pytest.raises(ProcessV2Active8MapReduceError, match="the bound rebind"):
+        reduce_process_v2_active8_decisions(
+            plan, artifact_root=chain.artifact_root, repo_root=ROOT
+        )
+    assert not (mounted(chain, plan["run_artifact_root"]) / COMPLETION_FILENAME).exists()
+
+
 def test_the_reduction_requires_the_exact_published_plan_bytes(chain: Chain) -> None:
     """Without this a run could reduce against a plan nobody published."""
 
