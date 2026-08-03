@@ -1106,8 +1106,13 @@ def _task_by_identity(plan: Mapping[str, Any], task_identity_sha256: str) -> dic
     return matches[0]
 
 
-def _chunk_filename(chunk_index: int) -> str:
+def chunk_object_filename(chunk_index: int) -> str:
+    """The one chunk-naming rule, so no consumer rebuilds a second one."""
+
     return f"chunk-{chunk_index:06d}.jsonl.gz"
+
+
+_chunk_filename = chunk_object_filename
 
 
 def _write_chunk(path: Path, payload: bytes) -> str:
@@ -2304,6 +2309,7 @@ __all__ = [
     "build_cache_implementation_revision",
     "cache_implementation_sha256",
     "cache_semantic_identity",
+    "chunk_object_filename",
     "chunk_targets_for_source",
     "completed_process_v2_chunk_cache_task_ids",
     "execute_process_v2_chunk_cache_task",

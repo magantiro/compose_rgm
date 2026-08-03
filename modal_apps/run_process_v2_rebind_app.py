@@ -3,8 +3,16 @@
 The V1 migration payload is consumed as **immutable chemical data**.  Nothing is
 relabelled: every record keeps its V1 identity, and the V2 admission decision is
 recorded alongside it.  The driver freezes a content-addressed plan, resumes only
-the range tasks that are not already durably present, maps them across
+the chunk tasks that are not already durably present, maps them across
 independent CPU containers, and hands off to the strict reducer.
+
+**The corpus is a committed chunk cache, and its root is the only source input.**
+One proof task reads exactly one verified chunk; no task opens a packed shard.
+The V1 payload root is *derived* from the pinned production completion path and
+the exact completion is bound, so this launcher no longer takes a payload root at
+all.  It used to take one as a bare positional with no default, no declared
+expectation and no equality check, which flowed unchecked into the plan -- the
+chunk-cache launcher beside it had pinned its own path all along.
 
 Three properties this app must preserve, and how it does:
 
@@ -300,13 +308,17 @@ def prove_one_range(
     image_revision: dict[str, Any],
     source_revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """One independent range task: prove it, or publish nothing."""
+    """One independent chunk task: prove it, or publish nothing."""
 
-    from compose_v4.data.editing_process_v2_rebind import execute_process_v2_rebind_task
+    from compose_v4.data.editing_process_v2_rebind import (
+        execute_process_v2_rebind_task,
+        require_production_source_geometry,
+    )
 
     _validate_remote_image_revision(image_revision)
     validate_remote_source_revision(source_revision, image_revision)
-    # This worker reads the V1 payload and the plan another container wrote.
+    require_production_source_geometry(plan, label="the Process-V2 rebind plan")
+    # This worker reads one cache chunk and the plan another container wrote.
     artifact_volume.reload()
     result = execute_process_v2_rebind_task(
         plan,
@@ -331,11 +343,15 @@ def reduce_rebind(
 ) -> dict[str, Any]:
     """Only the serialized reducer may declare the run complete."""
 
-    from compose_v4.data.editing_process_v2_rebind import reduce_process_v2_rebind
+    from compose_v4.data.editing_process_v2_rebind import (
+        reduce_process_v2_rebind,
+        require_production_source_geometry,
+    )
 
     _validate_remote_image_revision(image_revision)
     validate_remote_source_revision(source_revision, image_revision)
-    # Reduction reads every range result, each written by another container.
+    require_production_source_geometry(plan, label="the Process-V2 rebind plan")
+    # Reduction reads every chunk result, each written by another container.
     artifact_volume.reload()
     completion = reduce_process_v2_rebind(
         plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
@@ -354,17 +370,15 @@ def reduce_rebind(
 )
 def driver(
     *,
-    v1_payload_root: str,
-    expected_v1_process_identity: str,
+    cache_run_artifact_root: str,
     output_artifact_prefix: str,
-    entries_per_task: int,
     max_map_containers: int,
     image_revision: dict[str, Any],
     source_revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """Plan, publish, resume, map the missing ranges in waves, then reduce.
+    """Plan, publish, resume, map the missing chunks in waves, then reduce.
 
-    No Git call appears in this body or in anything it calls: ``build_plan``
+    No Git call appears in this body or in anything it calls: the plan driver
     receives the already-verified ``source_revision`` and validates it against
     the image's own files.
     """
@@ -379,28 +393,28 @@ def driver(
     )
     from compose_v4.data.editing_process_v2_rebind import (
         completed_process_v2_rebind_task_ids,
+        require_production_source_geometry,
         write_process_v2_rebind_plan,
     )
-    from plan_process_v2_rebind import build_plan, plan_envelope
+    from plan_process_v2_rebind import build_cache_fed_plan, plan_envelope
 
     _validate_remote_image_revision(image_revision)
     revision = validate_remote_source_revision(source_revision, image_revision)
     bound = validate_map_container_bound(max_map_containers)
-    # Before reading the V1 payload the caller named.
+    # Before reading the committed cache and the pinned payload.
     artifact_volume.reload()
 
     # The plan driver is imported, not reimplemented: the pinned-identity
-    # discovery and the refusal to plan against an unexpected historical
-    # process must be identical locally and here.
-    plan = build_plan(
+    # discovery, the exact-completion binding and the refusal to plan against an
+    # unexpected historical process must be identical locally and here.
+    plan = build_cache_fed_plan(
         artifact_root=ARTIFACT_ROOT,
-        v1_payload_root_artifact_path=v1_payload_root,
-        expected_process_identity_sha256=expected_v1_process_identity,
+        cache_run_artifact_root=cache_run_artifact_root,
         output_artifact_prefix=output_artifact_prefix,
-        entries_per_task=entries_per_task,
         source_revision=revision,
         repo_root=REMOTE_ROOT,
     )
+    require_production_source_geometry(plan, label="the Process-V2 rebind plan")
     write_process_v2_rebind_plan(plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT)
     artifact_volume.commit()
 
@@ -453,6 +467,8 @@ def driver(
     return {
         "phase": "process_v2_rebind_complete",
         "plan": plan_envelope(plan, written=None),
+        "source_geometry": completion["source_geometry"],
+        "cache_run_artifact_root": cache_run_artifact_root,
         "completion_sha256": completion["completion_sha256"],
         "run_identity_sha256": completion["run_identity_sha256"],
         "run_artifact_root": plan["run_artifact_root"],
@@ -467,25 +483,24 @@ def driver(
 
 @app.local_entrypoint()
 def main(
-    v1_payload_root: str,
+    cache_run_artifact_root: str,
     expected_commit: str,
-    expected_v1_process_identity: str = "",
     output_artifact_prefix: str = OUTPUT_ARTIFACT_PREFIX,
-    entries_per_task: int = 0,
     max_map_containers: int = DEFAULT_MAX_MAP_CONTAINERS,
 ) -> None:
+    """The production launcher: a committed cache root, and nothing else.
+
+    There is deliberately no ``v1_payload_root`` and no ``entries_per_task``.
+    The payload root is derived from the pinned production completion, and the
+    task size is the cache's own chunk size, because the chunk boundary is the
+    task boundary. Both used to be caller-supplied and unchecked.
+    """
+
     from compose_v4.data.editing_process_v2_rebind import (
-        DEFAULT_ENTRIES_PER_TASK,
         repository_process_v2_rebind_source_revision,
-    )
-    from compose_v4.rewrite.editing_v2_process_identity import (
-        SUPERSEDED_V1_PROCESS_IDENTITY_SHA256,
     )
 
     bound = validate_map_container_bound(int(max_map_containers))
-    resolved_identity = expected_v1_process_identity or SUPERSEDED_V1_PROCESS_IDENTITY_SHA256
-    resolved_entries = int(entries_per_task) or DEFAULT_ENTRIES_PER_TASK
-
     image_revision = local_image_revision(expected_commit=expected_commit)
     # Computed here, where `.git` exists. The remote side revalidates it against
     # the image and never runs Git.
@@ -493,10 +508,8 @@ def main(
     if source_revision["commit"] != image_revision["commit"]:
         raise RuntimeError("the local source and image revisions name different commits")
     report = driver.remote(
-        v1_payload_root=v1_payload_root,
-        expected_v1_process_identity=resolved_identity,
+        cache_run_artifact_root=cache_run_artifact_root,
         output_artifact_prefix=output_artifact_prefix,
-        entries_per_task=resolved_entries,
         max_map_containers=bound,
         image_revision=image_revision,
         source_revision=source_revision,
