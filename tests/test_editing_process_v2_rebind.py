@@ -749,6 +749,17 @@ def test_sharding_the_work_cannot_change_the_published_artifact(
     # part of the provenance.  Pinning the set is what keeps that a design
     # choice: a newly added schedule-dependent field fails here rather than
     # quietly making some future artifact unreproducible across a re-shard.
+    #
+    # SCOPE, stated rather than implied: this fixture admits every entry, so
+    # `rejected_trace_inventory_sha256` hashes an empty list here and agrees by
+    # construction. It is NOT schedule-invariant in general -- the rows it
+    # hashes embed the rebind task identity, which is a range address -- so on a
+    # payload containing a rejection the movable set is nine keys, not eight.
+    # Asserting eight here without saying so would read as exhaustive while
+    # being unreachable: see
+    # `tests/test_process_v2_rebind_end_to_end.py::test_sharding_changes_the_run_address_but_not_the_admitted_evidence`,
+    # which measures the nine-key set on a payload that does reject a trace.
+    assert _totals(wide_complete)["rejected_entries"] == 0
     assert {
         key
         for key in wide_complete
