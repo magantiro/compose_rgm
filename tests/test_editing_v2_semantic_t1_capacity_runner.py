@@ -649,6 +649,57 @@ def partition_model():
     ).eval()
 
 
+@pytest.fixture(scope="module")
+def process_v2_partition_model():
+    """The same architecture as `partition_model`, under Process V2.
+
+    Kept separate rather than parameterised: `partition_model` is the legacy
+    control that must stay byte-identical, and every V2-only field is `None`
+    there.
+    """
+
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+        PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+        SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+        SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+        SEMANTIC_RING_RESTATE_SCORER_MODE,
+    )
+
+    target = _state("c1ccccc1")
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(2), n_slots=12
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    catalog = build_typed_ring_catalog((trace,))
+    torch.manual_seed(4)
+    return FactorizedTraceletRateModel(
+        catalog,
+        hidden_dim=12,
+        message_passing_steps=1,
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        enable_ring_system_delete=False,
+        editing_process_semantics=PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        atom_restate_action_semantics=SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+        ring_restate_scorer_mode=SEMANTIC_RING_RESTATE_SCORER_MODE,
+        cycle_close_action_semantics=SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+        cycle_open_action_semantics=SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+        atom_delete_action_semantics=PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    ).eval()
+
+
 def test_full_partition_scorer_matches_production_segmented_kernel_and_oracle(
     partition_model,
 ) -> None:
@@ -819,37 +870,83 @@ def test_materialized_panel_row_selection_matches_fresh_collation(
     full = collator([example(state) for state in states])
     selected = runner._index_factorized_batch(full, (2, 0, 2))
     direct = collator([example(states[index]) for index in (2, 0, 2)])
-    for name in (
-        "atom_types",
-        "formal_charges",
-        "implicit_h_counts",
-        "bonds",
-        "neural_bonds",
-        "times",
-        "atom_topology",
-        "closure_topology",
-        "ring_system_topology",
-        "atom_delete_mask",
-        "cycle_edge_mask",
-        "cyclic_pair_mask",
-        "graft_mask",
-        "graft_remove_neighbors",
-        "graft_successor_groups",
-        "teacher_rates",
-        "importance_weights",
-        "atom_restate_admission_mask",
-        "cycle_close_admission_mask",
-        "cycle_open_admission_mask",
-    ):
-        selected_value = getattr(selected, name)
-        direct_value = getattr(direct, name)
-        if selected_value is None or direct_value is None:
-            assert selected_value is direct_value, name
-        else:
-            assert torch.equal(selected_value, direct_value), name
+    _assert_row_selection_matches(selected, direct)
     with torch.no_grad():
         selected_node, selected_global, selected_pair = model._encode_batch(selected)
         direct_node, direct_global, direct_pair = model._encode_batch(direct)
     assert torch.equal(selected_node, direct_node)
     assert torch.equal(selected_global, direct_global)
     assert torch.equal(selected_pair, direct_pair)
+
+
+def _assert_row_selection_matches(selected, direct) -> None:
+    """Compare EVERY batch field, derived from the dataclass.
+
+    This comparison used to enumerate the fields by hand, and the enumeration is
+    what let `atom_delete_admission_mask` go unre-indexed: a hand-written list
+    silently omits any field added after it was written, so the batch member
+    that most needed checking was the one field not checked. Deriving the names
+    from `dataclasses.fields` means a future field is covered on the day it is
+    added rather than on the day someone remembers.
+    """
+
+    import dataclasses
+
+    names = [item.name for item in dataclasses.fields(type(selected))]
+    assert "atom_delete_admission_mask" in names
+    for name in names:
+        selected_value = getattr(selected, name)
+        direct_value = getattr(direct, name)
+        if selected_value is None or direct_value is None:
+            assert selected_value is direct_value, name
+        elif isinstance(selected_value, torch.Tensor):
+            assert torch.equal(selected_value, direct_value), name
+        else:
+            assert selected_value == direct_value, name
+
+
+def test_process_v2_row_selection_reindexes_the_admission_mask(
+    process_v2_partition_model,
+) -> None:
+    """A non-identity selection of a Process-V2 batch must stay self-consistent.
+
+    `_index_factorized_batch` rebuilds the batch with `dataclasses.replace`, so
+    a field it does not name keeps the FULL-batch tensor. For the Process-V2
+    admission mask that produced a batch whose delete mask had the selected rows
+    and whose admission mask had all of them, and the forward guard then refused
+    the batch outright -- the whole T1 capacity path was unable to run under
+    Process V2 while every other test passed, because the V1 model that the
+    other selection test uses carries `None` here and compares vacuously.
+    """
+
+    from compose_v4.experiments import editing_v2_semantic_t1_capacity_runner as runner
+    from compose_v4.experiments.factorized_mark_conditional import FactorizedMarkExample
+
+    model = process_v2_partition_model
+    states = (_state("C1CCCCC1"), _state("CC1CCCCC1"), _state("CCO"))
+
+    def example(state):
+        return FactorizedMarkExample(
+            state=state,
+            time=0.5,
+            teacher_action=None,
+            teacher_rule_name=None,
+            teacher_rate=1.0,
+            importance_weight=1.0,
+        )
+
+    collator = runner._collator(model)
+    full = collator([example(state) for state in states])
+    # The premise: under Process V2 this field is a real tensor, not None.
+    assert full.atom_delete_admission_mask is not None
+    assert tuple(full.atom_delete_admission_mask.shape) == (3, full.atom_types.shape[1])
+
+    for selection in ((2, 0), (0,), (2, 0, 2)):
+        selected = runner._index_factorized_batch(full, selection)
+        direct = collator([example(states[index]) for index in selection])
+        assert selected.atom_delete_admission_mask is not None
+        assert selected.atom_delete_admission_mask.shape[0] == len(selection), selection
+        _assert_row_selection_matches(selected, direct)
+        # The forward guard is what caught this; it must now pass.
+        with torch.no_grad():
+            model.forward_mark_batch(selected)

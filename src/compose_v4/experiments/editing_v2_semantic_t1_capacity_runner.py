@@ -490,6 +490,7 @@ def _index_factorized_batch(batch: Any, indices: Sequence[int]) -> Any:
         ring_restate_successor_group_multiplicities=aligned_tuple(
             batch.ring_restate_successor_group_multiplicities
         ),
+        atom_delete_admission_mask=optional_tensor(batch.atom_delete_admission_mask),
         atom_restate_admission_mask=optional_tensor(batch.atom_restate_admission_mask),
         cycle_close_admission_mask=optional_tensor(batch.cycle_close_admission_mask),
         cycle_open_admission_mask=optional_tensor(batch.cycle_open_admission_mask),
