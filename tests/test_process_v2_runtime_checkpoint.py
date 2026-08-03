@@ -18,9 +18,14 @@ These tests pin the two properties that fix is worth:
 
 from __future__ import annotations
 
+import hashlib
 import inspect
 import json
+import pickle
+import subprocess
+import sys
 from dataclasses import fields as dataclass_fields
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -58,6 +63,7 @@ from compose_v4.experiments.editing_v2_semantic_runtime import (
 )
 from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
+    FactorizedMarkDataset,
     _require_complete_capability_keywords,
     operator_capability_batch_kwargs,
     sample_factorized_mark_batch,
@@ -103,17 +109,7 @@ def _state(smiles: str) -> MolecularGraph:
 
 @pytest.fixture(scope="module")
 def ring_catalog():
-    target = _state("c1ccccc1")
-    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
-        np.random.default_rng(1), n_slots=_SLOTS
-    )
-    trace = compile_carbon_tree_to_target(
-        source,
-        target,
-        use_bond_reroute=True,
-        align_source=True,
-    )
-    return build_typed_ring_catalog((trace,))
+    return build_process_v2_ring_catalog()
 
 
 def _build_model(ring_catalog, *, process: str, delete_mode: str):
@@ -158,9 +154,13 @@ def process_v2_model(ring_catalog):
     )
 
 
-@pytest.fixture(scope="module")
-def semantic_record():
-    """One real semantic-editing trace, so the sampler has a productive record."""
+def build_semantic_record() -> PathRecord:
+    """One real semantic-editing trace, so the sampler has a productive record.
+
+    Module level, not fixture-local, so the bounded multiworker subprocess in
+    `test_direct_and_multiworker_collation_produce_identical_masks` can rebuild
+    the identical record by importing this module.
+    """
 
     runtime = editing_v2_semantic_rewrite_system()
     source = _state("C1CCCCC1")
@@ -178,6 +178,27 @@ def semantic_record():
             system=runtime,
         ),
     )
+
+
+def build_process_v2_ring_catalog():
+    """The `ring_catalog` fixture body, importable for the same reason."""
+
+    target = _state("c1ccccc1")
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(1), n_slots=_SLOTS
+    )
+    trace = compile_carbon_tree_to_target(
+        source,
+        target,
+        use_bond_reroute=True,
+        align_source=True,
+    )
+    return build_typed_ring_catalog((trace,))
+
+
+@pytest.fixture(scope="module")
+def semantic_record():
+    return build_semantic_record()
 
 
 # ---- 1. The capability keywords are derived, never hand-copied ----
@@ -254,38 +275,184 @@ def test_every_semantic_process_version_has_a_kernel_configuration_label() -> No
 # ---- 2. Direct versus multiworker collation ----
 
 
+# `workers >= 1` builds a real torch DataLoader, and on macOS the start method
+# is `spawn`, so the worker is a fresh interpreter that re-imports the package
+# and unpickles the dataset and collate function.  Nothing in that path has a
+# deadline: if a worker never becomes ready, `iter(loader)` blocks forever and
+# the whole suite stops rather than failing.  This repository has a recorded
+# history of exactly that on macOS multiprocessing.  The bound below turns a
+# stall into a reported failure, and it is generous enough that a merely slow
+# machine cannot trip it.
+_MULTIWORKER_DEADLINE_SECONDS = 300
+
+_MULTIWORKER_CHILD = """
+import hashlib, json, sys
+sys.path.insert(0, {tests!r})
+sys.path.insert(0, {src!r})
+import test_process_v2_runtime_checkpoint as harness
+from compose_v4.experiments.factorized_mark_conditional import (
+    sample_factorized_mark_batch,
+)
+
+catalog = harness.build_process_v2_ring_catalog()
+model = harness._build_model(
+    catalog,
+    process=harness.PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+    delete_mode=harness.PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+)
+batch = sample_factorized_mark_batch(
+    (harness.build_semantic_record(),),
+    batch_size=4,
+    seed=5,
+    late_time_fraction=0.0,
+    operational_horizon=1.0,
+    workers={workers},
+    ring_catalog=catalog,
+    capabilities=model.operator_capabilities,
+)
+
+
+def digest(tensor):
+    array = tensor.detach().cpu().numpy()
+    return f"{{array.dtype}}|{{array.shape}}|" + hashlib.sha256(
+        array.tobytes()
+    ).hexdigest()
+
+
+print(
+    json.dumps(
+        {{
+            "atom_delete_action_semantics": batch.atom_delete_action_semantics,
+            "atom_delete_mask": digest(batch.atom_delete_mask),
+            "atom_delete_admission_mask": digest(batch.atom_delete_admission_mask),
+        }}
+    )
+)
+"""
+
+
+def _sampled_mask_digests(workers: int) -> dict:
+    """Run one sampling in a child process under a hard deadline."""
+
+    root = Path(__file__).resolve().parents[1]
+    script = _MULTIWORKER_CHILD.format(
+        tests=str(root / "tests"), src=str(root / "src"), workers=workers
+    )
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True,
+            text=True,
+            timeout=_MULTIWORKER_DEADLINE_SECONDS,
+            cwd=str(root),
+        )
+    except subprocess.TimeoutExpired as error:
+        raise AssertionError(
+            f"multiworker collation at workers={workers} did not finish within "
+            f"{_MULTIWORKER_DEADLINE_SECONDS}s; the DataLoader worker never "
+            "delivered a batch. This is the invariant failing, not a flaky test."
+        ) from error
+    if completed.returncode != 0:
+        raise AssertionError(
+            f"multiworker collation at workers={workers} exited "
+            f"{completed.returncode}\nstdout:\n{completed.stdout}\n"
+            f"stderr:\n{completed.stderr[-4000:]}"
+        )
+    return json.loads(completed.stdout.strip().splitlines()[-1])
+
+
+def test_the_multiworker_fixtures_are_picklable(
+    process_v2_model,
+    semantic_record,
+) -> None:
+    """Spawn transfers these by pickle, so an unpicklable one is a startup hang.
+
+    Checked directly rather than inferred from the loader succeeding: a pickling
+    regression here is one of the three named mechanisms (pickling, startup,
+    teardown) by which the worker path fails, and it is the only one that can be
+    localized without running a worker at all.
+    """
+
+    dataset = FactorizedMarkDataset(
+        (semantic_record,),
+        start_index=0,
+        length=4,
+        seed=5,
+        late_time_fraction=0.0,
+        operational_horizon=1.0,
+        progress_stratification_fraction=0.0,
+        ring_catalog=process_v2_model.ring_catalog,
+    )
+    collator = FactorizedMarkCollator.from_capabilities(
+        process_v2_model.operator_capabilities,
+        use_aromatic_bond_view=True,
+        ring_catalog=process_v2_model.ring_catalog,
+    )
+    for label, obj in (
+        ("ring_catalog", process_v2_model.ring_catalog),
+        ("semantic_record", semantic_record),
+        ("dataset", dataset),
+        ("collator", collator),
+    ):
+        restored = pickle.loads(pickle.dumps(obj))
+        assert restored is not None, label
+    # The collator must survive the round trip with its Process-V2 modes intact,
+    # or a worker would collate a legacy mask under a V2 identity.
+    revived = pickle.loads(pickle.dumps(collator))
+    assert revived.atom_delete_action_semantics == (
+        PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
+    )
+    assert revived.editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS
+
+
 def test_direct_and_multiworker_collation_produce_identical_masks(
     process_v2_model,
     semantic_record,
 ) -> None:
-    """Both eval paths must consume the same Process-V2 mask, not just the direct one."""
+    """Both eval paths must consume the same Process-V2 mask, not just the direct one.
 
-    def sampled(workers: int):
-        return sample_factorized_mark_batch(
-            (semantic_record,),
-            batch_size=4,
-            seed=5,
-            late_time_fraction=0.0,
-            operational_horizon=1.0,
-            workers=workers,
-            ring_catalog=process_v2_model.ring_catalog,
-            capabilities=process_v2_model.operator_capabilities,
-        )
+    The worker-backed half runs in a child process under a deadline. That keeps
+    the invariant intact while making a worker that never starts a bounded
+    failure instead of an unbounded hang, and it isolates the DataLoader's
+    process teardown from the pytest session.
+    """
 
-    direct = sampled(0)
+    direct = sample_factorized_mark_batch(
+        (semantic_record,),
+        batch_size=4,
+        seed=5,
+        late_time_fraction=0.0,
+        operational_horizon=1.0,
+        workers=0,
+        ring_catalog=process_v2_model.ring_catalog,
+        capabilities=process_v2_model.operator_capabilities,
+    )
     assert direct.atom_delete_action_semantics == (
         PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
     )
     assert direct.atom_delete_admission_mask is not None
 
-    multiworker = sampled(1)
-    assert multiworker.atom_delete_action_semantics == (
+    def digest(tensor) -> str:
+        array = tensor.detach().cpu().numpy()
+        return f"{array.dtype}|{array.shape}|" + hashlib.sha256(
+            array.tobytes()
+        ).hexdigest()
+
+    # The child recomputes the direct path too, so a mismatch between this
+    # process and the child is attributable before the worker comparison runs.
+    child_direct = _sampled_mask_digests(0)
+    assert child_direct["atom_delete_mask"] == digest(direct.atom_delete_mask)
+    assert child_direct["atom_delete_admission_mask"] == digest(
+        direct.atom_delete_admission_mask
+    )
+
+    multiworker = _sampled_mask_digests(1)
+    assert multiworker["atom_delete_action_semantics"] == (
         direct.atom_delete_action_semantics
     )
-    assert torch.equal(direct.atom_delete_mask, multiworker.atom_delete_mask)
-    assert torch.equal(
-        direct.atom_delete_admission_mask,
-        multiworker.atom_delete_admission_mask,
+    assert multiworker["atom_delete_mask"] == digest(direct.atom_delete_mask)
+    assert multiworker["atom_delete_admission_mask"] == digest(
+        direct.atom_delete_admission_mask
     )
 
 

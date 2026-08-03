@@ -17,7 +17,7 @@ defect it exists to guard.
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import fields as dataclass_fields, replace
 
 import networkx as nx
 import numpy as np
@@ -789,18 +789,70 @@ def test_batch_reconstruction_preserves_the_admission_mask(process_v2_model) -> 
     assert moved.atom_delete_action_semantics == batch.atom_delete_action_semantics
 
 
-def test_pin_memory_preserves_the_admission_mask(process_v2_model) -> None:
+def test_pin_memory_propagates_every_process_v2_field(
+    process_v2_model, monkeypatch
+) -> None:
+    """The CPU-safe half: `pin_memory` must rebuild every field, on any machine.
+
+    `pin_memory` is a hand-written field-by-field reconstruction, which is the
+    exact shape that dropped `atom_delete_admission_mask` from
+    `_index_factorized_batch`. What is worth testing here is that reconstruction,
+    not the host allocator.
+
+    `Tensor.pin_memory()` takes no device argument and dispatches to the current
+    accelerator. On this repository's Macs that is MPS, which has no pinned host
+    memory, so the real call raises (torch 2.11 and 2.13 alike) and the previous
+    `except RuntimeError: pytest.skip(...)` meant the Process-V2 assertion below
+    never executed on any developer machine. Substituting identity for the pin
+    exercises the whole reconstruction without invoking an unsupported backend,
+    which is why this test is the one that runs everywhere.
+    """
+
     batch = _batch(process_v2_model, (_state("C1CCCCC1"), _state("CC1CCCCC1")))
-    try:
-        pinned = batch.pin_memory()
-    except RuntimeError as error:  # pragma: no cover - accelerator dependent
-        pytest.skip(f"pinned host memory is unavailable on this machine: {error}")
+    assert batch.atom_delete_admission_mask is not None
+
+    monkeypatch.setattr(torch.Tensor, "pin_memory", lambda self: self, raising=True)
+    rebuilt = batch.pin_memory()
+
+    names = [item.name for item in dataclass_fields(type(batch))]
+    assert "atom_delete_admission_mask" in names
+    assert "atom_delete_action_semantics" in names
+    for name in names:
+        original = getattr(batch, name)
+        produced = getattr(rebuilt, name)
+        if original is None or produced is None:
+            assert original is produced, name
+        elif isinstance(original, torch.Tensor):
+            assert torch.equal(original, produced), name
+        else:
+            assert original == produced, name
+
+
+@pytest.mark.skipif(
+    not torch.cuda.is_available(),
+    reason="pinned host memory requires CUDA; MPS has no pinned-host-memory path",
+)
+def test_pin_memory_preserves_the_admission_mask(process_v2_model) -> None:
+    """The accelerator-backed half, on hardware that genuinely supports pinning.
+
+    Gated on the capability rather than on catching an exception from an
+    unsupported backend: invoking `pin_memory` on MPS to discover it is
+    unavailable is what made this test unsafe in the first place.
+    """
+
+    batch = _batch(process_v2_model, (_state("C1CCCCC1"), _state("CC1CCCCC1")))
+    pinned = batch.pin_memory()
     assert pinned.atom_delete_action_semantics == (
         PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS
     )
+    assert pinned.atom_delete_admission_mask.is_pinned()
     assert torch.equal(
         pinned.atom_delete_admission_mask.cpu(),
         batch.atom_delete_admission_mask,
+    )
+    assert torch.equal(
+        pinned.atom_delete_mask.cpu(),
+        pinned.atom_delete_admission_mask.cpu(),
     )
 
 
