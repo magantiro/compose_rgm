@@ -760,6 +760,16 @@ def test_concurrency_and_randomized_completion_order_reduce_byte_identically(
     completion = reduce_process_v2_rebind(
         plan, artifact_root=payload.artifact_root, repo_root=ROOT
     )
+    # Named-field first, bytes second. A bare byte comparison reports two
+    # 64-character digests and nothing else, which is exactly what a single
+    # unreproduced failure of this assertion left behind: no way to tell a
+    # chemistry difference from an addressing one without reproducing it.
+    divergent = sorted(
+        field
+        for field in set(completion) | set(reference)
+        if completion.get(field) != reference.get(field)
+    )
+    assert divergent == [], f"the schedule moved {divergent}"
     assert canonical_bytes(completion) == canonical_bytes(reference)
 
 
