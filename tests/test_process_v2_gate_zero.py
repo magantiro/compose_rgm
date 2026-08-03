@@ -135,6 +135,23 @@ class StandInIndex:
     def iter_resolved_traces(self) -> Iterator[Mapping[str, Any]]:
         yield from self._rows
 
+
+    def iter_accepted_transitions(self, *, partition_roles):
+        """The role-filtered bulk stream, exactly as the production index owes it.
+
+        Filtering is a TASK-level predicate here for the same reason it is in
+        production: a task carries exactly one partition role, so a sealed-role
+        chunk is never opened rather than opened and discarded.
+        """
+
+        for row in self._rows:
+            if row["rejection_category"] is not None:
+                continue
+            if row["partition_role"] not in partition_roles:
+                continue
+            key = (row["v1_task_identity_sha256"], row["entry_index"], row["trace_id"])
+            yield from self._transitions.get(key, ())
+
     def accepted_transitions_for(
         self, trace_key: ProcessV2TraceKey
     ) -> Iterator[Mapping[str, Any]]:
