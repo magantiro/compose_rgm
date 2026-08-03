@@ -34,10 +34,43 @@ What this is not
 
 This is a validated *source*: an iterator, its identities and its measured
 counts.  It is deliberately not an Active8 builder, and it grants no authority.
-``training_authorized`` is ``False``; Gate 0, T1 and P50 authority are not
-conferred, not implied, and not obtainable from this object.  A later builder
-must record :meth:`ProcessV2AdmittedSource.identity` as its input provenance and
-obtain its own authorization.
+Every field of the frozen authority vocabulary is ``False``; Gate 0, T1 and P50
+authority are not conferred, not implied, and not obtainable from this object.  A
+later builder must record :meth:`ProcessV2AdmittedSource.identity` as its input
+provenance and obtain its own authorization.
+
+The identity is one exact production shape
+------------------------------------------
+
+Schema version 3 replaces two arrangements that let a consumer read a descriptor
+this module never emits.
+
+* **Authority was a set of mutable constructor arguments whose values the
+  descriptor ignored.**  ``ProcessV2AdmittedSource(..., p50_authorized=True)``
+  constructed cleanly and still published ``False``, so the object and its own
+  artifact disagreed, and the field carried a spelling outside the frozen
+  vocabulary.  The seven canonical fields are now read-only properties and the
+  descriptor is built from :func:`authority_false_block`, so the object and the
+  artifact are the same statement and there is one spelling.
+* **No owning validator existed.**  Every consumer re-derived which fields it
+  believed this identity carried, and the one that did so
+  (``editing_v2_process_v2_evidence_binding``) required three names -- a physical
+  inventory hash, a process identity hash and a semantic evidence hash -- that
+  this adapter has never emitted under any version.  Nothing caught it because
+  that consumer was only ever exercised against a hand-written fixture inventing
+  those names.  :func:`validate_process_v2_admitted_source_identity` is now the
+  single authority on the shape, and a consumer that wants to know what an
+  admitted source looks like calls it instead of restating it.
+
+Version 2 is refused rather than upgraded.  It spelled the bounded-P50 field
+under the retired name, omitted three authority fields entirely, and declared no
+version on its nested physical-execution body, so a converter would have to
+invent the values it lacks.
+
+Every mapping in the descriptor is emitted in sorted key order, at every depth.
+That is what makes the artifact byte-stable through any canonical serializer:
+a consumer that embeds it verbatim and re-serializes with ``sort_keys=True``
+reproduces it exactly rather than reordering it.
 """
 
 from __future__ import annotations
@@ -46,6 +79,7 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import tempfile
 from collections.abc import Iterator, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, field
@@ -69,8 +103,14 @@ from compose_v4.data.editing_process_v2_rebind import (
     validate_process_v2_rebind_task_result,
 )
 from compose_v4.data.editing_v2_process_v2_schema import (
+    AUTHORITY_FIELDS,
     REJECTION_LEDGER_SCHEMA,
     REJECTION_LEDGER_SCHEMA_VERSION,
+    ProcessV2SchemaError,
+    authority_false_block,
+    require_authority_false,
+    require_no_granted_authority,
+    verify_self_hash,
 )
 from compose_v4.data.packed_trace_store import AddressedPackedTrace
 from compose_v4.data.semantic_packed_trace_store import (
@@ -82,13 +122,17 @@ from compose_v4.data.semantic_trace_migration_materializer import (
 )
 
 ADMITTED_SOURCE_SCHEMA = "compose.data.editing_process_v2_admitted_source"
-# Version 2 adds the streaming join's outputs: `decision_semantic_sha256`,
+# Version 2 added the streaming join's outputs: `decision_semantic_sha256`,
 # `admitted_evidence_sha256`, `rejection_ledger` and `physical_execution_identity`.
-# Version 1 carried none of them and could not distinguish a reshard from a
-# different corpus, so the versions are incompatible rather than additive; a
+# Version 3 makes the descriptor one exact shape with one owning validator: the
+# seven canonical authority fields replace the four ad-hoc ones (which included a
+# spelling outside the frozen vocabulary), every mapping is sorted at every depth,
+# and the nested physical-execution body carries its own version instead of
+# borrowing this one. None of the versions is a superset of the one before, so a
 # consumer must import this constant instead of assuming a shape.
-ADMITTED_SOURCE_SCHEMA_VERSION = 2
+ADMITTED_SOURCE_SCHEMA_VERSION = 3
 ADMITTED_SOURCE_STATUS = "V2_ADMISSION_OVERLAY_RESOLVED_NO_TRAINING_AUTHORITY"
+ADMITTED_SOURCE_SELF_HASH_FIELD = "admitted_source_sha256"
 V1_PAYLOAD_IDENTITY_SCHEMA = "compose.data.editing_process_v2_v1_payload_identity"
 V1_PAYLOAD_IDENTITY_SCHEMA_VERSION = 1
 ADMISSION_OVERLAY_SCHEMA = "compose.data.editing_process_v2_admission_overlay"
@@ -100,6 +144,21 @@ DEFAULT_REJECTION_LEDGER_FILENAME = "PROCESS_V2_REJECTION_LEDGER.jsonl.gz"
 
 _ADAPTER_SOURCE_FILE = "src/compose_v4/data/editing_process_v2_admitted_source.py"
 
+# The nested operational replay address. It carries its OWN version: under
+# version 2 it echoed `ADMITTED_SOURCE_SCHEMA_VERSION`, so a reader could not
+# tell whether the block had changed or merely its parent had.
+PHYSICAL_EXECUTION_IDENTITY_SCHEMA = f"{ADMITTED_SOURCE_SCHEMA}.physical_execution_identity"
+PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION = 1
+PHYSICAL_EXECUTION_SELF_HASH_FIELD = "physical_execution_sha256"
+
+REJECTION_LEDGER_SELF_HASH_FIELD = "rejection_ledger_sha256"
+REJECTION_LEDGER_SORT_ORDER = "v1_task_identity_sha256_then_entry_index"
+
+#: The declared census. `source == admitted + rejected` and
+#: `admitted_states == admitted_transitions + admitted_entries` both hold over
+#: it; the second because an admitted entry is proved only when every one of its
+#: persisted steps replays, so its state count is exactly its transition count
+#: plus the source state.
 _COUNT_FIELDS = (
     "source_entries",
     "admitted_entries",
@@ -108,6 +167,70 @@ _COUNT_FIELDS = (
     "admitted_transitions",
 )
 
+#: Every measured SHA-256 the descriptor pins, and the complete set of them.
+#: Named here rather than in each consumer: the consumer that named its own set
+#: required three hashes this adapter has never emitted, and nothing failed
+#: because that consumer was exercised only against a fixture inventing them.
+_IDENTITY_SHA256_FIELDS = (
+    "adapter_implementation_sha256",
+    "admitted_evidence_sha256",
+    "completion_sha256",
+    "decision_semantic_sha256",
+    "pinned_builder_identity_sha256",
+    "pinned_process_identity_sha256",
+    "plan_sha256",
+    "process_v2_identity_sha256",
+    "run_identity_sha256",
+    "v1_payload_binding_sha256",
+)
+
+#: The exact field set of the nested physical-execution identity.
+PHYSICAL_EXECUTION_IDENTITY_FIELDS: tuple[str, ...] = (
+    "entries_per_task",
+    "physical_execution_sha256",
+    "plan_sha256",
+    "range_task_count",
+    "range_task_inventory_sha256",
+    "run_identity_sha256",
+    "schema",
+    "schema_version",
+)
+
+#: The exact field set of the nested rejection ledger.
+REJECTION_LEDGER_FIELDS: tuple[str, ...] = (
+    "ledger_artifact_path",
+    "ledger_file_sha256",
+    "rejected_entries",
+    "rejected_traces_by_code",
+    "rejection_ledger_sha256",
+    "rejection_semantic_sha256",
+    "rejection_stream_sha256",
+    "schema",
+    "schema_version",
+    "sort_order",
+)
+
+#: The exact field set of :meth:`ProcessV2AdmittedSource.identity`, sorted
+#: because the descriptor itself is sorted at every depth.
+ADMITTED_SOURCE_IDENTITY_FIELDS: tuple[str, ...] = tuple(
+    sorted(
+        (
+            "schema",
+            "schema_version",
+            "status",
+            *AUTHORITY_FIELDS,
+            *_IDENTITY_SHA256_FIELDS,
+            "physical_execution_identity",
+            "rejection_ledger",
+            "counts",
+            "rejected_traces_by_code",
+            ADMITTED_SOURCE_SELF_HASH_FIELD,
+        )
+    )
+)
+
+_SHA256_RE = re.compile(r"[0-9a-f]{64}")
+
 
 class ProcessV2AdmittedSourceError(RuntimeError):
     """The V2 admission overlay cannot be joined to the V1 payload."""
@@ -115,6 +238,15 @@ class ProcessV2AdmittedSourceError(RuntimeError):
 
 class ProcessV2AdmittedSourceIncomplete(ProcessV2AdmittedSourceError):
     """The overlay is absent or does not decide every V1 record."""
+
+
+class ProcessV2AdmittedSourceIdentityError(ProcessV2AdmittedSourceError):
+    """An admitted-source identity descriptor is malformed, stale, or claims authority.
+
+    Distinct from the resolution errors above so a caller can tell "the overlay
+    on the volume is unreadable" from "this descriptor does not describe an
+    admitted source", which are different problems with different owners.
+    """
 
 
 # ---- Deterministic serialization ---------------------------------------------
@@ -136,6 +268,22 @@ def _canonical_sha256(value: object) -> str:
 
 def _self_hash(value: Mapping[str, object], *, field: str) -> str:
     return _canonical_sha256({key: item for key, item in value.items() if key != field})
+
+
+def _sorted_deep(value: Any) -> Any:
+    """Rebuild ``value`` with every mapping in sorted key order, at every depth.
+
+    List order is preserved: a sequence's order is data, a mapping's is not.  The
+    point is byte stability rather than aesthetics -- a consumer that embeds this
+    descriptor verbatim and re-serializes it under ``sort_keys=True`` must
+    reproduce it, not reorder it.
+    """
+
+    if isinstance(value, Mapping):
+        return {key: _sorted_deep(value[key]) for key in sorted(value)}
+    if isinstance(value, (list, tuple)):
+        return [_sorted_deep(item) for item in value]
+    return value
 
 
 def _adapter_implementation_sha256(repo_root: Path) -> str:
@@ -458,44 +606,87 @@ class ProcessV2AdmittedSource:
     rejection_ledger: Mapping[str, Any] = field(default_factory=dict)
     # The operational replay address, kept apart from everything above.
     physical_execution_identity: Mapping[str, Any] = field(default_factory=dict)
-    training_authorized: bool = False
-    gate_zero_authorized: bool = False
-    t1_authorized: bool = False
-    p50_authorized: bool = False
+
+    # ---- Authority: false by construction, never by value ----
+    #
+    # These were constructor arguments, and `identity()` ignored what they were
+    # set to. `ProcessV2AdmittedSource(..., p50_authorized=True)` therefore built
+    # cleanly and published `False`, so the object contradicted its own artifact,
+    # and one of the four names was outside the frozen vocabulary. Read-only
+    # properties over the frozen vocabulary make the object and the artifact the
+    # same statement, and there is nothing left to set. `test_the_authority
+    # _surface_is_exactly_the_frozen_vocabulary` pins the set to AUTHORITY_FIELDS
+    # so this block cannot drift away from it.
+
+    @property
+    def training_authorized(self) -> bool:
+        return False
+
+    @property
+    def gate_zero_authorized(self) -> bool:
+        return False
+
+    @property
+    def t1_authorized(self) -> bool:
+        return False
+
+    @property
+    def bounded_p50_authorized(self) -> bool:
+        return False
+
+    @property
+    def long_training_authorized(self) -> bool:
+        return False
+
+    @property
+    def checkpoint_selection_authorized(self) -> bool:
+        return False
+
+    @property
+    def final_test_selection_authorized(self) -> bool:
+        return False
 
     def identity(self) -> dict[str, Any]:
-        """Return the deterministic descriptor a consumer must record."""
+        """Return the deterministic descriptor a consumer must record.
 
-        body: dict[str, Any] = {
-            "schema": ADMITTED_SOURCE_SCHEMA,
-            "schema_version": ADMITTED_SOURCE_SCHEMA_VERSION,
-            "status": ADMITTED_SOURCE_STATUS,
-            "training_authorized": False,
-            "gate_zero_authorized": False,
-            "t1_authorized": False,
-            "p50_authorized": False,
-            "decision_semantic_sha256": self.decision_semantic_sha256,
-            "admitted_evidence_sha256": self.admitted_evidence_sha256,
-            "rejection_ledger": dict(self.rejection_ledger),
-            "physical_execution_identity": dict(self.physical_execution_identity),
-            "run_identity_sha256": str(self.plan["run_identity_sha256"]),
-            "plan_sha256": str(self.plan["plan_sha256"]),
-            "completion_sha256": str(self.completion["completion_sha256"]),
-            "v1_payload_binding_sha256": str(self.plan["v1_payload_binding_sha256"]),
-            "pinned_process_identity_sha256": str(
-                self.plan["pinned_process_identity"]["process_identity_sha256"]
-            ),
-            "pinned_builder_identity_sha256": str(
-                self.plan["pinned_builder_identity"]["identity_sha256"]
-            ),
-            "process_v2_identity_sha256": str(
-                self.plan["process_v2_identity"]["process_identity_sha256"]
-            ),
-            "adapter_implementation_sha256": self.adapter_implementation_sha256,
-            "counts": {field: int(self.counts[field]) for field in _COUNT_FIELDS},
-            "rejected_traces_by_code": dict(sorted(self.rejected_traces_by_code.items())),
-        }
-        return {**body, "admitted_source_sha256": _canonical_sha256(body)}
+        Sorted at every depth, so embedding it verbatim and re-serializing under
+        ``sort_keys=True`` reproduces it byte for byte.
+        :func:`validate_process_v2_admitted_source_identity` is the owning
+        authority on this shape; a consumer checks it there rather than
+        restating which fields it believes are present.
+        """
+
+        body: dict[str, Any] = _sorted_deep(
+            {
+                "schema": ADMITTED_SOURCE_SCHEMA,
+                "schema_version": ADMITTED_SOURCE_SCHEMA_VERSION,
+                "status": ADMITTED_SOURCE_STATUS,
+                **authority_false_block(),
+                "adapter_implementation_sha256": self.adapter_implementation_sha256,
+                "admitted_evidence_sha256": self.admitted_evidence_sha256,
+                "completion_sha256": str(self.completion["completion_sha256"]),
+                "decision_semantic_sha256": self.decision_semantic_sha256,
+                "pinned_builder_identity_sha256": str(
+                    self.plan["pinned_builder_identity"]["identity_sha256"]
+                ),
+                "pinned_process_identity_sha256": str(
+                    self.plan["pinned_process_identity"]["process_identity_sha256"]
+                ),
+                "plan_sha256": str(self.plan["plan_sha256"]),
+                "process_v2_identity_sha256": str(
+                    self.plan["process_v2_identity"]["process_identity_sha256"]
+                ),
+                "run_identity_sha256": str(self.plan["run_identity_sha256"]),
+                "v1_payload_binding_sha256": str(self.plan["v1_payload_binding_sha256"]),
+                "physical_execution_identity": dict(self.physical_execution_identity),
+                "rejection_ledger": dict(self.rejection_ledger),
+                "counts": {name: int(self.counts[name]) for name in _COUNT_FIELDS},
+                "rejected_traces_by_code": dict(self.rejected_traces_by_code),
+            }
+        )
+        return _sorted_deep(
+            {**body, ADMITTED_SOURCE_SELF_HASH_FIELD: _canonical_sha256(body)}
+        )
 
     def iter_records(self) -> Iterator[ProcessV2AdmittedRecord]:
         """Yield every admitted record, refusing on any overlay disagreement."""
@@ -786,15 +977,15 @@ def _physical_execution_identity(plan: Mapping[str, Any]) -> dict[str, Any]:
         for task in plan["tasks"]
     ]
     body = {
-        "schema": f"{ADMITTED_SOURCE_SCHEMA}.physical_execution_identity",
-        "schema_version": ADMITTED_SOURCE_SCHEMA_VERSION,
+        "schema": PHYSICAL_EXECUTION_IDENTITY_SCHEMA,
+        "schema_version": PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION,
         "run_identity_sha256": str(plan["run_identity_sha256"]),
         "plan_sha256": str(plan["plan_sha256"]),
         "entries_per_task": int(plan["entries_per_task"]),
         "range_task_count": len(ranges),
         "range_task_inventory_sha256": _canonical_sha256(ranges),
     }
-    return {**body, "physical_execution_sha256": _canonical_sha256(body)}
+    return {**body, PHYSICAL_EXECUTION_SELF_HASH_FIELD: _canonical_sha256(body)}
 
 
 def _rejection_ledger_row(
@@ -941,7 +1132,7 @@ def _stream_admission_join(
     ledger_body: dict[str, Any] = {
         "schema": REJECTION_LEDGER_SCHEMA,
         "schema_version": REJECTION_LEDGER_SCHEMA_VERSION,
-        "sort_order": "v1_task_identity_sha256_then_entry_index",
+        "sort_order": REJECTION_LEDGER_SORT_ORDER,
         "rejected_entries": counts["rejected_entries"],
         "rejected_traces_by_code": dict(sorted(rejected_by_code.items())),
         # Physical: the exact bytes of the ordered ledger content.
@@ -958,9 +1149,342 @@ def _stream_admission_join(
         "admitted_evidence_sha256": evidence_digest.hexdigest(),
         "rejection_ledger": {
             **ledger_body,
-            "rejection_ledger_sha256": _canonical_sha256(ledger_body),
+            REJECTION_LEDGER_SELF_HASH_FIELD: _canonical_sha256(ledger_body),
         },
     }
+
+
+# ---- The owning identity validator ----------------------------------------------
+
+
+def _identity_fail(detail: str) -> None:
+    raise ProcessV2AdmittedSourceIdentityError(detail)
+
+
+def _exact_str(payload: Mapping[str, Any], key: str, *, label: str) -> str:
+    value = payload.get(key)
+    if type(value) is not str:
+        _identity_fail(
+            f"{label}.{key} is {type(value).__name__}, not str; an admitted-source "
+            "identity is type-checked rather than coerced, because a coerced field is "
+            "not the field the producer emitted"
+        )
+    assert isinstance(value, str)  # narrowed by the guard above
+    return value
+
+
+def _exact_sha256(payload: Mapping[str, Any], key: str, *, label: str) -> str:
+    value = _exact_str(payload, key, label=label)
+    if _SHA256_RE.fullmatch(value) is None:
+        _identity_fail(
+            f"{label}.{key} is {value!r}, not exactly 64 lowercase hex characters; an "
+            "uppercase variant of the same digest is a different string and hashes to a "
+            "different descriptor"
+        )
+    return value
+
+
+def _exact_count(payload: Mapping[str, Any], key: str, *, label: str) -> int:
+    value = payload.get(key)
+    # `bool` is excluded explicitly: it is an `int` subclass, so `True` would
+    # otherwise be accepted as the count 1.
+    if type(value) is not int:
+        _identity_fail(
+            f"{label}.{key} is {type(value).__name__}, not an exact int; a coerced "
+            "count is not a count"
+        )
+    assert isinstance(value, int)  # narrowed by the guard above
+    if value < 0:
+        _identity_fail(
+            f"{label}.{key} is {value}; a negative count can reconcile an inflated "
+            "total and hide lost support"
+        )
+    return value
+
+
+def _require_exact_fields(
+    payload: Mapping[str, Any], expected: tuple[str, ...], *, label: str
+) -> None:
+    """Exact field set AND sorted key order, both required.
+
+    Order is checked because the descriptor is emitted sorted at every depth, and
+    that is what lets a consumer embed it verbatim and re-serialize it without
+    changing it.  A reordered mapping still self-hashes -- the canonical hash
+    sorts -- so nothing else would catch it.
+    """
+
+    observed = tuple(payload)
+    if set(observed) != set(expected):
+        missing = sorted(set(expected) - set(observed))
+        unexpected = sorted(set(observed) - set(expected))
+        _identity_fail(
+            f"{label} field set differs from the declared shape; missing={missing} "
+            f"unexpected={unexpected}"
+        )
+    if observed != expected:
+        _identity_fail(
+            f"{label} keys are not in sorted order; a Process-V2 identity descriptor is "
+            "sorted at every depth so that embedding it verbatim is byte-stable"
+        )
+
+
+def _require_sorted_mapping(value: object, *, label: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        _identity_fail(f"{label} is {type(value).__name__}, not an object")
+    assert isinstance(value, Mapping)  # narrowed by the guard above
+    for key in value:
+        if type(key) is not str:
+            _identity_fail(f"{label} has a non-string key {key!r}")
+    if list(value) != sorted(value):
+        _identity_fail(f"{label} is not in sorted key order")
+    return value
+
+
+def _validate_physical_execution_identity(
+    value: object, *, top_level: Mapping[str, Any]
+) -> None:
+    """Validate the nested replay address through its OWN owning schema."""
+
+    label = "physical_execution_identity"
+    block = _require_sorted_mapping(value, label=label)
+    _require_exact_fields(block, PHYSICAL_EXECUTION_IDENTITY_FIELDS, label=label)
+    if _exact_str(block, "schema", label=label) != PHYSICAL_EXECUTION_IDENTITY_SCHEMA:
+        _identity_fail(
+            f"{label}.schema is {block['schema']!r}, not "
+            f"{PHYSICAL_EXECUTION_IDENTITY_SCHEMA!r}"
+        )
+    version = block.get("schema_version")
+    if type(version) is not int or version != PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION:
+        _identity_fail(
+            f"{label}.schema_version is {version!r}, not "
+            f"{PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION}"
+        )
+    for key in ("physical_execution_sha256", "plan_sha256", "range_task_inventory_sha256"):
+        _exact_sha256(block, key, label=label)
+    for key in ("entries_per_task", "range_task_count"):
+        _exact_count(block, key, label=label)
+    _exact_sha256(block, "run_identity_sha256", label=label)
+    # The nested run and plan must be the SAME run and plan the descriptor names.
+    # Without this the replay address could point at a different execution of a
+    # different payload and every other field would still check out.
+    for key in ("run_identity_sha256", "plan_sha256"):
+        if block[key] != top_level[key]:
+            _identity_fail(
+                f"{label}.{key} is {block[key]!r}, but the admitted source names "
+                f"{top_level[key]!r}; the replay address must address this run"
+            )
+    try:
+        verify_self_hash(block, field=PHYSICAL_EXECUTION_SELF_HASH_FIELD, label=label)
+    except ProcessV2SchemaError as error:
+        raise ProcessV2AdmittedSourceIdentityError(str(error)) from error
+
+
+def _validate_rejection_ledger(value: object, *, top_level: Mapping[str, Any]) -> None:
+    """Validate the nested rejection ledger through its OWN owning schema."""
+
+    label = "rejection_ledger"
+    block = _require_sorted_mapping(value, label=label)
+    _require_exact_fields(block, REJECTION_LEDGER_FIELDS, label=label)
+    if _exact_str(block, "schema", label=label) != REJECTION_LEDGER_SCHEMA:
+        _identity_fail(f"{label}.schema is {block['schema']!r}, not {REJECTION_LEDGER_SCHEMA!r}")
+    version = block.get("schema_version")
+    if type(version) is not int or version != REJECTION_LEDGER_SCHEMA_VERSION:
+        _identity_fail(
+            f"{label}.schema_version is {version!r}, not {REJECTION_LEDGER_SCHEMA_VERSION}"
+        )
+    if _exact_str(block, "sort_order", label=label) != REJECTION_LEDGER_SORT_ORDER:
+        _identity_fail(
+            f"{label}.sort_order is {block['sort_order']!r}, not "
+            f"{REJECTION_LEDGER_SORT_ORDER!r}"
+        )
+    for key in (
+        "rejection_ledger_sha256",
+        "rejection_semantic_sha256",
+        "rejection_stream_sha256",
+    ):
+        _exact_sha256(block, key, label=label)
+    for key in ("ledger_artifact_path", "ledger_file_sha256"):
+        if block[key] is not None and type(block[key]) is not str:
+            _identity_fail(
+                f"{label}.{key} is {type(block[key]).__name__}, not str or null"
+            )
+    if block["ledger_file_sha256"] is not None:
+        _exact_sha256(block, "ledger_file_sha256", label=label)
+    _exact_count(block, "rejected_entries", label=label)
+    by_code = _validate_rejection_census(
+        block["rejected_traces_by_code"],
+        rejected_entries=int(block["rejected_entries"]),
+        label=f"{label}.rejected_traces_by_code",
+    )
+    # The ledger and the descriptor are two publications of one decision set.
+    if int(block["rejected_entries"]) != int(top_level["counts"]["rejected_entries"]):
+        _identity_fail(
+            f"{label}.rejected_entries is {block['rejected_entries']}, but the census "
+            f"records {top_level['counts']['rejected_entries']}"
+        )
+    if by_code != dict(top_level["rejected_traces_by_code"]):
+        _identity_fail(
+            f"{label}.rejected_traces_by_code disagrees with the descriptor's own "
+            "reason-coded census"
+        )
+    try:
+        verify_self_hash(block, field=REJECTION_LEDGER_SELF_HASH_FIELD, label=label)
+    except ProcessV2SchemaError as error:
+        raise ProcessV2AdmittedSourceIdentityError(str(error)) from error
+
+
+def _validate_rejection_census(
+    value: object, *, rejected_entries: int, label: str
+) -> dict[str, int]:
+    census = _require_sorted_mapping(value, label=label)
+    resolved = {str(code): _exact_count(census, str(code), label=label) for code in census}
+    allowed = {code.value for code in ProcessV2RebindExclusionCode}
+    unknown = sorted(set(resolved) - allowed)
+    if unknown:
+        _identity_fail(
+            f"{label} names exclusion codes {unknown} that the rebind does not define"
+        )
+    total = sum(resolved.values())
+    if total != rejected_entries:
+        _identity_fail(
+            f"{label} sums to {total}, which disagrees with rejected_entries="
+            f"{rejected_entries}"
+        )
+    return resolved
+
+
+def _validate_counts(value: object) -> dict[str, int]:
+    label = "counts"
+    census = _require_sorted_mapping(value, label=label)
+    _require_exact_fields(census, tuple(sorted(_COUNT_FIELDS)), label=label)
+    resolved = {name: _exact_count(census, name, label=label) for name in _COUNT_FIELDS}
+    if resolved["admitted_entries"] + resolved["rejected_entries"] != (
+        resolved["source_entries"]
+    ):
+        _identity_fail(
+            f"{label} does not reconcile: {resolved['admitted_entries']} admitted + "
+            f"{resolved['rejected_entries']} rejected != {resolved['source_entries']} source"
+        )
+    # An admitted entry is proved only when every one of its persisted steps
+    # replays, so its state count is exactly its transition count plus its source
+    # state. Summed, that is the identity below, and it is the one check that
+    # relates the two evidence counts to the census rather than carrying them
+    # beside it: a lost proof row moves all three together, an inflated count
+    # moves only one.
+    if resolved["admitted_transitions"] + resolved["admitted_entries"] != (
+        resolved["admitted_states"]
+    ):
+        _identity_fail(
+            f"{label} evidence does not reconcile: {resolved['admitted_transitions']} "
+            f"transitions + {resolved['admitted_entries']} admitted entries != "
+            f"{resolved['admitted_states']} states"
+        )
+    return resolved
+
+
+def validate_process_v2_admitted_source_identity(
+    value: object, *, repo_root: Path
+) -> dict[str, Any]:
+    """Validate one admitted-source identity descriptor. The owning authority.
+
+    Every consumer of this descriptor calls this rather than restating the shape.
+    The consumer that restated it required three hashes this adapter has never
+    emitted, under any version, and nothing failed because that consumer was
+    exercised only against a hand-written fixture that invented them.
+
+    Checked, in this order so that the most dangerous defect is reported first:
+    schema and version, with version 2 refused explicitly rather than read as a
+    subset of version 3; a granted authority field at any depth under any
+    spelling; the frozen authority vocabulary, complete and false; the exact field
+    set and sorted key order at every depth; exact types with no coercion and
+    lowercase SHA-256 syntax; the live adapter implementation hash; the live
+    Process-V2 identity; the census, its reason-coded breakdown, and the
+    state/transition identity; the two nested bodies through their own owning
+    schemas, including that they name this run and this plan; and the self-hash.
+
+    Raises:
+        ProcessV2AdmittedSourceIdentityError: naming the specific defect.
+    """
+
+    if not isinstance(value, Mapping):
+        _identity_fail(
+            f"an admitted-source identity must be an object, got {type(value).__name__}"
+        )
+    assert isinstance(value, Mapping)  # narrowed by the guard above
+    payload: dict[str, Any] = dict(value)
+    label = "the admitted-source identity"
+
+    if payload.get("schema") != ADMITTED_SOURCE_SCHEMA:
+        _identity_fail(
+            f"{label} declares schema {payload.get('schema')!r}, not "
+            f"{ADMITTED_SOURCE_SCHEMA!r}"
+        )
+    version = payload.get("schema_version")
+    if type(version) is not int:
+        _identity_fail(
+            f"{label} declares schema_version {version!r}, which is not an exact int"
+        )
+    if version != ADMITTED_SOURCE_SCHEMA_VERSION:
+        _identity_fail(
+            f"{label} declares schema_version {version}, which is incompatible with "
+            f"{ADMITTED_SOURCE_SCHEMA_VERSION}. No version is a superset of the one "
+            "before it: version 2 spelled the bounded-P50 field under the retired name, "
+            "omitted three authority fields entirely, and declared no independent "
+            "version on its nested physical-execution body, so a converter would have "
+            "to invent the values it lacks rather than translate them"
+        )
+
+    # Authority first: a grant is the defect that must never be read past, and the
+    # vocabulary-free walk reaches mappings nested inside lists, where a field-set
+    # check would have reported only an unexpected key.
+    try:
+        require_no_granted_authority(payload, label=label)
+        require_authority_false(payload, label=label)
+    except ProcessV2SchemaError as error:
+        raise ProcessV2AdmittedSourceIdentityError(str(error)) from error
+
+    _require_sorted_mapping(payload, label=label)
+    _require_exact_fields(payload, ADMITTED_SOURCE_IDENTITY_FIELDS, label=label)
+
+    if _exact_str(payload, "status", label=label) != ADMITTED_SOURCE_STATUS:
+        _identity_fail(
+            f"{label} declares status {payload['status']!r}, not {ADMITTED_SOURCE_STATUS!r}"
+        )
+    for key in _IDENTITY_SHA256_FIELDS:
+        _exact_sha256(payload, key, label=label)
+
+    live_adapter = _adapter_implementation_sha256(Path(repo_root))
+    if payload["adapter_implementation_sha256"] != live_adapter:
+        _identity_fail(
+            f"{label} pins adapter implementation "
+            f"{payload['adapter_implementation_sha256']}, but the live implementation "
+            f"hashes to {live_adapter}; the descriptor was produced by a different "
+            "adapter than the one reading it"
+        )
+    live_v2 = str(editing_process_v2_identity()["process_identity_sha256"])
+    if payload["process_v2_identity_sha256"] != live_v2:
+        _identity_fail(
+            f"{label} binds Process-V2 identity {payload['process_v2_identity_sha256']}, "
+            f"but the live Process-V2 identity is {live_v2}; evidence produced under a "
+            "superseded identity stays invalid rather than being revalidated"
+        )
+
+    counts = _validate_counts(payload["counts"])
+    _validate_rejection_census(
+        payload["rejected_traces_by_code"],
+        rejected_entries=counts["rejected_entries"],
+        label="rejected_traces_by_code",
+    )
+    _validate_physical_execution_identity(
+        payload["physical_execution_identity"], top_level=payload
+    )
+    _validate_rejection_ledger(payload["rejection_ledger"], top_level=payload)
+
+    try:
+        verify_self_hash(payload, field=ADMITTED_SOURCE_SELF_HASH_FIELD, label=label)
+    except ProcessV2SchemaError as error:
+        raise ProcessV2AdmittedSourceIdentityError(str(error)) from error
+    return payload
 
 
 def write_admitted_source_refusal_report(
@@ -982,10 +1506,11 @@ def write_admitted_source_refusal_report(
         "schema": REFUSAL_SCHEMA,
         "schema_version": REFUSAL_SCHEMA_VERSION,
         "status": REFUSAL_STATUS,
-        "training_authorized": False,
-        "gate_zero_authorized": False,
-        "t1_authorized": False,
-        "bounded_p50_authorized": False,
+        # The complete frozen vocabulary, not the four fields this used to list:
+        # an incomplete authority block is refused by `require_authority_false`,
+        # so a partial one would make the refusal report itself unreadable by the
+        # guard every other artifact in this module passes.
+        **authority_false_block(),
         "stage": stage,
         "error_type": type(error).__name__,
         "error": str(error),
@@ -1008,21 +1533,32 @@ def write_admitted_source_refusal_report(
 __all__ = [
     "ADMISSION_OVERLAY_SCHEMA",
     "ADMISSION_OVERLAY_SCHEMA_VERSION",
+    "ADMITTED_SOURCE_IDENTITY_FIELDS",
     "ADMITTED_SOURCE_SCHEMA",
     "ADMITTED_SOURCE_SCHEMA_VERSION",
+    "ADMITTED_SOURCE_SELF_HASH_FIELD",
     "ADMITTED_SOURCE_STATUS",
     "DEFAULT_REJECTION_LEDGER_FILENAME",
+    "PHYSICAL_EXECUTION_IDENTITY_FIELDS",
+    "PHYSICAL_EXECUTION_IDENTITY_SCHEMA",
+    "PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION",
+    "PHYSICAL_EXECUTION_SELF_HASH_FIELD",
     "REFUSAL_SCHEMA",
     "REFUSAL_SCHEMA_VERSION",
     "REFUSAL_STATUS",
+    "REJECTION_LEDGER_FIELDS",
+    "REJECTION_LEDGER_SELF_HASH_FIELD",
+    "REJECTION_LEDGER_SORT_ORDER",
     "V1_PAYLOAD_IDENTITY_SCHEMA",
     "V1_PAYLOAD_IDENTITY_SCHEMA_VERSION",
     "ProcessV2AdmissionOverlay",
     "ProcessV2AdmittedRecord",
     "ProcessV2AdmittedSource",
     "ProcessV2AdmittedSourceError",
+    "ProcessV2AdmittedSourceIdentityError",
     "ProcessV2AdmittedSourceIncomplete",
     "ProcessV2V1PayloadIdentity",
     "resolve_process_v2_admitted_source",
+    "validate_process_v2_admitted_source_identity",
     "write_admitted_source_refusal_report",
 ]
