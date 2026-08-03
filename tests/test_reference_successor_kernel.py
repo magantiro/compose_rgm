@@ -10,6 +10,7 @@ Two things are checked here:
 """
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -24,6 +25,92 @@ from compose_v4.experiments.successor_kernel import validate_successor_batch
 from compose_v4.rewrite.kernel import canonical_state_key
 
 _ROOT = Path(__file__).resolve().parent.parent
+_ORACLE_MODULE = "compose_v4.experiments.reference_successor_kernel"
+_ORACLE_PATH = Path("src/compose_v4/experiments/reference_successor_kernel.py")
+
+
+def _module_name_for_path(path: Path) -> str:
+    """Return the import name a repository Python file would have when imported."""
+    relative = path.relative_to(_ROOT)
+    parts = list(relative.with_suffix("").parts)
+    if parts and parts[0] == "src":
+        parts.pop(0)
+    if parts and parts[-1] == "__init__":
+        parts.pop()
+    return ".".join(parts)
+
+
+def _resolve_import_from(node: ast.ImportFrom, *, importer: str) -> str:
+    """Resolve an ImportFrom base sufficiently to identify the frozen oracle."""
+    if node.level == 0:
+        return node.module or ""
+    package = importer.rsplit(".", 1)[0] if "." in importer else ""
+    package_parts = package.split(".") if package else []
+    parents_to_drop = node.level - 1
+    if parents_to_drop > len(package_parts):
+        return ""
+    prefix = package_parts[: len(package_parts) - parents_to_drop]
+    suffix = node.module.split(".") if node.module else []
+    return ".".join((*prefix, *suffix))
+
+
+def _is_oracle_module(name: str) -> bool:
+    return name == _ORACLE_MODULE or name.startswith(f"{_ORACLE_MODULE}.")
+
+
+def _oracle_import_edges(source: str, *, importer: str, filename: str) -> tuple[str, ...]:
+    """Find static imports of the test oracle, including literal dynamic imports."""
+    try:
+        tree = ast.parse(source, filename=filename)
+    except SyntaxError as error:
+        raise AssertionError(
+            f"cannot verify the oracle-import boundary because {filename} does not parse: {error}"
+        ) from error
+
+    importlib_aliases = {"importlib"}
+    import_module_aliases: set[str] = set()
+    findings: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "importlib":
+                    importlib_aliases.add(alias.asname or alias.name)
+                if _is_oracle_module(alias.name):
+                    findings.append(f"line {node.lineno}: import {alias.name}")
+        elif isinstance(node, ast.ImportFrom):
+            base = _resolve_import_from(node, importer=importer)
+            if base == "importlib":
+                for alias in node.names:
+                    if alias.name == "import_module":
+                        import_module_aliases.add(alias.asname or alias.name)
+            if _is_oracle_module(base):
+                findings.append(f"line {node.lineno}: from {base} import ...")
+                continue
+            for alias in node.names:
+                candidate = f"{base}.{alias.name}" if base else alias.name
+                if _is_oracle_module(candidate):
+                    findings.append(f"line {node.lineno}: from {base} import {alias.name}")
+        elif isinstance(node, ast.Call) and node.args:
+            is_dynamic_import = (
+                isinstance(node.func, ast.Name)
+                and node.func.id in {"__import__", *import_module_aliases}
+            ) or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "import_module"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in importlib_aliases
+            )
+            module_arg = node.args[0]
+            if (
+                is_dynamic_import
+                and isinstance(module_arg, ast.Constant)
+                and isinstance(module_arg.value, str)
+                and _is_oracle_module(module_arg.value)
+            ):
+                findings.append(
+                    f"line {node.lineno}: literal dynamic import {module_arg.value}"
+                )
+    return tuple(findings)
 
 
 class _StubSystem:
@@ -188,19 +275,73 @@ def test_real_executor_grouping_on_a_symmetric_molecule():
 # ---- the oracle must stay an oracle ---------------------------------------------------------------------
 
 
+@pytest.mark.parametrize(
+    "source,importer",
+    (
+        ("import compose_v4.experiments.reference_successor_kernel\n", "scripts.direct"),
+        (
+            "from compose_v4.experiments.reference_successor_kernel import "
+            "reference_successor_batch\n",
+            "scripts.from_direct",
+        ),
+        (
+            "from compose_v4.experiments import reference_successor_kernel\n",
+            "scripts.from_parent",
+        ),
+        ("from . import reference_successor_kernel\n", "compose_v4.experiments.relative"),
+    ),
+)
+def test_oracle_boundary_scanner_detects_static_import_edges(source: str, importer: str):
+    assert _oracle_import_edges(source, importer=importer, filename="attacker.py")
+
+
+@pytest.mark.parametrize(
+    "source",
+    (
+        "import importlib\nimportlib.import_module("
+        "'compose_v4.experiments.reference_successor_kernel')\n",
+        "import importlib as il\nil.import_module("
+        "'compose_v4.experiments.reference_successor_kernel')\n",
+        "from importlib import import_module as load\nload("
+        "'compose_v4.experiments.reference_successor_kernel')\n",
+        "__import__('compose_v4.experiments.reference_successor_kernel')\n",
+    ),
+)
+def test_oracle_boundary_scanner_detects_literal_dynamic_imports(source: str):
+    assert _oracle_import_edges(source, importer="scripts.dynamic", filename="attacker.py")
+
+
+def test_oracle_boundary_scanner_ignores_a_hashed_inventory_path():
+    source = """
+IMPLEMENTATION_FILES = (
+    "src/compose_v4/experiments/reference_successor_kernel.py",
+)
+"""
+    assert not _oracle_import_edges(source, importer="compose_v4.rewrite.identity", filename="safe.py")
+
+
+def test_oracle_boundary_scanner_fails_closed_on_unparseable_python():
+    with pytest.raises(AssertionError, match="does not parse"):
+        _oracle_import_edges("def broken(:\n", importer="scripts.broken", filename="broken.py")
+
+
 def test_no_production_module_imports_the_oracle():
-    """Enforcement, not convention: a reported number must never come from the reference implementation."""
-    offenders = []
+    """Enforcement, not substring matching: production must not import the test oracle."""
+    offenders: list[str] = []
     for directory in ("src", "scripts", "modal_apps"):
         root = _ROOT / directory
         if not root.is_dir():
             continue
         for path in root.rglob("*.py"):
-            if path.name == "reference_successor_kernel.py":
+            relative = path.relative_to(_ROOT)
+            if relative == _ORACLE_PATH:
                 continue
-            text = path.read_text(errors="replace")
-            if "reference_successor_kernel" in text:
-                offenders.append(str(path.relative_to(_ROOT)))
+            findings = _oracle_import_edges(
+                path.read_text(errors="strict"),
+                importer=_module_name_for_path(path),
+                filename=str(relative),
+            )
+            offenders.extend(f"{relative}: {finding}" for finding in findings)
     assert not offenders, (
         "the reference aggregator is a TEST ORACLE and must not be imported by production or result-"
         f"producing code; found: {offenders}"
