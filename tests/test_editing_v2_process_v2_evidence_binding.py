@@ -249,8 +249,34 @@ def test_a_hand_written_descriptor_cannot_substitute_for_the_real_one() -> None:
         "t1_authorized": False,
         "p50_authorized": False,
     }
-    with pytest.raises(ProcessV2EvidenceBindingError, match="not one this binding can pin"):
+    with pytest.raises(
+        ProcessV2EvidenceBindingError, match="not one this binding can pin"
+    ) as raised:
         _build(version_one_fixture)
+    # It is not even shaped like the artifact: it declares no schema at all, which
+    # is how far from a real descriptor the version-1 fixture was.
+    assert "declares schema None" in str(raised.value)
+
+    # Give it the envelope it lacked, so the refusal has to come from the FIELDS.
+    # Now the fabricated names are named as unexpected and the real ones as
+    # missing, which is the divergence itself rather than a generic mismatch.
+    enveloped = {
+        **version_one_fixture,
+        "schema": ADMITTED_SOURCE_SCHEMA,
+        "schema_version": ADMITTED_SOURCE_SCHEMA_VERSION,
+        "status": "V2_ADMISSION_OVERLAY_RESOLVED_NO_TRAINING_AUTHORITY",
+    }
+    del enveloped["p50_authorized"]
+    enveloped.update(dict.fromkeys(AUTHORITY_FIELDS, False))
+    with pytest.raises(ProcessV2EvidenceBindingError) as raised:
+        _build(_reseal_identity(enveloped))
+    message = str(raised.value)
+    unexpected = message.split("unexpected=")[1]
+    assert "physical_inventory_sha256" in unexpected
+    assert "semantic_evidence_sha256" in unexpected
+    missing = message.split("missing=")[1].split("unexpected=")[0]
+    assert "admitted_evidence_sha256" in missing
+    assert "rejection_ledger" in missing
 
 
 def test_this_module_carries_no_fabricated_admitted_source_descriptor() -> None:
