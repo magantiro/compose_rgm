@@ -88,7 +88,7 @@ from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Any
 
 import networkx as nx
@@ -107,6 +107,11 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
 from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.data.editing_corpus_contract import ACTIVE8_FAMILIES
+from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+    ProcessV2ArtifactPathError,
+    mount_process_v2_artifact_path,
+    require_process_v2_artifact_path,
+)
 from compose_v4.data.semantic_packed_trace_store import (
     SemanticPackedStoreError,
     load_semantic_packed_manifest,
@@ -570,31 +575,23 @@ def _require_git_object(value: object, *, field: str) -> str:
 
 
 def _require_artifact_path(value: object, *, field: str) -> str:
-    raw = value if isinstance(value, str) else ""
-    path = PurePosixPath(raw)
-    if (
-        not raw
-        or "\\" in raw
-        or not path.is_absolute()
-        or len(path.parts) < 3
-        or path.parts[1] != "artifacts"
-        or ".." in path.parts
-        or str(path) != raw
-        or raw.endswith("/")
-    ):
-        raise ProcessV2RebindError(f"{field} must be a normalized path below /artifacts")
-    return raw
+    # The primitive lives in the chunk-cache module, which this module now
+    # consumes; keeping a second copy here is how two supposedly identical
+    # containment checks drift apart. The error type is translated so every
+    # caller of this module still sees exactly `ProcessV2RebindError`.
+    try:
+        return require_process_v2_artifact_path(value, field=field)
+    except ProcessV2ArtifactPathError as error:
+        raise ProcessV2RebindError(str(error)) from error
 
 
 def _mounted_artifact_path(artifact_path: str, *, artifact_root: Path, field: str) -> Path:
-    normalized = _require_artifact_path(artifact_path, field=field)
-    root = Path(artifact_root).resolve()
-    resolved = (root / PurePosixPath(normalized).relative_to("/artifacts")).resolve()
     try:
-        resolved.relative_to(root)
-    except ValueError as error:
-        raise ProcessV2RebindError(f"{field} resolves outside the artifact root") from error
-    return resolved
+        return mount_process_v2_artifact_path(
+            artifact_path, artifact_root=artifact_root, field=field
+        )
+    except ProcessV2ArtifactPathError as error:
+        raise ProcessV2RebindError(str(error)) from error
 
 
 def mounted_process_v2_artifact_path(
