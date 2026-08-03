@@ -111,10 +111,13 @@ support.
 **§4.2** Planning called Git inside an image with no `.git`, so it could not run
 remotely at all. The source revision is now computed locally and passed in.
 
-**§4.3** The 2,048-entry range plan was actively harmful on non-seekable gzip:
-each range rehashed the whole shard and decompressed from byte zero, roughly
-seventeen times per shard. Replaced by a cache making exactly one fused
-validation and decompression pass per source shard.
+**§4.3** A one-pass content-addressed chunk cache is **built and tested, but
+nothing consumes it yet** -- see the correction in §7. The rebind still reads
+through the rescanning range reader, so the cost saving is available, not
+realized. Wiring it means editing `editing_process_v2_rebind.py`, which is in
+its own `_SOURCE_FILES`, so doing so moves `source_revision_sha256` and
+therefore `run_identity_sha256`, relocating every rebind artifact. That is an
+owner decision, listed in §10.
 
 **§4.4** The container limit was cosmetic — validated and printed while the
 decorator capped at 20. It now bounds actual submission geometry.
@@ -211,6 +214,36 @@ hard-coded constants, so it structurally cannot express "an artifact deliberatel
 records its own superseded hash." A direct consequence of §3.2, and an argument
 for retiring it in favour of `scripts/verify_process_v2_chain.py`.
 
+**The specification's §4.3 referent is wrong, and the correction cuts both ways.**
+There is no 2,048-entry range plan anywhere in the repository; the rebind's
+actual default is `DEFAULT_ENTRIES_PER_TASK = 64`, giving roughly 506 ranges per
+shard rather than seventeen. Measured on a production-shaped shard, the range
+reader's projected overhead is **28.0 s/shard, 15x one fused pass** at the real
+default of 64. But at the specification's assumed 2,048 it would be 0.9 s/shard,
+i.e. **0.5x -- cheaper than one validating fused pass**. The one-pass cache is
+the right call at the granularity that actually ships; it would not have been at
+the granularity the specification assumed. Separately,
+`semantic_active8_chunk_cache.py` already makes one sequential pass and is *not*
+the module carrying the rescan defect; the defect lives in the rebind itself and
+in `active8_inventory_mapreduce.py`.
+
+**`ADMITTED_SOURCE_SCHEMA_VERSION` moves 1 to 2**, adding four fields to
+`identity()` and changing `admitted_source_sha256`. Documented as incompatible,
+not additive. Workstream A's evidence binding imports that constant, so the two
+are coupled and should be reviewed together.
+
+**B reported one whole-suite failure I could not reproduce.**
+`test_editing_v2_semantic_p50_successor_cache.py::test_open_physically_reopens_prepared_recipe`
+failed in B's tree (17 failed there) and does **not** appear in the integrated
+head run (16 failed, absent from the failure set); it also passes in isolation at
+the integrated head, 12/12. The suspected mechanism is that
+`semantic_p50_successor_cache_implementation_sha256` rglobs every `.py` under
+`src/compose_v4`, so new modules move it, and collection order then exposes a
+pre-existing cross-test isolation sensitivity. B could not identify the
+interacting test and neither did I. Recorded as an unexplained order-dependent
+risk rather than dismissed: it did not occur in the measured integrated run, but
+the mechanism is real and a bisect is warranted.
+
 **Six mutations survive in `resolve_process_v2_admitted_source`'s
 completion-binding predicate** (`editing_process_v2_admitted_source.py:536-552`).
 Six of seven guards have no test: run identity, plan hash, task inventory,
@@ -224,19 +257,14 @@ collection errors hiding ~211 tests, invented four failures that pass here, and
 reported a RingCore catalog "drift" that does not exist under the compliant
 interpreter.
 
-### Provenance caveat on Workstream B
+### Provenance note on Workstream B
 
-Workstream B's files were integrated from its worktree while it was still
-running, and **its own report was never received**. Everything attributed to B in
-§5 was therefore verified by me directly rather than taken on its account: its 80
-tests pass under the compliant interpreter, ruff is clean, and its central claim
-is genuinely tested rather than asserted --
-`test_one_source_shard_is_opened_once_and_read_exactly_once` counts real
-`gzip.open` calls through a monkeypatched counter, and a contrasting test proves
-a range reader does re-hash and re-decompress. What is missing is B's own
-narrative: its confirmation of each defect, its microbenchmark numbers, and any
-caveat it would have raised. A reviewer should read B's diff without the benefit
-of an author's summary.
+B's files were integrated from its worktree while it was still verifying, before
+its report arrived. The report has since been received and resolves the concern:
+B had finished, the apparently clean worktree was a `git stash` taken to run its
+own base comparison, **nothing was reverted**, and the SHA-256 of all nine files
+matches what was committed. The integration captured B's final state. Its
+findings are folded into §5, §7 and §8 below.
 
 ## 8. Local microbenchmarks — NOT production evidence
 
@@ -250,8 +278,22 @@ contract publish          42.4 ms
 generation validation     26.9 ms
 ```
 
-These are Workstream A's measurements. No cache or rebind throughput figure is
-reported, because B's report was not received (above) and I did not re-measure.
+Workstream A. Workstream B, on one production-shaped shard (32,339 rows, 281.8 MB
+decompressed, 1.91 MB gzipped): fused pass **1.864 s**, 17,350 rec/s, peak
+**39.6 MB**. Peak memory converges rather than scaling with corpus size -- 64x the
+data costs 3.3x the peak -- bounded by the read block, the decompress block and
+one chunk. The streaming resolver's peak grows at **+146 KB** per source entry
+against the eager global-dictionary's **+440 KB**, a 3.0x shallower slope,
+reproducible to two decimals.
+
+B also found and fixed a real bug in its own first implementation: it was
+unbounded, and one 1 MiB compressed block of repetitive rows expanded to the
+whole shard, giving 26.5 MB peak for an 8 MB corpus.
+
+Precise accounting, because it matters: the whole job opens each gzip **twice** --
+once hash-only inside the payload binding, which §4.1 requires, and once fused in
+the build task. Only the second decompresses. "Exactly one fused pass" is a claim
+about the cache build, which is what §4.3 specifies.
 
 ## 9. The three riskiest areas for review
 
@@ -277,5 +319,12 @@ Offered for review, not built:
   schemas, keeping the V1 path unchanged;
 - the strict xfail in `tests/test_process_v2_import_boundaries.py` becomes a real
   gate the moment the V1-loader dependency is removed.
+
+A second owner decision, smaller than §6: **may the rebind be wired to consume
+the chunk cache?** It requires editing `editing_process_v2_rebind.py`, which is in
+its own `_SOURCE_FILES`, so it moves `run_identity_sha256` and relocates every
+rebind artifact. The payoff is large -- roughly 10,106 range tasks become ~320
+chunk tasks, 8 waves at a bound of 40 instead of 253 -- but it is an identity move
+and not mine to make.
 
 Wave 2 also needs the §6 decision before its authority-field vocabulary settles.
