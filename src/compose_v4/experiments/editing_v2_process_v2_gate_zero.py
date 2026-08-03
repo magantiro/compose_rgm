@@ -792,14 +792,16 @@ def build_process_v2_gate_zero_evidence(
         declared_transition_total += declared
         observed = 0
         for published in index.accepted_transitions_for(key):
-            transition = view(published, contract=contract)
             observed += 1
             decision_transitions += 1
-            missing = [field for field in TRANSITION_FIELDS if field not in transition]
-            if missing:
-                raise ProcessV2GateZeroError(f"an accepted transition omits {sorted(missing)}")
+            # The index owns the RAW schema, so the raw row is what it may be
+            # asked about, and it is asked BEFORE anything transforms it.
+            # Validating the derived view here would hand the index an object it
+            # never published and cannot judge: the view renames fields, drops
+            # some and adds others, so a pass would mean nothing and a failure
+            # would be attributed to the index rather than to this module.
             try:
-                index.validate_accepted_transition(transition)
+                index.validate_accepted_transition(published)
             except Exception as error:  # noqa: BLE001 - the index owns its refusal type
                 classification_failures += 1
                 if len(receipts) < contract.failure_receipt_limit:
@@ -807,12 +809,16 @@ def build_process_v2_gate_zero_evidence(
                         _receipt(
                             key=key,
                             decision_sha256=decision_sha256,
-                            transition=transition,
+                            transition=published,
                             failure_type="index_refused_its_own_transition",
                             reason=str(error),
                         )
                     )
                 continue
+            transition = view(published, contract=contract)
+            missing = [field for field in TRANSITION_FIELDS if field not in transition]
+            if missing:
+                raise ProcessV2GateZeroError(f"an accepted transition view omits {sorted(missing)}")
             if transition["partition_role"] != role:
                 raise ProcessV2GateZeroError(
                     "an accepted transition declares a partition role its trace does not"
