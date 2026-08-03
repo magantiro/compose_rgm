@@ -11,7 +11,11 @@ prove the graph it claims to have checked.  Three mechanisms, each fixed here:
    artifact carrying the V1 value passed.  This verifier resolves an identity edge
    **contextually** -- from the declared provider, identity schema, process
    semantics and value together -- to **exactly one** node.  A declaration that
-   resolves to no node is a failure, and nothing ever resolves to two.
+   resolves to no node is a failure, and nothing ever resolves to two.  Cardinality
+   is required **per required artifact**: each declared root declares exactly one
+   identity edge.  Discovery is an exact field-set match, so an edge that gains or
+   loses a key is not malformed, it is *absent*; counting per artifact is what
+   stops the other artifacts' edges from hiding that absence.
 
 2. **A pointer existed only if its target did.**  Edges were discovered by
    scanning for strings that named an *existing* file, so a deleted or misspelled
@@ -579,6 +583,7 @@ def verify_process_v2_chain(
     report = Report()
     seen: set[str] = set()
     queue: list[str] = list(roots)
+    declared_per_artifact: dict[str, int] = {}
 
     while queue:
         relative_path = queue.pop(0)
@@ -637,6 +642,7 @@ def verify_process_v2_chain(
             ):
                 queue.append(str(pointer["target"]))
         for location, edge in identities:
+            declared_per_artifact[relative_path] = declared_per_artifact.get(relative_path, 0) + 1
             report.identity_edges.append(
                 _check_identity_edge(
                     edge,
@@ -646,13 +652,46 @@ def verify_process_v2_chain(
                 )
             )
 
-    if not report.identity_edges:
+    # Cardinality is checked PER REQUIRED ARTIFACT, not once per graph. The
+    # declared roots are the required artifacts, and a graph-global "at least one
+    # identity edge" cannot see a missing edge in one of them while the others
+    # carry theirs -- the rest of the graph hides its absence. That matters here
+    # more than anywhere else because discovery is an exact field-set match: an
+    # edge that GAINS or LOSES a key stops being discovered, so it does not
+    # become malformed, it becomes absent. Counting per artifact is what makes
+    # that reportable, and it is the same "a declared thing must not vanish"
+    # rule typed pointers already enforce.
+    required = tuple(dict.fromkeys(roots))
+    if not required:
         report.add(
             UNVERIFIED,
             "no_identity_edge_declared",
-            ",".join(roots),
-            "the graph declares no process-identity edge, so nothing proves which "
-            "process it describes",
+            "",
+            "no root artifact was named, so nothing proves which process this graph "
+            "describes",
+        )
+    for name in required:
+        declared = declared_per_artifact.get(name, 0)
+        if declared == 1:
+            continue
+        if declared == 0:
+            report.add(
+                UNVERIFIED,
+                "no_identity_edge_declared",
+                name,
+                "declares no process-identity edge, so nothing proves which process it "
+                "describes. An identity edge is discovered by its exact declared field "
+                "set, so one that gained or lost a key has vanished rather than merely "
+                "been malformed, and no other artifact's edge stands in for it",
+            )
+            continue
+        report.add(
+            FAIL,
+            "multiple_identity_edges_declared",
+            name,
+            f"declares {declared} process-identity edges; a required artifact declares "
+            "exactly one, because two declarations leave 'which process does this "
+            "artifact describe' unanswerable from the artifact itself",
         )
     return report.as_dict()
 
