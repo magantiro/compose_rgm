@@ -33,10 +33,21 @@ from compose_v4.data.editing_corpus_contract import (
 )
 from compose_v4.data.editing_process_v2_admitted_source import (
     ADMITTED_SOURCE_SCHEMA,
+    ADMITTED_SOURCE_SCHEMA_VERSION,
     ADMITTED_SOURCE_STATUS,
+    PHYSICAL_EXECUTION_IDENTITY_SCHEMA,
+    PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION,
+    ProcessV2AdmittedSource,
     ProcessV2AdmittedSourceError,
+    ProcessV2AdmittedSourceIdentityError,
     ProcessV2AdmittedSourceIncomplete,
     resolve_process_v2_admitted_source,
+    validate_process_v2_admitted_source_identity,
+)
+from compose_v4.data.editing_v2_process_v2_schema import (
+    AUTHORITY_FIELDS,
+    REJECTION_LEDGER_SCHEMA,
+    REJECTION_LEDGER_SCHEMA_VERSION,
 )
 from compose_v4.data.editing_process_v2_rebind import (
     COMPLETION_FILENAME,
@@ -137,6 +148,20 @@ def _canonical_sha256(value: object) -> str:
 
 def _self_hash(value: Mapping[str, object], field: str) -> str:
     return _canonical_sha256({key: item for key, item in value.items() if key != field})
+
+
+def _reseal(payload: Mapping[str, object]) -> dict:
+    """Sort and re-seal a mutated descriptor so it fails on the mutation.
+
+    Without the reseal every mutation would be caught by the self-hash, which
+    tests one guard seven ways and none of the others.
+    """
+
+    body = {
+        key: item for key, item in sorted(payload.items()) if key != "admitted_source_sha256"
+    }
+    sealed = {**body, "admitted_source_sha256": _canonical_sha256(body)}
+    return dict(sorted(sealed.items()))
 
 
 def _sha256(path: Path) -> str:
@@ -292,23 +317,317 @@ def test_the_admitted_source_yields_only_admitted_records(tmp_path: Path) -> Non
 def test_the_admitted_source_grants_no_authority(tmp_path: Path) -> None:
     fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
     source = _resolve(fixture)
-    assert source.training_authorized is False
-    assert source.gate_zero_authorized is False
-    assert source.t1_authorized is False
-    assert source.p50_authorized is False
     identity = source.identity()
     assert identity["schema"] == ADMITTED_SOURCE_SCHEMA
+    assert identity["schema_version"] == ADMITTED_SOURCE_SCHEMA_VERSION == 3
     assert identity["status"] == ADMITTED_SOURCE_STATUS
     assert "NO_TRAINING_AUTHORITY" in identity["status"]
-    assert identity["training_authorized"] is False
-    assert identity["gate_zero_authorized"] is False
-    assert identity["t1_authorized"] is False
-    assert identity["p50_authorized"] is False
+    for name in AUTHORITY_FIELDS:
+        assert getattr(source, name) is False, name
+        assert identity[name] is False, name
     assert identity["admitted_source_sha256"] == _self_hash(identity, "admitted_source_sha256")
     assert identity["counts"] == dict(source.counts)
     assert identity["adapter_implementation_sha256"] == _sha256(
         ROOT / "src/compose_v4/data/editing_process_v2_admitted_source.py"
     )
+    # The retired spelling is gone from the object as well as from the artifact.
+    # A property that still answered it would keep the second vocabulary alive
+    # exactly where a consumer is most likely to read it.
+    assert not hasattr(source, "p50_authorized")
+    assert "p50_authorized" not in identity
+
+
+def test_the_authority_surface_is_exactly_the_frozen_vocabulary() -> None:
+    """The properties cannot drift away from ``AUTHORITY_FIELDS``.
+
+    They are written out one by one for readability, so without this the seven
+    could fall out of step with the vocabulary they are supposed to be.
+    """
+
+    observed = {
+        name
+        for name in dir(ProcessV2AdmittedSource)
+        if name.endswith("_authorized")
+        and isinstance(getattr(ProcessV2AdmittedSource, name), property)
+    }
+    assert observed == set(AUTHORITY_FIELDS)
+    # And none of them is settable: the defect being closed is a constructor
+    # argument whose value the descriptor ignored.
+    for name in AUTHORITY_FIELDS:
+        assert getattr(ProcessV2AdmittedSource, name).fset is None, name
+    with pytest.raises(TypeError):
+        ProcessV2AdmittedSource(  # type: ignore[call-arg]
+            plan={},
+            artifact_root=Path("/artifacts"),
+            repo_root=ROOT,
+            completion={},
+            counts={},
+            rejected_traces_by_code={},
+            adapter_implementation_sha256="0" * 64,
+            training_authorized=True,
+        )
+
+
+def test_the_identity_is_sorted_at_every_depth_and_survives_canonical_reserialization(
+    tmp_path: Path,
+) -> None:
+    """Byte stability is what lets a consumer embed this descriptor verbatim."""
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+
+    def _mappings(node: object):
+        if isinstance(node, Mapping):
+            yield node
+            for value in node.values():
+                yield from _mappings(value)
+        elif isinstance(node, list):
+            for value in node:
+                yield from _mappings(value)
+
+    seen = list(_mappings(identity))
+    assert len(seen) >= 4, "the nested bodies must be reached"
+    for node in seen:
+        assert list(node) == sorted(node), node
+
+    # `sort_keys=True` is what every canonical serializer in the chain uses, so
+    # a descriptor that is not already sorted comes back reordered.
+    reserialized = json.loads(json.dumps(identity, sort_keys=True))
+    assert json.dumps(reserialized) == json.dumps(identity)
+
+
+# ---- The owning identity validator --------------------------------------------
+
+
+def test_a_real_resolved_identity_validates(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+    assert validate_process_v2_admitted_source_identity(identity, repo_root=ROOT) == identity
+
+
+def test_schema_version_two_is_refused_as_an_incompatibility(tmp_path: Path) -> None:
+    """Not read as a subset of version 3, and told why it cannot be converted."""
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    downgraded = {**identity, "schema_version": 2}
+    downgraded["admitted_source_sha256"] = _self_hash(downgraded, "admitted_source_sha256")
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="incompatible with 3"
+    ) as raised:
+        validate_process_v2_admitted_source_identity(downgraded, repo_root=ROOT)
+    assert "converter would have to invent" in str(raised.value)
+
+
+def test_a_coerced_or_uppercase_field_is_refused(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    for key, value, message in (
+        ("completion_sha256", identity["completion_sha256"].upper(), "lowercase hex"),
+        ("completion_sha256", "0" * 63, "lowercase hex"),
+        ("schema_version", True, "not an exact int"),
+        ("status", 3, "not str"),
+    ):
+        broken = _reseal({**identity, key: value})
+        with pytest.raises(ProcessV2AdmittedSourceIdentityError, match=message):
+            validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+
+def test_a_missing_extra_or_renamed_field_is_refused(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+
+    missing = _reseal({k: v for k, v in identity.items() if k != "plan_sha256"})
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="missing"):
+        validate_process_v2_admitted_source_identity(missing, repo_root=ROOT)
+
+    extra = _reseal({**identity, "measured_later": "0" * 64})
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="unexpected"):
+        validate_process_v2_admitted_source_identity(extra, repo_root=ROOT)
+
+    renamed = {k: v for k, v in identity.items() if k != "plan_sha256"}
+    renamed["rebind_plan_sha256"] = identity["plan_sha256"]
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="missing.*unexpected"):
+        validate_process_v2_admitted_source_identity(_reseal(renamed), repo_root=ROOT)
+
+
+def test_an_unsorted_mapping_is_refused_even_though_it_self_hashes(
+    tmp_path: Path,
+) -> None:
+    """The canonical hash sorts, so nothing else would catch a reordering."""
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    shuffled = dict(reversed(list(identity.items())))
+    assert shuffled == identity, "reordering alone must not change equality"
+    assert shuffled["admitted_source_sha256"] == _self_hash(
+        shuffled, "admitted_source_sha256"
+    ), "the self-hash cannot see the reordering, which is why the check exists"
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="sorted"):
+        validate_process_v2_admitted_source_identity(shuffled, repo_root=ROOT)
+
+
+def test_a_granted_authority_field_is_refused_at_any_depth(tmp_path: Path) -> None:
+    """Including inside a mapping nested in a list, which no field-set check sees."""
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+
+    for name in AUTHORITY_FIELDS:
+        with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="authority"):
+            validate_process_v2_admitted_source_identity(
+                _reseal({**identity, name: True}), repo_root=ROOT
+            )
+
+    nested_mapping = _reseal(
+        {
+            **identity,
+            "physical_execution_identity": {
+                **identity["physical_execution_identity"],
+                "gate_zero_authorized": True,
+            },
+        }
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="authority"):
+        validate_process_v2_admitted_source_identity(nested_mapping, repo_root=ROOT)
+
+    nested_in_list = _reseal(
+        {
+            **identity,
+            "physical_execution_identity": {
+                **identity["physical_execution_identity"],
+                "range_task_inventory": [{"t1_authorized": True}],
+            },
+        }
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="authority") as raised:
+        validate_process_v2_admitted_source_identity(nested_in_list, repo_root=ROOT)
+    assert "[0].t1_authorized" in str(raised.value)
+
+
+def test_the_retired_bounded_p50_spelling_is_refused(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    retired = {k: v for k, v in identity.items() if k != "bounded_p50_authorized"}
+    retired["p50_authorized"] = False
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="retired authority"):
+        validate_process_v2_admitted_source_identity(_reseal(retired), repo_root=ROOT)
+
+
+def test_a_moved_adapter_or_process_identity_is_refused(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    moved_adapter = _reseal({**identity, "adapter_implementation_sha256": "0" * 64})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="different adapter"
+    ):
+        validate_process_v2_admitted_source_identity(moved_adapter, repo_root=ROOT)
+    moved_process = _reseal({**identity, "process_v2_identity_sha256": "1" * 64})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="live Process-V2 identity"
+    ):
+        validate_process_v2_admitted_source_identity(moved_process, repo_root=ROOT)
+
+
+def test_the_census_and_its_evidence_must_both_reconcile(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+
+    unbalanced = _reseal(
+        {**identity, "counts": {**identity["counts"], "source_entries": 99}}
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="does not reconcile"):
+        validate_process_v2_admitted_source_identity(unbalanced, repo_root=ROOT)
+
+    # `source == admitted + rejected` still holds here; only the state/transition
+    # identity breaks, so this is the check that adds information.
+    inflated = _reseal(
+        {
+            **identity,
+            "counts": {
+                **identity["counts"],
+                "admitted_states": int(identity["counts"]["admitted_states"]) + 1,
+            },
+        }
+    )
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="evidence does not reconcile"
+    ):
+        validate_process_v2_admitted_source_identity(inflated, repo_root=ROOT)
+
+
+def test_a_rejection_census_that_does_not_sum_is_refused(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+    assert identity["rejected_traces_by_code"], "the fixture must reject something"
+    code = next(iter(identity["rejected_traces_by_code"]))
+    broken = _reseal(
+        {**identity, "rejected_traces_by_code": {code: 7}}
+    )
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="sums to 7"):
+        validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+    unknown = _reseal({**identity, "rejected_traces_by_code": {"invented_reason": 1}})
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="does not define"):
+        validate_process_v2_admitted_source_identity(unknown, repo_root=ROOT)
+
+
+def test_the_nested_bodies_validate_through_their_own_schemas(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _TASKS_WITH_EXCLUSION)
+    identity = _resolve(fixture).identity()
+
+    physical = identity["physical_execution_identity"]
+    assert physical["schema"] == PHYSICAL_EXECUTION_IDENTITY_SCHEMA
+    assert physical["schema_version"] == PHYSICAL_EXECUTION_IDENTITY_SCHEMA_VERSION == 1
+    ledger = identity["rejection_ledger"]
+    assert ledger["schema"] == REJECTION_LEDGER_SCHEMA
+    assert ledger["schema_version"] == REJECTION_LEDGER_SCHEMA_VERSION
+
+    for block, key, value, message in (
+        ("physical_execution_identity", "schema_version", 2, "schema_version"),
+        ("physical_execution_identity", "range_task_count", "3", "not an exact int"),
+        ("rejection_ledger", "sort_order", "entry_index_only", "sort_order"),
+        ("rejection_ledger", "schema", "compose.other", "schema"),
+    ):
+        nested = dict(identity[block])
+        nested[key] = value
+        self_hash_field = (
+            "physical_execution_sha256"
+            if block == "physical_execution_identity"
+            else "rejection_ledger_sha256"
+        )
+        nested[self_hash_field] = _self_hash(nested, self_hash_field)
+        broken = _reseal({**identity, block: dict(sorted(nested.items()))})
+        with pytest.raises(ProcessV2AdmittedSourceIdentityError, match=message):
+            validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+
+def test_a_replay_address_for_another_run_is_refused(tmp_path: Path) -> None:
+    """Every other field checks out; only the nested run identity moved."""
+
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    physical = {**identity["physical_execution_identity"], "run_identity_sha256": "9" * 64}
+    physical["physical_execution_sha256"] = _self_hash(physical, "physical_execution_sha256")
+    broken = _reseal({**identity, "physical_execution_identity": dict(sorted(physical.items()))})
+    with pytest.raises(
+        ProcessV2AdmittedSourceIdentityError, match="must address this run"
+    ):
+        validate_process_v2_admitted_source_identity(broken, repo_root=ROOT)
+
+
+def test_a_disagreeing_self_hash_is_refused(tmp_path: Path) -> None:
+    fixture = _build_and_prove(tmp_path / "artifacts", _ADMITTED_ONLY_TASKS)
+    identity = _resolve(fixture).identity()
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="self-hash"):
+        validate_process_v2_admitted_source_identity(
+            {**identity, "admitted_source_sha256": "2" * 64}, repo_root=ROOT
+        )
+
+
+def test_a_non_object_identity_is_refused() -> None:
+    with pytest.raises(ProcessV2AdmittedSourceIdentityError, match="must be an object"):
+        validate_process_v2_admitted_source_identity([], repo_root=ROOT)
 
 
 # ---- Fail-closed refusals -----------------------------------------------------
