@@ -39,9 +39,28 @@ A trace Active8 evaluated and refused is recorded under
 Merging them would make "we did not look" indistinguishable from "we looked and
 said no", which is a different scientific statement about the same trace.
 
+TWO VOCABULARIES, AND THEY ARE NOT INTERCHANGEABLE
+--------------------------------------------------
+The eight declared development families are ``ACTIVE8_FAMILIES``
+(``editing_corpus_contract``).  ``ACTIVE8_EXECUTOR_RULES``
+(``action_codec_v4``) is a different tuple of the same length: it is the
+EXECUTOR-rule spelling of the same eight, and the two disagree on two entries by
+design.  ``cycle_insert`` is the model-family name whose executor rule is
+``cycle_close`` and which means ring closing; ``cycle_attach`` is the
+model-family name whose executor rule is ``cycle_open`` and which means ring
+opening.  The inherited name ``cycle_attach`` does not mean attaching a ring.
+
+So: ``active_families`` is bound to the FAMILY tuple, because that is what the
+model scores and what the corpus contract declares; the executor tuple is used
+only to build ``executor_rule_to_family`` and to classify a persisted action,
+which arrives under its executor rule name.  Reaching for the wrong constant is
+the two-vocabulary failure this program keeps hitting, so both are named
+explicitly and neither is derived from the other.
+
 INVARIANTS MAINTAINED (and tested)
 ----------------------------------
-* the eight declared families are exactly ``ACTIVE8_EXECUTOR_RULES``, and
+* the eight declared families are exactly ``ACTIVE8_FAMILIES``, their executor
+  spelling is exactly ``ACTIVE8_EXECUTOR_RULES``, and
   ``ring_system_delete``/``ring_system_grow`` are refused as explicitly disabled;
 * the policy binds ``editing_process_v2_identity()``, never the V1 identity;
 * the checker refuses a model that is not in the exact Process-V2 modes;
@@ -110,12 +129,19 @@ POLICY_SCHEMA_VERSION = 1
 POLICY_STATUS = "FROZEN_PROCESS_V2_ACTIVE8_POLICY_NO_DOWNSTREAM_AUTHORITY"
 SELECTION_UNIT = "complete_process_v2_trace"
 
-#: The eight declared development families, in executor-rule spelling, read from
-#: the frozen codec rather than restated here.
+#: The EXECUTOR-rule spelling of the declared eight, read from the frozen codec.
+#: A persisted action arrives under one of these names, so this is the tuple the
+#: classifier matches against.  It is NOT the family vocabulary: ``cycle_close``
+#: and ``cycle_open`` are executor rules whose families are ``cycle_insert`` and
+#: ``cycle_attach``.
 PROCESS_V2_ACTIVE8_EXECUTOR_RULES: tuple[str, ...] = tuple(
     action_codec_v4.ACTIVE8_EXECUTOR_RULES
 )
+#: The eight declared development FAMILIES, read from the corpus contract.  This
+#: is what the model scores and what ``active_families`` is bound to.
 PROCESS_V2_ACTIVE8_FAMILIES: tuple[str, ...] = tuple(ACTIVE8_FAMILIES)
+#: The translation between the two, taken from the codec rather than written out,
+#: so the two vocabularies can never be paired by hand.
 PROCESS_V2_ACTIVE8_RULE_TO_FAMILY: tuple[tuple[str, str], ...] = tuple(
     (rule, action_codec_v4.canonical_family(rule))
     for rule in PROCESS_V2_ACTIVE8_EXECUTOR_RULES
