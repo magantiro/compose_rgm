@@ -57,6 +57,10 @@ from compose_v4.experiments.editing_v2_semantic_runtime import (
     SemanticScratchRuntime,
     build_semantic_scratch_runtime,
 )
+from compose_v4.model.factorized_tracelet_rate_model import (
+    PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+)
 
 RUNTIME_IDENTITY_SCHEMA = "compose.data.editing_v2_process_v2_active8_model_runtime"
 RUNTIME_IDENTITY_SCHEMA_VERSION = 1
@@ -208,6 +212,55 @@ def process_v2_active8_model_runtime_identity(
     return {**body, "identity_sha256": canonical_sha256(body)}
 
 
+def validate_process_v2_active8_model_runtime_identity(value: object) -> dict[str, Any]:
+    """Refuse a runtime descriptor that does not describe a Process-V2 model.
+
+    A self-hash proves a descriptor is intact, not that it describes the right
+    model.  A Process-V1 runtime identity is perfectly self-consistent, so the
+    only thing separating it from a Process-V2 one is what it says about the
+    process semantics and the atom-delete fiber -- which is precisely the
+    expansion Process V2 exists for.  Both are required here by name.
+    """
+
+    if not isinstance(value, dict):
+        raise ProcessV2Active8RuntimeError("a model runtime identity must be an object")
+    identity = dict(value)
+    declared = identity.get("identity_sha256")
+    body = {key: item for key, item in identity.items() if key != "identity_sha256"}
+    if not isinstance(declared, str) or declared != canonical_sha256(body):
+        raise ProcessV2Active8RuntimeError(
+            "the model runtime identity self-hash disagrees with its body"
+        )
+    if (
+        identity.get("schema") != RUNTIME_IDENTITY_SCHEMA
+        or identity.get("schema_version") != RUNTIME_IDENTITY_SCHEMA_VERSION
+    ):
+        raise ProcessV2Active8RuntimeError(
+            "the model runtime identity is not a Process-V2 Active8 runtime descriptor"
+        )
+    model_identity = identity.get("semantic_model_identity")
+    if not isinstance(model_identity, dict):
+        raise ProcessV2Active8RuntimeError(
+            "the model runtime identity carries no semantic model identity"
+        )
+    observed = {
+        "editing_process_semantics": model_identity.get("editing_process_semantics"),
+        "atom_delete_action_semantics": model_identity.get(
+            "atom_delete_action_semantics"
+        ),
+    }
+    expected = {
+        "editing_process_semantics": PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        "atom_delete_action_semantics": PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+    }
+    if observed != expected:
+        raise ProcessV2Active8RuntimeError(
+            "the model runtime identity describes another editing process: "
+            f"expected {expected}, observed {observed}"
+        )
+    return identity
+
+
 def build_process_v2_active8_runtime(
     *,
     model_config: SemanticScratchModelConfig,
@@ -279,6 +332,7 @@ __all__ = [
     "ProcessV2Active8Runtime",
     "ProcessV2Active8RuntimeError",
     "build_process_v2_active8_runtime",
+    "validate_process_v2_active8_model_runtime_identity",
     "load_process_v2_active8_model_config",
     "process_v2_active8_model_runtime_identity",
     "process_v2_model_process_contract",
