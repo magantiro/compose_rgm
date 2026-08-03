@@ -363,6 +363,13 @@ class ProcessV2Active8DecisionIndex:
         Empty for an excluded or upstream-rejected trace: absence of transitions
         is the answer, not an error.  The exact slot-addressed states come from
         the cached record's own arrays through the production chunk reader.
+
+        This is a POINT lookup and it costs one chunk decode, because a chunk is
+        the smallest thing the cache addresses.  A consumer that wants every
+        accepted transition must use :meth:`iter_accepted_transitions`, which
+        decodes each chunk exactly once: calling this in a loop over the corpus
+        would decode one chunk per trace and reinstate exactly the triangular
+        rescan the chunk cache exists to remove.
         """
 
         task, row = self._row_for(trace_key)
@@ -377,6 +384,48 @@ class ProcessV2Active8DecisionIndex:
         ):
             self.validate_accepted_transition(transition)
             yield MappingProxyType(transition)
+
+    def iter_accepted_transitions(self) -> Iterator[Mapping[str, Any]]:
+        """Every accepted transition of the whole run, in reduction order.
+
+        One pass: each task's decision shard and each cached chunk are decoded
+        exactly once, and the decoded rows are joined in lockstep by ascending
+        entry index.  Transitions are validated as they are produced, but against
+        the trace already in hand rather than by re-reading it, so the linear
+        cost stays linear.
+        """
+
+        for task in reduction_order(self._plan["tasks"]):
+            bound = self._tasks[str(task["task_identity_sha256"])]
+            output = self._task_root(bound)
+            validate_process_v2_active8_task_result(output, plan=self._plan, task=bound)
+            raw = gzip.decompress((output / DECISION_FILENAME).read_bytes())
+            rows = {
+                int(row["entry_index"]): row
+                for row in read_process_v2_active8_decision_rows(
+                    raw, task=bound, plan=self._plan
+                )
+                if row["category"] is None
+            }
+            if not rows:
+                continue
+            for read in self._iter_chunk_rows(bound):
+                row = rows.get(read.entry_index)
+                if row is None:
+                    continue
+                if read.addressed is None or read.addressed.address.trace_id != str(
+                    row["trace_id"]
+                ):
+                    raise ProcessV2Active8DecisionIndexError(
+                        f"the cached row at entry {read.entry_index} is not the indexed trace"
+                    )
+                for transition in _transitions(
+                    task=bound,
+                    row=row,
+                    addressed=read.addressed,
+                    index_identity_sha256=self._index_identity_sha256,
+                ):
+                    yield MappingProxyType(transition)
 
     def validate_accepted_transition(self, transition: Mapping[str, Any]) -> None:
         """Raise unless this is exactly what the index published.
@@ -491,9 +540,13 @@ class ProcessV2Active8DecisionIndex:
             f"the indexed trace {key} is absent from the task that claims it"
         )
 
-    def _addressed_trace(
-        self, task: Mapping[str, Any], entry_index: int, trace_id: str
-    ) -> Any:
+    def _iter_chunk_rows(self, task: Mapping[str, Any]) -> Iterator[Any]:
+        """Decode one task's cache chunk once, through the production reader.
+
+        The one place a chunk is opened, so the point lookup and the bulk stream
+        cannot drift into two different readings of the same bytes.
+        """
+
         target = _chunk_target(task)
         source_output = _mounted(
             target.source_artifact_path,
@@ -501,25 +554,30 @@ class ProcessV2Active8DecisionIndex:
             field="task.cache_source_artifact_path",
         )
         try:
-            for read in read_process_v2_chunk_target(
+            yield from read_process_v2_chunk_target(
                 source_output,
                 target=target,
                 expected_process_identity=self._plan["pinned_process_identity"],
                 sentinel_replay_entries=0,
                 recover_row_errors=False,
                 repo_root=self._repo_root,
-            ):
-                if read.entry_index != entry_index:
-                    continue
-                if read.addressed is None or read.addressed.address.trace_id != trace_id:
-                    raise ProcessV2Active8DecisionIndexError(
-                        f"the cached row at entry {entry_index} is not the indexed trace"
-                    )
-                return read.addressed
+            )
         except ProcessV2ChunkCacheError as error:
             raise ProcessV2Active8DecisionIndexError(
-                f"the cached chunk backing entry {entry_index} is unreadable"
+                f"the cached chunk of task {task['task_identity_sha256']} is unreadable"
             ) from error
+
+    def _addressed_trace(
+        self, task: Mapping[str, Any], entry_index: int, trace_id: str
+    ) -> Any:
+        for read in self._iter_chunk_rows(task):
+            if read.entry_index != entry_index:
+                continue
+            if read.addressed is None or read.addressed.address.trace_id != trace_id:
+                raise ProcessV2Active8DecisionIndexError(
+                    f"the cached row at entry {entry_index} is not the indexed trace"
+                )
+            return read.addressed
         raise ProcessV2Active8DecisionIndexError(
             f"the cached chunk does not hold entry {entry_index}"
         )
