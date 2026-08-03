@@ -105,6 +105,10 @@ from compose_v4.data.editing_v2_process_v2_active8_policy import (
     validate_process_v2_active8_policy,
     validate_process_v2_active8_policy_payload,
 )
+from compose_v4.data.editing_v2_process_v2_active8_runtime import (
+    ProcessV2Active8RuntimeError,
+    validate_process_v2_active8_model_runtime_identity,
+)
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     ProcessV2ArtifactPathError,
     ProcessV2ChunkCacheError,
@@ -489,7 +493,7 @@ def validate_process_v2_active8_implementation_revision(
 
 
 def validate_model_runtime_identity(value: object) -> dict[str, Any]:
-    """Require a self-hashed, nonempty model runtime descriptor."""
+    """Require a self-hashed, nonempty, Process-V2 model runtime descriptor."""
 
     if not isinstance(value, Mapping):
         raise ProcessV2Active8MapReduceError("the model runtime identity must be an object")
@@ -502,6 +506,13 @@ def validate_model_runtime_identity(value: object) -> dict[str, Any]:
         raise ProcessV2Active8MapReduceError(
             "the model runtime identity is empty or its self-hash disagrees"
         )
+    # Intact is not the same as correct: a Process-V1 runtime descriptor is
+    # perfectly self-consistent, so the owning validator is asked whether this
+    # one describes a Process-V2 model at all.
+    try:
+        validate_process_v2_active8_model_runtime_identity(identity)
+    except ProcessV2Active8RuntimeError as error:
+        raise ProcessV2Active8MapReduceError(str(error)) from error
     return identity
 
 
@@ -856,7 +867,12 @@ def validate_process_v2_active8_plan(
             "the pinned payload identity and the live Process-V2 identity are the same value; "
             "the historical payload is superseded by construction and the two must stay distinct"
         )
-    policy_payload = validate_process_v2_active8_policy_payload(plan["policy"])
+    try:
+        policy_payload = validate_process_v2_active8_policy_payload(plan["policy"])
+    except ProcessV2Active8PolicyError as error:
+        raise ProcessV2Active8MapReduceError(
+            f"the Process-V2 Active8 plan does not carry the live Active8 policy: {error}"
+        ) from error
     runtime = validate_model_runtime_identity(plan["model_runtime_identity"])
     for field_set, block, label in (
         (_CACHE_BINDING_FIELDS, plan["cache_binding"], "cache_binding"),
