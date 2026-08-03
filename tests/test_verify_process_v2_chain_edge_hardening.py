@@ -82,9 +82,44 @@ from verify_process_v2_chain import (  # noqa: E402
 )
 
 _EDGE_KEY = "process_identity"
-#: A real declared pointer pair in the committed graph, addressed by JSON path.
-_PARENT_ROLE = "development_cell_roles"
 _REMOTE = "/editing_v2/semantic_v4_migration/fixture/SEMANTIC_MIGRATION_COMPLETE.json"
+
+
+def _a_parent_role(
+    artifact: str, *, slots: set[str], target_schema_declared: bool | None = None
+) -> str:
+    """A parent role of ``artifact`` with the shape a test needs, chosen structurally.
+
+    Naming a role would couple these tests to the dependency graph, which the chain
+    owner revises. What each test actually needs is a SHAPE: a role carrying both
+    pointer slots, or one whose target declares a schema of its own, or one whose
+    target is not JSON and therefore declares none.
+    """
+
+    parents = json.loads((_ROOT / artifact).read_bytes())["parents"]
+    found = sorted(
+        role
+        for role, edge in parents.items()
+        if set(edge) == slots
+        and (
+            target_schema_declared is None
+            or (edge["physical"]["target_schema"] is not None) is target_schema_declared
+        )
+    )
+    assert found, (artifact, slots, target_schema_declared)
+    return found[0]
+
+
+#: Both pointer slots, so a mutation exercises the physical and the semantic path.
+_T1_PANEL_ROLE = _a_parent_role(T1_PANEL_POLICY, slots={"physical", "semantic"})
+#: The same, on the graph leaf, whose target declares a schema of its own.
+_P50_JSON_ROLE = _a_parent_role(
+    P50_RECIPE_POLICY, slots={"physical", "semantic"}, target_schema_declared=True
+)
+#: A physical-only role whose target has no separable schema at all.
+_CELLS_UNSCHEMED_ROLE = _a_parent_role(
+    CAPABILITY_CELLS, slots={"physical"}, target_schema_declared=False
+)
 
 
 # ---- Helpers ----
@@ -112,8 +147,8 @@ def _report_after(artifact: str, mutate: Callable[[dict[str, Any]], None]) -> di
         return verify_process_v2_chain(repo_root=root)
 
 
-def _pointer_of(payload: dict[str, Any], slot: str) -> dict[str, Any]:
-    return payload["parents"][_PARENT_ROLE][slot]
+def _pointer_of(payload: dict[str, Any], role: str, slot: str) -> dict[str, Any]:
+    return payload["parents"][role][slot]
 
 
 def _stage_receipt(
@@ -181,12 +216,13 @@ def test_a_declared_pointer_that_loses_a_field_fails_rather_than_vanishing(
     dropped: str,
 ) -> None:
     report = _report_after(
-        T1_PANEL_POLICY, lambda payload: _pointer_of(payload, "physical").pop(dropped)
+        T1_PANEL_POLICY,
+        lambda payload: _pointer_of(payload, _T1_PANEL_ROLE, "physical").pop(dropped),
     )
     named = _findings(report, "near_miss_declared_pointer")
     assert named, report["findings"]
     assert named[0]["severity"] == FAIL
-    assert named[0]["location"].endswith(f".parents.{_PARENT_ROLE}.physical")
+    assert named[0]["location"].endswith(f".parents.{_T1_PANEL_ROLE}.physical")
     assert dropped in named[0]["detail"]
 
 
@@ -195,7 +231,7 @@ def test_a_misspelled_pointer_field_fails_rather_than_vanishing(renamed: str) ->
     """One rename is one deletion plus one insertion, the widest near miss allowed."""
 
     def misspell(payload: dict[str, Any]) -> None:
-        pointer = _pointer_of(payload, "physical")
+        pointer = _pointer_of(payload, _T1_PANEL_ROLE, "physical")
         pointer[f"{renamed}_"] = pointer.pop(renamed)
 
     report = _report_after(T1_PANEL_POLICY, misspell)
@@ -207,7 +243,9 @@ def test_a_misspelled_pointer_field_fails_rather_than_vanishing(renamed: str) ->
 def test_a_declared_pointer_that_gains_a_field_fails_rather_than_vanishing() -> None:
     report = _report_after(
         T1_PANEL_POLICY,
-        lambda payload: _pointer_of(payload, "physical").update(note="beyond the field set"),
+        lambda payload: _pointer_of(payload, _T1_PANEL_ROLE, "physical").update(
+            note="beyond the field set"
+        ),
     )
     named = _findings(report, "near_miss_declared_pointer")
     assert named, report["findings"]
@@ -343,7 +381,7 @@ def test_a_schema_version_written_as_a_string_is_not_coerced_into_matching() -> 
 )
 def test_a_repository_target_that_escapes_the_checkout_fails(target: str) -> None:
     def escape(payload: dict[str, Any]) -> None:
-        _pointer_of(payload, "physical")["target"] = target
+        _pointer_of(payload, _T1_PANEL_ROLE, "physical")["target"] = target
 
     report = _report_after(T1_PANEL_POLICY, escape)
     assert report["status"] == DISAGREES
@@ -368,7 +406,7 @@ def test_a_symlink_that_leaves_the_checkout_fails_even_when_its_bytes_agree() ->
         smuggled = "configs/smuggled.json"
 
         def repoint(payload: dict[str, Any]) -> None:
-            pointer = _pointer_of(payload, "physical")
+            pointer = _pointer_of(payload, _T1_PANEL_ROLE, "physical")
             pointer["target"] = smuggled
             pointer["sha256"] = digest
             pointer["target_schema"] = "smuggled"
@@ -401,7 +439,7 @@ def test_a_target_that_resolves_inside_but_is_not_normalized_is_still_refused() 
 
     def respell(payload: dict[str, Any]) -> None:
         for slot in ("physical", "semantic"):
-            payload["parents"]["source_requirements"][slot]["target"] = spelling
+            _pointer_of(payload, _P50_JSON_ROLE, slot)["target"] = spelling
 
     report = _report_after(P50_RECIPE_POLICY, respell)
     assert report["status"] == DISAGREES
@@ -441,7 +479,7 @@ def test_a_pointer_binding_the_right_bytes_under_the_wrong_schema_fails() -> Non
 
     def relabel(payload: dict[str, Any]) -> None:
         for slot in ("physical", "semantic"):
-            _pointer_of(payload, slot)["target_schema"] = "compose.some.other.contract"
+            _pointer_of(payload, _P50_JSON_ROLE, slot)["target_schema"] = "compose.other"
 
     report = _report_after(P50_RECIPE_POLICY, relabel)
     assert report["status"] == DISAGREES
@@ -460,11 +498,11 @@ def test_a_pointer_declaring_no_schema_for_a_target_that_has_one_fails() -> None
     """``None`` is a claim too: it says the target carries no schema of its own."""
 
     live = json.loads((_ROOT / P50_RECIPE_POLICY).read_bytes())
-    assert live["parents"]["source_requirements"]["physical"]["target_schema"] is not None
+    assert live["parents"][_P50_JSON_ROLE]["physical"]["target_schema"] is not None
 
     def blank(payload: dict[str, Any]) -> None:
         for slot in ("physical", "semantic"):
-            payload["parents"]["source_requirements"][slot]["target_schema"] = None
+            _pointer_of(payload, _P50_JSON_ROLE, slot)["target_schema"] = None
 
     report = _report_after(P50_RECIPE_POLICY, blank)
     assert report["status"] == DISAGREES
@@ -479,10 +517,10 @@ def test_a_pointer_declaring_a_schema_for_a_target_that_has_none_fails() -> None
     """
 
     live = json.loads((_ROOT / CAPABILITY_CELLS).read_bytes())
-    assert live["parents"]["classifier_implementation"]["physical"]["target_schema"] is None
+    assert live["parents"][_CELLS_UNSCHEMED_ROLE]["physical"]["target_schema"] is None
 
     def invent(payload: dict[str, Any]) -> None:
-        payload["parents"]["classifier_implementation"]["physical"]["target_schema"] = (
+        _pointer_of(payload, _CELLS_UNSCHEMED_ROLE, "physical")["target_schema"] = (
             "compose.editing_v2.capability_cell_classifier"
         )
 
@@ -490,7 +528,7 @@ def test_a_pointer_declaring_a_schema_for_a_target_that_has_none_fails() -> None
     assert report["status"] == DISAGREES
     named = _findings(report, "target_schema_disagrees")
     assert len(named) == 1, report["findings"]
-    assert named[0]["location"].endswith(".parents.classifier_implementation.physical")
+    assert named[0]["location"].endswith(f".parents.{_CELLS_UNSCHEMED_ROLE}.physical")
 
 
 def test_a_lineage_pointer_target_schema_is_deliberately_not_compared() -> None:
