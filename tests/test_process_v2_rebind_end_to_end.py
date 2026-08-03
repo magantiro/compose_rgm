@@ -76,6 +76,7 @@ from compose_v4.data.editing_process_v2_admitted_source import (
     ProcessV2AdmittedSourceIncomplete,
     resolve_process_v2_admitted_source,
 )
+from compose_v4.data.editing_v2_process_v2_schema import AUTHORITY_FIELDS
 from compose_v4.data.editing_process_v2_rebind import (
     COMPLETION_FILENAME,
     MANIFEST_FILENAME,
@@ -819,22 +820,18 @@ def test_no_stage_of_the_rebind_chain_emits_training_authority(tmp_path: Path) -
     assert envelope["plan_artifact_path"] is None
 
     # The resolved source object and the descriptor a consumer must record.
-    # It names the P50 field `p50_authorized`, so both spellings are asserted
-    # against the object that actually carries each.
+    # Both now name the P50 field `bounded_p50_authorized`: admitted-source
+    # schema 3 removed the adapter's retired spelling, so outside the frozen
+    # process contract there is one spelling, and the object publishes the whole
+    # frozen vocabulary rather than a four-field subset of it.
     source = _resolve(payload, plan)
-    assert source.training_authorized is False
-    assert source.gate_zero_authorized is False
-    assert source.t1_authorized is False
-    assert source.p50_authorized is False
+    for name in AUTHORITY_FIELDS:
+        assert getattr(source, name) is False, name
+    assert not hasattr(source, "p50_authorized")
     identity = source.identity()
     assert {
         key: value for key, value in identity.items() if key.endswith("_authorized")
-    } == {
-        "training_authorized": False,
-        "gate_zero_authorized": False,
-        "t1_authorized": False,
-        "p50_authorized": False,
-    }
+    } == dict.fromkeys(AUTHORITY_FIELDS, False)
     assert identity["status"] == ADMITTED_SOURCE_STATUS
 
     # The published plan file on the volume says the same thing as the object.
