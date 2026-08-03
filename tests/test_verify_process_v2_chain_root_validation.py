@@ -31,6 +31,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     P50_RECIPE_POLICY,
     PROCESS_V2_CHAIN_ARTIFACTS,
     SELF_HASH_FIELD,
+    T1_PANEL_POLICY,
 )
 
 _ROOT = Path(__file__).resolve().parents[1]
@@ -210,6 +211,115 @@ def test_a_root_with_no_owning_validator_is_unverified_never_assumed_sound() -> 
         PROCESS_V2_CHAIN_ARTIFACTS
     )
     assert {row["result"] for row in report["roots"]} == {"no_validator"}
+
+
+# ---- A validator may be withheld, never substituted ----
+
+
+def _forge_the_registry_pin(payload: dict[str, Any]) -> None:
+    """A tamper inside the graph leaf that only its owning validator can see."""
+
+    block, pin = _REGISTRY_PIN
+    payload[block][pin] = "0" * 64
+
+
+def test_a_substituted_validator_is_refused_unrun_rather_than_believed() -> None:
+    """``validators={}`` was refused correctly; a mapping of NO-OPS was not.
+
+    That is the hole root validation exists to close, reopened through the seam
+    that measures it. Every root reported ``validated``, the run reported
+    ``AGREES`` over a tampered governed root, and the leaf's unchecked pins were
+    absorbed into the covered set -- because ``proven`` membership followed the
+    validator not raising, and a callable that does nothing never raises.
+
+    A validator is EVIDENCE. Withholding it makes a run weaker, which is the
+    control arm; supplying one's own would let the caller write the verdict, so it
+    is refused without being invoked.
+    """
+
+    invoked: list[Path] = []
+
+    def a_validator_of_my_own(repo_root: Path) -> None:
+        invoked.append(repo_root)
+
+    substituted = dict.fromkeys(PROCESS_V2_CHAIN_ARTIFACTS, a_validator_of_my_own)
+    with _graph_copy() as root:
+        _reseal(root, P50_RECIPE_POLICY, _forge_the_registry_pin)
+        owned = verify_process_v2_chain(repo_root=root)
+        injected = verify_process_v2_chain(repo_root=root, validators=substituted)
+
+    assert owned["status"] == DISAGREES
+    assert "root_artifact_refused_by_its_validator" in _categories(owned, FAIL)
+
+    assert injected["status"] == INCONCLUSIVE
+    assert invoked == [], "a substituted validator must never be invoked"
+    assert {row["result"] for row in injected["roots"]} == {"substituted_validator"}
+    assert _categories(injected, UNVERIFIED) == ["root_validator_not_registered"] * len(
+        PROCESS_V2_CHAIN_ARTIFACTS
+    )
+    assert _categories(injected, FAIL) == []
+
+
+def test_an_injected_validator_can_only_make_a_run_weaker_never_stronger() -> None:
+    """The property, stated over the report rather than over one scenario.
+
+    A substituted validator must land a run exactly where withholding one lands
+    it: nothing proven, every pin still listed. It absorbed 6 of the leaf's pins
+    before, which is the "looks checked but is not" failure one level up.
+    """
+
+    substituted = dict.fromkeys(PROCESS_V2_CHAIN_ARTIFACTS, lambda repo_root: None)
+    with _graph_copy() as root:
+        _reseal(root, P50_RECIPE_POLICY, _forge_the_registry_pin)
+        injected = verify_process_v2_chain(repo_root=root, validators=substituted)
+        withheld = verify_process_v2_chain(repo_root=root, validators={})
+        owned = verify_process_v2_chain(repo_root=root)
+
+    assert injected["unchecked_pins"] == withheld["unchecked_pins"]
+    assert len(injected["unchecked_pins"]) > len(owned["unchecked_pins"])
+    assert [pin for pin in injected["unchecked_pins"] if pin["artifact"] == P50_RECIPE_POLICY]
+    assert AGREES not in {injected["status"], withheld["status"]}
+
+
+def test_a_registered_validator_moved_onto_another_root_is_refused() -> None:
+    """The second half of the rule: registered is not enough, it must own THIS root.
+
+    Pointing the leaf at another contract's validator would prove that contract
+    and report the leaf as validated, which is a stale binding of exactly the kind
+    this verifier refuses everywhere else.
+    """
+
+    registry = owning_root_validators()
+    swapped = {**registry, P50_RECIPE_POLICY: registry[T1_PANEL_POLICY]}
+    report = verify_process_v2_chain(repo_root=_ROOT, validators=swapped)
+
+    assert report["status"] == INCONCLUSIVE
+    named = [
+        finding
+        for finding in report["findings"]
+        if finding["category"] == "root_validator_not_registered"
+    ]
+    assert [finding["location"] for finding in named] == [P50_RECIPE_POLICY]
+    assert _root_row(report, P50_RECIPE_POLICY)["result"] == "substituted_validator"
+    assert {
+        row["result"] for row in report["roots"] if row["artifact"] != P50_RECIPE_POLICY
+    } == {"validated"}
+
+
+def test_withholding_one_validator_is_supported_and_weakens_only_that_root() -> None:
+    """The seam stays usable: a partial mapping is a partial control arm."""
+
+    registry = owning_root_validators()
+    withheld = {name: registry[name] for name in registry if name != P50_RECIPE_POLICY}
+    report = verify_process_v2_chain(repo_root=_ROOT, validators=withheld)
+
+    assert report["status"] == INCONCLUSIVE
+    assert _categories(report, UNVERIFIED) == ["root_validator_unknown"]
+    assert _root_row(report, P50_RECIPE_POLICY)["result"] == "no_validator"
+    assert {
+        row["result"] for row in report["roots"] if row["artifact"] != P50_RECIPE_POLICY
+    } == {"validated"}
+    assert [pin for pin in report["unchecked_pins"] if pin["artifact"] == P50_RECIPE_POLICY]
 
 
 def test_a_frozen_parent_used_as_a_root_is_not_silently_accepted() -> None:
