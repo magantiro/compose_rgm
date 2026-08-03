@@ -143,6 +143,15 @@ TIMEOUT_HEADROOM_FACTOR = 2.0
 # One production-shaped trace: forty slots (the executor's own
 # ``MAX_ACTIVE_ATOMS``) and eight steps, which puts a persisted row within a few
 # percent of the measured production mean of ~8.7 kB.
+#
+# The corpus repeats that one trace, which is the right trade for the two
+# selection criteria -- decode and proof cost follow molecule size, not variety
+# -- with one consequence worth naming: a shard of one repeated row compresses
+# far better than a production shard of distinct molecules, so the recorded
+# ``compressed_bytes`` is not a production figure and the gzip read is a smaller
+# share of task time here than it would be in production. Task time is dominated
+# by the per-state mask derivation either way, which is why this is a trade
+# rather than a defect.
 BENCHMARK_SLOTS = 40
 BENCHMARK_SMILES = "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
 BENCHMARK_OPERATIONS = (

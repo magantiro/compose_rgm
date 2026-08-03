@@ -274,6 +274,13 @@ def validate_remote_source_revision(
     module the narrow revision names must appear in the image inventory with the
     identical hash, so pairing one tree's code with another tree's revision
     object fails on the exact file that differs.
+
+    That cross-check is currently unreachable by construction, and is kept
+    deliberately: both validators rehash the same image, and the image inventory
+    is a superset of the narrow one, so if both pass they cannot disagree.  It
+    exists so that a future change to either file set -- a narrow module that
+    stops being serialized, an image that stops carrying ``src`` whole -- becomes
+    a loud refusal instead of a silent gap.
     """
 
     if str(remote_root) not in sys.path:

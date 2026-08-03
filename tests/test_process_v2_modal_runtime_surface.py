@@ -51,13 +51,16 @@ from compose_v4.data.editing_process_v2_rebind import (
     repository_process_v2_rebind_source_revision,
 )
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
+    CACHE_IMPLEMENTATION_FILES,
     DEFAULT_CACHE_MAP_CONTAINERS,
     PLATFORM_MAX_MAP_CONTAINERS,
     ProcessV2ConcurrencyError,
+    build_cache_implementation_revision,
     plan_submission_waves,
     run_bounded_map,
     validate_map_container_bound,
 )
+from compose_v4.data.editing_v2_process_v2_schema import canonical_sha256
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 for _extra in (str(_REPO_ROOT / "tests"), str(_REPO_ROOT / "scripts")):
@@ -253,6 +256,115 @@ def test_each_remote_body_revalidates_the_supplied_revision() -> None:
         for name in names:
             _source, segment = _function(path, name)
             assert validator in segment, f"{path.name}:{name} does not revalidate its revision"
+
+
+def test_the_cache_app_separates_the_narrow_and_broad_revisions(
+    image_surface: Path,
+) -> None:
+    """The artifact-addressing revision is the library's, not the image's.
+
+    The image revision hashes every file under ``src`` and ``configs``, so
+    passing it in as the scientific ``source_revision`` -- which the app used to
+    do -- relocated every cached byte whenever anything anywhere moved.
+    """
+
+    cache = _load(CACHE_APP)
+    narrow = build_cache_implementation_revision(repo_root=image_surface)
+    assert set(narrow["implementation_files"]) == set(CACHE_IMPLEMENTATION_FILES)
+    assert "commit" not in narrow and "serialized_sources" not in narrow
+
+    sources = {
+        relative: cache._file_sha256(image_surface / relative)
+        for relative in cache.serialized_source_paths(image_surface)
+    }
+    body = {
+        "schema": cache.IMAGE_REVISION_SCHEMA,
+        "schema_version": cache.IMAGE_REVISION_SCHEMA_VERSION,
+        "commit": "a" * 40,
+        "tree": "b" * 40,
+        "worktree_clean": True,
+        "serialized_sources": sources,
+    }
+    image_revision = {**body, "image_revision_sha256": cache._sha256(body)}
+    assert (
+        cache.validate_remote_source_revision(
+            narrow, image_revision, remote_root=image_surface
+        )
+        == narrow
+    )
+
+    # The relationship between the two, stated as the structural fact it is:
+    # the image inventory is a superset of the narrow one and agrees on every
+    # shared file. That is what makes the explicit cross-check in the app
+    # currently unreachable -- both sides rehash the same image -- and it is
+    # kept there so a future divergence in either file set becomes loud rather
+    # than silent. Recorded here rather than tested through a stub, because a
+    # test of an unreachable branch proves nothing about the shipped path.
+    assert set(CACHE_IMPLEMENTATION_FILES) <= set(sources)
+    assert all(
+        sources[relative] == narrow["implementation_files"][relative]
+        for relative in CACHE_IMPLEMENTATION_FILES
+    )
+
+    # Both halves refuse a claim that does not match the image.
+    drifted = {**sources, CACHE_IMPLEMENTATION_FILES[0]: "0" * 64}
+    drifted_body = {**body, "serialized_sources": drifted}
+    with pytest.raises(RuntimeError, match="differs in the image"):
+        cache.validate_remote_source_revision(
+            narrow,
+            {**drifted_body, "image_revision_sha256": cache._sha256(drifted_body)},
+            remote_root=image_surface,
+        )
+    forged_files = {**narrow["implementation_files"], CACHE_IMPLEMENTATION_FILES[0]: "1" * 64}
+    forged_body = {
+        "schema": narrow["schema"],
+        "schema_version": narrow["schema_version"],
+        "implementation_files": forged_files,
+        "implementation_files_sha256": canonical_sha256(forged_files),
+    }
+    with pytest.raises(RuntimeError, match="modules that are actually present"):
+        cache.validate_remote_source_revision(
+            {**forged_body, "cache_implementation_sha256": canonical_sha256(forged_body)},
+            image_revision,
+            remote_root=image_surface,
+        )
+
+
+def test_the_rebind_launcher_takes_no_v1_payload_root() -> None:
+    """Defect #10: the raw root was a bare unchecked positional. It is gone.
+
+    Read off the real signature, not off a comment, so reintroducing the
+    argument fails here rather than in review.
+    """
+
+    source = REBIND_APP.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    entrypoint = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "main"
+    )
+    arguments = [argument.arg for argument in entrypoint.args.args]
+    assert arguments[0] == "cache_run_artifact_root"
+    assert "v1_payload_root" not in arguments
+    # `entries_per_task` is the cache's chunk size, so it is not a launcher dial
+    # either: the chunk boundary is the task boundary.
+    assert "entries_per_task" not in arguments
+
+    driver_source = ast.get_source_segment(
+        source, next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "driver")
+    )
+    assert driver_source is not None
+    assert "build_cache_fed_plan" in driver_source
+    assert "v1_payload_root" not in driver_source
+
+
+def test_every_remote_rebind_body_requires_the_production_geometry() -> None:
+    """An oracle-geometry plan cannot be mapped, reduced, or planned remotely."""
+
+    for name in ("prove_one_range", "reduce_rebind", "driver"):
+        _source, segment = _function(REBIND_APP, name)
+        assert "require_production_source_geometry" in segment, name
 
 
 # ---- 2. Real bounded parallelism ----------------------------------------------
