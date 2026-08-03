@@ -678,6 +678,93 @@ def test_rebind_grants_no_training_authority_at_any_level(tmp_path: Path) -> Non
             assert "NO_TRAINING_AUTHORITY" in document["status"]
 
 
+def test_sharding_the_work_cannot_change_the_published_artifact(
+    tmp_path: Path,
+) -> None:
+    """One task per entry must publish exactly what one task for everything does.
+
+    Rerun stability alone does not establish this: that test plans both runs the
+    same way, so a task-count-dependent artifact -- an ordering that follows task
+    boundaries, a per-task counter leaking into a published census, a reduction
+    that is not associative -- reproduces identically in both halves and passes.
+    Sharding is a scheduling decision and must be unobservable in the output, or
+    a rebind executed on N containers is not the artifact that was reviewed.
+    """
+
+    published: list[tuple[Path, list[PurePosixPath]]] = []
+    for name, entries_per_task in (("wide", 1), ("single", 1000)):
+        payload = _build_v1_payload(tmp_path / name / "artifacts")
+        plan = _plan_for(payload, entries_per_task=entries_per_task)
+        published.append((plan, payload))
+
+    (wide_plan, wide_payload), (single_plan, single_payload) = published
+    # The premise: the two plans really do partition the work differently.  A
+    # task never spans two (lane, split) sources, so the coarse plan bottoms out
+    # at one task per source rather than at one task overall.
+    assert len(wide_plan["tasks"]) > len(single_plan["tasks"]) >= 1
+
+    roots = []
+    for plan, payload in ((wide_plan, wide_payload), (single_plan, single_payload)):
+        _execute_all(payload, plan)
+        reduce_process_v2_rebind(plan, artifact_root=payload.artifact_root, repo_root=ROOT)
+        roots.append(_run_root(payload, plan))
+    wide, single = roots
+
+    def _proof_rows(root: Path) -> list[str]:
+        rows: list[str] = []
+        for shard in sorted(root.rglob("proofs.jsonl.gz")):
+            with gzip.open(shard, "rb") as handle:
+                rows.extend(
+                    json.dumps(json.loads(line), sort_keys=True)
+                    for line in handle
+                    if line.strip()
+                )
+        return sorted(rows)
+
+    # The rebound data itself: identical, row for row.
+    wide_rows = _proof_rows(wide)
+    assert wide_rows, "the wide plan published no proof rows to compare"
+    assert wide_rows == _proof_rows(single)
+
+    wide_complete = json.loads((wide / COMPLETION_FILENAME).read_text())
+    single_complete = json.loads((single / COMPLETION_FILENAME).read_text())
+    assert sorted(wide_complete) == sorted(single_complete)
+
+    # The census is reported per task, so its rows follow the schedule; its
+    # TOTALS must not.  A count that changed with the shard count would make
+    # every published census a function of how many containers happened to run.
+    def _totals(complete: Mapping[str, object]) -> dict[str, int]:
+        aggregate: dict[str, int] = {}
+        for row in complete["result_inventory"]:
+            for key, value in row["counts"].items():
+                aggregate[key] = aggregate.get(key, 0) + int(value)
+        return aggregate
+
+    assert _totals(wide_complete) == _totals(single_complete)
+    assert _totals(wide_complete)["source_entries"] > 0
+
+    # Exactly which fields the schedule is allowed to move, as an absolute list.
+    # `entries_per_task` is deliberately part of the run identity, so the plan,
+    # run and task addresses are schedule-dependent BY DESIGN -- the schedule is
+    # part of the provenance.  Pinning the set is what keeps that a design
+    # choice: a newly added schedule-dependent field fails here rather than
+    # quietly making some future artifact unreproducible across a re-shard.
+    assert {
+        key
+        for key in wide_complete
+        if wide_complete[key] != single_complete[key]
+    } == {
+        "completion_sha256",
+        "plan_file_sha256",
+        "plan_sha256",
+        "result_inventory",
+        "result_inventory_sha256",
+        "run_identity_sha256",
+        "task_count",
+        "task_inventory_sha256",
+    }
+
+
 def test_published_rebind_bytes_are_stable_across_an_independent_rerun(
     tmp_path: Path,
 ) -> None:
