@@ -166,6 +166,16 @@ CANDIDATE_TOTAL_FIELDS: tuple[str, ...] = (
     "successor_aliases",
 )
 
+#: A POLICY-EXCLUDED action -- one outside ActionCodecV4, or a multi-neighbour
+#: insert -- publishes `candidate_evidence: null`.  The evaluator never ran, so
+#: there is no evidence to record, and a fabricated zero-filled payload would be
+#: indistinguishable from a real one that happened to measure zero.  Its trace
+#: still carries the trace-level `active8_candidate_excluded` category, which is
+#: what every census counts; no accepted-transition field and no aggregate reads
+#: the per-action reason.  Stated here so a consumer treats null as a declared
+#: value rather than a missing one.
+ACTIVE8_POLICY_EXCLUDED_EVIDENCE = None
+
 # ---- The accepted transition Gate 0 aggregates ----
 
 #: Everything Gate 0 needs, and nothing it must compute.  It carries the cell,
@@ -245,6 +255,12 @@ ACTIVE8_ROW_SHARD_FILENAME = "rows.jsonl.gz"
 
 #: The accepted transitions (`ACCEPTED_TRANSITION_FIELDS`).
 ACTIVE8_DECISION_SHARD_FILENAME = "transitions.jsonl.gz"
+
+#: Run/plan binding and the derived per-task histograms.  A fourth sibling so
+#: the receipt stays exactly `ACTIVE8_RECEIPT_FIELDS`: a derived aggregate does
+#: not belong in the artifact a gate reads to decide eligibility, and widening
+#: the receipt to hold it would break the key-set equality both sides assert.
+ACTIVE8_TASK_SUMMARY_FILENAME = "TASK_SUMMARY.json"
 GATE_ZERO_DECISION_FILENAME = "DECISION.json"
 
 # ---- The release sentinel ----
@@ -291,6 +307,8 @@ SENTINEL_RESULT_FIELDS: tuple[str, ...] = (
 SENTINEL_BLOCKS_COMPLETION = True
 
 __all__ = [
+    "ACTIVE8_TASK_SUMMARY_FILENAME",
+    "ACTIVE8_POLICY_EXCLUDED_EVIDENCE",
     "ACTIVE8_ROW_SHARD_FILENAME",
     "GATE_ZERO_DECISION_FILENAME",
     "ACTIVE8_TASKS_DIRNAME",
