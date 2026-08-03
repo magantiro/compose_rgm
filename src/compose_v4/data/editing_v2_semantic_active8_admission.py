@@ -251,6 +251,39 @@ class SemanticExactCandidateEvidence:
 
 
 @dataclass(frozen=True, slots=True)
+class SemanticExactCandidateAudit:
+    """One evidence object beside the exact-successor mark count behind it.
+
+    ``ProductionSemanticExactCandidateChecker`` has always counted how many of
+    the marks matching the teacher action actually reproduce the exact
+    persistent successor; it used the count to choose an exclusion reason and
+    then discarded it.  A pipeline that publishes candidate evidence across a
+    stage boundary has to carry that count, because it is the only published
+    number that distinguishes "no mark matched the action" from "a mark matched
+    the action but produced another successor".
+
+    The count is surfaced BESIDE the frozen evidence rather than inside it, so
+    the evidence dataclass, its field set and every existing consumer of it are
+    unchanged, and there is still exactly one place the count is computed.
+    """
+
+    evidence: SemanticExactCandidateEvidence
+    exact_successor_mark_count: int
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.evidence, SemanticExactCandidateEvidence):
+            raise ValueError("candidate audit requires exact candidate evidence")
+        if type(self.exact_successor_mark_count) is not int:
+            raise ValueError("exact_successor_mark_count must be an integer")
+        if not 0 <= self.exact_successor_mark_count <= self.evidence.matching_mark_count:
+            raise ValueError(
+                "exact_successor_mark_count must lie within the matching marks it counts"
+            )
+        if self.evidence.supported and self.exact_successor_mark_count == 0:
+            raise ValueError("a supported teacher reproduces at least one exact successor")
+
+
+@dataclass(frozen=True, slots=True)
 class SemanticActive8Exclusion:
     """One Active8 exclusion, distinct from any migration rejection."""
 
@@ -627,6 +660,15 @@ class ProductionSemanticExactCandidateChecker:
         addressed: AddressedPackedTrace,
         step_index: int,
     ) -> SemanticExactCandidateEvidence:
+        return self.evaluate(addressed, step_index).evidence
+
+    def evaluate(
+        self,
+        addressed: AddressedPackedTrace,
+        step_index: int,
+    ) -> SemanticExactCandidateAudit:
+        """Return the evidence and the exact-successor mark count behind it."""
+
         if type(step_index) is not int or not 0 <= step_index < len(addressed.trace.steps):
             raise SemanticActive8AdmissionError(
                 "semantic candidate step_index lies outside the trace"
@@ -674,17 +716,22 @@ class ProductionSemanticExactCandidateChecker:
             reason = "teacher_successor_absent_from_canonical_quotient"
         elif target_key == result.marked_law.source_key:
             reason = "teacher_successor_is_virtual_self_transition"
-        return SemanticExactCandidateEvidence(
-            supported=reason is None,
-            action_sha256=classification.action_sha256,
-            source_state_sha256=source_sha256,
-            target_state_sha256=target_sha256,
-            canonical_successor_key=target_key,
-            raw_mark_count=len(result.marked_law.marks),
-            canonical_successor_count=len(result.batch.successors),
-            matching_mark_count=len(matching_marks),
-            successor_alias_count=(0 if canonical_match is None else canonical_match.alias_count),
-            exclusion_reason=reason,
+        return SemanticExactCandidateAudit(
+            evidence=SemanticExactCandidateEvidence(
+                supported=reason is None,
+                action_sha256=classification.action_sha256,
+                source_state_sha256=source_sha256,
+                target_state_sha256=target_sha256,
+                canonical_successor_key=target_key,
+                raw_mark_count=len(result.marked_law.marks),
+                canonical_successor_count=len(result.batch.successors),
+                matching_mark_count=len(matching_marks),
+                successor_alias_count=(
+                    0 if canonical_match is None else canonical_match.alias_count
+                ),
+                exclusion_reason=reason,
+            ),
+            exact_successor_mark_count=matching_exact,
         )
 
 
@@ -819,6 +866,7 @@ __all__ = [
     "SemanticActive8AdmissionPolicy",
     "SemanticActive8Exclusion",
     "SemanticActive8TraceDecision",
+    "SemanticExactCandidateAudit",
     "SemanticExactCandidateChecker",
     "SemanticExactCandidateEvidence",
     "SemanticMigrationRejection",
