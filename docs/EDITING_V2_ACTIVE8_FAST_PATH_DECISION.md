@@ -1,28 +1,29 @@
 # Editing V2 Active8 fast-path decision
 
-Status: the teacher-support fast path and restart-safe independent-task launcher
-are implemented and verified. A corrective 80-task remote pilot was stopped
+Status: the family-local teacher-admission path and restart-safe independent-task
+launcher are implemented and verified. A corrective 80-task remote pilot was stopped
 after eight hours because its fixed process groups produced unacceptable
 straggler cost. The subsequent three-task operational canary established the
 one-CPU, 4-GiB resource envelope but was censored before its two production-sized
-tasks completed. The release map therefore uses independent, content-addressed
-task invocations with a runtime concurrency bound of at most 80.
+tasks completed. A subsequent production-chunk canary completed 13,597 teacher
+transitions in 61.55 seconds. A separate bounded equivalence panel matched the
+exhaustive admission evidence exactly. The release map therefore uses independent,
+content-addressed task invocations with a runtime concurrency bound of at most 80.
 
 ## Decision
 
-The full-corpus Process-V2 Active8 pass performs exhaustive teacher-support
+The full-corpus Process-V2 Active8 pass performs exact family-local teacher
 validation, not a complete canonical-successor quotient for every transition.
 For each policy-eligible teacher it must:
 
-1. construct the exact production model support masks;
-2. count every legal Active8 mark in those masks;
-3. decode and match the complete teacher ActionV4 identity;
-4. execute the unique matching mark through the production rewrite system;
-5. reproduce the stored persistent-slot successor exactly; and
-6. establish that the canonical successor is productive and non-self.
+1. decode the complete teacher ActionV4 identity and declared family;
+2. establish that it is one legal coordinate of that exact family;
+3. execute the teacher once through the production rewrite system;
+4. reproduce the stored persistent-slot successor exactly; and
+5. establish that the canonical successor is productive and non-self.
 
 It records the source and target state hashes, source and successor canonical
-keys, raw legal-mark count, matching-mark count, and exact-successor mark count.
+keys, coordinate-legality flag, exact-replay flag, and productivity flag.
 Whole-trace admission remains immutable: any unsupported action excludes the
 entire trace.
 
@@ -37,12 +38,19 @@ Active8 answers whether every stored teacher is representable and executable
 under the frozen eight-family process. Constructing and executing every other
 legal successor for every corpus transition is not necessary to answer that
 question and made corpus admission computationally disproportionate. The
-bounded sentinel retains a direct check that the production quotient and its
-alias aggregation agree with the slow reference construction.
+bounded sentinel still reconstructs the complete production quotient and checks
+the shared teacher evidence against the family-local result. T1 separately
+caches complete quotient geometry for its bounded successor-level panels.
 
 This changes computation, not model support. It does not remove candidates,
 change the executor, change canonical identity, weaken whole-trace admission,
 or authorize training.
+
+The accompanying schema migration retires corpus-wide Gate 0 raw-fiber-size
+strata. Gate 0 remains a metadata-only structural gate over exact teacher
+legality, replay, productivity, family and capability-cell coverage, and
+provenance. Full-fiber counts remain measured by the bounded sentinel and T1;
+they are not inferred from the family-local corpus pass.
 
 ## Disabled families
 
@@ -61,7 +69,7 @@ Measured locally on the implementation worktree:
 - reversed input order and multi-item batching preserve evidence exactly;
 - nonzero disabled-family masks fail loudly;
 - the final release-focused Active8, sentinel, publication, Modal-surface, and
-  Gate 0 suite passes 135 tests after the remote-pilot correction;
+  Gate 0 suite passes 569 tests after the remote-pilot correction;
 - both frozen scientific process identities and the frozen V1 Gate 0 file stay
   unchanged.
 
@@ -147,6 +155,26 @@ The canary nevertheless answered its resource question: the hard tasks ran for
 more than one CPU-hour within the one-CPU, 4-GiB envelope without memory growth
 or a runtime error. The old app was stopped after the measurement. No reducer,
 release sentinel, Gate 0, T1, P50, or training ran.
+
+### Family-local production-chunk canary result
+
+The family-local canary launched from clean commit
+`16961fe7d0a4e060625d5b3bf8e2640c29ae1750` as Modal app
+`ap-xEF3dGzAWkx7hAOroMLo03`. On the same full 2,048-row multistep chunk used by
+the earlier progress probe, it processed all 13,597 teacher transitions in
+61.5527 seconds of wall time and 57.6 seconds of process CPU time. Peak resident
+memory was 3,631.53 MB. Query preparation took 14.8307 seconds, and the teacher
+histogram was 6,858 atom deletions and 6,739 atom insertions. The canary emitted
+heartbeats and completed without publishing an Active8 task artifact, reducing,
+running the sentinel, or authorizing any downstream stage.
+
+The independent local 64-query equivalence panel compared the same
+family-local admission evidence with the exhaustive quotient path. Evidence
+digests matched and measured wall time improved from 44.9379 to 1.142617 seconds,
+a 39.3289-fold speedup on that bounded panel. These results establish runtime
+viability and bounded decision equivalence, not full-corpus correctness. The
+machine-readable record is
+`diagnostics/active8/process_v2_active8_family_local_canary_2026-08-04.json`.
 
 ## Release execution architecture
 

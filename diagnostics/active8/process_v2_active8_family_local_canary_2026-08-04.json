@@ -1,0 +1,66 @@
+{
+  "artifact_publication": false,
+  "code_revision": "16961fe7d0a4e060625d5b3bf8e2640c29ae1750",
+  "execution_date": "2026-08-04",
+  "execution_environment": {
+    "cpu_per_container": 1.0,
+    "memory_mb": 4096,
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "python": "3.11",
+    "rdkit": "2024.3.5",
+    "scipy": "1.13.1",
+    "torch": "2.4.0"
+  },
+  "immutable_inputs": {
+    "cache_run_artifact_root": "/artifacts/editing_v2/process_v2_chunk_cache/417dc4125e48c2d6cca3ea49d3ef0ad25d91cc78df047b028f022ec207288039",
+    "rebind_run_artifact_root": "/artifacts/editing_v2/process_v2_rebind/f0a2b8cd85f676d98a053d17cea3276fad0f9e257bc15d59c43682eae5c6b1f3"
+  },
+  "local_bounded_equivalence": {
+    "direct_family_local_queries_per_second": 56.0118,
+    "direct_family_local_wall_seconds": 1.142617,
+    "exhaustive_quotient_queries_per_second": 1.424,
+    "exhaustive_quotient_wall_seconds": 44.9379,
+    "query_count": 64,
+    "same_admission_evidence_sha256": true,
+    "speedup": 39.3289
+  },
+  "modal_execution": {
+    "app_id": "ap-xEF3dGzAWkx7hAOroMLo03",
+    "function_call_id": "fc-01KZ7DGGKVX9V9YYJJQPAMJNFX",
+    "result": {
+      "artifact_published": false,
+      "process_cpu_seconds": 57.6,
+      "process_peak_rss_mb": 3631.53408,
+      "processed_transitions": 13597,
+      "query_preparation_wall_seconds": 14.830712907,
+      "source_query_reuse_fraction": 0.06648525410016916,
+      "teacher_rule_histogram": {
+        "atom_delete": 6858,
+        "atom_insert": 6739
+      },
+      "total_transitions": 13597,
+      "unique_source_state_count": 12693,
+      "wall_seconds": 61.552700767
+    },
+    "task_identity_sha256": "78ffc3977675cb5cad792b32cc2de2ebe3ea90c173e2b0eae1a838e871733ed9",
+    "task_selector": {
+      "chunk_index": 58,
+      "chunk_row_count": 2048,
+      "data_lane": "real_endpoint_multistep_path",
+      "entry_start": 118784,
+      "entry_stop": 120832,
+      "split": "train"
+    }
+  },
+  "randomness": "not_applicable_deterministic_admission",
+  "schema": "compose.diagnostics.process_v2_active8_family_local_canary",
+  "schema_version": 1,
+  "scientific_authority": false,
+  "summary": {
+    "complete_production_chunk_canary_finished": true,
+    "full_corpus_active8_completed": false,
+    "full_corpus_active8_launched": false,
+    "training_launched": false
+  }
+}
