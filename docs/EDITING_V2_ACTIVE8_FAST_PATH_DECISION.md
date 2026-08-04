@@ -1,7 +1,7 @@
 # Editing V2 Active8 fast-path decision
 
-Status: implemented locally, verified by focused tests, not yet benchmarked or
-executed on the production corpus.
+Status: implemented locally and verified by focused tests and a production-shape
+40-slot benchmark. No remote Active8 task has run yet.
 
 ## Decision
 
@@ -55,16 +55,47 @@ Measured locally on the implementation worktree:
 - all eight declared operator families are represented in that comparison;
 - reversed input order and multi-item batching preserve evidence exactly;
 - nonzero disabled-family masks fail loudly;
-- the combined Active8, Gate 0, and Process-V2 contract-chain suite passes
-  160 tests;
+- the final release-focused Active8, sentinel, publication, Modal-surface, and
+  Gate 0 suite passes 122 tests;
 - both frozen scientific process identities and the frozen V1 Gate 0 file stay
   unchanged.
 
-These are focused implementation checks, not production-corpus evidence. A
-production-shape benchmark at 40 persistent slots, hidden width 256, and the
-frozen float32 runtime must pass before remote execution. The benchmark may
-select batch size, CPU, memory, and worker geometry. It may not change support,
-sentinel selection, scientific thresholds, or admission rules.
+These are focused implementation checks, not production-corpus evidence. The
+40-slot benchmark at hidden width 256 and the frozen float32 runtime evaluated
+64 genuine queries, eight from each Active8 family. The batch-8 fast path agreed
+with the slow checker on every query, completed in 20.43 seconds (3.133 queries
+per second), and used 443 MB peak resident memory. The slow path took 42.61
+seconds. The machine-readable diagnostic is
+`/private/tmp/process_v2_active8_teacher_support_benchmark.json`; it is a local
+resource-sizing diagnostic, not an authority-bearing scientific artifact.
+
+## Release execution architecture
+
+The release launcher binds every plan to the exact clean 40-character Git
+commit serialized into the Modal image. Its default invocation submits only the
+prospectively pinned train-role smoke task
+`c3740f704521edb8d1e686c8e39c80d10331919ada12bfd7cb5ed492b8fb21bd`.
+That task is the unique heaviest train task in the frozen plan by admitted
+transition count (14,889 transitions across 2,048 source rows). No validation,
+controller-validation, or final-test aggregate was inspected to choose it.
+
+After the smoke passes, the explicit full invocation uses at most five Modal
+Volume-v1 writer containers. Each container owns 16 CPUs and evaluates at most
+16 independent chunk tasks in spawned, single-threaded subprocesses. Children
+never reload or commit the shared volume. The parent reopens and validates every
+child receipt against the exact plan and run identities before issuing one
+explicit commit. Individual task artifacts are content-addressed and restart
+safe. The group is not described as transactionally atomic because the volume
+may publish background commits; a failed group can therefore leave valid task
+artifacts that a restart safely reuses.
+
+Reduction no longer retains the corpus-wide transition inventory in memory. It
+uses a temporary SQLite index to enforce global source-row uniqueness, derive
+the exact sentinel selection, and retain occurrence payloads only for selected
+pairs. Preparation and finalization independently repeat the same two-pass
+derivation and compare the exact inventories. Both phases request 8 GiB of
+ephemeral scratch disk. This changes execution resources, not corpus support,
+selection semantics, admission, or any scientific threshold.
 
 ## Reuse boundary
 

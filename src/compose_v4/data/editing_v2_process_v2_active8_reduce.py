@@ -23,7 +23,10 @@ from __future__ import annotations
 
 import json
 import re
+import sqlite3
+import tempfile
 from collections.abc import Mapping
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -47,11 +50,14 @@ from compose_v4.data.editing_v2_process_v2_active8_plan import (
 from compose_v4.data.editing_v2_process_v2_active8_sentinel import (
     SELECTION_EXHAUSTIVE,
     ProcessV2Active8SentinelError,
+    create_sentinel_pair_index,
+    index_sentinel_transition,
     load_release_sentinel_partition_result,
-    prepare_release_sentinel_plan,
+    prepare_release_sentinel_plan_from_selection,
     reduce_release_sentinel_partitions,
     require_sentinel_passed,
     run_release_sentinel_partition,
+    select_sentinel_pairs_from_index,
     sentinel_partition_identities,
     validate_release_sentinel_plan,
     write_release_sentinel_partition_result,
@@ -124,6 +130,29 @@ class ProcessV2Active8Incomplete(ProcessV2Active8ReduceError):
     """A planned Active8 task result is absent or does not reconcile."""
 
 
+def _create_reduction_index(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE source_rows (
+            v1_task_identity_sha256 TEXT NOT NULL,
+            entry_index INTEGER NOT NULL,
+            PRIMARY KEY (v1_task_identity_sha256, entry_index)
+        ) WITHOUT ROWID
+        """
+    )
+    create_sentinel_pair_index(connection)
+
+
+def _index_source_row(connection: sqlite3.Connection, row: Mapping[str, Any]) -> None:
+    key = (str(row["v1_task_identity_sha256"]), int(row["entry_index"]))
+    try:
+        connection.execute("INSERT INTO source_rows VALUES (?, ?)", key)
+    except sqlite3.IntegrityError as error:
+        raise ProcessV2Active8ReduceError(
+            f"two Active8 tasks decide the same source entry: {key}"
+        ) from error
+
+
 def task_output_path(
     plan: Mapping[str, Any], task: Mapping[str, Any], *, artifact_root: Path
 ) -> Path:
@@ -179,12 +208,43 @@ def run_process_v2_active8_tasks(
     return receipts
 
 
-def _collect_reduction_inputs(
+def _validated_task_result(
+    plan: Mapping[str, Any],
+    task: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+) -> tuple[Path, dict[str, Any], dict[str, Any]]:
+    identity = str(task["task_identity_sha256"])
+    output = task_output_path(plan, task, artifact_root=artifact_root)
+    if not output.is_dir():
+        raise ProcessV2Active8Incomplete(
+            f"the Active8 run is missing the result of task {identity}"
+        )
+    try:
+        receipt, summary = validate_process_v2_active8_task_result(output)
+    except ProcessV2Active8MapError as error:
+        raise ProcessV2Active8Incomplete(
+            f"the Active8 result of task {identity} does not reconcile"
+        ) from error
+    if (
+        receipt["task_identity_sha256"] != identity
+        or summary["plan_sha256"] != str(plan["plan_sha256"])
+        or summary["run_identity_sha256"] != str(plan["run_identity_sha256"])
+        or summary["binding_sha256"] != str(plan["binding_sha256"])
+    ):
+        raise ProcessV2Active8Incomplete(
+            f"the Active8 result of task {identity} belongs to another run"
+        )
+    return output, receipt, summary
+
+
+def _derive_reduction_inputs(
     plan: Mapping[str, Any],
     *,
     artifact_root: Path,
+    max_sentinel_pairs_per_partition: int,
 ) -> dict[str, Any]:
-    """Recompute all aggregates and the exact map-result inventory."""
+    """Two-pass, disk-indexed derivation of aggregates and sentinel selection."""
 
     census = dict.fromkeys(ACTIVE8_CENSUS_FIELDS, 0)
     totals = dict.fromkeys(CANDIDATE_TOTAL_FIELDS, 0)
@@ -193,74 +253,103 @@ def _collect_reduction_inputs(
     exclusions: dict[str, int] = {}
     inventory: list[list[str]] = []
     content_inventory: list[list[str]] = []
-    transitions: list[dict[str, Any]] = []
-    seen_rows: set[tuple[str, int]] = set()
+    accepted_transitions = 0
+    selection: dict[str, Any]
+    selected_transitions: list[dict[str, Any]] = []
 
-    for task in plan["tasks"]:
-        identity = str(task["task_identity_sha256"])
-        output = task_output_path(plan, task, artifact_root=artifact_root)
-        if not output.is_dir():
-            raise ProcessV2Active8Incomplete(
-                f"the Active8 run is missing the result of task {identity}"
-            )
-        try:
-            receipt, summary = validate_process_v2_active8_task_result(output)
-        except ProcessV2Active8MapError as error:
-            raise ProcessV2Active8Incomplete(
-                f"the Active8 result of task {identity} does not reconcile"
-            ) from error
-        if (
-            receipt["task_identity_sha256"] != identity
-            or summary["plan_sha256"] != str(plan["plan_sha256"])
-            or summary["run_identity_sha256"] != str(plan["run_identity_sha256"])
-            or summary["binding_sha256"] != str(plan["binding_sha256"])
-        ):
-            raise ProcessV2Active8Incomplete(
-                f"the Active8 result of task {identity} belongs to another run"
-            )
-        inventory.append([identity, str(receipt["receipt_sha256"])])
-        content_inventory.append(
-            [
-                identity,
-                str(receipt["receipt_sha256"]),
-                str(summary["summary_sha256"]),
-            ]
-        )
-        rows = read_task_rows(output)
-        task_transitions = read_task_transitions(output)
-        for row in rows:
-            key = (str(row["v1_task_identity_sha256"]), int(row["entry_index"]))
-            if key in seen_rows:
-                raise ProcessV2Active8ReduceError(
-                    f"two Active8 tasks decide the same source entry: {key}"
+    with tempfile.TemporaryDirectory(prefix="compose-active8-reduce-") as temporary:
+        database_path = Path(temporary) / "reduction.sqlite3"
+        with closing(sqlite3.connect(database_path)) as connection:
+            connection.execute("PRAGMA temp_store = FILE")
+            _create_reduction_index(connection)
+
+            # Pass one derives every aggregate and stores only unique pair/cell
+            # membership.  The database enforces the global source-row refusal.
+            for task in plan["tasks"]:
+                identity = str(task["task_identity_sha256"])
+                output, receipt, summary = _validated_task_result(
+                    plan, task, artifact_root=artifact_root
                 )
-            seen_rows.add(key)
-            census["source_entries"] += 1
-            status = str(row["admission_status"])
-            if status == ACCEPTED:
-                census["active8_accepted_entries"] += 1
-            elif status == EXCLUDED:
-                census["active8_excluded_entries"] += 1
-            elif status == NOT_EVALUATED:
-                census["upstream_rejected_entries"] += 1
-            else:
-                raise ProcessV2Active8ReduceError(
-                    f"unknown Active8 admission status: {status!r}"
+                inventory.append([identity, str(receipt["receipt_sha256"])])
+                content_inventory.append(
+                    [
+                        identity,
+                        str(receipt["receipt_sha256"]),
+                        str(summary["summary_sha256"]),
+                    ]
                 )
-            for name, value in derive_candidate_totals(row["actions"]).items():
-                totals[name] += value
-            for name, value in derive_action_family_histogram(row["actions"]).items():
-                families[name] = families.get(name, 0) + value
-            for action in row["actions"]:
-                evidence = action["candidate_evidence"]
-                if evidence is not None and not evidence["supported"]:
-                    reason = str(evidence["exclusion_reason"])
-                    exclusions[reason] = exclusions.get(reason, 0) + 1
-        for transition in task_transitions:
-            cell = transition["capability_cell_id"]
-            if cell is not None:
-                cells[str(cell)] = cells.get(str(cell), 0) + 1
-        transitions.extend(task_transitions)
+                for row in read_task_rows(output):
+                    _index_source_row(connection, row)
+                    census["source_entries"] += 1
+                    status = str(row["admission_status"])
+                    if status == ACCEPTED:
+                        census["active8_accepted_entries"] += 1
+                    elif status == EXCLUDED:
+                        census["active8_excluded_entries"] += 1
+                    elif status == NOT_EVALUATED:
+                        census["upstream_rejected_entries"] += 1
+                    else:
+                        raise ProcessV2Active8ReduceError(
+                            f"unknown Active8 admission status: {status!r}"
+                        )
+                    for name, value in derive_candidate_totals(row["actions"]).items():
+                        totals[name] += value
+                    for name, value in derive_action_family_histogram(row["actions"]).items():
+                        families[name] = families.get(name, 0) + value
+                    for action in row["actions"]:
+                        evidence = action["candidate_evidence"]
+                        if evidence is not None and not evidence["supported"]:
+                            reason = str(evidence["exclusion_reason"])
+                            exclusions[reason] = exclusions.get(reason, 0) + 1
+                for transition in read_task_transitions(output):
+                    accepted_transitions += 1
+                    cell = transition["capability_cell_id"]
+                    if cell is not None:
+                        cells[str(cell)] = cells.get(str(cell), 0) + 1
+                    index_sentinel_transition(connection, transition)
+                connection.commit()
+
+            selection = select_sentinel_pairs_from_index(
+                connection,
+                required_cell_ids=list(plan["binding"]["required_cell_ids"]),
+            )
+            selected_pairs = set(selection["selected"])
+
+            # Pass two rereads accepted transitions but retains occurrence
+            # payloads only for the bounded selected-pair union.
+            second_pass_transitions = 0
+            second_content_inventory: list[list[str]] = []
+            for task in plan["tasks"]:
+                identity = str(task["task_identity_sha256"])
+                output = task_output_path(plan, task, artifact_root=artifact_root)
+                task_transitions = read_task_transitions(output)
+                for transition in task_transitions:
+                    second_pass_transitions += 1
+                    evidence = transition["candidate_evidence"]
+                    pair = (
+                        str(evidence["source_state_sha256"]),
+                        str(evidence["action_sha256"]),
+                    )
+                    if pair in selected_pairs:
+                        selected_transitions.append(transition)
+                del task_transitions
+                _, receipt, summary = _validated_task_result(
+                    plan, task, artifact_root=artifact_root
+                )
+                second_content_inventory.append(
+                    [
+                        identity,
+                        str(receipt["receipt_sha256"]),
+                        str(summary["summary_sha256"]),
+                    ]
+                )
+            if (
+                second_pass_transitions != accepted_transitions
+                or second_content_inventory != content_inventory
+            ):
+                raise ProcessV2Active8Incomplete(
+                    "the Active8 map results changed during bounded reduction"
+                )
 
     if census["source_entries"] != int(plan["expected_entry_count"]):
         raise ProcessV2Active8Incomplete(
@@ -274,6 +363,14 @@ def _collect_reduction_inputs(
     ):
         raise ProcessV2Active8ReduceError("the Active8 run census does not reconcile")
 
+    result_inventory_sha256 = canonical_sha256(inventory)
+    sentinel_plan = prepare_release_sentinel_plan_from_selection(
+        plan,
+        selection,
+        selected_transitions,
+        result_inventory_sha256=result_inventory_sha256,
+        max_pairs_per_partition=max_sentinel_pairs_per_partition,
+    )
     return {
         "census": census,
         "candidate_totals": totals,
@@ -281,10 +378,11 @@ def _collect_reduction_inputs(
         "capability_cell_histogram": dict(sorted(cells.items())),
         "active8_exclusion_histogram": dict(sorted(exclusions.items())),
         "result_inventory": inventory,
-        "result_inventory_sha256": canonical_sha256(inventory),
+        "result_inventory_sha256": result_inventory_sha256,
         "task_result_content_inventory": content_inventory,
         "task_result_content_inventory_sha256": canonical_sha256(content_inventory),
-        "transitions": transitions,
+        "accepted_transitions": accepted_transitions,
+        "sentinel_plan": sentinel_plan,
     }
 
 
@@ -305,19 +403,17 @@ def prepare_process_v2_active8_reduction(
         raise ProcessV2Active8ReduceError(
             "the supplied model runtime is not the one the Active8 plan binds"
         )
-    collected = _collect_reduction_inputs(validated, artifact_root=Path(artifact_root))
-    sentinel_plan = prepare_release_sentinel_plan(
+    collected = _derive_reduction_inputs(
         validated,
-        collected["transitions"],
-        result_inventory_sha256=str(collected["result_inventory_sha256"]),
-        max_pairs_per_partition=max_sentinel_pairs_per_partition,
+        artifact_root=Path(artifact_root),
+        max_sentinel_pairs_per_partition=max_sentinel_pairs_per_partition,
     )
     body = {
         "schema": ACTIVE8_REDUCTION_PREPARED_SCHEMA,
         "schema_version": ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION,
         "status": PIPELINE_STATUS_NO_AUTHORITY,
         **authority_false_block(),
-        "accepted_transitions": len(collected["transitions"]),
+        "accepted_transitions": int(collected["accepted_transitions"]),
         "action_family_histogram": collected["action_family_histogram"],
         "active8_exclusion_histogram": collected["active8_exclusion_histogram"],
         "binding_sha256": str(binding["binding_sha256"]),
@@ -328,21 +424,17 @@ def prepare_process_v2_active8_reduction(
         "plan_sha256": str(validated["plan_sha256"]),
         "result_inventory": collected["result_inventory"],
         "result_inventory_sha256": str(collected["result_inventory_sha256"]),
-        "task_result_content_inventory": collected[
-            "task_result_content_inventory"
-        ],
+        "task_result_content_inventory": collected["task_result_content_inventory"],
         "task_result_content_inventory_sha256": str(
             collected["task_result_content_inventory_sha256"]
         ),
         "run_artifact_root": str(validated["run_artifact_root"]),
         "run_identity_sha256": str(validated["run_identity_sha256"]),
-        "sentinel_plan": sentinel_plan,
+        "sentinel_plan": collected["sentinel_plan"],
         "task_inventory_sha256": str(validated["task_inventory_sha256"]),
     }
     prepared = self_hashed(body, field="preparation_sha256")
-    validate_process_v2_active8_reduction_preparation(
-        prepared, active8_plan=validated
-    )
+    validate_process_v2_active8_reduction_preparation(prepared, active8_plan=validated)
     if publish:
         run_root = mounted_process_v2_artifact_path(
             str(validated["run_artifact_root"]),
@@ -366,12 +458,8 @@ def validate_process_v2_active8_reduction_preparation(
 ) -> dict[str, Any]:
     """Authenticate the frozen handoff between map and sentinel workers."""
 
-    if not isinstance(value, Mapping) or set(value) != set(
-        ACTIVE8_REDUCTION_PREPARED_FIELDS
-    ):
-        raise ProcessV2Active8ReduceError(
-            "the Active8 reduction preparation field set disagrees"
-        )
+    if not isinstance(value, Mapping) or set(value) != set(ACTIVE8_REDUCTION_PREPARED_FIELDS):
+        raise ProcessV2Active8ReduceError("the Active8 reduction preparation field set disagrees")
     prepared = dict(value)
     verify_self_hash(
         prepared,
@@ -380,14 +468,11 @@ def validate_process_v2_active8_reduction_preparation(
     )
     if (
         prepared["schema"] != ACTIVE8_REDUCTION_PREPARED_SCHEMA
-        or prepared["schema_version"]
-        != ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION
+        or prepared["schema_version"] != ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION
         or prepared["status"] != PIPELINE_STATUS_NO_AUTHORITY
         or prepared["classification_affects_admission"] is not False
     ):
-        raise ProcessV2Active8ReduceError(
-            "the Active8 reduction preparation contract disagrees"
-        )
+        raise ProcessV2Active8ReduceError("the Active8 reduction preparation contract disagrees")
     for field, false_value in authority_false_block().items():
         if prepared[field] is not false_value:
             raise ProcessV2Active8ReduceError(
@@ -412,8 +497,7 @@ def validate_process_v2_active8_reduction_preparation(
             not isinstance(item, list)
             or len(item) != 2
             or any(
-                not isinstance(digest, str) or _SHA256.fullmatch(digest) is None
-                for digest in item
+                not isinstance(digest, str) or _SHA256.fullmatch(digest) is None for digest in item
             )
             for item in inventory
         )
@@ -431,14 +515,12 @@ def validate_process_v2_active8_reduction_preparation(
             not isinstance(item, list)
             or len(item) != 3
             or any(
-                not isinstance(digest, str) or _SHA256.fullmatch(digest) is None
-                for digest in item
+                not isinstance(digest, str) or _SHA256.fullmatch(digest) is None for digest in item
             )
             for item in content_inventory
         )
         or [item[:2] for item in content_inventory] != inventory
-        or canonical_sha256(content_inventory)
-        != prepared["task_result_content_inventory_sha256"]
+        or canonical_sha256(content_inventory) != prepared["task_result_content_inventory_sha256"]
     ):
         raise ProcessV2Active8ReduceError(
             "the Active8 reduction preparation content inventory disagrees"
@@ -457,9 +539,7 @@ def validate_process_v2_active8_reduction_preparation(
         raise ProcessV2Active8ReduceError(
             "the Active8 reduction preparation census does not reconcile"
         )
-    if type(prepared["accepted_transitions"]) is not int or prepared[
-        "accepted_transitions"
-    ] < 0:
+    if type(prepared["accepted_transitions"]) is not int or prepared["accepted_transitions"] < 0:
         raise ProcessV2Active8ReduceError(
             "the Active8 reduction preparation transition count is invalid"
         )
@@ -488,9 +568,7 @@ def validate_process_v2_active8_reduction_preparation(
         )
     except ProcessV2Active8SentinelError as error:
         raise ProcessV2Active8ReduceError(str(error)) from error
-    if sentinel_plan["result_inventory_sha256"] != prepared[
-        "result_inventory_sha256"
-    ]:
+    if sentinel_plan["result_inventory_sha256"] != prepared["result_inventory_sha256"]:
         raise ProcessV2Active8ReduceError(
             "the Active8 reduction preparation and sentinel plan disagree"
         )
@@ -545,12 +623,8 @@ def load_process_v2_active8_reduction_preparation(
             "the Active8 reduction preparation is not valid JSON"
         ) from error
     if canonical_bytes(prepared) + b"\n" != raw:
-        raise ProcessV2Active8ReduceError(
-            "the Active8 reduction preparation is not canonical JSON"
-        )
-    return validate_process_v2_active8_reduction_preparation(
-        prepared, active8_plan=active8_plan
-    )
+        raise ProcessV2Active8ReduceError("the Active8 reduction preparation is not canonical JSON")
+    return validate_process_v2_active8_reduction_preparation(prepared, active8_plan=active8_plan)
 
 
 def run_process_v2_active8_sentinel_partition(
@@ -601,11 +675,15 @@ def _require_current_result_inventory(
     *,
     artifact_root: Path,
 ) -> None:
-    """Re-derive the complete preparation from current immutable map bytes."""
+    """Re-run the same bounded derivation from current immutable map bytes."""
 
-    current = _collect_reduction_inputs(plan, artifact_root=Path(artifact_root))
+    current = _derive_reduction_inputs(
+        plan,
+        artifact_root=Path(artifact_root),
+        max_sentinel_pairs_per_partition=int(prepared["sentinel_plan"]["max_pairs_per_partition"]),
+    )
     comparisons = {
-        "accepted_transitions": len(current["transitions"]),
+        "accepted_transitions": current["accepted_transitions"],
         "action_family_histogram": current["action_family_histogram"],
         "active8_exclusion_histogram": current["active8_exclusion_histogram"],
         "candidate_totals": current["candidate_totals"],
@@ -614,29 +692,14 @@ def _require_current_result_inventory(
         "result_inventory": current["result_inventory"],
         "result_inventory_sha256": current["result_inventory_sha256"],
         "task_result_content_inventory": current["task_result_content_inventory"],
-        "task_result_content_inventory_sha256": current[
-            "task_result_content_inventory_sha256"
-        ],
+        "task_result_content_inventory_sha256": current["task_result_content_inventory_sha256"],
+        "sentinel_plan": current["sentinel_plan"],
     }
     for field, observed in comparisons.items():
         if canonical_bytes(prepared[field]) != canonical_bytes(observed):
             raise ProcessV2Active8Incomplete(
                 f"the Active8 map-result {field} changed after sentinel preparation"
             )
-    rebuilt_sentinel_plan = prepare_release_sentinel_plan(
-        plan,
-        current["transitions"],
-        result_inventory_sha256=str(current["result_inventory_sha256"]),
-        max_pairs_per_partition=int(
-            prepared["sentinel_plan"]["max_pairs_per_partition"]
-        ),
-    )
-    if canonical_bytes(rebuilt_sentinel_plan) != canonical_bytes(
-        prepared["sentinel_plan"]
-    ):
-        raise ProcessV2Active8Incomplete(
-            "the Active8 sentinel selection no longer derives from the map results"
-        )
 
 
 def finalize_process_v2_active8_reduction(
@@ -664,9 +727,7 @@ def finalize_process_v2_active8_reduction(
             raise ProcessV2Active8Incomplete(
                 "the published Active8 reduction preparation differs from finalization"
             )
-    _require_current_result_inventory(
-        validated, preparation, artifact_root=Path(artifact_root)
-    )
+    _require_current_result_inventory(validated, preparation, artifact_root=Path(artifact_root))
     effective_results = list(partition_results)
     if publish:
         partition_ids = sentinel_partition_identities(preparation["sentinel_plan"])
@@ -680,18 +741,14 @@ def finalize_process_v2_active8_reduction(
             for identity in partition_ids
         ]
         supplied_by_identity = {
-            str(result.get("partition_identity_sha256")): result
-            for result in effective_results
+            str(result.get("partition_identity_sha256")): result for result in effective_results
         }
         if (
             len(supplied_by_identity) != len(effective_results)
             or set(supplied_by_identity) != set(partition_ids)
             or any(
-                canonical_bytes(supplied_by_identity[identity])
-                != canonical_bytes(published)
-                for identity, published in zip(
-                    partition_ids, published_results, strict=True
-                )
+                canonical_bytes(supplied_by_identity[identity]) != canonical_bytes(published)
+                for identity, published in zip(partition_ids, published_results, strict=True)
             )
         ):
             raise ProcessV2Active8Incomplete(
@@ -720,14 +777,10 @@ def finalize_process_v2_active8_reduction(
         **authority_false_block(),
         "accepted_transitions": int(preparation["accepted_transitions"]),
         "action_family_histogram": dict(preparation["action_family_histogram"]),
-        "active8_exclusion_histogram": dict(
-            preparation["active8_exclusion_histogram"]
-        ),
+        "active8_exclusion_histogram": dict(preparation["active8_exclusion_histogram"]),
         "binding_sha256": str(preparation["binding_sha256"]),
         "candidate_totals": dict(preparation["candidate_totals"]),
-        "capability_cell_histogram": dict(
-            preparation["capability_cell_histogram"]
-        ),
+        "capability_cell_histogram": dict(preparation["capability_cell_histogram"]),
         "census": dict(preparation["census"]),
         "classification_affects_admission": False,
         "plan_sha256": str(preparation["plan_sha256"]),
@@ -844,8 +897,7 @@ def validate_process_v2_active8_completion(
             not isinstance(item, list)
             or len(item) != 2
             or not all(
-                isinstance(value, str) and _SHA256.fullmatch(value) is not None
-                for value in item
+                isinstance(value, str) and _SHA256.fullmatch(value) is not None for value in item
             )
             for item in inventory
         )
@@ -869,9 +921,7 @@ def validate_process_v2_active8_completion(
     ):
         value = completion[field]
         if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
-            raise ProcessV2Active8ReduceError(
-                f"the Active8 completion {field} is not a SHA-256"
-            )
+            raise ProcessV2Active8ReduceError(f"the Active8 completion {field} is not a SHA-256")
     census = completion["census"]
     if not isinstance(census, Mapping) or set(census) != set(ACTIVE8_CENSUS_FIELDS):
         raise ProcessV2Active8ReduceError("the Active8 completion census field set disagrees")
@@ -910,9 +960,7 @@ def validate_process_v2_active8_completion(
             or any(not isinstance(key, str) for key in aggregate)
             or any(type(value) is not int or value < 0 for value in aggregate.values())
         ):
-            raise ProcessV2Active8ReduceError(
-                f"the Active8 completion {field} is malformed"
-            )
+            raise ProcessV2Active8ReduceError(f"the Active8 completion {field} is malformed")
     try:
         require_sentinel_passed(
             completion["sentinel"],

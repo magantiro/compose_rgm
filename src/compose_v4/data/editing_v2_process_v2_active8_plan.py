@@ -27,18 +27,24 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from compose_v4.data.editing_process_v2_rebind import (
+    COMPLETION_SCHEMA as REBIND_COMPLETION_SCHEMA,
+)
 from compose_v4.data.editing_process_v2_rebind import (
     PRODUCTION_SOURCE_GEOMETRY,
     chunk_target_for_task,
     mounted_process_v2_artifact_path,
     require_production_source_geometry,
 )
-from compose_v4.data.editing_process_v2_rebind import (
-    COMPLETION_SCHEMA as REBIND_COMPLETION_SCHEMA,
+from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    SemanticActive8AdmissionPolicy,
+    build_process_v2_semantic_active8_admission_policy,
+    validate_process_v2_semantic_active8_admission_policy,
 )
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     ProcessV2ChunkTarget,
@@ -59,17 +65,12 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     self_hashed,
     verify_self_hash,
 )
+from compose_v4.data.editing_v2_semantic_capability_cells import (
+    load_semantic_capability_cell_registry,
+)
 from compose_v4.data.immutable_artifact import (
     ImmutableArtifactError,
     write_bytes_if_absent,
-)
-from compose_v4.data.editing_v2_process_v2_active8_admission import (
-    SemanticActive8AdmissionPolicy,
-    build_process_v2_semantic_active8_admission_policy,
-    validate_process_v2_semantic_active8_admission_policy,
-)
-from compose_v4.data.editing_v2_semantic_capability_cells import (
-    load_semantic_capability_cell_registry,
 )
 from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
     load_semantic_development_cell_roles,
@@ -81,7 +82,9 @@ TASK_DIRNAME = ACTIVE8_TASKS_DIRNAME
 PLAN_FILENAME = "PROCESS_V2_ACTIVE8_PLAN.json"
 
 BINDING_SCHEMA = "compose.data.editing_v2_process_v2_active8_binding"
-BINDING_SCHEMA_VERSION = 1
+BINDING_SCHEMA_VERSION = 2
+
+_GIT_COMMIT_LENGTH = 40
 
 #: Exactly the modules that decide, classify or publish an Active8 answer.  A
 #: change to any of them relocates the run rather than silently reusing it.
@@ -124,6 +127,7 @@ BINDING_FIELDS: frozenset[str] = frozenset(
         "capability_cell_registry_sha256",
         "cell_role_policy_sha256",
         "code_revision_sha256",
+        "execution_commit",
         "implementation_files_sha256",
         "model_runtime",
         "process_v2_identity_sha256",
@@ -192,6 +196,21 @@ def _file_sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def _repository_commit(repo_root: Path) -> str:
+    try:
+        return subprocess.run(
+            ("git", "rev-parse", "HEAD"),
+            cwd=Path(repo_root),
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise ProcessV2Active8PlanError(
+            "the Active8 binding requires an explicit execution commit outside a Git tree"
+        ) from error
+
+
 def implementation_files_sha256(*, repo_root: Path) -> dict[str, str]:
     """Hash every module whose contents change an Active8 answer."""
 
@@ -228,9 +247,7 @@ def model_runtime_descriptor(runtime: Any) -> dict[str, Any]:
         "max_atoms": int(architecture.max_atoms),
         "message_passing_steps": int(architecture.message_passing_steps),
         "model_identity_sha256": canonical_sha256(dict(runtime.semantic_model_identity)),
-        "operator_capability_fingerprint": str(
-            architecture.operator_capability_fingerprint
-        ),
+        "operator_capability_fingerprint": str(architecture.operator_capability_fingerprint),
         "semantic_model_process_contract_sha256": str(
             runtime.semantic_model_process_contract_sha256
         ),
@@ -247,6 +264,7 @@ def build_process_v2_active8_binding(
     rebind_completion: Mapping[str, Any],
     admitted_source_identity: Mapping[str, Any],
     model_runtime: Mapping[str, Any],
+    execution_commit: str | None = None,
     repo_root: Path,
     policy: SemanticActive8AdmissionPolicy | None = None,
 ) -> dict[str, Any]:
@@ -255,6 +273,15 @@ def build_process_v2_active8_binding(
     selected = validate_process_v2_semantic_active8_admission_policy(
         policy or build_process_v2_semantic_active8_admission_policy()
     )
+    selected_commit = (
+        _repository_commit(Path(repo_root)) if execution_commit is None else execution_commit
+    )
+    if (
+        not isinstance(selected_commit, str)
+        or len(selected_commit) != _GIT_COMMIT_LENGTH
+        or any(character not in "0123456789abcdef" for character in selected_commit)
+    ):
+        raise ProcessV2Active8PlanError("the execution commit must be a full lowercase Git commit")
     if sorted(model_runtime) != list(MODEL_RUNTIME_FIELDS):
         raise ProcessV2Active8PlanError("the bound model runtime descriptor is incomplete")
     if rebind_completion.get("schema") != REBIND_COMPLETION_SCHEMA:
@@ -275,9 +302,7 @@ def build_process_v2_active8_binding(
     if str(admitted_source_identity["plan_sha256"]) != str(rebind_plan["plan_sha256"]):
         raise ProcessV2Active8PlanError("the bound admitted source resolves another rebind plan")
     cache_binding = rebind_plan["cache_binding"]
-    if str(cache_binding["cache_completion_sha256"]) != str(
-        cache_completion["completion_sha256"]
-    ):
+    if str(cache_binding["cache_completion_sha256"]) != str(cache_completion["completion_sha256"]):
         raise ProcessV2Active8PlanError(
             "the bound chunk cache is not the one the rebind was planned against"
         )
@@ -290,16 +315,13 @@ def build_process_v2_active8_binding(
         "active8_policy_sha256": selected.policy_sha256,
         "admitted_source_sha256": str(admitted_source_identity["admitted_source_sha256"]),
         "cache_completion_sha256": str(cache_completion["completion_sha256"]),
-        "cache_physical_identity_sha256": str(
-            cache_completion["cache_physical_identity_sha256"]
-        ),
+        "cache_physical_identity_sha256": str(cache_completion["cache_physical_identity_sha256"]),
         "cache_run_artifact_root": str(cache_completion["run_artifact_root"]),
-        "cache_semantic_identity_sha256": str(
-            cache_binding["cache_semantic_identity_sha256"]
-        ),
+        "cache_semantic_identity_sha256": str(cache_binding["cache_semantic_identity_sha256"]),
         "capability_cell_registry_sha256": registry.registry_sha256,
         "cell_role_policy_sha256": cell_roles.policy_sha256,
         "code_revision_sha256": canonical_sha256(revision),
+        "execution_commit": selected_commit,
         "implementation_files_sha256": dict(revision),
         "model_runtime": dict(model_runtime),
         "process_v2_identity_sha256": live_identity,
@@ -363,9 +385,7 @@ def plan_process_v2_active8(
         raise ProcessV2Active8PlanError("the Active8 binding field set disagrees")
     verify_self_hash(binding, field="binding_sha256", label="the Active8 binding")
     require_process_v2_artifact_path(output_artifact_prefix, field="output_artifact_prefix")
-    geometry = require_production_source_geometry(
-        rebind_plan, label="the Process-V2 rebind plan"
-    )
+    geometry = require_production_source_geometry(rebind_plan, label="the Process-V2 rebind plan")
     if str(rebind_plan["plan_sha256"]) != str(binding["rebind_plan_sha256"]):
         raise ProcessV2Active8PlanError("the Active8 binding names another rebind plan")
     pinned = str(rebind_plan["pinned_process_identity"]["process_identity_sha256"])
@@ -456,7 +476,18 @@ def validate_process_v2_active8_plan(
     binding = plan["binding"]
     if not isinstance(binding, Mapping) or set(binding) != BINDING_FIELDS:
         raise ProcessV2Active8PlanError("the Active8 plan binding field set disagrees")
+    if binding["schema"] != BINDING_SCHEMA or binding["schema_version"] != BINDING_SCHEMA_VERSION:
+        raise ProcessV2Active8PlanError("the Active8 plan binding schema disagrees")
     verify_self_hash(binding, field="binding_sha256", label="the Active8 plan binding")
+    execution_commit = binding["execution_commit"]
+    if (
+        not isinstance(execution_commit, str)
+        or len(execution_commit) != _GIT_COMMIT_LENGTH
+        or any(character not in "0123456789abcdef" for character in execution_commit)
+    ):
+        raise ProcessV2Active8PlanError(
+            "the Active8 plan does not bind a full lowercase execution commit"
+        )
     if plan["binding_sha256"] != binding["binding_sha256"]:
         raise ProcessV2Active8PlanError("the Active8 plan and its binding disagree")
     tasks = plan["tasks"]
@@ -476,9 +507,7 @@ def validate_process_v2_active8_plan(
             raise ProcessV2Active8PlanError("an Active8 task identity disagrees with its body")
         if task["binding_sha256"] != binding["binding_sha256"]:
             raise ProcessV2Active8PlanError("an Active8 task binds another input set")
-        expected_path = (
-            f"{plan['run_artifact_root']}/{TASK_DIRNAME}/{task['task_identity_sha256']}"
-        )
+        expected_path = f"{plan['run_artifact_root']}/{TASK_DIRNAME}/{task['task_identity_sha256']}"
         if task["output_artifact_path"] != expected_path:
             raise ProcessV2Active8PlanError("an Active8 task publishes outside its run namespace")
         identities.append(str(task["task_identity_sha256"]))
@@ -551,18 +580,14 @@ def load_process_v2_active8_plan(
 
     source = Path(path)
     if source.name != PLAN_FILENAME:
-        raise ProcessV2Active8PlanError(
-            f"the Active8 plan must be named {PLAN_FILENAME}"
-        )
+        raise ProcessV2Active8PlanError(f"the Active8 plan must be named {PLAN_FILENAME}")
     try:
         raw = source.read_bytes()
         value = json.loads(raw)
     except OSError as error:
         raise ProcessV2Active8PlanError(f"the Active8 plan is absent: {source}") from error
     except json.JSONDecodeError as error:
-        raise ProcessV2Active8PlanError(
-            f"the Active8 plan is not valid JSON: {source}"
-        ) from error
+        raise ProcessV2Active8PlanError(f"the Active8 plan is not valid JSON: {source}") from error
     if canonical_bytes(value) + b"\n" != raw:
         raise ProcessV2Active8PlanError("the Active8 plan is not canonical JSON")
     return validate_process_v2_active8_plan(value, repo_root=Path(repo_root))

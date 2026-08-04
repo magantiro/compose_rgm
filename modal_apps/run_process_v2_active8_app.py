@@ -2,10 +2,11 @@
 
 This is orchestration only.  The production library owns planning, teacher
 support, immutable publication, reduction and the sentinel.  One invocation
-handles a deterministic task partition; two simultaneous invocations with
-``--partition-count 2`` use two independent 40-container queues without ever
-addressing the same task.  A final invocation with ``--reduce`` reuses every
-validated task, runs the parallel sentinel, and publishes completion.
+handles a deterministic task partition. At most five Volume-v1 writer
+containers run concurrently; each owns 16 CPUs and may evaluate 16 independent
+chunks in spawned subprocesses before its parent validates the whole group and
+commits once. A final invocation with ``--reduce`` reuses every validated task,
+runs the parallel sentinel, and publishes completion.
 
 Importing this module launches nothing.  Run only from the exact clean commit.
 Every returned envelope keeps downstream authority explicitly false.
@@ -16,10 +17,12 @@ from __future__ import annotations
 import hashlib
 import importlib.metadata
 import json
+import multiprocessing
 import platform
 import re
 import subprocess
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -36,13 +39,19 @@ RUNTIME_CONTRACT_SOURCE = "configs/editing_v2_process_v2_active8_decision_runtim
 SEMANTIC_CONTRACT_SOURCE = "configs/editing_gate_zero_semantic_model_process_v2.json"
 OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_active8"
 
-MAX_MAP_CONTAINERS = 40
-MAP_CPU = 1.0
-MAP_MEMORY_MB = 8192
+MAX_MAP_CONTAINERS = 5
+MAP_CPU = 16.0
+TASK_PROCESSES_PER_CONTAINER = 16
+# The pinned one-task smoke validates this request before 16 subprocesses are
+# authorized. 128 GiB overstates the measured 8 GiB/task operating point and
+# is unnecessarily difficult to schedule; 64 GiB is the staged launch request.
+MAP_MEMORY_MB = 64 * 1024
 MAP_TIMEOUT_SECONDS = 12 * 3600
 SENTINEL_TIMEOUT_SECONDS = 6 * 3600
 SERIAL_TIMEOUT_SECONDS = 4 * 3600
+REDUCTION_EPHEMERAL_DISK_MB = 8192
 DEFAULT_SENTINEL_PAIRS_PER_PARTITION = 256
+DEFAULT_SMOKE_TASK_IDENTITY = "c3740f704521edb8d1e686c8e39c80d10331919ada12bfd7cb5ed492b8fb21bd"
 
 REVISION_SCHEMA = "compose.data.process_v2_active8_modal_image_revision"
 REVISION_SCHEMA_VERSION = 1
@@ -73,9 +82,7 @@ for source_directory in IMAGE_SOURCE_DIRECTORIES:
         copy=True,
         ignore=("**/__pycache__/**", "**/*.pyc"),
     )
-image = image.add_local_file(
-    ROOT / LAUNCHER_SOURCE, str(REMOTE_ROOT / LAUNCHER_SOURCE), copy=True
-)
+image = image.add_local_file(ROOT / LAUNCHER_SOURCE, str(REMOTE_ROOT / LAUNCHER_SOURCE), copy=True)
 
 app = modal.App("compose-v4-process-v2-active8")
 artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missing=False)
@@ -146,8 +153,7 @@ def local_image_revision(*, expected_commit: str, repo_root: Path = ROOT) -> dic
     if commit != expected_commit or dirty:
         raise RuntimeError("Process-V2 Active8 launch requires the exact clean commit")
     sources = {
-        relative: _file_sha256(root / relative)
-        for relative in _serialized_source_paths(root)
+        relative: _file_sha256(root / relative) for relative in _serialized_source_paths(root)
     }
     tracked = set(_git(root, "ls-files").splitlines())
     if not set(sources).issubset(tracked):
@@ -199,15 +205,22 @@ def _imports() -> dict[str, Any]:
     )
     from compose_v4.data.editing_process_v2_rebind import (
         COMPLETION_FILENAME as REBIND_COMPLETION_FILENAME,
+    )
+    from compose_v4.data.editing_process_v2_rebind import (
         PLAN_FILENAME as REBIND_PLAN_FILENAME,
+    )
+    from compose_v4.data.editing_process_v2_rebind import (
         load_process_v2_rebind_plan,
         mounted_process_v2_artifact_path,
     )
     from compose_v4.data.editing_v2_process_v2_active8_map import (
         execute_process_v2_active8_task,
+        validate_process_v2_active8_task_result,
     )
     from compose_v4.data.editing_v2_process_v2_active8_plan import (
         PLAN_FILENAME as ACTIVE8_PLAN_FILENAME,
+    )
+    from compose_v4.data.editing_v2_process_v2_active8_plan import (
         build_process_v2_active8_binding,
         load_process_v2_active8_plan,
         model_runtime_descriptor,
@@ -248,31 +261,22 @@ def _imports() -> dict[str, Any]:
         "load_process_v2_rebind_plan": load_process_v2_rebind_plan,
         "mounted_process_v2_artifact_path": mounted_process_v2_artifact_path,
         "execute_process_v2_active8_task": execute_process_v2_active8_task,
+        "validate_process_v2_active8_task_result": (validate_process_v2_active8_task_result),
         "ACTIVE8_PLAN_FILENAME": ACTIVE8_PLAN_FILENAME,
         "build_process_v2_active8_binding": build_process_v2_active8_binding,
         "load_process_v2_active8_plan": load_process_v2_active8_plan,
         "model_runtime_descriptor": model_runtime_descriptor,
         "plan_process_v2_active8": plan_process_v2_active8,
         "write_process_v2_active8_plan": write_process_v2_active8_plan,
-        "completed_process_v2_active8_task_ids": (
-            completed_process_v2_active8_task_ids
-        ),
-        "finalize_process_v2_active8_reduction": (
-            finalize_process_v2_active8_reduction
-        ),
+        "completed_process_v2_active8_task_ids": (completed_process_v2_active8_task_ids),
+        "finalize_process_v2_active8_reduction": (finalize_process_v2_active8_reduction),
         "load_process_v2_active8_reduction_preparation": (
             load_process_v2_active8_reduction_preparation
         ),
         "prepare_process_v2_active8_reduction": prepare_process_v2_active8_reduction,
-        "run_process_v2_active8_sentinel_partition": (
-            run_process_v2_active8_sentinel_partition
-        ),
-        "completed_release_sentinel_partition_ids": (
-            completed_release_sentinel_partition_ids
-        ),
-        "load_release_sentinel_partition_result": (
-            load_release_sentinel_partition_result
-        ),
+        "run_process_v2_active8_sentinel_partition": (run_process_v2_active8_sentinel_partition),
+        "completed_release_sentinel_partition_ids": (completed_release_sentinel_partition_ids),
+        "load_release_sentinel_partition_result": (load_release_sentinel_partition_result),
         "sentinel_partition_identities": sentinel_partition_identities,
         "load_committed_process_v2_chunk_cache_completion": (
             load_committed_process_v2_chunk_cache_completion
@@ -308,9 +312,7 @@ def _runtime() -> Any:
         "rdkit": importlib.metadata.version("rdkit"),
     }
     if observed_software != payload["software"]:
-        raise RuntimeError(
-            f"Process-V2 Active8 software differs: {observed_software}"
-        )
+        raise RuntimeError(f"Process-V2 Active8 software differs: {observed_software}")
     model = payload["model"]
     torch.set_num_threads(1)
     config = loaded["SemanticScratchModelConfig"](
@@ -323,9 +325,7 @@ def _runtime() -> Any:
         atom_vocabulary_class_count=int(model["atom_vocabulary_class_count"]),
         catalog_fingerprint=str(model["catalog_fingerprint"]),
     )
-    semantic = loaded["load_gate_zero_semantic_contract"](
-        REMOTE_ROOT / SEMANTIC_CONTRACT_SOURCE
-    )
+    semantic = loaded["load_gate_zero_semantic_contract"](REMOTE_ROOT / SEMANTIC_CONTRACT_SOURCE)
     _RUNTIME = loaded["build_semantic_scratch_runtime"](config, semantic)
     descriptor = loaded["model_runtime_descriptor"](_RUNTIME)
     for field in (
@@ -353,6 +353,13 @@ def _active8_plan_path(plan: dict[str, Any]) -> Path:
     return root / loaded["ACTIVE8_PLAN_FILENAME"]
 
 
+def _require_plan_revision(plan: dict[str, Any], revision: dict[str, Any]) -> None:
+    """Require the plan namespace to bind the exact validated execution commit."""
+
+    if plan.get("binding", {}).get("execution_commit") != revision.get("commit"):
+        raise RuntimeError("the Active8 plan execution commit differs from the image revision")
+
+
 def _partition_task_ids(
     plan: dict[str, Any],
     *,
@@ -372,6 +379,86 @@ def _partition_task_ids(
         if index % partition_count == partition_index
         and str(task["task_identity_sha256"]) not in completed
     ]
+
+
+def _task_groups(plan: dict[str, Any], task_ids: list[str], *, group_size: int) -> list[list[str]]:
+    """Build deterministic bounded groups in the supplied plan order."""
+
+    if type(group_size) is not int or group_size <= 0 or group_size > TASK_PROCESSES_PER_CONTAINER:
+        raise ValueError(f"group_size must lie in [1, {TASK_PROCESSES_PER_CONTAINER}]")
+    if len(task_ids) != len(set(task_ids)):
+        raise ValueError("an Active8 task group input repeats an identity")
+    planned = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
+    if not set(task_ids).issubset(planned):
+        raise ValueError("an Active8 task group input names an unplanned task")
+    groups = [task_ids[start : start + group_size] for start in range(0, len(task_ids), group_size)]
+    return groups
+
+
+def _submission_groups(
+    plan: dict[str, Any],
+    missing: list[str],
+    *,
+    completed: set[str],
+    group_size: int,
+    group_limit: int,
+    smoke_task_identity: str,
+) -> list[list[str]]:
+    """Select either the exact smoke task or an explicitly bounded full map."""
+
+    if type(group_limit) is not int or group_limit < 0:
+        raise ValueError("group_limit must be a nonnegative integer")
+    planned = {str(task["task_identity_sha256"]) for task in plan["tasks"]}
+    if smoke_task_identity:
+        if smoke_task_identity not in planned:
+            raise ValueError("the exact Active8 smoke task is absent from the plan")
+        if smoke_task_identity in completed:
+            return []
+        if smoke_task_identity not in missing:
+            raise ValueError("the exact Active8 smoke task is outside the selected partition")
+        return [[smoke_task_identity]]
+    groups = _task_groups(plan, missing, group_size=group_size)
+    return groups if group_limit == 0 else groups[:group_limit]
+
+
+def _execute_one_chunk_process(
+    plan_path: str, task_identity_sha256: str, revision: dict[str, Any]
+) -> dict[str, str]:
+    """Subprocess body. It never calls Volume reload or commit."""
+
+    import torch
+
+    _validate_remote_revision(revision)
+    loaded = _imports()
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
+    with torch.inference_mode():
+        receipt = loaded["execute_process_v2_active8_task"](
+            plan,
+            task_identity_sha256,
+            runtime=_runtime(),
+            artifact_root=ARTIFACT_ROOT,
+            repo_root=REMOTE_ROOT,
+        )
+    return {
+        "task_identity_sha256": str(receipt["task_identity_sha256"]),
+        "receipt_sha256": str(receipt["receipt_sha256"]),
+    }
+
+
+def _collect_process_results(futures: dict[Any, str]) -> dict[str, dict[str, str]]:
+    """Collect an exact subprocess result set, propagating any child failure."""
+
+    results: dict[str, dict[str, str]] = {}
+    for future in as_completed(futures):
+        result = future.result()
+        identity = str(result["task_identity_sha256"])
+        if identity != futures[future] or identity in results:
+            raise RuntimeError("an Active8 child returned another task identity")
+        results[identity] = result
+    if set(results) != set(futures.values()):
+        raise RuntimeError("the Active8 process group lost a task result")
+    return results
 
 
 @app.function(
@@ -421,6 +508,7 @@ def prepare_plan(
         rebind_completion=rebind_completion,
         admitted_source_identity=admitted.identity(),
         model_runtime=loaded["model_runtime_descriptor"](runtime),
+        execution_commit=str(revision["commit"]),
         repo_root=REMOTE_ROOT,
     )
     plan = loaded["plan_process_v2_active8"](
@@ -428,6 +516,7 @@ def prepare_plan(
         rebind_plan=rebind_plan,
         output_artifact_prefix=output_artifact_prefix,
     )
+    _require_plan_revision(plan, revision)
     loaded["write_process_v2_active8_plan"](
         plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
     )
@@ -447,13 +536,10 @@ def scan_completed(plan_path: str, revision: dict[str, Any]) -> list[str]:
     _validate_remote_revision(revision)
     loaded = _imports()
     artifact_volume.reload()
-    plan = loaded["load_process_v2_active8_plan"](
-        Path(plan_path), repo_root=REMOTE_ROOT
-    )
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
     return sorted(
-        loaded["completed_process_v2_active8_task_ids"](
-            plan, artifact_root=ARTIFACT_ROOT
-        )
+        loaded["completed_process_v2_active8_task_ids"](plan, artifact_root=ARTIFACT_ROOT)
     )
 
 
@@ -465,31 +551,65 @@ def scan_completed(plan_path: str, revision: dict[str, Any]) -> list[str]:
     max_containers=MAX_MAP_CONTAINERS,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def decide_one_chunk(
-    plan_path: str, task_identity_sha256: str, revision: dict[str, Any]
+def decide_task_group(
+    plan_path: str, task_identity_sha256s: list[str], revision: dict[str, Any]
 ) -> dict[str, Any]:
-    """Evaluate one immutable chunk task and durably commit its receipt."""
+    """Run a bounded subprocess group and commit once after full validation."""
 
-    import torch
-
+    if (
+        not task_identity_sha256s
+        or len(task_identity_sha256s) > TASK_PROCESSES_PER_CONTAINER
+        or len(task_identity_sha256s) != len(set(task_identity_sha256s))
+    ):
+        raise RuntimeError("the Active8 process group geometry is invalid")
     _validate_remote_revision(revision)
     loaded = _imports()
     artifact_volume.reload()
-    plan = loaded["load_process_v2_active8_plan"](
-        Path(plan_path), repo_root=REMOTE_ROOT
-    )
-    with torch.inference_mode():
-        receipt = loaded["execute_process_v2_active8_task"](
-            plan,
-            task_identity_sha256,
-            runtime=_runtime(),
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
+    tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
+    expected = set(task_identity_sha256s)
+    if not expected.issubset(tasks):
+        raise RuntimeError("the Active8 process group names an unplanned task")
+
+    context = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(max_workers=len(task_identity_sha256s), mp_context=context) as pool:
+        futures = {
+            pool.submit(
+                _execute_one_chunk_process,
+                plan_path,
+                task_identity_sha256,
+                revision,
+            ): task_identity_sha256
+            for task_identity_sha256 in task_identity_sha256s
+        }
+        results = _collect_process_results(futures)
+
+    reopened: dict[str, str] = {}
+    for identity in task_identity_sha256s:
+        task = tasks[identity]
+        output = loaded["mounted_process_v2_artifact_path"](
+            str(task["output_artifact_path"]),
             artifact_root=ARTIFACT_ROOT,
-            repo_root=REMOTE_ROOT,
+            field="task.output_artifact_path",
         )
+        receipt, summary = loaded["validate_process_v2_active8_task_result"](output)
+        if not (
+            receipt["task_identity_sha256"] == identity
+            and receipt["receipt_sha256"] == results[identity]["receipt_sha256"]
+            and summary["binding_sha256"] == plan["binding_sha256"]
+            and summary["plan_sha256"] == plan["plan_sha256"]
+            and summary["run_identity_sha256"] == plan["run_identity_sha256"]
+        ):
+            raise RuntimeError("an Active8 child output does not bind its group plan")
+        reopened[identity] = str(receipt["receipt_sha256"])
+
+    # Children never call commit. One successful parent commit covers the
+    # completely reopened group and keeps concurrent Volume-v1 commits at five.
     artifact_volume.commit()
     return {
-        "task_identity_sha256": task_identity_sha256,
-        "receipt_sha256": receipt["receipt_sha256"],
+        "task_identity_sha256s": task_identity_sha256s,
+        "receipt_sha256s": reopened,
     }
 
 
@@ -497,6 +617,7 @@ def decide_one_chunk(
     image=image,
     cpu=1.0,
     memory=8192,
+    ephemeral_disk=REDUCTION_EPHEMERAL_DISK_MB,
     timeout=SERIAL_TIMEOUT_SECONDS,
     max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
@@ -507,9 +628,8 @@ def prepare_sentinel(
     _validate_remote_revision(revision)
     loaded = _imports()
     artifact_volume.reload()
-    plan = loaded["load_process_v2_active8_plan"](
-        Path(plan_path), repo_root=REMOTE_ROOT
-    )
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
     prepared = loaded["prepare_process_v2_active8_reduction"](
         plan,
         runtime=_runtime(),
@@ -527,9 +647,7 @@ def prepare_sentinel(
     return {
         "run_artifact_root": plan["run_artifact_root"],
         "preparation_sha256": prepared["preparation_sha256"],
-        "partition_ids": loaded["sentinel_partition_identities"](
-            prepared["sentinel_plan"]
-        ),
+        "partition_ids": loaded["sentinel_partition_identities"](prepared["sentinel_plan"]),
         "completed_partition_ids": sorted(completed),
     }
 
@@ -548,9 +666,8 @@ def run_sentinel_partition(
     _validate_remote_revision(revision)
     loaded = _imports()
     artifact_volume.reload()
-    plan = loaded["load_process_v2_active8_plan"](
-        Path(plan_path), repo_root=REMOTE_ROOT
-    )
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
     prepared = loaded["load_process_v2_active8_reduction_preparation"](
         str(plan["run_artifact_root"]),
         active8_plan=plan,
@@ -573,6 +690,7 @@ def run_sentinel_partition(
     image=image,
     cpu=1.0,
     memory=8192,
+    ephemeral_disk=REDUCTION_EPHEMERAL_DISK_MB,
     timeout=SERIAL_TIMEOUT_SECONDS,
     max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
@@ -581,17 +699,14 @@ def finalize(plan_path: str, revision: dict[str, Any]) -> dict[str, Any]:
     _validate_remote_revision(revision)
     loaded = _imports()
     artifact_volume.reload()
-    plan = loaded["load_process_v2_active8_plan"](
-        Path(plan_path), repo_root=REMOTE_ROOT
-    )
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
     prepared = loaded["load_process_v2_active8_reduction_preparation"](
         str(plan["run_artifact_root"]),
         active8_plan=plan,
         artifact_root=ARTIFACT_ROOT,
     )
-    partition_ids = loaded["sentinel_partition_identities"](
-        prepared["sentinel_plan"]
-    )
+    partition_ids = loaded["sentinel_partition_identities"](prepared["sentinel_plan"])
     completed = loaded["completed_release_sentinel_partition_ids"](
         active8_plan=plan,
         sentinel_plan=prepared["sentinel_plan"],
@@ -628,10 +743,18 @@ def main(
     output_artifact_prefix: str = OUTPUT_ARTIFACT_PREFIX,
     partition_count: int = 1,
     partition_index: int = 0,
+    group_size: int = 1,
+    group_limit: int = 1,
+    smoke_task_identity: str = DEFAULT_SMOKE_TASK_IDENTITY,
     reduce: bool = False,
     sentinel_pairs_per_partition: int = DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
 ) -> None:
-    """Map one deterministic partition; optionally finalize the whole run."""
+    """Map one partition; by default run only the pinned train-task smoke.
+
+    Clear ``smoke_task_identity`` and set ``group_size=16, group_limit=0``
+    explicitly to submit every missing group after the smoke validates the
+    64-GiB container request and subprocess runtime construction.
+    """
 
     revision = local_image_revision(expected_commit=expected_commit)
     plan = prepare_plan.remote(
@@ -648,14 +771,23 @@ def main(
         partition_index=int(partition_index),
         completed=complete,
     )
-    if missing:
+    submitted_groups = _submission_groups(
+        plan,
+        missing,
+        completed=complete,
+        group_size=int(group_size),
+        group_limit=int(group_limit),
+        smoke_task_identity=str(smoke_task_identity),
+    )
+    submitted_tasks = sum(len(group) for group in submitted_groups)
+    if submitted_groups:
         results = list(
-            decide_one_chunk.starmap(
-                [(plan_path, identity, revision) for identity in missing]
-            )
+            decide_task_group.starmap([(plan_path, group, revision) for group in submitted_groups])
         )
-        if len(results) != len(missing):
-            raise RuntimeError("the Active8 map lost a task result")
+        if len(results) != len(submitted_groups) or {
+            identity for result in results for identity in result["task_identity_sha256s"]
+        } != {identity for group in submitted_groups for identity in group}:
+            raise RuntimeError("the Active8 grouped map lost a task result")
 
     completion = None
     sentinel_partitions = 0
@@ -666,24 +798,17 @@ def main(
             raise RuntimeError(
                 f"Active8 reduction requires all tasks; missing={len(expected - all_complete)}"
             )
-        prepared = prepare_sentinel.remote(
-            plan_path, int(sentinel_pairs_per_partition), revision
-        )
+        prepared = prepare_sentinel.remote(plan_path, int(sentinel_pairs_per_partition), revision)
         partition_ids = list(prepared["partition_ids"])
         completed_partition_ids = set(prepared["completed_partition_ids"])
         missing_partition_ids = [
-            identity
-            for identity in partition_ids
-            if identity not in completed_partition_ids
+            identity for identity in partition_ids if identity not in completed_partition_ids
         ]
         sentinel_partitions = len(missing_partition_ids)
         if missing_partition_ids:
             results = list(
                 run_sentinel_partition.starmap(
-                    [
-                        (plan_path, identity, revision)
-                        for identity in missing_partition_ids
-                    ]
+                    [(plan_path, identity, revision) for identity in missing_partition_ids]
                 )
             )
             if len(results) != len(missing_partition_ids):
@@ -697,7 +822,12 @@ def main(
                 "run_artifact_root": plan["run_artifact_root"],
                 "expected_tasks": plan["expected_task_count"],
                 "already_complete": len(complete),
-                "submitted_tasks": len(missing),
+                "missing_tasks_before_submit": len(missing),
+                "submitted_groups": len(submitted_groups),
+                "submitted_tasks": submitted_tasks,
+                "group_size": int(group_size),
+                "group_limit": int(group_limit),
+                "smoke_task_identity": str(smoke_task_identity) or None,
                 "partition_count": int(partition_count),
                 "partition_index": int(partition_index),
                 "sentinel_partitions": sentinel_partitions,
