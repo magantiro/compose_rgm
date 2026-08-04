@@ -49,7 +49,7 @@ import operator
 import os
 import shutil
 import tempfile
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -1058,6 +1058,7 @@ def execute_process_v2_active8_task(
     artifact_root: Path,
     repo_root: Path,
     reuse: bool = True,
+    progress_callback: Callable[[int, int], None] | None = None,
 ) -> dict[str, Any]:
     """Decide and publish exactly one source chunk.
 
@@ -1142,6 +1143,7 @@ def execute_process_v2_active8_task(
         expected_process_identity=pinned_process_identity,
         artifact_root=Path(artifact_root),
         repo_root=Path(repo_root),
+        progress_callback=progress_callback,
     ):
         rows.append(row)
         transitions.extend(produced)
@@ -1204,6 +1206,7 @@ def _decide_chunk(
     expected_process_identity: Mapping[str, Any],
     artifact_root: Path,
     repo_root: Path,
+    progress_callback: Callable[[int, int], None] | None = None,
 ) -> Iterator[tuple[dict[str, Any], list[dict[str, Any]]]]:
     target = _chunk_target(task)
     source_output = mounted_process_v2_artifact_path(
@@ -1256,7 +1259,7 @@ def _decide_chunk(
             query_keys.append((entry_index, step_index))
             queries.append((read.addressed, step_index))
 
-    evidence = checker.evaluate_many(queries)
+    evidence = checker.evaluate_many(queries, progress_callback=progress_callback)
     evidence_by_key = dict(zip(query_keys, evidence, strict=True))
     for read in reads:
         entry_index = int(read.entry_index)

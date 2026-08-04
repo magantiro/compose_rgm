@@ -146,6 +146,19 @@ def test_progress_probe_reports_exact_source_reuse() -> None:
     }
 
 
+def test_progress_probe_uses_family_local_admission_and_never_publishes() -> None:
+    source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
+    tree = ast.parse(source)
+    node = _function(tree, "probe_task_progress")
+    body = ast.get_source_segment(source, node)
+    assert body is not None
+    assert "ProductionProcessV2FamilyTeacherAdmissionChecker" in body
+    assert "ProductionProcessV2BatchedTeacherSupportChecker" not in body
+    assert "teacher_admission_before_structural_rows" in body
+    assert '"artifact_published": False' in body
+    assert "artifact_volume.commit()" not in body
+
+
 def test_the_serialized_image_contains_every_active8_answer_module() -> None:
     sources = set(launcher._serialized_source_paths(ROOT))
     assert launcher.LAUNCHER_SOURCE in sources
@@ -305,6 +318,18 @@ def test_tasks_are_independent_right_sized_and_measured() -> None:
     )
     for field in ("wall_seconds", "cpu_seconds", "process_peak_rss_mb"):
         assert field in body
+    for event in (
+        "ACTIVE8_TASK_START",
+        "ACTIVE8_TASK_HEARTBEAT",
+        "ACTIVE8_TASK_FAILED",
+        "ACTIVE8_TASK_COMMITTED",
+    ):
+        assert event in body
+    assert "progress_callback=report" in body
+    assert "processed_transitions" in body
+    assert "total_transitions" in body
+    assert "transitions_per_second" in body
+    assert "eta_seconds" in body
     assert "cpu=MAP_CPU" in decorator
     assert "memory=MAP_MEMORY_MB" in decorator
     assert "max_containers=MAX_MAP_CONTAINERS" in decorator

@@ -59,6 +59,9 @@ from compose_v4.data.editing_v2_process_v2_active8_admission import (  # noqa: E
     ProductionProcessV2SemanticExactCandidateChecker,
     build_process_v2_semantic_active8_admission_policy,
 )
+from compose_v4.data.editing_v2_process_v2_teacher_admission import (  # noqa: E402
+    ProductionProcessV2FamilyTeacherAdmissionChecker,
+)
 from compose_v4.data.editing_v2_process_v2_active8_plan import (  # noqa: E402
     model_runtime_descriptor,
 )
@@ -516,6 +519,33 @@ def common_evidence(value: Any) -> dict[str, Any]:
     }
 
 
+def admission_evidence(value: Any) -> dict[str, Any]:
+    """Project every checker onto the corpus-wide admission contract."""
+
+    if isinstance(value, ProcessV2SemanticExactCandidateAudit):
+        evidence = value.evidence
+        legal = evidence.matching_mark_count == 1
+        exact = value.exact_successor_mark_count == 1
+        productive = evidence.canonical_successor_key != evidence.source_canonical_key
+    else:
+        evidence = value
+        legal = bool(evidence.teacher_coordinate_legal)
+        exact = bool(evidence.teacher_executes_to_exact_successor)
+        productive = bool(evidence.productive_canonical_successor)
+    return {
+        "supported": bool(evidence.supported),
+        "exclusion_reason": evidence.exclusion_reason,
+        "action_sha256": str(evidence.action_sha256),
+        "source_state_sha256": str(evidence.source_state_sha256),
+        "target_state_sha256": str(evidence.target_state_sha256),
+        "source_canonical_key": str(evidence.source_canonical_key),
+        "canonical_successor_key": str(evidence.canonical_successor_key),
+        "teacher_coordinate_legal": legal,
+        "teacher_executes_to_exact_successor": exact,
+        "productive_canonical_successor": productive,
+    }
+
+
 def measure_worker(
     *,
     method: str,
@@ -543,6 +573,15 @@ def measure_worker(
             batch_size=batch_size,
             time=CANDIDATE_TIME,
         )
+    elif method == "direct_family_teacher_admission":
+        if batch_size is not None:
+            raise TeacherSupportBenchmarkError(
+                "direct teacher admission does not accept a batch size"
+            )
+        checker = ProductionProcessV2FamilyTeacherAdmissionChecker(
+            runtime.model,
+            policy=policy,
+        )
     else:
         raise TeacherSupportBenchmarkError(f"unknown benchmark method: {method}")
 
@@ -554,7 +593,12 @@ def measure_worker(
         observed = checker.evaluate_many(queries)
     wall_seconds = time.perf_counter() - wall_before
     cpu_seconds = time.process_time() - cpu_before
-    evidence = [common_evidence(item) for item in observed]
+    evidence = [admission_evidence(item) for item in observed]
+    mark_count_evidence = (
+        None
+        if method == "direct_family_teacher_admission"
+        else [common_evidence(item) for item in observed]
+    )
     if len(evidence) != len(entries) or not all(item["supported"] for item in evidence):
         raise TeacherSupportBenchmarkError(
             "the selected production teachers did not all remain supported"
@@ -570,6 +614,9 @@ def measure_worker(
         "process_peak_rss_mb": _peak_rss_mb(),
         "evidence_sha256": canonical_sha256(evidence),
         "evidence": evidence,
+        "mark_count_evidence_sha256": (
+            None if mark_count_evidence is None else canonical_sha256(mark_count_evidence)
+        ),
     }
 
 
@@ -648,12 +695,17 @@ def build_report(
     runtime: SemanticScratchRuntime,
     slow: Mapping[str, Any],
     fast: Sequence[Mapping[str, Any]],
+    direct: Mapping[str, Any],
     report_path: Path,
     repo_root: Path = REPO_ROOT,
 ) -> dict[str, Any]:
     if any(item["evidence_sha256"] != slow["evidence_sha256"] for item in fast):
         raise TeacherSupportBenchmarkError(
             "fast teacher-support evidence differs from the slow full quotient"
+        )
+    if direct["evidence_sha256"] != slow["evidence_sha256"]:
+        raise TeacherSupportBenchmarkError(
+            "direct family admission differs from the slow full quotient"
         )
     revision, dirty = _git_state(repo_root)
     try:
@@ -722,6 +774,17 @@ def build_report(
                 key: value for key, value in slow.items() if key != "evidence"
             },
             "fast_batched_teacher_support": fast_rows,
+            "direct_family_teacher_admission": {
+                **{
+                    key: value
+                    for key, value in direct.items()
+                    if key != "evidence"
+                },
+                "wall_speedup_vs_slow": float(slow["wall_seconds"])
+                / max(float(direct["wall_seconds"]), 1e-12),
+                "cpu_speedup_vs_slow": float(slow["cpu_seconds"])
+                / max(float(direct["cpu_seconds"]), 1e-12),
+            },
         },
         "limitations": [
             "local CPU timing does not measure Modal volume I/O or cold-start latency",
@@ -760,12 +823,19 @@ def run_benchmark(*, panel_size: int, report_path: Path, repo_root: Path) -> dic
             )
             for batch_size in BATCH_SIZES
         )
+        direct = _run_isolated_worker(
+            method="direct_family_teacher_admission",
+            batch_size=None,
+            panel_path=panel_path,
+            repo_root=repo_root,
+        )
     report = build_report(
         panel=panel,
         panel_selection=selection,
         runtime=runtime,
         slow=slow,
         fast=fast,
+        direct=direct,
         report_path=report_path,
         repo_root=repo_root,
     )
@@ -780,7 +850,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--panel", type=Path, help=argparse.SUPPRESS)
     parser.add_argument(
         "--worker-method",
-        choices=("slow_full_quotient", "fast_batched_teacher_support"),
+        choices=(
+            "slow_full_quotient",
+            "fast_batched_teacher_support",
+            "direct_family_teacher_admission",
+        ),
         help=argparse.SUPPRESS,
     )
     parser.add_argument("--worker-batch-size", type=int, help=argparse.SUPPRESS)

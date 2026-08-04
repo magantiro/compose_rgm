@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pytest
 
 from compose_v4.data.editing_process_v2_rebind import (
@@ -105,6 +106,9 @@ from compose_v4.data.editing_v2_process_v2_active8_admission import (
     build_process_v2_semantic_active8_admission_policy,
     validate_process_v2_semantic_active8_admission_policy,
 )
+from compose_v4.data.editing_v2_process_v2_teacher_admission import (
+    ProductionProcessV2FamilyTeacherAdmissionChecker,
+)
 from compose_v4.data.editing_v2_semantic_active8_admission import (
     SemanticActive8AdmissionError as V1SemanticActive8AdmissionError,
     build_semantic_active8_admission_policy,
@@ -129,6 +133,7 @@ from compose_v4.rewrite.editing_v2_process_identity import (
 )
 from compose_v4.rewrite.action_codec_v4 import ACTIVE8_EXECUTOR_RULES
 from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.operators import AtomInsert
 from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -747,6 +752,49 @@ def test_a_restart_reuses_exact_outputs_and_refuses_a_corrupt_target(
         validate_process_v2_active8_task_result(damaged)
 
 
+def test_one_chunk_reports_progress_and_an_exact_restart_reuses_it(
+    stage: _Stage,
+) -> None:
+    task = next(
+        task
+        for task in stage.plan["tasks"]
+        if sum(
+            validate_process_v2_active8_task_result(
+                task_output_path(stage.plan, task, artifact_root=stage.artifact_root)
+            )[1]["action_family_histogram"].values()
+        )
+        > 0
+    )
+    progress: list[tuple[int, int]] = []
+    execute_process_v2_active8_task(
+        stage.plan,
+        task["task_identity_sha256"],
+        runtime=stage.runtime,
+        artifact_root=stage.artifact_root,
+        repo_root=ROOT,
+        reuse=False,
+        progress_callback=lambda processed, total: progress.append((processed, total)),
+    )
+    assert progress
+    assert progress[-1][0] == progress[-1][1]
+    assert all(
+        0 < processed <= total == progress[-1][1] for processed, total in progress
+    )
+
+    reused_progress: list[tuple[int, int]] = []
+    execute_process_v2_active8_task(
+        stage.plan,
+        task["task_identity_sha256"],
+        runtime=stage.runtime,
+        artifact_root=stage.artifact_root,
+        repo_root=ROOT,
+        progress_callback=lambda processed, total: reused_progress.append(
+            (processed, total)
+        ),
+    )
+    assert reused_progress == []
+
+
 def test_the_completion_is_published_only_after_the_sentinel_passes(
     tmp_path: Path,
 ) -> None:
@@ -1135,6 +1183,139 @@ def test_batched_teacher_support_matches_all_genuine_cells_in_reversed_order(
             )
         else:
             assert fast.exclusion_reason == evidence.exclusion_reason
+
+
+def test_family_teacher_admission_matches_all_genuine_cells(
+    stage: _Stage,
+) -> None:
+    queries = _genuine_teacher_queries()
+    assert len(queries) == 22
+    policy = build_process_v2_semantic_active8_admission_policy()
+    observed = ProductionProcessV2FamilyTeacherAdmissionChecker(
+        stage.runtime.model,
+        policy=policy,
+    ).evaluate_many(queries)
+    expected = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        policy=policy,
+        batch_size=3,
+    ).evaluate_many(queries)
+
+    assert len(observed) == len(expected)
+    for query, direct, exhaustive in zip(queries, observed, expected, strict=True):
+        rule = query[0].trace.steps[0].rule_name
+        assert direct.supported == exhaustive.supported, rule
+        assert direct.exclusion_reason == exhaustive.exclusion_reason, rule
+        assert direct.action_sha256 == exhaustive.action_sha256
+        assert direct.source_state_sha256 == exhaustive.source_state_sha256
+        assert direct.target_state_sha256 == exhaustive.target_state_sha256
+        assert direct.source_canonical_key == exhaustive.source_canonical_key
+        assert direct.canonical_successor_key == exhaustive.canonical_successor_key
+        assert direct.teacher_coordinate_legal == exhaustive.teacher_coordinate_legal
+        assert (
+            direct.teacher_executes_to_exact_successor
+            == exhaustive.teacher_executes_to_exact_successor
+        )
+        assert (
+            direct.productive_canonical_successor
+            == exhaustive.productive_canonical_successor
+        )
+
+
+def _replace_one_step_query(
+    query: tuple[AddressedPackedTrace, int],
+    *,
+    step: RewriteStep | None = None,
+    target=None,
+) -> tuple[AddressedPackedTrace, int]:
+    addressed, step_index = query
+    assert step_index == 0
+    selected_step = step or addressed.trace.steps[0]
+    selected_target = target or addressed.path.state_at(1)
+    trace = RewriteTrace(
+        source=addressed.path.state_at(0),
+        target=selected_target,
+        steps=(selected_step,),
+        metadata=dict(addressed.trace.metadata),
+    )
+    return (
+        AddressedPackedTrace(
+            address=addressed.address,
+            trace=trace,
+            path=PackedTraceProgress(trace, (trace.source, trace.target)),
+        ),
+        0,
+    )
+
+
+def test_family_teacher_admission_rejects_an_exact_successor_mismatch(
+    stage: _Stage,
+) -> None:
+    queries = _genuine_teacher_queries()
+    original = queries[0]
+    replacement_target = next(
+        query[0].path.state_at(1)
+        for query in queries[1:]
+        if query[0].path.state_at(1).n_atoms == original[0].path.state_at(1).n_atoms
+    )
+    query = _replace_one_step_query(original, target=replacement_target)
+    observed = ProductionProcessV2FamilyTeacherAdmissionChecker(
+        stage.runtime.model,
+    ).evaluate(*query)
+    assert observed.supported is False
+    assert observed.teacher_coordinate_legal is True
+    assert observed.teacher_executes_to_exact_successor is False
+    assert observed.exclusion_reason == "teacher_action_does_not_reproduce_exact_successor"
+
+
+def test_family_teacher_admission_rejects_a_noncanonical_insert_slot(
+    stage: _Stage,
+) -> None:
+    original = next(
+        query
+        for query in _genuine_teacher_queries()
+        if query[0].trace.steps[0].rule_name == "atom_insert"
+    )
+    action = original[0].trace.steps[0].action
+    assert isinstance(action, AtomInsert)
+    null_slots = tuple(
+        int(slot)
+        for slot in np.flatnonzero(original[0].path.state_at(0).atom_types == 0)
+    )
+    assert len(null_slots) >= 2 and action.slot == null_slots[0]
+    changed = AtomInsert(
+        slot=null_slots[1],
+        atom_type=action.atom_type,
+        formal_charge=action.formal_charge,
+        implicit_h_count=action.implicit_h_count,
+        neighbors=action.neighbors,
+    )
+    query = _replace_one_step_query(
+        original,
+        step=RewriteStep("atom_insert", changed),
+    )
+    observed = ProductionProcessV2FamilyTeacherAdmissionChecker(
+        stage.runtime.model,
+    ).evaluate(*query)
+    assert observed.supported is False
+    assert observed.teacher_coordinate_legal is False
+    assert observed.exclusion_reason == "teacher_action_not_a_unique_process_v2_coordinate"
+
+
+def test_family_teacher_admission_reports_bounded_monotone_progress(
+    stage: _Stage,
+) -> None:
+    queries = tuple(_genuine_teacher_queries()) * 4
+    progress: list[tuple[int, int]] = []
+    checker = ProductionProcessV2FamilyTeacherAdmissionChecker(stage.runtime.model)
+    expected = checker.evaluate_many(queries)
+    observed = checker.evaluate_many(
+        queries,
+        progress_callback=lambda processed, total: progress.append((processed, total)),
+    )
+
+    assert observed == expected
+    assert progress == [(64, len(queries)), (len(queries), len(queries))]
 
 
 def test_batched_teacher_support_is_a_callable_checker(stage: _Stage) -> None:

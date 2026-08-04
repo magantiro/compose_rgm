@@ -20,6 +20,9 @@ from compose_v4.data.editing_v2_process_v2_active8_admission import (  # noqa: E
     ProductionProcessV2BatchedTeacherSupportChecker,
     ProductionProcessV2SemanticExactCandidateChecker,
 )
+from compose_v4.data.editing_v2_process_v2_teacher_admission import (  # noqa: E402
+    ProductionProcessV2FamilyTeacherAdmissionChecker,
+)
 
 
 @pytest.fixture(scope="module")
@@ -105,6 +108,22 @@ def test_fast_and_slow_exact_common_evidence_match_on_frozen_jin_teacher(
     assert benchmark.common_evidence(fast)["supported"] is True
 
 
+def test_direct_and_slow_admission_evidence_match_on_frozen_jin_teacher(
+    frozen_runtime, jin_panel
+) -> None:
+    entries, _selection = jin_panel
+    query = benchmark.query_from_entry(entries[0])
+    slow = ProductionProcessV2SemanticExactCandidateChecker(
+        frozen_runtime.model,
+        time=benchmark.CANDIDATE_TIME,
+    ).evaluate(*query)
+    direct = ProductionProcessV2FamilyTeacherAdmissionChecker(
+        frozen_runtime.model,
+    ).evaluate(*query)
+    assert benchmark.admission_evidence(direct) == benchmark.admission_evidence(slow)
+    assert benchmark.admission_evidence(direct)["supported"] is True
+
+
 def test_report_refuses_one_fast_evidence_mismatch(
     frozen_runtime, jin_panel, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -132,6 +151,11 @@ def test_report_refuses_one_fast_evidence_mismatch(
         "batch_size": 8,
         "evidence_sha256": "b" * 64,
     }
+    direct = {
+        **measurement,
+        "method": "direct_family_teacher_admission",
+        "evidence_sha256": "a" * 64,
+    }
     with pytest.raises(benchmark.TeacherSupportBenchmarkError, match="differs"):
         benchmark.build_report(
             panel=panel,
@@ -139,6 +163,7 @@ def test_report_refuses_one_fast_evidence_mismatch(
             runtime=frozen_runtime,
             slow=measurement,
             fast=(fast,),
+            direct=direct,
             report_path=ROOT / benchmark.DEFAULT_REPORT,
         )
 
@@ -172,6 +197,12 @@ def test_report_carries_complete_false_authority_and_provenance(
         "wall_seconds": 1.0,
         "cpu_seconds": 0.8,
     }
+    direct = {
+        **slow,
+        "method": "direct_family_teacher_admission",
+        "wall_seconds": 0.25,
+        "cpu_seconds": 0.2,
+    }
     monkeypatch.setattr(benchmark, "_git_state", lambda _root: ("1" * 40, []))
     report = benchmark.build_report(
         panel=panel,
@@ -179,6 +210,7 @@ def test_report_carries_complete_false_authority_and_provenance(
         runtime=frozen_runtime,
         slow=slow,
         fast=(fast,),
+        direct=direct,
         report_path=ROOT / benchmark.DEFAULT_REPORT,
     )
     assert report["status"] == benchmark.STATUS
@@ -186,6 +218,9 @@ def test_report_carries_complete_false_authority_and_provenance(
     assert report["result"]["fast_batched_teacher_support"][0][
         "wall_speedup_vs_slow"
     ] == 4.0
+    assert report["result"]["direct_family_teacher_admission"][
+        "wall_speedup_vs_slow"
+    ] == 16.0
     assert all(
         report[field] is False for field in benchmark.authority_false_block()
     )

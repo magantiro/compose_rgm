@@ -44,6 +44,7 @@ OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_active8"
 MAX_MAP_CONTAINERS = 80
 MAP_CPU = 1.0
 FULL_MAP_TASKS_PER_CONTAINER = 1
+MAP_PROGRESS_INTERVAL = 64
 PILOT_GROUP_COUNT = 3
 PILOT_GROUP_SIZE = 1
 PILOT_TASK_COUNT = 3
@@ -754,19 +755,84 @@ def decide_task(
 
     import torch
 
+    task = tasks[task_identity_sha256]
     cpu_before = time.process_time()
     wall_before = time.perf_counter()
-    with torch.inference_mode():
-        receipt = loaded["execute_process_v2_active8_task"](
-            plan,
-            task_identity_sha256,
-            runtime=_runtime(),
-            artifact_root=ARTIFACT_ROOT,
-            repo_root=REMOTE_ROOT,
+    print(
+        json.dumps(
+            {
+                "event": "ACTIVE8_TASK_START",
+                "task_identity_sha256": task_identity_sha256,
+                "data_lane": str(task["data_lane"]),
+                "split": str(task["split"]),
+                "chunk_index": int(task["chunk_index"]),
+                "chunk_row_count": int(task["chunk_row_count"]),
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    next_report = MAP_PROGRESS_INTERVAL
+
+    def report(processed: int, total: int) -> None:
+        nonlocal next_report
+        if processed < next_report and processed != total:
+            return
+        wall_seconds = time.perf_counter() - wall_before
+        cpu_seconds = time.process_time() - cpu_before
+        rate = processed / wall_seconds if wall_seconds > 0.0 else 0.0
+        eta_seconds = None if rate <= 0.0 else (total - processed) / rate
+        print(
+            json.dumps(
+                {
+                    "event": "ACTIVE8_TASK_HEARTBEAT",
+                    "task_identity_sha256": task_identity_sha256,
+                    "chunk_index": int(task["chunk_index"]),
+                    "processed_transitions": int(processed),
+                    "total_transitions": int(total),
+                    "wall_seconds": wall_seconds,
+                    "cpu_seconds": cpu_seconds,
+                    "transitions_per_second": rate,
+                    "eta_seconds": eta_seconds,
+                    "process_peak_rss_mb": _peak_rss_mb(),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
         )
+        while next_report <= processed:
+            next_report += MAP_PROGRESS_INTERVAL
+
+    try:
+        with torch.inference_mode():
+            receipt = loaded["execute_process_v2_active8_task"](
+                plan,
+                task_identity_sha256,
+                runtime=_runtime(),
+                artifact_root=ARTIFACT_ROOT,
+                repo_root=REMOTE_ROOT,
+                progress_callback=report,
+            )
+    except Exception as error:
+        print(
+            json.dumps(
+                {
+                    "event": "ACTIVE8_TASK_FAILED",
+                    "task_identity_sha256": task_identity_sha256,
+                    "chunk_index": int(task["chunk_index"]),
+                    "wall_seconds": time.perf_counter() - wall_before,
+                    "cpu_seconds": time.process_time() - cpu_before,
+                    "process_peak_rss_mb": _peak_rss_mb(),
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        raise
     wall_seconds = time.perf_counter() - wall_before
     cpu_seconds = time.process_time() - cpu_before
-    task = tasks[task_identity_sha256]
     output = loaded["mounted_process_v2_artifact_path"](
         str(task["output_artifact_path"]),
         artifact_root=ARTIFACT_ROOT,
@@ -782,6 +848,24 @@ def decide_task(
     ):
         raise RuntimeError("the Active8 task output does not bind its plan")
     artifact_volume.commit()
+    print(
+        json.dumps(
+            {
+                "event": "ACTIVE8_TASK_COMMITTED",
+                "task_identity_sha256": task_identity_sha256,
+                "chunk_index": int(task["chunk_index"]),
+                "teacher_action_count": int(
+                    sum(summary["action_family_histogram"].values())
+                ),
+                "wall_seconds": wall_seconds,
+                "cpu_seconds": cpu_seconds,
+                "process_peak_rss_mb": _peak_rss_mb(),
+                "receipt_sha256": str(receipt["receipt_sha256"]),
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
     return {
         "task_identity_sha256": task_identity_sha256,
         "data_lane": str(task["data_lane"]),
@@ -811,11 +895,11 @@ def probe_task_progress(
 ) -> dict[str, Any]:
     """Measure one queued task with bounded heartbeats and no publication.
 
-    This operational probe uses the production reader, policy, model, support
-    checker, executor, and structural row construction.  It deliberately wraps
-    only the checker's ``evaluate_many`` call so that each bounded block emits
-    elapsed time, CPU time, resident memory, throughput, and ETA.  It writes no
-    artifact and grants no downstream authority.
+    This operational probe uses the production reader, policy, model,
+    family-local support checker and executor. It stops at the teacher-admission
+    evidence boundary, before structural-row construction or publication, and
+    emits elapsed time, CPU time, resident memory, throughput and ETA. It
+    writes no artifact and grants no downstream authority.
     """
 
     if type(progress_batch_size) is not int or progress_batch_size <= 0:
@@ -836,14 +920,15 @@ def probe_task_progress(
         mounted_process_v2_artifact_path,
     )
     from compose_v4.data.editing_v2_process_v2_active8_admission import (
-        ProductionProcessV2BatchedTeacherSupportChecker,
         build_process_v2_semantic_active8_admission_policy,
         validate_process_v2_semantic_active8_admission_policy,
     )
     from compose_v4.data.editing_v2_process_v2_active8_map import (
-        TEACHER_SUPPORT_BATCH_SIZE,
         _decide_chunk,
         read_rebind_chunk_decisions,
+    )
+    from compose_v4.data.editing_v2_process_v2_teacher_admission import (
+        ProductionProcessV2FamilyTeacherAdmissionChecker,
     )
     from compose_v4.data.editing_v2_semantic_capability_cells import (
         load_semantic_capability_cell_registry,
@@ -864,17 +949,16 @@ def probe_task_progress(
     registry = load_semantic_capability_cell_registry()
     if registry.registry_sha256 != binding["capability_cell_registry_sha256"]:
         raise RuntimeError("the progress probe cell registry is not the one bound by the plan")
-    inner = ProductionProcessV2BatchedTeacherSupportChecker(
+    inner = ProductionProcessV2FamilyTeacherAdmissionChecker(
         runtime.model,
         policy=policy,
-        batch_size=TEACHER_SUPPORT_BATCH_SIZE,
     )
 
     wall_start = time.perf_counter()
     cpu_start = time.process_time()
 
-    class StatsOnlyComplete(Exception):
-        """Stop after the exact production query-preparation boundary."""
+    class ProbeMeasurementComplete(Exception):
+        """Stop before structural-row construction or publication."""
 
     class ProgressChecker:
         def __init__(self) -> None:
@@ -917,7 +1001,7 @@ def probe_task_progress(
                 flush=True,
             )
             if stats_only:
-                raise StatsOnlyComplete
+                raise ProbeMeasurementComplete
             next_report = min(progress_batch_size, self.total)
 
             def report(processed: int, total: int) -> None:
@@ -952,7 +1036,8 @@ def probe_task_progress(
                 while next_report <= processed:
                     next_report += progress_batch_size
 
-            return inner.evaluate_many(queries, progress_callback=report)
+            inner.evaluate_many(queries, progress_callback=report)
+            raise ProbeMeasurementComplete
 
     checker = ProgressChecker()
     rebind_output = mounted_process_v2_artifact_path(
@@ -968,8 +1053,6 @@ def probe_task_progress(
         chunk_file_sha256=str(task["chunk_file_sha256"]),
         pinned_process_identity_sha256=str(task["pinned_process_identity_sha256"]),
     )
-    row_count = 0
-    produced_transition_count = 0
     try:
         for _row, produced in _decide_chunk(
             task,
@@ -980,9 +1063,10 @@ def probe_task_progress(
             artifact_root=ARTIFACT_ROOT,
             repo_root=REMOTE_ROOT,
         ):
-            row_count += 1
-            produced_transition_count += len(produced)
-    except StatsOnlyComplete:
+            raise RuntimeError(
+                "the progress probe crossed its teacher-admission measurement boundary"
+            )
+    except ProbeMeasurementComplete:
         pass
     result = {
         "event": (
@@ -991,15 +1075,16 @@ def probe_task_progress(
             else "ACTIVE8_PROGRESS_PROBE_COMPLETE"
         ),
         "task_identity_sha256": task_identity_sha256,
-        "source_rows": None if stats_only else row_count,
+        "source_rows": None,
         "planned_source_rows": int(task["chunk_row_count"]),
         "processed_transitions": checker.processed,
         "total_transitions": checker.total,
-        "produced_transitions": None if stats_only else produced_transition_count,
+        "produced_transitions": None,
         "wall_seconds": time.perf_counter() - wall_start,
         "cpu_seconds": time.process_time() - cpu_start,
         "process_peak_rss_mb": _peak_rss_mb(),
         "stats_only": stats_only,
+        "measurement_boundary": "teacher_admission_before_structural_rows",
         "workload_statistics": checker.workload_statistics,
         "scientific_authority": False,
         "artifact_published": False,
