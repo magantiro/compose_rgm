@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,7 @@ from compose_v4.data.editing_v2_process_v2_active8_plan import (
     validate_process_v2_active8_plan,
 )
 from compose_v4.data.editing_v2_process_v2_active8_sentinel import (
+    ProcessV2Active8SentinelError,
     require_sentinel_passed,
     run_release_sentinel,
 )
@@ -71,6 +73,7 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
 )
 
 COMPLETION_FILENAME = "PROCESS_V2_ACTIVE8_COMPLETE.json"
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 COMPLETION_FIELDS: frozenset[str] = frozenset(
     {
@@ -260,15 +263,24 @@ def reduce_process_v2_active8(
     checker = ProductionProcessV2SemanticExactCandidateChecker(
         runtime.model, policy=build_process_v2_semantic_active8_admission_policy()
     )
+    result_inventory_sha256 = canonical_sha256(inventory)
     sentinel = run_release_sentinel(
         validated,
         transitions,
+        result_inventory_sha256=result_inventory_sha256,
         checker=checker,
         namespace=load_semantic_capability_cell_registry().namespace,
         artifact_root=Path(artifact_root),
         repo_root=Path(repo_root),
     )
-    require_sentinel_passed(sentinel)
+    require_sentinel_passed(
+        sentinel,
+        binding_sha256=str(binding["binding_sha256"]),
+        plan_sha256=str(validated["plan_sha256"]),
+        run_identity_sha256=str(validated["run_identity_sha256"]),
+        task_inventory_sha256=str(validated["task_inventory_sha256"]),
+        result_inventory_sha256=result_inventory_sha256,
+    )
 
     body = {
         "schema": ACTIVE8_COMPLETION_SCHEMA,
@@ -285,7 +297,7 @@ def reduce_process_v2_active8(
         "classification_affects_admission": False,
         "plan_sha256": str(validated["plan_sha256"]),
         "result_inventory": inventory,
-        "result_inventory_sha256": canonical_sha256(inventory),
+        "result_inventory_sha256": result_inventory_sha256,
         "run_artifact_root": str(validated["run_artifact_root"]),
         "run_identity_sha256": str(validated["run_identity_sha256"]),
         "sentinel": sentinel,
@@ -325,7 +337,15 @@ def load_process_v2_active8_completion(
             f"the Active8 generation is not committed; no {COMPLETION_FILENAME} at {run_root}"
         )
     completion = json.loads(path.read_bytes())
-    if not isinstance(completion, dict) or set(completion) != COMPLETION_FIELDS:
+    return validate_process_v2_active8_completion(completion)
+
+
+def validate_process_v2_active8_completion(
+    completion: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Authenticate one committed completion and its blocking sentinel."""
+
+    if not isinstance(completion, Mapping) or set(completion) != COMPLETION_FIELDS:
         raise ProcessV2Active8ReduceError("the Active8 completion field set disagrees")
     verify_self_hash(completion, field="completion_sha256", label="the Active8 completion")
     if (
@@ -335,7 +355,99 @@ def load_process_v2_active8_completion(
         or completion["classification_affects_admission"] is not False
     ):
         raise ProcessV2Active8ReduceError("the Active8 completion contract disagrees")
-    return completion
+    for field, value in authority_false_block().items():
+        if completion.get(field) is not value:
+            raise ProcessV2Active8ReduceError(
+                f"the Active8 completion grants forbidden authority through {field}"
+            )
+    inventory = completion["result_inventory"]
+    if (
+        not isinstance(inventory, list)
+        or any(
+            not isinstance(item, list)
+            or len(item) != 2
+            or not all(
+                isinstance(value, str) and _SHA256.fullmatch(value) is not None
+                for value in item
+            )
+            for item in inventory
+        )
+        or len({item[0] for item in inventory}) != len(inventory)
+        or canonical_sha256(inventory) != completion["result_inventory_sha256"]
+    ):
+        raise ProcessV2Active8ReduceError(
+            "the Active8 completion result inventory does not reconcile"
+        )
+    identities = [item[0] for item in inventory]
+    if canonical_sha256(identities) != completion["task_inventory_sha256"]:
+        raise ProcessV2Active8ReduceError(
+            "the Active8 completion task inventory does not reconcile"
+        )
+    for field in (
+        "binding_sha256",
+        "plan_sha256",
+        "run_identity_sha256",
+        "task_inventory_sha256",
+        "result_inventory_sha256",
+    ):
+        value = completion[field]
+        if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
+            raise ProcessV2Active8ReduceError(
+                f"the Active8 completion {field} is not a SHA-256"
+            )
+    census = completion["census"]
+    if not isinstance(census, Mapping) or set(census) != set(ACTIVE8_CENSUS_FIELDS):
+        raise ProcessV2Active8ReduceError("the Active8 completion census field set disagrees")
+    if any(type(census[field]) is not int or census[field] < 0 for field in census):
+        raise ProcessV2Active8ReduceError(
+            "the Active8 completion census must contain nonnegative integers"
+        )
+    if census["source_entries"] != (
+        census["upstream_rejected_entries"]
+        + census["active8_accepted_entries"]
+        + census["active8_excluded_entries"]
+    ):
+        raise ProcessV2Active8ReduceError("the Active8 completion census does not close")
+    if (
+        type(completion["accepted_transitions"]) is not int
+        or completion["accepted_transitions"] < 0
+    ):
+        raise ProcessV2Active8ReduceError(
+            "the Active8 completion accepted transition count is invalid"
+        )
+    totals = completion["candidate_totals"]
+    if not isinstance(totals, Mapping) or set(totals) != set(CANDIDATE_TOTAL_FIELDS):
+        raise ProcessV2Active8ReduceError(
+            "the Active8 completion candidate total field set disagrees"
+        )
+    aggregate_fields = (
+        "action_family_histogram",
+        "active8_exclusion_histogram",
+        "capability_cell_histogram",
+        "candidate_totals",
+    )
+    for field in aggregate_fields:
+        aggregate = completion[field]
+        if (
+            not isinstance(aggregate, Mapping)
+            or any(not isinstance(key, str) for key in aggregate)
+            or any(type(value) is not int or value < 0 for value in aggregate.values())
+        ):
+            raise ProcessV2Active8ReduceError(
+                f"the Active8 completion {field} is malformed"
+            )
+    try:
+        require_sentinel_passed(
+            completion["sentinel"],
+            binding_sha256=str(completion["binding_sha256"]),
+            plan_sha256=str(completion["plan_sha256"]),
+            run_identity_sha256=str(completion["run_identity_sha256"]),
+            task_inventory_sha256=str(completion["task_inventory_sha256"]),
+            result_inventory_sha256=str(completion["result_inventory_sha256"]),
+        )
+    except ProcessV2Active8SentinelError as error:
+        raise ProcessV2Active8ReduceError(str(error)) from error
+    return dict(completion)
 
 
 __all__ = [
@@ -348,4 +460,5 @@ __all__ = [
     "reduce_process_v2_active8",
     "run_process_v2_active8_tasks",
     "task_output_path",
+    "validate_process_v2_active8_completion",
 ]

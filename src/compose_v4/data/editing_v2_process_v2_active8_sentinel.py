@@ -50,6 +50,7 @@ forbidden to import, so the instrument itself is checked by the real oracle.
 from __future__ import annotations
 
 import hashlib
+import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -58,7 +59,6 @@ from compose_v4.data.editing_process_v2_rebind import mounted_process_v2_artifac
 from compose_v4.data.editing_v2_process_v2_active8_map import (
     _chunk_target,
     _classification_block,
-    _evidence_payload,
 )
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     read_process_v2_chunk_target,
@@ -85,6 +85,7 @@ SENTINEL_PASSED = "SENTINEL_PASSED"
 SENTINEL_FAILED = "SENTINEL_FAILED"
 SELECTION_EXHAUSTIVE = "exhaustive_all_unique_accepted_pairs"
 SELECTION_RANKED = "deduplicated_union_of_per_cell_and_global_ranked_examples"
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 class ProcessV2Active8SentinelError(RuntimeError):
@@ -188,6 +189,7 @@ def run_release_sentinel(
     plan: Mapping[str, Any],
     transitions: Sequence[Mapping[str, Any]],
     *,
+    result_inventory_sha256: str,
     checker: ProductionProcessV2SemanticExactCandidateChecker,
     namespace: str,
     artifact_root: Path,
@@ -248,9 +250,21 @@ def run_release_sentinel(
                 step_index = int(anchor["step_index"])
                 addressed = read.addressed
                 audit = checker.evaluate(addressed, step_index)
-                observed = _evidence_payload(audit)
                 source = addressed.path.state_at(step_index)
                 successor = addressed.path.state_at(step_index + 1)
+                exact = audit.evidence
+                observed = {
+                    "supported": bool(exact.supported),
+                    "exclusion_reason": exact.exclusion_reason,
+                    "action_sha256": exact.action_sha256,
+                    "source_state_sha256": exact.source_state_sha256,
+                    "target_state_sha256": exact.target_state_sha256,
+                    "source_canonical_key": canonical_state_key(source),
+                    "canonical_successor_key": exact.canonical_successor_key,
+                    "raw_mark_count": int(exact.raw_mark_count),
+                    "matching_mark_count": int(exact.matching_mark_count),
+                    "exact_successor_mark_count": int(audit.exact_successor_mark_count),
+                }
                 block = _classification_block(
                     source,
                     successor,
@@ -292,9 +306,17 @@ def run_release_sentinel(
             else SENTINEL_FAILED
         ),
         "salt": SENTINEL_SALT,
+        "binding_sha256": str(plan["binding_sha256"]),
+        "plan_sha256": str(plan["plan_sha256"]),
+        "run_identity_sha256": str(plan["run_identity_sha256"]),
+        "task_inventory_sha256": str(plan["task_inventory_sha256"]),
+        "result_inventory_sha256": str(result_inventory_sha256),
         "unique_accepted_pairs": int(selection["unique_accepted_pairs"]),
         "selection_mode": str(selection["selection_mode"]),
         "selected_pairs": len(selected),
+        "selected_pairs_sha256": canonical_sha256(
+            [[source_sha256, action_sha256] for source_sha256, action_sha256 in selected]
+        ),
         "per_cell_examples": int(selection["per_cell_examples"]),
         "global_examples": int(selection["global_examples"]),
         "oracle_examples": oracle_checked,
@@ -322,7 +344,15 @@ def _oracle_disagrees(
     return produced != _dictionary_successor_oracle(result, state, system=checker.system)
 
 
-def require_sentinel_passed(sentinel: Mapping[str, Any]) -> None:
+def require_sentinel_passed(
+    sentinel: Mapping[str, Any],
+    *,
+    binding_sha256: str | None = None,
+    plan_sha256: str | None = None,
+    run_identity_sha256: str | None = None,
+    task_inventory_sha256: str | None = None,
+    result_inventory_sha256: str | None = None,
+) -> None:
     """Any mismatch blocks completion; there is no partial release."""
 
     if not SENTINEL_BLOCKS_COMPLETION:  # pragma: no cover - frozen True in the seam
@@ -333,6 +363,84 @@ def require_sentinel_passed(sentinel: Mapping[str, Any]) -> None:
         {key: value for key, value in sentinel.items() if key != "sentinel_sha256"}
     ) != sentinel["sentinel_sha256"]:
         raise ProcessV2Active8SentinelError("the sentinel self-hash disagrees")
+    if (
+        sentinel["schema"] != SENTINEL_SCHEMA
+        or sentinel["schema_version"] != SENTINEL_SCHEMA_VERSION
+        or sentinel["salt"] != SENTINEL_SALT
+    ):
+        raise ProcessV2Active8SentinelError("the sentinel protocol identity disagrees")
+    expected = {
+        "binding_sha256": binding_sha256,
+        "plan_sha256": plan_sha256,
+        "run_identity_sha256": run_identity_sha256,
+        "task_inventory_sha256": task_inventory_sha256,
+        "result_inventory_sha256": result_inventory_sha256,
+    }
+    for field, value in expected.items():
+        observed = sentinel[field]
+        if not isinstance(observed, str) or _SHA256.fullmatch(observed) is None:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel {field} is not a SHA-256"
+            )
+        if value is not None and observed != value:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel {field} addresses another Active8 run"
+            )
+    counts = {
+        field: sentinel[field]
+        for field in (
+            "unique_accepted_pairs",
+            "selected_pairs",
+            "per_cell_examples",
+            "global_examples",
+            "oracle_examples",
+        )
+    }
+    if any(type(value) is not int or value < 0 for value in counts.values()):
+        raise ProcessV2Active8SentinelError("the sentinel counts must be nonnegative integers")
+    if _SHA256.fullmatch(str(sentinel["selected_pairs_sha256"])) is None:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel selected-pair digest is not a SHA-256"
+        )
+    if (
+        counts["selected_pairs"] > counts["unique_accepted_pairs"]
+        or counts["oracle_examples"] > counts["selected_pairs"]
+        or counts["oracle_examples"] > SENTINEL_ORACLE_EXAMPLES
+    ):
+        raise ProcessV2Active8SentinelError("the sentinel counts do not reconcile")
+    if sentinel["selection_mode"] == SELECTION_EXHAUSTIVE:
+        if (
+            counts["unique_accepted_pairs"] > SENTINEL_EXHAUSTIVE_THRESHOLD
+            or counts["selected_pairs"] != counts["unique_accepted_pairs"]
+            or counts["per_cell_examples"] != 0
+            or counts["global_examples"] != 0
+        ):
+            raise ProcessV2Active8SentinelError(
+                "the exhaustive sentinel selection counts do not reconcile"
+            )
+    elif sentinel["selection_mode"] == SELECTION_RANKED:
+        if counts["unique_accepted_pairs"] <= SENTINEL_EXHAUSTIVE_THRESHOLD:
+            raise ProcessV2Active8SentinelError(
+                "the ranked sentinel selection is below the exhaustive threshold"
+            )
+    else:
+        raise ProcessV2Active8SentinelError("the sentinel selection mode is unknown")
+    mismatch_fields = (
+        "evidence_mismatches",
+        "cell_mismatches",
+        "oracle_mismatches",
+    )
+    if any(
+        not isinstance(sentinel[field], list)
+        or any(not isinstance(item, str) for item in sentinel[field])
+        for field in mismatch_fields
+    ):
+        raise ProcessV2Active8SentinelError("the sentinel mismatch receipts are malformed")
+    has_mismatch = any(bool(sentinel[field]) for field in mismatch_fields)
+    if sentinel["status"] == SENTINEL_PASSED and has_mismatch:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel claims PASS while publishing mismatches"
+        )
     if sentinel["status"] != SENTINEL_PASSED:
         raise ProcessV2Active8SentinelError(
             "the release sentinel found a mismatch, so the Active8 run publishes no "

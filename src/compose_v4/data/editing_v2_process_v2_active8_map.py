@@ -103,10 +103,11 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     verify_self_hash,
 )
 from compose_v4.data.editing_v2_process_v2_active8_admission import (
-    ProcessV2SemanticExactCandidateAudit,
-    ProductionProcessV2SemanticExactCandidateChecker,
+    ProcessV2TeacherSupportEvidence,
+    ProductionProcessV2BatchedTeacherSupportChecker,
     SemanticActive8AdmissionError,
     build_process_v2_semantic_active8_admission_policy,
+    classify_process_v2_semantic_action,
     evaluate_process_v2_semantic_active8_trace,
     validate_process_v2_semantic_active8_admission_policy,
 )
@@ -319,20 +320,18 @@ def _classification_block(
 # ---- Evidence, derived aggregates ----------------------------------------------
 
 
-def _evidence_payload(audit: ProcessV2SemanticExactCandidateAudit) -> dict[str, Any]:
-    evidence = audit.evidence
+def _evidence_payload(evidence: ProcessV2TeacherSupportEvidence) -> dict[str, Any]:
     payload = {
         "supported": bool(evidence.supported),
         "exclusion_reason": evidence.exclusion_reason,
         "action_sha256": evidence.action_sha256,
         "source_state_sha256": evidence.source_state_sha256,
         "target_state_sha256": evidence.target_state_sha256,
+        "source_canonical_key": evidence.source_canonical_key,
         "canonical_successor_key": evidence.canonical_successor_key,
         "raw_mark_count": int(evidence.raw_mark_count),
-        "canonical_successor_count": int(evidence.canonical_successor_count),
         "matching_mark_count": int(evidence.matching_mark_count),
-        "exact_successor_mark_count": int(audit.exact_successor_mark_count),
-        "successor_alias_count": int(evidence.successor_alias_count),
+        "exact_successor_mark_count": int(evidence.exact_successor_mark_count),
     }
     if tuple(payload) != CANDIDATE_EVIDENCE_FIELDS:
         raise ProcessV2Active8MapError("the published candidate-evidence fields disagree")
@@ -350,13 +349,17 @@ _COMPARATORS: tuple[tuple[str, Any], ...] = (
 )
 
 
-def _invariant_term(token: str, evidence: Mapping[str, Any]) -> int:
+def _invariant_term(token: str, evidence: Mapping[str, Any]) -> Any:
     name = token.strip()
     if name in CANDIDATE_EVIDENCE_FIELDS:
         value = evidence[name]
-        if type(value) is not int:
+        if name.endswith("_count") and type(value) is not int:
             raise ProcessV2Active8MapError(
                 f"published candidate evidence {name!r} is not an integer count"
+            )
+        if name.endswith("_key") and (not isinstance(value, str) or not value):
+            raise ProcessV2Active8MapError(
+                f"published candidate evidence {name!r} is not a nonempty key"
             )
         return value
     try:
@@ -407,10 +410,8 @@ def derive_candidate_totals(actions: Sequence[Mapping[str, Any]]) -> dict[str, i
         if evidence is None:
             continue
         totals["raw_candidate_marks"] += int(evidence["raw_mark_count"])
-        totals["canonical_candidate_successors"] += int(evidence["canonical_successor_count"])
         totals["matching_candidate_marks"] += int(evidence["matching_mark_count"])
         totals["exact_successor_marks"] += int(evidence["exact_successor_mark_count"])
-        totals["successor_aliases"] += int(evidence["successor_alias_count"])
     return totals
 
 
@@ -486,10 +487,11 @@ def upstream_rejected_row(
 def evaluated_row(
     addressed: AddressedPackedTrace,
     *,
-    checker: ProductionProcessV2SemanticExactCandidateChecker,
+    checker: ProductionProcessV2BatchedTeacherSupportChecker,
     v1_task_identity_sha256: str,
     task_identity_sha256: str,
     namespace: str,
+    precomputed_evidence: Mapping[int, ProcessV2TeacherSupportEvidence] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Evaluate one admitted trace and publish its row and its transitions.
 
@@ -499,12 +501,16 @@ def evaluated_row(
     opinion about it.
     """
 
-    audits: dict[int, ProcessV2SemanticExactCandidateAudit] = {}
+    observed_evidence: dict[int, ProcessV2TeacherSupportEvidence] = {}
 
     def _recording_checker(trace: AddressedPackedTrace, step_index: int):
-        audit = checker.evaluate(trace, step_index)
-        audits[int(step_index)] = audit
-        return audit.evidence
+        evidence = (
+            checker.evaluate(trace, step_index)
+            if precomputed_evidence is None
+            else precomputed_evidence[int(step_index)]
+        )
+        observed_evidence[int(step_index)] = evidence
+        return evidence
 
     decision = evaluate_process_v2_semantic_active8_trace(
         addressed,
@@ -521,12 +527,12 @@ def evaluated_row(
         payload = None
         supported = False
         if evidence is not None:
-            audit = audits[step_index]
-            if audit.evidence != evidence:
+            recorded = observed_evidence[step_index]
+            if recorded != evidence:
                 raise ProcessV2Active8MapError(
-                    "the recorded candidate audit differs from the evidence admission used"
+                    "the recorded teacher evidence differs from the evidence admission used"
                 )
-            payload = _evidence_payload(audit)
+            payload = _evidence_payload(recorded)
             supported = bool(evidence.supported)
         step = addressed.trace.steps[step_index]
         block = _classification_block(
@@ -986,7 +992,7 @@ def execute_process_v2_active8_task(
     if registry.registry_sha256 != binding["capability_cell_registry_sha256"]:
         raise ProcessV2Active8MapError("the live capability-cell registry is not the one planned")
     try:
-        checker = ProductionProcessV2SemanticExactCandidateChecker(
+        checker = ProductionProcessV2BatchedTeacherSupportChecker(
             runtime.model, policy=policy
         )
     except SemanticActive8AdmissionError as error:
@@ -1072,7 +1078,7 @@ def _decide_chunk(
     task: Mapping[str, Any],
     *,
     decisions: Mapping[int, Mapping[str, Any]],
-    checker: ProductionProcessV2SemanticExactCandidateChecker,
+    checker: ProductionProcessV2BatchedTeacherSupportChecker,
     namespace: str,
     artifact_root: Path,
     repo_root: Path,
@@ -1085,13 +1091,18 @@ def _decide_chunk(
     )
     v1_task_identity = str(task["v1_task_identity_sha256"])
     task_identity = str(task["task_identity_sha256"])
-    for read in read_process_v2_chunk_target(
-        source_output,
-        target=target,
-        sentinel_replay_entries=0,
-        recover_row_errors=False,
-        repo_root=repo_root,
-    ):
+    reads = tuple(
+        read_process_v2_chunk_target(
+            source_output,
+            target=target,
+            sentinel_replay_entries=0,
+            recover_row_errors=False,
+            repo_root=repo_root,
+        )
+    )
+    query_keys: list[tuple[int, int]] = []
+    queries: list[tuple[AddressedPackedTrace, int]] = []
+    for read in reads:
         entry_index = int(read.entry_index)
         decision = decisions[entry_index]
         record = read.record
@@ -1099,6 +1110,35 @@ def _decide_chunk(
             raise ProcessV2Active8MapError(
                 f"the cached row and the upstream decision name different traces at {entry_index}"
             )
+        if not decision["admitted"]:
+            continue
+        if read.addressed is None:
+            raise ProcessV2Active8MapError(
+                f"an admitted cached row has no decoded trace at entry {entry_index}"
+            )
+        classifications = tuple(
+            classify_process_v2_semantic_action(
+                step,
+                step_index=step_index,
+                policy=checker.policy,
+            )
+            for step_index, step in enumerate(read.addressed.trace.steps)
+        )
+        # Static policy exclusion decides the whole trace before any dynamic
+        # support work.  A multi-neighbour birth or non-ActionV4 mark therefore
+        # never consumes a batch slot merely to be rejected again.
+        if any(not classification.policy_eligible for classification in classifications):
+            continue
+        for step_index in range(len(classifications)):
+            query_keys.append((entry_index, step_index))
+            queries.append((read.addressed, step_index))
+
+    evidence = checker.evaluate_many(queries)
+    evidence_by_key = dict(zip(query_keys, evidence, strict=True))
+    for read in reads:
+        entry_index = int(read.entry_index)
+        decision = decisions[entry_index]
+        record = read.record
         if not decision["admitted"]:
             yield (
                 upstream_rejected_row(
@@ -1124,6 +1164,11 @@ def _decide_chunk(
             v1_task_identity_sha256=v1_task_identity,
             task_identity_sha256=task_identity,
             namespace=namespace,
+            precomputed_evidence={
+                step_index: evidence_by_key[(entry_index, step_index)]
+                for step_index in range(len(read.addressed.trace.steps))
+                if (entry_index, step_index) in evidence_by_key
+            },
         )
 
 

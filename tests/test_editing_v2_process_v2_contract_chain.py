@@ -68,6 +68,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     SELF_HASH_FIELD_ALGORITHM,
     SUPERSEDED_CHAIN_CONTRACT_REVISION,
     SUPERSEDED_CHAIN_CONTRACT_REVISION_V2,
+    SUPERSEDED_CHAIN_CONTRACT_REVISION_V3,
     T1_CAPACITY_POLICY,
     T1_PANEL_POLICY,
     WHOLE_CANONICAL_BODY_ALGORITHM,
@@ -108,11 +109,15 @@ _SUPERSEDED_CHAIN_REVISION = "3f3258e"
 # yields the same seven artifacts.
 _SUPERSEDED_CHAIN_REVISION_V2 = "b39420c"
 
+# The revision that sealed contract-chain schema version 3.
+_SUPERSEDED_CHAIN_REVISION_V3 = "f4baef1"
+
 # Every superseded generation, oldest first, as (schema version, revision that
 # sealed it, its named `contract_revision`).
 _SUPERSEDED_GENERATION_SOURCES: tuple[tuple[int, str, str], ...] = (
     (1, _SUPERSEDED_CHAIN_REVISION, SUPERSEDED_CHAIN_CONTRACT_REVISION),
     (2, _SUPERSEDED_CHAIN_REVISION_V2, SUPERSEDED_CHAIN_CONTRACT_REVISION_V2),
+    (3, _SUPERSEDED_CHAIN_REVISION_V3, SUPERSEDED_CHAIN_CONTRACT_REVISION_V3),
 )
 
 # The four frozen non-chain files the chain binds.  None of them is V1-named.
@@ -476,7 +481,7 @@ def test_the_added_edges_are_present_and_were_absent_in_schema_version_one() -> 
 def test_declaring_a_dependency_edge_required_a_new_schema_version() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         payload = _load(name)
-        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 3
+        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 4
         assert payload["contract_revision"] == CHAIN_CONTRACT_REVISION
 
 
@@ -779,6 +784,7 @@ def test_a_single_lineage_block_where_a_list_is_required_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     lineage = payload["superseded_design_lineage"]
     payload["superseded_design_lineage"] = {
+        "contract_revision": lineage[-1]["contract_revision"],
         "physical": lineage[-1]["physical"],
         "semantic": lineage[-1]["semantic"],
     }
@@ -1218,11 +1224,16 @@ def test_decision_runtime_model_and_software_are_identical_to_v1() -> None:
     assert v2["model"]["operator_capability_fingerprint"] == "d79ffe8ef65f3fb3"
 
 
-def test_gate_zero_structural_blocks_are_identical_to_v1() -> None:
+def test_gate_zero_structural_has_only_the_declared_process_v2_delta() -> None:
     v1 = _load(_V1_COUNTERPART[GATE_ZERO_STRUCTURAL])
     v2 = _load(GATE_ZERO_STRUCTURAL)
-    for field in ("required_architecture", "structural_checks", "decision_policy"):
+    for field in ("required_architecture", "decision_policy"):
         assert v2[field] == v1[field], field
+    expected = dict(v1["structural_checks"])
+    assert expected.pop("require_positive_canonical_successor_count") is True
+    assert expected.pop("require_positive_successor_alias_count") is True
+    expected["require_productive_nonself_successor"] = True
+    assert v2["structural_checks"] == expected
 
 
 def test_t1_panel_policy_thresholds_are_identical_to_v1() -> None:
@@ -1294,8 +1305,8 @@ _ENVELOPE_FIELDS = {
 }
 
 
-def test_no_policy_value_moved_across_any_schema_version() -> None:
-    """Every version bump moved the envelope only. No mirrored policy value.
+def test_no_policy_value_moved_beyond_the_declared_gate_zero_delta() -> None:
+    """Only schema 4's declared Process-V2 Gate-0 policy delta may move.
 
     Checked against BOTH superseded generations rather than only the oldest: a
     value that moved at version 2 and moved back at version 3 would agree with
@@ -1313,6 +1324,8 @@ def test_no_policy_value_moved_across_any_schema_version() -> None:
             superseded = json.loads(_git_show(revision, name) or b"{}")
             assert superseded["schema_version"] == version, (name, revision)
             for field in sorted(set(current) & set(superseded) - _ENVELOPE_FIELDS):
+                if name == GATE_ZERO_STRUCTURAL and field == "structural_checks":
+                    continue
                 assert current[field] == superseded[field], f"{name}.{field}@{revision}"
 
 
@@ -1343,8 +1356,10 @@ def test_version_three_changed_exactly_the_binding_version_and_the_lineage() -> 
 
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V2):
         pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout")
+    if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V3):
+        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout")
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
-        current = _load(name)
+        current = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V3, name) or b"{}")
         previous = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V2, name) or b"{}")
         moved = {
             field
@@ -1384,6 +1399,39 @@ def test_version_three_changed_exactly_the_binding_version_and_the_lineage() -> 
                     assert edge[slot]["sha256"] != was[slot]["sha256"], f"{name}:{role}"
                 else:
                     assert edge[slot] == was[slot], f"{name}:{role}.{slot}"
+
+
+def test_version_four_changes_only_gate_zero_policy_and_chain_envelopes() -> None:
+    """Schema 4 moves the declared Gate-0 checks and the resulting chain pins."""
+
+    if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V3):
+        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout")
+    for name in PROCESS_V2_CHAIN_ARTIFACTS:
+        current = _load(name)
+        previous = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V3, name) or b"{}")
+        moved = {
+            field
+            for field in set(current) | set(previous)
+            if current.get(field) != previous.get(field)
+        }
+        allowed = {
+            "contract_revision",
+            "parents",
+            "schema_version",
+            "superseded_design_lineage",
+            SELF_HASH_FIELD,
+        }
+        if name == GATE_ZERO_STRUCTURAL:
+            allowed.add("structural_checks")
+        assert moved <= allowed, (name, sorted(moved))
+        assert {
+            "contract_revision",
+            "schema_version",
+            "superseded_design_lineage",
+            SELF_HASH_FIELD,
+        } <= moved
+        if name == GATE_ZERO_STRUCTURAL:
+            assert "structural_checks" in moved
 
 
 # ---- The Gate-0 consumption boundary ----

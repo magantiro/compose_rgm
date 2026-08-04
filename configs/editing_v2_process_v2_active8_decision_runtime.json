@@ -12,8 +12,8 @@
   "bounded_p50_authorized": false,
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_active8_decision_runtime",
-  "contract_revision": "process_v2_binding_v2_and_cumulative_design_lineage",
-  "contract_sha256": "fc0bc10625b9d80464f2e4098fa6085aa17c91878dba52bc24339d04e4a43766",
+  "contract_revision": "process_v2_gate_zero_productive_nonself",
+  "contract_sha256": "799291b6ab17a689d34e08cc849e3a0b510e7c07967fc1d3382d3805a7870bdf",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -66,7 +66,7 @@
     "measured_evidence_in_this_contract": false
   },
   "schema": "compose.editing_v2.process_v2_active8_decision_runtime",
-  "schema_version": 3,
+  "schema_version": 4,
   "shared_policy_registry": {
     "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
     "schema": "compose.editing_v2.shared_policy_registry",
@@ -122,6 +122,28 @@
         "kind": "lineage_reference",
         "provider": "editing_v2_process_v2_contract_chain",
         "sha256": "8b829cb311837205ca786dc15fe797bd4fd7926e30467f43a539150d37bbe656",
+        "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+        "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+      }
+    },
+    {
+      "contract_revision": "process_v2_binding_v2_and_cumulative_design_lineage",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "53f8fea7d0165d229d674725fc2aaab5eeb61a138d4d5b45def03c969fde146f",
+        "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
+        "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
+      },
+      "schema_version": 3,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "fc0bc10625b9d80464f2e4098fa6085aa17c91878dba52bc24339d04e4a43766",
         "target": "configs/editing_v2_process_v2_active8_decision_runtime.json",
         "target_schema": "compose.editing_v2.process_v2_active8_decision_runtime"
       }

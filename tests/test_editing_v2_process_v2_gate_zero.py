@@ -32,6 +32,14 @@ from compose_v4.data.editing_v2_process_v2_gate_zero import (
     reduction_order,
     run_gate_zero,
 )
+from compose_v4.data.editing_v2_process_v2_active8_reduce import (
+    COMPLETION_FIELDS,
+    COMPLETION_FILENAME,
+)
+from compose_v4.data.editing_v2_process_v2_active8_sentinel import (
+    SELECTION_EXHAUSTIVE,
+    SENTINEL_PASSED,
+)
 from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     CAPABILITY_CELLS,
     DEVELOPMENT_CELL_ROLES,
@@ -46,11 +54,19 @@ from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
     ACTIVE8_TASK_SCHEMA,
     ACTIVE8_TASK_SCHEMA_VERSION,
     ACTIVE8_TASKS_DIRNAME,
+    ACTIVE8_COMPLETION_SCHEMA,
+    ACTIVE8_COMPLETION_SCHEMA_VERSION,
     CANDIDATE_EVIDENCE_FIELDS,
+    CANDIDATE_TOTAL_FIELDS,
     GATE_ZERO_DECISION_FILENAME,
     GATE_ZERO_DECISION_SCHEMA,
     PIPELINE_STATUS_NO_AUTHORITY,
+    SENTINEL_RESULT_FIELDS,
+    SENTINEL_SALT,
+    SENTINEL_SCHEMA,
+    SENTINEL_SCHEMA_VERSION,
 )
+from compose_v4.data.editing_v2_process_v2_schema import authority_false_block
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -95,12 +111,11 @@ def _evidence(**overrides: object) -> dict[str, object]:
         "action_sha256": _identity("action"),
         "source_state_sha256": _identity("source"),
         "target_state_sha256": _identity("target"),
+        "source_canonical_key": "CC",
         "canonical_successor_key": "CCO",
         "raw_mark_count": 8,
-        "canonical_successor_count": 5,
         "matching_mark_count": 1,
         "exact_successor_mark_count": 1,
-        "successor_alias_count": 2,
     }
     evidence.update(overrides)
     assert set(evidence) == set(CANDIDATE_EVIDENCE_FIELDS)
@@ -222,9 +237,11 @@ def _write_shard(
     }
     receipt = {**body, "receipt_sha256": _digest(body)}
     assert set(receipt) == set(ACTIVE8_RECEIPT_FIELDS)
+    (directory / ACTIVE8_RECEIPT_FILENAME).write_bytes(_canonical(receipt) + b"\n")
+    _publish_completion(run_root)
     if receipt_mutate is not None:
         receipt = receipt_mutate(receipt)
-    (directory / ACTIVE8_RECEIPT_FILENAME).write_bytes(_canonical(receipt) + b"\n")
+        (directory / ACTIVE8_RECEIPT_FILENAME).write_bytes(_canonical(receipt) + b"\n")
     return task_identity
 
 
@@ -234,6 +251,91 @@ def _reseal(receipt: dict[str, object], **changes: object) -> dict[str, object]:
     body = {k: v for k, v in receipt.items() if k != "receipt_sha256"}
     body.update(changes)
     return {**body, "receipt_sha256": _digest(body)}
+
+
+def _publish_completion(run_root: Path) -> dict[str, object]:
+    """Publish an exact context-bound stand-in completion for the reducer tests."""
+
+    receipts = []
+    for directory in sorted((run_root / ACTIVE8_TASKS_DIRNAME).iterdir()):
+        receipt = json.loads((directory / ACTIVE8_RECEIPT_FILENAME).read_bytes())
+        receipts.append(receipt)
+    inventory = [
+        [str(receipt["task_identity_sha256"]), str(receipt["receipt_sha256"])]
+        for receipt in receipts
+    ]
+    task_inventory_sha256 = _digest([item[0] for item in inventory])
+    result_inventory_sha256 = _digest(inventory)
+    binding_sha256 = _identity("binding")
+    plan_sha256 = _identity("plan")
+    run_identity_sha256 = _identity("run")
+    transition_count = sum(int(receipt["transition_count"]) for receipt in receipts)
+    sentinel_body = {
+        "schema": SENTINEL_SCHEMA,
+        "schema_version": SENTINEL_SCHEMA_VERSION,
+        "status": SENTINEL_PASSED,
+        "salt": SENTINEL_SALT,
+        "binding_sha256": binding_sha256,
+        "plan_sha256": plan_sha256,
+        "run_identity_sha256": run_identity_sha256,
+        "task_inventory_sha256": task_inventory_sha256,
+        "result_inventory_sha256": result_inventory_sha256,
+        "unique_accepted_pairs": transition_count,
+        "selection_mode": SELECTION_EXHAUSTIVE,
+        "selected_pairs": transition_count,
+        "selected_pairs_sha256": _digest(
+            [["source", str(index)] for index in range(transition_count)]
+        ),
+        "per_cell_examples": 0,
+        "global_examples": 0,
+        "oracle_examples": 0,
+        "evidence_mismatches": [],
+        "cell_mismatches": [],
+        "oracle_mismatches": [],
+    }
+    sentinel = {**sentinel_body, "sentinel_sha256": _digest(sentinel_body)}
+    assert tuple(sentinel) == SENTINEL_RESULT_FIELDS
+    census = {
+        field: sum(int(receipt[field]) for receipt in receipts)
+        for field in ACTIVE8_CENSUS_FIELDS
+    }
+    body = {
+        "schema": ACTIVE8_COMPLETION_SCHEMA,
+        "schema_version": ACTIVE8_COMPLETION_SCHEMA_VERSION,
+        "status": PIPELINE_STATUS_NO_AUTHORITY,
+        **authority_false_block(),
+        "accepted_transitions": transition_count,
+        "action_family_histogram": {},
+        "active8_exclusion_histogram": {},
+        "binding_sha256": binding_sha256,
+        "candidate_totals": dict.fromkeys(CANDIDATE_TOTAL_FIELDS, 0),
+        "capability_cell_histogram": {},
+        "census": census,
+        "classification_affects_admission": False,
+        "plan_sha256": plan_sha256,
+        "result_inventory": inventory,
+        "result_inventory_sha256": result_inventory_sha256,
+        "run_artifact_root": str(run_root),
+        "run_identity_sha256": run_identity_sha256,
+        "sentinel": sentinel,
+        "task_inventory_sha256": task_inventory_sha256,
+    }
+    completion = {**body, "completion_sha256": _digest(body)}
+    assert set(completion) == COMPLETION_FIELDS
+    (run_root / COMPLETION_FILENAME).write_bytes(_canonical(completion) + b"\n")
+    return completion
+
+
+def _rewrite_completion(run_root: Path, mutate) -> dict[str, object]:
+    """Mutate and fully reseal a stand-in completion."""
+
+    path = run_root / COMPLETION_FILENAME
+    completion = json.loads(path.read_bytes())
+    body = {key: value for key, value in completion.items() if key != "completion_sha256"}
+    body = mutate(body)
+    rewritten = {**body, "completion_sha256": _digest(body)}
+    path.write_bytes(_canonical(rewritten) + b"\n")
+    return rewritten
 
 
 def _contracts() -> GateZeroContracts:
@@ -290,11 +392,7 @@ def test_contracts_bind_the_frozen_process_v2_identity_and_registry() -> None:
 
 def test_stratum_bins_tile_their_range_exactly_once() -> None:
     contracts = _contracts()
-    assert sorted(contracts.strata) == [
-        "canonical_successor_count",
-        "raw_mark_count",
-        "successor_alias_multiplicity",
-    ]
+    assert sorted(contracts.strata) == ["raw_mark_count"]
     for name, bins in contracts.strata.items():
         edges = [(item["minimum"], item["maximum"]) for item in bins]
         assert edges[0][0] == 1, name
@@ -328,9 +426,6 @@ def test_strata_are_derived_once_from_literal_counts() -> None:
     assert _stratum_for("raw_mark_count", 5, marks) == "marks_005_016"
     assert _stratum_for("raw_mark_count", 64, marks) == "marks_017_064"
     assert _stratum_for("raw_mark_count", 65, marks) == "marks_065_plus"
-    aliases = contracts.strata["successor_alias_multiplicity"]
-    assert _stratum_for("successor_alias_multiplicity", 1, aliases) == "aliases_001"
-    assert _stratum_for("successor_alias_multiplicity", 5, aliases) == "aliases_005_plus"
 
 
 def test_the_deriver_refuses_bins_that_do_not_place_a_count_exactly_once() -> None:
@@ -378,9 +473,8 @@ def test_complete_train_coverage_passes_and_authorizes_nothing(tmp_path: Path) -
         "require_every_teacher_supported": True,
         "require_exactly_one_matching_mark": True,
         "require_one_assignment_per_accepted_action": True,
-        "require_positive_canonical_successor_count": True,
         "require_positive_raw_mark_count": True,
-        "require_positive_successor_alias_count": True,
+        "require_productive_nonself_successor": True,
         "require_zero_terminal_assignments": True,
     }
     assert sum(decision["stratum_counts"]["raw_mark_count"].values()) == 17
@@ -411,6 +505,72 @@ def test_every_role_is_censused_while_only_train_is_read(tmp_path: Path) -> None
         for shard in index.shards
         if shard["census"]["active8_accepted_entries"] == 0
     )
+
+
+def test_gate_zero_refuses_a_run_without_the_sentinel_gated_completion(
+    tmp_path: Path,
+) -> None:
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    _build_run(active8, contracts=contracts)
+    (active8 / COMPLETION_FILENAME).unlink()
+    with pytest.raises(ProcessV2GateZeroIncomplete, match="sentinel-gated completion"):
+        run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
+
+
+def test_gate_zero_refuses_a_resealed_pass_sentinel_with_a_mismatch(
+    tmp_path: Path,
+) -> None:
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    _build_run(active8, contracts=contracts)
+
+    def mutate(completion: dict[str, object]) -> dict[str, object]:
+        sentinel = dict(completion["sentinel"])
+        sentinel_body = {
+            key: value for key, value in sentinel.items() if key != "sentinel_sha256"
+        }
+        sentinel_body["evidence_mismatches"] = ["resealed-mismatch"]
+        completion["sentinel"] = {
+            **sentinel_body,
+            "sentinel_sha256": _digest(sentinel_body),
+        }
+        return completion
+
+    _rewrite_completion(active8, mutate)
+    with pytest.raises(ProcessV2GateZeroIncomplete, match="sentinel-gated completion"):
+        run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
+
+
+def test_an_injected_index_cannot_bypass_a_later_failed_completion(
+    tmp_path: Path,
+) -> None:
+    contracts = _contracts()
+    active8 = tmp_path / "active8"
+    _build_run(active8, contracts=contracts)
+    index = read_active8_decision_index(active8, contracts=contracts)
+
+    def fail(completion: dict[str, object]) -> dict[str, object]:
+        sentinel = dict(completion["sentinel"])
+        sentinel_body = {
+            key: value for key, value in sentinel.items() if key != "sentinel_sha256"
+        }
+        sentinel_body["status"] = "SENTINEL_FAILED"
+        sentinel_body["evidence_mismatches"] = ["late-failure"]
+        completion["sentinel"] = {
+            **sentinel_body,
+            "sentinel_sha256": _digest(sentinel_body),
+        }
+        return completion
+
+    _rewrite_completion(active8, fail)
+    with pytest.raises(ProcessV2GateZeroIncomplete, match="sentinel-gated completion"):
+        reduce_gate_zero(
+            active8,
+            gate_zero_root=tmp_path / "gate0",
+            contracts=contracts,
+            index=index,
+        )
 
 
 # ---- The three defects the previous attempt shipped --------------------------
@@ -478,25 +638,26 @@ def test_require_every_teacher_supported_is_actually_enforced(tmp_path: Path) ->
     assert "outside_declared_support" in decision["negative_receipts"][0]["detail"]
 
 
-def test_an_alias_count_crossing_a_bin_is_recorded_not_absorbed(tmp_path: Path) -> None:
-    """The previous attempt compared a stratum against `stratum_for(count, bins)`
-    -- both sides one input -- so an alias count could cross a bin with zero
-    failures recorded.  Here the strata come from the counts once, and the bin
-    a count lands in moves when the count moves."""
+def test_a_canonical_self_transition_fails_the_productive_successor_gate(
+    tmp_path: Path,
+) -> None:
+    """Whole-corpus evidence must prove a productive nonself successor."""
 
-    def widen(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    def make_self(rows: list[dict[str, object]]) -> list[dict[str, object]]:
         body = {key: value for key, value in rows[0].items() if key != "assignment_sha256"}
-        body["candidate_evidence"] = _evidence(successor_alias_count=6, raw_mark_count=9)
+        body["candidate_evidence"] = _evidence(
+            source_canonical_key="CCO", canonical_successor_key="CCO"
+        )
         return [{**body, "assignment_sha256": _digest(body)}, *rows[1:]]
 
     contracts = _contracts()
     active8 = tmp_path / "active8"
-    _build_run(active8, contracts=contracts, mutate=widen)
+    _build_run(active8, contracts=contracts, mutate=make_self)
     decision = run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
 
-    aliases = decision["stratum_counts"]["successor_alias_multiplicity"]
-    assert aliases == {"aliases_002_004": 14, "aliases_005_plus": 3}
-    assert decision["decision"] == "PASS"
+    assert decision["decision"] == "FAIL"
+    assert decision["violation_counts"]["self_transition_teacher"] == 3
+    assert decision["checks"]["productive_nonself_successor"] is False
 
 
 # ---- Every declared structural clause has a behavioural enforcement site ------
@@ -507,13 +668,15 @@ def test_an_alias_count_crossing_a_bin_is_recorded_not_absorbed(tmp_path: Path) 
     [
         ({"matching_mark_count": 2}, "matching_mark_count_not_one"),
         ({"raw_mark_count": 0}, "nonpositive_raw_mark_count"),
-        ({"canonical_successor_count": 0}, "nonpositive_canonical_successor_count"),
-        ({"successor_alias_count": 0}, "nonpositive_successor_alias_count"),
         ({"exact_successor_mark_count": 2}, "evidence_arithmetic"),
+        (
+            {"source_canonical_key": "CCO", "canonical_successor_key": "CCO"},
+            "self_transition_teacher",
+        ),
     ],
 )
 def test_evidence_clauses_fail_the_gate(
-    tmp_path: Path, overrides: dict[str, int], violation: str
+    tmp_path: Path, overrides: dict[str, object], violation: str
 ) -> None:
     def corrupt(rows: list[dict[str, object]]) -> list[dict[str, object]]:
         body = {key: value for key, value in rows[0].items() if key != "assignment_sha256"}
@@ -935,6 +1098,7 @@ def test_shard_bytes_are_authenticated_against_the_receipt(tmp_path: Path) -> No
         receipt_mutate=lambda receipt: _reseal(receipt, decision_shard_sha256=_identity("other")),
     )
     assert identity
+    _publish_completion(active8)
     with pytest.raises(ProcessV2GateZeroError, match="decision_shard_sha256"):
         run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
 
@@ -949,6 +1113,7 @@ def test_a_shard_shorter_than_its_declared_transition_count_raises(tmp_path: Pat
         cells=list(contracts.required_cell_ids),
         receipt_mutate=lambda receipt: _reseal(receipt, transition_count=999),
     )
+    _publish_completion(active8)
     with pytest.raises(ProcessV2GateZeroError, match="its receipt declares"):
         run_gate_zero(active8, gate_zero_root=tmp_path / "gate0", repo_root=REPO_ROOT)
 

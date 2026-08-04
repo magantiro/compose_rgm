@@ -189,13 +189,16 @@ SELF_HASH_FIELD = "contract_sha256"
 #: Version 3 declares resolved-evidence-binding schema 2 -- the binding now embeds
 #: the admitted-source descriptor verbatim instead of projecting a field list that
 #: named three hashes the adapter never emitted -- and carries the whole design
-#: lineage rather than only the immediately preceding generation.  No generation
-#: is overwritten or resealed; each is preserved as lineage.
-CHAIN_SCHEMA_VERSION = 3
+#: lineage rather than only the immediately preceding generation.  Version 4
+#: makes the Process-V2 Gate-0 policy successor-directed: whole-corpus evidence
+#: proves exact teacher support plus a productive nonself successor, while full
+#: quotient size and alias multiplicity move to the completion-bound sentinel.
+#: No generation is overwritten or resealed; each is preserved as lineage.
+CHAIN_SCHEMA_VERSION = 4
 
 #: The named successor generation, following this repository's ``contract_revision``
 #: convention (see ``configs/editing_v2_semantic_process_v2.json``).
-CHAIN_CONTRACT_REVISION = "process_v2_binding_v2_and_cumulative_design_lineage"
+CHAIN_CONTRACT_REVISION = "process_v2_gate_zero_productive_nonself"
 
 #: The revision the version-1 bodies were sealed under.  Kept as a named constant
 #: because it is the oldest generation and several tests address it by name.
@@ -205,6 +208,11 @@ SUPERSEDED_CHAIN_CONTRACT_REVISION = (
 
 #: The revision the version-2 bodies were sealed under.
 SUPERSEDED_CHAIN_CONTRACT_REVISION_V2 = "process_v2_explicit_dependency_graph"
+
+#: The revision the version-3 bodies were sealed under.
+SUPERSEDED_CHAIN_CONTRACT_REVISION_V3 = (
+    "process_v2_binding_v2_and_cumulative_design_lineage"
+)
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
@@ -476,6 +484,68 @@ _SUPERSEDED_GENERATIONS: tuple[tuple[int, str, dict[str, dict[str, str]]], ...] 
                 ),
                 "file_sha256": (
                     "4355d360baba35927fe20dbedc898e08db5b6211a5e302fa4a7f33b238ff620d"
+                ),
+            },
+        },
+    ),
+    (
+        3,
+        SUPERSEDED_CHAIN_CONTRACT_REVISION_V3,
+        {
+            ACTIVE8_DECISION_RUNTIME: {
+                "contract_sha256": (
+                    "fc0bc10625b9d80464f2e4098fa6085aa17c91878dba52bc24339d04e4a43766"
+                ),
+                "file_sha256": (
+                    "53f8fea7d0165d229d674725fc2aaab5eeb61a138d4d5b45def03c969fde146f"
+                ),
+            },
+            CAPABILITY_CELLS: {
+                "contract_sha256": (
+                    "3891411db00387edebcc4d0770a4f5e4624535c1d58fa51e562dfe0441c12962"
+                ),
+                "file_sha256": (
+                    "f8919ff530cb22823f6c9e4c806550fa4d4ba65f963a4e94a672ef962fdc6c57"
+                ),
+            },
+            DEVELOPMENT_CELL_ROLES: {
+                "contract_sha256": (
+                    "a88086e6762bd55aa1a888752d7cb6dc87615055693e94c374d2e99c45ee8977"
+                ),
+                "file_sha256": (
+                    "344175f30a3c0ae13cb5d491ac0729b76c7ecfb6f4b82ccb15d3a41c8c900cd8"
+                ),
+            },
+            GATE_ZERO_STRUCTURAL: {
+                "contract_sha256": (
+                    "b7d663ebd30d31051a5f01e08db15817b49f86f7a2ba0d7c4e7a3efc631fc042"
+                ),
+                "file_sha256": (
+                    "c14fd34b649a7581e93fcec317d8905a066017bb1817ae058c0148941be76658"
+                ),
+            },
+            T1_PANEL_POLICY: {
+                "contract_sha256": (
+                    "f6a305f2f652e3f411a8b0b8188203942c83e2fa279e56ef8b57c5febe47ba78"
+                ),
+                "file_sha256": (
+                    "7f81ce3313ccca8c1b2e9fa5c4ebd9039c17655f72c199a24a7df424c0dc5d64"
+                ),
+            },
+            T1_CAPACITY_POLICY: {
+                "contract_sha256": (
+                    "913b9bd86deebce726b3e2e866cf54fff664847faa25c351528bd0fb70e29625"
+                ),
+                "file_sha256": (
+                    "5911bf120297ebb5b88b89f2daa5e596622fef8c12df0594562fb933b563a6f4"
+                ),
+            },
+            P50_RECIPE_POLICY: {
+                "contract_sha256": (
+                    "885f2b13bac4ea7b80df35b286fad8933e33a5a7757f587abb6fb5b5ba25c69b"
+                ),
+                "file_sha256": (
+                    "4534cc62b10aecc3d201ffa774d9a08fdf82f27205bb774fa38504a3c7a2f7a9"
                 ),
             },
         },
@@ -840,13 +910,42 @@ def _build_development_cell_roles(
     return payload
 
 
+def _process_v2_gate_zero_structural_checks(repo_root: Path) -> dict[str, Any]:
+    """Project the frozen base checks and apply the explicit Process-V2 delta.
+
+    The V1 gate measured full quotient size and alias multiplicity for every
+    corpus transition.  Process V2 proves exact teacher support and productive
+    nonself execution exhaustively, then measures full quotient geometry in the
+    completion-bound release sentinel.  Requiring the old keys before removing
+    them makes upstream policy drift fail instead of silently widening the delta.
+    """
+
+    checks = dict(_project("structural_checks", repo_root))
+    retired = (
+        "require_positive_canonical_successor_count",
+        "require_positive_successor_alias_count",
+    )
+    for field in retired:
+        if checks.get(field) is not True:
+            raise ProcessV2ChainError(
+                f"the Process-V2 Gate-0 base policy no longer declares {field} true"
+            )
+        del checks[field]
+    if "require_productive_nonself_successor" in checks:
+        raise ProcessV2ChainError(
+            "the Process-V2 Gate-0 base policy unexpectedly declares the V2 delta"
+        )
+    checks["require_productive_nonself_successor"] = True
+    return checks
+
+
 def _build_gate_zero_structural(
     repo_root: Path, sealed: Mapping[str, bytes]
 ) -> dict[str, Any]:
     payload = _envelope(repo_root, GATE_ZERO_STRUCTURAL, sealed)
     payload["decision_policy"] = _project("gate_zero_decision_policy", repo_root)
     payload["required_architecture"] = _project("required_architecture", repo_root)
-    payload["structural_checks"] = _project("structural_checks", repo_root)
+    payload["structural_checks"] = _process_v2_gate_zero_structural_checks(repo_root)
     return payload
 
 
@@ -1692,6 +1791,7 @@ __all__ = [
     "STATUS_SUFFIX",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION_V2",
+    "SUPERSEDED_CHAIN_CONTRACT_REVISION_V3",
     "T1_CAPACITY_POLICY",
     "T1_PANEL_POLICY",
     "WHOLE_CANONICAL_BODY_ALGORITHM",

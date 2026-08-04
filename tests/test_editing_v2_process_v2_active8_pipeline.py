@@ -90,7 +90,13 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     canonical_bytes,
     canonical_sha256,
 )
+from compose_v4.data.packed_trace_store import (
+    AddressedPackedTrace,
+    PackedTraceAddress,
+    PackedTraceProgress,
+)
 from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    ProductionProcessV2BatchedTeacherSupportChecker,
     ProductionProcessV2SemanticExactCandidateChecker,
     SemanticActive8AdmissionError,
     build_process_v2_semantic_active8_admission_policy,
@@ -118,12 +124,16 @@ from compose_v4.rewrite.editing_v2_process_identity import (
     editing_process_v2_identity,
     editing_v2_process_identity,
 )
+from compose_v4.rewrite.action_codec_v4 import ACTIVE8_EXECUTOR_RULES
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace import RewriteStep, RewriteTrace
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 for _extra_path in (str(_REPO_ROOT / "tests"), str(_REPO_ROOT / "scripts")):
     if _extra_path not in sys.path:
         sys.path.insert(0, _extra_path)
 
+import process_v2_genuine_transitions as genuine_fixture  # noqa: E402
 import test_process_v2_chunk_fed_rebind as rebind_fixture  # noqa: E402
 
 ROOT = _REPO_ROOT
@@ -319,9 +329,11 @@ def test_the_stage_binds_the_process_v2_policy_and_the_v1_policy_is_untouched() 
         if key
         not in {
             "schema",
+            "schema_version",
             "status",
             "process_identity_sha256",
             "required_model_modes",
+            "candidate_evaluator",
             "implementation_file_sha256",
             "policy_sha256",
         }
@@ -332,14 +344,20 @@ def test_the_stage_binds_the_process_v2_policy_and_the_v1_policy_is_untouched() 
         if key
         not in {
             "schema",
+            "schema_version",
             "status",
             "process_identity_sha256",
             "required_model_modes",
+            "candidate_evaluator",
             "implementation_file_sha256",
             "policy_sha256",
         }
     }
     assert v1_body == v2_body
+    assert v2.schema_version == 2
+    assert v2.candidate_evaluator.endswith(
+        ".ProductionProcessV2BatchedTeacherSupportChecker"
+    )
     with pytest.raises(SemanticActive8AdmissionError):
         validate_process_v2_semantic_active8_admission_policy(v1)
     with pytest.raises(V1SemanticActive8AdmissionError):
@@ -543,12 +561,11 @@ def test_a_resealed_row_whose_total_moved_is_refused(stage: _Stage) -> None:
     (
         ("matching_mark_count", 2),
         ("exact_successor_mark_count", 0),
-        ("successor_alias_count", 0),
         ("raw_mark_count", 0),
-        ("canonical_successor_count", 99),
+        ("source_canonical_key", "K"),
     ),
 )
-def test_each_frozen_evidence_invariant_is_enforced(field: str, value: int) -> None:
+def test_each_frozen_evidence_invariant_is_enforced(field: str, value: object) -> None:
     """Fed a violating payload, not compared against a recomputed expectation."""
 
     payload = {
@@ -557,12 +574,11 @@ def test_each_frozen_evidence_invariant_is_enforced(field: str, value: int) -> N
         "action_sha256": "a" * 64,
         "source_state_sha256": "b" * 64,
         "target_state_sha256": "c" * 64,
+        "source_canonical_key": "SOURCE",
         "canonical_successor_key": "K",
         "raw_mark_count": 10,
-        "canonical_successor_count": 4,
         "matching_mark_count": 1,
         "exact_successor_mark_count": 1,
-        "successor_alias_count": 2,
     }
     require_accepted_evidence_invariants(payload)
     with pytest.raises(ProcessV2Active8MapError, match="frozen invariant"):
@@ -802,25 +818,38 @@ def test_the_sentinel_rank_is_the_frozen_salted_digest() -> None:
     assert SENTINEL_SALT == "process_v2_active8_release_sentinel_v1"
 
 
-def test_require_sentinel_passed_blocks_on_any_mismatch() -> None:
-    body = {
-        "schema": "compose.data.editing_v2_process_v2_pipeline.active8_release_sentinel",
-        "schema_version": 1,
-        "status": "SENTINEL_FAILED",
-        "salt": SENTINEL_SALT,
-        "unique_accepted_pairs": 3,
-        "selection_mode": SELECTION_EXHAUSTIVE,
-        "selected_pairs": 3,
-        "per_cell_examples": 0,
-        "global_examples": 0,
-        "oracle_examples": 3,
-        "evidence_mismatches": ["x"],
-        "cell_mismatches": [],
-        "oracle_mismatches": [],
-    }
-    sentinel = {**body, "sentinel_sha256": canonical_sha256(body)}
-    with pytest.raises(ProcessV2Active8SentinelError):
-        require_sentinel_passed(sentinel)
+def test_require_sentinel_passed_refuses_resealed_semantic_mutations(stage: _Stage) -> None:
+    completion = stage.reduce(publish=False)
+    original = completion["sentinel"]
+    require_sentinel_passed(
+        original,
+        binding_sha256=completion["binding_sha256"],
+        plan_sha256=completion["plan_sha256"],
+        run_identity_sha256=completion["run_identity_sha256"],
+        task_inventory_sha256=completion["task_inventory_sha256"],
+        result_inventory_sha256=completion["result_inventory_sha256"],
+    )
+    mutations = (
+        {"schema_version": 999},
+        {"salt": "another-salt"},
+        {"selection_mode": "unknown-selection"},
+        {"evidence_mismatches": ["real mismatch"]},
+        {"plan_sha256": "f" * 64},
+        {"selected_pairs": int(original["unique_accepted_pairs"]) + 1},
+    )
+    for changes in mutations:
+        body = {key: value for key, value in original.items() if key != "sentinel_sha256"}
+        body.update(changes)
+        sentinel = {**body, "sentinel_sha256": canonical_sha256(body)}
+        with pytest.raises(ProcessV2Active8SentinelError):
+            require_sentinel_passed(
+                sentinel,
+                binding_sha256=completion["binding_sha256"],
+                plan_sha256=completion["plan_sha256"],
+                run_identity_sha256=completion["run_identity_sha256"],
+                task_inventory_sha256=completion["task_inventory_sha256"],
+                result_inventory_sha256=completion["result_inventory_sha256"],
+            )
 
 
 # ---- The bounded dictionary oracle is checked by the repository's own oracle ----
@@ -885,6 +914,192 @@ def _chunk_reads(stage: _Stage, task):
         recover_row_errors=False,
         repo_root=ROOT,
     )
+
+
+def _accepted_teacher_queries(stage: _Stage):
+    accepted = {
+        (str(row["v1_task_identity_sha256"]), int(row["entry_index"]))
+        for row in stage.rows()
+        if row["admission_status"] == ACCEPTED
+    }
+    queries = []
+    for task in stage.plan["tasks"]:
+        task_key = str(task["v1_task_identity_sha256"])
+        for read in _chunk_reads(stage, task):
+            if (
+                (task_key, int(read.entry_index)) not in accepted
+                or read.addressed is None
+            ):
+                continue
+            queries.extend(
+                (read.addressed, step_index)
+                for step_index in range(len(read.addressed.trace.steps))
+            )
+    return tuple(queries)
+
+
+def _genuine_teacher_queries() -> tuple[tuple[AddressedPackedTrace, int], ...]:
+    """One real, executed one-step teacher for every discovered capability cell."""
+
+    discovered = genuine_fixture.discover_genuine_transitions()
+    assert len(discovered) == 22
+    queries: list[tuple[AddressedPackedTrace, int]] = []
+    for entry_index, cell in enumerate(sorted(discovered, reverse=True)):
+        item = discovered[cell]
+        step = RewriteStep(item.executor_rule, item.action)
+        trace = RewriteTrace(
+            source=item.source_state,
+            target=item.successor_state,
+            steps=(step,),
+            metadata={"fixture": "process-v2-genuine-capability-cell", "cell": cell},
+        )
+        addressed = AddressedPackedTrace(
+            address=PackedTraceAddress(
+                packed_shard_content_sha256="e" * 64,
+                packed_shard_name="process-v2-genuine-cells.jsonl.gz",
+                entry_index=entry_index,
+                trace_id=f"genuine-cell-{entry_index}",
+                layer="reversible_synthetic_walk",
+                partition="validation",
+                source_key=canonical_state_key(item.source_state),
+                target_key=item.canonical_successor_key,
+                path_length=1,
+            ),
+            trace=trace,
+            path=PackedTraceProgress(
+                trace,
+                (item.source_state, item.successor_state),
+            ),
+        )
+        queries.append((addressed, 0))
+    return tuple(queries)
+
+
+def test_batched_teacher_support_matches_the_slow_full_quotient(stage: _Stage) -> None:
+    queries = _accepted_teacher_queries(stage)
+    assert queries
+    policy = build_process_v2_semantic_active8_admission_policy()
+    fast = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        policy=policy,
+        batch_size=4,
+    ).evaluate_many(queries)
+    slow_checker = ProductionProcessV2SemanticExactCandidateChecker(
+        stage.runtime.model,
+        policy=policy,
+    )
+    slow = tuple(slow_checker.evaluate(*query) for query in queries)
+    assert len(fast) == len(slow)
+    for observed, expected in zip(fast, slow, strict=True):
+        evidence = expected.evidence
+        assert observed.supported == evidence.supported
+        assert observed.exclusion_reason == evidence.exclusion_reason
+        assert observed.action_sha256 == evidence.action_sha256
+        assert observed.source_state_sha256 == evidence.source_state_sha256
+        assert observed.target_state_sha256 == evidence.target_state_sha256
+        assert observed.canonical_successor_key == evidence.canonical_successor_key
+        assert observed.raw_mark_count == evidence.raw_mark_count
+        assert observed.matching_mark_count == evidence.matching_mark_count
+        assert observed.exact_successor_mark_count == expected.exact_successor_mark_count
+
+
+def test_batched_teacher_support_matches_all_genuine_cells_in_reversed_order(
+    stage: _Stage,
+) -> None:
+    queries = _genuine_teacher_queries()
+    assert len(queries) == 22
+    policy = build_process_v2_semantic_active8_admission_policy()
+    observed = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        policy=policy,
+        batch_size=3,
+    ).evaluate_many(queries)
+    slow_checker = ProductionProcessV2SemanticExactCandidateChecker(
+        stage.runtime.model,
+        policy=policy,
+    )
+    expected = tuple(slow_checker.evaluate(*query) for query in queries)
+
+    assert {query[0].trace.steps[0].rule_name for query in queries} == set(
+        ACTIVE8_EXECUTOR_RULES
+    )
+    assert len(observed) == len(expected)
+    for fast, slow in zip(observed, expected, strict=True):
+        evidence = slow.evidence
+        assert fast.supported == evidence.supported
+        assert fast.action_sha256 == evidence.action_sha256
+        assert fast.source_state_sha256 == evidence.source_state_sha256
+        assert fast.target_state_sha256 == evidence.target_state_sha256
+        assert fast.source_canonical_key == evidence.source_canonical_key
+        assert fast.canonical_successor_key == evidence.canonical_successor_key
+        assert fast.raw_mark_count == evidence.raw_mark_count
+        assert fast.matching_mark_count == evidence.matching_mark_count
+        assert fast.exact_successor_mark_count == slow.exact_successor_mark_count
+        if evidence.matching_mark_count == 0:
+            assert evidence.exclusion_reason == (
+                "teacher_action_absent_from_production_marked_law"
+            )
+            assert fast.exclusion_reason == (
+                "teacher_action_not_a_unique_process_v2_coordinate"
+            )
+        else:
+            assert fast.exclusion_reason == evidence.exclusion_reason
+
+
+def test_batched_teacher_support_is_a_callable_checker(stage: _Stage) -> None:
+    query = _accepted_teacher_queries(stage)[0]
+    checker = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        batch_size=2,
+    )
+    assert checker(*query) == checker.evaluate(*query)
+
+
+@pytest.mark.parametrize("table_name", ("ring_system_grow", "ring_system_delete"))
+def test_batched_teacher_support_refuses_nonzero_disabled_family_masks(
+    stage: _Stage,
+    monkeypatch: pytest.MonkeyPatch,
+    table_name: str,
+) -> None:
+    query = _accepted_teacher_queries(stage)[0]
+    model_type = type(stage.runtime.model)
+    real_action_tables = model_type._action_tables
+
+    def action_tables_with_disabled_support(model, *args, **kwargs):
+        masks, logits, partitions = real_action_tables(model, *args, **kwargs)
+        masks = dict(masks)
+        injected = masks[table_name].clone()
+        injected.reshape(-1)[0] = True
+        masks[table_name] = injected
+        return masks, logits, partitions
+
+    monkeypatch.setattr(model_type, "_action_tables", action_tables_with_disabled_support)
+    checker = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        batch_size=2,
+    )
+    with pytest.raises(SemanticActive8AdmissionError, match="disabled"):
+        checker.evaluate_many((query,))
+
+
+def test_batched_teacher_support_never_builds_a_canonical_quotient(
+    stage: _Stage, monkeypatch
+) -> None:
+    queries = _accepted_teacher_queries(stage)[:4]
+    assert queries
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("whole-corpus teacher support built a canonical quotient")
+
+    monkeypatch.setattr(
+        "compose_v4.data.editing_v2_process_v2_active8_admission.canonical_successor_result",
+        forbidden,
+    )
+    observed = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        batch_size=4,
+    ).evaluate_many(queries)
+    assert all(item.supported for item in observed)
 
 
 # ---- The plan ------------------------------------------------------------------

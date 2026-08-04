@@ -78,6 +78,11 @@ from pathlib import Path
 from typing import Any
 
 from compose_v4.data.editing_corpus_contract import REQUIRED_PARTITION_ROLES
+from compose_v4.data.editing_v2_process_v2_active8_reduce import (
+    COMPLETION_FILENAME,
+    ProcessV2Active8ReduceError,
+    validate_process_v2_active8_completion,
+)
 from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
     ACCEPTED_TRANSITION_FIELDS,
     ACTION_KEY_FIELDS,
@@ -132,14 +137,11 @@ _AUTHORITY: Mapping[str, bool] = {
     "training_authorized": False,
 }
 
-#: Which candidate-evidence count each exact-evidence stratum bins.  The first
-#: two share their name with the field; ``successor_alias_multiplicity`` bins
-#: ``successor_alias_count`` -- "all action_v4 marks in the teacher canonical
-#: successor fiber" -- and is spelled out here rather than guessed at use.
+#: Whole-corpus Gate 0 bins only raw marked-fiber size.  Canonical-successor
+#: count and alias multiplicity require complete quotient construction and are
+#: measured by the completion-bound release sentinel instead.
 _STRATUM_EVIDENCE_FIELD: Mapping[str, str] = {
     "raw_mark_count": "raw_mark_count",
-    "canonical_successor_count": "canonical_successor_count",
-    "successor_alias_multiplicity": "successor_alias_count",
 }
 
 #: Typed negative-receipt categories.  A well-formed row that violates the
@@ -150,8 +152,7 @@ _VIOLATION_CATEGORIES: tuple[str, ...] = (
     "terminal_assignment",
     "matching_mark_count_not_one",
     "nonpositive_raw_mark_count",
-    "nonpositive_canonical_successor_count",
-    "nonpositive_successor_alias_count",
+    "self_transition_teacher",
     "evidence_arithmetic",
     "unregistered_capability_cell",
     "unknown_model_family",
@@ -270,9 +271,8 @@ _REQUIRED_STRUCTURAL_CLAUSES: tuple[str, ...] = (
     "require_every_teacher_supported",
     "require_exactly_one_matching_mark",
     "require_one_assignment_per_accepted_action",
-    "require_positive_canonical_successor_count",
     "require_positive_raw_mark_count",
-    "require_positive_successor_alias_count",
+    "require_productive_nonself_successor",
     "require_zero_terminal_assignments",
 )
 
@@ -462,6 +462,8 @@ class GateZeroSourceIndex:
     """
 
     active8_run_root: str
+    active8_completion_sha256: str
+    active8_sentinel_sha256: str
     contracts_binding_sha256: str
     shards: tuple[Mapping[str, Any], ...]
     eligible_task_identities: tuple[str, ...]
@@ -543,6 +545,9 @@ def _read_active8_task_metadata(
         "decision_shard_sha256": _require_sha(
             payload["decision_shard_sha256"], field="decision_shard_sha256"
         ),
+        "receipt_sha256": _require_sha(
+            payload["receipt_sha256"], field="receipt_sha256"
+        ),
     }
     return metadata, hashlib.sha256(raw).hexdigest()
 
@@ -558,12 +563,28 @@ def read_active8_decision_index(
     """
 
     root = Path(active8_run_root)
+    completion_path = root / COMPLETION_FILENAME
+    try:
+        completion_payload = json.loads(completion_path.read_bytes())
+        completion = validate_process_v2_active8_completion(completion_payload)
+    except (OSError, json.JSONDecodeError, ProcessV2Active8ReduceError) as error:
+        raise ProcessV2GateZeroIncomplete(
+            f"active8 run has no valid sentinel-gated completion: {completion_path}"
+        ) from error
+    completion_inventory = {
+        str(task_identity): str(receipt_sha256)
+        for task_identity, receipt_sha256 in completion["result_inventory"]
+    }
     parent = root / ACTIVE8_TASKS_DIRNAME
     if not parent.is_dir():
         raise ProcessV2GateZeroError(f"active8 run root has no task directory: {parent}")
     identities = sorted(entry.name for entry in parent.iterdir() if entry.is_dir())
     if not identities:
         raise ProcessV2GateZeroError(f"active8 run root publishes no tasks: {parent}")
+    if set(identities) != set(completion_inventory):
+        raise ProcessV2GateZeroError(
+            "active8 task directories differ from the committed completion inventory"
+        )
 
     shards: list[dict[str, Any]] = []
     eligible: list[str] = []
@@ -577,6 +598,10 @@ def read_active8_decision_index(
             contracts=contracts,
         )
         role = metadata["partition_role"]
+        if metadata["receipt_sha256"] != completion_inventory[identity]:
+            raise ProcessV2GateZeroError(
+                "an Active8 receipt differs from the committed completion inventory"
+            )
         decision_eligible_role = role in contracts.decision_eligible_roles
         nonempty = metadata["census"]["active8_accepted_entries"] > 0
         shards.append(
@@ -600,6 +625,20 @@ def read_active8_decision_index(
         role: {key: int(value) for key, value in sorted(counter.items())}
         for role, counter in sorted(role_totals.items())
     }
+    receipt_census = {
+        field: sum(role_census[role].get(field, 0) for role in role_census)
+        for field in ACTIVE8_CENSUS_FIELDS
+    }
+    if receipt_census != dict(completion["census"]):
+        raise ProcessV2GateZeroError(
+            "the Active8 receipt census differs from the committed completion"
+        )
+    if sum(int(shard["transition_count"]) for shard in shards) != int(
+        completion["accepted_transitions"]
+    ):
+        raise ProcessV2GateZeroError(
+            "the Active8 receipt transition count differs from the committed completion"
+        )
     # Resolution facts only.  How many of a sealed role's shards were OPENED is
     # not knowable here -- nothing has been opened yet -- so it is measured at
     # the reduction's one open site instead of asserted as a literal.
@@ -613,6 +652,8 @@ def read_active8_decision_index(
     }
     body = {
         "active8_run_root": str(root),
+        "active8_completion_sha256": str(completion["completion_sha256"]),
+        "active8_sentinel_sha256": str(completion["sentinel"]["sentinel_sha256"]),
         "contracts_binding_sha256": contracts.binding_sha256,
         "shards": shards,
         "eligible_task_identities": sorted(eligible),
@@ -621,6 +662,8 @@ def read_active8_decision_index(
     }
     return GateZeroSourceIndex(
         active8_run_root=str(root),
+        active8_completion_sha256=str(completion["completion_sha256"]),
+        active8_sentinel_sha256=str(completion["sentinel"]["sentinel_sha256"]),
         contracts_binding_sha256=contracts.binding_sha256,
         shards=tuple(shards),
         eligible_task_identities=tuple(sorted(eligible)),
@@ -771,30 +814,27 @@ def _fold_shard(
             field: _require_nonnegative_int(evidence[field], field=f"candidate_evidence.{field}")
             for field in (
                 "raw_mark_count",
-                "canonical_successor_count",
                 "matching_mark_count",
                 "exact_successor_mark_count",
-                "successor_alias_count",
             )
         }
         if counts["matching_mark_count"] != 1:
             record("matching_mark_count_not_one", row, str(counts["matching_mark_count"]))
         if counts["raw_mark_count"] < 1:
             record("nonpositive_raw_mark_count", row, str(counts["raw_mark_count"]))
-        if counts["canonical_successor_count"] < 1:
-            record(
-                "nonpositive_canonical_successor_count",
-                row,
-                str(counts["canonical_successor_count"]),
-            )
-        if counts["successor_alias_count"] < 1:
-            record("nonpositive_successor_alias_count", row, str(counts["successor_alias_count"]))
+        source_key = _require_str(
+            evidence["source_canonical_key"], field="source_canonical_key"
+        )
+        successor_key = _require_str(
+            evidence["canonical_successor_key"], field="canonical_successor_key"
+        )
+        if source_key == successor_key:
+            record("self_transition_teacher", row, source_key)
         arithmetic_ok = (
             counts["exact_successor_mark_count"] == 1
-            and counts["exact_successor_mark_count"] <= counts["successor_alias_count"]
+            and counts["exact_successor_mark_count"] <= counts["matching_mark_count"]
             and counts["matching_mark_count"] <= counts["raw_mark_count"]
-            and counts["canonical_successor_count"] <= counts["raw_mark_count"]
-            and counts["successor_alias_count"] <= counts["raw_mark_count"]
+            and source_key != successor_key
         )
         if not arithmetic_ok:
             record("evidence_arithmetic", row, json.dumps(counts, sort_keys=True))
@@ -843,8 +883,12 @@ def reduce_gate_zero(
     authority field is False either way.
     """
 
-    if index is None:
-        index = read_active8_decision_index(active8_run_root, contracts=contracts)
+    resolved = read_active8_decision_index(active8_run_root, contracts=contracts)
+    if index is not None and index != resolved:
+        raise ProcessV2GateZeroError(
+            "the supplied Gate-0 source index differs from the authenticated Active8 run"
+        )
+    index = resolved
     if index.contracts_binding_sha256 != contracts.binding_sha256:
         raise ProcessV2GateZeroError("the resolved index was built against other contracts")
     if str(Path(active8_run_root)) != index.active8_run_root:
@@ -922,10 +966,7 @@ def reduce_gate_zero(
         "every_teacher_supported": violations["unsupported_teacher"] == 0,
         "exactly_one_matching_mark": violations["matching_mark_count_not_one"] == 0,
         "positive_raw_mark_count": violations["nonpositive_raw_mark_count"] == 0,
-        "positive_canonical_successor_count": (
-            violations["nonpositive_canonical_successor_count"] == 0
-        ),
-        "positive_successor_alias_count": violations["nonpositive_successor_alias_count"] == 0,
+        "productive_nonself_successor": violations["self_transition_teacher"] == 0,
         "evidence_arithmetic_holds": violations["evidence_arithmetic"] == 0,
         "every_cell_registered": (
             violations["unregistered_capability_cell"] == 0
@@ -947,6 +988,8 @@ def reduce_gate_zero(
         "status": PIPELINE_STATUS_NO_AUTHORITY,
         **_AUTHORITY,
         "decision": "PASS" if passed else "FAIL",
+        "active8_completion_sha256": index.active8_completion_sha256,
+        "active8_sentinel_sha256": index.active8_sentinel_sha256,
         "contracts_binding_sha256": contracts.binding_sha256,
         "gate_zero_structural_contract_sha256": contracts.contract_sha256,
         "process_identity_sha256": contracts.process_identity_sha256,
@@ -1015,7 +1058,6 @@ def run_gate_zero(
     """Bind the contracts, resolve every role's metadata, reduce, publish."""
 
     contracts = load_gate_zero_contracts(repo_root=repo_root)
-    index = read_active8_decision_index(active8_run_root, contracts=contracts)
     return reduce_gate_zero(
-        active8_run_root, gate_zero_root=gate_zero_root, contracts=contracts, index=index
+        active8_run_root, gate_zero_root=gate_zero_root, contracts=contracts
     )

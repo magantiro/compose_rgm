@@ -39,22 +39,22 @@ from __future__ import annotations
 PIPELINE_NAMESPACE = "compose.data.editing_v2_process_v2_pipeline"
 
 PLAN_SCHEMA = f"{PIPELINE_NAMESPACE}.plan"
-PLAN_SCHEMA_VERSION = 1
+PLAN_SCHEMA_VERSION = 2
 
 ACTIVE8_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_task_result"
-ACTIVE8_TASK_SCHEMA_VERSION = 1
+ACTIVE8_TASK_SCHEMA_VERSION = 2
 
 ACTIVE8_COMPLETION_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_completion"
-ACTIVE8_COMPLETION_SCHEMA_VERSION = 1
+ACTIVE8_COMPLETION_SCHEMA_VERSION = 2
 
 SENTINEL_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel"
-SENTINEL_SCHEMA_VERSION = 1
+SENTINEL_SCHEMA_VERSION = 2
 
 GATE_ZERO_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_task_result"
-GATE_ZERO_TASK_SCHEMA_VERSION = 1
+GATE_ZERO_TASK_SCHEMA_VERSION = 2
 
 GATE_ZERO_DECISION_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_decision"
-GATE_ZERO_DECISION_SCHEMA_VERSION = 1
+GATE_ZERO_DECISION_SCHEMA_VERSION = 2
 
 #: No stage in this pipeline authorizes anything, in either outcome.
 PIPELINE_STATUS_NO_AUTHORITY = "PROCESS_V2_PIPELINE_EVIDENCE_ONLY_NO_AUTHORITY"
@@ -87,12 +87,11 @@ CANDIDATE_EVIDENCE_FIELDS: tuple[str, ...] = (
     "action_sha256",
     "source_state_sha256",
     "target_state_sha256",
+    "source_canonical_key",
     "canonical_successor_key",
     "raw_mark_count",
-    "canonical_successor_count",
     "matching_mark_count",
     "exact_successor_mark_count",
-    "successor_alias_count",
 )
 
 #: Arithmetic every accepted action's evidence satisfies.  Stated as data so the
@@ -100,11 +99,8 @@ CANDIDATE_EVIDENCE_FIELDS: tuple[str, ...] = (
 ACCEPTED_EVIDENCE_INVARIANTS: tuple[str, ...] = (
     "matching_mark_count == 1",
     "exact_successor_mark_count == 1",
-    "successor_alias_count >= 1",
-    "exact_successor_mark_count <= successor_alias_count",
     "matching_mark_count <= raw_mark_count",
-    "canonical_successor_count <= raw_mark_count",
-    "successor_alias_count <= raw_mark_count",
+    "source_canonical_key != canonical_successor_key",
 )
 
 # ---- Classification: derived annotation, beside the evidence ----
@@ -160,10 +156,8 @@ REJECTION_CATEGORIES: tuple[str, ...] = (UPSTREAM_REJECTED, ACTIVE8_EXCLUDED)
 #: them; a resealed row could move a census by 1000 undetected.
 CANDIDATE_TOTAL_FIELDS: tuple[str, ...] = (
     "raw_candidate_marks",
-    "canonical_candidate_successors",
     "matching_candidate_marks",
     "exact_successor_marks",
-    "successor_aliases",
 )
 
 #: A POLICY-EXCLUDED action -- one outside ActionCodecV4, or a multi-neighbour
@@ -287,9 +281,15 @@ SENTINEL_RESULT_FIELDS: tuple[str, ...] = (
     "schema_version",
     "status",
     "salt",
+    "binding_sha256",
+    "plan_sha256",
+    "run_identity_sha256",
+    "task_inventory_sha256",
+    "result_inventory_sha256",
     "unique_accepted_pairs",
     "selection_mode",
     "selected_pairs",
+    "selected_pairs_sha256",
     "per_cell_examples",
     "global_examples",
     "oracle_examples",
