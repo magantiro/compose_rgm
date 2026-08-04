@@ -26,6 +26,7 @@ frozen authority vocabulary is ``False``.
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,7 @@ from typing import Any
 from compose_v4.data.editing_process_v2_rebind import (
     PRODUCTION_SOURCE_GEOMETRY,
     chunk_target_for_task,
+    mounted_process_v2_artifact_path,
     require_production_source_geometry,
 )
 from compose_v4.data.editing_process_v2_rebind import (
@@ -51,10 +53,15 @@ from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
 from compose_v4.data.editing_v2_process_v2_schema import (
     ProcessV2SchemaError,
     authority_false_block,
+    canonical_bytes,
     canonical_sha256,
     require_authority_false,
     self_hashed,
     verify_self_hash,
+)
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
 )
 from compose_v4.data.editing_v2_process_v2_active8_admission import (
     SemanticActive8AdmissionPolicy,
@@ -510,6 +517,57 @@ def validate_process_v2_active8_plan(
     return plan
 
 
+def write_process_v2_active8_plan(
+    plan: Mapping[str, Any],
+    *,
+    artifact_root: Path,
+    repo_root: Path,
+) -> Path:
+    """Publish one validated plan immutably in its content-addressed run root."""
+
+    validated = validate_process_v2_active8_plan(plan, repo_root=Path(repo_root))
+    run_root = mounted_process_v2_artifact_path(
+        str(validated["run_artifact_root"]),
+        artifact_root=Path(artifact_root),
+        field="plan.run_artifact_root",
+    )
+    path = run_root / PLAN_FILENAME
+    content = canonical_bytes(validated) + b"\n"
+    try:
+        write_bytes_if_absent(path, content)
+    except ImmutableArtifactError as error:
+        raise ProcessV2Active8PlanError(
+            f"immutable Active8 plan publication failed: {path}"
+        ) from error
+    return path
+
+
+def load_process_v2_active8_plan(
+    path: Path,
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Reopen canonical plan bytes and revalidate every live dependency."""
+
+    source = Path(path)
+    if source.name != PLAN_FILENAME:
+        raise ProcessV2Active8PlanError(
+            f"the Active8 plan must be named {PLAN_FILENAME}"
+        )
+    try:
+        raw = source.read_bytes()
+        value = json.loads(raw)
+    except OSError as error:
+        raise ProcessV2Active8PlanError(f"the Active8 plan is absent: {source}") from error
+    except json.JSONDecodeError as error:
+        raise ProcessV2Active8PlanError(
+            f"the Active8 plan is not valid JSON: {source}"
+        ) from error
+    if canonical_bytes(value) + b"\n" != raw:
+        raise ProcessV2Active8PlanError("the Active8 plan is not canonical JSON")
+    return validate_process_v2_active8_plan(value, repo_root=Path(repo_root))
+
+
 def _require_live_binding(binding: Mapping[str, Any], *, repo_root: Path) -> None:
     live_identity = str(editing_process_v2_identity()["process_identity_sha256"])
     if binding["process_v2_identity_sha256"] != live_identity:
@@ -571,8 +629,10 @@ __all__ = [
     "ProcessV2Active8PlanError",
     "build_process_v2_active8_binding",
     "implementation_files_sha256",
+    "load_process_v2_active8_plan",
     "model_runtime_descriptor",
     "plan_process_v2_active8",
     "task_by_identity",
     "validate_process_v2_active8_plan",
+    "write_process_v2_active8_plan",
 ]

@@ -34,6 +34,8 @@ decoding no molecular state and re-enumerating no successor fiber.
 
 from __future__ import annotations
 
+from compose_v4.data.editing_v2_process_v2_schema import AUTHORITY_FIELDS
+
 # ---- Schemas and versions ----
 
 PIPELINE_NAMESPACE = "compose.data.editing_v2_process_v2_pipeline"
@@ -49,6 +51,19 @@ ACTIVE8_COMPLETION_SCHEMA_VERSION = 2
 
 SENTINEL_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel"
 SENTINEL_SCHEMA_VERSION = 2
+
+SENTINEL_PLAN_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel_plan"
+SENTINEL_PLAN_SCHEMA_VERSION = 1
+
+SENTINEL_PARTITION_RESULT_SCHEMA = (
+    f"{PIPELINE_NAMESPACE}.active8_release_sentinel_partition_result"
+)
+SENTINEL_PARTITION_RESULT_SCHEMA_VERSION = 1
+
+ACTIVE8_REDUCTION_PREPARED_SCHEMA = (
+    f"{PIPELINE_NAMESPACE}.active8_reduction_prepared"
+)
+ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION = 1
 
 GATE_ZERO_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_task_result"
 GATE_ZERO_TASK_SCHEMA_VERSION = 2
@@ -256,6 +271,9 @@ ACTIVE8_DECISION_SHARD_FILENAME = "transitions.jsonl.gz"
 #: the receipt to hold it would break the key-set equality both sides assert.
 ACTIVE8_TASK_SUMMARY_FILENAME = "TASK_SUMMARY.json"
 GATE_ZERO_DECISION_FILENAME = "DECISION.json"
+ACTIVE8_REDUCTION_PREPARED_FILENAME = "PROCESS_V2_ACTIVE8_REDUCTION_PREPARED.json"
+SENTINEL_PARTITIONS_DIRNAME = "sentinel_partitions"
+SENTINEL_PARTITION_RESULT_FILENAME = "RESULT.json"
 
 # ---- The release sentinel ----
 
@@ -299,6 +317,122 @@ SENTINEL_RESULT_FIELDS: tuple[str, ...] = (
     "sentinel_sha256",
 )
 
+#: The compact occurrence projection carried by the frozen sentinel plan.  It
+#: contains exactly the published fields the release check compares.  Keeping
+#: it beside the selected pair makes every worker independent of the mutable
+#: directory listing and preserves comparison against every occurrence rather
+#: than only one representative.
+SENTINEL_OCCURRENCE_FIELDS: tuple[str, ...] = (
+    "task_identity_sha256",
+    "v1_task_identity_sha256",
+    "entry_index",
+    "step_index",
+    "candidate_evidence",
+    "capability_cell_id",
+    "family_context",
+    "audit_axes",
+)
+
+SENTINEL_PAIR_FIELDS: tuple[str, ...] = (
+    "source_state_sha256",
+    "action_sha256",
+    "rank_sha256",
+    "source_task_identity_sha256",
+    "source_entry_index",
+    "source_step_index",
+    "source_model_family",
+    "oracle_required",
+    "occurrences",
+    "pair_sha256",
+)
+
+SENTINEL_PARTITION_FIELDS: tuple[str, ...] = (
+    "partition_index",
+    "source_task_identity_sha256",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "oracle_examples",
+    "pairs",
+    "partition_identity_sha256",
+)
+
+SENTINEL_PLAN_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    *AUTHORITY_FIELDS,
+    "salt",
+    "binding_sha256",
+    "plan_sha256",
+    "run_identity_sha256",
+    "task_inventory_sha256",
+    "result_inventory_sha256",
+    "unique_accepted_pairs",
+    "selection_mode",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "per_cell_examples",
+    "global_examples",
+    "oracle_examples",
+    "max_pairs_per_partition",
+    "partitions",
+    "partition_inventory_sha256",
+    "sentinel_plan_sha256",
+)
+
+SENTINEL_PARTITION_MATCHED = "SENTINEL_PARTITION_MATCHED"
+SENTINEL_PARTITION_MISMATCH = "SENTINEL_PARTITION_MISMATCH"
+
+SENTINEL_PARTITION_RESULT_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    *AUTHORITY_FIELDS,
+    "partition_outcome",
+    "sentinel_plan_sha256",
+    "partition_identity_sha256",
+    "partition_index",
+    "binding_sha256",
+    "plan_sha256",
+    "run_identity_sha256",
+    "task_inventory_sha256",
+    "result_inventory_sha256",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "evaluated_pairs",
+    "evaluated_pairs_sha256",
+    "oracle_examples",
+    "evidence_mismatches",
+    "cell_mismatches",
+    "oracle_mismatches",
+    "partition_result_sha256",
+)
+
+ACTIVE8_REDUCTION_PREPARED_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    *AUTHORITY_FIELDS,
+    "accepted_transitions",
+    "action_family_histogram",
+    "active8_exclusion_histogram",
+    "binding_sha256",
+    "candidate_totals",
+    "capability_cell_histogram",
+    "census",
+    "classification_affects_admission",
+    "plan_sha256",
+    "result_inventory",
+    "result_inventory_sha256",
+    "task_result_content_inventory",
+    "task_result_content_inventory_sha256",
+    "run_artifact_root",
+    "run_identity_sha256",
+    "sentinel_plan",
+    "task_inventory_sha256",
+    "preparation_sha256",
+)
+
 #: The sentinel runs AFTER task publication and BEFORE authoritative completion,
 #: and ANY mismatch blocks completion. It is the only thing that converts the
 #: residual -- a per-action count moved within its arithmetic bounds and
@@ -321,6 +455,10 @@ __all__ = [
     "ACTIVE8_CENSUS_FIELDS",
     "ACTIVE8_COMPLETION_SCHEMA",
     "ACTIVE8_COMPLETION_SCHEMA_VERSION",
+    "ACTIVE8_REDUCTION_PREPARED_FIELDS",
+    "ACTIVE8_REDUCTION_PREPARED_FILENAME",
+    "ACTIVE8_REDUCTION_PREPARED_SCHEMA",
+    "ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION",
     "ACTIVE8_EXCLUDED",
     "ACTIVE8_ROW_FIELDS",
     "ACTIVE8_TASK_SCHEMA",
@@ -343,6 +481,19 @@ __all__ = [
     "SENTINEL_GLOBAL_EXAMPLES",
     "SENTINEL_ORACLE_EXAMPLES",
     "SENTINEL_PER_CELL_EXAMPLES",
+    "SENTINEL_OCCURRENCE_FIELDS",
+    "SENTINEL_PAIR_FIELDS",
+    "SENTINEL_PARTITION_FIELDS",
+    "SENTINEL_PARTITION_MATCHED",
+    "SENTINEL_PARTITION_MISMATCH",
+    "SENTINEL_PARTITION_RESULT_FIELDS",
+    "SENTINEL_PARTITION_RESULT_FILENAME",
+    "SENTINEL_PARTITION_RESULT_SCHEMA",
+    "SENTINEL_PARTITION_RESULT_SCHEMA_VERSION",
+    "SENTINEL_PARTITIONS_DIRNAME",
+    "SENTINEL_PLAN_FIELDS",
+    "SENTINEL_PLAN_SCHEMA",
+    "SENTINEL_PLAN_SCHEMA_VERSION",
     "SENTINEL_RESULT_FIELDS",
     "SENTINEL_SALT",
     "SENTINEL_SCHEMA",

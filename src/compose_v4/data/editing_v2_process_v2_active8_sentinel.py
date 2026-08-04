@@ -20,7 +20,8 @@ undetectable failure a detectable one at a bounded, prospectively frozen rate.
 WHEN IT RUNS
 ------------
 After every task has published and BEFORE the authoritative completion.  Any
-mismatch blocks completion: the reduction publishes nothing.
+mismatch blocks completion: preparation and mismatch receipts remain auditable,
+but no authoritative completion is published.
 
 SELECTION
 ---------
@@ -50,8 +51,10 @@ forbidden to import, so the instrument itself is checked by the real oracle.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from collections.abc import Mapping, Sequence
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -64,17 +67,42 @@ from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     read_process_v2_chunk_target,
 )
 from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
+    PIPELINE_STATUS_NO_AUTHORITY,
     SENTINEL_BLOCKS_COMPLETION,
     SENTINEL_EXHAUSTIVE_THRESHOLD,
     SENTINEL_GLOBAL_EXAMPLES,
+    SENTINEL_OCCURRENCE_FIELDS,
     SENTINEL_ORACLE_EXAMPLES,
+    SENTINEL_PAIR_FIELDS,
+    SENTINEL_PARTITION_FIELDS,
+    SENTINEL_PARTITION_MATCHED,
+    SENTINEL_PARTITION_MISMATCH,
+    SENTINEL_PARTITION_RESULT_FIELDS,
+    SENTINEL_PARTITION_RESULT_FILENAME,
+    SENTINEL_PARTITION_RESULT_SCHEMA,
+    SENTINEL_PARTITION_RESULT_SCHEMA_VERSION,
+    SENTINEL_PARTITIONS_DIRNAME,
     SENTINEL_PER_CELL_EXAMPLES,
+    SENTINEL_PLAN_FIELDS,
+    SENTINEL_PLAN_SCHEMA,
+    SENTINEL_PLAN_SCHEMA_VERSION,
     SENTINEL_RESULT_FIELDS,
     SENTINEL_SALT,
     SENTINEL_SCHEMA,
     SENTINEL_SCHEMA_VERSION,
 )
-from compose_v4.data.editing_v2_process_v2_schema import canonical_sha256, self_hashed
+from compose_v4.data.editing_v2_process_v2_schema import (
+    ProcessV2SchemaError,
+    authority_false_block,
+    canonical_bytes,
+    canonical_sha256,
+    self_hashed,
+    verify_self_hash,
+)
+from compose_v4.data.immutable_artifact import (
+    ImmutableArtifactError,
+    write_bytes_if_absent,
+)
 from compose_v4.data.editing_v2_process_v2_active8_admission import (
     ProductionProcessV2SemanticExactCandidateChecker,
 )
@@ -185,18 +213,50 @@ def _dictionary_successor_oracle(result: Any, state: Any, *, system: Any) -> dic
     return aliases
 
 
-def run_release_sentinel(
+def _occurrence_projection(transition: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        field: deepcopy(transition[field]) for field in SENTINEL_OCCURRENCE_FIELDS
+    }
+
+
+def _pair_key(pair: Mapping[str, Any]) -> list[str]:
+    return [str(pair["source_state_sha256"]), str(pair["action_sha256"])]
+
+
+def _partition_identity_body(
+    partition: Mapping[str, Any], *, context: Mapping[str, Any]
+) -> dict[str, Any]:
+    return {
+        "binding_sha256": str(context["binding_sha256"]),
+        "plan_sha256": str(context["plan_sha256"]),
+        "run_identity_sha256": str(context["run_identity_sha256"]),
+        "task_inventory_sha256": str(context["task_inventory_sha256"]),
+        "result_inventory_sha256": str(context["result_inventory_sha256"]),
+        **{
+            key: value
+            for key, value in partition.items()
+            if key != "partition_identity_sha256"
+        },
+    }
+
+
+def prepare_release_sentinel_plan(
     plan: Mapping[str, Any],
     transitions: Sequence[Mapping[str, Any]],
     *,
     result_inventory_sha256: str,
-    checker: ProductionProcessV2SemanticExactCandidateChecker,
-    namespace: str,
-    artifact_root: Path,
-    repo_root: Path,
+    max_pairs_per_partition: int,
 ) -> dict[str, Any]:
-    """Re-enumerate the selected accepted transitions and report every mismatch."""
+    """Freeze the exact selection into source-chunk-aligned worker partitions."""
 
+    if type(max_pairs_per_partition) is not int or max_pairs_per_partition <= 0:
+        raise ProcessV2Active8SentinelError(
+            "max_pairs_per_partition must be a positive integer"
+        )
+    if _SHA256.fullmatch(str(result_inventory_sha256)) is None:
+        raise ProcessV2Active8SentinelError(
+            "the result inventory identity is not a SHA-256"
+        )
     binding = plan["binding"]
     selection = select_sentinel_pairs(
         transitions, required_cell_ids=list(binding["required_cell_ids"])
@@ -209,94 +269,812 @@ def run_release_sentinel(
         "occurrences"
     ]
     oracle_pairs = set(selected[:SENTINEL_ORACLE_EXAMPLES])
-
-    by_task: dict[str, list[tuple[str, str]]] = {}
-    for pair in selected:
-        transition = representatives[pair]
-        by_task.setdefault(str(transition["task_identity_sha256"]), []).append(pair)
-
     tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
-    evidence_mismatches: list[str] = []
-    cell_mismatches: list[str] = []
-    oracle_mismatches: list[str] = []
-    oracle_checked = 0
-    for task_identity in sorted(by_task):
-        task = tasks.get(task_identity)
-        if task is None:
+    by_task: dict[str, list[dict[str, Any]]] = {}
+    for source_sha256, action_sha256 in selected:
+        pair = (source_sha256, action_sha256)
+        anchor = representatives[pair]
+        task_identity = str(anchor["task_identity_sha256"])
+        if task_identity not in tasks:
             raise ProcessV2Active8SentinelError(
                 f"a selected transition names an unplanned task: {task_identity}"
             )
-        wanted: dict[int, list[tuple[str, str]]] = {}
-        for pair in by_task[task_identity]:
-            wanted.setdefault(int(representatives[pair]["entry_index"]), []).append(pair)
-        target = _chunk_target(task)
-        source_output = mounted_process_v2_artifact_path(
-            target.source_artifact_path,
-            artifact_root=Path(artifact_root),
-            field="task.cache_source_artifact_path",
-        )
-        for read in read_process_v2_chunk_target(
-            source_output,
-            target=target,
-            sentinel_replay_entries=0,
-            recover_row_errors=False,
-            repo_root=Path(repo_root),
-        ):
-            pairs = wanted.get(int(read.entry_index))
-            if not pairs or read.addressed is None:
-                continue
-            for pair in pairs:
-                anchor = representatives[pair]
-                step_index = int(anchor["step_index"])
-                addressed = read.addressed
-                audit = checker.evaluate(addressed, step_index)
-                source = addressed.path.state_at(step_index)
-                successor = addressed.path.state_at(step_index + 1)
-                exact = audit.evidence
-                observed = {
-                    "supported": bool(exact.supported),
-                    "exclusion_reason": exact.exclusion_reason,
-                    "action_sha256": exact.action_sha256,
-                    "source_state_sha256": exact.source_state_sha256,
-                    "target_state_sha256": exact.target_state_sha256,
-                    "source_canonical_key": canonical_state_key(source),
-                    "canonical_successor_key": exact.canonical_successor_key,
-                    "raw_mark_count": int(exact.raw_mark_count),
-                    "matching_mark_count": int(exact.matching_mark_count),
-                    "exact_successor_mark_count": int(audit.exact_successor_mark_count),
+        pair_body = {
+            "source_state_sha256": source_sha256,
+            "action_sha256": action_sha256,
+            "rank_sha256": sentinel_rank(source_sha256, action_sha256),
+            "source_task_identity_sha256": task_identity,
+            "source_entry_index": int(anchor["entry_index"]),
+            "source_step_index": int(anchor["step_index"]),
+            "source_model_family": str(anchor["model_family"]),
+            "oracle_required": pair in oracle_pairs,
+            "occurrences": [
+                _occurrence_projection(item) for item in occurrences[pair]
+            ],
+        }
+        pair_record = self_hashed(pair_body, field="pair_sha256")
+        if tuple(pair_record) != SENTINEL_PAIR_FIELDS:
+            raise ProcessV2Active8SentinelError(
+                "the sentinel pair field set disagrees"
+            )
+        by_task.setdefault(task_identity, []).append(pair_record)
+
+    context = {
+        "binding_sha256": str(plan["binding_sha256"]),
+        "plan_sha256": str(plan["plan_sha256"]),
+        "run_identity_sha256": str(plan["run_identity_sha256"]),
+        "task_inventory_sha256": str(plan["task_inventory_sha256"]),
+        "result_inventory_sha256": str(result_inventory_sha256),
+    }
+    partitions: list[dict[str, Any]] = []
+    for task_identity in sorted(by_task):
+        task_pairs = by_task[task_identity]
+        for start in range(0, len(task_pairs), max_pairs_per_partition):
+            items = task_pairs[start : start + max_pairs_per_partition]
+            selected_keys = [_pair_key(item) for item in items]
+            partition_body = {
+                "partition_index": len(partitions),
+                "source_task_identity_sha256": task_identity,
+                "selected_pairs": len(items),
+                "selected_pairs_sha256": canonical_sha256(selected_keys),
+                "oracle_examples": sum(bool(item["oracle_required"]) for item in items),
+                "pairs": items,
+            }
+            partitions.append(
+                {
+                    **partition_body,
+                    "partition_identity_sha256": canonical_sha256(
+                        _partition_identity_body(partition_body, context=context)
+                    ),
                 }
-                block = _classification_block(
-                    source,
-                    successor,
-                    addressed.trace.steps[step_index],
-                    family=str(anchor["model_family"]),
-                    supported=bool(audit.evidence.supported),
-                    step_index=step_index,
-                    path_length=int(addressed.address.path_length),
-                    namespace=namespace,
+            )
+    selected_keys = [[source, action] for source, action in selected]
+    body = {
+        "schema": SENTINEL_PLAN_SCHEMA,
+        "schema_version": SENTINEL_PLAN_SCHEMA_VERSION,
+        "status": PIPELINE_STATUS_NO_AUTHORITY,
+        **authority_false_block(),
+        "salt": SENTINEL_SALT,
+        **context,
+        "unique_accepted_pairs": int(selection["unique_accepted_pairs"]),
+        "selection_mode": str(selection["selection_mode"]),
+        "selected_pairs": len(selected),
+        "selected_pairs_sha256": canonical_sha256(selected_keys),
+        "per_cell_examples": int(selection["per_cell_examples"]),
+        "global_examples": int(selection["global_examples"]),
+        "oracle_examples": min(len(selected), SENTINEL_ORACLE_EXAMPLES),
+        "max_pairs_per_partition": max_pairs_per_partition,
+        "partitions": partitions,
+        "partition_inventory_sha256": canonical_sha256(
+            [item["partition_identity_sha256"] for item in partitions]
+        ),
+    }
+    sentinel_plan = self_hashed(body, field="sentinel_plan_sha256")
+    validate_release_sentinel_plan(sentinel_plan, active8_plan=plan)
+    return sentinel_plan
+
+
+def validate_release_sentinel_plan(
+    value: Mapping[str, Any], *, active8_plan: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Validate selection, partition geometry, and every nested content hash."""
+
+    if not isinstance(value, Mapping) or set(value) != set(SENTINEL_PLAN_FIELDS):
+        raise ProcessV2Active8SentinelError("the sentinel plan field set disagrees")
+    sentinel_plan = dict(value)
+    verify_self_hash(
+        sentinel_plan, field="sentinel_plan_sha256", label="the sentinel plan"
+    )
+    if (
+        sentinel_plan["schema"] != SENTINEL_PLAN_SCHEMA
+        or sentinel_plan["schema_version"] != SENTINEL_PLAN_SCHEMA_VERSION
+        or sentinel_plan["status"] != PIPELINE_STATUS_NO_AUTHORITY
+        or sentinel_plan["salt"] != SENTINEL_SALT
+    ):
+        raise ProcessV2Active8SentinelError("the sentinel plan protocol disagrees")
+    for field, false_value in authority_false_block().items():
+        if sentinel_plan[field] is not false_value:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel plan grants forbidden authority through {field}"
+            )
+    context = {
+        "binding_sha256": str(active8_plan["binding_sha256"]),
+        "plan_sha256": str(active8_plan["plan_sha256"]),
+        "run_identity_sha256": str(active8_plan["run_identity_sha256"]),
+        "task_inventory_sha256": str(active8_plan["task_inventory_sha256"]),
+        "result_inventory_sha256": str(sentinel_plan["result_inventory_sha256"]),
+    }
+    for field, expected in context.items():
+        observed = sentinel_plan[field]
+        if not isinstance(observed, str) or _SHA256.fullmatch(observed) is None:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel plan {field} is not a SHA-256"
+            )
+        if field != "result_inventory_sha256" and observed != expected:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel plan {field} addresses another Active8 run"
+            )
+    max_pairs = sentinel_plan["max_pairs_per_partition"]
+    if type(max_pairs) is not int or max_pairs <= 0:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition size must be a positive integer"
+        )
+    planned_tasks = {
+        str(task["task_identity_sha256"]) for task in active8_plan["tasks"]
+    }
+    partitions = sentinel_plan["partitions"]
+    if not isinstance(partitions, list):
+        raise ProcessV2Active8SentinelError("the sentinel partitions must be a list")
+    identities: list[str] = []
+    all_pairs: list[dict[str, Any]] = []
+    occurrence_locations: set[tuple[str, int, int, str, str]] = set()
+    for expected_index, partition in enumerate(partitions):
+        if not isinstance(partition, Mapping) or set(partition) != set(
+            SENTINEL_PARTITION_FIELDS
+        ):
+            raise ProcessV2Active8SentinelError(
+                "a sentinel partition field set disagrees"
+            )
+        if (
+            type(partition["partition_index"]) is not int
+            or partition["partition_index"] != expected_index
+        ):
+            raise ProcessV2Active8SentinelError(
+                "the sentinel partition indices are not canonical"
+            )
+        task_identity = partition["source_task_identity_sha256"]
+        if task_identity not in planned_tasks:
+            raise ProcessV2Active8SentinelError(
+                "a sentinel partition names an unplanned source task"
+            )
+        pairs = partition["pairs"]
+        if (
+            not isinstance(pairs, list)
+            or not pairs
+            or len(pairs) > max_pairs
+            or type(partition["selected_pairs"]) is not int
+            or partition["selected_pairs"] != len(pairs)
+        ):
+            raise ProcessV2Active8SentinelError(
+                "a sentinel partition pair inventory is malformed"
+            )
+        pair_keys: list[list[str]] = []
+        oracle_examples = 0
+        for pair in pairs:
+            if not isinstance(pair, Mapping) or set(pair) != set(SENTINEL_PAIR_FIELDS):
+                raise ProcessV2Active8SentinelError(
+                    "a sentinel selected-pair field set disagrees"
                 )
-                # Every published transition carrying this pair is compared
-                # against the one re-enumeration: the exact source state and the
-                # exact action determine the fiber, so they must all agree.
-                for published in occurrences[pair]:
-                    where = (
-                        f"{published['v1_task_identity_sha256']}"
-                        f"[{published['entry_index']}]:{published['step_index']}"
+            verify_self_hash(pair, field="pair_sha256", label="a sentinel selected pair")
+            source_sha256, action_sha256 = _pair_key(pair)
+            if (
+                _SHA256.fullmatch(source_sha256) is None
+                or _SHA256.fullmatch(action_sha256) is None
+                or pair["rank_sha256"] != sentinel_rank(source_sha256, action_sha256)
+                or pair["source_task_identity_sha256"] != task_identity
+                or type(pair["source_entry_index"]) is not int
+                or pair["source_entry_index"] < 0
+                or type(pair["source_step_index"]) is not int
+                or pair["source_step_index"] < 0
+                or not isinstance(pair["source_model_family"], str)
+            ):
+                raise ProcessV2Active8SentinelError(
+                    "a sentinel selected-pair identity disagrees"
+                )
+            occurrences = pair["occurrences"]
+            if not isinstance(occurrences, list) or not occurrences:
+                raise ProcessV2Active8SentinelError(
+                    "a sentinel selected pair has no published occurrence"
+                )
+            representative_found = False
+            for occurrence in occurrences:
+                if not isinstance(occurrence, Mapping) or set(occurrence) != set(
+                    SENTINEL_OCCURRENCE_FIELDS
+                ):
+                    raise ProcessV2Active8SentinelError(
+                        "a sentinel occurrence field set disagrees"
                     )
-                    if observed != dict(published["candidate_evidence"]):
-                        evidence_mismatches.append(where)
-                    if (
-                        block["capability_cell_id"] != published["capability_cell_id"]
-                        or block["family_context"] != published["family_context"]
-                        or block["audit_axes"] != published["audit_axes"]
-                    ):
-                        cell_mismatches.append(where)
-                if pair in oracle_pairs:
-                    oracle_checked += 1
-                    if _oracle_disagrees(checker, source):
-                        oracle_mismatches.append(
-                            f"{task_identity}[{read.entry_index}]:{step_index}"
-                        )
+                evidence = occurrence["candidate_evidence"]
+                if (
+                    not isinstance(evidence, Mapping)
+                    or evidence.get("source_state_sha256") != source_sha256
+                    or evidence.get("action_sha256") != action_sha256
+                    or type(occurrence["entry_index"]) is not int
+                    or occurrence["entry_index"] < 0
+                    or type(occurrence["step_index"]) is not int
+                    or occurrence["step_index"] < 0
+                ):
+                    raise ProcessV2Active8SentinelError(
+                        "a sentinel occurrence belongs to another selected pair"
+                    )
+                location = (
+                    str(occurrence["v1_task_identity_sha256"]),
+                    occurrence["entry_index"],
+                    occurrence["step_index"],
+                    source_sha256,
+                    action_sha256,
+                )
+                if location in occurrence_locations:
+                    raise ProcessV2Active8SentinelError(
+                        "the sentinel plan repeats a published occurrence"
+                    )
+                occurrence_locations.add(location)
+                if (
+                    occurrence["task_identity_sha256"] == task_identity
+                    and occurrence["entry_index"] == pair["source_entry_index"]
+                    and occurrence["step_index"] == pair["source_step_index"]
+                ):
+                    representative_found = True
+            if not representative_found:
+                raise ProcessV2Active8SentinelError(
+                    "a sentinel pair does not contain its source occurrence"
+                )
+            if type(pair["oracle_required"]) is not bool:
+                raise ProcessV2Active8SentinelError(
+                    "a sentinel pair oracle flag is not boolean"
+                )
+            oracle_examples += bool(pair["oracle_required"])
+            pair_keys.append([source_sha256, action_sha256])
+            all_pairs.append(dict(pair))
+        if (
+            not isinstance(partition["selected_pairs_sha256"], str)
+            or _SHA256.fullmatch(partition["selected_pairs_sha256"]) is None
+            or canonical_sha256(pair_keys) != partition["selected_pairs_sha256"]
+        ):
+            raise ProcessV2Active8SentinelError(
+                "a sentinel partition selected-pair digest disagrees"
+            )
+        if (
+            type(partition["oracle_examples"]) is not int
+            or partition["oracle_examples"] != oracle_examples
+        ):
+            raise ProcessV2Active8SentinelError(
+                "a sentinel partition oracle count disagrees"
+            )
+        expected_identity = canonical_sha256(
+            _partition_identity_body(partition, context=context)
+        )
+        if (
+            not isinstance(partition["partition_identity_sha256"], str)
+            or _SHA256.fullmatch(partition["partition_identity_sha256"]) is None
+            or partition["partition_identity_sha256"] != expected_identity
+        ):
+            raise ProcessV2Active8SentinelError(
+                "a sentinel partition identity disagrees"
+            )
+        identities.append(str(partition["partition_identity_sha256"]))
+    if (
+        not isinstance(sentinel_plan["partition_inventory_sha256"], str)
+        or _SHA256.fullmatch(sentinel_plan["partition_inventory_sha256"]) is None
+        or canonical_sha256(identities)
+        != sentinel_plan["partition_inventory_sha256"]
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition inventory digest disagrees"
+        )
+    by_rank = sorted(all_pairs, key=lambda pair: str(pair["rank_sha256"]))
+    selected_keys = [_pair_key(pair) for pair in by_rank]
+    if (
+        len({tuple(pair) for pair in selected_keys}) != len(selected_keys)
+        or not isinstance(sentinel_plan["selected_pairs_sha256"], str)
+        or _SHA256.fullmatch(sentinel_plan["selected_pairs_sha256"]) is None
+        or sentinel_plan["selected_pairs"] != len(selected_keys)
+        or sentinel_plan["selected_pairs_sha256"] != canonical_sha256(selected_keys)
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel plan selected-pair inventory disagrees"
+        )
+    expected_oracle = min(len(selected_keys), SENTINEL_ORACLE_EXAMPLES)
+    if (
+        sentinel_plan["oracle_examples"] != expected_oracle
+        or [bool(pair["oracle_required"]) for pair in by_rank]
+        != [index < expected_oracle for index in range(len(by_rank))]
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel plan oracle selection disagrees"
+        )
+    _require_selection_counts(sentinel_plan)
+    max_per_cell_examples = min(
+        int(sentinel_plan["unique_accepted_pairs"]),
+        SENTINEL_PER_CELL_EXAMPLES
+        * len(active8_plan["binding"]["required_cell_ids"]),
+    )
+    if int(sentinel_plan["per_cell_examples"]) > max_per_cell_examples:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel per-cell selection exceeds its frozen bound"
+        )
+    return sentinel_plan
+
+
+def _require_selection_counts(value: Mapping[str, Any]) -> None:
+    count_fields = (
+        "unique_accepted_pairs",
+        "selected_pairs",
+        "per_cell_examples",
+        "global_examples",
+        "oracle_examples",
+    )
+    if any(type(value[field]) is not int or value[field] < 0 for field in count_fields):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel selection counts must be nonnegative integers"
+        )
+    if value["selected_pairs"] > value["unique_accepted_pairs"]:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel selects more pairs than exist"
+        )
+    if (value["selected_pairs"] == 0) != (value["unique_accepted_pairs"] == 0):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel empty selection does not match its unique-pair census"
+        )
+    if value["selection_mode"] == SELECTION_EXHAUSTIVE:
+        if (
+            value["unique_accepted_pairs"] > SENTINEL_EXHAUSTIVE_THRESHOLD
+            or value["selected_pairs"] != value["unique_accepted_pairs"]
+            or value["per_cell_examples"] != 0
+            or value["global_examples"] != 0
+        ):
+            raise ProcessV2Active8SentinelError(
+                "the exhaustive sentinel selection counts do not reconcile"
+            )
+    elif value["selection_mode"] == SELECTION_RANKED:
+        if value["unique_accepted_pairs"] <= SENTINEL_EXHAUSTIVE_THRESHOLD:
+            raise ProcessV2Active8SentinelError(
+                "the ranked sentinel selection is below the exhaustive threshold"
+            )
+        expected_global = min(
+            value["unique_accepted_pairs"], SENTINEL_GLOBAL_EXAMPLES
+        )
+        if (
+            value["global_examples"] != expected_global
+            or value["selected_pairs"] < value["global_examples"]
+            or value["selected_pairs"] < value["per_cell_examples"]
+            or value["selected_pairs"]
+            > value["global_examples"] + value["per_cell_examples"]
+        ):
+            raise ProcessV2Active8SentinelError(
+                "the ranked sentinel selection counts do not reconcile"
+            )
+    else:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel selection mode is unknown"
+        )
+
+
+def sentinel_partition_identities(sentinel_plan: Mapping[str, Any]) -> tuple[str, ...]:
+    """Return the exact worker inventory in deterministic plan order."""
+
+    return tuple(
+        str(partition["partition_identity_sha256"])
+        for partition in sentinel_plan["partitions"]
+    )
+
+
+def run_release_sentinel_partition(
+    plan: Mapping[str, Any],
+    sentinel_plan: Mapping[str, Any],
+    partition_identity_sha256: str,
+    *,
+    checker: ProductionProcessV2SemanticExactCandidateChecker,
+    namespace: str,
+    artifact_root: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Re-enumerate one independently addressed source-chunk partition."""
+
+    validated = validate_release_sentinel_plan(sentinel_plan, active8_plan=plan)
+    matching = [
+        partition
+        for partition in validated["partitions"]
+        if partition["partition_identity_sha256"] == partition_identity_sha256
+    ]
+    if len(matching) != 1:
+        raise ProcessV2Active8SentinelError(
+            "the requested sentinel partition is absent or ambiguous"
+        )
+    partition = matching[0]
+    tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
+    task_identity = str(partition["source_task_identity_sha256"])
+    task = tasks.get(task_identity)
+    if task is None:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition names an unplanned task"
+        )
+    pairs = list(partition["pairs"])
+    wanted: dict[int, list[Mapping[str, Any]]] = {}
+    for pair in pairs:
+        wanted.setdefault(int(pair["source_entry_index"]), []).append(pair)
+    target = _chunk_target(task)
+    source_output = mounted_process_v2_artifact_path(
+        target.source_artifact_path,
+        artifact_root=Path(artifact_root),
+        field="task.cache_source_artifact_path",
+    )
+    evidence_mismatches: list[str] = []
+    cell_mismatches: list[str] = []
+    oracle_mismatches: list[str] = []
+    evaluated: list[list[str]] = []
+    oracle_checked = 0
+    for read in read_process_v2_chunk_target(
+        source_output,
+        target=target,
+        sentinel_replay_entries=0,
+        recover_row_errors=False,
+        repo_root=Path(repo_root),
+    ):
+        selected = wanted.get(int(read.entry_index))
+        if not selected or read.addressed is None:
+            continue
+        for pair in selected:
+            step_index = int(pair["source_step_index"])
+            addressed = read.addressed
+            audit = checker.evaluate(addressed, step_index)
+            source = addressed.path.state_at(step_index)
+            successor = addressed.path.state_at(step_index + 1)
+            exact = audit.evidence
+            observed = {
+                "supported": bool(exact.supported),
+                "exclusion_reason": exact.exclusion_reason,
+                "action_sha256": exact.action_sha256,
+                "source_state_sha256": exact.source_state_sha256,
+                "target_state_sha256": exact.target_state_sha256,
+                "source_canonical_key": canonical_state_key(source),
+                "canonical_successor_key": exact.canonical_successor_key,
+                "raw_mark_count": int(exact.raw_mark_count),
+                "matching_mark_count": int(exact.matching_mark_count),
+                "exact_successor_mark_count": int(audit.exact_successor_mark_count),
+            }
+            block = _classification_block(
+                source,
+                successor,
+                addressed.trace.steps[step_index],
+                family=str(pair["source_model_family"]),
+                supported=bool(audit.evidence.supported),
+                step_index=step_index,
+                path_length=int(addressed.address.path_length),
+                namespace=namespace,
+            )
+            for published in pair["occurrences"]:
+                where = (
+                    f"{published['v1_task_identity_sha256']}"
+                    f"[{published['entry_index']}]:{published['step_index']}"
+                )
+                if observed != dict(published["candidate_evidence"]):
+                    evidence_mismatches.append(where)
+                if (
+                    block["capability_cell_id"] != published["capability_cell_id"]
+                    or block["family_context"] != published["family_context"]
+                    or block["audit_axes"] != published["audit_axes"]
+                ):
+                    cell_mismatches.append(where)
+            if pair["oracle_required"]:
+                oracle_checked += 1
+                if _oracle_disagrees(checker, source):
+                    oracle_mismatches.append(
+                        f"{task_identity}[{read.entry_index}]:{step_index}"
+                    )
+            evaluated.append(_pair_key(pair))
+    selected_keys = [_pair_key(pair) for pair in pairs]
+    if sorted(evaluated) != sorted(selected_keys) or len(evaluated) != len(selected_keys):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition did not evaluate its exact selected-pair inventory"
+        )
+    mismatched = bool(evidence_mismatches or cell_mismatches or oracle_mismatches)
+    body = {
+        "schema": SENTINEL_PARTITION_RESULT_SCHEMA,
+        "schema_version": SENTINEL_PARTITION_RESULT_SCHEMA_VERSION,
+        "status": PIPELINE_STATUS_NO_AUTHORITY,
+        **authority_false_block(),
+        "partition_outcome": (
+            SENTINEL_PARTITION_MISMATCH if mismatched else SENTINEL_PARTITION_MATCHED
+        ),
+        "sentinel_plan_sha256": str(validated["sentinel_plan_sha256"]),
+        "partition_identity_sha256": str(partition["partition_identity_sha256"]),
+        "partition_index": int(partition["partition_index"]),
+        "binding_sha256": str(validated["binding_sha256"]),
+        "plan_sha256": str(validated["plan_sha256"]),
+        "run_identity_sha256": str(validated["run_identity_sha256"]),
+        "task_inventory_sha256": str(validated["task_inventory_sha256"]),
+        "result_inventory_sha256": str(validated["result_inventory_sha256"]),
+        "selected_pairs": int(partition["selected_pairs"]),
+        "selected_pairs_sha256": str(partition["selected_pairs_sha256"]),
+        "evaluated_pairs": len(evaluated),
+        "evaluated_pairs_sha256": canonical_sha256(selected_keys),
+        "oracle_examples": oracle_checked,
+        "evidence_mismatches": sorted(evidence_mismatches),
+        "cell_mismatches": sorted(cell_mismatches),
+        "oracle_mismatches": sorted(oracle_mismatches),
+    }
+    result = self_hashed(body, field="partition_result_sha256")
+    validate_release_sentinel_partition_result(result, sentinel_plan=validated)
+    return result
+
+
+def validate_release_sentinel_partition_result(
+    value: Mapping[str, Any], *, sentinel_plan: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Authenticate one result against a sealed sentinel-plan envelope.
+
+    Authoritative callers additionally validate the complete plan against the
+    Active8 run before reaching this helper.  Requiring the envelope here keeps
+    the standalone API from accepting an unsealed mutation while avoiding a
+    second, weaker reimplementation of full plan validation.
+    """
+
+    if not isinstance(sentinel_plan, Mapping) or set(sentinel_plan) != set(
+        SENTINEL_PLAN_FIELDS
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel plan field set disagrees"
+        )
+    try:
+        verify_self_hash(
+            sentinel_plan,
+            field="sentinel_plan_sha256",
+            label="the sentinel plan",
+        )
+    except ProcessV2SchemaError as error:
+        raise ProcessV2Active8SentinelError(str(error)) from error
+    if (
+        sentinel_plan["schema"] != SENTINEL_PLAN_SCHEMA
+        or sentinel_plan["schema_version"] != SENTINEL_PLAN_SCHEMA_VERSION
+        or sentinel_plan["status"] != PIPELINE_STATUS_NO_AUTHORITY
+        or sentinel_plan["salt"] != SENTINEL_SALT
+    ):
+        raise ProcessV2Active8SentinelError("the sentinel plan protocol disagrees")
+    for field, false_value in authority_false_block().items():
+        if sentinel_plan[field] is not false_value:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel plan grants forbidden authority through {field}"
+            )
+
+    if not isinstance(value, Mapping) or set(value) != set(
+        SENTINEL_PARTITION_RESULT_FIELDS
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result field set disagrees"
+        )
+    result = dict(value)
+    verify_self_hash(
+        result,
+        field="partition_result_sha256",
+        label="the sentinel partition result",
+    )
+    if (
+        result["schema"] != SENTINEL_PARTITION_RESULT_SCHEMA
+        or result["schema_version"] != SENTINEL_PARTITION_RESULT_SCHEMA_VERSION
+        or result["status"] != PIPELINE_STATUS_NO_AUTHORITY
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result protocol disagrees"
+        )
+    for field, false_value in authority_false_block().items():
+        if result[field] is not false_value:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel partition result grants authority through {field}"
+            )
+    if result["sentinel_plan_sha256"] != sentinel_plan["sentinel_plan_sha256"]:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result belongs to another sentinel plan"
+        )
+    partitions = {
+        str(partition["partition_identity_sha256"]): partition
+        for partition in sentinel_plan["partitions"]
+    }
+    partition = partitions.get(str(result["partition_identity_sha256"]))
+    if partition is None:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result is not in the planned inventory"
+        )
+    for field in (
+        "partition_index",
+        "selected_pairs",
+        "selected_pairs_sha256",
+    ):
+        if result[field] != partition[field]:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel partition result {field} disagrees with its plan"
+            )
+    for field in (
+        "binding_sha256",
+        "plan_sha256",
+        "run_identity_sha256",
+        "task_inventory_sha256",
+        "result_inventory_sha256",
+    ):
+        if result[field] != sentinel_plan[field]:
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel partition result {field} addresses another run"
+            )
+    expected_keys = [_pair_key(pair) for pair in partition["pairs"]]
+    if (
+        type(result["partition_index"]) is not int
+        or type(result["selected_pairs"]) is not int
+        or type(result["evaluated_pairs"]) is not int
+        or type(result["oracle_examples"]) is not int
+        or result["evaluated_pairs"] != len(expected_keys)
+        or result["evaluated_pairs_sha256"] != canonical_sha256(expected_keys)
+        or result["oracle_examples"] != partition["oracle_examples"]
+    ):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result coverage does not reconcile"
+        )
+    mismatch_fields = (
+        "evidence_mismatches",
+        "cell_mismatches",
+        "oracle_mismatches",
+    )
+    for field in mismatch_fields:
+        values = result[field]
+        if (
+            not isinstance(values, list)
+            or any(not isinstance(item, str) for item in values)
+            or values != sorted(values)
+        ):
+            raise ProcessV2Active8SentinelError(
+                f"the sentinel partition result {field} is malformed"
+            )
+    mismatched = any(result[field] for field in mismatch_fields)
+    expected_outcome = (
+        SENTINEL_PARTITION_MISMATCH if mismatched else SENTINEL_PARTITION_MATCHED
+    )
+    if result["partition_outcome"] != expected_outcome:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result outcome contradicts its mismatches"
+        )
+    return result
+
+
+def sentinel_partition_result_path(
+    active8_plan: Mapping[str, Any],
+    partition_identity_sha256: str,
+    *,
+    artifact_root: Path,
+) -> Path:
+    """Resolve one content-addressed partition result inside the run root."""
+
+    if _SHA256.fullmatch(str(partition_identity_sha256)) is None:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition identity is not a SHA-256"
+        )
+    run_root = mounted_process_v2_artifact_path(
+        str(active8_plan["run_artifact_root"]),
+        artifact_root=Path(artifact_root),
+        field="plan.run_artifact_root",
+    )
+    return (
+        run_root
+        / SENTINEL_PARTITIONS_DIRNAME
+        / str(partition_identity_sha256)
+        / SENTINEL_PARTITION_RESULT_FILENAME
+    )
+
+
+def write_release_sentinel_partition_result(
+    result: Mapping[str, Any],
+    *,
+    active8_plan: Mapping[str, Any],
+    sentinel_plan: Mapping[str, Any],
+    artifact_root: Path,
+) -> Path:
+    """Publish a result immutably; an exact retry reuses the same bytes."""
+
+    validated_plan = validate_release_sentinel_plan(
+        sentinel_plan, active8_plan=active8_plan
+    )
+    validated = validate_release_sentinel_partition_result(
+        result, sentinel_plan=validated_plan
+    )
+    path = sentinel_partition_result_path(
+        active8_plan,
+        str(validated["partition_identity_sha256"]),
+        artifact_root=Path(artifact_root),
+    )
+    try:
+        write_bytes_if_absent(path, canonical_bytes(validated) + b"\n")
+    except ImmutableArtifactError as error:
+        raise ProcessV2Active8SentinelError(
+            f"immutable sentinel partition publication failed: {path}"
+        ) from error
+    return path
+
+
+def load_release_sentinel_partition_result(
+    partition_identity_sha256: str,
+    *,
+    active8_plan: Mapping[str, Any],
+    sentinel_plan: Mapping[str, Any],
+    artifact_root: Path,
+) -> dict[str, Any]:
+    """Reopen canonical bytes and independently validate one partition result."""
+
+    validated_plan = validate_release_sentinel_plan(
+        sentinel_plan, active8_plan=active8_plan
+    )
+    path = sentinel_partition_result_path(
+        active8_plan,
+        partition_identity_sha256,
+        artifact_root=Path(artifact_root),
+    )
+    try:
+        raw = path.read_bytes()
+        result = json.loads(raw)
+    except OSError as error:
+        raise ProcessV2Active8SentinelError(
+            f"the sentinel partition result is absent: {path}"
+        ) from error
+    except json.JSONDecodeError as error:
+        raise ProcessV2Active8SentinelError(
+            f"the sentinel partition result is not valid JSON: {path}"
+        ) from error
+    if canonical_bytes(result) + b"\n" != raw:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel partition result is not canonical JSON"
+        )
+    return validate_release_sentinel_partition_result(
+        result, sentinel_plan=validated_plan
+    )
+
+
+def completed_release_sentinel_partition_ids(
+    *,
+    active8_plan: Mapping[str, Any],
+    sentinel_plan: Mapping[str, Any],
+    artifact_root: Path,
+) -> set[str]:
+    """Return only exact planned partition results safe to reuse on restart."""
+
+    validated_plan = validate_release_sentinel_plan(
+        sentinel_plan, active8_plan=active8_plan
+    )
+    complete: set[str] = set()
+    for identity in sentinel_partition_identities(validated_plan):
+        try:
+            load_release_sentinel_partition_result(
+                identity,
+                active8_plan=active8_plan,
+                sentinel_plan=validated_plan,
+                artifact_root=Path(artifact_root),
+            )
+        except (ProcessV2Active8SentinelError, OSError, ValueError):
+            continue
+        complete.add(identity)
+    return complete
+
+
+def reduce_release_sentinel_partitions(
+    plan: Mapping[str, Any],
+    sentinel_plan: Mapping[str, Any],
+    partition_results: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Reduce the exact partition inventory; input order cannot change bytes."""
+
+    validated = validate_release_sentinel_plan(sentinel_plan, active8_plan=plan)
+    by_identity: dict[str, dict[str, Any]] = {}
+    for value in partition_results:
+        result = validate_release_sentinel_partition_result(
+            value, sentinel_plan=validated
+        )
+        identity = str(result["partition_identity_sha256"])
+        if identity in by_identity:
+            raise ProcessV2Active8SentinelError(
+                "the sentinel reducer received one partition result twice"
+            )
+        by_identity[identity] = result
+    expected = sentinel_partition_identities(validated)
+    if set(by_identity) != set(expected) or len(by_identity) != len(expected):
+        raise ProcessV2Active8SentinelError(
+            "the sentinel result inventory is incomplete or contains an extra partition"
+        )
+    ordered = [by_identity[identity] for identity in expected]
+    evidence_mismatches = sorted(
+        item for result in ordered for item in result["evidence_mismatches"]
+    )
+    cell_mismatches = sorted(
+        item for result in ordered for item in result["cell_mismatches"]
+    )
+    oracle_mismatches = sorted(
+        item for result in ordered for item in result["oracle_mismatches"]
+    )
     body = {
         "schema": SENTINEL_SCHEMA,
         "schema_version": SENTINEL_SCHEMA_VERSION,
@@ -306,28 +1084,60 @@ def run_release_sentinel(
             else SENTINEL_FAILED
         ),
         "salt": SENTINEL_SALT,
-        "binding_sha256": str(plan["binding_sha256"]),
-        "plan_sha256": str(plan["plan_sha256"]),
-        "run_identity_sha256": str(plan["run_identity_sha256"]),
-        "task_inventory_sha256": str(plan["task_inventory_sha256"]),
-        "result_inventory_sha256": str(result_inventory_sha256),
-        "unique_accepted_pairs": int(selection["unique_accepted_pairs"]),
-        "selection_mode": str(selection["selection_mode"]),
-        "selected_pairs": len(selected),
-        "selected_pairs_sha256": canonical_sha256(
-            [[source_sha256, action_sha256] for source_sha256, action_sha256 in selected]
-        ),
-        "per_cell_examples": int(selection["per_cell_examples"]),
-        "global_examples": int(selection["global_examples"]),
-        "oracle_examples": oracle_checked,
-        "evidence_mismatches": sorted(evidence_mismatches),
-        "cell_mismatches": sorted(cell_mismatches),
-        "oracle_mismatches": sorted(oracle_mismatches),
+        "binding_sha256": str(validated["binding_sha256"]),
+        "plan_sha256": str(validated["plan_sha256"]),
+        "run_identity_sha256": str(validated["run_identity_sha256"]),
+        "task_inventory_sha256": str(validated["task_inventory_sha256"]),
+        "result_inventory_sha256": str(validated["result_inventory_sha256"]),
+        "unique_accepted_pairs": int(validated["unique_accepted_pairs"]),
+        "selection_mode": str(validated["selection_mode"]),
+        "selected_pairs": int(validated["selected_pairs"]),
+        "selected_pairs_sha256": str(validated["selected_pairs_sha256"]),
+        "per_cell_examples": int(validated["per_cell_examples"]),
+        "global_examples": int(validated["global_examples"]),
+        "oracle_examples": sum(int(result["oracle_examples"]) for result in ordered),
+        "evidence_mismatches": evidence_mismatches,
+        "cell_mismatches": cell_mismatches,
+        "oracle_mismatches": oracle_mismatches,
     }
     sentinel = self_hashed(body, field="sentinel_sha256")
     if tuple(sentinel) != SENTINEL_RESULT_FIELDS:
         raise ProcessV2Active8SentinelError("the sentinel result field set disagrees")
     return sentinel
+
+
+def run_release_sentinel(
+    plan: Mapping[str, Any],
+    transitions: Sequence[Mapping[str, Any]],
+    *,
+    result_inventory_sha256: str,
+    checker: ProductionProcessV2SemanticExactCandidateChecker,
+    namespace: str,
+    artifact_root: Path,
+    repo_root: Path,
+    max_pairs_per_partition: int = 256,
+) -> dict[str, Any]:
+    """Local reference wrapper over the same prepare/map/reduce interfaces."""
+
+    sentinel_plan = prepare_release_sentinel_plan(
+        plan,
+        transitions,
+        result_inventory_sha256=result_inventory_sha256,
+        max_pairs_per_partition=max_pairs_per_partition,
+    )
+    results = [
+        run_release_sentinel_partition(
+            plan,
+            sentinel_plan,
+            identity,
+            checker=checker,
+            namespace=namespace,
+            artifact_root=Path(artifact_root),
+            repo_root=Path(repo_root),
+        )
+        for identity in sentinel_partition_identities(sentinel_plan)
+    ]
+    return reduce_release_sentinel_partitions(plan, sentinel_plan, results)
 
 
 def _oracle_disagrees(
@@ -402,29 +1212,13 @@ def require_sentinel_passed(
         raise ProcessV2Active8SentinelError(
             "the sentinel selected-pair digest is not a SHA-256"
         )
-    if (
-        counts["selected_pairs"] > counts["unique_accepted_pairs"]
-        or counts["oracle_examples"] > counts["selected_pairs"]
-        or counts["oracle_examples"] > SENTINEL_ORACLE_EXAMPLES
+    _require_selection_counts(sentinel)
+    if counts["oracle_examples"] != min(
+        counts["selected_pairs"], SENTINEL_ORACLE_EXAMPLES
     ):
-        raise ProcessV2Active8SentinelError("the sentinel counts do not reconcile")
-    if sentinel["selection_mode"] == SELECTION_EXHAUSTIVE:
-        if (
-            counts["unique_accepted_pairs"] > SENTINEL_EXHAUSTIVE_THRESHOLD
-            or counts["selected_pairs"] != counts["unique_accepted_pairs"]
-            or counts["per_cell_examples"] != 0
-            or counts["global_examples"] != 0
-        ):
-            raise ProcessV2Active8SentinelError(
-                "the exhaustive sentinel selection counts do not reconcile"
-            )
-    elif sentinel["selection_mode"] == SELECTION_RANKED:
-        if counts["unique_accepted_pairs"] <= SENTINEL_EXHAUSTIVE_THRESHOLD:
-            raise ProcessV2Active8SentinelError(
-                "the ranked sentinel selection is below the exhaustive threshold"
-            )
-    else:
-        raise ProcessV2Active8SentinelError("the sentinel selection mode is unknown")
+        raise ProcessV2Active8SentinelError(
+            "the sentinel oracle count does not reconcile"
+        )
     mismatch_fields = (
         "evidence_mismatches",
         "cell_mismatches",
@@ -433,6 +1227,7 @@ def require_sentinel_passed(
     if any(
         not isinstance(sentinel[field], list)
         or any(not isinstance(item, str) for item in sentinel[field])
+        or sentinel[field] != sorted(sentinel[field])
         for field in mismatch_fields
     ):
         raise ProcessV2Active8SentinelError("the sentinel mismatch receipts are malformed")
@@ -455,8 +1250,18 @@ __all__ = [
     "SENTINEL_FAILED",
     "SENTINEL_PASSED",
     "ProcessV2Active8SentinelError",
+    "completed_release_sentinel_partition_ids",
+    "load_release_sentinel_partition_result",
+    "prepare_release_sentinel_plan",
+    "reduce_release_sentinel_partitions",
     "require_sentinel_passed",
     "run_release_sentinel",
+    "run_release_sentinel_partition",
     "select_sentinel_pairs",
+    "sentinel_partition_identities",
+    "sentinel_partition_result_path",
     "sentinel_rank",
+    "validate_release_sentinel_partition_result",
+    "validate_release_sentinel_plan",
+    "write_release_sentinel_partition_result",
 ]

@@ -47,11 +47,14 @@ from compose_v4.data.editing_v2_process_v2_active8_map import (
 )
 from compose_v4.data.editing_v2_process_v2_active8_plan import (
     IMPLEMENTATION_FILES,
+    PLAN_FILENAME,
     ProcessV2Active8PlanError,
     build_process_v2_active8_binding,
+    load_process_v2_active8_plan,
     model_runtime_descriptor,
     plan_process_v2_active8,
     validate_process_v2_active8_plan,
+    write_process_v2_active8_plan,
 )
 from compose_v4.data.editing_v2_process_v2_active8_reduce import (
     COMPLETION_FILENAME,
@@ -629,7 +632,9 @@ def test_an_incomplete_reduction_publishes_nothing(tmp_path: Path) -> None:
     assert not (run_root / COMPLETION_FILENAME).exists()
 
 
-def test_a_restart_reuses_only_exact_valid_receipts(tmp_path: Path) -> None:
+def test_a_restart_reuses_exact_outputs_and_refuses_a_corrupt_target(
+    tmp_path: Path,
+) -> None:
     stage = _Stage(tmp_path / "restart", prefix="/artifacts/active8_restart")
     first = stage.run()
     assert completed_process_v2_active8_task_ids(
@@ -644,16 +649,38 @@ def test_a_restart_reuses_only_exact_valid_receipts(tmp_path: Path) -> None:
     body = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
     receipt["receipt_sha256"] = canonical_sha256(body)
     (damaged / RECEIPT_FILENAME).write_bytes(canonical_bytes(receipt) + b"\n")
+    damaged_bytes = {
+        name: (damaged / name).read_bytes()
+        for name in (
+            ROWS_FILENAME,
+            TRANSITIONS_FILENAME,
+            RECEIPT_FILENAME,
+            SUMMARY_FILENAME,
+        )
+    }
     assert str(damaged_task["task_identity_sha256"]) not in (
         completed_process_v2_active8_task_ids(stage.plan, artifact_root=stage.artifact_root)
     )
 
     reused_dir = task_output_path(stage.plan, reused_task, artifact_root=stage.artifact_root)
     before = (reused_dir / ROWS_FILENAME).stat().st_mtime_ns
-    second = stage.run()
-    assert second == first
+    with pytest.raises(
+        ProcessV2Active8MapError,
+        match="refusing to overwrite an invalid existing Active8 task output",
+    ):
+        stage.run()
     assert (reused_dir / ROWS_FILENAME).stat().st_mtime_ns == before
-    validate_process_v2_active8_task_result(damaged)
+    assert {
+        name: (damaged / name).read_bytes()
+        for name in (
+            ROWS_FILENAME,
+            TRANSITIONS_FILENAME,
+            RECEIPT_FILENAME,
+            SUMMARY_FILENAME,
+        )
+    } == damaged_bytes
+    with pytest.raises(ProcessV2Active8MapError):
+        validate_process_v2_active8_task_result(damaged)
 
 
 def test_the_completion_is_published_only_after_the_sentinel_passes(
@@ -1131,6 +1158,39 @@ def test_the_plan_addresses_every_declared_input(stage: _Stage) -> None:
     ):
         assert len(binding[field]) == 64
     assert binding["model_runtime"] == model_runtime_descriptor(stage.runtime)
+
+
+def test_the_plan_publishes_immutably_and_reopens_exactly(stage: _Stage) -> None:
+    path = write_process_v2_active8_plan(
+        stage.plan,
+        artifact_root=stage.artifact_root,
+        repo_root=ROOT,
+    )
+    assert path.name == PLAN_FILENAME
+    assert load_process_v2_active8_plan(path, repo_root=ROOT) == stage.plan
+    assert (
+        write_process_v2_active8_plan(
+            stage.plan,
+            artifact_root=stage.artifact_root,
+            repo_root=ROOT,
+        )
+        == path
+    )
+
+
+def test_the_plan_refuses_an_existing_different_payload(stage: _Stage) -> None:
+    path = write_process_v2_active8_plan(
+        stage.plan,
+        artifact_root=stage.artifact_root,
+        repo_root=ROOT,
+    )
+    path.write_bytes(b"{}\n")
+    with pytest.raises(ProcessV2Active8PlanError, match="immutable.*publication"):
+        write_process_v2_active8_plan(
+            stage.plan,
+            artifact_root=stage.artifact_root,
+            repo_root=ROOT,
+        )
 
 
 def test_a_moved_implementation_revision_refuses_the_plan(

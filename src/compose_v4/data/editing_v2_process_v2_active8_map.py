@@ -48,6 +48,7 @@ import json
 import operator
 import os
 import shutil
+import tempfile
 from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -111,6 +112,7 @@ from compose_v4.data.editing_v2_process_v2_active8_admission import (
     evaluate_process_v2_semantic_active8_trace,
     validate_process_v2_semantic_active8_admission_policy,
 )
+
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     SemanticCapabilityCellError,
     _action_audit_axes,
@@ -120,6 +122,11 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
 from compose_v4.data.packed_trace_store import AddressedPackedTrace
+
+# Frozen from the 40-slot, eight-family benchmark.  The value changes only
+# execution geometry, not the exact teacher-support evidence, and achieved the
+# highest measured throughput with substantially lower peak memory than 64.
+TEACHER_SUPPORT_BATCH_SIZE = 8
 
 # The published layout, which the Gate-0 reducer pins as module constants.
 # METADATA AND ROWS ARE SEPARATE FILES ON PURPOSE.  Gate 0 reads every role's
@@ -772,7 +779,14 @@ def validate_process_v2_active8_task_result(
     """
 
     output = Path(output)
-    if not output.is_dir() or {path.name for path in output.iterdir()} != {
+    if output.is_symlink() or not output.is_dir():
+        raise ProcessV2Active8MapError(
+            f"the Active8 task output is not a real directory: {output}"
+        )
+    entries = tuple(output.iterdir())
+    if any(path.is_symlink() or not path.is_file() for path in entries) or {
+        path.name for path in entries
+    } != {
         ROWS_FILENAME,
         TRANSITIONS_FILENAME,
         RECEIPT_FILENAME,
@@ -908,37 +922,97 @@ def summarize_task(
 def _publish(
     output: Path, *, rows, transitions, receipt_body, summary_body
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Publish one immutable task directory or reuse an identical winner.
+
+    Every attempt writes a private sibling directory.  Promotion never removes
+    or replaces the final path.  If another writer wins the final-name race,
+    both the winner and this attempt are validated from their own bytes and
+    must agree byte for byte.  A partial, stale, malformed or divergent target
+    is preserved and refused rather than silently repaired.
+    """
+
+    output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    staging = output.parent / f".{output.name}.staging"
-    if staging.exists():
-        shutil.rmtree(staging)
-    staging.mkdir(parents=True)
-    rows_file, rows_stream = _write_stream(staging / ROWS_FILENAME, rows)
-    shard_file, shard_stream = _write_stream(staging / TRANSITIONS_FILENAME, transitions)
-    receipt = self_hashed(
-        {**receipt_body, "decision_shard_sha256": shard_file},
-        field="receipt_sha256",
+    staging = Path(
+        tempfile.mkdtemp(prefix=f".{output.name}.attempt-", dir=output.parent)
     )
-    if tuple(receipt) != ACTIVE8_RECEIPT_FIELDS:
-        raise ProcessV2Active8MapError("the Active8 receipt field set disagrees")
-    summary = self_hashed(
-        {
-            **summary_body,
-            "receipt_sha256": receipt["receipt_sha256"],
-            "rows_file_sha256": rows_file,
-            "rows_stream_sha256": rows_stream,
-            "transitions_stream_sha256": shard_stream,
-        },
-        field="summary_sha256",
-    )
-    if set(summary) != SUMMARY_FIELDS:
-        raise ProcessV2Active8MapError("the Active8 task summary field set disagrees")
-    (staging / RECEIPT_FILENAME).write_bytes(canonical_bytes(receipt) + b"\n")
-    (staging / SUMMARY_FILENAME).write_bytes(canonical_bytes(summary) + b"\n")
-    if output.exists():
-        shutil.rmtree(output)
-    os.replace(staging, output)
-    return receipt, summary
+    try:
+        rows_file, rows_stream = _write_stream(staging / ROWS_FILENAME, rows)
+        shard_file, shard_stream = _write_stream(
+            staging / TRANSITIONS_FILENAME, transitions
+        )
+        receipt = self_hashed(
+            {**receipt_body, "decision_shard_sha256": shard_file},
+            field="receipt_sha256",
+        )
+        if tuple(receipt) != ACTIVE8_RECEIPT_FIELDS:
+            raise ProcessV2Active8MapError("the Active8 receipt field set disagrees")
+        summary = self_hashed(
+            {
+                **summary_body,
+                "receipt_sha256": receipt["receipt_sha256"],
+                "rows_file_sha256": rows_file,
+                "rows_stream_sha256": rows_stream,
+                "transitions_stream_sha256": shard_stream,
+            },
+            field="summary_sha256",
+        )
+        if set(summary) != SUMMARY_FIELDS:
+            raise ProcessV2Active8MapError("the Active8 task summary field set disagrees")
+        (staging / RECEIPT_FILENAME).write_bytes(canonical_bytes(receipt) + b"\n")
+        (staging / SUMMARY_FILENAME).write_bytes(canonical_bytes(summary) + b"\n")
+        validate_process_v2_active8_task_result(staging)
+
+        if os.path.lexists(output):
+            return _reuse_identical_task_output(output, staging)
+        try:
+            # `rename`, unlike the previous rmtree + replace sequence, cannot
+            # replace a non-empty task directory.  A concurrent compliant
+            # writer always promotes a complete four-file staging directory.
+            os.rename(staging, output)
+        except OSError:
+            if not os.path.lexists(output):
+                raise
+            return _reuse_identical_task_output(output, staging)
+        committed = validate_process_v2_active8_task_result(output)
+        if committed != (receipt, summary):
+            raise ProcessV2Active8MapError(
+                f"the committed Active8 task changed during publication: {output}"
+            )
+        return committed
+    finally:
+        # This is the attempt-owned, unaddressed staging directory, never a
+        # published target.  A successful rename makes it cease to exist.
+        if staging.exists():
+            shutil.rmtree(staging)
+
+
+def _reuse_identical_task_output(
+    output: Path, staging: Path
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Reuse a committed race winner only when its complete bytes agree."""
+
+    try:
+        winner = validate_process_v2_active8_task_result(output)
+        expected_names = (
+            ROWS_FILENAME,
+            TRANSITIONS_FILENAME,
+            RECEIPT_FILENAME,
+            SUMMARY_FILENAME,
+        )
+        byte_agreement = all(
+            (output / name).read_bytes() == (staging / name).read_bytes()
+            for name in expected_names
+        )
+    except (ProcessV2Active8MapError, OSError, ValueError) as error:
+        raise ProcessV2Active8MapError(
+            f"refusing to overwrite an invalid existing Active8 task output: {output}"
+        ) from error
+    if not byte_agreement:
+        raise ProcessV2Active8MapError(
+            f"immutable Active8 task output collision at {output}"
+        )
+    return winner
 
 
 def execute_process_v2_active8_task(
@@ -952,10 +1026,12 @@ def execute_process_v2_active8_task(
 ) -> dict[str, Any]:
     """Decide and publish exactly one source chunk.
 
-    ``reuse`` is restart safety, not caching: an existing output is reused ONLY
-    when it reconciles completely from its own bytes and names this exact plan,
-    run and task.  Anything else -- a partial write, a stale namespace, a
-    receipt whose summary disagrees with its rows -- is redone from the chunk.
+    ``reuse`` is restart safety, not mutable caching: an existing output is
+    reused ONLY when it reconciles completely from its own bytes and names this
+    exact plan, run and task.  A partial, stale or unknown output is preserved
+    and refused.  With ``reuse=False`` the task is recomputed, but immutable
+    publication still requires byte agreement with any already committed
+    output.
     """
 
     validated = validate_process_v2_active8_plan(plan, repo_root=Path(repo_root))
@@ -975,17 +1051,23 @@ def execute_process_v2_active8_task(
         artifact_root=Path(artifact_root),
         field="task.output_artifact_path",
     )
-    if reuse and output.is_dir():
+    if os.path.lexists(output):
         try:
             reused, summary = validate_process_v2_active8_task_result(output)
-        except (ProcessV2Active8MapError, OSError, ValueError):
-            reused = None
-        if reused is not None and (
+        except (ProcessV2Active8MapError, OSError, ValueError) as error:
+            raise ProcessV2Active8MapError(
+                f"refusing to overwrite an invalid existing Active8 task output: {output}"
+            ) from error
+        if not (
             reused["task_identity_sha256"] == str(task["task_identity_sha256"])
             and summary["run_identity_sha256"] == str(validated["run_identity_sha256"])
             and summary["plan_sha256"] == str(validated["plan_sha256"])
             and summary["binding_sha256"] == str(binding["binding_sha256"])
         ):
+            raise ProcessV2Active8MapError(
+                f"immutable Active8 task output names another task or run: {output}"
+            )
+        if reuse:
             return reused
 
     registry = load_semantic_capability_cell_registry()
@@ -993,7 +1075,9 @@ def execute_process_v2_active8_task(
         raise ProcessV2Active8MapError("the live capability-cell registry is not the one planned")
     try:
         checker = ProductionProcessV2BatchedTeacherSupportChecker(
-            runtime.model, policy=policy
+            runtime.model,
+            policy=policy,
+            batch_size=TEACHER_SUPPORT_BATCH_SIZE,
         )
     except SemanticActive8AdmissionError as error:
         raise ProcessV2Active8MapError(
@@ -1188,6 +1272,7 @@ __all__ = [
     "RECEIPT_FILENAME",
     "SUMMARY_FIELDS",
     "SUMMARY_FILENAME",
+    "TEACHER_SUPPORT_BATCH_SIZE",
     "ROWS_FILENAME",
     "TRANSITIONS_FILENAME",
     "ProcessV2Active8MapError",
