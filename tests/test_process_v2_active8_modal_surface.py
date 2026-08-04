@@ -38,6 +38,8 @@ def _pilot_plan() -> dict[str, object]:
     plan = _plan(size=100)
     for index, task in enumerate(plan["tasks"]):
         task["split"] = "train" if index < 90 else "validation"
+        task["data_lane"] = "observed_local_analogue"
+    plan["tasks"][80].update(launcher.DEFAULT_SYNTHETIC_CANARY_SELECTOR)
     plan["tasks"][-1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
     return plan
 
@@ -215,11 +217,32 @@ def test_group_worker_has_five_writers_and_children_never_commit() -> None:
     assert launcher.MAX_MAP_CONTAINERS == 5
 
 
-def test_first_launch_defaults_to_the_fixed_bounded_train_pilot() -> None:
+def test_canary_tasks_are_independent_right_sized_and_measured() -> None:
+    source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
+    tree = ast.parse(source)
+    node = _function(tree, "decide_canary_task")
+    body = ast.get_source_segment(source, node)
+    decorator = ast.get_source_segment(source, node.decorator_list[0])
+    assert body is not None and decorator is not None
+    assert "ProcessPoolExecutor" not in body
+    assert body.count("artifact_volume.commit()") == 1
+    assert body.index("validate_process_v2_active8_task_result") < body.index(
+        "artifact_volume.commit()"
+    )
+    for field in ("wall_seconds", "cpu_seconds", "process_peak_rss_mb"):
+        assert field in body
+    assert "cpu=PILOT_CPU" in decorator
+    assert "memory=PILOT_MEMORY_MB" in decorator
+    assert "max_containers=PILOT_MAX_CONTAINERS" in decorator
+
+
+def test_first_launch_defaults_to_three_independent_train_canaries() -> None:
     parameters = inspect.signature(launcher.main.info.raw_f).parameters
-    assert launcher.PILOT_GROUP_COUNT == launcher.MAX_MAP_CONTAINERS == 5
-    assert launcher.PILOT_GROUP_SIZE == launcher.TASK_PROCESSES_PER_CONTAINER == 16
-    assert launcher.PILOT_TASK_COUNT == 80
+    assert launcher.PILOT_GROUP_COUNT == launcher.PILOT_MAX_CONTAINERS == 3
+    assert launcher.PILOT_GROUP_SIZE == 1
+    assert launcher.PILOT_TASK_COUNT == 3
+    assert launcher.PILOT_CPU == 1.0
+    assert launcher.PILOT_MEMORY_MB == 4 * 1024
     assert parameters["group_size"].default == launcher.PILOT_GROUP_SIZE
     assert parameters["group_limit"].default == launcher.PILOT_GROUP_COUNT
     assert parameters["pilot"].default is True
@@ -244,14 +267,14 @@ def test_exact_pilot_selection_and_explicit_full_grouping() -> None:
         plan,
         identities,
         completed=set(),
-        group_size=16,
-        group_limit=5,
+        group_size=1,
+        group_limit=3,
         pilot=True,
         full_map=False,
     )
     pilot_ids = [identity for group in pilot for identity in group]
-    assert [len(group) for group in pilot] == [16] * 5
-    assert pilot_ids == identities[:79] + [canary]
+    assert [len(group) for group in pilot] == [1, 1, 1]
+    assert pilot_ids == [identities[0], identities[80], canary]
     assert canary in pilot_ids
     task_by_identity = {
         str(task["task_identity_sha256"]): task for task in plan["tasks"]
@@ -274,7 +297,7 @@ def test_exact_pilot_selection_and_explicit_full_grouping() -> None:
 def test_pilot_partial_and_full_restarts_submit_only_unfinished_cohort_tasks() -> None:
     plan = _pilot_plan()
     cohort = launcher._pilot_task_ids(plan)
-    completed = {cohort[2], cohort[17], cohort[-1]}
+    completed = {cohort[1]}
     missing = launcher._partition_task_ids(
         plan, partition_count=1, partition_index=0, completed=completed
     )
@@ -283,13 +306,13 @@ def test_pilot_partial_and_full_restarts_submit_only_unfinished_cohort_tasks() -
         plan,
         missing,
         completed=completed,
-        group_size=16,
-        group_limit=5,
+        group_size=1,
+        group_limit=3,
         pilot=True,
         full_map=False,
     )
     submitted = [identity for group in groups for identity in group]
-    assert [len(group) for group in groups] == [16, 16, 16, 16, 13]
+    assert [len(group) for group in groups] == [1, 1]
     assert submitted == [identity for identity in cohort if identity not in completed]
     assert set(submitted).isdisjoint(completed)
 
@@ -304,8 +327,8 @@ def test_pilot_partial_and_full_restarts_submit_only_unfinished_cohort_tasks() -
         plan,
         missing_after_full_restart,
         completed=all_cohort_complete,
-        group_size=16,
-        group_limit=5,
+        group_size=1,
+        group_limit=3,
         pilot=True,
         full_map=False,
     ) == []
@@ -318,11 +341,15 @@ def test_pilot_locator_survives_binding_derived_task_identity_changes() -> None:
     right["tasks"][-1]["task_identity_sha256"] = "b" * 64
 
     assert launcher._pilot_task_ids(left) == [
-        str(task["task_identity_sha256"]) for task in left["tasks"][:79]
-    ] + ["a" * 64]
+        str(left["tasks"][0]["task_identity_sha256"]),
+        str(left["tasks"][80]["task_identity_sha256"]),
+        "a" * 64,
+    ]
     assert launcher._pilot_task_ids(right) == [
-        str(task["task_identity_sha256"]) for task in right["tasks"][:79]
-    ] + ["b" * 64]
+        str(right["tasks"][0]["task_identity_sha256"]),
+        str(right["tasks"][80]["task_identity_sha256"]),
+        "b" * 64,
+    ]
 
 
 @pytest.mark.parametrize(("pilot", "full_map"), [(False, False), (True, True)])
@@ -334,8 +361,8 @@ def test_pilot_and_full_map_are_mutually_exclusive(pilot: bool, full_map: bool) 
             plan,
             identities,
             completed=set(),
-            group_size=16,
-            group_limit=5,
+            group_size=1,
+            group_limit=3,
             pilot=pilot,
             full_map=full_map,
         )
@@ -395,6 +422,7 @@ def test_remote_driver_owns_orchestration_without_a_volume_mount_or_commit() -> 
     for call in (
         "prepare_plan.remote(",
         "scan_completed.remote(",
+        "decide_canary_task.starmap(",
         "decide_task_group.starmap(",
         "prepare_sentinel.remote(",
         "run_sentinel_partition.starmap(",

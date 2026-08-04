@@ -2,11 +2,11 @@
 
 This is orchestration only.  The production library owns planning, teacher
 support, immutable publication, reduction and the sentinel.  A spawned remote
-driver survives client disconnection and handles one deterministic phase. At
-most five Volume-v1 writer containers run concurrently; each owns 16 CPUs and
-may evaluate 16 independent chunks in spawned subprocesses before its parent
-validates the whole group and commits once. A final reduction invocation reuses
-every validated task, runs the parallel sentinel, and publishes completion.
+driver survives client disconnection and handles one deterministic phase. The
+default operational pilot runs three independently measured one-CPU canaries.
+The explicit full map retains at most five Volume-v1 writer containers, each
+with a bounded spawned process group. A final reduction invocation reuses every
+validated task, runs the parallel sentinel, and publishes completion.
 
 Importing this module launches nothing.  Run only from the exact clean commit.
 Every returned envelope keeps downstream authority explicitly false.
@@ -20,8 +20,10 @@ import json
 import multiprocessing
 import platform
 import re
+import resource
 import subprocess
 import sys
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
@@ -42,12 +44,14 @@ OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_active8"
 MAX_MAP_CONTAINERS = 5
 MAP_CPU = 16.0
 TASK_PROCESSES_PER_CONTAINER = 16
-PILOT_GROUP_COUNT = MAX_MAP_CONTAINERS
-PILOT_GROUP_SIZE = TASK_PROCESSES_PER_CONTAINER
-PILOT_TASK_COUNT = PILOT_GROUP_COUNT * PILOT_GROUP_SIZE
-# The bounded pilot validates this request under the intended 16-process load.
-# 128 GiB overstates the measured 8 GiB/task operating point and is
-# unnecessarily difficult to schedule; 64 GiB is the staged launch request.
+PILOT_GROUP_COUNT = 3
+PILOT_GROUP_SIZE = 1
+PILOT_TASK_COUNT = 3
+PILOT_MAX_CONTAINERS = PILOT_TASK_COUNT
+PILOT_CPU = 1.0
+PILOT_MEMORY_MB = 4 * 1024
+# The full-map geometry remains frozen until the independent canary supplies a
+# production-task time and memory bound. It is not used by the default pilot.
 MAP_MEMORY_MB = 64 * 1024
 MAP_TIMEOUT_SECONDS = 12 * 3600
 SENTINEL_TIMEOUT_SECONDS = 6 * 3600
@@ -59,6 +63,11 @@ DEFAULT_SMOKE_TASK_SELECTOR = {
     "chunk_index": 24,
     "entry_start": 49_152,
     "entry_stop": 51_200,
+    "chunk_row_count": 2_048,
+}
+DEFAULT_SYNTHETIC_CANARY_SELECTOR = {
+    "split": "train",
+    "data_lane": "reversible_synthetic_walk",
     "chunk_row_count": 2_048,
 }
 
@@ -405,32 +414,46 @@ def _task_groups(plan: dict[str, Any], task_ids: list[str], *, group_size: int) 
 
 
 def _pilot_task_ids(plan: dict[str, Any]) -> list[str]:
-    """Freeze one train-only 80-task cohort that includes the heavy canary."""
+    """Freeze three train-only operational canaries in plan order.
+
+    The canaries cover publication overhead, the multistep lane that dominated
+    the stopped pilot, and the other full-corpus dominant lane.  Capability or
+    outcome values never influence this selection.
+    """
 
     train_tasks = [task for task in plan["tasks"] if task.get("split") == "train"]
-    matching = [
+    heavy = [
         task
         for task in train_tasks
         if all(task.get(field) == value for field, value in DEFAULT_SMOKE_TASK_SELECTOR.items())
     ]
-    if len(matching) != 1:
+    if len(heavy) != 1:
         raise ValueError("the pinned Active8 train canary source chunk is absent or ambiguous")
-    canary = str(matching[0]["task_identity_sha256"])
-    other_ids = [
-        str(task["task_identity_sha256"])
+    synthetic = [
+        task
         for task in train_tasks
-        if str(task["task_identity_sha256"]) != canary
+        if all(
+            task.get(field) == value
+            for field, value in DEFAULT_SYNTHETIC_CANARY_SELECTOR.items()
+        )
     ]
-    if len(other_ids) < PILOT_TASK_COUNT - 1:
-        raise ValueError("the Active8 train partition cannot supply the bounded pilot cohort")
-    selected = set(other_ids[: PILOT_TASK_COUNT - 1]) | {canary}
-    # Restore plan order after membership selection so task grouping is stable.
+    if not synthetic:
+        raise ValueError("the Active8 train partition lacks a full synthetic-walk canary")
+    tiny_size = min(int(task["chunk_row_count"]) for task in train_tasks)
+    tiny = next(task for task in train_tasks if int(task["chunk_row_count"]) == tiny_size)
+    selected = {
+        str(tiny["task_identity_sha256"]),
+        str(heavy[0]["task_identity_sha256"]),
+        str(synthetic[0]["task_identity_sha256"]),
+    }
+    if len(selected) != PILOT_TASK_COUNT:
+        raise ValueError("the Active8 operational canary roles do not resolve distinctly")
     cohort = [
         str(task["task_identity_sha256"])
         for task in plan["tasks"]
         if str(task["task_identity_sha256"]) in selected
     ]
-    if len(cohort) != PILOT_TASK_COUNT or canary not in cohort:
+    if len(cohort) != PILOT_TASK_COUNT:
         raise RuntimeError("the Active8 bounded pilot cohort is inconsistent")
     return cohort
 
@@ -453,12 +476,12 @@ def _submission_groups(
         raise ValueError("select exactly one of the bounded pilot or full Active8 map")
     if pilot:
         if group_size != PILOT_GROUP_SIZE or group_limit != PILOT_GROUP_COUNT:
-            raise ValueError("the Active8 pilot requires five groups of sixteen tasks")
+            raise ValueError("the Active8 pilot requires three independent canary tasks")
         cohort = _pilot_task_ids(plan)
         remaining = [identity for identity in cohort if identity not in completed]
         if not set(remaining).issubset(missing):
             raise ValueError("the Active8 pilot cohort lies outside the selected partition")
-        return _task_groups(plan, remaining, group_size=PILOT_GROUP_SIZE)
+        return [[identity] for identity in remaining]
     groups = _task_groups(plan, missing, group_size=group_size)
     return groups if group_limit == 0 else groups[:group_limit]
 
@@ -501,6 +524,13 @@ def _collect_process_results(futures: dict[Any, str]) -> dict[str, dict[str, str
     if set(results) != set(futures.values()):
         raise RuntimeError("the Active8 process group lost a task result")
     return results
+
+
+def _peak_rss_mb() -> float:
+    value = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    if sys.platform != "darwin":
+        value *= 1024.0
+    return value / 1e6
 
 
 @app.function(
@@ -657,6 +687,70 @@ def decide_task_group(
 
 @app.function(
     image=image,
+    cpu=PILOT_CPU,
+    memory=PILOT_MEMORY_MB,
+    timeout=MAP_TIMEOUT_SECONDS,
+    max_containers=PILOT_MAX_CONTAINERS,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def decide_canary_task(
+    plan_path: str, task_identity_sha256: str, revision: dict[str, Any]
+) -> dict[str, Any]:
+    """Measure and publish one restart-safe task with no cohort barrier."""
+
+    _validate_remote_revision(revision)
+    loaded = _imports()
+    artifact_volume.reload()
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
+    tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
+    if task_identity_sha256 not in tasks:
+        raise RuntimeError("the Active8 canary names an unplanned task")
+
+    import torch
+
+    cpu_before = time.process_time()
+    wall_before = time.perf_counter()
+    with torch.inference_mode():
+        receipt = loaded["execute_process_v2_active8_task"](
+            plan,
+            task_identity_sha256,
+            runtime=_runtime(),
+            artifact_root=ARTIFACT_ROOT,
+            repo_root=REMOTE_ROOT,
+        )
+    wall_seconds = time.perf_counter() - wall_before
+    cpu_seconds = time.process_time() - cpu_before
+    task = tasks[task_identity_sha256]
+    output = loaded["mounted_process_v2_artifact_path"](
+        str(task["output_artifact_path"]),
+        artifact_root=ARTIFACT_ROOT,
+        field="task.output_artifact_path",
+    )
+    reopened, summary = loaded["validate_process_v2_active8_task_result"](output)
+    if not (
+        reopened["task_identity_sha256"] == task_identity_sha256
+        and reopened["receipt_sha256"] == receipt["receipt_sha256"]
+        and summary["binding_sha256"] == plan["binding_sha256"]
+        and summary["plan_sha256"] == plan["plan_sha256"]
+        and summary["run_identity_sha256"] == plan["run_identity_sha256"]
+    ):
+        raise RuntimeError("the Active8 canary output does not bind its plan")
+    artifact_volume.commit()
+    return {
+        "task_identity_sha256": task_identity_sha256,
+        "data_lane": str(task["data_lane"]),
+        "chunk_row_count": int(task["chunk_row_count"]),
+        "teacher_action_count": int(sum(summary["action_family_histogram"].values())),
+        "wall_seconds": wall_seconds,
+        "cpu_seconds": cpu_seconds,
+        "process_peak_rss_mb": _peak_rss_mb(),
+        "receipt_sha256": str(receipt["receipt_sha256"]),
+    }
+
+
+@app.function(
+    image=image,
     cpu=1.0,
     memory=8192,
     timeout=SERIAL_TIMEOUT_SECONDS,
@@ -803,6 +897,8 @@ def driver(
         raise ValueError("select exactly one Active8 phase: pilot, full_map, or reduce")
     if (pilot or reduce) and (int(partition_count) != 1 or int(partition_index) != 0):
         raise ValueError("the pilot and reduction require the complete unpartitioned plan")
+    if pilot and (int(group_size) != PILOT_GROUP_SIZE or int(group_limit) != PILOT_GROUP_COUNT):
+        raise ValueError("the Active8 pilot requires the frozen canary geometry")
     if full_map and (
         int(group_size) != TASK_PROCESSES_PER_CONTAINER or int(group_limit) != 0
     ):
@@ -834,7 +930,18 @@ def driver(
             full_map=bool(full_map),
         )
     submitted_tasks = sum(len(group) for group in submitted_groups)
-    if submitted_groups:
+    canary_measurements: list[dict[str, Any]] = []
+    if submitted_groups and pilot:
+        canary_measurements = list(
+            decide_canary_task.starmap(
+                [(plan_path, group[0], revision) for group in submitted_groups]
+            )
+        )
+        if len(canary_measurements) != len(submitted_groups) or {
+            result["task_identity_sha256"] for result in canary_measurements
+        } != {group[0] for group in submitted_groups}:
+            raise RuntimeError("the Active8 canary map lost a task result")
+    elif submitted_groups:
         results = list(
             decide_task_group.starmap([(plan_path, group, revision) for group in submitted_groups])
         )
@@ -877,6 +984,7 @@ def driver(
         "missing_tasks_before_submit": len(missing),
         "submitted_groups": len(submitted_groups),
         "submitted_tasks": submitted_tasks,
+        "canary_measurements": canary_measurements,
         "group_size": int(group_size),
         "group_limit": int(group_limit),
         "pilot": bool(pilot),

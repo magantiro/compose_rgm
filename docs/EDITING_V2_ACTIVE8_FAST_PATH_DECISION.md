@@ -1,9 +1,10 @@
 # Editing V2 Active8 fast-path decision
 
-Status: implemented locally and verified by focused tests and a production-shape
-40-slot benchmark. The first bounded remote pilot stopped on a historical-payload
-identity error before any Active8 task group committed; the corrective pilot has
-not yet been launched.
+Status: the teacher-support fast path is implemented and verified. A corrective
+80-task remote pilot was stopped after eight hours because its fixed process
+groups produced unacceptable straggler cost. A three-task, independently
+scheduled operational canary is implemented and verified locally but has not
+yet been launched.
 
 ## Decision
 
@@ -71,6 +72,16 @@ seconds. The machine-readable diagnostic is
 `/private/tmp/process_v2_active8_teacher_support_benchmark.json`; it is a local
 resource-sizing diagnostic, not an authority-bearing scientific artifact.
 
+A later mask-only prototype removed every neural action-score head from the
+checker. On the matched 64-query panel it took 20.42 seconds, versus 20.43
+seconds for the existing fast checker. Peak resident memory fell from about
+443 MB to 337 MB, but wall time was unchanged within measurement resolution.
+Profiling attributed 30.8 of 31.6 profiled seconds to exact chemistry support
+construction, principally cycle-close, atom-restatement, and ring-restatement
+enumeration. The prototype was therefore rejected and fully reverted. Keeping
+duplicated legal-mask logic for no measured time improvement would add risk
+without solving the operational bottleneck.
+
 ### First bounded remote-pilot result
 
 The 80-task pilot launched from commit `37ab57d50b2ec1de3850e77e967260968ec67d94`
@@ -90,33 +101,63 @@ identity validator, change the corpus, or alter either scientific process
 identity. Two regression tests require the complete receipt-bound identity at
 both read boundaries.
 
+### Corrective 80-task pilot result
+
+The corrected pilot launched from commit `37ab57d50b2ec1de3850e77e967260968ec67d94`
+as detached Modal app `ap-atikauWElSGEieY1U9NwYm`. It requested five
+containers, each with 16 CPUs and 64 GiB, and assigned one fixed group of 16
+tasks to each container. It was stopped after approximately eight hours. No
+reduction, release sentinel, Gate 0, T1, P50, or training ran.
+
+Exactly 34 of the fixed 80 pilot tasks published valid content-addressed task
+directories. They cover 65,117 of 159,325 pilot source rows. All 34 belong to
+the three earlier local/topology lanes. The pinned 2,048-row multistep canary,
+which contains 14,889 admitted transitions, did not publish. The other 46
+pilot tasks were all full 2,048-row chunks. Consequently this run does not
+establish the runtime or success of the dominant multistep and synthetic-walk
+lanes and cannot authorize the full map.
+
+The approximately 50 USD charge is explained by the declared request: 80 CPU
+cores and 320 GiB of memory remained allocated across five fixed groups while
+stragglers ran. Completed children could not pull another task, and shorter
+children left their reserved cores idle until the slowest child in the same
+group finished. The preserved artifacts remain valid only under their exact
+historical run identity. They are diagnostic evidence, not evidence for a
+changed execution implementation.
+
 ## Release execution architecture
 
 The release launcher binds every plan to the exact clean 40-character Git
 commit serialized into the Modal image. A remote driver is spawned as the local
-entry point's only remote call, so client disconnection cannot interrupt the
-later fan-out. The default invocation submits a prospectively fixed 80-task,
-train-only operational pilot. It consists of the first 79 other train tasks in
-plan order plus the uniquely heaviest train task: lane
-`real_endpoint_multistep_path`, chunk 24, entries 49,152 through 51,200. The
-current task identities are derived from the final plan rather than embedded in
-source code because they intentionally include the execution-commit binding.
-The heavy canary contains 14,889 admitted transitions across 2,048 source rows.
-No validation, controller-validation, or final-test aggregate was inspected to
-choose it.
+entry point's only remote call, so client disconnection cannot interrupt later
+fan-out. The default invocation now submits three train-only operational
+canaries, each as an independent Modal invocation with one CPU and 4 GiB:
 
-The pilot and the explicit full invocation use at most five Modal Volume-v1
-writer containers. Each container owns 16 CPUs and evaluates at most 16
-independent chunk tasks in spawned, single-threaded subprocesses, providing 80
-concurrent CPU workers without exceeding five concurrent writers. The pilot
-cohort is selected before completed-task filtering, so a restart resumes only
-the same 80 tasks and cannot silently advance into the full map. Children never
-reload or commit the shared volume. The parent reopens and validates every child
-receipt against the exact plan and run identities before issuing one explicit
-commit. Individual task artifacts are content-addressed and restart safe. The
-group is not described as transactionally atomic because the volume may publish
-background commits; a failed group can therefore leave valid task artifacts
-that a restart safely reuses.
+1. the smallest train chunk, which measures fixed startup and publication cost;
+2. `real_endpoint_multistep_path` chunk 24, entries 49,152 through 51,200; and
+3. the first full 2,048-row `reversible_synthetic_walk` train chunk.
+
+The latter two lanes contain 285 of the full plan's 328 tasks and therefore
+measure the workloads that dominate the release pass. The current task
+identities are derived from the final plan rather than embedded in source code
+because they intentionally include the execution-commit binding. No validation,
+controller-validation, or final-test aggregate was inspected to choose them.
+Each result reports wall time, process CPU time, peak resident memory, source
+rows, and classified teacher actions.
+
+The three-task canary uses at most three Modal Volume-v1 writer containers.
+Each invocation reopens and validates its receipt against the exact plan and
+run identities before one explicit commit. There is no multi-task barrier, so a
+slow canary cannot strand reserved CPUs assigned to another canary. The cohort
+is selected before completed-task filtering, so a restart resumes only missing
+canaries and cannot silently advance into the full map. Individual task
+artifacts remain content-addressed and restart safe.
+
+The explicit full invocation retains at most five Volume-v1 writer containers
+until the canary supplies a measured production-task time and memory bound.
+Its final CPU, process-group, and memory geometry must be selected from the
+three canary measurements. The launcher does not infer full-map authority from
+successful task publication alone.
 
 Reduction no longer retains the corpus-wide transition inventory in memory. It
 uses a temporary SQLite index to enforce global source-row uniqueness, derive
