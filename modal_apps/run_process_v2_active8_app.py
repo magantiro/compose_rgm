@@ -1,12 +1,12 @@
 """Run the Process-V2 Active8 map and release sentinel on Modal.
 
 This is orchestration only.  The production library owns planning, teacher
-support, immutable publication, reduction and the sentinel.  One invocation
-handles a deterministic task partition. At most five Volume-v1 writer
-containers run concurrently; each owns 16 CPUs and may evaluate 16 independent
-chunks in spawned subprocesses before its parent validates the whole group and
-commits once. A final invocation with ``--reduce`` reuses every validated task,
-runs the parallel sentinel, and publishes completion.
+support, immutable publication, reduction and the sentinel.  A spawned remote
+driver survives client disconnection and handles one deterministic phase. At
+most five Volume-v1 writer containers run concurrently; each owns 16 CPUs and
+may evaluate 16 independent chunks in spawned subprocesses before its parent
+validates the whole group and commits once. A final reduction invocation reuses
+every validated task, runs the parallel sentinel, and publishes completion.
 
 Importing this module launches nothing.  Run only from the exact clean commit.
 Every returned envelope keeps downstream authority explicitly false.
@@ -42,9 +42,12 @@ OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_active8"
 MAX_MAP_CONTAINERS = 5
 MAP_CPU = 16.0
 TASK_PROCESSES_PER_CONTAINER = 16
-# The pinned one-task smoke validates this request before 16 subprocesses are
-# authorized. 128 GiB overstates the measured 8 GiB/task operating point and
-# is unnecessarily difficult to schedule; 64 GiB is the staged launch request.
+PILOT_GROUP_COUNT = MAX_MAP_CONTAINERS
+PILOT_GROUP_SIZE = TASK_PROCESSES_PER_CONTAINER
+PILOT_TASK_COUNT = PILOT_GROUP_COUNT * PILOT_GROUP_SIZE
+# The bounded pilot validates this request under the intended 16-process load.
+# 128 GiB overstates the measured 8 GiB/task operating point and is
+# unnecessarily difficult to schedule; 64 GiB is the staged launch request.
 MAP_MEMORY_MB = 64 * 1024
 MAP_TIMEOUT_SECONDS = 12 * 3600
 SENTINEL_TIMEOUT_SECONDS = 6 * 3600
@@ -401,6 +404,37 @@ def _task_groups(plan: dict[str, Any], task_ids: list[str], *, group_size: int) 
     return groups
 
 
+def _pilot_task_ids(plan: dict[str, Any]) -> list[str]:
+    """Freeze one train-only 80-task cohort that includes the heavy canary."""
+
+    train_tasks = [task for task in plan["tasks"] if task.get("split") == "train"]
+    matching = [
+        task
+        for task in train_tasks
+        if all(task.get(field) == value for field, value in DEFAULT_SMOKE_TASK_SELECTOR.items())
+    ]
+    if len(matching) != 1:
+        raise ValueError("the pinned Active8 train canary source chunk is absent or ambiguous")
+    canary = str(matching[0]["task_identity_sha256"])
+    other_ids = [
+        str(task["task_identity_sha256"])
+        for task in train_tasks
+        if str(task["task_identity_sha256"]) != canary
+    ]
+    if len(other_ids) < PILOT_TASK_COUNT - 1:
+        raise ValueError("the Active8 train partition cannot supply the bounded pilot cohort")
+    selected = set(other_ids[: PILOT_TASK_COUNT - 1]) | {canary}
+    # Restore plan order after membership selection so task grouping is stable.
+    cohort = [
+        str(task["task_identity_sha256"])
+        for task in plan["tasks"]
+        if str(task["task_identity_sha256"]) in selected
+    ]
+    if len(cohort) != PILOT_TASK_COUNT or canary not in cohort:
+        raise RuntimeError("the Active8 bounded pilot cohort is inconsistent")
+    return cohort
+
+
 def _submission_groups(
     plan: dict[str, Any],
     missing: list[str],
@@ -408,36 +442,23 @@ def _submission_groups(
     completed: set[str],
     group_size: int,
     group_limit: int,
-    smoke_task_identity: str,
+    pilot: bool,
     full_map: bool,
 ) -> list[list[str]]:
-    """Select the pinned source chunk or an explicitly requested full map."""
+    """Select the fixed bounded pilot or an explicitly requested full map."""
 
     if type(group_limit) is not int or group_limit < 0:
         raise ValueError("group_limit must be a nonnegative integer")
-    planned = {str(task["task_identity_sha256"]) for task in plan["tasks"]}
-    if not full_map:
-        matching = [
-            task
-            for task in plan["tasks"]
-            if all(task.get(field) == value for field, value in DEFAULT_SMOKE_TASK_SELECTOR.items())
-        ]
-        if len(matching) != 1:
-            raise ValueError("the pinned Active8 train smoke source chunk is absent or ambiguous")
-        selected = str(matching[0]["task_identity_sha256"])
-        if smoke_task_identity and smoke_task_identity != selected:
-            raise ValueError("the requested smoke identity is not the pinned train source chunk")
-        if group_size != 1 or group_limit != 1:
-            raise ValueError("the Active8 smoke requires group_size=1 and group_limit=1")
-        if selected not in planned:
-            raise ValueError("the exact Active8 smoke task is absent from the plan")
-        if selected in completed:
-            return []
-        if selected not in missing:
-            raise ValueError("the exact Active8 smoke task is outside the selected partition")
-        return [[selected]]
-    if smoke_task_identity:
-        raise ValueError("a full Active8 map cannot also request a smoke task identity")
+    if pilot == full_map:
+        raise ValueError("select exactly one of the bounded pilot or full Active8 map")
+    if pilot:
+        if group_size != PILOT_GROUP_SIZE or group_limit != PILOT_GROUP_COUNT:
+            raise ValueError("the Active8 pilot requires five groups of sixteen tasks")
+        cohort = _pilot_task_ids(plan)
+        remaining = [identity for identity in cohort if identity not in completed]
+        if not set(remaining).issubset(missing):
+            raise ValueError("the Active8 pilot cohort lies outside the selected partition")
+        return _task_groups(plan, remaining, group_size=PILOT_GROUP_SIZE)
     groups = _task_groups(plan, missing, group_size=group_size)
     return groups if group_limit == 0 else groups[:group_limit]
 
@@ -754,29 +775,39 @@ def finalize(plan_path: str, revision: dict[str, Any]) -> dict[str, Any]:
     return completion
 
 
-@app.local_entrypoint()
-def main(
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=8192,
+    timeout=MAP_TIMEOUT_SECONDS,
+    max_containers=1,
+)
+def driver(
     cache_run_artifact_root: str,
     rebind_run_artifact_root: str,
-    expected_commit: str,
-    output_artifact_prefix: str = OUTPUT_ARTIFACT_PREFIX,
-    partition_count: int = 1,
-    partition_index: int = 0,
-    group_size: int = 1,
-    group_limit: int = 1,
-    smoke_task_identity: str = "",
-    full_map: bool = False,
-    reduce: bool = False,
-    sentinel_pairs_per_partition: int = DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
-) -> None:
-    """Map one partition; by default run only the pinned train-task smoke.
+    output_artifact_prefix: str,
+    partition_count: int,
+    partition_index: int,
+    group_size: int,
+    group_limit: int,
+    pilot: bool,
+    full_map: bool,
+    reduce: bool,
+    sentinel_pairs_per_partition: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run detached orchestration remotely so client exit cannot stop fan-out."""
 
-    Set ``full_map``, ``group_size=16`` and ``group_limit=0`` explicitly to
-    submit every missing group after the smoke validates the 64-GiB container
-    request and subprocess runtime construction.
-    """
+    _validate_remote_revision(revision)
+    if sum((bool(pilot), bool(full_map), bool(reduce))) != 1:
+        raise ValueError("select exactly one Active8 phase: pilot, full_map, or reduce")
+    if (pilot or reduce) and (int(partition_count) != 1 or int(partition_index) != 0):
+        raise ValueError("the pilot and reduction require the complete unpartitioned plan")
+    if full_map and (
+        int(group_size) != TASK_PROCESSES_PER_CONTAINER or int(group_limit) != 0
+    ):
+        raise ValueError("the full Active8 map requires group_size=16 and group_limit=0")
 
-    revision = local_image_revision(expected_commit=expected_commit)
     plan = prepare_plan.remote(
         cache_run_artifact_root,
         rebind_run_artifact_root,
@@ -791,15 +822,17 @@ def main(
         partition_index=int(partition_index),
         completed=complete,
     )
-    submitted_groups = _submission_groups(
-        plan,
-        missing,
-        completed=complete,
-        group_size=int(group_size),
-        group_limit=int(group_limit),
-        smoke_task_identity=str(smoke_task_identity),
-        full_map=bool(full_map),
-    )
+    submitted_groups = []
+    if not reduce:
+        submitted_groups = _submission_groups(
+            plan,
+            missing,
+            completed=complete,
+            group_size=int(group_size),
+            group_limit=int(group_limit),
+            pilot=bool(pilot),
+            full_map=bool(full_map),
+        )
     submitted_tasks = sum(len(group) for group in submitted_groups)
     if submitted_groups:
         results = list(
@@ -836,26 +869,73 @@ def main(
                 raise RuntimeError("the Active8 sentinel lost a partition result")
         completion = finalize.remote(plan_path, revision)
 
+    result = {
+        "phase": "process_v2_active8_complete" if reduce else "process_v2_active8_map",
+        "run_artifact_root": plan["run_artifact_root"],
+        "expected_tasks": plan["expected_task_count"],
+        "already_complete": len(complete),
+        "missing_tasks_before_submit": len(missing),
+        "submitted_groups": len(submitted_groups),
+        "submitted_tasks": submitted_tasks,
+        "group_size": int(group_size),
+        "group_limit": int(group_limit),
+        "pilot": bool(pilot),
+        "full_map": bool(full_map),
+        "partition_count": int(partition_count),
+        "partition_index": int(partition_index),
+        "sentinel_partitions": sentinel_partitions,
+        "completion_sha256": None if completion is None else completion["completion_sha256"],
+        "image_revision": revision,
+        "training_launched": False,
+        "training_authorized": False,
+        "gate_zero_authorized": False,
+        "t1_authorized": False,
+        "bounded_p50_authorized": False,
+    }
+    print(json.dumps(result, sort_keys=True), flush=True)
+    return result
+
+
+@app.local_entrypoint()
+def main(
+    cache_run_artifact_root: str,
+    rebind_run_artifact_root: str,
+    expected_commit: str,
+    output_artifact_prefix: str = OUTPUT_ARTIFACT_PREFIX,
+    partition_count: int = 1,
+    partition_index: int = 0,
+    group_size: int = PILOT_GROUP_SIZE,
+    group_limit: int = PILOT_GROUP_COUNT,
+    pilot: bool = True,
+    full_map: bool = False,
+    reduce: bool = False,
+    sentinel_pairs_per_partition: int = DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
+) -> None:
+    """Spawn one disconnect-safe remote pilot, full-map, or reduction driver."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    call = driver.spawn(
+        cache_run_artifact_root,
+        rebind_run_artifact_root,
+        output_artifact_prefix,
+        int(partition_count),
+        int(partition_index),
+        int(group_size),
+        int(group_limit),
+        bool(pilot),
+        bool(full_map),
+        bool(reduce),
+        int(sentinel_pairs_per_partition),
+        revision,
+    )
     print(
         json.dumps(
             {
-                "phase": "process_v2_active8_complete" if reduce else "process_v2_active8_map",
-                "run_artifact_root": plan["run_artifact_root"],
-                "expected_tasks": plan["expected_task_count"],
-                "already_complete": len(complete),
-                "missing_tasks_before_submit": len(missing),
-                "submitted_groups": len(submitted_groups),
-                "submitted_tasks": submitted_tasks,
-                "group_size": int(group_size),
-                "group_limit": int(group_limit),
-                "smoke_task_identity": str(smoke_task_identity) or None,
+                "phase": "process_v2_active8_driver_launched",
+                "driver_call_id": call.object_id,
+                "pilot": bool(pilot),
                 "full_map": bool(full_map),
-                "partition_count": int(partition_count),
-                "partition_index": int(partition_index),
-                "sentinel_partitions": sentinel_partitions,
-                "completion_sha256": (
-                    None if completion is None else completion["completion_sha256"]
-                ),
+                "reduce": bool(reduce),
                 "image_revision": revision,
                 "training_launched": False,
                 "training_authorized": False,

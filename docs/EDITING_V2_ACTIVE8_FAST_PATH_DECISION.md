@@ -72,24 +72,30 @@ resource-sizing diagnostic, not an authority-bearing scientific artifact.
 ## Release execution architecture
 
 The release launcher binds every plan to the exact clean 40-character Git
-commit serialized into the Modal image. Its default invocation submits only the
-prospectively pinned train-role source chunk: lane
+commit serialized into the Modal image. A remote driver is spawned as the local
+entry point's only remote call, so client disconnection cannot interrupt the
+later fan-out. The default invocation submits a prospectively fixed 80-task,
+train-only operational pilot. It consists of the first 79 other train tasks in
+plan order plus the uniquely heaviest train task: lane
 `real_endpoint_multistep_path`, chunk 24, entries 49,152 through 51,200. The
-current task identity is derived from the final plan rather than embedded in
-source code because task identities intentionally include the execution-commit
-binding. This chunk is uniquely heaviest among train tasks by admitted
-transition count (14,889 transitions across 2,048 source rows). No validation,
-controller-validation, or final-test aggregate was inspected to choose it.
+current task identities are derived from the final plan rather than embedded in
+source code because they intentionally include the execution-commit binding.
+The heavy canary contains 14,889 admitted transitions across 2,048 source rows.
+No validation, controller-validation, or final-test aggregate was inspected to
+choose it.
 
-After the smoke passes, the explicit full invocation uses at most five Modal
-Volume-v1 writer containers. Each container owns 16 CPUs and evaluates at most
-16 independent chunk tasks in spawned, single-threaded subprocesses. Children
-never reload or commit the shared volume. The parent reopens and validates every
-child receipt against the exact plan and run identities before issuing one
-explicit commit. Individual task artifacts are content-addressed and restart
-safe. The group is not described as transactionally atomic because the volume
-may publish background commits; a failed group can therefore leave valid task
-artifacts that a restart safely reuses.
+The pilot and the explicit full invocation use at most five Modal Volume-v1
+writer containers. Each container owns 16 CPUs and evaluates at most 16
+independent chunk tasks in spawned, single-threaded subprocesses, providing 80
+concurrent CPU workers without exceeding five concurrent writers. The pilot
+cohort is selected before completed-task filtering, so a restart resumes only
+the same 80 tasks and cannot silently advance into the full map. Children never
+reload or commit the shared volume. The parent reopens and validates every child
+receipt against the exact plan and run identities before issuing one explicit
+commit. Individual task artifacts are content-addressed and restart safe. The
+group is not described as transactionally atomic because the volume may publish
+background commits; a failed group can therefore leave valid task artifacts
+that a restart safely reuses.
 
 Reduction no longer retains the corpus-wide transition inventory in memory. It
 uses a temporary SQLite index to enforce global source-row uniqueness, derive

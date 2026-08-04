@@ -34,6 +34,14 @@ def _plan(size: int = 12) -> dict[str, object]:
     }
 
 
+def _pilot_plan() -> dict[str, object]:
+    plan = _plan(size=100)
+    for index, task in enumerate(plan["tasks"]):
+        task["split"] = "train" if index < 90 else "validation"
+    plan["tasks"][-1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
+    return plan
+
+
 def _function(tree: ast.Module, name: str) -> ast.FunctionDef:
     return next(
         node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name
@@ -207,12 +215,16 @@ def test_group_worker_has_five_writers_and_children_never_commit() -> None:
     assert launcher.MAX_MAP_CONTAINERS == 5
 
 
-def test_first_launch_defaults_to_the_exact_single_train_smoke_task() -> None:
+def test_first_launch_defaults_to_the_fixed_bounded_train_pilot() -> None:
     parameters = inspect.signature(launcher.main.info.raw_f).parameters
-    assert parameters["group_size"].default == 1
-    assert parameters["group_limit"].default == 1
-    assert parameters["smoke_task_identity"].default == ""
+    assert launcher.PILOT_GROUP_COUNT == launcher.MAX_MAP_CONTAINERS == 5
+    assert launcher.PILOT_GROUP_SIZE == launcher.TASK_PROCESSES_PER_CONTAINER == 16
+    assert launcher.PILOT_TASK_COUNT == 80
+    assert parameters["group_size"].default == launcher.PILOT_GROUP_SIZE
+    assert parameters["group_limit"].default == launcher.PILOT_GROUP_COUNT
+    assert parameters["pilot"].default is True
     assert parameters["full_map"].default is False
+    assert parameters["reduce"].default is False
     assert launcher.DEFAULT_SMOKE_TASK_SELECTOR == {
         "split": "train",
         "data_lane": "real_endpoint_multistep_path",
@@ -223,33 +235,28 @@ def test_first_launch_defaults_to_the_exact_single_train_smoke_task() -> None:
     }
 
 
-def test_exact_smoke_selection_and_explicit_full_grouping() -> None:
-    plan = _plan(size=34)
-    plan["tasks"][17].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
-    smoke = str(plan["tasks"][17]["task_identity_sha256"])
+def test_exact_pilot_selection_and_explicit_full_grouping() -> None:
+    plan = _pilot_plan()
     identities = [str(task["task_identity_sha256"]) for task in plan["tasks"]]
+    canary = identities[-1]
 
-    assert launcher._submission_groups(
+    pilot = launcher._submission_groups(
         plan,
         identities,
         completed=set(),
-        group_size=1,
-        group_limit=1,
-        smoke_task_identity="",
+        group_size=16,
+        group_limit=5,
+        pilot=True,
         full_map=False,
-    ) == [[smoke]]
-    assert (
-        launcher._submission_groups(
-            plan,
-            identities,
-            completed={smoke},
-            group_size=1,
-            group_limit=1,
-            smoke_task_identity="",
-            full_map=False,
-        )
-        == []
     )
+    pilot_ids = [identity for group in pilot for identity in group]
+    assert [len(group) for group in pilot] == [16] * 5
+    assert pilot_ids == identities[:79] + [canary]
+    assert canary in pilot_ids
+    task_by_identity = {
+        str(task["task_identity_sha256"]): task for task in plan["tasks"]
+    }
+    assert {task_by_identity[identity]["split"] for identity in pilot_ids} == {"train"}
 
     full = launcher._submission_groups(
         plan,
@@ -257,39 +264,147 @@ def test_exact_smoke_selection_and_explicit_full_grouping() -> None:
         completed=set(),
         group_size=16,
         group_limit=0,
-        smoke_task_identity="",
+        pilot=False,
         full_map=True,
     )
-    assert [len(group) for group in full] == [16, 16, 2]
+    assert [len(group) for group in full] == [16, 16, 16, 16, 16, 16, 4]
     assert [identity for group in full for identity in group] == identities
 
 
-def test_smoke_locator_survives_binding_derived_task_identity_changes() -> None:
-    left = _plan(size=2)
-    right = _plan(size=2)
-    left["tasks"][1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
-    right["tasks"][1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
-    left["tasks"][1]["task_identity_sha256"] = "a" * 64
-    right["tasks"][1]["task_identity_sha256"] = "b" * 64
+def test_pilot_partial_and_full_restarts_submit_only_unfinished_cohort_tasks() -> None:
+    plan = _pilot_plan()
+    cohort = launcher._pilot_task_ids(plan)
+    completed = {cohort[2], cohort[17], cohort[-1]}
+    missing = launcher._partition_task_ids(
+        plan, partition_count=1, partition_index=0, completed=completed
+    )
 
-    assert launcher._submission_groups(
-        left,
-        [str(task["task_identity_sha256"]) for task in left["tasks"]],
-        completed=set(),
-        group_size=1,
-        group_limit=1,
-        smoke_task_identity="",
+    groups = launcher._submission_groups(
+        plan,
+        missing,
+        completed=completed,
+        group_size=16,
+        group_limit=5,
+        pilot=True,
         full_map=False,
-    ) == [["a" * 64]]
+    )
+    submitted = [identity for group in groups for identity in group]
+    assert [len(group) for group in groups] == [16, 16, 16, 16, 13]
+    assert submitted == [identity for identity in cohort if identity not in completed]
+    assert set(submitted).isdisjoint(completed)
+
+    all_cohort_complete = set(cohort)
+    missing_after_full_restart = launcher._partition_task_ids(
+        plan,
+        partition_count=1,
+        partition_index=0,
+        completed=all_cohort_complete,
+    )
     assert launcher._submission_groups(
-        right,
-        [str(task["task_identity_sha256"]) for task in right["tasks"]],
-        completed=set(),
-        group_size=1,
-        group_limit=1,
-        smoke_task_identity="",
+        plan,
+        missing_after_full_restart,
+        completed=all_cohort_complete,
+        group_size=16,
+        group_limit=5,
+        pilot=True,
         full_map=False,
-    ) == [["b" * 64]]
+    ) == []
+
+
+def test_pilot_locator_survives_binding_derived_task_identity_changes() -> None:
+    left = _pilot_plan()
+    right = _pilot_plan()
+    left["tasks"][-1]["task_identity_sha256"] = "a" * 64
+    right["tasks"][-1]["task_identity_sha256"] = "b" * 64
+
+    assert launcher._pilot_task_ids(left) == [
+        str(task["task_identity_sha256"]) for task in left["tasks"][:79]
+    ] + ["a" * 64]
+    assert launcher._pilot_task_ids(right) == [
+        str(task["task_identity_sha256"]) for task in right["tasks"][:79]
+    ] + ["b" * 64]
+
+
+@pytest.mark.parametrize(("pilot", "full_map"), [(False, False), (True, True)])
+def test_pilot_and_full_map_are_mutually_exclusive(pilot: bool, full_map: bool) -> None:
+    plan = _pilot_plan()
+    identities = [str(task["task_identity_sha256"]) for task in plan["tasks"]]
+    with pytest.raises(ValueError, match="exactly one"):
+        launcher._submission_groups(
+            plan,
+            identities,
+            completed=set(),
+            group_size=16,
+            group_limit=5,
+            pilot=pilot,
+            full_map=full_map,
+        )
+
+
+@pytest.mark.parametrize(
+    ("pilot", "full_map", "reduce"),
+    [
+        (False, False, False),
+        (True, True, False),
+        (True, False, True),
+        (False, True, True),
+        (True, True, True),
+    ],
+)
+def test_remote_driver_requires_exactly_one_phase(
+    monkeypatch: pytest.MonkeyPatch,
+    pilot: bool,
+    full_map: bool,
+    reduce: bool,
+) -> None:
+    monkeypatch.setattr(launcher, "_validate_remote_revision", lambda _revision: None)
+    with pytest.raises(ValueError, match="exactly one Active8 phase"):
+        launcher.driver.info.raw_f(
+            "/cache",
+            "/rebind",
+            launcher.OUTPUT_ARTIFACT_PREFIX,
+            1,
+            0,
+            16,
+            5,
+            pilot,
+            full_map,
+            reduce,
+            launcher.DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
+            {},
+        )
+
+
+def test_local_main_only_spawns_the_remote_driver() -> None:
+    source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
+    tree = ast.parse(source)
+    main = ast.get_source_segment(source, _function(tree, "main"))
+    assert main is not None
+    assert main.count("driver.spawn(") == 1
+    assert ".remote(" not in main
+    assert ".starmap(" not in main
+
+
+def test_remote_driver_owns_orchestration_without_a_volume_mount_or_commit() -> None:
+    source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
+    tree = ast.parse(source)
+    driver_node = _function(tree, "driver")
+    driver = ast.get_source_segment(source, driver_node)
+    decorator = ast.get_source_segment(source, driver_node.decorator_list[0])
+    assert driver is not None and decorator is not None
+    for call in (
+        "prepare_plan.remote(",
+        "scan_completed.remote(",
+        "decide_task_group.starmap(",
+        "prepare_sentinel.remote(",
+        "run_sentinel_partition.starmap(",
+        "finalize.remote(",
+    ):
+        assert call in driver
+    assert "volumes=" not in decorator
+    assert "artifact_volume" not in driver
+    assert ".commit(" not in driver
+    assert ".reload(" not in driver
 
 
 def test_every_remote_plan_phase_requires_the_execution_commit() -> None:
