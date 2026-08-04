@@ -807,15 +807,13 @@ def probe_task_progress(
     )
     from compose_v4.data.editing_v2_process_v2_active8_admission import (
         ProductionProcessV2BatchedTeacherSupportChecker,
+        build_process_v2_semantic_active8_admission_policy,
+        validate_process_v2_semantic_active8_admission_policy,
     )
     from compose_v4.data.editing_v2_process_v2_active8_map import (
         TEACHER_SUPPORT_BATCH_SIZE,
         _decide_chunk,
         read_rebind_chunk_decisions,
-    )
-    from compose_v4.data.editing_v2_semantic_active8_admission import (
-        build_process_v2_semantic_active8_admission_policy,
-        validate_process_v2_semantic_active8_admission_policy,
     )
     from compose_v4.data.editing_v2_semantic_capability_cells import (
         load_semantic_capability_cell_registry,
