@@ -299,11 +299,10 @@ def test_every_remote_plan_phase_requires_the_execution_commit() -> None:
         launcher._require_plan_revision(plan, {"commit": "2" * 40})
 
 
-def test_bounded_reducers_request_explicit_scratch_disk() -> None:
+def test_bounded_reducers_use_the_default_modal_scratch_disk() -> None:
     source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
     tree = ast.parse(source)
     for name in ("prepare_sentinel", "finalize"):
         decorator = ast.get_source_segment(source, _function(tree, name).decorator_list[0])
         assert decorator is not None
-        assert "ephemeral_disk=REDUCTION_EPHEMERAL_DISK_MB" in decorator
-    assert launcher.REDUCTION_EPHEMERAL_DISK_MB == 8192
+        assert "ephemeral_disk=" not in decorator

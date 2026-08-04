@@ -95,9 +95,11 @@ Reduction no longer retains the corpus-wide transition inventory in memory. It
 uses a temporary SQLite index to enforce global source-row uniqueness, derive
 the exact sentinel selection, and retain occurrence payloads only for selected
 pairs. Preparation and finalization independently repeat the same two-pass
-derivation and compare the exact inventories. Both phases request 8 GiB of
-ephemeral scratch disk. This changes execution resources, not corpus support,
-selection semantics, admission, or any scientific threshold.
+derivation and compare the exact inventories. Both phases are budgeted for at
+most 8 GiB of temporary storage within Modal's default 512 GiB per-container
+disk quota, so the launcher does not request a larger `ephemeral_disk`. This
+changes execution resources, not corpus support, selection semantics,
+admission, or any scientific threshold.
 
 ## Reuse boundary
 

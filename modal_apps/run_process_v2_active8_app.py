@@ -49,7 +49,6 @@ MAP_MEMORY_MB = 64 * 1024
 MAP_TIMEOUT_SECONDS = 12 * 3600
 SENTINEL_TIMEOUT_SECONDS = 6 * 3600
 SERIAL_TIMEOUT_SECONDS = 4 * 3600
-REDUCTION_EPHEMERAL_DISK_MB = 8192
 DEFAULT_SENTINEL_PAIRS_PER_PARTITION = 256
 DEFAULT_SMOKE_TASK_SELECTOR = {
     "split": "train",
@@ -639,7 +638,6 @@ def decide_task_group(
     image=image,
     cpu=1.0,
     memory=8192,
-    ephemeral_disk=REDUCTION_EPHEMERAL_DISK_MB,
     timeout=SERIAL_TIMEOUT_SECONDS,
     max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
@@ -712,7 +710,6 @@ def run_sentinel_partition(
     image=image,
     cpu=1.0,
     memory=8192,
-    ephemeral_disk=REDUCTION_EPHEMERAL_DISK_MB,
     timeout=SERIAL_TIMEOUT_SECONDS,
     max_containers=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
