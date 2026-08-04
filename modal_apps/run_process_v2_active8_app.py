@@ -51,7 +51,14 @@ SENTINEL_TIMEOUT_SECONDS = 6 * 3600
 SERIAL_TIMEOUT_SECONDS = 4 * 3600
 REDUCTION_EPHEMERAL_DISK_MB = 8192
 DEFAULT_SENTINEL_PAIRS_PER_PARTITION = 256
-DEFAULT_SMOKE_TASK_IDENTITY = "c3740f704521edb8d1e686c8e39c80d10331919ada12bfd7cb5ed492b8fb21bd"
+DEFAULT_SMOKE_TASK_SELECTOR = {
+    "split": "train",
+    "data_lane": "real_endpoint_multistep_path",
+    "chunk_index": 24,
+    "entry_start": 49_152,
+    "entry_stop": 51_200,
+    "chunk_row_count": 2_048,
+}
 
 REVISION_SCHEMA = "compose.data.process_v2_active8_modal_image_revision"
 REVISION_SCHEMA_VERSION = 1
@@ -403,20 +410,35 @@ def _submission_groups(
     group_size: int,
     group_limit: int,
     smoke_task_identity: str,
+    full_map: bool,
 ) -> list[list[str]]:
-    """Select either the exact smoke task or an explicitly bounded full map."""
+    """Select the pinned source chunk or an explicitly requested full map."""
 
     if type(group_limit) is not int or group_limit < 0:
         raise ValueError("group_limit must be a nonnegative integer")
     planned = {str(task["task_identity_sha256"]) for task in plan["tasks"]}
-    if smoke_task_identity:
-        if smoke_task_identity not in planned:
+    if not full_map:
+        matching = [
+            task
+            for task in plan["tasks"]
+            if all(task.get(field) == value for field, value in DEFAULT_SMOKE_TASK_SELECTOR.items())
+        ]
+        if len(matching) != 1:
+            raise ValueError("the pinned Active8 train smoke source chunk is absent or ambiguous")
+        selected = str(matching[0]["task_identity_sha256"])
+        if smoke_task_identity and smoke_task_identity != selected:
+            raise ValueError("the requested smoke identity is not the pinned train source chunk")
+        if group_size != 1 or group_limit != 1:
+            raise ValueError("the Active8 smoke requires group_size=1 and group_limit=1")
+        if selected not in planned:
             raise ValueError("the exact Active8 smoke task is absent from the plan")
-        if smoke_task_identity in completed:
+        if selected in completed:
             return []
-        if smoke_task_identity not in missing:
+        if selected not in missing:
             raise ValueError("the exact Active8 smoke task is outside the selected partition")
-        return [[smoke_task_identity]]
+        return [[selected]]
+    if smoke_task_identity:
+        raise ValueError("a full Active8 map cannot also request a smoke task identity")
     groups = _task_groups(plan, missing, group_size=group_size)
     return groups if group_limit == 0 else groups[:group_limit]
 
@@ -745,15 +767,16 @@ def main(
     partition_index: int = 0,
     group_size: int = 1,
     group_limit: int = 1,
-    smoke_task_identity: str = DEFAULT_SMOKE_TASK_IDENTITY,
+    smoke_task_identity: str = "",
+    full_map: bool = False,
     reduce: bool = False,
     sentinel_pairs_per_partition: int = DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
 ) -> None:
     """Map one partition; by default run only the pinned train-task smoke.
 
-    Clear ``smoke_task_identity`` and set ``group_size=16, group_limit=0``
-    explicitly to submit every missing group after the smoke validates the
-    64-GiB container request and subprocess runtime construction.
+    Set ``full_map``, ``group_size=16`` and ``group_limit=0`` explicitly to
+    submit every missing group after the smoke validates the 64-GiB container
+    request and subprocess runtime construction.
     """
 
     revision = local_image_revision(expected_commit=expected_commit)
@@ -778,6 +801,7 @@ def main(
         group_size=int(group_size),
         group_limit=int(group_limit),
         smoke_task_identity=str(smoke_task_identity),
+        full_map=bool(full_map),
     )
     submitted_tasks = sum(len(group) for group in submitted_groups)
     if submitted_groups:
@@ -828,6 +852,7 @@ def main(
                 "group_size": int(group_size),
                 "group_limit": int(group_limit),
                 "smoke_task_identity": str(smoke_task_identity) or None,
+                "full_map": bool(full_map),
                 "partition_count": int(partition_count),
                 "partition_index": int(partition_index),
                 "sentinel_partitions": sentinel_partitions,

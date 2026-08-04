@@ -73,9 +73,11 @@ resource-sizing diagnostic, not an authority-bearing scientific artifact.
 
 The release launcher binds every plan to the exact clean 40-character Git
 commit serialized into the Modal image. Its default invocation submits only the
-prospectively pinned train-role smoke task
-`c3740f704521edb8d1e686c8e39c80d10331919ada12bfd7cb5ed492b8fb21bd`.
-That task is the unique heaviest train task in the frozen plan by admitted
+prospectively pinned train-role source chunk: lane
+`real_endpoint_multistep_path`, chunk 24, entries 49,152 through 51,200. The
+current task identity is derived from the final plan rather than embedded in
+source code because task identities intentionally include the execution-commit
+binding. This chunk is uniquely heaviest among train tasks by admitted
 transition count (14,889 transitions across 2,048 source rows). No validation,
 controller-validation, or final-test aggregate was inspected to choose it.
 

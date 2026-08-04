@@ -211,17 +211,22 @@ def test_first_launch_defaults_to_the_exact_single_train_smoke_task() -> None:
     parameters = inspect.signature(launcher.main.info.raw_f).parameters
     assert parameters["group_size"].default == 1
     assert parameters["group_limit"].default == 1
-    assert (
-        parameters["smoke_task_identity"].default
-        == launcher.DEFAULT_SMOKE_TASK_IDENTITY
-        == "c3740f704521edb8d1e686c8e39c80d10331919ada12bfd7cb5ed492b8fb21bd"
-    )
+    assert parameters["smoke_task_identity"].default == ""
+    assert parameters["full_map"].default is False
+    assert launcher.DEFAULT_SMOKE_TASK_SELECTOR == {
+        "split": "train",
+        "data_lane": "real_endpoint_multistep_path",
+        "chunk_index": 24,
+        "entry_start": 49_152,
+        "entry_stop": 51_200,
+        "chunk_row_count": 2_048,
+    }
 
 
 def test_exact_smoke_selection_and_explicit_full_grouping() -> None:
-    smoke = launcher.DEFAULT_SMOKE_TASK_IDENTITY
     plan = _plan(size=34)
-    plan["tasks"][17]["task_identity_sha256"] = smoke
+    plan["tasks"][17].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
+    smoke = str(plan["tasks"][17]["task_identity_sha256"])
     identities = [str(task["task_identity_sha256"]) for task in plan["tasks"]]
 
     assert launcher._submission_groups(
@@ -230,7 +235,8 @@ def test_exact_smoke_selection_and_explicit_full_grouping() -> None:
         completed=set(),
         group_size=1,
         group_limit=1,
-        smoke_task_identity=smoke,
+        smoke_task_identity="",
+        full_map=False,
     ) == [[smoke]]
     assert (
         launcher._submission_groups(
@@ -239,7 +245,8 @@ def test_exact_smoke_selection_and_explicit_full_grouping() -> None:
             completed={smoke},
             group_size=1,
             group_limit=1,
-            smoke_task_identity=smoke,
+            smoke_task_identity="",
+            full_map=False,
         )
         == []
     )
@@ -251,9 +258,38 @@ def test_exact_smoke_selection_and_explicit_full_grouping() -> None:
         group_size=16,
         group_limit=0,
         smoke_task_identity="",
+        full_map=True,
     )
     assert [len(group) for group in full] == [16, 16, 2]
     assert [identity for group in full for identity in group] == identities
+
+
+def test_smoke_locator_survives_binding_derived_task_identity_changes() -> None:
+    left = _plan(size=2)
+    right = _plan(size=2)
+    left["tasks"][1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
+    right["tasks"][1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
+    left["tasks"][1]["task_identity_sha256"] = "a" * 64
+    right["tasks"][1]["task_identity_sha256"] = "b" * 64
+
+    assert launcher._submission_groups(
+        left,
+        [str(task["task_identity_sha256"]) for task in left["tasks"]],
+        completed=set(),
+        group_size=1,
+        group_limit=1,
+        smoke_task_identity="",
+        full_map=False,
+    ) == [["a" * 64]]
+    assert launcher._submission_groups(
+        right,
+        [str(task["task_identity_sha256"]) for task in right["tasks"]],
+        completed=set(),
+        group_size=1,
+        group_limit=1,
+        smoke_task_identity="",
+        full_map=False,
+    ) == [["b" * 64]]
 
 
 def test_every_remote_plan_phase_requires_the_execution_commit() -> None:
