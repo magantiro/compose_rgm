@@ -1,0 +1,93 @@
+{
+  "artifact_publication": false,
+  "cache_run_artifact_root": "/artifacts/editing_v2/process_v2_chunk_cache/417dc4125e48c2d6cca3ea49d3ef0ad25d91cc78df047b028f022ec207288039",
+  "conclusion": {
+    "full_eight_family_support_per_teacher_is_the_measured_bottleneck": true,
+    "query_preparation_is_the_measured_bottleneck": false,
+    "source_reuse_alone_can_remove_at_most_fraction_on_this_task": 0.06648525410016916,
+    "task_exceeds_current_12_hour_timeout_at_observed_rate": true
+  },
+  "execution_environment": {
+    "cpu_per_container": 1.0,
+    "memory_mb": 4096,
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "python": "3.11",
+    "rdkit": "2024.3.5",
+    "scipy": "1.13.1",
+    "torch": "2.4.0"
+  },
+  "observations": {
+    "progress_probe": {
+      "app_id": "ap-BAgL6xT6W7sjAoBg38awP0",
+      "artifact_published": false,
+      "commit": "05d525eb82a86b1e47eb73c600984edffb0ce1cf",
+      "heartbeat_1": {
+        "cpu_seconds": 274.53,
+        "eta_seconds": 62789.18,
+        "process_peak_rss_mb": 3705.577472,
+        "processed_transitions": 64,
+        "total_transitions": 13597,
+        "transitions_per_second": 0.21553075996341922,
+        "wall_seconds": 296.941373987
+      },
+      "heartbeat_2": {
+        "cpu_seconds": 521.0,
+        "eta_seconds": 59301.31,
+        "process_peak_rss_mb": 3722.878976,
+        "processed_transitions": 128,
+        "total_transitions": 13597,
+        "transitions_per_second": 0.22712821539748243,
+        "wall_seconds": 563.558339839
+      },
+      "interval_measurement": {
+        "cpu_seconds": 246.47,
+        "processed_transitions": 64,
+        "seconds_per_transition": 4.1658900914375,
+        "transitions_per_second": 0.24004473975188283,
+        "wall_seconds": 266.616965852
+      },
+      "stopped_before_completion": true
+    },
+    "workload_probe": {
+      "app_id": "ap-eZp5oynUAMw6PVJumYbkgP",
+      "artifact_published": false,
+      "commit": "84d48a1aa9c730af0de7291c592d1c95bb8ab9de",
+      "maximum_queries_per_source_state": 4,
+      "process_peak_rss_mb": 3631.304704,
+      "query_count": 13597,
+      "query_preparation_cpu_seconds": 14.09,
+      "query_preparation_wall_seconds": 15.165326571,
+      "repeated_source_query_count": 904,
+      "repeated_source_query_fraction": 0.06648525410016916,
+      "source_query_multiplicity_histogram": {
+        "1": 11842,
+        "2": 815,
+        "3": 19,
+        "4": 17
+      },
+      "source_states_with_multiple_queries": 851,
+      "stats_only": true,
+      "teacher_rule_histogram": {
+        "atom_delete": 6858,
+        "atom_insert": 6739
+      },
+      "unique_source_state_count": 12693,
+      "wall_seconds": 15.246118132
+    }
+  },
+  "rebind_run_artifact_root": "/artifacts/editing_v2/process_v2_rebind/f0a2b8cd85f676d98a053d17cea3276fad0f9e257bc15d59c43682eae5c6b1f3",
+  "schema": "compose.diagnostics.process_v2_active8_production_workload_probe",
+  "schema_version": 1,
+  "scientific_authority": false,
+  "split_identity": "train",
+  "task": {
+    "chunk_index": 58,
+    "chunk_row_count": 2048,
+    "data_lane": "real_endpoint_multistep_path",
+    "entry_start": 118784,
+    "entry_stop": 120832,
+    "task_identity_sha256": "43da2a13791d23d01fa7c633350ba5206cf945f8deadbb036e28eb1b10e05b2f"
+  },
+  "training_launched": false
+}
