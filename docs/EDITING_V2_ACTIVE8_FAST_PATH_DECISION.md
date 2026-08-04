@@ -1,7 +1,9 @@
 # Editing V2 Active8 fast-path decision
 
 Status: implemented locally and verified by focused tests and a production-shape
-40-slot benchmark. No remote Active8 task has run yet.
+40-slot benchmark. The first bounded remote pilot stopped on a historical-payload
+identity error before any Active8 task group committed; the corrective pilot has
+not yet been launched.
 
 ## Decision
 
@@ -56,7 +58,7 @@ Measured locally on the implementation worktree:
 - reversed input order and multi-item batching preserve evidence exactly;
 - nonzero disabled-family masks fail loudly;
 - the final release-focused Active8, sentinel, publication, Modal-surface, and
-  Gate 0 suite passes 122 tests;
+  Gate 0 suite passes 135 tests after the remote-pilot correction;
 - both frozen scientific process identities and the frozen V1 Gate 0 file stay
   unchanged.
 
@@ -68,6 +70,25 @@ per second), and used 443 MB peak resident memory. The slow path took 42.61
 seconds. The machine-readable diagnostic is
 `/private/tmp/process_v2_active8_teacher_support_benchmark.json`; it is a local
 resource-sizing diagnostic, not an authority-bearing scientific artifact.
+
+### First bounded remote-pilot result
+
+The 80-task pilot launched from commit `37ab57d50b2ec1de3850e77e967260968ec67d94`
+as detached Modal app `ap-0USx2MXUn0oTIlGWflV8wy`. Five map containers reached
+the intended geometry of sixteen spawned subprocesses each. Multiple workers
+then refused their first cached rows because Active8 called the cache decoder
+without the complete historical V1 payload identity. The cache and rebind
+artifacts correctly bind that superseded identity, and the rebind receipt already
+validates and carries its complete self-consistent object. The omission was at
+the Active8 read boundary, not in the corpus or rebind evidence.
+
+The app stopped with zero authorized Active8 output. Child processes never
+commit, and each failed parent therefore published no task group. The correction
+passes the exact receipt-bound historical identity to both the map decoder and
+the release-sentinel decoder. It does not relabel historical rows, weaken the
+identity validator, change the corpus, or alter either scientific process
+identity. Two regression tests require the complete receipt-bound identity at
+both read boundaries.
 
 ## Release execution architecture
 

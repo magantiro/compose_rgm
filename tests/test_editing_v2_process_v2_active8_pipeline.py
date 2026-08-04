@@ -265,6 +265,70 @@ def test_both_process_identities_are_the_frozen_values() -> None:
     )
 
 
+def test_active8_names_the_receipt_bound_payload_identity_when_decoding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Historical cache rows are read under their identity, never the live one.
+
+    The fixture's V1 identity happens to remain current, so an omitted
+    ``expected_process_identity`` would otherwise stay invisible.  This guard
+    makes the production call name the complete object carried by the exact
+    rebind receipt, which is the path required by a genuinely superseded
+    production payload.
+    """
+
+    import compose_v4.data.editing_v2_process_v2_active8_map as map_module
+
+    built = _Stage(tmp_path / "explicit-payload-identity")
+    expected = built.rebind_plan["pinned_process_identity"]
+    original = map_module.read_process_v2_chunk_target
+    observed: list[dict[str, Any]] = []
+
+    def _require_explicit_identity(*args, expected_process_identity=None, **kwargs):
+        assert expected_process_identity == expected
+        observed.append(dict(expected_process_identity))
+        return original(
+            *args,
+            expected_process_identity=expected_process_identity,
+            **kwargs,
+        )
+
+    monkeypatch.setattr(
+        map_module, "read_process_v2_chunk_target", _require_explicit_identity
+    )
+    built.run()
+    assert len(observed) == len(built.plan["tasks"])
+
+
+def test_release_sentinel_names_the_receipt_bound_payload_identity_when_decoding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The bounded re-enumeration uses the same historical identity contract."""
+
+    import compose_v4.data.editing_v2_process_v2_active8_sentinel as sentinel_module
+
+    built = _Stage(tmp_path / "sentinel-explicit-payload-identity")
+    built.run()
+    expected = built.rebind_plan["pinned_process_identity"]
+    original = sentinel_module.read_process_v2_chunk_target
+    observed: list[dict[str, Any]] = []
+
+    def _require_explicit_identity(*args, expected_process_identity=None, **kwargs):
+        assert expected_process_identity == expected
+        observed.append(dict(expected_process_identity))
+        return original(
+            *args,
+            expected_process_identity=expected_process_identity,
+            **kwargs,
+        )
+
+    monkeypatch.setattr(
+        sentinel_module, "read_process_v2_chunk_target", _require_explicit_identity
+    )
+    built.reduce()
+    assert observed
+
+
 def test_the_published_layout_is_the_one_gate_zero_pins(stage: _Stage) -> None:
     """Metadata and rows are separate files, at the seam's own pinned names."""
 

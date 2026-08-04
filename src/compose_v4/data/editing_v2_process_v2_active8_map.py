@@ -619,21 +619,16 @@ def accepted_transition(
 # ---- Reading the upstream decision for exactly one chunk ------------------------
 
 
-def read_rebind_chunk_decisions(
+def _validated_rebind_chunk_receipt(
     output: Path,
     *,
     entry_start: int,
     entry_stop: int,
     task_identity_sha256: str,
     chunk_file_sha256: str,
-) -> dict[int, dict[str, Any]]:
-    """Every rebind decision of one chunk, as ``entry_index -> decision``.
-
-    The rebind's own validator is the authority on the artifact; this reads the
-    two published streams it already reconciled and refuses anything that does
-    not decide THIS chunk -- the same rebind task the plan names, over the same
-    chunk bytes, covering the exact entry range exactly once.
-    """
+    pinned_process_identity_sha256: str,
+) -> dict[str, Any]:
+    """Validate the exact rebind receipt that authorizes one cached chunk."""
 
     try:
         receipt = validate_process_v2_rebind_task_result(output)
@@ -649,12 +644,52 @@ def read_rebind_chunk_decisions(
         raise ProcessV2Active8MapError(
             "the upstream rebind decided another chunk's bytes than this task reads"
         )
+    pinned_process_identity = dict(receipt["pinned_process_identity"])
+    if str(pinned_process_identity["process_identity_sha256"]) != str(
+        pinned_process_identity_sha256
+    ):
+        raise ProcessV2Active8MapError(
+            "the upstream rebind receipt carries another frozen payload identity"
+        )
     if int(receipt["entry_start"]) != int(entry_start) or int(receipt["entry_stop"]) != int(
         entry_stop
     ):
         raise ProcessV2Active8MapError(
             "the upstream rebind task decided another entry range than this chunk"
         )
+    return receipt
+
+
+def read_rebind_chunk_decisions(
+    output: Path,
+    *,
+    entry_start: int,
+    entry_stop: int,
+    task_identity_sha256: str,
+    chunk_file_sha256: str,
+    pinned_process_identity_sha256: str,
+) -> tuple[dict[int, dict[str, Any]], dict[str, Any]]:
+    """Every rebind decision and the frozen payload identity for one chunk.
+
+    The rebind's own validator is the authority on the artifact; this reads the
+    two published streams it already reconciled and refuses anything that does
+    not decide THIS chunk -- the same rebind task the plan names, over the same
+    chunk bytes, covering the exact entry range exactly once.  It also returns
+    the complete frozen V1 payload identity already validated by that receipt.
+    The cache decoder needs the complete object, rather than only its SHA, to
+    read immutable rows whose identity has since been superseded without
+    pretending that historical identity is current.
+    """
+
+    receipt = _validated_rebind_chunk_receipt(
+        output,
+        entry_start=entry_start,
+        entry_stop=entry_stop,
+        task_identity_sha256=task_identity_sha256,
+        chunk_file_sha256=chunk_file_sha256,
+        pinned_process_identity_sha256=pinned_process_identity_sha256,
+    )
+    pinned_process_identity = dict(receipt["pinned_process_identity"])
     manifest = json.loads((output / REBIND_MANIFEST_FILENAME).read_bytes())
     decisions: dict[int, dict[str, Any]] = {}
     with gzip.open(output / REBIND_PROOF_FILENAME, "rb") as handle:
@@ -674,7 +709,7 @@ def read_rebind_chunk_decisions(
         raise ProcessV2Active8MapError(
             "the upstream rebind does not decide the chunk's exact entry range"
         )
-    return decisions
+    return decisions, pinned_process_identity
 
 
 def _chunk_target(task: Mapping[str, Any]):
@@ -1089,12 +1124,13 @@ def execute_process_v2_active8_task(
         artifact_root=Path(artifact_root),
         field="task.rebind_task_artifact_path",
     )
-    decisions = read_rebind_chunk_decisions(
+    decisions, pinned_process_identity = read_rebind_chunk_decisions(
         rebind_output,
         entry_start=int(task["entry_start"]),
         entry_stop=int(task["entry_stop"]),
         task_identity_sha256=str(task["rebind_task_identity_sha256"]),
         chunk_file_sha256=str(task["chunk_file_sha256"]),
+        pinned_process_identity_sha256=str(task["pinned_process_identity_sha256"]),
     )
     rows: list[dict[str, Any]] = []
     transitions: list[dict[str, Any]] = []
@@ -1103,6 +1139,7 @@ def execute_process_v2_active8_task(
         decisions=decisions,
         checker=checker,
         namespace=registry.namespace,
+        expected_process_identity=pinned_process_identity,
         artifact_root=Path(artifact_root),
         repo_root=Path(repo_root),
     ):
@@ -1164,6 +1201,7 @@ def _decide_chunk(
     decisions: Mapping[int, Mapping[str, Any]],
     checker: ProductionProcessV2BatchedTeacherSupportChecker,
     namespace: str,
+    expected_process_identity: Mapping[str, Any],
     artifact_root: Path,
     repo_root: Path,
 ) -> Iterator[tuple[dict[str, Any], list[dict[str, Any]]]]:
@@ -1179,6 +1217,7 @@ def _decide_chunk(
         read_process_v2_chunk_target(
             source_output,
             target=target,
+            expected_process_identity=expected_process_identity,
             sentinel_replay_entries=0,
             recover_row_errors=False,
             repo_root=repo_root,

@@ -61,8 +61,10 @@ from typing import Any
 
 from compose_v4.data.editing_process_v2_rebind import mounted_process_v2_artifact_path
 from compose_v4.data.editing_v2_process_v2_active8_map import (
+    ProcessV2Active8MapError,
     _chunk_target,
     _classification_block,
+    _validated_rebind_chunk_receipt,
 )
 from compose_v4.data.editing_v2_process_v2_chunk_cache import (
     read_process_v2_chunk_target,
@@ -824,6 +826,25 @@ def run_release_sentinel_partition(
     task = tasks.get(task_identity)
     if task is None:
         raise ProcessV2Active8SentinelError("the sentinel partition names an unplanned task")
+    rebind_output = mounted_process_v2_artifact_path(
+        str(task["rebind_task_artifact_path"]),
+        artifact_root=Path(artifact_root),
+        field="task.rebind_task_artifact_path",
+    )
+    try:
+        rebind_receipt = _validated_rebind_chunk_receipt(
+            rebind_output,
+            entry_start=int(task["entry_start"]),
+            entry_stop=int(task["entry_stop"]),
+            task_identity_sha256=str(task["rebind_task_identity_sha256"]),
+            chunk_file_sha256=str(task["chunk_file_sha256"]),
+            pinned_process_identity_sha256=str(task["pinned_process_identity_sha256"]),
+        )
+    except ProcessV2Active8MapError as error:
+        raise ProcessV2Active8SentinelError(
+            "the sentinel source is not authorized by the bound rebind receipt"
+        ) from error
+    expected_process_identity = dict(rebind_receipt["pinned_process_identity"])
     pairs = list(partition["pairs"])
     wanted: dict[int, list[Mapping[str, Any]]] = {}
     for pair in pairs:
@@ -842,6 +863,7 @@ def run_release_sentinel_partition(
     for read in read_process_v2_chunk_target(
         source_output,
         target=target,
+        expected_process_identity=expected_process_identity,
         sentinel_replay_entries=0,
         recover_row_errors=False,
         repo_root=Path(repo_root),
