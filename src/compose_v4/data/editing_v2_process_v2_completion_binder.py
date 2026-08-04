@@ -200,10 +200,11 @@ class ProcessV2CompletionExpectation:
 # ``/editing_v2/semantic_v4_migration/…`` on the ``compose-v4-artifacts``
 # volume, and a job that mounts it at ``/artifacts`` reads it one prefix down.
 #
-# These values are *declared expectations* transcribed from the authoritative
-# handoff.  They have not been reopened locally; every one of them is asserted
-# fail-closed at bind time, and a later authorized read-only source audit is
-# what turns them from declared into measured.
+# These values are declared expectations checked against the exact completion
+# downloaded read-only from the production volume on 2026-08-03.  The audit
+# re-derived the completion and result-inventory self-hashes from canonical
+# bytes before this binding was corrected; bind time still asserts every field
+# fail-closed.
 PRODUCTION_COMPLETION_VOLUME_PATH = (
     "/editing_v2/semantic_v4_migration"
     "/da6f82845b5998819d59e10d364a34aa6b7a0e76fb6451dcf315b5b1b7e55cc2"
@@ -221,7 +222,7 @@ PRODUCTION_COMPLETION_EXPECTATION = ProcessV2CompletionExpectation(
     # the live one here would refuse the only payload that exists.
     process_identity_sha256=SUPERSEDED_V1_PROCESS_IDENTITY_SHA256,
     builder_identity_sha256="5004b099733c81c3b7954576b4c8233f971a8dacf91d10ad42632ba52f0c3a8d",
-    result_inventory_sha256="80d12064ac078cc105f142f7f0c7b9aabb27a7c1bed9d1c18e97a3df25a3c911",
+    result_inventory_sha256="80d12064ac078cc105f142c7f0c7b9aabb27a7c1bed9d1c18e97a3df25a3c911",
     task_count=EXPECTED_TASK_COUNT,
     source_traces=695_638,
     admitted_traces=646_779,
