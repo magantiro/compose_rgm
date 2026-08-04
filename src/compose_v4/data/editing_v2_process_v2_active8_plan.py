@@ -56,10 +56,10 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     self_hashed,
     verify_self_hash,
 )
-from compose_v4.data.editing_v2_semantic_active8_admission import (
+from compose_v4.data.editing_v2_process_v2_active8_admission import (
     SemanticActive8AdmissionPolicy,
-    build_semantic_active8_admission_policy,
-    validate_semantic_active8_admission_policy,
+    build_process_v2_semantic_active8_admission_policy,
+    validate_process_v2_semantic_active8_admission_policy,
 )
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
@@ -84,6 +84,7 @@ IMPLEMENTATION_FILES: tuple[str, ...] = (
     "src/compose_v4/data/editing_v2_process_v2_active8_reduce.py",
     "src/compose_v4/data/editing_v2_process_v2_active8_sentinel.py",
     "src/compose_v4/data/editing_v2_process_v2_pipeline_schema.py",
+    "src/compose_v4/data/editing_v2_process_v2_active8_admission.py",
     "src/compose_v4/data/editing_v2_semantic_active8_admission.py",
     "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
 )
@@ -244,8 +245,8 @@ def build_process_v2_active8_binding(
 ) -> dict[str, Any]:
     """Bind every input whose value changes what an Active8 task answers."""
 
-    selected = validate_semantic_active8_admission_policy(
-        policy or build_semantic_active8_admission_policy(process_v2=True)
+    selected = validate_process_v2_semantic_active8_admission_policy(
+        policy or build_process_v2_semantic_active8_admission_policy()
     )
     if sorted(model_runtime) != list(MODEL_RUNTIME_FIELDS):
         raise ProcessV2Active8PlanError("the bound model runtime descriptor is incomplete")
@@ -515,7 +516,7 @@ def _require_live_binding(binding: Mapping[str, Any], *, repo_root: Path) -> Non
         raise ProcessV2Active8PlanError(
             "the Active8 plan was built under a superseded Process-V2 identity"
         )
-    policy = build_semantic_active8_admission_policy(process_v2=True)
+    policy = build_process_v2_semantic_active8_admission_policy()
     if binding["active8_policy_sha256"] != policy.policy_sha256:
         raise ProcessV2Active8PlanError(
             "the Active8 plan was built under a superseded admission policy"

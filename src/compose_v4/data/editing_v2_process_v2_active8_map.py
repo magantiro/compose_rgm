@@ -102,13 +102,13 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     self_hashed,
     verify_self_hash,
 )
-from compose_v4.data.editing_v2_semantic_active8_admission import (
-    ProductionSemanticExactCandidateChecker,
+from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    ProcessV2SemanticExactCandidateAudit,
+    ProductionProcessV2SemanticExactCandidateChecker,
     SemanticActive8AdmissionError,
-    SemanticExactCandidateAudit,
-    build_semantic_active8_admission_policy,
-    evaluate_semantic_active8_trace,
-    validate_semantic_active8_admission_policy,
+    build_process_v2_semantic_active8_admission_policy,
+    evaluate_process_v2_semantic_active8_trace,
+    validate_process_v2_semantic_active8_admission_policy,
 )
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     SemanticCapabilityCellError,
@@ -319,7 +319,7 @@ def _classification_block(
 # ---- Evidence, derived aggregates ----------------------------------------------
 
 
-def _evidence_payload(audit: SemanticExactCandidateAudit) -> dict[str, Any]:
+def _evidence_payload(audit: ProcessV2SemanticExactCandidateAudit) -> dict[str, Any]:
     evidence = audit.evidence
     payload = {
         "supported": bool(evidence.supported),
@@ -486,7 +486,7 @@ def upstream_rejected_row(
 def evaluated_row(
     addressed: AddressedPackedTrace,
     *,
-    checker: ProductionSemanticExactCandidateChecker,
+    checker: ProductionProcessV2SemanticExactCandidateChecker,
     v1_task_identity_sha256: str,
     task_identity_sha256: str,
     namespace: str,
@@ -499,14 +499,14 @@ def evaluated_row(
     opinion about it.
     """
 
-    audits: dict[int, SemanticExactCandidateAudit] = {}
+    audits: dict[int, ProcessV2SemanticExactCandidateAudit] = {}
 
     def _recording_checker(trace: AddressedPackedTrace, step_index: int):
         audit = checker.evaluate(trace, step_index)
         audits[int(step_index)] = audit
         return audit.evidence
 
-    decision = evaluate_semantic_active8_trace(
+    decision = evaluate_process_v2_semantic_active8_trace(
         addressed,
         exact_candidate_checker=_recording_checker,
         policy=checker.policy,
@@ -959,8 +959,8 @@ def execute_process_v2_active8_task(
         raise ProcessV2Active8MapError(
             "the supplied model runtime is not the one the Active8 plan binds"
         )
-    policy = validate_semantic_active8_admission_policy(
-        build_semantic_active8_admission_policy(process_v2=True)
+    policy = validate_process_v2_semantic_active8_admission_policy(
+        build_process_v2_semantic_active8_admission_policy()
     )
     if policy.policy_sha256 != binding["active8_policy_sha256"]:
         raise ProcessV2Active8MapError("the live admission policy is not the one planned")
@@ -986,7 +986,9 @@ def execute_process_v2_active8_task(
     if registry.registry_sha256 != binding["capability_cell_registry_sha256"]:
         raise ProcessV2Active8MapError("the live capability-cell registry is not the one planned")
     try:
-        checker = ProductionSemanticExactCandidateChecker(runtime.model, policy=policy)
+        checker = ProductionProcessV2SemanticExactCandidateChecker(
+            runtime.model, policy=policy
+        )
     except SemanticActive8AdmissionError as error:
         raise ProcessV2Active8MapError(
             "the supplied model does not implement the semantic Active8 modes"
@@ -1070,7 +1072,7 @@ def _decide_chunk(
     task: Mapping[str, Any],
     *,
     decisions: Mapping[int, Mapping[str, Any]],
-    checker: ProductionSemanticExactCandidateChecker,
+    checker: ProductionProcessV2SemanticExactCandidateChecker,
     namespace: str,
     artifact_root: Path,
     repo_root: Path,

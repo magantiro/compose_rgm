@@ -11,6 +11,7 @@ forbidden to import.
 
 from __future__ import annotations
 
+import ast
 import gzip
 import hashlib
 import json
@@ -89,9 +90,16 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     canonical_bytes,
     canonical_sha256,
 )
+from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    ProductionProcessV2SemanticExactCandidateChecker,
+    SemanticActive8AdmissionError,
+    build_process_v2_semantic_active8_admission_policy,
+    validate_process_v2_semantic_active8_admission_policy,
+)
 from compose_v4.data.editing_v2_semantic_active8_admission import (
-    ProductionSemanticExactCandidateChecker,
+    SemanticActive8AdmissionError as V1SemanticActive8AdmissionError,
     build_semantic_active8_admission_policy,
+    validate_semantic_active8_admission_policy,
 )
 from compose_v4.experiments.editing_gate_zero_semantic_contract import (
     FrozenGateZeroSemanticContract,
@@ -122,6 +130,9 @@ ROOT = _REPO_ROOT
 
 FROZEN_V1_PROCESS_IDENTITY = (
     "6c4721f0dd37132aae657e7aa5f1bfc01cef270662f228171c4587eb7dd48491"
+)
+FROZEN_V1_ACTIVE8_POLICY = (
+    "34f3f7ed77bbf0a007399a4e39d2361c9351f34ae1c641377ce2f8d3e09c02a0"
 )
 FROZEN_V2_PROCESS_IDENTITY = (
     "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd"
@@ -287,7 +298,8 @@ def test_the_published_layout_is_the_one_gate_zero_pins(stage: _Stage) -> None:
 
 def test_the_stage_binds_the_process_v2_policy_and_the_v1_policy_is_untouched() -> None:
     v1 = build_semantic_active8_admission_policy()
-    v2 = build_semantic_active8_admission_policy(process_v2=True)
+    v2 = build_process_v2_semantic_active8_admission_policy()
+    assert v1.policy_sha256 == FROZEN_V1_ACTIVE8_POLICY
     assert v1.process_identity_sha256 == FROZEN_V1_PROCESS_IDENTITY
     assert v2.process_identity_sha256 == FROZEN_V2_PROCESS_IDENTITY
     assert dict(v1.required_model_modes)["editing_process_semantics"] == (
@@ -296,18 +308,53 @@ def test_the_stage_binds_the_process_v2_policy_and_the_v1_policy_is_untouched() 
     assert dict(v2.required_model_modes)["editing_process_semantics"] == (
         "semantic_editing_v2_v2"
     )
-    # Everything except the two version-bearing fields is the same statement.
+    assert dict(v2.required_model_modes)["atom_delete_action_semantics"] == (
+        "process_v2_uniform_gated_atom_delete_v2"
+    )
+    # The support statement is shared; schema, identity, implementation and the
+    # two version-specific model modes deliberately belong to separate modules.
     v1_body = {
         key: value
         for key, value in v1.as_payload().items()
-        if key not in {"process_identity_sha256", "required_model_modes", "policy_sha256"}
+        if key
+        not in {
+            "schema",
+            "status",
+            "process_identity_sha256",
+            "required_model_modes",
+            "implementation_file_sha256",
+            "policy_sha256",
+        }
     }
     v2_body = {
         key: value
         for key, value in v2.as_payload().items()
-        if key not in {"process_identity_sha256", "required_model_modes", "policy_sha256"}
+        if key
+        not in {
+            "schema",
+            "status",
+            "process_identity_sha256",
+            "required_model_modes",
+            "implementation_file_sha256",
+            "policy_sha256",
+        }
     }
     assert v1_body == v2_body
+    with pytest.raises(SemanticActive8AdmissionError):
+        validate_process_v2_semantic_active8_admission_policy(v1)
+    with pytest.raises(V1SemanticActive8AdmissionError):
+        validate_semantic_active8_admission_policy(v2)
+
+
+def test_the_process_v2_policy_module_does_not_import_the_v1_policy_module() -> None:
+    path = ROOT / "src/compose_v4/data/editing_v2_process_v2_active8_admission.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    imported = {
+        node.module
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert "compose_v4.data.editing_v2_semantic_active8_admission" not in imported
 
 
 # ---- The published shapes are exactly the frozen seam --------------------------
@@ -784,8 +831,8 @@ def test_the_bounded_dictionary_oracle_agrees_with_the_reference_oracle(
 ) -> None:
     """The instrument is verified by the oracle production may not import."""
 
-    checker = ProductionSemanticExactCandidateChecker(
-        stage.runtime.model, policy=build_semantic_active8_admission_policy(process_v2=True)
+    checker = ProductionProcessV2SemanticExactCandidateChecker(
+        stage.runtime.model, policy=build_process_v2_semantic_active8_admission_policy()
     )
     states = []
     for task in stage.plan["tasks"]:
@@ -857,7 +904,7 @@ def test_the_plan_addresses_every_declared_input(stage: _Stage) -> None:
     binding = stage.plan["binding"]
     assert binding["process_v2_identity_sha256"] == FROZEN_V2_PROCESS_IDENTITY
     assert binding["active8_policy_sha256"] == (
-        build_semantic_active8_admission_policy(process_v2=True).policy_sha256
+        build_process_v2_semantic_active8_admission_policy().policy_sha256
     )
     for field in (
         "cache_completion_sha256",

@@ -75,8 +75,8 @@ from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
     SENTINEL_SCHEMA_VERSION,
 )
 from compose_v4.data.editing_v2_process_v2_schema import canonical_sha256, self_hashed
-from compose_v4.data.editing_v2_semantic_active8_admission import (
-    ProductionSemanticExactCandidateChecker,
+from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    ProductionProcessV2SemanticExactCandidateChecker,
 )
 from compose_v4.experiments.production_successor_kernel import canonical_successor_result
 from compose_v4.rewrite.kernel import canonical_state_key
@@ -188,7 +188,7 @@ def run_release_sentinel(
     plan: Mapping[str, Any],
     transitions: Sequence[Mapping[str, Any]],
     *,
-    checker: ProductionSemanticExactCandidateChecker,
+    checker: ProductionProcessV2SemanticExactCandidateChecker,
     namespace: str,
     artifact_root: Path,
     repo_root: Path,
@@ -309,7 +309,7 @@ def run_release_sentinel(
 
 
 def _oracle_disagrees(
-    checker: ProductionSemanticExactCandidateChecker, state: Any
+    checker: ProductionProcessV2SemanticExactCandidateChecker, state: Any
 ) -> bool:
     """Compare the production canonical quotient against the dictionary oracle."""
 

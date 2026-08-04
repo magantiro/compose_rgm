@@ -62,9 +62,9 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     self_hashed,
     verify_self_hash,
 )
-from compose_v4.data.editing_v2_semantic_active8_admission import (
-    ProductionSemanticExactCandidateChecker,
-    build_semantic_active8_admission_policy,
+from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    ProductionProcessV2SemanticExactCandidateChecker,
+    build_process_v2_semantic_active8_admission_policy,
 )
 from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
@@ -257,8 +257,8 @@ def reduce_process_v2_active8(
     ):
         raise ProcessV2Active8ReduceError("the Active8 run census does not reconcile")
 
-    checker = ProductionSemanticExactCandidateChecker(
-        runtime.model, policy=build_semantic_active8_admission_policy(process_v2=True)
+    checker = ProductionProcessV2SemanticExactCandidateChecker(
+        runtime.model, policy=build_process_v2_semantic_active8_admission_policy()
     )
     sentinel = run_release_sentinel(
         validated,
