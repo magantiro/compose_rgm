@@ -51,8 +51,13 @@ PILOT_TASK_COUNT = 3
 # The full-map geometry remains frozen until the independent canary supplies a
 # production-task time and memory bound. It is not used by the default pilot.
 MAP_MEMORY_MB = 4 * 1024
-MAP_TIMEOUT_SECONDS = 12 * 3600
-SENTINEL_TIMEOUT_SECONDS = 6 * 3600
+# The production-chunk canary finished in 61.6 seconds.  Bound every map task
+# independently so a bad input or platform stall cannot turn the 80-container
+# fan-out into an open-ended compute bill.  The detached driver has its own
+# longer wall bound because it waits for several replenishing task waves.
+MAP_TIMEOUT_SECONDS = 15 * 60
+DRIVER_TIMEOUT_SECONDS = 90 * 60
+SENTINEL_TIMEOUT_SECONDS = 30 * 60
 SERIAL_TIMEOUT_SECONDS = 4 * 3600
 DEFAULT_SENTINEL_PAIRS_PER_PARTITION = 256
 DEFAULT_SMOKE_TASK_SELECTOR = {
@@ -1224,7 +1229,7 @@ def finalize(plan_path: str, revision: dict[str, Any]) -> dict[str, Any]:
     image=image,
     cpu=2.0,
     memory=8192,
-    timeout=MAP_TIMEOUT_SECONDS,
+    timeout=DRIVER_TIMEOUT_SECONDS,
     max_containers=1,
 )
 def driver(

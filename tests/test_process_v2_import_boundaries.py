@@ -7,16 +7,11 @@ refuses, and by then the layers above it have been built on the assumption that
 the boundary held.
 
 1. **The reference successor kernel stays a test oracle.**  Enforcement already
-   exists in ``tests/test_reference_successor_kernel.py``, which owns the strict
-   rule that no production module may so much as *mention* the oracle.  That gate
-   is not duplicated and not weakened here.  Recorded finding: it fails at this
-   commit, on a false positive, because it is a substring scan and
-   ``src/compose_v4/rewrite/editing_v2_process_identity.py`` names the oracle's
-   *path* in the content-addressed file list whose hashes define the V1 process
-   identity.  That is a hashed path literal, not an edge.  What this module adds
-   is the typed version of the same boundary: an import-graph check that no
-   production module, and in particular no Process-V2 module, actually imports
-   the oracle.  Repairing the substring gate belongs to the module that owns it.
+   exists in ``tests/test_reference_successor_kernel.py``, which owns the AST
+   rule that no production module imports the oracle.  That gate is invoked here
+   rather than duplicated or weakened.  This module additionally checks the
+   Process-V2 import graph directly so the boundary remains explicit at both
+   owners.
 
 2. **No Process-V2 module imports a V1 loader that revalidates V1 schema or live
    identity.**  This boundary currently FAILS, deliberately and visibly: see the
@@ -155,14 +150,18 @@ def test_the_owning_oracle_gate_exists_and_covers_the_process_v2_directories() -
     narrowing it fails here rather than silently removing the enforcement the
     Process-V2 modules inherit.
 
-    The gate is deliberately not invoked.  It fails at this commit on a false
-    positive (see this module's docstring), and importing a pre-existing failure
-    into this file would report a defect that is not this boundary's.
+    The oracle identity is owned by a module constant, not by a string literal
+    inside the gate body.  Assert that identity directly, then invoke the real
+    gate so this test cannot pass merely because a similarly named function
+    exists.
     """
 
     gate = oracle_boundary.test_no_production_module_imports_the_oracle
+    assert oracle_boundary._ORACLE_PATH == Path(  # noqa: SLF001
+        "src/compose_v4/experiments/reference_successor_kernel.py"
+    )
+    gate()
     gate_source = inspect.getsource(gate)
-    assert "reference_successor_kernel" in gate_source
 
     # The gate names its scanned roots in its own body; a narrowing that dropped
     # a directory a Process-V2 module lives in would leave that module

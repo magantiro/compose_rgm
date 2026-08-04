@@ -1,16 +1,17 @@
 """The Active8 map task: one source chunk in, published evidence out.
 
-This is the only expensive pass over the corpus.  Nothing downstream opens a
-molecular chunk, reconstructs a model or re-enumerates a successor fiber, so
-everything a later stage needs is decided and published HERE, while the exact
-source state, the action, the candidate fiber and the executor result are still
-in memory.
+This is the only molecular pass over the complete corpus. Nothing downstream
+opens a molecular chunk. Active8 checks only whether each stored teacher is one
+legal coordinate of its declared family and replays it through the production
+executor. Complete quotient geometry is intentionally reserved for the bounded
+release sentinel and cached T1 panels.
 
 WHAT THE TASK DECIDES, AND WHAT IT MERELY ANNOTATES
 ---------------------------------------------------
-Admission is a function of candidate evidence alone.  A trace is evaluated
-through the production evaluator, and the whole-trace all-or-nothing rule the
-production admission module already owns decides ``accepted`` or ``excluded``.
+Admission is a function of teacher-admission evidence alone. A trace is
+evaluated through the production evaluator, and the whole-trace all-or-nothing
+rule the production admission module already owns decides ``accepted`` or
+``excluded``.
 A trace the rebind already refused is never candidate-evaluated at all: it is
 published as ``not_evaluated`` under the ``upstream_rebind_rejected`` category
 with the upstream code it was refused for, so "we did not look" stays
@@ -33,8 +34,9 @@ successor states alone and mention no action payload at all.
 
 AGGREGATES ARE DERIVED, NEVER CARRIED
 -------------------------------------
-``candidate_totals`` and ``action_family_histogram`` are recomputed from the
-published per-action evidence every time they are read, by
+``candidate_totals`` records teacher-admission counts, never full-fiber counts.
+It and ``action_family_histogram`` are recomputed from published per-action
+evidence every time they are read, by
 :func:`derive_candidate_totals` and :func:`derive_action_family_histogram`.  A
 row that stores a total disagreeing with its own actions is refused.  Nothing
 in this pipeline trusts a number it did not recompute from evidence.
@@ -104,13 +106,15 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     verify_self_hash,
 )
 from compose_v4.data.editing_v2_process_v2_active8_admission import (
-    ProcessV2TeacherSupportEvidence,
-    ProductionProcessV2BatchedTeacherSupportChecker,
+    ProcessV2TeacherAdmissionEvidence,
     SemanticActive8AdmissionError,
     build_process_v2_semantic_active8_admission_policy,
     classify_process_v2_semantic_action,
     evaluate_process_v2_semantic_active8_trace,
     validate_process_v2_semantic_active8_admission_policy,
+)
+from compose_v4.data.editing_v2_process_v2_teacher_admission import (
+    ProductionProcessV2FamilyTeacherAdmissionChecker,
 )
 
 from compose_v4.data.editing_v2_semantic_capability_cells import (
@@ -122,11 +126,6 @@ from compose_v4.data.editing_v2_semantic_capability_cells import (
     load_semantic_capability_cell_registry,
 )
 from compose_v4.data.packed_trace_store import AddressedPackedTrace
-
-# Frozen from the 40-slot, eight-family benchmark.  The value changes only
-# execution geometry, not the exact teacher-support evidence, and achieved the
-# highest measured throughput with substantially lower peak memory than 64.
-TEACHER_SUPPORT_BATCH_SIZE = 8
 
 # The published layout, which the Gate-0 reducer pins as module constants.
 # METADATA AND ROWS ARE SEPARATE FILES ON PURPOSE.  Gate 0 reads every role's
@@ -327,7 +326,7 @@ def _classification_block(
 # ---- Evidence, derived aggregates ----------------------------------------------
 
 
-def _evidence_payload(evidence: ProcessV2TeacherSupportEvidence) -> dict[str, Any]:
+def _evidence_payload(evidence: ProcessV2TeacherAdmissionEvidence) -> dict[str, Any]:
     payload = {
         "supported": bool(evidence.supported),
         "exclusion_reason": evidence.exclusion_reason,
@@ -336,9 +335,11 @@ def _evidence_payload(evidence: ProcessV2TeacherSupportEvidence) -> dict[str, An
         "target_state_sha256": evidence.target_state_sha256,
         "source_canonical_key": evidence.source_canonical_key,
         "canonical_successor_key": evidence.canonical_successor_key,
-        "raw_mark_count": int(evidence.raw_mark_count),
-        "matching_mark_count": int(evidence.matching_mark_count),
-        "exact_successor_mark_count": int(evidence.exact_successor_mark_count),
+        "teacher_coordinate_legal": bool(evidence.teacher_coordinate_legal),
+        "teacher_executes_to_exact_successor": bool(
+            evidence.teacher_executes_to_exact_successor
+        ),
+        "productive_canonical_successor": bool(evidence.productive_canonical_successor),
     }
     if tuple(payload) != CANDIDATE_EVIDENCE_FIELDS:
         raise ProcessV2Active8MapError("the published candidate-evidence fields disagree")
@@ -360,21 +361,29 @@ def _invariant_term(token: str, evidence: Mapping[str, Any]) -> Any:
     name = token.strip()
     if name in CANDIDATE_EVIDENCE_FIELDS:
         value = evidence[name]
-        if name.endswith("_count") and type(value) is not int:
+        if name in {
+            "teacher_coordinate_legal",
+            "teacher_executes_to_exact_successor",
+            "productive_canonical_successor",
+        } and type(value) is not bool:
             raise ProcessV2Active8MapError(
-                f"published candidate evidence {name!r} is not an integer count"
+                f"published candidate evidence {name!r} is not boolean"
             )
         if name.endswith("_key") and (not isinstance(value, str) or not value):
             raise ProcessV2Active8MapError(
                 f"published candidate evidence {name!r} is not a nonempty key"
             )
         return value
+    if name == "true":
+        return True
+    if name == "false":
+        return False
     try:
         return int(name)
     except ValueError as error:
         raise ProcessV2Active8MapError(
             f"the frozen evidence invariant names {name!r}, which is neither a "
-            "published count nor a literal"
+            "published field nor a literal"
         ) from error
 
 
@@ -409,16 +418,22 @@ def require_accepted_evidence_invariants(evidence: Mapping[str, Any]) -> None:
 
 
 def derive_candidate_totals(actions: Sequence[Mapping[str, Any]]) -> dict[str, int]:
-    """Recompute the row totals from the published action evidence."""
+    """Recompute teacher-admission totals from published action evidence."""
 
     totals = dict.fromkeys(CANDIDATE_TOTAL_FIELDS, 0)
     for action in actions:
         evidence = action.get("candidate_evidence")
         if evidence is None:
             continue
-        totals["raw_candidate_marks"] += int(evidence["raw_mark_count"])
-        totals["matching_candidate_marks"] += int(evidence["matching_mark_count"])
-        totals["exact_successor_marks"] += int(evidence["exact_successor_mark_count"])
+        totals["evaluated_teachers"] += 1
+        totals["legal_teacher_coordinates"] += int(evidence["teacher_coordinate_legal"])
+        totals["exact_teacher_successors"] += int(
+            evidence["teacher_executes_to_exact_successor"]
+        )
+        totals["productive_teacher_successors"] += int(
+            evidence["productive_canonical_successor"]
+        )
+        totals["supported_teachers"] += int(evidence["supported"])
     return totals
 
 
@@ -494,11 +509,11 @@ def upstream_rejected_row(
 def evaluated_row(
     addressed: AddressedPackedTrace,
     *,
-    checker: ProductionProcessV2BatchedTeacherSupportChecker,
+    checker: ProductionProcessV2FamilyTeacherAdmissionChecker,
     v1_task_identity_sha256: str,
     task_identity_sha256: str,
     namespace: str,
-    precomputed_evidence: Mapping[int, ProcessV2TeacherSupportEvidence] | None = None,
+    precomputed_evidence: Mapping[int, ProcessV2TeacherAdmissionEvidence] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Evaluate one admitted trace and publish its row and its transitions.
 
@@ -508,7 +523,7 @@ def evaluated_row(
     opinion about it.
     """
 
-    observed_evidence: dict[int, ProcessV2TeacherSupportEvidence] = {}
+    observed_evidence: dict[int, ProcessV2TeacherAdmissionEvidence] = {}
 
     def _recording_checker(trace: AddressedPackedTrace, step_index: int):
         evidence = (
@@ -1110,10 +1125,9 @@ def execute_process_v2_active8_task(
     if registry.registry_sha256 != binding["capability_cell_registry_sha256"]:
         raise ProcessV2Active8MapError("the live capability-cell registry is not the one planned")
     try:
-        checker = ProductionProcessV2BatchedTeacherSupportChecker(
+        checker = ProductionProcessV2FamilyTeacherAdmissionChecker(
             runtime.model,
             policy=policy,
-            batch_size=TEACHER_SUPPORT_BATCH_SIZE,
         )
     except SemanticActive8AdmissionError as error:
         raise ProcessV2Active8MapError(
@@ -1201,7 +1215,7 @@ def _decide_chunk(
     task: Mapping[str, Any],
     *,
     decisions: Mapping[int, Mapping[str, Any]],
-    checker: ProductionProcessV2BatchedTeacherSupportChecker,
+    checker: ProductionProcessV2FamilyTeacherAdmissionChecker,
     namespace: str,
     expected_process_identity: Mapping[str, Any],
     artifact_root: Path,
@@ -1314,7 +1328,6 @@ __all__ = [
     "RECEIPT_FILENAME",
     "SUMMARY_FIELDS",
     "SUMMARY_FILENAME",
-    "TEACHER_SUPPORT_BATCH_SIZE",
     "ROWS_FILENAME",
     "TRANSITIONS_FILENAME",
     "ProcessV2Active8MapError",

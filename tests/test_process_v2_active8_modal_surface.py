@@ -10,11 +10,8 @@ from pathlib import Path
 import pytest
 
 import modal_apps.run_process_v2_active8_app as launcher
-from compose_v4.data.editing_v2_process_v2_active8_admission import (
-    ProductionProcessV2BatchedTeacherSupportChecker,
-)
-from compose_v4.data.editing_v2_process_v2_active8_map import (
-    TEACHER_SUPPORT_BATCH_SIZE,
+from compose_v4.data.editing_v2_process_v2_teacher_admission import (
+    ProductionProcessV2FamilyTeacherAdmissionChecker,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -104,11 +101,13 @@ def test_invalid_partition_geometry_is_refused(count: int, index: int) -> None:
 
 def test_launcher_uses_the_measured_low_memory_operating_point() -> None:
     runtime = json.loads((ROOT / launcher.RUNTIME_CONTRACT_SOURCE).read_bytes())
-    assert TEACHER_SUPPORT_BATCH_SIZE == 8
     assert launcher.MAP_CPU == 1.0
     assert launcher.FULL_MAP_TASKS_PER_CONTAINER == 1
     assert launcher.MAP_MEMORY_MB == 4 * 1024
     assert launcher.MAX_MAP_CONTAINERS == 80
+    assert launcher.MAP_TIMEOUT_SECONDS == 15 * 60
+    assert launcher.DRIVER_TIMEOUT_SECONDS == 90 * 60
+    assert launcher.SENTINEL_TIMEOUT_SECONDS == 30 * 60
     assert runtime["model"] == {
         "atom_vocabulary_class_count": 15,
         "candidate_cache_size": 4096,
@@ -122,12 +121,10 @@ def test_launcher_uses_the_measured_low_memory_operating_point() -> None:
         "message_passing_steps": 6,
         "operator_capability_fingerprint": "d79ffe8ef65f3fb3",
     }
-    parameters = inspect.signature(ProductionProcessV2BatchedTeacherSupportChecker).parameters
-    assert parameters["time"].default == runtime["model"]["candidate_time"]
-    assert (
-        parameters["chemistry_feature_cache_size"].default
-        == runtime["model"]["candidate_cache_size"]
-    )
+    parameters = inspect.signature(
+        ProductionProcessV2FamilyTeacherAdmissionChecker
+    ).parameters
+    assert tuple(parameters) == ("model", "policy")
 
 
 def test_progress_probe_reports_exact_source_reuse() -> None:
@@ -176,6 +173,7 @@ def test_the_serialized_image_contains_every_active8_answer_module() -> None:
         "editing_v2_process_v2_active8_plan.py",
         "editing_v2_process_v2_active8_reduce.py",
         "editing_v2_process_v2_active8_sentinel.py",
+        "editing_v2_process_v2_teacher_admission.py",
     ):
         assert f"src/compose_v4/data/{name}" in sources
 

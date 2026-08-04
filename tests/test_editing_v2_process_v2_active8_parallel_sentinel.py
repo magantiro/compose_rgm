@@ -292,7 +292,7 @@ def test_a_parallel_sentinel_mismatch_blocks_completion(tmp_path: Path) -> None:
             )
         )
     )
-    pipeline_fixture._bump_raw_mark_count(
+    pipeline_fixture._replace_target_state_sha256(
         task_output_path(stage.plan, task, artifact_root=stage.artifact_root)
     )
     prepared, results = _run_parallel(stage, max_pairs=1, publish=True)

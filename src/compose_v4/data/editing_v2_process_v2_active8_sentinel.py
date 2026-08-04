@@ -2,20 +2,17 @@
 
 WHY IT EXISTS
 -------------
-There is a measured residual that no amount of internal consistency can reach.
-A per-action count that moves WITHIN its arithmetic bounds -- a
-``raw_mark_count`` of 41 published as 40, say -- and is then propagated
-consistently through the row totals, the task summary and the run census is
-undetectable by construction: every aggregate is derived from the moved number,
-so every aggregate agrees with it, and every invariant it has to satisfy still
-holds.  Nothing downstream re-derives the evidence, so nothing downstream can
-notice either.
+There is a residual that no amount of internal consistency can reach. If
+family-local teacher evidence is produced incorrectly and then propagated
+consistently through every aggregate, no downstream consistency check can
+detect it because nothing downstream re-enters the molecular state.
 
-The sentinel converts that residual from undetectable to SAMPLED.  It re-enters
-the chunk, re-enumerates the candidate fiber through the production evaluator,
-and compares the COMPLETE candidate-evidence payload and the cell assignment
-against what was published.  It cannot prove the whole corpus; it makes the
-undetectable failure a detectable one at a bounded, prospectively frozen rate.
+The sentinel converts that residual from undetectable to SAMPLED. It re-enters
+the chunk, reconstructs complete quotient geometry through the production
+evaluator, and compares the shared teacher-admission projection and cell
+assignment against what was published. It cannot prove the whole corpus; it
+makes the undetectable failure detectable at a bounded, prospectively frozen
+rate.
 
 WHEN IT RUNS
 ------------
@@ -878,17 +875,26 @@ def run_release_sentinel_partition(
             source = addressed.path.state_at(step_index)
             successor = addressed.path.state_at(step_index + 1)
             exact = audit.evidence
+            teacher_coordinate_legal = exact.matching_mark_count == 1
+            teacher_executes_to_exact_successor = (
+                audit.exact_successor_mark_count == 1
+            )
+            productive_canonical_successor = (
+                exact.source_canonical_key != exact.canonical_successor_key
+            )
             observed = {
                 "supported": bool(exact.supported),
                 "exclusion_reason": exact.exclusion_reason,
                 "action_sha256": exact.action_sha256,
                 "source_state_sha256": exact.source_state_sha256,
                 "target_state_sha256": exact.target_state_sha256,
-                "source_canonical_key": canonical_state_key(source),
+                "source_canonical_key": exact.source_canonical_key,
                 "canonical_successor_key": exact.canonical_successor_key,
-                "raw_mark_count": int(exact.raw_mark_count),
-                "matching_mark_count": int(exact.matching_mark_count),
-                "exact_successor_mark_count": int(audit.exact_successor_mark_count),
+                "teacher_coordinate_legal": teacher_coordinate_legal,
+                "teacher_executes_to_exact_successor": (
+                    teacher_executes_to_exact_successor
+                ),
+                "productive_canonical_successor": productive_canonical_successor,
             }
             block = _classification_block(
                 source,

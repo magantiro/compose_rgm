@@ -11,7 +11,7 @@ namespace:
 * the **admitted-source identity**, the resolved join of the two above;
 * the **Process-V2 identity**, which moves whenever the frozen fiber moves;
 * the **Active8 admission policy**, which decides what a supported teacher is;
-* the **model runtime**, because the candidate fiber is enumerated by a model
+* the **model runtime**, because teacher-family support is defined by the model
   and a different model is a different fiber;
 * the **code revision** of the modules that decide, classify or publish here.
 
@@ -82,7 +82,7 @@ TASK_DIRNAME = ACTIVE8_TASKS_DIRNAME
 PLAN_FILENAME = "PROCESS_V2_ACTIVE8_PLAN.json"
 
 BINDING_SCHEMA = "compose.data.editing_v2_process_v2_active8_binding"
-BINDING_SCHEMA_VERSION = 2
+BINDING_SCHEMA_VERSION = 3
 
 _GIT_COMMIT_LENGTH = 40
 
@@ -95,6 +95,7 @@ IMPLEMENTATION_FILES: tuple[str, ...] = (
     "src/compose_v4/data/editing_v2_process_v2_active8_sentinel.py",
     "src/compose_v4/data/editing_v2_process_v2_pipeline_schema.py",
     "src/compose_v4/data/editing_v2_process_v2_active8_admission.py",
+    "src/compose_v4/data/editing_v2_process_v2_teacher_admission.py",
     "src/compose_v4/data/editing_v2_semantic_active8_admission.py",
     "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
 )

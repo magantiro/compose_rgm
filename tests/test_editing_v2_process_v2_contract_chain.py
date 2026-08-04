@@ -1230,9 +1230,13 @@ def test_gate_zero_structural_has_only_the_declared_process_v2_delta() -> None:
     for field in ("required_architecture", "decision_policy"):
         assert v2[field] == v1[field], field
     expected = dict(v1["structural_checks"])
+    assert expected.pop("require_exactly_one_matching_mark") is True
     assert expected.pop("require_positive_canonical_successor_count") is True
+    assert expected.pop("require_positive_raw_mark_count") is True
     assert expected.pop("require_positive_successor_alias_count") is True
     expected["require_productive_nonself_successor"] = True
+    expected["require_teacher_coordinate_legal"] = True
+    expected["require_teacher_executes_to_exact_successor"] = True
     assert v2["structural_checks"] == expected
 
 

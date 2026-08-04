@@ -426,9 +426,9 @@ def test_the_stage_binds_the_process_v2_policy_and_the_v1_policy_is_untouched() 
         }
     }
     assert v1_body == v2_body
-    assert v2.schema_version == 2
+    assert v2.schema_version == 3
     assert v2.candidate_evaluator.endswith(
-        ".ProductionProcessV2BatchedTeacherSupportChecker"
+        ".ProductionProcessV2FamilyTeacherAdmissionChecker"
     )
     with pytest.raises(SemanticActive8AdmissionError):
         validate_process_v2_semantic_active8_admission_policy(v1)
@@ -608,11 +608,11 @@ def test_a_resealed_row_whose_total_moved_is_refused(stage: _Stage) -> None:
     original = (output / ROWS_FILENAME).read_bytes()
     rows = read_task_rows(output)
     target = next(
-        index for index, row in enumerate(rows) if row["candidate_totals"]["raw_candidate_marks"]
+        index for index, row in enumerate(rows) if row["candidate_totals"]["evaluated_teachers"]
     )
     tampered = dict(rows[target])
     totals = dict(tampered["candidate_totals"])
-    totals["raw_candidate_marks"] -= 1
+    totals["evaluated_teachers"] -= 1
     tampered["candidate_totals"] = totals
     body = {key: value for key, value in tampered.items() if key != "row_sha256"}
     tampered["row_sha256"] = canonical_sha256(body)
@@ -631,9 +631,9 @@ def test_a_resealed_row_whose_total_moved_is_refused(stage: _Stage) -> None:
 @pytest.mark.parametrize(
     "field,value",
     (
-        ("matching_mark_count", 2),
-        ("exact_successor_mark_count", 0),
-        ("raw_mark_count", 0),
+        ("teacher_coordinate_legal", False),
+        ("teacher_executes_to_exact_successor", False),
+        ("productive_canonical_successor", False),
         ("source_canonical_key", "K"),
     ),
 )
@@ -648,9 +648,9 @@ def test_each_frozen_evidence_invariant_is_enforced(field: str, value: object) -
         "target_state_sha256": "c" * 64,
         "source_canonical_key": "SOURCE",
         "canonical_successor_key": "K",
-        "raw_mark_count": 10,
-        "matching_mark_count": 1,
-        "exact_successor_mark_count": 1,
+        "teacher_coordinate_legal": True,
+        "teacher_executes_to_exact_successor": True,
+        "productive_canonical_successor": True,
     }
     require_accepted_evidence_invariants(payload)
     with pytest.raises(ProcessV2Active8MapError, match="frozen invariant"):
@@ -833,14 +833,14 @@ def test_the_sentinel_is_exhaustive_on_a_small_corpus_and_reports_the_seam_field
     assert sentinel["oracle_mismatches"] == []
 
 
-def test_a_moved_count_inside_its_bounds_is_caught_by_the_sentinel(
+def test_a_resealed_false_state_identity_is_caught_by_the_sentinel(
     tmp_path: Path,
 ) -> None:
-    """The residual the sentinel exists for: bounded, consistent, undetectable.
+    """The residual the sentinel exists for: internally consistent but false.
 
-    The tampered row satisfies every invariant, its own self-hash, its derived
-    totals and its receipt summary, so the whole reduction reconciles.  Only the
-    sentinel's re-enumeration sees it.
+    The tampered row satisfies every logical invariant, its own self-hash, its
+    derived totals and its receipt summary, so the whole reduction reconciles.
+    Only the sentinel's molecular re-entry sees it.
     """
 
     stage = _Stage(tmp_path / "residual", prefix="/artifacts/active8_residual")
@@ -856,7 +856,7 @@ def test_a_moved_count_inside_its_bounds_is_caught_by_the_sentinel(
         )
     )
     output = task_output_path(stage.plan, task, artifact_root=stage.artifact_root)
-    _bump_raw_mark_count(output)
+    _replace_target_state_sha256(output)
     # The task still reconciles completely from its own bytes ...
     validate_process_v2_active8_task_result(output)
     # ... and only the sentinel refuses it.
@@ -868,8 +868,8 @@ def test_a_moved_count_inside_its_bounds_is_caught_by_the_sentinel(
     assert not (run_root / COMPLETION_FILENAME).exists()
 
 
-def _bump_raw_mark_count(output: Path) -> None:
-    """Raise one accepted action's ``raw_mark_count`` and reseal everything."""
+def _replace_target_state_sha256(output: Path) -> None:
+    """Replace one accepted action's target-state digest and reseal everything."""
 
     rows = read_task_rows(output)
     transitions = read_task_transitions(output)
@@ -878,7 +878,10 @@ def _bump_raw_mark_count(output: Path) -> None:
     )
     row = json.loads(json.dumps(rows[target]))
     action = row["actions"][0]
-    action["candidate_evidence"]["raw_mark_count"] += 1
+    original_target = action["candidate_evidence"]["target_state_sha256"]
+    action["candidate_evidence"]["target_state_sha256"] = (
+        "0" * 64 if original_target != "0" * 64 else "1" * 64
+    )
     row["candidate_totals"] = derive_candidate_totals(row["actions"])
     body = {key: value for key, value in row.items() if key != "row_sha256"}
     row["row_sha256"] = canonical_sha256(body)

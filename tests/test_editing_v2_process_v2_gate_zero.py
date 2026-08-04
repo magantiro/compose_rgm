@@ -23,8 +23,6 @@ from compose_v4.data.editing_v2_process_v2_gate_zero import (
     GateZeroContracts,
     ProcessV2GateZeroError,
     ProcessV2GateZeroIncomplete,
-    _stratum_for,
-    _validate_bins,
     build_gate_zero_contracts,
     load_gate_zero_contracts,
     read_active8_decision_index,
@@ -114,9 +112,9 @@ def _evidence(**overrides: object) -> dict[str, object]:
         "target_state_sha256": _identity("target"),
         "source_canonical_key": "CC",
         "canonical_successor_key": "CCO",
-        "raw_mark_count": 8,
-        "matching_mark_count": 1,
-        "exact_successor_mark_count": 1,
+        "teacher_coordinate_legal": True,
+        "teacher_executes_to_exact_successor": True,
+        "productive_canonical_successor": True,
     }
     evidence.update(overrides)
     assert set(evidence) == set(CANDIDATE_EVIDENCE_FIELDS)
@@ -388,65 +386,6 @@ def test_contracts_bind_the_frozen_process_v2_identity_and_registry() -> None:
     assert set(contracts.sealed_roles) == {"validation", "controller_validation", "final_test"}
 
 
-# ---- Strata: tiling proved separately from the derivation --------------------
-
-
-def test_stratum_bins_tile_their_range_exactly_once() -> None:
-    contracts = _contracts()
-    assert sorted(contracts.strata) == ["raw_mark_count"]
-    for name, bins in contracts.strata.items():
-        edges = [(item["minimum"], item["maximum"]) for item in bins]
-        assert edges[0][0] == 1, name
-        assert edges[-1][1] is None, name
-        for (_, upper), (lower, _) in zip(edges, edges[1:]):
-            assert lower == upper + 1, name
-
-
-@pytest.mark.parametrize(
-    "bins",
-    [
-        [{"id": "a", "minimum": 1, "maximum": 4}, {"id": "b", "minimum": 6, "maximum": None}],
-        [{"id": "a", "minimum": 1, "maximum": 4}, {"id": "b", "minimum": 3, "maximum": None}],
-        [{"id": "a", "minimum": 2, "maximum": None}],
-        [{"id": "a", "minimum": 1, "maximum": 4}, {"id": "b", "minimum": 5, "maximum": 9}],
-    ],
-    ids=["gap", "overlap", "does_not_start_at_one", "not_open_above"],
-)
-def test_bins_that_do_not_tile_are_refused(bins: list[dict[str, object]]) -> None:
-    with pytest.raises(ProcessV2GateZeroError):
-        _validate_bins("probe", bins)
-
-
-def test_strata_are_derived_once_from_literal_counts() -> None:
-    """The expectations are literal bin ids, not a second call to the deriver."""
-
-    contracts = _contracts()
-    marks = contracts.strata["raw_mark_count"]
-    assert _stratum_for("raw_mark_count", 1, marks) == "marks_001_004"
-    assert _stratum_for("raw_mark_count", 4, marks) == "marks_001_004"
-    assert _stratum_for("raw_mark_count", 5, marks) == "marks_005_016"
-    assert _stratum_for("raw_mark_count", 64, marks) == "marks_017_064"
-    assert _stratum_for("raw_mark_count", 65, marks) == "marks_065_plus"
-
-
-def test_the_deriver_refuses_bins_that_do_not_place_a_count_exactly_once() -> None:
-    """The exactly-one guard is unreachable through the frozen registry, whose
-    bins tile.  It is reached directly here so it is tested rather than trusted."""
-
-    overlapping = [
-        {"id": "low", "minimum": 1, "maximum": 8},
-        {"id": "high", "minimum": 4, "maximum": None},
-    ]
-    with pytest.raises(ProcessV2GateZeroError, match="matched 2 bins"):
-        _stratum_for("probe", 5, overlapping)
-    gapped = [
-        {"id": "low", "minimum": 1, "maximum": 4},
-        {"id": "high", "minimum": 9, "maximum": None},
-    ]
-    with pytest.raises(ProcessV2GateZeroError, match="matched 0 bins"):
-        _stratum_for("probe", 6, gapped)
-
-
 # ---- The decision ------------------------------------------------------------
 
 
@@ -472,13 +411,12 @@ def test_complete_train_coverage_passes_and_authorizes_nothing(tmp_path: Path) -
     assert decision["enforced_structural_clauses"] == {
         "require_every_active8_family": True,
         "require_every_teacher_supported": True,
-        "require_exactly_one_matching_mark": True,
         "require_one_assignment_per_accepted_action": True,
-        "require_positive_raw_mark_count": True,
         "require_productive_nonself_successor": True,
+        "require_teacher_coordinate_legal": True,
+        "require_teacher_executes_to_exact_successor": True,
         "require_zero_terminal_assignments": True,
     }
-    assert sum(decision["stratum_counts"]["raw_mark_count"].values()) == 17
     assert (tmp_path / "gate0" / GATE_ZERO_DECISION_FILENAME).is_file()
 
 
@@ -667,9 +605,15 @@ def test_a_canonical_self_transition_fails_the_productive_successor_gate(
 @pytest.mark.parametrize(
     ("overrides", "violation"),
     [
-        ({"matching_mark_count": 2}, "matching_mark_count_not_one"),
-        ({"raw_mark_count": 0}, "nonpositive_raw_mark_count"),
-        ({"exact_successor_mark_count": 2}, "evidence_arithmetic"),
+        ({"teacher_coordinate_legal": False}, "illegal_teacher_coordinate"),
+        (
+            {"teacher_executes_to_exact_successor": False},
+            "inexact_teacher_successor",
+        ),
+        (
+            {"productive_canonical_successor": False},
+            "nonproductive_teacher_successor",
+        ),
         (
             {"source_canonical_key": "CCO", "canonical_successor_key": "CCO"},
             "self_transition_teacher",
@@ -770,11 +714,11 @@ def test_a_row_spelling_split_instead_of_partition_role_raises(tmp_path: Path) -
     assert not (tmp_path / "gate0" / GATE_ZERO_DECISION_FILENAME).exists()
 
 
-def test_a_tampered_count_breaks_the_row_self_hash(tmp_path: Path) -> None:
+def test_tampered_teacher_evidence_breaks_the_row_self_hash(tmp_path: Path) -> None:
     def tamper(rows: list[dict[str, object]]) -> list[dict[str, object]]:
         row = dict(rows[0])
         evidence = dict(row["candidate_evidence"])
-        evidence["raw_mark_count"] = 1_000
+        evidence["teacher_coordinate_legal"] = False
         row["candidate_evidence"] = evidence
         return [row, *rows[1:]]
 

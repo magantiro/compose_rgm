@@ -13,7 +13,7 @@
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_gate_zero_structural",
   "contract_revision": "process_v2_gate_zero_productive_nonself",
-  "contract_sha256": "b684bde685009de116f9a1bf145e31294241b8c01bb0ec75c48a0b7aeb23bf1a",
+  "contract_sha256": "ad88dc9712f2f9f7ddd172ce2886b0d46d928d29f71bf4e5c6aa3799bb76980a",
   "decision_policy": {
     "failure_policy": "publish_fail_closed_negative_evidence",
     "pass_grants_checkpoint_selection_authority": false,
@@ -172,10 +172,10 @@
     "legacy_action_v2_evidence": "forbidden",
     "require_every_active8_family": true,
     "require_every_teacher_supported": true,
-    "require_exactly_one_matching_mark": true,
     "require_one_assignment_per_accepted_action": true,
-    "require_positive_raw_mark_count": true,
     "require_productive_nonself_successor": true,
+    "require_teacher_coordinate_legal": true,
+    "require_teacher_executes_to_exact_successor": true,
     "require_zero_terminal_assignments": true,
     "sealed_nondecision_partition_roles": [
       "controller_validation",

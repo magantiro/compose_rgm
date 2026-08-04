@@ -16,7 +16,7 @@ nothing else.  It holds no machinery, computes nothing, and owns no artifact.
 THE PIPELINE
 ------------
     plan -> Active8 map (one task per source chunk) -> Active8 reduce + sentinel
-         -> Gate-0 map (one task per nonempty train-role shard) -> Gate-0 reduce
+         -> Gate 0 deterministic metadata reduction
 
 CLASSIFICATION IS DERIVED ANNOTATION
 ------------------------------------
@@ -41,35 +41,35 @@ from compose_v4.data.editing_v2_process_v2_schema import AUTHORITY_FIELDS
 PIPELINE_NAMESPACE = "compose.data.editing_v2_process_v2_pipeline"
 
 PLAN_SCHEMA = f"{PIPELINE_NAMESPACE}.plan"
-PLAN_SCHEMA_VERSION = 2
+PLAN_SCHEMA_VERSION = 3
 
 ACTIVE8_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_task_result"
-ACTIVE8_TASK_SCHEMA_VERSION = 2
+ACTIVE8_TASK_SCHEMA_VERSION = 3
 
 ACTIVE8_COMPLETION_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_completion"
-ACTIVE8_COMPLETION_SCHEMA_VERSION = 2
+ACTIVE8_COMPLETION_SCHEMA_VERSION = 3
 
 SENTINEL_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel"
-SENTINEL_SCHEMA_VERSION = 2
+SENTINEL_SCHEMA_VERSION = 3
 
 SENTINEL_PLAN_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel_plan"
-SENTINEL_PLAN_SCHEMA_VERSION = 1
+SENTINEL_PLAN_SCHEMA_VERSION = 2
 
 SENTINEL_PARTITION_RESULT_SCHEMA = (
     f"{PIPELINE_NAMESPACE}.active8_release_sentinel_partition_result"
 )
-SENTINEL_PARTITION_RESULT_SCHEMA_VERSION = 1
+SENTINEL_PARTITION_RESULT_SCHEMA_VERSION = 2
 
 ACTIVE8_REDUCTION_PREPARED_SCHEMA = (
     f"{PIPELINE_NAMESPACE}.active8_reduction_prepared"
 )
-ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION = 1
+ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION = 2
 
 GATE_ZERO_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_task_result"
-GATE_ZERO_TASK_SCHEMA_VERSION = 2
+GATE_ZERO_TASK_SCHEMA_VERSION = 3
 
 GATE_ZERO_DECISION_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_decision"
-GATE_ZERO_DECISION_SCHEMA_VERSION = 2
+GATE_ZERO_DECISION_SCHEMA_VERSION = 3
 
 #: No stage in this pipeline authorizes anything, in either outcome.
 PIPELINE_STATUS_NO_AUTHORITY = "PROCESS_V2_PIPELINE_EVIDENCE_ONLY_NO_AUTHORITY"
@@ -92,7 +92,10 @@ ACTION_KEY_FIELDS: tuple[str, ...] = (*TRACE_KEY_FIELDS, "step_index")
 
 # ---- Candidate evidence: what admission is a function of ----
 
-#: Emitted per action by the production evaluator while the fiber is in memory.
+#: Emitted per action by the production evaluator after checking only the
+#: teacher's declared family coordinate and replaying it through the production
+#: executor. Full quotient geometry is intentionally absent and belongs to the
+#: bounded release sentinel and cached T1 panel.
 #: `supported` and `exclusion_reason` are PUBLISHED, unlike the previous
 #: attempt, where they never crossed the seam and Gate 0 therefore could not
 #: enforce the clause its own contract declared.
@@ -104,17 +107,17 @@ CANDIDATE_EVIDENCE_FIELDS: tuple[str, ...] = (
     "target_state_sha256",
     "source_canonical_key",
     "canonical_successor_key",
-    "raw_mark_count",
-    "matching_mark_count",
-    "exact_successor_mark_count",
+    "teacher_coordinate_legal",
+    "teacher_executes_to_exact_successor",
+    "productive_canonical_successor",
 )
 
-#: Arithmetic every accepted action's evidence satisfies.  Stated as data so the
-#: writer, the reader and the sentinel check one list rather than three copies.
+#: Logical invariants every accepted action's evidence satisfies. Stated as data
+#: so the writer, reader and sentinel check one list rather than three copies.
 ACCEPTED_EVIDENCE_INVARIANTS: tuple[str, ...] = (
-    "matching_mark_count == 1",
-    "exact_successor_mark_count == 1",
-    "matching_mark_count <= raw_mark_count",
+    "teacher_coordinate_legal == true",
+    "teacher_executes_to_exact_successor == true",
+    "productive_canonical_successor == true",
     "source_canonical_key != canonical_successor_key",
 )
 
@@ -170,9 +173,11 @@ REJECTION_CATEGORIES: tuple[str, ...] = (UPSTREAM_REJECTED, ACTIVE8_EXCLUDED)
 #: as a trusted aggregate.  The previous attempt published these and re-read
 #: them; a resealed row could move a census by 1000 undetected.
 CANDIDATE_TOTAL_FIELDS: tuple[str, ...] = (
-    "raw_candidate_marks",
-    "matching_candidate_marks",
-    "exact_successor_marks",
+    "evaluated_teachers",
+    "legal_teacher_coordinates",
+    "exact_teacher_successors",
+    "productive_teacher_successors",
+    "supported_teachers",
 )
 
 #: A POLICY-EXCLUDED action -- one outside ActionCodecV4, or a multi-neighbour
@@ -434,10 +439,9 @@ ACTIVE8_REDUCTION_PREPARED_FIELDS: tuple[str, ...] = (
 )
 
 #: The sentinel runs AFTER task publication and BEFORE authoritative completion,
-#: and ANY mismatch blocks completion. It is the only thing that converts the
-#: residual -- a per-action count moved within its arithmetic bounds and
-#: propagated consistently through every aggregate -- from undetectable to
-#: sampled.
+#: and ANY mismatch blocks completion. It independently reconstructs complete
+#: quotient geometry only for its bounded sample while rechecking the published
+#: family-local teacher evidence for every selected occurrence.
 SENTINEL_BLOCKS_COMPLETION = True
 
 __all__ = [

@@ -922,7 +922,9 @@ def _process_v2_gate_zero_structural_checks(repo_root: Path) -> dict[str, Any]:
 
     checks = dict(_project("structural_checks", repo_root))
     retired = (
+        "require_exactly_one_matching_mark",
         "require_positive_canonical_successor_count",
+        "require_positive_raw_mark_count",
         "require_positive_successor_alias_count",
     )
     for field in retired:
@@ -936,6 +938,8 @@ def _process_v2_gate_zero_structural_checks(repo_root: Path) -> dict[str, Any]:
             "the Process-V2 Gate-0 base policy unexpectedly declares the V2 delta"
         )
     checks["require_productive_nonself_successor"] = True
+    checks["require_teacher_coordinate_legal"] = True
+    checks["require_teacher_executes_to_exact_successor"] = True
     return checks
 
 

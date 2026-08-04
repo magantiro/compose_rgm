@@ -55,7 +55,7 @@ from compose_v4.rewrite.operators import AtomInsert
 from compose_v4.rewrite.trace import RewriteStep
 
 POLICY_SCHEMA = "compose.data.editing_v2_process_v2_active8_admission_policy"
-POLICY_SCHEMA_VERSION = 2
+POLICY_SCHEMA_VERSION = 3
 POLICY_STATUS = "FROZEN_PROCESS_V2_PRIMITIVE_POLICY_NO_ACTIVE8_OR_TRAINING_AUTHORITY"
 SEMANTIC_ACTIVE8_FAMILIES = tuple(ACTIVE8_FAMILIES)
 SEMANTIC_ACTIVE8_EXECUTOR_RULES = tuple(action_codec_v4.ACTIVE8_EXECUTOR_RULES)
@@ -111,8 +111,8 @@ _REQUIRED_MODEL_MODES: tuple[tuple[str, object], ...] = (
 )
 
 _CANDIDATE_EVALUATOR = (
-    "compose_v4.data.editing_v2_process_v2_active8_admission."
-    "ProductionProcessV2BatchedTeacherSupportChecker"
+    "compose_v4.data.editing_v2_process_v2_teacher_admission."
+    "ProductionProcessV2FamilyTeacherAdmissionChecker"
 )
 
 
@@ -286,8 +286,8 @@ class ProcessV2SemanticExactCandidateAudit:
 
 
 @dataclass(frozen=True, slots=True)
-class ProcessV2TeacherSupportEvidence:
-    """Exhaustive per-teacher evidence without constructing its whole quotient.
+class ProcessV2TeacherAdmissionEvidence:
+    """Family-local membership and exact-execution evidence for one teacher.
 
     Active8 admission needs to establish that the exact teacher coordinate is
     in the Process-V2 model support and that executing it produces the stored,
@@ -307,9 +307,6 @@ class ProcessV2TeacherSupportEvidence:
     teacher_coordinate_legal: bool
     teacher_executes_to_exact_successor: bool
     productive_canonical_successor: bool
-    raw_mark_count: int
-    matching_mark_count: int
-    exact_successor_mark_count: int
 
     def __post_init__(self) -> None:
         for field in ("action_sha256", "source_state_sha256", "target_state_sha256"):
@@ -323,7 +320,26 @@ class ProcessV2TeacherSupportEvidence:
             self.productive_canonical_successor,
         )
         if any(type(value) is not bool for value in flags):
-            raise ValueError("teacher-support flags must be booleans")
+            raise ValueError("teacher-admission flags must be booleans")
+        if self.supported:
+            if self.exclusion_reason is not None or not all(flags):
+                raise ValueError("supported teacher-admission evidence is incomplete")
+        elif not self.exclusion_reason:
+            raise ValueError(
+                "unsupported teacher-admission evidence requires an exclusion reason"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ProcessV2TeacherSupportEvidence(ProcessV2TeacherAdmissionEvidence):
+    """Teacher admission plus exhaustive mark-count geometry for bounded audits."""
+
+    raw_mark_count: int
+    matching_mark_count: int
+    exact_successor_mark_count: int
+
+    def __post_init__(self) -> None:
+        ProcessV2TeacherAdmissionEvidence.__post_init__(self)
         for field in (
             "raw_mark_count",
             "matching_mark_count",
@@ -338,16 +354,10 @@ class ProcessV2TeacherSupportEvidence:
             <= self.raw_mark_count
         ):
             raise ValueError("teacher-support mark counts do not aggregate")
-        if self.supported:
-            if (
-                self.exclusion_reason is not None
-                or not all(flags)
-                or self.matching_mark_count != 1
-                or self.exact_successor_mark_count != 1
-            ):
-                raise ValueError("supported teacher evidence is incomplete")
-        elif not self.exclusion_reason:
-            raise ValueError("unsupported teacher evidence requires an exclusion reason")
+        if self.supported and (
+            self.matching_mark_count != 1 or self.exact_successor_mark_count != 1
+        ):
+            raise ValueError("supported exhaustive teacher evidence is incomplete")
 
 
 @dataclass(frozen=True, slots=True)
@@ -371,7 +381,7 @@ class SemanticActive8ActionDecision:
 
     classification: SemanticActionClassification
     candidate_evidence: (
-        SemanticExactCandidateEvidence | ProcessV2TeacherSupportEvidence | None
+        SemanticExactCandidateEvidence | ProcessV2TeacherAdmissionEvidence | None
     )
 
     def __post_init__(self) -> None:
@@ -413,7 +423,7 @@ class ProcessV2SemanticExactCandidateChecker(Protocol):
         self,
         addressed: AddressedPackedTrace,
         step_index: int,
-    ) -> SemanticExactCandidateEvidence | ProcessV2TeacherSupportEvidence: ...
+    ) -> SemanticExactCandidateEvidence | ProcessV2TeacherAdmissionEvidence: ...
 
 
 def _file_sha256(path: Path) -> str:
@@ -1049,7 +1059,7 @@ def evaluate_process_v2_semantic_active8_trace(
             evidence = exact_candidate_checker(addressed, classification.step_index)
             if not isinstance(
                 evidence,
-                (SemanticExactCandidateEvidence, ProcessV2TeacherSupportEvidence),
+                (SemanticExactCandidateEvidence, ProcessV2TeacherAdmissionEvidence),
             ):
                 raise SemanticActive8AdmissionError(
                     "Process-V2 candidate checker returned another result type"

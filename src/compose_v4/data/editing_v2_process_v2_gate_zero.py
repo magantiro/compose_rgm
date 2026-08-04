@@ -4,8 +4,8 @@ WHAT THIS STAGE IS
 ------------------
 Active8 performs the sole expensive chunk pass.  It assigns
 ``capability_cell_id`` at WRITE time, while the exact source state, the action,
-the candidate fiber and the executor result are still in memory, and it writes
-the raw structural axes, the candidate evidence and the counts beside the cell,
+the teacher-family coordinate and the executor result are still in memory. It
+writes the raw structural axes and teacher-admission evidence beside the cell,
 each row authenticated by its own ``assignment_sha256``.
 
 Gate 0 is therefore a SMALL DETERMINISTIC POST-ACTIVE8 REDUCER over those rows.
@@ -53,9 +53,8 @@ INVARIANTS MAINTAINED (and tested)
   including a final action whose successor is terminal.
 * ``supported`` is READ and enforced, because the structural contract declares
   ``require_every_teacher_supported``.
-* Each exact-evidence stratum is derived ONCE, from a count already verified
-  against ``ACCEPTED_EVIDENCE_INVARIANTS``.  That the bins tile their range
-  exactly once is proved separately, from the bins alone.
+* Whole-fiber geometry is not recomputed or inferred here. It belongs to the
+  bounded release sentinel and cached T1 panels.
 * The fold order is stated (``reduction_order``: ascending
   ``task_identity_sha256``) and the combiner is key-sorted counter addition,
   which is commutative and associative.  Nothing is published on an incomplete
@@ -137,23 +136,17 @@ _AUTHORITY: Mapping[str, bool] = {
     "training_authorized": False,
 }
 
-#: Whole-corpus Gate 0 bins only raw marked-fiber size.  Canonical-successor
-#: count and alias multiplicity require complete quotient construction and are
-#: measured by the completion-bound release sentinel instead.
-_STRATUM_EVIDENCE_FIELD: Mapping[str, str] = {
-    "raw_mark_count": "raw_mark_count",
-}
-
 #: Typed negative-receipt categories.  A well-formed row that violates the
 #: structural contract is RECORDED and fails the gate; it does not raise.  A
 #: malformed artifact raises, because there is then no honest census to publish.
 _VIOLATION_CATEGORIES: tuple[str, ...] = (
     "unsupported_teacher",
     "terminal_assignment",
-    "matching_mark_count_not_one",
-    "nonpositive_raw_mark_count",
+    "illegal_teacher_coordinate",
+    "inexact_teacher_successor",
+    "nonproductive_teacher_successor",
     "self_transition_teacher",
-    "evidence_arithmetic",
+    "evidence_inconsistency",
     "unregistered_capability_cell",
     "unknown_model_family",
     "unknown_family_context",
@@ -191,6 +184,12 @@ def _require_str(value: object, *, field: str) -> str:
 def _require_nonnegative_int(value: object, *, field: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value < 0:
         raise ProcessV2GateZeroError(f"{field} must be a nonnegative integer")
+    return value
+
+
+def _require_bool(value: object, *, field: str) -> bool:
+    if type(value) is not bool:
+        raise ProcessV2GateZeroError(f"{field} must be boolean")
     return value
 
 
@@ -242,7 +241,6 @@ class GateZeroContracts:
     conditional_cell_ids: tuple[str, ...]
     separate_lane_cell_ids: tuple[str, ...]
     registered_cell_ids: frozenset[str]
-    strata: Mapping[str, tuple[Mapping[str, Any], ...]]
     receipt_limit: int
     structural_checks: Mapping[str, Any]
 
@@ -269,63 +267,12 @@ class GateZeroContracts:
 _REQUIRED_STRUCTURAL_CLAUSES: tuple[str, ...] = (
     "require_every_active8_family",
     "require_every_teacher_supported",
-    "require_exactly_one_matching_mark",
     "require_one_assignment_per_accepted_action",
-    "require_positive_raw_mark_count",
     "require_productive_nonself_successor",
+    "require_teacher_coordinate_legal",
+    "require_teacher_executes_to_exact_successor",
     "require_zero_terminal_assignments",
 )
-
-
-def _validate_bins(name: str, bins: Sequence[Mapping[str, Any]]) -> tuple[Mapping[str, Any], ...]:
-    """Prove the bins tile ``[1, inf)`` exactly once, from the bins alone.
-
-    This is deliberately independent of any observed count.  Deriving a stratum
-    from a count and then comparing it against the same derivation applied to
-    the same count cannot fail; the tiling proof and the derivation share no
-    input.
-    """
-
-    if not isinstance(bins, Sequence) or isinstance(bins, (str, bytes)) or not bins:
-        raise ProcessV2GateZeroError(f"stratum {name} must declare a nonempty bin list")
-    ordered = sorted(bins, key=lambda item: int(item["minimum"]))
-    identifiers = [_require_str(item.get("id"), field=f"{name}.id") for item in ordered]
-    if len(set(identifiers)) != len(identifiers):
-        raise ProcessV2GateZeroError(f"stratum {name} repeats a bin id")
-    lower = 1
-    for index, item in enumerate(ordered):
-        minimum = item.get("minimum")
-        maximum = item.get("maximum")
-        if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum != lower:
-            raise ProcessV2GateZeroError(
-                f"stratum {name} bin {identifiers[index]} must start at {lower}"
-            )
-        if index == len(ordered) - 1:
-            if maximum is not None:
-                raise ProcessV2GateZeroError(f"stratum {name} must end open above")
-            break
-        if not isinstance(maximum, int) or isinstance(maximum, bool) or maximum < minimum:
-            raise ProcessV2GateZeroError(
-                f"stratum {name} bin {identifiers[index]} has no closed upper edge"
-            )
-        lower = maximum + 1
-    return tuple(dict(item) for item in ordered)
-
-
-def _stratum_for(name: str, count: int, bins: Sequence[Mapping[str, Any]]) -> str:
-    """Derive ONE stratum id, scanning every bin so an overlap is not hidden."""
-
-    matches = [
-        str(item["id"])
-        for item in bins
-        if count >= int(item["minimum"])
-        and (item["maximum"] is None or count <= int(item["maximum"]))
-    ]
-    if len(matches) != 1:
-        raise ProcessV2GateZeroError(
-            f"stratum {name} matched {len(matches)} bins for count {count}"
-        )
-    return matches[0]
 
 
 def build_gate_zero_contracts(
@@ -401,12 +348,6 @@ def build_gate_zero_contracts(
             "the registered cells are not exactly the family x context registry"
         )
 
-    strata_block = cells["exact_evidence_strata"]
-    strata = {
-        name: _validate_bins(name, strata_block[name]["bins"])
-        for name in sorted(_STRATUM_EVIDENCE_FIELD)
-    }
-
     lanes = tuple(str(item) for item in cells["bindings"]["data_lanes"])
     pinned = _require_sha(
         structural["process_identity"]["process_identity_sha256"],
@@ -429,7 +370,6 @@ def build_gate_zero_contracts(
         conditional_cell_ids=conditional,
         separate_lane_cell_ids=separate,
         registered_cell_ids=frozenset(registered),
-        strata=strata,
         receipt_limit=int(checks["classification_failure_receipt_limit"]),
         structural_checks=dict(checks),
     )
@@ -748,7 +688,6 @@ class _Aggregate:
     families: Counter[str]
     executor_rules: Counter[str]
     cells: Counter[str]
-    strata: dict[str, Counter[str]]
     violations: Counter[str]
     receipts: list[dict[str, Any]]
     action_keys: set[tuple[Any, ...]]
@@ -804,24 +743,42 @@ def _fold_shard(
             record("terminal_assignment", row, "source progress position is terminal")
 
         evidence = row["candidate_evidence"]
-        if evidence["supported"] is not True:
+        supported = _require_bool(evidence["supported"], field="candidate_evidence.supported")
+        exclusion_reason = evidence["exclusion_reason"]
+        if exclusion_reason is not None and (
+            not isinstance(exclusion_reason, str) or not exclusion_reason
+        ):
+            raise ProcessV2GateZeroError(
+                "candidate_evidence.exclusion_reason must be null or nonempty text"
+            )
+        if not supported:
             record(
                 "unsupported_teacher",
                 row,
-                f"supported={evidence['supported']!r} exclusion={evidence['exclusion_reason']!r}",
+                f"supported={supported!r} exclusion={exclusion_reason!r}",
             )
-        counts = {
-            field: _require_nonnegative_int(evidence[field], field=f"candidate_evidence.{field}")
+        flags = {
+            field: _require_bool(evidence[field], field=f"candidate_evidence.{field}")
             for field in (
-                "raw_mark_count",
-                "matching_mark_count",
-                "exact_successor_mark_count",
+                "teacher_coordinate_legal",
+                "teacher_executes_to_exact_successor",
+                "productive_canonical_successor",
             )
         }
-        if counts["matching_mark_count"] != 1:
-            record("matching_mark_count_not_one", row, str(counts["matching_mark_count"]))
-        if counts["raw_mark_count"] < 1:
-            record("nonpositive_raw_mark_count", row, str(counts["raw_mark_count"]))
+        if not flags["teacher_coordinate_legal"]:
+            record("illegal_teacher_coordinate", row, "teacher coordinate is absent")
+        if not flags["teacher_executes_to_exact_successor"]:
+            record(
+                "inexact_teacher_successor",
+                row,
+                "teacher replay differs from stored successor",
+            )
+        if not flags["productive_canonical_successor"]:
+            record(
+                "nonproductive_teacher_successor",
+                row,
+                "teacher successor is not productive",
+            )
         source_key = _require_str(
             evidence["source_canonical_key"], field="source_canonical_key"
         )
@@ -830,14 +787,21 @@ def _fold_shard(
         )
         if source_key == successor_key:
             record("self_transition_teacher", row, source_key)
-        arithmetic_ok = (
-            counts["exact_successor_mark_count"] == 1
-            and counts["exact_successor_mark_count"] <= counts["matching_mark_count"]
-            and counts["matching_mark_count"] <= counts["raw_mark_count"]
-            and source_key != successor_key
+        status_consistent = (
+            supported and exclusion_reason is None and all(flags.values())
+        ) or (
+            not supported and isinstance(exclusion_reason, str) and bool(exclusion_reason)
         )
-        if not arithmetic_ok:
-            record("evidence_arithmetic", row, json.dumps(counts, sort_keys=True))
+        evidence_consistent = (
+            status_consistent
+            and flags["productive_canonical_successor"] == (source_key != successor_key)
+            and (
+                not flags["teacher_executes_to_exact_successor"]
+                or flags["teacher_coordinate_legal"]
+            )
+        )
+        if not evidence_consistent:
+            record("evidence_inconsistency", row, json.dumps(flags, sort_keys=True))
 
         family = _require_str(row["model_family"], field="model_family")
         context = _require_str(row["family_context"], field="family_context")
@@ -857,15 +821,6 @@ def _fold_shard(
         aggregate.families[family] += 1
         aggregate.executor_rules[_require_str(row["executor_rule"], field="executor_rule")] += 1
         aggregate.cells[cell] += 1
-        # Each stratum is derived ONCE, from a count already checked positive
-        # and arithmetically consistent.  Nothing recomputes it for comparison.
-        if arithmetic_ok:
-            for name, field in sorted(_STRATUM_EVIDENCE_FIELD.items()):
-                count = counts[field]
-                if count >= 1:
-                    aggregate.strata[name][
-                        _stratum_for(name, count, contracts.strata[name])
-                    ] += 1
 
 
 def reduce_gate_zero(
@@ -904,7 +859,6 @@ def reduce_gate_zero(
         families=Counter(),
         executor_rules=Counter(),
         cells=Counter(),
-        strata={name: Counter() for name in contracts.strata},
         violations=Counter(),
         receipts=[],
         action_keys=set(),
@@ -964,10 +918,14 @@ def reduce_gate_zero(
         "every_required_cell_present": not missing_required_cells,
         "terminal_assignment_count_is_zero": violations["terminal_assignment"] == 0,
         "every_teacher_supported": violations["unsupported_teacher"] == 0,
-        "exactly_one_matching_mark": violations["matching_mark_count_not_one"] == 0,
-        "positive_raw_mark_count": violations["nonpositive_raw_mark_count"] == 0,
-        "productive_nonself_successor": violations["self_transition_teacher"] == 0,
-        "evidence_arithmetic_holds": violations["evidence_arithmetic"] == 0,
+        "every_teacher_coordinate_legal": violations["illegal_teacher_coordinate"] == 0,
+        "every_teacher_replays_exact_successor": violations["inexact_teacher_successor"]
+        == 0,
+        "productive_nonself_successor": (
+            violations["nonproductive_teacher_successor"] == 0
+            and violations["self_transition_teacher"] == 0
+        ),
+        "teacher_evidence_consistent": violations["evidence_inconsistency"] == 0,
         "every_cell_registered": (
             violations["unregistered_capability_cell"] == 0
             and violations["unknown_model_family"] == 0
@@ -1032,10 +990,6 @@ def reduce_gate_zero(
         },
         "separate_lane_cell_counts": {
             cell: cells.get(cell, 0) for cell in sorted(contracts.separate_lane_cell_ids)
-        },
-        "stratum_counts": {
-            name: dict(sorted(counter.items()))
-            for name, counter in sorted(aggregate.strata.items())
         },
         "violation_counts": dict(sorted(violations.items())),
         "total_violations": sum(violations.values()),

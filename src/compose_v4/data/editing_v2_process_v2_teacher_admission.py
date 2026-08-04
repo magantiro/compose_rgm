@@ -8,8 +8,6 @@ The exhaustive production quotient remains the independent bounded sentinel.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-import re
 from typing import Callable, Sequence
 
 import numpy as np
@@ -23,6 +21,7 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.data.editing_v2_process_v2_active8_admission import (
+    ProcessV2TeacherAdmissionEvidence,
     SemanticActive8AdmissionError,
     SemanticActive8AdmissionPolicy,
     _action_sha256,
@@ -57,55 +56,7 @@ from compose_v4.rewrite.ring_restate_semantics import (
 from compose_v4.rewrite.tracelets import RingSystemRestate
 
 
-_SHA256_RE = re.compile(r"[0-9a-f]{64}")
 _PROGRESS_INTERVAL = 64
-
-
-def _is_sha256(value: object) -> bool:
-    return isinstance(value, str) and _SHA256_RE.fullmatch(value) is not None
-
-
-@dataclass(frozen=True, slots=True)
-class ProcessV2TeacherAdmissionEvidence:
-    """Teacher-only Process-V2 admission evidence.
-
-    This proves exact ActionV4 membership in the teacher family, exact
-    persistent-slot replay, and a productive canonical successor.  It does not
-    claim an all-family raw mark count.  Full fiber geometry remains a bounded
-    release-sentinel and T1 responsibility.
-    """
-
-    supported: bool
-    exclusion_reason: str | None
-    action_sha256: str
-    source_state_sha256: str
-    target_state_sha256: str
-    source_canonical_key: str
-    canonical_successor_key: str
-    teacher_coordinate_legal: bool
-    teacher_executes_to_exact_successor: bool
-    productive_canonical_successor: bool
-
-    def __post_init__(self) -> None:
-        for field in ("action_sha256", "source_state_sha256", "target_state_sha256"):
-            if not _is_sha256(getattr(self, field)):
-                raise ValueError(f"{field} must be a lowercase SHA-256")
-        if not self.source_canonical_key or not self.canonical_successor_key:
-            raise ValueError("teacher-admission canonical keys must be nonempty")
-        flags = (
-            self.teacher_coordinate_legal,
-            self.teacher_executes_to_exact_successor,
-            self.productive_canonical_successor,
-        )
-        if any(type(value) is not bool for value in flags):
-            raise ValueError("teacher-admission flags must be booleans")
-        if self.supported:
-            if self.exclusion_reason is not None or not all(flags):
-                raise ValueError("supported teacher-admission evidence is incomplete")
-        elif not self.exclusion_reason:
-            raise ValueError(
-                "unsupported teacher-admission evidence requires an exclusion reason"
-            )
 
 
 def _edge_is_bridge(state: MolecularGraph, left: int, right: int) -> bool:
