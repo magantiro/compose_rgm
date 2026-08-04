@@ -4,8 +4,9 @@ This is orchestration only.  The production library owns planning, teacher
 support, immutable publication, reduction and the sentinel.  A spawned remote
 driver survives client disconnection and handles one deterministic phase. The
 default operational pilot runs three independently measured one-CPU canaries.
-The explicit full map retains at most five Volume-v1 writer containers, each
-with a bounded spawned process group. A final reduction invocation reuses every
+The explicit full map retains at most eighty independently replenished Volume-v1
+writer containers, extending the proven Process-V2 rebind publication pattern,
+with one restart-safe task per container. A final reduction invocation reuses every
 validated task, runs the parallel sentinel, and publishes completion.
 
 Importing this module launches nothing.  Run only from the exact clean commit.
@@ -17,14 +18,12 @@ from __future__ import annotations
 import hashlib
 import importlib.metadata
 import json
-import multiprocessing
 import platform
 import re
 import resource
 import subprocess
 import sys
 import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -41,18 +40,15 @@ RUNTIME_CONTRACT_SOURCE = "configs/editing_v2_process_v2_active8_decision_runtim
 SEMANTIC_CONTRACT_SOURCE = "configs/editing_gate_zero_semantic_model_process_v2.json"
 OUTPUT_ARTIFACT_PREFIX = "/artifacts/editing_v2/process_v2_active8"
 
-MAX_MAP_CONTAINERS = 5
-MAP_CPU = 16.0
-TASK_PROCESSES_PER_CONTAINER = 16
+MAX_MAP_CONTAINERS = 80
+MAP_CPU = 1.0
+FULL_MAP_TASKS_PER_CONTAINER = 1
 PILOT_GROUP_COUNT = 3
 PILOT_GROUP_SIZE = 1
 PILOT_TASK_COUNT = 3
-PILOT_MAX_CONTAINERS = PILOT_TASK_COUNT
-PILOT_CPU = 1.0
-PILOT_MEMORY_MB = 4 * 1024
 # The full-map geometry remains frozen until the independent canary supplies a
 # production-task time and memory bound. It is not used by the default pilot.
-MAP_MEMORY_MB = 64 * 1024
+MAP_MEMORY_MB = 4 * 1024
 MAP_TIMEOUT_SECONDS = 12 * 3600
 SENTINEL_TIMEOUT_SECONDS = 6 * 3600
 SERIAL_TIMEOUT_SECONDS = 4 * 3600
@@ -378,6 +374,97 @@ def _require_plan_revision(plan: dict[str, Any], revision: dict[str, Any]) -> No
         raise RuntimeError("the Active8 plan execution commit differs from the image revision")
 
 
+def _build_task_workloads(
+    plan: dict[str, Any], rebind_completion: dict[str, Any]
+) -> dict[str, int]:
+    """Bind every Active8 task to its frozen admitted-transition workload.
+
+    Workload affects scheduling only.  It is derived from the exact rebind
+    completion already bound by the Active8 plan and cannot alter task content,
+    admission, or reduction.  Requiring an exact one-to-one join prevents a
+    missing or duplicated upstream result from becoming a scheduling hint.
+    """
+
+    binding = plan.get("binding")
+    if not isinstance(binding, dict) or rebind_completion.get("completion_sha256") != binding.get(
+        "rebind_completion_sha256"
+    ):
+        raise RuntimeError("the Active8 workload source is not the bound rebind completion")
+    result_inventory = rebind_completion.get("result_inventory")
+    tasks = plan.get("tasks")
+    if not isinstance(result_inventory, list) or not isinstance(tasks, list):
+        raise RuntimeError("the Active8 workload inventories must be lists")
+
+    workload_by_rebind_task: dict[str, int] = {}
+    for result in result_inventory:
+        if not isinstance(result, dict) or not isinstance(result.get("counts"), dict):
+            raise RuntimeError("a rebind workload result is malformed")
+        identity = result.get("task_identity_sha256")
+        transitions = result["counts"].get("admitted_transitions")
+        if (
+            not isinstance(identity, str)
+            or _SHA256_RE.fullmatch(identity) is None
+            or type(transitions) is not int
+            or transitions < 0
+            or identity in workload_by_rebind_task
+        ):
+            raise RuntimeError("a rebind workload result is invalid or duplicated")
+        workload_by_rebind_task[identity] = transitions
+
+    task_workloads: dict[str, int] = {}
+    joined_rebind_identities: set[str] = set()
+    for task in tasks:
+        if not isinstance(task, dict):
+            raise RuntimeError("an Active8 workload task is malformed")
+        identity = task.get("task_identity_sha256")
+        rebind_identity = task.get("rebind_task_identity_sha256")
+        if (
+            not isinstance(identity, str)
+            or _SHA256_RE.fullmatch(identity) is None
+            or not isinstance(rebind_identity, str)
+            or _SHA256_RE.fullmatch(rebind_identity) is None
+            or identity in task_workloads
+            or rebind_identity in joined_rebind_identities
+            or rebind_identity not in workload_by_rebind_task
+        ):
+            raise RuntimeError("the Active8 workload join is incomplete or duplicated")
+        joined_rebind_identities.add(rebind_identity)
+        task_workloads[identity] = workload_by_rebind_task[rebind_identity]
+    if joined_rebind_identities != set(workload_by_rebind_task):
+        raise RuntimeError("the Active8 workload join does not exhaust the rebind completion")
+
+    total = sum(task_workloads.values())
+    counts = rebind_completion.get("counts")
+    if (
+        not isinstance(counts, dict)
+        or type(counts.get("admitted_transitions")) is not int
+        or counts["admitted_transitions"] != total
+    ):
+        raise RuntimeError("the Active8 workload total disagrees with the rebind completion")
+    return task_workloads
+
+
+def _validate_task_workloads(plan: dict[str, Any], task_workloads: Any) -> dict[str, int]:
+    """Require a complete typed scheduling map for the exact plan."""
+
+    if not isinstance(task_workloads, dict):
+        raise RuntimeError("the Active8 task workload map is absent")
+    workload_by_task: dict[str, int] = {}
+    for identity, transitions in task_workloads.items():
+        if (
+            not isinstance(identity, str)
+            or _SHA256_RE.fullmatch(identity) is None
+            or type(transitions) is not int
+            or transitions < 0
+        ):
+            raise RuntimeError("an Active8 task workload is invalid")
+        workload_by_task[identity] = transitions
+    planned = {str(task["task_identity_sha256"]) for task in plan.get("tasks", [])}
+    if set(workload_by_task) != planned:
+        raise RuntimeError("the Active8 task workloads do not cover the plan exactly")
+    return workload_by_task
+
+
 def _partition_task_ids(
     plan: dict[str, Any],
     *,
@@ -402,8 +489,8 @@ def _partition_task_ids(
 def _task_groups(plan: dict[str, Any], task_ids: list[str], *, group_size: int) -> list[list[str]]:
     """Build deterministic bounded groups in the supplied plan order."""
 
-    if type(group_size) is not int or group_size <= 0 or group_size > TASK_PROCESSES_PER_CONTAINER:
-        raise ValueError(f"group_size must lie in [1, {TASK_PROCESSES_PER_CONTAINER}]")
+    if type(group_size) is not int or group_size <= 0 or group_size > FULL_MAP_TASKS_PER_CONTAINER:
+        raise ValueError(f"group_size must lie in [1, {FULL_MAP_TASKS_PER_CONTAINER}]")
     if len(task_ids) != len(set(task_ids)):
         raise ValueError("an Active8 task group input repeats an identity")
     planned = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
@@ -411,6 +498,33 @@ def _task_groups(plan: dict[str, Any], task_ids: list[str], *, group_size: int) 
         raise ValueError("an Active8 task group input names an unplanned task")
     groups = [task_ids[start : start + group_size] for start in range(0, len(task_ids), group_size)]
     return groups
+
+
+def _workload_ordered_task_groups(
+    plan: dict[str, Any],
+    task_ids: list[str],
+    *,
+    group_size: int,
+    task_workloads: dict[str, int],
+) -> list[list[str]]:
+    """Submit the heaviest restart-safe tasks first.
+
+    Sorting by the prospectively frozen rebind transition count bounds the tail
+    without changing task membership or outputs. One task per container lets
+    Modal replenish every freed worker immediately.
+    """
+
+    # Reuse the structural checks and exact task-membership validation.
+    _task_groups(plan, task_ids, group_size=group_size)
+    workload_by_task = _validate_task_workloads(plan, task_workloads)
+    plan_order = {
+        str(task["task_identity_sha256"]): index for index, task in enumerate(plan["tasks"])
+    }
+    ordered = sorted(
+        task_ids,
+        key=lambda identity: (-workload_by_task[identity], plan_order[identity]),
+    )
+    return [ordered[start : start + group_size] for start in range(0, len(ordered), group_size)]
 
 
 def _pilot_task_ids(plan: dict[str, Any]) -> list[str]:
@@ -433,8 +547,7 @@ def _pilot_task_ids(plan: dict[str, Any]) -> list[str]:
         task
         for task in train_tasks
         if all(
-            task.get(field) == value
-            for field, value in DEFAULT_SYNTHETIC_CANARY_SELECTOR.items()
+            task.get(field) == value for field, value in DEFAULT_SYNTHETIC_CANARY_SELECTOR.items()
         )
     ]
     if not synthetic:
@@ -467,6 +580,7 @@ def _submission_groups(
     group_limit: int,
     pilot: bool,
     full_map: bool,
+    task_workloads: dict[str, int] | None = None,
 ) -> list[list[str]]:
     """Select the fixed bounded pilot or an explicitly requested full map."""
 
@@ -482,48 +596,13 @@ def _submission_groups(
         if not set(remaining).issubset(missing):
             raise ValueError("the Active8 pilot cohort lies outside the selected partition")
         return [[identity] for identity in remaining]
-    groups = _task_groups(plan, missing, group_size=group_size)
+    groups = _workload_ordered_task_groups(
+        plan,
+        missing,
+        group_size=group_size,
+        task_workloads=task_workloads,
+    )
     return groups if group_limit == 0 else groups[:group_limit]
-
-
-def _execute_one_chunk_process(
-    plan_path: str, task_identity_sha256: str, revision: dict[str, Any]
-) -> dict[str, str]:
-    """Subprocess body. It never calls Volume reload or commit."""
-
-    import torch
-
-    _validate_remote_revision(revision)
-    loaded = _imports()
-    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
-    _require_plan_revision(plan, revision)
-    with torch.inference_mode():
-        receipt = loaded["execute_process_v2_active8_task"](
-            plan,
-            task_identity_sha256,
-            runtime=_runtime(),
-            artifact_root=ARTIFACT_ROOT,
-            repo_root=REMOTE_ROOT,
-        )
-    return {
-        "task_identity_sha256": str(receipt["task_identity_sha256"]),
-        "receipt_sha256": str(receipt["receipt_sha256"]),
-    }
-
-
-def _collect_process_results(futures: dict[Any, str]) -> dict[str, dict[str, str]]:
-    """Collect an exact subprocess result set, propagating any child failure."""
-
-    results: dict[str, dict[str, str]] = {}
-    for future in as_completed(futures):
-        result = future.result()
-        identity = str(result["task_identity_sha256"])
-        if identity != futures[future] or identity in results:
-            raise RuntimeError("an Active8 child returned another task identity")
-        results[identity] = result
-    if set(results) != set(futures.values()):
-        raise RuntimeError("the Active8 process group lost a task result")
-    return results
 
 
 def _peak_rss_mb() -> float:
@@ -592,8 +671,9 @@ def prepare_plan(
     loaded["write_process_v2_active8_plan"](
         plan, artifact_root=ARTIFACT_ROOT, repo_root=REMOTE_ROOT
     )
+    task_workloads = _build_task_workloads(plan, rebind_completion)
     artifact_volume.commit()
-    return plan
+    return {"plan": plan, "task_workloads": task_workloads}
 
 
 @app.function(
@@ -623,77 +703,7 @@ def scan_completed(plan_path: str, revision: dict[str, Any]) -> list[str]:
     max_containers=MAX_MAP_CONTAINERS,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def decide_task_group(
-    plan_path: str, task_identity_sha256s: list[str], revision: dict[str, Any]
-) -> dict[str, Any]:
-    """Run a bounded subprocess group and commit once after full validation."""
-
-    if (
-        not task_identity_sha256s
-        or len(task_identity_sha256s) > TASK_PROCESSES_PER_CONTAINER
-        or len(task_identity_sha256s) != len(set(task_identity_sha256s))
-    ):
-        raise RuntimeError("the Active8 process group geometry is invalid")
-    _validate_remote_revision(revision)
-    loaded = _imports()
-    artifact_volume.reload()
-    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
-    _require_plan_revision(plan, revision)
-    tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
-    expected = set(task_identity_sha256s)
-    if not expected.issubset(tasks):
-        raise RuntimeError("the Active8 process group names an unplanned task")
-
-    context = multiprocessing.get_context("spawn")
-    with ProcessPoolExecutor(max_workers=len(task_identity_sha256s), mp_context=context) as pool:
-        futures = {
-            pool.submit(
-                _execute_one_chunk_process,
-                plan_path,
-                task_identity_sha256,
-                revision,
-            ): task_identity_sha256
-            for task_identity_sha256 in task_identity_sha256s
-        }
-        results = _collect_process_results(futures)
-
-    reopened: dict[str, str] = {}
-    for identity in task_identity_sha256s:
-        task = tasks[identity]
-        output = loaded["mounted_process_v2_artifact_path"](
-            str(task["output_artifact_path"]),
-            artifact_root=ARTIFACT_ROOT,
-            field="task.output_artifact_path",
-        )
-        receipt, summary = loaded["validate_process_v2_active8_task_result"](output)
-        if not (
-            receipt["task_identity_sha256"] == identity
-            and receipt["receipt_sha256"] == results[identity]["receipt_sha256"]
-            and summary["binding_sha256"] == plan["binding_sha256"]
-            and summary["plan_sha256"] == plan["plan_sha256"]
-            and summary["run_identity_sha256"] == plan["run_identity_sha256"]
-        ):
-            raise RuntimeError("an Active8 child output does not bind its group plan")
-        reopened[identity] = str(receipt["receipt_sha256"])
-
-    # Children never call commit. One successful parent commit covers the
-    # completely reopened group and keeps concurrent Volume-v1 commits at five.
-    artifact_volume.commit()
-    return {
-        "task_identity_sha256s": task_identity_sha256s,
-        "receipt_sha256s": reopened,
-    }
-
-
-@app.function(
-    image=image,
-    cpu=PILOT_CPU,
-    memory=PILOT_MEMORY_MB,
-    timeout=MAP_TIMEOUT_SECONDS,
-    max_containers=PILOT_MAX_CONTAINERS,
-    volumes={str(ARTIFACT_ROOT): artifact_volume},
-)
-def decide_canary_task(
+def decide_task(
     plan_path: str, task_identity_sha256: str, revision: dict[str, Any]
 ) -> dict[str, Any]:
     """Measure and publish one restart-safe task with no cohort barrier."""
@@ -705,7 +715,7 @@ def decide_canary_task(
     _require_plan_revision(plan, revision)
     tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
     if task_identity_sha256 not in tasks:
-        raise RuntimeError("the Active8 canary names an unplanned task")
+        raise RuntimeError("the Active8 map names an unplanned task")
 
     import torch
 
@@ -735,7 +745,7 @@ def decide_canary_task(
         and summary["plan_sha256"] == plan["plan_sha256"]
         and summary["run_identity_sha256"] == plan["run_identity_sha256"]
     ):
-        raise RuntimeError("the Active8 canary output does not bind its plan")
+        raise RuntimeError("the Active8 task output does not bind its plan")
     artifact_volume.commit()
     return {
         "task_identity_sha256": task_identity_sha256,
@@ -884,6 +894,7 @@ def driver(
     partition_index: int,
     group_size: int,
     group_limit: int,
+    max_map_containers: int,
     pilot: bool,
     full_map: bool,
     reduce: bool,
@@ -893,23 +904,32 @@ def driver(
     """Run detached orchestration remotely so client exit cannot stop fan-out."""
 
     _validate_remote_revision(revision)
+    if (
+        type(max_map_containers) is not int
+        or max_map_containers <= 0
+        or max_map_containers > MAX_MAP_CONTAINERS
+    ):
+        raise ValueError(f"max_map_containers must lie in [1, {MAX_MAP_CONTAINERS}]")
     if sum((bool(pilot), bool(full_map), bool(reduce))) != 1:
         raise ValueError("select exactly one Active8 phase: pilot, full_map, or reduce")
     if (pilot or reduce) and (int(partition_count) != 1 or int(partition_index) != 0):
         raise ValueError("the pilot and reduction require the complete unpartitioned plan")
     if pilot and (int(group_size) != PILOT_GROUP_SIZE or int(group_limit) != PILOT_GROUP_COUNT):
         raise ValueError("the Active8 pilot requires the frozen canary geometry")
-    if full_map and (
-        int(group_size) != TASK_PROCESSES_PER_CONTAINER or int(group_limit) != 0
-    ):
-        raise ValueError("the full Active8 map requires group_size=16 and group_limit=0")
+    if full_map and (int(group_size) != FULL_MAP_TASKS_PER_CONTAINER or int(group_limit) != 0):
+        raise ValueError(
+            "the full Active8 map requires "
+            f"group_size={FULL_MAP_TASKS_PER_CONTAINER} and group_limit=0"
+        )
 
-    plan = prepare_plan.remote(
+    prepared_plan = prepare_plan.remote(
         cache_run_artifact_root,
         rebind_run_artifact_root,
         output_artifact_prefix,
         revision,
     )
+    plan = prepared_plan["plan"]
+    workload_by_task = _validate_task_workloads(plan, prepared_plan["task_workloads"])
     plan_path = str(_active8_plan_path(plan))
     complete = set(scan_completed.remote(plan_path, revision))
     missing = _partition_task_ids(
@@ -928,27 +948,32 @@ def driver(
             group_limit=int(group_limit),
             pilot=bool(pilot),
             full_map=bool(full_map),
+            task_workloads=workload_by_task,
         )
     submitted_tasks = sum(len(group) for group in submitted_groups)
+    submitted_transition_work = sum(
+        workload_by_task[identity] for group in submitted_groups for identity in group
+    )
+    submitted_group_capacity = sum(
+        max(workload_by_task[identity] for identity in group) * len(group)
+        for group in submitted_groups
+    )
     canary_measurements: list[dict[str, Any]] = []
-    if submitted_groups and pilot:
-        canary_measurements = list(
-            decide_canary_task.starmap(
+    if submitted_groups:
+        if any(len(group) != 1 for group in submitted_groups):
+            raise RuntimeError("the Active8 map requires one task per replenishable container")
+        decide_task.update_autoscaler(max_containers=max_map_containers)
+        task_results = list(
+            decide_task.starmap(
                 [(plan_path, group[0], revision) for group in submitted_groups]
             )
         )
-        if len(canary_measurements) != len(submitted_groups) or {
-            result["task_identity_sha256"] for result in canary_measurements
+        if len(task_results) != len(submitted_groups) or {
+            result["task_identity_sha256"] for result in task_results
         } != {group[0] for group in submitted_groups}:
-            raise RuntimeError("the Active8 canary map lost a task result")
-    elif submitted_groups:
-        results = list(
-            decide_task_group.starmap([(plan_path, group, revision) for group in submitted_groups])
-        )
-        if len(results) != len(submitted_groups) or {
-            identity for result in results for identity in result["task_identity_sha256s"]
-        } != {identity for group in submitted_groups for identity in group}:
-            raise RuntimeError("the Active8 grouped map lost a task result")
+            raise RuntimeError("the Active8 map lost a task result")
+        if pilot:
+            canary_measurements = task_results
 
     completion = None
     sentinel_partitions = 0
@@ -984,9 +1009,26 @@ def driver(
         "missing_tasks_before_submit": len(missing),
         "submitted_groups": len(submitted_groups),
         "submitted_tasks": submitted_tasks,
+        "submitted_admitted_transitions": submitted_transition_work,
+        "submitted_group_capacity": submitted_group_capacity,
+        "submitted_group_utilization": (
+            None
+            if submitted_group_capacity == 0
+            else submitted_transition_work / submitted_group_capacity
+        ),
+        "task_workloads_sha256": _sha256(
+            [
+                [
+                    str(task["task_identity_sha256"]),
+                    workload_by_task[str(task["task_identity_sha256"])],
+                ]
+                for task in plan["tasks"]
+            ]
+        ),
         "canary_measurements": canary_measurements,
         "group_size": int(group_size),
         "group_limit": int(group_limit),
+        "max_map_containers": max_map_containers,
         "pilot": bool(pilot),
         "full_map": bool(full_map),
         "partition_count": int(partition_count),
@@ -1014,6 +1056,7 @@ def main(
     partition_index: int = 0,
     group_size: int = PILOT_GROUP_SIZE,
     group_limit: int = PILOT_GROUP_COUNT,
+    max_map_containers: int = MAX_MAP_CONTAINERS,
     pilot: bool = True,
     full_map: bool = False,
     reduce: bool = False,
@@ -1030,6 +1073,7 @@ def main(
         int(partition_index),
         int(group_size),
         int(group_limit),
+        int(max_map_containers),
         bool(pilot),
         bool(full_map),
         bool(reduce),
@@ -1044,6 +1088,7 @@ def main(
                 "pilot": bool(pilot),
                 "full_map": bool(full_map),
                 "reduce": bool(reduce),
+                "max_map_containers": int(max_map_containers),
                 "image_revision": revision,
                 "training_launched": False,
                 "training_authorized": False,

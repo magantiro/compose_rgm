@@ -5,7 +5,6 @@ from __future__ import annotations
 import ast
 import inspect
 import json
-from concurrent.futures import Future
 from pathlib import Path
 
 import pytest
@@ -23,10 +22,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def _plan(size: int = 12) -> dict[str, object]:
     return {
+        "plan_sha256": "b" * 64,
+        "binding": {"rebind_completion_sha256": "c" * 64},
         "run_artifact_root": "/artifacts/editing_v2/process_v2_active8/" + "a" * 64,
         "tasks": [
             {
                 "task_identity_sha256": f"{index:064x}",
+                "rebind_task_identity_sha256": f"{index + 10_000:064x}",
                 "chunk_row_count": index + 1,
             }
             for index in range(size)
@@ -42,6 +44,25 @@ def _pilot_plan() -> dict[str, object]:
     plan["tasks"][80].update(launcher.DEFAULT_SYNTHETIC_CANARY_SELECTOR)
     plan["tasks"][-1].update(launcher.DEFAULT_SMOKE_TASK_SELECTOR)
     return plan
+
+
+def _task_workloads(
+    plan: dict[str, object], transitions: list[int] | None = None
+) -> dict[str, object]:
+    values = transitions or [index + 1 for index in range(len(plan["tasks"]))]
+    assert len(values) == len(plan["tasks"])
+    completion = {
+        "completion_sha256": plan["binding"]["rebind_completion_sha256"],
+        "counts": {"admitted_transitions": sum(values)},
+        "result_inventory": [
+            {
+                "task_identity_sha256": task["rebind_task_identity_sha256"],
+                "counts": {"admitted_transitions": value},
+            }
+            for task, value in zip(plan["tasks"], values, strict=True)
+        ],
+    }
+    return launcher._build_task_workloads(plan, completion)
 
 
 def _function(tree: ast.Module, name: str) -> ast.FunctionDef:
@@ -84,10 +105,10 @@ def test_invalid_partition_geometry_is_refused(count: int, index: int) -> None:
 def test_launcher_uses_the_measured_low_memory_operating_point() -> None:
     runtime = json.loads((ROOT / launcher.RUNTIME_CONTRACT_SOURCE).read_bytes())
     assert TEACHER_SUPPORT_BATCH_SIZE == 8
-    assert launcher.MAP_CPU == 16.0
-    assert launcher.TASK_PROCESSES_PER_CONTAINER == 16
-    assert launcher.MAP_MEMORY_MB == 64 * 1024
-    assert launcher.MAX_MAP_CONTAINERS == 5
+    assert launcher.MAP_CPU == 1.0
+    assert launcher.FULL_MAP_TASKS_PER_CONTAINER == 1
+    assert launcher.MAP_MEMORY_MB == 4 * 1024
+    assert launcher.MAX_MAP_CONTAINERS == 80
     assert runtime["model"] == {
         "atom_vocabulary_class_count": 15,
         "candidate_cache_size": 4096,
@@ -158,12 +179,81 @@ def test_plan_path_is_the_exact_mounted_content_address() -> None:
 def test_groups_are_bounded_complete_and_keep_plan_order() -> None:
     plan = _plan()
     identities = [str(task["task_identity_sha256"]) for task in plan["tasks"]]
-    groups = launcher._task_groups(plan, identities, group_size=4)
+    groups = launcher._task_groups(plan, identities, group_size=1)
 
-    assert [int(group[0], 16) for group in groups] == [0, 4, 8]
-    assert all(1 <= len(group) <= 4 for group in groups)
+    assert [int(group[0], 16) for group in groups] == list(range(12))
+    assert all(len(group) == 1 for group in groups)
     assert {identity for group in groups for identity in group} == set(identities)
     assert sum(len(group) for group in groups) == len(identities)
+
+
+def test_task_workloads_are_an_exact_rebind_to_active8_join() -> None:
+    plan = _plan(size=5)
+    observed = _task_workloads(plan, [9, 1, 7, 3, 5])
+
+    assert observed == {
+        str(task["task_identity_sha256"]): value
+        for task, value in zip(plan["tasks"], [9, 1, 7, 3, 5], strict=True)
+    }
+    assert sum(observed.values()) == 25
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["wrong_completion", "missing_result", "duplicate_result", "boolean_count", "wrong_total"],
+)
+def test_task_workloads_refuse_incomplete_or_untyped_evidence(mutation: str) -> None:
+    plan = _plan(size=3)
+    completion = {
+        "completion_sha256": plan["binding"]["rebind_completion_sha256"],
+        "counts": {"admitted_transitions": 6},
+        "result_inventory": [
+            {
+                "task_identity_sha256": task["rebind_task_identity_sha256"],
+                "counts": {"admitted_transitions": index + 1},
+            }
+            for index, task in enumerate(plan["tasks"])
+        ],
+    }
+    if mutation == "wrong_completion":
+        completion["completion_sha256"] = "d" * 64
+    elif mutation == "missing_result":
+        completion["result_inventory"].pop()
+        completion["counts"]["admitted_transitions"] = 3
+    elif mutation == "duplicate_result":
+        completion["result_inventory"][1]["task_identity_sha256"] = completion["result_inventory"][
+            0
+        ]["task_identity_sha256"]
+    elif mutation == "boolean_count":
+        completion["result_inventory"][0]["counts"]["admitted_transitions"] = True
+    else:
+        completion["counts"]["admitted_transitions"] = 7
+
+    with pytest.raises(RuntimeError, match="workload"):
+        launcher._build_task_workloads(plan, completion)
+
+
+def test_workload_ordering_submits_heaviest_tasks_first_and_is_restart_safe() -> None:
+    plan = _plan(size=12)
+    transitions = [1, 100, 2, 99, 3, 98, 4, 97, 5, 96, 6, 95]
+    workloads = _task_workloads(plan, transitions)
+    identities = [str(task["task_identity_sha256"]) for task in plan["tasks"]]
+    complete = {identities[3]}
+    missing = [identity for identity in identities if identity not in complete]
+
+    groups = launcher._workload_ordered_task_groups(
+        plan,
+        missing,
+        group_size=1,
+        task_workloads=workloads,
+    )
+    work = launcher._validate_task_workloads(plan, workloads)
+
+    assert [len(group) for group in groups] == [1] * 11
+    assert {identity for group in groups for identity in group} == set(missing)
+    assert not ({identity for group in groups for identity in group} & complete)
+    flattened_work = [work[identity] for group in groups for identity in group]
+    assert flattened_work == sorted((work[identity] for identity in missing), reverse=True)
 
 
 def test_completed_tasks_are_removed_before_restart_groups_are_built() -> None:
@@ -172,55 +262,23 @@ def test_completed_tasks_are_removed_before_restart_groups_are_built() -> None:
     missing = launcher._partition_task_ids(
         plan, partition_count=1, partition_index=0, completed=completed
     )
-    groups = launcher._task_groups(plan, missing, group_size=3)
+    groups = launcher._task_groups(plan, missing, group_size=1)
 
     submitted = {identity for group in groups for identity in group}
     assert submitted.isdisjoint(completed)
     assert submitted | completed == {str(task["task_identity_sha256"]) for task in plan["tasks"]}
 
 
-@pytest.mark.parametrize("group_size", [0, 17, True])
+@pytest.mark.parametrize("group_size", [0, 2, True])
 def test_invalid_process_group_size_is_refused(group_size: int) -> None:
     with pytest.raises(ValueError, match="group_size"):
         launcher._task_groups(_plan(), [], group_size=group_size)
 
 
-def test_a_child_failure_propagates_out_of_group_collection() -> None:
-    left: Future[dict[str, str]] = Future()
-    right: Future[dict[str, str]] = Future()
-    left.set_result({"task_identity_sha256": "a" * 64, "receipt_sha256": "1" * 64})
-    right.set_exception(RuntimeError("child failed"))
-
-    with pytest.raises(RuntimeError, match="child failed"):
-        launcher._collect_process_results({left: "a" * 64, right: "b" * 64})
-
-
-def test_group_worker_has_five_writers_and_children_never_commit() -> None:
+def test_tasks_are_independent_right_sized_and_measured() -> None:
     source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
     tree = ast.parse(source)
-    child = ast.get_source_segment(source, _function(tree, "_execute_one_chunk_process"))
-    group = ast.get_source_segment(source, _function(tree, "decide_task_group"))
-    decorator = ast.get_source_segment(
-        source, _function(tree, "decide_task_group").decorator_list[0]
-    )
-    assert child is not None and group is not None and decorator is not None
-    assert "artifact_volume.commit" not in child
-    assert "artifact_volume.reload" not in child
-    assert 'multiprocessing.get_context("spawn")' in group
-    assert group.count("artifact_volume.commit()") == 1
-    assert (
-        group.index("_collect_process_results")
-        < group.index("validate_process_v2_active8_task_result")
-        < group.index("artifact_volume.commit()")
-    )
-    assert "max_containers=MAX_MAP_CONTAINERS" in decorator
-    assert launcher.MAX_MAP_CONTAINERS == 5
-
-
-def test_canary_tasks_are_independent_right_sized_and_measured() -> None:
-    source = (ROOT / launcher.LAUNCHER_SOURCE).read_text()
-    tree = ast.parse(source)
-    node = _function(tree, "decide_canary_task")
+    node = _function(tree, "decide_task")
     body = ast.get_source_segment(source, node)
     decorator = ast.get_source_segment(source, node.decorator_list[0])
     assert body is not None and decorator is not None
@@ -231,20 +289,22 @@ def test_canary_tasks_are_independent_right_sized_and_measured() -> None:
     )
     for field in ("wall_seconds", "cpu_seconds", "process_peak_rss_mb"):
         assert field in body
-    assert "cpu=PILOT_CPU" in decorator
-    assert "memory=PILOT_MEMORY_MB" in decorator
-    assert "max_containers=PILOT_MAX_CONTAINERS" in decorator
+    assert "cpu=MAP_CPU" in decorator
+    assert "memory=MAP_MEMORY_MB" in decorator
+    assert "max_containers=MAX_MAP_CONTAINERS" in decorator
 
 
 def test_first_launch_defaults_to_three_independent_train_canaries() -> None:
     parameters = inspect.signature(launcher.main.info.raw_f).parameters
-    assert launcher.PILOT_GROUP_COUNT == launcher.PILOT_MAX_CONTAINERS == 3
+    assert launcher.PILOT_GROUP_COUNT == 3
     assert launcher.PILOT_GROUP_SIZE == 1
     assert launcher.PILOT_TASK_COUNT == 3
-    assert launcher.PILOT_CPU == 1.0
-    assert launcher.PILOT_MEMORY_MB == 4 * 1024
+    assert launcher.MAP_CPU == 1.0
+    assert launcher.MAP_MEMORY_MB == 4 * 1024
+    assert launcher.MAX_MAP_CONTAINERS == 80
     assert parameters["group_size"].default == launcher.PILOT_GROUP_SIZE
     assert parameters["group_limit"].default == launcher.PILOT_GROUP_COUNT
+    assert parameters["max_map_containers"].default == launcher.MAX_MAP_CONTAINERS
     assert parameters["pilot"].default is True
     assert parameters["full_map"].default is False
     assert parameters["reduce"].default is False
@@ -276,22 +336,21 @@ def test_exact_pilot_selection_and_explicit_full_grouping() -> None:
     assert [len(group) for group in pilot] == [1, 1, 1]
     assert pilot_ids == [identities[0], identities[80], canary]
     assert canary in pilot_ids
-    task_by_identity = {
-        str(task["task_identity_sha256"]): task for task in plan["tasks"]
-    }
+    task_by_identity = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
     assert {task_by_identity[identity]["split"] for identity in pilot_ids} == {"train"}
 
     full = launcher._submission_groups(
         plan,
         identities,
         completed=set(),
-        group_size=16,
+        group_size=1,
         group_limit=0,
         pilot=False,
         full_map=True,
+        task_workloads=_task_workloads(plan),
     )
-    assert [len(group) for group in full] == [16, 16, 16, 16, 16, 16, 4]
-    assert [identity for group in full for identity in group] == identities
+    assert [len(group) for group in full] == [1] * 100
+    assert [identity for group in full for identity in group] == list(reversed(identities))
 
 
 def test_pilot_partial_and_full_restarts_submit_only_unfinished_cohort_tasks() -> None:
@@ -323,15 +382,18 @@ def test_pilot_partial_and_full_restarts_submit_only_unfinished_cohort_tasks() -
         partition_index=0,
         completed=all_cohort_complete,
     )
-    assert launcher._submission_groups(
-        plan,
-        missing_after_full_restart,
-        completed=all_cohort_complete,
-        group_size=1,
-        group_limit=3,
-        pilot=True,
-        full_map=False,
-    ) == []
+    assert (
+        launcher._submission_groups(
+            plan,
+            missing_after_full_restart,
+            completed=all_cohort_complete,
+            group_size=1,
+            group_limit=3,
+            pilot=True,
+            full_map=False,
+        )
+        == []
+    )
 
 
 def test_pilot_locator_survives_binding_derived_task_identity_changes() -> None:
@@ -394,9 +456,33 @@ def test_remote_driver_requires_exactly_one_phase(
             0,
             16,
             5,
+            launcher.MAX_MAP_CONTAINERS,
             pilot,
             full_map,
             reduce,
+            launcher.DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
+            {},
+        )
+
+
+@pytest.mark.parametrize("max_map_containers", [0, 81, True])
+def test_remote_driver_refuses_invalid_runtime_container_bound(
+    monkeypatch: pytest.MonkeyPatch, max_map_containers: int
+) -> None:
+    monkeypatch.setattr(launcher, "_validate_remote_revision", lambda _revision: None)
+    with pytest.raises(ValueError, match="max_map_containers"):
+        launcher.driver.info.raw_f(
+            "/cache",
+            "/rebind",
+            launcher.OUTPUT_ARTIFACT_PREFIX,
+            1,
+            0,
+            launcher.PILOT_GROUP_SIZE,
+            launcher.PILOT_GROUP_COUNT,
+            max_map_containers,
+            True,
+            False,
+            False,
             launcher.DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
             {},
         )
@@ -422,13 +508,13 @@ def test_remote_driver_owns_orchestration_without_a_volume_mount_or_commit() -> 
     for call in (
         "prepare_plan.remote(",
         "scan_completed.remote(",
-        "decide_canary_task.starmap(",
-        "decide_task_group.starmap(",
+        "decide_task.starmap(",
         "prepare_sentinel.remote(",
         "run_sentinel_partition.starmap(",
         "finalize.remote(",
     ):
         assert call in driver
+    assert "decide_task.update_autoscaler(max_containers=max_map_containers)" in driver
     assert "volumes=" not in decorator
     assert "artifact_volume" not in driver
     assert ".commit(" not in driver
