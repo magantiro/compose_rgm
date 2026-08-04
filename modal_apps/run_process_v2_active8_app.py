@@ -26,7 +26,7 @@ import sys
 import time
 from collections import Counter
 from pathlib import Path
-from typing import Any, Hashable, Iterable
+from typing import Any, Callable, Hashable, Iterable
 
 import modal
 
@@ -967,7 +967,12 @@ def probe_task_progress(
             self.total = 0
             self.workload_statistics: dict[str, Any] | None = None
 
-        def evaluate_many(self, queries: Any) -> tuple[Any, ...]:
+        def evaluate_many(
+            self,
+            queries: Any,
+            *,
+            progress_callback: Callable[[int, int], None] | None = None,
+        ) -> tuple[Any, ...]:
             self.total = len(queries)
             source_keys = (
                 molecular_state_cache_key(addressed.path.state_at(step_index))
@@ -1007,6 +1012,8 @@ def probe_task_progress(
             def report(processed: int, total: int) -> None:
                 nonlocal next_report
                 self.processed = processed
+                if progress_callback is not None:
+                    progress_callback(processed, total)
                 if processed < next_report and processed != total:
                     return
                 wall_seconds = time.perf_counter() - wall_start

@@ -157,6 +157,8 @@ def test_progress_probe_uses_family_local_admission_and_never_publishes() -> Non
     assert "teacher_admission_before_structural_rows" in body
     assert '"artifact_published": False' in body
     assert "artifact_volume.commit()" not in body
+    assert "progress_callback: Callable[[int, int], None] | None = None" in body
+    assert "progress_callback(processed, total)" in body
 
     orchestrator = ast.get_source_segment(
         source, _function(tree, "progress_probe_orchestrator")
