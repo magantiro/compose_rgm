@@ -130,6 +130,22 @@ def test_launcher_uses_the_measured_low_memory_operating_point() -> None:
     )
 
 
+def test_progress_probe_reports_exact_source_reuse() -> None:
+    observed = launcher._source_reuse_statistics(
+        ("source-a", "source-a", "source-b", "source-c", "source-c", "source-c")
+    )
+
+    assert observed == {
+        "query_count": 6,
+        "unique_source_state_count": 3,
+        "repeated_source_query_count": 3,
+        "repeated_source_query_fraction": 0.5,
+        "source_states_with_multiple_queries": 2,
+        "maximum_queries_per_source_state": 3,
+        "source_query_multiplicity_histogram": {"1": 1, "2": 1, "3": 1},
+    }
+
+
 def test_the_serialized_image_contains_every_active8_answer_module() -> None:
     sources = set(launcher._serialized_source_paths(ROOT))
     assert launcher.LAUNCHER_SOURCE in sources

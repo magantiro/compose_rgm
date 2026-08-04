@@ -24,8 +24,9 @@ import resource
 import subprocess
 import sys
 import time
+from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, Hashable, Iterable
 
 import modal
 
@@ -111,6 +112,32 @@ artifact_volume = modal.Volume.from_name("compose-v4-artifacts", create_if_missi
 
 _RUNTIME: Any | None = None
 _VALIDATED_REVISION_SHA256: str | None = None
+
+
+def _source_reuse_statistics(keys: Iterable[Hashable]) -> dict[str, Any]:
+    """Summarize exact source-state reuse without inspecting held-out labels."""
+
+    multiplicities = Counter(keys)
+    total = sum(multiplicities.values())
+    unique = len(multiplicities)
+    repeated_queries = total - unique
+    histogram = Counter(multiplicities.values())
+    return {
+        "query_count": total,
+        "unique_source_state_count": unique,
+        "repeated_source_query_count": repeated_queries,
+        "repeated_source_query_fraction": (
+            0.0 if total == 0 else repeated_queries / total
+        ),
+        "source_states_with_multiple_queries": sum(
+            count for multiplicity, count in histogram.items() if multiplicity > 1
+        ),
+        "maximum_queries_per_source_state": max(multiplicities.values(), default=0),
+        "source_query_multiplicity_histogram": {
+            str(multiplicity): histogram[multiplicity]
+            for multiplicity in sorted(histogram)
+        },
+    }
 
 
 def _canonical_bytes(value: object) -> bytes:
@@ -780,6 +807,7 @@ def probe_task_progress(
     task_identity_sha256: str,
     revision: dict[str, Any],
     progress_batch_size: int,
+    stats_only: bool,
 ) -> dict[str, Any]:
     """Measure one queued task with bounded heartbeats and no publication.
 
@@ -792,6 +820,8 @@ def probe_task_progress(
 
     if type(progress_batch_size) is not int or progress_batch_size <= 0:
         raise ValueError("progress_batch_size must be positive")
+    if type(stats_only) is not bool:
+        raise ValueError("stats_only must be boolean")
     _validate_remote_revision(revision)
     loaded = _imports()
     artifact_volume.reload()
@@ -818,6 +848,9 @@ def probe_task_progress(
     from compose_v4.data.editing_v2_semantic_capability_cells import (
         load_semantic_capability_cell_registry,
     )
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        molecular_state_cache_key,
+    )
 
     runtime = _runtime()
     binding = plan["binding"]
@@ -840,14 +873,51 @@ def probe_task_progress(
     wall_start = time.perf_counter()
     cpu_start = time.process_time()
 
+    class StatsOnlyComplete(Exception):
+        """Stop after the exact production query-preparation boundary."""
+
     class ProgressChecker:
         def __init__(self) -> None:
             self.policy = inner.policy
             self.processed = 0
             self.total = 0
+            self.workload_statistics: dict[str, Any] | None = None
 
         def evaluate_many(self, queries: Any) -> tuple[Any, ...]:
             self.total = len(queries)
+            source_keys = (
+                molecular_state_cache_key(addressed.path.state_at(step_index))
+                for addressed, step_index in queries
+            )
+            rule_histogram = Counter(
+                str(addressed.trace.steps[step_index].rule_name)
+                for addressed, step_index in queries
+            )
+            self.workload_statistics = {
+                **_source_reuse_statistics(source_keys),
+                "teacher_rule_histogram": {
+                    rule_name: rule_histogram[rule_name]
+                    for rule_name in sorted(rule_histogram)
+                },
+                "query_preparation_wall_seconds": time.perf_counter() - wall_start,
+                "query_preparation_cpu_seconds": time.process_time() - cpu_start,
+                "process_peak_rss_mb": _peak_rss_mb(),
+            }
+            print(
+                json.dumps(
+                    {
+                        "event": "ACTIVE8_PROGRESS_PROBE_WORKLOAD",
+                        "task_identity_sha256": task_identity_sha256,
+                        **self.workload_statistics,
+                        "stats_only": stats_only,
+                        "scientific_authority": False,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            if stats_only:
+                raise StatsOnlyComplete
             next_report = min(progress_batch_size, self.total)
 
             def report(processed: int, total: int) -> None:
@@ -900,27 +970,37 @@ def probe_task_progress(
     )
     row_count = 0
     produced_transition_count = 0
-    for _row, produced in _decide_chunk(
-        task,
-        decisions=decisions,
-        checker=checker,
-        namespace=registry.namespace,
-        expected_process_identity=pinned_process_identity,
-        artifact_root=ARTIFACT_ROOT,
-        repo_root=REMOTE_ROOT,
-    ):
-        row_count += 1
-        produced_transition_count += len(produced)
+    try:
+        for _row, produced in _decide_chunk(
+            task,
+            decisions=decisions,
+            checker=checker,
+            namespace=registry.namespace,
+            expected_process_identity=pinned_process_identity,
+            artifact_root=ARTIFACT_ROOT,
+            repo_root=REMOTE_ROOT,
+        ):
+            row_count += 1
+            produced_transition_count += len(produced)
+    except StatsOnlyComplete:
+        pass
     result = {
-        "event": "ACTIVE8_PROGRESS_PROBE_COMPLETE",
+        "event": (
+            "ACTIVE8_PROGRESS_PROBE_STATS_COMPLETE"
+            if stats_only
+            else "ACTIVE8_PROGRESS_PROBE_COMPLETE"
+        ),
         "task_identity_sha256": task_identity_sha256,
-        "source_rows": row_count,
+        "source_rows": None if stats_only else row_count,
+        "planned_source_rows": int(task["chunk_row_count"]),
         "processed_transitions": checker.processed,
         "total_transitions": checker.total,
-        "produced_transitions": produced_transition_count,
+        "produced_transitions": None if stats_only else produced_transition_count,
         "wall_seconds": time.perf_counter() - wall_start,
         "cpu_seconds": time.process_time() - cpu_start,
         "process_peak_rss_mb": _peak_rss_mb(),
+        "stats_only": stats_only,
+        "workload_statistics": checker.workload_statistics,
         "scientific_authority": False,
         "artifact_published": False,
     }
@@ -1221,6 +1301,7 @@ def progress_probe_orchestrator(
     rebind_run_artifact_root: str,
     output_artifact_prefix: str,
     progress_batch_size: int,
+    stats_only: bool,
     revision: dict[str, Any],
 ) -> dict[str, Any]:
     """Prepare and spawn one non-authoritative queued-task progress probe."""
@@ -1228,6 +1309,8 @@ def progress_probe_orchestrator(
     _validate_remote_revision(revision)
     if type(progress_batch_size) is not int or progress_batch_size <= 0:
         raise ValueError("progress_batch_size must be positive")
+    if type(stats_only) is not bool:
+        raise ValueError("stats_only must be boolean")
     prepared_plan = prepare_plan.remote(
         cache_run_artifact_root,
         rebind_run_artifact_root,
@@ -1248,12 +1331,14 @@ def progress_probe_orchestrator(
         str(selected[0]["task_identity_sha256"]),
         revision,
         int(progress_batch_size),
+        stats_only,
     )
     result = {
         "phase": "process_v2_active8_progress_probe_spawned",
         "probe_call_id": call.object_id,
         "selector": PROGRESS_PROBE_SELECTOR,
         "progress_batch_size": int(progress_batch_size),
+        "stats_only": stats_only,
         "image_revision": revision,
         "artifact_publication": False,
         "scientific_authority": False,
@@ -1280,6 +1365,7 @@ def main(
     sentinel_pairs_per_partition: int = DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
     progress_probe: bool = False,
     progress_batch_size: int = 64,
+    progress_stats_only: bool = False,
 ) -> None:
     """Spawn one disconnect-safe remote pilot, full-map, or reduction driver."""
 
@@ -1290,6 +1376,7 @@ def main(
             rebind_run_artifact_root,
             output_artifact_prefix,
             int(progress_batch_size),
+            bool(progress_stats_only),
             revision,
         )
         print(
@@ -1299,6 +1386,7 @@ def main(
                     "probe_orchestrator_call_id": call.object_id,
                     "selector": PROGRESS_PROBE_SELECTOR,
                     "progress_batch_size": int(progress_batch_size),
+                    "stats_only": bool(progress_stats_only),
                     "image_revision": revision,
                     "artifact_publication": False,
                     "scientific_authority": False,
@@ -1349,6 +1437,7 @@ def main(
 __all__ = [
     "MAX_MAP_CONTAINERS",
     "PROGRESS_PROBE_SELECTOR",
+    "_source_reuse_statistics",
     "_partition_task_ids",
     "local_image_revision",
 ]
