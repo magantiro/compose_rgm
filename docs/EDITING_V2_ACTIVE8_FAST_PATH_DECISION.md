@@ -1,10 +1,12 @@
 # Editing V2 Active8 fast-path decision
 
-Status: the teacher-support fast path is implemented and verified. A corrective
-80-task remote pilot was stopped after eight hours because its fixed process
-groups produced unacceptable straggler cost. A three-task, independently
-scheduled operational canary is implemented and verified locally but has not
-yet been launched.
+Status: the teacher-support fast path and restart-safe independent-task launcher
+are implemented and verified. A corrective 80-task remote pilot was stopped
+after eight hours because its fixed process groups produced unacceptable
+straggler cost. The subsequent three-task operational canary established the
+one-CPU, 4-GiB resource envelope but was censored before its two production-sized
+tasks completed. The release map therefore uses independent, content-addressed
+task invocations with a runtime concurrency bound of at most 80.
 
 ## Decision
 
@@ -125,6 +127,27 @@ group finished. The preserved artifacts remain valid only under their exact
 historical run identity. They are diagnostic evidence, not evidence for a
 changed execution implementation.
 
+### Independent-task canary result
+
+The three-task canary launched from commit
+`fbe2e0f6e9dc04641dc226657ba882b1b473cdc5` as detached Modal app
+`ap-FFaH9uho8ZMe5yEjALaJj8`. It used one CPU and 4 GiB for each task. The
+smallest task published successfully at 11:46 EDT with 54 classified
+transitions. The two production-sized tasks remained CPU-active without an
+exception and with stable resident memory when the app was stopped. At the
+final observation, their process CPU times were at least 4,596.59 and 4,895.26
+seconds and their resident-memory measurements were 3,547,508 and 3,733,420
+kB. Neither task published a partial result, as required by atomic task
+publication.
+
+This is a censored operational result, not a scientific pass and not a runtime
+estimate for the corpus. Waiting longer could not authorize a changed execution
+commit, and the two unfinished artifacts could not be reused under that commit.
+The canary nevertheless answered its resource question: the hard tasks ran for
+more than one CPU-hour within the one-CPU, 4-GiB envelope without memory growth
+or a runtime error. The old app was stopped after the measurement. No reducer,
+release sentinel, Gate 0, T1, P50, or training ran.
+
 ## Release execution architecture
 
 The release launcher binds every plan to the exact clean 40-character Git
@@ -153,11 +176,28 @@ is selected before completed-task filtering, so a restart resumes only missing
 canaries and cannot silently advance into the full map. Individual task
 artifacts remain content-addressed and restart safe.
 
-The explicit full invocation retains at most five Volume-v1 writer containers
-until the canary supplies a measured production-task time and memory bound.
-Its final CPU, process-group, and memory geometry must be selected from the
-three canary measurements. The launcher does not infer full-map authority from
-successful task publication alone.
+The explicit full invocation submits one plan task per Modal invocation, with
+one CPU and 4 GiB per task, and accepts a runtime concurrency bound up to 80.
+The bound changes scheduling only and is not part of scientific artifact
+identity, so a pressure-related restart may lower concurrency while reusing
+every completed task from the same exact execution commit. There is no fixed
+process group and no group barrier. A completed worker releases its container,
+and the platform may immediately schedule another missing task within the
+bound.
+
+The exact release workload contains 328 disjoint plan tasks and 2,327,413
+admitted transitions. Tasks are submitted in decreasing admitted-transition
+count so the longest tasks start first. The measured scheduler inventory joins
+all 328 plan tasks exactly once, with no missing, duplicate, or out-of-order
+entry, and its modeled scheduling utilization is 1.0. These are plan and
+scheduler facts, not Active8 scientific results.
+
+Task publication alone does not authorize downstream work. The map must finish,
+the reducer must reconcile the exact corpus inventory, and the bounded release
+sentinel must pass before Gate 0 may consume the result. If 80 concurrent
+writers produce storage pressure or repeated transient failures, the same clean
+commit is relaunched with a lower bound and the already published task
+directories are reused.
 
 Reduction no longer retains the corpus-wide transition inventory in memory. It
 uses a temporary SQLite index to enforce global source-row uniqueness, derive
