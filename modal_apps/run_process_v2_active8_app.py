@@ -66,6 +66,14 @@ DEFAULT_SYNTHETIC_CANARY_SELECTOR = {
     "data_lane": "reversible_synthetic_walk",
     "chunk_row_count": 2_048,
 }
+PROGRESS_PROBE_SELECTOR = {
+    "split": "train",
+    "data_lane": "real_endpoint_multistep_path",
+    "chunk_index": 58,
+    "entry_start": 118_784,
+    "entry_stop": 120_832,
+    "chunk_row_count": 2_048,
+}
 
 REVISION_SCHEMA = "compose.data.process_v2_active8_modal_image_revision"
 REVISION_SCHEMA_VERSION = 1
@@ -761,6 +769,169 @@ def decide_task(
 
 @app.function(
     image=image,
+    cpu=MAP_CPU,
+    memory=MAP_MEMORY_MB,
+    timeout=MAP_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def probe_task_progress(
+    plan_path: str,
+    task_identity_sha256: str,
+    revision: dict[str, Any],
+    progress_batch_size: int,
+) -> dict[str, Any]:
+    """Measure one queued task with bounded heartbeats and no publication.
+
+    This operational probe uses the production reader, policy, model, support
+    checker, executor, and structural row construction.  It deliberately wraps
+    only the checker's ``evaluate_many`` call so that each bounded block emits
+    elapsed time, CPU time, resident memory, throughput, and ETA.  It writes no
+    artifact and grants no downstream authority.
+    """
+
+    if type(progress_batch_size) is not int or progress_batch_size <= 0:
+        raise ValueError("progress_batch_size must be positive")
+    _validate_remote_revision(revision)
+    loaded = _imports()
+    artifact_volume.reload()
+    plan = loaded["load_process_v2_active8_plan"](Path(plan_path), repo_root=REMOTE_ROOT)
+    _require_plan_revision(plan, revision)
+    tasks = {str(task["task_identity_sha256"]): task for task in plan["tasks"]}
+    if task_identity_sha256 not in tasks:
+        raise RuntimeError("the Active8 progress probe names an unplanned task")
+    task = tasks[task_identity_sha256]
+
+    from compose_v4.data.editing_process_v2_rebind import (
+        mounted_process_v2_artifact_path,
+    )
+    from compose_v4.data.editing_v2_process_v2_active8_admission import (
+        ProductionProcessV2BatchedTeacherSupportChecker,
+    )
+    from compose_v4.data.editing_v2_process_v2_active8_map import (
+        TEACHER_SUPPORT_BATCH_SIZE,
+        _decide_chunk,
+        read_rebind_chunk_decisions,
+    )
+    from compose_v4.data.editing_v2_semantic_active8_admission import (
+        build_process_v2_semantic_active8_admission_policy,
+        validate_process_v2_semantic_active8_admission_policy,
+    )
+    from compose_v4.data.editing_v2_semantic_capability_cells import (
+        load_semantic_capability_cell_registry,
+    )
+
+    runtime = _runtime()
+    binding = plan["binding"]
+    if loaded["model_runtime_descriptor"](runtime) != dict(binding["model_runtime"]):
+        raise RuntimeError("the progress probe runtime is not the one bound by the plan")
+    policy = validate_process_v2_semantic_active8_admission_policy(
+        build_process_v2_semantic_active8_admission_policy()
+    )
+    if policy.policy_sha256 != binding["active8_policy_sha256"]:
+        raise RuntimeError("the progress probe policy is not the one bound by the plan")
+    registry = load_semantic_capability_cell_registry()
+    if registry.registry_sha256 != binding["capability_cell_registry_sha256"]:
+        raise RuntimeError("the progress probe cell registry is not the one bound by the plan")
+    inner = ProductionProcessV2BatchedTeacherSupportChecker(
+        runtime.model,
+        policy=policy,
+        batch_size=TEACHER_SUPPORT_BATCH_SIZE,
+    )
+
+    wall_start = time.perf_counter()
+    cpu_start = time.process_time()
+
+    class ProgressChecker:
+        def __init__(self) -> None:
+            self.policy = inner.policy
+            self.processed = 0
+            self.total = 0
+
+        def evaluate_many(self, queries: Any) -> tuple[Any, ...]:
+            self.total = len(queries)
+            next_report = min(progress_batch_size, self.total)
+
+            def report(processed: int, total: int) -> None:
+                nonlocal next_report
+                self.processed = processed
+                if processed < next_report and processed != total:
+                    return
+                wall_seconds = time.perf_counter() - wall_start
+                cpu_seconds = time.process_time() - cpu_start
+                rate = self.processed / wall_seconds if wall_seconds > 0.0 else 0.0
+                eta_seconds = (
+                    None if rate <= 0.0 else (self.total - self.processed) / rate
+                )
+                print(
+                    json.dumps(
+                        {
+                            "event": "ACTIVE8_PROGRESS_PROBE_HEARTBEAT",
+                            "task_identity_sha256": task_identity_sha256,
+                            "processed_transitions": self.processed,
+                            "total_transitions": self.total,
+                            "wall_seconds": wall_seconds,
+                            "cpu_seconds": cpu_seconds,
+                            "transitions_per_second": rate,
+                            "eta_seconds": eta_seconds,
+                            "process_peak_rss_mb": _peak_rss_mb(),
+                            "scientific_authority": False,
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
+                while next_report <= processed:
+                    next_report += progress_batch_size
+
+            return inner.evaluate_many(queries, progress_callback=report)
+
+    checker = ProgressChecker()
+    rebind_output = mounted_process_v2_artifact_path(
+        str(task["rebind_task_artifact_path"]),
+        artifact_root=ARTIFACT_ROOT,
+        field="task.rebind_task_artifact_path",
+    )
+    decisions, pinned_process_identity = read_rebind_chunk_decisions(
+        rebind_output,
+        entry_start=int(task["entry_start"]),
+        entry_stop=int(task["entry_stop"]),
+        task_identity_sha256=str(task["rebind_task_identity_sha256"]),
+        chunk_file_sha256=str(task["chunk_file_sha256"]),
+        pinned_process_identity_sha256=str(task["pinned_process_identity_sha256"]),
+    )
+    row_count = 0
+    produced_transition_count = 0
+    for _row, produced in _decide_chunk(
+        task,
+        decisions=decisions,
+        checker=checker,
+        namespace=registry.namespace,
+        expected_process_identity=pinned_process_identity,
+        artifact_root=ARTIFACT_ROOT,
+        repo_root=REMOTE_ROOT,
+    ):
+        row_count += 1
+        produced_transition_count += len(produced)
+    result = {
+        "event": "ACTIVE8_PROGRESS_PROBE_COMPLETE",
+        "task_identity_sha256": task_identity_sha256,
+        "source_rows": row_count,
+        "processed_transitions": checker.processed,
+        "total_transitions": checker.total,
+        "produced_transitions": produced_transition_count,
+        "wall_seconds": time.perf_counter() - wall_start,
+        "cpu_seconds": time.process_time() - cpu_start,
+        "process_peak_rss_mb": _peak_rss_mb(),
+        "scientific_authority": False,
+        "artifact_published": False,
+    }
+    print(json.dumps(result, sort_keys=True), flush=True)
+    return result
+
+
+@app.function(
+    image=image,
     cpu=1.0,
     memory=8192,
     timeout=SERIAL_TIMEOUT_SECONDS,
@@ -1046,6 +1217,54 @@ def driver(
     return result
 
 
+@app.function(image=image, cpu=0.125, memory=512, timeout=SERIAL_TIMEOUT_SECONDS)
+def progress_probe_orchestrator(
+    cache_run_artifact_root: str,
+    rebind_run_artifact_root: str,
+    output_artifact_prefix: str,
+    progress_batch_size: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Prepare and spawn one non-authoritative queued-task progress probe."""
+
+    _validate_remote_revision(revision)
+    if type(progress_batch_size) is not int or progress_batch_size <= 0:
+        raise ValueError("progress_batch_size must be positive")
+    prepared_plan = prepare_plan.remote(
+        cache_run_artifact_root,
+        rebind_run_artifact_root,
+        output_artifact_prefix,
+        revision,
+    )
+    plan = prepared_plan["plan"]
+    selected = [
+        task
+        for task in plan["tasks"]
+        if all(task.get(field) == value for field, value in PROGRESS_PROBE_SELECTOR.items())
+    ]
+    if len(selected) != 1:
+        raise RuntimeError("the Active8 progress probe selector is absent or ambiguous")
+    plan_path = str(_active8_plan_path(plan))
+    call = probe_task_progress.spawn(
+        plan_path,
+        str(selected[0]["task_identity_sha256"]),
+        revision,
+        int(progress_batch_size),
+    )
+    result = {
+        "phase": "process_v2_active8_progress_probe_spawned",
+        "probe_call_id": call.object_id,
+        "selector": PROGRESS_PROBE_SELECTOR,
+        "progress_batch_size": int(progress_batch_size),
+        "image_revision": revision,
+        "artifact_publication": False,
+        "scientific_authority": False,
+        "training_launched": False,
+    }
+    print(json.dumps(result, sort_keys=True), flush=True)
+    return result
+
+
 @app.local_entrypoint()
 def main(
     cache_run_artifact_root: str,
@@ -1061,10 +1280,37 @@ def main(
     full_map: bool = False,
     reduce: bool = False,
     sentinel_pairs_per_partition: int = DEFAULT_SENTINEL_PAIRS_PER_PARTITION,
+    progress_probe: bool = False,
+    progress_batch_size: int = 64,
 ) -> None:
     """Spawn one disconnect-safe remote pilot, full-map, or reduction driver."""
 
     revision = local_image_revision(expected_commit=expected_commit)
+    if progress_probe:
+        call = progress_probe_orchestrator.spawn(
+            cache_run_artifact_root,
+            rebind_run_artifact_root,
+            output_artifact_prefix,
+            int(progress_batch_size),
+            revision,
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "process_v2_active8_progress_probe_launched",
+                    "probe_orchestrator_call_id": call.object_id,
+                    "selector": PROGRESS_PROBE_SELECTOR,
+                    "progress_batch_size": int(progress_batch_size),
+                    "image_revision": revision,
+                    "artifact_publication": False,
+                    "scientific_authority": False,
+                    "training_launched": False,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
     call = driver.spawn(
         cache_run_artifact_root,
         rebind_run_artifact_root,
@@ -1104,6 +1350,7 @@ def main(
 
 __all__ = [
     "MAX_MAP_CONTAINERS",
+    "PROGRESS_PROBE_SELECTOR",
     "_partition_task_ids",
     "local_image_revision",
 ]

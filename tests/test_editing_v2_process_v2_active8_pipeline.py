@@ -1146,6 +1146,30 @@ def test_batched_teacher_support_is_a_callable_checker(stage: _Stage) -> None:
     assert checker(*query) == checker.evaluate(*query)
 
 
+def test_batched_teacher_support_reports_monotone_progress_without_changing_results(
+    stage: _Stage,
+) -> None:
+    queries = _accepted_teacher_queries(stage)[:7]
+    assert len(queries) == 7
+    checker = ProductionProcessV2BatchedTeacherSupportChecker(
+        stage.runtime.model,
+        batch_size=3,
+    )
+    expected = checker.evaluate_many(queries)
+    progress: list[tuple[int, int]] = []
+    observed = checker.evaluate_many(
+        queries,
+        progress_callback=lambda processed, total: progress.append((processed, total)),
+    )
+
+    assert observed == expected
+    assert progress[-1] == (len(queries), len(queries))
+    assert [processed for processed, _total in progress] == sorted(
+        processed for processed, _total in progress
+    )
+    assert all(total == len(queries) for _processed, total in progress)
+
+
 @pytest.mark.parametrize("table_name", ("ring_system_grow", "ring_system_delete"))
 def test_batched_teacher_support_refuses_nonzero_disabled_family_masks(
     stage: _Stage,

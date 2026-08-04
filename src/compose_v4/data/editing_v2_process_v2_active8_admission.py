@@ -15,7 +15,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Literal, Protocol, Sequence
+from typing import Any, Callable, Literal, Protocol, Sequence
 
 import torch
 
@@ -795,6 +795,8 @@ class ProductionProcessV2BatchedTeacherSupportChecker:
     def evaluate_many(
         self,
         queries: Sequence[tuple[AddressedPackedTrace, int]],
+        *,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> tuple[ProcessV2TeacherSupportEvidence, ...]:
         """Return evidence in input order, batching only compatible slot shapes."""
 
@@ -828,6 +830,7 @@ class ProductionProcessV2BatchedTeacherSupportChecker:
             groups.setdefault(int(source.n_atoms), []).append(query_index)
 
         outputs: list[ProcessV2TeacherSupportEvidence | None] = [None] * len(queries)
+        processed = 0
         for n_slots in sorted(groups):
             indices = groups[n_slots]
             for start in range(0, len(indices), self.batch_size):
@@ -893,6 +896,9 @@ class ProductionProcessV2BatchedTeacherSupportChecker:
                         batch_index=batch_index,
                         masks=cpu_masks,
                     )
+                processed += len(selected_indices)
+                if progress_callback is not None:
+                    progress_callback(processed, len(queries))
         if any(output is None for output in outputs):
             raise SemanticActive8AdmissionError(
                 "batched teacher-support failed to produce every requested result"
