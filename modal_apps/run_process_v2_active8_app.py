@@ -1389,7 +1389,7 @@ def progress_probe_orchestrator(
     stats_only: bool,
     revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """Prepare and spawn one non-authoritative queued-task progress probe."""
+    """Prepare and await one non-authoritative queued-task progress probe."""
 
     _validate_remote_revision(revision)
     if type(progress_batch_size) is not int or progress_batch_size <= 0:
@@ -1411,7 +1411,7 @@ def progress_probe_orchestrator(
     if len(selected) != 1:
         raise RuntimeError("the Active8 progress probe selector is absent or ambiguous")
     plan_path = str(_active8_plan_path(plan))
-    call = probe_task_progress.spawn(
+    probe_result = probe_task_progress.remote(
         plan_path,
         str(selected[0]["task_identity_sha256"]),
         revision,
@@ -1419,8 +1419,8 @@ def progress_probe_orchestrator(
         stats_only,
     )
     result = {
-        "phase": "process_v2_active8_progress_probe_spawned",
-        "probe_call_id": call.object_id,
+        "phase": "process_v2_active8_progress_probe_complete",
+        "probe_result": probe_result,
         "selector": PROGRESS_PROBE_SELECTOR,
         "progress_batch_size": int(progress_batch_size),
         "stats_only": stats_only,

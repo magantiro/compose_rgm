@@ -158,6 +158,13 @@ def test_progress_probe_uses_family_local_admission_and_never_publishes() -> Non
     assert '"artifact_published": False' in body
     assert "artifact_volume.commit()" not in body
 
+    orchestrator = ast.get_source_segment(
+        source, _function(tree, "progress_probe_orchestrator")
+    )
+    assert orchestrator is not None
+    assert "probe_task_progress.remote(" in orchestrator
+    assert "probe_task_progress.spawn(" not in orchestrator
+
 
 def test_the_serialized_image_contains_every_active8_answer_module() -> None:
     sources = set(launcher._serialized_source_paths(ROOT))
