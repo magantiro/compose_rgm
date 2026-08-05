@@ -692,7 +692,7 @@ def finalize_prepared_remote(
         _require_artifact_path(panel_path, field="panel_path"),
         label="the Process-V2 T1 panel",
     )
-    root = _require_artifact_path(run_root, field="run_root")
+    root = _require_physical_artifact_path(run_root, field="run_root")
     with _heartbeat("process_v2_t1_prepared_leaf_reduction"):
         completion_path = loaded["publish_prepared"](
             plan,
@@ -754,7 +754,7 @@ def finalize_reused_prepared_remote(
         _require_artifact_path(panel_path, field="panel_path"),
         label="the reusable Process-V2 T1 panel",
     )
-    root = _require_artifact_path(run_root, field="run_root")
+    root = _require_physical_artifact_path(run_root, field="run_root")
     _progress(
         "process_v2_t1_reused_reduction_start",
         run_root=str(root),
