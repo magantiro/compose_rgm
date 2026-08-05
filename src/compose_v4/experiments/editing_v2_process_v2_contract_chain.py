@@ -22,18 +22,20 @@ Process-V2 identity:
  7   ``..._p50_recipe_policy.json``                                       the V1 P50 recipe policy
 ===  ==================================================================  ==========
 
-MIRROR, NOT REDESIGN
---------------------
-No policy value moves.  Cell definitions, family contexts, data lanes, partition
-roles, the ``editing_v2_active8_v1`` cell namespace, the 17 required / 3
+MIRROR, WITH ONE VERSIONED OPERATIONAL DELTA
+--------------------------------------------
+No scientific policy value moves.  Cell definitions, family contexts, data lanes,
+partition roles, the ``editing_v2_active8_v1`` cell namespace, the 17 required / 3
 conditional / 2 separate-lane counts, panel cardinalities, every threshold, the
 optimizer and sampling laws are **projected** from the frozen V1 contracts through
 ``compose_v4.data.editing_v2_process_v2_policy_registry`` rather than transcribed
-here.  The registry pins each frozen source by physical hash and self-hash, so a
-projection cannot drift and an edited frozen source makes the build refuse.  This
-replaces roughly five hundred lines of hand-copied policy; the projection was
-proved byte-identical to every constant it replaced before those constants were
-deleted.
+here.  Process-V2 T1 operational-semantics version 1 evaluates only at step zero
+and the frozen report points, and makes step 10 the earliest eligible threshold
+stop.  The validator proves every other T1 value is still identical to V1.  The
+registry pins each frozen source by physical hash and self-hash, so a projection
+cannot drift and an edited frozen source makes the build refuse.  This replaces
+roughly five hundred lines of hand-copied policy; the projection was proved
+byte-identical to every constant it replaced before those constants were deleted.
 
 THE DEPENDENCY GRAPH IS EXPLICIT
 --------------------------------
@@ -199,6 +201,19 @@ CHAIN_SCHEMA_VERSION = 4
 #: The named successor generation, following this repository's ``contract_revision``
 #: convention (see ``configs/editing_v2_semantic_process_v2.json``).
 CHAIN_CONTRACT_REVISION = "process_v2_gate_zero_productive_nonself"
+
+#: Versioned Process-V2-only operational delta for the T1 capacity run.  The
+#: shared V1 policy remains frozen: panel composition, sampling, objective,
+#: thresholds, optimizer, batch size, and the 500-step ceiling are projected
+#: unchanged.  Only when metrics are evaluated and when early stopping becomes
+#: eligible differ here.  MVP recovery restarts T1 from step zero.
+PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION = 1
+PROCESS_V2_T1_TRAJECTORY_EVALUATION = "step_zero_and_report_points_only"
+PROCESS_V2_T1_EARLY_STOP_RULE = (
+    "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_"
+    "evaluated_report_point_after_minimum_optimizer_steps"
+)
+PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP = 10
 
 #: The revision the version-1 bodies were sealed under.  Kept as a named constant
 #: because it is the oldest generation and several tests address it by name.
@@ -963,7 +978,27 @@ def _build_t1_capacity_policy(
     repo_root: Path, sealed: Mapping[str, bytes]
 ) -> dict[str, Any]:
     payload = _envelope(repo_root, T1_CAPACITY_POLICY, sealed)
-    payload.update(_project_body("t1_capacity_body", repo_root))
+    shared = _project_body("t1_capacity_body", repo_root)
+    shared_optimization = shared.get("optimization")
+    if not isinstance(shared_optimization, Mapping):
+        raise ProcessV2ChainError(
+            "the shared T1 capacity policy has no optimization mapping"
+        )
+    optimization = dict(shared_optimization)
+    optimization.update(
+        {
+            "early_stop_rule": PROCESS_V2_T1_EARLY_STOP_RULE,
+            "minimum_optimizer_steps_before_early_stop": (
+                PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP
+            ),
+            "operational_semantics_version": (
+                PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION
+            ),
+            "trajectory_evaluation": PROCESS_V2_T1_TRAJECTORY_EVALUATION,
+        }
+    )
+    shared["optimization"] = optimization
+    payload.update(shared)
     return payload
 
 
@@ -1368,6 +1403,66 @@ def _check_registry(name: str, payload: Mapping[str, Any], repo_root: Path) -> N
         )
 
 
+def _check_t1_capacity_operational_delta(
+    name: str,
+    payload: Mapping[str, Any],
+    repo_root: Path,
+) -> None:
+    """Prove the Process-V2 T1 body differs from V1 only operationally."""
+
+    if name != T1_CAPACITY_POLICY:
+        return
+    shared = _project_body("t1_capacity_body", repo_root)
+    shared_optimization = shared.get("optimization")
+    observed_optimization = payload.get("optimization")
+    if not isinstance(shared_optimization, Mapping) or not isinstance(
+        observed_optimization, Mapping
+    ):
+        _fail(name, "T1 capacity optimization policy is not a mapping")
+
+    for field, expected in shared.items():
+        if field != "optimization" and payload.get(field) != expected:
+            _fail(
+                name,
+                "mirrored policy values are frozen: "
+                f"shared scientific T1 field {field!r} differs from frozen V1",
+            )
+
+    changed = {"early_stop_rule", "trajectory_evaluation"}
+    added = {
+        "minimum_optimizer_steps_before_early_stop",
+        "operational_semantics_version",
+    }
+    expected_keys = set(shared_optimization) | added
+    if set(observed_optimization) != expected_keys:
+        _fail(
+            name,
+            "Process-V2 T1 optimization fields differ outside the frozen operational delta",
+        )
+    for field, expected in shared_optimization.items():
+        if field not in changed and observed_optimization.get(field) != expected:
+            _fail(
+                name,
+                "mirrored policy values are frozen: shared scientific T1 "
+                f"optimization field {field!r} differs from frozen V1",
+            )
+    expected_operational = {
+        "early_stop_rule": PROCESS_V2_T1_EARLY_STOP_RULE,
+        "minimum_optimizer_steps_before_early_stop": (
+            PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP
+        ),
+        "operational_semantics_version": PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION,
+        "trajectory_evaluation": PROCESS_V2_T1_TRAJECTORY_EVALUATION,
+    }
+    for field, expected in expected_operational.items():
+        if observed_optimization.get(field) != expected:
+            _fail(
+                name,
+                f"Process-V2 T1 operational field {field!r} is "
+                f"{observed_optimization.get(field)!r}, not {expected!r}",
+            )
+
+
 def validate_process_v2_chain_artifact(
     value: object,
     *,
@@ -1425,6 +1520,7 @@ def validate_process_v2_chain_artifact(
     _check_parents(name, payload, repo_root, overlay)
     _check_superseded_lineage(name, payload, repo_root, overlay)
     _check_registry(name, payload, repo_root)
+    _check_t1_capacity_operational_delta(name, payload, repo_root)
 
     difference = _first_difference(
         {k: v for k, v in payload.items() if k != SELF_HASH_FIELD},
@@ -1787,6 +1883,10 @@ __all__ = [
     "PROCESS_IDENTITY_EDGE_FIELDS",
     "PROCESS_IDENTITY_PIN_FIELD",
     "PROCESS_V2_CHAIN_ARTIFACTS",
+    "PROCESS_V2_T1_EARLY_STOP_RULE",
+    "PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP",
+    "PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION",
+    "PROCESS_V2_T1_TRAJECTORY_EVALUATION",
     "PROCESS_V2_IDENTITY_PROVIDER",
     "PROCESS_V2_IDENTITY_SCHEMA",
     "SELF_HASH_FIELD",

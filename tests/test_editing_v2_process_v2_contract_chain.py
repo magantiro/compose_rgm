@@ -64,6 +64,10 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     GENERATION_SELF_HASH_FIELD,
     P50_RECIPE_POLICY,
     PROCESS_V2_CHAIN_ARTIFACTS,
+    PROCESS_V2_T1_EARLY_STOP_RULE,
+    PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP,
+    PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION,
+    PROCESS_V2_T1_TRAJECTORY_EVALUATION,
     SELF_HASH_FIELD,
     SELF_HASH_FIELD_ALGORITHM,
     SUPERSEDED_CHAIN_CONTRACT_REVISION,
@@ -1261,14 +1265,13 @@ def test_t1_panel_policy_thresholds_are_identical_to_v1() -> None:
         assert v2[field] == v1[field], field
 
 
-def test_t1_capacity_policy_blocks_are_identical_to_v1() -> None:
+def test_t1_capacity_policy_science_is_identical_to_v1_except_operational_delta() -> None:
     v1 = _load(_V1_COUNTERPART[T1_CAPACITY_POLICY])
     v2 = _load(T1_CAPACITY_POLICY)
     for field in (
         "thresholds",
         "panel_cardinality",
         "sampling_law",
-        "optimization",
         "required_families",
         "empirical_repeated_state_gate",
         "objective_unit",
@@ -1277,6 +1280,28 @@ def test_t1_capacity_policy_blocks_are_identical_to_v1() -> None:
         "hazard_included",
     ):
         assert v2[field] == v1[field], field
+
+    changed = {"early_stop_rule", "trajectory_evaluation"}
+    added = {
+        "minimum_optimizer_steps_before_early_stop",
+        "operational_semantics_version",
+    }
+    assert set(v2["optimization"]) == set(v1["optimization"]) | added
+    for field, value in v1["optimization"].items():
+        if field not in changed:
+            assert v2["optimization"][field] == value, field
+    assert v2["optimization"] == {
+        **v1["optimization"],
+        "early_stop_rule": PROCESS_V2_T1_EARLY_STOP_RULE,
+        "minimum_optimizer_steps_before_early_stop": (
+            PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP
+        ),
+        "operational_semantics_version": PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION,
+        "trajectory_evaluation": PROCESS_V2_T1_TRAJECTORY_EVALUATION,
+    }
+    assert v2["optimization"]["report_points"] == [1, 10, 50, 100, 250, 500]
+    assert v2["optimization"]["maximum_optimizer_steps"] == 500
+    assert v2["optimization"]["batch_size"] == 64
 
 
 def test_p50_recipe_policy_blocks_are_identical_to_v1() -> None:
@@ -1309,8 +1334,8 @@ _ENVELOPE_FIELDS = {
 }
 
 
-def test_no_policy_value_moved_beyond_the_declared_gate_zero_delta() -> None:
-    """Only schema 4's declared Process-V2 Gate-0 policy delta may move.
+def test_no_policy_value_moved_beyond_the_declared_process_v2_deltas() -> None:
+    """Only Gate-0 science and T1 operational semantics may move.
 
     Checked against BOTH superseded generations rather than only the oldest: a
     value that moved at version 2 and moved back at version 3 would agree with
@@ -1330,7 +1355,38 @@ def test_no_policy_value_moved_beyond_the_declared_gate_zero_delta() -> None:
             for field in sorted(set(current) & set(superseded) - _ENVELOPE_FIELDS):
                 if name == GATE_ZERO_STRUCTURAL and field == "structural_checks":
                     continue
+                if name == T1_CAPACITY_POLICY and field == "optimization":
+                    continue
                 assert current[field] == superseded[field], f"{name}.{field}@{revision}"
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        (
+            "minimum_optimizer_steps_before_early_stop",
+            9,
+            "operational field",
+        ),
+        ("trajectory_evaluation", "every_step", "operational field"),
+        ("batch_size", 32, "shared scientific T1 optimization field"),
+    ],
+)
+def test_t1_capacity_operational_delta_is_fail_closed(
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    payload = build_process_v2_chain_artifact(T1_CAPACITY_POLICY, repo_root=_ROOT)
+    payload["optimization"][field] = value
+    del payload[SELF_HASH_FIELD]
+    payload[SELF_HASH_FIELD] = process_v2_chain_self_hash(payload)
+    with pytest.raises(ProcessV2ChainError, match=message):
+        validate_process_v2_chain_artifact(
+            payload,
+            name=T1_CAPACITY_POLICY,
+            repo_root=_ROOT,
+        )
 
 
 def test_the_field_set_changed_only_where_a_version_bump_says_it_did() -> None:
@@ -1405,8 +1461,8 @@ def test_version_three_changed_exactly_the_binding_version_and_the_lineage() -> 
                     assert edge[slot] == was[slot], f"{name}:{role}.{slot}"
 
 
-def test_version_four_changes_only_gate_zero_policy_and_chain_envelopes() -> None:
-    """Schema 4 moves the declared Gate-0 checks and the resulting chain pins."""
+def test_current_chain_changes_only_declared_policy_deltas_and_envelopes() -> None:
+    """Current bytes move only Gate-0 science, T1 cadence, and resulting pins."""
 
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V3):
         pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout")
@@ -1427,6 +1483,8 @@ def test_version_four_changes_only_gate_zero_policy_and_chain_envelopes() -> Non
         }
         if name == GATE_ZERO_STRUCTURAL:
             allowed.add("structural_checks")
+        if name == T1_CAPACITY_POLICY:
+            allowed.add("optimization")
         assert moved <= allowed, (name, sorted(moved))
         assert {
             "contract_revision",
