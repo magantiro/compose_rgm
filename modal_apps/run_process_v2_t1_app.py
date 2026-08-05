@@ -16,8 +16,9 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Mapping
 
 import modal
 
@@ -29,6 +30,21 @@ IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 
 REVISION_SCHEMA = "compose.editing_v2.process_v2_t1_modal_image_revision"
 REVISION_SCHEMA_VERSION = 1
+
+PANEL_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_panel"
+PANEL_CPU = 1.0
+PANEL_MEMORY_MB = 16 * 1024
+PANEL_TIMEOUT_SECONDS = 4 * 3600
+
+NO_AUTHORITY = {
+    "training_authorized": False,
+    "gate_zero_authorized": False,
+    "t1_authorized": False,
+    "bounded_p50_authorized": False,
+    "long_training_authorized": False,
+    "checkpoint_selection_authorized": False,
+    "final_test_selection_authorized": False,
+}
 
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -198,7 +214,129 @@ def _require_artifact_path(value: str, *, field: str) -> Path:
     return path
 
 
+def _panel_imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
+    source_root = str(Path(remote_root) / "src")
+    if source_root not in sys.path:
+        sys.path.insert(0, source_root)
+    from compose_v4.data.editing_v2_process_v2_schema import canonical_bytes
+    from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
+        PANEL_FILENAME,
+        build_process_v2_t1_panel,
+        load_process_v2_t1_panel,
+        open_process_v2_t1_source,
+        write_process_v2_t1_panel,
+    )
+
+    return {
+        "PANEL_FILENAME": PANEL_FILENAME,
+        "canonical_bytes": canonical_bytes,
+        "open_source": open_process_v2_t1_source,
+        "build_panel": build_process_v2_t1_panel,
+        "write_panel": write_process_v2_t1_panel,
+        "load_panel": load_process_v2_t1_panel,
+    }
+
+
+def _materialize_panel(
+    *,
+    image_revision: dict[str, Any],
+    active8_run_root: str,
+    gate_zero_decision: str,
+    output_prefix: str,
+    remote_root: Path,
+    artifact_root: Path,
+    reload_volume: Callable[[], None],
+    commit_volume: Callable[[], None],
+    loaded: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Delegate one authenticated panel publication to the native library."""
+
+    _validate_remote_revision(image_revision, remote_root=remote_root)
+    reload_volume()
+    active8_root = _require_artifact_path(active8_run_root, field="active8_run_root")
+    gate_zero_path = _require_artifact_path(
+        gate_zero_decision,
+        field="gate_zero_decision",
+    )
+    prefix = _require_artifact_path(output_prefix, field="output_prefix")
+    interfaces = dict(loaded or _panel_imports(remote_root))
+    source = interfaces["open_source"](
+        active8_root,
+        gate_zero_decision_path=gate_zero_path,
+        artifact_root=artifact_root,
+        repo_root=remote_root,
+    )
+    panel = interfaces["build_panel"](source)
+    panel_sha256 = str(panel.get("panel_sha256"))
+    if _SHA256_RE.fullmatch(panel_sha256) is None:
+        raise RuntimeError("the Process-V2 T1 panel has no valid identity")
+    output_root = prefix / panel_sha256
+    path = interfaces["write_panel"](
+        panel,
+        output_root=output_root,
+        source=source,
+    )
+    expected_path = output_root / str(interfaces["PANEL_FILENAME"])
+    if Path(path).resolve() != expected_path.resolve():
+        raise RuntimeError("the Process-V2 T1 panel writer returned another path")
+    commit_volume()
+    reload_volume()
+    reopened = interfaces["load_panel"](path, source=source)
+    if interfaces["canonical_bytes"](reopened) != interfaces["canonical_bytes"](panel):
+        raise RuntimeError("the Process-V2 T1 panel changed across publication")
+    family_counts = reopened.get("family_counts")
+    cell_counts = reopened.get("capability_cell_counts")
+    entries = reopened.get("entries")
+    if (
+        not isinstance(family_counts, dict)
+        or not isinstance(cell_counts, dict)
+        or not isinstance(entries, list)
+    ):
+        raise RuntimeError("the Process-V2 T1 panel summary is malformed")
+    return {
+        "phase": "process_v2_t1_panel_complete",
+        "panel_artifact_path": str(path),
+        "panel_file_sha256": _file_sha256(path),
+        "panel_sha256": panel_sha256,
+        "entry_count": len(entries),
+        "family_counts": dict(family_counts),
+        "capability_cell_count": len(cell_counts),
+        "image_revision_sha256": image_revision["image_revision_sha256"],
+        **NO_AUTHORITY,
+    }
+
+
+@app.function(
+    image=image,
+    cpu=PANEL_CPU,
+    memory=PANEL_MEMORY_MB,
+    timeout=PANEL_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def materialize_process_v2_t1_panel(
+    *,
+    image_revision: dict[str, Any],
+    active8_run_root: str,
+    gate_zero_decision: str,
+    output_prefix: str = PANEL_OUTPUT_PREFIX,
+) -> dict[str, Any]:
+    """Materialize one deterministic Process-V2 unique-state T1 panel."""
+
+    return _materialize_panel(
+        image_revision=image_revision,
+        active8_run_root=active8_run_root,
+        gate_zero_decision=gate_zero_decision,
+        output_prefix=output_prefix,
+        remote_root=REMOTE_ROOT,
+        artifact_root=ARTIFACT_ROOT,
+        reload_volume=artifact_volume.reload,
+        commit_volume=artifact_volume.commit,
+    )
+
+
 __all__ = [
     "app",
     "local_image_revision",
+    "materialize_process_v2_t1_panel",
 ]
