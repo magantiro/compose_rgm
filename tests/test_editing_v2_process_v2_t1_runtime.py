@@ -7,7 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from compose_v4.data.editing_v2_process_v2_schema import canonical_sha256
+from compose_v4.data.editing_v2_process_v2_schema import canonical_bytes, canonical_sha256
+from compose_v4.experiments import editing_v2_process_v2_t1_runtime as t1_runtime
 from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
     build_process_v2_t1_panel,
     iter_process_v2_t1_candidates,
@@ -15,11 +16,16 @@ from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
 )
 from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
     ProcessV2T1RuntimeError,
+    _build_prepared_completion,
     _entry_from_exact_transition,
+    _load_prepared_completion,
+    _validate_source_revision,
     authenticate_process_v2_t1_prepared_plan_for_worker,
     build_process_v2_t1_prepared_inputs,
     build_process_v2_t1_prepared_plan,
     build_process_v2_t1_scratch_runtime,
+    publish_process_v2_t1_prepared_inputs,
+    validate_process_v2_t1_prepared_inputs,
     validate_process_v2_t1_prepared_leaf,
     write_process_v2_t1_prepared_leaf,
 )
@@ -27,6 +33,18 @@ from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
 from test_editing_v2_process_v2_t1_panel import _pass_source, _stage_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _test_source_revision() -> dict[str, object]:
+    body = {
+        "schema": "compose.editing_v2.process_v2_t1_authenticated_image_revision",
+        "schema_version": 1,
+        "commit": "a" * 40,
+        "tree": "b" * 40,
+        "image_revision_sha256": "c" * 64,
+        "serialized_source_inventory_sha256": "d" * 64,
+    }
+    return {**body, "source_revision_sha256": canonical_sha256(body)}
 
 
 @pytest.fixture(scope="module")
@@ -71,13 +89,8 @@ def _standin_planned_panel(genuine_stage, tmp_path: Path):
     }
     source = _fixture_cardinality_source(replace(source, plan=active8_plan))
     panel = build_process_v2_t1_panel(source, scratch_dir=tmp_path)
-    revision = {
-        "commit": "a" * 40,
-        "source_revision_sha256": canonical_sha256({"commit": "a" * 40}),
-    }
-    plan = build_process_v2_t1_prepared_plan(
-        panel, source=source, source_revision=revision
-    )
+    revision = _test_source_revision()
+    plan = build_process_v2_t1_prepared_plan(panel, source=source, source_revision=revision)
     return source, panel, revision, plan
 
 
@@ -96,8 +109,9 @@ def test_one_genuine_cached_transition_compiles_the_complete_successor_partition
         support_time=0.5,
     )
 
-    assert binding["model_runtime"]["initial_model_state_sha256"] == (
-        source.plan["binding"]["model_runtime"]["initial_model_state_sha256"]
+    assert (
+        binding["model_runtime"]["initial_model_state_sha256"]
+        == (source.plan["binding"]["model_runtime"]["initial_model_state_sha256"])
     )
     assert entry["raw_mark_count"] == (
         entry["productive_alias_count"] + entry["virtual_alias_count"]
@@ -112,9 +126,7 @@ def test_prepared_plan_groups_panel_entries_by_existing_active8_chunk(
     genuine_stage, tmp_path: Path
 ) -> None:
     source, panel, revision, first = _standin_planned_panel(genuine_stage, tmp_path)
-    second = build_process_v2_t1_prepared_plan(
-        panel, source=source, source_revision=revision
-    )
+    second = build_process_v2_t1_prepared_plan(panel, source=source, source_revision=revision)
     authenticated = authenticate_process_v2_t1_prepared_plan_for_worker(
         first, panel=panel, source=source
     )
@@ -124,15 +136,61 @@ def test_prepared_plan_groups_panel_entries_by_existing_active8_chunk(
     assert first["task_count"] == len(first["tasks"])
     assert first["selected_entry_count"] == len(panel["entries"])
     assert sorted(
-        identifier
-        for task in first["tasks"]
-        for identifier in task["panel_entry_sha256s"]
+        identifier for task in first["tasks"] for identifier in task["panel_entry_sha256s"]
     ) == sorted(entry["panel_entry_sha256"] for entry in panel["entries"])
 
 
-def test_reduction_refuses_an_incomplete_leaf_inventory(
-    genuine_stage, tmp_path: Path
-) -> None:
+def test_prepared_leaf_publication_is_restart_safe(genuine_stage, tmp_path: Path) -> None:
+    _stage, source, _decision = genuine_stage
+    candidate = next(iter(iter_process_v2_t1_candidates(source)))
+    addressed = resolve_process_v2_t1_entries(source, (candidate,))[0].addressed_trace
+    scratch, binding = build_process_v2_t1_scratch_runtime(source)
+    entry = _entry_from_exact_transition(
+        {**candidate, "panel_entry_sha256": candidate["assignment_sha256"]},
+        addressed=addressed,
+        scratch_runtime=scratch,
+        support_time=0.5,
+    )
+    task = {
+        "task_identity_sha256": "b" * 64,
+        "active8_task_identity_sha256": candidate["task_identity_sha256"],
+        "panel_entry_sha256s": [candidate["assignment_sha256"]],
+    }
+    plan = {
+        "plan_sha256": "c" * 64,
+        "run_identity_sha256": "d" * 64,
+        "build_identity_sha256": "e" * 64,
+        "panel_sha256": "f" * 64,
+        "model_binding": binding,
+        "tasks": [task],
+    }
+    leaf_body = {
+        "schema": t1_runtime.LEAF_SCHEMA,
+        "schema_version": t1_runtime.LEAF_SCHEMA_VERSION,
+        "status": t1_runtime.LEAF_STATUS,
+        **t1_runtime.authority_false_block(),
+        "plan_sha256": plan["plan_sha256"],
+        "run_identity_sha256": plan["run_identity_sha256"],
+        "build_identity_sha256": plan["build_identity_sha256"],
+        "task_identity_sha256": task["task_identity_sha256"],
+        "active8_task_identity_sha256": task["active8_task_identity_sha256"],
+        "panel_sha256": plan["panel_sha256"],
+        "initial_model_state_sha256": binding["model_runtime"]["initial_model_state_sha256"],
+        "entry_count": 1,
+        "entry_inventory_sha256": canonical_sha256([entry]),
+        "entries": [entry],
+        "model_scores_or_probabilities_stored": False,
+        "hazard_included": False,
+    }
+    leaf = {**leaf_body, "leaf_sha256": canonical_sha256(leaf_body)}
+    first = write_process_v2_t1_prepared_leaf(leaf, plan=plan, run_root=tmp_path / "run")
+    first_bytes = first.read_bytes()
+    second = write_process_v2_t1_prepared_leaf(leaf, plan=plan, run_root=tmp_path / "run")
+    assert second == first
+    assert second.read_bytes() == first_bytes
+
+
+def test_reduction_refuses_an_incomplete_leaf_inventory(genuine_stage, tmp_path: Path) -> None:
     source, panel, _revision, plan = _standin_planned_panel(genuine_stage, tmp_path)
 
     with pytest.raises(ProcessV2T1RuntimeError, match="prepared leaf is absent"):
@@ -157,9 +215,7 @@ def test_worker_authentication_refuses_changed_upstream_provenance(
         )
 
 
-def test_a_resealed_wrong_teacher_key_is_refused(
-    genuine_stage, tmp_path: Path
-) -> None:
+def test_a_resealed_wrong_teacher_key_is_refused(genuine_stage, tmp_path: Path) -> None:
     _stage, source, _decision = genuine_stage
     candidate = next(iter(iter_process_v2_t1_candidates(source)))
     addressed = resolve_process_v2_t1_entries(source, (candidate,))[0].addressed_trace
@@ -200,9 +256,7 @@ def test_a_resealed_wrong_teacher_key_is_refused(
         "task_identity_sha256": task["task_identity_sha256"],
         "active8_task_identity_sha256": task["active8_task_identity_sha256"],
         "panel_sha256": plan["panel_sha256"],
-        "initial_model_state_sha256": binding["model_runtime"][
-            "initial_model_state_sha256"
-        ],
+        "initial_model_state_sha256": binding["model_runtime"]["initial_model_state_sha256"],
         "entry_count": 1,
         "entry_inventory_sha256": canonical_sha256([entry]),
         "entries": [entry],
@@ -211,15 +265,15 @@ def test_a_resealed_wrong_teacher_key_is_refused(
     }
     leaf = {**leaf_body, "leaf_sha256": canonical_sha256(leaf_body)}
 
-    first_path = write_process_v2_t1_prepared_leaf(
-        leaf, plan=plan, run_root=tmp_path
-    )
+    first_path = write_process_v2_t1_prepared_leaf(leaf, plan=plan, run_root=tmp_path)
     first_bytes = first_path.read_bytes()
-    second_path = write_process_v2_t1_prepared_leaf(
-        leaf, plan=plan, run_root=tmp_path
-    )
+    second_path = write_process_v2_t1_prepared_leaf(leaf, plan=plan, run_root=tmp_path)
     assert second_path == first_path
     assert second_path.read_bytes() == first_bytes
+
+    post_seal_mutation = {**leaf, "entry_count": 2}
+    with pytest.raises(ProcessV2T1RuntimeError, match="self-hash"):
+        validate_process_v2_t1_prepared_leaf(post_seal_mutation, plan=plan)
 
     changed_body = {
         **{key: value for key, value in entry.items() if key != "entry_sha256"},
@@ -236,7 +290,125 @@ def test_a_resealed_wrong_teacher_key_is_refused(
         "leaf_sha256": canonical_sha256(invalid_leaf_body),
     }
 
-    with pytest.raises(
-        ProcessV2T1RuntimeError, match="state or successor census disagrees"
-    ):
+    with pytest.raises(ProcessV2T1RuntimeError, match="state or successor census disagrees"):
         validate_process_v2_t1_prepared_leaf(invalid_leaf, plan=plan)
+
+
+def test_prepared_plan_refuses_a_forged_commit() -> None:
+    forged_body = {
+        "commit": "b" * 40,
+    }
+    forged = {
+        **forged_body,
+        "source_revision_sha256": canonical_sha256(forged_body),
+    }
+
+    with pytest.raises(ProcessV2T1RuntimeError, match="fields disagree"):
+        _validate_source_revision(forged)
+
+
+def test_publish_writes_nothing_when_a_planned_leaf_is_missing(
+    genuine_stage, tmp_path: Path
+) -> None:
+    source, panel, _revision, plan = _standin_planned_panel(genuine_stage, tmp_path)
+    output = tmp_path / "failed-release"
+    with pytest.raises(ProcessV2T1RuntimeError, match="prepared leaf is absent"):
+        publish_process_v2_t1_prepared_inputs(
+            plan,
+            panel=panel,
+            source=source,
+            run_root=output,
+        )
+    assert not (output / t1_runtime.PREPARED_FILENAME).exists()
+    assert not (output / t1_runtime.COMPLETION_FILENAME).exists()
+
+
+def _minimal_published_release(
+    root: Path,
+    *,
+    source,
+    binding,
+    entry,
+) -> Path:
+    revision = _test_source_revision()
+    body = {
+        "schema": t1_runtime.PREPARED_SCHEMA,
+        "schema_version": t1_runtime.PREPARED_SCHEMA_VERSION,
+        "status": t1_runtime.PREPARED_STATUS,
+        **t1_runtime.authority_false_block(),
+        "source_revision": revision,
+        "implementation_sha256": t1_runtime._implementation_sha256(ROOT),
+        "process_identity_sha256": source.contracts.process_identity_sha256,
+        "active8_completion_sha256": source.index.active8_completion_sha256,
+        "active8_sentinel_sha256": source.index.active8_sentinel_sha256,
+        "gate_zero_decision_sha256": source.decision["decision_sha256"],
+        "panel_sha256": canonical_sha256("minimal-panel"),
+        "panel_entry_inventory_sha256": canonical_sha256([entry["panel_entry_sha256"]]),
+        "plan_sha256": canonical_sha256("minimal-plan"),
+        "run_identity_sha256": canonical_sha256("minimal-run"),
+        "build_identity_sha256": canonical_sha256("minimal-build"),
+        "manifest_sha256": canonical_sha256("minimal-manifest"),
+        "model_binding": binding,
+        "support_time_hex": float(0.5).hex(),
+        "state_encoding": "compose.rewrite.trace.encoded_state_v2_exact_slots",
+        "successor_partition_contract": {
+            "productive_groups_complete": True,
+            "productive_aliases_disjoint": True,
+            "virtual_aliases_disjoint": True,
+            "self_events_excluded_from_embedded_jump_chain": True,
+            "model_scores_or_probabilities_stored": False,
+            "hazard_included": False,
+        },
+        "leaf_count": 1,
+        "leaf_inventory_sha256": canonical_sha256("minimal-leaf"),
+        "entry_count": 1,
+        "entry_inventory_sha256": canonical_sha256((entry,)),
+        "entries": [entry],
+    }
+    artifact = {**body, "artifact_sha256": canonical_sha256(body)}
+    artifact = validate_process_v2_t1_prepared_inputs(artifact, repo_root=ROOT)
+    artifact_raw = canonical_bytes(artifact) + b"\n"
+    completion = _build_prepared_completion(
+        artifact,
+        artifact_raw=artifact_raw,
+    )
+    root.mkdir(parents=True)
+    (root / t1_runtime.PREPARED_FILENAME).write_bytes(artifact_raw)
+    completion_path = root / t1_runtime.COMPLETION_FILENAME
+    completion_path.write_bytes(canonical_bytes(completion) + b"\n")
+    return completion_path
+
+
+def test_completion_reopens_without_chemistry(genuine_stage, tmp_path: Path, monkeypatch) -> None:
+    _stage, source, _decision = genuine_stage
+    candidate = next(iter(iter_process_v2_t1_candidates(source)))
+    panel_entry = {
+        **candidate,
+        "panel_entry_sha256": candidate["assignment_sha256"],
+    }
+    resolved = resolve_process_v2_t1_entries(source, (panel_entry,))
+    scratch, binding = build_process_v2_t1_scratch_runtime(source)
+    entry = _entry_from_exact_transition(
+        panel_entry,
+        addressed=resolved[0].addressed_trace,
+        scratch_runtime=scratch,
+        support_time=0.5,
+    )
+    completion_path = _minimal_published_release(
+        tmp_path / "valid-release",
+        source=source,
+        binding=binding,
+        entry=entry,
+    )
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("normal reopen must not execute or enumerate chemistry")
+
+    monkeypatch.setattr(t1_runtime, "compile_state_successor_map", forbidden)
+    monkeypatch.setattr(t1_runtime, "resolve_process_v2_t1_entries", forbidden)
+    completion, artifact, _completion_file, _artifact_file = _load_prepared_completion(
+        completion_path,
+        repo_root=ROOT,
+    )
+    assert completion["entry_count"] == 1
+    assert artifact["entry_count"] == 1
