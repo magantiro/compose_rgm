@@ -56,3 +56,30 @@ def test_cached_gpu_binds_cache_completion_into_run_identity() -> None:
     assert '"collated_completion_sha256": collated_completion["completion_sha256"]' in body
     assert '"prepared_completion_sha256": provenance["prepared_completion_sha256"]' in body
     assert '"runner_source_revision_sha256"' in body
+
+
+def test_failure_scope_reuses_the_cache_and_fans_out_independent_arms() -> None:
+    body = _body(launcher.run_t1_failure_scope_gpu_remote)
+    assert 'loaded["load_materialized_collated_panel"](' in body
+    assert 'loaded["failing_families"](' in body
+    assert 'if family not in failing_families:' in body
+    assert 'scratch.model.to(device="cuda"' in body
+    assert 'loaded["run_failure_scope"](' in body
+    assert '"fiber_recomputation_count": 0' in body
+    assert '"gpu_side_collation_count": 0' in body
+    assert "starmap(" not in body
+    driver = _body(launcher.failure_scope_driver)
+    assert 'loaded["failing_families"](' in driver
+    assert "update_autoscaler(" in driver
+    assert "max_containers=len(families)" in driver
+    assert "run_t1_failure_scope_gpu_remote.starmap(" in driver
+
+
+def test_failure_scope_publishes_each_family_restart_safely() -> None:
+    body = _body(launcher.run_t1_failure_scope_gpu_remote)
+    assert "if result_path.is_file():" in body
+    assert body.index('loaded["write_bytes_if_absent"](') < body.index(
+        "artifact_volume.commit()"
+    )
+    assert '"bounded_p50_authorized": False' in body
+    assert '"p50_launched": False' in body

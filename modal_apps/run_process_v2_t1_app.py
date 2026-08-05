@@ -41,6 +41,7 @@ IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_prepared"
 COLLATED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_collated"
 RUN_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_capacity"
+FAILURE_SCOPE_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_failure_scope"
 CAPACITY_POLICY_SOURCE = "configs/editing_v2_process_v2_t1_capacity_policy.json"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
 PANEL_CACHE_DIRNAME = "_panel_cache"
@@ -48,6 +49,7 @@ PLAN_FILENAME = "PROCESS_V2_T1_PREPARED_PLAN.json"
 LEAF_FILENAME = "PROCESS_V2_T1_PREPARED_LEAF.json"
 PREPARED_COMPLETION_FILENAME = "PROCESS_V2_T1_PREPARED_COMPLETE.json"
 PROCESS_V2_RESULT_FILENAME = "PROCESS_V2_T1_CAPACITY_RESULT.json"
+FAILURE_SCOPE_RESULT_FILENAME = "PROCESS_V2_T1_FAILURE_SCOPE_RESULT.json"
 STEP_TEN_CHECKPOINT_FILENAME = "step_0010.pt"
 PUBLICATION_RECOVERY_RECEIPT_FILENAME = "PROCESS_V2_T1_PUBLICATION_RECOVERY.json"
 PUBLICATION_RECOVERY_OUTPUT_PREFIX = (
@@ -324,6 +326,11 @@ def _imports() -> dict[str, Any]:
         validate_process_v2_t1_capacity_decision,
         validate_process_v2_t1_capacity_result,
     )
+    from compose_v4.experiments.editing_v2_process_v2_t1_failure_scope import (
+        failing_families_from_capacity_result,
+        run_heads_only_failure_scope,
+        validate_failure_scope_result,
+    )
     from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
         TASKS_DIRNAME,
         build_process_v2_t1_prepared_plan,
@@ -393,6 +400,9 @@ def _imports() -> dict[str, Any]:
         "project_result_provenance": project_process_v2_t1_result_provenance,
         "validate_decision": validate_process_v2_t1_capacity_decision,
         "validate_result": validate_process_v2_t1_capacity_result,
+        "failing_families": failing_families_from_capacity_result,
+        "run_failure_scope": run_heads_only_failure_scope,
+        "validate_failure_scope": validate_failure_scope_result,
         "write_bytes_if_absent": write_bytes_if_absent,
         "build_environment": build_semantic_t1_execution_environment,
         "run_capacity": run_semantic_t1_capacity,
@@ -1559,6 +1569,271 @@ def run_t1_collated_gpu_remote(
         "image_revision_sha256": revision["image_revision_sha256"],
         "training_launched": True,
         "bounded_p50_authorized": decision["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=1.0,
+    memory=4 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def failure_scope_driver(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    capacity_result_path: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Derive the failing families and run their independent arms in parallel."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    policy, _policy_file_sha256 = loaded["load_capacity_policy"](
+        REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    result_path = _require_artifact_path(
+        capacity_result_path, field="capacity_result_path"
+    )
+    capacity_result = loaded["validate_result"](
+        _read_canonical_object(
+            result_path, label="the Process-V2 T1 capacity result"
+        ),
+        capacity_policy=policy,
+    )
+    families = loaded["failing_families"](
+        capacity_result, capacity_policy=policy
+    )
+    run_t1_failure_scope_gpu_remote.update_autoscaler(
+        max_containers=len(families)
+    )
+    _progress(
+        "process_v2_t1_failure_scope_parallel_plan",
+        families=list(families),
+        gpu_containers=len(families),
+        fiber_recomputation_count=0,
+    )
+    results = list(
+        run_t1_failure_scope_gpu_remote.starmap(
+            [
+                (
+                    prepared_completion_path,
+                    collated_plan_path,
+                    collated_completion_path,
+                    capacity_result_path,
+                    family,
+                    output_prefix,
+                    revision,
+                )
+                for family in families
+            ]
+        )
+    )
+    by_family = {str(item["family"]): dict(item) for item in results}
+    if set(by_family) != set(families) or len(results) != len(families):
+        raise RuntimeError("Process-V2 T1 failure-scope fanout lost a family")
+    response = {
+        "phase": "process_v2_t1_failure_scope_complete",
+        "scope": "heads_only",
+        "families": list(families),
+        "gpu_containers": len(families),
+        "results": [by_family[family] for family in families],
+        "all_diagnostics_passed": all(
+            by_family[family]["diagnostic_passed"] for family in families
+        ),
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "image_revision_sha256": revision["image_revision_sha256"],
+        "bounded_p50_authorized": False,
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    gpu="A10G",
+    cpu=4.0,
+    memory=64 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=4,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def run_t1_failure_scope_gpu_remote(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    capacity_result_path: str,
+    family: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run one independent first-scope arm for a family that failed T1's tail.
+
+    The collated cache is an authenticated immutable input produced by its own
+    source revision.  This diagnostic binds that upstream revision separately
+    from its current runner revision, and never rebuilds a fiber or retrains a
+    family whose aggregate and entry checks already passed.
+    """
+
+    _validate_remote_revision(revision)
+    if (
+        os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+        != DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise RuntimeError("Process-V2 T1 failure scope requires deterministic cuBLAS")
+    artifact_volume.reload()
+    loaded = _imports()
+    prepared_path = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    runtime, scratch, provenance = loaded["load_runtime"](
+        prepared_path,
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    plan_path = _require_artifact_path(collated_plan_path, field="collated_plan_path")
+    plan = loaded["load_collated_plan"](
+        plan_path,
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+    )
+    if (
+        plan["prepared_completion_path"] != str(prepared_path)
+        or plan["prepared_completion_sha256"]
+        != provenance["prepared_completion_sha256"]
+    ):
+        raise RuntimeError("Process-V2 T1 failure scope cache binds another input")
+    collated_path = _require_artifact_path(
+        collated_completion_path, field="collated_completion_path"
+    )
+    materialized_panel = loaded["load_materialized_collated_panel"](
+        collated_path,
+        plan=plan,
+        runtime=runtime,
+    )
+    collated_completion = _read_canonical_object(
+        collated_path, label="the Process-V2 T1 collated completion"
+    )
+    capacity_path = _require_artifact_path(
+        capacity_result_path, field="capacity_result_path"
+    )
+    capacity_result = loaded["validate_result"](
+        _read_canonical_object(
+            capacity_path, label="the Process-V2 T1 capacity result"
+        ),
+        capacity_policy=runtime.capacity_policy,
+    )
+    capacity_result_file_sha256 = _file_sha256(capacity_path)
+    if (
+        capacity_result["provenance"]["prepared_completion_sha256"]
+        != provenance["prepared_completion_sha256"]
+        or capacity_result["provenance"]["initial_model_state_sha256"]
+        != provenance["initial_model_state_sha256"]
+        or capacity_result["provenance"]["capacity_policy_sha256"]
+        != provenance["capacity_policy_sha256"]
+    ):
+        raise RuntimeError("Process-V2 T1 failure scope result binds another run")
+    failing_families = loaded["failing_families"](
+        capacity_result, capacity_policy=runtime.capacity_policy
+    )
+    if family not in failing_families:
+        raise RuntimeError("Process-V2 T1 failure scope received a passing family")
+    source_revision = _source_revision(revision)
+    identity = {
+        "capacity_result_file_sha256": capacity_result_file_sha256,
+        "capacity_result_sha256": capacity_result["result_sha256"],
+        "collated_completion_sha256": collated_completion["completion_sha256"],
+        "capacity_policy_sha256": provenance["capacity_policy_sha256"],
+        "initial_model_state_sha256": provenance["initial_model_state_sha256"],
+        "scope": "heads_only",
+        "family": family,
+        "runner_source_revision_sha256": source_revision["source_revision_sha256"],
+    }
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix")
+        / _sha256(identity)
+    )
+    _progress(
+        "process_v2_t1_failure_scope_start",
+        run_root=str(run_root),
+        family=family,
+        fiber_recomputation_count=0,
+        gpu_side_collation_count=0,
+    )
+    result_path = run_root / FAILURE_SCOPE_RESULT_FILENAME
+    if result_path.is_file():
+        result = loaded["validate_failure_scope"](
+            _read_canonical_object(
+                result_path,
+                label=f"the Process-V2 T1 {family} failure-scope result",
+            )
+        )
+        reused = True
+    else:
+        model = scratch.model.to(device="cuda", dtype=loaded["torch"].float32)
+
+        def report(row: Mapping[str, Any]) -> None:
+            _progress(
+                "process_v2_t1_failure_scope_heartbeat",
+                family=family,
+                **dict(row),
+            )
+
+        result = loaded["run_failure_scope"](
+            model,
+            materialized_panel,
+            family=family,
+            failing_families=failing_families,
+            capacity_policy=runtime.capacity_policy,
+            input_capacity_result_file_sha256=capacity_result_file_sha256,
+            input_capacity_result_sha256=capacity_result["result_sha256"],
+            collated_completion_sha256=collated_completion["completion_sha256"],
+            initial_model_state_sha256=provenance["initial_model_state_sha256"],
+            progress=report,
+        )
+        loaded["write_bytes_if_absent"](
+            result_path, _canonical_bytes(result) + b"\n"
+        )
+        artifact_volume.commit()
+        reused = False
+    if (
+        result["family"] != family
+        or result["input_capacity_result_file_sha256"]
+        != capacity_result_file_sha256
+        or result["input_capacity_result_sha256"]
+        != capacity_result["result_sha256"]
+        or result["collated_completion_sha256"]
+        != collated_completion["completion_sha256"]
+        or result["initial_model_state_sha256"]
+        != provenance["initial_model_state_sha256"]
+    ):
+        raise RuntimeError("Process-V2 T1 failure-scope publication drifted")
+    response = {
+        "phase": "process_v2_t1_failure_scope_family_complete",
+        "run_root": str(run_root),
+        "scope": "heads_only",
+        "family": family,
+        "result_path": str(result_path),
+        "result_file_sha256": _file_sha256(result_path),
+        "result_sha256": result["result_sha256"],
+        "status": result["status"],
+        "diagnostic_passed": result["diagnostic_passed"],
+        "selected_step": result["selected_step"],
+        "reused": reused,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "image_revision_sha256": revision["image_revision_sha256"],
+        "bounded_p50_authorized": False,
         "p50_launched": False,
     }
     _progress(**response)
@@ -2849,8 +3124,59 @@ def gpu_from_cache_main(
     )
 
 
+@app.local_entrypoint()
+def failure_scope_main(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    capacity_result_path: str,
+    expected_commit: str,
+    output_prefix: str = FAILURE_SCOPE_OUTPUT_PREFIX,
+    wait_for_completion: bool = False,
+) -> None:
+    """Launch one detached driver that fans out the failing families."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_plan_path,
+        collated_completion_path,
+        capacity_result_path,
+        output_prefix,
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                failure_scope_driver.remote(*arguments),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    call = failure_scope_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_failure_scope_launched",
+                "driver_call_id": call.object_id,
+                "scope": "heads_only",
+                "parallel_family_arms": True,
+                "fiber_recomputation_count": 0,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
 __all__ = [
     "COLLATED_OUTPUT_PREFIX",
+    "FAILURE_SCOPE_OUTPUT_PREFIX",
     "MAX_CPU_CONTAINERS",
     "PREPARED_OUTPUT_PREFIX",
     "PROCESS_V2_RESULT_FILENAME",
@@ -2862,16 +3188,19 @@ __all__ = [
     "collated_cache_only_driver",
     "collated_reuse_driver",
     "driver",
+    "failure_scope_driver",
     "finalize_collated_remote",
     "finalize_prepared_remote",
     "finalize_reused_prepared_remote",
     "gpu_from_cache_main",
+    "failure_scope_main",
     "local_image_revision",
     "main",
     "prepare_collated_plan_remote",
     "prepare_leaf_remote",
     "prepare_plan_remote",
     "run_t1_collated_gpu_remote",
+    "run_t1_failure_scope_gpu_remote",
     "run_t1_gpu_remote",
     "reuse_driver",
     "scan_collated_remote",
