@@ -1,0 +1,39 @@
+{
+  "schema": "compose.diagnostics.process_v2_t1_panel_scan_microbenchmark",
+  "schema_version": 1,
+  "status": "LOCAL_SYNTHETIC_ENGINEERING_MICROBENCHMARK_NOT_PRODUCTION_EVIDENCE",
+  "timestamp_local": "2026-08-05",
+  "environment": {
+    "hardware": "Apple arm64 local CPU",
+    "operating_system": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.2",
+    "omp_num_threads": 1
+  },
+  "workload": {
+    "description": "deterministic unique-source Process-V2 decision-row stream across the 17 required capability cells",
+    "row_count": 100000,
+    "selected_entry_count": 512,
+    "selected_entries_per_family": 64,
+    "seed_derivation": "sha256 of deterministic row labels",
+    "measurement_sha256": "8ee51a04fd1ace0e7419286f938069141406245a2d2ea3951c386349db5791b6",
+    "temporary_harness_sha256": "e73c16c3ce325347a1efc65c7c537e8b8a5cfc6859ba458d30613840e34ee4f0"
+  },
+  "before": {
+    "code_revision": "332f382572fa63cea6f48accde2ed4132184ce42",
+    "wall_seconds": 5.15414029173553,
+    "rows_per_second": 19401.877779762075,
+    "peak_rss_mb": 692.609375
+  },
+  "after": {
+    "code_revision": "cdc859238dc9fbb11be0e426309e2eb96cea3d31",
+    "wall_seconds": 4.146943375002593,
+    "rows_per_second": 24114.146482633725,
+    "peak_rss_mb": 272.046875
+  },
+  "comparison": {
+    "throughput_multiplier": 1.242876939869551,
+    "peak_rss_reduction_multiplier": 2.5459192464533915,
+    "output_measurement_identity_equal": true
+  },
+  "interpretation": "The bounded SQL selection preserves the selected-panel measurement identity while reducing local peak memory and improving throughput. This synthetic benchmark sizes engineering risk only; the authenticated production materialization remains the authoritative operational measurement."
+}
