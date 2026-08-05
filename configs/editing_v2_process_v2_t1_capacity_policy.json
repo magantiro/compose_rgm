@@ -13,7 +13,7 @@
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_t1_capacity_policy",
   "contract_revision": "process_v2_gate_zero_productive_nonself",
-  "contract_sha256": "f27d40f03ec80c2241c18f70186a706885ea55d4ede15e70535bf4d2bbdf207b",
+  "contract_sha256": "e2d0e0e0bc708c6f821ec92912170516c9c579c52f792127fcd652a0ea672968",
   "empirical_repeated_state_gate": {
     "bounded_p50_capacity_prerequisite": false,
     "empirical_law_claims_authorized": false,
@@ -34,7 +34,7 @@
     "checkpoint_selection": "maximize_minimum_entry_teacher_successor_probability__tie_lower_mean_nll__tie_earlier_step",
     "deterministic_algorithms_required": true,
     "dtype": "float32",
-    "early_stop_rule": "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_evaluated_state",
+    "early_stop_rule": "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_evaluated_report_point_after_minimum_optimizer_steps",
     "failure_diagnostic_scope_order": [
       "heads_only",
       "heads_plus_local_adapter_if_distinct",
@@ -44,8 +44,10 @@
     "gradient_clip_norm": 10.0,
     "learning_rate": 0.001,
     "maximum_optimizer_steps": 500,
+    "minimum_optimizer_steps_before_early_stop": 10,
     "mixed_precision": false,
     "model_initialization": "scratch",
+    "operational_semantics_version": 1,
     "optimizer": "adamw",
     "parameter_scope": "all_trainable_active8_parameters",
     "report_points": [
@@ -58,7 +60,7 @@
     ],
     "scheduler": "constant",
     "seed": 31,
-    "trajectory_evaluation": "every_pre_update_state_and_terminal_state",
+    "trajectory_evaluation": "step_zero_and_report_points_only",
     "weight_decay": 0.0
   },
   "panel_cardinality": {

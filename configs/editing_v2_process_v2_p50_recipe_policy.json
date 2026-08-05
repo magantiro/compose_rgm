@@ -19,7 +19,7 @@
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_p50_recipe_policy",
   "contract_revision": "process_v2_gate_zero_productive_nonself",
-  "contract_sha256": "85e313b36152da5007f7f2486ac34732645728ce88e932aa4f89511cc5fe855c",
+  "contract_sha256": "365e2fa675154353500189f7460d0cb64c65cdb847d5ceb4f7216299d3f14b6a",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -156,7 +156,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "540ded12207bef585b6c8bc677f609d362884bd71dd580f0789de6f75ff247dd",
+        "sha256": "73a6cfbcfff1b9711a2bb8d69f73e9a4dc9bd662688c8c383e980c1bfbb98df3",
         "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
         "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
       },
@@ -165,7 +165,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "f27d40f03ec80c2241c18f70186a706885ea55d4ede15e70535bf4d2bbdf207b",
+        "sha256": "e2d0e0e0bc708c6f821ec92912170516c9c579c52f792127fcd652a0ea672968",
         "target": "configs/editing_v2_process_v2_t1_capacity_policy.json",
         "target_schema": "compose.editing_v2.process_v2_t1_capacity_policy"
       }
