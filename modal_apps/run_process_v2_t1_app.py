@@ -48,6 +48,11 @@ LEAF_FILENAME = "PROCESS_V2_T1_PREPARED_LEAF.json"
 PREPARED_COMPLETION_FILENAME = "PROCESS_V2_T1_PREPARED_COMPLETE.json"
 PROCESS_V2_RESULT_FILENAME = "PROCESS_V2_T1_CAPACITY_RESULT.json"
 STEP_TEN_CHECKPOINT_FILENAME = "step_0010.pt"
+PUBLICATION_RECOVERY_RECEIPT_FILENAME = "PROCESS_V2_T1_PUBLICATION_RECOVERY.json"
+PUBLICATION_RECOVERY_OUTPUT_PREFIX = (
+    "/artifacts/editing_v2/process_v2_t1_publication_recovery"
+)
+PUBLICATION_RECOVERY_GPU = "A10G"
 
 MAX_CPU_CONTAINERS = 40
 CPU_PER_LEAF = 1.0
@@ -319,6 +324,13 @@ def _imports() -> dict[str, Any]:
     from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
         run_semantic_t1_capacity,
     )
+    from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
+        CHECKPOINT_SCHEMA,
+        CHECKPOINT_SCHEMA_VERSION,
+        CHECKPOINT_STATUS,
+        NO_AUTHORITY,
+        validate_semantic_t1_selected_checkpoint,
+    )
     from compose_v4.experiments.editing_v2_semantic_t1_decision import (
         build_semantic_t1_execution_environment,
     )
@@ -352,7 +364,118 @@ def _imports() -> dict[str, Any]:
         "write_bytes_if_absent": write_bytes_if_absent,
         "build_environment": build_semantic_t1_execution_environment,
         "run_capacity": run_semantic_t1_capacity,
+        "CHECKPOINT_SCHEMA": CHECKPOINT_SCHEMA,
+        "CHECKPOINT_SCHEMA_VERSION": CHECKPOINT_SCHEMA_VERSION,
+        "CHECKPOINT_STATUS": CHECKPOINT_STATUS,
+        "NO_AUTHORITY": NO_AUTHORITY,
+        "validate_selected_checkpoint": validate_semantic_t1_selected_checkpoint,
     }
+
+
+def _publication_recovery_result_builder(
+    *,
+    build_result: Callable[..., Mapping[str, Any]],
+    capacity_policy: Mapping[str, Any],
+    provenance: Mapping[str, Any],
+    run_integrity: Mapping[str, Any],
+    evaluation_trajectory: Sequence[Mapping[str, Any]],
+    entry_metrics: Sequence[Mapping[str, Any]],
+    gradient_evidence: Sequence[Mapping[str, Any]],
+) -> Mapping[str, Any]:
+    """Repair publication metadata after a completed, uninterrupted optimizer run."""
+
+    maximum_steps = int(capacity_policy["optimization"]["maximum_optimizer_steps"])
+    if (
+        run_integrity.get("optimizer_steps_completed") != maximum_steps
+        or run_integrity.get("resume_requested") is not True
+        or run_integrity.get("resume_count") != 1
+        or not evaluation_trajectory
+        or evaluation_trajectory[-1].get("step") != maximum_steps
+    ):
+        raise RuntimeError(
+            "Process-V2 T1 publication recovery did not reopen exactly one completed run"
+        )
+    families = tuple(str(item) for item in capacity_policy["required_families"])
+    family_indices = {family: index for index, family in enumerate(families)}
+    metadata = sorted(
+        (
+            {
+                "panel_entry_sha256": str(row["panel_entry_sha256"]),
+                "family": str(row["family"]),
+                "semantic_cell_id": str(row["semantic_cell_id"]),
+            }
+            for row in entry_metrics
+        ),
+        key=lambda row: (
+            family_indices[row["family"]],
+            row["semantic_cell_id"],
+            row["panel_entry_sha256"],
+        ),
+    )
+    corrected_provenance = {
+        **dict(provenance),
+        "panel_entry_metadata_sha256": _sha256(metadata),
+    }
+    corrected_integrity = {
+        **dict(run_integrity),
+        # These fields describe optimization, not this publication-only
+        # reconstruction.  The trusted step-500 checkpoint below proves the
+        # original optimizer ran uninterrupted with resume_count == 0.
+        "resume_requested": False,
+        "resume_count": 0,
+    }
+    return build_result(
+        provenance=corrected_provenance,
+        run_integrity=corrected_integrity,
+        evaluation_trajectory=evaluation_trajectory,
+        entry_metrics=entry_metrics,
+        gradient_evidence=gradient_evidence,
+        capacity_policy=capacity_policy,
+    )
+
+
+def _validate_publication_recovery_checkpoint(
+    payload: object,
+    *,
+    loaded: Mapping[str, Any],
+    runtime: Any,
+    expected_runner_implementation_sha256: str,
+    expected_runner_source_revision_sha256: str,
+) -> dict[str, Any]:
+    """Validate the metadata needed before the runner rechecks all tensor state."""
+
+    if not isinstance(payload, dict):
+        raise RuntimeError("Process-V2 T1 recovery checkpoint is not a mapping")
+    authority = loaded["NO_AUTHORITY"]
+    identity = payload.get("identity")
+    maximum_steps = int(runtime.capacity_policy["optimization"]["maximum_optimizer_steps"])
+    if (
+        payload.get("schema") != loaded["CHECKPOINT_SCHEMA"]
+        or payload.get("schema_version") != loaded["CHECKPOINT_SCHEMA_VERSION"]
+        or payload.get("status") != loaded["CHECKPOINT_STATUS"]
+        or any(payload.get(name) is not value for name, value in authority.items())
+        or payload.get("completed_steps") != maximum_steps
+        or payload.get("resume_count") != 0
+        or not isinstance(identity, Mapping)
+        or identity.get("capacity_policy_sha256")
+        != runtime.capacity_policy["policy_sha256"]
+        or identity.get("prepared_input_artifact_sha256")
+        != runtime.prepared.artifact["artifact_sha256"]
+        or identity.get("cache_completion_sha256")
+        != runtime.cache.completion["completion_sha256"]
+        or identity.get("cache_manifest_sha256")
+        != runtime.cache.manifest["manifest_sha256"]
+        or identity.get("initial_model_state_sha256")
+        != runtime.cache.completion["initial_model_state_sha256"]
+        or identity.get("runner_implementation_sha256")
+        != expected_runner_implementation_sha256
+        or identity.get("runner_source_revision_sha256")
+        != expected_runner_source_revision_sha256
+        or runtime.prepared.artifact["source_revision"]["source_revision_sha256"]
+        != expected_runner_source_revision_sha256
+    ):
+        raise RuntimeError("Process-V2 T1 publication-recovery checkpoint disagrees")
+    return payload
 
 
 def _open_source(
@@ -989,6 +1112,229 @@ def run_t1_gpu_remote(
         "all_threshold_checks_pass": all(result["threshold_checks"].values()),
         "image_revision_sha256": revision["image_revision_sha256"],
         "training_launched": True,
+        "bounded_p50_authorized": decision["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    gpu=PUBLICATION_RECOVERY_GPU,
+    cpu=8.0,
+    memory=64 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def recover_t1_publication_remote(
+    prepared_completion_path: str,
+    step_500_checkpoint_path: str,
+    expected_step_500_file_sha256: str,
+    selected_checkpoint_path: str,
+    expected_selected_checkpoint_file_sha256: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Recover missing result publication after an uninterrupted 500-step run."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    torch = loaded["torch"]
+    completion = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    step_500_path = _require_artifact_path(
+        step_500_checkpoint_path, field="step_500_checkpoint_path"
+    )
+    selected_path = _require_artifact_path(
+        selected_checkpoint_path, field="selected_checkpoint_path"
+    )
+    for field, value, path in (
+        (
+            "expected_step_500_file_sha256",
+            expected_step_500_file_sha256,
+            step_500_path,
+        ),
+        (
+            "expected_selected_checkpoint_file_sha256",
+            expected_selected_checkpoint_file_sha256,
+            selected_path,
+        ),
+    ):
+        if _SHA256_RE.fullmatch(value) is None or _file_sha256(path) != value:
+            raise RuntimeError(f"Process-V2 T1 publication recovery {field} disagrees")
+
+    runtime, scratch, runtime_provenance = loaded["load_runtime"](
+        completion,
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    try:
+        checkpoint = torch.load(step_500_path, map_location="cpu", weights_only=False)
+    except (OSError, RuntimeError, TypeError, ValueError) as error:
+        raise RuntimeError("Process-V2 T1 step-500 checkpoint is unreadable") from error
+    if not isinstance(checkpoint, Mapping) or not isinstance(
+        checkpoint.get("identity"), Mapping
+    ):
+        raise RuntimeError("Process-V2 T1 step-500 checkpoint identity is absent")
+    checkpoint_identity = dict(checkpoint["identity"])
+    runner_hash = loaded["runner_implementation_sha256"](repo_root=REMOTE_ROOT)
+    runner_source_revision_sha256 = str(
+        checkpoint_identity.get("runner_source_revision_sha256")
+    )
+    checkpoint = _validate_publication_recovery_checkpoint(
+        checkpoint,
+        loaded=loaded,
+        runtime=runtime,
+        expected_runner_implementation_sha256=runner_hash,
+        expected_runner_source_revision_sha256=runner_source_revision_sha256,
+    )
+
+    model = scratch.model.to(device="cuda", dtype=torch.float32)
+    environment = _execution_environment(
+        loaded, batch_size=int(runtime.capacity_policy["optimization"]["batch_size"])
+    )
+    if environment != checkpoint_identity.get("execution_environment"):
+        raise RuntimeError(
+            "Process-V2 T1 publication recovery execution environment disagrees"
+        )
+    loaded["validate_selected_checkpoint"](
+        selected_path,
+        expected_file_sha256=expected_selected_checkpoint_file_sha256,
+        expected_selected_step=int(checkpoint["selected_step"]),
+        expected_model_state_sha256=str(checkpoint["selected_model_state_sha256"]),
+        expected_stream_sha256=str(checkpoint["stream_sha256"]),
+        expected_identity_fields=checkpoint_identity,
+    )
+    provenance = loaded["project_result_provenance"](
+        {
+            **dict(runtime_provenance),
+            "runner_source_revision_sha256": runner_source_revision_sha256,
+            "runner_implementation_sha256": runner_hash,
+            "execution_environment": environment,
+        }
+    )
+    recovery_revision = _source_revision(revision)
+    recovery_identity_sha256 = _sha256(
+        {
+            "prepared_completion_sha256": provenance["prepared_completion_sha256"],
+            "step_500_checkpoint_file_sha256": expected_step_500_file_sha256,
+            "selected_checkpoint_file_sha256": (
+                expected_selected_checkpoint_file_sha256
+            ),
+            "training_runner_source_revision_sha256": runner_source_revision_sha256,
+            "training_runner_implementation_sha256": runner_hash,
+            "recovery_source_revision_sha256": recovery_revision[
+                "source_revision_sha256"
+            ],
+        }
+    )
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix")
+        / recovery_identity_sha256
+    )
+    builder = functools.partial(
+        _publication_recovery_result_builder,
+        build_result=loaded["build_result"],
+        capacity_policy=runtime.capacity_policy,
+    )
+    _progress(
+        "process_v2_t1_publication_recovery_start",
+        run_root=str(run_root),
+        optimizer_updates_planned=0,
+        prepared_entry_count=len(runtime.entries),
+    )
+    with _heartbeat("process_v2_t1_publication_recovery_heartbeat"):
+        run = loaded["run_capacity"](
+            model,
+            runtime,
+            output_directory=run_root,
+            provenance=provenance,
+            resume_checkpoint_path=step_500_path,
+            resume_checkpoint_file_sha256=expected_step_500_file_sha256,
+            result_builder=builder,
+            result_filename=PROCESS_V2_RESULT_FILENAME,
+            expected_runner_implementation_sha256=runner_hash,
+        )
+    result = loaded["validate_result"](
+        run["result"], capacity_policy=runtime.capacity_policy
+    )
+    recovered_selected_path = Path(run["selected_checkpoint_path"])
+    if (
+        result["run_integrity"]["optimizer_steps_completed"] != 500
+        or result["run_integrity"]["resume_requested"] is not False
+        or result["run_integrity"]["resume_count"] != 0
+        or result["run_integrity"]["optimizer_state_sha256"]
+        != checkpoint["optimizer_state_sha256"]
+        or _file_sha256(recovered_selected_path)
+        != expected_selected_checkpoint_file_sha256
+        or run["recovery_checkpoints"] != []
+    ):
+        raise RuntimeError(
+            "Process-V2 T1 publication recovery changed optimization or selection"
+        )
+    result_path = Path(run["result_path"])
+    result_file_sha256 = _file_sha256(result_path)
+    decision = loaded["build_decision"](
+        result,
+        capacity_policy=runtime.capacity_policy,
+        result_file_sha256=result_file_sha256,
+    )
+    decision_path = run_root / loaded["DECISION_FILENAME"]
+    loaded["write_bytes_if_absent"](
+        decision_path, _canonical_bytes(decision) + b"\n"
+    )
+    decision = loaded["validate_decision"](
+        _read_canonical_object(
+            decision_path, label="the recovered Process-V2 T1 capacity decision"
+        ),
+        result=result,
+        capacity_policy=runtime.capacity_policy,
+        result_file_sha256=result_file_sha256,
+    )
+    receipt_body = {
+        "schema": "compose.editing_v2.process_v2_t1_publication_recovery",
+        "schema_version": 1,
+        "status": "COMPLETE_T1_PUBLICATION_RECOVERY_NO_DOWNSTREAM_AUTHORITY",
+        **loaded["NO_AUTHORITY"],
+        "prepared_completion_sha256": provenance["prepared_completion_sha256"],
+        "step_500_checkpoint_file_sha256": expected_step_500_file_sha256,
+        "selected_checkpoint_file_sha256": (
+            expected_selected_checkpoint_file_sha256
+        ),
+        "training_runner_source_revision_sha256": runner_source_revision_sha256,
+        "training_runner_implementation_sha256": runner_hash,
+        "recovery_source_revision": recovery_revision,
+        "optimizer_updates_executed": 0,
+        "panel_materialization_count": 1,
+        "result_file_sha256": result_file_sha256,
+        "result_sha256": result["result_sha256"],
+        "decision_sha256": decision["decision_sha256"],
+    }
+    receipt = {
+        **receipt_body,
+        "recovery_receipt_sha256": _sha256(receipt_body),
+    }
+    receipt_path = run_root / PUBLICATION_RECOVERY_RECEIPT_FILENAME
+    loaded["write_bytes_if_absent"](
+        receipt_path, _canonical_bytes(receipt) + b"\n"
+    )
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_publication_recovery_complete",
+        "run_root": str(run_root),
+        "result_path": str(result_path),
+        "result_file_sha256": result_file_sha256,
+        "result_sha256": result["result_sha256"],
+        "decision_path": str(decision_path),
+        "decision_sha256": decision["decision_sha256"],
+        "decision_status": decision["status"],
+        "recovery_receipt_path": str(receipt_path),
+        "recovery_receipt_sha256": receipt["recovery_receipt_sha256"],
+        "optimizer_updates_executed": 0,
         "bounded_p50_authorized": decision["bounded_p50_authorized"],
         "p50_launched": False,
     }
