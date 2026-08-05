@@ -408,6 +408,28 @@ def _collator(model: FactorizedTraceletRateModel) -> FactorizedMarkCollator:
     )
 
 
+def _attach_successor_family_coordinates(
+    batch: Any,
+    entries: Sequence[Mapping[str, Any]],
+) -> Any:
+    """Attach family-only successor targets after mark-free collation."""
+
+    if (
+        batch.batch_size != len(entries)
+        or any(action is not None for action in batch.teacher_actions)
+        or any(name is not None for name in batch.teacher_rule_names)
+    ):
+        raise SemanticT1CapacityRunnerError(
+            "successor-family coordinates require an aligned mark-free batch"
+        )
+    families = tuple(str(entry["model_family"]) for entry in entries)
+    if any(family not in ACTION_ROUTE_PREFIXES for family in families):
+        raise SemanticT1CapacityRunnerError(
+            "successor-family coordinate references a non-Active8 model family"
+        )
+    return replace(batch, teacher_rule_names=families)
+
+
 def _batch_for_ids(
     runtime: SemanticT1RuntimeInputs,
     model: FactorizedTraceletRateModel,
@@ -421,13 +443,18 @@ def _batch_for_ids(
             state=runtime.prepared.states_by_panel_entry_sha256[panel_id],
             time=float.fromhex(str(entry["support_time_hex"])),
             teacher_action=None,
-            teacher_rule_name=str(entry["model_family"]),
+            teacher_rule_name=None,
             teacher_rate=1.0,
             importance_weight=1.0,
         )
         for panel_id, entry in zip(panel_ids, entries, strict=True)
     ]
-    batch = collator(examples)
+    # The canonical-successor objective has no selected mark teacher.  Collate
+    # chemistry with both teacher coordinates absent, then attach only the
+    # selecting model-family coordinate needed to measure within-family
+    # successor mass.  Passing a model-family name through the mark-teacher
+    # validator misclassifies ``atom_restate`` as a legacy raw AtomRestate.
+    batch = _attach_successor_family_coordinates(collator(examples), entries)
     fibers = tuple(
         runtime.cache.record_for_panel_entry_sha256(panel_id).teacher_fiber
         for panel_id in panel_ids

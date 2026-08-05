@@ -843,6 +843,33 @@ def process_v2_partition_model():
     ).eval()
 
 
+def test_process_v2_successor_batch_attaches_family_after_mark_free_collation(
+    process_v2_partition_model,
+) -> None:
+    """Successor training names a family without inventing a mark teacher."""
+
+    from compose_v4.experiments.factorized_mark_conditional import (
+        FactorizedMarkExample,
+    )
+
+    model = process_v2_partition_model
+    example = FactorizedMarkExample(
+        state=_state("CCO"),
+        time=0.5,
+        teacher_action=None,
+        teacher_rule_name=None,
+        teacher_rate=1.0,
+        importance_weight=1.0,
+    )
+    collated = capacity_runner._collator(model)([example])
+    batch = capacity_runner._attach_successor_family_coordinates(
+        collated,
+        ({"model_family": "atom_restate"},),
+    )
+    assert batch.teacher_actions == (None,)
+    assert batch.teacher_rule_names == ("atom_restate",)
+
+
 def test_full_partition_scorer_matches_production_segmented_kernel_and_oracle(
     partition_model,
 ) -> None:
