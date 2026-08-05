@@ -19,6 +19,7 @@ from __future__ import annotations
 import functools
 import hashlib
 import json
+import os
 import platform
 import re
 import subprocess
@@ -55,6 +56,7 @@ CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
 GPU_TIMEOUT_SECONDS = 8 * 3600
 HEARTBEAT_SECONDS = 30
+DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 
 REVISION_SCHEMA = "compose.editing_v2.process_v2_t1_modal_image_revision"
 REVISION_SCHEMA_VERSION = 1
@@ -77,6 +79,8 @@ image = (
             "PYTHONPATH": str(REMOTE_ROOT / "src"),
             "PYTHONUNBUFFERED": "1",
             "OMP_NUM_THREADS": "1",
+            "CUBLAS_WORKSPACE_CONFIG": DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG,
+            "NVIDIA_TF32_OVERRIDE": "0",
         }
     )
 )
@@ -858,6 +862,13 @@ def run_t1_gpu_remote(
     """Run one hazard-free joint scratch-model T1 job and stop before P50."""
 
     _validate_remote_revision(revision)
+    if (
+        os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+        != DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise RuntimeError(
+            "Process-V2 T1 requires deterministic cuBLAS before materialization"
+        )
     artifact_volume.reload()
     loaded = _imports()
     runtime, scratch, provenance = loaded["load_runtime"](

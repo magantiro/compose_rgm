@@ -39,6 +39,14 @@ def test_launcher_freezes_bounded_cpu_fanout_and_one_gpu() -> None:
     assert "prepare_leaf_remote.starmap(" in source
 
 
+def test_gpu_image_sets_deterministic_cublas_before_expensive_materialization() -> None:
+    source = _source()
+    assert launcher.DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG == ":4096:8"
+    assert '"CUBLAS_WORKSPACE_CONFIG": DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG' in source
+    assert 'os.environ.get("CUBLAS_WORKSPACE_CONFIG")' in source
+    assert "requires deterministic cuBLAS before materialization" in source
+
+
 def test_launcher_binds_the_sparse_seven_point_process_v2_policy() -> None:
     policy = json.loads((ROOT / launcher.CAPACITY_POLICY_SOURCE).read_bytes())
     assert policy["optimization"]["trajectory_evaluation"] == ("step_zero_and_report_points_only")
