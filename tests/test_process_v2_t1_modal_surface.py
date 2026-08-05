@@ -207,6 +207,19 @@ def test_publication_recovery_does_not_conflate_prepared_and_runner_revisions() 
     assert 'runtime.prepared.artifact["source_revision"]' not in body
 
 
+def test_publication_recovery_uses_the_policy_terminal_step() -> None:
+    node = _function("recover_t1_publication_remote")
+    parameters = [argument.arg for argument in node.args.args]
+    body = ast.get_source_segment(_source(), node)
+    assert body is not None
+    assert "terminal_checkpoint_path" in parameters
+    assert "expected_terminal_checkpoint_file_sha256" in parameters
+    assert "step_500_checkpoint_path" not in parameters
+    assert '["optimization"]["maximum_optimizer_steps"]' in body
+    assert "optimizer_steps_completed\"] != 500" not in body
+    assert "expected_runner_source_revision_sha256" in body
+
+
 def test_cpu_groups_are_ordered_complete_disjoint_and_bounded() -> None:
     values = tuple(f"{index:064x}" for index in range(93))
     groups = launcher._groups(values, maximum=40)

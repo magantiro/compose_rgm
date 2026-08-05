@@ -457,7 +457,7 @@ def _publication_recovery_result_builder(
     corrected_integrity = {
         **dict(run_integrity),
         # These fields describe optimization, not this publication-only
-        # reconstruction.  The trusted step-500 checkpoint below proves the
+        # reconstruction.  The trusted terminal checkpoint below proves the
         # original optimizer ran uninterrupted with resume_count == 0.
         "resume_requested": False,
         "resume_count": 0,
@@ -1576,14 +1576,14 @@ def run_t1_collated_gpu_remote(
 )
 def recover_t1_publication_remote(
     prepared_completion_path: str,
-    step_500_checkpoint_path: str,
-    expected_step_500_file_sha256: str,
+    terminal_checkpoint_path: str,
+    expected_terminal_checkpoint_file_sha256: str,
     selected_checkpoint_path: str,
     expected_selected_checkpoint_file_sha256: str,
     output_prefix: str,
     revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """Recover missing result publication after an uninterrupted 500-step run."""
+    """Recover missing result publication after an uninterrupted terminal step."""
 
     _validate_remote_revision(revision)
     artifact_volume.reload()
@@ -1592,17 +1592,17 @@ def recover_t1_publication_remote(
     completion = _require_artifact_path(
         prepared_completion_path, field="prepared_completion_path"
     )
-    step_500_path = _require_artifact_path(
-        step_500_checkpoint_path, field="step_500_checkpoint_path"
+    terminal_path = _require_artifact_path(
+        terminal_checkpoint_path, field="terminal_checkpoint_path"
     )
     selected_path = _require_artifact_path(
         selected_checkpoint_path, field="selected_checkpoint_path"
     )
     for field, value, path in (
         (
-            "expected_step_500_file_sha256",
-            expected_step_500_file_sha256,
-            step_500_path,
+            "expected_terminal_checkpoint_file_sha256",
+            expected_terminal_checkpoint_file_sha256,
+            terminal_path,
         ),
         (
             "expected_selected_checkpoint_file_sha256",
@@ -1619,13 +1619,13 @@ def recover_t1_publication_remote(
         repo_root=REMOTE_ROOT,
     )
     try:
-        checkpoint = torch.load(step_500_path, map_location="cpu", weights_only=False)
+        checkpoint = torch.load(terminal_path, map_location="cpu", weights_only=False)
     except (OSError, RuntimeError, TypeError, ValueError) as error:
-        raise RuntimeError("Process-V2 T1 step-500 checkpoint is unreadable") from error
+        raise RuntimeError("Process-V2 T1 terminal checkpoint is unreadable") from error
     if not isinstance(checkpoint, Mapping) or not isinstance(
         checkpoint.get("identity"), Mapping
     ):
-        raise RuntimeError("Process-V2 T1 step-500 checkpoint identity is absent")
+        raise RuntimeError("Process-V2 T1 terminal checkpoint identity is absent")
     checkpoint_identity = dict(checkpoint["identity"])
     runner_hash = loaded["runner_implementation_sha256"](repo_root=REMOTE_ROOT)
     runner_source_revision_sha256 = str(
@@ -1667,7 +1667,9 @@ def recover_t1_publication_remote(
     recovery_identity_sha256 = _sha256(
         {
             "prepared_completion_sha256": provenance["prepared_completion_sha256"],
-            "step_500_checkpoint_file_sha256": expected_step_500_file_sha256,
+            "terminal_checkpoint_file_sha256": (
+                expected_terminal_checkpoint_file_sha256
+            ),
             "selected_checkpoint_file_sha256": (
                 expected_selected_checkpoint_file_sha256
             ),
@@ -1699,18 +1701,22 @@ def recover_t1_publication_remote(
             runtime,
             output_directory=run_root,
             provenance=provenance,
-            resume_checkpoint_path=step_500_path,
-            resume_checkpoint_file_sha256=expected_step_500_file_sha256,
+            resume_checkpoint_path=terminal_path,
+            resume_checkpoint_file_sha256=expected_terminal_checkpoint_file_sha256,
             result_builder=builder,
             result_filename=PROCESS_V2_RESULT_FILENAME,
             expected_runner_implementation_sha256=runner_hash,
+            expected_runner_source_revision_sha256=(
+                runner_source_revision_sha256
+            ),
         )
     result = loaded["validate_result"](
         run["result"], capacity_policy=runtime.capacity_policy
     )
     recovered_selected_path = Path(run["selected_checkpoint_path"])
     if (
-        result["run_integrity"]["optimizer_steps_completed"] != 500
+        result["run_integrity"]["optimizer_steps_completed"]
+        != int(runtime.capacity_policy["optimization"]["maximum_optimizer_steps"])
         or result["run_integrity"]["resume_requested"] is not False
         or result["run_integrity"]["resume_count"] != 0
         or result["run_integrity"]["optimizer_state_sha256"]
@@ -1743,11 +1749,13 @@ def recover_t1_publication_remote(
     )
     receipt_body = {
         "schema": "compose.editing_v2.process_v2_t1_publication_recovery",
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "COMPLETE_T1_PUBLICATION_RECOVERY_NO_DOWNSTREAM_AUTHORITY",
         **loaded["NO_AUTHORITY"],
         "prepared_completion_sha256": provenance["prepared_completion_sha256"],
-        "step_500_checkpoint_file_sha256": expected_step_500_file_sha256,
+        "terminal_checkpoint_file_sha256": (
+            expected_terminal_checkpoint_file_sha256
+        ),
         "selected_checkpoint_file_sha256": (
             expected_selected_checkpoint_file_sha256
         ),

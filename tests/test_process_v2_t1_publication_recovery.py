@@ -74,7 +74,7 @@ def _checkpoint_fixture():
     runtime = SimpleNamespace(
         capacity_policy={
             "policy_sha256": policy_sha,
-            "optimization": {"maximum_optimizer_steps": 500},
+            "optimization": {"maximum_optimizer_steps": 750},
         },
         prepared=SimpleNamespace(
             artifact={
@@ -101,7 +101,7 @@ def _checkpoint_fixture():
         "schema_version": 3,
         "status": "complete",
         "training_authorized": False,
-        "completed_steps": 500,
+        "completed_steps": 750,
         "resume_count": 0,
         "identity": {
             "capacity_policy_sha256": policy_sha,
