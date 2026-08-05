@@ -34,8 +34,11 @@ from compose_v4.experiments.editing_v2_semantic_gate_zero import (
     EVIDENCE_STATUS as GATE_ZERO_EVIDENCE_STATUS,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
+    EXPECTED_REPORT_POINTS,
+    MINIMUM_EARLY_STOP_STEP,
     SemanticT1CapacityPolicyError,
     load_semantic_t1_capacity_policy,
+    semantic_t1_evaluation_schedule,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
     SemanticT1SelectedCheckpointError,
@@ -559,8 +562,9 @@ def build_semantic_t1_capacity_result(
     ``entry_metrics`` is the exact selected-state panel projection.  It names
     each panel entry, its frozen family and semantic cell, teacher-successor
     probability, corresponding NLL, and rank.  ``evaluation_trajectory``
-    supplies the frozen checkpoint-selection summaries for every state from
-    step zero through the terminal state.  ``gradient_evidence`` supplies one
+    supplies the frozen checkpoint-selection summaries at the actual optimizer
+    steps selected by the bound dense or sparse evaluation policy.
+    ``gradient_evidence`` supplies one
     ordered family-gate and action-route receipt per Active8 family.  These are
     artifact field names, not required internal runner variable names.
     """
@@ -642,12 +646,20 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
     steps = integrity["optimizer_steps_completed"]
     selected_step = integrity["selected_step"]
     evaluation_steps = integrity["evaluation_steps"]
+    dense_evaluation_steps = list(range(steps + 1)) if type(steps) is int and steps >= 0 else None
+    sparse_evaluation_steps = (
+        [point for point in (0, *EXPECTED_REPORT_POINTS) if type(steps) is int and point <= steps]
+        if type(steps) is int and steps >= 0
+        else None
+    )
     if (
         type(steps) is not int
         or not 1 <= steps <= 500
         or type(selected_step) is not int
         or not isinstance(evaluation_steps, list)
-        or evaluation_steps != list(range(steps + 1))
+        or evaluation_steps not in (dense_evaluation_steps, sparse_evaluation_steps)
+        or not evaluation_steps
+        or evaluation_steps[-1] != steps
         or selected_step not in evaluation_steps
         or integrity["termination_reason"]
         not in {
@@ -691,14 +703,14 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
         _require_sha(integrity[name], field=f"result.run_integrity.{name}")
 
     trajectory = result["evaluation_trajectory"]
-    if not isinstance(trajectory, list) or len(trajectory) != steps + 1:
+    if not isinstance(trajectory, list) or len(trajectory) != len(evaluation_steps):
         raise SemanticT1DecisionError("semantic T1 evaluation trajectory is incomplete")
     normalized_trajectory: list[tuple[int, float, float, str]] = []
     for index, item in enumerate(trajectory):
         row = _exact_mapping(item, _TRAJECTORY_FIELDS, field="evaluation trajectory row")
-        if row["step"] != index:
+        if row["step"] != evaluation_steps[index]:
             raise SemanticT1DecisionError(
-                "semantic T1 trajectory steps are not complete and ordered"
+                "semantic T1 trajectory steps disagree with the declared evaluation schedule"
             )
         minimum = _finite_probability(
             row["minimum_entry_teacher_successor_probability"],
@@ -710,7 +722,7 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
             minimum=0.0,
         )
         state_sha = _require_sha(row["model_state_sha256"], field="trajectory.model_state_sha256")
-        normalized_trajectory.append((index, minimum, mean_nll, state_sha))
+        normalized_trajectory.append((int(row["step"]), minimum, mean_nll, state_sha))
     expected_selected = min(
         normalized_trajectory,
         key=lambda row: (-row[1], row[2], row[0]),
@@ -784,7 +796,8 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
         raise SemanticT1DecisionError(
             "semantic T1 result entry inventory or metadata differs from bound provenance"
         )
-    selected_trajectory = normalized_trajectory[selected_step]
+    trajectory_by_step = {row[0]: row for row in normalized_trajectory}
+    selected_trajectory = trajectory_by_step[selected_step]
     selected_minimum = min(float(entry["teacher_successor_probability"]) for entry in entries)
     selected_mean_nll = _mean([float(entry["canonical_successor_nll"]) for entry in entries])
     if not (
@@ -1332,9 +1345,23 @@ def _decision_failures(result: Mapping[str, Any], policy: Mapping[str, Any]) -> 
     optimizer_steps = integrity["optimizer_steps_completed"]
     abort_triggered = integrity["abort_triggered"]
     abort_reasons = integrity["abort_reasons"]
+    optimization = policy["optimization"]
+    maximum_optimizer_steps = int(optimization["maximum_optimizer_steps"])
+    try:
+        policy_evaluation_schedule = semantic_t1_evaluation_schedule(optimization)
+    except SemanticT1CapacityPolicyError as error:
+        raise SemanticT1DecisionError(
+            f"semantic T1 decision policy has an invalid evaluation schedule: {error}"
+        ) from error
+    expected_evaluation_steps = [
+        step for step in policy_evaluation_schedule if step <= optimizer_steps
+    ]
     integrity_checks = {
         "resume_requested": integrity["resume_requested"] is False,
         "resume_count_zero": integrity["resume_count"] == 0,
+        "evaluation_schedule_matches_policy": (
+            integrity["evaluation_steps"] == expected_evaluation_steps
+        ),
         "abort_not_triggered": integrity["abort_triggered"] is False,
         "abort_reasons_empty": integrity["abort_reasons"] == [],
         "nonfinite_event_count_zero": integrity["nonfinite_event_count"] == 0,
@@ -1348,12 +1375,12 @@ def _decision_failures(result: Mapping[str, Any], policy: Mapping[str, Any]) -> 
         "termination_reason_consistent": (
             (
                 termination_reason == "all_thresholds_passed_early"
-                and optimizer_steps < 500
+                and MINIMUM_EARLY_STOP_STEP <= optimizer_steps <= maximum_optimizer_steps
                 and abort_triggered is False
             )
             or (
                 termination_reason == "maximum_optimizer_steps_reached"
-                and optimizer_steps == 500
+                and optimizer_steps == maximum_optimizer_steps
                 and abort_triggered is False
             )
             or (termination_reason == "aborted" and abort_triggered is True and bool(abort_reasons))
