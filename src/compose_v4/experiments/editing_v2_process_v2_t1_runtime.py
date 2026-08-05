@@ -27,7 +27,7 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType, SimpleNamespace
@@ -93,7 +93,7 @@ LEAF_SCHEMA_VERSION = 1
 LEAF_STATUS = "PROCESS_V2_T1_PREPARED_LEAF_NO_DOWNSTREAM_AUTHORITY"
 LEAF_FILENAME = "PROCESS_V2_T1_PREPARED_LEAF.json"
 PREPARED_SCHEMA = "compose.editing_v2.process_v2_t1_prepared_inputs"
-PREPARED_SCHEMA_VERSION = 2
+PREPARED_SCHEMA_VERSION = 3
 PREPARED_STATUS = "PROCESS_V2_T1_EXACT_SUCCESSOR_INPUTS_NO_DOWNSTREAM_AUTHORITY"
 PREPARED_FILENAME = "PROCESS_V2_T1_PREPARED_INPUTS.json"
 COMPLETION_SCHEMA = "compose.editing_v2.process_v2_t1_prepared_completion"
@@ -325,6 +325,7 @@ def _build_process_v2_t1_prepared_plan(
     *,
     source: ProcessV2T1Source,
     source_revision: Mapping[str, Any],
+    implementation_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Pure plan construction from an already authenticated revision receipt."""
 
@@ -344,7 +345,11 @@ def _build_process_v2_t1_prepared_plan(
     panel_bytes = canonical_bytes(validated_panel) + b"\n"
     base = {
         "source_revision": revision,
-        "implementation_sha256": _implementation_sha256(source.repo_root),
+        "implementation_sha256": (
+            _implementation_sha256(source.repo_root)
+            if implementation_sha256 is None
+            else _require_sha(implementation_sha256, field="T1 implementation")
+        ),
         "process_identity_sha256": source.contracts.process_identity_sha256,
         "active8_completion_sha256": source.index.active8_completion_sha256,
         "active8_sentinel_sha256": source.index.active8_sentinel_sha256,
@@ -397,11 +402,12 @@ def _build_process_v2_t1_prepared_plan(
     return {**with_run, "plan_sha256": canonical_sha256(with_run)}
 
 
-def validate_process_v2_t1_prepared_plan(
+def _validate_process_v2_t1_prepared_plan(
     value: object,
     *,
     panel: Mapping[str, Any],
     source: ProcessV2T1Source,
+    implementation_sha256: str | None,
 ) -> dict[str, Any]:
     """Rebuild a plan from its exact inputs and require byte identity."""
 
@@ -456,10 +462,50 @@ def validate_process_v2_t1_prepared_plan(
         panel,
         source=source,
         source_revision=_validate_source_revision(plan["source_revision"]),
+        implementation_sha256=implementation_sha256,
     )
     if canonical_bytes(rebuilt) != canonical_bytes(plan):
         raise ProcessV2T1RuntimeError("T1 prepared plan differs from exact recomputation")
     return plan
+
+
+def validate_process_v2_t1_prepared_plan(
+    value: object,
+    *,
+    panel: Mapping[str, Any],
+    source: ProcessV2T1Source,
+) -> dict[str, Any]:
+    """Rebuild a current plan from its exact inputs and require byte identity."""
+
+    return _validate_process_v2_t1_prepared_plan(
+        value,
+        panel=panel,
+        source=source,
+        implementation_sha256=None,
+    )
+
+
+def validate_process_v2_t1_leaf_reuse_plan(
+    value: object,
+    *,
+    panel: Mapping[str, Any],
+    source: ProcessV2T1Source,
+    expected_plan_sha256: str,
+) -> dict[str, Any]:
+    """Authenticate one exact historical plan without claiming current compilation."""
+
+    expected = _require_sha(expected_plan_sha256, field="expected reuse plan")
+    if not isinstance(value, Mapping) or value.get("plan_sha256") != expected:
+        raise ProcessV2T1RuntimeError("T1 leaf reuse plan is not the explicitly authorized plan")
+    implementation = _require_sha(
+        value.get("implementation_sha256"), field="historical T1 implementation"
+    )
+    return _validate_process_v2_t1_prepared_plan(
+        value,
+        panel=panel,
+        source=source,
+        implementation_sha256=implementation,
+    )
 
 
 def authenticate_process_v2_t1_prepared_plan_for_worker(
@@ -966,23 +1012,106 @@ def _load_prepared_leaf(path: Path, *, plan: Mapping[str, Any]) -> dict[str, Any
     return validate_process_v2_t1_prepared_leaf(leaf, plan=plan)
 
 
-def build_process_v2_t1_prepared_inputs(
-    plan: Mapping[str, Any],
+def _load_reusable_prepared_leaf(path: Path, *, plan: Mapping[str, Any]) -> dict[str, Any]:
+    """Authenticate an immutable leaf envelope without decoding its chemistry again."""
+
+    leaf, _raw = _load_canonical(path, label="a reusable T1 prepared leaf")
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "status",
+        *authority_false_block(),
+        "plan_sha256",
+        "run_identity_sha256",
+        "build_identity_sha256",
+        "task_identity_sha256",
+        "active8_task_identity_sha256",
+        "panel_sha256",
+        "initial_model_state_sha256",
+        "entry_count",
+        "entry_inventory_sha256",
+        "entries",
+        "model_scores_or_probabilities_stored",
+        "hazard_included",
+        "leaf_sha256",
+    }
+    if set(leaf) != expected_fields:
+        raise ProcessV2T1RuntimeError("reusable T1 prepared leaf field set disagrees")
+    try:
+        verify_self_hash(leaf, field="leaf_sha256", label="a reusable T1 prepared leaf")
+        require_authority_false(leaf, label="a reusable T1 prepared leaf")
+    except ProcessV2SchemaError as error:
+        raise ProcessV2T1RuntimeError(str(error)) from error
+    task = next(
+        (
+            candidate
+            for candidate in plan["tasks"]
+            if candidate["task_identity_sha256"] == leaf["task_identity_sha256"]
+        ),
+        None,
+    )
+    entries = leaf.get("entries")
+    observed_ids = [
+        str(entry.get("panel_entry_sha256"))
+        for entry in entries
+        if isinstance(entry, Mapping)
+    ] if isinstance(entries, list) else []
+    if (
+        task is None
+        or leaf["schema"] != LEAF_SCHEMA
+        or leaf["schema_version"] != LEAF_SCHEMA_VERSION
+        or leaf["status"] != LEAF_STATUS
+        or leaf["plan_sha256"] != plan["plan_sha256"]
+        or leaf["run_identity_sha256"] != plan["run_identity_sha256"]
+        or leaf["build_identity_sha256"] != plan["build_identity_sha256"]
+        or leaf["panel_sha256"] != plan["panel_sha256"]
+        or leaf["active8_task_identity_sha256"] != task["active8_task_identity_sha256"]
+        or leaf["initial_model_state_sha256"]
+        != plan["model_binding"]["model_runtime"]["initial_model_state_sha256"]
+        or not isinstance(entries, list)
+        or leaf["entry_count"] != len(entries)
+        or leaf["entry_inventory_sha256"] != canonical_sha256(entries)
+        or leaf["model_scores_or_probabilities_stored"] is not False
+        or leaf["hazard_included"] is not False
+        or len(observed_ids) != len(entries)
+        or observed_ids != sorted(task["panel_entry_sha256s"])
+    ):
+        raise ProcessV2T1RuntimeError("reusable T1 prepared leaf identity or census disagrees")
+    return leaf
+
+
+def _require_complete_panel_entry_inventory(
+    observed_ids: Sequence[str], expected_ids: Sequence[str]
+) -> None:
+    """Compare membership independently of the runtime entry ordering."""
+
+    if sorted(observed_ids) != sorted(expected_ids) or len(set(observed_ids)) != len(
+        observed_ids
+    ):
+        raise ProcessV2T1RuntimeError("T1 prepared reduction omits or repeats a panel entry")
+
+
+def _build_process_v2_t1_prepared_inputs(
+    validated: Mapping[str, Any],
     *,
-    panel: Mapping[str, Any],
     source: ProcessV2T1Source,
     run_root: Path,
+    source_revision: Mapping[str, Any],
+    reusable_leaves: bool,
 ) -> dict[str, Any]:
-    """Reduce every exact task leaf into one score-independent runtime input."""
+    """Reduce authenticated leaves into one score-independent runtime input."""
 
-    validated = validate_process_v2_t1_prepared_plan(plan, panel=panel, source=source)
     leaves: list[dict[str, Any]] = []
     for task in validated["tasks"]:
         task_root = Path(run_root) / TASKS_DIRNAME / str(task["task_identity_sha256"])
         leaf_path = task_root / LEAF_FILENAME
         if not leaf_path.is_file():
             raise ProcessV2T1RuntimeError(f"T1 prepared leaf is absent: {leaf_path}")
-        leaf = _load_prepared_leaf(leaf_path, plan=validated)
+        leaf = (
+            _load_reusable_prepared_leaf(leaf_path, plan=validated)
+            if reusable_leaves
+            else _load_prepared_leaf(leaf_path, plan=validated)
+        )
         leaves.append(leaf)
     if len(leaves) != validated["task_count"]:
         raise ProcessV2T1RuntimeError("T1 prepared leaf count differs from the plan")
@@ -995,11 +1124,10 @@ def build_process_v2_t1_prepared_inputs(
         )
     )
     observed_ids = [str(entry["panel_entry_sha256"]) for entry in entries]
-    expected_ids = sorted(
+    expected_ids = [
         str(identifier) for task in validated["tasks"] for identifier in task["panel_entry_sha256s"]
-    )
-    if observed_ids != sorted(expected_ids) or len(set(observed_ids)) != len(observed_ids):
-        raise ProcessV2T1RuntimeError("T1 prepared reduction omits or repeats a panel entry")
+    ]
+    _require_complete_panel_entry_inventory(observed_ids, expected_ids)
     leaf_receipts = [
         {
             "task_identity_sha256": leaf["task_identity_sha256"],
@@ -1022,8 +1150,16 @@ def build_process_v2_t1_prepared_inputs(
         "schema_version": PREPARED_SCHEMA_VERSION,
         "status": PREPARED_STATUS,
         **authority_false_block(),
-        "source_revision": validated["source_revision"],
-        "implementation_sha256": validated["implementation_sha256"],
+        "source_revision": _validate_source_revision(source_revision),
+        "implementation_sha256": _implementation_sha256(source.repo_root),
+        "leaf_source_revision": validated["source_revision"],
+        "leaf_implementation_sha256": validated["implementation_sha256"],
+        "leaf_reuse": {
+            "reused_precomputed_leaves": reusable_leaves,
+            "leaf_plan_sha256": validated["plan_sha256"],
+            "leaf_run_identity_sha256": validated["run_identity_sha256"],
+            "reduction_rule": "complete_panel_entry_identity_multiset_v1",
+        },
         "process_identity_sha256": validated["process_identity_sha256"],
         "active8_completion_sha256": validated["active8_completion_sha256"],
         "active8_sentinel_sha256": validated["active8_sentinel_sha256"],
@@ -1055,6 +1191,52 @@ def build_process_v2_t1_prepared_inputs(
     return validate_process_v2_t1_prepared_inputs(
         artifact,
         expected_plan=validated,
+        validate_entry_payloads=not reusable_leaves,
+    )
+
+
+def build_process_v2_t1_prepared_inputs(
+    plan: Mapping[str, Any],
+    *,
+    panel: Mapping[str, Any],
+    source: ProcessV2T1Source,
+    run_root: Path,
+) -> dict[str, Any]:
+    """Reduce current exact task leaves into one score-independent runtime input."""
+
+    validated = validate_process_v2_t1_prepared_plan(plan, panel=panel, source=source)
+    return _build_process_v2_t1_prepared_inputs(
+        validated,
+        source=source,
+        run_root=run_root,
+        source_revision=validated["source_revision"],
+        reusable_leaves=False,
+    )
+
+
+def build_reused_process_v2_t1_prepared_inputs(
+    plan: Mapping[str, Any],
+    *,
+    panel: Mapping[str, Any],
+    source: ProcessV2T1Source,
+    run_root: Path,
+    source_revision: Mapping[str, Any],
+    expected_plan_sha256: str,
+) -> dict[str, Any]:
+    """Reduce one explicitly authorized complete leaf run without chemistry recomputation."""
+
+    validated = validate_process_v2_t1_leaf_reuse_plan(
+        plan,
+        panel=panel,
+        source=source,
+        expected_plan_sha256=expected_plan_sha256,
+    )
+    return _build_process_v2_t1_prepared_inputs(
+        validated,
+        source=source,
+        run_root=run_root,
+        source_revision=source_revision,
+        reusable_leaves=True,
     )
 
 
@@ -1063,6 +1245,7 @@ def validate_process_v2_t1_prepared_inputs(
     *,
     expected_plan: Mapping[str, Any] | None = None,
     repo_root: Path | None = None,
+    validate_entry_payloads: bool = True,
 ) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise ProcessV2T1RuntimeError("T1 prepared inputs must be an object")
@@ -1074,6 +1257,9 @@ def validate_process_v2_t1_prepared_inputs(
         *authority_false_block(),
         "source_revision",
         "implementation_sha256",
+        "leaf_source_revision",
+        "leaf_implementation_sha256",
+        "leaf_reuse",
         "process_identity_sha256",
         "active8_completion_sha256",
         "active8_sentinel_sha256",
@@ -1113,14 +1299,34 @@ def validate_process_v2_t1_prepared_inputs(
     ):
         raise ProcessV2T1RuntimeError("T1 prepared input identity or census disagrees")
     _validate_source_revision(artifact["source_revision"])
+    _validate_source_revision(artifact["leaf_source_revision"])
+    leaf_reuse = artifact["leaf_reuse"]
+    if (
+        not isinstance(leaf_reuse, Mapping)
+        or set(leaf_reuse)
+        != {
+            "reused_precomputed_leaves",
+            "leaf_plan_sha256",
+            "leaf_run_identity_sha256",
+            "reduction_rule",
+        }
+        or type(leaf_reuse["reused_precomputed_leaves"]) is not bool
+        or leaf_reuse["leaf_plan_sha256"] != artifact["plan_sha256"]
+        or leaf_reuse["leaf_run_identity_sha256"] != artifact["run_identity_sha256"]
+        or leaf_reuse["reduction_rule"] != "complete_panel_entry_identity_multiset_v1"
+    ):
+        raise ProcessV2T1RuntimeError("T1 prepared leaf provenance disagrees")
+    _require_sha(
+        artifact["leaf_implementation_sha256"], field="leaf implementation"
+    )
     if repo_root is not None and artifact["implementation_sha256"] != _implementation_sha256(
         repo_root
     ):
         raise ProcessV2T1RuntimeError("T1 prepared input implementation is stale")
     if expected_plan is not None:
         comparisons = {
-            "source_revision": expected_plan["source_revision"],
-            "implementation_sha256": expected_plan["implementation_sha256"],
+            "leaf_source_revision": expected_plan["source_revision"],
+            "leaf_implementation_sha256": expected_plan["implementation_sha256"],
             "process_identity_sha256": expected_plan["process_identity_sha256"],
             "active8_completion_sha256": expected_plan["active8_completion_sha256"],
             "active8_sentinel_sha256": expected_plan["active8_sentinel_sha256"],
@@ -1142,36 +1348,39 @@ def validate_process_v2_t1_prepared_inputs(
             raise ProcessV2T1RuntimeError("T1 prepared entry field set disagrees")
         # Validate the entry body directly without pretending the synthetic
         # envelope belongs to a plan task.
-        try:
-            verify_self_hash(entry, field="entry_sha256", label="a T1 prepared entry")
-            state = decode_state(entry["exact_state"])
-            partition = compiled_successor_map_from_payload(entry["successor_partition"])
-            teacher = teacher_successor_fiber_from_exact_digest(
-                partition, str(entry["target_state_sha256"])
-            )
-            require_exact_successor_action_identity(
-                partition,
-                target_state_sha256=str(entry["target_state_sha256"]),
-                action_sha256=str(entry["teacher_action_sha256"]),
-            )
-        except (ProcessV2SchemaError, SuccessorTrainingError, TypeError, ValueError) as error:
-            raise ProcessV2T1RuntimeError("T1 prepared entry is internally invalid") from error
-        productive = sum(len(group.marks) for group in partition.successor_groups)
-        virtual = len(partition.virtual_marks)
-        if (
-            encode_state(state) != entry["exact_state"]
-            or persistent_slot_state_sha256(state) != entry["source_state_sha256"]
-            or partition.source_state_sha256 != entry["source_state_sha256"]
-            or teacher.target_key != entry["successor_canonical_key"]
-            or entry["raw_mark_count"] != productive + virtual
-            or entry["canonical_successor_count"] != len(partition.successor_groups)
-            or entry["production_successor_alias_multiplicity"] != len(teacher.aliases)
-            or entry["productive_alias_count"] != productive
-            or entry["virtual_alias_count"] != virtual
-            or entry["model_scores_or_probabilities_stored"] is not False
-            or entry["hazard_included"] is not False
-        ):
-            raise ProcessV2T1RuntimeError("T1 prepared entry state or successor census disagrees")
+        if validate_entry_payloads:
+            try:
+                verify_self_hash(entry, field="entry_sha256", label="a T1 prepared entry")
+                state = decode_state(entry["exact_state"])
+                partition = compiled_successor_map_from_payload(entry["successor_partition"])
+                teacher = teacher_successor_fiber_from_exact_digest(
+                    partition, str(entry["target_state_sha256"])
+                )
+                require_exact_successor_action_identity(
+                    partition,
+                    target_state_sha256=str(entry["target_state_sha256"]),
+                    action_sha256=str(entry["teacher_action_sha256"]),
+                )
+            except (ProcessV2SchemaError, SuccessorTrainingError, TypeError, ValueError) as error:
+                raise ProcessV2T1RuntimeError("T1 prepared entry is internally invalid") from error
+            productive = sum(len(group.marks) for group in partition.successor_groups)
+            virtual = len(partition.virtual_marks)
+            if (
+                encode_state(state) != entry["exact_state"]
+                or persistent_slot_state_sha256(state) != entry["source_state_sha256"]
+                or partition.source_state_sha256 != entry["source_state_sha256"]
+                or teacher.target_key != entry["successor_canonical_key"]
+                or entry["raw_mark_count"] != productive + virtual
+                or entry["canonical_successor_count"] != len(partition.successor_groups)
+                or entry["production_successor_alias_multiplicity"] != len(teacher.aliases)
+                or entry["productive_alias_count"] != productive
+                or entry["virtual_alias_count"] != virtual
+                or entry["model_scores_or_probabilities_stored"] is not False
+                or entry["hazard_included"] is not False
+            ):
+                raise ProcessV2T1RuntimeError(
+                    "T1 prepared entry state or successor census disagrees"
+                )
         observed.append(str(entry["panel_entry_sha256"]))
         source_sha256 = str(entry["source_state_sha256"])
         if source_sha256 in observed_sources:
@@ -1244,6 +1453,43 @@ def publish_process_v2_t1_prepared_inputs(
         artifact,
         artifact_raw=raw,
     )
+    completion_path = root / COMPLETION_FILENAME
+    try:
+        write_bytes_if_absent(completion_path, canonical_bytes(completion) + b"\n")
+    except ImmutableArtifactError as error:
+        raise ProcessV2T1RuntimeError(str(error)) from error
+    return completion_path
+
+
+def publish_reused_process_v2_t1_prepared_inputs(
+    plan: Mapping[str, Any],
+    *,
+    panel: Mapping[str, Any],
+    source: ProcessV2T1Source,
+    run_root: Path,
+    source_revision: Mapping[str, Any],
+    expected_plan_sha256: str,
+) -> Path:
+    """Publish a corrected reduction of one exact, already-complete leaf run."""
+
+    artifact = build_reused_process_v2_t1_prepared_inputs(
+        plan,
+        panel=panel,
+        source=source,
+        run_root=run_root,
+        source_revision=source_revision,
+        expected_plan_sha256=expected_plan_sha256,
+    )
+    root = Path(run_root)
+    artifact_path = root / PREPARED_FILENAME
+    try:
+        write_bytes_if_absent(artifact_path, canonical_bytes(artifact) + b"\n")
+    except ImmutableArtifactError as error:
+        raise ProcessV2T1RuntimeError(str(error)) from error
+    raw = artifact_path.read_bytes()
+    if raw != canonical_bytes(artifact) + b"\n":
+        raise ProcessV2T1RuntimeError("published reused T1 prepared bytes changed on reopen")
+    completion = _build_prepared_completion(artifact, artifact_raw=raw)
     completion_path = root / COMPLETION_FILENAME
     try:
         write_bytes_if_absent(completion_path, canonical_bytes(completion) + b"\n")
@@ -1468,6 +1714,11 @@ def load_process_v2_t1_runtime_inputs(
         "active8_completion_sha256": artifact["active8_completion_sha256"],
         "process_identity_sha256": artifact["process_identity_sha256"],
         "initial_model_state_sha256": completion["initial_model_state_sha256"],
+        "leaf_source_revision_sha256": artifact["leaf_source_revision"][
+            "source_revision_sha256"
+        ],
+        "leaf_implementation_sha256": artifact["leaf_implementation_sha256"],
+        "leaf_reuse": dict(artifact["leaf_reuse"]),
     }
     return runtime, scratch, provenance
 
@@ -1483,6 +1734,7 @@ __all__ = [
     "ProcessV2T1RuntimeInputs",
     "authenticate_process_v2_t1_prepared_plan_for_worker",
     "build_process_v2_t1_prepared_inputs",
+    "build_reused_process_v2_t1_prepared_inputs",
     "build_process_v2_t1_prepared_plan",
     "build_process_v2_t1_scratch_runtime",
     "compile_process_v2_t1_prepared_leaf",
@@ -1490,9 +1742,11 @@ __all__ = [
     "load_process_v2_t1_capacity_policy",
     "load_process_v2_t1_runtime_inputs",
     "publish_process_v2_t1_prepared_inputs",
+    "publish_reused_process_v2_t1_prepared_inputs",
     "validate_process_v2_t1_prepared_inputs",
     "validate_process_v2_t1_prepared_leaf",
     "validate_process_v2_t1_prepared_plan",
+    "validate_process_v2_t1_leaf_reuse_plan",
     "write_process_v2_t1_prepared_leaf",
     "write_process_v2_t1_prepared_plan",
 ]

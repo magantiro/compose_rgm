@@ -140,7 +140,9 @@ def test_prepared_plan_groups_panel_entries_by_existing_active8_chunk(
     ) == sorted(entry["panel_entry_sha256"] for entry in panel["entries"])
 
 
-def test_prepared_leaf_publication_is_restart_safe(genuine_stage, tmp_path: Path) -> None:
+def test_prepared_leaf_publication_is_restart_safe(
+    genuine_stage, tmp_path: Path, monkeypatch
+) -> None:
     _stage, source, _decision = genuine_stage
     candidate = next(iter(iter_process_v2_t1_candidates(source)))
     addressed = resolve_process_v2_t1_entries(source, (candidate,))[0].addressed_trace
@@ -189,6 +191,12 @@ def test_prepared_leaf_publication_is_restart_safe(genuine_stage, tmp_path: Path
     assert second == first
     assert second.read_bytes() == first_bytes
 
+    def forbidden_decode(*_args, **_kwargs):
+        raise AssertionError("authenticated leaf reuse must not decode chemistry")
+
+    monkeypatch.setattr(t1_runtime, "decode_state", forbidden_decode)
+    assert t1_runtime._load_reusable_prepared_leaf(second, plan=plan) == leaf
+
 
 def test_reduction_refuses_an_incomplete_leaf_inventory(genuine_stage, tmp_path: Path) -> None:
     source, panel, _revision, plan = _standin_planned_panel(genuine_stage, tmp_path)
@@ -199,6 +207,37 @@ def test_reduction_refuses_an_incomplete_leaf_inventory(genuine_stage, tmp_path:
             panel=panel,
             source=source,
             run_root=tmp_path / "empty-run",
+        )
+
+
+def test_reduction_inventory_ignores_runtime_family_order() -> None:
+    expected = ["0" * 64, "f" * 64]
+    observed_in_family_order = ["f" * 64, "0" * 64]
+
+    t1_runtime._require_complete_panel_entry_inventory(
+        observed_in_family_order,
+        expected,
+    )
+
+
+def test_leaf_reuse_requires_the_exact_authorized_plan(genuine_stage, tmp_path: Path) -> None:
+    source, panel, _revision, plan = _standin_planned_panel(genuine_stage, tmp_path)
+
+    assert (
+        t1_runtime.validate_process_v2_t1_leaf_reuse_plan(
+            plan,
+            panel=panel,
+            source=source,
+            expected_plan_sha256=plan["plan_sha256"],
+        )
+        == plan
+    )
+    with pytest.raises(ProcessV2T1RuntimeError, match="explicitly authorized plan"):
+        t1_runtime.validate_process_v2_t1_leaf_reuse_plan(
+            plan,
+            panel=panel,
+            source=source,
+            expected_plan_sha256="0" * 64,
         )
 
 
@@ -338,6 +377,14 @@ def _minimal_published_release(
         **t1_runtime.authority_false_block(),
         "source_revision": revision,
         "implementation_sha256": t1_runtime._implementation_sha256(ROOT),
+        "leaf_source_revision": revision,
+        "leaf_implementation_sha256": t1_runtime._implementation_sha256(ROOT),
+        "leaf_reuse": {
+            "reused_precomputed_leaves": False,
+            "leaf_plan_sha256": canonical_sha256("minimal-plan"),
+            "leaf_run_identity_sha256": canonical_sha256("minimal-run"),
+            "reduction_rule": "complete_panel_entry_identity_multiset_v1",
+        },
         "process_identity_sha256": source.contracts.process_identity_sha256,
         "active8_completion_sha256": source.index.active8_completion_sha256,
         "active8_sentinel_sha256": source.index.active8_sentinel_sha256,

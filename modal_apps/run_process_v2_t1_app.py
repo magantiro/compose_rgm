@@ -306,6 +306,7 @@ def _imports() -> dict[str, Any]:
         compile_authenticated_process_v2_t1_prepared_leaf,
         load_process_v2_t1_runtime_inputs,
         publish_process_v2_t1_prepared_inputs,
+        publish_reused_process_v2_t1_prepared_inputs,
         validate_process_v2_t1_prepared_leaf,
         write_process_v2_t1_prepared_leaf,
         write_process_v2_t1_prepared_plan,
@@ -333,6 +334,7 @@ def _imports() -> dict[str, Any]:
         "compile_leaf": compile_authenticated_process_v2_t1_prepared_leaf,
         "load_runtime": load_process_v2_t1_runtime_inputs,
         "publish_prepared": publish_process_v2_t1_prepared_inputs,
+        "publish_reused_prepared": publish_reused_process_v2_t1_prepared_inputs,
         "validate_leaf": validate_process_v2_t1_prepared_leaf,
         "write_leaf": write_process_v2_t1_prepared_leaf,
         "write_plan": write_process_v2_t1_prepared_plan,
@@ -715,6 +717,75 @@ def finalize_prepared_remote(
     return result
 
 
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def finalize_reused_prepared_remote(
+    plan_path: str,
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    panel_path: str,
+    run_root: str,
+    expected_plan_sha256: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Reduce one exact completed leaf run without recomputing any successor fiber."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    plan = _read_canonical_object(
+        _require_artifact_path(plan_path, field="plan_path"),
+        label="the reusable Process-V2 T1 prepared plan",
+    )
+    source = _open_source(
+        active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
+        gate_zero_decision_path=_require_artifact_path(
+            gate_zero_decision_path, field="gate_zero_decision_path"
+        ),
+        loaded=loaded,
+    )
+    panel = _read_canonical_object(
+        _require_artifact_path(panel_path, field="panel_path"),
+        label="the reusable Process-V2 T1 panel",
+    )
+    root = _require_artifact_path(run_root, field="run_root")
+    _progress(
+        "process_v2_t1_reused_reduction_start",
+        run_root=str(root),
+        expected_plan_sha256=expected_plan_sha256,
+    )
+    with _heartbeat("process_v2_t1_reused_leaf_reduction"):
+        completion_path = loaded["publish_reused_prepared"](
+            plan,
+            panel=panel,
+            source=source,
+            run_root=root,
+            source_revision=_source_revision(revision),
+            expected_plan_sha256=expected_plan_sha256,
+        )
+    artifact_volume.commit()
+    completion = _read_canonical_object(
+        completion_path, label="the reused Process-V2 T1 prepared completion"
+    )
+    result = {
+        "phase": "process_v2_t1_reused_prepared_complete",
+        "run_root": str(root),
+        "prepared_completion_path": str(completion_path),
+        "prepared_completion_sha256": completion["completion_sha256"],
+        "entry_count": int(completion["entry_count"]),
+        "training_launched": False,
+        "bounded_p50_authorized": False,
+    }
+    _progress(**result)
+    return result
+
+
 def _execution_environment(loaded: Mapping[str, Any], *, batch_size: int) -> dict[str, Any]:
     torch = loaded["torch"]
     device_index = torch.cuda.current_device()
@@ -1012,6 +1083,61 @@ def driver(
     return result
 
 
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+)
+def reuse_driver(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    reusable_run_root: str,
+    expected_plan_sha256: str,
+    run_output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Reduce an exact completed leaf run, then launch exactly one GPU T1 job."""
+
+    _validate_remote_revision(revision)
+    root = _require_artifact_path(reusable_run_root, field="reusable_run_root")
+    finalized = finalize_reused_prepared_remote.remote(
+        str(root / PLAN_FILENAME),
+        active8_run_root,
+        gate_zero_decision_path,
+        str(root / PANEL_FILENAME),
+        str(root),
+        expected_plan_sha256,
+        revision,
+    )
+    gpu = run_t1_gpu_remote.remote(
+        finalized["prepared_completion_path"],
+        run_output_prefix,
+        revision,
+    )
+    result = {
+        "phase": "process_v2_t1_reuse_driver_complete",
+        "prepared": finalized,
+        "capacity": gpu,
+        "image_revision": revision,
+        "fiber_recomputation_count": 0,
+        "bounded_p50_authorized": gpu["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(
+        "process_v2_t1_reuse_driver_complete",
+        prepared_completion_sha256=finalized["prepared_completion_sha256"],
+        result_sha256=gpu["result_sha256"],
+        decision_sha256=gpu["decision_sha256"],
+        decision_status=gpu["decision_status"],
+        fiber_recomputation_count=0,
+        bounded_p50_authorized=gpu["bounded_p50_authorized"],
+        p50_launched=False,
+    )
+    return result
+
+
 @app.local_entrypoint()
 def main(
     active8_run_root: str,
@@ -1020,24 +1146,43 @@ def main(
     prepared_output_prefix: str = PREPARED_OUTPUT_PREFIX,
     run_output_prefix: str = RUN_OUTPUT_PREFIX,
     max_cpu_containers: int = MAX_CPU_CONTAINERS,
+    reusable_run_root: str = "",
+    expected_reuse_plan_sha256: str = "",
 ) -> None:
     """Spawn one disconnect-safe Process-V2 T1 driver and return immediately."""
 
     revision = local_image_revision(expected_commit=expected_commit)
-    call = driver.spawn(
-        active8_run_root,
-        gate_zero_decision_path,
-        prepared_output_prefix,
-        run_output_prefix,
-        int(max_cpu_containers),
-        revision,
-    )
+    reuse_requested = bool(reusable_run_root or expected_reuse_plan_sha256)
+    if reuse_requested and not (reusable_run_root and expected_reuse_plan_sha256):
+        raise ValueError(
+            "reusable_run_root and expected_reuse_plan_sha256 must be supplied together"
+        )
+    if reuse_requested:
+        call = reuse_driver.spawn(
+            active8_run_root,
+            gate_zero_decision_path,
+            reusable_run_root,
+            expected_reuse_plan_sha256,
+            run_output_prefix,
+            revision,
+        )
+    else:
+        call = driver.spawn(
+            active8_run_root,
+            gate_zero_decision_path,
+            prepared_output_prefix,
+            run_output_prefix,
+            int(max_cpu_containers),
+            revision,
+        )
     print(
         json.dumps(
             {
                 "phase": "process_v2_t1_driver_launched",
                 "driver_call_id": call.object_id,
                 "max_cpu_containers": int(max_cpu_containers),
+                "reused_precomputed_leaves": reuse_requested,
+                "fiber_recomputation_count": 0 if reuse_requested else None,
                 "commit": revision["commit"],
                 "image_revision_sha256": revision["image_revision_sha256"],
                 "bounded_p50_authorized": False,
@@ -1057,10 +1202,12 @@ __all__ = [
     "app",
     "driver",
     "finalize_prepared_remote",
+    "finalize_reused_prepared_remote",
     "local_image_revision",
     "main",
     "prepare_leaf_remote",
     "prepare_plan_remote",
     "run_t1_gpu_remote",
+    "reuse_driver",
     "scan_completed_remote",
 ]

@@ -33,7 +33,8 @@ def test_launcher_freezes_bounded_cpu_fanout_and_one_gpu() -> None:
     assert launcher.CPU_PER_LEAF == 1.0
     assert "max_containers=MAX_CPU_CONTAINERS" in source
     assert source.count('gpu="A10G"') == 1
-    assert source.count("run_t1_gpu_remote.remote(") == 1
+    assert source.count("run_t1_gpu_remote.remote(") == 2
+    assert "fiber_recomputation_count=0" in source
     assert "prepare_leaf_remote.update_autoscaler(max_containers=max_cpu_containers)" in source
     assert "prepare_leaf_remote.starmap(" in source
 
