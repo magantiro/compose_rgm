@@ -1063,3 +1063,55 @@ def iter_gate_zero_eligible_shards(
             for number, row in enumerate(rows, start=1)
         )
         yield shard, validated
+
+
+def iter_process_v2_role_shards(
+    active8_run_root: Path,
+    *,
+    contracts: GateZeroContracts,
+    index: GateZeroSourceIndex,
+    partition_role: str,
+) -> Iterator[tuple[Mapping[str, Any], tuple[dict[str, Any], ...]]]:
+    """Yield authenticated Active8 shards for one explicitly requested role.
+
+    Gate 0 intentionally calls only :func:`iter_gate_zero_eligible_shards`, so
+    held-out decision shards remain unopened during structural gating.  A
+    later, separately authorized evaluation stage may use this role-scoped
+    reader to open validation evidence without ever constructing a path for
+    controller-validation or final-test data.
+    """
+
+    if partition_role not in REQUIRED_PARTITION_ROLES:
+        raise ProcessV2GateZeroError(
+            f"unknown Process-V2 partition role: {partition_role!r}"
+        )
+    selected = reduction_order(
+        tuple(
+            shard
+            for shard in index.shards
+            if shard["partition_role"] == partition_role and shard["nonempty"]
+        )
+    )
+    parent = Path(active8_run_root) / ACTIVE8_TASKS_DIRNAME
+    for shard in selected:
+        identity = str(shard["task_identity_sha256"])
+        path = parent / identity / ACTIVE8_DECISION_SHARD_FILENAME
+        rows, digest = _read_decision_shard(path)
+        if digest != shard["decision_shard_sha256"]:
+            raise ProcessV2GateZeroError(
+                f"{path}: bytes do not match the receipt decision_shard_sha256"
+            )
+        if len(rows) != shard["transition_count"]:
+            raise ProcessV2GateZeroError(
+                f"{path}: holds {len(rows)} transitions, its receipt declares "
+                f"{shard['transition_count']}"
+            )
+        validated = tuple(
+            _validated_row(row, where=f"{path}:{number}")
+            for number, row in enumerate(rows, start=1)
+        )
+        if any(row["partition_role"] != partition_role for row in validated):
+            raise ProcessV2GateZeroError(
+                f"{path}: contains a transition outside role {partition_role!r}"
+            )
+        yield shard, validated
