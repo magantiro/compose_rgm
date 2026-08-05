@@ -82,7 +82,7 @@ PANEL_SCHEMA = "compose.editing_v2.process_v2_t1_panel"
 PANEL_SCHEMA_VERSION = 1
 PANEL_STATUS = "PROCESS_V2_T1_PANEL_PREPARED_NO_DOWNSTREAM_AUTHORITY"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
-SELECTION_RULE = "unique_source_single_canonical_target_cell_round_robin_v1"
+SELECTION_RULE = "unique_source_single_canonical_target_cell_round_robin_minimum_v2"
 
 _DECISION_FIELDS = frozenset(
     {
@@ -537,12 +537,16 @@ def _selected_candidates(
             )
         offsets = dict.fromkeys(cells, 0)
         family_selected: list[dict[str, Any]] = []
-        while len(family_selected) < maximum[family]:
+        # The frozen policy permits a bounded range.  T1 is a capacity gate, not
+        # a data-volume stress test, so select its declared minimum.  The
+        # maximum remains a validation bound for externally supplied panels.
+        target = minimum[family]
+        while len(family_selected) < target:
             progressed = False
             for cell in cells:
                 bucket = by_family_cell[(family, cell)]
                 offset = offsets[cell]
-                if offset < len(bucket) and len(family_selected) < maximum[family]:
+                if offset < len(bucket) and len(family_selected) < target:
                     family_selected.append(bucket[offset])
                     offsets[cell] = offset + 1
                     progressed = True

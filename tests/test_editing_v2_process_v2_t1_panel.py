@@ -239,9 +239,7 @@ def test_small_genuine_fixture_exercises_panel_provenance_without_relaxing_produ
         _namespace, family, _context = cell.split(":", 2)
         required_by_family[family] = required_by_family.get(family, 0) + 1
     policy = dict(source.policy)
-    policy["minimum_entries_by_family"] = dict.fromkeys(
-        source.contracts.active_families, 1
-    )
+    policy["minimum_entries_by_family"] = required_by_family
     policy["maximum_entries_by_family"] = required_by_family
     policy["contract_sha256"] = canonical_sha256(
         {key: value for key, value in policy.items() if key != "contract_sha256"}
