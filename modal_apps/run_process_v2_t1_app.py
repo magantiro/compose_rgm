@@ -52,6 +52,8 @@ PUBLICATION_RECOVERY_RECEIPT_FILENAME = "PROCESS_V2_T1_PUBLICATION_RECOVERY.json
 PUBLICATION_RECOVERY_OUTPUT_PREFIX = (
     "/artifacts/editing_v2/process_v2_t1_publication_recovery"
 )
+TERMINAL_AUDIT_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_terminal_audit"
+TERMINAL_AUDIT_FILENAME = "PROCESS_V2_T1_TERMINAL_AUDIT.json"
 PUBLICATION_RECOVERY_GPU = "A10G"
 
 MAX_CPU_CONTAINERS = 40
@@ -314,6 +316,7 @@ def _imports() -> dict[str, Any]:
         build_process_v2_t1_prepared_plan,
         build_process_v2_t1_scratch_runtime,
         compile_authenticated_process_v2_t1_prepared_leaf,
+        load_process_v2_t1_capacity_policy,
         load_process_v2_t1_runtime_inputs,
         publish_process_v2_t1_prepared_inputs,
         publish_reused_process_v2_t1_prepared_inputs,
@@ -322,7 +325,13 @@ def _imports() -> dict[str, Any]:
         write_process_v2_t1_prepared_plan,
     )
     from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
+        _MaterializedSemanticT1Panel,
+        _batch_for_ids,
+        _collator,
+        _metric_rows,
         run_semantic_t1_capacity,
+        semantic_t1_threshold_checks,
+        summarize_semantic_t1_metrics,
     )
     from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
         CHECKPOINT_SCHEMA,
@@ -349,6 +358,7 @@ def _imports() -> dict[str, Any]:
         "build_plan": build_process_v2_t1_prepared_plan,
         "build_scratch": build_process_v2_t1_scratch_runtime,
         "compile_leaf": compile_authenticated_process_v2_t1_prepared_leaf,
+        "load_capacity_policy": load_process_v2_t1_capacity_policy,
         "load_runtime": load_process_v2_t1_runtime_inputs,
         "publish_prepared": publish_process_v2_t1_prepared_inputs,
         "publish_reused_prepared": publish_reused_process_v2_t1_prepared_inputs,
@@ -364,6 +374,12 @@ def _imports() -> dict[str, Any]:
         "write_bytes_if_absent": write_bytes_if_absent,
         "build_environment": build_semantic_t1_execution_environment,
         "run_capacity": run_semantic_t1_capacity,
+        "MaterializedT1Panel": _MaterializedSemanticT1Panel,
+        "batch_for_ids": _batch_for_ids,
+        "collator": _collator,
+        "metric_rows": _metric_rows,
+        "threshold_checks": semantic_t1_threshold_checks,
+        "summarize_metrics": summarize_semantic_t1_metrics,
         "CHECKPOINT_SCHEMA": CHECKPOINT_SCHEMA,
         "CHECKPOINT_SCHEMA_VERSION": CHECKPOINT_SCHEMA_VERSION,
         "CHECKPOINT_STATUS": CHECKPOINT_STATUS,
@@ -1336,6 +1352,369 @@ def recover_t1_publication_remote(
         "recovery_receipt_sha256": receipt["recovery_receipt_sha256"],
         "optimizer_updates_executed": 0,
         "bounded_p50_authorized": decision["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+def _terminal_audit_rows(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    entries: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Attach only prepared-fiber census fields to deterministic metric rows."""
+
+    entry_by_id = {str(entry["panel_entry_sha256"]): entry for entry in entries}
+    if len(entry_by_id) != len(entries):
+        raise RuntimeError("Process-V2 T1 terminal audit repeats a prepared entry")
+    result: list[dict[str, Any]] = []
+    for row in rows:
+        identifier = str(row["panel_entry_sha256"])
+        try:
+            entry = entry_by_id[identifier]
+        except KeyError as error:
+            raise RuntimeError(
+                "Process-V2 T1 terminal metric references another prepared panel"
+            ) from error
+        result.append(
+            {
+                **dict(row),
+                "raw_mark_count": int(entry["raw_mark_count"]),
+                "productive_alias_count": int(entry["productive_alias_count"]),
+                "virtual_alias_count": int(entry["virtual_alias_count"]),
+                "teacher_alias_multiplicity": int(
+                    entry["production_successor_alias_multiplicity"]
+                ),
+            }
+        )
+    return result
+
+
+@app.function(
+    image=image,
+    gpu=PUBLICATION_RECOVERY_GPU,
+    cpu=8.0,
+    memory=32 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=8,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def audit_t1_family_remote(
+    prepared_completion_path: str,
+    step_500_checkpoint_path: str,
+    expected_step_500_file_sha256: str,
+    family: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Score one exact 64-entry family at selected and terminal checkpoints."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    torch = loaded["torch"]
+    completion = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    step_500_path = _require_artifact_path(
+        step_500_checkpoint_path, field="step_500_checkpoint_path"
+    )
+    if (
+        _SHA256_RE.fullmatch(expected_step_500_file_sha256) is None
+        or _file_sha256(step_500_path) != expected_step_500_file_sha256
+    ):
+        raise RuntimeError("Process-V2 T1 terminal-audit checkpoint SHA-256 disagrees")
+
+    with _heartbeat(f"process_v2_t1_terminal_audit_{family}"):
+        runtime, scratch, _provenance = loaded["load_runtime"](
+            completion,
+            capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+            repo_root=REMOTE_ROOT,
+        )
+        required_families = tuple(str(item) for item in runtime.capacity_policy["required_families"])
+        if family not in required_families:
+            raise RuntimeError(f"Process-V2 T1 terminal audit received unknown family {family!r}")
+        try:
+            checkpoint = torch.load(step_500_path, map_location="cpu", weights_only=False)
+        except (OSError, RuntimeError, TypeError, ValueError) as error:
+            raise RuntimeError("Process-V2 T1 terminal-audit checkpoint is unreadable") from error
+        if not isinstance(checkpoint, Mapping) or not isinstance(
+            checkpoint.get("identity"), Mapping
+        ):
+            raise RuntimeError("Process-V2 T1 terminal-audit checkpoint identity is absent")
+        checkpoint_identity = dict(checkpoint["identity"])
+        runner_hash = loaded["runner_implementation_sha256"](repo_root=REMOTE_ROOT)
+        checkpoint = _validate_publication_recovery_checkpoint(
+            checkpoint,
+            loaded=loaded,
+            runtime=runtime,
+            expected_runner_implementation_sha256=runner_hash,
+            expected_runner_source_revision_sha256=str(
+                checkpoint_identity["runner_source_revision_sha256"]
+            ),
+        )
+        model = scratch.model.to(device="cuda", dtype=torch.float32)
+        environment = _execution_environment(
+            loaded, batch_size=int(runtime.capacity_policy["optimization"]["batch_size"])
+        )
+        if environment != checkpoint_identity.get("execution_environment"):
+            raise RuntimeError("Process-V2 T1 terminal-audit environment disagrees")
+        panel_ids = tuple(
+            str(entry["panel_entry_sha256"])
+            for entry in runtime.entries
+            if entry["model_family"] == family
+        )
+        if len(panel_ids) != 64:
+            raise RuntimeError(
+                f"Process-V2 T1 terminal audit expected 64 {family} entries, got {len(panel_ids)}"
+            )
+        batch, fibers, partitions, entries = loaded["batch_for_ids"](
+            runtime, model, loaded["collator"](model), panel_ids
+        )
+        panel = loaded["MaterializedT1Panel"](
+            batch=batch,
+            panel_ids=panel_ids,
+            fibers=fibers,
+            partitions=partitions,
+            entries=entries,
+            index_by_panel_id={identifier: index for index, identifier in enumerate(panel_ids)},
+        )
+
+        def evaluate(state: Mapping[str, Any]) -> list[dict[str, Any]]:
+            model.load_state_dict(state, strict=True)
+            return _terminal_audit_rows(
+                loaded["metric_rows"](panel, model, batch_size=64),
+                entries=entries,
+            )
+
+        selected_rows = evaluate(checkpoint["selected_model_state"])
+        terminal_rows = evaluate(checkpoint["model_state"])
+
+    response = {
+        "family": family,
+        "entry_count": len(panel_ids),
+        "selected_step": int(checkpoint["selected_step"]),
+        "terminal_step": int(checkpoint["completed_steps"]),
+        "selected_model_state_sha256": str(checkpoint["selected_model_state_sha256"]),
+        "terminal_model_state_sha256": str(checkpoint["model_state_sha256"]),
+        "gradient_evidence": checkpoint["gradient_evidence"],
+        "selected_rows": selected_rows,
+        "terminal_rows": terminal_rows,
+    }
+    _progress(
+        "process_v2_t1_terminal_family_audit_complete",
+        family=family,
+        entry_count=len(panel_ids),
+        selected_step=response["selected_step"],
+        terminal_step=response["terminal_step"],
+    )
+    return response
+
+
+def _metric_result_projection(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    family_order: Sequence[str],
+) -> list[dict[str, Any]]:
+    indices = {family: index for index, family in enumerate(family_order)}
+    return sorted(
+        (
+            {
+                "panel_entry_sha256": str(row["panel_entry_sha256"]),
+                "family": str(row["model_family"]),
+                "semantic_cell_id": str(row["capability_cell_id"]),
+                "teacher_successor_probability": float(row["teacher_successor_probability"]),
+                "canonical_successor_nll": float(row["teacher_successor_nll"]),
+                "teacher_successor_rank": int(row["teacher_successor_rank"]),
+                "teacher_successor_top1": bool(row["teacher_successor_top1"]),
+            }
+            for row in rows
+        ),
+        key=lambda row: (
+            indices[row["family"]],
+            row["semantic_cell_id"],
+            row["panel_entry_sha256"],
+        ),
+    )
+
+
+@app.function(
+    image=image,
+    cpu=1.0,
+    memory=4 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def audit_t1_terminal_driver(
+    prepared_completion_path: str,
+    step_500_checkpoint_path: str,
+    expected_step_500_file_sha256: str,
+    recovered_result_path: str,
+    expected_recovered_result_file_sha256: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Fan out family scoring and publish one non-authorizing terminal audit."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    result_path = _require_artifact_path(recovered_result_path, field="recovered_result_path")
+    if (
+        _SHA256_RE.fullmatch(expected_recovered_result_file_sha256) is None
+        or _file_sha256(result_path) != expected_recovered_result_file_sha256
+    ):
+        raise RuntimeError("Process-V2 T1 recovered result SHA-256 disagrees")
+    policy, _policy_file_sha256 = loaded["load_capacity_policy"](
+        REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    recovered_result = loaded["validate_result"](
+        _read_canonical_object(result_path, label="the recovered Process-V2 T1 result"),
+        capacity_policy=policy,
+    )
+    family_order = tuple(str(item) for item in policy["required_families"])
+    audit_t1_family_remote.update_autoscaler(max_containers=len(family_order))
+    family_results = list(
+        audit_t1_family_remote.starmap(
+            [
+                (
+                    prepared_completion_path,
+                    step_500_checkpoint_path,
+                    expected_step_500_file_sha256,
+                    family,
+                    revision,
+                )
+                for family in family_order
+            ]
+        )
+    )
+    by_family = {str(item["family"]): item for item in family_results}
+    if set(by_family) != set(family_order):
+        raise RuntimeError("Process-V2 T1 terminal audit lost a family result")
+    first = by_family[family_order[0]]
+    if any(
+        item["selected_step"] != first["selected_step"]
+        or item["terminal_step"] != first["terminal_step"]
+        or item["selected_model_state_sha256"] != first["selected_model_state_sha256"]
+        or item["terminal_model_state_sha256"] != first["terminal_model_state_sha256"]
+        or item["gradient_evidence"] != first["gradient_evidence"]
+        for item in by_family.values()
+    ):
+        raise RuntimeError("Process-V2 T1 terminal family audits disagree on checkpoint identity")
+    selected_rows = [
+        row for family in family_order for row in by_family[family]["selected_rows"]
+    ]
+    terminal_rows = [
+        row for family in family_order for row in by_family[family]["terminal_rows"]
+    ]
+    selected_projection = _metric_result_projection(selected_rows, family_order=family_order)
+    expected_projection = list(recovered_result["entry_metrics"])
+    if selected_projection != expected_projection:
+        raise RuntimeError(
+            "Process-V2 T1 terminal audit does not reproduce the authoritative selected metrics"
+        )
+    selected_metrics = loaded["summarize_metrics"](selected_rows)
+    terminal_metrics = loaded["summarize_metrics"](terminal_rows)
+    gradients = first["gradient_evidence"]
+    thresholds = policy["thresholds"]
+    selected_checks = loaded["threshold_checks"](
+        selected_metrics, thresholds=thresholds, gradient_evidence=gradients
+    )
+    terminal_checks = loaded["threshold_checks"](
+        terminal_metrics, thresholds=thresholds, gradient_evidence=gradients
+    )
+    if selected_checks != recovered_result["threshold_checks"]:
+        raise RuntimeError("Process-V2 T1 terminal audit threshold cross-check disagrees")
+
+    selected_by_id = {str(row["panel_entry_sha256"]): row for row in selected_rows}
+    terminal_by_id = {str(row["panel_entry_sha256"]): row for row in terminal_rows}
+    entry_comparisons = []
+    for family in family_order:
+        for identifier in sorted(
+            row_id
+            for row_id, row in terminal_by_id.items()
+            if row["model_family"] == family
+        ):
+            selected = selected_by_id[identifier]
+            terminal = terminal_by_id[identifier]
+            entry_comparisons.append(
+                {
+                    "panel_entry_sha256": identifier,
+                    "family": family,
+                    "semantic_cell_id": terminal["capability_cell_id"],
+                    "canonical_successor_count": int(terminal["canonical_successor_count"]),
+                    "raw_mark_count": int(terminal["raw_mark_count"]),
+                    "productive_alias_count": int(terminal["productive_alias_count"]),
+                    "virtual_alias_count": int(terminal["virtual_alias_count"]),
+                    "teacher_alias_multiplicity": int(terminal["teacher_alias_multiplicity"]),
+                    "selected_probability": float(selected["teacher_successor_probability"]),
+                    "terminal_probability": float(terminal["teacher_successor_probability"]),
+                    "probability_delta": float(terminal["teacher_successor_probability"])
+                    - float(selected["teacher_successor_probability"]),
+                    "selected_nll": float(selected["teacher_successor_nll"]),
+                    "terminal_nll": float(terminal["teacher_successor_nll"]),
+                    "selected_rank": int(selected["teacher_successor_rank"]),
+                    "terminal_rank": int(terminal["teacher_successor_rank"]),
+                    "selected_top1": bool(selected["teacher_successor_top1"]),
+                    "terminal_top1": bool(terminal["teacher_successor_top1"]),
+                }
+            )
+    revision_body = _source_revision(revision)
+    identity = {
+        "prepared_completion_path": prepared_completion_path,
+        "step_500_checkpoint_path": step_500_checkpoint_path,
+        "step_500_checkpoint_file_sha256": expected_step_500_file_sha256,
+        "recovered_result_path": recovered_result_path,
+        "recovered_result_file_sha256": expected_recovered_result_file_sha256,
+        "recovered_result_sha256": recovered_result["result_sha256"],
+        "audit_source_revision_sha256": revision_body["source_revision_sha256"],
+    }
+    artifact_body = {
+        "schema": "compose.editing_v2.process_v2_t1_terminal_audit",
+        "schema_version": 1,
+        "status": "COMPLETE_PROCESS_V2_T1_TERMINAL_AUDIT_NO_DOWNSTREAM_AUTHORITY",
+        **loaded["NO_AUTHORITY"],
+        "identity": identity,
+        "selected_step": int(first["selected_step"]),
+        "terminal_step": int(first["terminal_step"]),
+        "selected_model_state_sha256": first["selected_model_state_sha256"],
+        "terminal_model_state_sha256": first["terminal_model_state_sha256"],
+        "family_worker_count": len(family_results),
+        "entry_count": len(entry_comparisons),
+        "selected_result_reproduced_exactly": True,
+        "selected_threshold_checks": selected_checks,
+        "terminal_threshold_checks": terminal_checks,
+        "selected_metrics": {
+            key: value for key, value in selected_metrics.items() if key != "per_entry"
+        },
+        "terminal_metrics": {
+            key: value for key, value in terminal_metrics.items() if key != "per_entry"
+        },
+        "entry_comparisons": entry_comparisons,
+        "optimizer_updates_executed": 0,
+        "p50_launched": False,
+    }
+    artifact = {**artifact_body, "audit_sha256": _sha256(artifact_body)}
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix")
+        / _sha256(identity)
+    )
+    audit_path = run_root / TERMINAL_AUDIT_FILENAME
+    loaded["write_bytes_if_absent"](audit_path, _canonical_bytes(artifact) + b"\n")
+    reopened = _read_canonical_object(audit_path, label="the Process-V2 T1 terminal audit")
+    if reopened != artifact:
+        raise RuntimeError("published Process-V2 T1 terminal audit changed on reopen")
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_terminal_audit_complete",
+        "audit_path": str(audit_path),
+        "audit_file_sha256": _file_sha256(audit_path),
+        "audit_sha256": artifact["audit_sha256"],
+        "selected_result_reproduced_exactly": True,
+        "terminal_threshold_checks": terminal_checks,
+        "optimizer_updates_executed": 0,
         "p50_launched": False,
     }
     _progress(**response)
