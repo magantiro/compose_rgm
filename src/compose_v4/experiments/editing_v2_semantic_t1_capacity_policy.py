@@ -27,6 +27,9 @@ EXPECTED_CELL_ROLE_POLICY_SHA256 = (
 EXPECTED_PANEL_MINIMUM = 64
 EXPECTED_PANEL_MAXIMUM = 128
 EXPECTED_REPORT_POINTS = (1, 10, 50, 100, 250, 500)
+LEGACY_DENSE_TRAJECTORY_EVALUATION = "every_pre_update_state_and_terminal_state"
+SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION = "initial_report_points_and_terminal_state"
+MINIMUM_EARLY_STOP_STEP = 10
 EXPECTED_SAMPLING_ORDER = (
     "model_family",
     "semantic_capability_cell",
@@ -41,6 +44,54 @@ EXPECTED_FAILURE_DIAGNOSTIC_SCOPE_ORDER = (
 
 class SemanticT1CapacityPolicyError(ValueError):
     """The prospective semantic T1 capacity policy is malformed or stale."""
+
+
+def semantic_t1_evaluation_schedule(
+    optimization: Mapping[str, Any],
+) -> tuple[int, ...]:
+    """Resolve the complete full-panel schedule for one explicit policy mode.
+
+    The legacy dense mode remains supported byte-for-byte.  A separately
+    versioned policy may opt into sparse evaluation at the initial state and
+    its frozen report points.  Requiring the maximum step among those points
+    keeps the terminal state observable without an implicit extra evaluation.
+    """
+
+    maximum_steps = optimization.get("maximum_optimizer_steps")
+    report_points = optimization.get("report_points")
+    mode = optimization.get("trajectory_evaluation")
+    if (
+        type(maximum_steps) is not int
+        or maximum_steps <= 0
+        or not isinstance(report_points, list)
+        or any(type(point) is not int or not 0 < point <= maximum_steps for point in report_points)
+        or report_points != sorted(set(report_points))
+        or maximum_steps not in report_points
+    ):
+        raise SemanticT1CapacityPolicyError("semantic T1 evaluation schedule inputs are invalid")
+    if mode == LEGACY_DENSE_TRAJECTORY_EVALUATION:
+        return tuple(range(maximum_steps + 1))
+    if mode == SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION:
+        return (0, *report_points)
+    raise SemanticT1CapacityPolicyError("semantic T1 trajectory-evaluation policy is unknown")
+
+
+def semantic_t1_threshold_stop_allowed(
+    *,
+    optimizer_step: int,
+    threshold_checks: Mapping[str, Any],
+) -> bool:
+    """Return whether a threshold pass may terminate the capacity run."""
+
+    if type(optimizer_step) is not int or optimizer_step < 0:
+        raise SemanticT1CapacityPolicyError(
+            "semantic T1 optimizer step must be a nonnegative integer"
+        )
+    if not threshold_checks or any(type(value) is not bool for value in threshold_checks.values()):
+        raise SemanticT1CapacityPolicyError(
+            "semantic T1 threshold checks must be a nonempty Boolean mapping"
+        )
+    return optimizer_step >= MINIMUM_EARLY_STOP_STEP and all(threshold_checks.values())
 
 
 def _canonical_bytes(value: object) -> bytes:
@@ -209,7 +260,7 @@ def validate_semantic_t1_capacity_policy(
         or tuple(optimization["failure_diagnostic_scope_order"])
         != EXPECTED_FAILURE_DIAGNOSTIC_SCOPE_ORDER
         or optimization["failure_diagnostics_only_for_failing_families"] is not True
-        or optimization["trajectory_evaluation"] != "every_pre_update_state_and_terminal_state"
+        or optimization["trajectory_evaluation"] != LEGACY_DENSE_TRAJECTORY_EVALUATION
         or optimization["early_stop_rule"]
         != "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_evaluated_state"
     ):
@@ -294,7 +345,12 @@ def load_semantic_t1_capacity_policy(path: str | Path) -> dict[str, Any]:
 
 
 __all__ = [
+    "LEGACY_DENSE_TRAJECTORY_EVALUATION",
+    "MINIMUM_EARLY_STOP_STEP",
+    "SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION",
     "SemanticT1CapacityPolicyError",
     "load_semantic_t1_capacity_policy",
+    "semantic_t1_evaluation_schedule",
+    "semantic_t1_threshold_stop_allowed",
     "validate_semantic_t1_capacity_policy",
 ]

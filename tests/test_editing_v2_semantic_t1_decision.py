@@ -101,7 +101,11 @@ def _write(path: Path, value: object) -> None:
     path.write_bytes(_bytes(value))
 
 
-def _selected_checkpoint_bytes(provenance: dict[str, object]) -> bytes:
+def _selected_checkpoint_bytes(
+    provenance: dict[str, object],
+    *,
+    selected_step: int = 10,
+) -> bytes:
     policy = load_semantic_t1_capacity_policy(
         ROOT / "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
     )
@@ -138,7 +142,7 @@ def _selected_checkpoint_bytes(provenance: dict[str, object]) -> bytes:
         "status": CHECKPOINT_STATUS,
         **CHECKPOINT_NO_AUTHORITY,
         "identity": identity,
-        "selected_step": 1,
+        "selected_step": selected_step,
         "model_state": CHECKPOINT_MODEL_STATE,
         "model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
         "stream_sha256": "a" * 64,
@@ -314,12 +318,15 @@ def _gradients(*, zero_family: str | None = None) -> list[dict[str, object]]:
 def _integrity(
     *,
     resumed: bool = False,
+    evaluation_steps: list[int] | None = None,
     selected_checkpoint_file_sha256: str | None = None,
 ) -> dict[str, object]:
+    evaluated = list(range(11)) if evaluation_steps is None else evaluation_steps
+    optimizer_steps = evaluated[-1]
     return {
-        "optimizer_steps_completed": 1,
-        "evaluation_steps": [0, 1],
-        "selected_step": 1,
+        "optimizer_steps_completed": optimizer_steps,
+        "evaluation_steps": evaluated,
+        "selected_step": optimizer_steps,
         "termination_reason": "all_thresholds_passed_early",
         "resume_requested": resumed,
         "resume_count": 1 if resumed else 0,
@@ -348,6 +355,7 @@ def _result(
     *,
     probability: float = 0.9,
     resumed: bool = False,
+    evaluation_steps: list[int] | None = None,
     zero_gradient_family: str | None = None,
     entries_per_family: int = 64,
     entries: list[dict[str, object]] | None = None,
@@ -356,26 +364,33 @@ def _result(
     entries = (
         _entries(probability, entries_per_family=entries_per_family) if entries is None else entries
     )
-    selected_nll = -math.log(probability)
+    evaluated = list(range(11)) if evaluation_steps is None else evaluation_steps
+    optimizer_steps = evaluated[-1]
+
+    def trajectory_probability(step: int) -> float:
+        if step == 0:
+            return 0.2
+        return 0.2 + (probability - 0.2) * (step / optimizer_steps)
+
     return build_semantic_t1_capacity_result(
         provenance=provenance,
         run_integrity=_integrity(
             resumed=resumed,
+            evaluation_steps=evaluated,
             selected_checkpoint_file_sha256=selected_checkpoint_file_sha256,
         ),
         evaluation_trajectory=[
             {
-                "step": 0,
-                "minimum_entry_teacher_successor_probability": 0.2,
-                "mean_entry_canonical_successor_nll": -math.log(0.2),
-                "model_state_sha256": "d" * 64,
-            },
-            {
-                "step": 1,
-                "minimum_entry_teacher_successor_probability": probability,
-                "mean_entry_canonical_successor_nll": selected_nll,
-                "model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
-            },
+                "step": step,
+                "minimum_entry_teacher_successor_probability": (trajectory_probability(step)),
+                "mean_entry_canonical_successor_nll": (-math.log(trajectory_probability(step))),
+                "model_state_sha256": (
+                    CHECKPOINT_MODEL_STATE_SHA256
+                    if step == optimizer_steps
+                    else hashlib.sha256(f"trajectory:{step}".encode()).hexdigest()
+                ),
+            }
+            for step in evaluated
         ],
         entry_metrics=entries,
         gradient_evidence=_gradients(zero_family=zero_gradient_family),
@@ -388,6 +403,7 @@ def _physical_chain(
     *,
     probability: float = 0.9,
     resumed: bool = False,
+    evaluation_steps: list[int] | None = None,
     zero_gradient_family: str | None = None,
     entries_per_family: int = 64,
 ) -> tuple[Path, dict[str, object]]:
@@ -396,7 +412,7 @@ def _physical_chain(
         lambda value, **_kwargs: dict(value),
     )
     run = tmp_path / "run"
-    run.mkdir()
+    run.mkdir(parents=True)
     initial_model = "e" * 64
     inventory = "f" * 64
     gate_zero = _gate_zero(initial_model, inventory)
@@ -421,12 +437,17 @@ def _physical_chain(
         execution_environment=_environment(),
         repo_root=ROOT,
     )
-    selected_checkpoint_bytes = _selected_checkpoint_bytes(provenance)
+    evaluated = list(range(11)) if evaluation_steps is None else evaluation_steps
+    selected_checkpoint_bytes = _selected_checkpoint_bytes(
+        provenance,
+        selected_step=evaluated[-1],
+    )
     selected_checkpoint_path.write_bytes(selected_checkpoint_bytes)
     result = _result(
         provenance,
         probability=probability,
         resumed=resumed,
+        evaluation_steps=evaluated,
         zero_gradient_family=zero_gradient_family,
         entries_per_family=entries_per_family,
         entries=entries,
@@ -502,6 +523,93 @@ def test_threshold_resume_and_gradient_defects_are_durable_no_go(
             repo_root=ROOT,
             require_p50_go=True,
         )
+
+
+def test_threshold_pass_before_step_ten_is_durable_no_go(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    decision_path, decision = _physical_chain(
+        tmp_path,
+        monkeypatch,
+        evaluation_steps=[0, 1],
+    )
+    observed = validate_semantic_t1_capacity_decision(
+        decision,
+        decision_path=decision_path,
+        repo_root=ROOT,
+    )
+    assert observed["status"] == DECISION_NO_GO_STATUS
+    assert "run_integrity:termination_reason_consistent" in observed["failed_checks"]
+
+
+def test_result_validator_accepts_sparse_steps_keyed_by_optimizer_step() -> None:
+    provenance = {
+        name: "1" * 64
+        for name in (
+            "capacity_policy_file_sha256",
+            "capacity_policy_sha256",
+            "cell_role_policy_sha256",
+            "cache_completion_file_sha256",
+            "cache_completion_sha256",
+            "cache_manifest_file_sha256",
+            "cache_manifest_sha256",
+            "cache_run_identity_sha256",
+            "cache_build_identity_sha256",
+            "cache_source_revision_sha256",
+            "panel_completion_sha256",
+            "panel_artifact_sha256",
+            "panel_entry_inventory_sha256",
+            "panel_entry_metadata_sha256",
+            "decision_source_inventory_sha256",
+            "gate_zero_evidence_file_sha256",
+            "gate_zero_evidence_sha256",
+            "initial_model_state_sha256",
+            "prepared_input_file_sha256",
+            "prepared_input_artifact_sha256",
+            "prepared_input_implementation_sha256",
+            "runner_implementation_sha256",
+            "runner_source_revision_sha256",
+        )
+    }
+    entries = _entries()
+    (
+        provenance["panel_entry_inventory_sha256"],
+        provenance["panel_entry_metadata_sha256"],
+    ) = _entry_lineage_hashes(entries)
+    provenance["panel_entry_binding_count"] = len(entries)
+    provenance["execution_environment"] = _environment()
+    result = _result(
+        provenance,
+        entries=entries,
+        evaluation_steps=[0, 1, 10, 50],
+    )
+    observed = validate_semantic_t1_capacity_result(result)
+    assert observed["run_integrity"]["evaluation_steps"] == [0, 1, 10, 50]
+    assert [row["step"] for row in observed["evaluation_trajectory"]] == [
+        0,
+        1,
+        10,
+        50,
+    ]
+
+
+def test_sparse_result_cannot_claim_a_legacy_dense_policy(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    decision_path, decision = _physical_chain(
+        tmp_path,
+        monkeypatch,
+        evaluation_steps=[0, 1, 10, 50],
+    )
+    observed = validate_semantic_t1_capacity_decision(
+        decision,
+        decision_path=decision_path,
+        repo_root=ROOT,
+    )
+    assert observed["status"] == DECISION_NO_GO_STATUS
+    assert "run_integrity:evaluation_schedule_matches_policy" in observed["failed_checks"]
 
 
 def test_sixty_three_entries_per_family_is_durable_no_go(

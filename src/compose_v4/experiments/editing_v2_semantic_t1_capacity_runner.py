@@ -33,7 +33,10 @@ from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
     load_semantic_development_cell_roles,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
+    SemanticT1CapacityPolicyError,
     load_semantic_t1_capacity_policy,
+    semantic_t1_evaluation_schedule,
+    semantic_t1_threshold_stop_allowed,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_checkpoint import (
     CHECKPOINT_SCHEMA,
@@ -1212,43 +1215,58 @@ def run_semantic_t1_capacity(
     output_root = Path(output_directory)
     checkpoint_receipts: list[dict[str, Any]] = []
     report_points = {int(value) for value in optimization["report_points"]}
+    try:
+        evaluation_schedule = semantic_t1_evaluation_schedule(optimization)
+    except SemanticT1CapacityPolicyError as error:
+        raise SemanticT1CapacityRunnerError(
+            f"semantic T1 evaluation policy is invalid: {error}"
+        ) from error
+    evaluation_steps = frozenset(evaluation_schedule)
     stop_reason = "MAXIMUM_OPTIMIZER_STEPS_REACHED"
-    final_metrics: dict[str, Any] | None = None
     final_checks: dict[str, bool] | None = None
 
     model.train()
     while completed_steps <= maximum_steps:
-        rows = _metric_rows(
-            materialized_panel,
-            model,
-            batch_size=batch_size,
-        )
-        metrics = summarize_semantic_t1_metrics(rows)
-        checks = semantic_t1_threshold_checks(
-            metrics,
-            thresholds=thresholds,
-            gradient_evidence=gradient_evidence,
-        )
-        criterion = _criterion(metrics, step=completed_steps)
-        if criterion > selected_criterion:
-            selected_criterion = criterion
-            selected_step = completed_steps
-            selected_state = _clone_state_dict(model)
-        trajectory.append(
-            {
-                "step": completed_steps,
-                "minimum_entry_teacher_successor_probability": criterion[0],
-                "mean_teacher_successor_nll": -criterion[1],
-                "all_threshold_checks_pass": all(checks.values()),
-                "threshold_checks": checks,
-                "model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
-            }
-        )
-        final_metrics = metrics
-        final_checks = checks
-        if all(checks.values()):
-            stop_reason = "ALL_FROZEN_THRESHOLDS_PASS"
-            break
+        if completed_steps in evaluation_steps:
+            rows = _metric_rows(
+                materialized_panel,
+                model,
+                batch_size=batch_size,
+            )
+            metrics = summarize_semantic_t1_metrics(rows)
+            checks = semantic_t1_threshold_checks(
+                metrics,
+                thresholds=thresholds,
+                gradient_evidence=gradient_evidence,
+            )
+            criterion = _criterion(metrics, step=completed_steps)
+            if criterion > selected_criterion:
+                selected_criterion = criterion
+                selected_step = completed_steps
+                selected_state = _clone_state_dict(model)
+            trajectory.append(
+                {
+                    "step": completed_steps,
+                    "minimum_entry_teacher_successor_probability": criterion[0],
+                    "mean_teacher_successor_nll": -criterion[1],
+                    "all_threshold_checks_pass": all(checks.values()),
+                    "threshold_checks": checks,
+                    "model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
+                }
+            )
+            final_checks = checks
+            try:
+                threshold_stop_allowed = semantic_t1_threshold_stop_allowed(
+                    optimizer_step=completed_steps,
+                    threshold_checks=checks,
+                )
+            except SemanticT1CapacityPolicyError as error:
+                raise SemanticT1CapacityRunnerError(
+                    f"semantic T1 threshold-stop state is invalid: {error}"
+                ) from error
+            if threshold_stop_allowed:
+                stop_reason = "ALL_FROZEN_THRESHOLDS_PASS"
+                break
         if completed_steps == maximum_steps:
             break
 
@@ -1324,7 +1342,7 @@ def run_semantic_t1_capacity(
                 )
             )
 
-    assert final_metrics is not None and final_checks is not None
+    assert final_checks is not None
     terminal_state = _clone_state_dict(model)
     terminal_state_sha256 = state_dict_semantic_sha256(terminal_state)
     model.load_state_dict(selected_state, strict=True)
@@ -1406,7 +1424,7 @@ def run_semantic_t1_capacity(
     ]
     run_integrity = {
         "optimizer_steps_completed": completed_steps,
-        "evaluation_steps": list(range(completed_steps + 1)),
+        "evaluation_steps": [int(point["step"]) for point in trajectory],
         "selected_step": selected_step,
         "termination_reason": (
             "all_thresholds_passed_early"
@@ -1486,8 +1504,10 @@ __all__ = [
     "optimizer_state_semantic_sha256",
     "run_semantic_t1_capacity",
     "semantic_t1_address_stream",
+    "semantic_t1_evaluation_schedule",
     "semantic_t1_failing_families",
     "semantic_t1_runner_implementation_sha256",
+    "semantic_t1_threshold_stop_allowed",
     "semantic_t1_threshold_checks",
     "summarize_semantic_t1_metrics",
 ]

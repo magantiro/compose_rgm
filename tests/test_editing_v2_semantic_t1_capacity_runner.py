@@ -27,6 +27,8 @@ from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
     load_semantic_development_cell_roles,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
+    LEGACY_DENSE_TRAJECTORY_EVALUATION,
+    SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION,
     load_semantic_t1_capacity_policy,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
@@ -35,6 +37,8 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
     build_semantic_t1_failure_diagnostics,
     optimizer_state_semantic_sha256,
     semantic_t1_address_stream,
+    semantic_t1_evaluation_schedule,
+    semantic_t1_threshold_stop_allowed,
     semantic_t1_threshold_checks,
     summarize_semantic_t1_metrics,
 )
@@ -71,6 +75,43 @@ from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
+
+
+def test_sparse_policy_calls_full_panel_exactly_at_initial_and_report_points() -> None:
+    optimization = {
+        "maximum_optimizer_steps": 500,
+        "report_points": [1, 10, 50, 100, 250, 500],
+        "trajectory_evaluation": SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION,
+    }
+    schedule = semantic_t1_evaluation_schedule(optimization)
+    assert schedule == (0, 1, 10, 50, 100, 250, 500)
+    assert len(schedule) == 7
+
+
+def test_legacy_dense_policy_retains_every_state_evaluation() -> None:
+    optimization = {
+        "maximum_optimizer_steps": 3,
+        "report_points": [1, 3],
+        "trajectory_evaluation": LEGACY_DENSE_TRAJECTORY_EVALUATION,
+    }
+    assert semantic_t1_evaluation_schedule(optimization) == (0, 1, 2, 3)
+
+
+def test_threshold_pass_cannot_stop_before_ten_optimizer_steps() -> None:
+    passed = {"capacity": True, "gradient": True}
+    failed = {"capacity": True, "gradient": False}
+    assert not semantic_t1_threshold_stop_allowed(
+        optimizer_step=1,
+        threshold_checks=passed,
+    )
+    assert semantic_t1_threshold_stop_allowed(
+        optimizer_step=10,
+        threshold_checks=passed,
+    )
+    assert not semantic_t1_threshold_stop_allowed(
+        optimizer_step=10,
+        threshold_checks=failed,
+    )
 
 
 def _source_revision() -> dict[str, object]:
