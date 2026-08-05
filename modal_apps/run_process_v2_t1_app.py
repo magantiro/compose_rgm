@@ -300,6 +300,7 @@ def _imports() -> dict[str, Any]:
         build_process_v2_t1_capacity_decision,
         build_process_v2_t1_capacity_result,
         process_v2_t1_runner_implementation_sha256,
+        project_process_v2_t1_result_provenance,
         validate_process_v2_t1_capacity_decision,
         validate_process_v2_t1_capacity_result,
     )
@@ -345,6 +346,7 @@ def _imports() -> dict[str, Any]:
         "build_result": build_process_v2_t1_capacity_result,
         "build_decision": build_process_v2_t1_capacity_decision,
         "runner_implementation_sha256": process_v2_t1_runner_implementation_sha256,
+        "project_result_provenance": project_process_v2_t1_result_provenance,
         "validate_decision": validate_process_v2_t1_capacity_decision,
         "validate_result": validate_process_v2_t1_capacity_result,
         "write_bytes_if_absent": write_bytes_if_absent,
@@ -885,12 +887,14 @@ def run_t1_gpu_remote(
     source_revision = _source_revision(revision)
     if dict(runtime.prepared.artifact["source_revision"]) != source_revision:
         raise RuntimeError("Process-V2 T1 prepared inputs bind another image revision")
-    provenance = {
-        **dict(provenance),
-        "runner_source_revision_sha256": source_revision["source_revision_sha256"],
-        "runner_implementation_sha256": runner_hash,
-        "execution_environment": environment,
-    }
+    provenance = loaded["project_result_provenance"](
+        {
+            **dict(provenance),
+            "runner_source_revision_sha256": source_revision["source_revision_sha256"],
+            "runner_implementation_sha256": runner_hash,
+            "execution_environment": environment,
+        }
+    )
     run_identity_sha256 = _sha256(
         {
             "prepared_completion_sha256": provenance["prepared_completion_sha256"],

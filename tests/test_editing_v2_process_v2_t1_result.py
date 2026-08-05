@@ -28,11 +28,26 @@ from compose_v4.experiments.editing_v2_process_v2_t1_result import (
     build_process_v2_t1_capacity_decision,
     build_process_v2_t1_capacity_result,
     process_v2_t1_runner_implementation_sha256,
+    project_process_v2_t1_result_provenance,
     validate_process_v2_t1_capacity_result,
     validate_process_v2_t1_capacity_decision,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_runtime_provenance_projection_drops_only_transitively_bound_leaf_details() -> None:
+    _policy, inputs = _inputs()
+    provenance = {
+        **inputs["provenance"],
+        "leaf_source_revision_sha256": "b" * 64,
+        "leaf_implementation_sha256": "c" * 64,
+        "leaf_reuse": {"reused_precomputed_leaves": True},
+    }
+
+    assert project_process_v2_t1_result_provenance(provenance) == inputs["provenance"]
+    with pytest.raises(ProcessV2T1ResultError, match="runtime provenance field set"):
+        project_process_v2_t1_result_provenance({**provenance, "unexpected": True})
 
 
 def _policy() -> dict[str, object]:

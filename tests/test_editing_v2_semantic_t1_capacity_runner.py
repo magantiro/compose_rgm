@@ -1070,9 +1070,71 @@ def _assert_row_selection_matches(selected, direct) -> None:
         if selected_value is None or direct_value is None:
             assert selected_value is direct_value, name
         elif isinstance(selected_value, torch.Tensor):
-            assert torch.equal(selected_value, direct_value), name
+            if isinstance(direct_value, bool):
+                assert selected_value.dtype == torch.bool, name
+                assert selected_value.shape[0] == selected.batch_size, name
+                assert bool(torch.all(selected_value == direct_value)), name
+            else:
+                assert torch.equal(selected_value, direct_value), name
         else:
             assert selected_value == direct_value, name
+
+
+def test_parallel_materialization_preserves_exact_panel_order_and_batch(
+    partition_model,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from compose_v4.experiments import editing_v2_semantic_t1_capacity_runner as runner
+    from compose_v4.experiments.factorized_mark_conditional import FactorizedMarkExample
+
+    model = partition_model
+    states = tuple(_state(smiles) for smiles in ("C", "CC", "CCC", "CO", "CCO", "CN"))
+    entries = tuple(
+        {
+            "panel_entry_sha256": f"{index:064x}",
+            "model_family": "atom_insert",
+        }
+        for index in range(len(states))
+    )
+
+    def example(state):
+        return FactorizedMarkExample(
+            state=state,
+            time=0.5,
+            teacher_action=None,
+            teacher_rule_name=None,
+            teacher_rate=1.0,
+            importance_weight=1.0,
+        )
+
+    collator = runner._collator(model)
+    direct = collator([example(state) for state in states])
+    retained_collators = []
+
+    def batch_for_ids(_runtime, _model, shard_collator, panel_ids):
+        retained_collators.append(shard_collator)
+        indices = tuple(int(identifier, 16) for identifier in panel_ids)
+        selected_entries = tuple(entries[index] for index in indices)
+        return (
+            runner._index_factorized_batch(direct, indices),
+            tuple(f"fiber-{index}" for index in indices),
+            tuple(f"partition-{index}" for index in indices),
+            selected_entries,
+        )
+
+    monkeypatch.setattr(runner, "MATERIALIZATION_WORKERS", 3)
+    monkeypatch.setattr(runner, "_batch_for_ids", batch_for_ids)
+    materialized = runner._materialize_panel(
+        SimpleNamespace(entries=entries),
+        model,
+        collator,
+    )
+
+    assert materialized.panel_ids == tuple(entry["panel_entry_sha256"] for entry in entries)
+    assert materialized.fibers == tuple(f"fiber-{index}" for index in range(len(entries)))
+    assert materialized.partitions == tuple(f"partition-{index}" for index in range(len(entries)))
+    assert len({id(item) for item in retained_collators}) == 3
+    _assert_row_selection_matches(materialized.batch, direct)
 
 
 def test_process_v2_row_selection_reindexes_the_admission_mask(

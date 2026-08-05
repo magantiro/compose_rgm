@@ -31,25 +31,34 @@ DECISION_SCHEMA_VERSION = 1
 DECISION_GO_STATUS = "GO_PROCESS_V2_BOUNDED_P50_T1_CAPACITY"
 DECISION_NO_GO_STATUS = "NO_GO_PROCESS_V2_BOUNDED_P50_T1_CAPACITY"
 
-_PROVENANCE_FIELDS = {
-    "capacity_policy_file_sha256",
-    "capacity_policy_sha256",
-    "prepared_completion_file_sha256",
-    "prepared_completion_sha256",
-    "prepared_input_file_sha256",
-    "prepared_input_artifact_sha256",
-    "panel_sha256",
-    "panel_entry_inventory_sha256",
-    "panel_entry_metadata_sha256",
-    "panel_entry_binding_count",
-    "gate_zero_decision_sha256",
-    "active8_completion_sha256",
-    "process_identity_sha256",
-    "initial_model_state_sha256",
-    "runner_implementation_sha256",
-    "runner_source_revision_sha256",
-    "execution_environment",
-}
+PROCESS_V2_T1_RESULT_PROVENANCE_FIELDS = frozenset(
+    {
+        "capacity_policy_file_sha256",
+        "capacity_policy_sha256",
+        "prepared_completion_file_sha256",
+        "prepared_completion_sha256",
+        "prepared_input_file_sha256",
+        "prepared_input_artifact_sha256",
+        "panel_sha256",
+        "panel_entry_inventory_sha256",
+        "panel_entry_metadata_sha256",
+        "panel_entry_binding_count",
+        "gate_zero_decision_sha256",
+        "active8_completion_sha256",
+        "process_identity_sha256",
+        "initial_model_state_sha256",
+        "runner_implementation_sha256",
+        "runner_source_revision_sha256",
+        "execution_environment",
+    }
+)
+PROCESS_V2_T1_RUNTIME_ONLY_PROVENANCE_FIELDS = frozenset(
+    {
+        "leaf_source_revision_sha256",
+        "leaf_implementation_sha256",
+        "leaf_reuse",
+    }
+)
 _EXECUTION_ENVIRONMENT_FIELDS = {
     "hardware_class",
     "device_name",
@@ -176,6 +185,17 @@ def _exact_mapping(value: object, fields: set[str], *, label: str) -> dict[str, 
     return dict(value)
 
 
+def project_process_v2_t1_result_provenance(value: object) -> dict[str, Any]:
+    """Drop authenticated preparation details that the result binds transitively."""
+
+    runtime = _exact_mapping(
+        value,
+        PROCESS_V2_T1_RESULT_PROVENANCE_FIELDS | PROCESS_V2_T1_RUNTIME_ONLY_PROVENANCE_FIELDS,
+        label="T1 runtime provenance",
+    )
+    return {name: runtime[name] for name in PROCESS_V2_T1_RESULT_PROVENANCE_FIELDS}
+
+
 def _finite(value: object, *, label: str, minimum: float | None = None) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ProcessV2T1ResultError(f"{label} must be finite")
@@ -274,7 +294,11 @@ def _threshold_checks(
 
 
 def _validate_provenance(value: object) -> dict[str, Any]:
-    provenance = _exact_mapping(value, _PROVENANCE_FIELDS, label="T1 provenance")
+    provenance = _exact_mapping(
+        value,
+        PROCESS_V2_T1_RESULT_PROVENANCE_FIELDS,
+        label="T1 provenance",
+    )
     for name, item in provenance.items():
         if name == "execution_environment":
             environment = _exact_mapping(
@@ -639,9 +663,12 @@ __all__ = [
     "RESULT_SCHEMA",
     "RESULT_SCHEMA_VERSION",
     "ProcessV2T1ResultError",
+    "PROCESS_V2_T1_RESULT_PROVENANCE_FIELDS",
+    "PROCESS_V2_T1_RUNTIME_ONLY_PROVENANCE_FIELDS",
     "build_process_v2_t1_capacity_decision",
     "build_process_v2_t1_capacity_result",
     "process_v2_t1_runner_implementation_sha256",
+    "project_process_v2_t1_result_provenance",
     "validate_process_v2_t1_capacity_decision",
     "validate_process_v2_t1_capacity_result",
 ]

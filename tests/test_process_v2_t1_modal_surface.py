@@ -49,7 +49,9 @@ def test_gpu_image_sets_deterministic_cublas_before_expensive_materialization() 
 
 def test_launcher_binds_the_sparse_seven_point_process_v2_policy() -> None:
     policy = json.loads((ROOT / launcher.CAPACITY_POLICY_SOURCE).read_bytes())
-    assert policy["optimization"]["trajectory_evaluation"] == ("step_zero_and_report_points_only")
+    assert policy["optimization"]["trajectory_evaluation"] == (
+        "step_zero_and_report_points_only"
+    )
     assert policy["optimization"]["report_points"] == [1, 10, 50, 100, 250, 500]
     assert policy["optimization"]["maximum_optimizer_steps"] == 500
     assert policy["hazard_included"] is False
@@ -65,9 +67,7 @@ def test_runtime_loader_accepts_the_same_sparse_process_v2_policy() -> None:
         repo_root=ROOT,
     )
 
-    assert policy["optimization"]["trajectory_evaluation"] == (
-        "step_zero_and_report_points_only"
-    )
+    assert policy["optimization"]["trajectory_evaluation"] == ("step_zero_and_report_points_only")
     assert policy["policy_sha256"] == policy["contract_sha256"]
     assert len(file_sha256) == 64
 
@@ -112,6 +112,10 @@ def test_gpu_binds_process_v2_result_policy_and_runner_hash() -> None:
     assert "result_filename=PROCESS_V2_RESULT_FILENAME" in _source()
     assert "STEP_TEN_CHECKPOINT_FILENAME" in body
     assert "completed step 10 without its durable checkpoint" in body
+    assert 'loaded["project_result_provenance"](' in body
+    assert body.index('loaded["project_result_provenance"](') < body.index(
+        "_invoke_process_v2_capacity_runner("
+    )
 
 
 def test_step_ten_checkpoint_is_committed_by_the_gpu_heartbeat() -> None:
