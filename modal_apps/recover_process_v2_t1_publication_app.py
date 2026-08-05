@@ -6,7 +6,7 @@ from modal_apps import run_process_v2_t1_app as t1_app
 
 
 @t1_app.app.local_entrypoint()
-def main(
+def recover_publication(
     prepared_completion_path: str,
     step_500_checkpoint_path: str,
     expected_step_500_file_sha256: str,
