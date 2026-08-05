@@ -1171,6 +1171,7 @@ def _checkpoint_identity(
     model: FactorizedTraceletRateModel,
     optimizer: torch.optim.Optimizer,
     expected_runner_implementation_sha256: str | None = None,
+    expected_runner_source_revision_sha256: str | None = None,
 ) -> dict[str, Any]:
     environment = provenance.get("execution_environment")
     if not isinstance(environment, Mapping):
@@ -1193,13 +1194,41 @@ def _checkpoint_identity(
         raise SemanticT1CapacityRunnerError(
             "expected T1 runner implementation identity is not a SHA-256"
         )
+    if not isinstance(source_revision, Mapping):
+        raise SemanticT1CapacityRunnerError(
+            "T1 prepared input lacks a source revision"
+        )
+    prepared_source_revision_sha256 = source_revision.get("source_revision_sha256")
+    if (
+        not isinstance(prepared_source_revision_sha256, str)
+        or len(prepared_source_revision_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in prepared_source_revision_sha256
+        )
+    ):
+        raise SemanticT1CapacityRunnerError(
+            "T1 prepared input source revision is not a SHA-256"
+        )
+    if expected_runner_source_revision_sha256 is None:
+        expected_runner_source_revision_sha256 = prepared_source_revision_sha256
+    if (
+        not isinstance(expected_runner_source_revision_sha256, str)
+        or len(expected_runner_source_revision_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in expected_runner_source_revision_sha256
+        )
+    ):
+        raise SemanticT1CapacityRunnerError(
+            "expected T1 runner source revision is not a SHA-256"
+        )
     parameter = next(model.parameters())
     device = parameter.device
     optimization = dict(runtime.capacity_policy.get("optimization", {}))
     deterministic = torch.are_deterministic_algorithms_enabled()
     if (
-        not isinstance(source_revision, Mapping)
-        or runner_source_revision_sha256 != source_revision.get("source_revision_sha256")
+        runner_source_revision_sha256 != expected_runner_source_revision_sha256
         or runner_implementation_sha256 != expected_runner_implementation_sha256
         or environment_sha256 != _sha(environment_body)
         or environment.get("dtype") != str(parameter.dtype).removeprefix("torch.")
@@ -1347,6 +1376,7 @@ def run_semantic_t1_capacity(
     result_builder: SemanticT1ResultBuilder | None = None,
     result_filename: str = RESULT_FILENAME,
     expected_runner_implementation_sha256: str | None = None,
+    expected_runner_source_revision_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Run or resume the frozen joint Active8 unique-state capacity test."""
 
@@ -1400,6 +1430,9 @@ def run_semantic_t1_capacity(
         model=model,
         optimizer=optimizer,
         expected_runner_implementation_sha256=expected_runner_implementation_sha256,
+        expected_runner_source_revision_sha256=(
+            expected_runner_source_revision_sha256
+        ),
     )
 
     maximum_steps = int(optimization["maximum_optimizer_steps"])

@@ -40,6 +40,7 @@ def test_cached_gpu_uses_authenticated_materialized_panel() -> None:
         'scratch.model.to(device="cuda"'
     )
     assert "materialized_panel=materialized_panel" in body
+    assert "expected_runner_source_revision_sha256=" in body
     assert "_materialize_panel" not in body
     assert '"gpu_side_collation_count": 0' in body
 

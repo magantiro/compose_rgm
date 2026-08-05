@@ -509,8 +509,6 @@ def _validate_publication_recovery_checkpoint(
         != expected_runner_implementation_sha256
         or identity.get("runner_source_revision_sha256")
         != expected_runner_source_revision_sha256
-        or runtime.prepared.artifact["source_revision"]["source_revision_sha256"]
-        != expected_runner_source_revision_sha256
     ):
         raise RuntimeError("Process-V2 T1 publication-recovery checkpoint disagrees")
     return payload
@@ -1491,6 +1489,9 @@ def run_t1_collated_gpu_remote(
             result_builder=builder,
             result_filename=PROCESS_V2_RESULT_FILENAME,
             expected_runner_implementation_sha256=runner_hash,
+            expected_runner_source_revision_sha256=source_revision[
+                "source_revision_sha256"
+            ],
         )
     result = loaded["validate_result"](
         run["result"], capacity_policy=runtime.capacity_policy

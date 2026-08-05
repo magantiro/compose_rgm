@@ -548,7 +548,8 @@ def test_checkpoint_identity_binds_implementation_environment_and_optimizer(
     torch.use_deterministic_algorithms(True)
     model = copy.deepcopy(partition_model).train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.0)
-    source_revision_sha256 = "a" * 64
+    prepared_source_revision_sha256 = "a" * 64
+    runner_source_revision_sha256 = "b" * 64
     optimization = {
         "optimizer": "adamw",
         "learning_rate": 1e-3,
@@ -560,7 +561,9 @@ def test_checkpoint_identity_binds_implementation_environment_and_optimizer(
         prepared=SimpleNamespace(
             artifact={
                 "artifact_sha256": "2" * 64,
-                "source_revision": {"source_revision_sha256": source_revision_sha256},
+                "source_revision": {
+                    "source_revision_sha256": prepared_source_revision_sha256
+                },
             }
         ),
         cache=SimpleNamespace(
@@ -580,7 +583,7 @@ def test_checkpoint_identity_binds_implementation_environment_and_optimizer(
         "runner_implementation_sha256": (
             runner.semantic_t1_runner_implementation_sha256(repo_root=ROOT)
         ),
-        "runner_source_revision_sha256": source_revision_sha256,
+        "runner_source_revision_sha256": runner_source_revision_sha256,
         "execution_environment": {
             **environment_body,
             "environment_sha256": runner._sha(environment_body),
@@ -591,8 +594,12 @@ def test_checkpoint_identity_binds_implementation_environment_and_optimizer(
         provenance=provenance,
         model=model,
         optimizer=optimizer,
+        expected_runner_source_revision_sha256=runner_source_revision_sha256,
     )
-    assert identity["runner_source_revision_sha256"] == source_revision_sha256
+    assert identity["runner_source_revision_sha256"] == runner_source_revision_sha256
+    assert runtime.prepared.artifact["source_revision"]["source_revision_sha256"] == (
+        prepared_source_revision_sha256
+    )
     assert identity["runner_implementation_sha256"] == provenance["runner_implementation_sha256"]
     assert identity["execution_environment"] == provenance["execution_environment"]
     assert identity["model_device_type"] == "cpu"
@@ -600,6 +607,15 @@ def test_checkpoint_identity_binds_implementation_environment_and_optimizer(
     assert identity["deterministic_algorithms_enabled"] is True
     assert identity["optimizer_configuration"]["class"].endswith(".AdamW")
     assert identity["optimization_policy"] == optimization
+
+    with pytest.raises(SemanticT1CapacityRunnerError, match="identity disagrees"):
+        runner._checkpoint_identity(
+            runtime,
+            provenance=provenance,
+            model=model,
+            optimizer=optimizer,
+            expected_runner_source_revision_sha256="c" * 64,
+        )
 
 
 def test_checkpoint_resume_is_bit_identical_to_uninterrupted_cpu_execution(

@@ -195,6 +195,16 @@ def test_shared_runner_exposes_both_process_v2_callback_seams() -> None:
     assert "result_builder" in parameters
     assert "result_filename" in parameters
     assert "expected_runner_implementation_sha256" in parameters
+    assert "expected_runner_source_revision_sha256" in parameters
+
+
+def test_publication_recovery_does_not_conflate_prepared_and_runner_revisions() -> None:
+    body = ast.get_source_segment(
+        _source(), _function("_validate_publication_recovery_checkpoint")
+    )
+    assert body is not None
+    assert 'identity.get("runner_source_revision_sha256")' in body
+    assert 'runtime.prepared.artifact["source_revision"]' not in body
 
 
 def test_cpu_groups_are_ordered_complete_disjoint_and_bounded() -> None:
