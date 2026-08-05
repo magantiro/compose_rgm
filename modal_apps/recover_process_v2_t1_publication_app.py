@@ -8,6 +8,8 @@ from modal_apps import run_process_v2_t1_app as t1_app
 @t1_app.app.local_entrypoint()
 def recover_publication(
     prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
     terminal_checkpoint_path: str,
     expected_terminal_checkpoint_file_sha256: str,
     selected_checkpoint_path: str,
@@ -20,6 +22,8 @@ def recover_publication(
     revision = t1_app.local_image_revision(expected_commit=expected_commit)
     call = t1_app.recover_t1_publication_remote.spawn(
         prepared_completion_path,
+        collated_plan_path,
+        collated_completion_path,
         terminal_checkpoint_path,
         expected_terminal_checkpoint_file_sha256,
         selected_checkpoint_path,

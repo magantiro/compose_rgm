@@ -214,10 +214,14 @@ def test_publication_recovery_uses_the_policy_terminal_step() -> None:
     assert body is not None
     assert "terminal_checkpoint_path" in parameters
     assert "expected_terminal_checkpoint_file_sha256" in parameters
+    assert "collated_plan_path" in parameters
+    assert "collated_completion_path" in parameters
     assert "step_500_checkpoint_path" not in parameters
     assert '["optimization"]["maximum_optimizer_steps"]' in body
     assert "optimizer_steps_completed\"] != 500" not in body
     assert "expected_runner_source_revision_sha256" in body
+    assert 'materialized_panel=materialized_panel' in body
+    assert '"gpu_side_collation_count": 0' in body
 
 
 def test_cpu_groups_are_ordered_complete_disjoint_and_bounded() -> None:

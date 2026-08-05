@@ -1576,6 +1576,8 @@ def run_t1_collated_gpu_remote(
 )
 def recover_t1_publication_remote(
     prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
     terminal_checkpoint_path: str,
     expected_terminal_checkpoint_file_sha256: str,
     selected_checkpoint_path: str,
@@ -1617,6 +1619,33 @@ def recover_t1_publication_remote(
         completion,
         capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
         repo_root=REMOTE_ROOT,
+    )
+    plan_path = _require_artifact_path(
+        collated_plan_path, field="collated_plan_path"
+    )
+    plan = loaded["load_collated_plan"](
+        plan_path,
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+    )
+    if (
+        plan["prepared_completion_path"] != str(completion)
+        or plan["prepared_completion_sha256"]
+        != runtime_provenance["prepared_completion_sha256"]
+    ):
+        raise RuntimeError(
+            "Process-V2 T1 recovery collated plan binds another prepared input"
+        )
+    collated_path = _require_artifact_path(
+        collated_completion_path, field="collated_completion_path"
+    )
+    materialized_panel = loaded["load_materialized_collated_panel"](
+        collated_path,
+        plan=plan,
+        runtime=runtime,
+    )
+    collated_completion = _read_canonical_object(
+        collated_path, label="the Process-V2 T1 collated completion"
     )
     try:
         checkpoint = torch.load(terminal_path, map_location="cpu", weights_only=False)
@@ -1682,6 +1711,7 @@ def recover_t1_publication_remote(
     recovery_identity_sha256 = _sha256(
         {
             "prepared_completion_sha256": provenance["prepared_completion_sha256"],
+            "collated_completion_sha256": collated_completion["completion_sha256"],
             "terminal_checkpoint_file_sha256": (
                 expected_terminal_checkpoint_file_sha256
             ),
@@ -1709,6 +1739,8 @@ def recover_t1_publication_remote(
         run_root=str(run_root),
         optimizer_updates_planned=0,
         prepared_entry_count=len(runtime.entries),
+        collated_task_count=collated_completion["task_count"],
+        gpu_side_collation_count=0,
     )
     with _heartbeat("process_v2_t1_publication_recovery_heartbeat"):
         run = loaded["run_capacity"](
@@ -1718,6 +1750,7 @@ def recover_t1_publication_remote(
             provenance=provenance,
             resume_checkpoint_path=terminal_path,
             resume_checkpoint_file_sha256=expected_terminal_checkpoint_file_sha256,
+            materialized_panel=materialized_panel,
             result_builder=builder,
             result_filename=PROCESS_V2_RESULT_FILENAME,
             expected_runner_implementation_sha256=runner_hash,
@@ -1768,6 +1801,7 @@ def recover_t1_publication_remote(
         "status": "COMPLETE_T1_PUBLICATION_RECOVERY_NO_DOWNSTREAM_AUTHORITY",
         **loaded["NO_AUTHORITY"],
         "prepared_completion_sha256": provenance["prepared_completion_sha256"],
+        "collated_completion_sha256": collated_completion["completion_sha256"],
         "terminal_checkpoint_file_sha256": (
             expected_terminal_checkpoint_file_sha256
         ),
@@ -1779,6 +1813,7 @@ def recover_t1_publication_remote(
         "recovery_source_revision": recovery_revision,
         "optimizer_updates_executed": 0,
         "panel_materialization_count": 1,
+        "gpu_side_collation_count": 0,
         "result_file_sha256": result_file_sha256,
         "result_sha256": result["result_sha256"],
         "decision_sha256": decision["decision_sha256"],
@@ -1804,6 +1839,7 @@ def recover_t1_publication_remote(
         "recovery_receipt_path": str(receipt_path),
         "recovery_receipt_sha256": receipt["recovery_receipt_sha256"],
         "optimizer_updates_executed": 0,
+        "gpu_side_collation_count": 0,
         "bounded_p50_authorized": decision["bounded_p50_authorized"],
         "p50_launched": False,
     }
