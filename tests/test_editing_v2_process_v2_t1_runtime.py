@@ -220,6 +220,27 @@ def test_reduction_inventory_ignores_runtime_family_order() -> None:
     )
 
 
+def test_result_metadata_binding_uses_result_family_order() -> None:
+    entries = [
+        {
+            "panel_entry_sha256": "0" * 64,
+            "model_family": "cycle_attach",
+            "capability_cell_id": "process_v2::cycle_attach:ring_open",
+        },
+        {
+            "panel_entry_sha256": "f" * 64,
+            "model_family": "atom_insert",
+            "capability_cell_id": "process_v2::atom_insert:leaf_birth",
+        },
+    ]
+    metadata = t1_runtime._panel_entry_metadata_for_result(
+        entries,
+        family_order=("atom_insert", "cycle_attach"),
+    )
+
+    assert [row["family"] for row in metadata] == ["atom_insert", "cycle_attach"]
+
+
 def test_runtime_reads_required_cells_from_the_process_v2_role_schema() -> None:
     roles = t1_runtime.load_process_v2_chain_artifact(
         t1_runtime.DEVELOPMENT_CELL_ROLES,

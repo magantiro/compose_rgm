@@ -1623,6 +1623,34 @@ class ProcessV2T1RuntimeInputs:
         return tuple(self.prepared.artifact["entries"])
 
 
+def _panel_entry_metadata_for_result(
+    entries: Sequence[Mapping[str, Any]], *, family_order: Sequence[str]
+) -> list[dict[str, str]]:
+    """Return the exact ordering required by the Process-V2 result schema."""
+
+    family_indices = {family: index for index, family in enumerate(family_order)}
+    try:
+        return sorted(
+            (
+                {
+                    "panel_entry_sha256": str(entry["panel_entry_sha256"]),
+                    "family": str(entry["model_family"]),
+                    "semantic_cell_id": str(entry["capability_cell_id"]),
+                }
+                for entry in entries
+            ),
+            key=lambda row: (
+                family_indices[row["family"]],
+                row["semantic_cell_id"],
+                row["panel_entry_sha256"],
+            ),
+        )
+    except KeyError as error:
+        raise ProcessV2T1RuntimeError(
+            "T1 prepared entry family is outside the capacity policy"
+        ) from error
+
+
 def load_process_v2_t1_runtime_inputs(
     completion_path: Path,
     *,
@@ -1702,14 +1730,9 @@ def load_process_v2_t1_runtime_inputs(
         cache=cache,
         capacity_policy=MappingProxyType(dict(policy)),
     )
-    panel_entry_metadata = [
-        {
-            "panel_entry_sha256": str(entry["panel_entry_sha256"]),
-            "family": str(entry["model_family"]),
-            "semantic_cell_id": str(entry["capability_cell_id"]),
-        }
-        for entry in artifact["entries"]
-    ]
+    panel_entry_metadata = _panel_entry_metadata_for_result(
+        artifact["entries"], family_order=policy["required_families"]
+    )
     provenance = {
         "capacity_policy_file_sha256": policy_file_sha256,
         "capacity_policy_sha256": policy["policy_sha256"],
