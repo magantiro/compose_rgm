@@ -754,7 +754,17 @@ def finalize_reused_prepared_remote(
         _require_artifact_path(panel_path, field="panel_path"),
         label="the reusable Process-V2 T1 panel",
     )
-    root = _require_physical_artifact_path(run_root, field="run_root")
+    leaf_root = _require_physical_artifact_path(run_root, field="run_root")
+    source_revision = _source_revision(revision)
+    reduction_identity = _sha256(
+        {
+            "schema": "compose.editing_v2.process_v2_t1_reused_reduction",
+            "schema_version": 1,
+            "leaf_plan_sha256": expected_plan_sha256,
+            "source_revision_sha256": source_revision["source_revision_sha256"],
+        }
+    )
+    root = leaf_root / "reductions" / reduction_identity
     _progress(
         "process_v2_t1_reused_reduction_start",
         run_root=str(root),
@@ -765,8 +775,9 @@ def finalize_reused_prepared_remote(
             plan,
             panel=panel,
             source=source,
-            run_root=root,
-            source_revision=_source_revision(revision),
+            leaf_run_root=leaf_root,
+            output_root=root,
+            source_revision=source_revision,
             expected_plan_sha256=expected_plan_sha256,
         )
     artifact_volume.commit()

@@ -220,6 +220,17 @@ def test_reduction_inventory_ignores_runtime_family_order() -> None:
     )
 
 
+def test_runtime_reads_required_cells_from_the_process_v2_role_schema() -> None:
+    roles = t1_runtime.load_process_v2_chain_artifact(
+        t1_runtime.DEVELOPMENT_CELL_ROLES,
+        repo_root=ROOT,
+    )
+    required = t1_runtime._required_editing_cell_ids(roles)
+
+    assert required == set(roles["required_cell_ids"])
+    assert len(required) == 17
+
+
 def test_leaf_reuse_requires_the_exact_authorized_plan(genuine_stage, tmp_path: Path) -> None:
     source, panel, _revision, plan = _standin_planned_panel(genuine_stage, tmp_path)
 

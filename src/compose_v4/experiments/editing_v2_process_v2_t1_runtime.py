@@ -251,6 +251,18 @@ def load_process_v2_t1_capacity_policy(
     return {**policy, "policy_sha256": policy["contract_sha256"]}, _file_sha256(source)
 
 
+def _required_editing_cell_ids(roles: Mapping[str, Any]) -> set[str]:
+    values = roles.get("required_cell_ids")
+    if (
+        not isinstance(values, list)
+        or not values
+        or any(not isinstance(value, str) or not value for value in values)
+        or len(values) != len(set(values))
+    ):
+        raise ProcessV2T1RuntimeError("T1 development role artifact lacks required cell ids")
+    return set(values)
+
+
 def _scratch_runtime_from_descriptor(
     descriptor: Mapping[str, Any], *, repo_root: Path
 ) -> tuple[SemanticScratchRuntime, dict[str, Any]]:
@@ -1466,7 +1478,8 @@ def publish_reused_process_v2_t1_prepared_inputs(
     *,
     panel: Mapping[str, Any],
     source: ProcessV2T1Source,
-    run_root: Path,
+    leaf_run_root: Path,
+    output_root: Path,
     source_revision: Mapping[str, Any],
     expected_plan_sha256: str,
 ) -> Path:
@@ -1476,11 +1489,11 @@ def publish_reused_process_v2_t1_prepared_inputs(
         plan,
         panel=panel,
         source=source,
-        run_root=run_root,
+        run_root=leaf_run_root,
         source_revision=source_revision,
         expected_plan_sha256=expected_plan_sha256,
     )
-    root = Path(run_root)
+    root = Path(output_root)
     artifact_path = root / PREPARED_FILENAME
     try:
         write_bytes_if_absent(artifact_path, canonical_bytes(artifact) + b"\n")
@@ -1648,9 +1661,7 @@ def load_process_v2_t1_runtime_inputs(
         family = str(entry["model_family"])
         family_counts[family] = family_counts.get(family, 0) + 1
     roles = load_process_v2_chain_artifact(DEVELOPMENT_CELL_ROLES, repo_root=repo_root)
-    required_cells = {
-        str(cell) for cell, role in roles["cell_roles"].items() if role == "required_editing"
-    }
+    required_cells = _required_editing_cell_ids(roles)
     if observed_cells != required_cells:
         raise ProcessV2T1RuntimeError(
             "T1 prepared inputs do not exactly cover the required Process-V2 cells"
