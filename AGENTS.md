@@ -497,6 +497,11 @@ null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not tr
   initialization parity where applicable, and corpus or support provenance.
 - T1 must measure canonical-successor capacity for every load-bearing family on bounded development
   panels. A family that cannot overfit its small successor-level panel blocks a larger run.
+- Bounded T1 preparation requires one exact-commit successor-partition materialization, immutable
+  internal validation, the completed Active8 sentinel, and bounded independent dictionary-oracle
+  tests. Re-enumerating the same prepared fibers with the identical compiler is a diagnostic, not a
+  prerequisite or source of training authority. Do not represent same-compiler repetition as
+  independent algorithmic evidence.
 - The pre-P50 capacity gate uses the prospectively frozen unique-state, single-target canonical-successor
   panel. Repeated-state empirical-law fitting is a separate conditional calibration gate. It may be run
   only when every counted transition has an authoritative independent-observation multiplicity receipt.
