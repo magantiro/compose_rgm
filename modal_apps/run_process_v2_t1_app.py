@@ -1148,6 +1148,7 @@ def main(
     max_cpu_containers: int = MAX_CPU_CONTAINERS,
     reusable_run_root: str = "",
     expected_reuse_plan_sha256: str = "",
+    wait_for_completion: bool = False,
 ) -> None:
     """Spawn one disconnect-safe Process-V2 T1 driver and return immediately."""
 
@@ -1158,7 +1159,7 @@ def main(
             "reusable_run_root and expected_reuse_plan_sha256 must be supplied together"
         )
     if reuse_requested:
-        call = reuse_driver.spawn(
+        arguments = (
             active8_run_root,
             gate_zero_decision_path,
             reusable_run_root,
@@ -1166,6 +1167,10 @@ def main(
             run_output_prefix,
             revision,
         )
+        if wait_for_completion:
+            print(json.dumps(reuse_driver.remote(*arguments), indent=2, sort_keys=True))
+            return
+        call = reuse_driver.spawn(*arguments)
     else:
         call = driver.spawn(
             active8_run_root,
