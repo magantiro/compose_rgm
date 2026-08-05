@@ -209,6 +209,7 @@ def test_panel_surface_delegates_to_native_interface_and_reopens(
         "load_panel": load_panel,
     }
     revision = {"image_revision_sha256": "d" * 64}
+    progress: list[dict] = []
     monkeypatch.setattr(launcher, "ARTIFACT_ROOT", artifact_root)
     monkeypatch.setattr(launcher, "_validate_remote_revision", lambda *_args, **_kwargs: None)
 
@@ -221,6 +222,7 @@ def test_panel_surface_delegates_to_native_interface_and_reopens(
         artifact_root=artifact_root,
         reload_volume=lambda: events.append("reload"),
         commit_volume=lambda: events.append("commit"),
+        emit_progress=lambda event: progress.append(dict(event)),
         loaded=loaded,
     )
 
@@ -230,6 +232,14 @@ def test_panel_surface_delegates_to_native_interface_and_reopens(
     assert result["training_authorized"] is False
     assert result["t1_authorized"] is False
     assert result["bounded_p50_authorized"] is False
+    assert [event["event"] for event in progress] == [
+        "stage_start",
+        "panel_built",
+        "stage_end",
+    ]
+    assert progress[1]["entry_count"] == 1
+    assert progress[1]["panel_sha256"] == panel_sha
+    assert progress[2]["panel_file_sha256"] == result["panel_file_sha256"]
 
 
 def test_panel_surface_refuses_writer_path_substitution(
@@ -268,6 +278,7 @@ def test_panel_surface_refuses_writer_path_substitution(
             artifact_root=artifact_root,
             reload_volume=lambda: None,
             commit_volume=lambda: None,
+            emit_progress=lambda _event: None,
             loaded=loaded,
         )
 
@@ -284,3 +295,26 @@ def test_panel_modal_surface_has_bounded_cpu_geometry() -> None:
     assert "timeout=PANEL_TIMEOUT_SECONDS" in decorator
     assert "max_containers=1" in decorator
     assert "gpu=" not in decorator
+
+
+def test_progress_emitter_writes_one_canonical_json_line(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    launcher._emit_progress(
+        {
+            "stage": "panel",
+            "event": "stage_start",
+            "panel_sha256": "a" * 64,
+        }
+    )
+    line = capsys.readouterr().out
+    assert line.endswith("\n")
+    assert line.count("\n") == 1
+    payload = json.loads(line)
+    assert payload == {
+        "schema": launcher.PROGRESS_SCHEMA,
+        "schema_version": launcher.PROGRESS_SCHEMA_VERSION,
+        "stage": "panel",
+        "event": "stage_start",
+        "panel_sha256": "a" * 64,
+    }

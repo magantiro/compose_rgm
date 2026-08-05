@@ -30,6 +30,8 @@ IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 
 REVISION_SCHEMA = "compose.editing_v2.process_v2_t1_modal_image_revision"
 REVISION_SCHEMA_VERSION = 1
+PROGRESS_SCHEMA = "compose.editing_v2.process_v2_t1_modal_progress"
+PROGRESS_SCHEMA_VERSION = 1
 
 PANEL_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_panel"
 PANEL_CPU = 1.0
@@ -214,6 +216,23 @@ def _require_artifact_path(value: str, *, field: str) -> Path:
     return path
 
 
+def _emit_progress(event: Mapping[str, Any]) -> None:
+    """Emit one compact structured event without performing extra science."""
+
+    print(
+        json.dumps(
+            {
+                "schema": PROGRESS_SCHEMA,
+                "schema_version": PROGRESS_SCHEMA_VERSION,
+                **dict(event),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        flush=True,
+    )
+
+
 def _panel_imports(remote_root: Path = REMOTE_ROOT) -> dict[str, Any]:
     source_root = str(Path(remote_root) / "src")
     if source_root not in sys.path:
@@ -247,6 +266,7 @@ def _materialize_panel(
     artifact_root: Path,
     reload_volume: Callable[[], None],
     commit_volume: Callable[[], None],
+    emit_progress: Callable[[Mapping[str, Any]], None] = _emit_progress,
     loaded: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Delegate one authenticated panel publication to the native library."""
@@ -259,6 +279,15 @@ def _materialize_panel(
         field="gate_zero_decision",
     )
     prefix = _require_artifact_path(output_prefix, field="output_prefix")
+    emit_progress(
+        {
+            "stage": "panel",
+            "event": "stage_start",
+            "image_revision_sha256": image_revision["image_revision_sha256"],
+            "active8_run_root": str(active8_root),
+            "gate_zero_decision_path": str(gate_zero_path),
+        }
+    )
     interfaces = dict(loaded or _panel_imports(remote_root))
     source = interfaces["open_source"](
         active8_root,
@@ -270,6 +299,25 @@ def _materialize_panel(
     panel_sha256 = str(panel.get("panel_sha256"))
     if _SHA256_RE.fullmatch(panel_sha256) is None:
         raise RuntimeError("the Process-V2 T1 panel has no valid identity")
+    entries = panel.get("entries")
+    family_counts = panel.get("family_counts")
+    cell_counts = panel.get("capability_cell_counts")
+    if (
+        not isinstance(entries, list)
+        or not isinstance(family_counts, dict)
+        or not isinstance(cell_counts, dict)
+    ):
+        raise RuntimeError("the Process-V2 T1 panel summary is malformed")
+    emit_progress(
+        {
+            "stage": "panel",
+            "event": "panel_built",
+            "panel_sha256": panel_sha256,
+            "entry_count": len(entries),
+            "family_counts": dict(family_counts),
+            "capability_cell_count": len(cell_counts),
+        }
+    )
     output_root = prefix / panel_sha256
     path = interfaces["write_panel"](
         panel,
@@ -293,7 +341,7 @@ def _materialize_panel(
         or not isinstance(entries, list)
     ):
         raise RuntimeError("the Process-V2 T1 panel summary is malformed")
-    return {
+    result = {
         "phase": "process_v2_t1_panel_complete",
         "panel_artifact_path": str(path),
         "panel_file_sha256": _file_sha256(path),
@@ -304,6 +352,17 @@ def _materialize_panel(
         "image_revision_sha256": image_revision["image_revision_sha256"],
         **NO_AUTHORITY,
     }
+    emit_progress(
+        {
+            "stage": "panel",
+            "event": "stage_end",
+            "panel_artifact_path": result["panel_artifact_path"],
+            "panel_file_sha256": result["panel_file_sha256"],
+            "panel_sha256": result["panel_sha256"],
+            "entry_count": result["entry_count"],
+        }
+    )
+    return result
 
 
 @app.function(
