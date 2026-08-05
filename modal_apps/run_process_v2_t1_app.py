@@ -2425,15 +2425,14 @@ def reuse_driver(
     timeout=COORDINATOR_TIMEOUT_SECONDS,
     max_containers=1,
 )
-def collated_reuse_driver(
+def collated_cache_only_driver(
     prepared_completion_path: str,
     collated_output_prefix: str,
-    run_output_prefix: str,
     entries_per_task: int,
     max_cpu_containers: int,
     revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """Fan out CPU collation over frozen fibers, then launch GPU-only T1."""
+    """Fan out CPU collation over frozen fibers and stop before any GPU."""
 
     _validate_remote_revision(revision)
     if type(max_cpu_containers) is not int or not 1 <= max_cpu_containers <= MAX_CPU_CONTAINERS:
@@ -2498,16 +2497,67 @@ def collated_reuse_driver(
         planned["run_root"],
         revision,
     )
+    result = {
+        "phase": "process_v2_t1_collated_cache_only_complete",
+        "prepared_completion_path": prepared_completion_path,
+        "plan_path": planned["plan_path"],
+        "collated": finalized,
+        "max_cpu_containers": max_cpu_containers,
+        "entries_per_task": entries_per_task,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "image_revision": revision,
+        "training_launched": False,
+        "bounded_p50_authorized": False,
+        "p50_launched": False,
+    }
+    _progress(
+        "process_v2_t1_collated_cache_only_complete",
+        collated_completion_sha256=finalized["completion_sha256"],
+        task_count=finalized["task_count"],
+        fiber_recomputation_count=0,
+        gpu_side_collation_count=0,
+        training_launched=False,
+        bounded_p50_authorized=False,
+        p50_launched=False,
+    )
+    return result
+
+
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+)
+def collated_reuse_driver(
+    prepared_completion_path: str,
+    collated_output_prefix: str,
+    run_output_prefix: str,
+    entries_per_task: int,
+    max_cpu_containers: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Complete the CPU cache, then launch the GPU-only T1 function."""
+
+    cached = collated_cache_only_driver.remote(
+        prepared_completion_path,
+        collated_output_prefix,
+        entries_per_task,
+        max_cpu_containers,
+        revision,
+    )
     gpu = run_t1_collated_gpu_remote.remote(
         prepared_completion_path,
-        planned["plan_path"],
-        finalized["completion_path"],
+        cached["plan_path"],
+        cached["collated"]["completion_path"],
         run_output_prefix,
         revision,
     )
     result = {
         "phase": "process_v2_t1_collated_driver_complete",
-        "collated": finalized,
+        "collated": cached["collated"],
         "capacity": gpu,
         "max_cpu_containers": max_cpu_containers,
         "entries_per_task": entries_per_task,
@@ -2519,7 +2569,7 @@ def collated_reuse_driver(
     }
     _progress(
         "process_v2_t1_collated_driver_complete",
-        collated_completion_sha256=finalized["completion_sha256"],
+        collated_completion_sha256=cached["collated"]["completion_sha256"],
         decision_sha256=gpu["decision_sha256"],
         decision_status=gpu["decision_status"],
         bounded_p50_authorized=gpu["bounded_p50_authorized"],
@@ -2641,6 +2691,104 @@ def cached_main(
     )
 
 
+@app.local_entrypoint()
+def cache_only_main(
+    prepared_completion_path: str,
+    expected_commit: str,
+    collated_output_prefix: str = COLLATED_OUTPUT_PREFIX,
+    entries_per_task: int = COLLATED_ENTRIES_PER_TASK,
+    max_cpu_containers: int = MAX_CPU_CONTAINERS,
+    wait_for_completion: bool = False,
+) -> None:
+    """Materialize the authenticated CPU cache and allocate no GPU."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_output_prefix,
+        int(entries_per_task),
+        int(max_cpu_containers),
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                collated_cache_only_driver.remote(*arguments),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    call = collated_cache_only_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_collated_cache_only_launched",
+                "driver_call_id": call.object_id,
+                "prepared_completion_path": prepared_completion_path,
+                "entries_per_task": int(entries_per_task),
+                "max_cpu_containers": int(max_cpu_containers),
+                "fiber_recomputation_count": 0,
+                "gpu_allocated": False,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+@app.local_entrypoint()
+def gpu_from_cache_main(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    expected_commit: str,
+    run_output_prefix: str = RUN_OUTPUT_PREFIX,
+    wait_for_completion: bool = False,
+) -> None:
+    """Launch only the GPU phase from a complete authenticated CPU cache."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_plan_path,
+        collated_completion_path,
+        run_output_prefix,
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                run_t1_collated_gpu_remote.remote(*arguments),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    call = run_t1_collated_gpu_remote.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_collated_gpu_launched",
+                "gpu_call_id": call.object_id,
+                "prepared_completion_path": prepared_completion_path,
+                "collated_plan_path": collated_plan_path,
+                "collated_completion_path": collated_completion_path,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
 __all__ = [
     "COLLATED_OUTPUT_PREFIX",
     "MAX_CPU_CONTAINERS",
@@ -2649,12 +2797,15 @@ __all__ = [
     "RUN_OUTPUT_PREFIX",
     "app",
     "cached_main",
+    "cache_only_main",
     "collate_t1_leaf_remote",
+    "collated_cache_only_driver",
     "collated_reuse_driver",
     "driver",
     "finalize_collated_remote",
     "finalize_prepared_remote",
     "finalize_reused_prepared_remote",
+    "gpu_from_cache_main",
     "local_image_revision",
     "main",
     "prepare_collated_plan_remote",

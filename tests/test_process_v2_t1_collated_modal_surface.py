@@ -12,20 +12,23 @@ def _body(function) -> str:
 
 
 def test_collated_driver_finishes_cpu_cache_before_allocating_gpu() -> None:
-    body = _body(launcher.collated_reuse_driver)
-    assert body.index("collate_t1_leaf_remote.starmap(") < body.index(
+    cache_body = _body(launcher.collated_cache_only_driver)
+    assert cache_body.index("collate_t1_leaf_remote.starmap(") < cache_body.index(
         "finalize_collated_remote.remote("
     )
-    assert body.index("finalize_collated_remote.remote(") < body.index(
+    assert "run_t1_collated_gpu_remote" not in cache_body
+    assert "prepare_leaf_remote" not in cache_body
+    assert '"training_launched": False' in cache_body
+    body = _body(launcher.collated_reuse_driver)
+    assert body.index("collated_cache_only_driver.remote(") < body.index(
         "run_t1_collated_gpu_remote.remote("
     )
-    assert "prepare_leaf_remote" not in body
     assert '"fiber_recomputation_count": 0' in body
     assert '"gpu_side_collation_count": 0' in body
 
 
 def test_cpu_collation_uses_one_replenishing_bounded_starmap() -> None:
-    body = _body(launcher.collated_reuse_driver)
+    body = _body(launcher.collated_cache_only_driver)
     assert body.count("collate_t1_leaf_remote.starmap(") == 1
     assert "update_autoscaler(max_containers=max_cpu_containers)" in body
     assert "for identifier in missing" in body
