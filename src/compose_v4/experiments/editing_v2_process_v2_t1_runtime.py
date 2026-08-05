@@ -245,7 +245,7 @@ def load_process_v2_t1_capacity_policy(
         or policy.get("training_authorized") is not False
         or policy.get("bounded_p50_authorized") is not False
         or policy.get("optimization", {}).get("trajectory_evaluation")
-        != "initial_report_points_and_terminal_state"
+        != "step_zero_and_report_points_only"
     ):
         raise ProcessV2T1RuntimeError("T1 capacity policy is outside Process-V2 T1 scope")
     return {**policy, "policy_sha256": policy["contract_sha256"]}, _file_sha256(source)

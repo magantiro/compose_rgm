@@ -46,6 +46,23 @@ def test_launcher_binds_the_sparse_seven_point_process_v2_policy() -> None:
     assert policy["hazard_included"] is False
 
 
+def test_runtime_loader_accepts_the_same_sparse_process_v2_policy() -> None:
+    from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
+        load_process_v2_t1_capacity_policy,
+    )
+
+    policy, file_sha256 = load_process_v2_t1_capacity_policy(
+        ROOT / launcher.CAPACITY_POLICY_SOURCE,
+        repo_root=ROOT,
+    )
+
+    assert policy["optimization"]["trajectory_evaluation"] == (
+        "step_zero_and_report_points_only"
+    )
+    assert policy["policy_sha256"] == policy["contract_sha256"]
+    assert len(file_sha256) == 64
+
+
 def test_cpu_fanout_sends_the_plan_address_not_the_plan_payload() -> None:
     body = ast.get_source_segment(_source(), _function("driver"))
     assert body is not None
