@@ -1093,3 +1093,20 @@ def test_process_v2_row_selection_reindexes_the_admission_mask(
         # The forward guard is what caught this; it must now pass.
         with torch.no_grad():
             model.forward_mark_batch(selected)
+
+
+def test_gradient_route_diagnostics_retire_after_both_routes_are_observed() -> None:
+    from compose_v4.experiments import editing_v2_semantic_t1_capacity_runner as runner
+
+    evidence = {
+        "atom_insert": {
+            "family_route_finite_nonzero_seen": True,
+            "action_route_finite_nonzero_seen": True,
+        },
+        "cycle_attach": {
+            "family_route_finite_nonzero_seen": True,
+            "action_route_finite_nonzero_seen": False,
+        },
+    }
+
+    assert runner._pending_gradient_families(evidence) == frozenset({"cycle_attach"})

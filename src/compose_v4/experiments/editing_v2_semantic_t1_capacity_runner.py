@@ -881,6 +881,8 @@ def _route_gradient_evidence(
     prediction: Any,
     batch: Any,
     entries: Sequence[Mapping[str, Any]],
+    *,
+    required_families: frozenset[str] | None = None,
 ) -> dict[str, dict[str, float | bool]]:
     named = dict(model.named_parameters())
     family_parameters = tuple(
@@ -890,7 +892,10 @@ def _route_gradient_evidence(
     )
     result: dict[str, dict[str, float | bool]] = {}
     log_probabilities = prediction.selected_productive_successor_log_probability
-    for family in sorted({str(entry["model_family"]) for entry in entries}):
+    present_families = {str(entry["model_family"]) for entry in entries}
+    if required_families is not None:
+        present_families &= required_families
+    for family in sorted(present_families):
         indices = [index for index, entry in enumerate(entries) if entry["model_family"] == family]
         family_loss = -log_probabilities[indices].mean()
         action_parameters = tuple(
@@ -942,6 +947,26 @@ def _merge_gradient_evidence(
             target[f"{route}_finite_nonzero_seen"] |= seen
             target[f"{route}_nonzero_steps"] += int(seen)
             target[f"{route}_cumulative_gradient_norm"] += float(evidence[f"{route}_gradient_norm"])
+
+
+def _pending_gradient_families(
+    cumulative: Mapping[str, Mapping[str, Any]],
+) -> frozenset[str]:
+    """Return routes that still need one finite, nonzero diagnostic.
+
+    The capacity gate asks whether every load-bearing route receives a usable
+    gradient.  Repeating up to one retained-graph backward traversal per family
+    on all 500 optimizer steps does not strengthen that Boolean finding.  Once
+    both routes for a family have been observed, the ordinary minibatch
+    backward pass remains the training signal and the diagnostic is retired.
+    """
+
+    return frozenset(
+        family
+        for family, evidence in cumulative.items()
+        if not evidence["family_route_finite_nonzero_seen"]
+        or not evidence["action_route_finite_nonzero_seen"]
+    )
 
 
 def _optimizer_configuration(
@@ -997,6 +1022,7 @@ def _checkpoint_identity(
     provenance: Mapping[str, Any],
     model: FactorizedTraceletRateModel,
     optimizer: torch.optim.Optimizer,
+    expected_runner_implementation_sha256: str | None = None,
 ) -> dict[str, Any]:
     environment = provenance.get("execution_environment")
     if not isinstance(environment, Mapping):
@@ -1009,9 +1035,16 @@ def _checkpoint_identity(
     source_revision = runtime.prepared.artifact.get("source_revision")
     runner_source_revision_sha256 = provenance.get("runner_source_revision_sha256")
     runner_implementation_sha256 = provenance.get("runner_implementation_sha256")
-    expected_runner_implementation_sha256 = semantic_t1_runner_implementation_sha256(
-        repo_root=Path(__file__).resolve().parents[3]
-    )
+    if expected_runner_implementation_sha256 is None:
+        expected_runner_implementation_sha256 = semantic_t1_runner_implementation_sha256(
+            repo_root=Path(__file__).resolve().parents[3]
+        )
+    elif len(expected_runner_implementation_sha256) != 64 or any(
+        character not in "0123456789abcdef" for character in expected_runner_implementation_sha256
+    ):
+        raise SemanticT1CapacityRunnerError(
+            "expected T1 runner implementation identity is not a SHA-256"
+        )
     parameter = next(model.parameters())
     device = parameter.device
     optimization = dict(runtime.capacity_policy.get("optimization", {}))
@@ -1164,6 +1197,7 @@ def run_semantic_t1_capacity(
     resume_checkpoint_file_sha256: str | None = None,
     result_builder: SemanticT1ResultBuilder | None = None,
     result_filename: str = RESULT_FILENAME,
+    expected_runner_implementation_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Run or resume the frozen joint Active8 unique-state capacity test."""
 
@@ -1213,6 +1247,7 @@ def run_semantic_t1_capacity(
         provenance=provenance,
         model=model,
         optimizer=optimizer,
+        expected_runner_implementation_sha256=expected_runner_implementation_sha256,
     )
 
     maximum_steps = int(optimization["maximum_optimizer_steps"])
@@ -1341,7 +1376,18 @@ def run_semantic_t1_capacity(
             raise SemanticT1CapacityRunnerError(
                 f"nonfinite T1 loss before optimizer step {completed_steps + 1}"
             )
-        observed_routes = _route_gradient_evidence(model, prediction, device_batch, entries)
+        pending_gradient_families = _pending_gradient_families(gradient_evidence)
+        observed_routes = (
+            _route_gradient_evidence(
+                model,
+                prediction,
+                device_batch,
+                entries,
+                required_families=pending_gradient_families,
+            )
+            if pending_gradient_families
+            else {}
+        )
         if any(
             not evidence["family_route_finite_nonzero_seen"]
             or not evidence["action_route_finite_nonzero_seen"]
