@@ -32,6 +32,7 @@ from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
     PANEL_FILENAME,
     ProcessV2T1PanelError,
     ProcessV2T1Source,
+    _canonical_string_cursor_sha256,
     _validate_gate_zero_pass,
     build_process_v2_t1_panel,
     iter_process_v2_t1_candidates,
@@ -53,6 +54,13 @@ from test_editing_v2_process_v2_gate_zero import (  # noqa: E402
     _digest as _standin_digest,
     _identity as _standin_identity,
 )
+
+
+def test_streaming_source_inventory_hash_matches_canonical_list_hash() -> None:
+    values = ["0" * 64, "7" * 64, "f" * 64]
+    assert _canonical_string_cursor_sha256((value,) for value in values) == (
+        canonical_sha256(values)
+    )
 
 
 def _stage_evidence(tmp_path: Path):

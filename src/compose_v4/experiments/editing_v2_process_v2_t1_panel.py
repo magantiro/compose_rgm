@@ -83,6 +83,7 @@ PANEL_SCHEMA_VERSION = 1
 PANEL_STATUS = "PROCESS_V2_T1_PANEL_PREPARED_NO_DOWNSTREAM_AUTHORITY"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
 SELECTION_RULE = "unique_source_single_canonical_target_cell_round_robin_minimum_v2"
+_SQLITE_INSERT_BATCH_SIZE = 8192
 
 _DECISION_FIELDS = frozenset(
     {
@@ -391,6 +392,30 @@ def _selection_rank(candidate: Mapping[str, Any], *, seed: str) -> str:
     )
 
 
+def _canonical_string_cursor_sha256(rows: Iterable[Sequence[Any]]) -> str:
+    """Hash a sorted one-column cursor as the canonical JSON string list."""
+
+    digest = hashlib.sha256()
+    digest.update(b"[")
+    first = True
+    for row in rows:
+        if len(row) != 1 or not isinstance(row[0], str):
+            raise ProcessV2T1PanelError("the eligible-source inventory row disagrees")
+        if not first:
+            digest.update(b",")
+        digest.update(
+            json.dumps(
+                row[0],
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        )
+        first = False
+    digest.update(b"]")
+    return digest.hexdigest()
+
+
 def _selected_candidates(
     candidates: Iterable[Mapping[str, Any]],
     *,
@@ -424,8 +449,13 @@ def _selected_candidates(
                 );
                 """
             )
+            minimum = {
+                str(key): int(value)
+                for key, value in source.policy["minimum_entries_by_family"].items()
+            }
             raw_count = 0
             stream = hashlib.sha256()
+            insert_rows: list[tuple[str, str, str, str, str, str, str]] = []
             for item in candidates:
                 candidate = dict(item)
                 if candidate["partition_role"] not in source.contracts.decision_eligible_roles:
@@ -444,73 +474,106 @@ def _selected_candidates(
                     ensure_ascii=False,
                     allow_nan=False,
                 )
+                insert_rows.append(
+                    (
+                        candidate["assignment_sha256"],
+                        candidate["source_state_sha256"],
+                        candidate["canonical_successor_key"],
+                        family,
+                        cell,
+                        rank,
+                        payload,
+                    )
+                )
+                if len(insert_rows) == _SQLITE_INSERT_BATCH_SIZE:
+                    try:
+                        connection.executemany(
+                            "INSERT INTO occurrences VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            insert_rows,
+                        )
+                    except sqlite3.IntegrityError as error:
+                        raise ProcessV2T1PanelError(
+                            "the T1 source repeats one accepted assignment"
+                        ) from error
+                    insert_rows.clear()
+                raw_count += 1
+                stream.update(str(candidate["assignment_sha256"]).encode("ascii") + b"\n")
+            if insert_rows:
                 try:
-                    connection.execute(
+                    connection.executemany(
                         "INSERT INTO occurrences VALUES (?, ?, ?, ?, ?, ?, ?)",
-                        (
-                            candidate["assignment_sha256"],
-                            candidate["source_state_sha256"],
-                            candidate["canonical_successor_key"],
-                            family,
-                            cell,
-                            rank,
-                            payload,
-                        ),
+                        insert_rows,
                     )
                 except sqlite3.IntegrityError as error:
                     raise ProcessV2T1PanelError(
                         "the T1 source repeats one accepted assignment"
                     ) from error
-                raw_count += 1
-                stream.update(str(candidate["assignment_sha256"]).encode("ascii") + b"\n")
             connection.commit()
             if raw_count != int(source.decision["accounting"]["transitions"]):
                 raise ProcessV2T1PanelError(
                     "the T1 stream count differs from the authenticated Gate-0 PASS"
                 )
-            census = connection.execute(
+            connection.executescript(
                 """
-                SELECT
-                    COUNT(*),
-                    SUM(CASE WHEN target_count = 1 AND context_count = 1 THEN 1 ELSE 0 END),
-                    SUM(CASE WHEN target_count > 1 THEN 1 ELSE 0 END),
-                    SUM(CASE WHEN context_count > 1 THEN 1 ELSE 0 END)
-                FROM (
+                CREATE INDEX occurrences_source_idx
+                    ON occurrences(source_state_sha256);
+                CREATE TEMP TABLE source_census AS
                     SELECT source_state_sha256,
+                           COUNT(*) AS occurrence_count,
                            COUNT(DISTINCT canonical_successor_key) AS target_count,
                            COUNT(DISTINCT model_family || char(31) || capability_cell_id)
                                AS context_count
-                    FROM occurrences GROUP BY source_state_sha256
-                )
+                    FROM occurrences GROUP BY source_state_sha256;
+                CREATE UNIQUE INDEX source_census_source_idx
+                    ON source_census(source_state_sha256);
+                """
+            )
+            census = connection.execute(
+                """
+                SELECT COUNT(*),
+                       SUM(CASE WHEN target_count = 1 AND context_count = 1 THEN 1 ELSE 0 END),
+                       SUM(CASE WHEN target_count > 1 THEN 1 ELSE 0 END),
+                       SUM(CASE WHEN context_count > 1 THEN 1 ELSE 0 END)
+                FROM source_census
                 """
             ).fetchone()
+            eligible_source_inventory_sha256 = _canonical_string_cursor_sha256(
+                connection.execute(
+                    """
+                    SELECT source_state_sha256 FROM source_census
+                    WHERE target_count = 1 AND context_count = 1
+                    ORDER BY source_state_sha256
+                    """
+                )
+            )
             rows = connection.execute(
                 """
-                WITH eligible AS (
-                    SELECT source_state_sha256, COUNT(*) AS occurrence_count
-                    FROM occurrences
-                    GROUP BY source_state_sha256
-                    HAVING COUNT(DISTINCT canonical_successor_key) = 1
-                       AND COUNT(DISTINCT model_family || char(31) || capability_cell_id) = 1
-                ), ranked AS (
-                    SELECT o.*, e.occurrence_count,
+                WITH representatives AS (
+                    SELECT o.*, c.occurrence_count,
                            ROW_NUMBER() OVER (
                                PARTITION BY o.source_state_sha256
                                ORDER BY o.assignment_sha256
                            ) AS representative_rank
-                    FROM occurrences o JOIN eligible e USING (source_state_sha256)
+                    FROM occurrences o JOIN source_census c USING (source_state_sha256)
+                    WHERE c.target_count = 1 AND c.context_count = 1
+                ), cell_ranked AS (
+                    SELECT *, ROW_NUMBER() OVER (
+                        PARTITION BY model_family, capability_cell_id
+                        ORDER BY selection_rank_sha256, source_state_sha256
+                    ) AS cell_rank
+                    FROM representatives WHERE representative_rank = 1
                 )
                 SELECT payload_json, selection_rank_sha256, occurrence_count
-                FROM ranked WHERE representative_rank = 1
+                FROM cell_ranked WHERE cell_rank <= ?
                 ORDER BY model_family, capability_cell_id, selection_rank_sha256,
                          source_state_sha256
-                """
+                """,
+                (max(minimum.values()),),
             ).fetchall()
         finally:
             connection.close()
 
     by_family_cell: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
-    candidate_inventory: list[str] = []
     for payload, rank, occurrence_count in rows:
         candidate = json.loads(payload)
         candidate["selection_rank_sha256"] = str(rank)
@@ -518,10 +581,6 @@ def _selected_candidates(
         by_family_cell[(candidate["model_family"], candidate["capability_cell_id"])].append(
             candidate
         )
-        candidate_inventory.append(str(candidate["source_state_sha256"]))
-
-    minimum = {str(k): int(v) for k, v in source.policy["minimum_entries_by_family"].items()}
-    maximum = {str(k): int(v) for k, v in source.policy["maximum_entries_by_family"].items()}
     required_by_family: dict[str, list[str]] = defaultdict(list)
     for cell in source.contracts.required_cell_ids:
         _namespace, family, _context = cell.split(":", 2)
@@ -580,7 +639,7 @@ def _selected_candidates(
         "eligible_single_target_single_context_source_count": int(census[1] or 0),
         "multi_target_source_count": int(census[2] or 0),
         "multi_context_source_count": int(census[3] or 0),
-        "eligible_source_inventory_sha256": canonical_sha256(sorted(candidate_inventory)),
+        "eligible_source_inventory_sha256": eligible_source_inventory_sha256,
     }
     return tuple(entries), measurement
 
