@@ -74,7 +74,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from compose_v4.data.editing_corpus_contract import REQUIRED_PARTITION_ROLES
 from compose_v4.data.editing_v2_process_v2_active8_reduce import (
@@ -1015,3 +1015,51 @@ def run_gate_zero(
     return reduce_gate_zero(
         active8_run_root, gate_zero_root=gate_zero_root, contracts=contracts
     )
+
+
+def resolve_gate_zero_eligible_stream(
+    active8_run_root: Path,
+    *,
+    repo_root: Path,
+) -> tuple[GateZeroContracts, GateZeroSourceIndex]:
+    """Authenticate the train-only metadata stream without opening a shard."""
+
+    contracts = load_gate_zero_contracts(repo_root=repo_root)
+    index = read_active8_decision_index(active8_run_root, contracts=contracts)
+    if not reduction_order(index.eligible()):
+        raise ProcessV2GateZeroIncomplete("no decision-eligible nonempty Active8 shard exists")
+    return contracts, index
+
+
+def iter_gate_zero_eligible_shards(
+    active8_run_root: Path,
+    *,
+    contracts: GateZeroContracts,
+    index: GateZeroSourceIndex,
+) -> Iterator[tuple[Mapping[str, Any], tuple[dict[str, Any], ...]]]:
+    """Yield authenticated train-only shards while holding one shard in memory."""
+
+    eligible = reduction_order(index.eligible())
+    if not eligible:
+        raise ProcessV2GateZeroIncomplete("no decision-eligible nonempty Active8 shard exists")
+    parent = Path(active8_run_root) / ACTIVE8_TASKS_DIRNAME
+    for shard in eligible:
+        if shard["partition_role"] not in contracts.decision_eligible_roles:
+            raise ProcessV2GateZeroError("a sealed partition role reached the T1 stream")
+        identity = str(shard["task_identity_sha256"])
+        path = parent / identity / ACTIVE8_DECISION_SHARD_FILENAME
+        rows, digest = _read_decision_shard(path)
+        if digest != shard["decision_shard_sha256"]:
+            raise ProcessV2GateZeroError(
+                f"{path}: shard bytes do not match the decision_shard_sha256 its receipt declares"
+            )
+        if len(rows) != shard["transition_count"]:
+            raise ProcessV2GateZeroError(
+                f"{path}: holds {len(rows)} transitions, its receipt declares "
+                f"{shard['transition_count']}"
+            )
+        validated = tuple(
+            _validated_row(row, where=f"{path}:{number}")
+            for number, row in enumerate(rows, start=1)
+        )
+        yield shard, validated
