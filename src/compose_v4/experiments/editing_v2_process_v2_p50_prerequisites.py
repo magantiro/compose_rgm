@@ -33,6 +33,7 @@ from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
     PIPELINE_STATUS_NO_AUTHORITY,
 )
 from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
+    CHAIN_SCHEMA_VERSION,
     P50_RECIPE_POLICY,
     T1_CAPACITY_POLICY,
     load_process_v2_chain_artifact,
@@ -175,7 +176,7 @@ def validate_process_v2_p50_prerequisite_relationships(
     )
     if (
         policy.get("schema") != "compose.editing_v2.process_v2_p50_recipe_policy"
-        or policy.get("schema_version") != 4
+        or policy.get("schema_version") != CHAIN_SCHEMA_VERSION
         or policy.get("status")
         != "FROZEN_PROCESS_V2_P50_RECIPE_POLICY_NO_DOWNSTREAM_AUTHORITY"
         or not isinstance(process, Mapping)

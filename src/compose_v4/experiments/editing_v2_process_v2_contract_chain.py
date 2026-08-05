@@ -195,25 +195,52 @@ SELF_HASH_FIELD = "contract_sha256"
 #: makes the Process-V2 Gate-0 policy successor-directed: whole-corpus evidence
 #: proves exact teacher support plus a productive nonself successor, while full
 #: quotient size and alias multiplicity move to the completion-bound sentinel.
+#: Version 5 prospectively repairs the bounded T1 protocol after its first
+#: completed NO_GO: it samples the already family-balanced 512-entry panel
+#: uniformly by unique entry and adds a low-rate stabilization phase.  The panel,
+#: objective, thresholds, model, seed, batch size, and hazard exclusion do not
+#: move.
 #: No generation is overwritten or resealed; each is preserved as lineage.
-CHAIN_SCHEMA_VERSION = 4
+CHAIN_SCHEMA_VERSION = 5
 
 #: The named successor generation, following this repository's ``contract_revision``
 #: convention (see ``configs/editing_v2_semantic_process_v2.json``).
-CHAIN_CONTRACT_REVISION = "process_v2_gate_zero_productive_nonself"
+CHAIN_CONTRACT_REVISION = "process_v2_unique_entry_two_stage_t1_capacity"
 
-#: Versioned Process-V2-only operational delta for the T1 capacity run.  The
-#: shared V1 policy remains frozen: panel composition, sampling, objective,
-#: thresholds, optimizer, batch size, and the 500-step ceiling are projected
-#: unchanged.  Only when metrics are evaluated and when early stopping becomes
-#: eligible differ here.  MVP recovery restarts T1 from step zero.
-PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION = 1
+#: Versioned Process-V2-only recovery protocol for the T1 capacity run.  The
+#: shared V1 policy remains frozen.  Process V2 keeps its exact panel, objective,
+#: thresholds, model, seed, batch size, optimizer, and hazard exclusion, while
+#: replacing the discovered hierarchical exposure imbalance with equal unique-
+#: entry sampling and adding one bounded low-rate stabilization phase.  Recovery
+#: restarts from the exact scratch state; no historical optimizer state is reused.
+PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION = 2
 PROCESS_V2_T1_TRAJECTORY_EVALUATION = "step_zero_and_report_points_only"
 PROCESS_V2_T1_EARLY_STOP_RULE = (
     "all_required_family_nonempty_cell_and_entry_thresholds_pass_at_one_"
     "evaluated_report_point_after_minimum_optimizer_steps"
 )
 PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP = 10
+PROCESS_V2_T1_SAMPLING_LAW = {
+    "importance_correction": "none",
+    "order": ["unique_panel_entry"],
+    "probability_within_each_level": "uniform_over_unique_panel_entries",
+    "target_coefficient": 1.0,
+}
+PROCESS_V2_T1_LEARNING_RATE_SCHEDULE = [
+    {
+        "first_optimizer_step": 1,
+        "last_optimizer_step": 500,
+        "learning_rate": 0.001,
+    },
+    {
+        "first_optimizer_step": 501,
+        "last_optimizer_step": 750,
+        "learning_rate": 0.0001,
+    },
+]
+PROCESS_V2_T1_REPORT_POINTS = [1, 10, 50, 100, 250, 500, 600, 700, 750]
+PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS = 750
+PROCESS_V2_T1_SCHEDULER = "piecewise_constant_by_optimizer_step"
 
 #: The revision the version-1 bodies were sealed under.  Kept as a named constant
 #: because it is the oldest generation and several tests address it by name.
@@ -228,6 +255,9 @@ SUPERSEDED_CHAIN_CONTRACT_REVISION_V2 = "process_v2_explicit_dependency_graph"
 SUPERSEDED_CHAIN_CONTRACT_REVISION_V3 = (
     "process_v2_binding_v2_and_cumulative_design_lineage"
 )
+
+#: The revision the version-4 bodies were sealed under.
+SUPERSEDED_CHAIN_CONTRACT_REVISION_V4 = "process_v2_gate_zero_productive_nonself"
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
@@ -561,6 +591,68 @@ _SUPERSEDED_GENERATIONS: tuple[tuple[int, str, dict[str, dict[str, str]]], ...] 
                 ),
                 "file_sha256": (
                     "4534cc62b10aecc3d201ffa774d9a08fdf82f27205bb774fa38504a3c7a2f7a9"
+                ),
+            },
+        },
+    ),
+    (
+        4,
+        SUPERSEDED_CHAIN_CONTRACT_REVISION_V4,
+        {
+            ACTIVE8_DECISION_RUNTIME: {
+                "contract_sha256": (
+                    "799291b6ab17a689d34e08cc849e3a0b510e7c07967fc1d3382d3805a7870bdf"
+                ),
+                "file_sha256": (
+                    "997f2f596cd7a766d1f1a37271602dc3bec6fbcf982e44664c5d20daa11f155f"
+                ),
+            },
+            CAPABILITY_CELLS: {
+                "contract_sha256": (
+                    "96a3418bb3a364b1135c46917b97902bcec75e93653add21f1ba583499824fe4"
+                ),
+                "file_sha256": (
+                    "968e4343b0051dd82a893bb75c78219f1cd587e7b17a395f122ac9fd0eb740b2"
+                ),
+            },
+            DEVELOPMENT_CELL_ROLES: {
+                "contract_sha256": (
+                    "23ec60562cbc7de5d39be7505d6928c89ea34f1eb1e4c20bbe7b66a619e71259"
+                ),
+                "file_sha256": (
+                    "319dc27ecb9ee42ecb088953a8339740de3aab868dc83a106ede3d51c3d97aa0"
+                ),
+            },
+            GATE_ZERO_STRUCTURAL: {
+                "contract_sha256": (
+                    "ad88dc9712f2f9f7ddd172ce2886b0d46d928d29f71bf4e5c6aa3799bb76980a"
+                ),
+                "file_sha256": (
+                    "c6d4a41f695371633967246deb48ba2c2c7c1bd7fa27b9b653cca9d477e3905b"
+                ),
+            },
+            T1_PANEL_POLICY: {
+                "contract_sha256": (
+                    "8a57487b9181b0e35b1d28895f18278a7c527554bdfab2730300651d33e4e2fb"
+                ),
+                "file_sha256": (
+                    "46137eed0cf063b649eb77d855876ebca950c5a9bb3e4be6788a9e595d98a769"
+                ),
+            },
+            T1_CAPACITY_POLICY: {
+                "contract_sha256": (
+                    "e2d0e0e0bc708c6f821ec92912170516c9c579c52f792127fcd652a0ea672968"
+                ),
+                "file_sha256": (
+                    "73a6cfbcfff1b9711a2bb8d69f73e9a4dc9bd662688c8c383e980c1bfbb98df3"
+                ),
+            },
+            P50_RECIPE_POLICY: {
+                "contract_sha256": (
+                    "365e2fa675154353500189f7460d0cb64c65cdb847d5ceb4f7216299d3f14b6a"
+                ),
+                "file_sha256": (
+                    "3f0cf8b5eb840c20f1f58b3647fdb63af130621065676a70a765239cc3f5639b"
                 ),
             },
         },
@@ -988,15 +1080,20 @@ def _build_t1_capacity_policy(
     optimization.update(
         {
             "early_stop_rule": PROCESS_V2_T1_EARLY_STOP_RULE,
+            "learning_rate_schedule": PROCESS_V2_T1_LEARNING_RATE_SCHEDULE,
+            "maximum_optimizer_steps": PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS,
             "minimum_optimizer_steps_before_early_stop": (
                 PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP
             ),
             "operational_semantics_version": (
                 PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION
             ),
+            "report_points": PROCESS_V2_T1_REPORT_POINTS,
+            "scheduler": PROCESS_V2_T1_SCHEDULER,
             "trajectory_evaluation": PROCESS_V2_T1_TRAJECTORY_EVALUATION,
         }
     )
+    shared["sampling_law"] = PROCESS_V2_T1_SAMPLING_LAW
     shared["optimization"] = optimization
     payload.update(shared)
     return payload
@@ -1408,7 +1505,7 @@ def _check_t1_capacity_operational_delta(
     payload: Mapping[str, Any],
     repo_root: Path,
 ) -> None:
-    """Prove the Process-V2 T1 body differs from V1 only operationally."""
+    """Prove the prospective Process-V2 T1 recovery delta exactly."""
 
     if name != T1_CAPACITY_POLICY:
         return
@@ -1421,15 +1518,28 @@ def _check_t1_capacity_operational_delta(
         _fail(name, "T1 capacity optimization policy is not a mapping")
 
     for field, expected in shared.items():
-        if field != "optimization" and payload.get(field) != expected:
+        if field not in {"optimization", "sampling_law"} and payload.get(field) != expected:
             _fail(
                 name,
                 "mirrored policy values are frozen: "
                 f"shared scientific T1 field {field!r} differs from frozen V1",
             )
 
-    changed = {"early_stop_rule", "trajectory_evaluation"}
+    if payload.get("sampling_law") != PROCESS_V2_T1_SAMPLING_LAW:
+        _fail(
+            name,
+            "Process-V2 T1 sampling law is not the prospective equal-entry recovery law",
+        )
+
+    changed = {
+        "early_stop_rule",
+        "maximum_optimizer_steps",
+        "report_points",
+        "scheduler",
+        "trajectory_evaluation",
+    }
     added = {
+        "learning_rate_schedule",
         "minimum_optimizer_steps_before_early_stop",
         "operational_semantics_version",
     }
@@ -1448,10 +1558,14 @@ def _check_t1_capacity_operational_delta(
             )
     expected_operational = {
         "early_stop_rule": PROCESS_V2_T1_EARLY_STOP_RULE,
+        "learning_rate_schedule": PROCESS_V2_T1_LEARNING_RATE_SCHEDULE,
+        "maximum_optimizer_steps": PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS,
         "minimum_optimizer_steps_before_early_stop": (
             PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP
         ),
         "operational_semantics_version": PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION,
+        "report_points": PROCESS_V2_T1_REPORT_POINTS,
+        "scheduler": PROCESS_V2_T1_SCHEDULER,
         "trajectory_evaluation": PROCESS_V2_T1_TRAJECTORY_EVALUATION,
     }
     for field, expected in expected_operational.items():

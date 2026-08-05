@@ -1,4 +1,4 @@
-"""The Process-V2 contract chain must mirror V1 exactly and never mix with it.
+"""The Process-V2 contract chain must declare every V1 delta and never mix with it.
 
 Four failures are possible here and all four are silent, so each gets explicit
 tests.
@@ -65,14 +65,20 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     P50_RECIPE_POLICY,
     PROCESS_V2_CHAIN_ARTIFACTS,
     PROCESS_V2_T1_EARLY_STOP_RULE,
+    PROCESS_V2_T1_LEARNING_RATE_SCHEDULE,
+    PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS,
     PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP,
     PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION,
+    PROCESS_V2_T1_REPORT_POINTS,
+    PROCESS_V2_T1_SAMPLING_LAW,
+    PROCESS_V2_T1_SCHEDULER,
     PROCESS_V2_T1_TRAJECTORY_EVALUATION,
     SELF_HASH_FIELD,
     SELF_HASH_FIELD_ALGORITHM,
     SUPERSEDED_CHAIN_CONTRACT_REVISION,
     SUPERSEDED_CHAIN_CONTRACT_REVISION_V2,
     SUPERSEDED_CHAIN_CONTRACT_REVISION_V3,
+    SUPERSEDED_CHAIN_CONTRACT_REVISION_V4,
     T1_CAPACITY_POLICY,
     T1_PANEL_POLICY,
     WHOLE_CANONICAL_BODY_ALGORITHM,
@@ -116,12 +122,16 @@ _SUPERSEDED_CHAIN_REVISION_V2 = "b39420c"
 # The revision that sealed contract-chain schema version 3.
 _SUPERSEDED_CHAIN_REVISION_V3 = "f4baef1"
 
+# The last clean revision carrying contract-chain schema version 4.
+_SUPERSEDED_CHAIN_REVISION_V4 = "dd58c90"
+
 # Every superseded generation, oldest first, as (schema version, revision that
 # sealed it, its named `contract_revision`).
 _SUPERSEDED_GENERATION_SOURCES: tuple[tuple[int, str, str], ...] = (
     (1, _SUPERSEDED_CHAIN_REVISION, SUPERSEDED_CHAIN_CONTRACT_REVISION),
     (2, _SUPERSEDED_CHAIN_REVISION_V2, SUPERSEDED_CHAIN_CONTRACT_REVISION_V2),
     (3, _SUPERSEDED_CHAIN_REVISION_V3, SUPERSEDED_CHAIN_CONTRACT_REVISION_V3),
+    (4, _SUPERSEDED_CHAIN_REVISION_V4, SUPERSEDED_CHAIN_CONTRACT_REVISION_V4),
 )
 
 # The four frozen non-chain files the chain binds.  None of them is V1-named.
@@ -485,7 +495,7 @@ def test_the_added_edges_are_present_and_were_absent_in_schema_version_one() -> 
 def test_declaring_a_dependency_edge_required_a_new_schema_version() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         payload = _load(name)
-        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 4
+        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 5
         assert payload["contract_revision"] == CHAIN_CONTRACT_REVISION
 
 
@@ -790,6 +800,7 @@ def test_a_single_lineage_block_where_a_list_is_required_is_rejected() -> None:
     payload["superseded_design_lineage"] = {
         "contract_revision": lineage[-1]["contract_revision"],
         "physical": lineage[-1]["physical"],
+        "schema_version": lineage[-1]["schema_version"],
         "semantic": lineage[-1]["semantic"],
     }
     assert len(payload["superseded_design_lineage"]) == len(lineage), (
@@ -1265,13 +1276,12 @@ def test_t1_panel_policy_thresholds_are_identical_to_v1() -> None:
         assert v2[field] == v1[field], field
 
 
-def test_t1_capacity_policy_science_is_identical_to_v1_except_operational_delta() -> None:
+def test_t1_capacity_policy_preserves_science_and_declares_recovery_delta() -> None:
     v1 = _load(_V1_COUNTERPART[T1_CAPACITY_POLICY])
     v2 = _load(T1_CAPACITY_POLICY)
     for field in (
         "thresholds",
         "panel_cardinality",
-        "sampling_law",
         "required_families",
         "empirical_repeated_state_gate",
         "objective_unit",
@@ -1280,9 +1290,17 @@ def test_t1_capacity_policy_science_is_identical_to_v1_except_operational_delta(
         "hazard_included",
     ):
         assert v2[field] == v1[field], field
+    assert v2["sampling_law"] == PROCESS_V2_T1_SAMPLING_LAW
 
-    changed = {"early_stop_rule", "trajectory_evaluation"}
+    changed = {
+        "early_stop_rule",
+        "maximum_optimizer_steps",
+        "report_points",
+        "scheduler",
+        "trajectory_evaluation",
+    }
     added = {
+        "learning_rate_schedule",
         "minimum_optimizer_steps_before_early_stop",
         "operational_semantics_version",
     }
@@ -1293,14 +1311,28 @@ def test_t1_capacity_policy_science_is_identical_to_v1_except_operational_delta(
     assert v2["optimization"] == {
         **v1["optimization"],
         "early_stop_rule": PROCESS_V2_T1_EARLY_STOP_RULE,
+        "learning_rate_schedule": PROCESS_V2_T1_LEARNING_RATE_SCHEDULE,
+        "maximum_optimizer_steps": PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS,
         "minimum_optimizer_steps_before_early_stop": (
             PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP
         ),
         "operational_semantics_version": PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION,
+        "report_points": PROCESS_V2_T1_REPORT_POINTS,
+        "scheduler": PROCESS_V2_T1_SCHEDULER,
         "trajectory_evaluation": PROCESS_V2_T1_TRAJECTORY_EVALUATION,
     }
-    assert v2["optimization"]["report_points"] == [1, 10, 50, 100, 250, 500]
-    assert v2["optimization"]["maximum_optimizer_steps"] == 500
+    assert v2["optimization"]["report_points"] == [
+        1,
+        10,
+        50,
+        100,
+        250,
+        500,
+        600,
+        700,
+        750,
+    ]
+    assert v2["optimization"]["maximum_optimizer_steps"] == 750
     assert v2["optimization"]["batch_size"] == 64
 
 
@@ -1355,7 +1387,10 @@ def test_no_policy_value_moved_beyond_the_declared_process_v2_deltas() -> None:
             for field in sorted(set(current) & set(superseded) - _ENVELOPE_FIELDS):
                 if name == GATE_ZERO_STRUCTURAL and field == "structural_checks":
                     continue
-                if name == T1_CAPACITY_POLICY and field == "optimization":
+                if name == T1_CAPACITY_POLICY and field in {
+                    "optimization",
+                    "sampling_law",
+                }:
                     continue
                 assert current[field] == superseded[field], f"{name}.{field}@{revision}"
 
@@ -1484,7 +1519,7 @@ def test_current_chain_changes_only_declared_policy_deltas_and_envelopes() -> No
         if name == GATE_ZERO_STRUCTURAL:
             allowed.add("structural_checks")
         if name == T1_CAPACITY_POLICY:
-            allowed.add("optimization")
+            allowed.update({"optimization", "sampling_law"})
         assert moved <= allowed, (name, sorted(moved))
         assert {
             "contract_revision",

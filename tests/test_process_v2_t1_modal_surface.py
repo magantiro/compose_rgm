@@ -47,13 +47,29 @@ def test_gpu_image_sets_deterministic_cublas_before_expensive_materialization() 
     assert "requires deterministic cuBLAS before materialization" in source
 
 
-def test_launcher_binds_the_sparse_seven_point_process_v2_policy() -> None:
+def test_launcher_binds_the_sparse_two_stage_process_v2_policy() -> None:
     policy = json.loads((ROOT / launcher.CAPACITY_POLICY_SOURCE).read_bytes())
     assert policy["optimization"]["trajectory_evaluation"] == (
         "step_zero_and_report_points_only"
     )
-    assert policy["optimization"]["report_points"] == [1, 10, 50, 100, 250, 500]
-    assert policy["optimization"]["maximum_optimizer_steps"] == 500
+    assert policy["sampling_law"]["order"] == ["unique_panel_entry"]
+    assert policy["optimization"]["report_points"] == [
+        1,
+        10,
+        50,
+        100,
+        250,
+        500,
+        600,
+        700,
+        750,
+    ]
+    assert policy["optimization"]["maximum_optimizer_steps"] == 750
+    assert policy["optimization"]["learning_rate_schedule"][-1] == {
+        "first_optimizer_step": 501,
+        "last_optimizer_step": 750,
+        "learning_rate": 1e-4,
+    }
     assert policy["hazard_included"] is False
 
 

@@ -357,12 +357,54 @@ def semantic_t1_address_stream(
     *,
     draw_count: int,
 ) -> tuple[str, ...]:
-    """Draw family, nonempty cell, and unique entry uniformly by SHA counter."""
+    """Draw the exact frozen address stream declared by the capacity policy."""
 
     if type(draw_count) is not int or draw_count < 0:
         raise ValueError("draw_count must be a nonnegative integer")
     policy = runtime.capacity_policy
     families = tuple(policy["required_families"])
+    sampling_law = policy["sampling_law"]
+    sampling_order = tuple(sampling_law["order"])
+    seed_material = ":".join(
+        (
+            str(policy["policy_sha256"]),
+            str(runtime.prepared.artifact["artifact_sha256"]),
+            str(policy["optimization"]["seed"]),
+        )
+    )
+
+    def choose(values: Sequence[str], *, counter: int, level: str) -> str:
+        digest = hashlib.sha256(f"{seed_material}:{counter}:{level}".encode()).digest()
+        return values[int.from_bytes(digest[:8], "big") % len(values)]
+
+    if sampling_order == ("unique_panel_entry",):
+        if (
+            sampling_law.get("probability_within_each_level")
+            != "uniform_over_unique_panel_entries"
+            or sampling_law.get("importance_correction") != "none"
+            or sampling_law.get("target_coefficient") != 1.0
+        ):
+            raise SemanticT1CapacityRunnerError(
+                "equal-entry T1 sampling-law fields disagree"
+            )
+        entries = tuple(
+            sorted(str(entry["panel_entry_sha256"]) for entry in runtime.entries)
+        )
+        if not entries or len(entries) != len(set(entries)):
+            raise SemanticT1CapacityRunnerError(
+                "equal-entry T1 sampling requires distinct prepared panel entries"
+            )
+        return tuple(
+            choose(entries, counter=counter, level="unique_panel_entry")
+            for counter in range(draw_count)
+        )
+
+    if sampling_order != (
+        "model_family",
+        "semantic_capability_cell",
+        "unique_panel_entry",
+    ):
+        raise SemanticT1CapacityRunnerError("T1 sampling order is unsupported")
     entries_by_cell: dict[str, dict[str, tuple[str, ...]]] = {}
     for family in families:
         grouped: defaultdict[str, list[str]] = defaultdict(list)
@@ -376,18 +418,6 @@ def semantic_t1_address_stream(
         entries_by_cell[family] = {
             cell: tuple(sorted(values)) for cell, values in sorted(grouped.items())
         }
-    seed_material = ":".join(
-        (
-            str(policy["policy_sha256"]),
-            str(runtime.prepared.artifact["artifact_sha256"]),
-            str(policy["optimization"]["seed"]),
-        )
-    )
-
-    def choose(values: Sequence[str], *, counter: int, level: str) -> str:
-        digest = hashlib.sha256(f"{seed_material}:{counter}:{level}".encode()).digest()
-        return values[int.from_bytes(digest[:8], "big") % len(values)]
-
     stream: list[str] = []
     for counter in range(draw_count):
         family = choose(families, counter=counter, level="family")
@@ -401,6 +431,68 @@ def semantic_t1_address_stream(
             )
         )
     return tuple(stream)
+
+
+def semantic_t1_learning_rate_for_step(
+    optimization: Mapping[str, Any], *, optimizer_step: int
+) -> float:
+    """Return the frozen rate for one one-indexed optimizer update."""
+
+    maximum_steps = optimization.get("maximum_optimizer_steps")
+    if (
+        type(optimizer_step) is not int
+        or type(maximum_steps) is not int
+        or not 1 <= optimizer_step <= maximum_steps
+    ):
+        raise SemanticT1CapacityRunnerError("T1 optimizer step is outside its schedule")
+    scheduler = optimization.get("scheduler")
+    if scheduler == "constant":
+        value = optimization.get("learning_rate")
+        if type(value) not in {int, float} or not math.isfinite(float(value)) or value <= 0:
+            raise SemanticT1CapacityRunnerError("constant T1 learning rate is invalid")
+        return float(value)
+    if scheduler != "piecewise_constant_by_optimizer_step":
+        raise SemanticT1CapacityRunnerError("T1 learning-rate scheduler is unsupported")
+    schedule = optimization.get("learning_rate_schedule")
+    if not isinstance(schedule, list) or not schedule:
+        raise SemanticT1CapacityRunnerError("piecewise T1 learning-rate schedule is absent")
+    expected_first = 1
+    selected: float | None = None
+    for phase in schedule:
+        if not isinstance(phase, Mapping) or set(phase) != {
+            "first_optimizer_step",
+            "last_optimizer_step",
+            "learning_rate",
+        }:
+            raise SemanticT1CapacityRunnerError("T1 learning-rate phase fields disagree")
+        first = phase["first_optimizer_step"]
+        last = phase["last_optimizer_step"]
+        rate = phase["learning_rate"]
+        if (
+            type(first) is not int
+            or type(last) is not int
+            or first != expected_first
+            or last < first
+            or type(rate) not in {int, float}
+            or not math.isfinite(float(rate))
+            or rate <= 0
+        ):
+            raise SemanticT1CapacityRunnerError(
+                "T1 learning-rate phases are not positive contiguous ranges"
+            )
+        if first <= optimizer_step <= last:
+            selected = float(rate)
+        expected_first = last + 1
+    if expected_first != maximum_steps + 1 or selected is None:
+        raise SemanticT1CapacityRunnerError(
+            "T1 learning-rate schedule does not cover every optimizer update exactly"
+        )
+    initial_rate = optimization.get("learning_rate")
+    if float(initial_rate) != float(schedule[0]["learning_rate"]):
+        raise SemanticT1CapacityRunnerError(
+            "T1 optimizer initial rate disagrees with its first schedule phase"
+        )
+    return selected
 
 
 def _collator(model: FactorizedTraceletRateModel) -> FactorizedMarkCollator:
@@ -1287,9 +1379,12 @@ def run_semantic_t1_capacity(
         parameter.requires_grad_(not name.startswith(TOTAL_HAZARD_PREFIX))
         if parameter.requires_grad:
             trainable.append(parameter)
+    initial_learning_rate = semantic_t1_learning_rate_for_step(
+        optimization, optimizer_step=1
+    )
     optimizer = torch.optim.AdamW(
         trainable,
-        lr=float(optimization["learning_rate"]),
+        lr=initial_learning_rate,
         weight_decay=float(optimization["weight_decay"]),
     )
     if any(
@@ -1356,6 +1451,17 @@ def run_semantic_t1_capacity(
         resume_count = int(recovered["resume_count"]) + 1
         if not 0 <= completed_steps <= maximum_steps:
             raise SemanticT1CapacityRunnerError("checkpoint step is out of range")
+        expected_resume_rate = semantic_t1_learning_rate_for_step(
+            optimization,
+            optimizer_step=max(1, completed_steps),
+        )
+        if any(
+            float(group.get("lr", float("nan"))) != expected_resume_rate
+            for group in optimizer.param_groups
+        ):
+            raise SemanticT1CapacityRunnerError(
+                "checkpoint optimizer rate disagrees with the frozen T1 schedule"
+            )
 
     output_root = Path(output_directory)
     checkpoint_receipts: list[dict[str, Any]] = []
@@ -1421,6 +1527,13 @@ def run_semantic_t1_capacity(
             materialized_panel, selected_ids
         )
         device_batch = batch.to(model.device)
+        next_optimizer_step = completed_steps + 1
+        learning_rate = semantic_t1_learning_rate_for_step(
+            optimization,
+            optimizer_step=next_optimizer_step,
+        )
+        for group in optimizer.param_groups:
+            group["lr"] = learning_rate
         optimizer.zero_grad(set_to_none=True)
         prediction = forward_teacher_successor_batch(
             model,
@@ -1664,6 +1777,7 @@ __all__ = [
     "semantic_t1_address_stream",
     "semantic_t1_evaluation_schedule",
     "semantic_t1_failing_families",
+    "semantic_t1_learning_rate_for_step",
     "semantic_t1_runner_implementation_sha256",
     "semantic_t1_threshold_stop_allowed",
     "semantic_t1_threshold_checks",

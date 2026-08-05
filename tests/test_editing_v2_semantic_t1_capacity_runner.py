@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import random
+from collections import Counter
 from pathlib import Path
 from types import MappingProxyType, SimpleNamespace
 
@@ -42,6 +43,7 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
     optimizer_state_semantic_sha256,
     semantic_t1_address_stream,
     semantic_t1_evaluation_schedule,
+    semantic_t1_learning_rate_for_step,
     semantic_t1_threshold_stop_allowed,
     semantic_t1_threshold_checks,
     summarize_semantic_t1_metrics,
@@ -107,6 +109,72 @@ def test_process_v2_sparse_schedule_spelling_resolves_the_same_frozen_steps() ->
         250,
         500,
     )
+
+
+def test_process_v2_recovery_schedule_has_only_three_new_panel_evaluations() -> None:
+    optimization = {
+        "maximum_optimizer_steps": 750,
+        "report_points": [1, 10, 50, 100, 250, 500, 600, 700, 750],
+        "trajectory_evaluation": PROCESS_V2_SPARSE_TRAJECTORY_EVALUATION,
+    }
+    assert semantic_t1_evaluation_schedule(optimization) == (
+        0,
+        1,
+        10,
+        50,
+        100,
+        250,
+        500,
+        600,
+        700,
+        750,
+    )
+
+
+def test_process_v2_learning_rate_schedule_switches_after_step_500() -> None:
+    optimization = {
+        "learning_rate": 1e-3,
+        "maximum_optimizer_steps": 750,
+        "scheduler": "piecewise_constant_by_optimizer_step",
+        "learning_rate_schedule": [
+            {
+                "first_optimizer_step": 1,
+                "last_optimizer_step": 500,
+                "learning_rate": 1e-3,
+            },
+            {
+                "first_optimizer_step": 501,
+                "last_optimizer_step": 750,
+                "learning_rate": 1e-4,
+            },
+        ],
+    }
+    assert semantic_t1_learning_rate_for_step(optimization, optimizer_step=1) == 1e-3
+    assert semantic_t1_learning_rate_for_step(optimization, optimizer_step=500) == 1e-3
+    assert semantic_t1_learning_rate_for_step(optimization, optimizer_step=501) == 1e-4
+    assert semantic_t1_learning_rate_for_step(optimization, optimizer_step=750) == 1e-4
+
+
+def test_process_v2_learning_rate_schedule_refuses_a_gap() -> None:
+    optimization = {
+        "learning_rate": 1e-3,
+        "maximum_optimizer_steps": 750,
+        "scheduler": "piecewise_constant_by_optimizer_step",
+        "learning_rate_schedule": [
+            {
+                "first_optimizer_step": 1,
+                "last_optimizer_step": 500,
+                "learning_rate": 1e-3,
+            },
+            {
+                "first_optimizer_step": 502,
+                "last_optimizer_step": 750,
+                "learning_rate": 1e-4,
+            },
+        ],
+    }
+    with pytest.raises(SemanticT1CapacityRunnerError, match="contiguous"):
+        semantic_t1_learning_rate_for_step(optimization, optimizer_step=600)
 
 
 def test_legacy_dense_policy_retains_every_state_evaluation() -> None:
@@ -704,6 +772,42 @@ def test_hierarchical_stream_is_deterministic_and_bound_to_policy(
             cache,
             policy,
         )
+
+
+def test_equal_entry_stream_removes_within_family_cell_oversampling() -> None:
+    entries = tuple(
+        {
+            "panel_entry_sha256": hashlib.sha256(f"entry:{index}".encode()).hexdigest(),
+            "model_family": "atom_delete" if index < 64 else "atom_insert",
+            "capability_cell_id": (
+                "cell:atom_delete:rare" if index < 2 else "cell:common"
+            ),
+        }
+        for index in range(512)
+    )
+    runtime = SimpleNamespace(
+        entries=entries,
+        prepared=SimpleNamespace(artifact={"artifact_sha256": "6" * 64}),
+        capacity_policy={
+            "policy_sha256": "7" * 64,
+            "required_families": ["atom_insert", "atom_delete"],
+            "sampling_law": {
+                "order": ["unique_panel_entry"],
+                "probability_within_each_level": "uniform_over_unique_panel_entries",
+                "target_coefficient": 1.0,
+                "importance_correction": "none",
+            },
+            "optimization": {"seed": 31},
+        },
+    )
+
+    stream = semantic_t1_address_stream(runtime, draw_count=32_768)
+    counts = Counter(stream)
+
+    assert len(stream) == 32_768
+    assert set(stream) == set(counts)
+    assert min(counts.values()) > 16
+    assert max(counts.values()) < 128
 
 
 def test_metric_checks_apply_family_cell_entry_and_gradient_floors() -> None:
