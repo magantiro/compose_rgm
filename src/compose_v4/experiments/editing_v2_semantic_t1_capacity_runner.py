@@ -21,7 +21,7 @@ from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 import torch
@@ -100,6 +100,20 @@ ACTION_ROUTE_PREFIXES: Mapping[str, tuple[str, ...]] = {
 
 class SemanticT1CapacityRunnerError(RuntimeError):
     """T1 execution or its recovery identity failed closed."""
+
+
+class SemanticT1ResultBuilder(Protocol):
+    """Build one result mapping from the runner's five evidence projections."""
+
+    def __call__(
+        self,
+        *,
+        provenance: Mapping[str, Any],
+        run_integrity: Mapping[str, Any],
+        evaluation_trajectory: Sequence[Mapping[str, Any]],
+        entry_metrics: Sequence[Mapping[str, Any]],
+        gradient_evidence: Sequence[Mapping[str, Any]],
+    ) -> Mapping[str, Any]: ...
 
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
@@ -824,6 +838,44 @@ def _criterion(metrics: Mapping[str, Any], *, step: int) -> tuple[float, float, 
     return (minimum_probability, -mean_nll, -step)
 
 
+def _build_and_publish_capacity_result(
+    *,
+    output_root: Path,
+    provenance: Mapping[str, Any],
+    run_integrity: Mapping[str, Any],
+    evaluation_trajectory: Sequence[Mapping[str, Any]],
+    entry_metrics: Sequence[Mapping[str, Any]],
+    gradient_evidence: Sequence[Mapping[str, Any]],
+    result_builder: SemanticT1ResultBuilder | None = None,
+    result_filename: str = RESULT_FILENAME,
+) -> tuple[dict[str, Any], Path]:
+    """Build and immutably publish either the legacy or an injected result."""
+
+    if not isinstance(result_filename, str) or not result_filename:
+        raise SemanticT1CapacityRunnerError(
+            "semantic T1 result filename must be one nonempty relative filename"
+        )
+    filename = Path(result_filename)
+    if filename.is_absolute() or filename.name != result_filename or result_filename in {".", ".."}:
+        raise SemanticT1CapacityRunnerError(
+            "semantic T1 result filename must be one nonempty relative filename"
+        )
+    builder = build_semantic_t1_capacity_result if result_builder is None else result_builder
+    built = builder(
+        provenance=provenance,
+        run_integrity=run_integrity,
+        evaluation_trajectory=evaluation_trajectory,
+        entry_metrics=entry_metrics,
+        gradient_evidence=gradient_evidence,
+    )
+    if not isinstance(built, Mapping):
+        raise SemanticT1CapacityRunnerError("semantic T1 result builder returned a non-mapping")
+    result = dict(built)
+    result_path = Path(output_root) / result_filename
+    write_bytes_if_absent(result_path, _canonical_bytes(result, newline=True))
+    return result, result_path
+
+
 def _route_gradient_evidence(
     model: FactorizedTraceletRateModel,
     prediction: Any,
@@ -1110,6 +1162,8 @@ def run_semantic_t1_capacity(
     provenance: Mapping[str, Any],
     resume_checkpoint_path: Path | None = None,
     resume_checkpoint_file_sha256: str | None = None,
+    result_builder: SemanticT1ResultBuilder | None = None,
+    result_filename: str = RESULT_FILENAME,
 ) -> dict[str, Any]:
     """Run or resume the frozen joint Active8 unique-state capacity test."""
 
@@ -1449,15 +1503,16 @@ def run_semantic_t1_capacity(
         "selected_checkpoint_file_sha256": hashlib.sha256(selected_bytes).hexdigest(),
         "optimizer_state_sha256": optimizer_state_semantic_sha256(optimizer.state_dict()),
     }
-    result = build_semantic_t1_capacity_result(
+    result, result_path = _build_and_publish_capacity_result(
+        output_root=output_root,
         provenance=provenance,
         run_integrity=run_integrity,
         evaluation_trajectory=trajectory_for_result,
         entry_metrics=entry_metrics,
         gradient_evidence=gradient_rows,
+        result_builder=result_builder,
+        result_filename=result_filename,
     )
-    result_path = output_root / RESULT_FILENAME
-    write_bytes_if_absent(result_path, _canonical_bytes(result, newline=True))
     failure_diagnostics_path: Path | None = None
     failure_diagnostics: dict[str, Any] | None = None
     if not all(selected_checks.values()):
@@ -1498,6 +1553,7 @@ __all__ = [
     "RESULT_FILENAME",
     "SELECTED_CHECKPOINT_FILENAME",
     "SemanticT1CapacityRunnerError",
+    "SemanticT1ResultBuilder",
     "SemanticT1RuntimeInputs",
     "build_semantic_t1_failure_diagnostics",
     "load_capacity_policy_for_runner",

@@ -28,12 +28,16 @@ from compose_v4.experiments.editing_v2_semantic_development_cell_roles import (
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
     LEGACY_DENSE_TRAJECTORY_EVALUATION,
+    PROCESS_V2_SPARSE_TRAJECTORY_EVALUATION,
     SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION,
     load_semantic_t1_capacity_policy,
 )
+from compose_v4.experiments import editing_v2_semantic_t1_capacity_runner as capacity_runner
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
+    RESULT_FILENAME,
     SemanticT1CapacityRunnerError,
     SemanticT1RuntimeInputs,
+    _build_and_publish_capacity_result,
     build_semantic_t1_failure_diagnostics,
     optimizer_state_semantic_sha256,
     semantic_t1_address_stream,
@@ -88,6 +92,23 @@ def test_sparse_policy_calls_full_panel_exactly_at_initial_and_report_points() -
     assert len(schedule) == 7
 
 
+def test_process_v2_sparse_schedule_spelling_resolves_the_same_frozen_steps() -> None:
+    optimization = {
+        "maximum_optimizer_steps": 500,
+        "report_points": [1, 10, 50, 100, 250, 500],
+        "trajectory_evaluation": PROCESS_V2_SPARSE_TRAJECTORY_EVALUATION,
+    }
+    assert semantic_t1_evaluation_schedule(optimization) == (
+        0,
+        1,
+        10,
+        50,
+        100,
+        250,
+        500,
+    )
+
+
 def test_legacy_dense_policy_retains_every_state_evaluation() -> None:
     optimization = {
         "maximum_optimizer_steps": 3,
@@ -112,6 +133,87 @@ def test_threshold_pass_cannot_stop_before_ten_optimizer_steps() -> None:
         optimizer_step=10,
         threshold_checks=failed,
     )
+
+
+def test_default_result_publication_preserves_the_legacy_builder_and_filename(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+    expected = {"schema": "legacy-result", "result_sha256": "a" * 64}
+
+    def legacy_builder(**kwargs):
+        calls.append(kwargs)
+        return expected
+
+    monkeypatch.setattr(capacity_runner, "build_semantic_t1_capacity_result", legacy_builder)
+    projections = {
+        "provenance": {"legacy": "provenance"},
+        "run_integrity": {"steps": 10},
+        "evaluation_trajectory": [{"step": 0}, {"step": 10}],
+        "entry_metrics": [{"entry": "legacy"}],
+        "gradient_evidence": [{"family": "atom_insert"}],
+    }
+    result, result_path = _build_and_publish_capacity_result(
+        output_root=tmp_path,
+        **projections,
+    )
+
+    assert calls == [projections]
+    assert result == expected
+    assert result_path == tmp_path / RESULT_FILENAME
+    assert result_path.read_bytes() == (
+        json.dumps(expected, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+    )
+
+
+def test_injected_result_builder_publishes_without_legacy_v1_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def reject_legacy_builder(**_kwargs):
+        raise AssertionError("legacy result builder must not run")
+
+    observed: list[dict[str, object]] = []
+
+    def process_v2_builder(**kwargs):
+        observed.append(kwargs)
+        return {
+            "schema": "compose.editing_v2.process_v2_t1_capacity_result",
+            "result_sha256": "b" * 64,
+        }
+
+    monkeypatch.setattr(
+        capacity_runner,
+        "build_semantic_t1_capacity_result",
+        reject_legacy_builder,
+    )
+    process_v2_provenance = {
+        "process_identity_sha256": "c" * 64,
+        "prepared_completion_sha256": "d" * 64,
+    }
+    result, result_path = _build_and_publish_capacity_result(
+        output_root=tmp_path,
+        provenance=process_v2_provenance,
+        run_integrity={"steps": 10},
+        evaluation_trajectory=[{"step": 0}, {"step": 10}],
+        entry_metrics=[{"entry": "process-v2"}],
+        gradient_evidence=[{"family": "atom_insert"}],
+        result_builder=process_v2_builder,
+        result_filename="PROCESS_V2_T1_CAPACITY_RESULT.json",
+    )
+
+    assert observed[0]["provenance"] == process_v2_provenance
+    assert set(observed[0]) == {
+        "provenance",
+        "run_integrity",
+        "evaluation_trajectory",
+        "entry_metrics",
+        "gradient_evidence",
+    }
+    assert result["schema"] == "compose.editing_v2.process_v2_t1_capacity_result"
+    assert result_path == tmp_path / "PROCESS_V2_T1_CAPACITY_RESULT.json"
+    assert result_path.is_file()
 
 
 def _source_revision() -> dict[str, object]:

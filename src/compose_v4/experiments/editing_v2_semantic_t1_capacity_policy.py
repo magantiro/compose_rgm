@@ -29,6 +29,7 @@ EXPECTED_PANEL_MAXIMUM = 128
 EXPECTED_REPORT_POINTS = (1, 10, 50, 100, 250, 500)
 LEGACY_DENSE_TRAJECTORY_EVALUATION = "every_pre_update_state_and_terminal_state"
 SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION = "initial_report_points_and_terminal_state"
+PROCESS_V2_SPARSE_TRAJECTORY_EVALUATION = "step_zero_and_report_points_only"
 MINIMUM_EARLY_STOP_STEP = 10
 EXPECTED_SAMPLING_ORDER = (
     "model_family",
@@ -71,7 +72,10 @@ def semantic_t1_evaluation_schedule(
         raise SemanticT1CapacityPolicyError("semantic T1 evaluation schedule inputs are invalid")
     if mode == LEGACY_DENSE_TRAJECTORY_EVALUATION:
         return tuple(range(maximum_steps + 1))
-    if mode == SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION:
+    if mode in {
+        SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION,
+        PROCESS_V2_SPARSE_TRAJECTORY_EVALUATION,
+    }:
         return (0, *report_points)
     raise SemanticT1CapacityPolicyError("semantic T1 trajectory-evaluation policy is unknown")
 
@@ -347,6 +351,7 @@ def load_semantic_t1_capacity_policy(path: str | Path) -> dict[str, Any]:
 __all__ = [
     "LEGACY_DENSE_TRAJECTORY_EVALUATION",
     "MINIMUM_EARLY_STOP_STEP",
+    "PROCESS_V2_SPARSE_TRAJECTORY_EVALUATION",
     "SPARSE_REPORT_POINT_TRAJECTORY_EVALUATION",
     "SemanticT1CapacityPolicyError",
     "load_semantic_t1_capacity_policy",
