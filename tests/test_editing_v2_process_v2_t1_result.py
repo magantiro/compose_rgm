@@ -1,13 +1,28 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import math
 from pathlib import Path
 
 import pytest
 
-from compose_v4.data.editing_v2_process_v2_schema import canonical_sha256
+from compose_v4.data.editing_v2_process_v2_pipeline_schema import (
+    GATE_ZERO_DECISION_SCHEMA,
+    GATE_ZERO_DECISION_SCHEMA_VERSION,
+    PIPELINE_STATUS_NO_AUTHORITY,
+)
+from compose_v4.data.editing_v2_process_v2_schema import (
+    authority_false_block,
+    canonical_bytes,
+    canonical_sha256,
+)
+from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
+    ProcessV2P50PrerequisiteError,
+    load_process_v2_p50_prerequisites,
+    validate_process_v2_p50_prerequisite_relationships,
+)
 from compose_v4.experiments.editing_v2_process_v2_t1_result import (
     ProcessV2T1ResultError,
     build_process_v2_t1_capacity_decision,
@@ -154,6 +169,66 @@ def _inputs() -> tuple[dict[str, object], dict[str, object]]:
     return policy, inputs
 
 
+def _p50_policy() -> dict[str, object]:
+    return json.loads(
+        (ROOT / "configs/editing_v2_process_v2_p50_recipe_policy.json").read_text()
+    )
+
+
+def _gate_zero_pass(*, process_sha256: str, active8_sha256: str) -> dict[str, object]:
+    body: dict[str, object] = {
+        "schema": GATE_ZERO_DECISION_SCHEMA,
+        "schema_version": GATE_ZERO_DECISION_SCHEMA_VERSION,
+        "status": PIPELINE_STATUS_NO_AUTHORITY,
+        **authority_false_block(),
+        "decision": "PASS",
+        "process_identity_sha256": process_sha256,
+        "active8_completion_sha256": active8_sha256,
+    }
+    return {**body, "decision_sha256": canonical_sha256(body)}
+
+
+def _p50_inputs(*, probability: float = 0.9) -> tuple[
+    dict[str, object],
+    dict[str, object],
+    dict[str, object],
+    dict[str, object],
+    dict[str, object],
+]:
+    policy, inputs = _inputs()
+    p50_policy = _p50_policy()
+    process_sha256 = p50_policy["process_identity"]["process_identity_sha256"]
+    active8_sha256 = "f" * 64
+    gate = _gate_zero_pass(
+        process_sha256=process_sha256,
+        active8_sha256=active8_sha256,
+    )
+    inputs["provenance"].update(
+        {
+            "process_identity_sha256": process_sha256,
+            "active8_completion_sha256": active8_sha256,
+            "gate_zero_decision_sha256": gate["decision_sha256"],
+        }
+    )
+    if probability != 0.9:
+        for entry in inputs["entry_metrics"]:
+            entry["teacher_successor_probability"] = probability
+            entry["canonical_successor_nll"] = -math.log(probability)
+        inputs["evaluation_trajectory"][-1][
+            "minimum_entry_teacher_successor_probability"
+        ] = probability
+        inputs["evaluation_trajectory"][-1][
+            "mean_entry_canonical_successor_nll"
+        ] = -math.log(probability)
+    result = build_process_v2_t1_capacity_result(**inputs, capacity_policy=policy)
+    decision = build_process_v2_t1_capacity_decision(
+        result,
+        capacity_policy=policy,
+        result_file_sha256="e" * 64,
+    )
+    return p50_policy, policy, gate, result, decision
+
+
 def test_process_v2_result_recomputes_the_frozen_capacity_decision_inputs() -> None:
     policy, inputs = _inputs()
     result = build_process_v2_t1_capacity_result(**inputs, capacity_policy=policy)
@@ -232,3 +307,92 @@ def test_process_v2_runner_implementation_hash_is_exact_and_stable() -> None:
 
     assert first == second
     assert len(first) == 64
+
+
+def test_process_v2_p50_prerequisites_accept_only_the_exact_t1_go_chain() -> None:
+    p50_policy, policy, gate, result, decision = _p50_inputs()
+
+    binding = validate_process_v2_p50_prerequisite_relationships(
+        p50_policy=p50_policy,
+        capacity_policy=policy,
+        gate_zero_decision=gate,
+        t1_result=result,
+        t1_decision=decision,
+        t1_result_file_sha256="e" * 64,
+    )
+
+    assert binding.optimizer_steps == 50
+    assert binding.batch_size == 64
+    assert binding.t1_initial_model_state_sha256 == result["provenance"][
+        "initial_model_state_sha256"
+    ]
+    assert binding.t1_selected_model_state_sha256 == decision[
+        "selected_model_state_sha256"
+    ]
+    assert (
+        binding.t1_initial_model_state_sha256
+        != binding.t1_selected_model_state_sha256
+    )
+
+
+def test_process_v2_p50_prerequisites_refuse_a_t1_no_go() -> None:
+    p50_policy, policy, gate, result, no_go = _p50_inputs(probability=0.5)
+
+    with pytest.raises(ProcessV2P50PrerequisiteError, match="not a bounded-P50 GO"):
+        validate_process_v2_p50_prerequisite_relationships(
+            p50_policy=p50_policy,
+            capacity_policy=policy,
+            gate_zero_decision=gate,
+            t1_result=result,
+            t1_decision=no_go,
+            t1_result_file_sha256="e" * 64,
+        )
+
+
+def test_process_v2_p50_prerequisites_refuse_cross_run_gate_zero() -> None:
+    p50_policy, policy, gate, result, decision = _p50_inputs()
+    changed_gate = {
+        **gate,
+        "active8_completion_sha256": "1" * 64,
+    }
+    changed_gate["decision_sha256"] = canonical_sha256(
+        {key: value for key, value in changed_gate.items() if key != "decision_sha256"}
+    )
+
+    with pytest.raises(ProcessV2P50PrerequisiteError, match="identity disagrees"):
+        validate_process_v2_p50_prerequisite_relationships(
+            p50_policy=p50_policy,
+            capacity_policy=policy,
+            gate_zero_decision=changed_gate,
+            t1_result=result,
+            t1_decision=decision,
+            t1_result_file_sha256="e" * 64,
+        )
+
+
+def test_process_v2_p50_prerequisites_reopen_exact_artifact_bytes(
+    tmp_path: Path,
+) -> None:
+    _p50, policy, gate, result, _decision = _p50_inputs()
+    gate_path = tmp_path / "gate-zero.json"
+    result_path = tmp_path / "t1-result.json"
+    decision_path = tmp_path / "t1-decision.json"
+    gate_path.write_bytes(canonical_bytes(gate) + b"\n")
+    result_bytes = canonical_bytes(result) + b"\n"
+    result_path.write_bytes(result_bytes)
+    decision = build_process_v2_t1_capacity_decision(
+        result,
+        capacity_policy=policy,
+        result_file_sha256=hashlib.sha256(result_bytes).hexdigest(),
+    )
+    decision_path.write_bytes(canonical_bytes(decision) + b"\n")
+
+    binding = load_process_v2_p50_prerequisites(
+        gate_zero_decision_path=gate_path,
+        t1_result_path=result_path,
+        t1_decision_path=decision_path,
+        repo_root=ROOT,
+    )
+
+    assert binding.t1_decision_sha256 == decision["decision_sha256"]
+    assert binding.p50_recipe_policy_sha256 == _p50_policy()["contract_sha256"]
