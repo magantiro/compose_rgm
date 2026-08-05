@@ -647,7 +647,15 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
         or not 1 <= steps <= 500
         or type(selected_step) is not int
         or not isinstance(evaluation_steps, list)
-        or evaluation_steps != list(range(steps + 1))
+        or evaluation_steps
+        not in (
+            list(range(steps + 1)),
+            [
+                point
+                for point in (0, 1, 10, 50, 100, 250, 500)
+                if point <= steps
+            ],
+        )
         or selected_step not in evaluation_steps
         or integrity["termination_reason"]
         not in {
@@ -691,14 +699,14 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
         _require_sha(integrity[name], field=f"result.run_integrity.{name}")
 
     trajectory = result["evaluation_trajectory"]
-    if not isinstance(trajectory, list) or len(trajectory) != steps + 1:
+    if not isinstance(trajectory, list) or len(trajectory) != len(evaluation_steps):
         raise SemanticT1DecisionError("semantic T1 evaluation trajectory is incomplete")
     normalized_trajectory: list[tuple[int, float, float, str]] = []
     for index, item in enumerate(trajectory):
         row = _exact_mapping(item, _TRAJECTORY_FIELDS, field="evaluation trajectory row")
-        if row["step"] != index:
+        if row["step"] != evaluation_steps[index]:
             raise SemanticT1DecisionError(
-                "semantic T1 trajectory steps are not complete and ordered"
+                "semantic T1 trajectory steps disagree with the declared evaluation schedule"
             )
         minimum = _finite_probability(
             row["minimum_entry_teacher_successor_probability"],
@@ -710,7 +718,7 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
             minimum=0.0,
         )
         state_sha = _require_sha(row["model_state_sha256"], field="trajectory.model_state_sha256")
-        normalized_trajectory.append((index, minimum, mean_nll, state_sha))
+        normalized_trajectory.append((int(row["step"]), minimum, mean_nll, state_sha))
     expected_selected = min(
         normalized_trajectory,
         key=lambda row: (-row[1], row[2], row[0]),
@@ -784,7 +792,8 @@ def validate_semantic_t1_capacity_result(value: object) -> dict[str, Any]:
         raise SemanticT1DecisionError(
             "semantic T1 result entry inventory or metadata differs from bound provenance"
         )
-    selected_trajectory = normalized_trajectory[selected_step]
+    trajectory_by_step = {row[0]: row for row in normalized_trajectory}
+    selected_trajectory = trajectory_by_step[selected_step]
     selected_minimum = min(float(entry["teacher_successor_probability"]) for entry in entries)
     selected_mean_nll = _mean([float(entry["canonical_successor_nll"]) for entry in entries])
     if not (

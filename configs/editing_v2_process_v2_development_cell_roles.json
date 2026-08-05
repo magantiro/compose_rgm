@@ -25,8 +25,8 @@
     "validate_when_present": true
   },
   "contract_id": "editing_v2_process_v2_development_cell_roles",
-  "contract_revision": "process_v2_gate_zero_productive_nonself",
-  "contract_sha256": "23ec60562cbc7de5d39be7505d6928c89ea34f1eb1e4c20bbe7b66a619e71259",
+  "contract_revision": "process_v2_t1_report_point_evaluation",
+  "contract_sha256": "1294a184d62ffdf42bbfa96e2d05fcf14bf0fb6e06c53fce20090ab91e9e8d54",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -37,7 +37,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "968e4343b0051dd82a893bb75c78219f1cd587e7b17a395f122ac9fd0eb740b2",
+        "sha256": "139870d49a18366e9f6b4efbb7ec69bedbf76e0db5a7aecc1a466037bf5c0196",
         "target": "configs/editing_v2_process_v2_capability_cells.json",
         "target_schema": "compose.editing_v2.process_v2_capability_cells"
       },
@@ -46,7 +46,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "96a3418bb3a364b1135c46917b97902bcec75e93653add21f1ba583499824fe4",
+        "sha256": "0974ae369d5574af50c2ae414e9643d396f9e9f324825eb38cbc4b18bcc09370",
         "target": "configs/editing_v2_process_v2_capability_cells.json",
         "target_schema": "compose.editing_v2.process_v2_capability_cells"
       }
@@ -92,7 +92,7 @@
     "measured_evidence_in_this_contract": false
   },
   "schema": "compose.editing_v2.process_v2_development_cell_roles",
-  "schema_version": 4,
+  "schema_version": 5,
   "scope": "source_conditioned_editing_gate0_t1_p50",
   "separate_lane_cell_ids": [
     "editing_v2_active8_v1:atom_insert:root_birth",
@@ -175,6 +175,28 @@
         "kind": "lineage_reference",
         "provider": "editing_v2_process_v2_contract_chain",
         "sha256": "a88086e6762bd55aa1a888752d7cb6dc87615055693e94c374d2e99c45ee8977",
+        "target": "configs/editing_v2_process_v2_development_cell_roles.json",
+        "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
+      }
+    },
+    {
+      "contract_revision": "process_v2_gate_zero_productive_nonself",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "319dc27ecb9ee42ecb088953a8339740de3aab868dc83a106ede3d51c3d97aa0",
+        "target": "configs/editing_v2_process_v2_development_cell_roles.json",
+        "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
+      },
+      "schema_version": 4,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "23ec60562cbc7de5d39be7505d6928c89ea34f1eb1e4c20bbe7b66a619e71259",
         "target": "configs/editing_v2_process_v2_development_cell_roles.json",
         "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
       }

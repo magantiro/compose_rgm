@@ -30,11 +30,14 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_policy import (
     load_semantic_t1_capacity_policy,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
+    EVERY_STEP_TRAJECTORY_EVALUATION,
+    REPORT_POINT_TRAJECTORY_EVALUATION,
     SemanticT1CapacityRunnerError,
     SemanticT1RuntimeInputs,
     build_semantic_t1_failure_diagnostics,
     optimizer_state_semantic_sha256,
     semantic_t1_address_stream,
+    semantic_t1_evaluation_schedule,
     semantic_t1_threshold_checks,
     summarize_semantic_t1_metrics,
 )
@@ -71,6 +74,59 @@ from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "configs/editing_v2_semantic_t1_capacity_policy_v1.json"
+
+
+def test_report_point_evaluation_schedule_avoids_full_panel_rescoring() -> None:
+    optimization = {
+        "maximum_optimizer_steps": 500,
+        "report_points": [1, 10, 50, 100, 250, 500],
+        "trajectory_evaluation": REPORT_POINT_TRAJECTORY_EVALUATION,
+    }
+    assert semantic_t1_evaluation_schedule(optimization) == (
+        0,
+        1,
+        10,
+        50,
+        100,
+        250,
+        500,
+    )
+
+
+def test_every_step_evaluation_schedule_remains_explicitly_supported() -> None:
+    optimization = {
+        "maximum_optimizer_steps": 3,
+        "report_points": [1, 3],
+        "trajectory_evaluation": EVERY_STEP_TRAJECTORY_EVALUATION,
+    }
+    assert semantic_t1_evaluation_schedule(optimization) == (0, 1, 2, 3)
+
+
+@pytest.mark.parametrize(
+    "optimization",
+    (
+        {
+            "maximum_optimizer_steps": 500,
+            "report_points": [1, 10, 50, 100, 250],
+            "trajectory_evaluation": REPORT_POINT_TRAJECTORY_EVALUATION,
+        },
+        {
+            "maximum_optimizer_steps": 500,
+            "report_points": [1, 10, 10, 500],
+            "trajectory_evaluation": REPORT_POINT_TRAJECTORY_EVALUATION,
+        },
+        {
+            "maximum_optimizer_steps": 500,
+            "report_points": [1, 10, 50, 100, 250, 500],
+            "trajectory_evaluation": "unknown",
+        },
+    ),
+)
+def test_evaluation_schedule_refuses_malformed_or_unknown_policy(
+    optimization: dict[str, object],
+) -> None:
+    with pytest.raises(SemanticT1CapacityRunnerError, match="evaluation schedule|policy"):
+        semantic_t1_evaluation_schedule(optimization)
 
 
 def _source_revision() -> dict[str, object]:

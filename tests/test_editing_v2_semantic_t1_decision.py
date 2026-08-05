@@ -265,6 +265,44 @@ def _environment() -> dict[str, object]:
     )
 
 
+def _result_provenance(entries: list[dict[str, object]]) -> dict[str, object]:
+    provenance: dict[str, object] = {
+        name: "1" * 64
+        for name in (
+            "capacity_policy_file_sha256",
+            "capacity_policy_sha256",
+            "cell_role_policy_sha256",
+            "cache_completion_file_sha256",
+            "cache_completion_sha256",
+            "cache_manifest_file_sha256",
+            "cache_manifest_sha256",
+            "cache_run_identity_sha256",
+            "cache_build_identity_sha256",
+            "cache_source_revision_sha256",
+            "panel_completion_sha256",
+            "panel_artifact_sha256",
+            "panel_entry_inventory_sha256",
+            "panel_entry_metadata_sha256",
+            "decision_source_inventory_sha256",
+            "gate_zero_evidence_file_sha256",
+            "gate_zero_evidence_sha256",
+            "initial_model_state_sha256",
+            "prepared_input_file_sha256",
+            "prepared_input_artifact_sha256",
+            "prepared_input_implementation_sha256",
+            "runner_implementation_sha256",
+            "runner_source_revision_sha256",
+        )
+    }
+    (
+        provenance["panel_entry_inventory_sha256"],
+        provenance["panel_entry_metadata_sha256"],
+    ) = _entry_lineage_hashes(entries)
+    provenance["panel_entry_binding_count"] = len(entries)
+    provenance["execution_environment"] = _environment()
+    return provenance
+
+
 def _entries(probability: float = 0.9, *, entries_per_family: int = 64) -> list[dict[str, object]]:
     required_cells = load_semantic_development_cell_roles().required_cell_ids
     cells_by_family = {
@@ -622,41 +660,8 @@ def test_rehashed_result_cannot_change_exact_prepared_entry_projection(
 
 
 def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
-    provenance = {
-        name: "1" * 64
-        for name in (
-            "capacity_policy_file_sha256",
-            "capacity_policy_sha256",
-            "cell_role_policy_sha256",
-            "cache_completion_file_sha256",
-            "cache_completion_sha256",
-            "cache_manifest_file_sha256",
-            "cache_manifest_sha256",
-            "cache_run_identity_sha256",
-            "cache_build_identity_sha256",
-            "cache_source_revision_sha256",
-            "panel_completion_sha256",
-            "panel_artifact_sha256",
-            "panel_entry_inventory_sha256",
-            "panel_entry_metadata_sha256",
-            "decision_source_inventory_sha256",
-            "gate_zero_evidence_file_sha256",
-            "gate_zero_evidence_sha256",
-            "initial_model_state_sha256",
-            "prepared_input_file_sha256",
-            "prepared_input_artifact_sha256",
-            "prepared_input_implementation_sha256",
-            "runner_implementation_sha256",
-            "runner_source_revision_sha256",
-        )
-    }
     entries = _entries()
-    (
-        provenance["panel_entry_inventory_sha256"],
-        provenance["panel_entry_metadata_sha256"],
-    ) = _entry_lineage_hashes(entries)
-    provenance["panel_entry_binding_count"] = 512
-    provenance["execution_environment"] = _environment()
+    provenance = _result_provenance(entries)
     result = _result(provenance, entries=entries)
     broken = copy.deepcopy(result)
     broken["family_metrics"][0]["teacher_successor_probability"] = 1.0
@@ -664,6 +669,77 @@ def test_result_aggregate_cannot_disagree_with_exact_entries() -> None:
     broken["result_sha256"] = _sha(body)
     with pytest.raises(SemanticT1DecisionError, match="recompute from entries"):
         validate_semantic_t1_capacity_result(broken)
+
+
+def test_sparse_report_point_trajectory_selects_the_actual_optimizer_step() -> None:
+    entries = _entries()
+    provenance = _result_provenance(entries)
+    integrity = _integrity()
+    integrity.update(
+        {
+            "optimizer_steps_completed": 10,
+            "evaluation_steps": [0, 1, 10],
+            "selected_step": 10,
+        }
+    )
+    probability = 0.9
+    result = build_semantic_t1_capacity_result(
+        provenance=provenance,
+        run_integrity=integrity,
+        evaluation_trajectory=[
+            {
+                "step": 0,
+                "minimum_entry_teacher_successor_probability": 0.2,
+                "mean_entry_canonical_successor_nll": -math.log(0.2),
+                "model_state_sha256": "d" * 64,
+            },
+            {
+                "step": 1,
+                "minimum_entry_teacher_successor_probability": 0.5,
+                "mean_entry_canonical_successor_nll": -math.log(0.5),
+                "model_state_sha256": "e" * 64,
+            },
+            {
+                "step": 10,
+                "minimum_entry_teacher_successor_probability": probability,
+                "mean_entry_canonical_successor_nll": -math.log(probability),
+                "model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
+            },
+        ],
+        entry_metrics=entries,
+        gradient_evidence=_gradients(),
+    )
+    assert result["run_integrity"]["selected_step"] == 10
+    assert [row["step"] for row in result["evaluation_trajectory"]] == [0, 1, 10]
+
+
+def test_sparse_report_point_trajectory_refuses_an_unregistered_step() -> None:
+    entries = _entries()
+    provenance = _result_provenance(entries)
+    integrity = _integrity()
+    integrity.update(
+        {
+            "optimizer_steps_completed": 10,
+            "evaluation_steps": [0, 1, 9],
+            "selected_step": 9,
+        }
+    )
+    with pytest.raises(SemanticT1DecisionError, match="run-integrity"):
+        build_semantic_t1_capacity_result(
+            provenance=provenance,
+            run_integrity=integrity,
+            evaluation_trajectory=[
+                {
+                    "step": step,
+                    "minimum_entry_teacher_successor_probability": probability,
+                    "mean_entry_canonical_successor_nll": -math.log(probability),
+                    "model_state_sha256": CHECKPOINT_MODEL_STATE_SHA256,
+                }
+                for step, probability in ((0, 0.2), (1, 0.5), (9, 0.9))
+            ],
+            entry_metrics=entries,
+            gradient_evidence=_gradients(),
+        )
 
 
 def test_tampered_physical_result_invalidates_decision(

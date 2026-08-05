@@ -93,10 +93,39 @@ ACTION_ROUTE_PREFIXES: Mapping[str, tuple[str, ...]] = {
     "cycle_attach": ("cycle_open_head.",),
     "ring_system_restate": ("ring_restate_head.",),
 }
+REPORT_POINT_TRAJECTORY_EVALUATION = "initial_report_points_and_terminal_state"
+EVERY_STEP_TRAJECTORY_EVALUATION = "every_pre_update_state_and_terminal_state"
 
 
 class SemanticT1CapacityRunnerError(RuntimeError):
     """T1 execution or its recovery identity failed closed."""
+
+
+def semantic_t1_evaluation_schedule(
+    optimization: Mapping[str, Any],
+) -> tuple[int, ...]:
+    """Return the exact full-panel evaluation steps declared by the policy."""
+
+    maximum_steps = optimization.get("maximum_optimizer_steps")
+    report_points = optimization.get("report_points")
+    mode = optimization.get("trajectory_evaluation")
+    if (
+        type(maximum_steps) is not int
+        or maximum_steps <= 0
+        or not isinstance(report_points, list)
+        or any(
+            type(point) is not int or not 0 < point <= maximum_steps
+            for point in report_points
+        )
+        or report_points != sorted(set(report_points))
+        or maximum_steps not in report_points
+    ):
+        raise SemanticT1CapacityRunnerError("T1 evaluation schedule inputs are invalid")
+    if mode == EVERY_STEP_TRAJECTORY_EVALUATION:
+        return tuple(range(maximum_steps + 1))
+    if mode == REPORT_POINT_TRAJECTORY_EVALUATION:
+        return (0, *report_points)
+    raise SemanticT1CapacityRunnerError("T1 trajectory-evaluation policy is unknown")
 
 
 def _canonical_bytes(value: object, *, newline: bool = False) -> bytes:
@@ -1212,43 +1241,46 @@ def run_semantic_t1_capacity(
     output_root = Path(output_directory)
     checkpoint_receipts: list[dict[str, Any]] = []
     report_points = {int(value) for value in optimization["report_points"]}
+    evaluation_schedule = semantic_t1_evaluation_schedule(optimization)
+    evaluation_steps = set(evaluation_schedule)
     stop_reason = "MAXIMUM_OPTIMIZER_STEPS_REACHED"
     final_metrics: dict[str, Any] | None = None
     final_checks: dict[str, bool] | None = None
 
     model.train()
     while completed_steps <= maximum_steps:
-        rows = _metric_rows(
-            materialized_panel,
-            model,
-            batch_size=batch_size,
-        )
-        metrics = summarize_semantic_t1_metrics(rows)
-        checks = semantic_t1_threshold_checks(
-            metrics,
-            thresholds=thresholds,
-            gradient_evidence=gradient_evidence,
-        )
-        criterion = _criterion(metrics, step=completed_steps)
-        if criterion > selected_criterion:
-            selected_criterion = criterion
-            selected_step = completed_steps
-            selected_state = _clone_state_dict(model)
-        trajectory.append(
-            {
-                "step": completed_steps,
-                "minimum_entry_teacher_successor_probability": criterion[0],
-                "mean_teacher_successor_nll": -criterion[1],
-                "all_threshold_checks_pass": all(checks.values()),
-                "threshold_checks": checks,
-                "model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
-            }
-        )
-        final_metrics = metrics
-        final_checks = checks
-        if all(checks.values()):
-            stop_reason = "ALL_FROZEN_THRESHOLDS_PASS"
-            break
+        if completed_steps in evaluation_steps:
+            rows = _metric_rows(
+                materialized_panel,
+                model,
+                batch_size=batch_size,
+            )
+            metrics = summarize_semantic_t1_metrics(rows)
+            checks = semantic_t1_threshold_checks(
+                metrics,
+                thresholds=thresholds,
+                gradient_evidence=gradient_evidence,
+            )
+            criterion = _criterion(metrics, step=completed_steps)
+            if criterion > selected_criterion:
+                selected_criterion = criterion
+                selected_step = completed_steps
+                selected_state = _clone_state_dict(model)
+            trajectory.append(
+                {
+                    "step": completed_steps,
+                    "minimum_entry_teacher_successor_probability": criterion[0],
+                    "mean_teacher_successor_nll": -criterion[1],
+                    "all_threshold_checks_pass": all(checks.values()),
+                    "threshold_checks": checks,
+                    "model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
+                }
+            )
+            final_metrics = metrics
+            final_checks = checks
+            if all(checks.values()):
+                stop_reason = "ALL_FROZEN_THRESHOLDS_PASS"
+                break
         if completed_steps == maximum_steps:
             break
 
@@ -1406,7 +1438,7 @@ def run_semantic_t1_capacity(
     ]
     run_integrity = {
         "optimizer_steps_completed": completed_steps,
-        "evaluation_steps": list(range(completed_steps + 1)),
+        "evaluation_steps": [int(point["step"]) for point in trajectory],
         "selected_step": selected_step,
         "termination_reason": (
             "all_thresholds_passed_early"
@@ -1481,11 +1513,13 @@ __all__ = [
     "SELECTED_CHECKPOINT_FILENAME",
     "SemanticT1CapacityRunnerError",
     "SemanticT1RuntimeInputs",
+    "REPORT_POINT_TRAJECTORY_EVALUATION",
     "build_semantic_t1_failure_diagnostics",
     "load_capacity_policy_for_runner",
     "optimizer_state_semantic_sha256",
     "run_semantic_t1_capacity",
     "semantic_t1_address_stream",
+    "semantic_t1_evaluation_schedule",
     "semantic_t1_failing_families",
     "semantic_t1_runner_implementation_sha256",
     "semantic_t1_threshold_checks",

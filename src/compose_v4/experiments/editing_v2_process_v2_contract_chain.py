@@ -193,12 +193,14 @@ SELF_HASH_FIELD = "contract_sha256"
 #: makes the Process-V2 Gate-0 policy successor-directed: whole-corpus evidence
 #: proves exact teacher support plus a productive nonself successor, while full
 #: quotient size and alias multiplicity move to the completion-bound sentinel.
+#: Version 5 keeps all 500 T1 optimizer updates but evaluates the full bounded
+#: panel only at the prospectively frozen report points and terminal step.
 #: No generation is overwritten or resealed; each is preserved as lineage.
-CHAIN_SCHEMA_VERSION = 4
+CHAIN_SCHEMA_VERSION = 5
 
 #: The named successor generation, following this repository's ``contract_revision``
 #: convention (see ``configs/editing_v2_semantic_process_v2.json``).
-CHAIN_CONTRACT_REVISION = "process_v2_gate_zero_productive_nonself"
+CHAIN_CONTRACT_REVISION = "process_v2_t1_report_point_evaluation"
 
 #: The revision the version-1 bodies were sealed under.  Kept as a named constant
 #: because it is the oldest generation and several tests address it by name.
@@ -213,6 +215,9 @@ SUPERSEDED_CHAIN_CONTRACT_REVISION_V2 = "process_v2_explicit_dependency_graph"
 SUPERSEDED_CHAIN_CONTRACT_REVISION_V3 = (
     "process_v2_binding_v2_and_cumulative_design_lineage"
 )
+
+#: The revision the version-4 bodies were sealed under.
+SUPERSEDED_CHAIN_CONTRACT_REVISION_V4 = "process_v2_gate_zero_productive_nonself"
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
@@ -546,6 +551,68 @@ _SUPERSEDED_GENERATIONS: tuple[tuple[int, str, dict[str, dict[str, str]]], ...] 
                 ),
                 "file_sha256": (
                     "4534cc62b10aecc3d201ffa774d9a08fdf82f27205bb774fa38504a3c7a2f7a9"
+                ),
+            },
+        },
+    ),
+    (
+        4,
+        SUPERSEDED_CHAIN_CONTRACT_REVISION_V4,
+        {
+            ACTIVE8_DECISION_RUNTIME: {
+                "contract_sha256": (
+                    "799291b6ab17a689d34e08cc849e3a0b510e7c07967fc1d3382d3805a7870bdf"
+                ),
+                "file_sha256": (
+                    "997f2f596cd7a766d1f1a37271602dc3bec6fbcf982e44664c5d20daa11f155f"
+                ),
+            },
+            CAPABILITY_CELLS: {
+                "contract_sha256": (
+                    "96a3418bb3a364b1135c46917b97902bcec75e93653add21f1ba583499824fe4"
+                ),
+                "file_sha256": (
+                    "968e4343b0051dd82a893bb75c78219f1cd587e7b17a395f122ac9fd0eb740b2"
+                ),
+            },
+            DEVELOPMENT_CELL_ROLES: {
+                "contract_sha256": (
+                    "23ec60562cbc7de5d39be7505d6928c89ea34f1eb1e4c20bbe7b66a619e71259"
+                ),
+                "file_sha256": (
+                    "319dc27ecb9ee42ecb088953a8339740de3aab868dc83a106ede3d51c3d97aa0"
+                ),
+            },
+            GATE_ZERO_STRUCTURAL: {
+                "contract_sha256": (
+                    "ad88dc9712f2f9f7ddd172ce2886b0d46d928d29f71bf4e5c6aa3799bb76980a"
+                ),
+                "file_sha256": (
+                    "c6d4a41f695371633967246deb48ba2c2c7c1bd7fa27b9b653cca9d477e3905b"
+                ),
+            },
+            T1_PANEL_POLICY: {
+                "contract_sha256": (
+                    "8a57487b9181b0e35b1d28895f18278a7c527554bdfab2730300651d33e4e2fb"
+                ),
+                "file_sha256": (
+                    "46137eed0cf063b649eb77d855876ebca950c5a9bb3e4be6788a9e595d98a769"
+                ),
+            },
+            T1_CAPACITY_POLICY: {
+                "contract_sha256": (
+                    "f27d40f03ec80c2241c18f70186a706885ea55d4ede15e70535bf4d2bbdf207b"
+                ),
+                "file_sha256": (
+                    "540ded12207bef585b6c8bc677f609d362884bd71dd580f0789de6f75ff247dd"
+                ),
+            },
+            P50_RECIPE_POLICY: {
+                "contract_sha256": (
+                    "85e313b36152da5007f7f2486ac34732645728ce88e932aa4f89511cc5fe855c"
+                ),
+                "file_sha256": (
+                    "bbba62d48b3b6fb366c791329ee0998724f86067351db53bd259cd2001af9174"
                 ),
             },
         },
@@ -964,6 +1031,17 @@ def _build_t1_capacity_policy(
 ) -> dict[str, Any]:
     payload = _envelope(repo_root, T1_CAPACITY_POLICY, sealed)
     payload.update(_project_body("t1_capacity_body", repo_root))
+    optimization = dict(payload["optimization"])
+    if optimization.get("trajectory_evaluation") != (
+        "every_pre_update_state_and_terminal_state"
+    ):
+        raise ProcessV2ChainError(
+            "the inherited T1 trajectory policy changed before the Process-V2 delta"
+        )
+    optimization["trajectory_evaluation"] = (
+        "initial_report_points_and_terminal_state"
+    )
+    payload["optimization"] = optimization
     return payload
 
 
@@ -1796,6 +1874,7 @@ __all__ = [
     "SUPERSEDED_CHAIN_CONTRACT_REVISION",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION_V2",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION_V3",
+    "SUPERSEDED_CHAIN_CONTRACT_REVISION_V4",
     "T1_CAPACITY_POLICY",
     "T1_PANEL_POLICY",
     "WHOLE_CANONICAL_BODY_ALGORITHM",
