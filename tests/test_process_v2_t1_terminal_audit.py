@@ -96,3 +96,71 @@ def test_terminal_audit_refuses_substantive_environment_drift() -> None:
 
     with pytest.raises(RuntimeError, match="torch_version"):
         app._terminal_audit_environment_disposition(observed, expected)
+
+
+def _family_audit_result(
+    family: str,
+    *,
+    observed_device_name: str,
+    disposition: str,
+) -> dict[str, object]:
+    expected = _environment("NVIDIA A10")
+    observed = {
+        **_environment(observed_device_name),
+        "environment_sha256": (
+            expected["environment_sha256"]
+            if observed_device_name == "NVIDIA A10"
+            else "b" * 64
+        ),
+    }
+    return {
+        "family": family,
+        "selected_step": 250,
+        "terminal_step": 500,
+        "selected_model_state_sha256": "c" * 64,
+        "terminal_model_state_sha256": "d" * 64,
+        "gradient_evidence": {"checkpoint_wide": {"finite": True}},
+        "checkpoint_execution_environment": expected,
+        "audit_execution_environment": observed,
+        "execution_environment_disposition": disposition,
+    }
+
+
+def test_terminal_audit_retains_mixed_exact_and_alias_worker_receipts() -> None:
+    exact = _family_audit_result(
+        "atom_insert",
+        observed_device_name="NVIDIA A10",
+        disposition="EXACT",
+    )
+    alias = _family_audit_result(
+        "atom_delete",
+        observed_device_name="NVIDIA A10G",
+        disposition="MODAL_A10_DEVICE_NAME_ALIAS_ONLY",
+    )
+
+    assert app._terminal_audit_checkpoint_projection(exact) == (
+        app._terminal_audit_checkpoint_projection(alias)
+    )
+    receipts = app._terminal_audit_worker_execution_receipts(
+        {"atom_insert": exact, "atom_delete": alias},
+        family_order=("atom_insert", "atom_delete"),
+    )
+
+    assert [receipt["execution_environment_disposition"] for receipt in receipts] == [
+        "EXACT",
+        "MODAL_A10_DEVICE_NAME_ALIAS_ONLY",
+    ]
+
+
+def test_terminal_audit_refuses_a_forged_worker_disposition() -> None:
+    result = _family_audit_result(
+        "atom_insert",
+        observed_device_name="NVIDIA A10G",
+        disposition="EXACT",
+    )
+
+    with pytest.raises(RuntimeError, match="disposition disagrees"):
+        app._terminal_audit_worker_execution_receipts(
+            {"atom_insert": result},
+            family_order=("atom_insert",),
+        )

@@ -1433,6 +1433,55 @@ def _terminal_audit_environment_disposition(
     )
 
 
+def _terminal_audit_checkpoint_projection(result: Mapping[str, Any]) -> dict[str, Any]:
+    """Return fields that must be identical across independently scored families."""
+
+    return {
+        "selected_step": result["selected_step"],
+        "terminal_step": result["terminal_step"],
+        "selected_model_state_sha256": result["selected_model_state_sha256"],
+        "terminal_model_state_sha256": result["terminal_model_state_sha256"],
+        "gradient_evidence": result["gradient_evidence"],
+        "checkpoint_execution_environment": result[
+            "checkpoint_execution_environment"
+        ],
+    }
+
+
+def _terminal_audit_worker_execution_receipts(
+    by_family: Mapping[str, Mapping[str, Any]],
+    *,
+    family_order: Sequence[str],
+) -> list[dict[str, Any]]:
+    """Validate and retain each worker's observed execution environment.
+
+    Modal can expose the same A10 accelerator as either ``NVIDIA A10`` or
+    ``NVIDIA A10G``.  Each worker is checked independently against the frozen
+    checkpoint environment.  Requiring the observed spelling to agree across
+    workers would incorrectly turn an accepted infrastructure alias into a
+    checkpoint-identity disagreement.
+    """
+
+    receipts: list[dict[str, Any]] = []
+    for family in family_order:
+        result = by_family[family]
+        observed = result["audit_execution_environment"]
+        expected = result["checkpoint_execution_environment"]
+        disposition = _terminal_audit_environment_disposition(observed, expected)
+        if disposition != result["execution_environment_disposition"]:
+            raise RuntimeError(
+                "Process-V2 T1 terminal family audit environment disposition disagrees"
+            )
+        receipts.append(
+            {
+                "family": family,
+                "audit_execution_environment": observed,
+                "execution_environment_disposition": disposition,
+            }
+        )
+    return receipts
+
+
 @app.function(
     image=image,
     gpu=PUBLICATION_RECOVERY_GPU,
@@ -1642,20 +1691,16 @@ def audit_t1_terminal_driver(
     if set(by_family) != set(family_order):
         raise RuntimeError("Process-V2 T1 terminal audit lost a family result")
     first = by_family[family_order[0]]
+    checkpoint_projection = _terminal_audit_checkpoint_projection(first)
     if any(
-        item["selected_step"] != first["selected_step"]
-        or item["terminal_step"] != first["terminal_step"]
-        or item["selected_model_state_sha256"] != first["selected_model_state_sha256"]
-        or item["terminal_model_state_sha256"] != first["terminal_model_state_sha256"]
-        or item["gradient_evidence"] != first["gradient_evidence"]
-        or item["checkpoint_execution_environment"]
-        != first["checkpoint_execution_environment"]
-        or item["audit_execution_environment"] != first["audit_execution_environment"]
-        or item["execution_environment_disposition"]
-        != first["execution_environment_disposition"]
+        _terminal_audit_checkpoint_projection(item) != checkpoint_projection
         for item in by_family.values()
     ):
         raise RuntimeError("Process-V2 T1 terminal family audits disagree on checkpoint identity")
+    worker_execution_receipts = _terminal_audit_worker_execution_receipts(
+        by_family,
+        family_order=family_order,
+    )
     selected_rows = [
         row for family in family_order for row in by_family[family]["selected_rows"]
     ]
@@ -1735,10 +1780,7 @@ def audit_t1_terminal_driver(
         "selected_model_state_sha256": first["selected_model_state_sha256"],
         "terminal_model_state_sha256": first["terminal_model_state_sha256"],
         "checkpoint_execution_environment": first["checkpoint_execution_environment"],
-        "audit_execution_environment": first["audit_execution_environment"],
-        "execution_environment_disposition": first[
-            "execution_environment_disposition"
-        ],
+        "worker_execution_receipts": worker_execution_receipts,
         "family_worker_count": len(family_results),
         "entry_count": len(entry_comparisons),
         "selected_result_reproduced_exactly": True,
