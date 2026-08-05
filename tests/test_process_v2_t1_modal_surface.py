@@ -287,7 +287,7 @@ def test_artifact_paths_cannot_escape_the_mounted_volume(value: str) -> None:
         launcher._require_artifact_path(value, field="test_path")
 
 
-def test_artifact_path_resolves_a_modal_style_symlink_mount(
+def test_artifact_path_preserves_identity_but_writes_through_the_physical_mount(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     physical = tmp_path / "physical"
@@ -296,12 +296,29 @@ def test_artifact_path_resolves_a_modal_style_symlink_mount(
     logical.symlink_to(physical, target_is_directory=True)
     monkeypatch.setattr(launcher, "ARTIFACT_ROOT", logical)
 
-    observed = launcher._require_artifact_path(
-        str(logical / "editing_v2" / "panel.json"),
+    supplied = str(logical / "editing_v2" / "panel.json")
+    identity_path = launcher._require_artifact_path(
+        supplied,
         field="panel_path",
     )
-    assert observed == physical / "editing_v2" / "panel.json"
-    assert logical not in observed.parents
+    write_path = launcher._require_physical_artifact_path(
+        supplied,
+        field="panel_path",
+    )
+    assert identity_path == logical / "editing_v2" / "panel.json"
+    assert write_path == physical / "editing_v2" / "panel.json"
+    assert logical not in write_path.parents
+
+
+def test_source_identity_uses_logical_root_and_output_uses_physical_root() -> None:
+    source_body = ast.get_source_segment(_source(), _function("_open_source"))
+    prepare_body = ast.get_source_segment(_source(), _function("prepare_plan_remote"))
+    gpu_body = ast.get_source_segment(_source(), _function("run_t1_gpu_remote"))
+    assert source_body is not None and prepare_body is not None and gpu_body is not None
+    assert "artifact_root=ARTIFACT_ROOT," in source_body
+    assert "artifact_root=ARTIFACT_ROOT.resolve()" not in source_body
+    assert "_require_physical_artifact_path(output_prefix" in prepare_body
+    assert "_require_physical_artifact_path(output_prefix" in gpu_body
 
 
 def test_serialized_image_contains_all_process_v2_t1_owners() -> None:

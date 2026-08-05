@@ -221,7 +221,23 @@ def _require_artifact_path(value: str, *, field: str) -> Path:
         resolved.relative_to(physical_root)
     except ValueError as error:
         raise ValueError(f"{field} resolves outside {ARTIFACT_ROOT}") from error
-    return resolved
+    # Preserve the logical /artifacts spelling when supplied.  Upstream
+    # Process-V2 source identities bind that stable address, not Modal's
+    # container-specific physical volume target.
+    return path
+
+
+def _require_physical_artifact_path(value: str, *, field: str) -> Path:
+    """Resolve a validated artifact address for immutable local writes."""
+
+    path = _require_artifact_path(value, field=field)
+    logical_root = ARTIFACT_ROOT
+    physical_root = logical_root.resolve()
+    try:
+        relative = path.relative_to(logical_root)
+    except ValueError:
+        relative = path.relative_to(physical_root)
+    return (physical_root / relative).resolve()
 
 
 def _read_canonical_object(path: Path, *, label: str) -> dict[str, Any]:
@@ -337,7 +353,7 @@ def _open_source(
     return loaded["open_source"](
         active8_run_root,
         gate_zero_decision_path=gate_zero_decision_path,
-        artifact_root=ARTIFACT_ROOT.resolve(),
+        artifact_root=ARTIFACT_ROOT,
         repo_root=REMOTE_ROOT,
     )
 
@@ -467,7 +483,7 @@ def prepare_plan_remote(
     gate_zero_path = _require_artifact_path(
         gate_zero_decision_path, field="gate_zero_decision_path"
     )
-    prefix = _require_artifact_path(output_prefix, field="output_prefix")
+    prefix = _require_physical_artifact_path(output_prefix, field="output_prefix")
     source = _open_source(
         active8_run_root=active8_root,
         gate_zero_decision_path=gate_zero_path,
@@ -791,7 +807,9 @@ def run_t1_gpu_remote(
             "execution_environment_sha256": environment["environment_sha256"],
         }
     )
-    run_root = _require_artifact_path(output_prefix, field="output_prefix") / run_identity_sha256
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix") / run_identity_sha256
+    )
     builder = functools.partial(loaded["build_result"], capacity_policy=runtime.capacity_policy)
     _progress(
         "process_v2_t1_gpu_start",
