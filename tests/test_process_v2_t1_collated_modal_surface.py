@@ -83,3 +83,19 @@ def test_failure_scope_publishes_each_family_restart_safely() -> None:
     )
     assert '"bounded_p50_authorized": False' in body
     assert '"p50_launched": False' in body
+
+
+def test_next_failure_scope_binds_predecessors_and_uses_one_gpu() -> None:
+    body = _body(launcher.run_t1_failure_scope_gpu_remote)
+    assert 'loaded["validate_failure_scope"](' in body
+    assert 'loaded["next_failure_scope"](' in body
+    assert 'loaded["run_next_failure_scope"](' in body
+    assert '"prior_scope_result_file_sha256"' in body
+    assert '"prior_scope_result_sha256"' in body
+    driver = _body(launcher.next_failure_scope_driver)
+    assert "set(prior_scope_result_paths) != set(families)" in driver
+    assert "update_autoscaler(max_containers=1)" in driver
+    assert 'execution_mode="one_gpu_sequential_arms"' in driver
+    assert "run_t1_failure_scope_gpu_remote.starmap(" in driver
+    assert '"fiber_recomputation_count": 0' in driver
+    assert launcher.FAILURE_SCOPE_GPU_TIMEOUT_SECONDS == 20 * 60

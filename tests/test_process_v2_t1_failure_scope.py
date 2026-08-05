@@ -9,13 +9,16 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     canonical_sha256,
 )
 from compose_v4.experiments.editing_v2_process_v2_t1_failure_scope import (
+    NEXT_SCHEMA_VERSION,
     PASS_STATUS,
     ProcessV2T1FailureScopeError,
     SCHEMA,
     SCHEMA_VERSION,
     SUPPORTED_SCOPE,
     failing_families_from_capacity_result,
+    next_scope_for_family,
     run_heads_only_failure_scope,
+    run_next_failure_scope,
     validate_failure_scope_result,
 )
 
@@ -165,6 +168,16 @@ def _result() -> dict[str, object]:
     return {**body, "result_sha256": canonical_sha256(body)}
 
 
+def _next_result() -> dict[str, object]:
+    result = _result()
+    result["schema_version"] = NEXT_SCHEMA_VERSION
+    result["scope"] = "all"
+    result["input_prior_scope_result_file_sha256"] = "a" * 64
+    result["input_prior_scope_result_sha256"] = "b" * 64
+    _reseal(result)
+    return result
+
+
 def _reseal(value: dict[str, object]) -> None:
     body = {key: item for key, item in value.items() if key != "result_sha256"}
     value["result_sha256"] = canonical_sha256(body)
@@ -182,6 +195,36 @@ def test_failure_scope_result_refuses_resealed_family_metric_drift() -> None:
     result["selected_metrics"]["by_family"] = {"cycle_attach": {}}
     _reseal(result)
     with pytest.raises(ProcessV2T1FailureScopeError, match="identity disagrees"):
+        validate_failure_scope_result(result)
+
+
+def test_next_scope_is_local_only_when_the_family_has_a_distinct_adapter() -> None:
+    policy = {
+        "required_families": ["atom_insert", "cycle_attach"],
+        "optimization": {
+            "failure_diagnostic_scope_order": [
+                "heads_only",
+                "heads_plus_local_adapter_if_distinct",
+                "all",
+            ]
+        },
+    }
+    assert next_scope_for_family("atom_insert", capacity_policy=policy) == "all"
+    assert (
+        next_scope_for_family("cycle_attach", capacity_policy=policy)
+        == "heads_plus_local_adapter"
+    )
+
+
+def test_next_scope_result_binds_the_failed_predecessor() -> None:
+    result = _next_result()
+    assert validate_failure_scope_result(result) == result
+    result["input_prior_scope_result_sha256"] = "c" * 64
+    _reseal(result)
+    assert validate_failure_scope_result(result) == result
+    result["input_prior_scope_result_sha256"] = "not-a-sha256"
+    _reseal(result)
+    with pytest.raises(ProcessV2T1FailureScopeError, match="predecessor identity"):
         validate_failure_scope_result(result)
 
 
@@ -207,4 +250,33 @@ def test_heads_only_runner_refuses_a_family_that_did_not_fail() -> None:
             input_capacity_result_sha256="2" * 64,
             collated_completion_sha256="3" * 64,
             initial_model_state_sha256="4" * 64,
+        )
+
+
+def test_next_scope_runner_refuses_a_passing_heads_only_predecessor() -> None:
+    prior = _result()
+    with pytest.raises(ProcessV2T1FailureScopeError, match="failed heads-only arm"):
+        run_next_failure_scope(
+            object(),
+            object(),
+            family="atom_insert",
+            failing_families=("atom_insert",),
+            capacity_policy={
+                "policy_sha256": "3" * 64,
+                "required_families": ["atom_insert"],
+                "optimization": {
+                    "failure_diagnostic_scope_order": [
+                        "heads_only",
+                        "heads_plus_local_adapter_if_distinct",
+                        "all",
+                    ],
+                    "failure_diagnostics_only_for_failing_families": True,
+                },
+            },
+            prior_scope_result=prior,
+            prior_scope_result_file_sha256="a" * 64,
+            input_capacity_result_file_sha256="1" * 64,
+            input_capacity_result_sha256="2" * 64,
+            collated_completion_sha256="4" * 64,
+            initial_model_state_sha256="5" * 64,
         )

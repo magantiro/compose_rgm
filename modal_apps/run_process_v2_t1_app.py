@@ -66,6 +66,7 @@ CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
 GPU_TIMEOUT_SECONDS = 8 * 3600
+FAILURE_SCOPE_GPU_TIMEOUT_SECONDS = 20 * 60
 HEARTBEAT_SECONDS = 30
 DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 
@@ -328,7 +329,9 @@ def _imports() -> dict[str, Any]:
     )
     from compose_v4.experiments.editing_v2_process_v2_t1_failure_scope import (
         failing_families_from_capacity_result,
+        next_scope_for_family,
         run_heads_only_failure_scope,
+        run_next_failure_scope,
         validate_failure_scope_result,
     )
     from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
@@ -401,7 +404,9 @@ def _imports() -> dict[str, Any]:
         "validate_decision": validate_process_v2_t1_capacity_decision,
         "validate_result": validate_process_v2_t1_capacity_result,
         "failing_families": failing_families_from_capacity_result,
+        "next_failure_scope": next_scope_for_family,
         "run_failure_scope": run_heads_only_failure_scope,
+        "run_next_failure_scope": run_next_failure_scope,
         "validate_failure_scope": validate_failure_scope_result,
         "write_bytes_if_absent": write_bytes_if_absent,
         "build_environment": build_semantic_t1_execution_environment,
@@ -1661,10 +1666,114 @@ def failure_scope_driver(
 
 @app.function(
     image=image,
+    cpu=1.0,
+    memory=4 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def next_failure_scope_driver(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    capacity_result_path: str,
+    prior_scope_result_paths: dict[str, str],
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run the first applicable post-heads scope for each failed family."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    policy, _policy_file_sha256 = loaded["load_capacity_policy"](
+        REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    result_path = _require_artifact_path(
+        capacity_result_path, field="capacity_result_path"
+    )
+    capacity_result = loaded["validate_result"](
+        _read_canonical_object(
+            result_path, label="the Process-V2 T1 capacity result"
+        ),
+        capacity_policy=policy,
+    )
+    families = loaded["failing_families"](
+        capacity_result, capacity_policy=policy
+    )
+    if set(prior_scope_result_paths) != set(families) or any(
+        not isinstance(path, str) or not path
+        for path in prior_scope_result_paths.values()
+    ):
+        raise RuntimeError(
+            "Process-V2 T1 next-scope predecessor paths do not match the failures"
+        )
+    scopes = {
+        family: loaded["next_failure_scope"](
+            family, capacity_policy=policy
+        )
+        for family in families
+    }
+    # This post-heads diagnostic is intentionally serialized onto one A10.
+    # Each starmap item remains independently content-addressed and restartable,
+    # while the single-container ceiling bounds concurrent GPU spend.
+    run_t1_failure_scope_gpu_remote.update_autoscaler(max_containers=1)
+    _progress(
+        "process_v2_t1_next_failure_scope_sequential_plan",
+        families=list(families),
+        scopes=scopes,
+        gpu_containers=1,
+        execution_mode="one_gpu_sequential_arms",
+        fiber_recomputation_count=0,
+    )
+    results = list(
+        run_t1_failure_scope_gpu_remote.starmap(
+            [
+                (
+                    prepared_completion_path,
+                    collated_plan_path,
+                    collated_completion_path,
+                    capacity_result_path,
+                    family,
+                    output_prefix,
+                    revision,
+                    scopes[family],
+                    prior_scope_result_paths[family],
+                )
+                for family in families
+            ]
+        )
+    )
+    by_family = {str(item["family"]): dict(item) for item in results}
+    if set(by_family) != set(families) or len(results) != len(families):
+        raise RuntimeError("Process-V2 T1 next-scope fanout lost a family")
+    response = {
+        "phase": "process_v2_t1_next_failure_scope_complete",
+        "scopes": scopes,
+        "families": list(families),
+        "gpu_containers": 1,
+        "execution_mode": "one_gpu_sequential_arms",
+        "results": [by_family[family] for family in families],
+        "all_diagnostics_passed": all(
+            by_family[family]["diagnostic_passed"] for family in families
+        ),
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "image_revision_sha256": revision["image_revision_sha256"],
+        "bounded_p50_authorized": False,
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
     gpu="A10G",
     cpu=4.0,
     memory=64 * 1024,
-    timeout=GPU_TIMEOUT_SECONDS,
+    timeout=FAILURE_SCOPE_GPU_TIMEOUT_SECONDS,
     max_containers=4,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
@@ -1676,8 +1785,10 @@ def run_t1_failure_scope_gpu_remote(
     family: str,
     output_prefix: str,
     revision: dict[str, Any],
+    scope: str = "heads_only",
+    prior_scope_result_path: str | None = None,
 ) -> dict[str, Any]:
-    """Run one independent first-scope arm for a family that failed T1's tail.
+    """Run one independent scope arm for a family that failed T1's tail.
 
     The collated cache is an authenticated immutable input produced by its own
     source revision.  This diagnostic binds that upstream revision separately
@@ -1748,6 +1859,27 @@ def run_t1_failure_scope_gpu_remote(
     )
     if family not in failing_families:
         raise RuntimeError("Process-V2 T1 failure scope received a passing family")
+    prior_scope_result: dict[str, Any] | None = None
+    prior_scope_result_file_sha256: str | None = None
+    expected_scope = "heads_only"
+    if prior_scope_result_path is not None:
+        expected_scope = loaded["next_failure_scope"](
+            family, capacity_policy=runtime.capacity_policy
+        )
+        prior_path = _require_artifact_path(
+            prior_scope_result_path, field="prior_scope_result_path"
+        )
+        prior_scope_result = loaded["validate_failure_scope"](
+            _read_canonical_object(
+                prior_path,
+                label=f"the Process-V2 T1 {family} prior-scope result",
+            )
+        )
+        prior_scope_result_file_sha256 = _file_sha256(prior_path)
+    if scope != expected_scope or (
+        scope == "heads_only" and prior_scope_result_path is not None
+    ) or (scope != "heads_only" and prior_scope_result_path is None):
+        raise RuntimeError("Process-V2 T1 failure-scope ladder was skipped")
     source_revision = _source_revision(revision)
     identity = {
         "capacity_result_file_sha256": capacity_result_file_sha256,
@@ -1755,8 +1887,14 @@ def run_t1_failure_scope_gpu_remote(
         "collated_completion_sha256": collated_completion["completion_sha256"],
         "capacity_policy_sha256": provenance["capacity_policy_sha256"],
         "initial_model_state_sha256": provenance["initial_model_state_sha256"],
-        "scope": "heads_only",
+        "scope": scope,
         "family": family,
+        "prior_scope_result_file_sha256": prior_scope_result_file_sha256,
+        "prior_scope_result_sha256": (
+            None
+            if prior_scope_result is None
+            else prior_scope_result["result_sha256"]
+        ),
         "runner_source_revision_sha256": source_revision["source_revision_sha256"],
     }
     run_root = (
@@ -1767,6 +1905,7 @@ def run_t1_failure_scope_gpu_remote(
         "process_v2_t1_failure_scope_start",
         run_root=str(run_root),
         family=family,
+        scope=scope,
         fiber_recomputation_count=0,
         gpu_side_collation_count=0,
     )
@@ -1786,21 +1925,36 @@ def run_t1_failure_scope_gpu_remote(
             _progress(
                 "process_v2_t1_failure_scope_heartbeat",
                 family=family,
+                scope=scope,
                 **dict(row),
             )
 
-        result = loaded["run_failure_scope"](
-            model,
-            materialized_panel,
-            family=family,
-            failing_families=failing_families,
-            capacity_policy=runtime.capacity_policy,
-            input_capacity_result_file_sha256=capacity_result_file_sha256,
-            input_capacity_result_sha256=capacity_result["result_sha256"],
-            collated_completion_sha256=collated_completion["completion_sha256"],
-            initial_model_state_sha256=provenance["initial_model_state_sha256"],
-            progress=report,
-        )
+        common = {
+            "family": family,
+            "failing_families": failing_families,
+            "capacity_policy": runtime.capacity_policy,
+            "input_capacity_result_file_sha256": capacity_result_file_sha256,
+            "input_capacity_result_sha256": capacity_result["result_sha256"],
+            "collated_completion_sha256": collated_completion["completion_sha256"],
+            "initial_model_state_sha256": provenance["initial_model_state_sha256"],
+            "progress": report,
+        }
+        if scope == "heads_only":
+            result = loaded["run_failure_scope"](
+                model,
+                materialized_panel,
+                **common,
+            )
+        else:
+            if prior_scope_result is None or prior_scope_result_file_sha256 is None:
+                raise RuntimeError("Process-V2 T1 next scope lost its predecessor")
+            result = loaded["run_next_failure_scope"](
+                model,
+                materialized_panel,
+                prior_scope_result=prior_scope_result,
+                prior_scope_result_file_sha256=prior_scope_result_file_sha256,
+                **common,
+            )
         loaded["write_bytes_if_absent"](
             result_path, _canonical_bytes(result) + b"\n"
         )
@@ -1808,6 +1962,7 @@ def run_t1_failure_scope_gpu_remote(
         reused = False
     if (
         result["family"] != family
+        or result["scope"] != scope
         or result["input_capacity_result_file_sha256"]
         != capacity_result_file_sha256
         or result["input_capacity_result_sha256"]
@@ -1816,12 +1971,21 @@ def run_t1_failure_scope_gpu_remote(
         != collated_completion["completion_sha256"]
         or result["initial_model_state_sha256"]
         != provenance["initial_model_state_sha256"]
+        or (
+            scope != "heads_only"
+            and (
+                result["input_prior_scope_result_file_sha256"]
+                != prior_scope_result_file_sha256
+                or result["input_prior_scope_result_sha256"]
+                != prior_scope_result["result_sha256"]
+            )
+        )
     ):
         raise RuntimeError("Process-V2 T1 failure-scope publication drifted")
     response = {
         "phase": "process_v2_t1_failure_scope_family_complete",
         "run_root": str(run_root),
-        "scope": "heads_only",
+        "scope": scope,
         "family": family,
         "result_path": str(result_path),
         "result_file_sha256": _file_sha256(result_path),
@@ -3174,6 +3338,74 @@ def failure_scope_main(
     )
 
 
+@app.local_entrypoint()
+def next_failure_scope_main(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    capacity_result_path: str,
+    prior_scope_result_paths_json: str,
+    expected_commit: str,
+    output_prefix: str = FAILURE_SCOPE_OUTPUT_PREFIX,
+    wait_for_completion: bool = False,
+) -> None:
+    """Launch the detached first post-heads parameter-scope wave."""
+
+    parsed = json.loads(prior_scope_result_paths_json)
+    if (
+        not isinstance(parsed, dict)
+        or not parsed
+        or any(
+            not isinstance(family, str)
+            or not family
+            or not isinstance(path, str)
+            or not path
+            for family, path in parsed.items()
+        )
+    ):
+        raise RuntimeError(
+            "prior_scope_result_paths_json must map family names to artifact paths"
+        )
+    prior_paths = {str(family): str(path) for family, path in parsed.items()}
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_plan_path,
+        collated_completion_path,
+        capacity_result_path,
+        prior_paths,
+        output_prefix,
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                next_failure_scope_driver.remote(*arguments),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    call = next_failure_scope_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_next_failure_scope_launched",
+                "driver_call_id": call.object_id,
+                "parallel_family_arms": False,
+                "execution_mode": "one_gpu_sequential_arms",
+                "fiber_recomputation_count": 0,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
 __all__ = [
     "COLLATED_OUTPUT_PREFIX",
     "FAILURE_SCOPE_OUTPUT_PREFIX",
@@ -3189,11 +3421,13 @@ __all__ = [
     "collated_reuse_driver",
     "driver",
     "failure_scope_driver",
+    "next_failure_scope_driver",
     "finalize_collated_remote",
     "finalize_prepared_remote",
     "finalize_reused_prepared_remote",
     "gpu_from_cache_main",
     "failure_scope_main",
+    "next_failure_scope_main",
     "local_image_revision",
     "main",
     "prepare_collated_plan_remote",

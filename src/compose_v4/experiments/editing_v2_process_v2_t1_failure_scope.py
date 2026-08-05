@@ -1,10 +1,11 @@
 """Failure-only Process-V2 T1 parameter-scope diagnostics.
 
 The primary T1 gate remains authoritative and immutable.  This diagnostic
-answers only whether one failing family can fit its existing 64-entry panel
-when optimization is restricted to the first frozen scope, ``heads_only``.
-It consumes the authenticated materialized panel and never enumerates
-chemistry, rebuilds fibers, or trains a family that already passed T1.
+answers where one failing family first fits its existing 64-entry panel along
+the frozen parameter-scope ladder.  It consumes the authenticated materialized
+panel and never enumerates chemistry, rebuilds fibers, or trains a family that
+already passed T1.  Every scope after ``heads_only`` binds the failed result
+from the preceding scope.
 """
 
 from __future__ import annotations
@@ -39,15 +40,18 @@ from compose_v4.experiments.factorized_successor_training import (
     forward_teacher_successor_batch,
 )
 from compose_v4.experiments.successor_micro_overfit import (
+    MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES,
     configure_micro_overfit_parameters,
 )
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
 
 SCHEMA = "compose.editing_v2.process_v2_t1_failure_scope_result"
 SCHEMA_VERSION = 1
+NEXT_SCHEMA_VERSION = 2
 PASS_STATUS = "PASS_PROCESS_V2_T1_FAILURE_SCOPE_NO_DOWNSTREAM_AUTHORITY"
 FAIL_STATUS = "FAIL_PROCESS_V2_T1_FAILURE_SCOPE_NO_DOWNSTREAM_AUTHORITY"
 SUPPORTED_SCOPE = "heads_only"
+NEXT_SCOPES = ("heads_plus_local_adapter", "all")
 
 
 class ProcessV2T1FailureScopeError(RuntimeError):
@@ -149,6 +153,37 @@ def _criterion(metrics: Mapping[str, Any], *, step: int) -> tuple[float, float, 
     return minimum, -mean_nll, -step
 
 
+def next_scope_for_family(
+    family: str,
+    *,
+    capacity_policy: Mapping[str, Any],
+) -> str:
+    """Resolve the first scope after heads-only without skipping the frozen ladder."""
+
+    order = tuple(
+        capacity_policy.get("optimization", {}).get(
+            "failure_diagnostic_scope_order", ()
+        )
+    )
+    if order != (
+        "heads_only",
+        "heads_plus_local_adapter_if_distinct",
+        "all",
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "capacity policy no longer declares the frozen diagnostic ladder"
+        )
+    if family not in capacity_policy.get("required_families", ()):
+        raise ProcessV2T1FailureScopeError(
+            "next diagnostic scope received a non-required family"
+        )
+    return (
+        "heads_plus_local_adapter"
+        if family in MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES
+        else "all"
+    )
+
+
 def _subset_panel(
     panel: _MaterializedSemanticT1Panel,
     *,
@@ -199,7 +234,7 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise ProcessV2T1FailureScopeError("T1 failure-scope result is not an object")
     result = dict(value)
-    required = {
+    common_required = {
         "schema",
         "schema_version",
         "status",
@@ -224,6 +259,16 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
         "diagnostic_passed",
         "result_sha256",
     }
+    if result.get("schema_version") == SCHEMA_VERSION:
+        required = common_required
+    elif result.get("schema_version") == NEXT_SCHEMA_VERSION:
+        required = {
+            *common_required,
+            "input_prior_scope_result_file_sha256",
+            "input_prior_scope_result_sha256",
+        }
+    else:
+        required = common_required
     if set(result) != required:
         raise ProcessV2T1FailureScopeError("T1 failure-scope result fields disagree")
     try:
@@ -244,8 +289,15 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
     )
     if (
         result["schema"] != SCHEMA
-        or result["schema_version"] != SCHEMA_VERSION
-        or result["scope"] != SUPPORTED_SCOPE
+        or result["schema_version"] not in {SCHEMA_VERSION, NEXT_SCHEMA_VERSION}
+        or (
+            result["schema_version"] == SCHEMA_VERSION
+            and result["scope"] != SUPPORTED_SCOPE
+        )
+        or (
+            result["schema_version"] == NEXT_SCHEMA_VERSION
+            and result["scope"] not in NEXT_SCOPES
+        )
         or type(result["diagnostic_passed"]) is not bool
         or result["status"]
         != (PASS_STATUS if result["diagnostic_passed"] else FAIL_STATUS)
@@ -287,48 +339,42 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
         is not all(result["selected_threshold_checks"].values())
     ):
         raise ProcessV2T1FailureScopeError("T1 failure-scope result identity disagrees")
+    if result["schema_version"] == NEXT_SCHEMA_VERSION and any(
+        not _is_sha256(result[name])
+        for name in (
+            "input_prior_scope_result_file_sha256",
+            "input_prior_scope_result_sha256",
+        )
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "T1 next-scope predecessor identity disagrees"
+        )
     return result
 
 
-def run_heads_only_failure_scope(
+def _run_failure_scope(
     model: FactorizedTraceletRateModel,
-    materialized_panel: _MaterializedSemanticT1Panel,
+    panel: _MaterializedSemanticT1Panel,
     *,
     family: str,
-    failing_families: Sequence[str],
+    scope: str,
     capacity_policy: Mapping[str, Any],
     input_capacity_result_file_sha256: str,
     input_capacity_result_sha256: str,
     collated_completion_sha256: str,
     initial_model_state_sha256: str,
-    progress: Callable[[Mapping[str, Any]], None] | None = None,
+    schema_version: int,
+    predecessor: Mapping[str, str],
+    progress: Callable[[Mapping[str, Any]], None] | None,
 ) -> dict[str, Any]:
-    """Run only the first frozen diagnostic scope for one failed family."""
+    """Optimize one already-materialized family panel at one declared scope."""
 
     optimization = capacity_policy["optimization"]
-    ordered_failures = tuple(dict.fromkeys(str(item) for item in failing_families))
-    if (
-        family not in ordered_failures
-        or family not in capacity_policy["required_families"]
-        or tuple(optimization["failure_diagnostic_scope_order"])[0]
-        != SUPPORTED_SCOPE
-        or optimization["failure_diagnostics_only_for_failing_families"] is not True
-    ):
-        raise ProcessV2T1FailureScopeError(
-            "heads-only diagnostic is not restricted to a frozen failing family"
-        )
     thresholds = capacity_policy["thresholds"]
     observed_initial = state_dict_semantic_sha256(model.state_dict())
     if observed_initial != initial_model_state_sha256:
         raise ProcessV2T1FailureScopeError(
-            "heads-only diagnostic model is not the frozen scratch initialization"
-        )
-    panel = _subset_panel(materialized_panel, family=family)
-    minimums = capacity_policy["panel_cardinality"]["minimum_entries_by_family"]
-    maximums = capacity_policy["panel_cardinality"]["maximum_entries_by_family"]
-    if not int(minimums[family]) <= len(panel.panel_ids) <= int(maximums[family]):
-        raise ProcessV2T1FailureScopeError(
-            "heads-only diagnostic panel cardinality violates the capacity policy"
+            f"{scope} diagnostic model is not the frozen scratch initialization"
         )
 
     torch.use_deterministic_algorithms(True)
@@ -339,15 +385,16 @@ def run_heads_only_failure_scope(
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-    trainable_names = configure_micro_overfit_parameters(
+    route_names = configure_micro_overfit_parameters(
         model, (family,), scope=SUPPORTED_SCOPE
     )
+    trainable_names = configure_micro_overfit_parameters(model, (family,), scope=scope)
     trainable = [parameter for parameter in model.parameters() if parameter.requires_grad]
-    family_names = tuple(name for name in trainable_names if name.startswith("family_head."))
-    action_names = tuple(name for name in trainable_names if not name.startswith("family_head."))
+    family_names = tuple(name for name in route_names if name.startswith("family_head."))
+    action_names = tuple(name for name in route_names if not name.startswith("family_head."))
     if not family_names or not action_names:
         raise ProcessV2T1FailureScopeError(
-            "heads-only diagnostic does not expose both family and action routes"
+            f"{scope} diagnostic does not expose both family and action routes"
         )
     named_parameters = dict(model.named_parameters())
     optimizer = torch.optim.AdamW(
@@ -430,7 +477,7 @@ def run_heads_only_failure_scope(
         loss = factorized_successor_identity_loss(prediction, device_batch)
         if not bool(torch.isfinite(loss)):
             raise ProcessV2T1FailureScopeError(
-                f"nonfinite heads-only loss before step {next_step}"
+                f"nonfinite {scope} loss before step {next_step}"
             )
         loss.backward()
 
@@ -442,7 +489,7 @@ def run_heads_only_failure_scope(
                     continue
                 if not bool(torch.isfinite(gradient).all()):
                     raise ProcessV2T1FailureScopeError(
-                        f"nonfinite heads-only gradient for {name!r}"
+                        f"nonfinite {scope} gradient for {name!r}"
                     )
                 value = float(gradient.norm())
                 squared += value * value
@@ -462,12 +509,16 @@ def run_heads_only_failure_scope(
             trainable, float(optimization["gradient_clip_norm"])
         )
         if not bool(torch.isfinite(gradient_norm)):
-            raise ProcessV2T1FailureScopeError("heads-only gradient norm is nonfinite")
+            raise ProcessV2T1FailureScopeError(
+                f"{scope} gradient norm is nonfinite"
+            )
         optimizer.step()
         completed_steps = next_step
 
     if selected_metrics is None or selected_checks is None:
-        raise ProcessV2T1FailureScopeError("heads-only diagnostic selected no report point")
+        raise ProcessV2T1FailureScopeError(
+            f"{scope} diagnostic selected no report point"
+        )
     gradients = {
         family: _gradient_row(
             family_seen=family_seen,
@@ -478,8 +529,6 @@ def run_heads_only_failure_scope(
             action_l2=action_l2,
         )
     }
-    # Recompute the selected checks with the terminal gradient evidence.  The
-    # metric rows remain those of the prospectively selected report point.
     selected_checks = semantic_t1_threshold_checks(
         selected_metrics,
         thresholds=thresholds,
@@ -488,16 +537,17 @@ def run_heads_only_failure_scope(
     passed = all(selected_checks.values())
     body = {
         "schema": SCHEMA,
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "status": PASS_STATUS if passed else FAIL_STATUS,
         **authority_false_block(),
         "family": family,
-        "scope": SUPPORTED_SCOPE,
+        "scope": scope,
         "input_capacity_result_file_sha256": input_capacity_result_file_sha256,
         "input_capacity_result_sha256": input_capacity_result_sha256,
         "capacity_policy_sha256": capacity_policy["policy_sha256"],
         "collated_completion_sha256": collated_completion_sha256,
         "initial_model_state_sha256": initial_model_state_sha256,
+        **dict(predecessor),
         "panel_entry_count": len(panel.panel_ids),
         "panel_entry_inventory_sha256": canonical_sha256(list(panel.panel_ids)),
         "optimizer_steps_completed": completed_steps,
@@ -515,14 +565,149 @@ def run_heads_only_failure_scope(
     )
 
 
+def run_heads_only_failure_scope(
+    model: FactorizedTraceletRateModel,
+    materialized_panel: _MaterializedSemanticT1Panel,
+    *,
+    family: str,
+    failing_families: Sequence[str],
+    capacity_policy: Mapping[str, Any],
+    input_capacity_result_file_sha256: str,
+    input_capacity_result_sha256: str,
+    collated_completion_sha256: str,
+    initial_model_state_sha256: str,
+    progress: Callable[[Mapping[str, Any]], None] | None = None,
+) -> dict[str, Any]:
+    """Run only the first frozen diagnostic scope for one failed family."""
+
+    optimization = capacity_policy["optimization"]
+    ordered_failures = tuple(dict.fromkeys(str(item) for item in failing_families))
+    if (
+        family not in ordered_failures
+        or family not in capacity_policy["required_families"]
+        or tuple(optimization["failure_diagnostic_scope_order"])[0]
+        != SUPPORTED_SCOPE
+        or optimization["failure_diagnostics_only_for_failing_families"] is not True
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "heads-only diagnostic is not restricted to a frozen failing family"
+        )
+    observed_initial = state_dict_semantic_sha256(model.state_dict())
+    if observed_initial != initial_model_state_sha256:
+        raise ProcessV2T1FailureScopeError(
+            "heads-only diagnostic model is not the frozen scratch initialization"
+        )
+    panel = _subset_panel(materialized_panel, family=family)
+    minimums = capacity_policy["panel_cardinality"]["minimum_entries_by_family"]
+    maximums = capacity_policy["panel_cardinality"]["maximum_entries_by_family"]
+    if not int(minimums[family]) <= len(panel.panel_ids) <= int(maximums[family]):
+        raise ProcessV2T1FailureScopeError(
+            "heads-only diagnostic panel cardinality violates the capacity policy"
+        )
+    return _run_failure_scope(
+        model,
+        panel,
+        family=family,
+        scope=SUPPORTED_SCOPE,
+        capacity_policy=capacity_policy,
+        input_capacity_result_file_sha256=input_capacity_result_file_sha256,
+        input_capacity_result_sha256=input_capacity_result_sha256,
+        collated_completion_sha256=collated_completion_sha256,
+        initial_model_state_sha256=initial_model_state_sha256,
+        schema_version=SCHEMA_VERSION,
+        predecessor={},
+        progress=progress,
+    )
+
+
+def run_next_failure_scope(
+    model: FactorizedTraceletRateModel,
+    materialized_panel: _MaterializedSemanticT1Panel,
+    *,
+    family: str,
+    failing_families: Sequence[str],
+    capacity_policy: Mapping[str, Any],
+    prior_scope_result: Mapping[str, Any],
+    prior_scope_result_file_sha256: str,
+    input_capacity_result_file_sha256: str,
+    input_capacity_result_sha256: str,
+    collated_completion_sha256: str,
+    initial_model_state_sha256: str,
+    progress: Callable[[Mapping[str, Any]], None] | None = None,
+) -> dict[str, Any]:
+    """Run the first applicable scope after a failed heads-only result."""
+
+    ordered_failures = tuple(dict.fromkeys(str(item) for item in failing_families))
+    optimization = capacity_policy["optimization"]
+    if (
+        family not in ordered_failures
+        or optimization["failure_diagnostics_only_for_failing_families"] is not True
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "next diagnostic is not restricted to a frozen failing family"
+        )
+    prior = validate_failure_scope_result(prior_scope_result)
+    scope = next_scope_for_family(family, capacity_policy=capacity_policy)
+    if (
+        prior["schema_version"] != SCHEMA_VERSION
+        or prior["scope"] != SUPPORTED_SCOPE
+        or prior["family"] != family
+        or prior["diagnostic_passed"] is not False
+        or prior["input_capacity_result_file_sha256"]
+        != input_capacity_result_file_sha256
+        or prior["input_capacity_result_sha256"] != input_capacity_result_sha256
+        or prior["capacity_policy_sha256"] != capacity_policy["policy_sha256"]
+        or prior["collated_completion_sha256"] != collated_completion_sha256
+        or prior["initial_model_state_sha256"] != initial_model_state_sha256
+        or not _is_sha256(prior_scope_result_file_sha256)
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "next diagnostic predecessor does not bind the failed heads-only arm"
+        )
+    panel = _subset_panel(materialized_panel, family=family)
+    if prior["panel_entry_inventory_sha256"] != canonical_sha256(
+        list(panel.panel_ids)
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "next diagnostic predecessor binds another family panel"
+        )
+    minimums = capacity_policy["panel_cardinality"]["minimum_entries_by_family"]
+    maximums = capacity_policy["panel_cardinality"]["maximum_entries_by_family"]
+    if not int(minimums[family]) <= len(panel.panel_ids) <= int(maximums[family]):
+        raise ProcessV2T1FailureScopeError(
+            "next diagnostic panel cardinality violates the capacity policy"
+        )
+    return _run_failure_scope(
+        model,
+        panel,
+        family=family,
+        scope=scope,
+        capacity_policy=capacity_policy,
+        input_capacity_result_file_sha256=input_capacity_result_file_sha256,
+        input_capacity_result_sha256=input_capacity_result_sha256,
+        collated_completion_sha256=collated_completion_sha256,
+        initial_model_state_sha256=initial_model_state_sha256,
+        schema_version=NEXT_SCHEMA_VERSION,
+        predecessor={
+            "input_prior_scope_result_file_sha256": prior_scope_result_file_sha256,
+            "input_prior_scope_result_sha256": prior["result_sha256"],
+        },
+        progress=progress,
+    )
+
+
 __all__ = [
     "FAIL_STATUS",
     "PASS_STATUS",
     "ProcessV2T1FailureScopeError",
+    "NEXT_SCHEMA_VERSION",
+    "NEXT_SCOPES",
     "SCHEMA",
     "SCHEMA_VERSION",
     "SUPPORTED_SCOPE",
     "failing_families_from_capacity_result",
+    "next_scope_for_family",
     "run_heads_only_failure_scope",
+    "run_next_failure_scope",
     "validate_failure_scope_result",
 ]
