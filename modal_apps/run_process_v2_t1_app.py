@@ -1391,6 +1391,48 @@ def _terminal_audit_rows(
     return result
 
 
+def _terminal_audit_environment_disposition(
+    observed: Mapping[str, Any],
+    expected: object,
+) -> str:
+    """Classify the one known Modal A10 device-name alias for this audit.
+
+    This does not modify the frozen T1 execution receipt.  The terminal audit
+    carries no downstream authority and separately requires exact reproduction
+    of every selected-checkpoint metric before publishing terminal metrics.
+    """
+
+    if not isinstance(expected, Mapping):
+        raise RuntimeError("Process-V2 T1 checkpoint execution environment is absent")
+    if observed == expected:
+        return "EXACT"
+    nonidentity_fields = {"device_name", "environment_sha256"}
+    observed_substantive = {
+        key: value for key, value in observed.items() if key not in nonidentity_fields
+    }
+    expected_substantive = {
+        key: value for key, value in expected.items() if key not in nonidentity_fields
+    }
+    if (
+        observed_substantive == expected_substantive
+        and (str(expected.get("device_name")), str(observed.get("device_name")))
+        == ("NVIDIA A10", "NVIDIA A10G")
+    ):
+        return "MODAL_A10_DEVICE_NAME_ALIAS_ONLY"
+    differing_fields = {
+        key: {
+            "expected": expected.get(key),
+            "observed": observed.get(key),
+        }
+        for key in sorted(set(observed) | set(expected))
+        if expected.get(key) != observed.get(key)
+    }
+    raise RuntimeError(
+        "Process-V2 T1 terminal-audit environment disagrees: "
+        f"{differing_fields}"
+    )
+
+
 @app.function(
     image=image,
     gpu=PUBLICATION_RECOVERY_GPU,
@@ -1457,32 +1499,11 @@ def audit_t1_family_remote(
         environment = _execution_environment(
             loaded, batch_size=int(runtime.capacity_policy["optimization"]["batch_size"])
         )
-        if environment != checkpoint_identity.get("execution_environment"):
-            expected_environment = checkpoint_identity.get("execution_environment")
-            differing_fields = {
-                key: {
-                    "expected": (
-                        expected_environment.get(key)
-                        if isinstance(expected_environment, Mapping)
-                        else None
-                    ),
-                    "observed": environment.get(key),
-                }
-                for key in sorted(
-                    set(environment)
-                    | (
-                        set(expected_environment)
-                        if isinstance(expected_environment, Mapping)
-                        else set()
-                    )
-                )
-                if not isinstance(expected_environment, Mapping)
-                or expected_environment.get(key) != environment.get(key)
-            }
-            raise RuntimeError(
-                "Process-V2 T1 terminal-audit environment disagrees: "
-                f"{differing_fields}"
-            )
+        expected_environment = checkpoint_identity.get("execution_environment")
+        environment_disposition = _terminal_audit_environment_disposition(
+            environment,
+            expected_environment,
+        )
         panel_ids = tuple(
             str(entry["panel_entry_sha256"])
             for entry in runtime.entries
@@ -1522,6 +1543,9 @@ def audit_t1_family_remote(
         "selected_model_state_sha256": str(checkpoint["selected_model_state_sha256"]),
         "terminal_model_state_sha256": str(checkpoint["model_state_sha256"]),
         "gradient_evidence": checkpoint["gradient_evidence"],
+        "checkpoint_execution_environment": expected_environment,
+        "audit_execution_environment": environment,
+        "execution_environment_disposition": environment_disposition,
         "selected_rows": selected_rows,
         "terminal_rows": terminal_rows,
     }
@@ -1624,6 +1648,11 @@ def audit_t1_terminal_driver(
         or item["selected_model_state_sha256"] != first["selected_model_state_sha256"]
         or item["terminal_model_state_sha256"] != first["terminal_model_state_sha256"]
         or item["gradient_evidence"] != first["gradient_evidence"]
+        or item["checkpoint_execution_environment"]
+        != first["checkpoint_execution_environment"]
+        or item["audit_execution_environment"] != first["audit_execution_environment"]
+        or item["execution_environment_disposition"]
+        != first["execution_environment_disposition"]
         for item in by_family.values()
     ):
         raise RuntimeError("Process-V2 T1 terminal family audits disagree on checkpoint identity")
@@ -1705,6 +1734,11 @@ def audit_t1_terminal_driver(
         "terminal_step": int(first["terminal_step"]),
         "selected_model_state_sha256": first["selected_model_state_sha256"],
         "terminal_model_state_sha256": first["terminal_model_state_sha256"],
+        "checkpoint_execution_environment": first["checkpoint_execution_environment"],
+        "audit_execution_environment": first["audit_execution_environment"],
+        "execution_environment_disposition": first[
+            "execution_environment_disposition"
+        ],
         "family_worker_count": len(family_results),
         "entry_count": len(entry_comparisons),
         "selected_result_reproduced_exactly": True,

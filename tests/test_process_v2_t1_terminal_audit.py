@@ -63,3 +63,36 @@ def test_metric_projection_uses_frozen_family_order() -> None:
         "teacher_successor_rank",
         "teacher_successor_top1",
     }
+
+
+def _environment(device_name: str, *, torch_version: str = "2.4.0") -> dict[str, object]:
+    return {
+        "device_name": device_name,
+        "device_capability": "8.6",
+        "torch_version": torch_version,
+        "environment_sha256": "a" * 64,
+    }
+
+
+def test_terminal_audit_accepts_only_the_observed_a10_name_alias() -> None:
+    expected = _environment("NVIDIA A10")
+    observed = {
+        **_environment("NVIDIA A10G"),
+        "environment_sha256": "b" * 64,
+    }
+
+    assert (
+        app._terminal_audit_environment_disposition(observed, expected)
+        == "MODAL_A10_DEVICE_NAME_ALIAS_ONLY"
+    )
+
+
+def test_terminal_audit_refuses_substantive_environment_drift() -> None:
+    expected = _environment("NVIDIA A10")
+    observed = {
+        **_environment("NVIDIA A10G", torch_version="2.5.0"),
+        "environment_sha256": "b" * 64,
+    }
+
+    with pytest.raises(RuntimeError, match="torch_version"):
+        app._terminal_audit_environment_disposition(observed, expected)
