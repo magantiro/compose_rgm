@@ -1644,8 +1644,23 @@ def recover_t1_publication_remote(
         loaded, batch_size=int(runtime.capacity_policy["optimization"]["batch_size"])
     )
     if environment != checkpoint_identity.get("execution_environment"):
+        expected_environment = checkpoint_identity.get("execution_environment")
+        expected_mapping = (
+            dict(expected_environment)
+            if isinstance(expected_environment, Mapping)
+            else {"value": expected_environment}
+        )
+        differing_fields = {
+            name: {
+                "expected": expected_mapping.get(name),
+                "observed": environment.get(name),
+            }
+            for name in sorted(set(expected_mapping) | set(environment))
+            if expected_mapping.get(name) != environment.get(name)
+        }
         raise RuntimeError(
-            "Process-V2 T1 publication recovery execution environment disagrees"
+            "Process-V2 T1 publication recovery execution environment disagrees: "
+            f"{differing_fields}"
         )
     loaded["validate_selected_checkpoint"](
         selected_path,
