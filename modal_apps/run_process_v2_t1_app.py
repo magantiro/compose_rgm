@@ -1458,7 +1458,31 @@ def audit_t1_family_remote(
             loaded, batch_size=int(runtime.capacity_policy["optimization"]["batch_size"])
         )
         if environment != checkpoint_identity.get("execution_environment"):
-            raise RuntimeError("Process-V2 T1 terminal-audit environment disagrees")
+            expected_environment = checkpoint_identity.get("execution_environment")
+            differing_fields = {
+                key: {
+                    "expected": (
+                        expected_environment.get(key)
+                        if isinstance(expected_environment, Mapping)
+                        else None
+                    ),
+                    "observed": environment.get(key),
+                }
+                for key in sorted(
+                    set(environment)
+                    | (
+                        set(expected_environment)
+                        if isinstance(expected_environment, Mapping)
+                        else set()
+                    )
+                )
+                if not isinstance(expected_environment, Mapping)
+                or expected_environment.get(key) != environment.get(key)
+            }
+            raise RuntimeError(
+                "Process-V2 T1 terminal-audit environment disagrees: "
+                f"{differing_fields}"
+            )
         panel_ids = tuple(
             str(entry["panel_entry_sha256"])
             for entry in runtime.entries
