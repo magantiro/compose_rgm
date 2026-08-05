@@ -19,7 +19,6 @@ import random
 import tempfile
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Protocol
@@ -63,7 +62,6 @@ from compose_v4.experiments.editing_v2_semantic_t1_successor_cache import (
 from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
     FactorizedMarkExample,
-    _concatenate_factorized_mark_batches,
 )
 from compose_v4.experiments.factorized_successor_training import (
     factorized_successor_identity_loss,
@@ -98,9 +96,6 @@ ACTION_ROUTE_PREFIXES: Mapping[str, tuple[str, ...]] = {
     "cycle_attach": ("cycle_open_head.",),
     "ring_system_restate": ("ring_restate_head.",),
 }
-MATERIALIZATION_WORKERS = 8
-
-
 class SemanticT1CapacityRunnerError(RuntimeError):
     """T1 execution or its recovery identity failed closed."""
 
@@ -569,38 +564,12 @@ def _materialize_panel(
     collator: FactorizedMarkCollator,
 ) -> _MaterializedSemanticT1Panel:
     panel_ids = tuple(str(entry["panel_entry_sha256"]) for entry in runtime.entries)
-    worker_count = min(MATERIALIZATION_WORKERS, len(panel_ids))
-    if worker_count <= 1:
-        batches = (_batch_for_ids(runtime, model, collator, panel_ids),)
-    else:
-        chunk_size = math.ceil(len(panel_ids) / worker_count)
-        chunks = tuple(
-            panel_ids[start : start + chunk_size] for start in range(0, len(panel_ids), chunk_size)
-        )
-
-        def materialize_chunk(item: tuple[int, tuple[str, ...]]):
-            index, chunk = item
-            # A collator owns mutable chemistry caches.  Never share one across
-            # threads; use the already-created instance once and construct one
-            # isolated collator for every other deterministic shard.
-            chunk_collator = collator if index == 0 else _collator(model)
-            return _batch_for_ids(runtime, model, chunk_collator, chunk)
-
-        with ThreadPoolExecutor(
-            max_workers=len(chunks),
-            thread_name_prefix="semantic-t1-materialize",
-        ) as executor:
-            batches = tuple(executor.map(materialize_chunk, enumerate(chunks)))
-
-    batch = _concatenate_factorized_mark_batches(tuple(item[0] for item in batches))
-    fibers = tuple(fiber for item in batches for fiber in item[1])
-    partitions = tuple(partition for item in batches for partition in item[2])
-    entries = tuple(entry for item in batches for entry in item[3])
-    observed_panel_ids = tuple(str(entry["panel_entry_sha256"]) for entry in entries)
-    if observed_panel_ids != panel_ids or batch.batch_size != len(panel_ids):
-        raise SemanticT1CapacityRunnerError(
-            "parallel T1 materialization changed panel order or cardinality"
-        )
+    batch, fibers, partitions, entries = _batch_for_ids(
+        runtime,
+        model,
+        collator,
+        panel_ids,
+    )
     return _MaterializedSemanticT1Panel(
         batch=batch,
         panel_ids=panel_ids,
