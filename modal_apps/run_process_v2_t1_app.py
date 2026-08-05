@@ -39,6 +39,7 @@ LAUNCHER_SOURCE = "modal_apps/run_process_v2_t1_app.py"
 IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 
 PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_prepared"
+COLLATED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_collated"
 RUN_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_capacity"
 CAPACITY_POLICY_SOURCE = "configs/editing_v2_process_v2_t1_capacity_policy.json"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
@@ -57,6 +58,7 @@ TERMINAL_AUDIT_FILENAME = "PROCESS_V2_T1_TERMINAL_AUDIT.json"
 PUBLICATION_RECOVERY_GPU = "A10G"
 
 MAX_CPU_CONTAINERS = 40
+COLLATED_ENTRIES_PER_TASK = 16
 CPU_PER_LEAF = 1.0
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
@@ -301,6 +303,17 @@ def _imports() -> dict[str, Any]:
         open_process_v2_t1_source,
         write_process_v2_t1_panel,
     )
+    from compose_v4.experiments.editing_v2_process_v2_t1_collated_cache import (
+        COMPLETION_FILENAME as COLLATED_COMPLETION_FILENAME,
+        PLAN_FILENAME as COLLATED_PLAN_FILENAME,
+        build_collated_cache_plan,
+        compile_collated_cache_leaf,
+        completed_collated_task_identities,
+        load_collated_cache_plan,
+        load_materialized_collated_panel,
+        publish_collated_cache_completion,
+        write_collated_cache_plan,
+    )
     from compose_v4.experiments.editing_v2_process_v2_t1_result import (
         DECISION_FILENAME,
         RESULT_FILENAME,
@@ -365,6 +378,15 @@ def _imports() -> dict[str, Any]:
         "validate_leaf": validate_process_v2_t1_prepared_leaf,
         "write_leaf": write_process_v2_t1_prepared_leaf,
         "write_plan": write_process_v2_t1_prepared_plan,
+        "COLLATED_COMPLETION_FILENAME": COLLATED_COMPLETION_FILENAME,
+        "COLLATED_PLAN_FILENAME": COLLATED_PLAN_FILENAME,
+        "build_collated_plan": build_collated_cache_plan,
+        "compile_collated_leaf": compile_collated_cache_leaf,
+        "completed_collated_tasks": completed_collated_task_identities,
+        "load_collated_plan": load_collated_cache_plan,
+        "load_materialized_collated_panel": load_materialized_collated_panel,
+        "publish_collated_completion": publish_collated_cache_completion,
+        "write_collated_plan": write_collated_cache_plan,
         "build_result": build_process_v2_t1_capacity_result,
         "build_decision": build_process_v2_t1_capacity_decision,
         "runner_implementation_sha256": process_v2_t1_runner_implementation_sha256,
@@ -942,6 +964,229 @@ def finalize_reused_prepared_remote(
     return result
 
 
+def _collated_software_versions(loaded: Mapping[str, Any]) -> dict[str, str]:
+    return {
+        "python": platform.python_version(),
+        "torch": str(loaded["torch"].__version__),
+        "numpy": str(loaded["np"].__version__),
+        "rdkit": str(loaded["rdkit"].__version__),
+    }
+
+
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def prepare_collated_plan_remote(
+    prepared_completion_path: str,
+    collated_output_prefix: str,
+    entries_per_task: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Plan CPU-only collation over an already-published exact T1 panel."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    completion_path = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    runtime, _scratch, provenance = loaded["load_runtime"](
+        completion_path,
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    plan = loaded["build_collated_plan"](
+        runtime,
+        prepared_completion_path=completion_path,
+        prepared_completion_sha256=provenance["prepared_completion_sha256"],
+        source_revision=_source_revision(revision),
+        software_versions=_collated_software_versions(loaded),
+        repo_root=REMOTE_ROOT,
+        entries_per_task=int(entries_per_task),
+    )
+    run_root = (
+        _require_physical_artifact_path(
+            collated_output_prefix, field="collated_output_prefix"
+        )
+        / plan["run_identity_sha256"]
+    )
+    plan_path = run_root / loaded["COLLATED_PLAN_FILENAME"]
+    loaded["write_collated_plan"](plan_path, plan)
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_collated_plan_complete",
+        "run_root": str(run_root),
+        "plan_path": str(plan_path),
+        "plan": plan,
+        "plan_sha256": plan["plan_sha256"],
+        "task_count": plan["task_count"],
+        "panel_entry_count": plan["panel_entry_count"],
+        "training_launched": False,
+        "bounded_p50_authorized": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=1.0,
+    memory=16 * 1024,
+    timeout=45 * 60,
+    max_containers=MAX_CPU_CONTAINERS,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def collate_t1_leaf_remote(
+    prepared_completion_path: str,
+    plan_path: str,
+    run_root: str,
+    task_identity_sha256: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Collate one bounded T1 panel slice and publish it immutably."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    runtime, scratch, provenance = loaded["load_runtime"](
+        _require_artifact_path(
+            prepared_completion_path, field="prepared_completion_path"
+        ),
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    plan = loaded["load_collated_plan"](
+        _require_artifact_path(plan_path, field="plan_path"),
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+    )
+    if (
+        plan["source_revision"] != _source_revision(revision)
+        or plan["prepared_completion_sha256"]
+        != provenance["prepared_completion_sha256"]
+    ):
+        raise RuntimeError("Process-V2 T1 collated leaf binds another input or image")
+    with _heartbeat(
+        "process_v2_t1_collated_leaf_heartbeat",
+        interval_seconds=HEARTBEAT_SECONDS,
+    ):
+        receipt_path = loaded["compile_collated_leaf"](
+            runtime,
+            scratch.model,
+            plan=plan,
+            task_identity_sha256=task_identity_sha256,
+            run_root=_require_physical_artifact_path(run_root, field="run_root"),
+        )
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_collated_leaf_complete",
+        "task_identity_sha256": task_identity_sha256,
+        "receipt_path": str(receipt_path),
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def scan_collated_remote(
+    prepared_completion_path: str,
+    plan_path: str,
+    run_root: str,
+    revision: dict[str, Any],
+) -> list[str]:
+    """Return only physically complete, authenticated collated tasks."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    runtime, _scratch, _provenance = loaded["load_runtime"](
+        _require_artifact_path(
+            prepared_completion_path, field="prepared_completion_path"
+        ),
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    plan = loaded["load_collated_plan"](
+        _require_artifact_path(plan_path, field="plan_path"),
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+    )
+    return list(
+        loaded["completed_collated_tasks"](
+            run_root=_require_physical_artifact_path(run_root, field="run_root"),
+            plan=plan,
+            runtime=runtime,
+        )
+    )
+
+
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def finalize_collated_remote(
+    prepared_completion_path: str,
+    plan_path: str,
+    run_root: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Reduce the complete CPU-collation receipts without recomputing rows."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    runtime, _scratch, provenance = loaded["load_runtime"](
+        _require_artifact_path(
+            prepared_completion_path, field="prepared_completion_path"
+        ),
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    plan = loaded["load_collated_plan"](
+        _require_artifact_path(plan_path, field="plan_path"),
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+    )
+    if plan["prepared_completion_sha256"] != provenance["prepared_completion_sha256"]:
+        raise RuntimeError("Process-V2 T1 collated completion binds another prepared input")
+    completion_path = loaded["publish_collated_completion"](
+        run_root=_require_physical_artifact_path(run_root, field="run_root"),
+        plan=plan,
+        runtime=runtime,
+    )
+    artifact_volume.commit()
+    completion = _read_canonical_object(
+        completion_path, label="the Process-V2 T1 collated completion"
+    )
+    response = {
+        "phase": "process_v2_t1_collated_complete",
+        "completion_path": str(completion_path),
+        "completion_sha256": completion["completion_sha256"],
+        "task_count": completion["task_count"],
+        "panel_entry_count": completion["panel_entry_count"],
+        "training_launched": False,
+        "bounded_p50_authorized": False,
+    }
+    _progress(**response)
+    return response
+
+
 def _execution_environment(loaded: Mapping[str, Any], *, batch_size: int) -> dict[str, Any]:
     torch = loaded["torch"]
     device_index = torch.cuda.current_device()
@@ -988,7 +1233,7 @@ def _invoke_process_v2_capacity_runner(
 
 @app.function(
     image=image,
-    gpu="A10G",
+    gpu=PUBLICATION_RECOVERY_GPU,
     cpu=8.0,
     memory=64 * 1024,
     timeout=GPU_TIMEOUT_SECONDS,
@@ -1126,6 +1371,190 @@ def run_t1_gpu_remote(
         "optimizer_steps_completed": completed_steps,
         "threshold_checks": result["threshold_checks"],
         "all_threshold_checks_pass": all(result["threshold_checks"].values()),
+        "image_revision_sha256": revision["image_revision_sha256"],
+        "training_launched": True,
+        "bounded_p50_authorized": decision["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    gpu="A10G",
+    cpu=4.0,
+    memory=64 * 1024,
+    timeout=GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def run_t1_collated_gpu_remote(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run T1 from authenticated CPU-collated tensors with no GPU collation."""
+
+    _validate_remote_revision(revision)
+    if (
+        os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+        != DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise RuntimeError("Process-V2 T1 requires deterministic cuBLAS")
+    artifact_volume.reload()
+    loaded = _imports()
+    prepared_path = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    runtime, scratch, provenance = loaded["load_runtime"](
+        prepared_path,
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+    )
+    plan = loaded["load_collated_plan"](
+        _require_artifact_path(collated_plan_path, field="collated_plan_path"),
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+    )
+    source_revision = _source_revision(revision)
+    if (
+        plan["source_revision"] != source_revision
+        or plan["prepared_completion_path"] != str(prepared_path)
+        or plan["prepared_completion_sha256"]
+        != provenance["prepared_completion_sha256"]
+    ):
+        raise RuntimeError("Process-V2 T1 collated cache binds another input or image")
+    collated_path = _require_artifact_path(
+        collated_completion_path, field="collated_completion_path"
+    )
+    materialized_panel = loaded["load_materialized_collated_panel"](
+        collated_path,
+        plan=plan,
+        runtime=runtime,
+    )
+    collated_completion = _read_canonical_object(
+        collated_path, label="the Process-V2 T1 collated completion"
+    )
+    torch = loaded["torch"]
+    model = scratch.model.to(device="cuda", dtype=torch.float32)
+    environment = _execution_environment(
+        loaded, batch_size=int(runtime.capacity_policy["optimization"]["batch_size"])
+    )
+    runner_hash = loaded["runner_implementation_sha256"](repo_root=REMOTE_ROOT)
+    provenance = loaded["project_result_provenance"](
+        {
+            **dict(provenance),
+            "runner_source_revision_sha256": source_revision["source_revision_sha256"],
+            "runner_implementation_sha256": runner_hash,
+            "execution_environment": environment,
+        }
+    )
+    run_identity_sha256 = _sha256(
+        {
+            "prepared_completion_sha256": provenance["prepared_completion_sha256"],
+            "collated_completion_sha256": collated_completion["completion_sha256"],
+            "capacity_policy_sha256": provenance["capacity_policy_sha256"],
+            "runner_source_revision_sha256": provenance[
+                "runner_source_revision_sha256"
+            ],
+            "runner_implementation_sha256": runner_hash,
+            "execution_environment_sha256": environment["environment_sha256"],
+        }
+    )
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix")
+        / run_identity_sha256
+    )
+    builder = functools.partial(
+        loaded["build_result"], capacity_policy=runtime.capacity_policy
+    )
+    _progress(
+        "process_v2_t1_collated_gpu_start",
+        run_root=str(run_root),
+        maximum_optimizer_steps=int(
+            runtime.capacity_policy["optimization"]["maximum_optimizer_steps"]
+        ),
+        prepared_entry_count=len(runtime.entries),
+        collated_task_count=collated_completion["task_count"],
+        gpu_side_collation_count=0,
+    )
+    with _gpu_checkpoint_heartbeat(run_root):
+        run = loaded["run_capacity"](
+            model,
+            runtime,
+            output_directory=run_root,
+            provenance=provenance,
+            materialized_panel=materialized_panel,
+            result_builder=builder,
+            result_filename=PROCESS_V2_RESULT_FILENAME,
+            expected_runner_implementation_sha256=runner_hash,
+        )
+    result = loaded["validate_result"](
+        run["result"], capacity_policy=runtime.capacity_policy
+    )
+    if loaded["RESULT_FILENAME"] != PROCESS_V2_RESULT_FILENAME:
+        raise RuntimeError("Process-V2 T1 result filename contract changed")
+    result_path = Path(run["result_path"])
+    if result_path != run_root / PROCESS_V2_RESULT_FILENAME:
+        raise RuntimeError("Process-V2 T1 runner published the result at another path")
+    result_file_sha256 = _file_sha256(result_path)
+    decision = loaded["build_decision"](
+        result,
+        capacity_policy=runtime.capacity_policy,
+        result_file_sha256=result_file_sha256,
+    )
+    decision_path = run_root / loaded["DECISION_FILENAME"]
+    loaded["write_bytes_if_absent"](
+        decision_path, _canonical_bytes(decision) + b"\n"
+    )
+    decision = loaded["validate_decision"](
+        _read_canonical_object(
+            decision_path, label="the Process-V2 T1 capacity decision"
+        ),
+        result=result,
+        capacity_policy=runtime.capacity_policy,
+        result_file_sha256=result_file_sha256,
+    )
+    completed_steps = int(result["run_integrity"]["optimizer_steps_completed"])
+    step_ten_path = run_root / "checkpoints" / STEP_TEN_CHECKPOINT_FILENAME
+    step_ten_receipts = [
+        dict(receipt)
+        for receipt in run["recovery_checkpoints"]
+        if int(receipt["completed_steps"]) == 10
+    ]
+    if completed_steps >= 10 and (
+        not step_ten_path.is_file()
+        or len(step_ten_receipts) != 1
+        or step_ten_receipts[0]["path"] != str(step_ten_path)
+        or step_ten_receipts[0]["file_sha256"] != _file_sha256(step_ten_path)
+    ):
+        raise RuntimeError("Process-V2 T1 step-10 checkpoint receipt disagrees")
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_collated_gpu_complete",
+        "run_root": str(run_root),
+        "result_path": str(result_path),
+        "result_file_sha256": result_file_sha256,
+        "result_sha256": result["result_sha256"],
+        "decision_path": str(decision_path),
+        "decision_sha256": decision["decision_sha256"],
+        "decision_status": decision["status"],
+        "selected_checkpoint_path": str(run["selected_checkpoint_path"]),
+        "selected_checkpoint_file_sha256": run[
+            "selected_checkpoint_file_sha256"
+        ],
+        "step_ten_checkpoint_path": (
+            None if completed_steps < 10 else str(step_ten_path)
+        ),
+        "optimizer_steps_completed": completed_steps,
+        "threshold_checks": result["threshold_checks"],
+        "all_threshold_checks_pass": all(result["threshold_checks"].values()),
+        "collated_completion_path": str(collated_path),
+        "collated_completion_sha256": collated_completion["completion_sha256"],
+        "gpu_side_collation_count": 0,
         "image_revision_sha256": revision["image_revision_sha256"],
         "training_launched": True,
         "bounded_p50_authorized": decision["bounded_p50_authorized"],
@@ -1989,6 +2418,118 @@ def reuse_driver(
     return result
 
 
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+)
+def collated_reuse_driver(
+    prepared_completion_path: str,
+    collated_output_prefix: str,
+    run_output_prefix: str,
+    entries_per_task: int,
+    max_cpu_containers: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Fan out CPU collation over frozen fibers, then launch GPU-only T1."""
+
+    _validate_remote_revision(revision)
+    if type(max_cpu_containers) is not int or not 1 <= max_cpu_containers <= MAX_CPU_CONTAINERS:
+        raise ValueError(f"max_cpu_containers must lie in [1, {MAX_CPU_CONTAINERS}]")
+    planned = prepare_collated_plan_remote.remote(
+        prepared_completion_path,
+        collated_output_prefix,
+        int(entries_per_task),
+        revision,
+    )
+    plan = planned["plan"]
+    expected = [str(task["task_identity_sha256"]) for task in plan["tasks"]]
+    completed = set(
+        scan_collated_remote.remote(
+            prepared_completion_path,
+            planned["plan_path"],
+            planned["run_root"],
+            revision,
+        )
+    )
+    missing = [identifier for identifier in expected if identifier not in completed]
+    _progress(
+        "process_v2_t1_collated_cpu_map_plan",
+        expected_tasks=len(expected),
+        already_complete=len(completed),
+        missing_tasks=len(missing),
+        max_cpu_containers=max_cpu_containers,
+    )
+    collate_t1_leaf_remote.update_autoscaler(max_containers=max_cpu_containers)
+    if missing:
+        results = list(
+            collate_t1_leaf_remote.starmap(
+                [
+                    (
+                        prepared_completion_path,
+                        planned["plan_path"],
+                        planned["run_root"],
+                        identifier,
+                        revision,
+                    )
+                    for identifier in missing
+                ]
+            )
+        )
+        if {str(result["task_identity_sha256"]) for result in results} != set(missing):
+            raise RuntimeError("Process-V2 T1 CPU collation lost a task result")
+    complete = set(
+        scan_collated_remote.remote(
+            prepared_completion_path,
+            planned["plan_path"],
+            planned["run_root"],
+            revision,
+        )
+    )
+    if complete != set(expected):
+        raise RuntimeError(
+            f"Process-V2 T1 CPU collation is incomplete: missing={len(set(expected) - complete)}"
+        )
+    finalized = finalize_collated_remote.remote(
+        prepared_completion_path,
+        planned["plan_path"],
+        planned["run_root"],
+        revision,
+    )
+    gpu = run_t1_collated_gpu_remote.remote(
+        prepared_completion_path,
+        planned["plan_path"],
+        finalized["completion_path"],
+        run_output_prefix,
+        revision,
+    )
+    result = {
+        "phase": "process_v2_t1_collated_driver_complete",
+        "collated": finalized,
+        "capacity": gpu,
+        "max_cpu_containers": max_cpu_containers,
+        "entries_per_task": entries_per_task,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "image_revision": revision,
+        "bounded_p50_authorized": gpu["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(
+        "process_v2_t1_collated_driver_complete",
+        collated_completion_sha256=finalized["completion_sha256"],
+        decision_sha256=gpu["decision_sha256"],
+        decision_status=gpu["decision_status"],
+        bounded_p50_authorized=gpu["bounded_p50_authorized"],
+        fiber_recomputation_count=0,
+        gpu_side_collation_count=0,
+        p50_launched=False,
+    )
+    return result
+
+
 @app.local_entrypoint()
 def main(
     active8_run_root: str,
@@ -2050,20 +2591,78 @@ def main(
     )
 
 
+@app.local_entrypoint()
+def cached_main(
+    prepared_completion_path: str,
+    expected_commit: str,
+    collated_output_prefix: str = COLLATED_OUTPUT_PREFIX,
+    run_output_prefix: str = RUN_OUTPUT_PREFIX,
+    entries_per_task: int = COLLATED_ENTRIES_PER_TASK,
+    max_cpu_containers: int = MAX_CPU_CONTAINERS,
+    wait_for_completion: bool = False,
+) -> None:
+    """Launch the optimized T1 path from an existing prepared completion."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_output_prefix,
+        run_output_prefix,
+        int(entries_per_task),
+        int(max_cpu_containers),
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                collated_reuse_driver.remote(*arguments), indent=2, sort_keys=True
+            )
+        )
+        return
+    call = collated_reuse_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_collated_driver_launched",
+                "driver_call_id": call.object_id,
+                "prepared_completion_path": prepared_completion_path,
+                "entries_per_task": int(entries_per_task),
+                "max_cpu_containers": int(max_cpu_containers),
+                "fiber_recomputation_count": 0,
+                "gpu_side_collation_count": 0,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
 __all__ = [
+    "COLLATED_OUTPUT_PREFIX",
     "MAX_CPU_CONTAINERS",
     "PREPARED_OUTPUT_PREFIX",
     "PROCESS_V2_RESULT_FILENAME",
     "RUN_OUTPUT_PREFIX",
     "app",
+    "cached_main",
+    "collate_t1_leaf_remote",
+    "collated_reuse_driver",
     "driver",
+    "finalize_collated_remote",
     "finalize_prepared_remote",
     "finalize_reused_prepared_remote",
     "local_image_revision",
     "main",
+    "prepare_collated_plan_remote",
     "prepare_leaf_remote",
     "prepare_plan_remote",
+    "run_t1_collated_gpu_remote",
     "run_t1_gpu_remote",
     "reuse_driver",
+    "scan_collated_remote",
     "scan_completed_remote",
 ]

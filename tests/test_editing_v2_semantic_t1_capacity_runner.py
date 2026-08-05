@@ -1241,6 +1241,210 @@ def test_parallel_materialization_preserves_exact_panel_order_and_batch(
     _assert_row_selection_matches(materialized.batch, direct)
 
 
+def test_cpu_collated_cache_round_trip_matches_fresh_materialization(
+    process_v2_partition_model,
+    tmp_path: Path,
+) -> None:
+    from compose_v4.experiments import (
+        editing_v2_process_v2_t1_collated_cache as collated_cache,
+    )
+
+    model = process_v2_partition_model
+    states = (_state("CCO"), _state("C1CCCCC1"), _state("CCN"))
+    entries = tuple(
+        {
+            "panel_entry_sha256": f"{index + 1:064x}",
+            "model_family": "atom_insert",
+            "support_time_hex": (0.5).hex(),
+        }
+        for index in range(len(states))
+    )
+    state_by_id = {
+        entry["panel_entry_sha256"]: state
+        for entry, state in zip(entries, states, strict=True)
+    }
+    partitions = {
+        entry["panel_entry_sha256"]: f"partition-{index}"
+        for index, entry in enumerate(entries)
+    }
+    fibers = {
+        entry["panel_entry_sha256"]: f"fiber-{index}"
+        for index, entry in enumerate(entries)
+    }
+
+    class Cache:
+        @staticmethod
+        def record_for_panel_entry_sha256(identifier: str):
+            return SimpleNamespace(teacher_fiber=fibers[identifier])
+
+    runtime = SimpleNamespace(
+        entries=entries,
+        prepared=SimpleNamespace(
+            states_by_panel_entry_sha256=state_by_id,
+            partitions_by_panel_entry_sha256=partitions,
+        ),
+        cache=Cache(),
+    )
+    source_body = {
+        "schema": "compose.editing_v2.process_v2_t1_authenticated_image_revision",
+        "schema_version": 1,
+        "commit": "4" * 40,
+        "tree": "5" * 40,
+        "image_revision_sha256": "6" * 64,
+        "serialized_source_inventory_sha256": "7" * 64,
+    }
+    source_revision = {
+        **source_body,
+        "source_revision_sha256": hashlib.sha256(
+            json.dumps(source_body, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest(),
+    }
+    plan = collated_cache.build_collated_cache_plan(
+        runtime,
+        prepared_completion_path=tmp_path / "PREPARED_COMPLETE.json",
+        prepared_completion_sha256="8" * 64,
+        source_revision=source_revision,
+        software_versions={
+            "python": "3.11",
+            "torch": str(torch.__version__),
+            "numpy": str(np.__version__),
+            "rdkit": "test",
+        },
+        repo_root=ROOT,
+        entries_per_task=2,
+    )
+    run_root = tmp_path / plan["run_identity_sha256"]
+    plan_path = run_root / collated_cache.PLAN_FILENAME
+    collated_cache.write_collated_cache_plan(plan_path, plan)
+    reopened = collated_cache.load_collated_cache_plan(
+        plan_path, runtime=runtime, repo_root=ROOT
+    )
+    for task in reopened["tasks"]:
+        collated_cache.compile_collated_cache_leaf(
+            runtime,
+            model,
+            plan=reopened,
+            task_identity_sha256=task["task_identity_sha256"],
+            run_root=run_root,
+        )
+    # A retry must produce byte-identical payloads and reuse the immutable paths.
+    first_task = reopened["tasks"][0]
+    collated_cache.compile_collated_cache_leaf(
+        runtime,
+        model,
+        plan=reopened,
+        task_identity_sha256=first_task["task_identity_sha256"],
+        run_root=run_root,
+    )
+    assert set(
+        collated_cache.completed_collated_task_identities(
+            run_root=run_root, plan=reopened, runtime=runtime
+        )
+    ) == {task["task_identity_sha256"] for task in reopened["tasks"]}
+    completion_path = collated_cache.publish_collated_cache_completion(
+        run_root=run_root, plan=reopened, runtime=runtime
+    )
+    cached = collated_cache.load_materialized_collated_panel(
+        completion_path, plan=reopened, runtime=runtime
+    )
+    fresh = capacity_runner._materialize_panel(
+        runtime, model, capacity_runner._collator(model)
+    )
+    assert cached.panel_ids == fresh.panel_ids
+    assert cached.fibers == fresh.fibers
+    assert cached.partitions == fresh.partitions
+    assert cached.entries == fresh.entries
+    from compose_v4.chem.persistent_state_identity import (
+        persistent_slot_state_sha256,
+    )
+    from dataclasses import replace
+
+    assert tuple(map(persistent_slot_state_sha256, cached.batch.states)) == tuple(
+        map(persistent_slot_state_sha256, fresh.batch.states)
+    )
+    _assert_row_selection_matches(
+        replace(cached.batch, states=fresh.batch.states), fresh.batch
+    )
+
+
+def test_cpu_collated_cache_refuses_payload_tampering(
+    process_v2_partition_model,
+    tmp_path: Path,
+) -> None:
+    from compose_v4.experiments import (
+        editing_v2_process_v2_t1_collated_cache as collated_cache,
+    )
+
+    identifier = "1" * 64
+    state = _state("CCO")
+    entry = {
+        "panel_entry_sha256": identifier,
+        "model_family": "atom_insert",
+        "support_time_hex": (0.5).hex(),
+    }
+    runtime = SimpleNamespace(
+        entries=(entry,),
+        prepared=SimpleNamespace(
+            states_by_panel_entry_sha256={identifier: state},
+            partitions_by_panel_entry_sha256={identifier: "partition"},
+        ),
+        cache=SimpleNamespace(
+            record_for_panel_entry_sha256=lambda _identifier: SimpleNamespace(
+                teacher_fiber="fiber"
+            )
+        ),
+    )
+    source_body = {
+        "schema": "compose.editing_v2.process_v2_t1_authenticated_image_revision",
+        "schema_version": 1,
+        "commit": "4" * 40,
+        "tree": "5" * 40,
+        "image_revision_sha256": "6" * 64,
+        "serialized_source_inventory_sha256": "7" * 64,
+    }
+    source_revision = {
+        **source_body,
+        "source_revision_sha256": hashlib.sha256(
+            json.dumps(source_body, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest(),
+    }
+    plan = collated_cache.build_collated_cache_plan(
+        runtime,
+        prepared_completion_path=tmp_path / "PREPARED_COMPLETE.json",
+        prepared_completion_sha256="8" * 64,
+        source_revision=source_revision,
+        software_versions={
+            "python": "3.11",
+            "torch": str(torch.__version__),
+            "numpy": str(np.__version__),
+            "rdkit": "test",
+        },
+        repo_root=ROOT,
+        entries_per_task=1,
+    )
+    task = plan["tasks"][0]
+    collated_cache.compile_collated_cache_leaf(
+        runtime,
+        process_v2_partition_model,
+        plan=plan,
+        task_identity_sha256=task["task_identity_sha256"],
+        run_root=tmp_path,
+    )
+    payload = (
+        tmp_path
+        / collated_cache.TASKS_DIRNAME
+        / task["task_identity_sha256"]
+        / collated_cache.PAYLOAD_FILENAME
+    )
+    original = payload.read_bytes()
+    payload.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+    receipt = payload.parent / collated_cache.RECEIPT_FILENAME
+    with pytest.raises(collated_cache.ProcessV2T1CollatedCacheError, match="bytes disagree"):
+        collated_cache.validate_collated_cache_leaf(
+            receipt, plan=plan, runtime=runtime
+        )
+
+
 def test_process_v2_row_selection_reindexes_the_admission_mask(
     process_v2_partition_model,
 ) -> None:

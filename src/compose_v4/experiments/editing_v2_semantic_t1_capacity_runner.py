@@ -1341,6 +1341,7 @@ def run_semantic_t1_capacity(
     *,
     output_directory: Path,
     provenance: Mapping[str, Any],
+    materialized_panel: _MaterializedSemanticT1Panel | None = None,
     resume_checkpoint_path: Path | None = None,
     resume_checkpoint_file_sha256: str | None = None,
     result_builder: SemanticT1ResultBuilder | None = None,
@@ -1423,8 +1424,27 @@ def run_semantic_t1_capacity(
     selected_step = 0
     selected_state = _clone_state_dict(model)
     selected_criterion = (float("-inf"), float("-inf"), 0)
-    collator = _collator(model)
-    materialized_panel = _materialize_panel(runtime, model, collator)
+    if materialized_panel is None:
+        collator = _collator(model)
+        materialized_panel = _materialize_panel(runtime, model, collator)
+    else:
+        expected_panel_ids = tuple(
+            str(entry["panel_entry_sha256"]) for entry in runtime.entries
+        )
+        if (
+            materialized_panel.panel_ids != expected_panel_ids
+            or materialized_panel.batch.batch_size != len(expected_panel_ids)
+            or tuple(
+                str(entry["panel_entry_sha256"])
+                for entry in materialized_panel.entries
+            )
+            != expected_panel_ids
+            or tuple(materialized_panel.index_by_panel_id)
+            != expected_panel_ids
+        ):
+            raise SemanticT1CapacityRunnerError(
+                "precollated T1 panel differs from the authenticated runtime"
+            )
 
     resume_count = 0
     if (resume_checkpoint_path is None) is not (resume_checkpoint_file_sha256 is None):

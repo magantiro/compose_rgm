@@ -1,0 +1,22 @@
+{
+  "schema": "compose.diagnostics.process_v2_t1_gpu_idle_bottleneck",
+  "schema_version": 1,
+  "evidence_class": "measured_operational_diagnostic",
+  "observed_at_utc": "2026-08-05T19:37:44Z",
+  "modal_app_id": "ap-2cTbbM826wEY9ZKSswPFvK",
+  "modal_container_id": "ta-01KZ9G6NWHBSJE3B51FWZG9FZR",
+  "source_commit": "97cc85b13d3a14c45429a2de69c8614881fec135",
+  "prepared_completion_path": "/artifacts/editing_v2/process_v2_t1_prepared/3719fa70eac18085c88aaa512bb973d6fa2a6016029b08a0abd8b93ed49c3f88/PROCESS_V2_T1_PREPARED_COMPLETE.json",
+  "prepared_completion_sha256": "a93c0b65b08c6b7726deeae727213b7145b88407830f95563c5060b86c4fc865",
+  "prepared_entry_count": 512,
+  "accelerator": "NVIDIA A10G",
+  "gpu_utilization_percent": 0,
+  "gpu_memory_used_mib": 289,
+  "gpu_power_draw_watts": 62.8,
+  "step_10_checkpoint_present": false,
+  "capacity_run_directory_present": false,
+  "interpretation": "The live T1 process was CPU-bound in pre-step panel collation while holding an A10G. The app was stopped with the prepared exact fibers preserved.",
+  "authorized_next_action": "Derive an authenticated CPU-collated cache from the same 512 prepared entries, then allocate the GPU only after cache completion.",
+  "training_result_authority": false,
+  "bounded_p50_authorized": false
+}

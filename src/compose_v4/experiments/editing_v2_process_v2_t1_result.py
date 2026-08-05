@@ -145,6 +145,7 @@ class ProcessV2T1ResultError(ValueError):
 
 
 _RUNNER_IMPLEMENTATION_FILES = (
+    "src/compose_v4/experiments/editing_v2_process_v2_t1_collated_cache.py",
     "src/compose_v4/experiments/editing_v2_semantic_t1_capacity_runner.py",
     "src/compose_v4/experiments/editing_v2_semantic_t1_capacity_policy.py",
     "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py",
