@@ -41,6 +41,7 @@ PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_prepared"
 RUN_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_capacity"
 CAPACITY_POLICY_SOURCE = "configs/editing_v2_process_v2_t1_capacity_policy.json"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
+PANEL_CACHE_DIRNAME = "_panel_cache"
 PLAN_FILENAME = "PROCESS_V2_T1_PREPARED_PLAN.json"
 LEAF_FILENAME = "PROCESS_V2_T1_PREPARED_LEAF.json"
 PREPARED_COMPLETION_FILENAME = "PROCESS_V2_T1_PREPARED_COMPLETE.json"
@@ -204,13 +205,23 @@ def _validate_remote_revision(value: Mapping[str, Any]) -> None:
 
 def _require_artifact_path(value: str, *, field: str) -> Path:
     path = Path(value)
-    try:
-        path.relative_to(ARTIFACT_ROOT)
-    except ValueError as error:
-        raise ValueError(f"{field} must be below {ARTIFACT_ROOT}") from error
     if not path.is_absolute() or ".." in path.parts:
         raise ValueError(f"{field} must be a normalized absolute artifact path")
-    return path
+    logical_root = ARTIFACT_ROOT
+    physical_root = logical_root.resolve()
+    try:
+        relative = path.relative_to(logical_root)
+    except ValueError:
+        try:
+            relative = path.relative_to(physical_root)
+        except ValueError as error:
+            raise ValueError(f"{field} must be below {ARTIFACT_ROOT}") from error
+    resolved = (physical_root / relative).resolve()
+    try:
+        resolved.relative_to(physical_root)
+    except ValueError as error:
+        raise ValueError(f"{field} resolves outside {ARTIFACT_ROOT}") from error
+    return resolved
 
 
 def _read_canonical_object(path: Path, *, label: str) -> dict[str, Any]:
@@ -259,6 +270,7 @@ def _imports() -> dict[str, Any]:
     from compose_v4.data.immutable_artifact import write_bytes_if_absent
     from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
         build_process_v2_t1_panel,
+        load_process_v2_t1_panel,
         open_process_v2_t1_source,
         write_process_v2_t1_panel,
     )
@@ -297,6 +309,7 @@ def _imports() -> dict[str, Any]:
         "RESULT_FILENAME": RESULT_FILENAME,
         "TASKS_DIRNAME": TASKS_DIRNAME,
         "build_panel": build_process_v2_t1_panel,
+        "load_panel": load_process_v2_t1_panel,
         "open_source": open_process_v2_t1_source,
         "write_panel": write_process_v2_t1_panel,
         "build_plan": build_process_v2_t1_prepared_plan,
@@ -324,8 +337,26 @@ def _open_source(
     return loaded["open_source"](
         active8_run_root,
         gate_zero_decision_path=gate_zero_decision_path,
-        artifact_root=ARTIFACT_ROOT,
+        artifact_root=ARTIFACT_ROOT.resolve(),
         repo_root=REMOTE_ROOT,
+    )
+
+
+def _panel_cache_identity(source: Any, *, source_revision: Mapping[str, Any]) -> str:
+    """Address one panel selection before the expensive stream is scanned."""
+
+    return _sha256(
+        {
+            "schema": "compose.editing_v2.process_v2_t1_panel_cache_address",
+            "schema_version": 1,
+            "source_revision_sha256": source_revision["source_revision_sha256"],
+            "process_identity_sha256": source.contracts.process_identity_sha256,
+            "active8_completion_sha256": source.index.active8_completion_sha256,
+            "active8_sentinel_sha256": source.index.active8_sentinel_sha256,
+            "active8_plan_sha256": source.plan["plan_sha256"],
+            "gate_zero_decision_sha256": source.decision["decision_sha256"],
+            "panel_policy_sha256": source.policy["contract_sha256"],
+        }
     )
 
 
@@ -442,13 +473,42 @@ def prepare_plan_remote(
         gate_zero_decision_path=gate_zero_path,
         loaded=loaded,
     )
-    with _heartbeat("process_v2_t1_panel_selection"):
-        panel = loaded["build_panel"](source)
+    source_revision = _source_revision(revision)
+    panel_cache_identity = _panel_cache_identity(
+        source,
+        source_revision=source_revision,
+    )
+    panel_cache_root = prefix / PANEL_CACHE_DIRNAME / panel_cache_identity
+    panel_cache_path = panel_cache_root / PANEL_FILENAME
+    panel_cache_hit = panel_cache_path.is_file()
+    if panel_cache_hit:
+        panel = loaded["load_panel"](panel_cache_path, source=source)
+        _progress(
+            "process_v2_t1_panel_cache_hit",
+            panel_cache_path=str(panel_cache_path),
+            panel_sha256=panel["panel_sha256"],
+        )
+    else:
+        with _heartbeat("process_v2_t1_panel_selection"):
+            panel = loaded["build_panel"](source)
+        panel_cache_path = loaded["write_panel"](
+            panel,
+            output_root=panel_cache_root,
+            source=source,
+        )
+        # The panel is the expensive selection result.  Commit it before model
+        # reconstruction or plan publication so any later failure resumes here.
+        artifact_volume.commit()
+        _progress(
+            "process_v2_t1_panel_cache_published",
+            panel_cache_path=str(panel_cache_path),
+            panel_sha256=panel["panel_sha256"],
+        )
     # The runtime derives and validates the clean repository revision itself.
     plan = loaded["build_plan"](
         panel,
         source=source,
-        source_revision=_source_revision(revision),
+        source_revision=source_revision,
     )
     run_root = prefix / str(plan["run_identity_sha256"])
     panel_path = loaded["write_panel"](panel, output_root=run_root, source=source)
@@ -465,6 +525,8 @@ def prepare_plan_remote(
         "phase": "process_v2_t1_plan_complete",
         "run_root": str(run_root),
         "panel_path": str(panel_path),
+        "panel_cache_path": str(panel_cache_path),
+        "panel_cache_hit": panel_cache_hit,
         "plan_path": str(plan_path),
         "plan": plan,
         "task_count": int(plan["task_count"]),

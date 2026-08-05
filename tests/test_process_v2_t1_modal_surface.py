@@ -6,6 +6,7 @@ import ast
 import inspect
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -225,7 +226,37 @@ def test_runtime_source_revision_binds_commit_tree_image_and_inventory() -> None
 def test_plan_receives_the_authenticated_remote_source_revision() -> None:
     body = ast.get_source_segment(_source(), _function("prepare_plan_remote"))
     assert body is not None
-    assert "source_revision=_source_revision(revision)" in body
+    assert "source_revision = _source_revision(revision)" in body
+    assert "source_revision=source_revision" in body
+
+
+def test_expensive_panel_is_committed_before_plan_construction() -> None:
+    body = ast.get_source_segment(_source(), _function("prepare_plan_remote"))
+    assert body is not None
+    assert 'loaded["load_panel"](' in body
+    assert 'loaded["write_panel"](' in body
+    cache_commit = body.index("artifact_volume.commit()")
+    assert body.index('loaded["write_panel"](') < cache_commit
+    assert cache_commit < body.index('loaded["build_plan"](')
+
+
+def test_panel_cache_address_binds_every_selection_input() -> None:
+    source = SimpleNamespace(
+        contracts=SimpleNamespace(process_identity_sha256="1" * 64),
+        index=SimpleNamespace(
+            active8_completion_sha256="2" * 64,
+            active8_sentinel_sha256="3" * 64,
+        ),
+        plan={"plan_sha256": "4" * 64},
+        decision={"decision_sha256": "5" * 64},
+        policy={"contract_sha256": "6" * 64},
+    )
+    revision = {"source_revision_sha256": "7" * 64}
+    observed = launcher._panel_cache_identity(source, source_revision=revision)
+    source.decision["decision_sha256"] = "8" * 64
+    changed = launcher._panel_cache_identity(source, source_revision=revision)
+    assert len(observed) == 64
+    assert observed != changed
 
 
 def test_remote_revision_refuses_changed_serialized_bytes(
@@ -254,6 +285,23 @@ def test_remote_revision_refuses_changed_serialized_bytes(
 def test_artifact_paths_cannot_escape_the_mounted_volume(value: str) -> None:
     with pytest.raises(ValueError):
         launcher._require_artifact_path(value, field="test_path")
+
+
+def test_artifact_path_resolves_a_modal_style_symlink_mount(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    physical = tmp_path / "physical"
+    physical.mkdir()
+    logical = tmp_path / "artifacts"
+    logical.symlink_to(physical, target_is_directory=True)
+    monkeypatch.setattr(launcher, "ARTIFACT_ROOT", logical)
+
+    observed = launcher._require_artifact_path(
+        str(logical / "editing_v2" / "panel.json"),
+        field="panel_path",
+    )
+    assert observed == physical / "editing_v2" / "panel.json"
+    assert logical not in observed.parents
 
 
 def test_serialized_image_contains_all_process_v2_t1_owners() -> None:
