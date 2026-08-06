@@ -35,7 +35,10 @@ FAMILY_PARAMETER_PREFIXES: Mapping[str, tuple[str, ...]] = {
     "bond_reroute": ("graft_head.", "graft_relation_head."),
     "cycle_insert": ("cycle_close_head.",),
     "cycle_attach": ("cycle_open_head.",),
-    "ring_system_restate": ("ring_restate_head.",),
+    "ring_system_restate": (
+        "ring_restate_head.",
+        "ring_restate_context_head.",
+    ),
 }
 
 

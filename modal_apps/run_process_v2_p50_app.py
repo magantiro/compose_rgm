@@ -37,6 +37,8 @@ IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_p50_prepared"
 RUN_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_p50"
 P50_POLICY_SOURCE = "configs/editing_v2_process_v2_p50_recipe_policy.json"
+T1_EVIDENCE_SOURCE = "configs/editing_v2_process_v2_p50_t1_evidence.json"
+SCOPED_T1_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_scoped_capacity"
 SELECTION_FILENAME = "PROCESS_V2_P50_SELECTION.json"
 PREPARED_FILENAME = "PROCESS_V2_P50_PREPARED_INPUTS.json"
 LEAF_FILENAME = "PROCESS_V2_P50_PREPARED_LEAF.json"
@@ -48,7 +50,7 @@ CPU_PER_LEAF = 1.0
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
-GPU_TIMEOUT_SECONDS = 8 * 3600
+GPU_TIMEOUT_SECONDS = 60 * 60
 HEARTBEAT_SECONDS = 30
 DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 
@@ -67,6 +69,8 @@ _RUNNER_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/editing_v2_process_v2_p50_prerequisites.py",
     "src/compose_v4/experiments/editing_v2_process_v2_p50_result.py",
     "src/compose_v4/experiments/editing_v2_process_v2_p50_runtime.py",
+    "src/compose_v4/experiments/editing_v2_process_v2_t1_scoped_result.py",
+    "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py",
 )
 
 image = (
@@ -345,10 +349,11 @@ def _imports() -> dict[str, Any]:
     from compose_v4.experiments.editing_p50_gate import state_dict_semantic_sha256
     from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
         P50_RECIPE_POLICY,
+        T1_CAPACITY_POLICY,
         load_process_v2_chain_artifact,
     )
     from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-        load_process_v2_p50_prerequisites,
+        load_process_v2_p50_scoped_prerequisites,
     )
     from compose_v4.experiments.editing_v2_process_v2_p50_result import (
         DECISION_FILENAME,
@@ -371,7 +376,16 @@ def _imports() -> dict[str, Any]:
         open_process_v2_t1_source,
     )
     from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
-        build_process_v2_t1_scratch_runtime,
+        build_process_v2_score_revised_scratch_runtime,
+    )
+    from compose_v4.experiments.editing_v2_process_v2_t1_scoped_result import (
+        DECISION_FILENAME as SCOPED_T1_DECISION_FILENAME,
+        RESULT_FILENAME as SCOPED_T1_RESULT_FILENAME,
+        build_process_v2_t1_scoped_capacity_decision,
+        build_process_v2_t1_scoped_capacity_result,
+        validate_process_v2_t1_scoped_capacity_decision,
+        validate_process_v2_t1_scoped_capacity_result,
+        validate_t1_evidence_source_manifest,
     )
     from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
         optimizer_state_semantic_sha256,
@@ -388,10 +402,18 @@ def _imports() -> dict[str, Any]:
         "write_bytes_if_absent": write_bytes_if_absent,
         "state_dict_sha256": state_dict_semantic_sha256,
         "P50_RECIPE_POLICY": P50_RECIPE_POLICY,
+        "T1_CAPACITY_POLICY": T1_CAPACITY_POLICY,
         "load_policy": load_process_v2_chain_artifact,
-        "load_prerequisites": load_process_v2_p50_prerequisites,
+        "load_prerequisites": load_process_v2_p50_scoped_prerequisites,
         "open_source": open_process_v2_t1_source,
-        "build_scratch": build_process_v2_t1_scratch_runtime,
+        "build_scratch": build_process_v2_score_revised_scratch_runtime,
+        "build_scoped_t1_result": build_process_v2_t1_scoped_capacity_result,
+        "build_scoped_t1_decision": build_process_v2_t1_scoped_capacity_decision,
+        "validate_scoped_t1_result": validate_process_v2_t1_scoped_capacity_result,
+        "validate_scoped_t1_decision": validate_process_v2_t1_scoped_capacity_decision,
+        "validate_t1_evidence_manifest": validate_t1_evidence_source_manifest,
+        "SCOPED_T1_RESULT_FILENAME": SCOPED_T1_RESULT_FILENAME,
+        "SCOPED_T1_DECISION_FILENAME": SCOPED_T1_DECISION_FILENAME,
         "build_selection": build_process_v2_p50_selection,
         "validate_selection": validate_process_v2_p50_selection,
         "compile_entries": compile_process_v2_p50_entries,
@@ -585,6 +607,98 @@ def _validate_checkpoint_payload(
     ):
         raise RuntimeError("Process-V2 P50 terminal checkpoint disagrees")
     return payload
+
+
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def materialize_scoped_t1_remote(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Compose existing per-family receipts and publish the P50 GO decision."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    manifest = loaded["validate_t1_evidence_manifest"](
+        _read_canonical_object(
+            REMOTE_ROOT / T1_EVIDENCE_SOURCE,
+            label="the Process-V2 P50 T1 evidence source manifest",
+        )
+    )
+    source = _open_source(
+        active8_run_root=_require_artifact_path(
+            active8_run_root, field="active8_run_root"
+        ),
+        gate_zero_decision_path=_require_artifact_path(
+            gate_zero_decision_path, field="gate_zero_decision_path"
+        ),
+        loaded=loaded,
+    )
+    _scratch, _binding, score_receipt = loaded["build_scratch"](source)
+    capacity_policy = loaded["load_policy"](
+        loaded["T1_CAPACITY_POLICY"], repo_root=REMOTE_ROOT
+    )
+    sources: dict[str, dict[str, Any]] = {}
+    source_hashes: dict[str, str] = {}
+    for name, descriptor in manifest["input_sources"].items():
+        path = _require_artifact_path(str(descriptor["path"]), field=f"{name}_path")
+        sources[name] = _read_canonical_object(path, label=f"the {name} T1 receipt")
+        source_hashes[name] = _file_sha256(path)
+    result = loaded["build_scoped_t1_result"](
+        source_manifest=manifest,
+        source_file_sha256s=source_hashes,
+        base_result=sources.pop("base"),
+        repair_results=sources,
+        capacity_policy=capacity_policy,
+        score_revision_receipt=score_receipt,
+    )
+    result = loaded["validate_scoped_t1_result"](result)
+    run_identity = _sha256(
+        {
+            "schema": "compose.editing_v2.process_v2_t1_scoped_capacity_address",
+            "schema_version": 1,
+            "source_manifest_sha256": manifest["manifest_sha256"],
+            "capacity_policy_sha256": capacity_policy["contract_sha256"],
+            "score_revision_receipt_sha256": score_receipt["receipt_sha256"],
+            "result_sha256": result["result_sha256"],
+        }
+    )
+    run_root = _require_physical_artifact_path(output_prefix, field="output_prefix") / run_identity
+    result_path = run_root / loaded["SCOPED_T1_RESULT_FILENAME"]
+    decision_path = run_root / loaded["SCOPED_T1_DECISION_FILENAME"]
+    _publish_canonical(result_path, result, loaded=loaded)
+    result_file_sha256 = _file_sha256(result_path)
+    decision = loaded["build_scoped_t1_decision"](
+        result, result_file_sha256=result_file_sha256
+    )
+    _publish_canonical(decision_path, decision, loaded=loaded)
+    decision = loaded["validate_scoped_t1_decision"](
+        _read_canonical_object(decision_path, label="the scoped T1 decision"),
+        result=result,
+        result_file_sha256=result_file_sha256,
+        require_p50_go=True,
+    )
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_scoped_capacity_complete",
+        "run_root": str(run_root),
+        "result_path": str(result_path),
+        "result_sha256": result["result_sha256"],
+        "decision_path": str(decision_path),
+        "decision_sha256": decision["decision_sha256"],
+        "bounded_p50_authorized": decision["bounded_p50_authorized"],
+    }
+    _progress(**response)
+    return response
 
 
 @app.function(
@@ -885,7 +999,7 @@ def run_p50_gpu_remote(
         raise RuntimeError("Process-V2 P50 prepared inputs bind another image revision")
     _require_prepared_prerequisite_binding(prepared, prerequisites=prerequisites)
     runtime = loaded["load_runtime"](prepared)
-    scratch, _binding = loaded["build_scratch"](source)
+    scratch, _binding, score_receipt = loaded["build_scratch"](source)
     policy = loaded["load_policy"](loaded["P50_RECIPE_POLICY"], repo_root=REMOTE_ROOT)
     source_revision = _source_revision(revision)
     runner_hash = _runner_implementation_sha256(revision)
@@ -908,6 +1022,15 @@ def run_p50_gpu_remote(
         "runner_source_revision_sha256": source_revision["source_revision_sha256"],
         "execution_environment": environment,
     }
+    if (
+        score_receipt["receipt_sha256"]
+        != prerequisites.t1_score_revision_receipt_sha256
+        or score_receipt["current_initial_model_state_sha256"]
+        != prerequisites.t1_initial_model_state_sha256
+        or loaded["state_dict_sha256"](scratch.model.state_dict())
+        != prerequisites.t1_initial_model_state_sha256
+    ):
+        raise RuntimeError("Process-V2 P50 score-revision scratch binding disagrees")
     # ``active_families``, ``optimizer_steps``, and ``batch_size`` belong to
     # the validated prerequisite object but are not result provenance fields.
     for field in ("active_families", "optimizer_steps", "batch_size"):
@@ -1092,8 +1215,7 @@ def run_p50_gpu_remote(
 def driver(
     active8_run_root: str,
     gate_zero_decision_path: str,
-    t1_result_path: str,
-    t1_decision_path: str,
+    scoped_t1_output_prefix: str,
     prepared_output_prefix: str,
     run_output_prefix: str,
     max_cpu_containers: int,
@@ -1104,6 +1226,14 @@ def driver(
     _validate_remote_revision(revision)
     if type(max_cpu_containers) is not int or not 1 <= max_cpu_containers <= MAX_CPU_CONTAINERS:
         raise ValueError(f"max_cpu_containers must lie in [1, {MAX_CPU_CONTAINERS}]")
+    scoped_t1 = materialize_scoped_t1_remote.remote(
+        active8_run_root,
+        gate_zero_decision_path,
+        scoped_t1_output_prefix,
+        revision,
+    )
+    t1_result_path = str(scoped_t1["result_path"])
+    t1_decision_path = str(scoped_t1["decision_path"])
     selected = prepare_selection_remote.remote(
         active8_run_root,
         gate_zero_decision_path,
@@ -1172,6 +1302,7 @@ def driver(
         "phase": "process_v2_p50_driver_complete",
         "prepared": prepared,
         "pilot": gpu,
+        "scoped_t1": scoped_t1,
         "max_cpu_containers": max_cpu_containers,
         "cpu_submission_waves": len(waves),
         "image_revision": revision,
@@ -1192,9 +1323,8 @@ def driver(
 def main(
     active8_run_root: str,
     gate_zero_decision_path: str,
-    t1_result_path: str,
-    t1_decision_path: str,
     expected_commit: str,
+    scoped_t1_output_prefix: str = SCOPED_T1_OUTPUT_PREFIX,
     prepared_output_prefix: str = PREPARED_OUTPUT_PREFIX,
     run_output_prefix: str = RUN_OUTPUT_PREFIX,
     max_cpu_containers: int = MAX_CPU_CONTAINERS,
@@ -1206,8 +1336,7 @@ def main(
     arguments = (
         active8_run_root,
         gate_zero_decision_path,
-        t1_result_path,
-        t1_decision_path,
+        scoped_t1_output_prefix,
         prepared_output_prefix,
         run_output_prefix,
         int(max_cpu_containers),
@@ -1245,6 +1374,7 @@ __all__ = [
     "finalize_prepared_remote",
     "local_image_revision",
     "main",
+    "materialize_scoped_t1_remote",
     "prepare_leaf_remote",
     "prepare_selection_remote",
     "run_p50_gpu_remote",

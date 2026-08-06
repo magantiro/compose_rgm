@@ -46,7 +46,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     load_process_v2_chain_artifact,
 )
 from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-    ProcessV2P50Prerequisites,
+    ProcessV2P50ScopedPrerequisites,
 )
 from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
     ProcessV2T1PanelError,
@@ -56,9 +56,10 @@ from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
 from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
     ProcessV2T1RuntimeError,
     _entry_from_exact_transition,
-    build_process_v2_t1_scratch_runtime,
+    build_process_v2_score_revised_scratch_runtime,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
+    ACTION_ROUTE_PREFIXES,
     TOTAL_HAZARD_PREFIX,
     _assert_hazard_identity,
     _attach_successor_family_coordinates,
@@ -404,7 +405,7 @@ def _validation_panel(
 def build_process_v2_p50_selection(
     source: ProcessV2T1Source,
     *,
-    prerequisites: ProcessV2P50Prerequisites,
+    prerequisites: ProcessV2P50ScopedPrerequisites,
 ) -> dict[str, Any]:
     """Scan authenticated metadata once and freeze train/validation addresses."""
 
@@ -589,7 +590,9 @@ def compile_process_v2_p50_entries(
     ]
     try:
         resolved = resolve_process_v2_t1_entries(source, resolver_entries)
-        scratch, _binding = build_process_v2_t1_scratch_runtime(source)
+        scratch, _binding, _score_receipt = (
+            build_process_v2_score_revised_scratch_runtime(source)
+        )
     except (ProcessV2T1PanelError, ProcessV2T1RuntimeError) as error:
         raise ProcessV2P50RuntimeError(str(error)) from error
     addressed_by_entry: dict[str, Any] = {}
@@ -899,8 +902,9 @@ def run_process_v2_p50(
         torch.cuda.manual_seed_all(seed)
     hazard_initial = _hazard_state(model)
     hazard_initial_state_sha256 = state_dict_semantic_sha256(hazard_initial)
+    named_parameters = dict(model.named_parameters())
     trainable: list[torch.Tensor] = []
-    for name, parameter in model.named_parameters():
+    for name, parameter in named_parameters.items():
         parameter.requires_grad_(not name.startswith(TOTAL_HAZARD_PREFIX))
         if parameter.requires_grad:
             trainable.append(parameter)
@@ -926,6 +930,21 @@ def run_process_v2_p50(
             "finite_nonzero_global_gradient_exposure_steps": 0,
             "all_exposure_step_global_gradients_finite": True,
             "cumulative_exposure_step_global_gradient_l2": 0.0,
+            "finite_nonzero_action_route_gradient_exposure_steps": 0,
+            "all_exposure_step_action_route_gradients_finite": True,
+            "cumulative_exposure_step_action_route_gradient_l2": 0.0,
+            "required_revision_parameter": (
+                "graft_relation_head.weight"
+                if family == "bond_reroute"
+                else (
+                    "ring_restate_context_head.weight"
+                    if family == "ring_system_restate"
+                    else None
+                )
+            ),
+            "finite_nonzero_revision_parameter_gradient_exposure_steps": 0,
+            "all_exposure_step_revision_parameter_gradients_finite": True,
+            "cumulative_exposure_step_revision_parameter_gradient_l2": 0.0,
         }
         for family in families
     }
@@ -958,7 +977,7 @@ def run_process_v2_p50(
         loss.backward()
         squared_gradient_l2 = 0.0
         all_gradients_finite = True
-        for name, parameter in model.named_parameters():
+        for name, parameter in named_parameters.items():
             if name.startswith(TOTAL_HAZARD_PREFIX):
                 if parameter.grad is not None:
                     raise ProcessV2P50RuntimeError(
@@ -992,10 +1011,56 @@ def run_process_v2_p50(
         finite_nonzero = all_gradients_finite and global_gradient_l2 > 0.0
         for family, count in row_family_counts.items():
             exposure = family_exposure[family]
+            route_gradients = [
+                parameter.grad
+                for name, parameter in named_parameters.items()
+                if name.startswith(ACTION_ROUTE_PREFIXES[family])
+                and parameter.requires_grad
+                and parameter.grad is not None
+            ]
+            route_finite = bool(route_gradients) and all(
+                bool(torch.isfinite(gradient).all()) for gradient in route_gradients
+            )
+            route_l2 = math.sqrt(
+                sum(float(gradient.detach().norm()) ** 2 for gradient in route_gradients)
+            )
+            if not route_finite or not math.isfinite(route_l2):
+                raise ProcessV2P50RuntimeError(
+                    f"nonfinite or absent {family} action-route gradient at step {step + 1}"
+                )
             exposure["observed_example_count"] += count
             exposure["finite_nonzero_global_gradient_exposure_steps"] += int(finite_nonzero)
             exposure["all_exposure_step_global_gradients_finite"] &= all_gradients_finite
             exposure["cumulative_exposure_step_global_gradient_l2"] += global_gradient_l2
+            exposure["finite_nonzero_action_route_gradient_exposure_steps"] += int(
+                route_l2 > 0.0
+            )
+            exposure["all_exposure_step_action_route_gradients_finite"] &= route_finite
+            exposure["cumulative_exposure_step_action_route_gradient_l2"] += route_l2
+            revision_name = exposure["required_revision_parameter"]
+            if revision_name is not None:
+                revision_gradient = named_parameters[revision_name].grad
+                revision_finite = revision_gradient is not None and bool(
+                    torch.isfinite(revision_gradient).all()
+                )
+                revision_l2 = (
+                    float(revision_gradient.detach().norm())
+                    if revision_gradient is not None
+                    else 0.0
+                )
+                if not revision_finite or not math.isfinite(revision_l2):
+                    raise ProcessV2P50RuntimeError(
+                        f"nonfinite or absent {revision_name} gradient at step {step + 1}"
+                    )
+                exposure[
+                    "finite_nonzero_revision_parameter_gradient_exposure_steps"
+                ] += int(revision_l2 > 0.0)
+                exposure[
+                    "all_exposure_step_revision_parameter_gradients_finite"
+                ] &= revision_finite
+                exposure[
+                    "cumulative_exposure_step_revision_parameter_gradient_l2"
+                ] += revision_l2
         for cell, count in row_cell_counts.items():
             exposure = cell_exposure[cell]
             exposure["observed_example_count"] += count

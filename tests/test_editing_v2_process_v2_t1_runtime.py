@@ -152,8 +152,16 @@ def test_score_revision_bridge_adds_only_contextual_ring_restate_capacity(
     genuine_stage,
     monkeypatch,
 ) -> None:
-    _stage, source, _decision = genuine_stage
+    stage, source, _decision = genuine_stage
     predecessor = dict(source.plan["binding"]["model_runtime"])
+    predecessor_state = stage.runtime.model.state_dict()
+    predecessor["initial_model_state_sha256"] = t1_runtime.state_dict_semantic_sha256(
+        {
+            name: value
+            for name, value in predecessor_state.items()
+            if name != "graft_relation_head.weight"
+        }
+    )
     frozen = {
         "prepared_completion_sha256": "a" * 64,
         "prepared_completion_file_sha256": "b" * 64,

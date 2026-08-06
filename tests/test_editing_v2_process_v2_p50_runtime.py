@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-    ProcessV2P50Prerequisites,
+    ProcessV2P50ScopedPrerequisites,
 )
 from compose_v4.experiments import editing_v2_process_v2_p50_runtime as runtime
 
@@ -45,8 +45,8 @@ def _candidate(*, cell: str, role: str, index: int) -> dict[str, object]:
     return {**body, "p50_entry_sha256": runtime._candidate_identity(body)}
 
 
-def _prerequisites(families: tuple[str, ...]) -> ProcessV2P50Prerequisites:
-    return ProcessV2P50Prerequisites(
+def _prerequisites(families: tuple[str, ...]) -> ProcessV2P50ScopedPrerequisites:
+    return ProcessV2P50ScopedPrerequisites(
         process_identity_sha256=_sha("process"),
         active8_completion_sha256=_sha("active8"),
         gate_zero_decision_sha256=_sha("gate0"),
@@ -54,7 +54,7 @@ def _prerequisites(families: tuple[str, ...]) -> ProcessV2P50Prerequisites:
         t1_result_sha256=_sha("t1-result"),
         t1_decision_sha256=_sha("t1-decision"),
         t1_initial_model_state_sha256=_sha("initial"),
-        t1_selected_model_state_sha256=_sha("selected-not-used"),
+        t1_score_revision_receipt_sha256=_sha("score-revision"),
         p50_recipe_policy_sha256=_sha("p50-policy"),
         active_families=families,
         optimizer_steps=50,

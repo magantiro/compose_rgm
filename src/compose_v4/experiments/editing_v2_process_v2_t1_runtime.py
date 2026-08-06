@@ -451,6 +451,24 @@ def _scratch_runtime_for_score_revision(
             atom_vocabulary=ORGANIC_VOCABULARY,
         ).to(dtype=torch.float32)
     predecessor_state = predecessor_runtime.model.state_dict()
+    if set(predecessor_state) - {"graft_relation_head.weight"} == set(predecessor_state):
+        raise ProcessV2T1RuntimeError(
+            "relational score predecessor lacks its declared residual parameter"
+        )
+    base_state = {
+        name: value
+        for name, value in predecessor_state.items()
+        if name != "graft_relation_head.weight"
+    }
+    base_state_sha256 = state_dict_semantic_sha256(base_state)
+    relational_state_sha256 = state_dict_semantic_sha256(predecessor_state)
+    if (
+        base_state_sha256 != frozen["initial_model_state_sha256"]
+        or bool(predecessor_state["graft_relation_head.weight"].count_nonzero())
+    ):
+        raise ProcessV2T1RuntimeError(
+            "relational score revision is not one zero-initialized residual over base"
+        )
     current_state = model.state_dict()
     if any(
         name not in current_state or not torch.equal(value, current_state[name])
@@ -522,10 +540,71 @@ def _scratch_runtime_for_score_revision(
             {field: current[field] for field in _SCORE_INDEPENDENT_MODEL_RUNTIME_FIELDS}
         ),
     }
+    containment_body = {
+        "schema": "compose.editing_v2.process_v2_score_revision_containment",
+        "schema_version": 1,
+        "base_initial_model_state_sha256": base_state_sha256,
+        "relational_initial_model_state_sha256": relational_state_sha256,
+        "current_initial_model_state_sha256": current[
+            "initial_model_state_sha256"
+        ],
+        "support_geometry_sha256": bridge["support_geometry_sha256"],
+        "implementation_sha256": canonical_sha256(
+            [
+                {
+                    "path": relative,
+                    "file_sha256": _file_sha256(Path(repo_root) / relative),
+                }
+                for relative in (
+                    "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py",
+                    "src/compose_v4/model/factorized_tracelet_rate_model.py",
+                    "src/compose_v4/model/relational_reroute_rate_model.py",
+                    "src/compose_v4/model/contextual_ring_restate_rate_model.py",
+                )
+            ]
+        ),
+        "zero_initialized_residuals": [
+            {
+                "affected_family": "bond_reroute",
+                "parameter": "graft_relation_head.weight",
+                "predecessor": "base",
+                "successor": "relational",
+                "zero_initialized": True,
+            },
+            {
+                "affected_family": "ring_system_restate",
+                "parameter": "ring_restate_context_head.weight",
+                "predecessor": "relational",
+                "successor": "current",
+                "zero_initialized": True,
+            },
+        ],
+    }
+    containment = {
+        **containment_body,
+        "receipt_sha256": canonical_sha256(containment_body),
+    }
     return runtime, binding, {
         **bridge,
+        "score_revision_containment": containment,
         "score_revision_rebind_sha256": canonical_sha256(bridge),
     }
+
+
+def build_process_v2_score_revised_scratch_runtime(
+    source: ProcessV2T1Source,
+) -> tuple[SemanticScratchRuntime, dict[str, Any], dict[str, Any]]:
+    """Construct the P50 scorer and its exact zero-residual containment receipt."""
+
+    bound = source.plan.get("binding", {}).get("model_runtime")
+    if not isinstance(bound, Mapping) or tuple(sorted(bound)) != MODEL_RUNTIME_FIELDS:
+        raise ProcessV2T1RuntimeError("Active8 plan lacks its model runtime descriptor")
+    runtime, binding, bridge = _scratch_runtime_for_score_revision(
+        bound, repo_root=source.repo_root
+    )
+    if runtime.process_identity_sha256 != source.contracts.process_identity_sha256:
+        raise ProcessV2T1RuntimeError("score-revised scratch process identity changed")
+    return runtime, binding, dict(bridge["score_revision_containment"])
 
 
 def build_process_v2_t1_scratch_runtime(
@@ -2080,6 +2159,7 @@ __all__ = [
     "build_reused_process_v2_t1_prepared_inputs",
     "build_process_v2_t1_prepared_plan",
     "build_process_v2_t1_scratch_runtime",
+    "build_process_v2_score_revised_scratch_runtime",
     "compile_process_v2_t1_prepared_leaf",
     "compile_authenticated_process_v2_t1_prepared_leaf",
     "load_process_v2_t1_capacity_policy",

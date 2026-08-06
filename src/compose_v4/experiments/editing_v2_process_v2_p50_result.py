@@ -19,13 +19,16 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     verify_self_hash,
 )
 from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-    ProcessV2P50Prerequisites,
+    ProcessV2P50ScopedPrerequisites,
+)
+from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
+    CHAIN_SCHEMA_VERSION,
 )
 
 RESULT_FILENAME = "PROCESS_V2_P50_RESULT.json"
 DECISION_FILENAME = "PROCESS_V2_P50_DECISION.json"
 RESULT_SCHEMA = "compose.editing_v2.process_v2_p50_result"
-RESULT_SCHEMA_VERSION = 1
+RESULT_SCHEMA_VERSION = 2
 RESULT_STATUS = "COMPLETE_PROCESS_V2_P50_RESULT_NO_DOWNSTREAM_AUTHORITY"
 DECISION_SCHEMA = "compose.editing_v2.process_v2_p50_decision"
 DECISION_SCHEMA_VERSION = 1
@@ -57,7 +60,7 @@ _PROVENANCE_FIELDS = {
     "t1_result_sha256",
     "t1_decision_sha256",
     "t1_initial_model_state_sha256",
-    "t1_selected_model_state_sha256",
+    "t1_score_revision_receipt_sha256",
     "p50_recipe_policy_sha256",
     "prepared_inputs_sha256",
     "training_stream_sha256",
@@ -122,6 +125,15 @@ _EXPOSURE_FIELDS = {
     "finite_nonzero_global_gradient_exposure_steps",
     "all_exposure_step_global_gradients_finite",
     "cumulative_exposure_step_global_gradient_l2",
+}
+_FAMILY_ROUTE_EXPOSURE_FIELDS = {
+    "finite_nonzero_action_route_gradient_exposure_steps",
+    "all_exposure_step_action_route_gradients_finite",
+    "cumulative_exposure_step_action_route_gradient_l2",
+    "required_revision_parameter",
+    "finite_nonzero_revision_parameter_gradient_exposure_steps",
+    "all_exposure_step_revision_parameter_gradients_finite",
+    "cumulative_exposure_step_revision_parameter_gradient_l2",
 }
 _RESULT_FIELDS = {
     "schema",
@@ -193,7 +205,7 @@ def _validate_policy(
     families = tuple(policy.get("active_families", ()))
     if (
         policy.get("schema") != "compose.editing_v2.process_v2_p50_recipe_policy"
-        or policy.get("schema_version") != 4
+        or policy.get("schema_version") != CHAIN_SCHEMA_VERSION
         or policy.get("status") != "FROZEN_PROCESS_V2_P50_RECIPE_POLICY_NO_DOWNSTREAM_AUTHORITY"
         or policy.get("p500_authorized") is not False
         or not isinstance(optimization, Mapping)
@@ -282,10 +294,10 @@ def _validate_provenance(
     value: object,
     *,
     policy: Mapping[str, Any],
-    prerequisites: ProcessV2P50Prerequisites,
+    prerequisites: ProcessV2P50ScopedPrerequisites,
     expected_runtime_provenance: Mapping[str, str],
 ) -> dict[str, Any]:
-    if not isinstance(prerequisites, ProcessV2P50Prerequisites):
+    if not isinstance(prerequisites, ProcessV2P50ScopedPrerequisites):
         raise ProcessV2P50ResultError("P50 provenance requires validated Process-V2 prerequisites")
     provenance = _exact_mapping(value, _PROVENANCE_FIELDS, label="P50 provenance")
     environment = _exact_mapping(
@@ -309,7 +321,9 @@ def _validate_provenance(
         "t1_result_sha256": prerequisites.t1_result_sha256,
         "t1_decision_sha256": prerequisites.t1_decision_sha256,
         "t1_initial_model_state_sha256": prerequisites.t1_initial_model_state_sha256,
-        "t1_selected_model_state_sha256": prerequisites.t1_selected_model_state_sha256,
+        "t1_score_revision_receipt_sha256": (
+            prerequisites.t1_score_revision_receipt_sha256
+        ),
         "p50_recipe_policy_sha256": prerequisites.p50_recipe_policy_sha256,
     }
     if any(provenance[name] != expected_value for name, expected_value in expected.items()):
@@ -476,6 +490,7 @@ def _validate_exposure(
     identities: tuple[str, ...],
     identity_field: str,
     scheduled_examples: int,
+    require_family_routes: bool = False,
 ) -> list[dict[str, Any]]:
     """Validate cheap group exposure, never isolated per-group backward passes.
 
@@ -491,9 +506,10 @@ def _validate_exposure(
         raise ProcessV2P50ResultError(f"P50 {identity_field} evidence coverage disagrees")
     rows: list[dict[str, Any]] = []
     for item in value:
-        row = _exact_mapping(
-            item, {identity_field, *_EXPOSURE_FIELDS}, label=f"P50 {identity_field} evidence"
-        )
+        expected_fields = {identity_field, *_EXPOSURE_FIELDS}
+        if require_family_routes:
+            expected_fields.update(_FAMILY_ROUTE_EXPOSURE_FIELDS)
+        row = _exact_mapping(item, expected_fields, label=f"P50 {identity_field} evidence")
         for name in (
             "planned_example_count",
             "observed_example_count",
@@ -514,6 +530,58 @@ def _validate_exposure(
             or type(row["all_exposure_step_global_gradients_finite"]) is not bool
         ):
             raise ProcessV2P50ResultError("P50 exposure evidence range disagrees")
+        if require_family_routes:
+            for name in (
+                "finite_nonzero_action_route_gradient_exposure_steps",
+                "finite_nonzero_revision_parameter_gradient_exposure_steps",
+            ):
+                if type(row[name]) is not int or not 0 <= row[name] <= 50:
+                    raise ProcessV2P50ResultError(
+                        f"P50 family-route exposure {name} is outside range"
+                    )
+            for name in (
+                "all_exposure_step_action_route_gradients_finite",
+                "all_exposure_step_revision_parameter_gradients_finite",
+            ):
+                if type(row[name]) is not bool:
+                    raise ProcessV2P50ResultError(
+                        f"P50 family-route exposure {name} is not Boolean"
+                    )
+            action_l2 = _finite(
+                row["cumulative_exposure_step_action_route_gradient_l2"],
+                label="P50 action-route cumulative gradient",
+                minimum=0.0,
+            )
+            revision_l2 = _finite(
+                row["cumulative_exposure_step_revision_parameter_gradient_l2"],
+                label="P50 revision-parameter cumulative gradient",
+                minimum=0.0,
+            )
+            expected_revision = {
+                "bond_reroute": "graft_relation_head.weight",
+                "ring_system_restate": "ring_restate_context_head.weight",
+            }.get(str(row[identity_field]))
+            if (
+                row["required_revision_parameter"] != expected_revision
+                or action_l2 != row[
+                    "cumulative_exposure_step_action_route_gradient_l2"
+                ]
+                or revision_l2
+                != row["cumulative_exposure_step_revision_parameter_gradient_l2"]
+                or (
+                    expected_revision is None
+                    and (
+                        row[
+                            "finite_nonzero_revision_parameter_gradient_exposure_steps"
+                        ]
+                        != 0
+                        or revision_l2 != 0.0
+                    )
+                )
+            ):
+                raise ProcessV2P50ResultError(
+                    "P50 scorer-revision gradient evidence disagrees"
+                )
         rows.append({**row, "cumulative_exposure_step_global_gradient_l2": gradient})
     if sum(row["planned_example_count"] for row in rows) != scheduled_examples:
         raise ProcessV2P50ResultError("P50 planned exposure does not sum to 3,200")
@@ -557,26 +625,45 @@ def _exposure_checks(
     *,
     identity_field: str,
     fraction: float,
+    require_family_routes: bool = False,
 ) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     for row in rows:
         minimum = max(1, math.ceil(fraction * row["planned_optimizer_step_opportunities"]))
+        action_route_passed = (
+            not require_family_routes
+            or row["all_exposure_step_action_route_gradients_finite"] is True
+            and row["cumulative_exposure_step_action_route_gradient_l2"] > 0.0
+            and row["finite_nonzero_action_route_gradient_exposure_steps"] >= minimum
+        )
+        revision_required = (
+            require_family_routes and row["required_revision_parameter"] is not None
+        )
+        revision_passed = (
+            not revision_required
+            or row["all_exposure_step_revision_parameter_gradients_finite"] is True
+            and row["cumulative_exposure_step_revision_parameter_gradient_l2"] > 0.0
+            and row["finite_nonzero_revision_parameter_gradient_exposure_steps"]
+            >= minimum
+        )
+        global_passed = (
+            row["all_exposure_step_global_gradients_finite"] is True
+            and row["cumulative_exposure_step_global_gradient_l2"] > 0.0
+            and row["finite_nonzero_global_gradient_exposure_steps"] >= minimum
+        )
         checks.append(
             {
                 identity_field: row[identity_field],
                 "minimum_required_finite_nonzero_global_gradient_exposure_steps": minimum,
                 "complete_example_exposure": row["observed_example_count"]
                 == row["planned_example_count"],
-                "finite_nonzero_global_gradient_exposure": row[
-                    "all_exposure_step_global_gradients_finite"
-                ]
-                is True
-                and row["cumulative_exposure_step_global_gradient_l2"] > 0.0
-                and row["finite_nonzero_global_gradient_exposure_steps"] >= minimum,
+                "finite_nonzero_global_gradient_exposure": global_passed,
+                "finite_nonzero_action_route_gradient_exposure": action_route_passed,
+                "required_revision_parameter_gradient_exposure": revision_passed,
                 "passed": row["observed_example_count"] == row["planned_example_count"]
-                and row["all_exposure_step_global_gradients_finite"] is True
-                and row["cumulative_exposure_step_global_gradient_l2"] > 0.0
-                and row["finite_nonzero_global_gradient_exposure_steps"] >= minimum,
+                and global_passed
+                and action_route_passed
+                and revision_passed,
             }
         )
     return checks
@@ -616,7 +703,12 @@ def _derived_sections(
         ),
     )
     fraction = float(thresholds["gradient_opportunity_fraction"])
-    family_training = _exposure_checks(family_exposure, identity_field="family", fraction=fraction)
+    family_training = _exposure_checks(
+        family_exposure,
+        identity_field="family",
+        fraction=fraction,
+        require_family_routes=True,
+    )
     cell_training = _exposure_checks(
         cell_exposure, identity_field="semantic_cell_id", fraction=fraction
     )
@@ -675,7 +767,7 @@ def validate_process_v2_p50_result(
     value: object,
     *,
     recipe_policy: Mapping[str, Any],
-    prerequisites: ProcessV2P50Prerequisites,
+    prerequisites: ProcessV2P50ScopedPrerequisites,
     required_cell_ids: Sequence[str],
     validation_unsupported_required_cells: Sequence[str],
     expected_runtime_provenance: Mapping[str, str],
@@ -750,6 +842,7 @@ def validate_process_v2_p50_result(
         identities=families,
         identity_field="family",
         scheduled_examples=optimization["scheduled_nonterminal_examples"],
+        require_family_routes=True,
     )
     cell_exposure = _validate_exposure(
         result["semantic_cell_training_evidence"],
@@ -776,7 +869,7 @@ def validate_process_v2_p50_result(
 def build_process_v2_p50_result(
     *,
     recipe_policy: Mapping[str, Any],
-    prerequisites: ProcessV2P50Prerequisites,
+    prerequisites: ProcessV2P50ScopedPrerequisites,
     required_cell_ids: Sequence[str],
     validation_unsupported_required_cells: Sequence[str],
     expected_runtime_provenance: Mapping[str, str],
@@ -815,6 +908,7 @@ def build_process_v2_p50_result(
         identities=families,
         identity_field="family",
         scheduled_examples=optimization["scheduled_nonterminal_examples"],
+        require_family_routes=True,
     )
     cell_exposure = _validate_exposure(
         list(semantic_cell_training_evidence),
@@ -899,7 +993,7 @@ def build_process_v2_p50_decision(
     result: Mapping[str, Any],
     *,
     recipe_policy: Mapping[str, Any],
-    prerequisites: ProcessV2P50Prerequisites,
+    prerequisites: ProcessV2P50ScopedPrerequisites,
     required_cell_ids: Sequence[str],
     validation_unsupported_required_cells: Sequence[str],
     expected_runtime_provenance: Mapping[str, str],
@@ -956,7 +1050,7 @@ def validate_process_v2_p50_decision(
     *,
     result: Mapping[str, Any],
     recipe_policy: Mapping[str, Any],
-    prerequisites: ProcessV2P50Prerequisites,
+    prerequisites: ProcessV2P50ScopedPrerequisites,
     required_cell_ids: Sequence[str],
     validation_unsupported_required_cells: Sequence[str],
     expected_runtime_provenance: Mapping[str, str],

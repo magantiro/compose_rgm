@@ -11,7 +11,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     canonical_sha256,
 )
 from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-    ProcessV2P50Prerequisites,
+    ProcessV2P50ScopedPrerequisites,
 )
 from compose_v4.experiments.editing_v2_process_v2_p50_result import (
     DECISION_GO_STATUS,
@@ -38,8 +38,8 @@ def _required_cells() -> tuple[str, ...]:
     return tuple(payload["required_cell_ids"])
 
 
-def _prerequisites(policy: dict[str, object]) -> ProcessV2P50Prerequisites:
-    return ProcessV2P50Prerequisites(
+def _prerequisites(policy: dict[str, object]) -> ProcessV2P50ScopedPrerequisites:
+    return ProcessV2P50ScopedPrerequisites(
         process_identity_sha256=policy["process_identity"]["process_identity_sha256"],
         active8_completion_sha256="1" * 64,
         gate_zero_decision_sha256="2" * 64,
@@ -47,7 +47,7 @@ def _prerequisites(policy: dict[str, object]) -> ProcessV2P50Prerequisites:
         t1_result_sha256="4" * 64,
         t1_decision_sha256="5" * 64,
         t1_initial_model_state_sha256="6" * 64,
-        t1_selected_model_state_sha256="7" * 64,
+        t1_score_revision_receipt_sha256="7" * 64,
         p50_recipe_policy_sha256=policy["contract_sha256"],
         active_families=tuple(policy["active_families"]),
         optimizer_steps=50,
@@ -55,7 +55,9 @@ def _prerequisites(policy: dict[str, object]) -> ProcessV2P50Prerequisites:
     )
 
 
-def _inputs() -> tuple[dict[str, object], ProcessV2P50Prerequisites, dict[str, object]]:
+def _inputs() -> tuple[
+    dict[str, object], ProcessV2P50ScopedPrerequisites, dict[str, object]
+]:
     policy = _policy()
     prerequisites = _prerequisites(policy)
     families = prerequisites.active_families
@@ -85,7 +87,9 @@ def _inputs() -> tuple[dict[str, object], ProcessV2P50Prerequisites, dict[str, o
         "t1_result_sha256": prerequisites.t1_result_sha256,
         "t1_decision_sha256": prerequisites.t1_decision_sha256,
         "t1_initial_model_state_sha256": prerequisites.t1_initial_model_state_sha256,
-        "t1_selected_model_state_sha256": prerequisites.t1_selected_model_state_sha256,
+        "t1_score_revision_receipt_sha256": (
+            prerequisites.t1_score_revision_receipt_sha256
+        ),
         "p50_recipe_policy_sha256": prerequisites.p50_recipe_policy_sha256,
         "prepared_inputs_sha256": "7" * 64,
         "training_stream_sha256": "8" * 64,
@@ -172,6 +176,25 @@ def _inputs() -> tuple[dict[str, object], ProcessV2P50Prerequisites, dict[str, o
             "finite_nonzero_global_gradient_exposure_steps": 40,
             "all_exposure_step_global_gradients_finite": True,
             "cumulative_exposure_step_global_gradient_l2": 1.0,
+            "finite_nonzero_action_route_gradient_exposure_steps": 40,
+            "all_exposure_step_action_route_gradients_finite": True,
+            "cumulative_exposure_step_action_route_gradient_l2": 1.0,
+            "required_revision_parameter": (
+                "graft_relation_head.weight"
+                if family == "bond_reroute"
+                else (
+                    "ring_restate_context_head.weight"
+                    if family == "ring_system_restate"
+                    else None
+                )
+            ),
+            "finite_nonzero_revision_parameter_gradient_exposure_steps": (
+                40 if family in {"bond_reroute", "ring_system_restate"} else 0
+            ),
+            "all_exposure_step_revision_parameter_gradients_finite": True,
+            "cumulative_exposure_step_revision_parameter_gradient_l2": (
+                1.0 if family in {"bond_reroute", "ring_system_restate"} else 0.0
+            ),
         }
         for family in families
     ]
@@ -203,13 +226,15 @@ def _inputs() -> tuple[dict[str, object], ProcessV2P50Prerequisites, dict[str, o
     return policy, prerequisites, inputs
 
 
-def _build() -> tuple[dict[str, object], ProcessV2P50Prerequisites, dict[str, object]]:
+def _build() -> tuple[
+    dict[str, object], ProcessV2P50ScopedPrerequisites, dict[str, object]
+]:
     policy, prerequisites, inputs = _inputs()
     return policy, prerequisites, build_process_v2_p50_result(**inputs)
 
 
 def _validate_args(
-    policy: dict[str, object], prerequisites: ProcessV2P50Prerequisites
+    policy: dict[str, object], prerequisites: ProcessV2P50ScopedPrerequisites
 ) -> dict[str, object]:
     return {
         "recipe_policy": policy,
