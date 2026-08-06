@@ -1642,10 +1642,25 @@ def run_t1_score_revision_repair_remote(
     collated_completion_path: str,
     output_prefix: str,
     revision: dict[str, Any],
+    repair_families: tuple[str, ...] = _SCORE_REVISION_REPAIR_FAMILIES,
 ) -> dict[str, Any]:
-    """Run only the three unresolved T1 families on the corrected scorer."""
+    """Run an exact nonempty subset of unresolved T1 families from cached tensors."""
 
     _validate_remote_revision(revision)
+    if (
+        not repair_families
+        or len(set(repair_families)) != len(repair_families)
+        or tuple(
+            family
+            for family in _SCORE_REVISION_REPAIR_FAMILIES
+            if family in repair_families
+        )
+        != repair_families
+    ):
+        raise ValueError(
+            "repair_families must be a nonempty canonical-order subset of "
+            "the score-revision repair families"
+        )
     if (
         os.environ.get("CUBLAS_WORKSPACE_CONFIG")
         != DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG
@@ -1684,7 +1699,9 @@ def run_t1_score_revision_repair_remote(
         collated_path, label="the Process-V2 T1 collated completion"
     )
     policy = runtime.capacity_policy
-    if tuple(family for family in policy["required_families"] if family in _SCORE_REVISION_REPAIR_FAMILIES) != _SCORE_REVISION_REPAIR_FAMILIES:
+    if tuple(
+        family for family in policy["required_families"] if family in repair_families
+    ) != repair_families:
         raise RuntimeError("Process-V2 T1 repair family order disagrees with the policy")
 
     source_revision = _source_revision(revision)
@@ -1698,7 +1715,7 @@ def run_t1_score_revision_repair_remote(
         ),
         "predecessor_capacity_result_sha256": _PREDECESSOR_CAPACITY_RESULT_SHA256,
         "atom_insert_pass_result_sha256": _ATOM_INSERT_PASS_RESULT_SHA256,
-        "repair_families": list(_SCORE_REVISION_REPAIR_FAMILIES),
+        "repair_families": list(repair_families),
         "runner_source_revision_sha256": source_revision[
             "source_revision_sha256"
         ],
@@ -1710,14 +1727,14 @@ def run_t1_score_revision_repair_remote(
     _progress(
         "process_v2_t1_score_revision_repair_start",
         run_root=str(run_root),
-        families=list(_SCORE_REVISION_REPAIR_FAMILIES),
+        families=list(repair_families),
         gpu_containers=1,
         fiber_recomputation_count=0,
         gpu_side_collation_count=0,
     )
 
     family_results: list[dict[str, Any]] = []
-    for family in _SCORE_REVISION_REPAIR_FAMILIES:
+    for family in repair_families:
         family_root = run_root / family
 
         def report(row: Mapping[str, Any], *, _family: str = family) -> None:
@@ -1734,7 +1751,7 @@ def run_t1_score_revision_repair_remote(
             heads_model,
             materialized_panel,
             family=family,
-            failing_families=_SCORE_REVISION_REPAIR_FAMILIES,
+            failing_families=repair_families,
             capacity_policy=policy,
             input_capacity_result_file_sha256=(
                 _PREDECESSOR_CAPACITY_RESULT_FILE_SHA256
@@ -1758,7 +1775,7 @@ def run_t1_score_revision_repair_remote(
                 next_model,
                 materialized_panel,
                 family=family,
-                failing_families=_SCORE_REVISION_REPAIR_FAMILIES,
+                failing_families=repair_families,
                 capacity_policy=policy,
                 prior_scope_result=heads_result,
                 prior_scope_result_file_sha256=_file_sha256(heads_path),
@@ -3796,17 +3813,28 @@ def score_revision_repair_main(
     collated_completion_path: str,
     expected_commit: str,
     output_prefix: str = SCORE_REVISION_REPAIR_OUTPUT_PREFIX,
+    repair_family: str = "",
     wait_for_completion: bool = False,
 ) -> None:
-    """Launch one GPU that reruns only the three unresolved T1 families."""
+    """Launch one GPU for all unresolved families or one exact requested family."""
 
     revision = local_image_revision(expected_commit=expected_commit)
+    repair_families = (
+        _SCORE_REVISION_REPAIR_FAMILIES
+        if not repair_family
+        else (repair_family,)
+    )
+    if any(family not in _SCORE_REVISION_REPAIR_FAMILIES for family in repair_families):
+        raise ValueError(
+            "repair_family must be empty or name one score-revision repair family"
+        )
     arguments = (
         prepared_completion_path,
         collated_plan_path,
         collated_completion_path,
         output_prefix,
         revision,
+        repair_families,
     )
     if wait_for_completion:
         print(
@@ -3823,7 +3851,7 @@ def score_revision_repair_main(
             {
                 "phase": "process_v2_t1_score_revision_repair_launched",
                 "function_call_id": call.object_id,
-                "families": list(_SCORE_REVISION_REPAIR_FAMILIES),
+                "families": list(repair_families),
                 "gpu_containers": 1,
                 "fiber_recomputation_count": 0,
                 "commit": revision["commit"],
