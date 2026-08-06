@@ -200,12 +200,16 @@ SELF_HASH_FIELD = "contract_sha256"
 #: uniformly by unique entry and adds a low-rate stabilization phase.  The panel,
 #: objective, thresholds, model, seed, batch size, and hazard exclusion do not
 #: move.
+#: Version 6 binds the relation-aware bond-reroute scorer selected after the
+#: bounded T1 capacity diagnostic exposed an exact tie under the endpoint-only
+#: scorer.  The rewrite process, support, panel, objective, thresholds, and
+#: optimizer policy are unchanged.
 #: No generation is overwritten or resealed; each is preserved as lineage.
-CHAIN_SCHEMA_VERSION = 5
+CHAIN_SCHEMA_VERSION = 6
 
 #: The named successor generation, following this repository's ``contract_revision``
 #: convention (see ``configs/editing_v2_semantic_process_v2.json``).
-CHAIN_CONTRACT_REVISION = "process_v2_unique_entry_two_stage_t1_capacity"
+CHAIN_CONTRACT_REVISION = "process_v2_relational_reroute_capacity_model"
 
 #: Versioned Process-V2-only recovery protocol for the T1 capacity run.  The
 #: shared V1 policy remains frozen.  Process V2 keeps its exact panel, objective,
@@ -258,6 +262,11 @@ SUPERSEDED_CHAIN_CONTRACT_REVISION_V3 = (
 
 #: The revision the version-4 bodies were sealed under.
 SUPERSEDED_CHAIN_CONTRACT_REVISION_V4 = "process_v2_gate_zero_productive_nonself"
+
+#: The revision the version-5 bodies were sealed under.
+SUPERSEDED_CHAIN_CONTRACT_REVISION_V5 = (
+    "process_v2_unique_entry_two_stage_t1_capacity"
+)
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
@@ -653,6 +662,68 @@ _SUPERSEDED_GENERATIONS: tuple[tuple[int, str, dict[str, dict[str, str]]], ...] 
                 ),
                 "file_sha256": (
                     "3f0cf8b5eb840c20f1f58b3647fdb63af130621065676a70a765239cc3f5639b"
+                ),
+            },
+        },
+    ),
+    (
+        5,
+        SUPERSEDED_CHAIN_CONTRACT_REVISION_V5,
+        {
+            ACTIVE8_DECISION_RUNTIME: {
+                "contract_sha256": (
+                    "75c646f67ee926cdba83c89f8af10165dc4be4efd1fa2af3d3608d9a7fb29ac9"
+                ),
+                "file_sha256": (
+                    "468ef915d8f21629759b22789cd670a08a5e55ea4c8f59ab658e861dc35c34b9"
+                ),
+            },
+            CAPABILITY_CELLS: {
+                "contract_sha256": (
+                    "765b929d5077ddd5c0be29cb92b70c539f21ce1b0689ac8a4b06f696751e382c"
+                ),
+                "file_sha256": (
+                    "449bcee6d5572f8801eaea63f6df716590477ac506e3ecfaf618b9e99742a9ae"
+                ),
+            },
+            DEVELOPMENT_CELL_ROLES: {
+                "contract_sha256": (
+                    "85ffb0c8cd9154b4b682f3e262d3ed0a08a35220babc67379d60eac9036477d5"
+                ),
+                "file_sha256": (
+                    "b6a857b5927cd39f4d8e13ffbb30c818172537689c3f9e0cab40a8b1c96f826b"
+                ),
+            },
+            GATE_ZERO_STRUCTURAL: {
+                "contract_sha256": (
+                    "2fdfe7641457660c61a6315f26dacb07897c8da7ab3d385060f5cd72e6f4afc6"
+                ),
+                "file_sha256": (
+                    "da059085c91005da047a6aa834ff46e9a953dc6ca66f1b74f4d70365b36bd834"
+                ),
+            },
+            T1_PANEL_POLICY: {
+                "contract_sha256": (
+                    "914cb9d494144c3df37b3b878a46e872ab01edff5a5552e06eed23243391b92a"
+                ),
+                "file_sha256": (
+                    "eb984192f14d92c9ea2d3b71c3229ee45cb891273f8dddf8bb65673157a5c1a0"
+                ),
+            },
+            T1_CAPACITY_POLICY: {
+                "contract_sha256": (
+                    "6940710e8104764376ae85999fdfbe346a8f76aa98899aac65ab19f1acca9ef3"
+                ),
+                "file_sha256": (
+                    "1e8bb119487c2b401600b2d9e993ac366de30aea36fc3283a6fd801fff9cc330"
+                ),
+            },
+            P50_RECIPE_POLICY: {
+                "contract_sha256": (
+                    "1e3bca9e8e31bcd78b79e77df91ef21743d5e95c743521eb2a76743ef9103c08"
+                ),
+                "file_sha256": (
+                    "b482d96fb1a880574d5e913f00e6a266609bde52752cc03578c49cfbf8818c99"
                 ),
             },
         },
@@ -2010,6 +2081,8 @@ __all__ = [
     "SUPERSEDED_CHAIN_CONTRACT_REVISION",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION_V2",
     "SUPERSEDED_CHAIN_CONTRACT_REVISION_V3",
+    "SUPERSEDED_CHAIN_CONTRACT_REVISION_V4",
+    "SUPERSEDED_CHAIN_CONTRACT_REVISION_V5",
     "T1_CAPACITY_POLICY",
     "T1_PANEL_POLICY",
     "WHOLE_CANONICAL_BODY_ALGORITHM",

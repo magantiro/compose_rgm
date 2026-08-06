@@ -93,6 +93,7 @@ _EVALUATOR_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/production_successor_kernel.py",
     "src/compose_v4/experiments/successor_kernel.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "src/compose_v4/model/relational_reroute_rate_model.py",
     "src/compose_v4/model/segmented_successor.py",
     "src/compose_v4/rewrite/kernel.py",
 )

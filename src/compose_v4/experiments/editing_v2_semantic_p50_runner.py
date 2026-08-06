@@ -144,6 +144,7 @@ _IMPLEMENTATION_SOURCES = (
     "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
     "src/compose_v4/data/successor_fiber_cache.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "src/compose_v4/model/relational_reroute_rate_model.py",
     "src/compose_v4/chem/persistent_state_identity.py",
 )
 

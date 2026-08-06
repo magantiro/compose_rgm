@@ -153,6 +153,7 @@ _RUNNER_IMPLEMENTATION_FILES = (
     "src/compose_v4/experiments/factorized_successor_training.py",
     "src/compose_v4/experiments/factorized_mark_conditional.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "src/compose_v4/model/relational_reroute_rate_model.py",
     "configs/editing_v2_process_v2_t1_capacity_policy.json",
 )
 

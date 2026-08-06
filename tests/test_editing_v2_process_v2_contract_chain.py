@@ -79,6 +79,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     SUPERSEDED_CHAIN_CONTRACT_REVISION_V2,
     SUPERSEDED_CHAIN_CONTRACT_REVISION_V3,
     SUPERSEDED_CHAIN_CONTRACT_REVISION_V4,
+    SUPERSEDED_CHAIN_CONTRACT_REVISION_V5,
     T1_CAPACITY_POLICY,
     T1_PANEL_POLICY,
     WHOLE_CANONICAL_BODY_ALGORITHM,
@@ -125,6 +126,9 @@ _SUPERSEDED_CHAIN_REVISION_V3 = "f4baef1"
 # The last clean revision carrying contract-chain schema version 4.
 _SUPERSEDED_CHAIN_REVISION_V4 = "dd58c90"
 
+# The last clean revision carrying contract-chain schema version 5.
+_SUPERSEDED_CHAIN_REVISION_V5 = "93848a6"
+
 # Every superseded generation, oldest first, as (schema version, revision that
 # sealed it, its named `contract_revision`).
 _SUPERSEDED_GENERATION_SOURCES: tuple[tuple[int, str, str], ...] = (
@@ -132,6 +136,7 @@ _SUPERSEDED_GENERATION_SOURCES: tuple[tuple[int, str, str], ...] = (
     (2, _SUPERSEDED_CHAIN_REVISION_V2, SUPERSEDED_CHAIN_CONTRACT_REVISION_V2),
     (3, _SUPERSEDED_CHAIN_REVISION_V3, SUPERSEDED_CHAIN_CONTRACT_REVISION_V3),
     (4, _SUPERSEDED_CHAIN_REVISION_V4, SUPERSEDED_CHAIN_CONTRACT_REVISION_V4),
+    (5, _SUPERSEDED_CHAIN_REVISION_V5, SUPERSEDED_CHAIN_CONTRACT_REVISION_V5),
 )
 
 # The four frozen non-chain files the chain binds.  None of them is V1-named.
@@ -495,7 +500,7 @@ def test_the_added_edges_are_present_and_were_absent_in_schema_version_one() -> 
 def test_declaring_a_dependency_edge_required_a_new_schema_version() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         payload = _load(name)
-        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 5
+        assert payload["schema_version"] == CHAIN_SCHEMA_VERSION == 6
         assert payload["contract_revision"] == CHAIN_CONTRACT_REVISION
 
 
@@ -802,6 +807,7 @@ def test_a_single_lineage_block_where_a_list_is_required_is_rejected() -> None:
         "physical": lineage[-1]["physical"],
         "schema_version": lineage[-1]["schema_version"],
         "semantic": lineage[-1]["semantic"],
+        "unexpected_fifth_mapping_key": None,
     }
     assert len(payload["superseded_design_lineage"]) == len(lineage), (
         "the same length, so a length check alone would pass it"

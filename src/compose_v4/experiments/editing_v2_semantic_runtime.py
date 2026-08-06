@@ -33,12 +33,17 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     FactorizedTraceletRateModel,
 )
+from compose_v4.model.relational_reroute_rate_model import (
+    RELATIONAL_BOND_REROUTE_SCORER_MODE,
+    RelationalRerouteFactorizedTraceletRateModel,
+)
 from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
     ring_catalog_fingerprint,
 )
 
 ATOM_DELETE_ACTION_SEMANTICS_FIELD = "atom_delete_action_semantics"
+BOND_REROUTE_SCORER_MODE_FIELD = "bond_reroute_scorer_mode"
 
 
 class SemanticScratchRuntimeError(RuntimeError):
@@ -205,6 +210,9 @@ def semantic_runtime_model_identity(
         identity[ATOM_DELETE_ACTION_SEMANTICS_FIELD] = (
             capabilities.atom_delete_action_semantics
         )
+    bond_reroute_scorer_mode = getattr(model, BOND_REROUTE_SCORER_MODE_FIELD, None)
+    if bond_reroute_scorer_mode is not None:
+        identity[BOND_REROUTE_SCORER_MODE_FIELD] = str(bond_reroute_scorer_mode)
     return identity
 
 
@@ -258,7 +266,13 @@ def build_model_from_semantic_model_identity(
     # later sampling streams independent of model construction.
     with torch.random.fork_rng(devices=[]):
         torch.manual_seed(initialization_seed)
-        model = FactorizedTraceletRateModel(
+        model_type = (
+            RelationalRerouteFactorizedTraceletRateModel
+            if model_identity.get(BOND_REROUTE_SCORER_MODE_FIELD)
+            == RELATIONAL_BOND_REROUTE_SCORER_MODE
+            else FactorizedTraceletRateModel
+        )
+        model = model_type(
             catalog,
             hidden_dim=hidden_dim,
             message_passing_steps=message_passing_steps,
@@ -375,6 +389,7 @@ def build_semantic_scratch_runtime(
 
 __all__ = [
     "ATOM_DELETE_ACTION_SEMANTICS_FIELD",
+    "BOND_REROUTE_SCORER_MODE_FIELD",
     "SemanticScratchArchitecture",
     "SemanticScratchModelConfig",
     "SemanticScratchRuntime",

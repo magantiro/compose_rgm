@@ -93,7 +93,7 @@ ACTION_ROUTE_PREFIXES: Mapping[str, tuple[str, ...]] = {
     "atom_delete": ("delete_head.",),
     "atom_restate": ("restate_head.",),
     "bond_reorder": ("reorder_head.",),
-    "bond_reroute": ("graft_head.",),
+    "bond_reroute": ("graft_head.", "graft_relation_head."),
     "cycle_insert": ("cycle_close_head.",),
     "cycle_attach": ("cycle_open_head.",),
     "ring_system_restate": ("ring_restate_head.",),

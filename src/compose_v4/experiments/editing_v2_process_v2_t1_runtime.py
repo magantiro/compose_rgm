@@ -133,6 +133,7 @@ _IMPLEMENTATION_FILES = (
     "src/compose_v4/experiments/editing_v2_semantic_t1_prepared_inputs.py",
     "src/compose_v4/experiments/editing_v2_semantic_runtime.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
+    "src/compose_v4/model/relational_reroute_rate_model.py",
 )
 
 

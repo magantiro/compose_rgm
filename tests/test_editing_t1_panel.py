@@ -110,6 +110,7 @@ from compose_v4.experiments.successor_micro_overfit import (
     configure_micro_overfit_parameters,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
+    SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedTraceletRateModel,
 )
 from compose_v4.rewrite.action_codec import canonical_family
@@ -1286,6 +1287,26 @@ def test_t1_contract_and_ring_family_scope_ladder_are_explicit():
     assert any(name.startswith("pair_project.") for name in selected)
     assert any(name.startswith("restate_order_embedding.") for name in selected)
     assert any(name.startswith("family_head.") for name in selected)
+
+    semantic_model = FactorizedTraceletRateModel(
+        build_typed_ring_catalog(()),
+        hidden_dim=12,
+        message_passing_steps=1,
+        enable_ring_restates=True,
+        ring_restate_scorer_mode=SEMANTIC_RING_RESTATE_SCORER_MODE,
+    )
+    semantic_selected = configure_micro_overfit_parameters(
+        semantic_model,
+        ("ring_system_restate",),
+        scope="heads_plus_local_adapter",
+    )
+    assert any(
+        name.startswith("restate_transition_embedding.")
+        for name in semantic_selected
+    )
+    assert not any(
+        name.startswith("restate_order_embedding.") for name in semantic_selected
+    )
     with pytest.raises(
         SuccessorMicroOverfitError,
         match="changes no parameters beyond heads_only",

@@ -13,8 +13,8 @@
   "cache_handoff": "complete_train_trace_union_for_cpu_successor_fiber_cache_v1",
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_t1_panel_policy",
-  "contract_revision": "process_v2_unique_entry_two_stage_t1_capacity",
-  "contract_sha256": "914cb9d494144c3df37b3b878a46e872ab01edff5a5552e06eed23243391b92a",
+  "contract_revision": "process_v2_relational_reroute_capacity_model",
+  "contract_sha256": "bb45d1e40079080ec0f5c9a68a2b0d387dc0905ea01495f68fae4cb95d5b02fe",
   "empirical_multiplicity_receipts_included": false,
   "final_test_selection_authorized": false,
   "gate_thresholds_included": false,
@@ -52,7 +52,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "b6a857b5927cd39f4d8e13ffbb30c818172537689c3f9e0cab40a8b1c96f826b",
+        "sha256": "bbed49b0ada2a4795ad65e6a68bd354c0ebb157ebe425019d8fff967620d841c",
         "target": "configs/editing_v2_process_v2_development_cell_roles.json",
         "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
       },
@@ -61,7 +61,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "85ffb0c8cd9154b4b682f3e262d3ed0a08a35220babc67379d60eac9036477d5",
+        "sha256": "530eb71cdc58213f04630b18521191dbef035031b97ba2c6fc4069c09b07e0df",
         "target": "configs/editing_v2_process_v2_development_cell_roles.json",
         "target_schema": "compose.editing_v2.process_v2_development_cell_roles"
       }
@@ -72,7 +72,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "da059085c91005da047a6aa834ff46e9a953dc6ca66f1b74f4d70365b36bd834",
+        "sha256": "6d3e08e27a958cc644dc3618d4c0ba2146ed6a3c64692c48d7266fdfd0de1627",
         "target": "configs/editing_v2_process_v2_gate_zero_structural.json",
         "target_schema": "compose.editing_v2.process_v2_gate_zero_structural"
       },
@@ -81,7 +81,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "editing_v2_process_v2_contract_chain",
-        "sha256": "2fdfe7641457660c61a6315f26dacb07897c8da7ab3d385060f5cd72e6f4afc6",
+        "sha256": "383de4c21482f513ca33ef6605996039d481c34106d5603f4f32b8b145fdfe6b",
         "target": "configs/editing_v2_process_v2_gate_zero_structural.json",
         "target_schema": "compose.editing_v2.process_v2_gate_zero_structural"
       }
@@ -122,7 +122,7 @@
     "measured_evidence_in_this_contract": false
   },
   "schema": "compose.editing_v2.process_v2_t1_panel_policy",
-  "schema_version": 5,
+  "schema_version": 6,
   "shared_policy_registry": {
     "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
     "schema": "compose.editing_v2.shared_policy_registry",
@@ -215,6 +215,28 @@
         "kind": "lineage_reference",
         "provider": "editing_v2_process_v2_contract_chain",
         "sha256": "8a57487b9181b0e35b1d28895f18278a7c527554bdfab2730300651d33e4e2fb",
+        "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
+      }
+    },
+    {
+      "contract_revision": "process_v2_unique_entry_two_stage_t1_capacity",
+      "physical": {
+        "hash_algorithm": null,
+        "identity_role": "physical_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "eb984192f14d92c9ea2d3b71c3229ee45cb891273f8dddf8bb65673157a5c1a0",
+        "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
+        "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
+      },
+      "schema_version": 5,
+      "semantic": {
+        "hash_algorithm": "self_hash_field_v1",
+        "identity_role": "semantic_sha256",
+        "kind": "lineage_reference",
+        "provider": "editing_v2_process_v2_contract_chain",
+        "sha256": "914cb9d494144c3df37b3b878a46e872ab01edff5a5552e06eed23243391b92a",
         "target": "configs/editing_v2_process_v2_t1_panel_policy.json",
         "target_schema": "compose.editing_v2.process_v2_t1_panel_policy"
       }

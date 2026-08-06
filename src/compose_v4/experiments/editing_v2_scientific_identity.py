@@ -15,7 +15,8 @@ own frozen contract:
 
 ``compose.editing_v2_scientific_identity.process_v2``
     Process V2. It binds the Process-V2 process identity and additionally binds
-    ``atom_delete_action_semantics``, which the V1 contract does not carry at all.
+    ``atom_delete_action_semantics`` and ``bond_reroute_scorer_mode``, which the
+    V1 contract does not carry at all.
 
 The two contracts are disjoint: a V1 payload cannot declare the atom-delete mode
 and a V2 payload must. Selecting the contract by schema, and requiring the model
@@ -43,6 +44,9 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_RING_RESTATE_SCORER_MODE,
     OperatorCapabilities,
 )
+from compose_v4.model.relational_reroute_rate_model import (
+    RELATIONAL_BOND_REROUTE_SCORER_MODE,
+)
 from compose_v4.rewrite.editing_v2_process_identity import (
     editing_process_v2_identity,
     editing_v2_process_identity,
@@ -54,7 +58,7 @@ SCIENTIFIC_IDENTITY_STATUS = "COMPLETE_EDITING_V2_SCIENTIFIC_IDENTITY"
 PROCESS_V2_SCIENTIFIC_IDENTITY_SCHEMA = (
     "compose.editing_v2_scientific_identity.process_v2"
 )
-PROCESS_V2_SCIENTIFIC_IDENTITY_SCHEMA_VERSION = 1
+PROCESS_V2_SCIENTIFIC_IDENTITY_SCHEMA_VERSION = 2
 PROCESS_V2_SCIENTIFIC_IDENTITY_STATUS = (
     "COMPLETE_EDITING_V2_PROCESS_V2_SCIENTIFIC_IDENTITY"
 )
@@ -95,7 +99,13 @@ _MODEL_FIELDS = frozenset(
         "cycle_open_scorer_mode",
     }
 )
-_PROCESS_V2_MODEL_FIELDS = frozenset({*_MODEL_FIELDS, "atom_delete_action_semantics"})
+_PROCESS_V2_MODEL_FIELDS = frozenset(
+    {
+        *_MODEL_FIELDS,
+        "atom_delete_action_semantics",
+        "bond_reroute_scorer_mode",
+    }
+)
 _IDENTITY_FIELDS = frozenset(
     {
         "schema",
@@ -169,6 +179,7 @@ _PROCESS_V2_CONTRACT = _ScientificIdentityContract(
         **_SHARED_EXPECTED_MODEL_VALUES,
         "editing_process_semantics": PROCESS_V2_EDITING_PROCESS_SEMANTICS,
         "atom_delete_action_semantics": PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+        "bond_reroute_scorer_mode": RELATIONAL_BOND_REROUTE_SCORER_MODE,
     },
     process_identity=editing_process_v2_identity,
 )
@@ -453,9 +464,9 @@ def process_v2_semantic_model_identity(
 ) -> dict[str, Any]:
     """Build the exact semantic model-mode identity for Editing V2 Process V2.
 
-    It differs from the V1 identity in exactly two bound values: the semantic
-    process version, and the atom-delete action semantics the expanded delete
-    fiber is defined by.
+    It additionally binds the semantic process version, expanded atom-delete
+    semantics, and the relation-aware bond-reroute scorer required by the
+    Process-V2 capacity model.
     """
 
     return _model_identity_for_contract(
