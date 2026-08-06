@@ -97,6 +97,7 @@ def test_gpu_has_no_selected_checkpoint_input_or_load_call() -> None:
     assert body is not None
     assert parameter_names == [
         "prepared_path",
+        "collated_completion_path",
         "active8_run_root",
         "gate_zero_decision_path",
         "t1_result_path",
@@ -105,6 +106,8 @@ def test_gpu_has_no_selected_checkpoint_input_or_load_call() -> None:
         "revision",
     ]
     assert "torch.load" not in body
+    assert 'loaded["materialize_batch"](' in body
+    assert "materialized=materialized" in body
     assert 'loaded["build_scratch"](source)' in body
     assert '"t1_selected_checkpoint_loaded": False' in body
 
@@ -125,8 +128,8 @@ def test_split_drivers_order_preparation_before_explicit_gpu_training() -> None:
     assert "run_p50_gpu_remote" not in prepare_body
     assert train_body.count("run_p50_gpu_remote.remote(") == 1
     assert combined_body.index("prepare_driver.remote(") < combined_body.index(
-        "train_driver.remote("
-    )
+        "collate_driver.remote("
+    ) < combined_body.index("train_driver.remote(")
 
 
 def test_canary_publishes_one_reusable_worst_case_leaf_without_gpu() -> None:
@@ -327,6 +330,41 @@ def test_cpu_groups_are_complete_disjoint_and_bounded() -> None:
     assert [len(group) for group in groups] == [40, 40, 13]
     assert tuple(item for group in groups for item in group) == values
     assert len({item for group in groups for item in group}) == len(values)
+
+
+def test_collation_balances_measured_mark_work_without_changing_inventory() -> None:
+    leaves = []
+    for leaf_index, workloads in enumerate(((100, 1), (90,), (80,), (2, 2, 2))):
+        entries = [
+            {
+                "p50_entry_sha256": f"{leaf_index * 10 + index:064x}",
+                "raw_mark_count": workload,
+            }
+            for index, workload in enumerate(workloads)
+        ]
+        leaves.append(
+            {
+                "task_identity_sha256": f"{leaf_index + 100:064x}",
+                "leaf_sha256": f"{leaf_index + 200:064x}",
+                "entries": entries,
+            }
+        )
+    tasks = launcher._balanced_collated_tasks(leaves, maximum=2)
+    observed = [identifier for task in tasks for identifier in task["p50_entry_sha256s"]]
+    expected = sorted(
+        entry["p50_entry_sha256"] for leaf in leaves for entry in leaf["entries"]
+    )
+    assert sorted(observed) == expected
+    assert len(observed) == len(set(observed))
+    assert len(tasks) == 2
+    assert max(task["raw_mark_count"] for task in tasks) <= 190
+
+
+def test_gpu_is_unreachable_until_cpu_collation_completion() -> None:
+    body = ast.get_source_segment(_source(), _function("driver"))
+    assert body is not None
+    assert body.index("collate_driver.remote(") < body.index("train_driver.remote(")
+    assert 'collated["completion"]["completion_path"]' in body
 
 
 @pytest.mark.parametrize("maximum", [0, 81, True])

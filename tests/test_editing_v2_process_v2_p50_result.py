@@ -97,6 +97,8 @@ def _inputs() -> tuple[
         "initial_model_state_sha256": prerequisites.t1_initial_model_state_sha256,
         "runner_implementation_sha256": "a" * 64,
         "runner_source_revision_sha256": "b" * 64,
+        "collated_completion_sha256": "c" * 64,
+        "collated_payload_file_sha256": "d" * 64,
         "execution_environment": {
             **environment_body,
             "environment_sha256": canonical_sha256(environment_body),
@@ -110,6 +112,8 @@ def _inputs() -> tuple[
             "validation_stream_sha256",
             "runner_implementation_sha256",
             "runner_source_revision_sha256",
+            "collated_completion_sha256",
+            "collated_payload_file_sha256",
         )
     }
     run_integrity = {
@@ -247,6 +251,8 @@ def _validate_args(
             "validation_stream_sha256": "9" * 64,
             "runner_implementation_sha256": "a" * 64,
             "runner_source_revision_sha256": "b" * 64,
+            "collated_completion_sha256": "c" * 64,
+            "collated_payload_file_sha256": "d" * 64,
         },
     }
 

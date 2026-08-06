@@ -35,6 +35,7 @@ LAUNCHER_SOURCE = "modal_apps/run_process_v2_p50_app.py"
 IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 
 PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_p50_prepared"
+COLLATED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_p50_collated"
 LEGACY_PREPARED_RUN_ROOT = (
     PREPARED_OUTPUT_PREFIX + "/d9ffc03094161dcadb3d1fc670d9c4e9595ec31787cca7964560a7a591b2f1dc"
 )
@@ -47,13 +48,18 @@ PREPARED_FILENAME = "PROCESS_V2_P50_PREPARED_INPUTS.json"
 LEAF_FILENAME = "PROCESS_V2_P50_PREPARED_LEAF.json"
 TASKS_DIRNAME = "tasks"
 TERMINAL_CHECKPOINT_FILENAME = "PROCESS_V2_P50_TERMINAL.pt"
+COLLATED_PLAN_FILENAME = "PROCESS_V2_P50_COLLATED_PLAN.json"
+COLLATED_COMPLETION_FILENAME = "PROCESS_V2_P50_COLLATED_COMPLETE.json"
+COLLATED_PAYLOAD_FILENAME = "PROCESS_V2_P50_COLLATED_BATCH.pt"
+COLLATED_RECEIPT_FILENAME = "PROCESS_V2_P50_COLLATED_RECEIPT.json"
+COLLATED_TASKS_DIRNAME = "collated_tasks"
 
 MAX_CPU_CONTAINERS = 80
 CPU_PER_LEAF = 1.0
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
-GPU_TIMEOUT_SECONDS = 60 * 60
+GPU_TIMEOUT_SECONDS = 20 * 60
 HEARTBEAT_SECONDS = 30
 DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 
@@ -67,6 +73,12 @@ CHECKPOINT_STATUS = "COMPLETE_PROCESS_V2_P50_TERMINAL_NO_DOWNSTREAM_AUTHORITY"
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
+COLLATED_PLAN_SCHEMA = "compose.editing_v2.process_v2_p50_collated_plan"
+COLLATED_RECEIPT_SCHEMA = "compose.editing_v2.process_v2_p50_collated_receipt"
+COLLATED_COMPLETION_SCHEMA = "compose.editing_v2.process_v2_p50_collated_completion"
+COLLATED_PAYLOAD_SCHEMA = "compose.editing_v2.process_v2_p50_collated_batch"
+COLLATED_SCHEMA_VERSION = 1
+
 _RUNNER_IMPLEMENTATION_SOURCES = (
     LAUNCHER_SOURCE,
     "src/compose_v4/experiments/editing_v2_process_v2_p50_prerequisites.py",
@@ -76,6 +88,13 @@ _RUNNER_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py",
     "src/compose_v4/experiments/factorized_successor_training.py",
     "src/compose_v4/experiments/score_free_successor_support.py",
+)
+
+_COLLATION_IMPLEMENTATION_SOURCES = (
+    "src/compose_v4/experiments/editing_v2_process_v2_p50_runtime.py",
+    "src/compose_v4/experiments/editing_v2_semantic_t1_capacity_runner.py",
+    "src/compose_v4/experiments/factorized_mark_conditional.py",
+    "src/compose_v4/model/factorized_tracelet_rate_model.py",
 )
 
 image = (
@@ -255,6 +274,22 @@ def _runner_implementation_sha256(revision: Mapping[str, Any]) -> str:
     )
 
 
+def _collation_implementation_sha256(revision: Mapping[str, Any]) -> str:
+    """Bind only code that can change model-ready tensor contents."""
+
+    sources = revision.get("serialized_sources")
+    if not isinstance(sources, Mapping) or any(
+        path not in sources for path in _COLLATION_IMPLEMENTATION_SOURCES
+    ):
+        raise RuntimeError("Process-V2 P50 collation source closure is incomplete")
+    return _sha256(
+        {
+            "algorithm": "compose.process_v2_p50_cpu_collation.v1",
+            "sources": {path: sources[path] for path in _COLLATION_IMPLEMENTATION_SOURCES},
+        }
+    )
+
+
 def _require_artifact_path(value: str, *, field: str) -> Path:
     path = Path(value)
     if not path.is_absolute() or ".." in path.parts:
@@ -371,9 +406,11 @@ def _imports() -> dict[str, Any]:
     from compose_v4.experiments.editing_v2_process_v2_p50_runtime import (
         build_process_v2_p50_prepared_inputs,
         build_process_v2_p50_selection,
+        collate_process_v2_p50_entries,
         compile_process_v2_p50_entries,
         convert_process_v2_p50_v1_leaf,
         load_process_v2_p50_inputs,
+        materialize_process_v2_p50_batch,
         run_process_v2_p50,
         validate_process_v2_p50_prepared_inputs,
         validate_process_v2_p50_selection,
@@ -394,11 +431,16 @@ def _imports() -> dict[str, Any]:
         validate_t1_evidence_source_manifest,
     )
     from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
+        _index_factorized_batch,
         optimizer_state_semantic_sha256,
     )
     from compose_v4.experiments.editing_v2_semantic_t1_decision import (
         build_semantic_t1_execution_environment,
     )
+    from compose_v4.experiments.factorized_mark_conditional import (
+        _concatenate_factorized_mark_batches,
+    )
+    from compose_v4.model.factorized_tracelet_rate_model import FactorizedMarkBatch
 
     return {
         "np": np,
@@ -426,7 +468,9 @@ def _imports() -> dict[str, Any]:
         "convert_v1_leaf": convert_process_v2_p50_v1_leaf,
         "build_prepared": build_process_v2_p50_prepared_inputs,
         "validate_prepared": validate_process_v2_p50_prepared_inputs,
+        "collate_entries": collate_process_v2_p50_entries,
         "load_runtime": load_process_v2_p50_inputs,
+        "materialize_batch": materialize_process_v2_p50_batch,
         "run_p50": run_process_v2_p50,
         "build_result": build_process_v2_p50_result,
         "validate_result": validate_process_v2_p50_result,
@@ -436,6 +480,9 @@ def _imports() -> dict[str, Any]:
         "DECISION_FILENAME": DECISION_FILENAME,
         "optimizer_state_sha256": optimizer_state_semantic_sha256,
         "build_environment": build_semantic_t1_execution_environment,
+        "concatenate_batches": _concatenate_factorized_mark_batches,
+        "index_batch": _index_factorized_batch,
+        "FactorizedMarkBatch": FactorizedMarkBatch,
     }
 
 
@@ -495,6 +542,465 @@ def _validate_leaf(
     ):
         raise RuntimeError("a Process-V2 P50 leaf binding disagrees")
     return leaf
+
+
+def _collated_task_root(run_root: Path, task_identity_sha256: str) -> Path:
+    return Path(run_root) / COLLATED_TASKS_DIRNAME / task_identity_sha256
+
+
+def _balanced_collated_tasks(
+    leaves: Sequence[Mapping[str, Any]], *, maximum: int
+) -> list[dict[str, Any]]:
+    """Greedily balance immutable leaves by measured candidate-mark work."""
+
+    if type(maximum) is not int or not 1 <= maximum <= MAX_CPU_CONTAINERS:
+        raise ValueError(f"maximum must lie in [1, {MAX_CPU_CONTAINERS}]")
+    descriptors: list[dict[str, Any]] = []
+    observed_entries: set[str] = set()
+    observed_leaves: set[str] = set()
+    for raw in leaves:
+        leaf = dict(raw)
+        leaf_id = str(leaf["task_identity_sha256"])
+        entry_ids = tuple(sorted(str(entry["p50_entry_sha256"]) for entry in leaf["entries"]))
+        if (
+            leaf_id in observed_leaves
+            or not entry_ids
+            or len(entry_ids) != len(set(entry_ids))
+            or observed_entries.intersection(entry_ids)
+        ):
+            raise RuntimeError("Process-V2 P50 collated source inventory repeats an identity")
+        observed_leaves.add(leaf_id)
+        observed_entries.update(entry_ids)
+        workload = sum(int(entry["raw_mark_count"]) for entry in leaf["entries"])
+        if workload <= 0:
+            raise RuntimeError("Process-V2 P50 collated source has no candidate work")
+        descriptors.append(
+            {
+                "leaf_task_identity_sha256": leaf_id,
+                "leaf_sha256": str(leaf["leaf_sha256"]),
+                "entry_count": len(entry_ids),
+                "p50_entry_sha256s": list(entry_ids),
+                "raw_mark_count": workload,
+            }
+        )
+    worker_count = min(maximum, len(descriptors))
+    bins: list[dict[str, Any]] = [
+        {"raw_mark_count": 0, "leaves": []} for _ in range(worker_count)
+    ]
+    for descriptor in sorted(
+        descriptors,
+        key=lambda item: (-int(item["raw_mark_count"]), item["leaf_task_identity_sha256"]),
+    ):
+        index = min(
+            range(worker_count),
+            key=lambda item: (
+                int(bins[item]["raw_mark_count"]),
+                len(bins[item]["leaves"]),
+                item,
+            ),
+        )
+        bins[index]["leaves"].append(descriptor)
+        bins[index]["raw_mark_count"] += int(descriptor["raw_mark_count"])
+    tasks: list[dict[str, Any]] = []
+    for index, bucket in enumerate(bins):
+        bucket_leaves = sorted(
+            bucket["leaves"], key=lambda item: item["leaf_task_identity_sha256"]
+        )
+        entry_ids = sorted(
+            entry_id for leaf in bucket_leaves for entry_id in leaf["p50_entry_sha256s"]
+        )
+        body = {
+            "task_index": index,
+            "leaves": bucket_leaves,
+            "leaf_count": len(bucket_leaves),
+            "entry_count": len(entry_ids),
+            "p50_entry_sha256s": entry_ids,
+            "entry_inventory_sha256": _sha256(entry_ids),
+            "raw_mark_count": int(bucket["raw_mark_count"]),
+        }
+        tasks.append({**body, "task_identity_sha256": _sha256(body)})
+    return tasks
+
+
+def _require_false_authority(value: Mapping[str, Any], *, label: str) -> None:
+    fields = {key for key in value if key.endswith("_authorized")}
+    expected = {
+        "training_authorized",
+        "bounded_p50_authorized",
+        "p500_authorized",
+        "p2000_authorized",
+        "long_run_authorized",
+        "checkpoint_selection_authorized",
+        "final_test_selection_authorized",
+    }
+    if fields != expected or any(value[field] is not False for field in fields):
+        raise RuntimeError(f"{label} grants or omits authority")
+
+
+def _validate_collated_plan(
+    value: Mapping[str, Any], *, prepared: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
+    plan = _validate_self_hash(
+        value, field="plan_sha256", label="the Process-V2 P50 collated plan"
+    )
+    _require_false_authority(plan, label="the Process-V2 P50 collated plan")
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "status",
+        "training_authorized",
+        "bounded_p50_authorized",
+        "p500_authorized",
+        "p2000_authorized",
+        "long_run_authorized",
+        "checkpoint_selection_authorized",
+        "final_test_selection_authorized",
+        "prepared_path",
+        "prepared_file_sha256",
+        "prepared_sha256",
+        "selection_sha256",
+        "initial_model_state_sha256",
+        "collation_implementation_sha256",
+        "source_revision_sha256",
+        "entry_count",
+        "entry_inventory_sha256",
+        "task_count",
+        "task_inventory_sha256",
+        "tasks",
+        "run_identity_sha256",
+        "plan_sha256",
+    }
+    tasks = plan.get("tasks")
+    if not isinstance(tasks, list) or not tasks or any(
+        not isinstance(task, Mapping) for task in tasks
+    ):
+        raise RuntimeError("Process-V2 P50 collated plan tasks are malformed")
+    expected_ids = (
+        tuple(sorted(str(entry["p50_entry_sha256"]) for entry in prepared["entries"]))
+        if prepared is not None
+        else tuple(
+            sorted(
+                str(identifier)
+                for task in tasks or ()
+                for identifier in task.get("p50_entry_sha256s", ())
+            )
+        )
+    )
+    if (
+        set(plan) != expected_fields
+        or plan.get("schema") != COLLATED_PLAN_SCHEMA
+        or plan.get("schema_version") != COLLATED_SCHEMA_VERSION
+        or plan.get("status") != "PLANNED_CPU_COLLATION_NO_DOWNSTREAM_AUTHORITY"
+        or (
+            prepared is not None
+            and (
+                plan.get("prepared_sha256") != prepared["prepared_sha256"]
+                or plan.get("selection_sha256") != prepared["selection_sha256"]
+                or plan.get("initial_model_state_sha256")
+                != prepared["initial_model_state_sha256"]
+            )
+        )
+        or plan.get("task_count") != len(tasks)
+        or plan.get("task_inventory_sha256") != _sha256(tasks)
+        or plan.get("entry_count") != len(expected_ids)
+        or plan.get("entry_inventory_sha256") != _sha256(expected_ids)
+    ):
+        raise RuntimeError("Process-V2 P50 collated plan identity disagrees")
+    observed_ids: list[str] = []
+    observed_leaves: set[str] = set()
+    for index, raw_task in enumerate(tasks):
+        if not isinstance(raw_task, Mapping):
+            raise RuntimeError("Process-V2 P50 collated task is malformed")
+        task = dict(raw_task)
+        body = {key: item for key, item in task.items() if key != "task_identity_sha256"}
+        leaves = task.get("leaves")
+        entry_ids = task.get("p50_entry_sha256s")
+        if (
+            set(task)
+            != {
+                "task_index",
+                "leaves",
+                "leaf_count",
+                "entry_count",
+                "p50_entry_sha256s",
+                "entry_inventory_sha256",
+                "raw_mark_count",
+                "task_identity_sha256",
+            }
+            or task.get("task_index") != index
+            or task.get("task_identity_sha256") != _sha256(body)
+            or not isinstance(leaves, list)
+            or not isinstance(entry_ids, list)
+            or entry_ids != sorted(entry_ids)
+            or task.get("leaf_count") != len(leaves)
+            or task.get("entry_count") != len(entry_ids)
+            or task.get("entry_inventory_sha256") != _sha256(entry_ids)
+            or task.get("raw_mark_count")
+            != sum(int(leaf["raw_mark_count"]) for leaf in leaves)
+        ):
+            raise RuntimeError("Process-V2 P50 collated task identity disagrees")
+        for leaf in leaves:
+            if (
+                not isinstance(leaf, Mapping)
+                or set(leaf)
+                != {
+                    "leaf_task_identity_sha256",
+                    "leaf_sha256",
+                    "entry_count",
+                    "p50_entry_sha256s",
+                    "raw_mark_count",
+                }
+                or _SHA256_RE.fullmatch(str(leaf["leaf_task_identity_sha256"])) is None
+                or _SHA256_RE.fullmatch(str(leaf["leaf_sha256"])) is None
+                or leaf["entry_count"] != len(leaf["p50_entry_sha256s"])
+                or leaf["p50_entry_sha256s"] != sorted(leaf["p50_entry_sha256s"])
+                or any(
+                    _SHA256_RE.fullmatch(str(identifier)) is None
+                    for identifier in leaf["p50_entry_sha256s"]
+                )
+                or type(leaf["raw_mark_count"]) is not int
+                or leaf["raw_mark_count"] <= 0
+            ):
+                raise RuntimeError("Process-V2 P50 collated source leaf is malformed")
+            leaf_id = str(leaf["leaf_task_identity_sha256"])
+            if leaf_id in observed_leaves:
+                raise RuntimeError("Process-V2 P50 collated plan repeats a source leaf")
+            observed_leaves.add(leaf_id)
+        observed_ids.extend(str(item) for item in entry_ids)
+    if tuple(sorted(observed_ids)) != expected_ids or len(observed_ids) != len(set(observed_ids)):
+        raise RuntimeError("Process-V2 P50 collated plan changed the entry inventory")
+    identity = {
+        "prepared_file_sha256": plan["prepared_file_sha256"],
+        "prepared_sha256": plan["prepared_sha256"],
+        "collation_implementation_sha256": plan["collation_implementation_sha256"],
+        "task_inventory_sha256": plan["task_inventory_sha256"],
+    }
+    if plan.get("run_identity_sha256") != _sha256(identity):
+        raise RuntimeError("Process-V2 P50 collated run identity disagrees")
+    return plan
+
+
+def _collated_task(plan: Mapping[str, Any], task_identity_sha256: str) -> dict[str, Any]:
+    matches = [
+        dict(task)
+        for task in plan["tasks"]
+        if task["task_identity_sha256"] == task_identity_sha256
+    ]
+    if len(matches) != 1:
+        raise RuntimeError("Process-V2 P50 collated task is absent or repeated")
+    return matches[0]
+
+
+def _validate_collated_receipt(
+    value: Mapping[str, Any], *, plan: Mapping[str, Any], task_identity_sha256: str
+) -> dict[str, Any]:
+    receipt = _validate_self_hash(
+        value, field="receipt_sha256", label="a Process-V2 P50 collated receipt"
+    )
+    _require_false_authority(receipt, label="a Process-V2 P50 collated receipt")
+    task = _collated_task(plan, task_identity_sha256)
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "status",
+        "training_authorized",
+        "bounded_p50_authorized",
+        "p500_authorized",
+        "p2000_authorized",
+        "long_run_authorized",
+        "checkpoint_selection_authorized",
+        "final_test_selection_authorized",
+        "plan_sha256",
+        "run_identity_sha256",
+        "prepared_sha256",
+        "collation_implementation_sha256",
+        "task_identity_sha256",
+        "entry_count",
+        "entry_inventory_sha256",
+        "payload_filename",
+        "payload_file_sha256",
+        "payload_file_bytes",
+        "receipt_sha256",
+    }
+    if (
+        set(receipt) != expected_fields
+        or receipt.get("schema") != COLLATED_RECEIPT_SCHEMA
+        or receipt.get("schema_version") != COLLATED_SCHEMA_VERSION
+        or receipt.get("status") != "COMPLETE_CPU_COLLATION_NO_DOWNSTREAM_AUTHORITY"
+        or receipt.get("plan_sha256") != plan["plan_sha256"]
+        or receipt.get("run_identity_sha256") != plan["run_identity_sha256"]
+        or receipt.get("prepared_sha256") != plan["prepared_sha256"]
+        or receipt.get("collation_implementation_sha256")
+        != plan["collation_implementation_sha256"]
+        or receipt.get("task_identity_sha256") != task_identity_sha256
+        or receipt.get("entry_count") != task["entry_count"]
+        or receipt.get("entry_inventory_sha256") != task["entry_inventory_sha256"]
+        or receipt.get("payload_filename") != COLLATED_PAYLOAD_FILENAME
+        or type(receipt.get("payload_file_bytes")) is not int
+        or receipt["payload_file_bytes"] <= 0
+        or _SHA256_RE.fullmatch(str(receipt.get("payload_file_sha256"))) is None
+    ):
+        raise RuntimeError("Process-V2 P50 collated receipt identity disagrees")
+    return receipt
+
+
+def _load_collated_payload(
+    receipt_path: Path,
+    *,
+    plan: Mapping[str, Any],
+    task_identity_sha256: str,
+    loaded: Mapping[str, Any],
+) -> tuple[dict[str, Any], Any]:
+    receipt = _validate_collated_receipt(
+        _read_canonical_object(receipt_path, label="a Process-V2 P50 collated receipt"),
+        plan=plan,
+        task_identity_sha256=task_identity_sha256,
+    )
+    payload_path = Path(receipt_path).parent / COLLATED_PAYLOAD_FILENAME
+    if (
+        not payload_path.is_file()
+        or payload_path.stat().st_size != receipt["payload_file_bytes"]
+        or _file_sha256(payload_path) != receipt["payload_file_sha256"]
+    ):
+        raise RuntimeError("Process-V2 P50 collated payload bytes disagree")
+    payload = loaded["torch"].load(
+        payload_path, map_location="cpu", weights_only=False, mmap=True
+    )
+    task = _collated_task(plan, task_identity_sha256)
+    if (
+        not isinstance(payload, Mapping)
+        or set(payload)
+        != {
+            "schema",
+            "schema_version",
+            "task_identity_sha256",
+            "p50_entry_sha256s",
+            "batch",
+        }
+        or payload.get("schema") != COLLATED_PAYLOAD_SCHEMA
+        or payload.get("schema_version") != COLLATED_SCHEMA_VERSION
+        or payload.get("task_identity_sha256") != task_identity_sha256
+        or payload.get("p50_entry_sha256s") != task["p50_entry_sha256s"]
+        or not isinstance(payload.get("batch"), loaded["FactorizedMarkBatch"])
+        or payload["batch"].batch_size != task["entry_count"]
+    ):
+        raise RuntimeError("Process-V2 P50 collated payload identity disagrees")
+    return receipt, payload["batch"]
+
+
+def _load_collated_completion(
+    completion_path: Path,
+    *,
+    plan: Mapping[str, Any],
+    prepared: Mapping[str, Any],
+    loaded: Mapping[str, Any],
+) -> tuple[dict[str, Any], Any, list[str]]:
+    completion = _validate_self_hash(
+        _read_canonical_object(
+            completion_path, label="the Process-V2 P50 collated completion"
+        ),
+        field="completion_sha256",
+        label="the Process-V2 P50 collated completion",
+    )
+    _require_false_authority(completion, label="the Process-V2 P50 collated completion")
+    expected_fields = {
+        "schema",
+        "schema_version",
+        "status",
+        "training_authorized",
+        "bounded_p50_authorized",
+        "p500_authorized",
+        "p2000_authorized",
+        "long_run_authorized",
+        "checkpoint_selection_authorized",
+        "final_test_selection_authorized",
+        "plan_sha256",
+        "run_identity_sha256",
+        "prepared_path",
+        "prepared_file_sha256",
+        "prepared_sha256",
+        "collation_implementation_sha256",
+        "entry_count",
+        "entry_inventory_sha256",
+        "task_count",
+        "task_receipt_inventory_sha256",
+        "task_receipts",
+        "payload_filename",
+        "payload_file_sha256",
+        "payload_file_bytes",
+        "gpu_training_launched",
+        "completion_sha256",
+    }
+    summaries = completion.get("task_receipts")
+    if (
+        not isinstance(summaries, list)
+        or len(summaries) != len(plan["tasks"])
+        or any(
+            not isinstance(summary, Mapping)
+            or set(summary)
+            != {
+                "task_identity_sha256",
+                "receipt_sha256",
+                "payload_file_sha256",
+            }
+            or summary["task_identity_sha256"] != task["task_identity_sha256"]
+            or _SHA256_RE.fullmatch(str(summary["receipt_sha256"])) is None
+            or _SHA256_RE.fullmatch(str(summary["payload_file_sha256"])) is None
+            for task, summary in zip(plan["tasks"], summaries, strict=True)
+        )
+    ):
+        raise RuntimeError("Process-V2 P50 collated completion receipts disagree")
+    if (
+        set(completion) != expected_fields
+        or completion.get("schema") != COLLATED_COMPLETION_SCHEMA
+        or completion.get("schema_version") != COLLATED_SCHEMA_VERSION
+        or completion.get("status") != "COMPLETE_CPU_COLLATION_NO_DOWNSTREAM_AUTHORITY"
+        or completion.get("plan_sha256") != plan["plan_sha256"]
+        or completion.get("run_identity_sha256") != plan["run_identity_sha256"]
+        or completion.get("prepared_path") != plan["prepared_path"]
+        or completion.get("prepared_file_sha256") != plan["prepared_file_sha256"]
+        or completion.get("prepared_sha256") != prepared["prepared_sha256"]
+        or completion.get("collation_implementation_sha256")
+        != plan["collation_implementation_sha256"]
+        or completion.get("entry_count") != prepared["entry_count"]
+        or completion.get("entry_inventory_sha256") != plan["entry_inventory_sha256"]
+        or completion.get("task_count") != plan["task_count"]
+        or completion.get("task_receipt_inventory_sha256")
+        != _sha256(summaries)
+        or completion.get("payload_filename") != COLLATED_PAYLOAD_FILENAME
+        or completion.get("gpu_training_launched") is not False
+    ):
+        raise RuntimeError("Process-V2 P50 collated completion identity disagrees")
+    payload_path = Path(completion_path).parent / COLLATED_PAYLOAD_FILENAME
+    if (
+        not payload_path.is_file()
+        or payload_path.stat().st_size != completion["payload_file_bytes"]
+        or _file_sha256(payload_path) != completion["payload_file_sha256"]
+    ):
+        raise RuntimeError("Process-V2 P50 consolidated payload bytes disagree")
+    payload = loaded["torch"].load(
+        payload_path, map_location="cpu", weights_only=False, mmap=True
+    )
+    expected_ids = sorted(str(entry["p50_entry_sha256"]) for entry in prepared["entries"])
+    if (
+        not isinstance(payload, Mapping)
+        or set(payload)
+        != {
+            "schema",
+            "schema_version",
+            "task_identity_sha256",
+            "p50_entry_sha256s",
+            "batch",
+        }
+        or payload.get("schema") != COLLATED_PAYLOAD_SCHEMA
+        or payload.get("schema_version") != COLLATED_SCHEMA_VERSION
+        or payload.get("task_identity_sha256") != plan["run_identity_sha256"]
+        or payload.get("p50_entry_sha256s") != expected_ids
+        or not isinstance(payload.get("batch"), loaded["FactorizedMarkBatch"])
+        or payload["batch"].batch_size != len(expected_ids)
+    ):
+        raise RuntimeError("Process-V2 P50 consolidated payload identity disagrees")
+    return completion, payload["batch"], expected_ids
 
 
 def _require_prepared_prerequisite_binding(
@@ -1069,6 +1575,390 @@ def finalize_prepared_remote(
 
 @app.function(
     image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def prepare_collated_plan_remote(
+    prepared_path: str,
+    output_prefix: str,
+    max_cpu_containers: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Plan balanced CPU-only collation from already compiled immutable leaves."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    prepared_file = _require_artifact_path(prepared_path, field="prepared_path")
+    prepared = loaded["validate_prepared"](
+        _read_canonical_object(prepared_file, label="the Process-V2 P50 prepared input")
+    )
+    selection = loaded["validate_selection"](
+        _read_canonical_object(
+            prepared_file.parent / SELECTION_FILENAME,
+            label="the Process-V2 P50 selection beside the prepared input",
+        )
+    )
+    if selection["selection_sha256"] != prepared["selection_sha256"]:
+        raise RuntimeError("Process-V2 P50 prepared input and selection disagree")
+    task_ids = sorted({str(entry["task_identity_sha256"]) for entry in selection["entries"]})
+    leaves = [
+        _validate_leaf(
+            _read_canonical_object(
+                _leaf_path(prepared_file.parent, task_id),
+                label="a Process-V2 P50 prepared leaf",
+            ),
+            selection_sha256=str(selection["selection_sha256"]),
+            task_identity_sha256=task_id,
+        )
+        for task_id in task_ids
+    ]
+    tasks = _balanced_collated_tasks(leaves, maximum=max_cpu_containers)
+    source_revision = _source_revision(revision)
+    implementation_sha256 = _collation_implementation_sha256(revision)
+    prepared_file_sha256 = _file_sha256(prepared_file)
+    entry_ids = tuple(
+        sorted(str(entry["p50_entry_sha256"]) for entry in prepared["entries"])
+    )
+    identity = {
+        "prepared_file_sha256": prepared_file_sha256,
+        "prepared_sha256": prepared["prepared_sha256"],
+        "collation_implementation_sha256": implementation_sha256,
+        "task_inventory_sha256": _sha256(tasks),
+    }
+    run_identity = _sha256(identity)
+    run_root = _require_physical_artifact_path(output_prefix, field="output_prefix") / run_identity
+    plan_path = run_root / COLLATED_PLAN_FILENAME
+    if plan_path.is_file():
+        plan = _validate_collated_plan(
+            _read_canonical_object(plan_path, label="the cached Process-V2 P50 collated plan"),
+            prepared=prepared,
+        )
+    else:
+        body = {
+            "schema": COLLATED_PLAN_SCHEMA,
+            "schema_version": COLLATED_SCHEMA_VERSION,
+            "status": "PLANNED_CPU_COLLATION_NO_DOWNSTREAM_AUTHORITY",
+            **loaded["authority_false_block"](),
+            "prepared_path": str(prepared_file),
+            "prepared_file_sha256": prepared_file_sha256,
+            "prepared_sha256": prepared["prepared_sha256"],
+            "selection_sha256": prepared["selection_sha256"],
+            "initial_model_state_sha256": prepared["initial_model_state_sha256"],
+            "collation_implementation_sha256": implementation_sha256,
+            "source_revision_sha256": source_revision["source_revision_sha256"],
+            "entry_count": len(entry_ids),
+            "entry_inventory_sha256": _sha256(entry_ids),
+            "task_count": len(tasks),
+            "task_inventory_sha256": _sha256(tasks),
+            "tasks": tasks,
+            "run_identity_sha256": run_identity,
+        }
+        plan = _validate_collated_plan(
+            {**body, "plan_sha256": _sha256(body)}, prepared=prepared
+        )
+        _publish_canonical(plan_path, plan, loaded=loaded)
+        artifact_volume.commit()
+    response = {
+        "phase": "process_v2_p50_collated_plan_complete",
+        "run_root": str(run_root),
+        "plan_path": str(plan_path),
+        "plan_sha256": plan["plan_sha256"],
+        "task_identity_sha256s": [task["task_identity_sha256"] for task in plan["tasks"]],
+        "task_count": plan["task_count"],
+        "entry_count": plan["entry_count"],
+        "estimated_raw_mark_count": sum(task["raw_mark_count"] for task in plan["tasks"]),
+        "gpu_training_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=1.0,
+    memory=8 * 1024,
+    timeout=20 * 60,
+    max_containers=MAX_CPU_CONTAINERS,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def collate_p50_task_remote(
+    plan_path: str,
+    task_identity_sha256: str,
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Collate one balanced bundle without chemistry or GPU allocation."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    plan_file = _require_artifact_path(plan_path, field="plan_path")
+    plan = _validate_collated_plan(
+        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan")
+    )
+    if plan["collation_implementation_sha256"] != _collation_implementation_sha256(revision):
+        raise RuntimeError("Process-V2 P50 collated plan binds another tensor implementation")
+    task = _collated_task(plan, task_identity_sha256)
+    task_root = _collated_task_root(plan_file.parent, task_identity_sha256)
+    receipt_path = task_root / COLLATED_RECEIPT_FILENAME
+    if receipt_path.is_file():
+        receipt, _batch = _load_collated_payload(
+            receipt_path,
+            plan=plan,
+            task_identity_sha256=task_identity_sha256,
+            loaded=loaded,
+        )
+        return {
+            "task_identity_sha256": task_identity_sha256,
+            "receipt_sha256": receipt["receipt_sha256"],
+            "entry_count": task["entry_count"],
+            "reused": True,
+        }
+    source = _open_source(
+        active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
+        gate_zero_decision_path=_require_artifact_path(
+            gate_zero_decision_path, field="gate_zero_decision_path"
+        ),
+        loaded=loaded,
+    )
+    scratch, _binding, _score_receipt = loaded["build_scratch"](source)
+    if loaded["state_dict_sha256"](scratch.model.state_dict()) != plan[
+        "initial_model_state_sha256"
+    ]:
+        raise RuntimeError("Process-V2 P50 collated task model identity disagrees")
+    entries: list[dict[str, Any]] = []
+    for descriptor in task["leaves"]:
+        leaf_id = str(descriptor["leaf_task_identity_sha256"])
+        leaf = _validate_leaf(
+            _read_canonical_object(
+                _leaf_path(Path(plan["prepared_path"]).parent, leaf_id),
+                label="a Process-V2 P50 collation source leaf",
+            ),
+            selection_sha256=str(plan["selection_sha256"]),
+            task_identity_sha256=leaf_id,
+        )
+        if (
+            leaf["leaf_sha256"] != descriptor["leaf_sha256"]
+            or sorted(str(entry["p50_entry_sha256"]) for entry in leaf["entries"])
+            != descriptor["p50_entry_sha256s"]
+        ):
+            raise RuntimeError("Process-V2 P50 collation source leaf changed")
+        entries.extend(dict(entry) for entry in leaf["entries"])
+    entries.sort(key=lambda entry: entry["p50_entry_sha256"])
+    with _heartbeat("process_v2_p50_cpu_collation_heartbeat"):
+        batch, entry_ids = loaded["collate_entries"](entries, scratch.model)
+    if list(entry_ids) != task["p50_entry_sha256s"]:
+        raise RuntimeError("Process-V2 P50 collated task changed entry order")
+    payload = {
+        "schema": COLLATED_PAYLOAD_SCHEMA,
+        "schema_version": COLLATED_SCHEMA_VERSION,
+        "task_identity_sha256": task_identity_sha256,
+        "p50_entry_sha256s": list(entry_ids),
+        "batch": batch,
+    }
+    payload_bytes = _torch_bytes(payload, torch_module=loaded["torch"])
+    loaded["write_bytes_if_absent"](task_root / COLLATED_PAYLOAD_FILENAME, payload_bytes)
+    body = {
+        "schema": COLLATED_RECEIPT_SCHEMA,
+        "schema_version": COLLATED_SCHEMA_VERSION,
+        "status": "COMPLETE_CPU_COLLATION_NO_DOWNSTREAM_AUTHORITY",
+        **loaded["authority_false_block"](),
+        "plan_sha256": plan["plan_sha256"],
+        "run_identity_sha256": plan["run_identity_sha256"],
+        "prepared_sha256": plan["prepared_sha256"],
+        "collation_implementation_sha256": plan["collation_implementation_sha256"],
+        "task_identity_sha256": task_identity_sha256,
+        "entry_count": task["entry_count"],
+        "entry_inventory_sha256": task["entry_inventory_sha256"],
+        "payload_filename": COLLATED_PAYLOAD_FILENAME,
+        "payload_file_sha256": hashlib.sha256(payload_bytes).hexdigest(),
+        "payload_file_bytes": len(payload_bytes),
+    }
+    receipt = _validate_collated_receipt(
+        {**body, "receipt_sha256": _sha256(body)},
+        plan=plan,
+        task_identity_sha256=task_identity_sha256,
+    )
+    _publish_canonical(receipt_path, receipt, loaded=loaded)
+    artifact_volume.commit()
+    response = {
+        "task_identity_sha256": task_identity_sha256,
+        "receipt_sha256": receipt["receipt_sha256"],
+        "entry_count": task["entry_count"],
+        "payload_file_bytes": len(payload_bytes),
+        "reused": False,
+    }
+    _progress("process_v2_p50_cpu_collation_complete", **response)
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=1.0,
+    memory=4 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def scan_collated_remote(
+    plan_path: str, task_identity_sha256s: list[str], revision: dict[str, Any]
+) -> list[str]:
+    """Return only complete, byte-authenticated collation tasks."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    plan_file = _require_artifact_path(plan_path, field="plan_path")
+    plan = _validate_collated_plan(
+        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan")
+    )
+    completed: list[str] = []
+    for task_id in task_identity_sha256s:
+        receipt_path = _collated_task_root(plan_file.parent, task_id) / COLLATED_RECEIPT_FILENAME
+        if not receipt_path.is_file():
+            continue
+        receipt = _validate_collated_receipt(
+            _read_canonical_object(receipt_path, label="a Process-V2 P50 collated receipt"),
+            plan=plan,
+            task_identity_sha256=task_id,
+        )
+        payload_path = receipt_path.parent / COLLATED_PAYLOAD_FILENAME
+        if (
+            not payload_path.is_file()
+            or payload_path.stat().st_size != receipt["payload_file_bytes"]
+            or _file_sha256(payload_path) != receipt["payload_file_sha256"]
+        ):
+            raise RuntimeError("Process-V2 P50 collated payload bytes disagree")
+        completed.append(task_id)
+    return completed
+
+
+@app.function(
+    image=image,
+    cpu=8.0,
+    memory=64 * 1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def finalize_collated_remote(
+    plan_path: str, task_identity_sha256s: list[str], revision: dict[str, Any]
+) -> dict[str, Any]:
+    """Concatenate and reorder CPU batches once; publish completion last."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    plan_file = _require_artifact_path(plan_path, field="plan_path")
+    plan = _validate_collated_plan(
+        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan")
+    )
+    completion_path = plan_file.parent / COLLATED_COMPLETION_FILENAME
+    if completion_path.is_file():
+        prepared = loaded["validate_prepared"](
+            _read_canonical_object(
+                _require_artifact_path(plan["prepared_path"], field="prepared_path"),
+                label="the Process-V2 P50 prepared input",
+            )
+        )
+        completion, _batch, _entry_ids = _load_collated_completion(
+            completion_path, plan=plan, prepared=prepared, loaded=loaded
+        )
+        return {
+            "phase": "process_v2_p50_collated_cache_reused",
+            "completion_path": str(completion_path),
+            "completion_sha256": completion["completion_sha256"],
+            "entry_count": completion["entry_count"],
+            "reused": True,
+        }
+    expected_tasks = [task["task_identity_sha256"] for task in plan["tasks"]]
+    if task_identity_sha256s != expected_tasks:
+        raise RuntimeError("Process-V2 P50 collation finalizer task inventory disagrees")
+    batches: list[Any] = []
+    concatenated_ids: list[str] = []
+    receipts: list[dict[str, Any]] = []
+    with _heartbeat("process_v2_p50_collated_finalization_heartbeat"):
+        for task_id in expected_tasks:
+            receipt_path = (
+                _collated_task_root(plan_file.parent, task_id) / COLLATED_RECEIPT_FILENAME
+            )
+            receipt, batch = _load_collated_payload(
+                receipt_path,
+                plan=plan,
+                task_identity_sha256=task_id,
+                loaded=loaded,
+            )
+            batches.append(batch)
+            concatenated_ids.extend(_collated_task(plan, task_id)["p50_entry_sha256s"])
+            receipts.append(
+                {
+                    "task_identity_sha256": task_id,
+                    "receipt_sha256": receipt["receipt_sha256"],
+                    "payload_file_sha256": receipt["payload_file_sha256"],
+                }
+            )
+        merged = loaded["concatenate_batches"](tuple(batches))
+        expected_ids = sorted(concatenated_ids)
+        if (
+            len(expected_ids) != plan["entry_count"]
+            or len(expected_ids) != len(set(expected_ids))
+            or _sha256(expected_ids) != plan["entry_inventory_sha256"]
+        ):
+            raise RuntimeError("Process-V2 P50 collated reduction changed entry inventory")
+        position = {identifier: index for index, identifier in enumerate(concatenated_ids)}
+        merged = loaded["index_batch"](merged, tuple(position[item] for item in expected_ids))
+        payload = {
+            "schema": COLLATED_PAYLOAD_SCHEMA,
+            "schema_version": COLLATED_SCHEMA_VERSION,
+            "task_identity_sha256": plan["run_identity_sha256"],
+            "p50_entry_sha256s": expected_ids,
+            "batch": merged,
+        }
+        payload_bytes = _torch_bytes(payload, torch_module=loaded["torch"])
+        payload_path = plan_file.parent / COLLATED_PAYLOAD_FILENAME
+        loaded["write_bytes_if_absent"](payload_path, payload_bytes)
+    body = {
+        "schema": COLLATED_COMPLETION_SCHEMA,
+        "schema_version": COLLATED_SCHEMA_VERSION,
+        "status": "COMPLETE_CPU_COLLATION_NO_DOWNSTREAM_AUTHORITY",
+        **loaded["authority_false_block"](),
+        "plan_sha256": plan["plan_sha256"],
+        "run_identity_sha256": plan["run_identity_sha256"],
+        "prepared_path": plan["prepared_path"],
+        "prepared_file_sha256": plan["prepared_file_sha256"],
+        "prepared_sha256": plan["prepared_sha256"],
+        "collation_implementation_sha256": plan["collation_implementation_sha256"],
+        "entry_count": plan["entry_count"],
+        "entry_inventory_sha256": plan["entry_inventory_sha256"],
+        "task_count": plan["task_count"],
+        "task_receipt_inventory_sha256": _sha256(receipts),
+        "task_receipts": receipts,
+        "payload_filename": COLLATED_PAYLOAD_FILENAME,
+        "payload_file_sha256": hashlib.sha256(payload_bytes).hexdigest(),
+        "payload_file_bytes": len(payload_bytes),
+        "gpu_training_launched": False,
+    }
+    completion = {**body, "completion_sha256": _sha256(body)}
+    _publish_canonical(completion_path, completion, loaded=loaded)
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_p50_collated_cache_complete",
+        "completion_path": str(completion_path),
+        "completion_sha256": completion["completion_sha256"],
+        "entry_count": completion["entry_count"],
+        "payload_file_bytes": completion["payload_file_bytes"],
+        "reused": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
     gpu="A10G",
     cpu=8.0,
     memory=64 * 1024,
@@ -1078,6 +1968,7 @@ def finalize_prepared_remote(
 )
 def run_p50_gpu_remote(
     prepared_path: str,
+    collated_completion_path: str,
     active8_run_root: str,
     gate_zero_decision_path: str,
     t1_result_path: str,
@@ -1110,18 +2001,30 @@ def run_p50_gpu_remote(
             label="the Process-V2 P50 prepared input",
         ),
     )
-    expected_prepared_parent = _sha256(
-        {
-            "schema": "compose.editing_v2.process_v2_p50_prepared_run_address",
-            "schema_version": 1,
-            "prerequisites_binding_sha256": prerequisites.binding_sha256,
-            "source_revision_sha256": _source_revision(revision)["source_revision_sha256"],
-        }
+    collated_completion_file = _require_artifact_path(
+        collated_completion_path, field="collated_completion_path"
     )
-    if Path(prepared_path).parent.name != expected_prepared_parent:
-        raise RuntimeError("Process-V2 P50 prepared inputs bind another image revision")
+    plan = _validate_collated_plan(
+        _read_canonical_object(
+            collated_completion_file.parent / COLLATED_PLAN_FILENAME,
+            label="the Process-V2 P50 collated plan",
+        ),
+        prepared=prepared,
+    )
+    if (
+        plan["collation_implementation_sha256"] != _collation_implementation_sha256(revision)
+        or plan["prepared_path"] != str(prepared_path)
+        or plan["prepared_file_sha256"] != _file_sha256(Path(prepared_path))
+    ):
+        raise RuntimeError("Process-V2 P50 collated cache binds another scientific input")
+    collated_completion, collated_batch, collated_entry_ids = _load_collated_completion(
+        collated_completion_file, plan=plan, prepared=prepared, loaded=loaded
+    )
     _require_prepared_prerequisite_binding(prepared, prerequisites=prerequisites)
     runtime = loaded["load_runtime"](prepared)
+    materialized = loaded["materialize_batch"](
+        runtime, batch=collated_batch, entry_ids=collated_entry_ids
+    )
     scratch, _binding, score_receipt = loaded["build_scratch"](source)
     policy = loaded["load_policy"](loaded["P50_RECIPE_POLICY"], repo_root=REMOTE_ROOT)
     source_revision = _source_revision(revision)
@@ -1133,6 +2036,8 @@ def run_p50_gpu_remote(
         "validation_stream_sha256": prepared["validation_inventory_sha256"],
         "runner_implementation_sha256": runner_hash,
         "runner_source_revision_sha256": source_revision["source_revision_sha256"],
+        "collated_completion_sha256": collated_completion["completion_sha256"],
+        "collated_payload_file_sha256": collated_completion["payload_file_sha256"],
     }
     provenance = {
         **prerequisites.as_payload(),
@@ -1143,6 +2048,8 @@ def run_p50_gpu_remote(
         "initial_model_state_sha256": prepared["initial_model_state_sha256"],
         "runner_implementation_sha256": runner_hash,
         "runner_source_revision_sha256": source_revision["source_revision_sha256"],
+        "collated_completion_sha256": collated_completion["completion_sha256"],
+        "collated_payload_file_sha256": collated_completion["payload_file_sha256"],
         "execution_environment": environment,
     }
     if (
@@ -1163,6 +2070,8 @@ def run_p50_gpu_remote(
             "prerequisites_binding_sha256": prerequisites.binding_sha256,
             "runner_implementation_sha256": runner_hash,
             "runner_source_revision_sha256": source_revision["source_revision_sha256"],
+            "collated_completion_sha256": collated_completion["completion_sha256"],
+            "collated_payload_file_sha256": collated_completion["payload_file_sha256"],
             "environment_sha256": environment["environment_sha256"],
         }
     )
@@ -1226,6 +2135,7 @@ def run_p50_gpu_remote(
             runtime,
             policy=policy,
             progress_callback=report,
+            materialized=materialized,
         )
     checkpoint = _checkpoint_payload(
         run,
@@ -1235,6 +2145,9 @@ def run_p50_gpu_remote(
             "prepared_input_path": str(prepared_path),
             "prepared_sha256": prepared["prepared_sha256"],
             "selection_sha256": prepared["selection_sha256"],
+            "collated_completion_path": str(collated_completion_file),
+            "collated_completion_sha256": collated_completion["completion_sha256"],
+            "collated_payload_file_sha256": collated_completion["payload_file_sha256"],
         },
         loaded=loaded,
     )
@@ -1449,8 +2362,87 @@ def prepare_driver(
     timeout=COORDINATOR_TIMEOUT_SECONDS,
     max_containers=1,
 )
+def collate_driver(
+    prepared_path: str,
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    collated_output_prefix: str,
+    max_cpu_containers: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the reusable CPU tensor cache before any GPU allocation."""
+
+    _validate_remote_revision(revision)
+    if type(max_cpu_containers) is not int or not 1 <= max_cpu_containers <= MAX_CPU_CONTAINERS:
+        raise ValueError(f"max_cpu_containers must lie in [1, {MAX_CPU_CONTAINERS}]")
+    planned = prepare_collated_plan_remote.remote(
+        prepared_path, collated_output_prefix, max_cpu_containers, revision
+    )
+    expected = list(planned["task_identity_sha256s"])
+    completed = set(scan_collated_remote.remote(planned["plan_path"], expected, revision))
+    missing = [task_id for task_id in expected if task_id not in completed]
+    _progress(
+        "process_v2_p50_cpu_collation_map_plan",
+        expected_tasks=len(expected),
+        already_complete=len(completed),
+        missing_tasks=len(missing),
+        max_cpu_containers=max_cpu_containers,
+        gpu_training_launched=False,
+    )
+    collate_p50_task_remote.update_autoscaler(max_containers=max_cpu_containers)
+    if missing:
+        results = list(
+            collate_p50_task_remote.starmap(
+                [
+                    (
+                        planned["plan_path"],
+                        task_id,
+                        active8_run_root,
+                        gate_zero_decision_path,
+                        revision,
+                    )
+                    for task_id in missing
+                ]
+            )
+        )
+        if {result["task_identity_sha256"] for result in results} != set(missing):
+            raise RuntimeError("Process-V2 P50 CPU collation lost a task result")
+    complete = set(scan_collated_remote.remote(planned["plan_path"], expected, revision))
+    if complete != set(expected):
+        raise RuntimeError(
+            f"Process-V2 P50 CPU collation is incomplete: "
+            f"missing={len(set(expected) - complete)}"
+        )
+    finalized = finalize_collated_remote.remote(planned["plan_path"], expected, revision)
+    response = {
+        "phase": "process_v2_p50_cpu_collation_driver_complete",
+        "plan": planned,
+        "completion": finalized,
+        "max_cpu_containers": max_cpu_containers,
+        "computed_tasks": len(missing),
+        "reused_tasks": len(completed),
+        "gpu_training_launched": False,
+    }
+    _progress(
+        "process_v2_p50_cpu_collation_driver_complete",
+        completion_sha256=finalized["completion_sha256"],
+        computed_tasks=len(missing),
+        reused_tasks=len(completed),
+        gpu_training_launched=False,
+    )
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+)
 def train_driver(
     prepared_path: str,
+    collated_completion_path: str,
     active8_run_root: str,
     gate_zero_decision_path: str,
     t1_result_path: str,
@@ -1463,6 +2455,7 @@ def train_driver(
     _validate_remote_revision(revision)
     gpu = run_p50_gpu_remote.remote(
         prepared_path,
+        collated_completion_path,
         active8_run_root,
         gate_zero_decision_path,
         t1_result_path,
@@ -1498,6 +2491,7 @@ def driver(
     gate_zero_decision_path: str,
     scoped_t1_output_prefix: str,
     prepared_output_prefix: str,
+    collated_output_prefix: str,
     run_output_prefix: str,
     max_cpu_containers: int,
     legacy_prepared_run_root: str,
@@ -1515,8 +2509,17 @@ def driver(
         legacy_prepared_run_root,
         revision,
     )
+    collated = collate_driver.remote(
+        prepared["prepared"]["prepared_path"],
+        active8_run_root,
+        gate_zero_decision_path,
+        collated_output_prefix,
+        max_cpu_containers,
+        revision,
+    )
     gpu = train_driver.remote(
         prepared["prepared"]["prepared_path"],
+        collated["completion"]["completion_path"],
         active8_run_root,
         gate_zero_decision_path,
         prepared["scoped_t1"]["result_path"],
@@ -1526,6 +2529,7 @@ def driver(
     )
     return {
         **prepared,
+        "collated": collated,
         "phase": "process_v2_p50_driver_complete",
         "pilot": gpu["pilot"],
         "p500_authorized": gpu["p500_authorized"],
@@ -1577,8 +2581,51 @@ def prepare(
 
 
 @app.local_entrypoint()
+def collate(
+    prepared_path: str,
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    expected_commit: str,
+    collated_output_prefix: str = COLLATED_OUTPUT_PREFIX,
+    max_cpu_containers: int = MAX_CPU_CONTAINERS,
+    wait_for_completion: bool = False,
+) -> None:
+    """Spawn reusable CPU-only tensor collation and return immediately."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_path,
+        active8_run_root,
+        gate_zero_decision_path,
+        collated_output_prefix,
+        int(max_cpu_containers),
+        revision,
+    )
+    if wait_for_completion:
+        print(json.dumps(collate_driver.remote(*arguments), indent=2, sort_keys=True))
+        return
+    call = collate_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_p50_cpu_collation_launched",
+                "driver_call_id": call.object_id,
+                "prepared_path": prepared_path,
+                "max_cpu_containers": int(max_cpu_containers),
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "gpu_training_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+@app.local_entrypoint()
 def train(
     prepared_path: str,
+    collated_completion_path: str,
     active8_run_root: str,
     gate_zero_decision_path: str,
     t1_result_path: str,
@@ -1592,6 +2639,7 @@ def train(
     revision = local_image_revision(expected_commit=expected_commit)
     arguments = (
         prepared_path,
+        collated_completion_path,
         active8_run_root,
         gate_zero_decision_path,
         t1_result_path,
@@ -1609,6 +2657,7 @@ def train(
                 "phase": "process_v2_p50_training_launched",
                 "driver_call_id": call.object_id,
                 "prepared_path": prepared_path,
+                "collated_completion_path": collated_completion_path,
                 "commit": revision["commit"],
                 "image_revision_sha256": revision["image_revision_sha256"],
                 "p50_training_launched": True,
@@ -1627,6 +2676,7 @@ def main(
     expected_commit: str,
     scoped_t1_output_prefix: str = SCOPED_T1_OUTPUT_PREFIX,
     prepared_output_prefix: str = PREPARED_OUTPUT_PREFIX,
+    collated_output_prefix: str = COLLATED_OUTPUT_PREFIX,
     run_output_prefix: str = RUN_OUTPUT_PREFIX,
     max_cpu_containers: int = MAX_CPU_CONTAINERS,
     legacy_prepared_run_root: str = LEGACY_PREPARED_RUN_ROOT,
@@ -1640,6 +2690,7 @@ def main(
         gate_zero_decision_path,
         scoped_t1_output_prefix,
         prepared_output_prefix,
+        collated_output_prefix,
         run_output_prefix,
         int(max_cpu_containers),
         legacy_prepared_run_root,
@@ -1669,13 +2720,18 @@ def main(
 
 
 __all__ = [
+    "COLLATED_OUTPUT_PREFIX",
     "MAX_CPU_CONTAINERS",
     "LEGACY_PREPARED_RUN_ROOT",
     "PREPARED_OUTPUT_PREFIX",
     "RUN_OUTPUT_PREFIX",
     "app",
+    "collate",
+    "collate_driver",
+    "collate_p50_task_remote",
     "driver",
     "finalize_prepared_remote",
+    "finalize_collated_remote",
     "local_image_revision",
     "main",
     "materialize_scoped_t1_remote",
@@ -1684,8 +2740,10 @@ __all__ = [
     "prepare_driver",
     "prepare",
     "prepare_selection_remote",
+    "prepare_collated_plan_remote",
     "run_p50_gpu_remote",
     "scan_completed_remote",
+    "scan_collated_remote",
     "train_driver",
     "train",
 ]

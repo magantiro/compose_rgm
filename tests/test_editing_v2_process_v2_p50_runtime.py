@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import hashlib
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
+import torch
 
-from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY, smiles_to_molecular_graph
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
+from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.factorized_successor_training import (
     CanonicalSuccessorAliasGroup,
@@ -23,11 +27,22 @@ from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
     compiled_successor_map_payload,
 )
 from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 from compose_v4.rewrite.trace_shard import encode_state
+from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
     ProcessV2P50ScopedPrerequisites,
 )
 from compose_v4.experiments import editing_v2_process_v2_p50_runtime as runtime
+from compose_v4.model.factorized_tracelet_rate_model import (
+    PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+    SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+    SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+    SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+    SEMANTIC_RING_RESTATE_SCORER_MODE,
+    FactorizedTraceletRateModel,
+)
 
 
 def _sha(text: str) -> str:
@@ -36,6 +51,37 @@ def _sha(text: str) -> str:
 
 def _family(cell: str) -> str:
     return cell.split(":", 2)[1]
+
+
+@pytest.fixture(scope="module")
+def process_v2_partition_model() -> FactorizedTraceletRateModel:
+    target = pad_molecular_graph(smiles_to_molecular_graph("c1ccccc1"), 12)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(2), n_slots=12
+    )
+    trace = compile_carbon_tree_to_target(
+        source, target, use_bond_reroute=True, align_source=True
+    )
+    torch.manual_seed(4)
+    return FactorizedTraceletRateModel(
+        build_typed_ring_catalog((trace,)),
+        hidden_dim=12,
+        message_passing_steps=1,
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
+        enable_ring_system_delete=False,
+        editing_process_semantics=PROCESS_V2_EDITING_PROCESS_SEMANTICS,
+        atom_restate_action_semantics=SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
+        ring_restate_scorer_mode=SEMANTIC_RING_RESTATE_SCORER_MODE,
+        cycle_close_action_semantics=SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
+        cycle_open_action_semantics=SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+        atom_delete_action_semantics=PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+    ).eval()
 
 
 def _candidate(*, cell: str, role: str, index: int) -> dict[str, object]:
@@ -251,6 +297,72 @@ def test_compact_prepared_input_round_trips_only_the_teacher_fiber() -> None:
     loaded = runtime.load_process_v2_p50_inputs(prepared)
     assert loaded.fibers_by_id[identifier] == fiber
     assert not hasattr(loaded, "partitions_by_id")
+
+
+def test_cpu_collated_p50_batch_matches_fresh_rows_at_stream_times(
+    process_v2_partition_model,
+) -> None:
+    model = process_v2_partition_model
+    states = (
+        pad_molecular_graph(smiles_to_molecular_graph("CCO"), 12),
+        pad_molecular_graph(smiles_to_molecular_graph("C1CCCCC1"), 12),
+        pad_molecular_graph(smiles_to_molecular_graph("CCN"), 12),
+    )
+    entries: list[dict[str, object]] = []
+    for index, state in enumerate(states):
+        body = {
+            "p50_entry_sha256": _sha(f"collated-{index}"),
+            "model_family": "atom_insert",
+            "source_state_sha256": persistent_slot_state_sha256(state),
+            "exact_state": encode_state(state),
+        }
+        entries.append(
+            {
+                **body,
+                "p50_compiled_entry_sha256": runtime.canonical_sha256(body),
+            }
+        )
+    batch, entry_ids = runtime.collate_process_v2_p50_entries(entries, model)
+    runtime_inputs = SimpleNamespace(
+        prepared={"entries": entries},
+        metadata_by_id={entry["p50_entry_sha256"]: entry for entry in entries},
+        states_by_id={
+            entry["p50_entry_sha256"]: state
+            for entry, state in zip(entries, states, strict=True)
+        },
+        fibers_by_id={
+            entry["p50_entry_sha256"]: f"fiber-{index}"
+            for index, entry in enumerate(entries)
+        },
+    )
+    materialized = runtime.materialize_process_v2_p50_batch(
+        runtime_inputs, batch=batch, entry_ids=entry_ids
+    )
+    selected_ids = (entry_ids[2], entry_ids[0], entry_ids[2])
+    selected_times = (0.125, 0.75, 0.375)
+    direct, direct_fibers, direct_entries = runtime._batch(
+        runtime_inputs, model, selected_ids, selected_times
+    )
+    cached, cached_fibers, cached_entries = runtime._batch(
+        runtime_inputs,
+        model,
+        selected_ids,
+        selected_times,
+        materialized=materialized,
+    )
+    assert direct_fibers == cached_fibers
+    assert direct_entries == cached_entries
+    for field in dataclasses.fields(type(direct)):
+        direct_value = getattr(direct, field.name)
+        cached_value = getattr(cached, field.name)
+        if field.name == "states":
+            assert tuple(map(persistent_slot_state_sha256, direct_value)) == tuple(
+                map(persistent_slot_state_sha256, cached_value)
+            )
+        elif isinstance(direct_value, torch.Tensor):
+            assert torch.equal(direct_value, cached_value), field.name
+        else:
+            assert direct_value == cached_value, field.name
 
 
 def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:

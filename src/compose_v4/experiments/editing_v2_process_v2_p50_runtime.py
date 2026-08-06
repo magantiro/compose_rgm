@@ -20,7 +20,7 @@ import math
 import random
 from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -64,6 +64,7 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
     _attach_successor_family_coordinates,
     _clone_state_dict,
     _hazard_state,
+    _index_factorized_batch,
     _rng_state,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
@@ -1047,6 +1048,15 @@ class LoadedProcessV2P50Inputs:
     metadata_by_id: Mapping[str, Mapping[str, Any]]
 
 
+@dataclass(frozen=True)
+class MaterializedProcessV2P50Batch:
+    """One CPU-collated row per unique prepared P50 entry."""
+
+    batch: Any
+    entry_ids: tuple[str, ...]
+    index_by_entry_id: Mapping[str, int]
+
+
 def load_process_v2_p50_inputs(value: Mapping[str, Any]) -> LoadedProcessV2P50Inputs:
     prepared_value = validate_process_v2_p50_prepared_inputs(value)
     entries = tuple(prepared_value["entries"])
@@ -1081,22 +1091,119 @@ def _batch(
     model: FactorizedTraceletRateModel,
     identifiers: Sequence[str],
     times: Sequence[float],
+    *,
+    materialized: MaterializedProcessV2P50Batch | None = None,
 ) -> tuple[Any, tuple[TeacherSuccessorFiber, ...], tuple[Mapping[str, Any], ...]]:
     entries = tuple(runtime.metadata_by_id[identifier] for identifier in identifiers)
-    examples = [
-        FactorizedMarkExample(
-            state=runtime.states_by_id[identifier],
-            time=float(time_value),
-            teacher_action=None,
-            teacher_rule_name=None,
-            teacher_rate=1.0,
-            importance_weight=1.0,
+    if materialized is None:
+        examples = [
+            FactorizedMarkExample(
+                state=runtime.states_by_id[identifier],
+                time=float(time_value),
+                teacher_action=None,
+                teacher_rule_name=None,
+                teacher_rate=1.0,
+                importance_weight=1.0,
+            )
+            for identifier, time_value in zip(identifiers, times, strict=True)
+        ]
+        batch = _attach_successor_family_coordinates(_collator(model)(examples), entries)
+    else:
+        try:
+            indices = tuple(materialized.index_by_entry_id[identifier] for identifier in identifiers)
+        except KeyError as error:
+            raise ProcessV2P50RuntimeError(
+                "the P50 stream references an entry outside the collated cache"
+            ) from error
+        batch = _index_factorized_batch(materialized.batch, indices)
+        batch = replace(
+            batch,
+            times=torch.tensor(
+                tuple(float(value) for value in times),
+                dtype=batch.times.dtype,
+                device=batch.times.device,
+            ),
         )
-        for identifier, time_value in zip(identifiers, times, strict=True)
-    ]
-    batch = _attach_successor_family_coordinates(_collator(model)(examples), entries)
     fibers = tuple(runtime.fibers_by_id[identifier] for identifier in identifiers)
     return batch, fibers, entries
+
+
+def collate_process_v2_p50_entries(
+    entries: Sequence[Mapping[str, Any]], model: FactorizedTraceletRateModel
+) -> tuple[Any, tuple[str, ...]]:
+    """Collate unique prepared entries once, without scoring or chemistry execution."""
+
+    resolved = tuple(dict(entry) for entry in entries)
+    if not resolved:
+        raise ProcessV2P50RuntimeError("a P50 collated leaf has no entries")
+    identifiers: list[str] = []
+    examples: list[FactorizedMarkExample] = []
+    for entry in resolved:
+        body = {key: item for key, item in entry.items() if key != "p50_compiled_entry_sha256"}
+        identifier = _require_sha(entry.get("p50_entry_sha256"), field="P50 entry")
+        try:
+            state = decode_state(entry["exact_state"])
+        except (KeyError, TypeError, ValueError) as error:
+            raise ProcessV2P50RuntimeError("a P50 collated entry state is invalid") from error
+        if (
+            entry.get("p50_compiled_entry_sha256") != canonical_sha256(body)
+            or encode_state(state) != entry["exact_state"]
+            or persistent_slot_state_sha256(state) != entry.get("source_state_sha256")
+            or identifier in identifiers
+        ):
+            raise ProcessV2P50RuntimeError("a P50 collated entry identity disagrees")
+        identifiers.append(identifier)
+        examples.append(
+            FactorizedMarkExample(
+                state=state,
+                time=_COMPILE_SUPPORT_TIME,
+                teacher_action=None,
+                teacher_rule_name=None,
+                teacher_rate=1.0,
+                importance_weight=1.0,
+            )
+        )
+    batch = _attach_successor_family_coordinates(_collator(model)(examples), resolved)
+    if batch.batch_size != len(identifiers):
+        raise ProcessV2P50RuntimeError("a P50 collated batch changed entry cardinality")
+    return batch, tuple(identifiers)
+
+
+def materialize_process_v2_p50_batch(
+    runtime: LoadedProcessV2P50Inputs,
+    *,
+    batch: Any,
+    entry_ids: Sequence[str],
+) -> MaterializedProcessV2P50Batch:
+    """Validate a consolidated collated batch against the immutable prepared input."""
+
+    identifiers = tuple(str(identifier) for identifier in entry_ids)
+    expected = tuple(str(entry["p50_entry_sha256"]) for entry in runtime.prepared["entries"])
+    if identifiers != expected or batch.batch_size != len(expected):
+        raise ProcessV2P50RuntimeError("the P50 collated batch inventory disagrees")
+    observed_state_sha256s = tuple(
+        persistent_slot_state_sha256(state) for state in batch.states
+    )
+    expected_state_sha256s = tuple(
+        str(runtime.metadata_by_id[identifier]["source_state_sha256"])
+        for identifier in identifiers
+    )
+    expected_families = tuple(
+        str(runtime.metadata_by_id[identifier]["model_family"]) for identifier in identifiers
+    )
+    if (
+        observed_state_sha256s != expected_state_sha256s
+        or any(action is not None for action in batch.teacher_actions)
+        or tuple(batch.teacher_rule_names) != expected_families
+    ):
+        raise ProcessV2P50RuntimeError("the P50 collated batch contents disagree")
+    return MaterializedProcessV2P50Batch(
+        batch=batch,
+        entry_ids=identifiers,
+        index_by_entry_id=MappingProxyType(
+            {identifier: index for index, identifier in enumerate(identifiers)}
+        ),
+    )
 
 
 def _evaluation_rows(
@@ -1105,6 +1212,7 @@ def _evaluation_rows(
     identifiers: Sequence[str],
     *,
     batch_size: int,
+    materialized: MaterializedProcessV2P50Batch | None = None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     was_training = model.training
@@ -1113,7 +1221,9 @@ def _evaluation_rows(
         for start in range(0, len(identifiers), batch_size):
             selected = tuple(identifiers[start : start + batch_size])
             times = tuple(_COMPILE_SUPPORT_TIME for _ in selected)
-            batch, fibers, entries = _batch(runtime, model, selected, times)
+            batch, fibers, entries = _batch(
+                runtime, model, selected, times, materialized=materialized
+            )
             prediction = forward_teacher_successor_batch(model, batch.to(model.device), fibers)
             nlls = -prediction.selected_productive_successor_log_probability.detach().cpu()
             for entry, nll in zip(entries, nlls, strict=True):
@@ -1152,6 +1262,7 @@ def run_process_v2_p50(
     *,
     policy: Mapping[str, Any],
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
+    materialized: MaterializedProcessV2P50Batch | None = None,
 ) -> dict[str, Any]:
     """Run exactly fifty scratch, hazard-free canonical-successor updates."""
 
@@ -1184,10 +1295,29 @@ def run_process_v2_p50(
         weight_decay=float(optimization["weight_decay"]),
     )
     validation_ids = tuple(runtime.prepared["validation_entry_sha256s"])
+    if progress_callback is not None:
+        progress_callback(
+            {
+                "phase": "process_v2_p50_baseline_start",
+                "validation_example_count": len(validation_ids),
+                "collated_cache_used": materialized is not None,
+            }
+        )
     baseline_rows = _evaluation_rows(
-        runtime, model, validation_ids, batch_size=int(optimization["batch_size"])
+        runtime,
+        model,
+        validation_ids,
+        batch_size=int(optimization["batch_size"]),
+        materialized=materialized,
     )
     baseline = _aggregate_validation(baseline_rows)
+    if progress_callback is not None:
+        progress_callback(
+            {
+                "phase": "process_v2_p50_baseline_complete",
+                "validation_example_count": len(validation_ids),
+            }
+        )
     families = tuple(policy["active_families"])
     required_cells = tuple(runtime.prepared["required_cells"])
     family_examples = Counter(row["model_family"] for row in runtime.prepared["training_stream"])
@@ -1235,7 +1365,9 @@ def run_process_v2_p50(
         ]
         identifiers = tuple(str(row["p50_entry_sha256"]) for row in rows)
         times = tuple(float.fromhex(str(row["time_hex"])) for row in rows)
-        batch, fibers, entries = _batch(runtime, model, identifiers, times)
+        batch, fibers, entries = _batch(
+            runtime, model, identifiers, times, materialized=materialized
+        )
         device_batch = batch.to(model.device)
         optimizer.zero_grad(set_to_none=True)
         prediction = forward_teacher_successor_batch(model, device_batch, fibers)
@@ -1339,7 +1471,11 @@ def run_process_v2_p50(
                 }
             )
     final_rows = _evaluation_rows(
-        runtime, model, validation_ids, batch_size=int(optimization["batch_size"])
+        runtime,
+        model,
+        validation_ids,
+        batch_size=int(optimization["batch_size"]),
+        materialized=materialized,
     )
     final = _aggregate_validation(final_rows)
     _assert_hazard_identity(model, hazard_initial)
@@ -1422,9 +1558,11 @@ __all__ = [
     "VALIDATION_EXAMPLES_PER_SUPPORTED_CELL",
     "build_process_v2_p50_prepared_inputs",
     "build_process_v2_p50_selection",
+    "collate_process_v2_p50_entries",
     "compile_process_v2_p50_entries",
     "convert_process_v2_p50_v1_leaf",
     "load_process_v2_p50_inputs",
+    "materialize_process_v2_p50_batch",
     "run_process_v2_p50",
     "validate_process_v2_p50_prepared_inputs",
     "validate_process_v2_p50_selection",

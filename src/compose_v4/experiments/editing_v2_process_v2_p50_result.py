@@ -28,7 +28,7 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
 RESULT_FILENAME = "PROCESS_V2_P50_RESULT.json"
 DECISION_FILENAME = "PROCESS_V2_P50_DECISION.json"
 RESULT_SCHEMA = "compose.editing_v2.process_v2_p50_result"
-RESULT_SCHEMA_VERSION = 2
+RESULT_SCHEMA_VERSION = 3
 RESULT_STATUS = "COMPLETE_PROCESS_V2_P50_RESULT_NO_DOWNSTREAM_AUTHORITY"
 DECISION_SCHEMA = "compose.editing_v2.process_v2_p50_decision"
 DECISION_SCHEMA_VERSION = 1
@@ -68,6 +68,8 @@ _PROVENANCE_FIELDS = {
     "initial_model_state_sha256",
     "runner_implementation_sha256",
     "runner_source_revision_sha256",
+    "collated_completion_sha256",
+    "collated_payload_file_sha256",
     "execution_environment",
 }
 PROCESS_V2_P50_RUNTIME_PROVENANCE_FIELDS = frozenset(
@@ -77,6 +79,8 @@ PROCESS_V2_P50_RUNTIME_PROVENANCE_FIELDS = frozenset(
         "prepared_inputs_sha256",
         "runner_implementation_sha256",
         "runner_source_revision_sha256",
+        "collated_completion_sha256",
+        "collated_payload_file_sha256",
     }
 )
 _RUN_INTEGRITY_FIELDS = {
