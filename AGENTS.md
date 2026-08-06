@@ -379,6 +379,42 @@ As of the current editing-V2 rebuild, the authorized sequence is:
 The current existence of trainer, launcher, or checkpoint code does not authorize a later stage. A stale,
 null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not training authority.
 
+### Scoped evidence reuse and minimal reruns
+
+- Gate 0, T1, P50, P500, and P2000 are scientific decision points. Implement each with the minimum
+  sufficient computation and artifact chain that answers its declared question while preserving every
+  authorization, leakage, provenance, and acceptance requirement in this contract.
+- Record scientific semantics, data or panel contents, optimization or evaluation recipe, and operational
+  execution code as separate identities when they differ. A launcher, logging, scheduling, retry, or
+  publication-only change must not invalidate a scientific result unless it changes that result's declared
+  computational dependency closure.
+- Active8 admission, Gate 0 reductions, exact fibers, prepared panels, and collated tensors are reusable
+  when their scientific identities and dependency closures remain unchanged. A downstream model-scoring
+  change does not authorize recomputing those unaffected inputs.
+- Publish T1 evidence independently by family and training scope. Re-evaluate only families whose forward
+  computation, trainable parameter route, objective, panel, thresholds, initialization semantics, or
+  scientific dependencies changed. Do not replay a passing family solely because an unrelated
+  family-specific parameter or operational file moved a global hash.
+- Reuse a family result across model revisions only through a machine-checkable containment or equivalence
+  artifact that binds both revisions and proves that the relevant initialization, forward law, trainable
+  parameter route, objective, panel, and thresholds are unchanged. A human assertion, matching tensor
+  shape, or zero-initialized parameter alone is insufficient. When this proof is not cheaper and clearer
+  than a bounded rerun, rerun only the affected family and scope.
+- Prefer typed content-addressed manifests of compatible per-family receipts over hard-coded serial chains
+  of predecessor result hashes. A failed unit may route the next scientific action without invalidating
+  unaffected passing units.
+- Cache expensive deterministic intermediates, publish restart-safe progress, and retry only missing,
+  failed, corrupted, or scientifically affected units. Remote work that could otherwise conceal progress
+  or force material recomputation must emit heartbeats and cost-relevant progress receipts.
+- During a narrow repair, run focused tests for the affected dependency and launch surface. Do not rerun a
+  repository-wide suite for an unchanged exact commit, and do not repeatedly run it while iterating on a
+  later commit. Run the required repository-wide suite once on the frozen milestone candidate, and rerun it
+  only when subsequent code changes can affect its result.
+- Do not delay a bounded scientific run for unrelated cleanup, generic framework construction, additional
+  hardening, or mutation testing beyond the current named threat and acceptance criteria. Record such work
+  as follow-up unless it blocks correctness, reproducibility, leakage control, or safe recovery of the
+  current run.
+
 ### Project-specific forbidden actions
 
 - Do not launch P50, P500, P2000, a long editing run, or a de novo run without the exact current
