@@ -11,10 +11,20 @@ import numpy as np
 import pytest
 import torch
 
-from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY, smiles_to_molecular_graph
+from compose_v4.chem.molecular_graph import (
+    ORGANIC_VOCABULARY,
+    smiles_to_molecular_graph,
+)
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.experiments import editing_v2_process_v2_p50_runtime as runtime
+from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
+    ProcessV2P50ScopedPrerequisites,
+)
+from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
+    compiled_successor_map_payload,
+)
 from compose_v4.experiments.factorized_successor_training import (
     CanonicalSuccessorAliasGroup,
     CompiledStateSuccessorMap,
@@ -23,17 +33,6 @@ from compose_v4.experiments.factorized_successor_training import (
     TeacherSuccessorAlias,
     TeacherSuccessorFiber,
 )
-from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
-    compiled_successor_map_payload,
-)
-from compose_v4.rewrite.kernel import canonical_state_key
-from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
-from compose_v4.rewrite.trace_shard import encode_state
-from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
-from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-    ProcessV2P50ScopedPrerequisites,
-)
-from compose_v4.experiments import editing_v2_process_v2_p50_runtime as runtime
 from compose_v4.model.factorized_tracelet_rate_model import (
     PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
     PROCESS_V2_EDITING_PROCESS_SEMANTICS,
@@ -43,6 +42,10 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedTraceletRateModel,
 )
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace_shard import encode_state
+from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
+from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
 
 def _sha(text: str) -> str:
@@ -130,7 +133,6 @@ def test_selection_is_exactly_50_by_64_and_uses_a_bounded_validation_sentinel(
     cells = (
         "ns:atom_insert:one_neighbor_birth",
         "ns:atom_delete:leaf_death",
-        "ns:atom_delete:connected_nonleaf_death",
         "ns:atom_restate:element_identity_change",
         "ns:atom_restate:valence_state_change",
         "ns:bond_reorder:increase",
@@ -156,31 +158,39 @@ def test_selection_is_exactly_50_by_64_and_uses_a_bounded_validation_sentinel(
             "batch_size": 64,
             "seed": 31,
         },
+        "sampling": {
+            "balanced_training_cell_count": 16,
+            "candidate_reserve_per_balanced_cell": 1024,
+            "examples_per_balanced_cell": 200,
+            "optional_path_efficiency_cell_ids": [
+                "ns:atom_delete:connected_nonleaf_death"
+            ],
+        },
     }
     train: list[dict[str, object]] = []
     validation: list[dict[str, object]] = []
     index = 0
-    unsupported = "ns:atom_delete:connected_nonleaf_death"
     for cell in cells:
         for _ in range(200):
             train.append(_candidate(cell=cell, role="train", index=index))
             index += 1
-        if cell != unsupported:
-            for _ in range(4):
-                validation.append(_candidate(cell=cell, role="validation", index=index))
-                index += 1
+        for _ in range(4):
+            validation.append(_candidate(cell=cell, role="validation", index=index))
+            index += 1
 
     def candidates(_source, *, partition_role):
         return iter(train if partition_role == "train" else validation)
 
     monkeypatch.setattr(runtime, "_iter_role_candidates", candidates)
-    monkeypatch.setattr(runtime, "_required_cells", lambda _root: cells)
+    monkeypatch.setattr(runtime, "_required_cells", lambda _root, _policy: cells)
     monkeypatch.setattr(
         runtime,
         "load_process_v2_chain_artifact",
         lambda _name, *, repo_root: policy,
     )
-    source = SimpleNamespace(repo_root="/unused", plan={"run_identity_sha256": _sha("run")})
+    source = SimpleNamespace(
+        repo_root="/unused", plan={"run_identity_sha256": _sha("run")}
+    )
     selected = runtime.build_process_v2_p50_selection(
         source, prerequisites=_prerequisites(families)
     )
@@ -193,11 +203,25 @@ def test_selection_is_exactly_50_by_64_and_uses_a_bounded_validation_sentinel(
     assert set(selected["training_cell_opportunities"]) == set(cells)
     assert set(selected["training_family_opportunities"]) == set(families)
     assert all(0.0 < float.fromhex(row["time_hex"]) < 1.0 for row in stream)
-    assert selected["validation_unsupported_required_cells"] == [unsupported]
+    assert selected["validation_unsupported_required_cells"] == []
     assert len(selected["validation_entry_sha256s"]) == 64
+    training_ids = [row["p50_entry_sha256"] for row in stream]
+    by_id = {entry["p50_entry_sha256"]: entry for entry in selected["entries"]}
+    assert len(training_ids) == len(set(training_ids)) == 3200
+    assert (
+        len({by_id[identifier]["source_state_sha256"] for identifier in training_ids})
+        == 3200
+    )
+    assert set(selected["training_retained_unique_source_counts_by_cell"]) == set(cells)
+    assert all(
+        count >= 200
+        for count in selected["training_retained_unique_source_counts_by_cell"].values()
+    )
     validation_ids = set(selected["validation_entry_sha256s"])
     validation_rows = [
-        entry for entry in selected["entries"] if entry["p50_entry_sha256"] in validation_ids
+        entry
+        for entry in selected["entries"]
+        if entry["p50_entry_sha256"] in validation_ids
     ]
     assert len({row["source_state_sha256"] for row in validation_rows}) == 64
     assert all(row["partition_role"] == "validation" for row in validation_rows)
@@ -210,7 +234,9 @@ def test_selection_is_exactly_50_by_64_and_uses_a_bounded_validation_sentinel(
     tampered = copy.deepcopy(selected)
     tampered["training_stream"][0]["time_hex"] = "not-a-hex-float"
     body = {key: item for key, item in tampered.items() if key != "selection_sha256"}
-    tampered["training_stream_sha256"] = runtime.canonical_sha256(tampered["training_stream"])
+    tampered["training_stream_sha256"] = runtime.canonical_sha256(
+        tampered["training_stream"]
+    )
     tampered["selection_sha256"] = runtime.canonical_sha256(body)
     # Re-seal after updating the dependent stream hash as well.
     body = {key: item for key, item in tampered.items() if key != "selection_sha256"}
@@ -226,6 +252,38 @@ def test_time_derivation_binds_stream_position_and_entry() -> None:
     assert observed == runtime._time_hex(stream_index=0, candidate=first, seed=31)
     assert observed != runtime._time_hex(stream_index=1, candidate=first, seed=31)
     assert observed != runtime._time_hex(stream_index=0, candidate=second, seed=31)
+
+
+def test_training_schedule_refuses_raw_count_without_200_unique_sources(
+    monkeypatch,
+) -> None:
+    cell = "ns:atom_delete:leaf_death"
+    candidates = [
+        _candidate(cell=cell, role="train", index=index) for index in range(200)
+    ]
+    candidates[-1]["source_state_sha256"] = candidates[-2]["source_state_sha256"]
+    policy = {
+        "contract_sha256": _sha("unique-source-policy"),
+        "optimization": {
+            "scheduled_nonterminal_examples": 200,
+            "batch_size": 64,
+            "seed": 31,
+        },
+        "sampling": {
+            "candidate_reserve_per_balanced_cell": 1024,
+            "examples_per_balanced_cell": 200,
+        },
+    }
+
+    monkeypatch.setattr(
+        runtime,
+        "_iter_role_candidates",
+        lambda _source, *, partition_role: iter(candidates),
+    )
+    with pytest.raises(runtime.ProcessV2P50RuntimeError, match="unique-source floor"):
+        runtime._training_schedule(
+            SimpleNamespace(), required_cells=(cell,), policy=policy
+        )
 
 
 def test_compact_prepared_input_round_trips_only_the_teacher_fiber() -> None:
@@ -252,7 +310,7 @@ def test_compact_prepared_input_round_trips_only_the_teacher_fiber() -> None:
         "model_family": "atom_restate",
         "capability_cell_id": "ns:atom_restate:element_identity_change",
         "partition_role": "train",
-        "support_time_hex": float(0.5).hex(),
+        "support_time_hex": (0.5).hex(),
         "source_state_sha256": source_sha,
         "target_state_sha256": fiber.target_state_sha256,
         "successor_canonical_key": fiber.target_key,
@@ -385,7 +443,9 @@ def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:
             source_key=canonical_state_key(state),
             source_state_sha256=source_sha,
         ),
-        successor_groups=(CanonicalSuccessorAliasGroup(target_key="CCN", marks=(mark,)),),
+        successor_groups=(
+            CanonicalSuccessorAliasGroup(target_key="CCN", marks=(mark,)),
+        ),
     )
     task_id = _sha("task")
     candidate_body = {
@@ -418,7 +478,7 @@ def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:
         "model_family": "atom_restate",
         "capability_cell_id": candidate["capability_cell_id"],
         "partition_role": "train",
-        "support_time_hex": float(0.5).hex(),
+        "support_time_hex": (0.5).hex(),
         "source_state_sha256": source_sha,
         "target_state_sha256": target_sha,
         "successor_canonical_key": "CCN",
@@ -448,7 +508,9 @@ def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:
     converted = runtime.convert_process_v2_p50_v1_leaf(selection, legacy_leaf)
     entry = converted["entries"][0]
     assert "successor_partition" not in entry
-    assert entry["teacher_successor_fiber"]["aliases"] == [runtime._alias_payload(alias)]
+    assert entry["teacher_successor_fiber"]["aliases"] == [
+        runtime._alias_payload(alias)
+    ]
     assert entry["exact_teacher_alias"] == runtime._alias_payload(alias)
     assert entry["decoded_mark_count"] == 1
 
@@ -456,10 +518,16 @@ def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:
     corrupted_entry = corrupted["entries"][0]
     corrupted_entry["raw_mark_count"] = 2
     corrupted_body = {
-        key: value for key, value in corrupted_entry.items() if key != "p50_compiled_entry_sha256"
+        key: value
+        for key, value in corrupted_entry.items()
+        if key != "p50_compiled_entry_sha256"
     }
-    corrupted_entry["p50_compiled_entry_sha256"] = runtime.canonical_sha256(corrupted_body)
-    corrupted_leaf_body = {key: value for key, value in corrupted.items() if key != "leaf_sha256"}
+    corrupted_entry["p50_compiled_entry_sha256"] = runtime.canonical_sha256(
+        corrupted_body
+    )
+    corrupted_leaf_body = {
+        key: value for key, value in corrupted.items() if key != "leaf_sha256"
+    }
     corrupted["leaf_sha256"] = runtime.canonical_sha256(corrupted_leaf_body)
     with pytest.raises(runtime.ProcessV2P50RuntimeError, match="identity disagrees"):
         runtime.convert_process_v2_p50_v1_leaf(selection, corrupted)

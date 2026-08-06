@@ -64,6 +64,13 @@ from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     GENERATION_SELF_HASH_FIELD,
     P50_RECIPE_POLICY,
     PROCESS_V2_CHAIN_ARTIFACTS,
+    PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT,
+    PROCESS_V2_P50_CANDIDATE_RESERVE_PER_BALANCED_CELL,
+    PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL,
+    PROCESS_V2_P50_LEARNING_RATE,
+    PROCESS_V2_P50_OPERATIONAL_SEMANTICS_VERSION,
+    PROCESS_V2_P50_OPTIONAL_PATH_EFFICIENCY_CELL_IDS,
+    PROCESS_V2_P50_POLICY_ID,
     PROCESS_V2_T1_EARLY_STOP_RULE,
     PROCESS_V2_T1_LEARNING_RATE_SCHEDULE,
     PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS,
@@ -171,7 +178,9 @@ def _physical(relative_path: str) -> str:
 
 
 def _canonical(value: object) -> str:
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    payload = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    )
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
@@ -225,7 +234,9 @@ def _v1_config_paths() -> list[str]:
 def test_every_artifact_round_trips_build_validate_load() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         built = build_process_v2_chain_artifact(name, repo_root=_ROOT)
-        validated = validate_process_v2_chain_artifact(built, name=name, repo_root=_ROOT)
+        validated = validate_process_v2_chain_artifact(
+            built, name=name, repo_root=_ROOT
+        )
         assert validated == built
         loaded = load_process_v2_chain_artifact(name, repo_root=_ROOT)
         assert loaded == built, f"{name} on disk differs from its deterministic rebuild"
@@ -259,7 +270,9 @@ def test_each_artifact_carries_exactly_one_self_hash_field() -> None:
             and isinstance(value, str)
             and value == _canonical({k: v for k, v in payload.items() if k != key})
         ]
-        assert satisfying == ["contract_sha256"], f"{name} self-hash fields: {satisfying}"
+        assert satisfying == [
+            "contract_sha256"
+        ], f"{name} self-hash fields: {satisfying}"
         assert payload["contract_sha256"] == process_v2_chain_self_hash(payload)
 
 
@@ -276,9 +289,9 @@ def test_write_process_v2_chain_is_byte_stable_across_runs() -> None:
         assert first_bytes == second_bytes
         assert list(first) == list(PROCESS_V2_CHAIN_ARTIFACTS)
         for name in PROCESS_V2_CHAIN_ARTIFACTS:
-            assert first_bytes[name] == (_ROOT / name).read_bytes(), (
-                f"the committed {name} is not what the builder produces"
-            )
+            assert (
+                first_bytes[name] == (_ROOT / name).read_bytes()
+            ), f"the committed {name} is not what the builder produces"
             assert first_bytes[name].endswith(b"\n")
 
 
@@ -302,7 +315,9 @@ def test_build_process_v2_chain_seals_parents_before_children() -> None:
 
 def test_building_the_chain_writes_nothing() -> None:
     with _isolated_repo() as root:
-        before = sorted(str(p.relative_to(root)) for p in root.rglob("*") if p.is_file())
+        before = sorted(
+            str(p.relative_to(root)) for p in root.rglob("*") if p.is_file()
+        )
         build_process_v2_chain(root)
         after = sorted(str(p.relative_to(root)) for p in root.rglob("*") if p.is_file())
         assert before == after
@@ -349,7 +364,9 @@ def test_every_edge_is_a_declared_typed_pointer_that_resolves() -> None:
             semantic = validate_typed_pointer(edge["semantic"], label=f"{name}:{role}")
             assert semantic["identity_role"] == IdentityRole.SEMANTIC
             assert semantic["target"] == target
-            assert semantic["sha256"] == expected_semantic[target], f"{name}:{role} semantic"
+            assert (
+                semantic["sha256"] == expected_semantic[target]
+            ), f"{name}:{role} semantic"
             assert semantic["hash_algorithm"] == (
                 WHOLE_CANONICAL_BODY_ALGORITHM
                 if target == corpus
@@ -367,7 +384,10 @@ def test_every_artifact_binds_the_live_process_v2_identity() -> None:
         identity = _load(name)["process_identity"]
         assert identity["process_identity_sha256"] == live_v2
         assert identity["process_semantics"] == "semantic_editing_v2_v2"
-        assert identity["identity_schema"] == "compose.editing.semantic_process_v2_identity"
+        assert (
+            identity["identity_schema"]
+            == "compose.editing.semantic_process_v2_identity"
+        )
         assert identity["provider"] == "editing_process_v2_identity"
 
 
@@ -492,9 +512,9 @@ def test_the_added_edges_are_present_and_were_absent_in_schema_version_one() -> 
         current = _load(name)
         for role in roles:
             assert role in current["parents"], f"{name}:{role}"
-            assert role not in superseded["parents"], (
-                f"{name}:{role} is declared as newly added but version 1 already had it"
-            )
+            assert (
+                role not in superseded["parents"]
+            ), f"{name}:{role} is declared as newly added but version 1 already had it"
 
 
 def test_declaring_a_dependency_edge_required_a_new_schema_version() -> None:
@@ -512,7 +532,9 @@ def test_a_missing_dependency_edge_is_rejected() -> None:
         if role != "t1_capacity_policy"
     }
     with pytest.raises(ProcessV2ChainError, match="declared dependency edges differ"):
-        validate_process_v2_chain_artifact(payload, name=P50_RECIPE_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=P50_RECIPE_POLICY, repo_root=_ROOT
+        )
 
 
 # ---- (f) superseded design lineage ----
@@ -553,7 +575,10 @@ def test_every_artifact_preserves_every_superseded_generation_as_lineage() -> No
 
 def test_the_lineage_is_ordered_oldest_first_and_precedes_the_live_version() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
-        versions = [entry["schema_version"] for entry in _load(name)["superseded_design_lineage"]]
+        versions = [
+            entry["schema_version"]
+            for entry in _load(name)["superseded_design_lineage"]
+        ]
         assert versions == sorted(versions), name
         assert len(set(versions)) == len(versions), name
         assert max(versions) < CHAIN_SCHEMA_VERSION, name
@@ -561,16 +586,24 @@ def test_the_lineage_is_ordered_oldest_first_and_precedes_the_live_version() -> 
 
 def test_a_lineage_pointer_that_is_not_a_lineage_kind_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
-    payload["superseded_design_lineage"][0]["semantic"]["kind"] = PointerKind.REPOSITORY_CONFIG
+    payload["superseded_design_lineage"][0]["semantic"][
+        "kind"
+    ] = PointerKind.REPOSITORY_CONFIG
     with pytest.raises(ProcessV2ChainError, match="must carry no currency claim"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_lineage_hash_equal_to_the_live_self_hash_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
-    payload["superseded_design_lineage"][-1]["semantic"]["sha256"] = payload[SELF_HASH_FIELD]
+    payload["superseded_design_lineage"][-1]["semantic"]["sha256"] = payload[
+        SELF_HASH_FIELD
+    ]
     with pytest.raises(ProcessV2ChainError, match="so it is not superseded"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_the_self_referential_lineage_physical_check_is_unfalsifiable() -> None:
@@ -602,7 +635,9 @@ def test_the_self_referential_lineage_physical_check_is_unfalsifiable() -> None:
     # The on-disk formulation still refuses this payload, because before the
     # mutation the built artifact IS the committed one.
     with pytest.raises(ProcessV2ChainError, match="but that is the live physical hash"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_lineage_value_that_is_the_live_on_disk_value_is_rejected() -> None:
@@ -625,7 +660,9 @@ def test_a_lineage_value_that_is_the_live_on_disk_value_is_rejected() -> None:
         == on_disk_before
     ), "the expectation must not move when the payload under test is mutated"
     with pytest.raises(ProcessV2ChainError, match="records .* as superseded") as raised:
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
     assert "live physical hash of " + CAPABILITY_CELLS in str(raised.value)
     # The physical hash is a value NOTHING inside the payload carries, which is
     # what the semantic half cannot say: an artifact's own `contract_sha256` is in
@@ -647,11 +684,13 @@ def test_a_lineage_entry_carrying_another_artifacts_live_hash_is_rejected() -> N
     other_live = hashlib.sha256((_ROOT / GATE_ZERO_STRUCTURAL).read_bytes()).hexdigest()
     entry = payload["superseded_design_lineage"][0]
     entry["physical"]["sha256"] = other_live
-    assert entry["physical"]["target"] == CAPABILITY_CELLS, (
-        "the target is correct, which is what makes the target check blind here"
-    )
+    assert (
+        entry["physical"]["target"] == CAPABILITY_CELLS
+    ), "the target is correct, which is what makes the target check blind here"
     with pytest.raises(ProcessV2ChainError, match="live physical hash of") as raised:
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
     assert GATE_ZERO_STRUCTURAL in str(raised.value)
 
     # The semantic role, where the value is another artifact's self-hash. The
@@ -662,7 +701,9 @@ def test_a_lineage_entry_carrying_another_artifacts_live_hash_is_rejected() -> N
     assert other_semantic != payload[SELF_HASH_FIELD]
     payload["superseded_design_lineage"][0]["semantic"]["sha256"] = other_semantic
     with pytest.raises(ProcessV2ChainError, match="live semantic hash of") as raised:
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
     assert GATE_ZERO_STRUCTURAL in str(raised.value)
 
 
@@ -688,7 +729,9 @@ def test_a_duplicated_lineage_generation_is_rejected() -> None:
     lineage = payload["superseded_design_lineage"]
     lineage[1]["physical"]["sha256"] = lineage[0]["physical"]["sha256"]
     with pytest.raises(ProcessV2ChainError, match="already recorded at"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_an_out_of_order_or_repeated_lineage_version_is_rejected() -> None:
@@ -697,19 +740,27 @@ def test_an_out_of_order_or_repeated_lineage_version_is_rejected() -> None:
         reversed(payload["superseded_design_lineage"])
     )
     with pytest.raises(ProcessV2ChainError, match="does not follow"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["superseded_design_lineage"][1]["schema_version"] = 1
     with pytest.raises(ProcessV2ChainError, match="does not follow"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_lineage_entry_naming_the_live_revision_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
-    payload["superseded_design_lineage"][-1]["contract_revision"] = CHAIN_CONTRACT_REVISION
+    payload["superseded_design_lineage"][-1][
+        "contract_revision"
+    ] = CHAIN_CONTRACT_REVISION
     with pytest.raises(ProcessV2ChainError, match="is the live revision"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_dropped_lineage_generation_is_rejected() -> None:
@@ -718,14 +769,18 @@ def test_a_dropped_lineage_generation_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["superseded_design_lineage"] = payload["superseded_design_lineage"][-1:]
     with pytest.raises(ProcessV2ChainError, match="records 1 generations"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_lineage_entry_targeting_another_artifact_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["superseded_design_lineage"][0]["semantic"]["target"] = GATE_ZERO_STRUCTURAL
     with pytest.raises(ProcessV2ChainError, match="records its OWN superseded hashes"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_lineage_generation_at_or_above_the_live_schema_version_is_rejected() -> None:
@@ -741,7 +796,9 @@ def test_a_lineage_generation_at_or_above_the_live_schema_version_is_rejected() 
     for version in (CHAIN_SCHEMA_VERSION, CHAIN_SCHEMA_VERSION + 1):
         payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
         payload["superseded_design_lineage"][-1]["schema_version"] = version
-        with pytest.raises(ProcessV2ChainError, match="not older than the live") as raised:
+        with pytest.raises(
+            ProcessV2ChainError, match="not older than the live"
+        ) as raised:
             validate_process_v2_chain_artifact(
                 payload, name=CAPABILITY_CELLS, repo_root=_ROOT
             )
@@ -760,19 +817,25 @@ def test_a_repeated_lineage_contract_revision_is_rejected() -> None:
     lineage[1]["contract_revision"] = lineage[0]["contract_revision"]
     assert lineage[1]["physical"]["sha256"] != lineage[0]["physical"]["sha256"]
     with pytest.raises(ProcessV2ChainError, match="is already recorded"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_lineage_entry_with_an_extra_or_missing_field_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["superseded_design_lineage"][0]["superseded_at_revision"] = "3f3258e"
     with pytest.raises(ProcessV2ChainError, match="must carry exactly"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     del payload["superseded_design_lineage"][0]["contract_revision"]
     with pytest.raises(ProcessV2ChainError, match="must carry exactly"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_a_coerced_lineage_schema_version_is_rejected() -> None:
@@ -809,11 +872,13 @@ def test_a_single_lineage_block_where_a_list_is_required_is_rejected() -> None:
         "semantic": lineage[-1]["semantic"],
         "unexpected_fifth_mapping_key": None,
     }
-    assert len(payload["superseded_design_lineage"]) == len(lineage), (
-        "the same length, so a length check alone would pass it"
-    )
+    assert len(payload["superseded_design_lineage"]) == len(
+        lineage
+    ), "the same length, so a length check alone would pass it"
     with pytest.raises(ProcessV2ChainError, match="is missing or is not a list"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 # ---- (g) a V1 identity pin is rejected ----
@@ -825,7 +890,9 @@ def test_v1_identity_pin_is_rejected() -> None:
     payload["process_identity"]["process_identity_sha256"] = str(
         editing_v2_process_identity()["process_identity_sha256"]
     )
-    with pytest.raises(ProcessV2ChainError, match="binds the V1 semantic process identity"):
+    with pytest.raises(
+        ProcessV2ChainError, match="binds the V1 semantic process identity"
+    ):
         validate_process_v2_chain_artifact(
             payload, name=GATE_ZERO_STRUCTURAL, repo_root=_ROOT
         )
@@ -836,7 +903,9 @@ def test_an_unknown_identity_pin_is_rejected_distinctly() -> None:
     payload["process_identity"] = dict(payload["process_identity"])
     payload["process_identity"]["process_identity_sha256"] = "0" * 64
     with pytest.raises(ProcessV2ChainError) as raised:
-        validate_process_v2_chain_artifact(payload, name=T1_PANEL_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=T1_PANEL_POLICY, repo_root=_ROOT
+        )
     message = str(raised.value)
     assert "which is not the live Process-V2 identity" in message
     assert "V1 semantic process identity" not in message
@@ -856,7 +925,9 @@ def test_a_relabelled_v1_identity_declaration_is_rejected() -> None:
         "provider": "editing_v2_process_identity",
     }
     with pytest.raises(ProcessV2ChainError, match="resolves only"):
-        validate_process_v2_chain_artifact(payload, name=T1_PANEL_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=T1_PANEL_POLICY, repo_root=_ROOT
+        )
 
 
 # ---- (h) a _v1 parent path is rejected ----
@@ -879,7 +950,9 @@ def test_v1_parent_path_is_rejected() -> None:
         },
     }
     with pytest.raises(ProcessV2ChainError, match="must never bind a _v1 config"):
-        validate_process_v2_chain_artifact(payload, name=T1_PANEL_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=T1_PANEL_POLICY, repo_root=_ROOT
+        )
 
 
 def test_a_stale_parent_pin_is_rejected() -> None:
@@ -956,12 +1029,16 @@ def test_the_retired_authority_spelling_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(P50_RECIPE_POLICY, repo_root=_ROOT)
     payload["p50_authorized"] = False
     with pytest.raises(ProcessV2ChainError, match="field set differs"):
-        validate_process_v2_chain_artifact(payload, name=P50_RECIPE_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=P50_RECIPE_POLICY, repo_root=_ROOT
+        )
 
 
 def test_gate_zero_structural_grants_no_authority_on_pass() -> None:
     decision = _load(GATE_ZERO_STRUCTURAL)["decision_policy"]
-    granted = {key: value for key, value in decision.items() if key.startswith("pass_grants_")}
+    granted = {
+        key: value for key, value in decision.items() if key.startswith("pass_grants_")
+    }
     assert granted and all(value is False for value in granted.values())
 
 
@@ -971,14 +1048,18 @@ def test_gate_zero_structural_grants_no_authority_on_pass() -> None:
 def test_active8_order_matches_the_corpus_contract_constant() -> None:
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         assert tuple(_load(name)["active_families"]) == tuple(ACTIVE8_FAMILIES), name
-    assert tuple(_load(T1_CAPACITY_POLICY)["required_families"]) == tuple(ACTIVE8_FAMILIES)
+    assert tuple(_load(T1_CAPACITY_POLICY)["required_families"]) == tuple(
+        ACTIVE8_FAMILIES
+    )
 
 
 def test_a_reordered_active8_list_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["active_families"] = list(reversed(ACTIVE8_FAMILIES))
     with pytest.raises(ProcessV2ChainError, match="differs from the Active8"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 # ---- (k) the shared policy registry ----
@@ -991,16 +1072,18 @@ def test_every_artifact_pins_the_shared_policy_registry() -> None:
         assert pin["registry_identity_sha256"] == live["registry_identity_sha256"], name
         assert pin["schema"] == live["schema"]
         assert pin["schema_version"] == live["schema_version"]
-        assert "frozen_sources" not in pin, (
-            "the registry body must be pinned, not copied into every artifact"
-        )
+        assert (
+            "frozen_sources" not in pin
+        ), "the registry body must be pinned, not copied into every artifact"
 
 
 def test_a_stale_registry_pin_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(CAPABILITY_CELLS, repo_root=_ROOT)
     payload["shared_policy_registry"]["registry_identity_sha256"] = "3" * 64
     with pytest.raises(ProcessV2ChainError, match="but the live registry identity is"):
-        validate_process_v2_chain_artifact(payload, name=CAPABILITY_CELLS, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=CAPABILITY_CELLS, repo_root=_ROOT
+        )
 
 
 def test_an_edited_frozen_policy_source_makes_the_chain_unbuildable() -> None:
@@ -1030,12 +1113,16 @@ def test_a_changed_field_set_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(T1_PANEL_POLICY, repo_root=_ROOT)
     payload["extra_policy_knob"] = 1
     with pytest.raises(ProcessV2ChainError, match="field set differs"):
-        validate_process_v2_chain_artifact(payload, name=T1_PANEL_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=T1_PANEL_POLICY, repo_root=_ROOT
+        )
 
     payload = build_process_v2_chain_artifact(T1_PANEL_POLICY, repo_root=_ROOT)
     del payload["support_time_hex"]
     with pytest.raises(ProcessV2ChainError, match="field set differs"):
-        validate_process_v2_chain_artifact(payload, name=T1_PANEL_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=T1_PANEL_POLICY, repo_root=_ROOT
+        )
 
 
 def test_a_silently_moved_policy_value_is_rejected() -> None:
@@ -1052,7 +1139,9 @@ def test_a_wrong_schema_version_is_rejected() -> None:
     payload = build_process_v2_chain_artifact(T1_PANEL_POLICY, repo_root=_ROOT)
     payload["schema_version"] = 1
     with pytest.raises(ProcessV2ChainError, match="adding dependency edges required"):
-        validate_process_v2_chain_artifact(payload, name=T1_PANEL_POLICY, repo_root=_ROOT)
+        validate_process_v2_chain_artifact(
+            payload, name=T1_PANEL_POLICY, repo_root=_ROOT
+        )
 
 
 def test_an_unknown_artifact_name_is_rejected() -> None:
@@ -1088,7 +1177,9 @@ def test_the_marker_is_published_last_and_a_staged_generation_is_invisible() -> 
 
     with _isolated_repo() as root:
         generations = root / "generations"
-        generation = stage_process_v2_chain_generation(root, generations_root=generations)
+        generation = stage_process_v2_chain_generation(
+            root, generations_root=generations
+        )
         assert not (generation / GENERATION_COMMITTED_MARKER).exists()
         for name in PROCESS_V2_CHAIN_ARTIFACTS:
             assert (generation / name).is_file()
@@ -1098,9 +1189,9 @@ def test_the_marker_is_published_last_and_a_staged_generation_is_invisible() -> 
         with pytest.raises(ProcessV2ChainError, match="not committed"):
             materialize_committed_generation(generation, repo_root=root)
         for name in PROCESS_V2_CHAIN_ARTIFACTS:
-            assert not (root / name).exists(), (
-                "an uncommitted generation must never reach the canonical paths"
-            )
+            assert not (
+                root / name
+            ).exists(), "an uncommitted generation must never reach the canonical paths"
 
         commit_process_v2_chain_generation(generation)
         assert committed_generations(generations) == [generation]
@@ -1112,7 +1203,9 @@ def test_the_marker_is_published_last_and_a_staged_generation_is_invisible() -> 
 def test_an_incomplete_generation_cannot_be_committed() -> None:
     with _isolated_repo() as root:
         generations = root / "generations"
-        generation = stage_process_v2_chain_generation(root, generations_root=generations)
+        generation = stage_process_v2_chain_generation(
+            root, generations_root=generations
+        )
         (generation / P50_RECIPE_POLICY).unlink()
         with pytest.raises(ProcessV2ChainError, match="is incomplete"):
             commit_process_v2_chain_generation(generation)
@@ -1137,7 +1230,9 @@ def test_a_marker_that_grants_authority_is_refused() -> None:
         marker = json.loads(marker_path.read_bytes())
         marker["training_authorized"] = True
         del marker[GENERATION_SELF_HASH_FIELD]
-        body = json.dumps(marker, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        body = json.dumps(
+            marker, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        )
         marker[GENERATION_SELF_HASH_FIELD] = hashlib.sha256(body.encode()).hexdigest()
         marker_path.write_bytes(json.dumps(marker, indent=2, sort_keys=True).encode())
         with pytest.raises(ProcessV2ChainError, match="grants authority"):
@@ -1146,7 +1241,9 @@ def test_a_marker_that_grants_authority_is_refused() -> None:
 
 def test_the_marker_declares_the_frozen_generation_schema_and_no_authority() -> None:
     with _isolated_repo() as root:
-        generation = publish_process_v2_chain(root, generations_root=root / "generations")
+        generation = publish_process_v2_chain(
+            root, generations_root=root / "generations"
+        )
         marker = json.loads((generation / GENERATION_COMMITTED_MARKER).read_bytes())
         assert marker["schema"] == GENERATION_COMMITTED_SCHEMA
         for field in AUTHORITY_FIELDS:
@@ -1177,7 +1274,9 @@ def test_no_v1_config_changed_since_the_frozen_base_revision() -> None:
     for relative_path in paths:
         frozen = _git_show(_FROZEN_V1_BASE_REVISION, relative_path)
         assert frozen is not None, f"{relative_path} is absent at the frozen base"
-        assert (_ROOT / relative_path).read_bytes() == frozen, (
+        assert (
+            _ROOT / relative_path
+        ).read_bytes() == frozen, (
             f"{relative_path} is a frozen V1 artifact and must not be modified"
         )
 
@@ -1238,9 +1337,9 @@ def test_decision_runtime_model_and_software_are_identical_to_v1() -> None:
     assert set(v2["model"]) - set(v1["model"]) == {"operator_capability_fingerprint"}
     assert {k: v for k, v in v2["model"].items() if k in v1["model"]} == v1["model"]
     assert v2["model"]["operator_capability_fingerprint"] == (
-        _load("configs/editing_gate_zero_semantic_model_process_v2.json")["model_identity"][
-            "operator_capability_fingerprint"
-        ]
+        _load("configs/editing_gate_zero_semantic_model_process_v2.json")[
+            "model_identity"
+        ]["operator_capability_fingerprint"]
     )
     assert v2["model"]["operator_capability_fingerprint"] == "d79ffe8ef65f3fb3"
 
@@ -1342,14 +1441,12 @@ def test_t1_capacity_policy_preserves_science_and_declares_recovery_delta() -> N
     assert v2["optimization"]["batch_size"] == 64
 
 
-def test_p50_recipe_policy_blocks_are_identical_to_v1() -> None:
+def test_p50_recipe_policy_preserves_science_and_declares_unique_source_delta() -> None:
     v1 = _load(_V1_COUNTERPART[P50_RECIPE_POLICY])
     v2 = _load(P50_RECIPE_POLICY)
     for field in (
-        "optimization",
         "objective",
         "time_derivation",
-        "sampling",
         "cache",
         "thresholds",
         "active_families",
@@ -1358,6 +1455,32 @@ def test_p50_recipe_policy_blocks_are_identical_to_v1() -> None:
         "p500_authorized",
     ):
         assert v2[field] == v1[field], field
+    assert v2["optimization"] == {
+        **v1["optimization"],
+        "learning_rate": PROCESS_V2_P50_LEARNING_RATE,
+    }
+    assert v2["sampling"] == {
+        **v1["sampling"],
+        "balanced_training_cell_count": PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT,
+        "candidate_reserve_per_balanced_cell": (
+            PROCESS_V2_P50_CANDIDATE_RESERVE_PER_BALANCED_CELL
+        ),
+        "examples_per_balanced_cell": PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL,
+        "global_source_reuse": "forbidden_within_the_bounded_pilot",
+        "minimum_unique_train_sources_per_balanced_cell": (
+            PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL
+        ),
+        "operational_semantics_version": PROCESS_V2_P50_OPERATIONAL_SEMANTICS_VERSION,
+        "optional_path_efficiency_cell_ids": list(
+            PROCESS_V2_P50_OPTIONAL_PATH_EFFICIENCY_CELL_IDS
+        ),
+        "optional_path_efficiency_policy": (
+            "legal_support_retained_not_balanced_not_claimed_learned"
+        ),
+        "policy_id": PROCESS_V2_P50_POLICY_ID,
+        "semantic_cell_probability": "equal_round_robin_over_balanced_training_cells",
+        "within_cell_probability": "deterministic_source_unique_without_replacement",
+    }
 
 
 _ENVELOPE_FIELDS = {
@@ -1373,7 +1496,7 @@ _ENVELOPE_FIELDS = {
 
 
 def test_no_policy_value_moved_beyond_the_declared_process_v2_deltas() -> None:
-    """Only Gate-0 science and T1 operational semantics may move.
+    """Only Gate-0 science, T1 recovery, and P50 recovery policy may move.
 
     Checked against BOTH superseded generations rather than only the oldest: a
     value that moved at version 2 and moved back at version 3 would agree with
@@ -1397,6 +1520,8 @@ def test_no_policy_value_moved_beyond_the_declared_process_v2_deltas() -> None:
                     "optimization",
                     "sampling_law",
                 }:
+                    continue
+                if name == P50_RECIPE_POLICY and field in {"optimization", "sampling"}:
                     continue
                 assert current[field] == superseded[field], f"{name}.{field}@{revision}"
 
@@ -1437,11 +1562,15 @@ def test_the_field_set_changed_only_where_a_version_bump_says_it_did() -> None:
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION):
         pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION} is not reachable from this checkout")
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V2):
-        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout")
+        pytest.skip(
+            f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout"
+        )
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         current = _load(name)
         version_one = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION, name) or b"{}")
-        version_two = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V2, name) or b"{}")
+        version_two = json.loads(
+            _git_show(_SUPERSEDED_CHAIN_REVISION_V2, name) or b"{}"
+        )
         assert set(version_one) - set(current) == {"admitted_source"}, name
         assert set(current) - set(version_one) == {
             "contract_revision",
@@ -1456,9 +1585,13 @@ def test_version_three_changed_exactly_the_binding_version_and_the_lineage() -> 
     """The substantive delta, stated so a reviewer need not diff two generations."""
 
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V2):
-        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout")
+        pytest.skip(
+            f"{_SUPERSEDED_CHAIN_REVISION_V2} is not reachable from this checkout"
+        )
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V3):
-        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout")
+        pytest.skip(
+            f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout"
+        )
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         current = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V3, name) or b"{}")
         previous = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V2, name) or b"{}")
@@ -1503,10 +1636,12 @@ def test_version_three_changed_exactly_the_binding_version_and_the_lineage() -> 
 
 
 def test_current_chain_changes_only_declared_policy_deltas_and_envelopes() -> None:
-    """Current bytes move only Gate-0 science, T1 cadence, and resulting pins."""
+    """Current bytes move only declared Gate-0, T1, and P50 deltas and pins."""
 
     if not _revision_available(_SUPERSEDED_CHAIN_REVISION_V3):
-        pytest.skip(f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout")
+        pytest.skip(
+            f"{_SUPERSEDED_CHAIN_REVISION_V3} is not reachable from this checkout"
+        )
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
         current = _load(name)
         previous = json.loads(_git_show(_SUPERSEDED_CHAIN_REVISION_V3, name) or b"{}")
@@ -1526,6 +1661,8 @@ def test_current_chain_changes_only_declared_policy_deltas_and_envelopes() -> No
             allowed.add("structural_checks")
         if name == T1_CAPACITY_POLICY:
             allowed.update({"optimization", "sampling_law"})
+        if name == P50_RECIPE_POLICY:
+            allowed.update({"optimization", "sampling"})
         assert moved <= allowed, (name, sorted(moved))
         assert {
             "contract_revision",

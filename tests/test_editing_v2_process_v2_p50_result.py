@@ -28,14 +28,18 @@ UNSUPPORTED_CELL = "editing_v2_active8_v1:atom_delete:connected_nonleaf_death"
 
 
 def _policy() -> dict[str, object]:
-    return json.loads((ROOT / "configs/editing_v2_process_v2_p50_recipe_policy.json").read_text())
+    return json.loads(
+        (ROOT / "configs/editing_v2_process_v2_p50_recipe_policy.json").read_text()
+    )
 
 
 def _required_cells() -> tuple[str, ...]:
+    policy = _policy()
     payload = json.loads(
         (ROOT / "configs/editing_v2_process_v2_development_cell_roles.json").read_text()
     )
-    return tuple(payload["required_cell_ids"])
+    optional = set(policy["sampling"]["optional_path_efficiency_cell_ids"])
+    return tuple(cell for cell in payload["required_cell_ids"] if cell not in optional)
 
 
 def _prerequisites(policy: dict[str, object]) -> ProcessV2P50ScopedPrerequisites:
@@ -55,14 +59,14 @@ def _prerequisites(policy: dict[str, object]) -> ProcessV2P50ScopedPrerequisites
     )
 
 
-def _inputs() -> tuple[
-    dict[str, object], ProcessV2P50ScopedPrerequisites, dict[str, object]
-]:
+def _inputs() -> (
+    tuple[dict[str, object], ProcessV2P50ScopedPrerequisites, dict[str, object]]
+):
     policy = _policy()
     prerequisites = _prerequisites(policy)
     families = prerequisites.active_families
     cells = _required_cells()
-    observable_cells = tuple(cell for cell in cells if cell != UNSUPPORTED_CELL)
+    observable_cells = cells
     environment_body = {
         "hardware_class": "test_gpu",
         "device_name": "test",
@@ -205,20 +209,20 @@ def _inputs() -> tuple[
     cell_exposure = [
         {
             "semantic_cell_id": cell,
-            "planned_example_count": 189 if index < 4 else 188,
-            "observed_example_count": 189 if index < 4 else 188,
+            "planned_example_count": 200,
+            "observed_example_count": 200,
             "planned_optimizer_step_opportunities": 50,
             "finite_nonzero_global_gradient_exposure_steps": 40,
             "all_exposure_step_global_gradients_finite": True,
             "cumulative_exposure_step_global_gradient_l2": 1.0,
         }
-        for index, cell in enumerate(cells)
+        for cell in cells
     ]
     inputs = {
         "recipe_policy": policy,
         "prerequisites": prerequisites,
         "required_cell_ids": cells,
-        "validation_unsupported_required_cells": (UNSUPPORTED_CELL,),
+        "validation_unsupported_required_cells": (),
         "expected_runtime_provenance": expected_runtime_provenance,
         "provenance": provenance,
         "run_integrity": run_integrity,
@@ -230,9 +234,9 @@ def _inputs() -> tuple[
     return policy, prerequisites, inputs
 
 
-def _build() -> tuple[
-    dict[str, object], ProcessV2P50ScopedPrerequisites, dict[str, object]
-]:
+def _build() -> (
+    tuple[dict[str, object], ProcessV2P50ScopedPrerequisites, dict[str, object]]
+):
     policy, prerequisites, inputs = _inputs()
     return policy, prerequisites, build_process_v2_p50_result(**inputs)
 
@@ -244,7 +248,7 @@ def _validate_args(
         "recipe_policy": policy,
         "prerequisites": prerequisites,
         "required_cell_ids": _required_cells(),
-        "validation_unsupported_required_cells": (UNSUPPORTED_CELL,),
+        "validation_unsupported_required_cells": (),
         "expected_runtime_provenance": {
             "prepared_inputs_sha256": "7" * 64,
             "training_stream_sha256": "8" * 64,
@@ -264,7 +268,9 @@ def test_result_is_strictly_nonauthorizing_and_decision_is_the_only_p500_go() ->
     assert validate_process_v2_p50_result(result, **args) == result
     assert result["p500_authorized"] is False
     assert all(result[field] is False for field in AUTHORITY_FIELDS)
-    decision = build_process_v2_p50_decision(result, **args, result_file_sha256="f" * 64)
+    decision = build_process_v2_p50_decision(
+        result, **args, result_file_sha256="f" * 64
+    )
 
     assert decision["status"] == DECISION_GO_STATUS
     assert decision["p500_authorized"] is True
@@ -282,23 +288,28 @@ def test_result_is_strictly_nonauthorizing_and_decision_is_the_only_p500_go() ->
     )
 
 
-def test_absent_held_out_cell_is_reported_not_fabricated_or_automatically_failed() -> None:
+def test_optional_path_efficiency_cell_is_not_claimed_as_balanced_or_learned() -> None:
     policy, prerequisites, result = _build()
 
-    assert result["validation_unsupported_required_cells"] == [UNSUPPORTED_CELL]
+    assert UNSUPPORTED_CELL not in result["required_cell_ids"]
+    assert result["validation_unsupported_required_cells"] == []
     assert all(
-        row["semantic_cell_id"] != UNSUPPORTED_CELL for row in result["validation_entry_metrics"]
+        row["semantic_cell_id"] != UNSUPPORTED_CELL
+        for row in result["validation_entry_metrics"]
     )
     assert len(result["semantic_cell_validation_nll_checks"]) == 16
-    assert len(result["semantic_cell_training_checks"]) == 17
+    assert len(result["semantic_cell_training_checks"]) == 16
     assert all(result["threshold_checks"].values())
 
-    with pytest.raises(ProcessV2P50ResultError, match="identity disagrees|coverage"):
+    with pytest.raises(
+        ProcessV2P50ResultError,
+        match="identity disagrees|coverage|ordered proper subset",
+    ):
         validate_process_v2_p50_result(
             result,
             **{
                 **_validate_args(policy, prerequisites),
-                "validation_unsupported_required_cells": (),
+                "validation_unsupported_required_cells": (UNSUPPORTED_CELL,),
             },
         )
 
@@ -317,7 +328,12 @@ def test_cell_nonincrease_failure_is_no_go_even_when_not_catastrophic() -> None:
     )
 
     assert result["threshold_checks"]["semantic_cell_validation_nonincrease"] is False
-    assert result["threshold_checks"]["semantic_cell_validation_no_catastrophic_regression"] is True
+    assert (
+        result["threshold_checks"][
+            "semantic_cell_validation_no_catastrophic_regression"
+        ]
+        is True
+    )
     assert decision["status"] == DECISION_NO_GO_STATUS
     assert decision["p500_authorized"] is False
     with pytest.raises(ProcessV2P50ResultError, match="not a bounded-P500 GO"):
@@ -343,28 +359,33 @@ def test_catastrophic_family_and_cell_regression_is_recorded_as_no_go() -> None:
         result_file_sha256="f" * 64,
     )
 
-    assert result["threshold_checks"]["family_validation_no_catastrophic_regression"] is False
     assert (
-        result["threshold_checks"]["semantic_cell_validation_no_catastrophic_regression"] is False
+        result["threshold_checks"]["family_validation_no_catastrophic_regression"]
+        is False
+    )
+    assert (
+        result["threshold_checks"][
+            "semantic_cell_validation_no_catastrophic_regression"
+        ]
+        is False
     )
     assert decision["status"] == DECISION_NO_GO_STATUS
 
 
 def test_hazard_change_and_missing_gradient_exposure_each_block_p500() -> None:
-    policy, prerequisites, inputs = _inputs()
+    _policy_value, _prerequisites_value, inputs = _inputs()
     inputs["run_integrity"]["hazard_final_state_sha256"] = "0" * 64
     result = build_process_v2_p50_result(**inputs)
     assert result["threshold_checks"]["hazard_frozen_excluded_and_unchanged"] is False
 
-    policy, prerequisites, inputs = _inputs()
-    unsupported = next(
-        row
-        for row in inputs["semantic_cell_training_evidence"]
-        if row["semantic_cell_id"] == UNSUPPORTED_CELL
-    )
-    unsupported["finite_nonzero_global_gradient_exposure_steps"] = 0
+    _policy_value, _prerequisites_value, inputs = _inputs()
+    target = inputs["semantic_cell_training_evidence"][0]
+    target["finite_nonzero_global_gradient_exposure_steps"] = 0
     result = build_process_v2_p50_result(**inputs)
-    assert result["threshold_checks"]["semantic_cell_training_exposure_and_gradient"] is False
+    assert (
+        result["threshold_checks"]["semantic_cell_training_exposure_and_gradient"]
+        is False
+    )
 
 
 def test_resealed_provenance_or_derived_threshold_tampering_is_refused() -> None:
@@ -386,17 +407,15 @@ def test_resealed_provenance_or_derived_threshold_tampering_is_refused() -> None
         validate_process_v2_p50_result(changed, **_validate_args(policy, prerequisites))
 
 
-def test_builder_refuses_non_50_step_trajectory_and_missing_seventeenth_cell() -> None:
+def test_builder_refuses_non_50_step_trajectory_and_missing_balanced_cell() -> None:
     _policy_value, _prerequisites_value, inputs = _inputs()
     inputs["trajectory"] = inputs["trajectory"][:-1]
     with pytest.raises(ProcessV2P50ResultError, match="exactly 50 rows"):
         build_process_v2_p50_result(**inputs)
 
     _policy_value, _prerequisites_value, inputs = _inputs()
-    inputs["semantic_cell_training_evidence"] = [
-        row
-        for row in inputs["semantic_cell_training_evidence"]
-        if row["semantic_cell_id"] != UNSUPPORTED_CELL
-    ]
+    inputs["semantic_cell_training_evidence"] = inputs[
+        "semantic_cell_training_evidence"
+    ][:-1]
     with pytest.raises(ProcessV2P50ResultError, match="evidence coverage"):
         build_process_v2_p50_result(**inputs)

@@ -19,7 +19,7 @@
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_p50_recipe_policy",
   "contract_revision": "process_v2_relational_reroute_capacity_model",
-  "contract_sha256": "8373929f63be37d3f7a04b56ebff81ecdab364c807b2d5e0f62f5ea81756d7fa",
+  "contract_sha256": "16ecd8c021c69f915c6f7546eb09c5a6ed22a34461811e49cc1ea286b537991d",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -38,7 +38,7 @@
     "dtype": "float32",
     "gradient_clip_norm": 10.0,
     "initialization": "scratch_from_t1_bound_initial_model_state",
-    "learning_rate": 0.001,
+    "learning_rate": 0.0003,
     "mixed_precision": false,
     "optimizer": "adamw",
     "optimizer_steps": 50,
@@ -212,14 +212,24 @@
     "measured_evidence_in_this_contract": false
   },
   "sampling": {
+    "balanced_training_cell_count": 16,
+    "candidate_reserve_per_balanced_cell": 1024,
+    "examples_per_balanced_cell": 200,
+    "global_source_reuse": "forbidden_within_the_bounded_pilot",
     "lane_probability": "not_a_sampling_level_preserved_as_audit_dimension",
-    "policy_id": "stage_a_equal_semantic_cell_capability_exception_v1",
+    "minimum_unique_train_sources_per_balanced_cell": 200,
+    "operational_semantics_version": 2,
+    "optional_path_efficiency_cell_ids": [
+      "editing_v2_active8_v1:atom_delete:connected_nonleaf_death"
+    ],
+    "optional_path_efficiency_policy": "legal_support_retained_not_balanced_not_claimed_learned",
+    "policy_id": "stage_a_unique_source_capability_pilot_v2",
     "production_hierarchy_claim_authorized": false,
     "rationale": "P50 tests load-bearing capability acquisition; production-law calibration remains a later separately frozen stage",
-    "semantic_cell_probability": "equal_round_robin",
+    "semantic_cell_probability": "equal_round_robin_over_balanced_training_cells",
     "source_group_id_in_stream": null,
     "source_group_probability": "explicit_stage_a_exception_not_used",
-    "within_cell_probability": "deterministic_uniform_cycle"
+    "within_cell_probability": "deterministic_source_unique_without_replacement"
   },
   "schema": "compose.editing_v2.process_v2_p50_recipe_policy",
   "schema_version": 6,

@@ -22,12 +22,12 @@ Process-V2 identity:
  7   ``..._p50_recipe_policy.json``                                       the V1 P50 recipe policy
 ===  ==================================================================  ==========
 
-MIRROR, WITH ONE VERSIONED OPERATIONAL DELTA
---------------------------------------------
+MIRROR, WITH VERSIONED OPERATIONAL DELTAS
+-----------------------------------------
 No scientific policy value moves.  Cell definitions, family contexts, data lanes,
 partition roles, the ``editing_v2_active8_v1`` cell namespace, the 17 required / 3
 conditional / 2 separate-lane counts, panel cardinalities, every threshold, the
-optimizer and sampling laws are **projected** from the frozen V1 contracts through
+most optimizer and sampling laws are **projected** from the frozen V1 contracts through
 ``compose_v4.data.editing_v2_process_v2_policy_registry`` rather than transcribed
 here.  Process-V2 T1 operational-semantics version 1 evaluates only at step zero
 and the frozen report points, and makes step 10 the earliest eligible threshold
@@ -36,6 +36,11 @@ registry pins each frozen source by physical hash and self-hash, so a projection
 cannot drift and an edited frozen source makes the build refuse.  This replaces
 roughly five hundred lines of hand-copied policy; the projection was proved
 byte-identical to every constant it replaced before those constants were deleted.
+P50 operational-semantics version 2 prospectively removes the two-source
+connected-nonleaf deletion shortcut from equal-cell training, retains its legal
+support, requires 200 source-unique examples for each of the remaining 16 cells,
+and lowers the bounded pilot learning rate after the completed P50 NO_GO exposed
+shared-route interference.  No earlier artifact or completed result is relabelled.
 
 THE DEPENDENCY GRAPH IS EXPLICIT
 --------------------------------
@@ -181,7 +186,9 @@ PROCESS_V2_CHAIN_ARTIFACTS: tuple[str, ...] = (
 GATE_ZERO_MODEL_PROCESS_V2 = "configs/editing_gate_zero_semantic_model_process_v2.json"
 SEMANTIC_PROCESS_V2 = "configs/editing_v2_semantic_process_v2.json"
 EDITING_CORPUS_V2_CONTRACT = "configs/editing_corpus_v2_contract.json"
-CAPABILITY_CELL_CLASSIFIER = "src/compose_v4/data/editing_v2_semantic_capability_cells.py"
+CAPABILITY_CELL_CLASSIFIER = (
+    "src/compose_v4/data/editing_v2_semantic_capability_cells.py"
+)
 
 #: The single self-hash field name every chain artifact carries.
 SELF_HASH_FIELD = "contract_sha256"
@@ -246,6 +253,21 @@ PROCESS_V2_T1_REPORT_POINTS = [1, 10, 50, 100, 250, 500, 600, 700, 750]
 PROCESS_V2_T1_MAXIMUM_OPTIMIZER_STEPS = 750
 PROCESS_V2_T1_SCHEDULER = "piecewise_constant_by_optimizer_step"
 
+#: Prospective Process-V2-only correction for the second bounded P50 attempt.
+#: Connected-nonleaf deletion remains in the executable process, but its two
+#: admitted train sources cannot support an equal-cell learning claim.  The
+#: balanced pilot therefore treats it as an optional path-efficiency capability
+#: and samples the remaining cells without replacement by exact source identity.
+PROCESS_V2_P50_OPERATIONAL_SEMANTICS_VERSION = 2
+PROCESS_V2_P50_POLICY_ID = "stage_a_unique_source_capability_pilot_v2"
+PROCESS_V2_P50_OPTIONAL_PATH_EFFICIENCY_CELL_IDS = (
+    "editing_v2_active8_v1:atom_delete:connected_nonleaf_death",
+)
+PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT = 16
+PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL = 200
+PROCESS_V2_P50_CANDIDATE_RESERVE_PER_BALANCED_CELL = 1024
+PROCESS_V2_P50_LEARNING_RATE = 0.0003
+
 #: The revision the version-1 bodies were sealed under.  Kept as a named constant
 #: because it is the oldest generation and several tests address it by name.
 SUPERSEDED_CHAIN_CONTRACT_REVISION = (
@@ -264,9 +286,7 @@ SUPERSEDED_CHAIN_CONTRACT_REVISION_V3 = (
 SUPERSEDED_CHAIN_CONTRACT_REVISION_V4 = "process_v2_gate_zero_productive_nonself"
 
 #: The revision the version-5 bodies were sealed under.
-SUPERSEDED_CHAIN_CONTRACT_REVISION_V5 = (
-    "process_v2_unique_entry_two_stage_t1_capacity"
-)
+SUPERSEDED_CHAIN_CONTRACT_REVISION_V5 = "process_v2_unique_entry_two_stage_t1_capacity"
 
 STATUS_SUFFIX = "_NO_DOWNSTREAM_AUTHORITY"
 
@@ -854,7 +874,9 @@ def _read_target_bytes(
         ) from error
 
 
-def _edge(repo_root: Path, relative_path: str, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+def _edge(
+    repo_root: Path, relative_path: str, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
     """Build one declared edge: a physical pointer, plus a semantic one when defined."""
 
     raw = _read_target_bytes(repo_root, relative_path, sealed)
@@ -966,7 +988,9 @@ def _resolved_evidence_binding_declaration() -> dict[str, Any]:
     }
 
 
-def _operator_capability_fingerprint(repo_root: Path, sealed: Mapping[str, bytes]) -> str:
+def _operator_capability_fingerprint(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> str:
     """Read the V2 operator capability expectation from the pinned Gate-0 contract.
 
     Reading it from the parent rather than restating it means the runtime's
@@ -977,7 +1001,9 @@ def _operator_capability_fingerprint(repo_root: Path, sealed: Mapping[str, bytes
         GATE_ZERO_MODEL_PROCESS_V2,
         _read_target_bytes(repo_root, GATE_ZERO_MODEL_PROCESS_V2, sealed),
     )
-    fingerprint = payload.get("model_identity", {}).get("operator_capability_fingerprint")
+    fingerprint = payload.get("model_identity", {}).get(
+        "operator_capability_fingerprint"
+    )
     if not isinstance(fingerprint, str) or not fingerprint:
         raise ProcessV2ChainError(
             f"{GATE_ZERO_MODEL_PROCESS_V2} declares no "
@@ -1029,7 +1055,9 @@ def _registry_pin(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def _envelope(repo_root: Path, name: str, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+def _envelope(
+    repo_root: Path, name: str, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
     meta = _ENVELOPE[name]
     payload: dict[str, Any] = {
         "active_families": list(ACTIVE8_FAMILIES),
@@ -1048,7 +1076,9 @@ def _envelope(repo_root: Path, name: str, sealed: Mapping[str, bytes]) -> dict[s
     return payload
 
 
-def _build_decision_runtime(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+def _build_decision_runtime(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
     model = dict(_project("runtime_model", repo_root))
     model["operator_capability_fingerprint"] = _operator_capability_fingerprint(
         repo_root, sealed
@@ -1059,10 +1089,14 @@ def _build_decision_runtime(repo_root: Path, sealed: Mapping[str, bytes]) -> dic
     return payload
 
 
-def _build_capability_cells(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+def _build_capability_cells(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
     payload = _envelope(repo_root, CAPABILITY_CELLS, sealed)
     payload["bindings"] = {
-        "action_codec_schema_version": _project("action_codec_schema_version", repo_root),
+        "action_codec_schema_version": _project(
+            "action_codec_schema_version", repo_root
+        ),
         "data_lanes": _project("data_lanes", repo_root),
         "partition_roles": _project("partition_roles", repo_root),
     }
@@ -1131,7 +1165,9 @@ def _build_gate_zero_structural(
     return payload
 
 
-def _build_t1_panel_policy(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+def _build_t1_panel_policy(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
     payload = _envelope(repo_root, T1_PANEL_POLICY, sealed)
     payload.update(_project_body("t1_panel_body", repo_root))
     return payload
@@ -1170,9 +1206,54 @@ def _build_t1_capacity_policy(
     return payload
 
 
-def _build_p50_recipe_policy(repo_root: Path, sealed: Mapping[str, bytes]) -> dict[str, Any]:
+def _build_p50_recipe_policy(
+    repo_root: Path, sealed: Mapping[str, bytes]
+) -> dict[str, Any]:
     payload = _envelope(repo_root, P50_RECIPE_POLICY, sealed)
-    payload.update(_project_body("p50_recipe_body", repo_root))
+    shared = _project_body("p50_recipe_body", repo_root)
+    shared_sampling = shared.get("sampling")
+    shared_optimization = shared.get("optimization")
+    if not isinstance(shared_sampling, Mapping) or not isinstance(
+        shared_optimization, Mapping
+    ):
+        raise ProcessV2ChainError(
+            "the shared P50 policy has no sampling or optimization mapping"
+        )
+    sampling = dict(shared_sampling)
+    sampling.update(
+        {
+            "balanced_training_cell_count": PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT,
+            "candidate_reserve_per_balanced_cell": (
+                PROCESS_V2_P50_CANDIDATE_RESERVE_PER_BALANCED_CELL
+            ),
+            "examples_per_balanced_cell": PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL,
+            "global_source_reuse": "forbidden_within_the_bounded_pilot",
+            "minimum_unique_train_sources_per_balanced_cell": (
+                PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL
+            ),
+            "operational_semantics_version": (
+                PROCESS_V2_P50_OPERATIONAL_SEMANTICS_VERSION
+            ),
+            "optional_path_efficiency_cell_ids": list(
+                PROCESS_V2_P50_OPTIONAL_PATH_EFFICIENCY_CELL_IDS
+            ),
+            "optional_path_efficiency_policy": (
+                "legal_support_retained_not_balanced_not_claimed_learned"
+            ),
+            "policy_id": PROCESS_V2_P50_POLICY_ID,
+            "semantic_cell_probability": (
+                "equal_round_robin_over_balanced_training_cells"
+            ),
+            "within_cell_probability": (
+                "deterministic_source_unique_without_replacement"
+            ),
+        }
+    )
+    optimization = dict(shared_optimization)
+    optimization["learning_rate"] = PROCESS_V2_P50_LEARNING_RATE
+    shared["sampling"] = sampling
+    shared["optimization"] = optimization
+    payload.update(shared)
     return payload
 
 
@@ -1227,7 +1308,9 @@ def build_process_v2_chain(repo_root: Path) -> dict[str, bytes]:
     repo_root = Path(repo_root)
     sealed: dict[str, bytes] = {}
     for name in PROCESS_V2_CHAIN_ARTIFACTS:
-        payload = build_process_v2_chain_artifact(name, repo_root=repo_root, sealed=sealed)
+        payload = build_process_v2_chain_artifact(
+            name, repo_root=repo_root, sealed=sealed
+        )
         sealed[name] = serialize_process_v2_chain_artifact(payload)
     return sealed
 
@@ -1313,7 +1396,9 @@ def _check_process_identity(name: str, payload: Mapping[str, Any]) -> None:
     """
 
     block = payload.get("process_identity")
-    if not isinstance(block, Mapping) or set(block) != set(PROCESS_IDENTITY_EDGE_FIELDS):
+    if not isinstance(block, Mapping) or set(block) != set(
+        PROCESS_IDENTITY_EDGE_FIELDS
+    ):
         _fail(
             name,
             "process_identity must carry exactly "
@@ -1377,7 +1462,9 @@ def _check_parents(
         assert isinstance(edge, Mapping)  # narrowed by the guard above
         for slot in sorted(live):
             try:
-                pointer = validate_typed_pointer(edge[slot], label=f"{name} edge {role}.{slot}")
+                pointer = validate_typed_pointer(
+                    edge[slot], label=f"{name} edge {role}.{slot}"
+                )
             except ProcessV2SchemaError as error:
                 _fail(name, str(error))
             target = pointer["target"]
@@ -1486,8 +1573,12 @@ def _check_superseded_lineage(
     previous_version = 0
     for index, entry in enumerate(block):
         where = f"superseded_design_lineage[{index}]"
-        if not isinstance(entry, Mapping) or set(entry) != set(LINEAGE_GENERATION_FIELDS):
-            _fail(name, f"{where} must carry exactly {sorted(LINEAGE_GENERATION_FIELDS)}")
+        if not isinstance(entry, Mapping) or set(entry) != set(
+            LINEAGE_GENERATION_FIELDS
+        ):
+            _fail(
+                name, f"{where} must carry exactly {sorted(LINEAGE_GENERATION_FIELDS)}"
+            )
         assert isinstance(entry, Mapping)  # narrowed by the guard above
         version = entry["schema_version"]
         if type(version) is not int:
@@ -1518,7 +1609,9 @@ def _check_superseded_lineage(
         seen_revisions.add(str(revision))
         for slot in ("physical", "semantic"):
             try:
-                pointer = validate_typed_pointer(entry.get(slot), label=f"{name} {where}.{slot}")
+                pointer = validate_typed_pointer(
+                    entry.get(slot), label=f"{name} {where}.{slot}"
+                )
             except ProcessV2SchemaError as error:
                 _fail(name, str(error))
             if pointer["kind"] != PointerKind.LINEAGE_REFERENCE:
@@ -1589,7 +1682,10 @@ def _check_t1_capacity_operational_delta(
         _fail(name, "T1 capacity optimization policy is not a mapping")
 
     for field, expected in shared.items():
-        if field not in {"optimization", "sampling_law"} and payload.get(field) != expected:
+        if (
+            field not in {"optimization", "sampling_law"}
+            and payload.get(field) != expected
+        ):
             _fail(
                 name,
                 "mirrored policy values are frozen: "
@@ -1673,7 +1769,9 @@ def validate_process_v2_chain_artifact(
     assert isinstance(value, Mapping)  # narrowed by the guard above
     payload: dict[str, Any] = dict(value)
 
-    expected = build_process_v2_chain_artifact(name, repo_root=repo_root, sealed=overlay)
+    expected = build_process_v2_chain_artifact(
+        name, repo_root=repo_root, sealed=overlay
+    )
     if set(payload) != set(expected):
         missing = sorted(set(expected) - set(payload))
         unexpected = sorted(set(payload) - set(expected))
@@ -1748,7 +1846,9 @@ def load_process_v2_chain_artifact(
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError as error:
-        raise ProcessV2ChainError(f"{name}: chain artifact is not valid JSON") from error
+        raise ProcessV2ChainError(
+            f"{name}: chain artifact is not valid JSON"
+        ) from error
     return validate_process_v2_chain_artifact(
         payload, name=name, repo_root=repo_root, sealed=sealed
     )
@@ -1821,7 +1921,9 @@ def process_v2_generation_id(sealed: Mapping[str, bytes]) -> str:
     )
 
 
-def stage_process_v2_chain_generation(repo_root: Path, *, generations_root: Path) -> Path:
+def stage_process_v2_chain_generation(
+    repo_root: Path, *, generations_root: Path
+) -> Path:
     """Write and validate one complete generation WITHOUT its committed marker.
 
     This is deliberately a separate step from :func:`commit_process_v2_chain_generation`.
@@ -1879,7 +1981,9 @@ def commit_process_v2_chain_generation(generation: Path) -> Path:
             "contract_sha256": str(json.loads(raw)[SELF_HASH_FIELD]),
             "file_sha256": _sha256_bytes(raw),
         }
-    sealed = {name: (generation / name).read_bytes() for name in PROCESS_V2_CHAIN_ARTIFACTS}
+    sealed = {
+        name: (generation / name).read_bytes() for name in PROCESS_V2_CHAIN_ARTIFACTS
+    }
     body: dict[str, Any] = {
         "artifacts": artifacts,
         "generation_id": process_v2_generation_id(sealed),
@@ -1951,13 +2055,17 @@ def read_committed_generation(generation: Path) -> dict[str, bytes]:
         )
     try:
         verify_self_hash(
-            marker, field=GENERATION_SELF_HASH_FIELD, label=f"the marker at {generation}"
+            marker,
+            field=GENERATION_SELF_HASH_FIELD,
+            label=f"the marker at {generation}",
         )
         require_authority_false(marker, label=f"the marker at {generation}")
     except ProcessV2SchemaError as error:
         raise ProcessV2ChainError(str(error)) from error
     declared = marker.get("artifacts")
-    if not isinstance(declared, dict) or set(declared) != set(PROCESS_V2_CHAIN_ARTIFACTS):
+    if not isinstance(declared, dict) or set(declared) != set(
+        PROCESS_V2_CHAIN_ARTIFACTS
+    ):
         described = sorted(declared) if isinstance(declared, dict) else declared
         raise ProcessV2ChainError(
             f"the marker at {generation} declares {described!r}, not the seven chain "
@@ -2009,7 +2117,9 @@ def committed_generations(generations_root: Path) -> list[Path]:
     return found
 
 
-def materialize_committed_generation(generation: Path, *, repo_root: Path) -> dict[str, str]:
+def materialize_committed_generation(
+    generation: Path, *, repo_root: Path
+) -> dict[str, str]:
     """Copy a COMMITTED generation into ``repo_root``; return ``name -> self-hash``.
 
     Refuses an uncommitted generation, so an interruption cannot reach the
@@ -2068,12 +2178,12 @@ __all__ = [
     "PROCESS_IDENTITY_EDGE_FIELDS",
     "PROCESS_IDENTITY_PIN_FIELD",
     "PROCESS_V2_CHAIN_ARTIFACTS",
+    "PROCESS_V2_IDENTITY_PROVIDER",
+    "PROCESS_V2_IDENTITY_SCHEMA",
     "PROCESS_V2_T1_EARLY_STOP_RULE",
     "PROCESS_V2_T1_MINIMUM_STEPS_BEFORE_EARLY_STOP",
     "PROCESS_V2_T1_OPERATIONAL_SEMANTICS_VERSION",
     "PROCESS_V2_T1_TRAJECTORY_EVALUATION",
-    "PROCESS_V2_IDENTITY_PROVIDER",
-    "PROCESS_V2_IDENTITY_SCHEMA",
     "SELF_HASH_FIELD",
     "SELF_HASH_FIELD_ALGORITHM",
     "SEMANTIC_PROCESS_V2",

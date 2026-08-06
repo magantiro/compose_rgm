@@ -90,7 +90,7 @@ from compose_v4.rewrite import action_codec_v4
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 SELECTION_SCHEMA = "compose.editing_v2.process_v2_p50_selection"
-SELECTION_SCHEMA_VERSION = 1
+SELECTION_SCHEMA_VERSION = 2
 SELECTION_STATUS = "PROCESS_V2_P50_SELECTION_NO_DOWNSTREAM_AUTHORITY"
 PREPARED_SCHEMA = "compose.editing_v2.process_v2_p50_prepared_inputs"
 PREPARED_SCHEMA_VERSION = 2
@@ -142,7 +142,9 @@ def _alias_from_payload(value: object) -> TeacherSuccessorAlias:
         or not coordinate
         or any(type(item) is not int or item < 0 for item in coordinate)
     ):
-        raise ProcessV2P50RuntimeError("a compact P50 successor coordinate is malformed")
+        raise ProcessV2P50RuntimeError(
+            "a compact P50 successor coordinate is malformed"
+        )
     return TeacherSuccessorAlias(
         family_name=str(value["family_name"]),
         table_name=str(value["table_name"]),
@@ -204,7 +206,9 @@ def _teacher_fiber_from_payload(value: object) -> TeacherSuccessorFiber:
             state_support=state_support,
         )
     except ValueError as error:
-        raise ProcessV2P50RuntimeError("a compact P50 teacher fiber is invalid") from error
+        raise ProcessV2P50RuntimeError(
+            "a compact P50 teacher fiber is invalid"
+        ) from error
 
 
 def _candidate_identity(candidate: Mapping[str, Any]) -> str:
@@ -222,7 +226,9 @@ def _candidate_identity(candidate: Mapping[str, Any]) -> str:
 def _candidate_from_transition(row: Mapping[str, Any]) -> dict[str, Any]:
     evidence = row.get("candidate_evidence")
     if not isinstance(evidence, Mapping):
-        raise ProcessV2P50RuntimeError("an accepted P50 transition lacks candidate evidence")
+        raise ProcessV2P50RuntimeError(
+            "an accepted P50 transition lacks candidate evidence"
+        )
     if (
         row.get("terminal") is not False
         or evidence.get("supported") is not True
@@ -255,14 +261,31 @@ def _candidate_from_transition(row: Mapping[str, Any]) -> dict[str, Any]:
         "source_canonical_key": str(evidence["source_canonical_key"]),
         "canonical_successor_key": str(evidence["canonical_successor_key"]),
         "action_sha256": _require_sha(evidence["action_sha256"], field="action_sha256"),
-        "assignment_sha256": _require_sha(row["assignment_sha256"], field="assignment_sha256"),
+        "assignment_sha256": _require_sha(
+            row["assignment_sha256"], field="assignment_sha256"
+        ),
     }
     return {**body, "p50_entry_sha256": _candidate_identity(body)}
 
 
-def _required_cells(repo_root: Path) -> tuple[str, ...]:
+def _required_cells(repo_root: Path, policy: Mapping[str, Any]) -> tuple[str, ...]:
     roles = load_process_v2_chain_artifact(DEVELOPMENT_CELL_ROLES, repo_root=repo_root)
-    return tuple(str(cell) for cell in roles["required_cell_ids"])
+    development_cells = tuple(str(cell) for cell in roles["required_cell_ids"])
+    sampling = policy.get("sampling")
+    if not isinstance(sampling, Mapping):
+        raise ProcessV2P50RuntimeError("P50 sampling policy is not a mapping")
+    optional = sampling.get("optional_path_efficiency_cell_ids", ())
+    if (
+        not isinstance(optional, Sequence)
+        or isinstance(optional, (str, bytes))
+        or len(optional) != len(set(optional))
+        or any(cell not in development_cells for cell in optional)
+    ):
+        raise ProcessV2P50RuntimeError("P50 optional path-efficiency cells are invalid")
+    cells = tuple(cell for cell in development_cells if cell not in set(optional))
+    if len(cells) != sampling.get("balanced_training_cell_count"):
+        raise ProcessV2P50RuntimeError("P50 balanced training-cell count disagrees")
+    return cells
 
 
 def _rank(
@@ -326,72 +349,156 @@ def _training_schedule(
     *,
     required_cells: Sequence[str],
     policy: Mapping[str, Any],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, int]]:
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, int],
+    dict[str, int],
+]:
     total = int(policy["optimization"]["scheduled_nonterminal_examples"])
     cells = tuple(required_cells)
-    maximum_per_cell = math.ceil(total / len(cells))
-    kept: dict[str, list[tuple[int, str, dict[str, Any]]]] = {cell: [] for cell in cells}
+    sampling = policy["sampling"]
+    if total % len(cells) != 0:
+        raise ProcessV2P50RuntimeError("P50 stream cannot balance cells exactly")
+    examples_per_cell = total // len(cells)
+    if examples_per_cell != int(sampling["examples_per_balanced_cell"]):
+        raise ProcessV2P50RuntimeError("P50 examples-per-cell policy disagrees")
+    reserve = int(sampling["candidate_reserve_per_balanced_cell"])
+    if reserve < examples_per_cell:
+        raise ProcessV2P50RuntimeError(
+            "P50 source reserve is below the balanced-cell target"
+        )
+
+    # Retain one deterministic teacher per exact source in a bounded max-heap.
+    # This keeps the selection scan O(N log reserve) without loading the corpus.
+    kept: dict[str, dict[str, tuple[int, str, dict[str, Any]]]] = {
+        cell: {} for cell in cells
+    }
+    worst: dict[str, list[tuple[int, str, str]]] = {cell: [] for cell in cells}
     counts: Counter[str] = Counter()
     for candidate in _iter_role_candidates(source, partition_role=TRAIN_ROLE):
         cell = str(candidate["capability_cell_id"])
         if cell not in kept:
             continue
         counts[cell] += 1
-        rank = _rank(
+        entry_rank = _rank(
             candidate,
             policy_sha256=str(policy["contract_sha256"]),
             purpose="train",
         )
-        item = (-int(rank, 16), str(candidate["p50_entry_sha256"]), candidate)
-        ranked = kept[cell]
-        if len(ranked) < maximum_per_cell:
-            heapq.heappush(ranked, item)
-        elif int(rank, 16) < -ranked[0][0]:
-            heapq.heapreplace(ranked, item)
+        source_sha = str(candidate["source_state_sha256"])
+        source_rank = int(
+            canonical_sha256(
+                {
+                    "algorithm": "process_v2_p50_source_hash_permutation_v1",
+                    "policy_sha256": policy["contract_sha256"],
+                    "purpose": "train",
+                    "capability_cell_id": cell,
+                    "source_state_sha256": source_sha,
+                }
+            ),
+            16,
+        )
+        item = (source_rank, entry_rank, candidate)
+        retained = kept[cell]
+        heap = worst[cell]
+        previous = retained.get(source_sha)
+        if previous is not None:
+            if (entry_rank, candidate["p50_entry_sha256"]) < (
+                previous[1],
+                previous[2]["p50_entry_sha256"],
+            ):
+                retained[source_sha] = item
+                heapq.heappush(
+                    heap,
+                    (-source_rank, str(candidate["p50_entry_sha256"]), source_sha),
+                )
+            continue
+        while heap:
+            neg_rank, entry_id, heap_source = heap[0]
+            current = retained.get(heap_source)
+            if current is not None and (-neg_rank, entry_id) == (
+                current[0],
+                current[2]["p50_entry_sha256"],
+            ):
+                break
+            heapq.heappop(heap)
+        if len(retained) < reserve:
+            retained[source_sha] = item
+            heapq.heappush(
+                heap,
+                (-source_rank, str(candidate["p50_entry_sha256"]), source_sha),
+            )
+        elif heap and (source_rank, candidate["p50_entry_sha256"]) < (
+            -heap[0][0],
+            heap[0][1],
+        ):
+            _neg_rank, _entry_id, removed_source = heapq.heappop(heap)
+            del retained[removed_source]
+            retained[source_sha] = item
+            heapq.heappush(
+                heap,
+                (-source_rank, str(candidate["p50_entry_sha256"]), source_sha),
+            )
     missing = sorted(cell for cell in cells if counts[cell] == 0)
     if missing:
-        raise ProcessV2P50RuntimeError(f"P50 train stream omits required semantic cells: {missing}")
-    pools = {
+        raise ProcessV2P50RuntimeError(
+            f"P50 train stream omits required semantic cells: {missing}"
+        )
+    retained_unique_counts = {cell: len(kept[cell]) for cell in cells}
+    sparse = {
+        cell: count
+        for cell, count in retained_unique_counts.items()
+        if count < examples_per_cell
+    }
+    if sparse:
+        raise ProcessV2P50RuntimeError(
+            f"P50 train cells lack the unique-source floor: {sparse}"
+        )
+    candidate_pools = {
         cell: sorted(
-            (item[2] for item in kept[cell]),
+            (item[2] for item in kept[cell].values()),
             key=lambda candidate: (
-                _rank(
-                    candidate,
-                    policy_sha256=str(policy["contract_sha256"]),
-                    purpose="train",
+                canonical_sha256(
+                    {
+                        "algorithm": "process_v2_p50_source_hash_permutation_v1",
+                        "policy_sha256": policy["contract_sha256"],
+                        "purpose": "train",
+                        "capability_cell_id": cell,
+                        "source_state_sha256": candidate["source_state_sha256"],
+                    }
                 ),
                 candidate["p50_entry_sha256"],
             ),
         )
         for cell in cells
     }
+    # Scarce cells claim sources first.  If the bounded reserve cannot produce a
+    # globally unique assignment, fail before any chemistry or GPU work.
+    selected_sources: set[str] = set()
+    pools: dict[str, list[dict[str, Any]]] = {}
+    for cell in sorted(
+        cells, key=lambda item: (len(candidate_pools[item]), cells.index(item))
+    ):
+        available = [
+            candidate
+            for candidate in candidate_pools[cell]
+            if candidate["source_state_sha256"] not in selected_sources
+        ]
+        if len(available) < examples_per_cell:
+            raise ProcessV2P50RuntimeError(
+                "P50 retained source reserve has no globally source-unique balanced matching"
+            )
+        pools[cell] = available[:examples_per_cell]
+        selected_sources.update(
+            str(candidate["source_state_sha256"]) for candidate in pools[cell]
+        )
     rows: list[dict[str, Any]] = []
     seed = int(policy["optimization"]["seed"])
     for stream_index in range(total):
         cell = cells[stream_index % len(cells)]
         occurrence = stream_index // len(cells)
-        population = int(counts[cell])
-        cycle_index, offset = divmod(occurrence, population)
-        if cycle_index == 0:
-            ordered = pools[cell]
-        else:
-            if len(pools[cell]) != population:
-                raise ProcessV2P50RuntimeError(
-                    "bounded P50 selector discarded a candidate needed by a later cycle"
-                )
-            ordered = sorted(
-                pools[cell],
-                key=lambda candidate: (
-                    _rank(
-                        candidate,
-                        policy_sha256=str(policy["contract_sha256"]),
-                        purpose="train",
-                        cycle_index=cycle_index,
-                    ),
-                    candidate["p50_entry_sha256"],
-                ),
-            )
-        candidate = ordered[offset]
+        candidate = pools[cell][occurrence]
         body = {
             "stream_index": stream_index,
             "optimizer_step": stream_index // int(policy["optimization"]["batch_size"]),
@@ -399,18 +506,25 @@ def _training_schedule(
             "p50_entry_sha256": candidate["p50_entry_sha256"],
             "model_family": candidate["model_family"],
             "capability_cell_id": cell,
-            "time_hex": _time_hex(stream_index=stream_index, candidate=candidate, seed=seed),
+            "time_hex": _time_hex(
+                stream_index=stream_index, candidate=candidate, seed=seed
+            ),
             "objective_coefficient": 1,
         }
         rows.append({**body, "stream_row_sha256": canonical_sha256(body)})
-    scheduled_entry_ids = {str(row["p50_entry_sha256"]) for row in rows}
     selected = {
         candidate["p50_entry_sha256"]: candidate
         for cell_pool in pools.values()
         for candidate in cell_pool
-        if candidate["p50_entry_sha256"] in scheduled_entry_ids
     }
-    return rows, [selected[key] for key in sorted(selected)], dict(sorted(counts.items()))
+    if len(selected) != total or len(selected_sources) != total:
+        raise AssertionError("P50 source-unique selection changed cardinality")
+    return (
+        rows,
+        [selected[key] for key in sorted(selected)],
+        dict(sorted(counts.items())),
+        dict(sorted(retained_unique_counts.items())),
+    )
 
 
 def _validation_panel(
@@ -443,9 +557,12 @@ def _validation_panel(
     unsupported = [cell for cell in required_cells if not by_cell_source[cell]]
     supported = tuple(cell for cell in required_cells if cell not in set(unsupported))
     if not supported:
-        raise ProcessV2P50RuntimeError("P50 validation role has no required-cell support")
+        raise ProcessV2P50RuntimeError(
+            "P50 validation role has no required-cell support"
+        )
     if any(
-        len(by_cell_source[cell]) < VALIDATION_EXAMPLES_PER_SUPPORTED_CELL for cell in supported
+        len(by_cell_source[cell]) < VALIDATION_EXAMPLES_PER_SUPPORTED_CELL
+        for cell in supported
     ):
         sparse = {
             cell: len(by_cell_source[cell])
@@ -456,7 +573,11 @@ def _validation_panel(
             f"P50 validation support is below its prospective four-state floor: {sparse}"
         )
 
-    slot_cells = [cell for cell in supported for _ in range(VALIDATION_EXAMPLES_PER_SUPPORTED_CELL)]
+    slot_cells = [
+        cell
+        for cell in supported
+        for _ in range(VALIDATION_EXAMPLES_PER_SUPPORTED_CELL)
+    ]
     options = {
         cell: [
             item[1]
@@ -502,28 +623,37 @@ def build_process_v2_p50_selection(
 ) -> dict[str, Any]:
     """Scan authenticated metadata once and freeze train/validation addresses."""
 
-    policy = load_process_v2_chain_artifact(P50_RECIPE_POLICY, repo_root=source.repo_root)
-    cells = _required_cells(source.repo_root)
-    training_rows, train_entries, train_counts = _training_schedule(
-        source, required_cells=cells, policy=policy
+    policy = load_process_v2_chain_artifact(
+        P50_RECIPE_POLICY, repo_root=source.repo_root
+    )
+    cells = _required_cells(source.repo_root, policy)
+    training_rows, train_entries, train_counts, retained_unique_source_counts = (
+        _training_schedule(source, required_cells=cells, policy=policy)
     )
     validation_entries, unsupported, validation_counts = _validation_panel(
         source, required_cells=cells, policy=policy
     )
     training_source_ids = {entry["source_state_sha256"] for entry in train_entries}
-    validation_source_ids = {entry["source_state_sha256"] for entry in validation_entries}
+    validation_source_ids = {
+        entry["source_state_sha256"] for entry in validation_entries
+    }
     if training_source_ids & validation_source_ids:
         raise ProcessV2P50RuntimeError(
             "P50 train and validation selections share an exact source state"
         )
     unique_entries = {
-        entry["p50_entry_sha256"]: entry for entry in (*train_entries, *validation_entries)
+        entry["p50_entry_sha256"]: entry
+        for entry in (*train_entries, *validation_entries)
     }
     family_opportunities = Counter(row["model_family"] for row in training_rows)
     cell_opportunities = Counter(row["capability_cell_id"] for row in training_rows)
     family_step_opportunities = {
         family: len(
-            {int(row["optimizer_step"]) for row in training_rows if row["model_family"] == family}
+            {
+                int(row["optimizer_step"])
+                for row in training_rows
+                if row["model_family"] == family
+            }
         )
         for family in sorted(family_opportunities)
     }
@@ -543,7 +673,9 @@ def build_process_v2_p50_selection(
         or set(family_opportunities) != set(prerequisites.active_families)
         or any(value <= 0 for value in cell_opportunities.values())
     ):
-        raise ProcessV2P50RuntimeError("P50 schedule is not the complete balanced Active8 stream")
+        raise ProcessV2P50RuntimeError(
+            "P50 schedule is not the complete balanced Active8 stream"
+        )
     body = {
         "schema": SELECTION_SCHEMA,
         "schema_version": SELECTION_SCHEMA_VERSION,
@@ -555,6 +687,9 @@ def build_process_v2_p50_selection(
         "active8_run_identity_sha256": source.plan["run_identity_sha256"],
         "required_cells": list(cells),
         "training_candidate_counts_by_cell": train_counts,
+        "training_retained_unique_source_counts_by_cell": (
+            retained_unique_source_counts
+        ),
         "validation_candidate_counts_by_cell": validation_counts,
         "validation_examples_per_supported_cell": VALIDATION_EXAMPLES_PER_SUPPORTED_CELL,
         "validation_unsupported_required_cells": unsupported,
@@ -598,14 +733,26 @@ def validate_process_v2_p50_selection(value: object) -> dict[str, Any]:
         != canonical_sha256(selection.get("validation_entry_sha256s"))
         or selection.get("unique_entry_count") != len(selection.get("entries", ()))
         or not isinstance(prerequisites, Mapping)
-        or selection.get("prerequisites_binding_sha256") != canonical_sha256(prerequisites)
+        or selection.get("prerequisites_binding_sha256")
+        != canonical_sha256(prerequisites)
         or selection.get("p50_recipe_policy_sha256")
         != prerequisites.get("p50_recipe_policy_sha256")
         or prerequisites.get("optimizer_steps") != 50
         or prerequisites.get("batch_size") != 64
         or not isinstance(selection.get("required_cells"), list)
-        or len(selection["required_cells"]) != 17
+        or len(selection["required_cells"]) != 16
         or len(selection["required_cells"]) != len(set(selection["required_cells"]))
+        or not isinstance(
+            selection.get("training_retained_unique_source_counts_by_cell"), Mapping
+        )
+        or set(selection["training_retained_unique_source_counts_by_cell"])
+        != set(selection["required_cells"])
+        or any(
+            type(count) is not int or count < 200
+            for count in selection[
+                "training_retained_unique_source_counts_by_cell"
+            ].values()
+        )
     ):
         raise ProcessV2P50RuntimeError("P50 selection identity or census disagrees")
     entries = selection["entries"]
@@ -628,6 +775,7 @@ def validate_process_v2_p50_selection(value: object) -> dict[str, Any]:
     stream = selection["training_stream"]
     if not isinstance(stream, list) or len(stream) != 3200:
         raise ProcessV2P50RuntimeError("P50 training stream is not exactly 3,200 rows")
+    stream_entry_ids: list[str] = []
     for index, row in enumerate(stream):
         try:
             time_value = float.fromhex(str(row.get("time_hex")))
@@ -648,13 +796,34 @@ def validate_process_v2_p50_selection(value: object) -> dict[str, Any]:
             or not 0.0 < time_value < 1.0
         ):
             raise ProcessV2P50RuntimeError("a P50 training stream row disagrees")
+        stream_entry_ids.append(str(row["p50_entry_sha256"]))
+    if (
+        len(stream_entry_ids) != len(set(stream_entry_ids))
+        or len(
+            {
+                str(by_id[identifier]["source_state_sha256"])
+                for identifier in stream_entry_ids
+            }
+        )
+        != len(stream_entry_ids)
+        or not isinstance(selection.get("training_cell_opportunities"), Mapping)
+        or set(selection["training_cell_opportunities"])
+        != set(selection["required_cells"])
+        or any(
+            count != 200 for count in selection["training_cell_opportunities"].values()
+        )
+    ):
+        raise ProcessV2P50RuntimeError(
+            "P50 training stream repeats an entry/source or is not exactly cell-balanced"
+        )
     validation_ids = selection["validation_entry_sha256s"]
     if (
         not isinstance(validation_ids, list)
         or validation_ids != sorted(validation_ids)
         or len(validation_ids) != len(set(validation_ids))
         or any(
-            identifier not in by_id or by_id[identifier]["partition_role"] != VALIDATION_ROLE
+            identifier not in by_id
+            or by_id[identifier]["partition_role"] != VALIDATION_ROLE
             for identifier in validation_ids
         )
     ):
@@ -683,7 +852,9 @@ def compile_process_v2_p50_entries(
     ]
     try:
         resolved = resolve_process_v2_t1_entries(source, resolver_entries)
-        scratch, _binding, _score_receipt = build_process_v2_score_revised_scratch_runtime(source)
+        scratch, _binding, _score_receipt = (
+            build_process_v2_score_revised_scratch_runtime(source)
+        )
     except (ProcessV2T1PanelError, ProcessV2T1RuntimeError) as error:
         raise ProcessV2P50RuntimeError(str(error)) from error
     addressed_by_entry: dict[str, Any] = {}
@@ -705,8 +876,10 @@ def compile_process_v2_p50_entries(
         )
         if (
             observed_action_sha256 != entry["action_sha256"]
-            or persistent_slot_state_sha256(source_state) != entry["source_state_sha256"]
-            or persistent_slot_state_sha256(target_state) != entry["target_state_sha256"]
+            or persistent_slot_state_sha256(source_state)
+            != entry["source_state_sha256"]
+            or persistent_slot_state_sha256(target_state)
+            != entry["target_state_sha256"]
         ):
             raise ProcessV2P50RuntimeError(
                 "a selected P50 action or exact state changed after selection"
@@ -718,8 +891,12 @@ def compile_process_v2_p50_entries(
             scratch.model,
             tuple(sources),
             tuple(targets),
-            teacher_action_sha256s=tuple(str(entry["action_sha256"]) for entry in resolver_entries),
-            teacher_families=tuple(str(entry["model_family"]) for entry in resolver_entries),
+            teacher_action_sha256s=tuple(
+                str(entry["action_sha256"]) for entry in resolver_entries
+            ),
+            teacher_families=tuple(
+                str(entry["model_family"]) for entry in resolver_entries
+            ),
             times=tuple(_COMPILE_SUPPORT_TIME for _entry in resolver_entries),
         )
     except (SuccessorTrainingError, ValueError) as error:
@@ -733,7 +910,9 @@ def compile_process_v2_p50_entries(
     ):
         state_payload = encode_state(source_state)
         if encode_state(decode_state(state_payload)) != state_payload:
-            raise ProcessV2P50RuntimeError("P50 exact-state encoding is not byte-stable")
+            raise ProcessV2P50RuntimeError(
+                "P50 exact-state encoding is not byte-stable"
+            )
         fiber = compact.teacher_fiber
         prepared_body = {
             "p50_entry_sha256": entry["p50_entry_sha256"],
@@ -813,12 +992,18 @@ def convert_process_v2_p50_v1_leaf(
     converted: list[dict[str, Any]] = []
     for raw in leaf["entries"]:
         entry = dict(raw)
-        old_body = {key: item for key, item in entry.items() if key != "p50_compiled_entry_sha256"}
+        old_body = {
+            key: item
+            for key, item in entry.items()
+            if key != "p50_compiled_entry_sha256"
+        }
         identifier = str(entry.get("p50_entry_sha256"))
         selection_entry = selected.get(identifier)
         try:
             state = decode_state(entry["exact_state"])
-            partition = compiled_successor_map_from_payload(entry["successor_partition"])
+            partition = compiled_successor_map_from_payload(
+                entry["successor_partition"]
+            )
             fiber = teacher_successor_fiber_from_exact_digest(
                 partition, str(entry["target_state_sha256"])
             )
@@ -851,7 +1036,8 @@ def convert_process_v2_p50_v1_leaf(
             or entry.get("canonical_successor_count") != len(partition.successor_groups)
             or entry.get("productive_alias_count")
             != sum(len(group.marks) for group in partition.successor_groups)
-            or entry.get("production_successor_alias_multiplicity") != len(fiber.aliases)
+            or entry.get("production_successor_alias_multiplicity")
+            != len(fiber.aliases)
             or entry.get("virtual_alias_count") != len(partition.virtual_marks)
             or len(exact_aliases) != 1
             or entry.get("hazard_included") is not False
@@ -941,7 +1127,9 @@ def build_process_v2_p50_prepared_inputs(
     entries = [dict(entry) for leaf in leaves for entry in leaf["entries"]]
     observed = [str(entry["p50_entry_sha256"]) for entry in entries]
     if set(observed) != expected or len(observed) != len(set(observed)):
-        raise ProcessV2P50RuntimeError("P50 prepared leaves omit or repeat a selected entry")
+        raise ProcessV2P50RuntimeError(
+            "P50 prepared leaves omit or repeat a selected entry"
+        )
     entries.sort(key=lambda row: row["p50_entry_sha256"])
     body = {
         "schema": PREPARED_SCHEMA,
@@ -950,15 +1138,23 @@ def build_process_v2_p50_prepared_inputs(
         **authority_false_block(),
         "selection_sha256": selection["selection_sha256"],
         "prerequisites_binding_sha256": selection["prerequisites_binding_sha256"],
-        "initial_model_state_sha256": selection["prerequisites"]["t1_initial_model_state_sha256"],
+        "initial_model_state_sha256": selection["prerequisites"][
+            "t1_initial_model_state_sha256"
+        ],
         "training_stream": selection["training_stream"],
         "training_stream_sha256": selection["training_stream_sha256"],
         "required_cells": selection["required_cells"],
-        "training_family_step_opportunities": selection["training_family_step_opportunities"],
-        "training_cell_step_opportunities": selection["training_cell_step_opportunities"],
+        "training_family_step_opportunities": selection[
+            "training_family_step_opportunities"
+        ],
+        "training_cell_step_opportunities": selection[
+            "training_cell_step_opportunities"
+        ],
         "validation_entry_sha256s": selection["validation_entry_sha256s"],
         "validation_inventory_sha256": selection["validation_inventory_sha256"],
-        "validation_unsupported_required_cells": selection["validation_unsupported_required_cells"],
+        "validation_unsupported_required_cells": selection[
+            "validation_unsupported_required_cells"
+        ],
         "entry_count": len(entries),
         "entries": entries,
     }
@@ -972,7 +1168,9 @@ def validate_process_v2_p50_prepared_inputs(value: object) -> dict[str, Any]:
         raise ProcessV2P50RuntimeError("P50 prepared inputs must be an object")
     prepared = dict(value)
     try:
-        verify_self_hash(prepared, field="prepared_sha256", label="the P50 prepared inputs")
+        verify_self_hash(
+            prepared, field="prepared_sha256", label="the P50 prepared inputs"
+        )
         require_authority_false(prepared, label="the P50 prepared inputs")
     except ValueError as error:
         raise ProcessV2P50RuntimeError(str(error)) from error
@@ -986,12 +1184,18 @@ def validate_process_v2_p50_prepared_inputs(value: object) -> dict[str, Any]:
         != canonical_sha256(prepared.get("validation_entry_sha256s"))
         or prepared.get("entry_count") != len(prepared.get("entries", ()))
     ):
-        raise ProcessV2P50RuntimeError("P50 prepared input identity or census disagrees")
+        raise ProcessV2P50RuntimeError(
+            "P50 prepared input identity or census disagrees"
+        )
     observed: set[str] = set()
     by_id: dict[str, Mapping[str, Any]] = {}
     for raw in prepared["entries"]:
         entry = dict(raw)
-        body = {key: item for key, item in entry.items() if key != "p50_compiled_entry_sha256"}
+        body = {
+            key: item
+            for key, item in entry.items()
+            if key != "p50_compiled_entry_sha256"
+        }
         identifier = _require_sha(entry.get("p50_entry_sha256"), field="P50 entry")
         try:
             state = decode_state(entry["exact_state"])
@@ -1009,8 +1213,10 @@ def validate_process_v2_p50_prepared_inputs(value: object) -> dict[str, Any]:
             or teacher.target_state_sha256 != entry["target_state_sha256"]
             or teacher.target_key != entry["successor_canonical_key"]
             or exact_teacher_alias not in teacher.aliases
-            or entry.get("production_successor_alias_multiplicity") != len(teacher.aliases)
-            or entry.get("virtual_alias_count") != len(teacher.state_support.virtual_aliases)
+            or entry.get("production_successor_alias_multiplicity")
+            != len(teacher.aliases)
+            or entry.get("virtual_alias_count")
+            != len(teacher.state_support.virtual_aliases)
             or type(entry.get("raw_mark_count")) is not int
             or type(entry.get("decoded_mark_count")) is not int
             or not 0 < entry["decoded_mark_count"] <= entry["raw_mark_count"]
@@ -1031,9 +1237,13 @@ def validate_process_v2_p50_prepared_inputs(value: object) -> dict[str, Any]:
     validation_ids = set(prepared["validation_entry_sha256s"])
     if (
         observed != train_ids | validation_ids
-        or any(by_id[identifier]["partition_role"] != TRAIN_ROLE for identifier in train_ids)
         or any(
-            by_id[identifier]["partition_role"] != VALIDATION_ROLE for identifier in validation_ids
+            by_id[identifier]["partition_role"] != TRAIN_ROLE
+            for identifier in train_ids
+        )
+        or any(
+            by_id[identifier]["partition_role"] != VALIDATION_ROLE
+            for identifier in validation_ids
         )
     ):
         raise ProcessV2P50RuntimeError("P50 prepared train/validation roles disagree")
@@ -1107,10 +1317,14 @@ def _batch(
             )
             for identifier, time_value in zip(identifiers, times, strict=True)
         ]
-        batch = _attach_successor_family_coordinates(_collator(model)(examples), entries)
+        batch = _attach_successor_family_coordinates(
+            _collator(model)(examples), entries
+        )
     else:
         try:
-            indices = tuple(materialized.index_by_entry_id[identifier] for identifier in identifiers)
+            indices = tuple(
+                materialized.index_by_entry_id[identifier] for identifier in identifiers
+            )
         except KeyError as error:
             raise ProcessV2P50RuntimeError(
                 "the P50 stream references an entry outside the collated cache"
@@ -1139,12 +1353,18 @@ def collate_process_v2_p50_entries(
     identifiers: list[str] = []
     examples: list[FactorizedMarkExample] = []
     for entry in resolved:
-        body = {key: item for key, item in entry.items() if key != "p50_compiled_entry_sha256"}
+        body = {
+            key: item
+            for key, item in entry.items()
+            if key != "p50_compiled_entry_sha256"
+        }
         identifier = _require_sha(entry.get("p50_entry_sha256"), field="P50 entry")
         try:
             state = decode_state(entry["exact_state"])
         except (KeyError, TypeError, ValueError) as error:
-            raise ProcessV2P50RuntimeError("a P50 collated entry state is invalid") from error
+            raise ProcessV2P50RuntimeError(
+                "a P50 collated entry state is invalid"
+            ) from error
         if (
             entry.get("p50_compiled_entry_sha256") != canonical_sha256(body)
             or encode_state(state) != entry["exact_state"]
@@ -1178,7 +1398,9 @@ def materialize_process_v2_p50_batch(
     """Validate a consolidated collated batch against the immutable prepared input."""
 
     identifiers = tuple(str(identifier) for identifier in entry_ids)
-    expected = tuple(str(entry["p50_entry_sha256"]) for entry in runtime.prepared["entries"])
+    expected = tuple(
+        str(entry["p50_entry_sha256"]) for entry in runtime.prepared["entries"]
+    )
     if identifiers != expected or batch.batch_size != len(expected):
         raise ProcessV2P50RuntimeError("the P50 collated batch inventory disagrees")
     observed_state_sha256s = tuple(
@@ -1189,7 +1411,8 @@ def materialize_process_v2_p50_batch(
         for identifier in identifiers
     )
     expected_families = tuple(
-        str(runtime.metadata_by_id[identifier]["model_family"]) for identifier in identifiers
+        str(runtime.metadata_by_id[identifier]["model_family"])
+        for identifier in identifiers
     )
     if (
         observed_state_sha256s != expected_state_sha256s
@@ -1224,8 +1447,12 @@ def _evaluation_rows(
             batch, fibers, entries = _batch(
                 runtime, model, selected, times, materialized=materialized
             )
-            prediction = forward_teacher_successor_batch(model, batch.to(model.device), fibers)
-            nlls = -prediction.selected_productive_successor_log_probability.detach().cpu()
+            prediction = forward_teacher_successor_batch(
+                model, batch.to(model.device), fibers
+            )
+            nlls = (
+                -prediction.selected_productive_successor_log_probability.detach().cpu()
+            )
             for entry, nll in zip(entries, nlls, strict=True):
                 rows.append(
                     {
@@ -1241,7 +1468,9 @@ def _evaluation_rows(
 
 def _aggregate_validation(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     def mean(selected: Sequence[Mapping[str, Any]]) -> float:
-        return sum(float(row["canonical_successor_nll"]) for row in selected) / len(selected)
+        return sum(float(row["canonical_successor_nll"]) for row in selected) / len(
+            selected
+        )
 
     return {
         "overall_mean_successor_nll": mean(rows),
@@ -1320,7 +1549,9 @@ def run_process_v2_p50(
         )
     families = tuple(policy["active_families"])
     required_cells = tuple(runtime.prepared["required_cells"])
-    family_examples = Counter(row["model_family"] for row in runtime.prepared["training_stream"])
+    family_examples = Counter(
+        row["model_family"] for row in runtime.prepared["training_stream"]
+    )
     cell_examples = Counter(
         row["capability_cell_id"] for row in runtime.prepared["training_stream"]
     )
@@ -1337,7 +1568,9 @@ def run_process_v2_p50(
                 "graft_relation_head.weight"
                 if family == "bond_reroute"
                 else (
-                    "ring_restate_context_head.weight" if family == "ring_system_restate" else None
+                    "ring_restate_context_head.weight"
+                    if family == "ring_system_restate"
+                    else None
                 )
             ),
             "finite_nonzero_revision_parameter_gradient_exposure_steps": 0,
@@ -1361,7 +1594,9 @@ def run_process_v2_p50(
     model.train()
     for step in range(int(optimization["optimizer_steps"])):
         rows = stream[
-            step * int(optimization["batch_size"]) : (step + 1) * int(optimization["batch_size"])
+            step
+            * int(optimization["batch_size"]) : (step + 1)
+            * int(optimization["batch_size"])
         ]
         identifiers = tuple(str(row["p50_entry_sha256"]) for row in rows)
         times = tuple(float.fromhex(str(row["time_hex"])) for row in rows)
@@ -1383,7 +1618,9 @@ def run_process_v2_p50(
                     raise ProcessV2P50RuntimeError(
                         f"frozen hazard parameter received a P50 gradient: {name}"
                     )
-            elif parameter.grad is not None and not bool(torch.isfinite(parameter.grad).all()):
+            elif parameter.grad is not None and not bool(
+                torch.isfinite(parameter.grad).all()
+            ):
                 all_gradients_finite = False
             if parameter.grad is not None and not name.startswith(TOTAL_HAZARD_PREFIX):
                 squared_gradient_l2 += float(parameter.grad.detach().norm()) ** 2
@@ -1394,7 +1631,9 @@ def run_process_v2_p50(
             trainable, float(optimization["gradient_clip_norm"])
         )
         if not bool(torch.isfinite(gradient_norm)):
-            raise ProcessV2P50RuntimeError(f"nonfinite P50 gradient norm at step {step + 1}")
+            raise ProcessV2P50RuntimeError(
+                f"nonfinite P50 gradient norm at step {step + 1}"
+            )
         optimizer.step()
         _assert_hazard_identity(model, hazard_initial)
         losses.append(float(loss.detach().cpu()))
@@ -1422,17 +1661,27 @@ def run_process_v2_p50(
                 bool(torch.isfinite(gradient).all()) for gradient in route_gradients
             )
             route_l2 = math.sqrt(
-                sum(float(gradient.detach().norm()) ** 2 for gradient in route_gradients)
+                sum(
+                    float(gradient.detach().norm()) ** 2 for gradient in route_gradients
+                )
             )
             if not route_finite or not math.isfinite(route_l2):
                 raise ProcessV2P50RuntimeError(
                     f"nonfinite or absent {family} action-route gradient at step {step + 1}"
                 )
             exposure["observed_example_count"] += count
-            exposure["finite_nonzero_global_gradient_exposure_steps"] += int(finite_nonzero)
-            exposure["all_exposure_step_global_gradients_finite"] &= all_gradients_finite
-            exposure["cumulative_exposure_step_global_gradient_l2"] += global_gradient_l2
-            exposure["finite_nonzero_action_route_gradient_exposure_steps"] += int(route_l2 > 0.0)
+            exposure["finite_nonzero_global_gradient_exposure_steps"] += int(
+                finite_nonzero
+            )
+            exposure[
+                "all_exposure_step_global_gradients_finite"
+            ] &= all_gradients_finite
+            exposure[
+                "cumulative_exposure_step_global_gradient_l2"
+            ] += global_gradient_l2
+            exposure["finite_nonzero_action_route_gradient_exposure_steps"] += int(
+                route_l2 > 0.0
+            )
             exposure["all_exposure_step_action_route_gradients_finite"] &= route_finite
             exposure["cumulative_exposure_step_action_route_gradient_l2"] += route_l2
             revision_name = exposure["required_revision_parameter"]
@@ -1450,17 +1699,27 @@ def run_process_v2_p50(
                     raise ProcessV2P50RuntimeError(
                         f"nonfinite or absent {revision_name} gradient at step {step + 1}"
                     )
-                exposure["finite_nonzero_revision_parameter_gradient_exposure_steps"] += int(
-                    revision_l2 > 0.0
-                )
-                exposure["all_exposure_step_revision_parameter_gradients_finite"] &= revision_finite
-                exposure["cumulative_exposure_step_revision_parameter_gradient_l2"] += revision_l2
+                exposure[
+                    "finite_nonzero_revision_parameter_gradient_exposure_steps"
+                ] += int(revision_l2 > 0.0)
+                exposure[
+                    "all_exposure_step_revision_parameter_gradients_finite"
+                ] &= revision_finite
+                exposure[
+                    "cumulative_exposure_step_revision_parameter_gradient_l2"
+                ] += revision_l2
         for cell, count in row_cell_counts.items():
             exposure = cell_exposure[cell]
             exposure["observed_example_count"] += count
-            exposure["finite_nonzero_global_gradient_exposure_steps"] += int(finite_nonzero)
-            exposure["all_exposure_step_global_gradients_finite"] &= all_gradients_finite
-            exposure["cumulative_exposure_step_global_gradient_l2"] += global_gradient_l2
+            exposure["finite_nonzero_global_gradient_exposure_steps"] += int(
+                finite_nonzero
+            )
+            exposure[
+                "all_exposure_step_global_gradients_finite"
+            ] &= all_gradients_finite
+            exposure[
+                "cumulative_exposure_step_global_gradient_l2"
+            ] += global_gradient_l2
         if progress_callback is not None:
             progress_callback(
                 {
@@ -1496,7 +1755,9 @@ def run_process_v2_p50(
                 "baseline_canonical_successor_nll": baseline_by_id[identifier][
                     "canonical_successor_nll"
                 ],
-                "final_canonical_successor_nll": final_by_id[identifier]["canonical_successor_nll"],
+                "final_canonical_successor_nll": final_by_id[identifier][
+                    "canonical_successor_nll"
+                ],
             }
             for identifier in validation_ids
         ),
@@ -1553,9 +1814,9 @@ def run_process_v2_p50(
 __all__ = [
     "PREPARED_FILENAME",
     "SELECTION_FILENAME",
+    "VALIDATION_EXAMPLES_PER_SUPPORTED_CELL",
     "LoadedProcessV2P50Inputs",
     "ProcessV2P50RuntimeError",
-    "VALIDATION_EXAMPLES_PER_SUPPORTED_CELL",
     "build_process_v2_p50_prepared_inputs",
     "build_process_v2_p50_selection",
     "collate_process_v2_p50_entries",

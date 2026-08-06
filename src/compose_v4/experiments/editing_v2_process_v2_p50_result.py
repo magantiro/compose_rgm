@@ -18,11 +18,17 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     require_authority_false,
     verify_self_hash,
 )
-from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
-    ProcessV2P50ScopedPrerequisites,
-)
 from compose_v4.experiments.editing_v2_process_v2_contract_chain import (
     CHAIN_SCHEMA_VERSION,
+    PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT,
+    PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL,
+    PROCESS_V2_P50_LEARNING_RATE,
+    PROCESS_V2_P50_OPERATIONAL_SEMANTICS_VERSION,
+    PROCESS_V2_P50_OPTIONAL_PATH_EFFICIENCY_CELL_IDS,
+    PROCESS_V2_P50_POLICY_ID,
+)
+from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
+    ProcessV2P50ScopedPrerequisites,
 )
 
 RESULT_FILENAME = "PROCESS_V2_P50_RESULT.json"
@@ -199,22 +205,27 @@ def _validate_policy(
 ) -> tuple[dict[str, Any], tuple[str, ...], dict[str, Any], dict[str, Any]]:
     policy = dict(value)
     try:
-        verify_self_hash(policy, field="contract_sha256", label="the Process-V2 P50 policy")
+        verify_self_hash(
+            policy, field="contract_sha256", label="the Process-V2 P50 policy"
+        )
         require_authority_false(policy, label="the Process-V2 P50 policy")
     except ValueError as error:
         raise ProcessV2P50ResultError(str(error)) from error
     optimization = policy.get("optimization")
     objective = policy.get("objective")
     thresholds = policy.get("thresholds")
+    sampling = policy.get("sampling")
     families = tuple(policy.get("active_families", ()))
     if (
         policy.get("schema") != "compose.editing_v2.process_v2_p50_recipe_policy"
         or policy.get("schema_version") != CHAIN_SCHEMA_VERSION
-        or policy.get("status") != "FROZEN_PROCESS_V2_P50_RECIPE_POLICY_NO_DOWNSTREAM_AUTHORITY"
+        or policy.get("status")
+        != "FROZEN_PROCESS_V2_P50_RECIPE_POLICY_NO_DOWNSTREAM_AUTHORITY"
         or policy.get("p500_authorized") is not False
         or not isinstance(optimization, Mapping)
         or not isinstance(objective, Mapping)
         or not isinstance(thresholds, Mapping)
+        or not isinstance(sampling, Mapping)
         or not families
         or len(families) != len(set(families))
     ):
@@ -227,8 +238,12 @@ def _validate_policy(
         "resume": False,
         "dtype": "float32",
         "mixed_precision": False,
+        "learning_rate": PROCESS_V2_P50_LEARNING_RATE,
     }
-    if any(optimization.get(name) != expected for name, expected in expected_optimization.items()):
+    if any(
+        optimization.get(name) != expected
+        for name, expected in expected_optimization.items()
+    ):
         raise ProcessV2P50ResultError("Process-V2 P50 optimization policy disagrees")
     if (
         objective.get("unit") != "productive_embedded_canonical_successor"
@@ -237,10 +252,26 @@ def _validate_policy(
         or policy.get("scientific_scope")
         != "scratch_active8_stage_a_capability_pilot_not_production_law_calibration"
         or thresholds.get("baseline_partition_role") != "validation"
-        or thresholds.get("baseline_values_inspected_when_thresholds_frozen") is not False
-        or thresholds.get("zero_planned_family_or_cell_opportunities_allowed") is not False
+        or thresholds.get("baseline_values_inspected_when_thresholds_frozen")
+        is not False
+        or thresholds.get("zero_planned_family_or_cell_opportunities_allowed")
+        is not False
+        or sampling.get("policy_id") != PROCESS_V2_P50_POLICY_ID
+        or sampling.get("operational_semantics_version")
+        != PROCESS_V2_P50_OPERATIONAL_SEMANTICS_VERSION
+        or sampling.get("balanced_training_cell_count")
+        != PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT
+        or sampling.get("examples_per_balanced_cell")
+        != PROCESS_V2_P50_EXAMPLES_PER_BALANCED_CELL
+        or tuple(sampling.get("optional_path_efficiency_cell_ids", ()))
+        != PROCESS_V2_P50_OPTIONAL_PATH_EFFICIENCY_CELL_IDS
+        or sampling.get("optional_path_efficiency_policy")
+        != "legal_support_retained_not_balanced_not_claimed_learned"
+        or sampling.get("global_source_reuse") != "forbidden_within_the_bounded_pilot"
     ):
-        raise ProcessV2P50ResultError("Process-V2 P50 objective or threshold scope disagrees")
+        raise ProcessV2P50ResultError(
+            "Process-V2 P50 objective or threshold scope disagrees"
+        )
     for name in (
         "maximum_cell_final_minus_baseline_for_p50_nonincrease_nats",
         "maximum_cell_final_minus_baseline_successor_nll_nats",
@@ -254,16 +285,25 @@ def _validate_policy(
         minimum=0.0,
     )
     if fraction <= 0.0 or fraction > 1.0:
-        raise ProcessV2P50ResultError("P50 gradient opportunity fraction must be in (0, 1]")
-    return policy, tuple(str(item) for item in families), dict(optimization), dict(thresholds)
+        raise ProcessV2P50ResultError(
+            "P50 gradient opportunity fraction must be in (0, 1]"
+        )
+    return (
+        policy,
+        tuple(str(item) for item in families),
+        dict(optimization),
+        dict(thresholds),
+    )
 
 
-def _validate_required_cells(value: object, *, families: tuple[str, ...]) -> tuple[str, ...]:
+def _validate_required_cells(
+    value: object, *, families: tuple[str, ...]
+) -> tuple[str, ...]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
         raise ProcessV2P50ResultError("P50 required cells must be a sequence")
     cells = tuple(value)
     if (
-        len(cells) != 17
+        len(cells) != PROCESS_V2_P50_BALANCED_TRAINING_CELL_COUNT
         or len(cells) != len(set(cells))
         or any(not isinstance(cell, str) or not cell for cell in cells)
         or any(not any(f":{family}:" in cell for family in families) for cell in cells)
@@ -271,7 +311,7 @@ def _validate_required_cells(value: object, *, families: tuple[str, ...]) -> tup
         or any(not any(f":{family}:" in cell for cell in cells) for family in families)
     ):
         raise ProcessV2P50ResultError(
-            "P50 required cells must be the ordered 17-cell Active8 editing partition"
+            "P50 required cells must be the ordered 16-cell balanced editing partition"
         )
     return tuple(str(cell) for cell in cells)
 
@@ -302,7 +342,9 @@ def _validate_provenance(
     expected_runtime_provenance: Mapping[str, str],
 ) -> dict[str, Any]:
     if not isinstance(prerequisites, ProcessV2P50ScopedPrerequisites):
-        raise ProcessV2P50ResultError("P50 provenance requires validated Process-V2 prerequisites")
+        raise ProcessV2P50ResultError(
+            "P50 provenance requires validated Process-V2 prerequisites"
+        )
     provenance = _exact_mapping(value, _PROVENANCE_FIELDS, label="P50 provenance")
     environment = _exact_mapping(
         provenance["execution_environment"],
@@ -330,8 +372,12 @@ def _validate_provenance(
         ),
         "p50_recipe_policy_sha256": prerequisites.p50_recipe_policy_sha256,
     }
-    if any(provenance[name] != expected_value for name, expected_value in expected.items()):
-        raise ProcessV2P50ResultError("P50 provenance differs from its prerequisite chain")
+    if any(
+        provenance[name] != expected_value for name, expected_value in expected.items()
+    ):
+        raise ProcessV2P50ResultError(
+            "P50 provenance differs from its prerequisite chain"
+        )
     runtime = _exact_mapping(
         expected_runtime_provenance,
         set(PROCESS_V2_P50_RUNTIME_PROVENANCE_FIELDS),
@@ -343,7 +389,8 @@ def _validate_provenance(
         raise ProcessV2P50ResultError("P50 runtime provenance disagrees")
     if (
         provenance["p50_recipe_policy_sha256"] != policy.get("contract_sha256")
-        or provenance["initial_model_state_sha256"] != prerequisites.t1_initial_model_state_sha256
+        or provenance["initial_model_state_sha256"]
+        != prerequisites.t1_initial_model_state_sha256
     ):
         raise ProcessV2P50ResultError("P50 scratch initialization provenance disagrees")
     return provenance
@@ -376,7 +423,9 @@ def _validate_integrity(
         "missing_candidate_count",
     ):
         if type(integrity[name]) is not int or integrity[name] < 0:
-            raise ProcessV2P50ResultError(f"P50 run integrity {name} is not nonnegative")
+            raise ProcessV2P50ResultError(
+                f"P50 run integrity {name} is not nonnegative"
+            )
     for name in (
         "resume_requested",
         "abort_triggered",
@@ -390,16 +439,19 @@ def _validate_integrity(
         if type(integrity[name]) is not bool:
             raise ProcessV2P50ResultError(f"P50 run integrity {name} is not Boolean")
     if not isinstance(integrity["abort_reasons"], list) or any(
-        not isinstance(reason, str) or not reason for reason in integrity["abort_reasons"]
+        not isinstance(reason, str) or not reason
+        for reason in integrity["abort_reasons"]
     ):
         raise ProcessV2P50ResultError("P50 abort reasons are malformed")
     if (
         integrity["optimizer_steps_completed"] != optimization["optimizer_steps"]
-        or integrity["scheduled_example_count"] != optimization["scheduled_nonterminal_examples"]
+        or integrity["scheduled_example_count"]
+        != optimization["scheduled_nonterminal_examples"]
         or integrity["batch_size"] != optimization["batch_size"]
         or integrity["initialization"] != optimization["initialization"]
         or integrity["dtype"] != optimization["dtype"]
-        or integrity["initial_model_state_sha256"] != provenance["initial_model_state_sha256"]
+        or integrity["initial_model_state_sha256"]
+        != provenance["initial_model_state_sha256"]
     ):
         raise ProcessV2P50ResultError("P50 exact 50-step run structure disagrees")
     return integrity
@@ -416,7 +468,9 @@ def _validate_trajectory(value: object, *, steps: int) -> list[dict[str, Any]]:
             label="P50 batch successor NLL",
             minimum=0.0,
         )
-        gradient = _finite(row["global_gradient_l2"], label="P50 global gradient", minimum=0.0)
+        gradient = _finite(
+            row["global_gradient_l2"], label="P50 global gradient", minimum=0.0
+        )
         if (
             row["optimizer_step"] != expected_step
             or type(row["global_gradient_finite"]) is not bool
@@ -444,7 +498,9 @@ def _validate_validation_entries(
     rows: list[dict[str, Any]] = []
     identifiers: list[str] = []
     for item in value:
-        row = _exact_mapping(item, _VALIDATION_ENTRY_FIELDS, label="P50 validation entry")
+        row = _exact_mapping(
+            item, _VALIDATION_ENTRY_FIELDS, label="P50 validation entry"
+        )
         baseline = _finite(
             row["baseline_canonical_successor_nll"],
             label="P50 baseline successor NLL",
@@ -507,13 +563,17 @@ def _validate_exposure(
     if not isinstance(value, list) or [
         row.get(identity_field) for row in value if isinstance(row, Mapping)
     ] != list(identities):
-        raise ProcessV2P50ResultError(f"P50 {identity_field} evidence coverage disagrees")
+        raise ProcessV2P50ResultError(
+            f"P50 {identity_field} evidence coverage disagrees"
+        )
     rows: list[dict[str, Any]] = []
     for item in value:
         expected_fields = {identity_field, *_EXPOSURE_FIELDS}
         if require_family_routes:
             expected_fields.update(_FAMILY_ROUTE_EXPOSURE_FIELDS)
-        row = _exact_mapping(item, expected_fields, label=f"P50 {identity_field} evidence")
+        row = _exact_mapping(
+            item, expected_fields, label=f"P50 {identity_field} evidence"
+        )
         for name in (
             "planned_example_count",
             "observed_example_count",
@@ -567,17 +627,13 @@ def _validate_exposure(
             }.get(str(row[identity_field]))
             if (
                 row["required_revision_parameter"] != expected_revision
-                or action_l2 != row[
-                    "cumulative_exposure_step_action_route_gradient_l2"
-                ]
+                or action_l2 != row["cumulative_exposure_step_action_route_gradient_l2"]
                 or revision_l2
                 != row["cumulative_exposure_step_revision_parameter_gradient_l2"]
                 or (
                     expected_revision is None
                     and (
-                        row[
-                            "finite_nonzero_revision_parameter_gradient_exposure_steps"
-                        ]
+                        row["finite_nonzero_revision_parameter_gradient_exposure_steps"]
                         != 0
                         or revision_l2 != 0.0
                     )
@@ -603,10 +659,12 @@ def _validation_checks(
     checks: list[dict[str, Any]] = []
     for identity in identities:
         selected = [row for row in rows if row[identity_field] == identity]
-        baseline = sum(float(row["baseline_canonical_successor_nll"]) for row in selected) / len(
-            selected
-        )
-        final = sum(float(row["final_canonical_successor_nll"]) for row in selected) / len(selected)
+        baseline = sum(
+            float(row["baseline_canonical_successor_nll"]) for row in selected
+        ) / len(selected)
+        final = sum(
+            float(row["final_canonical_successor_nll"]) for row in selected
+        ) / len(selected)
         delta = final - baseline
         checks.append(
             {
@@ -633,7 +691,9 @@ def _exposure_checks(
 ) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     for row in rows:
-        minimum = max(1, math.ceil(fraction * row["planned_optimizer_step_opportunities"]))
+        minimum = max(
+            1, math.ceil(fraction * row["planned_optimizer_step_opportunities"])
+        )
         action_route_passed = (
             not require_family_routes
             or row["all_exposure_step_action_route_gradients_finite"] is True
@@ -734,7 +794,8 @@ def _derived_sections(
     threshold_checks = {
         "exact_50_step_scratch_run": integrity_passed,
         "hazard_frozen_excluded_and_unchanged": integrity["hazard_included"] is False
-        and integrity["hazard_initial_state_sha256"] == integrity["hazard_final_state_sha256"],
+        and integrity["hazard_initial_state_sha256"]
+        == integrity["hazard_final_state_sha256"],
         "trajectory_finite_nonzero_gradients": all(
             row["global_gradient_finite"] is True and row["global_gradient_l2"] > 0.0
             for row in trajectory
@@ -780,7 +841,9 @@ def validate_process_v2_p50_result(
 
     result = _exact_mapping(value, _RESULT_FIELDS, label="Process-V2 P50 result")
     try:
-        verify_self_hash(result, field="result_sha256", label="the Process-V2 P50 result")
+        verify_self_hash(
+            result, field="result_sha256", label="the Process-V2 P50 result"
+        )
         require_authority_false(result, label="the Process-V2 P50 result")
     except ValueError as error:
         raise ProcessV2P50ResultError(str(error)) from error
@@ -789,7 +852,9 @@ def validate_process_v2_p50_result(
     unsupported_cells = _validate_unsupported_validation_cells(
         validation_unsupported_required_cells, required_cells=cells
     )
-    observable_cells = tuple(cell for cell in cells if cell not in set(unsupported_cells))
+    observable_cells = tuple(
+        cell for cell in cells if cell not in set(unsupported_cells)
+    )
     if (
         result["schema"] != RESULT_SCHEMA
         or result["schema_version"] != RESULT_SCHEMA_VERSION
@@ -814,7 +879,9 @@ def validate_process_v2_p50_result(
     integrity = _validate_integrity(
         result["run_integrity"], optimization=optimization, provenance=provenance
     )
-    trajectory = _validate_trajectory(result["trajectory"], steps=optimization["optimizer_steps"])
+    trajectory = _validate_trajectory(
+        result["trajectory"], steps=optimization["optimizer_steps"]
+    )
     validation = _validate_validation_entries(
         result["validation_entry_metrics"],
         families=families,
@@ -891,7 +958,9 @@ def build_process_v2_p50_result(
     unsupported_cells = _validate_unsupported_validation_cells(
         validation_unsupported_required_cells, required_cells=cells
     )
-    observable_cells = tuple(cell for cell in cells if cell not in set(unsupported_cells))
+    observable_cells = tuple(
+        cell for cell in cells if cell not in set(unsupported_cells)
+    )
     validated_provenance = _validate_provenance(
         provenance,
         policy=policy,
@@ -901,7 +970,9 @@ def build_process_v2_p50_result(
     integrity = _validate_integrity(
         run_integrity, optimization=optimization, provenance=validated_provenance
     )
-    trajectory_rows = _validate_trajectory(list(trajectory), steps=optimization["optimizer_steps"])
+    trajectory_rows = _validate_trajectory(
+        list(trajectory), steps=optimization["optimizer_steps"]
+    )
     validation = _validate_validation_entries(
         list(validation_entry_metrics),
         families=families,
@@ -1026,7 +1097,9 @@ def build_process_v2_p50_decision(
         **authority_false_block(),
         "p500_authorized": passed,
         "p50_recipe_policy_sha256": provenance["p50_recipe_policy_sha256"],
-        "p50_prerequisite_binding_sha256": provenance["p50_prerequisite_binding_sha256"],
+        "p50_prerequisite_binding_sha256": provenance[
+            "p50_prerequisite_binding_sha256"
+        ],
         "process_identity_sha256": provenance["process_identity_sha256"],
         "active8_completion_sha256": provenance["active8_completion_sha256"],
         "gate_zero_decision_sha256": provenance["gate_zero_decision_sha256"],
@@ -1076,7 +1149,9 @@ def validate_process_v2_p50_decision(
     )
     decision = dict(value)
     if decision != expected:
-        raise ProcessV2P50ResultError("Process-V2 P50 decision differs from recomputation")
+        raise ProcessV2P50ResultError(
+            "Process-V2 P50 decision differs from recomputation"
+        )
     try:
         require_authority_false(decision, label="the Process-V2 P50 decision")
     except ValueError as error:
@@ -1086,7 +1161,9 @@ def validate_process_v2_p50_decision(
         or decision["p500_authorized"] is not True
         or decision["failed_checks"] != []
     ):
-        raise ProcessV2P50ResultError("Process-V2 P50 decision is not a bounded-P500 GO")
+        raise ProcessV2P50ResultError(
+            "Process-V2 P50 decision is not a bounded-P500 GO"
+        )
     return decision
 
 
@@ -1094,10 +1171,10 @@ __all__ = [
     "DECISION_FILENAME",
     "DECISION_GO_STATUS",
     "DECISION_NO_GO_STATUS",
+    "PROCESS_V2_P50_RUNTIME_PROVENANCE_FIELDS",
     "RESULT_FILENAME",
     "RESULT_SCHEMA",
     "RESULT_SCHEMA_VERSION",
-    "PROCESS_V2_P50_RUNTIME_PROVENANCE_FIELDS",
     "ProcessV2P50ResultError",
     "build_process_v2_p50_decision",
     "build_process_v2_p50_result",
