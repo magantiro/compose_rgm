@@ -48,6 +48,7 @@ from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRa
 SCHEMA = "compose.editing_v2.process_v2_t1_failure_scope_result"
 SCHEMA_VERSION = 1
 NEXT_SCHEMA_VERSION = 2
+FINAL_SCHEMA_VERSION = 3
 PASS_STATUS = "PASS_PROCESS_V2_T1_FAILURE_SCOPE_NO_DOWNSTREAM_AUTHORITY"
 FAIL_STATUS = "FAIL_PROCESS_V2_T1_FAILURE_SCOPE_NO_DOWNSTREAM_AUTHORITY"
 SUPPORTED_SCOPE = "heads_only"
@@ -261,7 +262,10 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
     }
     if result.get("schema_version") == SCHEMA_VERSION:
         required = common_required
-    elif result.get("schema_version") == NEXT_SCHEMA_VERSION:
+    elif result.get("schema_version") in {
+        NEXT_SCHEMA_VERSION,
+        FINAL_SCHEMA_VERSION,
+    }:
         required = {
             *common_required,
             "input_prior_scope_result_file_sha256",
@@ -289,13 +293,14 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
     )
     if (
         result["schema"] != SCHEMA
-        or result["schema_version"] not in {SCHEMA_VERSION, NEXT_SCHEMA_VERSION}
+        or result["schema_version"]
+        not in {SCHEMA_VERSION, NEXT_SCHEMA_VERSION, FINAL_SCHEMA_VERSION}
         or (
             result["schema_version"] == SCHEMA_VERSION
             and result["scope"] != SUPPORTED_SCOPE
         )
         or (
-            result["schema_version"] == NEXT_SCHEMA_VERSION
+            result["schema_version"] in {NEXT_SCHEMA_VERSION, FINAL_SCHEMA_VERSION}
             and result["scope"] not in NEXT_SCOPES
         )
         or type(result["diagnostic_passed"]) is not bool
@@ -339,7 +344,7 @@ def validate_failure_scope_result(value: object) -> dict[str, Any]:
         is not all(result["selected_threshold_checks"].values())
     ):
         raise ProcessV2T1FailureScopeError("T1 failure-scope result identity disagrees")
-    if result["schema_version"] == NEXT_SCHEMA_VERSION and any(
+    if result["schema_version"] in {NEXT_SCHEMA_VERSION, FINAL_SCHEMA_VERSION} and any(
         not _is_sha256(result[name])
         for name in (
             "input_prior_scope_result_file_sha256",
@@ -696,8 +701,96 @@ def run_next_failure_scope(
     )
 
 
+def run_final_failure_scope(
+    model: FactorizedTraceletRateModel,
+    materialized_panel: _MaterializedSemanticT1Panel,
+    *,
+    family: str,
+    failing_families: Sequence[str],
+    capacity_policy: Mapping[str, Any],
+    prior_scope_result: Mapping[str, Any],
+    prior_scope_result_file_sha256: str,
+    input_capacity_result_file_sha256: str,
+    input_capacity_result_sha256: str,
+    collated_completion_sha256: str,
+    initial_model_state_sha256: str,
+    progress: Callable[[Mapping[str, Any]], None] | None = None,
+) -> dict[str, Any]:
+    """Run ``all`` after a failed, distinct local-adapter scope.
+
+    This is the final declared rung.  It accepts no heads-only predecessor and
+    therefore cannot skip the local-adapter diagnostic for families that own
+    one.
+    """
+
+    ordered_failures = tuple(dict.fromkeys(str(item) for item in failing_families))
+    optimization = capacity_policy["optimization"]
+    if (
+        family not in ordered_failures
+        or family not in MICRO_OVERFIT_LOCAL_ADAPTER_FAMILIES
+        or optimization["failure_diagnostics_only_for_failing_families"] is not True
+        or tuple(optimization["failure_diagnostic_scope_order"])
+        != (
+            "heads_only",
+            "heads_plus_local_adapter_if_distinct",
+            "all",
+        )
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "final diagnostic is not a declared failed local-adapter family"
+        )
+    prior = validate_failure_scope_result(prior_scope_result)
+    if (
+        prior["schema_version"] != NEXT_SCHEMA_VERSION
+        or prior["scope"] != "heads_plus_local_adapter"
+        or prior["family"] != family
+        or prior["diagnostic_passed"] is not False
+        or prior["input_capacity_result_file_sha256"]
+        != input_capacity_result_file_sha256
+        or prior["input_capacity_result_sha256"] != input_capacity_result_sha256
+        or prior["capacity_policy_sha256"] != capacity_policy["policy_sha256"]
+        or prior["collated_completion_sha256"] != collated_completion_sha256
+        or prior["initial_model_state_sha256"] != initial_model_state_sha256
+        or not _is_sha256(prior_scope_result_file_sha256)
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "final diagnostic predecessor is not the failed local-adapter arm"
+        )
+    panel = _subset_panel(materialized_panel, family=family)
+    if prior["panel_entry_inventory_sha256"] != canonical_sha256(
+        list(panel.panel_ids)
+    ):
+        raise ProcessV2T1FailureScopeError(
+            "final diagnostic predecessor binds another family panel"
+        )
+    minimums = capacity_policy["panel_cardinality"]["minimum_entries_by_family"]
+    maximums = capacity_policy["panel_cardinality"]["maximum_entries_by_family"]
+    if not int(minimums[family]) <= len(panel.panel_ids) <= int(maximums[family]):
+        raise ProcessV2T1FailureScopeError(
+            "final diagnostic panel cardinality violates the capacity policy"
+        )
+    return _run_failure_scope(
+        model,
+        panel,
+        family=family,
+        scope="all",
+        capacity_policy=capacity_policy,
+        input_capacity_result_file_sha256=input_capacity_result_file_sha256,
+        input_capacity_result_sha256=input_capacity_result_sha256,
+        collated_completion_sha256=collated_completion_sha256,
+        initial_model_state_sha256=initial_model_state_sha256,
+        schema_version=FINAL_SCHEMA_VERSION,
+        predecessor={
+            "input_prior_scope_result_file_sha256": prior_scope_result_file_sha256,
+            "input_prior_scope_result_sha256": prior["result_sha256"],
+        },
+        progress=progress,
+    )
+
+
 __all__ = [
     "FAIL_STATUS",
+    "FINAL_SCHEMA_VERSION",
     "PASS_STATUS",
     "ProcessV2T1FailureScopeError",
     "NEXT_SCHEMA_VERSION",
@@ -708,6 +801,7 @@ __all__ = [
     "failing_families_from_capacity_result",
     "next_scope_for_family",
     "run_heads_only_failure_scope",
+    "run_final_failure_scope",
     "run_next_failure_scope",
     "validate_failure_scope_result",
 ]

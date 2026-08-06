@@ -118,3 +118,21 @@ def test_score_revision_repair_runs_only_three_cached_families_on_one_gpu() -> N
     assert '"fiber_recomputation_count": 0' in body
     assert '"gpu_side_collation_count": 0' in body
     assert '"p50_launched": False' in body
+
+
+def test_final_scope_repair_runs_only_two_all_parameter_arms() -> None:
+    body = _body(launcher.run_t1_final_scope_repair_remote)
+    assert launcher._FINAL_SCOPE_REPAIR_FAMILIES == (
+        "cycle_attach",
+        "ring_system_restate",
+    )
+    assert body.count("score_revision_rebind=True") == 3
+    assert 'loaded["run_final_failure_scope"](' in body
+    assert 'loaded["load_materialized_collated_panel"](' in body
+    assert 'row.get("selected_scope") != "heads_plus_local_adapter"' in body
+    assert '"scope": "all"' in body
+    assert "compile_state_successor_map" not in body
+    assert "starmap(" not in body
+    assert '"fiber_recomputation_count": 0' in body
+    assert '"gpu_side_collation_count": 0' in body
+    assert '"p50_launched": False' in body

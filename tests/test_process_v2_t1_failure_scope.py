@@ -9,6 +9,7 @@ from compose_v4.data.editing_v2_process_v2_schema import (
     canonical_sha256,
 )
 from compose_v4.experiments.editing_v2_process_v2_t1_failure_scope import (
+    FINAL_SCHEMA_VERSION,
     NEXT_SCHEMA_VERSION,
     PASS_STATUS,
     ProcessV2T1FailureScopeError,
@@ -226,6 +227,14 @@ def test_next_scope_result_binds_the_failed_predecessor() -> None:
     _reseal(result)
     with pytest.raises(ProcessV2T1FailureScopeError, match="predecessor identity"):
         validate_failure_scope_result(result)
+
+
+def test_final_scope_result_is_a_distinct_all_parameter_rung() -> None:
+    result = _next_result()
+    result["schema_version"] = FINAL_SCHEMA_VERSION
+    result["scope"] = "all"
+    _reseal(result)
+    assert validate_failure_scope_result(result) == result
 
 
 def test_heads_only_runner_refuses_a_family_that_did_not_fail() -> None:

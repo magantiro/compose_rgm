@@ -46,6 +46,9 @@ FAILURE_SCOPE_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_failure_scope
 SCORE_REVISION_REPAIR_OUTPUT_PREFIX = (
     "/artifacts/editing_v2/process_v2_t1_score_revision_repair"
 )
+FINAL_SCOPE_REPAIR_OUTPUT_PREFIX = (
+    "/artifacts/editing_v2/process_v2_t1_final_scope_repair"
+)
 CAPACITY_POLICY_SOURCE = "configs/editing_v2_process_v2_t1_capacity_policy.json"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
 PANEL_CACHE_DIRNAME = "_panel_cache"
@@ -55,6 +58,7 @@ PREPARED_COMPLETION_FILENAME = "PROCESS_V2_T1_PREPARED_COMPLETE.json"
 PROCESS_V2_RESULT_FILENAME = "PROCESS_V2_T1_CAPACITY_RESULT.json"
 FAILURE_SCOPE_RESULT_FILENAME = "PROCESS_V2_T1_FAILURE_SCOPE_RESULT.json"
 SCORE_REVISION_REPAIR_FILENAME = "PROCESS_V2_T1_SCORE_REVISION_REPAIR.json"
+FINAL_SCOPE_REPAIR_FILENAME = "PROCESS_V2_T1_FINAL_SCOPE_REPAIR.json"
 STEP_TEN_CHECKPOINT_FILENAME = "step_0010.pt"
 PUBLICATION_RECOVERY_RECEIPT_FILENAME = "PROCESS_V2_T1_PUBLICATION_RECOVERY.json"
 PUBLICATION_RECOVERY_OUTPUT_PREFIX = (
@@ -97,6 +101,26 @@ _PREDECESSOR_CAPACITY_RESULT_SHA256 = (
 _ATOM_INSERT_PASS_RESULT_SHA256 = (
     "06e5c1c991740ba849fb26326326f104976e716d53588bdd80b96de6f0942c45"
 )
+_FINAL_SCOPE_REPAIR_FAMILIES = (
+    "cycle_attach",
+    "ring_system_restate",
+)
+_SCORE_REVISION_REPAIR_RESULT_FILE_SHA256 = (
+    "423d61cd814c457f41c36ef2ee06be5f56265b0ca6c9f6dd51fd9603eb19a316"
+)
+_SCORE_REVISION_REPAIR_RESULT_SHA256 = (
+    "a13bbdad41318343c78e70a91c855104c32327b5058b15fab78ea333bd0fcd17"
+)
+_FINAL_SCOPE_PREDECESSORS = {
+    "cycle_attach": {
+        "file_sha256": "c66b73ef1ed09053341ab58bca421230902d036f5f75c2b83e7cf69cc6579d20",
+        "result_sha256": "6f6631ec8bde598c8295c19e5c71749504b32e361e3dcd90627f013bb987fbe5",
+    },
+    "ring_system_restate": {
+        "file_sha256": "f25ead40949cb5169a218484731d284f4c66c54544b3092bc64c1bdcebdbb778",
+        "result_sha256": "b00853616c4cbe0af4f3db412064fdda93f42e7d4567cdc97d8ff92560eb514b",
+    },
+}
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -351,6 +375,7 @@ def _imports() -> dict[str, Any]:
     from compose_v4.experiments.editing_v2_process_v2_t1_failure_scope import (
         failing_families_from_capacity_result,
         next_scope_for_family,
+        run_final_failure_scope,
         run_heads_only_failure_scope,
         run_next_failure_scope,
         validate_failure_scope_result,
@@ -426,6 +451,7 @@ def _imports() -> dict[str, Any]:
         "validate_result": validate_process_v2_t1_capacity_result,
         "failing_families": failing_families_from_capacity_result,
         "next_failure_scope": next_scope_for_family,
+        "run_final_failure_scope": run_final_failure_scope,
         "run_failure_scope": run_heads_only_failure_scope,
         "run_next_failure_scope": run_next_failure_scope,
         "validate_failure_scope": validate_failure_scope_result,
@@ -1802,6 +1828,250 @@ def run_t1_score_revision_repair_remote(
         "repair_sha256": result["repair_sha256"],
         "family_results": family_results,
         "all_repair_families_passed": passed,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "bounded_p50_authorized": False,
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    gpu="A10G",
+    cpu=4.0,
+    memory=64 * 1024,
+    timeout=SCORE_REVISION_REPAIR_GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def run_t1_final_scope_repair_remote(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    repair_result_path: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run only the missing ``all`` rung for two failed local-adapter arms."""
+
+    _validate_remote_revision(revision)
+    if (
+        os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+        != DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise RuntimeError("Process-V2 T1 final scope requires deterministic cuBLAS")
+    artifact_volume.reload()
+    loaded = _imports()
+    prepared_path = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    runtime, scratch, provenance = loaded["load_runtime"](
+        prepared_path,
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+        score_revision_rebind=True,
+    )
+    bridge = provenance.pop("score_revision_rebind", None)
+    if not isinstance(bridge, Mapping):
+        raise RuntimeError("Process-V2 T1 final scope lost the score-revision bridge")
+    plan = loaded["load_collated_plan"](
+        _require_artifact_path(collated_plan_path, field="collated_plan_path"),
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+        score_revision_rebind=True,
+    )
+    collated_path = _require_artifact_path(
+        collated_completion_path, field="collated_completion_path"
+    )
+    materialized_panel = loaded["load_materialized_collated_panel"](
+        collated_path,
+        plan=plan,
+        runtime=runtime,
+        score_revision_rebind=True,
+    )
+    collated_completion = _read_canonical_object(
+        collated_path, label="the Process-V2 T1 collated completion"
+    )
+    repair_path = _require_artifact_path(
+        repair_result_path, field="repair_result_path"
+    )
+    repair = _read_canonical_object(
+        repair_path, label="the Process-V2 T1 score-revision repair"
+    )
+    if (
+        _file_sha256(repair_path) != _SCORE_REVISION_REPAIR_RESULT_FILE_SHA256
+        or repair.get("repair_sha256") != _SCORE_REVISION_REPAIR_RESULT_SHA256
+        or repair.get("schema")
+        != "compose.editing_v2.process_v2_t1_score_revision_repair"
+        or repair.get("status")
+        != "FAIL_PROCESS_V2_T1_SCORE_REVISION_REPAIR_NO_DOWNSTREAM_AUTHORITY"
+        or repair.get("all_repair_families_passed") is not False
+        or repair.get("initial_model_state_sha256")
+        != provenance["initial_model_state_sha256"]
+        or repair.get("collated_completion_sha256")
+        != collated_completion["completion_sha256"]
+        or repair.get("capacity_policy_sha256")
+        != runtime.capacity_policy["policy_sha256"]
+        or any(repair.get(name) is not False for name in loaded["NO_AUTHORITY"])
+    ):
+        raise RuntimeError("Process-V2 T1 final scope repair predecessor disagrees")
+    family_rows = {
+        str(row["family"]): dict(row)
+        for row in repair.get("family_results", ())
+        if isinstance(row, Mapping) and "family" in row
+    }
+    if set(family_rows) != set(_SCORE_REVISION_REPAIR_FAMILIES):
+        raise RuntimeError("Process-V2 T1 repair predecessor lost a family")
+
+    source_revision = _source_revision(revision)
+    identity = {
+        "repair_result_file_sha256": _SCORE_REVISION_REPAIR_RESULT_FILE_SHA256,
+        "repair_result_sha256": _SCORE_REVISION_REPAIR_RESULT_SHA256,
+        "collated_completion_sha256": collated_completion["completion_sha256"],
+        "capacity_policy_sha256": runtime.capacity_policy["policy_sha256"],
+        "initial_model_state_sha256": provenance["initial_model_state_sha256"],
+        "score_revision_rebind_sha256": bridge["score_revision_rebind_sha256"],
+        "families": list(_FINAL_SCOPE_REPAIR_FAMILIES),
+        "scope": "all",
+        "runner_source_revision_sha256": source_revision[
+            "source_revision_sha256"
+        ],
+    }
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix")
+        / _sha256(identity)
+    )
+    _progress(
+        "process_v2_t1_final_scope_repair_start",
+        run_root=str(run_root),
+        families=list(_FINAL_SCOPE_REPAIR_FAMILIES),
+        scope="all",
+        gpu_containers=1,
+        fiber_recomputation_count=0,
+        gpu_side_collation_count=0,
+    )
+
+    family_results: list[dict[str, Any]] = []
+    for family in _FINAL_SCOPE_REPAIR_FAMILIES:
+        row = family_rows[family]
+        expected = _FINAL_SCOPE_PREDECESSORS[family]
+        prior_path = _require_artifact_path(
+            str(row["selected_result_path"]),
+            field=f"{family}_prior_scope_result_path",
+        )
+        prior = loaded["validate_failure_scope"](
+            _read_canonical_object(
+                prior_path,
+                label=f"the Process-V2 T1 {family} local-adapter result",
+            )
+        )
+        if (
+            row.get("selected_scope") != "heads_plus_local_adapter"
+            or row.get("diagnostic_passed") is not False
+            or row.get("selected_result_file_sha256") != expected["file_sha256"]
+            or row.get("selected_result_sha256") != expected["result_sha256"]
+            or _file_sha256(prior_path) != expected["file_sha256"]
+            or prior["result_sha256"] != expected["result_sha256"]
+            or prior["family"] != family
+            or prior["scope"] != "heads_plus_local_adapter"
+            or prior["diagnostic_passed"] is not False
+            or prior["initial_model_state_sha256"]
+            != provenance["initial_model_state_sha256"]
+            or prior["collated_completion_sha256"]
+            != collated_completion["completion_sha256"]
+        ):
+            raise RuntimeError(f"Process-V2 T1 {family} predecessor disagrees")
+
+        result_path = run_root / family / "all" / FAILURE_SCOPE_RESULT_FILENAME
+        if result_path.is_file():
+            result = loaded["validate_failure_scope"](
+                _read_canonical_object(
+                    result_path,
+                    label=f"the Process-V2 T1 {family} all-scope result",
+                )
+            )
+            reused = True
+        else:
+            model = copy.deepcopy(scratch.model).to(
+                device="cuda", dtype=loaded["torch"].float32
+            )
+
+            def report(metric: Mapping[str, Any], *, _family: str = family) -> None:
+                _progress(
+                    "process_v2_t1_final_scope_repair_heartbeat",
+                    family=_family,
+                    scope="all",
+                    **dict(metric),
+                )
+
+            result = loaded["run_final_failure_scope"](
+                model,
+                materialized_panel,
+                family=family,
+                failing_families=_FINAL_SCOPE_REPAIR_FAMILIES,
+                capacity_policy=runtime.capacity_policy,
+                prior_scope_result=prior,
+                prior_scope_result_file_sha256=expected["file_sha256"],
+                input_capacity_result_file_sha256=(
+                    _PREDECESSOR_CAPACITY_RESULT_FILE_SHA256
+                ),
+                input_capacity_result_sha256=_PREDECESSOR_CAPACITY_RESULT_SHA256,
+                collated_completion_sha256=collated_completion["completion_sha256"],
+                initial_model_state_sha256=provenance[
+                    "initial_model_state_sha256"
+                ],
+                progress=report,
+            )
+            loaded["write_bytes_if_absent"](
+                result_path, _canonical_bytes(result) + b"\n"
+            )
+            artifact_volume.commit()
+            del model
+            reused = False
+        family_results.append(
+            {
+                "family": family,
+                "scope": "all",
+                "result_path": str(result_path),
+                "result_file_sha256": _file_sha256(result_path),
+                "result_sha256": result["result_sha256"],
+                "diagnostic_passed": result["diagnostic_passed"],
+                "reused": reused,
+            }
+        )
+
+    passed = all(row["diagnostic_passed"] for row in family_results)
+    body = {
+        "schema": "compose.editing_v2.process_v2_t1_final_scope_repair",
+        "schema_version": 1,
+        "status": (
+            "PASS_PROCESS_V2_T1_FINAL_SCOPE_REPAIR_NO_DOWNSTREAM_AUTHORITY"
+            if passed
+            else "FAIL_PROCESS_V2_T1_FINAL_SCOPE_REPAIR_NO_DOWNSTREAM_AUTHORITY"
+        ),
+        **loaded["NO_AUTHORITY"],
+        **identity,
+        "repair_result_path": str(repair_path),
+        "family_results": family_results,
+        "all_final_scope_families_passed": passed,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "p50_launched": False,
+    }
+    result = {**body, "final_scope_repair_sha256": _sha256(body)}
+    wrapper_path = run_root / FINAL_SCOPE_REPAIR_FILENAME
+    loaded["write_bytes_if_absent"](
+        wrapper_path, _canonical_bytes(result) + b"\n"
+    )
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_final_scope_repair_complete",
+        "run_root": str(run_root),
+        "result_path": str(wrapper_path),
+        "family_results": family_results,
+        "all_final_scope_families_passed": passed,
         "fiber_recomputation_count": 0,
         "gpu_side_collation_count": 0,
         "bounded_p50_authorized": False,
@@ -3568,6 +3838,57 @@ def score_revision_repair_main(
 
 
 @app.local_entrypoint()
+def final_scope_repair_main(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    repair_result_path: str,
+    expected_commit: str,
+    output_prefix: str = FINAL_SCOPE_REPAIR_OUTPUT_PREFIX,
+    wait_for_completion: bool = False,
+) -> None:
+    """Launch only the final all-parameter rung for two failed families."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_plan_path,
+        collated_completion_path,
+        repair_result_path,
+        output_prefix,
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                run_t1_final_scope_repair_remote.remote(*arguments),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    call = run_t1_final_scope_repair_remote.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_final_scope_repair_launched",
+                "function_call_id": call.object_id,
+                "families": list(_FINAL_SCOPE_REPAIR_FAMILIES),
+                "scope": "all",
+                "gpu_containers": 1,
+                "fiber_recomputation_count": 0,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+@app.local_entrypoint()
 def failure_scope_main(
     prepared_completion_path: str,
     collated_plan_path: str,
@@ -3700,6 +4021,7 @@ __all__ = [
     "collated_reuse_driver",
     "driver",
     "failure_scope_driver",
+    "final_scope_repair_main",
     "next_failure_scope_driver",
     "finalize_collated_remote",
     "finalize_prepared_remote",
@@ -3714,6 +4036,7 @@ __all__ = [
     "prepare_plan_remote",
     "run_t1_collated_gpu_remote",
     "run_t1_failure_scope_gpu_remote",
+    "run_t1_final_scope_repair_remote",
     "run_t1_score_revision_repair_remote",
     "run_t1_gpu_remote",
     "score_revision_repair_main",
