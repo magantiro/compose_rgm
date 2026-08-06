@@ -394,6 +394,17 @@ null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not tr
   execution code as separate identities when they differ. A launcher, logging, scheduling, retry, or
   publication-only change must not invalidate a scientific result unless it changes that result's declared
   computational dependency closure.
+- Before launching any materialization or fan-out, inventory existing local and remote artifacts and test
+  whether they satisfy the requested scientific dependency closure. Reuse compatible complete units and
+  rerun only missing, corrupt, or scientifically changed units. A new Git commit, launcher revision, schema
+  wrapper, or output directory is not by itself a reason to repeat molecular computation.
+- Address deterministic scientific caches by their narrow semantic and implementation dependency closure,
+  not by the whole repository revision. Record the exact Git commit as provenance, but do not put unrelated
+  documentation, orchestration, logging, or test changes into a cache key.
+- When a prior artifact contains all information required by a new compact schema, prefer a deterministic,
+  validated conversion over re-enumeration. The conversion must bind the old artifact hash, selection or
+  stream identity, process identity, executor and canonicalization identities, target schema, and converter
+  implementation. It must prove the converted payload equals direct computation on a bounded oracle sample.
 - Active8 admission, Gate 0 reductions, exact fibers, prepared panels, and collated tensors are reusable
   when their scientific identities and dependency closures remain unchanged. A downstream model-scoring
   change does not authorize recomputing those unaffected inputs.
@@ -412,6 +423,15 @@ null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not tr
 - Cache expensive deterministic intermediates, publish restart-safe progress, and retry only missing,
   failed, corrupted, or scientifically affected units. Remote work that could otherwise conceal progress
   or force material recomputation must emit heartbeats and cost-relevant progress receipts.
+- Split expensive workflows into explicit `prepare-only` and `train-only` commands. CPU preparation must
+  publish and validate an immutable reusable artifact before any accelerator is allocated. GPU training must
+  consume that artifact directly, perform no corpus scan or molecular re-enumeration, and start only through
+  a separate explicit launch after preparation is reviewed. A combined convenience driver may orchestrate
+  both only when it preserves this boundary and never leaves an accelerator idle during CPU work.
+- Before remote execution, record the task census, concurrency, representative task time, expected wall
+  time, expected cost, restart unit, and stop limit. Prefer one reusable production task as the benchmark;
+  do not run disposable canaries when an exact bounded equivalence benchmark and reusable task execution
+  already answer the risk.
 - During a narrow repair, run focused tests for the affected dependency and launch surface. Do not rerun a
   repository-wide suite for an unchanged exact commit, and do not repeatedly run it while iterating on a
   later commit. Run the required repository-wide suite once on the frozen milestone candidate, and rerun it
