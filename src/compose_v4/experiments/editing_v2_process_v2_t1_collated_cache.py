@@ -63,6 +63,28 @@ _IMPLEMENTATION_FILES = (
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
 )
 
+_SCORE_REVISION_PREDECESSOR = {
+    "plan_sha256": "1f13c83cc778bcbe5d34414547356c7a20e714d1a55798276d549b6a931f5682",
+    "plan_file_sha256": (
+        "399877de32e7016dc11e3aacc8a00b30d1a80fbe57e9bdae4c8f1640d785067d"
+    ),
+    "run_identity_sha256": (
+        "61c0f4ccb4cc4d70d37d471be36cf0596b8687ef177cc24af685522332ea3cd9"
+    ),
+    "implementation_sha256": (
+        "41df1271d9400ff442e65c073c0985b3373f0e6be01cefd99af6fc0d83dbc295"
+    ),
+    "prepared_completion_sha256": (
+        "a93c0b65b08c6b7726deeae727213b7145b88407830f95563c5060b86c4fc865"
+    ),
+    "completion_sha256": (
+        "77f01ca5ecf8a94ef8fb2d90d53eb180f6ddedd3725bbe678b2beab95c79f504"
+    ),
+    "completion_file_sha256": (
+        "08c28b1d2ede162db69661fd0049386d5682f33abee5b8a370fe75d21d0ea25b"
+    ),
+}
+
 
 class ProcessV2T1CollatedCacheError(RuntimeError):
     """The CPU-collated T1 cache is incomplete, stale, or inconsistent."""
@@ -211,6 +233,7 @@ def validate_collated_cache_plan(
     *,
     runtime: Any,
     repo_root: Path,
+    score_revision_rebind: bool = False,
 ) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise ProcessV2T1CollatedCacheError("T1 collated-cache plan must be an object")
@@ -241,11 +264,16 @@ def validate_collated_cache_plan(
         require_authority_false(plan, label="the T1 collated-cache plan")
     except ValueError as error:
         raise ProcessV2T1CollatedCacheError(str(error)) from error
+    expected_implementation_sha256 = (
+        _SCORE_REVISION_PREDECESSOR["implementation_sha256"]
+        if score_revision_rebind
+        else _implementation_sha256(repo_root)
+    )
     if (
         plan["schema"] != PLAN_SCHEMA
         or plan["schema_version"] != PLAN_SCHEMA_VERSION
         or plan["status"] != PLAN_STATUS
-        or plan["implementation_sha256"] != _implementation_sha256(repo_root)
+        or plan["implementation_sha256"] != expected_implementation_sha256
         or type(plan["entries_per_task"]) is not int
         or plan["entries_per_task"] <= 0
     ):
@@ -302,6 +330,20 @@ def validate_collated_cache_plan(
     }
     if plan["run_identity_sha256"] != canonical_sha256(identity):
         raise ProcessV2T1CollatedCacheError("T1 collated-cache run identity disagrees")
+    if score_revision_rebind and any(
+        plan[field] != expected
+        for field, expected in _SCORE_REVISION_PREDECESSOR.items()
+        if field
+        in {
+            "plan_sha256",
+            "run_identity_sha256",
+            "implementation_sha256",
+            "prepared_completion_sha256",
+        }
+    ):
+        raise ProcessV2T1CollatedCacheError(
+            "T1 collated-cache plan is not the exact allowlisted predecessor"
+        )
     return plan
 
 
@@ -312,7 +354,13 @@ def write_collated_cache_plan(path: Path, plan: Mapping[str, Any]) -> None:
         raise ProcessV2T1CollatedCacheError(str(error)) from error
 
 
-def load_collated_cache_plan(path: Path, *, runtime: Any, repo_root: Path) -> dict[str, Any]:
+def load_collated_cache_plan(
+    path: Path,
+    *,
+    runtime: Any,
+    repo_root: Path,
+    score_revision_rebind: bool = False,
+) -> dict[str, Any]:
     raw = Path(path).read_bytes()
     try:
         value = json.loads(raw)
@@ -320,7 +368,18 @@ def load_collated_cache_plan(path: Path, *, runtime: Any, repo_root: Path) -> di
         raise ProcessV2T1CollatedCacheError("T1 collated-cache plan is unreadable") from error
     if not isinstance(value, dict) or raw != _canonical_bytes(value) + b"\n":
         raise ProcessV2T1CollatedCacheError("T1 collated-cache plan is not canonical JSON")
-    return validate_collated_cache_plan(value, runtime=runtime, repo_root=repo_root)
+    if score_revision_rebind and _file_sha256(path) != _SCORE_REVISION_PREDECESSOR[
+        "plan_file_sha256"
+    ]:
+        raise ProcessV2T1CollatedCacheError(
+            "T1 collated-cache plan file is not the exact allowlisted predecessor"
+        )
+    return validate_collated_cache_plan(
+        value,
+        runtime=runtime,
+        repo_root=repo_root,
+        score_revision_rebind=score_revision_rebind,
+    )
 
 
 def _task_for_identity(plan: Mapping[str, Any], task_identity_sha256: str) -> dict[str, Any]:
@@ -563,6 +622,7 @@ def load_materialized_collated_panel(
     *,
     plan: Mapping[str, Any],
     runtime: Any,
+    score_revision_rebind: bool = False,
 ) -> _MaterializedSemanticT1Panel:
     raw = Path(completion_path).read_bytes()
     try:
@@ -571,6 +631,15 @@ def load_materialized_collated_panel(
         raise ProcessV2T1CollatedCacheError("T1 collated completion is unreadable") from error
     if not isinstance(completion, dict) or raw != _canonical_bytes(completion) + b"\n":
         raise ProcessV2T1CollatedCacheError("T1 collated completion is not canonical JSON")
+    if score_revision_rebind and (
+        hashlib.sha256(raw).hexdigest()
+        != _SCORE_REVISION_PREDECESSOR["completion_file_sha256"]
+        or completion.get("completion_sha256")
+        != _SCORE_REVISION_PREDECESSOR["completion_sha256"]
+    ):
+        raise ProcessV2T1CollatedCacheError(
+            "T1 collated completion is not the exact allowlisted predecessor"
+        )
     try:
         verify_self_hash(
             completion, field="completion_sha256", label="the T1 collated completion"

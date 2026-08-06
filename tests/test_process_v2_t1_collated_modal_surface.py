@@ -99,3 +99,22 @@ def test_next_failure_scope_binds_predecessors_and_uses_one_gpu() -> None:
     assert "run_t1_failure_scope_gpu_remote.starmap(" in driver
     assert '"fiber_recomputation_count": 0' in driver
     assert launcher.FAILURE_SCOPE_GPU_TIMEOUT_SECONDS == 20 * 60
+
+
+def test_score_revision_repair_runs_only_three_cached_families_on_one_gpu() -> None:
+    body = _body(launcher.run_t1_score_revision_repair_remote)
+    assert launcher._SCORE_REVISION_REPAIR_FAMILIES == (
+        "bond_reroute",
+        "cycle_attach",
+        "ring_system_restate",
+    )
+    assert body.count("score_revision_rebind=True") == 3
+    assert 'loaded["load_materialized_collated_panel"](' in body
+    assert 'loaded["run_failure_scope"](' in body
+    assert 'loaded["run_next_failure_scope"](' in body
+    assert "copy.deepcopy(scratch.model)" in body
+    assert "compile_state_successor_map" not in body
+    assert "starmap(" not in body
+    assert '"fiber_recomputation_count": 0' in body
+    assert '"gpu_side_collation_count": 0' in body
+    assert '"p50_launched": False' in body

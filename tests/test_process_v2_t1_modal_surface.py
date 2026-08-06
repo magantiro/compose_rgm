@@ -32,9 +32,9 @@ def test_launcher_freezes_bounded_cpu_fanout_and_one_gpu_per_entrypoint() -> Non
     assert launcher.MAX_CPU_CONTAINERS == 40
     assert launcher.CPU_PER_LEAF == 1.0
     assert "max_containers=MAX_CPU_CONTAINERS" in source
-    # The primary T1 and its separately invoked failure-only diagnostic each
-    # own one bounded GPU function. No driver calls both.
-    assert source.count('gpu="A10G"') == 2
+    # Primary T1, the legacy failure diagnostic, and the exact score-revision
+    # repair are separate entrypoints.  Every entrypoint owns one bounded GPU.
+    assert source.count('gpu="A10G"') == 3
     assert source.count("run_t1_gpu_remote.remote(") == 2
     assert "fiber_recomputation_count=0" in source
     assert "prepare_leaf_remote.update_autoscaler(max_containers=max_cpu_containers)" in source

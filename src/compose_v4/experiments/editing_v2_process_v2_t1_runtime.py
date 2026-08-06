@@ -137,6 +137,51 @@ _IMPLEMENTATION_FILES = (
     "src/compose_v4/model/relational_reroute_rate_model.py",
 )
 
+# Exact score-free T1 preparation produced before the scorer-only Process-V2
+# repair.  These values are an allowlist, not a general stale-artifact escape.
+# The bridge below accepts no other predecessor and still validates every
+# canonical entry, successor partition, and physical file hash.
+_SCORE_REVISION_PREDECESSOR = MappingProxyType(
+    {
+        "prepared_completion_sha256": (
+            "a93c0b65b08c6b7726deeae727213b7145b88407830f95563c5060b86c4fc865"
+        ),
+        "prepared_completion_file_sha256": (
+            "7d46cce0aaa0cf1534f9ae49a63690f7c5cef5dbc57a74c4735516ba2ff5de66"
+        ),
+        "prepared_artifact_sha256": (
+            "39c264c7b6f370b983d46301ab299721e6b2ded4e3eb350ef8f27b76e1f910f2"
+        ),
+        "prepared_file_sha256": (
+            "3b46192fba2f83fe1ff2d82b4804c4145d222f16b7a76bba43486156f294c16f"
+        ),
+        "prepared_implementation_sha256": (
+            "867bc894d14c3b2cb80f4ddd5f97eeb0cf7252ee4d04001090799a573fd871c1"
+        ),
+        "initial_model_state_sha256": (
+            "f721684555a7f2ec1fafba422a5cb73334c19f832738aae1fa1ce82168efcfb6"
+        ),
+        "model_identity_sha256": (
+            "f34b0207da8d1df50686b97e7e691574bf09025a33e7cfcac525475c5147fc52"
+        ),
+        "semantic_model_process_contract_sha256": (
+            "971a124a3d790e6d5435be5651d9d3f324ea7407cfd0e82944290ffaad138d3a"
+        ),
+    }
+)
+
+_SCORE_INDEPENDENT_MODEL_RUNTIME_FIELDS = (
+    "atom_vocabulary_class_count",
+    "catalog_fingerprint",
+    "dtype",
+    "hidden_dim",
+    "initialization_seed",
+    "mark_dim",
+    "max_atoms",
+    "message_passing_steps",
+    "operator_capability_fingerprint",
+)
+
 
 class ProcessV2T1RuntimeError(RuntimeError):
     """A Process-V2 T1 prerequisite or exact successor partition is invalid."""
@@ -303,6 +348,94 @@ def _scratch_runtime_from_descriptor(
         "model_runtime": observed,
     }
     return runtime, binding
+
+
+def _scratch_runtime_for_score_revision(
+    predecessor_descriptor: Mapping[str, Any], *, repo_root: Path
+) -> tuple[SemanticScratchRuntime, dict[str, Any], dict[str, Any]]:
+    """Build the current scorer on one exact predecessor's support geometry."""
+
+    predecessor = dict(predecessor_descriptor)
+    if tuple(sorted(predecessor)) != MODEL_RUNTIME_FIELDS:
+        raise ProcessV2T1RuntimeError(
+            "score-revision predecessor model descriptor fields disagree"
+        )
+    frozen = _SCORE_REVISION_PREDECESSOR
+    for field in (
+        "initial_model_state_sha256",
+        "model_identity_sha256",
+        "semantic_model_process_contract_sha256",
+    ):
+        if predecessor[field] != frozen[field]:
+            raise ProcessV2T1RuntimeError(
+                f"score-revision predecessor {field} is not allowlisted"
+            )
+
+    semantic_path = Path(repo_root) / GATE_ZERO_MODEL_PROCESS_V2
+    semantic = load_gate_zero_semantic_contract(semantic_path)
+    runtime_contract = load_process_v2_chain_artifact(
+        ACTIVE8_DECISION_RUNTIME, repo_root=repo_root
+    )
+    expected_parent = runtime_contract["parents"]["semantic_model_process"]
+    if (
+        semantic.file_sha256 != expected_parent["physical"]["sha256"]
+        or semantic.sha256 != expected_parent["semantic"]["sha256"]
+    ):
+        raise ProcessV2T1RuntimeError("Process-V2 semantic model contract bytes disagree")
+
+    config = SemanticScratchModelConfig(
+        initialization_seed=int(predecessor["initialization_seed"]),
+        max_atoms=int(predecessor["max_atoms"]),
+        hidden_dim=int(predecessor["hidden_dim"]),
+        message_passing_steps=int(predecessor["message_passing_steps"]),
+        mark_dim=int(predecessor["mark_dim"]),
+        dtype=str(predecessor["dtype"]),
+        atom_vocabulary_class_count=int(predecessor["atom_vocabulary_class_count"]),
+        catalog_fingerprint=str(predecessor["catalog_fingerprint"]),
+    )
+    runtime = build_semantic_scratch_runtime(config, semantic)
+    current = model_runtime_descriptor(runtime)
+    if any(
+        current[field] != predecessor[field]
+        for field in _SCORE_INDEPENDENT_MODEL_RUNTIME_FIELDS
+    ):
+        raise ProcessV2T1RuntimeError(
+            "score-revision repair changed T1 support or tensor geometry"
+        )
+    if current["initial_model_state_sha256"] != state_dict_semantic_sha256(
+        runtime.model.state_dict()
+    ):
+        raise ProcessV2T1RuntimeError("current score-revision scratch state is unstable")
+    if all(current[field] == predecessor[field] for field in set(current)):
+        raise ProcessV2T1RuntimeError("score-revision bridge did not observe a scorer revision")
+
+    binding = {
+        "active8_decision_runtime_file_sha256": _file_sha256(
+            Path(repo_root) / ACTIVE8_DECISION_RUNTIME
+        ),
+        "active8_decision_runtime_sha256": runtime_contract["contract_sha256"],
+        "semantic_model_process_file_sha256": semantic.file_sha256,
+        "semantic_model_process_sha256": semantic.sha256,
+        "model_runtime": current,
+    }
+    bridge = {
+        "predecessor_prepared_completion_sha256": frozen[
+            "prepared_completion_sha256"
+        ],
+        "predecessor_initial_model_state_sha256": predecessor[
+            "initial_model_state_sha256"
+        ],
+        "current_initial_model_state_sha256": current[
+            "initial_model_state_sha256"
+        ],
+        "support_geometry_sha256": canonical_sha256(
+            {field: current[field] for field in _SCORE_INDEPENDENT_MODEL_RUNTIME_FIELDS}
+        ),
+    }
+    return runtime, binding, {
+        **bridge,
+        "score_revision_rebind_sha256": canonical_sha256(bridge),
+    }
 
 
 def build_process_v2_t1_scratch_runtime(
@@ -1568,7 +1701,7 @@ def publish_reused_process_v2_t1_prepared_inputs(
 
 
 def _load_prepared_completion(
-    completion_path: Path, *, repo_root: Path
+    completion_path: Path, *, repo_root: Path, score_revision_rebind: bool = False
 ) -> tuple[dict[str, Any], dict[str, Any], str, str]:
     completion, completion_raw = _load_canonical(
         completion_path, label="the T1 prepared completion"
@@ -1612,10 +1745,37 @@ def _load_prepared_completion(
         raise ProcessV2T1RuntimeError("T1 prepared completion identity disagrees")
     artifact_path = Path(completion_path).resolve().parent / PREPARED_FILENAME
     artifact, artifact_raw = _load_canonical(artifact_path, label="the T1 prepared inputs")
-    artifact = validate_process_v2_t1_prepared_inputs(artifact, repo_root=repo_root)
-    scratch, binding = _scratch_runtime_from_descriptor(
-        artifact["model_binding"]["model_runtime"], repo_root=repo_root
+    artifact = validate_process_v2_t1_prepared_inputs(
+        artifact,
+        repo_root=None if score_revision_rebind else repo_root,
     )
+    if score_revision_rebind:
+        frozen = _SCORE_REVISION_PREDECESSOR
+        observed_completion_file_sha256 = hashlib.sha256(completion_raw).hexdigest()
+        observed_prepared_file_sha256 = hashlib.sha256(artifact_raw).hexdigest()
+        predecessor_runtime = artifact["model_binding"]["model_runtime"]
+        if (
+            completion["completion_sha256"] != frozen["prepared_completion_sha256"]
+            or observed_completion_file_sha256
+            != frozen["prepared_completion_file_sha256"]
+            or artifact["artifact_sha256"] != frozen["prepared_artifact_sha256"]
+            or observed_prepared_file_sha256 != frozen["prepared_file_sha256"]
+            or artifact["implementation_sha256"]
+            != frozen["prepared_implementation_sha256"]
+        ):
+            raise ProcessV2T1RuntimeError(
+                "T1 score-revision input is not the exact allowlisted predecessor"
+            )
+        bound_runtime_ok = artifact["model_binding"]["model_runtime"] == predecessor_runtime
+        scratch_process_ok = True
+    else:
+        scratch, binding = _scratch_runtime_from_descriptor(
+            artifact["model_binding"]["model_runtime"], repo_root=repo_root
+        )
+        bound_runtime_ok = artifact["model_binding"] == binding
+        scratch_process_ok = (
+            scratch.process_identity_sha256 == artifact["process_identity_sha256"]
+        )
     if (
         completion["prepared_file_sha256"] != hashlib.sha256(artifact_raw).hexdigest()
         or completion["prepared_file_bytes"] != len(artifact_raw)
@@ -1629,8 +1789,8 @@ def _load_prepared_completion(
         != artifact["model_binding"]["model_runtime"]["initial_model_state_sha256"]
         or completion["entry_count"] != artifact["entry_count"]
         or completion["entry_inventory_sha256"] != artifact["entry_inventory_sha256"]
-        or artifact["model_binding"] != binding
-        or scratch.process_identity_sha256 != artifact["process_identity_sha256"]
+        or not bound_runtime_ok
+        or not scratch_process_ok
     ):
         raise ProcessV2T1RuntimeError(
             "T1 completion, prepared bytes, and current scratch runtime disagree"
@@ -1684,19 +1844,37 @@ def load_process_v2_t1_runtime_inputs(
     *,
     capacity_policy_path: Path,
     repo_root: Path,
+    score_revision_rebind: bool = False,
 ) -> tuple[ProcessV2T1RuntimeInputs, SemanticScratchRuntime, dict[str, Any]]:
     """Reopen CPU-prepared partitions and reconstruct the bound scratch model."""
 
-    completion, artifact, completion_file_sha256, prepared_file_sha256 = _load_prepared_completion(
-        completion_path, repo_root=repo_root
+    (
+        completion,
+        artifact,
+        completion_file_sha256,
+        prepared_file_sha256,
+    ) = _load_prepared_completion(
+        completion_path,
+        repo_root=repo_root,
+        score_revision_rebind=score_revision_rebind,
     )
+    bridge: dict[str, Any] | None = None
+    if score_revision_rebind:
+        scratch, binding, bridge = _scratch_runtime_for_score_revision(
+            artifact["model_binding"]["model_runtime"], repo_root=repo_root
+        )
+        if scratch.process_identity_sha256 != artifact["process_identity_sha256"]:
+            raise ProcessV2T1RuntimeError(
+                "current score-revision scratch process identity changed"
+            )
+    else:
+        scratch, binding = _scratch_runtime_from_descriptor(
+            artifact["model_binding"]["model_runtime"], repo_root=repo_root
+        )
     policy, policy_file_sha256 = load_process_v2_t1_capacity_policy(
         capacity_policy_path, repo_root=repo_root
     )
-    scratch, binding = _scratch_runtime_from_descriptor(
-        artifact["model_binding"]["model_runtime"], repo_root=repo_root
-    )
-    if binding != artifact["model_binding"]:
+    if not score_revision_rebind and binding != artifact["model_binding"]:
         raise ProcessV2T1RuntimeError("T1 scratch runtime differs from prepared inputs")
     states: dict[str, Any] = {}
     partitions: dict[str, CompiledStateSuccessorMap] = {}
@@ -1745,7 +1923,9 @@ def load_process_v2_t1_runtime_inputs(
     }
     cache_completion = {
         **dict(completion),
-        "initial_model_state_sha256": completion["initial_model_state_sha256"],
+        "initial_model_state_sha256": binding["model_runtime"][
+            "initial_model_state_sha256"
+        ],
         "manifest_sha256": artifact["manifest_sha256"],
     }
     cache = ProcessV2T1CacheView(
@@ -1780,13 +1960,19 @@ def load_process_v2_t1_runtime_inputs(
         "gate_zero_decision_sha256": artifact["gate_zero_decision_sha256"],
         "active8_completion_sha256": artifact["active8_completion_sha256"],
         "process_identity_sha256": artifact["process_identity_sha256"],
-        "initial_model_state_sha256": completion["initial_model_state_sha256"],
+        "initial_model_state_sha256": binding["model_runtime"][
+            "initial_model_state_sha256"
+        ],
         "leaf_source_revision_sha256": artifact["leaf_source_revision"][
             "source_revision_sha256"
         ],
         "leaf_implementation_sha256": artifact["leaf_implementation_sha256"],
         "leaf_reuse": dict(artifact["leaf_reuse"]),
     }
+    if score_revision_rebind:
+        if bridge is None:
+            raise ProcessV2T1RuntimeError("T1 score-revision bridge identity is absent")
+        provenance["score_revision_rebind"] = bridge
     return runtime, scratch, provenance
 
 

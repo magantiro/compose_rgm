@@ -16,6 +16,7 @@ grants downstream authority.
 
 from __future__ import annotations
 
+import copy
 import functools
 import hashlib
 import json
@@ -42,6 +43,9 @@ PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_prepared"
 COLLATED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_collated"
 RUN_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_capacity"
 FAILURE_SCOPE_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_t1_failure_scope"
+SCORE_REVISION_REPAIR_OUTPUT_PREFIX = (
+    "/artifacts/editing_v2/process_v2_t1_score_revision_repair"
+)
 CAPACITY_POLICY_SOURCE = "configs/editing_v2_process_v2_t1_capacity_policy.json"
 PANEL_FILENAME = "PROCESS_V2_T1_PANEL.json"
 PANEL_CACHE_DIRNAME = "_panel_cache"
@@ -50,6 +54,7 @@ LEAF_FILENAME = "PROCESS_V2_T1_PREPARED_LEAF.json"
 PREPARED_COMPLETION_FILENAME = "PROCESS_V2_T1_PREPARED_COMPLETE.json"
 PROCESS_V2_RESULT_FILENAME = "PROCESS_V2_T1_CAPACITY_RESULT.json"
 FAILURE_SCOPE_RESULT_FILENAME = "PROCESS_V2_T1_FAILURE_SCOPE_RESULT.json"
+SCORE_REVISION_REPAIR_FILENAME = "PROCESS_V2_T1_SCORE_REVISION_REPAIR.json"
 STEP_TEN_CHECKPOINT_FILENAME = "step_0010.pt"
 PUBLICATION_RECOVERY_RECEIPT_FILENAME = "PROCESS_V2_T1_PUBLICATION_RECOVERY.json"
 PUBLICATION_RECOVERY_OUTPUT_PREFIX = (
@@ -67,6 +72,7 @@ CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
 GPU_TIMEOUT_SECONDS = 8 * 3600
 FAILURE_SCOPE_GPU_TIMEOUT_SECONDS = 20 * 60
+SCORE_REVISION_REPAIR_GPU_TIMEOUT_SECONDS = 60 * 60
 HEARTBEAT_SECONDS = 30
 DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 
@@ -76,6 +82,21 @@ SOURCE_REVISION_SCHEMA = "compose.editing_v2.process_v2_t1_authenticated_image_r
 SOURCE_REVISION_SCHEMA_VERSION = 1
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+_SCORE_REVISION_REPAIR_FAMILIES = (
+    "bond_reroute",
+    "cycle_attach",
+    "ring_system_restate",
+)
+_PREDECESSOR_CAPACITY_RESULT_FILE_SHA256 = (
+    "947732cdfbaf425ebb09ecb8bff453bd6023aaba3445131937ee727d021f60f9"
+)
+_PREDECESSOR_CAPACITY_RESULT_SHA256 = (
+    "dd60265b494e74a236c6902d0d658a0cdf4a10a4733b8d8351ba8e6109b86f4e"
+)
+_ATOM_INSERT_PASS_RESULT_SHA256 = (
+    "06e5c1c991740ba849fb26326326f104976e716d53588bdd80b96de6f0942c45"
+)
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -1574,6 +1595,216 @@ def run_t1_collated_gpu_remote(
         "image_revision_sha256": revision["image_revision_sha256"],
         "training_launched": True,
         "bounded_p50_authorized": decision["bounded_p50_authorized"],
+        "p50_launched": False,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
+    gpu="A10G",
+    cpu=4.0,
+    memory=64 * 1024,
+    timeout=SCORE_REVISION_REPAIR_GPU_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def run_t1_score_revision_repair_remote(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run only the three unresolved T1 families on the corrected scorer."""
+
+    _validate_remote_revision(revision)
+    if (
+        os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+        != DETERMINISTIC_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise RuntimeError("Process-V2 T1 score repair requires deterministic cuBLAS")
+    artifact_volume.reload()
+    loaded = _imports()
+    prepared_path = _require_artifact_path(
+        prepared_completion_path, field="prepared_completion_path"
+    )
+    runtime, scratch, provenance = loaded["load_runtime"](
+        prepared_path,
+        capacity_policy_path=REMOTE_ROOT / CAPACITY_POLICY_SOURCE,
+        repo_root=REMOTE_ROOT,
+        score_revision_rebind=True,
+    )
+    bridge = provenance.pop("score_revision_rebind", None)
+    if not isinstance(bridge, Mapping):
+        raise RuntimeError("Process-V2 T1 score-revision bridge identity is absent")
+    plan = loaded["load_collated_plan"](
+        _require_artifact_path(collated_plan_path, field="collated_plan_path"),
+        runtime=runtime,
+        repo_root=REMOTE_ROOT,
+        score_revision_rebind=True,
+    )
+    collated_path = _require_artifact_path(
+        collated_completion_path, field="collated_completion_path"
+    )
+    materialized_panel = loaded["load_materialized_collated_panel"](
+        collated_path,
+        plan=plan,
+        runtime=runtime,
+        score_revision_rebind=True,
+    )
+    collated_completion = _read_canonical_object(
+        collated_path, label="the Process-V2 T1 collated completion"
+    )
+    policy = runtime.capacity_policy
+    if tuple(family for family in policy["required_families"] if family in _SCORE_REVISION_REPAIR_FAMILIES) != _SCORE_REVISION_REPAIR_FAMILIES:
+        raise RuntimeError("Process-V2 T1 repair family order disagrees with the policy")
+
+    source_revision = _source_revision(revision)
+    identity = {
+        "score_revision_rebind_sha256": bridge["score_revision_rebind_sha256"],
+        "collated_completion_sha256": collated_completion["completion_sha256"],
+        "capacity_policy_sha256": policy["policy_sha256"],
+        "initial_model_state_sha256": provenance["initial_model_state_sha256"],
+        "predecessor_capacity_result_file_sha256": (
+            _PREDECESSOR_CAPACITY_RESULT_FILE_SHA256
+        ),
+        "predecessor_capacity_result_sha256": _PREDECESSOR_CAPACITY_RESULT_SHA256,
+        "atom_insert_pass_result_sha256": _ATOM_INSERT_PASS_RESULT_SHA256,
+        "repair_families": list(_SCORE_REVISION_REPAIR_FAMILIES),
+        "runner_source_revision_sha256": source_revision[
+            "source_revision_sha256"
+        ],
+    }
+    run_root = (
+        _require_physical_artifact_path(output_prefix, field="output_prefix")
+        / _sha256(identity)
+    )
+    _progress(
+        "process_v2_t1_score_revision_repair_start",
+        run_root=str(run_root),
+        families=list(_SCORE_REVISION_REPAIR_FAMILIES),
+        gpu_containers=1,
+        fiber_recomputation_count=0,
+        gpu_side_collation_count=0,
+    )
+
+    family_results: list[dict[str, Any]] = []
+    for family in _SCORE_REVISION_REPAIR_FAMILIES:
+        family_root = run_root / family
+
+        def report(row: Mapping[str, Any], *, _family: str = family) -> None:
+            _progress(
+                "process_v2_t1_score_revision_repair_heartbeat",
+                family=_family,
+                **dict(row),
+            )
+
+        heads_model = copy.deepcopy(scratch.model).to(
+            device="cuda", dtype=loaded["torch"].float32
+        )
+        heads_result = loaded["run_failure_scope"](
+            heads_model,
+            materialized_panel,
+            family=family,
+            failing_families=_SCORE_REVISION_REPAIR_FAMILIES,
+            capacity_policy=policy,
+            input_capacity_result_file_sha256=(
+                _PREDECESSOR_CAPACITY_RESULT_FILE_SHA256
+            ),
+            input_capacity_result_sha256=_PREDECESSOR_CAPACITY_RESULT_SHA256,
+            collated_completion_sha256=collated_completion["completion_sha256"],
+            initial_model_state_sha256=provenance["initial_model_state_sha256"],
+            progress=report,
+        )
+        heads_path = family_root / "heads_only" / FAILURE_SCOPE_RESULT_FILENAME
+        loaded["write_bytes_if_absent"](
+            heads_path, _canonical_bytes(heads_result) + b"\n"
+        )
+        selected = heads_result
+        selected_path = heads_path
+        if not heads_result["diagnostic_passed"]:
+            next_model = copy.deepcopy(scratch.model).to(
+                device="cuda", dtype=loaded["torch"].float32
+            )
+            selected = loaded["run_next_failure_scope"](
+                next_model,
+                materialized_panel,
+                family=family,
+                failing_families=_SCORE_REVISION_REPAIR_FAMILIES,
+                capacity_policy=policy,
+                prior_scope_result=heads_result,
+                prior_scope_result_file_sha256=_file_sha256(heads_path),
+                input_capacity_result_file_sha256=(
+                    _PREDECESSOR_CAPACITY_RESULT_FILE_SHA256
+                ),
+                input_capacity_result_sha256=_PREDECESSOR_CAPACITY_RESULT_SHA256,
+                collated_completion_sha256=collated_completion[
+                    "completion_sha256"
+                ],
+                initial_model_state_sha256=provenance[
+                    "initial_model_state_sha256"
+                ],
+                progress=report,
+            )
+            selected_path = (
+                family_root / selected["scope"] / FAILURE_SCOPE_RESULT_FILENAME
+            )
+            loaded["write_bytes_if_absent"](
+                selected_path, _canonical_bytes(selected) + b"\n"
+            )
+        family_results.append(
+            {
+                "family": family,
+                "heads_result_sha256": heads_result["result_sha256"],
+                "selected_scope": selected["scope"],
+                "selected_result_path": str(selected_path),
+                "selected_result_file_sha256": _file_sha256(selected_path),
+                "selected_result_sha256": selected["result_sha256"],
+                "diagnostic_passed": selected["diagnostic_passed"],
+            }
+        )
+        del heads_model
+        if "next_model" in locals():
+            del next_model
+
+    passed = all(row["diagnostic_passed"] for row in family_results)
+    body = {
+        "schema": "compose.editing_v2.process_v2_t1_score_revision_repair",
+        "schema_version": 1,
+        "status": (
+            "PASS_PROCESS_V2_T1_SCORE_REVISION_REPAIR_NO_DOWNSTREAM_AUTHORITY"
+            if passed
+            else "FAIL_PROCESS_V2_T1_SCORE_REVISION_REPAIR_NO_DOWNSTREAM_AUTHORITY"
+        ),
+        **loaded["NO_AUTHORITY"],
+        **identity,
+        "score_revision_rebind": dict(bridge),
+        "prepared_completion_path": str(prepared_path),
+        "collated_completion_path": str(collated_path),
+        "family_results": family_results,
+        "all_repair_families_passed": passed,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "p50_launched": False,
+    }
+    result = {**body, "repair_sha256": _sha256(body)}
+    result_path = run_root / SCORE_REVISION_REPAIR_FILENAME
+    loaded["write_bytes_if_absent"](
+        result_path, _canonical_bytes(result) + b"\n"
+    )
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_t1_score_revision_repair_complete",
+        "run_root": str(run_root),
+        "result_path": str(result_path),
+        "repair_sha256": result["repair_sha256"],
+        "family_results": family_results,
+        "all_repair_families_passed": passed,
+        "fiber_recomputation_count": 0,
+        "gpu_side_collation_count": 0,
+        "bounded_p50_authorized": False,
         "p50_launched": False,
     }
     _progress(**response)
@@ -3289,6 +3520,54 @@ def gpu_from_cache_main(
 
 
 @app.local_entrypoint()
+def score_revision_repair_main(
+    prepared_completion_path: str,
+    collated_plan_path: str,
+    collated_completion_path: str,
+    expected_commit: str,
+    output_prefix: str = SCORE_REVISION_REPAIR_OUTPUT_PREFIX,
+    wait_for_completion: bool = False,
+) -> None:
+    """Launch one GPU that reruns only the three unresolved T1 families."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_completion_path,
+        collated_plan_path,
+        collated_completion_path,
+        output_prefix,
+        revision,
+    )
+    if wait_for_completion:
+        print(
+            json.dumps(
+                run_t1_score_revision_repair_remote.remote(*arguments),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    call = run_t1_score_revision_repair_remote.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_t1_score_revision_repair_launched",
+                "function_call_id": call.object_id,
+                "families": list(_SCORE_REVISION_REPAIR_FAMILIES),
+                "gpu_containers": 1,
+                "fiber_recomputation_count": 0,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "bounded_p50_authorized": False,
+                "p50_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+@app.local_entrypoint()
 def failure_scope_main(
     prepared_completion_path: str,
     collated_plan_path: str,
@@ -3435,7 +3714,9 @@ __all__ = [
     "prepare_plan_remote",
     "run_t1_collated_gpu_remote",
     "run_t1_failure_scope_gpu_remote",
+    "run_t1_score_revision_repair_remote",
     "run_t1_gpu_remote",
+    "score_revision_repair_main",
     "reuse_driver",
     "scan_collated_remote",
     "scan_completed_remote",
