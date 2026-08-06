@@ -11,6 +11,7 @@ import pytest
 import torch
 
 import modal_apps.run_process_v2_p50_app as launcher
+from compose_v4.data.editing_v2_process_v2_schema import authority_false_block
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -358,6 +359,30 @@ def test_collation_balances_measured_mark_work_without_changing_inventory() -> N
     assert len(observed) == len(set(observed))
     assert len(tasks) == 2
     assert max(task["raw_mark_count"] for task in tasks) <= 190
+
+
+def test_collated_artifacts_use_the_live_process_v2_authority_vocabulary() -> None:
+    current = authority_false_block()
+    launcher._require_false_authority(
+        current,
+        label="a current Process-V2 collation artifact",
+        authority_false=current,
+    )
+    stale = {
+        "training_authorized": False,
+        "bounded_p50_authorized": False,
+        "p500_authorized": False,
+        "p2000_authorized": False,
+        "long_run_authorized": False,
+        "checkpoint_selection_authorized": False,
+        "final_test_selection_authorized": False,
+    }
+    with pytest.raises(RuntimeError, match="grants or omits authority"):
+        launcher._require_false_authority(
+            stale,
+            label="a stale Process-V2 collation artifact",
+            authority_false=current,
+        )
 
 
 def test_gpu_is_unreachable_until_cpu_collation_completion() -> None:

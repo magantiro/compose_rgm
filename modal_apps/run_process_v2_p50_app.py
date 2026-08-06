@@ -622,39 +622,41 @@ def _balanced_collated_tasks(
     return tasks
 
 
-def _require_false_authority(value: Mapping[str, Any], *, label: str) -> None:
+def _require_false_authority(
+    value: Mapping[str, Any],
+    *,
+    label: str,
+    authority_false: Mapping[str, bool],
+) -> None:
     fields = {key for key in value if key.endswith("_authorized")}
-    expected = {
-        "training_authorized",
-        "bounded_p50_authorized",
-        "p500_authorized",
-        "p2000_authorized",
-        "long_run_authorized",
-        "checkpoint_selection_authorized",
-        "final_test_selection_authorized",
-    }
-    if fields != expected or any(value[field] is not False for field in fields):
+    expected = set(authority_false)
+    if (
+        any(item is not False for item in authority_false.values())
+        or fields != expected
+        or any(value[field] is not False for field in fields)
+    ):
         raise RuntimeError(f"{label} grants or omits authority")
 
 
 def _validate_collated_plan(
-    value: Mapping[str, Any], *, prepared: Mapping[str, Any] | None = None
+    value: Mapping[str, Any],
+    *,
+    authority_false: Mapping[str, bool],
+    prepared: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     plan = _validate_self_hash(
         value, field="plan_sha256", label="the Process-V2 P50 collated plan"
     )
-    _require_false_authority(plan, label="the Process-V2 P50 collated plan")
+    _require_false_authority(
+        plan,
+        label="the Process-V2 P50 collated plan",
+        authority_false=authority_false,
+    )
     expected_fields = {
         "schema",
         "schema_version",
         "status",
-        "training_authorized",
-        "bounded_p50_authorized",
-        "p500_authorized",
-        "p2000_authorized",
-        "long_run_authorized",
-        "checkpoint_selection_authorized",
-        "final_test_selection_authorized",
+        *authority_false,
         "prepared_path",
         "prepared_file_sha256",
         "prepared_sha256",
@@ -792,24 +794,26 @@ def _collated_task(plan: Mapping[str, Any], task_identity_sha256: str) -> dict[s
 
 
 def _validate_collated_receipt(
-    value: Mapping[str, Any], *, plan: Mapping[str, Any], task_identity_sha256: str
+    value: Mapping[str, Any],
+    *,
+    authority_false: Mapping[str, bool],
+    plan: Mapping[str, Any],
+    task_identity_sha256: str,
 ) -> dict[str, Any]:
     receipt = _validate_self_hash(
         value, field="receipt_sha256", label="a Process-V2 P50 collated receipt"
     )
-    _require_false_authority(receipt, label="a Process-V2 P50 collated receipt")
+    _require_false_authority(
+        receipt,
+        label="a Process-V2 P50 collated receipt",
+        authority_false=authority_false,
+    )
     task = _collated_task(plan, task_identity_sha256)
     expected_fields = {
         "schema",
         "schema_version",
         "status",
-        "training_authorized",
-        "bounded_p50_authorized",
-        "p500_authorized",
-        "p2000_authorized",
-        "long_run_authorized",
-        "checkpoint_selection_authorized",
-        "final_test_selection_authorized",
+        *authority_false,
         "plan_sha256",
         "run_identity_sha256",
         "prepared_sha256",
@@ -853,6 +857,7 @@ def _load_collated_payload(
 ) -> tuple[dict[str, Any], Any]:
     receipt = _validate_collated_receipt(
         _read_canonical_object(receipt_path, label="a Process-V2 P50 collated receipt"),
+        authority_false=loaded["authority_false_block"](),
         plan=plan,
         task_identity_sha256=task_identity_sha256,
     )
@@ -902,18 +907,17 @@ def _load_collated_completion(
         field="completion_sha256",
         label="the Process-V2 P50 collated completion",
     )
-    _require_false_authority(completion, label="the Process-V2 P50 collated completion")
+    authority_false = loaded["authority_false_block"]()
+    _require_false_authority(
+        completion,
+        label="the Process-V2 P50 collated completion",
+        authority_false=authority_false,
+    )
     expected_fields = {
         "schema",
         "schema_version",
         "status",
-        "training_authorized",
-        "bounded_p50_authorized",
-        "p500_authorized",
-        "p2000_authorized",
-        "long_run_authorized",
-        "checkpoint_selection_authorized",
-        "final_test_selection_authorized",
+        *authority_false,
         "plan_sha256",
         "run_identity_sha256",
         "prepared_path",
@@ -1635,6 +1639,7 @@ def prepare_collated_plan_remote(
     if plan_path.is_file():
         plan = _validate_collated_plan(
             _read_canonical_object(plan_path, label="the cached Process-V2 P50 collated plan"),
+            authority_false=loaded["authority_false_block"](),
             prepared=prepared,
         )
     else:
@@ -1658,7 +1663,9 @@ def prepare_collated_plan_remote(
             "run_identity_sha256": run_identity,
         }
         plan = _validate_collated_plan(
-            {**body, "plan_sha256": _sha256(body)}, prepared=prepared
+            {**body, "plan_sha256": _sha256(body)},
+            authority_false=loaded["authority_false_block"](),
+            prepared=prepared,
         )
         _publish_canonical(plan_path, plan, loaded=loaded)
         artifact_volume.commit()
@@ -1699,7 +1706,8 @@ def collate_p50_task_remote(
     loaded = _imports()
     plan_file = _require_artifact_path(plan_path, field="plan_path")
     plan = _validate_collated_plan(
-        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan")
+        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan"),
+        authority_false=loaded["authority_false_block"](),
     )
     if plan["collation_implementation_sha256"] != _collation_implementation_sha256(revision):
         raise RuntimeError("Process-V2 P50 collated plan binds another tensor implementation")
@@ -1781,6 +1789,7 @@ def collate_p50_task_remote(
     }
     receipt = _validate_collated_receipt(
         {**body, "receipt_sha256": _sha256(body)},
+        authority_false=loaded["authority_false_block"](),
         plan=plan,
         task_identity_sha256=task_identity_sha256,
     )
@@ -1812,9 +1821,11 @@ def scan_collated_remote(
 
     _validate_remote_revision(revision)
     artifact_volume.reload()
+    loaded = _imports()
     plan_file = _require_artifact_path(plan_path, field="plan_path")
     plan = _validate_collated_plan(
-        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan")
+        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan"),
+        authority_false=loaded["authority_false_block"](),
     )
     completed: list[str] = []
     for task_id in task_identity_sha256s:
@@ -1823,6 +1834,7 @@ def scan_collated_remote(
             continue
         receipt = _validate_collated_receipt(
             _read_canonical_object(receipt_path, label="a Process-V2 P50 collated receipt"),
+            authority_false=loaded["authority_false_block"](),
             plan=plan,
             task_identity_sha256=task_id,
         )
@@ -1855,7 +1867,8 @@ def finalize_collated_remote(
     loaded = _imports()
     plan_file = _require_artifact_path(plan_path, field="plan_path")
     plan = _validate_collated_plan(
-        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan")
+        _read_canonical_object(plan_file, label="the Process-V2 P50 collated plan"),
+        authority_false=loaded["authority_false_block"](),
     )
     completion_path = plan_file.parent / COLLATED_COMPLETION_FILENAME
     if completion_path.is_file():
@@ -2009,6 +2022,7 @@ def run_p50_gpu_remote(
             collated_completion_file.parent / COLLATED_PLAN_FILENAME,
             label="the Process-V2 P50 collated plan",
         ),
+        authority_false=loaded["authority_false_block"](),
         prepared=prepared,
     )
     if (
