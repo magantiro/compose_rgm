@@ -210,6 +210,12 @@ Testing rules:
 - Mark tests that require vendored data and skip only when the documented asset is absent.
 - Never skip or weaken a test because its result is inconvenient.
 - Run the narrowest relevant test while iterating.
+- Do not use the repository-wide suite as an iteration gate. Freeze the milestone candidate first,
+  run focused dependency-level tests after each repair, then run the full suite once at the milestone or
+  scientific-launch boundary. Rerun the full suite only when later code changes can affect its result.
+- When a known multiprocessing or native-runtime test is denied by sandbox policy, do not retry the
+  suite or repeatedly retry inside the sandbox. Run only the exact affected node once in the documented
+  environment that provides the required semaphore, subprocess, filesystem, or accelerator capability.
 - Run formatting and lint checks for touched code.
 - Run the repository-wide verification and test suite before declaring a milestone complete.
 - Inspect generated artifacts and the final diff.
