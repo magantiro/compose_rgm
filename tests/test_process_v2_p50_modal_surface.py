@@ -68,6 +68,16 @@ def test_launcher_is_the_exact_bounded_fast_path() -> None:
     assert "run_process_v2_p50" in source
 
 
+def test_checked_in_t1_evidence_manifest_is_canonical_newline_framed_json() -> None:
+    path = ROOT / launcher.T1_EVIDENCE_SOURCE
+    raw = path.read_bytes()
+    value = launcher._read_canonical_object(
+        path,
+        label="the checked-in Process-V2 P50 T1 evidence source manifest",
+    )
+    assert raw == launcher._canonical_bytes(value) + b"\n"
+
+
 def test_launcher_does_not_adapt_the_legacy_p50_pipeline() -> None:
     tree = ast.parse(_source())
     imported = {
