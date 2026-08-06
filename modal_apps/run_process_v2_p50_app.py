@@ -759,6 +759,10 @@ def prepare_selection_remote(
         _publish_canonical(selection_path, selection, loaded=loaded)
         artifact_volume.commit()
     task_ids = sorted({str(entry["task_identity_sha256"]) for entry in selection["entries"]})
+    task_entry_counts = {
+        task_id: sum(entry["task_identity_sha256"] == task_id for entry in selection["entries"])
+        for task_id in task_ids
+    }
     response = {
         "phase": "process_v2_p50_selection_complete",
         "run_root": str(run_root),
@@ -766,6 +770,7 @@ def prepare_selection_remote(
         "selection_sha256": selection["selection_sha256"],
         "selection_cache_hit": selection_cache_hit,
         "task_identity_sha256s": task_ids,
+        "task_entry_counts": task_entry_counts,
         "task_count": len(task_ids),
         "unique_entry_count": int(selection["unique_entry_count"]),
         "source_revision": source_revision,
@@ -773,6 +778,59 @@ def prepare_selection_remote(
     }
     _progress(**response)
     return response
+
+
+@app.local_entrypoint()
+def canary(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    expected_commit: str,
+    scoped_t1_output_prefix: str = SCOPED_T1_OUTPUT_PREFIX,
+    prepared_output_prefix: str = PREPARED_OUTPUT_PREFIX,
+) -> None:
+    """Compile and publish the largest selected leaf without launching P50."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    scoped_t1 = materialize_scoped_t1_remote.remote(
+        active8_run_root,
+        gate_zero_decision_path,
+        scoped_t1_output_prefix,
+        revision,
+    )
+    selected = prepare_selection_remote.remote(
+        active8_run_root,
+        gate_zero_decision_path,
+        str(scoped_t1["result_path"]),
+        str(scoped_t1["decision_path"]),
+        prepared_output_prefix,
+        revision,
+    )
+    counts = dict(selected["task_entry_counts"])
+    task_identity = min(counts, key=lambda identity: (-int(counts[identity]), identity))
+    started = time.monotonic()
+    leaf = prepare_leaf_remote.remote(
+        selected["selection_path"],
+        task_identity,
+        active8_run_root,
+        gate_zero_decision_path,
+        selected["run_root"],
+        revision,
+    )
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_p50_prepare_canary_complete",
+                "elapsed_seconds": time.monotonic() - started,
+                "selected_task_entry_count": int(counts[task_identity]),
+                "selection_path": selected["selection_path"],
+                "run_root": selected["run_root"],
+                "leaf": leaf,
+                "p50_training_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 @app.function(

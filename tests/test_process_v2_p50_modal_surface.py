@@ -123,6 +123,16 @@ def test_driver_orders_selection_fanout_reduction_and_gpu() -> None:
     assert body.count("run_p50_gpu_remote.remote(") == 1
 
 
+def test_canary_publishes_one_reusable_worst_case_leaf_without_gpu() -> None:
+    body = ast.get_source_segment(_source(), _function("canary"))
+    assert body is not None
+    assert body.count("prepare_leaf_remote.remote(") == 1
+    assert "task_entry_counts" in body
+    assert "(-int(counts[identity]), identity)" in body
+    assert "run_p50_gpu_remote" not in body
+    assert '"p50_training_launched": False' in body
+
+
 def test_scoped_t1_materialization_binds_the_current_authenticated_source() -> None:
     body = ast.get_source_segment(_source(), _function("materialize_scoped_t1_remote"))
     assert body is not None
