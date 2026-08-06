@@ -35,6 +35,7 @@ from typing import Any, Callable
 
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.data.editing_v2_process_v2_active8_plan import (
+    MODEL_RUNTIME_FIELDS,
     model_runtime_descriptor,
 )
 from compose_v4.data.editing_v2_process_v2_schema import (
@@ -307,12 +308,66 @@ def _scratch_runtime_from_descriptor(
 def build_process_v2_t1_scratch_runtime(
     source: ProcessV2T1Source,
 ) -> tuple[SemanticScratchRuntime, dict[str, Any]]:
-    """Reconstruct the exact scratch model already bound by Active8."""
+    """Construct the current score model on Active8's frozen support geometry.
+
+    Active8 admission enumerates candidates and stores no model scores or
+    probabilities.  Its runtime descriptor therefore owns the architecture and
+    legal-support geometry, while Gate 0 owns the current scoring-model
+    contract.  A scorer-only model revision may change the model identity and
+    zero-initialized state hash without forcing molecular re-enumeration, but it
+    may not change any field that determines tensor geometry or legal support.
+    """
 
     bound = source.plan.get("binding", {}).get("model_runtime")
-    if not isinstance(bound, Mapping):
+    if not isinstance(bound, Mapping) or tuple(sorted(bound)) != MODEL_RUNTIME_FIELDS:
         raise ProcessV2T1RuntimeError("Active8 plan lacks its model runtime descriptor")
-    runtime, binding = _scratch_runtime_from_descriptor(bound, repo_root=source.repo_root)
+    config = SemanticScratchModelConfig(
+        initialization_seed=int(bound["initialization_seed"]),
+        max_atoms=int(bound["max_atoms"]),
+        hidden_dim=int(bound["hidden_dim"]),
+        message_passing_steps=int(bound["message_passing_steps"]),
+        mark_dim=int(bound["mark_dim"]),
+        dtype=str(bound["dtype"]),
+        atom_vocabulary_class_count=int(bound["atom_vocabulary_class_count"]),
+        catalog_fingerprint=str(bound["catalog_fingerprint"]),
+    )
+    semantic_path = Path(source.repo_root) / GATE_ZERO_MODEL_PROCESS_V2
+    semantic = load_gate_zero_semantic_contract(semantic_path)
+    runtime = build_semantic_scratch_runtime(config, semantic)
+    observed = model_runtime_descriptor(runtime)
+    support_fields = (
+        "atom_vocabulary_class_count",
+        "catalog_fingerprint",
+        "dtype",
+        "hidden_dim",
+        "initialization_seed",
+        "mark_dim",
+        "max_atoms",
+        "message_passing_steps",
+        "operator_capability_fingerprint",
+    )
+    if any(observed[field] != bound[field] for field in support_fields):
+        raise ProcessV2T1RuntimeError(
+            "the current T1 model changed Active8 architecture or legal support"
+        )
+    runtime_contract = load_process_v2_chain_artifact(
+        ACTIVE8_DECISION_RUNTIME, repo_root=source.repo_root
+    )
+    expected_parent = runtime_contract["parents"]["semantic_model_process"]
+    if (
+        semantic.file_sha256 != expected_parent["physical"]["sha256"]
+        or semantic.sha256 != expected_parent["semantic"]["sha256"]
+    ):
+        raise ProcessV2T1RuntimeError("Process-V2 semantic model contract bytes disagree")
+    binding = {
+        "active8_decision_runtime_file_sha256": _file_sha256(
+            Path(source.repo_root) / ACTIVE8_DECISION_RUNTIME
+        ),
+        "active8_decision_runtime_sha256": runtime_contract["contract_sha256"],
+        "semantic_model_process_file_sha256": semantic.file_sha256,
+        "semantic_model_process_sha256": semantic.sha256,
+        "model_runtime": observed,
+    }
     if runtime.process_identity_sha256 != source.contracts.process_identity_sha256:
         raise ProcessV2T1RuntimeError("scratch model differs from the Active8-bound runtime")
     return runtime, binding

@@ -122,6 +122,49 @@ def test_one_genuine_cached_transition_compiles_the_complete_successor_partition
     assert entry["hazard_included"] is False
 
 
+def test_score_only_model_revision_reuses_active8_support_but_not_its_state(
+    genuine_stage,
+) -> None:
+    _stage, source, _decision = genuine_stage
+    predecessor = dict(source.plan["binding"]["model_runtime"])
+    predecessor["model_identity_sha256"] = "1" * 64
+    predecessor["initial_model_state_sha256"] = "2" * 64
+    predecessor["semantic_model_process_contract_sha256"] = "3" * 64
+    revised = replace(
+        source,
+        plan={
+            **source.plan,
+            "binding": {**source.plan["binding"], "model_runtime": predecessor},
+        },
+    )
+
+    runtime, binding = build_process_v2_t1_scratch_runtime(revised)
+
+    assert binding["model_runtime"]["model_identity_sha256"] != "1" * 64
+    assert binding["model_runtime"]["initial_model_state_sha256"] == (
+        runtime.initial_model_state_sha256
+    )
+    assert binding["model_runtime"]["semantic_model_process_contract_sha256"] != "3" * 64
+
+
+def test_active8_support_geometry_change_blocks_t1_model_reconstruction(
+    genuine_stage,
+) -> None:
+    _stage, source, _decision = genuine_stage
+    changed = dict(source.plan["binding"]["model_runtime"])
+    changed["operator_capability_fingerprint"] = "changed-support"
+    revised = replace(
+        source,
+        plan={
+            **source.plan,
+            "binding": {**source.plan["binding"], "model_runtime": changed},
+        },
+    )
+
+    with pytest.raises(ProcessV2T1RuntimeError, match="architecture or legal support"):
+        build_process_v2_t1_scratch_runtime(revised)
+
+
 def test_prepared_plan_groups_panel_entries_by_existing_active8_chunk(
     genuine_stage, tmp_path: Path
 ) -> None:
